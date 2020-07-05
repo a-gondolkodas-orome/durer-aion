@@ -1,0 +1,52 @@
+<style>
+.redDot {
+  height: 70px;
+  width: 70px;
+  background-color: #ff5e5e;
+  border-radius: 50%;
+  display: inline-block;
+}
+.blueDot {
+  height: 70px;
+  width: 70px;
+  background-color: #5e87ff;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+</style>
+	<p style="text-align: justify;">Ez a játék a VI. Dürer döntõjén szerepelt D kategóriában. A török szultán serege megtámadta Hunyadi várát. A várlépcsõ egyes fokain néhány janicsár áll.
+Minden reggel a szultán kettéosztja a hadseregét egy piros és egy kék hadtestre.
+Hunyadi a nap folyamán vagy a piros, vagy a kék sereget megsemmisíti, választása szerint. Éjszaka minden megmaradt janicsár egy lépcsõfokot fellép.
+Hunyadi nyer, ha a szultán egész seregét megsemmisítette. A szultán nyer, ha lesz
+olyan janicsár, aki felér a várhoz.
+Az új játék gombra kattintva generálhatsz egy felállást. A felállás ismeretében te döntheted e, hogy Hunyadiként vagy a török szultánként szeretnél-e játszani.
+ Sok sikert! :)</p>
+<div class="" style="width: 100%">
+	 [su_row class=""]
+  [su_column size="3/4" center="no" class="game"]
+  				<img src="/wp-includes/js/janicsar/var.jpg" style="display: flex; margin: auto;">
+				<div class="board">
+					<div style="height: 80px;text-align:left; border-top-color: black; border-top-width: 3px; border-top-style: solid;" id ="r0" class="pile">
+	                                </div>
+					<div style="height: 80px;text-align:left;border-top-color: black; border-top-width: 3px;border-top-style: solid;" id ="r1" class="pile">
+	                                </div>
+					<div style="height: 80px;text-align:left;border-top-color: black; border-top-width: 3px;border-top-style: solid;" id ="r2" class="pile">
+	                                </div>
+					<div style="height: 80px;text-align:left;border-top-color: black; border-top-width: 3px;border-top-style: solid;" id ="r3" class="pile">
+	                                </div>
+					<div style="height: 80px;text-align:left;border-top-color: black; border-top-width: 3px;border-top-style: solid;" id ="r4" class="pile">
+	                                </div>
+				</div>
+[/su_column]
+  [su_column size="1/4" center="no" class=""]<div class="info">
+					<p class="whos" style="font-weight:bold">A gombra kattintva tudod elindítani a játékot.</p>
+					<p class="move" style="font-style: italic;height: auto;"></p>
+					<button style="white-space: normal; margin: 5px 0px;width: 100%;background-color: #5fba7d; border: none;color: white;padding: 5px 10px;text-align: center;text-decoration: none;display: block;font-size: 16px;align:center;with: 100%" class="repeat" id="startTrue" onclick="game.reset(true)">Hunyadi leszek</button> <button style="white-space: normal; margin: 5px 0px;width: 100%;background-color: #5fba7d; border: none;color: white;padding: 5px 10px;text-align: center;text-decoration: none;display: block;font-size: 16px;align:center;with: 100%" class="repeat" id="startFalse" onclick="game.reset(false)">Szultán leszek</button> <button style="white-space: normal; margin: 5px 0px;width: 100%;background-color: #5fba7d; border: none;color: white;padding: 5px 10px;text-align: center;text-decoration: none;display: none;font-size: 16px;align:center;with: 100%" class="repeat" id=step> Lépek </button> <button style="white-space: normal; margin: 5px 0px;width: 100%;background-color: #5fba7d; border: none;color: white;padding: 5px 10px;text-align: center;text-decoration: none;display: none;font-size: 16px;align:center;with: 100%" class="repeat" id=red>Legyõzöm a pirosakat </button> <button style="white-space: normal; margin: 5px 0px;width: 100%;background-color: #5fba7d; border: none;color: white;padding: 5px 10px;text-align: center;text-decoration: none;display: none;font-size: 16px;align:center;with: 100%" class="repeat" id=blue>Legyõzöm a kékeket </button> <button style="white-space: normal; margin: 5px 0px;width: 100%;background-color: #5fba7d; border: none;color: white;padding: 5px 10px;text-align: center;text-decoration: none;display: none;font-size: 16px;align:center;with: 100%" class="repeat" id=reset> Új leosztás </button>
+				</div>
+				<div class="status">			    
+				</div>
+			[/su_column]
+[/su_row]
+			</div>				
+			<script src="/wp-includes/js/janicsar/pubSub.js"></script><script src="/wp-includes/js/janicsar/nim.js"></script><script src="/wp-includes/js/janicsar/nimAi.js"></script><script src="/wp-includes/js/janicsar/game.js"></script>
