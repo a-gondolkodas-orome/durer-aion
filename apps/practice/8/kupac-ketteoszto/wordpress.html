@@ -1,46 +1,73 @@
 <style>
-.redDot {
-  height: 70px;
-  width: 70px;
-  background-color: #ff5e5e;
-  border-radius: 50%;
-  display: inline-block;
-}
-.blueDot {
-  height: 70px;
-  width: 70px;
-  background-color: #5e87ff;
-  border-radius: 50%;
-  display: inline-block;
-}
+	.redDot {
+		height: 70px;
+		width: 70px;
+		background-color: #ff5e5e;
+		border-radius: 50%;
+		display: inline-block;
+	}
 
+	.blueDot {
+		height: 70px;
+		width: 70px;
+		background-color: #5e87ff;
+		border-radius: 50%;
+		display: inline-block;
+	}
+
+	.repeat {
+		background-color: #5fba7d;
+		border: none;
+		color: white;
+		font-size: 16px;
+		margin: 5px 0px;
+		padding: 5px 10px;
+		text-align: center;
+		text-decoration: none;
+		width: 100%;
+		white-space: normal; 
+	}
+
+	.pile {
+		border-top-color: black; 
+		border-top-style: solid;
+		border-top-width: 3px;
+		height: 80px;
+		text-align: left; 
+	}
 </style>
-	<p style="text-align: justify;">Ez a j·tÈk a VIII. D¸rer dˆntıjÈn szerepelt A kategÛri·ban. A p·ly·n mindig kÈt kupac korong tal·lhatÛ. A soron kˆvetkezı j·tÈkos v·laszt egy kupacot, Ès azt szÈtosztja kÈt kisebb kupacra (mindkettıbe legal·bb 1 korongnak ker¸lnie kell), a m·sik kupacot pedig kidobjuk. Az a j·tÈkos veszÌt, aki nem tud szab·lyosan lÈpni (azaz egyik kupacot se tudja szÈtosztani).
+<p style="text-align: justify;">
+	Ez a j√°t√©k a VIII. D√ºrer d√∂nt≈ëj√©n szerepelt A kateg√≥ri√°ban. A p√°ly√°n mindig k√©t kupac
+	korong tal√°lhat√≥. A soron k√∂vetkez≈ë j√°t√©kos v√°laszt egy kupacot, √©s azt sz√©tosztja k√©t kisebb kupacra (mindkett≈ëbe
+	legal√°bb 1 korongnak ker√ºlnie kell), a m√°sik kupacot pedig kidobjuk. Az a j√°t√©kos vesz√≠t, aki nem tud szab√°lyosan
+	l√©pni (azaz egyik kupacot se tudja sz√©tosztani).
 
-Az ˙j leoszt·s gombra kattintva gener·lhatsz egy fel·ll·st. A fel·ll·s ismeretÈben te dˆntheted el, hogy kezdeni szeretnÈl-e, vagy m·sodik j·tÈkos lenni.
- Sok sikert! :)</p>
-	 [su_row class=""]
-  [su_column size="2/3" center="no" class="game"]
-				<div class="board">
-					<div style="height: 80px;text-align:left; border-top-color: black; border-top-width: 3px; border-top-style: solid;" id ="r0" class="pile">
-	                                </div>
-					<div style="height: 80px;text-align:left;border-top-color: black; border-top-width: 3px;border-top-style: solid;" id ="r1" class="pile">
-	                                </div><!-- 
-					<div style="height: 80px;text-align:left;border-top-color: black; border-top-width: 3px;border-top-style: solid;" id ="r2" class="pile">
-	                                </div>
-					<div style="height: 80px;text-align:left;border-top-color: black; border-top-width: 3px;border-top-style: solid;" id ="r3" class="pile">
-	                                </div>
-					<div style="height: 80px;text-align:left;border-top-color: black; border-top-width: 3px;border-top-style: solid;" id ="r4" class="pile">
-	                                </div> -->
-				</div>
-[/su_column]
-  [su_column size="1/3" center="no" class=""]<div class="info">
-					<p class="whos" style="font-weight:bold">A gombra kattintva tudod elindÌtani a j·tÈkot.</p>
-					<p class="move" style="font-style: italic;height: auto;"></p>
-					<button style="white-space: normal; margin: 5px 0px;width: 100%;background-color: #5fba7d; border: none;color: white;padding: 5px 10px;text-align: center;text-decoration: none;display: block;font-size: 16px;align:center;with: 100%" class="repeat" id="startTrue" onclick="game.reset(false)">Kezdı leszek</button> <button style="white-space: normal; margin: 5px 0px;width: 100%;background-color: #5fba7d; border: none;color: white;padding: 5px 10px;text-align: center;text-decoration: none;display: block;font-size: 16px;align:center;with: 100%" class="repeat" id="startFalse" onclick="game.reset(true)">M·sodik leszek</button> <button style="white-space: normal; margin: 5px 0px;width: 100%;background-color: #5fba7d; border: none;color: white;padding: 5px 10px;text-align: center;text-decoration: none;display: none;font-size: 16px;align:center;with: 100%" class="repeat" id=reset> ⁄j leoszt·s </button>
-				</div>
-				<div class="status">			    
-				</div>
-			[/su_column]
-[/su_row]
-			<script src="/wp-includes/js/nim-oszto/pubSub.js"></script><script src="/wp-includes/js/nim-oszto/nim.js"></script><script src="/wp-includes/js/nim-oszto/nimAi.js"></script><script src="/wp-includes/js/nim-oszto/game.js"></script>
+	Az √∫j leoszt√°s gombra kattintva gener√°lhatsz egy fel√°ll√°st. A fel√°ll√°s ismeret√©ben te d√∂ntheted el, hogy kezdeni
+	szeretn√©l-e, vagy m√°sodik j√°t√©kos lenni.
+	Sok sikert! :)
+</p>
+<div style="display:flex; flex-wrap: wrap;">
+	<div class="game" style="min-width: 400px; flex:auto; margin-right: 15px; flex-grow: 10;">
+		<div class="board">
+			<div id="r0" class="pile"></div>
+			<div id="r1" class="pile"></div>
+		</div>
+	</div>
+	<div class="info" style="width: 300px;">
+		<p class="whos" style="font-weight:bold">A gombra kattintva tudod elind√≠tani a j√°t√©kot.</p>
+		<p class="move" style="font-style: italic; height: auto; text-align: justify;"></p>
+		<button style="display: block;" class="repeat" id="startTrue" onclick="game.reset(false)">
+			Kezd≈ë leszek
+		</button> 
+		<button style="display: block;" class="repeat" id="startFalse" onclick="game.reset(true)">
+			M√°sodik leszek
+		</button> 
+		<button style="display: none;" class="repeat" id=reset> 
+			√öj leoszt√°s 
+		</button>
+	</div>
+</div>
+<script src="wp-includes/js/nim-oszto/pubSub.js"></script>
+<script src="wp-includes/js/nim-oszto/nim.js"></script>
+<script src="wp-includes/js/nim-oszto/nimAi.js"></script>
+<script src="wp-includes/js/nim-oszto/game.js"></script>

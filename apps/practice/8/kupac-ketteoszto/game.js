@@ -226,7 +226,7 @@ var game = (function() {
     var reset = function(player) {
         n.reset(player);
         //document.querySelector('.whos').innerHTML = 'Te jössz.';
-
+    
         //document.querySelector('.repeat').style.display = 'none';
 
 
