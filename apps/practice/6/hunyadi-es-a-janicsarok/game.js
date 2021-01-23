@@ -121,7 +121,7 @@ var game = (function() {
 
         if (!n.status().isGameOn) {
             document.querySelector('.game__step-description').innerHTML = '';
-            board.toggleVisibilityForElements('game__step-for-role', false);
+            board.toggleVisibilityForElements('game__step-for', false);
 
             board.toggleGameStartButtons(false);
         }
@@ -160,21 +160,20 @@ var game = (function() {
             }
     }
 
-    var startGameAsPlayer = function(player) {
-        const playerAsBoolean = player === 'hunyadi';
-        n.startGameAsPlayer(playerAsBoolean);
+    var startGameAsPlayer = function(isFirstPlayer) {
+        n.startGameAsPlayer(isFirstPlayer);
         n.isBeginningOfGame = true;
 
         board.toggleGameStartButtons(false);
 
-        board.toggleVisibilityForElements('game__step-for-role-hunyadi', playerAsBoolean);
-        board.toggleVisibilityForElements('game__step-for-role-szultan', !playerAsBoolean);
+        board.toggleVisibilityForElements('game__step-for-first', isFirstPlayer);
+        board.toggleVisibilityForElements('game__step-for-second', !isFirstPlayer);
 
-        document.querySelector('.game__step-cta-text').innerHTML = n.status().playerAsBoolean;
+        document.querySelector('.game__step-cta-text').innerHTML = n.status().player;
         board.drawBoard(n.board());
 
         checkGame();
-        if (playerAsBoolean) {
+        if (!isFirstPlayer) {
             aiMove();
         }
     }
@@ -184,7 +183,7 @@ var game = (function() {
         document.querySelector('.game__step-description').innerHTML = '';
         document.querySelector('.game__step-cta-text').innerHTML = 'A gombra kattintva tudod elindítani a játékot.';
         board.toggleGameStartButtons(true);
-        board.toggleVisibilityForElements('game__step-for-role', false);
+        board.toggleVisibilityForElements('game__step-for-', false);
     }
 
     board.drawBoard(n.board());

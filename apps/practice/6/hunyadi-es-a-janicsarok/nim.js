@@ -157,8 +157,8 @@ var nim = function() {
 
     }
 
-    var startGameAsPlayer = function(player) {
-        playerOne = !player;
+    var startGameAsPlayer = function(isFirstPlayer) {
+        playerOne = isFirstPlayer;
         isBeginningOfGame = true;
         isGameOverb = false;
         killState = false;

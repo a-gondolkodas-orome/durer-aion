@@ -3,8 +3,7 @@
 var nim = function() {
 
     //The Game board
-    var board =
-        [4, 5];
+    var board = [4, 5];
 
 
 
@@ -85,8 +84,8 @@ var nim = function() {
 
     }
 
-    var startGameAsPlayer = function(player) {
-        playerOne = !player;
+    var startGameAsPlayer = function(isFirstPlayer) {
+        playerOne = isFirstPlayer;
         isGameOverb = false;
     }
 

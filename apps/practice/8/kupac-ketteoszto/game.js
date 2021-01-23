@@ -161,15 +161,15 @@ var game = (function() {
         }
     }
 
-    var startGameAsPlayer = function(player) {
-        n.startGameAsPlayer(player);
+    var startGameAsPlayer = function(isFirstPlayer) {
+        n.startGameAsPlayer(isFirstPlayer);
 
         board.toggleGameStartButtons(false);
 
         document.querySelector('.game__step-cta-text').innerHTML = n.status().player;
         board.drawBoard(n.board());
         checkGame();
-        if (player) {
+        if (!isFirstPlayer) {
             aiMove();
         }
     }
