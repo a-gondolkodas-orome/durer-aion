@@ -1,17 +1,17 @@
 'use strict';
 
 var nim = function() {
-    
+
     //The Game board
-    var board = 
-    [4,5];
-    
+    var board =
+        [4, 5];
+
 
 
     var playerOne = true;
-    var isGameOverb=true;
-    var isPlayerWinner=false;
-    
+    var isGameOverb = true;
+    var isPlayerWinner = false;
+
     //Check the object if it's valid
     /*var parseObj = function(o) {
         for (var i in getBoard) {
@@ -32,8 +32,8 @@ var nim = function() {
     */
 
 
-    var generateBoard= function(){
-        board = [Math.floor(Math.random()*4)+3,Math.floor(Math.random()*4)+3];
+    var generateBoard = function() {
+        board = [Math.floor(Math.random() * 4) + 3, Math.floor(Math.random() * 4) + 3];
 
         return board;
     };
@@ -43,19 +43,19 @@ var nim = function() {
 
 
     var move = function(obj) {
-            //parseObj(obj);
-                
+        //parseObj(obj);
 
-       
+
+
         board = obj;
         playerOne = !playerOne;
         //!Move the soldiers
-        if(board[0]==1    &&  board[1]==1){
-            isGameOverb=true;
-            isPlayerWinner=!playerOne;
+        if (board[0] == 1 && board[1] == 1) {
+            isGameOverb = true;
+            isPlayerWinner = !playerOne;
         }
         return board;
-  
+
     };
 
     var getBoard = function() {
@@ -73,7 +73,7 @@ var nim = function() {
     var getStatus = function() {
         if (isGameOver()) {
             return {
-                player: !isPlayerWinner ?  "Sajnos, most nem nyertél, de ne add fel.": "Nyertél. Gratulálunk! :)",
+                player: !isPlayerWinner ? "Sajnos, most nem nyertél, de ne add fel." : "Nyertél. Gratulálunk! :)",
                 isGameOn: false
             };
         }
@@ -87,7 +87,7 @@ var nim = function() {
 
     var startGameAsPlayer = function(player) {
         playerOne = !player;
-        isGameOverb=false;
+        isGameOverb = false;
     }
 
     return {
@@ -96,6 +96,6 @@ var nim = function() {
         play: getPlayer,
         status: getStatus,
         startGameAsPlayer: startGameAsPlayer,
-        newBoard:generateBoard
+        newBoard: generateBoard
     };
 }

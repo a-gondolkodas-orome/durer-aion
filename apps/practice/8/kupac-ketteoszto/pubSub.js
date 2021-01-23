@@ -18,8 +18,8 @@ window.pubSub = (function() {
     }
 
     return {
-    	sub : subscribe,
-    	pub : publish
+        sub: subscribe,
+        pub: publish
     }
 
 })();
