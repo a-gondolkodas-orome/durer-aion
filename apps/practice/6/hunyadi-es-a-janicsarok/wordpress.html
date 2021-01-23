@@ -1,21 +1,21 @@
 <style>
-	.redDot {
+	.dot {
 		height: 70px;
 		width: 70px;
-		background-color: #ff5e5e;
 		border-radius: 50%;
 		display: inline-block;
+		padding: 5px;
+		margin: 0 1px;
+	}
+	.redDot {
+		background-color: #ff5e5e;
 	}
 
 	.blueDot {
-		height: 70px;
-		width: 70px;
 		background-color: #5e87ff;
-		border-radius: 50%;
-		display: inline-block;
 	}
 
-	.repeat {
+	.gameActionButton {
 		background-color: #5fba7d;
 		border: none;
 		color: white;
@@ -28,12 +28,33 @@
 		white-space: normal; 
 	}
 
-	.pile {
+	.topPileBorder {
 		border-top-color: black; 
 		border-top-style: solid;
 		border-top-width: 3px;
+	}
+
+	.bottomPileBorder {
+		border-bottom-color: black; 
+		border-bottom-style: solid;
+		border-bottom-width: 3px;
+	}
+
+	.pile {
 		height: 80px;
+		padding: 2px;
 		text-align: left; 
+		white-space: nowrap;
+	}
+
+	.game {
+		flex: 3 0 400px;
+		padding: 5px;
+	}
+
+	.info {
+		flex: 1 0 300px;
+		padding: 5px;
 	}
 
 </style>
@@ -50,41 +71,39 @@
 	Sok sikert! :)
 </p>
 <div style="display:flex; flex-wrap: wrap;">
-	<div class="game" style="min-width: 400px; flex:auto; margin-right: 15px;">
+	<div class="game">
 		<img src="/wp-includes/js/janicsar/var.jpg" style="display: flex; margin: auto;">
 		<div class="board">
-			<div id="r0" class="pile"></div>
-			<div id="r1" class="pile"></div>
-			<div id="r2" class="pile"></div>
-			<div id="r3" class="pile"></div>
-			<div id="r4" class="pile"></div>
+			<div id="r0" class="pile topPileBorder"></div>
+			<div id="r1" class="pile topPileBorder"></div>
+			<div id="r2" class="pile topPileBorder"></div>
+			<div id="r3" class="pile topPileBorder"></div>
+			<div id="r4" class="pile topPileBorder bottomPileBorder"></div>
 		</div>
 	</div>
-	<div>
-		<div class="info" style="width: 300px;">
-			<p class="whos" style="font-weight:bold;">A gombra kattintva tudod elindítani a játékot.</p>
-			<p class="move" style="font-style: italic; height: auto;"></p>
-			<button class="repeat" style="display:block;" id="startTrue" onclick="game.reset(true)">
-				Hunyadi leszek
-			</button> 
-			<button class="repeat" style="display:block;" id="startFalse" onclick="game.reset(false)">
-				Szultán leszek
-			</button> 
-			<button class="repeat" style="display:none;" id=step> 
-				Lépek 
-			</button> 
-			<button class="repeat" style="display:none;" id=red>
-				Legyőzöm a pirosakat 
-			</button> 
-			<button class="repeat" style="display:none;" id=blue>
-				Legyőzöm a kékeket 
-			</button> 
-			<button class="repeat" style="display:none;" id=reset> 
-				Új leosztás 
-			</button>
-		</div>
-		<div class="status">
-		</div>
+	<div class="info">
+		<p class="whos" style="font-weight:bold;">
+			A gombra kattintva tudod elindítani a játékot.
+		</p>
+		<p class="move" style="font-style: italic; height: auto;"></p>
+		<button class="gameActionButton" style="display:block;" id="startTrue" onclick="game.reset(true)">
+			Hunyadi leszek
+		</button> 
+		<button class="gameActionButton" style="display:block;" id="startFalse" onclick="game.reset(false)">
+			Szultán leszek
+		</button> 
+		<button class="gameActionButton" style="display:none;" id=step> 
+			Lépek 
+		</button> 
+		<button class="gameActionButton" style="display:none;" id=red>
+			Legyőzöm a pirosakat 
+		</button> 
+		<button class="gameActionButton" style="display:none;" id=blue>
+			Legyőzöm a kékeket 
+		</button> 
+		<button class="gameActionButton" style="display:none;" id=reset> 
+			Új leosztás 
+		</button>
 	</div>
 </div>
 <script src="/wp-includes/js/janicsar/pubSub.js"></script>

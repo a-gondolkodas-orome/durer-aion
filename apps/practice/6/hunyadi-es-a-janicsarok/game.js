@@ -5,8 +5,6 @@ var gameBoard = function(nim) {
     //store a reference to the container
     var container = document.querySelector('.game').querySelector('.board');
 
-    var info = document.querySelector('.move');
-
     var move = n.board();
 
     
@@ -21,10 +19,9 @@ var gameBoard = function(nim) {
         //get a reference to the style object
         //if (lastTwo) s.opacity = '0.5';*/
         img.classList.add(num);
+        img.classList.add('dot');
         img.classList.add(source?'redDot':'blueDot');
         var s = img.style
-        //s.width = '10%';
-        s.padding = '5px';
         return img;
     }
 
@@ -122,7 +119,9 @@ var gameBoard = function(nim) {
 	
 
 	var resetButton = function() {
-    	drawBoard(n.newBoard());
+        drawBoard(n.newBoard());
+        document.querySelector('.move').innerHTML = '';
+        document.querySelector('.whos').innerHTML = 'A gombra kattintva tudod elindítani a játékot.';
     	document.getElementById("startTrue").style.display = 'block';
 		document.getElementById("startFalse").style.display = 'block';
 		document.getElementById("reset").style.display = 'none';
@@ -205,7 +204,7 @@ var game = (function() {
 			document.getElementById("reset").style.display = 'block';
 			//var time = Math.floor(Math.random() * 1500 + 1500);
         	//setTimeout(reset, time);
-            //document.querySelector('.repeat').style.display = '';
+            //document.querySelector('.gameActionButton').style.display = '';
 
         }
 		n.isBeginningOfGame = false;
@@ -227,10 +226,10 @@ var game = (function() {
 
     var reset = function(player) {
         n.reset(player);
-	    n.isBeginningOfGame = true;
+        n.isBeginningOfGame = true;
         //document.querySelector('.whos').innerHTML = 'Te jössz.';
 
-        //document.querySelector('.repeat').style.display = 'none';
+        //document.querySelector('.gameActionButton').style.display = 'none';
 
 
 		document.getElementById("startTrue").style.display = 'none';
