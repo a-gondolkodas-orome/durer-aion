@@ -1,63 +1,4 @@
-<style>
-	.dot {
-		height: 70px;
-		width: 70px;
-		border-radius: 50%;
-		display: inline-block;
-		padding: 5px;
-		margin: 0 1px;
-	}
-	.redDot {
-		background-color: #ff5e5e;
-	}
-
-	.blueDot {
-		background-color: #5e87ff;
-	}
-
-	.gameActionButton {
-		background-color: #5fba7d;
-		border: none;
-		color: white;
-		font-size: 16px;
-		margin: 5px 0px;
-		padding: 5px 10px;
-		text-align: center;
-		text-decoration: none;
-		width: 100%;
-		white-space: normal; 
-	}
-
-	.topPileBorder {
-		border-top-color: black; 
-		border-top-style: solid;
-		border-top-width: 3px;
-	}
-
-	.bottomPileBorder {
-		border-bottom-color: black; 
-		border-bottom-style: solid;
-		border-bottom-width: 3px;
-	}
-
-	.pile {
-		height: 80px;
-		padding: 2px;
-		text-align: left; 
-		white-space: nowrap;
-	}
-
-	.game {
-		flex: 3 0 400px;
-		padding: 5px;
-	}
-
-	.info {
-		flex: 1 0 300px;
-		padding: 5px;
-	}
-
-</style>
+<link rel="stylesheet" type="text/css" href="../../game.css">
 <p style="text-align: justify;">
 	Ez a játék a VI. Dürer döntőjén szerepelt D kategóriában. A török szultán serege
 	megtámadta Hunyadi várát. A várlépcső egyes fokain néhány janicsár áll.
@@ -82,10 +23,10 @@
 		</div>
 	</div>
 	<div class="info">
-		<p class="whos" style="font-weight:bold;">
+		<p class="whos">
 			A gombra kattintva tudod elindítani a játékot.
 		</p>
-		<p class="move" style="font-style: italic; height: auto;"></p>
+		<p class="move"></p>
 		<button class="gameActionButton" style="display:block;" id="startTrue" onclick="game.startGameAsPlayer(true)">
 			Hunyadi leszek
 		</button> 

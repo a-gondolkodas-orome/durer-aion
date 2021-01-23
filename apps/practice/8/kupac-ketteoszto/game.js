@@ -21,10 +21,8 @@ var gameBoard = function(nim) {
         //get a reference to the style object
         //if (lastTwo) s.opacity = '0.5';*/
         img.classList.add(num);
+        img.classList.add('dot');
         img.classList.add('blueDot');
-        var s = img.style
-        //s.width = '10%';
-        s.padding = '5px';
         return img;
     }
 
@@ -124,18 +122,6 @@ var gameBoard = function(nim) {
 
     }
 
-	
-
-	var resetButton = function() {
-    	drawBoard(n.newBoard());
-    	document.getElementById("startTrue").style.display = 'block';
-		document.getElementById("startFalse").style.display = 'block';
-		document.getElementById("reset").style.display = 'none';
-	
-    }
-	document.getElementById("reset").addEventListener("click", resetButton);
-	
-
 
     var appendEventsToBoard = function() {
         var imgs = container.getElementsByTagName('span');
@@ -201,7 +187,7 @@ var game = (function() {
 			document.getElementById("startTrue").style.display = 'none';
 			document.getElementById("startFalse").style.display = 'none';
 
-			document.getElementById("reset").style.display = 'block';
+			document.getElementById("resetGame").style.display = 'block';
 			//var time = Math.floor(Math.random() * 1500 + 1500);
         	//setTimeout(reset, time);
             //document.querySelector('.repeat').style.display = '';
@@ -217,14 +203,8 @@ var game = (function() {
     	}
     }
 
-    var start = function() {
-       document.querySelector('.game').style.display = 'block';
-       document.querySelector('.whos').innerHTML = n.status().player;
-    	   board.drawBoard(n.board());
-    }
-
-    var reset = function(player) {
-        n.reset(player);
+    var startGameAsPlayer = function(player) {
+        n.startGameAsPlayer(player);
         //document.querySelector('.whos').innerHTML = 'Te jössz.';
     
         //document.querySelector('.repeat').style.display = 'none';
@@ -233,20 +213,32 @@ var game = (function() {
 		document.getElementById("startTrue").style.display = 'none';
 		document.getElementById("startFalse").style.display = 'none';
 
-		document.getElementById("reset").style.display = 'block';
+		document.getElementById("resetGame").style.display = 'block';
          
-        start();
+        document.querySelector('.game').style.display = 'block';
+        document.querySelector('.whos').innerHTML = n.status().player;
+    	board.drawBoard(n.board());
         checkGame();
         if(player){
         	aiMove();
         }
     }
 
+    var resetGame = function() {
+        board.drawBoard(n.newBoard());
+        document.querySelector('.move').innerHTML = '';
+        document.querySelector('.whos').innerHTML = 'A gombra kattintva tudod elindítani a játékot.';
+    	document.getElementById("startTrue").style.display = 'block';
+		document.getElementById("startFalse").style.display = 'block';
+		document.getElementById("resetGame").style.display = 'none';
+	
+    }
+
     board.drawBoard(n.board());
 
     return {
-    	reset : reset,
-    	start : start
+        startGameAsPlayer : startGameAsPlayer,
+        resetGame: resetGame
     }
 
 })();

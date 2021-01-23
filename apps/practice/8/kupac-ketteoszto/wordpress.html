@@ -1,41 +1,4 @@
-<style>
-	.redDot {
-		height: 70px;
-		width: 70px;
-		background-color: #ff5e5e;
-		border-radius: 50%;
-		display: inline-block;
-	}
-
-	.blueDot {
-		height: 70px;
-		width: 70px;
-		background-color: #5e87ff;
-		border-radius: 50%;
-		display: inline-block;
-	}
-
-	.repeat {
-		background-color: #5fba7d;
-		border: none;
-		color: white;
-		font-size: 16px;
-		margin: 5px 0px;
-		padding: 5px 10px;
-		text-align: center;
-		text-decoration: none;
-		width: 100%;
-		white-space: normal; 
-	}
-
-	.pile {
-		border-top-color: black; 
-		border-top-style: solid;
-		border-top-width: 3px;
-		height: 80px;
-		text-align: left; 
-	}
-</style>
+<link rel="stylesheet" type="text/css" href="../../game.css">
 <p style="text-align: justify;">
 	Ez a játék a VIII. Dürer döntőjén szerepelt A kategóriában. A pályán mindig két kupac
 	korong található. A soron következő játékos választ egy kupacot, és azt szétosztja két kisebb kupacra (mindkettőbe
@@ -47,22 +10,24 @@
 	Sok sikert! :)
 </p>
 <div style="display:flex; flex-wrap: wrap;">
-	<div class="game" style="min-width: 400px; flex:auto; margin-right: 15px; flex-grow: 10;">
+	<div class="game">
 		<div class="board">
-			<div id="r0" class="pile"></div>
-			<div id="r1" class="pile"></div>
+			<div id="r0" class="pile topPileBorder"></div>
+			<div id="r1" class="pile topPileBorder bottomPileBorder"></div>
 		</div>
 	</div>
-	<div class="info" style="width: 300px;">
-		<p class="whos" style="font-weight:bold">A gombra kattintva tudod elindítani a játékot.</p>
-		<p class="move" style="font-style: italic; height: auto; text-align: justify;"></p>
-		<button style="display: block;" class="repeat" id="startTrue" onclick="game.reset(false)">
+	<div class="info">
+		<p class="whos">
+			A gombra kattintva tudod elindítani a játékot.
+		</p>
+		<p class="move"></p>
+		<button class="gameActionButton" style="display: block;" id="startTrue" onclick="game.startGameAsPlayer(false)">
 			Kezdő leszek
 		</button> 
-		<button style="display: block;" class="repeat" id="startFalse" onclick="game.reset(true)">
+		<button class="gameActionButton" style="display: block;" id="startFalse" onclick="game.startGameAsPlayer(true)">
 			Második leszek
 		</button> 
-		<button style="display: none;" class="repeat" id=reset> 
+		<button class="gameActionButton" style="display: none;" id="resetGame" onclick="game.resetGame()"> 
 			Új leosztás 
 		</button>
 	</div>

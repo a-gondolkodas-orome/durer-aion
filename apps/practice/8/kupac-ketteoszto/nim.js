@@ -85,7 +85,7 @@ var nim = function() {
 
     }
 
-    var resetGame = function(player) {
+    var startGameAsPlayer = function(player) {
         playerOne = !player;
         isGameOverb=false;
     }
@@ -95,7 +95,7 @@ var nim = function() {
         board: getBoard,
         play: getPlayer,
         status: getStatus,
-        reset: resetGame,
+        startGameAsPlayer: startGameAsPlayer,
         newBoard:generateBoard
     };
 }
