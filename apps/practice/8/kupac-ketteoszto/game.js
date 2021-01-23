@@ -1,4 +1,5 @@
 const isMachineDue = () => document.querySelector('.game__step-cta-text').innerHTML === "Mi jövünk.";
+const displayStyle = toShow => toShow ? 'block' : 'none';
 
 //The game board handles all the dom interaction
 //Drawing the board and listening for click events
@@ -107,8 +108,15 @@ var gameBoard = function(nim) {
         appendEventsToBoard();
     };
 
+    const toggleGameStartButtons = function(showGameStart) {
+        document.getElementById("startTrue").style.display = displayStyle(showGameStart);
+        document.getElementById("startFalse").style.display = displayStyle(showGameStart);
+        document.getElementById("resetGame").style.display = displayStyle(!showGameStart);
+    }
+
     return {
         drawBoard: drawBoard,
+        toggleGameStartButtons: toggleGameStartButtons
     }
 }
 
@@ -127,7 +135,7 @@ var game = (function() {
 
     var checkGame = function() {
         document.querySelector('.game__step-cta-text').innerHTML = n.status().player;
-        
+
         if (isMachineDue()) {
             document.querySelector('.game__step-description').innerHTML = '';
         } else {
@@ -137,11 +145,7 @@ var game = (function() {
 
         if (!n.status().isGameOn) {
             document.querySelector('.game__step-description').innerHTML = '';
-
-            document.getElementById("startTrue").style.display = 'none';
-            document.getElementById("startFalse").style.display = 'none';
-
-            document.getElementById("resetGame").style.display = 'block';
+            board.toggleGameStartButtons(false);
         }
     }
 
@@ -155,12 +159,8 @@ var game = (function() {
     var startGameAsPlayer = function(player) {
         n.startGameAsPlayer(player);
 
-        document.getElementById("startTrue").style.display = 'none';
-        document.getElementById("startFalse").style.display = 'none';
+        board.toggleGameStartButtons(false);
 
-        document.getElementById("resetGame").style.display = 'block';
-
-        document.querySelector('.game__game-area').style.display = 'block';
         document.querySelector('.game__step-cta-text').innerHTML = n.status().player;
         board.drawBoard(n.board());
         checkGame();
@@ -171,12 +171,9 @@ var game = (function() {
 
     var resetGame = function() {
         board.drawBoard(n.newBoard());
-        document.querySelector('.game__step-description').innerHTML = '';
         document.querySelector('.game__step-cta-text').innerHTML = 'A gombra kattintva tudod elindítani a játékot.';
-        document.getElementById("startTrue").style.display = 'block';
-        document.getElementById("startFalse").style.display = 'block';
-        document.getElementById("resetGame").style.display = 'none';
-
+        document.querySelector('.game__step-description').innerHTML = '';
+        board.toggleGameStartButtons(true);
     }
 
     board.drawBoard(n.board());
