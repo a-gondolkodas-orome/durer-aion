@@ -1,22 +1,45 @@
-.dot {
-    height: 70px;
-    width: 70px;
-    border-radius: 50%;
-    display: inline-block;
+:root {
+    --red: #ff5e5e;
+    --blue: #5e87ff;
+    --green: #5fba7d;
+}
+
+p {
+    margin: 0 0 0.5em 0;
+}
+
+.game__rules {
+    text-align: justify;
+}
+
+.game__container {
+    display:flex; 
+    flex-wrap: wrap;
+}
+
+.game__game-area {
+    flex: 3 0 400px;
     padding: 5px;
-    margin: 0 1px;
 }
 
-.redDot {
-    background-color: #ff5e5e;
+.game__info-area {
+    flex: 1 0 300px;
+    padding: 5px;
 }
 
-.blueDot {
-    background-color: #5e87ff;
+.game__step-cta-text {
+    font-size: 1.1em;
+    font-weight:bold;
 }
 
-.gameActionButton {
-    background-color: #5fba7d;
+.game__step-description {
+    font-style: italic; 
+    height: auto; 
+    text-align: justify;
+}
+
+.game__cta-button {
+    background-color: var(--green);
     border: none;
     border-radius: 5px;
     color: white;
@@ -27,48 +50,37 @@
     text-decoration: none;
     width: 100%;
     white-space: normal; 
-}
+}    
 
-.topPileBorder {
+.game__pile {
     border-top-color: black; 
     border-top-style: solid;
     border-top-width: 3px;
-}
+    height: 80px;
+    padding: 2px;
+    text-align: left; 
+    white-space: nowrap;
+}    
 
-.bottomPileBorder {
+.game__pile-bottom-border {
     border-bottom-color: black; 
     border-bottom-style: solid;
     border-bottom-width: 3px;
 }
 
-.pile {
-    height: 80px;
-    padding: 2px;
-    text-align: left; 
-    white-space: nowrap;
-}
-
-.game {
-    flex: 3 0 400px;
+.game__piece {
+    height: 70px;
+    width: 70px;
+    border-radius: 50%;
+    display: inline-block;
     padding: 5px;
-}
+    margin: 0 1px;
+}    
 
-.info {
-    flex: 1 0 300px;
-    padding: 5px;
-}
+.game__piece-blue {
+    background-color: var(--blue);
+}    
 
-.move {
-    font-style: italic; 
-    height: auto; 
-    text-align: justify;
-}
-
-.whos {
-    font-size: 1.1em;
-    font-weight:bold;
-}
-
-p {
-    margin: 0 0 0.5em 0;
-}
+.game__piece-red {
+    background-color: var(--red);
+}    

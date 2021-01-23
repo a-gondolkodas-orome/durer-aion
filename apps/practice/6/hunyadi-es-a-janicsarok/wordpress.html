@@ -1,5 +1,5 @@
 <link rel="stylesheet" type="text/css" href="../../game.css">
-<p style="text-align: justify;">
+<p class="game__rules">
 	Ez a játék a VI. Dürer döntőjén szerepelt D kategóriában. A török szultán serege
 	megtámadta Hunyadi várát. A várlépcső egyes fokain néhány janicsár áll.
 	Minden reggel a szultán kettéosztja a hadseregét egy piros és egy kék hadtestre.
@@ -11,38 +11,38 @@
 	vagy a török szultánként szeretnél-e játszani.
 	Sok sikert! :)
 </p>
-<div style="display:flex; flex-wrap: wrap;">
-	<div class="game">
 		<img src="/wp-includes/js/janicsar/var.jpg" style="display: flex; margin: auto;">
-		<div class="board">
-			<div id="r0" class="pile topPileBorder"></div>
-			<div id="r1" class="pile topPileBorder"></div>
-			<div id="r2" class="pile topPileBorder"></div>
-			<div id="r3" class="pile topPileBorder"></div>
-			<div id="r4" class="pile topPileBorder bottomPileBorder"></div>
+<div class="game__container">
+	<div class="game__game-area">
+		<div class="game__board">
+			<div id="row_0" class="game__pile"></div>
+			<div id="row_1" class="game__pile"></div>
+			<div id="row_2" class="game__pile"></div>
+			<div id="row_3" class="game__pile"></div>
+			<div id="row_4" class="game__pile game__pile-bottom-border"></div>
 		</div>
 	</div>
-	<div class="info">
-		<p class="whos">
+	<div class="game__info-area">
+		<p class="game__step-cta-text">
 			A gombra kattintva tudod elindítani a játékot.
 		</p>
-		<p class="move"></p>
-		<button class="gameActionButton" style="display:block;" id="startTrue" onclick="game.startGameAsPlayer(true)">
+		<p class="game__step-description"></p>
+		<button class="game__cta-button" style="display:block;" id="startTrue" onclick="game.startGameAsPlayer(true)">
 			Hunyadi leszek
 		</button> 
-		<button class="gameActionButton" style="display:block;" id="startFalse" onclick="game.startGameAsPlayer(false)">
+		<button class="game__cta-button" style="display:block;" id="startFalse" onclick="game.startGameAsPlayer(false)">
 			Szultán leszek
 		</button> 
-		<button class="gameActionButton" style="display:none;" id="step" onclick="game.step()"> 
+		<button class="game__cta-button" style="display:none;" id="step" onclick="game.step()"> 
 			Lépek 
 		</button> 
-		<button class="gameActionButton" style="display:none;" id="red" onclick="game.killRed()">
+		<button class="game__cta-button" style="display:none;" id="red" onclick="game.killRed()">
 			Legyőzöm a pirosakat 
 		</button> 
-		<button class="gameActionButton" style="display:none;" id="blue" onclick="game.killBlue()">
+		<button class="game__cta-button" style="display:none;" id="blue" onclick="game.killBlue()">
 			Legyőzöm a kékeket 
 		</button> 
-		<button class="gameActionButton" style="display:none;" id="resetGame" onclick="game.resetGame()"> 
+		<button class="game__cta-button" style="display:none;" id="resetGame" onclick="game.resetGame()"> 
 			Új leosztás 
 		</button>
 	</div>
