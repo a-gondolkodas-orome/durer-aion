@@ -86,54 +86,6 @@ var gameBoard = function(nim) {
     }
 
 
-    var step = function() {
-    	if (n.status().isGameOn)
-        if (document.querySelector('.whos').innerHTML === "Mi jövünk." && n.state()===true) {			
-		  console.error('Túl gyorsan léptél, még mi jövünk.');
-		} else if(!n.state()) pubSub.pub('PLAYER_MOVE', move);
-    }
-    document.getElementById("step").addEventListener("click", step);
-
-
-    var killBlue = function() {
-    	if (n.status().isGameOn)
-    	if (document.querySelector('.whos').innerHTML === "Mi jövünk."  && n.state()===false) {			
-		  console.error('Túl gyorsan léptél, még mi jövünk.');
-		} else if(n.state()){
-    		pubSub.pub('PLAYER_MOVE', true);
-    	}
-    }
-    document.getElementById("blue").addEventListener("click", killBlue);
-	
-
-
-    var killRed = function() {
-    	if (n.status().isGameOn)
-    	if (document.querySelector('.whos').innerHTML === "Mi jövünk."  && n.state()===false) {			
-		  console.error('Túl gyorsan léptél, még mi jövünk.');
-		} else if(n.state()){
-    		pubSub.pub('PLAYER_MOVE', false);
-    	}
-    }
-	document.getElementById("red").addEventListener("click", killRed);
-	
-
-	var resetButton = function() {
-        drawBoard(n.newBoard());
-        document.querySelector('.move').innerHTML = '';
-        document.querySelector('.whos').innerHTML = 'A gombra kattintva tudod elindítani a játékot.';
-    	document.getElementById("startTrue").style.display = 'block';
-		document.getElementById("startFalse").style.display = 'block';
-		document.getElementById("reset").style.display = 'none';
-	
-        document.getElementById("step").style.display = 'none';
-		document.getElementById("red").style.display = 'none';
-		document.getElementById("blue").style.display = 'none';
-    }
-	document.getElementById("reset").addEventListener("click", resetButton);
-	
-
-
     var appendEventsToBoard = function() {
         var imgs = container.getElementsByTagName('span');
         for (var i = imgs.length - 1; i >= 0; i--) {
@@ -201,7 +153,7 @@ var game = (function() {
 			document.getElementById("startTrue").style.display = 'none';
 			document.getElementById("startFalse").style.display = 'none';
 
-			document.getElementById("reset").style.display = 'block';
+			document.getElementById("resetGame").style.display = 'block';
 			//var time = Math.floor(Math.random() * 1500 + 1500);
         	//setTimeout(reset, time);
             //document.querySelector('.gameActionButton').style.display = '';
@@ -218,14 +170,33 @@ var game = (function() {
     	}
     }
 
-    var start = function() {
-       document.querySelector('.game').style.display = 'block';
-       document.querySelector('.whos').innerHTML = n.status().player;
-    	   board.drawBoard(n.board());
+    var step = function() {
+    	if (n.status().isGameOn)
+        if (document.querySelector('.whos').innerHTML === "Mi jövünk." && n.state()===true) {			
+		  console.error('Túl gyorsan léptél, még mi jövünk.');
+		} else if(!n.state()) pubSub.pub('PLAYER_MOVE', move);
     }
 
-    var reset = function(player) {
-        n.reset(player);
+    var killBlue = function() {
+    	if (n.status().isGameOn)
+    	if (document.querySelector('.whos').innerHTML === "Mi jövünk."  && n.state()===false) {			
+		  console.error('Túl gyorsan léptél, még mi jövünk.');
+		} else if(n.state()){
+    		pubSub.pub('PLAYER_MOVE', true);
+    	}
+    }
+
+    var killRed = function() {
+    	if (n.status().isGameOn)
+    	if (document.querySelector('.whos').innerHTML === "Mi jövünk."  && n.state()===false) {			
+		  console.error('Túl gyorsan léptél, még mi jövünk.');
+		} else if(n.state()){
+    		pubSub.pub('PLAYER_MOVE', false);
+    	}
+    }
+
+    var startGameAsPlayer = function(player) {
+        n.startGameAsPlayer(player);
         n.isBeginningOfGame = true;
         //document.querySelector('.whos').innerHTML = 'Te jössz.';
 
@@ -235,7 +206,7 @@ var game = (function() {
 		document.getElementById("startTrue").style.display = 'none';
 		document.getElementById("startFalse").style.display = 'none';
 
-		document.getElementById("reset").style.display = 'block';
+		document.getElementById("resetGame").style.display = 'block';
          
 
 		document.getElementById("step").style.display = player?'none':'block';
@@ -243,18 +214,37 @@ var game = (function() {
 		document.getElementById("red").style.display = (!player)?'none':'block';
 		document.getElementById("blue").style.display = (!player)?'none':'block';
 
-        start();
+        document.querySelector('.game').style.display = 'block';
+        document.querySelector('.whos').innerHTML = n.status().player;
+        board.drawBoard(n.board());
+
         checkGame();
         if(player){
         	aiMove();
         }
     }
 
+    var resetGame = function() {
+        board.drawBoard(n.newBoard());
+        document.querySelector('.move').innerHTML = '';
+        document.querySelector('.whos').innerHTML = 'A gombra kattintva tudod elindítani a játékot.';
+    	document.getElementById("startTrue").style.display = 'block';
+		document.getElementById("startFalse").style.display = 'block';
+		document.getElementById("resetGame").style.display = 'none';
+	
+        document.getElementById("step").style.display = 'none';
+		document.getElementById("red").style.display = 'none';
+		document.getElementById("blue").style.display = 'none';
+    }
+
     board.drawBoard(n.board());
 
     return {
-    	reset : reset,
-    	start : start
+        startGameAsPlayer : startGameAsPlayer,
+        resetGame: resetGame,
+        step: step,
+        killRed: killRed,
+        killBlue: killBlue
     }
 
 })();
