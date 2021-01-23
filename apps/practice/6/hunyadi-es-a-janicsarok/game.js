@@ -1,3 +1,5 @@
+const isMachineDue = () => document.querySelector('.game__step-cta-text').innerHTML === "Mi jövünk.";
+
 //The game board handles all the dom interaction
 //Drawing the board and listening for click events
 var gameBoard = function(nim) {
@@ -32,7 +34,7 @@ var gameBoard = function(nim) {
 
     var makeMove = function() {
         if (n.status().isGameOn) {
-            if (document.querySelector('.game__step-cta-text').innerHTML === "Mi jövünk." && n.state() === true) {
+            if (isMachineDue() && n.state() === true) {
                 console.error('Túl gyorsan léptél, még mi jövünk.');
             } else if (n.state() === false) {
                 var pile = parseInt(this.parentElement.id.replace(/row\_/, ''));
@@ -94,7 +96,7 @@ var game = (function() {
 
     var checkGame = function() {
         document.querySelector('.game__step-cta-text').innerHTML = n.status().player;
-        if (document.querySelector('.game__step-cta-text').innerHTML === "Mi jövünk.") {
+        if (isMachineDue()) {
             document.querySelector('.game__step-description').innerHTML = '';
         } else {
             document.querySelector('.game__step-description').innerHTML = n.state() 
@@ -125,14 +127,14 @@ var game = (function() {
 
     var step = function() {
         if (n.status().isGameOn)
-            if (document.querySelector('.game__step-cta-text').innerHTML === "Mi jövünk." && n.state() === true) {
+            if (isMachineDue() && n.state() === true) {
                 console.error('Túl gyorsan léptél, még mi jövünk.');
             } else if (!n.state()) pubSub.pub('PLAYER_MOVE', window.move);
     }
 
     var killBlue = function() {
         if (n.status().isGameOn)
-            if (document.querySelector('.game__step-cta-text').innerHTML === "Mi jövünk." && n.state() === false) {
+            if (isMachineDue() && n.state() === false) {
                 console.error('Túl gyorsan léptél, még mi jövünk.');
             } else if (n.state()) {
                 pubSub.pub('PLAYER_MOVE', true);

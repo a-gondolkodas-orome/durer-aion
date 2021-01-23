@@ -1,3 +1,5 @@
+const isMachineDue = () => document.querySelector('.game__step-cta-text').innerHTML === "Mi jövünk.";
+
 //The game board handles all the dom interaction
 //Drawing the board and listening for click events
 var gameBoard = function(nim) {
@@ -52,7 +54,7 @@ var gameBoard = function(nim) {
 
     var makeMove = function() {
         if (n.status().isGameOn) {
-            if (document.querySelector('.game__step-description').innerHTML === "Mi jövünk.") {
+            if (isMachineDue()) {
                 console.error('Túl gyorsan léptél, még mi jövünk.');
             } else {
                 var pile = parseInt(this.parentElement.id.replace(/row_/, ''));
@@ -125,7 +127,8 @@ var game = (function() {
 
     var checkGame = function() {
         document.querySelector('.game__step-cta-text').innerHTML = n.status().player;
-        if (document.querySelector('.game__step-cta-text').innerHTML === "Mi jövünk.") {
+        
+        if (isMachineDue()) {
             document.querySelector('.game__step-description').innerHTML = '';
         } else {
             const desc = 'Kattints egy korongra, hogy azzal kettéosztd azt a kupacot. Amelyik korongra kattintasz, az és a tőle jobbra lévők kerülnek az új kupacba.';
