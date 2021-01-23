@@ -1,5 +1,6 @@
-const isMachineDue = () => document.querySelector('.game__step-cta-text').innerHTML === "Mi jövünk.";
 const displayStyle = toShow => toShow ? 'block' : 'none';
+
+const isMachineDue = () => document.querySelector('.game__step-cta-text').innerHTML === "Mi jövünk.";
 
 //The game board handles all the dom interaction
 //Drawing the board and listening for click events
@@ -78,14 +79,20 @@ var gameBoard = function(nim) {
     };
 
     const toggleGameStartButtons = function(showGameStart) {
-        document.getElementById("startTrue").style.display = displayStyle(showGameStart);
-        document.getElementById("startFalse").style.display = displayStyle(showGameStart);
-        document.getElementById("resetGame").style.display = displayStyle(!showGameStart);
+        toggleVisibilityForElements('game__role-selector', showGameStart);
+        toggleVisibilityForElements('game__reset-game', !showGameStart);
+    }
+
+    const toggleVisibilityForElements = (classPrefix, toShow) => {
+        [
+            ...document.querySelectorAll(`[class*="${classPrefix}"]`)
+        ].map(el => el.style.display = displayStyle(toShow));
     }
 
     return {
         drawBoard: drawBoard,
-        toggleGameStartButtons: toggleGameStartButtons
+        toggleGameStartButtons: toggleGameStartButtons,
+        toggleVisibilityForElements: toggleVisibilityForElements
     }
 }
 
@@ -114,9 +121,7 @@ var game = (function() {
 
         if (!n.status().isGameOn) {
             document.querySelector('.game__step-description').innerHTML = '';
-            document.getElementById("step").style.display = displayStyle(false);
-            document.getElementById("red").style.display = displayStyle(false);
-            document.getElementById("blue").style.display = displayStyle(false);
+            board.toggleVisibilityForElements('game__step-for-role', false);
 
             board.toggleGameStartButtons(false);
         }
@@ -156,22 +161,20 @@ var game = (function() {
     }
 
     var startGameAsPlayer = function(player) {
-        n.startGameAsPlayer(player);
+        const playerAsBoolean = player === 'hunyadi';
+        n.startGameAsPlayer(playerAsBoolean);
         n.isBeginningOfGame = true;
 
         board.toggleGameStartButtons(false);
 
-        document.getElementById("step").style.display = displayStyle(!player);
+        board.toggleVisibilityForElements('game__step-for-role-hunyadi', playerAsBoolean);
+        board.toggleVisibilityForElements('game__step-for-role-szultan', !playerAsBoolean);
 
-        document.getElementById("red").style.display = displayStyle(player);
-        document.getElementById("blue").style.display = displayStyle(player);
-
-        document.querySelector('.game__game-area').style.display = 'block';
-        document.querySelector('.game__step-cta-text').innerHTML = n.status().player;
+        document.querySelector('.game__step-cta-text').innerHTML = n.status().playerAsBoolean;
         board.drawBoard(n.board());
 
         checkGame();
-        if (player) {
+        if (playerAsBoolean) {
             aiMove();
         }
     }
@@ -181,10 +184,7 @@ var game = (function() {
         document.querySelector('.game__step-description').innerHTML = '';
         document.querySelector('.game__step-cta-text').innerHTML = 'A gombra kattintva tudod elindítani a játékot.';
         board.toggleGameStartButtons(true);
-
-        document.getElementById("step").style.display = displayStyle(false);
-        document.getElementById("red").style.display = displayStyle(false);
-        document.getElementById("blue").style.display = displayStyle(false);
+        board.toggleVisibilityForElements('game__step-for-role', false);
     }
 
     board.drawBoard(n.board());

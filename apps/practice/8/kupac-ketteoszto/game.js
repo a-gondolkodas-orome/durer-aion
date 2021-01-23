@@ -109,9 +109,14 @@ var gameBoard = function(nim) {
     };
 
     const toggleGameStartButtons = function(showGameStart) {
-        document.getElementById("startTrue").style.display = displayStyle(showGameStart);
-        document.getElementById("startFalse").style.display = displayStyle(showGameStart);
-        document.getElementById("resetGame").style.display = displayStyle(!showGameStart);
+        toggleVisibilityForElements('game__role-selector', showGameStart);
+        toggleVisibilityForElements('game__reset-game', !showGameStart);
+    }
+
+    const toggleVisibilityForElements = (classPrefix, toShow) => {
+        [
+            ...document.querySelectorAll(`[class*="${classPrefix}"]`)
+        ].map(el => el.style.display = displayStyle(toShow));
     }
 
     return {

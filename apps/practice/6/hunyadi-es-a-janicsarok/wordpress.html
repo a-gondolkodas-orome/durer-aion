@@ -27,22 +27,22 @@
 			A gombra kattintva tudod elindítani a játékot.
 		</p>
 		<p class="game__step-description"></p>
-		<button class="game__cta-button" style="display:block;" id="startTrue" onclick="game.startGameAsPlayer(true)">
+		<button class="game__cta-button game__role-selector" style="display:block;" onclick="game.startGameAsPlayer('hunyadi')">
 			Hunyadi leszek
 		</button>
-		<button class="game__cta-button" style="display:block;" id="startFalse" onclick="game.startGameAsPlayer(false)">
+		<button class="game__cta-button game__role-selector" style="display:block;" onclick="game.startGameAsPlayer('szultan')">
 			Szultán leszek
 		</button>
-		<button class="game__cta-button" style="display:none;" id="step" onclick="game.step()">
+		<button class="game__cta-button game__step-for-role-szultan" style="display:none;" onclick="game.step()">
 			Lépek
 		</button>
-		<button class="game__cta-button" style="display:none;" id="red" onclick="game.killRed()">
+		<button class="game__cta-button game__step-for-role-hunyadi" style="display:none;" onclick="game.killRed()">
 			Legyőzöm a pirosakat
 		</button>
-		<button class="game__cta-button" style="display:none;" id="blue" onclick="game.killBlue()">
+		<button class="game__cta-button game__step-for-role-hunyadi" style="display:none;" onclick="game.killBlue()">
 			Legyőzöm a kékeket
 		</button>
-		<button class="game__cta-button" style="display:none;" id="resetGame" onclick="game.resetGame()">
+		<button class="game__cta-button game__reset-game" style="display:none;" onclick="game.resetGame()">
 			Új leosztás
 		</button>
 	</div>
