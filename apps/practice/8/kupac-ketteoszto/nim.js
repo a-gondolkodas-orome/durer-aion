@@ -4,10 +4,8 @@ const nim = function() {
 
     let board = [4, 5];
 
-
-
     let playerOne = true;
-    let isGameOverb = true;
+    let isGameOver = true;
     let isPlayerWinner = false;
 
     const generateBoard = function() {
@@ -15,21 +13,14 @@ const nim = function() {
 
         return board;
     };
-
+    
     generateBoard();
 
-
-
     const move = function(obj) {
-        //parseObj(obj);
-
-
-
         board = obj;
         playerOne = !playerOne;
-        //!Move the soldiers
         if (board[0] == 1 && board[1] == 1) {
-            isGameOverb = true;
+            isGameOver = true;
             isPlayerWinner = !playerOne;
         }
         return board;
@@ -40,16 +31,8 @@ const nim = function() {
         return JSON.parse(JSON.stringify(board));
     };
 
-    const getPlayer = function() {
-        return playerOne;
-    };
-
-    const isGameOver = function() {
-        return isGameOverb;
-    };
-
     const getStatus = function() {
-        if (isGameOver()) {
+        if (isGameOver) {
             return {
                 player: !isPlayerWinner ? "Sajnos, most nem nyertél, de ne add fel." : "Nyertél. Gratulálunk! :)",
                 isGameOn: false
@@ -65,13 +48,12 @@ const nim = function() {
 
     const startGameAsPlayer = function(isFirstPlayer) {
         playerOne = isFirstPlayer;
-        isGameOverb = false;
+        isGameOver = false;
     }
 
     return {
         move: move,
         board: getBoard,
-        play: getPlayer,
         status: getStatus,
         startGameAsPlayer: startGameAsPlayer,
         newBoard: generateBoard

@@ -2,17 +2,19 @@
 const nimAi = function() {
 	const findOptimalDivision = function(sum, start) {
 		if (sum <= 1) { console.error("sum<=1"); }
+		
+		let move = [];
+		
 		if (sum == 2) {
-			let move = [];
 			move[start] = 1;
 			move[(start + 1) % 2] = 1;
 			return move;
 		}
-		const startPile = 1 + 2 * Math.ceil(Math.random() * Math.floor((sum - 2) / 2));
 
-		let move = [];
+		const startPile = 1 + 2 * Math.ceil(Math.random() * Math.floor((sum - 2) / 2));
 		move[start] = startPile;
 		move[(start + 1) % 2] = sum - startPile;
+
 		return move;
 	}
 

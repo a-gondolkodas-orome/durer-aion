@@ -3,18 +3,17 @@
 const nim = function() {
 
     //The Game board
-    let board =
-        [[true],
+    let board = [
+        [true],
         [true],
         [true, true, true],
         [true, true, true],
-        [true, true, true]];
-
-
+        [true, true, true]
+    ];
 
     let playerOne = true;
     let isBeginningOfGame = true;
-    let isGameOverb = false;
+    let isGameOver = false;
     let killState = false;
     let isPlayerWinner = false;
 
@@ -57,8 +56,6 @@ const nim = function() {
         if (!killState) {
             isBeginningOfGame = false;
             killState = true;
-            //parseObj(obj);
-
 
             if (!isMoveLegal(obj)) {
                 throw new Error('Nem megengedett lépés!!!');
@@ -66,7 +63,6 @@ const nim = function() {
 
             board = obj;
             playerOne = !playerOne;
-            //!Move the soldiers
             return board;
         } else {
             killState = false;
@@ -75,11 +71,10 @@ const nim = function() {
                 throw new Error('Nem megengedett szín!!!');
             }
 
-
             let sum = 0;
             for (const j in board[0]) {
                 if (board[0][j] != obj) {
-                    isGameOverb = true;
+                    isGameOver = true;
                     isPlayerWinner = !playerOne;
                 }
             }
@@ -98,8 +93,8 @@ const nim = function() {
             }
 
             playerOne = !playerOne;
-            if (sum == 0 && !isGameOverb) {
-                isGameOverb = true;
+            if (sum == 0 && !isGameOver) {
+                isGameOver = true;
                 isPlayerWinner = !playerOne;
             }
 
@@ -114,16 +109,13 @@ const nim = function() {
     const getPlayer = function() {
         return playerOne;
     };
+
     const getState = function() {
         return killState;
     };
 
-    const isGameOver = function() {
-        return isGameOverb;
-    };
-
     const getStatus = function() {
-        if (isGameOver()) {
+        if (isGameOver) {
             return {
                 player: !isPlayerWinner ? "Sajnos, most nem nyertél, de ne add fel." : "Nyertél. Gratulálunk! :)",
                 isGameOn: false
@@ -140,7 +132,7 @@ const nim = function() {
     const startGameAsPlayer = function(isFirstPlayer) {
         playerOne = isFirstPlayer;
         isBeginningOfGame = true;
-        isGameOverb = false;
+        isGameOver = false;
         killState = false;
     }
 
