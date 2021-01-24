@@ -1,37 +1,16 @@
 'use strict';
 
-var nim = function() {
+const nim = function() {
 
-    //The Game board
-    var board = [4, 5];
-
+    let board = [4, 5];
 
 
-    var playerOne = true;
-    var isGameOverb = true;
-    var isPlayerWinner = false;
 
-    //Check the object if it's valid
-    /*var parseObj = function(o) {
-        for (var i in getBoard) {
-            if (!o.hasOwnProperty(i) || o[i]==undefined) {
-                o[i]=board[i];
-            }else if(o[i]!=undefined){
-                for(var field in o[i]){
-                    if(!(o[field]===true || o[field]===false)){
-                        throw new Error('Non-boolean field on board.');
-                    }
-                }
-            }
-        }
+    let playerOne = true;
+    let isGameOverb = true;
+    let isPlayerWinner = false;
 
-
-        
-    };
-    */
-
-
-    var generateBoard = function() {
+    const generateBoard = function() {
         board = [Math.floor(Math.random() * 4) + 3, Math.floor(Math.random() * 4) + 3];
 
         return board;
@@ -41,7 +20,7 @@ var nim = function() {
 
 
 
-    var move = function(obj) {
+    const move = function(obj) {
         //parseObj(obj);
 
 
@@ -57,19 +36,19 @@ var nim = function() {
 
     };
 
-    var getBoard = function() {
+    const getBoard = function() {
         return JSON.parse(JSON.stringify(board));
     };
 
-    var getPlayer = function() {
+    const getPlayer = function() {
         return playerOne;
     };
 
-    var isGameOver = function() {
+    const isGameOver = function() {
         return isGameOverb;
     };
 
-    var getStatus = function() {
+    const getStatus = function() {
         if (isGameOver()) {
             return {
                 player: !isPlayerWinner ? "Sajnos, most nem nyertél, de ne add fel." : "Nyertél. Gratulálunk! :)",
@@ -84,7 +63,7 @@ var nim = function() {
 
     }
 
-    var startGameAsPlayer = function(isFirstPlayer) {
+    const startGameAsPlayer = function(isFirstPlayer) {
         playerOne = isFirstPlayer;
         isGameOverb = false;
     }

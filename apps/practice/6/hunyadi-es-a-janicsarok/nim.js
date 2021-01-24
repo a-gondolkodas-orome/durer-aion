@@ -1,9 +1,9 @@
 'use strict';
 
-var nim = function() {
+const nim = function() {
 
     //The Game board
-    var board =
+    let board =
         [[true],
         [true],
         [true, true, true],
@@ -12,34 +12,14 @@ var nim = function() {
 
 
 
-    var playerOne = true;
-    var isBeginningOfGame = true;
-    var isGameOverb = false;
-    var killState = false;
-    var isPlayerWinner = false;
+    let playerOne = true;
+    let isBeginningOfGame = true;
+    let isGameOverb = false;
+    let killState = false;
+    let isPlayerWinner = false;
 
-    //Check the object if it's valid
-    /*var parseObj = function(o) {
-        for (var i in getBoard) {
-            if (!o.hasOwnProperty(i) || o[i]==undefined) {
-                o[i]=board[i];
-            }else if(o[i]!=undefined){
-                for(var field in o[i]){
-                    if(!(o[field]===true || o[field]===false)){
-                        throw new Error('Non-boolean field on board.');
-                    }
-                }
-            }
-        }
-
-
-        
-    };
-    */
-
-    //is the move legal
-    var isMoveLegal = function(obj) {
-        for (var i in board) {
+    const isMoveLegal = function(obj) {
+        for (const i in board) {
             if (obj[i].length != board[i].length) {
                 return false;
             }
@@ -47,18 +27,18 @@ var nim = function() {
         return true;
     }
 
-    var generateBoard = function() {
-        var sum = 2.0 + Math.ceil(Math.random() * 8) / 8 - 0.5;
+    const generateBoard = function() {
+        let sum = 2.0 + Math.ceil(Math.random() * 8) / 8 - 0.5;
         board = [];
-        for (var i = 0; i < 5; i++) {
-            var row = [];
+        for (let i = 0; i < 5; i++) {
+            const row = [];
             for (sum; sum >= ((1.0 / 2.0) ** i); sum -= ((1.0 / 2.0) ** i)) {
                 row.push(true);
             }
             board.push(row);
         };
-        for (var i = 0; i < 4; i++) {
-            for (var j = board[i].length - 1; j >= 0; j--) {
+        for (let i = 0; i < 4; i++) {
+            for (let j = board[i].length - 1; j >= 0; j--) {
                 if (Math.random() > 0.5) {
                     board[i].splice(j, 1);
                     board[i + 1].push(true); board[i + 1].push(true);
@@ -73,7 +53,7 @@ var nim = function() {
 
 
 
-    var move = function(obj) {
+    const move = function(obj) {
         if (!killState) {
             isBeginningOfGame = false;
             killState = true;
@@ -96,17 +76,17 @@ var nim = function() {
             }
 
 
-            var sum = 0;
-            for (var j in board[0]) {
+            let sum = 0;
+            for (const j in board[0]) {
                 if (board[0][j] != obj) {
                     isGameOverb = true;
                     isPlayerWinner = !playerOne;
                 }
             }
 
-            for (var i in board) {
+            for (const i in board) {
                 if (i != 0) {
-                    for (var j in board[i]) {
+                    for (const j in board[i]) {
                         if (board[i][j] != obj) {
                             sum++;
                             board[i - 1].push(board[i][j]);
@@ -127,22 +107,22 @@ var nim = function() {
         return board;
     };
 
-    var getBoard = function() {
+    const getBoard = function() {
         return JSON.parse(JSON.stringify(board));
     };
 
-    var getPlayer = function() {
+    const getPlayer = function() {
         return playerOne;
     };
-    var getState = function() {
+    const getState = function() {
         return killState;
     };
 
-    var isGameOver = function() {
+    const isGameOver = function() {
         return isGameOverb;
     };
 
-    var getStatus = function() {
+    const getStatus = function() {
         if (isGameOver()) {
             return {
                 player: !isPlayerWinner ? "Sajnos, most nem nyertél, de ne add fel." : "Nyertél. Gratulálunk! :)",
@@ -157,7 +137,7 @@ var nim = function() {
 
     }
 
-    var startGameAsPlayer = function(isFirstPlayer) {
+    const startGameAsPlayer = function(isFirstPlayer) {
         playerOne = isFirstPlayer;
         isBeginningOfGame = true;
         isGameOverb = false;

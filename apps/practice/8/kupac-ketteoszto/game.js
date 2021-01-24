@@ -8,50 +8,50 @@ const isMachineDue = () => {
 
 //The game board handles all the dom interaction
 //Drawing the board and listening for click events
-var gameBoard = function(nim) {
-    var n = nim;
-    var gameContainer = document.getElementById('kupac-ketteoszto');
-    var boardContainer = gameContainer.querySelector('.game__board');
+const gameBoard = function(nim) {
+    const n = nim;
+    const gameContainer = document.getElementById('kupac-ketteoszto');
+    const boardContainer = gameContainer.querySelector('.game__board');
 
-    var move = n.board();
+    let move = n.board();
 
 
     //create an image node
-    var createGamePiece = function(num) {
-        var piece = document.createElement('span');
+    const createGamePiece = function(num) {
+        const piece = document.createElement('span');
         piece.classList.add(num, 'game__piece', 'game__piece-blue');
         return piece;
     }
 
 
-    var drawPile = function(num) {
+    const drawPile = function(num) {
         //create a document fragment once
-        var frag = document.createDocumentFragment();
+        const frag = document.createDocumentFragment();
         //create all num images
-        for (var i = 0; i < num; i = i + 1) {
+        for (let i = 0; i < num; i = i + 1) {
             frag.appendChild(createGamePiece(i + 1, true));
         }
         return frag;
     }
 
-    var hoverEvent = function() {
-        var parent = this.parentElement;
+    const hoverEvent = function() {
+        const parent = this.parentElement;
         parent.classList[1];
-        var matches = parseInt(this.classList[0], 10) - 1;
+        const matches = parseInt(this.classList[0], 10) - 1;
         if (matches != 0 && n.status().isGameOn)
-            for (var i = this.parentElement.children.length - 1; i >= 0; i--) {
+            for (let i = this.parentElement.children.length - 1; i >= 0; i--) {
                 if (parseInt(this.parentElement.children[i].classList[0], 10) - 1 >= matches) {
                     this.parentElement.children[i].style.opacity = '0.5';
                 }
             }
     }
 
-    var hoverOutEvent = function() {
-        var parent = this.parentElement;
+    const hoverOutEvent = function() {
+        const parent = this.parentElement;
         parent.classList[1];
-        var matches = parseInt(this.classList[0], 10) - 1;
+        const matches = parseInt(this.classList[0], 10) - 1;
         if (matches != 0)
-            for (var i = this.parentElement.children.length - 1; i >= 0; i--) {
+            for (let i = this.parentElement.children.length - 1; i >= 0; i--) {
                 if (parseInt(this.parentElement.children[i].classList[0], 10) - 1 >= matches) {
                     this.parentElement.children[i].style.opacity = '1';
                 }
@@ -59,15 +59,15 @@ var gameBoard = function(nim) {
     }
 
 
-    var makeMove = function() {
+    const makeMove = function() {
         if (n.status().isGameOn) {
             if (isMachineDue()) {
                 console.error('Túl gyorsan léptél, még mi jövünk.');
             } else {
-                var pile = parseInt(this.parentElement.id.replace(/row_/, ''));
-                var num = parseInt(this.parentElement.querySelectorAll('span').length, 10);
-                var rem = parseInt(this.classList[0], 10);
-                var diff = num - (rem - 1);
+                const pile = parseInt(this.parentElement.id.replace(/row_/, ''));
+                const num = parseInt(this.parentElement.querySelectorAll('span').length, 10);
+                const rem = parseInt(this.classList[0], 10);
+                const diff = num - (rem - 1);
 
                 if (move[pile] <= 1 || rem - 1 < 1 || diff < 1) {
                     console.error('Nincs elég/nem marad elég korong a sorban, hogy kettéoszd.');
@@ -83,16 +83,16 @@ var gameBoard = function(nim) {
     }
 
 
-    var appendEventsToBoard = function() {
-        var imgs = boardContainer.getElementsByTagName('span');
-        for (var i = imgs.length - 1; i >= 0; i--) {
+    const appendEventsToBoard = function() {
+        const imgs = boardContainer.getElementsByTagName('span');
+        for (let i = imgs.length - 1; i >= 0; i--) {
             imgs[i].onmouseover = hoverEvent;
             imgs[i].onmouseout = hoverOutEvent;
             imgs[i].onclick = makeMove;
         };
     };
 
-    var emptyPile = function(el) {
+    const emptyPile = function(el) {
         if (el && el.firstChild) {
             while (el.firstChild) {
                 el.removeChild(el.firstChild);
@@ -100,12 +100,12 @@ var gameBoard = function(nim) {
         }
     }
 
-    var drawBoard = function(board) {
+    const drawBoard = function(board) {
         move = board;
         //loop through the board
-        for (var i in board) {
+        for (const i in board) {
             if (board.hasOwnProperty(i) && typeof i !== 'undefined') {
-                var frag = drawPile(board[i]);
+                const frag = drawPile(board[i]);
                 //append images to the pile
                 emptyPile(boardContainer.querySelector('#row_' + i));
                 boardContainer.querySelector('#row_' + i).appendChild(frag);
@@ -132,20 +132,20 @@ var gameBoard = function(nim) {
 }
 
 
-var game = (function() {
-    var ai = nimAi();
-    var n = nim();
-    var board = gameBoard(n);
-    var gameContainer = document.getElementById('kupac-ketteoszto');
+const game = (function() {
+    const ai = nimAi();
+    const n = nim();
+    const board = gameBoard(n);
+    const gameContainer = document.getElementById('kupac-ketteoszto');
 
     pubSub.sub('PLAYER_MOVE', function(move) {
         board.drawBoard(n.move(move));
         checkGame();
-        var time = Math.floor(Math.random() * 750 + 750);
+        const time = Math.floor(Math.random() * 750 + 750);
         setTimeout(aiMove, time);
     });
 
-    var checkGame = function() {
+    const checkGame = function() {
         gameContainer.querySelector('.game__step-cta-text').innerHTML = n.status().player;
 
         if (isMachineDue()) {
@@ -161,14 +161,14 @@ var game = (function() {
         }
     }
 
-    var aiMove = function() {
+    const aiMove = function() {
         if (n.status().isGameOn) {
             board.drawBoard(n.move(ai.makeMove(n.board())));
             checkGame();
         }
     }
 
-    var startGameAsPlayer = function(isFirstPlayer) {
+    const startGameAsPlayer = function(isFirstPlayer) {
         n.startGameAsPlayer(isFirstPlayer);
 
         board.toggleGameStartButtons(false);
@@ -181,7 +181,7 @@ var game = (function() {
         }
     }
 
-    var resetGame = function() {
+    const resetGame = function() {
         board.drawBoard(n.newBoard());
         gameContainer.querySelector('.game__step-cta-text').innerHTML = 'A gombra kattintva tudod elindítani a játékot.';
         gameContainer.querySelector('.game__step-description').innerHTML = '';
