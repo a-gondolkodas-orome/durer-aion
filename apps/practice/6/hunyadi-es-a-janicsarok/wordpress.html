@@ -33,13 +33,13 @@
 		<button class="game__cta-button game__role-selector" style="display:block;" onclick="game.startGameAsPlayer(true)">
 			Szultán leszek
 		</button>
-		<button class="game__cta-button game__step-for-first" style="display:none;" onclick="game.step()">
+		<button class="game__cta-button game__step-for-first" style="display:none;">
 			Lépek
 		</button>
-		<button class="game__cta-button game__step-for-second" style="display:none;" onclick="game.killRed()">
+		<button id="game-red" class="game__cta-button game__step-for-second" style="display:none;">
 			Legyőzöm a pirosakat
 		</button>
-		<button class="game__cta-button game__step-for-second" style="display:none;" onclick="game.killBlue()">
+		<button id="game-blue" class="game__cta-button game__step-for-second" style="display:none;">
 			Legyőzöm a kékeket
 		</button>
 		<button class="game__cta-button game__reset-game" style="display:none;" onclick="game.resetGame()">

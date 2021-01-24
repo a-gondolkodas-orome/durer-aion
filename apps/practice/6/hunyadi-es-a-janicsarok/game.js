@@ -1,17 +1,17 @@
 const isMachineDue = () => {
     const whoisDueDescription = document
-        .getElementById('hunyadi-es-a-janicsarok')
+        .querySelector('#hunyadi-es-a-janicsarok')
         .querySelector('.game__step-cta-text')
         .innerHTML;
-    return whoisDueDescription === "Mi jövünk.";
+    return whoisDueDescription === 'Mi jövünk.';
 }
 
 //The game board handles all the dom interaction
 //Drawing the board and listening for click events
 const gameBoard = function(nim) {
     const n = nim;
-    window.move = n.board();
-    const gameContainer = document.getElementById('hunyadi-es-a-janicsarok');
+    let move = n.board();
+    const gameContainer = document.querySelector('#hunyadi-es-a-janicsarok');
     const boardContainer = gameContainer.querySelector('.game__board');
 
     const createGamePiece = function(num, source) {
@@ -39,6 +39,31 @@ const gameBoard = function(nim) {
         return frag;
     }
 
+    const step = function() {
+        if (n.status().isGameOn)
+            if (isMachineDue() && n.state() === true) {
+                console.error('Túl gyorsan léptél, még mi jövünk.');
+            } else if (!n.state()) pubSub.pub('PLAYER_MOVE', move);
+    }
+
+    const killBlue = function() {
+        if (n.status().isGameOn)
+            if (isMachineDue() && n.state() === false) {
+                console.error('Túl gyorsan léptél, még mi jövünk.');
+            } else if (n.state()) {
+                pubSub.pub('PLAYER_MOVE', true);
+            }
+    }
+
+    const killRed = function() {
+        if (n.status().isGameOn)
+            if (gameContainer.querySelector('.game__step-cta-text').innerHTML === 'Mi jövünk.' && n.state() === false) {
+                console.error('Túl gyorsan léptél, még mi jövünk.');
+            } else if (n.state()) {
+                pubSub.pub('PLAYER_MOVE', false);
+            }
+    }
+
     const makeMove = function() {
         if (n.status().isGameOn) {
             if (isMachineDue() && n.state() === true) {
@@ -46,18 +71,21 @@ const gameBoard = function(nim) {
             } else if (n.state() === false) {
                 const pile = parseInt(this.parentElement.id.replace(/row\_/, ''));
                 const matches = this.classList[0] - 1;
-                window.move[pile][matches] = !window.move[pile][matches];
-                drawBoard(window.move);
+                move[pile][matches] = !move[pile][matches];
+                drawBoard(move);
             }
         }
 
     }
 
     const appendEventsToBoard = function() {
-        const imgs = boardContainer.getElementsByTagName('span');
+        const imgs = boardContainer.querySelectorAll('span');
         for (let i = imgs.length - 1; i >= 0; i--) {
             imgs[i].onclick = makeMove;
         };
+        gameContainer.querySelector('#game-red').onclick = killRed;
+        gameContainer.querySelector('#game-blue').onclick = killBlue;
+        gameContainer.querySelector('[class*="game__step-for-first"]').onclick = step;
     };
 
     const emptyPile = function(el) {
@@ -69,15 +97,15 @@ const gameBoard = function(nim) {
     }
 
     const drawBoard = function(board) {
-        window.move = board;
+        move = board;
         //loop through the board
         for (const i in board) {
             if (board.hasOwnProperty(i) && typeof i !== 'undefined') {
                 //get images
                 const frag = drawPile(board[i].length, board[i]);
                 //append images to the pile
-                emptyPile(boardContainer.querySelector('#row_' + i));
-                boardContainer.querySelector('#row_' + i).appendChild(frag);
+                emptyPile(boardContainer.querySelector(`#row_${i}`));
+                boardContainer.querySelector(`#row_${i}`).appendChild(frag);
             }
         }
         appendEventsToBoard();
@@ -106,7 +134,7 @@ const game = (function() {
     const ai = nimAi();
     const n = nim();
     const board = gameBoard(n);
-    const gameContainer = document.getElementById('hunyadi-es-a-janicsarok');
+    const gameContainer = document.querySelector('#hunyadi-es-a-janicsarok');
 
     pubSub.sub('PLAYER_MOVE', function(move) {
         board.drawBoard(n.move(move));
@@ -141,31 +169,6 @@ const game = (function() {
         }
     }
 
-    const step = function() {
-        if (n.status().isGameOn)
-            if (isMachineDue() && n.state() === true) {
-                console.error('Túl gyorsan léptél, még mi jövünk.');
-            } else if (!n.state()) pubSub.pub('PLAYER_MOVE', window.move);
-    }
-
-    const killBlue = function() {
-        if (n.status().isGameOn)
-            if (isMachineDue() && n.state() === false) {
-                console.error('Túl gyorsan léptél, még mi jövünk.');
-            } else if (n.state()) {
-                pubSub.pub('PLAYER_MOVE', true);
-            }
-    }
-
-    const killRed = function() {
-        if (n.status().isGameOn)
-            if (gameContainer.querySelector('.game__step-cta-text').innerHTML === "Mi jövünk." && n.state() === false) {
-                console.error('Túl gyorsan léptél, még mi jövünk.');
-            } else if (n.state()) {
-                pubSub.pub('PLAYER_MOVE', false);
-            }
-    }
-
     const startGameAsPlayer = function(isFirstPlayer) {
         n.startGameAsPlayer(isFirstPlayer);
         n.isBeginningOfGame = true;
@@ -196,12 +199,9 @@ const game = (function() {
 
     return {
         startGameAsPlayer: startGameAsPlayer,
-        resetGame: resetGame,
-        step: step,
-        killRed: killRed,
-        killBlue: killBlue
+        resetGame: resetGame
     }
 
 })();
-window.game = game;
 
+window.game = game;

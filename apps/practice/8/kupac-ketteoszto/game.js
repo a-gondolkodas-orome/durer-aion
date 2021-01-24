@@ -1,16 +1,16 @@
 const isMachineDue = () => {
     const whoisDueDescription = document
-        .getElementById('kupac-ketteoszto')
+        .querySelector('#kupac-ketteoszto')
         .querySelector('.game__step-cta-text')
         .innerHTML;
-    return whoisDueDescription === "Mi jövünk.";
+    return whoisDueDescription === 'Mi jövünk.';
 }
 
 //The game board handles all the dom interaction
 //Drawing the board and listening for click events
 const gameBoard = function(nim) {
     const n = nim;
-    const gameContainer = document.getElementById('kupac-ketteoszto');
+    const gameContainer = document.querySelector('#kupac-ketteoszto');
     const boardContainer = gameContainer.querySelector('.game__board');
 
     let move = n.board();
@@ -84,7 +84,7 @@ const gameBoard = function(nim) {
 
 
     const appendEventsToBoard = function() {
-        const imgs = boardContainer.getElementsByTagName('span');
+        const imgs = boardContainer.querySelectorAll('span');
         for (let i = imgs.length - 1; i >= 0; i--) {
             imgs[i].onmouseover = hoverEvent;
             imgs[i].onmouseout = hoverOutEvent;
@@ -107,8 +107,8 @@ const gameBoard = function(nim) {
             if (board.hasOwnProperty(i) && typeof i !== 'undefined') {
                 const frag = drawPile(board[i]);
                 //append images to the pile
-                emptyPile(boardContainer.querySelector('#row_' + i));
-                boardContainer.querySelector('#row_' + i).appendChild(frag);
+                emptyPile(boardContainer.querySelector(`#row_${i}`));
+                boardContainer.querySelector(`#row_${i}`).appendChild(frag);
             }
         }
         appendEventsToBoard();
@@ -136,7 +136,7 @@ const game = (function() {
     const ai = nimAi();
     const n = nim();
     const board = gameBoard(n);
-    const gameContainer = document.getElementById('kupac-ketteoszto');
+    const gameContainer = document.querySelector('#kupac-ketteoszto');
 
     pubSub.sub('PLAYER_MOVE', function(move) {
         board.drawBoard(n.move(move));
