@@ -1,11 +1,17 @@
-const isMachineDue = () => document.querySelector('.game__step-cta-text').innerHTML === "Mi jövünk.";
-const displayStyle = toShow => toShow ? 'block' : 'none';
+const isMachineDue = () => {
+    const whoisDueDescription = document
+        .getElementById('kupac-ketteoszto')
+        .querySelector('.game__step-cta-text')
+        .innerHTML;
+    return whoisDueDescription === "Mi jövünk.";
+}
 
 //The game board handles all the dom interaction
 //Drawing the board and listening for click events
 var gameBoard = function(nim) {
     var n = nim;
-    var container = document.querySelector('.game__board');
+    var gameContainer = document.getElementById('kupac-ketteoszto');
+    var boardContainer = gameContainer.querySelector('.game__board');
 
     var move = n.board();
 
@@ -78,7 +84,7 @@ var gameBoard = function(nim) {
 
 
     var appendEventsToBoard = function() {
-        var imgs = container.getElementsByTagName('span');
+        var imgs = boardContainer.getElementsByTagName('span');
         for (var i = imgs.length - 1; i >= 0; i--) {
             imgs[i].onmouseover = hoverEvent;
             imgs[i].onmouseout = hoverOutEvent;
@@ -101,8 +107,8 @@ var gameBoard = function(nim) {
             if (board.hasOwnProperty(i) && typeof i !== 'undefined') {
                 var frag = drawPile(board[i]);
                 //append images to the pile
-                emptyPile(container.querySelector('#row_' + i));
-                container.querySelector('#row_' + i).appendChild(frag);
+                emptyPile(boardContainer.querySelector('#row_' + i));
+                boardContainer.querySelector('#row_' + i).appendChild(frag);
             }
         }
         appendEventsToBoard();
@@ -115,7 +121,7 @@ var gameBoard = function(nim) {
 
     const toggleVisibilityForElements = (classPrefix, toShow) => {
         [
-            ...document.querySelectorAll(`[class*="${classPrefix}"]`)
+            ...gameContainer.querySelectorAll(`[class*="${classPrefix}"]`)
         ].map(el => el.style.display = displayStyle(toShow));
     }
 
@@ -130,6 +136,7 @@ var game = (function() {
     var ai = nimAi();
     var n = nim();
     var board = gameBoard(n);
+    var gameContainer = document.getElementById('kupac-ketteoszto');
 
     pubSub.sub('PLAYER_MOVE', function(move) {
         board.drawBoard(n.move(move));
@@ -139,17 +146,17 @@ var game = (function() {
     });
 
     var checkGame = function() {
-        document.querySelector('.game__step-cta-text').innerHTML = n.status().player;
+        gameContainer.querySelector('.game__step-cta-text').innerHTML = n.status().player;
 
         if (isMachineDue()) {
-            document.querySelector('.game__step-description').innerHTML = '';
+            gameContainer.querySelector('.game__step-description').innerHTML = '';
         } else {
             const desc = 'Kattints egy korongra, hogy azzal kettéosztd azt a kupacot. Amelyik korongra kattintasz, az és a tőle jobbra lévők kerülnek az új kupacba.';
-            document.querySelector('.game__step-description').innerHTML = desc;
+            gameContainer.querySelector('.game__step-description').innerHTML = desc;
         }
 
         if (!n.status().isGameOn) {
-            document.querySelector('.game__step-description').innerHTML = '';
+            gameContainer.querySelector('.game__step-description').innerHTML = '';
             board.toggleGameStartButtons(false);
         }
     }
@@ -166,7 +173,7 @@ var game = (function() {
 
         board.toggleGameStartButtons(false);
 
-        document.querySelector('.game__step-cta-text').innerHTML = n.status().player;
+        gameContainer.querySelector('.game__step-cta-text').innerHTML = n.status().player;
         board.drawBoard(n.board());
         checkGame();
         if (!isFirstPlayer) {
@@ -176,8 +183,8 @@ var game = (function() {
 
     var resetGame = function() {
         board.drawBoard(n.newBoard());
-        document.querySelector('.game__step-cta-text').innerHTML = 'A gombra kattintva tudod elindítani a játékot.';
-        document.querySelector('.game__step-description').innerHTML = '';
+        gameContainer.querySelector('.game__step-cta-text').innerHTML = 'A gombra kattintva tudod elindítani a játékot.';
+        gameContainer.querySelector('.game__step-description').innerHTML = '';
         board.toggleGameStartButtons(true);
     }
 

@@ -1,0 +1,1 @@
+const displayStyle = toShow => toShow ? 'block' : 'none';

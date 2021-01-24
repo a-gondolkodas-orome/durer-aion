@@ -1,13 +1,18 @@
-const displayStyle = toShow => toShow ? 'block' : 'none';
-
-const isMachineDue = () => document.querySelector('.game__step-cta-text').innerHTML === "Mi jövünk.";
+const isMachineDue = () => {
+    const whoisDueDescription = document
+        .getElementById('hunyadi-es-a-janicsarok')
+        .querySelector('.game__step-cta-text')
+        .innerHTML;
+    return whoisDueDescription === "Mi jövünk.";
+}
 
 //The game board handles all the dom interaction
 //Drawing the board and listening for click events
 var gameBoard = function(nim) {
     var n = nim;
     window.move = n.board();
-    var container = document.querySelector('.game__board');
+    var gameContainer = document.getElementById('hunyadi-es-a-janicsarok');
+    var boardContainer = gameContainer.querySelector('.game__board');
 
     var createGamePiece = function(num, source) {
         var piece = document.createElement('span');
@@ -49,7 +54,7 @@ var gameBoard = function(nim) {
     }
 
     var appendEventsToBoard = function() {
-        var imgs = container.getElementsByTagName('span');
+        var imgs = boardContainer.getElementsByTagName('span');
         for (var i = imgs.length - 1; i >= 0; i--) {
             imgs[i].onclick = makeMove;
         };
@@ -71,8 +76,8 @@ var gameBoard = function(nim) {
                 //get images
                 var frag = drawPile(board[i].length, board[i]);
                 //append images to the pile
-                emptyPile(container.querySelector('#row_' + i));
-                container.querySelector('#row_' + i).appendChild(frag);
+                emptyPile(boardContainer.querySelector('#row_' + i));
+                boardContainer.querySelector('#row_' + i).appendChild(frag);
             }
         }
         appendEventsToBoard();
@@ -85,7 +90,7 @@ var gameBoard = function(nim) {
 
     const toggleVisibilityForElements = (classPrefix, toShow) => {
         [
-            ...document.querySelectorAll(`[class*="${classPrefix}"]`)
+            ...gameContainer.querySelectorAll(`[class*="${classPrefix}"]`)
         ].map(el => el.style.display = displayStyle(toShow));
     }
 
@@ -101,6 +106,7 @@ var game = (function() {
     var ai = nimAi();
     var n = nim();
     var board = gameBoard(n);
+    var gameContainer = document.getElementById('hunyadi-es-a-janicsarok');
 
     pubSub.sub('PLAYER_MOVE', function(move) {
         board.drawBoard(n.move(move));
@@ -110,17 +116,17 @@ var game = (function() {
     });
 
     var checkGame = function() {
-        document.querySelector('.game__step-cta-text').innerHTML = n.status().player;
+        gameContainer.querySelector('.game__step-cta-text').innerHTML = n.status().player;
         if (isMachineDue()) {
-            document.querySelector('.game__step-description').innerHTML = '';
+            gameContainer.querySelector('.game__step-description').innerHTML = '';
         } else {
-            document.querySelector('.game__step-description').innerHTML = n.state() 
+            gameContainer.querySelector('.game__step-description').innerHTML = n.state() 
                 ? 'Válaszd ki, hogy ma a piros vagy kék hadtestet semmisíted meg.' 
                 : 'Kattints  a korongokra és válaszd két részre a seregedet.';
         }
 
         if (!n.status().isGameOn) {
-            document.querySelector('.game__step-description').innerHTML = '';
+            gameContainer.querySelector('.game__step-description').innerHTML = '';
             board.toggleVisibilityForElements('game__step-for', false);
 
             board.toggleGameStartButtons(false);
@@ -153,7 +159,7 @@ var game = (function() {
 
     var killRed = function() {
         if (n.status().isGameOn)
-            if (document.querySelector('.game__step-cta-text').innerHTML === "Mi jövünk." && n.state() === false) {
+            if (gameContainer.querySelector('.game__step-cta-text').innerHTML === "Mi jövünk." && n.state() === false) {
                 console.error('Túl gyorsan léptél, még mi jövünk.');
             } else if (n.state()) {
                 pubSub.pub('PLAYER_MOVE', false);
@@ -169,7 +175,7 @@ var game = (function() {
         board.toggleVisibilityForElements('game__step-for-first', isFirstPlayer);
         board.toggleVisibilityForElements('game__step-for-second', !isFirstPlayer);
 
-        document.querySelector('.game__step-cta-text').innerHTML = n.status().player;
+        gameContainer.querySelector('.game__step-cta-text').innerHTML = n.status().player;
         board.drawBoard(n.board());
 
         checkGame();
@@ -180,8 +186,8 @@ var game = (function() {
 
     var resetGame = function() {
         board.drawBoard(n.newBoard());
-        document.querySelector('.game__step-description').innerHTML = '';
-        document.querySelector('.game__step-cta-text').innerHTML = 'A gombra kattintva tudod elindítani a játékot.';
+        gameContainer.querySelector('.game__step-description').innerHTML = '';
+        gameContainer.querySelector('.game__step-cta-text').innerHTML = 'A gombra kattintva tudod elindítani a játékot.';
         board.toggleGameStartButtons(true);
         board.toggleVisibilityForElements('game__step-for-', false);
     }
