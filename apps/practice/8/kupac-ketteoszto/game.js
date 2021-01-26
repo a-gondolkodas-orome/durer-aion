@@ -86,10 +86,24 @@ const gameBoard = function(nim) {
     const appendEventsToBoard = function() {
         const imgs = boardContainer.querySelectorAll('span');
         for (let i = imgs.length - 1; i >= 0; i--) {
-            imgs[i].onmouseover = hoverEvent;
-            imgs[i].onmouseout = hoverOutEvent;
-            imgs[i].onclick = makeMove;
+            imgs[i].addEventListener('click', makeMove);
+            imgs[i].addEventListener('mouseover', hoverEvent);
+            imgs[i].addEventListener('mouseout', hoverOutEvent);
         };
+    };
+
+    const disablePlayerMoves = function() {
+        [...gameContainer.querySelector('.game__board').querySelectorAll('span')].map(el => {
+            el.style.opacity = 0.5;
+            el.removeEventListener('click', makeMove);
+            el.removeEventListener('mouseover', hoverEvent);
+            el.removeEventListener('mouseout', hoverOutEvent);
+        });
+        gameContainer.querySelector('.game__ai-loader').style.display = displayStyle(true);
+    };
+
+    const enablePlayerMoves = function() {
+        gameContainer.querySelector('.game__ai-loader').style.display = displayStyle(false);
     };
 
     const emptyPile = function(el) {
@@ -127,7 +141,9 @@ const gameBoard = function(nim) {
 
     return {
         drawBoard: drawBoard,
-        toggleGameStartButtons: toggleGameStartButtons
+        toggleGameStartButtons: toggleGameStartButtons,
+        disablePlayerMoves: disablePlayerMoves,
+        enablePlayerMoves: enablePlayerMoves
     }
 }
 
@@ -142,6 +158,7 @@ const game = (function() {
         board.drawBoard(n.move(move));
         checkGame();
         const time = Math.floor(Math.random() * 750 + 750);
+        board.disablePlayerMoves();
         setTimeout(aiMove, time);
     });
 
@@ -158,6 +175,7 @@ const game = (function() {
         if (!n.status().isGameOn) {
             gameContainer.querySelector('.game__step-description').innerHTML = '';
             board.toggleGameStartButtons(false);
+            gameContainer.querySelector('.game__ai-loader').style.display = displayStyle(false);
         }
     }
 
@@ -165,6 +183,9 @@ const game = (function() {
         if (n.status().isGameOn) {
             board.drawBoard(n.move(ai.makeMove(n.board())));
             checkGame();
+            board.enablePlayerMoves();
+        } else {
+            gameContainer.querySelector('.game__ai-loader').style.display = displayStyle(false);
         }
     }
 
@@ -177,7 +198,9 @@ const game = (function() {
         board.drawBoard(n.board());
         checkGame();
         if (!isFirstPlayer) {
-            aiMove();
+            const time = Math.floor(Math.random() * 750 + 750);
+            board.disablePlayerMoves();
+            setTimeout(aiMove, time);
         }
     }
 
@@ -186,6 +209,7 @@ const game = (function() {
         gameContainer.querySelector('.game__step-cta-text').innerHTML = 'A gombra kattintva tudod elindítani a játékot.';
         gameContainer.querySelector('.game__step-description').innerHTML = '';
         board.toggleGameStartButtons(true);
+        gameContainer.querySelector('.game__ai-loader').style.display = displayStyle(false);
     }
 
     board.drawBoard(n.board());

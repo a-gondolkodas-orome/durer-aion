@@ -81,11 +81,25 @@ const gameBoard = function(nim) {
     const appendEventsToBoard = function() {
         const imgs = boardContainer.querySelectorAll('span');
         for (let i = imgs.length - 1; i >= 0; i--) {
-            imgs[i].onclick = makeMove;
+            imgs[i].addEventListener('click', makeMove);
         };
-        gameContainer.querySelector('#game-red').onclick = killRed;
-        gameContainer.querySelector('#game-blue').onclick = killBlue;
-        gameContainer.querySelector('[class*="game__step-for-first"]').onclick = step;
+        gameContainer.querySelector('#game-red').addEventListener('click', killRed);
+        gameContainer.querySelector('#game-blue').addEventListener('click', killBlue);
+        gameContainer.querySelector('[class*="game__step-for-first"]').addEventListener('click', step);
+    };
+
+    const disablePlayerMoves = function() {
+        [...gameContainer.querySelectorAll('[class*="game__step-for"]')].map(el => el.setAttribute('disabled', true));
+        [...gameContainer.querySelector('.game__board').querySelectorAll('span')].map(el => {
+            el.style.opacity = 0.5;
+            el.removeEventListener('click', makeMove);
+        });
+        gameContainer.querySelector('.game__ai-loader').style.display = displayStyle(true);
+    };
+
+    const enablePlayerMoves = function() {
+        [...gameContainer.querySelectorAll('[class*="game__step-for"]')].map(el => el.removeAttribute('disabled'));
+        gameContainer.querySelector('.game__ai-loader').style.display = displayStyle(false);
     };
 
     const emptyPile = function(el) {
@@ -94,7 +108,7 @@ const gameBoard = function(nim) {
                 el.removeChild(el.firstChild);
             }
         }
-    }
+    };
 
     const drawBoard = function(board) {
         move = board;
@@ -125,7 +139,9 @@ const gameBoard = function(nim) {
     return {
         drawBoard: drawBoard,
         toggleGameStartButtons: toggleGameStartButtons,
-        toggleVisibilityForElements: toggleVisibilityForElements
+        toggleVisibilityForElements: toggleVisibilityForElements,
+        disablePlayerMoves: disablePlayerMoves,
+        enablePlayerMoves: enablePlayerMoves
     }
 }
 
@@ -140,6 +156,7 @@ const game = (function() {
         board.drawBoard(n.move(move));
         checkGame();
         const time = Math.floor(Math.random() * 750 + 750);
+        board.disablePlayerMoves();
         setTimeout(aiMove, time);
     });
 
@@ -158,6 +175,7 @@ const game = (function() {
             board.toggleVisibilityForElements('game__step-for', false);
 
             board.toggleGameStartButtons(false);
+            gameContainer.querySelector('.game__ai-loader').style.display = displayStyle(false);
         }
         n.isBeginningOfGame = false;
     }
@@ -166,6 +184,9 @@ const game = (function() {
         if (n.status().isGameOn) {
             board.drawBoard(n.move(ai.makeMove(n.board(), n.state())));
             checkGame();
+            board.enablePlayerMoves();
+        } else {
+            gameContainer.querySelector('.game__ai-loader').style.display = displayStyle(false);
         }
     }
 
@@ -183,7 +204,9 @@ const game = (function() {
 
         checkGame();
         if (!isFirstPlayer) {
-            aiMove();
+            const time = Math.floor(Math.random() * 750 + 750);
+            board.disablePlayerMoves();
+            setTimeout(aiMove, time);
         }
     }
 
@@ -193,6 +216,7 @@ const game = (function() {
         gameContainer.querySelector('.game__step-cta-text').innerHTML = 'A gombra kattintva tudod elindítani a játékot.';
         board.toggleGameStartButtons(true);
         board.toggleVisibilityForElements('game__step-for-', false);
+        gameContainer.querySelector('.game__ai-loader').style.display = displayStyle(false);
     }
 
     board.drawBoard(n.board());

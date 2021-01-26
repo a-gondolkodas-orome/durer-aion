@@ -30,6 +30,7 @@ p {
 .game__step-cta-text {
     font-size: 1.1em;
     font-weight:bold;
+    text-align: center;
 }
 
 .game__step-description {
@@ -50,7 +51,11 @@ p {
     text-decoration: none;
     width: 100%;
     white-space: normal; 
-}    
+}  
+
+.game__cta-button:disabled {
+    opacity: 0.5;
+}
 
 .game__pile {
     border-top-color: black; 
@@ -84,3 +89,18 @@ p {
 .game__piece-red {
     background-color: var(--red);
 }    
+
+.game__ai-loader {
+    animation: spin 1s linear infinite;
+    border: 0.33em solid #f3f3f3; 
+    border-radius: 50%;
+    border-top: 0.33em solid var(--blue);
+    height: 2em;
+    margin: auto;
+    width: 2em;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
