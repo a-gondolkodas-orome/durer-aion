@@ -61,23 +61,19 @@ const gameBoard = function(nim) {
 
     const makeMove = function() {
         if (n.status().isGameOn) {
-            if (isMachineDue()) {
-                console.error('Túl gyorsan léptél, még mi jövünk.');
+            const pile = parseInt(this.parentElement.id.replace(/row_/, ''));
+            const num = parseInt(this.parentElement.querySelectorAll('span').length, 10);
+            const rem = parseInt(this.classList[0], 10);
+            const diff = num - (rem - 1);
+
+            if (move[pile] <= 1 || rem - 1 < 1 || diff < 1) {
+                console.error('Nincs elég/nem marad elég korong a sorban, hogy kettéoszd.');
             } else {
-                const pile = parseInt(this.parentElement.id.replace(/row_/, ''));
-                const num = parseInt(this.parentElement.querySelectorAll('span').length, 10);
-                const rem = parseInt(this.classList[0], 10);
-                const diff = num - (rem - 1);
+                move[pile] = rem - 1;
+                move[(pile + 1) % 2] = diff;
 
-                if (move[pile] <= 1 || rem - 1 < 1 || diff < 1) {
-                    console.error('Nincs elég/nem marad elég korong a sorban, hogy kettéoszd.');
-                } else {
-                    move[pile] = rem - 1;
-                    move[(pile + 1) % 2] = diff;
-
-                    drawBoard(move);
-                    pubSub.pub('PLAYER_MOVE', move);
-                }
+                drawBoard(move);
+                pubSub.pub('PLAYER_MOVE', move);
             }
         }
     }

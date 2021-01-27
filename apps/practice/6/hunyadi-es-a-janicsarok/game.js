@@ -41,34 +41,22 @@ const gameBoard = function(nim) {
 
     const step = function() {
         if (n.status().isGameOn)
-            if (isMachineDue() && n.state() === true) {
-                console.error('Túl gyorsan léptél, még mi jövünk.');
-            } else if (!n.state()) pubSub.pub('PLAYER_MOVE', move);
+            if (!n.state()) pubSub.pub('PLAYER_MOVE', move);
     }
 
     const killBlue = function() {
         if (n.status().isGameOn)
-            if (isMachineDue() && n.state() === false) {
-                console.error('Túl gyorsan léptél, még mi jövünk.');
-            } else if (n.state()) {
-                pubSub.pub('PLAYER_MOVE', true);
-            }
+            if (n.state()) pubSub.pub('PLAYER_MOVE', true);
     }
 
     const killRed = function() {
         if (n.status().isGameOn)
-            if (gameContainer.querySelector('.game__step-cta-text').innerHTML === 'Mi jövünk.' && n.state() === false) {
-                console.error('Túl gyorsan léptél, még mi jövünk.');
-            } else if (n.state()) {
-                pubSub.pub('PLAYER_MOVE', false);
-            }
+            if (n.state()) pubSub.pub('PLAYER_MOVE', false);
     }
 
     const makeMove = function() {
         if (n.status().isGameOn) {
-            if (isMachineDue() && n.state() === true) {
-                console.error('Túl gyorsan léptél, még mi jövünk.');
-            } else if (n.state() === false) {
+            if (n.state() === false) {
                 const pile = parseInt(this.parentElement.id.replace(/row\_/, ''));
                 const matches = this.classList[0] - 1;
                 move[pile][matches] = !move[pile][matches];
