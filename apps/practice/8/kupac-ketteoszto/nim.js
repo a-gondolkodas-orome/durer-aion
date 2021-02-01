@@ -2,29 +2,27 @@
 
 const nim = function() {
 
-    let board = [4, 5];
+    // array of number of pieces in each pile
+    let board;
 
-    let playerOne = true;
-    let isGameOver = true;
-    let isPlayerWinner = false;
+    let shouldPlayerMoveNext;
+    let gameStatus;
+    let isPlayerWinner;
 
-    const generateBoard = function() {
+    const generateNewBoard = function() {
+        gameStatus = 'readyToStart';
         board = [Math.floor(Math.random() * 4) + 3, Math.floor(Math.random() * 4) + 3];
-
         return board;
     };
-    
-    generateBoard();
 
-    const move = function(obj) {
-        board = obj;
-        playerOne = !playerOne;
+    const move = function(newBoardState) {
+        board = newBoardState;
+        shouldPlayerMoveNext = !shouldPlayerMoveNext;
         if (board[0] == 1 && board[1] == 1) {
-            isGameOver = true;
-            isPlayerWinner = !playerOne;
+            gameStatus = 'finished';
+            isPlayerWinner = !shouldPlayerMoveNext;
         }
         return board;
-
     };
 
     const getBoard = function() {
@@ -32,30 +30,25 @@ const nim = function() {
     };
 
     const getStatus = function() {
-        if (isGameOver) {
-            return {
-                player: !isPlayerWinner ? "Sajnos, most nem nyertél, de ne add fel." : "Nyertél. Gratulálunk! :)",
-                isGameOn: false
-            };
-        }
-
         return {
-            player: playerOne ? "Te jössz." : "Mi jövünk.",
-            isGameOn: true
-        }
-
-    }
+            isGameInProgress: gameStatus === 'inProgress',
+            isGameFinished: gameStatus === 'finished',
+            isGameReadyToStart: gameStatus === 'readyToStart',
+            shouldPlayerMoveNext: gameStatus === 'inProgress' ? shouldPlayerMoveNext : undefined,
+            isPlayerWinner: gameStatus === 'finished' ? isPlayerWinner : undefined
+        };
+    };
 
     const startGameAsPlayer = function(isFirstPlayer) {
-        playerOne = isFirstPlayer;
-        isGameOver = false;
-    }
+        shouldPlayerMoveNext = isFirstPlayer;
+        gameStatus = 'inProgress';
+    };
 
     return {
-        move: move,
-        board: getBoard,
-        status: getStatus,
-        startGameAsPlayer: startGameAsPlayer,
-        newBoard: generateBoard
+        move,
+        getBoard,
+        getStatus,
+        startGameAsPlayer,
+        generateNewBoard
     };
-}
+};
