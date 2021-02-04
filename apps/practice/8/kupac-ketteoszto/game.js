@@ -159,6 +159,7 @@ const game = (function() {
     const n = nim();
     const board = gameBoard(n);
     const gameContainer = document.querySelector('#kupac-ketteoszto');
+    let aiMoveTimeoutHandle;
 
     pubSub.sub('PLAYER_MOVE', function(move) {
         board.drawBoard(n.move(move));
@@ -179,7 +180,7 @@ const game = (function() {
         board.disablePlayerMoves();
 
         const time = Math.floor(Math.random() * 750 + 750);
-        setTimeout(() => {
+        aiMoveTimeoutHandle = setTimeout(() => {
             board.drawBoard(n.move(ai.makeMove(n.getBoard())))
             checkGame();
             board.enablePlayerMoves();
@@ -196,11 +197,13 @@ const game = (function() {
     }
 
     const resetGame = function() {
+        // If new board is requested while AI move is in progress
+        clearTimeout(aiMoveTimeoutHandle);
+        gameContainer.querySelector('.game__ai-loader').style.display = displayStyle(false);
+
         board.drawBoard(n.generateNewBoard());
         board.updateGamePrompts();
         board.toggleGameStartButtons(true);
-        // If new board is requested while AI move is in progress
-        gameContainer.querySelector('.game__ai-loader').style.display = displayStyle(false);
 
     }
 
