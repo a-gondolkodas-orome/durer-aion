@@ -1,18 +1,11 @@
-const isMachineDue = () => {
-    const whoisDueDescription = document
-        .querySelector('#hunyadi-es-a-janicsarok')
-        .querySelector('.game__step-cta-text')
-        .innerHTML;
-    return whoisDueDescription === 'Mi jövünk.';
-}
-
 //The game board handles all the dom interaction
 //Drawing the board and listening for click events
 const gameBoard = function(nim) {
     const n = nim;
-    let move = n.board();
     const gameContainer = document.querySelector('#hunyadi-es-a-janicsarok');
     const boardContainer = gameContainer.querySelector('.game__board');
+
+    let move;
 
     const createGamePiece = function(num, source) {
         const piece = document.createElement('span');
@@ -40,23 +33,23 @@ const gameBoard = function(nim) {
     }
 
     const step = function() {
-        if (n.status().isGameOn)
-            if (!n.state()) pubSub.pub('PLAYER_MOVE', move);
+        if (n.getStatus().isGameInProgress)
+            if (!n.getStatus().killState) pubSub.pub('PLAYER_MOVE', move);
     }
 
     const killBlue = function() {
-        if (n.status().isGameOn)
-            if (n.state()) pubSub.pub('PLAYER_MOVE', true);
+        if (n.getStatus().isGameInProgress)
+            if (n.getStatus().killState) pubSub.pub('PLAYER_MOVE', true);
     }
 
     const killRed = function() {
-        if (n.status().isGameOn)
-            if (n.state()) pubSub.pub('PLAYER_MOVE', false);
+        if (n.getStatus().isGameInProgress)
+            if (n.getStatus().killState) pubSub.pub('PLAYER_MOVE', false);
     }
 
     const makeMove = function() {
-        if (n.status().isGameOn) {
-            if (n.state() === false) {
+        if (n.getStatus().isGameInProgress) {
+            if (n.getStatus().killState === false) {
                 const pile = parseInt(this.parentElement.id.replace(/row\_/, ''));
                 const matches = this.classList[0] - 1;
                 move[pile][matches] = !move[pile][matches];
@@ -124,12 +117,36 @@ const gameBoard = function(nim) {
         ].map(el => el.style.display = displayStyle(toShow));
     }
 
+    const ctaText = function() {
+        if (n.getStatus().isGameInProgress) {
+            return n.getStatus().shouldPlayerMoveNext ? 'Te jössz.' : 'Mi jövünk.';
+        } else if (n.getStatus().isGameFinished) {
+            return n.getStatus().isPlayerWinner ? 'Nyertél. Gratulálunk! :)' : 'Sajnos, most nem nyertél, de ne add fel.';
+        } else { // ready to start
+            return 'A gombra kattintva tudod elindítani a játékot.';
+        }
+    };
+
+    const stepDescription = function() {
+        if (!n.getStatus().isGameInProgress) return '';
+        if (!n.getStatus().shouldPlayerMoveNext) return '';
+        return n.getStatus().killState 
+            ? 'Válaszd ki, hogy ma a piros vagy kék hadtestet semmisíted meg.'
+            : 'Kattints  a korongokra és válaszd két részre a seregedet.';
+    };
+
+    const updateGamePrompts = function() {
+        gameContainer.querySelector('.game__step-cta-text').innerHTML = ctaText();
+        gameContainer.querySelector('.game__step-description').innerHTML = stepDescription();
+    };
+
     return {
-        drawBoard: drawBoard,
-        toggleGameStartButtons: toggleGameStartButtons,
-        toggleVisibilityForElements: toggleVisibilityForElements,
-        disablePlayerMoves: disablePlayerMoves,
-        enablePlayerMoves: enablePlayerMoves
+        drawBoard,
+        toggleGameStartButtons,
+        toggleVisibilityForElements,
+        disablePlayerMoves,
+        enablePlayerMoves,
+        updateGamePrompts
     }
 }
 
@@ -139,79 +156,64 @@ const game = (function() {
     const n = nim();
     const board = gameBoard(n);
     const gameContainer = document.querySelector('#hunyadi-es-a-janicsarok');
+    let aiMoveTimeoutHandle;
 
     pubSub.sub('PLAYER_MOVE', function(move) {
         board.drawBoard(n.move(move));
         checkGame();
-        const time = Math.floor(Math.random() * 750 + 750);
-        board.disablePlayerMoves();
-        setTimeout(aiMove, time);
+        if (n.getStatus().isGameInProgress) aiMove();
     });
 
     const checkGame = function() {
-        gameContainer.querySelector('.game__step-cta-text').innerHTML = n.status().player;
-        if (isMachineDue()) {
-            gameContainer.querySelector('.game__step-description').innerHTML = '';
-        } else {
-            gameContainer.querySelector('.game__step-description').innerHTML = n.state() 
-                ? 'Válaszd ki, hogy ma a piros vagy kék hadtestet semmisíted meg.' 
-                : 'Kattints  a korongokra és válaszd két részre a seregedet.';
-        }
+        board.updateGamePrompts();
 
-        if (!n.status().isGameOn) {
-            gameContainer.querySelector('.game__step-description').innerHTML = '';
+        if (!n.getStatus().isGameInProgress) {
             board.toggleVisibilityForElements('game__step-for', false);
-
             board.toggleGameStartButtons(false);
             gameContainer.querySelector('.game__ai-loader').style.display = displayStyle(false);
         }
-        n.isBeginningOfGame = false;
     }
 
     const aiMove = function() {
-        if (n.status().isGameOn) {
-            board.drawBoard(n.move(ai.makeMove(n.board(), n.state())));
+        board.disablePlayerMoves();
+
+        const time = Math.floor(Math.random() * 750 + 750);
+        aiMoveTimeoutHandle = setTimeout(() => {
+            board.drawBoard(n.move(ai.makeMove(n.getBoard(), n.getStatus().killState)));
             checkGame();
             board.enablePlayerMoves();
-        } else {
-            gameContainer.querySelector('.game__ai-loader').style.display = displayStyle(false);
-        }
+        }, time);
     }
 
     const startGameAsPlayer = function(isFirstPlayer) {
         n.startGameAsPlayer(isFirstPlayer);
-        n.isBeginningOfGame = true;
 
         board.toggleGameStartButtons(false);
 
         board.toggleVisibilityForElements('game__step-for-first', isFirstPlayer);
         board.toggleVisibilityForElements('game__step-for-second', !isFirstPlayer);
 
-        gameContainer.querySelector('.game__step-cta-text').innerHTML = n.status().player;
-        board.drawBoard(n.board());
+        board.updateGamePrompts();
 
-        checkGame();
-        if (!isFirstPlayer) {
-            const time = Math.floor(Math.random() * 750 + 750);
-            board.disablePlayerMoves();
-            setTimeout(aiMove, time);
-        }
+        if (!isFirstPlayer) aiMove();
     }
 
     const resetGame = function() {
-        board.drawBoard(n.newBoard());
-        gameContainer.querySelector('.game__step-description').innerHTML = '';
-        gameContainer.querySelector('.game__step-cta-text').innerHTML = 'A gombra kattintva tudod elindítani a játékot.';
+        // If new board is requested while AI move is in progress
+        clearTimeout(aiMoveTimeoutHandle);
+        gameContainer.querySelector('.game__ai-loader').style.display = displayStyle(false);
+        
+        board.drawBoard(n.generateNewBoard());
         board.toggleGameStartButtons(true);
         board.toggleVisibilityForElements('game__step-for-', false);
-        gameContainer.querySelector('.game__ai-loader').style.display = displayStyle(false);
+        board.updateGamePrompts();
     }
 
-    board.drawBoard(n.board());
+    resetGame();
 
     return {
-        startGameAsPlayer: startGameAsPlayer,
-        resetGame: resetGame
+        startGameAsPlayer,
+        resetGame
     }
 
 })();

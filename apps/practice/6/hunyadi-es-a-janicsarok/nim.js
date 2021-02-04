@@ -2,31 +2,26 @@
 
 const nim = function() {
 
-    //The Game board
-    let board = [
-        [true],
-        [true],
-        [true, true, true],
-        [true, true, true],
-        [true, true, true]
-    ];
+    // array of arrays for each row, pieces are array elements, true means one color, false the other
+    let board;
 
-    let playerOne = true;
-    let isBeginningOfGame = true;
-    let isGameOver = false;
-    let killState = false;
-    let isPlayerWinner = false;
+    let shouldPlayerMoveNext;
+    let gameStatus;
+    let killState;
+    let isPlayerWinner;
 
-    const isMoveLegal = function(obj) {
+    const isMoveLegal = function(newBoardState) {
         for (const i in board) {
-            if (obj[i].length != board[i].length) {
+            if (newBoardState[i].length != board[i].length) {
                 return false;
             }
         }
         return true;
     }
 
-    const generateBoard = function() {
+    const generateNewBoard = function() {
+        gameStatus = 'readyToStart';
+        killState = false;
         let sum = 2.0 + Math.ceil(Math.random() * 8) / 8 - 0.5;
         board = [];
         for (let i = 0; i < 5; i++) {
@@ -48,43 +43,38 @@ const nim = function() {
         return board;
     };
 
-    generateBoard();
 
-
-
-    const move = function(obj) {
+    const move = function(newBoardState) {
         if (!killState) {
-            isBeginningOfGame = false;
             killState = true;
 
-            if (!isMoveLegal(obj)) {
+            if (!isMoveLegal(newBoardState)) {
                 throw new Error('Nem megengedett lépés!!!');
             }
 
-            board = obj;
-            playerOne = !playerOne;
+            board = newBoardState;
+            shouldPlayerMoveNext = !shouldPlayerMoveNext;
             return board;
         } else {
             killState = false;
-            isBeginningOfGame = false;
-            if (!(obj === true || obj === false)) {
+            if (!(newBoardState === true || newBoardState === false)) {
                 throw new Error('Nem megengedett szín!!!');
             }
 
             let sum = 0;
             for (const j in board[0]) {
-                if (board[0][j] != obj) {
-                    isGameOver = true;
-                    isPlayerWinner = !playerOne;
+                if (board[0][j] != newBoardState) { // a soldier reached the castle
+                    gameStatus = 'finished';
+                    isPlayerWinner = !shouldPlayerMoveNext;
                 }
             }
 
             for (const i in board) {
                 if (i != 0) {
                     for (const j in board[i]) {
-                        if (board[i][j] != obj) {
+                        if (board[i][j] != newBoardState) {
                             sum++;
-                            board[i - 1].push(board[i][j]);
+                            board[i - 1].push(board[i][j]); // a soldier still lives and can step up the stairs
                         }
                     }
                 }
@@ -92,10 +82,11 @@ const nim = function() {
                 board[i] = [];
             }
 
-            playerOne = !playerOne;
-            if (sum == 0 && !isGameOver) {
-                isGameOver = true;
-                isPlayerWinner = !playerOne;
+            shouldPlayerMoveNext = !shouldPlayerMoveNext;
+            console.log(sum, gameStatus);
+            if (sum === 0 && gameStatus !== 'finished') {
+                gameStatus = 'finished';
+                isPlayerWinner = !shouldPlayerMoveNext;
             }
 
         }
@@ -106,43 +97,27 @@ const nim = function() {
         return JSON.parse(JSON.stringify(board));
     };
 
-    const getPlayer = function() {
-        return playerOne;
-    };
-
-    const getState = function() {
-        return killState;
-    };
-
     const getStatus = function() {
-        if (isGameOver) {
-            return {
-                player: !isPlayerWinner ? "Sajnos, most nem nyertél, de ne add fel." : "Nyertél. Gratulálunk! :)",
-                isGameOn: false
-            };
-        }
-
         return {
-            player: playerOne ? "Te jössz." : "Mi jövünk.",
-            isGameOn: true
-        }
-
+            isGameInProgress: gameStatus === 'inProgress',
+            isGameFinished: gameStatus === 'finished',
+            isGameReadyToStart: gameStatus === 'readyToStart',
+            shouldPlayerMoveNext: gameStatus === 'inProgress' ? shouldPlayerMoveNext : undefined,
+            isPlayerWinner: gameStatus === 'finished' ? isPlayerWinner : undefined,
+            killState
+        };
     }
 
     const startGameAsPlayer = function(isFirstPlayer) {
-        playerOne = isFirstPlayer;
-        isBeginningOfGame = true;
-        isGameOver = false;
-        killState = false;
+        shouldPlayerMoveNext = isFirstPlayer;
+        gameStatus = 'inProgress';
     }
 
     return {
-        move: move,
-        board: getBoard,
-        play: getPlayer,
-        status: getStatus,
-        state: getState,
-        startGameAsPlayer: startGameAsPlayer,
-        newBoard: generateBoard
+        move,
+        getBoard,
+        getStatus,
+        startGameAsPlayer,
+        generateNewBoard
     };
 }
