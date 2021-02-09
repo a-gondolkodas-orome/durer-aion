@@ -74,20 +74,31 @@ p {
 }
 
 .game__piece {
-    height: 70px;
-    width: 70px;
-    border-radius: 50%;
     display: inline-block;
-    padding: 5px;
+    height: 70px;
     margin: 0 1px;
-}    
+    padding: 5px;
+    width: 70px;
+}  
+
+.game__circle {
+    border-radius: 50%;
+}
 
 .game__piece-blue {
     background-color: var(--blue);
-}    
+}
 
 .game__piece-red {
     background-color: var(--red);
+}    
+
+.game__svg-piece-blue {
+    fill: var(--blue);
+}
+
+.game__svg-piece-red {
+    fill: var(--red);
 }    
 
 .game__ai-loader {

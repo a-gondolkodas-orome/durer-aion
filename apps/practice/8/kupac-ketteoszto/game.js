@@ -10,7 +10,7 @@ const gameBoard = function(nim) {
     //create an image node
     const createGamePiece = function(num) {
         const piece = document.createElement('span');
-        piece.classList.add(num, 'game__piece', 'game__piece-blue');
+        piece.classList.add(num, 'game__piece', 'game__piece-blue', 'game__circle');
         return piece;
     }
 
