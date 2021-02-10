@@ -85,11 +85,11 @@ const gameBoard = function(nim) {
             el.removeEventListener('mouseover', hoverEvent);
             el.removeEventListener('mouseout', hoverOutEvent);
         });
-        gameContainer.querySelector('.game__ai-loader').style.display = displayStyle(true);
+        gameContainer.querySelector('.game__ai-loader').style.visibility = 'visible';
     };
 
     const enablePlayerMoves = function() {
-        gameContainer.querySelector('.game__ai-loader').style.display = displayStyle(false);
+        gameContainer.querySelector('.game__ai-loader').style.visibility = 'hidden';
     };
 
     const emptyPile = function(el) {
@@ -122,7 +122,7 @@ const gameBoard = function(nim) {
     const toggleVisibilityForElements = (classPrefix, toShow) => {
         [
             ...gameContainer.querySelectorAll(`[class*="${classPrefix}"]`)
-        ].map(el => el.style.display = displayStyle(toShow));
+        ].map(el => el.style.display = toShow ? 'block' : 'none');
     }
 
     const ctaText = function() {
@@ -172,7 +172,7 @@ const game = (function() {
 
         if (!n.getStatus().isGameInProgress) {
             board.toggleGameStartButtons(false);
-            gameContainer.querySelector('.game__ai-loader').style.display = displayStyle(false);
+            gameContainer.querySelector('.game__ai-loader').style.visibility = 'hidden';
         }
     }
 
@@ -199,7 +199,7 @@ const game = (function() {
     const resetGame = function() {
         // If new board is requested while AI move is in progress
         clearTimeout(aiMoveTimeoutHandle);
-        gameContainer.querySelector('.game__ai-loader').style.display = displayStyle(false);
+        gameContainer.querySelector('.game__ai-loader').style.visibility = 'hidden';
 
         board.drawBoard(n.generateNewBoard());
         board.updateGamePrompts();

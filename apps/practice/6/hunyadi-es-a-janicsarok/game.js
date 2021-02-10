@@ -78,12 +78,12 @@ const gameBoard = function(nim) {
             el.style.opacity = 0.5;
             el.removeEventListener('click', makeMove);
         });
-        gameContainer.querySelector('.game__ai-loader').style.display = displayStyle(true);
+        gameContainer.querySelector('.game__ai-loader').style.visibility = 'visible';
     };
 
     const enablePlayerMoves = function() {
         [...gameContainer.querySelectorAll('[class*="game__step-for"]')].map(el => el.removeAttribute('disabled'));
-        gameContainer.querySelector('.game__ai-loader').style.display = displayStyle(false);
+        gameContainer.querySelector('.game__ai-loader').style.visibility = 'hidden';
     };
 
     const emptyPile = function(el) {
@@ -117,7 +117,7 @@ const gameBoard = function(nim) {
     const toggleVisibilityForElements = (classPrefix, toShow) => {
         [
             ...gameContainer.querySelectorAll(`[class*="${classPrefix}"]`)
-        ].map(el => el.style.display = displayStyle(toShow));
+        ].map(el => el.style.display = toShow ? 'block' : 'none');
     }
 
     const ctaText = function() {
@@ -134,7 +134,7 @@ const gameBoard = function(nim) {
         if (!n.getStatus().isGameInProgress) return '';
         if (!n.getStatus().shouldPlayerMoveNext) return '';
         return n.getStatus().killState 
-            ? 'Válaszd ki, hogy ma a piros vagy kék hadtestet semmisíted meg.'
+            ? ''
             : 'Kattints  a korongokra és válaszd két részre a seregedet.';
     };
 
@@ -173,7 +173,7 @@ const game = (function() {
         if (!n.getStatus().isGameInProgress) {
             board.toggleVisibilityForElements('game__step-for', false);
             board.toggleGameStartButtons(false);
-            gameContainer.querySelector('.game__ai-loader').style.display = displayStyle(false);
+            gameContainer.querySelector('.game__ai-loader').style.visibility = 'hidden';
         }
     }
 
@@ -204,7 +204,7 @@ const game = (function() {
     const resetGame = function() {
         // If new board is requested while AI move is in progress
         clearTimeout(aiMoveTimeoutHandle);
-        gameContainer.querySelector('.game__ai-loader').style.display = displayStyle(false);
+        gameContainer.querySelector('.game__ai-loader').style.visibility = 'hidden';
         
         board.drawBoard(n.generateNewBoard());
         board.toggleGameStartButtons(true);

@@ -50,7 +50,7 @@
 	</div>
 	<div class="game__info-area">
 		<p class="game__step-cta-text"></p>
-		<div class="game__ai-loader" style="display:none;"></div>
+		<div class="game__ai-loader" style="visibility:hidden"></div>
 		<p class="game__step-description"></p>
 		<button class="game__cta-button game__role-selector" style="display:block;" onclick="game.startGameAsPlayer(false)">
 			Hunyadi leszek
@@ -61,19 +61,20 @@
 		<button class="game__cta-button game__step-for-first" style="display:none;">
 			Lépek
 		</button>
-		<button id="game-red" class="game__cta-button game__step-for-second" style="display:none;">
+		<button id="game-red" class="game__cta-button game__step-for-second" style="display:none; background-color: var(--red);">
 			Legyőzöm a pirosakat
 		</button>
-		<button id="game-blue" class="game__cta-button game__step-for-second" style="display:none;">
+		<button id="game-blue" class="game__cta-button game__step-for-second" style="display:none; background-color: var(--blue);">
 			Legyőzöm a kékeket
 		</button>
-		<button class="game__cta-button game__reset-game" style="display:none;" onclick="game.resetGame()">
-			Új leosztás
-		</button>
+		<div class="game__flex-reset-container">
+			<button class="game__cta-button game__reset-game"  style="display:none" onclick="game.resetGame()">
+				Új leosztás
+			</button>
+		</div>
 	</div>
 </div>
 <script src="../../common/js/pubSub.js"></script>
-<script src="../../common/js/utils.js"></script>
 <script src="nim.js"></script>
 <script src="nimAi.js"></script>
 <script src="game.js"></script>
