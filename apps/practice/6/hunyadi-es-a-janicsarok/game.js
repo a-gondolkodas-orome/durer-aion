@@ -9,7 +9,10 @@ const gameBoard = function(nim) {
 
     const createGamePiece = function(num, source) {
         const piece = document.createElement('span');
-        piece.innerHTML = `<svg class="${num} game__piece game__svg-piece-${source ? 'red' : 'blue'}"><use xlink:href="#game-soldier-icon" /></svg>`;
+        piece.classList.add(num);
+        piece.innerHTML = `<svg class="game__piece game__svg-piece-${source ? 'red' : 'blue'}">
+            <use xlink:href="#game-soldier-icon" />
+        </svg>`;
         return piece;
     }
 
@@ -51,7 +54,7 @@ const gameBoard = function(nim) {
         if (n.getStatus().isGameInProgress) {
             if (n.getStatus().killState === false) {
                 const pile = parseInt(this.parentElement.id.replace(/row\_/, ''));
-                const matches = this.firstChild.classList[0] - 1;
+                const matches = this.classList[0] - 1;
                 move[pile][matches] = !move[pile][matches];
                 drawBoard(move);
             }
