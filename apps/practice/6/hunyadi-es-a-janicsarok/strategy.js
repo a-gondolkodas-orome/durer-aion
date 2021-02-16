@@ -51,6 +51,6 @@ const strategy = function() {
 	};
 
 	return {
-		makeMove: makeMove
+		makeMove
 	}
 }
