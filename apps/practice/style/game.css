@@ -18,7 +18,7 @@ p {
     flex-wrap: wrap;
 }
 
-.game__game-area {
+.game__board {
     flex: 3 0 400px;
     padding: 5px;
 }
