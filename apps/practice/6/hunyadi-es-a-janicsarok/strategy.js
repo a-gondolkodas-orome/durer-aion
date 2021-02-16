@@ -1,5 +1,5 @@
 'use strict';
-const nimAi = function() {
+const strategy = function() {
 	const optimalColoring = function(board) {
 		let trueSum = 0.0;
 		let falseSum = 0.0;

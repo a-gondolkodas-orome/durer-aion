@@ -85,11 +85,11 @@ const gameBoard = function(nim) {
             el.removeEventListener('mouseover', hoverEvent);
             el.removeEventListener('mouseout', hoverOutEvent);
         });
-        gameContainer.querySelector('.game__ai-loader').style.visibility = 'visible';
+        gameContainer.querySelector('.game__loader').style.visibility = 'visible';
     };
 
     const enablePlayerMoves = function() {
-        gameContainer.querySelector('.game__ai-loader').style.visibility = 'hidden';
+        gameContainer.querySelector('.game__loader').style.visibility = 'hidden';
     };
 
     const emptyPile = function(el) {
@@ -155,11 +155,11 @@ const gameBoard = function(nim) {
 
 
 const game = (function() {
-    const ai = nimAi();
+    const enemyStrategy = strategy();
     const n = nim();
     const board = gameBoard(n);
     const gameContainer = document.querySelector('#kupac-ketteoszto');
-    let aiMoveTimeoutHandle;
+    let enemyMoveTimeoutHandle;
 
     pubSub.sub('PLAYER_MOVE', function(move) {
         board.drawBoard(n.move(move));
@@ -172,7 +172,7 @@ const game = (function() {
 
         if (!n.getStatus().isGameInProgress) {
             board.toggleGameStartButtons(false);
-            gameContainer.querySelector('.game__ai-loader').style.visibility = 'hidden';
+            gameContainer.querySelector('.game__loader').style.visibility = 'hidden';
         }
     }
 
@@ -180,8 +180,8 @@ const game = (function() {
         board.disablePlayerMoves();
 
         const time = Math.floor(Math.random() * 750 + 750);
-        aiMoveTimeoutHandle = setTimeout(() => {
-            board.drawBoard(n.move(ai.makeMove(n.getBoard())))
+        enemyMoveTimeoutHandle = setTimeout(() => {
+            board.drawBoard(n.move(enemyStrategy.makeMove(n.getBoard())))
             checkGame();
             board.enablePlayerMoves();
         }, time);
@@ -197,9 +197,9 @@ const game = (function() {
     }
 
     const resetGame = function() {
-        // If new board is requested while AI move is in progress
-        clearTimeout(aiMoveTimeoutHandle);
-        gameContainer.querySelector('.game__ai-loader').style.visibility = 'hidden';
+        // If new board is requested while enemy move is in progress
+        clearTimeout(enemyMoveTimeoutHandle);
+        gameContainer.querySelector('.game__loader').style.visibility = 'hidden';
 
         board.drawBoard(n.generateNewBoard());
         board.updateGamePrompts();

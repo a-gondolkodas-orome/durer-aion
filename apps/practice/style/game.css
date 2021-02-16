@@ -104,7 +104,7 @@ p {
     fill: var(--red);
 }    
 
-.game__ai-loader {
+.game__loader {
     animation: spin 1s linear infinite;
     border: 0.33em solid #f3f3f3; 
     border-radius: 50%;

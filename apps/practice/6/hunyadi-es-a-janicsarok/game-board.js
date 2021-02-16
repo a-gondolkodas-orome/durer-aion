@@ -78,12 +78,12 @@ const gameBoard = function(nim) {
             el.style.opacity = 0.5;
             el.removeEventListener('click', makeMove);
         });
-        gameContainer.querySelector('.game__ai-loader').style.visibility = 'visible';
+        gameContainer.querySelector('.game__loader').style.visibility = 'visible';
     };
 
     const enablePlayerMoves = function() {
         [...gameContainer.querySelectorAll('[class*="game__step-for"]')].map(el => el.removeAttribute('disabled'));
-        gameContainer.querySelector('.game__ai-loader').style.visibility = 'hidden';
+        gameContainer.querySelector('.game__loader').style.visibility = 'hidden';
     };
 
     const emptyPile = function(el) {
@@ -155,11 +155,11 @@ const gameBoard = function(nim) {
 
 
 const game = (function() {
-    const ai = nimAi();
+    const enemyStrategy = strategy();
     const n = nim();
     const board = gameBoard(n);
     const gameContainer = document.querySelector('#hunyadi-es-a-janicsarok');
-    let aiMoveTimeoutHandle;
+    let enemyMoveTimeoutHandle;
 
     pubSub.sub('PLAYER_MOVE', function(move) {
         board.drawBoard(n.move(move));
@@ -173,7 +173,7 @@ const game = (function() {
         if (!n.getStatus().isGameInProgress) {
             board.toggleVisibilityForElements('game__step-for', false);
             board.toggleGameStartButtons(false);
-            gameContainer.querySelector('.game__ai-loader').style.visibility = 'hidden';
+            gameContainer.querySelector('.game__loader').style.visibility = 'hidden';
         }
     }
 
@@ -181,8 +181,8 @@ const game = (function() {
         board.disablePlayerMoves();
 
         const time = Math.floor(Math.random() * 750 + 750);
-        aiMoveTimeoutHandle = setTimeout(() => {
-            board.drawBoard(n.move(ai.makeMove(n.getBoard(), n.getStatus().killState)));
+        enemyMoveTimeoutHandle = setTimeout(() => {
+            board.drawBoard(n.move(enemyStrategy.makeMove(n.getBoard(), n.getStatus().killState)));
             checkGame();
             board.enablePlayerMoves();
         }, time);
@@ -202,9 +202,9 @@ const game = (function() {
     }
 
     const resetGame = function() {
-        // If new board is requested while AI move is in progress
-        clearTimeout(aiMoveTimeoutHandle);
-        gameContainer.querySelector('.game__ai-loader').style.visibility = 'hidden';
+        // If new board is requested while enemy move is in progress
+        clearTimeout(enemyMoveTimeoutHandle);
+        gameContainer.querySelector('.game__loader').style.visibility = 'hidden';
         
         board.drawBoard(n.generateNewBoard());
         board.toggleGameStartButtons(true);

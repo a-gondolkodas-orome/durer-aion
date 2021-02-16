@@ -1,5 +1,5 @@
 'use strict';
-const nimAi = function() {
+const strategy = function() {
 	const findOptimalDivision = function(sum, start) {
 		if (sum <= 1) { console.error("sum<=1"); }
 		
