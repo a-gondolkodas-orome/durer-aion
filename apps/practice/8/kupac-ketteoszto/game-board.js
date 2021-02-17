@@ -24,28 +24,26 @@ const gameBoard = function(nim) {
         return frag;
     }
 
-    const hoverEvent = function() {
-        const parent = this.parentElement;
-        parent.classList[1];
-        const matches = parseInt(this.classList[0], 10) - 1;
-        if (matches != 0 && n.getStatus().isGameInProgress)
-            for (let i = this.parentElement.children.length - 1; i >= 0; i--) {
-                if (parseInt(this.parentElement.children[i].classList[0], 10) - 1 >= matches) {
-                    this.parentElement.children[i].style.opacity = '0.5';
+    const hoverEventHandler = function() {
+        const hoveredPieceIndex = parseInt(this.classList[0], 10);
+        if (hoveredPieceIndex > 1 && n.getStatus().isGameInProgress) {
+            [...this.parentElement.children].forEach(piece => {
+                if (parseInt(piece.classList[0], 10) >= hoveredPieceIndex) {
+                    piece.style.opacity = 0.5;
                 }
-            }
+            })
+        }
     }
 
-    const hoverOutEvent = function() {
-        const parent = this.parentElement;
-        parent.classList[1];
-        const matches = parseInt(this.classList[0], 10) - 1;
-        if (matches != 0)
-            for (let i = this.parentElement.children.length - 1; i >= 0; i--) {
-                if (parseInt(this.parentElement.children[i].classList[0], 10) - 1 >= matches) {
-                    this.parentElement.children[i].style.opacity = '1';
+    const hoverOutEventHandler = function() {
+        const hoveredOutPieceIndex = parseInt(this.classList[0], 10);
+        if (hoveredOutPieceIndex > 1 && n.getStatus().isGameInProgress) {
+            [...this.parentElement.children].forEach(piece => {
+                if (parseInt(piece.classList[0], 10) >= hoveredOutPieceIndex) {
+                    piece.style.opacity = 1;
                 }
-            }
+            })
+        }
     }
 
 
@@ -70,20 +68,20 @@ const gameBoard = function(nim) {
 
 
     const appendEventsToBoard = function() {
-        const imgs = boardContainer.querySelectorAll('span');
-        for (let i = imgs.length - 1; i >= 0; i--) {
-            imgs[i].addEventListener('click', makeMove);
-            imgs[i].addEventListener('mouseover', hoverEvent);
-            imgs[i].addEventListener('mouseout', hoverOutEvent);
-        };
+        const pieces = boardContainer.querySelectorAll('span');
+        pieces.forEach(piece => {
+            piece.addEventListener('click', makeMove);
+            piece.addEventListener('mouseover', hoverEventHandler);
+            piece.addEventListener('mouseout', hoverOutEventHandler);
+        });
     };
 
     const disablePlayerMoves = function() {
         [...gameContainer.querySelector('.game__board').querySelectorAll('span')].map(el => {
             el.style.opacity = 0.5;
             el.removeEventListener('click', makeMove);
-            el.removeEventListener('mouseover', hoverEvent);
-            el.removeEventListener('mouseout', hoverOutEvent);
+            el.removeEventListener('mouseover', hoverEventHandler);
+            el.removeEventListener('mouseout', hoverOutEventHandler);
         });
         gameContainer.querySelector('.game__loader').style.visibility = 'visible';
     };

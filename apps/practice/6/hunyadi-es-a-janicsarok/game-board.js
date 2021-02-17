@@ -63,10 +63,7 @@ const gameBoard = function(nim) {
     }
 
     const appendEventsToBoard = function() {
-        const imgs = boardContainer.querySelectorAll('span');
-        for (let i = imgs.length - 1; i >= 0; i--) {
-            imgs[i].addEventListener('click', makeMove);
-        };
+        [...boardContainer.querySelectorAll('span')].forEach(img => img.addEventListener('click', makeMove));
         gameContainer.querySelector('#game-red').addEventListener('click', killRed);
         gameContainer.querySelector('#game-blue').addEventListener('click', killBlue);
         gameContainer.querySelector('[class*="game__step-for-first"]').addEventListener('click', step);

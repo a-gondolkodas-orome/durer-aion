@@ -11,8 +11,12 @@ const nim = function() {
 
     const generateNewBoard = function() {
         gameStatus = 'readyToStart';
-        board = [Math.floor(Math.random() * 4) + 3, Math.floor(Math.random() * 4) + 3];
+        board = [generateRandomIntBetween(3, 6), generateRandomIntBetween(3, 6)];
         return board;
+    };
+
+    const generateRandomIntBetween = function(low, high) {
+        return Math.floor(Math.random() * (high - low + 1)) + low;
     };
 
     const move = function(newBoardState) {
