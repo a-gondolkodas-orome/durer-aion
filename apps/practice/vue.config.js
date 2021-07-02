@@ -4,7 +4,7 @@ module.exports = {
   filenameHashing: false,
   lintOnSave: false,
   runtimeCompiler: true,
-  publicPath: process.env.BASE_URL || '',
+  publicPath: process.env.NODE_ENV === 'production' ? '/durer-jatekok/' : '/',
   configureWebpack: {
     module: {
       rules: [
