@@ -1,7 +1,9 @@
 name: test
 on:
   push:
-    branches: [master]
+    branches-ignore:
+      - production
+      - gh-pages
 
 jobs:
   test:
