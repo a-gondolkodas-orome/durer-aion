@@ -1,0 +1,14 @@
+name: deploy
+on:
+  push:
+    branches: [master]
+
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+    container:
+      image: node:16.0.0
+    steps:
+      - uses: actions/checkout@v2
+      - run: npm ci
+      - run: npm t

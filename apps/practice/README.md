@@ -6,6 +6,8 @@ A játékok legfrissebb verziója elérhető itt: https://a-gondolkodas-orome.gi
 
 Egy példa honlap a beágyazás demonstrációjára: https://sites.google.com/view/durer-jatekok-beagyazas-pelda
 
+# Development
+
 Currently this project has a vue setup but also games developed outside the vue project. 
 
 ## Project setup
