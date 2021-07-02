@@ -1,0 +1,14 @@
+import KupacKetteoszto from '../kupac-ketteoszto/kupac-ketteoszto';
+import HunyadiEsAJanicsarok from '../hunyadi-es-a-janicsarok/hunyadi-es-a-janicsarok';
+
+export default {
+  name: 'jatek-lista',
+  template: require('./jatek-lista.html'),
+  components: {
+    KupacKetteoszto,
+    HunyadiEsAJanicsarok
+  },
+  data: () => ({
+    openedGame: null
+  })
+}

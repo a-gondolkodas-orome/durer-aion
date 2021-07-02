@@ -1,0 +1,34 @@
+<div>
+  <div v-if="!openedGame">
+    <h1>Dürer játékok</h1>
+
+    <table style="width:100%">
+      <tr>
+        <th>Év</th>
+        <th>Forduló</th>
+        <th>Kategória</th>
+        <th>Játék</th>
+      </tr>
+      <tr>
+        <td>VI. Dürer</td>
+        <td>döntő</td>
+        <td>D</td>
+        <td>
+          <button @click="openedGame='HunyadiEsAJanicsarok'">Hunyadi es a janicsarok</button>
+        </td>
+      </tr>
+      <tr>
+        <td>VIII. Dürer</td>
+        <td>döntő</td>
+        <td>A</td>
+        <td>
+          <button @click="openedGame='KupacKetteoszto'">Kupac ketteosztó</button>
+        </td>
+      </tr>
+    </table>
+  </div>
+  <div v-if="openedGame">
+    <button @click="openedGame=null">Vissza a listához</button>
+  </div>
+  <component v-if="openedGame" :is="openedGame"></component>
+</div>

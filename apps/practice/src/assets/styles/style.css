@@ -9,12 +9,16 @@ p {
     margin: 0 0 0.5em 0;
 }
 
+h1 {
+    color: var(--blue)
+}
+
 .game__rules {
     text-align: justify;
 }
 
 .game__container {
-    display:flex; 
+    display:flex;
     flex-wrap: wrap;
 }
 
@@ -37,8 +41,8 @@ p {
 }
 
 .game__step-description {
-    font-style: italic; 
-    height: auto; 
+    font-style: italic;
+    height: auto;
     text-align: justify;
 }
 
@@ -48,30 +52,30 @@ p {
     border-radius: 5px;
     color: white;
     font-size: 1.2em;
-    margin: 5px 0px;
+    margin: 5px 0;
     padding: 5px 10px;
     text-align: center;
     text-decoration: none;
     width: 100%;
-    white-space: normal; 
-}  
+    white-space: normal;
+}
 
 .game__cta-button:disabled {
     opacity: 0.5;
 }
 
 .game__pile {
-    border-top-color: black; 
+    border-top-color: black;
     border-top-style: solid;
     border-top-width: 3px;
     height: 80px;
     padding: 2px;
-    text-align: left; 
+    text-align: left;
     white-space: nowrap;
-}    
+}
 
 .game__pile-bottom-border {
-    border-bottom-color: black; 
+    border-bottom-color: black;
     border-bottom-style: solid;
     border-bottom-width: 3px;
 }
@@ -82,7 +86,7 @@ p {
     margin: 0 1px;
     padding: 5px;
     width: 70px;
-}  
+}
 
 .game__circle {
     border-radius: 50%;
@@ -94,7 +98,7 @@ p {
 
 .game__piece-red {
     background-color: var(--red);
-}    
+}
 
 .game__svg-piece-blue {
     fill: var(--blue);
@@ -102,26 +106,26 @@ p {
 
 .game__svg-piece-red {
     fill: var(--red);
-}    
+}
 
 .game__loader {
     animation: spin 1s linear infinite;
-    border: 0.33em solid #f3f3f3; 
+    border: 0.33em solid #f3f3f3;
     border-radius: 50%;
     border-top: 0.33em solid var(--blue);
     height: 2em;
     margin: 0 auto;
     width: 2em;
   }
-  
+
   @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
   }
 
 .game__flex-reset-container {
-    align-items: flex-end; 
-    display: flex; 
+    align-items: flex-end;
+    display: flex;
     flex-grow: 1;
 }
 

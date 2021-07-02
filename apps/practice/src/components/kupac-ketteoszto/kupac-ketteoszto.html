@@ -1,0 +1,35 @@
+<div>
+
+  <p class="game__rules">
+    Ez a játék a VIII. Dürer döntőjén szerepelt A kategóriában. A pályán mindig két kupac
+    korong található. A soron következő játékos választ egy kupacot, és azt szétosztja két kisebb kupacra (mindkettőbe
+    legalább 1 korongnak kerülnie kell), a másik kupacot pedig kidobjuk. Az a játékos veszít, aki nem tud szabályosan
+    lépni (azaz egyik kupacot se tudja szétosztani).
+
+    Az új leosztás gombra kattintva generálhatsz egy felállást. A felállás ismeretében te döntheted el, hogy kezdeni
+    szeretnél-e, vagy második játékos lenni.
+    Sok sikert! :)
+  </p>
+  <div class="game__container" id="kupac-ketteoszto">
+    <div class="game__board">
+      <div id="row_0" class="game__pile"></div>
+      <div id="row_1" class="game__pile game__pile-bottom-border"></div>
+    </div>
+    <div class="game__info-area">
+      <p class="game__step-cta-text"></p>
+      <div class="game__loader" style="visibility:hidden;"></div>
+      <p class="game__step-description"></p>
+      <button class="game__cta-button game__role-selector" style="display: block;" @click="startGameAsPlayer(true)">
+        Kezdő leszek
+      </button>
+      <button class="game__cta-button game__role-selector" style="display: block;" @click="startGameAsPlayer(false)">
+        Második leszek
+      </button>
+      <div class="game__flex-reset-container">
+        <button class="game__cta-button game__reset-game"  style="display:none" @click="resetGame()">
+          Új leosztás
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

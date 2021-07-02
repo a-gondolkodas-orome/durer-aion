@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import HelloWorld from '../components/hello-world/hello-world'
+import JatekLista from '../components/jatek-lista/jatek-lista'
 
 Vue.use(VueRouter)
 
@@ -8,7 +8,7 @@ const routes = [
   {
     path: '/',
     name: 'Home',
-    component: HelloWorld
+    component: JatekLista
   }
 ]
 
