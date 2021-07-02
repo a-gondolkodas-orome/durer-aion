@@ -4,15 +4,15 @@ on:
     branches: [production]
 
 jobs:
-  test:
+  deploy:
     runs-on: ubuntu-20.04
     container:
       image: node:16.0.0
     steps:
       - uses: actions/checkout@v2
       - run: npm ci
-      - run: npm t
-      - run: npm build
+      - run: npm run test
+      - run: npm run build
       - run: cd dist
       - run: git init
       - run: git add -A
