@@ -22,6 +22,9 @@ export default {
   computed: {
     gamesToShow() {
       return this.gameList.filter(game => !game.hidden)
+    },
+    selectedGame() {
+      return this.gameList.find(game => game.component === this.openedGame)
     }
   }
 }

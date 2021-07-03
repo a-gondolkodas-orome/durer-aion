@@ -20,7 +20,11 @@
     </table>
   </div>
   <div v-if="openedGame">
+    <h1>{{ selectedGame.name }}</h1>
+    {{ `${selectedGame.year}. verseny, ${selectedGame.round} forduló, ${selectedGame.category} kategória` }}
+    <br />
     <button @click="openedGame=null">Vissza a listához</button>
+    <hr />
   </div>
   <component v-if="openedGame" :is="openedGame"></component>
 </div>
