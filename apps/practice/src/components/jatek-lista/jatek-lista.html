@@ -9,20 +9,12 @@
         <th>Kategória</th>
         <th>Játék</th>
       </tr>
-      <tr>
-        <td>VI. Dürer</td>
-        <td>döntő</td>
-        <td>D</td>
+      <tr v-for="game in gameList">
+        <td>{{ game.year }}</td>
+        <td>{{ game.round }}</td>
+        <td>{{ game.category }}</td>
         <td>
-          <button @click="openedGame='HunyadiEsAJanicsarok'">Hunyadi es a janicsarok</button>
-        </td>
-      </tr>
-      <tr>
-        <td>VIII. Dürer</td>
-        <td>döntő</td>
-        <td>A</td>
-        <td>
-          <button @click="openedGame='KupacKetteoszto'">Kupac ketteosztó</button>
+          <button @click="openedGame=game.component">{{ game.name }}</button>
         </td>
       </tr>
     </table>

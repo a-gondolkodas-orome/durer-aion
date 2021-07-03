@@ -10,6 +10,10 @@ export default {
     HunyadiEsAJanicsarok
   },
   data: () => ({
-    openedGame: null
+    openedGame: null,
+    gameList: [
+      { year: 6, round: 'döntő', category: 'D', component: 'HunyadiEsAJanicsarok', name: 'Hunyadi és a janicsárok' },
+      { year: 8, round: 'döntő', category: 'A', component: 'KupacKetteoszto', name: 'Kupac kettéosztó' }
+    ]
   })
 }
