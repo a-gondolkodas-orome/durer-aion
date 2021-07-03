@@ -24,11 +24,10 @@
     </div>
     <div class="game__info-area">
       <p class="game__step-cta-text">{{ ctaText }}</p>
-      <div class="game__loader" :style="{ 'visibility': isEnemyMoveInProgress ? 'visible' : 'hidden' }"></div>
+      <enemy-loader />
       <p class="game__step-description">{{ stepDescription }}</p>
       <button
           v-if="isGameReadyToStart"
-          style="display:block"
           class="game__cta-button game__role-selector"
           @click="startGameAsPlayer(true)"
       >
@@ -37,13 +36,12 @@
       <button
           v-if="isGameReadyToStart"
           class="game__cta-button game__role-selector"
-          style="display:block"
           @click="startGameAsPlayer(false)"
       >
         Második leszek
       </button>
       <div class="game__flex-reset-container">
-        <button class="game__cta-button game__reset-game"  style="display:block" @click="resetGame()">
+        <button class="game__cta-button game__reset-game" @click="resetGame()">
           Új leosztás
         </button>
       </div>

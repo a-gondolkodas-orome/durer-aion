@@ -1,34 +1,39 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import { makeAiMove } from '../components/kupac-ketteoszto/ai-strategy/ai-strategy';
-import { generateNewBoard } from '../components/kupac-ketteoszto/initial-state/initial-state';
+import { isGameEnd, generateNewBoard } from '../components/kupac-ketteoszto/rules/rules';
 
 Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
     gameStatus: 'readyToStart',
-    shouldPlayerMoveNext: null,
-    isPlayerWinner: null,
+    shouldPlayerMoveNext: false,
+    isPlayerWinner: false,
     board: null,
     enemyMoveTimeoutHandle: null,
     isEnemyMoveInProgress: false
   },
   getters: {
-    isEnemyMoveInProgress: state => state.isEnemyMoveInProgress && state.enemyMoveTimeoutHandle != null,
     isGameInProgress: state => state.gameStatus === 'inProgress',
     isGameFinished: state => state.gameStatus === 'finished',
     isGameReadyToStart: state => state.gameStatus === 'readyToStart',
-    shouldPlayerMoveNext: state => state.gameStatus === 'inProgress' ? state.shouldPlayerMoveNext : undefined,
-    isPlayerWinner: state => state.gameStatus === 'finished' ? state.isPlayerWinner : undefined,
-    getBoard: state => state.board
+    isEnemyMoveInProgress: state => state.isEnemyMoveInProgress && state.enemyMoveTimeoutHandle != null,
+    shouldPlayerMoveNext: state => state.shouldPlayerMoveNext,
+    getBoard: state => state.board,
+    ctaText: (state, getters) => {
+      if (getters.isGameInProgress) {
+        return state.shouldPlayerMoveNext ? 'Te jössz.' : 'Mi jövünk.';
+      } else if (getters.isGameFinished) {
+        return state.isPlayerWinner ? 'Nyertél. Gratulálunk! :)' : 'Sajnos, most nem nyertél, de ne add fel.';
+      } else { // ready to start
+        return 'A gombra kattintva tudod elindítani a játékot.';
+      }
+    }
   },
   mutations: {
     setEnemyMoveInProgress(state, isInProgress) {
       state.isEnemyMoveInProgress = isInProgress;
-    },
-    setBoard(state, board) {
-      state.board = board;
     },
     startGameAsPlayer(state, isFirstPlayer) {
       state.gameStatus = 'inProgress';
@@ -37,7 +42,7 @@ export default new Vuex.Store({
     applyMove(state, board) {
       state.board = board;
       state.shouldPlayerMoveNext = !state.shouldPlayerMoveNext;
-      if (board[0] === 1 && board[1] === 1) {
+      if (isGameEnd(board)) {
         clearTimeout(state.enemyMoveTimeoutHandle);
         state.gameStatus = 'finished';
         state.isPlayerWinner = !state.shouldPlayerMoveNext;
@@ -48,8 +53,8 @@ export default new Vuex.Store({
       state.board = generateNewBoard();
       state.isEnemyMoveInProgress = false;
       state.gameStatus = 'readyToStart';
-      state.shouldPlayerMoveNext = null;
-      state.isPlayerWinner = null;
+      state.shouldPlayerMoveNext = false;
+      state.isPlayerWinner = false;
     }
   },
   actions: {

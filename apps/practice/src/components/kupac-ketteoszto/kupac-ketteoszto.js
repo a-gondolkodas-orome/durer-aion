@@ -1,16 +1,22 @@
 import { mapGetters, mapMutations, mapActions } from 'vuex';
-import { getBoardAfterPlayerStep } from './player-step/player-step';
+import { getBoardAfterPlayerStep } from './rules/rules';
+import EnemyLoader from '../common/enemy-loader/enemy-loader';
 
 export default {
   name: 'kupac-ketteoszto',
   template: require('./kupac-ketteoszto.html'),
+  components: { EnemyLoader },
   data: () => ({
     hoveredPiece: null
   }),
   computed: {
     ...mapGetters([
-      'isEnemyMoveInProgress', 'getBoard', 'shouldPlayerMoveNext',
-      'isGameInProgress', 'isGameFinished', 'isPlayerWinner', 'isGameReadyToStart'
+      'ctaText',
+      'isEnemyMoveInProgress',
+      'getBoard',
+      'shouldPlayerMoveNext',
+      'isGameInProgress',
+      'isGameReadyToStart'
     ]),
     pieceOpacity() {
       return ({ rowIndex, pieceIndex }) => {
@@ -18,15 +24,6 @@ export default {
         if (!this.hoveredPiece) return 1;
         return rowIndex === this.hoveredPiece.rowIndex && pieceIndex >= this.hoveredPiece.pieceIndex ? 0.5 : 1;
       };
-    },
-    ctaText() {
-      if (this.isGameInProgress) {
-        return this.shouldPlayerMoveNext ? 'Te jössz.' : 'Mi jövünk.';
-      } else if (this.isGameFinished) {
-        return this.isPlayerWinner ? 'Nyertél. Gratulálunk! :)' : 'Sajnos, most nem nyertél, de ne add fel.';
-      } else { // ready to start
-        return 'A gombra kattintva tudod elindítani a játékot.';
-      }
     },
     stepDescription() {
       return this.isGameInProgress && this.shouldPlayerMoveNext
