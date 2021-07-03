@@ -11,21 +11,39 @@
   </p>
   <div class="game__container" id="kupac-ketteoszto">
     <div class="game__board">
-      <div id="row_0" class="game__pile"></div>
-      <div id="row_1" class="game__pile game__pile-bottom-border"></div>
+      <div v-for="rowIndex in [0, 1]" class="game__pile" :class="{ 'game__pile-bottom-border': rowIndex === 1 }">
+        <span
+            v-for="pieceIndex in [...Array(getBoard[rowIndex]).keys()].map(i => i + 1)"
+            class="game__piece game__piece-blue game__circle"
+            :style="{ 'opacity': pieceOpacity({ rowIndex, pieceIndex }) }"
+            @click="clickPiece(rowIndex, pieceIndex)"
+            @mouseover="handleMouseOverPiece(rowIndex, pieceIndex)"
+            @mouseout="handleMouseOutPiece(rowIndex, pieceIndex)"
+        ></span>
+      </div>
     </div>
     <div class="game__info-area">
-      <p class="game__step-cta-text"></p>
-      <div class="game__loader" style="visibility:hidden;"></div>
-      <p class="game__step-description"></p>
-      <button class="game__cta-button game__role-selector" style="display: block;" @click="startGameAsPlayer(true)">
+      <p class="game__step-cta-text">{{ ctaText }}</p>
+      <div class="game__loader" :style="{ 'visibility': isEnemyMoveInProgress ? 'visible' : 'hidden' }"></div>
+      <p class="game__step-description">{{ stepDescription }}</p>
+      <button
+          v-if="isGameReadyToStart"
+          style="display:block"
+          class="game__cta-button game__role-selector"
+          @click="startGameAsPlayer(true)"
+      >
         Kezdő leszek
       </button>
-      <button class="game__cta-button game__role-selector" style="display: block;" @click="startGameAsPlayer(false)">
+      <button
+          v-if="isGameReadyToStart"
+          class="game__cta-button game__role-selector"
+          style="display:block"
+          @click="startGameAsPlayer(false)"
+      >
         Második leszek
       </button>
       <div class="game__flex-reset-container">
-        <button class="game__cta-button game__reset-game"  style="display:none" @click="resetGame()">
+        <button class="game__cta-button game__reset-game"  style="display:block" @click="resetGame()">
           Új leosztás
         </button>
       </div>

@@ -1,6 +1,6 @@
 'use strict';
 
-export const makeMove = function(board) {
+export const makeAiMove = function(board) {
   const start = Math.floor(Math.random() * 2);
 
   if (board[start] === 1) return findOptimalDivision(board[(start + 1) % 2], (start + 1) % 2);
