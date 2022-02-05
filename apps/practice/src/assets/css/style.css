@@ -117,12 +117,12 @@ h1 {
     height: 2em;
     margin: 0 auto;
     width: 2em;
-  }
+}
 
-  @keyframes spin {
+@keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
-  }
+}
 
 .game__flex-reset-container {
     align-items: flex-end;
@@ -133,4 +133,23 @@ h1 {
 .game__reset-game {
     background-color: var(--gray);
     margin-top: 1em;
+}
+
+table { 
+    width: 100%; 
+    border-collapse: collapse; 
+}
+/* Zebra striping */
+tr:nth-of-type(odd) { 
+    background: #eee; 
+}
+th { 
+    background: #333; 
+    color: white; 
+    font-weight: bold; 
+}
+td, th { 
+  padding: 6px; 
+  border: 1px solid #ccc; 
+  text-align: center; 
 }

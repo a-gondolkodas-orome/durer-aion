@@ -2,28 +2,30 @@
   <div v-if="!openedGame">
     <h1>Dürer játékok</h1>
 
-    <table style="width:100%">
-      <tr>
-        <th>Év</th>
-        <th>Forduló</th>
-        <th>Kategória</th>
-        <th>Játék</th>
-      </tr>
+    <table style="width:100%;border-collapse:collapse">
+      <thead>
+        <tr>
+          <th>Év</th>
+          <th>Forduló</th>
+          <th>Kategória</th>
+          <th>Játék</th>
+          <th></th>
+        </tr>
+      </thead>
       <tr v-for="game in gamesToShow">
         <td>{{ game.year }}</td>
         <td>{{ game.round }}</td>
         <td>{{ game.category }}</td>
+        <td>{{ game.name }}</td>
         <td>
-          <button @click="openedGame=game.component">{{ game.name }}</button>
+          <button @click="openedGame=game.component">Kipróbálom!</button>
         </td>
       </tr>
     </table>
   </div>
   <div v-if="openedGame">
+    <button @click="openedGame=null">&lt; Vissza a listához</button>
     <h1>{{ selectedGame.name }}</h1>
-    {{ `${selectedGame.year}. verseny, ${selectedGame.round} forduló, ${selectedGame.category} kategória` }}
-    <br />
-    <button @click="openedGame=null">Vissza a listához</button>
     <hr />
   </div>
   <component v-if="openedGame" :is="openedGame"></component>
