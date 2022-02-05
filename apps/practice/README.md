@@ -9,6 +9,7 @@ Egy példa honlap a beágyazás demonstrációjára: https://sites.google.com/vi
 # Development
 
 Currently this project has a vue setup, but you can include games not using vue with minimal modifications.
+If you are using VS Code, https://marketplace.visualstudio.com/items?itemName=johnsoncodehk.volar is highly recommended.
 
 ## Prerequisites:
 
