@@ -26,5 +26,8 @@ export default {
     selectedGame() {
       return this.gameList.find(game => game.component === this.openedGame)
     }
+  },
+  created() {
+    document.title = 'Dürer games'
   }
 }
