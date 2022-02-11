@@ -13,16 +13,16 @@
   },
   "dependencies": {
     "vue": "3.2.30",
-    "vuex": "^4.0.0"
+    "vuex": "4.0.2"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "4.5.15",
     "@vue/cli-plugin-eslint": "4.5.15",
     "@vue/cli-plugin-unit-jest": "4.5.15",
     "@vue/cli-service": "4.5.15",
-    "@vue/compiler-sfc": "3.2.21",
-    "@vue/test-utils": "2.0.0-rc.13",
-    "@vue/vue3-jest": "27.0.0-alpha.3",
+    "@vue/compiler-sfc": "3.2.30",
+    "@vue/test-utils": "2.0.0-rc.17",
+    "@vue/vue3-jest": "27.0.0-alpha.4",
     "babel-eslint": "10.1.0",
     "better-npm-audit": "3.5.1",
     "cors": "2.8.5",
