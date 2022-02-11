@@ -1,11 +1,8 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
+import { createStore } from 'vuex';
 import { makeAiMove } from '../components/kupac-ketteoszto/ai-strategy/ai-strategy';
 import { isGameEnd, generateNewBoard } from '../components/kupac-ketteoszto/rules/rules';
 
-Vue.use(Vuex)
-
-export default new Vuex.Store({
+export const store = createStore({
   state: {
     gameStatus: 'readyToStart',
     shouldPlayerMoveNext: false,

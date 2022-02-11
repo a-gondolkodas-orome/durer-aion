@@ -4,7 +4,7 @@ module.exports = {
     node: true
   },
   extends: [
-    'plugin:vue/strongly-recommended',
+    'plugin:vue3/strongly-recommended',
     'eslint:recommended',
     'plugin:jest/recommended'
   ],

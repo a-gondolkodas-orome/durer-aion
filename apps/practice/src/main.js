@@ -1,12 +1,8 @@
-import Vue from 'vue'
+import { createApp } from 'vue';
 import JatekLista from './components/jatek-lista/jatek-lista';
-import router from './router'
-import store from './store'
+import { store } from './store'
 
-Vue.config.productionTip = false
+const app = createApp(JatekLista);
+app.use(store);
 
-new Vue({
-  router,
-  store,
-  render: h => h(JatekLista)
-}).$mount('#app')
+app.mount('#app');

@@ -28,6 +28,6 @@ export default {
     }
   },
   created() {
-    document.title = 'Dürer games'
+    document.title = 'Dürer játékok'
   }
 }
