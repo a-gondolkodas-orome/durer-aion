@@ -33,7 +33,7 @@ npm run test:unit
 
 ## Deploy to github pages
 
-`git pull origin master; git push origin master;git push origin master:production`
+`git pull origin production; git push origin master:production`
 
 For further options see `package.json`.
 
