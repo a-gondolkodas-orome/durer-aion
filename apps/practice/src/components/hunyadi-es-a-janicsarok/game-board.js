@@ -83,7 +83,7 @@ export const updateGamePrompts = function() {
 const createGamePiece = function(num, source) {
     const piece = document.createElement('span');
     piece.classList.add(num);
-    piece.innerHTML = `<svg class="game__piece game__svg-piece-${source ? 'red' : 'blue'}">
+    piece.innerHTML = `<svg class="game__piece ${source ? 'fill-red-600' : 'fill-blue-600'}">
         <use xlink:href="#game-soldier-icon" />
     </svg>`;
     return piece;

@@ -1,5 +1,5 @@
 <div>
-  <p class="game__rules">
+  <p class="text-justify">
     A pályán mindig két kupac
     korong található. A soron következő játékos választ egy kupacot, és azt szétosztja két kisebb kupacra (mindkettőbe
     legalább 1 korongnak kerülnie kell), a másik kupacot pedig kidobjuk. Az a játékos veszít, aki nem tud szabályosan
@@ -14,7 +14,7 @@
       <div v-for="rowIndex in [0, 1]" class="game__pile" :class="{ 'game__pile-bottom-border': rowIndex === 1 }">
         <span
             v-for="pieceIndex in [...Array(getBoard[rowIndex]).keys()].map(i => i + 1)"
-            class="game__piece game__piece-blue game__circle"
+            class="game__piece bg-blue-600 rounded-full"
             :style="{ 'opacity': pieceOpacity({ rowIndex, pieceIndex }) }"
             @click="clickPiece(rowIndex, pieceIndex)"
             @mouseover="handleMouseOverPiece(rowIndex, pieceIndex)"

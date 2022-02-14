@@ -1,24 +1,15 @@
+@tailwind base;
+
+@tailwind components;
+
+@tailwind utilities;
+
 :root {
-    --red: #ff5e5e;
-    --blue: #5e87ff;
-    --green: #5fba7d;
-    --gray: #666666;
-}
-
-p {
-    margin: 0 0 0.5em 0;
-}
-
-h1 {
-    color: var(--blue)
-}
-
-.game__rules {
-    text-align: justify;
+    --blue: #3763eb; /* blue-600*/
 }
 
 .game__container {
-    display:flex;
+    display: flex;
     flex-wrap: wrap;
 }
 
@@ -46,23 +37,20 @@ h1 {
     text-align: justify;
 }
 
-.game__cta-button {
-    background-color: var(--green);
-    border: none;
-    border-radius: 5px;
-    color: white;
-    display: block;
-    font-size: 1.2em;
-    margin: 5px 0;
-    padding: 5px 10px;
-    text-align: center;
-    text-decoration: none;
-    width: 100%;
-    white-space: normal;
-}
-
-.game__cta-button:disabled {
-    opacity: 0.5;
+@layer base {
+    .game__cta-button {
+        @apply bg-green-400 text-white disabled:opacity-50 hover:bg-green-600;
+        border: none;
+        border-radius: 5px;
+        display: block;
+        font-size: 1.2em;
+        margin: 5px 0;
+        padding: 5px 10px;
+        text-align: center;
+        text-decoration: none;
+        width: 100%;
+        white-space: normal;
+    }
 }
 
 .game__pile {
@@ -89,26 +77,6 @@ h1 {
     width: 70px;
 }
 
-.game__circle {
-    border-radius: 50%;
-}
-
-.game__piece-blue {
-    background-color: var(--blue);
-}
-
-.game__piece-red {
-    background-color: var(--red);
-}
-
-.game__svg-piece-blue {
-    fill: var(--blue);
-}
-
-.game__svg-piece-red {
-    fill: var(--red);
-}
-
 .game__loader {
     animation: spin 1s linear infinite;
     border: 0.33em solid #f3f3f3;
@@ -131,7 +99,6 @@ h1 {
 }
 
 .game__reset-game {
-    background-color: var(--gray);
     margin-top: 1em;
 }
 
@@ -141,12 +108,10 @@ table {
 }
 /* Zebra striping */
 tr:nth-of-type(odd) { 
-    background: #eee; 
+    @apply bg-gray-200; 
 }
 th { 
-    background: #333; 
-    color: white; 
-    font-weight: bold; 
+    @apply bg-gray-500 text-white font-bold; 
 }
 td, th { 
   padding: 6px; 

@@ -1,6 +1,6 @@
-<div>
+<div class="px-4 py-4">
   <div v-if="!openedGame">
-    <h1>Dürer játékok</h1>
+    <h1 class="text-blue-600 text-2xl font-bold pb-4">Dürer játékok</h1>
 
     <table style="width:100%;border-collapse:collapse">
       <thead>
@@ -18,14 +18,20 @@
         <td>{{ game.category }}</td>
         <td>{{ game.name }}</td>
         <td>
-          <button @click="openedGame=game.component">Kipróbálom!</button>
+          <button 
+            @click="openedGame=game.component"
+            class="rounded-lg px-4 bg-blue-400 hover:bg-blue-600"
+          >Kipróbálom!</button>
         </td>
       </tr>
     </table>
   </div>
   <div v-if="openedGame">
-    <button @click="openedGame=null">&lt; Vissza a listához</button>
-    <h1>{{ selectedGame.name }}</h1>
+    <button 
+      class="rounded-lg px-4 bg-blue-400 hover:bg-blue-600"
+      @click="openedGame=null"
+    >&lt; Vissza a listához</button>
+    <h1 class="text-blue-600 text-2xl font-bold pb-4">{{ selectedGame.name }}</h1>
     <hr />
   </div>
   <component v-if="openedGame" :is="openedGame"></component>
