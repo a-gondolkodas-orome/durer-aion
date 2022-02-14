@@ -3,12 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start-dev": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "test": "npm run audit && npm run lint && npm run test:unit",
-    "audit": "better-npm-audit audit --production",
-    "lint": "vue-cli-service lint --no-fix",
     "test:unit": "vue-cli-service test:unit",
+    "lint": "vue-cli-service lint --no-fix",
+    "audit": "better-npm-audit audit --production",
+    "start-dev": "vue-cli-service serve",
+    "test": "npm run audit && npm run lint && npm run test:unit",
     "test:watch": "npm run test:unit -- --watchAll"
   },
   "dependencies": {
@@ -16,10 +16,10 @@
     "vuex": "4.0.2"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "4.5.15",
-    "@vue/cli-plugin-eslint": "4.5.15",
-    "@vue/cli-plugin-unit-jest": "4.5.15",
-    "@vue/cli-service": "4.5.15",
+    "@vue/cli-plugin-babel": "5.0.0-rc.3",
+    "@vue/cli-plugin-eslint": "5.0.0-rc.3",
+    "@vue/cli-plugin-unit-jest": "5.0.0-rc.3",
+    "@vue/cli-service": "5.0.0-rc.3",
     "@vue/compiler-sfc": "3.2.30",
     "@vue/test-utils": "2.0.0-rc.17",
     "@vue/vue3-jest": "27.0.0-alpha.4",

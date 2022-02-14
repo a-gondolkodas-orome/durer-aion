@@ -1,5 +1,3 @@
-const cors = require('cors');
-
 module.exports = {
   filenameHashing: false,
   lintOnSave: false,
@@ -16,10 +14,6 @@ module.exports = {
     }
   },
   devServer: {
-    port: 8012,
-    stats: 'minimal',
-    before(app) {
-      app.use(cors());
-    }
+    port: 8012
   }
 };
