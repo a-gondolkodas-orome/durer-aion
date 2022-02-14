@@ -12,6 +12,5 @@ module.exports = {
   ],
   testMatch: [
     '**/src/**/*.spec.js'
-  ],
-  testURL: 'http://localhost:9638'
+  ]
 }

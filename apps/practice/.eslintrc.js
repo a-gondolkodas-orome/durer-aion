@@ -15,7 +15,7 @@ module.exports = {
     'operator-linebreak': ['error', 'after', { overrides: { '?': 'before', ':': 'before' } }]
   },
   parserOptions: {
-    parser: 'babel-eslint'
+    parser: '@babel/eslint-parser'
   },
   overrides: [
     {
