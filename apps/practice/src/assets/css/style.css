@@ -39,7 +39,7 @@
 
 @layer base {
     .game__cta-button {
-        @apply bg-green-400 text-white disabled:opacity-50 hover:bg-green-600;
+        @apply bg-teal-400 text-white disabled:opacity-50 hover:bg-teal-600;
         border: none;
         border-radius: 5px;
         display: block;
