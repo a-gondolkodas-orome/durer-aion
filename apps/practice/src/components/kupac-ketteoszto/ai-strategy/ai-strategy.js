@@ -1,27 +1,30 @@
 'use strict';
 
+import { generateRandomIntBetween } from "../../../lib/generate-random";
+
 export const makeAiMove = function(board) {
-  const start = Math.floor(Math.random() * 2);
+  const randomPileIndex = generateRandomIntBetween(0, 1);
 
-  if (board[start] === 1) return findOptimalDivision(board[(start + 1) % 2], (start + 1) % 2);
-  else if (board[(start + 1) % 2] === 1) return findOptimalDivision(board[start], start);
-  else if (board[start] % 2 === 0) return findOptimalDivision(board[start], start);
-  else return findOptimalDivision(board[(start + 1) % 2], (start + 1) % 2);
+  const pileIndexToSplit = (board[randomPileIndex] % 2 === 0 || board[other(randomPileIndex)] === 1)
+    ? randomPileIndex
+    : other(randomPileIndex);
 
+  return findOptimalDivision(board[pileIndexToSplit], pileIndexToSplit);
 };
 
-const findOptimalDivision = function(sum, start) {
-  let move = [];
-
-  if (sum === 2) {
-    move[start] = 1;
-    move[(start + 1) % 2] = 1;
-    return move;
+const findOptimalDivision = function(pieceCountInPile, pileIndexToSplit) {
+  if (pieceCountInPile === 2) {
+    return [1, 1];
   }
-
-  const startPile = 1 + 2 * Math.ceil(Math.random() * Math.floor((sum - 2) / 2));
-  move[start] = startPile;
-  move[(start + 1) % 2] = sum - startPile;
+  
+  let move = [];
+  const startPile = 1 + generateEven(pieceCountInPile - 2);
+  move[pileIndexToSplit] = startPile;
+  move[other(pileIndexToSplit)] = pieceCountInPile - startPile;
 
   return move;
 };
+
+const other = current => 1 - current;
+
+const generateEven = num => 2 * Math.ceil(Math.random() * Math.floor(num / 2));

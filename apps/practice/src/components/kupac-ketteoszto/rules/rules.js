@@ -1,3 +1,7 @@
+'use strict';
+
+import { generateRandomIntBetween } from '../../../lib/generate-random';
+
 export const getBoardAfterPlayerStep = (board, { rowIndex, pieceIndex }) => {
   return [pieceIndex - 1, board[rowIndex] - pieceIndex + 1];
 };
@@ -8,6 +12,3 @@ export const generateNewBoard = function() {
   return [generateRandomIntBetween(3, 10), generateRandomIntBetween(3, 10)];
 };
 
-const generateRandomIntBetween = function(low, high) {
-  return Math.floor(Math.random() * (high - low + 1)) + low;
-};
