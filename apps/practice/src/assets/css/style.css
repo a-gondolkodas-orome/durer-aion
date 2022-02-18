@@ -28,5 +28,5 @@
 }
 
 .game__piece {
-    @apply h-16 w-16 mx-1 my-0 p-1 inline-block;
+    @apply h-16 w-16 p-1 inline-block;
 }
