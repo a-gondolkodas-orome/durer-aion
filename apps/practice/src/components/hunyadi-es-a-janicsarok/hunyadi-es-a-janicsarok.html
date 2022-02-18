@@ -37,19 +37,19 @@
     vagy a török szultánként szeretnél-e játszani.
     Sok sikert! :)
   </p>
-  <div class="game__container" id="hunyadi-es-a-janicsarok">
+  <div class="flex flex-wrap" id="hunyadi-es-a-janicsarok">
     <div class="game__board">
       <img src="../../assets/hunyadi-es-a-janicsarok-var.jpg" style="display: block; margin: auto;">
       <div id="row_0" class="game__pile"></div>
       <div id="row_1" class="game__pile"></div>
       <div id="row_2" class="game__pile"></div>
       <div id="row_3" class="game__pile"></div>
-      <div id="row_4" class="game__pile game__pile-bottom-border"></div>
+      <div id="row_4" class="game__pile border-b-black border-b-2"></div>
     </div>
-    <div class="game__info-area">
-      <p class="game__step-cta-text"></p>
-      <div class="game__loader" style="visibility:hidden"></div>
-      <p class="game__step-description"></p>
+    <div class="p-1 flex flex-col flex-grow flex-shrink-0 basis-80">
+      <p class="game__step-cta-text text-center font-bold text-lg"></p>
+      <div class="js-enemy-loader animate-spin h-8 w-8 place-self-center border-t-blue-600 rounded-full border-4" style="visibility:hidden"></div>
+      <p class="js-step-description italic text-justify"></p>
       <button class="game__cta-button game__role-selector" style="display:block;" @click="startGameAsPlayer(false)">
         Hunyadi leszek
       </button>
@@ -65,8 +65,8 @@
       <button id="game-blue" class="game__cta-button game__step-for-second bg-blue-400 hover:bg-blue-600" style="display:none;">
         Legyőzöm a kékeket
       </button>
-      <div class="game__flex-reset-container">
-        <button class="game__cta-button game__reset-game"  style="display:none" @click="resetGame()">
+      <div class="flex flex-grow items-end">
+        <button class="game__cta-button js-reset-game mt-4"  style="display:none" @click="resetGame()">
           Új leosztás
         </button>
       </div>

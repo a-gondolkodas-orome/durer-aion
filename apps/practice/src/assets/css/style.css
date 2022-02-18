@@ -8,102 +8,25 @@
     --blue: #3763eb; /* blue-600*/
 }
 
-.game__container {
-    display: flex;
-    flex-wrap: wrap;
-}
-
 .game__board {
-    flex: 3 0 400px;
-    padding: 5px;
-}
-
-.game__info-area {
-    flex: 1 0 300px;
-    padding: 5px;
-    display: flex;
-    flex-direction: column;
-}
-
-.game__step-cta-text {
-    font-size: 1.1em;
-    font-weight:bold;
-    text-align: center;
-}
-
-.game__step-description {
-    font-style: italic;
-    height: auto;
-    text-align: justify;
+    @apply p-1;
+    flex-shrink: 0;
+    flex-grow: 3;
+    flex-basis: 400px;
 }
 
 @layer base {
     .game__cta-button {
-        @apply bg-teal-400 text-white disabled:opacity-50 hover:bg-teal-600;
-        border: none;
-        border-radius: 5px;
-        display: block;
-        font-size: 1.2em;
-        margin: 5px 0;
-        padding: 5px 10px;
-        text-align: center;
-        text-decoration: none;
-        width: 100%;
-        white-space: normal;
+        @apply bg-teal-400 disabled:opacity-50 hover:bg-teal-600;
+        @apply border-none rounded block my-1 mx-0 py-1 px-2 w-full;
+        @apply text-center text-white text-xl whitespace-normal;
     }
 }
 
 .game__pile {
-    border-top-color: black;
-    border-top-style: solid;
-    border-top-width: 3px;
-    height: 80px;
-    padding: 2px;
-    text-align: left;
-    white-space: nowrap;
-}
-
-.game__pile-bottom-border {
-    border-bottom-color: black;
-    border-bottom-style: solid;
-    border-bottom-width: 3px;
+    @apply border-t-black border-t-2 h-20 p-1 text-left whitespace-nowrap;
 }
 
 .game__piece {
-    display: inline-block;
-    height: 70px;
-    margin: 0 1px;
-    padding: 5px;
-    width: 70px;
-}
-
-.game__loader {
-    @apply animate-spin h-8 w-8 place-self-center border-t-blue-600 rounded-full border-4;
-}
-
-.game__flex-reset-container {
-    align-items: flex-end;
-    display: flex;
-    flex-grow: 1;
-}
-
-.game__reset-game {
-    margin-top: 1em;
-}
-
-table { 
-    width: 100%; 
-    border-collapse: collapse; 
-}
-/* Zebra striping */
-tr:nth-of-type(odd) { 
-    @apply bg-gray-200; 
-}
-th { 
-    @apply bg-gray-500 text-white font-bold; 
-}
-td, th { 
-  padding: 6px; 
-  border: 1px solid #ccc; 
-  text-align: center; 
+    @apply h-16 w-16 mx-1 my-0 p-1 inline-block;
 }

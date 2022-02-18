@@ -34,7 +34,7 @@ export const startGame = function(isFirstPlayer) {
 export const resetGame = function() {
     // If new board is requested while enemy move is in progress
     clearTimeout(enemyMoveTimeoutHandle);
-    gameContainer().querySelector('.game__loader').style.visibility = 'hidden';
+    gameContainer().querySelector('.js-enemy-loader').style.visibility = 'hidden';
 
     drawBoard(generateNewBoard());
     toggleGameStartButtons(true);
@@ -48,7 +48,7 @@ const checkGame = function() {
   if (!getStatus().isGameInProgress) {
     toggleVisibilityForElements('game__step-for', false);
     toggleGameStartButtons(false);
-    gameContainer().querySelector('.game__loader').style.visibility = 'hidden';
+    gameContainer().querySelector('.js-enemy-loader').style.visibility = 'hidden';
   }
 };
 

@@ -15,12 +15,12 @@ export const disablePlayerMoves = function() {
         el.style.opacity = '0.5';
         el.removeEventListener('click', makeMove);
     });
-    gameContainer().querySelector('.game__loader').style.visibility = 'visible';
+    gameContainer().querySelector('.js-enemy-loader').style.visibility = 'visible';
 };
 
 export const enablePlayerMoves = function() {
     [...gameContainer().querySelectorAll('[class*="game__step-for"]')].map(el => el.removeAttribute('disabled'));
-    gameContainer().querySelector('.game__loader').style.visibility = 'hidden';
+    gameContainer().querySelector('.js-enemy-loader').style.visibility = 'hidden';
 };
 
 const emptyPile = function(el) {
@@ -48,7 +48,7 @@ export const drawBoard = function(board) {
 
 export const toggleGameStartButtons = function(showGameStart) {
     toggleVisibilityForElements('game__role-selector', showGameStart);
-    toggleVisibilityForElements('game__reset-game', !showGameStart);
+    toggleVisibilityForElements('js-reset-game', !showGameStart);
 }
 
 export const toggleVisibilityForElements = (classPrefix, toShow) => {
@@ -77,7 +77,7 @@ const stepDescription = function() {
 
 export const updateGamePrompts = function() {
     gameContainer().querySelector('.game__step-cta-text').innerHTML = ctaText();
-    gameContainer().querySelector('.game__step-description').innerHTML = stepDescription();
+    gameContainer().querySelector('.js-step-description').innerHTML = stepDescription();
 };
 
 const createGamePiece = function(num, source) {

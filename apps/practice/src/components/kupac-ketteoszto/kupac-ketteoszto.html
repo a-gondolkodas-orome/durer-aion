@@ -9,9 +9,9 @@
     szeretnél-e, vagy második játékos lenni.
     Sok sikert! :)
   </p>
-  <div class="game__container" id="kupac-ketteoszto">
+  <div class="flex flex-wrap" id="kupac-ketteoszto">
     <div class="game__board">
-      <div v-for="rowIndex in [0, 1]" class="game__pile" :class="{ 'game__pile-bottom-border': rowIndex === 1 }">
+      <div v-for="rowIndex in [0, 1]" class="game__pile" :class="{ 'border-b-black border-b-2': rowIndex === 1 }">
         <span
             v-for="pieceIndex in [...Array(getBoard[rowIndex]).keys()].map(i => i + 1)"
             class="game__piece bg-blue-600 rounded-full"
@@ -22,10 +22,10 @@
         ></span>
       </div>
     </div>
-    <div class="game__info-area">
-      <p class="game__step-cta-text">{{ ctaText }}</p>
+    <div class="p-1 flex flex-col flex-grow flex-shrink-0 basis-80">
+      <p class="game__step-cta-text text-center font-bold text-lg">{{ ctaText }}</p>
       <enemy-loader />
-      <p class="game__step-description">{{ stepDescription }}</p>
+      <p class="italic text-justify">{{ stepDescription }}</p>
       <button
           v-if="isGameReadyToStart"
           class="game__cta-button game__role-selector"
@@ -40,8 +40,8 @@
       >
         Második leszek
       </button>
-      <div class="game__flex-reset-container">
-        <button class="game__cta-button game__reset-game" @click="resetGame()">
+      <div class="flex flex-grow items-end">
+        <button class="game__cta-button js-reset-game mt-4" @click="resetGame()">
           Új leosztás
         </button>
       </div>
