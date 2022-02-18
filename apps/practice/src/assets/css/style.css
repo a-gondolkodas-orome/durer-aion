@@ -78,18 +78,7 @@
 }
 
 .game__loader {
-    animation: spin 1s linear infinite;
-    border: 0.33em solid #f3f3f3;
-    border-radius: 50%;
-    border-top: 0.33em solid var(--blue);
-    height: 2em;
-    margin: 0 auto;
-    width: 2em;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    @apply animate-spin h-8 w-8 place-self-center border-t-blue-600 rounded-full border-4;
 }
 
 .game__flex-reset-container {
