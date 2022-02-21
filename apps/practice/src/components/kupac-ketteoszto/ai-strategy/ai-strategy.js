@@ -1,6 +1,6 @@
 'use strict';
 
-import { generateRandomIntBetween } from "../../../lib/generate-random";
+import { generateRandomIntBetween, generateRandomEvenBetween } from "../../../lib/generate-random";
 
 export const makeAiMove = function(board) {
   const randomPileIndex = generateRandomIntBetween(0, 1);
@@ -18,13 +18,10 @@ const findOptimalDivision = function(pieceCountInPile, pileIndexToSplit) {
   }
   
   let move = [];
-  const startPile = 1 + generateEven(pieceCountInPile - 2);
-  move[pileIndexToSplit] = startPile;
-  move[other(pileIndexToSplit)] = pieceCountInPile - startPile;
+  move[pileIndexToSplit] = generateRandomEvenBetween(1, pieceCountInPile - 1);
+  move[other(pileIndexToSplit)] = pieceCountInPile - move[pileIndexToSplit];
 
   return move;
 };
 
 const other = current => 1 - current;
-
-const generateEven = num => 2 * Math.ceil(Math.random() * Math.floor(num / 2));
