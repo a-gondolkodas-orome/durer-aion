@@ -8,7 +8,4 @@ export const getBoardAfterPlayerStep = (board, { rowIndex, pieceIndex }) => {
 
 export const isGameEnd = board => board[0] === 1 && board[1] === 1;
 
-export const generateNewBoard = function() {
-  return [generateRandomIntBetween(3, 10), generateRandomIntBetween(3, 10)];
-};
-
+export const generateNewBoard = () => ([generateRandomIntBetween(3, 10), generateRandomIntBetween(3, 10)]);

@@ -9,7 +9,7 @@ const boardContainer = () => gameContainer().querySelector('.game__board');
 
 let move;
 
-export const disablePlayerMoves = function () {
+export const disablePlayerMoves = () => {
   [...gameContainer().querySelectorAll('[class*="game__step-for"]')].map(el => el.setAttribute('disabled', true));
   [...gameContainer().querySelector('.game__board').querySelectorAll('span')].map(el => {
     el.style.opacity = '0.5';
@@ -18,12 +18,12 @@ export const disablePlayerMoves = function () {
   gameContainer().querySelector('.js-enemy-loader').style.visibility = 'visible';
 };
 
-export const enablePlayerMoves = function () {
+export const enablePlayerMoves = () => {
   [...gameContainer().querySelectorAll('[class*="game__step-for"]')].map(el => el.removeAttribute('disabled'));
   gameContainer().querySelector('.js-enemy-loader').style.visibility = 'hidden';
 };
 
-const emptyPile = function (el) {
+const emptyPile = el => {
   if (el && el.firstChild) {
     while (el.firstChild) {
       el.removeChild(el.firstChild);
@@ -31,7 +31,7 @@ const emptyPile = function (el) {
   }
 };
 
-export const drawBoard = function (board) {
+export const drawBoard = board => {
   move = board;
   //loop through the board
   for (const i in board) {
@@ -46,7 +46,7 @@ export const drawBoard = function (board) {
   appendEventsToBoard();
 };
 
-export const toggleGameStartButtons = function (showGameStart) {
+export const toggleGameStartButtons = showGameStart => {
   toggleVisibilityForElements('game__role-selector', showGameStart);
   toggleVisibilityForElements('js-reset-game', !showGameStart);
 }
@@ -57,7 +57,7 @@ export const toggleVisibilityForElements = (classPrefix, toShow) => {
   ].map(el => el.style.display = toShow ? 'block' : 'none');
 }
 
-const ctaText = function () {
+const ctaText = () => {
   if (getStatus().isGameInProgress) {
     return getStatus().shouldPlayerMoveNext ? 'Te jössz.' : 'Mi jövünk.';
   } else if (getStatus().isGameFinished) {
@@ -67,7 +67,7 @@ const ctaText = function () {
   }
 };
 
-const stepDescription = function () {
+const stepDescription = () => {
   if (!getStatus().isGameInProgress) return '';
   if (!getStatus().shouldPlayerMoveNext) return '';
   return getStatus().killState
@@ -75,12 +75,12 @@ const stepDescription = function () {
     : 'Kattints  a korongokra és válaszd két részre a seregedet.';
 };
 
-export const updateGamePrompts = function () {
+export const updateGamePrompts = () => {
   gameContainer().querySelector('.game__step-cta-text').innerHTML = ctaText();
   gameContainer().querySelector('.js-step-description').innerHTML = stepDescription();
 };
 
-const createGamePiece = function (num, source) {
+const createGamePiece = (num, source) => {
   const piece = document.createElement('span');
   piece.classList.add(num);
   piece.innerHTML = `<svg class="game__piece ${source ? 'fill-red-600' : 'fill-blue-600'}">
@@ -90,7 +90,7 @@ const createGamePiece = function (num, source) {
 }
 
 
-const drawPile = function (num, array) {
+const drawPile = (num, array) => {
   //create a document fragment once
   const frag = document.createDocumentFragment();
   //create all num images
@@ -108,19 +108,19 @@ const drawPile = function (num, array) {
   return frag;
 }
 
-const step = function () {
+const step = () => {
   if (getStatus().isGameInProgress) {
     if (!getStatus().killState) reactToPlayerMove(move);
   }
 }
 
-const killBlue = function () {
+const killBlue = () => {
   if (getStatus().isGameInProgress) {
     if (getStatus().killState) reactToPlayerMove(true);
   }
 }
 
-const killRed = function () {
+const killRed = () => {
   if (getStatus().isGameInProgress) {
     if (getStatus().killState) reactToPlayerMove(false);
   }
@@ -138,7 +138,7 @@ const makeMove = function () {
 
 }
 
-const appendEventsToBoard = function () {
+const appendEventsToBoard = () => {
   [...boardContainer().querySelectorAll('span')].forEach(img => img.addEventListener('click', makeMove));
   gameContainer().querySelector('#game-red').addEventListener('click', killRed);
   gameContainer().querySelector('#game-blue').addEventListener('click', killBlue);

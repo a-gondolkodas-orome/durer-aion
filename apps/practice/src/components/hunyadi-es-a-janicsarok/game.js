@@ -12,37 +12,37 @@ import {
 const gameContainer = () => document.querySelector('#hunyadi-es-a-janicsarok');
 let enemyMoveTimeoutHandle;
 
-export const reactToPlayerMove = function(lastMove) {
-    drawBoard(move(lastMove));
-    checkGame();
-    if (getStatus().isGameInProgress) aiMove();
+export const reactToPlayerMove = lastMove => {
+  drawBoard(move(lastMove));
+  checkGame();
+  if (getStatus().isGameInProgress) aiMove();
 };
 
-export const startGame = function(isFirstPlayer) {
-    startGameAsPlayer(isFirstPlayer);
+export const startGame = isFirstPlayer => {
+  startGameAsPlayer(isFirstPlayer);
 
-    toggleGameStartButtons(false);
+  toggleGameStartButtons(false);
 
-    toggleVisibilityForElements('game__step-for-first', isFirstPlayer);
-    toggleVisibilityForElements('game__step-for-second', !isFirstPlayer);
+  toggleVisibilityForElements('game__step-for-first', isFirstPlayer);
+  toggleVisibilityForElements('game__step-for-second', !isFirstPlayer);
 
-    updateGamePrompts();
+  updateGamePrompts();
 
-    if (!isFirstPlayer) aiMove();
+  if (!isFirstPlayer) aiMove();
 };
 
-export const resetGame = function() {
-    // If new board is requested while enemy move is in progress
-    clearTimeout(enemyMoveTimeoutHandle);
-    gameContainer().querySelector('.js-enemy-loader').style.visibility = 'hidden';
+export const resetGame = () => {
+  // If new board is requested while enemy move is in progress
+  clearTimeout(enemyMoveTimeoutHandle);
+  gameContainer().querySelector('.js-enemy-loader').style.visibility = 'hidden';
 
-    drawBoard(generateNewBoard());
-    toggleGameStartButtons(true);
-    toggleVisibilityForElements('game__step-for-', false);
-    updateGamePrompts();
+  drawBoard(generateNewBoard());
+  toggleGameStartButtons(true);
+  toggleVisibilityForElements('game__step-for-', false);
+  updateGamePrompts();
 };
 
-const checkGame = function() {
+const checkGame = () => {
   updateGamePrompts();
 
   if (!getStatus().isGameInProgress) {
@@ -52,7 +52,7 @@ const checkGame = function() {
   }
 };
 
-const aiMove = function() {
+const aiMove = () => {
   disablePlayerMoves();
 
   const time = Math.floor(Math.random() * 750 + 750);

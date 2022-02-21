@@ -7,7 +7,7 @@ let gameStatus;
 let killState;
 let isPlayerWinner;
 
-export const generateNewBoard = function () {
+export const generateNewBoard = () => {
   gameStatus = 'readyToStart';
   killState = false;
   let sum = 2.0 + Math.ceil(Math.random() * 8) / 8 - 0.5;
@@ -32,7 +32,7 @@ export const generateNewBoard = function () {
 };
 
 
-export const move = function (newBoardState) {
+export const move = newBoardState => {
   if (!killState) {
     killState = true;
 
@@ -80,11 +80,11 @@ export const move = function (newBoardState) {
   return board;
 };
 
-export const getBoard = function () {
+export const getBoard = () => {
   return JSON.parse(JSON.stringify(board));
 };
 
-export const getStatus = function () {
+export const getStatus = () => {
   return {
     isGameInProgress: gameStatus === 'inProgress',
     isGameFinished: gameStatus === 'finished',
@@ -95,12 +95,12 @@ export const getStatus = function () {
   };
 }
 
-export const startGameAsPlayer = function (isFirstPlayer) {
+export const startGameAsPlayer = isFirstPlayer => {
   shouldPlayerMoveNext = isFirstPlayer;
   gameStatus = 'inProgress';
 }
 
-const isMoveLegal = function (newBoardState) {
+const isMoveLegal = newBoardState => {
   for (const i in board) {
     if (newBoardState[i].length !== board[i].length) {
       return false;

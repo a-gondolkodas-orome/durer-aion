@@ -8,7 +8,7 @@ export const makeMove = (board, killState) => {
   }
 };
 
-const optimalColoring = function(board) {
+const optimalColoring = board => {
   let trueSum = 0.0;
   let falseSum = 0.0;
   for (let i = 0; i < 5; i++) {
@@ -32,7 +32,7 @@ const optimalColoring = function(board) {
   return board;
 }
 
-const optimalKill = function(board) {
+const optimalKill = board => {
   if (board[0].length > 0) {
     return board[0][0];
   }

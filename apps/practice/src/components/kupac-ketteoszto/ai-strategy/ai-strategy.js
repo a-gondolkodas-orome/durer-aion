@@ -2,26 +2,21 @@
 
 import { generateRandomIntBetween, generateRandomEvenBetween } from "../../../lib/generate-random";
 
-export const makeAiMove = function(board) {
+export const makeAiMove = board => {
   const randomPileIndex = generateRandomIntBetween(0, 1);
 
   const pileIndexToSplit = (board[randomPileIndex] % 2 === 0 || board[other(randomPileIndex)] === 1)
     ? randomPileIndex
     : other(randomPileIndex);
 
-  return findOptimalDivision(board[pileIndexToSplit], pileIndexToSplit);
+  return findOptimalDivision(board[pileIndexToSplit]);
 };
 
-const findOptimalDivision = function(pieceCountInPile, pileIndexToSplit) {
-  if (pieceCountInPile === 2) {
-    return [1, 1];
-  }
+const findOptimalDivision = (pieceCountInPile) => {
+  if (pieceCountInPile === 2) return [1, 1];
   
-  let move = [];
-  move[pileIndexToSplit] = generateRandomEvenBetween(1, pieceCountInPile - 1);
-  move[other(pileIndexToSplit)] = pieceCountInPile - move[pileIndexToSplit];
-
-  return move;
+  const countInFirstPartAfterSplit = generateRandomEvenBetween(1, pieceCountInPile - 1);
+  return [countInFirstPartAfterSplit, pieceCountInPile - countInFirstPartAfterSplit];
 };
 
 const other = current => 1 - current;
