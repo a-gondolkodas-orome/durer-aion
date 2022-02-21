@@ -1,5 +1,5 @@
-import { makeMove } from './strategy';
-import { move, generateNewBoard, getBoard, getStatus, startGameAsPlayer } from './communication';
+import { makeAiMove } from './ai-strategy/ai-strategy';
+import { move, generateNewBoard, getBoard, getStatus, startGameAsPlayer } from './rules/rules';
 import {
   drawBoard,
   updateGamePrompts,
@@ -57,7 +57,7 @@ const aiMove = () => {
 
   const time = Math.floor(Math.random() * 750 + 750);
   enemyMoveTimeoutHandle = setTimeout(() => {
-    drawBoard(move(makeMove(getBoard(), getStatus().killState)));
+    drawBoard(move(makeAiMove(getBoard(), getStatus().killState)));
     checkGame();
     enablePlayerMoves();
   }, time);

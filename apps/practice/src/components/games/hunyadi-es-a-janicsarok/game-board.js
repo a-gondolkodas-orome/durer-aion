@@ -1,4 +1,4 @@
-import { getStatus } from './communication';
+import { getStatus } from './rules/rules';
 import { reactToPlayerMove } from './game';
 
 //The game board handles all the dom interaction

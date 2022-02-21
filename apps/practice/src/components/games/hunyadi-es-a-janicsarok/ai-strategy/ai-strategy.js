@@ -1,6 +1,6 @@
 'use strict';
 
-export const makeMove = (board, killState) => {
+export const makeAiMove = (board, killState) => {
   if (killState) {
     return optimalKill(board);
   } else {
