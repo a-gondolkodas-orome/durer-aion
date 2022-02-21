@@ -1,6 +1,6 @@
 'use strict';
 
-import { generateRandomIntBetween, generateRandomEvenBetween } from "../../../lib/generate-random";
+import { generateRandomIntBetween, generateRandomEvenBetween } from '@/lib/generate-random';
 
 export const makeAiMove = board => {
   const randomPileIndex = generateRandomIntBetween(0, 1);

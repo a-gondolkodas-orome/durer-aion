@@ -1,6 +1,6 @@
-import { mapGetters, mapMutations, mapActions } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 import { getBoardAfterPlayerStep } from './rules/rules';
-import EnemyLoader from '../common/enemy-loader/enemy-loader';
+import EnemyLoader from '../../common/enemy-loader/enemy-loader';
 
 export default {
   name: 'kupac-ketteoszto',
@@ -32,8 +32,7 @@ export default {
     }
   },
   methods: {
-    ...mapMutations(['resetGame']),
-    ...mapActions(['playerMove', 'startGameAsPlayer']),
+    ...mapActions(['playerMove', 'startGameAsPlayer', 'resetGame']),
     clickPiece(rowIndex, pieceIndex) {
       if (!this.shouldPlayerMoveNext) return;
       if (pieceIndex === 1) return;

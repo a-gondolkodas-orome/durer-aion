@@ -2,7 +2,7 @@
   <template v-if="openedGame">
     <button 
       class="rounded-lg px-4 bg-blue-400 hover:bg-blue-600"
-      @click="openedGame=null"
+      @click="setOpenedGame(null)"
     >&lt; Vissza a listához</button>
     <h1 class="text-blue-600 text-2xl font-bold pb-4">{{ selectedGame.name }}</h1>
     <hr />
@@ -28,7 +28,7 @@
         >{{ gameProp }}</td>
         <td class="border-2 border-gray-300 text-center p-1">
           <button 
-            @click="openedGame=game.component"
+            @click="setOpenedGame(game.component)"
             class="rounded-lg px-4 bg-blue-400 hover:bg-blue-600"
           >Kipróbálom!</button>
         </td>

@@ -1,6 +1,6 @@
 'use strict';
 
-import { generateRandomIntBetween } from '../../../lib/generate-random';
+import { generateRandomIntBetween } from '@/lib/generate-random';
 
 export const getBoardAfterPlayerStep = (board, { rowIndex, pieceIndex }) => {
   return [pieceIndex - 1, board[rowIndex] - pieceIndex + 1];
