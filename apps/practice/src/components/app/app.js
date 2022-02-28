@@ -9,11 +9,11 @@ export default {
     gamesToShow: gameList
   }),
   computed: {
-    ...mapState(['openedGame']),
-    ...mapGetters(['selectedGame'])
+    ...mapState(['gameId']),
+    ...mapGetters(['game'])
   },
   methods: {
-    ...mapMutations(['setOpenedGame'])
+    ...mapMutations(['setGameId'])
   },
   created() {
     document.title = 'Dürer játékok'

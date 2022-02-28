@@ -1,21 +1,21 @@
 <div class="p-4">
-  <template v-if="openedGame">
-    <button 
+  <template v-if="gameId">
+    <button
       class="rounded-lg px-4 bg-blue-400 hover:bg-blue-600"
-      @click="setOpenedGame(null)"
+      @click="setGameId(null)"
     >&lt; Vissza a listához</button>
-    <h1 class="text-blue-600 text-2xl font-bold pb-4">{{ selectedGame.name }}</h1>
+    <h1 class="text-blue-600 text-2xl font-bold pb-4">{{ game.name }}</h1>
     <hr />
-    <component v-if="openedGame" :is="openedGame"></component>
+    <component v-if="gameId" :is="gameId"></component>
   </template>
 
-  <div v-if="!openedGame">
+  <div v-if="!gameId">
     <h1 class="text-blue-600 text-2xl font-bold pb-4">Dürer játékok</h1>
 
     <table class="w-full border-collapse">
       <thead>
         <tr>
-          <th 
+          <th
             v-for="header in ['Év', 'Forduló', 'Kategória', 'Játék', '']"
             class="bg-gray-500 border-2 border-gray-300 text-center text-white font-bold p-1"
           >{{ header }}</th>
@@ -27,8 +27,8 @@
           class="border-2 border-gray-300 text-center p-1"
         >{{ gameProp }}</td>
         <td class="border-2 border-gray-300 text-center p-1">
-          <button 
-            @click="setOpenedGame(game.component)"
+          <button
+            @click="setGameId(game.component)"
             class="rounded-lg px-4 bg-blue-400 hover:bg-blue-600"
           >Kipróbálom!</button>
         </td>

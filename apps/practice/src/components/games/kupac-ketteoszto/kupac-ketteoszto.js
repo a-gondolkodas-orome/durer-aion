@@ -1,5 +1,5 @@
 import { mapGetters, mapActions } from 'vuex';
-import { getBoardAfterPlayerStep } from './rules/rules';
+import { getBoardAfterPlayerStep } from './strategy/strategy';
 import EnemyLoader from '../../common/enemy-loader/enemy-loader';
 
 export default {
@@ -36,8 +36,7 @@ export default {
     clickPiece(rowIndex, pieceIndex) {
       if (!this.shouldPlayerMoveNext) return;
       if (pieceIndex === 1) return;
-      const boardAfterPlayerStep = getBoardAfterPlayerStep(this.getBoard, { rowIndex, pieceIndex });
-      this.playerMove(boardAfterPlayerStep);
+      this.playerMove(getBoardAfterPlayerStep(this.getBoard, { rowIndex, pieceIndex }));
     },
     handleMouseOverPiece(rowIndex, pieceIndex) {
       if (!this.shouldPlayerMoveNext) return;

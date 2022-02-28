@@ -3,8 +3,9 @@ import { gameList } from '../components/games/games';
 
 export const store = createStore({
   state: {
-    openedGame: null,
+    gameId: null,
     gameStatus: 'readyToStart',
+    isPlayerTheFirstToMove: null,
     shouldPlayerMoveNext: false,
     isPlayerWinner: false,
     board: null,
@@ -12,7 +13,8 @@ export const store = createStore({
     isEnemyMoveInProgress: false
   },
   getters: {
-    selectedGame: state => gameList.find(game => game.component === state.openedGame),
+    game: state => gameList.find(game => game.component === state.gameId),
+    strategy: (_, getters) => getters.game.strategy,
     isGameInProgress: state => state.gameStatus === 'inProgress',
     isGameFinished: state => state.gameStatus === 'finished',
     isGameReadyToStart: state => state.gameStatus === 'readyToStart',
@@ -30,15 +32,19 @@ export const store = createStore({
     }
   },
   mutations: {
-    setOpenedGame(state, openedGame) {
-      state.openedGame = openedGame;
+    setGameId(state, gameId) {
+      state.gameId = gameId;
     },
     setEnemyMoveInProgress(state, isInProgress) {
       state.isEnemyMoveInProgress = isInProgress;
     },
     startGameAsPlayer(state, isFirstPlayer) {
+      state.isPlayerTheFirstToMove = isFirstPlayer;
       state.gameStatus = 'inProgress';
       state.shouldPlayerMoveNext = isFirstPlayer;
+    },
+    setBoard(state, board) {
+      state.board = board;
     }
   },
   actions: {
@@ -48,34 +54,37 @@ export const store = createStore({
         dispatch('aiMove');
       }
     },
-    applyMove({ state, getters }, board) {
+    applyMove({ state }, { board, isGameEnd, hasFirstPlayerWon }) {
       state.board = board;
       state.shouldPlayerMoveNext = !state.shouldPlayerMoveNext;
-      if (getters.selectedGame.rules.isGameEnd(board)) {
+      if (isGameEnd) {
         clearTimeout(state.enemyMoveTimeoutHandle);
         state.gameStatus = 'finished';
-        state.isPlayerWinner = !state.shouldPlayerMoveNext;
+        state.isPlayerWinner = hasFirstPlayerWon === undefined
+          ? !state.shouldPlayerMoveNext
+          : state.isPlayerTheFirstToMove === hasFirstPlayerWon;
       }
     },
     resetGame({ state, getters }) {
       clearTimeout(state.enemyMoveTimeoutHandle);
-      state.board = getters.selectedGame.rules.generateNewBoard();
+      state.board = getters.strategy.generateNewBoard();
       state.isEnemyMoveInProgress = false;
       state.gameStatus = 'readyToStart';
       state.shouldPlayerMoveNext = false;
       state.isPlayerWinner = false;
+      state.isPlayerTheFirstToMove = null;
     },
     aiMove: async ({ state, getters, dispatch, commit }) => {
       commit('setEnemyMoveInProgress', true);
       const time = Math.floor(Math.random() * 750 + 750);
       state.enemyMoveTimeoutHandle = setTimeout(() => {
-        dispatch('applyMove', getters.selectedGame.strategy.makeAiMove(state.board));
+        dispatch('applyMove', getters.strategy.makeAiMove(state.board, state.isPlayerTheFirstToMove));
         commit('setEnemyMoveInProgress', false);
       }, time);
     },
-    playerMove: ({ getters, dispatch }, board) => {
-      dispatch('applyMove', board);
-      if (!getters.isGameFinished) {
+    playerMove: ({ dispatch }, { board, isGameEnd, hasFirstPlayerWon }) => {
+      dispatch('applyMove', { board, isGameEnd, hasFirstPlayerWon });
+      if (!isGameEnd) {
         dispatch('aiMove');
       }
     }
