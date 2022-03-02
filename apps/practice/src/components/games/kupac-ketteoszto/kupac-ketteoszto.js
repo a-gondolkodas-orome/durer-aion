@@ -1,5 +1,4 @@
-import { mapGetters, mapActions } from 'vuex';
-import { getBoardAfterPlayerStep } from './strategy/strategy';
+import { mapGetters, mapActions, mapState } from 'vuex';
 import EnemyLoader from '../../common/enemy-loader/enemy-loader';
 
 export default {
@@ -10,11 +9,11 @@ export default {
     hoveredPiece: null
   }),
   computed: {
+    ...mapState(['board', 'shouldPlayerMoveNext']),
     ...mapGetters([
+      'game',
       'ctaText',
       'isEnemyMoveInProgress',
-      'getBoard',
-      'shouldPlayerMoveNext',
       'isGameInProgress',
       'isGameReadyToStart'
     ]),
@@ -32,11 +31,11 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['playerMove', 'startGameAsPlayer', 'resetGame']),
+    ...mapActions(['playerMove', 'startGameAsPlayer', 'initializeGame']),
     clickPiece(rowIndex, pieceIndex) {
       if (!this.shouldPlayerMoveNext) return;
       if (pieceIndex === 1) return;
-      this.playerMove(getBoardAfterPlayerStep(this.getBoard, { rowIndex, pieceIndex }));
+      this.playerMove(this.game.strategy.getBoardAfterPlayerStep(this.board, { rowIndex, pieceIndex }));
     },
     handleMouseOverPiece(rowIndex, pieceIndex) {
       if (!this.shouldPlayerMoveNext) return;
@@ -48,6 +47,6 @@ export default {
     }
   },
   created() {
-    this.resetGame();
+    this.initializeGame();
   }
 }

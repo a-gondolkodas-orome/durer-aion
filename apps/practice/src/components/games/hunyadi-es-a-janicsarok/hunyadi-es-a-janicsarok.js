@@ -1,18 +1,16 @@
 import { mapGetters, mapActions, mapMutations, mapState } from 'vuex';
 import EnemyLoader from '../../common/enemy-loader/enemy-loader';
-import { getBoardAfterKillingGroup } from './strategy/strategy';
 
 export default {
   name: 'hunyadi-es-a-janicsarok',
   template: require('./hunyadi-es-a-janicsarok.html'),
   components: { EnemyLoader },
   computed: {
-    ...mapState({ isPlayerSultan: 'isPlayerTheFirstToMove' }),
+    ...mapState({ isPlayerSultan: 'isPlayerTheFirstToMove', board: 'board', shouldPlayerMoveNext: 'shouldPlayerMoveNext' }),
     ...mapGetters([
+      'game',
       'ctaText',
       'isEnemyMoveInProgress',
-      'getBoard',
-      'shouldPlayerMoveNext',
       'isGameInProgress',
       'isGameReadyToStart'
     ]),
@@ -23,21 +21,21 @@ export default {
   },
   methods: {
     ...mapMutations(['setBoard']),
-    ...mapActions(['playerMove', 'startGameAsPlayer', 'resetGame']),
+    ...mapActions(['playerMove', 'startGameAsPlayer', 'initializeGame']),
     toggleGroup(rowIndex, pieceIndex) {
       if (!this.shouldPlayerMoveNext || !this.isPlayerSultan) return;
-      const currentBoard = this.getBoard;
+      const currentBoard = this.board;
       currentBoard[rowIndex][pieceIndex] = !currentBoard[rowIndex][pieceIndex];
       this.setBoard(currentBoard);
     },
     finalizeSoldierGrouping() {
-      this.playerMove({ board: this.getBoard, isGameEnd: false });
+      this.playerMove({ board: this.board, isGameEnd: false });
     },
     killGroup(groupValue) {
-      this.playerMove(getBoardAfterKillingGroup(this.getBoard, groupValue));
+      this.playerMove(this.game.strategy.getBoardAfterKillingGroup(this.board, groupValue));
     }
   },
   created() {
-    this.resetGame();
+    this.initializeGame();
   }
 }

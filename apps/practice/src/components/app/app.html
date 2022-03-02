@@ -2,7 +2,7 @@
   <template v-if="gameId">
     <button
       class="rounded-lg px-4 bg-blue-400 hover:bg-blue-600"
-      @click="setGameId(null)"
+      @click="clearGameData()"
     >&lt; Vissza a listához</button>
     <h1 class="text-blue-600 text-2xl font-bold pb-4">{{ game.name }}</h1>
     <hr />

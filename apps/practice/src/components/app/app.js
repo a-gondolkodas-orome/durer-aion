@@ -13,7 +13,11 @@ export default {
     ...mapGetters(['game'])
   },
   methods: {
-    ...mapMutations(['setGameId'])
+    ...mapMutations(['setGameId', 'setGameStatus']),
+    clearGameData() {
+      this.setGameId(null);
+      this.setGameStatus(null);
+    }
   },
   created() {
     document.title = 'Dürer játékok'
