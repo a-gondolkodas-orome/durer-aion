@@ -1,9 +1,10 @@
 'use strict';
 
-import { generateRandomIntBetween, generateRandomEvenBetween } from '@/lib/generate-random';
+import { generateRandomEvenBetween } from '@/lib/generate-random';
+import { random } from 'lodash-es';
 
 export const makeAiMove = board => {
-  const randomPileIndex = generateRandomIntBetween(0, 1);
+  const randomPileIndex = random(0, 1);
 
   const pileIndexToSplit = (board[randomPileIndex] % 2 === 0 || board[other(randomPileIndex)] === 1)
     ? randomPileIndex
@@ -29,4 +30,4 @@ export const getBoardAfterPlayerStep = (board, { rowIndex, pieceIndex }) => {
 
 const isGameEnd = board => board[0] === 1 && board[1] === 1;
 
-export const generateNewBoard = () => ([generateRandomIntBetween(3, 10), generateRandomIntBetween(3, 10)]);
+export const generateNewBoard = () => ([random(3, 10), random(3, 10)]);
