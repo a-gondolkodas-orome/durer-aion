@@ -13,12 +13,12 @@
     <div class="game__board">
       <div v-for="rowIndex in [0, 1]" class="game__pile" :class="{ 'border-b-black border-b-2': rowIndex === 1 }">
         <span
-            v-for="pieceIndex in [...Array(board[rowIndex]).keys()].map(i => i + 1)"
-            class="game__piece bg-blue-600 rounded-full"
-            :style="{ 'opacity': pieceOpacity({ rowIndex, pieceIndex }) }"
-            @click="clickPiece({ rowIndex, pieceIndex })"
-            @mouseover="hoveredPiece = { rowIndex, pieceIndex }"
-            @mouseout="hoveredPiece = null"
+          v-for="pieceIndex in [...Array(board[rowIndex]).keys()].map(i => i + 1)"
+          class="game__piece bg-blue-600 rounded-full"
+          :style="{ 'opacity': pieceOpacity({ rowIndex, pieceIndex }) }"
+          @click="clickPiece({ rowIndex, pieceIndex })"
+          @mouseover="hoveredPiece = { rowIndex, pieceIndex }"
+          @mouseout="hoveredPiece = null"
         ></span>
       </div>
     </div>
@@ -27,16 +27,16 @@
       <enemy-loader />
       <p class="italic text-justify">{{ stepDescription }}</p>
       <button
-          v-if="isGameReadyToStart"
-          class="game__cta-button"
-          @click="startGameAsPlayer(true)"
+        v-if="isGameReadyToStart"
+        class="game__cta-button"
+        @click="startGameAsPlayer(true)"
       >
         Kezdő leszek
       </button>
       <button
-          v-if="isGameReadyToStart"
-          class="game__cta-button"
-          @click="startGameAsPlayer(false)"
+        v-if="isGameReadyToStart"
+        class="game__cta-button"
+        @click="startGameAsPlayer(false)"
       >
         Második leszek
       </button>
