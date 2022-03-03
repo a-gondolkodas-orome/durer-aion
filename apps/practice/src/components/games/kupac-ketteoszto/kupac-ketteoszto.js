@@ -21,7 +21,9 @@ export default {
       return ({ rowIndex, pieceIndex }) => {
         if (!this.shouldPlayerMoveNext) return 0.5;
         if (!this.hoveredPiece) return 1;
-        return rowIndex === this.hoveredPiece.rowIndex && pieceIndex >= this.hoveredPiece.pieceIndex ? 0.5 : 1;
+        if (this.hoveredPiece.pieceIndex === 1) return 1;
+        if (rowIndex !== this.hoveredPiece.rowIndex) return 1;
+        return pieceIndex >= this.hoveredPiece.pieceIndex ? 0.5 : 1;
       };
     },
     stepDescription() {
@@ -32,18 +34,10 @@ export default {
   },
   methods: {
     ...mapActions(['playerMove', 'startGameAsPlayer', 'initializeGame']),
-    clickPiece(rowIndex, pieceIndex) {
+    clickPiece({ rowIndex, pieceIndex }) {
       if (!this.shouldPlayerMoveNext) return;
       if (pieceIndex === 1) return;
       this.playerMove(this.game.strategy.getBoardAfterPlayerStep(this.board, { rowIndex, pieceIndex }));
-    },
-    handleMouseOverPiece(rowIndex, pieceIndex) {
-      if (!this.shouldPlayerMoveNext) return;
-      if (pieceIndex === 1) return;
-      this.hoveredPiece = { rowIndex, pieceIndex }
-    },
-    handleMouseOutPiece() {
-      this.hoveredPiece = null;
     }
   },
   created() {

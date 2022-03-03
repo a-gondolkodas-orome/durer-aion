@@ -42,7 +42,7 @@
       <img src="../../../assets/hunyadi-es-a-janicsarok-var.jpg" style="display: block; margin: auto;">
       <div v-for="rowIndex in [0, 1, 2, 3, 4]" class="game__pile" :class="{ 'border-b-black border-b-2': rowIndex === 4 }">
         <span
-          v-for="(isBlue, pieceIndex) in getBoard[rowIndex]"
+          v-for="(isBlue, pieceIndex) in board[rowIndex]"
           class="game__piece mx-1"
           @click="toggleGroup(rowIndex, pieceIndex)"
         >
