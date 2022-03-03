@@ -17,15 +17,6 @@ export default {
       'isGameInProgress',
       'isGameReadyToStart'
     ]),
-    pieceOpacity() {
-      return ({ rowIndex, pieceIndex }) => {
-        if (!this.shouldPlayerMoveNext) return 0.5;
-        if (!this.hoveredPiece) return 1;
-        if (this.hoveredPiece.pieceIndex === 1) return 1;
-        if (rowIndex !== this.hoveredPiece.rowIndex) return 1;
-        return pieceIndex >= this.hoveredPiece.pieceIndex ? 0.5 : 1;
-      };
-    },
     stepDescription() {
       return this.isGameInProgress && this.shouldPlayerMoveNext
         ? 'Kattints egy korongra, hogy azzal kettéosztd azt a kupacot. Amelyik korongra kattintasz, az és a tőle jobbra lévők kerülnek az új kupacba.'
@@ -35,9 +26,17 @@ export default {
   methods: {
     ...mapActions(['playerMove', 'startGameAsPlayer', 'initializeGame']),
     clickPiece({ rowIndex, pieceIndex }) {
-      if (!this.shouldPlayerMoveNext) return;
-      if (pieceIndex === 1) return;
       this.playerMove(this.game.strategy.getBoardAfterPlayerStep(this.board, { rowIndex, pieceIndex }));
+    },
+    pieceOpacity({ rowIndex, pieceIndex }) {
+      if (!this.shouldPlayerMoveNext) return 0.5;
+      if (!this.hoveredPiece) return 1;
+      if (this.hoveredPiece.pieceIndex === 1) return 1;
+      if (rowIndex !== this.hoveredPiece.rowIndex) return 1;
+      return pieceIndex >= this.hoveredPiece.pieceIndex ? 0.5 : 1;
+    },
+    isClickDisabled(pieceIndex) {
+      return !this.shouldPlayerMoveNext || pieceIndex === 1;
     }
   },
   created() {

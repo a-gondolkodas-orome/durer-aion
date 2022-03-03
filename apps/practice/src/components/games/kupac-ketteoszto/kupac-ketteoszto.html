@@ -15,7 +15,7 @@
         <span
           v-for="pieceIndex in [...Array(board[rowIndex]).keys()].map(i => i + 1)"
           class="game__piece bg-blue-600 rounded-full"
-          :style="{ 'opacity': pieceOpacity({ rowIndex, pieceIndex }) }"
+          :style="{ 'opacity': pieceOpacity({ rowIndex, pieceIndex }), 'pointer-events': isClickDisabled(pieceIndex) ? 'none' : 'auto' }"
           @click="clickPiece({ rowIndex, pieceIndex })"
           @mouseover="hoveredPiece = { rowIndex, pieceIndex }"
           @mouseout="hoveredPiece = null"
