@@ -6,7 +6,8 @@ export default {
   template: require('./hunyadi-es-a-janicsarok.html'),
   components: { EnemyLoader },
   computed: {
-    ...mapState({ isPlayerSultan: 'isPlayerTheFirstToMove', board: 'board', shouldPlayerMoveNext: 'shouldPlayerMoveNext' }),
+    ...mapState({ isPlayerSultan: 'isPlayerTheFirstToMove' }),
+    ...mapState(['board', 'shouldPlayerMoveNext']),
     ...mapGetters([
       'game',
       'ctaText',
