@@ -29,14 +29,14 @@
       <button
         v-if="isGameReadyToStart"
         class="game__cta-button"
-        @click="startGameAsPlayer(true)"
+        @click="startGameAsPlayer({ isFirst: true })"
       >
         Kezdő leszek
       </button>
       <button
         v-if="isGameReadyToStart"
         class="game__cta-button"
-        @click="startGameAsPlayer(false)"
+        @click="startGameAsPlayer({ isFirst: false })"
       >
         Második leszek
       </button>

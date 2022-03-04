@@ -34,9 +34,9 @@ export const store = createStore({
     setGameStatus(state, status) {
       state.gameStatus = status;
     },
-    startGameAsPlayer(state, isFirstPlayer) {
-      state.isPlayerTheFirstToMove = isFirstPlayer;
-      state.shouldPlayerMoveNext = isFirstPlayer;
+    startGameAsPlayer(state, { isFirst }) {
+      state.isPlayerTheFirstToMove = isFirst;
+      state.shouldPlayerMoveNext = isFirst;
       state.gameStatus = 'inProgress';
     },
     setBoard(state, board) {
@@ -44,11 +44,9 @@ export const store = createStore({
     }
   },
   actions: {
-    startGameAsPlayer: ({ commit, dispatch }, isFirstPlayer) => {
-      commit('startGameAsPlayer', isFirstPlayer);
-      if (!isFirstPlayer) {
-        dispatch('aiMove');
-      }
+    startGameAsPlayer: ({ commit, dispatch }, { isFirst = true }) => {
+      commit('startGameAsPlayer', { isFirst });
+      if (!isFirst) dispatch('aiMove');
     },
     applyMove({ state, commit }, { board, isGameEnd, hasFirstPlayerWon }) {
       commit('setBoard', board);
