@@ -15,10 +15,10 @@ const optimalColoring = (board) => {
   for (let i = 0; i < 5; i++) {
     for (let j = 0; j < board[i].length; j++) {
       if (trueSum < falseSum) {
-        board[i][j] = true;
+        board[i][j] = 'blue';
         trueSum += (1 / 2) ** i;
       } else {
-        board[i][j] = false;
+        board[i][j] = 'red';
         falseSum += (1 / 2) ** i;
       }
     }
@@ -26,7 +26,7 @@ const optimalColoring = (board) => {
   if (Math.random() > 0.5) {
     for (let i = 0; i < 5; i++) {
       for (let j = 0; j < board[i].length; j++) {
-        board[i][j] = !board[i][j];
+        board[i][j] = board[i][j] === 'blue' ? 'red' : 'blue';
       }
     }
   }
@@ -41,14 +41,14 @@ const optimalKill = (board) => {
   let falseSum = 0.0;
   for (let i = 0; i < 5; i++) {
     for (let j = 0; j < board[i].length; j++) {
-      if (board[i][j]) {
+      if (board[i][j] === 'blue') {
         trueSum += (1 / 2) ** i;
       } else {
         falseSum += (1 / 2) ** i;
       }
     }
   }
-  return trueSum > falseSum;
+  return trueSum > falseSum ? 'blue' : 'red';
 }
 
 export const generateNewBoard = () => {
@@ -57,7 +57,7 @@ export const generateNewBoard = () => {
   for (let i = 0; i < 5; i++) {
     const row = [];
     for (sum; sum >= ((1.0 / 2.0) ** i); sum -= ((1.0 / 2.0) ** i)) {
-      row.push(true);
+      row.push('blue');
     }
     board.push(row);
   }
@@ -65,7 +65,7 @@ export const generateNewBoard = () => {
     for (let j = board[i].length - 1; j >= 0; j--) {
       if (Math.random() > 0.5) {
         board[i].splice(j, 1);
-        board[i + 1].push(true); board[i + 1].push(true);
+        board[i + 1].push('blue'); board[i + 1].push('blue');
       }
     }
   }
@@ -73,12 +73,12 @@ export const generateNewBoard = () => {
   return board;
 };
 
-export const getBoardAfterKillingGroup = (board, groupValue) => {
+export const getBoardAfterKillingGroup = (board, group) => {
   let isGameEnd = false;
   let sum = 0;
   let hasFirstPlayerWon = undefined;
   for (const j in board[0]) {
-    if (board[0][j] !== groupValue) { // a soldier reached the castle
+    if (board[0][j] !== group) { // a soldier reached the castle
       isGameEnd = true;
       hasFirstPlayerWon = true;
     }
@@ -86,7 +86,7 @@ export const getBoardAfterKillingGroup = (board, groupValue) => {
   for (const i in board) {
     if (i != 0) {
       for (const j in board[i]) {
-        if (board[i][j] !== groupValue) {
+        if (board[i][j] !== group) {
           sum++;
           board[i - 1].push(board[i][j]); // a soldier still lives and can step up the stairs
         }

@@ -42,11 +42,11 @@
       <img src="../../../assets/hunyadi-es-a-janicsarok-var.jpg" style="display: block; margin: auto;">
       <div v-for="rowIndex in [0, 1, 2, 3, 4]" class="game__pile" :class="{ 'border-b-black border-b-2': rowIndex === 4 }">
         <span
-          v-for="(isBlue, pieceIndex) in board[rowIndex]"
+          v-for="(group, pieceIndex) in board[rowIndex]"
           class="game__piece mx-1"
           @click="toggleGroup(rowIndex, pieceIndex)"
         >
-          <svg class="game__piece" :class="isBlue ? 'fill-blue-600' : 'fill-red-600'">
+          <svg class="game__piece" :class="group === 'blue' ? 'fill-blue-600' : 'fill-red-600'">
             <use xlink:href="#game-soldier-icon" />
           </svg>
         </span>
@@ -77,7 +77,7 @@
           v-if="!isPlayerSultan"
           :class="{ 'opacity-50': isEnemyMoveInProgress }"
           class="game__cta-button bg-red-400 hover:bg-red-600"
-          @click="killGroup(false)"
+          @click="killGroup('red')"
         >
           Legyőzöm a pirosakat
         </button>
@@ -85,7 +85,7 @@
           v-if="!isPlayerSultan"
           :class="{ 'opacity-50': isEnemyMoveInProgress }"
           class="game__cta-button bg-blue-400 hover:bg-blue-600"
-          @click="killGroup(true)"
+          @click="killGroup('blue')"
         >
           Legyőzöm a kékeket
         </button>

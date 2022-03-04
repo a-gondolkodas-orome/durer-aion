@@ -26,7 +26,7 @@ export default {
     toggleGroup(rowIndex, pieceIndex) {
       if (!this.shouldPlayerMoveNext || !this.isPlayerSultan) return;
       const currentBoard = this.board;
-      currentBoard[rowIndex][pieceIndex] = !currentBoard[rowIndex][pieceIndex];
+      currentBoard[rowIndex][pieceIndex] = currentBoard[rowIndex][pieceIndex] === 'blue' ? 'red' : 'blue';
       this.setBoard(currentBoard);
     },
     finalizeSoldierGrouping() {
