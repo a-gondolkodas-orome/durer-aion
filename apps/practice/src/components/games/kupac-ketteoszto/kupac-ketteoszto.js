@@ -1,5 +1,6 @@
 import { mapGetters, mapActions, mapState } from 'vuex';
 import EnemyLoader from '../../common/enemy-loader/enemy-loader';
+import { isEqual } from 'lodash-es';
 
 export default {
   name: 'kupac-ketteoszto',
@@ -15,7 +16,8 @@ export default {
       'ctaText',
       'isEnemyMoveInProgress',
       'isGameInProgress',
-      'isGameReadyToStart'
+      'isGameReadyToStart',
+      'isGameFinished'
     ]),
     stepDescription() {
       return this.isGameInProgress && this.shouldPlayerMoveNext
@@ -26,17 +28,22 @@ export default {
   methods: {
     ...mapActions(['playerMove', 'startGameAsPlayer', 'initializeGame']),
     clickPiece({ rowIndex, pieceIndex }) {
+      if (!this.shouldPlayerMoveNext || pieceIndex === 0) return;
       this.playerMove(this.game.strategy.getBoardAfterPlayerStep(this.board, { rowIndex, pieceIndex }));
+      this.hoveredPiece = null;
     },
-    pieceOpacity({ rowIndex, pieceIndex }) {
-      if (!this.shouldPlayerMoveNext) return 0.5;
-      if (!this.hoveredPiece) return 1;
-      if (this.hoveredPiece.pieceIndex === 0) return 1;
-      if (rowIndex !== this.hoveredPiece.rowIndex) return 1;
-      return pieceIndex >= this.hoveredPiece.pieceIndex ? 0.5 : 1;
+    shouldShowDividerToTheLeft(piece) {
+      return isEqual(this.hoveredPiece, piece) && piece.pieceIndex !== 0;
     },
-    isClickDisabled(pieceIndex) {
-      return !this.shouldPlayerMoveNext || pieceIndex === 0;
+    currentChoiceDescription(rowIndex) {
+      if (this.isGameFinished) return '';
+
+      const pieceCountInPile = this.board[rowIndex];
+
+      if (this.isGameReadyToStart || !this.shouldPlayerMoveNext || !this.hoveredPiece) return pieceCountInPile;
+      if (this.hoveredPiece.rowIndex !== rowIndex || this.hoveredPiece.pieceIndex === 0) return pieceCountInPile;
+
+      return `${pieceCountInPile} --> ${this.hoveredPiece.pieceIndex}, ${pieceCountInPile - this.hoveredPiece.pieceIndex}`;
     }
   },
   created() {

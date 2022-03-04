@@ -12,14 +12,22 @@
   <div class="flex flex-wrap" id="kupac-ketteoszto">
     <div class="game__board">
       <div v-for="rowIndex in [0, 1]" class="game__pile" :class="{ 'border-b-black border-b-2': rowIndex === 1 }">
-        <span
-          v-for="pieceIndex in [...Array(board[rowIndex]).keys()]"
-          class="game__piece bg-blue-600 rounded-full"
-          :style="{ 'opacity': pieceOpacity({ rowIndex, pieceIndex }), 'pointer-events': isClickDisabled(pieceIndex) ? 'none' : 'auto' }"
-          @click="clickPiece({ rowIndex, pieceIndex })"
-          @mouseover="hoveredPiece = { rowIndex, pieceIndex }"
-          @mouseout="hoveredPiece = null"
-        ></span>
+        <template v-for="(_, pieceIndex) in board[rowIndex]">
+          <span
+            v-if="shouldShowDividerToTheLeft({ rowIndex, pieceIndex })"
+            class="inline-block border-r-black border-r-4 h-16 border-dotted -ml-1"
+          ></span>
+          <span
+            class="game__piece bg-blue-600 rounded-full mr-1"
+            :style="{ 'opacity-50': !shouldPlayerMoveNext, 'pointer-events': shouldPlayerMoveNext ? 'auto' : 'none', 'cursor': pieceIndex === 0 ? 'not-allowed' : 'pointer' }"
+            @click="clickPiece({ rowIndex, pieceIndex })"
+            @mouseover="hoveredPiece = { rowIndex, pieceIndex }"
+            @mouseout="hoveredPiece = null"
+          ></span>
+        </template>
+        <span class="inline-block h-16 align-middle px-2 text-xl -mt-4">
+          {{ currentChoiceDescription(rowIndex) }}
+        </span>
       </div>
     </div>
     <div class="p-1 flex flex-col flex-grow flex-shrink-0 basis-80">

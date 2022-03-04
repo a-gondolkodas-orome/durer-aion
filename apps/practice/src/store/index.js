@@ -16,11 +16,12 @@ export const store = createStore({
     game: (state) => gameList.find((game) => game.component === state.gameId),
     isGameInProgress: (state) => state.gameStatus === 'inProgress',
     isGameReadyToStart: (state) => state.gameStatus === 'readyToStart',
+    isGameFinished: (state) => state.gameStatus === 'finished',
     isEnemyMoveInProgress: (state) => state.isEnemyMoveInProgress && state.enemyMoveTimeoutHandle !== null,
     ctaText: (state, getters) => {
       if (getters.isGameInProgress) {
         return state.shouldPlayerMoveNext ? 'Te jössz.' : 'Mi jövünk.';
-      } else if (state.gameStatus === 'finished') {
+      } else if (getters.isGameFinished) {
         return state.isPlayerWinner ? 'Nyertél. Gratulálunk! :)' : 'Sajnos, most nem nyertél, de ne add fel.';
       } else { // ready to start
         return 'A gombra kattintva tudod elindítani a játékot.';
