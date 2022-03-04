@@ -31,12 +31,12 @@ export default {
     pieceOpacity({ rowIndex, pieceIndex }) {
       if (!this.shouldPlayerMoveNext) return 0.5;
       if (!this.hoveredPiece) return 1;
-      if (this.hoveredPiece.pieceIndex === 1) return 1;
+      if (this.hoveredPiece.pieceIndex === 0) return 1;
       if (rowIndex !== this.hoveredPiece.rowIndex) return 1;
       return pieceIndex >= this.hoveredPiece.pieceIndex ? 0.5 : 1;
     },
     isClickDisabled(pieceIndex) {
-      return !this.shouldPlayerMoveNext || pieceIndex === 1;
+      return !this.shouldPlayerMoveNext || pieceIndex === 0;
     }
   },
   created() {
