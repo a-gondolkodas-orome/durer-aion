@@ -12,7 +12,8 @@ module.exports = {
     'no-console': 'error',
     'no-debugger': 'error',
     'curly': ['error', 'multi-line'],
-    'operator-linebreak': ['error', 'after', { overrides: { '?': 'before', ':': 'before' } }]
+    'operator-linebreak': ['error', 'after', { overrides: { '?': 'before', ':': 'before' } }],
+    'arrow-parens': ["error", "always"]
   },
   parserOptions: {
     parser: '@babel/eslint-parser'

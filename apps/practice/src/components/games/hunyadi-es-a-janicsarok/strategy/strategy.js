@@ -9,7 +9,7 @@ export const makeAiMove = (board, isPlayerTheFirstToMove) => {
   }
 };
 
-const optimalColoring = board => {
+const optimalColoring = (board) => {
   let trueSum = 0.0;
   let falseSum = 0.0;
   for (let i = 0; i < 5; i++) {
@@ -33,7 +33,7 @@ const optimalColoring = board => {
   return board;
 }
 
-const optimalKill = board => {
+const optimalKill = (board) => {
   if (board[0].length > 0) {
     return board[0][0];
   }

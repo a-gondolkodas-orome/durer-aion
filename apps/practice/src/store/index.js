@@ -13,10 +13,10 @@ export const store = createStore({
     isEnemyMoveInProgress: null
   },
   getters: {
-    game: state => gameList.find(game => game.component === state.gameId),
-    isGameInProgress: state => state.gameStatus === 'inProgress',
-    isGameReadyToStart: state => state.gameStatus === 'readyToStart',
-    isEnemyMoveInProgress: state => state.isEnemyMoveInProgress && state.enemyMoveTimeoutHandle != null,
+    game: (state) => gameList.find((game) => game.component === state.gameId),
+    isGameInProgress: (state) => state.gameStatus === 'inProgress',
+    isGameReadyToStart: (state) => state.gameStatus === 'readyToStart',
+    isEnemyMoveInProgress: (state) => state.isEnemyMoveInProgress && state.enemyMoveTimeoutHandle !== null,
     ctaText: (state, getters) => {
       if (getters.isGameInProgress) {
         return state.shouldPlayerMoveNext ? 'Te jössz.' : 'Mi jövünk.';

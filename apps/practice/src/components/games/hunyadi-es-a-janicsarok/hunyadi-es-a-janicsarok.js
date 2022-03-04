@@ -6,7 +6,7 @@ export default {
   template: require('./hunyadi-es-a-janicsarok.html'),
   components: { EnemyLoader },
   computed: {
-    ...mapState({ isPlayerSultan: 'isPlayerTheFirstToMove' }),
+    ...mapState({ isPlayerSultan: (state) => state.isPlayerTheFirstToMove }),
     ...mapState(['board', 'shouldPlayerMoveNext']),
     ...mapGetters([
       'game',
@@ -32,8 +32,8 @@ export default {
     finalizeSoldierGrouping() {
       this.playerMove({ board: this.board, isGameEnd: false });
     },
-    killGroup(groupValue) {
-      this.playerMove(this.game.strategy.getBoardAfterKillingGroup(this.board, groupValue));
+    killGroup(group) {
+      this.playerMove(this.game.strategy.getBoardAfterKillingGroup(this.board, group));
     }
   },
   created() {
