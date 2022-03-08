@@ -1,7 +1,7 @@
 import { createStore } from 'vuex';
 import { gameList } from '../components/games/games';
 
-export const store = createStore({
+export default () => createStore({
   state: {
     gameId: null,
     board: null,

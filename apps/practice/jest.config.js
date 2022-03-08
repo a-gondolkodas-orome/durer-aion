@@ -1,6 +1,6 @@
 module.exports = {
   preset: '@vue/cli-plugin-unit-jest',
-  setupFilesAfterEnv: [],
+  setupFilesAfterEnv: ['jest-extended/all'],
   clearMocks: true,
   restoreMocks: true,
   transform: {
