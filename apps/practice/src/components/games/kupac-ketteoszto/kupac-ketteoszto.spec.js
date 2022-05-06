@@ -1,8 +1,9 @@
 'use strict';
 
 import KupacKetteoszto from './kupac-ketteoszto';
-import { mount } from '@vue/test-utils';
+import { flushPromises, mount } from '@vue/test-utils';
 import createStore from '../../../store/store';
+import { cloneDeep } from 'lodash-es';
 
 const mountKupacKetteoszto = () => {
   const store = createStore();
@@ -33,5 +34,38 @@ describe('KupacKetteoszto', () => {
     wrapper.find('.js-restart-game').trigger('click');
 
     expect(store.state.gameStatus).toEqual('readyToStart');
+  });
+
+  it('should apply player move correctly', () => {
+    const { store, wrapper } = mountKupacKetteoszto();
+    const initialBoard = cloneDeep(store.state.board);
+    wrapper.find('.js-first-player').trigger('click');
+
+    wrapper.findAll('.game__pile')[1].findAll('.game__piece')[2].trigger('click');
+
+    expect(store.state.board).toEqual([2, initialBoard[1] - 2]);
+  });
+
+  it('should not allow player move while enemy move is in progress', () => {
+    const { store, wrapper } = mountKupacKetteoszto();
+    const initialBoard = cloneDeep(store.state.board);
+    wrapper.find('.js-second-player').trigger('click');
+
+    wrapper.findAll('.game__pile')[1].findAll('.game__piece')[2].trigger('click');
+
+    expect(store.state.board).toEqual(initialBoard);
+  });
+
+  it('should show the result to the user when the game is finished', async () => {
+    const { store, wrapper } = mountKupacKetteoszto();
+    store.commit('setBoard', [2, 1]);
+
+    wrapper.find('.js-first-player').trigger('click');
+    await flushPromises();
+
+    wrapper.findAll('.game__pile')[0].findAll('.game__piece')[1].trigger('click');
+    await flushPromises();
+
+    expect(wrapper.find('#kupac-ketteoszto').text()).toMatch(/gratul/i)
   });
 });
