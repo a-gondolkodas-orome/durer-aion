@@ -36,20 +36,20 @@
       <p class="italic text-justify">{{ stepDescription }}</p>
       <button
         v-if="isGameReadyToStart"
-        class="game__cta-button"
+        class="game__cta-button js-first-player"
         @click="startGameAsPlayer({ isFirst: true })"
       >
         Kezdő leszek
       </button>
       <button
         v-if="isGameReadyToStart"
-        class="game__cta-button"
+        class="game__cta-button js-second-player"
         @click="startGameAsPlayer({ isFirst: false })"
       >
         Második leszek
       </button>
       <div class="flex flex-grow items-end">
-        <button class="game__cta-button mt-4" @click="initializeGame()">
+        <button class="game__cta-button mt-4 js-restart-game" @click="initializeGame()">
           Új leosztás
         </button>
       </div>
