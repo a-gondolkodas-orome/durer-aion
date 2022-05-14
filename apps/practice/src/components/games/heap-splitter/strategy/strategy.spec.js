@@ -5,7 +5,7 @@ import { generateNewBoard, getBoardAfterPlayerStep, makeAiMove } from './strateg
 
 jest.mock('lodash-es/random');
 
-describe('KupacKetteoszto Strategy', () => {
+describe('HeapSplitter Strategy', () => {
   describe('generateNewBoard', () => {
     it('should generate a new board with two piles of random size', () => {
       random.mockReturnValueOnce(4).mockReturnValueOnce(6);

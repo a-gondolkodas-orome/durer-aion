@@ -1,25 +1,25 @@
 'use strict';
 
-import KupacKetteoszto from './kupac-ketteoszto';
+import HeapSplitter from './heap-splitter';
 import { flushPromises, mount } from '@vue/test-utils';
 import createStore from '../../../store/store';
 import { cloneDeep } from 'lodash-es';
 
-const mountKupacKetteoszto = () => {
+const mountHeapSplitter = () => {
   const store = createStore();
-  store.commit('setGameId', 'KupacKetteoszto');
-  const wrapper = mount(KupacKetteoszto, { global: { plugins: [store] } });
+  store.commit('setGameId', 'HeapSplitter');
+  const wrapper = mount(HeapSplitter, { global: { plugins: [store] } });
   return { store, wrapper };
 }
 
-describe('KupacKetteoszto', () => {
+describe('HeapSplitter', () => {
   it('should initialize a game when mounted', () => {
-    const { store } = mountKupacKetteoszto();
+    const { store } = mountHeapSplitter();
     expect(store.state.board).toMatchObject([expect.toBeInteger(), expect.toBeInteger()]);
   });
 
   it('should set selected role for player and start game accordingly', () => {
-    const { store, wrapper } = mountKupacKetteoszto();
+    const { store, wrapper } = mountHeapSplitter();
 
     wrapper.find('.js-first-player').trigger('click');
 
@@ -28,7 +28,7 @@ describe('KupacKetteoszto', () => {
   });
 
   it('should start a new game when button is pressed', () => {
-    const { store, wrapper } = mountKupacKetteoszto();
+    const { store, wrapper } = mountHeapSplitter();
     wrapper.find('.js-first-player').trigger('click');
 
     wrapper.find('.js-restart-game').trigger('click');
@@ -37,7 +37,7 @@ describe('KupacKetteoszto', () => {
   });
 
   it('should apply player move correctly', () => {
-    const { store, wrapper } = mountKupacKetteoszto();
+    const { store, wrapper } = mountHeapSplitter();
     const initialBoard = cloneDeep(store.state.board);
     wrapper.find('.js-first-player').trigger('click');
 
@@ -47,7 +47,7 @@ describe('KupacKetteoszto', () => {
   });
 
   it('should not allow player move while enemy move is in progress', () => {
-    const { store, wrapper } = mountKupacKetteoszto();
+    const { store, wrapper } = mountHeapSplitter();
     const initialBoard = cloneDeep(store.state.board);
     wrapper.find('.js-second-player').trigger('click');
 
@@ -57,7 +57,7 @@ describe('KupacKetteoszto', () => {
   });
 
   it('should show the result to the user when the game is finished', async () => {
-    const { store, wrapper } = mountKupacKetteoszto();
+    const { store, wrapper } = mountHeapSplitter();
     store.commit('setBoard', [2, 1]);
 
     wrapper.find('.js-first-player').trigger('click');

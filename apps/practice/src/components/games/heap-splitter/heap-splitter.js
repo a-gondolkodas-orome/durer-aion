@@ -3,8 +3,8 @@ import EnemyLoader from '../../common/enemy-loader/enemy-loader';
 import { isEqual } from 'lodash-es';
 
 export default {
-  name: 'kupac-ketteoszto',
-  template: require('./kupac-ketteoszto.html'),
+  name: 'heap-splitter',
+  template: require('./heap-splitter.html'),
   components: { EnemyLoader },
   data: () => ({
     hoveredPiece: null

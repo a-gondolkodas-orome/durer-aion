@@ -2,8 +2,8 @@ import { mapGetters, mapActions, mapMutations, mapState } from 'vuex';
 import EnemyLoader from '../../common/enemy-loader/enemy-loader';
 
 export default {
-  name: 'hunyadi-es-a-janicsarok',
-  template: require('./hunyadi-es-a-janicsarok.html'),
+  name: 'hunyadi-and-the-janissaries',
+  template: require('./hunyadi-and-the-janissaries.html'),
   components: { EnemyLoader },
   computed: {
     ...mapState({ isPlayerSultan: (state) => state.isPlayerTheFirstToMove }),

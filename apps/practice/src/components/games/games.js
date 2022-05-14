@@ -1,11 +1,11 @@
-import KupacKetteoszto from './kupac-ketteoszto/kupac-ketteoszto';
-import * as kupacKetteosztoStrategy from './kupac-ketteoszto/strategy/strategy';
-import HunyadiEsAJanicsarok from './hunyadi-es-a-janicsarok/hunyadi-es-a-janicsarok';
-import * as hunyadiEsAJanicsarokStrategy from './hunyadi-es-a-janicsarok/strategy/strategy';
+import HeapSplitter from './heap-splitter/heap-splitter';
+import * as heapSplitterStrategy from './heap-splitter/strategy/strategy';
+import HunyadiAndTheJanissaries from './hunyadi-and-the-janissaries/hunyadi-and-the-janissaries';
+import * as hunyadiAndTheJanissariesStrategy from './hunyadi-and-the-janissaries/strategy/strategy';
 
 export const gameComponents = {
-  KupacKetteoszto,
-  HunyadiEsAJanicsarok
+  HeapSplitter,
+  HunyadiAndTheJanissaries
 };
 
 export const gameList = [
@@ -13,16 +13,16 @@ export const gameList = [
     year: 6,
     round: 'döntő',
     category: 'D',
-    component: 'HunyadiEsAJanicsarok',
+    component: 'HunyadiAndTheJanissaries',
     name: 'Hunyadi és a janicsárok',
-    strategy: hunyadiEsAJanicsarokStrategy
+    strategy: hunyadiAndTheJanissariesStrategy
   },
   {
     year: 8,
     round: 'döntő',
     category: 'A',
-    component: 'KupacKetteoszto',
+    component: 'HeapSplitter',
     name: 'Kupac kettéosztó',
-    strategy: kupacKetteosztoStrategy
+    strategy: heapSplitterStrategy
   }
 ];
