@@ -57,10 +57,10 @@
       <enemy-loader />
       <p class="italic text-justify">{{ stepDescription }}</p>
       <template v-if="isGameReadyToStart">
-        <button class="game__cta-button" @click="startGameAsPlayer({ isFirst: false })">
+        <button class="game__cta-button js-second-player" @click="startGameAsPlayer({ isFirst: false })">
           Hunyadi leszek
         </button>
-        <button class="game__cta-button" @click="startGameAsPlayer({ isFirst: true })">
+        <button class="game__cta-button js-first-player" @click="startGameAsPlayer({ isFirst: true })">
           Szultán leszek
         </button>
       </template>
@@ -76,7 +76,7 @@
         <button
           v-if="!isPlayerSultan"
           :class="{ 'opacity-50': isEnemyMoveInProgress }"
-          class="game__cta-button bg-red-400 hover:bg-red-600"
+          class="game__cta-button bg-red-400 hover:bg-red-600 js-kill-red"
           @click="killGroup('red')"
         >
           Legyőzöm a pirosakat
@@ -91,7 +91,7 @@
         </button>
       </template>
       <div class="flex flex-grow items-end">
-        <button class="game__cta-button mt-4"  @click="initializeGame()">
+        <button class="game__cta-button mt-4 js-restart-game"  @click="initializeGame()">
           Új leosztás
         </button>
       </div>
