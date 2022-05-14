@@ -1,5 +1,9 @@
 'use strict';
 
+import { random, flatten } from 'lodash-es';
+
+const rowCount = 5;
+
 export const makeAiMove = (board, isPlayerTheFirstToMove) => {
   if (isPlayerTheFirstToMove) {
     const optimalGroupToKill = optimalKill(board);
@@ -10,21 +14,16 @@ export const makeAiMove = (board, isPlayerTheFirstToMove) => {
 };
 
 const optimalColoring = (board) => {
-  let trueSum = 0.0;
-  let falseSum = 0.0;
-  for (let i = 0; i < 5; i++) {
+  const groupScores = { blue: 0, red: 0 };
+  for (let i = 0; i < rowCount; i++) {
     for (let j = 0; j < board[i].length; j++) {
-      if (trueSum < falseSum) {
-        board[i][j] = 'blue';
-        trueSum += (1 / 2) ** i;
-      } else {
-        board[i][j] = 'red';
-        falseSum += (1 / 2) ** i;
-      }
+      const nextGroup = groupScores['blue'] < groupScores['red'] ? 'blue' : 'red';
+      board[i][j] = nextGroup;
+      groupScores[nextGroup] += (1 / 2) ** i;
     }
   }
   if (Math.random() > 0.5) {
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < rowCount; i++) {
       for (let j = 0; j < board[i].length; j++) {
         board[i][j] = board[i][j] === 'blue' ? 'red' : 'blue';
       }
@@ -37,35 +36,32 @@ const optimalKill = (board) => {
   if (board[0].length > 0) {
     return board[0][0];
   }
-  let trueSum = 0.0;
-  let falseSum = 0.0;
-  for (let i = 0; i < 5; i++) {
-    for (let j = 0; j < board[i].length; j++) {
-      if (board[i][j] === 'blue') {
-        trueSum += (1 / 2) ** i;
-      } else {
-        falseSum += (1 / 2) ** i;
-      }
+
+  const groupScores = { blue: 0, red: 0};
+  for (let i = 0; i < rowCount; i++) {
+    for (const soldier of board[i]) {
+      groupScores[soldier] += (1 / 2) ** i;
     }
   }
-  return trueSum > falseSum ? 'blue' : 'red';
+
+  return groupScores['blue'] > groupScores['red'] ? 'blue' : 'red';
 }
 
 export const generateNewBoard = () => {
-  let sum = 2.0 + Math.ceil(Math.random() * 8) / 8 - 0.5;
   let board = [];
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < (rowCount - 1); i++) {
     const row = [];
-    for (sum; sum >= ((1.0 / 2.0) ** i); sum -= ((1.0 / 2.0) ** i)) {
-      row.push('blue');
-    }
+    if (i === 0) row.push('blue');
+    if (random(0, 1) === 1) row.push('blue');
     board.push(row);
   }
-  for (let i = 0; i < 4; i++) {
-    for (let j = board[i].length - 1; j >= 0; j--) {
-      if (Math.random() > 0.5) {
+  board.push([]);
+
+  for (let i = 0; i < (rowCount - 1); i++) {
+    for (let j of board[i]) {
+      if (random(0, 1) === 1) {
         board[i].splice(j, 1);
-        board[i + 1].push('blue'); board[i + 1].push('blue');
+        board[i + 1].push('blue', 'blue');
       }
     }
   }
@@ -75,27 +71,22 @@ export const generateNewBoard = () => {
 
 export const getBoardAfterKillingGroup = (board, group) => {
   let isGameEnd = false;
-  let sum = 0;
   let hasFirstPlayerWon = undefined;
-  for (const j in board[0]) {
-    if (board[0][j] !== group) { // a soldier reached the castle
-      isGameEnd = true;
-      hasFirstPlayerWon = true;
-    }
-  }
-  for (const i in board) {
-    if (i != 0) {
-      for (const j in board[i]) {
-        if (board[i][j] !== group) {
-          sum++;
-          board[i - 1].push(board[i][j]); // a soldier still lives and can step up the stairs
-        }
+
+  for (let i = 0; i < board.length; i++) {
+    const remainingSoldiersInRow = board[i].filter((soldier) => soldier !== group);
+    if (remainingSoldiersInRow.length > 0) {
+      if (i === 0) {
+        isGameEnd = true;
+        hasFirstPlayerWon = true;
+      } else {
+        board[i - 1].push(...remainingSoldiersInRow);
       }
     }
-
     board[i] = [];
   }
-  if (sum === 0 && !isGameEnd) {
+
+  if (flatten(board).length === 0 && !isGameEnd) {
     isGameEnd = true;
     hasFirstPlayerWon = false;
   }
