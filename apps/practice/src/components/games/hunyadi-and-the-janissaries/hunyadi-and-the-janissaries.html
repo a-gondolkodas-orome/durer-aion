@@ -37,13 +37,13 @@
     vagy a török szultánként szeretnél-e játszani.
     Sok sikert! :)
   </p>
-  <div class="flex flex-wrap">
+  <div class="flex flex-wrap" id="hunyadi-and-the-janissaries">
     <div class="game__board">
       <img src="../../../assets/hunyadi-and-the-janissaries-castle.jpg" style="display: block; margin: auto;">
       <div v-for="rowIndex in [0, 1, 2, 3, 4]" class="game__pile" :class="{ 'border-b-black border-b-2': rowIndex === 4 }">
         <span
           v-for="(group, pieceIndex) in board[rowIndex]"
-          class="game__piece mx-1"
+          class="game__piece mx-1 js-clickable-soldier"
           @click="toggleGroup(rowIndex, pieceIndex)"
         >
           <svg class="game__piece" :class="group === 'blue' ? 'fill-blue-600' : 'fill-red-600'">
@@ -68,7 +68,7 @@
         <button
           v-if="isPlayerSultan"
           :class="{ 'opacity-50': isEnemyMoveInProgress }"
-          class="game__cta-button"
+          class="game__cta-button js-finalize-groups"
           @click="finalizeSoldierGrouping()"
         >
           Lépek
