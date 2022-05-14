@@ -66,6 +66,6 @@ describe('HeapSplitter', () => {
     wrapper.findAll('.game__pile')[0].findAll('.game__piece')[1].trigger('click');
     await flushPromises();
 
-    expect(wrapper.find('#kupac-ketteoszto').text()).toMatch(/gratul/i)
+    expect(wrapper.find('#heap-splitter').text()).toMatch(/gratul/i)
   });
 });
