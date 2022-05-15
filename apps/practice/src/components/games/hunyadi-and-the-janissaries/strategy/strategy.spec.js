@@ -72,7 +72,7 @@ describe('HunyadiAndTheJanissaries strategy', () => {
           ['blue'],
           [],
           ['blue', 'blue', 'blue', 'blue']
-        ]
+        ];
         expect(makeAiMove(board, false)).toEqual({
           board: [['blue'], ['red'], [], ['red', 'red', 'red', 'red']],
           isGameEnd: false
@@ -86,7 +86,7 @@ describe('HunyadiAndTheJanissaries strategy', () => {
           ['blue', 'blue', 'blue'],
           ['blue'],
           ['blue', 'blue']
-        ]
+        ];
         expect(makeAiMove(board, false)).toEqual({
           board: [['blue'], ['red', 'red', 'blue'], ['red'], ['red', 'red']],
           isGameEnd: false

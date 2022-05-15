@@ -25,7 +25,7 @@ const optimalColoring = (board) => {
   }
 
   return board;
-}
+};
 
 const optimalKill = (board) => {
   if (board[0].length > 0) {
@@ -40,7 +40,7 @@ const optimalKill = (board) => {
   }
 
   return groupScores['blue'] > groupScores['red'] ? 'blue' : 'red';
-}
+};
 
 export const generateNewBoard = () => {
   const rowCount = 5;
@@ -87,4 +87,4 @@ export const getBoardAfterKillingGroup = (board, group) => {
     hasFirstPlayerWon = false;
   }
   return { board, isGameEnd, hasFirstPlayerWon };
-}
+};

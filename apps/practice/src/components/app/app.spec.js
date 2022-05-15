@@ -9,7 +9,7 @@ const mountApp = () => {
   const store = createStore();
   const wrapper = mount(App, { global: { plugins: [store] } });
   return { store, wrapper };
-}
+};
 
 describe('App', () => {
   it('should show a list of available games', () => {

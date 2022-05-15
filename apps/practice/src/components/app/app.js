@@ -20,6 +20,6 @@ export default {
     }
   },
   created() {
-    document.title = 'Dürer játékok'
+    document.title = 'Dürer játékok';
   }
-}
+};

@@ -24,7 +24,7 @@ describe('HeapSplitter Strategy', () => {
       expect(
         getBoardAfterPlayerStep([5, 2], { rowIndex: 0, pieceIndex: 2 })
       ).toEqual({ board: [2, 3], isGameEnd: false });
-    })
+    });
   });
 
   describe('makeAiMove', () => {

@@ -49,4 +49,4 @@ export default {
   created() {
     this.initializeGame();
   }
-}
+};

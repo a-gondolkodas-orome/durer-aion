@@ -13,4 +13,4 @@ module.exports = {
   testMatch: [
     '**/src/**/*.spec.js'
   ]
-}
+};

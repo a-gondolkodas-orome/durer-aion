@@ -10,7 +10,7 @@ const mountHunyadiAndTheJanissaries = () => {
   store.commit('setGameId', 'HunyadiAndTheJanissaries');
   const wrapper = mount(HunyadiAndTheJanissaries, { global: { plugins: [store] } });
   return { store, wrapper };
-}
+};
 
 
 describe('HunyadiAndTheJanissaries', () => {
@@ -94,6 +94,6 @@ describe('HunyadiAndTheJanissaries', () => {
 
     await wrapper.find('.js-kill-red').trigger('click');
 
-    expect(wrapper.find('#hunyadi-and-the-janissaries').text()).toMatch(/sajnos, most nem/i)
+    expect(wrapper.find('#hunyadi-and-the-janissaries').text()).toMatch(/sajnos, most nem/i);
   });
 });

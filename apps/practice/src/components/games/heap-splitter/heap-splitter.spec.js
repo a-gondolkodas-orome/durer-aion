@@ -10,7 +10,7 @@ const mountHeapSplitter = () => {
   store.commit('setGameId', 'HeapSplitter');
   const wrapper = mount(HeapSplitter, { global: { plugins: [store] } });
   return { store, wrapper };
-}
+};
 
 describe('HeapSplitter', () => {
   it('should initialize a game when mounted', () => {
@@ -66,6 +66,6 @@ describe('HeapSplitter', () => {
     wrapper.findAll('.game__pile')[0].findAll('.game__piece')[1].trigger('click');
     await flushPromises();
 
-    expect(wrapper.find('#heap-splitter').text()).toMatch(/gratul/i)
+    expect(wrapper.find('#heap-splitter').text()).toMatch(/gratul/i);
   });
 });
