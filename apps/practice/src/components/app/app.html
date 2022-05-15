@@ -1,7 +1,7 @@
 <div class="p-4">
   <template v-if="gameId">
     <button
-      class="rounded-lg px-4 bg-blue-400 hover:bg-blue-600"
+      class="rounded-lg px-4 bg-blue-400 hover:bg-blue-600 js-back-to-overview"
       @click="clearGameData()"
     >&lt; Vissza a listához</button>
     <h1 class="text-blue-600 text-2xl font-bold pb-4">{{ game.name }}</h1>
@@ -29,7 +29,7 @@
         <td class="border-2 border-gray-300 text-center p-1">
           <button
             @click="setGameId(game.component)"
-            class="rounded-lg px-4 bg-blue-400 hover:bg-blue-600"
+            :class="`rounded-lg px-4 bg-blue-400 hover:bg-blue-600 js-select-${game.component}`"
           >Kipróbálom!</button>
         </td>
       </tr>
