@@ -19,7 +19,6 @@ export const makeAiMove = (board) => {
     ? randomPileIndex
     : 1 - randomPileIndex;
 
-
   const newBoard = findOptimalDivision(board[pileIndexToSplit]);
   return { board: newBoard, isGameEnd: isGameEnd(newBoard) };
 };

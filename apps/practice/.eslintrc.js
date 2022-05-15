@@ -14,9 +14,10 @@ module.exports = {
     'curly': ['error', 'multi-line'],
     'eqeqeq': ['error', 'always'],
     'max-len': ['error', { code: 120, ignoreStrings: true, ignoreTemplateLiterals: true }],
-    'no-var': 'error',
     'no-console': 'error',
     'no-debugger': 'error',
+    'no-multiple-empty-lines': ['error', { max: 1 }],
+    'no-var': 'error',
     'operator-linebreak': ['error', 'after', { overrides: { '?': 'before', ':': 'before' } }],
     'padded-blocks': ['error', 'never'],
     'semi': ['error', 'always']

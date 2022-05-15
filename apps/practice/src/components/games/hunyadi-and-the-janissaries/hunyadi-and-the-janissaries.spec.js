@@ -12,7 +12,6 @@ const mountHunyadiAndTheJanissaries = () => {
   return { store, wrapper };
 };
 
-
 describe('HunyadiAndTheJanissaries', () => {
   it('should initialize game when mounted', () => {
     const { store } = mountHunyadiAndTheJanissaries();
