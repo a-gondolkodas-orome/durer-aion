@@ -32,7 +32,7 @@ const optimalKill = (board) => {
     return board[0][0];
   }
 
-  const groupScores = { blue: 0, red: 0};
+  const groupScores = { blue: 0, red: 0 };
   for (let i = 0; i < board.length; i++) {
     for (const soldier of board[i]) {
       groupScores[soldier] += (1 / 2) ** i;
