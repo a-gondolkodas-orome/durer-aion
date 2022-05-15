@@ -1,14 +1,14 @@
 'use strict';
 
-import { random } from 'lodash-es';
+import * as random from 'lodash-es/random';
 import { generateNewBoard, getBoardAfterPlayerStep, makeAiMove } from './strategy';
-
-jest.mock('lodash-es/random');
 
 describe('HeapSplitter Strategy', () => {
   describe('generateNewBoard', () => {
     it('should generate a new board with two piles of random size', () => {
-      random.mockReturnValueOnce(4).mockReturnValueOnce(6);
+      jest.spyOn(random, 'default')
+        .mockImplementationOnce(() => 4)
+        .mockImplementationOnce(() => 6);
       expect(generateNewBoard()).toEqual([4, 6]);
     });
   });
@@ -34,22 +34,26 @@ describe('HeapSplitter Strategy', () => {
       [23, 2],
       [2, 3]
     ])('should finish the game if one of the piles has 2 pebbles and the other an odd number (%d, %d)', (firstPile, secondPile) => {
-      random.mockReturnValue(0);
+      jest.spyOn(random, 'default').mockImplementationOnce(() => 0);
       expect(makeAiMove([firstPile, secondPile])).toEqual({ board: [1, 1], isGameEnd: true });
     });
 
     it('should split a random pile randomly into two odd parts if both piles have an even number of pebbles', () => {
-      random.mockReturnValueOnce(1).mockReturnValueOnce(1);
+      jest.spyOn(random, 'default').mockImplementation(() => 1);
       expect(makeAiMove([4, 8])).toEqual({ board: [3, 5], isGameEnd: false });
     });
 
     it('should split a random pile randomly into two parts if both piles have an odd number of pebbles', () => {
-      random.mockReturnValueOnce(0).mockReturnValueOnce(1);
+      jest.spyOn(random, 'default')
+        .mockImplementationOnce(() => 0)
+        .mockImplementationOnce(() => 1);
       expect(makeAiMove([3, 7])).toEqual({ board: [3, 4], isGameEnd: false });
     });
 
     it('should split the even pile into two odd parts if one pile is even and the other is odd', () => {
-      random.mockReturnValueOnce(0).mockReturnValueOnce(1);
+      jest.spyOn(random, 'default')
+        .mockImplementationOnce(() => 0)
+        .mockImplementationOnce(() => 1);
       expect(makeAiMove([5, 8])).toEqual({ board: [3, 5], isGameEnd: false });
     });
   });

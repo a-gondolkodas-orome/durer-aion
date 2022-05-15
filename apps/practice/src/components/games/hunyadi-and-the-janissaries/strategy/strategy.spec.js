@@ -1,9 +1,8 @@
 'use strict';
 
 import { generateNewBoard, getBoardAfterKillingGroup, makeAiMove } from './strategy';
-import { uniq, flatten, random } from 'lodash-es';
-
-jest.mock('lodash-es/random');
+import { uniq, flatten } from 'lodash-es';
+import * as random from 'lodash-es/random';
 
 describe('HunyadiAndTheJanissaries strategy', () => {
   describe('generateNewBoard', () => {
@@ -67,7 +66,7 @@ describe('HunyadiAndTheJanissaries strategy', () => {
       });
 
       it('should balance soldiers with smaller weight for later rows - v1', () => {
-        random.mockReturnValueOnce(1);
+        jest.spyOn(random, 'default').mockImplementationOnce(() => 1);
         const board = [
           ['blue'],
           ['blue'],
@@ -81,7 +80,7 @@ describe('HunyadiAndTheJanissaries strategy', () => {
       });
 
       it('should balance soldiers with smaller weight for later rows - v2', () => {
-        random.mockReturnValueOnce(1);
+        jest.spyOn(random, 'default').mockImplementationOnce(() => 1);
         const board = [
           ['blue'],
           ['blue', 'blue', 'blue'],
