@@ -2,8 +2,6 @@
 
 import { random, flatten } from 'lodash-es';
 
-const rowCount = 5;
-
 export const makeAiMove = (board, isPlayerTheFirstToMove) => {
   if (isPlayerTheFirstToMove) {
     const optimalGroupToKill = optimalKill(board);
@@ -15,20 +13,17 @@ export const makeAiMove = (board, isPlayerTheFirstToMove) => {
 
 const optimalColoring = (board) => {
   const groupScores = { blue: 0, red: 0 };
-  for (let i = 0; i < rowCount; i++) {
+  const firstColor = random(0, 1) === 1 ? 'red' : 'blue';
+  const secondColor = firstColor === 'blue' ? 'red' : 'blue';
+
+  for (let i = 0; i < board.length; i++) {
     for (let j = 0; j < board[i].length; j++) {
-      const nextGroup = groupScores['blue'] < groupScores['red'] ? 'blue' : 'red';
+      const nextGroup = groupScores[firstColor] < groupScores[secondColor] ? firstColor : secondColor;
       board[i][j] = nextGroup;
       groupScores[nextGroup] += (1 / 2) ** i;
     }
   }
-  if (Math.random() > 0.5) {
-    for (let i = 0; i < rowCount; i++) {
-      for (let j = 0; j < board[i].length; j++) {
-        board[i][j] = board[i][j] === 'blue' ? 'red' : 'blue';
-      }
-    }
-  }
+
   return board;
 }
 
@@ -38,7 +33,7 @@ const optimalKill = (board) => {
   }
 
   const groupScores = { blue: 0, red: 0};
-  for (let i = 0; i < rowCount; i++) {
+  for (let i = 0; i < board.length; i++) {
     for (const soldier of board[i]) {
       groupScores[soldier] += (1 / 2) ** i;
     }
@@ -48,6 +43,7 @@ const optimalKill = (board) => {
 }
 
 export const generateNewBoard = () => {
+  const rowCount = 5;
   let board = [];
   for (let i = 0; i < (rowCount - 1); i++) {
     const row = [];
