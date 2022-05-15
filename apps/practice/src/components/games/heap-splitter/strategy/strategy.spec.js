@@ -33,10 +33,13 @@ describe('HeapSplitter Strategy', () => {
       [1, 2],
       [23, 2],
       [2, 3]
-    ])('should finish the game if one of the piles has 2 pebbles and the other an odd number (%d, %d)', (firstPile, secondPile) => {
-      jest.spyOn(random, 'default').mockImplementationOnce(() => 0);
-      expect(makeAiMove([firstPile, secondPile])).toEqual({ board: [1, 1], isGameEnd: true });
-    });
+    ])(
+      'should finish the game if one of the piles has 2 pebbles and the other an odd number (%d, %d)',
+      (firstPile, secondPile) => {
+        jest.spyOn(random, 'default').mockImplementationOnce(() => 0);
+        expect(makeAiMove([firstPile, secondPile])).toEqual({ board: [1, 1], isGameEnd: true });
+      }
+    );
 
     it('should split a random pile randomly into two odd parts if both piles have an even number of pebbles', () => {
       jest.spyOn(random, 'default').mockImplementation(() => 1);
