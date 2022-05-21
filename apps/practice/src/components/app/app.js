@@ -1,23 +1,16 @@
-import { mapGetters, mapMutations, mapState } from 'vuex';
-import { gameComponents, gameList } from '../games/games';
+import { mapState } from 'vuex';
+import Game from '../game/game';
+import Overview from '../overview/overview';
 
 export default {
   name: 'app',
   template: require('./app.html'),
-  components: gameComponents,
-  data: () => ({
-    gamesToShow: gameList
-  }),
-  computed: {
-    ...mapState(['gameId']),
-    ...mapGetters(['game'])
+  components: {
+    Game,
+    Overview
   },
-  methods: {
-    ...mapMutations(['setGameId', 'setGameStatus']),
-    clearGameData() {
-      this.setGameId(null);
-      this.setGameStatus(null);
-    }
+  computed: {
+    ...mapState(['gameId'])
   },
   created() {
     document.title = 'Dürer játékok';

@@ -1,0 +1,26 @@
+<div>
+  <h1 class="text-blue-600 text-2xl font-bold pb-4">Dürer játékok</h1>
+
+  <table class="w-full border-collapse">
+    <thead>
+      <tr>
+        <th
+          v-for="header in ['Év', 'Forduló', 'Kategória', 'Játék', '']"
+          class="bg-gray-500 border-2 border-gray-300 text-center text-white font-bold p-1"
+        >{{ header }}</th>
+      </tr>
+    </thead>
+    <tr v-for="game in gamesToShow" class="odd:bg-gray-200">
+      <td
+        v-for="gameProp in [game.year, game.round, game.category, game.name]"
+        class="border-2 border-gray-300 text-center p-1"
+      >{{ gameProp }}</td>
+      <td class="border-2 border-gray-300 text-center p-1">
+        <button
+          @click="setGameId(game.component)"
+          :class="`rounded-lg px-4 bg-blue-400 hover:bg-blue-600 js-select-${game.component}`"
+        >Kipróbálom!</button>
+      </td>
+    </tr>
+  </table>
+</div>
