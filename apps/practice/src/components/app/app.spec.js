@@ -36,4 +36,9 @@ describe('App', () => {
     expect(store.state.game).toBe(null);
     expect(wrapper.find('#heap-splitter').exists()).toBe(false);
   });
+
+  it('should show page not found url does not match known patterns', async () => {
+    const { wrapper } = await mountComponent(App, { path: '/unknown' });
+    expect(wrapper.find('div').text()).toMatch(/a keresett oldal nem található/);
+  });
 });

@@ -25,4 +25,10 @@ describe('Game', () => {
     await wrapper.setProps({ gameId: 'HunyadiAndTheJanissaries' });
     expect(store.state.game.component).toEqual('HunyadiAndTheJanissaries');
   });
+
+  it('should show not found page if gameId is unknown', async () => {
+    const { wrapper, store } = await mountComponent(Game,  { propsData: { gameId: 'UnknownGame' } });
+    expect(store.state.game).toBe(null);
+    expect(wrapper.find('div').text()).toMatch(/a keresett oldal nem található/);
+  });
 });
