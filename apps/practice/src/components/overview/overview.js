@@ -1,13 +1,14 @@
-import { mapMutations } from 'vuex';
 import { gameList } from '../games/games';
 
 export default {
   name: 'overview',
   template: require('./overview.html'),
   data: () => ({
-    gamesToShow: gameList
+    gamesToShow: Object.values(gameList)
   }),
   methods: {
-    ...mapMutations(['setGameId'])
+    goToGamePage(gameId) {
+      this.$router.push(`/game/${gameId}`);
+    }
   }
 };

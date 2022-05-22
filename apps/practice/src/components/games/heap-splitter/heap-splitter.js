@@ -10,9 +10,8 @@ export default {
     hoveredPiece: null
   }),
   computed: {
-    ...mapState(['board', 'shouldPlayerMoveNext']),
+    ...mapState(['game', 'board', 'shouldPlayerMoveNext']),
     ...mapGetters([
-      'game',
       'ctaText',
       'isEnemyMoveInProgress',
       'isGameInProgress',

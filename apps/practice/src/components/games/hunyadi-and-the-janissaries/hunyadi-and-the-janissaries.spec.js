@@ -1,25 +1,25 @@
 'use strict';
 
 import HunyadiAndTheJanissaries from './hunyadi-and-the-janissaries';
-import { mount } from '@vue/test-utils';
 import createStore from '../../../store/store';
 import { flatten } from 'lodash-es';
+import { gameList } from '../games';
+import { mountComponent } from '../../../../test-helpers';
 
-const mountHunyadiAndTheJanissaries = () => {
+const mountHunyadiAndTheJanissaries = async () => {
   const store = createStore();
-  store.commit('setGameId', 'HunyadiAndTheJanissaries');
-  const wrapper = mount(HunyadiAndTheJanissaries, { global: { plugins: [store] } });
-  return { store, wrapper };
+  store.commit('setGame', gameList.HunyadiAndTheJanissaries);
+  return await mountComponent(HunyadiAndTheJanissaries, { store });
 };
 
 describe('HunyadiAndTheJanissaries', () => {
-  it('should initialize game when mounted', () => {
-    const { store } = mountHunyadiAndTheJanissaries();
+  it('should initialize game when mounted', async () => {
+    const { store } = await mountHunyadiAndTheJanissaries();
     expect(flatten(store.state.board)).toIncludeAllMembers(['blue', 'blue']);
   });
 
   it('should set selected role for player and start game accordingly', async () => {
-    const { store, wrapper } = mountHunyadiAndTheJanissaries();
+    const { store, wrapper } = await mountHunyadiAndTheJanissaries();
 
     await wrapper.find('.js-first-player').trigger('click');
 
@@ -29,7 +29,7 @@ describe('HunyadiAndTheJanissaries', () => {
   });
 
   it('should start a new game when button is pressed', async () => {
-    const { store, wrapper } = mountHunyadiAndTheJanissaries();
+    const { store, wrapper } = await mountHunyadiAndTheJanissaries();
     await wrapper.find('.js-first-player').trigger('click');
 
     await wrapper.find('.js-restart-game').trigger('click');
@@ -39,7 +39,7 @@ describe('HunyadiAndTheJanissaries', () => {
 
   it('should apply player move of killing a group', async () => {
     jest.useFakeTimers();
-    const { store, wrapper } = mountHunyadiAndTheJanissaries();
+    const { store, wrapper } = await mountHunyadiAndTheJanissaries();
 
     await wrapper.find('.js-second-player').trigger('click');
     jest.advanceTimersToNextTimer();
@@ -52,7 +52,7 @@ describe('HunyadiAndTheJanissaries', () => {
   });
 
   it('should apply player move of splitting soldiers', async () => {
-    const { store, wrapper } = mountHunyadiAndTheJanissaries();
+    const { store, wrapper } = await mountHunyadiAndTheJanissaries();
     store.commit('setBoard', [['blue', 'blue'], ['blue'], []]);
     await wrapper.find('.js-first-player').trigger('click');
 
@@ -72,7 +72,7 @@ describe('HunyadiAndTheJanissaries', () => {
   });
 
   it('should not allow player move while enemy move is in progress', async () => {
-    const { store, wrapper } = mountHunyadiAndTheJanissaries();
+    const { store, wrapper } = await mountHunyadiAndTheJanissaries();
     const initialBoard = store.state.board;
     await wrapper.find('.js-second-player').trigger('click');
 
@@ -84,7 +84,7 @@ describe('HunyadiAndTheJanissaries', () => {
 
   it('should show the result to the user when the game is finished', async () => {
     jest.useFakeTimers();
-    const { store, wrapper } = mountHunyadiAndTheJanissaries();
+    const { store, wrapper } = await mountHunyadiAndTheJanissaries();
 
     await wrapper.find('.js-second-player').trigger('click');
     jest.advanceTimersToNextTimer();

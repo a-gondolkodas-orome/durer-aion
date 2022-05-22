@@ -1,4 +1,3 @@
-import { mapState } from 'vuex';
 import Game from '../game/game';
 import Overview from '../overview/overview';
 
@@ -8,9 +7,6 @@ export default {
   components: {
     Game,
     Overview
-  },
-  computed: {
-    ...mapState(['gameId'])
   },
   created() {
     document.title = 'Dürer játékok';

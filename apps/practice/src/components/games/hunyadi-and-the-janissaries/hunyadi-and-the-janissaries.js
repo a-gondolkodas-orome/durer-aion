@@ -7,9 +7,8 @@ export default {
   components: { EnemyLoader },
   computed: {
     ...mapState({ isPlayerSultan: (state) => state.isPlayerTheFirstToMove }),
-    ...mapState(['board', 'shouldPlayerMoveNext']),
+    ...mapState(['game', 'board', 'shouldPlayerMoveNext']),
     ...mapGetters([
-      'game',
       'ctaText',
       'isEnemyMoveInProgress',
       'isGameInProgress',

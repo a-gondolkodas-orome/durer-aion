@@ -1,9 +1,8 @@
 import { createStore } from 'vuex';
-import { gameList } from '../components/games/games';
 
 export default () => createStore({
   state: {
-    gameId: null,
+    game: null,
     board: null,
     gameStatus: null,
     isPlayerTheFirstToMove: null,
@@ -13,7 +12,6 @@ export default () => createStore({
     isEnemyMoveInProgress: null
   },
   getters: {
-    game: (state) => gameList.find((game) => game.component === state.gameId),
     isGameInProgress: (state) => state.gameStatus === 'inProgress',
     isGameReadyToStart: (state) => state.gameStatus === 'readyToStart',
     isGameFinished: (state) => state.gameStatus === 'finished',
@@ -29,8 +27,8 @@ export default () => createStore({
     }
   },
   mutations: {
-    setGameId(state, gameId) {
-      state.gameId = gameId;
+    setGame(state, game) {
+      state.game = game;
     },
     setGameStatus(state, status) {
       state.gameStatus = status;
@@ -60,21 +58,21 @@ export default () => createStore({
           : state.isPlayerTheFirstToMove === hasFirstPlayerWon;
       }
     },
-    initializeGame({ state, commit, getters }) {
+    initializeGame({ state, commit }) {
       clearTimeout(state.enemyMoveTimeoutHandle);
       state.isEnemyMoveInProgress = false;
       state.shouldPlayerMoveNext = null;
       state.isPlayerWinner = null;
       state.isPlayerTheFirstToMove = null;
 
-      state.board = getters.game.strategy.generateNewBoard();
+      state.board = state.game.strategy.generateNewBoard();
       commit('setGameStatus', 'readyToStart');
     },
-    aiMove: async ({ state, getters, dispatch }) => {
+    aiMove: async ({ state, dispatch }) => {
       state.isEnemyMoveInProgress = true;
       const time = Math.floor(Math.random() * 750 + 750);
       state.enemyMoveTimeoutHandle = setTimeout(() => {
-        dispatch('applyMove', getters.game.strategy.makeAiMove(state.board, state.isPlayerTheFirstToMove));
+        dispatch('applyMove', state.game.strategy.makeAiMove(state.board, state.isPlayerTheFirstToMove));
         state.isEnemyMoveInProgress = false;
       }, time);
     },

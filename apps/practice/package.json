@@ -21,6 +21,7 @@
     "postcss": "8.4.13",
     "tailwindcss": "3.0.24",
     "vue": "3.2.33",
+    "vue-router": "4.0.15",
     "vuex": "4.0.2"
   },
   "devDependencies": {

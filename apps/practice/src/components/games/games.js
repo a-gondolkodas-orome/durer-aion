@@ -8,8 +8,8 @@ export const gameComponents = {
   HunyadiAndTheJanissaries
 };
 
-export const gameList = [
-  {
+export const gameList = {
+  HunyadiAndTheJanissaries: {
     year: 6,
     round: 'döntő',
     category: 'D',
@@ -17,7 +17,7 @@ export const gameList = [
     name: 'Hunyadi és a janicsárok',
     strategy: hunyadiAndTheJanissariesStrategy
   },
-  {
+  HeapSplitter: {
     year: 8,
     round: 'döntő',
     category: 'A',
@@ -25,4 +25,4 @@ export const gameList = [
     name: 'Kupac kettéosztó',
     strategy: heapSplitterStrategy
   }
-];
+};
