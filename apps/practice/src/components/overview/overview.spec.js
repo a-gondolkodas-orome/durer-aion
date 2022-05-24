@@ -8,9 +8,11 @@ describe('Overview', () => {
   it('should show a list of available games', async () => {
     const { wrapper } = await mountComponent(Overview);
 
-    expect(wrapper.findAll('tr')).toHaveLength(Object.values(gameList).length + 1);
+    const gamesToShow = Object.values(gameList).filter((game) => !game.isHiddenFromOverview);
+
+    expect(wrapper.findAll('tr')).toHaveLength(gamesToShow.length + 1);
     expect(wrapper.find('table').text()).toMatch(
-      new RegExp(Object.values(gameList).map((game) => game.name).join('.*'))
+      new RegExp(gamesToShow.map((game) => game.name).join('.*'))
     );
   });
 });

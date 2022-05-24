@@ -23,7 +23,7 @@ export default {
       this.$router.push('/');
     },
     setGameBasedOnRoute() {
-      this.setGame(Object.values(gameList).find((game) => game.component === this.gameId) || null);
+      this.setGame(gameList[this.gameId] || null);
     }
   },
   mounted() {
