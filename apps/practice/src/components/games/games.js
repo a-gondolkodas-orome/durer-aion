@@ -4,11 +4,14 @@ import HunyadiAndTheJanissaries from './hunyadi-and-the-janissaries/hunyadi-and-
 import * as hunyadiAndTheJanissariesStrategy from './hunyadi-and-the-janissaries/strategy/strategy';
 import Demonstration from './demonstration/demonstration';
 import * as demonstrationStrategy from './demonstration/strategy/strategy';
+import TwoTimesTwo from './two-times-two/two-times-two';
+import * as twoTimesTwoStrategy from './two-times-two/strategy/strategy';
 
 export const gameComponents = {
   HeapSplitter,
   HunyadiAndTheJanissaries,
-  Demonstration
+  Demonstration,
+  TwoTimesTwo
 };
 
 export const gameList = {
@@ -33,5 +36,13 @@ export const gameList = {
     component: 'Demonstration',
     strategy: demonstrationStrategy,
     isHiddenFromOverview: true
+  },
+  TwoTimesTwo: {
+    year: 13,
+    round: 'döntő',
+    category: 'A',
+    name: '2x2-es játék',
+    component: 'TwoTimesTwo',
+    strategy: twoTimesTwoStrategy
   }
 };

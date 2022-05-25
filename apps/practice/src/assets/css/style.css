@@ -30,3 +30,16 @@
 .game__piece {
     @apply h-16 w-16 p-1 inline-block;
 }
+
+.game_table {
+    margin: 10px;
+    border-collapse:collapse;
+}
+
+.game_table td {
+    @apply text-center
+    width: 150px;
+    height: 150px;
+    border: 5px solid black;
+    font-size: x-large;
+}

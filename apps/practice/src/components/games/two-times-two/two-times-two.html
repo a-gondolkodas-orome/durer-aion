@@ -1,0 +1,75 @@
+<div>
+  <p class="text-justify">
+    Adott egy 2 × 2-es táblázat, és hozzá mindkét játékosnak van 3 db korongja. A
+    játék során felváltva tesznek le ezekből egyet-egyet a táblázat tetszőleges mezőjére. A második
+    játékos akkor nyer, ha a játék végén minden mezőben különböző számú korong található. (Azaz
+    0, 1, 2, 3 a kiosztás a végén valamilyen sorrendben). Minden egyéb esetben pedig a kezdő játékos
+    nyer.
+
+    Te döntheteted el, hogy a kezdő vagy a második játékos bőrébe szeretnél e bújni.
+    Sok sikert! :)
+  </p>
+  <div class="flex flex-wrap" id="two_times_two">
+    <div class="game__board game_board_small">
+      <table class="game_table">
+        <tr>
+          <td id ="pile_0" @click=placePiece(0)>
+            <span
+              v-for="i in board[0]"
+              :key="i"
+              class="game__piece bg-blue-600 rounded-full mr-1"
+            ></span>
+          </td>
+          <td id ="pile_1" @click=placePiece(1)>
+            <span
+              v-for="i in board[1]"
+              :key="i"
+              class="game__piece bg-blue-600 rounded-full mr-1"
+            ></span>
+          </td>
+        </tr>
+        <tr>
+          <td id ="pile_2" @click=placePiece(2)>
+            <span
+              v-for="i in board[2]"
+              :key="i"
+              class="game__piece bg-blue-600 rounded-full mr-1"
+            ></span>
+          </td>
+          <td id ="pile_3" @click=placePiece(3)>
+            <span
+              v-for="i in board[3]"
+              :key="i"
+              class="game__piece bg-blue-600 rounded-full mr-1"
+            ></span>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="p-1 flex flex-col flex-grow flex-shrink-0 basis-80">
+      <p class="text-center font-bold text-lg">{{ ctaText }}</p>
+      <enemy-loader />
+      <p class="italic text-justify">{{ stepDescription }}</p>
+      <button
+        v-if="isGameReadyToStart"
+        class="game__cta-button js-first-player"
+        @click="startGameAsPlayer({ isFirst: true })"
+      >
+        Kezdő leszek
+      </button>
+      <button
+        v-if="isGameReadyToStart"
+        class="game__cta-button js-second-player"
+        @click="startGameAsPlayer({ isFirst: false })"
+      >
+        Második leszek
+      </button>
+      <div class="flex flex-grow items-end">
+        <button class="game__cta-button mt-4 js-restart-game" @click="initializeGame()">
+          Új leosztás
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
