@@ -47,14 +47,14 @@ export default () => createStore({
       commit('startGameAsPlayer', { isFirst });
       if (!isFirst) dispatch('aiMove');
     },
-    applyMove({ state, commit }, { board, isGameEnd, hasFirstPlayerWon }) {
+    applyMove({ state, commit }, { board, isGameEnd, hasFirstPlayerWon, lastToMoveWins = true }) {
       commit('setBoard', board);
       state.shouldPlayerMoveNext = !state.shouldPlayerMoveNext;
       if (isGameEnd) {
         clearTimeout(state.enemyMoveTimeoutHandle);
         state.gameStatus = 'finished';
         state.isPlayerWinner = hasFirstPlayerWon === undefined
-          ? !state.shouldPlayerMoveNext
+          ? (lastToMoveWins ? !state.shouldPlayerMoveNext : state.shouldPlayerMoveNext)
           : state.isPlayerTheFirstToMove === hasFirstPlayerWon;
       }
     },
@@ -76,8 +76,8 @@ export default () => createStore({
         state.isEnemyMoveInProgress = false;
       }, time);
     },
-    playerMove: ({ dispatch }, { board, isGameEnd, hasFirstPlayerWon }) => {
-      dispatch('applyMove', { board, isGameEnd, hasFirstPlayerWon });
+    playerMove: ({ dispatch }, { board, isGameEnd, hasFirstPlayerWon, lastToMoveWins }) => {
+      dispatch('applyMove', { board, isGameEnd, hasFirstPlayerWon, lastToMoveWins });
       if (!isGameEnd) {
         dispatch('aiMove');
       }

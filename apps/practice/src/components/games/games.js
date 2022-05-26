@@ -6,12 +6,15 @@ import Demonstration from './demonstration/demonstration';
 import * as demonstrationStrategy from './demonstration/strategy/strategy';
 import TwoTimesTwo from './two-times-two/two-times-two';
 import * as twoTimesTwoStrategy from './two-times-two/strategy/strategy';
+import SuperstitiousCounting from './superstitious-counting/superstitious-counting';
+import * as superstitiousCountingStrategy from './superstitious-counting/strategy/strategy';
 
 export const gameComponents = {
   HeapSplitter,
   HunyadiAndTheJanissaries,
   Demonstration,
-  TwoTimesTwo
+  TwoTimesTwo,
+  SuperstitiousCounting
 };
 
 export const gameList = {
@@ -44,5 +47,13 @@ export const gameList = {
     name: '2x2-es játék',
     component: 'TwoTimesTwo',
     strategy: twoTimesTwoStrategy
+  },
+  SuperstitiousCounting: {
+    year: 13,
+    round: 'döntő',
+    category: 'E',
+    name: 'Babonás számoló',
+    component: 'SuperstitiousCounting',
+    strategy: superstitiousCountingStrategy
   }
 };

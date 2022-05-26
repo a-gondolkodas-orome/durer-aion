@@ -1,0 +1,64 @@
+<div>
+  <p class="text-justify">
+    Ez a játék a XIII. Dürer döntőjén szerepelt E kategóriában.
+
+    Károly és Dezső m-ig szeretnének elszámolni, és közben a következő játékot játsszák:
+    0-ról kezdenek, a két játékos felváltva adhat hozzá egy 13-nál kisebb pozitív egészet a korábbi
+    számhoz, azonban a babonájuk miatt ha egyikük x-et adott hozzá, akkor másikuk a következő
+    lépésben nem adhat hozzá 13 − x-et. Az veszít, aki eléri (vagy átlépi) m-et.
+
+    Az új játék gombra kattintva generálhatsz egy felállást.
+
+    Az m szám ismeretében te döntheteted el, hogy a kezdő vagy a második játékos bőrébe szeretnél e bújni.
+  </p>
+  <div class="flex flex-wrap" id="two_times_two">
+    <div class="game__board game_board_small">
+      <table class="game_table">
+        <tr>
+          <th>Szám</th>
+          <th>Cél</th>
+          <th>Tiltott lépés</th>
+        </tr>
+        <tr>
+          <td>{{ board.current }}</td>
+          <td>{{ board.target }}</td>
+          <td>{{ board.restricted || '-' }}</td>
+        </tr>
+      </table>
+      <template v-if="isGameInProgress">
+        <label for="step"> Következő lépés: </label>
+        <input id="step" type="number" min="1" max="12" v-model="step" class="border-2">
+        <button
+          class="game__cta-button"
+          @click="attemptStep()"
+          :class="{ 'opacity-50': isEnemyMoveInProgress }"
+        >Lépek</button>
+      </template>
+    </div>
+
+    <div class="p-1 flex flex-col flex-grow flex-shrink-0 basis-80">
+      <p class="text-center font-bold text-lg">{{ ctaText }}</p>
+      <enemy-loader />
+      <p class="italic text-justify">{{ stepDescription }}</p>
+      <button
+        v-if="isGameReadyToStart"
+        class="game__cta-button js-first-player"
+        @click="startGameAsPlayer({ isFirst: true })"
+      >
+        Kezdő leszek
+      </button>
+      <button
+        v-if="isGameReadyToStart"
+        class="game__cta-button js-second-player"
+        @click="startGameAsPlayer({ isFirst: false })"
+      >
+        Második leszek
+      </button>
+      <div class="flex flex-grow items-end">
+        <button class="game__cta-button mt-4 js-restart-game" @click="initializeGame()">
+          Új leosztás
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
