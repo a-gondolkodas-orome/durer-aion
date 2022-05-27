@@ -2,7 +2,7 @@
 
 import { random, difference } from 'lodash-es';
 
-export const generateNewBoard = () => ([random(4, 20), random(4, 20), random(4, 20), random(4, 20)]);
+export const generateNewBoard = () => ([random(4, 18), random(4, 18), random(4, 18), random(4, 18)]);
 
 export const getBoardAfterPlayerStep = (board, { removedRowIndex, splitRowIndex, pieceIndex }) => {
   const keptRowIndices = difference([0, 1, 2, 3], [removedRowIndex, splitRowIndex]);

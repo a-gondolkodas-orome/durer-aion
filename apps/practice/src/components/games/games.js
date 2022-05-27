@@ -10,6 +10,8 @@ import SuperstitiousCounting from './superstitious-counting/superstitious-counti
 import * as superstitiousCountingStrategy from './superstitious-counting/strategy/strategy';
 import HeapSplitter4 from './heap-splitter-4/heap-splitter-4';
 import * as heapSplitter4Strategy from './heap-splitter-4/strategy/strategy';
+import HeapSplitter3 from './heap-splitter-3/heap-splitter-3';
+import * as heapSplitter3Strategy from './heap-splitter-3/strategy/strategy';
 
 export const gameComponents = {
   HeapSplitter,
@@ -17,7 +19,8 @@ export const gameComponents = {
   Demonstration,
   TwoTimesTwo,
   SuperstitiousCounting,
-  HeapSplitter4
+  HeapSplitter4,
+  HeapSplitter3
 };
 
 export const gameList = {
@@ -36,6 +39,14 @@ export const gameList = {
     component: 'HeapSplitter',
     name: 'Kupac kettéosztó',
     strategy: heapSplitterStrategy
+  },
+  HeapSplitter3: {
+    year: 8,
+    round: 'döntő',
+    category: 'B',
+    name: 'Kupac kettéosztó 3 kupaccal',
+    component: 'HeapSplitter3',
+    strategy: heapSplitter3Strategy
   },
   Demonstration: {
     name: 'Demonstráló játék',
