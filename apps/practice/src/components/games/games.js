@@ -8,13 +8,16 @@ import TwoTimesTwo from './two-times-two/two-times-two';
 import * as twoTimesTwoStrategy from './two-times-two/strategy/strategy';
 import SuperstitiousCounting from './superstitious-counting/superstitious-counting';
 import * as superstitiousCountingStrategy from './superstitious-counting/strategy/strategy';
+import HeapSplitter4 from './heap-splitter-4/heap-splitter-4';
+import * as heapSplitter4Strategy from './heap-splitter-4/strategy/strategy';
 
 export const gameComponents = {
   HeapSplitter,
   HunyadiAndTheJanissaries,
   Demonstration,
   TwoTimesTwo,
-  SuperstitiousCounting
+  SuperstitiousCounting,
+  HeapSplitter4
 };
 
 export const gameList = {
@@ -55,5 +58,13 @@ export const gameList = {
     name: 'Babonás számoló',
     component: 'SuperstitiousCounting',
     strategy: superstitiousCountingStrategy
+  },
+  HeapSplitter4: {
+    year: 13,
+    round: 'döntő',
+    category: 'E+',
+    name: 'Kupac kettéosztó 4 kupaccal',
+    component: 'HeapSplitter4',
+    strategy: heapSplitter4Strategy
   }
 };

@@ -1,8 +1,9 @@
 <div>
   <p class="text-justify">
-    A pályán mindig két kupac
-    korong található. A soron következő játékos választ egy kupacot, és azt szétosztja két kisebb kupacra (mindkettőbe
-    legalább 1 korongnak kerülnie kell), a másik kupacot pedig kidobjuk. Az a játékos veszít, aki nem tud szabályosan
+    Ez a játék a XIII. Dürer döntőjén szerepelt E+ kategóriában. A pályán kezdetben négy kupac korong van.
+    A soron következő játékos először az egyik kupacot teljes egészében kiveszi a játékból;
+    majd egy másik kupacot kettéoszt két kisebb kupacra (mindkettőbe legalább 1 korongnak kerülnie kell).
+    Egy lépést követően tehát újra 4 kupac marad. Az a játékos veszít, aki nem tud szabályosan
     lépni (azaz egyik kupacot se tudja szétosztani).
 
     Az új leosztás gombra kattintva generálhatsz egy felállást. A felállás ismeretében te döntheted el, hogy kezdeni
@@ -11,16 +12,16 @@
   </p>
   <div class="flex flex-wrap" id="heap-splitter">
     <div class="game__board">
-      <div v-for="rowIndex in [0, 1]" class="game__pile" :class="{ 'border-b-black border-b-2': rowIndex === 1 }">
+      <div v-for="rowIndex in [0, 1, 2, 3]" class="game__pile" :class="{ 'border-b-black border-b-2': rowIndex === 3 }">
         <template v-for="(_, pieceIndex) in board[rowIndex]">
           <span
             v-if="shouldShowDividerToTheLeft({ rowIndex, pieceIndex })"
             class="inline-block border-r-black border-r-4 h-16 border-dotted -ml-1"
           ></span>
           <span
-            :class="{ 'opacity-50': !shouldPlayerMoveNext && isGameInProgress }"
-            class="game__piece bg-blue-600 rounded-full mr-1"
-            :style="{ 'pointer-events': shouldPlayerMoveNext ? 'auto' : 'none', 'cursor': pieceIndex === 0 ? 'not-allowed' : 'pointer' }"
+            :class="{ 'bg-red-600': rowColor({ rowIndex }) === 'red', 'bg-blue-600': rowColor({ rowIndex }) === 'blue', 'opacity-50': (!shouldPlayerMoveNext && isGameInProgress) || rowIndex === removedRowIndex }"
+            class="game__piece rounded-full mr-1"
+            :style="{ 'pointer-events': shouldPlayerMoveNext ? 'auto' : 'none', 'cursor': pieceClickNotAllowed({ rowIndex, pieceIndex }) ? 'not-allowed' : 'pointer' }"
             @click="clickPiece({ rowIndex, pieceIndex })"
             @mouseover="hoveredPiece = { rowIndex, pieceIndex }"
             @mouseout="hoveredPiece = null"
