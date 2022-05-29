@@ -35,30 +35,6 @@
         >Lépek</button>
       </template>
     </div>
-
-    <div class="p-1 flex flex-col flex-grow flex-shrink-0 basis-80">
-      <p class="text-center font-bold text-lg">{{ ctaText }}</p>
-      <enemy-loader />
-      <p class="italic text-justify">{{ stepDescription }}</p>
-      <button
-        v-if="isGameReadyToStart"
-        class="game__cta-button js-first-player"
-        @click="startGameAsPlayer({ isFirst: true })"
-      >
-        Kezdő leszek
-      </button>
-      <button
-        v-if="isGameReadyToStart"
-        class="game__cta-button js-second-player"
-        @click="startGameAsPlayer({ isFirst: false })"
-      >
-        Második leszek
-      </button>
-      <div class="flex flex-grow items-end">
-        <button class="game__cta-button mt-4 js-restart-game" @click="initializeGame()">
-          Új leosztás
-        </button>
-      </div>
-    </div>
+    <game-sidebar :step-description="stepDescription"></game-sidebar>
   </div>
 </div>

@@ -1,20 +1,18 @@
-import { mapGetters, mapActions, mapMutations, mapState } from 'vuex';
-import EnemyLoader from '../../common/enemy-loader/enemy-loader';
+import { mapGetters, mapActions, mapState } from 'vuex';
+import GameSidebar from '../../common/game-sidebar/game-sidebar';
 import { getGameStateAfterMove } from './strategy/strategy';
 
 export default {
   name: 'superstitious-counting',
   template: require('./superstitious-counting.html'),
-  components: { EnemyLoader },
+  components: { GameSidebar },
   data: () => ({ step: 1 }),
   computed: {
     ...mapState({ isPlayerSultan: (state) => state.isPlayerTheFirstToMove }),
     ...mapState(['game', 'board', 'shouldPlayerMoveNext']),
     ...mapGetters([
-      'ctaText',
       'isEnemyMoveInProgress',
-      'isGameInProgress',
-      'isGameReadyToStart'
+      'isGameInProgress'
     ]),
     stepDescription() {
       if (!this.isGameInProgress || !this.shouldPlayerMoveNext) return '';
@@ -22,8 +20,7 @@ export default {
     }
   },
   methods: {
-    ...mapMutations(['setBoard']),
-    ...mapActions(['playerMove', 'startGameAsPlayer', 'initializeGame']),
+    ...mapActions(['playerMove', 'initializeGame']),
     attemptStep() {
       if (!this.shouldPlayerMoveNext) return;
       if(this.step === this.board.restricted || this.step <= 0 || this.step >= 13) {

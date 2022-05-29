@@ -1,19 +1,13 @@
 import { mapGetters, mapActions, mapState } from 'vuex';
-import EnemyLoader from '../../common/enemy-loader/enemy-loader';
+import GameSidebar from '../../common/game-sidebar/game-sidebar';
 
 export default {
   name: 'demonstration',
   template: require('./demonstration.html'),
-  components: { EnemyLoader },
+  components: { GameSidebar },
   computed: {
     ...mapState(['game', 'shouldPlayerMoveNext']),
-    ...mapGetters([
-      'ctaText',
-      'isEnemyMoveInProgress',
-      'isGameInProgress',
-      'isGameReadyToStart',
-      'isGameFinished'
-    ]),
+    ...mapGetters(['isGameInProgress']),
     stepDescription() {
       return this.isGameInProgress && this.shouldPlayerMoveNext
         ? 'Kattints a "Lépek" gombra, hogy lépj.'
@@ -21,7 +15,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['playerMove', 'startGameAsPlayer', 'initializeGame'])
+    ...mapActions(['playerMove', 'initializeGame'])
   },
   created() {
     this.initializeGame();

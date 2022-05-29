@@ -1,18 +1,14 @@
 import { mapGetters, mapActions, mapState } from 'vuex';
-import EnemyLoader from '../../common/enemy-loader/enemy-loader';
+import GameSidebar from '../../common/game-sidebar/game-sidebar';
 
 export default {
   name: 'two-times-two',
   template: require('./two-times-two.html'),
-  components: { EnemyLoader },
+  components: { GameSidebar },
   computed: {
     ...mapState(['game', 'board', 'shouldPlayerMoveNext']),
     ...mapGetters([
-      'ctaText',
-      'isEnemyMoveInProgress',
-      'isGameInProgress',
-      'isGameReadyToStart',
-      'isGameFinished'
+      'isGameInProgress'
     ]),
     stepDescription() {
       return this.isGameInProgress && this.shouldPlayerMoveNext
@@ -21,7 +17,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['playerMove', 'startGameAsPlayer', 'initializeGame']),
+    ...mapActions(['playerMove', 'initializeGame']),
     placePiece(tileIndex) {
       if (!this.shouldPlayerMoveNext) return;
       this.playerMove(this.game.strategy.getGameStateAfterMove(this.board, tileIndex));

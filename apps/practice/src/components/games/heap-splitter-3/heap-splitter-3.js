@@ -1,11 +1,11 @@
 import { mapGetters, mapActions, mapState } from 'vuex';
-import EnemyLoader from '../../common/enemy-loader/enemy-loader';
+import GameSidebar from '../../common/game-sidebar/game-sidebar';
 import { isEqual } from 'lodash-es';
 
 export default {
   name: 'heap-splitter-3',
   template: require('./heap-splitter-3.html'),
-  components: { EnemyLoader },
+  components: { GameSidebar },
   data: () => ({
     removedRowIndex: null,
     hoveredPiece: null
@@ -13,8 +13,6 @@ export default {
   computed: {
     ...mapState(['game', 'board', 'shouldPlayerMoveNext']),
     ...mapGetters([
-      'ctaText',
-      'isEnemyMoveInProgress',
       'isGameInProgress',
       'isGameReadyToStart',
       'isGameFinished'
@@ -26,7 +24,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['playerMove', 'startGameAsPlayer', 'initializeGame']),
+    ...mapActions(['playerMove', 'initializeGame']),
     rowColor({ rowIndex }) {
       if (!this.isGameInProgress) return 'blue';
       if (rowIndex === this.removedRowIndex) {

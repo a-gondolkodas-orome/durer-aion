@@ -1,19 +1,17 @@
 import { mapGetters, mapActions, mapState } from 'vuex';
-import EnemyLoader from '../../common/enemy-loader/enemy-loader';
 import { isEqual } from 'lodash-es';
+import GameSidebar from '../../common/game-sidebar/game-sidebar';
 
 export default {
   name: 'heap-splitter',
   template: require('./heap-splitter.html'),
-  components: { EnemyLoader },
+  components: { GameSidebar },
   data: () => ({
     hoveredPiece: null
   }),
   computed: {
     ...mapState(['game', 'board', 'shouldPlayerMoveNext']),
     ...mapGetters([
-      'ctaText',
-      'isEnemyMoveInProgress',
       'isGameInProgress',
       'isGameReadyToStart',
       'isGameFinished'
@@ -25,7 +23,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['playerMove', 'startGameAsPlayer', 'initializeGame']),
+    ...mapActions(['playerMove', 'initializeGame']),
     clickPiece({ rowIndex, pieceIndex }) {
       if (!this.shouldPlayerMoveNext || pieceIndex === 0) return;
       this.playerMove(this.game.strategy.getGameStateAfterMove(this.board, { rowIndex, pieceIndex }));
