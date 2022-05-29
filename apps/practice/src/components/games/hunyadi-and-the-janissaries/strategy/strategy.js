@@ -1,48 +1,18 @@
 'use strict';
 
 import { random, flatten } from 'lodash-es';
+import { getOptimalGroupToKill, colorBoardOptimally } from './ai-step';
 
-export const makeAiMove = (board, isPlayerTheFirstToMove) => {
+export const getGameStateAfterAiMove = (board, isPlayerTheFirstToMove) => {
   if (isPlayerTheFirstToMove) {
-    const optimalGroupToKill = optimalKill(board);
-    return getBoardAfterKillingGroup(board, optimalGroupToKill);
+    const optimalGroupToKill = getOptimalGroupToKill(board);
+    return getGameStateAfterKillingGroup(board, optimalGroupToKill);
   } else {
-    return { board: optimalColoring(board), isGameEnd: false };
+    return { board: colorBoardOptimally(board), isGameEnd: false };
   }
 };
 
 export const isTheLastMoverTheWinner = null;
-
-const optimalColoring = (board) => {
-  const groupScores = { blue: 0, red: 0 };
-  const firstColor = random(0, 1) === 1 ? 'red' : 'blue';
-  const secondColor = firstColor === 'blue' ? 'red' : 'blue';
-
-  for (let i = 0; i < board.length; i++) {
-    for (let j = 0; j < board[i].length; j++) {
-      const nextGroup = groupScores[firstColor] < groupScores[secondColor] ? firstColor : secondColor;
-      board[i][j] = nextGroup;
-      groupScores[nextGroup] += (1 / 2) ** i;
-    }
-  }
-
-  return board;
-};
-
-const optimalKill = (board) => {
-  if (board[0].length > 0) {
-    return board[0][0];
-  }
-
-  const groupScores = { blue: 0, red: 0 };
-  for (let i = 0; i < board.length; i++) {
-    for (const soldier of board[i]) {
-      groupScores[soldier] += (1 / 2) ** i;
-    }
-  }
-
-  return groupScores['blue'] > groupScores['red'] ? 'blue' : 'red';
-};
 
 export const generateNewBoard = () => {
   const rowCount = 5;
@@ -67,7 +37,7 @@ export const generateNewBoard = () => {
   return board;
 };
 
-export const getBoardAfterKillingGroup = (board, group) => {
+export const getGameStateAfterKillingGroup = (board, group) => {
   let isGameEnd = false;
   let hasFirstPlayerWon = undefined;
 

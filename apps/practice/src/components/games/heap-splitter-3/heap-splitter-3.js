@@ -54,7 +54,7 @@ export default {
         return;
       }
       if (pieceIndex === 0) return;
-      this.playerMove(this.game.strategy.getBoardAfterPlayerStep(this.board, {
+      this.playerMove(this.game.strategy.getGameStateAfterMove(this.board, {
         removedRowIndex: this.removedRowIndex,
         splitRowIndex: rowIndex,
         pieceIndex

@@ -72,7 +72,7 @@ export default () => createStore({
       state.isEnemyMoveInProgress = true;
       const time = Math.floor(Math.random() * 750 + 750);
       state.enemyMoveTimeoutHandle = setTimeout(() => {
-        dispatch('applyMove', state.game.strategy.makeAiMove(state.board, state.isPlayerTheFirstToMove));
+        dispatch('applyMove', state.game.strategy.getGameStateAfterAiMove(state.board, state.isPlayerTheFirstToMove));
         state.isEnemyMoveInProgress = false;
       }, time);
     },

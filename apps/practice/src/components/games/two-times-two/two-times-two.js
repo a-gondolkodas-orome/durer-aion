@@ -24,7 +24,7 @@ export default {
     ...mapActions(['playerMove', 'startGameAsPlayer', 'initializeGame']),
     placePiece(tileIndex) {
       if (!this.shouldPlayerMoveNext) return;
-      this.playerMove(this.game.strategy.getBoardAfterPlacingOnTile(this.board, tileIndex));
+      this.playerMove(this.game.strategy.getGameStateAfterMove(this.board, tileIndex));
     }
   },
   created() {

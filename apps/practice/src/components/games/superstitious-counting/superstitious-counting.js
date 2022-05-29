@@ -1,6 +1,6 @@
 import { mapGetters, mapActions, mapMutations, mapState } from 'vuex';
 import EnemyLoader from '../../common/enemy-loader/enemy-loader';
-import { getBoardAfterStep } from './strategy/strategy';
+import { getGameStateAfterMove } from './strategy/strategy';
 
 export default {
   name: 'superstitious-counting',
@@ -30,7 +30,7 @@ export default {
         alert("Ez a lépés nem megengedett");
         return;
       }
-      this.playerMove(getBoardAfterStep(this.board, this.step));
+      this.playerMove(getGameStateAfterMove(this.board, this.step));
     }
   },
   created() {

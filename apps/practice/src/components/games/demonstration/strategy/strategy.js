@@ -2,7 +2,7 @@
 
 export const generateNewBoard = () => ([]);
 
-export const makeAiMove = (board) => {
+export const getGameStateAfterAiMove = (board) => {
   return { board, isGameEnd: true };
 };
 

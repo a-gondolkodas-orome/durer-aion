@@ -28,7 +28,7 @@ export default {
     ...mapActions(['playerMove', 'startGameAsPlayer', 'initializeGame']),
     clickPiece({ rowIndex, pieceIndex }) {
       if (!this.shouldPlayerMoveNext || pieceIndex === 0) return;
-      this.playerMove(this.game.strategy.getBoardAfterPlayerStep(this.board, { rowIndex, pieceIndex }));
+      this.playerMove(this.game.strategy.getGameStateAfterMove(this.board, { rowIndex, pieceIndex }));
       this.hoveredPiece = null;
     },
     shouldShowDividerToTheLeft(piece) {

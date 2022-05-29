@@ -32,7 +32,7 @@ export default {
       this.playerMove({ board: this.board, isGameEnd: false });
     },
     killGroup(group) {
-      this.playerMove(this.game.strategy.getBoardAfterKillingGroup(this.board, group));
+      this.playerMove(this.game.strategy.getGameStateAfterKillingGroup(this.board, group));
     }
   },
   created() {
