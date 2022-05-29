@@ -5,6 +5,8 @@ import { random } from 'lodash-es';
 
 export const generateNewBoard = () => ([random(3, 10), random(3, 10)]);
 
+export const isTheLastMoverTheWinner = true;
+
 export const getBoardAfterPlayerStep = (board, { rowIndex, pieceIndex }) => {
   const newBoard = [pieceIndex, board[rowIndex] - pieceIndex];
   return { board: newBoard, isGameEnd: isGameEnd(newBoard) };

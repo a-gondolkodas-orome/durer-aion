@@ -11,6 +11,8 @@ export const makeAiMove = (board, isPlayerTheFirstToMove) => {
   }
 };
 
+export const isTheLastMoverTheWinner = null;
+
 const optimalColoring = (board) => {
   const groupScores = { blue: 0, red: 0 };
   const firstColor = random(0, 1) === 1 ? 'red' : 'blue';

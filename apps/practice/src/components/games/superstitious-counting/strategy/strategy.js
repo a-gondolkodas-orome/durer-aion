@@ -10,13 +10,14 @@ export const generateNewBoard = () => {
   return { current: 0, target: random(20, 100), restricted: null };
 };
 
+export const isTheLastMoverTheWinner = false;
+
 export const getBoardAfterStep = (board, step) => {
   const numberAfterStep = board.current + step;
   const isGameEnd = numberAfterStep >= board.target;
   return {
     board: { current: numberAfterStep, target: board.target, restricted: 13 - step },
-    isGameEnd,
-    lastToMoveWins: false
+    isGameEnd
   };
 };
 

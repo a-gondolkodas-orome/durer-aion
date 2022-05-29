@@ -19,6 +19,8 @@ export const getBoardAfterPlacingOnTile = (board, tileIndex) => {
   };
 };
 
+export const isTheLastMoverTheWinner = null;
+
 const getOptimalTileIndex = (board) => {
   const pieces = sum(board);
 

@@ -14,6 +14,8 @@ export const getBoardAfterPlayerStep = (board, { removedRowIndex, splitRowIndex,
   return { board: newBoard, isGameEnd: isGameEnd(newBoard) };
 };
 
+export const isTheLastMoverTheWinner = true;
+
 const isGameEnd = (board) => board[0] === 1 && board[1] === 1 && board[2] === 1;
 
 export const makeAiMove = (board) => {
