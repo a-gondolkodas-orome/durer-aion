@@ -34,6 +34,6 @@ npm run test:unit
 
 ## Deploy to github pages
 
-`git pull origin production; git push origin master:production`
+`npm run merge-production`
 
 For further options see `package.json`.
