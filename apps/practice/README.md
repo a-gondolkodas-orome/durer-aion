@@ -1,10 +1,10 @@
 # durer-jatekok
 
-Itt fejlesztjük a Dürer Versenyen szerepelt játékok online verzióját.
+Code for the online versions of past strategy games at the Dürer Math Competition.
 
-A játékok legfrissebb verziója elérhető itt: https://a-gondolkodas-orome.github.io/durer-jatekok/.
+The deployed version is here: https://a-gondolkodas-orome.github.io/durer-jatekok/.
 
-Egy példa honlap a beágyazás demonstrációjára: https://sites.google.com/view/durer-jatekok-beagyazas-pelda
+You might wish to embed a game in another webpage, here is an example how to do this: https://sites.google.com/view/durer-jatekok-beagyazas-pelda
 
 # Development
 
