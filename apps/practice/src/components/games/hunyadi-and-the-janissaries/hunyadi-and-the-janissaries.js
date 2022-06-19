@@ -1,10 +1,11 @@
 import { mapGetters, mapActions, mapMutations, mapState } from 'vuex';
 import EnemyLoader from '../../common/enemy-loader/enemy-loader';
+import SoldierSvg from './soldier-svg/soldier-svg';
 
 export default {
   name: 'hunyadi-and-the-janissaries',
   template: require('./hunyadi-and-the-janissaries.html'),
-  components: { EnemyLoader },
+  components: { EnemyLoader, SoldierSvg },
   computed: {
     ...mapState({ isPlayerSultan: (state) => state.isPlayerTheFirstToMove }),
     ...mapState(['game', 'board', 'shouldPlayerMoveNext']),
