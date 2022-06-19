@@ -8,7 +8,6 @@ export default {
   components: { EnemyLoader },
   computed: {
     ...mapGetters([
-      'isEnemyMoveInProgress',
       'ctaText',
       'isGameReadyToStart'
     ])

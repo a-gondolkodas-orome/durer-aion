@@ -40,7 +40,7 @@ export default {
       if (this.isGameReadyToStart || !this.shouldPlayerMoveNext || !this.hoveredPiece) return pieceCountInPile;
       if (this.hoveredPiece.rowIndex !== rowIndex || this.hoveredPiece.pieceIndex === 0) return pieceCountInPile;
 
-      return `${pieceCountInPile} --> ${this.hoveredPiece.pieceIndex}, ${pieceCountInPile - this.hoveredPiece.pieceIndex}`;
+      return `${pieceCountInPile} → ${this.hoveredPiece.pieceIndex}, ${pieceCountInPile - this.hoveredPiece.pieceIndex}`;
     }
   },
   created() {

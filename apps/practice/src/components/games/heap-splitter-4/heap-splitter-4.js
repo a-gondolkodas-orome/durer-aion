@@ -75,15 +75,15 @@ export default {
         if (this.hoveredPiece && this.hoveredPiece.rowIndex === rowIndex) {
           return 'Eldobás visszavonása?';
         }
-        return `${pieceCountInPile} --> 🗑️`;
+        return `${pieceCountInPile} → 🗑️`;
       }
       if (!this.hoveredPiece) return pieceCountInPile;
       if (this.removedRowIndex === null && this.hoveredPiece.rowIndex === rowIndex) {
-        return `${pieceCountInPile} --> 🗑️`;
+        return `${pieceCountInPile} → 🗑️`;
       }
       if (this.hoveredPiece.rowIndex !== rowIndex || this.hoveredPiece.pieceIndex === 0) return pieceCountInPile;
 
-      return `${pieceCountInPile} --> ${this.hoveredPiece.pieceIndex}, ${pieceCountInPile - this.hoveredPiece.pieceIndex}`;
+      return `${pieceCountInPile} → ${this.hoveredPiece.pieceIndex}, ${pieceCountInPile - this.hoveredPiece.pieceIndex}`;
     }
   },
   created() {
