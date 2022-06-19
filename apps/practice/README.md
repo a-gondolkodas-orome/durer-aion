@@ -12,6 +12,8 @@ Currently this project has a vue setup, but you can include games not using vue 
 If you are using VS Code, [Volar VS Code extension](https://marketplace.visualstudio.com/items?itemName=johnsoncodehk.volar) is highly recommended.
 Tailwindcss is used for some of the styling, the [tailwind VS Code extension](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss) is also recommended.
 
+Html classes starting with `js-` are there for unit testing purposes.
+
 ## Prerequisites:
 
 - install `nvm` (node.js version manager) on your computer globally
