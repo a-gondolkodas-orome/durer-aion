@@ -1,4 +1,3 @@
-import { flatten, compact } from 'lodash-es';
 import { mapGetters, mapActions, mapState } from 'vuex';
 import GameSidebar from '../../common/game-sidebar/game-sidebar';
 import { getGameStateAfterMove, inPlacingPhase } from './strategy/strategy';
