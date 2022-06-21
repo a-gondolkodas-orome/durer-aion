@@ -1,14 +1,14 @@
 'use strict';
 
-import { findIndex, isNull, compact, flatten } from "lodash-es";
+import { findIndex, isNull, some, difference, groupBy, range, cloneDeep } from "lodash-es";
 
-export const generateNewBoard = () => ([null, null, null, null, null, null, null, null, null]);
+export const generateNewBoard = () => (range(0, 9).map(() => null));
 
 export const getGameStateAfterAiMove = (board) => {
   if (inPlacingPhase(board)) {
-    board[findIndex(board, isNull)] = 'red';
+    board[getOptimalAiPlacingPosition(board)] = 'red';
   } else {
-    board[findIndex(board, (c) => c === 'blue')] = 'purple';
+    board[getOptimalAiFlippingPosition(board)] = 'purple';
   }
   return getGameStateAfterMove(board);
 };
@@ -19,21 +19,53 @@ export const getGameStateAfterMove = (board) => {
 
 export const isTheLastMoverTheWinner = true;
 
-export const inPlacingPhase = (board) => compact(flatten(board)).length !== 9;
+export const inPlacingPhase = (board) => freePlaces(board).length > 0;
+
+const freePlaces = (board) => range(0, 9).filter((i) => isNull(board[i]));
+const occupiedPlaces = (board) => range(0, 9).filter((i) => board[i]);
 
 const isGameEnd = (board) => {
-  return (
-    isMatch(board, [0, 1, 2]) ||
-    isMatch(board, [3, 4, 5]) ||
-    isMatch(board, [6, 7, 8]) ||
-    isMatch(board, [0, 3, 6]) ||
-    isMatch(board, [1, 4, 7]) ||
-    isMatch(board, [2, 5, 8]) ||
-    isMatch(board, [0, 4, 8]) ||
-    isMatch(board, [2, 4, 6])
-  );
+  const boardIndicesByPieceColor = groupBy(occupiedPlaces(board), (i) => board[i]);
+  return some(boardIndicesByPieceColor, hasWinningSubset);
 };
 
-const isMatch = (board, indices) => {
-  return board[indices[0]] && board[indices[0]] === board[indices[1]] && board[indices[1]] === board[indices[2]];
+const hasWinningSubset = (indices) => {
+  return some(winningIndexSets.map((winningSet) => difference(winningSet, indices).length === 0));
+};
+
+const winningIndexSets = [
+  [0, 1, 2], [3, 4, 5], [6, 7, 8],
+  [0, 3, 6], [1, 4, 7], [2, 5, 8],
+  [0, 4, 8], [2, 4, 6]
+];
+
+const getOptimalAiPlacingPosition = (board) => {
+  const instantWinningPlace = freePlaces(board).find((i) => {
+    const localBoard = cloneDeep(board);
+    localBoard[i] = 'red';
+    return isGameEnd(localBoard);
+  });
+  if (instantWinningPlace) return instantWinningPlace;
+
+  const instantDefendingPlace = freePlaces(board).find((i) => {
+    const localBoard = cloneDeep(board);
+    localBoard[i] = 'blue';
+    return isGameEnd(localBoard);
+  });
+  if (instantDefendingPlace) return instantDefendingPlace;
+
+  if (freePlaces(board).includes(4)) return 4;
+
+  return findIndex(board, isNull);
+};
+
+const getOptimalAiFlippingPosition = (board) => {
+  const instantWinningPlace = freePlaces(board).find((i) => {
+    const localBoard = cloneDeep(board);
+    localBoard[i] = 'purple';
+    return isGameEnd(localBoard);
+  });
+  if (instantWinningPlace) return instantWinningPlace;
+
+  return findIndex(board, (c) => c === 'blue');
 };
