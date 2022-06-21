@@ -12,6 +12,8 @@ import HeapSplitter4 from './heap-splitter-4/heap-splitter-4';
 import * as heapSplitter4Strategy from './heap-splitter-4/strategy/strategy';
 import HeapSplitter3 from './heap-splitter-3/heap-splitter-3';
 import * as heapSplitter3Strategy from './heap-splitter-3/strategy/strategy';
+import TicTacToe from './tictactoe/tictactoe';
+import * as ticTacToeStrategy from './tictactoe/strategy/strategy';
 
 export const gameComponents = {
   HeapSplitter,
@@ -20,7 +22,8 @@ export const gameComponents = {
   TwoTimesTwo,
   SuperstitiousCounting,
   HeapSplitter4,
-  HeapSplitter3
+  HeapSplitter3,
+  TicTacToe
 };
 
 export const gameList = {
@@ -77,5 +80,14 @@ export const gameList = {
     name: 'Kupac kettéosztó 4 kupaccal',
     component: 'HeapSplitter4',
     strategy: heapSplitter4Strategy
+  },
+  TicTacToe: {
+    year: 13,
+    round: 'döntő',
+    category: 'C',
+    name: 'Átszínezős Tic Tac Toe',
+    component: 'TicTacToe',
+    strategy: ticTacToeStrategy,
+    isHiddenFromOverview: true
   }
 };

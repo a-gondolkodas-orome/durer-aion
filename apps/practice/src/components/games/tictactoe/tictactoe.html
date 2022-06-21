@@ -1,0 +1,26 @@
+<div>
+  <p class="text-justify">
+    Két játékos játszik egy 3 × 3-as táblán kék és piros korongokkal a szokásos amőba
+    szabályai szerint, tehát felváltva tesznek le korongokat, és ha egy sorban, oszlopban vagy átlóban
+    összegyűlik három azonos színű korong, az adott játékos nyer. Ha az első 9 korong lehelyezése
+    után döntetlen az állás (azaz egyik játékos sem nyert), akkor tovább folytatják a játékot, a soron
+    következő játékos az ellenfél egy már lehelyezett korongját lilára színezheti. Ezek után az nyer,
+    aki először hoz létre három lila korongot egy sorban, oszlopban vagy átlóban.
+
+    Az új leosztás gombra kattintva generálhatsz egy felállást. A felállás ismeretében te döntheted el, hogy kezdeni
+    szeretnél-e, vagy második játékos lenni.
+    Sok sikert! :)
+  </p>
+  <div class="flex flex-wrap" id="tictactoe">
+    <div class="game__board game_board_small">
+      <table class="game_table">
+        <tr v-for="row in [0, 1, 2]" :key="row">
+          <td v-for="col in [0, 1, 2]" :key="col" @click="clickField({ row, col })">
+            <span v-if="board[row * 3 + col]" :class="`game__piece ${pieceColor({ row, col })} rounded-full mr-1`"></span>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <game-sidebar :step-description="stepDescription"></game-sidebar>
+  </div>
+</div>
