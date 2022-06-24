@@ -65,6 +65,14 @@ export const gameList = {
     component: 'TwoTimesTwo',
     strategy: twoTimesTwoStrategy
   },
+  TicTacToe: {
+    year: 13,
+    round: 'döntő',
+    category: 'C',
+    name: 'Átszínezős Tic Tac Toe',
+    component: 'TicTacToe',
+    strategy: ticTacToeStrategy
+  },
   SuperstitiousCounting: {
     year: 13,
     round: 'döntő',
@@ -80,14 +88,5 @@ export const gameList = {
     name: 'Kupac kettéosztó 4 kupaccal',
     component: 'HeapSplitter4',
     strategy: heapSplitter4Strategy
-  },
-  TicTacToe: {
-    year: 13,
-    round: 'döntő',
-    category: 'C',
-    name: 'Átszínezős Tic Tac Toe',
-    component: 'TicTacToe',
-    strategy: ticTacToeStrategy,
-    isHiddenFromOverview: true
   }
 };
