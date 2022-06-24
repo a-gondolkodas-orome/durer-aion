@@ -74,7 +74,6 @@ const getOptimalAiFlippingPosition = (board) => {
 
   if (board[4] === 'blue') return 4;
 
-
   if (isEqual(allowedPlaces, [1, 3, 5, 6, 8])) return 3;
   if (isEqual(allowedPlaces, [1, 2, 3, 6, 8])) return 2;
 
