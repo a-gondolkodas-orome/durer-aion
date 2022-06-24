@@ -1,6 +1,6 @@
 'use strict';
 
-import { findIndex, isNull, some, difference, groupBy, range, cloneDeep } from "lodash-es";
+import { findIndex, isNull, some, difference, groupBy, range, cloneDeep, isEqual, sample } from 'lodash-es';
 
 export const generateNewBoard = () => (range(0, 9).map(() => null));
 
@@ -22,6 +22,7 @@ export const isTheLastMoverTheWinner = true;
 export const inPlacingPhase = (board) => freePlaces(board).length > 0;
 
 const freePlaces = (board) => range(0, 9).filter((i) => isNull(board[i]));
+const playerPlaces = (board) => range(0, 9).filter((i) => board[i] === 'blue');
 const occupiedPlaces = (board) => range(0, 9).filter((i) => board[i]);
 
 const isGameEnd = (board) => {
@@ -54,18 +55,28 @@ const getOptimalAiPlacingPosition = (board) => {
   });
   if (instantDefendingPlace) return instantDefendingPlace;
 
-  if (freePlaces(board).includes(4)) return 4;
+  if (isNull(board[4])) return 4;
+  if (isNull(board[0])) return 0;
+  if (isNull(board[2])) return 2;
 
   return findIndex(board, isNull);
 };
 
 const getOptimalAiFlippingPosition = (board) => {
-  const instantWinningPlace = freePlaces(board).find((i) => {
+  const allowedPlaces = playerPlaces(board);
+
+  const instantWinningPlace = allowedPlaces.find((i) => {
     const localBoard = cloneDeep(board);
     localBoard[i] = 'purple';
     return isGameEnd(localBoard);
   });
   if (instantWinningPlace) return instantWinningPlace;
 
-  return findIndex(board, (c) => c === 'blue');
+  if (board[4] === 'blue') return 4;
+
+
+  if (isEqual(allowedPlaces, [1, 3, 5, 6, 8])) return 3;
+  if (isEqual(allowedPlaces, [1, 2, 3, 6, 8])) return 2;
+
+  return sample(allowedPlaces);
 };
