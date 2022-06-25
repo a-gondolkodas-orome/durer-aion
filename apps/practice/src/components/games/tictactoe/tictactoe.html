@@ -12,7 +12,7 @@
     Sok sikert! :)
   </p>
   <div class="flex flex-wrap" id="tictactoe">
-    <div class="game__board game_board_small">
+    <div class="game__board">
       <table class="game_table">
         <tr v-for="row in [0, 1, 2]" :key="row">
           <td v-for="col in [0, 1, 2]" :key="col" @click="clickField({ row, col })">
