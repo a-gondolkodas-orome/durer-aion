@@ -14,6 +14,8 @@ import HeapSplitter3 from './heap-splitter-3/heap-splitter-3';
 import * as heapSplitter3Strategy from './heap-splitter-3/strategy/strategy';
 import TicTacToe from './tictactoe/tictactoe';
 import * as ticTacToeStrategy from './tictactoe/strategy/strategy';
+import Coin123 from './coin123/coin123';
+import * as coin123Strategy from './coin123/strategy/strategy';
 
 export const gameComponents = {
   HeapSplitter,
@@ -23,7 +25,8 @@ export const gameComponents = {
   SuperstitiousCounting,
   HeapSplitter4,
   HeapSplitter3,
-  TicTacToe
+  TicTacToe,
+  Coin123
 };
 
 export const gameList = {
@@ -88,5 +91,13 @@ export const gameList = {
     name: 'Kupac kettéosztó 4 kupaccal',
     component: 'HeapSplitter4',
     strategy: heapSplitter4Strategy
+  },
+  Coin123: {
+    year: 15,
+    round: 'döntő',
+    category: 'B',
+    name: '3, 2, 1 érmék',
+    component: 'Coin123',
+    strategy: coin123Strategy
   }
 };

@@ -1,0 +1,57 @@
+<div>
+  <p class="text-justify">
+    Van egy kupacban néhány érme, mindegyik 1, 2 vagy 3 pengős. Egy lépésben az
+    éppen soron lévő játékos elvesz egy érmét a kupacból, és helyette berakhat egy darab kisebb
+    értékű érmét, vagy dönthet úgy, hogy nem tesz be semmit. Az nyer, aki elveszi az utolsó érmét
+    a kupacból.
+
+    Az új leosztás gombra kattintva generálhatsz egy felállást. A felállás ismeretében te döntheted el, hogy kezdeni
+    szeretnél-e, vagy második játékos lenni.
+    Sok sikert! :)
+  </p>
+  <div class="flex flex-wrap" id="coin123">
+    <div class="game__board">
+      <table class="game_table">
+        <tr>
+          <th>1-es</th>
+          <th>2-es</th>
+          <th>3-as</th>
+        </tr>
+        <tr>
+          <td @click="clickPiece(0)">
+            <span
+              v-for="i in board[0]"
+              :key="i"
+              class="game__piece bg-yellow-700 rounded-full mr-1"
+            >
+            </span>
+          </td>
+          <td
+            @click="clickPiece(1)"
+            :class="{ 'bg-gray-400': takenValue && takenValue <= 1 }"
+          >
+            <span
+              v-for="i in board[1]"
+              :key="i"
+              class="game__piece bg-slate-700 rounded-full mr-1"
+            >
+            </span>
+          </td>
+          <td
+            @click="clickPiece(2)"
+            :class="{ 'bg-gray-400': takenValue }"
+          >
+            <span
+              v-for="i in board[2]"
+              :key="i"
+              class="game__piece bg-yellow-400 rounded-full mr-1"
+            >
+            </span>
+          </td>
+        </tr>
+      </table>
+      <button v-if="takenValue" class="game__cta-button" @click="endMove()">Semmit se rakok be</button>
+    </div>
+    <game-sidebar :step-description="stepDescription" @restart="resetMoveState()" />
+  </div>
+</div>
