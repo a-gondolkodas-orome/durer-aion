@@ -21,7 +21,7 @@ You can include work in progress games safely on the main branch as well if you 
 - install `nvm` (node.js version manager) on your computer globally
 - in the project directory run the project setup commands in the terminal
 
-```
+```bash
 nvm install && nvm use && npm ci
 ```
 
@@ -39,26 +39,23 @@ Tailwindcss is used for some of the styling, the [tailwind VS Code extension](ht
 npm run start-dev
 ```
 
-### Run your unit tests
-```
-npm run test:unit
+### Run tests
+
+```bash
+npm run test # audit, lint and tests (as GA)
 ```
 
-### Run your unit tests in watch mode
-
-```
-npm run test:watch
+```bash
+npm run test:unit # unit tests
 ```
 
-### Run audit, lint and tests
-
-```
-npm run test
+```bash
+npm run test:watch # unit tests in watch mode
 ```
 
 ### Deploy to github pages
 
-```
+```bash
 npm run merge-production
 ```
 
