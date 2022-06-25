@@ -56,6 +56,7 @@ export default () => createStore({
         state.isPlayerWinner = state.game.strategy.isTheLastMoverTheWinner === null
           ? state.isPlayerTheFirstToMove === hasFirstPlayerWon
           : state.game.strategy.isTheLastMoverTheWinner === !state.shouldPlayerMoveNext;
+        state.shouldPlayerMoveNext = null;
       }
     },
     initializeGame({ state, commit }) {

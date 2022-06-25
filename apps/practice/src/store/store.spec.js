@@ -66,6 +66,14 @@ describe('store', () => {
       expect(store.state.shouldPlayerMoveNext).toBe(true);
     });
 
+    it('should mark as nobody should move next if game ended', () => {
+      const store = initializeStoreWithGame('HeapSplitter');
+      store.dispatch('startGameAsPlayer', { isFirst: true });
+
+      store.dispatch('applyMove', { board: [1, 1], isGameEnd: true });
+      expect(store.state.shouldPlayerMoveNext).toBe(null);
+    });
+
     it('should mark the player winner in a game where the last to move is always the winner', () => {
       const store = initializeStoreWithGame('HeapSplitter');
       store.commit('setBoard', [2, 9]);
