@@ -25,7 +25,7 @@
           <td>{{ board.restricted || '-' }}</td>
         </tr>
       </table>
-      <template v-if="isGameInProgress">
+      <template v-if="shouldPlayerMoveNext">
         <label for="step"> Következő lépés: </label>
         <input id="step" type="number" min="1" max="12" v-model="step" class="border-2">
         <button
@@ -35,6 +35,6 @@
         >Lépek</button>
       </template>
     </div>
-    <game-sidebar :step-description="stepDescription"></game-sidebar>
+    <game-sidebar :step-description="stepDescription" @restart="resetMoveState()" />
   </div>
 </div>

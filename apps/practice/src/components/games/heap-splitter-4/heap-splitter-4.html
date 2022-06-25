@@ -32,6 +32,6 @@
         </span>
       </div>
     </div>
-    <game-sidebar :step-description="stepDescription"></game-sidebar>
+    <game-sidebar :step-description="stepDescription" @restart="resetMoveState()" />
   </div>
 </div>

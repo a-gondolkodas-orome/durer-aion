@@ -57,8 +57,7 @@ export default {
         splitRowIndex: rowIndex,
         pieceIndex
       }));
-      this.hoveredPiece = null;
-      this.removedRowIndex = null;
+      this.resetMoveState();
     },
     shouldShowDividerToTheLeft(piece) {
       if (this.removedRowIndex === null) return false;
@@ -84,6 +83,10 @@ export default {
       if (this.hoveredPiece.rowIndex !== rowIndex || this.hoveredPiece.pieceIndex === 0) return pieceCountInPile;
 
       return `${pieceCountInPile} → ${this.hoveredPiece.pieceIndex}, ${pieceCountInPile - this.hoveredPiece.pieceIndex}`;
+    },
+    resetMoveState() {
+      this.hoveredPiece = null;
+      this.removedRowIndex = null;
     }
   },
   created() {

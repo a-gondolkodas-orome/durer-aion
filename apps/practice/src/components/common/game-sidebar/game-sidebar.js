@@ -13,7 +13,11 @@ export default {
     ])
   },
   methods: {
-    ...mapActions(['startGameAsPlayer', 'initializeGame'])
+    ...mapActions(['startGameAsPlayer', 'initializeGame']),
+    restartGame() {
+      this.$emit('restart');
+      this.initializeGame();
+    }
   },
   created() {
     this.initializeGame();

@@ -28,6 +28,9 @@ export default {
         return;
       }
       this.playerMove(getGameStateAfterMove(this.board, this.step));
+    },
+    resetMoveState() {
+      this.step = 1;
     }
   },
   created() {
