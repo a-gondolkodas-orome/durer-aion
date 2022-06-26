@@ -54,7 +54,7 @@ const getOptimalAiPlacingPosition = (board) => {
   });
   if (instantDefendingPlace) return instantDefendingPlace;
 
-  if (isNull(board[4])) return 4;
+  if (allowedPlaces.length !== 9 && isNull(board[4])) return 4;
   if (isNull(board[0])) return 0;
   if (isNull(board[2])) return 2;
 

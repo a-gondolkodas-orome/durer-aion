@@ -43,6 +43,15 @@ export default {
     endMove() {
       this.playerMove(getGameStateAfterMove(this.board));
       this.takenValue = null;
+    },
+    pieceColor(coinValue) {
+      if (coinValue === 0) return 'bg-yellow-700';
+      if (coinValue === 1) return 'bg-slate-700';
+      return 'bg-yellow-400';
+    },
+    disableCell(coinValue) {
+      if (this.takenValue === null) return this.board[coinValue] === 0;
+      return this.takenValue <= coinValue;
     }
   },
   created() {

@@ -12,11 +12,19 @@
     Sok sikert! :)
   </p>
   <div class="flex flex-wrap" id="tictactoe">
-    <div class="game__board">
-      <table class="game_table">
+    <div class="p-1 shrink-0 grow basis-8/12">
+      <table class="m-2 border-collapse">
         <tr v-for="row in [0, 1, 2]" :key="row">
-          <td v-for="col in [0, 1, 2]" :key="col" @click="clickField({ row, col })">
-            <span v-if="board[row * 3 + col]" :class="`game__piece ${pieceColor({ row, col })} rounded-full mr-1`"></span>
+          <td
+            v-for="col in [0, 1, 2]" :key="col"
+            @click="clickField({ row, col })"
+            class="text-center h-36 w-36 border-4 text-8xl"
+          >
+            <span
+              v-if="board[row * 3 + col]"
+              class="h-16 w-16 p-1 inline-block rounded-full mr-1"
+              :class="pieceColor({ row, col })"
+            ></span>
           </td>
         </tr>
       </table>

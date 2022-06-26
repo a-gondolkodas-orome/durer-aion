@@ -67,6 +67,18 @@ describe('TicTacToe strategy', () => {
         expect(result.isGameEnd).toBe(false);
       });
 
+      it('should not place to middle place as a first move', () => {
+        const board = [
+          null, null, null,
+          null, null, null,
+          null, null, null
+        ];
+
+        const result = getGameStateAfterAiMove(board);
+        expect(result.board[4]).not.toEqual('red');
+        expect(result.isGameEnd).toBe(false);
+      });
+
       it('should place to corner if middle is not empty', () => {
         const board = [
           null, null, null,

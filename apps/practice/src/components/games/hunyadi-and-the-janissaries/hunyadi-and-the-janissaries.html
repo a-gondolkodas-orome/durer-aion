@@ -13,29 +13,34 @@
     Sok sikert! :)
   </p>
   <div class="flex flex-wrap" id="hunyadi-and-the-janissaries">
-    <div class="game__board">
+    <div class="p-1 shrink-0 grow basis-8/12">
       <img src="../../../assets/hunyadi-and-the-janissaries-castle.jpg" style="display: block; margin: auto;">
-      <div v-for="rowIndex in [0, 1, 2, 3, 4]" class="game__pile" :class="{ 'border-b-black border-b-2': rowIndex === 4 }">
+      <div
+        v-for="rowIndex in [0, 1, 2, 3, 4]"
+        :key="rowIndex"
+        class="border-t-black border-t-2 h-20 p-1 text-left whitespace-nowrap"
+        :class="{ 'border-b-black border-b-2': rowIndex === 4 }"
+      >
         <span
           v-for="(group, pieceIndex) in board[rowIndex]"
-          class="game__piece mx-1 js-clickable-soldier"
+          class="h-16 w-16 p-1 inline-block mx-1 js-clickable-soldier"
           @click="toggleGroup(rowIndex, pieceIndex)"
         >
-          <svg class="game__piece" :class="group === 'blue' ? 'fill-blue-600' : 'fill-red-600'">
+          <svg class="h-16 w-16 p-1 inline-block" :class="group === 'blue' ? 'fill-blue-600' : 'fill-red-600'">
             <use xlink:href="#game-soldier-icon" />
           </svg>
         </span>
       </div>
     </div>
-    <div class="p-1 flex flex-col flex-grow flex-shrink-0 basis-80">
+    <div class="p-1 flex flex-col grow-0 shrink-0 basis-64">
       <p class="text-center font-bold text-lg">{{ ctaText }}</p>
       <enemy-loader />
       <p class="italic text-justify">{{ stepDescription }}</p>
       <template v-if="isGameReadyToStart">
-        <button class="game__cta-button js-second-player" @click="startGameAsPlayer({ isFirst: false })">
+        <button class="cta-button js-second-player" @click="startGameAsPlayer({ isFirst: false })">
           Hunyadi leszek
         </button>
-        <button class="game__cta-button js-first-player" @click="startGameAsPlayer({ isFirst: true })">
+        <button class="cta-button js-first-player" @click="startGameAsPlayer({ isFirst: true })">
           Szultán leszek
         </button>
       </template>
@@ -43,7 +48,7 @@
         <button
           v-if="isPlayerSultan"
           :class="{ 'opacity-50': isEnemyMoveInProgress }"
-          class="game__cta-button js-finalize-groups"
+          class="cta-button js-finalize-groups"
           @click="finalizeSoldierGrouping()"
         >
           Lépek
@@ -51,7 +56,7 @@
         <button
           v-if="!isPlayerSultan"
           :class="{ 'opacity-50': isEnemyMoveInProgress }"
-          class="game__cta-button bg-red-400 hover:bg-red-600 js-kill-red"
+          class="cta-button bg-red-400 hover:bg-red-600 js-kill-red"
           @click="killGroup('red')"
         >
           Legyőzöm a pirosakat
@@ -59,14 +64,14 @@
         <button
           v-if="!isPlayerSultan"
           :class="{ 'opacity-50': isEnemyMoveInProgress }"
-          class="game__cta-button bg-blue-400 hover:bg-blue-600"
+          class="cta-button bg-blue-400 hover:bg-blue-600"
           @click="killGroup('blue')"
         >
           Legyőzöm a kékeket
         </button>
       </template>
       <div class="flex flex-grow items-end">
-        <button class="game__cta-button mt-4 js-restart-game"  @click="initializeGame()">
+        <button class="cta-button mt-4 js-restart-game"  @click="initializeGame()">
           Új leosztás
         </button>
       </div>

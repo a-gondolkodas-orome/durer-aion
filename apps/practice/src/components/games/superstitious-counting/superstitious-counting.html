@@ -12,24 +12,24 @@
     Az m szám ismeretében te döntheteted el, hogy a kezdő vagy a második játékos bőrébe szeretnél e bújni.
   </p>
   <div class="flex flex-wrap" id="two_times_two">
-    <div class="game__board">
-      <table class="game_table">
+    <div class="p-1 shrink-0 grow basis-8/12">
+      <table class="m-2 border-collapse">
         <tr>
           <th>Szám</th>
           <th>Cél</th>
           <th>Tiltott lépés</th>
         </tr>
         <tr>
-          <td>{{ board.current }}</td>
-          <td>{{ board.target }}</td>
-          <td>{{ board.restricted || '-' }}</td>
+          <td class="text-center h-36 w-36 border-4 text-8xl">{{ board.current }}</td>
+          <td class="text-center h-36 w-36 border-4 text-8xl">{{ board.target }}</td>
+          <td class="text-center h-36 w-36 border-4 text-8xl">{{ board.restricted || '-' }}</td>
         </tr>
       </table>
       <template v-if="shouldPlayerMoveNext">
         <label for="step"> Következő lépés: </label>
         <input id="step" type="number" min="1" max="12" v-model="step" class="border-2">
         <button
-          class="game__cta-button"
+          class="cta-button"
           @click="attemptStep()"
           :class="{ 'opacity-50': isEnemyMoveInProgress }"
         >Lépek</button>

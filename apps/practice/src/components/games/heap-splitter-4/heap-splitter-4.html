@@ -11,8 +11,13 @@
     Sok sikert! :)
   </p>
   <div class="flex flex-wrap" id="heap-splitter">
-    <div class="game__board">
-      <div v-for="rowIndex in [0, 1, 2, 3]" class="game__pile" :class="{ 'border-b-black border-b-2': rowIndex === 3 }">
+    <div class="p-1 shrink-0 grow basis-8/12">
+      <div
+        v-for="rowIndex in [0, 1, 2, 3]"
+        :key="rowIndex"
+        class="border-t-black border-t-2 h-20 p-1 text-left whitespace-nowrap"
+        :class="{ 'border-b-black border-b-2': rowIndex === 3 }"
+      >
         <template v-for="(_, pieceIndex) in board[rowIndex]">
           <span
             v-if="shouldShowDividerToTheLeft({ rowIndex, pieceIndex })"
@@ -20,7 +25,7 @@
           ></span>
           <span
             :class="{ 'bg-red-600': rowColor({ rowIndex }) === 'red', 'bg-blue-600': rowColor({ rowIndex }) === 'blue', 'opacity-50': (!shouldPlayerMoveNext && isGameInProgress) || rowIndex === removedRowIndex }"
-            class="game__piece rounded-full mr-1"
+            class="h-16 w-16 p-1 inline-block rounded-full mr-1"
             :style="{ 'pointer-events': shouldPlayerMoveNext ? 'auto' : 'none', 'cursor': pieceClickNotAllowed({ rowIndex, pieceIndex }) ? 'not-allowed' : 'pointer' }"
             @click="clickPiece({ rowIndex, pieceIndex })"
             @mouseover="hoveredPiece = { rowIndex, pieceIndex }"

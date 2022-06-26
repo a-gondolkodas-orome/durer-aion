@@ -7,10 +7,10 @@
     Sok sikert! :)
   </p>
   <div class="flex flex-wrap" id="demonstration">
-    <div class="game__board">
+    <div class="p-1 shrink-0 grow basis-8/12">
       <button
         v-if="shouldPlayerMoveNext && isGameInProgress"
-        class="game__cta-button"
+        class="cta-button"
         @click="playerMove({ board: [], isGameEnd: true })"
       >Lépek!</button>
     </div>

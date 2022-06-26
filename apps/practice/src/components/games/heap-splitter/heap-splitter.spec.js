@@ -42,7 +42,7 @@ describe('HeapSplitter', () => {
     const initialBoard = cloneDeep(store.state.board);
     wrapper.find('.js-first-player').trigger('click');
 
-    wrapper.findAll('.game__pile')[1].findAll('.game__piece')[2].trigger('click');
+    wrapper.findAll('.js-pile')[1].findAll('.js-pebble')[2].trigger('click');
 
     expect(store.state.board).toEqual([2, initialBoard[1] - 2]);
   });
@@ -52,7 +52,7 @@ describe('HeapSplitter', () => {
     const initialBoard = cloneDeep(store.state.board);
     wrapper.find('.js-second-player').trigger('click');
 
-    wrapper.findAll('.game__pile')[1].findAll('.game__piece')[2].trigger('click');
+    wrapper.findAll('.js-pile')[1].findAll('.js-pebble')[2].trigger('click');
 
     expect(store.state.board).toEqual(initialBoard);
   });
@@ -64,7 +64,7 @@ describe('HeapSplitter', () => {
     wrapper.find('.js-first-player').trigger('click');
     await flushPromises();
 
-    wrapper.findAll('.game__pile')[0].findAll('.game__piece')[1].trigger('click');
+    wrapper.findAll('.js-pile')[0].findAll('.js-pebble')[1].trigger('click');
     await flushPromises();
 
     expect(wrapper.find('#heap-splitter').text()).toMatch(/gratul/i);
