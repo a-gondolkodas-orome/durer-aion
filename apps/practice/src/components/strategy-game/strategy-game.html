@@ -1,12 +1,12 @@
 <div>
-  <template v-if="game">
+  <template v-if="gameDefinition">
     <button
       class="rounded-lg px-4 bg-blue-400 hover:bg-blue-600 js-back-to-overview"
       @click="goBackToOverview()"
     >← Vissza a listához</button>
-    <h1 class="text-blue-600 text-2xl font-bold pb-4">{{ game.name }}</h1>
+    <h1 class="text-blue-600 text-2xl font-bold pb-4">{{ gameDefinition.name }}</h1>
     <hr />
     <component :is="gameId"></component>
   </template>
-  <page-not-found v-if="!game"></page-not-found>
+  <page-not-found v-if="!gameDefinition"></page-not-found>
 </div>

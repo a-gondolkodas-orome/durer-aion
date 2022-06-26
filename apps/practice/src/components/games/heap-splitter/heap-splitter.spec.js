@@ -5,11 +5,10 @@ import { flushPromises } from '@vue/test-utils';
 import createStore from '../../../store/store';
 import { cloneDeep } from 'lodash-es';
 import { mountComponent } from '../../../../test-helpers';
-import { gameList } from '../games';
 
 const mountHeapSplitter = async () => {
   const store = createStore();
-  store.commit('setGame', gameList.HeapSplitter);
+  store.commit('setGameDefinition', { gameId: 'HeapSplitter' });
   return await mountComponent(HeapSplitter, { store });
 };
 

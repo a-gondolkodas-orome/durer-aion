@@ -23,7 +23,7 @@ describe('App', () => {
     wrapper.find('.js-select-HeapSplitter').trigger('click');
     await flushPromises();
 
-    expect(store.state.game.component).toEqual('HeapSplitter');
+    expect(store.state.gameDefinition.component).toEqual('HeapSplitter');
     expect(wrapper.find('#heap-splitter').exists()).toBe(true);
   });
 
@@ -35,7 +35,7 @@ describe('App', () => {
     wrapper.find('.js-back-to-overview').trigger('click');
     await flushPromises();
 
-    expect(store.state.game).toBe(null);
+    expect(store.state.gameDefinition).toBe(null);
     expect(wrapper.find('#heap-splitter').exists()).toBe(false);
   });
 

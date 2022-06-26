@@ -3,12 +3,11 @@
 import HunyadiAndTheJanissaries from './hunyadi-and-the-janissaries';
 import createStore from '../../../store/store';
 import { flatten } from 'lodash-es';
-import { gameList } from '../games';
 import { mountComponent } from '../../../../test-helpers';
 
 const mountHunyadiAndTheJanissaries = async () => {
   const store = createStore();
-  store.commit('setGame', gameList.HunyadiAndTheJanissaries);
+  store.commit('setGameDefinition', { gameId: 'HunyadiAndTheJanissaries' });
   return await mountComponent(HunyadiAndTheJanissaries, { store });
 };
 
