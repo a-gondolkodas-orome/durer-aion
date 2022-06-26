@@ -4,10 +4,6 @@
 
 @tailwind utilities;
 
-:root {
-    --blue: #3763eb; /* blue-600*/
-}
-
 .game__board {
     @apply p-1;
     flex-shrink: 0;
