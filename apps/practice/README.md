@@ -6,15 +6,19 @@ The deployed version is here: https://a-gondolkodas-orome.github.io/durer-jateko
 
 # Development
 
+Feel free to commit directly to the default branch. If in doubt, send a pull request instead.
+
 When you push to the main branch, the tests are run, but the project is not deployed.
 
 Currently this project has a Vue.js setup, but you can include games not using Vue.js with small modifications.
 
 ## Adding a new game
 
+TL;DR;
+
 Currently each game should have a folder under `src/components/games` and its metadata listed in `src/components/games/games.js`. See existing examples for inspiration, and the demonstration game for a minimal example.
 
-You can include work in progress games safely on the main branch as well if you set `isHiddenFromOverview: true` in `games.js`. You can also send a pull request or develop on a branch for a short time.
+For more information, see [the modest documentation](./HOW-TO-DEVELOP.md).
 
 ## Project setup
 
@@ -62,6 +66,6 @@ For further options see `package.json`.
 - it is highly recommended to add unit tests at least for the AI strategy, `jest` is used for unit testing
 - Html classes starting with `js-` are there for unit testing purposes.
 
-# Misc.
+# Other
 
 - simple usage tracking at https://agondolkodasorome.goatcounter.com/ (Ildi has access)
