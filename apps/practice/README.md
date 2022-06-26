@@ -64,4 +64,4 @@ For further options see `package.json`.
 
 # Misc.
 
-- simple usage tracking at https://agongolkodasorome.goatcounter.com/ (Ildi has access)
+- simple usage tracking at https://agondolkodasorome.goatcounter.com/ (Ildi has access)
