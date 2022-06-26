@@ -8,9 +8,6 @@ export default {
     Game,
     Overview
   },
-  created() {
-    document.title = 'Dürer játékok';
-  },
   async errorCaptured() {
     window.alert('An unexpected error happened, it is our fault, not yours! Try refreshing the page.');
   }
