@@ -92,6 +92,6 @@ describe('HunyadiAndTheJanissaries', () => {
 
     await wrapper.find('.js-kill-red').trigger('click');
 
-    expect(wrapper.find('#hunyadi-and-the-janissaries').text()).toMatch(/sajnos, most nem/i);
+    expect(wrapper.find('.js-hunyadi-and-the-janissaries').text()).toMatch(/sajnos, most nem/i);
   });
 });

@@ -6,12 +6,12 @@
     szeretnél-e, vagy második játékos lenni.
     Sok sikert! :)
   </p>
-  <div class="flex flex-wrap" id="demonstration">
+  <div class="flex flex-wrap">
     <div class="p-1 shrink-0 grow basis-8/12">
       <button
         v-if="shouldPlayerMoveNext"
         class="cta-button"
-        @click="playerMove({ board: [], isGameEnd: true })"
+        @click="makeMove()"
       >Lépek!</button>
     </div>
     <game-sidebar :step-description="stepDescription"></game-sidebar>

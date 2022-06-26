@@ -24,7 +24,7 @@ describe('App', () => {
     await flushPromises();
 
     expect(store.state.gameDefinition.component).toEqual('HeapSplitter');
-    expect(wrapper.find('#heap-splitter').exists()).toBe(true);
+    expect(wrapper.find('.js-heap-splitter').exists()).toBe(true);
   });
 
   it('should navigate back to game list when clicking back button in game view', async () => {
@@ -36,7 +36,7 @@ describe('App', () => {
     await flushPromises();
 
     expect(store.state.gameDefinition).toBe(null);
-    expect(wrapper.find('#heap-splitter').exists()).toBe(false);
+    expect(wrapper.find('.js-heap-splitter').exists()).toBe(false);
   });
 
   it('should show page not found url does not match known patterns', async () => {

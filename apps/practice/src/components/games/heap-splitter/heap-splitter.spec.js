@@ -66,6 +66,6 @@ describe('HeapSplitter', () => {
     wrapper.findAll('.js-pile')[0].findAll('.js-pebble')[1].trigger('click');
     await flushPromises();
 
-    expect(wrapper.find('#heap-splitter').text()).toMatch(/gratul/i);
+    expect(wrapper.find('.js-heap-splitter').text()).toMatch(/gratul/i);
   });
 });

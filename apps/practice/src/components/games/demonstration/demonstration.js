@@ -11,7 +11,10 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['playerMove', 'initializeGame'])
+    ...mapActions(['playerMove', 'initializeGame']),
+    makeMove() {
+      this.playerMove({ board: [], isGameEnd: true });
+    }
   },
   created() {
     this.initializeGame();
