@@ -1,6 +1,6 @@
 'use strict';
 
-import { random, difference } from 'lodash-es';
+import { random, difference, every } from 'lodash-es';
 import { getBoardAfterAiStep } from './ai-step';
 
 export const generateNewBoard = () => ([random(4, 18), random(4, 18), random(4, 18), random(4, 18)]);
@@ -13,7 +13,7 @@ export const getGameStateAfterMove = (board, { removedRowIndex, splitRowIndex, p
 
 export const isTheLastMoverTheWinner = true;
 
-const isGameEnd = (board) => board[0] === 1 && board[1] === 1 && board[2] === 1 && board[3] === 1;
+const isGameEnd = (board) => every(board, i => i === 1);
 
 export const getGameStateAfterAiMove = (board) => {
   const newBoard = getBoardAfterAiStep(board);

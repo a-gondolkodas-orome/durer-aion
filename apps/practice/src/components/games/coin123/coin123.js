@@ -6,51 +6,51 @@ export default {
   template: require('./coin123.html'),
   components: { GameSidebar },
   data: () => ({
-    takenValue: null
+    valueOfRemovedCoin: null
   }),
   computed: {
     ...mapState(['board', 'shouldPlayerMoveNext']),
+    wasCoinAlreadyRemovedInTurn() {
+      return this.valueOfRemovedCoin !== null;
+    },
     stepDescription() {
-      return this.takenValue !== null
+      return this.wasCoinAlreadyRemovedInTurn
         ? 'Kattints egy mezőre, hogy visszatégy egy olyan pénzérmét'
         : 'Kattints egy mezőre, hogy elvegyél egy olyan pénzérmét';
     }
   },
   methods: {
     ...mapActions(['playerMove', 'initializeGame']),
-    clickPiece(coinValue) {
+    clickHeap(coinValue) {
       if (!this.shouldPlayerMoveNext) return;
+      if (this.isCoinActionInvalid(coinValue)) return;
 
-      if (this.takenValue === null) {
-        if (this.board[coinValue] === 0) return;
-        this.takenValue = coinValue;
+      if (!this.wasCoinAlreadyRemovedInTurn) {
+        this.valueOfRemovedCoin = coinValue;
         this.board[coinValue] -= 1;
-        if (coinValue === 0) {
-          this.endMove();
-        }
-        return;
+        if (coinValue === 0) this.endTurn();
       } else {
-        if (coinValue >= this.takenValue) return;
         this.board[coinValue] += 1;
-
-        this.endMove();
+        this.endTurn();
       }
     },
-    resetMoveState() {
-      this.takenValue = null;
+    resetTurnState() {
+      this.valueOfRemovedCoin = null;
     },
-    endMove() {
+    endTurn() {
       this.playerMove(getGameStateAfterMove(this.board));
-      this.takenValue = null;
+      this.resetTurnState();
     },
-    getPieceColor(coinValue) {
+    getCoinColor(coinValue) {
       if (coinValue === 0) return 'bg-yellow-700';
       if (coinValue === 1) return 'bg-slate-700';
       return 'bg-yellow-400';
     },
-    isCellDisabled(coinValue) {
-      if (this.takenValue === null) return this.board[coinValue] === 0;
-      return this.takenValue <= coinValue;
+    isCoinActionInvalid(coinValue) {
+      if (this.wasCoinAlreadyRemovedInTurn) {
+        return this.valueOfRemovedCoin <= coinValue;
+      }
+      return this.board[coinValue] === 0;
     }
   },
   created() {

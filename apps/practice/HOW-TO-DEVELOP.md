@@ -8,7 +8,7 @@ To keep track of who works on which game, use [this pinned issue](https://github
 
 ## Must have for a new game
 
-*It is recommended to copy and modify the files of an existing game (see demonstration game for a minimal example).*
+*It is recommended to copy and modify the files of an existing, similar game (see demonstration game for a minimal example).*
 
 The `board` field on the store is the single source of truth for the state of the board. The AI step won't have access to other component specific data. You can read/write it from your component after mapping it with `mapState()`.
 

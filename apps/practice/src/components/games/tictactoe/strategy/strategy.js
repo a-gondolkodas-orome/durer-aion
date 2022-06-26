@@ -28,16 +28,15 @@ const isGameEnd = (board) => {
 };
 
 const hasWinningSubset = (indices) => {
+  const winningIndexSets = [
+    [0, 1, 2], [3, 4, 5], [6, 7, 8],
+    [0, 3, 6], [1, 4, 7], [2, 5, 8],
+    [0, 4, 8], [2, 4, 6]
+  ];
   return some(winningIndexSets.map((winningSet) => difference(winningSet, indices).length === 0));
 };
 
-const winningIndexSets = [
-  [0, 1, 2], [3, 4, 5], [6, 7, 8],
-  [0, 3, 6], [1, 4, 7], [2, 5, 8],
-  [0, 4, 8], [2, 4, 6]
-];
-
-const getOptimalAiPlacingPosition = (board) => {
+export const getOptimalAiPlacingPosition = (board) => {
   const allowedPlaces = range(0, 9).filter((i) => isNull(board[i]));
 
   const instantWinningPlace = allowedPlaces.find((i) => {
@@ -61,7 +60,7 @@ const getOptimalAiPlacingPosition = (board) => {
   return findIndex(board, isNull);
 };
 
-const getOptimalAiFlippingPosition = (board) => {
+export const getOptimalAiFlippingPosition = (board) => {
   const allowedPlaces = range(0, 9).filter((i) => board[i] === 'blue');
 
   const instantWinningPlace = allowedPlaces.find((i) => {

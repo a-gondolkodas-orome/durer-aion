@@ -57,7 +57,7 @@ export default {
         splitRowIndex: rowIndex,
         pieceIndex
       }));
-      this.resetMoveState();
+      this.resetTurnState();
     },
     shouldShowDividerToTheLeft(piece) {
       if (this.removedRowIndex === null) return false;
@@ -84,7 +84,7 @@ export default {
 
       return `${pieceCountInPile} → ${this.hoveredPiece.pieceIndex}, ${pieceCountInPile - this.hoveredPiece.pieceIndex}`;
     },
-    resetMoveState() {
+    resetTurnState() {
       this.hoveredPiece = null;
       this.removedRowIndex = null;
     }

@@ -23,7 +23,7 @@ export default {
       }
       this.playerMove(getGameStateAfterMove(this.board, this.step));
     },
-    resetMoveState() {
+    resetTurnState() {
       this.step = 1;
     }
   },

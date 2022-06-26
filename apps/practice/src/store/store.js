@@ -48,16 +48,14 @@ export default () => createStore({
       commit('startGameAsPlayer', { isFirst });
       if (!isFirst) dispatch('aiMove');
     },
-    applyMove({ state }, { board, isGameEnd, hasFirstPlayerWon }) {
+    applyMove({ state, dispatch }, { board, isGameEnd, hasFirstPlayerWon }) {
       state.board = board;
       state.shouldPlayerMoveNext = !state.shouldPlayerMoveNext;
       if (isGameEnd) {
-        clearTimeout(state.enemyMoveTimeoutHandle);
-        state.gameStatus = 'finished';
-        state.isPlayerWinner = state.gameDefinition.strategy.isTheLastMoverTheWinner === null
+        const isPlayerWinner = state.gameDefinition.strategy.isTheLastMoverTheWinner === null
           ? state.isPlayerTheFirstToMove === hasFirstPlayerWon
           : state.gameDefinition.strategy.isTheLastMoverTheWinner === !state.shouldPlayerMoveNext;
-        state.shouldPlayerMoveNext = null;
+        dispatch('endGame', { isPlayerWinner });
       }
     },
     initializeGame({ state, commit }) {
@@ -69,6 +67,12 @@ export default () => createStore({
 
       state.board = state.gameDefinition.strategy.generateNewBoard();
       commit('setGameStatus', 'readyToStart');
+    },
+    endGame({ state }, { isPlayerWinner }) {
+      state.isPlayerWinner = isPlayerWinner;
+      clearTimeout(state.enemyMoveTimeoutHandle);
+      state.gameStatus = 'finished';
+      state.shouldPlayerMoveNext = null;
     },
     aiMove: async ({ state, dispatch }) => {
       state.isEnemyMoveInProgress = true;
