@@ -65,3 +65,7 @@ For further options see `package.json`.
 
 - it is highly recommended to add unit tests at least for the AI strategy, `jest` is used for unit testing
 - Html classes starting with `js-` are there for unit testing purposes.
+
+# Misc.
+
+- simple usage tracking at https://agongolkodasorome.goatcounter.com/ (Ildi has access)
