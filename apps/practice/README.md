@@ -16,9 +16,9 @@ To keep track of who works on which game, use [this pinned issue](https://github
 
 TL;DR;
 
-Currently each game should have a folder under `src/components/games` and its metadata listed in `src/components/games/games.js`. See existing examples for inspiration, and the demonstration game for a minimal example.
+Currently each game should have a folder under `src/components/games` and its metadata listed in `src/components/games/games.js`. See existing examples for inspiration, and the `demonstration` game for a minimal example.
 
-For more information, see [the modest documentation](./HOW-TO-DEVELOP.md).
+*For more information, see [HOW-TO-DEVELOP.md](./HOW-TO-DEVELOP.md).*
 
 ## Project setup
 
@@ -28,12 +28,6 @@ For more information, see [the modest documentation](./HOW-TO-DEVELOP.md).
 ```bash
 npm ci
 ```
-
-## IDE setup
-
-If you are using VS Code, [Volar VS Code extension](https://marketplace.visualstudio.com/items?itemName=johnsoncodehk.volar) is highly recommended.
-Tailwindcss is used for some of the styling, the [tailwind VS Code extension](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss) is also recommended.
-
 
 ## Useful npm commands
 
@@ -67,10 +61,11 @@ npm run merge-production
 
 For further options see `package.json`.
 
-## Further development notes
+## IDE setup
 
-- it is highly recommended to add unit tests at least for the AI strategy, `jest` is used for unit testing
-- Html classes starting with `js-` are there for unit testing purposes.
+If you are using VS Code, [Volar VS Code extension](https://marketplace.visualstudio.com/items?itemName=johnsoncodehk.volar) is highly recommended.
+Tailwindcss is used for some of the styling, the [tailwind VS Code extension](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss) is also recommended.
+
 
 # Other
 
