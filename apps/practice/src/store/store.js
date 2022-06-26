@@ -48,8 +48,8 @@ export default () => createStore({
       commit('startGameAsPlayer', { isFirst });
       if (!isFirst) dispatch('aiMove');
     },
-    applyMove({ state, commit }, { board, isGameEnd, hasFirstPlayerWon }) {
-      commit('setBoard', board);
+    applyMove({ state }, { board, isGameEnd, hasFirstPlayerWon }) {
+      state.board = board;
       state.shouldPlayerMoveNext = !state.shouldPlayerMoveNext;
       if (isGameEnd) {
         clearTimeout(state.enemyMoveTimeoutHandle);
