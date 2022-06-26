@@ -9,7 +9,7 @@
   <div class="flex flex-wrap" id="demonstration">
     <div class="p-1 shrink-0 grow basis-8/12">
       <button
-        v-if="shouldPlayerMoveNext && isGameInProgress"
+        v-if="shouldPlayerMoveNext"
         class="cta-button"
         @click="playerMove({ board: [], isGameEnd: true })"
       >Lépek!</button>

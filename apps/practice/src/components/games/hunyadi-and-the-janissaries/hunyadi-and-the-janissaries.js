@@ -1,13 +1,14 @@
-import { mapGetters, mapActions, mapMutations, mapState } from 'vuex';
+import { mapGetters, mapActions, mapState } from 'vuex';
 import EnemyLoader from '../../common/enemy-loader/enemy-loader';
 import SoldierSvg from './soldier-svg/soldier-svg';
+import { getGameStateAfterKillingGroup } from './strategy/strategy';
 
 export default {
   template: require('./hunyadi-and-the-janissaries.html'),
   components: { EnemyLoader, SoldierSvg },
   computed: {
     ...mapState({ isPlayerSultan: (state) => state.isPlayerTheFirstToMove }),
-    ...mapState(['game', 'board', 'shouldPlayerMoveNext']),
+    ...mapState(['board', 'shouldPlayerMoveNext']),
     ...mapGetters([
       'ctaText',
       'isEnemyMoveInProgress',
@@ -15,24 +16,21 @@ export default {
       'isGameReadyToStart'
     ]),
     stepDescription() {
-      if (!this.isGameInProgress || !this.shouldPlayerMoveNext) return '';
+      if (!this.shouldPlayerMoveNext) return '';
       return this.isPlayerSultan ? 'Kattints a katonákra és válaszd két részre a seregedet.' : '';
     }
   },
   methods: {
-    ...mapMutations(['setBoard']),
     ...mapActions(['playerMove', 'startGameAsPlayer', 'initializeGame']),
     toggleGroup(rowIndex, pieceIndex) {
       if (!this.shouldPlayerMoveNext || !this.isPlayerSultan) return;
-      const currentBoard = this.board;
-      currentBoard[rowIndex][pieceIndex] = currentBoard[rowIndex][pieceIndex] === 'blue' ? 'red' : 'blue';
-      this.setBoard(currentBoard);
+      this.board[rowIndex][pieceIndex] = this.board[rowIndex][pieceIndex] === 'blue' ? 'red' : 'blue';
     },
     finalizeSoldierGrouping() {
       this.playerMove({ board: this.board, isGameEnd: false });
     },
     killGroup(group) {
-      this.playerMove(this.game.strategy.getGameStateAfterKillingGroup(this.board, group));
+      this.playerMove(getGameStateAfterKillingGroup(this.board, group));
     }
   },
   created() {

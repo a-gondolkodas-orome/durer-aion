@@ -1,4 +1,4 @@
-import { mapGetters, mapActions, mapState } from 'vuex';
+import { mapActions, mapState } from 'vuex';
 import GameSidebar from '../../common/game-sidebar/game-sidebar';
 import { getGameStateAfterMove } from './strategy/strategy';
 
@@ -9,18 +9,18 @@ export default {
     takenValue: null
   }),
   computed: {
-    ...mapState(['game', 'board', 'shouldPlayerMoveNext']),
-    ...mapGetters(['isGameInProgress']),
+    ...mapState(['board', 'shouldPlayerMoveNext']),
     stepDescription() {
-      return this.isGameInProgress && this.shouldPlayerMoveNext
-        ? this.takenValue !== null ? 'Kattints egy mezőre, hogy visszatégy egy olyan pénzérmét' : 'Kattints egy mezőre, hogy elvegyél egy olyan pénzérmét'
-        : '';
+      return this.takenValue !== null
+        ? 'Kattints egy mezőre, hogy visszatégy egy olyan pénzérmét'
+        : 'Kattints egy mezőre, hogy elvegyél egy olyan pénzérmét';
     }
   },
   methods: {
     ...mapActions(['playerMove', 'initializeGame']),
     clickPiece(coinValue) {
       if (!this.shouldPlayerMoveNext) return;
+
       if (this.takenValue === null) {
         if (this.board[coinValue] === 0) return;
         this.takenValue = coinValue;
@@ -43,12 +43,12 @@ export default {
       this.playerMove(getGameStateAfterMove(this.board));
       this.takenValue = null;
     },
-    pieceColor(coinValue) {
+    getPieceColor(coinValue) {
       if (coinValue === 0) return 'bg-yellow-700';
       if (coinValue === 1) return 'bg-slate-700';
       return 'bg-yellow-400';
     },
-    disableCell(coinValue) {
+    isCellDisabled(coinValue) {
       if (this.takenValue === null) return this.board[coinValue] === 0;
       return this.takenValue <= coinValue;
     }

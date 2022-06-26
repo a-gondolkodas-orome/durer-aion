@@ -7,14 +7,9 @@ export default {
   components: { GameSidebar },
   data: () => ({ step: 1 }),
   computed: {
-    ...mapState({ isPlayerSultan: (state) => state.isPlayerTheFirstToMove }),
-    ...mapState(['game', 'board', 'shouldPlayerMoveNext']),
-    ...mapGetters([
-      'isEnemyMoveInProgress',
-      'isGameInProgress'
-    ]),
+    ...mapState(['board', 'shouldPlayerMoveNext']),
+    ...mapGetters(['isEnemyMoveInProgress']),
     stepDescription() {
-      if (!this.isGameInProgress || !this.shouldPlayerMoveNext) return '';
       return 'Írj be egy számot, majd kattints a "Lépek" gombra.';
     }
   },

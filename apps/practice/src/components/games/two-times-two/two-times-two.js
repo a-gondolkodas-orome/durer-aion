@@ -1,25 +1,21 @@
-import { mapGetters, mapActions, mapState } from 'vuex';
+import { mapActions, mapState } from 'vuex';
 import GameSidebar from '../../common/game-sidebar/game-sidebar';
+import { getGameStateAfterMove } from './strategy/strategy';
 
 export default {
   template: require('./two-times-two.html'),
   components: { GameSidebar },
   computed: {
-    ...mapState(['game', 'board', 'shouldPlayerMoveNext']),
-    ...mapGetters([
-      'isGameInProgress'
-    ]),
+    ...mapState(['board', 'shouldPlayerMoveNext']),
     stepDescription() {
-      return this.isGameInProgress && this.shouldPlayerMoveNext
-        ? 'Kattints arra a mezőre, ahova korongot szeretnél lerakni.'
-        : '';
+      return 'Kattints arra a mezőre, ahova korongot szeretnél lerakni.';
     }
   },
   methods: {
     ...mapActions(['playerMove', 'initializeGame']),
     placePiece(tileIndex) {
       if (!this.shouldPlayerMoveNext) return;
-      this.playerMove(this.game.strategy.getGameStateAfterMove(this.board, tileIndex));
+      this.playerMove(getGameStateAfterMove(this.board, tileIndex));
     }
   },
   created() {

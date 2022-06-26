@@ -57,4 +57,5 @@ You can include work in progress games safely on the default branch if you set `
 ## Vue.js notes
 
 - separate .js and .html files are used for each component
+- the project uses locally registered components, meaning you have to import the component file and add it to components in your component .js file if you want to use another vue component.
 - refer to dynamic js values in your html file with starting your attribute name with `:`, e.g. `<button :class="color"></button>` to refer to `color` javascript field.

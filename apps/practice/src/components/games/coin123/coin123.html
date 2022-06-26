@@ -22,13 +22,13 @@
             v-for="coinValue in [0, 1, 2]" :key="coinValue"
             @click="clickPiece(coinValue)"
             class="text-center h-36 w-36 border-4 text-8xl"
-            :class="{ 'bg-gray-400': disableCell(coinValue) }"
+            :class="{ 'bg-gray-400': isCellDisabled(coinValue) }"
           >
             <span
               v-for="i in board[coinValue]"
               :key="i"
               class="h-16 w-16 p-1 inline-block rounded-full mr-1"
-              :class="pieceColor(coinValue)"
+              :class="getPieceColor(coinValue)"
             >
             </span>
           </td>
