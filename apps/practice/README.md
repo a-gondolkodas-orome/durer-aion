@@ -18,12 +18,8 @@ You can include work in progress games safely on the main branch as well if you 
 
 ## Project setup
 
-- install `nvm` (node.js version manager) on your computer globally
-- in the project directory run the project setup commands in the terminal
-
-```bash
-nvm install && nvm use && npm ci
-```
+- install Node.js on your computer globally
+- in the project directory terminal run `npm ci`
 
 ## IDE setup
 
