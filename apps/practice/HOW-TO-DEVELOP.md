@@ -2,6 +2,8 @@
 
 For general information and installation instructions, see the [readme](./README.md).
 
+This project uses the Vue.js frontend framework, the [official tutorial](https://vuejs.org/tutorial/#step-1) is a good starting point to understand the syntax and most important concepts.
+
 To keep track of who works on which game, use [this pinned issue](https://github.com/a-gondolkodas-orome/durer-jatekok/issues/1) to track it.
 
 ## Must have for a new game
