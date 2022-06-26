@@ -24,7 +24,9 @@ For more information, see [the modest documentation](./HOW-TO-DEVELOP.md).
 
 - install Node.js on your computer globally
 - in the project directory terminal run
-```npm ci
+
+```bash
+npm ci
 ```
 
 ## IDE setup
