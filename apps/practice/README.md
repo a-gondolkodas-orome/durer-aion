@@ -8,11 +8,11 @@ The deployed version is here: https://a-gondolkodas-orome.github.io/durer-jateko
 
 Feel free to commit directly to the default branch. If in doubt, send a pull request instead.
 
-When you push to the main branch, the tests are run, but the project is not deployed.
-
-Currently this project has a Vue.js setup, but you can include games not using Vue.js with small modifications.
+When you push to the main branch, the tests are run, but the project is not deployed to the live website.
 
 ## Adding a new game
+
+To keep track of who works on which game, use [this pinned issue](https://github.com/a-gondolkodas-orome/durer-jatekok/issues/1) to track it.
 
 TL;DR;
 
@@ -23,7 +23,9 @@ For more information, see [the modest documentation](./HOW-TO-DEVELOP.md).
 ## Project setup
 
 - install Node.js on your computer globally
-- in the project directory terminal run `npm ci`
+- in the project directory terminal run
+```npm ci
+```
 
 ## IDE setup
 
@@ -54,6 +56,8 @@ npm run test:watch # unit tests in watch mode
 ```
 
 ### Deploy to github pages
+
+Merges the master branch to the production branch on the remote, which automatically starts the github action to deploy from the production branch to the live website.
 
 ```bash
 npm run merge-production

@@ -1,6 +1,8 @@
 This document aims to give a short introduction to how to add a new game and the project's current structure.
 For general information, and installation instructions, see the [readme](./README.md).
 
+To keep track of who works on which game, use [this pinned issue](https://github.com/a-gondolkodas-orome/durer-jatekok/issues/1) to track it.
+
 ## Must have for a new game
 
 It is recommended to copy and modify the files of an existing game (see demonstration game for a minimal example).
@@ -39,7 +41,7 @@ Role selection, and game restart is managed by `<game-siderbar></game-siderbar>`
 
 ## Things to look out for
 
-- do not allow the player interacting with the game while the other player's step is in progress, use store getter `shouldPlayerMoveNext` to cheeck for this in your client side code
+- do not allow the player interacting with the game while the other player's step is in progress, use store getter `shouldPlayerMoveNext` to check for this in your client side code
 
 ## Handling work in progress
 
