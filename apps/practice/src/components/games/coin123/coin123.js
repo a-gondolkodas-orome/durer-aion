@@ -20,19 +20,19 @@ export default {
   },
   methods: {
     ...mapActions(['playerMove', 'initializeGame']),
-    clickPiece(i) {
+    clickPiece(coinValue) {
       if (!this.shouldPlayerMoveNext) return;
       if (this.takenValue === null) {
-        if (this.board[i] === 0) return;
-        this.takenValue = i;
-        this.board[i] -= 1;
-        if (i === 0) {
+        if (this.board[coinValue] === 0) return;
+        this.takenValue = coinValue;
+        this.board[coinValue] -= 1;
+        if (coinValue === 0) {
           this.endMove();
         }
         return;
       } else {
-        if (i >= this.takenValue) return;
-        this.board[i] += 1;
+        if (coinValue >= this.takenValue) return;
+        this.board[coinValue] += 1;
 
         this.endMove();
       }
