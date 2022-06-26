@@ -3,8 +3,7 @@ import { gameComponents, gameList } from '../games/games';
 import PageNotFound from '../page-not-found/page-not-found';
 
 export default {
-  name: 'game',
-  template: require('./game.html'),
+  template: require('./strategy-game.html'),
   components: {
     ...gameComponents,
     PageNotFound

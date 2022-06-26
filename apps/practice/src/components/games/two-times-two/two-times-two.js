@@ -2,7 +2,6 @@ import { mapGetters, mapActions, mapState } from 'vuex';
 import GameSidebar from '../../common/game-sidebar/game-sidebar';
 
 export default {
-  name: 'two-times-two',
   template: require('./two-times-two.html'),
   components: { GameSidebar },
   computed: {

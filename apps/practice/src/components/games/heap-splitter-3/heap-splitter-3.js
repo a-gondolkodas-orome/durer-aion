@@ -3,7 +3,6 @@ import GameSidebar from '../../common/game-sidebar/game-sidebar';
 import { isEqual } from 'lodash-es';
 
 export default {
-  name: 'heap-splitter-3',
   template: require('./heap-splitter-3.html'),
   components: { GameSidebar },
   data: () => ({

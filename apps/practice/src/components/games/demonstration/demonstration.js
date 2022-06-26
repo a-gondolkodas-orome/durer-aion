@@ -2,7 +2,6 @@ import { mapGetters, mapActions, mapState } from 'vuex';
 import GameSidebar from '../../common/game-sidebar/game-sidebar';
 
 export default {
-  name: 'demonstration',
   template: require('./demonstration.html'),
   components: { GameSidebar },
   computed: {

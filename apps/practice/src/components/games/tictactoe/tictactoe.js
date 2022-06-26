@@ -3,7 +3,6 @@ import GameSidebar from '../../common/game-sidebar/game-sidebar';
 import { getGameStateAfterMove, inPlacingPhase } from './strategy/strategy';
 
 export default {
-  name: 'tictactoe',
   template: require('./tictactoe.html'),
   components: { GameSidebar },
   computed: {

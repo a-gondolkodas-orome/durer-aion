@@ -3,7 +3,6 @@ import EnemyLoader from '../../common/enemy-loader/enemy-loader';
 import SoldierSvg from './soldier-svg/soldier-svg';
 
 export default {
-  name: 'hunyadi-and-the-janissaries',
   template: require('./hunyadi-and-the-janissaries.html'),
   components: { EnemyLoader, SoldierSvg },
   computed: {

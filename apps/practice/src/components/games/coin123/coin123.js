@@ -3,7 +3,6 @@ import GameSidebar from '../../common/game-sidebar/game-sidebar';
 import { getGameStateAfterMove } from './strategy/strategy';
 
 export default {
-  name: 'coin123',
   template: require('./coin123.html'),
   components: { GameSidebar },
   data: () => ({

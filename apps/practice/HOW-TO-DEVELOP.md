@@ -43,8 +43,10 @@ Role selection and game restart is managed by `<game-siderbar>` component in the
 ## Things to look out for
 
 - do not allow the player interacting with the game while the other player's step is in progress, use store getter `shouldPlayerMoveNext` to check for this in your client side code
+- reset component state when game is restarted
 - it is highly recommended to add unit tests at least for the AI strategy, place a `filename.spec.js` next to the `filename.js` you want to test.
 - Html classes starting with `js-` are there for unit testing purposes.
+- https://v2.vuejs.org/v2/guide/components.html#data-Must-Be-a-Function
 
 ## Handling work in progress
 
