@@ -8,10 +8,12 @@ To keep track of who works on which game, use [this pinned issue](https://github
 
 *It is recommended to copy and modify the files of an existing game (see demonstration game for a minimal example).*
 
+The `board` field on the store is the single source of truth for the state of the board. The AI step won't have access to other component specific data. You can read/write it from your component after mapping it with `mapState()`.
+
 The game logic must have the following 3 exported values
 - `isTheLastMoverTheWinner`: `true`, `false`, or `null` if winner is decided explicitly
 - `generateNewBoard` a function which returns a javascript object representing the board (UI state) for a new game
-- `getGameStateAfterAiMove` a function which
+- `getGameStateAfterAiMove` a function which has `board` as its first argument and optionally `isPlayerTheFirstToMove` as its second argument and returns an object with properties `board`, 'isGameEnd' and optionally `hasFirstPlayerWon`.
 
 Store actions to call from your component code the manage the game progress:
 - `initializeGame()`
@@ -20,7 +22,9 @@ Store actions to call from your component code the manage the game progress:
 Each game must have a folder under `src/components/games` and its metadata listed in `src/components/games/games.js`.
 - Include a new game in `gameList` and `gameComponents` exported values as well.
 
-Role selection and game restart is managed by `<game-siderbar>` component in the most common cases.
+Good to know
+- Role selection and game restart is managed by `<game-siderbar>` component in the most common cases.
+- The state of the board is stored in the `board` field of the store, so that the AI step has easy access to it.
 
 ## Technologies used
 
