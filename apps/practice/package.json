@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "vue-cli-service build",
-    "test:unit": "vue-cli-service test:unit --passWithNoTests",
+    "test:unit": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint --no-fix",
     "audit": "better-npm-audit audit --production",
     "start-dev": "vue-cli-service serve",

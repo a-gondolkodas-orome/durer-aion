@@ -1,12 +1,9 @@
 'use strict';
 
-import { findIndex, isNull, some, difference, groupBy, range, cloneDeep, isEqual, sample } from 'lodash-es';
-
-//export const generateNewBoard = () => Array(9).fill(null);
 export const generateNewBoard = () => {
-  return { 
-    usedColors: ["red", "green", "blue"], 
-    colors: Array(8).fill("white"), 
+  return {
+    usedColors: ["red", "green", "blue"],
+    colors: Array(8).fill("white"),
     neighbours: {
       0: [1, 3, 4],
       1: [0, 2, 5],
@@ -27,7 +24,7 @@ export const getGameStateAfterAiMove = (board) => {
 
 export const getGameStateAfterMove = (board) => {
   let hasFirstPlayerWon = !hasEmptyVertex(board);
-  return { board, isGameEnd: isGameEnd(board), hasFirstPlayerWon};
+  return { board, isGameEnd: isGameEnd(board), hasFirstPlayerWon };
 };
 
 export const isTheLastMoverTheWinner = null;
@@ -68,7 +65,7 @@ const makeOptimalStep = (board) => {
       if (isAllowedStep(board, vertex, color)) {
         board.colors[vertex] = color;
         return board;
-      }        
+      }
     }
   }
   return false;
@@ -88,5 +85,3 @@ const hasEmptyVertex = (board) => {
 const isGameEnd = (board) => {
   return !existsAllowedStep(board);
 };
-
-

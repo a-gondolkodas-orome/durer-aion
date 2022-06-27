@@ -21,11 +21,10 @@ export default {
       show: false,
       x: 0,
       y: 0
-  
-    }
+    };
   },
   methods: {
-    ...mapActions(['playerMove', 'initializeGame']),
+    ...mapActions(['endPlayerTurn', 'initializeGame']),
     clickPicker(color) {
       if (!this.shouldPlayerMoveNext) return;
       if (this.color === color) {
@@ -43,7 +42,7 @@ export default {
       if (!this.shouldPlayerMoveNext) return;
       if (this.show && isAllowedStep(this.board, vertex, this.color)) {
           this.board.colors[vertex] = this.color;
-          this.playerMove(getGameStateAfterMove(this.board));
+          this.endPlayerTurn(getGameStateAfterMove(this.board));
       }
     }
   },
