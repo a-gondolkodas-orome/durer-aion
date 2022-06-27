@@ -12,10 +12,10 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['playerMove', 'initializeGame']),
+    ...mapActions(['endPlayerTurn', 'initializeGame']),
     placePiece(tileIndex) {
       if (!this.shouldPlayerMoveNext) return;
-      this.playerMove(getGameStateAfterMove(this.board, tileIndex));
+      this.endPlayerTurn(getGameStateAfterMove(this.board, tileIndex));
     }
   },
   created() {

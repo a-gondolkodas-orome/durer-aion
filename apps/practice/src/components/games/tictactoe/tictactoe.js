@@ -15,7 +15,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['playerMove', 'initializeGame']),
+    ...mapActions(['endPlayerTurn', 'initializeGame']),
     clickField({ row, col }) {
       if (!this.shouldPlayerMoveNext) return;
       if (inPlacingPhase(this.board)) {
@@ -25,7 +25,7 @@ export default {
         if (this.board[row * 3 + col] !== 'red') return;
         this.board[row * 3 + col] = 'purple';
       }
-      this.playerMove(getGameStateAfterMove(this.board));
+      this.endPlayerTurn(getGameStateAfterMove(this.board));
     },
     pieceColor({ row, col }) {
       const colorCode = this.board[row * 3 + col];

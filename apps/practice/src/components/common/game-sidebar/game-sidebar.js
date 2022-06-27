@@ -14,7 +14,7 @@ export default {
     ])
   },
   methods: {
-    ...mapActions(['startGameAsPlayer', 'initializeGame']),
+    ...mapActions(['startGameWithRoleSelection', 'initializeGame']),
     restartGame() {
       this.$emit('restart');
       this.initializeGame();

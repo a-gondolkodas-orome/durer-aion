@@ -21,16 +21,16 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['playerMove', 'startGameAsPlayer', 'initializeGame']),
+    ...mapActions(['endPlayerTurn', 'startGameWithRoleSelection', 'initializeGame']),
     toggleGroup(rowIndex, pieceIndex) {
       if (!this.shouldPlayerMoveNext || !this.isPlayerSultan) return;
       this.board[rowIndex][pieceIndex] = this.board[rowIndex][pieceIndex] === 'blue' ? 'red' : 'blue';
     },
     finalizeSoldierGrouping() {
-      this.playerMove({ board: this.board, isGameEnd: false });
+      this.endPlayerTurn({ board: this.board, isGameEnd: false });
     },
     killGroup(group) {
-      this.playerMove(getGameStateAfterKillingGroup(this.board, group));
+      this.endPlayerTurn(getGameStateAfterKillingGroup(this.board, group));
     }
   },
   created() {

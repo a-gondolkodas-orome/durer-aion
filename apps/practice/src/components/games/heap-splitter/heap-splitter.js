@@ -21,10 +21,10 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['playerMove', 'initializeGame']),
+    ...mapActions(['endPlayerTurn', 'initializeGame']),
     clickPiece({ rowIndex, pieceIndex }) {
       if (!this.shouldPlayerMoveNext || pieceIndex === 0) return;
-      this.playerMove(getGameStateAfterMove(this.board, { rowIndex, pieceIndex }));
+      this.endPlayerTurn(getGameStateAfterMove(this.board, { rowIndex, pieceIndex }));
       this.hoveredPiece = null;
     },
     shouldShowDividerToTheLeft(piece) {

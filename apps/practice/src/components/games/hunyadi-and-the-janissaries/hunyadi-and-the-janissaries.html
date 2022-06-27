@@ -37,10 +37,10 @@
       <enemy-loader />
       <p class="italic text-justify">{{ stepDescription }}</p>
       <template v-if="isGameReadyToStart">
-        <button class="cta-button js-second-player" @click="startGameAsPlayer({ isFirst: false })">
+        <button class="cta-button js-second-player" @click="startGameWithRoleSelection({ isFirst: false })">
           Hunyadi leszek
         </button>
-        <button class="cta-button js-first-player" @click="startGameAsPlayer({ isFirst: true })">
+        <button class="cta-button js-first-player" @click="startGameWithRoleSelection({ isFirst: true })">
           Szultán leszek
         </button>
       </template>

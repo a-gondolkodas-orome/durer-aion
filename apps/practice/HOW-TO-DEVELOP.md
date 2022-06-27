@@ -19,7 +19,7 @@ The game logic must have the following 3 exported values
 
 Store actions to call from your component code the manage the game progress:
 - `initializeGame()`
-- `playerMove()`: At the end of each move by the player, your component code must call `playerMove({ board, isGameEnd })` and optionally `hasFirstPlayerWon`.
+- `endPlayerTurn()`: At the end of each move by the player, your component code must call `endPlayerTurn({ board, isGameEnd })` and optionally `hasFirstPlayerWon`.
 
 Each game must have a folder under `src/components/games` and its metadata listed in `src/components/games/games.js`.
 - Include a new game in `gameList` and `gameComponents` exported values as well.

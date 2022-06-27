@@ -11,9 +11,9 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['playerMove', 'initializeGame']),
+    ...mapActions(['endPlayerTurn', 'initializeGame']),
     makeMove() {
-      this.playerMove({ board: [], isGameEnd: true });
+      this.endPlayerTurn({ board: [], isGameEnd: true });
     }
   },
   created() {

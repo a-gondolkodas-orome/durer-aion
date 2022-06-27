@@ -20,7 +20,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['playerMove', 'initializeGame']),
+    ...mapActions(['endPlayerTurn', 'initializeGame']),
     clickHeap(coinValue) {
       if (!this.shouldPlayerMoveNext) return;
       if (this.isCoinActionInvalid(coinValue)) return;
@@ -38,7 +38,7 @@ export default {
       this.valueOfRemovedCoin = null;
     },
     endTurn() {
-      this.playerMove(getGameStateAfterMove(this.board));
+      this.endPlayerTurn(getGameStateAfterMove(this.board));
       this.resetTurnState();
     },
     getCoinColor(coinValue) {

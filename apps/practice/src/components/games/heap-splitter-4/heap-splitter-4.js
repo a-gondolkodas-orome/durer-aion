@@ -24,7 +24,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['playerMove', 'initializeGame']),
+    ...mapActions(['endPlayerTurn', 'initializeGame']),
     rowColor({ rowIndex }) {
       if (!this.isGameInProgress) return 'blue';
       if (rowIndex === this.removedRowIndex) {
@@ -52,7 +52,7 @@ export default {
         return;
       }
       if (pieceIndex === 0) return;
-      this.playerMove(getGameStateAfterMove(this.board, {
+      this.endPlayerTurn(getGameStateAfterMove(this.board, {
         removedRowIndex: this.removedRowIndex,
         splitRowIndex: rowIndex,
         pieceIndex

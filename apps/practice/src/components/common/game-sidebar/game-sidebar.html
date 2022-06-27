@@ -5,14 +5,14 @@
   <button
     v-if="isGameReadyToStart"
     class="cta-button js-first-player"
-    @click="startGameAsPlayer({ isFirst: true })"
+    @click="startGameWithRoleSelection({ isFirst: true })"
   >
     Kezdő leszek
   </button>
   <button
     v-if="isGameReadyToStart"
     class="cta-button js-second-player"
-    @click="startGameAsPlayer({ isFirst: false })"
+    @click="startGameWithRoleSelection({ isFirst: false })"
   >
     Második leszek
   </button>
