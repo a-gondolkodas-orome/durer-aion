@@ -1,9 +1,9 @@
 import { mapGetters, mapActions, mapState } from 'vuex';
 import GameSidebar from '../../common/game-sidebar/game-sidebar';
 import { isEqual } from 'lodash-es';
+import { getGameStateAfterMove } from './strategy/strategy';
 
 export default {
-  name: 'heap-splitter-3',
   template: require('./heap-splitter-3.html'),
   components: { GameSidebar },
   data: () => ({
@@ -11,22 +11,21 @@ export default {
     hoveredPiece: null
   }),
   computed: {
-    ...mapState(['game', 'board', 'shouldPlayerMoveNext']),
+    ...mapState(['board', 'shouldPlayerMoveNext']),
     ...mapGetters([
       'isGameInProgress',
       'isGameReadyToStart',
       'isGameFinished'
     ]),
     stepDescription() {
-      return this.isGameInProgress && this.shouldPlayerMoveNext
-        ? 'Először kattints az eltávolítandó kupacra, majd arra a korongra, ahol ketté akarod vágni a kupacot.'
-        : '';
+      return 'Először kattints az eltávolítandó kupacra, majd arra a korongra, ahol ketté akarod vágni a kupacot.';
     }
   },
   methods: {
     ...mapActions(['playerMove', 'initializeGame']),
     rowColor({ rowIndex }) {
       if (!this.isGameInProgress) return 'blue';
+
       if (rowIndex === this.removedRowIndex) {
         if (this.hoveredPiece === null) return 'red';
         if (this.hoveredPiece.rowIndex === rowIndex) return 'blue';
@@ -43,6 +42,7 @@ export default {
     },
     clickPiece({ rowIndex, pieceIndex }) {
       if (!this.shouldPlayerMoveNext) return;
+
       if (this.removedRowIndex === rowIndex) {
         this.removedRowIndex = null;
         return;
@@ -52,12 +52,12 @@ export default {
         return;
       }
       if (pieceIndex === 0) return;
-      this.playerMove(this.game.strategy.getGameStateAfterMove(this.board, {
+      this.playerMove(getGameStateAfterMove(this.board, {
         removedRowIndex: this.removedRowIndex,
         splitRowIndex: rowIndex,
         pieceIndex
       }));
-      this.resetMoveState();
+      this.resetTurnState();
     },
     shouldShowDividerToTheLeft(piece) {
       if (this.removedRowIndex === null) return false;
@@ -69,7 +69,7 @@ export default {
 
       const pieceCountInPile = this.board[rowIndex];
 
-      if (this.isGameReadyToStart || !this.shouldPlayerMoveNext) return pieceCountInPile;
+      if (!this.shouldPlayerMoveNext) return pieceCountInPile;
       if (rowIndex === this.removedRowIndex) {
         if (this.hoveredPiece && this.hoveredPiece.rowIndex === rowIndex) {
           return 'Eldobás visszavonása?';
@@ -84,7 +84,7 @@ export default {
 
       return `${pieceCountInPile} → ${this.hoveredPiece.pieceIndex}, ${pieceCountInPile - this.hoveredPiece.pieceIndex}`;
     },
-    resetMoveState() {
+    resetTurnState() {
       this.hoveredPiece = null;
       this.removedRowIndex = null;
     }

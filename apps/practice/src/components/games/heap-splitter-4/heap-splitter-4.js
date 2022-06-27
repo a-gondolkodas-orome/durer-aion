@@ -1,9 +1,9 @@
 import { mapGetters, mapActions, mapState } from 'vuex';
 import GameSidebar from '../../common/game-sidebar/game-sidebar';
 import { isEqual } from 'lodash-es';
+import { getGameStateAfterMove } from './strategy/strategy';
 
 export default {
-  name: 'heap-splitter-4',
   template: require('./heap-splitter-4.html'),
   components: { GameSidebar },
   data: () => ({
@@ -11,7 +11,7 @@ export default {
     hoveredPiece: null
   }),
   computed: {
-    ...mapState(['game', 'board', 'shouldPlayerMoveNext']),
+    ...mapState(['board', 'shouldPlayerMoveNext']),
     ...mapGetters([
       'isGameInProgress',
       'isGameReadyToStart',
@@ -52,12 +52,12 @@ export default {
         return;
       }
       if (pieceIndex === 0) return;
-      this.playerMove(this.game.strategy.getGameStateAfterMove(this.board, {
+      this.playerMove(getGameStateAfterMove(this.board, {
         removedRowIndex: this.removedRowIndex,
         splitRowIndex: rowIndex,
         pieceIndex
       }));
-      this.resetMoveState();
+      this.resetTurnState();
     },
     shouldShowDividerToTheLeft(piece) {
       if (this.removedRowIndex === null) return false;
@@ -84,7 +84,7 @@ export default {
 
       return `${pieceCountInPile} → ${this.hoveredPiece.pieceIndex}, ${pieceCountInPile - this.hoveredPiece.pieceIndex}`;
     },
-    resetMoveState() {
+    resetTurnState() {
       this.hoveredPiece = null;
       this.removedRowIndex = null;
     }

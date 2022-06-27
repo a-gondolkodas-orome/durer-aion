@@ -3,16 +3,15 @@ import GameSidebar from '../../common/game-sidebar/game-sidebar';
 import { getGameStateAfterMove, inPlacingPhase } from './strategy/strategy';
 
 export default {
-  name: 'tictactoe',
   template: require('./tictactoe.html'),
   components: { GameSidebar },
   computed: {
-    ...mapState(['game', 'board', 'shouldPlayerMoveNext']),
+    ...mapState(['board', 'shouldPlayerMoveNext']),
     ...mapGetters(['isGameInProgress']),
     stepDescription() {
-      return this.isGameInProgress && this.shouldPlayerMoveNext
-        ? inPlacingPhase(this.board) ? 'Kattints egy üres mezőre.' : 'Kattints egy piros korongra.'
-        : '';
+      return inPlacingPhase(this.board)
+        ? 'Kattints egy üres mezőre.'
+        : 'Kattints egy piros korongra.';
     }
   },
   methods: {

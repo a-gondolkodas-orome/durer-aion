@@ -1,21 +1,20 @@
-import { mapGetters, mapActions, mapState } from 'vuex';
+import { mapActions, mapState } from 'vuex';
 import GameSidebar from '../../common/game-sidebar/game-sidebar';
 
 export default {
-  name: 'demonstration',
   template: require('./demonstration.html'),
   components: { GameSidebar },
   computed: {
-    ...mapState(['game', 'shouldPlayerMoveNext']),
-    ...mapGetters(['isGameInProgress']),
+    ...mapState(['shouldPlayerMoveNext']),
     stepDescription() {
-      return this.isGameInProgress && this.shouldPlayerMoveNext
-        ? 'Kattints a "Lépek" gombra, hogy lépj.'
-        : '';
+      return 'Kattints a "Lépek" gombra, hogy lépj.';
     }
   },
   methods: {
-    ...mapActions(['playerMove', 'initializeGame'])
+    ...mapActions(['playerMove', 'initializeGame']),
+    makeMove() {
+      this.playerMove({ board: [], isGameEnd: true });
+    }
   },
   created() {
     this.initializeGame();

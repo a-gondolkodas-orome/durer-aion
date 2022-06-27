@@ -1,8 +1,9 @@
 import { createStore } from 'vuex';
+import { gameList } from '../components/games/games';
 
 export default () => createStore({
   state: {
-    game: null,
+    gameDefinition: null,
     board: null,
     gameStatus: null,
     isPlayerTheFirstToMove: null,
@@ -27,8 +28,8 @@ export default () => createStore({
     }
   },
   mutations: {
-    setGame(state, game) {
-      state.game = game;
+    setGameDefinition(state, { gameId }) {
+      state.gameDefinition = gameList[gameId] || null;
     },
     setGameStatus(state, status) {
       state.gameStatus = status;
@@ -47,16 +48,14 @@ export default () => createStore({
       commit('startGameAsPlayer', { isFirst });
       if (!isFirst) dispatch('aiMove');
     },
-    applyMove({ state, commit }, { board, isGameEnd, hasFirstPlayerWon }) {
-      commit('setBoard', board);
+    applyMove({ state, dispatch }, { board, isGameEnd, hasFirstPlayerWon }) {
+      state.board = board;
       state.shouldPlayerMoveNext = !state.shouldPlayerMoveNext;
       if (isGameEnd) {
-        clearTimeout(state.enemyMoveTimeoutHandle);
-        state.gameStatus = 'finished';
-        state.isPlayerWinner = state.game.strategy.isTheLastMoverTheWinner === null
+        const isPlayerWinner = state.gameDefinition.strategy.isTheLastMoverTheWinner === null
           ? state.isPlayerTheFirstToMove === hasFirstPlayerWon
-          : state.game.strategy.isTheLastMoverTheWinner === !state.shouldPlayerMoveNext;
-        state.shouldPlayerMoveNext = null;
+          : state.gameDefinition.strategy.isTheLastMoverTheWinner === !state.shouldPlayerMoveNext;
+        dispatch('endGame', { isPlayerWinner });
       }
     },
     initializeGame({ state, commit }) {
@@ -66,14 +65,20 @@ export default () => createStore({
       state.isPlayerWinner = null;
       state.isPlayerTheFirstToMove = null;
 
-      state.board = state.game.strategy.generateNewBoard();
+      state.board = state.gameDefinition.strategy.generateNewBoard();
       commit('setGameStatus', 'readyToStart');
+    },
+    endGame({ state }, { isPlayerWinner }) {
+      state.isPlayerWinner = isPlayerWinner;
+      clearTimeout(state.enemyMoveTimeoutHandle);
+      state.gameStatus = 'finished';
+      state.shouldPlayerMoveNext = null;
     },
     aiMove: async ({ state, dispatch }) => {
       state.isEnemyMoveInProgress = true;
       const time = Math.floor(Math.random() * 750 + 750);
       state.enemyMoveTimeoutHandle = setTimeout(() => {
-        dispatch('applyMove', state.game.strategy.getGameStateAfterAiMove(state.board, state.isPlayerTheFirstToMove));
+        dispatch('applyMove', state.gameDefinition.strategy.getGameStateAfterAiMove(state.board, state.isPlayerTheFirstToMove));
         state.isEnemyMoveInProgress = false;
       }, time);
     },

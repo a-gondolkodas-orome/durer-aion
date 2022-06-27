@@ -23,8 +23,8 @@ describe('App', () => {
     wrapper.find('.js-select-HeapSplitter').trigger('click');
     await flushPromises();
 
-    expect(store.state.game.component).toEqual('HeapSplitter');
-    expect(wrapper.find('#heap-splitter').exists()).toBe(true);
+    expect(store.state.gameDefinition.component).toEqual('HeapSplitter');
+    expect(wrapper.find('.js-heap-splitter').exists()).toBe(true);
   });
 
   it('should navigate back to game list when clicking back button in game view', async () => {
@@ -35,8 +35,8 @@ describe('App', () => {
     wrapper.find('.js-back-to-overview').trigger('click');
     await flushPromises();
 
-    expect(store.state.game).toBe(null);
-    expect(wrapper.find('#heap-splitter').exists()).toBe(false);
+    expect(store.state.gameDefinition).toBe(null);
+    expect(wrapper.find('.js-heap-splitter').exists()).toBe(false);
   });
 
   it('should show page not found url does not match known patterns', async () => {

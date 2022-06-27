@@ -1,8 +1,7 @@
-import Game from '../game/game';
+import Game from '../strategy-game/strategy-game';
 import Overview from '../overview/overview';
 
 export default {
-  name: 'app',
   template: require('./app.html'),
   components: {
     Game,

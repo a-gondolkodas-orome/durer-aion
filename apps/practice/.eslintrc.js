@@ -9,7 +9,6 @@ module.exports = {
     'plugin:jest/recommended'
   ],
   rules: {
-    'arrow-parens': ['error', 'always'],
     'arrow-spacing': 'error',
     'comma-dangle': ['error', 'never'],
     'curly': ['error', 'multi-line'],
@@ -18,12 +17,11 @@ module.exports = {
     'no-console': 'error',
     'no-debugger': 'error',
     'no-duplicate-imports': 'error',
-    'no-multiple-empty-lines': ['error', { max: 1 }],
+    'no-multiple-empty-lines': ['error', { max: 2 }],
     'no-trailing-spaces': 'error',
     'no-var': 'error',
     'object-curly-spacing': ['error', 'always'],
     'operator-linebreak': ['error', 'after', { overrides: { '?': 'before', ':': 'before' } }],
-    'padded-blocks': ['error', 'never'],
     'semi': ['error', 'always']
   },
   parserOptions: {

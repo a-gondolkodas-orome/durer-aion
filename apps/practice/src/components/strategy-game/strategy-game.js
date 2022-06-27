@@ -1,10 +1,9 @@
 import { mapMutations, mapState } from 'vuex';
-import { gameComponents, gameList } from '../games/games';
+import { gameComponents } from '../games/games';
 import PageNotFound from '../page-not-found/page-not-found';
 
 export default {
-  name: 'game',
-  template: require('./game.html'),
+  template: require('./strategy-game.html'),
   components: {
     ...gameComponents,
     PageNotFound
@@ -13,17 +12,17 @@ export default {
     gameId: String
   },
   computed: {
-    ...mapState(['game'])
+    ...mapState(['gameDefinition'])
   },
   methods: {
-    ...mapMutations(['setGame', 'setGameStatus']),
+    ...mapMutations(['setGameDefinition', 'setGameStatus']),
     goBackToOverview() {
-      this.setGame(null);
+      this.setGameDefinition({ gameId: null });
       this.setGameStatus(null);
       this.$router.push('/');
     },
     setGameBasedOnRoute() {
-      this.setGame(gameList[this.gameId] || null);
+      this.setGameDefinition({ gameId: this.gameId });
     }
   },
   mounted() {

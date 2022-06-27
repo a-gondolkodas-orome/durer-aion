@@ -6,26 +6,28 @@ The deployed version is here: https://a-gondolkodas-orome.github.io/durer-jateko
 
 # Development
 
-When you push to the main branch, the tests are run, but the project is not deployed.
+Feel free to commit directly to the default branch. If in doubt, send a pull request instead.
 
-Currently this project has a Vue.js setup, but you can include games not using Vue.js with small modifications.
+When you push to the main branch, the tests are run, but the project is not deployed to the live website.
 
 ## Adding a new game
 
-Currently each game should have a folder under `src/components/games` and its metadata listed in `src/components/games/games.js`. See existing examples for inspiration, and the demonstration game for a minimal example.
+To keep track of who works on which game, use [this pinned issue](https://github.com/a-gondolkodas-orome/durer-jatekok/issues/1) to track it.
 
-You can include work in progress games safely on the main branch as well if you set `isHiddenFromOverview: true` in `games.js`. You can also send a pull request or develop on a branch for a short time.
+TL;DR;
+
+Currently each game should have a folder under `src/components/games` and its metadata listed in `src/components/games/games.js`. See existing examples for inspiration, and the `demonstration` game for a minimal example.
+
+*For more information, see [HOW-TO-DEVELOP.md](./HOW-TO-DEVELOP.md).*
 
 ## Project setup
 
 - install Node.js on your computer globally
-- in the project directory terminal run `npm ci`
+- in the project directory terminal run
 
-## IDE setup
-
-If you are using VS Code, [Volar VS Code extension](https://marketplace.visualstudio.com/items?itemName=johnsoncodehk.volar) is highly recommended.
-Tailwindcss is used for some of the styling, the [tailwind VS Code extension](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss) is also recommended.
-
+```bash
+npm ci
+```
 
 ## Useful npm commands
 
@@ -51,17 +53,20 @@ npm run test:watch # unit tests in watch mode
 
 ### Deploy to github pages
 
+Merges the master branch to the production branch on the remote, which automatically starts the github action to deploy from the production branch to the live website.
+
 ```bash
 npm run merge-production
 ```
 
 For further options see `package.json`.
 
-## Further development notes
+## IDE setup
 
-- it is highly recommended to add unit tests at least for the AI strategy, `jest` is used for unit testing
-- Html classes starting with `js-` are there for unit testing purposes.
+If you are using VS Code, [Volar VS Code extension](https://marketplace.visualstudio.com/items?itemName=johnsoncodehk.volar) is highly recommended.
+Tailwindcss is used for some of the styling, the [tailwind VS Code extension](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss) is also recommended.
 
-# Misc.
+
+# Other
 
 - simple usage tracking at https://agondolkodasorome.goatcounter.com/ (Ildi has access)

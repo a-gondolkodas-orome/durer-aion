@@ -9,7 +9,7 @@
     szeretnél-e, vagy második játékos lenni.
     Sok sikert! :)
   </p>
-  <div class="flex flex-wrap" id="coin123">
+  <div class="flex flex-wrap">
     <div class="p-1 shrink-0 grow basis-8/12">
       <table class="m-2 border-collapse">
         <tr>
@@ -20,22 +20,24 @@
         <tr>
           <td
             v-for="coinValue in [0, 1, 2]" :key="coinValue"
-            @click="clickPiece(coinValue)"
+            @click="clickHeap(coinValue)"
             class="text-center h-36 w-36 border-4 text-8xl"
-            :class="{ 'bg-gray-400': disableCell(coinValue) }"
+            :class="{ 'bg-gray-400': isCoinActionInvalid(coinValue) }"
           >
             <span
               v-for="i in board[coinValue]"
               :key="i"
               class="h-16 w-16 p-1 inline-block rounded-full mr-1"
-              :class="pieceColor(coinValue)"
+              :class="getCoinColor(coinValue)"
             >
             </span>
           </td>
         </tr>
       </table>
-      <button v-if="takenValue" class="cta-button" @click="endMove()">Semmit se rakok be</button>
+      <button v-if="valueOfRemovedCoin" class="cta-button" @click="endTurn()">
+        Semmit se rakok be
+      </button>
     </div>
-    <game-sidebar :step-description="stepDescription" @restart="resetMoveState()" />
+    <game-sidebar :step-description="stepDescription" @restart="resetTurnState()" />
   </div>
 </div>

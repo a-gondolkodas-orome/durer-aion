@@ -1,4 +1,4 @@
-import { mapGetters, mapActions } from 'vuex';
+import { mapGetters, mapActions, mapState } from 'vuex';
 import EnemyLoader from '../enemy-loader/enemy-loader';
 
 export default {
@@ -7,6 +7,7 @@ export default {
   props: { stepDescription: String },
   components: { EnemyLoader },
   computed: {
+    ...mapState(['shouldPlayerMoveNext']),
     ...mapGetters([
       'ctaText',
       'isGameReadyToStart'

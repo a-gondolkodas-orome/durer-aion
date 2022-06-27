@@ -5,11 +5,10 @@ import { flushPromises } from '@vue/test-utils';
 import createStore from '../../../store/store';
 import { cloneDeep } from 'lodash-es';
 import { mountComponent } from '../../../../test-helpers';
-import { gameList } from '../games';
 
 const mountHeapSplitter = async () => {
   const store = createStore();
-  store.commit('setGame', gameList.HeapSplitter);
+  store.commit('setGameDefinition', { gameId: 'HeapSplitter' });
   return await mountComponent(HeapSplitter, { store });
 };
 
@@ -67,6 +66,6 @@ describe('HeapSplitter', () => {
     wrapper.findAll('.js-pile')[0].findAll('.js-pebble')[1].trigger('click');
     await flushPromises();
 
-    expect(wrapper.find('#heap-splitter').text()).toMatch(/gratul/i);
+    expect(wrapper.find('.js-heap-splitter').text()).toMatch(/gratul/i);
   });
 });

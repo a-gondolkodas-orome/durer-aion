@@ -1,9 +1,8 @@
 import createStore from './store';
-import { gameList } from '../components/games/games';
 
 const initializeStoreWithGame = (gameId = 'HeapSplitter') => {
   const store = createStore();
-  store.commit('setGame', gameList[gameId]);
+  store.commit('setGameDefinition', { gameId });
   store.dispatch('initializeGame');
   return store;
 };

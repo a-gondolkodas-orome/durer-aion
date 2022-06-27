@@ -1,57 +1,56 @@
-import { mapGetters, mapActions, mapState } from 'vuex';
+import { mapActions, mapState } from 'vuex';
 import GameSidebar from '../../common/game-sidebar/game-sidebar';
 import { getGameStateAfterMove } from './strategy/strategy';
 
 export default {
-  name: 'coin123',
   template: require('./coin123.html'),
   components: { GameSidebar },
   data: () => ({
-    takenValue: null
+    valueOfRemovedCoin: null
   }),
   computed: {
-    ...mapState(['game', 'board', 'shouldPlayerMoveNext']),
-    ...mapGetters(['isGameInProgress']),
+    ...mapState(['board', 'shouldPlayerMoveNext']),
+    wasCoinAlreadyRemovedInTurn() {
+      return this.valueOfRemovedCoin !== null;
+    },
     stepDescription() {
-      return this.isGameInProgress && this.shouldPlayerMoveNext
-        ? this.takenValue !== null ? 'Kattints egy mezőre, hogy visszatégy egy olyan pénzérmét' : 'Kattints egy mezőre, hogy elvegyél egy olyan pénzérmét'
-        : '';
+      return this.wasCoinAlreadyRemovedInTurn
+        ? 'Kattints egy mezőre, hogy visszatégy egy olyan pénzérmét'
+        : 'Kattints egy mezőre, hogy elvegyél egy olyan pénzérmét';
     }
   },
   methods: {
     ...mapActions(['playerMove', 'initializeGame']),
-    clickPiece(coinValue) {
+    clickHeap(coinValue) {
       if (!this.shouldPlayerMoveNext) return;
-      if (this.takenValue === null) {
-        if (this.board[coinValue] === 0) return;
-        this.takenValue = coinValue;
-        this.board[coinValue] -= 1;
-        if (coinValue === 0) {
-          this.endMove();
-        }
-        return;
-      } else {
-        if (coinValue >= this.takenValue) return;
-        this.board[coinValue] += 1;
+      if (this.isCoinActionInvalid(coinValue)) return;
 
-        this.endMove();
+      if (!this.wasCoinAlreadyRemovedInTurn) {
+        this.valueOfRemovedCoin = coinValue;
+        this.board[coinValue] -= 1;
+        if (coinValue === 0) this.endTurn();
+      } else {
+        this.board[coinValue] += 1;
+        this.endTurn();
       }
     },
-    resetMoveState() {
-      this.takenValue = null;
+    resetTurnState() {
+      this.valueOfRemovedCoin = null;
     },
-    endMove() {
+    endTurn() {
       this.playerMove(getGameStateAfterMove(this.board));
-      this.takenValue = null;
+      this.resetTurnState();
     },
-    pieceColor(coinValue) {
+    getCoinColor(coinValue) {
       if (coinValue === 0) return 'bg-yellow-700';
       if (coinValue === 1) return 'bg-slate-700';
       return 'bg-yellow-400';
     },
-    disableCell(coinValue) {
-      if (this.takenValue === null) return this.board[coinValue] === 0;
-      return this.takenValue <= coinValue;
+    isCoinActionInvalid(coinValue) {
+      if (this.wasCoinAlreadyRemovedInTurn) {
+        return this.valueOfRemovedCoin <= coinValue;
+      }
+      return this.board[coinValue] === 0;
     }
   },
   created() {

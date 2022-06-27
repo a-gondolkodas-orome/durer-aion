@@ -3,7 +3,7 @@
 import { sum, isEqual, cloneDeep } from 'lodash-es';
 import { getOptimalTileIndex } from './ai-step';
 
-export const generateNewBoard = () => ([0, 0, 0, 0]);
+export const generateNewBoard = () => Array(4).fill(0);
 
 export const getGameStateAfterAiMove = (board) => {
   const tileIndex = getOptimalTileIndex(board);

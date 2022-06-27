@@ -3,19 +3,13 @@ import GameSidebar from '../../common/game-sidebar/game-sidebar';
 import { getGameStateAfterMove } from './strategy/strategy';
 
 export default {
-  name: 'superstitious-counting',
   template: require('./superstitious-counting.html'),
   components: { GameSidebar },
   data: () => ({ step: 1 }),
   computed: {
-    ...mapState({ isPlayerSultan: (state) => state.isPlayerTheFirstToMove }),
-    ...mapState(['game', 'board', 'shouldPlayerMoveNext']),
-    ...mapGetters([
-      'isEnemyMoveInProgress',
-      'isGameInProgress'
-    ]),
+    ...mapState(['board', 'shouldPlayerMoveNext']),
+    ...mapGetters(['isEnemyMoveInProgress']),
     stepDescription() {
-      if (!this.isGameInProgress || !this.shouldPlayerMoveNext) return '';
       return 'Írj be egy számot, majd kattints a "Lépek" gombra.';
     }
   },
@@ -29,7 +23,7 @@ export default {
       }
       this.playerMove(getGameStateAfterMove(this.board, this.step));
     },
-    resetMoveState() {
+    resetTurnState() {
       this.step = 1;
     }
   },

@@ -1,32 +1,30 @@
 import { mapGetters, mapActions, mapState } from 'vuex';
 import { isEqual } from 'lodash-es';
 import GameSidebar from '../../common/game-sidebar/game-sidebar';
+import { getGameStateAfterMove } from './strategy/strategy';
 
 export default {
-  name: 'heap-splitter',
   template: require('./heap-splitter.html'),
   components: { GameSidebar },
   data: () => ({
     hoveredPiece: null
   }),
   computed: {
-    ...mapState(['game', 'board', 'shouldPlayerMoveNext']),
+    ...mapState(['board', 'shouldPlayerMoveNext']),
     ...mapGetters([
       'isGameInProgress',
       'isGameReadyToStart',
       'isGameFinished'
     ]),
     stepDescription() {
-      return this.isGameInProgress && this.shouldPlayerMoveNext
-        ? 'Kattints egy korongra, hogy azzal kettéosztd azt a kupacot. Amelyik korongra kattintasz, az és a tőle jobbra lévők kerülnek az új kupacba.'
-        : '';
+      return 'Kattints egy korongra, hogy azzal kettéosztd azt a kupacot. Amelyik korongra kattintasz, az és a tőle jobbra lévők kerülnek az új kupacba.';
     }
   },
   methods: {
     ...mapActions(['playerMove', 'initializeGame']),
     clickPiece({ rowIndex, pieceIndex }) {
       if (!this.shouldPlayerMoveNext || pieceIndex === 0) return;
-      this.playerMove(this.game.strategy.getGameStateAfterMove(this.board, { rowIndex, pieceIndex }));
+      this.playerMove(getGameStateAfterMove(this.board, { rowIndex, pieceIndex }));
       this.hoveredPiece = null;
     },
     shouldShowDividerToTheLeft(piece) {
