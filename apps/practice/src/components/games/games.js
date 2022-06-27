@@ -14,6 +14,8 @@ import HeapSplitter3 from './heap-splitter-3/heap-splitter-3';
 import * as heapSplitter3Strategy from './heap-splitter-3/strategy/strategy';
 import TicTacToe from './tictactoe/tictactoe';
 import * as ticTacToeStrategy from './tictactoe/strategy/strategy';
+import CubeColoring from './cube-coloring/cube-coloring';
+import * as cubeColoringStrategy from './cube-coloring/strategy/strategy';
 import Coin123 from './coin123/coin123';
 import * as coin123Strategy from './coin123/strategy/strategy';
 
@@ -26,6 +28,7 @@ export const gameComponents = {
   HeapSplitter4,
   HeapSplitter3,
   TicTacToe,
+  CubeColoring,
   Coin123
 };
 
@@ -91,6 +94,15 @@ export const gameList = {
     name: 'Kupac kettéosztó 4 kupaccal',
     component: 'HeapSplitter4',
     strategy: heapSplitter4Strategy
+  },
+  CubeColoring: {
+    year: 15,
+    round: 'döntő',
+    category: 'C',
+    name: 'Kockaszínezés',
+    component: 'CubeColoring',
+    isHiddenFromOverview: true,
+    strategy: cubeColoringStrategy
   },
   Coin123: {
     year: 15,
