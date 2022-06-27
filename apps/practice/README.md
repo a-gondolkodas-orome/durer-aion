@@ -6,7 +6,7 @@ The deployed version is here: https://a-gondolkodas-orome.github.io/durer-jateko
 
 # Development
 
-Feel free to commit directly to the default branch. If in doubt, send a pull request instead.
+Feel free to commit directly to the default branch. If in doubt, send a pull request instead. Prefer rebasing over merge commits.
 
 When you push to the main branch, the tests are run, but the project is not deployed to the live website.
 
