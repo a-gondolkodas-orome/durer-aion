@@ -11,7 +11,7 @@ export default {
     ...mapGetters(['isGameInProgress']),
     stepDescription() {
       return this.isGameInProgress && this.shouldPlayerMoveNext
-        ? 'Színezz meg egy csúcsot!'
+        ? 'Válassz színt, majd színezz meg egy csúcsot!'
         : '';
     }
   },
@@ -35,6 +35,7 @@ export default {
       }
     },
     drawPickedColor(event) {
+      if (!this.shouldPlayerMoveNext) this.show = false;
       this.x = event.offsetX;
       this.y = event.offsetY;
     },
