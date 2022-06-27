@@ -28,6 +28,14 @@ Good to know
 - Role selection and game restart is managed by `<game-siderbar>` component in the most common cases.
 - The state of the board is stored in the `board` field of the store, so that the AI step has easy access to it.
 
+### Game end, determining winner
+
+When ending the turn, specify the game state with an object `{ board, isGameEnd: true/false }`.
+
+If the winner can be determined from who moved last before the game ended, you do not have to identify if the player or the AI is the winner. Define the `isTheLastMoverTheWinner` game level constant in the `strategy.js` and when you provide `isGameEnd: true`, the winner will be calculated by the common logic in store.
+
+Otherwise, if the game ended, also calculate and return if the first or the second player is the winner. In your component code, the `isPlayerTheFirstToMove` field on the common state can help. In the ai move, `getGameStateAfterAiMove()` function will receive `isPlayerTheFirstToMove` as its second argument.
+
 ## Technologies used
 
 - Node.js for the development server
