@@ -8,7 +8,7 @@ The deployed version is here: https://a-gondolkodas-orome.github.io/durer-jateko
 
 Feel free to commit directly to the default branch. If in doubt, send a pull request instead. Prefer rebasing over merge commits.
 
-When you push to the main branch, the tests are run, but the project is not deployed to the live website.
+When you push to the main branch, the tests are run, and if they are successful, the project is deployed to the live website.
 
 ## Adding a new game
 
@@ -49,14 +49,6 @@ npm run test:unit # unit tests
 
 ```bash
 npm run test:watch # unit tests in watch mode
-```
-
-### Deploy to github pages
-
-Merges the master branch to the production branch on the remote, which automatically starts the github action to deploy from the production branch to the live website.
-
-```bash
-npm run merge-production
 ```
 
 For further options see `package.json`.

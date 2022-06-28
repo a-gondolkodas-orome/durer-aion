@@ -1,13 +1,13 @@
-name: deploy
+name: test
 on:
   push:
-    branches: [production]
+    branches: [master]
 
 jobs:
-  deploy:
+  test:
     runs-on: ubuntu-20.04
     container:
-      image: node:16.0.0
+      image: node:16.13.1
     steps:
       - name: Checkout
         uses: actions/checkout@v2
