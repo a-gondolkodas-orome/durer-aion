@@ -17,8 +17,8 @@ export const generateNewBoard = () => {
   };
 };
 
-export const getGameStateAfterAiMove = (board) => {
-  board = makeOptimalStep(board);
+export const getGameStateAfterAiMove = (board, isPlayerTheFirstToMove) => {
+  isPlayerTheFirstToMove ? board = makeOptimalStepAsSecond(board) : board = makeOptimalStepAsFirtst(board);
   return getGameStateAfterMove(board);
 };
 
@@ -49,19 +49,10 @@ export const existsAllowedStep = (board) => {
   return false;
 };
 
-const makeOptimalStep = (board) => {
-  for (let color of board.usedColors) {
-    if (isAllowedStep(board, 2, color)) {
-      board.colors[2] = color;
-      return board;
-    }
-    if (isAllowedStep(board, 4, color)) {
-      board.colors[4] = color;
-      return board;
-    }
-  }
-  for (let color of board.usedColors) {
-    for (let vertex in board.colors) {
+const makeOptimalStepAsFirtst = (board) => {
+  let optimalOrderOfVertices = [2, 4, 0, 1, 3, 5, 6, 7];
+  for (let vertex of optimalOrderOfVertices) {
+    for (let color of board.usedColors) {
       if (isAllowedStep(board, vertex, color)) {
         board.colors[vertex] = color;
         return board;
@@ -70,6 +61,69 @@ const makeOptimalStep = (board) => {
   }
   return false;
 };
+
+const makeOptimalStepAsSecond = (board) => {
+  let optimalOrderOfVertices = [0, 1, 3, 5, 6, 7, 2, 4];
+  for (let vertex of optimalOrderOfVertices) {
+    let missingColors = getMissingColors(board, vertex);
+    if (isEmptyVertex(board, vertex) && missingColors.size === 1) {
+      for (let v of getEmptyNeighbours(board, vertex)) {
+        for (let c of missingColors) {
+          if (isAllowedStep(board, v, c)) {
+            board.colors[v] = c;
+            return board;
+          }
+        }
+      }
+    }
+  }
+
+  for (let vertex of optimalOrderOfVertices) {
+    let missingColors = getMissingColors(board, vertex);
+    if (isEmptyVertex(board, vertex) && missingColors.size === 2) {
+      for (let v of getEmptyNeighbours(board, vertex)) {
+        for (let c of missingColors) {
+          if (isAllowedStep(board, v, c)) {
+            board.colors[v] = c;
+            return board;
+          }
+        }
+      }
+    }
+  }
+
+
+  for (let vertex of optimalOrderOfVertices) {
+    for (let color of board.usedColors) {
+      if (isAllowedStep(board, vertex, color)) {
+        board.colors[vertex] = color;
+        return board;
+      }
+    }
+  }
+  return false;
+};
+
+const getMissingColors = (board, vertex) => {
+  let nbColors = new Set();
+  for (let v of board.neighbours[vertex]) {
+    nbColors.add(board.colors[v]);
+  }
+  let missingColors = new Set();
+  for (let c of board.usedColors) {
+    if (!nbColors.has(c)) missingColors.add(c);
+  }
+  return missingColors;
+};
+
+const getEmptyNeighbours = (board, vertex) => {
+  let emptyNeighbours = new Set();
+  for (let v of board.neighbours[vertex]) {
+    if (isEmptyVertex(board, v)) emptyNeighbours.add(v);
+  }
+  return emptyNeighbours;
+};
+
 
 const isEmptyVertex = (board, vertex) => {
   return (board.colors[vertex] === "white");
