@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router';
+import { createRouter, createWebHashHistory } from 'vue-router';
 import Overview from './components/overview/overview';
 import StrategyGame from './components/strategy-game/strategy-game';
 import PageNotFound from './components/page-not-found/page-not-found';
@@ -10,6 +10,6 @@ const routes = [
 ];
 
 export default () => createRouter({
-  history: createWebHistory('/durer-jatekok/'),
+  history: createWebHashHistory(),
   routes
 });
