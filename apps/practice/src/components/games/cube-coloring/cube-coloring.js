@@ -35,7 +35,6 @@ export default {
       }
     },
     drawPickedColor(event) {
-      if (!this.shouldPlayerMoveNext) this.show = false;
       this.x = event.offsetX;
       this.y = event.offsetY;
     },
@@ -43,6 +42,7 @@ export default {
       if (!this.shouldPlayerMoveNext) return;
       if (this.show && isAllowedStep(this.board, vertex, this.color)) {
           this.board.colors[vertex] = this.color;
+          this.show = false;
           this.endPlayerTurn(getGameStateAfterMove(this.board));
       }
     }

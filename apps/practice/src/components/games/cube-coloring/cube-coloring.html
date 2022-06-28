@@ -26,9 +26,9 @@
         <circle cx="440" cy="320" r="15" @click="setColor(6)" stroke="black" stroke-width="3" :fill="board.colors[6]" />
         <circle cx="140" cy="320" r="15" @click="setColor(7)" stroke="black" stroke-width="3" :fill="board.colors[7]" />
 
-        <rect x="550" y="20" rx="5" ry="5" width="80" height="30" @click="clickPicker('red')" stroke="black" stroke-width="2" :fill="board.usedColors[0]" />
-        <rect x="550" y="70" rx="5" ry="5" width="80" height="30" @click="clickPicker('green')" stroke="black" stroke-width="2" :fill="board.usedColors[1]" />
-        <rect x="550" y="120" rx="5" ry="5" width="80" height="30" @click="clickPicker('blue')" stroke="black" stroke-width="2" :fill="board.usedColors[2]" />
+        <rect x="550" y="20" rx="5" ry="5" width="80" height="30" @click="clickPicker(board.usedColors[0])" stroke="black" stroke-width="2" :fill="board.usedColors[0]" />
+        <rect x="550" y="70" rx="5" ry="5" width="80" height="30" @click="clickPicker(board.usedColors[1])" stroke="black" stroke-width="2" :fill="board.usedColors[1]" />
+        <rect x="550" y="120" rx="5" ry="5" width="80" height="30" @click="clickPicker(board.usedColors[2])" stroke="black" stroke-width="2" :fill="board.usedColors[2]" />
 
         <circle v-if="show" :cx="x" :cy="y" r="15" :fill="color" fill-opacity="0.5" stroke="white" stroke-width="2" pointer-events="none" />
       </svg>
