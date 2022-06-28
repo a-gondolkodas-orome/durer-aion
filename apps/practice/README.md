@@ -6,9 +6,9 @@ The deployed version is here: https://a-gondolkodas-orome.github.io/durer-jateko
 
 # Development
 
-Feel free to commit directly to the default branch. If in doubt, send a pull request instead. Prefer rebasing over merge commits.
+Feel free to commit directly to the default (master) branch. If in doubt, send a pull request instead. Prefer rebasing over merge commits.
 
-When you push to the main branch, the tests are run, and if they are successful, the project is deployed to the live website.
+When you push to the default (master) branch, the tests are run, and if they are successful, the project is deployed to the live website.
 
 ## Adding a new game
 
