@@ -14,15 +14,13 @@ module.exports = {
     'curly': ['error', 'multi-line'],
     'eqeqeq': ['error', 'always'],
     'max-len': ['error', { code: 120, ignoreStrings: true, ignoreTemplateLiterals: true }],
-    'no-console': 'error',
     'no-debugger': 'error',
     'no-duplicate-imports': 'error',
     'no-multiple-empty-lines': ['error', { max: 2 }],
     'no-trailing-spaces': 'error',
-    'no-var': 'error',
-    'object-curly-spacing': ['error', 'always'],
-    'operator-linebreak': ['error', 'after', { overrides: { '?': 'before', ':': 'before' } }],
-    'semi': ['error', 'always']
+    'no-var': 'warn',
+    'object-curly-spacing': ['warn', 'always'],
+    'semi': 'warn'
   },
   parserOptions: {
     parser: '@babel/eslint-parser'
