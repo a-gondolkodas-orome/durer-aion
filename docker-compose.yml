@@ -1,0 +1,30 @@
+version: "3"
+services:
+  web:
+    image: nginx
+    ports:
+      - 80:80
+    volumes:
+      - ./build:/usr/share/nginx/html
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+  backend:
+    build: .
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres/postgres
+      - PORT=8000
+    ports:
+      - 8000:8000
+    volumes:
+      - .:/usr/src/app
+    depends_on:
+      - postgres
+  postgres:
+    image: bitnami/postgresql
+    ports:
+      - 5432
+    volumes:
+      - postgresdb:/var/lib/postgresql/data
+    environment:
+      - POSTGRESQL_PASSWORD=postgres
+volumes:
+  postgresdb: {}
