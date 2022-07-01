@@ -20,6 +20,8 @@ import Coin123 from './coin123/coin123';
 import * as coin123Strategy from './coin123/strategy/strategy';
 import TicTacToeDoubleStart from './tictactoe-doublestart/tictactoe-doublestart';
 import * as ticTacToeDoubleStartStrategy from './tictactoe-doublestart/strategy/strategy';
+import AntiTicTacToe from './anti-tictactoe/anti-tictactoe';
+import * as antiTicTacToeStrategy from './anti-tictactoe/strategy/strategy';
 
 export const gameComponents = {
   HeapSplitter,
@@ -32,7 +34,8 @@ export const gameComponents = {
   TicTacToe,
   CubeColoring,
   Coin123,
-  TicTacToeDoubleStart
+  TicTacToeDoubleStart,
+  AntiTicTacToe
 };
 
 export const gameList = {
@@ -73,6 +76,14 @@ export const gameList = {
     name: 'Duplán kezdő 3x3 amőba',
     component: 'TicTacToeDoubleStart',
     strategy: ticTacToeDoubleStartStrategy
+  },
+  AntiTicTacToe: {
+    year: 12,
+    round: 'döntő',
+    category: 'B',
+    name: '3x3 Anti-amőba',
+    component: 'AntiTicTacToe',
+    strategy: antiTicTacToeStrategy
   },
   TwoTimesTwo: {
     year: 13,
