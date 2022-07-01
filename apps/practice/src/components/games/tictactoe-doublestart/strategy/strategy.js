@@ -9,7 +9,7 @@ export const getGameStateAfterAiMove = (board, isPlayerTheFirstToMove) => {
     board[0] = 'red';
     board[2] = 'red';
   } else {
-    board[getOptimalAiPlacingPosition(board)] = isPlayerTheFirstToMove ? 'blue' : 'red';
+    board[getOptimalAiPlacingPosition(board, isPlayerTheFirstToMove)] = isPlayerTheFirstToMove ? 'blue' : 'red';
   }
   return getGameStateAfterMove(board);
 };
@@ -47,9 +47,12 @@ export const getOptimalAiPlacingPosition = (board, isPlayerTheFirstToMove) => {
   const playerPieces = range(0, 9).filter(i => board[i] !== aiColor && !isNull(board[i]));
 
   const instantDefendingPlace = allowedPlaces.find(i => hasWinningSubset([...playerPieces, i]));
-  if (instantDefendingPlace !== undefined) return instantDefendingPlace;
-
   const winningSubsetCompleterPlace = allowedPlaces.find(i => hasWinningSubset([...aiPieces, i]));
+
+  if (instantDefendingPlace !== undefined && winningSubsetCompleterPlace !== undefined) {
+    return isPlayerTheFirstToMove ? winningSubsetCompleterPlace : instantDefendingPlace;
+  }
+  if (instantDefendingPlace !== undefined) return instantDefendingPlace;
   if (winningSubsetCompleterPlace !== undefined) return winningSubsetCompleterPlace;
 
   if (isNull(board[4])) return 4;
