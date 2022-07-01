@@ -22,6 +22,8 @@ import TicTacToeDoubleStart from './tictactoe-doublestart/tictactoe-doublestart'
 import * as ticTacToeDoubleStartStrategy from './tictactoe-doublestart/strategy/strategy';
 import AntiTicTacToe from './anti-tictactoe/anti-tictactoe';
 import * as antiTicTacToeStrategy from './anti-tictactoe/strategy/strategy';
+import ChessRook from './chess-rook/chess-rook';
+import * as chessRookStrategy from './chess-rook/strategy/strategy';
 
 export const gameComponents = {
   HeapSplitter,
@@ -35,10 +37,20 @@ export const gameComponents = {
   CubeColoring,
   Coin123,
   TicTacToeDoubleStart,
-  AntiTicTacToe
+  AntiTicTacToe,
+  ChessRook
 };
 
 export const gameList = {
+  ChessRook: {
+    year: 1,
+    round: 'döntő',
+    category: 'C',
+    component: 'ChessRook',
+    name: 'Sakktáblán egy bástya',
+    strategy: chessRookStrategy,
+    isHiddenFromOverview: true
+  },
   HunyadiAndTheJanissaries: {
     year: 6,
     round: 'döntő',
