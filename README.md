@@ -74,10 +74,21 @@ Tasks:
 
 ## Developer environment -- Docker way
 
-Frontend needs to be built, but the server auto-reloads(!).
+Frontend needs to be built after every change, but the server auto-reloads(!).
+
+First-time you will need: `docker-compose build`
+
+### Setting up the server
+
+`docker-compose up`
+
+(before first run, you will need `npm run build`)
+
+### Reload frontend manually
 
 `npm run build`
-`docker-compose up`
+
+...and reload page
 
 ## Developer environment -- without docker
 
