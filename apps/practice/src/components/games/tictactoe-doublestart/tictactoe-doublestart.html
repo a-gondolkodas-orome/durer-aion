@@ -1,0 +1,33 @@
+<div>
+  <p class="text-justify">
+    A 3 × 3-as duplánkezdő amőba játékban először a kezdő tesz le két piros korongot, majd
+  a második egy kék korongot és innentől felváltva egy-egy korongot tesznek le a saját színükből, amíg
+  be nem telik a tábla. A kezdő nyer, ha a játék végén van valahol három piros egy sorban, oszlopban
+  vagy átlóban, de sehol sincs három kék egy sorban, oszlopban vagy átlóban; egyébként a második
+  nyer.
+
+    Az új leosztás gombra kattintva generálhatsz egy felállást. A felállás ismeretében te döntheted el, hogy kezdeni
+    szeretnél-e, vagy második játékos lenni.
+    Sok sikert! :)
+  </p>
+  <div class="flex flex-wrap">
+    <div class="p-1 shrink-0 grow basis-8/12">
+      <table class="m-2 border-collapse">
+        <tr v-for="row in [0, 1, 2]" :key="row">
+          <td
+            v-for="col in [0, 1, 2]" :key="col"
+            @click="clickField({ row, col })"
+            class="text-center h-36 w-36 border-4 text-8xl"
+          >
+            <span
+              v-if="board[row * 3 + col]"
+              class="h-16 w-16 p-1 inline-block rounded-full mr-1"
+              :class="pieceColor({ row, col })"
+            ></span>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <game-sidebar :step-description="stepDescription"></game-sidebar>
+  </div>
+</div>

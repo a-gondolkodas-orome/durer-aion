@@ -18,6 +18,8 @@ import CubeColoring from './cube-coloring/cube-coloring';
 import * as cubeColoringStrategy from './cube-coloring/strategy/strategy';
 import Coin123 from './coin123/coin123';
 import * as coin123Strategy from './coin123/strategy/strategy';
+import TicTacToeDoubleStart from './tictactoe-doublestart/tictactoe-doublestart';
+import * as ticTacToeDoubleStartStrategy from './tictactoe-doublestart/strategy/strategy';
 
 export const gameComponents = {
   HeapSplitter,
@@ -29,7 +31,8 @@ export const gameComponents = {
   HeapSplitter3,
   TicTacToe,
   CubeColoring,
-  Coin123
+  Coin123,
+  TicTacToeDoubleStart
 };
 
 export const gameList = {
@@ -62,6 +65,14 @@ export const gameList = {
     component: 'Demonstration',
     strategy: demonstrationStrategy,
     isHiddenFromOverview: true
+  },
+  TicTacToeDoubleStart: {
+    year: 12,
+    round: 'döntő',
+    category: 'A',
+    name: 'Duplán kezdő 3x3 amőba',
+    component: 'TicTacToeDoubleStart',
+    strategy: ticTacToeDoubleStartStrategy
   },
   TwoTimesTwo: {
     year: 13,
@@ -101,7 +112,6 @@ export const gameList = {
     category: 'C',
     name: 'Kockaszínezés',
     component: 'CubeColoring',
-    isHiddenFromOverview: true,
     strategy: cubeColoringStrategy
   },
   Coin123: {
