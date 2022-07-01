@@ -4,14 +4,24 @@ import { MyGame as SuperstitiousCountingGame } from './games/superstitious-count
 import { PostgresStore } from 'bgio-postgres';
 import { env } from 'process';
 
-const CONNECTION_STRING = env.DATABASE_URL || "posgresql://postgres:postgres@localhost:5432/postgres";
+function getDb() {
+    if (env.DATABASE_URL) {
+        const CONNECTION_STRING = env.DATABASE_URL;
+        return {
+            db: new PostgresStore(CONNECTION_STRING),
+        }
+    } else {
+        return {};
+    }
+}
+
 
 const server = Server({
     games: [
         TicTacToeGame,
         SuperstitiousCountingGame,
     ],
-    db: new PostgresStore(CONNECTION_STRING),
+    ...getDb(),
 })
 
 const PORT = parseInt(env.PORT || "8000");
