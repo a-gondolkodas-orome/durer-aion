@@ -31,6 +31,18 @@ describe('TicTacToe strategy', () => {
         expect(result.isGameEnd).toBe(true);
       });
 
+      it('should win the game in 1 move if possible for 0th place as well', () => {
+        const board = [
+          null, 'red', 'red',
+          null, null, null,
+          'blue', 'blue', null
+        ];
+
+        const result = getGameStateAfterAiMove(board);
+        expect(result.board[0]).toEqual('red');
+        expect(result.isGameEnd).toBe(true);
+      });
+
       it('should identify a diagonal winning position', () => {
         const board = [
           'blue', 'blue', 'red',

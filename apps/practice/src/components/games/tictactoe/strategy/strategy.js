@@ -44,7 +44,7 @@ export const getOptimalAiPlacingPosition = (board) => {
     localBoard[i] = 'red';
     return isGameEnd(localBoard);
   });
-  if (instantWinningPlace) return instantWinningPlace;
+  if (instantWinningPlace !== undefined) return instantWinningPlace;
 
   const instantDefendingPlace = allowedPlaces.find((i) => {
     const localBoard = cloneDeep(board);
