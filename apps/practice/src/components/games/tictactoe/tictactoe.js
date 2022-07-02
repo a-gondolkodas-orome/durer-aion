@@ -8,8 +8,11 @@ export default {
   computed: {
     ...mapState(['board', 'shouldPlayerMoveNext']),
     ...mapGetters(['isGameInProgress']),
+    inPlacingPhase() {
+      return inPlacingPhase(this.board);
+    },
     stepDescription() {
-      return inPlacingPhase(this.board)
+      return this.inPlacingPhase
         ? 'Kattints egy üres mezőre.'
         : 'Kattints egy piros korongra.';
     }
@@ -19,12 +22,12 @@ export default {
     clickField({ row, col }) {
       if (!this.isMoveAllowed({ row, col })) return;
 
-      this.board[row * 3 + col] = inPlacingPhase(this.board) ? 'blue' : 'purple';
+      this.board[row * 3 + col] = this.inPlacingPhase ? 'blue' : 'white';
       this.endPlayerTurn(getGameStateAfterMove(this.board));
     },
     isMoveAllowed({ row, col }) {
       if (!this.shouldPlayerMoveNext) return false;
-      if (inPlacingPhase(this.board)) {
+      if (this.inPlacingPhase) {
         return this.board[row * 3 + col] === null;
       } else {
         return this.board[row * 3 + col] === 'red';
@@ -33,7 +36,7 @@ export default {
     pieceColor({ row, col }) {
       const colorCode = this.board[row * 3 + col];
       if (colorCode === 'red') return 'bg-red-600';
-      if (colorCode === 'purple') return 'bg-purple-600';
+      if (colorCode === 'white') return 'bg-white';
       return 'bg-blue-600';
     }
   },

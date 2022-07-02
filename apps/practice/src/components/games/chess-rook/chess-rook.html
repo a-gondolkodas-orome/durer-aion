@@ -7,8 +7,7 @@
     ezekre a mezőkre már nem léphetünk (át sem haladhatunk felettük). Az a játékos veszít, aki
     nem tud lépni.
 
-    Az új leosztás gombra kattintva generálhatsz egy felállást. A felállás ismeretében te döntheted el, hogy kezdeni
-    szeretnél-e, vagy második játékos lenni.
+    Te döntheted el, hogy kezdeni szeretnél-e, vagy második játékos lenni.
     Sok sikert! :)
   </p>
   <div class="flex flex-wrap">
@@ -19,8 +18,12 @@
             v-for="col in [0, 1, 2, 3, 4, 5, 6, 7]" :key="col" 
             @click="clickField({ row, col })"
             class="text-center h-20 w-20 border-4"
-            :class="{ 'bg-slate-400': board.chessBoard[row * 8 + col] === 'visited', 'bg-green-100': isAllowedMove({ row, col }) }"
+            :class="{ 'bg-slate-400': board.chessBoard[row * 8 + col] === 'visited' }"
           >
+            <span 
+              v-if="isAllowedMove({ row, col })" 
+              class="h-6 w-6 p-1 inline-block rounded-full opacity-25 bg-black"
+            ></span>
             <span v-if="board.chessBoard[row * 8 + col] === 'rook'">
               <svg class="h-16 w-16 p-1 inline-block">
                 <use xlink:href="#game-chess-rook" />

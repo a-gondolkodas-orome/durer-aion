@@ -8,7 +8,7 @@ export const getGameStateAfterAiMove = (board) => {
   if (inPlacingPhase(board)) {
     board[getOptimalAiPlacingPosition(board)] = 'red';
   } else {
-    board[getOptimalAiFlippingPosition(board)] = 'purple';
+    board[getOptimalAiFlippingPosition(board)] = 'white';
   }
   return getGameStateAfterMove(board);
 };
@@ -65,7 +65,7 @@ export const getOptimalAiFlippingPosition = (board) => {
 
   const instantWinningPlace = allowedPlaces.find((i) => {
     const localBoard = cloneDeep(board);
-    localBoard[i] = 'purple';
+    localBoard[i] = 'white';
     return isGameEnd(localBoard);
   });
   if (instantWinningPlace) return instantWinningPlace;

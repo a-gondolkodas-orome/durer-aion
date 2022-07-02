@@ -13,7 +13,7 @@ describe('TicTacToe strategy', () => {
     });
 
     it('should return false if board does not have empty place', () => {
-      expect(inPlacingPhase(['blue', 'red', 'red', 'purple', 'red', 'purple', 'blue', 'blue', 'purple'])).toBe(false);
+      expect(inPlacingPhase(['blue', 'red', 'red', 'white', 'red', 'white', 'blue', 'blue', 'white'])).toBe(false);
     });
   });
 
@@ -117,7 +117,7 @@ describe('TicTacToe strategy', () => {
     });
 
     describe('board is already full phase', () => {
-      it('should color middle field to purple if allowed', () => {
+      it('should color middle field to white if allowed', () => {
         const board = [
           'red', 'blue', 'red',
           'red', 'blue', 'blue',
@@ -125,147 +125,147 @@ describe('TicTacToe strategy', () => {
         ];
 
         const result = getGameStateAfterAiMove(board);
-        expect(result.board[4]).toEqual('purple');
+        expect(result.board[4]).toEqual('white');
         expect(result.isGameEnd).toBe(false);
       });
 
       it('should win the game in one move is possible', () => {
         const board = [
           'red', 'blue', 'red',
-          'purple', 'purple', 'blue',
+          'white', 'white', 'blue',
           'blue', 'red', 'blue'
         ];
 
         const result = getGameStateAfterAiMove(board);
-        expect(result.board[5]).toEqual('purple');
+        expect(result.board[5]).toEqual('white');
         expect(result.isGameEnd).toBe(true);
       });
 
       describe('r b r, b r b, b r b scenario', () => {
-        it('should color 3 to purple (and similarly in rotated scenarios)', () => {
+        it('should color 3 to white (and similarly in rotated scenarios)', () => {
           expect(getGameStateAfterAiMove([
             'red', 'blue', 'red',
             'blue', 'red', 'blue',
             'blue', 'red', 'blue'
-          ]).board[3]).toEqual('purple');
+          ]).board[3]).toEqual('white');
 
           expect(getGameStateAfterAiMove([
             'blue', 'blue', 'red',
             'red', 'red', 'blue',
             'blue', 'blue', 'red'
-          ]).board[1]).toEqual('purple');
+          ]).board[1]).toEqual('white');
 
           expect(getGameStateAfterAiMove([
             'blue', 'red', 'blue',
             'blue', 'red', 'blue',
             'red', 'blue', 'red'
-          ]).board[5]).toEqual('purple');
+          ]).board[5]).toEqual('white');
 
           expect(getGameStateAfterAiMove([
             'red', 'blue', 'blue',
             'blue', 'red', 'red',
             'red', 'blue', 'blue'
-          ]).board[7]).toEqual('purple');
+          ]).board[7]).toEqual('white');
         });
 
-        it('should color 8 to purple as 3rd if no instant win (and similarly in rotated scenarios)', () => {
+        it('should color 8 to white as 3rd if no instant win (and similarly in rotated scenarios)', () => {
           expect(getGameStateAfterAiMove([
-            'red', 'blue', 'purple',
-            'purple', 'red', 'blue',
+            'red', 'blue', 'white',
+            'white', 'red', 'blue',
             'blue', 'red', 'blue'
-          ]).board[8]).toEqual('purple');
+          ]).board[8]).toEqual('white');
           expect(getGameStateAfterAiMove([
             'red', 'blue', 'red',
-            'purple', 'red', 'blue',
-            'blue', 'purple', 'blue'
-          ]).board[8]).toEqual('purple');
+            'white', 'red', 'blue',
+            'blue', 'white', 'blue'
+          ]).board[8]).toEqual('white');
 
           expect(getGameStateAfterAiMove([
-            'blue', 'purple', 'red',
-            'purple', 'red', 'blue',
+            'blue', 'white', 'red',
+            'white', 'red', 'blue',
             'blue', 'blue', 'red'
-          ]).board[6]).toEqual('purple');
+          ]).board[6]).toEqual('white');
           expect(getGameStateAfterAiMove([
-            'blue', 'purple', 'red',
+            'blue', 'white', 'red',
             'red', 'red', 'blue',
-            'blue', 'blue', 'purple'
-          ]).board[6]).toEqual('purple');
+            'blue', 'blue', 'white'
+          ]).board[6]).toEqual('white');
 
           expect(getGameStateAfterAiMove([
-            'blue', 'purple', 'blue',
-            'blue', 'red', 'purple',
+            'blue', 'white', 'blue',
+            'blue', 'red', 'white',
             'red', 'blue', 'red'
-          ]).board[0]).toEqual('purple');
+          ]).board[0]).toEqual('white');
           expect(getGameStateAfterAiMove([
             'blue', 'red', 'blue',
-            'blue', 'red', 'purple',
-            'purple', 'blue', 'red'
-          ]).board[0]).toEqual('purple');
+            'blue', 'red', 'white',
+            'white', 'blue', 'red'
+          ]).board[0]).toEqual('white');
 
           expect(getGameStateAfterAiMove([
             'red', 'blue', 'blue',
-            'blue', 'red', 'purple',
-            'red', 'purple', 'blue'
-          ]).board[2]).toEqual('purple');
+            'blue', 'red', 'white',
+            'red', 'white', 'blue'
+          ]).board[2]).toEqual('white');
           expect(getGameStateAfterAiMove([
-            'purple', 'blue', 'blue',
+            'white', 'blue', 'blue',
             'blue', 'red', 'red',
-            'red', 'purple', 'blue'
-          ]).board[2]).toEqual('purple');
+            'red', 'white', 'blue'
+          ]).board[2]).toEqual('white');
         });
       });
 
       describe('r b b, b r r, b r b scenario', () => {
-        it('should color 2 to purple (and similarly in rotated scenarios)', () => {
+        it('should color 2 to white (and similarly in rotated scenarios)', () => {
           expect(getGameStateAfterAiMove([
             'red', 'blue', 'blue',
             'blue', 'red', 'red',
             'blue', 'red', 'blue'
-          ]).board[2]).toEqual('purple');
+          ]).board[2]).toEqual('white');
 
           expect(getGameStateAfterAiMove([
             'blue', 'blue', 'red',
             'red', 'red', 'blue',
             'blue', 'red', 'blue'
-          ]).board[8]).toEqual('purple');
+          ]).board[8]).toEqual('white');
 
           expect(getGameStateAfterAiMove([
             'blue', 'red', 'blue',
             'red', 'red', 'blue',
             'blue', 'blue', 'red'
-          ]).board[6]).toEqual('purple');
+          ]).board[6]).toEqual('white');
 
           expect(getGameStateAfterAiMove([
             'blue', 'red', 'blue',
             'blue', 'red', 'red',
             'red', 'blue', 'blue'
-          ]).board[0]).toEqual('purple');
+          ]).board[0]).toEqual('white');
         });
 
-        it('should color 3 to purple (and similarly in rotated scenarios)', () => {
+        it('should color 3 to white (and similarly in rotated scenarios)', () => {
           expect(getGameStateAfterAiMove([
-            'red', 'blue', 'purple',
+            'red', 'blue', 'white',
             'blue', 'red', 'red',
-            'blue', 'purple', 'blue'
-          ]).board[3]).toEqual('purple');
+            'blue', 'white', 'blue'
+          ]).board[3]).toEqual('white');
 
           expect(getGameStateAfterAiMove([
             'blue', 'blue', 'red',
-            'purple', 'red', 'blue',
-            'blue', 'red', 'purple'
-          ]).board[1]).toEqual('purple');
+            'white', 'red', 'blue',
+            'blue', 'red', 'white'
+          ]).board[1]).toEqual('white');
 
           expect(getGameStateAfterAiMove([
-            'blue', 'purple', 'blue',
+            'blue', 'white', 'blue',
             'red', 'red', 'blue',
-            'purple', 'blue', 'red'
-          ]).board[5]).toEqual('purple');
+            'white', 'blue', 'red'
+          ]).board[5]).toEqual('white');
 
           expect(getGameStateAfterAiMove([
-            'purple', 'red', 'blue',
-            'blue', 'red', 'purple',
+            'white', 'red', 'blue',
+            'blue', 'red', 'white',
             'red', 'blue', 'blue'
-          ]).board[7]).toEqual('purple');
+          ]).board[7]).toEqual('white');
         });
       });
     });
