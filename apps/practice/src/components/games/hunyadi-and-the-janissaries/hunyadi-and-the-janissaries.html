@@ -17,15 +17,20 @@
       <div
         v-for="rowIndex in [0, 1, 2, 3, 4]"
         :key="rowIndex"
-        class="border-t-black border-t-2 h-20 p-1 text-left whitespace-nowrap"
+        class="border-t-black border-t-2 h-20 p-1 text-center whitespace-nowrap"
         :class="{ 'border-b-black border-b-2': rowIndex === 4 }"
       >
         <span
           v-for="(group, pieceIndex) in board[rowIndex]"
           class="h-16 w-16 p-1 inline-block mx-1 js-clickable-soldier"
-          @click="toggleGroup(rowIndex, pieceIndex)"
+          @click="clickOnSoldier(rowIndex, pieceIndex)"
+          @mouseover="hoveredPiece = { rowIndex, pieceIndex }"
+          @mouseout="hoveredPiece = null"
         >
-          <svg class="h-16 w-16 p-1 inline-block" :class="group === 'blue' ? 'fill-blue-600' : 'fill-red-600'">
+          <svg 
+            class="h-16 w-16 p-1 inline-block border-dashed border-black" 
+            :class="{ 'border-2': showToBeKilled(group), 'opacity-50': showToBeKilled(group), 'fill-blue-600': group === 'blue', 'fill-red-600': group === 'red' }"
+          >
             <use xlink:href="#game-soldier-icon" />
           </svg>
         </span>
@@ -50,7 +55,7 @@
           class="cta-button js-finalize-groups"
           @click="finalizeSoldierGrouping()"
         >
-          Lépek
+          Befejezem a kettéosztást
         </button>
         <button
           v-if="!isPlayerSultan"
@@ -70,7 +75,7 @@
         </button>
       </template>
       <div class="flex flex-grow items-end">
-        <button class="cta-button mt-4 js-restart-game"  @click="initializeGame()">
+        <button class="cta-button mt-4 js-restart-game" @click="restartGame()">
           Új játék
         </button>
       </div>
