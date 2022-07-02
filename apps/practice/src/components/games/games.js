@@ -48,8 +48,7 @@ export const gameList = {
     category: 'C',
     component: 'ChessRook',
     name: 'Sakktáblán egy bástya',
-    strategy: chessRookStrategy,
-    isHiddenFromOverview: false
+    strategy: chessRookStrategy
   },
   HunyadiAndTheJanissaries: {
     year: 6,
