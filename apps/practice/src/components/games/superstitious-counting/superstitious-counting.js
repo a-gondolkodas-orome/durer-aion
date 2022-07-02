@@ -10,7 +10,7 @@ export default {
     ...mapState(['board', 'shouldPlayerMoveNext']),
     ...mapGetters(['isEnemyMoveInProgress']),
     stepDescription() {
-      return 'Írj be egy számot, majd kattints a "Lépek" gombra.';
+      return 'Írj be egy számot, majd nyomj Enter-t.';
     }
   },
   methods: {

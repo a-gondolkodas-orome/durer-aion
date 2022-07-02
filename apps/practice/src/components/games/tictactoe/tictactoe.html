@@ -19,6 +19,7 @@
             v-for="col in [0, 1, 2]" :key="col"
             @click="clickField({ row, col })"
             class="text-center h-36 w-36 border-4 text-8xl"
+            :class="{ 'cursor-not-allowed': !isMoveAllowed({ row, col }) && shouldPlayerMoveNext, 'bg-green-100': isMoveAllowed({ row, col }) }"
           >
             <span
               v-if="board[row * 3 + col]"

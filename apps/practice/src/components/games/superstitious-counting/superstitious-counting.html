@@ -27,12 +27,7 @@
       </table>
       <template v-if="shouldPlayerMoveNext">
         <label for="step"> Következő lépés: </label>
-        <input id="step" type="number" min="1" max="12" v-model="step" class="border-2">
-        <button
-          class="cta-button"
-          @click="attemptStep()"
-          :class="{ 'opacity-50': isEnemyMoveInProgress }"
-        >Lépek</button>
+        <input id="step" type="number" min="1" max="12" v-model="step" class="border-2" v-on:keyup.enter="attemptStep()">
       </template>
     </div>
     <game-sidebar :step-description="stepDescription" @restart="resetTurnState()" />

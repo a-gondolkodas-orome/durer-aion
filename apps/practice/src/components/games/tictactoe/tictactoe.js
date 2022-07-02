@@ -17,15 +17,18 @@ export default {
   methods: {
     ...mapActions(['endPlayerTurn', 'initializeGame']),
     clickField({ row, col }) {
-      if (!this.shouldPlayerMoveNext) return;
-      if (inPlacingPhase(this.board)) {
-        if (this.board[row * 3 + col]) return;
-        else this.board[row * 3 + col] = 'blue';
-      } else {
-        if (this.board[row * 3 + col] !== 'red') return;
-        this.board[row * 3 + col] = 'purple';
-      }
+      if (!this.isMoveAllowed({ row, col })) return;
+
+      this.board[row * 3 + col] = inPlacingPhase(this.board) ? 'blue' : 'purple';
       this.endPlayerTurn(getGameStateAfterMove(this.board));
+    },
+    isMoveAllowed({ row, col }) {
+      if (!this.shouldPlayerMoveNext) return false;
+      if (inPlacingPhase(this.board)) {
+        return this.board[row * 3 + col] === null;
+      } else {
+        return this.board[row * 3 + col] === 'red';
+      }
     },
     pieceColor({ row, col }) {
       const colorCode = this.board[row * 3 + col];

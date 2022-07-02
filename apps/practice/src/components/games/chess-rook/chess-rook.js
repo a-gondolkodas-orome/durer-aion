@@ -15,11 +15,13 @@ export default {
   methods: {
     ...mapActions(['endPlayerTurn', 'initializeGame']),
     clickField({ row, col }) {
-      if (!this.shouldPlayerMoveNext) return;
-
-      if (!getAllowedMoves(this.board).map(({ row, col }) => row * 8 + col).includes(row * 8 + col)) return;
+      if (!this.isAllowedMove({ row, col })) return;
 
       this.endPlayerTurn(getGameStateAfterMove(this.board, { row, col }));
+    },
+    isAllowedMove({ row, col }) {
+      if (!this.shouldPlayerMoveNext) return false;
+      return getAllowedMoves(this.board).map(({ row, col }) => row * 8 + col).includes(row * 8 + col);
     }
   },
   created() {
