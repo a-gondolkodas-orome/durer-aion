@@ -6,6 +6,8 @@ import Demonstration from './demonstration/demonstration';
 import * as demonstrationStrategy from './demonstration/strategy/strategy';
 import TwoTimesTwo from './two-times-two/two-times-two';
 import * as twoTimesTwoStrategy from './two-times-two/strategy/strategy';
+import FiveSquares from './five-squares/five-squares';
+import * as fiveSquaresStrategy from './five-squares/strategy/strategy';
 import SuperstitiousCounting from './superstitious-counting/superstitious-counting';
 import * as superstitiousCountingStrategy from './superstitious-counting/strategy/strategy';
 import HeapSplitter4 from './heap-splitter-4/heap-splitter-4';
@@ -33,6 +35,7 @@ export const gameComponents = {
   HunyadiAndTheJanissaries,
   Demonstration,
   TwoTimesTwo,
+  FiveSquares,
   SuperstitiousCounting,
   HeapSplitter4,
   HeapSplitter3,
@@ -115,6 +118,14 @@ export const gameList = {
     name: '2x2-es játék',
     component: 'TwoTimesTwo',
     strategy: twoTimesTwoStrategy
+  },
+  FiveSquares: {
+    year: 13,
+    round: 'döntő',
+    category: 'B',
+    name: '5 mezős játék',
+    component: 'FiveSquares',
+    strategy: fiveSquaresStrategy
   },
   TicTacToe: {
     year: 13,
