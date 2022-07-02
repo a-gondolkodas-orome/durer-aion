@@ -1,7 +1,7 @@
 'use strict';
 
 import { sum, isEqual, cloneDeep, random } from 'lodash-es';
-import { getOptimalTileIndex } from './ai-step';
+import { getOptimalTileIndex, getOptimalTileIndices } from './ai-step';
 
 export const generateNewBoard = () => {
   const board = Array(5).fill(0);
@@ -12,11 +12,14 @@ export const generateNewBoard = () => {
 
 export const getGameStateAfterAiMove = (board, isPlayerTheFirstToMove) => {
   if(isPlayerTheFirstToMove){
-    const tileIndex = getOptimalTileIndex(board);
-    board[tileIndex] += 1;
+    const tileIndices = getOptimalTileIndices(board);
+    board[tileIndices[0]] += 1;
+    return getGameStateAfterMove(board, tileIndices[1]);
   }
-  const tileIndex = getOptimalTileIndex(board);
-  return getGameStateAfterMove(board, tileIndex);
+  else{
+    const tileIndex = getOptimalTileIndex(board);
+    return getGameStateAfterMove(board, tileIndex);
+  }
 };
 
 export const getGameStateAfterMove = (board, tileIndex) => {
