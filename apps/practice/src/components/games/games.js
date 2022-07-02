@@ -49,7 +49,7 @@ export const gameList = {
     component: 'ChessRook',
     name: 'Sakktáblán egy bástya',
     strategy: chessRookStrategy,
-    isHiddenFromOverview: true
+    isHiddenFromOverview: false
   },
   HunyadiAndTheJanissaries: {
     year: 6,
