@@ -1,0 +1,34 @@
+<div>
+  <chess-bishop-svg></chess-bishop-svg>
+  <p class="text-justify">
+    Két játékos felváltva tesz le (a kezdetben üres) sakktáblára futókat. Egy új futót mindig
+    csak olyan mezőre tehetünk, amin még nem áll futó, és azt a mezőt nem is támadja futó. Az
+    veszít, aki nem tud lerakni futót. (Futó támad egy mezőt: ha a sakk szabályai szerint a futóval
+    arra a mezőre tudnánk lépni, azaz a futóhoz képest átlósan helyezkedik el.)
+
+    Az új leosztás gombra kattintva generálhatsz egy felállást. A felállás ismeretében te döntheted el, hogy kezdeni
+    szeretnél-e, vagy második játékos lenni.
+    Sok sikert! :)
+  </p>
+  <div class="flex flex-wrap">
+    <div class="p-1 shrink-0 grow basis-8/12">
+      <table class="m-2 border-collapse">
+        <tr v-for="row in [0, 1, 2, 3, 4, 5, 6, 7]" :key="row">
+          <td 
+            v-for="col in [0, 1, 2, 3, 4, 5, 6, 7]" :key="col" 
+            @click="clickField({ row, col })"
+            class="text-center h-20 w-20 border-4"
+            :class="{ 'bg-slate-400': board[row * 8 + col] === 'forbidden' }"
+          >
+            <span v-if="board[row * 8 + col] === 'bishop'">
+              <svg class="h-16 w-16 p-1 inline-block">
+                <use xlink:href="#game-chess-bishop" />
+              </svg>
+            </span>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <game-sidebar :step-description="stepDescription"></game-sidebar>
+  </div>
+</div>

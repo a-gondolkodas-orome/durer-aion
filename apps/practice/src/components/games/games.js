@@ -24,6 +24,9 @@ import AntiTicTacToe from './anti-tictactoe/anti-tictactoe';
 import * as antiTicTacToeStrategy from './anti-tictactoe/strategy/strategy';
 import ChessRook from './chess-rook/chess-rook';
 import * as chessRookStrategy from './chess-rook/strategy/strategy';
+import ChessBishops from './chess-bishops/chess-bishops';
+import * as chessBishopsStrategy from './chess-bishops/strategy/strategy';
+
 
 export const gameComponents = {
   HeapSplitter,
@@ -38,10 +41,19 @@ export const gameComponents = {
   Coin123,
   TicTacToeDoubleStart,
   AntiTicTacToe,
-  ChessRook
+  ChessRook,
+  ChessBishops
 };
 
 export const gameList = {
+  ChessBishops: {
+    year: 1,
+    round: 'döntő',
+    category: 'B',
+    component: 'ChessBishops',
+    name: 'Sakktáblán futók',
+    strategy: chessBishopsStrategy
+  },
   ChessRook: {
     year: 1,
     round: 'döntő',
