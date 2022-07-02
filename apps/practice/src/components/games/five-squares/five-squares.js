@@ -5,8 +5,11 @@ import { getGameStateAfterMove } from './strategy/strategy';
 export default {
   template: require('./five-squares.html'),
   components: { GameSidebar },
+  data: () => ({
+    oneMoveDone: false
+  }),
   computed: {
-    ...mapState(['board', 'shouldPlayerMoveNext']),
+    ...mapState(['board', 'shouldPlayerMoveNext', 'isPlayerTheFirstToMove']),
     stepDescription() {
       return 'Kattints arra a mezőre, ahova korongot szeretnél lerakni.';
     }
@@ -15,7 +18,14 @@ export default {
     ...mapActions(['endPlayerTurn', 'initializeGame']),
     placePiece(tileIndex) {
       if (!this.shouldPlayerMoveNext) return;
-      this.endPlayerTurn(getGameStateAfterMove(this.board, tileIndex));
+      if (!this.isPlayerTheFirstToMove && !this.oneMoveDone){
+        this.oneMoveDone = true;
+        this.board[tileIndex] += 1;
+      }
+      else{
+        this.oneMoveDone = false;
+        this.endPlayerTurn(getGameStateAfterMove(this.board, tileIndex));
+      }
     }
   },
   created() {
