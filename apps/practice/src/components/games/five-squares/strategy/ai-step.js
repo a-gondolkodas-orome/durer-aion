@@ -82,6 +82,7 @@ export const getOptimalTileIndex = (board) => {
       return random(4);
     }
   }
+  // eslint-disable-next-line max-len
   else if(pieces === 7){ // (1,1,1,2,2) or 0,1,2,2,2 or (1,1,1,1,3) or 0,1,1,2,3 or (0,0,2,2,3) or (0,0,1,3,3) or 0,1,1,1,4 or 0,0,1,2,4 or 0,0,0,3,4 or (0,0,1,1,5) or (0,0,0,2,5) or (0,0,0,1,6) or (0,0,0,0,7)
     if(board2[4] === 4){
       return findSquare(board,4);
