@@ -12,7 +12,6 @@ export default {
   computed: {
     ...mapState(['board', 'shouldPlayerMoveNext']),
     ...mapGetters([
-      'isGameInProgress',
       'isGameReadyToStart',
       'isGameFinished'
     ]),

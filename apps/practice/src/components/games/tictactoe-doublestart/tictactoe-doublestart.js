@@ -1,4 +1,4 @@
-import { mapGetters, mapActions, mapState } from 'vuex';
+import { mapActions, mapState } from 'vuex';
 import GameSidebar from '../../common/game-sidebar/game-sidebar';
 import { getGameStateAfterMove } from './strategy/strategy';
 
@@ -7,7 +7,6 @@ export default {
   components: { GameSidebar },
   computed: {
     ...mapState(['board', 'shouldPlayerMoveNext', 'isPlayerTheFirstToMove']),
-    ...mapGetters(['isGameInProgress']),
     isDuringFirstMove() {
       return this.board.filter(c => c).length <= 1;
     },

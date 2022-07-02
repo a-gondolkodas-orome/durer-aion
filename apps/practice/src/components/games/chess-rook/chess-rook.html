@@ -18,7 +18,7 @@
             v-for="col in [0, 1, 2, 3, 4, 5, 6, 7]" :key="col" 
             @click="clickField({ row, col })"
             class="text-center h-20 w-20 border-4"
-            :class="{ 'bg-slate-400': board.chessBoard[row * 8 + col] === 'visited' }"
+            :class="{ 'bg-slate-300': board.chessBoard[row * 8 + col] === 'visited' }"
           >
             <span 
               v-if="isAllowedMove({ row, col })" 

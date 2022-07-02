@@ -18,9 +18,7 @@ export default {
       'isGameFinished'
     ]),
     stepDescription() {
-      return this.isGameInProgress && this.shouldPlayerMoveNext
-        ? 'Először kattints az eltávolítandó kupacra, majd arra a korongra, ahol ketté akarod vágni a kupacot.'
-        : '';
+      return 'Először kattints az eltávolítandó kupacra, majd arra a korongra, ahol ketté akarod vágni a kupacot.';
     }
   },
   methods: {

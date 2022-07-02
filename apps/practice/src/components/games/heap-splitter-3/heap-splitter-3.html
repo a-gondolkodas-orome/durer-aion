@@ -23,7 +23,7 @@
             class="inline-block border-r-black border-r-4 h-16 border-dotted -ml-1"
           ></span>
           <span
-            :class="{ 'bg-red-600': rowColor({ rowIndex }) === 'red', 'bg-blue-600': rowColor({ rowIndex }) === 'blue', 'opacity-50': (!shouldPlayerMoveNext && isGameInProgress) || rowIndex === removedRowIndex }"
+            :class="{ 'bg-red-600': rowColor({ rowIndex }) === 'red', 'bg-blue-600': rowColor({ rowIndex }) === 'blue', 'opacity-50': rowIndex === removedRowIndex }"
             class="h-16 w-16 p-1 inline-block rounded-full mr-1"
             :style="{ 'pointer-events': shouldPlayerMoveNext ? 'auto' : 'none', 'cursor': pieceClickNotAllowed({ rowIndex, pieceIndex }) ? 'not-allowed' : 'pointer' }"
             @click="clickPiece({ rowIndex, pieceIndex })"

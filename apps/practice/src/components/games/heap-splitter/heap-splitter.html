@@ -22,7 +22,6 @@
             class="inline-block border-r-black border-r-4 h-16 border-dotted -ml-1"
           ></span>
           <span
-            :class="{ 'opacity-50': !shouldPlayerMoveNext && isGameInProgress }"
             class="js-pebble h-16 w-16 p-1 inline-block bg-blue-600 rounded-full mr-1"
             :style="{ 'pointer-events': shouldPlayerMoveNext ? 'auto' : 'none', 'cursor': pieceIndex === 0 ? 'not-allowed' : 'pointer' }"
             @click="clickPiece({ rowIndex, pieceIndex })"
