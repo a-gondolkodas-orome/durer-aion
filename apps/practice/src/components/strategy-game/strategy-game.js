@@ -17,8 +17,6 @@ export default {
   methods: {
     ...mapMutations(['setGameDefinition', 'setGameStatus']),
     goBackToOverview() {
-      this.setGameDefinition({ gameId: null });
-      this.setGameStatus(null);
       this.$router.push('/');
     },
     setGameBasedOnRoute() {

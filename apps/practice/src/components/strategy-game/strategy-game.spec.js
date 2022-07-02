@@ -4,17 +4,6 @@ import StrategyGame from './strategy-game';
 import { mountComponent } from '../../../test-helpers';
 
 describe('StrategyGame', () => {
-  it('should clear selected game when navigating back to overview page', async () => {
-    const { wrapper, store } = await mountComponent(StrategyGame,  { propsData: { gameId: 'HeapSplitter' } });
-
-    wrapper.find('.js-first-player').trigger('click');
-    expect(store.state.gameStatus).toBe('inProgress');
-
-    await wrapper.find('.js-back-to-overview').trigger('click');
-
-    expect(store.state.gameStatus).toBe(null);
-  });
-
   it('should set game on store based on gameId when mounted', async () => {
     const { store } = await mountComponent(StrategyGame,  { propsData: { gameId: 'HeapSplitter' } });
     expect(store.state.gameDefinition.component).toEqual('HeapSplitter');
