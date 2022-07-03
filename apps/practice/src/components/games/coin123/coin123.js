@@ -6,7 +6,8 @@ export default {
   template: require('./coin123.html'),
   components: { GameSidebar },
   data: () => ({
-    valueOfRemovedCoin: null
+    valueOfRemovedCoin: null,
+    hoveredHeap: null
   }),
   computed: {
     ...mapState(['board', 'shouldPlayerMoveNext']),
@@ -35,6 +36,7 @@ export default {
       }
     },
     resetTurnState() {
+      this.hoveredHeap = null;
       this.valueOfRemovedCoin = null;
     },
     endTurn() {
@@ -45,6 +47,15 @@ export default {
       if (coinValue === 0) return 'bg-yellow-700';
       if (coinValue === 1) return 'bg-slate-700';
       return 'bg-yellow-400';
+    },
+    shouldShowCoinToBeRemoved(coinValue) {
+      if (!this.shouldPlayerMoveNext) return false;
+      if (this.wasCoinAlreadyRemovedInTurn) return false;
+      return coinValue === this.hoveredHeap && this.board[coinValue] !== 0;
+    },
+    shouldShowCoinToBeAdded(coinValue) {
+      if (!this.wasCoinAlreadyRemovedInTurn) return false;
+      return this.valueOfRemovedCoin > coinValue && coinValue === this.hoveredHeap;
     },
     isCoinActionInvalid(coinValue) {
       if (this.wasCoinAlreadyRemovedInTurn) {
