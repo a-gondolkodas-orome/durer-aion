@@ -60,7 +60,7 @@ export const getOptimalTileIndices = (board) => {
     }
   }
   else alert("illegal state");
-}
+};
 
 //trying to win if the player makes a mistake
 export const getOptimalTileIndex = (board) => {
@@ -82,7 +82,6 @@ export const getOptimalTileIndex = (board) => {
       return random(4);
     }
   }
-  // eslint-disable-next-line max-len
   else if(pieces === 7){ // (1,1,1,2,2) or 0,1,2,2,2 or (1,1,1,1,3) or 0,1,1,2,3 or (0,0,2,2,3) or (0,0,1,3,3) or 0,1,1,1,4 or 0,0,1,2,4 or 0,0,0,3,4 or (0,0,1,1,5) or (0,0,0,2,5) or (0,0,0,1,6) or (0,0,0,0,7)
     if(board2[4] === 4){
       return findSquare(board,4);
@@ -95,14 +94,14 @@ export const getOptimalTileIndex = (board) => {
     }
   }
   else alert("illegal state");
-}
+};
 
 // finds a square with n pieces randomly
 const findSquare = (board,n) => {
   let ret = random(4);
   while (board[ret] !== n) ret = random(4);
   return ret;
-}
+};
 
 // finds the squares with values n and k
 // n and k does not need to be different but there must be exactly 2 such squares
@@ -112,4 +111,4 @@ const findSquares = (board,n,k) => {
   let i2 = i1+1;
   while (board[i2] !== n || board[i2] !== k) i2++;
   return [i1,i2];
-}
+};

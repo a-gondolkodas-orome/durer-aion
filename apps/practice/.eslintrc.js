@@ -13,7 +13,7 @@ module.exports = {
     'comma-dangle': ['error', 'never'],
     'curly': ['error', 'multi-line'],
     'eqeqeq': ['error', 'always'],
-    'max-len': ['error', { code: 120, ignoreStrings: true, ignoreTemplateLiterals: true }],
+    'max-len': ['error', { code: 120, ignoreStrings: true, ignoreTemplateLiterals: true, ignoreComments: true }],
     'no-debugger': 'error',
     'no-duplicate-imports': 'error',
     'no-multiple-empty-lines': ['error', { max: 2 }],

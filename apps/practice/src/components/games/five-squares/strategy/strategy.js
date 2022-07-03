@@ -8,7 +8,7 @@ export const generateNewBoard = () => {
   const x = random(4);
   board[x] += 1;
   return board;
-}
+};
 
 export const getGameStateAfterAiMove = (board, isPlayerTheFirstToMove) => {
   if(isPlayerTheFirstToMove){
