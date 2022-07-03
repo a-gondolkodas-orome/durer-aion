@@ -9,11 +9,6 @@ export default {
     ...mapState(['board', 'shouldPlayerMoveNext']),
     inPlacingPhase() {
       return inPlacingPhase(this.board);
-    },
-    stepDescription() {
-      return this.inPlacingPhase
-        ? 'Kattints egy üres mezőre.'
-        : 'Kattints egy piros korongra.';
     }
   },
   methods: {

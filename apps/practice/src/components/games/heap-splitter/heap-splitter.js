@@ -11,13 +11,7 @@ export default {
   }),
   computed: {
     ...mapState(['board', 'shouldPlayerMoveNext']),
-    ...mapGetters([
-      'isGameReadyToStart',
-      'isGameFinished'
-    ]),
-    stepDescription() {
-      return 'Kattints egy korongra, hogy azzal kettéosztd azt a kupacot. Amelyik korongra kattintasz, az és a tőle jobbra lévők kerülnek az új kupacba.';
-    }
+    ...mapGetters(['isGameReadyToStart', 'isGameFinished'])
   },
   methods: {
     ...mapActions(['endPlayerTurn', 'initializeGame']),

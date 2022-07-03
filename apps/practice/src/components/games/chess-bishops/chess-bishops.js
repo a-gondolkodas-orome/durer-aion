@@ -11,10 +11,7 @@ export default {
     hoveredField: null
   }),
   computed: {
-    ...mapState(['board', 'shouldPlayerMoveNext']),
-    stepDescription() {
-      return 'Kattints egy mezőre, amit nem üt egyik futó sem.';
-    }
+    ...mapState(['board', 'shouldPlayerMoveNext'])
   },
   methods: {
     ...mapActions(['endPlayerTurn', 'initializeGame']),

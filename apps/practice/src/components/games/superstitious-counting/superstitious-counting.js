@@ -1,4 +1,4 @@
-import { mapGetters, mapActions, mapState } from 'vuex';
+import { mapActions, mapState } from 'vuex';
 import GameSidebar from '../../common/game-sidebar/game-sidebar';
 import { getGameStateAfterMove } from './strategy/strategy';
 
@@ -7,11 +7,7 @@ export default {
   components: { GameSidebar },
   data: () => ({ step: 1 }),
   computed: {
-    ...mapState(['board', 'shouldPlayerMoveNext']),
-    ...mapGetters(['isEnemyMoveInProgress']),
-    stepDescription() {
-      return 'Írj be egy számot, majd nyomj Enter-t.';
-    }
+    ...mapState(['board', 'shouldPlayerMoveNext'])
   },
   methods: {
     ...mapActions(['endPlayerTurn', 'initializeGame']),

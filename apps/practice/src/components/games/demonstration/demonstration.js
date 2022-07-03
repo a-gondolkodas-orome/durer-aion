@@ -5,16 +5,10 @@ export default {
   template: require('./demonstration.html'),
   components: { GameSidebar },
   computed: {
-    ...mapState(['shouldPlayerMoveNext']),
-    stepDescription() {
-      return 'Kattints a "Lépek" gombra, hogy lépj.';
-    }
+    ...mapState(['shouldPlayerMoveNext'])
   },
   methods: {
-    ...mapActions(['endPlayerTurn', 'initializeGame']),
-    makeMove() {
-      this.endPlayerTurn({ board: [], isGameEnd: true });
-    }
+    ...mapActions(['endPlayerTurn', 'initializeGame'])
   },
   created() {
     this.initializeGame();

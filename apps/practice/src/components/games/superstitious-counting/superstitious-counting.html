@@ -27,6 +27,6 @@
         <input id="step" type="number" min="1" max="12" v-model="step" class="border-2" v-on:keyup.enter="attemptStep()">
       </template>
     </div>
-    <game-sidebar :step-description="stepDescription" @restart="resetTurnState()" />
+    <game-sidebar step-description="rj be egy számot, majd nyomj Enter-t." @restart="resetTurnState()" />
   </div>
 </div>

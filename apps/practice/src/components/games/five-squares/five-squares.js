@@ -9,10 +9,7 @@ export default {
     oneMoveDone: false
   }),
   computed: {
-    ...mapState(['board', 'shouldPlayerMoveNext', 'isPlayerTheFirstToMove']),
-    stepDescription() {
-      return 'Kattints arra a mezőre, ahova korongot szeretnél lerakni.';
-    }
+    ...mapState(['board', 'shouldPlayerMoveNext', 'isPlayerTheFirstToMove'])
   },
   methods: {
     ...mapActions(['endPlayerTurn', 'initializeGame']),

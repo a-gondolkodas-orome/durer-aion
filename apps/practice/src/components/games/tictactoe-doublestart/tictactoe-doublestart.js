@@ -9,11 +9,6 @@ export default {
     ...mapState(['board', 'shouldPlayerMoveNext', 'isPlayerTheFirstToMove']),
     isDuringFirstMove() {
       return this.board.filter(c => c).length <= 1;
-    },
-    stepDescription() {
-      return this.isDuringFirstMove
-        ? 'Helyezz le két korongot (kattints a mezőkre)'
-        : 'Helyezz le egy korongot egy üres mezőre kattintással.';
     }
   },
   methods: {

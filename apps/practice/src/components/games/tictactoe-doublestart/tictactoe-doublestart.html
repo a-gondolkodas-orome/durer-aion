@@ -27,6 +27,8 @@
         </tr>
       </table>
     </div>
-    <game-sidebar :step-description="stepDescription"></game-sidebar>
+    <game-sidebar 
+      :step-description="isDuringFirstMove ? 'Helyezz le két korongot (kattints a mezőkre)' : 'Helyezz le egy korongot egy üres mezőre kattintással.'" 
+    />
   </div>
 </div>

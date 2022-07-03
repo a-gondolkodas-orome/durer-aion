@@ -7,10 +7,7 @@ export default {
   template: require('./chess-rook.html'),
   components: { GameSidebar, ChessRookSvg },
   computed: {
-    ...mapState(['board', 'shouldPlayerMoveNext']),
-    stepDescription() {
-      return 'Kattints egy szabad mezőre a bástyával egy sorban vagy oszlopban, ahova a bástyával mozogni szeretnél.';
-    }
+    ...mapState(['board', 'shouldPlayerMoveNext'])
   },
   methods: {
     ...mapActions(['endPlayerTurn', 'initializeGame']),

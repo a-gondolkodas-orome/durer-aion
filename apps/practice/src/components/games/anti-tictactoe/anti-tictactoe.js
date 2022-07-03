@@ -6,10 +6,7 @@ export default {
   template: require('./anti-tictactoe.html'),
   components: { GameSidebar },
   computed: {
-    ...mapState(['board', 'shouldPlayerMoveNext', 'isPlayerTheFirstToMove']),
-    stepDescription() {
-      return 'Helyezz le egy korongot egy üres mezőre kattintással.';
-    }
+    ...mapState(['board', 'shouldPlayerMoveNext', 'isPlayerTheFirstToMove'])
   },
   methods: {
     ...mapActions(['endPlayerTurn', 'initializeGame']),

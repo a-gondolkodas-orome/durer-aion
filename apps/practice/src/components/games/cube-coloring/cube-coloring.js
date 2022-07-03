@@ -7,10 +7,7 @@ export default {
   template: require('./cube-coloring.html'),
   components: { GameSidebar },
   computed: {
-    ...mapState(['game', 'board', 'shouldPlayerMoveNext']),
-    stepDescription() {
-      return 'Válassz színt, majd színezz meg egy csúcsot!';
-    }
+    ...mapState(['board', 'shouldPlayerMoveNext'])
   },
   data() {
     return {

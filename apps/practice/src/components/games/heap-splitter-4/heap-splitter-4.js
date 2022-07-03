@@ -16,10 +16,7 @@ export default {
       'isGameInProgress',
       'isGameReadyToStart',
       'isGameFinished'
-    ]),
-    stepDescription() {
-      return 'Először kattints az eltávolítandó kupacra, majd arra a korongra, ahol ketté akarod vágni a kupacot.';
-    }
+    ])
   },
   methods: {
     ...mapActions(['endPlayerTurn', 'initializeGame']),

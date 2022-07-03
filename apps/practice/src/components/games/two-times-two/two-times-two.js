@@ -6,10 +6,7 @@ export default {
   template: require('./two-times-two.html'),
   components: { GameSidebar },
   computed: {
-    ...mapState(['board', 'shouldPlayerMoveNext']),
-    stepDescription() {
-      return 'Kattints arra a mezőre, ahova korongot szeretnél lerakni.';
-    }
+    ...mapState(['board', 'shouldPlayerMoveNext'])
   },
   methods: {
     ...mapActions(['endPlayerTurn', 'initializeGame']),
