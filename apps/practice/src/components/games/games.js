@@ -20,6 +20,8 @@ import CubeColoring from './cube-coloring/cube-coloring';
 import * as cubeColoringStrategy from './cube-coloring/strategy/strategy';
 import Coin123 from './coin123/coin123';
 import * as coin123Strategy from './coin123/strategy/strategy';
+import Coin357 from './coin357/coin357';
+import * as coin357Strategy from './coin357/strategy/strategy';
 import TicTacToeDoubleStart from './tictactoe-doublestart/tictactoe-doublestart';
 import * as ticTacToeDoubleStartStrategy from './tictactoe-doublestart/strategy/strategy';
 import AntiTicTacToe from './anti-tictactoe/anti-tictactoe';
@@ -42,6 +44,7 @@ export const gameComponents = {
   TicTacToe,
   CubeColoring,
   Coin123,
+  Coin357,
   TicTacToeDoubleStart,
   AntiTicTacToe,
   ChessRook,
@@ -158,6 +161,14 @@ export const gameList = {
     name: 'Kockaszínezés',
     component: 'CubeColoring',
     strategy: cubeColoringStrategy
+  },
+  Coin357: {
+    year: 15,
+    round: 'döntő',
+    category: 'A',
+    name: '3 db 1, 5 db 2 és 7 db 3 pengős',
+    component: 'Coin357',
+    strategy: coin357Strategy
   },
   Coin123: {
     year: 15,
