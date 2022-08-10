@@ -5,7 +5,7 @@ import { gameWrapper } from './gamewrapper';
 import { boardWrapper } from './boardwrapper';
 
 
-export default function MyClient(game: any, board: any, strategy: any) { // TODO types
+export function MyClient(game: any, board: any, strategy: any) { // TODO types
 	return Client({
 		game: gameWrapper(game),
 		board: boardWrapper(board),

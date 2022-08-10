@@ -7,13 +7,8 @@ export interface MyGameState {
   restricted: null | number;
 }
 
-export const MyGame : Game<MyGameState> = {
+export const MyGame : Game<any> = { // TOOO: solve type (It was Game<MyGameState>)
     setup: () => ({ current: 0, target: 100, restricted: null }), // TODO: Random
-
-    turn: {
-        minMoves: 1,
-        maxMoves: 1,
-      },
 
     moves: {
         increaseNumber: ({G, ctx, playerID}, numberToAdd) => {
@@ -23,14 +18,14 @@ export const MyGame : Game<MyGameState> = {
             }
             G.current = G.current + numberToAdd;
             G.restricted = 13 - numberToAdd;
+            if (G.current >= G.target) {
+              G.winner = ctx.currentPlayer === "0" ? "1" : "0";
+            }
           }
         },
 
-    endIf: ({G, ctx, playerID}) => {
-        if (G.target <= G.current) {
-            return { loser: ctx.currentPlayer };
-        }
-        },
+    //TODO rename this function to startingPosition
+    endIf: ({G,ctx,playerID}) => ({ current: 0, target: G.target+100, restricted: null }),
 
     ai: {
         enumerate: (G, ctx, playerID) => {

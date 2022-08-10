@@ -16,7 +16,7 @@ export function gameWrapper(game: any): Game<any> { // TODO: solve types
 			startNewGame: {
 				moves: {
 					chooseNewGameType({ G, ctx, playerID }: any, difficulty: string) { // TODO: type
-						return {...game.setup(), difficulty: difficulty, firstPlayer: null, winner: null};
+						return {...game.endIf({G,ctx,playerID}), difficulty: difficulty, firstPlayer: null, winner: null};
 						// In case of no difficulty, it is undefined (which is not null)
 					}
 				}, // HELP: How can I outsource this function, like the chooseRole function?
