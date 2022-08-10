@@ -16,10 +16,8 @@ export const MyGame: Game<any> = { // TOOO: solve type
 
 			if (IsVictory(G.cells)) {
 				G.winner = ctx.currentPlayer;
-				G.difficulty = null;
 			} else if (IsDraw(G.cells)) {
 				G.winner = "draw";
-				G.difficulty = null;
 			}
 		},
 	},

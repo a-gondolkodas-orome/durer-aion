@@ -1,14 +1,6 @@
 import { Game } from 'boardgame.io';
 import { TurnOrder } from 'boardgame.io/core';
 
-
-function chooseNewGameType({ G, ctx, playerID }: any, difficulty: string) { // TODO: type
-	G.difficulty = difficulty;
-	G.cells = Array(9).fill(null); // TODO: this is a game-spicic thing now
-	G.firstPlayer = null;
-	G.winner = null;
-}
-
 function chooseRole({ G, ctx, playerID }: any, firstPlayer: string) { // TODO: type
 	G.firstPlayer = firstPlayer;
 }
@@ -22,8 +14,13 @@ export function gameWrapper(game: any): Game<any> { // TODO: solve types
 		},
 		phases: {
 			startNewGame: {
-				moves: { chooseNewGameType },
-				endIf: ({ G, ctx, playerID }) => { return G.difficulty !== null },
+				moves: {
+					chooseNewGameType({ G, ctx, playerID }: any, difficulty: string) { // TODO: type
+						return {...game.setup(), difficulty: difficulty, firstPlayer: null, winner: null};
+						// In case of no difficulty, it is undefined (which is not null)
+					}
+				}, // HELP: How can I outsource this function, like the chooseRole function?
+				endIf: ({ G, ctx, playerID }) => { return G.difficulty !== null && G.winner === null },
 				next: "chooseRole",
 				turn: { order: TurnOrder.RESET },
 				start: true,
@@ -42,7 +39,6 @@ export function gameWrapper(game: any): Game<any> { // TODO: solve types
 					order: {
 						first: ({ G, ctx }) => G.firstPlayer === 0 ? 0 : 1,
 						next: ({ G, ctx }) => {
-							console.log(G, ctx)
 							return (ctx.playOrderPos + 1) % ctx.numPlayers
 						},
 					},

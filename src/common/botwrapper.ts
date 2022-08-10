@@ -19,7 +19,6 @@ export default function botWrapper<T_SpecificGameState, T_Move>(botstrategy: Bot
             await this.wait();
             const [move,moveName] = botstrategy(state, playerID);
             if (move === undefined) {
-                console.log("asd")
                 let possible_moves = this.enumerate(state.G, state.ctx, playerID);
                 let randomIndex = Math.floor(Math.random() * possible_moves.length);
                 return { action: possible_moves[randomIndex] };
