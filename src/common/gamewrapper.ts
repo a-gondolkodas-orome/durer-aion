@@ -17,8 +17,8 @@ export function gameWrapper(game: any): Game<any> { // TODO: solve types
 				moves: {
 					chooseNewGameType({ G, ctx, playerID }: any, difficulty: string) { // TODO: type
 						let startingPosition = game.setup();
-						if(game?.endIf) {
-							startingPosition = game.endIf({G,ctx,playerID})
+						if("startingPosition" in game) {
+							startingPosition = game.startingPosition({G,ctx,playerID})
 						}
 						return {...startingPosition, difficulty: difficulty, firstPlayer: null, winner: null};
 						// In case of no difficulty, it is undefined (which is not null)
@@ -37,7 +37,7 @@ export function gameWrapper(game: any): Game<any> { // TODO: solve types
 			},
 			play: {
 				moves: { ...game.moves },
-				endIf: ({ G, ctx, playerID }) => { return G.winner !== null; },
+				endIf: ({ G, ctx, playerID }) => { return G.winner !== null },
 				next: "startNewGame",
 				turn: {
 					order: {
@@ -46,11 +46,14 @@ export function gameWrapper(game: any): Game<any> { // TODO: solve types
 							return (ctx.playOrderPos + 1) % ctx.numPlayers
 						},
 					},
-					endIf: ({ G, ctx, playerID }) => true,
+					...(!("turn" in game) && {
+						minMoves: 1,
+						maxMoves: 1
+					}),
+					...game.turn,
 				},
 			},
 		},
-		ai: game.ai
-        // TODO: add remaining objects from game
+		ai: {enumerate: game.possibleMoves}
 	};
 };

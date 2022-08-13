@@ -5,10 +5,10 @@ export interface MyGameState {
 	cells: Array<null | string>;
 }
 
-export const MyGame: Game<any> = { // TOOO: solve type
+export const MyGame: any = { // TOOO: solve type
 	setup: () => ({ cells: Array(9).fill(null)}),
 	moves: {
-		clickCell: ({ G, ctx, playerID }, cellID: number) => {
+		clickCell: ({ G, ctx, playerID } : any, cellID: number) => {
 			if (G.cells[cellID] !== null) {
 				return INVALID_MOVE;
 			}
@@ -21,16 +21,14 @@ export const MyGame: Game<any> = { // TOOO: solve type
 			}
 		},
 	},
-	ai: {
-		enumerate: (G, ctx, playerID) => {
-			let moves = [];
-			for (let i = 0; i < 9; i++) {
-				if (G.cells[i] === null) {
-					moves.push({ move: 'clickCell', args: [i] });
-				}
+	possibleMoves: (G : any, ctx : any, playerID : any) => {
+		let moves = [];
+		for (let i = 0; i < 9; i++) {
+			if (G.cells[i] === null) {
+				moves.push({ move: 'clickCell', args: [i] });
 			}
-			return moves;
-		},
+		}
+		return moves;
 	},
 };
 
