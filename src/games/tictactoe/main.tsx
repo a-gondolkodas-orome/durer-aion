@@ -3,7 +3,9 @@ import { MyGame } from './game';
 import { MyBoard } from './board';
 import { strategy } from './strategy';
 
-const TicTacToe = MyClient(MyGame,MyBoard,strategy);
+let description = <p>Ez egy TicTacToe</p>
+
+const TicTacToe = MyClient(MyGame,MyBoard,strategy, description);
 
 export default function() {
   return (

@@ -13,6 +13,7 @@ export const MyGame: any = { // TOOO: solve type I was Game<MyGameState>
 				return INVALID_MOVE;
 			}
 			G.board[cellID] = "forbidden";
+			// TODO: fix this strategy (it's wrong!!)
 			[-9,-7,7,9].forEach(element => {
 				let i = 1;
 				while(cellID+element*i >= 0 && cellID+element*i < 64) {
