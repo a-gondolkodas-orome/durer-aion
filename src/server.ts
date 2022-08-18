@@ -1,6 +1,7 @@
 import { Server } from 'boardgame.io/server';
 import { MyGame as TicTacToeGame } from './games/tictactoe/game';
 import { MyGame as SuperstitiousCountingGame } from './games/superstitious-counting/game';
+import { MyGame as ChessBishopsGame } from './games/chess-bishops/game';
 import { PostgresStore } from 'bgio-postgres';
 import { env } from 'process';
 
@@ -20,6 +21,7 @@ const server = Server({
     games: [
         TicTacToeGame,
         SuperstitiousCountingGame,
+        ChessBishopsGame,
     ],
     ...getDb(),
 })
