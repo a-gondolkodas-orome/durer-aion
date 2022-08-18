@@ -8,11 +8,11 @@ export function MyBoard({ G, ctx, moves } : MyGameProps) {
     <div
       style={{
         display: 'grid',
-        gridTemplate: 'repeat(3, 3rem) / repeat(3, 3rem)',
+        gridTemplate: 'repeat(8, 3rem) / repeat(8, 3rem)',
         gridGap: '0.3em',
       }}
     >
-      {G.cells.map((cell, index) => (
+      {G.board.map((cell, index) => (
         <button
           key={index}
           onClick={() => moves.clickCell(index)}

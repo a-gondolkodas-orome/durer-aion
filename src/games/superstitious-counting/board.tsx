@@ -19,18 +19,6 @@ export function MyBoard({ G, ctx, moves } : MyGameProps) {
   
   return (
     <div>
-      <p className="text-justify">
-        Ez a játék a XIII. Dürer döntőjén szerepelt E kategóriában.
-
-        Károly és Dezső m-ig szeretnének elszámolni, és közben a következő játékot játsszák:
-        0-ról kezdenek, a két játékos felváltva adhat hozzá egy 13-nál kisebb pozitív egészet a korábbi
-        számhoz, azonban a babonájuk miatt ha egyikük x-et adott hozzá, akkor másikuk a következő
-        lépésben nem adhat hozzá 13 − x-et. Az veszít, aki eléri (vagy átlépi) m-et.
-
-        Az új játék gombra kattintva generálhatsz egy felállást.
-
-        Az m szám ismeretében te döntheteted el, hogy a kezdő vagy a második játékos bőrébe szeretnél e bújni.
-      </p>
         <div className="flex flex-wrap">
         <div className="p-1 shrink-0 grow basis-8/12">
           <table className="m-2 border-collapse">

@@ -22,14 +22,14 @@ function checkRow(cells: (string|null)[], cell1: number, cell2: number, cell3: n
     return null;
 }
 
-export default function strategy(state: State<MyGameState>, botID: string):number|undefined {
+export function strategy(state: State<MyGameState>, botID: string): [number|undefined, string] {
     const cells = state.G.cells;
     // check if player can win
     for (const row of THREE_IN_A_ROWS) {
         const result = checkRow(cells, row[0], row[1], row[2], botID);
         if (result !== null) {
             console.debug("I've found it!");
-            return result;
+            return [result, "clickCell"];
         }
     }
     // check if enemy could win
@@ -37,8 +37,9 @@ export default function strategy(state: State<MyGameState>, botID: string):numbe
         const result = checkRow(cells, row[0], row[1], row[2], botID === '0' ? '1' : '0');
         if (result !== null) {
             console.debug("I won't let you!");
-            return result;
+            return [result, "clickCell"];
         }
     }
     // Fall-through: no return -> choose random move
+    return [undefined, "clickCell"];
 }

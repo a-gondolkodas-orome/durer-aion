@@ -7,40 +7,36 @@ export interface MyGameState {
   restricted: null | number;
 }
 
-export const MyGame : Game<MyGameState> = {
+export const MyGame : any = { // TOOO: solve type (It was Game<MyGameState>)
     setup: () => ({ current: 0, target: 100, restricted: null }), // TODO: Random
 
-    turn: {
-        minMoves: 1,
-        maxMoves: 1,
-      },
-
     moves: {
-        increaseNumber: ({G, ctx, playerID}, numberToAdd) => {
+        increaseNumber: ({G, ctx, playerID} : any, numberToAdd : number) => {
             if (!Array.from(Array(12).keys()).map(x => x+1).includes(numberToAdd)
             || G.restricted == numberToAdd) {
               return INVALID_MOVE;
             }
             G.current = G.current + numberToAdd;
             G.restricted = 13 - numberToAdd;
-          }
-        },
-
-    endIf: ({G, ctx, playerID}) => {
-        if (G.target <= G.current) {
-            return { loser: ctx.currentPlayer };
-        }
-        },
-
-    ai: {
-        enumerate: (G, ctx, playerID) => {
-          let moves = [];
-          for (let i = 1; i <= 12; i++) {
-            if (G.restricted === null || 13-G.restricted !== i) {
-              moves.push({ move: 'increaseNumber', args: [i] });
+            if (G.current >= G.target) {
+              G.winner = ctx.currentPlayer === "0" ? "1" : "0";
             }
           }
-          return moves
         },
+
+    startingPosition: ({G,ctx,playerID} : any) => ({
+      current: 0,
+      target: G.target+100,
+      restricted: null
+    }),
+
+    possibleMoves: (G:any, ctx : any, playerID : any) => {
+      let moves = [];
+      for (let i = 1; i <= 12; i++) {
+        if (G.restricted === null || 13-G.restricted !== i) {
+          moves.push({ move: 'increaseNumber', args: [i] });
+        }
+      }
+      return moves
     },
 };
