@@ -1,5 +1,4 @@
-import { Client, Lobby } from 'boardgame.io/react';
-import { Local } from 'boardgame.io/multiplayer';
+import { Lobby } from 'boardgame.io/react';
 import { MyGame as TicTacToeGame } from './games/tictactoe/game';
 import { MyBoard as TicTacToeBoard } from './games/tictactoe/board';
 import { MyGame as SuperstitiousCountingGame } from './games/superstitious-counting/game';
