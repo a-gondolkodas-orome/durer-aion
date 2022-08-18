@@ -4,6 +4,7 @@ import { MyGame as SuperstitiousCountingGame } from './games/superstitious-count
 import { MyGame as ChessBishopsGame } from './games/chess-bishops/game';
 import { PostgresStore } from 'bgio-postgres';
 import { env } from 'process';
+import { gameWrapper } from './common/gamewrapper';
 
 function getDb() {
   if (env.DATABASE_URL) {
@@ -19,9 +20,9 @@ function getDb() {
 
 const server = Server({
   games: [
-    TicTacToeGame,
-    SuperstitiousCountingGame,
-    ChessBishopsGame,
+    gameWrapper(TicTacToeGame),
+    gameWrapper(SuperstitiousCountingGame),
+    gameWrapper(ChessBishopsGame),
   ],
   ...getDb(),
 })
