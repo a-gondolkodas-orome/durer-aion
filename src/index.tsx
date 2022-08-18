@@ -1,9 +1,9 @@
 import React from 'react';
-import {render} from 'react-dom';
+import { render } from 'react-dom';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import {Route, BrowserRouter, Routes} from 'react-router-dom';
+import { Route, BrowserRouter, Routes } from 'react-router-dom';
 import TicTacToe from './games/tictactoe/main';
 import SuperstitiousCounting from './games/superstitious-counting/main';
 import ChessBishops from './games/chess-bishops/main';
@@ -12,13 +12,13 @@ const root = document.getElementById('root');
 render(
   <React.StrictMode>
     <BrowserRouter>
-    <Routes>
-      <Route path="/" element={<App />} />
-      <Route path="/tictactoe" element={<TicTacToe/>} />
-      <Route path="/superstitious-counting" element={<SuperstitiousCounting/>} />
-      <Route path="/chess-bishops" element={<ChessBishops/>} />
-    </Routes>
-  </BrowserRouter>
+      <Routes>
+        <Route path="/" element={<App />} />
+        <Route path="/tictactoe" element={<TicTacToe />} />
+        <Route path="/superstitious-counting" element={<SuperstitiousCounting />} />
+        <Route path="/chess-bishops" element={<ChessBishops />} />
+      </Routes>
+    </BrowserRouter>
   </React.StrictMode>,
   root
 );

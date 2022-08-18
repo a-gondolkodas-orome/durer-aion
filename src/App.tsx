@@ -5,9 +5,9 @@ import { Link } from 'react-router-dom';
 function App() {
   return (
     <div>
-    <Link to="/tictactoe">Tic Tac Toe</Link><br/>
-    <Link to="/superstitious-counting">Superstitious counting</Link><br/>
-    <Link to="/chess-bishops">Chess bishops</Link><br/>
+      <Link to="/tictactoe">Tic Tac Toe</Link><br />
+      <Link to="/superstitious-counting">Superstitious counting</Link><br />
+      <Link to="/chess-bishops">Chess bishops</Link><br />
     </div>
   );
 }

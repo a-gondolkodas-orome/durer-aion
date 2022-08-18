@@ -5,9 +5,9 @@ import { strategy } from './strategy';
 
 let description = <p>Ez egy TicTacToe</p>
 
-const TicTacToe = MyClient(MyGame,MyBoard,strategy, description);
+const TicTacToe = MyClient(MyGame, MyBoard, strategy, description);
 
-export default function() {
+export default function () {
   return (
     <>
       <TicTacToe playerID='0' />

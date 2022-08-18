@@ -1,9 +1,9 @@
 import { MyGameState } from './game';
 import { BoardProps } from 'boardgame.io/react';
 
-interface MyGameProps extends BoardProps<MyGameState> {};
+interface MyGameProps extends BoardProps<MyGameState> { };
 
-export function MyBoard({ G, ctx, moves } : MyGameProps) {
+export function MyBoard({ G, ctx, moves }: MyGameProps) {
   return (
     <div
       style={{
@@ -22,5 +22,5 @@ export function MyBoard({ G, ctx, moves } : MyGameProps) {
         </button>
       ))}
     </div>
-    );
+  );
 }
