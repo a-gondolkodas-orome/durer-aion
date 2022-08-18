@@ -12,6 +12,8 @@ export function gameWrapper(game: any): Game<any> { // TODO: solve types
       minMoves: 1,
       maxMoves: 1,
     },
+    minPlayers: 2,
+    maxPlayers: 2,
     phases: {
       startNewGame: {
         moves: {
