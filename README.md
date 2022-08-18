@@ -94,6 +94,13 @@ First-time you will need: `docker-compose build`
 
 :)
 
+## How to create a new game
+
+1) Copy 4 files (board, game, main, strategy) to a new directory in `src/games/`.
+1) Add game in `index.tsx` (frontend-only code)
+1) Add game in `lobby.tsx` (client-side code)
+1) Add game in `server.tsx` (server-side code)
+
 ## Developer environment -- without docker
 
 Node v10 and NPM v6 is not enough! I do not know why exactly.
