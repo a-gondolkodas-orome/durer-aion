@@ -6,7 +6,9 @@ import { MyBoard as TicTacToeBoard } from './games/tictactoe/board';
 import { MyGame as SuperstitiousCountingGame } from './games/superstitious-counting/game';
 import { MyBoard as SuperstitiousCountingBoard } from './games/superstitious-counting/board';
 
-const server = 'http://localhost:8000';
+// TODO use Nginx as a proxy
+const server = `http://${window.location.host}`; // DO NOT use trailing slash!
+console.assert(!server.endsWith('/'));
 
 export default function () {
   return (
