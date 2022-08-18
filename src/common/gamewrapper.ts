@@ -5,6 +5,17 @@ function chooseRole({ G, ctx, playerID }: any, firstPlayer: string) { // TODO: t
   G.firstPlayer = firstPlayer;
 }
 
+function chooseNewGameType(game: any) { // TODO: type
+  return ({ G, ctx, playerID }: any, difficulty: string) => {
+    let startingPosition = game.setup();
+    if ("startingPosition" in game) {
+      startingPosition = game.startingPosition({ G, ctx, playerID })
+    }
+    return { ...startingPosition, difficulty: difficulty, firstPlayer: null, winner: null };
+    // In case of no difficulty, it is undefined (which is not null)
+  }
+}
+
 export function gameWrapper(game: any): Game<any> { // TODO: solve types
   return {
     setup: () => ({ ...game.setup(), firstPlayer: null, difficulty: null, winner: null }),
@@ -17,16 +28,7 @@ export function gameWrapper(game: any): Game<any> { // TODO: solve types
     maxPlayers: 2,
     phases: {
       startNewGame: {
-        moves: {
-          chooseNewGameType({ G, ctx, playerID }: any, difficulty: string) { // TODO: type
-            let startingPosition = game.setup();
-            if ("startingPosition" in game) {
-              startingPosition = game.startingPosition({ G, ctx, playerID })
-            }
-            return { ...startingPosition, difficulty: difficulty, firstPlayer: null, winner: null };
-            // In case of no difficulty, it is undefined (which is not null)
-          }
-        }, // HELP: How can I outsource this function, like the chooseRole function?
+        moves: { chooseNewGameType: chooseNewGameType(game) },
         endIf: ({ G, ctx, playerID }) => { return G.difficulty !== null && G.winner === null },
         next: "chooseRole",
         turn: { order: TurnOrder.RESET },
