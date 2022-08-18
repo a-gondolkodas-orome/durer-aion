@@ -9,16 +9,16 @@ Create the following 4 files: `board.tsx`, `game.ts`, `main.tsx`, `strategy.ts`.
 
     // Moves, that can user or bot do. It should also change the value of G.winner, when someone won.
     moves: {
-        A: ({G, ctx, ...args}) => {},
+        A: ({G, ctx, ...args}) => void | INVALID_MOVE,
     }
 
     // Everything below is OPTIONAL
 
     // Gamestate at the beginning of every match. 
-    startingPosition: ({G, ctx, ..args}) => {}
+    startingPosition: ({G, ctx, ..args}) => G
 
     // When the computer play random, it can choose a possible move from this
-    possibleMoves: ({G, ctx, ..args}) => {}
+    possibleMoves: ({G, ctx, ..args}) => [{moves: "nameOfMove", args: [move]}, ...]
 
     // How many moves can be played by a player. If it is not defined, then it's default value is: {minMoves: 1, maxMoves: 1}
     turn: ({G, ctx, ...args}) => {
