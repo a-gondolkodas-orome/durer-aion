@@ -6,24 +6,24 @@ import { PostgresStore } from 'bgio-postgres';
 import { env } from 'process';
 
 function getDb() {
-    if (env.DATABASE_URL) {
-        const CONNECTION_STRING = env.DATABASE_URL;
-        return {
-            db: new PostgresStore(CONNECTION_STRING),
-        }
-    } else {
-        return {};
+  if (env.DATABASE_URL) {
+    const CONNECTION_STRING = env.DATABASE_URL;
+    return {
+      db: new PostgresStore(CONNECTION_STRING),
     }
+  } else {
+    return {};
+  }
 }
 
 
 const server = Server({
-    games: [
-        TicTacToeGame,
-        SuperstitiousCountingGame,
-        ChessBishopsGame,
-    ],
-    ...getDb(),
+  games: [
+    TicTacToeGame,
+    SuperstitiousCountingGame,
+    ChessBishopsGame,
+  ],
+  ...getDb(),
 })
 
 const PORT = parseInt(env.PORT || "8000");
