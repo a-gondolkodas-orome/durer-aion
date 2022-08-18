@@ -13,7 +13,7 @@ export const MyGame: any = { // TOOO: solve type (It was Game<MyGameState>)
   moves: {
     increaseNumber: ({ G, ctx, playerID }: any, numberToAdd: number) => {
       if (!Array.from(Array(12).keys()).map(x => x + 1).includes(numberToAdd)
-        || G.restricted == numberToAdd) {
+        || G.restricted === numberToAdd) {
         return INVALID_MOVE;
       }
       G.current = G.current + numberToAdd;
