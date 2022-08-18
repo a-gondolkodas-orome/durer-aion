@@ -1,8 +1,10 @@
 import { Game } from 'boardgame.io';
 import { INVALID_MOVE } from 'boardgame.io/core';
 
+type Cell = Array<null | string>;
+
 export interface MyGameState {
-	cells: Array<null | string>;
+	cells: Cell;
 }
 
 export const MyGame: any = { // TOOO: solve type
@@ -33,7 +35,7 @@ export const MyGame: any = { // TOOO: solve type
 };
 
 // Return true if `cells` is in a winning configuration.
-function IsVictory(cells: Array<null | string>) {
+function IsVictory(cells: Cell) {
 	const positions = [
 		[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6],
 		[1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]
