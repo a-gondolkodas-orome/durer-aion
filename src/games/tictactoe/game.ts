@@ -1,28 +1,31 @@
 import { INVALID_MOVE } from 'boardgame.io/core';
+import { currentPlayer, GameType, PlayerIDType } from '../../common/types';
 
-type Cell = Array<null | string>;
+type Cell = Array<null | PlayerIDType>;
 
 export interface MyGameState {
   cells: Cell;
 }
 
-export const MyGame: any = { // TOOO: solve type
+export const MyGame: GameType<MyGameState> = { // TOOO: solve type
   setup: () => ({ cells: Array(9).fill(null) }),
+
   moves: {
-    clickCell: ({ G, ctx, playerID }: any, cellID: number) => {
+    clickCell: ({ G, ctx, playerID }, cellID: number) => {
       if (G.cells[cellID] !== null) {
         return INVALID_MOVE;
       }
-      G.cells[cellID] = ctx.currentPlayer;
+      G.cells[cellID] = currentPlayer(ctx);
 
       if (IsVictory(G.cells)) {
-        G.winner = ctx.currentPlayer;
+        G.winner = currentPlayer(ctx);
       } else if (IsDraw(G.cells)) {
         G.winner = "draw";
       }
-    },
+    }
   },
-  possibleMoves: (G: any, ctx: any, playerID: any) => {
+
+  possibleMoves: (G, ctx, playerID) => {
     let moves = [];
     for (let i = 0; i < 9; i++) {
       if (G.cells[i] === null) {

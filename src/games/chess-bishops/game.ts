@@ -1,13 +1,16 @@
 import { INVALID_MOVE } from 'boardgame.io/core';
+import { currentPlayer, GameType } from '../../common/types';
+
+type Cell = null | "forbidden";
 
 export interface MyGameState {
-  board: Array<null | string>;
+  board: Array<Cell>;
 }
 
-export const MyGame: any = { // TOOO: solve type I was Game<MyGameState>
+export const MyGame: GameType<MyGameState> = { // TOOO: solve type I was Game<MyGameState>
   setup: () => ({ board: Array(64).fill(null) }),
   moves: {
-    clickCell: ({ G, ctx, playerID }: any, cellID: number) => {
+    clickCell: ({ G, ctx, playerID }, cellID: number) => {
       if (G.board[cellID] !== null) {
         return INVALID_MOVE;
       }
@@ -22,11 +25,11 @@ export const MyGame: any = { // TOOO: solve type I was Game<MyGameState>
       });
 
       if (IsVictory(G.board)) {
-        G.winner = ctx.currentPlayer;
+        G.winner = currentPlayer(ctx);
       }
     },
   },
-  possibleMoves: (G: any, ctx: any, playerID: any) => {
+  possibleMoves: (G, ctx, playerID) => {
     let moves = [];
     for (let i = 0; i < 64; i++) {
       if (G.board[i] === null) {
@@ -38,6 +41,6 @@ export const MyGame: any = { // TOOO: solve type I was Game<MyGameState>
 };
 
 // Return true if `cells` is in a winning configuration.
-function IsVictory(cells: Array<null | string>) {
+function IsVictory(cells: Array<Cell>) {
   return !cells.some(i => i === null);
 }
