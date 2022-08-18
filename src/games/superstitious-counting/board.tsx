@@ -1,6 +1,5 @@
 import { MyGameState } from './game';
 import { BoardProps } from 'boardgame.io/react';
-import { Ctx } from 'boardgame.io';
 import { useRef } from 'react';
 
 interface MyGameProps extends BoardProps<MyGameState> { }

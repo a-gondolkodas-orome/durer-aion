@@ -1,5 +1,3 @@
-import { BoardProps } from "boardgame.io/dist/types/packages/react";
-
 export function boardWrapper(board: any, description: any) { // TODO: solve types with BoardProps<MyGameState>
   return ({ G, ctx, moves, log }: any) => {
     return (
