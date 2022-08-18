@@ -6,7 +6,7 @@ function App() {
   return (
     <div>
     <Link to="/tictactoe">Tic Tac Toe</Link><br/>
-    <Link to="/superstitious-counting">Coin123</Link><br/>
+    <Link to="/superstitious-counting">Superstitious counting</Link><br/>
     <Link to="/chess-bishops">Chess bishops</Link><br/>
     </div>
   );
