@@ -8,6 +8,7 @@ export interface MyGameState {
 }
 
 export const MyGame: GameType<MyGameState> = { // TOOO: solve type
+  name: "tic-tac-toe",
   setup: () => ({ cells: Array(9).fill(null) }),
 
   moves: {
