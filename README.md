@@ -80,7 +80,7 @@ First-time you will need: `docker-compose build`
 
 ### Setting up the server
 
-`docker-compose up`
+`docker-compose up --build`
 
 (before first run, you will need `npm run build`)
 
@@ -93,6 +93,8 @@ First-time you will need: `docker-compose build`
 ### Backend reloads automatically
 
 :)
+
+If you install a package used by the backend, you will have to `docker-compose build`.
 
 ## How to create a new game
 
