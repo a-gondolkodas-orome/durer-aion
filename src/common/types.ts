@@ -4,6 +4,10 @@ export type PlayerIDType = "0" | "1";
 
 interface WrapperStateMixin {
   winner: PlayerIDType | "draw" | null;
+  numberOfTries: number;
+  numberOfLoss: number;
+  winningStreak: number;
+  points: number;
 }
 
 /// GameWrapper's mixin.

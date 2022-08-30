@@ -11,14 +11,24 @@ function chooseNewGameType(game: any) { // TODO: type
     if ("startingPosition" in game) {
       startingPosition = game.startingPosition({ G, ctx, playerID })
     }
-    return { ...startingPosition, difficulty: difficulty, firstPlayer: null, winner: null };
+    return {
+      ...startingPosition,
+      difficulty: difficulty,
+      firstPlayer: null,
+      winner: null,
+      numberOfTries: G.numberOfTries + (difficulty === "live" ? 1 : 0),
+      numberOfLoss: G.numberOfLoss,
+      winningStreak: G.winningStreak,
+      points: G.points,
+    }
+  };
     // In case of no difficulty, it is undefined (which is not null)
-  }
 }
+
 
 export function gameWrapper(game: any): Game<any> { // TODO: solve types
   return {
-    setup: () => ({ ...game.setup(), firstPlayer: null, difficulty: null, winner: null }),
+    setup: () => ({ ...game.setup(), firstPlayer: null, difficulty: null, winner: null, numberOfTries: 0, numberOfLoss: 0, winningStreak: 0, points: null}),
     turn: {
       minMoves: 1,
       maxMoves: 1,
