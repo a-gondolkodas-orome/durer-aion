@@ -16,7 +16,7 @@ interface WrapperStateMixin {
 interface WrapperMixin<G> {
   possibleMoves: (G: G, ctx: Ctx, playerID: PlayerIDType) => any[];
   setup: () => G,
-  startingPosition?: (_: {G: G; ctx: Ctx; playerID: PlayerIDType}) => G;
+  startingPosition?: (_: {G: G; ctx: Ctx; playerID: PlayerIDType; random: any}) => G;
 }
 
 /// Base structure, passed through directly to boardgame.io.
