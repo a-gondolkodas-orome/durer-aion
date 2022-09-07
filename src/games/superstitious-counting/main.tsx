@@ -1,7 +1,7 @@
-import { MyClientWithBot } from '../../common/myclient';
 import { MyGame } from './game';
 import { MyBoard } from './board';
 import { strategy } from './strategy';
+import { ClientFactory } from '../../common/client_factory';
 
 let description = <p className="text-justify">
   Ez a játék a XIII. Dürer döntőjén szerepelt E kategóriában.
@@ -16,12 +16,4 @@ let description = <p className="text-justify">
   Az m szám ismeretében te döntheteted el, hogy a kezdő vagy a második játékos bőrébe szeretnél e bújni.
 </p>
 
-const SuperstitiousCounting = MyClientWithBot(MyGame, MyBoard, strategy, description);
-
-export default function () {
-  return (
-    <>
-      <SuperstitiousCounting playerID='0' />
-    </>
-  )
-};
+export const { Client, ClientWithBot } = ClientFactory(MyGame, MyBoard, strategy, description);

@@ -1,16 +1,8 @@
-import { MyClientWithBot } from '../../common/myclient';
 import { MyGame } from './game';
 import { MyBoard } from './board';
 import { strategy } from './strategy';
+import { ClientFactory } from '../../common/client_factory';
 
 let description = <p>Ez egy TicTacToe</p>
 
-const TicTacToe = MyClientWithBot(MyGame, MyBoard, strategy, description);
-
-export default function () {
-  return (
-    <>
-      <TicTacToe playerID='0' />
-    </>
-  );
-};
+export const { Client, ClientWithBot } = ClientFactory(MyGame, MyBoard, strategy, description);
