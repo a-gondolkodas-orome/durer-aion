@@ -1,4 +1,4 @@
-import { MyClient } from '../../common/myclient';
+import { MyClientWithBot } from '../../common/myclient';
 import { MyGame } from './game';
 import { MyBoard } from './board';
 import { strategy } from './strategy';
@@ -16,7 +16,7 @@ let description = <p className="text-justify">
   Az m szám ismeretében te döntheteted el, hogy a kezdő vagy a második játékos bőrébe szeretnél e bújni.
 </p>
 
-const SuperstitiousCounting = MyClient(MyGame, MyBoard, strategy, description);
+const SuperstitiousCounting = MyClientWithBot(MyGame, MyBoard, strategy, description);
 
 export default function () {
   return (
