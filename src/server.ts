@@ -47,6 +47,10 @@ async function injectBots(db: any) {
     console.log(`Found match ${matchID}`);
     var match = await fetch(db, matchID, {metadata: true});
     // TODO do not connect a bot to ALL unconnected
+    // TODO broken
+    if (match === undefined) {
+      return;
+    }
     if (!match.metadata.players[BOT_ID].isConnected) {
       console.log(`Found empty match!`);
       match.metadata.players[BOT_ID].name = 'Bot';
