@@ -27,9 +27,25 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type
     }
   },
 
-  startingPosition: ({ random }) => ({
-    rookPosition: [random.Die(3)-1, random.Die(3)-1]
-  }),
+  startingPosition: ({G, ctx, playerID, random}) => {
+    let rookPosition:Position = [0,0]
+    if(G.difficulty === undefined){
+      rookPosition = [random.Die(7)-1, random.Die(7)-1];
+    } else if(G.numberOfTries === 1){
+      rookPosition = [0,1];
+    } else if(G.numberOfTries === 2){
+      rookPosition = [0,0];
+    } else if(G.numberOfTries%2 === 1){
+      rookPosition = [random.Die(3)-1, random.Die(2)-1];
+      if(rookPosition[0] === G.rookPosition[1]){
+        rookPosition[1] += 1;
+      }
+    } else{
+      rookPosition[0] = random.Die(3)-1;
+      rookPosition[1] = rookPosition[0];
+    }
+    return {rookPosition: rookPosition}
+  },
 
   possibleMoves: (G, ctx, playerID) => {
     let moves = [];
