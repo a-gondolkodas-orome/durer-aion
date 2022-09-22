@@ -4,6 +4,7 @@ export type PlayerIDType = "0" | "1";
 
 interface WrapperStateMixin {
   winner: PlayerIDType | "draw" | null;
+  difficulty: null | undefined | string;
   numberOfTries: number;
   numberOfLoss: number;
   winningStreak: number;
