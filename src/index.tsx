@@ -8,6 +8,7 @@ import TicTacToe from './games/tictactoe/main';
 import SuperstitiousCounting from './games/superstitious-counting/main';
 import ChessBishops from './games/chess-bishops/main';
 import Game14OnlineC from './games/14oc/main';
+import Game14OnlineE from './games/14oe/main';
 import Lobby from './lobby';
 
 const root = document.getElementById('root');
@@ -21,6 +22,7 @@ render(
         <Route path="/chess-bishops" element={<ChessBishops />} />
         <Route path="/lobby" element={<Lobby />} />
         <Route path="/game-14-online-c" element={<Game14OnlineC />} />
+        <Route path="/game-14-online-e" element={<Game14OnlineE />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>,
