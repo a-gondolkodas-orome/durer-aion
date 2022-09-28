@@ -18,7 +18,11 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type
       if (!G.remainingNumbers.includes(n)) {
         return INVALID_MOVE;
       }
-      G.playerNumbers.push(n);
+      if (playerID === "0") {
+        G.playerNumbers.push(n);
+      } else {
+        G.enemyNumbers.push(n);
+      }
       G.remainingNumbers = G.remainingNumbers.filter(x => x !== n);
       let winner = getWinner(G.playerNumbers, G.enemyNumbers, G.remainingNumbers);
       if (winner === "0" || winner === "1") {
@@ -48,7 +52,7 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type
 
 // Return true if `cells` is in a winning configuration.
 function getWinner(first: number[], second: number[], remaining: number[]) : string {
+  return ""; // No winner yet
   return "0"; // Player wins
   return "1"; // Enemy wins
-  return ""; // No winner yet
 }

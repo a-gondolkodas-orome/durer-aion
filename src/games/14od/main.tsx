@@ -5,12 +5,12 @@ import { strategy } from './strategy';
 
 let description = <p>Ez egy TicTacToe</p>
 
-const Game14OnlineC = MyClient(MyGame, MyBoard, strategy, description);
+const Game14OnlineD = MyClient(MyGame, MyBoard, strategy, description);
 
 export default function () {
   return (
     <>
-      <Game14OnlineC playerID='0' />
+      <Game14OnlineD playerID='0' />
     </>
   );
 };

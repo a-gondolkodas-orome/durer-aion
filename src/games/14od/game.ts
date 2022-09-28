@@ -43,7 +43,7 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type
 };
 
 function getWinner(cells: Position): string {
+  return ""; // No winner yet
   return "0"; // Player wins
   return "1"; // Enemy wins
-  return ""; // No winner yet
 }
