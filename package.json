@@ -15,7 +15,7 @@
     "@types/react": "^18.0.14",
     "@types/react-dom": "^18.0.5",
     "bgio-postgres": "^1.0.13",
-    "boardgame.io": "^0.50.0-alpha.2",
+    "boardgame.io": "./boardgame.io",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-router-dom": "^6.3.0",
@@ -26,8 +26,11 @@
   "scripts": {
     "lint": "eslint src/ --ext js,ts,jsx,tsx",
     "dev:server": "nodemon -e js,ts --exec babel-node --extensions \".ts\" --presets=@babel/preset-typescript --plugins=@babel/plugin-transform-modules-commonjs src/server.ts",
+    "prod:server": "babel-node --extensions \".ts\" --presets=@babel/preset-typescript --plugins=@babel/plugin-transform-modules-commonjs src/server.ts",
+    "build:server": "tsc -p ./tsconfig.json",
+    "start:server": "node server/server.js",
     "start": "react-scripts start",
-    "build": "(cd boardgame.io/ && npm ci --include=dev && npm run clean && npm run build && npm run prepack && npm ci --omit=dev) && react-scripts build",
+    "build": "(cd boardgame.io/ && npm ci --include=dev && npm run prepack && npm ci --omit=dev) && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
