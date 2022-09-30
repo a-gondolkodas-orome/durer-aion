@@ -3,6 +3,7 @@ import { Ctx, MoveMap, TurnConfig } from "boardgame.io";
 export type PlayerIDType = "0" | "1";
 
 export interface GameStateMixin {
+  firstPlayer: null | 0 | 1;
   winner: PlayerIDType | "draw" | null;
   difficulty: null | undefined | string;
   numberOfTries: number;
