@@ -11,9 +11,13 @@ export function strategy(state: State<MyGameState & GameStateMixin>, botID: stri
       return [[winningNumber, winningNumber], "clickCell"];
     } else {
       // He is on a winning position, return random with maximum 3 steps
-      let newPos = state.G.rookPosition;
-      newPos[Math.floor(Math.random()*2)] += Math.floor(Math.random()*3+1);
-      return [newPos, "clickCell"];
+      let randomNumber = Math.floor(2*Math.random());
+      if(randomNumber === 0){
+        return [[state.G.rookPosition[0]+Math.floor(Math.min(3,7-state.G.rookPosition[0])*Math.random()+1),state.G.rookPosition[1]],"clickCell"];
+      }
+      else{
+        return [[state.G.rookPosition[0],state.G.rookPosition[1]+Math.floor(Math.min(3,7-state.G.rookPosition[1])*Math.random()+1)],"clickCell"];
+      }
     }
   }
   else{
