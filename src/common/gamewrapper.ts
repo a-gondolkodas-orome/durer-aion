@@ -7,19 +7,20 @@ function chooseRole({ G, ctx, playerID }: any, firstPlayer: string) { // TODO: t
 
 function chooseNewGameType(game: any) { // TODO: type
   return ({ G, ctx, playerID, random }: any, difficulty: string) => {
-    let startingPosition = game.setup();
-    if ("startingPosition" in game) {
-      startingPosition = game.startingPosition({ G, ctx, playerID, random })
-    }
-    return {
-      ...startingPosition,
+    let newG = {
+      ...G,
       difficulty: difficulty,
       firstPlayer: null,
       winner: null,
       numberOfTries: G.numberOfTries + (difficulty === "live" ? 1 : 0),
-      numberOfLoss: G.numberOfLoss,
-      winningStreak: G.winningStreak,
-      points: G.points,
+    }
+    let startingPosition = game.setup();
+    if ("startingPosition" in game) {
+      startingPosition = game.startingPosition({ G: newG, ctx, playerID, random })
+    }
+    return {
+      ...newG,
+      ...startingPosition,
     }
   };
     // In case of no difficulty, it is undefined (which is not null)
