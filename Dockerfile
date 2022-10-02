@@ -14,7 +14,7 @@ COPY src src
 COPY tsconfig.json tsconfig.json
 COPY boardgame.io boardgame.io
 
-RUN (cd /usr/src/app/boardgame.io && npm run clean && npm run build && npm run prepack && npm ci --omit=dev)
+RUN (cd /usr/src/app/boardgame.io && npm run prepack && npm ci --omit=dev)
 RUN npm run build:server
 
 EXPOSE 8000
