@@ -23,14 +23,18 @@ export function MyBoard({ G, ctx, moves }: MyGameProps) {
           <table className="m-2 border-collapse">
             <tbody>
               <tr>
-                <th>Szám</th>
-                <th>Cél</th>
-                <th>Tiltott lépés</th>
+                <th>{G.coins[0]}</th>
+                <th>{G.coins[1]}</th>
+                <th>{G.coins[2]}</th>
+                <th>{G.coins[3]}</th>
+                <th>{G.coins[4]}</th>
               </tr>
               <tr>
-                <td className="text-center h-36 w-36 border-4 text-8xl">{G.current}</td>
-                <td className="text-center h-36 w-36 border-4 text-8xl">{G.target}</td>
-                <td className="text-center h-36 w-36 border-4 text-8xl">{G.restricted || "-"}</td>
+                <th>{G.coins[5]}</th>
+                <th>{G.coins[6]}</th>
+                <th>{G.coins[7]}</th>
+                <th>{G.coins[8]}</th>
+                <th>{G.coins[9]}</th>
               </tr>
             </tbody>
           </table>
