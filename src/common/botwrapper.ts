@@ -28,9 +28,7 @@ export default function botWrapper<T_SpecificGameState, T_Move>(botstrategy: Bot
           type: 'MAKE_MOVE',
           payload: {
             type: moveName,
-            args: [
-              move
-            ],
+            args: move,
             playerID
           },
         },
