@@ -1,36 +1,36 @@
 import { State } from 'boardgame.io';
 import { MyGameState } from './game';
 
-const strategyMap = new Map<Array<boolean>, undefined | Array<number>>([
-  [[true,true,false,false,false], [2,1]],
-  [[true,false,true,false,false], [3,1]],
-  [[true,false,false,true,false], [4,1]],
-  [[true,false,false,false,true], [5,1]],
-  [[false,true,true,false,false], [3,2]],
-  [[false,true,false,true,false], [4,2]],
-  [[false,true,false,false,true], [5,2]],
-  [[false,false,true,true,false], [4,3]],
-  [[false,false,true,false,true], [5,3]],
-  [[false,false,false,true,true], [5,4]],
+const strategyMap = new Map<string, undefined | Array<number>>([
+  ["11000", [2,1]],
+  ["10100", [3,1]],
+  ["10010", [4,1]],
+  ["10001", [5,1]],
+  ["01100", [3,2]],
+  ["01010", [4,2]],
+  ["01001", [5,2]],
+  ["00110", [4,3]],
+  ["00101", [5,3]],
+  ["00011", [5,4]],
 
-  [[true,true,true,false,false], undefined],
-  [[true,true,false,true,false], [4,3]],
-  [[true,true,false,false,true], [5,3]],
-  [[true,false,true,true,false], [4,2]],
-  [[true,false,true,false,true], [5,2]],
-  [[true,false,false,true,true], undefined],
-  [[false,true,true,true,false], [4,1]],
-  [[false,true,true,false,true], [5,1]],
-  [[false,true,false,true,true], [2,1]],
-  [[false,false,true,true,true], [3,1]],
+  ["11100", undefined],
+  ["11010", [4,3]],
+  ["11001", [5,3]],
+  ["10110", [4,2]],
+  ["10101", [5,2]],
+  ["10011", undefined],
+  ["01110", [4,1]],
+  ["01101", [5,1]],
+  ["01011", [2,1]],
+  ["00111", [3,1]],
 
-  [[true,true,true,true,false], [4,2]],
-  [[true,true,true,false,true], [5,3]],
-  [[true,true,false,true,true], [2,1]],
-  [[true,false,true,true,true], [3,1]],
-  [[false,true,true,true,true], undefined],
+  ["11110", [4,2]],
+  ["11101", [5,3]],
+  ["11011", [2,1]],
+  ["10111", [3,1]],
+  ["01111", undefined],
 
-  [[true,true,true,true,true], undefined]
+  ["11111", undefined]
 ]);
 
 export function strategy(state: State<MyGameState>, botID: string): [Array<number> | undefined, string] {
@@ -38,8 +38,13 @@ export function strategy(state: State<MyGameState>, botID: string): [Array<numbe
   //let randomIndex = Math.floor(Math.random() * possible_moves.length);
 
   let existingCoins = [false,false,false,false,false];
-    for(let i = 0; i < 10; i++){
-      existingCoins[state.G.coins[i]] = true;
-    }
-  return [strategyMap.get(existingCoins), "changeCoins"];
+  for(let i = 0; i < 10; i++){
+    existingCoins[state.G.coins[i] - 1] = true;
+  }
+  let coinsString = "";
+  for(let i = 0; i < 5; i++){
+    if(existingCoins[i]) coinsString += '1';
+    else coinsString += '0';
+  }
+  return [strategyMap.get(coinsString), "changeCoins"];
 }
