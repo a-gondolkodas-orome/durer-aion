@@ -10,6 +10,7 @@ import ChessBishops from './games/chess-bishops/main';
 import Game14OnlineC from './games/14oc/main';
 import Game14OnlineD from './games/14od/main';
 import Game14OnlineE from './games/14oe/main';
+import TenCoins from './games/ten-coins/main';
 import Lobby from './lobby';
 
 const root = document.getElementById('root');
@@ -25,6 +26,7 @@ render(
         <Route path="/game-14-online-c" element={<Game14OnlineC />} />
         <Route path="/game-14-online-d" element={<Game14OnlineD />} />
         <Route path="/game-14-online-e" element={<Game14OnlineE />} />
+        <Route path="/ten-coins" element={<TenCoins />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>,
