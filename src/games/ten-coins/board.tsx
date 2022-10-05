@@ -6,14 +6,17 @@ interface MyGameProps extends BoardProps<MyGameState> { }
 
 export function MyBoard({ G, ctx, moves }: MyGameProps) {
   // TODO: use formik
-  // create a ref to store the text input element
-  const inputEl = useRef<HTMLInputElement>(null);
+  // create refs to store the text input elements
+  const inputK = useRef<HTMLInputElement>(null);
+  const inputL = useRef<HTMLInputElement>(null);
 
   const onClick = () => {
     // read input value
-    const inputValue = parseInt(inputEl.current!.value);
-    inputEl.current!.value = '';
-    moves.increaseNumber(inputValue);
+    const inputValueK = parseInt(inputK.current!.value);
+    const inputValueL = parseInt(inputL.current!.value);
+    inputK.current!.value = '';
+    inputL.current!.value = '';
+    moves.changeCoins(inputValueK, inputValueL);
   };
 
   return (
@@ -38,8 +41,11 @@ export function MyBoard({ G, ctx, moves }: MyGameProps) {
               </tr>
             </tbody>
           </table>
-          <label htmlFor="step"> Következő lépés: </label>
-          <input ref={inputEl} id="step" type="number" min="1" max="12" v-model="step" className="border-2" />
+          <label> Következő lépés: </label>
+          <label htmlFor="stepK"> K: </label>
+          <input ref={inputK} id="stepK" type="number" min="1" max="5" v-model="step" className="border-2" />
+          <label htmlFor="stepL"> L: </label>
+          <input ref={inputL} id="stepL" type="number" min="1" max="5" v-model="step" className="border-2" />
           <button
             className="cta-button" onClick={() => onClick()}
           >Lépek</button>

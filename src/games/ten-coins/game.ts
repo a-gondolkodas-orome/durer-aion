@@ -14,10 +14,12 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<
       if (K < L || !G.coins.includes(K)) {
         return INVALID_MOVE;
       }
-      G.coins.forEach(c => {if(c == K) return L; else return c})
+      for(let i = 0; i < 10; i++){
+        if(G.coins[i] == K) G.coins[i] = L;
+      }
       const firstCoin = G.coins[0];
       if(G.coins.every(c => c == firstCoin)){
-        G.winner = ctx.currentPlayer === "0" ? "1" : "0";
+        G.winner = ctx.currentPlayer === "0" ? "0" : "1";
       }
     }
   },
