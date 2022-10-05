@@ -7,6 +7,7 @@ import { Route, BrowserRouter, Routes } from 'react-router-dom';
 import { Client as TicTacToeClient, ClientWithBot as TicTacToeWithBotClient } from './games/tictactoe/main';
 import { Client as SuperstitiousCountingClient, ClientWithBot as SuperstitiousCountingWithBotClient } from './games/superstitious-counting/main';
 import { Client as ChessBishopsClient, ClientWithBot as ChessBishopsWithBotClient } from './games/chess-bishops/main';
+import Relay from './games/relay/main';
 import Lobby from './lobby';
 
 const root = document.getElementById('root');
@@ -21,6 +22,7 @@ render(
         <Route path="/superstitious-counting-with-bot" element={<SuperstitiousCountingWithBotClient />} />
         <Route path="/chess-bishops" element={<ChessBishopsClient />} />
         <Route path="/chess-bishops-with-bot" element={<ChessBishopsWithBotClient />} />
+        <Route path="/relay" element={<Relay />} />
         <Route path="/lobby" element={<Lobby />} />
       </Routes>
     </BrowserRouter>
