@@ -16,14 +16,15 @@ export const MyBoard = ({ G, ctx, moves }: MyGameProps) =>{
 
   return (
     <div>
-      <div>{G.numberOfProblem+1}. feladat</div>
+      <div>{G.currentProblem+1}. feladat ({G.numberOfTry}. próba - {G.currentProblemMaxPoints} pont)</div>
       <div>{G.problemText}</div>
       <label htmlFor="answer"> Válaszod: </label>
       <input ref={inputEl} id="answer" type="number" min="0" max="9999" v-model="step" className="border-2" />
       <button
             className="cta-button" onClick={() => onClick()}
-      >Lépek</button>
-
+            >Lépek</button>
+      <div>Korábbi válaszok: {G.previousAnswers[G.currentProblem].join(", ")}</div>
+      <div>Jelenlegi összpontszám: {G.points}</div>
     </div>
   );
 }
