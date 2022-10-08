@@ -25,6 +25,8 @@ export const MyBoard = ({ G, ctx, moves }: MyGameProps) =>{
             >Lépek</button>
       <div>Korábbi válaszok: {G.previousAnswers[G.currentProblem].join(", ")}</div>
       <div>Jelenlegi összpontszám: {G.points}</div>
+      <div>Hátralevő idő: {G.milisecondsRemaining}</div>
+      <button onClick={() => moves.getTime()}>Asd</button>
     </div>
   );
 }
