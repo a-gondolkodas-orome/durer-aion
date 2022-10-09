@@ -9,11 +9,11 @@ import { Client as SuperstitiousCountingClient, ClientWithBot as SuperstitiousCo
 import { Client as ChessBishopsClient, ClientWithBot as ChessBishopsWithBotClient } from './games/chess-bishops/main';
 import Relay from './games/relay/main';
 import { Client as Game14OnlineCClient, ClientWithBot as Game14OnlineCWithBotClient } from './games/14oc/main';
-import { Client as Game14OnlineDClient, ClientWithBot as Game14OnlineDWithBotClient } from './games/14oc/main';
-import { Client as Game14OnlineEClient, ClientWithBot as Game14OnlineEWithBotClient } from './games/14oc/main';
-import { Client as Game15OnlineCClient, ClientWithBot as Game15OnlineCWithBotClient } from './games/14oc/main';
-import { Client as Game15OnlineDClient, ClientWithBot as Game15OnlineDWithBotClient } from './games/14oc/main';
-import { Client as Game15OnlineEClient, ClientWithBot as Game15OnlineEWithBotClient } from './games/14oc/main';
+import { Client as Game14OnlineDClient, ClientWithBot as Game14OnlineDWithBotClient } from './games/14od/main';
+import { Client as Game14OnlineEClient, ClientWithBot as Game14OnlineEWithBotClient } from './games/14oe/main';
+import { Client as Game15OnlineCClient, ClientWithBot as Game15OnlineCWithBotClient } from './games/15oc/main';
+import { Client as Game15OnlineDClient, ClientWithBot as Game15OnlineDWithBotClient } from './games/15od/main';
+import { Client as Game15OnlineEClient, ClientWithBot as Game15OnlineEWithBotClient } from './games/15oe/main';
 import { Client as TenCoinsClient, ClientWithBot as TenCoinsWithBotClient} from './games/ten-coins/main';
 import Lobby from './lobby';
 
