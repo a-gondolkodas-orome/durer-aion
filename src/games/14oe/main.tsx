@@ -1,16 +1,8 @@
-import { MyClient } from '../../common/myclient';
 import { MyGame } from './game';
 import { MyBoard } from './board';
 import { strategy } from './strategy';
+import { ClientFactory } from '../../common/client_factory';
 
 let description = <p>Ez egy játék</p>
 
-const Game14OnlineE = MyClient(MyGame, MyBoard, strategy, description);
-
-export default function () {
-  return (
-    <>
-      <Game14OnlineE playerID='0' />
-    </>
-  );
-};
+export const { Client, ClientWithBot } = ClientFactory(MyGame, MyBoard, strategy, description);
