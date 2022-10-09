@@ -1,0 +1,11 @@
+#board td {
+  padding: 0 0 0 0;
+  border: 2px solid;
+  width: 9vmin;
+  height: 9vmin;
+  align-items: center;
+}
+
+#board {
+  border-collapse: collapse;
+}

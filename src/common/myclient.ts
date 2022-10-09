@@ -3,6 +3,7 @@ import { Local } from 'boardgame.io/multiplayer';
 import botWrapper from './botwrapper';
 import { gameWrapper } from './gamewrapper';
 import { boardWrapper } from './boardwrapper';
+import { Debug } from 'boardgame.io/debug';
 
 
 export function MyClient(game: any, board: any, description: any) { // TODO types
@@ -23,5 +24,6 @@ export function MyClientWithBot(game: any, board: any, strategy: any, descriptio
       }
     ),
     numPlayers: 2,
+    //debug: { impl: Debug },
   })
 }

@@ -12,16 +12,24 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type
   setup: () => ({ cells: Array(9).fill(null) }),
 
   moves: {
-    clickCell: ({ G, ctx, playerID }, cellID: number) => {
+    clickCell: ({ G, ctx, playerID, events }, cellID: number) => {
       if (G.cells[cellID] !== null) {
         return INVALID_MOVE;
       }
       G.cells[cellID] = currentPlayer(ctx);
 
-      if (IsVictory(G.cells)) {
+      if (IsVictory(G.cells) || IsDraw(G.cells)) {
         G.winner = currentPlayer(ctx);
-      } else if (IsDraw(G.cells)) {
-        G.winner = "draw";
+        if(currentPlayer(ctx) === "0"){
+          G.winningStreak = G.winningStreak + 1;
+          if(G.winningStreak >= 2){
+            G.points = 12-G.numberOfLoss*2;
+            events.endGame();
+          }
+        } else {
+          G.winningStreak = 0;
+          G.numberOfLoss += 1;
+        }
       }
     }
   },
