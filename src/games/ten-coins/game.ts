@@ -31,7 +31,7 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<
   possibleMoves: (G, ctx, playerID) => {
     let existingCoins = [false,false,false,false,false];
     for(let i = 0; i < 10; i++){
-      existingCoins[G.coins[i]] = true;
+      existingCoins[G.coins[i]-1] = true;
     }
     let moves = [];
     for(let k = 1; k <= 5; k++){
