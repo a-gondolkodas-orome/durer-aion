@@ -99,7 +99,7 @@ export function strategy(state: State<MyGameState & GameStateMixin>, botID: stri
       );
     }
     let rEddigiekString = rEddigiek.join("");
-    if (rEddigiekString === "") {
+    if (rEddigiekString === "") { //kezdés
       switch (state.G.numberOfTries % 4) {
         case 0:
           return [buvosbolRendes[1], "clickCell"];
@@ -121,25 +121,25 @@ export function strategy(state: State<MyGameState & GameStateMixin>, botID: stri
     const RSOROK=[[8,3,4],[1,5,9],[6,7,2],[8,1,6],[3,5,7],[4,9,2],[8,5,2],[4,5,6]];
     for (let i of RSOROK){ //nyerés
       if( state.G.enemyNumbers.includes(i[0]) && state.G.enemyNumbers.includes(i[1]) && state.G.remainingNumbers.includes(i[2])){
-        return [i[2], "clickCell"]
+        return [i[2], "clickCell"];
       }
       if( state.G.enemyNumbers.includes(i[0]) && state.G.enemyNumbers.includes(i[2]) && state.G.remainingNumbers.includes(i[1])){
-        return [i[1], "clickCell"]
+        return [i[1], "clickCell"];
       }
       if( state.G.enemyNumbers.includes(i[2]) && state.G.enemyNumbers.includes(i[1]) && state.G.remainingNumbers.includes(i[0])){
-        return [i[0], "clickCell"]
+        return [i[0], "clickCell"];
       }
     }
 
     for (let i of RSOROK){ //blokkolás
       if( state.G.playerNumbers.includes(i[0]) && state.G.playerNumbers.includes(i[1]) && state.G.remainingNumbers.includes(i[2])){
-        return [i[2], "clickCell"]
+        return [i[2], "clickCell"];
       }
       if( state.G.playerNumbers.includes(i[0]) && state.G.playerNumbers.includes(i[2]) && state.G.remainingNumbers.includes(i[1])){
-        return [i[1], "clickCell"]
+        return [i[1], "clickCell"];
       }
       if( state.G.playerNumbers.includes(i[2]) && state.G.playerNumbers.includes(i[1]) && state.G.remainingNumbers.includes(i[0])){
-        return [i[0], "clickCell"]
+        return [i[0], "clickCell"];
       }
     }
 
@@ -147,31 +147,31 @@ export function strategy(state: State<MyGameState & GameStateMixin>, botID: stri
 
     for (let i of RVILLAK){ //villa
       if( state.G.remainingNumbers.includes(i[0]) && state.G.playerNumbers.includes(i[1]) && state.G.playerNumbers.includes(i[3]) && state.G.remainingNumbers.includes(i[2]) && state.G.remainingNumbers.includes(i[4])){
-        return [i[0], "clickCell"]
+        return [i[0], "clickCell"];
       }
       if( state.G.remainingNumbers.includes(i[0]) && state.G.playerNumbers.includes(i[1]) && state.G.playerNumbers.includes(i[4]) && state.G.remainingNumbers.includes(i[2]) && state.G.remainingNumbers.includes(i[3])){
-        return [i[0], "clickCell"]
+        return [i[0], "clickCell"];
       }
       if( state.G.remainingNumbers.includes(i[0]) && state.G.playerNumbers.includes(i[2]) && state.G.playerNumbers.includes(i[3]) && state.G.remainingNumbers.includes(i[1]) && state.G.remainingNumbers.includes(i[4])){
-        return [i[0], "clickCell"]
+        return [i[0], "clickCell"];
       }
       if( state.G.remainingNumbers.includes(i[0]) && state.G.playerNumbers.includes(i[2]) && state.G.playerNumbers.includes(i[4]) && state.G.remainingNumbers.includes(i[1]) && state.G.remainingNumbers.includes(i[3])){
-        return [i[0], "clickCell"]
+        return [i[0], "clickCell"];
       }
     }
 
-    for (let i of RVILLAK){ //blokkolás
+    for (let i of RVILLAK){ //villablokkolás
       if( state.G.remainingNumbers.includes(i[0]) && state.G.enemyNumbers.includes(i[1]) && state.G.enemyNumbers.includes(i[3]) && state.G.remainingNumbers.includes(i[2]) && state.G.remainingNumbers.includes(i[4])){
-        return [i[0], "clickCell"]
+        return [i[0], "clickCell"];
       }
       if( state.G.remainingNumbers.includes(i[0]) && state.G.enemyNumbers.includes(i[1]) && state.G.enemyNumbers.includes(i[4]) && state.G.remainingNumbers.includes(i[2]) && state.G.remainingNumbers.includes(i[3])){
-        return [i[0], "clickCell"]
+        return [i[0], "clickCell"];
       }
       if( state.G.remainingNumbers.includes(i[0]) && state.G.enemyNumbers.includes(i[2]) && state.G.enemyNumbers.includes(i[3]) && state.G.remainingNumbers.includes(i[1]) && state.G.remainingNumbers.includes(i[4])){
-        return [i[0], "clickCell"]
+        return [i[0], "clickCell"];
       }
       if( state.G.remainingNumbers.includes(i[0]) && state.G.enemyNumbers.includes(i[2]) && state.G.enemyNumbers.includes(i[4]) && state.G.remainingNumbers.includes(i[1]) && state.G.remainingNumbers.includes(i[3])){
-        return [i[0], "clickCell"]
+        return [i[0], "clickCell"];
       }
     }
 
