@@ -6,6 +6,12 @@ import { PostgresStore } from 'bgio-postgres';
 import { env } from 'process';
 import { gameWrapper } from './common/gamewrapper';
 import { BOT_ID, fetch, SocketIOButBotMoves } from './socketio_botmoves';
+import { Server, SocketIO } from 'boardgame.io/server';
+import botWrapper from './common/botwrapper';
+import { strategy as TicTacToeStrategy } from './games/tictactoe/strategy';
+import { strategy as SuperstitiousCountingStrategy } from './games/superstitious-counting/strategy';
+import { strategy as ChessBishopsStrategy } from './games/chess-bishops/strategy';
+import { configureTeamsRouter } from './server/router';
 
 function getDb() {
   if (env.DATABASE_URL) {
@@ -30,7 +36,7 @@ const server = Server({
   ],
   transport: new SocketIOButBotMoves({ https: undefined }),
   ...getDb(),
-})
+});
 
 const PORT = parseInt(env.PORT || "8000");
 
@@ -64,4 +70,5 @@ server.router.post('/games/:nameid/create', async (ctx, next) => {
   await injectBots(ctx.db);
 });
 
+configureTeamsRouter(server.router);
 server.run(PORT);
