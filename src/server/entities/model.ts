@@ -37,6 +37,8 @@ export class TeamModel extends Model {
   public teamName!: string;
   public credentials!: string;
 
+  public pageState!: 'INIT'|'RELAY'|'STRATEGY'|'FINISHED'
+
   public relayMatch!: MatchStatusModel;
   public strategyMatch!: MatchStatusModel;
 
@@ -62,6 +64,9 @@ export const teamAttributes: ModelAttributes = {
     type: DataTypes.STRING,
   },
   credentials: {
+    type: DataTypes.STRING,
+  },
+  pageState:{
     type: DataTypes.STRING,
   },
   relayMatch: {
