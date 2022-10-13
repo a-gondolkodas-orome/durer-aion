@@ -60,35 +60,5 @@ const server = Server({
 
 const PORT = parseInt(env.PORT || "8000");
 
-/** Joins a bot to all matches where the bot's side is not connected.
- * 
- * TODO inject bots only where it is needed.
- * 
- * This should be in line with boardgame.io/src/server/api.ts
- * path would be '/games/:name/:id/join'.
- */
-async function injectBots(db: any) {
-  console.log("Injecting listing matches!");
-  for (let matchID of await db.listMatches()) {
-    console.log(`Found match ${matchID}`);
-    var match = await fetch(db, matchID, {metadata: true});
-    // TODO do not connect a bot to ALL unconnected
-    if (!match.metadata.players[BOT_ID].isConnected) {
-      console.log(`Found empty match!`);
-      match.metadata.players[BOT_ID].name = 'Bot';
-      match.metadata.players[BOT_ID].credentials = getBotCredentials();
-      match.metadata.players[BOT_ID].isConnected = true;
-      await db.setMetadata(matchID, match.metadata);
-    }
-  }
-}
-
-/** This should be in line with boardgame.io/src/server/api.ts */
-server.router.post('/games/:nameid/create', async (ctx, next) => {
-  // TODO somehow figure out the MatchID of the created match
-  await next();
-  await injectBots(ctx.db);
-});
-
 configureTeamsRouter(server.router, teams);
 server.run(PORT);
