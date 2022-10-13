@@ -53,8 +53,7 @@ const server = Server({
   games: games,
   transport: new SocketIOButBotMoves(
     { https: undefined },
-    getBotCredentials(),
-    bots,
+    { "tic-tac-toe": bots[0], "superstitious-counting": bots[1], "chess-bishops": bots[2] },
   ),
   db,
 });

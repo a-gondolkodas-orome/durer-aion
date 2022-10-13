@@ -89,6 +89,11 @@ export const BOT_ID = '1';
  * Modifying the server is also needed to fill the bot's slot in the lobby (see injectBots()).
  */
 export class SocketIOButBotMoves extends SocketIO {
+  bots: Record<string, any>;
+  constructor(anything: any, bots: Record<string, any>) {
+    super(anything);
+    this.bots = bots;
+  }
   init(
     app: any,
     games: Game[],
@@ -98,10 +103,7 @@ export class SocketIOButBotMoves extends SocketIO {
 
     for (const game of games) {
       const nsp = app._io.of(game.name);
-      const bot = new (botWrapper(strategy))({
-        enumerate: (game as any).ai.enumerate,
-        seed: game.seed,
-      });
+      const bot = this.bots[game.name!];
 
       /** This should be in sync with how socket data is communicated.
        * See boardgame.io/dist/src/server/transport/socketio.ts
