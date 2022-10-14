@@ -143,10 +143,10 @@ if (argv[2] == "import") {
 
     if (login_code === undefined || login_code === "") {
       login_code = generateLoginCode();
-    } else {
+    } else if (login_code.match(/[0-9]{3}-[0-9]{4}-[0-9]{3}/)) {
       ok = false;
       console.error(`Login Code is not valid for team ${teamname}`);
-      console.error(`Found: ${id}`);
+      console.error(`Found: ${login_code}`);
       console.error(`Expected format: 111-2222-333`);
     }
 
