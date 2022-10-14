@@ -78,6 +78,9 @@ if (argv[2] == "import") {
   const filename = argv[3];
   const untrimmed_rows = readFileSync(filename, 'utf-8').split('\n');
   const rows = untrimmed_rows;
+  if (rows[rows.length - 1].trim() === "") {
+    rows.pop();
+  }
   const table = rows.map(row => row.split('\t'));
   const header = table.shift()!;
   const expected_header = ["Teamname", "Category", "Email", "Other", "ID", "Login Code"];
