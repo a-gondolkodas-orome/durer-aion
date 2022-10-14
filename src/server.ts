@@ -143,18 +143,18 @@ if (argv[2] == "import") {
 
     if (login_code === undefined || login_code === "") {
       login_code = generateLoginCode();
-    } else if (login_code.match(/[0-9]{3}-[0-9]{4}-[0-9]{3}/)) {
+    } else if (login_code.match(/^[0-9]{3}-[0-9]{4}-[0-9]{3}$/) === null) {
       ok = false;
       console.error(`Login Code is not valid for team ${teamname}`);
       console.error(`Found: ${login_code}`);
       console.error(`Expected format: 111-2222-333`);
     }
 
-    if (found_login_codes.has(id)) {
+    if (found_login_codes.has(login_code)) {
       console.error('Duplicate Login Code');
       ok = false;
     } else {
-      found_login_codes.add(id);
+      found_login_codes.add(login_code);
     }
 
     if (ok) {
