@@ -101,6 +101,7 @@ if (argv[2] == "import") {
     let login_code = extra_columns[1];
 
     if (category === undefined) {
+      console.warn('Skipping empty row...');
       // Do not print more error messages lol
       continue;
     }
