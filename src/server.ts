@@ -93,7 +93,13 @@ if (argv[2] == "import") {
     let ok = true;
     let id = extra_columns[0];
     let login_code = extra_columns[1];
-    // TODO make this more pragmatic
+
+    if (teamname === undefined) {
+      console.warn("Empty row");
+      ok = false;
+    }
+
+    // TODO hard-coded values
     if (!['C', 'D', 'E'].includes(category)) {
       console.error(`ERROR: Invalid category for team ${teamname}.`);
       ok = false;
