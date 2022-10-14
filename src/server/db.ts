@@ -1,6 +1,6 @@
 import type { PostgresStore } from 'bgio-postgres';
 import { teamAttributes, TeamModel } from './entities/model';
-import { Sequelize } from 'sequelize';
+import { Sequelize, Op } from 'sequelize';
 
 export class TeamsRepository {
   sequelize: Sequelize;
@@ -15,8 +15,9 @@ export class TeamsRepository {
     this.sequelize.sync();
   }
   async fetch(filter: string[]) : Promise<TeamModel[]> {
+    // TODO Like-injection
     return await TeamModel.findAll({ where:
-      Sequelize.and(...filter.map(part => ({'other': part}))),
+      Sequelize.and(...filter.map(part => ({'other': { [Op.like]: `%${part}%'`} }))),
     });
   }
   async insertTeam(
