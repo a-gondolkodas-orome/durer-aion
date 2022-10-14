@@ -22,14 +22,6 @@ interface FinishedMatchStatus {
 
 export type MatchStatus = NotStartedMatchStatus | InProgressMatchStatus | FinishedMatchStatus;
 
-export interface MatchStatusModel {
-  state: 'NOT STARTED' | 'IN PROGRESS' | 'FINISHED';
-  score?: number;
-  startAt?: Date;
-  endAt?: Date;
-  matchID?: string;
-}
-
 export class TeamModel extends Model {
   public id!: string;
   // Important fields
@@ -41,8 +33,8 @@ export class TeamModel extends Model {
 
   public pageState!: 'INIT'|'RELAY'|'STRATEGY'|'FINISHED'
 
-  public relayMatch!: MatchStatusModel;
-  public strategyMatch!: MatchStatusModel;
+  public relayMatch!: MatchStatus;
+  public strategyMatch!: MatchStatus;
 
   // Search fields
   public other!: string;
