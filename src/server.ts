@@ -115,27 +115,32 @@ if (argv[2] == "import") {
     if (id === undefined || id === "") {
       id = randomUUID();
     } else if (id.match(/^[0-9a-f\-]+$/) === null) {
-      console.warn(`ID is not a GUID for team ${teamname}`);
-      console.warn(`Found: ${id}`);
-      console.warn(`Expected format is usually: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`);
+      ok = false;
+      console.error(`ID is not a GUID for team ${teamname}`);
+      console.error(`  Found: ${id}`);
+      console.error(`  Expected format is usually: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`);
     }
 
     if (login_code === undefined || login_code === "") {
       login_code = generateLoginCode();
     } else {
-      console.warn(`ID is not a GUID for team ${teamname}`);
-      console.warn(`Found: ${id}`);
-      console.warn(`Expected: 111-2222-333`);
+      ok = false;
+      console.error(`Login Code is not valid for team ${teamname}`);
+      console.error(`Found: ${id}`);
+      console.error(`Expected: 111-2222-333`);
     }
 
     if (ok) {
+      // TODO access DB
       console.info(`Successfully imported team ${teamname}.`);
       const row_to_export = [teamname, category, email, other, id, login_code];
       export_table.push(row_to_export);
     } else {
-      console.error(`Failed to import team ${teamname}.`);
+      console.error(`Failed to import team ${teamname}. See reasons above.`);
+      console.error(''); // separate errors
     }
   }
+  // TODO Move the file
   writeFileSync(`export-${filename}`, export_table.map(row => row.join('\t')).join('\n'), { 'encoding': 'utf-8' });
   exit(0);
 }
