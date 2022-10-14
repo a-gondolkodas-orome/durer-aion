@@ -94,7 +94,7 @@ async function importer(filename: string) {
   var found_login_codes = new Set();
   let successful = 0;
   let failed = 0; // not counting empty rows...
-  await db.connect();
+  await teams.connect();
   for (var row of table) {
     // Trim: Remove possible '\r' characters in windows CRLF
     const [teamname, category, email, other, ...extra_columns] = row.map(column => column.trim());

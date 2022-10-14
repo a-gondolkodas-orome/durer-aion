@@ -35,6 +35,7 @@ export class TeamModel extends Model {
   // Important fields
   public joinCode!: string;
   public teamName!: string;
+  public category!: string;
   public credentials!: string;
 
   public pageState!: 'INIT'|'RELAY'|'STRATEGY'|'FINISHED'
@@ -57,6 +58,9 @@ export const teamAttributes: ModelAttributes = {
     primaryKey: true,
   },
   // metadata
+  category: {
+    type: DataTypes.STRING,
+  },
   joinCode: {
     type: DataTypes.STRING,
   },

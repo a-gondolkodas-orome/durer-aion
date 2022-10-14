@@ -11,8 +11,8 @@ export class TeamsRepository {
       tableName: "Teams",
     });
   }
-  connect() {
-    this.sequelize.sync();
+  async connect() {
+    await this.sequelize.sync();
   }
   async fetch(filter: string[]) : Promise<TeamModel[]> {
     // TODO Like-injection
@@ -25,6 +25,7 @@ export class TeamsRepository {
       { teamname: string, category: string, email: string, other: string, id: string, joinCode: string}) {
     return await TeamModel.create({
       id, joinCode, other,
+      category,
       strategyMatch: {state: "NOT STARTED"},
       relayMatch: {state: "NOT STARTED"},
       teamName: teamname,
