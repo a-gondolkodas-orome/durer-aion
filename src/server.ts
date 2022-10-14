@@ -97,9 +97,10 @@ if (argv[2] == "import") {
     let id = extra_columns[0];
     let login_code = extra_columns[1];
 
-    if (teamname === undefined) {
+    if (category === undefined) {
       console.warn("Empty row");
-      ok = false;
+      // Do not print more error messages lol
+      continue;
     }
 
     // TODO hard-coded values
