@@ -26,11 +26,11 @@ export class TeamsRepository {
     return await TeamModel.create({
       id, joinCode, other,
       category,
+      email,
       strategyMatch: {state: "NOT STARTED"},
       relayMatch: {state: "NOT STARTED"},
       teamName: teamname,
       pageState: 'INIT',
-      // category, email
     });
   }
 }
