@@ -168,6 +168,7 @@ if (argv[2] == "import") {
     }
   }
   // TODO Move the file
+  export_table.unshift(expected_header);
   writeFileSync(`export-${filename}`, export_table.map(row => row.join('\t')).join('\n'), { 'encoding': 'utf-8' });
   exit(0);
 }
