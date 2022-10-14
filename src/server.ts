@@ -72,11 +72,9 @@ function generateLoginCode() {
   return `${randomInt(1, 1000)}-${randomInt(1, 10000)}-${randomInt(1, 1000)}`;
 }
 
-// node: argv[0] vs server.ts: argv[1]
-if (argv[2] == "import") {
+async function importer(filename: string) {
   console.info("Importing teams.");
   console.info("  Use a .tsv file (UTF-8 format, no quoted strings, no tab characters)");
-  const filename = argv[3];
   const untrimmed_rows = readFileSync(filename, 'utf-8').split('\n');
   const rows = untrimmed_rows;
   if (rows[rows.length - 1].trim() === "") {
@@ -96,6 +94,7 @@ if (argv[2] == "import") {
   var found_login_codes = new Set();
   let successful = 0;
   let failed = 0; // not counting empty rows...
+  await db.connect();
   for (var row of table) {
     // Trim: Remove possible '\r' characters in windows CRLF
     const [teamname, category, email, other, ...extra_columns] = row.map(column => column.trim());
@@ -169,7 +168,7 @@ if (argv[2] == "import") {
     if (ok) {
       console.info(`Adding ${teamname} to DB.`);
       try {
-        teams.insertTeam({teamname, category, email, other, id, joinCode: login_code});
+        await teams.insertTeam({teamname, category, email, other, id, joinCode: login_code});
       } catch (err) {
         if (err instanceof ValidationError) {
           console.error(`Failed to validate team when adding to DB: ${err}`);
@@ -196,49 +195,54 @@ if (argv[2] == "import") {
   // TODO Move the file
   export_table.unshift(expected_header);
   writeFileSync(`export-${filename}`, export_table.map(row => row.join('\t')).join('\n'), { 'encoding': 'utf-8' });
-  exit(0);
+
 }
+// node: argv[0] vs server.ts: argv[1]
+if (argv[2] == "import") {
+  const filename = argv[3];
+  importer(filename).then(() => exit(0));
+} else {
+  const server = Server({
+    games: games,
+    transport: new SocketIOButBotMoves(
+      { https: undefined },
+      { "tic-tac-toe": bots[0], "superstitious-counting": bots[1], "chess-bishops": bots[2] },
+    ),
+    db,
+  });
 
-const server = Server({
-  games: games,
-  transport: new SocketIOButBotMoves(
-    { https: undefined },
-    { "tic-tac-toe": bots[0], "superstitious-counting": bots[1], "chess-bishops": bots[2] },
-  ),
-  db,
-});
+  const PORT = parseInt(env.PORT || "8000");
 
-const PORT = parseInt(env.PORT || "8000");
-
-/** Joins a bot to all matches where the bot's side is not connected.
- * 
- * TODO inject bots only where it is needed.
- * 
- * This should be in line with boardgame.io/src/server/api.ts
- * path would be '/games/:name/:id/join'.
- */
-async function injectBots(db: any) {
-  console.log("Injecting listing matches!");
-  for (let matchID of await db.listMatches()) {
-    console.log(`Found match ${matchID}`);
-    var match = await fetch(db, matchID, {metadata: true});
-    // TODO do not connect a bot to ALL unconnected
-    if (!match.metadata.players[BOT_ID].isConnected) {
-      console.log(`Found empty match!`);
-      match.metadata.players[BOT_ID].name = 'Bot';
-      match.metadata.players[BOT_ID].credentials = getBotCredentials();
-      match.metadata.players[BOT_ID].isConnected = true;
-      await db.setMetadata(matchID, match.metadata);
+  /** Joins a bot to all matches where the bot's side is not connected.
+   * 
+   * TODO inject bots only where it is needed.
+   * 
+   * This should be in line with boardgame.io/src/server/api.ts
+   * path would be '/games/:name/:id/join'.
+   */
+  async function injectBots(db: any) {
+    console.log("Injecting listing matches!");
+    for (let matchID of await db.listMatches()) {
+      console.log(`Found match ${matchID}`);
+      var match = await fetch(db, matchID, {metadata: true});
+      // TODO do not connect a bot to ALL unconnected
+      if (!match.metadata.players[BOT_ID].isConnected) {
+        console.log(`Found empty match!`);
+        match.metadata.players[BOT_ID].name = 'Bot';
+        match.metadata.players[BOT_ID].credentials = getBotCredentials();
+        match.metadata.players[BOT_ID].isConnected = true;
+        await db.setMetadata(matchID, match.metadata);
+      }
     }
   }
+
+  /** This should be in line with boardgame.io/src/server/api.ts */
+  server.router.post('/games/:nameid/create', async (ctx, next) => {
+    // TODO somehow figure out the MatchID of the created match
+    await next();
+    await injectBots(ctx.db);
+  });
+
+  configureTeamsRouter(server.router, teams);
+  server.run(PORT);
 }
-
-/** This should be in line with boardgame.io/src/server/api.ts */
-server.router.post('/games/:nameid/create', async (ctx, next) => {
-  // TODO somehow figure out the MatchID of the created match
-  await next();
-  await injectBots(ctx.db);
-});
-
-configureTeamsRouter(server.router, teams);
-server.run(PORT);
