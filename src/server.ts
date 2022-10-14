@@ -74,7 +74,7 @@ function generateLoginCode() {
 // node: argv[0] vs server.ts: argv[1]
 if (argv[2] == "import") {
   console.info("Importing teams.");
-  console.info("Use a .tsv file (UTF-8 format, no quoted strings, no tab characters)");
+  console.info("  Use a .tsv file (UTF-8 format, no quoted strings, no tab characters)");
   const filename = argv[3];
   const untrimmed_rows = readFileSync(filename, 'utf-8').split('\n');
   const rows = untrimmed_rows;
