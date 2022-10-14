@@ -82,7 +82,7 @@ if (argv[2] == "import") {
   const table = rows.map(row => row.split('\t'));
   const header = table.shift()!;
   const expected_header = ["Teamname", "Category", "Email", "Other", "ID", "Login Code"];
-  if (arraysEqual(header, expected_header)) {
+  if (!arraysEqual(header, expected_header)) {
     console.warn("WARNING: Header not exactly how we defined it. This is not always a problem.");
     console.warn(`Found: ${header.join(', ')}`);
     console.warn(`Expected: ${expected_header.join(', ')}`);
