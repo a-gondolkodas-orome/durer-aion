@@ -108,6 +108,11 @@ if (argv[2] == "import") {
       continue;
     }
 
+    if (teamname === undefined || teamname === "") {
+      console.error(`Empty teamname`);
+      ok = false;
+    }
+
     if (found_teamnames.has(teamname)) {
       console.error('Duplicate team name');
       ok = false;
