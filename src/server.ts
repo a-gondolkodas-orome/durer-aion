@@ -90,6 +90,9 @@ if (argv[2] == "import") {
     console.warn(`Expected: ${expected_header.join(', ')}`);
   }
   var export_table : string[][] = [];
+  var found_teamnames = new Set();
+  var found_ids = new Set();
+  var found_login_codes = new Set();
   for (var row of table) {
     // Trim: Remove possible '\r' characters in windows CRLF
     const [teamname, category, email, other, ...extra_columns] = row.map(column => column.trim());
@@ -98,9 +101,15 @@ if (argv[2] == "import") {
     let login_code = extra_columns[1];
 
     if (category === undefined) {
-      console.warn("Empty row");
       // Do not print more error messages lol
       continue;
+    }
+
+    if (found_teamnames.has(teamname)) {
+      console.error('Duplicate team name');
+      ok = false;
+    } else {
+      found_teamnames.add(teamname);
     }
 
     // TODO hard-coded values
@@ -125,6 +134,13 @@ if (argv[2] == "import") {
       console.error(`  Expected format is usually: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`);
     }
 
+    if (found_ids.has(id)) {
+      console.error('Duplicate ID');
+      ok = false;
+    } else {
+      found_ids.add(id);
+    }
+
     if (login_code === undefined || login_code === "") {
       login_code = generateLoginCode();
     } else {
@@ -132,6 +148,13 @@ if (argv[2] == "import") {
       console.error(`Login Code is not valid for team ${teamname}`);
       console.error(`Found: ${id}`);
       console.error(`Expected: 111-2222-333`);
+    }
+
+    if (found_login_codes.has(id)) {
+      console.error('Duplicate Login Code');
+      ok = false;
+    } else {
+      found_login_codes.add(id);
     }
 
     if (ok) {
