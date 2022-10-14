@@ -3,7 +3,7 @@ import koaBody from 'koa-body';
 import type { Server } from 'boardgame.io';
 import { TeamsRepository } from './db';
 
-export function configureTeamsRouter(router: Router, teams: TeamsRepository) {
+export function configureTeamsRouter(router: any, teams: TeamsRepository) {
   router.get('/teams', koaBody(), async (ctx: any) => {
     const filter_string = ctx.request.query['filter'];
     let filters;
