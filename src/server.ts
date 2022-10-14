@@ -77,8 +77,7 @@ if (argv[2] == "import") {
   console.info("Use a .tsv file (UTF-8 format, no quoted strings, no tab characters)");
   const filename = argv[3];
   const untrimmed_rows = readFileSync(filename, 'utf-8').split('\n');
-  // Remove possible '\r' characters in windows CRLF
-  const rows = untrimmed_rows.map(row => row.trim());
+  const rows = untrimmed_rows;
   const table = rows.map(row => row.split('\t'));
   const header = table.shift()!;
   const expected_header = ["Teamname", "Category", "Email", "Other", "ID", "Login Code"];
@@ -89,7 +88,8 @@ if (argv[2] == "import") {
   }
   var export_table : string[][] = [];
   for (var row of table) {
-    const [teamname, category, email, other, ...extra_columns] = row;
+    // Trim: Remove possible '\r' characters in windows CRLF
+    const [teamname, category, email, other, ...extra_columns] = row.map(column => column.trim());
     let ok = true;
     let id = extra_columns[0];
     let login_code = extra_columns[1];
