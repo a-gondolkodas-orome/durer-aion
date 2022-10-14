@@ -115,7 +115,7 @@ if (argv[2] == "import") {
 
     // TODO hard-coded values
     if (!['C', 'D', 'E'].includes(category)) {
-      console.error(`ERROR: Invalid category for team ${teamname}.`);
+      console.error(`ERROR: Invalid category [${category}] for team ${teamname}.`);
       ok = false;
     }
 
