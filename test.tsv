@@ -1,10 +1,10 @@
 Teamname	Category	Email	Other	ID	Login Code
-OK	C	a@b.com	x		
+OK	C	a@b.com	x
+Empty ID,Login	C	a@b.com	x		
 EmptyRowBelow	C	a@b.com	x		
 
-Filled	C	a@b.com	x	77777777-7777-7777-7777-777777777777 111-2222-111
+Filled	C	a@b.com	x	77777777-7777-7777-7777-777777777777	111-2222-111
 Wrong-category	X	a@b.com	x
-Empty ID,Login	C	a@b.com	x		
 	C	a@b.com	Empty teamname
 bullshit ID	C	a@b.com	x	Bullshit
 bullshit Login	C	a@b.com	x		111-2222-333
