@@ -21,12 +21,13 @@ export class TeamsRepository {
     });
   }
   async insertTeam(
-      { teamname, category, email, other, id, joinCode } :
-      { teamname: string, category: string, email: string, other: string, id: string, joinCode: string}) {
+      { teamname, category, email, other, id, joinCode, credentials } :
+      { teamname: string, category: string, email: string, other: string, id: string, joinCode: string, credentials: string}) {
     return await TeamModel.create({
       id, joinCode, other,
       category,
       email,
+      credentials,
       strategyMatch: {state: "NOT STARTED"},
       relayMatch: {state: "NOT STARTED"},
       teamName: teamname,

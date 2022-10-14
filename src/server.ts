@@ -101,6 +101,7 @@ async function importer(filename: string) {
     let ok = true;
     let id = extra_columns[0];
     let login_code = extra_columns[1];
+    let credentials = extra_columns[2];
 
     if (category === undefined) {
       console.warn('Skipping empty row...');
@@ -165,10 +166,19 @@ async function importer(filename: string) {
       found_login_codes.add(login_code);
     }
 
+    if (credentials === undefined || credentials === "") {
+      credentials = randomUUID();
+    } else if (credentials.match(/^[0-9a-f\-]+$/) === null) {
+      ok = false;
+      console.error(`Credential is not a GUID for team ${teamname}`);
+      console.error(`  Found: ${credentials}`);
+      console.error(`  Expected format is usually: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`);
+    }
+
     if (ok) {
       console.info(`Adding ${teamname} to DB.`);
       try {
-        await teams.insertTeam({teamname, category, email, other, id, joinCode: login_code});
+        await teams.insertTeam({teamname, category, email, other, id, joinCode: login_code, credentials});
       } catch (err) {
         if (err instanceof ValidationError) {
           console.error(`Failed to validate team when adding to DB: ${err}`);
@@ -181,7 +191,7 @@ async function importer(filename: string) {
 
     if (ok) {
       console.info(`Successfully imported team ${teamname}.`);
-      const row_to_export = [teamname, category, email, other, id, login_code];
+      const row_to_export = [teamname, category, email, other, id, login_code, credentials];
       export_table.push(row_to_export);
       successful++;
     } else {
