@@ -93,6 +93,8 @@ if (argv[2] == "import") {
   var found_teamnames = new Set();
   var found_ids = new Set();
   var found_login_codes = new Set();
+  let successful = 0;
+  let failed = 0; // not counting empty rows...
   for (var row of table) {
     // Trim: Remove possible '\r' characters in windows CRLF
     const [teamname, category, email, other, ...extra_columns] = row.map(column => column.trim());
@@ -163,11 +165,15 @@ if (argv[2] == "import") {
       console.info(`Successfully imported team ${teamname}.`);
       const row_to_export = [teamname, category, email, other, id, login_code];
       export_table.push(row_to_export);
+      successful++;
     } else {
       console.error(`Failed to import team ${teamname}. See reasons above.`);
       console.error(''); // separate errors
+      failed++;
     }
   }
+  console.info("Summary:");
+  console.info(`Successfully imported ${successful} teams, failed ${failed} times.`);
   // TODO Move the file
   export_table.unshift(expected_header);
   writeFileSync(`export-${filename}`, export_table.map(row => row.join('\t')).join('\n'), { 'encoding': 'utf-8' });
