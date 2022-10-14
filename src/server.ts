@@ -109,7 +109,7 @@ if (argv[2] == "import") {
 
     if (other === undefined || other === "") {
       console.warn(`"Other" field not set for team ${teamname}`);
-      console.warn(`This should include any info which could help identify a team. (team name, contestant names, school, email addresses, etc.)`);
+      console.warn(`  The other field should include any info which could help identify a team. (team name, contestant names, school, email addresses, etc.)`);
     }
 
     if (id === undefined || id === "") {
