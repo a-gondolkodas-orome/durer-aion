@@ -12,7 +12,7 @@ import { strategy as SuperstitiousCountingStrategy } from './games/superstitious
 import { strategy as ChessBishopsStrategy } from './games/chess-bishops/strategy';
 import { configureTeamsRouter } from './server/router';
 import { TeamsRepository } from './server/db';
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync, renameSync, writeFileSync } from 'fs';
 import { randomInt, randomUUID } from 'crypto';
 import { ValidationError } from 'sequelize';
 
@@ -204,7 +204,8 @@ async function importer(filename: string) {
   console.info(`Successfully imported ${successful} teams, failed ${failed} times.`);
   // TODO Move the file
   export_table.unshift(expected_header);
-  writeFileSync(`export-${filename}`, export_table.map(row => row.join('\t')).join('\n'), { 'encoding': 'utf-8' });
+  renameSync(`${filename}`, `${filename}.bak`);
+  writeFileSync(`${filename}`, export_table.map(row => row.join('\t')).join('\n'), { 'encoding': 'utf-8' });
 
 }
 // node: argv[0] vs server.ts: argv[1]
