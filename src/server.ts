@@ -14,6 +14,7 @@ import { configureTeamsRouter } from './server/router';
 import { TeamsRepository } from './server/db';
 import { readFileSync, writeFileSync } from 'fs';
 import { randomInt, randomUUID } from 'crypto';
+import { ValidationError } from 'sequelize';
 
 function getDb() {
   if (env.DATABASE_URL) {
@@ -166,7 +167,20 @@ if (argv[2] == "import") {
     }
 
     if (ok) {
-      // TODO access DB
+      console.info(`Adding ${teamname} to DB.`);
+      try {
+        teams.insertTeam({teamname, category, email, other, id, joinCode: login_code});
+      } catch (err) {
+        if (err instanceof ValidationError) {
+          console.error(`Failed to validate team when adding to DB: ${err}`);
+          ok = false;
+        } else {
+          throw err;
+        }
+      }
+    }
+
+    if (ok) {
       console.info(`Successfully imported team ${teamname}.`);
       const row_to_export = [teamname, category, email, other, id, login_code];
       export_table.push(row_to_export);

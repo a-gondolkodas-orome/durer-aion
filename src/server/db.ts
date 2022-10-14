@@ -15,9 +15,23 @@ export class TeamsRepository {
     this.sequelize.sync();
   }
   async fetch(filter: string[]) : Promise<TeamModel[]> {
-    
     return await TeamModel.findAll({ where:
       Sequelize.and(...filter.map(part => ({'other': part}))),
     });
+  }
+  async insertTeam(
+      { teamname, category, email, other, id, joinCode } :
+      { teamname: string, category: string, email: string, other: string, id: string, joinCode: string}) {
+    let team = new TeamModel();
+//    team.createdAt = moment.now()
+    team.id = id;
+    team.joinCode = joinCode;
+    team.other = other;
+//    team.category = category;
+    team.strategyMatch = {state: "NOT STARTED"};
+    team.relayMatch = {state: "NOT STARTED"};
+    team.teamName = teamname;
+    team.pageState = 'INIT';
+    await team.save();
   }
 }
