@@ -73,7 +73,7 @@ if (argv[2] == "import") {
    * This should be in line with boardgame.io/src/server/api.ts
    * path would be '/games/:name/:id/join'.
    */
-  async function injectBots(db: any) {
+  const injectBots = async (db: any) => {
     console.log("Injecting listing matches!");
     for (let matchID of await db.listMatches()) {
       console.log(`Found match ${matchID}`);
