@@ -147,7 +147,7 @@ if (argv[2] == "import") {
       ok = false;
       console.error(`Login Code is not valid for team ${teamname}`);
       console.error(`Found: ${id}`);
-      console.error(`Expected: 111-2222-333`);
+      console.error(`Expected format: 111-2222-333`);
     }
 
     if (found_login_codes.has(id)) {
