@@ -78,8 +78,6 @@ export async function importer(teams: TeamsRepository, filename: string) {
       ok = false;
     }
 
-    // TODO check email
-
     if (other === undefined || other === "") {
       console.warn(`"Other" field not set for team ${teamname}`);
       console.warn(`  The other field should include any info which could help identify a team. (team name, contestant names, school, email addresses, etc.)`);
