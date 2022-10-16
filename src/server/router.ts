@@ -4,7 +4,7 @@ import type { Server } from 'boardgame.io';
 import { TeamsRepository } from './db';
 
 export function configureTeamsRouter(router: any, teams: TeamsRepository) {
-  router.get('/teams', koaBody(), async (ctx: any) => {
+  router.get('/teams/admin', koaBody(), async (ctx: any) => {
     const filter_string = ctx.request.query['filter'];
     let filters;
     if (filter_string === undefined) {

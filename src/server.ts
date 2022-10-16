@@ -15,6 +15,10 @@ import { TeamsRepository } from './server/db';
 import { importer } from './server/team_import';
 import { StorageAPI } from 'boardgame.io';
 
+import auth from 'koa-basic-auth';
+import mount from 'koa-mount';
+
+
 function getDb() {
   if (env.DATABASE_URL) {
     const CONNECTION_STRING = env.DATABASE_URL;
@@ -96,6 +100,9 @@ if (argv[2] == "import") {
     console.log(`Injecting bot in :${ctx.response.body.matchID}`)
     await injectBot(ctx.db,ctx.response.body.matchID);
   });
+
+  server.app.use(mount('/teams/admin',auth({name:'admin',pass:'hellodankness'})));
+  
 
   configureTeamsRouter(server.router, teams);
   server.run(PORT);
