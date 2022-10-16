@@ -1,6 +1,6 @@
 // Demultiplexes to real transport or bots
 
-import type { Game, State } from "boardgame.io";
+import type { Game, Server, State, StorageAPI } from "boardgame.io";
 import { getFilterPlayerView } from "boardgame.io/internal";
 import { Master } from "boardgame.io/master";
 import { SocketIO } from "boardgame.io/server";
@@ -68,14 +68,23 @@ const TransportAPI = (
 };
 
 /** Copied from boardgame.io/dist/src/master/master.ts */
-export async function fetch(db: any, matchID: string, partial: Partial<{state: boolean, metadata: boolean}>) {
+export async function fetch(db: StorageAPI.Async | StorageAPI.Sync, matchID: string, partial: Partial<{state: boolean, metadata: boolean}>) {
   let state;
+  let metadata:Server.MatchData | undefined;
   if (isSynchronous(db)) {
-    ({ state } = db.fetch(matchID, partial));
+    ({ state,metadata } = db.fetch(matchID, partial)); //TODO fix type
   } else {
-    ({ state } = await db.fetch(matchID, partial));
+    ({ state,metadata } = await db.fetch(matchID, partial));
+    console.log(metadata);
   }
-  return state;
+  //TODO fix this awafull code, probably by changing interface, which is not ideal
+  if(state && metadata)
+    return {state,metadata}
+  else if(state)
+    return {state};
+  else if(metadata)
+    return {metadata};
+  throw new Error('Invalid parameter call for fetch');
 }
 
 /// Bot's playerID is '1', because the gameWrapper uses player '0' for the human player. 

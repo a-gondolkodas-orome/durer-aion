@@ -5,7 +5,7 @@ import { PostgresStore } from 'bgio-postgres';
 import { argv, env, exit } from 'process';
 import { gameWrapper } from './common/gamewrapper';
 import { BOT_ID, fetch, SocketIOButBotMoves } from './socketio_botmoves';
-import { Server, SocketIO } from 'boardgame.io/server';
+import { Origins, Server, SocketIO } from 'boardgame.io/server';
 import botWrapper from './common/botwrapper';
 import { strategy as TicTacToeStrategy } from './games/tictactoe/strategy';
 import { strategy as SuperstitiousCountingStrategy } from './games/superstitious-counting/strategy';
@@ -13,6 +13,7 @@ import { strategy as ChessBishopsStrategy } from './games/chess-bishops/strategy
 import { configureTeamsRouter } from './server/router';
 import { TeamsRepository } from './server/db';
 import { importer } from './server/team_import';
+import { StorageAPI } from 'boardgame.io';
 
 function getDb() {
   if (env.DATABASE_URL) {
@@ -61,39 +62,39 @@ if (argv[2] == "import") {
       { https: undefined },
       { "tic-tac-toe": bots[0], "superstitious-counting": bots[1], "chess-bishops": bots[2] },
     ),
+    origins:[
+      'https:\\www.verseny.durerinfo.hu',
+      Origins.LOCALHOST_IN_DEVELOPMENT
+    ],
     db,
   });
 
   const PORT = parseInt(env.PORT || "8000");
 
-  /** Joins a bot to all matches where the bot's side is not connected.
-   * 
-   * TODO inject bots only where it is needed.
+  /** Joins a bot to a match where the bot's side is not connected.
+   * @param db: Database context
+   * @param matchID: match id to connect a bot to
    * 
    * This should be in line with boardgame.io/src/server/api.ts
    * path would be '/games/:name/:id/join'.
    */
-  const injectBots = async (db: any) => {
-    console.log("Injecting listing matches!");
-    for (let matchID of await db.listMatches()) {
-      console.log(`Found match ${matchID}`);
-      var match = await fetch(db, matchID, {metadata: true});
-      // TODO do not connect a bot to ALL unconnected
+  const injectBot = async (db: StorageAPI.Async | StorageAPI.Sync,matchId:string) =>{
+      let match = await fetch(db, matchId, {metadata: true});
       if (!match.metadata.players[BOT_ID].isConnected) {
-        console.log(`Found empty match!`);
+        console.log(`Match is indeed empty, and thus in need for a bot!`);
         match.metadata.players[BOT_ID].name = 'Bot';
         match.metadata.players[BOT_ID].credentials = getBotCredentials();
         match.metadata.players[BOT_ID].isConnected = true;
-        await db.setMetadata(matchID, match.metadata);
+        await db.setMetadata(matchId, match.metadata);
       }
-    }
   }
 
   /** This should be in line with boardgame.io/src/server/api.ts */
   server.router.post('/games/:nameid/create', async (ctx, next) => {
-    // TODO somehow figure out the MatchID of the created match
     await next();
-    await injectBots(ctx.db);
+    //Figured out where match id is stored
+    console.log(`Injecting bot in :${ctx.response.body.matchID}`)
+    await injectBot(ctx.db,ctx.response.body.matchID);
   });
 
   configureTeamsRouter(server.router, teams);
