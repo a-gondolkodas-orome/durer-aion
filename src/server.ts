@@ -44,11 +44,6 @@ const bot_factories : any = [
   botWrapper(ChessBishopsStrategy),
 ];
 
-const bots = games.map((game, idx) => new (bot_factories[idx])({
-  enumerate: game.ai?.enumerate,
-  seed: game.seed,
-}));
-
 let { db, teams } = getDb();
 
 // node: argv[0] vs server.ts: argv[1]
@@ -56,6 +51,11 @@ if (argv[2] == "import") {
   const filename = argv[3];
   importer(teams, filename).then(() => exit(0));
 } else {
+  const bots = games.map((game, idx) => new (bot_factories[idx])({
+    enumerate: game.ai?.enumerate,
+    seed: game.seed,
+  }));
+  
   const server = Server({
     games: games,
     transport: new SocketIOButBotMoves(

@@ -70,20 +70,17 @@ const TransportAPI = (
 /** Copied from boardgame.io/dist/src/master/master.ts */
 export async function fetch(db: StorageAPI.Async | StorageAPI.Sync, matchID: string, partial: Partial<{state: boolean, metadata: boolean}>) {
   let state;
-  let metadata:Server.MatchData | undefined;
+  let metadata:Server.MatchData;
   if (isSynchronous(db)) {
-    ({ state,metadata } = db.fetch(matchID, partial)); //TODO fix type
+    //({ state,metadata } = db.fetch(matchID, partial)); //TODO fix type
+    throw new Error("FIX typing error!!!!!")
   } else {
     ({ state,metadata } = await db.fetch(matchID, partial));
     console.log(metadata);
   }
-  //TODO fix this awafull code, probably by changing interface, which is not ideal
-  if(state && metadata)
+  //TODO fix this awfull code, probably by changing interface, which is not ideal
+  if(state || metadata)
     return {state,metadata}
-  else if(state)
-    return {state};
-  else if(metadata)
-    return {metadata};
   throw new Error('Invalid parameter call for fetch');
 }
 
@@ -137,7 +134,7 @@ export class SocketIOButBotMoves extends SocketIO {
               // Do not react to bot's turn
               return;
             }
-            const state = await fetch(app.context.db, matchID, {state: true});
+            const {state} = await fetch(app.context.db, matchID, {state: true});
             if (state.ctx.phase !== 'play' || currentPlayer(state.ctx) !== BOT_ID) {
               // Not a real action, possibly a failed move.
               return;
