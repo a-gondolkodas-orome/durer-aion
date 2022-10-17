@@ -17,12 +17,33 @@ export function configureTeamsRouter(router: any, teams: TeamsRepository) {
   });
 
   router.get('/team/join/:token', koaBody(), async (ctx: any) => {
-    console.log(ctx.params);
     const connect_token: string = ctx.params.token ?? 'no-token';
-   const team = await teams.getTeam({'joinCode':connect_token});
-   ctx.body = team?.credentials;
-   if (team == null)
-    ctx.throw(404,"Team not found!")
+    const team = await teams.getTeam({ joinCode: connect_token });
+    ctx.body = team?.credentials;
+    if (team == null)
+      ctx.throw(404, "Team not found!")
   });
 
+
+  router.get('/team/:GUID', koaBody(), async (ctx: any) => {
+    const GUID = ctx.params.GUID ?? ctx.throw(400)
+    const team = await teams.getTeam({id:GUID}) ?? ctx.throw(404, `Team with {id:${GUID}} not found.`)
+    return team;
+  });
+
+  router.get('/team/:GUID/relay/play', koaBody(), async (ctx:Server.AppCtx) => {
+    ctx.throw(501, "Not implemented yet.");
+  })
+
+  router.get('/team/:GUID/strategy/play', koaBody(), async (ctx:Server.AppCtx) => {
+    ctx.throw(501, "Not implemented yet.");
+  })
+
+  router.get('/team/:GUID/relay/result', koaBody(), async (ctx:Server.AppCtx) => {
+    ctx.throw(501, "Not implemented yet.");
+  })
+
+  router.get('/team/:GUID/strategy/result', koaBody(), async (ctx:Server.AppCtx) => {
+    ctx.throw(501, "Not implemented yet.");
+  })
 }

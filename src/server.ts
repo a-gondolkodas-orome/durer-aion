@@ -102,6 +102,7 @@ if (argv[2] == "import") {
 
   server.app.use(mount('/teams/admin',auth({name:'admin',pass:'hellodankness'})));
   
+  //TODO regex mount protection for Boardgame.io endpoints
 
   configureTeamsRouter(server.router, teams);
   server.run(PORT);
