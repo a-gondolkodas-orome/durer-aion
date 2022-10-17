@@ -16,6 +16,7 @@ import { Client as Game15OnlineDClient, ClientWithBot as Game15OnlineDWithBotCli
 import { Client as Game15OnlineEClient, ClientWithBot as Game15OnlineEWithBotClient } from './games/15oe/main';
 import { Client as TenCoinsClient, ClientWithBot as TenCoinsWithBotClient} from './games/ten-coins/main';
 import Lobby from './lobby';
+import NotFound from './pages/NotFound';
 
 const root = document.getElementById('root');
 render(
@@ -45,6 +46,7 @@ render(
         <Route path="/game-15-online-e-with-bot" element={<Game15OnlineEWithBotClient />} />
         <Route path="/ten-coins" element={<TenCoinsClient />} />
         <Route path="/ten-coins-with-bot" element={<TenCoinsWithBotClient />} />
+        <Route path='*' element={<NotFound/>}></Route>
       </Routes>
     </BrowserRouter>
   </React.StrictMode>,
