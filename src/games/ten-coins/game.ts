@@ -3,14 +3,23 @@ import { GameType } from '../../common/types';
 
 export interface MyGameState {
   coins: Array<number>;
+  milisecondsRemaining: number;
+  start: Date;
+  end: Date;
 }
+const lengthOfCompetition = 30*60; // seconds
 
 export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<MyGameState>)
   name: "ten-coins",
-  setup: () => ({ coins: [1,1,1,1,1,1,1,1,1,1] }),
+  setup: () => ({
+    coins: [1,1,1,1,1,1,1,1,1,1],
+    milisecondsRemaining: 1000*lengthOfCompetition,
+    start: new Date(),
+    end: new Date(Date.now()+1000*lengthOfCompetition),
+  }),
 
   moves: {
-    changeCoins: ({ G, ctx, playerID }, K: number, L: number) => {
+    changeCoins: ({ G, ctx, playerID, events }, K: number, L: number) => {
       if (K < L || !G.coins.includes(K)) {
         return INVALID_MOVE;
       }
@@ -21,23 +30,42 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<
       if(G.coins.every(c => c == firstCoin)){
         G.winner = ctx.currentPlayer === "0" ? "0" : "1";
       }
-      
-      /*let winner = getWinner();
-      if (winner === "0" || winner === "1") {
-        G.winner = winner;
-        if(winner === "0"){
-          G.winningStreak = G.winningStreak + 1;
-          if(G.winningStreak >= 2){
-            G.points = 12-G.numberOfLoss*2; // TODO
-            events.endGame();
+      if(G.winner === "0"){
+        G.winningStreak = G.winningStreak + 1;
+        if(G.winningStreak >= 2){
+          switch(G.numberOfLoss){
+            case 0:
+              G.points = 12;
+              break;
+            case 1:
+              G.points = 9;
+              break;
+            case 2:
+              G.points = 6;
+              break;
+            case 3:
+              G.points = 4;
+              break;
+            case 4:
+              G.points = 3;
+              break;
+            default:
+              G.points = 2;
+              break;
           }
-        } else {
-          G.winningStreak = 0;
-          G.numberOfLoss += 1;
+          events.endGame();
         }
-      }*/
-
-
+      } else if (G.winner === "1") {
+        G.winningStreak = 0;
+        G.numberOfLoss += 1;
+      }
+      events.endTurn();
+    },
+    getTime({ G, ctx, playerID, events }){
+      if (playerID !== "0") {
+        return INVALID_MOVE;
+      }
+      G.milisecondsRemaining = G.end.getTime() - new Date().getTime();
     }
   },
 
@@ -56,4 +84,28 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<
     }
     return moves
   },
+
+  turn: {
+    onMove: ({G, ctx, playerID, events }) => {
+      console.log("onMove")
+      if(playerID === "0") {
+        let currentTime = new Date();
+        if(currentTime.getTime() - G.end.getTime() > 1000*10){
+          // Do not accept any answer if the time is over since more than 10 seconds
+          events.endGame();
+        }
+      }
+    },
+    onEnd: ({G, ctx, playerID, events }) => {
+      console.log("onEnd")
+      if(playerID === "1") {
+        let currentTime = new Date();
+        if(currentTime.getTime() - G.end.getTime() <= 0){
+          // Do not accept any answer if the time is over
+          events.endGame();
+        }
+      }
+    }
+  },
+
 };

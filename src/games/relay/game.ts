@@ -81,17 +81,16 @@ export const GameRelay: Game<MyGameState> = {
       events.endGame();
     },
     getTime({ G, ctx, playerID, events }){
-      console.log("asd")
       if (playerID !== "0") {
         return INVALID_MOVE;
       }
+      G.milisecondsRemaining = G.end.getTime() - new Date().getTime();
     }
   },
   turn: {
     onMove: ({G, ctx, playerID, events }) => {
       console.log("onMove")
-      G.milisecondsRemaining = G.end.getTime() - new Date().getTime();
-      if (playerID === "0") {
+      if(playerID === "0") {
         let currentTime = new Date();
         if(currentTime.getTime() - G.end.getTime() > 1000*10){
           // Do not accept any answer if the time is over since more than 10 seconds
@@ -101,9 +100,9 @@ export const GameRelay: Game<MyGameState> = {
     },
     onEnd: ({G, ctx, playerID, events }) => {
       console.log("onEnd")
-      G.milisecondsRemaining = G.end.getTime() - new Date().getTime();
-      if (playerID === "1") {
-        if(G.milisecondsRemaining <= 0){
+      if(playerID === "1") {
+        let currentTime = new Date();
+        if(currentTime.getTime() - G.end.getTime() <= 0){
           // Do not accept any answer if the time is over
           events.endGame();
         }

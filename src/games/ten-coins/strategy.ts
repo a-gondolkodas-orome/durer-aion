@@ -65,19 +65,20 @@ function startingPosition({ G, ctx}: any, category: "C" | "D" | "E"): {coins: Ar
       return {coins: getRandomNumbers(numbers, 10-numbers.length)};
     }
     if (G.numberOfTries === 1) {
-      return {coins: [1,1,1,2,2,2,3,3,3,3]};
-    } else if (G.numberOfTries === 2) {
       return {coins: [1,1,2,2,2,2,3,3,4,4]};
+    } else if (G.numberOfTries === 2) {
+      return {coins: [1,1,1,2,2,2,3,3,3,3]};
     } else if (G.numberOfTries%2 === 1) {
-      let evenNumber = 2;
+      let numbers = [1,2,3,4];
       if (G.numberOfTries%4 === 3) {
-        evenNumber = 4;
+        numbers = [1,3,4];
       }
-      return {coins: getRandomNumbers([1,3,evenNumber], 7)};
+      return {coins: getRandomNumbers(numbers, 10-numbers.length)};
+    } else {
+      return {coins: getRandomNumbers([1,2,3], 7)};
     }
-    return {coins: getRandomNumbers([1,2,3,4], 6)};
   } else if (category === "D" || 'E') {
-    // C Category
+    // D,E Category
     if (G.difficulty === "test") {
       let numbers = [1,2,3,4,5];
       let rndNumber = Math.floor(Math.random()*3);
