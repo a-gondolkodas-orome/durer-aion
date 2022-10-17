@@ -1,4 +1,4 @@
-Teamname	Category	Email	Other	ID	Login Code
+Teamname	Category	Email	Other	ID	Login Code	Credentials
 OK	C	a@b.com	x
 Empty ID,Login	C	a@b.com	x			
 EmptyRowBelow	C	a@b.com	x

@@ -13,6 +13,7 @@ services:
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@postgres/postgres
       - PORT=8000
+      - BOT_CREDENTIALS=botbotbot
     ports:
       - 8000:8000
     volumes:
