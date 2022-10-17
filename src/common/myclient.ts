@@ -1,5 +1,5 @@
 import { Client } from 'boardgame.io/react';
-import { Local } from 'boardgame.io/multiplayer';
+import { Local, SocketIO } from 'boardgame.io/multiplayer';
 import botWrapper from './botwrapper';
 import { gameWrapper } from './gamewrapper';
 import { boardWrapper } from './boardwrapper';
