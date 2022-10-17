@@ -14,7 +14,9 @@ import { Client as Game14OnlineEClient, ClientWithBot as Game14OnlineEWithBotCli
 import { Client as Game15OnlineCClient, ClientWithBot as Game15OnlineCWithBotClient } from './games/15oc/main';
 import { Client as Game15OnlineDClient, ClientWithBot as Game15OnlineDWithBotClient } from './games/15od/main';
 import { Client as Game15OnlineEClient, ClientWithBot as Game15OnlineEWithBotClient } from './games/15oe/main';
-import { Client as TenCoinsClient, ClientWithBot as TenCoinsWithBotClient} from './games/ten-coins/main';
+import { Client_C as TenCoinsClient_C, ClientWithBot_C as TenCoinsWithBotClient_C} from './games/ten-coins/main';
+import { Client_D as TenCoinsClient_D, ClientWithBot_D as TenCoinsWithBotClient_D} from './games/ten-coins/main';
+import { Client_E as TenCoinsClient_E, ClientWithBot_E as TenCoinsWithBotClient_E} from './games/ten-coins/main';
 import Lobby from './lobby';
 
 const root = document.getElementById('root');
@@ -43,8 +45,12 @@ render(
         <Route path="/game-15-online-d-with-bot" element={<Game15OnlineDWithBotClient />} />
         <Route path="/game-15-online-e" element={<Game15OnlineEClient />} />
         <Route path="/game-15-online-e-with-bot" element={<Game15OnlineEWithBotClient />} />
-        <Route path="/ten-coins" element={<TenCoinsClient />} />
-        <Route path="/ten-coins-with-bot" element={<TenCoinsWithBotClient />} />
+        <Route path="/ten-coins-c" element={<TenCoinsClient_C />} />
+        <Route path="/ten-coins-with-bot-c" element={<TenCoinsWithBotClient_C />} />
+        <Route path="/ten-coins-d" element={<TenCoinsClient_D />} />
+        <Route path="/ten-coins-with-bot-d" element={<TenCoinsWithBotClient_D />} />
+        <Route path="/ten-coins-e" element={<TenCoinsClient_E />} />
+        <Route path="/ten-coins-with-bot-e" element={<TenCoinsWithBotClient_E />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>,

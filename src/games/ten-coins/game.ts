@@ -7,7 +7,7 @@ export interface MyGameState {
 
 export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<MyGameState>)
   name: "ten-coins",
-  setup: () => ({ coins: [4,4,4,4,4,4,4,4,4,4] }),
+  setup: () => ({ coins: [1,1,1,1,1,1,1,1,1,1] }),
 
   moves: {
     changeCoins: ({ G, ctx, playerID }, K: number, L: number) => {
@@ -21,12 +21,25 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<
       if(G.coins.every(c => c == firstCoin)){
         G.winner = ctx.currentPlayer === "0" ? "0" : "1";
       }
+      
+      /*let winner = getWinner();
+      if (winner === "0" || winner === "1") {
+        G.winner = winner;
+        if(winner === "0"){
+          G.winningStreak = G.winningStreak + 1;
+          if(G.winningStreak >= 2){
+            G.points = 12-G.numberOfLoss*2; // TODO
+            events.endGame();
+          }
+        } else {
+          G.winningStreak = 0;
+          G.numberOfLoss += 1;
+        }
+      }*/
+
+
     }
   },
-
-  startingPosition: ({ G, ctx, playerID }) => ({
-    coins: [5,5,5,4,4,4,4,3,3,2] // TODO: Random
-  }),
 
   possibleMoves: (G, ctx, playerID) => {
     let existingCoins = [false,false,false,false,false];

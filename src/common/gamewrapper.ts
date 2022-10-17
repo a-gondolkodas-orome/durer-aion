@@ -14,16 +14,20 @@ function chooseNewGameType(game: any) { // TODO: type
       winner: null,
       numberOfTries: G.numberOfTries + (difficulty === "live" ? 1 : 0),
     }
-    let startingPosition = game.setup();
-    if ("startingPosition" in game) {
-      startingPosition = game.startingPosition({ G: newG, ctx, playerID, random })
-    }
     return {
       ...newG,
-      ...startingPosition,
     }
   };
     // In case of no difficulty, it is undefined (which is not null)
+}
+
+function setStartingPosition(game: any) {
+  return ({ G, ctx, playerID, random }: any, startingPosition: any) => {
+    return {
+      ...G,
+      ...startingPosition,
+    }
+  };
 }
 
 
@@ -39,10 +43,14 @@ export function gameWrapper(game: any): Game<any> { // TODO: solve types
     maxPlayers: 2,
     phases: {
       startNewGame: {
-        moves: { chooseNewGameType: chooseNewGameType(game) },
-        endIf: ({ G, ctx, playerID }) => { return G.difficulty !== null && G.winner === null },
+        moves: { chooseNewGameType: chooseNewGameType(game), setStartingPosition: setStartingPosition(game)  },
+        //endIf: ({ G, ctx, playerID }) => { return G.difficulty !== null && G.winner === null },
         next: "chooseRole",
-        turn: { order: TurnOrder.RESET },
+        turn: {
+          order: TurnOrder.ONCE,
+          minMoves: 1,
+          maxMoves: 1
+        },
         start: true,
       },
       chooseRole: {
