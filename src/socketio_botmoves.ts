@@ -1,12 +1,10 @@
 // Demultiplexes to real transport or bots
 
-import type { Game, Server, State, StorageAPI } from "boardgame.io";
+import type { Game, State, StorageAPI } from "boardgame.io";
 import { getFilterPlayerView } from "boardgame.io/internal";
 import { Master } from "boardgame.io/master";
 import { SocketIO } from "boardgame.io/server";
-import botWrapper from "./common/botwrapper";
 import { currentPlayer } from "./common/types";
-import { strategy } from "./games/tictactoe/strategy";
 import { getBotCredentials } from "./server";
 
 /** Copied from boardgame.io/dist/src/client/transport/local.ts */
