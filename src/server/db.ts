@@ -20,6 +20,12 @@ export class TeamsRepository {
       Sequelize.and(...filter.map(part => ({'other': { [Op.like]: `%${part}%`} }))),
     });
   }
+
+  async getTeam(joinCode: string) : Promise<TeamModel|null>{
+    return await TeamModel.findOne( {where:
+      ({joinCode:joinCode,})
+    });
+  }
   async insertTeam(
       { teamname, category, email, other, id, joinCode, credentials } :
       { teamname: string, category: string, email: string, other: string, id: string, joinCode: string, credentials: string}) {
