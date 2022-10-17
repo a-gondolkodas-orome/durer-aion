@@ -68,7 +68,7 @@ const TransportAPI = (
 };
 
 /** Copied from boardgame.io/dist/src/master/master.ts */
-export async function fetch(db: StorageAPI.Async | StorageAPI.Sync, matchID: string, partial: Partial<{state: boolean, metadata: boolean}>) {
+export async function fetch(db: StorageAPI.Async | StorageAPI.Sync, matchID: string, partial: Partial<{ state: boolean, metadata: boolean, logs: boolean, initialState: boolean }>) {
   return isSynchronous(db)
       ? db.fetch(matchID, partial)
       : await db.fetch(matchID, partial);
