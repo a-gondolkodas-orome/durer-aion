@@ -100,7 +100,7 @@ if (argv[2] == "import") {
     await injectBot(ctx.db,ctx.response.body.matchID);
   });
 
-  server.app.use(mount('/teams/admin',auth({name:'admin',pass:'hellodankness'})));
+  server.app.use(mount('/team/admin',auth({name:'admin',pass:'hellodankness'})));
   
 
   configureTeamsRouter(server.router, teams);
