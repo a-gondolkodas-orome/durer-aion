@@ -19,9 +19,10 @@ export function configureTeamsRouter(router: any, teams: TeamsRepository) {
   router.get('/team/join/:token', koaBody(), async (ctx: any) => {
     console.log(ctx.params);
     const connect_token: string = ctx.params.token ?? 'no-token';
-   const team = await teams.getTeam(connect_token);
+   const team = await teams.getTeam({'joinCode':connect_token});
    ctx.body = team?.credentials;
    if (team == null)
     ctx.throw(404,"Team not found!")
   });
+
 }

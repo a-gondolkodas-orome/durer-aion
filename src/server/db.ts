@@ -1,6 +1,6 @@
 import type { PostgresStore } from 'bgio-postgres';
 import { teamAttributes, TeamModel } from './entities/model';
-import { Sequelize, Op } from 'sequelize';
+import { Sequelize, Op, WhereOptions } from 'sequelize';
 
 export class TeamsRepository {
   sequelize: Sequelize;
@@ -21,9 +21,9 @@ export class TeamsRepository {
     });
   }
 
-  async getTeam(joinCode: string) : Promise<TeamModel|null>{
+  async getTeam(searchCondition: WhereOptions<Pick<TeamModel, "joinCode" | "credentials">>) : Promise<TeamModel|null>{
     return await TeamModel.findOne( {where:
-      ({joinCode:joinCode,})
+      (searchCondition)
     });
   }
   async insertTeam(
