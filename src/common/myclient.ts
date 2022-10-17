@@ -27,3 +27,11 @@ export function MyClientWithBot(game: any, board: any, strategy: any, descriptio
     //debug: { impl: Debug },
   })
 }
+
+export function MyOnlineClient(game: any, board: any, description: string) {
+  return Client({
+    board: boardWrapper(board, description),
+    game: gameWrapper(game),
+    multiplayer: SocketIO(),
+  });
+}
