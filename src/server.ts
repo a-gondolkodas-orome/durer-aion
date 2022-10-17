@@ -5,7 +5,7 @@ import { PostgresStore } from 'bgio-postgres';
 import { argv, env, exit } from 'process';
 import { gameWrapper } from './common/gamewrapper';
 import { BOT_ID, fetch, SocketIOButBotMoves } from './socketio_botmoves';
-import { Origins, Server, SocketIO } from 'boardgame.io/server';
+import { Server } from 'boardgame.io/server';
 import botWrapper from './common/botwrapper';
 import { strategy as TicTacToeStrategy } from './games/tictactoe/strategy';
 import { strategy as SuperstitiousCountingStrategy } from './games/superstitious-counting/strategy';
