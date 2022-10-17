@@ -69,19 +69,9 @@ const TransportAPI = (
 
 /** Copied from boardgame.io/dist/src/master/master.ts */
 export async function fetch(db: StorageAPI.Async | StorageAPI.Sync, matchID: string, partial: Partial<{state: boolean, metadata: boolean}>) {
-  let state;
-  let metadata:Server.MatchData;
-  if (isSynchronous(db)) {
-    //({ state,metadata } = db.fetch(matchID, partial)); //TODO fix type
-    throw new Error("FIX typing error!!!!!")
-  } else {
-    ({ state,metadata } = await db.fetch(matchID, partial));
-    console.log(metadata);
-  }
-  //TODO fix this awfull code, probably by changing interface, which is not ideal
-  if(state || metadata)
-    return {state,metadata}
-  throw new Error('Invalid parameter call for fetch');
+  return isSynchronous(db)
+      ? db.fetch(matchID, partial)
+      : await db.fetch(matchID, partial);
 }
 
 /// Bot's playerID is '1', because the gameWrapper uses player '0' for the human player. 
