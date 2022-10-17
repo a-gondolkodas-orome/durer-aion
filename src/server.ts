@@ -33,7 +33,10 @@ function getDb() {
 }
 
 export function getBotCredentials() {
-  return env.BOT_CREDENTIALS || "botbotbot";
+  if (!env.BOT_CREDENTIALS) {
+    throw 'No BOT_CREDENTIALS supplied! Do set it in the environment';
+  }
+  return env.BOT_CREDENTIALS;
 }
 
 const games = [
@@ -66,10 +69,6 @@ if (argv[2] == "import") {
       { https: undefined },
       { "tic-tac-toe": bots[0], "superstitious-counting": bots[1], "chess-bishops": bots[2] },
     ),
-    origins:[
-      'https:\\www.verseny.durerinfo.hu',
-      Origins.LOCALHOST_IN_DEVELOPMENT
-    ],
     db,
   });
 
