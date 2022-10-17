@@ -33,7 +33,7 @@ export async function importer(teams: TeamsRepository, filename: string) {
   }
   const table = rows.map(row => row.split('\t'));
   const header = table.shift()!;
-  const expected_header = ["Teamname", "Category", "Email", "Other", "ID", "Login Code"];
+  const expected_header = ["Teamname", "Category", "Email", "Other", "ID", "Login Code", "Credentials"];
   if (!arraysEqual(header, expected_header)) {
     console.warn("WARNING: Header not exactly how we defined it. This is not always a problem.");
     console.warn(`Found: ${header.join(', ')}`);
