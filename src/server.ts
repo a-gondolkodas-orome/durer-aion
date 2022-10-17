@@ -39,6 +39,17 @@ export function getBotCredentials() {
   return env.BOT_CREDENTIALS;
 }
 
+getBotCredentials(); // give love if no creds are supplied
+
+export function getAdminCredentials() {
+  if (!env.ADMIN_CREDENTIALS) {
+    throw 'No ADMIN_CREDENTIALS supplied! Do set it in the environment';
+  }
+  return env.ADMIN_CREDENTIALS;
+}
+
+getAdminCredentials(); // give love if no creds are supplied
+
 const games = [
   gameWrapper(TicTacToeGame),
   gameWrapper(SuperstitiousCountingGame),
@@ -100,7 +111,7 @@ if (argv[2] == "import") {
     await injectBot(ctx.db,ctx.response.body.matchID);
   });
 
-  server.app.use(mount('/team/admin',auth({name:'admin',pass:'hellodankness'})));
+  server.app.use(mount('/team/admin',auth({name:'admin',pass:getAdminCredentials()})));
   
 
   configureTeamsRouter(server.router, teams);
