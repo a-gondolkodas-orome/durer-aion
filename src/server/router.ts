@@ -45,6 +45,43 @@ async function startGame(
 };
 
 export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: TeamsRepository, games: Game<any, Record<string, unknown>, any>[]) {
+  /**
+   * Get data about a specific match.
+   *
+   * @param {string} name - The name of the game.
+   * @param {string} id - The ID of the match.
+   * @return - A match object.
+   */
+   router.get('/team/admin/:id/logs', async (ctx) => {
+    // TODO authorize!!
+    const matchID = ctx.params.id;
+    const { log } = await (ctx.db as StorageAPI.Async).fetch(matchID, {
+      log: true,
+    });
+    if (!log) {
+      ctx.throw(404, 'Match ' + matchID + ' not found');
+    }
+    ctx.body = log;
+  });
+
+  /**
+   * Get data about a specific match.
+   *
+   * @param {string} name - The name of the game.
+   * @param {string} id - The ID of the match.
+   * @return - A match object.
+   */
+   router.get('/games/:name/:id/state',  async (ctx) => {
+    // TODO authorize!!
+    const matchID = ctx.params.id;
+    const { state } = await (ctx.db as StorageAPI.Async).fetch(matchID, {
+      state: true,
+    });
+    if (!state) {
+      ctx.throw(404, 'Match ' + matchID + ' not found');
+    }
+    ctx.body = state;
+  });
 
   router.get('/team/admin/filter', koaBody(), async (ctx: Server.AppCtx) => {
     const filter_string = ctx.request.query['filter'];
