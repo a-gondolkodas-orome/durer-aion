@@ -1,18 +1,18 @@
 import { DataTypes, Model, ModelAttributes } from "sequelize";
 import { State, LogEntry, Server } from "boardgame.io";
 
-interface NotStartedMatchStatus {
+export interface NotStartedMatchStatus {
   state: 'NOT STARTED';
 }
 
-interface InProgressMatchStatus {
+export interface InProgressMatchStatus {
   state: 'IN PROGRESS';
   startAt: Date;
   endAt: Date;
   matchID: string;
 }
 
-interface FinishedMatchStatus {
+export interface FinishedMatchStatus {
   state: 'FINISHED';
   startAt: Date;
   endAt: Date;
