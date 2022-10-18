@@ -49,7 +49,7 @@ export function gameWrapper(game: any): Game<any> { // TODO: solve types
     phases: {
       startNewGame: {
         moves: { chooseNewGameType, setStartingPosition, getTime },
-        //endIf: ({ G, ctx, playerID }) => { return G.difficulty !== null && G.winner === null },
+        endIf: ({ G, ctx, playerID }) => { return G.difficulty !== null && G.winner === null && 'startingPosition' in game },
         next: "chooseRole",
         turn: {
           order: TurnOrder.ONCE,
