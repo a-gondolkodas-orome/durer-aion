@@ -1,9 +1,50 @@
 import type Router from '@koa/router';
 import koaBody from 'koa-body';
-import type { Server } from 'boardgame.io';
+import type { Game, LobbyAPI, Server, StorageAPI } from 'boardgame.io';
 import { TeamsRepository } from './db';
+import { createMatch } from 'boardgame.io/internal';
+import { nanoid } from 'nanoid';
+import { MatchStatus, TeamModel } from './entities/model';
+import { BOT_ID,fetch } from '../socketio_botmoves';
+import { getBotCredentials } from '../server';
 
-export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: TeamsRepository) {
+/** Joins a bot to a match where the bot's side is not connected.
+ * @param db: Database context
+ * @param matchID: match id to connect a bot to
+ * 
+ * This should be in line with boardgame.io/src/server/api.ts
+ * path would be '/games/:name/:id/join'.
+ */
+const injectBot = async (db: StorageAPI.Async | StorageAPI.Sync, matchId: string) => {
+  let match = await fetch(db, matchId, { metadata: true });
+  if (!match.metadata.players[BOT_ID].isConnected) {
+    console.log(`Match is indeed empty, and thus in need for a bot!`);
+    match.metadata.players[BOT_ID].name = 'Bot';
+    match.metadata.players[BOT_ID].credentials = getBotCredentials();
+    match.metadata.players[BOT_ID].isConnected = true;
+    await db.setMetadata(matchId, match.metadata);
+  }
+}
+
+
+async function startGame(
+  game: Game<any, Record<string, unknown>, any>,
+  ctx: Server.AppCtx
+) {
+  const matchID: string = nanoid(11);
+  const match = createMatch({ game: game!, numPlayers: 2, setupData: undefined, unlisted: false });
+
+  if ('setupDataError' in match) {
+    ctx.throw(400, match.setupDataError);
+  } else {
+    await ctx.db.createMatch(matchID, match);
+  }
+
+  const body: LobbyAPI.CreatedMatch = { matchID };
+  return body;
+};
+
+export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: TeamsRepository, games: Game<any, Record<string, unknown>, any>[]) {
 
   router.get('/team/admin/filter', koaBody(), async (ctx: Server.AppCtx) => {
     const filter_string = ctx.request.query['filter'];
@@ -33,11 +74,45 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
   });
 
   router.get('/team/:GUID/relay/play', koaBody(), async (ctx: Server.AppCtx) => {
-    ctx.throw(501, "Not implemented yet.");
+    const GUID = ctx.params.GUID;
+    const team:TeamModel = await teams.getTeam({ id: GUID }) ?? ctx.throw(404, `Team with {id:${GUID}} not found.`)
+
+    console.log(team.category)
+    //TODO remove hardcoded value
+    const gameName = 'tic-tac-toe';
+    const game = games.find((g) => g.name === gameName);
+    if (!game) ctx.throw(404, 'Game ' + gameName + ' not found');
+
+    const body = await startGame(game!, ctx);
+    await injectBot(ctx.db, body.matchID);
+
+
+    //TODO update teamState,gameState
+    team.update({
+      pageState:"RELAY",
+    })
+    ctx.body = body;
   })
 
   router.get('/team/:GUID/strategy/play', koaBody(), async (ctx: Server.AppCtx) => {
-    ctx.throw(501, "Not implemented yet.");
+    const GUID = ctx.params.GUID;
+    const team:TeamModel = await teams.getTeam({ id: GUID }) ?? ctx.throw(404, `Team with {id:${GUID}} not found.`)
+
+    console.log(team.category)
+    //TODO remove hardcoded value
+    const gameName = 'tic-tac-toe';
+    const game = games.find((g) => g.name === gameName);
+    if (!game) ctx.throw(404, 'Game ' + gameName + ' not found');
+
+    const body = await startGame(game!, ctx);
+    await injectBot(ctx.db, body.matchID);
+
+
+    //TODO update teamState,gameState
+    team.update({
+      pageState:"RELAY",
+    })
+    ctx.body = body;
   })
 
   router.get('/team/:GUID/relay/result', koaBody(), async (ctx: Server.AppCtx) => {
@@ -48,5 +123,14 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
     ctx.throw(501, "Not implemented yet.");
   })
 
+  /** This should be in line with boardgame.io/src/server/api.ts */
+  router.post('/games/:nameid/create', async (ctx, next) => {
+    await next();
+    //Figured out where match id is stored
+    console.log(`Injecting bot in :${ctx.response.body.matchID}`)
+    await injectBot(ctx.db,ctx.response.body.matchID);
+  });
+
 
 }
+

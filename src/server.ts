@@ -56,6 +56,20 @@ const games = [
   gameWrapper(ChessBishopsGame),
 ];
 
+//TODO add actual data
+export const relayNames = {
+  C:'relay-c',
+  D:'relay-d',
+  E:'relay-e',
+}
+
+//TODO add actual data
+export const strategyNames = {
+  C:'tic-tac-toe',
+  D:'tic-tac-toe',
+  E:'tic-tac-toe',
+}
+
 const bot_factories : any = [
   botWrapper(TicTacToeStrategy),
   botWrapper(SuperstitiousCountingStrategy),
@@ -85,36 +99,11 @@ if (argv[2] == "import") {
 
   const PORT = parseInt(env.PORT || "8000");
 
-  /** Joins a bot to a match where the bot's side is not connected.
-   * @param db: Database context
-   * @param matchID: match id to connect a bot to
-   * 
-   * This should be in line with boardgame.io/src/server/api.ts
-   * path would be '/games/:name/:id/join'.
-   */
-  const injectBot = async (db: StorageAPI.Async | StorageAPI.Sync,matchId:string) =>{
-      let match = await fetch(db, matchId, {metadata: true});
-      if (!match.metadata.players[BOT_ID].isConnected) {
-        console.log(`Match is indeed empty, and thus in need for a bot!`);
-        match.metadata.players[BOT_ID].name = 'Bot';
-        match.metadata.players[BOT_ID].credentials = getBotCredentials();
-        match.metadata.players[BOT_ID].isConnected = true;
-        await db.setMetadata(matchId, match.metadata);
-      }
-  }
-
-  /** This should be in line with boardgame.io/src/server/api.ts */
-  server.router.post('/games/:nameid/create', async (ctx, next) => {
-    await next();
-    //Figured out where match id is stored
-    console.log(`Injecting bot in :${ctx.response.body.matchID}`)
-    await injectBot(ctx.db,ctx.response.body.matchID);
-  });
-
+  //Admin page auth setup
   server.app.use(mount('/team/admin',auth({name:'admin',pass:getAdminCredentials()})));
-  
-  //TODO regex mount protection for Boardgame.io endpoints
 
-  configureTeamsRouter(server.router, teams);
+  //TODO regex mount protection for Boardgame.io endpoints
+  
+  configureTeamsRouter(server.router, teams,games);
   server.run(PORT);
 }
