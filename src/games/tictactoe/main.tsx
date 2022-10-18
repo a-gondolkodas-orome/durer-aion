@@ -5,4 +5,4 @@ import { ClientFactory } from '../../common/client_factory';
 
 let description = <p>Ez egy TicTacToe</p>
 
-export const { Client, ClientWithBot } = ClientFactory(MyGame, MyBoard, strategy, description);
+export const { Client, ClientWithBot, OnlineClient } = ClientFactory(MyGame, MyBoard, strategy, description);
