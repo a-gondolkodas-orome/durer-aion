@@ -31,7 +31,7 @@ function getTime({ G, ctx, playerID, events }: any){
   if (playerID !== "0") {
     return INVALID_MOVE;
   };
-  G.milisecondsRemaining = G.end.getTime() - new Date().getTime();
+  G.milisecondsRemaining = new Date(G.end).getTime() - new Date().getTime();
 };
 
 

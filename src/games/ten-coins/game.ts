@@ -4,8 +4,8 @@ import { GameType } from '../../common/types';
 export interface MyGameState {
   coins: Array<number>;
   milisecondsRemaining: number;
-  start: Date;
-  end: Date;
+  start: string;
+  end: string;
 }
 const lengthOfCompetition = 30*60; // seconds
 
@@ -14,8 +14,8 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<
   setup: () => ({
     coins: [1,1,1,1,1,1,1,1,1,1],
     milisecondsRemaining: 1000*lengthOfCompetition,
-    start: new Date(),
-    end: new Date(Date.now()+1000*lengthOfCompetition),
+    start: new Date().toISOString(),
+    end: new Date(Date.now()+1000*lengthOfCompetition).toISOString(),
   }),
 
   moves: {
@@ -65,7 +65,7 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<
       if (playerID !== "0") {
         return INVALID_MOVE;
       }
-      G.milisecondsRemaining = G.end.getTime() - new Date().getTime();
+      G.milisecondsRemaining = new Date(G.end).getTime() - new Date().getTime();
     }
   },
 
@@ -90,7 +90,7 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<
       console.log("onMove")
       if(playerID === "0") {
         let currentTime = new Date();
-        if(currentTime.getTime() - G.end.getTime() > 1000*10){
+        if(currentTime.getTime() - new Date(G.end).getTime() > 1000*10){
           // Do not accept any answer if the time is over since more than 10 seconds
           events.endGame();
         }
@@ -100,7 +100,7 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<
       console.log("onEnd")
       if(playerID === "1") {
         let currentTime = new Date();
-        if(currentTime.getTime() - G.end.getTime() <= 0){
+        if(currentTime.getTime() - new Date(G.end).getTime() <= 0){
           // Do not accept any answer if the time is over
           events.endGame();
         }

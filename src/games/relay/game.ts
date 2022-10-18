@@ -1,6 +1,5 @@
 import { Game } from "boardgame.io";
-import { INVALID_MOVE } from "boardgame.io/core";
-import { createTypeReferenceDirectiveResolutionCache } from "typescript";
+import { INVALID_MOVE, TurnOrder } from "boardgame.io/core";
 
 export interface MyGameState {
   currentProblem: number;
@@ -13,8 +12,8 @@ export interface MyGameState {
   currentProblemMaxPoints: number;
   numberOfTry: number;
   milisecondsRemaining: number;
-  start: Date;
-  end: Date;
+  start: string;
+  end: string;
 }
 
 const lengthOfCompetition = 60*60; // seconds
@@ -22,21 +21,37 @@ const lengthOfCompetition = 60*60; // seconds
 export const GameRelay: Game<MyGameState> = {
   setup: () => ({
     currentProblem: 0,
-    problemText: "1+1?", // TODO: get from the problem list
+    problemText: "", // TODO: get from the problem list
     answer: null,
     points: 0,
     correctnessPreviousAnswer: null,
     previousAnswers: [[]],
     previousPoints: [],
     currentProblemMaxPoints: 3, // TODO: get from the problem list
-    numberOfTry: 1,
+    numberOfTry: 0,
     milisecondsRemaining: 1000*lengthOfCompetition,
-    start: new Date(),
-    end: new Date(Date.now()+1000*lengthOfCompetition),
+    start: new Date().toISOString(),
+    end: new Date(Date.now()+1000*lengthOfCompetition).toISOString(),
   }),
+  playerView: ({G, ctx, playerID}) => {
+    const {
+      start, end, ...others
+    } = G;
+    return {...others};
+  },
 
   moves: {
-    newProblem({ G, ctx, playerID, events }, problemText: string, nextProblemMaxPoints: number, correctnessPreviousAnswer: boolean, previousAnswers: string) {
+    firstProblem({ G, ctx, playerID, events }, problemText: string, nextProblemMaxPoints: number) {
+      if (playerID !== "1") {
+        // He is not the bot OR G.answer is null (and it is not the first question)
+        return INVALID_MOVE;
+      }
+      G.problemText = problemText;
+      G.numberOfTry = 1;
+      events.endTurn();
+      console.log("end")
+    },
+    newProblem({ G, ctx, playerID, events }, problemText: string, nextProblemMaxPoints: number, correctnessPreviousAnswer: boolean) {
       if (playerID !== "1" || G.answer === null) {
         // He is not the bot OR G.answer is null (and it is not the first question)
         return INVALID_MOVE;
@@ -84,7 +99,7 @@ export const GameRelay: Game<MyGameState> = {
       if (playerID !== "0") {
         return INVALID_MOVE;
       }
-      G.milisecondsRemaining = G.end.getTime() - new Date().getTime();
+      G.milisecondsRemaining = new Date(G.end).getTime() - new Date().getTime();
     }
   },
   turn: {
@@ -92,7 +107,7 @@ export const GameRelay: Game<MyGameState> = {
       console.log("onMove")
       if(playerID === "0") {
         let currentTime = new Date();
-        if(currentTime.getTime() - G.end.getTime() > 1000*10){
+        if(currentTime.getTime() - new Date(G.end).getTime() > 1000*10){
           // Do not accept any answer if the time is over since more than 10 seconds
           events.endGame();
         }
@@ -102,12 +117,13 @@ export const GameRelay: Game<MyGameState> = {
       console.log("onEnd")
       if(playerID === "1") {
         let currentTime = new Date();
-        if(currentTime.getTime() - G.end.getTime() <= 0){
+        if(currentTime.getTime() - new Date(G.end).getTime() <= 0){
           // Do not accept any answer if the time is over
           events.endGame();
         }
       }
-    }
+    },
+    order: TurnOrder.CUSTOM(["1", "0"]),
   },
   ai: {
     enumerate: (G, ctx, playerID) => {

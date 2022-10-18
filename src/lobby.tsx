@@ -7,6 +7,8 @@ import { MyGame as SuperstitiousCountingGame } from './games/superstitious-count
 import { MyBoard as SuperstitiousCountingBoard } from './games/superstitious-counting/board';
 import { gameWrapper } from './common/gamewrapper';
 import { boardWrapper } from './common/boardwrapper';
+import { GameRelay } from './games/relay/game';
+import { MyBoard as RelayBoard } from './games/relay/board';
 
 // TODO use Nginx as a proxy
 const server = `http://${window.location.host}`; // DO NOT use trailing slash!
@@ -28,6 +30,10 @@ export default function () {
         {
           game: gameWrapper(ChessBishopGame),
           board: boardWrapper(ChessBishopBoard, "TODO")
+        },
+        {
+          game: {...GameRelay, name: "relay_c"},
+          board: RelayBoard
         }
       ]} />
     </div>
