@@ -1,12 +1,10 @@
 // Demultiplexes to real transport or bots
 
-import type { Game, Server, State, StorageAPI } from "boardgame.io";
+import type { Game, State, StorageAPI } from "boardgame.io";
 import { getFilterPlayerView } from "boardgame.io/internal";
 import { Master } from "boardgame.io/master";
 import { SocketIO } from "boardgame.io/server";
-import botWrapper from "./common/botwrapper";
 import { currentPlayer } from "./common/types";
-import { strategy } from "./games/tictactoe/strategy";
 import { getBotCredentials } from "./server";
 
 /** Copied from boardgame.io/dist/src/client/transport/local.ts */
@@ -68,7 +66,7 @@ const TransportAPI = (
 };
 
 /** Copied from boardgame.io/dist/src/master/master.ts */
-export async function fetch(db: StorageAPI.Async | StorageAPI.Sync, matchID: string, partial: Partial<{state: boolean, metadata: boolean}>) {
+export async function fetch(db: StorageAPI.Async | StorageAPI.Sync, matchID: string, partial: Partial<{ state: boolean, metadata: boolean, logs: boolean, initialState: boolean }>) {
   return isSynchronous(db)
       ? db.fetch(matchID, partial)
       : await db.fetch(matchID, partial);

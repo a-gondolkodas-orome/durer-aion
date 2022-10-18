@@ -1,5 +1,5 @@
 import { Client } from 'boardgame.io/react';
-import { Local } from 'boardgame.io/multiplayer';
+import { Local, SocketIO } from 'boardgame.io/multiplayer';
 import botWrapper from './botwrapper';
 import { gameWrapper } from './gamewrapper';
 import { boardWrapper } from './boardwrapper';
@@ -26,4 +26,12 @@ export function MyClientWithBot(game: any, board: any, strategy: any, descriptio
     numPlayers: 2,
     //debug: { impl: Debug },
   })
+}
+
+export function MyOnlineClient(game: any, board: any, description: string) {
+  return Client({
+    board: boardWrapper(board, description),
+    game: gameWrapper(game),
+    multiplayer: SocketIO(),
+  });
 }

@@ -1,13 +1,15 @@
 import { MyGame as TicTacToeGame } from './games/tictactoe/game';
+import { GameRelay } from './games/relay/game';
 import { MyGame as SuperstitiousCountingGame } from './games/superstitious-counting/game';
 import { MyGame as ChessBishopsGame } from './games/chess-bishops/game';
 import { PostgresStore } from 'bgio-postgres';
 import { argv, env, exit } from 'process';
 import { gameWrapper } from './common/gamewrapper';
 import { BOT_ID, fetch, SocketIOButBotMoves } from './socketio_botmoves';
-import { Origins, Server, SocketIO } from 'boardgame.io/server';
+import { Server } from 'boardgame.io/server';
 import botWrapper from './common/botwrapper';
 import { strategy as TicTacToeStrategy } from './games/tictactoe/strategy';
+import { strategy as RelayStrategy } from './games/relay/strategy';
 import { strategy as SuperstitiousCountingStrategy } from './games/superstitious-counting/strategy';
 import { strategy as ChessBishopsStrategy } from './games/chess-bishops/strategy';
 import { configureTeamsRouter } from './server/router';
@@ -54,6 +56,7 @@ const games = [
   gameWrapper(TicTacToeGame),
   gameWrapper(SuperstitiousCountingGame),
   gameWrapper(ChessBishopsGame),
+  {...GameRelay, name: "relay_c"},
 ];
 
 //TODO add actual data
@@ -74,6 +77,7 @@ const bot_factories : any = [
   botWrapper(TicTacToeStrategy),
   botWrapper(SuperstitiousCountingStrategy),
   botWrapper(ChessBishopsStrategy),
+  botWrapper(RelayStrategy("C")),
 ];
 
 let { db, teams } = getDb();
@@ -92,7 +96,7 @@ if (argv[2] == "import") {
     games: games,
     transport: new SocketIOButBotMoves(
       { https: undefined },
-      { "tic-tac-toe": bots[0], "superstitious-counting": bots[1], "chess-bishops": bots[2] },
+      { "tic-tac-toe": bots[0], "superstitious-counting": bots[1], "chess-bishops": bots[2], "relay": bots[3] },
     ),
     db,
   });

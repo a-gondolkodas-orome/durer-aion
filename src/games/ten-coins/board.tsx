@@ -50,8 +50,10 @@ export function MyBoard({ G, ctx, moves }: MyGameProps) {
             className="cta-button" onClick={() => onClick()}
           >Lépek</button>
         </div>
-        {ctx.gameover && <div id="loser">{ctx.gameover.loser}. játékos vesztett.</div>}
       </div>
+      <div>Hátralevő idő: {G.milisecondsRemaining}</div>
+      <button onClick={() => moves.getTime()}>Asd</button>
+
     </div>
   );
 }
