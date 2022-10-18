@@ -1,10 +1,17 @@
 import { MyGameState } from './game';
 import { BoardProps } from 'boardgame.io/react';
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { Countdown } from '../../components/Countdown';
 
 interface MyGameProps extends BoardProps<MyGameState> { };
 
 export const MyBoard = ({ G, ctx, moves }: MyGameProps) =>{
+  const [secondsRemaining, setSecondsRemaining] = useState(G.milisecondsRemaining as number|null); // asked from the server
+
+  useEffect(() => {
+    setSecondsRemaining(G.milisecondsRemaining);
+  }, [G.milisecondsRemaining]);
+
   const inputEl = useRef<HTMLInputElement>(null);
 
   const onClick = () => {
@@ -25,6 +32,7 @@ export const MyBoard = ({ G, ctx, moves }: MyGameProps) =>{
             >Lépek</button>
       <div>Korábbi válaszok: {G.previousAnswers[G.currentProblem].join(", ")}</div>
       <div>Jelenlegi összpontszám: {G.points}</div>
+      <p>Hátralévő idő: <Countdown secondsRemaining={secondsRemaining} setSecondsRemaining={setSecondsRemaining} getServerTimer={moves.getTime}/></p>
       <div>Hátralevő idő: {G.milisecondsRemaining}</div>
       <button onClick={() => moves.getTime()}>Asd</button>
     </div>

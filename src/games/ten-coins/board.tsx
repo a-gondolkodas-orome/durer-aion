@@ -1,6 +1,7 @@
 import { MyGameState } from './game';
 import { BoardProps } from 'boardgame.io/react';
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { Countdown } from '../../components/Countdown';
 
 interface MyGameProps extends BoardProps<MyGameState> { }
 
@@ -9,6 +10,11 @@ export function MyBoard({ G, ctx, moves }: MyGameProps) {
   // create refs to store the text input elements
   const inputK = useRef<HTMLInputElement>(null);
   const inputL = useRef<HTMLInputElement>(null);
+  const [secondsRemaining, setSecondsRemaining] = useState(G.milisecondsRemaining as number|null); // asked from the server
+
+  useEffect(() => {
+    setSecondsRemaining(G.milisecondsRemaining);
+  }, [G.milisecondsRemaining]);
 
   const onClick = () => {
     // read input value
@@ -51,6 +57,7 @@ export function MyBoard({ G, ctx, moves }: MyGameProps) {
           >Lépek</button>
         </div>
       </div>
+      <p>Hátralévő idő: <Countdown secondsRemaining={secondsRemaining} setSecondsRemaining={setSecondsRemaining} getServerTimer={moves.getTime}/></p>
       <div>Hátralevő idő: {G.milisecondsRemaining}</div>
       <button onClick={() => moves.getTime()}>Asd</button>
 
