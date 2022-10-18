@@ -84,9 +84,11 @@ export const BOT_ID = '1';
  */
 export class SocketIOButBotMoves extends SocketIO {
   bots: Record<string, any>;
-  constructor(anything: any, bots: Record<string, any>) {
+  onFinishedMatch: (matchID: string) => void;
+  constructor(anything: any, bots: Record<string, any>, onFinishedMatch: (matchID: string)=>void = ()=>{}) {
     super(anything);
     this.bots = bots;
+    this.onFinishedMatch = onFinishedMatch;
   }
   init(
     app: any,
@@ -142,6 +144,12 @@ export class SocketIOButBotMoves extends SocketIO {
             // TODO: is staleStateID+1 always valid?
             let nextStateID = staleStateID+1;
             await master.onUpdate({type: 'MAKE_MOVE', payload: {...botAction.action.payload, credentials: getBotCredentials()}}, nextStateID, matchID, BOT_ID);
+          });
+          await matchQueue.add(async () => {
+            const {state} = await fetch(app.context.db, matchID, {state: true});
+            if (state.ctx.gameover) {
+              this.onFinishedMatch(matchID);
+            }
           });
         });
       });

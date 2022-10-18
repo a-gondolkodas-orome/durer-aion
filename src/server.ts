@@ -98,6 +98,9 @@ if (argv[2] == "import") {
     transport: new SocketIOButBotMoves(
       { https: undefined },
       { "tic-tac-toe": bots[0], "superstitious-counting": bots[1], "chess-bishops": bots[2], "relay": bots[3] },
+      function onFinishedMatch(matchID) {
+        // teams.onMatchFinished
+      }
     ),
     db,
   });

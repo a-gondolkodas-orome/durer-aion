@@ -71,7 +71,7 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
    * @param {string} id - The ID of the match.
    * @return - A match object.
    */
-   router.get('/games/:name/:id/state',  async (ctx) => {
+   router.get('/team/admin/:id/state',  async (ctx) => {
     // TODO authorize!!
     const matchID = ctx.params.id;
     const { state } = await (ctx.db as StorageAPI.Async).fetch(matchID, {
