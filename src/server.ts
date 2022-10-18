@@ -57,20 +57,20 @@ const games = [
   gameWrapper(SuperstitiousCountingGame),
   gameWrapper(ChessBishopsGame),
   {...GameRelay, name: "relay_c"},
+  {...GameRelay, name: "relay_d"},
+  {...GameRelay, name: "relay_e"},
 ];
 
-//TODO add actual data
 export const relayNames = {
-  C:'relay-c',
-  D:'relay-d',
-  E:'relay-e',
+  C:'relay_c',
+  D:'relay_d',
+  E:'relay_e',
 }
 
-//TODO add actual data
 export const strategyNames = {
   C:'tic-tac-toe',
-  D:'tic-tac-toe',
-  E:'tic-tac-toe',
+  D:'superstitious-counting',
+  E:'chess-bishops',
 }
 
 const bot_factories : any = [
@@ -78,6 +78,8 @@ const bot_factories : any = [
   botWrapper(SuperstitiousCountingStrategy),
   botWrapper(ChessBishopsStrategy),
   botWrapper(RelayStrategy("C")),
+  botWrapper(RelayStrategy("D")),
+  botWrapper(RelayStrategy("E")),
 ];
 
 let { db, teams } = getDb();

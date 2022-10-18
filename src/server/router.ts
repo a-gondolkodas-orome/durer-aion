@@ -6,7 +6,7 @@ import { createMatch } from 'boardgame.io/internal';
 import { nanoid } from 'nanoid';
 import { MatchStatus, TeamModel } from './entities/model';
 import { BOT_ID,fetch } from '../socketio_botmoves';
-import { getBotCredentials } from '../server';
+import { getBotCredentials, relayNames, strategyNames } from '../server';
 
 /** Joins a bot to a match where the bot's side is not connected.
  * @param db: Database context
@@ -78,8 +78,7 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
     const team:TeamModel = await teams.getTeam({ id: GUID }) ?? ctx.throw(404, `Team with {id:${GUID}} not found.`)
 
     console.log(team.category)
-    //TODO remove hardcoded value
-    const gameName = 'tic-tac-toe';
+    const gameName = relayNames[team.category as keyof typeof relayNames] //TODO set type better??
     const game = games.find((g) => g.name === gameName);
     if (!game) ctx.throw(404, 'Game ' + gameName + ' not found');
 
@@ -99,8 +98,7 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
     const team:TeamModel = await teams.getTeam({ id: GUID }) ?? ctx.throw(404, `Team with {id:${GUID}} not found.`)
 
     console.log(team.category)
-    //TODO remove hardcoded value
-    const gameName = 'tic-tac-toe';
+    const gameName = strategyNames[team.category as keyof typeof strategyNames] //TODO set type better??
     const game = games.find((g) => g.name === gameName);
     if (!game) ctx.throw(404, 'Game ' + gameName + ' not found');
 
@@ -110,7 +108,7 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
 
     //TODO update teamState,gameState
     team.update({
-      pageState:"RELAY",
+      pageState:"STRATEGY",
     })
     ctx.body = body;
   })
