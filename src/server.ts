@@ -5,7 +5,7 @@ import { MyGame as ChessBishopsGame } from './games/chess-bishops/game';
 import { PostgresStore } from 'bgio-postgres';
 import { argv, env, exit } from 'process';
 import { gameWrapper } from './common/gamewrapper';
-import { BOT_ID, fetch, SocketIOButBotMoves } from './socketio_botmoves';
+import { SocketIOButBotMoves } from './socketio_botmoves';
 import { Server } from 'boardgame.io/server';
 import botWrapper from './common/botwrapper';
 import { strategy as TicTacToeStrategy } from './games/tictactoe/strategy';
@@ -15,7 +15,6 @@ import { strategy as ChessBishopsStrategy } from './games/chess-bishops/strategy
 import { configureTeamsRouter } from './server/router';
 import { TeamsRepository } from './server/db';
 import { importer } from './server/team_import';
-import { StorageAPI } from 'boardgame.io';
 
 import auth from 'koa-basic-auth';
 import mount from 'koa-mount';
