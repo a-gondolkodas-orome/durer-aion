@@ -9,14 +9,14 @@ import botWrapper from '../../common/botwrapper';
 let description = <p className="text-justify">
 </p>
 
-const Relay = Client({
+const Relay_C = Client({
   game: GameRelay,
   board: MyBoard,
   numPlayers: 2,
   debug: { impl: Debug },
   multiplayer: Local(
     {
-      bots: { '1': botWrapper(strategy) }
+      bots: { '1': botWrapper(strategy("C")) }
     }
   ),
 });
@@ -25,7 +25,7 @@ const Relay = Client({
 export default function () {
   return (
     <>
-      <Relay playerID='0' />
+      <Relay_C playerID='0' />
     </>
   );
 };

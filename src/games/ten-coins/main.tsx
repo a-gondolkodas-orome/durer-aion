@@ -1,6 +1,6 @@
 import { MyGame } from './game';
 import { MyBoard } from './board';
-import { strategy } from './strategy';
+import { strategyWrapper } from './strategy';
 import { ClientFactory } from '../../common/client_factory';
 
 let description = <p className="text-justify">
@@ -14,4 +14,6 @@ let description = <p className="text-justify">
   A kezdőállás szám ismeretében te döntheteted el, hogy a kezdő vagy a második játékos bőrébe szeretnél e bújni.
 </p>
 
-export const { Client, ClientWithBot } = ClientFactory(MyGame, MyBoard, strategy, description);
+export const { Client: Client_C, ClientWithBot: ClientWithBot_C } = ClientFactory(MyGame, MyBoard, strategyWrapper("C"), description);
+export const { Client: Client_D, ClientWithBot: ClientWithBot_D } = ClientFactory(MyGame, MyBoard, strategyWrapper("D"), description);
+export const { Client: Client_E, ClientWithBot: ClientWithBot_E } = ClientFactory(MyGame, MyBoard, strategyWrapper("E"), description);
