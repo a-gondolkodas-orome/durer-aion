@@ -14,12 +14,12 @@ const problems ={
       points: 3,
     },
     {
-      problemText: "Morpheusznak, az álmok istenének egy olyan négyzet alakú kertje van, aminek egy oldalának a hossza $30~\mathrm{m}$ (az ábrán a kert az $ABCD$ négyzet). Az oldalak harmadolópontjai által meghatározott nyolcszögbe mákot szeretne ültetni (az ábrán ez az $EFGHIJKL$ szürke nyolcszög). Hány négyzetméternyi területre szeretne mákot ültetni Morpheusz?",
+      problemText: "Morpheusznak, az álmok istenének egy olyan négyzet alakú kertje van, aminek egy oldalának a hossza $30~\\mathrm{m}$ (az ábrán a kert az $ABCD$ négyzet). Az oldalak harmadolópontjai által meghatározott nyolcszögbe mákot szeretne ültetni (az ábrán ez az $EFGHIJKL$ szürke nyolcszög). Hány négyzetméternyi területre szeretne mákot ültetni Morpheusz?",
       answer: 700,
       points: 4,
     },
     {
-      problemText: "Zeusz egy óriási papírlapra egy hatalmas szabályos sokszöget rajzolt a halandóknak. A sokszög olyan nagy, hogy az emberek nem szeretnék körbejárni, viszont azt meg tudták mérni, hogy egy szöge $160^{\circ}$. Hány oldala van az alakzatnak? (Szabályos sokszög az a sokszög, aminek minden szöge ugyanakkora és minden oldala ugyanakkora.)",
+      problemText: "Zeusz egy óriási papírlapra egy hatalmas szabályos sokszöget rajzolt a halandóknak. A sokszög olyan nagy, hogy az emberek nem szeretnék körbejárni, viszont azt meg tudták mérni, hogy egy szöge $160^{\\circ}$. Hány oldala van az alakzatnak? (Szabályos sokszög az a sokszög, aminek minden szöge ugyanakkora és minden oldala ugyanakkora.)",
       answer: 18,
       points: 4,
     },
@@ -34,7 +34,7 @@ const problems ={
       points: 5,
     },
     {
-      problemText: "Egy $4\times 4$-es táblázat mezőit szeretnénk kitölteni $0$-sokkal és $2$-esekkel úgy, hogy minden mezőbe pontosan egy számot írunk. Hány olyan kitöltés van, aminél minden sorban és oszlopban pontosan egy darab $0$-s van, és van olyan sor, illetve oszlop is, amit balról jobbra, illetve fentről lefelé olvasva a $2022$ számot kapjuk?",
+      problemText: "Egy $4\\times 4$-es táblázat mezőit szeretnénk kitölteni $0$-sokkal és $2$-esekkel úgy, hogy minden mezőbe pontosan egy számot írunk. Hány olyan kitöltés van, aminél minden sorban és oszlopban pontosan egy darab $0$-s van, és van olyan sor, illetve oszlop is, amit balról jobbra, illetve fentről lefelé olvasva a $2022$ számot kapjuk?",
       answer: 24,
       points: 5,
     },
@@ -56,7 +56,7 @@ const problems ={
       points: 3,
     },
     {
-      problemText: "Morpheusznak, az álmok istenének egy olyan négyzet alakú kertje van, aminek egy oldalának a hossza $30~\mathrm{m}$ (az ábrán a kert az $ABCD$ négyzet). Az oldalak harmadolópontjai által meghatározott nyolcszögbe mákot szeretne ültetni (az ábrán ez az $EFGHIJKL$ szürke nyolcszög). Hány négyzetméternyi területre szeretne mákot ültetni Morpheusz?",
+      problemText: "Morpheusznak, az álmok istenének egy olyan négyzet alakú kertje van, aminek egy oldalának a hossza $30~\\mathrm{m}$ (az ábrán a kert az $ABCD$ négyzet). Az oldalak harmadolópontjai által meghatározott nyolcszögbe mákot szeretne ültetni (az ábrán ez az $EFGHIJKL$ szürke nyolcszög). Hány négyzetméternyi területre szeretne mákot ültetni Morpheusz?",
       answer: 700,
       points: 3,
     },
@@ -76,7 +76,7 @@ const problems ={
       points: 4,
     },
     {
-      problemText: "Egy $4\times 4$-es táblázat mezőit szeretnénk kitölteni $0$-sokkal és $2$-esekkel úgy, hogy minden mezőbe pontosan egy számot írunk. Hány olyan kitöltés van, aminél minden sorban és oszlopban pontosan egy darab $0$-s van, és van olyan sor, illetve oszlop is, amit balról jobbra, illetve fentről lefelé olvasva a $2022$ számot kapjuk?",
+      problemText: "Egy $4\\times 4$-es táblázat mezőit szeretnénk kitölteni $0$-sokkal és $2$-esekkel úgy, hogy minden mezőbe pontosan egy számot írunk. Hány olyan kitöltés van, aminél minden sorban és oszlopban pontosan egy darab $0$-s van, és van olyan sor, illetve oszlop is, amit balról jobbra, illetve fentről lefelé olvasva a $2022$ számot kapjuk?",
       answer: 24,
       points: 5,
     },
@@ -98,7 +98,7 @@ const problems ={
   ],
   E: [
     {
-      problemText: "Zeusz egy óriási papírlapra egy hatalmas szabályos sokszöget rajzolt a halandóknak. A sokszög olyan nagy, hogy az emberek nem szeretnék körbejárni, viszont azt meg tudták mérni, hogy egy szöge $160^{\circ}$. Hány oldala van az alakzatnak? (Szabályos sokszög az a sokszög, aminek minden szöge ugyanakkora és minden oldala ugyanakkora.)",
+      problemText: "Zeusz egy óriási papírlapra egy hatalmas szabályos sokszöget rajzolt a halandóknak. A sokszög olyan nagy, hogy az emberek nem szeretnék körbejárni, viszont azt meg tudták mérni, hogy egy szöge $160^{\\circ}$. Hány oldala van az alakzatnak? (Szabályos sokszög az a sokszög, aminek minden szöge ugyanakkora és minden oldala ugyanakkora.)",
       answer: 18,
       points: 3,
     },
@@ -118,7 +118,7 @@ const problems ={
       points: 4,
     },
     {
-      problemText: "Egy $4\times 4$-es táblázat mezőit szeretnénk kitölteni $0$-sokkal és $2$-esekkel úgy, hogy minden mezőbe pontosan egy számot írunk. Hány olyan kitöltés van, aminél minden sorban és oszlopban pontosan egy darab $0$-s van, és van olyan sor, illetve oszlop is, amit balról jobbra, illetve fentről lefelé olvasva a $2022$ számot kapjuk?",
+      problemText: "Egy $4\\times 4$-es táblázat mezőit szeretnénk kitölteni $0$-sokkal és $2$-esekkel úgy, hogy minden mezőbe pontosan egy számot írunk. Hány olyan kitöltés van, aminél minden sorban és oszlopban pontosan egy darab $0$-s van, és van olyan sor, illetve oszlop is, amit balról jobbra, illetve fentről lefelé olvasva a $2022$ számot kapjuk?",
       answer: 24,
       points: 4,
     },
@@ -128,7 +128,7 @@ const problems ={
       points: 5,
     },
     {
-      problemText: "Egy pozitív egész számot \emph{felezett}nek nevezünk, ha kétjegyű és a két számjegyének szorzata osztója az eredeti számnak. Mennyi az összege a felezett számoknak? (Megjegyzés: a $0$ nem osztója semelyik számnak sem.)",
+      problemText: "Egy pozitív egész számot \\emph{felezett}nek nevezünk, ha kétjegyű és a két számjegyének szorzata osztója az eredeti számnak. Mennyi az összege a felezett számoknak? (Megjegyzés: a $0$ nem osztója semelyik számnak sem.)",
       answer: 98,
       points: 5,
     },
