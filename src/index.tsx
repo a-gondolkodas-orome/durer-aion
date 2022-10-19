@@ -19,6 +19,7 @@ import { Client_D as TenCoinsClient_D, ClientWithBot_D as TenCoinsWithBotClient_
 import { Client_E as TenCoinsClient_E, ClientWithBot_E as TenCoinsWithBotClient_E} from './games/ten-coins/main';
 import Lobby from './lobby';
 import NotFound from './pages/NotFound';
+import MatchTest from './match_testter';
 
 const root = document.getElementById('root');
 render(
@@ -52,6 +53,7 @@ render(
         <Route path="/ten-coins-with-bot-d" element={<TenCoinsWithBotClient_D />} />
         <Route path="/ten-coins-e" element={<TenCoinsClient_E />} />
         <Route path="/ten-coins-with-bot-e" element={<TenCoinsWithBotClient_E />} />
+        <Route path="/test" element={<MatchTest />}/>
         <Route path='*' element={<NotFound/>}></Route>
       </Routes>
     </BrowserRouter>

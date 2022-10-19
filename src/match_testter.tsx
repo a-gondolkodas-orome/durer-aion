@@ -9,27 +9,14 @@
 import React from 'react';
 import { DurerXVIRelayClient } from './components/ReactClient';
 
-type LoginFormProps = {
-  matchID?: string;
-  credential?:string;
-  onEnter: (playerName?: string,credential?:string) => void;
-};
 
-type LoginFormState = {
-  matchID?: string;
-  creadential?: string;
-  nameErrorMsg: string;
-};
-
-class MatchTest extends React.Component<LoginFormProps, LoginFormState> {
-  static defaultProps = {
-    playerName: '',
-  };
+class MatchTest extends React.Component{
 
   state = {
-    matchID: this.props.matchID,
-    credential:this.props.credential,
+    matchID: '',
+    credential: '',
     nameErrorMsg: '',
+    allowed: false,
   };
 
   render() {
@@ -42,7 +29,7 @@ class MatchTest extends React.Component<LoginFormProps, LoginFormState> {
           onChange={this.onChangeMatchId} />
         <input
           type="text"
-          value={this.state.matchID}
+          value={this.state.credential}
           onChange={this.onChangeCredentials} />
         <span className="buttons">
           <button className="buttons" onClick={this.onClickEnter}>
@@ -54,22 +41,18 @@ class MatchTest extends React.Component<LoginFormProps, LoginFormState> {
           {this.state.nameErrorMsg}
           <br />
         </span>
-        
-      </div>
-    );
-  }
-
-  /*
-  <DurerXVIRelayClient category='C' 
+        <DurerXVIRelayClient category='C' 
         matchID={
           this.state.matchID!}
         credentials={
-            this.state.credential!}>
-            </DurerXVIRelayClient>
-  */
+            this.state.credential!}></DurerXVIRelayClient>
+      </div>
+
+    );
+  }
   onClickEnter = () => {
-    if (this.state.matchID === '') return;
-    this.props.onEnter(this.state.matchID,this.state.credential);
+    if (this.state.matchID === '' || this.state.credential === '') return;
+    this.state.allowed = true;
   };
 
   
