@@ -4,10 +4,37 @@ import type { Game, LobbyAPI, Server, StorageAPI } from 'boardgame.io';
 import { TeamsRepository } from './db';
 import { createMatch } from 'boardgame.io/internal';
 import { nanoid } from 'nanoid';
-import { InProgressMatchStatus  } from './entities/model';
+import { InProgressMatchStatus, TeamModel  } from './entities/model';
 import { BOT_ID, fetch } from '../socketio_botmoves';
 import { getBotCredentials } from '../server';
 import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus } from './team_manage';
+
+/** Joins a player to a match where the bot's side is not connected.
+ * @param db: Database context
+ * @param matchID: match id to connect a bot to
+ * 
+ * This should be in line with boardgame.io/src/server/api.ts
+ * path would be '/games/:name/:id/join'.
+ */
+const injectPlayer = async (db: StorageAPI.Async | StorageAPI.Sync, matchId: string, {
+  playerID,
+  name,
+  credentials
+}:{
+  playerID: any,
+  name: string,
+  credentials: string,
+}
+) => {
+  let match = await fetch(db, matchId, { metadata: true });
+  if (!match.metadata.players[playerID].isConnected) {
+    console.log(`Match is indeed empty, and thus in need for a bot!`);
+    match.metadata.players[playerID].name = name;
+    match.metadata.players[playerID].credentials = credentials;
+    match.metadata.players[playerID].isConnected = true;
+    await db.setMetadata(matchId, match.metadata);
+  }
+}
 
 /** Joins a bot to a match where the bot's side is not connected.
  * @param db: Database context
@@ -16,17 +43,13 @@ import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus } from './tea
  * This should be in line with boardgame.io/src/server/api.ts
  * path would be '/games/:name/:id/join'.
  */
-const injectBot = async (db: StorageAPI.Async | StorageAPI.Sync, matchId: string) => {
-  let match = await fetch(db, matchId, { metadata: true });
-  if (!match.metadata.players[BOT_ID].isConnected) {
-    console.log(`Match is indeed empty, and thus in need for a bot!`);
-    match.metadata.players[BOT_ID].name = 'Bot';
-    match.metadata.players[BOT_ID].credentials = getBotCredentials();
-    match.metadata.players[BOT_ID].isConnected = true;
-    await db.setMetadata(matchId, match.metadata);
-  }
+ const injectBot = async (db: StorageAPI.Async | StorageAPI.Sync, matchId: string) => {
+  await injectPlayer(db, matchId, {
+    playerID: BOT_ID,
+    name: 'Bot',
+    credentials: getBotCredentials()
+  });
 }
-
 
 async function createGame(
   game: Game<any, Record<string, unknown>, any>,
@@ -137,15 +160,17 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
 
 
   router.get('/team/:GUID/relay/play', koaBody(), async (ctx: Server.AppCtx) => {
-
-    //check if in progress, play is rejecting
+    const GUID = ctx.params.GUID;
+    const team: TeamModel = await teams.getTeam({ id: GUID }) ?? ctx.throw(404, `Team with {id:${GUID}} not found.`)
+      //check if in progress, it is not allowed to play
     //check if it can be started, throw error if not
-    const { game, team } = await getNewGame(ctx, teams, games, 'RELAY');
-
+    const { game } = await getNewGame(team, ctx.db, teams, games, 'RELAY');
+    //about to start
 
     // about to start a game
 
     const body: LobbyAPI.CreatedMatch = await createGame(game, ctx);
+    await injectPlayer(ctx.db, body.matchID, {playerID: 0, name: ctx.GUID, credentials: team.credentials});
     await injectBot(ctx.db, body.matchID);
 
     //created new game, updated team state accordingly
@@ -162,12 +187,15 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
   })
 
   router.get('/team/:GUID/strategy/play', koaBody(), async (ctx: Server.AppCtx) => {
-    //check if in progress, it is not allowed to play
+    const GUID = ctx.params.GUID;
+    const team: TeamModel = await teams.getTeam({ id: GUID }) ?? ctx.throw(404, `Team with {id:${GUID}} not found.`)
+      //check if in progress, it is not allowed to play
     //check if it can be started, throw error if not
-    const { game, team } = await getNewGame(ctx, teams, games, 'STRATEGY');
+    const { game } = await getNewGame(team, ctx.db, teams, games, 'STRATEGY');
     //about to start
 
     const body: LobbyAPI.CreatedMatch = await createGame(game, ctx);
+    await injectPlayer(ctx.db, body.matchID, {playerID: '0', name: ctx.GUID, credentials: team.credentials});
     await injectBot(ctx.db, body.matchID);
 
     //created new game, updated team state accordingly
