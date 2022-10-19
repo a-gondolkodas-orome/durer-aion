@@ -19,6 +19,7 @@ export interface MyGameState {
   milisecondsRemaining: number;
   start: string;
   end: string;
+  url: string;
 }
 
 const lengthOfCompetition = 60 * 60; // seconds
@@ -37,6 +38,7 @@ export const GameRelay: Game<MyGameState> = {
     milisecondsRemaining: 1000 * lengthOfCompetition,
     start: new Date().toISOString(),
     end: new Date(Date.now() + 1000 * lengthOfCompetition).toISOString(),
+    url: "",
   }),
   phases:
   {
@@ -48,11 +50,12 @@ export const GameRelay: Game<MyGameState> = {
           }
           events.endTurn();
         },
-        firstProblem({ G, ctx, playerID, events }, problemText: string, nextProblemMaxPoints: number) {
+        firstProblem({ G, ctx, playerID, events }, problemText: string, nextProblemMaxPoints: number, url: string) {
           if (playerID !== "1") {
             // He is not the bot OR G.answer is null (and it is not the first question)
             return INVALID_MOVE;
           }
+          G.url = url;
           G.problemText = problemText;
           G.numberOfTry = 1;
           events.endTurn();
@@ -77,11 +80,12 @@ export const GameRelay: Game<MyGameState> = {
     },
     play: {
       moves: {
-        newProblem({ G, ctx, playerID, events }, problemText: string, nextProblemMaxPoints: number, correctnessPreviousAnswer: boolean) {
+        newProblem({ G, ctx, playerID, events }, problemText: string, nextProblemMaxPoints: number, correctnessPreviousAnswer: boolean, url: string) {
           if (playerID !== "1" || G.answer === null) {
             // He is not the bot OR G.answer is null (and it is not the first question)
             return INVALID_MOVE;
           }
+          G.url = url;
           G.previousAnswers[G.currentProblem].push({answer: G.answer, date: new Date().toISOString()});
           G.problemText = problemText;
           G.previousAnswers.push(Array(0));

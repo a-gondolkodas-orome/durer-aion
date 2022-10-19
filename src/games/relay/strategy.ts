@@ -1,12 +1,26 @@
 import { State } from 'boardgame.io';
 import { MyGameState } from './game';
 
-const problems ={
+type Problem = {
+  problemText: string;
+  answer: number;
+  points: number;
+  url?: string;
+}
+
+type RelayProblems = {
+  C: Problem[];
+  D: Problem[];
+  E: Problem[];
+}
+
+const problems : RelayProblems ={
   C: [
     {
       problemText: "Dionüszosz szőlőskertjében egy fürt szőlő egyik szeme megpenészedett (az ábrán a szürke). Minden nap pontosan azok a szemek fognak még megpenészedni, amik érintkeznek penészes szemmel. Hány nap múlva lesz penészes az egész szőlőfürt? (Az ábrán a teljes fürt látható.)",
       answer: 4,
       points: 3,
+      url: "https://durerinfo.hu",
     },
     {
       problemText: "Mint köztudott, Trójánál a görögök egy óriási ajándéknak álcázott fából készült négylábú lóba rejtve katonákat juttattak a trójai várba. Ezzel a trójai falóval $25$-ször annyi láb került be a vár belsejébe, mint ahogy azt a trójaiak hitték. Hány görög katona jutott be a várba?",
@@ -148,7 +162,11 @@ const problems ={
 export function strategy(category: "C" | "D" | "E"){
   return (state: State<MyGameState>, botID: string): [any[] | undefined, string] => {
     if (state.G.numberOfTry === 0) {
-      return [[problems[category][state.G.currentProblem].problemText,3,false], "firstProblem"];
+      let url = problems[category][state.G.currentProblem].url;
+      if(url === undefined){
+        url = "";
+      }
+      return [[problems[category][state.G.currentProblem].problemText,3,false, url], "firstProblem"];
     }
     let correctnessPreviousAnswer = false;
     if(state.G.answer === problems[category][state.G.currentProblem].answer){
@@ -160,7 +178,11 @@ export function strategy(category: "C" | "D" | "E"){
     
     // Next problem if there is one and the time is not over
     if (state.G.currentProblem < 8) { // TODO: it should be 9 if we count from 1 and not from 0. But it is currently 8 because we count from 0.
-      return [[problems[category][state.G.currentProblem+1].problemText,problems[category][state.G.currentProblem+1].points,correctnessPreviousAnswer], "newProblem"];
+      let url = problems[category][state.G.currentProblem].url;
+      if(url === undefined){
+        url = "";
+      }
+     return [[problems[category][state.G.currentProblem+1].problemText,problems[category][state.G.currentProblem+1].points,correctnessPreviousAnswer, url], "newProblem"];
     }
     // End of the game
     return [[], "endGame"];
