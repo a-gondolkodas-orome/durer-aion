@@ -30,7 +30,7 @@ export const MyBoard = ({ G, ctx, moves }: MyGameProps) =>{
       <button
             className="cta-button" onClick={() => onClick()}
             >Lépek</button>
-      <div>Korábbi válaszok: {G.previousAnswers[G.currentProblem].join(", ")}</div>
+      <div>Korábbi válaszok: {G.previousAnswers[G.currentProblem].map((elem) => elem.answer).join(", ")}</div>
       <div>Jelenlegi összpontszám: {G.points}</div>
       <p>Hátralévő idő: <Countdown secondsRemaining={secondsRemaining} setSecondsRemaining={setSecondsRemaining} getServerTimer={moves.getTime}/></p>
       <div>Hátralevő idő: {G.milisecondsRemaining}</div>
