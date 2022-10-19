@@ -19,8 +19,14 @@ function arraysEqual(a: string[], b: string[]) {
   return true;
 }
 
+function randomDigits(numDigits: number) {
+  var result = "";
+  for (var i = 0; i < numDigits; i++) { result += `${randomInt(0,10)}`; }
+  return result;
+}
+
 function generateLoginCode() {
-  return `${randomInt(1, 1000)}-${randomInt(1, 10000)}-${randomInt(1, 1000)}`;
+  return `${randomDigits(3)}-${randomDigits(4)}-${randomDigits(3)}`;
 }
 
 export async function importer(teams: TeamsRepository, filename: string) {
