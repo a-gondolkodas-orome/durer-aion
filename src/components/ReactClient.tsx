@@ -1,13 +1,12 @@
-import { RelayClientWithBot_C, RelayClientWithBot_D, RelayClientWithBot_E, RelayClient_C, RelayClient_D, RelayClient_E } from '../games/relay/main';
-import { ClientWithBot_C, ClientWithBot_D, ClientWithBot_E } from '../games/ten-coins/main';
+import { RelayOnlineClient_C, RelayOnlineClient_D, RelayOnlineClient_E } from "../games/relay/main";
+import { OnlineClient_C as StrategyOnlineClient_C, OnlineClient_D as StrategyOnlineClient_D, OnlineClient_E as StrategyOnlineClient_E } from "../games/ten-coins/main";
 
-
-const DURER_XVI_CLIENT_C_RELAY = RelayClientOnlineClient_C;
-const DURER_XVI_CLIENT_D_RELAY = RelayClientOnlineClient_D;
-const DURER_XVI_CLIENT_E_RELAY = RelayClientOnlineClient_E;
-const DURER_XVI_CLIENT_C_STRATEGY = ClientOnlineClient_C;
-const DURER_XVI_CLIENT_D_STRATEGY = ClientOnlineClient_D;
-const DURER_XVI_CLIENT_E_STRATEGY = ClientOnlineClient_E;
+const DURER_XVI_CLIENT_C_RELAY = RelayOnlineClient_C;
+const DURER_XVI_CLIENT_D_RELAY = RelayOnlineClient_D;
+const DURER_XVI_CLIENT_E_RELAY = RelayOnlineClient_E;
+const DURER_XVI_CLIENT_C_STRATEGY = StrategyOnlineClient_C;
+const DURER_XVI_CLIENT_D_STRATEGY = StrategyOnlineClient_D;
+const DURER_XVI_CLIENT_E_STRATEGY = StrategyOnlineClient_E;
 
 export function DurerXVIRelayClient({ category, matchID, credentials }: {
   category: undefined | 'C' | 'D' | 'E', matchID: string,
