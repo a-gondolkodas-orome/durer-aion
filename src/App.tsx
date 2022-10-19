@@ -36,7 +36,9 @@ const onClick = () => {
       <Link to="/superstitious-counting-with-bot">Tic Tac Toe (with bot)</Link><br />
       <Link to="/chess-bishops">Chess bishops</Link><br />
       <Link to="/chess-bishops-with-bot">Tic Tac Toe (with bot)</Link><br />
-      <Link to="/relay">Relay</Link><br />
+      <Link to="/relay-c">Relay-c</Link><br />
+      <Link to="/relay-d">Relay-d</Link><br />
+      <Link to="/relay-e">Relay-e</Link><br />
       Game 14 online C: <Link to="/game-14-online-c">offline</Link>, <Link to="/game-14-online-c-with-bot">with bot</Link><br />
       Game 14 online D: <Link to="/game-14-online-d">offline</Link>, <Link to="/game-14-online-d-with-bot">with bot</Link><br />
       Game 14 online e: <Link to="/game-14-online-e">offline</Link>, <Link to="/game-14-online-e-with-bot">with bot</Link><br />
