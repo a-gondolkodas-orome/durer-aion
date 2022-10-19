@@ -1,13 +1,18 @@
 import { Game } from "boardgame.io";
 import { INVALID_MOVE, TurnOrder } from "boardgame.io/core";
 
+type Answer = {
+  answer: number;
+  date: string;
+}
+
 export interface MyGameState {
   currentProblem: number;
   problemText: string;
   answer: number | null;
   points: number;
   correctnessPreviousAnswer: boolean | null;
-  previousAnswers: Array<Array<number>>;
+  previousAnswers: Array<Array<Answer>>;
   previousPoints: Array<number>;
   currentProblemMaxPoints: number;
   numberOfTry: number;
@@ -56,6 +61,16 @@ export const GameRelay: Game<MyGameState> = {
       },
       turn: {  
         order: TurnOrder.ONCE,
+        onMove: ({G, ctx, playerID, events }) => {
+          console.log("onMove")
+          if(playerID === "0") {
+            let currentTime = new Date();
+            if(currentTime.getTime() - new Date(G.end).getTime() > 1000*10){
+              // Do not accept any answer if the time is over since more than 10 seconds
+              events.endGame();
+            }
+          }
+        }
       },
       start: true,
       next: "play",
@@ -67,7 +82,7 @@ export const GameRelay: Game<MyGameState> = {
             // He is not the bot OR G.answer is null (and it is not the first question)
             return INVALID_MOVE;
           }
-          G.previousAnswers[G.currentProblem].push(G.answer);
+          G.previousAnswers[G.currentProblem].push({answer: G.answer, date: new Date().toISOString()});
           G.problemText = problemText;
           G.previousAnswers.push(Array(0));
           G.correctnessPreviousAnswer = correctnessPreviousAnswer;
@@ -86,7 +101,7 @@ export const GameRelay: Game<MyGameState> = {
           if (playerID !== "1" || G.answer === null) {
             return INVALID_MOVE;
           }
-          G.previousAnswers[G.currentProblem].push(G.answer);
+          G.previousAnswers[G.currentProblem].push({answer: G.answer, date: new Date().toISOString()});
           G.answer = null;
           G.correctnessPreviousAnswer = false;
           G.numberOfTry++;
@@ -113,6 +128,18 @@ export const GameRelay: Game<MyGameState> = {
           G.milisecondsRemaining = new Date(G.end).getTime() - new Date().getTime();
         }
       },
+      turn: {
+        onMove: ({G, ctx, playerID, events }) => {
+          console.log("onMove")
+          if(playerID === "0") {
+            let currentTime = new Date();
+            if(currentTime.getTime() - new Date(G.end).getTime() > 1000*10){
+              // Do not accept any answer if the time is over since more than 10 seconds
+              events.endGame();
+            }
+          }
+        },    
+      }
     },
     turn: {
       onEnd: ({ G, ctx, playerID, events }) => {
