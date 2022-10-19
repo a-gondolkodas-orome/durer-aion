@@ -16,6 +16,7 @@ import auth from 'koa-basic-auth';
 import mount from 'koa-mount';
 import { closeMatch } from './server/team_manage';
 
+import * as Sentry from "@sentry/node";
 
 function getDb() {
   if (env.DATABASE_URL) {
@@ -114,5 +115,17 @@ if (argv[2] == "import") {
   //TODO regex mount protection for Boardgame.io endpoints
   
   configureTeamsRouter(server.router, teams,games);
+
+  Sentry.init({ dsn: "https://1f4c47a1692b4936951908e2669a1e99@sentry.durerinfo.hu/4" });
+
+  server.app.on("error", (err, ctx) => {
+    Sentry.withScope(function(scope) {
+      scope.addEventProcessor(function(event) {
+        return Sentry.addRequestDataToEvent(event, ctx.request);
+      });
+      Sentry.captureException(err);
+    });
+  });
+
   server.run(PORT);
 }
