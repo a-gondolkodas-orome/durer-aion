@@ -56,15 +56,16 @@ export async function checkStaleMatch(team: TeamModel): Promise<{ isStale: boole
   if (team.relayMatch.state == 'IN PROGRESS'){
     if(typeof team.relayMatch.endAt === 'string')
       team.relayMatch.endAt = new Date(team.relayMatch.endAt);
-    console.log(typeof team.relayMatch.endAt,team.relayMatch.endAt,now)
-    console.log(team.relayMatch.endAt.getTime() , now.getTime())
     if (team.relayMatch.endAt.getTime() < now.getTime())
       return { isStale: true, gameState: 'relayMatch' };
   }
 
-  if (team.strategyMatch.state == 'IN PROGRESS')
+  if (team.strategyMatch.state == 'IN PROGRESS') {
+    if(typeof team.strategyMatch.endAt === 'string')
+      team.strategyMatch.endAt = new Date(team.strategyMatch.endAt);
     if (team.strategyMatch.endAt.getTime() < now.getTime())
       return { isStale: true, gameState: 'strategyMatch' };
+  }
 
   return { isStale: false };
 }
