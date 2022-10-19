@@ -20,7 +20,7 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<
 
   moves: {
     changeCoins: ({ G, ctx, playerID, events }, K: number, L: number) => {
-      if (K < L || !G.coins.includes(K)) {
+      if (K <= L || L < 1 || !G.coins.includes(K)) {
         return INVALID_MOVE;
       }
       for(let i = 0; i < 10; i++){
