@@ -27,13 +27,11 @@ const injectPlayer = async (db: StorageAPI.Async | StorageAPI.Sync, matchId: str
 }
 ) => {
   let match = await fetch(db, matchId, { metadata: true });
-  if (!match.metadata.players[playerID].isConnected) {
-    console.log(`Match is indeed empty, and thus in need for a bot!`);
-    match.metadata.players[playerID].name = name;
-    match.metadata.players[playerID].credentials = credentials;
-    match.metadata.players[playerID].isConnected = true;
-    await db.setMetadata(matchId, match.metadata);
-  }
+  console.log(`Match is indeed empty, and thus in need for a bot!`);
+  match.metadata.players[playerID].name = name;
+  match.metadata.players[playerID].credentials = credentials;
+  match.metadata.players[playerID].isConnected = true;
+  await db.setMetadata(matchId, match.metadata);
 }
 
 /** Joins a bot to a match where the bot's side is not connected.
