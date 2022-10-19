@@ -55,9 +55,6 @@ export function getAdminCredentials() {
 getAdminCredentials(); // give love if no creds are supplied
 
 const games = [
-  gameWrapper(TicTacToeGame),
-  gameWrapper(SuperstitiousCountingGame),
-  gameWrapper(ChessBishopsGame),
   {...GameRelay, name: "relay_c"},
   {...GameRelay, name: "relay_d"},
   {...GameRelay, name: "relay_e"},
@@ -73,15 +70,12 @@ export const relayNames = {
 }
 
 export const strategyNames = {
-  C:'tic-tac-toe',
-  D:'superstitious-counting',
-  E:'chess-bishops',
+  C:'tencoins_c',
+  D:'tencoins_d',
+  E:'tencoins_e',
 }
 
-const bot_factories : any = [
-  botWrapper(TicTacToeStrategy),
-  botWrapper(SuperstitiousCountingStrategy),
-  botWrapper(ChessBishopsStrategy),
+const bot_factories = [
   botWrapper(RelayStrategy("C")),
   botWrapper(RelayStrategy("D")),
   botWrapper(RelayStrategy("E")),
@@ -97,16 +91,20 @@ if (argv[2] == "import") {
   const filename = argv[3];
   importer(teams, filename).then(() => exit(0));
 } else {
-  const bots = games.map((game, idx) => new (bot_factories[idx])({
-    enumerate: game.ai?.enumerate,
-    seed: game.seed,
-  }));
+  const botSetup = Object.fromEntries(
+  games.map((game,idx) =>
+    [game.name,
+    new (bot_factories[idx])({
+      enumerate: game.ai?.enumerate,
+      seed: game.seed,
+    })]
+  ));
   
   const server = Server({
     games: games,
     transport: new SocketIOButBotMoves(
       { https: undefined },
-      { "tic-tac-toe": bots[0], "superstitious-counting": bots[1], "chess-bishops": bots[2], "relay_c": bots[3], "relay_d": bots[4], "relay_e": bots[5], "tencoins_c": bots[6], "tencoins_d": bots[7], "tencoins_e": bots[8] },
+      botSetup,
       function onFinishedMatch(matchID) {
         closeMatch(matchID,teams,db);
       }

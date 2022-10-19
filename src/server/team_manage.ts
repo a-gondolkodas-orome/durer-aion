@@ -9,8 +9,8 @@ export async function startMatchStatus(matchId: string, ctx: Server.AppCtx): Pro
   return {
     state: 'IN PROGRESS',
     matchID: matchId,
-    startAt: currentMatch.state.G.start,
-    endAt: currentMatch.state.G.end,
+    startAt: new Date(currentMatch.state.G.start),
+    endAt: new Date(currentMatch.state.G.end),
   }
 }
 
@@ -19,8 +19,8 @@ export async function endMatchStatusFromScratch(matchId: string, ctx: Server.App
   return {
     state: 'FINISHED',
     matchID: matchId,
-    startAt: currentMatch.state.G.start,
-    endAt: currentMatch.state.G.end,
+    startAt: new Date(currentMatch.state.G.start),
+    endAt: new Date(currentMatch.state.G.end),
     score: currentMatch.state.G.score,
   }
 }
@@ -51,13 +51,19 @@ export async function allowedToStart(team: TeamModel, gameType: 'RELAY' | 'STRAT
 
 export async function checkStaleMatch(team: TeamModel): Promise<{ isStale: boolean, gameState?: 'relayMatch' | 'strategyMatch' }> {
   // Find if boardgame match is already timed out, but not registered
-  const now = new Date();
-  if (team.relayMatch.state == 'IN PROGRESS')
-    if (team.relayMatch.endAt < now)
+  const now = new Date(Date());
+  console.log(`Stale check performed at: ${now}/${Date()}`)
+  if (team.relayMatch.state == 'IN PROGRESS'){
+    if(typeof team.relayMatch.endAt === 'string')
+      team.relayMatch.endAt = new Date(team.relayMatch.endAt);
+    console.log(typeof team.relayMatch.endAt,team.relayMatch.endAt,now)
+    console.log(team.relayMatch.endAt.getTime() , now.getTime())
+    if (team.relayMatch.endAt.getTime() < now.getTime())
       return { isStale: true, gameState: 'relayMatch' };
+  }
 
   if (team.strategyMatch.state == 'IN PROGRESS')
-    if (team.strategyMatch.endAt < now)
+    if (team.strategyMatch.endAt.getTime() < now.getTime())
       return { isStale: true, gameState: 'strategyMatch' };
 
   return { isStale: false };
@@ -79,6 +85,9 @@ function inferenceGameType(gameName: string) {
 export async function closeMatch(matchId: string, teams: TeamsRepository, db: StorageAPI.Async | StorageAPI.Sync) {
   const currentMatch = await db.fetch(matchId, { state: true, metadata: true });
   const teamId = currentMatch.metadata.players[0].id;
+  //TODO FIX THIS
+  if(teamId == 0)
+    return;
   const team: TeamModel | null = await teams.getTeam({ id: teamId }) ?? null;
   if (typeof TeamModel === null)
     throw new Error(`Match team is not found, the match has the following players:${currentMatch.metadata.players}`);
