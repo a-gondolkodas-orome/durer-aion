@@ -3,6 +3,8 @@ import { MyGame as ChessBishopGame } from './games/chess-bishops/game';
 import { MyBoard as ChessBishopBoard } from './games/chess-bishops/board';
 import { MyGame as TicTacToeGame } from './games/tictactoe/game';
 import { MyBoard as TicTacToeBoard } from './games/tictactoe/board';
+import { MyGame as TenCoinsGame } from './games/ten-coins/game';
+import { MyBoard as TenCoinsBoard } from './games/ten-coins/board';
 import { MyGame as SuperstitiousCountingGame } from './games/superstitious-counting/game';
 import { MyBoard as SuperstitiousCountingBoard } from './games/superstitious-counting/board';
 import { gameWrapper } from './common/gamewrapper';
@@ -34,7 +36,27 @@ export default function () {
         {
           game: {...GameRelay, name: "relay_c"},
           board: RelayBoard
-        }
+        },
+        {
+          game: {...GameRelay, name: "relay_d"},
+          board: RelayBoard
+        },
+        {
+          game: {...GameRelay, name: "relay_e"},
+          board: RelayBoard
+        },
+        {
+          game: {...gameWrapper(TenCoinsGame), name: "tencoins_c"},
+          board: boardWrapper(TenCoinsBoard, "TODO")
+        },
+        {
+          game: {...gameWrapper(TenCoinsGame), name: "tencoins_d"},
+          board: boardWrapper(TenCoinsBoard, "TODO")
+        },
+        {
+          game: {...gameWrapper(TenCoinsGame), name: "tencoins_e"},
+          board: boardWrapper(TenCoinsBoard, "TODO")
+        },
       ]} />
     </div>
   );

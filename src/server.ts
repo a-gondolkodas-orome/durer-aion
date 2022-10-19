@@ -2,6 +2,7 @@ import { MyGame as TicTacToeGame } from './games/tictactoe/game';
 import { GameRelay } from './games/relay/game';
 import { MyGame as SuperstitiousCountingGame } from './games/superstitious-counting/game';
 import { MyGame as ChessBishopsGame } from './games/chess-bishops/game';
+import { MyGame as TenCoinsGame } from './games/ten-coins/game';
 import { PostgresStore } from 'bgio-postgres';
 import { argv, env, exit } from 'process';
 import { gameWrapper } from './common/gamewrapper';
@@ -12,6 +13,7 @@ import { strategy as TicTacToeStrategy } from './games/tictactoe/strategy';
 import { strategy as RelayStrategy } from './games/relay/strategy';
 import { strategy as SuperstitiousCountingStrategy } from './games/superstitious-counting/strategy';
 import { strategy as ChessBishopsStrategy } from './games/chess-bishops/strategy';
+import { strategyWrapper as TenCoinsStrategy } from './games/ten-coins/strategy';
 import { configureTeamsRouter } from './server/router';
 import { TeamsRepository } from './server/db';
 import { importer } from './server/team_import';
@@ -59,6 +61,9 @@ const games = [
   {...GameRelay, name: "relay_c"},
   {...GameRelay, name: "relay_d"},
   {...GameRelay, name: "relay_e"},
+  {...gameWrapper(TenCoinsGame), name: "tencoins_c"},
+  {...gameWrapper(TenCoinsGame), name: "tencoins_d"},
+  {...gameWrapper(TenCoinsGame), name: "tencoins_e"},
 ];
 
 export const relayNames = {
@@ -80,6 +85,9 @@ const bot_factories : any = [
   botWrapper(RelayStrategy("C")),
   botWrapper(RelayStrategy("D")),
   botWrapper(RelayStrategy("E")),
+  botWrapper(TenCoinsStrategy("C")),
+  botWrapper(TenCoinsStrategy("D")),
+  botWrapper(TenCoinsStrategy("E")),
 ];
 
 let { db, teams } = getDb();
@@ -98,7 +106,7 @@ if (argv[2] == "import") {
     games: games,
     transport: new SocketIOButBotMoves(
       { https: undefined },
-      { "tic-tac-toe": bots[0], "superstitious-counting": bots[1], "chess-bishops": bots[2], "relay_c": bots[3] },
+      { "tic-tac-toe": bots[0], "superstitious-counting": bots[1], "chess-bishops": bots[2], "relay_c": bots[3], "relay_d": bots[4], "relay_e": bots[5], "tencoins_c": bots[6], "tencoins_d": bots[7], "tencoins_e": bots[8] },
       function onFinishedMatch(matchID) {
         closeMatch(matchID,teams,db);
       }
