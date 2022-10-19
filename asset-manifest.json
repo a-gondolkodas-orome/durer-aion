@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/static/css/main.cc156b67.css",
-    "main.js": "/static/js/main.96765c17.js",
-    "static/js/787.e61c0340.chunk.js": "/static/js/787.e61c0340.chunk.js",
-    "index.html": "/index.html",
-    "main.cc156b67.css.map": "/static/css/main.cc156b67.css.map",
-    "main.96765c17.js.map": "/static/js/main.96765c17.js.map",
-    "787.e61c0340.chunk.js.map": "/static/js/787.e61c0340.chunk.js.map"
+    "main.css": "/durer-jatekok-new/static/css/main.cc156b67.css",
+    "main.js": "/durer-jatekok-new/static/js/main.90869428.js",
+    "static/js/787.e61c0340.chunk.js": "/durer-jatekok-new/static/js/787.e61c0340.chunk.js",
+    "index.html": "/durer-jatekok-new/index.html",
+    "main.cc156b67.css.map": "/durer-jatekok-new/static/css/main.cc156b67.css.map",
+    "main.90869428.js.map": "/durer-jatekok-new/static/js/main.90869428.js.map",
+    "787.e61c0340.chunk.js.map": "/durer-jatekok-new/static/js/787.e61c0340.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.cc156b67.css",
-    "static/js/main.96765c17.js"
+    "static/js/main.90869428.js"
   ]
 }
