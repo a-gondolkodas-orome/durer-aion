@@ -1,12 +1,26 @@
 import { State } from 'boardgame.io';
 import { MyGameState } from './game';
 
-const problems ={
+type Problem = {
+  problemText: string;
+  answer: number;
+  points: number;
+  url?: string;
+}
+
+type RelayProblems = {
+  C: Problem[];
+  D: Problem[];
+  E: Problem[];
+}
+
+const problems : RelayProblems ={
   C: [
     {
       problemText: "Dionüszosz szőlőskertjében egy fürt szőlő egyik szeme megpenészedett (az ábrán a szürke). Minden nap pontosan azok a szemek fognak még megpenészedni, amik érintkeznek penészes szemmel. Hány nap múlva lesz penészes az egész szőlőfürt? (Az ábrán a teljes fürt látható.)",
       answer: 4,
       points: 3,
+      url: "https://durer-images.s3.eu-central-1.amazonaws.com/PmeYbLwIvaAnVczS-szolo.png",
     },
     {
       problemText: "Mint köztudott, Trójánál a görögök egy óriási ajándéknak álcázott fából készült négylábú lóba rejtve katonákat juttattak a trójai várba. Ezzel a trójai falóval $25$-ször annyi láb került be a vár belsejébe, mint ahogy azt a trójaiak hitték. Hány görög katona jutott be a várba?",
@@ -14,12 +28,13 @@ const problems ={
       points: 3,
     },
     {
-      problemText: "Morpheusznak, az álmok istenének egy olyan négyzet alakú kertje van, aminek egy oldalának a hossza $30~\mathrm{m}$ (az ábrán a kert az $ABCD$ négyzet). Az oldalak harmadolópontjai által meghatározott nyolcszögbe mákot szeretne ültetni (az ábrán ez az $EFGHIJKL$ szürke nyolcszög). Hány négyzetméternyi területre szeretne mákot ültetni Morpheusz?",
+      problemText: "Morpheusznak, az álmok istenének egy olyan négyzet alakú kertje van, aminek egy oldalának a hossza $30~\\mathrm{m}$ (az ábrán a kert az $ABCD$ négyzet). Az oldalak harmadolópontjai által meghatározott nyolcszögbe mákot szeretne ültetni (az ábrán ez az $EFGHIJKL$ szürke nyolcszög). Hány négyzetméternyi területre szeretne mákot ültetni Morpheusz?",
       answer: 700,
       points: 4,
+      url: "https://durer-images.s3.eu-central-1.amazonaws.com/crkXLXvbKLReqmO_-nyolcszog.png",
     },
     {
-      problemText: "Zeusz egy óriási papírlapra egy hatalmas szabályos sokszöget rajzolt a halandóknak. A sokszög olyan nagy, hogy az emberek nem szeretnék körbejárni, viszont azt meg tudták mérni, hogy egy szöge $160^{\circ}$. Hány oldala van az alakzatnak? (Szabályos sokszög az a sokszög, aminek minden szöge ugyanakkora és minden oldala ugyanakkora.)",
+      problemText: "Zeusz egy óriási papírlapra egy hatalmas szabályos sokszöget rajzolt a halandóknak. A sokszög olyan nagy, hogy az emberek nem szeretnék körbejárni, viszont azt meg tudták mérni, hogy egy szöge $160^{\\circ}$. Hány oldala van az alakzatnak? (Szabályos sokszög az a sokszög, aminek minden szöge ugyanakkora és minden oldala ugyanakkora.)",
       answer: 18,
       points: 4,
     },
@@ -34,7 +49,7 @@ const problems ={
       points: 5,
     },
     {
-      problemText: "Egy $4\times 4$-es táblázat mezőit szeretnénk kitölteni $0$-sokkal és $2$-esekkel úgy, hogy minden mezőbe pontosan egy számot írunk. Hány olyan kitöltés van, aminél minden sorban és oszlopban pontosan egy darab $0$-s van, és van olyan sor, illetve oszlop is, amit balról jobbra, illetve fentről lefelé olvasva a $2022$ számot kapjuk?",
+      problemText: "Egy $4\\times 4$-es táblázat mezőit szeretnénk kitölteni $0$-sokkal és $2$-esekkel úgy, hogy minden mezőbe pontosan egy számot írunk. Hány olyan kitöltés van, aminél minden sorban és oszlopban pontosan egy darab $0$-s van, és van olyan sor, illetve oszlop is, amit balról jobbra, illetve fentről lefelé olvasva a $2022$ számot kapjuk?",
       answer: 24,
       points: 5,
     },
@@ -54,11 +69,13 @@ const problems ={
       problemText: "Dionüszosz szőlőskertjében egy fürt szőlő két szeme megpenészedett (az ábrán a szürkék). Minden nap pontosan azok a szemek fognak még megpenészedni, amik legalább két penészes szemmel érintkeznek. Hány nap múlva lesz penészes az egész szőlőfürt? (Az ábrán a teljes fürt látható.)",
       answer: 6,
       points: 3,
+      url: "https://durer-images.s3.eu-central-1.amazonaws.com/CX_-UsFATq6y3-5N-szolo2.PNG",
     },
     {
-      problemText: "Morpheusznak, az álmok istenének egy olyan négyzet alakú kertje van, aminek egy oldalának a hossza $30~\mathrm{m}$ (az ábrán a kert az $ABCD$ négyzet). Az oldalak harmadolópontjai által meghatározott nyolcszögbe mákot szeretne ültetni (az ábrán ez az $EFGHIJKL$ szürke nyolcszög). Hány négyzetméternyi területre szeretne mákot ültetni Morpheusz?",
+      problemText: "Morpheusznak, az álmok istenének egy olyan négyzet alakú kertje van, aminek egy oldalának a hossza $30~\\mathrm{m}$ (az ábrán a kert az $ABCD$ négyzet). Az oldalak harmadolópontjai által meghatározott nyolcszögbe mákot szeretne ültetni (az ábrán ez az $EFGHIJKL$ szürke nyolcszög). Hány négyzetméternyi területre szeretne mákot ültetni Morpheusz?",
       answer: 700,
       points: 3,
+      url: "https://durer-images.s3.eu-central-1.amazonaws.com/crkXLXvbKLReqmO_-nyolcszog.png",
     },
     {
       problemText: "Jóska, Miki és Viktor elmentek a Trójai Falóba. Jóska rendelt $2$ gyrost pitában és $3$ baklavát, amiért $3660$ Ft-ot fizetett, míg Miki $5330$ Ft-ért $3$ gyrost pitában és $4$ baklavát rendelt. Hány forintot fizetett Viktor, ha $5$ gyrost pitában és $6$ baklavát rendelt?",
@@ -76,7 +93,7 @@ const problems ={
       points: 4,
     },
     {
-      problemText: "Egy $4\times 4$-es táblázat mezőit szeretnénk kitölteni $0$-sokkal és $2$-esekkel úgy, hogy minden mezőbe pontosan egy számot írunk. Hány olyan kitöltés van, aminél minden sorban és oszlopban pontosan egy darab $0$-s van, és van olyan sor, illetve oszlop is, amit balról jobbra, illetve fentről lefelé olvasva a $2022$ számot kapjuk?",
+      problemText: "Egy $4\\times 4$-es táblázat mezőit szeretnénk kitölteni $0$-sokkal és $2$-esekkel úgy, hogy minden mezőbe pontosan egy számot írunk. Hány olyan kitöltés van, aminél minden sorban és oszlopban pontosan egy darab $0$-s van, és van olyan sor, illetve oszlop is, amit balról jobbra, illetve fentről lefelé olvasva a $2022$ számot kapjuk?",
       answer: 24,
       points: 5,
     },
@@ -98,7 +115,7 @@ const problems ={
   ],
   E: [
     {
-      problemText: "Zeusz egy óriási papírlapra egy hatalmas szabályos sokszöget rajzolt a halandóknak. A sokszög olyan nagy, hogy az emberek nem szeretnék körbejárni, viszont azt meg tudták mérni, hogy egy szöge $160^{\circ}$. Hány oldala van az alakzatnak? (Szabályos sokszög az a sokszög, aminek minden szöge ugyanakkora és minden oldala ugyanakkora.)",
+      problemText: "Zeusz egy óriási papírlapra egy hatalmas szabályos sokszöget rajzolt a halandóknak. A sokszög olyan nagy, hogy az emberek nem szeretnék körbejárni, viszont azt meg tudták mérni, hogy egy szöge $160^{\\circ}$. Hány oldala van az alakzatnak? (Szabályos sokszög az a sokszög, aminek minden szöge ugyanakkora és minden oldala ugyanakkora.)",
       answer: 18,
       points: 3,
     },
@@ -118,7 +135,7 @@ const problems ={
       points: 4,
     },
     {
-      problemText: "Egy $4\times 4$-es táblázat mezőit szeretnénk kitölteni $0$-sokkal és $2$-esekkel úgy, hogy minden mezőbe pontosan egy számot írunk. Hány olyan kitöltés van, aminél minden sorban és oszlopban pontosan egy darab $0$-s van, és van olyan sor, illetve oszlop is, amit balról jobbra, illetve fentről lefelé olvasva a $2022$ számot kapjuk?",
+      problemText: "Egy $4\\times 4$-es táblázat mezőit szeretnénk kitölteni $0$-sokkal és $2$-esekkel úgy, hogy minden mezőbe pontosan egy számot írunk. Hány olyan kitöltés van, aminél minden sorban és oszlopban pontosan egy darab $0$-s van, és van olyan sor, illetve oszlop is, amit balról jobbra, illetve fentről lefelé olvasva a $2022$ számot kapjuk?",
       answer: 24,
       points: 4,
     },
@@ -128,7 +145,7 @@ const problems ={
       points: 5,
     },
     {
-      problemText: "Egy pozitív egész számot \emph{felezett}nek nevezünk, ha kétjegyű és a két számjegyének szorzata osztója az eredeti számnak. Mennyi az összege a felezett számoknak? (Megjegyzés: a $0$ nem osztója semelyik számnak sem.)",
+      problemText: "Egy pozitív egész számot \\emph{felezett}nek nevezünk, ha kétjegyű és a két számjegyének szorzata osztója az eredeti számnak. Mennyi az összege a felezett számoknak? (Megjegyzés: a $0$ nem osztója semelyik számnak sem.)",
       answer: 98,
       points: 5,
     },
@@ -148,7 +165,11 @@ const problems ={
 export function strategy(category: "C" | "D" | "E"){
   return (state: State<MyGameState>, botID: string): [any[] | undefined, string] => {
     if (state.G.numberOfTry === 0) {
-      return [[problems[category][state.G.currentProblem].problemText,3,false], "firstProblem"];
+      let url = problems[category][state.G.currentProblem].url;
+      if(url === undefined){
+        url = "";
+      }
+      return [[problems[category][state.G.currentProblem].problemText,3,false, url], "firstProblem"];
     }
     let correctnessPreviousAnswer = false;
     if(state.G.answer === problems[category][state.G.currentProblem].answer){
@@ -160,7 +181,11 @@ export function strategy(category: "C" | "D" | "E"){
     
     // Next problem if there is one and the time is not over
     if (state.G.currentProblem < 8) { // TODO: it should be 9 if we count from 1 and not from 0. But it is currently 8 because we count from 0.
-      return [[problems[category][state.G.currentProblem+1].problemText,problems[category][state.G.currentProblem+1].points,correctnessPreviousAnswer], "newProblem"];
+      let url = problems[category][state.G.currentProblem].url;
+      if(url === undefined){
+        url = "";
+      }
+     return [[problems[category][state.G.currentProblem+1].problemText,problems[category][state.G.currentProblem+1].points,correctnessPreviousAnswer, url], "newProblem"];
     }
     // End of the game
     return [[], "endGame"];
