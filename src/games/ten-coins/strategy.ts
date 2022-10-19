@@ -60,7 +60,7 @@ function startingPosition({ G, ctx}: any, category: "C" | "D" | "E"): {coins: Ar
       let numbers = [1,2,3,4];
       let rndNumber = Math.floor(Math.random()*2);
       for(let i = 0; i < rndNumber; i++){
-        numbers.splice(Math.floor(Math.random()*numbers.length));
+        numbers.splice(Math.floor(Math.random()*numbers.length),1);
       }
       return {coins: getRandomNumbers(numbers, 10-numbers.length)};
     }
@@ -83,7 +83,7 @@ function startingPosition({ G, ctx}: any, category: "C" | "D" | "E"): {coins: Ar
       let numbers = [1,2,3,4,5];
       let rndNumber = Math.floor(Math.random()*3);
       for(let i = 0; i < rndNumber; i++){
-        numbers.splice(Math.floor(Math.random()*numbers.length));
+        numbers.splice(Math.floor(Math.random()*numbers.length),1);
       }
       return {coins: getRandomNumbers(numbers, 10-numbers.length)};
     }
