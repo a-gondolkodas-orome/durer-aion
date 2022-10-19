@@ -9,6 +9,9 @@ export function Strategy(props: {state: TeamModelDto}) {
         <FinisheStrategy state={props.state}/>
       )
     case "IN PROGRESS":
+      console.log(props.state.category as 'C' | 'D' | 'E')
+      console.log(props.state.credentials)
+      console.log((props.state.strategyMatch as InProgressMatchStatus).matchID)
       return (
         <DurerXVIStrategyClient 
           category={props.state.category as 'C' | 'D' | 'E'}
