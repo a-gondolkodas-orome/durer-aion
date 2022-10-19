@@ -98,7 +98,7 @@ if (argv[2] == "import") {
     games: games,
     transport: new SocketIOButBotMoves(
       { https: undefined },
-      { "tic-tac-toe": bots[0], "superstitious-counting": bots[1], "chess-bishops": bots[2], "relay": bots[3] },
+      { "tic-tac-toe": bots[0], "superstitious-counting": bots[1], "chess-bishops": bots[2], "relay_c": bots[3] },
       function onFinishedMatch(matchID) {
         closeMatch(matchID,teams,db);
       }

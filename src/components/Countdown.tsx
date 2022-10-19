@@ -36,7 +36,7 @@ export function Countdown(props: PropsWithoutRef<{ secondsRemaining: number | nu
         } else {
             setCountdown(`${Math.floor(props.secondsRemaining / 3600 / 1000).toString().padStart(2, '0')
                 }:${(Math.floor(props.secondsRemaining / 60 / 1000) % 60).toString().padStart(2, '0')
-                }:${(props.secondsRemaining / 1000 % 60).toString().slice(0,2).padStart(2, '0')
+                }:${Math.floor(props.secondsRemaining / 1000 % 60).toString().slice(0,2).padStart(2, '0')
                 }`);
         }
     }, [props.secondsRemaining]);
