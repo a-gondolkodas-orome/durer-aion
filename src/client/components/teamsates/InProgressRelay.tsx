@@ -54,7 +54,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
             task={G.problemText}
             maxPoints={G.currentProblemMaxPoints}
             serial={G.currentProblem+1}
-            pictureUrl={null /* TODO WHERE is Picture */}
+            pictureUrl={G.url}
           />
         </Stack>
         <Stack sx={{ width: "30px" }} />
@@ -66,7 +66,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
           padding: '30px',
         }}>
           <ExcerciseForm 
-            previousTries={G.previousAnswers[G.currentProblem]} 
+            previousTries={G.previousAnswers[G.currentProblem].map(it=>it.answer)} 
             previousCorrectness={G.correctnessPreviousAnswer}
             attempt={(G.currentProblem+1)*3+G.numberOfTry}
             onSubmit={(input) => {

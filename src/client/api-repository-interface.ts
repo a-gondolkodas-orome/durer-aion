@@ -4,7 +4,7 @@ import { TeamModelDto } from "./dto/TeamStateDto";
 
 class ApiAxios {
   static instance(): AxiosInstance {
-    let apiUrl = 'http://localhost:8000'; // TODO env or something
+    let apiUrl = 'http://localhost:80'; // TODO env or something
 
     return axios.create({
       baseURL: apiUrl,
@@ -57,7 +57,10 @@ export class RealClientRepository implements ClientRepository {
     try {
       result = await ApiAxios.instance().get(url);
     } catch (e: any) {
-      console.log(e)
+      const { status, data } = e.response;
+      if(status == "404") {
+        throw new Error('Nem létező kód');
+      }
       // here we can set message according to status (or data)
       throw new Error('Váratlan hiba történt');
     }
