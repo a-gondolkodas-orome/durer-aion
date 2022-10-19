@@ -1,8 +1,33 @@
-import React from 'react';
+import React, { useRef } from 'react';
+import { useNavigate  } from 'react-router-dom';
 import './App.css';
 import { Link } from 'react-router-dom';
 
+
 function App() {
+
+const inputEl = useRef<HTMLInputElement>(null);
+const navigate = useNavigate()
+
+const codesC = ["111-1111-111"]
+const codesD = ["222-2222-222"]
+const codesE = ["333-3333-333"]
+
+const onClick = () => {
+  // read input value
+  const inputValue = inputEl.current!.value;
+  if(codesC.includes(inputValue)){
+    navigate('/relay-c')
+  } else if (codesD.includes(inputValue)){
+    navigate('/relay-d')
+  } else if (codesE.includes(inputValue)){
+    navigate('/relay-e')
+  } else {
+    alert("Nem megfelelő kód!")
+  }
+  inputEl.current!.value = '';
+};
+
   return (
     <div>
       <Link to="/tictactoe">Tic Tac Toe</Link><br />
@@ -22,6 +47,11 @@ function App() {
       Ten coins D: <Link to="/ten-coins-d">offline</Link>, <Link to="/ten-coins-with-bot-d">with bot</Link><br />
       Ten coins E: <Link to="/ten-coins-e">offline</Link>, <Link to="/ten-coins-with-bot-e">with bot</Link><br />
       <Link to="/lobby">Lobby (needs running server: <pre>npm run dev:server</pre></Link><br />
+      <label htmlFor="login"> Kód: </label>
+      <input ref={inputEl} id="login" type="text" className="border-2" />
+      <button
+            className="cta-button" onClick={() => onClick()}
+            >Bejelentkezés</button>
     </div>
   );
 }

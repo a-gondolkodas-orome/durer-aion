@@ -7,7 +7,7 @@ import { Route, BrowserRouter, Routes } from 'react-router-dom';
 import { Client as TicTacToeClient, ClientWithBot as TicTacToeWithBotClient } from './games/tictactoe/main';
 import { Client as SuperstitiousCountingClient, ClientWithBot as SuperstitiousCountingWithBotClient } from './games/superstitious-counting/main';
 import { Client as ChessBishopsClient, ClientWithBot as ChessBishopsWithBotClient } from './games/chess-bishops/main';
-import Relay from './games/relay/main';
+import { RelayClientWithBot_C, RelayClientWithBot_D, RelayClientWithBot_E } from './games/relay/main';
 import { Client as Game14OnlineCClient, ClientWithBot as Game14OnlineCWithBotClient } from './games/14oc/main';
 import { Client as Game14OnlineDClient, ClientWithBot as Game14OnlineDWithBotClient } from './games/14od/main';
 import { Client as Game14OnlineEClient, ClientWithBot as Game14OnlineEWithBotClient } from './games/14oe/main';
@@ -32,7 +32,9 @@ render(
         <Route path="/superstitious-counting-with-bot" element={<SuperstitiousCountingWithBotClient />} />
         <Route path="/chess-bishops" element={<ChessBishopsClient />} />
         <Route path="/chess-bishops-with-bot" element={<ChessBishopsWithBotClient />} />
-        <Route path="/relay" element={<Relay />} />
+        <Route path="/relay-c" element={<RelayClientWithBot_C />} />
+        <Route path="/relay-d" element={<RelayClientWithBot_D />} />
+        <Route path="/relay-e" element={<RelayClientWithBot_E />} />
         <Route path="/lobby" element={<Lobby />} />
         <Route path="/game-14-online-c" element={<Game14OnlineCClient />} />
         <Route path="/game-14-online-c-with-bot" element={<Game14OnlineCWithBotClient />} />
