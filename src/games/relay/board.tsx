@@ -35,6 +35,7 @@ export const MyBoard = ({ G, ctx, moves }: MyGameProps) =>{
       <p>Hátralévő idő: <Countdown secondsRemaining={secondsRemaining} setSecondsRemaining={setSecondsRemaining} getServerTimer={moves.getTime}/></p>
       <div>Hátralevő idő: {G.milisecondsRemaining}</div>
       <button onClick={() => moves.getTime()}>Asd</button>
+      <button onClick={() => moves.startGame()}>Váltó kezdése</button>
     </div>
   );
 }

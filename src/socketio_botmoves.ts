@@ -125,14 +125,19 @@ export class SocketIOButBotMoves extends SocketIO {
               return;
             }
             const {state} = await fetch(app.context.db, matchID, {state: true});
-            if (state.ctx.phase !== 'play' || currentPlayer(state.ctx) !== BOT_ID) {
+            if (currentPlayer(state.ctx) !== BOT_ID) {
               // Not a real action, possibly a failed move.
               return;
             }
-            const botAction = await bot.play(
-              state,
-              GetBotPlayer(state, {[BOT_ID]: bot}) as any
-            );
+            let botAction = undefined;
+            if (state.ctx.phase === 'play' || state.ctx.phase === 'startNewGame'){
+              botAction = await bot.play(
+                state,
+                GetBotPlayer(state, {[BOT_ID]: bot}) as any
+              );
+            } else {
+              return;
+            }
             
             const master = new Master(
               game,

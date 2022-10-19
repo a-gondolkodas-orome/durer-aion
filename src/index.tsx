@@ -57,6 +57,7 @@ render(
         <Route path="/ten-coins-e" element={<TenCoinsClient_E />} />
         <Route path="/ten-coins-with-bot-e" element={<TenCoinsWithBotClient_E />} />
         */}
+        <Route path='*' element={<NotFound/>}></Route>
         </Routes>
       </BrowserRouter>
     </RecoilRoot>
