@@ -1,8 +1,15 @@
 import React from 'react';
 import './App.css';
 import { Link } from 'react-router-dom';
+import { Main } from './components/Main';
+import { RecoilRoot } from 'recoil';
 
 function App() {
+
+  return (
+    <Main />
+  )
+  /*
   return (
     <div>
       <Link to="/tictactoe">Tic Tac Toe</Link><br />
@@ -23,7 +30,7 @@ function App() {
       Ten coins E: <Link to="/ten-coins-e">offline</Link>, <Link to="/ten-coins-with-bot-e">with bot</Link><br />
       <Link to="/lobby">Lobby (needs running server: <pre>npm run dev:server</pre></Link><br />
     </div>
-  );
+  );*/
 }
 
 export default App;

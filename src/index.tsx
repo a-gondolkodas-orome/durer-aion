@@ -14,18 +14,22 @@ import { Client as Game14OnlineEClient, ClientWithBot as Game14OnlineEWithBotCli
 import { Client as Game15OnlineCClient, ClientWithBot as Game15OnlineCWithBotClient } from './games/15oc/main';
 import { Client as Game15OnlineDClient, ClientWithBot as Game15OnlineDWithBotClient } from './games/15od/main';
 import { Client as Game15OnlineEClient, ClientWithBot as Game15OnlineEWithBotClient } from './games/15oe/main';
-import { Client_C as TenCoinsClient_C, ClientWithBot_C as TenCoinsWithBotClient_C} from './games/ten-coins/main';
-import { Client_D as TenCoinsClient_D, ClientWithBot_D as TenCoinsWithBotClient_D} from './games/ten-coins/main';
-import { Client_E as TenCoinsClient_E, ClientWithBot_E as TenCoinsWithBotClient_E} from './games/ten-coins/main';
+import { Client_C as TenCoinsClient_C, ClientWithBot_C as TenCoinsWithBotClient_C } from './games/ten-coins/main';
+import { Client_D as TenCoinsClient_D, ClientWithBot_D as TenCoinsWithBotClient_D } from './games/ten-coins/main';
+import { Client_E as TenCoinsClient_E, ClientWithBot_E as TenCoinsWithBotClient_E } from './games/ten-coins/main';
 import Lobby from './lobby';
+
 import NotFound from './pages/NotFound';
+import { RecoilRoot } from 'recoil';
 
 const root = document.getElementById('root');
 render(
   <React.StrictMode>
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<App />} />
+    <RecoilRoot>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<App />} />
+          {/*
         <Route path="/tictactoe" element={<TicTacToeClient />} />
         <Route path="/tictactoe-with-bot" element={<TicTacToeWithBotClient />} />
         <Route path="/superstitious-counting" element={<SuperstitiousCountingClient />} />
@@ -52,8 +56,10 @@ render(
         <Route path="/ten-coins-with-bot-d" element={<TenCoinsWithBotClient_D />} />
         <Route path="/ten-coins-e" element={<TenCoinsClient_E />} />
         <Route path="/ten-coins-with-bot-e" element={<TenCoinsWithBotClient_E />} />
-      </Routes>
-    </BrowserRouter>
+        */}
+        </Routes>
+      </BrowserRouter>
+    </RecoilRoot>
   </React.StrictMode>,
   root
 );
