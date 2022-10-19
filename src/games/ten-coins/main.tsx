@@ -16,6 +16,6 @@ Kezdetben van 10 érme az asztalon, melyek értékei 1 és 5 közé eső egésze
 (K: Melyik típusú érmét változtatjátok meg?; L: Mi legyen az új érme)
 </p>
 
-export const { Client: Client_C, ClientWithBot: ClientWithBot_C, OnlineClient: OnlineClient_C } = ClientFactory(MyGame, MyBoard, strategyWrapper("C"), descriptionC);
-export const { Client: Client_D, ClientWithBot: ClientWithBot_D, OnlineClient: OnlineClient_D } = ClientFactory(MyGame, MyBoard, strategyWrapper("D"), descriptionDE);
-export const { Client: Client_E, ClientWithBot: ClientWithBot_E, OnlineClient: OnlineClient_E } = ClientFactory(MyGame, MyBoard, strategyWrapper("E"), descriptionDE);
+export const { Client: Client_C, ClientWithBot: ClientWithBot_C, OnlineClient: OnlineClient_C } = ClientFactory({...MyGame, name: "tencoins_c"}, MyBoard, strategyWrapper("C"), descriptionC);
+export const { Client: Client_D, ClientWithBot: ClientWithBot_D, OnlineClient: OnlineClient_D } = ClientFactory({...MyGame, name: "tencoins_d"}, MyBoard, strategyWrapper("D"), descriptionDE);
+export const { Client: Client_E, ClientWithBot: ClientWithBot_E, OnlineClient: OnlineClient_E } = ClientFactory({...MyGame, name: "tencoins_e"}, MyBoard, strategyWrapper("E"), descriptionDE);
