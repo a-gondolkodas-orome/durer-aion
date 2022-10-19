@@ -25,7 +25,7 @@ export function boardWrapper(board: any, description: any) { // TODO: solve type
         {ctx.phase === 'chooseRole' && <p> Válaszd ki, hogy első vagy második játékos akarsz-e lenni. </p>}
         {ctx.phase === 'play' && ctx.currentPlayer === "0" && <p> Most Te jössz! </p>}
         {ctx.phase === 'play' && ctx.currentPlayer === "1" && <p> Várakozás a szerverre... </p>}
-        {ctx.phase === 'startNewGame' && G.winner === "0" && <p> Gratulálok, nyertetek! </p>}
+        {ctx.phase === 'startNewGame' && G.winner === "0" && <p> Gratulálok, nyertetek! Verjétek meg még egyszer a gépet!</p>}
         {ctx.phase === 'startNewGame' && G.winner === "1" && <p> Sajnos a gép nyert. </p>}
         {ctx.gameover === true && G.points > 0 && <p> Gratulálok, kétszer egymást után megvertétek a gépet. {G.points} pontot értetek el ezen a fordulón. </p>}
         {ctx.gameover === true && G.points === 0 && <p> Sajnos lejárt az időtök! :( </p>}
