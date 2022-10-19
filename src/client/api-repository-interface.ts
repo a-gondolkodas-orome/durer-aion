@@ -4,7 +4,7 @@ import { TeamModelDto } from "./dto/TeamStateDto";
 
 class ApiAxios {
   static instance(): AxiosInstance {
-    let apiUrl = 'http://localhost:80'; // TODO env or something
+    let apiUrl = '/'; // TODO env or something
 
     return axios.create({
       baseURL: apiUrl,
