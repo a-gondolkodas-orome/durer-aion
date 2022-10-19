@@ -49,14 +49,6 @@ export function getAdminCredentials() {
 
 getAdminCredentials(); // give love if no creds are supplied
 
-const games = [
-  {...GameRelay, name: "relay_c"},
-  {...GameRelay, name: "relay_d"},
-  {...GameRelay, name: "relay_e"},
-  {...gameWrapper(TenCoinsGame), name: "tencoins_c"},
-  {...gameWrapper(TenCoinsGame), name: "tencoins_d"},
-  {...gameWrapper(TenCoinsGame), name: "tencoins_e"},
-];
 
 export const relayNames = {
   C:'relay_c',
@@ -69,6 +61,16 @@ export const strategyNames = {
   D:'tencoins_d',
   E:'tencoins_e',
 }
+
+const games = [
+  {...GameRelay, name: relayNames.C},
+  {...GameRelay, name: relayNames.D},
+  {...GameRelay, name: relayNames.E},
+  {...gameWrapper(TenCoinsGame), name: strategyNames.C},
+  {...gameWrapper(TenCoinsGame), name: strategyNames.D},
+  {...gameWrapper(TenCoinsGame), name: strategyNames.E},
+];
+
 
 const bot_factories = [
   botWrapper(RelayStrategy("C")),
