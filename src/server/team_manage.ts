@@ -1,4 +1,6 @@
+import { PostgresStore } from "bgio-postgres";
 import { Game, Server, StorageAPI } from "boardgame.io";
+import { Async, Sync } from "boardgame.io/internal";
 import { assert } from "console";
 import { relayNames, strategyNames } from "../server";
 import { TeamsRepository } from "./db";
@@ -101,18 +103,16 @@ export async function closeMatch(matchId: string, teams: TeamsRepository, db: St
   team!.update({ type: finishState });
 }
 
-export async function getNewGame(ctx: Server.AppCtx, teams: TeamsRepository, games: Game<any, Record<string, unknown>, any>[], gameType: 'RELAY' | 'STRATEGY') {
-  const GUID = ctx.params.GUID;
-  const team: TeamModel = await teams.getTeam({ id: GUID }) ?? ctx.throw(404, `Team with {id:${GUID}} not found.`)
+export async function getNewGame(team: TeamModel, db: Async | Sync, teams: TeamsRepository, games: Game<any, Record<string, unknown>, any>[], gameType: 'RELAY' | 'STRATEGY') {
   
   //if middelware setup was better understand, this should be in a separated midleware
   const staleInfo =  await checkStaleMatch(team);
   if(staleInfo.isStale){
-    closeMatch((team[staleInfo.gameState!] as InProgressMatchStatus).matchID,teams,ctx.db);
+    closeMatch((team[staleInfo.gameState!] as InProgressMatchStatus).matchID, teams, db);
   }
   
   if (! await allowedToStart(team, gameType)){
-    ctx.throw(403, "Team is not allowed to start game.")
+    throw "Team is not allowed to start game.";
   }
   
   //find gameName based on team category
@@ -120,7 +120,7 @@ export async function getNewGame(ctx: Server.AppCtx, teams: TeamsRepository, gam
   const gameName = (gameType == 'RELAY') ?
     relayNames[team.category as keyof typeof relayNames] : strategyNames[team.category as keyof typeof strategyNames] //TODO set type better??;
 
-  const game: Game<any, Record<string, unknown>> = games.find((g) => g.name === gameName) ?? ctx.throw(404, 'Game ' + gameName + ' not found');
+  const game: Game<any, Record<string, unknown>> = games.find((g) => g.name === gameName) ?? ((()=>{throw 'Game ' + gameName + ' not found'})());
 
   return { game, team }
 }
