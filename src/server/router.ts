@@ -54,7 +54,7 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
    * @return - A match object.
    */
   router.get('/team/admin/:id/logs', async (ctx) => {
-    // TODO authorize!!
+    //It is already authenticated by the admin mount routing
     const matchID = ctx.params.id;
     const { log } = await (ctx.db as StorageAPI.Async).fetch(matchID, {
       log: true,
@@ -73,7 +73,6 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
    * @return - A match object.
    */
   router.get('/team/admin/:id/state', async (ctx) => {
-    // TODO authorize!!
     const matchID = ctx.params.id;
     const { state } = await (ctx.db as StorageAPI.Async).fetch(matchID, {
       state: true,
