@@ -85,10 +85,7 @@ function inferenceGameType(gameName: string) {
 
 export async function closeMatch(matchId: string, teams: TeamsRepository, db: StorageAPI.Async | StorageAPI.Sync) {
   const currentMatch = await db.fetch(matchId, { state: true, metadata: true });
-  const teamId = currentMatch.metadata.players[0].id;
-  //TODO FIX THIS
-  if(teamId == 0)
-    return;
+  const teamId = currentMatch.metadata.players[0].name;
   const team: TeamModel | null = await teams.getTeam({ id: teamId }) ?? null;
   if (typeof TeamModel === null)
     throw new Error(`Match team is not found, the match has the following players:${currentMatch.metadata.players}`);
