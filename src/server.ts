@@ -1,7 +1,4 @@
-import { MyGame as TicTacToeGame } from './games/tictactoe/game';
 import { GameRelay } from './games/relay/game';
-import { MyGame as SuperstitiousCountingGame } from './games/superstitious-counting/game';
-import { MyGame as ChessBishopsGame } from './games/chess-bishops/game';
 import { MyGame as TenCoinsGame } from './games/ten-coins/game';
 import { PostgresStore } from 'bgio-postgres';
 import { argv, env, exit } from 'process';
@@ -9,10 +6,7 @@ import { gameWrapper } from './common/gamewrapper';
 import { SocketIOButBotMoves } from './socketio_botmoves';
 import { Server } from 'boardgame.io/server';
 import botWrapper from './common/botwrapper';
-import { strategy as TicTacToeStrategy } from './games/tictactoe/strategy';
 import { strategy as RelayStrategy } from './games/relay/strategy';
-import { strategy as SuperstitiousCountingStrategy } from './games/superstitious-counting/strategy';
-import { strategy as ChessBishopsStrategy } from './games/chess-bishops/strategy';
 import { strategyWrapper as TenCoinsStrategy } from './games/ten-coins/strategy';
 import { configureTeamsRouter } from './server/router';
 import { TeamsRepository } from './server/db';
