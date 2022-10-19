@@ -1,11 +1,12 @@
-import { OnlineClient as TicTacToeOnlineClient } from '../games/tictactoe/main';
+import { RelayOnlineClient_C, RelayOnlineClient_D, RelayOnlineClient_E } from "../games/relay/main";
+import { OnlineClient_C as StrategyOnlineClient_C, OnlineClient_D as StrategyOnlineClient_D, OnlineClient_E as StrategyOnlineClient_E } from "../games/ten-coins/main";
 
-const DURER_XVI_CLIENT_C_RELAY = TicTacToeOnlineClient;
-const DURER_XVI_CLIENT_D_RELAY = TicTacToeOnlineClient;
-const DURER_XVI_CLIENT_E_RELAY = TicTacToeOnlineClient;
-const DURER_XVI_CLIENT_C_STRATEGY = TicTacToeOnlineClient;
-const DURER_XVI_CLIENT_D_STRATEGY = TicTacToeOnlineClient;
-const DURER_XVI_CLIENT_E_STRATEGY = TicTacToeOnlineClient;
+const DURER_XVI_CLIENT_C_RELAY = RelayOnlineClient_C;
+const DURER_XVI_CLIENT_D_RELAY = RelayOnlineClient_D;
+const DURER_XVI_CLIENT_E_RELAY = RelayOnlineClient_E;
+const DURER_XVI_CLIENT_C_STRATEGY = StrategyOnlineClient_C;
+const DURER_XVI_CLIENT_D_STRATEGY = StrategyOnlineClient_D;
+const DURER_XVI_CLIENT_E_STRATEGY = StrategyOnlineClient_E;
 
 export function DurerXVIRelayClient({ category, matchID, credentials }: {
   category: undefined | 'C' | 'D' | 'E', matchID: string,

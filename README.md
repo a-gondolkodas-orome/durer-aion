@@ -94,6 +94,7 @@ First-time you will need: `docker-compose build`
 
 :)
 
+Except routning, and KOA hooks. 
 If you install a package used by the backend, you will have to `docker-compose build`.
 
 ## How to create a new game
