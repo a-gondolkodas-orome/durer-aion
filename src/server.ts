@@ -18,6 +18,7 @@ import { importer } from './server/team_import';
 
 import auth from 'koa-basic-auth';
 import mount from 'koa-mount';
+import { closeMatch } from './server/team_manage';
 
 
 function getDb() {
@@ -99,7 +100,7 @@ if (argv[2] == "import") {
       { https: undefined },
       { "tic-tac-toe": bots[0], "superstitious-counting": bots[1], "chess-bishops": bots[2], "relay": bots[3] },
       function onFinishedMatch(matchID) {
-        // teams.onMatchFinished
+        closeMatch(matchID,teams,db);
       }
     ),
     db,
