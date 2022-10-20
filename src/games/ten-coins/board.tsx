@@ -23,7 +23,7 @@ export function MyBoard({ G, ctx, moves }: MyGameProps) {
     const inputValueL = parseInt(inputL.current!.value);
     inputK.current!.value = '';
     inputL.current!.value = '';
-    //console.log("asd")
+    console.log("asd")
     moves.changeCoins(inputValueK, inputValueL);
     sendDataStrategyStep(teamState, inputValueK, inputValueL, G, ctx);
   };
