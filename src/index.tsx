@@ -19,13 +19,29 @@ import { Client_D as TenCoinsClient_D, ClientWithBot_D as TenCoinsWithBotClient_
 import { Client_E as TenCoinsClient_E, ClientWithBot_E as TenCoinsWithBotClient_E} from './games/ten-coins/main';
 import Lobby from './lobby';
 import NotFound from './pages/NotFound';
+import { RecoilRoot } from 'recoil';
+import * as Sentry from "@sentry/react";
+import { BrowserTracing } from "@sentry/tracing";
+
+Sentry.init({
+  // TODO DSN only works when we give sentry to the people...
+  dsn: "https://c94695b2ab564e258774e5d0e5c97d79@sentry.durerinfo.hu/2",
+  integrations: [new BrowserTracing()],
+
+  // Set tracesSampleRate to 1.0 to capture 100%
+  // of transactions for performance monitoring.
+  // We recommend adjusting this value in production
+  tracesSampleRate: 1.0,
+});
 
 const root = document.getElementById('root');
 render(
   <React.StrictMode>
+    <RecoilRoot>
     <HashRouter basename={process.env.PUBLIC_URL}>
       <Routes>
         <Route path="/" element={<App />} />
+          {/*
         <Route path="/tictactoe" element={<TicTacToeClient />} />
         <Route path="/tictactoe-with-bot" element={<TicTacToeWithBotClient />} />
         <Route path="/superstitious-counting" element={<SuperstitiousCountingClient />} />
@@ -54,9 +70,11 @@ render(
         <Route path="/ten-coins-with-bot-d" element={<TenCoinsWithBotClient_D />} />
         <Route path="/ten-coins-e" element={<TenCoinsClient_E />} />
         <Route path="/ten-coins-with-bot-e" element={<TenCoinsWithBotClient_E />} />
+        */}
         <Route path='*' element={<NotFound/>}></Route>
       </Routes>
     </HashRouter>
+    </RecoilRoot>
   </React.StrictMode>,
   root
 );
