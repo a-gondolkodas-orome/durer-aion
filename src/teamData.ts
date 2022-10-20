@@ -3,6 +3,9 @@ export const teamData:{
   category:string,
   join_code:string
 }[] = [
+{ teamname:'testC', category:'C',join_code:'111-1111-111'},
+{ teamname:'testD', category:'D',join_code:'111-1111-222'},
+{ teamname:'testE', category:'E',join_code:'111-1111-333'},
 { teamname:'7', category:'C',join_code:'293-6926-439'},
 { teamname:'2022', category:'C',join_code:'592-4194-555'},
 { teamname:'√-erek', category:'C',join_code:'737-4564-496'},
