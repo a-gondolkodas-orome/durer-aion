@@ -13,7 +13,7 @@ export const Layout: React.FunctionComponent<MyProps> = (props: MyProps) => {
             <SnackbarProvider maxSnack={3}>
                 <Stack sx={{backgroundColor: theme.palette.background.default}}>
                   <Stack sx={{position: 'absolute', right: 0, top: 200}}>
-                    <SuperPicture picture={{webPUrl: "durerbackground.png", jpegOrPngUrl: "durerbackground.png", alt: "", title: ""}}/>
+                    <SuperPicture picture={{webPUrl: "durerbackground.png", jpegOrPngUrl: "durerbackground.png", alt: "", title: ""}} style={{opacity:.4}}/>
                   </Stack>
                   <div>
                     {props.children}
