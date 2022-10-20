@@ -7,40 +7,20 @@ import { Button, Dialog } from '@mui/material';
 import { useRefreshTeamState } from '../../hooks/user-hooks';
 import { ExcerciseTask } from '../ExcerciseTask';
 import { ExcerciseForm } from '../ExcerciseForm';
+import { Finished } from './Finished';
 interface MyGameProps extends BoardProps<MyGameState> { };
 export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
   const [secondsRemaining, setSecondsRemaining] = useState(G.milisecondsRemaining as number | null);
-  const refreshState = useRefreshTeamState();
   useEffect(()=>{
     moves.startGame()
   }, []);
   return (
     <>
       <Dialog open={
-        !secondsRemaining || secondsRemaining < - 10000
-      } onClose={() => { refreshState() }}>
-        <Stack sx={{
-          width: '350px',
-          textAlign: 'center',
-          padding: '40px',
-          fontSize: '18px',
-          fontWeight: 'bold',
-        }}>
-          <Stack>Lejárt az idő</Stack>
-          <Button sx={{
-            width: '170px',
-            height: '60px',
-            marginTop: '40px',
-            fontSize: '24px',
-            alignSelf: 'center',
-            textTransform: 'none',
-          }} variant='contained' color='primary' onClick={() => {
-            refreshState()
-          }}>
-            Tovább
-          </Button>
-        </Stack>
-      </Dialog>
+          !secondsRemaining || secondsRemaining < - 10000 || ctx.gameover === true
+        } onClose={() => { window.location.reload(); }}>
+          <Finished score={G.points}/>
+        </Dialog>
       <Stack sx={{
         with: "100%",
         display: 'flex',

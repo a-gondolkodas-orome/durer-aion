@@ -1,7 +1,9 @@
 import { MyGameState } from './game';
 import { BoardProps } from 'boardgame.io/react';
 import { useEffect, useRef, useState } from 'react';
-import { Countdown } from '../../components/Countdown';
+import Stack from '@mui/material/Stack';
+import { Button, InputBase, TextField } from '@mui/material';
+import theme from '../../client/components/theme';
 
 interface MyGameProps extends BoardProps<MyGameState> { }
 
@@ -10,11 +12,6 @@ export function MyBoard({ G, ctx, moves }: MyGameProps) {
   // create refs to store the text input elements
   const inputK = useRef<HTMLInputElement>(null);
   const inputL = useRef<HTMLInputElement>(null);
-  const [secondsRemaining, setSecondsRemaining] = useState(G.milisecondsRemaining as number|null); // asked from the server
-
-  useEffect(() => {
-    setSecondsRemaining(G.milisecondsRemaining);
-  }, [G.milisecondsRemaining]);
 
   const onClick = () => {
     // read input value
@@ -26,41 +23,115 @@ export function MyBoard({ G, ctx, moves }: MyGameProps) {
   };
 
   return (
-    <div>
-      <div className="flex flex-wrap">
-        <div className="p-1 shrink-0 grow basis-8/12">
-          <table className="m-2 border-collapse">
-            <tbody>
-              <tr>
-                <th>{G.coins[0]}</th>
-                <th>{G.coins[1]}</th>
-                <th>{G.coins[2]}</th>
-                <th>{G.coins[3]}</th>
-                <th>{G.coins[4]}</th>
-              </tr>
-              <tr>
-                <th>{G.coins[5]}</th>
-                <th>{G.coins[6]}</th>
-                <th>{G.coins[7]}</th>
-                <th>{G.coins[8]}</th>
-                <th>{G.coins[9]}</th>
-              </tr>
-            </tbody>
-          </table>
-          <label> Következő lépés: </label>
-          <label htmlFor="stepK"> K: </label>
-          <input ref={inputK} id="stepK" type="number" min="1" max="5" v-model="step" className="border-2" />
-          <label htmlFor="stepL"> L: </label>
-          <input ref={inputL} id="stepL" type="number" min="1" max="5" v-model="step" className="border-2" />
-          <button
-            className="cta-button" onClick={() => onClick()}
-          >Lépek</button>
-        </div>
-      </div>
-      <p>Hátralévő idő: <Countdown secondsRemaining={secondsRemaining} setSecondsRemaining={setSecondsRemaining} getServerTimer={moves.getTime}/></p>
-      <div>Hátralevő idő: {G.milisecondsRemaining}</div>
-      <button onClick={() => moves.getTime()}>Asd</button>
+    <Stack sx={{
+      padding: '20px',
+      display: 'flex',
+    }}>
+      <Stack sx={{
+        width: '100%',
+        flexDirection: 'row',
+        marginBottom: '20px',
+      }}>
+        <Coin value={G.coins[0]} />
+        <Coin value={G.coins[1]} />
+        <Coin value={G.coins[2]} />
+        <Coin value={G.coins[3]} />
+        <Coin value={G.coins[4]} />
+      </Stack>
+      <Stack sx={{
+        width: '100%',
+        flexDirection: 'row',
+        marginBottom: '20px',
+      }}>
+        <Coin value={G.coins[5]} />
+        <Coin value={G.coins[6]} />
+        <Coin value={G.coins[7]} />
+        <Coin value={G.coins[8]} />
+        <Coin value={G.coins[9]} />
+      </Stack>
+      <Stack sx={{
+        flexDirection: 'row',
+        alignItems: 'center'
+      }}>
+        <Stack sx={{
+          fontSize: '18px',
+          fontWeight: 'bold',
+          marginRight: '10px',
+        }}>
+          Következő lépés:
+        </Stack>
+        <Stack sx={{
+          marginRight: '10px',
+          width: '60px',
+        }}>
+          <label style={{
+            fontSize: '18px',
+            fontWeight: 'bold',
+          }} htmlFor="stepK"> K: </label>
+          <input style={{
+            width: '100%',
+            height: '40px',
+            borderWidth: '2px',
+            borderRadius: '5px',
+            borderColor: theme.palette.primary.main,
+            fontSize: '18px',
+          }} ref={inputK} id="stepK" type="number" min="1" max="5" v-model="step" className="border-2" />
+        </Stack>
+        <Stack sx={{
+          marginRight: '10px',
+          width: '60px',
+        }}>
+          <label style={{
+            fontSize: '18px',
+            fontWeight: 'bold',
+          }} htmlFor="stepK"> L: </label>
+          <input style={{
+            width: '100%',
+            height: '40px',
+            borderWidth: '2px',
+            borderRadius: '5px',
+            borderColor: theme.palette.primary.main,
+            fontSize: '18px',
+          }} ref={inputL} id="stepL" type="number" min="1" max="5" v-model="step" className="border-2" />
+        </Stack>
+        <Button sx={{
+          width: '150px',
+          height: '40px',
+          fontSize: '16px',
+          alignSelf: 'center',
+          textTransform: 'none',
+          borderRadius: '5px',
+        }} variant='contained' color='primary' onClick={() => {
+          onClick();
+        }}>
+          Lépek
+        </Button>
+      </Stack>
+    </Stack>
+  )
+}
 
-    </div>
-  );
+const Coin = (props: { value: number }) => {
+  let backgrondColor = '#FFFDCD';
+  if (props.value > 1) {
+    backgrondColor = '#FFE296'
+  }
+  if (props.value > 2) {
+    backgrondColor = '#FF7D6B'
+  }
+  return (
+    <Stack sx={{
+      width: '80px',
+      height: '80px',
+      borderRadius: '50%',
+      backgroundColor: backgrondColor,
+      marginLeft: '5px',
+      marginRight: '5px',
+      fontSize: '40px',
+      textAlign: 'center',
+      lineHeight: '80px',
+    }}>
+      {props.value}
+    </Stack>
+  )
 }
