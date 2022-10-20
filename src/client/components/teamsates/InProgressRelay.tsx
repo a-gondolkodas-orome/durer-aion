@@ -80,7 +80,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
             attempt={(G.currentProblem+1)*3+G.numberOfTry}
             onSubmit={(input) => {
               moves.submitAnswer(parseInt(input))
-              sendDataRelayStep(joincode,G,ctx)
+              sendDataRelayStep(teamState,G,ctx)
             }}
           />
           <Stack sx={{
