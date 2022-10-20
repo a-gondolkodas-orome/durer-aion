@@ -1,19 +1,8 @@
 import { TeamModelDto } from "./client/dto/TeamStateDto";
+import { teamData } from "./teamData";
 
-export const teams: TeamModelDto[] = [
-  {
-    joinCode: "111-1111-111",
-    category: "C",
-    name: "Team C",
-  },
-  {
-    joinCode: "222-2222-222",
-    category: "D",
-    name: "Team D",
-  },
-  {
-    joinCode: "333-3333-333",
-    category: "E",
-    name: "Team E",
-  }
-]
+export const teams: TeamModelDto[] = teamData.map(team =>{ return{
+  joinCode:team.join_code,
+  category:team.category,
+  name:team.teamname}
+})
