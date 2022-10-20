@@ -2,6 +2,8 @@ import { MyGameState } from './game';
 import { BoardProps } from 'boardgame.io/react';
 import { useEffect, useRef, useState } from 'react';
 import { Countdown } from '../../components/Countdown';
+import { useTeamState } from '../../client/hooks/user-hooks';
+import { sendDataStrategyStep } from '../../common/sendData';
 
 interface MyGameProps extends BoardProps<MyGameState> { }
 
@@ -11,6 +13,7 @@ export function MyBoard({ G, ctx, moves }: MyGameProps) {
   const inputK = useRef<HTMLInputElement>(null);
   const inputL = useRef<HTMLInputElement>(null);
   const [secondsRemaining, setSecondsRemaining] = useState(G.milisecondsRemaining as number|null); // asked from the server
+  const teamState = useTeamState();
 
   useEffect(() => {
     setSecondsRemaining(G.milisecondsRemaining);
@@ -23,6 +26,7 @@ export function MyBoard({ G, ctx, moves }: MyGameProps) {
     inputK.current!.value = '';
     inputL.current!.value = '';
     moves.changeCoins(inputValueK, inputValueL);
+    sendDataStrategyStep(teamState, inputValueK, inputValueL, G, ctx);
   };
 
   return (

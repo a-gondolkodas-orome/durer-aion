@@ -1,5 +1,6 @@
 import { Game } from "boardgame.io";
 import { INVALID_MOVE, TurnOrder } from "boardgame.io/core";
+import { useTeamState } from "../../client/hooks/user-hooks";
 import { sendDataRelayEnd, sendDataRelayStart, sendDataRelayStep } from "../../common/sendData";
 
 type Answer = {
@@ -27,7 +28,6 @@ const lengthOfCompetition = 60 * 60; // seconds
 
 export const GameRelay: Game<MyGameState> = {
   setup: () => {
-    sendDataRelayStart("TODOOO");
     return {
     currentProblem: 0,
     problemText: "kkkk", // TODO: get from the problem list
@@ -88,7 +88,6 @@ export const GameRelay: Game<MyGameState> = {
             // He is not the bot OR G.answer is null (and it is not the first question)
             return INVALID_MOVE;
           }
-          sendDataRelayStep("TODOOOO", G, ctx);
           G.url = url;
           G.previousAnswers[G.currentProblem].push({answer: G.answer, date: new Date().toISOString()});
           G.problemText = problemText;
@@ -110,7 +109,6 @@ export const GameRelay: Game<MyGameState> = {
           if (playerID !== "1" || G.answer === null) {
             return INVALID_MOVE;
           }
-          sendDataRelayStep("TODOOOO", G, ctx);
           G.previousAnswers[G.currentProblem].push({answer: G.answer, date: new Date().toISOString()});
           G.answer = null;
           G.correctnessPreviousAnswer = false;
@@ -129,7 +127,6 @@ export const GameRelay: Game<MyGameState> = {
           if (playerID !== "1") {
             return INVALID_MOVE;
           }
-            sendDataRelayEnd("TODOOOO", G, ctx);
             events.endGame();
         },
         getTime({ G, ctx, playerID, events }) {
@@ -146,7 +143,6 @@ export const GameRelay: Game<MyGameState> = {
             let currentTime = new Date();
             if(currentTime.getTime() - new Date(G.end).getTime() > 1000*10){
               // Do not accept any answer if the time is over since more than 10 seconds
-              sendDataRelayEnd("TODOOOO", G, ctx);
               events.endGame();
             }
           }
@@ -160,7 +156,6 @@ export const GameRelay: Game<MyGameState> = {
           if (currentTime.getTime() - new Date(G.end).getTime() <= 0) {
             console.log("onEnd")
             // Do not accept any answer if the time is over
-            sendDataRelayEnd("TODOOOO", G, ctx);
             events.endGame();
           }
         }
