@@ -47,7 +47,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
         <Stack sx={{ width: "30px" }} />
         <Stack sx={{
           width: "350px",
-          maxHeight: "300px",
+          maxHeight: "350px",
           backgroundColor: "#fff",
           borderRadius: "25px",
           padding: '30px',
