@@ -3,7 +3,7 @@ import { render } from 'react-dom';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import { Route, BrowserRouter, Routes } from 'react-router-dom';
+import { Route, Routes, HashRouter } from 'react-router-dom';
 import { Client as TicTacToeClient, ClientWithBot as TicTacToeWithBotClient } from './games/tictactoe/main';
 import { Client as SuperstitiousCountingClient, ClientWithBot as SuperstitiousCountingWithBotClient } from './games/superstitious-counting/main';
 import { Client as ChessBishopsClient, ClientWithBot as ChessBishopsWithBotClient } from './games/chess-bishops/main';
@@ -23,7 +23,7 @@ import NotFound from './pages/NotFound';
 const root = document.getElementById('root');
 render(
   <React.StrictMode>
-    <BrowserRouter basename={process.env.PUBLIC_URL}>
+    <HashRouter basename={process.env.PUBLIC_URL}>
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="/tictactoe" element={<TicTacToeClient />} />
@@ -56,7 +56,7 @@ render(
         <Route path="/ten-coins-with-bot-e" element={<TenCoinsWithBotClient_E />} />
         <Route path='*' element={<NotFound/>}></Route>
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   </React.StrictMode>,
   root
 );
