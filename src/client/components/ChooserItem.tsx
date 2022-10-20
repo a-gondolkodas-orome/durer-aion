@@ -1,7 +1,10 @@
 import { Button } from '@mui/material';
 import { Stack } from '@mui/system';
+import { sendDataRelayStart, sendDataStrategyStart } from '../../common/sendData';
+import { useTeamState } from '../hooks/user-hooks';
 
 export function ChooserItem(props: {setStarted: React.Dispatch<string>, type: 'strategias'|'relay' }) {
+  const teamState = useTeamState();
   return (
     <Stack sx={{
       display: 'flex',
@@ -60,6 +63,12 @@ export function ChooserItem(props: {setStarted: React.Dispatch<string>, type: 's
         textTransform: 'none',
       }} variant='contained' color='primary' onClick={()=>{
         props.setStarted(props.type)
+        if(props.type === "relay"){
+          sendDataRelayStart(teamState)
+        }else{
+          sendDataStrategyStart(teamState)
+        }
+
       }}>
         Kezdjük
       </Button>

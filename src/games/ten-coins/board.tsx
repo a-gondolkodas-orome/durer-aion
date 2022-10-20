@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import Stack from '@mui/material/Stack';
 import { Button, InputBase, TextField } from '@mui/material';
 import theme from '../../client/components/theme';
+import { useTeamState } from '../../client/hooks/user-hooks';
+import { sendDataStrategyStep } from '../../common/sendData';
 
 interface MyGameProps extends BoardProps<MyGameState> { }
 
@@ -12,6 +14,8 @@ export function MyBoard({ G, ctx, moves }: MyGameProps) {
   // create refs to store the text input elements
   const inputK = useRef<HTMLInputElement>(null);
   const inputL = useRef<HTMLInputElement>(null);
+  const teamState = useTeamState();
+
 
   const onClick = () => {
     // read input value
@@ -20,6 +24,7 @@ export function MyBoard({ G, ctx, moves }: MyGameProps) {
     inputK.current!.value = '';
     inputL.current!.value = '';
     moves.changeCoins(inputValueK, inputValueL);
+    sendDataStrategyStep(teamState, inputValueK, inputValueL, G, ctx);
   };
 
   return (
