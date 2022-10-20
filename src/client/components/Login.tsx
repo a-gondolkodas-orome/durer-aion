@@ -26,7 +26,7 @@ export function Login() {
         </Stack>
         <Stack sx={{
           marginTop: "15px",
-          fontSize: "30px",
+          fontSize: "20px",
         }}>
           A hivatalos verseny az előző felület kitöltésével véget ért. Itt a stratégiás játékkal tudtok játszani, amit nem kötelező kitölteni.
           Belépéshez üsd be a kategóriádat betűjét, majd a csapatnevedet.
@@ -45,7 +45,7 @@ export function Login() {
             <Field 
               name="joinCode"
               type="text"
-              placeHolder="111-2222-333"
+              placeHolder="CDürer"
               style={{
                 width: '250px',
                 height: '40px',
@@ -58,7 +58,7 @@ export function Login() {
           </Form>
         </Stack>
       </Stack>
-      <Stack sx={{fontSize: 14, paddingTop: "100px"}}>
+      <Stack sx={{fontSize: 18, paddingTop: "100px"}}>
         Pl. ha az a csapatnevetek, hogy "Dürer" és C kategóriás csapat vagytok, akkor üssétek be, hogy "CDürer".
       </Stack>
     </Stack>
