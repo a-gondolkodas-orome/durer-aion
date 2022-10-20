@@ -68,6 +68,7 @@ export function boardWrapper(board: any, description: any) { // TODO: solve type
               flexDirection: 'column',
               padding: '15px',
             }}>
+              { ctx.phase === 'startNewGame' &&
               <Stack sx={{
                 width: '100%',
                 flexDirection: 'row',
@@ -99,7 +100,9 @@ export function boardWrapper(board: any, description: any) { // TODO: solve type
                   Új játék kezdése
                 </Button>
               </Stack>
-              <Stack sx={{
+              }
+              {ctx.phase === 'chooseRole' &&
+                <Stack sx={{
                 width: '100%',
                 flexDirection: 'row',
                 marginBottom: '20px',
@@ -129,7 +132,7 @@ export function boardWrapper(board: any, description: any) { // TODO: solve type
                 }}>
                   Második leszek
                 </Button>
-              </Stack>
+              </Stack>}
               <Stack sx={{
                 width: '100%',
                 display: 'block',

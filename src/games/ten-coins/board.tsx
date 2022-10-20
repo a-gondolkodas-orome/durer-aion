@@ -107,7 +107,7 @@ export function MyBoard({ G, ctx, moves }: MyGameProps) {
           alignSelf: 'center',
           textTransform: 'none',
           borderRadius: '5px',
-        }} variant='contained' color='primary' onClick={() => {
+        }} variant='contained' color='primary' disabled = {ctx.phase !== 'play'} onClick={() => {
           onClick();
         }}>
           Lépek
