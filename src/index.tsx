@@ -25,7 +25,7 @@ import { BrowserTracing } from "@sentry/tracing";
 
 Sentry.init({
   // TODO DSN only works when we give sentry to the people...
-  dsn: "https://464851dbe21e4d428d9fc9c8720f3310@sentry.durerinfo.hu/2",
+  dsn: "https://464851dbe21e4d428d9fc9c8720f3310@sentry.durerinfo.hu/5",
   integrations: [new BrowserTracing()],
 
   // Set tracesSampleRate to 1.0 to capture 100%
