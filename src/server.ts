@@ -50,25 +50,40 @@ export function getAdminCredentials() {
 getAdminCredentials(); // give love if no creds are supplied
 
 
+export function getGameStartAndEndTime() {
+  if (!env.GAME_GLOBAL_START_T) {
+    throw 'No GAME_GLOBAL_START_T supplied! Do set it in the environment';
+  }
+  if (!env.GAME_GLOBAL_END_T) {
+    throw 'No GAME_GLOBAL_END_T supplied! Do set it in the environment';
+  }
+  return {
+    globalStartAt: new Date(env.GAME_GLOBAL_START_T),
+    globalEndAt: new Date(env.GAME_GLOBAL_END_T),
+  };
+}
+
+getGameStartAndEndTime(); // give love if no creds are supplied
+
 export const relayNames = {
-  C:'relay_c',
-  D:'relay_d',
-  E:'relay_e',
+  C: 'relay_c',
+  D: 'relay_d',
+  E: 'relay_e',
 }
 
 export const strategyNames = {
-  C:'tencoins_c',
-  D:'tencoins_d',
-  E:'tencoins_e',
+  C: 'tencoins_c',
+  D: 'tencoins_d',
+  E: 'tencoins_e',
 }
 
 const games = [
-  {...GameRelay, name: relayNames.C},
-  {...GameRelay, name: relayNames.D},
-  {...GameRelay, name: relayNames.E},
-  {...gameWrapper(TenCoinsGame), name: strategyNames.C},
-  {...gameWrapper(TenCoinsGame), name: strategyNames.D},
-  {...gameWrapper(TenCoinsGame), name: strategyNames.E},
+  { ...GameRelay, name: relayNames.C },
+  { ...GameRelay, name: relayNames.D },
+  { ...GameRelay, name: relayNames.E },
+  { ...gameWrapper(TenCoinsGame), name: strategyNames.C },
+  { ...gameWrapper(TenCoinsGame), name: strategyNames.D },
+  { ...gameWrapper(TenCoinsGame), name: strategyNames.E },
 ];
 
 
@@ -89,21 +104,21 @@ if (argv[2] == "import") {
   importer(teams, filename).then(() => exit(0));
 } else {
   const botSetup = Object.fromEntries(
-  games.map((game,idx) =>
-    [game.name,
-    new (bot_factories[idx])({
-      enumerate: game.ai?.enumerate,
-      seed: game.seed,
-    })]
-  ));
-  
+    games.map((game, idx) =>
+      [game.name,
+      new (bot_factories[idx])({
+        enumerate: game.ai?.enumerate,
+        seed: game.seed,
+      })]
+    ));
+
   const server = Server({
     games: games,
     transport: new SocketIOButBotMoves(
       { https: undefined },
       botSetup,
       function onFinishedMatch(matchID) {
-        closeMatch(matchID,teams,db);
+        closeMatch(matchID, teams, db);
       }
     ),
     db,
@@ -112,17 +127,17 @@ if (argv[2] == "import") {
   const PORT = parseInt(env.PORT || "8000");
 
   //Admin page auth setup
-  server.app.use(mount('/team/admin',auth({name:'admin',pass:getAdminCredentials()})));
+  server.app.use(mount('/team/admin', auth({ name: 'admin', pass: getAdminCredentials() })));
 
   //TODO regex mount protection for Boardgame.io endpoints
-  
-  configureTeamsRouter(server.router, teams,games);
+
+  configureTeamsRouter(server.router, teams, games);
 
   Sentry.init({ dsn: "https://1f4c47a1692b4936951908e2669a1e99@sentry.durerinfo.hu/4" });
 
   server.app.on("error", (err, ctx) => {
-    Sentry.withScope(function(scope) {
-      scope.addEventProcessor(function(event) {
+    Sentry.withScope(function (scope) {
+      scope.addEventProcessor(function (event) {
         return Sentry.addRequestDataToEvent(event, ctx.request);
       });
       Sentry.captureException(err);
