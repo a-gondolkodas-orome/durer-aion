@@ -7,6 +7,8 @@ import theme from '../../client/components/theme';
 import { useTeamState } from '../../client/hooks/user-hooks';
 import { sendDataStrategyStep } from '../../common/sendData';
 
+import KeyboardDoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
+
 interface MyGameProps extends BoardProps<MyGameState> { }
 
 export function MyBoard({ G, ctx, moves }: MyGameProps) {
@@ -84,6 +86,10 @@ export function MyBoard({ G, ctx, moves }: MyGameProps) {
             fontSize: '18px',
           }} ref={inputK} id="stepK" type="number" min="1" max="5" v-model="step" className="border-2" />
         </Stack>
+        <KeyboardDoubleArrowRightIcon style={{
+            fontSize: '2rem',
+            marginTop: '24px',
+          }}/>
         <Stack sx={{
           marginRight: '10px',
           width: '60px',
