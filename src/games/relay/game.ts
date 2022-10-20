@@ -123,10 +123,11 @@ export const GameRelay: Game<MyGameState> = {
           G.answer = answer;
           events.endTurn();
         },
-        endGame({ G, ctx, playerID, events }) {
+        endGame({ G, ctx, playerID, events }, correctnessPreviousAnswer: boolean) {
           if (playerID !== "1") {
             return INVALID_MOVE;
           }
+            G.points += G.currentProblemMaxPoints;
             events.endGame();
         },
         getTime({ G, ctx, playerID, events }) {

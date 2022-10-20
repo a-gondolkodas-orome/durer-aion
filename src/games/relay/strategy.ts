@@ -188,6 +188,6 @@ export function strategy(category: "C" | "D" | "E"){
      return [[problems[category][state.G.currentProblem+1].problemText,problems[category][state.G.currentProblem+1].points,correctnessPreviousAnswer, url], "newProblem"];
     }
     // End of the game
-    return [[], "endGame"];
+    return [[correctnessPreviousAnswer], "endGame"];
   }
 }
