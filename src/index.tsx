@@ -34,20 +34,6 @@ Sentry.init({
   tracesSampleRate: 1.0,
 });
 
-import * as Sentry from "@sentry/react";
-import { BrowserTracing } from "@sentry/tracing";
-
-Sentry.init({
-  // TODO DSN only works when we give sentry to the people...
-  dsn: "https://464851dbe21e4d428d9fc9c8720f3310@sentry.durerinfo.hu/5",
-  integrations: [new BrowserTracing()],
-
-  // Set tracesSampleRate to 1.0 to capture 100%
-  // of transactions for performance monitoring.
-  // We recommend adjusting this value in production
-  tracesSampleRate: 1.0,
-});
-
 const root = document.getElementById('root');
 render(
   <React.StrictMode>
