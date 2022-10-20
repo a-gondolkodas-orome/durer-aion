@@ -22,13 +22,14 @@ export function Login() {
           fontSize: "40px",
         }}>
           Kedves Versenyző!<br/>
-          Üdvözlünk a XVI. Dürer Verseny online fordulójának felületén.
+          Üdvözlünk a XVI. Dürer Verseny online fordulójának nem versenyszerű felületén.
         </Stack>
         <Stack sx={{
           marginTop: "15px",
           fontSize: "30px",
         }}>
-          Belépéshez nézd meg az emailjeidet, nyisd meg az ott található linket vagy üsd be a kódot ide:
+          A hivatalos verseny az előző felület kitöltésével véget ért. Itt a stratégiás játékkal tudtok játszani, amit nem kötelező kitölteni.
+          Belépéshez üsd be a kategóriádat betűjét, majd a csapatnevedet.
         </Stack>
         <Stack>
           <Form style={{ position: "relative", zIndex: 2 }} initialValues={{ joinCode: '' }}
@@ -58,7 +59,7 @@ export function Login() {
         </Stack>
       </Stack>
       <Stack sx={{fontSize: 14, paddingTop: "100px"}}>
-        Ha nem találjátok az emailt, akkor írjatok nekünk a durerinfo@gmail.com email címre.
+        Pl. ha az a csapatnevetek, hogy "Dürer" és C kategóriás csapat vagytok, akkor üssétek be, hogy "CDürer".
       </Stack>
     </Stack>
   )

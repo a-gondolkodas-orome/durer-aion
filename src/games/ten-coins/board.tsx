@@ -63,6 +63,7 @@ export function MyBoard({ G, ctx, moves }: MyGameProps) {
           fontSize: '18px',
           fontWeight: 'bold',
           marginRight: '10px',
+          marginTop: '30px',
         }}>
           Következő lépés:
         </Stack>
@@ -107,6 +108,7 @@ export function MyBoard({ G, ctx, moves }: MyGameProps) {
           alignSelf: 'center',
           textTransform: 'none',
           borderRadius: '5px',
+          marginTop: '30px',
         }} variant='contained' color='primary' disabled = {ctx.phase !== 'play'} onClick={() => {
           onClick();
         }}>

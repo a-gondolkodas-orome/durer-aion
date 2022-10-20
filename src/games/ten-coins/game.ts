@@ -33,34 +33,37 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<
       if(G.coins.every(c => c == firstCoin)){
         G.winner = ctx.currentPlayer === "0" ? "0" : "1";
       }
-      if(G.winner === "0"){
-        G.winningStreak = G.winningStreak + 1;
-        if(G.winningStreak >= 2){
-          switch(G.numberOfLoss){
-            case 0:
-              G.points = 12;
-              break;
-            case 1:
-              G.points = 9;
-              break;
-            case 2:
-              G.points = 6;
-              break;
-            case 3:
-              G.points = 4;
-              break;
-            case 4:
-              G.points = 3;
-              break;
-            default:
-              G.points = 2;
-              break;
+      if(G.difficulty === "live")
+        {
+        if(G.winner === "0"){
+          G.winningStreak = G.winningStreak + 1;
+          if(G.winningStreak >= 2){
+            switch(G.numberOfLoss){
+              case 0:
+                G.points = 12;
+                break;
+              case 1:
+                G.points = 9;
+                break;
+              case 2:
+                G.points = 6;
+                break;
+              case 3:
+                G.points = 4;
+                break;
+              case 4:
+                G.points = 3;
+                break;
+              default:
+                G.points = 2;
+                break;
+            }
+            events.endGame();
           }
-          events.endGame();
+        } else if (G.winner === "1") {
+          G.winningStreak = 0;
+          G.numberOfLoss += 1;
         }
-      } else if (G.winner === "1") {
-        G.winningStreak = 0;
-        G.numberOfLoss += 1;
       }
       events.endTurn();
     },
