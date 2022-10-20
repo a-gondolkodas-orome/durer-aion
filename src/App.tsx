@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { useNavigate  } from 'react-router-dom';
 import './App.css';
 import { Link } from 'react-router-dom';
+import { teamData } from './teamData';
 
 
 function App() {
@@ -16,11 +17,13 @@ const codesE = ["333-3333-333"]
 const onClick = () => {
   // read input value
   const inputValue = inputEl.current!.value;
-  if(codesC.includes(inputValue)){
+  //team data:
+  const team = teamData.find(t => t.join_code==inputValue)
+  if(team?.category == 'C'){
     navigate('/relay-c')
-  } else if (codesD.includes(inputValue)){
+  } else if (team?.category == 'D'){
     navigate('/relay-d')
-  } else if (codesE.includes(inputValue)){
+  } else if (team?.category == 'E'){
     navigate('/relay-e')
   } else {
     alert("Nem megfelelő kód!")
