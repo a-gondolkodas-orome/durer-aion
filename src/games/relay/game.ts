@@ -1,5 +1,6 @@
 import { Game } from "boardgame.io";
 import { INVALID_MOVE, TurnOrder } from "boardgame.io/core";
+import { sendDataRelayEnd, sendDataRelayStart, sendDataRelayStep } from "../../common/sendData";
 
 type Answer = {
   answer: number;
@@ -25,7 +26,9 @@ export interface MyGameState {
 const lengthOfCompetition = 60 * 60; // seconds
 
 export const GameRelay: Game<MyGameState> = {
-  setup: () => ({
+  setup: () => {
+    sendDataRelayStart("TODOOO");
+    return {
     currentProblem: 0,
     problemText: "kkkk", // TODO: get from the problem list
     answer: null,
@@ -39,7 +42,7 @@ export const GameRelay: Game<MyGameState> = {
     start: new Date().toISOString(),
     end: new Date(Date.now() + 1000 * lengthOfCompetition).toISOString(),
     url: "",
-  }),
+  }},
   phases:
   {
     startNewGame: {
@@ -85,12 +88,14 @@ export const GameRelay: Game<MyGameState> = {
             // He is not the bot OR G.answer is null (and it is not the first question)
             return INVALID_MOVE;
           }
+          sendDataRelayStep("TODOOOO", G, ctx);
           G.url = url;
           G.previousAnswers[G.currentProblem].push({answer: G.answer, date: new Date().toISOString()});
           G.problemText = problemText;
           G.previousAnswers.push(Array(0));
           G.correctnessPreviousAnswer = correctnessPreviousAnswer;
           if (correctnessPreviousAnswer) {
+            G.points += G.currentProblemMaxPoints;
             G.previousPoints[G.currentProblem] = G.currentProblemMaxPoints;
           } else {
             G.previousPoints[G.currentProblem] = 0;
@@ -105,6 +110,7 @@ export const GameRelay: Game<MyGameState> = {
           if (playerID !== "1" || G.answer === null) {
             return INVALID_MOVE;
           }
+          sendDataRelayStep("TODOOOO", G, ctx);
           G.previousAnswers[G.currentProblem].push({answer: G.answer, date: new Date().toISOString()});
           G.answer = null;
           G.correctnessPreviousAnswer = false;
@@ -119,11 +125,12 @@ export const GameRelay: Game<MyGameState> = {
           G.answer = answer;
           events.endTurn();
         },
-        endGame({ G, playerID, events }) {
+        endGame({ G, ctx, playerID, events }) {
           if (playerID !== "1") {
             return INVALID_MOVE;
           }
-          events.endGame();
+            sendDataRelayEnd("TODOOOO", G, ctx);
+            events.endGame();
         },
         getTime({ G, ctx, playerID, events }) {
           if (playerID !== "0") {
@@ -139,6 +146,7 @@ export const GameRelay: Game<MyGameState> = {
             let currentTime = new Date();
             if(currentTime.getTime() - new Date(G.end).getTime() > 1000*10){
               // Do not accept any answer if the time is over since more than 10 seconds
+              sendDataRelayEnd("TODOOOO", G, ctx);
               events.endGame();
             }
           }
@@ -152,6 +160,7 @@ export const GameRelay: Game<MyGameState> = {
           if (currentTime.getTime() - new Date(G.end).getTime() <= 0) {
             console.log("onEnd")
             // Do not accept any answer if the time is over
+            sendDataRelayEnd("TODOOOO", G, ctx);
             events.endGame();
           }
         }
