@@ -3,7 +3,7 @@ import React from 'react';
 import { useLogout } from '../hooks/user-hooks';
 import theme from './theme';
 
-export function Header(props: { teamName: string | null }) {
+export function Header(props: { teamName: string | null, resetState: React.Dispatch<string> }) {
   const logout = useLogout()
   return (
     <Stack sx={{
@@ -39,7 +39,10 @@ export function Header(props: { teamName: string | null }) {
             <Stack sx={{
               fontSize: 25,
             }}>{props.teamName}</Stack>
-            <Stack onClick={()=>{logout()}} sx={{
+            <Stack onClick={()=>{
+              logout();
+              props.resetState('init');
+            }} sx={{
               fontSize: 20,
               marginLeft: '15px',
               cursor: 'pointer',

@@ -15,7 +15,7 @@ export function Main() {
   return (
     <Layout>
       <LoadUTeamState/>
-      <Header teamName={teamState?.name ?? null} />
+      <Header teamName={teamState?.name ?? null} resetState={setState} />
       <Container sx={{ paddingLeft: 0, paddingRight: 0, zIndex: 3, position: 'relative', paddingBottom: '50px', maxWidth: '1200px' }}>
         {!teamState &&
           <Login/>}
