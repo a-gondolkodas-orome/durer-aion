@@ -40,7 +40,7 @@ const root = document.getElementById('root');
 render(
   <React.StrictMode>
     <RecoilRoot>
-      <BrowserRouter>
+      <BrowserRouter basename={process.env.PUBLIC_URL}>
         <Routes>
           <Route path="/" element={<App />} />
           {/*
