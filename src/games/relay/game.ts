@@ -30,7 +30,7 @@ export const GameRelay: Game<MyGameState> = {
   setup: () => {
     return {
     currentProblem: 0,
-    problemText: "kkkk", // TODO: get from the problem list
+    problemText: "", // TODO: get from the problem list
     answer: null,
     points: 0,
     correctnessPreviousAnswer: null,
