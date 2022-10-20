@@ -1,4 +1,5 @@
 import { INVALID_MOVE } from 'boardgame.io/core';
+import { sendDataStrategyEnd, sendDataStrategyStart, sendDataStrategyStep } from '../../common/sendData';
 import { GameType } from '../../common/types';
 
 export interface MyGameState {
@@ -11,18 +12,21 @@ const lengthOfCompetition = 30*60; // seconds
 
 export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<MyGameState>)
   name: "ten-coins",
-  setup: () => ({
-    coins: [1,1,1,1,1,1,1,1,1,1],
-    milisecondsRemaining: 1000*lengthOfCompetition,
-    start: new Date().toISOString(),
-    end: new Date(Date.now()+1000*lengthOfCompetition).toISOString(),
-  }),
+  setup: () => {
+    sendDataStrategyStart("TODOOO");
+    return {
+      coins: [1,1,1,1,1,1,1,1,1,1],
+      milisecondsRemaining: 1000*lengthOfCompetition,
+      start: new Date().toISOString(),
+      end: new Date(Date.now()+1000*lengthOfCompetition).toISOString(),
+    }},
 
   moves: {
     changeCoins: ({ G, ctx, playerID, events }, K: number, L: number) => {
       if (!Number.isInteger(L) || !Number.isInteger(K) || K <= L ||L < 1 || !G.coins.includes(K)) {
         return INVALID_MOVE;
       }
+      sendDataStrategyStep("TODOOO", G, ctx);
       for(let i = 0; i < 10; i++){
         if(G.coins[i] == K) G.coins[i] = L;
       }
@@ -53,6 +57,7 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<
               G.points = 2;
               break;
           }
+          sendDataStrategyEnd("TODOOO", G, ctx);
           events.endGame();
         }
       } else if (G.winner === "1") {
@@ -92,6 +97,7 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<
         let currentTime = new Date();
         if(currentTime.getTime() - new Date(G.end).getTime() > 1000*10){
           // Do not accept any answer if the time is over since more than 10 seconds
+          sendDataStrategyEnd("TODOOO", G, ctx);
           events.endGame();
         }
       }
@@ -102,6 +108,7 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<
         let currentTime = new Date();
         if(currentTime.getTime() - new Date(G.end).getTime() <= 0){
           // Do not accept any answer if the time is over
+          sendDataStrategyEnd("TODOOO", G, ctx);
           events.endGame();
         }
       }

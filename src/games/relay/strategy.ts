@@ -169,7 +169,7 @@ export function strategy(category: "C" | "D" | "E"){
       if(url === undefined){
         url = "";
       }
-      return [[problems[category][state.G.currentProblem].problemText,3,false, url], "firstProblem"];
+      return [[problems[category][state.G.currentProblem].problemText,3,url], "firstProblem"];
     }
     let correctnessPreviousAnswer = false;
     if(state.G.answer === problems[category][state.G.currentProblem].answer){
