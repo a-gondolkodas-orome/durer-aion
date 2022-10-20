@@ -1,7 +1,7 @@
 {
   "name": "bgio-tutorial",
   "version": "0.1.0",
-  "homepage": "http://localhost",
+  "homepage": "https://a-gondolkodas-orome.github.io/durer-jatekok-new/",
   "private": false,
   "dependencies": {
     "@babel/cli": "^7.18.6",
