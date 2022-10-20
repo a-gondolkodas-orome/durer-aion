@@ -17,7 +17,8 @@ export function Disclaimer(props: {setAccomplished: React.Dispatch<boolean>}) {
         fontSize: 16,
         marginBottom: "25px"
       }}>
-        Az online fordulón a csapatoknak önállóan kell dolgozniuk, külső segítséget nem fogadhatnak el, másokkal nem kommunikálhatnak egészen a versenyzési időszak végéig.
+        A felület nem stabil, ezért a hivatalos versenynek nem része. 
+        Versenyen kívül viszont megoldhatjátok a stratégiás a játékot, de ez a végeredménybe nem számít bele!
       </Stack>
 
       <Stack sx={{
@@ -25,14 +26,12 @@ export function Disclaimer(props: {setAccomplished: React.Dispatch<boolean>}) {
         marginBottom: "10px",
         fontStyle: "italic",
       }}>
-        Továbbjutás
       </Stack>
       
       <Stack sx={{
         fontSize: 16,
         marginBottom: "150px",
       }}>
-        Azok a csapatok, amelyek az online forduló során a megszerezhető 52 pontból legalább 25 pontot elérnek, továbbjutnak a helyi fordulóba. (Fenntartjuk a jogot, hogy a ponthatárt esetleg csökkentsük, növelni biztosan nem fogjuk.) Az online fordulón szerzett pontszám nem számít bele a további eredményekbe.
       </Stack>
 
       <Button sx={{
@@ -42,7 +41,7 @@ export function Disclaimer(props: {setAccomplished: React.Dispatch<boolean>}) {
         alignSelf: 'center',
         textTransform: 'none',
       }} variant='contained' color='primary' onClick={()=>{props.setAccomplished(true)}}>
-        Tovább a versenyhez
+        Tovább
       </Button>
     </Stack>
   )
