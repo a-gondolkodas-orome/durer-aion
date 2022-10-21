@@ -27,7 +27,7 @@ export function Login() {
           marginTop: "15px",
           fontSize: "20px",
         }}>
-          Itt ki tudtjátok próbálni a stratégiás játékot.
+          Itt ki tudjátok próbálni a stratégiás játékot.
           Belépéshez üsd be valamelyik kategória betűjét (C, D vagy E), majd egy jeligét.
         </Stack>
         <Stack>
