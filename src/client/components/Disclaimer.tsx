@@ -17,8 +17,7 @@ export function Disclaimer(props: {setAccomplished: React.Dispatch<boolean>}) {
         fontSize: 16,
         marginBottom: "25px"
       }}>
-        A felület nem stabil, ezért a hivatalos versenynek nem része. 
-        Versenyen kívül viszont megoldhatjátok a stratégiás a játékot, de ez a végeredménybe nem számít bele!
+        A felületen előfordulhatnak kisebb hibák. Minden visszajelzést szívesen fogadunk a durerinfo@gmail.com címen.
       </Stack>
 
       <Stack sx={{

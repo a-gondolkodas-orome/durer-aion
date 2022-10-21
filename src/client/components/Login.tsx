@@ -21,15 +21,14 @@ export function Login() {
         <Stack sx={{
           fontSize: "40px",
         }}>
-          Kedves Versenyző!<br/>
-          Üdvözlünk a XVI. Dürer Verseny online fordulójának nem versenyszerű felületén.
+          Üdvözlünk a XVI. Dürer Verseny online fordulójának stratégiás játék felületén.
         </Stack>
         <Stack sx={{
           marginTop: "15px",
           fontSize: "20px",
         }}>
-          A hivatalos verseny az előző felület kitöltésével véget ért. Itt a stratégiás játékkal tudtok játszani, amit nem kötelező kitölteni.
-          Belépéshez üsd be a kategóriádat betűjét, majd a csapatnevedet.
+          Itt ki tudtjátok próbálni a stratégiás játékot.
+          Belépéshez üsd be valamelyik kategória betűjét (C, D vagy E), majd egy jeligét.
         </Stack>
         <Stack>
           <Form style={{ position: "relative", zIndex: 2 }} initialValues={{ joinCode: '' }}
@@ -59,7 +58,7 @@ export function Login() {
         </Stack>
       </Stack>
       <Stack sx={{fontSize: 18, paddingTop: "100px"}}>
-        Pl. ha az a csapatnevetek, hogy "Dürer" és C kategóriás csapat vagytok, akkor üssétek be, hogy "CDürer".
+        Pl. ha azt a jeligét választod, hogy "Dürer" és C kategóriás játékkal szeretnél játszani, akkor üsd be azt, hogy "CDürer".
       </Stack>
     </Stack>
   )
