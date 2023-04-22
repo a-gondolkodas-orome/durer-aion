@@ -77,6 +77,18 @@ describe('Double starter TicTacToe strategy', () => {
         expect(result.board[6]).toEqual('blue');
         expect(result.isGameEnd).toBe(true);
       });
+
+      it('should attempt to block creating a red row 2 steps later', () => {
+        const board = [
+          null, 'red', null,
+          null, 'blue', 'red',
+          null, 'red', null
+        ];
+
+        const result = getGameStateAfterAiMove(board, true);
+        // 3 or 8 would be equally good steps
+        expect(result.board[8]).toEqual('blue');
+      });
     });
   });
 
