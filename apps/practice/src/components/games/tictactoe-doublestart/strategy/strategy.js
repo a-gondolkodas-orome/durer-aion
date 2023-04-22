@@ -1,6 +1,6 @@
 'use strict';
 
-import { findIndex, isNull, some, difference, range } from 'lodash-es';
+import { last, sortBy, isNull, some, difference, range, intersection } from 'lodash-es';
 
 export const generateNewBoard = () => Array(9).fill(null);
 
@@ -40,6 +40,18 @@ const hasWinningSubset = (indices) => {
   return some(winningIndexSets.map((winningSet) => difference(winningSet, indices).length === 0));
 };
 
+const coveredIndices = [
+  [1, 2, 3, 6, 4, 8],
+  [0, 2, 4, 7],
+  [0, 1, 5, 8, 4, 6],
+  [0, 6, 4, 5],
+  [0, 1, 2, 3, 5, 6, 7, 8],
+  [3, 4, 2, 8],
+  [0, 3, 2, 4, 7, 8],
+  [1, 4, 6, 8],
+  [9, 4, 2, 5, 6, 7]
+];
+
 export const getOptimalAiPlacingPosition = (board, isPlayerTheFirstToMove) => {
   const allowedPlaces = range(0, 9).filter(i => isNull(board[i]));
   const aiColor = isPlayerTheFirstToMove ? 'blue' : 'red';
@@ -57,15 +69,8 @@ export const getOptimalAiPlacingPosition = (board, isPlayerTheFirstToMove) => {
 
   if (isNull(board[4])) return 4;
 
-  if (isPlayerTheFirstToMove) {
-    if (isNull[board[0]] && !isNull[board[8]]) return 0;
-    if (isNull[board[8]] && !isNull[board[0]]) return 8;
-    if (isNull[board[1]] && !isNull[board[7]]) return 1;
-    if (isNull[board[7]] && !isNull[board[1]]) return 7;
-    if (isNull[board[2]] && !isNull[board[6]]) return 2;
-    if (isNull[board[6]] && !isNull[board[2]]) return 6;
-    if (isNull[board[3]] && !isNull[board[5]]) return 3;
-    if (isNull[board[5]] && !isNull[board[3]]) return 5;
-  }
-  return findIndex(board, isNull);
+  const countOfCoveredPlayerPieces = i =>
+    intersection(playerPieces, coveredIndices[i]).length;
+
+  return last(sortBy(allowedPlaces, countOfCoveredPlayerPieces));
 };
