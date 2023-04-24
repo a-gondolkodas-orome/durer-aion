@@ -1,4 +1,5 @@
 import { generateNewBoard, getGameStateAfterAiMove, getGameStateAfterMove } from './strategy';
+import { range } from 'lodash-es';
 
 describe('Double starter TicTacToe strategy', () => {
   describe('generateNewBoard', () => {
@@ -13,8 +14,10 @@ describe('Double starter TicTacToe strategy', () => {
         const board = Array(9).fill(null);
 
         const result = getGameStateAfterAiMove(board, false);
-        expect(result.board[0]).toEqual('red');
-        expect(result.board[2]).toEqual('red');
+
+        expect([[0, 2], [2, 8], [6, 8], [0, 6]]).toContainEqual(
+          range(0, 9).filter(i => result.board[i] === 'red')
+        );
       });
 
       it('should place to middle field as a second move', () => {
@@ -86,7 +89,18 @@ describe('Double starter TicTacToe strategy', () => {
         ];
 
         const result = getGameStateAfterAiMove(board, true);
-        // 3 or 8 would be equally good steps
+        // 2 or 8 would be equally good steps
+        expect(result.board[8]).toEqual('blue');
+      });
+
+      it('should try to create a blue row', () => {
+        const board = [
+          'red', 'red', 'blue',
+          null, 'red', null,
+          null, null, null
+        ];
+
+        const result = getGameStateAfterAiMove(board, true);
         expect(result.board[8]).toEqual('blue');
       });
     });

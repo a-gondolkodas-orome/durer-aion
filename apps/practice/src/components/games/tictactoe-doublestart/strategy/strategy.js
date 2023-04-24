@@ -1,13 +1,16 @@
 'use strict';
 
-import { last, sortBy, isNull, some, difference, range, intersection } from 'lodash-es';
+import {
+  last, sortBy, isNull, some, difference, range, intersection, sample, isEqual
+} from 'lodash-es';
 
 export const generateNewBoard = () => Array(9).fill(null);
 
 export const getGameStateAfterAiMove = (board, isPlayerTheFirstToMove) => {
   if (board.filter(c => c).length === 0) {
-    board[0] = 'red';
-    board[2] = 'red';
+    const firstStep = sample([[0, 2], [2, 8], [6, 8], [0, 6]]);
+    board[firstStep[0]] = 'red';
+    board[firstStep[1]] = 'red';
   } else {
     board[getOptimalAiPlacingPosition(board, isPlayerTheFirstToMove)] = isPlayerTheFirstToMove ? 'blue' : 'red';
   }
@@ -58,13 +61,16 @@ export const getOptimalAiPlacingPosition = (board, isPlayerTheFirstToMove) => {
   const aiPieces = range(0, 9).filter(i => board[i] === aiColor);
   const playerPieces = range(0, 9).filter(i => board[i] !== aiColor && !isNull(board[i]));
 
-  const instantDefendingPlace = allowedPlaces.find(i => hasWinningSubset([...playerPieces, i]));
+  const instantDefendingPlaces = allowedPlaces.filter(i => hasWinningSubset([...playerPieces, i]));
   const winningSubsetCompleterPlace = allowedPlaces.find(i => hasWinningSubset([...aiPieces, i]));
 
-  if (instantDefendingPlace !== undefined && winningSubsetCompleterPlace !== undefined) {
-    return isPlayerTheFirstToMove ? winningSubsetCompleterPlace : instantDefendingPlace;
+  if (!isEqual(instantDefendingPlaces, []) && winningSubsetCompleterPlace !== undefined) {
+    return isPlayerTheFirstToMove ? winningSubsetCompleterPlace : last(instantDefendingPlaces);
   }
-  if (instantDefendingPlace !== undefined) return instantDefendingPlace;
+  if (!isEqual(instantDefendingPlaces, [])) {
+    const countOfCoveredOwnPieces = i => intersection(aiPieces, coveredIndices[i]).length;
+    return last(sortBy(instantDefendingPlaces, countOfCoveredOwnPieces));
+  }
   if (winningSubsetCompleterPlace !== undefined) return winningSubsetCompleterPlace;
 
   if (isNull(board[4])) return 4;
