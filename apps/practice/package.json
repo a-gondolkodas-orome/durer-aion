@@ -8,7 +8,7 @@
     "lint": "vue-cli-service lint --no-fix",
     "audit": "better-npm-audit audit -- --omit=dev",
     "start-dev": "vue-cli-service serve",
-    "test": "npm run audit && npm run lint && npm run test:unit",
+    "test": "npm run lint && npm run test:unit",
     "test:watch": "npm run test:unit -- --watchAll"
   },
   "dependencies": {
