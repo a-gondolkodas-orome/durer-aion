@@ -24,7 +24,9 @@ const isGameEnd = (board) => {
 
 const hasFirstPlayerWon = (board) => {
   if (!isGameEnd(board)) return undefined;
-  if (board.filter(c => c).length === 9) return true;
+  if (board.filter(c => c).length === 9) {
+    return !hasWinningSubset(range(0, 9).filter(i => board[i] === 'red'));
+  }
   return board.filter(c => c).length % 2 === 0;
 };
 

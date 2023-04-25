@@ -57,6 +57,16 @@ describe('Anti TicTacToe strategy', () => {
         'red', 'blue', 'red'
       ];
       expect(getGameStateAfterMove(board).isGameEnd).toBe(true);
+      expect(getGameStateAfterMove(board).hasFirstPlayerWon).toBe(true);
+    });
+
+    it('should declare 2nd as winner even if they win at last piece', () => {
+      const board = [
+        'blue', 'blue', 'red',
+        'blue', 'red', 'red',
+        'red', 'red', 'blue'
+      ];
+      expect(getGameStateAfterMove(board).hasFirstPlayerWon).toBe(false);
     });
   });
 });
