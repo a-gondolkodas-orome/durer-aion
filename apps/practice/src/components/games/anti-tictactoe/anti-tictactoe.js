@@ -1,6 +1,6 @@
 import { mapActions, mapState } from 'vuex';
 import GameSidebar from '../../common/game-sidebar/game-sidebar';
-import { getGameStateAfterMove } from './strategy/strategy';
+import { getGameStateAfterMove, playerColor } from './strategy/strategy';
 
 export default {
   template: require('./anti-tictactoe.html'),
@@ -14,7 +14,7 @@ export default {
       if (!this.shouldPlayerMoveNext) return;
       if (this.board[row * 3 + col]) return;
 
-      this.board[row * 3 + col] = this.isPlayerTheFirstToMove ? 'red' : 'blue';
+      this.board[row * 3 + col] = playerColor(this.isPlayerTheFirstToMove);
       this.endPlayerTurn(getGameStateAfterMove(this.board));
     },
     pieceColor({ row, col }) {
