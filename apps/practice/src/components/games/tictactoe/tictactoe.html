@@ -25,6 +25,11 @@
               class="h-16 w-16 p-1 inline-block rounded-full mr-1"
               :class="{ [pieceColor({ row, col })]: true, 'border-4': pieceColor({ row, col }) === 'bg-white', 'border-slate-600': pieceColor({ row, col }) === 'bg-white' }"
             ></span>
+            <!-- Hack to stop grid changing width on narrow screen -->
+            <span
+              v-if="!board[row * 3 + col]"
+              class="h-16 w-16 p-1 inline-block rounded-full mr-1 opacity-100"
+            ></span>
           </td>
         </tr>
       </table>
