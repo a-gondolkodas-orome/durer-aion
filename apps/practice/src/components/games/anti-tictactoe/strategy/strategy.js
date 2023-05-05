@@ -77,10 +77,10 @@ const isWinningState = (board, amIFirst) => {
     return amIFirst === hasFirstPlayerWon(board);
   }
   const allowedPlaces = range(0, 9).filter(i => isNull(board[i]));
-  const optimalPlacesForOther = allowedPlaces.filter(i => {
+  const optimalPlaceForOther = allowedPlaces.find(i => {
     const boardCopy = cloneDeep(board);
     boardCopy[i] = roleColors[amIFirst ? 1 : 0];
     return isWinningState(boardCopy, !amIFirst);
   });
-  return optimalPlacesForOther.length === 0;
+  return optimalPlaceForOther === undefined;
 };
