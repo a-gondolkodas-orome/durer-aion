@@ -1,18 +1,24 @@
 'use strict';
 
 import {
-  last, sortBy, isNull, some, difference, range, intersection, sample, isEqual
+  isNull, some, difference, range, sample, cloneDeep
 } from 'lodash-es';
 
 export const generateNewBoard = () => Array(9).fill(null);
 
+const roleColors = ['red', 'blue'];
+
+export const playerColor = isPlayerTheFirstToMove => isPlayerTheFirstToMove ? roleColors[0] : roleColors[1];
+const aiColor = isPlayerTheFirstToMove => isPlayerTheFirstToMove ? roleColors[1] : roleColors[0];
+
+
 export const getGameStateAfterAiMove = (board, isPlayerTheFirstToMove) => {
   if (board.filter(c => c).length === 0) {
     const firstStep = sample([[0, 2], [2, 8], [6, 8], [0, 6]]);
-    board[firstStep[0]] = 'red';
-    board[firstStep[1]] = 'red';
+    board[firstStep[0]] = roleColors[0];
+    board[firstStep[1]] = roleColors[0];
   } else {
-    board[getOptimalAiPlacingPosition(board, isPlayerTheFirstToMove)] = isPlayerTheFirstToMove ? 'blue' : 'red';
+    board[getOptimalAiPlacingPosition(board, isPlayerTheFirstToMove)] = aiColor(isPlayerTheFirstToMove);
   }
   return getGameStateAfterMove(board);
 };
@@ -26,13 +32,12 @@ export const isTheLastMoverTheWinner = null;
 const hasFirstPlayerWon = (board) => {
   if (!isGameEnd(board)) return undefined;
 
-  const hasRedWinningSubset = hasWinningSubset(range(0, 9).filter(i => board[i] === 'red'));
-  const hasBlueWinningSubset = hasWinningSubset(range(0, 9).filter(i => board[i] === 'blue'));
-  return hasRedWinningSubset && !hasBlueWinningSubset;
+  return hasWinningSubsetForPlayer(board, 0) && !hasWinningSubsetForPlayer(board, 1);
 };
 
-const isGameEnd = (board) => board.filter(c => c).length === 9 || hasWinningSubsetForSecondPlayer(board);
-const hasWinningSubsetForSecondPlayer = (board) => hasWinningSubset(range(0, 9).filter(i => board[i] === 'blue'));
+const isGameEnd = (board) => board.filter(c => c).length === 9 || hasWinningSubsetForPlayer(board, 1);
+const hasWinningSubsetForPlayer = (board, roleIndex) =>
+  hasWinningSubset(range(0, 9).filter(i => board[i] === roleColors[roleIndex]));
 
 const hasWinningSubset = (indices) => {
   const winningIndexSets = [
@@ -43,40 +48,35 @@ const hasWinningSubset = (indices) => {
   return some(winningIndexSets.map((winningSet) => difference(winningSet, indices).length === 0));
 };
 
-const coveredIndices = [
-  [1, 2, 3, 6, 4, 8],
-  [0, 2, 4, 7],
-  [0, 1, 5, 8, 4, 6],
-  [0, 6, 4, 5],
-  [0, 1, 2, 3, 5, 6, 7, 8],
-  [3, 4, 2, 8],
-  [0, 3, 2, 4, 7, 8],
-  [1, 4, 6, 8],
-  [9, 4, 2, 5, 6, 7]
-];
-
 export const getOptimalAiPlacingPosition = (board, isPlayerTheFirstToMove) => {
   const allowedPlaces = range(0, 9).filter(i => isNull(board[i]));
-  const aiColor = isPlayerTheFirstToMove ? 'blue' : 'red';
-  const aiPieces = range(0, 9).filter(i => board[i] === aiColor);
-  const playerPieces = range(0, 9).filter(i => board[i] !== aiColor && !isNull(board[i]));
 
-  const instantDefendingPlaces = allowedPlaces.filter(i => hasWinningSubset([...playerPieces, i]));
-  const winningSubsetCompleterPlace = allowedPlaces.find(i => hasWinningSubset([...aiPieces, i]));
+  const optimalPlaces = allowedPlaces.filter(i => {
+    const boardCopy = cloneDeep(board);
+    boardCopy[i] = aiColor(isPlayerTheFirstToMove);
+    return isWinningState(boardCopy, !isPlayerTheFirstToMove);
+  });
 
-  if (!isEqual(instantDefendingPlaces, []) && winningSubsetCompleterPlace !== undefined) {
-    return isPlayerTheFirstToMove ? winningSubsetCompleterPlace : last(instantDefendingPlaces);
+  if (optimalPlaces.length > 0) return sample(optimalPlaces);
+
+  // even if we are gonna lose, try to prolong it
+  const playerPieces = range(0, 9).filter(i => board[i] === playerColor(isPlayerTheFirstToMove));
+  const defendingPlaces = allowedPlaces.filter(i => hasWinningSubset([...playerPieces, i]));
+  if (defendingPlaces.length > 0) return sample(defendingPlaces);
+
+  return sample(allowedPlaces);
+};
+
+// given board *after* your step, are you set up to win the game for sure?
+const isWinningState = (board, amIFirst) => {
+  if (isGameEnd(board)) {
+    return amIFirst === hasFirstPlayerWon(board);
   }
-  if (!isEqual(instantDefendingPlaces, [])) {
-    const countOfCoveredOwnPieces = i => intersection(aiPieces, coveredIndices[i]).length;
-    return last(sortBy(instantDefendingPlaces, countOfCoveredOwnPieces));
-  }
-  if (winningSubsetCompleterPlace !== undefined) return winningSubsetCompleterPlace;
-
-  if (isNull(board[4])) return 4;
-
-  const countOfCoveredPlayerPieces = i =>
-    intersection(playerPieces, coveredIndices[i]).length;
-
-  return last(sortBy(allowedPlaces, countOfCoveredPlayerPieces));
+  const allowedPlaces = range(0, 9).filter(i => isNull(board[i]));
+  const optimalPlaceForOther = allowedPlaces.find(i => {
+    const boardCopy = cloneDeep(board);
+    boardCopy[i] = roleColors[amIFirst ? 1 : 0];
+    return isWinningState(boardCopy, !amIFirst);
+  });
+  return optimalPlaceForOther === undefined;
 };

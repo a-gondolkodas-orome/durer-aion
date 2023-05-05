@@ -31,18 +31,6 @@ describe('Double starter TicTacToe strategy', () => {
         expect(result.board[4]).toEqual('red');
       });
 
-      it('should place to finish a winning row if possible', () => {
-        const board = [
-          'red', null, 'red',
-          'blue', null, null,
-          null, null, null
-        ];
-
-        const result = getGameStateAfterAiMove(board, false);
-        expect(result.board[1]).toEqual('red');
-        expect(result.isGameEnd).toBe(false);
-      });
-
       it('should place to finish a winning diagonal if possible', () => {
         const board = [
           'red', 'blue', 'red',
@@ -79,18 +67,6 @@ describe('Double starter TicTacToe strategy', () => {
         const result = getGameStateAfterAiMove(board, true);
         expect(result.board[6]).toEqual('blue');
         expect(result.isGameEnd).toBe(true);
-      });
-
-      it('should attempt to block creating a red row 2 steps later', () => {
-        const board = [
-          null, 'red', null,
-          null, 'blue', 'red',
-          null, 'red', null
-        ];
-
-        const result = getGameStateAfterAiMove(board, true);
-        // 2 or 8 would be equally good steps
-        expect(result.board[8]).toEqual('blue');
       });
 
       it('should try to create a blue row', () => {
