@@ -1,6 +1,6 @@
 import { mapActions, mapState } from 'vuex';
 import GameSidebar from '../../common/game-sidebar/game-sidebar';
-import { getGameStateAfterMove, inPlacingPhase } from './strategy/strategy';
+import { getGameStateAfterMove, inPlacingPhase, pColor, aiColor } from './strategy/strategy';
 
 export default {
   template: require('./tictactoe.html'),
@@ -16,7 +16,7 @@ export default {
     clickField({ row, col }) {
       if (!this.isMoveAllowed({ row, col })) return;
 
-      this.board[row * 3 + col] = this.inPlacingPhase ? 'blue' : 'white';
+      this.board[row * 3 + col] = this.inPlacingPhase ? pColor : 'white';
       this.endPlayerTurn(getGameStateAfterMove(this.board));
     },
     isMoveAllowed({ row, col }) {
@@ -24,7 +24,7 @@ export default {
       if (this.inPlacingPhase) {
         return this.board[row * 3 + col] === null;
       } else {
-        return this.board[row * 3 + col] === 'red';
+        return this.board[row * 3 + col] === aiColor;
       }
     },
     pieceColor({ row, col }) {
