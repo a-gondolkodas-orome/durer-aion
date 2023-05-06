@@ -1,7 +1,7 @@
 'use strict';
 
 import { random } from 'lodash-es';
-import { generateRandomEvenBetween } from '../../../../lib/generate-random';
+import { generateRandomEvenBetween } from '../../../../../lib/generate-random';
 
 export const getAiStep = (board) => {
   const randomPileIndex = random(0, 1);

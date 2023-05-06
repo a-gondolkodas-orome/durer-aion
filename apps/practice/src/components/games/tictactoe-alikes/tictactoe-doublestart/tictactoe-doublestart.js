@@ -1,12 +1,15 @@
 import { mapActions, mapState } from 'vuex';
-import GameSidebar from '../../common/game-sidebar/game-sidebar';
+import GameSidebar from '../../../common/game-sidebar/game-sidebar';
 import { getGameStateAfterMove, playerColor } from './strategy/strategy';
 
 export default {
-  template: require('./anti-tictactoe.html'),
+  template: require('./tictactoe-doublestart.html'),
   components: { GameSidebar },
   computed: {
-    ...mapState(['board', 'shouldPlayerMoveNext', 'isPlayerTheFirstToMove'])
+    ...mapState(['board', 'shouldPlayerMoveNext', 'isPlayerTheFirstToMove']),
+    isDuringFirstMove() {
+      return this.board.filter(c => c).length <= 1;
+    }
   },
   methods: {
     ...mapActions(['endPlayerTurn', 'initializeGame']),
@@ -15,6 +18,7 @@ export default {
       if (this.board[row * 3 + col]) return;
 
       this.board[row * 3 + col] = playerColor(this.isPlayerTheFirstToMove);
+      if (this.isDuringFirstMove) return;
       this.endPlayerTurn(getGameStateAfterMove(this.board));
     },
     pieceColor({ row, col }) {

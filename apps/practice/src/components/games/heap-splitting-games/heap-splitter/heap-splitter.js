@@ -1,6 +1,6 @@
 import { mapGetters, mapActions, mapState } from 'vuex';
 import { isEqual } from 'lodash-es';
-import GameSidebar from '../../common/game-sidebar/game-sidebar';
+import GameSidebar from '../../../common/game-sidebar/game-sidebar';
 import { getGameStateAfterMove } from './strategy/strategy';
 
 export default {

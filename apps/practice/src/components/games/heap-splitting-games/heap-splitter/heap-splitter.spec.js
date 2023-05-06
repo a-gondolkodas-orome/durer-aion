@@ -2,9 +2,9 @@
 
 import HeapSplitter from './heap-splitter';
 import { flushPromises } from '@vue/test-utils';
-import createStore from '../../../store/store';
+import createStore from '../../../../store/store';
 import { cloneDeep } from 'lodash-es';
-import { mountComponent } from '../../../../test-helpers';
+import { mountComponent } from '../../../../../test-helpers';
 
 const mountHeapSplitter = async () => {
   const store = createStore();

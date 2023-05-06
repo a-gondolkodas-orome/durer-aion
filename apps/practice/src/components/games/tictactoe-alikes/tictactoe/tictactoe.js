@@ -1,5 +1,5 @@
 import { mapActions, mapState } from 'vuex';
-import GameSidebar from '../../common/game-sidebar/game-sidebar';
+import GameSidebar from '../../../common/game-sidebar/game-sidebar';
 import { getGameStateAfterMove, inPlacingPhase, pColor, aiColor } from './strategy/strategy';
 
 export default {

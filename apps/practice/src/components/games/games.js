@@ -1,31 +1,31 @@
-import HeapSplitter from './heap-splitter/heap-splitter';
-import * as heapSplitterStrategy from './heap-splitter/strategy/strategy';
-import HunyadiAndTheJanissaries from './hunyadi-and-the-janissaries/hunyadi-and-the-janissaries';
-import * as hunyadiAndTheJanissariesStrategy from './hunyadi-and-the-janissaries/strategy/strategy';
 import Demonstration from './demonstration/demonstration';
 import * as demonstrationStrategy from './demonstration/strategy/strategy';
+import HunyadiAndTheJanissaries from './hunyadi-and-the-janissaries/hunyadi-and-the-janissaries';
+import * as hunyadiAndTheJanissariesStrategy from './hunyadi-and-the-janissaries/strategy/strategy';
 import TwoTimesTwo from './two-times-two/two-times-two';
 import * as twoTimesTwoStrategy from './two-times-two/strategy/strategy';
 import FiveSquares from './five-squares/five-squares';
 import * as fiveSquaresStrategy from './five-squares/strategy/strategy';
 import SuperstitiousCounting from './superstitious-counting/superstitious-counting';
 import * as superstitiousCountingStrategy from './superstitious-counting/strategy/strategy';
-import HeapSplitter4 from './heap-splitter-4/heap-splitter-4';
-import * as heapSplitter4Strategy from './heap-splitter-4/strategy/strategy';
-import HeapSplitter3 from './heap-splitter-3/heap-splitter-3';
-import * as heapSplitter3Strategy from './heap-splitter-3/strategy/strategy';
-import TicTacToe from './tictactoe/tictactoe';
-import * as ticTacToeStrategy from './tictactoe/strategy/strategy';
+import HeapSplitter from './heap-splitting-games/heap-splitter/heap-splitter';
+import * as heapSplitterStrategy from './heap-splitting-games/heap-splitter/strategy/strategy';
+import HeapSplitter3 from './heap-splitting-games/heap-splitter-3/heap-splitter-3';
+import * as heapSplitter3Strategy from './heap-splitting-games/heap-splitter-3/strategy/strategy';
+import HeapSplitter4 from './heap-splitting-games/heap-splitter-4/heap-splitter-4';
+import * as heapSplitter4Strategy from './heap-splitting-games/heap-splitter-4/strategy/strategy';
 import CubeColoring from './cube-coloring/cube-coloring';
 import * as cubeColoringStrategy from './cube-coloring/strategy/strategy';
 import Coin123 from './coin123/coin123';
 import * as coin123Strategy from './coin123/strategy/strategy';
 import Coin357 from './coin357/coin357';
 import * as coin357Strategy from './coin357/strategy/strategy';
-import TicTacToeDoubleStart from './tictactoe-doublestart/tictactoe-doublestart';
-import * as ticTacToeDoubleStartStrategy from './tictactoe-doublestart/strategy/strategy';
-import AntiTicTacToe from './anti-tictactoe/anti-tictactoe';
-import * as antiTicTacToeStrategy from './anti-tictactoe/strategy/strategy';
+import TicTacToe from './tictactoe-alikes/tictactoe/tictactoe';
+import * as ticTacToeStrategy from './tictactoe-alikes/tictactoe/strategy/strategy';
+import TicTacToeDoubleStart from './tictactoe-alikes/tictactoe-doublestart/tictactoe-doublestart';
+import * as ticTacToeDoubleStartStrategy from './tictactoe-alikes/tictactoe-doublestart/strategy/strategy';
+import AntiTicTacToe from './tictactoe-alikes/anti-tictactoe/anti-tictactoe';
+import * as antiTicTacToeStrategy from './tictactoe-alikes/anti-tictactoe/strategy/strategy';
 import ChessRook from './chess-rook/chess-rook';
 import * as chessRookStrategy from './chess-rook/strategy/strategy';
 import ChessBishops from './chess-bishops/chess-bishops';
@@ -33,18 +33,18 @@ import * as chessBishopsStrategy from './chess-bishops/strategy/strategy';
 
 
 export const gameComponents = {
-  HeapSplitter,
-  HunyadiAndTheJanissaries,
   Demonstration,
+  HunyadiAndTheJanissaries,
   TwoTimesTwo,
   FiveSquares,
   SuperstitiousCounting,
-  HeapSplitter4,
+  HeapSplitter,
   HeapSplitter3,
-  TicTacToe,
+  HeapSplitter4,
   CubeColoring,
   Coin123,
   Coin357,
+  TicTacToe,
   TicTacToeDoubleStart,
   AntiTicTacToe,
   ChessRook,

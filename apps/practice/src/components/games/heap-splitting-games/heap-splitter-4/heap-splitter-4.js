@@ -1,10 +1,10 @@
 import { mapGetters, mapActions, mapState } from 'vuex';
-import GameSidebar from '../../common/game-sidebar/game-sidebar';
+import GameSidebar from '../../../common/game-sidebar/game-sidebar';
 import { isEqual } from 'lodash-es';
 import { getGameStateAfterMove } from './strategy/strategy';
 
 export default {
-  template: require('./heap-splitter-3.html'),
+  template: require('./heap-splitter-4.html'),
   components: { GameSidebar },
   data: () => ({
     removedRowIndex: null,
@@ -12,13 +12,16 @@ export default {
   }),
   computed: {
     ...mapState(['board', 'shouldPlayerMoveNext']),
-    ...mapGetters(['isGameInProgress', 'isGameFinished'])
+    ...mapGetters([
+      'isGameInProgress',
+      'isGameReadyToStart',
+      'isGameFinished'
+    ])
   },
   methods: {
     ...mapActions(['endPlayerTurn', 'initializeGame']),
     rowColor({ rowIndex }) {
       if (!this.isGameInProgress) return 'blue';
-
       if (rowIndex === this.removedRowIndex) {
         if (this.hoveredPiece === null) return 'red';
         if (this.hoveredPiece.rowIndex === rowIndex) return 'blue';
@@ -35,7 +38,6 @@ export default {
     },
     clickPiece({ rowIndex, pieceIndex }) {
       if (!this.shouldPlayerMoveNext) return;
-
       if (this.removedRowIndex === rowIndex) {
         this.removedRowIndex = null;
         return;
@@ -62,7 +64,7 @@ export default {
 
       const pieceCountInPile = this.board[rowIndex];
 
-      if (!this.shouldPlayerMoveNext) return pieceCountInPile;
+      if (this.isGameReadyToStart || !this.shouldPlayerMoveNext) return pieceCountInPile;
       if (rowIndex === this.removedRowIndex) {
         if (this.hoveredPiece && this.hoveredPiece.rowIndex === rowIndex) {
           return 'Eldobás visszavonása?';
