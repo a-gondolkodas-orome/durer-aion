@@ -68,6 +68,17 @@ const makeOptimalStepAsSecond = (board) => {
       }
     }
   }
+
+  // if player does not start on main diagonal, color opposing node with same color
+  const pairs = [[0, 6], [6, 0], [1, 7], [7, 1], [3, 5], [5, 3]];
+  for (const p of pairs) {
+    if (!isNull(board[p[0]]) && isAllowedStep(board, p[1], board[p[0]])) {
+      board[p[1]] = board[p[0]];
+      return board;
+    }
+  }
+
+  // make a non-neighboring step if possible
   for (const vertex of emptyVertices) {
     const missingColors = getMissingColors(board, vertex);
     if (missingColors.length === 2) {

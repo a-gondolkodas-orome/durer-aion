@@ -63,4 +63,10 @@ describe('cube coloring strategy', () => {
     const res = getGameStateAfterAiMove(board, true).board;
     expect(res[0]).toEqual('green');
   });
+
+  it('should color opposing vertex with same color as second step', () => {
+    const board = [null, 'red', null, null, null, null, null, null];
+    const res = getGameStateAfterAiMove(board, true).board;
+    expect(res[7]).toEqual('red');
+  });
 });
