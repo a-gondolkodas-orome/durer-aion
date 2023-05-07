@@ -21,18 +21,24 @@
         <line x1="20" y1="440" x2="140" y2="320" style="stroke:black;stroke-width:3" />
         <line x1="320" y1="440" x2="140" y2="20" style="stroke:black;stroke-width:3" />
 
-        <circle cx="20" cy="140" r="15" @click="setColor(0)" stroke="black" stroke-width="3" :fill="board.colors[0]" />
-        <circle cx="320" cy="140" r="15" @click="setColor(1)" stroke="black" stroke-width="3" :fill="board.colors[1]" />
-        <circle cx="320" cy="440" r="15" @click="setColor(2)" stroke="black" stroke-width="3" :fill="board.colors[2]" />
-        <circle cx="20" cy="440" r="15" @click="setColor(3)" stroke="black" stroke-width="3" :fill="board.colors[3]" />
-        <circle cx="140" cy="20" r="15" @click="setColor(4)" stroke="black" stroke-width="3" :fill="board.colors[4]" />
-        <circle cx="440" cy="20" r="15" @click="setColor(5)" stroke="black" stroke-width="3" :fill="board.colors[5]" />
-        <circle cx="440" cy="320" r="15" @click="setColor(6)" stroke="black" stroke-width="3" :fill="board.colors[6]" />
-        <circle cx="140" cy="320" r="15" @click="setColor(7)" stroke="black" stroke-width="3" :fill="board.colors[7]" />
+        <circle cx="20" cy="140" r="15" @click="setColor(0)" stroke="black" stroke-width="3" :fill="board[0] || 'white'" />
+        <circle cx="320" cy="140" r="15" @click="setColor(1)" stroke="black" stroke-width="3" :fill="board[1] || 'white'" />
+        <circle cx="320" cy="440" r="15" @click="setColor(2)" stroke="black" stroke-width="3" :fill="board[2] || 'white'" />
+        <circle cx="20" cy="440" r="15" @click="setColor(3)" stroke="black" stroke-width="3" :fill="board[3] || 'white'" />
+        <circle cx="140" cy="20" r="15" @click="setColor(4)" stroke="black" stroke-width="3" :fill="board[4] || 'white'" />
+        <circle cx="440" cy="20" r="15" @click="setColor(5)" stroke="black" stroke-width="3" :fill="board[5] || 'white'" />
+        <circle cx="440" cy="320" r="15" @click="setColor(6)" stroke="black" stroke-width="3" :fill="board[6] || 'white'" />
+        <circle cx="140" cy="320" r="15" @click="setColor(7)" stroke="black" stroke-width="3" :fill="board[7] || 'white'" />
 
-        <rect x="550" y="20" rx="5" ry="5" width="80" height="30" @click="clickPicker(board.usedColors[0])" stroke="black" stroke-width="2" :fill="board.usedColors[0]" />
-        <rect x="550" y="70" rx="5" ry="5" width="80" height="30" @click="clickPicker(board.usedColors[1])" stroke="black" stroke-width="2" :fill="board.usedColors[1]" />
-        <rect x="550" y="120" rx="5" ry="5" width="80" height="30" @click="clickPicker(board.usedColors[2])" stroke="black" stroke-width="2" :fill="board.usedColors[2]" />
+        <rect :fill="allColors[0]" @click="clickPicker(allColors[0])"
+          x="550" y="20" rx="5" ry="5" width="80" height="30" stroke="black" stroke-width="2"
+        />
+        <rect :fill="allColors[1]" @click="clickPicker(allColors[1])"
+          x="550" y="70" rx="5" ry="5" width="80" height="30" stroke="black" stroke-width="2"
+        />
+        <rect :fill="allColors[2]" @click="clickPicker(allColors[2])"
+          x="550" y="120" rx="5" ry="5" width="80" height="30" stroke="black" stroke-width="2"
+        />
 
         <circle v-if="show" :cx="x" :cy="y" r="15" :fill="color" fill-opacity="0.5" stroke="white" stroke-width="2" pointer-events="none" />
       </svg>

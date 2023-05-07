@@ -1,141 +1,101 @@
 'use strict';
 
-export const generateNewBoard = () => {
-  return {
-    usedColors: ["red", "green", "blue"],
-    colors: Array(8).fill("white"),
-    neighbours: {
-      0: [1, 3, 4],
-      1: [0, 2, 5],
-      2: [1, 3, 4, 6],
-      3: [0, 2, 7],
-      4: [0, 2, 5, 7],
-      5: [1, 4, 6],
-      6: [2, 5, 7],
-      7: [3, 4, 6]
-    }
-  };
+import { isNull, every, some, difference, range } from 'lodash-es';
+
+export const generateNewBoard = () => Array(8).fill(null);
+
+export const allColors = ["red", "green", "blue"];
+const neighbours = {
+  0: [1, 3, 4],
+  1: [0, 2, 5],
+  2: [1, 3, 4, 6],
+  3: [0, 2, 7],
+  4: [0, 2, 5, 7],
+  5: [1, 4, 6],
+  6: [2, 5, 7],
+  7: [3, 4, 6]
 };
 
 export const getGameStateAfterAiMove = (board, isPlayerTheFirstToMove) => {
-  isPlayerTheFirstToMove ? board = makeOptimalStepAsSecond(board) : board = makeOptimalStepAsFirtst(board);
+  board = isPlayerTheFirstToMove ? makeOptimalStepAsSecond(board) : makeOptimalStepAsFirst(board);
   return getGameStateAfterMove(board);
 };
 
 export const getGameStateAfterMove = (board) => {
-  let hasFirstPlayerWon = !hasEmptyVertex(board);
-  return { board, isGameEnd: isGameEnd(board), hasFirstPlayerWon };
+  return {
+    board,
+    isGameEnd: isGameEnd(board),
+    hasFirstPlayerWon: hasFirstPlayerWon(board)
+  };
 };
 
 export const isTheLastMoverTheWinner = null;
 
-export const hasNeighbourWithSameColor = (board, vertex, color) => {
-  for (let v of board.neighbours[vertex]) {
-    if (board.colors[v] === color) return true;
-  }
-  return false;
-};
-
 export const isAllowedStep = (board, vertex, color) => {
-  return !hasNeighbourWithSameColor(board, vertex, color) && isEmptyVertex(board, vertex);
+  if (!isNull(board[vertex])) return false;
+  return every(neighbours[vertex], i => isNull(board[i]) || board[i] !== color);
 };
 
-export const existsAllowedStep = (board) => {
-  for (let color of board.usedColors) {
-    for (let vertex in board.colors) {
-      if (isAllowedStep(board, vertex, color)) return true;
-    }
-  }
-  return false;
+const isGameEnd = board => {
+  const canUseColor = color => some(range(0, 8), v => isAllowedStep(board, v, color));
+  return every(allColors, color => !canUseColor(color));
 };
 
-const makeOptimalStepAsFirtst = (board) => {
-  let optimalOrderOfVertices = [2, 4, 0, 1, 3, 5, 6, 7];
-  for (let vertex of optimalOrderOfVertices) {
-    for (let color of board.usedColors) {
-      if (isAllowedStep(board, vertex, color)) {
-        board.colors[vertex] = color;
-        return board;
-      }
-    }
-  }
-  return false;
+const hasFirstPlayerWon = board => every(board, v => !isNull(v));
+
+const makeOptimalStepAsFirst = (board) => {
+  const optimalOrderOfVertices = [2, 4, 0, 1, 3, 5, 6, 7];
+  const vertexToColor = optimalOrderOfVertices.find(v => isNull(board[v]));
+  const color = allColors.find(c => isAllowedStep(board, vertexToColor, c));
+  board[vertexToColor] = color;
+  return board;
 };
 
 const makeOptimalStepAsSecond = (board) => {
-  let optimalOrderOfVertices = [0, 1, 3, 5, 6, 7, 2, 4];
-  for (let vertex of optimalOrderOfVertices) {
-    let missingColors = getMissingColors(board, vertex);
-    if (isEmptyVertex(board, vertex) && missingColors.size === 1) {
-      for (let v of getEmptyNeighbours(board, vertex)) {
-        for (let c of missingColors) {
-          if (isAllowedStep(board, v, c)) {
-            board.colors[v] = c;
-            return board;
-          }
+  const optimalOrderOfVertices = [0, 1, 3, 5, 6, 7, 2, 4];
+  const emptyVertices = optimalOrderOfVertices.filter(v => isNull(board[v]));
+
+  // try to immediately make a vertex uncolorable
+  for (const vertex of emptyVertices) {
+    const missingColors = getMissingColors(board, vertex);
+    if (missingColors.length === 1) {
+      for (const v of getEmptyNeighbours(board, vertex)) {
+        if (isAllowedStep(board, v, missingColors[0])) {
+          board[v] = missingColors[0];
+          return board;
         }
       }
     }
   }
-
-  for (let vertex of optimalOrderOfVertices) {
-    let missingColors = getMissingColors(board, vertex);
-    if (isEmptyVertex(board, vertex) && missingColors.size === 2) {
-      for (let v of getEmptyNeighbours(board, vertex)) {
-        for (let c of missingColors) {
-          if (isAllowedStep(board, v, c)) {
-            board.colors[v] = c;
-            return board;
-          }
+  for (const vertex of emptyVertices) {
+    const missingColors = getMissingColors(board, vertex);
+    if (missingColors.length === 2) {
+      for (const v of getEmptyNeighbours(board, vertex)) {
+        if (isAllowedStep(board, v, missingColors[0])) {
+          board[v] = missingColors[0];
+          return board;
         }
       }
     }
   }
-
-
-  for (let vertex of optimalOrderOfVertices) {
-    for (let color of board.usedColors) {
+  // every vertex is either banned or has no colored neighbor
+  for (const vertex of emptyVertices) {
+    for (const color of allColors) {
       if (isAllowedStep(board, vertex, color)) {
-        board.colors[vertex] = color;
+        board[vertex] = color;
         return board;
       }
     }
   }
-  return false;
+  // if all vertices are banned we should have a game end
+  console.error("This state should not happen");
 };
 
 const getMissingColors = (board, vertex) => {
-  let nbColors = new Set();
-  for (let v of board.neighbours[vertex]) {
-    nbColors.add(board.colors[v]);
-  }
-  let missingColors = new Set();
-  for (let c of board.usedColors) {
-    if (!nbColors.has(c)) missingColors.add(c);
-  }
-  return missingColors;
+  const nbColors = neighbours[vertex].map(v => board[v]);
+  return difference(allColors, nbColors);
 };
 
 const getEmptyNeighbours = (board, vertex) => {
-  let emptyNeighbours = new Set();
-  for (let v of board.neighbours[vertex]) {
-    if (isEmptyVertex(board, v)) emptyNeighbours.add(v);
-  }
-  return emptyNeighbours;
-};
-
-
-const isEmptyVertex = (board, vertex) => {
-  return (board.colors[vertex] === "white");
-};
-
-const hasEmptyVertex = (board) => {
-  for (let vertex in board.colors) {
-    if (isEmptyVertex(board, vertex)) return true;
-  }
-    return false;
-};
-
-const isGameEnd = (board) => {
-  return !existsAllowedStep(board);
+  return neighbours[vertex].filter(i => isNull(board[i]));
 };
