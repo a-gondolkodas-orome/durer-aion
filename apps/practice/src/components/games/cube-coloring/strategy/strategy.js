@@ -5,16 +5,6 @@ import { isNull, every, some, difference, range } from 'lodash-es';
 export const generateNewBoard = () => Array(8).fill(null);
 
 export const allColors = ["red", "green", "blue"];
-const neighbours = {
-  0: [1, 3, 4],
-  1: [0, 2, 5],
-  2: [1, 3, 4, 6],
-  3: [0, 2, 7],
-  4: [0, 2, 5, 7],
-  5: [1, 4, 6],
-  6: [2, 5, 7],
-  7: [3, 4, 6]
-};
 
 export const getGameStateAfterAiMove = (board, isPlayerTheFirstToMove) => {
   board = isPlayerTheFirstToMove ? makeOptimalStepAsSecond(board) : makeOptimalStepAsFirst(board);
@@ -34,6 +24,17 @@ export const isTheLastMoverTheWinner = null;
 export const isAllowedStep = (board, vertex, color) => {
   if (!isNull(board[vertex])) return false;
   return every(neighbours[vertex], i => isNull(board[i]) || board[i] !== color);
+};
+
+const neighbours = {
+  0: [1, 3, 4],
+  1: [0, 2, 5],
+  2: [1, 3, 4, 6],
+  3: [0, 2, 7],
+  4: [0, 2, 5, 7],
+  5: [1, 4, 6],
+  6: [2, 5, 7],
+  7: [3, 4, 6]
 };
 
 const isGameEnd = board => {
