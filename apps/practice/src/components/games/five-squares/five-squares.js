@@ -15,13 +15,13 @@ export default {
     ...mapActions(['endPlayerTurn', 'initializeGame']),
     placePiece(tileIndex) {
       if (!this.shouldPlayerMoveNext) return;
+
+      this.board[tileIndex] += 1;
       if (!this.isPlayerTheFirstToMove && !this.oneMoveDone){
         this.oneMoveDone = true;
-        this.board[tileIndex] += 1;
-      }
-      else{
+      } else {
         this.oneMoveDone = false;
-        this.endPlayerTurn(getGameStateAfterMove(this.board, tileIndex));
+        this.endPlayerTurn(getGameStateAfterMove(this.board));
       }
     }
   },
