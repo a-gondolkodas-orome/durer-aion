@@ -1,6 +1,6 @@
 'use strict';
 
-import { isNull, every, some, difference, range } from 'lodash-es';
+import { isNull, every, some, difference, range, sampleSize, sample } from 'lodash-es';
 
 export const generateNewBoard = () => Array(8).fill(null);
 
@@ -45,16 +45,16 @@ const isGameEnd = board => {
 const hasFirstPlayerWon = board => every(board, v => !isNull(v));
 
 const makeOptimalStepAsFirst = (board) => {
-  const optimalOrderOfVertices = [2, 4, 0, 1, 3, 5, 6, 7];
-  const vertexToColor = optimalOrderOfVertices.find(v => isNull(board[v]));
-  const color = allColors.find(c => isAllowedStep(board, vertexToColor, c));
-  board[vertexToColor] = color;
+  const mainDiagonal = sampleSize([2, 4], 2);
+  const otherVertices = sampleSize([0, 1, 3, 5, 6, 7], 6);
+  const vertexToColor = [...mainDiagonal, ...otherVertices].find(v => isNull(board[v]));
+  const colors = allColors.filter(c => isAllowedStep(board, vertexToColor, c));
+  board[vertexToColor] = sample(colors);
   return board;
 };
 
 const makeOptimalStepAsSecond = (board) => {
-  const optimalOrderOfVertices = [0, 1, 3, 5, 6, 7, 2, 4];
-  const emptyVertices = optimalOrderOfVertices.filter(v => isNull(board[v]));
+  const emptyVertices = sampleSize(range(0, 8), 8).filter(v => isNull(board[v]));
 
   // try to immediately make a vertex uncolorable
   for (const vertex of emptyVertices) {
@@ -70,7 +70,7 @@ const makeOptimalStepAsSecond = (board) => {
   }
 
   // if player does not start on main diagonal, color opposing node with same color
-  const pairs = [[0, 6], [6, 0], [1, 7], [7, 1], [3, 5], [5, 3]];
+  const pairs = sampleSize([[0, 6], [6, 0], [1, 7], [7, 1], [3, 5], [5, 3]], 6);
   for (const p of pairs) {
     if (!isNull(board[p[0]]) && isAllowedStep(board, p[1], board[p[0]])) {
       board[p[1]] = board[p[0]];
@@ -92,7 +92,7 @@ const makeOptimalStepAsSecond = (board) => {
   }
   // every vertex is either banned or has no colored neighbor
   for (const vertex of emptyVertices) {
-    for (const color of allColors) {
+    for (const color of sampleSize(allColors, 3)) {
       if (isAllowedStep(board, vertex, color)) {
         board[vertex] = color;
         return board;
