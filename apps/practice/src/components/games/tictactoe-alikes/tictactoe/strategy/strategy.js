@@ -1,8 +1,9 @@
 'use strict';
 
-import { isNull, some, difference, groupBy, range, cloneDeep, sample } from 'lodash-es';
+import { isNull, some, groupBy, range, cloneDeep, sample } from 'lodash-es';
+import { generateEmptyTicTacToeBoard, hasWinningSubset } from '../../helpers';
 
-export const generateNewBoard = () => Array(9).fill(null);
+export const generateNewBoard = generateEmptyTicTacToeBoard;
 
 export const getGameStateAfterAiMove = (board) => {
   const aiPosition = getOptimalAiPosition(board);
@@ -108,13 +109,4 @@ const isGameEnd = (board) => {
   const occupiedPlaces = range(0, 9).filter((i) => board[i]);
   const boardIndicesByPieceColor = groupBy(occupiedPlaces, (i) => board[i]);
   return some(boardIndicesByPieceColor, hasWinningSubset);
-};
-
-const hasWinningSubset = (indices) => {
-  const winningIndexSets = [
-    [0, 1, 2], [3, 4, 5], [6, 7, 8],
-    [0, 3, 6], [1, 4, 7], [2, 5, 8],
-    [0, 4, 8], [2, 4, 6]
-  ];
-  return some(winningIndexSets.map((winningSet) => difference(winningSet, indices).length === 0));
 };

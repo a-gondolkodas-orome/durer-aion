@@ -1,8 +1,9 @@
 'use strict';
 
-import { isNull, some, difference, range, groupBy, sample, cloneDeep } from 'lodash-es';
+import { isNull, some, range, groupBy, sample, cloneDeep } from 'lodash-es';
+import { hasWinningSubset, generateEmptyTicTacToeBoard } from '../../helpers';
 
-export const generateNewBoard = () => Array(9).fill(null);
+export const generateNewBoard = generateEmptyTicTacToeBoard;
 
 const roleColors = ['red', 'blue'];
 
@@ -35,26 +36,25 @@ const hasFirstPlayerWon = (board) => {
   return board.filter(c => c).length % 2 === 0;
 };
 
-const hasWinningSubset = (indices) => {
-  const winningIndexSets = [
-    [0, 1, 2], [3, 4, 5], [6, 7, 8],
-    [0, 3, 6], [1, 4, 7], [2, 5, 8],
-    [0, 4, 8], [2, 4, 6]
-  ];
-  return some(winningIndexSets.map((winningSet) => difference(winningSet, indices).length === 0));
-};
-
 export const getOptimalAiPlacingPosition = (board, isPlayerTheFirstToMove) => {
   const allowedPlaces = range(0, 9).filter(i => isNull(board[i]));
-  const occupiedPlaces = range(0, 9).filter(i => board[i]);
+
+  // start with middle place as a first step
   if (allowedPlaces.length === 9) return 4;
 
+  // as a first player, proceed with placing at an empty place symmetrical to player's piece
   if (!isPlayerTheFirstToMove) {
-    const pairs = [[0, 8], [1, 7], [2, 6], [3, 5]];
-    const pair = pairs.find(pair => difference(pair, occupiedPlaces).length === 1);
-    if (pair) return difference(pair, occupiedPlaces)[0];
+    // pairs symmetric to middle place
+    const pairs = [[0, 8], [1, 7], [2, 6], [3, 5], [5, 3], [6, 2],  [7, 1] [8, 0]];
+    for (const p of pairs) {
+      // first is occupied, second is not from given pair
+      if (!isNull(board[p[0]]) && isNull(board[p[1]])) {
+        return p[1];
+      }
+    }
   }
 
+  // as a second player still try to win if first player may not play optimally
   const optimalPlaces = allowedPlaces.filter(i => {
     const boardCopy = cloneDeep(board);
     boardCopy[i] = aiColor(isPlayerTheFirstToMove);

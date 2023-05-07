@@ -1,10 +1,9 @@
 'use strict';
 
-import {
-  isNull, some, difference, range, sample, cloneDeep
-} from 'lodash-es';
+import { isNull, range, sample, cloneDeep } from 'lodash-es';
+import { generateEmptyTicTacToeBoard, hasWinningSubset } from '../../helpers';
 
-export const generateNewBoard = () => Array(9).fill(null);
+export const generateNewBoard = generateEmptyTicTacToeBoard;
 
 const roleColors = ['red', 'blue'];
 
@@ -14,6 +13,7 @@ const aiColor = isPlayerTheFirstToMove => isPlayerTheFirstToMove ? roleColors[1]
 
 export const getGameStateAfterAiMove = (board, isPlayerTheFirstToMove) => {
   if (board.filter(c => c).length === 0) {
+    // choose two neighboring corners randomly
     const firstStep = sample([[0, 2], [2, 8], [6, 8], [0, 6]]);
     board[firstStep[0]] = roleColors[0];
     board[firstStep[1]] = roleColors[0];
@@ -38,15 +38,6 @@ const hasFirstPlayerWon = (board) => {
 const isGameEnd = (board) => board.filter(c => c).length === 9 || hasWinningSubsetForPlayer(board, 1);
 const hasWinningSubsetForPlayer = (board, roleIndex) =>
   hasWinningSubset(range(0, 9).filter(i => board[i] === roleColors[roleIndex]));
-
-const hasWinningSubset = (indices) => {
-  const winningIndexSets = [
-    [0, 1, 2], [3, 4, 5], [6, 7, 8],
-    [0, 3, 6], [1, 4, 7], [2, 5, 8],
-    [0, 4, 8], [2, 4, 6]
-  ];
-  return some(winningIndexSets.map((winningSet) => difference(winningSet, indices).length === 0));
-};
 
 export const getOptimalAiPlacingPosition = (board, isPlayerTheFirstToMove) => {
   const allowedPlaces = range(0, 9).filter(i => isNull(board[i]));
