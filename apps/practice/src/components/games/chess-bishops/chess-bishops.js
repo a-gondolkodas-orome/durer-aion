@@ -2,7 +2,7 @@ import { isEqual } from 'lodash-es';
 import { mapActions, mapState } from 'vuex';
 import GameSidebar from '../../common/game-sidebar/game-sidebar';
 import ChessBishopSvg from './chess-bishop-svg/chess-bishop-svg';
-import { getGameStateAfterMove, getAllowedMoves } from './strategy/strategy';
+import { getGameStateAfterMove, getAllowedMoves, BISHOP, FORBIDDEN } from './strategy/strategy';
 
 export default {
   template: require('./chess-bishops.html'),
@@ -28,6 +28,12 @@ export default {
     isMoveAllowed({ row, col }) {
       if (!this.shouldPlayerMoveNext) return false;
       return getAllowedMoves(this.board).map(({ row, col }) => row * 8 + col).includes(row * 8 + col);
+    },
+    isForbidden({ row, col }) {
+      return this.board[row * 8 + col] === FORBIDDEN;
+    },
+    isBishop({ row, col }) {
+      return this.board[row * 8 + col] === BISHOP;
     },
     wouldBeForbidden({ row, col }) {
       if (!this.shouldPlayerMoveNext) return false;

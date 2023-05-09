@@ -17,11 +17,11 @@
             v-for="col in [0, 1, 2, 3, 4, 5, 6, 7]" :key="col" 
             @click="clickField({ row, col })"
             class="text-center h-20 w-20 border-4"
-            :class="{ 'bg-slate-400': board[row * 8 + col] === 'forbidden', 'bg-slate-200': wouldBeForbidden({ row, col }), 'cursor-not-allowed': board[row * 8 + col] === 'forbidden' }"
+            :class="{ 'bg-slate-400': isForbidden({ row, col }), 'bg-slate-200': wouldBeForbidden({ row, col }), 'cursor-not-allowed': isForbidden({ row, col }) }"
             @mouseover="hoveredField = { row, col }"
             @mouseout="hoveredField = null"
           >
-            <span v-show="board[row * 8 + col] === 'bishop'">
+            <span v-show="isBishop({ row, col })">
               <svg class="h-16 w-16 p-1 inline-block">
                 <use xlink:href="#game-chess-bishop" />
               </svg>
