@@ -1,8 +1,15 @@
 'use strict';
 
-import { flatMap, range, sample, cloneDeep } from 'lodash-es';
+import { flatMap, range, sample, cloneDeep, random } from 'lodash-es';
 
-export const generateNewBoard = () => Array(64).fill(null);
+const HORIZONTAL = "h";
+const VERTICAL = "v";
+let axis = null;
+
+export const generateNewBoard = () => {
+  axis = null;
+  return Array(64).fill(null);
+};
 export const BISHOP = 1;
 export const FORBIDDEN = 2;
 
@@ -22,19 +29,37 @@ export const getGameStateAfterMove = (board, { row, col }) => {
 };
 
 const getOptimalAiMove = (board) => {
-  // TODO: there are two possible axis!!
-  const allowedMirrorMoves = flatMap(range(0, 8), row => range(0, 8).map(col => ({ row, col })))
+  const allowedHMirrorMoves = flatMap(range(0, 8), row => range(0, 8).map(col => ({ row, col })))
     .filter(({ row, col }) => board[row * 8 + col] === null && board[row * 8 + 7 - col] === BISHOP);
+  const allowedVMirrorMoves = flatMap(range(0, 8), row => range(0, 8).map(col => ({ row, col })))
+    .filter(({ row, col }) => board[row * 8 + col] === null && board[8 * (7 - row) + col] === BISHOP);
 
   // we are playing according to optimal winning strategy
-  if (allowedMirrorMoves.length === 1) return allowedMirrorMoves[0];
+  // as a first step, choose a mirror axis randomly
+  if (board.filter(b => b === BISHOP).length === 1) {
+    axis = random(0, 1) ? HORIZONTAL : VERTICAL;
+  }
+  // identify player's axis if they are playing optimally in their first step
+  if (board.filter(b => b === BISHOP).length === 2) {
+    if (allowedHMirrorMoves.length === 0) {
+      axis = HORIZONTAL;
+    }
+    if (allowedVMirrorMoves.length === 0) {
+      axis = VERTICAL;
+    }
+  }
+
+  if (axis === HORIZONTAL && allowedHMirrorMoves.length === 1) {
+    return allowedHMirrorMoves[0];
+  }
+  if (axis === VERTICAL && allowedVMirrorMoves.length === 1) {
+    return allowedVMirrorMoves[0];
+  }
 
   const allowedMoves = getAllowedMoves(board);
-  // make a random move if player has played optimally so far
-  if (allowedMirrorMoves.length === 0) return sample(allowedMoves);
 
   // try to win from bad position if player does not play optimally
-  // following optimal strategy at the second step seems to slow
+  // following optimal strategy at the second step seems too slow
   if (board.filter(b => b === BISHOP).length >= 4) {
     const optimalPlaces = allowedMoves.filter(({ row, col }) => {
       const boardCopy = cloneDeep(board);
