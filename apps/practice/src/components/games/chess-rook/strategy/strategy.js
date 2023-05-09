@@ -1,6 +1,6 @@
 'use strict';
 
-import { last, range, sample } from 'lodash-es';
+import { last, range, random } from 'lodash-es';
 
 export const generateNewBoard = () => ({
   chessBoard: ['rook', ...Array(63).fill(null)],
@@ -26,30 +26,40 @@ export const getGameStateAfterMove = (board, { row, col }) => {
 const getOptimalAiMove = (board) => {
   const { row, col } = board.rookPosition;
 
-  const allowedMoves = [];
+  const allowedHorizontalMoves = [];
   let i = 1;
   while (col - i >= 0 && board.chessBoard[row * 8 + col - i] === null) {
-    allowedMoves.push({ row, col: col - i });
+    allowedHorizontalMoves.push({ row, col: col - i });
     i += 1;
   }
   i = 1;
   while (col + i <= 7 && board.chessBoard[row * 8 + col + i] === null) {
-    allowedMoves.push({ row, col: col + i });
+    allowedHorizontalMoves.push({ row, col: col + i });
     i += 1;
   }
-  if (allowedMoves.length >= 1) return last(allowedMoves);
 
+  const allowedVerticalMoves = [];
   i = 1;
   while (row - i >= 0 && board.chessBoard[(row - i) * 8 + col] === null) {
-    allowedMoves.push({ row: row - i, col });
+    allowedVerticalMoves.push({ row: row - i, col });
     i += 1;
   }
   i = 1;
   while (row + i <= 7 && board.chessBoard[(row + i) * 8 + col] === null) {
-    allowedMoves.push({ row: row + i, col });
+    allowedVerticalMoves.push({ row: row + i, col });
     i += 1;
   }
-  return sample(allowedMoves);
+
+  if (allowedHorizontalMoves.length < allowedVerticalMoves.length) {
+    return last(allowedVerticalMoves);
+  } else if (allowedHorizontalMoves.length > allowedVerticalMoves.length) {
+    return last(allowedHorizontalMoves);
+  }
+  if (random(0, 1) === 1) {
+    return last(allowedHorizontalMoves);
+  } else {
+    return last(allowedVerticalMoves);
+  }
 };
 
 export const getAllowedMoves = (board) => {
