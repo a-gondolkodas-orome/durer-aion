@@ -1,6 +1,6 @@
 'use strict';
 
-import { flatMap, range, sample, cloneDeep, random } from 'lodash-es';
+import { flatMap, range, sample, cloneDeep, random, sampleSize } from 'lodash-es';
 
 const HORIZONTAL = "h";
 const VERTICAL = "v";
@@ -60,8 +60,9 @@ const getOptimalAiMove = (board) => {
 
   // try to win from bad position if player does not play optimally
   // following optimal strategy at the second step seems too slow
-  if (board.filter(b => b === BISHOP).length >= 4) {
-    const optimalPlaces = allowedMoves.filter(({ row, col }) => {
+  // so we try a few places with hopes they are optimal
+  if (board.filter(b => b === BISHOP).length === 2) {
+    const optimalPlace = sampleSize(allowedMoves, 4).find(({ row, col }) => {
       const boardCopy = cloneDeep(board);
       markForbiddenFields(boardCopy, { row, col });
       boardCopy[row * 8 + col] = BISHOP;
@@ -69,8 +70,25 @@ const getOptimalAiMove = (board) => {
     });
 
 
-    if (optimalPlaces.length > 0) {
-      return sample(optimalPlaces);
+    if (optimalPlace !== undefined) {
+      return optimalPlace;
+    }
+  }
+
+  // try to win from bad position if player does not play optimally
+  if (board.filter(b => b === BISHOP).length >= 4) {
+    // sample + find has the same effect as filter + sample: find a random
+    // from the optimal moves
+    const optimalPlace = sampleSize(allowedMoves, 64).find(({ row, col }) => {
+      const boardCopy = cloneDeep(board);
+      markForbiddenFields(boardCopy, { row, col });
+      boardCopy[row * 8 + col] = BISHOP;
+      return isWinningState(boardCopy, false);
+    });
+
+
+    if (optimalPlace !== undefined) {
+      return optimalPlace;
     }
   }
   return sample(allowedMoves);
