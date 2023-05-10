@@ -13,22 +13,22 @@ export default {
   },
   methods: {
     ...mapActions(['endPlayerTurn', 'initializeGame']),
-    clickField({ row, col }) {
-      if (!this.isMoveAllowed({ row, col })) return;
+    clickField(id) {
+      if (!this.isMoveAllowed(id)) return;
 
-      this.board[row * 3 + col] = this.inPlacingPhase ? pColor : 'white';
+      this.board[id] = this.inPlacingPhase ? pColor : 'white';
       this.endPlayerTurn(getGameStateAfterMove(this.board));
     },
-    isMoveAllowed({ row, col }) {
+    isMoveAllowed(id) {
       if (!this.shouldPlayerMoveNext) return false;
       if (this.inPlacingPhase) {
-        return this.board[row * 3 + col] === null;
+        return this.board[id] === null;
       } else {
-        return this.board[row * 3 + col] === aiColor;
+        return this.board[id] === aiColor;
       }
     },
-    pieceColor({ row, col }) {
-      const colorCode = this.board[row * 3 + col];
+    pieceColor(id) {
+      const colorCode = this.board[id];
       if (colorCode === 'red') return 'bg-red-600';
       if (colorCode === 'white') return 'bg-white';
       return 'bg-blue-600';

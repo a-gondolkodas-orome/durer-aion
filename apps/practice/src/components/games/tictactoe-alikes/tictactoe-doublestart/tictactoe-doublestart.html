@@ -12,20 +12,20 @@
   <div class="flex flex-wrap">
     <div class="p-1 shrink-0 grow basis-8/12">
       <table class="m-2 border-collapse">
-        <tr v-for="row in [0, 1, 2]" :key="row">
+        <tr v-for="r in [0, 1, 2]" :key="r">
           <td
-            v-for="col in [0, 1, 2]" :key="col"
-            @click="clickField({ row, col })"
+            v-for="c in [0, 1, 2]" :key="c"
+            @click="clickField(r*3+c)"
             class="text-center h-36 w-36 border-4 text-8xl"
           >
             <span
-              v-if="board[row * 3 + col]"
+              v-if="board[r*3+c]"
               class="h-16 w-16 p-1 inline-block rounded-full mr-1"
-              :class="pieceColor({ row, col })"
+              :class="pieceColor(r*3+c)"
             ></span>
             <!-- Hack to stop grid changing width on narrow screen -->
             <span
-              v-if="!board[row * 3 + col]"
+              v-if="!board[r*3+c]"
               class="h-16 w-16 p-1 inline-block rounded-full mr-1 opacity-100"
             ></span>
           </td>

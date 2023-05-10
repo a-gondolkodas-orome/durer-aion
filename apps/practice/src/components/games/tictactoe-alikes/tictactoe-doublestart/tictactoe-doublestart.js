@@ -13,16 +13,16 @@ export default {
   },
   methods: {
     ...mapActions(['endPlayerTurn', 'initializeGame']),
-    clickField({ row, col }) {
+    clickField(id) {
       if (!this.shouldPlayerMoveNext) return;
-      if (this.board[row * 3 + col]) return;
+      if (this.board[id]) return;
 
-      this.board[row * 3 + col] = playerColor(this.isPlayerTheFirstToMove);
+      this.board[id] = playerColor(this.isPlayerTheFirstToMove);
       if (this.isDuringFirstMove) return;
       this.endPlayerTurn(getGameStateAfterMove(this.board));
     },
-    pieceColor({ row, col }) {
-      const colorCode = this.board[row * 3 + col];
+    pieceColor(id) {
+      const colorCode = this.board[id];
       if (colorCode === 'red') return 'bg-red-600';
       return 'bg-blue-600';
     }
