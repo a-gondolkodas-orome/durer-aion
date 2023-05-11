@@ -1,4 +1,4 @@
-import { isEqual } from 'lodash-es';
+import { isEqual, some } from 'lodash-es';
 import { mapActions, mapState } from 'vuex';
 import GameSidebar from '../../common/game-sidebar/game-sidebar';
 import ChessBishopSvg from './chess-bishop-svg/chess-bishop-svg';
@@ -15,25 +15,25 @@ export default {
   },
   methods: {
     ...mapActions(['endPlayerTurn', 'initializeGame']),
-    clickField({ row, col }) {
-      if (!this.isMoveAllowed({ row, col })) return;
+    clickField(field) {
+      if (!this.isMoveAllowed(field)) return;
 
-      this.endPlayerTurn(getGameStateAfterMove(this.board, { row, col }));
+      this.endPlayerTurn(getGameStateAfterMove(this.board, field));
     },
     isPotentialNextStep(field) {
       if (!this.isMoveAllowed(field)) return false;
       if (!this.hoveredField) return false;
       return isEqual(this.hoveredField, field);
     },
-    isMoveAllowed({ row, col }) {
+    isMoveAllowed(targetField) {
       if (!this.shouldPlayerMoveNext) return false;
-      return getAllowedMoves(this.board).map(({ row, col }) => row * 8 + col).includes(row * 8 + col);
+      return some(getAllowedMoves(this.board), field => isEqual(field, targetField));
     },
     isForbidden({ row, col }) {
-      return this.board[row * 8 + col] === FORBIDDEN;
+      return this.board[row][col] === FORBIDDEN;
     },
     isBishop({ row, col }) {
-      return this.board[row * 8 + col] === BISHOP;
+      return this.board[row][col] === BISHOP;
     },
     wouldBeForbidden({ row, col }) {
       if (!this.shouldPlayerMoveNext) return false;
