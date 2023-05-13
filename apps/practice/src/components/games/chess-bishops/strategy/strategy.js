@@ -1,6 +1,6 @@
 'use strict';
 
-import { flatMap, range, sample, cloneDeep, random, sampleSize, shuffle } from 'lodash-es';
+import { flatMap, range, sample, cloneDeep, random, shuffle } from 'lodash-es';
 
 const HORIZONTAL = "h";
 const VERTICAL = "v";
@@ -65,22 +65,6 @@ const getOptimalAiMove = (board) => {
 
   // try to win from bad position if player does not play optimally
   // following optimal strategy at the second step seems too slow
-  // so we try a few places with hopes they are optimal
-  if (bishopCount === 2) {
-    const optimalPlace = sampleSize(allowedMoves, 2).find(({ row, col }) => {
-      const boardCopy = cloneDeep(board);
-      markForbiddenFields(boardCopy, { row, col });
-      boardCopy[row][col] = BISHOP;
-      return isWinningState(boardCopy, false);
-    });
-
-
-    if (optimalPlace !== undefined) {
-      return optimalPlace;
-    }
-  }
-
-  // try to win from bad position if player does not play optimally
   if (bishopCount >= 4) {
     // sample + find has the same effect as filter + sample: find a random
     // from the optimal moves
