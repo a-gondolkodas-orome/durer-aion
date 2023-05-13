@@ -1,51 +1,57 @@
-<div>
-  <p class="text-justify">
-    Egy kupacban 3 darab 1, 5 darab 2 és 7 darab 3 pengős érme van. Egy lépésben az
-    éppen soron lévő játékos elvesz egy érmét a kupacból, és helyette berakhat egy darab kisebb
-    értékű érmét, vagy dönthet úgy, hogy nem tesz be semmit. Az nyer, aki elveszi az utolsó érmét
-    a kupacból.
+<div class="flex justify-center">
+  <div class="max-w-[100ch]">
+    <div class="flex justify-center mb-4 mt-1">
+      <p class="text-justify">
+        Egy kupacban 3 darab 1, 5 darab 2 és 7 darab 3 pengős érme van. Egy lépésben az
+        éppen soron lévő játékos elvesz egy érmét a kupacból, és helyette berakhat egy darab kisebb
+        értékű érmét, vagy dönthet úgy, hogy nem tesz be semmit. Az nyer, aki elveszi az utolsó érmét
+        a kupacból.
 
-    Te döntheted el, hogy kezdeni szeretnél-e, vagy második játékos lenni.
-    Sok sikert! :)
-  </p>
-  <div class="flex flex-wrap">
-    <div class="p-1 shrink-0 grow basis-8/12">
-      <table class="m-2 border-collapse">
-        <tr>
-          <th>1-es</th>
-          <th>2-es</th>
-          <th>3-as</th>
-        </tr>
-        <tr>
-          <td
-            v-for="coinValue in [0, 1, 2]" :key="coinValue"
-            @click="clickHeap(coinValue)"
-            class="text-center h-36 w-36 border-4"
-            :class="{ 'bg-gray-300': isCoinActionInvalid(coinValue), 'cursor-not-allowed': isCoinActionInvalid(coinValue) }"
-            @mouseover="hoveredHeap=coinValue"
-            @mouseout="hoveredHeap=null"
-          >
-            <span
-              v-for="i in board[coinValue]"
-              :key="i"
-              class="h-16 w-16 p-1 inline-block rounded-full mr-1 text-4xl"
-              :class="{ [getCoinColor(coinValue)]: true, 'opacity-50': shouldShowCoinToBeRemoved(coinValue) && i === 1 }"
-            ></span>
-            <span
-              v-show="shouldShowCoinToBeAdded(coinValue)"
-              class="h-16 w-16 p-1 inline-block rounded-full mr-1 opacity-50"
-              :class="getCoinColor(coinValue)"
-            ></span>
-          </td>
-        </tr>
-      </table>
-      <button v-if="valueOfRemovedCoin" class="cta-button" @click="endTurn()">
-        Semmit se rakok be
-      </button>
+        Te döntheted el, hogy kezdeni szeretnél-e, vagy második játékos lenni.
+        Sok sikert! :)
+      </p>
     </div>
-    <game-sidebar 
-      :step-description="stepDescription" 
-      @restart="resetTurnState()"
-    />
+    <div class="flex flex-wrap">
+      <div class="p-2 shrink-0 grow basis-8/12">
+        <table class="m-2 border-collapse table-fixed w-full">
+          <tr>
+            <th>1-es</th>
+            <th>2-es</th>
+            <th>3-as</th>
+          </tr>
+          <tr>
+            <td
+              v-for="coinValue in [0, 1, 2]" :key="coinValue"
+              @click="clickHeap(coinValue)"
+              class="text-center border-4"
+              :class="{ 'bg-gray-300': isCoinActionInvalid(coinValue), 'cursor-not-allowed': isCoinActionInvalid(coinValue) }"
+              @mouseover="hoveredHeap=coinValue"
+              @mouseout="hoveredHeap=null"
+            >
+              <div class="min-h-[25vh] p-[5%]">
+                <span
+                  v-for="i in board[coinValue]"
+                  :key="i"
+                  class="w-[30%] aspect-square inline-block rounded-full mr-0.5"
+                  :class="{ [getCoinColor(coinValue)]: true, 'opacity-50': shouldShowCoinToBeRemoved(coinValue) && i === 1 }"
+                ></span>
+                <span
+                  v-show="shouldShowCoinToBeAdded(coinValue)"
+                  class="w-[30%] aspect-square inline-block rounded-full mr-0.5 opacity-50"
+                  :class="getCoinColor(coinValue)"
+                ></span>
+              </div>
+            </td>
+          </tr>
+        </table>
+        <button v-if="valueOfRemovedCoin" class="cta-button" @click="endTurn()">
+          Semmit se rakok be
+        </button>
+      </div>
+      <game-sidebar 
+        :step-description="stepDescription" 
+        @restart="resetTurnState()"
+      />
+    </div>
   </div>
 </div>
