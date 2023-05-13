@@ -20,7 +20,7 @@ export default {
   },
   methods: {
     ...mapActions(['endPlayerTurn', 'initializeGame']),
-    clickPicker(color) {
+    pick(color) {
       if (!this.shouldPlayerMoveNext) return;
       if (this.color === color) {
         this.show = !this.show;
@@ -40,6 +40,10 @@ export default {
         this.show = false;
         this.endPlayerTurn(getGameStateAfterMove(this.board));
       }
+    },
+    resetTurnState() {
+      this.color = "";
+      this.show = false;
     }
   },
   created() {
