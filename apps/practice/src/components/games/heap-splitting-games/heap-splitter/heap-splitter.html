@@ -14,32 +14,28 @@
     <div class="flex flex-wrap js-heap-splitter">
       <div class="p-2 shrink-0 grow basis-2/3">
         <div
-          v-for="rowIndex in [0, 1]"
-          :key="rowIndex"
-          :style="{ 'aspect-ratio': 12 }"
-          class="border-t-black border-t-2 py-0.5 text-left whitespace-nowrap js-pile"
-          :class="{ 'border-b-black border-b-2': rowIndex === 1 }"
+          v-for="heapId in [0, 1]"
+          :key="heapId"
+          class="js-pile w-[50%] pl-1 inline-block text-center"
+          style="transform: scaleY(-1)"
         >
-          <template v-for="(_, pieceIndex) in board[rowIndex]">
-            <span
-              v-if="shouldShowDividerToTheLeft({ rowIndex, pieceIndex })"
-              class="inline-block border-r-black border-r-4 h-[90%] border-dotted -ml-1"
-            ></span>
-            <span
-              class="js-pebble h-[100%] aspect-square inline-block bg-blue-600 rounded-full mr-0.5"
-              :style="{ 'pointer-events': shouldPlayerMoveNext ? 'auto' : 'none', 'cursor': pieceIndex === 0 ? 'not-allowed' : 'pointer' }"
-              @click="clickPiece({ rowIndex, pieceIndex })"
-              @mouseover="hoveredPiece = { rowIndex, pieceIndex }"
-              @mouseout="hoveredPiece = null"
-            ></span>
-          </template>
-          <span class="inline-block h-[100%] align-middle px-2 text-xl -mt-4">
-            {{ currentChoiceDescription(rowIndex) }}
+          <div class="text-xl" :class="{ 'text-red-600': isBannedHover() }" style="transform: scaleY(-1)">
+            {{ currentChoiceDescription(heapId) }}
+          </div>
+          <span
+            v-for="(_, pieceId) in board[heapId]"
+            class="js-pebble inline-block bg-blue-600 w-[20%] aspect-square rounded-full mx-0.5"
+            :class="{ 'outline-dashed': toBeLeft({ heapId, pieceId }), 'opacity-50': toBeRemoved({ heapId }) }"
+            :style="{ 'pointer-events': shouldPlayerMoveNext ? 'auto' : 'none', 'cursor': pieceId === board[heapId] - 1 ? 'not-allowed' : 'pointer' }"
+            @click="clickPiece({ heapId, pieceId })"
+            @mouseover="hoveredPiece = { heapId, pieceId }"
+            @mouseout="hoveredPiece = null"
+          >
           </span>
         </div>
       </div>
       <game-sidebar 
-        step-description="Kattints egy korongra, hogy azzal kettéosztd azt a kupacot. Amelyik korongra kattintasz, az és a tőle jobbra lévők kerülnek az új kupacba." 
+        step-description="Kattints egy korongra, hogy azzal kettéosztd azt a kupacot." 
       />
     </div>
   </div>

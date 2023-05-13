@@ -16,13 +16,13 @@ describe('HeapSplitter Strategy', () => {
   describe('getGameStateAfterMove', () => {
     it('should return board and game end true if player move finished the game', () => {
       expect(
-        getGameStateAfterMove([5, 2], { rowIndex: 1, pieceIndex: 1 })
+        getGameStateAfterMove([5, 2], { heapId: 1, pieceId: 0 })
       ).toEqual({ board: [1, 1], isGameEnd: true });
     });
 
     it('should return board and game end false if player move does not finish the game', () => {
       expect(
-        getGameStateAfterMove([5, 2], { rowIndex: 0, pieceIndex: 2 })
+        getGameStateAfterMove([5, 2], { heapId: 0, pieceId: 1 })
       ).toEqual({ board: [2, 3], isGameEnd: false });
     });
   });

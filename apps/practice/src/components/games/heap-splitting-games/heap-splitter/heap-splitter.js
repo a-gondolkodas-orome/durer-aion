@@ -1,5 +1,4 @@
 import { mapGetters, mapActions, mapState } from 'vuex';
-import { isEqual } from 'lodash-es';
 import GameSidebar from '../../../common/game-sidebar/game-sidebar';
 import { getGameStateAfterMove } from './strategy/strategy';
 
@@ -15,23 +14,35 @@ export default {
   },
   methods: {
     ...mapActions(['endPlayerTurn', 'initializeGame']),
-    clickPiece({ rowIndex, pieceIndex }) {
-      if (!this.shouldPlayerMoveNext || pieceIndex === 0) return;
-      this.endPlayerTurn(getGameStateAfterMove(this.board, { rowIndex, pieceIndex }));
+    clickPiece({ heapId, pieceId }) {
+      if (!this.shouldPlayerMoveNext || pieceId === this.board[heapId] - 1) return;
+      this.endPlayerTurn(getGameStateAfterMove(this.board, { heapId, pieceId }));
       this.hoveredPiece = null;
     },
-    shouldShowDividerToTheLeft(piece) {
-      return isEqual(this.hoveredPiece, piece) && piece.pieceIndex !== 0;
+    toBeLeft({ heapId, pieceId }) {
+      if (this.hoveredPiece === null) return false;
+      if (heapId !== this.hoveredPiece.heapId) return false;
+      if (this.hoveredPiece.pieceId === this.board[heapId] - 1) return false;
+      if (pieceId > this.hoveredPiece.pieceId) return false;
+      return true;
     },
-    currentChoiceDescription(rowIndex) {
+    isBannedHover() {
+      if (this.hoveredPiece === null) return false;
+      return this.hoveredPiece.pieceId === this.board[this.hoveredPiece.heapId] - 1;
+    },
+    toBeRemoved({ heapId }) {
+      if (this.hoveredPiece === null) return false;
+      return this.hoveredPiece.heapId !== heapId;
+    },
+    currentChoiceDescription(heapId) {
       if (this.isGameFinished) return '';
 
-      const pieceCountInPile = this.board[rowIndex];
+      const pieceCountInPile = this.board[heapId];
 
       if (this.isGameReadyToStart || !this.shouldPlayerMoveNext || !this.hoveredPiece) return pieceCountInPile;
-      if (this.hoveredPiece.rowIndex !== rowIndex || this.hoveredPiece.pieceIndex === 0) return pieceCountInPile;
+      if (this.hoveredPiece.heapId !== heapId) return `${pieceCountInPile} → 🗑️`;
 
-      return `${pieceCountInPile} → ${this.hoveredPiece.pieceIndex}, ${pieceCountInPile - this.hoveredPiece.pieceIndex}`;
+      return `${pieceCountInPile} → ${this.hoveredPiece.pieceId + 1}, ${pieceCountInPile - this.hoveredPiece.pieceId - 1}`;
     }
   },
   created() {
