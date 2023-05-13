@@ -1,39 +1,36 @@
-<div>
-  <p class="text-justify">
-    Két játékos játszik egy 3 × 3-as táblán kék és piros korongokkal a szokásos amőba
-    szabályai szerint, tehát felváltva tesznek le korongokat, és ha egy sorban, oszlopban vagy átlóban
-    összegyűlik három azonos színű korong, az adott játékos nyer. Ha az első 9 korong lehelyezése
-    után döntetlen az állás (azaz egyik játékos sem nyert), akkor tovább folytatják a játékot, a soron
-    következő játékos az ellenfél egy már lehelyezett korongját fehérre színezheti. Ezek után az nyer,
-    aki először hoz létre három fehér korongot egy sorban, oszlopban vagy átlóban.
+<div class="flex justify-center">
+  <div class="max-w-[100ch]">
+    <div class="flex justify-center mb-4 mt-1">
+      <p class="text-justify">
+        Két játékos játszik egy 3 × 3-as táblán kék és piros korongokkal a szokásos amőba
+        szabályai szerint, tehát felváltva tesznek le korongokat, és ha egy sorban, oszlopban vagy átlóban
+        összegyűlik három azonos színű korong, az adott játékos nyer. Ha az első 9 korong lehelyezése
+        után döntetlen az állás (azaz egyik játékos sem nyert), akkor tovább folytatják a játékot, a soron
+        következő játékos az ellenfél egy már lehelyezett korongját fehérre színezheti. Ezek után az nyer,
+        aki először hoz létre három fehér korongot egy sorban, oszlopban vagy átlóban.
 
-    Te döntheted el, hogy kezdeni szeretnél-e, vagy második játékos lenni.
-    Sok sikert! :)
-  </p>
-  <div class="flex flex-wrap">
-    <div class="p-1 shrink-0 grow basis-8/12">
-      <table class="m-2 border-collapse">
-        <tr v-for="r in [0, 1, 2]" :key="r">
-          <td
-            v-for="c in [0, 1, 2]" :key="c"
-            @click="clickField(r*3+c)"
-            class="text-center h-36 w-36 border-4 text-8xl"
-            :class="{ 'cursor-not-allowed': !isMoveAllowed(r*3+c) && shouldPlayerMoveNext, 'bg-green-100': !inPlacingPhase && isMoveAllowed(r*3+c) }"
+        Te döntheted el, hogy kezdeni szeretnél-e, vagy második játékos lenni.
+        Sok sikert! :)
+      </p>
+    </div>
+    <div class="flex flex-wrap">
+      <div class="p-2 shrink-0 grow basis-2/3">
+        <div class="grid grid-cols-3 gap-0 border-2">
+          <div
+            v-for="id in [0, 1, 2, 3, 4, 5, 6, 7, 8]" :key="id"
+            @click="clickField(id)"
+            class="aspect-square p-[25%] border-2"
+            :class="{ 'cursor-not-allowed': !isMoveAllowed(id) && shouldPlayerMoveNext, 'bg-green-100': !inPlacingPhase && isMoveAllowed(id) }"
           >
             <span
-              v-if="board[r*3+c]"
-              class="h-16 w-16 p-1 inline-block rounded-full mr-1"
-              :class="{ [pieceColor(r*3+c)]: true, 'border-4': pieceColor(r*3+c) === 'bg-white', 'border-slate-600': pieceColor(r*3+c) === 'bg-white' }"
+              v-if="board[id]"
+              class="w-full aspect-square inline-block rounded-full mb-[-0.5rem]"
+              :class="{ [pieceColor(id)]: true, 'border-4': pieceColor(id) === 'bg-white', 'border-slate-600': pieceColor(id) === 'bg-white' }"
             ></span>
-            <!-- Hack to stop grid changing width on narrow screen -->
-            <span
-              v-if="!board[r*3+c]"
-              class="h-16 w-16 p-1 inline-block rounded-full mr-1 opacity-100"
-            ></span>
-          </td>
-        </tr>
-      </table>
+          </div>
+        </div>
+      </div>
+      <game-sidebar :step-description="inPlacingPhase ? 'Kattints egy üres mezőre.' : 'Kattints egy piros korongra.'" />
     </div>
-    <game-sidebar :step-description="inPlacingPhase ? 'Kattints egy üres mezőre.' : 'Kattints egy piros korongra.'" />
   </div>
 </div>

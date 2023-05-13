@@ -1,35 +1,32 @@
-<div>
-  <p class="text-justify">
-    A 3×3-as antiamőba játékban a kezdő piros, a második kék korongokat rak le. Felváltva
-    lépnek, és az veszít, akinek először lesz a saját színéből három korongja egy sorban, oszlopban vagy
-    átlóban. Ha mind a kilenc mező foglalt és nincs ilyen koronghármas, akkor a kezdő nyer.
+<div class="flex justify-center">
+  <div class="max-w-[100ch]">
+    <div class="flex justify-center mb-4 mt-1">
+      <p class="text-justify">
+        A 3×3-as antiamőba játékban a kezdő piros, a második kék korongokat rak le. Felváltva
+        lépnek, és az veszít, akinek először lesz a saját színéből három korongja egy sorban, oszlopban vagy
+        átlóban. Ha mind a kilenc mező foglalt és nincs ilyen koronghármas, akkor a kezdő nyer.
 
-    Te döntheted el, hogy kezdeni szeretnél-e, vagy második játékos lenni.
-    Sok sikert! :)
-  </p>
+        Te döntheted el, hogy kezdeni szeretnél-e, vagy második játékos lenni.
+        Sok sikert! :)
+      </p>
+    </div>
   <div class="flex flex-wrap">
-    <div class="p-1 shrink-0 grow basis-8/12">
-      <table class="m-2 border-collapse">
-        <tr v-for="r in [0, 1, 2]" :key="r">
-          <td
-            v-for="c in [0, 1, 2]" :key="c"
-            @click="clickField(r*3+c)"
-            class="text-center h-36 w-36 border-4 text-8xl"
-          >
-            <span
-              v-if="board[r*3+c]"
-              class="h-16 w-16 p-1 inline-block rounded-full mr-1"
-              :class="pieceColor(r*3+c)"
-            ></span>
-            <!-- Hack to stop grid changing width on narrow screen -->
-            <span
-              v-if="!board[r*3+c]"
-              class="h-16 w-16 p-1 inline-block rounded-full mr-1 opacity-100"
-            ></span>
-          </td>
-        </tr>
-      </table>
+    <div class="p-2 shrink-0 grow basis-2/3">
+      <div class="grid grid-cols-3 gap-0 border-2">
+        <div
+          v-for="id in [0, 1, 2, 3, 4, 5, 6, 7, 8]" :key="id"
+          @click="clickField(id)"
+          class="aspect-square p-[25%] border-2"
+        >
+          <span
+            v-if="board[id]"
+            class="w-full aspect-square inline-block rounded-full mb-[-0.5rem]"
+            :class="pieceColor(id)"
+          ></span>
+        </div>
+      </div>
     </div>
     <game-sidebar step-description="Helyezz le egy korongot egy üres mezőre kattintással." />
+  </div>
   </div>
 </div>
