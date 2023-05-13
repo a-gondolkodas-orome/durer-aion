@@ -17,27 +17,23 @@
         <div
           v-for="heapId in [0, 1, 2, 3]"
           :key="heapId"
-          :style="{ 'aspect-ratio': 20 }"
-          class="border-t-black border-t-2 py-0.5 text-left whitespace-nowrap"
-          :class="{ 'border-b-black border-b-2': heapId === 3 }"
+          class="js-pile w-[50%] pl-1 inline-block text-center py-2"
+          :class="{ 'border-t-2': heapId < 2 }"
+          style="transform: scaleY(-1)"
         >
-          <template v-for="(_, pieceId) in board[heapId]">
-            <span
-              v-if="shouldShowDividerToTheLeft({ heapId, pieceId })"
-              class="inline-block border-r-black border-r-4 h-[90%] border-dotted -ml-1"
-            ></span>
-            <span
-              :class="{ 'bg-red-600': rowColor({ heapId }) === 'red', 'bg-blue-600': rowColor({ heapId }) === 'blue', 'opacity-50': heapId === removedHeapId }"
-              class="h-[100%] aspect-square inline-block rounded-full mr-1"
-              :style="{ 'pointer-events': shouldPlayerMoveNext ? 'auto' : 'none', 'cursor': pieceClickNotAllowed({ heapId, pieceId }) ? 'not-allowed' : 'pointer' }"
-              @click="clickPiece({ heapId, pieceId })"
-              @mouseover="hoveredPiece = { heapId, pieceId }"
-              @mouseout="hoveredPiece = null"
-            ></span>
-          </template>
-          <span class="inline-block h-[100%] align-middle px-2 text-xl -mt-4">
+          <div class="text-xl" :class="{ 'text-red-600': isBannedHover() }" style="transform: scaleY(-1)">
             {{ currentChoiceDescription(heapId) }}
-          </span>
+          </div>
+          <span
+            v-for="(_, pieceId) in board[heapId]"
+            :key="pieceId"
+            :class="{ 'bg-red-600': rowColor({ heapId }) === 'red', 'bg-blue-600': rowColor({ heapId }) === 'blue', 'opacity-50': heapId === removedHeapId, 'outline-dashed': toBeLeft({ heapId, pieceId }) }"
+            class="js-pebble inline-block bg-blue-600 w-[20%] aspect-square rounded-full mx-0.5"
+            :style="{ 'pointer-events': shouldPlayerMoveNext ? 'auto' : 'none', 'cursor': pieceClickNotAllowed({ heapId, pieceId }) ? 'not-allowed' : 'pointer' }"
+            @click="clickPiece({ heapId, pieceId })"
+            @mouseover="hoveredPiece = { heapId, pieceId }"
+            @mouseout="hoveredPiece = null"
+          ></span>
         </div>
       </div>
       <game-sidebar 

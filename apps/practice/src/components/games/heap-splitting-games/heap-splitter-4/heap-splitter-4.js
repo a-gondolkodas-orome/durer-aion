@@ -1,6 +1,5 @@
 import { mapGetters, mapActions, mapState } from 'vuex';
 import GameSidebar from '../../../common/game-sidebar/game-sidebar';
-import { isEqual } from 'lodash-es';
 import { getGameStateAfterMove } from './strategy/strategy';
 
 export default {
@@ -34,7 +33,7 @@ export default {
     pieceClickNotAllowed({ heapId, pieceId }) {
       if (this.removedHeapId === null) return false;
       if (this.removedHeapId === heapId) return false;
-      return pieceId === 0;
+      return pieceId === this.board[heapId] - 1;
     },
     clickPiece({ heapId, pieceId }) {
       if (!this.shouldPlayerMoveNext) return;
@@ -46,7 +45,7 @@ export default {
         this.removedHeapId = heapId;
         return;
       }
-      if (pieceId === 0) return;
+      if (pieceId === this.board[heapId] - 1) return;
       this.endPlayerTurn(getGameStateAfterMove(this.board, {
         removedHeapId: this.removedHeapId,
         splitHeapId: heapId,
@@ -54,10 +53,18 @@ export default {
       }));
       this.resetTurnState();
     },
-    shouldShowDividerToTheLeft(piece) {
+    toBeLeft({ heapId, pieceId }) {
+      if (this.hoveredPiece === null) return false;
       if (this.removedHeapId === null) return false;
-      if (this.removedHeapId === piece.heapId) return false;
-      return isEqual(this.hoveredPiece, piece) && piece.pieceId !== 0;
+      if (this.removedHeapId === heapId) return false;
+      if (heapId !== this.hoveredPiece.heapId) return false;
+      if (this.hoveredPiece.pieceId === this.board[heapId] - 1) return false;
+      if (pieceId > this.hoveredPiece.pieceId) return false;
+      return true;
+    },
+    isBannedHover() {
+      if (this.hoveredPiece === null) return false;
+      return this.hoveredPiece.pieceId === this.board[this.hoveredPiece.heapId] - 1;
     },
     currentChoiceDescription(heapId) {
       if (this.isGameFinished) return '';
@@ -75,9 +82,9 @@ export default {
       if (this.removedHeapId === null && this.hoveredPiece.heapId === heapId) {
         return `${pieceCountInHeap} → 🗑️`;
       }
-      if (this.hoveredPiece.heapId !== heapId || this.hoveredPiece.pieceId === 0) return pieceCountInHeap;
+      if (this.hoveredPiece.heapId !== heapId) return pieceCountInHeap;
 
-      return `${pieceCountInHeap} → ${this.hoveredPiece.pieceId}, ${pieceCountInHeap - this.hoveredPiece.pieceId}`;
+      return `${pieceCountInHeap} → ${this.hoveredPiece.pieceId + 1}, ${pieceCountInHeap - this.hoveredPiece.pieceId - 1}`;
     },
     resetTurnState() {
       this.hoveredPiece = null;

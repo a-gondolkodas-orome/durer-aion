@@ -7,7 +7,7 @@ export const generateNewBoard = () => ([random(4, 18), random(4, 18), random(4, 
 
 export const getGameStateAfterMove = (board, { removedHeapId, splitHeapId, pieceId }) => {
   const keptRowIndices = difference([0, 1, 2, 3], [removedHeapId, splitHeapId]);
-  const newBoard = [board[keptRowIndices[0]], board[keptRowIndices[1]], pieceId, board[splitHeapId] - pieceId];
+  const newBoard = [board[keptRowIndices[0]], board[keptRowIndices[1]], pieceId + 1, board[splitHeapId] - pieceId - 1];
   return { board: newBoard, isGameEnd: isGameEnd(newBoard) };
 };
 
