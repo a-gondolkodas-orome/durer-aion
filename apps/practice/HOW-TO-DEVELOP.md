@@ -67,6 +67,7 @@ Otherwise, if the game ended, also calculate and return whether the first or the
 To avoid big merge conflicts or parallel work, aim to push frequently in small iterations to the default (master) branch.
 
 You can include work in progress games safely on the default (master) branch if you set `isHiddenFromOverview: true` in [`games.js`](./src/components/games/games.js).
+Or even more easily, you create a game but do not add it to gameList.
 
 ## Vue.js notes
 

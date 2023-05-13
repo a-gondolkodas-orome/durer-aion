@@ -1,18 +1,22 @@
-<div>
-  <p class="text-justify">
-    Ez egy példa játék.
+<div class="flex justify-center">
+  <div class="max-w-[100ch]">
+    <div class="flex justify-center mb-4 mt-1">
+      <p class="text-justify">
+        Ez egy példa játék.
 
-    A kezdőállás ismeretében te döntheted el, hogy kezdeni szeretnél-e, vagy második játékos lenni.
-    Sok sikert! :)
-  </p>
-  <div class="flex flex-wrap">
-    <div class="p-1 shrink-0 grow basis-8/12">
-      <button
-        v-if="shouldPlayerMoveNext"
-        class="cta-button"
-        @click="endPlayerTurn({ board: [], isGameEnd: true })"
-      >Lépek!</button>
+        A kezdőállás ismeretében te döntheted el, hogy kezdeni szeretnél-e, vagy második játékos lenni.
+        Sok sikert! :)
+      </p>
     </div>
-    <game-sidebar step-description="Kattints a 'Lépek' gombra, hogy lépj." />
+    <div class="flex flex-wrap">
+      <div class="p-2 shrink-0 grow basis-2/3">
+        <button
+          v-if="shouldPlayerMoveNext"
+          class="cta-button"
+          @click="endPlayerTurn({ board: [], isGameEnd: true })"
+        >Lépek!</button>
+      </div>
+      <game-sidebar step-description="Kattints a 'Lépek' gombra, hogy lépj." />
+    </div>
   </div>
 </div>

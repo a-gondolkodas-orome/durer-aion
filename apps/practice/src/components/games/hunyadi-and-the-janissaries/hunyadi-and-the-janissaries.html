@@ -1,83 +1,87 @@
-<div>
+<div class="flex justify-center">
   <soldier-svg />
-  <p class="text-justify">
-    A török szultán serege megtámadta Hunyadi várát. A várlépcső egyes fokain néhány janicsár áll.
-    Minden reggel a szultán kettéosztja a hadseregét egy piros és egy kék hadtestre.
-    Hunyadi a nap folyamán vagy a piros, vagy a kék sereget megsemmisíti, választása szerint. Éjszaka minden megmaradt
-    janicsár egy lépcsőfokot fellép.
-    Hunyadi nyer, ha a szultán egész seregét megsemmisítette. 
-    A szultán nyer, ha lesz olyan janicsár, aki felér a várhoz.
+  <div class="max-w-[100ch]">
+    <div class="flex justify-center mb-4 mt-1">
+      <p class="text-justify">
+        A török szultán serege megtámadta Hunyadi várát. A várlépcső egyes fokain néhány janicsár áll.
+        Minden reggel a szultán kettéosztja a hadseregét egy piros és egy kék hadtestre.
+        Hunyadi a nap folyamán vagy a piros, vagy a kék sereget megsemmisíti, választása szerint. Éjszaka minden megmaradt
+        janicsár egy lépcsőfokot fellép.
+        Hunyadi nyer, ha a szultán egész seregét megsemmisítette. 
+        A szultán nyer, ha lesz olyan janicsár, aki felér a várhoz.
 
-    A kezdőállás ismeretében te döntheted e, hogy Hunyadiként vagy a török szultánként szeretnél-e játszani.
-    Sok sikert! :)
-  </p>
-  <div class="flex flex-wrap js-hunyadi-and-the-janissaries">
-    <div class="p-1 shrink-0 grow basis-8/12">
-      <img src="../../../assets/hunyadi-and-the-janissaries-castle.jpg" style="display: block; margin: auto;">
-      <div
-        v-for="rowIndex in [0, 1, 2, 3, 4]"
-        :key="rowIndex"
-        class="border-t-black border-t-2 h-20 p-1 text-center whitespace-nowrap"
-        :class="{ 'border-b-black border-b-2': rowIndex === 4 }"
-      >
-        <span
-          v-for="(group, pieceIndex) in board[rowIndex]"
-          class="h-16 w-16 p-1 inline-block mx-1 js-clickable-soldier"
-          @click="clickOnSoldier(rowIndex, pieceIndex)"
-          @mouseover="hoveredPiece = { rowIndex, pieceIndex }"
-          @mouseout="hoveredPiece = null"
-        >
-          <svg 
-            class="h-16 w-16 p-1 inline-block border-dashed border-black" 
-            :class="{ 'border-2': showToBeKilled(group), 'opacity-50': showToBeKilled(group), 'fill-blue-600': group === 'blue', 'fill-red-600': group === 'red' }"
-          >
-            <use xlink:href="#game-soldier-icon" />
-          </svg>
-        </span>
-      </div>
+        A kezdőállás ismeretében te döntheted e, hogy Hunyadiként vagy a török szultánként szeretnél-e játszani.
+        Sok sikert! :)
+      </p>
     </div>
-    <div class="p-1 flex flex-col grow-0 shrink-0 basis-64">
-      <p class="text-center font-bold text-lg">{{ ctaText }}</p>
-      <enemy-loader />
-      <p class="italic text-justify">{{ stepDescription }}</p>
-      <template v-if="isGameReadyToStart">
-        <button class="cta-button js-second-player" @click="startGameWithRoleSelection({ isFirst: false })">
-          Hunyadi leszek
-        </button>
-        <button class="cta-button js-first-player" @click="startGameWithRoleSelection({ isFirst: true })">
-          Szultán leszek
-        </button>
-      </template>
-      <template v-if="isGameInProgress">
-        <button
-          v-if="isPlayerSultan"
-          :class="{ 'opacity-50': isEnemyMoveInProgress }"
-          class="cta-button js-finalize-groups"
-          @click="finalizeSoldierGrouping()"
+    <div class="flex flex-wrap js-hunyadi-and-the-janissaries">
+      <div class="p-2 shrink-0 grow basis-2/3">
+        <img src="../../../assets/hunyadi-and-the-janissaries-castle.jpg" class="block m-auto w-[40%]">
+        <div
+          v-for="rowIndex in [0, 1, 2, 3, 4, 5]"
+          :key="rowIndex"
+          :style="{ 'aspect-ratio': 8, 'margin-left': (5-rowIndex) + 'rem', 'margin-right': (5-rowIndex) + 'rem' }"
+          class="border-t-black border-t-2 p-0.5 text-center whitespace-nowrap"
         >
-          Befejezem a kettéosztást
-        </button>
-        <button
-          v-if="!isPlayerSultan"
-          :class="{ 'opacity-50': isEnemyMoveInProgress }"
-          class="cta-button bg-red-400 hover:bg-red-600 js-kill-red"
-          @click="killGroup('red')"
-        >
-          Legyőzöm a pirosakat
-        </button>
-        <button
-          v-if="!isPlayerSultan"
-          :class="{ 'opacity-50': isEnemyMoveInProgress }"
-          class="cta-button bg-blue-400 hover:bg-blue-600"
-          @click="killGroup('blue')"
-        >
-          Legyőzöm a kékeket
-        </button>
-      </template>
-      <div class="flex flex-grow items-end">
-        <button class="cta-button mt-4 js-restart-game" @click="restartGame()">
-          Új játék
-        </button>
+          <span
+            v-for="(group, pieceIndex) in board[rowIndex]"
+            class="aspect-square w-[10%] inline-block mx-1 js-clickable-soldier"
+            @click="clickOnSoldier(rowIndex, pieceIndex)"
+            @mouseover="hoveredPiece = { rowIndex, pieceIndex }"
+            @mouseout="hoveredPiece = null"
+          >
+            <svg 
+              class="w-full aspect-square inline-block border-dashed border-black" 
+              :class="{ 'outline-dashed': showToBeKilled(group), 'opacity-50': showToBeKilled(group), 'fill-blue-600': group === 'blue', 'fill-red-600': group === 'red' }"
+            >
+              <use xlink:href="#game-soldier-icon" />
+            </svg>
+          </span>
+        </div>
+      </div>
+      <div class="p-2 flex flex-col grow shrink-0 basis-64">
+        <p class="text-center font-bold text-lg">{{ ctaText }}</p>
+        <enemy-loader />
+        <p class="italic text-justify">{{ stepDescription }}</p>
+        <template v-if="isGameReadyToStart">
+          <button class="cta-button js-second-player" @click="startGameWithRoleSelection({ isFirst: false })">
+            Hunyadi leszek
+          </button>
+          <button class="cta-button js-first-player" @click="startGameWithRoleSelection({ isFirst: true })">
+            Szultán leszek
+          </button>
+        </template>
+        <template v-if="isGameInProgress">
+          <button
+            v-if="isPlayerSultan"
+            :class="{ 'opacity-50': isEnemyMoveInProgress }"
+            class="cta-button js-finalize-groups"
+            @click="finalizeSoldierGrouping()"
+          >
+            Befejezem a kettéosztást
+          </button>
+          <button
+            v-if="!isPlayerSultan"
+            :class="{ 'opacity-50': isEnemyMoveInProgress }"
+            class="cta-button bg-red-400 hover:bg-red-600 js-kill-red"
+            @click="killGroup('red')"
+          >
+            Legyőzöm a pirosakat
+          </button>
+          <button
+            v-if="!isPlayerSultan"
+            :class="{ 'opacity-50': isEnemyMoveInProgress }"
+            class="cta-button bg-blue-400 hover:bg-blue-600"
+            @click="killGroup('blue')"
+          >
+            Legyőzöm a kékeket
+          </button>
+        </template>
+        <div class="flex flex-grow items-end">
+          <button class="cta-button mt-4 js-restart-game" @click="restartGame()">
+            Új játék
+          </button>
+        </div>
       </div>
     </div>
   </div>
