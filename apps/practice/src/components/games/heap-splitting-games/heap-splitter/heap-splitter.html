@@ -24,6 +24,7 @@
           </div>
           <span
             v-for="(_, pieceId) in board[heapId]"
+            :key="pieceId"
             class="js-pebble inline-block bg-blue-600 w-[20%] aspect-square rounded-full mx-0.5"
             :class="{ 'outline-dashed': toBeLeft({ heapId, pieceId }), 'opacity-50': toBeRemoved({ heapId }) }"
             :style="{ 'pointer-events': shouldPlayerMoveNext ? 'auto' : 'none', 'cursor': pieceId === board[heapId] - 1 ? 'not-allowed' : 'pointer' }"

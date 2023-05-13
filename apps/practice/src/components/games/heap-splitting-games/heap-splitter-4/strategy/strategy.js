@@ -5,9 +5,9 @@ import { getBoardAfterAiStep } from './ai-step';
 
 export const generateNewBoard = () => ([random(4, 18), random(4, 18), random(4, 18), random(4, 18)]);
 
-export const getGameStateAfterMove = (board, { removedheapId, splitheapId, pieceId }) => {
-  const keptRowIndices = difference([0, 1, 2, 3], [removedheapId, splitheapId]);
-  const newBoard = [board[keptRowIndices[0]], board[keptRowIndices[1]], pieceId, board[splitheapId] - pieceId];
+export const getGameStateAfterMove = (board, { removedHeapId, splitHeapId, pieceId }) => {
+  const keptRowIndices = difference([0, 1, 2, 3], [removedHeapId, splitHeapId]);
+  const newBoard = [board[keptRowIndices[0]], board[keptRowIndices[1]], pieceId, board[splitHeapId] - pieceId];
   return { board: newBoard, isGameEnd: isGameEnd(newBoard) };
 };
 

@@ -37,12 +37,12 @@ export default {
     currentChoiceDescription(heapId) {
       if (this.isGameFinished) return '';
 
-      const pieceCountInPile = this.board[heapId];
+      const pieceCountInHeap = this.board[heapId];
 
-      if (this.isGameReadyToStart || !this.shouldPlayerMoveNext || !this.hoveredPiece) return pieceCountInPile;
-      if (this.hoveredPiece.heapId !== heapId) return `${pieceCountInPile} → 🗑️`;
+      if (this.isGameReadyToStart || !this.shouldPlayerMoveNext || !this.hoveredPiece) return pieceCountInHeap;
+      if (this.hoveredPiece.heapId !== heapId) return `${pieceCountInHeap} → 🗑️`;
 
-      return `${pieceCountInPile} → ${this.hoveredPiece.pieceId + 1}, ${pieceCountInPile - this.hoveredPiece.pieceId - 1}`;
+      return `${pieceCountInHeap} → ${this.hoveredPiece.pieceId + 1}, ${pieceCountInHeap - this.hoveredPiece.pieceId - 1}`;
     }
   },
   created() {

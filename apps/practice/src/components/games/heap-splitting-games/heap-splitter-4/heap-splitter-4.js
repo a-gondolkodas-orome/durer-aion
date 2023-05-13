@@ -7,7 +7,7 @@ export default {
   template: require('./heap-splitter-4.html'),
   components: { GameSidebar },
   data: () => ({
-    removedheapId: null,
+    removedHeapId: null,
     hoveredPiece: null
   }),
   computed: {
@@ -22,66 +22,66 @@ export default {
     ...mapActions(['endPlayerTurn', 'initializeGame']),
     rowColor({ heapId }) {
       if (!this.isGameInProgress) return 'blue';
-      if (heapId === this.removedheapId) {
+      if (heapId === this.removedHeapId) {
         if (this.hoveredPiece === null) return 'red';
         if (this.hoveredPiece.heapId === heapId) return 'blue';
         return 'red';
       }
       if (this.hoveredPiece === null) return 'blue';
-      if (this.removedheapId === null && this.hoveredPiece.heapId === heapId) return 'red';
+      if (this.removedHeapId === null && this.hoveredPiece.heapId === heapId) return 'red';
       return 'blue';
     },
     pieceClickNotAllowed({ heapId, pieceId }) {
-      if (this.removedheapId === null) return false;
-      if (this.removedheapId === heapId) return false;
+      if (this.removedHeapId === null) return false;
+      if (this.removedHeapId === heapId) return false;
       return pieceId === 0;
     },
     clickPiece({ heapId, pieceId }) {
       if (!this.shouldPlayerMoveNext) return;
-      if (this.removedheapId === heapId) {
-        this.removedheapId = null;
+      if (this.removedHeapId === heapId) {
+        this.removedHeapId = null;
         return;
       }
-      if (this.removedheapId === null) {
-        this.removedheapId = heapId;
+      if (this.removedHeapId === null) {
+        this.removedHeapId = heapId;
         return;
       }
       if (pieceId === 0) return;
       this.endPlayerTurn(getGameStateAfterMove(this.board, {
-        removedheapId: this.removedheapId,
-        splitheapId: heapId,
+        removedHeapId: this.removedHeapId,
+        splitHeapId: heapId,
         pieceId
       }));
       this.resetTurnState();
     },
     shouldShowDividerToTheLeft(piece) {
-      if (this.removedheapId === null) return false;
-      if (this.removedheapId === piece.heapId) return false;
+      if (this.removedHeapId === null) return false;
+      if (this.removedHeapId === piece.heapId) return false;
       return isEqual(this.hoveredPiece, piece) && piece.pieceId !== 0;
     },
     currentChoiceDescription(heapId) {
       if (this.isGameFinished) return '';
 
-      const pieceCountInPile = this.board[heapId];
+      const pieceCountInHeap = this.board[heapId];
 
-      if (this.isGameReadyToStart || !this.shouldPlayerMoveNext) return pieceCountInPile;
-      if (heapId === this.removedheapId) {
+      if (this.isGameReadyToStart || !this.shouldPlayerMoveNext) return pieceCountInHeap;
+      if (heapId === this.removedHeapId) {
         if (this.hoveredPiece && this.hoveredPiece.heapId === heapId) {
           return 'Mégse?';
         }
-        return `${pieceCountInPile} → 🗑️`;
+        return `${pieceCountInHeap} → 🗑️`;
       }
-      if (!this.hoveredPiece) return pieceCountInPile;
-      if (this.removedheapId === null && this.hoveredPiece.heapId === heapId) {
-        return `${pieceCountInPile} → 🗑️`;
+      if (!this.hoveredPiece) return pieceCountInHeap;
+      if (this.removedHeapId === null && this.hoveredPiece.heapId === heapId) {
+        return `${pieceCountInHeap} → 🗑️`;
       }
-      if (this.hoveredPiece.heapId !== heapId || this.hoveredPiece.pieceId === 0) return pieceCountInPile;
+      if (this.hoveredPiece.heapId !== heapId || this.hoveredPiece.pieceId === 0) return pieceCountInHeap;
 
-      return `${pieceCountInPile} → ${this.hoveredPiece.pieceId}, ${pieceCountInPile - this.hoveredPiece.pieceId}`;
+      return `${pieceCountInHeap} → ${this.hoveredPiece.pieceId}, ${pieceCountInHeap - this.hoveredPiece.pieceId}`;
     },
     resetTurnState() {
       this.hoveredPiece = null;
-      this.removedheapId = null;
+      this.removedHeapId = null;
     }
   },
   created() {
