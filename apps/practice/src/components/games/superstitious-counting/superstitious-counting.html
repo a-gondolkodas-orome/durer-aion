@@ -1,32 +1,40 @@
-<div>
-  <p class="text-justify">
-    Károly és Dezső <pre class="inline">m</pre>-ig szeretnének elszámolni, és közben a következő játékot játsszák:
-    0-ról kezdenek, a két játékos felváltva adhat hozzá egy 13-nál kisebb pozitív egészet a korábbi
-    számhoz, azonban a babonájuk miatt ha egyikük x-et adott hozzá, akkor másikuk a következő
-    lépésben nem adhat hozzá <pre class="inline">13-x</pre>-et. Az veszít, aki eléri (vagy átlépi) <pre class="inline">m</pre>-et.
+<div class="flex justify-center">
+  <div class="max-w-[100ch]">
+    <div class="flex justify-center mb-4 mt-1">
+      <p class="text-justify">
+        Károly és Dezső <pre class="inline">m</pre>-ig szeretnének elszámolni, és közben a következő játékot játsszák:
+        0-ról kezdenek, a két játékos felváltva adhat hozzá egy 13-nál kisebb pozitív egészet a korábbi
+        számhoz, azonban a babonájuk miatt ha egyikük x-et adott hozzá, akkor másikuk a következő
+        lépésben nem adhat hozzá <pre class="inline">13-x</pre>-et. Az veszít, aki eléri (vagy átlépi) <pre class="inline">m</pre>-et.
 
-    Az <pre class="inline">m</pre> szám ismeretében te döntheteted el, hogy a kezdő vagy a második játékos bőrébe szeretnél e bújni.
-    Sok sikert! :)
-  </p>
-  <div class="flex flex-wrap">
-    <div class="p-1 shrink-0 grow basis-8/12">
-      <table class="m-2 border-collapse">
-        <tr>
-          <th>Szám</th>
-          <th>Cél</th>
-          <th>Tiltott lépés</th>
-        </tr>
-        <tr>
-          <td class="text-center h-36 w-36 border-4 text-8xl">{{ board.current }}</td>
-          <td class="text-center h-36 w-36 border-4 text-8xl">{{ board.target }}</td>
-          <td class="text-center h-36 w-36 border-4 text-8xl">{{ board.restricted || '-' }}</td>
-        </tr>
-      </table>
-      <template v-if="shouldPlayerMoveNext">
-        <label for="step"> Következő lépés: </label>
-        <input id="step" type="number" min="1" max="12" v-model="step" class="border-2" v-on:keyup.enter="attemptStep()">
-      </template>
+        Az <pre class="inline">m</pre> szám ismeretében te döntheteted el, hogy a kezdő vagy a második játékos bőrébe szeretnél e bújni.
+        Sok sikert! :)
+      </p>
     </div>
-    <game-sidebar step-description="rj be egy számot, majd nyomj Enter-t." @restart="resetTurnState()" />
+    <div class="flex flex-wrap">
+      <div class="p-2 shrink-0 grow basis-2/3">
+        <table class="border-collapse table-fixed w-full">
+          <tr>
+            <th>Szám</th>
+            <th>Cél</th>
+            <th>Tiltott lépés</th>
+          </tr>
+          <tr>
+            <td class="text-center border-4 align-middle text-6xl py-4">{{ board.current }}</td>
+            <td class="text-center border-4 align-middle text-6xl py-4">{{ board.target }}</td>
+            <td class="text-center border-4 align-middle text-6xl py-4">{{ board.restricted || '-' }}</td>
+          </tr>
+        </table>
+        <div v-if="!shouldPlayerMoveNext" class="mt-4">
+          <label for="step" class="mr-2 text-lg"> Következő lépés: </label>
+          <input
+            id="step" type="number" min="1" max="12" v-model="step"
+            class="border-2 rounded pl-1 text-lg"
+            v-on:keyup.enter="attemptStep()"
+          >
+        </div>
+      </div>
+      <game-sidebar step-description="Írj be egy számot, majd nyomj Enter-t." @restart="resetTurnState()" />
+    </div>
   </div>
 </div>
