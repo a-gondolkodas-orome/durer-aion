@@ -65,7 +65,7 @@ export default {
       if (!this.shouldPlayerMoveNext) return pieceCountInPile;
       if (rowIndex === this.removedRowIndex) {
         if (this.hoveredPiece && this.hoveredPiece.rowIndex === rowIndex) {
-          return 'Eldobás visszavonása?';
+          return 'Mégse?';
         }
         return `${pieceCountInPile} → 🗑️`;
       }

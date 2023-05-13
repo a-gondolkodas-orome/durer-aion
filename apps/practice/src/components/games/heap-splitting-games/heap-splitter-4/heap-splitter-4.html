@@ -1,44 +1,49 @@
-<div>
-  <p class="text-justify">
-    A pályán kezdetben négy kupac korong van.
-    A soron következő játékos először az egyik kupacot teljes egészében kiveszi a játékból;
-    majd egy másik kupacot kettéoszt két kisebb kupacra (mindkettőbe legalább 1 korongnak kerülnie kell).
-    Egy lépést követően tehát újra 4 kupac marad. Az a játékos veszít, aki nem tud szabályosan
-    lépni (azaz egyik kupacot se tudja szétosztani).
+<div class="flex justify-center">
+  <div class="max-w-[100ch]">
+    <div class="flex justify-center mb-4 mt-1">
+      <p class="text-justify">
+        A pályán kezdetben négy kupac korong van.
+        A soron következő játékos először az egyik kupacot teljes egészében kiveszi a játékból;
+        majd egy másik kupacot kettéoszt két kisebb kupacra (mindkettőbe legalább 1 korongnak kerülnie kell).
+        Egy lépést követően tehát újra 4 kupac marad. Az a játékos veszít, aki nem tud szabályosan
+        lépni (azaz egyik kupacot se tudja szétosztani).
 
-    A kezdőállás ismeretében te döntheted el, hogy kezdeni szeretnél-e, vagy második játékos lenni.
-    Sok sikert! :)
-  </p>
-  <div class="flex flex-wrap">
-    <div class="p-1 shrink-0 grow basis-8/12">
-      <div
-        v-for="rowIndex in [0, 1, 2, 3]"
-        :key="rowIndex"
-        class="border-t-black border-t-2 h-20 p-1 text-left whitespace-nowrap"
-        :class="{ 'border-b-black border-b-2': rowIndex === 3 }"
-      >
-        <template v-for="(_, pieceIndex) in board[rowIndex]">
-          <span
-            v-if="shouldShowDividerToTheLeft({ rowIndex, pieceIndex })"
-            class="inline-block border-r-black border-r-4 h-16 border-dotted -ml-1"
-          ></span>
-          <span
-            :class="{ 'bg-red-600': rowColor({ rowIndex }) === 'red', 'bg-blue-600': rowColor({ rowIndex }) === 'blue', 'opacity-50': rowIndex === removedRowIndex }"
-            class="h-16 w-16 p-1 inline-block rounded-full mr-1"
-            :style="{ 'pointer-events': shouldPlayerMoveNext ? 'auto' : 'none', 'cursor': pieceClickNotAllowed({ rowIndex, pieceIndex }) ? 'not-allowed' : 'pointer' }"
-            @click="clickPiece({ rowIndex, pieceIndex })"
-            @mouseover="hoveredPiece = { rowIndex, pieceIndex }"
-            @mouseout="hoveredPiece = null"
-          ></span>
-        </template>
-        <span class="inline-block h-16 align-middle px-2 text-xl -mt-4">
-          {{ currentChoiceDescription(rowIndex) }}
-        </span>
-      </div>
+        A kezdőállás ismeretében te döntheted el, hogy kezdeni szeretnél-e, vagy második játékos lenni.
+        Sok sikert! :)
+      </p>
     </div>
-    <game-sidebar 
-      step-description="Először kattints az eltávolítandó kupacra, majd arra a korongra, ahol ketté akarod vágni a kupacot." 
-      @restart="resetTurnState()" 
-    />
+    <div class="flex flex-wrap">
+      <div class="p-2 shrink-0 grow basis-2/3">
+        <div
+          v-for="rowIndex in [0, 1, 2, 3]"
+          :key="rowIndex"
+          :style="{ 'aspect-ratio': 20 }"
+          class="border-t-black border-t-2 py-0.5 text-left whitespace-nowrap"
+          :class="{ 'border-b-black border-b-2': rowIndex === 3 }"
+        >
+          <template v-for="(_, pieceIndex) in board[rowIndex]">
+            <span
+              v-if="shouldShowDividerToTheLeft({ rowIndex, pieceIndex })"
+              class="inline-block border-r-black border-r-4 h-[90%] border-dotted -ml-1"
+            ></span>
+            <span
+              :class="{ 'bg-red-600': rowColor({ rowIndex }) === 'red', 'bg-blue-600': rowColor({ rowIndex }) === 'blue', 'opacity-50': rowIndex === removedRowIndex }"
+              class="h-[100%] aspect-square inline-block rounded-full mr-1"
+              :style="{ 'pointer-events': shouldPlayerMoveNext ? 'auto' : 'none', 'cursor': pieceClickNotAllowed({ rowIndex, pieceIndex }) ? 'not-allowed' : 'pointer' }"
+              @click="clickPiece({ rowIndex, pieceIndex })"
+              @mouseover="hoveredPiece = { rowIndex, pieceIndex }"
+              @mouseout="hoveredPiece = null"
+            ></span>
+          </template>
+          <span class="inline-block h-[100%] align-middle px-2 text-xl -mt-4">
+            {{ currentChoiceDescription(rowIndex) }}
+          </span>
+        </div>
+      </div>
+      <game-sidebar 
+        step-description="Először kattints az eltávolítandó kupacra, majd arra a korongra, ahol ketté akarod vágni a kupacot." 
+        @restart="resetTurnState()" 
+      />
+    </div>
   </div>
 </div>
