@@ -2,10 +2,14 @@
 
 import { last, range, random } from 'lodash-es';
 
-export const generateNewBoard = () => ({
-  chessBoard: ['rook', ...Array(63).fill(null)],
-  rookPosition: { row: 0, col: 0 }
-});
+export const generateNewBoard = () => {
+  const board = range(0, 8).map(() => range(0, 8).map(() => null));
+  board[0][0] = 'rook';
+  return {
+    chessBoard: board,
+    rookPosition: { row: 0, col: 0 }
+  };
+};
 
 export const isTheLastMoverTheWinner = true;
 
@@ -17,7 +21,7 @@ export const getGameStateAfterAiMove = (board) => {
 export const getGameStateAfterMove = (board, { row, col }) => {
   markVisitedFields(board, board.rookPosition, { row, col });
 
-  board.chessBoard[row * 8 + col] = 'rook';
+  board.chessBoard[row][col] = 'rook';
   board.rookPosition = { row, col };
 
   return { board, isGameEnd: getAllowedMoves(board).length === 0 };
@@ -28,24 +32,24 @@ const getOptimalAiMove = (board) => {
 
   const allowedHorizontalMoves = [];
   let i = 1;
-  while (col - i >= 0 && board.chessBoard[row * 8 + col - i] === null) {
+  while (col - i >= 0 && board.chessBoard[row ][col - i] === null) {
     allowedHorizontalMoves.push({ row, col: col - i });
     i += 1;
   }
   i = 1;
-  while (col + i <= 7 && board.chessBoard[row * 8 + col + i] === null) {
+  while (col + i <= 7 && board.chessBoard[row][col + i] === null) {
     allowedHorizontalMoves.push({ row, col: col + i });
     i += 1;
   }
 
   const allowedVerticalMoves = [];
   i = 1;
-  while (row - i >= 0 && board.chessBoard[(row - i) * 8 + col] === null) {
+  while (row - i >= 0 && board.chessBoard[(row - i)][col] === null) {
     allowedVerticalMoves.push({ row: row - i, col });
     i += 1;
   }
   i = 1;
-  while (row + i <= 7 && board.chessBoard[(row + i) * 8 + col] === null) {
+  while (row + i <= 7 && board.chessBoard[(row + i)][col] === null) {
     allowedVerticalMoves.push({ row: row + i, col });
     i += 1;
   }
@@ -67,22 +71,22 @@ export const getAllowedMoves = (board) => {
 
   const allowedMoves = [];
   let i = 1;
-  while (row - i >= 0 && board.chessBoard[(row - i) * 8 + col] === null) {
+  while (row - i >= 0 && board.chessBoard[(row - i)][col] === null) {
     allowedMoves.push({ row: row - i, col });
     i += 1;
   }
   i = 1;
-  while (row + i <= 7 && board.chessBoard[(row + i) * 8 + col] === null) {
+  while (row + i <= 7 && board.chessBoard[(row + i)][col] === null) {
     allowedMoves.push({ row: row + i, col });
     i += 1;
   }
   i = 1;
-  while (col - i >= 0 && board.chessBoard[row * 8 + col - i] === null) {
+  while (col - i >= 0 && board.chessBoard[row][col - i] === null) {
     allowedMoves.push({ row, col: col - i });
     i += 1;
   }
   i = 1;
-  while (col + i <= 7 && board.chessBoard[row * 8 + col + i] === null) {
+  while (col + i <= 7 && board.chessBoard[row][col + i] === null) {
     allowedMoves.push({ row, col: col + i });
     i += 1;
   }
@@ -92,12 +96,12 @@ export const getAllowedMoves = (board) => {
 const markVisitedFields = (board, rookPosition, newRookPosition) => {
   if (rookPosition.row === newRookPosition.row) {
     range(rookPosition.col, newRookPosition.col).forEach(col => {
-      board.chessBoard[rookPosition.row * 8 + col] = 'visited';
+      board.chessBoard[rookPosition.row][col] = 'visited';
     });
   }
   if (rookPosition.col === newRookPosition.col) {
     range(rookPosition.row, newRookPosition.row).forEach(row => {
-      board.chessBoard[row * 8 + rookPosition.col] = 'visited';
+      board.chessBoard[row][rookPosition.col] = 'visited';
     });
   }
 };
