@@ -14,6 +14,10 @@ export default {
   },
   methods: {
     ...mapActions(['endPlayerTurn', 'initializeGame']),
+    isMoveAllowed(id) {
+      if (!this.shouldPlayerMoveNext) return false;
+      return this.board[id] === null;
+    },
     clickField(id) {
       if (!this.shouldPlayerMoveNext) return;
       if (this.board[id]) return;

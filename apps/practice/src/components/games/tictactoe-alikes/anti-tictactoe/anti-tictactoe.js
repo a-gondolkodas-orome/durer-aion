@@ -11,9 +11,12 @@ export default {
   },
   methods: {
     ...mapActions(['endPlayerTurn', 'initializeGame']),
+    isMoveAllowed(id) {
+      if (!this.shouldPlayerMoveNext) return false;
+      return this.board[id] === null;
+    },
     clickField(id) {
-      if (!this.shouldPlayerMoveNext) return;
-      if (this.board[id]) return;
+      if (!this.isMoveAllowed(id)) return;
 
       this.board[id] = playerColor(this.isPlayerTheFirstToMove);
       this.endPlayerTurn(getGameStateAfterMove(this.board));

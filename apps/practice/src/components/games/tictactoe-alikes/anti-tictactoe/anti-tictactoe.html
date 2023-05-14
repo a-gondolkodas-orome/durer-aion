@@ -11,8 +11,9 @@
     <div class="flex flex-wrap">
       <div class="p-2 shrink-0 grow basis-2/3">
         <div class="grid grid-cols-3 gap-0 border-2">
-          <div
+          <button
             v-for="id in [0, 1, 2, 3, 4, 5, 6, 7, 8]" :key="id"
+            :disabled="!isMoveAllowed(id)"
             @click="clickField(id)"
             class="aspect-square p-[25%] border-2"
           >
@@ -21,7 +22,7 @@
               class="w-full aspect-square inline-block rounded-full mb-[-0.5rem]"
               :class="pieceColor(id)"
             ></span>
-          </div>
+        </button>
         </div>
       </div>
       <game-sidebar>
