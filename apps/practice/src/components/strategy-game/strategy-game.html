@@ -1,10 +1,16 @@
 <div>
   <template v-if="gameDefinition">
-    <button
-      class="rounded-lg px-4 bg-blue-400 hover:bg-blue-600 js-back-to-overview"
-      @click="goBackToOverview()"
-    >← Vissza a listához</button>
-    <h1 class="text-blue-600 text-2xl font-bold pb-4">{{ gameDefinition.name }}</h1>
+    <div class="flex flex-wrap items-baseline">
+      <button
+        class="rounded-lg px-4 bg-blue-400 hover:bg-blue-600 js-back-to-overview basis-44"
+        @click="goBackToOverview()"
+      >← Vissza a listához</button>
+      <h1 class="grow text-blue-600 text-2xl font-bold pb-4 text-center">
+        {{ gameDefinition.name }}
+      </h1>
+      <!-- Hack to have game name in absolute center most of the time -->
+      <span class="basis-44"></span>
+    </div>
     <hr />
     <component :is="gameId"></component>
   </template>
