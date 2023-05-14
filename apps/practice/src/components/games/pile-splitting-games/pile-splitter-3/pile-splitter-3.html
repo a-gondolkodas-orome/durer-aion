@@ -19,19 +19,20 @@
           :class="{ 'border-t-2': pileId < 2, 'border-r-2': pileId === 0 && board[0] >= board[1], 'border-l-2': pileId === 1 && board[0] < board[1] }"
           style="transform: scaleY(-1)"
         >
-          <div class="text-xl" :class="{ 'text-red-600': isBannedHover() }" style="transform: scaleY(-1)">
+          <div class="text-xl" style="transform: scaleY(-1)">
             {{ currentChoiceDescription(pileId) }}
           </div>
-            <span
-              v-for="(_, pieceId) in board[pileId]"
-              :key="pieceId"
-              :class="{ 'bg-red-600': rowColor({ pileId }) === 'red', 'bg-blue-600': rowColor({ pileId }) === 'blue', 'opacity-50': pileId === removedPileId, 'outline-dashed': toBeLeft({ pileId, pieceId }) }"
+            <button
+              v-for="(_, pieceId) in board[pileId]" :key="pieceId"
+              :disabled="isDisabled({ pileId, pieceId })"
               class="js-pebble inline-block bg-blue-600 w-[20%] aspect-square rounded-full mx-0.5"
-              :style="{ 'pointer-events': shouldPlayerMoveNext ? 'auto' : 'none', 'cursor': pieceClickNotAllowed({ pileId, pieceId }) ? 'not-allowed' : 'pointer' }"
+              :class="{ 'bg-red-600': pileId === removedPileId, 'opacity-50': pileId === removedPileId, 'bg-blue-900': toBeLeft({ pileId, pieceId }) }"
               @click="clickPiece({ pileId, pieceId })"
+              @focus="hoveredPiece = { pileId, pieceId }"
+              @blur="hoveredPiece = null"
               @mouseover="hoveredPiece = { pileId, pieceId }"
               @mouseout="hoveredPiece = null"
-            ></span>
+            ></button>
         </div>
       </div>
       <game-sidebar @restart="resetTurnState()">

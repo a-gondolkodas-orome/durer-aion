@@ -20,6 +20,23 @@ export default {
   },
   methods: {
     ...mapActions(['endPlayerTurn', 'initializeGame']),
+    isDisabled({ pileId, pieceId }) {
+      if (!this.shouldPlayerMoveNext) return true;
+      if (this.removedPileId === null) return false;
+      return pileId !== this.removedPileId && pieceId === this.board[pileId] - 1;
+    },
+    leftBorder(pileId) {
+      return (
+        (pileId === 1 && this.board[1] > this.board[0]) ||
+        (pileId === 3 && this.board[3] > this.board[2])
+      );
+    },
+    rightBorder(pileId) {
+      return (
+        (pileId === 0 && this.board[1] <= this.board[0]) ||
+        (pileId === 2 && this.board[3] <= this.board[2])
+      );
+    },
     rowColor({ pileId }) {
       if (!this.isGameInProgress) return 'blue';
       if (pileId === this.removedPileId) {
@@ -62,10 +79,6 @@ export default {
       if (this.hoveredPiece.pieceId === this.board[pileId] - 1) return false;
       if (pieceId > this.hoveredPiece.pieceId) return false;
       return true;
-    },
-    isBannedHover() {
-      if (this.hoveredPiece === null) return false;
-      return this.hoveredPiece.pieceId === this.board[this.hoveredPiece.pileId] - 1;
     },
     currentChoiceDescription(pileId) {
       if (this.isGameFinished) return '';

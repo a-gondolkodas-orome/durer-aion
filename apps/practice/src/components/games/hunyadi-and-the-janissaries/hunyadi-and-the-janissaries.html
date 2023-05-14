@@ -24,8 +24,9 @@
           :style="{ 'aspect-ratio': 8, 'margin-left': (5-rowIndex) + 'rem', 'margin-right': (5-rowIndex) + 'rem' }"
           class="border-t-black border-t-2 p-0.5 text-center whitespace-nowrap"
         >
-          <span
+          <button
             v-for="(group, pieceIndex) in board[rowIndex]"
+            :disabled="!shouldPlayerMoveNext"
             class="aspect-square w-[10%] inline-block mx-1 js-clickable-soldier"
             @click="clickOnSoldier(rowIndex, pieceIndex)"
             @mouseover="hoveredPiece = { rowIndex, pieceIndex }"
@@ -37,7 +38,7 @@
             >
               <use xlink:href="#game-soldier-icon" />
             </svg>
-          </span>
+          </button>
         </div>
       </div>
       <div class="p-2 flex flex-col grow shrink-0 basis-64">

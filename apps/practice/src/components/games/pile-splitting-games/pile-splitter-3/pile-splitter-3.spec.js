@@ -3,6 +3,7 @@
 import PileSplitter3 from './pile-splitter-3';
 import createStore from '../../../../store/store';
 import { cloneDeep } from 'lodash-es';
+import { flushPromises } from '@vue/test-utils';
 import { mountComponent } from '../../../../../test-helpers';
 
 const mountPileSplitter3 = async () => {
@@ -33,7 +34,9 @@ describe('PileSplitter3', () => {
   it('should apply player move correctly', async () => {
     const { store, wrapper } = await mountPileSplitter3();
     const initialBoard = cloneDeep(store.state.board);
+
     wrapper.find('.js-first-player').trigger('click');
+    await flushPromises();
 
     wrapper.findAll('.js-pile')[1].findAll('.js-pebble')[1].trigger('click');
     wrapper.findAll('.js-pile')[0].findAll('.js-pebble')[1].trigger('click');
@@ -48,7 +51,9 @@ describe('PileSplitter3', () => {
   it('should not allow player move while enemy move is in progress', async () => {
     const { store, wrapper } = await mountPileSplitter3();
     const initialBoard = cloneDeep(store.state.board);
+
     wrapper.find('.js-second-player').trigger('click');
+    await flushPromises();
 
     wrapper.findAll('.js-pile')[1].findAll('.js-pebble')[1].trigger('click');
     wrapper.findAll('.js-pile')[0].findAll('.js-pebble')[1].trigger('click');

@@ -25,7 +25,7 @@
             v-for="(_, pieceId) in board[pileId]" :key="pieceId"
             :disabled="isDisabled({ pileId, pieceId })"
             class="js-pebble inline-block bg-blue-600 w-[20%] aspect-square rounded-full mx-0.5"
-            :class="{ 'bg-blue-900': toBeLeft({ pileId, pieceId }), 'opacity-50': toBeRemoved({ pileId }) }"
+            :class="{ 'bg-blue-900': toBeLeft({ pileId, pieceId }), 'opacity-50': toBeRemoved({ pileId }), 'bg-red-600': toBeRemoved({ pileId }) }"
             @click="clickPiece({ pileId, pieceId })"
             @focus="hoveredPiece = { pileId, pieceId }"
             @blur="hoveredPiece = null"
