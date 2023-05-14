@@ -1,11 +1,12 @@
 import { mapActions, mapState } from 'vuex';
 import GameSidebar from '../../common/game-sidebar/game-sidebar';
+import GameRule from '../../common/game-rule/game-rule';
 import { getGameStateAfterMove, isAllowedStep, allColors } from './strategy/strategy';
 
 export default {
   name: 'cube-coloring',
   template: require('./cube-coloring.html'),
-  components: { GameSidebar },
+  components: { GameSidebar, GameRule },
   computed: {
     ...mapState(['board', 'shouldPlayerMoveNext']),
     allColors: () => allColors

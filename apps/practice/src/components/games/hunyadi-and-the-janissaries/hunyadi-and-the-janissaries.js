@@ -1,12 +1,13 @@
 import { mapGetters, mapActions, mapState } from 'vuex';
 import EnemyLoader from '../../common/enemy-loader/enemy-loader';
+import GameRule from '../../common/game-rule/game-rule';
 import SoldierSvg from './soldier-svg/soldier-svg';
 import CastleSvg from './castle-svg/castle-svg';
 import { getGameStateAfterKillingGroup } from './strategy/strategy';
 
 export default {
   template: require('./hunyadi-and-the-janissaries.html'),
-  components: { EnemyLoader, SoldierSvg, CastleSvg },
+  components: { EnemyLoader, SoldierSvg, CastleSvg, GameRule },
   data: () => ({
     hoveredPiece: null
   }),

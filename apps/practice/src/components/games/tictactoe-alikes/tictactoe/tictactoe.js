@@ -1,10 +1,11 @@
 import { mapActions, mapState } from 'vuex';
 import GameSidebar from '../../../common/game-sidebar/game-sidebar';
+import GameRule from '../../../common/game-rule/game-rule';
 import { getGameStateAfterMove, inPlacingPhase, pColor, aiColor } from './strategy/strategy';
 
 export default {
   template: require('./tictactoe.html'),
-  components: { GameSidebar },
+  components: { GameSidebar, GameRule },
   computed: {
     ...mapState(['board', 'shouldPlayerMoveNext']),
     inPlacingPhase() {

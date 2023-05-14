@@ -1,12 +1,13 @@
 import { isEqual, some } from 'lodash-es';
 import { mapActions, mapState } from 'vuex';
 import GameSidebar from '../../common/game-sidebar/game-sidebar';
+import GameRule from '../../common/game-rule/game-rule';
 import ChessBishopSvg from './chess-bishop-svg/chess-bishop-svg';
 import { getGameStateAfterMove, getAllowedMoves, BISHOP, FORBIDDEN } from './strategy/strategy';
 
 export default {
   template: require('./chess-bishops.html'),
-  components: { GameSidebar, ChessBishopSvg },
+  components: { GameSidebar, ChessBishopSvg, GameRule },
   data: () => ({
     hoveredField: null
   }),

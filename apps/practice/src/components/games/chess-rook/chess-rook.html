@@ -1,18 +1,16 @@
 <div class="flex justify-center">
   <chess-rook-svg></chess-rook-svg>
   <div class="max-w-[100ch]">
-    <div class="flex justify-center mb-4 mt-1">
-      <p class="text-justify">
-        A játékosok felváltva lépnek egy bástyával, amely a sakktábla bal felső sarkából indul. A
-        bástya vízszintesen vagy függőlegesen bármennyit (legalább egyet) léphet, de egyszerre csak az
-        egyik irányba. Azokat a mezőket amikre a bástya lép, illetve a lépés közben áthalad, megjelöljük,
-        ezekre a mezőkre már nem léphetünk (át sem haladhatunk felettük). Az a játékos veszít, aki
-        nem tud lépni.
-
-        Te döntheted el, hogy kezdeni szeretnél-e, vagy második játékos lenni.
-        Sok sikert! :)
-      </p>
-    </div>
+    <game-rule>
+      A játékosok felváltva lépnek egy bástyával, amely a sakktábla bal felső sarkából indul. A
+      bástya vízszintesen vagy függőlegesen bármennyit (legalább egyet) léphet, de egyszerre csak az
+      egyik irányba. Azokat a mezőket amikre a bástya lép, illetve a lépés közben áthalad, megjelöljük,
+      ezekre a mezőkre már nem léphetünk (át sem haladhatunk felettük). Az a játékos veszít, aki
+      nem tud lépni.
+  
+      Te döntheted el, hogy kezdeni szeretnél-e, vagy második játékos lenni.
+      Sok sikert! :)
+    </game-rule>
     <div class="flex flex-wrap">
       <div class="p-2 shrink-0 grow basis-2/3">
         <table class="m-2 border-collapse w-full table-fixed">

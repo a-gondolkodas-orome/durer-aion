@@ -1,12 +1,13 @@
 import { mapActions, mapState } from 'vuex';
 import GameSidebar from '../../common/game-sidebar/game-sidebar';
+import GameRule from '../../common/game-rule/game-rule';
 import ChessRookSvg from './chess-rook-svg/chess-rook-svg';
 import { getGameStateAfterMove, getAllowedMoves } from './strategy/strategy';
 import { some, isEqual } from 'lodash-es';
 
 export default {
   template: require('./chess-rook.html'),
-  components: { GameSidebar, ChessRookSvg },
+  components: { GameSidebar, ChessRookSvg, GameRule },
   computed: {
     ...mapState(['board', 'shouldPlayerMoveNext'])
   },

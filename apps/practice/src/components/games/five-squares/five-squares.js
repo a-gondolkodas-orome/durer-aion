@@ -1,10 +1,11 @@
 import { mapActions, mapState } from 'vuex';
 import GameSidebar from '../../common/game-sidebar/game-sidebar';
+import GameRule from '../../common/game-rule/game-rule';
 import { getGameStateAfterMove } from './strategy/strategy';
 
 export default {
   template: require('./five-squares.html'),
-  components: { GameSidebar },
+  components: { GameSidebar, GameRule },
   data: () => ({
     oneMoveDone: false
   }),

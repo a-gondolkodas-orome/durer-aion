@@ -4,7 +4,6 @@ import EnemyLoader from '../enemy-loader/enemy-loader';
 export default {
   name: 'game-sidebar',
   template: require('./game-sidebar.html'),
-  props: { stepDescription: String },
   components: { EnemyLoader },
   computed: {
     ...mapState(['shouldPlayerMoveNext']),
