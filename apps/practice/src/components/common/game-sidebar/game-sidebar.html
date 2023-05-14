@@ -1,24 +1,24 @@
 <div class="p-2 flex flex-col grow shrink-0 basis-64">
-  <p class="text-center font-bold text-lg">{{ ctaText }}</p>
-  <enemy-loader />
-  <p v-if="shouldPlayerMoveNext" class="italic text-justify">{{ stepDescription }}</p>
-  <button
-    v-if="isGameReadyToStart"
-    class="cta-button js-first-player"
-    @click="startGameWithRoleSelection({ isFirst: true })"
-  >
-    Kezdő leszek
-  </button>
-  <button
-    v-if="isGameReadyToStart"
-    class="cta-button js-second-player"
-    @click="startGameWithRoleSelection({ isFirst: false })"
-  >
-    Második leszek
-  </button>
-  <div class="flex flex-grow items-end">
-    <button class="cta-button mt-4 js-restart-game" @click="restartGame()">
-      Új játék
+  <p class="text-center font-bold text-lg basis-[3.5rem]">{{ ctaText }}</p>
+  <enemy-loader class="mb-[4rem]"/>
+  <p v-if="shouldPlayerMoveNext" class="italic text-justify basis-[6rem]">
+    {{ stepDescription }}
+  </p>
+  <span v-if="isGameReadyToStart" class="basis-[6rem]">
+    <button
+      class="cta-button js-first-player"
+      @click="startGameWithRoleSelection({ isFirst: true })"
+    >
+      Kezdő leszek
     </button>
-  </div>
+    <button
+      class="cta-button js-second-player"
+      @click="startGameWithRoleSelection({ isFirst: false })"
+    >
+      Második leszek
+    </button>
+  </span>
+  <button class="cta-button mt-[2vh] js-restart-game" @click="restartGame()">
+    Új játék
+  </button>
 </div>
