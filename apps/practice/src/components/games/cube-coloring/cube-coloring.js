@@ -21,6 +21,11 @@ export default {
   },
   methods: {
     ...mapActions(['endPlayerTurn', 'initializeGame']),
+    isMoveAllowed(vertex) {
+      if (!this.shouldPlayerMoveNext) return false;
+      if (!this.show) return false;
+      return isAllowedStep(this.board, vertex, this.color);
+    },
     pick(color) {
       if (!this.shouldPlayerMoveNext) return;
       if (this.color === color) {
@@ -35,12 +40,10 @@ export default {
       this.y = event.offsetY;
     },
     setColor(vertex) {
-      if (!this.shouldPlayerMoveNext) return;
-      if (this.show && isAllowedStep(this.board, vertex, this.color)) {
-        this.board[vertex] = this.color;
-        this.show = false;
-        this.endPlayerTurn(getGameStateAfterMove(this.board));
-      }
+      if (!this.isMoveAllowed(vertex)) return;
+      this.board[vertex] = this.color;
+      this.show = false;
+      this.endPlayerTurn(getGameStateAfterMove(this.board));
     },
     resetTurnState() {
       this.color = "";

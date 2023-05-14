@@ -12,9 +12,9 @@
     </game-rule>
     <div class="flex flex-wrap" id="cube-coloring">
       <div class="p-2 shrink-0 grow basis-2/3">
-        <button :disabled="!shouldPlayerMoveNext" class="w-[30%] mx-[1%] rounded h-8 mb-1 bg-red-600" @click="pick('red')">Piros</button>
-        <button :disabled="!shouldPlayerMoveNext" class="w-[30%] mx-[1%] rounded h-8 mb-1 bg-green-600" @click="pick('green')">Zöld</button>
-        <button :disabled="!shouldPlayerMoveNext" class="w-[30%] mx-[1%] rounded h-8 mb-1 bg-blue-600" @click="pick('blue')">Kék</button>
+        <button :disabled="!shouldPlayerMoveNext" class="w-[30%] mx-[1%] rounded text-xl mb-1 bg-opacity-75 bg-red-600" @click="pick('red')">Piros</button>
+        <button :disabled="!shouldPlayerMoveNext" class="w-[30%] mx-[1%] rounded text-xl mb-1 bg-opacity-75 bg-green-600" @click="pick('green')">Zöld</button>
+        <button :disabled="!shouldPlayerMoveNext" class="w-[30%] mx-[1%] rounded text-xl mb-1 bg-opacity-75 bg-blue-600" @click="pick('blue')">Kék</button>
         <svg @mousemove="drawPickedColor" class="aspect-square stroke-black stroke-[3]">
           <!-- front and back face -->
           <rect x="8%" y="25%" width="66%" height="66%" class="fill-transparent" />
@@ -29,14 +29,54 @@
           <line x1="74%" y1="91%" x2="25%" y2="8%"/>
 
           <!-- 8 nodes -->
-          <circle cx="8%"  cy="25%" r="4%" @click="setColor(0)" :fill="board[0] || 'white'" />
-          <circle cx="74%" cy="25%" r="4%" @click="setColor(1)" :fill="board[1] || 'white'" />
-          <circle cx="74%" cy="91%" r="4%" @click="setColor(2)" :fill="board[2] || 'white'" />
-          <circle cx="8%"  cy="91%" r="4%" @click="setColor(3)" :fill="board[3] || 'white'" />
-          <circle cx="25%" cy="8%"  r="4%" @click="setColor(4)" :fill="board[4] || 'white'" />
-          <circle cx="91%" cy="8%"  r="4%" @click="setColor(5)" :fill="board[5] || 'white'" />
-          <circle cx="91%" cy="74%" r="4%" @click="setColor(6)" :fill="board[6] || 'white'" />
-          <circle cx="25%" cy="74%" r="4%" @click="setColor(7)" :fill="board[7] || 'white'" />
+          <circle
+            cx="8%"  cy="25%" r="4%"
+            @click="setColor(0)" v-on:keyup.enter="setColor(0)"
+            :tabindex="isMoveAllowed(0) ? 0 : 'none'"
+            :fill="board[0] || 'white'"
+          />
+          <circle
+            cx="74%" cy="25%" r="4%"
+            @click="setColor(1)" v-on:keyup.enter="setColor(1)"
+            :tabindex="isMoveAllowed(1) ? 0 : 'none'"
+            :fill="board[1] || 'white'"
+          />
+          <circle
+            cx="74%" cy="91%" r="4%"
+            @click="setColor(2)" v-on:keyup.enter="setColor(2)"
+            :tabindex="isMoveAllowed(2) ? 0 : 'none'"
+            :fill="board[2] || 'white'"
+          />
+          <circle
+            cx="8%"  cy="91%" r="4%"
+            @click="setColor(3)" v-on:keyup.enter="setColor(3)"
+            :tabindex="isMoveAllowed(3) ? 0 : 'none'"
+            :fill="board[3] || 'white'"
+          />
+          <circle
+            cx="25%" cy="8%"  r="4%"
+            @click="setColor(4)" v-on:keyup.enter="setColor(4)"
+            :tabindex="isMoveAllowed(4) ? 0 : 'none'"
+            :fill="board[4] || 'white'"
+          />
+          <circle
+            cx="91%" cy="8%"  r="4%"
+            @click="setColor(5)" v-on:keyup.enter="setColor(5)"
+            :tabindex="isMoveAllowed(5) ? 0 : 'none'"
+            :fill="board[5] || 'white'"
+          />
+          <circle
+            cx="91%" cy="74%" r="4%"
+            @click="setColor(6)" v-on:keyup.enter="setColor(6)"
+            :tabindex="isMoveAllowed(6) ? 0 : 'none'"
+            :fill="board[6] || 'white'"
+          />
+          <circle
+            cx="25%" cy="74%" r="4%"
+            @click="setColor(7)" v-on:keyup.enter="setColor(7)"
+            :tabindex="isMoveAllowed(7) ? 0 : 'none'"
+            :fill="board[7] || 'white'"
+          />
 
           <!-- cursor position with to-be-used color -->
           <circle v-if="show" :cx="x" :cy="y" r="4%" :fill="color" class="pointer-events-none opacity-50 stroke-0" />

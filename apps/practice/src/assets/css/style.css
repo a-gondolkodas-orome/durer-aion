@@ -6,8 +6,8 @@
 
 @layer components {
     .cta-button {
-        @apply bg-teal-400 disabled:opacity-50 hover:bg-teal-600;
+        @apply bg-teal-400 disabled:opacity-50 hover:bg-teal-500;
         @apply border-none rounded block my-1 mx-0 py-1 px-2 w-full;
-        @apply text-center text-white text-xl whitespace-normal;
+        @apply text-center text-xl whitespace-normal;
     }
 }
