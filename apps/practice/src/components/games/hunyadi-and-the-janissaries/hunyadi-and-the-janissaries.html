@@ -1,5 +1,6 @@
 <div class="flex justify-center">
   <soldier-svg />
+  <castle-svg />
   <div class="max-w-[100ch]">
     <div class="flex justify-center mb-4 mt-1">
       <p class="text-justify">
@@ -16,7 +17,9 @@
     </div>
     <div class="flex flex-wrap js-hunyadi-and-the-janissaries">
       <div class="p-2 shrink-0 grow basis-2/3">
-        <img src="../../../assets/hunyadi-and-the-janissaries-castle.jpg" class="block m-auto w-[40%]">
+        <svg class="block m-auto w-[40%] fill-slate-600">
+          <use xlink:href="#game-castle" />
+        </svg>
         <div
           v-for="rowIndex in [0, 1, 2, 3, 4, 5]"
           :key="rowIndex"
