@@ -17,6 +17,7 @@
           v-for="pileId in [0, 1]"
           :key="pileId"
           class="js-pile w-[50%] pl-1 inline-block text-center"
+          :class="{ 'border-r-2': pileId === 0 && board[0] >= board[1], 'border-l-2': pileId === 1 && board[0] < board[1] }"
           style="transform: scaleY(-1)"
         >
           <div class="text-xl" :class="{ 'text-red-600': isBannedHover() }" style="transform: scaleY(-1)">
