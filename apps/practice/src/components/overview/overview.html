@@ -12,6 +12,55 @@
     </span>
   </div>
 
+  <div class="flex flex-wrap align-baseline">
+    <Listbox
+      v-model="selectedCategories" as="div" multiple horizontal
+      class="mb-2 w-96 inline-block"
+      v-slot="{ open }"
+    >
+      <label for="category-selector" class="block">Kategória szűrő:</label>
+      <ListboxButton id="category-selector" class="border-2 border-slate-600 rounded w-full">
+        {{ selectedCategories.join(', ') || 'Válassz kategóriákat' }}
+      </ListboxButton>
+      <ListboxOptions class="text-center mt-1">
+        <ListboxOption
+          v-for="category in allCategories" :key="category"
+          :value="category"
+          class="inline-block"
+          v-slot="{ selected, active }"
+        >
+         <span class="border-2 rounded px-1 mx-1 inline-block" :class="{ 'bg-blue-200': selected, 'outline': active }">
+          <span :class="{ 'text-transparent': !selected }">✓</span>{{ category }}
+         </span>
+        </ListboxOption>
+      </ListboxOptions>
+    </Listbox>
+  
+    <Listbox
+      v-model="selectedYears" as="div" multiple horizontal
+      class="ml-2 mb-2 w-96 inline-block"
+      v-slot="{ open }"
+    >
+      <label for="year-selector" class="block">Év szűrő:</label>
+      <ListboxButton id="year-selector" class="border-2 border-slate-600 rounded w-full">
+        {{ selectedYears.join(', ') || 'Válassz éveket' }}
+      </ListboxButton>
+      <ListboxOptions class="text-center mt-1">
+        <ListboxOption
+          v-for="year in allYears" :key="year"
+          :value="year"
+          class="inline-block"
+          v-slot="{ selected, active }"
+        >
+         <span class="border-2 rounded px-1 mx-1 inline-block" :class="{ 'bg-blue-200': selected, 'outline': active }">
+          <span :class="{ 'text-transparent': !selected }">✓</span>{{ year }}
+         </span>
+        </ListboxOption>
+      </ListboxOptions>
+    </Listbox>
+  </div>
+
+
   <table class="w-full border-collapse">
     <thead>
       <tr>

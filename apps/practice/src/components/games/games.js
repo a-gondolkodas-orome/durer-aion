@@ -141,7 +141,7 @@ export const gameList = {
   SuperstitiousCounting: {
     year: 13,
     round: 'döntő',
-    category: 'D,E',
+    category: 'D',
     name: 'Babonás számoló',
     component: 'SuperstitiousCounting',
     strategy: superstitiousCountingStrategy
