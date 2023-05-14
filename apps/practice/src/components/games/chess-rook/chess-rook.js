@@ -14,11 +14,11 @@ export default {
   methods: {
     ...mapActions(['endPlayerTurn', 'initializeGame']),
     clickField(field) {
-      if (!this.isAllowedMove(field)) return;
+      if (!this.isMoveAllowed(field)) return;
 
       this.endPlayerTurn(getGameStateAfterMove(this.board, field));
     },
-    isAllowedMove(targetField) {
+    isMoveAllowed(targetField) {
       if (!this.shouldPlayerMoveNext) return false;
       return some(getAllowedMoves(this.board), field => isEqual(field, targetField));
     }

@@ -22,17 +22,19 @@
               @mouseover="hoveredField = { row, col }"
               @mouseout="hoveredField = null"
             >
-              <div class="aspect-square p-[5%]">
-                <span v-show="isBishop({ row, col })" >
-                  <svg class="inline-block w-full aspect-square">
-                    <use xlink:href="#game-chess-bishop" />
-                  </svg>
-                </span>
-                <span v-show="isPotentialNextStep({ row, col })">
-                  <svg class="inline-block w-full aspect-square opacity-50">
-                    <use xlink:href="#game-chess-bishop" />
-                  </svg>
-                </span>
+              <div class="aspect-square w-full p-[5%]">
+                <button class="aspect-square w-full" :disabled="!isMoveAllowed({ row, col })">
+                  <span v-show="isBishop({ row, col })" >
+                    <svg class="inline-block w-full aspect-square">
+                      <use xlink:href="#game-chess-bishop" />
+                    </svg>
+                  </span>
+                  <span v-show="isPotentialNextStep({ row, col })">
+                    <svg class="inline-block w-full aspect-square opacity-50">
+                      <use xlink:href="#game-chess-bishop" />
+                    </svg>
+                  </span>
+                </button>
               </div>
             </td>
           </tr>
