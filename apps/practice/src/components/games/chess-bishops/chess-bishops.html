@@ -19,23 +19,26 @@
               @click="clickField({ row, col })"
               class="border-4"
               :class="{ 'bg-slate-400': isForbidden({ row, col }), 'bg-slate-200': wouldBeForbidden({ row, col }), 'cursor-not-allowed': isForbidden({ row, col }) }"
-              @mouseover="hoveredField = { row, col }"
-              @mouseout="hoveredField = null"
             >
-              <div class="aspect-square w-full p-[5%]">
-                <button class="aspect-square w-full" :disabled="!isMoveAllowed({ row, col })">
-                  <span v-show="isBishop({ row, col })" >
-                    <svg class="inline-block w-full aspect-square">
-                      <use xlink:href="#game-chess-bishop" />
-                    </svg>
-                  </span>
-                  <span v-show="isPotentialNextStep({ row, col })">
-                    <svg class="inline-block w-full aspect-square opacity-50">
-                      <use xlink:href="#game-chess-bishop" />
-                    </svg>
-                  </span>
-                </button>
-              </div>
+              <button
+                class="aspect-square w-full p-[5%]"
+                :disabled="!isMoveAllowed({ row, col })"
+                @mouseover="hoveredField = { row, col }"
+                @mouseout="hoveredField = null"
+                @focus="hoveredField = { row, col }"
+                @blur="hoveredField = null"
+              >
+                <span v-show="isBishop({ row, col })" >
+                  <svg class="inline-block w-full aspect-square">
+                    <use xlink:href="#game-chess-bishop" />
+                  </svg>
+                </span>
+                <span v-show="isPotentialNextStep({ row, col })">
+                  <svg class="inline-block w-full aspect-square opacity-50">
+                    <use xlink:href="#game-chess-bishop" />
+                  </svg>
+                </span>
+              </button>
             </td>
           </tr>
         </table>

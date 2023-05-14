@@ -24,13 +24,17 @@
               @click="clickPile(coinValue)"
               class="text-center border-4"
               :class="{ 'bg-gray-300': isCoinActionInvalid(coinValue), 'cursor-not-allowed': isCoinActionInvalid(coinValue) }"
-              @mouseover="hoveredPile=coinValue"
-              @mouseout="hoveredPile=null"
-            >
-              <div class="min-h-[25vh] p-[5%]">
+              >
+              <button
+                class="min-h-[25vh] w-full p-[5%]"
+                :disabled="!isMoveAllowed(coinValue)"
+                @mouseover="hoveredPile=coinValue"
+                @mouseout="hoveredPile=null"
+                @focus="hoveredPile=coinValue"
+                @blur="hoveredPile=null"
+              >
                 <span
-                  v-for="i in board[coinValue]"
-                  :key="i"
+                  v-for="i in board[coinValue]" :key="i"
                   class="w-[30%] aspect-square inline-block rounded-full mr-0.5"
                   :class="{ [getCoinColor(coinValue)]: true, 'opacity-50': shouldShowCoinToBeRemoved(coinValue) && i === 1 }"
                 ></span>
@@ -39,7 +43,7 @@
                   class="w-[30%] aspect-square inline-block rounded-full mr-0.5 opacity-50"
                   :class="getCoinColor(coinValue)"
                 ></span>
-              </div>
+              </button>
             </td>
           </tr>
         </table>

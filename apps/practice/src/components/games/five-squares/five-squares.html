@@ -15,8 +15,9 @@
     <div class="flex flex-wrap">
       <div class="p-2 shrink-0 grow basis-2/3">
         <div class="grid grid-cols-3 gap-0 border-t-4 border-l-4">
-          <div
+          <button
             v-for="id in [0, 1, 2, 3, 4]" :key="id"
+            :disabled="!shouldPlayerMoveNext"
             @click="placePiece(id)"
             class="aspect-square border-r-4 border-b-4 p-[3%]"
           >
@@ -27,7 +28,7 @@
               :class="{ 'w-[37%]': board[id] <= 4, 'w-[28%]': board[id] == 5 || board[id] == 6, 'w-[20%]': board[id] > 6 }"
             >
             </span>
-          </div>
+          </button>
         </div>
       </div>
       <game-sidebar>

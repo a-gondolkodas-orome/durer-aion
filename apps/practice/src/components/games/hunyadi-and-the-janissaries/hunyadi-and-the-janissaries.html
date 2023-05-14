@@ -29,6 +29,8 @@
             :disabled="!shouldPlayerMoveNext"
             class="aspect-square w-[10%] inline-block mx-1 js-clickable-soldier"
             @click="clickOnSoldier(rowIndex, pieceIndex)"
+            @focus="hoveredPiece = { rowIndex, pieceIndex }"
+            @blur="hoveredPiece = null"
             @mouseover="hoveredPiece = { rowIndex, pieceIndex }"
             @mouseout="hoveredPiece = null"
           >

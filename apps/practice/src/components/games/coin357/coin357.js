@@ -23,9 +23,12 @@ export default {
   },
   methods: {
     ...mapActions(['endPlayerTurn', 'initializeGame']),
+    isMoveAllowed(coinValue) {
+      if (!this.shouldPlayerMoveNext) return false;
+      return !this.isCoinActionInvalid(coinValue);
+    },
     clickPile(coinValue) {
-      if (!this.shouldPlayerMoveNext) return;
-      if (this.isCoinActionInvalid(coinValue)) return;
+      if (!this.isMoveAllowed(coinValue)) return;
 
       if (!this.wasCoinAlreadyRemovedInTurn) {
         this.valueOfRemovedCoin = coinValue;
