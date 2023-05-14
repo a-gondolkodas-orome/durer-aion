@@ -8,8 +8,15 @@
       <h1 class="grow text-blue-600 text-2xl font-bold pb-4 text-center">
         {{ gameDefinition.name }}
       </h1>
-      <!-- Hack to have game name in absolute center most of the time -->
-      <span class="basis-44"></span>
+      <span class="basis-44 text-right">
+        <a
+          href="https://github.com/a-gondolkodas-orome/durer-jatekok/issues/new"
+          target="_blank"
+          class="px-4 text-blue-800 underline"
+        >
+          Hibabejelentő    
+        </a>
+      </span>
     </div>
     <hr />
     <component :is="gameId"></component>
