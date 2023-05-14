@@ -14,8 +14,11 @@ export default {
   },
   methods: {
     ...mapActions(['endPlayerTurn', 'initializeGame']),
+    isDisabled({ pileId, pieceId }) {
+      return !this.shouldPlayerMoveNext || pieceId === this.board[pileId] - 1;
+    },
     clickPiece({ pileId, pieceId }) {
-      if (!this.shouldPlayerMoveNext || pieceId === this.board[pileId] - 1) return;
+      if (this.isDisabled({ pileId, pieceId })) return;
       this.endPlayerTurn(getGameStateAfterMove(this.board, { pileId, pieceId }));
       this.hoveredPiece = null;
     },
@@ -25,10 +28,6 @@ export default {
       if (this.hoveredPiece.pieceId === this.board[pileId] - 1) return false;
       if (pieceId > this.hoveredPiece.pieceId) return false;
       return true;
-    },
-    isBannedHover() {
-      if (this.hoveredPiece === null) return false;
-      return this.hoveredPiece.pieceId === this.board[this.hoveredPiece.pileId] - 1;
     },
     toBeRemoved({ pileId }) {
       if (this.hoveredPiece === null) return false;

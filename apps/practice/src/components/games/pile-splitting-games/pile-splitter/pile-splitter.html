@@ -20,20 +20,21 @@
           :class="{ 'border-r-2': pileId === 0 && board[0] >= board[1], 'border-l-2': pileId === 1 && board[0] < board[1] }"
           style="transform: scaleY(-1)"
         >
-          <div class="text-xl" :class="{ 'text-red-600': isBannedHover() }" style="transform: scaleY(-1)">
+          <div class="text-xl" style="transform: scaleY(-1)">
             {{ currentChoiceDescription(pileId) }}
           </div>
-          <span
-            v-for="(_, pieceId) in board[pileId]"
-            :key="pieceId"
+          <button
+            v-for="(_, pieceId) in board[pileId]" :key="pieceId"
+            :disabled="isDisabled({ pileId, pieceId })"
             class="js-pebble inline-block bg-blue-600 w-[20%] aspect-square rounded-full mx-0.5"
-            :class="{ 'outline-dashed': toBeLeft({ pileId, pieceId }), 'opacity-50': toBeRemoved({ pileId }) }"
-            :style="{ 'pointer-events': shouldPlayerMoveNext ? 'auto' : 'none', 'cursor': pieceId === board[pileId] - 1 ? 'not-allowed' : 'pointer' }"
+            :class="{ 'bg-blue-900': toBeLeft({ pileId, pieceId }), 'opacity-50': toBeRemoved({ pileId }) }"
             @click="clickPiece({ pileId, pieceId })"
+            @focus="hoveredPiece = { pileId, pieceId }"
+            @blur="hoveredPiece = null"
             @mouseover="hoveredPiece = { pileId, pieceId }"
             @mouseout="hoveredPiece = null"
           >
-          </span>
+        </button>
         </div>
       </div>
       <game-sidebar>
