@@ -36,10 +36,11 @@
           ></span>
         </div>
       </div>
-      <game-sidebar 
-        step-description="Először kattints az eltávolítandó kupacra, majd arra a korongra, ahol ketté akarod vágni a kupacot." 
-        @restart="resetTurnState()" 
-      />
+      <game-sidebar @restart="resetTurnState()">
+        <template #step-description>
+          Először kattints az eltávolítandó kupacra, majd arra a korongra, ahol ketté akarod vágni a kupacot.
+        </template>
+      </game-sidebar>
     </div>
   </div>
 </div>

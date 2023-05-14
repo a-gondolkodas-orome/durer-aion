@@ -2,7 +2,7 @@
   <p class="text-center font-bold text-lg basis-[3.5rem]">{{ ctaText }}</p>
   <enemy-loader class="mb-[4rem]"/>
   <p v-if="shouldPlayerMoveNext" class="italic text-justify basis-[6rem]">
-    {{ stepDescription }}
+    <slot name="step-description"></slot>
   </p>
   <span v-if="isGameReadyToStart" class="basis-[6rem]">
     <button

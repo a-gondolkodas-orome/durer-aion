@@ -48,10 +48,9 @@
           Semmit se rakok be
         </button>
       </div>
-      <game-sidebar 
-        :step-description="stepDescription" 
-        @restart="resetTurnState()"
-      />
+      <game-sidebar @restart="resetTurnState()">
+        <template #step-description>{{ stepDescription }}</template>
+      </game-sidebar>
     </div>
   </div>
 </div>

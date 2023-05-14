@@ -44,10 +44,11 @@
           <circle v-if="show" :cx="x" :cy="y" r="4%" :fill="color" class="pointer-events-none opacity-50 stroke-0" />
         </svg>
       </div>
-      <game-sidebar
-        step-description="Válassz színt, majd színezz meg egy csúcsot!"
-        @restart="resetTurnState()"
-      />
+      <game-sidebar @restart="resetTurnState()">
+        <template #step-description>
+          Válassz színt, majd színezz meg egy csúcsot!
+        </template>
+      </game-sidebar>
     </div>
   </div>
 </div>

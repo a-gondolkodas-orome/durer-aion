@@ -16,7 +16,9 @@
           @click="endPlayerTurn({ board: [], isGameEnd: true })"
         >Lépek!</button>
       </div>
-      <game-sidebar step-description="Kattints a 'Lépek' gombra, hogy lépj." />
+      <game-sidebar>
+        <template #step-description>Kattints a 'Lépek' gombra, hogy lépj.</template>
+      </game-sidebar>
     </div>
   </div>
 </div>

@@ -34,7 +34,11 @@
           >
         </div>
       </div>
-      <game-sidebar step-description="Írj be egy számot, majd nyomj Enter-t." @restart="resetTurnState()" />
+      <game-sidebar @restart="resetTurnState()">
+        <template #step-description>
+          Írj be egy számot, majd nyomj Enter-t.
+        </template>
+      </game-sidebar>
     </div>
   </div>
 </div>
