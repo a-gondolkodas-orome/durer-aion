@@ -1,6 +1,6 @@
 import createStore from './store';
 
-const initializeStoreWithGame = (gameId = 'HeapSplitter') => {
+const initializeStoreWithGame = (gameId = 'PileSplitter') => {
   const store = createStore();
   store.commit('setGameDefinition', { gameId });
   store.dispatch('initializeGame');
@@ -15,7 +15,7 @@ describe('store', () => {
     });
 
     it('should return who is next during game', () => {
-      const store = initializeStoreWithGame('HeapSplitter');
+      const store = initializeStoreWithGame('PileSplitter');
 
       store.dispatch('startGameWithRoleSelection', { isFirst: true });
       expect(store.getters.ctaText).toMatch(/Te jössz/);
@@ -25,7 +25,7 @@ describe('store', () => {
     });
 
     it('should return congratulations text at the end of game if player is the winner', () => {
-      const store = initializeStoreWithGame('HeapSplitter');
+      const store = initializeStoreWithGame('PileSplitter');
 
       store.dispatch('startGameWithRoleSelection', { isFirst: true });
       store.dispatch('endPlayerTurn', { board: [1, 1], isGameEnd: true, hasFirstPlayerWon: true });
@@ -34,7 +34,7 @@ describe('store', () => {
 
     it('should return keepTrying text at the end of game if player is the loser', () => {
       jest.useFakeTimers();
-      const store = initializeStoreWithGame('HeapSplitter');
+      const store = initializeStoreWithGame('PileSplitter');
 
       store.commit('setBoard', [2, 1]); // ensure win for AI in one step
       store.dispatch('startGameWithRoleSelection', { isFirst: false });
@@ -46,7 +46,7 @@ describe('store', () => {
 
   describe('endTurn', () => {
     it('should set the board', () => {
-      const store = initializeStoreWithGame('HeapSplitter');
+      const store = initializeStoreWithGame('PileSplitter');
       store.commit('setBoard', [5, 3]);
       store.dispatch('startGameWithRoleSelection', { isFirst: true });
 
@@ -56,7 +56,7 @@ describe('store', () => {
     });
 
     it('should mark the other player as next', () => {
-      const store = initializeStoreWithGame('HeapSplitter');
+      const store = initializeStoreWithGame('PileSplitter');
       store.dispatch('startGameWithRoleSelection', { isFirst: true });
 
       store.dispatch('endTurn', { board: [2, 3], isGameEnd: false });
@@ -66,7 +66,7 @@ describe('store', () => {
     });
 
     it('should mark as nobody should move next if game ended', () => {
-      const store = initializeStoreWithGame('HeapSplitter');
+      const store = initializeStoreWithGame('PileSplitter');
       store.dispatch('startGameWithRoleSelection', { isFirst: true });
 
       store.dispatch('endTurn', { board: [1, 1], isGameEnd: true });
@@ -74,7 +74,7 @@ describe('store', () => {
     });
 
     it('should mark the player winner in a game where the last to move is always the winner', () => {
-      const store = initializeStoreWithGame('HeapSplitter');
+      const store = initializeStoreWithGame('PileSplitter');
       store.commit('setBoard', [2, 9]);
       store.dispatch('startGameWithRoleSelection', { isFirst: true });
 
@@ -84,7 +84,7 @@ describe('store', () => {
     });
 
     it('should mark the player loser in a game where the last to move is always the winner', () => {
-      const store = initializeStoreWithGame('HeapSplitter');
+      const store = initializeStoreWithGame('PileSplitter');
       store.commit('setBoard', [2, 1]); // ensure win for AI in one step
       store.dispatch('startGameWithRoleSelection', { isFirst: false });
 
@@ -141,7 +141,7 @@ describe('store', () => {
   describe('makeAiMove', () => {
     it('should apply move according to the AI strategy of the game', () => {
       jest.useFakeTimers();
-      const store = initializeStoreWithGame('HeapSplitter');
+      const store = initializeStoreWithGame('PileSplitter');
       store.dispatch('startGameWithRoleSelection', { isFirst: true });
       store.dispatch('endTurn', { board: [2, 1], isGameEnd: false });
 
@@ -155,7 +155,7 @@ describe('store', () => {
 
     it('should simulate slow thinking', () => {
       jest.useFakeTimers();
-      const store = initializeStoreWithGame('HeapSplitter');
+      const store = initializeStoreWithGame('PileSplitter');
       store.dispatch('startGameWithRoleSelection', { isFirst: true });
       store.dispatch('endTurn', { board: [3, 5], isGameEnd: false });
 
@@ -168,7 +168,7 @@ describe('store', () => {
 
   describe('endPlayerTurn', () => {
     it('should apply the move', () => {
-      const store = initializeStoreWithGame('HeapSplitter');
+      const store = initializeStoreWithGame('PileSplitter');
       store.dispatch('startGameWithRoleSelection', { isFirst: true });
 
       store.dispatch('endPlayerTurn', { board: [1, 1], isGameEnd: true });
@@ -180,7 +180,7 @@ describe('store', () => {
     });
 
     it('should initiate AI move if game did not end', () => {
-      const store = initializeStoreWithGame('HeapSplitter');
+      const store = initializeStoreWithGame('PileSplitter');
       store.dispatch('startGameWithRoleSelection', { isFirst: true });
 
       store.dispatch('endPlayerTurn', { board: [2, 1], isGameEnd: false });

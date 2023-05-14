@@ -23,11 +23,11 @@
           <tr>
             <td
               v-for="coinValue in [0, 1, 2]" :key="coinValue"
-              @click="clickHeap(coinValue)"
+              @click="clickPile(coinValue)"
               class="text-center border-4"
               :class="{ 'bg-gray-300': isCoinActionInvalid(coinValue), 'cursor-not-allowed': isCoinActionInvalid(coinValue) }"
-              @mouseover="hoveredHeap=coinValue"
-              @mouseout="hoveredHeap=null"
+              @mouseover="hoveredPile=coinValue"
+              @mouseout="hoveredPile=null"
             >
               <div class="min-h-[25vh] p-[5%]">
                 <span

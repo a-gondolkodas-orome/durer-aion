@@ -11,25 +11,25 @@
         Sok sikert! :)
       </p>
     </div>
-    <div class="flex flex-wrap js-heap-splitter">
+    <div class="flex flex-wrap js-pile-splitter">
       <div class="p-2 shrink-0 grow basis-2/3">
         <div
-          v-for="heapId in [0, 1]"
-          :key="heapId"
+          v-for="pileId in [0, 1]"
+          :key="pileId"
           class="js-pile w-[50%] pl-1 inline-block text-center"
           style="transform: scaleY(-1)"
         >
           <div class="text-xl" :class="{ 'text-red-600': isBannedHover() }" style="transform: scaleY(-1)">
-            {{ currentChoiceDescription(heapId) }}
+            {{ currentChoiceDescription(pileId) }}
           </div>
           <span
-            v-for="(_, pieceId) in board[heapId]"
+            v-for="(_, pieceId) in board[pileId]"
             :key="pieceId"
             class="js-pebble inline-block bg-blue-600 w-[20%] aspect-square rounded-full mx-0.5"
-            :class="{ 'outline-dashed': toBeLeft({ heapId, pieceId }), 'opacity-50': toBeRemoved({ heapId }) }"
-            :style="{ 'pointer-events': shouldPlayerMoveNext ? 'auto' : 'none', 'cursor': pieceId === board[heapId] - 1 ? 'not-allowed' : 'pointer' }"
-            @click="clickPiece({ heapId, pieceId })"
-            @mouseover="hoveredPiece = { heapId, pieceId }"
+            :class="{ 'outline-dashed': toBeLeft({ pileId, pieceId }), 'opacity-50': toBeRemoved({ pileId }) }"
+            :style="{ 'pointer-events': shouldPlayerMoveNext ? 'auto' : 'none', 'cursor': pieceId === board[pileId] - 1 ? 'not-allowed' : 'pointer' }"
+            @click="clickPiece({ pileId, pieceId })"
+            @mouseover="hoveredPiece = { pileId, pieceId }"
             @mouseout="hoveredPiece = null"
           >
           </span>

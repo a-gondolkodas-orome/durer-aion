@@ -9,9 +9,9 @@ export const generateNewBoard = () => {
   return [x, y, 37 - x - y];
 };
 
-export const getGameStateAfterMove = (board, { removedHeapId, splitHeapId, pieceId }) => {
-  const keptHeapId = difference([0, 1, 2], [removedHeapId, splitHeapId]);
-  const newBoard = [board[keptHeapId[0]], pieceId + 1, board[splitHeapId] - pieceId - 1];
+export const getGameStateAfterMove = (board, { removedPileId, splitPileId, pieceId }) => {
+  const keptPileId = difference([0, 1, 2], [removedPileId, splitPileId]);
+  const newBoard = [board[keptPileId[0]], pieceId + 1, board[splitPileId] - pieceId - 1];
   return { board: newBoard, isGameEnd: isGameEnd(newBoard) };
 };
 

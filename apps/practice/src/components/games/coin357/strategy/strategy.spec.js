@@ -8,12 +8,12 @@ describe('coin357 strategy', () => {
   });
 
   describe('getGameStateAfterAiMove', () => {
-    it('should apply winning move if two heaps are odd and one is even', () => {
+    it('should apply winning move if two piles are odd and one is even', () => {
       expect(getGameStateAfterAiMove([3, 2, 5]).board).toEqual([4, 2, 4]);
       expect(getGameStateAfterAiMove([5, 1, 0]).board).toEqual([6, 0, 0]);
     });
 
-    it('should apply winning move if two heaps are even and one is odd', () => {
+    it('should apply winning move if two piles are even and one is odd', () => {
       expect(getGameStateAfterAiMove([0, 1, 0])).toEqual({ board: [0, 0, 0], isGameEnd: true });
       expect(getGameStateAfterAiMove([4, 1, 2]).board).toEqual([4, 0, 2]);
     });

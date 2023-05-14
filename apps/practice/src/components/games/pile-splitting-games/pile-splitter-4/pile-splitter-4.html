@@ -15,23 +15,23 @@
     <div class="flex flex-wrap">
       <div class="p-2 shrink-0 grow basis-2/3">
         <div
-          v-for="heapId in [0, 1, 2, 3]"
-          :key="heapId"
+          v-for="pileId in [0, 1, 2, 3]"
+          :key="pileId"
           class="js-pile w-[50%] pl-1 inline-block text-center py-2"
-          :class="{ 'border-t-2': heapId < 2 }"
+          :class="{ 'border-t-2': pileId < 2 }"
           style="transform: scaleY(-1)"
         >
           <div class="text-xl" :class="{ 'text-red-600': isBannedHover() }" style="transform: scaleY(-1)">
-            {{ currentChoiceDescription(heapId) }}
+            {{ currentChoiceDescription(pileId) }}
           </div>
           <span
-            v-for="(_, pieceId) in board[heapId]"
+            v-for="(_, pieceId) in board[pileId]"
             :key="pieceId"
-            :class="{ 'bg-red-600': rowColor({ heapId }) === 'red', 'bg-blue-600': rowColor({ heapId }) === 'blue', 'opacity-50': heapId === removedHeapId, 'outline-dashed': toBeLeft({ heapId, pieceId }) }"
+            :class="{ 'bg-red-600': rowColor({ pileId }) === 'red', 'bg-blue-600': rowColor({ pileId }) === 'blue', 'opacity-50': pileId === removedPileId, 'outline-dashed': toBeLeft({ pileId, pieceId }) }"
             class="js-pebble inline-block bg-blue-600 w-[20%] aspect-square rounded-full mx-0.5"
-            :style="{ 'pointer-events': shouldPlayerMoveNext ? 'auto' : 'none', 'cursor': pieceClickNotAllowed({ heapId, pieceId }) ? 'not-allowed' : 'pointer' }"
-            @click="clickPiece({ heapId, pieceId })"
-            @mouseover="hoveredPiece = { heapId, pieceId }"
+            :style="{ 'pointer-events': shouldPlayerMoveNext ? 'auto' : 'none', 'cursor': pieceClickNotAllowed({ pileId, pieceId }) ? 'not-allowed' : 'pointer' }"
+            @click="clickPiece({ pileId, pieceId })"
+            @mouseover="hoveredPiece = { pileId, pieceId }"
             @mouseout="hoveredPiece = null"
           ></span>
         </div>

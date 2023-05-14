@@ -5,12 +5,12 @@ import { mountComponent } from '../../../test-helpers';
 
 describe('StrategyGame', () => {
   it('should set game on store based on gameId when mounted', async () => {
-    const { store } = await mountComponent(StrategyGame,  { propsData: { gameId: 'HeapSplitter' } });
-    expect(store.state.gameDefinition.component).toEqual('HeapSplitter');
+    const { store } = await mountComponent(StrategyGame,  { propsData: { gameId: 'PileSplitter' } });
+    expect(store.state.gameDefinition.component).toEqual('PileSplitter');
   });
 
   it('should load page with new game when url changes', async () => {
-    const { wrapper, store } = await mountComponent(StrategyGame,  { propsData: { gameId: 'HeapSplitter' } });
+    const { wrapper, store } = await mountComponent(StrategyGame,  { propsData: { gameId: 'PileSplitter' } });
     await wrapper.setProps({ gameId: 'HunyadiAndTheJanissaries' });
     expect(store.state.gameDefinition.component).toEqual('HunyadiAndTheJanissaries');
   });

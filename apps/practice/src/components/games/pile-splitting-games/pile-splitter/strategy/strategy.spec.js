@@ -3,7 +3,7 @@
 import * as random from 'lodash-es/random';
 import { generateNewBoard, getGameStateAfterMove, getGameStateAfterAiMove } from './strategy';
 
-describe('HeapSplitter Strategy', () => {
+describe('PileSplitter Strategy', () => {
   describe('generateNewBoard', () => {
     it('should generate a new board with two piles of random size', () => {
       jest.spyOn(random, 'default')
@@ -16,13 +16,13 @@ describe('HeapSplitter Strategy', () => {
   describe('getGameStateAfterMove', () => {
     it('should return board and game end true if player move finished the game', () => {
       expect(
-        getGameStateAfterMove([5, 2], { heapId: 1, pieceId: 0 })
+        getGameStateAfterMove([5, 2], { pileId: 1, pieceId: 0 })
       ).toEqual({ board: [1, 1], isGameEnd: true });
     });
 
     it('should return board and game end false if player move does not finish the game', () => {
       expect(
-        getGameStateAfterMove([5, 2], { heapId: 0, pieceId: 1 })
+        getGameStateAfterMove([5, 2], { pileId: 0, pieceId: 1 })
       ).toEqual({ board: [2, 3], isGameEnd: false });
     });
   });

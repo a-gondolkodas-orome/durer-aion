@@ -8,12 +8,12 @@ import FiveSquares from './five-squares/five-squares';
 import * as fiveSquaresStrategy from './five-squares/strategy/strategy';
 import SuperstitiousCounting from './superstitious-counting/superstitious-counting';
 import * as superstitiousCountingStrategy from './superstitious-counting/strategy/strategy';
-import HeapSplitter from './heap-splitting-games/heap-splitter/heap-splitter';
-import * as heapSplitterStrategy from './heap-splitting-games/heap-splitter/strategy/strategy';
-import HeapSplitter3 from './heap-splitting-games/heap-splitter-3/heap-splitter-3';
-import * as heapSplitter3Strategy from './heap-splitting-games/heap-splitter-3/strategy/strategy';
-import HeapSplitter4 from './heap-splitting-games/heap-splitter-4/heap-splitter-4';
-import * as heapSplitter4Strategy from './heap-splitting-games/heap-splitter-4/strategy/strategy';
+import PileSplitter from './pile-splitting-games/pile-splitter/pile-splitter';
+import * as pileSplitterStrategy from './pile-splitting-games/pile-splitter/strategy/strategy';
+import PileSplitter3 from './pile-splitting-games/pile-splitter-3/pile-splitter-3';
+import * as pileSplitter3Strategy from './pile-splitting-games/pile-splitter-3/strategy/strategy';
+import PileSplitter4 from './pile-splitting-games/pile-splitter-4/pile-splitter-4';
+import * as pileSplitter4Strategy from './pile-splitting-games/pile-splitter-4/strategy/strategy';
 import CubeColoring from './cube-coloring/cube-coloring';
 import * as cubeColoringStrategy from './cube-coloring/strategy/strategy';
 import Coin123 from './coin123/coin123';
@@ -38,9 +38,9 @@ export const gameComponents = {
   TwoTimesTwo,
   FiveSquares,
   SuperstitiousCounting,
-  HeapSplitter,
-  HeapSplitter3,
-  HeapSplitter4,
+  PileSplitter,
+  PileSplitter3,
+  PileSplitter4,
   CubeColoring,
   Coin123,
   Coin357,
@@ -76,21 +76,21 @@ export const gameList = {
     name: 'Hunyadi és a janicsárok',
     strategy: hunyadiAndTheJanissariesStrategy
   },
-  HeapSplitter: {
+  PileSplitter: {
     year: 8,
     round: 'döntő',
     category: 'A',
-    component: 'HeapSplitter',
+    component: 'PileSplitter',
     name: 'Kupac kettéosztó',
-    strategy: heapSplitterStrategy
+    strategy: pileSplitterStrategy
   },
-  HeapSplitter3: {
+  PileSplitter3: {
     year: 8,
     round: 'döntő',
     category: 'B',
     name: 'Kupac kettéosztó 3 kupaccal',
-    component: 'HeapSplitter3',
-    strategy: heapSplitter3Strategy
+    component: 'PileSplitter3',
+    strategy: pileSplitter3Strategy
   },
   Demonstration: {
     name: 'Demonstráló játék',
@@ -146,13 +146,13 @@ export const gameList = {
     component: 'SuperstitiousCounting',
     strategy: superstitiousCountingStrategy
   },
-  HeapSplitter4: {
+  PileSplitter4: {
     year: 13,
     round: 'döntő',
     category: 'E+',
     name: 'Kupac kettéosztó 4 kupaccal',
-    component: 'HeapSplitter4',
-    strategy: heapSplitter4Strategy
+    component: 'PileSplitter4',
+    strategy: pileSplitter4Strategy
   },
   CubeColoring: {
     year: 15,

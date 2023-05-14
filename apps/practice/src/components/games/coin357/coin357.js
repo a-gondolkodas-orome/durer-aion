@@ -7,7 +7,7 @@ export default {
   components: { GameSidebar },
   data: () => ({
     valueOfRemovedCoin: null,
-    hoveredHeap: null
+    hoveredPile: null
   }),
   computed: {
     ...mapState(['board', 'shouldPlayerMoveNext']),
@@ -22,7 +22,7 @@ export default {
   },
   methods: {
     ...mapActions(['endPlayerTurn', 'initializeGame']),
-    clickHeap(coinValue) {
+    clickPile(coinValue) {
       if (!this.shouldPlayerMoveNext) return;
       if (this.isCoinActionInvalid(coinValue)) return;
 
@@ -36,7 +36,7 @@ export default {
       }
     },
     resetTurnState() {
-      this.hoveredHeap = null;
+      this.hoveredPile = null;
       this.valueOfRemovedCoin = null;
     },
     endTurn() {
@@ -51,11 +51,11 @@ export default {
     shouldShowCoinToBeRemoved(coinValue) {
       if (!this.shouldPlayerMoveNext) return false;
       if (this.wasCoinAlreadyRemovedInTurn) return false;
-      return coinValue === this.hoveredHeap && this.board[coinValue] !== 0;
+      return coinValue === this.hoveredPile && this.board[coinValue] !== 0;
     },
     shouldShowCoinToBeAdded(coinValue) {
       if (!this.wasCoinAlreadyRemovedInTurn) return false;
-      return this.valueOfRemovedCoin > coinValue && coinValue === this.hoveredHeap;
+      return this.valueOfRemovedCoin > coinValue && coinValue === this.hoveredPile;
     },
     isCoinActionInvalid(coinValue) {
       if (this.wasCoinAlreadyRemovedInTurn) {

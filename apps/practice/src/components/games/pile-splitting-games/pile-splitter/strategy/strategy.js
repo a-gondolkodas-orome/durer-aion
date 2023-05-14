@@ -11,8 +11,8 @@ export const getGameStateAfterAiMove = (board) => {
   return getGameStateAfterMove(board, getAiStep(board));
 };
 
-export const getGameStateAfterMove = (board, { heapId, pieceId }) => {
-  const newBoard = [pieceId + 1, board[heapId] - pieceId - 1];
+export const getGameStateAfterMove = (board, { pileId, pieceId }) => {
+  const newBoard = [pieceId + 1, board[pileId] - pieceId - 1];
   return { board: newBoard, isGameEnd: isGameEnd(newBoard) };
 };
 
