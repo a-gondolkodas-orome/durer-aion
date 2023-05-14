@@ -25,7 +25,7 @@
             <td class="text-center border-4 align-middle text-6xl py-4">{{ board.restricted || '-' }}</td>
           </tr>
         </table>
-        <div v-if="!shouldPlayerMoveNext" class="mt-4">
+        <div v-if="shouldPlayerMoveNext" class="mt-4">
           <label for="step" class="mr-2 text-lg"> Következő lépés: </label>
           <input
             id="step" type="number" min="1" max="12" v-model="step"
