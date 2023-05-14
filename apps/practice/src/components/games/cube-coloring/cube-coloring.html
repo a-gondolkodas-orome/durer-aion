@@ -12,9 +12,9 @@
     </game-rule>
     <div class="flex flex-wrap" id="cube-coloring">
       <div class="p-2 shrink-0 grow basis-2/3">
-        <button class="w-[30%] mx-[1%] rounded h-8 mb-1 bg-red-600" @click="pick('red')">Piros</button>
-        <button class="w-[30%] mx-[1%] rounded h-8 mb-1 bg-green-600" @click="pick('green')">Zöld</button>
-        <button class="w-[30%] mx-[1%] rounded h-8 mb-1 bg-blue-600" @click="pick('blue')">Kék</button>
+        <button :disabled="!shouldPlayerMoveNext" class="w-[30%] mx-[1%] rounded h-8 mb-1 bg-red-600" @click="pick('red')">Piros</button>
+        <button :disabled="!shouldPlayerMoveNext" class="w-[30%] mx-[1%] rounded h-8 mb-1 bg-green-600" @click="pick('green')">Zöld</button>
+        <button :disabled="!shouldPlayerMoveNext" class="w-[30%] mx-[1%] rounded h-8 mb-1 bg-blue-600" @click="pick('blue')">Kék</button>
         <svg @mousemove="drawPickedColor" class="aspect-square stroke-black stroke-[3]">
           <!-- front and back face -->
           <rect x="8%" y="25%" width="66%" height="66%" class="fill-transparent" />
