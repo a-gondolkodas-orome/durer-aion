@@ -41,6 +41,7 @@ describe('PileSplitter', () => {
     const initialBoard = cloneDeep(store.state.board);
     wrapper.find('.js-first-player').trigger('click');
 
+    await flushPromises();
     wrapper.findAll('.js-pile')[1].findAll('.js-pebble')[1].trigger('click');
 
     expect(store.state.board).toEqual([2, initialBoard[1] - 2]);
@@ -51,6 +52,7 @@ describe('PileSplitter', () => {
     const initialBoard = cloneDeep(store.state.board);
     wrapper.find('.js-second-player').trigger('click');
 
+    await flushPromises();
     wrapper.findAll('.js-pile')[1].findAll('.js-pebble')[1].trigger('click');
 
     expect(store.state.board).toEqual(initialBoard);
