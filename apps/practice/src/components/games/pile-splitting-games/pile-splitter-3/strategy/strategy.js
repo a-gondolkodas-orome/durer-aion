@@ -1,6 +1,6 @@
 'use strict';
 
-import { random, difference } from 'lodash-es';
+import { random, isEqual } from 'lodash-es';
 import { getBoardAfterAiStep } from './ai-step';
 
 export const generateNewBoard = () => {
@@ -10,9 +10,14 @@ export const generateNewBoard = () => {
 };
 
 export const getGameStateAfterMove = (board, { removedPileId, splitPileId, pieceId }) => {
-  const keptPileId = difference([0, 1, 2], [removedPileId, splitPileId]);
-  const newBoard = [board[keptPileId[0]], pieceId + 1, board[splitPileId] - pieceId - 1];
-  return { board: newBoard, isGameEnd: isGameEnd(newBoard) };
+  if (removedPileId < splitPileId) {
+    board[removedPileId] = pieceId + 1;
+    board[splitPileId] = board[splitPileId] - pieceId - 1;
+  } else {
+    board[removedPileId] = board[splitPileId] - pieceId - 1;
+    board[splitPileId] = pieceId + 1;
+  }
+  return { board, isGameEnd: isGameEnd(board) };
 };
 
 export const isTheLastMoverTheWinner = true;
@@ -22,4 +27,4 @@ export const getGameStateAfterAiMove = (board) => {
   return { board: newBoard, isGameEnd: isGameEnd(newBoard) };
 };
 
-const isGameEnd = (board) => board[0] === 1 && board[1] === 1 && board[2] === 1;
+const isGameEnd = (board) => isEqual(board, [1, 1, 1]);

@@ -39,9 +39,9 @@ describe('PileSplitter3', () => {
     wrapper.findAll('.js-pile')[0].findAll('.js-pebble')[1].trigger('click');
 
     expect(store.state.board).toEqual([
-      initialBoard[2],
       2,
-      initialBoard[0] - 2
+      initialBoard[0] - 2,
+      initialBoard[2]
     ]);
   });
 

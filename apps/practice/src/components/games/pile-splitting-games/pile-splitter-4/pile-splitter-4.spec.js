@@ -17,12 +17,12 @@ describe('PileSplitter4', () => {
     const initialBoard = cloneDeep(store.state.board);
     wrapper.find('.js-first-player').trigger('click');
 
-    wrapper.findAll('.js-pile')[1].findAll('.js-pebble')[1].trigger('click');
+    wrapper.findAll('.js-pile')[2].findAll('.js-pebble')[1].trigger('click');
     wrapper.findAll('.js-pile')[3].findAll('.js-pebble')[1].trigger('click');
 
     expect(store.state.board).toEqual([
       initialBoard[0],
-      initialBoard[2],
+      initialBoard[1],
       2,
       initialBoard[3] - 2
     ]);
