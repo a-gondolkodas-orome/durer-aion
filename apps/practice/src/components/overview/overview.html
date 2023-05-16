@@ -64,18 +64,18 @@
   <div class="flex flex-wrap">
     <span
       v-for="game in gamesToShow" :key="game.name"
-      class="rounded-lg shadow-lg border p-2 m-2 max-w-[32ch] w-full flex flex-col js-game-card"
+      class="rounded-lg shadow-lg border p-2 m-1 max-w-[32ch] w-full flex flex-col js-game-card"
     >
-      <h2 class="text-xl font-bold mb-2 text-center">{{ game.name }}</h2>
+      <h2 class="text-xl font-bold mb-4 text-center">{{ game.name }}</h2>
       <div class="grow"></div>
       <div class="flex items-baseline">
-        <span class="rounded-lg bg-orange-200 p-1 m-1">{{ game.year }}.</span>
-        <span class="rounded-lg bg-blue-200 p-1 m-1">{{ game.category }}</span>
-        <span class="rounded-lg bg-amber-200 p-1 m-1">{{ game.round }}</span>
+        <span class="rounded-lg bg-orange-200 px-1 m-0.5">{{ game.year }}.</span>
+        <span class="rounded-lg bg-blue-200 px-1 m-0.5">{{ game.category }}</span>
+        <span class="rounded-lg bg-amber-200 px-1 m-0.5">{{ game.round }}</span>
         <span class="grow"></span>
         <button
           @click="goToGamePage(game.component)"
-          class="cta-button rounded-lg py-1 px-1 underline m-1 text-base w-auto"
+          class="cta-button rounded-lg py-0 px-1 underline m-0.5 text-base w-auto"
           :class="`js-select-${game.component}`"
         >Kipróbálom!</button>
       </div>
