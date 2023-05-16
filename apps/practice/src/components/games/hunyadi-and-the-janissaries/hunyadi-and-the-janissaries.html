@@ -1,7 +1,7 @@
 <div class="flex justify-center">
   <soldier-svg />
   <castle-svg />
-  <div class="max-w-[100ch]">
+  <div class="max-w-[100ch] w-full">
     <game-rule>
       A török szultán serege megtámadta Hunyadi várát. A várlépcső egyes fokain néhány janicsár áll.
       Minden reggel a szultán kettéosztja a hadseregét egy piros és egy kék hadtestre.
@@ -21,7 +21,7 @@
         <div
           v-for="rowIndex in [0, 1, 2, 3, 4, 5]"
           :key="rowIndex"
-          :style="{ 'aspect-ratio': 8, 'margin-left': (5-rowIndex) + 'rem', 'margin-right': (5-rowIndex) + 'rem' }"
+          :style="{ 'aspect-ratio': rowIndex === 5 ? 24 : 8, 'margin-left': (5-rowIndex) + 'rem', 'margin-right': (5-rowIndex) + 'rem' }"
           class="border-t-black border-t-2 p-0.5 text-center whitespace-nowrap"
         >
           <button
