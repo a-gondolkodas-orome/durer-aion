@@ -18,7 +18,13 @@ export default {
       return Object.values(gameList).filter((game) => !game.isHiddenFromOverview);
     },
     allYears() {
-      return uniq(this.allGames.map(game => game.year));
+      return uniq(this.allGames.map(game => game.year)).sort((a, b) => Number(a) - Number(b));
+    },
+    selectedCategoriesLabel() {
+      return this.selectedCategories.sort().join(', ');
+    },
+    selectedYearsLabel() {
+      return this.selectedYears.sort((a, b) => Number(a) - Number(b)).join(', ');
     },
     gamesToShow() {
       return this.allGames.filter((game) =>

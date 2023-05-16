@@ -20,7 +20,7 @@
     >
       <label for="category-selector" class="block">Kategória szűrő:</label>
       <ListboxButton id="category-selector" class="border-2 border-slate-600 rounded w-full">
-        {{ selectedCategories.join(', ') || 'Válassz kategóriákat' }}
+        {{ selectedCategoriesLabel || 'Válassz kategóriákat' }}
       </ListboxButton>
       <ListboxOptions class="text-center mt-1">
         <ListboxOption
@@ -43,7 +43,7 @@
     >
       <label for="year-selector" class="block">Év szűrő:</label>
       <ListboxButton id="year-selector" class="border-2 border-slate-600 rounded w-full">
-        {{ selectedYears.join(', ') || 'Válassz éveket' }}
+        {{ selectedYearsLabel || 'Válassz éveket' }}
       </ListboxButton>
       <ListboxOptions class="text-center mt-1">
         <ListboxOption
