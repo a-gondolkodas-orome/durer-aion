@@ -44,21 +44,13 @@ const getOptimalAiMove = (board) => {
   if (bishopCount === 1) {
     axis = random(0, 1) ? HORIZONTAL : VERTICAL;
   }
-  // identify player's axis if they are playing optimally in their first step
-  if (bishopCount === 2) {
-    if (allowedHMirrorMoves.length === 0) {
-      axis = HORIZONTAL;
+  if (bishopCount < 4) {
+    if (axis === HORIZONTAL && allowedHMirrorMoves.length === 1) {
+      return allowedHMirrorMoves[0];
     }
-    if (allowedVMirrorMoves.length === 0) {
-      axis = VERTICAL;
+    if (axis === VERTICAL && allowedVMirrorMoves.length === 1) {
+      return allowedVMirrorMoves[0];
     }
-  }
-
-  if (axis === HORIZONTAL && allowedHMirrorMoves.length === 1) {
-    return allowedHMirrorMoves[0];
-  }
-  if (axis === VERTICAL && allowedVMirrorMoves.length === 1) {
-    return allowedVMirrorMoves[0];
   }
 
   const allowedMoves = getAllowedMoves(board);
