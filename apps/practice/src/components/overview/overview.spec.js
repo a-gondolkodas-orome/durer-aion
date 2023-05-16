@@ -11,10 +11,7 @@ describe('Overview', () => {
 
     const gamesToShow = Object.values(gameList).filter((game) => !game.isHiddenFromOverview);
 
-    expect(wrapper.findAll('tr')).toHaveLength(gamesToShow.length + 1);
-    expect(wrapper.find('table').text()).toMatch(
-      new RegExp(gamesToShow.map((game) => game.name).join('.*'))
-    );
+    expect(wrapper.findAll('.js-game-card')).toHaveLength(gamesToShow.length);
   });
 
   it('should clear previously selected game when mounted', async () => {
