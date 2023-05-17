@@ -11,30 +11,22 @@
     </game-rule>
     <div class="flex flex-wrap">
       <div class="p-2 shrink-0 grow basis-2/3">
-        <table class="border-collapse table-fixed w-full">
-          <tr>
-            <th>Szám</th>
-            <th>Cél</th>
-            <th>Tiltott lépés</th>
-          </tr>
-          <tr>
-            <td class="text-center border-4 align-middle text-6xl py-4">{{ board.current }}</td>
-            <td class="text-center border-4 align-middle text-6xl py-4">{{ board.target }}</td>
-            <td class="text-center border-4 align-middle text-6xl py-4">{{ board.restricted || '-' }}</td>
-          </tr>
-        </table>
-        <div v-if="shouldPlayerMoveNext" class="mt-4">
-          <label for="step" class="mr-2 text-lg"> Következő lépés: </label>
-          <input
-            id="step" type="number" min="1" max="12" v-model="step"
-            class="border-2 rounded pl-1 text-lg"
-            v-on:keyup.enter="attemptStep()"
-          >
+        <div class="flex flex-wrap mb-1">
+          <button
+            v-for="i in fields" :key="i"
+            :disabled="!isMoveAllowed(i - board.current)"
+            class="border-2 text-2xl min-w-[4ch] text-center p-1 my-1 font-bold"
+            :class="{ 'bg-emerald-200': isMoveAllowed(i - board.current), 'bg-red-200': board.restricted && i === board.current + board.restricted, 'bg-slate-400': i < board.current, 'bg-slate-200': i === board.current, 'hover:bg-emerald-400': isMoveAllowed(i - board.current) }"
+            @click="makeStep(i - board.current)"
+          >{{ i == board.current ? 'X' : i }}</button>
         </div>
+        <p v-if="shouldPlayerMoveNext" class="text-xl">
+          Előző lépés: {{ 13 - board.restricted }}. Tiltott: {{ board.restricted || '-' }}.
+        </p>
       </div>
-      <game-sidebar @restart="resetTurnState()">
+      <game-sidebar>
         <template #step-description>
-          Írj be egy számot, majd nyomj Enter-t.
+          Kattints a mezőre ahova lépni szeretnél.
         </template>
       </game-sidebar>
     </div>
