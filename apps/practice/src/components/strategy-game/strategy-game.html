@@ -29,6 +29,35 @@
         Hibabejelentő    
       </a>
     </div>
+
+    <Dialog
+      :open="isGameEndDialogOpen" @close="isGameEndDialogOpen = false"
+      class="relative z-50"
+    >
+      <!-- backdrop -->
+      <div class="fixed inset-0 bg-black/50" aria-hidden="true"></div>
+      <!-- modal -->
+      <div class="fixed inset-0 flex items-center justify-center p-4">
+        <DialogPanel class="rounded bg-white max-w-sm w-full p-2">
+          <div class="flex items-baseline mb-2">
+            <DialogTitle class="grow block text-2xl text-center">
+              A játék véget ért
+            </DialogTitle>
+            <button
+              @click="isGameEndDialogOpen = false"
+              class="bg-slate-200 rounded text-2xl px-1"
+            >×</button>
+          </div>
+          <DialogDescription class="text-lg block text-justify">
+            {{ gameEndText }}
+          </DialogDescription>
+    
+          <button @click="startNewGame()" class="cta-button mt-2">
+            Új játék
+          </button>
+        </DialogPanel>
+      </div>
+    </Dialog>
   </template>
   <page-not-found v-if="!gameDefinition"></page-not-found>
 </div>
