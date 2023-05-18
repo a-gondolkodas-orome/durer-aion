@@ -1,11 +1,16 @@
 import { defineStore } from 'pinia';
+import { gameList } from '../components/games/games';
 
 export const useGameStore = defineStore('game', {
   state: () => ({
+    // game-agnostic
     gameStatus: null,
     shouldPlayerMoveNext: false,
     isPlayerWinner: false,
-    isEnemyMoveInProgress: false
+    isEnemyMoveInProgress: false,
+    // game-specific
+    gameDefinition: null,
+    board: null
   }),
   getters: {
     isGameInProgress: state => state.gameStatus === 'inProgress',
@@ -22,11 +27,45 @@ export const useGameStore = defineStore('game', {
     }
   },
   actions: {
+    initializeGame(gameId) {
+      this.$reset();
+
+      this.gameDefinition = gameList[gameId] || null;
+      this.board = this.gameDefinition.strategy.generateNewBoard();
+      this.gameStatus = 'readyToStart';
+    },
+    startGameWithRoleSelection({ isFirst = true }) {
+      this.isPlayerTheFirstToMove = isFirst;
+      this.shouldPlayerMoveNext = isFirst;
+      this.gameStatus = 'inProgress';
+      if (!isFirst) this.makeAiMove();
+    },
+    endTurn({ board, isGameEnd, hasFirstPlayerWon }) {
+      this.board = board;
+      this.shouldPlayerMoveNext = !this.shouldPlayerMoveNext;
+      if (isGameEnd) {
+        const isPlayerWinner = this.gameDefinition.strategy.isTheLastMoverTheWinner === null
+          ? this.isPlayerTheFirstToMove === hasFirstPlayerWon
+          : this.gameDefinition.strategy.isTheLastMoverTheWinner === !this.shouldPlayerMoveNext;
+        this.endGame({ isPlayerWinner });
+      }
+    },
+    endPlayerTurn({ board, isGameEnd, hasFirstPlayerWon }) {
+      this.endTurn({ board, isGameEnd, hasFirstPlayerWon });
+      if (!isGameEnd) {
+        this.makeAiMove();
+      }
+    },
+    endGame({ isPlayerWinner }) {
+      this.isPlayerWinner = isPlayerWinner;
+      this.gameStatus = 'finished';
+      this.shouldPlayerMoveNext = null;
+    },
     makeAiMove() {
       this.isEnemyMoveInProgress = true;
       const time = Math.floor(Math.random() * 750 + 750);
-      this.enemyMoveTimeoutHandle = setTimeout(() => {
-        // this.endTurn(this.gameDefinition.strategy.getGameStateAfterAiMove(this.board, this.isPlayerTheFirstToMove));
+      setTimeout(() => {
+        this.endTurn(this.gameDefinition.strategy.getGameStateAfterAiMove(this.board, this.isPlayerTheFirstToMove));
         this.isEnemyMoveInProgress = false;
       }, time);
     }
