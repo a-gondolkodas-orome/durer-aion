@@ -2,12 +2,12 @@
 
 import Overview from './overview';
 import { gameList } from '../games/games';
-import { mountComponent } from '../../../test-helpers';
+import { mountComponentVuex } from '../../../test-helpers';
 import createStore from '../../store/store';
 
 describe('Overview', () => {
   it('should show a list of available games', async () => {
-    const { wrapper } = await mountComponent(Overview);
+    const { wrapper } = await mountComponentVuex(Overview);
 
     const gamesToShow = Object.values(gameList).filter((game) => !game.isHiddenFromOverview);
 
@@ -18,7 +18,7 @@ describe('Overview', () => {
     const store = createStore();
     store.commit('setGameDefinition', { gameId: 'HunyadiAndTheJanissaries' });
     store.commit('setGameStatus', 'readyToStart');
-    await mountComponent(Overview, { store });
+    await mountComponentVuex(Overview, { store });
 
     expect(store.state.gameDefinition).toBe(null);
     expect(store.state.gameStatus).toBe(null);

@@ -3,13 +3,13 @@
 import PileSplitter4 from './pile-splitter-4';
 import createStore from '../../../../store/store';
 import { cloneDeep } from 'lodash-es';
-import { mountComponent } from '../../../../../test-helpers';
+import { mountComponentVuex } from '../../../../../test-helpers';
 import { flushPromises } from '@vue/test-utils';
 
 const mountPileSplitter4 = async () => {
   const store = createStore();
   store.commit('setGameDefinition', { gameId: 'PileSplitter4' });
-  return await mountComponent(PileSplitter4, { store });
+  return await mountComponentVuex(PileSplitter4, { store });
 };
 
 describe('PileSplitter4', () => {

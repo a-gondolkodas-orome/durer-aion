@@ -2,12 +2,12 @@
 
 import App from './app';
 import { gameList } from '../games/games';
-import { mountComponent } from '../../../test-helpers';
+import { mountComponentVuex } from '../../../test-helpers';
 import { flushPromises } from '@vue/test-utils';
 
 describe('App', () => {
   it('should show a list of available games', async () => {
-    const { wrapper } = await mountComponent(App);
+    const { wrapper } = await mountComponentVuex(App);
 
     const gamesToShow = Object.values(gameList).filter((game) => !game.isHiddenFromOverview);
 
@@ -15,7 +15,7 @@ describe('App', () => {
   });
 
   it('should open selected game when clicking its start button', async () => {
-    const { store, wrapper } = await mountComponent(App);
+    const { store, wrapper } = await mountComponentVuex(App);
 
     wrapper.find('.js-select-PileSplitter').trigger('click');
     await flushPromises();
@@ -25,7 +25,7 @@ describe('App', () => {
   });
 
   it('should navigate back to game list when clicking back button in game view', async () => {
-    const { store, wrapper } = await mountComponent(App);
+    const { store, wrapper } = await mountComponentVuex(App);
 
     wrapper.find('.js-select-PileSplitter').trigger('click');
     await flushPromises();
@@ -37,7 +37,7 @@ describe('App', () => {
   });
 
   it('should show page not found url does not match known patterns', async () => {
-    const { wrapper } = await mountComponent(App, { path: '/unknown' });
+    const { wrapper } = await mountComponentVuex(App, { path: '/unknown' });
     expect(wrapper.find('div').text()).toMatch(/a keresett oldal nem található/);
   });
 });
