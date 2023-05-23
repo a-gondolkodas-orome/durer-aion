@@ -1,9 +1,10 @@
 import { isEqual, some } from 'lodash-es';
-import { mapActions, mapState } from 'vuex';
+import { mapActions, mapState } from 'pinia';
 import GameSidebar from '../../common/game-sidebar/game-sidebar';
 import GameRule from '../../common/game-rule/game-rule';
 import ChessBishopSvg from './chess-bishop-svg/chess-bishop-svg';
 import { getGameStateAfterMove, getAllowedMoves, BISHOP, FORBIDDEN } from './strategy/strategy';
+import { useGameStore } from '../../../stores/game';
 
 export default {
   template: require('./chess-bishops.html'),
@@ -12,10 +13,10 @@ export default {
     hoveredField: null
   }),
   computed: {
-    ...mapState(['board', 'shouldPlayerMoveNext'])
+    ...mapState(useGameStore, ['board', 'shouldPlayerMoveNext'])
   },
   methods: {
-    ...mapActions(['endPlayerTurn', 'initializeGame']),
+    ...mapActions(useGameStore, ['endPlayerTurn', 'initializeGame']),
     clickField(field) {
       if (!this.isMoveAllowed(field)) return;
 
@@ -46,6 +47,6 @@ export default {
     }
   },
   created() {
-    this.initializeGame();
+    this.initializeGame('ChessBishops');
   }
 };

@@ -83,14 +83,14 @@ The game logic must have the following 3 exported values
 - `getGameStateAfterAiMove` a function which has `board` as its first argument and `isPlayerTheFirstToMove` as its second argument and returns an object with properties `board`, `isGameEnd` and optionally `hasFirstPlayerWon`.
 
 Store actions to call from your component code the manage the game progress:
-- `initializeGame()`
+- `initializeGame('GameComponent')`
 - `endPlayerTurn()`: At the end of each move by the player, your component code must call `endPlayerTurn({ board, isGameEnd })` and optionally `hasFirstPlayerWon`.
 
 Each game must have a folder under `src/components/games` and its metadata listed in `src/components/games/games.js`.
 - Include a new game in `gameList` and `gameComponents` exported values as well.
 
 Good to know
-- Role selection and game restart is managed by `<game-siderbar>` component in the most common cases.
+- Role selection and game restart is managed by `<game-sidebar>` component in the most common cases.
 - The state of the board is stored in the `board` field of the store, so that the AI step has easy access to it.
 
 ### Game end, determining winner
@@ -105,7 +105,7 @@ Otherwise, if the game ended, also calculate and return whether the first or the
 
 - Node.js for the development server and building the application
 - Vue.js frontend framework ([official tutorial](https://vuejs.org/tutorial/#step-1) is a good starting point)
-- [vuex](https://vuex.vuejs.org/guide/state.html) for state management with Vue.js
+- [pinia](https://pinia.vuejs.org/cookbook/options-api.html) for state management with Vue.js
 - [optional] Tailwindcss for styling with utility classes
 - [optional] jest for unit testing
 - github actions for CI/CD.
@@ -116,7 +116,7 @@ Otherwise, if the game ended, also calculate and return whether the first or the
 
 - `src/components` vue components
 - `src/components/games/games.js` as a reference to implemented games
-- `src/store` for game-agnostic logic with vuex: managing role selection, game end, game restart, AI moves
+- `src/stores/game` for game-agnostic logic with pinia: managing role selection, game end, game restart, AI moves
 - `src/lib` game-agnostic utility functions, such as random numbers
 
 ## Things to look out for

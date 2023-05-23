@@ -1,20 +1,21 @@
-import { mapActions, mapState } from 'vuex';
+import { mapActions, mapState } from 'pinia';
 import GameSidebar from '../../common/game-sidebar/game-sidebar';
 import GameRule from '../../common/game-rule/game-rule';
 import { getGameStateAfterMove } from './strategy/strategy';
 import { range } from 'lodash-es';
+import { useGameStore } from '../../../stores/game';
 
 export default {
   template: require('./superstitious-counting.html'),
   components: { GameSidebar, GameRule },
   computed: {
-    ...mapState(['board', 'shouldPlayerMoveNext']),
+    ...mapState(useGameStore, ['board', 'shouldPlayerMoveNext']),
     fields() {
       return range(this.board.target + 1);
     }
   },
   methods: {
-    ...mapActions(['endPlayerTurn', 'initializeGame']),
+    ...mapActions(useGameStore, ['endPlayerTurn', 'initializeGame']),
     isMoveAllowed(step) {
       if (!this.shouldPlayerMoveNext) return false;
       if(step === this.board.restricted || step <= 0 || step >= 13) {
@@ -28,6 +29,6 @@ export default {
     }
   },
   created() {
-    this.initializeGame();
+    this.initializeGame('SuperstitiousCounting');
   }
 };

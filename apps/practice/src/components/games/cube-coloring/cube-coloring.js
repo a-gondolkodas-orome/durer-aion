@@ -1,26 +1,27 @@
-import { mapActions, mapState } from 'vuex';
+import { mapActions, mapState } from 'pinia';
 import GameSidebar from '../../common/game-sidebar/game-sidebar';
 import GameRule from '../../common/game-rule/game-rule';
 import { getGameStateAfterMove, isAllowedStep, allColors } from './strategy/strategy';
+import { useGameStore } from '../../../stores/game';
 
 export default {
   name: 'cube-coloring',
   template: require('./cube-coloring.html'),
   components: { GameSidebar, GameRule },
   computed: {
-    ...mapState(['board', 'shouldPlayerMoveNext']),
+    ...mapState(useGameStore, ['board', 'shouldPlayerMoveNext']),
     allColors: () => allColors
   },
   data() {
     return {
-      color: "",
+      color: '',
       show: false,
       x: 0,
       y: 0
     };
   },
   methods: {
-    ...mapActions(['endPlayerTurn', 'initializeGame']),
+    ...mapActions(useGameStore, ['endPlayerTurn', 'initializeGame']),
     isMoveAllowed(vertex) {
       if (!this.shouldPlayerMoveNext) return false;
       if (!this.show) return false;
@@ -46,11 +47,11 @@ export default {
       this.endPlayerTurn(getGameStateAfterMove(this.board));
     },
     resetTurnState() {
-      this.color = "";
+      this.color = '';
       this.show = false;
     }
   },
   created() {
-    this.initializeGame();
+    this.initializeGame('CubeColoring');
   }
 };

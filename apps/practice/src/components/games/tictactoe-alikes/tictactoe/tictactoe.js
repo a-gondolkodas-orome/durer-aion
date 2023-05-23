@@ -1,19 +1,20 @@
-import { mapActions, mapState } from 'vuex';
+import { mapActions, mapState } from 'pinia';
 import GameSidebar from '../../../common/game-sidebar/game-sidebar';
 import GameRule from '../../../common/game-rule/game-rule';
 import { getGameStateAfterMove, inPlacingPhase, pColor, aiColor } from './strategy/strategy';
+import { useGameStore } from '../../../../stores/game';
 
 export default {
   template: require('./tictactoe.html'),
   components: { GameSidebar, GameRule },
   computed: {
-    ...mapState(['board', 'shouldPlayerMoveNext']),
+    ...mapState(useGameStore, ['board', 'shouldPlayerMoveNext']),
     inPlacingPhase() {
       return inPlacingPhase(this.board);
     }
   },
   methods: {
-    ...mapActions(['endPlayerTurn', 'initializeGame']),
+    ...mapActions(useGameStore, ['endPlayerTurn', 'initializeGame']),
     clickField(id) {
       if (!this.isMoveAllowed(id)) return;
 
@@ -36,6 +37,6 @@ export default {
     }
   },
   created() {
-    this.initializeGame();
+    this.initializeGame('TicTacToe');
   }
 };
