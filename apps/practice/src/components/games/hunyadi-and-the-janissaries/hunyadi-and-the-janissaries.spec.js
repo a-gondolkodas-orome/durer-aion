@@ -1,94 +1,95 @@
 'use strict';
 
 import HunyadiAndTheJanissaries from './hunyadi-and-the-janissaries';
-import createStore from '../../../store/store';
 import { flatten } from 'lodash-es';
-import { mountComponentVuex } from '../../../../test-helpers';
-
-const mountHunyadiAndTheJanissaries = async () => {
-  const store = createStore();
-  store.commit('setGameDefinition', { gameId: 'HunyadiAndTheJanissaries' });
-  return await mountComponentVuex(HunyadiAndTheJanissaries, { store });
-};
+import { mountComponent } from '../../../../test-helpers';
+import { useGameStore } from '../../../stores/game';
 
 describe('HunyadiAndTheJanissaries', () => {
   it('should initialize game when mounted', async () => {
-    const { store } = await mountHunyadiAndTheJanissaries();
-    expect(flatten(store.state.board)).toIncludeAllMembers(['blue', 'blue']);
+    await mountComponent(HunyadiAndTheJanissaries);
+    const store = useGameStore();
+    expect(flatten(store.board)).toIncludeAllMembers(['blue', 'blue']);
   });
 
   it('should set selected role for player and start game accordingly', async () => {
-    const { store, wrapper } = await mountHunyadiAndTheJanissaries();
+    const { wrapper } = await mountComponent(HunyadiAndTheJanissaries);
+    const store = useGameStore();
 
     await wrapper.find('.js-first-player').trigger('click');
 
-    expect(store.state.isPlayerTheFirstToMove).toBe(true);
-    expect(store.state.shouldPlayerMoveNext).toBe(true);
-    expect(store.state.gameStatus).toEqual('inProgress');
+    expect(store.isPlayerTheFirstToMove).toBe(true);
+    expect(store.shouldPlayerMoveNext).toBe(true);
+    expect(store.gameStatus).toEqual('inProgress');
   });
 
   it('should start a new game when button is pressed', async () => {
-    const { store, wrapper } = await mountHunyadiAndTheJanissaries();
+    const { wrapper } = await mountComponent(HunyadiAndTheJanissaries);
+    const store = useGameStore();
     await wrapper.find('.js-first-player').trigger('click');
 
     await wrapper.find('.js-restart-game').trigger('click');
 
-    expect(store.state.gameStatus).toEqual('readyToStart');
+    expect(store.gameStatus).toEqual('readyToStart');
   });
 
   it('should apply player move of killing a group', async () => {
     jest.useFakeTimers();
-    const { store, wrapper } = await mountHunyadiAndTheJanissaries();
+    const { wrapper } = await mountComponent(HunyadiAndTheJanissaries);
+    const store = useGameStore();
 
     await wrapper.find('.js-second-player').trigger('click');
     jest.advanceTimersToNextTimer();
     // setting fake board after valid enemy move for testability
-    store.commit('setBoard', [['blue'], [], ['red', 'red', 'blue']]);
+    store.board = [['blue'], [], ['red', 'red', 'blue']];
 
     await wrapper.find('.js-kill-red').trigger('click');
 
-    expect(store.state.board).toEqual([[], ['blue'], []]);
+    expect(store.board).toEqual([[], ['blue'], []]);
   });
 
   it('should apply player move of splitting soldiers', async () => {
-    const { store, wrapper } = await mountHunyadiAndTheJanissaries();
-    store.commit('setBoard', [['blue', 'blue'], ['blue'], []]);
+    const { wrapper } = await mountComponent(HunyadiAndTheJanissaries);
+    const store = useGameStore();
+    store.board = [['blue', 'blue'], ['blue'], []];
     await wrapper.find('.js-first-player').trigger('click');
 
     const soldierElements = wrapper.findAll('.js-clickable-soldier');
 
     soldierElements[0].trigger('click');
-    expect(store.state.board).toEqual([['red', 'blue'], ['blue'], []]);
-    expect(store.state.shouldPlayerMoveNext).toBe(true);
+    expect(store.board).toEqual([['red', 'blue'], ['blue'], []]);
+    expect(store.shouldPlayerMoveNext).toBe(true);
 
     soldierElements[0].trigger('click');
     soldierElements[1].trigger('click');
 
     wrapper.find('.js-finalize-groups').trigger('click');
 
-    expect(store.state.board).toEqual([['blue', 'red'], ['blue'], []]);
-    expect(store.state.shouldPlayerMoveNext).toBe(false);
+    expect(store.board).toEqual([['blue', 'red'], ['blue'], []]);
+    expect(store.shouldPlayerMoveNext).toBe(false);
   });
 
   it('should not allow player move while enemy move is in progress', async () => {
-    const { store, wrapper } = await mountHunyadiAndTheJanissaries();
-    const initialBoard = store.state.board;
+    const { wrapper } = await mountComponent(HunyadiAndTheJanissaries);
+    const store = useGameStore();
+    const initialBoard = store.board;
     await wrapper.find('.js-second-player').trigger('click');
 
     wrapper.find('.js-clickable-soldier').trigger('click');
 
-    expect(store.state.board).toEqual(initialBoard);
+    expect(store.board).toEqual(initialBoard);
     expect(wrapper.find('.js-finalize-groups').exists()).toBe(false);
   });
 
   it('should show the result to the user when the game is finished', async () => {
     jest.useFakeTimers();
-    const { store, wrapper } = await mountHunyadiAndTheJanissaries();
+    const { wrapper } = await mountComponent(HunyadiAndTheJanissaries);
+    const store = useGameStore();
 
     await wrapper.find('.js-second-player').trigger('click');
     jest.advanceTimersToNextTimer();
     // setting fake board after valid enemy move for testability
-    store.commit('setBoard', [['blue', 'red'], []]);
+    store.board = [['blue', 'red'], []];
 
     await wrapper.find('.js-kill-red').trigger('click');
 

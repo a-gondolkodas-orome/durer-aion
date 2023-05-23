@@ -1,7 +1,8 @@
-import { mapGetters, mapActions, mapState } from 'vuex';
+import { mapActions, mapState } from 'pinia';
 import GameSidebar from '../../../common/game-sidebar/game-sidebar';
 import GameRule from '../../../common/game-rule/game-rule';
 import { getGameStateAfterMove } from './strategy/strategy';
+import { useGameStore } from '../../../../stores/game';
 
 export default {
   template: require('./pile-splitter-4.html'),
@@ -11,15 +12,16 @@ export default {
     hoveredPiece: null
   }),
   computed: {
-    ...mapState(['board', 'shouldPlayerMoveNext']),
-    ...mapGetters([
+    ...mapState(useGameStore, [
+      'board',
+      'shouldPlayerMoveNext',
       'isGameInProgress',
       'isGameReadyToStart',
       'isGameFinished'
     ])
   },
   methods: {
-    ...mapActions(['endPlayerTurn', 'initializeGame']),
+    ...mapActions(useGameStore, ['endPlayerTurn', 'initializeGame']),
     isDisabled({ pileId, pieceId }) {
       if (!this.shouldPlayerMoveNext) return true;
       if (this.removedPileId === null) return false;
@@ -106,6 +108,6 @@ export default {
     }
   },
   created() {
-    this.initializeGame();
+    this.initializeGame('PileSplitter4');
   }
 };

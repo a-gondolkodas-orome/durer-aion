@@ -1,9 +1,10 @@
-import { mapGetters, mapActions, mapState } from 'vuex';
 import EnemyLoader from '../../common/enemy-loader/enemy-loader';
 import GameRule from '../../common/game-rule/game-rule';
 import SoldierSvg from './soldier-svg/soldier-svg';
 import CastleSvg from './castle-svg/castle-svg';
 import { getGameStateAfterKillingGroup } from './strategy/strategy';
+import { mapActions, mapState } from 'pinia';
+import { useGameStore } from '../../../stores/game';
 
 export default {
   template: require('./hunyadi-and-the-janissaries.html'),
@@ -12,9 +13,10 @@ export default {
     hoveredPiece: null
   }),
   computed: {
-    ...mapState({ isPlayerSultan: (state) => state.isPlayerTheFirstToMove }),
-    ...mapState(['board', 'shouldPlayerMoveNext']),
-    ...mapGetters([
+    ...mapState(useGameStore, { isPlayerSultan: 'isPlayerTheFirstToMove' }),
+    ...mapState(useGameStore, [
+      'board',
+      'shouldPlayerMoveNext',
       'ctaText',
       'isEnemyMoveInProgress',
       'isGameInProgress',
@@ -32,7 +34,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['endPlayerTurn', 'startGameWithRoleSelection', 'initializeGame']),
+    ...mapActions(useGameStore, ['endPlayerTurn', 'startGameWithRoleSelection', 'initializeGame']),
     clickOnSoldier(rowIndex, pieceIndex) {
       if (!this.shouldPlayerMoveNext) return;
       if (this.isPlayerSultan) {
@@ -62,10 +64,10 @@ export default {
     },
     restartGame() {
       this.resetTurnState();
-      this.initializeGame();
+      this.initializeGame('HunyadiAndTheJanissaries');
     }
   },
   created() {
-    this.initializeGame();
+    this.initializeGame('HunyadiAndTheJanissaries');
   }
 };
