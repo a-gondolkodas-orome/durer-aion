@@ -4,6 +4,7 @@ import HunyadiAndTheJanissaries from './hunyadi-and-the-janissaries';
 import { flatten } from 'lodash-es';
 import { mountComponent } from '../../../../test-helpers';
 import { useGameStore } from '../../../stores/game';
+import { flushPromises } from '@vue/test-utils';
 
 describe('HunyadiAndTheJanissaries', () => {
   it('should initialize game when mounted', async () => {
@@ -90,6 +91,7 @@ describe('HunyadiAndTheJanissaries', () => {
     jest.advanceTimersToNextTimer();
     // setting fake board after valid enemy move for testability
     store.board = [['blue', 'red'], []];
+    await flushPromises();
 
     await wrapper.find('.js-kill-red').trigger('click');
 
