@@ -1,7 +1,8 @@
-import { mapMutations, mapState, mapGetters, mapActions } from 'vuex';
 import { gameComponents } from '../games/games';
 import PageNotFound from '../page-not-found/page-not-found';
 import { Dialog, DialogPanel, DialogDescription, DialogTitle } from '@headlessui/vue';
+import { mapState, mapActions } from 'pinia';
+import { useGameStore } from '../../stores/game';
 
 export default {
   template: require('./strategy-game.html'),
@@ -20,8 +21,7 @@ export default {
     isGameEndDialogOpen: false
   }),
   computed: {
-    ...mapState(['gameDefinition', 'isPlayerWinner']),
-    ...mapGetters(['isGameFinished']),
+    ...mapState(useGameStore, ['gameDefinition', 'isPlayerWinner', 'isGameFinished']),
     gameEndText() {
       return this.isPlayerWinner
         ? 'Nyertél. Gratulálunk! :)'
@@ -29,20 +29,19 @@ export default {
     }
   },
   methods: {
-    ...mapMutations(['setGameDefinition']),
-    ...mapActions(['initializeGame']),
+    ...mapActions(useGameStore, ['initializeGame']),
     goBackToOverview() {
       this.$router.push('/');
     },
     setGameBasedOnRoute() {
-      this.setGameDefinition({ gameId: this.gameId });
+      this.initializeGame(this.gameId);
     },
     setIsGameEndDialogOpen(newValue) {
       this.isGameEndDialogOpen = newValue;
     },
     startNewGame() {
       this.isGameEndDialogOpen = false;
-      this.initializeGame();
+      this.initializeGame(this.gameId);
     }
   },
   mounted() {

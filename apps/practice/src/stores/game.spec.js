@@ -1,5 +1,5 @@
 import { createPinia, setActivePinia } from 'pinia';
-import { useGameStore } from './game-store';
+import { useGameStore } from './game';
 
 describe('game store', () => {
   beforeEach(() => setActivePinia(createPinia()));

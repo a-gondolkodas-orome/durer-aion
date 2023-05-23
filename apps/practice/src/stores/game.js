@@ -27,12 +27,21 @@ export const useGameStore = defineStore('game', {
     }
   },
   actions: {
+    resetCurrentGame() {
+      if (this.gameDefinition !== null) {
+        this.gameStatus = 'readyToStart';
+        this.shouldPlayerMoveNext = false;
+        this.isPlayerWinner = false;
+        this.isEnemyMoveInProgress = false;
+
+        this.board = this.gameDefinition.strategy.generateNewBoard();
+      }
+    },
     initializeGame(gameId) {
       this.$reset();
 
       this.gameDefinition = gameList[gameId] || null;
-      this.board = this.gameDefinition.strategy.generateNewBoard();
-      this.gameStatus = 'readyToStart';
+      this.resetCurrentGame();
     },
     startGameWithRoleSelection({ isFirst = true }) {
       this.isPlayerTheFirstToMove = isFirst;

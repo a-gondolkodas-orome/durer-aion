@@ -1,7 +1,8 @@
-import { mapGetters, mapActions, mapState } from 'vuex';
 import GameSidebar from '../../../common/game-sidebar/game-sidebar';
 import GameRule from '../../../common/game-rule/game-rule';
 import { getGameStateAfterMove } from './strategy/strategy';
+import { mapActions, mapState } from 'pinia';
+import { useGameStore } from '../../../../stores/game';
 
 export default {
   template: require('./pile-splitter.html'),
@@ -10,11 +11,13 @@ export default {
     hoveredPiece: null
   }),
   computed: {
-    ...mapState(['board', 'shouldPlayerMoveNext']),
-    ...mapGetters(['isGameReadyToStart', 'isGameFinished'])
+    ...mapState(
+      useGameStore,
+      ['board', 'isGameFinished', 'isGameReadyToStart', 'shouldPlayerMoveNext']
+    )
   },
   methods: {
-    ...mapActions(['endPlayerTurn', 'initializeGame']),
+    ...mapActions(useGameStore, ['endPlayerTurn', 'initializeGame']),
     isDisabled({ pileId, pieceId }) {
       return !this.shouldPlayerMoveNext || pieceId === this.board[pileId] - 1;
     },
@@ -39,13 +42,17 @@ export default {
 
       const pieceCountInPile = this.board[pileId];
 
-      if (this.isGameReadyToStart || !this.shouldPlayerMoveNext || !this.hoveredPiece) return pieceCountInPile;
+      if (
+        this.isGameReadyToStart ||
+        !this.shouldPlayerMoveNext ||
+        !this.hoveredPiece
+      ) return pieceCountInPile;
       if (this.hoveredPiece.pileId !== pileId) return `${pieceCountInPile} → 🗑️`;
 
       return `${pieceCountInPile} → ${this.hoveredPiece.pieceId + 1}, ${pieceCountInPile - this.hoveredPiece.pieceId - 1}`;
     }
   },
   created() {
-    this.initializeGame();
+    this.initializeGame('PileSplitter');
   }
 };

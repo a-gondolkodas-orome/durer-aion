@@ -1,25 +1,27 @@
-import { mapGetters, mapActions, mapState } from 'vuex';
 import EnemyLoader from '../enemy-loader/enemy-loader';
+import { mapState, mapActions } from 'pinia';
+import { useGameStore } from '../../../stores/game';
 
 export default {
   name: 'game-sidebar',
   template: require('./game-sidebar.html'),
   components: { EnemyLoader },
   computed: {
-    ...mapState(['shouldPlayerMoveNext']),
-    ...mapGetters([
+    ...mapState(useGameStore, [
+      'shouldPlayerMoveNext',
       'ctaText',
-      'isGameReadyToStart'
+      'isGameReadyToStart',
+      'gameDefinition'
     ])
   },
   methods: {
-    ...mapActions(['startGameWithRoleSelection', 'initializeGame']),
+    ...mapActions(useGameStore, ['startGameWithRoleSelection', 'resetCurrentGame']),
     restartGame() {
       this.$emit('restart');
-      this.initializeGame();
+      this.resetCurrentGame();
     }
   },
   created() {
-    this.initializeGame();
+    this.resetCurrentGame();
   }
 };
