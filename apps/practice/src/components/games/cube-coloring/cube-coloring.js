@@ -10,7 +10,17 @@ export default {
   components: { GameSidebar, GameRule },
   computed: {
     ...mapState(useGameStore, ['board', 'shouldPlayerMoveNext']),
-    allColors: () => allColors
+    allColors: () => allColors,
+    cubeCoords: () => ([
+      { cx: '8%',  cy: '25%' },
+      { cx: '74%', cy: '25%' },
+      { cx: '74%', cy: '91%' },
+      { cx: '8%',  cy: '91%' },
+      { cx: '25%', cy: '8%' },
+      { cx: '91%', cy: '8%' },
+      { cx: '91%', cy: '74%' },
+      { cx: '25%', cy: '74%' }
+    ])
   },
   data() {
     return {
