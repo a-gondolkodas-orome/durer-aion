@@ -1,11 +1,11 @@
 <div>
   <div class="flex flex-wrap items-baseline">
-    <h1 class="text-blue-600 text-2xl font-bold pb-4 grow">Dürer játékok</h1>
+    <h1 class="text-blue-600 font-bold pb-4 grow">Dürer játékok</h1>
     <span class="text-right">
       <a
         href="https://forms.gle/7DwugmXNrvKgkiiu8"
         target="_blank"
-        class="px-4 text-blue-800 underline"
+        class="px-4"
       >
         Hibabejelentő    
       </a>
@@ -66,7 +66,7 @@
       v-for="game in gamesToShow" :key="game.name"
       class="rounded-lg shadow-lg border p-2 m-1 max-w-[32ch] w-full flex flex-col js-game-card"
     >
-      <h2 class="text-xl font-bold mb-4 text-center">{{ game.name }}</h2>
+      <h2 class="font-bold mb-4 text-center">{{ game.name }}</h2>
       <div class="grow"></div>
       <div class="flex items-baseline">
         <span class="rounded-lg bg-orange-200 px-1 m-0.5">{{ game.year }}.</span>
