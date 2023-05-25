@@ -2,7 +2,7 @@ import Game from '../strategy-game/strategy-game';
 import Overview from '../overview/overview';
 
 export default {
-  template: require('./app.html'),
+  template: '<router-view></router-view>',
   components: {
     Game,
     Overview

@@ -1,6 +1,6 @@
-<div>
+<main class="p-2">
   <template v-if="gameDefinition">
-    <div class="flex flex-wrap items-baseline">
+    <header class="flex flex-wrap items-baseline">
       <button
         class="rounded-lg px-2 md:px-4 bg-blue-400 hover:bg-blue-600 js-back-to-overview md:basis-44"
         @click="goBackToOverview()"
@@ -17,10 +17,10 @@
           Hibabejelentő    
         </a>
       </span>
-    </div>
+    </header>
     <hr />
     <component :is="gameId"></component>
-    <div class="text-right md:hidden">
+    <footer class="text-right md:hidden">
       <a
         href="https://forms.gle/7DwugmXNrvKgkiiu8"
         target="_blank"
@@ -28,7 +28,7 @@
       >
         Hibabejelentő    
       </a>
-    </div>
+    </footer>
 
     <Dialog
       :open="isGameEndDialogOpen" @close="isGameEndDialogOpen = false"
@@ -39,7 +39,7 @@
       <!-- modal -->
       <div class="fixed inset-0 flex items-center justify-center p-4">
         <DialogPanel class="rounded bg-white max-w-sm w-full p-2">
-          <div class="flex items-baseline mb-2">
+          <header class="flex items-baseline mb-2">
             <DialogTitle class="grow block text-2xl text-center">
               A játék véget ért
             </DialogTitle>
@@ -47,7 +47,7 @@
               @click="isGameEndDialogOpen = false"
               class="bg-slate-200 rounded text-2xl px-1"
             >×</button>
-          </div>
+          </header>
           <DialogDescription class="text-lg block text-justify">
             {{ gameEndText }}
           </DialogDescription>
@@ -60,4 +60,4 @@
     </Dialog>
   </template>
   <page-not-found v-if="!gameDefinition"></page-not-found>
-</div>
+</main>
