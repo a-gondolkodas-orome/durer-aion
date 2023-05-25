@@ -11,7 +11,7 @@
       Sok sikert! :)
     </game-rule>
     <div class="flex flex-wrap">
-      <div class="p-2 shrink-0 grow basis-2/3">
+      <section class="p-2 shrink-0 grow basis-2/3">
         <div class="grid grid-cols-2 gap-0 border-2">
           <button
             v-for="id in [0, 1, 2, 3]" :key="id"
@@ -28,7 +28,7 @@
             </span>
           </button>
         </div>
-      </div>
+      </section>
       <game-sidebar>
         <template #step-description>
           Kattints arra a mezőre, ahova korongot szeretnél lerakni.

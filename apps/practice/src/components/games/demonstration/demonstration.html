@@ -7,13 +7,13 @@
       Sok sikert! :)
     </game-rule>
     <div class="flex flex-wrap">
-      <div class="p-2 shrink-0 grow basis-2/3">
+      <section class="p-2 shrink-0 grow basis-2/3">
         <button
           v-if="shouldPlayerMoveNext"
           class="cta-button"
           @click="endPlayerTurn({ board: [], isGameEnd: true })"
         >Lépek!</button>
-      </div>
+      </section>
       <game-sidebar>
         <template #step-description>Kattints a 'Lépek' gombra, hogy lépj.</template>
       </game-sidebar>

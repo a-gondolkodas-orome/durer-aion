@@ -41,6 +41,6 @@ describe('App', () => {
 
   it('should show page not found url does not match known patterns', async () => {
     const { wrapper } = await mountComponent(App, { path: '/unknown' });
-    expect(wrapper.find('div').text()).toMatch(/a keresett oldal nem található/);
+    expect(wrapper.find('p').text()).toMatch(/a keresett oldal nem található/);
   });
 });

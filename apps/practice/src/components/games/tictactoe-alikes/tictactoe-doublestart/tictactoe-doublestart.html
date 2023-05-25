@@ -11,7 +11,7 @@
       Sok sikert! :)
     </game-rule>
     <div class="flex flex-wrap">
-      <div class="p-2 shrink-0 grow basis-2/3">
+      <section class="p-2 shrink-0 grow basis-2/3">
         <div class="grid grid-cols-3 gap-0 border-2">
           <button
             v-for="id in [0, 1, 2, 3, 4, 5, 6, 7, 8]" :key="id"
@@ -24,9 +24,9 @@
               class="w-full aspect-square inline-block rounded-full mb-[-0.5rem]"
               :class="pieceColor(id)"
             ></span>
-        </button>
+          </button>
         </div>
-      </div>
+      </section>
       <game-sidebar>
         <template #step-description>
           {{ isDuringFirstMove ? 'Helyezz le két korongot (kattints a mezőkre)' : 'Helyezz le egy korongot egy üres mezőre kattintással.' }}

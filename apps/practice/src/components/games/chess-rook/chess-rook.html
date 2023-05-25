@@ -12,7 +12,7 @@
       Sok sikert! :)
     </game-rule>
     <div class="flex flex-wrap">
-      <div class="p-2 shrink-0 grow basis-2/3">
+      <section id="gameboard" class="p-2 shrink-0 grow basis-2/3">
         <table class="m-2 border-collapse w-full table-fixed">
           <tr v-for="row in [0, 1, 2, 3, 4, 5, 6, 7]" :key="row">
             <td 
@@ -38,7 +38,7 @@
             </td>
           </tr>
         </table>
-      </div>
+      </section>
       <game-sidebar>
         <template #step-description>Kattints egy szabad mezőre a bástyával egy sorban vagy oszlopban, ahova a bástyával mozogni szeretnél.</template>
       </game-sidebar>

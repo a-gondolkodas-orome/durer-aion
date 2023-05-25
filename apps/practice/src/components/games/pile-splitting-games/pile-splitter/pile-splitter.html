@@ -10,7 +10,7 @@
       Sok sikert! :)
     </game-rule>
     <div class="flex flex-wrap js-pile-splitter">
-      <div class="p-2 shrink-0 grow basis-2/3">
+      <section class="p-2 shrink-0 grow basis-2/3">
         <div
           v-for="pileId in [0, 1]"
           :key="pileId"
@@ -18,9 +18,9 @@
           :class="{ 'border-r-2': pileId === 0 && board[0] >= board[1], 'border-l-2': pileId === 1 && board[0] < board[1] }"
           style="transform: scaleY(-1)"
         >
-          <div class="text-xl" style="transform: scaleY(-1)">
+          <p class="text-xl" style="transform: scaleY(-1)">
             {{ currentChoiceDescription(pileId) }}
-          </div>
+          </p>
           <button
             v-for="(_, pieceId) in board[pileId]" :key="pieceId"
             :disabled="isDisabled({ pileId, pieceId })"
@@ -34,7 +34,7 @@
           >
         </button>
         </div>
-      </div>
+      </section>
       <game-sidebar>
         <template #step-description>
           Kattints egy korongra, hogy azzal kettéosztd azt a kupacot.

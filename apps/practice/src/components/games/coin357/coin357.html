@@ -10,7 +10,7 @@
       Sok sikert! :)
     </game-rule>
     <div class="flex flex-wrap">
-      <div class="p-2 shrink-0 grow basis-8/12">
+      <section id="gameboard" class="p-2 shrink-0 grow basis-8/12">
         <table class="m-2 border-collapse table-fixed w-full">
           <tr>
             <th>1-es</th>
@@ -50,7 +50,7 @@
         <button v-if="valueOfRemovedCoin" class="cta-button" @click="endTurn()">
           Semmit se rakok be
         </button>
-      </div>
+      </section>
       <game-sidebar @restart="resetTurnState()">
         <template #step-description>{{ stepDescription }}</template>
       </game-sidebar>

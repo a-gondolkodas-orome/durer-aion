@@ -22,6 +22,6 @@ describe('StrategyGame', () => {
     const { wrapper } = await mountComponent(StrategyGame,  { propsData: { gameId: 'UnknownGame' } });
     const gameStore = useGameStore();
     expect(gameStore.gameDefinition).toBe(null);
-    expect(wrapper.find('div').text()).toMatch(/a keresett oldal nem található/);
+    expect(wrapper.find('p').text()).toMatch(/a keresett oldal nem található/);
   });
 });

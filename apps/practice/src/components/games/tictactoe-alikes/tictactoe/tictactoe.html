@@ -12,7 +12,7 @@
       Sok sikert! :)
     </game-rule>
     <div class="flex flex-wrap">
-      <div class="p-2 shrink-0 grow basis-2/3">
+      <section class="p-2 shrink-0 grow basis-2/3">
         <div class="grid grid-cols-3 gap-0 border-2">
           <button
             v-for="id in [0, 1, 2, 3, 4, 5, 6, 7, 8]" :key="id"
@@ -26,9 +26,9 @@
               class="w-full aspect-square inline-block rounded-full mb-[-0.5rem]"
               :class="{ [pieceColor(id)]: true, 'border-4': pieceColor(id) === 'bg-white', 'border-slate-600': pieceColor(id) === 'bg-white' }"
             ></span>
-        </button>
+          </button>
         </div>
-      </div>
+      </section>
       <game-sidebar>
         <template #step-description>
           {{ inPlacingPhase ? 'Kattints egy üres mezőre.' : 'Kattints egy piros korongra.' }}

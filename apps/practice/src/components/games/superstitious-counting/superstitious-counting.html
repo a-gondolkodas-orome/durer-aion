@@ -10,7 +10,7 @@
       Sok sikert! :)
     </game-rule>
     <div class="flex flex-wrap">
-      <div class="p-2 shrink-0 grow basis-2/3">
+      <section class="p-2 shrink-0 grow basis-2/3">
         <div class="flex flex-wrap mb-1">
           <button
             v-for="i in fields" :key="i"
@@ -23,7 +23,7 @@
         <p v-if="shouldPlayerMoveNext" class="text-xl">
           Előző lépés: {{ 13 - board.restricted }}. Tiltott: {{ board.restricted || '-' }}.
         </p>
-      </div>
+      </section>
       <game-sidebar>
         <template #step-description>
           Kattints a mezőre ahova lépni szeretnél.

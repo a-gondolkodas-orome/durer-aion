@@ -11,7 +11,7 @@
       Sok sikert! :)
     </game-rule>
     <div class="flex flex-wrap">
-      <div class="p-2 shrink-0 grow basis-2/3">
+      <section class="p-2 shrink-0 grow basis-2/3">
         <div
           v-for="pileId in [0, 1, 2]"
           :key="pileId"
@@ -19,9 +19,9 @@
           :class="{ 'border-t-2': pileId < 2, 'border-r-2': pileId === 0 && board[0] >= board[1], 'border-l-2': pileId === 1 && board[0] < board[1] }"
           style="transform: scaleY(-1)"
         >
-          <div class="text-xl" style="transform: scaleY(-1)">
+          <p class="text-xl" style="transform: scaleY(-1)">
             {{ currentChoiceDescription(pileId) }}
-          </div>
+          </p>
             <button
               v-for="(_, pieceId) in board[pileId]" :key="pieceId"
               :disabled="isDisabled({ pileId, pieceId })"
@@ -34,7 +34,7 @@
               @mouseout="hoveredPiece = null"
             ></button>
         </div>
-      </div>
+      </section>
       <game-sidebar @restart="resetTurnState()">
         <template #step-description>
           Először kattints az eltávolítandó kupacra, majd arra a korongra, ahol ketté akarod vágni a kupacot.

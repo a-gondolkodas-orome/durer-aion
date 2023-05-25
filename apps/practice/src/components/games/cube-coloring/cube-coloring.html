@@ -11,25 +11,27 @@
       Sok sikert! :)
     </game-rule>
     <div class="flex flex-wrap" id="cube-coloring">
-      <div class="p-2 shrink-0 grow basis-2/3">
-        <button
-          :disabled="!shouldPlayerMoveNext"
-          class="w-[30%] mx-[1%] rounded text-xl bg-red-600"
-          :class="{ 'bg-opacity-50': !show || color != 'red' }"
-          @click="pick('red')"
-        >Piros</button>
-        <button
-          :disabled="!shouldPlayerMoveNext"
-          class="w-[30%] mx-[1%] rounded text-xl bg-green-600"
-          :class="{ 'bg-opacity-50': !show || color != 'green' }"
-          @click="pick('green')"
-        >Zöld</button>
-        <button
-          :disabled="!shouldPlayerMoveNext"
-          class="w-[30%] mx-[1%] rounded text-xl bg-blue-600"
-          :class="{ 'bg-opacity-50': !show || color != 'blue' }"
-          @click="pick('blue')"
-        >Kék</button>
+      <section id="gameboard" class="p-2 shrink-0 grow basis-2/3">
+        <header>
+          <button
+            :disabled="!shouldPlayerMoveNext"
+            class="w-[30%] mx-[1%] rounded text-xl bg-red-600"
+            :class="{ 'bg-opacity-50': !show || color != 'red' }"
+            @click="pick('red')"
+          >Piros</button>
+          <button
+            :disabled="!shouldPlayerMoveNext"
+            class="w-[30%] mx-[1%] rounded text-xl bg-green-600"
+            :class="{ 'bg-opacity-50': !show || color != 'green' }"
+            @click="pick('green')"
+          >Zöld</button>
+          <button
+            :disabled="!shouldPlayerMoveNext"
+            class="w-[30%] mx-[1%] rounded text-xl bg-blue-600"
+            :class="{ 'bg-opacity-50': !show || color != 'blue' }"
+            @click="pick('blue')"
+          >Kék</button>
+        </header>
 
         <svg @mousemove="drawPickedColor" class="aspect-square stroke-black stroke-[3]">
           <!-- front and back face -->
@@ -56,7 +58,7 @@
           <!-- cursor position with to-be-used color -->
           <circle v-if="show" :cx="x" :cy="y" r="4%" :fill="color" class="pointer-events-none opacity-50 stroke-0" />
         </svg>
-      </div>
+      </section>
       <game-sidebar @restart="resetTurnState()">
         <template #step-description>
           Válassz színt, majd színezz meg egy csúcsot!

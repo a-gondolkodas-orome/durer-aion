@@ -14,7 +14,7 @@
       Sok sikert! :)
     </game-rule>
     <div class="flex flex-wrap js-hunyadi-and-the-janissaries">
-      <div class="p-2 shrink-0 grow basis-2/3">
+      <section id="gameboard" class="p-2 shrink-0 grow basis-2/3">
         <svg class="block m-auto w-[40%] fill-slate-600">
           <use xlink:href="#game-castle" />
         </svg>
@@ -42,20 +42,20 @@
             </svg>
           </button>
         </div>
-      </div>
-      <div class="p-2 flex flex-col grow shrink-0 basis-64">
+      </section>
+      <section class="p-2 flex flex-col grow shrink-0 basis-64">
         <p class="text-center font-bold text-lg">{{ ctaText }}</p>
         <enemy-loader />
         <p class="italic text-justify">{{ stepDescription }}</p>
-        <template v-if="isGameReadyToStart">
+        <section v-if="isGameReadyToStart">
           <button class="cta-button js-second-player" @click="startGameWithRoleSelection({ isFirst: false })">
             Hunyadi leszek
           </button>
           <button class="cta-button js-first-player" @click="startGameWithRoleSelection({ isFirst: true })">
             Szultán leszek
           </button>
-        </template>
-        <template v-if="isGameInProgress">
+        </section>
+        <section v-if="isGameInProgress">
           <button
             v-if="isPlayerSultan"
             :class="{ 'opacity-50': isEnemyMoveInProgress }"
@@ -80,13 +80,13 @@
           >
             Legyőzöm a kékeket
           </button>
-        </template>
+        </section>
         <div class="flex flex-grow items-end">
           <button class="cta-button mt-4 js-restart-game" @click="restartGame()">
             Új játék
           </button>
         </div>
-      </div>
+      </section>
     </div>
   </div>
 </div>
