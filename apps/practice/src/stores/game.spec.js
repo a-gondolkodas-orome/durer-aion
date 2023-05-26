@@ -37,7 +37,7 @@ describe('game store', () => {
     it('should return selectRole prompt at the start of game', () => {
       const game = useGameStore();
       game.gameStatus = 'readyToStart';
-      expect(game.ctaText).toMatch(/elindítani a játékot/);
+      expect(game.ctaText).toMatch(/Válassz szerepet/);
     });
 
     it('should return who is next during game', () => {

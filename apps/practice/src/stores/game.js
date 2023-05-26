@@ -22,7 +22,7 @@ export const useGameStore = defineStore('game', {
       } else if (this.isGameFinished) {
         return state.isPlayerWinner ? 'Nyertél. Gratulálunk! :)' : 'Sajnos, most nem nyertél, de ne add fel.';
       } else { // ready to start
-        return 'A gombra kattintva tudod elindítani a játékot.';
+        return 'Válassz szerepet, utána indul a játék!';
       }
     }
   },
