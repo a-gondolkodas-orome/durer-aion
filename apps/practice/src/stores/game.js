@@ -6,6 +6,7 @@ export const useGameStore = defineStore('game', {
     // game-agnostic
     gameStatus: null,
     shouldPlayerMoveNext: false,
+    isPlayerTheFirstToMove: null,
     isPlayerWinner: false,
     isEnemyMoveInProgress: false,
     // game-specific
