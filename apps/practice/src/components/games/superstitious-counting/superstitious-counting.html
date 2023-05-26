@@ -21,7 +21,7 @@
           >{{ i == board.current ? 'X' : i }}</button>
         </div>
         <p v-if="shouldPlayerMoveNext" class="text-xl">
-          Előző lépés: {{ 13 - board.restricted }}. Tiltott: {{ board.restricted || '-' }}.
+          Előző lépés: {{ board.restricted ? (13 - board.restricted) : '-' }}. Tiltott: {{ board.restricted || '-' }}.
         </p>
       </section>
       <game-sidebar>
