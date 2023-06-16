@@ -1,0 +1,51 @@
+<div class="flex justify-center">
+    <div class="max-w-[100ch] w-full">
+      <game-rule>
+        Adott négy, korongokból álló kupac, melyek 1-től 4-ig vannak számozva. Egy lépésben a
+soron következő játékos választ m és n egész számokat, melyekre 1 ≤ m < n ≤ 4, majd az n sorszámú
+kupacból elvesz m korongot, és az n − 1, n − 2, . . . , n − m sorszámú kupacokba egyesével szétosztja az
+elvett korongokat. Az veszít, aki nem tud a szabályoknak megfelelően lépni.
+    
+        A kezdőállás ismeretében te döntheted el, hogy kezdeni szeretnél-e, vagy második játékos lenni.
+        Sok sikert! :)
+      </game-rule>
+      <div class="flex flex-wrap js-pile-splitter">
+        <section class="p-2 shrink-0 grow basis-2/3">
+          <div
+            v-for="pileId in [0, 1, 2, 3]"
+            :key="pileId"
+            class="js-pile w-[50%] pl-1 inline-block text-center"
+            style="transform: scaleY(-1)"
+          >
+            <p class="text-xl" style="transform: scaleY(-1)">
+              {{ currentChoiceDescription(pileId) }}
+            </p>
+            <button
+              v-for="(_, pieceId) in board[pileId]+5" :key="pieceId"
+              :disabled="isDisabled({ pileId, pieceId })"
+              class="js-pebble inline-block w-[20%] aspect-square rounded-full mx-0.5"
+              :class="{ 
+                'bg-blue-900 opacity-30': toAppear({ pileId, pieceId }), 
+                'bg-red-600 opacity-50': toBeRemoved({ pileId, pieceId }), 
+                'bg-white': (nonExistent({ pileId, pieceId }) && !toAppear({ pileId, pieceId })),
+                'bg-blue-900': !nonExistent({ pileId, pieceId }) && !toBeRemoved({ pileId, pieceId })
+            }"
+              @click="clickPiece({ pileId, pieceId })"
+              @focus="hoveredPiece = { pileId, pieceId }"
+              @blur="hoveredPiece = null"
+              @mouseover="hoveredPiece = { pileId, pieceId }"
+              @mouseout="hoveredPiece = null"
+            >
+          </button>
+          </div>
+        </section>
+        <game-sidebar>
+          <template #step-description>
+            Kattints egy korongra, hogy jelezd, hány korongot szeretnél elvenni a kupacból.
+          </template>
+        </game-sidebar>
+      </div>
+    </div>
+  </div>
+  
+  

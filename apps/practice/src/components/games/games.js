@@ -30,6 +30,10 @@ import ChessRook from './chess-rook/chess-rook';
 import * as chessRookStrategy from './chess-rook/strategy/strategy';
 import ChessBishops from './chess-bishops/chess-bishops';
 import * as chessBishopsStrategy from './chess-bishops/strategy/strategy';
+import AddReduceDouble from './add-reduce-double/add-reduce-double';
+import * as addReduceDoubleStrategy from './add-reduce-double/strategy/strategy';
+import FourPilesSpreadAhead from './four-piles-spread-ahead/four-piles-spread-ahead';
+import * as fourPilesSpreadAheadStrategy from './four-piles-spread-ahead/strategy/strategy';
 
 
 export const gameComponents = {
@@ -48,7 +52,9 @@ export const gameComponents = {
   TicTacToeDoubleStart,
   AntiTicTacToe,
   ChessRook,
-  ChessBishops
+  ChessBishops,
+  AddReduceDouble,
+  FourPilesSpreadAhead
 };
 
 export const gameList = {
@@ -177,5 +183,21 @@ export const gameList = {
     name: '3, 2, 1 érmék',
     component: 'Coin123',
     strategy: coin123Strategy
+  },
+  AddReduceDouble: {
+    year: 16,
+    round: 'döntő',
+    category: 'D',
+    component: 'AddReduceDouble',
+    name: 'Kettőt vesz, egyet kap',
+    strategy: addReduceDoubleStrategy
+  },
+  FourPilesSpreadAhead: {
+    year: 16,
+    round: 'döntő',
+    category: 'E, E+',
+    name: '4 kupacban előrepakolás',
+    component: 'FourPilesSpreadAhead',
+    strategy: fourPilesSpreadAheadStrategy
   }
 };

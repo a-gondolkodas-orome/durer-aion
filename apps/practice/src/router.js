@@ -9,6 +9,7 @@ const routes = [
   { path: '/:path(.*)*', component: PageNotFound }
 ];
 
+
 export default () => createRouter({
   history: createWebHashHistory(),
   routes
