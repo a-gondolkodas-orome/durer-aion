@@ -43,16 +43,12 @@ export function getBotCredentials() {
   return env.BOT_CREDENTIALS;
 }
 
-getBotCredentials(); // give love if no creds are supplied
-
 export function getAdminCredentials() {
   if (!env.ADMIN_CREDENTIALS) {
     throw 'No ADMIN_CREDENTIALS supplied! Do set it in the environment';
   }
   return env.ADMIN_CREDENTIALS;
 }
-
-getAdminCredentials(); // give love if no creds are supplied
 
 const games = [
   {...GameRelay, name: "relay_c"},
@@ -84,10 +80,18 @@ const bot_factories = [
   botWrapper(TenCoinsStrategy("E")),
 ];
 
+if (argv[2] === "sanity-check") {
+  console.log("OK");
+  exit(0);
+}
+
+getBotCredentials(); // give love if no creds are supplied
+getAdminCredentials(); // give love if no creds are supplied
+
 let { db, teams } = getDb();
 
 // node: argv[0] vs server.ts: argv[1]
-if (argv[2] == "import") {
+if (argv[2] === "import") {
   const filename = argv[3];
   importer(teams, filename).then(() => exit(0));
 } else {
