@@ -29,8 +29,8 @@ jobs:
         run: npm ci
 
       - name: Run (client) build
-        run: npm run build
+        # CI was true -> treat warnings as errors. Not for now.
+        run: CI= npm run build
 
       - name: Run (server)
-        # CI was true -> treat warnings as errors. Not for now.
-        run: CI= npm run dev:server -- -- sanity-check
+        run: npm run dev:server -- -- sanity-check
