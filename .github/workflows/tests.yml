@@ -1,5 +1,5 @@
 # https://github.com/marketplace/actions/lint-action
-name: Build
+name: Test
 
 on:
   # Trigger the workflow on push or pull request,
@@ -12,8 +12,8 @@ on:
       - main
 
 jobs:
-  run-builders:
-    name: Run builders
+  run-testers:
+    name: Run testers
     runs-on: ubuntu-latest
 
     steps:
@@ -30,4 +30,4 @@ jobs:
 
       - name: Run (client) build
         # CI was true -> treat warnings as errors. Not for now.
-        run: CI= npx react-scripts test -- --all
+        run: npx react-scripts test
