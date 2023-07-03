@@ -44,7 +44,7 @@ export function Login() {
             <Field 
               name="joinCode"
               type="text"
-              placeHolder="CDürer"
+              placeholder="CDürer"
               style={{
                 width: '250px',
                 height: '40px',
