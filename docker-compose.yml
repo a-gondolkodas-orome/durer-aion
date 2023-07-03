@@ -15,16 +15,12 @@ services:
       - PORT=8000
       - BOT_CREDENTIALS=botbotbot
       - ADMIN_CREDENTIALS=hellodankness
-    ports:
-      - 8000:8000
     volumes:
       - .:/usr/src/app
     depends_on:
       - postgres
   postgres:
     image: bitnami/postgresql
-    ports:
-      - 5432
     volumes:
       - postgresdb:/var/lib/postgresql/data
     environment:
