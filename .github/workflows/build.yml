@@ -33,4 +33,4 @@ jobs:
         run: CI= npm run build
 
       - name: Run (server)
-        run: npm run dev:server -- -- sanity-check
+        run: npm run check:server
