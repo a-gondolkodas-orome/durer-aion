@@ -28,6 +28,5 @@ jobs:
       - name: Install Node.js dependencies
         run: npm ci
 
-      - name: Run (client) build
-        # CI was true -> treat warnings as errors. Not for now.
+      - name: Run (client) tests
         run: npx react-scripts test
