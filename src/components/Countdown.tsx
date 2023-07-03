@@ -30,7 +30,12 @@ export function Countdown(props: PropsWithoutRef<{ secondsRemaining: number | nu
         }
         // add some seconds: the server is the single point of truth, do not let the frontend
         // stop the player from submitting!
-        if (props.secondsRemaining <= 0) {
+        if (props.secondsRemaining <= 0 && props.secondsRemaining > -10000) {
+            setCountdown(`${Math.ceil(props.secondsRemaining / 3600 / 1000).toString().padStart(2, '0')
+          }:${(Math.ceil(props.secondsRemaining / 60 / 1000) % 60).toString().padStart(2, '0')
+          }:${(props.secondsRemaining / 1000 % 60).toString().slice(0,2).padStart(2, '0')
+          }`);
+        } else if (props.secondsRemaining <= -10000) {
             setCountdown("XX:XX:XX");
             // cleanup(); ???
         } else {

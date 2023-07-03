@@ -1,22 +1,22 @@
-import { TeamModelDto } from '../../dto/TeamStateDto';
-import { useTeamState } from '../../hooks/user-hooks';
-import { RelayClientWithBot_C, RelayClientWithBot_D, RelayClientWithBot_E } from '../../../games/relay/main';
+import { InProgressMatchStatus, TeamModelDto } from '../../dto/TeamStateDto';
+import { FinishedRelay } from './FinishedRelay';
+import { DurerXVIRelayClient } from '../../../components/ReactClient';
 
-export function Relay(props: { state: TeamModelDto }) {
-  const team = useTeamState();
-  switch (team?.category) {
-    case "C":
+export function Relay(props: {state: TeamModelDto}) {
+  switch (props.state.relayMatch.state) {
+    case "FINISHED":
       return (
-        <RelayClientWithBot_C />
+        <FinishedRelay state={props.state}/>
       )
-    case "D":
+    case "IN PROGRESS":
       return (
-        <RelayClientWithBot_D />
+        <DurerXVIRelayClient
+          category={props.state.category as 'C' | 'D' | 'E'}
+          credentials={props.state.credentials}
+          matchID={(props.state.relayMatch as InProgressMatchStatus).matchID}
+        />
       )
-    case "E":
-      return (
-        <RelayClientWithBot_E />
-      )
+    case "NOT STARTED":
     default: return <>ROSSZ KATEGÓRIA</>;
   }
 }

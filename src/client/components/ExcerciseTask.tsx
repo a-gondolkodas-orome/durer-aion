@@ -1,4 +1,7 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import * as Yup from 'yup';
+import { useSnackbar } from "notistack";
+import moment from "moment";
 import { Stack } from "@mui/system";
 
 export interface MyProps {
@@ -13,7 +16,7 @@ export const ExcerciseTask: React.FunctionComponent<MyProps> = (props: MyProps) 
 </latex-js>`;
   return <Stack>
     <Stack sx={{fontSize: '20px'}}>
-      {props.serial}. Feladat ({props.maxPoints} pont):
+      {props.serial}. Feladat ({props.serial} pont):
     </Stack>
     <div dangerouslySetInnerHTML={{ __html: completestring }} />
     {props.pictureUrl && <img src={props.pictureUrl} style={{maxWidth:'80%', display: 'flex', marginLeft:'auto', marginRight: 'auto', marginTop: "30px"}} alt={'feladatKép (ha nem töltött be próbáld frissíteni az oldalt)'}/>}

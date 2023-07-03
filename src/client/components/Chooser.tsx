@@ -1,8 +1,8 @@
 import { Stack } from '@mui/system';
-import React from 'react';
+import { TeamModelDto } from '../dto/TeamStateDto';
 import { ChooserItem } from './ChooserItem';
 
-export function Chooser(props: {setStarted: React.Dispatch<string>}) {
+export function Chooser(props: {state: TeamModelDto}) {
   return (
     <Stack sx={{
       display: 'flex',
@@ -10,9 +10,9 @@ export function Chooser(props: {setStarted: React.Dispatch<string>}) {
       margin: "40px",
       flexDirection: "row"
     }}>
-      <ChooserItem setStarted={props.setStarted} type="relay" />
+      <ChooserItem status={props.state.relayMatch} type="relay" />
       <Stack sx={{width: "20px"}}/>
-      <ChooserItem setStarted={props.setStarted} type="strategias" />
+      <ChooserItem status={props.state.strategyMatch} type="strategias" />
     </Stack>
   )
 }

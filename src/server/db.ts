@@ -1,5 +1,5 @@
 import type { PostgresStore } from 'bgio-postgres';
-import { teamAttributes, TeamModel } from './entities/model';
+import { InProgressMatchStatus, teamAttributes, TeamModel } from './entities/model';
 import { Sequelize, Op, WhereOptions } from 'sequelize';
 
 export class TeamsRepository {
@@ -19,6 +19,20 @@ export class TeamsRepository {
     return await TeamModel.findAll({ where:
       Sequelize.and(...filter.map(part => ({'other': { [Op.like]: `%${part}%`} }))),
     });
+  }
+
+  async deduceMatch(matchID:string):Promise<TeamModel|null>{
+    const matches =  await TeamModel.findAll( {where:
+      Sequelize.or([
+        {relayMatch:'IN PROGRESS'},
+        {strategyMatch:'IN PROGRESS'}
+      ])
+    });
+    console.log(matches)
+    return matches.find(team =>{
+      return (team.relayMatch as InProgressMatchStatus).matchID == matchID || 
+        (team.strategyMatch as InProgressMatchStatus).matchID == matchID
+    })??null;
   }
 
   async getTeam(searchCondition: WhereOptions<Pick<TeamModel, "joinCode" | "id">>) : Promise<TeamModel|null>{

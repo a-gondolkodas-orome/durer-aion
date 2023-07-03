@@ -1,4 +1,6 @@
+import { PostgresStore } from "bgio-postgres";
 import { Game, Server, StorageAPI } from "boardgame.io";
+import { Async, Sync } from "boardgame.io/internal";
 import { assert } from "console";
 import { relayNames, strategyNames } from "../server";
 import { TeamsRepository } from "./db";
@@ -56,15 +58,16 @@ export async function checkStaleMatch(team: TeamModel): Promise<{ isStale: boole
   if (team.relayMatch.state == 'IN PROGRESS'){
     if(typeof team.relayMatch.endAt === 'string')
       team.relayMatch.endAt = new Date(team.relayMatch.endAt);
-    console.log(typeof team.relayMatch.endAt,team.relayMatch.endAt,now)
-    console.log(team.relayMatch.endAt.getTime() , now.getTime())
     if (team.relayMatch.endAt.getTime() < now.getTime())
       return { isStale: true, gameState: 'relayMatch' };
   }
 
-  if (team.strategyMatch.state == 'IN PROGRESS')
+  if (team.strategyMatch.state == 'IN PROGRESS') {
+    if(typeof team.strategyMatch.endAt === 'string')
+      team.strategyMatch.endAt = new Date(team.strategyMatch.endAt);
     if (team.strategyMatch.endAt.getTime() < now.getTime())
       return { isStale: true, gameState: 'strategyMatch' };
+  }
 
   return { isStale: false };
 }
@@ -84,10 +87,7 @@ function inferenceGameType(gameName: string) {
 
 export async function closeMatch(matchId: string, teams: TeamsRepository, db: StorageAPI.Async | StorageAPI.Sync) {
   const currentMatch = await db.fetch(matchId, { state: true, metadata: true });
-  const teamId = currentMatch.metadata.players[0].id;
-  //TODO FIX THIS
-  if(teamId == 0)
-    return;
+  const teamId = currentMatch.metadata.players[0].name;
   const team: TeamModel | null = await teams.getTeam({ id: teamId }) ?? null;
   if (typeof TeamModel === null)
     throw new Error(`Match team is not found, the match has the following players:${currentMatch.metadata.players}`);
@@ -100,18 +100,16 @@ export async function closeMatch(matchId: string, teams: TeamsRepository, db: St
   team!.update({ type: finishState });
 }
 
-export async function getNewGame(ctx: Server.AppCtx, teams: TeamsRepository, games: Game<any, Record<string, unknown>, any>[], gameType: 'RELAY' | 'STRATEGY') {
-  const GUID = ctx.params.GUID;
-  const team: TeamModel = await teams.getTeam({ id: GUID }) ?? ctx.throw(404, `Team with {id:${GUID}} not found.`)
+export async function getNewGame(team: TeamModel, db: Async | Sync, teams: TeamsRepository, games: Game<any, Record<string, unknown>, any>[], gameType: 'RELAY' | 'STRATEGY') {
   
   //if middelware setup was better understand, this should be in a separated midleware
   const staleInfo =  await checkStaleMatch(team);
   if(staleInfo.isStale){
-    closeMatch((team[staleInfo.gameState!] as InProgressMatchStatus).matchID,teams,ctx.db);
+    closeMatch((team[staleInfo.gameState!] as InProgressMatchStatus).matchID, teams, db);
   }
   
   if (! await allowedToStart(team, gameType)){
-    ctx.throw(403, "Team is not allowed to start game.")
+    throw "Team is not allowed to start game.";
   }
   
   //find gameName based on team category
@@ -119,7 +117,7 @@ export async function getNewGame(ctx: Server.AppCtx, teams: TeamsRepository, gam
   const gameName = (gameType == 'RELAY') ?
     relayNames[team.category as keyof typeof relayNames] : strategyNames[team.category as keyof typeof strategyNames] //TODO set type better??;
 
-  const game: Game<any, Record<string, unknown>> = games.find((g) => g.name === gameName) ?? ctx.throw(404, 'Game ' + gameName + ' not found');
+  const game: Game<any, Record<string, unknown>> = games.find((g) => g.name === gameName) ?? ((()=>{throw 'Game ' + gameName + ' not found'})());
 
   return { game, team }
 }

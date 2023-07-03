@@ -1,24 +1,25 @@
-import { TeamModelDto } from '../../dto/TeamStateDto';
-import { useTeamState } from '../../hooks/user-hooks';
-import { Client_C as TenCoinsClient_C, ClientWithBot_C as TenCoinsWithBotClient_C} from '../../../games/ten-coins/main';
-import { Client_D as TenCoinsClient_D, ClientWithBot_D as TenCoinsWithBotClient_D} from '../../../games/ten-coins/main';
-import { Client_E as TenCoinsClient_E, ClientWithBot_E as TenCoinsWithBotClient_E} from '../../../games/ten-coins/main';
+import { InProgressMatchStatus, TeamModelDto } from '../../dto/TeamStateDto';
+import { FinisheStrategy } from './FinishedStrategy';
+import { DurerXVIStrategyClient } from '../../../components/ReactClient';
 
 export function Strategy(props: {state: TeamModelDto}) {
-  const team = useTeamState();
-  switch (team?.category) {
-    case "C":
+  switch (props.state.strategyMatch.state) {
+    case "FINISHED":
       return (
-        <TenCoinsWithBotClient_C />
+        <FinisheStrategy state={props.state}/>
       )
-    case "D":
+    case "IN PROGRESS":
+      console.log(props.state.category as 'C' | 'D' | 'E')
+      console.log(props.state.credentials)
+      console.log((props.state.strategyMatch as InProgressMatchStatus).matchID)
       return (
-        <TenCoinsWithBotClient_D />
+        <DurerXVIStrategyClient 
+          category={props.state.category as 'C' | 'D' | 'E'}
+          credentials={props.state.credentials}
+          matchID={(props.state.strategyMatch as InProgressMatchStatus).matchID}
+        />
       )
-    case "E":
-      return (
-        <TenCoinsWithBotClient_E />
-      )
-    default: return <>ROSSZ KATEGÓRIA</>;
+    case "NOT STARTED":
+    default: return <>NEM TÁMOGATOTT JÁTÉKÁLLAPOT</>;
   }
 }

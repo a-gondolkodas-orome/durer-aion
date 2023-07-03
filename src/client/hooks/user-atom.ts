@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { TeamModelDto } from '../dto/TeamStateDto';
 import { UserModel } from './user-model';
 
-const RECOIL_KEY = 'team';
+const RECOIL_KEY = 'team_status';
 
 export const currentStateAtom = atom<TeamModelDto | null>({
     key: RECOIL_KEY,

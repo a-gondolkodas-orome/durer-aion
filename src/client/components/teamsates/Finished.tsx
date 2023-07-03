@@ -1,6 +1,13 @@
 import { Stack } from '@mui/system';
+import { FinishedMatchStatus } from '../../../server/entities/model';
+import { TeamModelDto } from '../../dto/TeamStateDto';
 
-export function Finished(props: {score: number}) {
+export function Finished(props: {state: TeamModelDto | null}) {
+  if(props.state === null)
+    //TODO: fix this
+    throw new Error("teamState is null, and it was not properly handled earlier.")
+  const relayScore = (props.state.relayMatch as FinishedMatchStatus).score;
+  const stratScore = (props.state.strategyMatch as FinishedMatchStatus).score;
   return (
     <Stack sx={{
       display: 'flex',
@@ -17,7 +24,7 @@ export function Finished(props: {score: number}) {
         textAlign: 'center',
         marginBottom: '30px',
       }}>
-        Vége a feladatnak
+        Vége a játéknak
       </Stack>
       <Stack sx={{
         fontSize: 18,
@@ -32,7 +39,7 @@ export function Finished(props: {score: number}) {
         flexDirection: 'row',
         alignItems: 'baseline',
       }}>
-        {props.score} <span style={{fontSize: '16px', color: '#000', marginLeft: '5px'}}>pont</span>
+        {stratScore + relayScore} <span style={{fontSize: '16px', color: '#000', marginLeft: '5px'}}>pont</span>
       </Stack>
 
     </Stack>

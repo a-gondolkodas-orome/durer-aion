@@ -37,6 +37,30 @@ export class UserModel {
     return res;
   }
 
+  async startRelay(): Promise<void> {
+    const guid = this.getGuid();
+
+    if (!guid) {
+      return;
+    }
+
+    const repo = new RealClientRepository()
+
+    await repo.startRelay(guid)
+  }
+
+  async starStrategy(): Promise<void> {
+    const guid = this.getGuid();
+
+    if (!guid) {
+      return;
+    }
+
+    const repo = new RealClientRepository()
+
+    await repo.startStrategy(guid)
+  }
+
   isUserLoggedIn(): boolean {
     const guid = this.getGuid();
 
