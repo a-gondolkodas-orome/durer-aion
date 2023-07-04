@@ -8,6 +8,7 @@ export interface MyGameState {
 }
 
 export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<MyGameState>)
+  name: "superstitious-counting",
   setup: () => ({ current: 0, target: 100, restricted: null }), // TODO: Random
 
   moves: {
