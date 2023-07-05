@@ -4,13 +4,17 @@ import { Countdown } from '../../../components/Countdown';
 import { BoardProps } from 'boardgame.io/react';
 import { MyGameState } from '../../../games/relay/game';
 import { Button, Dialog } from '@mui/material';
-import { useRefreshTeamState } from '../../hooks/user-hooks';
+import { useRefreshTeamState, useTeamState } from '../../hooks/user-hooks';
 import { ExcerciseTask } from '../ExcerciseTask';
 import { ExcerciseForm } from '../ExcerciseForm';
+import { Finished } from './Finished';
+import { sendDataRelayEnd } from '../../../common/sendData';
+
 interface MyGameProps extends BoardProps<MyGameState> { };
 export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
   const [secondsRemaining, setSecondsRemaining] = useState(G.milisecondsRemaining as number | null);
   const refreshState = useRefreshTeamState();
+  const teamState = useTeamState();
   return (
     <>
       <Dialog open={

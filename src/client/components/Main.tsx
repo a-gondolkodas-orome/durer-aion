@@ -15,12 +15,12 @@ export function Main() {
   return (
     <Layout>
       <LoadUTeamState/>
-      <Header teamName={teamState?.name ?? null} resetState={setState} />
+      <Header teamName={teamState?.teamName ?? null} resetState={setState} />
       <Container sx={{ paddingLeft: 0, paddingRight: 0, zIndex: 3, position: 'relative', paddingBottom: '50px', maxWidth: '1200px' }}>
         {!teamState &&
           <Login/>}
         {teamState && state == "init" &&
-          <Init setStarted={setState}/>}
+          <Init state={teamState}/>}
         {teamState && state == "relay" &&
           <Relay state={teamState}/>}
         {teamState && state == "strategias" &&
