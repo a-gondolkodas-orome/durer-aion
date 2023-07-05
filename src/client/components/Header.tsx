@@ -28,7 +28,7 @@ export function Header(props: { teamName: string | null }) {
           fontSize: 40,
           fontWeight: 'bold',
           paddingTop: '20px',
-        }}>XVI. Dürer Verseny</Stack>
+        }}>Dürer Verseny</Stack>
         {props.teamName &&
           <Stack sx={{
             flexDirection: 'row',
@@ -53,7 +53,7 @@ export function Header(props: { teamName: string | null }) {
           fontSize: 30,
           fontWeight: 'bold',
           paddingTop: '30px',
-        }}>Online forduló</Stack>
+        }}>Váltó gyakorlás</Stack>
       </Container>
     </Stack>
   )

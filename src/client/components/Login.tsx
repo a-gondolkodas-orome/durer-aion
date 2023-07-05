@@ -4,6 +4,8 @@ import { useSnackbar } from 'notistack';
 import { useLogin } from '../hooks/user-hooks';
 import Form from './form';
 import theme from './theme';
+import SelectProblem from './SelectProblem';
+import { Button, Select } from '@mui/material';
 
 export function Login() {
   const { enqueueSnackbar } = useSnackbar();
@@ -21,44 +23,18 @@ export function Login() {
         <Stack sx={{
           fontSize: "40px",
         }}>
-          Kedves Versenyző!<br/>
-          Üdvözlünk a XVI. Dürer Verseny online fordulójának felületén.
+          Üdvözlünk a Dürer Verseny váltó gyakorló felületén.
         </Stack>
         <Stack sx={{
           marginTop: "15px",
           fontSize: "30px",
         }}>
-          Belépéshez nézd meg az emailjeidet, nyisd meg az ott található linket vagy üsd be a kódot ide:
+          Itt ki tudjátok próbálni a korábbi évi váltó versenyeket.
+          Válaszd ki a megfelelő feladatsort és lépj tovább.
         </Stack>
         <Stack>
-          <Form style={{ position: "relative", zIndex: 2 }} initialValues={{ joinCode: '' }}
-            onSubmit={(values) => {
-              if(!values.joinCode) {
-                enqueueSnackbar("nem adtad meg a kódot", { variant: 'error' });
-                return;
-              }
-              login(values.joinCode).catch(err => {
-                enqueueSnackbar(err?.message, { variant: 'error' });
-              });
-            }}>
-            <Field 
-              name="joinCode"
-              type="text"
-              placeholder="111-2222-333"
-              style={{
-                width: '250px',
-                height: '40px',
-                borderWidth: '2px',
-                borderRadius: '5px',
-                borderColor: theme.palette.primary.main,
-                fontSize: '18px',
-              }}
-            />
-          </Form>
+          <SelectProblem />
         </Stack>
-      </Stack>
-      <Stack sx={{fontSize: 14, paddingTop: "100px"}}>
-        Ha nem találjátok az emailt, akkor írjatok nekünk a durerinfo@gmail.com email címre.
       </Stack>
     </Stack>
   )
