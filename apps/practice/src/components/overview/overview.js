@@ -1,6 +1,6 @@
 import { gameList } from '../games/games';
 import { Listbox, ListboxButton, ListboxOptions, ListboxOption } from '@headlessui/vue';
-import { uniq } from 'lodash-es';
+import { uniq, some } from 'lodash-es';
 import { mapActions } from 'pinia';
 import { useGameStore } from '../../stores/game';
 
@@ -29,7 +29,7 @@ export default {
     },
     gamesToShow() {
       return this.allGames.filter((game) =>
-      this.selectedCategories.includes(game.category) || this.selectedCategories.length === 0
+      some(game.category, c => this.selectedCategories.includes(c)) || this.selectedCategories.length === 0
       ).filter(game =>
         this.selectedYears.includes(game.year) || this.selectedYears.length === 0
         );

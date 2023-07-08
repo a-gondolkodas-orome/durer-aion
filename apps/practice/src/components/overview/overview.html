@@ -70,7 +70,7 @@
       <div class="grow"></div>
       <div class="flex items-baseline">
         <span class="rounded-lg bg-orange-200 px-1 m-0.5">{{ game.year }}.</span>
-        <span class="rounded-lg bg-blue-200 px-1 m-0.5">{{ game.category }}</span>
+        <span class="rounded-lg bg-blue-200 px-1 m-0.5">{{ game.category.join(', ') }}</span>
         <span class="rounded-lg bg-amber-200 px-1 m-0.5">{{ game.round }}</span>
         <span class="grow"></span>
         <button

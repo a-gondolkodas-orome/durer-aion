@@ -61,7 +61,7 @@ export const gameList = {
   ChessBishops: {
     year: 1,
     round: 'döntő',
-    category: 'B',
+    category: ['B'],
     component: 'ChessBishops',
     name: 'Sakktáblán futók',
     strategy: chessBishopsStrategy
@@ -69,7 +69,7 @@ export const gameList = {
   ChessRook: {
     year: 1,
     round: 'döntő',
-    category: 'C',
+    category: ['C'],
     component: 'ChessRook',
     name: 'Sakktáblán egy bástya',
     strategy: chessRookStrategy
@@ -77,7 +77,7 @@ export const gameList = {
   HunyadiAndTheJanissaries: {
     year: 6,
     round: 'döntő',
-    category: 'D',
+    category: ['D'],
     component: 'HunyadiAndTheJanissaries',
     name: 'Hunyadi és a janicsárok',
     strategy: hunyadiAndTheJanissariesStrategy
@@ -85,7 +85,7 @@ export const gameList = {
   PileSplitter: {
     year: 8,
     round: 'döntő',
-    category: 'A',
+    category: ['A'],
     component: 'PileSplitter',
     name: 'Kupac kettéosztó',
     strategy: pileSplitterStrategy
@@ -93,7 +93,7 @@ export const gameList = {
   PileSplitter3: {
     year: 8,
     round: 'döntő',
-    category: 'B',
+    category: ['B'],
     name: 'Kupac kettéosztó 3 kupaccal',
     component: 'PileSplitter3',
     strategy: pileSplitter3Strategy
@@ -107,7 +107,7 @@ export const gameList = {
   TicTacToeDoubleStart: {
     year: 12,
     round: 'döntő',
-    category: 'A',
+    category: ['A'],
     name: 'Duplán kezdő 3x3 amőba',
     component: 'TicTacToeDoubleStart',
     strategy: ticTacToeDoubleStartStrategy
@@ -115,7 +115,7 @@ export const gameList = {
   AntiTicTacToe: {
     year: 12,
     round: 'döntő',
-    category: 'B',
+    category: ['B'],
     name: '3x3 Anti-amőba',
     component: 'AntiTicTacToe',
     strategy: antiTicTacToeStrategy
@@ -123,7 +123,7 @@ export const gameList = {
   TwoTimesTwo: {
     year: 13,
     round: 'döntő',
-    category: 'A',
+    category: ['A'],
     name: '2x2-es játék',
     component: 'TwoTimesTwo',
     strategy: twoTimesTwoStrategy
@@ -131,7 +131,7 @@ export const gameList = {
   FiveSquares: {
     year: 13,
     round: 'döntő',
-    category: 'B',
+    category: ['B'],
     name: '5 mezős játék',
     component: 'FiveSquares',
     strategy: fiveSquaresStrategy
@@ -139,7 +139,7 @@ export const gameList = {
   TicTacToe: {
     year: 13,
     round: 'döntő',
-    category: 'C',
+    category: ['C'],
     name: 'Átszínezős Tic Tac Toe',
     component: 'TicTacToe',
     strategy: ticTacToeStrategy
@@ -147,7 +147,7 @@ export const gameList = {
   SuperstitiousCounting: {
     year: 13,
     round: 'döntő',
-    category: 'D',
+    category: ['D', 'E'],
     name: 'Babonás számoló',
     component: 'SuperstitiousCounting',
     strategy: superstitiousCountingStrategy
@@ -155,7 +155,7 @@ export const gameList = {
   PileSplitter4: {
     year: 13,
     round: 'döntő',
-    category: 'E+',
+    category: ['E+'],
     name: 'Kupac kettéosztó 4 kupaccal',
     component: 'PileSplitter4',
     strategy: pileSplitter4Strategy
@@ -163,7 +163,7 @@ export const gameList = {
   CubeColoring: {
     year: 15,
     round: 'döntő',
-    category: 'C',
+    category: ['C'],
     name: 'Kockaszínezés',
     component: 'CubeColoring',
     strategy: cubeColoringStrategy
@@ -171,7 +171,7 @@ export const gameList = {
   Coin357: {
     year: 15,
     round: 'döntő',
-    category: 'A',
+    category: ['A'],
     name: '3 db 1, 5 db 2 és 7 db 3 pengős',
     component: 'Coin357',
     strategy: coin357Strategy
@@ -179,7 +179,7 @@ export const gameList = {
   Coin123: {
     year: 15,
     round: 'döntő',
-    category: 'B',
+    category: ['B'],
     name: '3, 2, 1 érmék',
     component: 'Coin123',
     strategy: coin123Strategy
@@ -187,7 +187,7 @@ export const gameList = {
   AddReduceDouble: {
     year: 16,
     round: 'döntő',
-    category: 'D',
+    category: ['D'],
     component: 'AddReduceDouble',
     name: 'Kettőt vesz, egyet kap',
     strategy: addReduceDoubleStrategy
@@ -195,7 +195,7 @@ export const gameList = {
   FourPilesSpreadAhead: {
     year: 16,
     round: 'döntő',
-    category: 'E, E+',
+    category: ['E', 'E+'],
     name: '4 kupacban előrepakolás',
     component: 'FourPilesSpreadAhead',
     strategy: fourPilesSpreadAheadStrategy
