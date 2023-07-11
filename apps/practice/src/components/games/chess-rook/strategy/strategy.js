@@ -1,6 +1,6 @@
 'use strict';
 
-import { last, range, random } from 'lodash-es';
+import { last, range, random, cloneDeep } from 'lodash';
 
 export const generateNewBoard = () => {
   const board = range(0, 8).map(() => range(0, 8).map(() => null));
@@ -11,20 +11,19 @@ export const generateNewBoard = () => {
   };
 };
 
-export const isTheLastMoverTheWinner = true;
-
-export const getGameStateAfterAiMove = (board) => {
+export const getGameStateAfterAiTurn = ({ board }) => {
   const aiMove = getOptimalAiMove(board);
   return getGameStateAfterMove(board, aiMove);
 };
 
 export const getGameStateAfterMove = (board, { row, col }) => {
-  markVisitedFields(board, board.rookPosition, { row, col });
+  const newBoard = cloneDeep(board);
+  markVisitedFields(newBoard, newBoard.rookPosition, { row, col });
 
-  board.chessBoard[row][col] = 'rook';
-  board.rookPosition = { row, col };
+  newBoard.chessBoard[row][col] = 'rook';
+  newBoard.rookPosition = { row, col };
 
-  return { board, isGameEnd: getAllowedMoves(board).length === 0 };
+  return { newBoard, isGameEnd: getAllowedMoves(newBoard).length === 0, winnerIndex: null };
 };
 
 const getOptimalAiMove = (board) => {

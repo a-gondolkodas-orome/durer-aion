@@ -1,33 +1,32 @@
 'use strict';
 
-import { flatMap, range, sample, cloneDeep, random, shuffle } from 'lodash-es';
-
-const HORIZONTAL = "h";
-const VERTICAL = "v";
-let axis = null;
+import { flatMap, range, sample, cloneDeep, random, shuffle } from 'lodash';
 
 export const generateNewBoard = () => {
   axis = null;
   return range(0, 8).map(() => range(0, 8).map(() => null));
 };
 
+const HORIZONTAL = "h";
+const VERTICAL = "v";
+let axis = null;
+
 const boardIndices = flatMap(range(0, 8), row => range(0, 8).map(col => ({ row, col })));
 
 export const BISHOP = 1;
 export const FORBIDDEN = 2;
 
-export const isTheLastMoverTheWinner = true;
-
-export const getGameStateAfterAiMove = (board) => {
+export const getGameStateAfterAiTurn = ({ board }) => {
   const aiMove = getOptimalAiMove(board);
   return getGameStateAfterMove(board, aiMove);
 };
 
 export const getGameStateAfterMove = (board, { row, col }) => {
-  markForbiddenFields(board, { row, col });
-  board[row][col] = BISHOP;
+  const newBoard = cloneDeep(board);
+  markForbiddenFields(newBoard, { row, col });
+  newBoard[row][col] = BISHOP;
 
-  return { board, isGameEnd: getAllowedMoves(board).length === 0 };
+  return { newBoard, isGameEnd: getAllowedMoves(newBoard).length === 0, winnerIndex: null };
 };
 
 const getOptimalAiMove = (board) => {

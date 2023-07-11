@@ -1,4 +1,4 @@
-import { some, difference } from 'lodash-es';
+import { some, difference } from 'lodash';
 
 /*
 board indices topography

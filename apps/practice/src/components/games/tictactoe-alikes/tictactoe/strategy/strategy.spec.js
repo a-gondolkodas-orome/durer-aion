@@ -1,12 +1,6 @@
-import { generateNewBoard, getGameStateAfterAiMove, inPlacingPhase } from './strategy';
+import { getGameStateAfterAiTurn, inPlacingPhase } from './strategy';
 
 describe('TicTacToe strategy', () => {
-  describe('generateNewBoard', () => {
-    it('should be a 9 element array of nulls', () => {
-      expect(generateNewBoard()).toEqual([null, null, null, null, null, null, null, null, null]);
-    });
-  });
-
   describe('inPlacingPhase', () => {
     it('should return true if board has empty place', () => {
       expect(inPlacingPhase([null, 'blue', 'red', 'red', 'red', 'blue', 'blue', 'blue', 'red'])).toBe(true);
@@ -17,7 +11,7 @@ describe('TicTacToe strategy', () => {
     });
   });
 
-  describe('getGameStateAfterAiMove', () => {
+  describe('getGameStateAfterAiTurn', () => {
     describe('new piece placing phase', () => {
       it('should win the game in 1 move if possible', () => {
         const board = [
@@ -26,8 +20,8 @@ describe('TicTacToe strategy', () => {
           'blue', 'blue', null
         ];
 
-        const result = getGameStateAfterAiMove(board);
-        expect(result.board[2]).toEqual('red');
+        const result = getGameStateAfterAiTurn({ board });
+        expect(result.newBoard[2]).toEqual('red');
         expect(result.isGameEnd).toBe(true);
       });
 
@@ -38,8 +32,8 @@ describe('TicTacToe strategy', () => {
           'blue', 'blue', null
         ];
 
-        const result = getGameStateAfterAiMove(board);
-        expect(result.board[0]).toEqual('red');
+        const result = getGameStateAfterAiTurn({ board });
+        expect(result.newBoard[0]).toEqual('red');
         expect(result.isGameEnd).toBe(true);
       });
 
@@ -50,8 +44,8 @@ describe('TicTacToe strategy', () => {
           null, null, 'blue'
         ];
 
-        const result = getGameStateAfterAiMove(board);
-        expect(result.board[6]).toEqual('red');
+        const result = getGameStateAfterAiTurn({ board });
+        expect(result.newBoard[6]).toEqual('red');
         expect(result.isGameEnd).toBe(true);
       });
 
@@ -62,8 +56,8 @@ describe('TicTacToe strategy', () => {
           null, 'red', null
         ];
 
-        const result = getGameStateAfterAiMove(board);
-        expect(result.board[6]).toEqual('red');
+        const result = getGameStateAfterAiTurn({ board });
+        expect(result.newBoard[6]).toEqual('red');
         expect(result.isGameEnd).toBe(false);
       });
 
@@ -74,8 +68,8 @@ describe('TicTacToe strategy', () => {
           null, null, null
         ];
 
-        const result = getGameStateAfterAiMove(board);
-        expect(result.board[4]).toEqual('red');
+        const result = getGameStateAfterAiTurn({ board });
+        expect(result.newBoard[4]).toEqual('red');
         expect(result.isGameEnd).toBe(false);
       });
 
@@ -86,10 +80,10 @@ describe('TicTacToe strategy', () => {
           null, null, null
         ];
 
-        const result = getGameStateAfterAiMove(board);
+        const result = getGameStateAfterAiTurn({ board });
         expect(
-          result.board[0] === 'red' || result.board[2] === 'red' ||
-          result.board[6] === 'red' || result.board[8] === 'red'
+          result.newBoard[0] === 'red' || result.newBoard[2] === 'red' ||
+          result.newBoard[6] === 'red' || result.newBoard[8] === 'red'
         ).toBe(true);
         expect(result.isGameEnd).toBe(false);
       });
@@ -101,8 +95,8 @@ describe('TicTacToe strategy', () => {
           null, null, 'blue'
         ];
 
-        const result = getGameStateAfterAiMove(board);
-        expect(result.board[2] === 'red' || result.board[6] === 'red').toBe(true);
+        const result = getGameStateAfterAiTurn({ board });
+        expect(result.newBoard[2] === 'red' || result.newBoard[6] === 'red').toBe(true);
         expect(result.isGameEnd).toBe(false);
       });
     });
@@ -115,8 +109,8 @@ describe('TicTacToe strategy', () => {
           'blue', 'red', 'blue'
         ];
 
-        const result = getGameStateAfterAiMove(board);
-        expect(result.board[4]).toEqual('white');
+        const result = getGameStateAfterAiTurn({ board });
+        expect(result.newBoard[4]).toEqual('white');
         expect(result.isGameEnd).toBe(false);
       });
 
@@ -127,109 +121,109 @@ describe('TicTacToe strategy', () => {
           'blue', 'red', 'blue'
         ];
 
-        const result = getGameStateAfterAiMove(board);
-        expect(result.board[5]).toEqual('white');
+        const result = getGameStateAfterAiTurn({ board });
+        expect(result.newBoard[5]).toEqual('white');
         expect(result.isGameEnd).toBe(true);
       });
 
       describe('r b r, b r b, b r b scenario', () => {
         it('should color 3 to white (and similarly in rotated scenarios)', () => {
-          const res1 = getGameStateAfterAiMove([
+          const res1 = getGameStateAfterAiTurn({ board: [
             'red', 'blue', 'red',
             'blue', 'red', 'blue',
             'blue', 'red', 'blue'
-          ]).board;
+          ] }).newBoard;
           expect(res1[3] === 'white' || res1[5] === 'white').toBe(true);
 
-          const res2 = getGameStateAfterAiMove([
+          const res2 = getGameStateAfterAiTurn({ board: [
             'red', 'blue', 'blue',
             'blue', 'red', 'red',
             'red', 'blue', 'blue'
-          ]).board;
+          ] }).newBoard;
           expect(res2[7] === 'white' || res2[1] === 'white').toBe(true);
         });
 
         it('should color 8 to white as 3rd if no instant win (and similarly in rotated scenarios)', () => {
-          expect(getGameStateAfterAiMove([
+          expect(getGameStateAfterAiTurn({ board: [
             'red', 'blue', 'white',
             'white', 'red', 'blue',
             'blue', 'red', 'blue'
-          ]).board[8]).toEqual('white');
-          expect(getGameStateAfterAiMove([
+          ] }).newBoard[8]).toEqual('white');
+          expect(getGameStateAfterAiTurn({ board: [
             'red', 'blue', 'red',
             'white', 'red', 'blue',
             'blue', 'white', 'blue'
-          ]).board[8]).toEqual('white');
+          ] }).newBoard[8]).toEqual('white');
 
-          expect(getGameStateAfterAiMove([
+          expect(getGameStateAfterAiTurn({ board: [
             'blue', 'white', 'red',
             'white', 'red', 'blue',
             'blue', 'blue', 'red'
-          ]).board[6]).toEqual('white');
-          expect(getGameStateAfterAiMove([
+          ] }).newBoard[6]).toEqual('white');
+          expect(getGameStateAfterAiTurn({ board: [
             'blue', 'white', 'red',
             'red', 'red', 'blue',
             'blue', 'blue', 'white'
-          ]).board[6]).toEqual('white');
+          ] }).newBoard[6]).toEqual('white');
 
-          expect(getGameStateAfterAiMove([
+          expect(getGameStateAfterAiTurn({ board: [
             'blue', 'white', 'blue',
             'blue', 'red', 'white',
             'red', 'blue', 'red'
-          ]).board[0]).toEqual('white');
-          expect(getGameStateAfterAiMove([
+          ] }).newBoard[0]).toEqual('white');
+          expect(getGameStateAfterAiTurn({ board: [
             'blue', 'red', 'blue',
             'blue', 'red', 'white',
             'white', 'blue', 'red'
-          ]).board[0]).toEqual('white');
+          ] }).newBoard[0]).toEqual('white');
 
-          expect(getGameStateAfterAiMove([
+          expect(getGameStateAfterAiTurn({ board: [
             'red', 'blue', 'blue',
             'blue', 'red', 'white',
             'red', 'white', 'blue'
-          ]).board[2]).toEqual('white');
-          expect(getGameStateAfterAiMove([
+          ] }).newBoard[2]).toEqual('white');
+          expect(getGameStateAfterAiTurn({ board: [
             'white', 'blue', 'blue',
             'blue', 'red', 'red',
             'red', 'white', 'blue'
-          ]).board[2]).toEqual('white');
+          ] }).newBoard[2]).toEqual('white');
         });
       });
 
       describe('r b b, b r r, b r b scenario', () => {
         it('should color 2 to white (and similarly in rotated scenarios)', () => {
-          const res = getGameStateAfterAiMove([
+          const res = getGameStateAfterAiTurn({ board: [
             'red', 'blue', 'blue',
             'blue', 'red', 'red',
             'blue', 'red', 'blue'
-          ]).board;
+          ] }).newBoard;
           expect(res[2] === 'white' || res[6] === 'white').toBe(true);
         });
 
         it('should color 3 to white (and similarly in rotated scenarios)', () => {
-          expect(getGameStateAfterAiMove([
+          expect(getGameStateAfterAiTurn({ board: [
             'red', 'blue', 'white',
             'blue', 'red', 'red',
             'blue', 'white', 'blue'
-          ]).board[3]).toEqual('white');
+          ] }).newBoard[3]).toEqual('white');
 
-          expect(getGameStateAfterAiMove([
+          expect(getGameStateAfterAiTurn({ board: [
             'blue', 'blue', 'red',
             'white', 'red', 'blue',
             'blue', 'red', 'white'
-          ]).board[1]).toEqual('white');
+          ] }).newBoard[1]).toEqual('white');
 
-          expect(getGameStateAfterAiMove([
+          expect(getGameStateAfterAiTurn({ board: [
             'blue', 'white', 'blue',
             'red', 'red', 'blue',
             'white', 'blue', 'red'
-          ]).board[5]).toEqual('white');
+          ] }).newBoard[5]).toEqual('white');
 
-          expect(getGameStateAfterAiMove([
+          expect(getGameStateAfterAiTurn({ board: [
             'white', 'red', 'blue',
             'blue', 'red', 'white',
             'red', 'blue', 'blue'
-          ]).board[7]).toEqual('white');
+          ] }).newBoard[7]).toEqual('white');
         });
       });
     });

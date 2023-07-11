@@ -1,32 +1,26 @@
-import { generateNewBoard, getGameStateAfterAiMove, getGameStateAfterMove } from './strategy';
+import { getGameStateAfterAiTurn, getGameStateAfterMove } from './strategy';
 
 describe('Anti TicTacToe strategy', () => {
-  describe('generateNewBoard', () => {
-    it('should be a 9 element array of nulls', () => {
-      expect(generateNewBoard()).toEqual([null, null, null, null, null, null, null, null, null]);
-    });
-  });
-
-  describe('getGameStateAfterAiMove', () => {
+  describe('getGameStateAfterAiTurn', () => {
     it('should place to middle place as a starting move', () => {
       const board = Array(9).fill(null);
 
-      const result = getGameStateAfterAiMove(board, false);
-      expect(result.board[4]).toEqual('red');
+      const result = getGameStateAfterAiTurn({ board, playerIndex: 1 });
+      expect(result.newBoard[4]).toEqual('red');
     });
 
     it('should place to central mirror image of item without mirror image', () => {
-      expect(getGameStateAfterAiMove([
+      expect(getGameStateAfterAiTurn({ board: [
         'blue', null, null,
         null, 'red', null,
         null, null, null
-      ], false).board[8]).toEqual('red');
+      ], playerIndex: 1 }).newBoard[8]).toEqual('red');
 
-      expect(getGameStateAfterAiMove([
+      expect(getGameStateAfterAiTurn({ board: [
         'blue', null, null,
         null, 'red', 'blue',
         null, null, 'red'
-      ], false).board[3]).toEqual('red');
+      ], playerIndex: 1 }).newBoard[3]).toEqual('red');
     });
 
     it('should not place to achieve 3 in a row if possible', () => {
@@ -35,8 +29,8 @@ describe('Anti TicTacToe strategy', () => {
         'blue', 'red', 'red',
         'red', null, 'red'
       ];
-      const result = getGameStateAfterAiMove(board, true);
-      expect(result.board[1]).not.toEqual('blue');
+      const result = getGameStateAfterAiTurn({ board, playerIndex: 0 });
+      expect(result.newBoard[1]).not.toEqual('blue');
     });
   });
 
@@ -57,7 +51,7 @@ describe('Anti TicTacToe strategy', () => {
         'red', 'blue', 'red'
       ];
       expect(getGameStateAfterMove(board).isGameEnd).toBe(true);
-      expect(getGameStateAfterMove(board).hasFirstPlayerWon).toBe(true);
+      expect(getGameStateAfterMove(board).winnerIndex).toBe(0);
     });
 
     it('should declare 2nd as winner even if they win at last piece', () => {
@@ -66,7 +60,7 @@ describe('Anti TicTacToe strategy', () => {
         'blue', 'red', 'red',
         'red', 'red', 'blue'
       ];
-      expect(getGameStateAfterMove(board).hasFirstPlayerWon).toBe(false);
+      expect(getGameStateAfterMove(board).winnerIndex).toBe(1);
     });
   });
 });

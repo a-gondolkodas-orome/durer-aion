@@ -1,33 +1,30 @@
 'use strict';
 
-import { isNull, range, sample, cloneDeep } from 'lodash-es';
-import { generateEmptyTicTacToeBoard, hasWinningSubset } from '../../helpers';
-
-export const generateNewBoard = generateEmptyTicTacToeBoard;
+import { isNull, range, sample, cloneDeep } from 'lodash';
+import { hasWinningSubset } from '../../helpers';
 
 const roleColors = ['red', 'blue'];
 
-export const playerColor = isPlayerTheFirstToMove => isPlayerTheFirstToMove ? roleColors[0] : roleColors[1];
-const aiColor = isPlayerTheFirstToMove => isPlayerTheFirstToMove ? roleColors[1] : roleColors[0];
+export const playerColor = playerIndex => playerIndex === 0 ? roleColors[0] : roleColors[1];
+const aiColor = playerIndex => playerIndex === 0 ? roleColors[1] : roleColors[0];
 
 
-export const getGameStateAfterAiMove = (board, isPlayerTheFirstToMove) => {
-  if (board.filter(c => c).length === 0) {
+export const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
+  const newBoard = cloneDeep(board);
+  if (newBoard.filter(c => c).length === 0) {
     // choose two neighboring corners randomly
     const firstStep = sample([[0, 2], [2, 8], [6, 8], [0, 6]]);
-    board[firstStep[0]] = roleColors[0];
-    board[firstStep[1]] = roleColors[0];
+    newBoard[firstStep[0]] = roleColors[0];
+    newBoard[firstStep[1]] = roleColors[0];
   } else {
-    board[getOptimalAiPlacingPosition(board, isPlayerTheFirstToMove)] = aiColor(isPlayerTheFirstToMove);
+    newBoard[getOptimalAiPlacingPosition(newBoard, playerIndex)] = aiColor(playerIndex);
   }
-  return getGameStateAfterMove(board);
+  return getGameStateAfterMove(newBoard);
 };
 
-export const getGameStateAfterMove = (board) => {
-  return { board, isGameEnd: isGameEnd(board), hasFirstPlayerWon: hasFirstPlayerWon(board) };
+export const getGameStateAfterMove = (newBoard) => {
+  return { newBoard, isGameEnd: isGameEnd(newBoard), winnerIndex: hasFirstPlayerWon(newBoard) ? 0 : 1 };
 };
-
-export const isTheLastMoverTheWinner = null;
 
 const hasFirstPlayerWon = (board) => {
   if (!isGameEnd(board)) return undefined;
@@ -39,19 +36,19 @@ const isGameEnd = (board) => board.filter(c => c).length === 9 || hasWinningSubs
 const hasWinningSubsetForPlayer = (board, roleIndex) =>
   hasWinningSubset(range(0, 9).filter(i => board[i] === roleColors[roleIndex]));
 
-export const getOptimalAiPlacingPosition = (board, isPlayerTheFirstToMove) => {
+const getOptimalAiPlacingPosition = (board, playerIndex) => {
   const allowedPlaces = range(0, 9).filter(i => isNull(board[i]));
 
   const optimalPlaces = allowedPlaces.filter(i => {
     const boardCopy = cloneDeep(board);
-    boardCopy[i] = aiColor(isPlayerTheFirstToMove);
-    return isWinningState(boardCopy, !isPlayerTheFirstToMove);
+    boardCopy[i] = aiColor(playerIndex);
+    return isWinningState(boardCopy, playerIndex === 1);
   });
 
   if (optimalPlaces.length > 0) return sample(optimalPlaces);
 
   // even if we are gonna lose, try to prolong it
-  const playerPieces = range(0, 9).filter(i => board[i] === playerColor(isPlayerTheFirstToMove));
+  const playerPieces = range(0, 9).filter(i => board[i] === playerColor(playerIndex));
   const defendingPlaces = allowedPlaces.filter(i => hasWinningSubset([...playerPieces, i]));
   if (defendingPlaces.length > 0) return sample(defendingPlaces);
 

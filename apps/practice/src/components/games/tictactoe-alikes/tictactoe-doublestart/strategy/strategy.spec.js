@@ -1,22 +1,16 @@
-import { generateNewBoard, getGameStateAfterAiMove, getGameStateAfterMove } from './strategy';
-import { range } from 'lodash-es';
+import { getGameStateAfterAiTurn, getGameStateAfterMove } from './strategy';
+import { range } from 'lodash';
 
 describe('Double starter TicTacToe strategy', () => {
-  describe('generateNewBoard', () => {
-    it('should be a 9 element array of nulls', () => {
-      expect(generateNewBoard()).toEqual([null, null, null, null, null, null, null, null, null]);
-    });
-  });
-
-  describe('getGameStateAfterAiMove', () => {
+  describe('getGameStateAfterAiTurn', () => {
     describe('AI is the first to move', () => {
       it('should place to two corners in same row as a starting move', () => {
         const board = Array(9).fill(null);
 
-        const result = getGameStateAfterAiMove(board, false);
+        const result = getGameStateAfterAiTurn({ board, playerIndex: 1 });
 
         expect([[0, 2], [2, 8], [6, 8], [0, 6]]).toContainEqual(
-          range(0, 9).filter(i => result.board[i] === 'red')
+          range(0, 9).filter(i => result.newBoard[i] === 'red')
         );
       });
 
@@ -27,8 +21,8 @@ describe('Double starter TicTacToe strategy', () => {
           null, null, null
         ];
 
-        const result = getGameStateAfterAiMove(board, false);
-        expect(result.board[4]).toEqual('red');
+        const result = getGameStateAfterAiTurn({ board, playerIndex: 1 });
+        expect(result.newBoard[4]).toEqual('red');
       });
 
       it('should place to finish a winning diagonal if possible', () => {
@@ -38,8 +32,8 @@ describe('Double starter TicTacToe strategy', () => {
           null, null, 'blue'
         ];
 
-        const result = getGameStateAfterAiMove(board, false);
-        expect(result.board[6]).toEqual('red');
+        const result = getGameStateAfterAiTurn({ board, playerIndex: 1 });
+        expect(result.newBoard[6]).toEqual('red');
         expect(result.isGameEnd).toBe(false);
       });
 
@@ -50,8 +44,8 @@ describe('Double starter TicTacToe strategy', () => {
           null, 'blue', 'blue'
         ];
 
-        const result = getGameStateAfterAiMove(board, false);
-        expect(result.board[6]).toEqual('red');
+        const result = getGameStateAfterAiTurn({ board, playerIndex: 1 });
+        expect(result.newBoard[6]).toEqual('red');
         expect(result.isGameEnd).toBe(false);
       });
     });
@@ -64,8 +58,8 @@ describe('Double starter TicTacToe strategy', () => {
           null, 'blue', 'blue'
         ];
 
-        const result = getGameStateAfterAiMove(board, true);
-        expect(result.board[6]).toEqual('blue');
+        const result = getGameStateAfterAiTurn({ board, playerIndex: 0 });
+        expect(result.newBoard[6]).toEqual('blue');
         expect(result.isGameEnd).toBe(true);
       });
 
@@ -76,8 +70,8 @@ describe('Double starter TicTacToe strategy', () => {
           null, null, null
         ];
 
-        const result = getGameStateAfterAiMove(board, true);
-        expect(result.board[8]).toEqual('blue');
+        const result = getGameStateAfterAiTurn({ board, playerIndex: 0 });
+        expect(result.newBoard[8]).toEqual('blue');
       });
     });
   });
@@ -93,7 +87,7 @@ describe('Double starter TicTacToe strategy', () => {
       const result = getGameStateAfterMove(board);
 
       expect(result.isGameEnd).toBe(true);
-      expect(result.hasFirstPlayerWon).toBe(false);
+      expect(result.winnerIndex).toBe(1);
     });
 
     it('should end the game when there are 9 pieces', () => {
@@ -106,7 +100,7 @@ describe('Double starter TicTacToe strategy', () => {
       const result = getGameStateAfterMove(board);
 
       expect(result.isGameEnd).toBe(true);
-      expect(result.hasFirstPlayerWon).toBe(true);
+      expect(result.winnerIndex).toBe(0);
     });
 
     it('should end the game when there are 9 pieces but no winning subset', () => {
@@ -119,7 +113,7 @@ describe('Double starter TicTacToe strategy', () => {
       const result = getGameStateAfterMove(board);
 
       expect(result.isGameEnd).toBe(true);
-      expect(result.hasFirstPlayerWon).toBe(false);
+      expect(result.winnerIndex).toBe(1);
     });
   });
 });

@@ -1,17 +1,15 @@
 'use strict';
 
-import { random, flatten } from 'lodash-es';
+import { random, flatten, cloneDeep } from 'lodash';
 
-export const getGameStateAfterAiMove = (board, isPlayerTheFirstToMove) => {
-  if (isPlayerTheFirstToMove) {
+export const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
+  if (playerIndex === 0) {
     const optimalGroupToKill = getOptimalGroupToKill(board);
     return getGameStateAfterKillingGroup(board, optimalGroupToKill);
   } else {
-    return { board: colorBoardOptimally(board), isGameEnd: false };
+    return { newBoard: colorBoardOptimally(board), isGameEnd: false };
   }
 };
-
-export const isTheLastMoverTheWinner = null;
 
 export const generateNewBoard = () => {
   const rowCount = 5;
@@ -39,41 +37,43 @@ export const generateNewBoard = () => {
 export const getGameStateAfterKillingGroup = (board, group) => {
   let isGameEnd = false;
   let hasFirstPlayerWon = undefined;
+  const newBoard = cloneDeep(board);
 
-  for (let i = 0; i < board.length; i++) {
-    const remainingSoldiersInRow = board[i].filter((soldier) => soldier !== group);
+  for (let i = 0; i < newBoard.length; i++) {
+    const remainingSoldiersInRow = newBoard[i].filter((soldier) => soldier !== group);
     if (remainingSoldiersInRow.length > 0) {
       if (i === 0) {
         isGameEnd = true;
         hasFirstPlayerWon = true;
       } else {
-        board[i - 1].push(...remainingSoldiersInRow);
+        newBoard[i - 1].push(...remainingSoldiersInRow);
       }
     }
-    board[i] = [];
+    newBoard[i] = [];
   }
 
-  if (flatten(board).length === 0 && !isGameEnd) {
+  if (flatten(newBoard).length === 0 && !isGameEnd) {
     isGameEnd = true;
     hasFirstPlayerWon = false;
   }
-  return { board, isGameEnd, hasFirstPlayerWon };
+  return { newBoard, isGameEnd, hasFirstPlayerWon };
 };
 
 const colorBoardOptimally = (board) => {
   const groupScores = { blue: 0, red: 0 };
   const firstColor = random(0, 1) === 1 ? 'red' : 'blue';
   const secondColor = firstColor === 'blue' ? 'red' : 'blue';
+  const newBoard = cloneDeep(board);
 
-  for (let i = 0; i < board.length; i++) {
-    for (let j = 0; j < board[i].length; j++) {
+  for (let i = 0; i < newBoard.length; i++) {
+    for (let j = 0; j < newBoard[i].length; j++) {
       const nextGroup = groupScores[firstColor] < groupScores[secondColor] ? firstColor : secondColor;
-      board[i][j] = nextGroup;
+      newBoard[i][j] = nextGroup;
       groupScores[nextGroup] += (1 / 2) ** i;
     }
   }
 
-  return board;
+  return newBoard;
 };
 
 const getOptimalGroupToKill = (board) => {

@@ -1,13 +1,7 @@
-import { createApp } from 'vue';
-import App from '@/components/app/app';
-import createRouter from './router';
-import '@/assets/css/style.css';
+import { createRoot } from "react-dom/client";
+import { App } from "./components/app/app";
 
-import { createPinia } from 'pinia';
+const container = document.getElementById("app");
+const root = createRoot(container);
 
-const app = createApp(App);
-
-app.use(createPinia());
-app.use(createRouter());
-
-app.mount('#app');
+root.render(<App />);

@@ -1,15 +1,13 @@
-'use strict';
-
-import Overview from './overview';
-import { gameList } from '../games/games';
-import { mountComponent } from '../../../test-helpers';
+import React from 'react';
+import { render } from '@testing-library/react';
+import { Overview } from './overview';
+import { gameList } from '../games/gameList';
+import { HashRouter } from 'react-router-dom';
 
 describe('Overview', () => {
   it('should show a list of available games', async () => {
-    const { wrapper } = await mountComponent(Overview);
+    const { container } = render(<HashRouter><Overview /></HashRouter>);
 
-    const gamesToShow = Object.values(gameList).filter((game) => !game.isHiddenFromOverview);
-
-    expect(wrapper.findAll('.js-game-card')).toHaveLength(gamesToShow.length);
+    expect(container.querySelectorAll('.js-game-card')).toHaveLength(Object.values(gameList).length);
   });
 });

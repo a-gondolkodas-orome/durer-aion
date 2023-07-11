@@ -1,24 +1,21 @@
 'use strict';
 
-import { isNull, some, groupBy, range, cloneDeep, sample } from 'lodash-es';
-import { generateEmptyTicTacToeBoard, hasWinningSubset } from '../../helpers';
+import { isNull, some, groupBy, range, cloneDeep, sample } from 'lodash';
+import { hasWinningSubset } from '../../helpers';
 
-export const generateNewBoard = generateEmptyTicTacToeBoard;
-
-export const getGameStateAfterAiMove = (board) => {
-  const aiPosition = getOptimalAiPosition(board);
-  board[aiPosition] = getNextColor(board, false);
-  return getGameStateAfterMove(board);
+export const getGameStateAfterAiTurn = ({ board }) => {
+  const newBoard = cloneDeep(board);
+  const aiPosition = getOptimalAiPosition(newBoard);
+  newBoard[aiPosition] = getNextColor(newBoard, false);
+  return getGameStateAfterMove(newBoard);
 };
 
 export const pColor = 'blue';
 export const aiColor = 'red';
 
-export const getGameStateAfterMove = (board) => {
-  return { board, isGameEnd: isGameEnd(board) };
+export const getGameStateAfterMove = (newBoard) => {
+  return { newBoard, isGameEnd: isGameEnd(newBoard), winnerIndex: null };
 };
-
-export const isTheLastMoverTheWinner = true;
 
 export const inPlacingPhase = (board) => board.find(isNull) !== undefined;
 

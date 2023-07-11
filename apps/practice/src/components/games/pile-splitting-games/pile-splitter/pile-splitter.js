@@ -1,58 +1,121 @@
-import GameSidebar from '../../../common/game-sidebar/game-sidebar';
-import GameRule from '../../../common/game-rule/game-rule';
-import { getGameStateAfterMove } from './strategy/strategy';
-import { mapActions, mapState } from 'pinia';
-import { useGameStore } from '../../../../stores/game';
+import React, { useState } from 'react';
+import { range, isEqual, random } from 'lodash';
+import { strategyGameFactory } from '../../strategy-game';
+import { getBoardAfterAiTurn } from './strategy';
 
-export default {
-  template: require('./pile-splitter.html'),
-  components: { GameSidebar, GameRule },
-  data: () => ({
-    hoveredPiece: null
-  }),
-  computed: {
-    ...mapState(
-      useGameStore,
-      ['board', 'isGameFinished', 'isGameReadyToStart', 'shouldPlayerMoveNext']
-    )
-  },
-  methods: {
-    ...mapActions(useGameStore, ['endPlayerTurn', 'initializeGame']),
-    isDisabled({ pileId, pieceId }) {
-      return !this.shouldPlayerMoveNext || pieceId === this.board[pileId] - 1;
-    },
-    clickPiece({ pileId, pieceId }) {
-      if (this.isDisabled({ pileId, pieceId })) return;
-      this.endPlayerTurn(getGameStateAfterMove(this.board, { pileId, pieceId }));
-      this.hoveredPiece = null;
-    },
-    toBeLeft({ pileId, pieceId }) {
-      if (this.hoveredPiece === null) return false;
-      if (pileId !== this.hoveredPiece.pileId) return false;
-      if (this.hoveredPiece.pieceId === this.board[pileId] - 1) return false;
-      if (pieceId > this.hoveredPiece.pieceId) return false;
-      return true;
-    },
-    toBeRemoved({ pileId }) {
-      if (this.hoveredPiece === null) return false;
-      return this.hoveredPiece.pileId !== pileId;
-    },
-    currentChoiceDescription(pileId) {
-      if (this.isGameFinished) return '';
+const generateNewBoard = () => ([random(3, 10), random(3, 10)]);
 
-      const pieceCountInPile = this.board[pileId];
+const isGameEnd = (board) => isEqual(board, [1, 1]);
 
-      if (
-        this.isGameReadyToStart ||
-        !this.shouldPlayerMoveNext ||
-        !this.hoveredPiece
-      ) return pieceCountInPile;
-      if (this.hoveredPiece.pileId !== pileId) return `${pieceCountInPile} → 🗑️`;
 
-      return `${pieceCountInPile} → ${this.hoveredPiece.pieceId + 1}, ${pieceCountInPile - this.hoveredPiece.pieceId - 1}`;
-    }
-  },
-  created() {
-    this.initializeGame('PileSplitter');
+const getGameStateAfterAiTurn = ({ board }) => {
+  const newBoard = getBoardAfterAiTurn(board);
+  return { newBoard, isGameEnd: isGameEnd(newBoard), winnerIndex: null };
+};
+
+const GameBoard = ({ board, ctx }) => {
+  const [hoveredPiece, setHoveredPiece] = useState(null);
+
+  const isDisabled = ({ pileId, pieceId }) => {
+    if (!ctx.shouldPlayerMoveNext) return true;
+    return pieceId === board[pileId] - 1;
+  };
+
+  const clickPiece = ({ pileId, pieceId }) => {
+    if (isDisabled({ pileId, pieceId })) return;
+
+    const newBoard = [pieceId + 1, board[pileId] - pieceId - 1];
+    ctx.endPlayerTurn({ newBoard, isGameEnd: isGameEnd(newBoard), winnerIndex: null });
+
+    setHoveredPiece(null);
+  };
+
+  const toBeLeft = ({ pileId, pieceId }) => {
+    if (hoveredPiece === null) return false;
+    if (pileId !== hoveredPiece.pileId) return false;
+    if (hoveredPiece.pieceId === board[pileId] - 1) return false;
+    if (pieceId > hoveredPiece.pieceId) return false;
+    return true;
+  };
+
+  const toBeRemoved = ({ pileId }) => {
+    if (hoveredPiece === null) return false;
+    return hoveredPiece.pileId !== pileId;
+  };
+
+  const currentChoiceDescription = (pileId) => {
+    const pieceCountInPile = board[pileId];
+
+    if (!ctx.shouldPlayerMoveNext) return pieceCountInPile;
+    if (!hoveredPiece) return pieceCountInPile;
+    if (hoveredPiece.pileId !== pileId) return `${pieceCountInPile} → 🗑️`;
+
+    return `${pieceCountInPile} → ${hoveredPiece.pieceId + 1}, ${pieceCountInPile - hoveredPiece.pieceId - 1}`;
+  };
+
+  return (
+  <section className="p-2 shrink-0 grow basis-2/3">
+    {[0, 1].map(pileId => (
+      <div
+        key={pileId}
+        className={`
+          js-pile w-[50%] pl-1 inline-block text-center
+          ${pileId === 0 && board[0] >= board[1] ? 'border-r-2' : ''}
+          ${pileId === 1 && board[0] < board[1] ? 'border-l-2' : ''}
+        `}
+        style={{ transform: 'scaleY(-1)' }}
+      >
+        <p className="text-xl" style={{ transform: 'scaleY(-1)' }}>
+          {currentChoiceDescription(pileId)}
+        </p>
+          {range(board[pileId]).map(pieceId => (
+            <button
+              key={pieceId}
+              disabled={isDisabled({ pileId, pieceId })}
+              className={`
+                js-pebble inline-block bg-blue-600 w-[20%] aspect-square rounded-full mx-0.5
+                ${toBeRemoved({ pileId }) ? 'opacity-50 bg-red-600' : ''}
+                ${toBeLeft({ pileId, pieceId }) ? 'bg-blue-900' : ''}
+              `}
+              onClick={() => clickPiece({ pileId, pieceId })}
+              onFocus={() => setHoveredPiece({ pileId, pieceId })}
+              onBlur={() => setHoveredPiece(null)}
+              onMouseOver={() => setHoveredPiece({ pileId, pieceId })}
+              onMouseOut={() => setHoveredPiece(null)}
+            ></button>
+          ))}
+      </div>
+    ))}
+  </section>
+  );
+};
+
+const getPlayerStepDescription = () =>
+  'Kattints egy korongra, hogy azzal kettéosztd azt a kupacot.';
+
+const rule = <>
+  A pályán mindig két kupac korong található.
+  A soron következő játékos választ egy kupacot, és azt szétosztja két kisebb kupacra (mindkettőbe
+  legalább 1 korongnak kerülnie kell), a másik kupacot pedig kidobjuk.
+  Az a játékos veszít, aki nem tud szabályosan lépni (azaz egyik kupacot se tudja szétosztani).
+
+  A kezdőállás ismeretében te döntheted el, hogy kezdeni szeretnél-e, vagy második játékos lenni.
+  Sok sikert! :)
+</>;
+
+const Game = strategyGameFactory({
+  rule,
+  title: 'Kupac kettéosztó',
+  GameBoard,
+  G: {
+    getPlayerStepDescription,
+    generateNewBoard,
+    getGameStateAfterAiTurn
   }
+});
+
+export const PileSplitter = () => {
+  const [board, setBoard] = useState(generateNewBoard());
+
+  return <Game board={board} setBoard={setBoard} />;
 };

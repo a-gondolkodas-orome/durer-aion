@@ -6,7 +6,8 @@ The deployed version is here: https://a-gondolkodas-orome.github.io/durer-jateko
 
 # Development
 
-Feel free to commit directly to the default (master) branch. If in doubt, send a pull request instead. Prefer rebasing over merge commits.
+Feel free to commit directly to the default (master) branch. If in doubt, send a pull request instead.
+Goal: only commit to the master branch if existing games keep working :)
 
 When you push to the default (master) branch, the tests are run, and if they are successful, the project is deployed to the live website.
 
@@ -16,7 +17,9 @@ To keep track of who works on which game, use [this pinned issue](https://github
 
 TL;DR;
 
-Currently each game should have a folder under `src/components/games` and its metadata listed in `src/components/games/games.js`. See existing examples for inspiration, and the `demonstration` game for a minimal example.
+1. Create a react component for the game under `src/components/games`.
+2. Add the game component to the router in `src/components/app/app.js`.
+3. Add the game metadata to `src/components/games/gameList.js`.
 
 *For more information, see Section [How to Develop](#how-to-develop)*
 
@@ -33,109 +36,118 @@ npm ci
 
 ### Compiles and hot-reloads for development
 
+```bash
+npm run dev
 ```
-npm run start-dev
-```
+
+Known issue: sometimes weird bugs happen which disappear if you delete the `.parcel-cache`
+directory manually and re-load.
 
 ### Run tests
 
 ```bash
-npm run test # audit, lint and tests (as GA)
-```
-
-```bash
-npm run test:unit # unit tests
+npm run test # lint and tests (as GA)
 ```
 
 ```bash
 npm run test:watch # unit tests in watch mode
 ```
 
-For further options see `package.json`.
+### Build for prod
+
+(some problems only appear in prod build, not while testing)
+
+```bash
+npm run build
+```
 
 ## IDE setup
 
-If you are using VS Code, [Volar VS Code extension](https://marketplace.visualstudio.com/items?itemName=johnsoncodehk.volar) is highly recommended.
-Tailwindcss is used for some of the styling, the [tailwind VS Code extension](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss) is also recommended.
+Recommended VS Code extensions:
 
-
-# Other
-
-- simple usage tracking at https://agondolkodasorome.goatcounter.com/ (Ildi has access)
+- [Eslint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
+- [Tailwind Css](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss)
 
 # How to develop
 
-For general information and installation instructions, see the [readme](./README.md).
+This project uses the React frontend "framework", the [official tutorial](https://react.dev/learn) is a good starting point.
 
-This project uses the Vue.js frontend framework, the [official tutorial](https://vuejs.org/tutorial/#step-1) is a good starting point to understand the syntax and most important concepts.
+The common parts of all games (showing rules, alternating turns, buttons for choosing a role, restart game) are extracted
+to a `strategyGameFactory` which is highly recommended (but not a must). The below documentation is about creating a new game
+with this factory (so that you can focus on game logic and designing the board interactions.)
 
-To keep track of who works on which game, use [this pinned issue](https://github.com/a-gondolkodas-orome/durer-jatekok/issues/1) to track it.
+If you need a new, common parameter, just pass it down from `strategyGameFactory`.
 
 ## Must have for a new game
 
-*It is recommended to copy and modify the files of an existing, similar game (see demonstration game for a minimal example).*
+*It is recommended to copy and modify an existing, similar game.*
 
-The `board` field on the store is the single source of truth for the state of the board. The AI step won't have access to other component specific data. You can read/write it from your component after mapping it with `mapState()`.
+```js
+// a React component with `board`, `setBoard`, `ctx` props
+// `ctx` is an object and will contain the following (extendable):
+// - `shouldPlayerMoveNext: boolean
+// - endPlayerTurn: a function, see below
+// - playerIndex: null/0/1
+const GameBoard = ({ board, setBoard, ctx }) => {
+  return (
+    <section className="p-2 shrink-0 grow basis-2/3">   
+        <button
+          onClick={() => ctx.endPlayerTurn({ newBoard: {}, isGameEnd: false })}
+        ></button>
+    </section>
+  );
+};
 
-The game logic must have the following 3 exported values
-- `isTheLastMoverTheWinner`: `true`, `false`, or `null` if winner is decided explicitly
-- `generateNewBoard` a function which returns a javascript object representing the board (UI state) for a new game
-- `getGameStateAfterAiMove` a function which has `board` as its first argument and `isPlayerTheFirstToMove` as its second argument and returns an object with properties `board`, `isGameEnd` and optionally `hasFirstPlayerWon`.
+const Game = strategyGameFactory({
+  // a React component (can be text in <></>)
+  rule,
+  // a short string
+  title: 'Hunyadi és a janicsárok',
+  GameBoard,
+  G: {
+    // a function returning a string with 1 optional parameter: an object containing `playerIndex`, etc.
+    getPlayerStepDescription,
+    // a function returning a new, possibly random board object
+    generateNewBoard,
+    // a function with `{ board, playerIndex }` parameter returning `{ newBoard, isGameEnd, winnerIndex }`
+    getGameStateAfterAiTurn
+  }
+});
 
-Store actions to call from your component code the manage the game progress:
-- `initializeGame('GameComponent')`
-- `endPlayerTurn()`: At the end of each move by the player, your component code must call `endPlayerTurn({ board, isGameEnd })` and optionally `hasFirstPlayerWon`.
+// React component for the whole game which should be added to router
+export const HunyadiAndTheJanissaries = () => {
+  const [board, setBoard] = useState(generateNewBoard());
 
-Each game must have a folder under `src/components/games` and its metadata listed in `src/components/games/games.js`.
-- Include a new game in `gameList` and `gameComponents` exported values as well.
-
-Good to know
-- Role selection and game restart is managed by `<game-sidebar>` component in the most common cases.
-- The state of the board is stored in the `board` field of the store, so that the AI step has easy access to it.
+  return <Game board={board} setBoard={setBoard} />;
+};
+```
 
 ### Game end, determining winner
 
-When ending the turn, specify the game state with an object `{ board, isGameEnd: true/false }`.
+When ending the turn, specify the game state with an object `{ newBoard, isGameEnd: false }` or
+`{ newBoard, isGameEnd: true, winnerIndex: null/0/1 }`
 
-If the winner can be determined from who moved last before the game ended, you do not have to identify if the player or the AI is the winner. Define the `isTheLastMoverTheWinner` game level constant in the `strategy.js` and when you provide `isGameEnd: true`, the winner will be calculated by the common logic in store.
+If the winner can be determined from who moved last before the game ended, it is enough to pass `winnerIndex: null`.
 
-Otherwise, if the game ended, also calculate and return whether the first or the second player is the winner. In your component code, the `isPlayerTheFirstToMove` field on the common state can help. In the AI move, `getGameStateAfterAiMove()` function will receive `isPlayerTheFirstToMove` as its second argument.
+`ctx.endPlayerTurn` should be called with this and also `getGameStateAfterAiTurn` should return
+such an object.
+
+## Things to look out for
+
+- are the starting positions representative of the game complexity?
+- can the player win with a not-winning strategy?
+- is the game (mostly) mobile-friendly?
+- is it clear what the player should do next?
+- is it easy to guess the winning strategy from wathing the AI play?
+- do not allow the player interacting with the game while the other player's step is in progress, use `ctx.shouldPlayerMoveNext`
+- never modify react state (e.g. the board) in place
 
 ## Technologies used
 
 - Node.js for the development server and building the application
-- Vue.js frontend framework ([official tutorial](https://vuejs.org/tutorial/#step-1) is a good starting point)
-- [pinia](https://pinia.vuejs.org/cookbook/options-api.html) for state management with Vue.js
+- React frontend framework ([official tutorial](https://react.dev/learn) is a good starting point)
 - [optional] Tailwindcss for styling with utility classes
 - [optional] jest for unit testing
 - github actions for CI/CD.
 - github pages as hosting
-- goatcounter as usage tracker
-
-## Project structure
-
-- `src/components` vue components
-- `src/components/games/games.js` as a reference to implemented games
-- `src/stores/game` for game-agnostic logic with pinia: managing role selection, game end, game restart, AI moves
-- `src/lib` game-agnostic utility functions, such as random numbers
-
-## Things to look out for
-
-- do not allow the player interacting with the game while the other player's step is in progress, use store getter `shouldPlayerMoveNext` to check for this in your client side code
-- reset component state when game is restarted
-- it is highly recommended to add unit tests at least for the AI strategy, place a `filename.spec.js` next to the `filename.js` you want to test.
-- Html classes starting with `js-` are there for unit testing purposes.
-- https://v2.vuejs.org/v2/guide/components.html#data-Must-Be-a-Function
-
-## Handling work in progress
-
-To avoid big merge conflicts or parallel work, aim to push frequently in small iterations to the default (master) branch.
-
-You can include work in progress games safely on the default (master) branch if you set `isHiddenFromOverview: true` in [`games.js`](./src/components/games/games.js).
-Or even more easily, you create a game but do not add it to gameList.
-
-## Vue.js notes
-
-- separate .js and .html files are used for each component
-- the project uses locally registered components, meaning you have to import the component file and add it to components in your component .js file if you want to use another vue component.
-- refer to dynamic js values in your html file with starting your attribute name with `:`, e.g. `<button :class="color"></button>` to refer to `color` javascript field.
+- [goatcounter](https://agondolkodasorome.goatcounter.com/) as usage tracker (Ildi has access)
