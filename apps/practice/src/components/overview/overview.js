@@ -70,7 +70,7 @@ const YearFilter = ({ selectedYears, setSelectedYears }) => {
     as="div" multiple horizontal
     className="mb-2 w-[28rem] inline-block px-1"
   >
-    <label htmlFor="year-selector" className="block">Kategória szűrő:</label>
+    <label htmlFor="year-selector" className="block">Év szűrő:</label>
     <Listbox.Button id="year-selector" className="border-2 border-slate-600 rounded w-full">
       {selectedYears.sort((a, b) => Number(a) - Number(b)).join(', ') || 'Válassz éveket'}
     </Listbox.Button>
