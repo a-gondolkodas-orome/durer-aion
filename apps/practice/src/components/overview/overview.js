@@ -14,6 +14,16 @@ export const Overview = () => {
     return true;
   };
 
+  // order by year and then by category regardless of order in gameList.js
+  const gamesToShow = Object.keys(gameList)
+    .filter(id => shouldShow(gameList[id]))
+    .sort((a, b) =>
+      gameList[a].category[0] > gameList[b].category[0]
+      ? 1
+      : (gameList[a].category[0] < gameList[b].category[0] ? -1 : 0)
+    )
+    .sort((a, b) => gameList[a].year - gameList[b].year);
+
   return <main className="p-2">
     <OverviewHeader></OverviewHeader>
     <div className="flex flex-wrap align-baseline">
@@ -27,7 +37,7 @@ export const Overview = () => {
       ></YearFilter>
     </div>
     <div className="flex flex-wrap">
-      {Object.keys(gameList).filter(id => shouldShow(gameList[id])).map(id => Game(id, gameList[id]))}
+      {gamesToShow.map(id => Game(id, gameList[id]))}
     </div>
   </main>;
 };
