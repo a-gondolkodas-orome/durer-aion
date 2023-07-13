@@ -71,6 +71,12 @@ export const gameList = {
     category: ['E+'],
     name: 'Kupac kettéosztó 4 kupaccal'
   },
+  TriangularGridRopes: {
+    year: 14,
+    round: 'döntő',
+    category: ['C', 'D'],
+    name: '10 totemoszlop'
+  },
   Coin357: {
     year: 15,
     round: 'döntő',
