@@ -18,7 +18,7 @@ describe('HunyadiAndTheJanissaries strategy', () => {
       expect(getGameStateAfterKillingGroup([[], ['red', 'red']], 'red')).toEqual({
         newBoard: [[], []],
         isGameEnd: true,
-        hasFirstPlayerWon: false
+        winnerIndex: 1
       });
     });
 
@@ -26,7 +26,7 @@ describe('HunyadiAndTheJanissaries strategy', () => {
       expect(getGameStateAfterKillingGroup([['red', 'blue'], ['blue']], 'red')).toEqual({
         newBoard: [['blue'], []],
         isGameEnd: true,
-        hasFirstPlayerWon: true
+        winnerIndex: 0
       });
     });
 
@@ -46,7 +46,7 @@ describe('HunyadiAndTheJanissaries strategy', () => {
         expect(getGameStateAfterAiTurn({ board, playerIndex: 0 })).toEqual({
           newBoard: [['red'], []],
           isGameEnd: true,
-          hasFirstPlayerWon: true
+          winnerIndex: 0
         });
       });
 
