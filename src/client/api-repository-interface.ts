@@ -1,9 +1,9 @@
 import urlcat from "urlcat";
-import { AxiosInstance } from 'axios';
+import { AxiosInstance,AxiosError } from 'axios';
 import { TeamModelDto } from "./dto/TeamStateDto";
 
 const axios = require('axios') 
-
+  
 class ApiAxios {
   static instance(): AxiosInstance {
     let apiUrl = '/'; // TODO env or something
@@ -60,7 +60,7 @@ export class RealClientRepository implements ClientRepository {
       result = await ApiAxios.instance().get(url);
     } catch (e: any) {
       const { status, data } = e.response;
-      if(status == "404") {
+      if(status === "404") {
         throw new Error('Nem létező kód');
       }
       // here we can set message according to status (or data)
@@ -116,7 +116,7 @@ export class MockClientRepository implements ClientRepository {
     return Promise.resolve("ok");
   }
   getTeamState(guid: string): Promise<TeamModelDto> {
-    if (guid == "1") {
+    if (guid === "1") {
       return Promise.resolve(
         {
           id: "1",
@@ -135,7 +135,7 @@ export class MockClientRepository implements ClientRepository {
         }
       )
     }
-    if (guid == "2") {
+    if (guid === "2") {
       return Promise.resolve(
         {
           id: "1",
@@ -157,7 +157,7 @@ export class MockClientRepository implements ClientRepository {
         }
       )
     }
-    if (guid == "3") {
+    if (guid === "3") {
       return Promise.resolve(
         {
           id: "1",
@@ -179,7 +179,7 @@ export class MockClientRepository implements ClientRepository {
         }
       )
     }
-    if (guid == "4") {
+    if (guid === "4") {
       return Promise.resolve(
         {
           id: "1",
@@ -205,7 +205,7 @@ export class MockClientRepository implements ClientRepository {
         }
       )
     }
-    if (guid == "5") {
+    if (guid === "5") {
       return Promise.resolve(
         {
           id: "1",
@@ -230,7 +230,7 @@ export class MockClientRepository implements ClientRepository {
         }
       )
     }
-    if (guid == "6") {
+    if (guid === "6") {
       return Promise.resolve(
         {
           id: "1",
@@ -256,7 +256,7 @@ export class MockClientRepository implements ClientRepository {
         }
       )
     }
-    if (guid == "7") {
+    if (guid === "7") {
       return Promise.resolve(
         {
           id: "1",

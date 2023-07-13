@@ -4,7 +4,7 @@ import type { Game, LobbyAPI, Server, StorageAPI } from 'boardgame.io';
 import { TeamsRepository } from './db';
 import { createMatch } from 'boardgame.io/internal';
 import { nanoid } from 'nanoid';
-import { InProgressMatchStatus, TeamModel  } from './entities/model';
+import { InProgressMatchStatus } from './entities/model';
 import { BOT_ID, fetch } from '../socketio_botmoves';
 import { getBotCredentials, getGameStartAndEndTime } from '../server';
 import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus } from './team_manage';
@@ -186,7 +186,7 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
 
     //created new game, updated team state accordingly
     const match = await startMatchStatus(body.matchID, ctx);
-    if(typeof match.startAt == null  || typeof match.endAt == null){
+    if(match.startAt === null  || match.endAt === null){
       console.error(`GAME [${game.name}] initialiser doesn't initialise the timer!!!`)
     }
     team.update({

@@ -1,5 +1,4 @@
 import { DataTypes, Model, ModelAttributes } from "sequelize";
-import { State, LogEntry, Server } from "boardgame.io";
 
 export interface NotStartedMatchStatus {
   state: 'NOT STARTED';

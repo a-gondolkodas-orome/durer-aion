@@ -19,9 +19,9 @@ export function ChooserItem(props: {status: MatchStatus, type: 'strategias'|'rel
         fontSize: 24,
         textAlign: 'center',
       }}>
-        {props.type=='relay' ? "Váltófeladatok" : "Stratégiás játék"}
+        {props.type==='relay' ? "Váltófeladatok" : "Stratégiás játék"}
       </Stack>
-      {props.status.state == "FINISHED" &&
+      {props.status.state === "FINISHED" &&
         <Stack sx={{
           height: 24,
           fontSize: 18,
@@ -30,7 +30,7 @@ export function ChooserItem(props: {status: MatchStatus, type: 'strategias'|'rel
           Kitöltve ekkor: {formatTime((props.status as FinishedMatchStatus).startAt)} - {formatTime((props.status as FinishedMatchStatus).endAt)} Elért pont: {(props.status as FinishedMatchStatus).score}
         </Stack>
       }
-      {props.type == 'relay' &&
+      {props.type === 'relay' &&
         <Stack sx={{
           fontSize: 14,
           height: "100%",
@@ -43,7 +43,7 @@ export function ChooserItem(props: {status: MatchStatus, type: 'strategias'|'rel
           </Stack>
         </Stack>
       }        
-      {props.type == 'strategias' &&
+      {props.type === 'strategias' &&
         <Stack sx={{
           fontSize: 14,
           height: "100%",
@@ -73,12 +73,12 @@ export function ChooserItem(props: {status: MatchStatus, type: 'strategias'|'rel
         alignSelf: 'center',
         textTransform: 'none',
       }} variant='contained' color='primary' onClick={()=>{
-        if (props.type == "relay") {
+        if (props.type === "relay") {
           startRelay()
         } else {
           startStrat()
         }
-      }} disabled={props.status.state != "NOT STARTED"}>
+      }} disabled={props.status.state !== "NOT STARTED"}>
         Kezdjük
       </Button>
     </Stack>

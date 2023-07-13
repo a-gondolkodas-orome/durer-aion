@@ -19,11 +19,11 @@ export function Main() {
       <Container sx={{ paddingLeft: 0, paddingRight: 0, zIndex: 3, position: 'relative', paddingBottom: '50px', maxWidth: '1200px' }}>
         {!teamState &&
           <Login/>}
-        {teamState && state == "init" &&
+        {teamState && state === "init" &&
           <Init state={teamState}/>}
-        {teamState && state == "relay" &&
+        {teamState && state === "relay" &&
           <Relay state={teamState}/>}
-        {teamState && state == "strategias" &&
+        {teamState && state === "strategias" &&
           <Strategy state={teamState}/>}
       </Container>
     </Layout>

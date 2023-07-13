@@ -30,8 +30,8 @@ export class TeamsRepository {
     });
     console.log(matches)
     return matches.find(team =>{
-      return (team.relayMatch as InProgressMatchStatus).matchID == matchID || 
-        (team.strategyMatch as InProgressMatchStatus).matchID == matchID
+      return (team.relayMatch as InProgressMatchStatus).matchID === matchID || 
+        (team.strategyMatch as InProgressMatchStatus).matchID === matchID
     })??null;
   }
 

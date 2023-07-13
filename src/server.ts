@@ -27,20 +27,20 @@ function getDb() {
       teams: new TeamsRepository(db),
     }
   } else {
-    throw 'Failed to load DB data. Only postgres is supported!';
+    throw new Error('Failed to load DB data. Only postgres is supported!');
   }
 }
 
 export function getBotCredentials() {
   if (!env.BOT_CREDENTIALS) {
-    throw 'No BOT_CREDENTIALS supplied! Do set it in the environment';
+    throw new Error('No BOT_CREDENTIALS supplied! Do set it in the environment');
   }
   return env.BOT_CREDENTIALS;
 }
 
 export function getAdminCredentials() {
   if (!env.ADMIN_CREDENTIALS) {
-    throw 'No ADMIN_CREDENTIALS supplied! Do set it in the environment';
+    throw new Error('No ADMIN_CREDENTIALS supplied! Do set it in the environment');
   }
   return env.ADMIN_CREDENTIALS;
 }
@@ -49,10 +49,10 @@ export function getAdminCredentials() {
 
 export function getGameStartAndEndTime() {
   if (!env.GAME_GLOBAL_START_T) {
-    throw 'No GAME_GLOBAL_START_T supplied! Do set it in the environment';
+    throw new Error('No GAME_GLOBAL_START_T supplied! Do set it in the environment');
   }
   if (!env.GAME_GLOBAL_END_T) {
-    throw 'No GAME_GLOBAL_END_T supplied! Do set it in the environment';
+    throw new Error('No GAME_GLOBAL_END_T supplied! Do set it in the environment');
   }
   return {
     globalStartAt: new Date(env.GAME_GLOBAL_START_T),

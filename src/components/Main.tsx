@@ -22,15 +22,15 @@ export function Main() {
         {!teamState &&
           <Login/>}
         {/* TODO WAITING ROOM when to show? and what is the time?
-        teamState?.pageState == "WAITING" &&
+        teamState?.pageState === "WAITING" &&
           <WaitingRoom/>*/}
-        {teamState?.pageState == "INIT" &&
+        {teamState?.pageState === "INIT" &&
           <Init state={teamState}/>}
-        {teamState?.pageState == "RELAY" &&
+        {teamState?.pageState === "RELAY" &&
           <Relay state={teamState}/>}
-        {teamState?.pageState == "STRATEGY" &&
+        {teamState?.pageState === "STRATEGY" &&
           <Strategy state={teamState}/>}
-        {teamState?.pageState == "FINISHED" &&
+        {teamState?.pageState === "FINISHED" &&
           <Finished state={teamState}/>}
       </Container>
     </Layout>

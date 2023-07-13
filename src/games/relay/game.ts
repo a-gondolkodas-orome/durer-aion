@@ -1,7 +1,5 @@
 import { Game } from "boardgame.io";
 import { INVALID_MOVE, TurnOrder } from "boardgame.io/core";
-import { useTeamState } from "../../client/hooks/user-hooks";
-import { sendDataRelayEnd, sendDataRelayStart, sendDataRelayStep } from "../../common/sendData";
 
 type Answer = {
   answer: number;
