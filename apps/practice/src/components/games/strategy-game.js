@@ -33,14 +33,17 @@ export const strategyGameFactory = ({ rule, title, GameBoard, G }) => {
     };
 
     const doAiTurn = ({ currentBoard }) => {
-      const { newBoard, isGameEnd, winnerIndex } = G.getGameStateAfterAiTurn({ board: currentBoard, playerIndex });
+      const localPlayerIndex = playerIndex === null ? 1 : playerIndex;
+      const { newBoard, isGameEnd, winnerIndex } = G.getGameStateAfterAiTurn(
+        { board: currentBoard, playerIndex: localPlayerIndex }
+      );
       const time = Math.floor(Math.random() * 500 + 500);
       setTimeout(() => {
         setBoard(newBoard);
         setNext(next => 1 - next);
         if (isGameEnd) {
           // default: last player to move is the winner
-          endGame(winnerIndex === null ? (1 - playerIndex) : winnerIndex);
+          endGame(winnerIndex === null ? (1 - localPlayerIndex) : winnerIndex);
         }
       }, time);
     };
