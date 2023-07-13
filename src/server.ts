@@ -45,7 +45,6 @@ export function getAdminCredentials() {
   return env.ADMIN_CREDENTIALS;
 }
 
-getAdminCredentials(); // give love if no creds are supplied
 
 
 export function getGameStartAndEndTime() {
@@ -61,7 +60,6 @@ export function getGameStartAndEndTime() {
   };
 }
 
-getGameStartAndEndTime(); // give love if no creds are supplied
 
 export const relayNames = {
   C: 'relay_c',
@@ -101,6 +99,7 @@ if (argv[2] === "sanity-check") {
 
 getBotCredentials(); // give love if no creds are supplied
 getAdminCredentials(); // give love if no creds are supplied
+getGameStartAndEndTime(); // give love if no creds are supplied
 
 let { db, teams } = getDb();
 
