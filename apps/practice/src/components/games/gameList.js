@@ -112,5 +112,11 @@ export const gameList = {
     round: 'döntő',
     category: ['B'],
     name: 'Számok lefedése 1-től 10-ig'
+  },
+  TwelveSquares: {
+    year: 6,
+    round: 'döntő',
+    category: ['A'],
+    name: 'Tizenkét mező'
   }
 };
