@@ -49,8 +49,8 @@ const injectPlayer = async (db: StorageAPI.Async | StorageAPI.Sync, matchId: str
   });
 }
 
+//TODO: check if export is needed
 function checkGlobalTime():"WAITING"|"FINISHED"|undefined{
-  //TODO implement
   const now = new Date()
   const {globalStartAt,globalEndAt} = getGameStartAndEndTime();
 
@@ -173,11 +173,10 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
 
   router.get('/team/:GUID/relay/play', koaBody(), async (ctx: Server.AppCtx) => {
     const GUID = ctx.params.GUID;
-    const team: TeamModel = await teams.getTeam({ id: GUID }) ?? ctx.throw(404, `Team with {id:${GUID}} not found.`)
       //check if in progress, it is not allowed to play
     //check if it can be started, throw error if not
-    const { game } = await getNewGame(team, ctx.db, teams, games, 'RELAY');
-    //about to start
+    const { game, team } = await getNewGame(ctx, teams, games, 'RELAY');
+
 
     // about to start a game
 
@@ -185,19 +184,23 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
     await injectPlayer(ctx.db, body.matchID, {playerID: '0', name: GUID, credentials: team.credentials});
     await injectBot(ctx.db, body.matchID);
 
+    //created new game, updated team state accordingly
+    const match = await startMatchStatus(body.matchID, ctx);
+    if(typeof match.startAt == null  || typeof match.endAt == null){
+      console.error(`GAME [${game.name}] initialiser doesn't initialise the timer!!!`)
+    }
     team.update({
       pageState: "RELAY",
-      relayMatch: await startMatchStatus(body.matchID, ctx)
+      relayMatch: match
     })
     ctx.body = body;
   })
 
   router.get('/team/:GUID/strategy/play', koaBody(), async (ctx: Server.AppCtx) => {
     const GUID = ctx.params.GUID;
-    const team: TeamModel = await teams.getTeam({ id: GUID }) ?? ctx.throw(404, `Team with {id:${GUID}} not found.`)
     //check if in progress, it is not allowed to play
     //check if it can be started, throw error if not
-    const { game } = await getNewGame(team, ctx.db, teams, games, 'STRATEGY');
+    const { game, team } = await getNewGame(ctx, teams, games, 'STRATEGY');
     //about to start
 
     const body: LobbyAPI.CreatedMatch = await createGame(game, ctx);
