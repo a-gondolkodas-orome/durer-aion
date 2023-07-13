@@ -1,8 +1,6 @@
-import { Container, InputBase } from '@mui/material';
 import { Stack } from '@mui/system';
 import { Field } from 'formik';
 import { useSnackbar } from 'notistack';
-import React from 'react';
 import { useLogin } from '../hooks/user-hooks';
 import Form from './form';
 import theme from './theme';
