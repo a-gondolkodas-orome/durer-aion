@@ -8,8 +8,7 @@ import { useRefreshTeamState, useTeamState } from '../../hooks/user-hooks';
 import { ExcerciseTask } from '../ExcerciseTask';
 import { ExcerciseForm } from '../ExcerciseForm';
 import { Finished } from './Finished';
-import { sendDataRelayEnd } from '../../../common/sendData';
-
+import { sendDataRelayEnd, sendDataRelayStep } from '../../../common/sendData';
 interface MyGameProps extends BoardProps<MyGameState> { };
 export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
   const [secondsRemaining, setSecondsRemaining] = useState(G.milisecondsRemaining as number | null);
@@ -56,6 +55,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
             attempt={(G.currentProblem+1)*3+G.numberOfTry}
             onSubmit={(input) => {
               moves.submitAnswer(parseInt(input))
+              sendDataRelayStep(teamState,G,ctx)
             }}
           />
           <Stack sx={{
