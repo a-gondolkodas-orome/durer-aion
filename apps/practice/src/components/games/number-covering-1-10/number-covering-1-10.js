@@ -5,7 +5,7 @@ const generateNewBoard = () => ([1,2,3,4,5,6,7,8,9,10]);
 
 const GameBoard = ({ board, setBoard, ctx }) => {
 
-    clickNumber = (number) => {
+    const clickNumber = (number) => {
         if (ctx.shouldPlayerMoveNext) {
             let newBoard = [...board];
             newBoard[number-1] = -1;
