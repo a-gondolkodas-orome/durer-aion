@@ -30,6 +30,14 @@ export interface ClientRepository {
   ): Promise<string>
 }
 
+function makeAxiosError(any_error:any): AxiosError {
+  if(!axios.isAxiosError(any_error)){
+    throw  any_error;
+  }
+  const axiosError = any_error as AxiosError<Error>;
+  return axiosError;
+}
+
 export class RealClientRepository implements ClientRepository {
   async getTeamState(
     guid: string,
@@ -59,8 +67,8 @@ export class RealClientRepository implements ClientRepository {
     try {
       result = await ApiAxios.instance().get(url);
     } catch (e: any) {
-      const { status, data } = e.response;
-      if(status === "404") {
+      const err = makeAxiosError(e);
+      if(err.status === 404) {
         throw new Error('Nem létező kód');
       }
       // here we can set message according to status (or data)
@@ -80,7 +88,8 @@ export class RealClientRepository implements ClientRepository {
     try {
       result = await ApiAxios.instance().get(url);
     } catch (e: any) {
-      const { status, data } = e.response;
+      const err = makeAxiosError(e)
+      console.log(err.message)
       // here we can set message according to status (or data)
       throw new Error('Váratlan hiba történt');
     }
@@ -98,7 +107,8 @@ export class RealClientRepository implements ClientRepository {
     try {
       result = await ApiAxios.instance().get(url);
     } catch (e: any) {
-      const { status, data } = e.response;
+      const err = makeAxiosError(e);
+      console.log(err.message)
       // here we can set message according to status (or data)
       throw new Error('Váratlan hiba történt');
     }
