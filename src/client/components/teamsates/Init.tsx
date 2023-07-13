@@ -1,4 +1,3 @@
-import { Stack } from '@mui/system';
 import React, { useState } from 'react';
 import { TeamModelDto } from '../../dto/TeamStateDto';
 import { Chooser } from '../Chooser';
