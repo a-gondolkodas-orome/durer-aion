@@ -16,6 +16,7 @@ export function boardWrapper(board: any, description: any) { // TODO: solve type
           !secondsRemaining || secondsRemaining < - 10000 || ctx.gameover === true
         } onClose={() => { window.location.reload(); }}>
           {/*<Finished score={G.points}/>*/}
+          // TODO: fix this
           This part is peak Personality Disorder. This component is not suppesd to be used, as far as I can tell.
         </Dialog>
         <Stack sx={{

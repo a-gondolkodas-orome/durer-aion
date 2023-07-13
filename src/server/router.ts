@@ -21,7 +21,7 @@ const injectPlayer = async (db: StorageAPI.Async | StorageAPI.Sync, matchId: str
   name,
   credentials
 }:{
-  playerID: any,
+  playerID: any, //TODO: fix to correct type
   name: string,
   credentials: string,
 }

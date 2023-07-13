@@ -1,7 +1,7 @@
 import React from 'react';
 import './App.css';
-import { Main } from './components/Main';
 import { RecoilRoot } from 'recoil';
+import { Main } from './client/components/Main';
 
 function App() {
 
