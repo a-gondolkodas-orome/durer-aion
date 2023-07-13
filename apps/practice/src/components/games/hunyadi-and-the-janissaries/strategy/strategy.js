@@ -56,7 +56,7 @@ export const getGameStateAfterKillingGroup = (board, group) => {
     isGameEnd = true;
     hasFirstPlayerWon = false;
   }
-  return { newBoard, isGameEnd, hasFirstPlayerWon };
+  return { newBoard, isGameEnd, winnerIndex: hasFirstPlayerWon ? 0 : 1 };
 };
 
 const colorBoardOptimally = (board) => {
