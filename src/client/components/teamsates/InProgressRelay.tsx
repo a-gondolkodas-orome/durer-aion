@@ -1,9 +1,9 @@
 import { Stack } from '@mui/system';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Countdown } from '../../../components/Countdown';
 import { BoardProps } from 'boardgame.io/react';
 import { MyGameState } from '../../../games/relay/game';
-import { Button, Dialog } from '@mui/material';
+import { Dialog } from '@mui/material';
 import { useRefreshTeamState, useTeamState } from '../../hooks/user-hooks';
 import { ExcerciseTask } from '../ExcerciseTask';
 import { ExcerciseForm } from '../ExcerciseForm';

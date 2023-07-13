@@ -1,6 +1,4 @@
 import { INVALID_MOVE } from 'boardgame.io/core';
-import { useTeamState } from '../../client/hooks/user-hooks';
-import { sendDataStrategyEnd, sendDataStrategyStart, sendDataStrategyStep } from '../../common/sendData';
 import { GameType } from '../../common/types';
 
 export interface MyGameState {

@@ -1,6 +1,6 @@
+import React from 'react';
 import { Button } from '@mui/material';
 import { Stack } from '@mui/system';
-import React, { useState } from 'react';
 
 export function RelayEndTable(props: {setShow: React.Dispatch<boolean>, points: number}) {
   return (
