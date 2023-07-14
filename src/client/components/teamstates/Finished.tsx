@@ -2,6 +2,13 @@ import { Stack } from '@mui/system';
 import { FinishedMatchStatus } from '../../../server/entities/model';
 import { TeamModelDto } from '../../dto/TeamStateDto';
 
+
+/**
+ * This component is used, when all interactions are finished with the user, and only the results are summarised.
+ * Contains some primitive logic, to aggregate the points, and creates a stack of mui components to display these
+ * @param props {{state: TeamModelDto}} (The null potion should be handled earlier, but it is not)
+ * @returns Aggregated point visualisations
+ */
 export function Finished(props: {state: TeamModelDto | null}) {
   if(props.state === null)
     //TODO: fix this
@@ -39,6 +46,7 @@ export function Finished(props: {state: TeamModelDto | null}) {
         flexDirection: 'row',
         alignItems: 'baseline',
       }}>
+        // TODO: add additional metrics
         {stratScore + relayScore} <span style={{fontSize: '16px', color: '#000', marginLeft: '5px'}}>pont</span>
       </Stack>
 

@@ -2,6 +2,11 @@ import React from 'react';
 import { Button } from '@mui/material';
 import { Stack } from '@mui/system';
 
+/**
+ * Component to display an end game screen with close button, and score
+ * @param props {{setShow: React.Dispatch<boolean>, points: number}}
+ * @returns End screen
+ */
 export function RelayEndTable(props: {setShow: React.Dispatch<boolean>, points: number}) {
   return (
     <Stack sx={{
