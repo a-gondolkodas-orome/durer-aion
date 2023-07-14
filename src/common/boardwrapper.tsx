@@ -1,12 +1,12 @@
 import { Button, Dialog, Stack } from "@mui/material";
 import { useEffect, useState } from "react";
-import { Finished } from "../client/components/teamstates/Finished";
 import { Countdown } from "../client/components/Countdown";
+import { RelayEndTable } from "../client/components/RelayEndTable";
 
-export function boardWrapper(board: any, description: any) { // TODO: solve types with BoardProps<MyGameState>
+export function boardWrapper(board: any, description: any) { //<please> TODO: solve types with BoardProps<MyGameState>
   return ({ G, ctx, moves, log }: any) => {
     const [secondsRemaining, setSecondsRemaining] = useState(G.milisecondsRemaining as number | null); // asked from the server
-
+    const [showEndPage, setShowEndPage] = useState(true);
     useEffect(() => {
       setSecondsRemaining(G.milisecondsRemaining);
     }, [G.milisecondsRemaining]);
@@ -15,9 +15,8 @@ export function boardWrapper(board: any, description: any) { // TODO: solve type
         <Dialog open={
           !secondsRemaining || secondsRemaining < - 10000 || ctx.gameover === true
         } onClose={() => { window.location.reload(); }}>
-          {/*<Finished score={G.points}/>*/}
-          {/* TODO: fix this*/}
-          This part is peak Personality Disorder. This component is not suppesd to be used, as far as I can tell.
+          //TODO: check if it is actually nescesery to have the showEndPage variable
+            {showEndPage && <RelayEndTable setShow={setShowEndPage} points={G.points}/>}
         </Dialog>
         <Stack sx={{
           padding: '20px',
@@ -53,6 +52,7 @@ export function boardWrapper(board: any, description: any) { // TODO: solve type
             fontSize: '24px',
             fontWeight: 'bold',
           }}>
+            {/* TODO: replace this with dynamic data*/}
             10 érme
           </Stack>
           <Stack sx={{
