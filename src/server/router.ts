@@ -118,7 +118,7 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
     ctx.body = state;
   });
 
-    /**
+  /**
    * Get data about a specific match.
    *
    * @param {string} name - The name of the game.
