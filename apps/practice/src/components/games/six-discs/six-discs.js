@@ -107,12 +107,12 @@ const GameBoard  = ({board, setBoard, ctx}) => {
 }
 
 const getGameStateAfterAiTurn = ({board,playerIndex}) => {
-    newBoard = [...board];
-    rem = newBoard[0]%3;
+    let newBoard = [...board];
+    let rem = newBoard[0]%3;
     if(rem===0) {
-        alt = Math.floor(Math.random()*2);
+        let alt = Math.floor(Math.random()*2);
         if(newBoard[alt]===0) alt = 1-alt;
-        amount = Math.floor(Math.random()*(newBoard[alt]>1 ? 2 : 1)+1)
+        let amount = Math.floor(Math.random()*(newBoard[alt]>1 ? 2 : 1)+1)
         if(alt===0) newBoard[0] = newBoard[0]-amount;
         else newBoard = [newBoard[0]+amount, newBoard[1]-amount];
     } else {
@@ -123,7 +123,6 @@ const getGameStateAfterAiTurn = ({board,playerIndex}) => {
 }
 
 const getGameStateAfterMove = (newBoard) => {
-    console.log(newBoard);
     return { newBoard: newBoard, isGameEnd: isEqual(newBoard,[0,0]), winnerIndex: null};
 }
 
