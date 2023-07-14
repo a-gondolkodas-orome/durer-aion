@@ -1,10 +1,12 @@
 import { Button } from '@mui/material';
 import { Stack } from '@mui/system';
-import { sendDataRelayStart, sendDataStrategyStart } from '../../common/sendData';
-import { useTeamState } from '../hooks/user-hooks';
+import { MatchStatus, FinishedMatchStatus } from '../dto/TeamStateDto';
+import { useStartRelay, useStartStrategy } from '../hooks/user-hooks';
+import { formatTime } from '../utils/DateFormatter';
 
-export function ChooserItem(props: {setStarted: React.Dispatch<string>, type: 'strategias'|'relay' }) {
-  const teamState = useTeamState();
+export function ChooserItem(props: {status: MatchStatus, type: 'strategias'|'relay' }) {
+  const startRelay = useStartRelay();
+  const startStrat = useStartStrategy();
   return (
     <Stack sx={{
       display: 'flex',
@@ -17,9 +19,18 @@ export function ChooserItem(props: {setStarted: React.Dispatch<string>, type: 's
         fontSize: 24,
         textAlign: 'center',
       }}>
-        {props.type=='relay' ? "Váltófeladatok" : "Stratégiás játék"}
+        {props.type==='relay' ? "Váltófeladatok" : "Stratégiás játék"}
       </Stack>
-      {props.type == 'relay' &&
+      {props.status.state === "FINISHED" &&
+        <Stack sx={{
+          height: 24,
+          fontSize: 18,
+          textAlign: 'center',
+        }}>
+          Kitöltve ekkor: {formatTime((props.status as FinishedMatchStatus).startAt)} - {formatTime((props.status as FinishedMatchStatus).endAt)} Elért pont: {(props.status as FinishedMatchStatus).score}
+        </Stack>
+      }
+      {props.type === 'relay' &&
         <Stack sx={{
           fontSize: 14,
           height: "100%",
@@ -32,7 +43,7 @@ export function ChooserItem(props: {setStarted: React.Dispatch<string>, type: 's
           </Stack>
         </Stack>
       }        
-      {props.type == 'strategias' &&
+      {props.type === 'strategias' &&
         <Stack sx={{
           fontSize: 14,
           height: "100%",
@@ -62,14 +73,12 @@ export function ChooserItem(props: {setStarted: React.Dispatch<string>, type: 's
         alignSelf: 'center',
         textTransform: 'none',
       }} variant='contained' color='primary' onClick={()=>{
-        props.setStarted(props.type)
-        if(props.type === "relay"){
-          sendDataRelayStart(teamState)
-        }else{
-          sendDataStrategyStart(teamState)
+        if (props.type === "relay") {
+          startRelay()
+        } else {
+          startStrat()
         }
-
-      }}>
+      }} disabled={props.status.state !== "NOT STARTED"}>
         Kezdjük
       </Button>
     </Stack>

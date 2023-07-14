@@ -50,7 +50,7 @@ export async function importer(teams: TeamsRepository, filename: string) {
     // Trim: Remove possible '\r' characters in windows CRLF
     const [teamname, category, email, other, ...extra_columns] = row.map(column => column.trim());
     let ok = true;
-    let id = extra_columns[0];
+    let teamId = extra_columns[0];
     let login_code = extra_columns[1];
     let credentials = extra_columns[2];
 
@@ -83,20 +83,20 @@ export async function importer(teams: TeamsRepository, filename: string) {
       console.warn(`  The other field should include any info which could help identify a team. (team name, contestant names, school, email addresses, etc.)`);
     }
 
-    if (id === undefined || id === "") {
-      id = randomUUID();
-    } else if (id.match(/^[0-9a-f\-]+$/) === null) {
+    if (teamId === undefined || teamId === "") {
+      teamId = randomUUID();
+    } else if (teamId.match(/^[0-9a-f\-]+$/) === null) {
       ok = false;
       console.error(`ID is not a GUID for team ${teamname}`);
-      console.error(`  Found: ${id}`);
+      console.error(`  Found: ${teamId}`);
       console.error(`  Expected format is usually: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`);
     }
 
-    if (found_ids.has(id)) {
+    if (found_ids.has(teamId)) {
       console.error('Duplicate ID');
       ok = false;
     } else {
-      found_ids.add(id);
+      found_ids.add(teamId);
     }
 
     if (login_code === undefined || login_code === "") {
@@ -127,7 +127,7 @@ export async function importer(teams: TeamsRepository, filename: string) {
     if (ok) {
       console.info(`Adding ${teamname} to DB.`);
       try {
-        await teams.insertTeam({teamname, category, email, other, id, joinCode: login_code, credentials});
+        await teams.insertTeam({teamname, category, email, other, teamId, joinCode: login_code, credentials});
       } catch (err) {
         if (err instanceof ValidationError) {
           console.error(`Failed to validate team when adding to DB: ${err}`);
@@ -140,7 +140,7 @@ export async function importer(teams: TeamsRepository, filename: string) {
 
     if (ok) {
       console.info(`Successfully imported team ${teamname}.`);
-      const row_to_export = [teamname, category, email, other, id, login_code, credentials];
+      const row_to_export = [teamname, category, email, other, teamId, login_code, credentials];
       export_table.push(row_to_export);
       successful++;
     } else {

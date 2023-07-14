@@ -1,7 +1,7 @@
 import { MyGameState } from './game';
 import { BoardProps } from 'boardgame.io/react';
 import { useEffect, useRef, useState } from 'react';
-import { Countdown } from '../../components/Countdown';
+import { Countdown } from '../../client/components/Countdown';
 
 interface MyGameProps extends BoardProps<MyGameState> { };
 

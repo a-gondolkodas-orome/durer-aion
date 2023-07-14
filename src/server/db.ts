@@ -1,5 +1,5 @@
 import type { PostgresStore } from 'bgio-postgres';
-import { teamAttributes, TeamModel } from './entities/model';
+import { InProgressMatchStatus, teamAttributes, TeamModel } from './entities/model';
 import { Sequelize, Op, WhereOptions } from 'sequelize';
 
 export class TeamsRepository {
@@ -21,16 +21,30 @@ export class TeamsRepository {
     });
   }
 
-  async getTeam(searchCondition: WhereOptions<Pick<TeamModel, "joinCode" | "id">>) : Promise<TeamModel|null>{
+  async deduceMatch(matchID:string):Promise<TeamModel|null>{
+    const matches =  await TeamModel.findAll( {where:
+      Sequelize.or([
+        {relayMatch:'IN PROGRESS'},
+        {strategyMatch:'IN PROGRESS'}
+      ])
+    });
+    console.log(matches)
+    return matches.find(team =>{
+      return (team.relayMatch as InProgressMatchStatus).matchID === matchID || 
+        (team.strategyMatch as InProgressMatchStatus).matchID === matchID
+    })??null;
+  }
+
+  async getTeam(searchCondition: WhereOptions<Pick<TeamModel, "joinCode" | "teamId">>) : Promise<TeamModel|null>{
     return await TeamModel.findOne( {where:
       (searchCondition)
     });
   }
   async insertTeam(
-      { teamname, category, email, other, id, joinCode, credentials } :
-      { teamname: string, category: string, email: string, other: string, id: string, joinCode: string, credentials: string}) {
+      { teamname, category, email, other, teamId, joinCode, credentials } :
+      { teamname: string, category: string, email: string, other: string, teamId: string, joinCode: string, credentials: string}) {
     return await TeamModel.create({
-      id, joinCode, other,
+      teamId, joinCode, other,
       category,
       email,
       credentials,

@@ -89,21 +89,21 @@ function startingPosition({ G, ctx}: any, category: "C" | "D" | "E"): {coins: Ar
     }
     // D, E Category
     if (G.numberOfLoss < 2) {
-      if (G.numberOfTries%2 == 1) {
+      if (G.numberOfTries%2 === 1) {
         return {coins: getRandomNumbers([1,2,3,4,5], 5)};
-      } else if (G.numberOfTries%2 == 0) {
+      } else if (G.numberOfTries%2 === 0) {
         return {coins: getRandomNumbers([2,3,4,5], 6)};
       }
     } else if (G.numberOfLoss < 4) {
-      if (G.numberOfTries%2 == 1) {
+      if (G.numberOfTries%2 === 1) {
         return {coins: getRandomNumbers([1,3,4,5], 6)};
-      } else if (G.numberOfTries%2 == 0) {
+      } else if (G.numberOfTries%2 === 0) {
         return {coins: getRandomNumbers([1,2,3,5], 6)};
       }
     } else {
-      if (G.numberOfTries%2 == 1) {
+      if (G.numberOfTries%2 === 1) {
         return {coins: getRandomNumbers([1,4,5], 7)};
-      } else if (G.numberOfTries%2 == 0) {
+      } else if (G.numberOfTries%2 === 0) {
         return {coins: getRandomNumbers([3,4,5], 7)};
       }
     }

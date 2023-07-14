@@ -37,3 +37,21 @@ export const useLogout = () => {
     setTeamState(null);
   };
 };
+
+export const useStartRelay = () => {
+  const [teamState, setTeamState] = useRecoilState(currentStateAtom);
+  return async () => {
+    await userModel.startRelay()
+    const state = await userModel.getTeamState();
+    setTeamState(state);
+  };
+};
+
+export const useStartStrategy = () => {
+  const [teamState, setTeamState] = useRecoilState(currentStateAtom);
+  return async () => {
+    await userModel.starStrategy()
+    const state = await userModel.getTeamState();
+    setTeamState(state);
+  };
+};

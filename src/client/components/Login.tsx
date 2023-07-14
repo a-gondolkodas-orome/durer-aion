@@ -21,14 +21,14 @@ export function Login() {
         <Stack sx={{
           fontSize: "40px",
         }}>
-          Üdvözlünk a XVI. Dürer Verseny online fordulójának stratégiás játék felületén.
+          Kedves Versenyző!<br/>
+          Üdvözlünk a XVI. Dürer Verseny online fordulójának felületén.
         </Stack>
         <Stack sx={{
           marginTop: "15px",
-          fontSize: "20px",
+          fontSize: "30px",
         }}>
-          Itt ki tudjátok próbálni a stratégiás játékot.
-          Belépéshez üsd be valamelyik kategória betűjét (C, D vagy E), majd egy jeligét.
+          Belépéshez nézd meg az emailjeidet, nyisd meg az ott található linket vagy üsd be a kódot ide:
         </Stack>
         <Stack>
           <Form style={{ position: "relative", zIndex: 2 }} initialValues={{ joinCode: '' }}
@@ -44,7 +44,7 @@ export function Login() {
             <Field 
               name="joinCode"
               type="text"
-              placeholder="CDürer"
+              placeHolder="sdkfjh-sdfsd-223"
               style={{
                 width: '250px',
                 height: '40px',
@@ -57,8 +57,8 @@ export function Login() {
           </Form>
         </Stack>
       </Stack>
-      <Stack sx={{fontSize: 18, paddingTop: "100px"}}>
-        Pl. ha azt a jeligét választod, hogy "Dürer" és C kategóriás játékkal szeretnél játszani, akkor üsd be azt, hogy "CDürer".
+      <Stack sx={{fontSize: 14, paddingTop: "100px"}}>
+        Ha nem találjátok az emailt, akkor írjatok nekünk a durerinfo@gmail.com email címre.
       </Stack>
     </Stack>
   )

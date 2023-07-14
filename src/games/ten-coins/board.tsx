@@ -1,8 +1,8 @@
 import { MyGameState } from './game';
 import { BoardProps } from 'boardgame.io/react';
-import { useEffect, useRef, useState } from 'react';
+import { useRef} from 'react';
 import Stack from '@mui/material/Stack';
-import { Button, InputBase, TextField } from '@mui/material';
+import { Button } from '@mui/material';
 import theme from '../../client/components/theme';
 import { useTeamState } from '../../client/hooks/user-hooks';
 import { sendDataStrategyStep } from '../../common/sendData';

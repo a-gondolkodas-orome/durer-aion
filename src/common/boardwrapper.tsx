@@ -1,12 +1,12 @@
 import { Button, Dialog, Stack } from "@mui/material";
 import { useEffect, useState } from "react";
-import { Finished } from "../client/components/teamsates/Finished";
-import { Countdown } from "../components/Countdown";
+import { Countdown } from "../client/components/Countdown";
+import { RelayEndTable } from "../client/components/RelayEndTable";
 
-export function boardWrapper(board: any, description: any) { // TODO: solve types with BoardProps<MyGameState>
+export function boardWrapper(board: any, description: any) { //<please> TODO: solve types with BoardProps<MyGameState>
   return ({ G, ctx, moves, log }: any) => {
     const [secondsRemaining, setSecondsRemaining] = useState(G.milisecondsRemaining as number | null); // asked from the server
-
+    const [showEndPage, setShowEndPage] = useState(true);
     useEffect(() => {
       setSecondsRemaining(G.milisecondsRemaining);
     }, [G.milisecondsRemaining]);
@@ -15,7 +15,8 @@ export function boardWrapper(board: any, description: any) { // TODO: solve type
         <Dialog open={
           !secondsRemaining || secondsRemaining < - 10000 || ctx.gameover === true
         } onClose={() => { window.location.reload(); }}>
-          <Finished score={G.points}/>
+          //TODO: check if it is actually nescesery to have the showEndPage variable
+            {showEndPage && <RelayEndTable setShow={setShowEndPage} points={G.points}/>}
         </Dialog>
         <Stack sx={{
           padding: '20px',
@@ -50,11 +51,6 @@ export function boardWrapper(board: any, description: any) { // TODO: solve type
             marginTop: '10px',
             fontSize: '24px',
             fontWeight: 'bold',
-          }}>
-            10 érme
-          </Stack>
-          <Stack sx={{
-            fontSize: '14px',
           }}>
             {description} <br />
             Az "Új próbajáték" gombra kattintva próbajáték indul, ami a pontozásba nem számít bele. Bátran kérjetek próbajátékot, hiszen ezzel tudjátok tesztelni, hogy jól értitek-e a játék működését. Az "Új éles játék" gombra kattintva indul a valódi játék, ami már pontért megy.
