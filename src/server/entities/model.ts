@@ -44,7 +44,7 @@ export class TeamModel extends Model {
 }
 
 export const teamAttributes: ModelAttributes = {
-  id: {
+  teamId: {
     type: DataTypes.STRING,
     unique: true,
     primaryKey: true,
