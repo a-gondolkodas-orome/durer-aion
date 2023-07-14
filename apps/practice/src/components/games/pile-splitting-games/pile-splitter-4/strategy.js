@@ -1,6 +1,6 @@
 'use strict';
 
-import { random, range } from 'lodash';
+import { random, range, sample } from 'lodash';
 
 export const getBoardAfterAiTurn = (board) => {
   const start = random(0, 3);
