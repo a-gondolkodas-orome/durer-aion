@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { range, cloneDeep, isNull } from 'lodash';
 import { strategyGameFactory } from '../strategy-game';
 import { getGameStateAfterMove, getGameStateAfterAiTurn, playerColor } from './strategy';
-import { generateEmptyTicTacToeBoard } from './helpers';
 import { RockSvg } from './rock-svg';
 import { PaperSvg } from './paper-svg';
 import { ScissorSvg } from './scissor-svg';
@@ -19,11 +18,6 @@ const GameBoard = ({ board, ctx }) => {
     newBoard[id] = playerColor(ctx.playerIndex);
     ctx.endPlayerTurn(getGameStateAfterMove(newBoard));
   };
-  const pieceColor = (id) => {
-    const colorCode = board[id];
-    if (colorCode === 'red') return 'bg-red-600';
-    return 'bg-blue-600';
-  };
 
   return (
   <section className="p-2 shrink-0 grow basis-2/3">
@@ -35,15 +29,6 @@ const GameBoard = ({ board, ctx }) => {
           onClick={() => clickField(id)}
           className="aspect-square p-[25%] border-2"
         >
-          
-          
-          
-          { // board[id] && (
-          //  <span
-          //</button>    className={`w-full aspect-square inline-block rounded-full mb-[-0.5rem] ${pieceColor(id)}`}
-          //  ></span>
-          // )
-          }
           
           { isNull(board[id]) && (id === 0 || id === 2) && (
             <RockSvg />
@@ -76,13 +61,13 @@ const Game = strategyGameFactory({
   GameBoard,
   G: {
     getPlayerStepDescription: () => 'Távolíts el egy ellenséges tárgyat',
-    generateNewBoard: generateEmptyTicTacToeBoard,
+    generateNewBoard: () => Array(9).fill(null),
     getGameStateAfterAiTurn
   }
 });
 
 export const RockPaperScissor = () => {
-  const [board, setBoard] = useState(generateEmptyTicTacToeBoard());
+  const [board, setBoard] = useState(Array(9).fill(null));
 
   return <Game board={board} setBoard={setBoard} />;
 };

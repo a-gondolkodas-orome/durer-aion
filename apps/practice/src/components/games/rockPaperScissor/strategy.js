@@ -51,7 +51,7 @@ const getOptimalAiPlacingPosition = (board, playerIndex) => {
 
   // start with middle place as a first step
   if (allowedPlaces.length === 6) {
-    rand = Math.floor(Math.random()*100)%3;
+    const rand = Math.floor(Math.random()*100)%3;
     if (rand == 0) return 2;
     if (rand == 1) return 5;
     if (rand == 2) return 8;
