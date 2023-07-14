@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { Disclosure, Dialog } from '@headlessui/react';
 
 export const GameSidebar = ({
+  firstRoleLabel,
+  secondRoleLabel,
   stepDescription,
   ctx,
   moves
@@ -28,13 +30,13 @@ export const GameSidebar = ({
             className="cta-button js-first-player"
             onClick={() => moves.chooseRole(0)}
           >
-            Kezdő leszek
+            {firstRoleLabel || "Kezdő leszek"}
           </button>
           <button
             className="cta-button js-second-player"
             onClick={() => moves.chooseRole(1)}
           >
-            Második leszek
+            {secondRoleLabel || "Második leszek"}
           </button>
         </span>
       )}

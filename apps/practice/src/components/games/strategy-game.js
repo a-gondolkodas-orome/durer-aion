@@ -4,7 +4,7 @@ import {
 } from './game-parts';
 import { v4 as uuidv4 } from 'uuid';
 
-export const strategyGameFactory = ({ rule, title, GameBoard, G }) => {
+export const strategyGameFactory = ({ rule, title, firstRoleLabel, secondRoleLabel, GameBoard, G }) => {
   return ({ board, setBoard }) => {
     const [phase, setPhase] = useState('roleSelection');
     const [playerIndex, setPlayerIndex] = useState(null);
@@ -92,6 +92,8 @@ export const strategyGameFactory = ({ rule, title, GameBoard, G }) => {
               }}
             />
             <GameSidebar
+              firstRoleLabel={firstRoleLabel}
+              secondRoleLabel={secondRoleLabel}
               stepDescription={G.getPlayerStepDescription({ board, playerIndex, turnStage })}
               ctx={{ phase, shouldPlayerMoveNext, isPlayerWinner }}
               moves={{ chooseRole, startNewGame }}
