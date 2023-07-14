@@ -2,7 +2,7 @@ import { Ctx, Game } from 'boardgame.io';
 import { INVALID_MOVE, TurnOrder } from 'boardgame.io/core';
 import { GameStateMixin, GameType } from './types';
 
-function chooseRole({ G, ctx, playerID }: any, firstPlayer: string) { // TODO: type
+function chooseRole({ G, ctx, playerID }: any, firstPlayer: string):void { // TODO: type
   G.firstPlayer = firstPlayer;
 }
 
@@ -28,7 +28,7 @@ function setStartingPosition({ G, ctx, playerID, random, events }: any, starting
   };
 };
 
-function getTime({ G, ctx, playerID, events }: any){
+function getTime({ G, ctx, playerID, events }:any){
   if (playerID !== "0") {
     return INVALID_MOVE;
   };

@@ -3,10 +3,8 @@ import { Local, SocketIO } from 'boardgame.io/multiplayer';
 import botWrapper from './botwrapper';
 import { gameWrapper } from './gamewrapper';
 import { boardWrapper } from './boardwrapper';
-import { Debug } from 'boardgame.io/debug';
-import { GameStateMixin, GameType } from './types';
-import { State } from 'boardgame.io';
-
+import { GameType } from './types';
+import type {GameRelay} from '../games/relay/game';
 
 export function MyClient<T_SpecificGameState>(
   game: GameType<T_SpecificGameState>,
@@ -21,12 +19,12 @@ export function MyClient<T_SpecificGameState>(
 }
 
 export function MyClientRelay<T_SpecificGameState >(
-  game: GameType<T_SpecificGameState>,
+  game: typeof GameRelay,
   board: any,
   description: string
 ) { // TODO finish types
   return Client({
-    game: gameWrapper(game),
+    game: game,
     board: board,
     numPlayers: 2,
   },)
@@ -53,12 +51,12 @@ export function MyClientWithBot<T_SpecificGameState >(
 }
 
 export function MyClientRelayWithBot<T_SpecificGameState >(
-  game: GameType<T_SpecificGameState>,
+  game: typeof GameRelay,
   board: any,
   strategy: any,
   description: string) { // TODO types
   return Client({
-    game: gameWrapper(game),
+    game: game,
     board: board,
     multiplayer: Local(
       {
@@ -83,11 +81,11 @@ export function MyOnlineClient<T_SpecificGameState >(
 }
 
 export function MyOnlineRelayClient<T_SpecificGameState >(
-  game: GameType<T_SpecificGameState>,
+  game: typeof GameRelay,
   board: any,
   description: string) {
   return Client({
-    game: gameWrapper(game),
+    game: game,
     board: board,
     multiplayer: SocketIO(),
   });
