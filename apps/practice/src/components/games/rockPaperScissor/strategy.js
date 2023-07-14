@@ -1,7 +1,6 @@
 'use strict';
 
 import { isNull, some, range, groupBy, sample, cloneDeep } from 'lodash';
-import { hasWinningSubset } from './helpers';
 
 const roleColors = ['red', 'blue'];
 
@@ -20,9 +19,7 @@ export const getGameStateAfterMove = (newBoard) => {
 
 const isGameEnd = (board) => {
   if (board.filter(c => c).length === 4) return true;
-  const occupiedPlaces = range(0, 9).filter((i) => board[i]);
-  const boardIndicesByPieceColor = groupBy(occupiedPlaces, (i) => board[i]);
-  return some(boardIndicesByPieceColor, hasWinningSubset);
+  return false;
 };
 
 const hasFirstPlayerWon = (board) => {
