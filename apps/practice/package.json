@@ -8,7 +8,8 @@
     "build": "parcel build src/index.html --public-url=/durer-jatekok/",
     "lint": "eslint --no-fix",
     "audit": "better-npm-audit audit -- --omit=dev",
-    "dev": "parcel src/index.html --open --port=8012"
+    "dev": "parcel src/index.html --open --port=8012",
+    "dev:nocache": "parcel serve src/index.html --no-cache --open --port=8012"
   },
   "dependencies": {
     "@headlessui/react": "1.7.15",
