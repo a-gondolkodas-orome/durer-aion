@@ -13,8 +13,8 @@ const GameBoard  = ({board, setBoard, ctx}) => {
 
     const select = (a, i) => {
         if (ctx.shouldPlayerMoveNext) {
-            newBoard = [...board];
-            d = newBoard[a]-i;
+            let newBoard = [...board];
+            let d = newBoard[a]-i;
             newBoard[a] = i;
             if(a===1) newBoard[0]+=d;
             ctx.endPlayerTurn(getGameStateAfterMove(newBoard))
