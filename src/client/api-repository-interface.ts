@@ -1,8 +1,6 @@
 import urlcat from "urlcat";
-import { AxiosInstance,AxiosError } from 'axios';
+import axios, { AxiosInstance,AxiosError } from 'axios';
 import { TeamModelDto } from "./dto/TeamStateDto";
-
-const axios = require('axios') 
   
 class ApiAxios {
   static instance(): AxiosInstance {
