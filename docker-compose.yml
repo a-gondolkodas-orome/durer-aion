@@ -17,8 +17,6 @@ services:
       - ADMIN_CREDENTIALS=hellodankness
       - GAME_GLOBAL_START_T='2022-10-20T00:09:36.150Z'
       - GAME_GLOBAL_END_T='2022-11-20T00:09:36.150Z'
-    ports:
-      - 8000:8000
     volumes:
       - .:/usr/src/app
     depends_on:
