@@ -151,7 +151,7 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
   router.get('/team/join/:token', koaBody(), async (ctx: Server.AppCtx) => {
     const connect_token: string = ctx.params.token ?? 'no-token';
     const team = await teams.getTeam({ joinCode: connect_token });
-    ctx.body = team?.id;
+    ctx.body = team?.teamId;
     if (team == null)
       ctx.throw(404, "Team not found!")
   })
@@ -160,7 +160,7 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
   router.get(/^\/team\/(?<GUID>[^-]{8}-[^-]{4}-[^-]{4}-[^-]{4}-[^-]{12}$)/, koaBody(), async (ctx: Server.AppCtx) => {
     const GUID = ctx.params.GUID ?? ctx.throw(400)
     console.log(GUID);
-    const team = await teams.getTeam({ id: GUID }) ?? ctx.throw(404, `Team with {id:${GUID}} not found.`)
+    const team = await teams.getTeam({ teamId: GUID }) ?? ctx.throw(404, `Team with {teamId:${GUID}} not found.`)
     const staleInfo = await checkStaleMatch(team);
     if (staleInfo.isStale){
       console.log(`Stale found: ${staleInfo}`)

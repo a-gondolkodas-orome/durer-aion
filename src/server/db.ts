@@ -35,16 +35,16 @@ export class TeamsRepository {
     })??null;
   }
 
-  async getTeam(searchCondition: WhereOptions<Pick<TeamModel, "joinCode" | "id">>) : Promise<TeamModel|null>{
+  async getTeam(searchCondition: WhereOptions<Pick<TeamModel, "joinCode" | "teamId">>) : Promise<TeamModel|null>{
     return await TeamModel.findOne( {where:
       (searchCondition)
     });
   }
   async insertTeam(
-      { teamname, category, email, other, id, joinCode, credentials } :
-      { teamname: string, category: string, email: string, other: string, id: string, joinCode: string, credentials: string}) {
+      { teamname, category, email, other, teamId, joinCode, credentials } :
+      { teamname: string, category: string, email: string, other: string, teamId: string, joinCode: string, credentials: string}) {
     return await TeamModel.create({
-      id, joinCode, other,
+      teamId, joinCode, other,
       category,
       email,
       credentials,

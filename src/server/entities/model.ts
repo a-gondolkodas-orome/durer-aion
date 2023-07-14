@@ -22,7 +22,7 @@ export interface FinishedMatchStatus {
 export type MatchStatus = NotStartedMatchStatus | InProgressMatchStatus | FinishedMatchStatus;
 
 export class TeamModel extends Model {
-  public id!: string;
+  public teamId!: string;
   // Important fields
   public joinCode!: string;
   public teamName!: string;
