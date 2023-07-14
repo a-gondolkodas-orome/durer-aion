@@ -23,7 +23,7 @@ const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
 };
 
 const GameBoard = ({ board, ctx }) => {
-  const fields = range(board.target + 1);
+  const fields = range(board.target + 14);
 
   const isMoveAllowed = (step) => {
     if (!ctx.shouldPlayerMoveNext) return false;
@@ -52,6 +52,7 @@ const GameBoard = ({ board, ctx }) => {
             ${board.restricted && i === board.current + board.restricted ? 'bg-red-200' : '' }
             ${i < board.current ? 'bg-slate-400' : ''}
             ${i === board.current ? 'bg-slate-200' : ''}
+            ${i > board.target + 1 ? 'text-slate-400' : ''}
           `}
         >{ i === board.current ? 'X' : i }
       </button>

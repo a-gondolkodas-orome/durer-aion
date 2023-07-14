@@ -76,6 +76,12 @@ export const gameList = {
     category: ['E+'],
     name: 'Kupac kettéosztó 4 kupaccal'
   },
+  TriangularGridRopes: {
+    year: 14,
+    round: 'döntő',
+    category: ['C', 'D'],
+    name: '10 totemoszlop'
+  },
   Coin357: {
     year: 15,
     round: 'döntő',
@@ -105,5 +111,23 @@ export const gameList = {
     round: 'döntő',
     category: ['E', 'E+'],
     name: '4 kupacban előrepakolás'
+  },
+  NumberCovering8: {
+    year: 11,
+    round: 'döntő',
+    category: ['A'],
+    name: 'Számok lefedése 1-től 8-ig'
+  },
+  NumberCovering10: {
+    year: 11,
+    round: 'döntő',
+    category: ['B'],
+    name: 'Számok lefedése 1-től 10-ig'
+  },
+  TwelveSquares: {
+    year: 6,
+    round: 'döntő',
+    category: ['A'],
+    name: 'Tizenkét mező'
   }
 };
