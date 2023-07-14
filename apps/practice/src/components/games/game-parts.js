@@ -88,7 +88,7 @@ export const GameFooter = () => {
 
 export const GameRule = ({ ruleDescription }) => {
   return <section className="flex justify-center mb-4 mt-1 max-w-[100ch]">
-    <Disclosure>
+    <Disclosure defaultOpen>
       {({ open }) => (
         <div className="border-2 rounded grow">
           <Disclosure.Button className="w-full bg-slate-200 text-xl flex justify-center">

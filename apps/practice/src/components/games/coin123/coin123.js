@@ -24,6 +24,7 @@ const GameBoard = ({ board, setBoard, ctx }) => {
 
     if (!wasCoinAlreadyRemovedInTurn) {
       setValueOfRemovedCoin(coinValue);
+      ctx.setTurnStage('placeBack');
       const newBoard = [...board];
       newBoard[coinValue] -= 1;
       setBoard(newBoard);
@@ -37,6 +38,7 @@ const GameBoard = ({ board, setBoard, ctx }) => {
   const resetTurnState = () => {
     setHoveredPile(null);
     setValueOfRemovedCoin(null);
+    ctx.setTurnStage(null);
   };
   const endTurn = (newBoard) => {
     ctx.endPlayerTurn(getGameStateAfterMove(newBoard));
@@ -120,9 +122,11 @@ const GameBoard = ({ board, setBoard, ctx }) => {
   );
 };
 
-const getPlayerStepDescription = () => {
-  // TODO: conditional on turn stage?
-  return 'Kattints egy mezőre, hogy elvegyél vagy visszatégy egy olyan pénzérmét';
+const getPlayerStepDescription = ({ turnStage }) => {
+  if (turnStage === 'placeBack') {
+    return 'Kattints egy mezőre, hogy visszatégy egy olyan pénzérmét';
+  }
+  return 'Kattints egy mezőre, hogy elvegyél egy olyan pénzérmét';
 };
 
 const rule = <>

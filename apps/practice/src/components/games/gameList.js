@@ -1,5 +1,10 @@
 export const gameList = {
-  ChessBishops: {
+  RockPaperScissor: {
+    year: 7,
+    round: 'döntő',
+    category: ['A'],
+    name: 'Kő papír olló'
+  },ChessBishops: {
     year: 1,
     round: 'döntő',
     category: ['B'],
@@ -70,6 +75,12 @@ export const gameList = {
     round: 'döntő',
     category: ['E+'],
     name: 'Kupac kettéosztó 4 kupaccal'
+  },
+  TriangularGridRopes: {
+    year: 14,
+    round: 'döntő',
+    category: ['C', 'D'],
+    name: '10 totemoszlop'
   },
   Coin357: {
     year: 15,

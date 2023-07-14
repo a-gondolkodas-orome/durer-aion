@@ -37,19 +37,10 @@ const GameBoard = ({ board, ctx }) => {
   const isMoveAllowed = (step) => {
 	  if(!ctx.shouldPlayerMoveNext) return false;
 	  if(ctx.playerIndex === 0) {
-      let av = [];
-      for(let i=board.left+1; i<=12 && av.length < 2; i++) {
-        if(i !== board.right) av.push(i-board.left);
-      }
-      return av.includes(step);
+      return (step > 0 && step <= 2 && step+board.left !== board.right)
     }
 
-	  let av = [];
-    for(let i=board.right-1; i>=1 && av.length < 2; i--) {
-      if(i !== board.left) av.push(i-board.right);
-    }
-    
-    return av.includes(step);
+	  return (step < 0 && step >= -2 && step+board.right !== board.left);
   };
 
   const makeStep = (step) => {
