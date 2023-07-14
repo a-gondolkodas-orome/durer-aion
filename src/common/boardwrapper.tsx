@@ -1,6 +1,6 @@
 import { Button, Dialog, Stack } from "@mui/material";
 import { useEffect, useState } from "react";
-import { Finished } from "../client/components/teamsates/Finished";
+import { Finished } from "../client/components/teamstates/Finished";
 import { Countdown } from "../client/components/Countdown";
 
 export function boardWrapper(board: any, description: any) { // TODO: solve types with BoardProps<MyGameState>

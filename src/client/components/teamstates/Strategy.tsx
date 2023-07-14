@@ -1,6 +1,6 @@
 import { InProgressMatchStatus, TeamModelDto } from '../../dto/TeamStateDto';
 import { FinisheStrategy } from './FinishedStrategy';
-import { DurerXVIStrategyClient } from '../../components/ReactClient';
+import { DurerXVIStrategyClient } from '../ReactClient';
 
 export function Strategy(props: {state: TeamModelDto}) {
   switch (props.state.strategyMatch.state) {

@@ -5,10 +5,10 @@ import { useTeamState } from '../hooks/user-hooks';
 import { Header } from './Header';
 import { Layout } from './layout';
 import { Login } from './Login';
-import { Finished } from './teamsates/Finished';
-import { Init } from './teamsates/Init';
-import { Relay } from './teamsates/Relay';
-import { Strategy } from './teamsates/Strategy';
+import { Finished } from './teamstates/Finished';
+import { Init } from './teamstates/Init';
+import { Relay } from './teamstates/Relay';
+import { Strategy } from './teamstates/Strategy';
 import { WaitingRoom } from './WaitingRoom';
 
 // TODO FINISHED, WAITING

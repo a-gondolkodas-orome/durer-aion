@@ -6,7 +6,7 @@ import { Debug } from 'boardgame.io/debug';
 import { Local } from 'boardgame.io/multiplayer';
 import botWrapper from '../../common/botwrapper';
 import { ClientFactoryRelay } from '../../common/client_factory';
-import { InProgressRelay } from '../../client/components/teamsates/InProgressRelay';
+import { InProgressRelay } from '../../client/components/teamstates/InProgressRelay';
 
 let description = <p className="text-justify">
 </p>
