@@ -123,7 +123,7 @@ const getGameStateAfterAiTurn = ({board,playerIndex}) => {
 }
 
 const getGameStateAfterMove = (newBoard) => {
-    console.log(newBoard);
+    
     return { newBoard: newBoard, isGameEnd: isEqual(newBoard,[0,0]), winnerIndex: null};
 }
 
