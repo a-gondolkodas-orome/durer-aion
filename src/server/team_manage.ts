@@ -92,7 +92,7 @@ export async function closeMatch(matchId: string, teams: TeamsRepository, db: St
   //TODO FIX THIS
   if(teamId === 0)
     return;
-  const team: TeamModel | null = await teams.getTeam({ id: teamId }) ?? null;
+  const team: TeamModel | null = await teams.getTeam({ teamId }) ?? null;
   if (team == null)
     throw new Error(`Match team is not found, the match has the following players:${currentMatch.metadata.players}`);
 
@@ -106,7 +106,7 @@ export async function closeMatch(matchId: string, teams: TeamsRepository, db: St
 
 export async function getNewGame(ctx: Server.AppCtx, teams: TeamsRepository, games: Game<any, Record<string, unknown>, any>[], gameType: 'RELAY' | 'STRATEGY') {
   const GUID = ctx.params.GUID;
-  const team: TeamModel = await teams.getTeam({ id: GUID }) ?? ctx.throw(404, `Team with {id:${GUID}} not found.`)
+  const team: TeamModel = await teams.getTeam({ teamId: GUID }) ?? ctx.throw(404, `Team with {id:${GUID}} not found.`)
   
   //if middelware setup was better understand, this should be in a separated midleware
   const staleInfo =  await checkStaleMatch(team);
