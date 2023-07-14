@@ -23,6 +23,9 @@ function checkRow(cells: (string | null)[], cell1: number, cell2: number, cell3:
 }
 
 export function strategy(state: State<MyGameState>, botID: string): [number | undefined, string] {
+  if(state.ctx.phase === "startNewGame") {
+    return [0, "setStartingPosition"];
+  }
   const cells = state.G.cells;
   // check if player can win
   for (const row of THREE_IN_A_ROWS) {
