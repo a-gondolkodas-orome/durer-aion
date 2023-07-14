@@ -68,7 +68,7 @@ async function createGame(
   ctx: Server.AppCtx
 ) {
   const matchID: string = nanoid(11);
-  const match = createMatch({ game: game!, numPlayers: 2, setupData: undefined, unlisted: false });
+  const match = createMatch({ game, numPlayers: 2, setupData: undefined, unlisted: false });
 
   if ('setupDataError' in match) {
     ctx.throw(400, match.setupDataError);
@@ -173,7 +173,7 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
 
   router.get('/team/:GUID/relay/play', koaBody(), async (ctx: Server.AppCtx) => {
     const GUID = ctx.params.GUID;
-      //check if in progress, it is not allowed to play
+    //check if in progress, it is not allowed to play
     //check if it can be started, throw error if not
     const { game, team } = await getNewGame(ctx, teams, games, 'RELAY');
 
