@@ -4,9 +4,15 @@ import botWrapper from './botwrapper';
 import { gameWrapper } from './gamewrapper';
 import { boardWrapper } from './boardwrapper';
 import { Debug } from 'boardgame.io/debug';
+import { GameStateMixin, GameType } from './types';
+import { State } from 'boardgame.io';
 
 
-export function MyClient(game: any, board: any, description: any) { // TODO types
+export function MyClient<T_SpecificGameState>(
+  game: GameType<T_SpecificGameState>,
+  board: any,
+  description: string
+) { // TODO finish types
   return Client({
     game: gameWrapper(game),
     board: boardWrapper(board, description),
@@ -14,16 +20,25 @@ export function MyClient(game: any, board: any, description: any) { // TODO type
   })
 }
 
-export function MyClientRelay(game: any, board: any, description: any) { // TODO types
+export function MyClientRelay<T_SpecificGameState >(
+  game: GameType<T_SpecificGameState>,
+  board: any,
+  description: string
+) { // TODO finish types
   return Client({
-    game: game,
+    game: gameWrapper(game),
     board: board,
     numPlayers: 2,
-  })
+  },)
 }
 
 
-export function MyClientWithBot(game: any, board: any, strategy: any, description: any) { // TODO types
+export function MyClientWithBot<T_SpecificGameState >(
+  game: GameType<T_SpecificGameState>,
+  board: any,
+  strategy: any,
+  description: string
+) { // TODO types
   return Client({
     game: gameWrapper(game),
     board: boardWrapper(board, description),
@@ -37,7 +52,11 @@ export function MyClientWithBot(game: any, board: any, strategy: any, descriptio
   })
 }
 
-export function MyClientRelayWithBot(game: any, board: any, strategy: any, description: any) { // TODO types
+export function MyClientRelayWithBot<T_SpecificGameState >(
+  game: GameType<T_SpecificGameState>,
+  board: any,
+  strategy: any,
+  description: string) { // TODO types
   return Client({
     game: game,
     board: board,
@@ -52,7 +71,10 @@ export function MyClientRelayWithBot(game: any, board: any, strategy: any, descr
 }
 
 
-export function MyOnlineClient(game: any, board: any, description: string) {
+export function MyOnlineClient<T_SpecificGameState >(
+  game: GameType<T_SpecificGameState>,
+  board: any,
+  description: string) {
   return Client({
     board: boardWrapper(board, description),
     game: gameWrapper(game),
@@ -60,7 +82,10 @@ export function MyOnlineClient(game: any, board: any, description: string) {
   });
 }
 
-export function MyOnlineRelayClient(game: any, board: any, description: string) {
+export function MyOnlineRelayClient<T_SpecificGameState >(
+  game: GameType<T_SpecificGameState>,
+  board: any,
+  description: string) {
   return Client({
     board: board,
     game: gameWrapper(game),
