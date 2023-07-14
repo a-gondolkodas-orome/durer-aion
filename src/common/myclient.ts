@@ -58,7 +58,7 @@ export function MyClientRelayWithBot<T_SpecificGameState >(
   strategy: any,
   description: string) { // TODO types
   return Client({
-    game: game,
+    game: gameWrapper(game),
     board: board,
     multiplayer: Local(
       {
@@ -76,8 +76,8 @@ export function MyOnlineClient<T_SpecificGameState >(
   board: any,
   description: string) {
   return Client({
-    board: boardWrapper(board, description),
     game: gameWrapper(game),
+    board: boardWrapper(board, description),
     multiplayer: SocketIO(),
   });
 }
@@ -87,8 +87,8 @@ export function MyOnlineRelayClient<T_SpecificGameState >(
   board: any,
   description: string) {
   return Client({
-    board: board,
     game: gameWrapper(game),
+    board: board,
     multiplayer: SocketIO(),
   });
 }
