@@ -1,6 +1,6 @@
 import { InProgressMatchStatus, TeamModelDto } from '../../dto/TeamStateDto';
 import { FinishedRelay } from './FinishedRelay';
-import { DurerXVIRelayClient } from '../../../components/ReactClient';
+import { DurerXVIRelayClient } from '../ReactClient';
 
 export function Relay(props: {state: TeamModelDto}) {
   switch (props.state.relayMatch.state) {

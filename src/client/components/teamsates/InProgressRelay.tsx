@@ -1,6 +1,6 @@
 import { Stack } from '@mui/system';
 import { useState } from 'react';
-import { Countdown } from '../../../components/Countdown';
+import { Countdown } from '../Countdown';
 import { BoardProps } from 'boardgame.io/react';
 import { MyGameState } from '../../../games/relay/game';
 import { Dialog } from '@mui/material';
