@@ -211,14 +211,24 @@ const GameBoard = ({ board, ctx }) => {
 const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
   const newBoard = [...board];
   const allowedMoves = getAllowedMoves(board);
-  if (playerIndex === 1 && board.length > 0) {
-    const symDir = edgeDirection(board[0].from, board[0].to);
-    const lastMove = last(board);
-    if (edgeDirection(lastMove.from, lastMove.to) === symDir) {
-      newBoard.push(allowedMoves.filter(e => edgeDirection(e.from, e.to) === symDir)[0]);
+  if (playerIndex === 1) {
+    if (board.length === 0) {
+      const goodFirstMove = sample([{ from: 3, to: 5 }, { from: 1, to: 8 }, { from: 2, to: 7 }]);
+      newBoard.push(goodFirstMove);
     } else {
-      const mirrorOfLastMove = { from: mirrorNodes[symDir][lastMove.from], to: mirrorNodes[symDir][lastMove.to] };
-      newBoard.push(mirrorOfLastMove);
+      const symDir = edgeDirection(board[0].from, board[0].to);
+      const lastMove = last(board);
+      if (edgeDirection(lastMove.from, lastMove.to) === symDir) {
+        newBoard.push(allowedMoves.filter(e => edgeDirection(e.from, e.to) === symDir)[0]);
+      } else {
+        const mirrorOfLastMove = { from: mirrorNodes[symDir][lastMove.from], to: mirrorNodes[symDir][lastMove.to] };
+        if (!isAllowed(board, mirrorOfLastMove)) {
+          console.error('Unexpected state, falling back');
+          newBoard.push(sample(allowedMoves));
+        } else {
+          newBoard.push(mirrorOfLastMove);
+        }
+      }
     }
   } else {
     newBoard.push(sample(allowedMoves));
