@@ -52,12 +52,6 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
             fontSize: '24px',
             fontWeight: 'bold',
           }}>
-            {/* TODO: replace this with dynamic data*/}
-            10 érme
-          </Stack>
-          <Stack sx={{
-            fontSize: '14px',
-          }}>
             {description} <br />
             Az "Új próbajáték" gombra kattintva próbajáték indul, ami a pontozásba nem számít bele. Bátran kérjetek próbajátékot, hiszen ezzel tudjátok tesztelni, hogy jól értitek-e a játék működését. Az "Új éles játék" gombra kattintva indul a valódi játék, ami már pontért megy.
           </Stack>
