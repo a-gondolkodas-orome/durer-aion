@@ -9,21 +9,22 @@ import { Init } from './teamsates/Init';
 import { Relay } from './teamsates/Relay';
 import { Strategy } from './teamsates/Strategy';
 
+// TODO FINISHED, WAITING
 export function Main() {
-  const teamState = useTeamState()
-  const [state, setState] = useState("init")
+  const teamState = useTeamState();
+
   return (
     <Layout>
       <LoadUTeamState/>
-      <Header teamName={teamState?.teamName ?? null} resetState={setState} />
+      <Header teamName={teamState?.teamName ?? null} />
       <Container sx={{ paddingLeft: 0, paddingRight: 0, zIndex: 3, position: 'relative', paddingBottom: '50px', maxWidth: '1200px' }}>
         {!teamState &&
           <Login/>}
-        {teamState && state === "init" &&
+        {teamState && teamState?.pageState === "INIT" &&
           <Init state={teamState}/>}
-        {teamState && state === "relay" &&
+        {teamState && teamState?.pageState === "RELAY" &&
           <Relay state={teamState}/>}
-        {teamState && state === "strategias" &&
+        {teamState && teamState?.pageState === "STRATEGY" &&
           <Strategy state={teamState}/>}
       </Container>
     </Layout>

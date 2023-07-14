@@ -23,7 +23,8 @@ export const LoadUTeamState = () => {
         userModel
             .getTeamState()
             .then(teamState => {
-                setTeamState(teamState);
+              console.log('New teamState:', teamState);
+              setTeamState(teamState);
             });
 
         
