@@ -1,5 +1,10 @@
 export const gameList = {
-  ChessBishops: {
+  RockPaperScissor: {
+    year: 7,
+    round: 'döntő',
+    category: ['A'],
+    name: 'Kő papír olló'
+  },ChessBishops: {
     year: 1,
     round: 'döntő',
     category: ['B'],

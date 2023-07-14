@@ -19,6 +19,7 @@ import { SuperstitiousCounting } from '../games/superstitious-counting/superstit
 import { TicTacToe } from '../games/tictactoe-alikes/tictactoe/tictactoe';
 import { TicTacToeDoubleStart } from '../games/tictactoe-alikes/tictactoe-doublestart/tictactoe-doublestart';
 import { TwoTimesTwo } from '../games/two-times-two/two-times-two';
+import { RockPaperScissor } from '../games/rockPaperScissor/rockPaperScissor';
 
 export const App = () => {
   const router = createHashRouter([
@@ -39,7 +40,8 @@ export const App = () => {
     { path: '/game/SuperstitiousCounting', element: <SuperstitiousCounting /> },
     { path: '/game/TicTacToe', element: <TicTacToe /> },
     { path: '/game/TicTacToeDoubleStart', element: <TicTacToeDoubleStart /> },
-    { path: '/game/TwoTimesTwo', element: <TwoTimesTwo /> }
+    { path: '/game/TwoTimesTwo', element: <TwoTimesTwo /> },
+    { path: '/game/rockPaperScissor', element: <RockPaperScissor /> }
   ]);
   return <StrictMode>
     <RouterProvider router={router}></RouterProvider>
