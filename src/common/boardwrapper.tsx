@@ -15,8 +15,8 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
         <Dialog open={
           !secondsRemaining || secondsRemaining < - 10000 || ctx.gameover === true
         } onClose={() => { window.location.reload(); }}>
-          //TODO: check if it is actually nescesery to have the showEndPage variable
-            {showEndPage && <RelayEndTable setShow={setShowEndPage} points={G.points}/>}
+          {/*TODO: check if it is actually nescesery to have the showEndPage variable*/}
+          {showEndPage && <RelayEndTable setShow={setShowEndPage} points={G.points}/>}
         </Dialog>
         <Stack sx={{
           padding: '20px',

@@ -19,6 +19,7 @@ console.assert(!server.endsWith('/'));
 export default function () {
   return (
     <div>
+      <h1> This should not be included in the live version</h1>
       <h1>Lobby</h1>
       <Lobby gameServer={server} lobbyServer={server} gameComponents={[
         {
