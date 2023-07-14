@@ -18,7 +18,7 @@ export function MyClient<T_SpecificGameState>(
   })
 }
 
-export function MyClientRelay<T_SpecificGameState >(
+export function MyClientRelay(
   game: typeof GameRelay,
   board: any,
   description: string
@@ -50,7 +50,7 @@ export function MyClientWithBot<T_SpecificGameState >(
   })
 }
 
-export function MyClientRelayWithBot<T_SpecificGameState >(
+export function MyClientRelayWithBot(
   game: typeof GameRelay,
   board: any,
   strategy: any,
