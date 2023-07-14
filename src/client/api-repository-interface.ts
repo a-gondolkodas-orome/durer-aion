@@ -66,7 +66,7 @@ export class RealClientRepository implements ClientRepository {
       result = await ApiAxios.instance().get(url);
     } catch (e: any) {
       const err = makeAxiosError(e);
-      if(err.status === 404) {
+      if(err.response?.status === 404) {
         throw new Error('Nem létező kód');
       }
       // here we can set message according to status (or data)
