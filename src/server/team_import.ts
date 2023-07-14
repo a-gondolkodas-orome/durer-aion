@@ -72,7 +72,7 @@ export async function importer(teams: TeamsRepository, filename: string) {
       found_teamnames.add(teamname);
     }
 
-    // TODO hard-coded values
+    // TODO: hard-coded values
     if (!['C', 'D', 'E'].includes(category)) {
       console.error(`ERROR: Invalid category [${category}] for team ${teamname}.`);
       ok = false;
@@ -151,7 +151,7 @@ export async function importer(teams: TeamsRepository, filename: string) {
   }
   console.info("Summary:");
   console.info(`Successfully imported ${successful} teams, failed ${failed} times.`);
-  // TODO Move the file
+  // TODO: Move the file
   export_table.unshift(expected_header);
   renameSync(`${filename}`, `${filename}.bak`);
   writeFileSync(`${filename}`, export_table.map(row => row.join('\t')).join('\n'), { 'encoding': 'utf-8' });

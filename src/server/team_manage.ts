@@ -89,7 +89,7 @@ function inferenceGameType(gameName: string) {
 export async function closeMatch(matchId: string, teams: TeamsRepository, db: StorageAPI.Async | StorageAPI.Sync) {
   const currentMatch = await db.fetch(matchId, { state: true, metadata: true });
   const teamId = currentMatch.metadata.players[0].id;
-  //TODO FIX THIS
+  //TODO: FIX THIS
   if(teamId === 0)
     return;
   const team: TeamModel | null = await teams.getTeam({ teamId }) ?? null;
@@ -121,7 +121,7 @@ export async function getNewGame(ctx: Server.AppCtx, teams: TeamsRepository, gam
   //find gameName based on team category
   console.log(team.category)
   const gameName = (gameType === 'RELAY') ?
-    relayNames[team.category as keyof typeof relayNames] : strategyNames[team.category as keyof typeof strategyNames] //TODO set type better??;
+    relayNames[team.category as keyof typeof relayNames] : strategyNames[team.category as keyof typeof strategyNames] //TODO: set type better??;
 
   const game: Game<any, Record<string, unknown>> = games.find((g) => g.name === gameName) ?? ctx.throw(404, 'Game ' + gameName + ' not found');
 

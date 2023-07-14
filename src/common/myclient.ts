@@ -6,7 +6,7 @@ import { boardWrapper } from './boardwrapper';
 import { Debug } from 'boardgame.io/debug';
 
 
-export function MyClient(game: any, board: any, description: any) { // TODO types
+export function MyClient(game: any, board: any, description: any) { // TODO: types
   return Client({
     game: gameWrapper(game),
     board: boardWrapper(board, description),
@@ -14,7 +14,7 @@ export function MyClient(game: any, board: any, description: any) { // TODO type
   })
 }
 
-export function MyClientRelay(game: any, board: any, description: any) { // TODO types
+export function MyClientRelay(game: any, board: any, description: any) { // TODO: types
   return Client({
     game: game,
     board: board,
@@ -23,7 +23,7 @@ export function MyClientRelay(game: any, board: any, description: any) { // TODO
 }
 
 
-export function MyClientWithBot(game: any, board: any, strategy: any, description: any) { // TODO types
+export function MyClientWithBot(game: any, board: any, strategy: any, description: any) { // TODO: types
   return Client({
     game: gameWrapper(game),
     board: boardWrapper(board, description),
@@ -37,7 +37,7 @@ export function MyClientWithBot(game: any, board: any, strategy: any, descriptio
   })
 }
 
-export function MyClientRelayWithBot(game: any, board: any, strategy: any, description: any) { // TODO types
+export function MyClientRelayWithBot(game: any, board: any, strategy: any, description: any) { // TODO: types
   return Client({
     game: game,
     board: board,

@@ -116,8 +116,8 @@ export class SocketIOButBotMoves extends SocketIO {
             // These happen after the player stepped.
             // The state is written to storage, and the server now returned
             // the authorative state to the player.
-            // TODO do not load the result from storage, reuse from the redux?
-            // TODO try do not send an authorative state to the player...?
+            // TODO: do not load the result from storage, reuse from the redux?
+            // TODO: try do not send an authorative state to the player...?
             console.log("Bot moves");
 
             if (stalePlayerID === BOT_ID) {
