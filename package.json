@@ -42,7 +42,7 @@
     "yup": "^0.32.11"
   },
   "scripts": {
-    "predeploy": "PUBLIC_URL=/durer-jatekok-new npm run build",
+    "predeploy": "PUBLIC_URL=/durer-jatekok-new REACT_APP_PAGE_CONFIG=gh-pages npm run build",
     "deploy": "gh-pages -d build",
     "lint": "eslint src/ --ext js,ts,jsx,tsx",
     "check:server": "babel-node --extensions \".ts\" --presets=@babel/preset-typescript --plugins=@babel/plugin-transform-modules-commonjs src/server.ts sanity-check",
