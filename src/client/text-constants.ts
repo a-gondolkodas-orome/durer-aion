@@ -31,5 +31,41 @@ export const dictionary = {
     filledAt: "Kitöltve ekkor",
     achievedPoint: "Elért pont",
     start: "Kezdjük",
+  },
+  relay: {
+    endTable: {
+      all: "összesen",
+      pointsGained: "pontot szereztél",
+      back: "Vissza a versenyhez",
+    },
+    badCategory: "ROSSZ KATEGÓRIA",
+    remainingTime: "Hátralevő idő",
+    name: "Váltófeladatok",
+  },
+  general: {
+    task: "Feladat",
+    point: "pont",
+  },
+  header: {
+    logout: "kijelentkezés",
+    subtitle: "Online forduló",
+    title: "XVI. Dürer Verseny",
+  },
+  login: {
+    greeting: "Kedves Versenyző!",
+    beforeTitle: "Üdvözlünk a",
+    afterTitle: "online fordulójának felületén.",
+    loginInstraction: "Belépéshez nézd meg az emailjeidet, nyisd meg az ott található linket vagy üsd be a kódot ide:",
+    fallback: "Ha nem találjátok az emailt, akkor írjatok nekünk a durerinfo@gmail.com email címre.",
+  },
+  waitingRoom: {
+    soon: "Az online forduló hamarosan kezdődik!",
+    remainingStart: "Még",
+    remainingEnd: "van hátra kezdésig!",
+    instruction: "A verseny kezdetekor automatikusan átirányításra kerültök a verseny felületre.",
+  },
+  strategy: {
+    notSupported: "NEM TÁMOGATOTT JÁTÉKÁLLAPOT",
+    name: "Stratégiás játék",
   }
 };

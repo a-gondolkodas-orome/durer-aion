@@ -1,6 +1,9 @@
 {
   "language": "en",
-  "words": [],
+  "words": [
+    "formik",
+    "notistack"
+  ],
   "flagWords": [],
   "ignorePaths": [
     "node_modules",
@@ -11,7 +14,11 @@
     "coverage/**/*",
     "docker-compose*",
     "readme.md",
-    "src/teamData.ts"
+    "src/teamData.ts",
+    "src/client/text-constants.ts",
+    "test.tsv*",
+    "src/games/relay/strategy.ts",
+    "src/games/14od/strategy.ts"
   ],
   "languageSettings": [
     {

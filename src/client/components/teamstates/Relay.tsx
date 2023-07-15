@@ -1,6 +1,7 @@
 import { InProgressMatchStatus, TeamModelDto } from "../../dto/TeamStateDto";
 import { FinishedRelay } from "./FinishedRelay";
 import { DurerXVIRelayClient } from "../ReactClient";
+import { dictionary } from "../../text-constants";
 
 const testId = "relayRoot";
 
@@ -24,6 +25,6 @@ export function Relay(props: { state: TeamModelDto }) {
       );
     case "NOT STARTED":
     default:
-      return <div data-testId={testId}>ROSSZ KATEGÓRIA</div>;
+      return <div data-testId={testId}>{dictionary.relay.badCategory}</div>;
   }
 }

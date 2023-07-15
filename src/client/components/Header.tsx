@@ -2,6 +2,7 @@ import { Container, Stack } from '@mui/material';
 import React from 'react';
 import { useLogout } from '../hooks/user-hooks';
 import theme from './theme';
+import { dictionary } from '../text-constants';
 
 export function Header(props: { teamName: string | null }) {
   const logout = useLogout()
@@ -28,7 +29,7 @@ export function Header(props: { teamName: string | null }) {
           fontSize: 40,
           fontWeight: 'bold',
           paddingTop: '20px',
-        }}>XVI. Dürer Verseny</Stack>
+        }}>{dictionary.header.title}</Stack>
         {props.teamName &&
           <Stack sx={{
             flexDirection: 'row',
@@ -46,14 +47,14 @@ export function Header(props: { teamName: string | null }) {
               "&:hover": {
                 opacity: '0.8',
               }
-            }}>kijelentkezés</Stack>
+            }}>{dictionary.header.logout}</Stack>
           </Stack>
         }
         <Stack sx={{
           fontSize: 30,
           fontWeight: 'bold',
           paddingTop: '30px',
-        }}>Online forduló</Stack>
+        }}>{dictionary.header.subtitle}</Stack>
       </Container>
     </Stack>
   )

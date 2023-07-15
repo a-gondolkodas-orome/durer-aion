@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button } from '@mui/material';
 import { Stack } from '@mui/system';
+import { dictionary } from '../text-constants';
 
 /**
  * Component to display an end game screen with close button, and score
@@ -20,7 +21,7 @@ export function RelayEndTable(props: {setShow: React.Dispatch<boolean>, points: 
       backgroundColor: '#fff',
       padding: '25px',
     }}>
-      <Stack>összesen {props.points} pontot szereztél</Stack>
+      <Stack>{dictionary.relay.endTable.all} {props.points} {dictionary.relay.endTable.pointsGained}</Stack>
       <Button sx={{
         width: '300px',
         height: '75px',
@@ -30,7 +31,7 @@ export function RelayEndTable(props: {setShow: React.Dispatch<boolean>, points: 
       }} variant='contained' color='primary' onClick={()=>{
         props.setShow(false)
       }}>
-        Vissza a versenyhez
+        {dictionary.relay.endTable.back}
       </Button>
     </Stack>
   )

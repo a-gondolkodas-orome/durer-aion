@@ -12,7 +12,7 @@ export function Chooser(props: {state: TeamModelDto}) {
     }}>
       <ChooserItem status={props.state.relayMatch} type="relay" />
       <Stack sx={{width: "20px"}}/>
-      <ChooserItem status={props.state.strategyMatch} type="strategias" />
+      <ChooserItem status={props.state.strategyMatch} type="strategy" />
     </Stack>
   )
 }

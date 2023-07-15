@@ -9,6 +9,7 @@ import { ExcerciseTask } from '../ExcerciseTask';
 import { ExcerciseForm } from '../ExcerciseForm';
 import { Finished } from './Finished';
 import { sendDataRelayEnd, sendDataRelayStep } from '../../../common/sendData';
+import { dictionary } from '../../text-constants';
 interface MyGameProps extends BoardProps<MyGameState> { };
 export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
   const [secondsRemaining, setSecondsRemaining] = useState(G.milisecondsRemaining as number | null);
@@ -71,7 +72,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
             fontSize: 18,
             flexDirection: 'row',
           }}>
-            <b style={{marginRight: '5px'}}>Hátralevő idő:</b>
+            <b style={{marginRight: '5px'}}>{dictionary.relay.remainingTime}:</b>
             <Countdown
               secondsRemaining={secondsRemaining ? secondsRemaining : null}
               setSecondsRemaining={setSecondsRemaining}

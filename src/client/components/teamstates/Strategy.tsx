@@ -1,6 +1,7 @@
 import { InProgressMatchStatus, TeamModelDto } from "../../dto/TeamStateDto";
 import { FinishedStrategy } from "./FinishedStrategy";
 import { DurerXVIStrategyClient } from "../ReactClient";
+import { dictionary } from "../../text-constants";
 
 const testId = "strategyRoot";
 
@@ -26,6 +27,6 @@ export function Strategy(props: { state: TeamModelDto }) {
       );
     case "NOT STARTED":
     default:
-      return <div data-testId={testId}>NEM TÁMOGATOTT JÁTÉKÁLLAPOT</div>;
+      return <div data-testId={testId}>{dictionary.strategy.notSupported}</div>;
   }
 }

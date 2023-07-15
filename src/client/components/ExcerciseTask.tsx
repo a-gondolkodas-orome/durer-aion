@@ -1,5 +1,6 @@
 import React from "react";
 import { Stack } from "@mui/system";
+import { dictionary } from "../text-constants";
 
 export interface MyProps {
   task: string;
@@ -13,7 +14,7 @@ export const ExcerciseTask: React.FunctionComponent<MyProps> = (props: MyProps) 
 </latex-js>`;
   return <Stack>
     <Stack sx={{fontSize: '20px'}}>
-      {props.serial}. Feladat ({props.maxPoints} pont):
+      {props.serial}. {dictionary.general.task} ({props.maxPoints} {dictionary.general.point}):
     </Stack>
     <div dangerouslySetInnerHTML={{ __html: completestring }} />
     {props.pictureUrl && <img src={props.pictureUrl} style={{maxWidth:'80%', display: 'flex', marginLeft:'auto', marginRight: 'auto', marginTop: "30px"}} alt={'feladatKép (ha nem töltött be próbáld frissíteni az oldalt)'}/>}

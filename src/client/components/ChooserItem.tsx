@@ -5,9 +5,9 @@ import { useStartRelay, useStartStrategy } from '../hooks/user-hooks';
 import { formatTime } from '../utils/DateFormatter';
 import { dictionary } from '../text-constants';
 
-export function ChooserItem(props: {status: MatchStatus, type: 'strategias'|'relay' }) {
+export function ChooserItem(props: {status: MatchStatus, type: 'strategy'|'relay' }) {
   const startRelay = useStartRelay();
-  const startStrat = useStartStrategy();
+  const startStrategy = useStartStrategy();
   return (
     <Stack sx={{
       display: 'flex',
@@ -20,7 +20,7 @@ export function ChooserItem(props: {status: MatchStatus, type: 'strategias'|'rel
         fontSize: 24,
         textAlign: 'center',
       }}>
-        {props.type==='relay' ? "Váltófeladatok" : "Stratégiás játék"}
+        {props.type==='relay' ? dictionary.relay.name : dictionary.strategy.name}
       </Stack>
       {props.status.state === "FINISHED" &&
         <Stack sx={{
@@ -44,7 +44,7 @@ export function ChooserItem(props: {status: MatchStatus, type: 'strategias'|'rel
           </Stack>
         </Stack>
       }        
-      {props.type === 'strategias' &&
+      {props.type === 'strategy' &&
         <Stack sx={{
           fontSize: 14,
           height: "100%",
@@ -66,7 +66,7 @@ export function ChooserItem(props: {status: MatchStatus, type: 'strategias'|'rel
         if (props.type === "relay") {
           startRelay()
         } else {
-          startStrat()
+          startStrategy()
         }
       }} disabled={props.status.state !== "NOT STARTED"}>
         {dictionary.chooser.start}

@@ -1,5 +1,6 @@
 import { Stack } from '@mui/system';
 import React from 'react';
+import { dictionary } from '../text-constants';
 
 export function WaitingRoom() {
   return (
@@ -17,20 +18,20 @@ export function WaitingRoom() {
         fontWeight: "bold",
         marginBottom: "50px",
       }}>
-        Az online forduló hamarosan kezdődik!
+        {dictionary.waitingRoom.soon}
       </Stack>
       <Stack sx={{
         fontSize: 32,
         marginBottom: "40px",
         marginLeft: "30px",
       }}>
-        Még #:##:## van hátra kezdésig!
+        {dictionary.waitingRoom.remainingStart} #:##:## {dictionary.waitingRoom.remainingEnd}
       </Stack>
       <Stack sx={{
         fontSize: 24,
         marginLeft: "30px",
       }}>
-        A verseny kezdetekor automatikusan átirányításra kerültök a verseny felületre.
+        {dictionary.waitingRoom.instruction}
       </Stack>
 
     </Stack>

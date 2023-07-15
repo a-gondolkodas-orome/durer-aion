@@ -4,6 +4,7 @@ import { useSnackbar } from 'notistack';
 import { useLogin } from '../hooks/user-hooks';
 import Form from './form';
 import theme from './theme';
+import { dictionary } from '../text-constants';
 
 export function Login() {
   const { enqueueSnackbar } = useSnackbar();
@@ -21,14 +22,14 @@ export function Login() {
         <Stack sx={{
           fontSize: "40px",
         }}>
-          Kedves Versenyző!<br/>
-          Üdvözlünk a XVI. Dürer Verseny online fordulójának felületén.
+          {dictionary.login.greeting}<br/>
+          {dictionary.login.beforeTitle} {dictionary.header.title} {dictionary.login.afterTitle}
         </Stack>
         <Stack sx={{
           marginTop: "15px",
           fontSize: "30px",
         }}>
-          Belépéshez nézd meg az emailjeidet, nyisd meg az ott található linket vagy üsd be a kódot ide:
+          {dictionary.login.loginInstraction}
         </Stack>
         <Stack>
           <Form style={{ position: "relative", zIndex: 2 }} initialValues={{ joinCode: '' }}
@@ -58,7 +59,7 @@ export function Login() {
         </Stack>
       </Stack>
       <Stack sx={{fontSize: 14, paddingTop: "100px"}}>
-        Ha nem találjátok az emailt, akkor írjatok nekünk a durerinfo@gmail.com email címre.
+        {dictionary.login.loginInstraction}
       </Stack>
     </Stack>
   )
