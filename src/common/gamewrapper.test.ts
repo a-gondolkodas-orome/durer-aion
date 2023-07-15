@@ -75,3 +75,85 @@ describe('gameWrapper', () => {
     expect(client.getState()?.G.data).toStrictEqual("move");
   });
 });
+
+describe('gameWrapper high-level logic', () => {
+  const setup = () => ({ data: "asd" });
+  const startingPosition = jest.fn();
+  const wrappedGame = gameWrapper(createGame(setup, startingPosition));
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
+  test('win once', () => {
+    const client = Client({ game: wrappedGame, numPlayers: 2 });
+    client.start();
+    client.moves.chooseNewGameType('live');
+    client.moves.setStartingPosition({ data: "startingPosition" });
+    client.moves.chooseRole('0');
+
+    client.moves.win();
+
+    expect(client.getState()?.ctx.phase).toStrictEqual("startNewGame");
+    expect(client.getState()?.G.numberOfTries).toStrictEqual(1);
+    expect(client.getState()?.G.numberOfLoss).toStrictEqual(0);
+    expect(client.getState()?.G.winningStreak).toStrictEqual(1);
+    expect(client.getState()?.G.points).toStrictEqual(0);
+  });
+
+  test('lose once', () => {
+    const client = Client({ game: wrappedGame, numPlayers: 2 });
+    client.start();
+    client.moves.chooseNewGameType('live');
+    client.moves.setStartingPosition({ data: "startingPosition" });
+    client.moves.chooseRole('0');
+
+    client.moves.lose();
+
+    expect(client.getState()?.ctx.phase).toStrictEqual("startNewGame");
+    expect(client.getState()?.G.numberOfTries).toStrictEqual(1);
+    expect(client.getState()?.G.numberOfLoss).toStrictEqual(1);
+    expect(client.getState()?.G.winningStreak).toStrictEqual(0);
+    expect(client.getState()?.G.points).toStrictEqual(0);
+  });
+
+  test('win twice', () => {
+    const client = Client({ game: wrappedGame, numPlayers: 2 });
+    client.start();
+    client.moves.chooseNewGameType('live');
+    client.moves.setStartingPosition({ data: "startingPosition" });
+    client.moves.chooseRole('0');
+
+    client.moves.win();
+
+    client.moves.chooseNewGameType('live');
+    client.moves.setStartingPosition({ data: "startingPosition" });
+    client.moves.chooseRole('0');
+
+    client.moves.win();
+
+    console.log(client.getState());
+
+    expect(client.getState()?.ctx.phase).toStrictEqual(null);
+    expect(client.getState()?.G.numberOfTries).toStrictEqual(2);
+    expect(client.getState()?.G.numberOfLoss).toStrictEqual(0);
+    expect(client.getState()?.G.winningStreak).toStrictEqual(2);
+    expect(client.getState()?.G.points).toStrictEqual(12);
+  });
+
+  test('win in test', () => {
+    const client = Client({ game: wrappedGame, numPlayers: 2 });
+    client.start();
+    client.moves.chooseNewGameType('test');
+    client.moves.setStartingPosition({ data: "startingPosition" });
+    client.moves.chooseRole('0');
+
+    client.moves.lose();
+
+    expect(client.getState()?.ctx.phase).toStrictEqual("startNewGame");
+    expect(client.getState()?.G.numberOfTries).toStrictEqual(0);
+    expect(client.getState()?.G.numberOfLoss).toStrictEqual(0);
+    expect(client.getState()?.G.winningStreak).toStrictEqual(0);
+    expect(client.getState()?.G.points).toStrictEqual(0);
+  });
+});

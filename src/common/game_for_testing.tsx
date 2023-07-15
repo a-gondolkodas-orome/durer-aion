@@ -26,8 +26,51 @@ export function createGame(setup: SetupFunction<G>, startingPosition: StartingPo
     setup,
     startingPosition: (...args) => startingPosition(...args),
     moves: {
-      win: ({ G }) => { G.winner = '0'; },
-      lose: ({ G }) => { G.winner = '1'; },
+      win: ({ G, events }) => {
+        G.winner = '0';
+        if (G.difficulty === "live") {
+          if (G.winner === "0") {
+            G.winningStreak = G.winningStreak + 1;
+            if (G.winningStreak >= 2) {
+              switch (G.numberOfLoss) {
+                case 0:
+                  G.points = 12;
+                  break;
+                case 1:
+                  G.points = 9;
+                  break;
+                case 2:
+                  G.points = 6;
+                  break;
+                case 3:
+                  G.points = 4;
+                  break;
+                case 4:
+                  G.points = 3;
+                  break;
+                default:
+                  G.points = 2;
+                  break;
+              }
+              events.endGame();
+            }
+          } else if (G.winner === "1") {
+            G.winningStreak = 0;
+            G.numberOfLoss += 1;
+          }
+        }
+        events.endTurn();
+      },
+      lose: ({ G, events }) => {
+        G.winner = '1';
+        if (G.difficulty === "live") {
+          if (G.winner === "1") {
+            G.winningStreak = 0;
+            G.numberOfLoss += 1;
+          }
+        }
+        events.endTurn();
+      },
     },
     possibleMoves: () => [],
   };
