@@ -24,8 +24,8 @@ export interface MyGameState {
 
 const lengthOfCompetition = 60 * 60; // seconds
 
-const GUESSER_PLAYER = '1';
-const JUDGE_PLAYER = '0';
+const GUESSER_PLAYER = '0';
+const JUDGE_PLAYER = '1';
 
 export const GameRelay: Game<MyGameState> = {
   setup: () => {
