@@ -3,7 +3,7 @@ import { render } from 'react-dom';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import { Route, BrowserRouter, Routes } from 'react-router-dom';
+import { Route, Routes, HashRouter } from 'react-router-dom';
 
 import NotFound from './pages/NotFound';
 import { RecoilRoot } from 'recoil';
@@ -26,12 +26,12 @@ const root = document.getElementById('root');
 render(
   <React.StrictMode>
     <RecoilRoot>
-      <BrowserRouter basename={process.env.PUBLIC_URL}>
+      <HashRouter>
         <Routes>
           <Route path="/" element={<App />} />
           <Route path='*' element={<NotFound/>}></Route>
         </Routes>
-      </BrowserRouter>
+      </HashRouter>
     </RecoilRoot>
   </React.StrictMode>,
   root
