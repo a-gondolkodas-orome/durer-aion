@@ -1,7 +1,8 @@
-import { Game } from 'boardgame.io';
+import { Ctx, Game } from 'boardgame.io';
 import { INVALID_MOVE, TurnOrder } from 'boardgame.io/core';
+import { GameStateMixin, GameType } from './types';
 
-function chooseRole({ G, ctx, playerID }: any, firstPlayer: string) { // TODO: type
+function chooseRole({ G, ctx, playerID }: any, firstPlayer: string):void { // TODO: type
   G.firstPlayer = firstPlayer;
 }
 
@@ -27,7 +28,7 @@ function setStartingPosition({ G, ctx, playerID, random, events }: any, starting
   };
 };
 
-function getTime({ G, ctx, playerID, events }: any){
+function getTime({ G, ctx, playerID, events }:any){
   if (playerID !== "0") {
     return INVALID_MOVE;
   };
@@ -36,9 +37,9 @@ function getTime({ G, ctx, playerID, events }: any){
 
 
 
-export function gameWrapper(game: any): Game<any> { // TODO: solve types
+export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameState>): Game<T_SpecificGameState & GameStateMixin> { // TODO: solve types
   return {
-    setup: () => ({ ...game.setup(), firstPlayer: null, difficulty: null, winner: null, numberOfTries: 0, numberOfLoss: 0, winningStreak: 0, points: null}),
+    setup: () => ({ ...game.setup(), firstPlayer: null, difficulty: null, winner: null, numberOfTries: 0, numberOfLoss: 0, winningStreak: 0, points: 0}),
     turn: {
       minMoves: 1,
       maxMoves: 1,
@@ -81,6 +82,7 @@ export function gameWrapper(game: any): Game<any> { // TODO: solve types
         },
       },
     },
-    ai: { enumerate: game.possibleMoves }
+    // conflict with boardgameio type, where id is string, instead of playerIDType
+    ai: { enumerate: game.possibleMoves as (G:T_SpecificGameState,ctx:Ctx,playerID:string)=>any[] }
   };
 };
