@@ -12,12 +12,15 @@ export interface GameStateMixin {
   points: number;
 }
 
+export type SetupFunction<G> = () => G;
+export type StartingPositionFunction<G> = (_: {G: G & GameStateMixin; ctx: Ctx; playerID: PlayerIDType; random: any}) => G;
+
 /// GameWrapper's mixin.
 /// setup() is defined here, as it returns G instead of G & WrapperState 
-interface GameMixin<MixG,G> {
+interface GameMixin<G> {
   possibleMoves: (G: G, ctx: Ctx, playerID: PlayerIDType) => any[];
-  setup: () => G,
-  startingPosition?: (_: {G: MixG; ctx: Ctx; playerID: PlayerIDType; random: any}) => G;
+  setup: SetupFunction<G>,
+  startingPosition?: StartingPositionFunction<G>;
 }
 
 /// Base structure, passed through directly to boardgame.io.
@@ -47,7 +50,7 @@ export interface Game<
 }
 */
 
-export type GameType<G> = WrappableGame<G & GameStateMixin> & GameMixin<G & GameStateMixin,G>;
+export type GameType<G> = WrappableGame<G & GameStateMixin> & GameMixin<G>;
 
 /// Allows typing: change ctx.currentPlayer -> currentPlayer(ctx)
 export function currentPlayer(ctx: Ctx): "0" | "1" {
