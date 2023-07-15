@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/durer-jatekok-new/static/css/main.cc156b67.css",
-    "main.js": "/durer-jatekok-new/static/js/main.335ce82e.js",
-    "static/js/787.e61c0340.chunk.js": "/durer-jatekok-new/static/js/787.e61c0340.chunk.js",
-    "index.html": "/durer-jatekok-new/index.html",
-    "main.cc156b67.css.map": "/durer-jatekok-new/static/css/main.cc156b67.css.map",
-    "main.335ce82e.js.map": "/durer-jatekok-new/static/js/main.335ce82e.js.map",
-    "787.e61c0340.chunk.js.map": "/durer-jatekok-new/static/js/787.e61c0340.chunk.js.map"
+    "main.css": "/durer-aion/static/css/main.cc156b67.css",
+    "main.js": "/durer-aion/static/js/main.67f89282.js",
+    "static/js/787.e61c0340.chunk.js": "/durer-aion/static/js/787.e61c0340.chunk.js",
+    "index.html": "/durer-aion/index.html",
+    "main.cc156b67.css.map": "/durer-aion/static/css/main.cc156b67.css.map",
+    "main.67f89282.js.map": "/durer-aion/static/js/main.67f89282.js.map",
+    "787.e61c0340.chunk.js.map": "/durer-aion/static/js/787.e61c0340.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.cc156b67.css",
-    "static/js/main.335ce82e.js"
+    "static/js/main.67f89282.js"
   ]
 }
