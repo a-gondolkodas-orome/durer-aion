@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { range, cloneDeep, isNull } from 'lodash';
+import { range, cloneDeep, isNull, max } from 'lodash';
 import { strategyGameFactory } from '../strategy-game';
 import { getGameStateAfterMove, getGameStateAfterAiTurn, playerColor } from './strategy';
 import { RockSvg } from './rock-svg';
@@ -21,6 +21,26 @@ const GameBoard = ({ board, ctx }) => {
 
   return (
   <section className="p-2 shrink-0 grow basis-2/3">
+    <div className="cols-3">
+
+      <button
+          className="aspect-square"
+          style={{width: "33%", aspectRatio: 0, color: "#AA98A9"}}
+        >
+          Kezdő
+      </button>
+      <button
+          className="aspect-square"
+          style={{width: "34%", aspectRatio: 0, color: "#AA98A9"}}
+        >
+      </button>
+      <button
+          className="aspect-square"
+          style={{width: "33%", aspectRatio: 0, color: "#AA98A9"}}
+        >
+          Második
+      </button>
+    </div>
     <div className="grid grid-cols-3 gap-100 border-2">
       {range(9).map(id => (
         <button
