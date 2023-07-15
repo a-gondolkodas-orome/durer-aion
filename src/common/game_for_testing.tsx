@@ -10,9 +10,9 @@ export function createGameWithMove(setup: SetupFunction<G>, startingPosition: St
   const game: GameType<G> = {
     name: "stub-game",
     setup,
-    startingPosition,
+    startingPosition: (...args) => startingPosition(...args),
     moves: {
-      move: ({ G, ctx, playerID, random }, ...args) => { return move({ G, ctx, playerID, random }, ...args) },
+      move: (...args) => move(...args),
     },
     possibleMoves: () => [null, "move"],
   };
@@ -24,12 +24,12 @@ export function createGame(setup: SetupFunction<G>, startingPosition: StartingPo
   const game: GameType<G> = {
     name: "stub-game",
     setup,
-    startingPosition,
+    startingPosition: (...args) => startingPosition(...args),
     moves: {
       win: (G) => { G.winner = '0'; },
       lose: (G) => { G.winner = '1'; },
     },
-    possibleMoves: () => [null, "move"],
+    possibleMoves: () => [],
   };
   return game;
 }
