@@ -1,18 +1,10 @@
 Teamname	Category	Email	Other	ID	Login Code	Credentials
-OK	C	a@b.com	x
-Empty ID,Login	C	a@b.com	x			
-EmptyRowBelow	C	a@b.com	x
-
+OK	C	a@b.com	x	20638d0e-ac06-4e72-a734-b4fcdcaee425	692-2481-797	a5303260-816d-4474-9024-42090672d74d
+Empty ID,Login	C	a@b.com	x	b5646f04-2591-4afc-9ae7-4350562c0649	492-7861-506	33a4efc1-8319-4cf7-9bc8-b9b7b7f09590
+EmptyRowBelow	C	a@b.com	x	ab883312-f020-4e0a-af26-e7ca79dd122d	125-9007-819	6dafa7f5-0b4c-414e-b2bc-9275b96d1422
 Filled	C	a@b.com	x	77777777-7777-7777-7777-777777777777	111-2222-111	67676767-6767-6767-6767-676767676767
-Wrong-category	X	a@b.com	x
-	C	a@b.com	Empty teamname
-bullshit ID	C	a@b.com	x	Bullshit
-bullshit Login	C	a@b.com	x		Bullshit
-Duplicate ID1	C	a@b.com	x	66666666-6666-6666-6666-666666666666
-Duplicate ID2	C	a@b.com	x	66666666-6666-6666-6666-666666666666
-Duplicate1Login	C	a@b.com	x		111-2222-222
-Duplicate2Login	C	a@b.com	x		111-2222-222
-Duplicate1Creds	C	a@b.com	x			67676767-6767-6767-6767-676767676768
-Duplicate2Creds	C	a@b.com	x			67676767-6767-6767-6767-676767676768
-DuplicateName	C	a@b.com	1
-DuplicateName	C	a@b.com	2
+Duplicate ID1	C	a@b.com	x	66666666-6666-6666-6666-666666666666	89-5453-64	e5874e43-87e5-46ea-b989-19a0dcf5fd9b
+Duplicate1Login	C	a@b.com	x	8654fc0a-00bf-40a0-9b13-3953cd8fe279	111-2222-222	f8cf322b-33b6-4ab8-8228-deccf9ca2fa9
+Duplicate1Creds	C	a@b.com	x	8d18fdfb-79b8-43bc-9fd0-68d32d5be86b	421-2988-965	67676767-6767-6767-6767-676767676768
+Duplicate2Creds	C	a@b.com	x	42d8d69f-7a6e-4196-8d76-f0ef5082dbc3	735-6303-273	67676767-6767-6767-6767-676767676768
+DuplicateName	C	a@b.com	1	b0de3f74-cb89-4ef2-b88d-2e60e9f24b76	705-152-925	d9b62d5e-d075-4c39-be08-df5ae55e6692

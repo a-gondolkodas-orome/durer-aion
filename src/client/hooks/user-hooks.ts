@@ -3,6 +3,7 @@ import { UserModel } from "./user-model";
 import { useRecoilState } from 'recoil';
 import { currentStateAtom } from "./user-atom";
 import { TeamModelDto } from "../dto/TeamStateDto";
+import { useEffect } from "react";
 
 const userModel = new UserModel();
 
@@ -10,6 +11,29 @@ export const useTeamState = (): TeamModelDto | null => {
   const [teamState, setTeamState] = useRecoilState(currentStateAtom);
 
   return teamState;
+};
+
+export const LoadTeamState = () => {
+  const [teamState, setTeamState] = useRecoilState(currentStateAtom);
+
+  useEffect(() => {
+      if (typeof window === 'undefined') {
+          return;
+      }
+
+      const userModel = new UserModel();
+
+      userModel
+          .getTeamState()
+          .then(teamState => {
+            setTeamState(teamState);
+          });
+
+      
+          userModel.addListener(setTeamState);
+  }, []);
+
+  return null;
 };
 
 export const useRefreshTeamState = () => {

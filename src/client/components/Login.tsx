@@ -14,7 +14,7 @@ export function Login() {
       display: 'flex',
       height: '100%',
       maxWidth: 600,
-    }}>
+    }} data-testId="loginRoot">
       <Stack sx={{
         marginTop: "80px",
       }}>
@@ -37,7 +37,7 @@ export function Login() {
                 enqueueSnackbar("nem adtad meg a kódot", { variant: 'error' });
                 return;
               }
-              const res = login(values.joinCode).catch(err => {
+              login(values.joinCode).catch(err => {
                 enqueueSnackbar(err?.message, { variant: 'error' });
               });
             }}>
