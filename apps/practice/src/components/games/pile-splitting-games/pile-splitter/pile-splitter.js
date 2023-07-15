@@ -7,13 +7,12 @@ const generateNewBoard = () => ([random(3, 10), random(3, 10)]);
 
 const isGameEnd = (board) => isEqual(board, [1, 1]);
 
-
 const getGameStateAfterAiTurn = ({ board }) => {
-  const newBoard = getBoardAfterAiTurn(board);
-  return { newBoard, isGameEnd: isGameEnd(newBoard), winnerIndex: null };
+  const { intermediateBoard, newBoard } = getBoardAfterAiTurn(board);
+  return { intermediateBoard, newBoard, isGameEnd: isGameEnd(newBoard), winnerIndex: null };
 };
 
-const GameBoard = ({ board, ctx }) => {
+const GameBoard = ({ board, setBoard, ctx }) => {
   const [hoveredPiece, setHoveredPiece] = useState(null);
 
   const isDisabled = ({ pileId, pieceId }) => {
@@ -24,10 +23,14 @@ const GameBoard = ({ board, ctx }) => {
   const clickPiece = ({ pileId, pieceId }) => {
     if (isDisabled({ pileId, pieceId })) return;
 
-    const newBoard = [pieceId + 1, board[pileId] - pieceId - 1];
-    ctx.endPlayerTurn({ newBoard, isGameEnd: isGameEnd(newBoard), winnerIndex: null });
+    setBoard(pileId === 0 ? [board[0], 0] : [0, board[1]]);
 
-    setHoveredPiece(null);
+    setTimeout(() => {
+      const newBoard = [pieceId + 1, board[pileId] - pieceId - 1];
+      ctx.endPlayerTurn({ newBoard, isGameEnd: isGameEnd(newBoard), winnerIndex: null });
+
+      setHoveredPiece(null);
+    }, 750);
   };
 
   const toBeLeft = ({ pileId, pieceId }) => {

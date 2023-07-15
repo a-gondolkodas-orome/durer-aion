@@ -18,18 +18,47 @@ const GameBoard = ({ board, ctx }) => {
     newBoard[id] = playerColor(ctx.playerIndex);
     ctx.endPlayerTurn(getGameStateAfterMove(newBoard));
   };
+  const isDisabled = (id) => {
+    if (!isMoveAllowed(id)) return true;
+    if ([1, 4, 7].includes(id)) return true;
+    if (ctx.playerIndex === 1) return [2, 5, 8].includes(id);
+    if (ctx.playerIndex === 0) return [0, 3, 6].includes(id);
+  };
 
   return (
   <section className="p-2 shrink-0 grow basis-2/3">
+    <div className="cols-3">
+
+      <button
+          disabled
+          className="aspect-square"
+          style={{width: "33%", aspectRatio: 0, color: "#AA98A9"}}
+        >
+          Kezdő
+      </button>
+      <button
+          disabled
+          className="aspect-square"
+          style={{width: "34%", aspectRatio: 0, color: "#AA98A9"}}
+        >
+      </button>
+      <button
+          disabled
+          className="aspect-square"
+          style={{width: "33%", aspectRatio: 0, color: "#AA98A9"}}
+        >
+          Második
+      </button>
+    </div>
     <div className="grid grid-cols-3 gap-100 border-2">
       {range(9).map(id => (
         <button
           key={id}
-          disabled={id === 1 || id === 4 || id === 7 || (ctx.playerIndex === 0 && (id == 0 || id == 3 || id == 6)) || (ctx.playerIndex == 1 && (id == 2 || id == 5 || id == 8))}
+          disabled={isDisabled(id)}
           onClick={() => clickField(id)}
-          className="aspect-square p-[25%] border-2"
+          className={`aspect-square p-[25%] border-2 ${isDisabled(id) && 'cursor-not-allowed'}`}
         >
-          
+
           { isNull(board[id]) && (id === 0 || id === 2) && (
             <RockSvg />
           )}

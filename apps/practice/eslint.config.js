@@ -22,8 +22,6 @@ module.exports = [{
     'no-duplicate-imports': 'error',
     'no-multiple-empty-lines': ['error', { max: 2 }],
     'no-trailing-spaces': 'error',
-    'no-var': 'warn',
-    'object-curly-spacing': ['warn', 'always'],
-    'semi': 'warn'
+    'no-var': 'warn'
   }
 }];

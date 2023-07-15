@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import { strategyGameFactory } from '../strategy-game';
 
 const generateNewBoard = () => ([1,2,3,4,5,6,7,8,9,10]);
@@ -11,7 +11,7 @@ const GameBoard = ({ board, setBoard, ctx }) => {
             newBoard[number-1] = -1;
             ctx.endPlayerTurn(getGameStateAfterMove(newBoard));
         }
-    }
+    };
 
 
     return(
@@ -25,13 +25,13 @@ const GameBoard = ({ board, setBoard, ctx }) => {
                         onClick={() => clickNumber(i)}>
                         {board[i-1]}</td> :
                         <td className='text-center border-4 bg-blue-300'
-                        key = {i}>X</td>                
+                        key = {i}>X</td>
                     ))}
                 </tr>
             </tbody></table>
         </section>
         );
-}
+};
 
 const getGameStateAfterMove = (newBoard) => {
     let remaining = newBoard.filter(i => i>0);
@@ -41,20 +41,21 @@ const getGameStateAfterMove = (newBoard) => {
         isGameEnd = true;
         winnerIndex = (remaining[0]+remaining[1])%2;
     }
-    return { newBoard: newBoard, isGameEnd: isGameEnd, winnerIndex: winnerIndex};
-}
+    return { newBoard: newBoard, isGameEnd: isGameEnd, winnerIndex: winnerIndex };
+};
 
 const getPlayerStepDescription = () => {
-    return "Kattints egy számra, hogy lefedd"
-}
+    return "Kattints egy számra, hogy lefedd";
+};
 
-const getGameStateAfterAiTurn = ({ board, playerIndex}) => {
+const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
     let newBoard = [...board];
     const notCovered = newBoard.filter(i => i!==-1);
     const evens = newBoard.filter(i => i%2===0);
     const odds = newBoard.filter(i => i%2===1 && i!==-1);
-    if (evens.length===odds.length || evens.length === 0 || odds.length === 0) newBoard[notCovered[Math.floor(Math.random() * (notCovered.length))]-1] = -1;
-    else {
+    if (evens.length===odds.length || evens.length === 0 || odds.length === 0) {
+        newBoard[notCovered[Math.floor(Math.random() * (notCovered.length))]-1] = -1;
+    } else {
         if (playerIndex===0){
             let ch = Math.floor(Math.random() * (evens.length>odds.length ? evens.length : odds.length));
             newBoard[(evens.length>odds.length ? evens : odds)[ch]-1] = -1;
@@ -63,9 +64,9 @@ const getGameStateAfterAiTurn = ({ board, playerIndex}) => {
             newBoard[(evens.length<odds.length ? evens : odds)[ch]-1] = -1;
         }
     }
-    
+
     return (getGameStateAfterMove(newBoard));
-}
+};
 
 const rule = <>
 Egy táblázatban 1-től 10-ig szerepelnek a számok. Két játékos felválva takar le 1-1
@@ -82,10 +83,10 @@ const Game = strategyGameFactory({
         generateNewBoard,
         getGameStateAfterAiTurn
     }
-})
+});
 
 export const NumberCovering10 = () => {
     const [board, setBoard] = useState(generateNewBoard());
-  
+
     return <Game board={board} setBoard={setBoard} />;
 };

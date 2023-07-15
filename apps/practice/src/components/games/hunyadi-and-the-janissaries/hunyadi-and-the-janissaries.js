@@ -32,7 +32,11 @@ const GameBoard = ({ board, setBoard, ctx }) => {
       setBoard(newBoard);
     } else {
       const group = board[rowIndex][pieceIndex];
-      ctx.endPlayerTurn(getGameStateAfterKillingGroup(board, group));
+      const { newBoard, intermediateBoard, isGameEnd, winnerIndex } = getGameStateAfterKillingGroup(board, group);
+      setBoard(intermediateBoard);
+      setTimeout(() => {
+        ctx.endPlayerTurn({ newBoard, isGameEnd, winnerIndex });
+      }, 750);
     }
   };
 
@@ -106,6 +110,8 @@ const rule = <>
 const Game = strategyGameFactory({
   rule,
   title: 'Hunyadi és a janicsárok',
+  firstRoleLabel: 'Szultán leszek',
+  secondRoleLabel: 'Hunyadi leszek',
   GameBoard,
   G: {
     getPlayerStepDescription,
