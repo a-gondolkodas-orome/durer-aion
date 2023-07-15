@@ -6,12 +6,15 @@ import { getOptimalAiMove } from './strategy';
 const generateNewBoard = () => ([random(3, 10), random(3, 10)]);
 
 const getGameStateAfterMove = (board, { pileId, pieceId }) => {
+  const intermediateBoard = pileId === 0
+    ? [board[0] - pieceId - 1, board[1]]
+    : [board[0], board[1]-pieceId-1];
   const newBoard = pileId === 0
     ? [board[0] - pieceId - 1, board[1]+(pieceId+1)/2]
     : [board[0] +(pieceId+1)/2, board[1]-pieceId-1];
   const isGameEnd = isEqual(newBoard, [1, 1]) || isEqual(newBoard, [0, 1]) || isEqual(newBoard, [1, 0]);
 
-  return { newBoard, isGameEnd, winnerIndex: null };
+  return { newBoard, intermediateBoard, isGameEnd, winnerIndex: null };
 };
 
 const GameBoard = ({ board, ctx }) => {

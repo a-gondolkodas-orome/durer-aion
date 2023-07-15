@@ -37,6 +37,7 @@ export const generateNewBoard = () => {
 export const getGameStateAfterKillingGroup = (board, group) => {
   let isGameEnd = false;
   let hasFirstPlayerWon = undefined;
+  const intermediateBoard = cloneDeep(board);
   const newBoard = cloneDeep(board);
 
   for (let i = 0; i < newBoard.length; i++) {
@@ -49,6 +50,7 @@ export const getGameStateAfterKillingGroup = (board, group) => {
         newBoard[i - 1].push(...remainingSoldiersInRow);
       }
     }
+    intermediateBoard[i] = remainingSoldiersInRow;
     newBoard[i] = [];
   }
 
@@ -57,9 +59,9 @@ export const getGameStateAfterKillingGroup = (board, group) => {
     hasFirstPlayerWon = false;
   }
   if (isGameEnd) {
-    return { newBoard, isGameEnd, winnerIndex: hasFirstPlayerWon ? 0 : 1 };
+    return { newBoard, intermediateBoard, isGameEnd, winnerIndex: hasFirstPlayerWon ? 0 : 1 };
   } else {
-    return { newBoard, isGameEnd };
+    return { newBoard, intermediateBoard, isGameEnd };
   }
 };
 

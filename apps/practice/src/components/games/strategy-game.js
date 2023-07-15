@@ -36,17 +36,23 @@ export const strategyGameFactory = ({ rule, title, firstRoleLabel, secondRoleLab
 
     const doAiTurn = ({ currentBoard }) => {
       const localPlayerIndex = playerIndex === null ? 1 : playerIndex;
-      const time = Math.floor(Math.random() * 500 + 500);
+      const time = Math.floor(Math.random() * 500 + 1000);
       setTimeout(() => {
-        const { newBoard, isGameEnd, winnerIndex } = G.getGameStateAfterAiTurn(
-          { board: currentBoard, playerIndex: localPlayerIndex }
+        const { intermediateBoard, newBoard, isGameEnd, winnerIndex } = G.getGameStateAfterAiTurn(
+          { board: currentBoard, setBoard, playerIndex: localPlayerIndex }
         );
-        setBoard(newBoard);
-        setNext(next => 1 - next);
-        if (isGameEnd) {
-          // default: last player to move is the winner
-          endGame(winnerIndex === null ? (1 - localPlayerIndex) : winnerIndex);
+        const stageTimeout = intermediateBoard !== undefined ? 750 : 0;
+        if (intermediateBoard !== undefined) {
+          setBoard(intermediateBoard);
         }
+        setTimeout(() => {
+          setBoard(newBoard);
+          setNext(next => 1 - next);
+          if (isGameEnd) {
+            // default: last player to move is the winner
+            endGame(winnerIndex === null ? (1 - localPlayerIndex) : winnerIndex);
+          }
+        }, stageTimeout);
       }, time);
     };
 

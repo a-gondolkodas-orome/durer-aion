@@ -1,8 +1,7 @@
 'use strict';
 
 import { generateNewBoard, getGameStateAfterKillingGroup, getGameStateAfterAiTurn } from './strategy';
-import { uniq, flatten } from 'lodash';
-// import * as random from 'lodash/random';
+import { uniq, flatten, isEqual } from 'lodash';
 
 describe('HunyadiAndTheJanissaries strategy', () => {
   describe('generateNewBoard', () => {
@@ -16,6 +15,7 @@ describe('HunyadiAndTheJanissaries strategy', () => {
   describe('getGameStateAfterKillingGroup', () => {
     it('should claim victory for Hunyadi if all soldiers are killed', () => {
       expect(getGameStateAfterKillingGroup([[], ['red', 'red']], 'red')).toEqual({
+        intermediateBoard: [[], []],
         newBoard: [[], []],
         isGameEnd: true,
         winnerIndex: 1
@@ -24,6 +24,7 @@ describe('HunyadiAndTheJanissaries strategy', () => {
 
     it('should claim loss for Hunyadi if a soldier reaches the castle', () => {
       expect(getGameStateAfterKillingGroup([['red', 'blue'], ['blue']], 'red')).toEqual({
+        intermediateBoard: [['blue'], ['blue']],
         newBoard: [['blue'], []],
         isGameEnd: true,
         winnerIndex: 0
@@ -33,6 +34,7 @@ describe('HunyadiAndTheJanissaries strategy', () => {
     it('should report game as still in progress and advance remaining soldiers otherwise', () => {
       const board = [['red'], ['blue', 'red'], [], ['blue', 'blue']];
       expect(getGameStateAfterKillingGroup(board, 'red')).toEqual({
+        intermediateBoard: [[], ['blue'], [], ['blue', 'blue']],
         newBoard: [['blue'], [], ['blue', 'blue'], []],
         isGameEnd: false
       });
@@ -44,6 +46,7 @@ describe('HunyadiAndTheJanissaries strategy', () => {
       it('should kill the group of the first soldier if there is any in the first row', () => {
         const board = [['blue', 'red', 'red'], ['red']];
         expect(getGameStateAfterAiTurn({ board, playerIndex: 0 })).toEqual({
+          intermediateBoard: [['red', 'red'], ['red']],
           newBoard: [['red'], []],
           isGameEnd: true,
           winnerIndex: 0
@@ -53,6 +56,7 @@ describe('HunyadiAndTheJanissaries strategy', () => {
       it('should kill the group with the bigger combined weight', () => {
         const board = [[], ['red'], ['blue', 'blue'], ['blue']];
         expect(getGameStateAfterAiTurn({ board, playerIndex: 0 })).toEqual({
+          intermediateBoard: [[], ['red'], [], []],
           newBoard: [['red'], [], [], []],
           isGameEnd: false
         });
@@ -68,34 +72,33 @@ describe('HunyadiAndTheJanissaries strategy', () => {
         });
       });
 
-      // TODO: fix tests
-      // it('should balance soldiers with smaller weight for later rows - v1', () => {
-      //   jest.spyOn(random, 'default').mockImplementationOnce(() => 1);
-      //   const board = [
-      //     ['blue'],
-      //     ['blue'],
-      //     [],
-      //     ['blue', 'blue', 'blue', 'blue']
-      //   ];
-      //   expect(getGameStateAfterAiTurn({ board, playerIndex: 1 })).toEqual({
-      //     newBoard: [['blue'], ['red'], [], ['red', 'red', 'red', 'red']],
-      //     isGameEnd: false
-      //   });
-      // });
+      it('should balance soldiers with smaller weight for later rows - v1', () => {
+        const board = [
+          ['blue'],
+          ['blue'],
+          [],
+          ['blue', 'blue', 'blue', 'blue']
+        ];
+        const { newBoard } = getGameStateAfterAiTurn({ board, playerIndex: 1 });
+        expect(
+          isEqual(newBoard, [['blue'], ['red'], [], ['red', 'red', 'red', 'red']]) ||
+          isEqual(newBoard, [['red'], ['blue'], [], ['blue', 'blue', 'blue', 'blue']])
+        ).toBe(true);
+      });
 
-      // it('should balance soldiers with smaller weight for later rows - v2', () => {
-      //   jest.spyOn(random, 'default').mockImplementationOnce(() => 1);
-      //   const board = [
-      //     ['blue'],
-      //     ['blue', 'blue', 'blue'],
-      //     ['blue'],
-      //     ['blue', 'blue']
-      //   ];
-      //   expect(getGameStateAfterAiTurn({ board, playerIndex: 1 })).toEqual({
-      //     newBoard: [['blue'], ['red', 'red', 'blue'], ['red'], ['red', 'red']],
-      //     isGameEnd: false
-      //   });
-      // });
+      it('should balance soldiers with smaller weight for later rows - v2', () => {
+        const board = [
+          ['blue'],
+          ['blue', 'blue', 'blue'],
+          ['blue'],
+          ['blue', 'blue']
+        ];
+        const { newBoard } = getGameStateAfterAiTurn({ board, playerIndex: 1 });
+        expect(
+          isEqual(newBoard, [['blue'], ['red', 'red', 'blue'], ['red'], ['red', 'red']]) ||
+          isEqual(newBoard, [['red'], ['blue', 'blue', 'red'], ['blue'], ['blue', 'blue']])
+        ).toBe(true);
+      });
     });
   });
 });
