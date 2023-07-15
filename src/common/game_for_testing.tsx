@@ -26,8 +26,8 @@ export function createGame(setup: SetupFunction<G>, startingPosition: StartingPo
     setup,
     startingPosition: (...args) => startingPosition(...args),
     moves: {
-      win: (G) => { G.winner = '0'; },
-      lose: (G) => { G.winner = '1'; },
+      win: ({ G }) => { G.winner = '0'; },
+      lose: ({ G }) => { G.winner = '1'; },
     },
     possibleMoves: () => [],
   };
