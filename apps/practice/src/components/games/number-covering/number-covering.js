@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { strategyGameFactory } from '../strategy-game';
+import { range } from 'lodash';
 
-const generateNewBoard = () => ([1,2,3,4,5,6,7,8,9,10]);
-
-const GameBoard = ({ board, setBoard, ctx }) => {
+const GameBoard = ({ board, ctx }) => {
 
     const clickNumber = (number) => {
         if (ctx.shouldPlayerMoveNext) {
@@ -15,22 +14,22 @@ const GameBoard = ({ board, setBoard, ctx }) => {
 
 
     return(
-        <section className="p-2 shrink-0 grow basis-2/3">
-            <table className="m-2 border-collapse table-fixed w-full"><tbody>
-                <tr>
-                    {[1,2,3,4,5,6,7,8,9,10].map(i => (
-                        board[i-1]!==-1 ?
-                        <td className='text-center border-4 aspect-square'
-                        key = {i}
-                        onClick={() => clickNumber(i)}>
-                        {board[i-1]}</td> :
-                        <td className='text-center border-4 bg-blue-300'
-                        key = {i}>X</td>
-                    ))}
-                </tr>
-            </tbody></table>
-        </section>
-        );
+    <section className="p-2 shrink-0 grow basis-2/3">
+        <table className="m-2 border-collapse table-fixed w-full"><tbody>
+            <tr>
+                {range(board.length).map(i => (
+                    board[i]!==-1 ?
+                    <td className='text-center border-4 aspect-square'
+                    key = {i}
+                    onClick={() => clickNumber(i+1)}>
+                    {board[i]}</td> :
+                    <td className='text-center border-4 bg-blue-300'
+                    key = {i}>X</td>
+                ))}
+            </tr>
+        </tbody></table>
+    </section>
+    );
 };
 
 const getGameStateAfterMove = (newBoard) => {
@@ -42,10 +41,6 @@ const getGameStateAfterMove = (newBoard) => {
         winnerIndex = (remaining[0]+remaining[1])%2;
     }
     return { newBoard: newBoard, isGameEnd: isGameEnd, winnerIndex: winnerIndex };
-};
-
-const getPlayerStepDescription = () => {
-    return "Kattints egy számra, hogy lefedd";
 };
 
 const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
@@ -68,25 +63,48 @@ const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
     return (getGameStateAfterMove(newBoard));
 };
 
-const rule = <>
+const rule8 = <>
+Egy táblázatban 1-től 8-ig szerepelnek a számok. Két játékos felválva takar le 1-1
+számot addig, amíg csak 2 szám marad. Ha a megmaradt két szám összege páros, akkor a kezdő
+nyer, ha pedig páratlan, akkor a második.
+</>;
+
+const rule10 = <>
 Egy táblázatban 1-től 10-ig szerepelnek a számok. Két játékos felválva takar le 1-1
 számot addig, amíg csak 2 szám marad. Ha a megmaradt két szám összege páros, akkor a kezdő
 nyer, ha pedig páratlan, akkor a második.
 </>;
 
-const Game = strategyGameFactory({
-    rule,
-    title: 'Számok lefedése',
+const Game8 = strategyGameFactory({
+    rule: rule8,
+    title: 'Számok lefedés 1-től 8-ig',
     GameBoard,
     G: {
-        getPlayerStepDescription,
-        generateNewBoard,
+        getPlayerStepDescription: () => 'Kattints egy számra, hogy lefedd',
+        generateNewBoard: () => [1,2,3,4,5,6,7,8],
         getGameStateAfterAiTurn
     }
 });
 
-export const NumberCovering10 = () => {
-    const [board, setBoard] = useState(generateNewBoard());
+const Game10 = strategyGameFactory({
+    rule: rule10,
+    title: 'Számok lefedés 1-től 10-ig',
+    GameBoard,
+    G: {
+        getPlayerStepDescription: () => 'Kattints egy számra, hogy lefedd',
+        generateNewBoard: () => [1,2,3,4,5,6,7,8,9,10],
+        getGameStateAfterAiTurn
+    }
+});
 
-    return <Game board={board} setBoard={setBoard} />;
+export const NumberCovering8 = () => {
+    const [board, setBoard] = useState([1,2,3,4,5,6,7,8]);
+
+    return <Game8 board={board} setBoard={setBoard} />;
+};
+
+export const NumberCovering10 = () => {
+    const [board, setBoard] = useState([1,2,3,4,5,6,7,8,9,10]);
+
+    return <Game10 board={board} setBoard={setBoard} />;
 };

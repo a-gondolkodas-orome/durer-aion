@@ -6,8 +6,8 @@ import { AddReduceDouble } from '../games/pile-splitting-games/add-reduce-double
 import { AntiTicTacToe } from '../games/tictactoe-alikes/anti-tictactoe/anti-tictactoe';
 import { ChessBishops } from '../games/chess-bishops/chess-bishops';
 import { ChessRook } from '../games/chess-rook/chess-rook';
-import { Coin123 } from '../games/coin123/coin123';
-import { Coin357 } from '../games/coin357/coin357';
+import { Coin123 } from '../games/coin-3-piles/coin123';
+import { Coin357 } from '../games/coin-3-piles/coin357';
 import { CubeColoring } from '../games/cube-coloring/cube-coloring';
 import { FiveSquares } from '../games/five-squares/five-squares';
 import { FourPilesSpreadAhead } from '../games/four-piles-spread-ahead/four-piles-spread-ahead';
@@ -21,11 +21,9 @@ import { TicTacToeDoubleStart } from '../games/tictactoe-alikes/tictactoe-double
 import { TriangularGridRopes } from '../games/triangular-grid-ropes/triangular-grid-ropes';
 import { TwoTimesTwo } from '../games/two-times-two/two-times-two';
 import { RockPaperScissor } from '../games/rockPaperScissor/rockPaperScissor';
-import { NumberCovering8 } from '../games/number-covering-1-8/number-covering-1-8';
-import { NumberCovering10 } from '../games/number-covering-1-10/number-covering-1-10';
+import { NumberCovering8, NumberCovering10 } from '../games/number-covering/number-covering';
 import { TwelveSquares } from '../games/twelve-squares/twelve-squares';
-import { SixDiscs } from '../games/six-discs/six-discs';
-import { TenDiscs } from '../games/ten-discs/ten-discs';
+import { SixDiscs, TenDiscs } from '../games/discs-turn-or-remove/discs-turn-or-remove';
 import { PrimeExponentials } from '../games/prime-exponentials/prime-exponentials';
 
 export const App = () => {
