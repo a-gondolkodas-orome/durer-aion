@@ -106,6 +106,8 @@ const rule = <>
 const Game = strategyGameFactory({
   rule,
   title: 'Hunyadi és a janicsárok',
+  firstRoleLabel: 'Szultán leszek',
+  secondRoleLabel: 'Hunyadi leszek',
   GameBoard,
   G: {
     getPlayerStepDescription,

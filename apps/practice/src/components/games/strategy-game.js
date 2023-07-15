@@ -4,7 +4,7 @@ import {
 } from './game-parts';
 import { v4 as uuidv4 } from 'uuid';
 
-export const strategyGameFactory = ({ rule, title, GameBoard, G }) => {
+export const strategyGameFactory = ({ rule, title, firstRoleLabel, secondRoleLabel, GameBoard, G }) => {
   return ({ board, setBoard }) => {
     const [phase, setPhase] = useState('roleSelection');
     const [playerIndex, setPlayerIndex] = useState(null);
@@ -12,6 +12,7 @@ export const strategyGameFactory = ({ rule, title, GameBoard, G }) => {
     const [isGameEndDialogOpen, setIsGameEndDialogOpen] = useState(false);
     const [winnerIndex, setWinnerIndex] = useState(null);
     const [gameUuid, setGameUuid] = useState(uuidv4());
+    const [turnStage, setTurnStage] = useState(null);
 
     const startNewGame = () => {
       setBoard(G.generateNewBoard());
@@ -21,6 +22,7 @@ export const strategyGameFactory = ({ rule, title, GameBoard, G }) => {
       setIsGameEndDialogOpen(false);
       setWinnerIndex(null);
       setGameUuid(uuidv4());
+      setTurnStage(null);
     };
 
     const shouldPlayerMoveNext = (phase === 'play' && next === playerIndex);
@@ -34,11 +36,11 @@ export const strategyGameFactory = ({ rule, title, GameBoard, G }) => {
 
     const doAiTurn = ({ currentBoard }) => {
       const localPlayerIndex = playerIndex === null ? 1 : playerIndex;
-      const { newBoard, isGameEnd, winnerIndex } = G.getGameStateAfterAiTurn(
-        { board: currentBoard, playerIndex: localPlayerIndex }
-      );
       const time = Math.floor(Math.random() * 500 + 500);
       setTimeout(() => {
+        const { newBoard, isGameEnd, winnerIndex } = G.getGameStateAfterAiTurn(
+          { board: currentBoard, playerIndex: localPlayerIndex }
+        );
         setBoard(newBoard);
         setNext(next => 1 - next);
         if (isGameEnd) {
@@ -84,11 +86,15 @@ export const strategyGameFactory = ({ rule, title, GameBoard, G }) => {
               ctx={{
                 shouldPlayerMoveNext,
                 endPlayerTurn,
-                playerIndex
+                playerIndex,
+                turnStage,
+                setTurnStage
               }}
             />
             <GameSidebar
-              stepDescription={G.getPlayerStepDescription({ board, playerIndex })}
+              firstRoleLabel={firstRoleLabel}
+              secondRoleLabel={secondRoleLabel}
+              stepDescription={G.getPlayerStepDescription({ board, playerIndex, turnStage })}
               ctx={{ phase, shouldPlayerMoveNext, isPlayerWinner }}
               moves={{ chooseRole, startNewGame }}
             />

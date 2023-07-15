@@ -129,5 +129,17 @@ export const gameList = {
     round: 'döntő',
     category: ['A'],
     name: 'Tizenkét mező'
+  },
+  SixDiscs: {
+    year: 10,
+    round: 'döntő',
+    category: ['A'],
+    name: '6 korong'
+  },
+  TenDiscs: {
+    year: 10,
+    round: 'döntő',
+    category: ['B'],
+    name: '10 korong'
   }
 };

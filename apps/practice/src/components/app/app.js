@@ -24,6 +24,8 @@ import { RockPaperScissor } from '../games/rockPaperScissor/rockPaperScissor';
 import { NumberCovering8 } from '../games/number-covering-1-8/number-covering-1-8';
 import { NumberCovering10 } from '../games/number-covering-1-10/number-covering-1-10';
 import { TwelveSquares } from '../games/twelve-squares/twelve-squares';
+import { SixDiscs } from '../games/six-discs/six-discs';
+import { TenDiscs } from '../games/ten-discs/ten-discs';
 
 export const App = () => {
   const router = createHashRouter([
@@ -49,7 +51,9 @@ export const App = () => {
     { path: '/game/rockPaperScissor', element: <RockPaperScissor /> },
     { path: '/game/NumberCovering8', element: <NumberCovering8 /> },
     { path: '/game/NumberCovering10', element: <NumberCovering10 /> },
-    { path: '/game/TwelveSquares', element: <TwelveSquares />}
+    { path: '/game/TwelveSquares', element: <TwelveSquares />},
+    { path: '/game/SixDiscs', element: <SixDiscs />},
+    { path: '/game/TenDiscs', element: <TenDiscs />}
   ]);
   return <StrictMode>
     <RouterProvider router={router}></RouterProvider>
