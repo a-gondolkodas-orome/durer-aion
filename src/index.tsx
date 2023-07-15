@@ -12,7 +12,7 @@ import * as Sentry from "@sentry/react";
 import { BrowserTracing } from "@sentry/tracing";
 
 Sentry.init({
-  // TODO DSN only works when we give sentry to the people...
+  // TODO: DSN only works when we give sentry to the people...
   dsn: "https://c94695b2ab564e258774e5d0e5c97d79@sentry.durerinfo.hu/2",
   integrations: [new BrowserTracing()],
 

@@ -11,7 +11,7 @@ export function MyClient<T_SpecificGameState>(
   game: GameType<T_SpecificGameState>,
   board: any,
   description: string
-) { // TODO finish types
+) { // TODO: finish types
   return Client({
     game: gameWrapper(game),
     board: boardWrapper(board, description),
@@ -23,7 +23,7 @@ export function MyClientRelay(
   game: typeof GameRelay,
   board: any,
   description: string
-) { // TODO finish types
+) { // TODO: finish types
   return Client({
     game: game,
     board: board,
@@ -37,7 +37,7 @@ export function MyClientWithBot<T_SpecificGameState,T_SpecificPosition>(
   board: any,
   strategy: (state: State<T_SpecificGameState & GameStateMixin>, botID: string)=>[T_SpecificPosition | undefined, string],
   description: string
-  ){ // TODO types
+  ){ // TODO: types
   return Client({
     game: gameWrapper(game),
     board: boardWrapper(board, description),
@@ -54,8 +54,8 @@ export function MyClientWithBot<T_SpecificGameState,T_SpecificPosition>(
 export function MyClientRelayWithBot(
   game: typeof GameRelay,
   board: any,
-  strategy: any, //TODO type (?)
-  description: string){ // TODO types
+  strategy: any, //TODO: type (?)
+  description: string){ // TODO: types
   return Client({
     game: game,
     board: board,

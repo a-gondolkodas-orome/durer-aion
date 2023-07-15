@@ -12,7 +12,7 @@ export function Countdown(props: PropsWithoutRef<{ secondsRemaining: number | nu
                     return s - 1000
                 }
                 props.getServerTimer();
-                // TODO fetch / something
+                // TODO: fetch / something
                 return s;
             });
         }, 1000);

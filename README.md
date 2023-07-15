@@ -52,7 +52,7 @@ Generalizing these into a single code base would make everything.
     - [ ] Add time / set time-out date
     - [ ] Reset state
     - [ ] View user's game
-    - [ ] TODO more?
+    - [ ] TODO: more?
   - [ ] Reset user password?
   - [ ] Login link???
   - Contest configuration related:

@@ -12,13 +12,14 @@ import { boardWrapper } from './common/boardwrapper';
 import { GameRelay } from './games/relay/game';
 import { MyBoard as RelayBoard } from './games/relay/board';
 
-// TODO use Nginx as a proxy
+// TODO: use Nginx as a proxy
 const server = `http://${window.location.host}`; // DO NOT use trailing slash!
 console.assert(!server.endsWith('/'));
 
 export default function () {
   return (
     <div>
+      <h1> This should not be included in the live version</h1>
       <h1>Lobby</h1>
       <Lobby gameServer={server} lobbyServer={server} gameComponents={[
         {

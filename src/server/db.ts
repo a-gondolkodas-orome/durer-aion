@@ -15,7 +15,7 @@ export class TeamsRepository {
     await this.sequelize.sync();
   }
   async fetch(filter: string[]) : Promise<TeamModel[]> {
-    // TODO Like-injection
+    // TODO: Like-injection
     return await TeamModel.findAll({ where:
       Sequelize.and(...filter.map(part => ({'other': { [Op.like]: `%${part}%`} }))),
     });
