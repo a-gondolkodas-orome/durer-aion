@@ -18,7 +18,8 @@ describe('gameWrapper', () => {
   beforeEach(() => {
     jest.resetAllMocks();
 
-    setup.mockReturnValue({ data: "asd" });
+    setup.mockReturnValue({ data: "setup" });
+    startingPosition.mockReturnValue({ data: "startingPosition" });
   });
 
   test('whether client calls into wrapped setup', () => {
@@ -28,26 +29,28 @@ describe('gameWrapper', () => {
 
   test('whether default state is consistent', () => {
     const client = Client({ game: wrappedGame, numPlayers: 2 });
-    expect(setup).toBeCalled();
-
     client.start();
 
     expect(client.getState()?.ctx.phase).toStrictEqual("startNewGame");
-    expect(client.getState()?.G.data).toStrictEqual("asd");
+    expect(client.getState()?.G.data).toStrictEqual("setup");
   });
 
   test('chooseNewGameType', () => {
     const client = Client({ game: wrappedGame, numPlayers: 2 });
     client.start();
 
-    client.moves.chooseNewGameType('live');
+    client.moves.chooseNewGameType("live");
+    client.moves.setStartingPosition({ data: "startingPosition" });
+
     expect(client.getState()?.ctx.phase).toStrictEqual("chooseRole");
+    expect(client.getState()?.G.data).toStrictEqual("startingPosition");
   });
 
   test('chooseRole', () => {
     const client = Client({ game: wrappedGame, numPlayers: 2 });
     client.start();
     client.moves.chooseNewGameType('live');
+    client.moves.setStartingPosition({ data: "startingPosition" });
 
     client.moves.chooseRole('0');
     expect(client.getState()?.ctx.phase).toStrictEqual("play");
@@ -55,10 +58,10 @@ describe('gameWrapper', () => {
   });
 
   test('move', () => {
-    setup.mockReturnValue({ data: "asd" });
     const client = Client({ game: wrappedGame, numPlayers: 2 });
     client.start();
     client.moves.chooseNewGameType('live');
+    client.moves.setStartingPosition({ data: "startingPosition" });
     client.moves.chooseRole('0');
 
     move.mockImplementation(({ G }, newData) => {
@@ -66,9 +69,9 @@ describe('gameWrapper', () => {
         ...G, data: newData
       }
     });
-    client.moves.move("fgh");
+    client.moves.move("move");
 
     expect(move).toBeCalled();
-    expect(client.getState()?.G.data).toStrictEqual("fgh");
+    expect(client.getState()?.G.data).toStrictEqual("move");
   });
 });
