@@ -41,9 +41,9 @@ const injectPlayer = async (db: StorageAPI.Async | StorageAPI.Sync, matchId: str
  * This should be in line with boardgame.io/src/server/api.ts
  * path would be '/games/:name/:id/join'.
  */
- const injectBot = async (db: StorageAPI.Async | StorageAPI.Sync, matchId: string) => {
+ const injectBot = async (db: StorageAPI.Async | StorageAPI.Sync, matchId: string, bot_id: string) => {
   await injectPlayer(db, matchId, {
-    playerID: BOT_ID,
+    playerID: bot_id,
     name: 'Bot',
     credentials: getBotCredentials()
   });
@@ -182,7 +182,7 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
 
     const body: LobbyAPI.CreatedMatch = await createGame(game, ctx);
     await injectPlayer(ctx.db, body.matchID, {playerID: '0', name: GUID, credentials: team.credentials});
-    await injectBot(ctx.db, body.matchID);
+    await injectBot(ctx.db, body.matchID, BOT_ID);
 
     //created new game, updated team state accordingly
     const match = await startMatchStatus(body.matchID, ctx);
@@ -205,7 +205,7 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
 
     const body: LobbyAPI.CreatedMatch = await createGame(game, ctx);
     await injectPlayer(ctx.db, body.matchID, {playerID: '0', name: GUID, credentials: team.credentials});
-    await injectBot(ctx.db, body.matchID);
+    await injectBot(ctx.db, body.matchID, BOT_ID);
 
     //created new game, updated team state accordingly
     team.update({
@@ -228,7 +228,7 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
     await next();
     //Figured out where match id is stored
     console.log(`Injecting bot in :${ctx.response.body.matchID}`)
-    await injectBot(ctx.db, ctx.response.body.matchID);
+    await injectBot(ctx.db, ctx.response.body.matchID, BOT_ID);
   });
 
 
