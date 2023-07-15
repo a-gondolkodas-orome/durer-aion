@@ -50,6 +50,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test . --coverage",
+    "spell-check": "cspell \"**/*.{ts,tsx}\" --no-progress",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -68,7 +69,13 @@
     "collectCoverageFrom": [
       "src/{client,common,games}/**/*.{ts,tsx}"
     ],
-    "coverageReporters": ["text", "json", "html", "cobertura", "lcov"]
+    "coverageReporters": [
+      "text",
+      "json",
+      "html",
+      "cobertura",
+      "lcov"
+    ]
   },
   "browserslist": {
     "production": [
@@ -85,6 +92,7 @@
   "devDependencies": {
     "@sentry/types": "^7.57.0",
     "@types/pg": "^8.6.5",
+    "cspell": "^6.31.1",
     "gh-pages": "^4.0.0",
     "nodemon": "^2.0.18"
   }

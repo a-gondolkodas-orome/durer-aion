@@ -1,0 +1,21 @@
+{
+  "language": "en",
+  "words": [],
+  "flagWords": [],
+  "ignorePaths": [
+    "node_modules",
+    "dist",
+    "build",
+    "*.log",
+    "package.json",
+    "coverage/**/*",
+    "docker-compose*",
+    "readme.md",
+    "src/teamData.ts"
+  ],
+  "languageSettings": [
+    {
+      "languageId": "typescript"
+    }
+  ]
+}
