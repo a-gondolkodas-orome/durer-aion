@@ -44,7 +44,7 @@ if (process.env.REACT_APP_PAGE_CONFIG === 'gh-pages') {
     <React.StrictMode>
       <RecoilRoot>
         <Layout>
-          <HashRouter basename={process.env.PUBLIC_URL}>
+          <HashRouter basename="/">
             <Routes>
               <Route path="/" element={<GithubPagesMain />} />
               <Route path="/tictactoe" element={<TicTacToeClient />} />
