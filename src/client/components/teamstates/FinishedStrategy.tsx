@@ -9,12 +9,12 @@ import { RelayEndTable } from '../RelayEndTable';
  * @param props {{state: TeamModelDto}}
  * @returns 
  */
-export function FinisheStrategy(props: {state: TeamModelDto}) {
+export function FinishedStrategy(props: {state: TeamModelDto}) {
   const [showEndPage, setShowEndPage] = useState(true)
   return (
-    <>
+    <div data-testId="FinishedStrategyRoot">
       {!showEndPage && <Chooser state={props.state}/>}
       {showEndPage && <RelayEndTable setShow={setShowEndPage} points={(props.state.strategyMatch as FinishedMatchStatus).score}/>}
-    </>
+    </div>
   )
 }

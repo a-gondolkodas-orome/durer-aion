@@ -9,10 +9,7 @@ import { TeamModelDto } from '../../dto/TeamStateDto';
  * @param props {{state: TeamModelDto}} (The null potion should be handled earlier, but it is not)
  * @returns Aggregated point visualisations
  */
-export function Finished(props: {state: TeamModelDto | null}) {
-  if(props.state === null)
-    //TODO: fix this
-    throw new Error("teamState is null, and it was not properly handled earlier.")
+export function Finished(props: {state: TeamModelDto}) {
   const relayScore = (props.state.relayMatch as FinishedMatchStatus).score;
   const stratScore = (props.state.strategyMatch as FinishedMatchStatus).score;
   return (
@@ -24,7 +21,7 @@ export function Finished(props: {state: TeamModelDto | null}) {
       padding: '30px',
       backgroundColor: "#fff",
       marginTop: "30px",
-    }}>
+    }} data-testId="finishedRoot">
       <Stack sx={{
         fontSize: 18,
         fontWeight: 'bold',
@@ -46,7 +43,7 @@ export function Finished(props: {state: TeamModelDto | null}) {
         flexDirection: 'row',
         alignItems: 'baseline',
       }}>
-        // TODO: add additional metrics
+        { /*TODO: add additional metrics */ }
         {stratScore + relayScore} <span style={{fontSize: '16px', color: '#000', marginLeft: '5px'}}>pont</span>
       </Stack>
 

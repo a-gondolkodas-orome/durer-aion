@@ -25,3 +25,24 @@ test('main renders init if team is in INIT state', () => {
   const linkElement = screen.getByTestId("initRoot");
   expect(linkElement).toBeInTheDocument();
 });
+
+test('main renders Relay if team is in RELAY state', () => {
+  MockTeamState.mockRelay()
+  render(<Main />);
+  const linkElement = screen.getByTestId("relayRoot");
+  expect(linkElement).toBeInTheDocument();
+});
+
+test('main renders Strategy if team is in STRATEGY state', () => {
+  MockTeamState.mockStrategy()
+  render(<Main />);
+  const linkElement = screen.getByTestId("strategyRoot");
+  expect(linkElement).toBeInTheDocument();
+});
+
+test('main Finished init if team is in FINISHED state', () => {
+  MockTeamState.mockFinished()
+  render(<Main />);
+  const linkElement = screen.getByTestId("finishedRoot");
+  expect(linkElement).toBeInTheDocument();
+});

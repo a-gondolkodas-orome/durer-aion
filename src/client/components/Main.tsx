@@ -33,16 +33,16 @@ export function Main() {
         {/* TODO: WAITING ROOM when to show? and what is the time?
         teamState?.pageState === "WAITING" &&
           <WaitingRoom/>*/}
-        {teamState && teamState?.pageState === "INIT" && (
+        {teamState && teamState.pageState === "INIT" && (
           <Init state={teamState} />
         )}
-        {teamState && teamState?.pageState === "RELAY" && (
+        {teamState && teamState.pageState === "RELAY" && (
           <Relay state={teamState} />
         )}
-        {teamState && teamState?.pageState === "STRATEGY" && (
+        {teamState && teamState.pageState === "STRATEGY" && (
           <Strategy state={teamState} />
         )}
-        {teamState && teamState?.pageState === "FINISHED" && (
+        {teamState && teamState.pageState === "FINISHED" && (
           <Finished state={teamState} />
         )}
       </Container>
