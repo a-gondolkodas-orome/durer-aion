@@ -49,7 +49,7 @@
     "dev:server": "nodemon -e js,ts --exec babel-node --extensions \".ts\" --presets=@babel/preset-typescript --plugins=@babel/plugin-transform-modules-commonjs src/server.ts",
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
+    "test": "react-scripts test . --coverage",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -64,7 +64,11 @@
   "jest": {
     "moduleNameMapper": {
       "axios": "axios/dist/node/axios.cjs"
-    }
+    },
+    "collectCoverageFrom": [
+      "src/{client,common,games}/**/*.{ts,tsx}"
+    ],
+    "coverageReporters": ["text", "json", "html", "cobertura", "lcov"]
   },
   "browserslist": {
     "production": [
