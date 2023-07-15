@@ -81,7 +81,7 @@ export function MyOnlineClient<T_SpecificGameState >(
   });
 }
 
-export function MyOnlineRelayClient<T_SpecificGameState >(
+export function MyOnlineRelayClient(
   game: typeof GameRelay,
   board: any,
   description: string) {
