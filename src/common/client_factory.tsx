@@ -1,6 +1,15 @@
+import { State } from "boardgame.io";
 import { MyClient, MyClientRelay, MyClientRelayWithBot, MyClientWithBot, MyOnlineClient, MyOnlineRelayClient } from "./myclient";
+import { GameStateMixin, GameType } from "./types";
 
-export const ClientFactory = function (game: any, board: any, strategy: any, description: any) {
+export const ClientFactory = function<
+T_SpecificGameState
+,T_SpecificPosition> (
+  game: GameType<T_SpecificGameState>, 
+  board: any, 
+  strategy: (state: State<T_SpecificGameState & GameStateMixin>, botID: string)=>[T_SpecificPosition | undefined, string], 
+  description: any
+  ) {
   const Client = MyClient(game, board, description);
   const ClientWithBot = MyClientWithBot(game, board, strategy, description);
   const OnlineClient = MyOnlineClient(game, board, description);

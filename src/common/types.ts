@@ -29,6 +29,24 @@ interface WrappableGame<G extends any = any, PluginAPIs extends Record<string, u
   turn?: TurnConfig<G, PluginAPIs>;
 }
 
+/* Game Interface fragment for reference (bitch.)
+export interface Game<
+  G extends any = any,
+  PluginAPIs extends Record<string, unknown> = Record<string, unknown>,
+  SetupData extends any = any
+> {
+  name?: string;
+  minPlayers?: number;
+  maxPlayers?: number;
+  setup?: (
+    context: PluginAPIs & DefaultPluginAPIs & { ctx: Ctx },
+    setupData?: SetupData
+  ) => G;
+  moves?: MoveMap<G, PluginAPIs>;
+  turn?: TurnConfig<G, PluginAPIs>;
+}
+*/
+
 export type GameType<G> = WrappableGame<G & GameStateMixin> & GameMixin<G & GameStateMixin,G>;
 
 /// Allows typing: change ctx.currentPlayer -> currentPlayer(ctx)

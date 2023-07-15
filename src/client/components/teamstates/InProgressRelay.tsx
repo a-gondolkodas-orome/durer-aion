@@ -1,5 +1,5 @@
 import { Stack } from '@mui/system';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Countdown } from '../Countdown';
 import { BoardProps } from 'boardgame.io/react';
 import { MyGameState } from '../../../games/relay/game';
@@ -14,6 +14,12 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
   const [secondsRemaining, setSecondsRemaining] = useState(G.milisecondsRemaining as number | null);
   const refreshState = useRefreshTeamState();
   const teamState = useTeamState();
+  useEffect(()=>{
+    if (G.numberOfTry === 0) {
+      moves.startGame();
+      console.log("Start Game!");
+    }
+  }, []);
   return (
     <>
       <Dialog open={
