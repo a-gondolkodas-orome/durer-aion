@@ -55,7 +55,7 @@ npm run test:watch # unit tests in watch mode
 
 ### Build for prod
 
-(some problems only appear in prod build, not while testing)
+(some problems only appear in prod build, not while testing, for example using a variable without declaring it)
 
 ```bash
 npm run build
