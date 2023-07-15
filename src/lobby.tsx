@@ -10,7 +10,7 @@ import { MyBoard as SuperstitiousCountingBoard } from './games/superstitious-cou
 import { gameWrapper } from './common/gamewrapper';
 import { boardWrapper } from './common/boardwrapper';
 import { GameRelay } from './games/relay/game';
-import { MyBoard as RelayBoard } from './games/relay/board';
+import { InProgressRelay } from './client/components/teamstates/InProgressRelay';
 
 // TODO: use Nginx as a proxy
 const server = `http://${window.location.host}`; // DO NOT use trailing slash!
@@ -36,15 +36,15 @@ export default function () {
         },
         {
           game: {...GameRelay, name: "relay_c"},
-          board: RelayBoard
+          board: InProgressRelay
         },
         {
           game: {...GameRelay, name: "relay_d"},
-          board: RelayBoard
+          board: InProgressRelay
         },
         {
           game: {...GameRelay, name: "relay_e"},
-          board: RelayBoard
+          board: InProgressRelay
         },
         {
           game: {...gameWrapper(TenCoinsGame), name: "tencoins_c"},
