@@ -26,6 +26,7 @@ import { NumberCovering10 } from '../games/number-covering-1-10/number-covering-
 import { TwelveSquares } from '../games/twelve-squares/twelve-squares';
 import { SixDiscs } from '../games/six-discs/six-discs';
 import { TenDiscs } from '../games/ten-discs/ten-discs';
+import { PrimeExponentials } from '../games/prime-exponentials/prime-exponentials';
 
 export const App = () => {
   const router = createHashRouter([
@@ -53,7 +54,8 @@ export const App = () => {
     { path: '/game/NumberCovering10', element: <NumberCovering10 /> },
     { path: '/game/TwelveSquares', element: <TwelveSquares />},
     { path: '/game/SixDiscs', element: <SixDiscs />},
-    { path: '/game/TenDiscs', element: <TenDiscs />}
+    { path: '/game/TenDiscs', element: <TenDiscs />},
+    { path: '/game/PrimeExponentials', element: <PrimeExponentials />}
   ]);
   return <StrictMode>
     <RouterProvider router={router}></RouterProvider>
