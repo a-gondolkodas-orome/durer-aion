@@ -19,12 +19,11 @@ export function createGameWithMove(setup: SetupFunction<G>, startingPosition: St
   return game;
 }
 
-export function createGame(setup: SetupFunction<G>, startingPosition: StartingPositionFunction<G>): GameType<G> {
+export function createGameWithoutStartingPosition(setup: SetupFunction<G>): GameType<G> {
   // Wraps move in a function so that it is registered as function (solves `invalid move object` error)
   const game: GameType<G> = {
     name: "stub-game",
     setup,
-    startingPosition: (...args) => startingPosition(...args),
     moves: {
       win: ({ G, events }) => {
         G.winner = '0';

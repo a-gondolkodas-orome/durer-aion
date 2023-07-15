@@ -56,7 +56,7 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
     phases: {
       startNewGame: {
         moves: { chooseNewGameType, setStartingPosition, getTime },
-        endIf: ({ G, ctx, playerID }) => { return G.difficulty !== null && G.winner === null && !('startingPosition' in game) },
+        endIf: ({ G, ctx, playerID }) => { return G.difficulty !== null && G.winner === null && 'startingPosition' in game },
         next: "chooseRole",
         turn: {
           order: TurnOrder.ONCE,

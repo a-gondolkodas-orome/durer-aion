@@ -4,7 +4,7 @@ import { RecoilRoot } from 'recoil';
 import { GameStateMixin, GameType } from './types';
 import { Ctx, DefaultPluginAPIs } from 'boardgame.io';
 import { Client } from 'boardgame.io/client';
-import { createGame, createGameWithMove } from './game_for_testing';
+import { createGameWithoutStartingPosition, createGameWithMove } from './game_for_testing';
 
 type G = { data: string };
 
@@ -78,8 +78,7 @@ describe('gameWrapper', () => {
 
 describe('gameWrapper high-level logic', () => {
   const setup = () => ({ data: "asd" });
-  const startingPosition = jest.fn();
-  const wrappedGame = gameWrapper(createGame(setup, startingPosition));
+  const wrappedGame = gameWrapper(createGameWithoutStartingPosition(setup));
 
   beforeEach(() => {
     jest.resetAllMocks();
