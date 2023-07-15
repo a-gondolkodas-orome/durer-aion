@@ -26,7 +26,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
           !secondsRemaining || secondsRemaining < - 10000 || ctx.gameover === true
         } onClose={() => { window.location.reload(); 
           sendDataRelayEnd(teamState,G,ctx); }}>
-          <Finished state={teamState}/>
+          {teamState && <Finished state={teamState}/>}
         </Dialog>
       <Stack sx={{
         with: "100%",

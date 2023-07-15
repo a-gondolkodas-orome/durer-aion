@@ -1,6 +1,6 @@
 import { TeamModelDto } from "../dto/TeamStateDto";
 
-const mockTeam: TeamModelDto = {
+export const mockTeamState: TeamModelDto = {
   id: "Long Id",
   joinCode: "111-1111-111",
   teamName: "test team",
@@ -21,28 +21,28 @@ export class MockTeamState {
 
   public static mockInit = () => {
     this.teamState = {
-      ...mockTeam,
+      ...mockTeamState,
       pageState: "INIT",
     };
   };
 
   public static mockRelay = () => {
     this.teamState = {
-      ...mockTeam,
+      ...mockTeamState,
       pageState: "RELAY",
     };
   };
 
   public static mockStrategy = () => {
     this.teamState = {
-      ...mockTeam,
+      ...mockTeamState,
       pageState: "STRATEGY",
     };
   };
 
   public static mockFinished = () => {
     this.teamState = {
-      ...mockTeam,
+      ...mockTeamState,
       pageState: "FINISHED",
     };
   };
