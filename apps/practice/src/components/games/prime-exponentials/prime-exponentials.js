@@ -16,7 +16,7 @@ const GameBoard = ({board, setBoard, ctx}) => {
     const choosePrime = (p) => {
         setPlayerPrime(p);
         setFirstTurnPhase(false);
-        ctx.setTurnStage(false);
+        ctx.setTurnStage("e");
         setHovered(null);
     }
 
@@ -25,7 +25,7 @@ const GameBoard = ({board, setBoard, ctx}) => {
         newBoard -= playerPrime ** e;
         setPlayerPrime(null);
         setFirstTurnPhase(true);
-        ctx.setTurnStage(true);
+        ctx.setTurnStage("p");
         ctx.endPlayerTurn(getGameStateAfterMove(newBoard));
     }
 
@@ -44,15 +44,60 @@ const GameBoard = ({board, setBoard, ctx}) => {
         }
         const segedvaltozo = tds.length*10
         let table
-        if(segedvaltozo===60){
-            table = <table className={`m-2 border-collapse table-fixed w-[60%] min-w-[60%]`} ><tbody><tr>
-            {tds.map(i => (i))}
-        </tr></tbody></table>
-        } else {
-        table = <table className={`m-2 border-collapse table-fixed w-[${segedvaltozo}%] min-w-[${segedvaltozo}%]`} ><tbody><tr>
-            {tds.map(i => (i))}
-        </tr></tbody></table>
-        }   
+
+        switch (tds.length*10) {
+            case 10:
+                table = <table className={`m-2 border-collapse table-fixed w-[10%] min-w-[10%]`} ><tbody><tr>
+                    {tds.map(i => (i))}
+                </tr></tbody></table>
+                break;
+            case 20:
+                table = <table className={`m-2 border-collapse table-fixed w-[20%] min-w-[20%]`} ><tbody><tr>
+                    {tds.map(i => (i))}
+                </tr></tbody></table>
+                break;
+            case 30:
+                table = <table className={`m-2 border-collapse table-fixed w-[30%] min-w-[30%]`} ><tbody><tr>
+                    {tds.map(i => (i))}
+                </tr></tbody></table>
+                break;
+            case 40:
+                table = <table className={`m-2 border-collapse table-fixed w-[40%] min-w-[40%]`} ><tbody><tr>
+                    {tds.map(i => (i))}
+                </tr></tbody></table>
+                break;
+            case 50:
+                table = <table className={`m-2 border-collapse table-fixed w-[50%] min-w-[50%]`} ><tbody><tr>
+                    {tds.map(i => (i))}
+                </tr></tbody></table>
+                break;
+            case 60:
+                table = <table className={`m-2 border-collapse table-fixed w-[60%] min-w-[60%]`} ><tbody><tr>
+                    {tds.map(i => (i))}
+                </tr></tbody></table>
+                break;
+            case 70:
+                table = <table className={`m-2 border-collapse table-fixed w-[70%] min-w-[70%]`} ><tbody><tr>
+                    {tds.map(i => (i))}
+                </tr></tbody></table>
+                break;
+            case 80:
+                table = <table className={`m-2 border-collapse table-fixed w-[80%] min-w-[80%]`} ><tbody><tr>
+                    {tds.map(i => (i))}
+                </tr></tbody></table>
+                break;
+            case 90:
+                table = <table className={`m-2 border-collapse table-fixed w-[90%] min-w-[90%]`} ><tbody><tr>
+                    {tds.map(i => (i))}
+                </tr></tbody></table>
+                break;
+            default:
+                table = <table className={`m-2 border-collapse table-fixed w-[100%] min-w-[100%]`} ><tbody><tr>
+                    {tds.map(i => (i))}
+                </tr></tbody></table>
+                break;
+        }        
+        
         return(table);
     }
 
@@ -121,7 +166,7 @@ const getGameStateAfterAiTurn = ({board, playerIndex}) => {
 }
 
 const getPlayerStepDescription = ({ turnStage }) => {
-    const ds = turnStage ? 'Válaszd ki a prímet, aminek a hatványát ki szeretnéd vonni.' : 'Válaszd ki a kitevőt, amelyre a prímet emelnéd';
+    const ds = !(turnStage==="e") ? 'Válaszd ki a prímet, aminek a hatványát ki szeretnéd vonni.' : 'Válaszd ki a kitevőt, amelyre a prímet emelnéd';
     return(ds);
 }
 
