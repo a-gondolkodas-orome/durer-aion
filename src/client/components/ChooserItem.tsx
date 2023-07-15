@@ -3,6 +3,7 @@ import { Stack } from '@mui/system';
 import { MatchStatus, FinishedMatchStatus } from '../dto/TeamStateDto';
 import { useStartRelay, useStartStrategy } from '../hooks/user-hooks';
 import { formatTime } from '../utils/DateFormatter';
+import { dictionary } from '../text-constants';
 
 export function ChooserItem(props: {status: MatchStatus, type: 'strategias'|'relay' }) {
   const startRelay = useStartRelay();
@@ -27,7 +28,7 @@ export function ChooserItem(props: {status: MatchStatus, type: 'strategias'|'rel
           fontSize: 18,
           textAlign: 'center',
         }}>
-          Kitöltve ekkor: {formatTime((props.status as FinishedMatchStatus).startAt)} - {formatTime((props.status as FinishedMatchStatus).endAt)} Elért pont: {(props.status as FinishedMatchStatus).score}
+          {dictionary.chooser.filledAt}: {formatTime((props.status as FinishedMatchStatus).startAt)} - {formatTime((props.status as FinishedMatchStatus).endAt)} {dictionary.chooser.achievedPoint}: {(props.status as FinishedMatchStatus).score}
         </Stack>
       }
       {props.type === 'relay' &&
@@ -39,7 +40,7 @@ export function ChooserItem(props: {status: MatchStatus, type: 'strategias'|'rel
           flexDirection: 'row',
         }}>
           <Stack>
-            A váltófeladatok rövid szöveges feladatok, melyekre a válasz egy egész szám (legalább 0 és legfeljebb 9999). Minden váltófeladatra maximum 3 tippet adhattok le, egy-egy rossz tipp után az adott feladatra megszerezhető pontszám 1-gyel csökken. Helyes tipp vagy három rossz tipp után megkapjátok a következő feladatot. A váltófeladatokra összesen 60 perc áll rendelkezésre, és összesen 40 pont szerezhető velük hibátlan teljesítés esetén. (Az egyes feladatokra kapható pontszám 3-tól 6-ig terjed.)
+            {dictionary.chooser.relayDescription}
           </Stack>
         </Stack>
       }        
@@ -52,18 +53,7 @@ export function ChooserItem(props: {status: MatchStatus, type: 'strategias'|'rel
             marginBlockEnd: 0,
           },
         }}>
-          <p>Ebben a feladatban egy kétszemélyes stratégiás játékot játszhattok, ahol az egyik játékos Ti lesztek, a másik játékos pedig a gép. Győzzétek le a gépet <b>kétszer egymás</b> után ebben a játékban! A kezdő helyzet ismeretében Ti dönthetitek el, hogy a kezdő vagy a második játékos bőrébe szeretnétek bújni.</p>         
-          <p>A sikeres teljesítésért az alábbiak szerint kaptok pontot:
-            <ul>
-              <li>Ha egyszer sem veszítetek, akkor 12 pontot kaptok.</li>
-              <li>1, 2, 3, 4, illetve 5 vereség esetén a kapott pontszám 9-re, 6-ra, 4-re, 3-ra, illetve 2-re csökken.</li>
-              <li>Ennél több vereség esetén is 2 pontot kaptok, ha sikerül teljesítenetek a játékot.</li>
-              <li>Ha 30 perc alatt nem győzitek le kétszer egymás után a gépet, akkor 0 pontot kaptok.</li>
-            </ul>
-          </p>
-          <p>
-            Ha készen álltok, kattintsatok a lenti gombra és onnantól kezdve összesen 30 perc áll rendelkezésetekre.
-          </p>
+          <span dangerouslySetInnerHTML={{ __html: dictionary.chooser.gameDescriptionHtml }}/>
         </Stack>
       }  
       <Button sx={{
@@ -79,7 +69,7 @@ export function ChooserItem(props: {status: MatchStatus, type: 'strategias'|'rel
           startStrat()
         }
       }} disabled={props.status.state !== "NOT STARTED"}>
-        Kezdjük
+        {dictionary.chooser.start}
       </Button>
     </Stack>
   )
