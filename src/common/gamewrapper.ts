@@ -7,6 +7,9 @@ function chooseRole({ G, ctx, playerID }: any, firstPlayer: string):void { // TO
 }
 
 function chooseNewGameType({ G, ctx, playerID, random, events }: any, difficulty: string) {
+  if (playerID !== "0") {
+    return INVALID_MOVE;
+  };
   let newG = {
     ...G,
     difficulty: difficulty,
@@ -21,6 +24,9 @@ function chooseNewGameType({ G, ctx, playerID, random, events }: any, difficulty
 };
 
 function setStartingPosition({ G, ctx, playerID, random, events }: any, startingPosition: any) { // TODO: type
+  if (playerID !== "1") {
+    return INVALID_MOVE;
+  };
   events.endTurn();
   return {
     ...G,
