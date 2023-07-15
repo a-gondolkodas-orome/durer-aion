@@ -44,7 +44,7 @@ export function Login() {
             <Field 
               name="joinCode"
               type="text"
-              placeHolder="sdkfjh-sdfsd-223"
+              placeholder="111-2222-333"
               style={{
                 width: '250px',
                 height: '40px',
