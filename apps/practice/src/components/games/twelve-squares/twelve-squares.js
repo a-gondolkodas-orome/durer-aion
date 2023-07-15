@@ -37,7 +37,7 @@ const GameBoard = ({ board, ctx }) => {
   const isMoveAllowed = (step) => {
 	  if(!ctx.shouldPlayerMoveNext) return false;
 	  if(ctx.playerIndex === 0) {
-      return (step > 0 && step <= 2 && step+board.left !== board.right)
+      return (step > 0 && step <= 2 && step+board.left !== board.right);
     }
 
 	  return (step < 0 && step >= -2 && step+board.right !== board.left);
@@ -59,9 +59,9 @@ const GameBoard = ({ board, ctx }) => {
           onClick={() => makeStep(ctx.playerIndex === 0 ? i-board.left : board.right-i)}
           className={`
             border-2 text-2xl min-w-[4ch] text-center p-1 my-1 font-bold
-            ${isMoveAllowed(ctx.playerIndex === 0 ? i-board.left : i-board.right) ? 
+            ${isMoveAllowed(ctx.playerIndex === 0 ? i-board.left : i-board.right) ?
               'bg-emerald-200 hover:bg-emerald-400' :
-              (( i === board.left && ctx.playerIndex === 0) || (i === board.right && ctx.playerIndex==1) ? 'bg-green-300' :
+              (( i === board.left && ctx.playerIndex === 0) || (i === board.right && ctx.playerIndex === 1) ? 'bg-green-300' :
               ( i === board.left || i === board.right ) ? 'bg-purple-400' :'bg-slate-200')
             }
           `}
