@@ -1,10 +1,14 @@
 import React from 'react';
+import { MockTeamState } from './client/hooks/mock-user-hooks';
 import { render, screen } from '@testing-library/react';
 import App from './App';
-import { RecoilRoot } from 'recoil';
+
+jest.mock('./client/hooks/user-hooks', () => {
+  return MockTeamState.mockHook;
+});
 
 test('renders', () => {
-  render(<RecoilRoot><App /></RecoilRoot>);
+  render(<App />);
   const linkElement = screen.getByText(/Üdvözlünk a XVI. Dürer/);
   expect(linkElement).toBeInTheDocument();
 });
