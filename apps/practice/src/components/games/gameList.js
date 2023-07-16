@@ -124,5 +124,11 @@ export const gameList = {
     round: 'döntő',
     category: ['A'],
     name: 'Tizenkét mező'
+  },
+  Bacteria: {
+    year: 10,
+    round: 'döntő',
+    category: ['C'],
+    name: 'Baktériumok terjedése'
   }
 };
