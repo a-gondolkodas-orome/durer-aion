@@ -55,7 +55,7 @@ npm run test:watch # unit tests in watch mode
 
 ### Build for prod
 
-(some problems only appear in prod build, not while testing)
+(some problems only appear in prod build, not while testing, for example using a variable without declaring it)
 
 ```bash
 npm run build
@@ -87,7 +87,10 @@ If you need a new, common parameter, just pass it down from `strategyGameFactory
 // `ctx` is an object and will contain the following (extendable):
 // - `shouldPlayerMoveNext: boolean
 // - endPlayerTurn: a function, see below
-// - playerIndex: null/0/1
+// - playerIndex: null/0/1 (the role that the player chooses at the beginning)
+// - turnStage: in game with multi-stage turns you may use this param to track to stage
+//     if you need it in common parts such as step description as well
+// - setTurnStage
 const GameBoard = ({ board, setBoard, ctx }) => {
   return (
     <section className="p-2 shrink-0 grow basis-2/3">   
@@ -105,7 +108,7 @@ const Game = strategyGameFactory({
   title: 'Hunyadi és a janicsárok',
   GameBoard,
   G: {
-    // a function returning a string with 1 optional parameter: an object containing `playerIndex`, etc.
+    // a function returning a string with 1 optional parameter: an object containing `playerIndex`, `turnStage`, etc.
     getPlayerStepDescription,
     // a function returning a new, possibly random board object
     generateNewBoard,

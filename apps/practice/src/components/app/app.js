@@ -6,8 +6,8 @@ import { AddReduceDouble } from '../games/pile-splitting-games/add-reduce-double
 import { AntiTicTacToe } from '../games/tictactoe-alikes/anti-tictactoe/anti-tictactoe';
 import { ChessBishops } from '../games/chess-bishops/chess-bishops';
 import { ChessRook } from '../games/chess-rook/chess-rook';
-import { Coin123 } from '../games/coin123/coin123';
-import { Coin357 } from '../games/coin357/coin357';
+import { Coin123 } from '../games/coin-3-piles/coin123';
+import { Coin357 } from '../games/coin-3-piles/coin357';
 import { CubeColoring } from '../games/cube-coloring/cube-coloring';
 import { FiveSquares } from '../games/five-squares/five-squares';
 import { FourPilesSpreadAhead } from '../games/four-piles-spread-ahead/four-piles-spread-ahead';
@@ -20,10 +20,12 @@ import { TicTacToe } from '../games/tictactoe-alikes/tictactoe/tictactoe';
 import { TicTacToeDoubleStart } from '../games/tictactoe-alikes/tictactoe-doublestart/tictactoe-doublestart';
 import { TriangularGridRopes } from '../games/triangular-grid-ropes/triangular-grid-ropes';
 import { TwoTimesTwo } from '../games/two-times-two/two-times-two';
-import { NumberCovering8 } from '../games/number-covering-1-8/number-covering-1-8';
-import { NumberCovering10 } from '../games/number-covering-1-10/number-covering-1-10';
+import { RockPaperScissor } from '../games/rockPaperScissor/rockPaperScissor';
+import { NumberCovering8, NumberCovering10 } from '../games/number-covering/number-covering';
 import { TwelveSquares } from '../games/twelve-squares/twelve-squares';
 import { Bacteria } from '../games/bacteria/bacteria';
+import { SixDiscs, TenDiscs } from '../games/discs-turn-or-remove/discs-turn-or-remove';
+import { PrimeExponentials } from '../games/prime-exponentials/prime-exponentials';
 
 export const App = () => {
   const router = createHashRouter([
@@ -46,10 +48,14 @@ export const App = () => {
     { path: '/game/TicTacToeDoubleStart', element: <TicTacToeDoubleStart /> },
     { path: '/game/TriangularGridRopes', element: <TriangularGridRopes /> },
     { path: '/game/TwoTimesTwo', element: <TwoTimesTwo /> },
+    { path: '/game/rockPaperScissor', element: <RockPaperScissor /> },
     { path: '/game/NumberCovering8', element: <NumberCovering8 /> },
     { path: '/game/NumberCovering10', element: <NumberCovering10 /> },
     { path: '/game/TwelveSquares', element: <TwelveSquares />},
-    { path: '/game/Bacteria', element: <Bacteria />}
+    { path: '/game/Bacteria', element: <Bacteria />},
+    { path: '/game/SixDiscs', element: <SixDiscs />},
+    { path: '/game/TenDiscs', element: <TenDiscs />},
+    { path: '/game/PrimeExponentials', element: <PrimeExponentials />}
   ]);
   return <StrictMode>
     <RouterProvider router={router}></RouterProvider>

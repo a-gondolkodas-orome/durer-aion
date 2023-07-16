@@ -1,5 +1,10 @@
 export const gameList = {
-  ChessBishops: {
+  RockPaperScissor: {
+    year: 7,
+    round: 'döntő',
+    category: ['A'],
+    name: 'Kő papír olló'
+  },ChessBishops: {
     year: 1,
     round: 'döntő',
     category: ['B'],
@@ -130,5 +135,23 @@ export const gameList = {
     round: 'döntő',
     category: ['C'],
     name: 'Baktériumok terjedése'
+  },
+  SixDiscs: {
+    year: 10,
+    round: 'döntő',
+    category: ['A'],
+    name: '6 korong'
+  },
+  TenDiscs: {
+    year: 10,
+    round: 'döntő',
+    category: ['B'],
+    name: '10 korong'
+  },
+  PrimeExponentials: {
+    year: 1,
+    round: 'döntő',
+    category: ['D'],
+    name: 'Prímhatványok kivonása'
   }
 };

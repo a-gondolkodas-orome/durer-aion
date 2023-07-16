@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   setupFilesAfterEnv: ['jest-extended/all'],
   testEnvironment: 'jsdom',
   clearMocks: true,

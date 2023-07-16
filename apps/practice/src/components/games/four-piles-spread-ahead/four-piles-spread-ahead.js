@@ -6,6 +6,9 @@ import { getOptimalAiMove } from './strategy';
 const generateNewBoard = () => ([random(0, 9), random(0, 9), random(0, 9), random(4, 9)]);
 
 const getGameStateAfterMove = (board, { pileId, pieceId }) => {
+  const intermediateBoard = [...board];
+  intermediateBoard[pileId]=board[pileId]-pieceId-1;
+
   const newBoard = [...board];
   newBoard[pileId]=board[pileId]-pieceId-1;
   for (let i=pileId-pieceId-1; i<pileId; i++){
@@ -13,10 +16,10 @@ const getGameStateAfterMove = (board, { pileId, pieceId }) => {
   }
   const isGameEnd = newBoard[1]===0 && newBoard[2]===0 && newBoard[3]===0;
 
-  return { newBoard, isGameEnd, winnerIndex: null };
+  return { newBoard, intermediateBoard, isGameEnd, winnerIndex: null };
 };
 
-const GameBoard = ({ board, ctx }) => {
+const GameBoard = ({ board, setBoard, ctx }) => {
   const [hoveredPiece, setHoveredPiece] = useState(null);
 
   const nonExistent = ({ pileId, pieceId }) => {

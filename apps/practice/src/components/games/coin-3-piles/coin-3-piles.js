@@ -1,11 +1,8 @@
 import React, { useState } from 'react';
 import { range } from 'lodash';
-import { strategyGameFactory } from '../strategy-game';
-import { getGameStateAfterMove, getGameStateAfterAiTurn  } from './strategy/strategy';
+import { getGameStateAfterMove  } from './strategy/strategy';
 
-const generateNewBoard = () => ([3, 5, 7]);
-
-const GameBoard = ({ board, setBoard, ctx }) => {
+export const GameBoard = ({ board, setBoard, ctx }) => {
   const [valueOfRemovedCoin, setValueOfRemovedCoin] = useState(null);
   const [hoveredPile, setHoveredPile] = useState(null);
 
@@ -20,6 +17,7 @@ const GameBoard = ({ board, setBoard, ctx }) => {
 
     if (!wasCoinAlreadyRemovedInTurn) {
       setValueOfRemovedCoin(coinValue);
+      ctx.setTurnStage('placeBack');
       const newBoard = [...board];
       newBoard[coinValue] -= 1;
       setBoard(newBoard);
@@ -33,6 +31,7 @@ const GameBoard = ({ board, setBoard, ctx }) => {
   const resetTurnState = () => {
     setHoveredPile(null);
     setValueOfRemovedCoin(null);
+    ctx.setTurnStage(null);
   };
   const endTurn = (newBoard) => {
     ctx.endPlayerTurn(getGameStateAfterMove(newBoard));
@@ -116,34 +115,9 @@ const GameBoard = ({ board, setBoard, ctx }) => {
   );
 };
 
-const getPlayerStepDescription = () => {
-  // TODO: conditional on turn stage?
-  return 'Kattints egy mezőre, hogy elvegyél vagy visszatégy egy olyan pénzérmét';
-};
-
-const rule = <>
-  Egy kupacban 3 darab 1, 5 darab 2 és 7 darab 3 pengős érme van. Egy lépésben az
-  éppen soron lévő játékos elvesz egy érmét a kupacból, és helyette berakhat egy darab kisebb
-  értékű érmét, vagy dönthet úgy, hogy nem tesz be semmit. Az nyer, aki elveszi az utolsó érmét
-  a kupacból.
-
-  Te döntheted el, hogy kezdeni szeretnél-e, vagy második játékos lenni.
-  Sok sikert! :)
-</>;
-
-const Game = strategyGameFactory({
-  rule,
-  title: '3 db 1, 5 db 2 és 7 db 3 pengős',
-  GameBoard,
-  G: {
-    getPlayerStepDescription,
-    generateNewBoard,
-    getGameStateAfterAiTurn
+export const getPlayerStepDescription = ({ turnStage }) => {
+  if (turnStage === 'placeBack') {
+    return 'Kattints egy mezőre, hogy visszatégy egy olyan pénzérmét';
   }
-});
-
-export const Coin357 = () => {
-  const [board, setBoard] = useState(generateNewBoard());
-
-  return <Game board={board} setBoard={setBoard} />;
+  return 'Kattints egy mezőre, hogy elvegyél egy olyan pénzérmét';
 };

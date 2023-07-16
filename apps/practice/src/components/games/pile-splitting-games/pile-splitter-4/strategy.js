@@ -1,6 +1,6 @@
 'use strict';
 
-import { random, range } from 'lodash';
+import { random, range, sample } from 'lodash';
 
 export const getBoardAfterAiTurn = (board) => {
   const start = random(0, 3);
@@ -33,9 +33,10 @@ export const getBoardAfterAiTurn = (board) => {
     } else {
       let modifiedBoard = [...board];
       modifiedBoard[oddPile] += 1;
-      modifiedBoard = getBoardAfterAiTurn(modifiedBoard);
-      modifiedBoard[oddPile] -= 1;
-      return modifiedBoard;
+      const { newBoard, intermediateBoard } = getBoardAfterAiTurn(modifiedBoard);
+      newBoard[oddPile] -= 1;
+      intermediateBoard[oddPile] -= 1;
+      return { newBoard, intermediateBoard };
     }
   }
 
@@ -43,24 +44,29 @@ export const getBoardAfterAiTurn = (board) => {
     if (board[0] === 2 && board[1] === 2 && board[2] === 2 && board[3] === 2) {
       return getOptimalDivision(board, start, (start + 1) % 4);
     } else {
-      return getBoardAfterAiTurn(board.map((x) => x / 2)).map((x) => x * 2);
+      const { newBoard, intermediateBoard } = getBoardAfterAiTurn(board.map((x) => x / 2));
+      return { newBoard: newBoard.map((x) => x * 2), intermediateBoard: intermediateBoard.map(x => x * 2) };
     }
   }
 };
 
 const getOptimalDivision = function (board, first, second) {
   const sum = board[first];
-  let move = [...board];
+
+  const intermediateBoard = [...board];
+  intermediateBoard[second] = 0;
+
+  const newBoard = [...board];
 
   if (sum === 2) {
-    move[first] = 1;
-    move[second] = 1;
-    return move;
+    newBoard[first] = 1;
+    newBoard[second] = 1;
+    return { newBoard, intermediateBoard };
   }
 
   const firstPile = 1 + 2 * Math.ceil(Math.random() * Math.floor((sum - 2) / 2));
-  move[first] = firstPile;
-  move[second] = sum - firstPile;
+  newBoard[first] = firstPile;
+  newBoard[second] = sum - firstPile;
 
-  return move;
+  return { intermediateBoard, newBoard };
 };
