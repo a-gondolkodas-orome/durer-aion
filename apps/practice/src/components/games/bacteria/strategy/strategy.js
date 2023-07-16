@@ -31,7 +31,7 @@ const compareCellsLeft = ({first, second}) => {
 
 let defensePaths = [];
 let attackCells = [];
-let [defenseBoard, setDefenseBoard] = useState(generateNewBoard());
+//let [defenseBoard, setDefenseBoard] = useState(generateNewBoard());
 
 const whoWins = (board) => {
     if (getSizeOfBoard(board) + 2*4 - getGoals(board).length < getBacteria(board).length) {
@@ -62,11 +62,11 @@ const whoWins = (board) => {
             (Math.floor(0.5*a[0]+a[1]) === Math.floor(0.5*b[0]+b[1]) && a[0] < b[0]) ? 1 : -1)});*/
         let deficient = false;
         let reached = false;
-        let jStart = -1;
+        //let jStart = -1;
         for(let j = 0; j<bacteria.length && !deficient; j++) {
             let reachables = reachable({row: bacteria[j][0], col: bacteria[j][1],board: freeBoard});
             reached = false;
-            let newPath = [];
+            /*let newPath = [];
             if (reachables.length > 0) {
                 let row = reachables[0][0]; let col = reachables[0][1];
                 freeBoard[row][col] = -3;
@@ -83,14 +83,14 @@ const whoWins = (board) => {
                 newPath.push([row,reachables[0][1]]);
                 defensePaths.push(newPath);
                 setDefenseBoard(freeBoard);
-            }
+            }*/
             if (!reached) {
                 deficient = true;
-                jStart = j;
+                //jStart = j;
             }
         };
         if (deficient) {
-            let iEnd = jStart;
+            /*let iEnd = jStart;
             for (let i = jStart; i>=0 && reached; i--) {
                 let reachables = reachable({row: bacteria[i][0], col: bacteria[i][1],board: freeBoard});
                 reached = false;
@@ -101,7 +101,7 @@ const whoWins = (board) => {
                     reached = true;
                 }
                 if (!reached) {iEnd = i;}
-            }
+            }*/
             return 0;
         } else {
             return 1;
