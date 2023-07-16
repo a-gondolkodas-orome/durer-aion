@@ -37,7 +37,7 @@ const whoWins = (board) => {
     if (getSizeOfBoard(board) + 2*4 - getGoals(board).length < getBacteria(board).length) {
         return 0;
     } else {
-        freeBoard = cloneDeep(board);
+        let freeBoard = cloneDeep(board);
         const goals = getGoals(board);
         goals.forEach(goal => {
             freeBoard[8][Math.max(0,goal-1)] = -4;
