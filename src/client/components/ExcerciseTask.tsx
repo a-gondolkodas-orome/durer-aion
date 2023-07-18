@@ -28,7 +28,7 @@ export const ExcerciseTaskMathJax: React.FunctionComponent<MyProps> = (props: My
       {props.serial}. Feladat ({props.maxPoints} pont):
     </Stack>
     <MathJaxContext>
-      <MathJax>
+      <MathJax dynamic={true}>
         <div dangerouslySetInnerHTML={{ __html: props.task }} />
         {props.pictureUrl && <img src={props.pictureUrl} style={{maxWidth:'80%', display: 'flex', marginLeft:'auto', marginRight: 'auto', marginTop: "30px"}} alt={'feladatKép (ha nem töltött be a kép, akkor jelentsd be a hibát.)'}/>}
       </MathJax>
