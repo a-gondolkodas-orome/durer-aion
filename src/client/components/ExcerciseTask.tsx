@@ -25,7 +25,7 @@ export const ExcerciseTask: React.FunctionComponent<MyProps> = (props: MyProps) 
 export const ExcerciseTaskMathJax: React.FunctionComponent<MyProps> = (props: MyProps) => {
   return <Stack>
     <Stack sx={{fontSize: '20px'}}>
-      {props.serial}. Feladat ({props.maxPoints} pont):
+      {props.serial}. feladat ({props.maxPoints} pont):
     </Stack>
     <MathJaxContext>
       <MathJax dynamic={true}>

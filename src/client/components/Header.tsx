@@ -46,7 +46,7 @@ export function Header(props: { teamName: string | null }) {
               "&:hover": {
                 opacity: '0.8',
               }
-            }}>kijelentkezés</Stack>
+            }}>kilépés</Stack>
           </Stack>
         }
         <Stack sx={{

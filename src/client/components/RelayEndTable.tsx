@@ -20,7 +20,7 @@ export function RelayEndTable(props: {setShow: React.Dispatch<boolean>, points: 
       backgroundColor: '#fff',
       padding: '25px',
     }}>
-      <Stack>Gratulálunk, összesen {props.points} pontot szereztél. Ha új versenyt szeretnél indítani, akkor kérlek jelentkezz ki és frissítsd újra az oldalt.</Stack>
+      <Stack>Gratulálunk, összesen {props.points} pontot szereztél. Ha új versenyt szeretnél indítani, akkor frisstísd az oldalt majd lépj ki ebből a versenyből.</Stack>
       {/*<Button sx={{
         width: '300px',
         height: '75px',

@@ -36,7 +36,7 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
       fontStyle: 'italic',
       marginBottom: '5px',
     }}>
-      Eredmény megadása:
+      Tipp:
     </Stack>
     <Stack>
       <Form
@@ -46,8 +46,8 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
           result: Yup.number()
             .integer('Egész számot kell írni')
             .typeError('Számot kell írnod')
-            .min(1, 'A válasz 1 és 9999 között van')
-            .max(9999, 'A válasz 1 és 9999 között van')
+            .min(1, '1 és 9999 közötti számot várunk válaszként')
+            .max(9999, '1 és 9999 közötti számot várunk válaszként')
             .required('Nem írtál semmi választ!')
         })}
         onSubmit={(values) => {

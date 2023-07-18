@@ -23,14 +23,13 @@ export function Login() {
         <Stack sx={{
           fontSize: "40px",
         }}>
-          Üdvözlünk a Dürer Verseny váltó gyakorló felületén.
+          Váltóversenyek gyakorlása
         </Stack>
         <Stack sx={{
           marginTop: "15px",
           fontSize: "30px",
         }}>
-          <p>Itt ki tudjátok próbálni a korábbi évi váltó versenyeket.
-          Válaszd ki a megfelelő feladatsort és utána 90 perced van kitölteni a feladatsort.</p>
+          <p>Ki tudjátok próbálni a korábbi évek versenyeit. Válaszd ki a megfelelő feladatsort, utána 90 perced van kitölteni a feladatsort.</p>
         </Stack>
         <Stack>
           <SelectProblem />
