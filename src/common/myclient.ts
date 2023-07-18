@@ -65,7 +65,7 @@ export function MyClientRelayWithBot(
       }
     ),
     numPlayers: 2,
-    //debug: { impl: Debug },
+    debug: false,
   })
 }
 
