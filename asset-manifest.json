@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/static/css/main.cc156b67.css",
-    "main.js": "/static/js/main.a2e00204.js",
-    "static/js/787.e61c0340.chunk.js": "/static/js/787.e61c0340.chunk.js",
-    "index.html": "/index.html",
-    "main.cc156b67.css.map": "/static/css/main.cc156b67.css.map",
-    "main.a2e00204.js.map": "/static/js/main.a2e00204.js.map",
-    "787.e61c0340.chunk.js.map": "/static/js/787.e61c0340.chunk.js.map"
+    "main.css": "/durer-aion/static/css/main.cc156b67.css",
+    "main.js": "/durer-aion/static/js/main.90e6cec4.js",
+    "static/js/787.e61c0340.chunk.js": "/durer-aion/static/js/787.e61c0340.chunk.js",
+    "index.html": "/durer-aion/index.html",
+    "main.cc156b67.css.map": "/durer-aion/static/css/main.cc156b67.css.map",
+    "main.90e6cec4.js.map": "/durer-aion/static/js/main.90e6cec4.js.map",
+    "787.e61c0340.chunk.js.map": "/durer-aion/static/js/787.e61c0340.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.cc156b67.css",
-    "static/js/main.a2e00204.js"
+    "static/js/main.90e6cec4.js"
   ]
 }
