@@ -1,4 +1,4 @@
-import { RealClientRepository } from "../api-repository-interface";
+import { MockClientRelayRepository, RealClientRepository } from "../api-repository-interface";
 import { TeamModelDto } from "../dto/TeamStateDto";
 
 const LOCAL_STORAGE_GUID = 'kjqAEKeFkMpOvOZrzcvp';
@@ -30,7 +30,7 @@ export class UserModel {
       return null;
     }
 
-    const repo = new RealClientRepository()
+    const repo = new MockClientRelayRepository()
 
     const res = await repo.getTeamState(guid)
 
@@ -44,9 +44,16 @@ export class UserModel {
       return;
     }
 
-    const repo = new RealClientRepository()
+    const repo = new MockClientRelayRepository()
 
     await repo.startRelay(guid)
+  }
+
+  async finishRelay(score: number): Promise<TeamModelDto | null> {
+    const repo = new MockClientRelayRepository()
+    const res = await repo.getFinalTeamState(score)
+
+    return {...res};
   }
 
   async starStrategy(): Promise<void> {
@@ -56,7 +63,7 @@ export class UserModel {
       return;
     }
 
-    const repo = new RealClientRepository()
+    const repo = new MockClientRelayRepository()
 
     await repo.startStrategy(guid)
   }
@@ -76,7 +83,7 @@ export class UserModel {
   }
 
   async login(joinCode: string): Promise<string | null> {
-    const repo = new RealClientRepository()
+    const repo = new MockClientRelayRepository()
     const guid = await repo.joinWithCode(joinCode)
     this.saveGUID(guid)
     return null;

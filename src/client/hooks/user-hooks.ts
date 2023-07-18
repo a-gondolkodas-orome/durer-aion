@@ -71,6 +71,14 @@ export const useStartRelay = () => {
   };
 };
 
+export const useFinishRelay = () => {
+  const [teamState, setTeamState] = useRecoilState(currentStateAtom);
+  return async (score: number) => {
+    const state = await userModel.finishRelay(score)
+    setTeamState(state);
+  };
+};
+
 export const useStartStrategy = () => {
   const [teamState, setTeamState] = useRecoilState(currentStateAtom);
   return async () => {

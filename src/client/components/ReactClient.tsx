@@ -1,4 +1,4 @@
-import { RelayOnlineClient_C, RelayOnlineClient_D, RelayOnlineClient_E } from "../../games/relay/main";
+import { RelayClientWithBot_10_D_A, RelayClientWithBot_10_D_B, RelayClientWithBot_10_D_C, RelayOnlineClient_C, RelayOnlineClient_D, RelayOnlineClient_E } from "../../games/relay/main";
 import { OnlineClient_C as StrategyOnlineClient_C, OnlineClient_D as StrategyOnlineClient_D, OnlineClient_E as StrategyOnlineClient_E } from "../../games/ten-coins/main";
 
 const DURER_XVI_CLIENT_C_RELAY = RelayOnlineClient_C;
@@ -7,6 +7,9 @@ const DURER_XVI_CLIENT_E_RELAY = RelayOnlineClient_E;
 const DURER_XVI_CLIENT_C_STRATEGY = StrategyOnlineClient_C;
 const DURER_XVI_CLIENT_D_STRATEGY = StrategyOnlineClient_D;
 const DURER_XVI_CLIENT_E_STRATEGY = StrategyOnlineClient_E;
+const DURER_OLD_CLIENT_10_D_A = RelayClientWithBot_10_D_A;
+const DURER_OLD_CLIENT_10_D_B = RelayClientWithBot_10_D_B;
+const DURER_OLD_CLIENT_10_D_C = RelayClientWithBot_10_D_C;
 
 export function DurerXVIRelayClient({ category, matchID, credentials }: {
   category: undefined | 'C' | 'D' | 'E', matchID: string,
@@ -54,6 +57,19 @@ export function DurerXVIStrategyClient({ category, matchID, credentials }: {
         <DURER_XVI_CLIENT_E_STRATEGY {...{credentials, matchID}}/>
       )
     }
+    </>
+  );
+}
+
+export function DurerOldRelayClient({ category, matchID, credentials }: {
+  category: undefined | string, matchID: string,
+  credentials: string
+}) {
+  return (
+    <>
+    { category === '10_D_A' && (<DURER_OLD_CLIENT_10_D_A/>)}
+    { category === '10_D_B' && (<DURER_OLD_CLIENT_10_D_B/>)}
+    { category === '10_D_C' && (<DURER_OLD_CLIENT_10_D_C/>)}
     </>
   );
 }

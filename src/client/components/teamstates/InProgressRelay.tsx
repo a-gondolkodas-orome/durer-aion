@@ -4,8 +4,8 @@ import { Countdown } from '../Countdown';
 import { BoardProps } from 'boardgame.io/react';
 import { MyGameState } from '../../../games/relay/game';
 import { Dialog } from '@mui/material';
-import { useRefreshTeamState, useTeamState } from '../../hooks/user-hooks';
-import { ExcerciseTask } from '../ExcerciseTask';
+import { useRefreshTeamState, useTeamState, useFinishRelay } from '../../hooks/user-hooks';
+import { ExcerciseTaskMathJax as ExcerciseTask } from '../ExcerciseTask';
 import { ExcerciseForm } from '../ExcerciseForm';
 import { Finished } from './Finished';
 import { sendDataRelayEnd, sendDataRelayStep } from '../../../common/sendData';
@@ -14,19 +14,36 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
   const [secondsRemaining, setSecondsRemaining] = useState(G.milisecondsRemaining as number | null);
   const refreshState = useRefreshTeamState();
   const teamState = useTeamState();
+  const finishRelay = useFinishRelay();
+  
   useEffect(()=>{
     if (G.numberOfTry === 0) {
       moves.startGame();
       console.log("Start Game!");
     }
   }, []);
+  useEffect(() => {
+    console.log("phase", ctx.phase);
+    if (ctx.phase === null){
+      finishRelay(G.points);
+    }
+  }, [ctx.phase]);
+
+  useEffect(() => {
+    console.log("phase", G.milisecondsRemaining);
+    if (G.milisecondsRemaining < 0){
+      finishRelay(G.points);
+    }
+  }, [G.milisecondsRemaining]);
+
+
   return (
     <>
       <Dialog open={
           !secondsRemaining || secondsRemaining < - 10000 || ctx.gameover === true
         } onClose={() => { window.location.reload(); 
           sendDataRelayEnd(teamState,G,ctx); }}>
-          <Finished state={teamState}/>
+          {/*teamState && <Finished state={teamState} score={G.points}/>*/}
         </Dialog>
       <Stack sx={{
         with: "100%",

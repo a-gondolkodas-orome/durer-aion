@@ -1,6 +1,7 @@
 import urlcat from "urlcat";
 import axios, { AxiosInstance,AxiosError } from 'axios';
 import { TeamModelDto } from "./dto/TeamStateDto";
+import { relayRound } from "./relay-rounds";
   
 class ApiAxios {
   static instance(): AxiosInstance {
@@ -302,6 +303,72 @@ export class MockClientRepository implements ClientRepository {
     }
     throw new Error("BAD CODE");
   }
+}
+export class MockClientRelayRepository implements ClientRepository {
+  startRelay(code: string): Promise<string> {
+    return Promise.resolve("ok");
+  }
+  finishRelay(code: string): Promise<string> {
+    return Promise.resolve("ok");
+  }
+  startStrategy(code: string): Promise<string> {
+    return Promise.resolve("ok");
+  }
+  getTeamState(guid: string): Promise<TeamModelDto> {
+    if (guid in relayRound) {
+      return Promise.resolve(
+        {
+          id: "1",
+          joinCode: "1",
+          teamName: relayRound[guid],
+          category: guid,
+          credentials: "asjdgaskjd",
+          email: "team1@mail.hu",
+          pageState: 'RELAY',
+          relayMatch: {
+            state: 'IN PROGRESS',
+            startAt: new Date(),
+            endAt: addMin(new Date(), 1),
+            matchID: "1",
+          },
+          strategyMatch: {
+            state: 'NOT STARTED',
+          },
+        }
+      )
+    }
+    throw new Error("BAD GUID");
+  }
+  joinWithCode(code: string): Promise<string> {
+    return Promise.resolve(code);
+  }
+
+  getFinalTeamState(score: number): Promise<TeamModelDto> {
+    return Promise.resolve(
+      {
+        id: "1",
+        joinCode: "1",
+        teamName: "",
+        category: "C kat",
+        credentials: "asjdgaskjd",
+        email: "team1@mail.hu",
+        pageState: 'RELAY',
+        relayMatch: {
+          state: 'FINISHED',
+          startAt: new Date(),
+          endAt: new Date(),
+          matchID: "2",
+          score: score,
+        },
+        strategyMatch: {
+          state: 'NOT STARTED',
+        },
+        other: "",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }
+    )
+    }
 }
 
 const addMin = (from: Date, t: number): Date => {

@@ -22,7 +22,7 @@ export interface MyGameState {
   url: string;
 }
 
-const lengthOfCompetition = 60 * 60; // seconds
+const lengthOfCompetition = 90 * 60; // seconds
 
 const GUESSER_PLAYER = '0';
 const JUDGE_PLAYER = '1';
@@ -130,6 +130,7 @@ export const GameRelay: Game<MyGameState> = {
           }
             G.points += G.currentProblemMaxPoints;
             events.endGame();
+            console.log("GameEnded");
         },
         getTime({ G, ctx, playerID, events }) {
           if (playerID !== GUESSER_PLAYER) {

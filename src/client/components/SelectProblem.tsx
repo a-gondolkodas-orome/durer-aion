@@ -32,7 +32,9 @@ export default function SelectProblem() {
           label="Forduló"
           onChange={handleChange}
         >
-          <MenuItem value={"16D-D"}>16. Döntő D</MenuItem>
+          <MenuItem value={"10_D_A"}>10. Döntő A</MenuItem>
+          <MenuItem value={"10_D_B"}>10. Döntő B</MenuItem>
+          <MenuItem value={"10_D_C"}>10. Döntő C</MenuItem>
           <MenuItem value={20}>Twenty</MenuItem>
         </Select>
       </FormControl>

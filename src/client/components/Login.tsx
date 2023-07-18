@@ -29,8 +29,8 @@ export function Login() {
           marginTop: "15px",
           fontSize: "30px",
         }}>
-          Itt ki tudjátok próbálni a korábbi évi váltó versenyeket.
-          Válaszd ki a megfelelő feladatsort és lépj tovább.
+          <p>Itt ki tudjátok próbálni a korábbi évi váltó versenyeket.
+          Válaszd ki a megfelelő feladatsort és utána 90 perced van kitölteni a feladatsort.</p>
         </Stack>
         <Stack>
           <SelectProblem />

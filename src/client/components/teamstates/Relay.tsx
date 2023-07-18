@@ -1,10 +1,10 @@
 import { InProgressMatchStatus, TeamModelDto } from "../../dto/TeamStateDto";
 import { FinishedRelay } from "./FinishedRelay";
-import { DurerXVIRelayClient } from "../ReactClient";
+import { DurerOldRelayClient, DurerXVIRelayClient } from "../ReactClient";
 
 const testId = "relayRoot";
 
-export function Relay(props: { state: TeamModelDto }) {
+export function Relay(props: { state: TeamModelDto }, score: number) {
   switch (props.state.relayMatch.state) {
     case "FINISHED":
       return (
@@ -15,8 +15,8 @@ export function Relay(props: { state: TeamModelDto }) {
     case "IN PROGRESS":
       return (
         <div data-testId={testId}>
-          <DurerXVIRelayClient
-            category={props.state.category as "C" | "D" | "E"}
+          <DurerOldRelayClient
+            category={props.state.category as string}
             credentials={props.state.credentials}
             matchID={(props.state.relayMatch as InProgressMatchStatus).matchID}
           />
