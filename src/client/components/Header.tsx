@@ -53,7 +53,7 @@ export function Header(props: { teamName: string | null }) {
           fontSize: 30,
           fontWeight: 'bold',
           paddingTop: '30px',
-        }}>Váltó gyakorlás</Stack>
+        }}>Váltóversenyek</Stack>
       </Container>
     </Stack>
   )
