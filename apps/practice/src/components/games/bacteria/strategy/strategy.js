@@ -1,9 +1,6 @@
 'use strict';
 
-import { random, cloneDeep, sample, range, sum } from 'lodash';
-import { useState } from 'react';
-import { generateNewBoard } from '../../chess-bishops/strategy/strategy';
-
+import { cloneDeep, sample, range } from 'lodash';
 
 
 export const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
@@ -18,7 +15,7 @@ export const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
 const compareCellsLeft = ({first, second}) => {
     const firstAxis = Math.floor(0.5*first[0]+first[1]);
     const secondAxis = Math.floor(0.5*second[0]+second[1]);
-    
+
     if (first === second) return 0;
     else {
         if (firstAxis > secondAxis || (firstAxis === secondAxis && first[0] < second[0])) {
@@ -31,7 +28,6 @@ const compareCellsLeft = ({first, second}) => {
 
 let defensePaths = [];
 let attackCells = [];
-//let [defenseBoard, setDefenseBoard] = useState(generateNewBoard());
 
 const whoWins = (board) => {
     if (getSizeOfBoard(board) + 2*4 - getGoals(board).length < getBacteria(board).length) {
@@ -58,7 +54,7 @@ const whoWins = (board) => {
 
         const bacteria = getBacteria(board);
         // in case we want ai to find winning state from a later position, this ordering is necessary
-        /*bacteria.sort((a,b) => {a === b ? 0 : (Math.floor(0.5*a[0]+a[1]) > Math.floor(0.5*b[0]+b[1]) || 
+        /*bacteria.sort((a,b) => {a === b ? 0 : (Math.floor(0.5*a[0]+a[1]) > Math.floor(0.5*b[0]+b[1]) ||
             (Math.floor(0.5*a[0]+a[1]) === Math.floor(0.5*b[0]+b[1]) && a[0] < b[0]) ? 1 : -1)});*/
         let deficient = false;
         let reached = false;
@@ -180,7 +176,7 @@ const aiAttack = (board) => {
 }
 
 const findPaths = (board) => {
-    
+
 }
 
 const getBacteria = (board) => {

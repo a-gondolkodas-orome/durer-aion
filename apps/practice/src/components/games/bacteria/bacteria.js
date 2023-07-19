@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { range, sampleSize, cloneDeep } from 'lodash';
 import { strategyGameFactory } from '../strategy-game';
-import { getGameStateAfterMove, getGameStateAfterAiTurn  } from './strategy/strategy';
+import { getGameStateAfterAiTurn  } from './strategy/strategy';
 
 const sizeOfBoard = 17;
 const adjGoals = true;
@@ -52,12 +52,20 @@ const GameBoard = ({ board, setBoard, ctx }) => {
     const spreadSame = attackCol === col;
     const jump = row === attackRow + 2 && col === attackCol;
     const attack = shift || spread || jump;
-    const goalReached = board[row][col] === -1 || (spreadSame && board[row][col + (-1)**row] === -1 || 
+    const goalReached = board[row][col] === -1 || (spreadSame && board[row][col + (-1)**row] === -1 ||
                                                     !spreadSame && board[row][attackCol] === -1);
     let winnerIndex = -1;
     let endPlayerTurn = true;
 
-    if (defend) { if (occupied) { newBoard[row][col] -= 1; if(emptyBoard()){ winnerIndex = 1};} else {endPlayerTurn = false;}
+    if (defend) {
+      if (occupied) {
+        newBoard[row][col] -= 1;
+        if(emptyBoard()){
+          winnerIndex = 1
+        };
+      } else {
+        endPlayerTurn = false;
+      }
     } else {
         if (selected) { if (attack) {
                 if (shift || spread) {
@@ -75,7 +83,7 @@ const GameBoard = ({ board, setBoard, ctx }) => {
                     newBoard[attackRow][attackCol] -= 1;
                 }
                 if (goalReached) winnerIndex = 0;
-                setSelected(false);   
+                setSelected(false);
             } else {endPlayerTurn = false;}
         } else {if (occupied) {
             setSelected(true);
@@ -127,12 +135,12 @@ const getPlayerStepDescription = (ctx) => {
   } else {
     return 'Kattints egy mezőre, amin van baktérium, hogy eltávolíts egy bakériumot onnan.';
   }
-  
+
 };
 
 const rule = <>
   A tábla alsó sorában a kijelölt mezőkön 1-1 baktérium található, a tábla felső sorában
-  a kijelölt mezők CÉL mezők. A játékban egy Támadó és Védekező játékos felváltbva lép.
+  a kijelölt mezők CÉL mezők. A játékban egy Támadó és Védekező játékos felváltva lép.
   A Védekező játékos minden körében levesz pontosan 1 baktériumot
   bármely általa választott mezőről. Ez a baktérium lekerül a pályáról.
   A Támadó játékos a következő háromféle lépés egyikét választhatja:
@@ -151,6 +159,8 @@ const rule = <>
 const Game = strategyGameFactory({
   rule,
   title: 'Baktérimok terjedése',
+  firstRoleLabel: 'Támadó leszek',
+  secondRoleLabel: 'Védekező leszek',
   GameBoard,
   G: {
     getPlayerStepDescription,
