@@ -13,7 +13,7 @@ When you push to the default (master) branch, the tests are run, and if they are
 
 ## Adding a new game
 
-To keep track of who works on which game, use [this pinned issue](https://github.com/a-gondolkodas-orome/durer-jatekok/issues/1) to track it.
+To keep track of who works on which game, use [this table](https://docs.google.com/spreadsheets/d/1-6u9PCtvf_gDHrs65x36pmDzFt4nZZx_IUuXrgS2aZk/edit#gid=0) to track it.
 
 TL;DR;
 
