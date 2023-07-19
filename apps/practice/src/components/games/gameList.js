@@ -4,7 +4,8 @@ export const gameList = {
     round: 'döntő',
     category: ['A'],
     name: 'Kő papír olló'
-  },ChessBishops: {
+  },
+  ChessBishops: {
     year: 1,
     round: 'döntő',
     category: ['B'],
@@ -97,7 +98,7 @@ export const gameList = {
   CubeColoring: {
     year: 15,
     round: 'döntő',
-    category: ['C'],
+    category: ['C', 'D'],
     name: 'Kockaszínezés'
   },
   AddReduceDouble: {
