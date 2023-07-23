@@ -24,7 +24,6 @@ const isGameEnd = (board) => {
 
 const hasFirstPlayerWon = (board) => {
   if (!isGameEnd(board)) return undefined;
-  
   let firstPlayerNumber = -1, secondPlayerNumber = -1;
   for (let i = 0; i < 15; i+= 3){
     if (isNull(board[i])){
@@ -59,9 +58,6 @@ const getIfWinningPosition = (i, j, playerIndex) => {
 }
 
 const getOptimalAiPlacingPosition = (board, playerIndex) => {
-
-
-
   let firstPlayersPossibleMoves = [];
   let secondPlayersPossibleMoves = [];
   for (let i = 0; i < 15; i++){
@@ -76,9 +72,6 @@ const getOptimalAiPlacingPosition = (board, playerIndex) => {
       }
     }
   }
-
-
-  
   // as a first player still try to win if second player may not play optimally
   if (playerIndex === 1) {
     let possibleWinningMoves = [];

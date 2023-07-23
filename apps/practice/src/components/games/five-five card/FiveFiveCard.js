@@ -47,7 +47,6 @@ const GameBoard = ({ board, ctx }) => {
           className="aspect-square p-[25%] border-2"
           style={{aspectRatio: 0}}
         >
-          
           { isNull(board[id]) && (id === 0 || id === 2) && (
             <p>1</p>
           )}
