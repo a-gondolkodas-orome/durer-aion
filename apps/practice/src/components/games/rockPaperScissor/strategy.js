@@ -20,7 +20,7 @@ export const getGameStateAfterMove = (newBoard) => {
 const isGameEnd = (board) => {
   if (board.filter(c => c).length === 4) return true;
   return false;
-};
+}; 
 
 const hasFirstPlayerWon = (board) => {
   if (!isGameEnd(board)) return undefined;
@@ -46,7 +46,7 @@ const getOptimalAiPlacingPosition = (board, playerIndex) => {
     }
   }
 
-  // start with middle place as a first step
+  // start with a random place as a first step
   if (allowedPlaces.length === 6) {
     const rand = Math.floor(Math.random()*100)%3;
     if (rand == 0) return 2;
@@ -56,7 +56,7 @@ const getOptimalAiPlacingPosition = (board, playerIndex) => {
 
   // as a first player still try to win if first player may not play optimally
   if (playerIndex === 1) {
-    // pairs symmetric to middle place
+    // pairs to still have chance
     const pairs = [[0, 8], [3, 2], [6, 5], [0, 2], [3, 5], [6, 8]];
     for (const p of pairs) {
       
@@ -67,10 +67,10 @@ const getOptimalAiPlacingPosition = (board, playerIndex) => {
     }
   }
 
-  // as a second player proceed with placing at an empty place symmetrical to player's piece
+  // as a second player proceed with chosing useless player's piece
 
   if (playerIndex === 0) {
-    // pairs symmetric to middle place
+    // pairs beating each other
     const pairs = [[0, 5], [3, 8], [6, 2]];
     for (const p of pairs) {
       // first is not occupied, second is occupied from given pair
@@ -79,18 +79,4 @@ const getOptimalAiPlacingPosition = (board, playerIndex) => {
       }
     }
   }
-};
-
-// given board *after* your step, are you set up to win the game for sure?
-const isWinningState = (board, amIFirst) => {
-  if (isGameEnd(board)) {
-    return amIFirst === hasFirstPlayerWon(board);
-  }
-  const allowedPlaces = range(0, 9).filter(i => isNull(board[i]));
-  const optimalPlaceForOther = allowedPlaces.find(i => {
-    const boardCopy = cloneDeep(board);
-    boardCopy[i] = roleColors[amIFirst ? 1 : 0];
-    return isWinningState(boardCopy, !amIFirst);
-  });
-  return optimalPlaceForOther === undefined;
 };

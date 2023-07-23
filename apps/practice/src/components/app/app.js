@@ -21,6 +21,7 @@ import { TicTacToeDoubleStart } from '../games/tictactoe-alikes/tictactoe-double
 import { TriangularGridRopes } from '../games/triangular-grid-ropes/triangular-grid-ropes';
 import { TwoTimesTwo } from '../games/two-times-two/two-times-two';
 import { RockPaperScissor } from '../games/rockPaperScissor/rockPaperScissor';
+import { FiveFiveCard } from '../games/five-five card/FiveFiveCard';
 import { NumberCovering8 } from '../games/number-covering-1-8/number-covering-1-8';
 import { NumberCovering10 } from '../games/number-covering-1-10/number-covering-1-10';
 import { TwelveSquares } from '../games/twelve-squares/twelve-squares';
@@ -49,6 +50,7 @@ export const App = () => {
     { path: '/game/TriangularGridRopes', element: <TriangularGridRopes /> },
     { path: '/game/TwoTimesTwo', element: <TwoTimesTwo /> },
     { path: '/game/rockPaperScissor', element: <RockPaperScissor /> },
+    { path: '/game/FiveFiveCard', element: <FiveFiveCard /> },
     { path: '/game/NumberCovering8', element: <NumberCovering8 /> },
     { path: '/game/NumberCovering10', element: <NumberCovering10 /> },
     { path: '/game/TwelveSquares', element: <TwelveSquares />},

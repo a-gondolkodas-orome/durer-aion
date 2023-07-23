@@ -1,4 +1,10 @@
 export const gameList = {
+  FiveFiveCard: {
+    year: 7,
+    round: 'döntő',
+    category: ['B'],
+    name: 'Öt-öt lap'
+  },
   RockPaperScissor: {
     year: 7,
     round: 'döntő',
