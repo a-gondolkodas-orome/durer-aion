@@ -2,7 +2,7 @@
 
 import { isNull, every, some, difference, range, shuffle, sample } from 'lodash';
 
-const allColors = ['red', 'green', 'blue'];
+const allColors = ['#dc2626', '#eab308', '#2563eb'];
 
 export const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
   let newBoard = [...board];

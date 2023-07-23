@@ -1,6 +1,6 @@
 'use strict';
 
-import { isNull, some, range, groupBy, sample, cloneDeep } from 'lodash';
+import { isNull, range, cloneDeep } from 'lodash';
 
 const roleColors = ['red', 'blue'];
 
@@ -26,7 +26,7 @@ const hasFirstPlayerWon = (board) => {
   if (!isGameEnd(board)) return undefined;
   const pairs = [[6, 2], [0, 5], [3, 8]];
   for (const p of pairs) {
-    
+
     // first is occupied, second is not from given pair
     if (isNull(board[p[0]]) && isNull(board[p[1]])) {
       return false;
@@ -36,11 +36,11 @@ const hasFirstPlayerWon = (board) => {
 };
 
 const getOptimalAiPlacingPosition = (board, playerIndex) => {
-  const allowedPlaces = range(0, 9).filter(i => i != 1 && i!= 4 && i != 7 && isNull(board[i]));
+  const allowedPlaces = range(0, 9).filter(i => i !== 1 && i!== 4 && i !== 7 && isNull(board[i]));
 
   let freePlaces = [];
   for (let i = 0; i <= 8; i++){
-    if (i == 1 || i == 4 || i == 7) continue;
+    if (i === 1 || i === 4 || i === 7) continue;
     if (isNull(board[i])) {
       freePlaces.push(i);
     }
@@ -49,9 +49,9 @@ const getOptimalAiPlacingPosition = (board, playerIndex) => {
   // start with a random place as a first step
   if (allowedPlaces.length === 6) {
     const rand = Math.floor(Math.random()*100)%3;
-    if (rand == 0) return 2;
-    if (rand == 1) return 5;
-    if (rand == 2) return 8;
+    if (rand === 0) return 2;
+    if (rand === 1) return 5;
+    if (rand === 2) return 8;
   }
 
   // as a first player still try to win if first player may not play optimally
@@ -59,7 +59,7 @@ const getOptimalAiPlacingPosition = (board, playerIndex) => {
     // pairs to still have chance
     const pairs = [[0, 8], [3, 2], [6, 5], [0, 2], [3, 5], [6, 8]];
     for (const p of pairs) {
-      
+
       // first is occupied, second is not from given pair
       if (!isNull(board[p[0]]) && isNull(board[p[1]])) {
         return p[1];

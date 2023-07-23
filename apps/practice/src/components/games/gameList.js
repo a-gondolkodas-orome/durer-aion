@@ -10,7 +10,8 @@ export const gameList = {
     round: 'döntő',
     category: ['A'],
     name: 'Kő papír olló'
-  },ChessBishops: {
+  },
+  ChessBishops: {
     year: 1,
     round: 'döntő',
     category: ['B'],
@@ -103,7 +104,7 @@ export const gameList = {
   CubeColoring: {
     year: 15,
     round: 'döntő',
-    category: ['C'],
+    category: ['C', 'D'],
     name: 'Kockaszínezés'
   },
   AddReduceDouble: {
@@ -136,6 +137,12 @@ export const gameList = {
     category: ['A'],
     name: 'Tizenkét mező'
   },
+  Bacteria: {
+    year: 10,
+    round: 'döntő',
+    category: ['C'],
+    name: 'Baktériumok terjedése'
+  },
   SixDiscs: {
     year: 10,
     round: 'döntő',
@@ -147,5 +154,11 @@ export const gameList = {
     round: 'döntő',
     category: ['B'],
     name: '10 korong'
+  },
+  PrimeExponentials: {
+    year: 1,
+    round: 'döntő',
+    category: ['D'],
+    name: 'Prímhatványok kivonása'
   }
 };

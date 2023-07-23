@@ -59,25 +59,25 @@ const GameBoard = ({ board, setBoard, ctx }) => {
         disabled={!ctx.shouldPlayerMoveNext}
         className={`
           w-[30%] mx-[1%] rounded text-xl bg-red-600
-          ${!show || color !== 'red' ? 'bg-opacity-50' : ''}
+          ${!show || color !== '#dc2626' ? 'bg-opacity-50' : ''}
         `}
-        onClick={() => pick('red')}
+        onClick={() => pick('#dc2626')}
       >Piros</button>
       <button
         disabled={!ctx.shouldPlayerMoveNext}
         className={`
-          w-[30%] mx-[1%] rounded text-xl bg-green-600
-          ${!show || color !== 'green' ? 'bg-opacity-50' : ''}
+          w-[30%] mx-[1%] rounded text-xl bg-yellow-600
+          ${!show || color !== '#eab308' ? 'bg-opacity-50' : ''}
         `}
-        onClick={() => pick('green')}
-      >Zöld</button>
+        onClick={() => pick('#eab308')}
+      >Sárga</button>
       <button
         disabled={!ctx.shouldPlayerMoveNext}
         className={`
           w-[30%] mx-[1%] rounded text-xl bg-blue-600
-          ${!show || color !== 'blue' ? 'bg-opacity-50' : ''}
+          ${!show || color !== '#2563eb' ? 'bg-opacity-50' : ''}
         `}
-        onClick={() => pick('blue')}
+        onClick={() => pick('#2563eb')}
       >Kék</button>
     </header>
 

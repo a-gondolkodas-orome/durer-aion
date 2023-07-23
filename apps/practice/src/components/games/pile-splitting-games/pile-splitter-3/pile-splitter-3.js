@@ -12,12 +12,14 @@ const generateNewBoard = () => {
 const isGameEnd = (board) => isEqual(board, [1, 1, 1]);
 
 const getGameStateAfterAiTurn = ({ board }) => {
-  const newBoard = getBoardAfterAiTurn(board);
-  return { newBoard, isGameEnd: isGameEnd(newBoard), winnerIndex: null };
+  const { intermediateBoard, newBoard } = getBoardAfterAiTurn(board);
+  return { intermediateBoard, newBoard, isGameEnd: isGameEnd(newBoard), winnerIndex: null };
 };
 
 const getBoardAfterMove = (board, { removedPileId, splitPileId, pieceId }) => {
   const newBoard = [...board];
+  const intermediateBoard = [...board];
+  intermediateBoard[removedPileId] = 0;
   if (removedPileId < splitPileId) {
     newBoard[removedPileId] = pieceId + 1;
     newBoard[splitPileId] = newBoard[splitPileId] - pieceId - 1;
@@ -25,10 +27,10 @@ const getBoardAfterMove = (board, { removedPileId, splitPileId, pieceId }) => {
     newBoard[removedPileId] = newBoard[splitPileId] - pieceId - 1;
     newBoard[splitPileId] = pieceId + 1;
   }
-  return newBoard;
+  return { intermediateBoard, newBoard };
 };
 
-const GameBoard = ({ board, ctx }) => {
+const GameBoard = ({ board, setBoard, ctx }) => {
   const [removedPileId, setRemovedPileId] = useState(null);
   const [hoveredPiece, setHoveredPiece] = useState(null);
 
@@ -51,15 +53,20 @@ const GameBoard = ({ board, ctx }) => {
     }
     if (pieceId === board[pileId] - 1) return;
 
-    const newBoard = getBoardAfterMove(board, {
+    const { intermediateBoard, newBoard } = getBoardAfterMove(board, {
       removedPileId: removedPileId,
       splitPileId: pileId,
       pieceId
     });
-    ctx.endPlayerTurn({ newBoard, isGameEnd: isGameEnd(newBoard), winnerIndex: null });
 
-    setRemovedPileId(null);
-    setHoveredPiece(null);
+    setBoard(intermediateBoard);
+
+    setTimeout(() => {
+      ctx.endPlayerTurn({ newBoard, isGameEnd: isGameEnd(newBoard), winnerIndex: null });
+
+      setRemovedPileId(null);
+      setHoveredPiece(null);
+    }, 750);
   };
 
   const toBeLeft = ({ pileId, pieceId }) => {

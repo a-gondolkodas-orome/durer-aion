@@ -4,7 +4,10 @@ import { random } from 'lodash';
 
 export const getBoardAfterAiTurn = (board) => {
   const { pileId, pieceId } = getAiStep(board);
-  return [pieceId + 1, board[pileId] - pieceId - 1];
+  return {
+    intermediateBoard: pileId === 0 ? [board[0], 0] : [0, board[1]],
+    newBoard: [pieceId + 1, board[pileId] - pieceId - 1]
+  };
 };
 
 const getAiStep = (board) => {
