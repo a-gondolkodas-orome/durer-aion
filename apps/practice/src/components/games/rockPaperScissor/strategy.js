@@ -20,7 +20,7 @@ export const getGameStateAfterMove = (newBoard) => {
 const isGameEnd = (board) => {
   if (board.filter(c => c).length === 4) return true;
   return false;
-}; 
+};
 
 const hasFirstPlayerWon = (board) => {
   if (!isGameEnd(board)) return undefined;
