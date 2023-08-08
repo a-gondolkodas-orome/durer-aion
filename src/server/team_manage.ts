@@ -101,7 +101,7 @@ export async function closeMatch(matchId: string, teams: TeamsRepository, db: St
     throw new Error(`The match{${matchId}} is not in progress, you can't close it`)
   const mStat = team![type] as InProgressMatchStatus;
   const finishState = await endMatchStatus(mStat, currentMatch.state.G.score);
-  team!.update({ type: finishState });
+  team!.update({ [type]: finishState });
 }
 
 export async function getNewGame(ctx: Server.AppCtx, teams: TeamsRepository, games: Game<any, Record<string, unknown>, any>[], gameType: 'RELAY' | 'STRATEGY') {
