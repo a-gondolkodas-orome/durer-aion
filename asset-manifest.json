@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/durer-aion/static/css/main.cc156b67.css",
-    "main.js": "/durer-aion/static/js/main.e884697f.js",
+    "main.js": "/durer-aion/static/js/main.04299dea.js",
     "static/js/787.e61c0340.chunk.js": "/durer-aion/static/js/787.e61c0340.chunk.js",
     "index.html": "/durer-aion/index.html",
     "main.cc156b67.css.map": "/durer-aion/static/css/main.cc156b67.css.map",
-    "main.e884697f.js.map": "/durer-aion/static/js/main.e884697f.js.map",
+    "main.04299dea.js.map": "/durer-aion/static/js/main.04299dea.js.map",
     "787.e61c0340.chunk.js.map": "/durer-aion/static/js/787.e61c0340.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.cc156b67.css",
-    "static/js/main.e884697f.js"
+    "static/js/main.04299dea.js"
   ]
 }
