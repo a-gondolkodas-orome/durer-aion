@@ -30,7 +30,7 @@ export class TeamModel extends Model {
   public credentials!: string;
   public email!: string;
 
-  public pageState!: 'HOME'|'RELAY'|'STRATEGY'|'FINISHED'
+  public pageState!: 'DISCLAIMER'|'HOME'|'RELAY'|'STRATEGY'|'FINISHED'
 
   public relayMatch!: MatchStatus;
   public strategyMatch!: MatchStatus;
