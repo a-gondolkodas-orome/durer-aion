@@ -4,7 +4,7 @@ import type { Game, LobbyAPI, Server, StorageAPI } from 'boardgame.io';
 import { TeamsRepository } from './db';
 import { createMatch } from 'boardgame.io/internal';
 import { nanoid } from 'nanoid';
-import { InProgressMatchStatus } from './entities/model';
+import { InProgressMatchStatus, TeamModel } from './entities/model';
 import { BOT_ID, fetch } from '../socketio_botmoves';
 import { getBotCredentials, getGameStartAndEndTime } from '../server';
 import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus } from './team_manage';
@@ -213,6 +213,21 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
       strategyMatch: await startMatchStatus(body.matchID, ctx)
     })
     ctx.body = body;
+  })
+
+  router.get('/team/:GUID/gohome', koaBody(), async (ctx: Server.AppCtx) => {
+    const GUID = ctx.params.GUID;
+    //check if in progress, it is not allowed to play
+    //check if it can be started, throw error if not
+    const team: TeamModel = await teams.getTeam({ teamId: GUID }) ?? ctx.throw(404, `Team with {id:${GUID}} not found.`)
+    if (team.relayMatch.state == 'IN PROGRESS' || team.strategyMatch.state == 'IN PROGRESS')
+      ctx.throw(403, "Not allowed, match in progress.")
+    
+    //update team state to go home
+    team.update({
+      pageState: 'HOME',
+    })
+    ctx.body = team;
   })
 
   router.get('/team/:GUID/relay/result', koaBody(), async (ctx: Server.AppCtx) => {
