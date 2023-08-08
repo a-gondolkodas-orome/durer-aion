@@ -133,7 +133,7 @@ export class MockClientRepository implements ClientRepository {
           category: "C kat",
           credentials: "asjdgaskjd",
           email: "team1@mail.hu",
-          pageState: 'INIT',
+          pageState: 'HOME',
           relayMatch: {
             state: 'NOT STARTED',
           },
@@ -174,7 +174,7 @@ export class MockClientRepository implements ClientRepository {
           category: "C kat",
           credentials: "asjdgaskjd",
           email: "team1@mail.hu",
-          pageState: 'INIT',
+          pageState: 'HOME',
           relayMatch: {
             state: 'NOT STARTED',
           },
