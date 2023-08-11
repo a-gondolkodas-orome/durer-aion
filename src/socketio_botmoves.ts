@@ -7,6 +7,7 @@ import { SocketIO } from "boardgame.io/server";
 import { currentPlayer } from "./common/types";
 import { getBotCredentials } from "./server";
 import { CorsOptionsDelegate } from "cors";
+import { Type } from 'boardgame.io/dist/types/src/server/db/base';
 
 /** Copied from boardgame.io/dist/src/client/transport/local.ts */
 function GetBotPlayer(state: State, bots: Record<string, any>) {
@@ -27,11 +28,6 @@ function GetBotPlayer(state: State, bots: Record<string, any>) {
   return null;
 }
 
-/** Copied from boardgame.io/dist/src/server/db/base.ts */
-export enum Type {
-  SYNC = 0,
-  ASYNC = 1,
-}
 
 /** Copied from boardgame.io/dist/src/server/transport.ts */
 export function isSynchronous(storageAPI: any): any {
@@ -119,6 +115,7 @@ export class SocketIOButBotMoves extends SocketIO {
           // But we are on the same API that reacts to it
           // Basically we assume that a socket.on('update', ...)
           // already updated the gamestate, making StateID and PlayerID stale
+          //TODO: types
           const [_, staleStateID, matchID, stalePlayerID]: any[] = args;
           const matchQueue = this.getMatchQueue(matchID);
           await matchQueue.add(async () => {
@@ -142,6 +139,7 @@ export class SocketIOButBotMoves extends SocketIO {
             if (state.ctx.phase === 'play' || state.ctx.phase === 'startNewGame') {
               botAction = await bot.play(
                 state,
+                //TODO: types
                 GetBotPlayer(state, { [BOT_ID]: bot }) as any
               );
             } else {
