@@ -52,8 +52,8 @@ export type ChangeReturnType<T> = T extends (...args: infer Args) => any ? (...a
 
 export function makeWrappedBot<T_SpecificGameState, T_Move>(
   wrappedFactory:SpecificBot<T_SpecificGameState, T_Move>,
-  enumerate: Bot['enumerate'],
-  seed?: Bot['seed']):
+  enumerate: NonNullable<Game['ai']>['enumerate'], //<- this is in fact inconsistent with itself for matter of fact this is not equal to Bot['enumerate]
+  seed?: Game['seed']):
   InstanceType<SpecificBot<T_SpecificGameState, T_Move>>{
   return new (wrappedFactory)({
     enumerate: enumerate,
