@@ -53,6 +53,6 @@ export interface Game<
 export type GameType<G> = WrappableGame<G & GameStateMixin> & GameMixin<G>;
 
 /// Allows typing: change ctx.currentPlayer -> currentPlayer(ctx)
-export function currentPlayer(ctx: Ctx): "0" | "1" {
-  return ctx.currentPlayer as "0" | "1";
+export function currentPlayer(ctx: Ctx): PlayerIDType {
+  return ctx.currentPlayer as PlayerIDType;
 }

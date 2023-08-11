@@ -1,11 +1,12 @@
 // Demultiplexes to real transport or bots
-
-import type { Game, State, StorageAPI } from "boardgame.io";
+import type IOTypes from 'socket.io';
+import type { Game, Server, State, StorageAPI } from "boardgame.io";
 import { getFilterPlayerView } from "boardgame.io/internal";
 import { Master } from "boardgame.io/master";
 import { SocketIO } from "boardgame.io/server";
 import { currentPlayer } from "./common/types";
 import { getBotCredentials } from "./server";
+import { CorsOptionsDelegate } from "cors";
 
 /** Copied from boardgame.io/dist/src/client/transport/local.ts */
 function GetBotPlayer(state: State, bots: Record<string, any>) {
@@ -54,7 +55,7 @@ const TransportAPI = (
   filterPlayerView: any,
   pubSub: any
 ): any => {
-  const send : (arg1: any, ...arg2: any) => void = ({ playerID, ...data }) => {
+  const send: (arg1: any, ...arg2: any) => void = ({ playerID, ...data }) => {
     emit(socket, filterPlayerView(playerID, data));
   };
 
@@ -68,8 +69,8 @@ const TransportAPI = (
 /** Copied from boardgame.io/dist/src/master/master.ts */
 export async function fetch(db: StorageAPI.Async | StorageAPI.Sync, matchID: string, partial: Partial<{ state: boolean, metadata: boolean, logs: boolean, initialState: boolean }>) {
   return isSynchronous(db)
-      ? db.fetch(matchID, partial)
-      : await db.fetch(matchID, partial);
+    ? db.fetch(matchID, partial)
+    : await db.fetch(matchID, partial);
 }
 
 /// Bot's playerID is '1', because the gameWrapper uses player '0' for the human player. 
@@ -85,21 +86,29 @@ export const BOT_ID = '1';
 export class SocketIOButBotMoves extends SocketIO {
   bots: Record<string, any>;
   onFinishedMatch: (matchID: string) => void;
-  constructor(anything: any, bots: Record<string, any>, onFinishedMatch: (matchID: string)=>void = ()=>{}) {
+  constructor(anything: any, bots: Record<string, any>, onFinishedMatch: (matchID: string) => void = () => { }) {
     super(anything);
     this.bots = bots;
     this.onFinishedMatch = onFinishedMatch;
   }
   init(
-    app: any,
+    app: Server.App & { _io?: IOTypes.Server; },
     games: Game[],
-    origins: any
-  ) {
+    origins?: Exclude<IOTypes.ServerOptions['cors'], undefined | CorsOptionsDelegate>['origin']
+  ): void {
     super.init(app, games, origins);
 
     for (const game of games) {
-      const nsp = app._io.of(game.name);
-      const bot = this.bots[game.name!];
+      if (game.name === undefined) {
+        console.log(`There was a game with no name. This is the game object:${JSON.stringify(game)}.\n We skipped the gameobject, you should fix this!".`)
+        continue
+      }
+      const nsp = app._io?.of(game.name);
+      const bot = this.bots[game.name];
+      if (nsp === undefined) {
+        console.log(`The network interface of game ${game.name} is undefined, and thus socket bot move initialisation was skipped. You should fix this!`)
+        continue
+      }
 
       /** This should be in sync with how socket data is communicated.
        * See boardgame.io/dist/src/server/transport/socketio.ts
@@ -110,7 +119,7 @@ export class SocketIOButBotMoves extends SocketIO {
           // But we are on the same API that reacts to it
           // Basically we assume that a socket.on('update', ...)
           // already updated the gamestate, making StateID and PlayerID stale
-          const [_, staleStateID, matchID, stalePlayerID] : any[] = args;
+          const [_, staleStateID, matchID, stalePlayerID]: any[] = args;
           const matchQueue = this.getMatchQueue(matchID);
           await matchQueue.add(async () => {
             // These happen after the player stepped.
@@ -124,21 +133,21 @@ export class SocketIOButBotMoves extends SocketIO {
               // Do not react to bot's turn
               return;
             }
-            const {state} = await fetch(app.context.db, matchID, {state: true});
+            const { state } = await fetch(app.context.db, matchID, { state: true });
             if (currentPlayer(state.ctx) !== BOT_ID) {
               // Not a real action, possibly a failed move.
               return;
             }
             let botAction = undefined;
-            if (state.ctx.phase === 'play' || state.ctx.phase === 'startNewGame'){
+            if (state.ctx.phase === 'play' || state.ctx.phase === 'startNewGame') {
               botAction = await bot.play(
                 state,
-                GetBotPlayer(state, {[BOT_ID]: bot}) as any
+                GetBotPlayer(state, { [BOT_ID]: bot }) as any
               );
             } else {
               return;
             }
-            
+
             const master = new Master(
               game,
               app.context.db,
@@ -147,11 +156,11 @@ export class SocketIOButBotMoves extends SocketIO {
             );
 
             // TODO: is staleStateID+1 always valid?
-            let nextStateID = staleStateID+1;
-            await master.onUpdate({type: 'MAKE_MOVE', payload: {...botAction.action.payload, credentials: getBotCredentials()}}, nextStateID, matchID, BOT_ID);
+            let nextStateID = staleStateID + 1;
+            await master.onUpdate({ type: 'MAKE_MOVE', payload: { ...botAction.action.payload, credentials: getBotCredentials() } }, nextStateID, matchID, BOT_ID);
           });
           await matchQueue.add(async () => {
-            const {state} = await fetch(app.context.db, matchID, {state: true});
+            const { state } = await fetch(app.context.db, matchID, { state: true });
             if (state.ctx.gameover) {
               this.onFinishedMatch(matchID);
             }

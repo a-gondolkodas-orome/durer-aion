@@ -1,8 +1,11 @@
-import { Ctx, Game } from 'boardgame.io';
+import { Ctx, Game, Move } from 'boardgame.io';
 import { INVALID_MOVE, TurnOrder } from 'boardgame.io/core';
-import { GameStateMixin, GameType } from './types';
+import { GameStateMixin, GameType, PlayerIDType } from './types';
+import { BotAction } from 'boardgame.io/dist/types/src/ai/bot';
 
-function chooseRole({ G, ctx, playerID }: any, firstPlayer: string):void { // TODO: type
+
+//HMM, type casting there may be not ideal, let's check it later TODO:  check it later
+function chooseRole({ G, ctx, playerID }:{G:any,ctx:any,playerID:string}, firstPlayer: PlayerIDType):void { // TODO: type
   G.firstPlayer = firstPlayer;
 }
 
@@ -88,7 +91,7 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
         },
       },
     },
-    // conflict with boardgameio type, where id is string, instead of playerIDType
-    ai: { enumerate: game.possibleMoves as (G:T_SpecificGameState,ctx:Ctx,playerID:string)=>any[] }
+    // conflict with boardgameio type, where id is string, instead of playerIDType, do manual type cast
+    ai: { enumerate: game.possibleMoves as (G:T_SpecificGameState,ctx:Ctx,playerID:string)=>BotAction[] }
   };
 };

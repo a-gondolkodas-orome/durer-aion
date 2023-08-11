@@ -1,5 +1,6 @@
 import { Game } from "boardgame.io";
 import { INVALID_MOVE, TurnOrder } from "boardgame.io/core";
+import { BotAction } from "boardgame.io/dist/types/src/ai/bot";
 
 type Answer = {
   answer: number;
@@ -166,7 +167,7 @@ export const GameRelay: Game<MyGameState> = {
   },
 
   ai: {
-    enumerate: (G, ctx, playerID) => {
+    enumerate: (G:MyGameState, ctx, playerID):BotAction[] =>  {
       return [];
     }
   }
