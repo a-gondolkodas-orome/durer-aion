@@ -2,6 +2,18 @@ import { Ctx, MoveMap, TurnConfig } from "boardgame.io";
 
 export type PlayerIDType = "0" | "1";
 
+
+//these are maybe usefull
+type ChangeKeyType<T, Key extends keyof T, NewType> = Omit<T, Key> & { [K in Key]: NewType };
+export type BruteForcedPropertyExtension<T, Key extends keyof T, NewType> = T extends Record<Key, T[Key]>
+  ? ChangeKeyType<T, Key, NewType>
+  : T;
+
+//or these
+export type BruteForcedPlayerIDExtension<T> = T extends {playerID:PlayerIDType} 
+? Omit<T,'playerID'>&{playerID:string} 
+:T
+
 export interface GameStateMixin {
   firstPlayer: null | 0 | 1;
   winner: PlayerIDType | "draw" | null;
