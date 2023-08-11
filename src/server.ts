@@ -5,7 +5,7 @@ import { argv, env, exit } from 'process';
 import { gameWrapper } from './common/gamewrapper';
 import { SocketIOButBotMoves } from './socketio_botmoves';
 import { Server } from 'boardgame.io/server';
-import botWrapper from './common/botwrapper';
+import botWrapper, { ChangeReturnType as  MergedWrappedBots,  makeWrappedBot } from './common/botwrapper';
 import { strategy as RelayStrategy } from './games/relay/strategy';
 import { strategyWrapper as TenCoinsStrategy } from './games/ten-coins/strategy';
 import { configureTeamsRouter } from './server/router';
@@ -74,12 +74,12 @@ export const strategyNames = {
 }
 
 const games = [
-  { ...GameRelay, name: relayNames.C },
-  { ...GameRelay, name: relayNames.D },
-  { ...GameRelay, name: relayNames.E },
-  { ...gameWrapper(TenCoinsGame), name: strategyNames.C },
-  { ...gameWrapper(TenCoinsGame), name: strategyNames.D },
-  { ...gameWrapper(TenCoinsGame), name: strategyNames.E },
+  { ...GameRelay, name: relayNames.C } as typeof GameRelay & {name:string},
+  { ...GameRelay, name: relayNames.D } as typeof GameRelay & {name:string},
+  { ...GameRelay, name: relayNames.E } as typeof GameRelay & {name:string},
+  { ...gameWrapper(TenCoinsGame), name: strategyNames.C } as ReturnType<typeof gameWrapper<typeof TenCoinsGame>> & {name:string},
+  { ...gameWrapper(TenCoinsGame), name: strategyNames.D } as ReturnType<typeof gameWrapper<typeof TenCoinsGame>> & {name:string},
+  { ...gameWrapper(TenCoinsGame), name: strategyNames.E } as ReturnType<typeof gameWrapper<typeof TenCoinsGame>> & {name:string},
 ];
 
 
@@ -111,10 +111,11 @@ if (argv[2] === "import") {
   const botSetup = Object.fromEntries(
     games.map((game, idx) =>
       [game.name,
-      new (bot_factories[idx])({
-        enumerate: game.ai?.enumerate,
-        seed: game.seed,
-      })]
+      makeWrappedBot(
+        (bot_factories as MergedWrappedBots<typeof bot_factories>)[idx],
+        game.ai!.enumerate,
+        game.seed,
+      )]
     ));
 
   const server = Server({
