@@ -5,7 +5,7 @@ export interface TeamModelDto {
   category: string;
   credentials: string;
   email: string;
-  pageState: 'HOME'|'RELAY'|'STRATEGY'|'FINISHED'
+  pageState: 'DISCLAIMER'|'HOME'|'RELAY'|'STRATEGY'|'FINISHED'
   relayMatch: MatchStatus;
   strategyMatch: MatchStatus;
 }
