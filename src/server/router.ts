@@ -1,5 +1,5 @@
-import type Router from '@koa/router';
 import koaBody from 'koa-body';
+import * as Router from '@koa/router';
 import type { Game, LobbyAPI, Server, StorageAPI } from 'boardgame.io';
 import { TeamsRepository } from './db';
 import { createMatch } from 'boardgame.io/internal';
@@ -163,10 +163,14 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
     const filter_string:string|string[]|undefined = ctx.request.query['filter'];
     let filters:string[];
     if (filter_string === undefined) {
-      filters = [];
-    } else {
+      filters = []
+    } else if (typeof(filter_string) === 'string' ) {
       filters = filter_string.split(',');
     }
+    else{
+      filters = filter_string;
+    }
+    //TODO: fix the return type and value
     ctx.body = await teams.fetch(filters);
     //    ctx.body = ['8eae8669-125c-42e5-8b49-89afbac31679', '18c3a69d-c477-4578-8dc1-6e430fbb4e80', '48df4969-a834-4131-ab75-24069a56d2d6'];
   })
@@ -260,7 +264,12 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
     ctx.body = body;
   })
 
-  router.get('/team/:GUID/gohome', koaBody(), async (ctx: Server.AppCtx) => {
+  /**
+   * Let a team set their PageState to HOME
+   * 
+   * @param {string} GUID - TeamId
+   */
+  router.get('/team/:GUID/gohome', koaBody(), async (ctx) => {
     const GUID = ctx.params.GUID;
     //check if in progress, it is not allowed to play
     //check if it can be started, throw error if not
@@ -275,15 +284,33 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
     ctx.body = team;
   })
 
-  router.get('/team/:GUID/relay/result', koaBody(), async (ctx: Server.AppCtx) => {
+  /**
+   * Let a team get their relay results
+   * TODO: implement
+   * 
+   * @param {string} GUID - TeamId
+   */
+  router.get('/team/:GUID/relay/result', koaBody(), async (ctx) => {
     ctx.throw(501, "Not implemented yet.");
   })
 
-  router.get('/team/:GUID/strategy/result', koaBody(), async (ctx: Server.AppCtx) => {
+  /**
+   * Let a team get their strategy results
+   * TODO: implement
+   * 
+   * @param {string} GUID - TeamId
+   */
+  router.get('/team/:GUID/strategy/result', koaBody(), async (ctx) => {
     ctx.throw(501, "Not implemented yet.");
   })
 
-  /** This should be in line with boardgame.io/src/server/api.ts */
+  /**
+   * Create a new BGio game
+   * 
+   * @param {string} nameid - game ID to create
+   * 
+   * This should be in line with boardgame.io/src/server/api.ts
+   */
   router.post('/games/:nameid/create', async (ctx, next) => {
     await next();
     //Figured out where match id is stored
