@@ -35,6 +35,10 @@ export class TeamsRepository {
     })??null;
   }
 
+  async listTeams(): Promise<TeamModel[]|null>{
+    return await TeamModel.findAll();
+  }
+
   async getTeam(searchCondition: WhereOptions<Pick<TeamModel, "joinCode" | "teamId">>) : Promise<TeamModel|null>{
     return await TeamModel.findOne( {where:
       (searchCondition)
@@ -51,7 +55,7 @@ export class TeamsRepository {
       strategyMatch: {state: "NOT STARTED"},
       relayMatch: {state: "NOT STARTED"},
       teamName: teamname,
-      pageState: 'HOME',
+      pageState: 'DISCLAIMER',
     });
   }
 }
