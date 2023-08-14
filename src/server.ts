@@ -137,6 +137,7 @@ if (argv[2] === "import") {
 
   //Admin page auth setup
   server.app.use(mount('/team/admin', auth({ name: 'admin', pass: getAdminCredentials() })));
+  server.app.use(mount('/match/admin', auth({ name: 'admin', pass: getAdminCredentials() })));
 
   //TODO regex mount protection for Boardgame.io endpoints
 
