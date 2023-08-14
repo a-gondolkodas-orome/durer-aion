@@ -96,6 +96,29 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
     ctx.body = await teams.listTeams();
   })
 
+  /**
+   * Set the team peremeters
+   * @param {string} GUID- Team DUID
+   */
+  router.post('/team/admin/:GUID', koaBody(),async (ctx) => {
+    const GUID = ctx.params.GUID ?? ctx.throw(400)
+    console.log(GUID);
+    let team = await teams.getTeam({ teamId: GUID }) ?? ctx.throw(404, `Team with {teamId:${GUID}} not found.`)
+    const requestBody = ctx.request.body
+    let updateParams:{[key:string]:any} = {}
+    // Whitelist the properties based on the model's attributes
+    const allowedAttributes = Object.keys(TeamModel.prototype)
+
+    for (const key of allowedAttributes) {
+      if (requestBody[key] !== undefined) {
+        updateParams[key] = requestBody[key]
+      }
+      else{
+        console.log(`Dropped request param '${key}' because it's not a valid property of TeamModell.`)
+      }
+    }
+    team.update(updateParams)
+  })
 
   /**
    * Get team ID based on login token
