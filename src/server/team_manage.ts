@@ -15,7 +15,7 @@ import {fetch} from  '../socketio_botmoves';
  * This should be in line with boardgame.io/src/server/api.ts
  * path would be '/games/:name/:id/join'.
  */
-const injectPlayer = async (db: StorageAPI.Async | StorageAPI.Sync, matchId: string, {
+export const injectPlayer = async (db: StorageAPI.Async | StorageAPI.Sync, matchId: string, {
   playerID,
   name,
   credentials

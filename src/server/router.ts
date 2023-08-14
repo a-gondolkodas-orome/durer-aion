@@ -4,7 +4,7 @@ import type { Game, LobbyAPI, Server, StorageAPI } from 'boardgame.io';
 import { TeamsRepository } from './db';
 import { InProgressMatchStatus, TeamModel } from './entities/model';
 import { BOT_ID } from '../socketio_botmoves';
-import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus, createGame, injectBot } from './team_manage';
+import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus, createGame, injectBot, injectPlayer } from './team_manage';
 /**
  * 
  * Big factory to set up the Router for the API, anso contains API function implementations.
@@ -242,9 +242,5 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
   });
 
 
-}
-
-function injectPlayer(db: StorageAPI.Async | StorageAPI.Sync, matchID: string, arg2: { playerID: string; name: string; credentials: string; }) {
-  throw new Error('Function not implemented.');
 }
 
