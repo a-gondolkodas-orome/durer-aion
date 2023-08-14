@@ -17,12 +17,12 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
   /**
    * Get the log data about a specific match.
    *
-   * @param {string} id - The ID of the match.
+   * @param {string} matchId - The ID of the match.
    * @returns {LogEntry[]} - A list of log objects.
    */
-  router.get('/team/admin/:id/logs', async (ctx) => {
+  router.get('/team/admin/:matchId/logs', async (ctx) => {
     //It is already authenticated by the admin mount routing
-    const matchID = ctx.params.id;
+    const matchID = ctx.params.matchId;
     const { log } = await (ctx.db as StorageAPI.Async).fetch(matchID, {
       log: true,
     });
@@ -35,11 +35,11 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
   /**
    * Get the state data of a specific match.
    *
-   * @param {string} id - The ID of the match.
+   * @param {string} matchId - The ID of the match.
    * @returns {State<any>} - A match state object object.
    */
-  router.get('/team/admin/:id/state', async (ctx) => {
-    const matchID = ctx.params.id;
+  router.get('/team/admin/:matchId/state', async (ctx) => {
+    const matchID = ctx.params.matchId;
     const { state } = await (ctx.db as StorageAPI.Async).fetch(matchID, {
       state: true,
     });
@@ -52,11 +52,11 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
   /**
    * Get metadata about a specific match.
    *
-   * @param {string} id - The ID of the match.
+   * @param {string} matchId - The ID of the match.
    * @returns {Server.MatchData} - A match object.
    */
-     router.get('/team/admin/:id/metadata', async (ctx) => {
-      const matchID = ctx.params.id;
+     router.get('/team/admin/:matchId/metadata', async (ctx) => {
+      const matchID = ctx.params.matchId;
       const { metadata } = await (ctx.db as StorageAPI.Async).fetch(matchID, {
         metadata: true,
       });
@@ -95,6 +95,7 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
   router.get('/team/admin/all',koaBody(),async (ctx) => {
     ctx.body = await teams.listTeams();
   })
+
 
   /**
    * Get team ID based on login token
