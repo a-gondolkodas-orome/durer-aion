@@ -1,9 +1,96 @@
-import { PostgresStore } from "bgio-postgres";
-import { Async, Sync } from "boardgame.io/internal";
-import { Game, Server, StorageAPI } from "boardgame.io";
+import { createMatch } from 'boardgame.io/internal';
+import { nanoid } from 'nanoid';
+import { getBotCredentials, getGameStartAndEndTime } from '../server';
+import { Game, LobbyAPI, Server, StorageAPI } from "boardgame.io";
 import { relayNames, strategyNames } from "../server";
 import { TeamsRepository } from "./db";
 import { FinishedMatchStatus, InProgressMatchStatus, TeamModel } from "./entities/model";
+import {fetch} from  '../socketio_botmoves';
+
+
+/** Joins a player to a match where the bot's side is not connected.
+ * @param db: Database context
+ * @param matchID: match id to connect a bot to
+ * 
+ * This should be in line with boardgame.io/src/server/api.ts
+ * path would be '/games/:name/:id/join'.
+ */
+const injectPlayer = async (db: StorageAPI.Async | StorageAPI.Sync, matchId: string, {
+  playerID,
+  name,
+  credentials
+}:{
+  playerID: any, //TODO: fix to correct type
+  name: string,
+  credentials: string,
+}
+) => {
+  let match = await fetch(db, matchId, { metadata: true });
+  console.log(`Match is indeed empty, and thus in need for a bot!`);
+  match.metadata.players[playerID].name = name;
+  match.metadata.players[playerID].credentials = credentials;
+  match.metadata.players[playerID].isConnected = true;
+  await db.setMetadata(matchId, match.metadata);
+}
+
+/** Joins a bot to a match where the bot's side is not connected.
+ * @param db: Database context
+ * @param matchID: match id to connect a bot to
+ * 
+ * This should be in line with boardgame.io/src/server/api.ts
+ * path would be '/games/:name/:id/join'.
+ */
+ export const injectBot = async (db: StorageAPI.Async | StorageAPI.Sync, matchId: string, bot_id: string) => {
+  await injectPlayer(db, matchId, {
+    playerID: bot_id,
+    name: 'Bot',
+    credentials: getBotCredentials()
+  });
+}
+
+/**
+ * Cheks if the status of the global timer
+ * TODO: implement usage
+ * @returns {"WAITING"|"FINISHED"|undefined} - status of global game
+ */
+export function checkGlobalTime():"WAITING"|"FINISHED"|undefined{
+  const now = new Date()
+  const {globalStartAt,globalEndAt} = getGameStartAndEndTime();
+
+  if(now.getTime() < globalStartAt.getTime()){
+    return "WAITING"
+  }
+  if(globalEndAt.getTime() < now.getTime()){
+    return "FINISHED"
+  }
+  return undefined
+}
+
+/**
+ * Creates a game based on context, and given Game.
+ * This is the interface between the API, and BGio components.
+ * 
+ * @param {Game<any, Record<string, unknown>, any>} game - Game object
+ * @param {Server.AppCtx} ctx - Context of the Koa & BGio call
+ * @returns {LobbyAPI.CreatedMatch} - MatchID for the created game
+ */
+export async function createGame(
+  game: Game<any, Record<string, unknown>, any>,
+  ctx: Server.AppCtx
+) {
+  const matchID: string = nanoid(11);
+  const match = createMatch({ game, numPlayers: 2, setupData: undefined, unlisted: false });
+
+  if ('setupDataError' in match) {
+    ctx.throw(400, match.setupDataError);
+  } else {
+    await ctx.db.createMatch(matchID, match);
+  }
+
+  const body: LobbyAPI.CreatedMatch = { matchID };
+  return body;
+};
+
 
 export async function startMatchStatus(matchId: string, ctx: Server.AppCtx): Promise<InProgressMatchStatus> {
   const currentMatch = await ctx.db.fetch(matchId, { state: true });
@@ -124,7 +211,6 @@ export async function getNewGame(ctx: Server.AppCtx, teams: TeamsRepository, gam
   if (! await allowedToStart(team, gameType)){
     ctx.throw(403, "Team is not allowed to start game.")
   }
-  
   //find gameName based on team category
   console.log(team.category)
   const gameName = (gameType === 'RELAY') ?
