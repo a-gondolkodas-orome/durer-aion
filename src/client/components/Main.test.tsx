@@ -19,7 +19,7 @@ test('main renders login if team is not logged in', () => {
   expect(linkElement).toBeInTheDocument();
 });
 
-test('main renders init if team is in INIT state', () => {
+test('main renders init if team is in HOME state', () => {
   MockTeamState.mockInit()
   render(<Main />);
   const linkElement = screen.getByTestId("initRoot");

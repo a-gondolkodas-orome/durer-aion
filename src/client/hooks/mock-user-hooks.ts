@@ -7,7 +7,7 @@ export const mockTeamState: TeamModelDto = {
   category: "C",
   credentials: "credentials",
   email: "email",
-  pageState: "INIT",
+  pageState: "HOME",
   relayMatch: {
     state: "NOT STARTED",
   },
@@ -22,7 +22,7 @@ export class MockTeamState {
   public static mockInit = () => {
     this.teamState = {
       ...mockTeamState,
-      pageState: "INIT",
+      pageState: "HOME",
     };
   };
 
