@@ -41,6 +41,8 @@ export async function allowedToStart(team: TeamModel, gameType: 'RELAY' | 'STRAT
     return true;
   if (team.pageState === 'FINISHED') //no return from this point
     return false;
+  if (team.pageState === 'DISCLAIMER') //no start from this point
+    return false;
   if (team.pageState === gameType) //restart attempt
     return false;
   if (team.relayMatch.state === 'IN PROGRESS' || team.strategyMatch.state === 'IN PROGRESS') // they are already playing one game
@@ -121,7 +123,7 @@ export async function getNewGame(ctx: Server.AppCtx, teams: TeamsRepository, gam
   //find gameName based on team category
   console.log(team.category)
   const gameName = (gameType === 'RELAY') ?
-    relayNames[team.category as keyof typeof relayNames] : strategyNames[team.category as keyof typeof strategyNames] //TODO: set type better??;
+    relayNames[team.category as keyof typeof relayNames] : strategyNames[team.category as keyof typeof strategyNames]
 
   const game: Game<any, Record<string, unknown>> = games.find((g) => g.name === gameName) ?? ctx.throw(404, 'Game ' + gameName + ' not found');
 
