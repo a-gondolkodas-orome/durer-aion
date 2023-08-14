@@ -66,6 +66,29 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
       ctx.body = metadata;
     });
 
+    /**
+     * Get metadata about a specific match.
+     *
+     * @param {string} matchId - The ID of the match.
+     * @returns {Server.MatchData} - A match object.
+     */
+    router.put('/match/admin/:matchId/metadata', async (ctx) => {
+      const matchID = ctx.params.matchId;
+      let { metadata } = await (ctx.db as StorageAPI.Async).fetch(matchID, {
+        metadata: true,
+      });
+      if (!metadata) {
+        ctx.throw(404, 'Match ' + matchID + ' not found');
+      }
+
+      const requestBody = ctx.request.body
+      if('createdAt' in requestBody){
+        metadata['createdAt'] = requestBody['createdAt']
+      }
+      await (ctx.db as StorageAPI.Async).setMetadata(matchID,metadata)
+      return ctx
+    });
+
   /**
    * Run a user defined filter query on teams
    * 
@@ -100,15 +123,15 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
    * Set the team peremeters
    * @param {string} GUID- Team DUID
    */
-  router.post('/team/admin/:GUID', koaBody(),async (ctx) => {
+  router.put('/team/admin/:GUID', koaBody(),async (ctx) => {
     const GUID = ctx.params.GUID ?? ctx.throw(400)
     console.log(GUID);
     let team = await teams.getTeam({ teamId: GUID }) ?? ctx.throw(404, `Team with {teamId:${GUID}} not found.`)
     const requestBody = ctx.request.body
     let updateParams:{[key:string]:any} = {}
+
     // Whitelist the properties based on the model's attributes
     const allowedAttributes = Object.keys(TeamModel.prototype)
-
     for (const key of allowedAttributes) {
       if (requestBody[key] !== undefined) {
         updateParams[key] = requestBody[key]
