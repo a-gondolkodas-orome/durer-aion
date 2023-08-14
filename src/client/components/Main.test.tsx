@@ -19,10 +19,17 @@ test('main renders login if team is not logged in', () => {
   expect(linkElement).toBeInTheDocument();
 });
 
-test('main renders init if team is in HOME state', () => {
-  MockTeamState.mockInit()
+test('main renders chooser if team is in HOME state', () => {
+  MockTeamState.mockHome()
   render(<Main />);
-  const linkElement = screen.getByTestId("initRoot");
+  const linkElement = screen.getByTestId("chooserRoot");
+  expect(linkElement).toBeInTheDocument();
+});
+
+test('main renders disclaimer if team is in DISCLAIMER state', () => {
+  MockTeamState.mockDisclaimer()
+  render(<Main />);
+  const linkElement = screen.getByTestId("disclaimerRoot");
   expect(linkElement).toBeInTheDocument();
 });
 

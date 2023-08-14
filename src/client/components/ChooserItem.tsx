@@ -8,7 +8,7 @@ import { dictionary } from '../text-constants';
 export function ChooserItem(props: {status: MatchStatus, type: 'strategy'|'relay' }) {
   const startRelay = useStartRelay();
   const startStrategy = useStartStrategy();
-  console.log(props.type, props.status)
+  
   return (
     <Stack sx={{
       display: 'flex',

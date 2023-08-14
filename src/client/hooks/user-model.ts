@@ -1,16 +1,15 @@
 import { RealClientRepository } from "../api-repository-interface";
 import { TeamModelDto } from "../dto/TeamStateDto";
 
-const LOCAL_STORAGE_GUID = 'kjqAEKeFkMpOvOZrzcvp';
+const LOCAL_STORAGE_GUID = "kjqAEKeFkMpOvOZrzcvp";
 
 export class UserModel {
-
   private async saveGUID(guid: string) {
     localStorage.setItem(LOCAL_STORAGE_GUID, guid);
   }
 
   getGuid(): string | null {
-    if (typeof localStorage === 'undefined') {
+    if (typeof localStorage === "undefined") {
       return null;
     }
 
@@ -30,9 +29,9 @@ export class UserModel {
       return null;
     }
 
-    const repo = new RealClientRepository()
+    const repo = new RealClientRepository();
 
-    const res = await repo.getTeamState(guid)
+    const res = await repo.getTeamState(guid);
 
     return res;
   }
@@ -44,9 +43,9 @@ export class UserModel {
       return;
     }
 
-    const repo = new RealClientRepository()
+    const repo = new RealClientRepository();
 
-    await repo.startRelay(guid)
+    await repo.startRelay(guid);
   }
 
   async starStrategy(): Promise<void> {
@@ -56,9 +55,9 @@ export class UserModel {
       return;
     }
 
-    const repo = new RealClientRepository()
+    const repo = new RealClientRepository();
 
-    await repo.startStrategy(guid)
+    await repo.startStrategy(guid);
   }
 
   isUserLoggedIn(): boolean {
@@ -76,31 +75,42 @@ export class UserModel {
   }
 
   async login(joinCode: string): Promise<string | null> {
-    const repo = new RealClientRepository()
-    const guid = await repo.joinWithCode(joinCode)
-    this.saveGUID(guid)
+    const repo = new RealClientRepository();
+    const guid = await repo.joinWithCode(joinCode);
+    this.saveGUID(guid);
     return null;
+  }
+
+  async toHome(): Promise<void> {
+    const guid = this.getGuid();
+
+    if (!guid) {
+      return;
+    }
+
+    const repo = new RealClientRepository();
+
+    await repo.toHome(guid);
   }
 
   private static wasListenerAddedYet = false;
 
   addListener(setTeamState: (teamState: TeamModelDto | null) => void) {
-      if (typeof window !== 'undefined' && !UserModel.wasListenerAddedYet) {
-          UserModel.wasListenerAddedYet = true;
-          let previousValue:TeamModelDto | null = null;
-          window.addEventListener('storage', async event => {
-              if (event?.key !== LOCAL_STORAGE_GUID) {
-                  return;
-              }
+    if (typeof window !== "undefined" && !UserModel.wasListenerAddedYet) {
+      UserModel.wasListenerAddedYet = true;
+      let previousValue: TeamModelDto | null = null;
+      window.addEventListener("storage", async (event) => {
+        if (event?.key !== LOCAL_STORAGE_GUID) {
+          return;
+        }
 
-              const value = await this.getTeamState();
+        const value = await this.getTeamState();
 
-              if (previousValue !== value) {
-                  setTeamState(value);
-                  previousValue = value;
-              }
-          });
-      }
+        if (previousValue !== value) {
+          setTeamState(value);
+          previousValue = value;
+        }
+      });
+    }
   }
 }
-

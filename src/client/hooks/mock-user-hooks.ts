@@ -19,10 +19,17 @@ export const mockTeamState: TeamModelDto = {
 export class MockTeamState {
   public static teamState: TeamModelDto | null = null;
 
-  public static mockInit = () => {
+  public static mockHome = () => {
     this.teamState = {
       ...mockTeamState,
       pageState: "HOME",
+    };
+  };
+
+  public static mockDisclaimer = () => {
+    this.teamState = {
+      ...mockTeamState,
+      pageState: "DISCLAIMER",
     };
   };
 

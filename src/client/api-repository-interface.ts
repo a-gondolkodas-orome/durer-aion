@@ -26,6 +26,9 @@ export interface ClientRepository {
   startStrategy(
     code: string,
   ): Promise<string>
+  toHome(
+    code: string,
+  ): Promise<string>
 }
 
 function makeAxiosError(any_error:any): AxiosError {
@@ -125,6 +128,25 @@ export class RealClientRepository implements ClientRepository {
 
     return result.data as string;
   }
+
+  async toHome(
+    guid: string,
+  ): Promise<string> {
+    const url = urlcat('/team/:guid/goHome', {
+      guid,
+    });
+    let result;
+    try {
+      result = await ApiAxios.instance().get(url);
+    } catch (e: any) {
+      const err = makeAxiosError(e);
+      console.log(err.message)
+      // here we can set message according to status (or data)
+      throw new Error('Váratlan hiba történt');
+    }
+
+    return result.data as string;
+  }
 }
 
 
@@ -133,6 +155,9 @@ export class MockClientRepository implements ClientRepository {
     return Promise.resolve("ok");
   }
   startStrategy(code: string): Promise<string> {
+    return Promise.resolve("ok");
+  }
+  toHome(code: string): Promise<string> {
     return Promise.resolve("ok");
   }
   getTeamState(guid: string): Promise<TeamModelDto> {

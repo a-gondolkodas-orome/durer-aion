@@ -1,4 +1,4 @@
-
+import React from "react";
 import { UserModel } from "./user-model";
 import { useRecoilState } from 'recoil';
 import { currentStateAtom } from "./user-atom";
@@ -66,6 +66,15 @@ export const useStartRelay = () => {
   const [teamState, setTeamState] = useRecoilState(currentStateAtom);
   return async () => {
     await userModel.startRelay()
+    const state = await userModel.getTeamState();
+    setTeamState(state);
+  };
+};
+
+export const useToHome = () => {
+  const [teamState, setTeamState] = useRecoilState(currentStateAtom);
+  return async () => {
+    await userModel.toHome()
     const state = await userModel.getTeamState();
     setTeamState(state);
   };

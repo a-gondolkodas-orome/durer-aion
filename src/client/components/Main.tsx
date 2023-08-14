@@ -5,15 +5,15 @@ import { Header } from "./Header";
 import { Layout } from "./layout";
 import { Login } from "./Login";
 import { Finished } from "./teamstates/Finished";
-import { Init } from "./teamstates/Init";
 import { Relay } from "./teamstates/Relay";
 import { Strategy } from "./teamstates/Strategy";
-// import { WaitingRoom } from "./WaitingRoom";
+import { Disclaimer } from "./Disclaimer";
+import { Chooser } from "./Chooser";
 
-// TODO: FINISHED, WAITING
+// TODO: FINISHED
 export function Main() {
   const teamState = useTeamState();
-
+console.log(teamState);
   return (
     <Layout>
       <LoadTeamState />
@@ -30,11 +30,11 @@ export function Main() {
         data-testId="mainRoot"
       >
         {!teamState && <Login />}
-        {/* TODO: WAITING ROOM when to show? and what is the time?
-        teamState?.pageState === "WAITING" &&
-          <WaitingRoom/>*/}
+        {teamState && teamState.pageState === "DISCLAIMER" && (
+          <Disclaimer />
+        )}
         {teamState && teamState.pageState === "HOME" && (
-          <Init state={teamState} />
+          <Chooser state={teamState} />
         )}
         {teamState && teamState.pageState === "RELAY" && (
           <Relay state={teamState} />
