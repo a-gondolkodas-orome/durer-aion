@@ -1,15 +1,15 @@
-import { Ctx, Game, Move } from 'boardgame.io';
+import { Ctx, Game} from 'boardgame.io';
 import { INVALID_MOVE, TurnOrder } from 'boardgame.io/core';
 import { GameStateMixin, GameType, PlayerIDType } from './types';
 import { BotAction } from 'boardgame.io/dist/types/src/ai/bot';
 
 
 //HMM, type casting there may be not ideal, let's check it later TODO:  check it later
-function chooseRole({ G, ctx, playerID }:{G:any,ctx:any,playerID:string}, firstPlayer: PlayerIDType):void { // TODO: type
+function chooseRole({ G, ctx, playerID }:{G:any,ctx:any,playerID:string}, firstPlayer: PlayerIDType):void { // TODO: solve type
   G.firstPlayer = firstPlayer;
 }
 
-function chooseNewGameType({ G, ctx, playerID, random, events }: any, difficulty: string) {
+function chooseNewGameType({ G, ctx, playerID, random, events }: any, difficulty: string) { // TODO: solve type
   if (playerID !== "0") {
     return INVALID_MOVE;
   };
@@ -26,7 +26,7 @@ function chooseNewGameType({ G, ctx, playerID, random, events }: any, difficulty
   }
 };
 
-function setStartingPosition({ G, ctx, playerID, random, events }: any, startingPosition: any) { // TODO: type
+function setStartingPosition({ G, ctx, playerID, random, events }: any, startingPosition: any) { // TODO: solve type
   if (playerID !== "1") {
     return INVALID_MOVE;
   };
@@ -37,7 +37,7 @@ function setStartingPosition({ G, ctx, playerID, random, events }: any, starting
   };
 };
 
-function getTime({ G, ctx, playerID, events }:any){
+function getTime({ G, ctx, playerID, events }:any){// TODO: solve types
   if (playerID !== "0") {
     return INVALID_MOVE;
   };
@@ -46,7 +46,7 @@ function getTime({ G, ctx, playerID, events }:any){
 
 
 
-export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameState>): Game<T_SpecificGameState & GameStateMixin> { // TODO: solve types
+export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameState>): Game<T_SpecificGameState & GameStateMixin> {
   return {
     setup: () => ({ ...game.setup(), firstPlayer: null, difficulty: null, winner: null, numberOfTries: 0, numberOfLoss: 0, winningStreak: 0, points: 0}),
     turn: {
