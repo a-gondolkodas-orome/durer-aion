@@ -9,6 +9,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
     const [secondsRemaining, setSecondsRemaining] = useState(G.milisecondsRemaining as number | null); // asked from the server
     const toHome = useToHome();
     useEffect(() => {
+      moves.getTime();
       setSecondsRemaining(G.milisecondsRemaining);
     }, [G.milisecondsRemaining]);
     return (
