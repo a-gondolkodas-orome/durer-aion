@@ -51,7 +51,7 @@ export class TeamsRepository {
       strategyMatch: {state: "NOT STARTED"},
       relayMatch: {state: "NOT STARTED"},
       teamName: teamname,
-      pageState: 'HOME',
+      pageState: 'DISCLAIMER',
     });
   }
 }
