@@ -16,8 +16,8 @@ export default function botWrapper<T_SpecificGameState, T_Move>(botstrategy: Bot
   {
     //this actually results in a somewhat correct type, altough it doesn't implements some of the private methods, for some reason ts doesn't complains about that
   class _Bot extends Bot {
-    // waits 400 ms for UX, and is a private type
-    async wait(): Promise<void> {
+    // waits 400 ms for UX
+    private async wait(): Promise<void> {
       await new Promise(resolve => setTimeout(resolve, 400));
     }
 
@@ -45,6 +45,7 @@ export default function botWrapper<T_SpecificGameState, T_Move>(botstrategy: Bot
 }
 // TODO: accept more than one move
 
+//Heresy in the name of ''''''type safety'''''
 export type MergedWrappedBots<T> = T extends (SpecificBot<infer U,infer M1>|SpecificBot<infer V,infer M2>)[] ? SpecificBot<U|V,M1|M2>[] : never;
 
 //Most unholiest possible trick in the name of ''''''type safety'''''
