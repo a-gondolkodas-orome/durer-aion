@@ -1,19 +1,20 @@
 import { Ctx } from "boardgame.io";
 import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
-import { GameStateMixin, GameType, SetupFunction, StartingPositionFunction } from "./types";
+import { BruteForcedPlayerIDExtension, GameStateMixin, GameType, PlayerIDType, SetupFunction, StartingPositionFunction } from "./types";
 
 type G = { data: string };
 
 export function createGameWithMoveWithoutStartingPosition(setup: SetupFunction<G>,
-  move: ({ G, ctx, playerID, random }: { G: G, ctx: Ctx; playerID: string; random: RandomAPI; }, ...args: any[]) => GameStateMixin & G): GameType<G> {
+  move: ({ G, ctx, playerID, random }: { G: G, ctx: Ctx, playerID: string, random: RandomAPI, }, ...args: any[]) => GameStateMixin & G
+  ): GameType<G> {
   // Wraps move in a function so that it is registered as function (solves `invalid move object` error)
   const game: GameType<G> = {
     name: "stub-game",
     setup,
     moves: {
-      move: (...args) => move(...args),
+      move: (...args) =>  move(...args), // TODO make the as type here to work, so it can be used with the proper signature
     },
-    possibleMoves: () => [null, "move"],
+    possibleMoves: () => [],
   };
   return game;
 }
@@ -24,11 +25,11 @@ export function createGameWithMove(setup: SetupFunction<G>, startingPosition: St
   const game: GameType<G> = {
     name: "stub-game",
     setup,
-    startingPosition: (...args) => startingPosition(...args),
+    startingPosition: (...args) => startingPosition(...args), // TODO make the as type here to work, so it can be used with the proper signature
     moves: {
       move: (...args) => move(...args),
     },
-    possibleMoves: () => [null, "move"],
+    possibleMoves: () => [],
   };
   return game;
 }

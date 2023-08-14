@@ -8,6 +8,7 @@ import { InProgressMatchStatus, TeamModel } from './entities/model';
 import { BOT_ID, fetch } from '../socketio_botmoves';
 import { getBotCredentials, getGameStartAndEndTime } from '../server';
 import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus } from './team_manage';
+import { PlayerIDType } from '../common/types';
 
 /** Joins a player to a match where the bot's side is not connected.
  * @param db: Database context
@@ -21,7 +22,7 @@ const injectPlayer = async (db: StorageAPI.Async | StorageAPI.Sync, matchId: str
   name,
   credentials
 }:{
-  playerID: any, //TODO: fix to correct type
+  playerID: PlayerIDType,
   name: string,
   credentials: string,
 }
@@ -41,7 +42,7 @@ const injectPlayer = async (db: StorageAPI.Async | StorageAPI.Sync, matchId: str
  * This should be in line with boardgame.io/src/server/api.ts
  * path would be '/games/:name/:id/join'.
  */
- const injectBot = async (db: StorageAPI.Async | StorageAPI.Sync, matchId: string, bot_id: string) => {
+ const injectBot = async (db: StorageAPI.Async | StorageAPI.Sync, matchId: string, bot_id: PlayerIDType) => {
   await injectPlayer(db, matchId, {
     playerID: bot_id,
     name: 'Bot',
@@ -274,7 +275,7 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
     //check if in progress, it is not allowed to play
     //check if it can be started, throw error if not
     const team: TeamModel = await teams.getTeam({ teamId: GUID }) ?? ctx.throw(404, `Team with {id:${GUID}} not found.`)
-    if (team.relayMatch.state == 'IN PROGRESS' || team.strategyMatch.state == 'IN PROGRESS')
+    if (team.relayMatch.state === 'IN PROGRESS' || team.strategyMatch.state ===  'IN PROGRESS')
       ctx.throw(403, "Not allowed, match in progress.")
     
     //update team state to go home
