@@ -47,13 +47,6 @@ export class MockTeamState {
     };
   };
 
-  public static mockFinished = () => {
-    this.teamState = {
-      ...mockTeamState,
-      pageState: "FINISHED",
-    };
-  };
-
   public static mockHook = {
     useTeamState: () => {
       return MockTeamState.teamState;

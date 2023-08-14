@@ -4,7 +4,7 @@ import { Countdown } from '../Countdown';
 import { BoardProps } from 'boardgame.io/react';
 import { MyGameState } from '../../../games/relay/game';
 import { Dialog } from '@mui/material';
-import { useRefreshTeamState, useTeamState } from '../../hooks/user-hooks';
+import { useTeamState, useToHome } from '../../hooks/user-hooks';
 import { ExcerciseTask } from '../ExcerciseTask';
 import { ExcerciseForm } from '../ExcerciseForm';
 import { sendDataRelayEnd, sendDataRelayStep } from '../../../common/sendData';
@@ -13,22 +13,33 @@ import { RelayEndTable } from '../RelayEndTable';
 interface MyGameProps extends BoardProps<MyGameState> { };
 export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
   const [secondsRemaining, setSecondsRemaining] = useState(G.milisecondsRemaining as number | null);
-  const refreshState = useRefreshTeamState();
+  const toHome = useToHome();
+
   const teamState = useTeamState();
-  const [showEndPage, setShowEndPage] = useState(true);
   useEffect(()=>{
     if (G.numberOfTry === 0) {
       moves.startGame();
       console.log("Start Game!");
     }
   }, []);
+  const finished = (!secondsRemaining || secondsRemaining < - 10000 || ctx.gameover === true)
   return (
     <>
-      <Dialog open={
-          (!secondsRemaining || secondsRemaining < - 10000 || ctx.gameover === true) && showEndPage
-        } onClose={() => { window.location.reload(); 
-          sendDataRelayEnd(teamState,G,ctx); }}>
-          {<RelayEndTable setShow={setShowEndPage} points={G.points}/>}
+      <Dialog maxWidth={false} open={
+          finished
+        } onClose={async () => { 
+          await toHome();
+          // sendDataRelayEnd(teamState, G, ctx);
+          window.location.reload(); 
+           }}>
+          {<RelayEndTable allPoints={G.points} task={
+           // TODO .maxpoints
+           [3, 3, 4, 4, 4, 5, 5, 6, 6].map((it, idx)=>({
+            max: it,
+            got: G.previousPoints[idx] ?? null,
+           })
+           ) 
+          }/>}
         </Dialog>
       <Stack sx={{
         with: "100%",
@@ -59,7 +70,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
         }}>
           <ExcerciseForm 
             previousTries={G.previousAnswers[G.currentProblem].map(it=>it.answer)} 
-            previousCorrectness={G.correctnessPreviousAnswer}
+            previousCorrectness={!finished ? G.correctnessPreviousAnswer : null}
             attempt={(G.currentProblem+1)*3+G.numberOfTry}
             onSubmit={(input) => {
               moves.submitAnswer(parseInt(input))

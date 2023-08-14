@@ -5,10 +5,15 @@ import { useStartRelay, useStartStrategy } from '../hooks/user-hooks';
 import { formatTime } from '../utils/DateFormatter';
 import { dictionary } from '../text-constants';
 
-export function ChooserItem(props: {status: MatchStatus, type: 'strategy'|'relay' }) {
+export function ChooserItem(props: {
+  status: MatchStatus,
+  type: 'strategy'|'relay',
+  setState: React.Dispatch<"R" | "S" | null> 
+  hideDesc?: boolean
+}) {
   const startRelay = useStartRelay();
   const startStrategy = useStartStrategy();
-  
+
   return (
     <Stack sx={{
       display: 'flex',
@@ -41,7 +46,7 @@ export function ChooserItem(props: {status: MatchStatus, type: 'strategy'|'relay
           flexDirection: 'row',
         }}>
           <Stack>
-            {dictionary.chooser.relayDescription}
+            {!props.hideDesc && dictionary.chooser.relayDescription}
           </Stack>
         </Stack>
       }        
@@ -54,7 +59,7 @@ export function ChooserItem(props: {status: MatchStatus, type: 'strategy'|'relay
             marginBlockEnd: 0,
           },
         }}>
-          <span dangerouslySetInnerHTML={{ __html: dictionary.chooser.gameDescriptionHtml }}/>
+          {!props.hideDesc && <span dangerouslySetInnerHTML={{ __html: dictionary.chooser.gameDescriptionHtml }}/>}
         </Stack>
       }  
       <Button sx={{
@@ -71,6 +76,22 @@ export function ChooserItem(props: {status: MatchStatus, type: 'strategy'|'relay
         }
       }} disabled={props.status.state !== "NOT STARTED"}>
         {dictionary.chooser.start}
+      </Button>
+      <Button sx={{
+        width: '70%',
+        height: '50px',
+        fontSize: '16px',
+        alignSelf: 'center',
+        textTransform: 'none',
+        marginTop: '15px',
+      }} variant='contained' color='primary' onClick={()=>{
+        if (props.type === "relay") {
+          props.setState("R");
+        } else {
+          props.setState("S");
+        }
+      }} disabled={props.status.state === "NOT STARTED"}>
+        {dictionary.chooser.result}
       </Button>
     </Stack>
   )

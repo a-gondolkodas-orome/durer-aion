@@ -1,5 +1,4 @@
 import { InProgressMatchStatus, TeamModelDto } from "../../dto/TeamStateDto";
-import { FinishedStrategy } from "./FinishedStrategy";
 import { DurerXVIStrategyClient } from "../ReactClient";
 import { dictionary } from "../../text-constants";
 
@@ -8,11 +7,6 @@ const testId = "strategyRoot";
 export function Strategy(props: { state: TeamModelDto }) {
   switch (props.state.strategyMatch.state) {
     case "FINISHED":
-      return (
-        <div data-testId={testId}>
-          <FinishedStrategy state={props.state} />
-        </div>
-      );
     case "IN PROGRESS":
       return (
         <div data-testId={testId}>

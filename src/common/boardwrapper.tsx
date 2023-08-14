@@ -1,22 +1,25 @@
 import { Button, Dialog, Stack } from "@mui/material";
 import { useEffect, useState } from "react";
 import { Countdown } from "../client/components/Countdown";
-import { RelayEndTable } from "../client/components/RelayEndTable";
+import { StrategyEndTable } from "../client/components/StrategyEndTable";
+import { useToHome } from "../client/hooks/user-hooks";
 
 export function boardWrapper(board: any, description: any) { //<please> TODO: solve types with BoardProps<MyGameState>
   return ({ G, ctx, moves, log }: any) => {
     const [secondsRemaining, setSecondsRemaining] = useState(G.milisecondsRemaining as number | null); // asked from the server
-    const [showEndPage, setShowEndPage] = useState(true);
+    const toHome = useToHome();
     useEffect(() => {
       setSecondsRemaining(G.milisecondsRemaining);
     }, [G.milisecondsRemaining]);
     return (
       <>
-        <Dialog open={
+        <Dialog maxWidth={false} open={
           !secondsRemaining || secondsRemaining < - 10000 || ctx.gameover === true
-        } onClose={() => { window.location.reload(); }}>
-          {/*TODO: check if it is actually nescesery to have the showEndPage variable*/}
-          {showEndPage && <RelayEndTable setShow={setShowEndPage} points={G.points}/>}
+        } onClose={async () => {
+          await toHome();
+          window.location.reload();
+          }}>
+          <StrategyEndTable allPoints={G.points} numOfTries={G.numberOfTries}/>
         </Dialog>
         <Stack sx={{
           padding: '20px',

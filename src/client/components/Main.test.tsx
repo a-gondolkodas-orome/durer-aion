@@ -46,10 +46,3 @@ test('main renders Strategy if team is in STRATEGY state', () => {
   const linkElement = screen.getByTestId("strategyRoot");
   expect(linkElement).toBeInTheDocument();
 });
-
-test('main Finished init if team is in FINISHED state', () => {
-  MockTeamState.mockFinished()
-  render(<Main />);
-  const linkElement = screen.getByTestId("finishedRoot");
-  expect(linkElement).toBeInTheDocument();
-});

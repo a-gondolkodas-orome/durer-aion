@@ -11,6 +11,11 @@ export const dictionary = {
     continue: "Tovább a versenyhez",
   },
   chooser: {
+    finish: {
+      title: "Gratulálunk sikeresen befejezted a versenyt!",
+      content: "Leiras a vegerol varunk a donton, valamikor ki is derul bejutottal, kicsit hosszabban, hogy jobban nezzen ki",
+      final: "Végső pontszám",
+    },
     gameDescriptionHtml: `<p>Ebben a feladatban egy kétszemélyes stratégiás játékot játszhattok, ahol az egyik játékos Ti lesztek, a másik játékos pedig a gép. Győzzétek le a gépet <b>kétszer egymás</b> után ebben a játékban! A kezdő helyzet ismeretében Ti dönthetitek el, hogy a kezdő vagy a második játékos bőrébe szeretnétek bújni.</p>         
     <p>A sikeres teljesítésért az alábbiak szerint kaptok pontot:
       <ul>
@@ -31,10 +36,16 @@ export const dictionary = {
     filledAt: "Kitöltve ekkor",
     achievedPoint: "Elért pont",
     start: "Kezdjük",
+    result: "Eredmények",
   },
   relay: {
     endTable: {
-      all: "összesen",
+      title: "A váltó befejeződött",
+      task: "Feladat",
+      point: "Pontszám",
+      try: "próbálkozás",
+      wrong: "Hibás válasz",
+      all: "Összpontszám",
       pointsGained: "pontot szereztél",
       back: "Vissza a versenyhez",
     },
@@ -67,6 +78,11 @@ export const dictionary = {
   strategy: {
     notSupported: "NEM TÁMOGATOTT JÁTÉKÁLLAPOT",
     name: "Stratégiás játék",
+    endTable: {
+      all: "Összpontszám",
+      gained: "Szerzett pontok",
+      tries: "Próbálkozások száma"
+    }
   },
   notFound: {
     message: "Ez az oldal nem található.",
