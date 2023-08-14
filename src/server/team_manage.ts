@@ -87,21 +87,26 @@ function inferenceGameType(gameName: string) {
 }
 
 export async function closeMatch(matchId: string, teams: TeamsRepository, db: StorageAPI.Async | StorageAPI.Sync) {
+  console.log("HERE");
   const currentMatch = await db.fetch(matchId, { state: true, metadata: true });
-  const teamId = currentMatch.metadata.players[0].id;
+  const teamId = currentMatch.metadata.players[0].name;
   //TODO: FIX THIS
-  if(teamId === 0)
-    return;
+  console.log("teamId", teamId);
+  console.log(JSON.stringify(currentMatch.metadata.players))
+  if(!teamId)
+    throw new Error(`Match teamId is not valid, the match has the following players:${currentMatch.metadata.players}`);
   const team: TeamModel | null = await teams.getTeam({ teamId }) ?? null;
   if (team == null)
     throw new Error(`Match team is not found, the match has the following players:${currentMatch.metadata.players}`);
 
   const type = inferenceGameType(currentMatch.metadata.gameName);
-  if (team![type].state !== "IN PROGRESS")
+  console.log("TYPE", type);
+  if (team[type].state !== "IN PROGRESS")
     throw new Error(`The match{${matchId}} is not in progress, you can't close it`)
-  const mStat = team![type] as InProgressMatchStatus;
-  const finishState = await endMatchStatus(mStat, currentMatch.state.G.score);
-  team!.update({ [type]: finishState });
+  const mStat = team[type] as InProgressMatchStatus;
+  const finishState = await endMatchStatus(mStat, currentMatch.state.G.points);
+  console.log("finishState", finishState)
+  await team.update({ [type]: finishState });
 }
 
 export async function getNewGame(ctx: Server.AppCtx, teams: TeamsRepository, games: Game<any, Record<string, unknown>, any>[], gameType: 'RELAY' | 'STRATEGY') {

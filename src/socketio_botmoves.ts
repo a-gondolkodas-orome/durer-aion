@@ -109,7 +109,7 @@ export class SocketIOButBotMoves extends SocketIO {
           // The arguments are stale: we react to a player's step
           // But we are on the same API that reacts to it
           // Basically we assume that a socket.on('update', ...)
-          // already updated the gamestate, making StateID and PlayerID stale
+          // already updated the game state, making StateID and PlayerID stale
           const [_, staleStateID, matchID, stalePlayerID] : any[] = args;
           const matchQueue = this.getMatchQueue(matchID);
           await matchQueue.add(async () => {

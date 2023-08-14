@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
+import { dictionary } from "../client/text-constants";
 
 export default function NotFound() {
   return (<>
     <h1>
-      Ez az oldal nem található.
+      {dictionary.notFound.message}
     </h1>
-    <p><Link to={"/"}>Vissza a főoldalra</Link></p>
+    <p><Link to={"/"}>{dictionary.notFound.back}</Link></p>
   </>);
 }

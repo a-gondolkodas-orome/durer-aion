@@ -40,7 +40,7 @@ export async function importer(teams: TeamsRepository, filename: string) {
     console.warn(`Expected: ${expected_header.join(', ')}`);
   }
   var export_table : string[][] = [];
-  var found_teamnames = new Set();
+  var found_teamNames = new Set();
   var found_ids = new Set();
   var found_login_codes = new Set();
   let successful = 0;
@@ -65,11 +65,11 @@ export async function importer(teams: TeamsRepository, filename: string) {
       ok = false;
     }
 
-    if (found_teamnames.has(teamname)) {
+    if (found_teamNames.has(teamname)) {
       console.error('Duplicate team name');
       ok = false;
     } else {
-      found_teamnames.add(teamname);
+      found_teamNames.add(teamname);
     }
 
     // TODO: hard-coded values

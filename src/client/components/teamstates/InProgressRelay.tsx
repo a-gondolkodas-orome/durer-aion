@@ -7,14 +7,15 @@ import { Dialog } from '@mui/material';
 import { useRefreshTeamState, useTeamState } from '../../hooks/user-hooks';
 import { ExcerciseTask } from '../ExcerciseTask';
 import { ExcerciseForm } from '../ExcerciseForm';
-import { Finished } from './Finished';
 import { sendDataRelayEnd, sendDataRelayStep } from '../../../common/sendData';
 import { dictionary } from '../../text-constants';
+import { RelayEndTable } from '../RelayEndTable';
 interface MyGameProps extends BoardProps<MyGameState> { };
 export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
   const [secondsRemaining, setSecondsRemaining] = useState(G.milisecondsRemaining as number | null);
   const refreshState = useRefreshTeamState();
   const teamState = useTeamState();
+  const [showEndPage, setShowEndPage] = useState(true);
   useEffect(()=>{
     if (G.numberOfTry === 0) {
       moves.startGame();
@@ -24,10 +25,10 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
   return (
     <>
       <Dialog open={
-          !secondsRemaining || secondsRemaining < - 10000 || ctx.gameover === true
+          (!secondsRemaining || secondsRemaining < - 10000 || ctx.gameover === true) && showEndPage
         } onClose={() => { window.location.reload(); 
           sendDataRelayEnd(teamState,G,ctx); }}>
-          {teamState && <Finished state={teamState}/>}
+          {<RelayEndTable setShow={setShowEndPage} points={G.points}/>}
         </Dialog>
       <Stack sx={{
         with: "100%",

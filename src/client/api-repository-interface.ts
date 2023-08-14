@@ -52,6 +52,18 @@ export class RealClientRepository implements ClientRepository {
       throw new Error('Váratlan hiba történt');
     }
 
+    if (result.data.relayMatch.startAt) {
+      result.data.relayMatch.startAt = new Date(result.data.relayMatch.startAt);
+    }
+    if (result.data.relayMatch.endAt) {
+      result.data.relayMatch.endAt = new Date(result.data.relayMatch.endAt);
+    }
+    if (result.data.strategyMatch.startAt) {
+      result.data.strategyMatch.startAt = new Date(result.data.strategyMatch.startAt);
+    }
+    if (result.data.strategyMatch.endAt) {
+      result.data.strategyMatch.endAt = new Date(result.data.strategyMatch.endAt);
+    }
     return result.data as TeamModelDto;
   }
 

@@ -67,5 +67,12 @@ export const dictionary = {
   strategy: {
     notSupported: "NEM TÁMOGATOTT JÁTÉKÁLLAPOT",
     name: "Stratégiás játék",
+  },
+  notFound: {
+    message: "Ez az oldal nem található.",
+    back: "Vissza a főoldalra", 
+  },
+  error: {
+    unsuspected: "Váratlan hiba történt",
   }
 };
