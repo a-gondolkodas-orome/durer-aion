@@ -49,7 +49,11 @@ const injectPlayer = async (db: StorageAPI.Async | StorageAPI.Sync, matchId: str
   });
 }
 
-//TODO: check if export is needed
+/**
+ * Cheks if the status of the global timer
+ * TODO: check if export is needed & implement usage
+ * @returns {"WAITING"|"FINISHED"|undefined} - status of global game
+ */
 function checkGlobalTime():"WAITING"|"FINISHED"|undefined{
   const now = new Date()
   const {globalStartAt,globalEndAt} = getGameStartAndEndTime();
@@ -63,6 +67,14 @@ function checkGlobalTime():"WAITING"|"FINISHED"|undefined{
   return undefined
 }
 
+/**
+ * Creates a game based on context, and given Game.
+ * This is the interface between the API, and BGio components.
+ * 
+ * @param {Game<any, Record<string, unknown>, any>} game - Game object
+ * @param {Server.AppCtx} ctx - Context of the Koa & BGio call
+ * @returns {LobbyAPI.CreatedMatch} - MatchID for the created game
+ */
 async function createGame(
   game: Game<any, Record<string, unknown>, any>,
   ctx: Server.AppCtx
@@ -80,13 +92,20 @@ async function createGame(
   return body;
 };
 
+/**
+ * 
+ * Big factory to set up the Router for the API, anso contains API function implementations.
+ * 
+ * @param router - Koa Router
+ * @param teams - List of teams, provided as a TeamsRepository
+ * @param games - List of possible games for teams
+ */
 export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: TeamsRepository, games: Game<any, Record<string, unknown>, any>[]) {
   /**
-   * Get data about a specific match.
+   * Get the log data about a specific match.
    *
-   * @param {string} name - The name of the game.
    * @param {string} id - The ID of the match.
-   * @return - A match object.
+   * @returns {LogEntry[]} - A list of log objects.
    */
   router.get('/team/admin/:id/logs', async (ctx) => {
     //It is already authenticated by the admin mount routing
@@ -101,11 +120,10 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
   });
 
   /**
-   * Get data about a specific match.
+   * Get the state data of a specific match.
    *
-   * @param {string} name - The name of the game.
    * @param {string} id - The ID of the match.
-   * @return - A match object.
+   * @returns {State<any>} - A match state object object.
    */
   router.get('/team/admin/:id/state', async (ctx) => {
     const matchID = ctx.params.id;
@@ -119,11 +137,10 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
   });
 
   /**
-   * Get data about a specific match.
+   * Get metadata about a specific match.
    *
-   * @param {string} name - The name of the game.
    * @param {string} id - The ID of the match.
-   * @return - A match object.
+   * @returns {Server.MatchData} - A match object.
    */
      router.get('/team/admin/:id/metadata', async (ctx) => {
       const matchID = ctx.params.id;
@@ -136,9 +153,15 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
       ctx.body = metadata;
     });
 
-  router.get('/team/admin/filter', koaBody(), async (ctx: Server.AppCtx) => {
-    const filter_string = ctx.request.query['filter'];
-    let filters;
+  /**
+   * Run a user defined filter query on teams
+   * 
+   * @param {string|string[]} filter - Get parameter to pass the filter
+   * @returns {TeamModel[]} - List of the selected teams 
+   */
+  router.get('/team/admin/filter', koaBody(), async (ctx) => {
+    const filter_string:string|string[]|undefined = ctx.request.query['filter'];
+    let filters:string[];
     if (filter_string === undefined) {
       filters = [];
     } else {
@@ -148,7 +171,13 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
     //    ctx.body = ['8eae8669-125c-42e5-8b49-89afbac31679', '18c3a69d-c477-4578-8dc1-6e430fbb4e80', '48df4969-a834-4131-ab75-24069a56d2d6'];
   })
 
-  router.get('/team/join/:token', koaBody(), async (ctx: Server.AppCtx) => {
+  /**
+   * Get team ID based on login token
+   * 
+   * @param {string} token: Login token
+   * @returns {srting } - TeamId for the team
+   */
+  router.get('/team/join/:token', koaBody(), async (ctx) => {
     const connect_token: string = ctx.params.token ?? 'no-token';
     const team = await teams.getTeam({ joinCode: connect_token });
     ctx.body = team?.teamId;
@@ -156,8 +185,15 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
       ctx.throw(404, "Team not found!")
   })
 
-  //ROUTING FOR TEAM DATA
-  router.get(/^\/team\/(?<GUID>[^-]{8}-[^-]{4}-[^-]{4}-[^-]{4}-[^-]{12}$)/, koaBody(), async (ctx: Server.AppCtx) => {
+  /**
+   * ROUTING FOR TEAM DATA is handled here. If wrong team then returns 400
+   * This is the main middleware to catch wrong team id-s
+   * 
+   * @param {string} GUID - TeamId
+   * @returns {TeamModel} - raw TeamModell if called directly
+   * 
+   */
+  router.get(/^\/team\/(?<GUID>[^-]{8}-[^-]{4}-[^-]{4}-[^-]{4}-[^-]{12}$)/, koaBody(), async (ctx) => {
     const GUID = ctx.params.GUID ?? ctx.throw(400)
     console.log(GUID);
     const team = await teams.getTeam({ teamId: GUID }) ?? ctx.throw(404, `Team with {teamId:${GUID}} not found.`)
@@ -170,8 +206,12 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
   });
 
 
-
-  router.get('/team/:GUID/relay/play', koaBody(), async (ctx: Server.AppCtx) => {
+  /**
+   * Let a team strat a RELAY match.
+   * 
+   * @param {string} GUID - TeamId
+   */
+  router.get('/team/:GUID/relay/play', koaBody(), async (ctx) => {
     const GUID = ctx.params.GUID;
     //check if in progress, it is not allowed to play
     //check if it can be started, throw error if not
@@ -196,7 +236,12 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
     ctx.body = body;
   })
 
-  router.get('/team/:GUID/strategy/play', koaBody(), async (ctx: Server.AppCtx) => {
+  /**
+   * Let a team strat a STRATEGY match.
+   * 
+   * @param {string} GUID - TeamId
+   */
+  router.get('/team/:GUID/strategy/play', koaBody(), async (ctx) => {
     const GUID = ctx.params.GUID;
     //check if in progress, it is not allowed to play
     //check if it can be started, throw error if not
