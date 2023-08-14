@@ -170,9 +170,17 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
     else{
       filters = filter_string;
     }
-    //TODO: fix the return type and value
+    //TODO: fix the return type value
     ctx.body = await teams.fetch(filters);
     //    ctx.body = ['8eae8669-125c-42e5-8b49-89afbac31679', '18c3a69d-c477-4578-8dc1-6e430fbb4e80', '48df4969-a834-4131-ab75-24069a56d2d6'];
+  })
+
+  /**
+   * Get all teams as a full object
+   * @returns {TeamModel[]} - List of the selected teams 
+   */
+  router.get('/team/admin/all',koaBody(),async (ctx) => {
+    ctx.body = await teams.listTeams();
   })
 
   /**
@@ -217,13 +225,12 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
    */
   router.get('/team/:GUID/relay/play', koaBody(), async (ctx) => {
     const GUID = ctx.params.GUID;
+
     //check if in progress, it is not allowed to play
     //check if it can be started, throw error if not
     const { game, team } = await getNewGame(ctx, teams, games, 'RELAY');
 
-
     // about to start a game
-
     const body: LobbyAPI.CreatedMatch = await createGame(game, ctx);
     await injectPlayer(ctx.db, body.matchID, {playerID: '0', name: GUID, credentials: team.credentials});
     await injectBot(ctx.db, body.matchID, BOT_ID);

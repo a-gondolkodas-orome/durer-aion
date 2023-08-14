@@ -35,6 +35,10 @@ export class TeamsRepository {
     })??null;
   }
 
+  async listTeams(): Promise<TeamModel[]|null>{
+    return await TeamModel.findAll();
+  }
+
   async getTeam(searchCondition: WhereOptions<Pick<TeamModel, "joinCode" | "teamId">>) : Promise<TeamModel|null>{
     return await TeamModel.findOne( {where:
       (searchCondition)
