@@ -41,7 +41,7 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type
   },
 
   possibleMoves: (G, ctx, playerID) => {
-    let moves = [1];
+    let moves:any[] = [];
     
     return moves;
   },

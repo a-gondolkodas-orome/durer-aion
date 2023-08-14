@@ -1,4 +1,4 @@
-import { Ctx, MoveMap, TurnConfig } from "boardgame.io";
+import { Ctx, Game, MoveMap, TurnConfig } from "boardgame.io";
 
 export type PlayerIDType = "0" | "1";
 
@@ -27,10 +27,12 @@ export interface GameStateMixin {
 export type SetupFunction<G> = () => G;
 export type StartingPositionFunction<G> = (_: {G: G & GameStateMixin; ctx: Ctx; playerID: PlayerIDType; random: any}) => G;
 
+type PossibleMovesReturnType = ReturnType<NonNullable<Game['ai']>['enumerate']>
+
 /// GameWrapper's mixin.
 /// setup() is defined here, as it returns G instead of G & WrapperState 
 interface GameMixin<G> {
-  possibleMoves: (G: G, ctx: Ctx, playerID: PlayerIDType) => any[];
+  possibleMoves: (G: G, ctx: Ctx, playerID: PlayerIDType) => PossibleMovesReturnType;
   setup: SetupFunction<G>,
   startingPosition?: StartingPositionFunction<G>;
 }

@@ -41,13 +41,13 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type
   },
 
   possibleMoves: (G, ctx, playerID) => {
-    let moves = [1];
+    let moves: any[] = [];
     
     return moves;
   },
 };
 
-function getWinner(): string {
-  return "";
+function getWinner(): PlayerIDType|'draw'|null {
+  return null;
 
 }

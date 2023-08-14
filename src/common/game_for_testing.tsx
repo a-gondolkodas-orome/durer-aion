@@ -14,7 +14,7 @@ export function createGameWithMoveWithoutStartingPosition(setup: SetupFunction<G
     moves: {
       move: (...args) =>  move(...args), // TODO make the as type here to work, so it can be used with the proper signature
     },
-    possibleMoves: () => [null, "move"],
+    possibleMoves: () => [],
   };
   return game;
 }
@@ -29,7 +29,7 @@ export function createGameWithMove(setup: SetupFunction<G>, startingPosition: St
     moves: {
       move: (...args) => move(...args),
     },
-    possibleMoves: () => [null, "move"],
+    possibleMoves: () => [],
   };
   return game;
 }
