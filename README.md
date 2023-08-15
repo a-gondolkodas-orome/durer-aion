@@ -139,8 +139,15 @@ Running DB (in background):
 sudo docker run -it --rm -e POSTGRESQL_PASSWORD=postgres -p 127.0.0.1:5432:5432 bitnami/postgresql
 ```
 
+Hint on how to get sudo on Windows: [gsudo](https://community.chocolatey.org/packages/gsudo)
+
+On linux/unix
 ```bash
 ./import_teams.sh test.tsv
+```
+On Windows
+```powershell
+.\import_teams.ps1 test.tsv
 ```
 
 and on debug page: `Node.JS... -> Run Script: dev:server`
