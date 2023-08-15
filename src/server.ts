@@ -126,6 +126,7 @@ if (argv[2] === "import") {
         closeMatch(matchID, teams, db);
       }
     ),
+    origins:['http://localhost:5173'],
     db,
   });
 
