@@ -56,6 +56,7 @@ export class MockTeamState {
     useLogout: jest.fn(),
     useStartRelay: jest.fn(),
     useStartStrategy: jest.fn(),
+    useToHome: jest.fn(),
     LoadTeamState: () => {
       return null;
     },
