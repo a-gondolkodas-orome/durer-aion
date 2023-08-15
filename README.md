@@ -110,7 +110,7 @@ Node v10 and NPM v6 is not enough! I do not know why exactly.
 
 ```
 npm run build # build frontend -- auto-reload
-npm dev:server # build server -- auto-reload
+npm run dev:server # build server -- auto-reload
 ```
 
 ### If your Node is old
@@ -139,7 +139,7 @@ Running DB (in background):
 sudo docker run -it --rm -e POSTGRESQL_PASSWORD=postgres -p 127.0.0.1:5432:5432 bitnami/postgresql
 ```
 
-Hint on how to get sudo on Windows: [gsudo](https://community.chocolatey.org/packages/gsudo)
+In Windows you can run this command in a terminal with administrator mode. (You can easily start one with [gsudo](https://github.com/gerardog/gsudo), but you can also start one in a start menu with right click and "run as administrator".)
 
 On linux/unix
 ```bash
