@@ -151,6 +151,8 @@ On Windows
 ```
 
 and on debug page: `Node.JS... -> Run Script: dev:server`
+![image](https://github.com/a-gondolkodas-orome/durer-aion/assets/33357968/f895cc2a-5180-45cc-b9d6-c66bfc708f1a)
+
 
 Breakpoints are working. Frontend is not.
 
