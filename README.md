@@ -130,3 +130,27 @@ Install node, and set path.
   `export PATH=/opt/node/bin:"$PATH"`
 
 1) `node --version` should return version of at least 16.
+
+# Debugging server -- only DB is behind Docker
+
+Running DB (in background):
+
+```bash
+sudo docker run -it --rm -e POSTGRESQL_PASSWORD=postgres -p 127.0.0.1:5432:5432 bitnami/postgresql
+```
+
+```bash
+./import_teams.sh test.tsv
+```
+
+and on debug page: `Node.JS... -> Run Script: dev:server`
+
+Breakpoints are working. Frontend is not.
+
+## Fixing Frontend -- Introduce proxy for CORS
+
+Add proxy for frontend in `package.json`:
+
+```json
+  "proxy": "http://localhost:8000",
+```
