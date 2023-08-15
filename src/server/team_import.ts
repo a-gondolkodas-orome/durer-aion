@@ -153,7 +153,6 @@ export async function importer(teams: TeamsRepository, filename: string) {
   console.info(`Successfully imported ${successful} teams, failed ${failed} times.`);
   // TODO: Move the file
   export_table.unshift(expected_header);
-  renameSync(`${filename}`, `${filename}.bak`);
-  writeFileSync(`${filename}`, export_table.map(row => row.join('\t')).join('\n'), { 'encoding': 'utf-8' });
+  writeFileSync(`${filename}.export`, export_table.map(row => row.join('\t')).join('\n'), { 'encoding': 'utf-8' });
 
 }
