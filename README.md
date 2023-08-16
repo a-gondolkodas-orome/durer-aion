@@ -72,17 +72,37 @@ Tasks:
 
 # Getting Started
 
-## Developer environment -- Docker way
+## Requirements
+
+- [Node.js](https://nodejs.org/) version 16 or above (which can be checked by running `node -v`).
+- [Docker](https://www.docker.com/)
+
+## Installation
+
+`npm ci`
+
+## Running developer environment -- Docker way
 
 Frontend needs to be built after every change, but the server auto-reloads(!).
-
-First-time you will need: `docker-compose build`
 
 ### Setting up the server
 
 `docker-compose up --build`
 
 (before first run, you will need `npm run build`)
+
+You should be up and running the application on `localhost`.
+
+### Importing teams
+
+On linux/unix
+```bash
+./import_teams.sh test.tsv
+```
+On Windows
+```powershell
+.\import_teams.ps1 test.tsv
+```
 
 ### Reload frontend manually
 
@@ -97,6 +117,44 @@ First-time you will need: `docker-compose build`
 Except routning, and KOA hooks. 
 If you install a package used by the backend, you will have to `docker-compose build`.
 
+## Running developer environment -- without docker (except DB)
+
+Set up the database (in Windows you can run it without sudo):
+
+```bash
+sudo docker run -it --rm -e POSTGRESQL_PASSWORD=postgres -p 127.0.0.1:5432:5432 bitnami/postgresql
+```
+
+After that you should import teams (see above).
+
+You should create an `.env.local` file (see `.env.local.sample`).
+
+Run the following two commands in two seperate terminal:
+
+```
+npm run dev:server # build server -- auto-reload
+npx react-scripts start # build frontend -- auto-reload
+```
+
+You should be up and running the application on `localhost:3000`.
+
+### Debugging server
+
+If you want to debug the server then instead of running `npm run dev:server` go to `Run and Debug` menu in VSCode and select `Node.JS... -> Run Script: dev:server`
+
+![image](https://github.com/a-gondolkodas-orome/durer-aion/assets/22480910/20fcba7b-148b-41c4-988d-83f9174708f5)
+
+Breakpoints work on the server, but not on the frontend.
+
+### Fixing Frontend -- Introduce proxy for CORS
+
+Add proxy for frontend in `package.json`:
+
+```json
+  "proxy": "http://localhost:8000",
+```
+
+
 ## How to create a new game
 
 1) Copy 4 files (board, game, main, strategy) to a new directory in `src/games/`.
@@ -104,16 +162,10 @@ If you install a package used by the backend, you will have to `docker-compose b
 1) Add game in `lobby.tsx` (client-side code)
 1) Add game in `server.tsx` (server-side code)
 
-## Developer environment -- without docker
+
+## If your Node is old
 
 Node v10 and NPM v6 is not enough! I do not know why exactly.
-
-```
-npm run build # build frontend -- auto-reload
-npm run dev:server # build server -- auto-reload
-```
-
-### If your Node is old
 
 Ubuntu 20.04 package is too old, for example.
 
@@ -130,36 +182,3 @@ Install node, and set path.
   `export PATH=/opt/node/bin:"$PATH"`
 
 1) `node --version` should return version of at least 16.
-
-# Debugging server -- only DB is behind Docker
-
-Running DB (in background):
-
-```bash
-sudo docker run -it --rm -e POSTGRESQL_PASSWORD=postgres -p 127.0.0.1:5432:5432 bitnami/postgresql
-```
-
-In Windows you can run this command in a terminal with administrator mode. (You can easily start one with [gsudo](https://github.com/gerardog/gsudo), but you can also start one in a start menu with right click and "run as administrator".)
-
-On linux/unix
-```bash
-./import_teams.sh test.tsv
-```
-On Windows
-```powershell
-.\import_teams.ps1 test.tsv
-```
-
-and on debug page: `Node.JS... -> Run Script: dev:server`
-![image](https://github.com/a-gondolkodas-orome/durer-aion/assets/33357968/f895cc2a-5180-45cc-b9d6-c66bfc708f1a)
-
-
-Breakpoints are working. Frontend is not.
-
-## Fixing Frontend -- Introduce proxy for CORS
-
-Add proxy for frontend in `package.json`:
-
-```json
-  "proxy": "http://localhost:8000",
-```
