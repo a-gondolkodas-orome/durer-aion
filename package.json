@@ -97,5 +97,6 @@
     "cspell": "^6.31.1",
     "gh-pages": "^4.0.0",
     "nodemon": "^2.0.18"
-  }
+  },
+  "proxy": "http://localhost:8000"
 }
