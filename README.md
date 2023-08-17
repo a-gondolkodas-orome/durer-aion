@@ -72,21 +72,47 @@ Tasks:
 
 # Getting Started
 
-## Developer environment -- Docker way
+## Requirements
 
-Frontend needs to be built after every change, but the server auto-reloads(!).
+- [Node.js](https://nodejs.org/) version 16 or above (which can be checked by running `node -v`).
+- [Docker](https://www.docker.com/)
 
-First-time you will need: `docker-compose build`
+## Installation
+
+```
+npm ci
+```
+
+## Running developer environment -- Docker way
+
+Frontend needs to be built after every change, but the server auto-reloads.
 
 ### Setting up the server
 
-`docker-compose up --build`
+```
+docker-compose up --build
+```
 
 (before first run, you will need `npm run build`)
 
+You should be up and running the application on `localhost`.
+
+### Importing teams
+
+On linux/unix
+```bash
+./import_teams.sh test.tsv
+```
+On Windows
+```powershell
+.\import_teams.ps1 test.tsv
+```
+
 ### Reload frontend manually
 
-`npm run build`
+```
+npm run build
+```
 
 ...and reload page
 
@@ -94,8 +120,53 @@ First-time you will need: `docker-compose build`
 
 :)
 
-Except routning, and KOA hooks. 
+Except routing, and KOA hooks.
 If you install a package used by the backend, you will have to `docker-compose build`.
+
+## Running developer environment -- without docker (except DB)
+
+Both frontend and server auto-reloads.
+
+- Set up the database (in Windows you can run it without sudo):
+
+```bash
+sudo docker run -it --rm -e POSTGRESQL_PASSWORD=postgres -p 127.0.0.1:5432:5432 bitnami/postgresql
+```
+
+- After that you should import teams (see above).
+
+- You should create an `.env.local` file (see `.env.local.sample`).
+
+- Run the following two commands in two separate terminal:
+
+```bash
+npm run dev:server
+```
+> This starts the backend with the earlier started db. Changing the code of server it auto-reloads itself.
+```bash
+npx react-scripts start
+```
+> This starts the frontend. Changing the code of frontend it auto-reloads itself. Note: you can use the backend without the frontend.
+
+You should be up and running the application on `localhost:3000`.
+
+### Debugging
+VS code gives you two options to debug the application. Both of them needs some setup first, and they can't be used at the same time.
+
+Breakpoints work either on the server, or on the frontend, but not on both at the same time. See different debugging options for further references.
+
+#### Debugging server
+
+If you want to debug the server then instead of running `npm run dev:server` go to `Run and Debug` menu in VSCode and select `Node.JS... -> Run Script: dev:server`
+
+![image](https://github.com/a-gondolkodas-orome/durer-aion/assets/22480910/20fcba7b-148b-41c4-988d-83f9174708f5)
+
+
+#### Debugging Frontend
+
+If you want to use the Debugger to debug frontend code, you can use the `Debug Frontend` option.
+In this case, you still have to start the frontend, and the backend manually.
+
 
 ## How to create a new game
 
@@ -104,16 +175,10 @@ If you install a package used by the backend, you will have to `docker-compose b
 1) Add game in `lobby.tsx` (client-side code)
 1) Add game in `server.tsx` (server-side code)
 
-## Developer environment -- without docker
+
+## If your Node is old
 
 Node v10 and NPM v6 is not enough! I do not know why exactly.
-
-```
-npm run build # build frontend -- auto-reload
-npm dev:server # build server -- auto-reload
-```
-
-### If your Node is old
 
 Ubuntu 20.04 package is too old, for example.
 
