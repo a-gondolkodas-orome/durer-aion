@@ -20,7 +20,7 @@ import * as Sentry from '@sentry/node';
 import dotenv from 'dotenv';
 
 dotenv.config();
-dotenv.config({ path: '.env.local' });
+dotenv.config({ path: '.env' });
 
 function getDb() {
   if (env.DATABASE_URL) {
@@ -130,6 +130,7 @@ if (argv[2] === "import") {
         closeMatch(matchID, teams, db);
       }
     ),
+    origins:['http://localhost:5173'],
     db,
   });
 
@@ -137,6 +138,7 @@ if (argv[2] === "import") {
 
   //Admin page auth setup
   server.app.use(mount('/team/admin', auth({ name: 'admin', pass: getAdminCredentials() })));
+  server.app.use(mount('/match/admin', auth({ name: 'admin', pass: getAdminCredentials() })));
 
   //TODO regex mount protection for Boardgame.io endpoints
 

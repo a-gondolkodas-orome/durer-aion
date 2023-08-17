@@ -20,7 +20,7 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
    * @param {string} matchId - The ID of the match.
    * @returns {LogEntry[]} - A list of log objects.
    */
-  router.get('/team/admin/:matchId/logs', async (ctx) => {
+  router.get('/match/admin/:matchId/logs', async (ctx) => {
     //It is already authenticated by the admin mount routing
     const matchID = ctx.params.matchId;
     const { log } = await (ctx.db as StorageAPI.Async).fetch(matchID, {
@@ -38,7 +38,7 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
    * @param {string} matchId - The ID of the match.
    * @returns {State<any>} - A match state object object.
    */
-  router.get('/team/admin/:matchId/state', async (ctx) => {
+  router.get('/match/admin/:matchId/state', async (ctx) => {
     const matchID = ctx.params.matchId;
     const { state } = await (ctx.db as StorageAPI.Async).fetch(matchID, {
       state: true,
@@ -55,7 +55,7 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
    * @param {string} matchId - The ID of the match.
    * @returns {Server.MatchData} - A match object.
    */
-     router.get('/team/admin/:matchId/metadata', async (ctx) => {
+     router.get('/match/admin/:matchId/metadata', async (ctx) => {
       const matchID = ctx.params.matchId;
       const { metadata } = await (ctx.db as StorageAPI.Async).fetch(matchID, {
         metadata: true,
@@ -64,6 +64,29 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
         ctx.throw(404, 'Match ' + matchID + ' not found');
       }
       ctx.body = metadata;
+    });
+
+    /**
+     * Get metadata about a specific match.
+     *
+     * @param {string} matchId - The ID of the match.
+     * @returns {Server.MatchData} - A match object.
+     */
+    router.put('/match/admin/:matchId/metadata', async (ctx) => {
+      const matchID = ctx.params.matchId;
+      let { metadata } = await (ctx.db as StorageAPI.Async).fetch(matchID, {
+        metadata: true,
+      });
+      if (!metadata) {
+        ctx.throw(404, 'Match ' + matchID + ' not found');
+      }
+
+      const requestBody = ctx.request.body
+      if('createdAt' in requestBody){
+        metadata['createdAt'] = requestBody['createdAt']
+      }
+      await (ctx.db as StorageAPI.Async).setMetadata(matchID,metadata)
+      return ctx
     });
 
   /**
@@ -96,6 +119,29 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
     ctx.body = await teams.listTeams();
   })
 
+  /**
+   * Set the team peremeters
+   * @param {string} GUID- Team DUID
+   */
+  router.put('/team/admin/:GUID', koaBody(),async (ctx) => {
+    const GUID = ctx.params.GUID ?? ctx.throw(400)
+    console.log(GUID);
+    let team = await teams.getTeam({ teamId: GUID }) ?? ctx.throw(404, `Team with {teamId:${GUID}} not found.`)
+    const requestBody = ctx.request.body
+    let updateParams:{[key:string]:any} = {}
+
+    // Whitelist the properties based on the model's attributes
+    const allowedAttributes = Object.keys(TeamModel.prototype)
+    for (const key of allowedAttributes) {
+      if (requestBody[key] !== undefined) {
+        updateParams[key] = requestBody[key]
+      }
+      else{
+        console.log(`Dropped request param '${key}' because it's not a valid property of TeamModell.`)
+      }
+    }
+    team.update(updateParams)
+  })
 
   /**
    * Get team ID based on login token

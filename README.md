@@ -135,7 +135,7 @@ sudo docker run -it --rm -e POSTGRESQL_PASSWORD=postgres -p 127.0.0.1:5432:5432 
 
 - After that you should import teams (see above).
 
-- You should create an `.env.local` file (see `.env.local.sample`).
+- You should create an `.env` file (see `.env.sample`).
 
 - Run the following two commands in two separate terminal:
 

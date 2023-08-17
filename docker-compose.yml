@@ -13,10 +13,10 @@ services:
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@postgres/postgres
       - PORT=8000
-      - BOT_CREDENTIALS=botbotbot
-      - ADMIN_CREDENTIALS=hellodankness
-      - GAME_GLOBAL_START_T='2022-10-20T00:09:36.150Z'
-      - GAME_GLOBAL_END_T='2022-11-20T00:09:36.150Z'
+      - BOT_CREDENTIALS=${BOT_CREDENTIALS}
+      - ADMIN_CREDENTIALS=${ADMIN_CREDENTIALS}
+      - GAME_GLOBAL_START_T=${GAME_GLOBAL_START_T}
+      - GAME_GLOBAL_END_T=${GAME_GLOBAL_END_T}
     volumes:
       - .:/usr/src/app
     depends_on:
@@ -26,6 +26,6 @@ services:
     volumes:
       - postgresdb:/var/lib/postgresql/data
     environment:
-      - POSTGRESQL_PASSWORD=postgres
+      - POSTGRESQL_PASSWORD=${POSTGRESQL_PASSWORD}
 volumes:
   postgresdb: {}
