@@ -2,6 +2,7 @@
   "name": "bgio-tutorial",
   "version": "0.1.0",
   "private": false,
+  "proxy": "http://localhost:8000",
   "dependencies": {
     "@babel/cli": "^7.18.6",
     "@babel/node": "^7.18.6",
@@ -97,6 +98,5 @@
     "cspell": "^6.31.1",
     "gh-pages": "^4.0.0",
     "nodemon": "^2.0.18"
-  },
-  "proxy": "http://localhost:8000"
+  }
 }
