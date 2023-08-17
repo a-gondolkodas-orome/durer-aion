@@ -20,7 +20,6 @@ import * as Sentry from '@sentry/node';
 import dotenv from 'dotenv';
 
 dotenv.config();
-dotenv.config({ path: '.env' });
 
 function getDb() {
   if (env.DATABASE_URL) {
