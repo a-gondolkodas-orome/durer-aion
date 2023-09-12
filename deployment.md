@@ -78,6 +78,20 @@ It will be hosted default on port 80, and all the stuff will be running in the d
 
 You still need to set up the ssl certificate, and DNS.
 
+## Access your docker containers
+
+To acces your docker coantainers, you have to find your containers first:
+```bash
+sudo docker ps
+```
+
+After this, select the id or the name of a container you want to connect to, and execute the following:
+```bash 
+sudo docker exec -it bash
+```
+
+This will give you a bash terminal ito that container, with sudo.
+
 ## Add SSL
 
 TODO!
