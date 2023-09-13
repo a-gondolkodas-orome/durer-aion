@@ -118,7 +118,7 @@ export function ChooserItem(props: {
         } else {
           startStrategy()
         }
-      }} disabled={props.status.state !== "NOT STARTED"}>
+      }} disabled={props.status.state !== "NOT STARTED" || (props.type !== "relay")}>
         {dictionary.chooser.start}
       </Button>
       <Button sx={{
