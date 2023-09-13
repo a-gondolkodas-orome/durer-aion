@@ -136,7 +136,7 @@ if (argv[2] === "import") {
   const PORT = parseInt(env.PORT || "8000");
 
   //Admin page auth setup
-  server.app.use(mount('/team/admin', auth({ name: 'admin', pass: getAdminCredentials() })));
+  //server.app.use(mount('/team/admin', auth({ name: 'admin', pass: getAdminCredentials() })));
 
   //TODO regex mount protection for Boardgame.io endpoints
 
