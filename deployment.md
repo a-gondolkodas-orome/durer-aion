@@ -1,8 +1,7 @@
 
 # Breadcrumbs to how someone may deploy this repository
 
-I used AWS for deployment, but generally, the deployment is done in a virtual machine, generally avaliable almost everywhere.
-Because I used AWS EC2, my package manager was yum. This may complicates your workflow.
+I used AWS for deployment, but generally, the deployment is done in a virtual machine, generally avaliable almost everywhere. For cross vendor compatibility, please use an Ubuntu installer for your instance. You can use the Amazon Linux 2 as well, but you have to modify the installation in multiple parts.
 
 ## Create an EC2
 
