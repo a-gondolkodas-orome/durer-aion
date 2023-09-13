@@ -89,11 +89,17 @@ Frontend needs to be built after every change, but the server auto-reloads.
 
 ### Setting up the server
 
-```
+```bash
 docker-compose up --build
 ```
 
 (before first run, you will need `npm run build`)
+
+Note: Some newer docker installs have a different compose interface, you may use the compose command like this:
+
+```bash
+docker compose up --build
+```
 
 You should be up and running the application on `localhost`.
 
