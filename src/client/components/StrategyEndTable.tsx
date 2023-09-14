@@ -2,7 +2,7 @@ import React from 'react';
 import { Button, Table, TableCell, TableRow } from '@mui/material';
 import { Stack } from '@mui/system';
 import { dictionary } from '../text-constants';
-import { useToHome } from '../hooks/user-hooks';
+import { useRefreshTeamState, useToHome } from '../hooks/user-hooks';
 import theme from './theme';
 
 /**
@@ -12,6 +12,7 @@ import theme from './theme';
  */
 export function StrategyEndTable(props: {allPoints: number, numOfTries: number}) {
   const toHome = useToHome();
+  const refreshState = useRefreshTeamState();
   return (
     <Stack sx={{
       display: 'flex',
@@ -44,6 +45,7 @@ export function StrategyEndTable(props: {allPoints: number, numOfTries: number})
         textTransform: 'none',
         marginTop: '15px',
       }} variant='contained' color='primary' onClick={async ()=>{
+        await refreshState();
         await toHome();
         window.location.reload(); 
       }}>

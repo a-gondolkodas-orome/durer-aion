@@ -1,15 +1,24 @@
 import { Dispatch, PropsWithoutRef, SetStateAction, useEffect, useState } from "react";
 
-export function Countdown(props: PropsWithoutRef<{ secondsRemaining: number | null, setSecondsRemaining: Dispatch<SetStateAction<number | null>>, getServerTimer: ()=>void }>) {
+export function Countdown(
+  props: PropsWithoutRef<{ 
+    msRemaining: number | null,
+    setMsRemaining: Dispatch<SetStateAction<number>>,
+    getServerTimer: ()=>void 
+  }>
+) {
     const [countdown, setCountdown] = useState("??:??:??");
     // initializes a timer. Note that it does not need updates, even though it "uses" secondsRemaining
     useEffect(() => {
         let handle: NodeJS.Timeout | null = null;
         handle = setInterval(function () {
-            props.setSecondsRemaining(s => {
+            props.setMsRemaining(s => {
                 // clock is not updated below 1 seconds, only the backend sets it below 1 second!
-                if (s !== null && s > 1) {
+                if (s !== null && s > 1000) {
                     return s - 1000
+                }
+                if (s !== null && s < 0) {
+                  return s - 1000;
                 }
                 props.getServerTimer();
                 // TODO: fetch / something
@@ -25,26 +34,27 @@ export function Countdown(props: PropsWithoutRef<{ secondsRemaining: number | nu
     }, []);
 
     useEffect(() => {
-        if (props.secondsRemaining === null) {
+        if (props.msRemaining === null) {
             return;
         }
         // add some seconds: the server is the single point of truth, do not let the frontend
         // stop the player from submitting!
-        if (props.secondsRemaining <= 0 && props.secondsRemaining > -10000) {
-            setCountdown(`${Math.ceil(props.secondsRemaining / 3600 / 1000).toString().padStart(2, '0')
-          }:${(Math.ceil(props.secondsRemaining / 60 / 1000) % 60).toString().padStart(2, '0')
-          }:${(props.secondsRemaining / 1000 % 60).toString().slice(0,2).padStart(2, '0')
-          }`);
-        } else if (props.secondsRemaining <= -10000) {
+        if (props.msRemaining <= 0 && props.msRemaining > -5000) {
+          setCountdown("00:00:00");
+            /*setCountdown(`${Math.ceil(props.msRemaining / 3600 / 1000).toString().padStart(2, '0')
+          }:${(Math.ceil(props.msRemaining / 60 / 1000) % 60).toString().padStart(2, '0')
+          }:${(props.msRemaining / 1000 % 60).toString().slice(0,2).padStart(2, '0')
+          }`);*/
+        } else if (props.msRemaining <= -10000) {
             setCountdown("XX:XX:XX");
             // cleanup(); ???
         } else {
-            setCountdown(`${Math.floor(props.secondsRemaining / 3600 / 1000).toString().padStart(2, '0')
-                }:${(Math.floor(props.secondsRemaining / 60 / 1000) % 60).toString().padStart(2, '0')
-                }:${Math.floor(props.secondsRemaining / 1000 % 60).toString().slice(0,2).padStart(2, '0')
+            setCountdown(`${Math.floor(props.msRemaining / 3600 / 1000).toString().padStart(2, '0')
+                }:${(Math.floor(props.msRemaining / 60 / 1000) % 60).toString().padStart(2, '0')
+                }:${Math.floor(props.msRemaining / 1000 % 60).toString().slice(0,2).padStart(2, '0')
                 }`);
         }
-    }, [props.secondsRemaining]);
+    }, [props.msRemaining]);
     return (<span className="fs-3 mb-3"><code className="mb-2">
         {countdown}
     </code></span>);

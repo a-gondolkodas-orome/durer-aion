@@ -2,7 +2,7 @@ import React from 'react';
 import { Button, Table, TableCell, TableRow } from '@mui/material';
 import { Stack } from '@mui/system';
 import { dictionary } from '../text-constants';
-import { useToHome } from '../hooks/user-hooks';
+import { useRefreshTeamState, useToHome } from '../hooks/user-hooks';
 import theme from './theme';
 
 /**
@@ -11,6 +11,7 @@ import theme from './theme';
  * @returns End screen
  */
 export function RelayEndTable(props: {allPoints: number, task: {max: number, got: number | null}[]}) {
+  const refreshState = useRefreshTeamState();
   const toHome = useToHome();
   return (
     <Stack sx={{
@@ -123,6 +124,7 @@ export function RelayEndTable(props: {allPoints: number, task: {max: number, got
         alignSelf: 'center',
         textTransform: 'none',
       }} variant='contained' color='primary' onClick={async ()=>{
+        await refreshState();
         await toHome();
         window.location.reload(); 
       }}>

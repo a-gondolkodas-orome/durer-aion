@@ -4,7 +4,7 @@ import { Countdown } from '../Countdown';
 import { BoardProps } from 'boardgame.io/react';
 import { MyGameState } from '../../../games/relay/game';
 import { Dialog } from '@mui/material';
-import { useTeamState, useToHome } from '../../hooks/user-hooks';
+import { useRefreshTeamState, useTeamState, useToHome } from '../../hooks/user-hooks';
 import { ExcerciseTask } from '../ExcerciseTask';
 import { ExcerciseForm } from '../ExcerciseForm';
 import { sendDataRelayEnd, sendDataRelayStep } from '../../../common/sendData';
@@ -12,26 +12,32 @@ import { dictionary } from '../../text-constants';
 import { RelayEndTable } from '../RelayEndTable';
 interface MyGameProps extends BoardProps<MyGameState> { };
 export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
-  const [secondsRemaining, setSecondsRemaining] = useState(G.milisecondsRemaining as number | null);
+  const [msRemaining, setMsRemaining] = useState(G.milisecondsRemaining);
+  const [gameover, setGameover] = useState(ctx.gameover);
+  const refreshState = useRefreshTeamState();
   const toHome = useToHome();
 
   const teamState = useTeamState();
   useEffect(()=>{
-    moves.getTime();
+    if (!ctx.gameover) {
+      moves.getTime();
+    }
     if (G.numberOfTry === 0) {
       moves.startGame();
       console.log("Start Game!");
     }
-  }, []);
+    setGameover(ctx.gameover)
+  }, [ctx.gameover, G.numberOfTry]);
   useEffect(() => {
-    setSecondsRemaining(G.milisecondsRemaining);
+    setMsRemaining(G.milisecondsRemaining);
   }, [G.milisecondsRemaining]);
-  const finished = (!secondsRemaining || secondsRemaining < - 10000 || ctx.gameover === true)
+  const finished = msRemaining < - 5000 || gameover === true
   return (
     <>
       <Dialog maxWidth={false} open={
           finished
         } onClose={async () => { 
+          refreshState()
           await toHome();
           // sendDataRelayEnd(teamState, G, ctx);
           window.location.reload(); 
@@ -90,8 +96,8 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
           }}>
             <b style={{marginRight: '5px'}}>{dictionary.relay.remainingTime}:</b>
             <Countdown
-              secondsRemaining={secondsRemaining ? secondsRemaining : null}
-              setSecondsRemaining={setSecondsRemaining}
+              msRemaining={msRemaining ? msRemaining : null}
+              setMsRemaining={setMsRemaining}
               getServerTimer={moves.getTime} />
           </Stack>
         </Stack>

@@ -2,23 +2,29 @@ import { Button, Dialog, Stack } from "@mui/material";
 import { useEffect, useState } from "react";
 import { Countdown } from "../client/components/Countdown";
 import { StrategyEndTable } from "../client/components/StrategyEndTable";
-import { useToHome } from "../client/hooks/user-hooks";
+import { useRefreshTeamState, useToHome } from "../client/hooks/user-hooks";
 
 export function boardWrapper(board: any, description: any) { //<please> TODO: solve types with BoardProps<MyGameState>
   return ({ G, ctx, moves, log }: any) => {
-    const [secondsRemaining, setSecondsRemaining] = useState(G.milisecondsRemaining as number | null); // asked from the server
+    const [msRemaining, setMsRemaining] = useState(G.milisecondsRemaining as number); // asked from the server
+    const [gameover, setGameover] = useState(ctx.gameover);
     const toHome = useToHome();
+    const refreshState = useRefreshTeamState();
     useEffect(() => {
-      moves.getTime();
-    }, []);
+      if (!ctx.gameover) {
+        moves.getTime();
+      }
+      setGameover(ctx.gameover)
+    }, [ctx.gameover]);
     useEffect(() => {
-      setSecondsRemaining(G.milisecondsRemaining);
+      setMsRemaining(G.milisecondsRemaining);
     }, [G.milisecondsRemaining]);
     return (
       <>
         <Dialog maxWidth={false} open={
-          !secondsRemaining || secondsRemaining < - 10000 || ctx.gameover === true
+          msRemaining < - 5000 || gameover === true
         } onClose={async () => {
+          await refreshState();
           await toHome();
           window.location.reload();
           }}>
@@ -48,8 +54,8 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
             }}>
               <b style={{ marginRight: '5px', width: '135px' }}>Hátralevő idő:</b>
               <Countdown
-                secondsRemaining={secondsRemaining ? secondsRemaining : null}
-                setSecondsRemaining={setSecondsRemaining}
+                msRemaining={msRemaining ? msRemaining : null}
+                setMsRemaining={setMsRemaining}
                 getServerTimer={moves.getTime} />
             </Stack>
           </Stack>

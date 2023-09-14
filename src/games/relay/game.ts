@@ -22,7 +22,7 @@ export interface MyGameState {
   url: string;
 }
 
-const lengthOfCompetition = 1 * 60; // seconds
+const lengthOfCompetition = 1 * 10; // seconds
 
 const GUESSER_PLAYER = '0';
 const JUDGE_PLAYER = '1';
