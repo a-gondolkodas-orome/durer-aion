@@ -160,8 +160,7 @@ export class SocketIOButBotMoves extends SocketIO {
               app.context.auth
             );
 
-            // TODO: is staleStateID+1 always valid?
-            let nextStateID = staleStateID+1;
+            let nextStateID = state._stateID;
             await master.onUpdate({type: 'MAKE_MOVE', payload: {...botAction.action.payload, credentials: getBotCredentials()}}, nextStateID, matchID, BOT_ID);
           });
           await matchQueue.add(async () => {
