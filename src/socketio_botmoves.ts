@@ -84,8 +84,9 @@ export const BOT_ID = '1';
  */
 export class SocketIOButBotMoves extends SocketIO {
   bots: Record<string, any>;
-  onFinishedMatch: (matchID: string) => void;
-  constructor(anything: any, bots: Record<string, any>, onFinishedMatch: (matchID: string)=>void = ()=>{}) {
+  onFinishedMatch: (matchID: string) => Promise<void>;
+  onFinishedExecuted = false;
+  constructor(anything: any, bots: Record<string, any>, onFinishedMatch: (matchID: string)=>Promise<void> = async ()=>{}) {
     super(anything);
     this.bots = bots;
     this.onFinishedMatch = onFinishedMatch;
@@ -110,7 +111,15 @@ export class SocketIOButBotMoves extends SocketIO {
           // But we are on the same API that reacts to it
           // Basically we assume that a socket.on('update', ...)
           // already updated the game state, making StateID and PlayerID stale
-          const [_, staleStateID, matchID, stalePlayerID] : any[] = args;
+          const [actionData, staleStateID, matchID, stalePlayerID] : any[] = args;
+          if (actionData.type !== 'MAKE_MOVE') {
+            // skip if alma type is not 'MAKE_MOVE'
+            return;
+          }
+          if (actionData.payload.type === 'getTime') {
+          // also skip if payload type is getTime
+          return;
+          }
           const matchQueue = this.getMatchQueue(matchID);
           await matchQueue.add(async () => {
             // These happen after the player stepped.
@@ -127,6 +136,10 @@ export class SocketIOButBotMoves extends SocketIO {
             const {state} = await fetch(app.context.db, matchID, {state: true});
             if (currentPlayer(state.ctx) !== BOT_ID) {
               // Not a real action, possibly a failed move.
+              return;
+            }
+            if(state.ctx.gameover) {
+              // Game is over, no need to react
               return;
             }
             let botAction = undefined;
@@ -153,7 +166,10 @@ export class SocketIOButBotMoves extends SocketIO {
           await matchQueue.add(async () => {
             const {state} = await fetch(app.context.db, matchID, {state: true});
             if (state.ctx.gameover) {
-              this.onFinishedMatch(matchID);
+              if (!this.onFinishedExecuted) {
+                this.onFinishedExecuted = true;
+                await this.onFinishedMatch(matchID);
+              }
             }
           });
         });

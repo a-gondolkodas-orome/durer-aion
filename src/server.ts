@@ -126,8 +126,8 @@ if (argv[2] === "import") {
     transport: new SocketIOButBotMoves(
       { https: undefined },
       botSetup,
-      function onFinishedMatch(matchID) {
-        closeMatch(matchID, teams, db);
+      async function onFinishedMatch(matchID) {
+        await closeMatch(matchID, teams, db);
       }
     ),
     db,

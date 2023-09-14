@@ -205,7 +205,7 @@ export async function getNewGame(ctx: Server.AppCtx, teams: TeamsRepository, gam
   //if middelware setup was better understand, this should be in a separated midleware
   const staleInfo =  await checkStaleMatch(team);
   if(staleInfo.isStale){
-    closeMatch((team[staleInfo.gameState!] as InProgressMatchStatus).matchID,teams,ctx.db);
+    await closeMatch((team[staleInfo.gameState!] as InProgressMatchStatus).matchID,teams,ctx.db);
   }
   
   if (! await allowedToStart(team, gameType)){
