@@ -41,7 +41,10 @@ function getTime({ G, ctx, playerID, events }:any){
   G.milisecondsRemaining = new Date(G.end).getTime() - new Date().getTime();
 };
 
-
+// This is *very important*, so as not to spam
+export function isMakeMovePayloadReadOnly(payload_type: string) {
+  return payload_type === "getTime";
+}
 
 export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameState>): Game<T_SpecificGameState & GameStateMixin> { // TODO: solve types
   return {

@@ -4,6 +4,7 @@ import type { Game, State, StorageAPI } from "boardgame.io";
 import { getFilterPlayerView } from "boardgame.io/internal";
 import { Master } from "boardgame.io/master";
 import { SocketIO } from "boardgame.io/server";
+import { isMakeMovePayloadReadOnly } from "./common/gamewrapper";
 import { currentPlayer } from "./common/types";
 import { getBotCredentials } from "./server";
 
@@ -116,9 +117,9 @@ export class SocketIOButBotMoves extends SocketIO {
             // skip if alma type is not 'MAKE_MOVE'
             return;
           }
-          if (actionData.payload.type === 'getTime') {
-          // also skip if payload type is getTime
-          return;
+          if (isMakeMovePayloadReadOnly(actionData.payload.type)) {
+            // also skip if payload type is getTime
+            return;
           }
           const matchQueue = this.getMatchQueue(matchID);
           await matchQueue.add(async () => {
