@@ -17,13 +17,13 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
 
   const teamState = useTeamState();
   useEffect(()=>{
+    moves.getTime();
     if (G.numberOfTry === 0) {
       moves.startGame();
       console.log("Start Game!");
     }
   }, []);
   useEffect(() => {
-    moves.getTime();
     setSecondsRemaining(G.milisecondsRemaining);
   }, [G.milisecondsRemaining]);
   const finished = (!secondsRemaining || secondsRemaining < - 10000 || ctx.gameover === true)
