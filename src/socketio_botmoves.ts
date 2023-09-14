@@ -108,20 +108,24 @@ export class SocketIOButBotMoves extends SocketIO {
        */
       nsp.on('connection', (socket: any) => {
         socket.on('update', async (...args: Parameters<any>) => {
-          // The arguments are stale: we react to a player's step
-          // But we are on the same API that reacts to it
-          // Basically we assume that a socket.on('update', ...)
-          // already updated the game state, making StateID and PlayerID stale
-          const [actionData, staleStateID, matchID, stalePlayerID] : any[] = args;
-          if (actionData.type !== 'MAKE_MOVE') {
-            // skip if alma type is not 'MAKE_MOVE'
-            return;
-          }
-          if (isMakeMovePayloadReadOnly(actionData.payload.type)) {
-            // also skip if payload type is getTime
-            return;
-          }
-          const matchQueue = this.getMatchQueue(matchID);
+        // The arguments are stale: we react to a player's step
+        // But we are on the same API that reacts to it
+        // Basically we assume that a socket.on('update', ...)
+        // already updated the game state, making StateID and PlayerID stale
+        const [actionData, _, matchID, stalePlayerID] : any[] = args;
+        if (actionData.type !== 'MAKE_MOVE') {
+          // skip if alma type is not 'MAKE_MOVE'
+          return;
+        }
+        if (isMakeMovePayloadReadOnly(actionData.payload.type)) {
+          // also skip if payload type is getTime
+          return;
+        }
+        if (stalePlayerID === BOT_ID) {
+          // Do not react to bot's turn
+          return;
+        }
+        const matchQueue = this.getMatchQueue(matchID);
           await matchQueue.add(async () => {
             // These happen after the player stepped.
             // The state is written to storage, and the server now returned
@@ -130,10 +134,6 @@ export class SocketIOButBotMoves extends SocketIO {
             // TODO: try do not send an authorative state to the player...?
             console.log("Bot moves");
 
-            if (stalePlayerID === BOT_ID) {
-              // Do not react to bot's turn
-              return;
-            }
             const {state} = await fetch(app.context.db, matchID, {state: true});
             if (currentPlayer(state.ctx) !== BOT_ID) {
               // Not a real action, possibly a failed move.
