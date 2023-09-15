@@ -19,7 +19,6 @@ import { closeMatch } from './server/team_manage';
 import * as Sentry from '@sentry/node';
 import dotenv from 'dotenv';
 
-dotenv.config();
 dotenv.config({ path: '.env.local' });
 
 function getDb() {
