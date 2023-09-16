@@ -35,7 +35,7 @@ export function MyBoard({ G, ctx, moves }: MyGameProps) {
           textTransform: 'none',
           borderRadius: '5px',
           marginTop: '30px',
-        }} variant='contained' color='primary' disabled = {ctx.phase !== 'play' } onClick={() => {
+        }} variant='contained' color='primary' disabled = {ctx.phase !== 'play'  || ctx.currentPlayer !== "0"} onClick={() => {
           onClick1();
         }}>
           -1
@@ -48,7 +48,7 @@ export function MyBoard({ G, ctx, moves }: MyGameProps) {
           textTransform: 'none',
           borderRadius: '5px',
           marginTop: '30px',
-        }} variant='contained' color='primary' disabled = {ctx.phase !== 'play' || G.pile%2 !== 0} onClick={() => {
+        }} variant='contained' color='primary' disabled = {ctx.phase !== 'play' || G.pile%2 !== 0 || ctx.currentPlayer !== "0"} onClick={() => {
           onClick2();
         }}>
           /2
