@@ -22,19 +22,19 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<
 
   moves: {
     changePile: ({ G, ctx, playerID, events }, K: number) => {
-      if (K != 0 && K != 1) {
+      if (K !== 0 && K !== 1) {
         return INVALID_MOVE;
       }
-      if (K == 1 && G.pile % 2 == 1) {
+      if (K === 1 && G.pile % 2 === 1) {
         return INVALID_MOVE;
       }
-      if (K == 0) {
+      if (K === 0) {
         G.pile -= 1;
       }
-      if (K == 1) {
+      if (K === 1) {
         G.pile /= 2;
       }
-      if (G.pile == 0) {
+      if (G.pile === 0) {
         G.winner = ctx.currentPlayer === "0" ? "0" : "1";
       }
 
@@ -81,7 +81,7 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<
 
   possibleMoves: (G, ctx, playerID) => {
     let moves = [{ move: 'changePile', args: [0] }];
-    if (G.pile % 2 == 0) {
+    if (G.pile % 2 === 0) {
       moves.push({ move: 'changePile', args: [1] })
     }
 

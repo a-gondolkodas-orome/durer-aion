@@ -10,8 +10,8 @@ export function strategyWrapper(category: "C" | "D" | "E")
       return [startingPosition({G: state.G, ctx: state.ctx}, category), "setStartingPosition"];
     }
     
-    if (state.G.pile%2 == 1) return [0, "changePile"];
-    else if ((state.G.pile/2 %2 == 0 && state.G.pile !== 4) || state.G.pile === 6) return [0, "changePile"];
+    if (state.G.pile%2 === 1) return [0, "changePile"];
+    else if ((state.G.pile/2 %2 === 0 && state.G.pile !== 4) || state.G.pile === 6) return [0, "changePile"];
     else if (state.G.pile === 4) return [1, "changePile"];
     else return [undefined, "changePile"];
   }
