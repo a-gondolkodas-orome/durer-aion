@@ -10,10 +10,25 @@ export const Layout: React.FunctionComponent<MyProps> = (props: MyProps) => {
     return <React.Fragment>
         <ThemeProvider theme={theme}>
             <CssBaseline/>
-            <SnackbarProvider maxSnack={3}>
+            <SnackbarProvider
+              maxSnack={3}
+              anchorOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}            
+            >
                 <Stack sx={{backgroundColor: theme.palette.background.default}}>
-                  <Stack sx={{position: 'absolute', right: 0, top: 200}}>
-                    <SuperPicture picture={{webPUrl: "durerbackground.png", jpegOrPngUrl: "durerbackground.png", alt: "", title: ""}} style={{opacity:.4}}/>
+                  <Stack sx={{
+                      position: 'absolute',
+                      right: 0, top: 200,
+                      display: {
+                        xs: 'none',
+                        md: 'flex',
+                      },
+                      overflow: "hidden",
+                      height: 'calc(100% - 200px)'
+                    }}>
+                    <SuperPicture picture={{webPUrl: "durerbackground.png", jpegOrPngUrl: "durerbackground.png", alt: "", title: ""}} style={{opacity:.3}}/>
                   </Stack>
                   <div>
                     {props.children}

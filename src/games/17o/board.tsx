@@ -25,29 +25,45 @@ export function MyBoard({ G, ctx, moves }: MyGameProps) {
     <Stack sx={{
       padding: '20px',
       display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center'
     }}>
-      {G.pile}
+      <Stack sx={{
+        fontSize: '24px'
+      }}>Kupac: {G.pile}</Stack>
       <Button sx={{
-          width: '150px',
+          width: {
+            xs: '60px',
+            md: '150px',
+          },
           height: '40px',
           fontSize: '16px',
           alignSelf: 'center',
           textTransform: 'none',
           borderRadius: '5px',
-          marginTop: '30px',
+          marginLeft: {
+            xs: '15px',
+            md: '30px',
+          },
         }} variant='contained' color='primary' disabled = {ctx.phase !== 'play'  || ctx.currentPlayer !== "0"} onClick={() => {
           onClick1();
         }}>
           -1
         </Button>
         <Button sx={{
-          width: '150px',
+          width: {
+            xs: '60px',
+            md: '150px',
+          },
           height: '40px',
           fontSize: '16px',
           alignSelf: 'center',
           textTransform: 'none',
           borderRadius: '5px',
-          marginTop: '30px',
+          marginLeft: {
+            xs: '15px',
+            md: '30px',
+          },
         }} variant='contained' color='primary' disabled = {ctx.phase !== 'play' || G.pile%2 !== 0 || ctx.currentPlayer !== "0"} onClick={() => {
           onClick2();
         }}>

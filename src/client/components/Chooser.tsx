@@ -18,7 +18,10 @@ export function Chooser(props: {
       sx={{
         display: "flex",
         width: "100%",
-        margin: "40px",
+        margin: { 
+          xs: 0,
+          md: "40px",
+        },
         flexDirection: "column",
       }}
       data-testId={"chooserRoot"}
@@ -27,8 +30,14 @@ export function Chooser(props: {
         <Stack
           sx={{
             display: "flex",
-            width: "calc(100% - 81px)",
-            padding: "40px",
+            width: {
+              xs: "100%",
+              md: "calc(100% - 81px)",
+            },
+            padding: {
+              xs: "10px",
+              md: "40px",
+            },
             backgroundColor: "#fff",
             marginBottom: "20px",
           }}
@@ -55,7 +64,10 @@ export function Chooser(props: {
         sx={{
           display: "flex",
           width: "100%",
-          flexDirection: "row",
+          flexDirection: {
+            xs: "column",
+            md: "row",
+          }
         }}
       >
         <ChooserItem
@@ -64,7 +76,10 @@ export function Chooser(props: {
           setState={props.setState}
           hideDesc={finished}
         />
-        <Stack sx={{ width: "20px" }} />
+        <Stack sx={{ 
+          width: "20px",
+          height: "20px"
+        }} />
         <ChooserItem
           status={props.state.strategyMatch}
           type="strategy"

@@ -34,7 +34,25 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
   const finished = msRemaining < - 5000 || gameover === true
   return (
     <>
-      <Dialog maxWidth={false} open={
+      <Dialog 
+        maxWidth={false} 
+        PaperProps={{
+          sx: {
+            marginLeft: {
+              xs: 0,
+              md: '32px'
+            },
+            marginRight: {
+              xs: 0,
+              md: '32px'
+            },
+            maxWidth: {
+              xs: '100%',
+              md: 'calc(100% - 64px)'
+            },
+          }
+        }}
+        open={
           finished
         } onClose={async () => { 
           refreshState()
@@ -54,13 +72,39 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
       <Stack sx={{
         with: "100%",
         display: 'flex',
-        flexDirection: 'row',
+        flexDirection: {
+          xs: 'column',
+          md: 'row',
+        },
         marginTop: "20px",
       }}>
         <Stack sx={{
-          width: "calc(100% - 380px)",
+            textAlign: 'center',
+            width: '100%',
+            fontSize: 18,
+            flexDirection: 'row',
+            display: {
+              md: 'none'
+            },
+            paddingLeft: "30px",
+            marginBottom: '20px'
+          }}>
+            <b style={{marginRight: '5px'}}>{dictionary.relay.remainingTime}:</b>
+            <Countdown
+              msRemaining={msRemaining ? msRemaining : null}
+              setMsRemaining={()=>{}}
+              getServerTimer={()=>{}} />
+          </Stack>
+        <Stack sx={{
+          width: {
+            xs: '100%',
+            md: "calc(100% - 380px)",
+          },
           backgroundColor: "#fff",
-          borderRadius: "25px",
+          borderRadius: {
+            xs: 0,
+            md: "25px",
+          },
           padding: '30px',
         }}>
           <ExcerciseTask 
@@ -70,9 +114,21 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
             pictureUrl={G.url}
           />
         </Stack>
-        <Stack sx={{ width: "30px" }} />
         <Stack sx={{
-          width: "350px",
+          width: {
+            xs: "0px",
+            md: "30px"
+          },
+          height: {
+            xs: "30px",
+            md: "0px"
+          },
+          }} />
+        <Stack sx={{
+          width: {
+            xs: '100%',
+            md: "350px",
+          },
           maxHeight: "300px",
           backgroundColor: "#fff",
           borderRadius: "25px",

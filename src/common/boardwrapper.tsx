@@ -21,7 +21,25 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
     }, [G.milisecondsRemaining]);
     return (
       <>
-        <Dialog maxWidth={false} open={
+        <Dialog
+          maxWidth={false}
+          PaperProps={{
+            sx: {
+              marginLeft: {
+                xs: 0,
+                md: '32px'
+              },
+              marginRight: {
+                xs: 0,
+                md: '32px'
+              },
+              maxWidth: {
+                xs: '100%',
+                md: 'calc(100% - 64px)'
+              },
+            }
+          }}
+          open={
           msRemaining < - 5000 || gameover === true
         } onClose={async () => {
           await refreshState();
@@ -61,18 +79,27 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
           </Stack>
           <Stack sx={{
             marginTop: '10px',
-            fontSize: '24px',
-            fontWeight: 'bold',
+            fontSize: {
+              xs: '14px',
+              md: '24px',
+            },
+            // fontWeight: 'bold',
           }}>
             {description} <br />
             Az "Új próbajáték" gombra kattintva próbajáték indul, ami a pontozásba nem számít bele. Bátran kérjetek próbajátékot, hiszen ezzel tudjátok tesztelni, hogy jól értitek-e a játék működését. Az "Új éles játék" gombra kattintva indul a valódi játék, ami már pontért megy.
           </Stack>
           <Stack sx={{
             width: '100%',
-            flexDirection: 'row',
+            flexDirection: {
+              xs: 'column',
+              md: 'row',
+            }
           }}>
             <Stack sx={{
-              width: '40%',
+              width: {
+                xs: '100%',
+                md: '40%',
+              },
               flexDirection: 'column',
               padding: '15px',
             }}>
@@ -85,7 +112,10 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
                 <Button sx={{
                   width: '45%',
                   height: '60px',
-                  fontSize: '18px',
+                  fontSize: {
+                    xs: '14px',
+                    sm: '18px',
+                  },
                   alignSelf: 'center',
                   textTransform: 'none',
                   borderRadius: '10px',
@@ -98,7 +128,10 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
                 <Button sx={{
                   width: '45%',
                   height: '60px',
-                  fontSize: '18px',
+                  fontSize: {
+                    xs: '14px',
+                    sm: '18px',
+                  },
                   alignSelf: 'center',
                   textTransform: 'none',
                   borderRadius: '10px',
@@ -162,7 +195,10 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
               </Stack>
             </Stack>
             <Stack sx={{
-              width: '60%',
+              width: {
+                xs: '100%',
+                md: '60%',
+              },
               flexDirection: 'row',
               padding: '15px',
             }}>
