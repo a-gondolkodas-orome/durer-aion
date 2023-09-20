@@ -1,5 +1,6 @@
 import { GameRelay } from './games/relay/game';
-import { MyGame as TenCoinsGame } from './games/ten-coins/game';
+import { MyGame as StrategyGame17oe } from './games/17o/game';
+//import { MyGame as TenCoinsGame } from './games/ten-coins/game';
 import { PostgresStore } from 'bgio-postgres';
 import { argv, env, exit } from 'process';
 import { gameWrapper } from './common/gamewrapper';
@@ -8,6 +9,7 @@ import { Server } from 'boardgame.io/server';
 import botWrapper from './common/botwrapper';
 import { strategy as RelayStrategy } from './games/relay/strategy';
 import { strategyWrapper as TenCoinsStrategy } from './games/ten-coins/strategy';
+import { strategyWrapper as StrategyStrategy17oe } from './games/17o/strategy';
 import { configureTeamsRouter } from './server/router';
 import { TeamsRepository } from './server/db';
 import { importer } from './server/team_import';
@@ -71,18 +73,18 @@ export const relayNames = {
 }
 
 export const strategyNames = {
-  C: 'tencoins_c',
-  D: 'tencoins_d',
-  E: 'tencoins_e',
+  C: '17o_c',
+  D: '17o_d',
+  E: '17o_e',
 }
 
 const games = [
   { ...GameRelay, name: relayNames.C },
   { ...GameRelay, name: relayNames.D },
   { ...GameRelay, name: relayNames.E },
-  { ...gameWrapper(TenCoinsGame), name: strategyNames.C },
-  { ...gameWrapper(TenCoinsGame), name: strategyNames.D },
-  { ...gameWrapper(TenCoinsGame), name: strategyNames.E },
+  { ...gameWrapper(StrategyGame17oe), name: strategyNames.C },
+  { ...gameWrapper(StrategyGame17oe), name: strategyNames.D },
+  { ...gameWrapper(StrategyGame17oe), name: strategyNames.E },
 ];
 
 
@@ -90,9 +92,9 @@ const bot_factories = [
   botWrapper(RelayStrategy("C")),
   botWrapper(RelayStrategy("D")),
   botWrapper(RelayStrategy("E")),
-  botWrapper(TenCoinsStrategy("C")),
-  botWrapper(TenCoinsStrategy("D")),
-  botWrapper(TenCoinsStrategy("E")),
+  botWrapper(StrategyStrategy17oe("C")),
+  botWrapper(StrategyStrategy17oe("D")),
+  botWrapper(StrategyStrategy17oe("E")),
 ];
 
 if (argv[2] === "sanity-check") {

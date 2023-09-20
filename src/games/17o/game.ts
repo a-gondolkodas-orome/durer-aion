@@ -10,7 +10,7 @@ export interface MyGameState {
 const lengthOfCompetition = 30 * 60; // seconds
 
 export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<MyGameState>)
-  name: "ten-coins",
+  name: "17o",
   setup: () => {
     return {
       pile: 17,
