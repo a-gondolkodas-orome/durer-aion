@@ -6,6 +6,7 @@ import { boardWrapper } from './boardwrapper';
 import { GameStateMixin, GameType } from './types';
 import type {GameRelay} from '../games/relay/game';
 import { State } from 'boardgame.io';
+//import { Debug } from 'boardgame.io/debug';
 
 export function MyClient<T_SpecificGameState>(
   game: GameType<T_SpecificGameState>,
@@ -78,6 +79,7 @@ export function MyOnlineClient<T_SpecificGameState >(
     game: gameWrapper(game),
     board: boardWrapper(board, description),
     multiplayer: SocketIO(),
+    //debug: { impl: Debug },
   });
 }
 
@@ -89,5 +91,6 @@ export function MyOnlineRelayClient(
     game: game,
     board: board,
     multiplayer: SocketIO(),
+    //debug: { impl: Debug },
   });
 }
