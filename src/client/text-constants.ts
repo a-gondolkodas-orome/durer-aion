@@ -52,13 +52,15 @@ export const dictionary = {
     badCategory: "ROSSZ KATEGÓRIA",
     remainingTime: "Hátralevő idő",
     name: "Váltófeladatok",
+    guess: "Tipp:",
+    send: "Küldés",
   },
   general: {
-    task: "Feladat",
+    task: "feladat",
     point: "pont",
   },
   header: {
-    logout: "kijelentkezés",
+    logout: "kilépés",
     subtitle: "Online forduló",
     title: "XVI. Dürer Verseny",
   },
@@ -67,7 +69,7 @@ export const dictionary = {
     beforeTitle: "Üdvözlünk a",
     afterTitle: "online fordulójának felületén.",
     loginInstraction: "Belépéshez nézd meg az emailjeidet, nyisd meg az ott található linket vagy üsd be a kódot ide:",
-    fallback: "Ha nem találjátok az emailt, akkor írjatok nekünk a durerinfo@gmail.com email címre.",
+    fallback: "Ha nem találjátok az emailt, akkor írjatok nekünk a verseny [K] durerinfo [P] hu email címre.",
   },
   waitingRoom: {
     soon: "Az online forduló hamarosan kezdődik!",

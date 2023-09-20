@@ -7,6 +7,7 @@ import theme from "./theme";
 import CloseIcon from '@mui/icons-material/Close';
 import { useSnackbar } from "notistack";
 import { useRefreshTeamState } from "../hooks/user-hooks";
+import { dictionary } from "../text-constants";
 
 export interface MyProps {
   previousTries: number[];
@@ -36,7 +37,7 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
       fontStyle: 'italic',
       marginBottom: '5px',
     }}>
-      Eredmény megadása:
+      {dictionary.relay.guess}
     </Stack>
     <Stack>
       <Form
@@ -46,8 +47,8 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
           result: Yup.number()
             .integer('Egész számot kell írni')
             .typeError('Számot kell írnod')
-            .min(1, 'A válasz 1 és 9999 között van')
-            .max(9999, 'A válasz 1 és 9999 között van')
+            .min(0, 'A válasz 0 és 9999 között van')
+            .max(9999, 'A válasz 0 és 9999 között van')
             .required('Nem írtál semmi választ!')
         })}
         onSubmit={(values) => {
@@ -106,7 +107,7 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
           borderRadius: '10px',
           marginTop: '40px',
         }} variant='contained' color='primary' type="submit">
-          Válasz
+          {dictionary.relay.send}
         </Button>
       </Form>
     </Stack>
