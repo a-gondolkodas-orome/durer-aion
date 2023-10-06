@@ -102,6 +102,12 @@ Note: Some newer docker installs have a different compose interface, you may use
 sudo docker compose up --build
 ```
 
+Note: Some newer docker installs have a different compose interface, you may use the compose command like this:
+
+```bash
+docker compose up --build
+```
+
 You should be up and running the application on `localhost`.
 
 ### Importing teams
