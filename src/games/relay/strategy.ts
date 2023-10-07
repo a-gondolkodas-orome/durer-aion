@@ -25,9 +25,10 @@ const problems : RelayProblems ={
       problemText: "Egy kalózcsapat az Ananász-szigetről a Banán-szigetre szeretne eljutni. Útközben úgy döntenek, hogy néhány szigetet meglátogatnak. Hányféleképpen tudják megtenni az útjukat, hogyha az ábrán jelölt szakaszokon haladhatnak, a nyíllal jelölt szakaszon olyan erős az áramlat, hogy csak a jelzett irányba tudnak haladni, továbbá minden szigeten legfeljebb egyszer járnak?",
       answer: 8,
       points: 3,
+      url: "https://durerimages.s3.eu-north-1.amazonaws.com/17o/fgTEvjDYAzTpmZgZ-utszamolas.png",
     },
     {
-      problemText: "András szülinapjára kapott 27 darab egybevágó fehér kockát, amiből azonnal egy nagyobb, $3\times 3\times 3$-as kockát épített. Testvére, Ábel, pirosra festette a nagy kocka egyik csúcsánál lévő három oldalát, majd megszáradás után szétszedte, és egy másik nagy kockát rakott belőle össze. Kisöccsük, Bendegúz, az új nagy kocka egyik csúcsánál lévő három oldalát lefestette pirosra. Legfeljebb hány olyan kis kocka keletkezhetett, aminek legalább 3 oldala festett?",
+      problemText: "András szülinapjára kapott 27 darab egybevágó fehér kockát, amiből azonnal egy nagyobb, $3\\times 3\\times 3$-as kockát épített. Testvére, Ábel, pirosra festette a nagy kocka egyik csúcsánál lévő három oldalát, majd megszáradás után szétszedte, és egy másik nagy kockát rakott belőle össze. Kisöccsük, Bendegúz, az új nagy kocka egyik csúcsánál lévő három oldalát lefestette pirosra. Legfeljebb hány olyan kis kocka keletkezhetett, aminek legalább 3 oldala festett?",
       answer: 14,
       points: 4,
     },
@@ -45,6 +46,7 @@ const problems : RelayProblems ={
       problemText: "Az alábbi térképen a szélcsendes B, D és E szigeteken kívül minden négyzetben fúj a szél a 4 irány valamelyikébe (az ábrán: fel, le, jobbra vagy balra). Ha egy csónak a térkép egy mezőjén van, akkor onnan a szél irányában sodródik tovább a szomszédos mezőre. Tudjuk, hogy az A négyzetről induló csónakok elsodródnak a B szigetre, a C-ről indulók pedig a D szigetre anélkül, hogy elhagynák a térképet. Ha egy hajó valamikor egy szigeten van, onnan a szélcsend miatt nem képes továbbmenni. Legfeljebb hány mezőről indulva lehet elérni az E szigetet a térkép elhagyása nélkül (magát az E szigetet is beleértve)?",
       answer: 18,
       points: 5,
+      url: "https://durerimages.s3.eu-north-1.amazonaws.com/17o/NrLvEWnrhQHSxxVA-szelfujas.png",
     },
     {
       problemText: "Alex kalózkapitány újabb rablókörútjára készül, ehhez előkészíti a kincsesládáit. Összesen 6 üres ládája van, melyek különböző méretűek, ezeket szeretné egymásba rakni, hogy kisebb helyen elférjenek. Mindegyik ládának két rekesze van, egy aranyos és egy ezüstös rekesz, melyekbe legfeljebb egy-egy ládát rakhat. Egy láda a nála nagyobb ládák bármely rekeszébe belefér. Hányféleképpen pakolhat be Alex kapitány, ha végül minden láda bekerül a legnagyobba? \\emph{Két bepakolást akkor tekintünk különbözőnek, ha van olyan láda, ami más ládába, vagy ugyanazon láda másik rekeszébe került.}",
@@ -57,7 +59,7 @@ const problems : RelayProblems ={
       points: 6,
     },
     {
-      problemText: "Hány olyan háromszög van, amelynek csúcsai egy adott négyzet csúcsai és oldalfelezőpontjai közül kerülnek ki, és van olyan szöge, ami legalább $90^{\circ}$-os? ",
+      problemText: "Hány olyan háromszög van, amelynek csúcsai egy adott négyzet csúcsai és oldalfelezőpontjai közül kerülnek ki, és van olyan szöge, ami legalább $90^{\\circ}$-os? ",
       answer: 44,
       points: 6,
     },
@@ -76,7 +78,7 @@ const problems : RelayProblems ={
       
     },
     {
-      problemText: "Két kalóz, Kartal és Kristóf üzletelni szeretne egymás között. Kartalnak $1$ darab $1$ dollárosa és $2$ darab $3$ dollárosa van, míg Kristófnak $3$ darab $5$ dollárosa. Ősi kalóztörvény szerint azonban csak háromféle műveletet hajthatnak végre (azokat viszont akárhányszor és bármilyen sorrendben): \begin{itemize} \item Egy $3$ dollárost egy $5$ dollárosra cserélnek; \item Egy $1$ dollárost egy $3$ dollárosra cserélnek;\item Az egyikük ad a másiknak egy $1$ dollárost. \end{itemize} A cserék végeztével hányféle értéket vehet fel Kartal vagyona?",
+      problemText: "Két kalóz, Kartal és Kristóf üzletelni szeretne egymás között. Kartalnak $1$ darab $1$ dollárosa és $2$ darab $3$ dollárosa van, míg Kristófnak $3$ darab $5$ dollárosa. Ősi kalóztörvény szerint azonban csak háromféle műveletet hajthatnak végre (azokat viszont akárhányszor és bármilyen sorrendben): Egy $3$ dollárost egy $5$ dollárosra cserélnek; Egy $1$ dollárost egy $3$ dollárosra cserélnek; Az egyikük ad a másiknak egy $1$ dollárost. A cserék végeztével hányféle értéket vehet fel Kartal vagyona?",
       answer: 21,
       points: 4,
     },
@@ -86,7 +88,7 @@ const problems : RelayProblems ={
       points: 4,
     },
     {
-      problemText: "András szülinapjára kapott 27 darab egybevágó fehér kockát, amiből azonnal egy nagyobb, $3\times 3\times 3$-as kockát épített. Testvére, Ábel, pirosra festette a nagy kocka egyik csúcsánál lévő három oldalát, majd megszáradás után szétszedte, és egy másik nagy kockát rakott belőle össze. Kisöccsük, Bendegúz, az új nagy kocka egyik csúcsánál lévő három oldalát lefestette pirosra. Legfeljebb hány olyan kis kocka keletkezhetett, aminek legalább 3 oldala festett?",
+      problemText: "András szülinapjára kapott 27 darab egybevágó fehér kockát, amiből azonnal egy nagyobb, $3\\times 3\\times 3$-as kockát épített. Testvére, Ábel, pirosra festette a nagy kocka egyik csúcsánál lévő három oldalát, majd megszáradás után szétszedte, és egy másik nagy kockát rakott belőle össze. Kisöccsük, Bendegúz, az új nagy kocka egyik csúcsánál lévő három oldalát lefestette pirosra. Legfeljebb hány olyan kis kocka keletkezhetett, aminek legalább 3 oldala festett?",
       answer: 14,
       points: 4,
     },
@@ -94,9 +96,10 @@ const problems : RelayProblems ={
       problemText: "Az alábbi térképen a szélcsendes B, D és E szigeteken kívül minden négyzetben fúj a szél a 4 irány valamelyikébe (az ábrán: fel, le, jobbra vagy balra). Ha egy csónak a térkép egy mezőjén van, akkor onnan a szél irányában sodródik tovább a szomszédos mezőre. Tudjuk, hogy az A négyzetről induló csónakok elsodródnak a B szigetre, a C-ről indulók pedig a D szigetre anélkül, hogy elhagynák a térképet. Ha egy hajó valamikor egy szigeten van, onnan a szélcsend miatt nem képes továbbmenni. Legfeljebb hány mezőről indulva lehet elérni az E szigetet a térkép elhagyása nélkül (magát az E szigetet is beleértve)?",
       answer: 18,
       points: 5,
+      url: "https://durerimages.s3.eu-north-1.amazonaws.com/17o/NrLvEWnrhQHSxxVA-szelfujas.png",
     },
     {
-      problemText: "Balszerencsés Bertold és Peches Péter kimennek a Terjedelmes Tengerre kincset keresni. A Terjedelmes Tenger négyzet alakú, és $4\times 4$ darab szektorra van felosztva. A két jóbarátnak van egy hálója, amit ha a tenger valamelyik szektorában a vízbe dobnak, akkor az ott és az azzal oldalszomszédos szektorokban lévő kincseket tudják kihalászni. Legalább hány szektorban van kincs, ha már első próbálkozásra biztosan találnak kincset, akárhova is dobják a hálójukat?",
+      problemText: "Balszerencsés Bertold és Peches Péter kimennek a Terjedelmes Tengerre kincset keresni. A Terjedelmes Tenger négyzet alakú, és $4\\times 4$ darab szektorra van felosztva. A két jóbarátnak van egy hálója, amit ha a tenger valamelyik szektorában a vízbe dobnak, akkor az ott és az azzal oldalszomszédos szektorokban lévő kincseket tudják kihalászni. Legalább hány szektorban van kincs, ha már első próbálkozásra biztosan találnak kincset, akárhova is dobják a hálójukat?",
       answer: 4,
       points: 5,
     },
@@ -106,7 +109,7 @@ const problems : RelayProblems ={
       points: 6,
     },
     {
-      problemText: "Az $ABCD$ négyzet belsejében vegyük fel a $P$ pontot úgy, hogy $CDP\sphericalangle=19^{\circ}$ és $PAB\sphericalangle=52^{\circ}$. Hány fokos a $PBC \sphericalangle$?",
+      problemText: "Az $ABCD$ négyzet belsejében vegyük fel a $P$ pontot úgy, hogy $CDP\\sphericalangle=19^{\\circ}$ és $PAB\\sphericalangle=52^{\\circ}$. Hány fokos a $PBC \\sphericalangle$?",
       answer: 26,
       points: 6,
     },
@@ -118,12 +121,12 @@ const problems : RelayProblems ={
       points: 3,
     },
     {
-      problemText: "Balszerencsés Bertold és Peches Péter kimennek a Terjedelmes Tengerre kincset keresni. A Terjedelmes Tenger négyzet alakú, és $4\times 4$ darab szektorra van felosztva. A két jóbarátnak van egy hálója, amit ha a tenger valamelyik szektorában a vízbe dobnak, akkor az ott és az azzal oldalszomszédos szektorokban lévő kincseket tudják kihalászni. Legalább hány szektorban van kincs, ha már első próbálkozásra biztosan találnak kincset, akárhova is dobják a hálójukat?",
+      problemText: "Balszerencsés Bertold és Peches Péter kimennek a Terjedelmes Tengerre kincset keresni. A Terjedelmes Tenger négyzet alakú, és $4\\times 4$ darab szektorra van felosztva. A két jóbarátnak van egy hálója, amit ha a tenger valamelyik szektorában a vízbe dobnak, akkor az ott és az azzal oldalszomszédos szektorokban lévő kincseket tudják kihalászni. Legalább hány szektorban van kincs, ha már első próbálkozásra biztosan találnak kincset, akárhova is dobják a hálójukat?",
       answer: 4,
       points: 3,
     },
     {
-      problemText: "Két kalóz, Kartal és Kristóf üzletelni szeretne egymás között. Kartalnak $1$ darab $1$ dollárosa és $2$ darab $3$ dollárosa van, míg Kristófnak $3$ darab $5$ dollárosa. Ősi kalóztörvény szerint azonban csak háromféle műveletet hajthatnak végre (azokat viszont akárhányszor és bármilyen sorrendben): \begin{itemize} \item Egy $3$ dollárost egy $5$ dollárosra cserélnek; \item Egy $1$ dollárost egy $3$ dollárosra cserélnek;\item Az egyikük ad a másiknak egy $1$ dollárost. \end{itemize} A cserék végeztével hányféle értéket vehet fel Kartal vagyona?",
+      problemText: "Két kalóz, Kartal és Kristóf üzletelni szeretne egymás között. Kartalnak $1$ darab $1$ dollárosa és $2$ darab $3$ dollárosa van, míg Kristófnak $3$ darab $5$ dollárosa. Ősi kalóztörvény szerint azonban csak háromféle műveletet hajthatnak végre (azokat viszont akárhányszor és bármilyen sorrendben): Egy $3$ dollárost egy $5$ dollárosra cserélnek; Egy $1$ dollárost egy $3$ dollárosra cserélnek; Az egyikük ad a másiknak egy $1$ dollárost. A cserék végeztével hányféle értéket vehet fel Kartal vagyona?",
       answer: 21,
       points: 4,
     },
@@ -133,7 +136,7 @@ const problems : RelayProblems ={
       points: 4,
     },
     {
-      problemText: "András szülinapjára kapott 27 darab egybevágó fehér kockát, amiből azonnal egy nagyobb, $3\times 3\times 3$-as kockát épített. Testvére, Ábel, pirosra festette a nagy kocka egyik csúcsánál lévő három oldalát, majd megszáradás után szétszedte, és egy másik nagy kockát rakott belőle össze. Kisöccsük, Bendegúz, az új nagy kocka egyik csúcsánál lévő három oldalát lefestette pirosra. Legfeljebb hány olyan kis kocka keletkezhetett, aminek legalább 3 oldala festett?",
+      problemText: "András szülinapjára kapott 27 darab egybevágó fehér kockát, amiből azonnal egy nagyobb, $3\\times 3\\times 3$-as kockát épített. Testvére, Ábel, pirosra festette a nagy kocka egyik csúcsánál lévő három oldalát, majd megszáradás után szétszedte, és egy másik nagy kockát rakott belőle össze. Kisöccsük, Bendegúz, az új nagy kocka egyik csúcsánál lévő három oldalát lefestette pirosra. Legfeljebb hány olyan kis kocka keletkezhetett, aminek legalább 3 oldala festett?",
       answer: 14,
       points: 4,
     },
@@ -141,14 +144,15 @@ const problems : RelayProblems ={
       problemText: "Az alábbi térképen a szélcsendes B, D és E szigeteken kívül minden négyzetben fúj a szél a 4 irány valamelyikébe (az ábrán: fel, le, jobbra vagy balra). Ha egy csónak a térkép egy mezőjén van, akkor onnan a szél irányában sodródik tovább a szomszédos mezőre. Tudjuk, hogy az A négyzetről induló csónakok elsodródnak a B szigetre, a C-ről indulók pedig a D szigetre anélkül, hogy elhagynák a térképet. Ha egy hajó valamikor egy szigeten van, onnan a szélcsend miatt nem képes továbbmenni. Legfeljebb hány mezőről indulva lehet elérni az E szigetet a térkép elhagyása nélkül (magát az E szigetet is beleértve)?",
       answer: 18,
       points: 5,
+      url: "https://durerimages.s3.eu-north-1.amazonaws.com/17o/NrLvEWnrhQHSxxVA-szelfujas.png",
     },
     {
-      problemText: "Ágoston június $10$-én $5$ órakor született, így a kedvenc számai az $5$, a $6$ és a $10$. Mióta matekozik, csak ebben a három számrendszerben dolgozik. Hány olyan $A\times B=C$ műveletet tud elvégezni Ágoston, melyben mindhárom szám egész, $B$ nem tartalmaz páros számjegyeket, de tartalmazza a számrendszer összes páratlan számjegyét pontosan egyszer, $C$ pedig nem tartalmaz páratlan számjegyeket, de tartalmaza a számrendszer összes páros számjegyét pontosan egyszer?",
+      problemText: "Ágoston június $10$-én $5$ órakor született, így a kedvenc számai az $5$, a $6$ és a $10$. Mióta matekozik, csak ebben a három számrendszerben dolgozik. Hány olyan $A\\times B=C$ műveletet tud elvégezni Ágoston, melyben mindhárom szám egész, $B$ nem tartalmaz páros számjegyeket, de tartalmazza a számrendszer összes páratlan számjegyét pontosan egyszer, $C$ pedig nem tartalmaz páratlan számjegyeket, de tartalmaza a számrendszer összes páros számjegyét pontosan egyszer?",
       answer: 0,
       points: 5,
     },
     {
-      problemText: "Az $ABCD$ négyzet belsejében vegyük fel a $P$ pontot úgy, hogy $CDP\sphericalangle=19^{\circ}$ és $PAB\sphericalangle=52^{\circ}$. Hány fokos a $PBC \sphericalangle$?",
+      problemText: "Az $ABCD$ négyzet belsejében vegyük fel a $P$ pontot úgy, hogy $CDP\\sphericalangle=19^{\\circ}$ és $PAB\\sphericalangle=52^{\\circ}$. Hány fokos a $PBC \\sphericalangle$?",
       answer: 26,
       points: 6,
     },
