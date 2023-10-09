@@ -4,7 +4,7 @@ import { PostgresStore } from 'bgio-postgres';
 import { argv, env, exit } from 'process';
 import { gameWrapper } from './common/gamewrapper';
 import { SocketIOButBotMoves } from './socketio_botmoves';
-import { Server } from 'boardgame.io/server';
+import { Origins, Server } from 'boardgame.io/server';
 import botWrapper from './common/botwrapper';
 import { strategy as RelayStrategy } from './games/relay/strategy';
 import { strategyWrapper as TenCoinsStrategy } from './games/ten-coins/strategy';
@@ -14,6 +14,7 @@ import { importer } from './server/team_import';
 
 import auth from 'koa-basic-auth';
 import mount from 'koa-mount';
+const cors = require('@koa/cors');
 import { closeMatch } from './server/team_manage';
 
 import * as Sentry from '@sentry/node';
@@ -130,7 +131,10 @@ if (argv[2] === "import") {
         closeMatch(matchID, teams, db);
       }
     ),
-    origins:['http://localhost:5173'],
+    origins:[
+      'http://localhost:5173/',
+      Origins.LOCALHOST_IN_DEVELOPMENT
+    ],
     db,
   });
 
@@ -139,6 +143,8 @@ if (argv[2] === "import") {
   //Admin page auth setup
   server.app.use(mount('/team/admin', auth({ name: 'admin', pass: getAdminCredentials() })));
   server.app.use(mount('/match/admin', auth({ name: 'admin', pass: getAdminCredentials() })));
+
+  server.app.use(cors({origin: true}))
 
   //TODO regex mount protection for Boardgame.io endpoints
 
