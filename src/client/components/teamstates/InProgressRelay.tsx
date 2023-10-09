@@ -140,7 +140,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
             attempt={(G.currentProblem+1)*3+G.numberOfTry}
             onSubmit={(input) => {
               moves.submitAnswer(parseInt(input))
-              sendDataRelayStep(teamState,G,ctx)
+              sendDataRelayStep(teamState,G,ctx,parseInt(input))
             }}
           />
           <Stack sx={{
@@ -151,10 +151,10 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
             flexDirection: 'row',
           }}>
             <b style={{marginRight: '5px'}}>{dictionary.relay.remainingTime}:</b>
-            <Countdown
-              msRemaining={msRemaining ? msRemaining : null}
+            {!finished && <Countdown
+              msRemaining={msRemaining ?? null}
               setMsRemaining={setMsRemaining}
-              getServerTimer={moves.getTime} />
+              getServerTimer={moves.getTime} />}
           </Stack>
         </Stack>
       </Stack>

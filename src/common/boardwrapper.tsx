@@ -19,6 +19,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
     useEffect(() => {
       setMsRemaining(G.milisecondsRemaining);
     }, [G.milisecondsRemaining]);
+    const finished = msRemaining < - 5000 || gameover === true
     return (
       <>
         <Dialog
@@ -40,7 +41,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
             }
           }}
           open={
-          msRemaining < - 5000 || gameover === true
+          finished
         } onClose={async () => {
           await refreshState();
           await toHome();
@@ -71,10 +72,10 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
               width: '262px'
             }}>
               <b style={{ marginRight: '5px', width: '135px' }}>Hátralevő idő:</b>
-              <Countdown
-                msRemaining={msRemaining ? msRemaining : null}
+              {finished && <Countdown
+                msRemaining={msRemaining ?? null}
                 setMsRemaining={setMsRemaining}
-                getServerTimer={moves.getTime} />
+                getServerTimer={moves.getTime} />}
             </Stack>
           </Stack>
           <Stack sx={{
