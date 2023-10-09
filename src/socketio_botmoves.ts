@@ -86,7 +86,7 @@ export const BOT_ID = '1';
 export class SocketIOButBotMoves extends SocketIO {
   bots: Record<string, any>;
   onFinishedMatch: (matchID: string) => Promise<void>;
-  onFinishedExecuted = false;
+  unFinishedMatches = new Set<string>();
   constructor(anything: any, bots: Record<string, any>, onFinishedMatch: (matchID: string)=>Promise<void> = async ()=>{}) {
     super(anything);
     this.bots = bots;
@@ -113,6 +113,7 @@ export class SocketIOButBotMoves extends SocketIO {
         // Basically we assume that a socket.on('update', ...)
         // already updated the game state, making StateID and PlayerID stale
         const [actionData, _, matchID, stalePlayerID] : any[] = args;
+        this.unFinishedMatches.add(matchID)
         if (actionData.type !== 'MAKE_MOVE') {
           // skip if alma type is not 'MAKE_MOVE'
           return;
@@ -166,8 +167,8 @@ export class SocketIOButBotMoves extends SocketIO {
           await matchQueue.add(async () => {
             const {state} = await fetch(app.context.db, matchID, {state: true});
             if (state.ctx.gameover) {
-              if (!this.onFinishedExecuted) {
-                this.onFinishedExecuted = true;
+              if (this.unFinishedMatches.has(matchID)) {
+                this.unFinishedMatches.delete(matchID);
                 await this.onFinishedMatch(matchID);
               }
             }
