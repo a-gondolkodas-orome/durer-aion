@@ -91,7 +91,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
           }}>
             <b style={{marginRight: '5px'}}>{dictionary.relay.remainingTime}:</b>
             <Countdown
-              msRemaining={msRemaining ? msRemaining : null}
+              msRemaining={msRemaining ?? null}
               setMsRemaining={()=>{}}
               getServerTimer={()=>{}} />
           </Stack>
