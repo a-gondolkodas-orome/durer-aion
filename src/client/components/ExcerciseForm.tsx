@@ -42,6 +42,7 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
     <Stack>
       <Form
         style={{ position: "relative", zIndex: 2 }}
+        key={`result-${props.attempt}`}
         initialValues={{ result: '' }}
         validationSchema={Yup.object().shape({
           result: Yup.number()
