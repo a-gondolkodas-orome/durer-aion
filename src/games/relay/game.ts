@@ -37,7 +37,7 @@ export const GameRelay: Game<MyGameState> = {
     correctnessPreviousAnswer: null,
     previousAnswers: [[]],
     previousPoints: [],
-    currentProblemMaxPoints: 3, // TODO: get from the problem list
+    currentProblemMaxPoints: 3, // TODO: get from the problem list, TODO: rename this function to currentProblemAvailablePoints
     numberOfTry: 0,
     milisecondsRemaining: 1000 * lengthOfCompetition,
     start: new Date().toISOString(),
@@ -125,10 +125,17 @@ export const GameRelay: Game<MyGameState> = {
           events.endTurn();
         },
         endGame({ G, ctx, playerID, events }, correctnessPreviousAnswer: boolean) {
-          if (playerID !== JUDGE_PLAYER) {
+          if (playerID !== JUDGE_PLAYER || G.answer === null) {
             return INVALID_MOVE;
           }
+          G.previousAnswers[G.currentProblem].push({answer: G.answer, date: new Date().toISOString()});
+          G.correctnessPreviousAnswer = correctnessPreviousAnswer;
+          if (correctnessPreviousAnswer) {
             G.points += G.currentProblemMaxPoints;
+            G.previousPoints[G.currentProblem] = G.currentProblemMaxPoints;
+          } else {
+            G.previousPoints[G.currentProblem] = 0;
+          }
             events.endGame();
         },
         getTime({ G, ctx, playerID, events }) {
