@@ -1,7 +1,10 @@
 import urlcat from "urlcat";
 import axios, { AxiosInstance,AxiosError } from 'axios';
 import { TeamModelDto } from "./dto/TeamStateDto";
-  
+import { teamData } from "../teamData";
+
+const LOCAL_STORAGE_TEAMSTATE = "aegnjrlearnjla";
+
 class ApiAxios {
   static instance(): AxiosInstance {
     let apiUrl = '/'; // TODO: env or something
@@ -340,6 +343,128 @@ export class MockClientRepository implements ClientRepository {
     throw new Error("BAD CODE");
   }
 }
+
+export class OfflineClientRepository implements ClientRepository {
+  startRelay(joinCode: string): Promise<string> {
+    if (typeof localStorage === "undefined") {
+      throw new Error('Váratlan hiba történt');
+    }
+    const teamstateString = localStorage.getItem(LOCAL_STORAGE_TEAMSTATE);
+    if (teamstateString === null) {
+      throw new Error('Váratlan hiba történt');
+    }
+    const teamstate = JSON.parse(teamstateString);
+    console.log(teamstate)
+    if (!(teamstate.pageState === 'HOME' && teamstate.relayMatch.state === 'NOT STARTED' && teamstate.strategyMatch.state !== 'IN PROGRESS')) {
+      throw new Error('Váratlan hiba történt');
+    }
+    localStorage.setItem(LOCAL_STORAGE_TEAMSTATE,
+      JSON.stringify({
+        ...teamstate,
+        pageState: 'RELAY',
+        relayMatch: {
+          state: 'IN PROGRESS',
+          startAt: new Date(),
+          endAt: addMin(new Date(), 30),
+          matchID: "",
+        },
+      })
+    );
+    return Promise.resolve("ok");
+  }
+
+  startStrategy(joinCode: string): Promise<string> {
+    if (typeof localStorage === "undefined") {
+      throw new Error('Váratlan hiba történt');
+    }
+    const teamstateString = localStorage.getItem(LOCAL_STORAGE_TEAMSTATE);
+    if (teamstateString === null) {
+      throw new Error('Váratlan hiba történt');
+    }
+    const teamstate = JSON.parse(teamstateString);
+    if (!(teamstate.pageState === 'HOME' && teamstate.strategyMatch.state === 'NOT STARTED' && teamstate.relayMatch.state !== 'IN PROGRESS')) {
+      throw new Error('Váratlan hiba történt');
+    }
+    localStorage.setItem(LOCAL_STORAGE_TEAMSTATE,
+      JSON.stringify({
+        ...teamstate,
+        pageState: 'STRATEGY',
+        strategyMatch: {
+          state: 'IN PROGRESS',
+          startAt: new Date(),
+          endAt: addMin(new Date(), 30),
+          matchID: "",
+        },
+      })
+    );
+    return Promise.resolve("ok");
+  }
+
+  toHome(joinCode: string): Promise<string> {
+    if (typeof localStorage === "undefined") {
+      throw new Error('Váratlan hiba történt');
+    }
+    const teamstateString = localStorage.getItem(LOCAL_STORAGE_TEAMSTATE);
+    if (teamstateString === null) {
+      throw new Error('Váratlan hiba történt');
+    }
+    const teamstate = JSON.parse(teamstateString);
+    if (teamstate.pageState === 'HOME' || teamstate.strategyMatch.state === 'IN PROGRESS' || teamstate.relayMatch.state === 'IN PROGRESS') {
+      throw new Error('Váratlan hiba történt');
+    }
+    localStorage.setItem(LOCAL_STORAGE_TEAMSTATE,
+      JSON.stringify({
+        ...teamstate,
+        pageState: 'HOME',
+      })
+    );
+    return Promise.resolve("ok");
+  }
+
+  getTeamState(joinCode: string): Promise<TeamModelDto> {
+    if (typeof localStorage === "undefined") {
+      throw new Error('Váratlan hiba történt');
+    }
+    const teamstate = localStorage.getItem(LOCAL_STORAGE_TEAMSTATE);
+    if (teamstate === null) {
+      throw new Error('Váratlan hiba történt');
+    }
+    return Promise.resolve(JSON.parse(teamstate)) as Promise<TeamModelDto>;
+  }
+
+  joinWithCode(joinCode: string): Promise<string> {
+    // return the  if it is in the teamData.ts file
+
+    const i = teamData.findIndex(e => e.join_code === joinCode);
+    const currentTeamData = teamData[i];
+    if (i > -1) {
+      const i = teamData.findIndex(e => e.join_code === joinCode);
+      const currentTeamData = teamData[i];
+  
+      localStorage.setItem(LOCAL_STORAGE_TEAMSTATE,
+        JSON.stringify({
+          id: "1",
+          joinCode: joinCode,
+          teamName: currentTeamData.teamname,
+          category: currentTeamData.category,
+          credentials: "credentials",
+          email: "asd@asd.asd",
+          pageState: 'HOME',
+          relayMatch: {
+            state: 'NOT STARTED',
+          },
+          strategyMatch: {
+            state: 'NOT STARTED',
+          },
+        })
+      );
+      return Promise.resolve(joinCode);
+    }
+
+    throw new Error("BAD CODE");
+  }
+}
+
 
 const addMin = (from: Date, t: number): Date => {
   return new Date(from.setMinutes(from.getMinutes()+t));

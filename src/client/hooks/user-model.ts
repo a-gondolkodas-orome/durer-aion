@@ -1,7 +1,9 @@
-import { RealClientRepository } from "../api-repository-interface";
+import { OfflineClientRepository, RealClientRepository } from "../api-repository-interface";
 import { TeamModelDto } from "../dto/TeamStateDto";
 
 const LOCAL_STORAGE_GUID = "kjqAEKeFkMpOvOZrzcvp";
+
+const ClientRepository = RealClientRepository; // TODO: decide it based on env
 
 export class UserModel {
   private async saveGUID(guid: string) {
@@ -29,7 +31,7 @@ export class UserModel {
       return null;
     }
 
-    const repo = new RealClientRepository();
+    const repo = new ClientRepository();
 
     const res = await repo.getTeamState(guid);
 
@@ -43,7 +45,7 @@ export class UserModel {
       return;
     }
 
-    const repo = new RealClientRepository();
+    const repo = new ClientRepository();
 
     await repo.startRelay(guid);
   }
@@ -55,7 +57,7 @@ export class UserModel {
       return;
     }
 
-    const repo = new RealClientRepository();
+    const repo = new ClientRepository();
 
     await repo.startStrategy(guid);
   }
@@ -75,7 +77,7 @@ export class UserModel {
   }
 
   async login(joinCode: string): Promise<string | null> {
-    const repo = new RealClientRepository();
+    const repo = new ClientRepository();
     const guid = await repo.joinWithCode(joinCode);
     this.saveGUID(guid);
     return null;
@@ -88,7 +90,7 @@ export class UserModel {
       return;
     }
 
-    const repo = new RealClientRepository();
+    const repo = new ClientRepository();
 
     await repo.toHome(guid);
   }
