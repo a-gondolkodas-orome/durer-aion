@@ -113,6 +113,8 @@ export class SocketIOButBotMoves extends SocketIO {
         // Basically we assume that a socket.on('update', ...)
         // already updated the game state, making StateID and PlayerID stale
         const [actionData, _, matchID, stalePlayerID] : any[] = args;
+        //this in theory means, that the match already exist
+        //also we assume, this event can't happen, after the game is finished
         this.unFinishedMatches.add(matchID)
         if (actionData.type !== 'MAKE_MOVE') {
           // skip if alma type is not 'MAKE_MOVE'
