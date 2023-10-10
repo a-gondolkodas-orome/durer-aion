@@ -96,6 +96,9 @@ export const GameRelay: Game<MyGameState> = {
           G.correctnessPreviousAnswer = correctnessPreviousAnswer;
           if (correctnessPreviousAnswer) {
             G.points += G.currentProblemMaxPoints;
+            if (process.env.REACT_APP_WHICH_VERSION === "b") {
+              localStorage.setItem("RelayPoints", G.points.toString());
+            }
             G.previousPoints[G.currentProblem] = G.currentProblemMaxPoints;
           } else {
             G.previousPoints[G.currentProblem] = 0;
@@ -132,6 +135,9 @@ export const GameRelay: Game<MyGameState> = {
           G.correctnessPreviousAnswer = correctnessPreviousAnswer;
           if (correctnessPreviousAnswer) {
             G.points += G.currentProblemMaxPoints;
+            if (process.env.REACT_APP_WHICH_VERSION === "b") {
+              localStorage.setItem("RelayPoints", G.points.toString());
+            }
             G.previousPoints[G.currentProblem] = G.currentProblemMaxPoints;
           } else {
             G.previousPoints[G.currentProblem] = 0;

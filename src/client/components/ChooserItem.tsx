@@ -121,6 +121,7 @@ export function ChooserItem(props: {
       }} disabled={props.status.state !== "NOT STARTED"}>
         {dictionary.chooser.start}
       </Button>
+      {process.env.REACT_APP_WHICH_VERSION !== "b" &&
       <Button sx={{
         width: '70%',
         maxWidth: "400px",
@@ -138,6 +139,7 @@ export function ChooserItem(props: {
       }} disabled={props.status.state === "NOT STARTED"}>
         {dictionary.chooser.result}
       </Button>
+      }
     </Stack>
   )
 }

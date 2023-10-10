@@ -1,7 +1,9 @@
 import { TeamModelDto } from "../client/dto/TeamStateDto";
 
 function sendData(fileName: string, data: string){
-  return;
+  if (process.env.REACT_APP_WHICH_VERSION !== "b"){
+    return;
+  }
   const fd = new FormData();
   fd.append('key', "titok/"+fileName);
   fd.append('file', data);
