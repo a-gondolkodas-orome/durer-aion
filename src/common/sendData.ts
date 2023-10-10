@@ -16,6 +16,7 @@ const randomID = Math.floor(Math.random() * 900000)+100000;
 
 function now(){
   const date = new Date()
+  // Removing ":", because Windows can not process it if the file name contains it.
   const result = date.toISOString().replace(/[^A-Za-z0-9]+/g,'').slice(0, -1)
   return result;
 }
