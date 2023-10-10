@@ -12,11 +12,11 @@ export const dictionary = {
   },
   chooser: {
     finish: {
-      title: "Gratulálunk sikeresen befejezted a versenyt!",
-      content: "Leiras a vegerol varunk a donton, valamikor ki is derul bejutottal, kicsit hosszabban, hogy jobban nezzen ki",
+      title: "Vége a versenynek!",
+      content: "Köszönjük a részvételeteket, reméljük, hogy tetszett nektek a verseny. Kíváncsiak vagyunk a fordulóval kapcsolatos véleményetekre, így kérjük, <a href=\"https://forms.gle/XDb8tt2RvCJv459A8\">töltsétek ki ezt az űrlapot</a>. Várhatóan szombatig közzétesszük az eredményeket és a továbbjutó csapatok listáját, és erről emailben is fogunk nektek értesítést küldeni.",
       final: "Végső pontszám",
     },
-    gameDescriptionHtml: `<p>Ebben a feladatban egy kétszemélyes stratégiás játékot játszhattok, ahol az egyik játékos Ti lesztek, a másik játékos pedig a gép. Győzzétek le a gépet <b>kétszer egymás</b> után ebben a játékban! A kezdő helyzet ismeretében Ti dönthetitek el, hogy a kezdő vagy a második játékos bőrébe szeretnétek bújni.</p>         
+    gameDescriptionHtml: `<p>Ebben a feladatban egy kétszemélyes stratégiás játékot játszhattok, ahol az egyik játékos Ti lesztek, a másik játékos pedig a gép. Győzzétek le a gépet <b>kétszer egymás után</b> ebben a játékban! A kezdő helyzet ismeretében Ti dönthetitek el, hogy a kezdő vagy a második játékos bőrébe szeretnétek bújni.</p>         
     <p>A sikeres teljesítésért az alábbiak szerint kaptok pontot:
       <ul>
         <li>Ha egyszer sem veszítetek, akkor 12 pontot kaptok.</li>
@@ -62,7 +62,7 @@ export const dictionary = {
   header: {
     logout: "kilépés",
     subtitle: "Online forduló",
-    title: "XVI. Dürer Verseny",
+    title: "XVII. Dürer Verseny",
   },
   login: {
     greeting: "Kedves Versenyző!",
