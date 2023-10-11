@@ -27,7 +27,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
       console.log("Start Game!");
     }
     setGameover(ctx.gameover)
-  }, [ctx.gameover, G.numberOfTry]);
+  }, [ctx.gameover]);
   useEffect(() => {
     setMsRemaining(G.milisecondsRemaining);
   }, [G.milisecondsRemaining]);
@@ -151,10 +151,10 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
             flexDirection: 'row',
           }}>
             <b style={{marginRight: '5px'}}>{dictionary.relay.remainingTime}:</b>
-            <Countdown
-              msRemaining={msRemaining ? msRemaining : null}
+            {!finished && <Countdown
+              msRemaining={msRemaining ?? null}
               setMsRemaining={setMsRemaining}
-              getServerTimer={moves.getTime} />
+              getServerTimer={moves.getTime} />}
           </Stack>
         </Stack>
       </Stack>
