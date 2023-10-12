@@ -2,7 +2,8 @@ import { Button, Dialog, Stack } from "@mui/material";
 import { useEffect, useState } from "react";
 import { Countdown } from "../client/components/Countdown";
 import { StrategyEndTable } from "../client/components/StrategyEndTable";
-import { useRefreshTeamState, useToHome } from "../client/hooks/user-hooks";
+import { useRefreshTeamState, useToHome, useTeamState } from "../client/hooks/user-hooks";
+import { sendDataStrategyEnd } from "./sendData";
 
 export function boardWrapper(board: any, description: any) { //<please> TODO: solve types with BoardProps<MyGameState>
   return ({ G, ctx, moves, log }: any) => {
@@ -10,6 +11,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
     const [gameover, setGameover] = useState(ctx.gameover);
     const toHome = useToHome();
     const refreshState = useRefreshTeamState();
+    const teamState = useTeamState();
     useEffect(() => {
       if (!ctx.gameover) {
         moves.getTime();
@@ -45,6 +47,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
         } onClose={async () => {
           await refreshState();
           await toHome();
+          sendDataStrategyEnd(teamState, G, ctx);
           window.location.reload();
           }}>
           <StrategyEndTable allPoints={G.points} numOfTries={G.numberOfTries}/>

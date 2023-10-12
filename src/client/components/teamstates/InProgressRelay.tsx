@@ -57,7 +57,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
         } onClose={async () => { 
           refreshState()
           await toHome();
-          // sendDataRelayEnd(teamState, G, ctx);
+          sendDataRelayEnd(teamState, G, ctx);
           window.location.reload(); 
            }}>
           {<RelayEndTable allPoints={G.points} task={

@@ -62,6 +62,9 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<
                 G.points = 2;
                 break;
             }
+            if (process.env.REACT_APP_WHICH_VERSION === "b") {
+              localStorage.setItem("StrategyPoints", G.points.toString());
+            }
             events.endGame();
           }
         } else if (G.winner === "1") {

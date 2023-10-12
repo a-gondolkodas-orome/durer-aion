@@ -50,7 +50,7 @@ export function Chooser(props: {
           >
             {dictionary.chooser.finish.title}
           </p>
-          <p>{dictionary.chooser.finish.content}</p>
+          <span dangerouslySetInnerHTML={{ __html: dictionary.chooser.finish.content }}></span>
           <p
             style={{
               fontSize: "24px",

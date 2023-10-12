@@ -45,7 +45,7 @@ export function Disclaimer() {
 
       <Stack
         sx={{
-          fontSize: 36,
+          fontSize: 24,
           marginBottom: "10px",
           fontStyle: "italic",
         }}
