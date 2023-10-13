@@ -2,7 +2,7 @@ import urlcat from "urlcat";
 import axios, { AxiosInstance,AxiosError } from 'axios';
 import { TeamModelDto } from "./dto/TeamStateDto";
 import { teamData } from "../teamData";
-import { sendDataLogin } from "../common/sendData";
+import { sendDataLogin, sendDataRelayEnd, sendDataRelayStart, sendDataStrategyStart } from "../common/sendData";
 
 export const LOCAL_STORAGE_TEAMSTATE = "aegnjrlearnjla";
 
@@ -347,76 +347,60 @@ export class MockClientRepository implements ClientRepository {
 
 export class OfflineClientRepository implements ClientRepository {
   startRelay(joinCode: string): Promise<string> {
-    if (typeof localStorage === "undefined") {
+    const teamState = getTeamStateFromLocal();
+    if (!(teamState.pageState === 'HOME' && teamState.relayMatch.state === 'NOT STARTED' && teamState.strategyMatch.state !== 'IN PROGRESS')) {
       throw new Error('Váratlan hiba történt');
     }
-    const teamstateString = localStorage.getItem(LOCAL_STORAGE_TEAMSTATE);
-    if (teamstateString === null) {
-      throw new Error('Váratlan hiba történt');
+    const newState = {
+      ...teamState,
+      pageState: 'RELAY',
+      relayMatch: {
+        state: 'IN PROGRESS',
+        startAt: new Date(),
+        endAt: addMin(new Date(), 60),
+        matchID: "",
+      },
     }
-    const teamstate = JSON.parse(teamstateString);
-    console.log(teamstate)
-    if (!(teamstate.pageState === 'HOME' && teamstate.relayMatch.state === 'NOT STARTED' && teamstate.strategyMatch.state !== 'IN PROGRESS')) {
-      throw new Error('Váratlan hiba történt');
-    }
+    sendDataRelayStart(newState as TeamModelDto);
     localStorage.setItem(LOCAL_STORAGE_TEAMSTATE,
-      JSON.stringify({
-        ...teamstate,
-        pageState: 'RELAY',
-        relayMatch: {
-          state: 'IN PROGRESS',
-          startAt: new Date(),
-          endAt: addMin(new Date(), 60),
-          matchID: "",
-        },
-      })
+      JSON.stringify(newState)
     );
     return Promise.resolve("ok");
   }
 
   startStrategy(joinCode: string): Promise<string> {
-    if (typeof localStorage === "undefined") {
+    const teamState = getTeamStateFromLocal();
+    if (!(teamState.pageState === 'HOME' && teamState.strategyMatch.state === 'NOT STARTED' && teamState.relayMatch.state !== 'IN PROGRESS')) {
       throw new Error('Váratlan hiba történt');
     }
-    const teamstateString = localStorage.getItem(LOCAL_STORAGE_TEAMSTATE);
-    if (teamstateString === null) {
-      throw new Error('Váratlan hiba történt');
+    const newState = {
+      ...teamState,
+      pageState: 'STRATEGY',
+      strategyMatch: {
+        state: 'IN PROGRESS',
+        startAt: new Date(),
+        endAt: addMin(new Date(), 30),
+        matchID: "",
+      },
     }
-    const teamstate = JSON.parse(teamstateString);
-    if (!(teamstate.pageState === 'HOME' && teamstate.strategyMatch.state === 'NOT STARTED' && teamstate.relayMatch.state !== 'IN PROGRESS')) {
-      throw new Error('Váratlan hiba történt');
-    }
+    sendDataStrategyStart(newState as TeamModelDto); // TODO remove "as"
     localStorage.setItem(LOCAL_STORAGE_TEAMSTATE,
-      JSON.stringify({
-        ...teamstate,
-        pageState: 'STRATEGY',
-        strategyMatch: {
-          state: 'IN PROGRESS',
-          startAt: new Date(),
-          endAt: addMin(new Date(), 30),
-          matchID: "",
-        },
-      })
+      JSON.stringify(newState)
     );
     return Promise.resolve("ok");
   }
 
   toHome(joinCode: string): Promise<string> {
-    if (typeof localStorage === "undefined") {
-      throw new Error('Váratlan hiba történt (toHome)');
-    }
-    const teamstateString = localStorage.getItem(LOCAL_STORAGE_TEAMSTATE);
-    if (teamstateString === null) {
-      throw new Error('Váratlan hiba történt (toHome)');
-    }
-    const teamState = JSON.parse(teamstateString);
+    const teamState = getTeamStateFromLocal();
     const newState = {...teamState, pageState: 'HOME'}
     if (teamState.relayMatch.state === "IN PROGRESS"){
+      const score = Number(localStorage.getItem("RelayPoints"))
+      sendDataRelayEnd(null, {points: score}, null)
       newState.relayMatch = {
         ...teamState.relayMatch,
         state: "FINISHED",
         endAt: new Date(),
-        score: Number(localStorage.getItem("RelayPoints")),
+        score: score,
       }
     }
     if (teamState.strategyMatch.state === "IN PROGRESS"){
@@ -432,14 +416,8 @@ export class OfflineClientRepository implements ClientRepository {
   }
 
   getTeamState(joinCode: string): Promise<TeamModelDto> {
-    if (typeof localStorage === "undefined") {
-      throw new Error('Váratlan hiba történt (getTeamsState)');
-    }
-    const teamState = localStorage.getItem(LOCAL_STORAGE_TEAMSTATE);
-    if (teamState === null) {
-      throw new Error('Váratlan hiba történt (getTeamsState)');
-    }
-    return Promise.resolve(JSON.parse(teamState)) as Promise<TeamModelDto>;
+    const teamState = getTeamStateFromLocal();
+    return Promise.resolve(teamState) as Promise<TeamModelDto>;
   }
 
   joinWithCode(joinCode: string): Promise<string> {
@@ -486,6 +464,17 @@ export class OfflineClientRepository implements ClientRepository {
   }
 }
 
+
+const getTeamStateFromLocal = (): TeamModelDto => {
+  if (typeof localStorage === "undefined") {
+    throw new Error('Váratlan hiba történt');
+  }
+  const teamstateString = localStorage.getItem(LOCAL_STORAGE_TEAMSTATE);
+  if (teamstateString === null) {
+    throw new Error('Váratlan hiba történt');
+  }
+  return JSON.parse(teamstateString);
+}
 
 const addMin = (from: Date, t: number): Date => {
   return new Date(from.setMinutes(from.getMinutes()+t));

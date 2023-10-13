@@ -1,5 +1,6 @@
 import { Game } from "boardgame.io";
 import { INVALID_MOVE, TurnOrder } from "boardgame.io/core";
+import { sendDataRelayEnd } from "../../common/sendData";
 
 type Answer = {
   answer: number;
@@ -137,6 +138,7 @@ export const GameRelay: Game<MyGameState> = {
             G.points += G.currentProblemMaxPoints;
             if (process.env.REACT_APP_WHICH_VERSION === "b") {
               localStorage.setItem("RelayPoints", G.points.toString());
+              sendDataRelayEnd(null, G, ctx);
             }
             G.previousPoints[G.currentProblem] = G.currentProblemMaxPoints;
           } else {

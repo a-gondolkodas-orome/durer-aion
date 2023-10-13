@@ -1,3 +1,4 @@
+import { LOCAL_STORAGE_TEAMSTATE } from "../client/api-repository-interface";
 import { TeamModelDto } from "../client/dto/TeamStateDto";
 
 function sendData(fileName: string, data: string){
@@ -21,62 +22,54 @@ function now(){
   return result;
 }
 
-export function sendDataLogin(teamState: TeamModelDto | null){
-  let code = "null";
+function getJoinCode(teamState: TeamModelDto | null){
   if (teamState !== null) {
-    code = teamState.joinCode;
+    return teamState.joinCode;
   }
+  const teamstateString = localStorage.getItem(LOCAL_STORAGE_TEAMSTATE);
+  if (teamstateString === null) {
+    throw new Error('Váratlan hiba történt (toHome)');
+  }
+  const teamStateStorage = JSON.parse(teamstateString);
+  return teamStateStorage.joinCode;
+}
+
+export function sendDataLogin(teamState: TeamModelDto | null){
+  let code = getJoinCode(teamState);
   sendData(code+"_"+randomID+"_login_"+now(), "code");
 }
 
 
 export function sendDataRelayStart(teamState: TeamModelDto | null){
-  let code = "null";
-  if (teamState !== null) {
-    code = teamState.joinCode;
-  }
+  let code = getJoinCode(teamState);
   sendData(code+"_"+randomID+"_relaystart_"+now(), "");
 }
 
 export function sendDataRelayStep(teamState: TeamModelDto | null, G: any, ctx: any, answer: number){
-  let code = "null";
-  if (teamState !== null) {
-    code = teamState.joinCode;
-  }
+  let code = getJoinCode(teamState);
   let problemNumber = G.currentProblem;
   sendData(code+"_"+randomID+"_relay_"+problemNumber+"_"+answer+"_"+now(), JSON.stringify({G, ctx}));
 }
 
 export function sendDataRelayEnd(teamState: TeamModelDto | null, G: any, ctx: any){
-  let code = "null";
-  if (teamState !== null) {
-    code = teamState.joinCode;
-  }
+  console.log("asd2")
+  let code = getJoinCode(teamState);
   let points = G.points;
   sendData(code+"_"+randomID+"_relayend_"+points+"_"+now(), JSON.stringify({G, ctx}));
 }
 
 export function sendDataStrategyStart(teamState: TeamModelDto | null){
-  let code = "null";
-  if (teamState !== null) {
-    code = teamState.joinCode;
-  }
+  let code = getJoinCode(teamState);
   sendData(code+"_"+randomID+"_stratstart_"+now(), "");
 }
 
-export function sendDataStrategyStep(teamState: TeamModelDto | null, K:number, L:number,  G: any, ctx: any){
-  let code = "null";
-  if (teamState !== null) {
-    code = teamState.joinCode;
-  }
-  sendData(code+"_"+randomID+"_strat_"+K+L+"_"+now(), JSON.stringify({G, ctx}));
+export function sendDataStrategyStep(teamState: TeamModelDto | null, pile:number,  G: any, ctx: any){
+  let code = getJoinCode(teamState);
+  sendData(code+"_"+randomID+"_strat_"+pile+"_"+now(), JSON.stringify({G, ctx}));
 }
 
 export function sendDataStrategyEnd(teamState: TeamModelDto | null, G: any, ctx: any){
-  let code = "null";
-  if (teamState !== null) {
-    code = teamState.joinCode;
-  }
+  let code = getJoinCode(teamState);
   let points = G.points;
   sendData(code+"_"+randomID+"_stratend_"+points+"_"+now(), JSON.stringify({G, ctx}));
 }

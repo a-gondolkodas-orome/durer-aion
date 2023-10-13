@@ -47,7 +47,6 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
         } onClose={async () => {
           await refreshState();
           await toHome();
-          sendDataStrategyEnd(teamState, G, ctx);
           window.location.reload();
           }}>
           <StrategyEndTable allPoints={G.points} numOfTries={G.numberOfTries}/>
