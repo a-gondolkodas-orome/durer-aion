@@ -75,7 +75,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
               width: '262px'
             }}>
               <b style={{ marginRight: '5px', width: '135px' }}>Hátralevő idő:</b>
-              {finished && <Countdown
+              {!finished && <Countdown
                 msRemaining={msRemaining ?? null}
                 setMsRemaining={setMsRemaining}
                 getServerTimer={moves.getTime} />}
