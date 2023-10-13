@@ -2,6 +2,7 @@ import urlcat from "urlcat";
 import axios, { AxiosInstance,AxiosError } from 'axios';
 import { TeamModelDto } from "./dto/TeamStateDto";
 import { teamData } from "../teamData";
+import { sendDataLogin } from "../common/sendData";
 
 export const LOCAL_STORAGE_TEAMSTATE = "aegnjrlearnjla";
 
@@ -458,28 +459,30 @@ export class OfflineClientRepository implements ClientRepository {
     if (i > -1) {
       const i = teamData.findIndex(e => e.join_code === joinCode);
       const currentTeamData = teamData[i];
-  
+      const teamState = {
+        id: "1",
+        joinCode: joinCode,
+        teamName: currentTeamData.teamname,
+        category: currentTeamData.category,
+        credentials: "credentials",
+        email: "asd@asd.asd",
+        pageState: pageState,
+        relayMatch: {
+          state: 'NOT STARTED',
+        },
+        strategyMatch: {
+          state: 'NOT STARTED',
+        },
+      }
+
+      sendDataLogin(teamState as TeamModelDto); // TODO: remove as TeamModelDto
       localStorage.setItem(LOCAL_STORAGE_TEAMSTATE,
-        JSON.stringify({
-          id: "1",
-          joinCode: joinCode,
-          teamName: currentTeamData.teamname,
-          category: currentTeamData.category,
-          credentials: "credentials",
-          email: "asd@asd.asd",
-          pageState: pageState,
-          relayMatch: {
-            state: 'NOT STARTED',
-          },
-          strategyMatch: {
-            state: 'NOT STARTED',
-          },
-        })
+        JSON.stringify(teamState)
       );
       return Promise.resolve(joinCode);
     }
 
-    throw new Error("BAD CODE");
+    throw new Error("Rossz belépési kód!");
   }
 }
 

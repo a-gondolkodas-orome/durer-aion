@@ -58,12 +58,36 @@ export function Disclaimer() {
           fontSize: 16,
           marginBottom: {
             xs: "15px",
-            md: "150px",
+            md: "15px",
           }
         }}
       >
         {dictionary.disclaimer.progressDescription}
       </Stack>
+
+      <Stack
+        sx={{
+          fontSize: 24,
+          marginBottom: "10px",
+          fontStyle: "italic",
+        }}
+      >
+        {dictionary.disclaimer.interface}
+      </Stack>
+
+      <Stack
+        sx={{
+          fontSize: 16,
+          marginBottom: {
+            xs: "15px",
+            md: "150px",
+          }
+        }}
+      >
+        <span dangerouslySetInnerHTML={{ __html: (process.env.REACT_APP_WHICH_VERSION === "b" ? dictionary.disclaimer.interfaceDescriptionBHTML : dictionary.disclaimer.interfaceDescription) }}></span>
+      </Stack>
+
+
 
       <Button
         sx={{

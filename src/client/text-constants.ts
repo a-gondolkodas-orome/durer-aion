@@ -8,6 +8,13 @@ export const dictionary = {
       "Azok a csapatok, amelyek az online forduló során a megszerezhető 52 pontból legalább 25 pontot " +
       "elérnek, továbbjutnak a helyi fordulóba. (Fenntartjuk a jogot, hogy a ponthatárt esetleg csökkentsük, " +
       "növelni biztosan nem fogjuk.) Az online fordulón szerzett pontszám nem számít bele a további eredményekbe.",
+    interface: "A felület",
+    interfaceDescription:
+      "A felület mobilon is gépen is kitölthető, egyszerre akár több eszközzel is bejelentkezhettek.",
+    interfaceDescriptionBHTML:
+      "A felület mobilon is gépen is kitölthető. Kérünk bennetek, hogy <b>legfeljebb 1 eszközről</b> töltsétek ki az online fordulót, továbbá <b>ne frissítsétek le az oldalt</b> a verseny során.<br>" +
+      "<small>(Ha mégis frissítitek vagy új gépre kell váltanotok, akkor (minél hamarabb) menjetek vissza, ahol jártatok. " +
+      "Bár az időzítő ilyenkor újraindul, az addig elért eredményeket is megkaptuk, a végső eredményt pedig az első indítástól számítva (30 vagy 60 percig) vesszük figyelembe.)</small>",
     continue: "Tovább a versenyhez",
   },
   chooser: {
