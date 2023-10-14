@@ -49,6 +49,69 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
     ctx.body = state;
   });
 
+    /**
+   * Add extra timeto a specific match.
+   *
+   * @param {string} matchId - The ID of the match.
+   * @param {integer} minutes - How many minutes to add
+   * @returns {State<any>} - A match state object object.
+   */
+    router.get('/team/admin/:matchId/addminutes/:minutes', async (ctx) => {
+      const matchID = ctx.params.matchId;
+      const minutes = Number(ctx.params.minutes);
+      const { state, metadata } = await (ctx.db as StorageAPI.Async).fetch(matchID, {
+        state: true,
+        metadata: true
+      });
+      if (!state) {
+        ctx.throw(404, 'Match ' + matchID + ' not found');
+      }
+      // Fetch team
+      const teamId = metadata.players[0].name;
+      const team = await teams.getTeam({teamId})
+
+      if (!team) {
+        ctx.throw(500, `Match found, but assigned team ${teamId} was not found.`);
+        return
+      }
+
+      const upDate =  new Date(state.G.end)
+      upDate.setMinutes(upDate.getMinutes() + minutes)
+
+      //Update state
+      state.G.end = upDate.toISOString();
+      const upd = state.G.end;
+      state.G.milisecondsRemaining = upDate.getTime() - new Date().getTime();
+      //manually increment stateID
+      //really hope this doesn't breaky anything
+      state._stateID += 1
+
+      //Update team
+      //TODO: review super duper forced update alternatives
+      if(team.strategyMatch.state == "IN PROGRESS")
+        await team.update({strategyMatch:{
+          state: 'IN PROGRESS',
+          matchID: matchID,
+          startAt: new Date(state.G.start),
+          endAt: upDate,
+        }})
+      else if(team.relayMatch.state == "IN PROGRESS")
+      await team.update({relayMatch:{
+        state: 'IN PROGRESS',
+        matchID: matchID,
+        startAt: new Date(state.G.start),
+        endAt: upDate,
+      }})
+      else
+        ctx.throw(501, 'Restarting an already finished match is not supported right now.');
+      
+
+      //TODO: add to logs, that time was added
+      await ctx.db.setState(matchID,state);
+
+      ctx.body = {updatedEndTime:upDate,matchID:matchID, team:team};
+    });
+
   /**
    * Get metadata about a specific match.
    *
