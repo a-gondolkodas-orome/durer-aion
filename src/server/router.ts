@@ -14,13 +14,14 @@ import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus, createGame, 
  * @param games - List of possible games for teams
  */
 export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: TeamsRepository, games: Game<any, Record<string, unknown>, any>[]) {
+
   /**
    * Get the log data about a specific match.
    *
    * @param {string} matchId - The ID of the match.
    * @returns {LogEntry[]} - A list of log objects.
    */
-  router.get('/team/admin/:matchId/logs', async (ctx) => {
+  router.get('/game/admin/:matchId/logs', async (ctx) => {
     //It is already authenticated by the admin mount routing
     const matchID = ctx.params.matchId;
     const { log } = await (ctx.db as StorageAPI.Async).fetch(matchID, {
@@ -38,7 +39,7 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
    * @param {string} matchId - The ID of the match.
    * @returns {State<any>} - A match state object object.
    */
-  router.get('/team/admin/:matchId/state', async (ctx) => {
+  router.get('/game/admin/:matchId/state', async (ctx) => {
     const matchID = ctx.params.matchId;
     const { state } = await (ctx.db as StorageAPI.Async).fetch(matchID, {
       state: true,
@@ -56,7 +57,7 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
    * @param {integer} minutes - How many minutes to add
    * @returns {State<any>} - A match state object object.
    */
-    router.get('/team/admin/:matchId/addminutes/:minutes', async (ctx) => {
+  router.get('/game/admin/:matchId/addminutes/:minutes', async (ctx) => {
       const matchID = ctx.params.matchId;
       const minutes = Number(ctx.params.minutes);
       const { state, metadata } = await (ctx.db as StorageAPI.Async).fetch(matchID, {
@@ -118,7 +119,7 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
    * @param {string} matchId - The ID of the match.
    * @returns {Server.MatchData} - A match object.
    */
-     router.get('/team/admin/:matchId/metadata', async (ctx) => {
+  router.get('/game/admin/:matchId/metadata', async (ctx) => {
       const matchID = ctx.params.matchId;
       const { metadata } = await (ctx.db as StorageAPI.Async).fetch(matchID, {
         metadata: true,
@@ -242,7 +243,7 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
     await injectPlayer(ctx.db, body.matchID, {playerID: '0', name: GUID, credentials: team.credentials});
     await injectBot(ctx.db, body.matchID, BOT_ID);
 
-    //created new game, updated team state accordingly
+   //created new game, updated team state accordingly
     team.update({
       pageState: 'STRATEGY',
       strategyMatch: await startMatchStatus(body.matchID, ctx)
