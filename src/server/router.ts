@@ -5,6 +5,8 @@ import { TeamsRepository } from './db';
 import { InProgressMatchStatus, TeamModel } from './entities/model';
 import { BOT_ID } from '../socketio_botmoves';
 import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus, createGame, injectBot, injectPlayer } from './team_manage';
+
+
 /**
  * 
  * Big factory to set up the Router for the API, anso contains API function implementations.
@@ -104,14 +106,17 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
         endAt: upDate,
       }})
       else
-        ctx.throw(501, 'Restarting an already finished match is not supported right now.');
-      
+      ctx.throw(501, 'Restarting an already finished match is not supported right now.');
+    
+    
+    await ctx.db.setState(matchID,state);
 
-      //TODO: add to logs, that time was added
-      await ctx.db.setState(matchID,state);
-
-      ctx.body = {updatedEndTime:upDate,matchID:matchID, team:team};
-    });
+    team.other += ` te[${matchID}]:${minutes}`
+    team.save()
+    
+    ctx.body = {updatedEndTime:upDate,matchID:matchID, team:team};
+    
+  });
 
   /**
    * Get metadata about a specific match.
@@ -129,6 +134,58 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
       }
       ctx.body = metadata;
     });
+
+  /**
+     * Reset teams's strategy
+     *
+     * @param {string} teamID - The ID of the team.
+     * @returns {TeamModel} - Returns the modified team model.
+     */
+  router.get('/team/admin/:teamID/reset/strategy', async (ctx) => {
+    const teamId = ctx.params.teamID;
+    const team = await teams.getTeam({teamId})
+
+    if (!team) {
+      ctx.throw(404, `Team not found with teamID ${teamId}.`);
+      return
+    }
+    // reset the strategy game while playing
+    if(team.pageState == 'STRATEGY')
+      team.pageState = 'HOME'
+
+    //log earlier matchid
+    if(team.strategyMatch.state != 'NOT STARTED')
+      team.other += ` prevstratid:${team.strategyMatch.matchID}`
+    team.strategyMatch = {state:'NOT STARTED'}
+    team.save();
+    ctx.body = team
+  });
+
+  /**
+     * Reset teams's relay
+     *
+     * @param {string} teamID - The ID of the team.
+     * @returns {TeamModel} - Returns the modified team model.
+     */
+  router.get('/team/admin/:teamID/reset/relay', async (ctx) => {
+    const teamId = ctx.params.teamID;
+    const team = await teams.getTeam({teamId})
+
+    if (!team) {
+      ctx.throw(404, `Team not found with teamID ${teamId}.`);
+      return
+    }
+    // reset the strategy game while playing
+    if(team.pageState == 'RELAY')
+      team.pageState = 'HOME'
+
+    //log earlier matchid
+    if(team.relayMatch.state != 'NOT STARTED')
+      team.other += ` prevrelayid:${team.relayMatch.matchID}`
+    team.relayMatch = {state:'NOT STARTED'}
+    team.save();
+    ctx.body = team
+  });
 
   /**
    * Run a user defined filter query on teams
