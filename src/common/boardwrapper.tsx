@@ -88,20 +88,20 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
             },
             // fontWeight: 'bold',
           }}>
-            {description} <br />
+            {description}
             Az "Új próbajáték" gombra kattintva próbajáték indul, ami a pontozásba nem számít bele. Bátran kérjetek próbajátékot, hiszen ezzel tudjátok tesztelni, hogy jól értitek-e a játék működését. Az "Új éles játék" gombra kattintva indul a valódi játék, ami már pontért megy.
 
           </Stack>
 
           <Stack sx={{
-            marginTop: '3px',
+            marginTop: '20px',
             fontSize: {
               xs: '14px',
               md: '24px',
             },
             // fontWeight: 'bold',
           }}>
-            Eddigi próbálkozások/vereségek száma: {G.numberOfTries}/{G.numberOfLoss}
+            Eddigi éles játékok/vereségek száma: {G.numberOfTries}/{G.numberOfLoss}
           </Stack>
 
           <Stack sx={{
