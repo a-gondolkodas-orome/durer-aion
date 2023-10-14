@@ -14,7 +14,7 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<
   name: "17o",
   setup: () => {
     return {
-      pile: 17,
+      pile: 0,
       milisecondsRemaining: 1000 * lengthOfCompetition,
       start: new Date().toISOString(),
       end: new Date(Date.now() + 1000 * lengthOfCompetition).toISOString(),

@@ -90,7 +90,20 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
           }}>
             {description} <br />
             Az "Új próbajáték" gombra kattintva próbajáték indul, ami a pontozásba nem számít bele. Bátran kérjetek próbajátékot, hiszen ezzel tudjátok tesztelni, hogy jól értitek-e a játék működését. Az "Új éles játék" gombra kattintva indul a valódi játék, ami már pontért megy.
+
           </Stack>
+
+          <Stack sx={{
+            marginTop: '3px',
+            fontSize: {
+              xs: '14px',
+              md: '24px',
+            },
+            // fontWeight: 'bold',
+          }}>
+            Eddigi próbálkozások/vereségek száma: {G.numberOfTries}/{G.numberOfLoss}
+          </Stack>
+
           <Stack sx={{
             width: '100%',
             flexDirection: {
@@ -141,7 +154,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
                 }} variant='contained' color='primary' onClick={() => {
                   moves.chooseNewGameType("live")
                 }}>
-                  Új játék kezdése
+                  Új éles játék kezdése
                 </Button>
               </Stack>
               }
@@ -193,7 +206,8 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
                 {ctx.phase === 'chooseRole' && <p> Válaszd ki, hogy első vagy második játékos akarsz-e lenni. </p>}
                 {ctx.phase === 'play' && ctx.currentPlayer === "0" && <p> Most Te jössz! </p>}
                 {ctx.phase === 'play' && ctx.currentPlayer === "1" && <p> Várakozás a szerverre... </p>}
-                {ctx.phase === 'startNewGame' && G.winner === "0" && <p> Gratulálok, nyertetek! Verjétek meg még egyszer a gépet!</p>}
+                {ctx.phase === 'startNewGame' && G.winner === "0" && G.difficulty === "live" && <p> Gratulálok, nyertetek! Verjétek meg még egyszer a gépet!</p>}
+                {ctx.phase === 'startNewGame' && G.winner === "0" && G.difficulty === "test" && <p> Gratulálok, a próbajátékban nyertetek!</p>}
                 {ctx.phase === 'startNewGame' && G.winner === "1" && <p> Sajnos a gép nyert. </p>}
               </Stack>
             </Stack>
