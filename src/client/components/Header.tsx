@@ -48,7 +48,12 @@ export function Header(props: { teamName: string | null }) {
             <Stack sx={{
               fontSize: 25,
             }}>{props.teamName}</Stack>
-            <Stack onClick={()=>{logout()}} sx={{
+            <Stack onClick={()=>{
+              logout();
+              if (process.env.REACT_APP_WHICH_VERSION === "b"){
+                window.location.reload();
+              }            
+            }} sx={{
               fontSize: 20,
               marginLeft: '15px',
               cursor: 'pointer',
