@@ -17,6 +17,7 @@ services:
       - ADMIN_CREDENTIALS=${ADMIN_CREDENTIALS}
       - GAME_GLOBAL_START_T=${GAME_GLOBAL_START_T}
       - GAME_GLOBAL_END_T=${GAME_GLOBAL_END_T}
+      - POSTGRESQL_PASSWORD=${POSTGRESQL_PASSWORD}
     volumes:
       - .:/usr/src/app
     depends_on:
