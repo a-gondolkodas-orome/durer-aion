@@ -121,6 +121,11 @@ If you install a package used by the backend, you will have to `docker-compose b
 
 ## Running developer environment -- without docker (except DB)
 
+> IMPORTANT!
+> 
+> The development enviroment uses a different connection setup to the database, so the .env files are different. 
+> Pay attention to use the .env.local file for development!
+
 Both frontend and server auto-reloads.
 
 - Set up the database (in Windows you can run it without sudo):
@@ -128,6 +133,7 @@ Both frontend and server auto-reloads.
 ```bash
 sudo docker run -it --rm -e POSTGRESQL_PASSWORD=postgres -p 127.0.0.1:5432:5432 bitnami/postgresql
 ```
+
 
 - After that you should import teams.
 

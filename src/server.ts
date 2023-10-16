@@ -26,7 +26,7 @@ dotenv.config({ path: '.env.local' });
 function getDb() {
   if (env.DATABASE_URL) {
     const CONNECTION_STRING = env.DATABASE_URL;
-    const db = new PostgresStore(CONNECTION_STRING,{password:env.POSTGRESQL_PASSWORD});
+    const db = new PostgresStore(CONNECTION_STRING);
     return {
       db,
       teams: new TeamsRepository(db),
