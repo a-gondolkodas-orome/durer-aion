@@ -58,6 +58,7 @@ export function Chooser(props: {
           >
             {dictionary.chooser.finish.final}: <b>{finalPoints}</b>
           </p>
+          {process.env.REACT_APP_WHICH_VERSION === "b" && "A pontszámotok csak tájékoztató jellegű, a végleges pontszámotokat a beküldött válaszok alapján újraértékeljük."}
         </Stack>
       )}
       <Stack

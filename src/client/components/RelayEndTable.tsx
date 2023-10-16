@@ -116,7 +116,8 @@ export function RelayEndTable(props: {allPoints: number, task: {max: number, got
             marginTop: '35px',
             marginLeft: '55px',
         }}>
-            {dictionary.relay.endTable.all}: {props.allPoints}
+            {dictionary.relay.endTable.all}: {props.allPoints} <br/>
+            Ne feledkezzetek meg a stratégiás játékról, ha azzal még nem játszottatok!
         </Stack>
       <Button sx={{
         width: '300px',

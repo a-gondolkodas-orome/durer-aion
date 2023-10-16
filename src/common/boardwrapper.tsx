@@ -43,13 +43,13 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
             }
           }}
           open={
-          finished
-        } onClose={async () => {
-          await refreshState();
-          await toHome();
-          window.location.reload();
+            finished
+          } onClose={async () => {
+            await refreshState();
+            await toHome();
+            window.location.reload();
           }}>
-          <StrategyEndTable allPoints={G.points} numOfTries={G.numberOfTries}/>
+          <StrategyEndTable allPoints={G.points} numOfTries={G.numberOfTries} />
         </Dialog>
         <Stack sx={{
           padding: '20px',
@@ -80,6 +80,15 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
                 getServerTimer={moves.getTime} />}
             </Stack>
           </Stack>
+          {process.env.REACT_APP_WHICH_VERSION === "b" && 
+          <Stack sx={{
+            flexDirection: 'row',
+            width: '250px',
+            fontSize: '10px',
+            marginLeft: 'auto',
+          }}>
+          ("Az óra csak tájékoztató jellegű. Ha lefrissítitek az oldalt, akkor az óra újraindul, de így is csak az időben beérkezett válaszokat fogjuk figyelembe venni.")
+          </Stack>}
           <Stack sx={{
             marginTop: '10px',
             fontSize: {
@@ -88,9 +97,22 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
             },
             // fontWeight: 'bold',
           }}>
-            {description} <br />
-            Az "Új próbajáték" gombra kattintva próbajáték indul, ami a pontozásba nem számít bele. Bátran kérjetek próbajátékot, hiszen ezzel tudjátok tesztelni, hogy jól értitek-e a játék működését. Az "Új éles játék" gombra kattintva indul a valódi játék, ami már pontért megy.
+            {description}
+            <strong>Tudnivalók: </strong>Az "Új próbajáték" gombra kattintva próbajáték indul, ami a pontozásba nem számít bele. Bátran kérjetek próbajátékot, hiszen ezzel tudjátok tesztelni, hogy jól értitek-e a játék műHátködését. Az "Új éles játék" gombra kattintva indul a valódi játék, ami már pontért megy.
+
           </Stack>
+
+          <Stack sx={{
+            marginTop: '20px',
+            fontSize: {
+              xs: '14px',
+              md: '24px',
+            },
+            // fontWeight: 'bold',
+          }}>
+            Éles játékok eddigi eredményei: {G.numberOfTries-G.numberOfLoss-Number(G.winner===null && G.difficulty==="live")} győzelem, {G.numberOfLoss} vereség
+          </Stack>
+
           <Stack sx={{
             width: '100%',
             flexDirection: {
@@ -106,77 +128,77 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
               flexDirection: 'column',
               padding: '15px',
             }}>
-              { ctx.phase === 'startNewGame' &&
-              <Stack sx={{
-                width: '100%',
-                flexDirection: 'row',
-                marginBottom: '20px',
-              }}>
-                <Button sx={{
-                  width: '45%',
-                  height: '60px',
-                  fontSize: {
-                    xs: '14px',
-                    sm: '18px',
-                  },
-                  alignSelf: 'center',
-                  textTransform: 'none',
-                  borderRadius: '10px',
-                }} variant='contained' color='primary' onClick={() => {
-                  moves.chooseNewGameType("test");
+              {ctx.phase === 'startNewGame' &&
+                <Stack sx={{
+                  width: '100%',
+                  flexDirection: 'row',
+                  marginBottom: '20px',
                 }}>
-                  Új próbajáték kezdése
-                </Button>
-                <Stack sx={{ width: '10%' }} />
-                <Button sx={{
-                  width: '45%',
-                  height: '60px',
-                  fontSize: {
-                    xs: '14px',
-                    sm: '18px',
-                  },
-                  alignSelf: 'center',
-                  textTransform: 'none',
-                  borderRadius: '10px',
-                }} variant='contained' color='primary' onClick={() => {
-                  moves.chooseNewGameType("live")
-                }}>
-                  Új játék kezdése
-                </Button>
-              </Stack>
+                  <Button sx={{
+                    width: '45%',
+                    height: '60px',
+                    fontSize: {
+                      xs: '14px',
+                      sm: '18px',
+                    },
+                    alignSelf: 'center',
+                    textTransform: 'none',
+                    borderRadius: '10px',
+                  }} variant='contained' color='primary' onClick={() => {
+                    moves.chooseNewGameType("test");
+                  }}>
+                    Új próbajáték kezdése
+                  </Button>
+                  <Stack sx={{ width: '10%' }} />
+                  <Button sx={{
+                    width: '45%',
+                    height: '60px',
+                    fontSize: {
+                      xs: '14px',
+                      sm: '18px',
+                    },
+                    alignSelf: 'center',
+                    textTransform: 'none',
+                    borderRadius: '10px',
+                  }} variant='contained' color='primary' onClick={() => {
+                    moves.chooseNewGameType("live")
+                  }}>
+                    Új éles játék kezdése
+                  </Button>
+                </Stack>
               }
               {ctx.phase === 'chooseRole' &&
                 <Stack sx={{
-                width: '100%',
-                flexDirection: 'row',
-                marginBottom: '20px',
-              }}>
-                <Button sx={{
-                  width: '45%',
-                  height: '60px',
-                  fontSize: '18px',
-                  alignSelf: 'center',
-                  textTransform: 'none',
-                  borderRadius: '10px',
-                }} variant='contained' color='primary' onClick={() => {
-                  moves.chooseRole(0);
+                  width: '100%',
+                  flexDirection: 'row',
+                  marginBottom: '20px',
                 }}>
-                  Kezdő leszek
-                </Button>
-                <Stack sx={{ width: '10%' }} />
-                <Button sx={{
-                  width: '45%',
-                  height: '60px',
-                  fontSize: '18px',
-                  alignSelf: 'center',
-                  textTransform: 'none',
-                  borderRadius: '10px',
-                }} variant='contained' color='primary' onClick={() => {
-                  moves.chooseRole(1);
-                }}>
-                  Második leszek
-                </Button>
-              </Stack>}
+                  <Button sx={{
+                    width: '45%',
+                    height: '60px',
+                    fontSize: '18px',
+                    alignSelf: 'center',
+                    textTransform: 'none',
+                    borderRadius: '10px',
+                  }} variant='contained' color='primary' onClick={() => {
+                    moves.chooseRole(0);
+                  }}>
+                    Kezdő leszek
+                  </Button>
+                  <Stack sx={{ width: '10%' }} />
+                  <Button sx={{
+                    width: '45%',
+                    height: '60px',
+                    fontSize: '18px',
+                    alignSelf: 'center',
+                    textTransform: 'none',
+                    borderRadius: '10px',
+                  }} variant='contained' color='primary' onClick={() => {
+                    moves.chooseRole(1);
+                  }}>
+                    Második leszek
+                  </Button>
+                </Stack>}
               <Stack sx={{
                 width: '100%',
                 display: 'block',
@@ -193,7 +215,8 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
                 {ctx.phase === 'chooseRole' && <p> Válaszd ki, hogy első vagy második játékos akarsz-e lenni. </p>}
                 {ctx.phase === 'play' && ctx.currentPlayer === "0" && <p> Most Te jössz! </p>}
                 {ctx.phase === 'play' && ctx.currentPlayer === "1" && <p> Várakozás a szerverre... </p>}
-                {ctx.phase === 'startNewGame' && G.winner === "0" && <p> Gratulálok, nyertetek! Verjétek meg még egyszer a gépet!</p>}
+                {ctx.phase === 'startNewGame' && G.winner === "0" && G.difficulty === "live" && <p> Gratulálok, nyertetek! Verjétek meg még egyszer a gépet!</p>}
+                {ctx.phase === 'startNewGame' && G.winner === "0" && G.difficulty === "test" && <p> Gratulálok, a próbajátékban nyertetek!</p>}
                 {ctx.phase === 'startNewGame' && G.winner === "1" && <p> Sajnos a gép nyert. </p>}
               </Stack>
             </Stack>

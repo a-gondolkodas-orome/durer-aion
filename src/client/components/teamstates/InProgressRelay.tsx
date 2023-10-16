@@ -155,6 +155,15 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
               setMsRemaining={setMsRemaining}
               getServerTimer={moves.getTime} />}
           </Stack>
+          {process.env.REACT_APP_WHICH_VERSION === "b" && 
+            <Stack sx={{
+              flexDirection: 'row',
+              width: '250px',
+              fontSize: '10px',
+            }}>
+            ("Az óra csak tájékoztató jellegű. Ha lefrissítitek az oldalt, akkor az óra újraindul, de így is csak az időben beérkezett válaszokat fogjuk figyelembe venni.")
+            </Stack>
+          }
         </Stack>
       </Stack>
     </>
