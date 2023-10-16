@@ -13,18 +13,20 @@ def add_minutes(minutes:int,type:str, user:str, passwd:str, baseurl:str = 'http:
   # Make a request with basic authentication
   response = requests.get(url, auth=HTTPBasicAuth(username, password))
 
-  def add_minutes(team):
-      if type == 'relay' and team['relayMatch']['status'] == 'IN PROGRESS':
-          url = baseurl + f'/game/{ team['relayMatch']['matchID']}/addminutes/{minutes}'
+  def add_minutes_team(team):
+      if type == 'relay' and team['relayMatch']['state'] == 'IN PROGRESS':
+          url = baseurl + f'/game/admin/{ team['relayMatch']['matchID']}/addminutes/{minutes}'
           response = requests.get(url, auth=HTTPBasicAuth(username, password))
           if response.status_code != 200:
+            print(response)
             print(f'Error at adding minutes to team {team['teamId']}')
           else:
-            print(f'Addded {minutes} min {team['teamId']}')
-      elif type == 'strategy' and team['strategyMatch']['status'] == 'IN PROGRESS':
+            print(f'Addded {minutes} min to team {team['teamId']}')
+      elif type == 'strategy' and team['strategyMatch']['state'] == 'IN PROGRESS':
         url = baseurl + f'/game/{ team['strategyMatch']['matchID']}/addminutes/{minutes}'
         response = requests.get(url, auth=HTTPBasicAuth(username, password))
         if response.status_code != 200:
+          print(response)
           print(f'Error at adding minutes to team {team['teamId']}')   
 
   # Check if the request was successful (status code 200)
@@ -33,12 +35,17 @@ def add_minutes(minutes:int,type:str, user:str, passwd:str, baseurl:str = 'http:
       try:
           json_data = response.json()
           
-          #for team in json_data:
-          #  add_minutes(team)
-          print(json_data[0])
+          for team in json_data:
+            add_minutes_team(team)
           
       except ValueError:
           print("Failed to parse JSON response")
   else:
       print(f"Request failed with status code {response.status_code}")
       print(response.text)
+
+def add_minutes_relay(minutes:int,passwd:str,baseurl:str = 'https://verseny.durerinfo.hu'):
+   add_minutes(minutes,'relay','admin',passwd,baseurl)
+
+def add_minutes_strategy(minutes:int,passwd:str,baseurl:str = 'https://verseny.durerinfo.hu'):
+   add_minutes(minutes,'strategy','admin',passwd,baseurl)
