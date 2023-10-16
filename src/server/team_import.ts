@@ -85,11 +85,11 @@ export async function importer(teams: TeamsRepository, filename: string) {
 
     if (teamId === undefined || teamId === "") {
       teamId = randomUUID();
-    } else if (teamId.match(/^[0-9a-f\-]+$/) === null) {
+    } else if (teamId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/) === null) {
       ok = false;
       console.error(`ID is not a GUID for team ${teamname}`);
       console.error(`  Found: ${teamId}`);
-      console.error(`  Expected format is usually: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`);
+      console.error(`  Expected format is exaclty: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`);
     }
 
     if (found_ids.has(teamId)) {
