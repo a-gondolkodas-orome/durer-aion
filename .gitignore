@@ -26,3 +26,5 @@ yarn-debug.log*
 yarn-error.log*
 test.tsv.export
 __pycache__
+.env
+.venv
