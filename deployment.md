@@ -137,4 +137,81 @@ After assigning a static ip address to the instatnce, you can use DNS to resolve
 
 ## Add SSL
 
-TODO!
+### Mount a directory to store the certs
+
+Make directory
+```bash
+mkdir /opt/fake-letsencrypt
+```
+
+Modify the docker-compose:
+```diff
+    web:
+     build: ./nginx
+     ports:
+       - 80:80
++      - 443:443
+     volumes:
+       - ./build:/usr/share/nginx/html
++      - /opt/fake-letsencrypt:/etc/letsencrypt
+     depends_on:
+       - backend
+```
+
+
+### Run certbot
+
+```bash
+sudo docker run -p 80:80 -p 443:443 -it --rm --name certbot \
+            -v "/opt/fake-letsencrypt:/etc/letsencrypt" \
+            certbot/certbot certonly --standalone
+```
+
+This only generates thecerts, but not the ngnix setup enhancement.
+If you want to do that as well, you may try:
+
+```bash
+sudo docker run -p 80:80 -p 443:443 -it --rm --name certbot \
+            -v "/opt/fake-letsencrypt:/etc/letsencrypt" \
+            certbot/certbot --standalone --ngnix
+```
+
+After this, apply the following changes to `nginx/nginx.conf`
+
+```diff
+@@ -1,5 +1,8 @@
+ server {
+-    listen       80;
++
++    server_name verseny.durerinfo.hu; # managed by Certbot
+
+     location /socket.io/ {
+         proxy_pass http://backend:8000;
+@@ -19,4 +22,25 @@ server {
+     location / {
+         root   /usr/share/nginx/html;
+         index  index.html index.htm;
+     }
++    listen [::]:443 ssl ipv6only=on; # managed by Certbot
++    listen 443 ssl; # managed by Certbot
++    ssl_certificate /etc/letsencrypt/live/verseny.durerinfo.hu/fullchain.pem;
++    ssl_certificate_key /etc/letsencrypt/live/verseny.durerinfo.hu/privkey.pem;
++    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
++    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
++
++}
++
++server {
++    if ($host = verseny.durerinfo.hu) {
++        return 301 https://$host$request_uri;
++    } # managed by Certbot
++
++
++       listen 80 ;
++       listen [::]:80 ;
++    server_name verseny.durerinfo.hu;
++    return 404; # managed by Certbot
++
++
+ }
+```
