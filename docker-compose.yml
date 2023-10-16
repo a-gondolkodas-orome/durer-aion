@@ -11,7 +11,7 @@ services:
   backend:
     build: .
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres@postgres/postgres
+      - DATABASE_URL=postgresql://postgres:${POSTGRESQL_PASSWORD}@postgres/postgres
       - PORT=8000
       - BOT_CREDENTIALS=${BOT_CREDENTIALS}
       - ADMIN_CREDENTIALS=${ADMIN_CREDENTIALS}
