@@ -89,7 +89,7 @@ export async function importer(teams: TeamsRepository, filename: string) {
       ok = false;
       console.error(`ID is not a GUID for team ${teamname}`);
       console.error(`  Found: ${teamId}`);
-      console.error(`  Expected format is exaclty: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`);
+      console.error(`  Expected format is exactly: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`);
     }
 
     if (found_ids.has(teamId)) {
