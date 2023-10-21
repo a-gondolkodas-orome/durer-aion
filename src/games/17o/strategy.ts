@@ -2,11 +2,7 @@ import { State } from 'boardgame.io';
 import { MyGameState } from './game';
 import { GameStateMixin } from '../../common/types';
 
-
-
-
-
-
+/// Strategy for backend-only
 export function strategyWrapper(category: "C" | "D" | "E") {
   return (state: State<MyGameState & GameStateMixin>, botID: string): [number | { pile: number } | undefined, string] => {
     if (state.ctx.phase === "startNewGame") {
@@ -31,6 +27,7 @@ export function strategyWrapper(category: "C" | "D" | "E") {
   }
 }
 
+/// Starting position selection, if we want to hide how starting positions are determined ( #35 )
 function startingPosition({ G, ctx }: any, category: "C" | "D" | "E"): { pile: number } {
   if (category === "C") {
     // C Category
