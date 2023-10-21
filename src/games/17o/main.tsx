@@ -1,6 +1,6 @@
 import { MyGame } from './game';
 import { MyBoard } from './board';
-import { strategyWrapper } from './strategy';
+import { strategyWrapper } from './randomStrategy';
 import { ClientFactory } from '../../common/client_factory';
 
 
