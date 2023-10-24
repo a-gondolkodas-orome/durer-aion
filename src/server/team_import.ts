@@ -82,6 +82,10 @@ export async function importer(teams: TeamsRepository, filename: string) {
       console.warn(`"Other" field not set for team ${teamname}`);
       console.warn(`  The other field should include any info which could help identify a team. (team name, contestant names, school, email addresses, etc.)`);
     }
+    if(other !== undefined &&  other.length > 700){
+      console.error(`"Other" filed is too long (${other.length} to be exact)`);
+      ok = false;
+    }
 
     if (teamId === undefined || teamId === "") {
       teamId = randomUUID();
@@ -133,6 +137,7 @@ export async function importer(teams: TeamsRepository, filename: string) {
           console.error(`Failed to validate team when adding to DB: ${err}`);
           ok = false;
         } else {
+          console.log('We experienced an unexpected error during import. This type of error is not handled in the import scritp, please file a bug report in the GitHub repository!')
           throw err;
         }
       }
