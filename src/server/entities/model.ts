@@ -48,6 +48,9 @@ export const teamAttributes: ModelAttributes = {
     type: DataTypes.STRING,
     unique: true,
     primaryKey: true,
+    validate:{
+      isUUID:4
+    }
   },
   // metadata
   category: {
@@ -55,12 +58,18 @@ export const teamAttributes: ModelAttributes = {
   },
   email: {
     type: DataTypes.STRING,
+    validate:{
+      len: [0,255]
+    }
   },
   joinCode: {
     type: DataTypes.STRING,
   },
   teamName: {
     type: DataTypes.STRING,
+    validate:{
+      len: [1,255]
+    }
   },
   credentials: {
     type: DataTypes.STRING,
@@ -75,6 +84,9 @@ export const teamAttributes: ModelAttributes = {
     type: DataTypes.JSON,
   },
   other: {
-    type: DataTypes.STRING,
+    type: DataTypes.STRING(1024),
+    validate:{
+      len: [0,700]
+    }
   },
 };
