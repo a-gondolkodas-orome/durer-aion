@@ -9,6 +9,7 @@
     "test:watch": "npm run test:unit -- --watchAll",
     "build": "parcel build src/index.html --public-url=/durer-jatekok/",
     "lint": "eslint \"src/**/*.js\" --no-fix",
+    "lint:fix": "eslint \"src/**/*.js\" --fix",
     "audit": "better-npm-audit audit -- --omit=dev",
     "dev": "parcel src/index.html --open --port=8012",
     "dev:nocache": "parcel serve src/index.html --no-cache --open --port=8012"

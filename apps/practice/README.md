@@ -52,6 +52,11 @@ https://github.com/parcel-bundler/parcel/issues/7104#issuecomment-967260755 migh
 npm run test # lint and tests (as GA)
 ```
 
+Simple formatting errors such as trailing spaces can be automatically fixed with
+```bash
+npm run lint:fix
+```
+
 ```bash
 npm run test:watch # unit tests in watch mode
 ```
