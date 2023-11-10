@@ -43,6 +43,9 @@ npm run dev
 Known issue: sometimes weird bugs happen which disappear if you delete the `.parcel-cache`
 directory manually and re-load.
 
+If you are using Windows and you see `Error: The specified module could not be found. ... code: 'ERR_DLOPEN_FAILED'`
+https://github.com/parcel-bundler/parcel/issues/7104#issuecomment-967260755 might help you.
+
 ### Run tests
 
 ```bash
