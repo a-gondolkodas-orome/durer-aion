@@ -48,16 +48,18 @@ const GameBoard = ({ board, ctx }) => {
           onClick={() => makeStep(i - board.current)}
           className={`
             border-2 text-2xl min-w-[4ch] text-center p-1 my-1 font-bold
+            ${i === board.target ? 'border-8 border-purple-600' : '' }
             ${isMoveAllowed(i - board.current) ? 'bg-emerald-200 hover:bg-emerald-400' : '' }
             ${board.restricted && i === board.current + board.restricted ? 'bg-red-200' : '' }
             ${i < board.current ? 'bg-slate-400' : ''}
             ${i === board.current ? 'bg-slate-200' : ''}
-            ${i > board.target + 1 ? 'text-slate-400' : ''}
+            ${i > board.target ? 'text-slate-400 border-purple-600' : ''}
           `}
         >{ i === board.current ? 'X' : i }
       </button>
       )}
     </div>
+    <span className = "text-xl"><code>m</code> értéke: { board.target }</span>
     {ctx.shouldPlayerMoveNext && (
       <p className="text-xl">
         Előző lépés: { board.restricted ? (13 - board.restricted) : '-' }. Tiltott: { board.restricted || '-' }.
@@ -68,12 +70,12 @@ const GameBoard = ({ board, ctx }) => {
 };
 
 const rule = <>
-  Károly és Dezső <pre className="inline">m</pre>-ig szeretnének elszámolni, és közben a következő játékot játsszák:
+  Károly és Dezső <code>m</code>-ig szeretnének elszámolni, és közben a következő játékot játsszák:
   0-ról kezdenek, a két játékos felváltva adhat hozzá egy 13-nál kisebb pozitív egészet a korábbi
   számhoz, azonban a babonájuk miatt ha egyikük x-et adott hozzá, akkor másikuk a következő
-  lépésben nem adhat hozzá <pre className="inline">13-x</pre>-et. Az veszít, aki eléri (vagy átlépi) <pre className="inline">m</pre>-et.
+  lépésben nem adhat hozzá <code>13-x</code>-et. Az veszít, aki eléri (vagy átlépi) <code>m</code>-et.
 
-  Az <pre className="inline">m</pre> szám ismeretében te döntheteted el, hogy a kezdő vagy a második játékos bőrébe szeretnél e bújni.
+  Az <code>m</code> szám ismeretében te döntheted el, hogy a kezdő vagy a második játékos bőrébe szeretnél e bújni.
   Sok sikert! :)
 </>;
 
