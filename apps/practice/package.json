@@ -7,7 +7,7 @@
     "test:unit": "jest",
     "test": "npm run lint && npm run test:unit",
     "test:watch": "npm run test:unit -- --watchAll",
-    "build": "parcel build src/index.html --public-url=/durer-jatekok/",
+    "build": "parcel build src/index.html --public-url=/durer-jatekok/ --no-source-maps",
     "lint": "eslint \"src/**/*.js\" --no-fix",
     "lint:fix": "eslint \"src/**/*.js\" --fix",
     "audit": "better-npm-audit audit -- --omit=dev",
