@@ -17,6 +17,12 @@ export const getGameStateAfterAiTurn = ({ board }) => {
   return getGameStateAfterMove(newBoard);
 };
 
+export const isWinningState = ({ board }) => {
+  const oddPiles = [0, 1, 2].filter(i => board[i] % 2 === 1);
+
+  return (oddPiles.length === 3 || oddPiles.length === 0);
+}
+
 export const getGameStateAfterMove = (newBoard) => {
   return { newBoard, isGameEnd: isGameEnd(newBoard), winnerIndex: null };
 };

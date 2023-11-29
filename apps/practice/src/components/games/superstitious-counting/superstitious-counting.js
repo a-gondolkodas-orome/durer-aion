@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
-import { range, random } from 'lodash';
+import { range, sample, difference } from 'lodash';
 import { strategyGameFactory } from '../strategy-game';
 import { getOptimalAiStep } from './strategy';
 
 const generateNewBoard = () => {
-  return { current: 0, target: random(20, 100), restricted: null };
+  const losingPositions = range(29, 127, 14);
+  const winningPositions = difference(range(26, 115), losingPositions);
+  const target = sample([sample(losingPositions), sample(winningPositions)]);
+  return { current: 0, target, restricted: null };
 };
 
 const getGameStateAfterMove = (board, step, moverIndex) => {

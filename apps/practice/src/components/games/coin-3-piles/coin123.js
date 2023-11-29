@@ -1,14 +1,28 @@
 import React, { useState } from 'react';
-import { random } from 'lodash';
+import { random, sum } from 'lodash';
 import { strategyGameFactory } from '../strategy-game';
-import { getGameStateAfterAiTurn  } from './strategy/strategy';
+import { getGameStateAfterAiTurn, isWinningState  } from './strategy/strategy';
 import { GameBoard, getPlayerStepDescription } from './coin-3-piles';
 
 const generateNewBoard = () => {
-  const board = [random(0, 6), random(0, 6), random(0, 6)];
-  if (board[1] !== 0 || board[2] !== 0) return board;
-  return generateNewBoard();
+  if (random(0, 1)) {
+    return generateNewWinningBoard();
+  } else {
+    return generateNewLosingBoard();
+  }
 };
+
+const generateNewWinningBoard = () => {
+  const board = [random(0, 5), random(0, 7), random(1, 8)];
+  if (!isWinningState({ board }) && sum(board) >= 4) return board;
+  return generateNewWinningBoard();
+}
+
+const generateNewLosingBoard = () => {
+  const board = [random(0, 5), random(0, 7), random(1, 8)];
+  if (isWinningState({ board }) && sum(board) >= 4) return board;
+  return generateNewLosingBoard();
+}
 
 const rule = <>
   Van egy kupacban néhány érme, mindegyik 1, 2 vagy 3 pengős. Egy lépésben az

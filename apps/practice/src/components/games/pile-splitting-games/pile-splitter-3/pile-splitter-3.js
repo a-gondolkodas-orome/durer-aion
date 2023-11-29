@@ -4,8 +4,8 @@ import { strategyGameFactory } from '../../strategy-game';
 import { getBoardAfterAiTurn } from './strategy';
 
 const generateNewBoard = () => {
-  const x = random(4, 20);
-  const y = random(Math.max(4, 17 - x), Math.min(20, 33 - x));
+  const x = random(2, 8) * 2 + 1;
+  const y = random(3, Math.min(20, 33 - x));
   return [x, y, 37 - x - y];
 };
 

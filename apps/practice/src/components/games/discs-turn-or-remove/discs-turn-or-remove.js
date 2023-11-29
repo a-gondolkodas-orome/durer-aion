@@ -1,17 +1,27 @@
 import React, { useState } from 'react';
 import { strategyGameFactory } from '../strategy-game';
-import { range, isEqual } from 'lodash';
+import { range, isEqual, random, sample, difference } from 'lodash';
 
 const generateNewBoard6 = () => {
-    const blue = Math.floor(Math.random()*7);
-    const red = Math.floor(Math.random()*(7-blue));
-    return [blue, red];
+    const discCount = random(3, 6);
+    if (random(0, 1)) {
+        const blueCount = sample(range(0, discCount + 1, 3));
+        return [blueCount, discCount - blueCount];
+    } else {
+        const blueCount = sample(difference(range(0, discCount + 1), range(0, 9, 3)));
+        return [blueCount, discCount - blueCount]
+    }
 };
 
 const generateNewBoard10 = () => {
-  const blue = Math.floor(Math.random()*11);
-  const red = Math.floor(Math.random()*(11-blue));
-  return [blue, red];
+    const discCount = random(4, 10);
+    if (random(0, 1)) {
+        const blueCount = sample(range(0, discCount + 1, 3));
+        return [blueCount, discCount - blueCount];
+    } else {
+        const blueCount = sample(difference(range(0, discCount + 1), range(0, 12, 3)));
+        return [blueCount, discCount - blueCount]
+    }
 };
 
 const gameBoardFactory = maxDiscs => {
@@ -116,18 +126,26 @@ const gameBoardFactory = maxDiscs => {
 
 const getGameStateAfterAiTurn = ({ board }) => {
     let newBoard = [...board];
-    let rem = newBoard[0]%3;
-    if(rem===0) {
-        let alt = Math.floor(Math.random()*2);
-        if(newBoard[alt]===0) alt = 1-alt;
-        let amount = Math.floor(Math.random()*(newBoard[alt]>1 ? 2 : 1)+1);
-        if(alt===0) newBoard[0] = newBoard[0]-amount;
-        else newBoard = [newBoard[0]+amount, newBoard[1]-amount];
+    const rem = newBoard[0] % 3;
+    if (rem === 0) {
+        const randomNonEmptyPile = sample(filter([0, 1], i => newBoard[i] > 0));
+        const amount = newBoard[randomNonEmptyPile] > 1 ? sample([1, 2]) : 1;
+        if (randomNonEmptyPile === 0) {
+            newBoard[0] -= amount;
+        } else {
+            newBoard[0] += amount;
+            newBoard[1] -= amount;
+        }
     } else {
-        if(newBoard[1]>=(3-rem) && Math.random()<0.5) newBoard = [newBoard[0]+(3-rem), newBoard[1]-(3-rem)];
-        else newBoard = [newBoard[0]-rem, newBoard[1]];
+        const amount = 3 - rem;
+        if (newBoard[1] >= amount && random(0, 1) === 1) {
+            newBoard[0] += amount;
+            newBoard[1] -= amount;
+        } else {
+            newBoard[0] -= rem;
+        };
     }
-    return(getGameStateAfterMove(newBoard));
+    return getGameStateAfterMove(newBoard);
 };
 
 const getGameStateAfterMove = (newBoard) => {
@@ -135,7 +153,7 @@ const getGameStateAfterMove = (newBoard) => {
 };
 
 const getPlayerStepDescription = () => {
-    return "Kattints, hogy eltávolíts egy vagy két korongot egy színből";
+    return "Kattints, hogy eltávolíts egy vagy két korongot egy színből.";
 };
 
 const rule6 = <>
@@ -144,7 +162,7 @@ mindegyiket a piros vagy a kék felével felfelé. A soron következő játékos
 léphet:<br/>
 • 1 vagy 2 kék korongot elvehet az asztalról.<br/>
 • 1 vagy 2 piros korongot átfordíthat kékké.<br/>
-Aki már nem tud lépni, az elveszíti a játékot
+Aki már nem tud lépni, az elveszíti a játékot.
 </>;
 
 const rule10 = <>
@@ -153,7 +171,7 @@ mindegyiket a piros vagy a kék felével felfelé. A soron következő játékos
 léphet:<br/>
 • 1 vagy 2 kék korongot elvehet az asztalról.<br/>
 • 1 vagy 2 piros korongot átfordíthat kékké.<br/>
-Aki már nem tud lépni, az elveszíti a játékot
+Aki már nem tud lépni, az elveszíti a játékot.
 </>;
 
 const GameBoard6 = gameBoardFactory(6);

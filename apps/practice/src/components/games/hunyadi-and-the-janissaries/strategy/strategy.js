@@ -1,6 +1,6 @@
 'use strict';
 
-import { random, flatten, cloneDeep } from 'lodash';
+import { random, flatten, cloneDeep, sum } from 'lodash';
 
 export const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
   if (playerIndex === 0) {
@@ -12,23 +12,40 @@ export const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
 };
 
 export const generateNewBoard = () => {
+  // this code is not 50% Hunyadi - 50% Szultan winnin position generator,
+  // but relatively balanced and biased toward situations with more soldiers
+  // and not single-step game
   const rowCount = 5;
   let board = [];
+  // for debugging purposes
+  let totalScore = 0;
   for (let i = 0; i < (rowCount - 1); i++) {
     const row = [];
-    if (i === 0) row.push('blue');
-    if (random(0, 1) === 1) row.push('blue');
+    if (i === 0) {
+      row.push('blue');
+      totalScore += 1;
+    }
+    if (random(0, 6) >= 3) {
+      row.push('blue');
+      totalScore += (1/2)**i;
+    }
     board.push(row);
   }
   board.push([]);
 
   for (let i = 0; i < (rowCount - 1); i++) {
     for (let j of board[i]) {
-      if (random(0, 1) === 1) {
+      if (random(0, 4) >= 2) {
         board[i].splice(j, 1);
         board[i + 1].push('blue', 'blue');
       }
     }
+  }
+
+  const soldierCount = sum(board.map(row => row.length));
+  if (totalScore <= 1.25 || soldierCount <= 2) {
+    // generate a more complex situation
+    return generateNewBoard();
   }
 
   return board;

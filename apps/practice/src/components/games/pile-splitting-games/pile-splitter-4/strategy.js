@@ -8,23 +8,23 @@ export const getBoardAfterAiTurn = (board) => {
   const odds = board.filter(p => p % 2 === 1).length;
 
   if (odds === 4) {
-    const notSinglePileIndices = range(0, 3).filter(i => board[i] !== 1);
+    const notSinglePileIndices = range(0, 4).filter(i => board[i] !== 1);
     const first = sample(notSinglePileIndices);
     return getOptimalDivision(board, first, (first + 1) % 4);
   }
 
   if (odds === 3) {
-    const evenPileIndex = range(0, 3).find(i => board[i] % 2 === 0);
+    const evenPileIndex = range(0, 4).find(i => board[i] % 2 === 0);
     return getOptimalDivision(board, evenPileIndex, (evenPileIndex + 1) % 4);
   }
 
   if (odds === 2) {
-    const evenPileIndices = range(0, 3).filter(i => board[i] % 2 === 0);
+    const evenPileIndices = range(0, 4).filter(i => board[i] % 2 === 0);
     return getOptimalDivision(board, evenPileIndices[0], evenPileIndices[1]);
   }
 
   if (odds === 1) {
-    const oddPile = range(0, 3).find(i => board[i] % 2 === 1);
+    const oddPile = range(0, 4).find(i => board[i] % 2 === 1);
     if (
       board[oddPile] === 1 && board[(oddPile + 1) % 4] === 2 &&
       board[(oddPile + 2) % 4] === 2 && board[(oddPile + 3) % 4] === 2
@@ -49,6 +49,23 @@ export const getBoardAfterAiTurn = (board) => {
     }
   }
 };
+
+export const isWinningState = board => {
+  const oddPileIndices = range(0, 4).filter(i => board[i] % 2 === 1);
+  const oddPileCount = oddPileIndices.length;
+
+  if (oddPileCount === 4) return true;
+  if (oddPileCount === 3 || oddPileCount === 2) return false;
+
+  if (oddPileCount === 1) {
+    const modifiedBoard = [...board];
+    modifiedBoard[oddPileIndices[0]] += 1;
+    return isWinningState(modifiedBoard);
+  }
+  if (oddPileCount === 0) {
+    return isWinningState(board.map(x => x / 2));
+  }
+}
 
 const getOptimalDivision = function (board, first, second) {
   const sum = board[first];

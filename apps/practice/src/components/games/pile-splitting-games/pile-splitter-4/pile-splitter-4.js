@@ -1,9 +1,46 @@
 import React, { useState } from 'react';
 import { range, isEqual, random } from 'lodash';
 import { strategyGameFactory } from '../../strategy-game';
-import { getBoardAfterAiTurn } from './strategy';
+import { getBoardAfterAiTurn, isWinningState } from './strategy';
 
-const generateNewBoard = () => ([random(4, 18), random(4, 18), random(4, 18), random(4, 18)]);
+const generateNewBoard = () => {
+  if (random(0, 1)) return generateNewWinningBoard();
+  return generateNewLosingBoard();
+};
+
+const generateNewWinningBoard = (remainingTrials = 50) => {
+  const board = [random(5, 12), random(5, 12), random(5, 12), random(5, 12)];
+  if (!isWinningState(board)) {
+    if (remainingTrials > 0) {
+      return generateNewWinningBoard(remainingTrials - 1);
+    }
+    return board;
+  }
+
+  const r = random(0, 2);
+  if (r === 0) return board;
+  if (r === 1) return board.map(x => x * 2);
+  const modifiedBoard = board.map(x => x * 2);
+  modifiedBoard[random(0, 3)] -= 1;
+  return modifiedBoard;
+};
+
+const generateNewLosingBoard = (remainingTrials = 50) => {
+  const board = [random(5, 12), random(5, 12), random(5, 12), random(5, 12)];
+  if (isWinningState(board)) {
+    if (remainingTrials > 0) {
+      return generateNewLosingBoard(remainingTrials - 1);
+    }
+    return board;
+  }
+
+  const r = random(0, 2);
+  if (r === 0) return board;
+  if (r === 1) return board.map(x => x * 2);
+  const modifiedBoard = board.map(x => x * 2);
+  modifiedBoard[random(0, 3)] -= 1;
+  return modifiedBoard;
+}
 
 const isGameEnd = (board) => isEqual(board, [1, 1, 1, 1]);
 
