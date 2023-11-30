@@ -40,7 +40,9 @@ const ExponentCell = ({ e, playerPrime, chooseExponential, hovered, setHovered }
   </td>
 }
 
-const ExponentsTable = ({ board, playerPrime, chooseExponential, hovered, setHovered }) => {
+const ExponentsTable = ({
+  board, playerPrime, chooseExponential, hovered, setHovered, resetChosenPrime
+}) => {
   const availableExponents = getAvailableExponents(board, playerPrime);
 
   // https://tailwindcss.com/docs/content-configuration#dynamic-class-names
@@ -75,10 +77,15 @@ const ExponentsTable = ({ board, playerPrime, chooseExponential, hovered, setHov
         )}
       </tr></tbody>
     </table>
-    {hovered === null ? '' : <p>
+    {hovered === null ? <br></br> : <p>
       Kivonandó prímhatvány: {playerPrime}^{hovered} = {playerPrime**hovered}.
       Eredmény: {board-playerPrime**hovered}.
     </p>}
+    <button
+      className="cta-button bg-slate-400 w-auto"
+      onClick={() => resetChosenPrime()}
+    >Vissza a prím választáshoz
+    </button>
   </>;
 }
 
@@ -140,6 +147,12 @@ const GameBoard = ({ board, ctx }) => {
     setHovered(null);
   }
 
+  const resetChosenPrime = () => {
+    setPlayerPrime(null);
+    setFirstTurnPhase(true);
+    ctx.setTurnStage("p");
+  }
+
   const chooseExponential = (e) => {
     setPlayerPrime(null);
     setFirstTurnPhase(true);
@@ -157,6 +170,7 @@ const GameBoard = ({ board, ctx }) => {
     : <ExponentsTable
         board={board}
         playerPrime={playerPrime}
+        resetChosenPrime={resetChosenPrime}
         chooseExponential={chooseExponential}
         hovered={hovered}
         setHovered={setHovered}
