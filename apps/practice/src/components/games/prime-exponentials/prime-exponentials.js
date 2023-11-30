@@ -24,6 +24,110 @@ const generateNewBoard = () => {
   }
 };
 
+const ExponentCell = ({ e, playerPrime, chooseExponential, hovered, setHovered }) => {
+  return <td
+    className={`border-4 aspect-square ${hovered === e ? 'bg-gray-300' : ''}`}
+    key={e}
+    onClick={() => chooseExponential(e)}>
+    <button
+      className={`w-full p-[5%] aspect-square`}
+      onMouseOver={() => setHovered(e)}
+      onMouseOut={() => setHovered(null)}
+      onFocus={() => setHovered(e)}
+      onBlur={() => setHovered(null)}
+    >{playerPrime ** e}
+    </button>
+  </td>
+}
+
+const ExponentsTable = ({ board, playerPrime, chooseExponential, hovered, setHovered }) => {
+  const availableExponents = getAvailableExponents(board, playerPrime);
+
+  // https://tailwindcss.com/docs/content-configuration#dynamic-class-names
+  // if we dynamically generate, tailwind won't recognize them :(
+  const widthClassNames = [
+    "",
+    "w-[10%] min-w-[10%]",
+    "w-[20%] min-w-[20%]",
+    "w-[30%] min-w-[30%]",
+    "w-[40%] min-w-[40%]",
+    "w-[50%] min-w-[50%]",
+    "w-[60%] min-w-[60%]",
+    "w-[70%] min-w-[70%]",
+    "w-[80%] min-w-[80%]",
+    "w-[90%] min-w-[90%]",
+    "w-[100%] min-w-[100%]"
+  ][availableExponents.length]
+
+  return <>
+    <p className="pb-4">Választott prím: {playerPrime}.</p>
+    <p>Lehetséges hatványok:</p>
+    <table id="exponentsTable" className={`m-2 border-collapse table-fixed ${widthClassNames}`}>
+      <tbody><tr>
+        {availableExponents.map(e =>
+          <ExponentCell
+            playerPrime={playerPrime}
+            e={e}
+            chooseExponential={chooseExponential}
+            hovered={hovered}
+            setHovered={setHovered}
+          ></ExponentCell>
+        )}
+      </tr></tbody>
+    </table>
+    {hovered === null ? '' : <p>
+      Kivonandó prímhatvány: {playerPrime}^{hovered} = {playerPrime**hovered}.
+      Eredmény: {board-playerPrime**hovered}.
+    </p>}
+  </>;
+}
+
+const PrimeCell = ({ p, choosePrime, hovered, setHovered }) => {
+  return <td
+    className={`max-w-[10%] border-4 ${hovered === p ? `bg-gray-300` : ''}`}
+    onClick={() => choosePrime(p)}
+    key={p}
+  >
+    <button
+      className='w-full p-[5%] aspect-square'
+      onMouseOver={() => setHovered(p)}
+      onMouseOut={() => setHovered(null)}
+      onFocus={() => setHovered(p)}
+      onBlur={() => setHovered(null)}
+    >
+      {p}
+    </button>
+  </td>
+}
+
+const PrimesTable = ({ board, choosePrime, hovered, setHovered }) => {
+  let choosablePrimesList = primeList.filter(i => i <= board);
+  if (choosablePrimesList.length === 0) {
+    choosablePrimesList = [2];
+  }
+
+  const widthClassName = `w-[${(Math.min(choosablePrimesList.length, 10))*10}%]`;
+
+  return <table
+    className={`m-2 border-collapse table-fixed max-w-full ${widthClassName}`}
+  >
+    <tbody>
+    {range(Math.floor(choosablePrimesList.length/10)+1).map(i => (
+      <tr key={i}>
+        {range(Math.min(10, choosablePrimesList.length - 10*i)).map(j => (
+          <PrimeCell
+            p={primeList[10*i+j]}
+            choosePrime={choosePrime}
+            hovered={hovered}
+            setHovered={setHovered}
+          ></PrimeCell>
+        ))}
+      </tr>
+    ))}
+    </tbody>
+  </table>;
+}
+
 const GameBoard = ({ board, ctx }) => {
   const [firstTurnPhase, setFirstTurnPhase] = useState(true);
   const [playerPrime, setPlayerPrime] = useState(null);
@@ -43,85 +147,25 @@ const GameBoard = ({ board, ctx }) => {
     ctx.endPlayerTurn(getGameStateAfterMove(board - playerPrime ** e));
   }
 
-  const generateTable = () => {
-    let exponentCells = [];
-
-    for(let e = 0; playerPrime**e <= board; e++) {
-      const cell = <td
-        className={`border-4 aspect-square ${hovered === e ? 'bg-gray-300' : ''}`}
-        key={e}
-        onClick={() => chooseExponential(e)}>
-        <button
-          className={`w-full p-[5%] aspect-square`}
-          onMouseOver={() => setHovered(e)}
-          onMouseOut={() => setHovered(null)}
-          onFocus={() => setHovered(e)}
-          onBlur={() => setHovered(null)}
-        >{e}
-        </button>
-      </td>
-      exponentCells.push(cell);
-    }
-
-    // https://tailwindcss.com/docs/content-configuration#dynamic-class-names
-    // if we dynamically generate, tailwind won't recognize them :(
-    const widthClassNames = [
-      "",
-      "w-[10%] min-w-[10%]",
-      "w-[20%] min-w-[20%]",
-      "w-[30%] min-w-[30%]",
-      "w-[40%] min-w-[40%]",
-      "w-[50%] min-w-[50%]",
-      "w-[60%] min-w-[60%]",
-      "w-[70%] min-w-[70%]",
-      "w-[80%] min-w-[80%]",
-      "w-[90%] min-w-[90%]",
-      "w-[100%] min-w-[100%]"
-    ][exponentCells.length]
-
-    return (<table className={`m-2 border-collapse table-fixed ${widthClassNames}`}>
-      <tbody><tr>
-        {exponentCells.map(cell => (cell))}
-      </tr></tbody>
-    </table>);
-  }
-
-  let choosablePrimesList = primeList.filter(i => i <= board);
-  if (choosablePrimesList.length === 0) {
-    choosablePrimesList = [2];
-  }
-
-  const widthClassName = `w-[${(Math.min(choosablePrimesList.length, 10))*10}%]`;
+  const PlayerOptions = firstTurnPhase
+    ? <PrimesTable
+      board={board}
+      choosePrime={choosePrime}
+      hovered={hovered}
+      setHovered={setHovered}
+    ></PrimesTable>
+    : <ExponentsTable
+        board={board}
+        playerPrime={playerPrime}
+        chooseExponential={chooseExponential}
+        hovered={hovered}
+        setHovered={setHovered}
+      ></ExponentsTable>;
 
   return (
     <section className='p-2 shrink-0 grow basis-2/3'>
       <p className='w-full text-8xl font-bold text-center'>{board}</p><br />
-      {!ctx.shouldPlayerMoveNext ? ''
-      : <>{firstTurnPhase ?
-        <table className={`m-2 border-collapse table-fixed max-w-full ${widthClassName}`}><tbody>
-          {range(Math.floor(choosablePrimesList.length/10)+1).map(i => (
-            <tr key={i}>
-              {range(Math.min(10, choosablePrimesList.slice(i*10, choosablePrimesList.length).length)).map(j => (
-                <td
-                  className={`max-w-[10%] border-4 ${hovered===primeList[10*i+j] ? `bg-gray-300` : ''}`}
-                  onClick={() => choosePrime(primeList[10*i+j])}
-                  key={`${primeList[10*i+j]}`}
-                >
-                  <button
-                    className='w-full p-[5%] aspect-square'
-                    onMouseOver={() => setHovered(primeList[10*i+j])}
-                    onMouseOut={() => setHovered(null)}
-                    onFocus={() => setHovered(primeList[10*i+j])}
-                    onBlur={() => setHovered(null)}
-                  >
-                    {primeList[10*i+j]}
-                  </button>
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody></table>
-      : generateTable()}</>}
+      {!ctx.shouldPlayerMoveNext ? '' : PlayerOptions}
     </section>
   );
 }
@@ -140,11 +184,11 @@ const getGameStateAfterAiTurn = ({ board }) => {
 
   if (board % 6 === 0) {
     chosenPrime = sample(availablePrimes);
-    chosenExponent = sample(availableExponents(board, chosenPrime));
+    chosenExponent = sample(getAvailableExponents(board, chosenPrime));
   } else {
     let possibleMoves = [];
     for (p of availablePrimes) {
-      for (e of availableExponents(board, p)) {
+      for (e of getAvailableExponents(board, p)) {
         if((board - p ** e) % 6 === 0) {
           possibleMoves.push([p, e]);
         }
@@ -155,7 +199,7 @@ const getGameStateAfterAiTurn = ({ board }) => {
   return getGameStateAfterMove(board - chosenPrime**chosenExponent);
 }
 
-const availableExponents = (num, prime) => {
+const getAvailableExponents = (num, prime) => {
   const baseLog = Math.log(num) / Math.log(prime);
   const maxExponent = Math.floor(baseLog);
   return range(0, maxExponent + 1);
