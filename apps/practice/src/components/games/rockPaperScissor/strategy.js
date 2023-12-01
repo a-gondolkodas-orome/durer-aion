@@ -2,14 +2,9 @@
 
 import { isNull, range, cloneDeep } from 'lodash';
 
-const roleColors = ['red', 'blue'];
-
-export const playerColor = playerIndex => playerIndex === 0 ? roleColors[0] : roleColors[1];
-const aiColor = playerIndex => playerIndex === 0 ? roleColors[1] : roleColors[0];
-
 export const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
   const newBoard = cloneDeep(board);
-  newBoard[getOptimalAiPlacingPosition(board, playerIndex)] = aiColor(playerIndex);
+  newBoard[getOptimalAiPlacingPosition(board, playerIndex)] = 'removed';
   return getGameStateAfterMove(newBoard);
 };
 
@@ -36,7 +31,7 @@ const hasFirstPlayerWon = (board) => {
 };
 
 const getOptimalAiPlacingPosition = (board, playerIndex) => {
-  const allowedPlaces = range(0, 9).filter(i => i !== 1 && i!== 4 && i !== 7 && isNull(board[i]));
+  const allowedPlaces = range(0, 9).filter(i => i !== 1 && i !== 4 && i !== 7 && isNull(board[i]));
 
   let freePlaces = [];
   for (let i = 0; i <= 8; i++){

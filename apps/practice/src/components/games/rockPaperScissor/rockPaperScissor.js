@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { range, cloneDeep, isNull } from 'lodash';
 import { strategyGameFactory } from '../strategy-game';
-import { getGameStateAfterMove, getGameStateAfterAiTurn, playerColor } from './strategy';
+import { getGameStateAfterMove, getGameStateAfterAiTurn } from './strategy';
 import { RockSvg } from './rock-svg';
 import { PaperSvg } from './paper-svg';
 import { ScissorSvg } from './scissor-svg';
@@ -15,7 +15,7 @@ const GameBoard = ({ board, ctx }) => {
     if (!isMoveAllowed(id)) return;
 
     const newBoard = cloneDeep(board);
-    newBoard[id] = playerColor(ctx.playerIndex);
+    newBoard[id] = 'removed';
     ctx.endPlayerTurn(getGameStateAfterMove(newBoard));
   };
   const isDisabled = (id) => {
@@ -27,36 +27,23 @@ const GameBoard = ({ board, ctx }) => {
 
   return (
   <section className="p-2 shrink-0 grow basis-2/3">
-    <div className="cols-3">
-
-      <button
-          disabled
-          className="aspect-square"
-          style={{width: "33%", aspectRatio: 0, color: "#AA98A9"}}
-        >
-          Kezdő
-      </button>
-      <button
-          disabled
-          className="aspect-square"
-          style={{width: "34%", aspectRatio: 0, color: "#AA98A9"}}
-        >
-      </button>
-      <button
-          disabled
-          className="aspect-square"
-          style={{width: "33%", aspectRatio: 0, color: "#AA98A9"}}
-        >
-          Második
-      </button>
+    <div className="grid grid-cols-3">
+      <span className="text-gray-500 text-xl text-center">Kezdő</span>
+      <span></span>
+      <span className="text-gray-500 text-xl text-center">Második</span>
     </div>
-    <div className="grid grid-cols-3 gap-100 border-2">
+    <div className="grid grid-cols-3">
       {range(9).map(id => (
-        <button
+        [1,4,7].includes(id) ? <span key={id}></span>
+        :<button
           key={id}
           disabled={isDisabled(id)}
           onClick={() => clickField(id)}
-          className={`aspect-square p-[25%] border-2 ${isDisabled(id) && 'cursor-not-allowed'}`}
+          className={`
+            p-2 m-2 aspect-[4/5] border-4 rounded-xl shadow-md
+            ${!isDisabled(id) && 'border-emerald-400 border-dashed hover:border-solid'}
+            ${isDisabled(id) && 'cursor-not-allowed'}
+          `}
         >
 
           { isNull(board[id]) && (id === 0 || id === 2) && (
@@ -77,10 +64,10 @@ const GameBoard = ({ board, ctx }) => {
 
 const rule = <>
   A játék kezdetekor mindkét játékos elé leteszünk három kártyát: az egyik követ, a
-másik papírt, a harmadik ollót ábrázol. Ezután a játkosok felváltva elvesznek egy-egy lapot az
-ellenfelük elől, egészen addig, amíg már csak egy-egy lap marad. Ekkor a megmaradt kártyákat
+másik papírt, a harmadik ollót ábrázol. Ezután a játékosok felváltva elvesznek egy-egy kártyát az
+ellenfelük elől, egészen addig, amíg már csak egy-egy kártya marad. Ekkor a megmaradt kártyákat
 ütköztetik a „kő-papír-olló” játék szabályai szerint, így eldöntve, hogy ki a győztes; ha mindkét
-kártyán ugyanaz van, akkor a Kezdő nyert. Sok sikert :):)
+kártyán ugyanaz van, akkor a Kezdő nyert. Sok sikert :)
 
 </>;
 
@@ -89,7 +76,7 @@ const Game = strategyGameFactory({
   title: 'Kő Papír Olló',
   GameBoard,
   G: {
-    getPlayerStepDescription: () => 'Távolíts el egy ellenséges tárgyat',
+    getPlayerStepDescription: () => 'Távolíts el egy kártyát az ellenfél elől.',
     generateNewBoard: () => Array(9).fill(null),
     getGameStateAfterAiTurn
   }
