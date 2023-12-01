@@ -1,15 +1,10 @@
 'use strict';
 
-import { isNull, some, range, groupBy, sample, cloneDeep } from 'lodash';
-
-const roleColors = ['red', 'blue'];
-
-export const playerColor = playerIndex => playerIndex === 0 ? roleColors[0] : roleColors[1];
-const aiColor = playerIndex => playerIndex === 0 ? roleColors[1] : roleColors[0];
+import { isNull, cloneDeep } from 'lodash';
 
 export const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
   const newBoard = cloneDeep(board);
-  newBoard[getOptimalAiPlacingPosition(board, playerIndex)] = aiColor(playerIndex);
+  newBoard[getOptimalAiPlacingPosition(board, playerIndex)] = 'removed';
   return getGameStateAfterMove(newBoard);
 };
 

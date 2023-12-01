@@ -34,8 +34,9 @@ const GameBoard = ({ board, ctx }) => {
     </div>
     <div className="grid grid-cols-3">
       {range(9).map(id => (
-        [1,4,7].includes(id) ? <span key={id}></span>
-        :<button
+        [1,4,7].includes(id) || !isNull(board[id])
+        ? <span className="aspect-[4/5] m-2" key={id}></span>
+        : <button
           key={id}
           disabled={isDisabled(id)}
           onClick={() => clickField(id)}
@@ -45,7 +46,6 @@ const GameBoard = ({ board, ctx }) => {
             ${isDisabled(id) && 'cursor-not-allowed'}
           `}
         >
-
           { isNull(board[id]) && (id === 0 || id === 2) && (
             <RockSvg />
           )}
