@@ -34,6 +34,7 @@ const GameBoard = ({ board, setBoard, ctx }) => {
   };
 
   const toBeLeft = ({ pileId, pieceId }) => {
+    if (!ctx.shouldPlayerMoveNext) return false;
     if (hoveredPiece === null) return false;
     if (pileId !== hoveredPiece.pileId) return false;
     if (hoveredPiece.pieceId === board[pileId] - 1) return false;
@@ -42,6 +43,7 @@ const GameBoard = ({ board, setBoard, ctx }) => {
   };
 
   const toBeRemoved = ({ pileId }) => {
+    if (!ctx.shouldPlayerMoveNext) return false;
     if (hoveredPiece === null) return false;
     return hoveredPiece.pileId !== pileId;
   };
