@@ -50,29 +50,36 @@ const GameBoard = ({ board, ctx }) => {
 
   return (
   <section className="p-2 shrink-0 grow basis-2/3">
-	<div className="flex flex-wrap mb-1">
     <ChessBishopSvg/>
-    {range(1,13).map(i =>
-        <button
-          key={i}
-          disabled={!isMoveAllowed(ctx.playerIndex === 0 ? i-board.left : i-board.right)}
-          onClick={() => makeStep(ctx.playerIndex === 0 ? i-board.left : board.right-i)}
+    <table className="w-full table-fixed">
+      <tr>
+        {range(1,13).map(i =>
+          <td
           className={`
-            border-2 text-2xl min-w-[4ch] text-center p-1 my-1 font-bold
+            text-xl text-center p-0.5 font-bold aspect-square border-2 border-white
             ${isMoveAllowed(ctx.playerIndex === 0 ? i-board.left : i-board.right) ?
-              'bg-emerald-200 hover:bg-emerald-400' :
-              (( i === board.left && ctx.playerIndex === 0) || (i === board.right && ctx.playerIndex === 1) ? 'bg-green-300' :
+              'bg-green-200 hover:bg-green-400' :
+              (( i === board.left && ctx.playerIndex === 0) || (i === board.right && ctx.playerIndex === 1) ? 'bg-green-400' :
               ( i === board.left || i === board.right ) ? 'bg-purple-400' :'bg-slate-200')
             }
           `}
-        >{ i === board.left || i === board.right ? <span>
-          <svg className="inline-block" style={{ width: "40px", height: "40px" }}>
-            <use xlinkHref="#game-chess-bishop" />
-          </svg>
-        </span> : i }
-      </button>
-      )}
-	</div>
+          >
+            <button
+              key={i}
+              className="w-full"
+              disabled={!isMoveAllowed(ctx.playerIndex === 0 ? i-board.left : i-board.right)}
+              onClick={() => makeStep(ctx.playerIndex === 0 ? i-board.left : board.right-i)}
+            >{ i === board.left || i === board.right
+              ? <span>
+                <svg className="inline-block w-full aspect-square">
+                  <use xlinkHref="#game-chess-bishop" />
+                </svg>
+              </span> : i }
+            </button>
+          </td>
+        )}
+      </tr>
+    </table>
   </section>
   );
 };
@@ -89,7 +96,9 @@ const Game = strategyGameFactory({
   title: 'Tizenkét mező',
   GameBoard,
   G: {
-	  getPlayerStepDescription: () => 'Kattints a mezőre ahova lépni szeretnél.',
+	  getPlayerStepDescription: ({ playerIndex }) => playerIndex === 0
+      ? 'Kattints a mezőre ahova lépni szeretnél a bal oldali bábuval.'
+      : 'Kattints a mezőre ahova lépni szeretnél a jobb oldali bábuval.',
 	  generateNewBoard,
 	  getGameStateAfterAiTurn
   }
