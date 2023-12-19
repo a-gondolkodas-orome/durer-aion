@@ -154,11 +154,5 @@ export const gameList = {
     round: 'döntő',
     category: ['B'],
     name: '10 korong'
-  },
-  PrimeExponentials: {
-    year: 1,
-    round: 'döntő',
-    category: ['D'],
-    name: 'Prímhatványok kivonása'
   }
 };
