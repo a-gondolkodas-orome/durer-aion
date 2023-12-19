@@ -17,6 +17,7 @@ const primeList = [
 ];
 
 const generateNewBoard = () => {
+  return 333;
   if (random(0, 1)) {
     return random(1, 166) * 6;
   } else {
@@ -68,6 +69,7 @@ const ExponentsTable = ({
       <tbody><tr>
         {availableExponents.map(e =>
           <ExponentCell
+            key={e}
             playerPrime={playerPrime}
             e={e}
             chooseExponential={chooseExponential}
@@ -123,6 +125,7 @@ const PrimesTable = ({ board, choosePrime, hovered, setHovered }) => {
       <tr key={i}>
         {range(Math.min(10, choosablePrimesList.length - 10*i)).map(j => (
           <PrimeCell
+            key={10*i + j}
             p={primeList[10*i+j]}
             choosePrime={choosePrime}
             hovered={hovered}
@@ -216,6 +219,7 @@ const getGameStateAfterAiTurn = ({ board }) => {
 const getAvailableExponents = (num, prime) => {
   const baseLog = Math.log(num) / Math.log(prime);
   const maxExponent = Math.floor(baseLog);
+  console.log(maxExponent);
   return range(0, maxExponent + 1);
 }
 
