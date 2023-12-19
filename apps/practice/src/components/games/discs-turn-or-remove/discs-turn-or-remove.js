@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { strategyGameFactory } from '../strategy-game';
-import { range, isEqual, random, sample, difference } from 'lodash';
+import { range, isEqual, random, sample, difference, filter } from 'lodash';
 
 const generateNewBoard6 = () => {
     const discCount = random(3, 6);
