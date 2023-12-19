@@ -219,7 +219,9 @@ const getGameStateAfterAiTurn = ({ board }) => {
 const getAvailableExponents = (num, prime) => {
   const baseLog = Math.log(num) / Math.log(prime);
   const maxExponent = Math.floor(baseLog);
-  console.log(maxExponent);
+  if (maxExponent <= 1) {
+    console.log(num, prime, Math.log(num), Math.log(prime), maxExponent);
+  }
   return range(0, maxExponent + 1);
 }
 
