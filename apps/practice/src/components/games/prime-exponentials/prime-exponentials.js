@@ -17,7 +17,6 @@ const primeList = [
 ];
 
 const generateNewBoard = () => {
-  return 333;
   if (random(0, 1)) {
     return random(1, 166) * 6;
   } else {
@@ -204,8 +203,8 @@ const getGameStateAfterAiTurn = ({ board }) => {
     chosenExponent = sample(getAvailableExponents(board, chosenPrime));
   } else {
     let possibleMoves = [];
-    for (p of availablePrimes) {
-      for (e of getAvailableExponents(board, p)) {
+    for (const p of availablePrimes) {
+      for (const e of getAvailableExponents(board, p)) {
         if((board - p ** e) % 6 === 0) {
           possibleMoves.push([p, e]);
         }
@@ -219,9 +218,6 @@ const getGameStateAfterAiTurn = ({ board }) => {
 const getAvailableExponents = (num, prime) => {
   const baseLog = Math.log(num) / Math.log(prime);
   const maxExponent = Math.floor(baseLog);
-  if (maxExponent <= 1) {
-    console.log(num, prime, Math.log(num), Math.log(prime), maxExponent);
-  }
   return range(0, maxExponent + 1);
 }
 

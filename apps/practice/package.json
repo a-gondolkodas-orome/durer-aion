@@ -12,7 +12,8 @@
     "lint:fix": "eslint \"src/**/*.js\" --fix",
     "audit": "better-npm-audit audit -- --omit=dev",
     "dev": "parcel src/index.html --open --port=8012",
-    "dev:nocache": "parcel serve src/index.html --no-cache --open --port=8012"
+    "dev:nocache": "parcel serve src/index.html --no-cache --open --port=8012",
+    "local-build": "parcel build src/index.html && http-server ./dist --push-state -o"
   },
   "dependencies": {
     "@headlessui/react": "1.7.15",
