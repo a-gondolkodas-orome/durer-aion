@@ -52,6 +52,7 @@ const GameBoard = ({ board, ctx }) => {
   <section className="p-2 shrink-0 grow basis-2/3">
     <ChessBishopSvg/>
     <table className="w-full table-fixed">
+      <tbody>
       <tr>
         {range(1,13).map(i =>
           <td
@@ -79,6 +80,7 @@ const GameBoard = ({ board, ctx }) => {
           </td>
         )}
       </tr>
+      </tbody>
     </table>
   </section>
   );
