@@ -1,5 +1,5 @@
 export default {
-  setupFilesAfterEnv: ['jest-extended/all'],
+  setupFilesAfterEnv: ['jest-extended/all', './test-setup.js'],
   testEnvironment: 'jsdom',
   clearMocks: true,
   restoreMocks: true,

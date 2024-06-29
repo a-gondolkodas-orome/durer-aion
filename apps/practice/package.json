@@ -16,7 +16,7 @@
     "local-build": "parcel build src/index.html && http-server ./dist --push-state -o"
   },
   "dependencies": {
-    "@headlessui/react": "1.7.15",
+    "@headlessui/react": "2.1.1",
     "lodash": "4.17.21",
     "postcss": "8.4.38",
     "react": "18.3.1",

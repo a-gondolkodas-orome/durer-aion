@@ -1,6 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Disclosure, Dialog } from '@headlessui/react';
+import {
+  Disclosure, DisclosureButton, DisclosurePanel
+  , Dialog, DialogPanel, DialogTitle
+  , Description
+} from '@headlessui/react';
 
 export const GameSidebar = ({
   firstRoleLabel,
@@ -93,16 +97,16 @@ export const GameRule = ({ ruleDescription }) => {
     <Disclosure defaultOpen>
       {({ open }) => (
         <div className="border-2 rounded grow">
-          <Disclosure.Button className="w-full bg-slate-200 text-xl flex justify-center">
+          <DisclosureButton className="w-full bg-slate-200 text-xl flex justify-center">
             <span className="grow">Játékszabályok</span>
             { !open && <span className="text-right pr-4">⛛</span>}
             { open && <span className="text-right pr-4" style={{ transform: 'scaleY(-1)' }}>⛛</span>}
-          </Disclosure.Button>
-            <Disclosure.Panel className="w-full p-2">
+          </DisclosureButton>
+            <DisclosurePanel className="w-full p-2">
               <p className="text-justify">
                 {ruleDescription}
               </p>
-            </Disclosure.Panel>
+            </DisclosurePanel>
         </div>
       )}
     </Disclosure>
@@ -118,24 +122,24 @@ export const GameEndDialog = ({ isOpen, setIsOpen, startNewGame, isPlayerWinner 
     >
       <div className="fixed inset-0 bg-black/50" aria-hidden="true"></div>
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Dialog.Panel className="rounded bg-white max-w-sm w-full p-2">
+        <DialogPanel className="rounded bg-white max-w-sm w-full p-2">
           <header className="flex items-baseline mb-2">
-            <Dialog.Title className="grow block text-2xl text-center">
+            <DialogTitle className="grow block text-2xl text-center">
               A játék véget ért
-            </Dialog.Title>
+            </DialogTitle>
             <button
               onClick={() => setIsOpen(false)}
               className="bg-slate-200 rounded text-2xl px-1"
             >×</button>
           </header>
-          <Dialog.Description className="text-lg block text-justify">
+          <Description className="text-lg block text-justify">
             {getResultDescription(isPlayerWinner)}
-          </Dialog.Description>
+          </Description>
 
           <button onClick={() => startNewGame()} className="cta-button mt-2">
             Új játék
           </button>
-        </Dialog.Panel>
+        </DialogPanel>
       </div>
     </Dialog>
   );

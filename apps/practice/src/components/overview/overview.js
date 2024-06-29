@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { gameList } from '../games/gameList';
-import { Listbox } from '@headlessui/react';
+import { Listbox, ListboxButton, ListboxOptions, ListboxOption } from '@headlessui/react';
 import { uniq, every } from 'lodash';
 import { Link } from 'react-router-dom';
 
@@ -51,23 +51,23 @@ const CategoryFilter = ({ selectedCategories, setSelectedCategories }) => {
     className="mb-2 w-[28rem] inline-block px-1"
   >
     <label htmlFor="category-selector" className="block">Kategória szűrő:</label>
-    <Listbox.Button
+    <ListboxButton
       id="category-selector"
-      className="border-2 border-slate-600 rounded w-full"
+      className="border-2 border-slate-600 rounded w-full bg-slate-100"
     >
       {selectedCategories.sort().join(', ') || 'Válassz kategóriákat'}
-    </Listbox.Button>
-    <Listbox.Options className="text-center mt-1">
-      {allCategories.map(category => <Listbox.Option
+    </ListboxButton>
+    <ListboxOptions className="text-center py-2 w-[var(--button-width)] shadow-xl bg-slate-100" anchor="bottom">
+      {allCategories.map(category => <ListboxOption
         key={category}
         value={category}
         className="inline-block"
-      >{({ active, selected }) =>
-        <span className={`border-2 rounded px-1 mx-1 inline-block ${selected ? 'bg-blue-200' : ''} ${active ? 'outline' : ''}`}>
+      >{({ focus, selected }) =>
+        <span className={`border-2 rounded px-1 m-1 inline-block ${selected ? 'bg-blue-200' : 'bg-white'} ${focus ? 'outline' : ''}`}>
           <span className={selected ? '' : 'text-transparent'}>✓</span>{category}
         </span>
-      }</Listbox.Option>)}
-    </Listbox.Options>
+      }</ListboxOption>)}
+    </ListboxOptions>
   </Listbox>;
 };
 
@@ -81,20 +81,20 @@ const YearFilter = ({ selectedYears, setSelectedYears }) => {
     className="mb-2 w-[28rem] inline-block px-1"
   >
     <label htmlFor="year-selector" className="block">Év szűrő:</label>
-    <Listbox.Button id="year-selector" className="border-2 border-slate-600 rounded w-full">
+    <ListboxButton id="year-selector" className="border-2 border-slate-600 rounded w-full bg-slate-100">
       {selectedYears.sort((a, b) => Number(a) - Number(b)).join(', ') || 'Válassz éveket'}
-    </Listbox.Button>
-    <Listbox.Options className="text-center mt-1">
-      {allYears.map(year => <Listbox.Option
+    </ListboxButton>
+    <ListboxOptions className="text-center mt-1 w-[var(--button-width)] shadow-xl bg-slate-100" anchor="bottom">
+      {allYears.map(year => <ListboxOption
         key={year}
         value={year}
         className="inline-block"
-      >{({ active, selected }) =>
-        <span className={`border-2 rounded px-1 mx-1 inline-block ${selected ? 'bg-blue-200' : ''} ${active ? 'outline' : ''}`}>
+      >{({ focus, selected }) =>
+        <span className={`border-2 rounded px-1 m-1 inline-block ${selected ? 'bg-blue-200' : 'bg-white'} ${focus ? 'outline' : ''}`}>
           <span className={selected ? '' : 'text-transparent'}>✓</span>{year}
         </span>
-      }</Listbox.Option>)}
-    </Listbox.Options>
+      }</ListboxOption>)}
+    </ListboxOptions>
   </Listbox>;
 };
 
