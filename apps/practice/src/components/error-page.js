@@ -16,7 +16,7 @@ export const ErrorPage = () => {
   }
   return (
     <main id="error-page">
-      <p>Sajnáljuk, egy váratlan hiba történt</p>
+      <p>Sajnáljuk, egy váratlan hiba történt.</p>
       <Link to='/'>Vissza a főoldalra</Link>
     </main>
   );

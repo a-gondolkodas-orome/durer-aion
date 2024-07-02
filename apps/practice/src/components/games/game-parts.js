@@ -1,9 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Disclosure, DisclosureButton, DisclosurePanel
-  , Dialog, DialogPanel, DialogTitle
-  , Description
+  Disclosure, DisclosureButton, DisclosurePanel,
+  Dialog, DialogPanel, DialogTitle,
+  Description
 } from '@headlessui/react';
 
 export const GameSidebar = ({
