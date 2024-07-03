@@ -76,7 +76,7 @@ const GameBoard = ({ board, setBoard, ctx }) => {
     {[0, 1, 2, 3].map(pileId => (
       <div
         key={pileId}
-        className={`js-pile w-[50%] pl-1 inline-block text-center`}
+        className={`w-[50%] pl-1 inline-block text-center`}
         style={{ transform: 'scaleY(-1)' }}
       >
         <p className="text-xl" style={{ transform: 'scaleY(-1)' }}>
@@ -87,7 +87,7 @@ const GameBoard = ({ board, setBoard, ctx }) => {
               key={pieceId}
               disabled={isDisabled({ pileId, pieceId })}
               className={`
-                js-pebble inline-block w-[20%] aspect-square rounded-full mx-0.5
+                inline-block w-[20%] aspect-square rounded-full mx-0.5
                 ${toAppear({ pileId, pieceId }) ? 'bg-blue-900 opacity-30' : ''}
                 ${toBeRemoved({ pileId, pieceId }) ? 'bg-red-600 opacity-50' : ''}
                 ${(nonExistent({ pileId, pieceId }) && !toAppear({ pileId, pieceId })) ? 'bg-white' : ''}

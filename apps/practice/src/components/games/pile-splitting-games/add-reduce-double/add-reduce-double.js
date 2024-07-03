@@ -68,7 +68,7 @@ const GameBoard = ({ board, ctx }) => {
       <div
         key={pileId}
         className={`
-          js-pile w-[50%] pl-1 inline-block text-center
+          w-[50%] pl-1 inline-block text-center
           ${pileId === 0 && board[0] >= board[1] ? 'border-r-2' : ''}
           ${pileId === 1 && board[0] < board[1] ? 'border-l-2' : ''}
         `}
@@ -82,7 +82,7 @@ const GameBoard = ({ board, ctx }) => {
               key={pieceId}
               disabled={isDisabled({ pileId, pieceId })}
               className={`
-                js-pebble inline-block w-[20%] aspect-square rounded-full mx-0.5
+                inline-block w-[20%] aspect-square rounded-full mx-0.5
                 ${toAppear({ pileId, pieceId }) && nonExistent({ pileId, pieceId }) ? 'bg-blue-900 opacity-30' : ''}
                 ${toBeRemoved({ pileId, pieceId }) ? 'bg-red-600 opacity-50' : ''}
                 ${(nonExistent({ pileId, pieceId }) && !toAppear({ pileId, pieceId })) ? 'bg-white' : ''}

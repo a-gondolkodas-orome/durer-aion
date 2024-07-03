@@ -31,13 +31,13 @@ export const GameSidebar = ({
       {ctx.phase === 'roleSelection' && (
         <span className="basis-[6rem]">
           <button
-            className="cta-button js-first-player"
+            className="cta-button"
             onClick={() => moves.chooseRole(0)}
           >
             {firstRoleLabel || "Kezdő leszek"}
           </button>
           <button
-            className="cta-button js-second-player"
+            className="cta-button"
             onClick={() => moves.chooseRole(1)}
           >
             {secondRoleLabel || "Második leszek"}
@@ -45,7 +45,7 @@ export const GameSidebar = ({
         </span>
       )}
       <button
-        className="cta-button mt-[2vh] js-restart-game"
+        className="cta-button mt-[2vh]"
         onClick={() => moves.startNewGame()}>
         Új játék
       </button>

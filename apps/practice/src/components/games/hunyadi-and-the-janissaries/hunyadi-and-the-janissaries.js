@@ -57,7 +57,7 @@ const GameBoard = ({ board, setBoard, ctx }) => {
             <button
               key={pieceIndex}
               disabled={!ctx.shouldPlayerMoveNext}
-              className="aspect-square w-[10%] inline-block mx-1 js-clickable-soldier"
+              className="aspect-square w-[10%] inline-block mx-1"
               onClick={() => clickOnSoldier(rowIndex, pieceIndex)}
               onFocus={() => setHoveredPiece({ rowIndex, pieceIndex })}
               onBlur={() => setHoveredPiece(null)}

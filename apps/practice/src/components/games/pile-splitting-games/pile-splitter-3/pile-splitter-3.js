@@ -104,7 +104,7 @@ const GameBoard = ({ board, setBoard, ctx }) => {
       <div
         key={pileId}
         className={`
-          js-pile w-[50%] pl-1 inline-block text-center py-2
+          w-[50%] pl-1 inline-block text-center py-2
           ${pileId < 2 ? 'border-t-2': ''}
           ${pileId === 0 && board[0] >= board[1] ? 'border-r-2' : ''}
           ${pileId === 1 && board[0] < board[1] ? 'border-l-2' : ''}
@@ -119,7 +119,7 @@ const GameBoard = ({ board, setBoard, ctx }) => {
               key={pieceId}
               disabled={isDisabled({ pileId, pieceId })}
               className={`
-                js-pebble inline-block bg-blue-600 w-[20%] aspect-square rounded-full mx-0.5
+                inline-block bg-blue-600 w-[20%] aspect-square rounded-full mx-0.5
                 ${pileId === removedPileId ? 'bg-red-600' : ''}
                 ${pileId === removedPileId ? 'opacity-50' : ''}
                 ${toBeLeft({ pileId, pieceId }) ? 'bg-blue-900' : ''}
