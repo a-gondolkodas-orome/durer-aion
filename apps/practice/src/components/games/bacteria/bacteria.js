@@ -143,11 +143,11 @@ const rule = <>
   a kijelölt mezők CÉL mezők. A játékban egy Támadó és Védekező játékos felváltva lép.
   A Védekező játékos minden körében levesz pontosan 1 baktériumot
   bármely általa választott mezőről. Ez a baktérium lekerül a pályáról.
-  A Támadó játékos a következő háromféle lépés egyikét választhatja:
-    1. Egy mezőn lévő összes baktériummal egyszerre balra vagy jobbra lép egyet.
-    2. Egyetlen baktériummal előre ugrik két sornyit.
+  A Támadó játékos a következő háromféle lépés egyikét választhatja:<br/>
+    1. Egy mezőn lévő összes baktériummal egyszerre balra vagy jobbra lép egyet.<br/>
+    2. Egyetlen baktériummal előre ugrik két sornyit.<br/>
     3. Kijelöl egy mezőt, ahol végbemegy a sejtosztódás. Ekkor az ezen mezőn lévő összes baktérium
-    osztódik: és mindegyikből egy-egy példány balra előre, ill. jobbra előre lép.
+    osztódik: és mindegyikből egy-egy példány balra előre, ill. jobbra előre lép.<br/>
   A Támadó akkor nyer, ha legalább egy baktérium bejut valamelyik CÉL mezőbe;
   a Védekező pedig akkor, ha az összes baktérium eltűnt a pályáról.
   Ha egy baktérium a pályán kívülre kerül egy lépéssel, akkor eltávolítottnak minősül.

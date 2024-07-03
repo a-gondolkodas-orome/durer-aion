@@ -158,7 +158,7 @@ const getPlayerStepDescription = () => {
 
 const rule6 = <>
 A játék kezdetén a szervezők néhány, de legfeljebb 6 korongot letesznek az asztalra,
-mindegyiket a piros vagy a kék felével felfelé. A soron következő játékos összesen négyfélét
+mindegyiket a piros vagy a kék oldalával felfelé. A soron következő játékos összesen négyfélét
 léphet:<br/>
 • 1 vagy 2 kék korongot elvehet az asztalról.<br/>
 • 1 vagy 2 piros korongot átfordíthat kékké.<br/>
@@ -167,7 +167,7 @@ Aki már nem tud lépni, az elveszíti a játékot.
 
 const rule10 = <>
 A játék kezdetén a szervezők néhány, de legfeljebb 10 korongot letesznek az asztalra,
-mindegyiket a piros vagy a kék felével felfelé. A soron következő játékos összesen négyfélét
+mindegyiket a piros vagy a kék oldalával felfelé. A soron következő játékos összesen négyfélét
 léphet:<br/>
 • 1 vagy 2 kék korongot elvehet az asztalról.<br/>
 • 1 vagy 2 piros korongot átfordíthat kékké.<br/>
