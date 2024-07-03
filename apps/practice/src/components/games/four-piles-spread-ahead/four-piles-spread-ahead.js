@@ -31,6 +31,15 @@ const GameBoard = ({ board, setBoard, ctx }) => {
     return pieceId>pileId-1 || (pieceId>board[pileId]-1);
   };
 
+  const hoverPiece = (piece) => {
+    if (piece === null) {
+      setHoveredPiece(null);
+      return;
+    }
+    if (isDisabled(piece)) return;
+    setHoveredPiece(piece);
+  }
+
   const clickPiece = ({ pileId, pieceId }) => {
     if (isDisabled({ pileId, pieceId })) return;
 
@@ -88,16 +97,17 @@ const GameBoard = ({ board, setBoard, ctx }) => {
               disabled={isDisabled({ pileId, pieceId })}
               className={`
                 inline-block w-[20%] aspect-square rounded-full mx-0.5
+                ${isDisabled({ pileId, pieceId }) && 'cursor-not-allowed'}
                 ${toAppear({ pileId, pieceId }) ? 'bg-blue-900 opacity-30' : ''}
                 ${toBeRemoved({ pileId, pieceId }) ? 'bg-red-600 opacity-50' : ''}
                 ${(nonExistent({ pileId, pieceId }) && !toAppear({ pileId, pieceId })) ? 'bg-white' : ''}
                 ${!nonExistent({ pileId, pieceId }) && !toBeRemoved({ pileId, pieceId }) ? 'bg-blue-900' : ''}
               `}
               onClick={() => clickPiece({ pileId, pieceId })}
-              onFocus={() => setHoveredPiece({ pileId, pieceId })}
-              onBlur={() => setHoveredPiece(null)}
-              onMouseOver={() => setHoveredPiece({ pileId, pieceId })}
-              onMouseOut={() => setHoveredPiece(null)}
+              onFocus={() => hoverPiece({ pileId, pieceId })}
+              onBlur={() => hoverPiece(null)}
+              onMouseOver={() => hoverPiece({ pileId, pieceId })}
+              onMouseOut={() => hoverPiece(null)}
             ></button>
           ))}
       </div>
