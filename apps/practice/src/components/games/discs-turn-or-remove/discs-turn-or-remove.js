@@ -42,12 +42,12 @@ const gameBoardFactory = maxDiscs => {
           <section className="p-2 shrink-0 grow basis-2/3">
           <table className="m-2 border-collapse table-fixed w-full"><tbody>
           <tr>
-              {range(Math.max(maxDiscs, board[1])).map(i => (
+              {range(board[1]).map(i => (
                   board[1]>i+2 ?
                       <td className='text-center aspect-square'
                           key = {i}>
                       <button
-                          className="aspect-square w-full p-[5%]"
+                          className="aspect-square w-full p-[5%] cursor-not-allowed"
                           disabled={true}
                       >
                       <span
@@ -71,21 +71,22 @@ const gameBoardFactory = maxDiscs => {
                       <span
                           key={i}
                           className={`
-                          w-[100%] aspect-square inline-block rounded-full mr-0.5 bg-red-800
-                          ${(ctx.shouldPlayerMoveNext && (isEqual(hovered,[1,i]) || isEqual(hovered, [1, i-1]))) ? 'opacity-50' : ''}
+                          w-[100%] aspect-square inline-block rounded-full mr-0.5
+                          ${(ctx.shouldPlayerMoveNext && (isEqual(hovered,[1,i]) || isEqual(hovered, [1, i-1]))) ? 'opacity-75 bg-blue-800' : 'bg-red-800'}
                           `}>
                       </span></button></td>
-                          :<td className='text-center aspect-square' key={i}><button className="aspect-square w-full p-[5%]" disabled={true}></button></td>
+                          :<td className='text-center aspect-square' key={i}>
+                            <button className="aspect-square w-full p-[5%]" disabled={true}></button>
+                            </td>
                       }</>
               ))}
-          </tr>
-          <tr>
+
               {range(board[0]).map(i => (
                   board[0]>i+2 ?
                       <td className='text-center aspect-square'
                           key = {i}>
                       <button
-                          className="aspect-square w-full p-[5%]"
+                          className="aspect-square w-full p-[5%] cursor-not-allowed"
                           disabled={true}
                       >
                       <span
@@ -109,11 +110,13 @@ const gameBoardFactory = maxDiscs => {
                       <span
                           key={i}
                           className={`
-                          w-[100%] aspect-square inline-block rounded-full mr-0.5 bg-blue-800
-                          ${(ctx.shouldPlayerMoveNext && (isEqual(hovered,[0,i]) || isEqual(hovered, [0, i-1]))) ? 'opacity-50' : ''}
+                          w-[100%] aspect-square inline-block rounded-full mr-0.5
+                          ${(ctx.shouldPlayerMoveNext && (isEqual(hovered,[0,i]) || isEqual(hovered, [0, i-1]))) ? 'opacity-50 bg-slate-600' : 'bg-blue-800'}
                           `}>
                       </span></button></td>
-                          :<td className='text-center aspect-square' key={i}><button className="aspect-square w-full p-[5%]" disabled={true}></button></td>
+                          :<td className='text-center aspect-square' key={i}>
+                            <button className="aspect-square w-full p-[5%]" disabled={true}></button>
+                            </td>
                       }</>
               ))}
               </tr>
