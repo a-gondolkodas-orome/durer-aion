@@ -40,25 +40,23 @@ const gameBoardFactory = maxDiscs => {
 
       return (
           <section className="p-2 shrink-0 grow basis-2/3">
-          <table className="m-2 border-collapse table-fixed w-full"><tbody>
+          <table className="table-fixed w-full"><tbody>
           <tr>
               {range(board[1]).map(i => (
                   board[1]>i+2 ?
                       <td className='text-center aspect-square'
-                          key = {i}>
+                          key = {`red-disabled-${i}`}>
                       <button
                           className="aspect-square w-full p-[5%] cursor-not-allowed"
-                          disabled={true}
+                          disabled
                       >
                       <span
-                          key={i}
                           className={`
                           w-[100%] aspect-square inline-block rounded-full mr-0.5 bg-red-800
                           `}>
                       </span></button></td>
-                  : <>{board[1]>i ?
-                      <td className='text-center aspect-square'
-                          key = {i}
+                  : <td className='text-center aspect-square'
+                          key = {`red-${i}`}
                           onClick = {() => select(1, i)}>
                       <button
                           className="aspect-square w-full p-[5%]"
@@ -69,35 +67,28 @@ const gameBoardFactory = maxDiscs => {
                           onBlur={() => setHovered(null)}
                       >
                       <span
-                          key={i}
                           className={`
                           w-[100%] aspect-square inline-block rounded-full mr-0.5
                           ${(ctx.shouldPlayerMoveNext && (isEqual(hovered,[1,i]) || isEqual(hovered, [1, i-1]))) ? 'opacity-75 bg-blue-800' : 'bg-red-800'}
                           `}>
                       </span></button></td>
-                          :<td className='text-center aspect-square' key={i}>
-                            <button className="aspect-square w-full p-[5%]" disabled={true}></button>
-                            </td>
-                      }</>
               ))}
 
               {range(board[0]).map(i => (
                   board[0]>i+2 ?
                       <td className='text-center aspect-square'
-                          key = {i}>
+                          key = {`blue-disabled-${i}`}>
                       <button
                           className="aspect-square w-full p-[5%] cursor-not-allowed"
                           disabled={true}
                       >
                       <span
-                          key={i}
                           className={`
                           w-[100%] aspect-square inline-block rounded-full mr-0.5 bg-blue-800
                           `}>
                       </span></button></td>
-                  : <>{board[0]>i ?
-                      <td className='text-center aspect-square'
-                          key = {i}
+                  : <td className='text-center aspect-square'
+                          key = {`blue-${i}`}
                           onClick = {() => select(0, i)}>
                       <button
                           className="aspect-square w-full p-[5%]"
@@ -108,16 +99,15 @@ const gameBoardFactory = maxDiscs => {
                           onBlur={() => setHovered(null)}
                       >
                       <span
-                          key={i}
                           className={`
                           w-[100%] aspect-square inline-block rounded-full mr-0.5
                           ${(ctx.shouldPlayerMoveNext && (isEqual(hovered,[0,i]) || isEqual(hovered, [0, i-1]))) ? 'opacity-50 bg-slate-600' : 'bg-blue-800'}
                           `}>
                       </span></button></td>
-                          :<td className='text-center aspect-square' key={i}>
-                            <button className="aspect-square w-full p-[5%]" disabled={true}></button>
-                            </td>
-                      }</>
+              ))}
+                {/* dummy cells to ensure stable piece width */}
+              {range((maxDiscs - board[0] - board[1])).map(i => (
+                <td key={`dummy-${i}`}></td>
               ))}
               </tr>
           </tbody></table>
@@ -156,7 +146,7 @@ const getGameStateAfterMove = (newBoard) => {
 };
 
 const getPlayerStepDescription = () => {
-    return "Kattints, hogy eltávolíts egy vagy két korongot egy színből.";
+    return "Kattints egy korongra, hogy eltávolítsd vagy átfordítsd az adott és tőle jobbra levő korongo(ka)t az adott színből.";
 };
 
 const rule6 = <>
