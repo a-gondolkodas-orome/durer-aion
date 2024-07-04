@@ -42,6 +42,21 @@ const gameBoardFactory = (maxDiscs) => {
       }
     };
 
+    const nextBoardDescription = () => {
+      if (hovered === null) return '';
+      if (!ctx.shouldPlayerMoveNext) return '';
+      if (hovered[0] === 0) {
+        if (hovered[1] === board[0] - 1) {
+          return ` --> ${board[1]} piros és ${board[0] - 1} kék korong`
+        }
+        return ` --> ${board[1]} piros és ${board[0] - 2} kék korong`
+      }
+      if (hovered[1] === board[1] - 1) {
+        return ` --> ${board[1] - 1} piros és ${board[0] + 1} kék korong`
+      }
+      return ` --> ${board[1] - 2} piros és ${board[0] + 2} kék korong`
+    }
+
     return (
       <section className="p-2 shrink-0 grow basis-2/3">
         <table className="table-fixed w-full">
@@ -99,7 +114,7 @@ const gameBoardFactory = (maxDiscs) => {
                   >
                     <button
                       className="aspect-square w-full p-[5%] cursor-not-allowed"
-                      disabled={true}
+                      disabled
                     >
                       <span
                         className={`w-[100%] aspect-square inline-block rounded-full mr-0.5 bg-blue-800`}
@@ -141,6 +156,7 @@ const gameBoardFactory = (maxDiscs) => {
             </tr>
           </tbody>
         </table>
+        {`${board[1]} piros és ${board[0]} kék korong${nextBoardDescription()}`}
       </section>
     );
   };
