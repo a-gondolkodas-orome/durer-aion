@@ -113,18 +113,45 @@ export const GameBoard = ({ board, setBoard, ctx }) => {
         </tr>
       </tbody>
     </table>
-    {valueOfRemovedCoin && (
-      <button className="cta-button" onClick={() => endTurn(board)}>
-        Semmit se rakok be
-      </button>
-    )}
+    <table className="mx-2 mt-4 table-fixed w-full">
+      <tbody>
+        <tr>
+          {[0, 1].map(coinValue =>
+            <td className="text-center">
+              <button
+                className={`
+                  inline-block w-[30%] aspect-square rounded-full mx-0.5
+                  ${getCoinColor(coinValue)}
+                  ${(!wasCoinAlreadyRemovedInTurn || valueOfRemovedCoin <= coinValue) && 'opacity-50 cursor-not-allowed'}
+                `}
+                disabled={!wasCoinAlreadyRemovedInTurn || valueOfRemovedCoin <= coinValue}
+                onClick={() => clickPile(coinValue)}
+                onMouseOver={() => {if (wasCoinAlreadyRemovedInTurn) setHoveredPile(coinValue)}}
+                onMouseOut={() => setHoveredPile(null)}
+                onFocus={() => {if (wasCoinAlreadyRemovedInTurn) setHoveredPile(coinValue)}}
+                onBlur={() => setHoveredPile(null)}
+              >{coinValue+1}</button>
+            </td>
+          )}
+          <td className="px-2">
+            <button
+              disabled={!wasCoinAlreadyRemovedInTurn}
+              className="cta-button"
+              onClick={() => endTurn(board)}
+            >
+              Semmit se rakok be
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </section>
   );
 };
 
 export const getPlayerStepDescription = ({ turnStage }) => {
   if (turnStage === 'placeBack') {
-    return 'Kattints egy mezőre, hogy visszatégy egy olyan pénzérmét';
+    return 'Kattints egy mezőre vagy érmére, hogy visszatégy egy olyan pénzérmét';
   }
   return 'Kattints egy mezőre, hogy elvegyél egy olyan pénzérmét';
 };
