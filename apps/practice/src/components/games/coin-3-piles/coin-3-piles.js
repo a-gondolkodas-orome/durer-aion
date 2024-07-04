@@ -39,7 +39,7 @@ export const GameBoard = ({ board, setBoard, ctx }) => {
   };
   const getCoinColor = (coinValue) => {
     if (coinValue === 0) return 'bg-yellow-700';
-    if (coinValue === 1) return 'bg-slate-700';
+    if (coinValue === 1) return 'bg-slate-500';
     return 'bg-yellow-400';
   };
   const shouldShowCoinToBeRemoved = (coinValue) => {
@@ -79,6 +79,7 @@ export const GameBoard = ({ board, setBoard, ctx }) => {
               >
               <button
                 className="min-h-[25vh] w-full p-[5%]"
+                style={{ transform: 'scaleY(-1)' }}
                 disabled={!isMoveAllowed(coinValue)}
                 onMouseOver={() => setHoveredPile(coinValue)}
                 onMouseOut={() => setHoveredPile(null)}
@@ -87,18 +88,24 @@ export const GameBoard = ({ board, setBoard, ctx }) => {
               >
                 {range(board[coinValue]).map(i => (
                   <span
-                    key={i}
+                    key={`${board[coinValue]}-${i}-${shouldShowCoinToBeAdded(coinValue)}`}
                     className={`
-                      w-[30%] aspect-square inline-block rounded-full mr-0.5
+                      w-[30%] aspect-square inline-block rounded-full mr-0.5 mt-0.5
                       ${getCoinColor(coinValue)}
-                      ${shouldShowCoinToBeRemoved(coinValue) && i === 1 ? 'opacity-50' : ''}
+                      ${shouldShowCoinToBeRemoved(coinValue) && i === (board[coinValue] - 1) ? 'opacity-50' : ''}
                     `}
-                  ></span>
+                    style={{ transform: 'scaleY(-1)' }}
+                  ><span className='relative top-[25%]'>{coinValue+1}</span></span>
                 ))}
                 {shouldShowCoinToBeAdded(coinValue) && (
                   <span
-                    className={`w-[30%] aspect-square inline-block rounded-full mr-0.5 opacity-50 ${getCoinColor(coinValue)}`}
-                  ></span>
+                    key="to-be-added"
+                    className={`
+                      w-[30%] aspect-square inline-block rounded-full mr-0.5 mt-0.5 opacity-50
+                      ${getCoinColor(coinValue)}
+                    `}
+                    style={{ transform: 'scaleY(-1)' }}
+                  ><span className='relative top-[25%]'>{coinValue+1}</span></span>
                 )}
               </button>
             </td>
