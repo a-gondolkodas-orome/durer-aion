@@ -160,5 +160,11 @@ export const gameList = {
     round: 'döntő',
     category: ['D'],
     name: 'Prímhatványok kivonása'
+  },
+  PlusOneTwoThree: {
+    year: 5,
+    round: 'döntő',
+    category: ['A'],
+    name: '+1, +2, +3'
   }
 };
