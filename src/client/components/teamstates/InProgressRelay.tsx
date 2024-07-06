@@ -92,7 +92,8 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
             <Countdown
               msRemaining={msRemaining ?? null}
               setMsRemaining={()=>{}}
-              getServerTimer={()=>{}} />
+              getServerTimer={()=>{}}
+              endTime={new Date(G.end)} />
           </Stack>
         <Stack sx={{
           width: {
@@ -153,7 +154,8 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
             {!finished && <Countdown
               msRemaining={msRemaining ?? null}
               setMsRemaining={setMsRemaining}
-              getServerTimer={moves.getTime} />}
+              getServerTimer={moves.getTime}
+              endTime={new Date(G.end)} />}
           </Stack>
           {process.env.REACT_APP_WHICH_VERSION === "b" && 
             <Stack sx={{

@@ -4,6 +4,7 @@ export function Countdown(
   props: PropsWithoutRef<{ 
     msRemaining: number | null,
     setMsRemaining: Dispatch<SetStateAction<number>>,
+    endTime: Date,
     getServerTimer: ()=>void 
   }>
 ) {
@@ -12,13 +13,16 @@ export function Countdown(
     useEffect(() => {
         let handle: NodeJS.Timeout | null = null;
         handle = setInterval(function () {
+            const now = new Date();
+            const end = new Date(props.endTime);
+            const diff = end.getTime() - now.getTime();
             props.setMsRemaining(s => {
                 // clock is not updated below 1 seconds, only the backend sets it below 1 second!
-                if (s !== null && s > 1000) {
-                    return s - 1000
+                if (s !== null && s > 1100) {
+                    return diff
                 }
                 if (s !== null && s < 0) {
-                  return s - 1000;
+                  return diff;
                 }
                 props.getServerTimer();
                 // TODO: fetch / something
@@ -54,7 +58,7 @@ export function Countdown(
                 }:${Math.floor(props.msRemaining / 1000 % 60).toString().slice(0,2).padStart(2, '0')
                 }`);
         }
-    }, [props.msRemaining]);
+    }, [props.msRemaining, props.endTime]);
     return (<span className="fs-3 mb-3"><code className="mb-2">
         {countdown}
     </code></span>);

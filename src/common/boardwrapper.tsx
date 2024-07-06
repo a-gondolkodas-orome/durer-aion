@@ -77,7 +77,8 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
               {!finished && <Countdown
                 msRemaining={msRemaining ?? null}
                 setMsRemaining={setMsRemaining}
-                getServerTimer={moves.getTime} />}
+                getServerTimer={moves.getTime}
+                endTime={new Date(G.end)} />}
             </Stack>
           </Stack>
           {process.env.REACT_APP_WHICH_VERSION === "b" && 
