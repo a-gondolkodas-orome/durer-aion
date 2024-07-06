@@ -1,0 +1,69 @@
+import { State } from 'boardgame.io';
+import { MyGameState } from './game';
+import { GameStateMixin } from '../../common/types';
+
+
+function possibleMoves(G: MyGameState) {
+  let moves = [];
+  if ((G.circle[1] || G.circle[G.circle.length-1]) && G.circle[0]) {
+    moves.push({move: 'removePoint', args: [0]});
+  }
+  for (let i = 1; i<G.circle.length-1; i++) {
+    if ((G.circle[i-1] || G.circle[i+1]) && G.circle[i]) {
+      moves.push({move: 'removePoint', args: [i]});
+    }
+  }  
+  if ((G.circle[0] || G.circle[G.circle.length-2]) && G.circle[G.circle.length-1]) {
+    moves.push({move: 'removePoint', args: [G.circle.length-1]});
+  }
+  return moves;
+}
+
+export function strategyWrapper(category: "C" | "D" | "E") {
+  return (state: State<MyGameState & GameStateMixin>, botID: string): [number | { circle: Array<boolean> } | undefined, string] => {
+    if (state.ctx.phase === "startNewGame") {
+      return [startingPosition({ G: state.G, ctx: state.ctx }, category), "setStartingPosition"];
+    }
+
+    if (state.G.difficulty === "test") {
+      return randomStrategy(state.G);
+    } else {
+      return randomStrategy(state.G);
+    }
+  }
+}
+
+function startingPosition({ G, ctx }: any, category: "C" | "D" | "E"): { circle: Array<boolean>, first: number} {
+  if (category === "C") {
+    // C Category
+    return { circle: Array(7).fill(true), first:-1};
+  }
+  if (category === "D") {
+    // D Category
+    return { circle: Array(9).fill(true), first:-1};
+  }
+  if (category === "E") {
+    // E Category
+    return { circle: Array(Math.floor(Math.random()*4+7)).fill(true), first:-1}
+  }
+  //just in case
+  return {circle: Array(7).fill(true), first:-1};
+}
+
+function randomStrategy(G: MyGameState): [number, string] {
+  let pMoves =  possibleMoves(G);
+  let i = Math.floor(Math.random()*pMoves.length);
+  return [pMoves[i].args[0], pMoves[i].move];
+}
+
+function winningStrategy(G: MyGameState): [number, string] {
+  let pMoves: string | any[] = [];
+  if (G.first === -1) {
+    pMoves = possibleMoves(G);
+  }
+
+  //TODO Implement strategy
+
+  let i = Math.floor(Math.random()*pMoves.length);
+  return [pMoves[i].args[0], pMoves[i].move];
+}
