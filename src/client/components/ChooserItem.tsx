@@ -78,7 +78,10 @@ export function ChooserItem(props: {
           display: 'flex',
           alignItems: "center",
           flexDirection: 'row',
-          paddingBottom: !props.hideDesc && mobileDescOpen ? "10px" : "0px",
+          paddingBottom: {
+            xs: !props.hideDesc && mobileDescOpen ? "10px" : "0px",
+            md: "0px",
+          },
         }}>
           <Stack sx={{marginTop: {
             md: 0,
@@ -97,7 +100,10 @@ export function ChooserItem(props: {
           },
           transition: "height 0.2s ease-in",
           overflow: 'hidden',
-          paddingBottom: !props.hideDesc && mobileDescOpen ? "10px" : "0px",
+          paddingBottom: {
+            xs: !props.hideDesc && mobileDescOpen ? "10px" : "0px",
+            md: "0px",
+          },
           "& p": {
             marginBlockEnd: 0,
           },
