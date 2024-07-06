@@ -129,7 +129,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
             xs: '100%',
             md: "350px",
           },
-          maxHeight: "300px",
+          maxHeight: "330px",
           backgroundColor: "#fff",
           borderRadius: "25px",
           padding: '30px',
