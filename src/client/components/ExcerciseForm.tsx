@@ -120,7 +120,7 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
                 fontSize: '18px',
                 marginLeft: '10px',
               }}>{data}</Stack>
-              <CloseIcon sx={{ color: '#FF0000', fontSize: '18ox' }} />
+              {props.previousCorrectness == false && <CloseIcon sx={{ color: '#FF0000', fontSize: '18ox' }} />}
             </Stack>
           })}
         </Stack>
