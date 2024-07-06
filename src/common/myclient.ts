@@ -6,7 +6,7 @@ import { boardWrapper } from './boardwrapper';
 import { GameStateMixin, GameType } from './types';
 import type {GameRelay} from '../games/relay/game';
 import { State } from 'boardgame.io';
-//import { Debug } from 'boardgame.io/debug';
+import { Debug } from 'boardgame.io/debug';
 
 export function MyClient<T_SpecificGameState>(
   game: GameType<T_SpecificGameState>,
@@ -48,7 +48,7 @@ export function MyClientWithBot<T_SpecificGameState,T_SpecificPosition>(
       }
     ),
     numPlayers: 2,
-    //debug: { impl: Debug },
+    debug: { impl: Debug },
   })
 }
 
