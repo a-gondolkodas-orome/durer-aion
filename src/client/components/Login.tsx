@@ -6,6 +6,9 @@ import Form from './form';
 import theme from './theme';
 import { dictionary } from '../text-constants';
 import { Button } from '@mui/material';
+import MaskedInput from "react-text-mask";
+
+const idMask = [/\d/, /\d/,  /\d/, "-", /\d/, /\d/, /\d/, /\d/, "-", /\d/, /\d/, /\d/ ];
 
 export function Login() {
   const { enqueueSnackbar } = useSnackbar();
@@ -70,6 +73,17 @@ export function Login() {
             <Field 
               name="joinCode"
               type="text"
+            >
+
+        {
+          ({
+            field, 
+            form: { handleChange },
+          }: any) => <MaskedInput
+            {...field}
+            mask={idMask}
+            onChange={handleChange}
+            className="text-input"
               placeholder="111-2222-333"
               style={{
                 width: '300px',
@@ -79,7 +93,9 @@ export function Login() {
                 borderColor: theme.palette.primary.main,
                 fontSize: '18px',
               }}
-            />
+          />
+        }
+            </Field>
             <Button 
               type="submit"
               color='primary'

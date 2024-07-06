@@ -2,12 +2,20 @@ import React, { useEffect } from "react";
 import * as Yup from 'yup';
 import { Button, Stack } from "@mui/material";
 import Form from "./form";
-import { ErrorMessage, Field } from "formik";
+import { ErrorMessage, Field, FormikProps } from "formik";
 import theme from "./theme";
 import CloseIcon from '@mui/icons-material/Close';
 import { useSnackbar } from "notistack";
 import { useRefreshTeamState } from "../hooks/user-hooks";
 import { dictionary } from "../text-constants";
+
+function sanitizeValue(value: string) {
+  const regex = /^([1-9]*[0-9]*)$/;
+  if (regex.test(value)) {
+    return true
+  }
+  return false;
+}
 
 export interface MyProps {
   previousTries: number[];
@@ -71,16 +79,30 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
         }}>
         <Field
           name="result"
-          type="text"
-          style={{
-            width: '100%',
-            height: '40px',
-            borderWidth: '2px',
-            borderRadius: '5px',
-            borderColor: theme.palette.primary.main,
-            fontSize: '18px',
-          }}
-        />
+        >
+        {
+          ({
+            field, 
+            form: { handleChange },
+          }: any) => <input
+            {...field}
+            onChange={(e)=>{
+                e.preventDefault();
+                if (sanitizeValue(e.target.value)) {
+                  handleChange(e);
+                }
+            }}
+            className="text-input"
+            style={{
+              width: '100%',
+              height: '40px',
+              borderWidth: '2px',
+              borderRadius: '5px',
+              borderColor: theme.palette.primary.main,
+              fontSize: '18px',
+            }}
+          />
+        }</Field>
         <ErrorMessage name="result" />
         <Stack sx={{marginTop: '20px'}}>
           {props.previousTries.map((data, idx) => {
