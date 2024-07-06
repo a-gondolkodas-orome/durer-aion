@@ -34,6 +34,7 @@ export function Header(props: { teamName: string | null }) {
           },
           fontWeight: 'bold',
           paddingTop: '20px',
+          whiteSpace: 'nowrap',
         }}>{dictionary.header.title}</Stack>
         {props.teamName &&
           <Stack sx={{
@@ -42,11 +43,23 @@ export function Header(props: { teamName: string | null }) {
               xs: 'none',
               md: 'flex'
             },
+            width: '100%',
+            flex: 1,
             paddingTop: '40px',
             alignItems: 'center',
+            overflow: 'hidden',
+            paddingLeft: '10px',
+            paddingRight: '10px',
           }}>
             <Stack sx={{
+              flex: 1
+            }}></Stack>
+            <Stack sx={{
               fontSize: 25,
+              display: 'block',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
             }}>{props.teamName}</Stack>
             <Stack onClick={()=>{
               logout();
@@ -61,13 +74,16 @@ export function Header(props: { teamName: string | null }) {
                 opacity: '0.8',
               }
             }}>{dictionary.header.logout}</Stack>
+            <Stack sx={{
+              flex: 1
+            }}></Stack>
           </Stack>
         }
         {props.teamName &&<Stack sx={{
           display: {
             xs: 'flex',
             md: 'none'
-          }
+          },
         }}><PowerSettingsNewIcon onClick={()=>{
           setMobileMenuOpen(true)
         }} sx={{
@@ -80,7 +96,8 @@ export function Header(props: { teamName: string | null }) {
           display: {
             xs: 'none',
             md: 'flex'
-          }
+          },
+          whiteSpace: 'nowrap',
         }}>{dictionary.header.subtitle}</Stack>
         <Dialog
           open={mobileMenuOpen}
