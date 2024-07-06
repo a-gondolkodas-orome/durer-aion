@@ -66,10 +66,10 @@ export const GameBoard = ({ board, setBoard, ctx }) => {
   <section className="p-2 shrink-0 grow basis-2/3">
     <div className="text-center" style={{ transform: 'scaleY(-1)' }}>
     {[0, 1, 2].map(coinValue => (
-      <>
+      <span key={coinValue}>
         {range(board[coinValue]).map(i => (
           <span
-            key={`${board[coinValue]}-${i}-${shouldShowCoinToBeAdded(coinValue)}`}
+            key={`${i}-${shouldShowCoinToBeAdded(coinValue)}`}
             className={`
               w-[15%] aspect-square inline-block rounded-full mr-0.5 mt-0.5
               ${getCoinColor(coinValue)}
@@ -93,14 +93,14 @@ export const GameBoard = ({ board, setBoard, ctx }) => {
             style={{ transform: 'scaleY(-1)' }}
           ><span className='relative top-[25%]'>{coinValue+1}</span></span>
         )}
-      </>))}
+      </span>))}
     </div>
     <hr className="my-4"></hr>
     <table className="mx-2 table-fixed w-full">
       <tbody>
         <tr>
           {[0, 1].map(coinValue =>
-            <td className="text-center">
+            <td key={coinValue} className="text-center">
               <button
                 className={`
                   inline-block w-[30%] aspect-square rounded-full mx-0.5
@@ -116,7 +116,7 @@ export const GameBoard = ({ board, setBoard, ctx }) => {
               >{coinValue+1}</button>
             </td>
           )}
-          <td className="px-2">
+          <td key="nothing" className="px-2">
             <button
               disabled={!wasCoinAlreadyRemovedInTurn}
               className="cta-button"
