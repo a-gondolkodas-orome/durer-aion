@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import * as Yup from 'yup';
 import { Button, Stack } from "@mui/material";
 import Form from "./form";
@@ -27,6 +27,7 @@ export interface MyProps {
 export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) => {
   const { enqueueSnackbar } = useSnackbar();
   const refreshState = useRefreshTeamState();
+  const [sentAnswer, setSentAnswer] = useState<number>(0);
   useEffect(()=>{
     if(props.previousCorrectness!=null){
       if(props.previousCorrectness){
@@ -37,6 +38,7 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
         enqueueSnackbar('A válasz sajnos nem volt jó', { variant: 'error' });
       }
     }
+    setSentAnswer((p)=>{return p-1;});
   }, [props.previousCorrectness, props.attempt])
   return <Stack>
     <Stack sx={{
@@ -72,10 +74,10 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
             console.log(e)
             enqueueSnackbar(e?.message || "Hiba történt", { variant: 'error' });
             if (e?.message === "cannot make move after game end") {
-              refreshState()
+              refreshState();
             }
           }
-          
+          setSentAnswer(1);
         }}>
         <Field
           name="result"
@@ -85,6 +87,7 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
             field, 
             form: { handleChange },
           }: any) => <input
+            autoFocus={sentAnswer>0}
             {...field}
             onChange={(e)=>{
                 e.preventDefault();
