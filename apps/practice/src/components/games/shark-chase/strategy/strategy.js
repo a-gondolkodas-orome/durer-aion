@@ -42,7 +42,7 @@ export const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
   }
   else
   {
-    place = findSubmarineNextToShark();
+    let place = findSubmarineNextToShark();
     if(place!==-1)
     {
       return moveSubmarine(place, board.shark);
@@ -137,6 +137,7 @@ const getOptimalAiPlacingPositionShark = (board, playerIndex) => {
   const visited2 = Array(16).fill(false);
   const componentSizes = Array(16).fill(0);
   const queue = [];
+  let first;
 
   for (let i = 0; i<16; i++)
   {
@@ -144,7 +145,7 @@ const getOptimalAiPlacingPositionShark = (board, playerIndex) => {
     {
       queue.push(i);
       visited[i] = true;
-      counter = 0;
+      let counter = 0;
       while(queue.length > 0)
       {
         counter++;
@@ -184,7 +185,7 @@ const getOptimalAiPlacingPositionShark = (board, playerIndex) => {
     }
   }
 
-  maxi = 1;
+  let maxi = 1;
   for (let i = 0; i < 16; i++)
   {
     if (distanceFromShark(i) <=2)
