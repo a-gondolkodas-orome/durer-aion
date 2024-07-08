@@ -20,7 +20,7 @@ const GameBoard = ({ board, setBoard, ctx }) => {
   const [playerState, setPlayerState] = useState('choosePiece');
   const [chosenPiece, setChosenPiece] = useState(12);
 
-  possibleMoves=[]
+  let possibleMoves=[]
   if (ctx.playerIndex===1) {
     for (let i = 0; i < 16; i++) {
       if ((Math.abs(board.shark%4-i%4) + Math.abs(Math.floor(board.shark/4)-Math.floor(i/4)))<=2 && board.board[i]!=='blue' && board.board[i]!=='red')
