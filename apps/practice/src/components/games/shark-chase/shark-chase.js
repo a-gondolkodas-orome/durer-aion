@@ -7,7 +7,7 @@ import { SubmarineSvg } from './strategy/shark-chase-submarine-svg';
 
 
 export const generateStartBoard = () => {
-  startboard = Array(16).fill(null);
+  let startboard = Array(16).fill(null);
   startboard[2] = 'red';
   startboard[3] = 'red';
   startboard[7] = 'red';
