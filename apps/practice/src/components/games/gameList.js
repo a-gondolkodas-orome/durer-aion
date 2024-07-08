@@ -162,6 +162,12 @@ export const gameList = {
     category: ['D'],
     name: 'Prímhatványok kivonása'
   },
+  SharkChase: {
+    year: 17,
+    round: 'döntő',
+    category: ['C'],
+    name: 'Cápa üldözés'
+  },
   PlusOneTwoThree: {
     year: 5,
     round: 'döntő',
