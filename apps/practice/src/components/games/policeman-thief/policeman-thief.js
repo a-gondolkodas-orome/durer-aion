@@ -193,6 +193,7 @@ const GameBoard = ({ board, setBoard, ctx }) => {
                 style={{ transform: "translate(-1%,1%)" }}
                 x={cubeCoords[nodeId].cx}
                 y={cubeCoords[nodeId].cy}
+                onClick={() => handleCircleClick(nodeId)}
               >
                 2x
               </text>
