@@ -162,6 +162,12 @@ export const gameList = {
     category: ['D'],
     name: 'Prímhatványok kivonása'
   },
+  Policemanthief: {
+    year: 9,
+    round: 'döntő',
+    category: ['A'],
+    name: 'rendőr, rabló'
+  },
   SharkChase: {
     year: 17,
     round: 'döntő',

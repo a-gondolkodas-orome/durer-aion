@@ -27,6 +27,7 @@ import { TwelveSquares } from '../games/twelve-squares/twelve-squares';
 import { Bacteria } from '../games/bacteria/bacteria';
 import { SixDiscs, TenDiscs } from '../games/discs-turn-or-remove/discs-turn-or-remove';
 import { PrimeExponentials } from '../games/prime-exponentials/prime-exponentials';
+import { Policemanthief } from '../games/policeman-thief/policeman-thief';
 import { SharkChase } from '../games/shark-chase/shark-chase';
 import { PlusOneTwoThree } from '../games/plus-one-two-three/plus-one-two-three';
 
@@ -60,6 +61,7 @@ export const App = () => {
     { path: '/game/SixDiscs', element: <SixDiscs />},
     { path: '/game/TenDiscs', element: <TenDiscs />},
     { path: '/game/PrimeExponentials', element: <PrimeExponentials />},
+    { path: '/game/Policemanthief', element: <Policemanthief />},
     { path: '/game/SharkChase', element: <SharkChase />},
     { path: '/game/PlusOneTwoThree', element: <PlusOneTwoThree />}
   ]);
