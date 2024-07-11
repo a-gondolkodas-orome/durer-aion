@@ -67,6 +67,7 @@ export const teamAttributes: ModelAttributes = {
   },
   teamName: {
     type: DataTypes.STRING,
+    unique: true,
     validate:{
       len: [1,255]
     }
