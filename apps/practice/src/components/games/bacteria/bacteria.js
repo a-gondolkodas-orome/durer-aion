@@ -1,33 +1,38 @@
 import React, { useState } from "react";
-import { range, sampleSize, cloneDeep, random } from "lodash";
+import { range, cloneDeep, random } from "lodash";
 import { strategyGameFactory } from "../strategy-game";
-import { getGameStateAfterAiTurn } from "./strategy/strategy";
+import { getGameStateAfterAiTurn } from "./strategy";
+import { isJump, reachedFieldsAfterClick, isAllowedAttackClick, areAllBacteriaRemoved } from "./helpers";
 
 const boardWidth = 11;
-const boardHeight = 9;
-const adjGoals = true;
 
 const generateNewBoard = () => {
-  const board = Array(boardHeight).fill([]);
-  range(boardHeight).forEach((rowIndex) => {
+  const board = Array(9).fill([]);
+  range(board.length).forEach((rowIndex) => {
     const rowSize = rowIndex % 2 === 0 ? boardWidth : boardWidth - 1;
     board[rowIndex] = Array(rowSize).fill(0);
   });
 
-  const numOfGoals = random(1, boardWidth);
-  if (adjGoals) {
-    const goalStart = random(boardWidth - numOfGoals);
-    for (let i = goalStart; i < goalStart + numOfGoals; i++) {
-      board[boardHeight - 1][i] = -1;
-    }
-  } else {
-    const goals = sampleSize(range(boardWidth), numOfGoals);
-    goals.forEach((index) => (board[8][index] = -1));
+  const boardVariantId = random(1, 6);
+  if (boardVariantId === 1) {
+    [3, 4, 5, 6, 7].forEach(g => board[8][g] = -1);
+    [2, 4, 6, 8].forEach(b => board[2][b] = 1);
+  } else if (boardVariantId === 2) {
+    [3, 4, 5, 6, 7].forEach(g => board[8][g] = -1);
+    [3, 5, 7].forEach(b => board[2][b] = 1);
+  } else if (boardVariantId === 3) {
+    [0, 1, 2, 3, 4, 5].forEach(g => board[8][g] = -1);
+    [1, 2, 3, 4].forEach(b => board[1][b] = 1);
+  } else if (boardVariantId === 4) {
+    [0, 1, 2, 3, 4, 5].forEach(g => board[8][g] = -1);
+    [0, 1, 3].forEach(b => board[2][b] = 1);
+  } else if (boardVariantId === 5) {
+    range(0, 11).forEach(g => board[8][g] = -1);
+    [2, 3, 7, 9].forEach(b => board[0][b] = 1);
+  } else if (boardVariantId === 6) {
+    range(0, 11).forEach(g => board[8][g] = -1);
+    [1, 2, 4, 8].forEach(b => board[0][b] = 1);
   }
-
-  const numOfBacteria = random(1, boardWidth - 1);
-  const bacteria = sampleSize(range(boardWidth), numOfBacteria);
-  bacteria.forEach((index) => (board[0][index] = 1));
 
   return board;
 };
@@ -39,33 +44,10 @@ const GameBoard = ({ board, ctx }) => {
   const newBoard = cloneDeep(board);
   const isPlayerAttacker = ctx.playerIndex === 0;
 
-  const areAllBacteriaRemoved = (newBoard) => {
-    for (let row = 0; row < boardHeight; row++) {
-      for (let col = 0; col < boardWidth - 0.5 - 0.5 * (-1) ** row; col++) {
-        if (newBoard[row][col] > 0) return false;
-      }
-    }
-    return true;
-  };
-
-  const isShift = ({ row, col }) => {
-    return attackRow === row && Math.abs(attackCol - col) === 1;
-  };
-
-  const isSpread = ({ row, col }) => {
-    return (
-      row === attackRow + 1 &&
-      (col === attackCol || col === attackCol + (-1) ** (1 + attackRow))
-    );
-  };
-
-  const isJump = ({ row, col }) => {
-    return row === attackRow + 2 && col === attackCol;
-  };
-
   const isAllowedAttack = ({ row, col }) => {
-    return isShift({ row, col }) || isSpread({ row, col }) || isJump({ row, col });
-  }
+    if (board[row][col] === undefined) return false;
+    return isAllowedAttackClick({ attackRow, attackCol, row, col });
+  };
 
   const clickField = ({ row, col }) => {
     if (!ctx.shouldPlayerMoveNext) return;
@@ -88,31 +70,29 @@ const GameBoard = ({ board, ctx }) => {
       return;
     }
 
-    if (isJump({ row, col })) {
+    const reachedFields = reachedFieldsAfterClick({
+      board,
+      attackRow,
+      attackCol,
+      row,
+      col
+    });
+
+    const goalsReached = reachedFields.filter(([row, col]) => {
+      board[row][col] === -1;
+    });
+
+    if (isJump({ attackRow, attackCol, row, col })) {
       newBoard[row][col] += 1;
       newBoard[attackRow][attackCol] -= 1;
     } else {
-      newBoard[row][col] += board[attackRow][attackCol];
       newBoard[attackRow][attackCol] = 0;
-
-      const spreadInBoard =
-        attackRow % 2 === 1 ||
-        (attackCol >= 1 && attackCol <= boardWidth - 2);
-      if (isSpread({ row, col }) && spreadInBoard) {
-        if (attackCol === col) {
-          newBoard[row][col + (-1) ** row] += board[attackRow][attackCol];
-        } else {
-          newBoard[row][attackCol] += board[attackRow][attackCol];
-        }
-      }
+      reachedFields.forEach(([row, col]) => {
+        newBoard[row][col] += board[attackRow][attackCol];
+      });
     }
 
-    const goalReached =
-      board[row][col] === -1 ||
-      (attackCol === col && board[row][col + (-1) ** row] === -1) ||
-      (attackCol !== col && board[row][attackCol] === -1);
-
-    if (goalReached) {
+    if (goalsReached.length >= 1) {
       ctx.endPlayerTurn({ newBoard, isGameEnd: true, winnerIndex: 0 });
     } else {
       ctx.endPlayerTurn({ newBoard, isGameEnd: false });
@@ -129,7 +109,7 @@ const GameBoard = ({ board, ctx }) => {
         style={{ transform: "scaleY(-1)" }}
       >
         <tbody>
-          {range(boardHeight).map((row) => (
+          {range(board.length).map((row) => (
             <tr
               style={{
                 transform: `translateX(${
@@ -190,8 +170,8 @@ const getPlayerStepDescription = (ctx) => {
 
 const rule = (
   <>
-    A tábla alsó sorában a kijelölt mezőkön 1-1 baktérium található, a tábla
-    felső sorában a kijelölt mezők CÉL mezők. A játékban egy Támadó és Védekező
+    A tábla B betűvel jelölt mezőin 1-1 baktérium található, a tábla
+    felső sorában a kijelölt (szomszédos) mezők CÉL mezők. A játékban egy Támadó és Védekező
     játékos felváltva lép. A Védekező játékos minden körében levesz pontosan 1
     baktériumot bármely általa választott mezőről. Ez a baktérium lekerül a
     pályáról. A Támadó játékos a következő háromféle lépés egyikét választhatja:

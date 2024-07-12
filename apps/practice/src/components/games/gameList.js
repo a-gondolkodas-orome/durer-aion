@@ -141,7 +141,7 @@ export const gameList = {
   // Bacteria: {
   //   year: 10,
   //   round: 'döntő',
-  //   category: ['C'],
+  //   category: ['C', 'D'],
   //   name: 'Baktériumok terjedése'
   // },
   SixDiscs: {

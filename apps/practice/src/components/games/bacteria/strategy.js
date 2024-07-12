@@ -1,7 +1,7 @@
 'use strict';
 
 import { cloneDeep, sample, range } from 'lodash';
-
+import { areAllBacteriaRemoved } from './helpers';
 
 export const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
 
@@ -13,18 +13,20 @@ export const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
 };
 
 const whoWins = (board) => {
-    if (getSizeOfBoard(board) + 2*4 - getGoals(board).length < getBacteria(board).length) {
+    const goalRowIdx = board.length - 1;
+    const boardWidth = board[0].length;
+    if (boardWidth + 2*4 - getGoals(board).length < getBacteria(board).length) {
         return 0;
     } else {
         let freeBoard = cloneDeep(board);
         const goals = getGoals(board);
         goals.forEach(goal => {
-            freeBoard[8][Math.max(0,goal-1)] = -4;
-            freeBoard[8][Math.min(getSizeOfBoard(board),goal+1)] = -4;
+            freeBoard[goalRowIdx][Math.max(0,goal-1)] = -4;
+            freeBoard[goalRowIdx][Math.min(boardWidth,goal+1)] = -4;
         })
-        goals.forEach(goal => {freeBoard[8][goal] = -1;});
+        goals.forEach(goal => {freeBoard[goalRowIdx][goal] = -1;});
         for(let row = 7; row >= 0; row--) {
-            for(let col = 0; col < getSizeOfBoard(board)-1; col++) {
+            for(let col = 0; col < boardWidth-1; col++) {
                 if (freeBoard[row+1][col]* freeBoard[row+1][col + (-1)**(row+1)] < 0) {
                     if (freeBoard[row+1][col] + freeBoard[row+1][col + (-1)**(row+1)] % 2 === 0) {
                         freeBoard[row][col] = -2;
@@ -52,11 +54,9 @@ const whoWins = (board) => {
     }
 }
 
-let aiWins = false;
-
 const aiDefense = (board) => {
-    let newBoard = cloneDeep(board);
-    if (!aiWins) {aiWins = whoWins(board) === 1;}
+    const newBoard = cloneDeep(board);
+    const aiWins = whoWins(board) === 1;
 
     if (!aiWins) {
         const [randomRow, randomCol] = sample(getBacteria(board));
@@ -66,14 +66,15 @@ const aiDefense = (board) => {
         const [randomRow, randomCol] = sample(getBacteria(board));
         newBoard[randomRow][randomCol] -= 1;
     }
-    const isGameEnd = getOccupied(newBoard).length === 0;
+    const isGameEnd = areAllBacteriaRemoved(newBoard);
     return { newBoard, isGameEnd };
 }
 
 const aiAttack = (board) => {
-    let newBoard = cloneDeep(board);
+    const newBoard = cloneDeep(board);
     let isGameEnd = false;
-    if (!aiWins) {aiWins = whoWins(board) === 0;}
+    const aiWins = whoWins(board) === 0;
+    const boardWidth = board[0].length;
 
     // TODO: if aiWins, follow strategy instead of random step
     if (!aiWins || aiWins) {
@@ -87,7 +88,7 @@ const aiAttack = (board) => {
                 // shift attack
                 let pm = 2*Math.round(Math.random())-1;
                 if (randomCol === 0) {pm = 1;}
-                else if (randomCol === getSizeOfBoard(board)-1-0.5-0.5*(-1)**(randomRow+1)) {pm = -1;}
+                else if (randomCol === boardWidth-1-0.5-0.5*(-1)**(randomRow+1)) {pm = -1;}
                 newBoard[randomRow][randomCol] = 0;
                 newBoard[randomRow][randomCol + pm] += board[randomRow][randomCol];
                 isGameEnd = board[randomRow][randomCol + pm] === -1;
@@ -95,7 +96,7 @@ const aiAttack = (board) => {
             }
             case 1: {
                 // spread attack
-                if (randomRow%2 === 1 || (randomCol > 0 && randomCol < getSizeOfBoard(board)-1)) {
+                if (randomRow%2 === 1 || (randomCol > 0 && randomCol < boardWidth-1)) {
                     newBoard[randomRow][randomCol] = 0;
                     newBoard[randomRow+1][randomCol] += board[randomRow][randomCol];
                     newBoard[randomRow+1][randomCol + (-1)**(randomRow+1)] += board[randomRow][randomCol];
@@ -131,24 +132,11 @@ const getBacteria = (board) => {
     return bacteria;
 }
 
-const getOccupied = (board) => {
-    let occupied = [];
-    for (let row = 0; row < board.length; row++) {
-        for (let col = 0; col < board[row].length; col++) {
-            if (board[row][col] > 0) { occupied.push([row,col]); }
-        }
-    }
-    return occupied;
-}
-
 const getGoals = (board) => {
+    const goalRowIdx = board.length - 1;
     let goals = [];
-    for (let col = 0; col < board[8].length; col++) {
-        if (board[8][col] < 0) { goals.push(col); }
+    for (let col = 0; col < board[goalRowIdx].length; col++) {
+        if (board[goalRowIdx][col] < 0) { goals.push(col); }
     }
     return goals;
-}
-
-const getSizeOfBoard = (board) => {
-    return board[0].length;
 }
