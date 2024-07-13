@@ -1,11 +1,10 @@
 import { INVALID_MOVE } from 'boardgame.io/core';
 import { GameType } from '../../common/types';
 import { sendDataStrategyEnd } from '../../common/sendData';
-import { range } from 'lodash';
 
 export interface MyGameState {
   circle: Array<boolean>;
-  first: number;
+  firstMove: number;
   milisecondsRemaining: number;
   start: string;
   end: string;
@@ -18,7 +17,7 @@ export const MyGame: GameType<MyGameState> = {
   setup: () => {
     return {
       circle: [],
-      first: -1,
+      firstMove: -1,
       milisecondsRemaining: 1000*lengthOfCompetition,
       start: new Date().toISOString(),
       end: new Date(Date.now() + 1000*lengthOfCompetition).toISOString(),
@@ -26,30 +25,25 @@ export const MyGame: GameType<MyGameState> = {
   },
 
   moves: {
-    removePoint: ({G, ctx, playerID, events }, P: number) => {
-      if( P<0 || P>=G.circle.length) {
-        return INVALID_MOVE;
-      } else if( !G.circle[P]) {
-        console.log("0");
-        return INVALID_MOVE;
-      } else if( P===0 && !(G.circle[1] || G.circle[G.circle.length-1])) {
-        console.log('1');
-        return INVALID_MOVE;
-      } else if( P===G.circle.length-1 && !(G.circle[0] || G.circle[G.circle.length-2])) {
-        console.log('2');
-        return INVALID_MOVE;
-      } else if( !(G.circle[P-1] || G.circle[P+1])) {
-        console.log("3")
+    removePoint: ({G, ctx, playerID, events }, index: number) => {
+      if( index<0 || index>=G.circle.length) {
         return INVALID_MOVE;
       }
 
-      G.circle[P] = false;
+      if( G.firstMove === -1 ){
+        G.firstMove = index;
+        index = 0;
+      } 
+      
+      if( !G.circle[index] ||  !(G.circle.at(index-1) || G.circle.at((index+1)%G.circle.length))) {
+        return INVALID_MOVE;
+      }
+
+      G.circle[index] = false;
+
       let isGameEnd = true;
-      if (G.circle[0] && G.circle[G.circle.length-1]){
-        isGameEnd = false;
-      };
-      for(let i = 0; i<G.circle.length; i++) {
-        if (G.circle[i] && G.circle[i+1]) {
+      for(let i = 1; i<G.circle.length; i++) {
+        if (G.circle[i-1] && G.circle[i]) {
           isGameEnd = false;
         }
       }
@@ -106,15 +100,12 @@ export const MyGame: GameType<MyGameState> = {
   
   possibleMoves: (G, ctx, playerID) => {
     let moves = [];
-    if ((G.circle[1] || G.circle[G.circle.length-1]) && G.circle[0]) {
-      moves.push({move: 'removePoint', args: [0]});
-    }
     for (let i = 1; i<G.circle.length-1; i++) {
       if ((G.circle[i-1] || G.circle[i+1]) && G.circle[i]) {
         moves.push({move: 'removePoint', args: [i]});
       }
     }  
-    if ((G.circle[0] || G.circle[G.circle.length-2]) && G.circle[G.circle.length-1]) {
+    if (G.circle[G.circle.length-2] && G.circle[G.circle.length-1]) {
       moves.push({move: 'removePoint', args: [G.circle.length-1]});
     }
     return moves;
