@@ -33,21 +33,21 @@ export function strategyWrapper(category: "C" | "D" | "E") {
   }
 }
 
-function startingPosition({ G, ctx }: any, category: "C" | "D" | "E"): { circle: Array<boolean>, first: number} {
+function startingPosition({ G, ctx }: any, category: "C" | "D" | "E"): { circle: Array<boolean>, firstMove: number} {
   if (category === "C") {
     // C Category
-    return { circle: Array(7).fill(true), first:-1};
+    return { circle: Array(7).fill(true), firstMove:-1};
   }
   if (category === "D") {
     // D Category
-    return { circle: Array(9).fill(true), first:-1};
+    return { circle: Array(9).fill(true), firstMove:-1};
   }
   if (category === "E") {
     // E Category
-    return { circle: Array(Math.floor(Math.random()*4+7)).fill(true), first:-1}
+    return { circle: Array(Math.floor(Math.random()*4+7)).fill(true), firstMove:-1}
   }
   //just in case
-  return {circle: Array(7).fill(true), first:-1};
+  return {circle: Array(7).fill(true), firstMove:-1};
 }
 
 function randomStrategy(G: MyGameState): [number, string] {
@@ -58,7 +58,7 @@ function randomStrategy(G: MyGameState): [number, string] {
 
 function winningStrategy(G: MyGameState): [number, string] {
   let pMoves: string | any[] = [];
-  if (G.first === -1) {
+  if (G.firstMove === -1) {
     pMoves = possibleMoves(G);
   }
 
