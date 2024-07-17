@@ -28,7 +28,13 @@ const aiDefense = (board) => {
   const dangerousBacteria = bacteriaCoords.filter(
     ([row, col]) => isDangerous(board, { row, col })
   );
-  if (dangerousBacteria.length >= 1) {
+  const multipleBacteria = bacteriaCoords.filter(
+    ([row, col]) => board.bacteria[row][col] > 1
+  );
+  if (multipleBacteria.length >= 1) {
+    const [defenseRow, defenseCol] = sample(multipleBacteria);
+    newBoard.bacteria[defenseRow][defenseCol] -= 1;
+  } else if (dangerousBacteria.length >= 1) {
     const [defenseRow, defenseCol] = sample(dangerousBacteria);
     newBoard.bacteria[defenseRow][defenseCol] -= 1;
   } else {
