@@ -1,10 +1,19 @@
-'use strict';
+"use strict";
 
-import { cloneDeep, sample, range } from 'lodash';
-import { areAllBacteriaRemoved } from './helpers';
+import { cloneDeep, sample, minBy, shuffle } from "lodash";
+import {
+  areAllBacteriaRemoved,
+  isGoal,
+  lastCol,
+  makeJump,
+  makeShiftOrSpread,
+  reachedFieldsWithAttack,
+  isDangerous,
+  distanceFromDangerousAttackZone
+} from "./helpers";
 
+/* Currently only implemented for the case of adjacent goal fields */
 export const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
-
   if (playerIndex === 0) {
     return aiDefense(board);
   } else {
@@ -12,131 +21,91 @@ export const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
   }
 };
 
-const whoWins = (board) => {
-    const goalRowIdx = board.length - 1;
-    const boardWidth = board[0].length;
-    if (boardWidth + 2*4 - getGoals(board).length < getBacteria(board).length) {
-        return 0;
-    } else {
-        let freeBoard = cloneDeep(board);
-        const goals = getGoals(board);
-        goals.forEach(goal => {
-            freeBoard[goalRowIdx][Math.max(0,goal-1)] = -4;
-            freeBoard[goalRowIdx][Math.min(boardWidth,goal+1)] = -4;
-        })
-        goals.forEach(goal => {freeBoard[goalRowIdx][goal] = -1;});
-        for(let row = 7; row >= 0; row--) {
-            for(let col = 0; col < boardWidth-1; col++) {
-                if (freeBoard[row+1][col]* freeBoard[row+1][col + (-1)**(row+1)] < 0) {
-                    if (freeBoard[row+1][col] + freeBoard[row+1][col + (-1)**(row+1)] % 2 === 0) {
-                        freeBoard[row][col] = -2;
-                    } else if (freeBoard[row+1][col] + freeBoard[row+1][col + (-1)**(row+1)] === -3) {
-                        freeBoard[row][col] = -3;
-                    }
-                }
-            }
-        }
-
-        const bacteria = getBacteria(board);
-        let deficient = false;
-        let reached = false;
-        for(let j = 0; j<bacteria.length && !deficient; j++) {
-            reached = false;
-            if (!reached) {
-                deficient = true;
-            }
-        };
-        if (deficient) {
-            return 0;
-        } else {
-            return 1;
-        }
-    }
-}
-
 const aiDefense = (board) => {
-    const newBoard = cloneDeep(board);
-    const aiWins = whoWins(board) === 1;
+  const newBoard = cloneDeep(board);
 
-    if (!aiWins) {
-        const [randomRow, randomCol] = sample(getBacteria(board));
-        newBoard[randomRow][randomCol] -= 1;
-    } else {
-        // TODO: follow strategy
-        const [randomRow, randomCol] = sample(getBacteria(board));
-        newBoard[randomRow][randomCol] -= 1;
-    }
-    const isGameEnd = areAllBacteriaRemoved(newBoard);
-    return { newBoard, isGameEnd };
-}
+  const bacteriaCoords = getBacteriaCoords(board.bacteria);
+  const dangerousBacteria = bacteriaCoords.filter(
+    ([row, col]) => isDangerous(board, { row, col })
+  );
+  if (dangerousBacteria.length >= 1) {
+    const [defenseRow, defenseCol] = sample(dangerousBacteria);
+    newBoard.bacteria[defenseRow][defenseCol] -= 1;
+  } else {
+    const [defenseRow, defenseCol] = minBy(
+      shuffle(bacteriaCoords),
+      ([row, col]) => distanceFromDangerousAttackZone(board, { row, col })
+    );
+    newBoard.bacteria[defenseRow][defenseCol] -= 1;
+  }
+
+  const isGameEnd = areAllBacteriaRemoved(newBoard.bacteria);
+  return { newBoard, isGameEnd };
+};
 
 const aiAttack = (board) => {
-    const newBoard = cloneDeep(board);
-    let isGameEnd = false;
-    const aiWins = whoWins(board) === 0;
-    const boardWidth = board[0].length;
+  const newBoard = cloneDeep(board);
+  const { bacteria, goals } = board;
 
-    // TODO: if aiWins, follow strategy instead of random step
-    if (!aiWins || aiWins) {
-        const [randomRow, randomCol] = sample(getBacteria(board));
-        let attackOptions = range(3);
-        if (randomRow > 6) {attackOptions.pop()}
-        if (randomRow > 7) {attackOptions.pop()}
-        const attackChoice = sample(attackOptions);
-        switch (attackChoice) {
-            case 0: {
-                // shift attack
-                let pm = 2*Math.round(Math.random())-1;
-                if (randomCol === 0) {pm = 1;}
-                else if (randomCol === boardWidth-1-0.5-0.5*(-1)**(randomRow+1)) {pm = -1;}
-                newBoard[randomRow][randomCol] = 0;
-                newBoard[randomRow][randomCol + pm] += board[randomRow][randomCol];
-                isGameEnd = board[randomRow][randomCol + pm] === -1;
-                break;
-            }
-            case 1: {
-                // spread attack
-                if (randomRow%2 === 1 || (randomCol > 0 && randomCol < boardWidth-1)) {
-                    newBoard[randomRow][randomCol] = 0;
-                    newBoard[randomRow+1][randomCol] += board[randomRow][randomCol];
-                    newBoard[randomRow+1][randomCol + (-1)**(randomRow+1)] += board[randomRow][randomCol];
-                    isGameEnd = (board[randomRow+1][randomCol + (-1)**(randomRow+1)] === -1 ||
-                                board[randomRow+1][randomCol] === -1);
-                } else if (randomCol === 0) {
-                    newBoard[randomRow+1][randomCol] += board[randomRow][randomCol];
-                    isGameEnd = board[randomRow+1][randomCol] === -1;
-                } else {
-                    newBoard[randomRow+1][randomCol - 1] += board[randomRow][randomCol];
-                    isGameEnd = board[randomRow+1][randomCol-1] === -1;
-                }
-                break;
-            }
-            case 2: {
-                // jump attack
-                newBoard[randomRow][randomCol] -= 1;
-                newBoard[randomRow+2][randomCol] += 1;
-                isGameEnd = board[randomRow+2][randomCol] === -1;
-            }
-        }
-    }
-    return {newBoard, isGameEnd};
-}
+  const goalRowIdx = bacteria.length - 1;
+  const bacteriaCoords = getBacteriaCoords(bacteria);
+  const dangerousBacteria = bacteriaCoords.filter(
+    ([row, col]) => isDangerous(board, { row, col })
+  );
+  let attackRow, attackCol;
+  let attackChoice;
 
-const getBacteria = (board) => {
-    let bacteria = []
-    for (let row = 0; row < board.length; row++) {
-        for (let col = 0; col < board[row].length; col++) {
-            for (let i = 0; i < board[row][col]; i++) { bacteria.push([row,col]); }
-        }
+  if (dangerousBacteria.length === 0) {
+    // Currently AI is moderately dangerous: not random but not as dangerous as possible either
+    [attackRow, attackCol] = minBy(
+      shuffle(bacteriaCoords),
+      ([row, col]) => distanceFromDangerousAttackZone(board, { row, col })
+    );
+    let attackOptions = ["shiftRight", "shiftLeft", "jump", "spread", "spread", "spread", "spread"];
+    if (attackRow === goalRowIdx - 1) {
+      attackOptions = ["spread"];
     }
-    return bacteria;
-}
+    if (attackRow === goalRowIdx) {
+      if (attackCol <= goals[0]) attackOptions = ["shiftRight"]
+      else attackOptions = ["shiftLeft"]
+    }
+    attackChoice = sample(attackOptions);
+    if (attackChoice === "shiftRight" && attackCol === lastCol(bacteria, attackRow)) {
+      attackChoice = "shiftLeft";
+    } else if (attackChoice === "shiftLeft" && attackCol === 0) {
+      attackChoice = "shiftRight";
+    }
+  } else {
+    [attackRow, attackCol] = sample(dangerousBacteria);
+    if (attackRow === goalRowIdx) {
+      attackChoice = (attackCol === goals[0] - 1) ? "shiftRight" : "shiftLeft";
+    } else {
+      attackChoice = "spread";
+    }
+  }
 
-const getGoals = (board) => {
-    const goalRowIdx = board.length - 1;
-    let goals = [];
-    for (let col = 0; col < board[goalRowIdx].length; col++) {
-        if (board[goalRowIdx][col] < 0) { goals.push(col); }
+
+  const reachedFields = reachedFieldsWithAttack(attackChoice, { bacteria, attackRow, attackCol });
+  const goalsReached = reachedFields.filter(([row, col]) => isGoal(board, row, col));
+  const isGameEnd = goalsReached.length >= 1;
+
+  if (attackChoice === "jump") {
+    newBoard.bacteria = makeJump(bacteria, attackRow, attackCol);
+  } else {
+    newBoard.bacteria = makeShiftOrSpread(bacteria, attackRow, attackCol, reachedFields);
+  }
+
+  return { newBoard, isGameEnd };
+};
+
+const getBacteriaCoords = (bacteria) => {
+  let bacteriaCoords = [];
+  for (let row = 0; row < bacteria.length; row++) {
+    for (let col = 0; col < bacteria[row].length; col++) {
+      for (let i = 0; i < bacteria[row][col]; i++) {
+        bacteriaCoords.push([row, col]);
+      }
     }
-    return goals;
-}
+  }
+  return bacteriaCoords;
+};

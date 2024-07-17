@@ -137,13 +137,12 @@ export const gameList = {
     category: ['A'],
     name: 'Tizenkét mező'
   },
-  // temporarily removed as not working yet
-  // Bacteria: {
-  //   year: 10,
-  //   round: 'döntő',
-  //   category: ['C', 'D'],
-  //   name: 'Baktériumok terjedése'
-  // },
+  Bacteria: {
+    year: 10,
+    round: 'döntő',
+    category: ['C', 'D'],
+    name: 'Baktériumok terjedése'
+  },
   SixDiscs: {
     year: 10,
     round: 'döntő',
