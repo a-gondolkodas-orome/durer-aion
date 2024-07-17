@@ -78,7 +78,8 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
                 msRemaining={msRemaining ?? null}
                 setMsRemaining={setMsRemaining}
                 getServerTimer={moves.getTime}
-                endTime={new Date(G.end)} />}
+                endTime={new Date(G.end)}
+                serverRemainingMs={G.milisecondsRemaining} />}
             </Stack>
           </Stack>
           {process.env.REACT_APP_WHICH_VERSION === "b" && 

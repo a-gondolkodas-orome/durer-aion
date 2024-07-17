@@ -99,5 +99,8 @@ export const dictionary = {
   },
   error: {
     unsuspected: "Váratlan hiba történt",
+  },
+  warnings: {
+    timeNotMatch: "A számítógép órája nincs szinkronban a szerver órájával, a jelzett hátralevő idő nem tökéletes, az oldal újra töltése megoldhatja a problémát",
   }
 };

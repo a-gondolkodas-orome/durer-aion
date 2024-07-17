@@ -1,21 +1,28 @@
 import { Dispatch, PropsWithoutRef, SetStateAction, useEffect, useState } from "react";
+import ReportIcon from '@mui/icons-material/Report';
+import { Tooltip } from "@mui/material";
+import { dictionary } from '../text-constants';
 
 export function Countdown(
   props: PropsWithoutRef<{ 
     msRemaining: number | null,
     setMsRemaining: Dispatch<SetStateAction<number>>,
     endTime: Date,
-    getServerTimer: ()=>void 
+    getServerTimer: ()=>void,
+    serverRemainingMs: number;
   }>
 ) {
     const [countdown, setCountdown] = useState("??:??:??");
+    const [offset, setOffset] = useState(0);
     // initializes a timer. Note that it does not need updates, even though it "uses" secondsRemaining
     useEffect(() => {
         let handle: NodeJS.Timeout | null = null;
+        const offsetInit = new Date(props.endTime).getTime() - new Date().getTime() - props.serverRemainingMs;
+        setOffset(offsetInit);
         handle = setInterval(function () {
             const now = new Date();
             const end = new Date(props.endTime);
-            const diff = end.getTime() - now.getTime();
+            const diff = end.getTime() - now.getTime() - (offsetInit > 5000 || offsetInit < -5000 ? offsetInit : 0);
             props.setMsRemaining(s => {
                 // clock is not updated below 1 seconds, only the backend sets it below 1 second!
                 if (s !== null && s > 1100) {
@@ -35,7 +42,7 @@ export function Countdown(
           }
           handle = null;
       };
-    }, []);
+    }, [props.serverRemainingMs]);
 
     useEffect(() => {
         if (props.msRemaining === null) {
@@ -59,7 +66,8 @@ export function Countdown(
                 }`);
         }
     }, [props.msRemaining, props.endTime]);
-    return (<span className="fs-3 mb-3"><code className="mb-2">
+    return (<><span className="fs-3 mb-3"><code className="mb-2">
         {countdown}
-    </code></span>);
+    </code></span>
+    {offset > 5000 || offset < -5000 && <Tooltip title={dictionary.warnings.timeNotMatch}><ReportIcon color="warning"/></Tooltip>}</>);
 }
