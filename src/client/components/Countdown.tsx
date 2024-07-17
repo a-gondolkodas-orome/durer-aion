@@ -13,7 +13,7 @@ export function Countdown(
   }>
 ) {
     const [countdown, setCountdown] = useState("??:??:??");
-    const [offset, setOffset] = useState(0);
+    const [offset, setOffset] = useState(0); // to show warning icon
     // initializes a timer. Note that it does not need updates, even though it "uses" secondsRemaining
     useEffect(() => {
         let handle: NodeJS.Timeout | null = null;
@@ -28,11 +28,12 @@ export function Countdown(
                 if (s !== null && s > 1100) {
                     return diff
                 }
+                // if it is set below one second we can continue the normal workflow
                 if (s !== null && s < 0) {
                   return diff;
                 }
+                // below 1100 ms and above 0ms sync server timer
                 props.getServerTimer();
-                // TODO: fetch / something
                 return s;
             });
         }, 1000);
@@ -52,13 +53,8 @@ export function Countdown(
         // stop the player from submitting!
         if (props.msRemaining <= 0 && props.msRemaining > -5000) {
           setCountdown("00:00:00");
-            /*setCountdown(`${Math.ceil(props.msRemaining / 3600 / 1000).toString().padStart(2, '0')
-          }:${(Math.ceil(props.msRemaining / 60 / 1000) % 60).toString().padStart(2, '0')
-          }:${(props.msRemaining / 1000 % 60).toString().slice(0,2).padStart(2, '0')
-          }`);*/
         } else if (props.msRemaining <= -10000) {
             setCountdown("XX:XX:XX");
-            // cleanup(); ???
         } else {
             setCountdown(`${Math.floor(props.msRemaining / 3600 / 1000).toString().padStart(2, '0')
                 }:${(Math.floor(props.msRemaining / 60 / 1000) % 60).toString().padStart(2, '0')
