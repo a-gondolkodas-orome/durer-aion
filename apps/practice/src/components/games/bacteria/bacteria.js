@@ -68,6 +68,11 @@ const GameBoard = ({ board: { bacteria, goals }, ctx }) => {
   const clickField = ({ row, col }) => {
     if (!ctx.shouldPlayerMoveNext) return;
     if (attackRow === null && !bacteria[row][col] >= 1) return;
+    if (isPlayerAttacker && attackRow === row && attackCol === col) {
+      setAttackRow(null);
+      setAttackCol(null);
+      return;
+    }
     if (attackRow !== null && !isAllowedAttack({ row, col })) return;
 
     if (isPlayerAttacker && attackRow === null) {
@@ -75,6 +80,7 @@ const GameBoard = ({ board: { bacteria, goals }, ctx }) => {
       setAttackCol(col);
       return;
     }
+
 
     if (!isPlayerAttacker) {
       newBoard.bacteria[row][col] -= 1;
@@ -125,6 +131,7 @@ const GameBoard = ({ board: { bacteria, goals }, ctx }) => {
   };
 
   const isForbidden = ({ row, col }) => {
+    if (attackRow !== null && row === attackRow && col === attackCol) return false;
     if (attackRow !== null && !isAllowedAttack({ row, col })) return true;
     if (attackRow === null && bacteria[row][col] < 1) return true;
     return false;
