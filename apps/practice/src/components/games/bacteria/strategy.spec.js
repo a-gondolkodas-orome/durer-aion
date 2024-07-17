@@ -61,6 +61,17 @@ describe('test ai strategy', () => {
       const { newBoard } = getGameStateAfterAiTurn({ board, playerIndex: 0 });
       expect(newBoard.bacteria[0][3]).toEqual(0);
     });
+
+    it('removes a bacteria if multiple in a cell', () => {
+      const bacteria = reverse([
+        [0, 0, 0, 0, 0],
+          [0, 0, 0, 0],
+        [2, 0, 0, 1, 0]
+      ]);
+      const board = { bacteria, goals: [2] };
+      const { newBoard } = getGameStateAfterAiTurn({ board, playerIndex: 0 });
+      expect(newBoard.bacteria[0][0]).toEqual(1);
+    });
   });
 
   describe('attack', () => {

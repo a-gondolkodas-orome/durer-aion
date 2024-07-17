@@ -34,7 +34,7 @@ const aiDefense = (board) => {
   } else {
     const [defenseRow, defenseCol] = minBy(
       shuffle(bacteriaCoords),
-      ([row, col]) => distanceFromDangerousAttackZone(board, { row, col })
+      ([row, col]) => -100 * board.bacteria[row][col] + distanceFromDangerousAttackZone(board, { row, col })
     );
     newBoard.bacteria[defenseRow][defenseCol] -= 1;
   }
