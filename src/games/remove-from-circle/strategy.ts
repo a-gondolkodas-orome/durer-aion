@@ -33,21 +33,21 @@ export function strategyWrapper(category: "C" | "D" | "E") {
   }
 }
 
-function startingPosition({ G, ctx }: any, category: "C" | "D" | "E"): { circle: Array<boolean>, firstMove: number} {
+function startingPosition({ G, ctx }: any, category: "C" | "D" | "E"): { circle: Array<boolean>, firstMove: number, lastMove: number} {
   if (category === "C") {
     // C Category
-    return { circle: Array(7).fill(true), firstMove:-1};
+    return { circle: Array(7).fill(true), firstMove:-1, lastMove:-1};
   }
   if (category === "D") {
     // D Category
-    return { circle: Array(9).fill(true), firstMove:-1};
+    return { circle: Array(9).fill(true), firstMove:-1, lastMove:-1};
   }
   if (category === "E") {
     // E Category
-    return { circle: Array(Math.floor(Math.random()*4+7)).fill(true), firstMove:-1}
+    return { circle: Array(Math.floor(Math.random()*4+7)).fill(true), firstMove:-1, lastMove:-1}
   }
   //just in case
-  return {circle: Array(7).fill(true), firstMove:-1};
+  return {circle: Array(7).fill(true), firstMove:-1, lastMove:-1};
 }
 
 function randomStrategy(G: MyGameState): [number, string] {

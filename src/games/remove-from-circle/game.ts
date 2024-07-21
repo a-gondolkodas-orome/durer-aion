@@ -5,6 +5,7 @@ import { sendDataStrategyEnd } from '../../common/sendData';
 export interface MyGameState {
   circle: Array<boolean>;
   firstMove: number;
+  lastMove: number;
   milisecondsRemaining: number;
   start: string;
   end: string;
@@ -18,6 +19,7 @@ export const MyGame: GameType<MyGameState> = {
     return {
       circle: [],
       firstMove: -1,
+      lastMove: -1,
       milisecondsRemaining: 1000*lengthOfCompetition,
       start: new Date().toISOString(),
       end: new Date(Date.now() + 1000*lengthOfCompetition).toISOString(),
@@ -40,6 +42,7 @@ export const MyGame: GameType<MyGameState> = {
       }
 
       G.circle[index] = false;
+      G.lastMove = index;
 
       let isGameEnd = true;
       for(let i = 1; i<G.circle.length; i++) {
