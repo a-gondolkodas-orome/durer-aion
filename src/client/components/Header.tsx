@@ -1,4 +1,4 @@
-import { Container, Dialog, Menu, Stack } from '@mui/material';
+import { Container, Dialog, Stack } from '@mui/material';
 import React, { useState } from 'react';
 import { useLogout } from '../hooks/user-hooks';
 import theme from './theme';

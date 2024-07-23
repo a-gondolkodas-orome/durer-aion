@@ -39,7 +39,7 @@ export function RelayEndTable(props: {allPoints: number, task: {max: number, got
         marginLeft:'10px',
         borderCollapse: 'collapse',
         fontSize: '18px',
-        ['& td']:{
+        '& td':{
             borderStyle: 'solid',
             borderColor: '#000',
             borderWidth: '1px',
@@ -119,15 +119,15 @@ export function RelayEndTable(props: {allPoints: number, task: {max: number, got
           display: 'flex',
           alignItems: 'center',
           flexWrap: 'wrap',
-          ['& div']: {
+          '& div': {
             alignItems: 'center',
           },
-          ['& div div']: {
+          '& div div': {
               width: '40px',
               height: '40px',
           },
           flexDirection: 'row',
-          ['& div span']: {
+          '& div span': {
               marginLeft: '12px',
               marginRight: '12px',
           }

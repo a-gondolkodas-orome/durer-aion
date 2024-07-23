@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import * as Yup from 'yup';
 import { Button, Stack } from "@mui/material";
 import Form from "./form";
-import { ErrorMessage, Field, FormikProps } from "formik";
+import { ErrorMessage, Field } from "formik";
 import theme from "./theme";
 import CloseIcon from '@mui/icons-material/Close';
 import { useSnackbar } from "notistack";
@@ -39,7 +39,7 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
       }
     }
     setSentAnswer((p)=>{return p-1;});
-  }, [props.previousCorrectness, props.attempt])
+  }, [props.previousCorrectness, props.attempt, enqueueSnackbar])
   return <Stack>
     <Stack sx={{
       fontSize: '22px',
@@ -120,7 +120,7 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
                 fontSize: '18px',
                 marginLeft: '10px',
               }}>{data}</Stack>
-              {props.previousCorrectness == false && <CloseIcon sx={{ color: '#FF0000', fontSize: '18ox' }} />}
+              {props.previousCorrectness === false && <CloseIcon sx={{ color: '#FF0000', fontSize: '18ox' }} />}
             </Stack>
           })}
         </Stack>

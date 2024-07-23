@@ -7,7 +7,7 @@ import { Dialog } from '@mui/material';
 import { useRefreshTeamState, useTeamState, useToHome } from '../../hooks/user-hooks';
 import { ExcerciseTask } from '../ExcerciseTask';
 import { ExcerciseForm } from '../ExcerciseForm';
-import { sendDataRelayEnd, sendDataRelayStep } from '../../../common/sendData';
+import { sendDataRelayStep } from '../../../common/sendData';
 import { dictionary } from '../../text-constants';
 import { RelayEndTable } from '../RelayEndTable';
 interface MyGameProps extends BoardProps<MyGameState> { };
@@ -22,12 +22,14 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
     if (!ctx.gameover) {
       moves.getTime();
     }
+    setGameover(ctx.gameover)
+  }, [ctx.gameover, moves]);
+  useEffect(()=>{
     if (G.numberOfTry === 0) {
       moves.startGame();
       console.log("Start Game!");
     }
-    setGameover(ctx.gameover)
-  }, [ctx.gameover]);
+  });
   useEffect(() => {
     setMsRemaining(G.milisecondsRemaining);
   }, [G.milisecondsRemaining]);
