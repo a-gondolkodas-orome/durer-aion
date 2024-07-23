@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import * as Yup from 'yup';
 import { Button, Stack } from "@mui/material";
 import Form from "./form";
@@ -8,6 +8,14 @@ import CloseIcon from '@mui/icons-material/Close';
 import { useSnackbar } from "notistack";
 import { useRefreshTeamState } from "../hooks/user-hooks";
 import { dictionary } from "../text-constants";
+
+function sanitizeValue(value: string) {
+  const regex = /^([1-9]*[0-9]*)$/;
+  if (regex.test(value)) {
+    return true
+  }
+  return false;
+}
 
 export interface MyProps {
   previousTries: number[];
@@ -19,6 +27,7 @@ export interface MyProps {
 export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) => {
   const { enqueueSnackbar } = useSnackbar();
   const refreshState = useRefreshTeamState();
+  const [sentAnswer, setSentAnswer] = useState<number>(0);
   useEffect(()=>{
     if(props.previousCorrectness!=null){
       if(props.previousCorrectness){
@@ -29,7 +38,8 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
         enqueueSnackbar('A válasz sajnos nem volt jó', { variant: 'error' });
       }
     }
-  }, [props.previousCorrectness, props.attempt])
+    setSentAnswer((p)=>{return p-1;});
+  }, [props.previousCorrectness, props.attempt, enqueueSnackbar])
   return <Stack>
     <Stack sx={{
       fontSize: '22px',
@@ -64,23 +74,38 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
             console.log(e)
             enqueueSnackbar(e?.message || "Hiba történt", { variant: 'error' });
             if (e?.message === "cannot make move after game end") {
-              refreshState()
+              refreshState();
             }
           }
-          
+          setSentAnswer(1);
         }}>
         <Field
           name="result"
-          type="text"
-          style={{
-            width: '100%',
-            height: '40px',
-            borderWidth: '2px',
-            borderRadius: '5px',
-            borderColor: theme.palette.primary.main,
-            fontSize: '18px',
-          }}
-        />
+        >
+        {
+          ({
+            field, 
+            form: { handleChange },
+          }: any) => <input
+            autoFocus={sentAnswer>0}
+            {...field}
+            onChange={(e)=>{
+                e.preventDefault();
+                if (sanitizeValue(e.target.value)) {
+                  handleChange(e);
+                }
+            }}
+            className="text-input"
+            style={{
+              width: '100%',
+              height: '40px',
+              borderWidth: '2px',
+              borderRadius: '5px',
+              borderColor: theme.palette.primary.main,
+              fontSize: '18px',
+            }}
+          />
+        }</Field>
         <ErrorMessage name="result" />
         <Stack sx={{marginTop: '20px'}}>
           {props.previousTries.map((data, idx) => {
@@ -95,7 +120,7 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
                 fontSize: '18px',
                 marginLeft: '10px',
               }}>{data}</Stack>
-              <CloseIcon sx={{ color: '#FF0000', fontSize: '18ox' }} />
+              {props.previousCorrectness === false && <CloseIcon sx={{ color: '#FF0000', fontSize: '18ox' }} />}
             </Stack>
           })}
         </Stack>

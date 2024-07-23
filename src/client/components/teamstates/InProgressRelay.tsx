@@ -7,7 +7,7 @@ import { Dialog } from '@mui/material';
 import { useRefreshTeamState, useTeamState, useToHome } from '../../hooks/user-hooks';
 import { ExcerciseTask } from '../ExcerciseTask';
 import { ExcerciseForm } from '../ExcerciseForm';
-import { sendDataRelayEnd, sendDataRelayStep } from '../../../common/sendData';
+import { sendDataRelayStep } from '../../../common/sendData';
 import { dictionary } from '../../text-constants';
 import { RelayEndTable } from '../RelayEndTable';
 interface MyGameProps extends BoardProps<MyGameState> { };
@@ -22,12 +22,14 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
     if (!ctx.gameover) {
       moves.getTime();
     }
+    setGameover(ctx.gameover)
+  }, [ctx.gameover, moves]);
+  useEffect(()=>{
     if (G.numberOfTry === 0) {
       moves.startGame();
       console.log("Start Game!");
     }
-    setGameover(ctx.gameover)
-  }, [ctx.gameover]);
+  });
   useEffect(() => {
     setMsRemaining(G.milisecondsRemaining);
   }, [G.milisecondsRemaining]);
@@ -92,7 +94,9 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
             <Countdown
               msRemaining={msRemaining ?? null}
               setMsRemaining={()=>{}}
-              getServerTimer={()=>{}} />
+              getServerTimer={()=>{}}
+              endTime={new Date(G.end)} 
+              serverRemainingMs={G.milisecondsRemaining}/>
           </Stack>
         <Stack sx={{
           width: {
@@ -128,7 +132,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
             xs: '100%',
             md: "350px",
           },
-          maxHeight: "300px",
+          maxHeight: "min-content",
           backgroundColor: "#fff",
           borderRadius: "25px",
           padding: '30px',
@@ -153,7 +157,9 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
             {!finished && <Countdown
               msRemaining={msRemaining ?? null}
               setMsRemaining={setMsRemaining}
-              getServerTimer={moves.getTime} />}
+              getServerTimer={moves.getTime}
+              endTime={new Date(G.end)}
+              serverRemainingMs={G.milisecondsRemaining} />}
           </Stack>
           {process.env.REACT_APP_WHICH_VERSION === "b" && 
             <Stack sx={{

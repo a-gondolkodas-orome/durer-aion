@@ -39,7 +39,7 @@ export function RelayEndTable(props: {allPoints: number, task: {max: number, got
         marginLeft:'10px',
         borderCollapse: 'collapse',
         fontSize: '18px',
-        ['& td']:{
+        '& td':{
             borderStyle: 'solid',
             borderColor: '#000',
             borderWidth: '1px',
@@ -61,13 +61,13 @@ export function RelayEndTable(props: {allPoints: number, task: {max: number, got
     }}>
             <TableRow>
                 <TableCell>{dictionary.relay.endTable.task}</TableCell>
-                {props.task.map((data, idx)=><TableCell>
+                {props.task.slice(0, 10).map((data, idx)=><TableCell>
                     {idx+1}.
                 </TableCell>)}
             </TableRow>
             <TableRow>
                 <TableCell>{dictionary.relay.endTable.point}</TableCell>
-                {props.task.map((data, idx)=>{
+                {props.task.slice(0, 10).map((data, idx)=>{
                     let currStyle = { backgroundColor: '#fff' };
                     if(data.got !== null){
                         switch(data.max - data.got){
@@ -85,29 +85,69 @@ export function RelayEndTable(props: {allPoints: number, task: {max: number, got
                     {data.got}
                 </TableCell>})}
             </TableRow>
+            {props.task.length > 10 && <>
+              <TableRow>
+                <TableCell>{dictionary.relay.endTable.task}</TableCell>
+                {props.task.slice(10).map((data, idx)=><TableCell>
+                    {idx+11}.
+                </TableCell>)}
+            </TableRow>
+            <TableRow>
+                <TableCell>{dictionary.relay.endTable.point}</TableCell>
+                {props.task.slice(10).map((data, idx)=>{
+                    let currStyle = { backgroundColor: '#fff' };
+                    if(data.got !== null){
+                        switch(data.max - data.got){
+                            case 0: 
+                              currStyle = { backgroundColor: '#3fc523' }; break;
+                            case 1: 
+                              currStyle = { backgroundColor: '#9beb53' }; break;
+                            case 2: 
+                              currStyle = { backgroundColor: '#d5eb42' }; break;
+                            default:
+                              currStyle = { backgroundColor: '#ee5555' };
+                        }
+                    }
+                return <TableCell sx={currStyle}>
+                    {data.got}
+                </TableCell>})}
+            </TableRow>
+            </>}
         </Table>
         <Stack sx={{
           marginTop: '25px',
           display: 'flex',
           alignItems: 'center',
           flexWrap: 'wrap',
-          ['& div']: {
+          '& div': {
+            alignItems: 'center',
+          },
+          '& div div': {
               width: '40px',
               height: '40px',
-              marginRight: '7px',
           },
-          ['& span']: {
-              marginRight: '25px'
+          flexDirection: 'row',
+          '& div span': {
+              marginLeft: '12px',
+              marginRight: '12px',
           }
-        }}>
-            <Stack sx={{ backgroundColor: '#3fc523' }}></Stack>
-            <span>1. {dictionary.relay.endTable.try}</span>
-            <Stack sx={{ backgroundColor: '#9beb53' }}></Stack>
-            <span>2. {dictionary.relay.endTable.try}</span>
-            <Stack sx={{ backgroundColor: '#d5eb42' }}></Stack>
-            <span>3. {dictionary.relay.endTable.try}</span>
-            <Stack sx={{ backgroundColor: '#ee5555' }}></Stack>
-            <span>{dictionary.relay.endTable.wrong}</span>
+        }}> 
+            <Stack sx={{display: 'flex' }}>
+              <Stack sx={{ backgroundColor: '#3fc523' }}></Stack>
+              <span>1. {dictionary.relay.endTable.try}</span>
+            </Stack>
+            <Stack sx={{display: 'flex' }}>
+              <Stack sx={{ backgroundColor: '#9beb53' }}></Stack>
+              <span>2. {dictionary.relay.endTable.try}</span>
+            </Stack>
+            <Stack sx={{display: 'flex' }}>
+              <Stack sx={{ backgroundColor: '#d5eb42' }}></Stack>
+              <span>3. {dictionary.relay.endTable.try}</span>
+            </Stack>
+            <Stack sx={{display: 'flex' }}>
+              <Stack sx={{ backgroundColor: '#ee5555' }}></Stack>
+              <span>{dictionary.relay.endTable.wrong}</span>
+            </Stack>
         </Stack>
         </Stack>
         <Stack sx={{
@@ -115,13 +155,14 @@ export function RelayEndTable(props: {allPoints: number, task: {max: number, got
             fontWeight: 'bold',
             marginTop: '35px',
             marginLeft: '55px',
+            marginBottom: '10px',
         }}>
             {dictionary.relay.endTable.all}: {props.allPoints} <br/>
             Ne feledkezzetek meg a stratégiás játékról, ha azzal még nem játszottatok!
         </Stack>
       <Button sx={{
         width: '300px',
-        height: '75px',
+        height: '55px',
         fontSize: '26px',
         alignSelf: 'center',
         textTransform: 'none',
