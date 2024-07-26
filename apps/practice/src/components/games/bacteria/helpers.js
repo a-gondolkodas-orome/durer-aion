@@ -99,6 +99,16 @@ export const distanceFromDangerousAttackZone = (board, { row, col }) => {
   const leftEdge = finalLeft + Math.floor((goalRowIdx - row)/2);
   const finalRight = last(board.goals) === boardWidth - 1 ? boardWidth - 1 : last(board.goals) + 1;
   const rightEdge = finalRight - Math.ceil((goalRowIdx - row)/2);
+  if (board.goals[0] === 0) {
+    if (col === 0 && row === (goalRowIdx - 2)) {
+      return { dist: 0, dir: "center" };
+    }
+  }
+  if (last(board.goals) === boardWidth - 1) {
+    if (col === (boardWidth - 1) && row === (goalRowIdx - 2)) {
+      return { dist: 0, dir: "center" };
+    }
+  }
   if (col >= leftEdge && col <= rightEdge) {
     return { dist: 0, dir: "center" };
   } else if (col < leftEdge) {

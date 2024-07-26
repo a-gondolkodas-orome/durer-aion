@@ -91,6 +91,8 @@ const aiAttack = (board) => {
     [attackRow, attackCol] = sample(dangerousBacteria);
     if (attackRow === goalRowIdx) {
       attackChoice = (attackCol === goals[0] - 1) ? "shiftRight" : "shiftLeft";
+    } else if (attackRow === (goalRowIdx - 2) && (attackCol === 0 || attackCol === lastCol(bacteria, attackRow))) {
+      attackChoice = "jump";
     } else {
       attackChoice = "spread";
     }
@@ -114,9 +116,7 @@ const getBacteriaCoords = (bacteria) => {
   let bacteriaCoords = [];
   for (let row = 0; row < bacteria.length; row++) {
     for (let col = 0; col < bacteria[row].length; col++) {
-      for (let i = 0; i < bacteria[row][col]; i++) {
-        bacteriaCoords.push([row, col]);
-      }
+      if (bacteria[row][col] > 0) bacteriaCoords.push([row, col]);
     }
   }
   return bacteriaCoords;

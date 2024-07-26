@@ -29,13 +29,16 @@ describe('distanceFromDangerousAttackZone', () => {
 });
 
 describe('isDangerous', () => {
-  it('odd edge is not dangerous', () => {
+  it('odd edge is not dangerous unless 1 jump left', () => {
     const bacteria = [
+      [0, 0, 0],
+        [0, 0],
       [0, 0, 0],
         [0, 0],
       [0, 0, 0]
     ];
     const board = { bacteria, goals: [0, 1, 2] };
     expect(isDangerous(board, { row: 0, col: 0 })).toBe(false);
+    expect(isDangerous(board, { row: 2, col: 0 })).toBe(true);
   });
 });
