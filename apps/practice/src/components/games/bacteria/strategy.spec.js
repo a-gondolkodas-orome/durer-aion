@@ -72,6 +72,39 @@ describe('test ai strategy', () => {
       const { newBoard } = getGameStateAfterAiTurn({ board, playerIndex: 0 });
       expect(newBoard.bacteria[0][0]).toEqual(1);
     });
+
+    it('removes a bacteria from a path with multiple bacteria', () => {
+      const bacteria = reverse([
+        [0, 0, 1, 0, 0],
+          [1, 1, 0, 0],
+        [0, 0, 1, 0, 0]
+      ]);
+      const board = { bacteria, goals: [4] };
+      const { newBoard } = getGameStateAfterAiTurn({ board, playerIndex: 0 });
+      expect(newBoard.bacteria[1][1] === 0 || newBoard.bacteria[0][2] === 0).toBe(true);
+    });
+
+    it('removes a bacteria from a path with multiple bacteria: right side', () => {
+      const bacteria = reverse([
+        [0, 0, 1, 0, 0],
+          [0, 0, 1, 1],
+        [0, 0, 1, 0, 0]
+      ]);
+      const board = { bacteria, goals: [0] };
+      const { newBoard } = getGameStateAfterAiTurn({ board, playerIndex: 0 });
+      expect(newBoard.bacteria[1][2] === 0 || newBoard.bacteria[0][2] === 0).toBe(true);
+    });
+
+    it('removes a dangerous bacteria if no multiple', () => {
+      const bacteria = reverse([
+        [0, 0, 0, 0, 0],
+          [1, 0, 0, 1],
+        [0, 0, 1, 0, 0]
+      ]);
+      const board = { bacteria, goals: [2] };
+      const { newBoard } = getGameStateAfterAiTurn({ board, playerIndex: 0 });
+      expect(newBoard.bacteria[0][2]).toEqual(0);
+    });
   });
 
   describe('attack', () => {

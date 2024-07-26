@@ -85,12 +85,12 @@ export const makeShiftOrSpread = (bacteria, attackRow, attackCol, reachedFields)
     newBacteria[row][col] += bacteria[attackRow][attackCol];
   });
   return newBacteria;
-}
+};
 
 /* Currently only correct for board with adjacent goals */
 export const isDangerous = (board, { row, col }) => {
-  return distanceFromDangerousAttackZone(board, { row, col }) === 0;
-}
+  return distanceFromDangerousAttackZone(board, { row, col }).dist === 0;
+};
 
 export const distanceFromDangerousAttackZone = (board, { row, col }) => {
   const boardWidth = board.bacteria[0].length;
@@ -100,10 +100,10 @@ export const distanceFromDangerousAttackZone = (board, { row, col }) => {
   const finalRight = last(board.goals) === boardWidth - 1 ? boardWidth - 1 : last(board.goals) + 1;
   const rightEdge = finalRight - Math.ceil((goalRowIdx - row)/2);
   if (col >= leftEdge && col <= rightEdge) {
-    return 0;
+    return { dist: 0, dir: "center" };
   } else if (col < leftEdge) {
-    return leftEdge - col;
+    return { dist: leftEdge - col, dir: "left" };
   } else {
-    return col - rightEdge;
+    return { dist: col - rightEdge, dir: "right" };
   };
-}
+};

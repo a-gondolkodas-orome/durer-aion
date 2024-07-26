@@ -1,6 +1,6 @@
 "use strict";
 
-import { cloneDeep, sample, minBy, shuffle } from "lodash";
+import { cloneDeep, sample, minBy, shuffle, groupBy, filter, sum } from "lodash";
 import {
   areAllBacteriaRemoved,
   isGoal,
@@ -23,28 +23,34 @@ export const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
 
 const aiDefense = (board) => {
   const newBoard = cloneDeep(board);
+  let defenseRow, defenseCol;
 
   const bacteriaCoords = getBacteriaCoords(board.bacteria);
   const dangerousBacteria = bacteriaCoords.filter(
     ([row, col]) => isDangerous(board, { row, col })
   );
-  const multipleBacteria = bacteriaCoords.filter(
-    ([row, col]) => board.bacteria[row][col] > 1
+  const bacteriaByPath = groupBy(
+    bacteriaCoords,
+    ([row, col]) => {
+      const { dist, dir } = distanceFromDangerousAttackZone(board, { row, col });
+      return `${dir}:${dist}`
+    }
   );
-  if (multipleBacteria.length >= 1) {
-    const [defenseRow, defenseCol] = sample(multipleBacteria);
-    newBoard.bacteria[defenseRow][defenseCol] -= 1;
+  const pathsWithMultipleBacteria = filter(bacteriaByPath, p =>
+    sum(p.map(([row, col]) => board.bacteria[row][col])) > 1
+  );
+  if (pathsWithMultipleBacteria.length >= 1) {
+    [defenseRow, defenseCol] = sample(sample(pathsWithMultipleBacteria));
   } else if (dangerousBacteria.length >= 1) {
-    const [defenseRow, defenseCol] = sample(dangerousBacteria);
-    newBoard.bacteria[defenseRow][defenseCol] -= 1;
+    [defenseRow, defenseCol] = sample(dangerousBacteria);
   } else {
-    const [defenseRow, defenseCol] = minBy(
+    [defenseRow, defenseCol] = minBy(
       shuffle(bacteriaCoords),
-      ([row, col]) => -100 * board.bacteria[row][col] + distanceFromDangerousAttackZone(board, { row, col })
+      ([row, col]) => distanceFromDangerousAttackZone(board, { row, col }).dist
     );
-    newBoard.bacteria[defenseRow][defenseCol] -= 1;
   }
 
+  newBoard.bacteria[defenseRow][defenseCol] -= 1;
   const isGameEnd = areAllBacteriaRemoved(newBoard.bacteria);
   return { newBoard, isGameEnd };
 };
@@ -65,7 +71,7 @@ const aiAttack = (board) => {
     // Currently AI is moderately dangerous: not random but not as dangerous as possible either
     [attackRow, attackCol] = minBy(
       shuffle(bacteriaCoords),
-      ([row, col]) => distanceFromDangerousAttackZone(board, { row, col })
+      ([row, col]) => distanceFromDangerousAttackZone(board, { row, col }).dist
     );
     let attackOptions = ["shiftRight", "shiftLeft", "jump", "spread", "spread", "spread", "spread"];
     if (attackRow === goalRowIdx - 1) {
