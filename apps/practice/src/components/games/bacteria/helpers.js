@@ -117,3 +117,6 @@ export const distanceFromDangerousAttackZone = (board, { row, col }) => {
     return { dist: col - rightEdge, dir: "right" };
   };
 };
+
+export const isOddEdge = (bacteria, { row, col }) =>
+  (col === 0 || col === lastCol(bacteria, row)) && row % 2 === 0;

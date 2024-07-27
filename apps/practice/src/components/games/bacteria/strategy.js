@@ -1,6 +1,15 @@
 "use strict";
 
-import { cloneDeep, sample, minBy, shuffle, groupBy, filter, sum } from "lodash";
+import {
+  cloneDeep,
+  sample,
+  minBy,
+  shuffle,
+  groupBy,
+  filter,
+  sum,
+  sortBy
+} from "lodash";
 import {
   areAllBacteriaRemoved,
   isGoal,
@@ -9,7 +18,8 @@ import {
   makeShiftOrSpread,
   reachedFieldsWithAttack,
   isDangerous,
-  distanceFromDangerousAttackZone
+  distanceFromDangerousAttackZone,
+  isOddEdge
 } from "./helpers";
 
 /* Currently only implemented for the case of adjacent goal fields */
@@ -36,8 +46,15 @@ const aiDefense = (board) => {
       return `${dir}:${dist}`
     }
   );
-  const pathsWithMultipleBacteria = filter(bacteriaByPath, p =>
-    sum(p.map(([row, col]) => board.bacteria[row][col])) > 1
+  const pathsWithMultipleBacteria = filter(bacteriaByPath, p => {
+    const adjustedBacteriaCount = p.map(([row, col]) => {
+      if (board.bacteria[row][col] > 1 && isOddEdge(board.bacteria, { row, col })) {
+        return board.bacteria[row][col] - 1;
+      }
+      return board.bacteria[row][col];
+    });
+    return sum(adjustedBacteriaCount) > 1;
+  }
   );
   if (pathsWithMultipleBacteria.length >= 1) {
     [defenseRow, defenseCol] = sample(sample(pathsWithMultipleBacteria));
@@ -67,12 +84,33 @@ const aiAttack = (board) => {
   let attackRow, attackCol;
   let attackChoice;
 
-  if (dangerousBacteria.length === 0) {
+  if (dangerousBacteria.length >= 1) {
+    [attackRow, attackCol] = sortBy(
+      shuffle(dangerousBacteria),
+      ([row, col]) => -row
+    )[0];
+    if (attackRow === goalRowIdx) {
+      attackChoice = (attackCol === goals[0] - 1) ? "shiftRight" : "shiftLeft";
+    } else if (attackRow === (goalRowIdx - 2) && (attackCol === 0 || attackCol === lastCol(bacteria, attackRow))) {
+      attackChoice = "jump";
+    } else {
+      attackChoice = "spread";
+    }
+  } else {
     // Currently AI is moderately dangerous: not random but not as dangerous as possible either
-    [attackRow, attackCol] = minBy(
-      shuffle(bacteriaCoords),
-      ([row, col]) => distanceFromDangerousAttackZone(board, { row, col }).dist
-    );
+    const coordsWithMultiples = bacteriaCoords.filter(([row, col]) => {
+      if (board.bacteria[row][col] <= 1) return false;
+      if (isOddEdge(board.bacteria, { row, col })) return false;
+      return true;
+    });
+    if (coordsWithMultiples.length >= 1) {
+      [attackRow, attackCol] = sample(coordsWithMultiples);
+    } else {
+      [attackRow, attackCol] = minBy(
+        shuffle(bacteriaCoords),
+        ([row, col]) => distanceFromDangerousAttackZone(board, { row, col }).dist
+      );
+    }
     let attackOptions = ["shiftRight", "shiftLeft", "jump", "spread", "spread", "spread", "spread"];
     if (attackRow === goalRowIdx - 1) {
       attackOptions = ["spread"];
@@ -87,17 +125,7 @@ const aiAttack = (board) => {
     } else if (attackChoice === "shiftLeft" && attackCol === 0) {
       attackChoice = "shiftRight";
     }
-  } else {
-    [attackRow, attackCol] = sample(dangerousBacteria);
-    if (attackRow === goalRowIdx) {
-      attackChoice = (attackCol === goals[0] - 1) ? "shiftRight" : "shiftLeft";
-    } else if (attackRow === (goalRowIdx - 2) && (attackCol === 0 || attackCol === lastCol(bacteria, attackRow))) {
-      attackChoice = "jump";
-    } else {
-      attackChoice = "spread";
-    }
   }
-
 
   const reachedFields = reachedFieldsWithAttack(attackChoice, { bacteria, attackRow, attackCol });
   const goalsReached = reachedFields.filter(([row, col]) => isGoal(board, row, col));

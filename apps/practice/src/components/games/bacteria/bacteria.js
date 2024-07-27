@@ -22,7 +22,7 @@ const generateNewBoard = () => {
   });
 
   // using isDangerous we could generate random but interesting boards instead of hardcoding a few
-  const boardVariantId = random(1, 6);
+  const boardVariantId = random(1, 8);
   switch (boardVariantId) {
     case 1: {
       [2, 4, 6, 8].forEach(b => bacteria[2][b] = 1);
@@ -47,6 +47,14 @@ const generateNewBoard = () => {
     case 6: {
       [1, 2, 4, 8].forEach(b => bacteria[0][b] = 1);
       return { bacteria, goals: range(0, 11) };
+    }
+    case 7: {
+      [5, 6, 7, 8].forEach(b => bacteria[1][b] = 1);
+      return { bacteria, goals: [5, 6, 7, 8, 9, 10] };
+    }
+    case 8: {
+      [7, 9, 10].forEach(b => bacteria[2][b] = 1);
+      return { bacteria, goals: [5, 6, 7, 8, 9, 10] };
     }
   }
 };

@@ -77,11 +77,11 @@ describe('test ai strategy', () => {
       const bacteria = reverse([
         [0, 0, 0, 0, 0],
           [0, 0, 0, 0],
-        [2, 0, 0, 1, 0]
+        [0, 2, 0, 1, 0]
       ]);
       const board = { bacteria, goals: [2] };
       const { newBoard } = getGameStateAfterAiTurn({ board, playerIndex: 0 });
-      expect(newBoard.bacteria[0][0]).toEqual(1);
+      expect(newBoard.bacteria[0][1]).toEqual(1);
     });
 
     it('removes a bacteria from a path with multiple bacteria', () => {
@@ -111,6 +111,17 @@ describe('test ai strategy', () => {
         [0, 0, 0, 0, 0],
           [1, 0, 0, 1],
         [0, 0, 1, 0, 0]
+      ]);
+      const board = { bacteria, goals: [2] };
+      const { newBoard } = getGameStateAfterAiTurn({ board, playerIndex: 0 });
+      expect(newBoard.bacteria[0][2]).toEqual(0);
+    });
+
+    it('removes dangerous bacteria if multiples cannot spread', () => {
+      const bacteria = reverse([
+        [0, 0, 0, 0, 0],
+          [0, 0, 0, 0],
+        [2, 0, 1, 0, 0]
       ]);
       const board = { bacteria, goals: [2] };
       const { newBoard } = getGameStateAfterAiTurn({ board, playerIndex: 0 });
@@ -220,6 +231,30 @@ describe('test ai strategy', () => {
         isEqual(newBoard.bacteria, variantC)
       ).toBe(true);
       expect(isGameEnd).toBe(false);
+    });
+
+    it('attack with multiple bacteria if no dangerous one', () => {
+      const bacteria = reverse([
+        [0, 0, 0, 0, 0],
+          [2, 0, 0, 0],
+        [0, 0, 0, 0, 1]
+      ]);
+      const board = { bacteria, goals: [3] };
+      const { newBoard } = getGameStateAfterAiTurn({ board, playerIndex: 1 });
+      expect(newBoard.bacteria[2][1]).toEqual(2);
+    });
+
+    it('should attack with closest dangerous bacteria', () => {
+      const bacteria = reverse([
+        [0, 0, 0, 0, 0],
+          [0, 1, 0, 0],
+        [0, 1, 0, 1, 0],
+          [0, 1, 1, 0],
+        [0, 0, 1, 0, 0]
+      ]);
+      const board = { bacteria, goals: [1, 2, 3] };
+      const { newBoard } = getGameStateAfterAiTurn({ board, playerIndex: 1 });
+      expect(newBoard.bacteria[4][2]).toEqual(1);
     });
   });
 });
