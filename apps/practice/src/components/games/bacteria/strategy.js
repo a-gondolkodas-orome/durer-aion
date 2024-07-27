@@ -7,8 +7,7 @@ import {
   shuffle,
   groupBy,
   filter,
-  sum,
-  sortBy
+  sum
 } from "lodash";
 import {
   areAllBacteriaRemoved,
@@ -40,7 +39,7 @@ const aiDefense = (board) => {
     ([row, col]) => isDangerous(board, { row, col })
   );
   const bacteriaByPath = groupBy(
-    bacteriaCoords,
+    bacteriaCoords.filter(([row, col]) => !isDangerous(board, { row, col })),
     ([row, col]) => {
       const { dist, dir } = distanceFromDangerousAttackZone(board, { row, col });
       return `${dir}:${dist}`
@@ -54,12 +53,14 @@ const aiDefense = (board) => {
       return board.bacteria[row][col];
     });
     return sum(adjustedBacteriaCount) > 1;
-  }
-  );
+  });
   if (pathsWithMultipleBacteria.length >= 1) {
     [defenseRow, defenseCol] = sample(sample(pathsWithMultipleBacteria));
   } else if (dangerousBacteria.length >= 1) {
-    [defenseRow, defenseCol] = sample(dangerousBacteria);
+    [defenseRow, defenseCol] = minBy(
+      shuffle(dangerousBacteria),
+      ([row]) => -row
+    );
   } else {
     [defenseRow, defenseCol] = minBy(
       shuffle(bacteriaCoords),
@@ -85,10 +86,10 @@ const aiAttack = (board) => {
   let attackChoice;
 
   if (dangerousBacteria.length >= 1) {
-    [attackRow, attackCol] = sortBy(
+    [attackRow, attackCol] = minBy(
       shuffle(dangerousBacteria),
-      ([row, col]) => -row
-    )[0];
+      ([row]) => -row
+    );
     if (attackRow === goalRowIdx) {
       attackChoice = (attackCol === goals[0] - 1) ? "shiftRight" : "shiftLeft";
     } else if (attackRow === (goalRowIdx - 2) && (attackCol === 0 || attackCol === lastCol(bacteria, attackRow))) {
