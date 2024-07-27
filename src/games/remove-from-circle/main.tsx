@@ -5,19 +5,19 @@ import { ClientFactory } from '../../common/client_factory';
 
 
 let descriptionC = <p className="text-justify">
-<strong>Feladat leírása:</strong> TODO
+<strong>Feladat leírása:</strong> Kezdetben 7 pont van egy körben. A két játékos felváltva lép a pontokra, egy pontra csak akkor léphetnek, ha van olyan szomszédja, amire még senki nem lépett. Az veszít, aki már nem tud lépni.
 
 
 </p>
 
 let descriptionD = <p className="text-justify">
-<strong>Feladat leírása:</strong> TODO
+<strong>Feladat leírása:</strong> Kezdetben 9 pont van egy körben. A két játékos felváltva lép a pontokra, egy pontra csak akkor léphetnek, ha van olyan szomszédja, amire még senki nem lépett. Az veszít, aki már nem tud lépni.
 
 
 </p>
 
 let descriptionE = <p className="text-justify">
-<strong>Feladat leírása:</strong> TODO
+<strong>Feladat leírása:</strong> Kezdetben legfeljebb 10 pont van egy körben. A két játékos felváltva lép a pontokra, egy pontra csak akkor léphetnek, ha van olyan szomszédja, amire még senki nem lépett. Az veszít, aki már nem tud lépni.
 
 
 </p>

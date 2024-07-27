@@ -44,7 +44,29 @@ function startingPosition({ G, ctx }: any, category: "C" | "D" | "E"): { circle:
   }
   if (category === "E") {
     // E Category
-    return { circle: Array(Math.floor(Math.random()*4+7)).fill(true), firstMove:-1, lastMove:-1}
+    if (G.difficulty === "live") {
+      let NoL = G.numberOfLoss;
+      let WS = G.winningStreak;
+      if (NoL === 0 && WS === 0) {
+        return { circle: Array(9).fill(true), firstMove:-1, lastMove:-1};
+      } else if (NoL === 0 && WS === 1) {
+        return { circle: Array(10).fill(true), firstMove:-1, lastMove:-1};
+      } else if (NoL === 1 && WS === 0) {
+        return { circle: Array(8).fill(true), firstMove:-1, lastMove:-1};
+      } else if (NoL === 1 && WS === 1) {
+        return { circle: Array(9).fill(true), firstMove:-1, lastMove:-1};
+      } else if (NoL === 2 && WS === 0) {
+        return { circle: Array(7).fill(true), firstMove:-1, lastMove:-1};
+      } else if (NoL === 2 && WS === 1) {
+        return { circle: Array(10).fill(true), firstMove:-1, lastMove:-1};
+      } else {
+        return { circle: Array(
+          6 + Math.floor(Math.random()*2)*2 + G.numberOfTries%2
+        ).fill(true), firstMove:-1, lastMove:-1};
+      }
+    } else {
+      return { circle: Array(Math.floor(Math.random()*4+7)).fill(true), firstMove:-1, lastMove:-1};
+    }
   }
   //just in case
   return {circle: Array(7).fill(true), firstMove:-1, lastMove:-1};
