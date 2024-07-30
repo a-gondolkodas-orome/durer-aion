@@ -3,13 +3,13 @@ import { range, isEqual, random } from 'lodash';
 import { strategyGameFactory } from '../../strategy-game';
 import { getBoardAfterAiTurn } from './strategy';
 
-const generateNewBoard = () => ([random(3, 10), random(3, 10)]);
+const generateStartBoard = () => ([random(3, 10), random(3, 10)]);
 
 const isGameEnd = (board) => isEqual(board, [1, 1]);
 
 const getGameStateAfterAiTurn = ({ board }) => {
-  const { intermediateBoard, newBoard } = getBoardAfterAiTurn(board);
-  return { intermediateBoard, newBoard, isGameEnd: isGameEnd(newBoard), winnerIndex: null };
+  const { intermediateBoard, nextBoard } = getBoardAfterAiTurn(board);
+  return { intermediateBoard, nextBoard, isGameEnd: isGameEnd(nextBoard), winnerIndex: null };
 };
 
 const GameBoard = ({ board, setBoard, ctx }) => {
@@ -26,8 +26,8 @@ const GameBoard = ({ board, setBoard, ctx }) => {
     setBoard(pileId === 0 ? [board[0], 0] : [0, board[1]]);
 
     setTimeout(() => {
-      const newBoard = [pieceId + 1, board[pileId] - pieceId - 1];
-      ctx.endPlayerTurn({ newBoard, isGameEnd: isGameEnd(newBoard), winnerIndex: null });
+      const nextBoard = [pieceId + 1, board[pileId] - pieceId - 1];
+      ctx.endPlayerTurn({ nextBoard, isGameEnd: isGameEnd(nextBoard), winnerIndex: null });
 
       setHoveredPiece(null);
     }, 750);
@@ -114,13 +114,13 @@ const Game = strategyGameFactory({
   GameBoard,
   G: {
     getPlayerStepDescription,
-    generateNewBoard,
+    generateStartBoard,
     getGameStateAfterAiTurn
   }
 });
 
 export const PileSplitter = () => {
-  const [board, setBoard] = useState(generateNewBoard());
+  const [board, setBoard] = useState(generateStartBoard());
 
   return <Game board={board} setBoard={setBoard} />;
 };

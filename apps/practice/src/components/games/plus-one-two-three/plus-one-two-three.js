@@ -6,8 +6,8 @@ const GameBoard = ({board, ctx}) => {
 
     const clickNumber = (number) => {
         if (ctx.shouldPlayerMoveNext) {
-            let newBoard = board + number;
-            ctx.endPlayerTurn(getGameStateAfterMove(newBoard, ctx.playerIndex));
+            let nextBoard = board + number;
+            ctx.endPlayerTurn(getGameStateAfterMove(nextBoard, ctx.playerIndex));
         }
     };
 
@@ -28,23 +28,23 @@ const GameBoard = ({board, ctx}) => {
         );
 };
 
-const getGameStateAfterMove = (newBoard, moverIndex) => {
+const getGameStateAfterMove = (nextBoard, moverIndex) => {
     let isGameEnd = false;
     let innerIndex = null;
-    if (newBoard>40) {
+    if (nextBoard>40) {
         isGameEnd = true;
     }
-    return { newBoard: newBoard, isGameEnd: isGameEnd, winnerIndex: 1-moverIndex };
+    return { nextBoard: nextBoard, isGameEnd: isGameEnd, winnerIndex: 1-moverIndex };
 };
 
 const getGameStateAfterAiTurn = ({board, playerIndex}) => {
-    let newBoard;
+    let nextBoard;
     if (board%4 !== 0) {
-        newBoard = board + 4 - board % 4;
+        nextBoard = board + 4 - board % 4;
     } else {
-        newBoard = board + Math.floor(Math.random()*3 + 1)
+        nextBoard = board + Math.floor(Math.random()*3 + 1)
     }
-    return (getGameStateAfterMove(newBoard, 1-playerIndex));
+    return (getGameStateAfterMove(nextBoard, 1-playerIndex));
 };
 
 const rule = <>
@@ -60,7 +60,7 @@ const Game = strategyGameFactory({
     GameBoard,
     G: {
         getPlayerStepDescription: () => 'Válaszd ki mennyivel szeretnéd növelni a számot.',
-        generateNewBoard: () => 0,
+        generateStartBoard: () => 0,
         getGameStateAfterAiTurn
     }
 });

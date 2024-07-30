@@ -2,7 +2,7 @@
 
 import { flatMap, range, sample, cloneDeep, random, shuffle } from 'lodash';
 
-export const generateNewBoard = () => {
+export const generateStartBoard = () => {
   return range(0, 8).map(() => range(0, 8).map(() => null));
 };
 
@@ -21,11 +21,11 @@ export const getGameStateAfterAiTurn = ({ board }) => {
 };
 
 export const getGameStateAfterMove = (board, { row, col }) => {
-  const newBoard = cloneDeep(board);
-  markForbiddenFields(newBoard, { row, col });
-  newBoard[row][col] = BISHOP;
+  const nextBoard = cloneDeep(board);
+  markForbiddenFields(nextBoard, { row, col });
+  nextBoard[row][col] = BISHOP;
 
-  return { newBoard, isGameEnd: getAllowedMoves(newBoard).length === 0, winnerIndex: null };
+  return { nextBoard, isGameEnd: getAllowedMoves(nextBoard).length === 0, winnerIndex: null };
 };
 
 const getOptimalAiMove = (board) => {

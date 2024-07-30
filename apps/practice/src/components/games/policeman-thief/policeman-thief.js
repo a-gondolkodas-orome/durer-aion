@@ -3,7 +3,7 @@ import { range, random } from "lodash";
 import { strategyGameFactory } from "../strategy-game";
 import { getGameStateAfterAiTurn, getGameStateAfterMove } from "./strategy";
 
-const generateNewBoard = () => {
+const generateStartBoard = () => {
   const blueStartPosition = random(0, 7);
   let redStartPosition = random(0, 7);
   while (blueStartPosition === redStartPosition) {
@@ -61,13 +61,13 @@ const GameBoard = ({ board, setBoard, ctx }) => {
       return null;
     }
 
-    const newboard = { ...board, ...circle };
+    const nextBoard = { ...board, ...circle };
     if (currentPlayer() === "red") {
-      newboard.turnCount++;
-      ctx.endPlayerTurn(getGameStateAfterMove(newboard));
+      nextBoard.turnCount++;
+      ctx.endPlayerTurn(getGameStateAfterMove(nextBoard));
     } else {
       let isTurnEnd = false;
-      setBoard(newboard);
+      setBoard(nextBoard);
       setTurnStage("choose");
       if (currentVertex === board.blue1) {
         setIsBlue1Moved(true);
@@ -81,11 +81,11 @@ const GameBoard = ({ board, setBoard, ctx }) => {
         }
       }
       if (isTurnEnd) {
-        newboard.turnCount++;
+        nextBoard.turnCount++;
         setIsBlue1Moved(false);
         setIsBlue2Moved(false);
         setTurnStage("choose");
-        ctx.endPlayerTurn(getGameStateAfterMove(newboard));
+        ctx.endPlayerTurn(getGameStateAfterMove(nextBoard));
       }
     }
   };
@@ -242,12 +242,12 @@ const Game = strategyGameFactory({
         return "Kattints arra az útkereszteződésre, ahová a tolvajjal lépni szeretnél.";
       }
     },
-    generateNewBoard,
+    generateStartBoard,
     getGameStateAfterAiTurn
   }
 });
 
 export const Policemanthief = () => {
-  const [board, setBoard] = useState(generateNewBoard());
+  const [board, setBoard] = useState(generateStartBoard());
   return <Game board={board} setBoard={setBoard} />;
 };

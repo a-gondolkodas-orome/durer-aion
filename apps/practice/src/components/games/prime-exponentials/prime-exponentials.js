@@ -16,7 +16,7 @@ const primeList = [
   919, 929, 937, 941, 947, 953, 967, 971, 977, 983, 991, 997
 ];
 
-const generateNewBoard = () => {
+const generateStartBoard = () => {
   if (random(0, 1)) {
     return random(1, 166) * 6;
   } else {
@@ -186,8 +186,8 @@ const GameBoard = ({ board, ctx }) => {
   );
 }
 
-const getGameStateAfterMove = (newBoard) => {
-  return { newBoard, isGameEnd: newBoard === 0, winnerIndex: null };
+const getGameStateAfterMove = (nextBoard) => {
+  return { nextBoard, isGameEnd: nextBoard === 0, winnerIndex: null };
 }
 
 const getGameStateAfterAiTurn = ({ board }) => {
@@ -239,13 +239,13 @@ const Game = strategyGameFactory({
   GameBoard,
   G: {
     getPlayerStepDescription,
-    generateNewBoard,
+    generateStartBoard,
     getGameStateAfterAiTurn
   }
 })
 
 export const PrimeExponentials = () => {
-  const [board, setBoard] = useState(generateNewBoard());
+  const [board, setBoard] = useState(generateStartBoard());
 
   return <Game board={board} setBoard={setBoard} />;
 };

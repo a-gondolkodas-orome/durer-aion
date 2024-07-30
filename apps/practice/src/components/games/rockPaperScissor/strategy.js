@@ -3,13 +3,13 @@
 import { isNull, range, cloneDeep } from 'lodash';
 
 export const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
-  const newBoard = cloneDeep(board);
-  newBoard[getOptimalAiPlacingPosition(board, playerIndex)] = 'removed';
-  return getGameStateAfterMove(newBoard);
+  const nextBoard = cloneDeep(board);
+  nextBoard[getOptimalAiPlacingPosition(board, playerIndex)] = 'removed';
+  return getGameStateAfterMove(nextBoard);
 };
 
-export const getGameStateAfterMove = (newBoard) => {
-  return { newBoard, isGameEnd: isGameEnd(newBoard), winnerIndex: hasFirstPlayerWon(newBoard) ? 0 : 1 };
+export const getGameStateAfterMove = (nextBoard) => {
+  return { nextBoard, isGameEnd: isGameEnd(nextBoard), winnerIndex: hasFirstPlayerWon(nextBoard) ? 0 : 1 };
 };
 
 const isGameEnd = (board) => {

@@ -14,9 +14,9 @@ const GameBoard = ({ board, ctx }) => {
       setFirstNode(null);
     } else {
       if (!isAllowed(board, { from: firstNode, to: node })) return;
-      const newBoard = [...board];
-      newBoard.push(getAllowedSuperset(board, { from: firstNode, to: node }));
-      ctx.endPlayerTurn({ newBoard, isGameEnd: isGameEnd(newBoard), winnerIndex: null });
+      const nextBoard = [...board];
+      nextBoard.push(getAllowedSuperset(board, { from: firstNode, to: node }));
+      ctx.endPlayerTurn({ nextBoard, isGameEnd: isGameEnd(nextBoard), winnerIndex: null });
       setFirstNode(null);
     }
   };
@@ -99,7 +99,7 @@ const Game = strategyGameFactory({
   GameBoard,
   G: {
     getPlayerStepDescription: () => 'Kattints két oszlopra, amik között kötelet szeretnél kifeszíteni.',
-    generateNewBoard: () => [],
+    generateStartBoard: () => [],
     getGameStateAfterAiTurn
   }
 });

@@ -3,7 +3,7 @@ import { range } from 'lodash';
 import { strategyGameFactory } from '../strategy-game';
 import { isAllowedStep, getGameStateAfterMove, getGameStateAfterAiTurn } from './strategy';
 
-const generateNewBoard = () => Array(8).fill(null);
+const generateStartBoard = () => Array(8).fill(null);
 
 const cubeCoords = [
   { cx: '8%',  cy: '25%' },
@@ -45,11 +45,11 @@ const GameBoard = ({ board, setBoard, ctx }) => {
 
   const setVertexColor = (vertex) => {
     if (!isMoveAllowed(vertex)) return;
-    const newBoard = [...board];
-    newBoard[vertex] = color;
-    setBoard(newBoard);
+    const nextBoard = [...board];
+    nextBoard[vertex] = color;
+    setBoard(nextBoard);
     setShow(false);
-    ctx.endPlayerTurn(getGameStateAfterMove(newBoard));
+    ctx.endPlayerTurn(getGameStateAfterMove(nextBoard));
   };
 
   return (
@@ -139,13 +139,13 @@ const Game = strategyGameFactory({
   GameBoard,
   G: {
     getPlayerStepDescription: () => 'Válassz színt, majd színezz meg egy csúcsot!',
-    generateNewBoard,
+    generateStartBoard,
     getGameStateAfterAiTurn
   }
 });
 
 export const CubeColoring = () => {
-  const [board, setBoard] = useState(generateNewBoard());
+  const [board, setBoard] = useState(generateStartBoard());
 
   return <Game board={board} setBoard={setBoard} />;
 };

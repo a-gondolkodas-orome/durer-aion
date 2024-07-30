@@ -1,12 +1,12 @@
 'use strict';
 
-import { generateNewBoard, getGameStateAfterKillingGroup, getGameStateAfterAiTurn } from './strategy';
+import { generateStartBoard, getGameStateAfterKillingGroup, getGameStateAfterAiTurn } from './strategy';
 import { uniq, flatten, isEqual } from 'lodash';
 
 describe('HunyadiAndTheJanissaries strategy', () => {
-  describe('generateNewBoard', () => {
+  describe('generateStartBoard', () => {
     it('should generate a board of 5 possibly empty soldier groups', () => {
-      const board = generateNewBoard();
+      const board = generateStartBoard();
       expect(board).toHaveLength(5);
       expect(uniq(flatten(board))).toEqual(['blue']);
     });
@@ -16,7 +16,7 @@ describe('HunyadiAndTheJanissaries strategy', () => {
     it('should claim victory for Hunyadi if all soldiers are killed', () => {
       expect(getGameStateAfterKillingGroup([[], ['red', 'red']], 'red')).toEqual({
         intermediateBoard: [[], []],
-        newBoard: [[], []],
+        nextBoard: [[], []],
         isGameEnd: true,
         winnerIndex: 1
       });
@@ -25,7 +25,7 @@ describe('HunyadiAndTheJanissaries strategy', () => {
     it('should claim loss for Hunyadi if a soldier reaches the castle', () => {
       expect(getGameStateAfterKillingGroup([['red', 'blue'], ['blue']], 'red')).toEqual({
         intermediateBoard: [['blue'], ['blue']],
-        newBoard: [['blue'], []],
+        nextBoard: [['blue'], []],
         isGameEnd: true,
         winnerIndex: 0
       });
@@ -35,7 +35,7 @@ describe('HunyadiAndTheJanissaries strategy', () => {
       const board = [['red'], ['blue', 'red'], [], ['blue', 'blue']];
       expect(getGameStateAfterKillingGroup(board, 'red')).toEqual({
         intermediateBoard: [[], ['blue'], [], ['blue', 'blue']],
-        newBoard: [['blue'], [], ['blue', 'blue'], []],
+        nextBoard: [['blue'], [], ['blue', 'blue'], []],
         isGameEnd: false
       });
     });
@@ -47,7 +47,7 @@ describe('HunyadiAndTheJanissaries strategy', () => {
         const board = [['blue', 'red', 'red'], ['red']];
         expect(getGameStateAfterAiTurn({ board, playerIndex: 0 })).toEqual({
           intermediateBoard: [['red', 'red'], ['red']],
-          newBoard: [['red'], []],
+          nextBoard: [['red'], []],
           isGameEnd: true,
           winnerIndex: 0
         });
@@ -57,7 +57,7 @@ describe('HunyadiAndTheJanissaries strategy', () => {
         const board = [[], ['red'], ['blue', 'blue'], ['blue']];
         expect(getGameStateAfterAiTurn({ board, playerIndex: 0 })).toEqual({
           intermediateBoard: [[], ['red'], [], []],
-          newBoard: [['red'], [], [], []],
+          nextBoard: [['red'], [], [], []],
           isGameEnd: false
         });
       });
@@ -67,7 +67,7 @@ describe('HunyadiAndTheJanissaries strategy', () => {
       it('should split first row evenly if there are more soldiers', () => {
         const board = [['blue', 'blue']];
         expect(getGameStateAfterAiTurn({ board, playerIndex: 1 })).toEqual({
-          newBoard: [expect.toIncludeSameMembers(['blue', 'red'])],
+          nextBoard: [expect.toIncludeSameMembers(['blue', 'red'])],
           isGameEnd: false
         });
       });
@@ -79,10 +79,10 @@ describe('HunyadiAndTheJanissaries strategy', () => {
           [],
           ['blue', 'blue', 'blue', 'blue']
         ];
-        const { newBoard } = getGameStateAfterAiTurn({ board, playerIndex: 1 });
+        const { nextBoard } = getGameStateAfterAiTurn({ board, playerIndex: 1 });
         expect(
-          isEqual(newBoard, [['blue'], ['red'], [], ['red', 'red', 'red', 'red']]) ||
-          isEqual(newBoard, [['red'], ['blue'], [], ['blue', 'blue', 'blue', 'blue']])
+          isEqual(nextBoard, [['blue'], ['red'], [], ['red', 'red', 'red', 'red']]) ||
+          isEqual(nextBoard, [['red'], ['blue'], [], ['blue', 'blue', 'blue', 'blue']])
         ).toBe(true);
       });
 
@@ -93,10 +93,10 @@ describe('HunyadiAndTheJanissaries strategy', () => {
           ['blue'],
           ['blue', 'blue']
         ];
-        const { newBoard } = getGameStateAfterAiTurn({ board, playerIndex: 1 });
+        const { nextBoard } = getGameStateAfterAiTurn({ board, playerIndex: 1 });
         expect(
-          isEqual(newBoard, [['blue'], ['red', 'red', 'blue'], ['red'], ['red', 'red']]) ||
-          isEqual(newBoard, [['red'], ['blue', 'blue', 'red'], ['blue'], ['blue', 'blue']])
+          isEqual(nextBoard, [['blue'], ['red', 'red', 'blue'], ['red'], ['red', 'red']]) ||
+          isEqual(nextBoard, [['red'], ['blue', 'blue', 'red'], ['blue'], ['blue', 'blue']])
         ).toBe(true);
       });
     });

@@ -3,20 +3,20 @@ import { range, random } from 'lodash';
 import { strategyGameFactory } from '../strategy-game';
 import { getOptimalAiMove } from './strategy';
 
-const generateNewBoard = () => ([random(0, 9), random(0, 9), random(0, 9), random(4, 9)]);
+const generateStartBoard = () => ([random(0, 9), random(0, 9), random(0, 9), random(4, 9)]);
 
 const getGameStateAfterMove = (board, { pileId, pieceId }) => {
   const intermediateBoard = [...board];
   intermediateBoard[pileId]=board[pileId]-pieceId-1;
 
-  const newBoard = [...board];
-  newBoard[pileId]=board[pileId]-pieceId-1;
+  const nextBoard = [...board];
+  nextBoard[pileId]=board[pileId]-pieceId-1;
   for (let i=pileId-pieceId-1; i<pileId; i++){
-    newBoard[i]=board[i]+1;
+    nextBoard[i]=board[i]+1;
   }
-  const isGameEnd = newBoard[1]===0 && newBoard[2]===0 && newBoard[3]===0;
+  const isGameEnd = nextBoard[1]===0 && nextBoard[2]===0 && nextBoard[3]===0;
 
-  return { newBoard, intermediateBoard, isGameEnd, winnerIndex: null };
+  return { nextBoard, intermediateBoard, isGameEnd, winnerIndex: null };
 };
 
 const GameBoard = ({ board, setBoard, ctx }) => {
@@ -132,13 +132,13 @@ const Game = strategyGameFactory({
   GameBoard,
   G: {
     getPlayerStepDescription: () => 'Kattints egy korongra, hogy jelezd, hány korongot szeretnél elvenni a kupacból.',
-    generateNewBoard,
+    generateStartBoard,
     getGameStateAfterAiTurn: ({ board }) => getGameStateAfterMove(board, getOptimalAiMove(board))
   }
 });
 
 export const FourPilesSpreadAhead = () => {
-  const [board, setBoard] = useState(generateNewBoard());
+  const [board, setBoard] = useState(generateStartBoard());
 
   return <Game board={board} setBoard={setBoard} />;
 };

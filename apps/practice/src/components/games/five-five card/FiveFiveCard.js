@@ -11,9 +11,9 @@ const GameBoard = ({ board, ctx }) => {
   const clickField = (id) => {
     if (!isMoveAllowed(id)) return;
 
-    const newBoard = cloneDeep(board);
-    newBoard[id] = 'removed';
-    ctx.endPlayerTurn(getGameStateAfterMove(newBoard));
+    const nextBoard = cloneDeep(board);
+    nextBoard[id] = 'removed';
+    ctx.endPlayerTurn(getGameStateAfterMove(nextBoard));
   };
 
   const isDisabled = id => {
@@ -73,7 +73,7 @@ const Game = strategyGameFactory({
   GameBoard,
   G: {
     getPlayerStepDescription: () => 'Vegyél el egy kártyát az ellenfél elől.',
-    generateNewBoard: () => Array(15).fill(null),
+    generateStartBoard: () => Array(15).fill(null),
     getGameStateAfterAiTurn
   }
 });

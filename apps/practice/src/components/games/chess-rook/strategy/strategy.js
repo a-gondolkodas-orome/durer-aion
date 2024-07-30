@@ -2,7 +2,7 @@
 
 import { last, range, random, cloneDeep } from 'lodash';
 
-export const generateNewBoard = () => {
+export const generateStartBoard = () => {
   const board = range(0, 8).map(() => range(0, 8).map(() => null));
   board[0][0] = 'rook';
   return {
@@ -17,13 +17,13 @@ export const getGameStateAfterAiTurn = ({ board }) => {
 };
 
 export const getGameStateAfterMove = (board, { row, col }) => {
-  const newBoard = cloneDeep(board);
-  markVisitedFields(newBoard, newBoard.rookPosition, { row, col });
+  const nextBoard = cloneDeep(board);
+  markVisitedFields(nextBoard, nextBoard.rookPosition, { row, col });
 
-  newBoard.chessBoard[row][col] = 'rook';
-  newBoard.rookPosition = { row, col };
+  nextBoard.chessBoard[row][col] = 'rook';
+  nextBoard.rookPosition = { row, col };
 
-  return { newBoard, isGameEnd: getAllowedMoves(newBoard).length === 0, winnerIndex: null };
+  return { nextBoard, isGameEnd: getAllowedMoves(nextBoard).length === 0, winnerIndex: null };
 };
 
 const getOptimalAiMove = (board) => {
@@ -92,14 +92,14 @@ export const getAllowedMoves = (board) => {
   return allowedMoves;
 };
 
-const markVisitedFields = (board, rookPosition, newRookPosition) => {
-  if (rookPosition.row === newRookPosition.row) {
-    range(rookPosition.col, newRookPosition.col).forEach(col => {
+const markVisitedFields = (board, rookPosition, nextRookPosition) => {
+  if (rookPosition.row === nextRookPosition.row) {
+    range(rookPosition.col, nextRookPosition.col).forEach(col => {
       board.chessBoard[rookPosition.row][col] = 'visited';
     });
   }
-  if (rookPosition.col === newRookPosition.col) {
-    range(rookPosition.row, newRookPosition.row).forEach(row => {
+  if (rookPosition.col === nextRookPosition.col) {
+    range(rookPosition.row, nextRookPosition.row).forEach(row => {
       board.chessBoard[row][rookPosition.col] = 'visited';
     });
   }

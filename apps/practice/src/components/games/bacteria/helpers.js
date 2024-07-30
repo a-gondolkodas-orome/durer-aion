@@ -72,19 +72,19 @@ export const isGoal = (board, row, col) => {
 export const lastCol = (bacteria, row) => bacteria[0].length - 0.5 - 0.5 * (-1) ** row;
 
 export const makeJump = (bacteria, attackRow, attackCol) => {
-  const newBacteria = cloneDeep(bacteria);
-  newBacteria[attackRow][attackCol] -= 1;
-  newBacteria[attackRow + 2][attackCol] += 1;
-  return newBacteria;
+  const nextBacteria = cloneDeep(bacteria);
+  nextBacteria[attackRow][attackCol] -= 1;
+  nextBacteria[attackRow + 2][attackCol] += 1;
+  return nextBacteria;
 };
 
 export const makeShiftOrSpread = (bacteria, attackRow, attackCol, reachedFields) => {
-  const newBacteria = cloneDeep(bacteria);
-  newBacteria[attackRow][attackCol] = 0;
+  const nextBacteria = cloneDeep(bacteria);
+  nextBacteria[attackRow][attackCol] = 0;
   reachedFields.forEach(([row, col]) => {
-    newBacteria[row][col] += bacteria[attackRow][attackCol];
+    nextBacteria[row][col] += bacteria[attackRow][attackCol];
   });
-  return newBacteria;
+  return nextBacteria;
 };
 
 /* Currently only correct for board with adjacent goals */

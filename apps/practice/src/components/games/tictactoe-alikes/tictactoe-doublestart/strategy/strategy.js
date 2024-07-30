@@ -10,20 +10,20 @@ const aiColor = playerIndex => playerIndex === 0 ? roleColors[1] : roleColors[0]
 
 
 export const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
-  const newBoard = cloneDeep(board);
-  if (newBoard.filter(c => c).length === 0) {
+  const nextBoard = cloneDeep(board);
+  if (nextBoard.filter(c => c).length === 0) {
     // choose two neighboring corners randomly
     const firstStep = sample([[0, 2], [2, 8], [6, 8], [0, 6]]);
-    newBoard[firstStep[0]] = roleColors[0];
-    newBoard[firstStep[1]] = roleColors[0];
+    nextBoard[firstStep[0]] = roleColors[0];
+    nextBoard[firstStep[1]] = roleColors[0];
   } else {
-    newBoard[getOptimalAiPlacingPosition(newBoard, playerIndex)] = aiColor(playerIndex);
+    nextBoard[getOptimalAiPlacingPosition(nextBoard, playerIndex)] = aiColor(playerIndex);
   }
-  return getGameStateAfterMove(newBoard);
+  return getGameStateAfterMove(nextBoard);
 };
 
-export const getGameStateAfterMove = (newBoard) => {
-  return { newBoard, isGameEnd: isGameEnd(newBoard), winnerIndex: hasFirstPlayerWon(newBoard) ? 0 : 1 };
+export const getGameStateAfterMove = (nextBoard) => {
+  return { nextBoard, isGameEnd: isGameEnd(nextBoard), winnerIndex: hasFirstPlayerWon(nextBoard) ? 0 : 1 };
 };
 
 const hasFirstPlayerWon = (board) => {

@@ -3,7 +3,7 @@ import { range, sample, difference } from 'lodash';
 import { strategyGameFactory } from '../strategy-game';
 import { getOptimalAiStep } from './strategy';
 
-const generateNewBoard = () => {
+const generateStartBoard = () => {
   const losingPositions = range(29, 127, 14);
   const winningPositions = difference(range(26, 115), losingPositions);
   const target = sample([sample(losingPositions), sample(winningPositions)]);
@@ -14,7 +14,7 @@ const getGameStateAfterMove = (board, step, moverIndex) => {
   const numberAfterStep = board.current + step;
   const isGameEnd = numberAfterStep >= board.target;
   return {
-    newBoard: { current: numberAfterStep, target: board.target, restricted: 13 - step },
+    nextBoard: { current: numberAfterStep, target: board.target, restricted: 13 - step },
     isGameEnd,
     winnerIndex: isGameEnd ? (1 - moverIndex) : null
   };
@@ -88,13 +88,13 @@ const Game = strategyGameFactory({
   GameBoard,
   G: {
     getPlayerStepDescription: () => 'Kattints a mezőre ahova lépni szeretnél.',
-    generateNewBoard,
+    generateStartBoard,
     getGameStateAfterAiTurn
   }
 });
 
 export const SuperstitiousCounting = () => {
-  const [board, setBoard] = useState(generateNewBoard());
+  const [board, setBoard] = useState(generateStartBoard());
 
   return <Game board={board} setBoard={setBoard} />;
 };

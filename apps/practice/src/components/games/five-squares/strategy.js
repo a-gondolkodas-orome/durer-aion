@@ -3,16 +3,16 @@
 import { sum, random, cloneDeep } from 'lodash';
 
 export const getBoardAfterAiTurn = ({ board, playerIndex }) => {
-  const newBoard = [...board];
+  const nextBoard = [...board];
   if (playerIndex === 0) {
-    const tileIndices = getOptimalTileIndices(newBoard);
-    newBoard[tileIndices[0]] += 1;
-    newBoard[tileIndices[1]] += 1;
+    const tileIndices = getOptimalTileIndices(nextBoard);
+    nextBoard[tileIndices[0]] += 1;
+    nextBoard[tileIndices[1]] += 1;
   } else {
-    const tileIndex = getOptimalTileIndex(newBoard);
-    newBoard[tileIndex] += 1;
+    const tileIndex = getOptimalTileIndex(nextBoard);
+    nextBoard[tileIndex] += 1;
   }
-  return newBoard;
+  return nextBoard;
 };
 
 //following the strategy

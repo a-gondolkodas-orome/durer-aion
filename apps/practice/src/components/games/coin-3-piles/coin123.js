@@ -4,24 +4,24 @@ import { strategyGameFactory } from '../strategy-game';
 import { getGameStateAfterAiTurn, isWinningState  } from './strategy/strategy';
 import { GameBoard, getPlayerStepDescription } from './coin-3-piles';
 
-const generateNewBoard = () => {
+const generateStartBoard = () => {
   if (random(0, 1)) {
-    return generateNewWinningBoard();
+    return generateWinningStartBoard();
   } else {
-    return generateNewLosingBoard();
+    return generateLosingStartBoard();
   }
 };
 
-const generateNewWinningBoard = () => {
+const generateWinningStartBoard = () => {
   const board = [random(0, 5), random(0, 7), random(1, 8)];
   if (!isWinningState({ board }) && sum(board) >= 4) return board;
-  return generateNewWinningBoard();
+  return generateWinningStartBoard();
 }
 
-const generateNewLosingBoard = () => {
+const generateLosingStartBoard = () => {
   const board = [random(0, 5), random(0, 7), random(1, 8)];
   if (isWinningState({ board }) && sum(board) >= 4) return board;
-  return generateNewLosingBoard();
+  return generateLosingStartBoard();
 }
 
 const rule = <>
@@ -41,13 +41,13 @@ const Game = strategyGameFactory({
   GameBoard,
   G: {
     getPlayerStepDescription,
-    generateNewBoard,
+    generateStartBoard,
     getGameStateAfterAiTurn
   }
 });
 
 export const Coin123 = () => {
-  const [board, setBoard] = useState(generateNewBoard());
+  const [board, setBoard] = useState(generateStartBoard());
 
   return <Game board={board} setBoard={setBoard} />;
 };

@@ -3,7 +3,7 @@ import { range, sum, isEqual } from 'lodash';
 import { strategyGameFactory } from '../strategy-game';
 import { getOptimalTileIndex } from './strategy';
 
-const generateNewBoard = () => [0, 0, 0, 0];
+const generateStartBoard = () => [0, 0, 0, 0];
 
 const isGameEnd = board => sum(board) === 6;
 
@@ -14,27 +14,27 @@ const getWinnerIndex = (board) => {
 };
 
 const addPiece = (board, pileId) => {
-  const newBoard = [...board];
-  newBoard[pileId] += 1;
-  return newBoard;
+  const nextBoard = [...board];
+  nextBoard[pileId] += 1;
+  return nextBoard;
 };
 
-const getGameState = newBoard => ({
-  newBoard,
-  isGameEnd: isGameEnd(newBoard),
-  winnerIndex: getWinnerIndex(newBoard)
+const getGameState = nextBoard => ({
+  nextBoard,
+  isGameEnd: isGameEnd(nextBoard),
+  winnerIndex: getWinnerIndex(nextBoard)
 });
 
 const getGameStateAfterAiTurn = ({ board }) => {
   const pileId = getOptimalTileIndex(board);
-  const newBoard = addPiece(board, pileId);
-  return getGameState(newBoard);
+  const nextBoard = addPiece(board, pileId);
+  return getGameState(nextBoard);
 };
 
 const GameBoard = ({ board, ctx }) => {
   const placePiece = id => {
-    const newBoard = addPiece(board, id);
-    ctx.endPlayerTurn(getGameState(newBoard));
+    const nextBoard = addPiece(board, id);
+    ctx.endPlayerTurn(getGameState(nextBoard));
   };
 
   return (
@@ -84,13 +84,13 @@ const Game = strategyGameFactory({
   GameBoard,
   G: {
     getPlayerStepDescription,
-    generateNewBoard,
+    generateStartBoard,
     getGameStateAfterAiTurn
   }
 });
 
 export const TwoTimesTwo = () => {
-  const [board, setBoard] = useState(generateNewBoard());
+  const [board, setBoard] = useState(generateStartBoard());
 
   return <Game board={board} setBoard={setBoard} />;
 };

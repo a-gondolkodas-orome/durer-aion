@@ -6,7 +6,7 @@ describe('Anti TicTacToe strategy', () => {
       const board = Array(9).fill(null);
 
       const result = getGameStateAfterAiTurn({ board, playerIndex: 1 });
-      expect(result.newBoard[4]).toEqual('red');
+      expect(result.nextBoard[4]).toEqual('red');
     });
 
     it('should place to central mirror image of item without mirror image', () => {
@@ -14,13 +14,13 @@ describe('Anti TicTacToe strategy', () => {
         'blue', null, null,
         null, 'red', null,
         null, null, null
-      ], playerIndex: 1 }).newBoard[8]).toEqual('red');
+      ], playerIndex: 1 }).nextBoard[8]).toEqual('red');
 
       expect(getGameStateAfterAiTurn({ board: [
         'blue', null, null,
         null, 'red', 'blue',
         null, null, 'red'
-      ], playerIndex: 1 }).newBoard[3]).toEqual('red');
+      ], playerIndex: 1 }).nextBoard[3]).toEqual('red');
     });
 
     it('should not place to achieve 3 in a row if possible', () => {
@@ -30,7 +30,7 @@ describe('Anti TicTacToe strategy', () => {
         'red', null, 'red'
       ];
       const result = getGameStateAfterAiTurn({ board, playerIndex: 0 });
-      expect(result.newBoard[1]).not.toEqual('blue');
+      expect(result.nextBoard[1]).not.toEqual('blue');
     });
   });
 

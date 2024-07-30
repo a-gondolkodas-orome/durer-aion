@@ -89,7 +89,7 @@ If you need a new, common parameter, you can create it and pass it down from `st
 GameBoard: a React component with `board`, `setBoard`, `ctx` props which calls `ctx.endPlayerTurn`,
 typically following a click from the user. Typically the user clicks, new state is calculated within
 the GameBoard component and then as a final step `ctx.endPlayerTurn` is called with a
-`{ newBoard, isGameEnd }` object (see more details in section "Game end, determining winner")
+`{ nextBoard, isGameEnd }` object (see more details in section "Game end, determining winner")
 
 Concept: `board` holds the state necessary to know the game state, that the next player
 needs to know. Additional state variables may be created within the `GameBoard` component
@@ -109,7 +109,7 @@ const GameBoard = ({ board, setBoard, ctx }) => {
   return (
     <section className="p-2 shrink-0 grow basis-2/3">   
         <button
-          onClick={() => ctx.endPlayerTurn({ newBoard: {}, isGameEnd: false })}
+          onClick={() => ctx.endPlayerTurn({ nextBoard: {}, isGameEnd: false })}
         ></button>
     </section>
   );
@@ -126,16 +126,16 @@ const Game = strategyGameFactory({
   G: {
     // a function returning a string with 1 optional parameter: an object containing `playerIndex`, `turnStage`, etc.
     getPlayerStepDescription,
-    // a function returning a new, possibly random board object
-    generateNewBoard,
-    // a function with `{ board, playerIndex }` parameter returning `{ newBoard, isGameEnd, winnerIndex }`
+    // a function returning a new, possibly random starting board object
+    generateStartBoard,
+    // a function with `{ board, playerIndex }` parameter returning `{ nextBoard, isGameEnd, winnerIndex }`
     getGameStateAfterAiTurn
   }
 });
 
 // React component for the whole game which should be added to router
 export const HunyadiAndTheJanissaries = () => {
-  const [board, setBoard] = useState(generateNewBoard());
+  const [board, setBoard] = useState(generateStartBoard());
 
   return <Game board={board} setBoard={setBoard} />;
 };
@@ -143,8 +143,8 @@ export const HunyadiAndTheJanissaries = () => {
 
 ### Game end, determining winner
 
-When ending the turn, specify the game state with an object `{ newBoard, isGameEnd: false }` or
-`{ newBoard, isGameEnd: true, winnerIndex: null/0/1 }`
+When ending the turn, specify the game state with an object `{ nextBoard, isGameEnd: false }` or
+`{ nextBoard, isGameEnd: true, winnerIndex: null/0/1 }`
 
 If the winner can be determined from who moved last before the game ended, it is enough to pass `winnerIndex: null`.
 

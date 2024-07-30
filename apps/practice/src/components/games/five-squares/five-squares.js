@@ -3,7 +3,7 @@ import { range, sum, isEqual, random } from 'lodash';
 import { strategyGameFactory } from '../strategy-game';
 import { getBoardAfterAiTurn } from './strategy';
 
-const generateNewBoard = () => {
+const generateStartBoard = () => {
   const board = Array(5).fill(0);
   const x = random(4);
   board[x] += 1;
@@ -18,28 +18,28 @@ const getWinnerIndex = (board) => {
   return isAllDifferent ? 1 : 0;
 };
 
-const getGameState = newBoard => ({
-  newBoard,
-  isGameEnd: isGameEnd(newBoard),
-  winnerIndex: getWinnerIndex(newBoard)
+const getGameState = nextBoard => ({
+  nextBoard,
+  isGameEnd: isGameEnd(nextBoard),
+  winnerIndex: getWinnerIndex(nextBoard)
 });
 
 const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
-  const newBoard = getBoardAfterAiTurn({ board, playerIndex });
-  return getGameState(newBoard);
+  const nextBoard = getBoardAfterAiTurn({ board, playerIndex });
+  return getGameState(nextBoard);
 };
 
 const GameBoard = ({ board, setBoard, ctx }) => {
   const [oneMoveDone, setOneMoveDone] = useState(false);
 
   const placePiece = id => {
-    const newBoard = [...board];
-    newBoard[id] += 1;
+    const nextBoard = [...board];
+    nextBoard[id] += 1;
     if (ctx.playerIndex !== 0 && !oneMoveDone) {
-      setBoard(newBoard);
+      setBoard(nextBoard);
       setOneMoveDone(true);
     } else {
-      ctx.endPlayerTurn(getGameState(newBoard));
+      ctx.endPlayerTurn(getGameState(nextBoard));
       setOneMoveDone(false);
     }
   };
@@ -93,13 +93,13 @@ const Game = strategyGameFactory({
   GameBoard,
   G: {
     getPlayerStepDescription,
-    generateNewBoard,
+    generateStartBoard,
     getGameStateAfterAiTurn
   }
 });
 
 export const FiveSquares = () => {
-  const [board, setBoard] = useState(generateNewBoard());
+  const [board, setBoard] = useState(generateStartBoard());
 
   return <Game board={board} setBoard={setBoard} />;
 };

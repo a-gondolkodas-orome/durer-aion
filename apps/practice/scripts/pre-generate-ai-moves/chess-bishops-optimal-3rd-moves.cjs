@@ -183,12 +183,12 @@ const optimalMoves = {};
 // for simplicity, invalid pairs are also included
 console.log(`Will search optimal step for ${uniqueBishopPairs.length} positions`)
 uniqueBishopPairs.map(([r1, c1, r2, c2]) => {
-  const newBoard = range(0, boardSize).map(() => range(0, boardSize).map(() => null));
+  const nextBoard = range(0, boardSize).map(() => range(0, boardSize).map(() => null));
   
-  markForbiddenFields(newBoard, { row: r1, col: c1 });
-  newBoard[r1][c1] = BISHOP;
-  markForbiddenFields(newBoard, { row: r2, col: c2 });
-  newBoard[r2][c2] = BISHOP;
+  markForbiddenFields(nextBoard, { row: r1, col: c1 });
+  nextBoard[r1][c1] = BISHOP;
+  markForbiddenFields(nextBoard, { row: r2, col: c2 });
+  nextBoard[r2][c2] = BISHOP;
   
   const initialMessage = `Initial steps: ${JSON.stringify({ r1, c1, r2, c2 })}`;
   
@@ -200,7 +200,7 @@ uniqueBishopPairs.map(([r1, c1, r2, c2]) => {
   
   const startDate = new Date();
   
-  const optimalMove = getOptimalAiMove(newBoard);
+  const optimalMove = getOptimalAiMove(nextBoard);
   
   const endDate = new Date();
   const calcDuration = Math.trunc((endDate - startDate)/1000);

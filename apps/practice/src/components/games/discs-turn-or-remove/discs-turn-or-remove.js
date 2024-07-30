@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { strategyGameFactory } from "../strategy-game";
 import { range, isEqual, random, sample, difference, filter } from "lodash";
 
-const generateNewBoard6 = () => {
+const generateStartBoard6 = () => {
   const discCount = random(3, 6);
   if (random(0, 1)) {
     const blueCount = sample(range(0, discCount + 1, 3));
@@ -15,7 +15,7 @@ const generateNewBoard6 = () => {
   }
 };
 
-const generateNewBoard10 = () => {
+const generateStartBoard10 = () => {
   const discCount = random(4, 10);
   if (random(0, 1)) {
     const blueCount = sample(range(0, discCount + 1, 3));
@@ -34,11 +34,11 @@ const gameBoardFactory = (maxDiscs) => {
 
     const select = (a, i) => {
       if (ctx.shouldPlayerMoveNext) {
-        let newBoard = [...board];
-        let d = newBoard[a] - i;
-        newBoard[a] = i;
-        if (a === 1) newBoard[0] += d;
-        ctx.endPlayerTurn(getGameStateAfterMove(newBoard));
+        let nextBoard = [...board];
+        let d = nextBoard[a] - i;
+        nextBoard[a] = i;
+        if (a === 1) nextBoard[0] += d;
+        ctx.endPlayerTurn(getGameStateAfterMove(nextBoard));
       }
     };
 
@@ -163,33 +163,33 @@ const gameBoardFactory = (maxDiscs) => {
 };
 
 const getGameStateAfterAiTurn = ({ board }) => {
-  let newBoard = [...board];
-  const rem = newBoard[0] % 3;
+  let nextBoard = [...board];
+  const rem = nextBoard[0] % 3;
   if (rem === 0) {
-    const randomNonEmptyPile = sample(filter([0, 1], (i) => newBoard[i] > 0));
-    const amount = newBoard[randomNonEmptyPile] > 1 ? sample([1, 2]) : 1;
+    const randomNonEmptyPile = sample(filter([0, 1], (i) => nextBoard[i] > 0));
+    const amount = nextBoard[randomNonEmptyPile] > 1 ? sample([1, 2]) : 1;
     if (randomNonEmptyPile === 0) {
-      newBoard[0] -= amount;
+      nextBoard[0] -= amount;
     } else {
-      newBoard[0] += amount;
-      newBoard[1] -= amount;
+      nextBoard[0] += amount;
+      nextBoard[1] -= amount;
     }
   } else {
     const amount = 3 - rem;
-    if (newBoard[1] >= amount && random(0, 1) === 1) {
-      newBoard[0] += amount;
-      newBoard[1] -= amount;
+    if (nextBoard[1] >= amount && random(0, 1) === 1) {
+      nextBoard[0] += amount;
+      nextBoard[1] -= amount;
     } else {
-      newBoard[0] -= rem;
+      nextBoard[0] -= rem;
     }
   }
-  return getGameStateAfterMove(newBoard);
+  return getGameStateAfterMove(nextBoard);
 };
 
-const getGameStateAfterMove = (newBoard) => {
+const getGameStateAfterMove = (nextBoard) => {
   return {
-    newBoard: newBoard,
-    isGameEnd: isEqual(newBoard, [0, 0]),
+    nextBoard: nextBoard,
+    isGameEnd: isEqual(nextBoard, [0, 0]),
     winnerIndex: null
   };
 };
@@ -235,7 +235,7 @@ const Game6 = strategyGameFactory({
   GameBoard: GameBoard6,
   G: {
     getPlayerStepDescription,
-    generateNewBoard: generateNewBoard6,
+    generateStartBoard: generateStartBoard6,
     getGameStateAfterAiTurn
   }
 });
@@ -246,19 +246,19 @@ const Game10 = strategyGameFactory({
   GameBoard: GameBoard10,
   G: {
     getPlayerStepDescription,
-    generateNewBoard: generateNewBoard10,
+    generateStartBoard: generateStartBoard10,
     getGameStateAfterAiTurn
   }
 });
 
 export const SixDiscs = () => {
-  const [board, setBoard] = useState(generateNewBoard6());
+  const [board, setBoard] = useState(generateStartBoard6());
 
   return <Game6 board={board} setBoard={setBoard} />;
 };
 
 export const TenDiscs = () => {
-  const [board, setBoard] = useState(generateNewBoard10());
+  const [board, setBoard] = useState(generateStartBoard10());
 
   return <Game10 board={board} setBoard={setBoard} />;
 };

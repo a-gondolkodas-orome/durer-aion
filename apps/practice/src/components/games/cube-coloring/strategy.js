@@ -5,17 +5,17 @@ import { isNull, every, some, difference, range, shuffle, sample } from 'lodash'
 const allColors = ['#dc2626', '#eab308', '#2563eb'];
 
 export const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
-  let newBoard = [...board];
+  let nextBoard = [...board];
   // TODO: instead of using let, make below functions not changing their argument
-  newBoard = playerIndex === 0 ? makeOptimalStepAsSecond(newBoard) : makeOptimalStepAsFirst(newBoard);
-  return getGameStateAfterMove(newBoard);
+  nextBoard = playerIndex === 0 ? makeOptimalStepAsSecond(nextBoard) : makeOptimalStepAsFirst(nextBoard);
+  return getGameStateAfterMove(nextBoard);
 };
 
-export const getGameStateAfterMove = (newBoard) => {
+export const getGameStateAfterMove = (nextBoard) => {
   return {
-    newBoard,
-    isGameEnd: isGameEnd(newBoard),
-    winnerIndex: hasFirstPlayerWon(newBoard) ? 0 : 1
+    nextBoard,
+    isGameEnd: isGameEnd(nextBoard),
+    winnerIndex: hasFirstPlayerWon(nextBoard) ? 0 : 1
   };
 };
 

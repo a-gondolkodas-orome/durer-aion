@@ -12,9 +12,9 @@ const GameBoard = ({ board, ctx }) => {
   const clickField = (id) => {
     if (!isMoveAllowed(id)) return;
 
-    const newBoard = cloneDeep(board);
-    newBoard[id] = playerColor(ctx.playerIndex);
-    ctx.endPlayerTurn(getGameStateAfterMove(newBoard));
+    const nextBoard = cloneDeep(board);
+    nextBoard[id] = playerColor(ctx.playerIndex);
+    ctx.endPlayerTurn(getGameStateAfterMove(nextBoard));
   };
   const pieceColor = (id) => {
     const colorCode = board[id];
@@ -59,7 +59,7 @@ const Game = strategyGameFactory({
   GameBoard,
   G: {
     getPlayerStepDescription: () => 'Helyezz le egy korongot egy üres mezőre kattintással.',
-    generateNewBoard: generateEmptyTicTacToeBoard,
+    generateStartBoard: generateEmptyTicTacToeBoard,
     getGameStateAfterAiTurn
   }
 });

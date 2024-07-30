@@ -10,7 +10,7 @@ describe('Double starter TicTacToe strategy', () => {
         const result = getGameStateAfterAiTurn({ board, playerIndex: 1 });
 
         expect([[0, 2], [2, 8], [6, 8], [0, 6]]).toContainEqual(
-          range(0, 9).filter(i => result.newBoard[i] === 'red')
+          range(0, 9).filter(i => result.nextBoard[i] === 'red')
         );
       });
 
@@ -22,7 +22,7 @@ describe('Double starter TicTacToe strategy', () => {
         ];
 
         const result = getGameStateAfterAiTurn({ board, playerIndex: 1 });
-        expect(result.newBoard[4]).toEqual('red');
+        expect(result.nextBoard[4]).toEqual('red');
       });
 
       it('should place to finish a winning diagonal if possible', () => {
@@ -33,7 +33,7 @@ describe('Double starter TicTacToe strategy', () => {
         ];
 
         const result = getGameStateAfterAiTurn({ board, playerIndex: 1 });
-        expect(result.newBoard[6]).toEqual('red');
+        expect(result.nextBoard[6]).toEqual('red');
         expect(result.isGameEnd).toBe(false);
       });
 
@@ -45,7 +45,7 @@ describe('Double starter TicTacToe strategy', () => {
         ];
 
         const result = getGameStateAfterAiTurn({ board, playerIndex: 1 });
-        expect(result.newBoard[6]).toEqual('red');
+        expect(result.nextBoard[6]).toEqual('red');
         expect(result.isGameEnd).toBe(false);
       });
     });
@@ -59,7 +59,7 @@ describe('Double starter TicTacToe strategy', () => {
         ];
 
         const result = getGameStateAfterAiTurn({ board, playerIndex: 0 });
-        expect(result.newBoard[6]).toEqual('blue');
+        expect(result.nextBoard[6]).toEqual('blue');
         expect(result.isGameEnd).toBe(true);
       });
 
@@ -71,7 +71,7 @@ describe('Double starter TicTacToe strategy', () => {
         ];
 
         const result = getGameStateAfterAiTurn({ board, playerIndex: 0 });
-        expect(result.newBoard[8]).toEqual('blue');
+        expect(result.nextBoard[8]).toEqual('blue');
       });
     });
   });

@@ -4,17 +4,17 @@ import { isNull, some, groupBy, range, cloneDeep, sample } from 'lodash';
 import { hasWinningSubset } from '../../helpers';
 
 export const getGameStateAfterAiTurn = ({ board }) => {
-  const newBoard = cloneDeep(board);
-  const aiPosition = getOptimalAiPosition(newBoard);
-  newBoard[aiPosition] = getNextColor(newBoard, false);
-  return getGameStateAfterMove(newBoard);
+  const nextBoard = cloneDeep(board);
+  const aiPosition = getOptimalAiPosition(nextBoard);
+  nextBoard[aiPosition] = getNextColor(nextBoard, false);
+  return getGameStateAfterMove(nextBoard);
 };
 
 export const pColor = 'blue';
 export const aiColor = 'red';
 
-export const getGameStateAfterMove = (newBoard) => {
-  return { newBoard, isGameEnd: isGameEnd(newBoard), winnerIndex: null };
+export const getGameStateAfterMove = (nextBoard) => {
+  return { nextBoard, isGameEnd: isGameEnd(nextBoard), winnerIndex: null };
 };
 
 export const inPlacingPhase = (board) => board.find(isNull) !== undefined;

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { range, some, isEqual } from 'lodash';
 import { strategyGameFactory } from '../strategy-game';
 import {
-  getAllowedMoves, getGameStateAfterAiTurn, getGameStateAfterMove, generateNewBoard
+  getAllowedMoves, getGameStateAfterAiTurn, getGameStateAfterMove, generateStartBoard
 } from './strategy/strategy';
 import { ChessRookSvg } from './chess-rook-svg';
 
@@ -75,13 +75,13 @@ const Game = strategyGameFactory({
   GameBoard,
   G: {
     getPlayerStepDescription: () => 'Kattints egy szabad mezőre a bástyával egy sorban vagy oszlopban, ahova a bástyával mozogni szeretnél.',
-    generateNewBoard,
+    generateStartBoard,
     getGameStateAfterAiTurn
   }
 });
 
 export const ChessRook = () => {
-  const [board, setBoard] = useState(generateNewBoard());
+  const [board, setBoard] = useState(generateStartBoard());
 
   return <Game board={board} setBoard={setBoard} />;
 };

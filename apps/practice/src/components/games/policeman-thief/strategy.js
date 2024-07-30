@@ -14,20 +14,20 @@ const neighbours = {
 };
 
 export const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
-  let newBoard = { ...board };
+  let nextBoard = { ...board };
   // TODO: instead of using let, make below functions not changing their argument
-  newBoard =
+  nextBoard =
     playerIndex === 0
-      ? makeOptimalStepAsSecond(newBoard)
-      : makeOptimalStepAsFirst(newBoard);
-  return getGameStateAfterMove(newBoard);
+      ? makeOptimalStepAsSecond(nextBoard)
+      : makeOptimalStepAsFirst(nextBoard);
+  return getGameStateAfterMove(nextBoard);
 };
 
-export const getGameStateAfterMove = (newBoard) => {
+export const getGameStateAfterMove = (nextBoard) => {
   const state = {
-    newBoard,
-    isGameEnd: isGameEnd(newBoard),
-    winnerIndex: hasFirstPlayerWon(newBoard) ? 0 : 1
+    nextBoard,
+    isGameEnd: isGameEnd(nextBoard),
+    winnerIndex: hasFirstPlayerWon(nextBoard) ? 0 : 1
   };
   return state;
 };
@@ -58,12 +58,12 @@ const makeOptimalStepAsFirst = (board) => {
   //blue1Step
   let index1 = board.blue1;
   let canWeCatch1 = false;
-  let newBoard = cloneDeep(board);
+  let nextBoard = cloneDeep(board);
   for (let i = 0; i < 3; i++) {
     if (neighbours[board.blue1][i] === board.red) {
       index1 = neighbours[board.blue1][i];
       let piece1 = { blue1: index1 };
-      newBoard = { ...newBoard, ...piece1 };
+      nextBoard = { ...nextBoard, ...piece1 };
       canWeCatch1 = true;
     } else {
       for (let j = 0; j < 3; j++) {
@@ -78,7 +78,7 @@ const makeOptimalStepAsFirst = (board) => {
   }
   if (!canWeCatch1) {
     let piece1 = { blue1: index1 };
-    newBoard = { ...newBoard, ...piece1 };
+    nextBoard = { ...nextBoard, ...piece1 };
   }
 
   //blue2Step
@@ -91,7 +91,7 @@ const makeOptimalStepAsFirst = (board) => {
     ) {
       index2 = neighbours[board.blue2][i];
       let piece2 = { blue2: index2 };
-      newBoard = { ...newBoard, ...piece2 };
+      nextBoard = { ...nextBoard, ...piece2 };
       canWeCatch2 = true;
     } else {
       for (let j = 0; j < 3; j++) {
@@ -111,9 +111,9 @@ const makeOptimalStepAsFirst = (board) => {
   }
   if (!canWeCatch2) {
     let piece2 = { blue2: index2 };
-    newBoard = { ...newBoard, ...piece2 };
+    nextBoard = { ...nextBoard, ...piece2 };
   }
-  return newBoard;
+  return nextBoard;
 };
 
 const makeOptimalStepAsSecond = (board) => {

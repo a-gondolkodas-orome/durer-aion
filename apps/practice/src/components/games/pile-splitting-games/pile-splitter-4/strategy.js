@@ -33,10 +33,10 @@ export const getBoardAfterAiTurn = (board) => {
     } else {
       let modifiedBoard = [...board];
       modifiedBoard[oddPile] += 1;
-      const { newBoard, intermediateBoard } = getBoardAfterAiTurn(modifiedBoard);
-      newBoard[oddPile] -= 1;
+      const { nextBoard, intermediateBoard } = getBoardAfterAiTurn(modifiedBoard);
+      nextBoard[oddPile] -= 1;
       intermediateBoard[oddPile] -= 1;
-      return { newBoard, intermediateBoard };
+      return { nextBoard, intermediateBoard };
     }
   }
 
@@ -44,8 +44,8 @@ export const getBoardAfterAiTurn = (board) => {
     if (board[0] === 2 && board[1] === 2 && board[2] === 2 && board[3] === 2) {
       return getOptimalDivision(board, start, (start + 1) % 4);
     } else {
-      const { newBoard, intermediateBoard } = getBoardAfterAiTurn(board.map((x) => x / 2));
-      return { newBoard: newBoard.map((x) => x * 2), intermediateBoard: intermediateBoard.map(x => x * 2) };
+      const { nextBoard, intermediateBoard } = getBoardAfterAiTurn(board.map((x) => x / 2));
+      return { nextBoard: nextBoard.map((x) => x * 2), intermediateBoard: intermediateBoard.map(x => x * 2) };
     }
   }
 };
@@ -73,17 +73,17 @@ const getOptimalDivision = function (board, first, second) {
   const intermediateBoard = [...board];
   intermediateBoard[second] = 0;
 
-  const newBoard = [...board];
+  const nextBoard = [...board];
 
   if (sum === 2) {
-    newBoard[first] = 1;
-    newBoard[second] = 1;
-    return { newBoard, intermediateBoard };
+    nextBoard[first] = 1;
+    nextBoard[second] = 1;
+    return { nextBoard, intermediateBoard };
   }
 
   const firstPile = 1 + 2 * Math.ceil(Math.random() * Math.floor((sum - 2) / 2));
-  newBoard[first] = firstPile;
-  newBoard[second] = sum - firstPile;
+  nextBoard[first] = firstPile;
+  nextBoard[second] = sum - firstPile;
 
-  return { intermediateBoard, newBoard };
+  return { intermediateBoard, nextBoard };
 };

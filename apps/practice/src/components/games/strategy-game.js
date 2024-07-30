@@ -15,7 +15,7 @@ export const strategyGameFactory = ({ rule, title, firstRoleLabel, secondRoleLab
     const [turnStage, setTurnStage] = useState(null);
 
     const startNewGame = () => {
-      setBoard(G.generateNewBoard());
+      setBoard(G.generateStartBoard());
       setPhase('roleSelection');
       setPlayerIndex(null);
       setNext(null);
@@ -38,7 +38,7 @@ export const strategyGameFactory = ({ rule, title, firstRoleLabel, secondRoleLab
       const localPlayerIndex = playerIndex === null ? 1 : playerIndex;
       const time = Math.floor(Math.random() * 500 + 1000);
       setTimeout(() => {
-        const { intermediateBoard, newBoard, isGameEnd, winnerIndex } = G.getGameStateAfterAiTurn(
+        const { intermediateBoard, nextBoard, isGameEnd, winnerIndex } = G.getGameStateAfterAiTurn(
           { board: currentBoard, setBoard, playerIndex: localPlayerIndex }
         );
         const stageTimeout = intermediateBoard !== undefined ? 750 : 0;
@@ -46,7 +46,7 @@ export const strategyGameFactory = ({ rule, title, firstRoleLabel, secondRoleLab
           setBoard(intermediateBoard);
         }
         setTimeout(() => {
-          setBoard(newBoard);
+          setBoard(nextBoard);
           setNext(next => 1 - next);
           if (isGameEnd) {
             // default: last player to move is the winner
@@ -56,8 +56,8 @@ export const strategyGameFactory = ({ rule, title, firstRoleLabel, secondRoleLab
       }, time);
     };
 
-    const endPlayerTurn = ({ newBoard, isGameEnd, winnerIndex }) => {
-      setBoard(newBoard);
+    const endPlayerTurn = ({ nextBoard, isGameEnd, winnerIndex }) => {
+      setBoard(nextBoard);
       setNext(next => 1 - next);
 
       if (isGameEnd) {
@@ -66,7 +66,7 @@ export const strategyGameFactory = ({ rule, title, firstRoleLabel, secondRoleLab
         return;
       }
 
-      doAiTurn({ currentBoard: newBoard });
+      doAiTurn({ currentBoard: nextBoard });
     };
 
     const chooseRole = (playerIdx) => {
@@ -93,6 +93,7 @@ export const strategyGameFactory = ({ rule, title, firstRoleLabel, secondRoleLab
                 shouldPlayerMoveNext,
                 endPlayerTurn,
                 playerIndex,
+                phase,
                 turnStage,
                 setTurnStage
               }}

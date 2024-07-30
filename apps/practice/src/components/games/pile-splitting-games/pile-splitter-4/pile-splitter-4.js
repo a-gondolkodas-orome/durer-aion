@@ -3,16 +3,16 @@ import { range, isEqual, random } from 'lodash';
 import { strategyGameFactory } from '../../strategy-game';
 import { getBoardAfterAiTurn, isWinningState } from './strategy';
 
-const generateNewBoard = () => {
-  if (random(0, 1)) return generateNewWinningBoard();
-  return generateNewLosingBoard();
+const generateStartBoard = () => {
+  if (random(0, 1)) return generateWinningStartBoard();
+  return generateLosingStartBoard();
 };
 
-const generateNewWinningBoard = (remainingTrials = 50) => {
+const generateWinningStartBoard = (remainingTrials = 50) => {
   const board = [random(5, 12), random(5, 12), random(5, 12), random(5, 12)];
   if (!isWinningState(board)) {
     if (remainingTrials > 0) {
-      return generateNewWinningBoard(remainingTrials - 1);
+      return generateWinningStartBoard(remainingTrials - 1);
     }
     return board;
   }
@@ -25,11 +25,11 @@ const generateNewWinningBoard = (remainingTrials = 50) => {
   return modifiedBoard;
 };
 
-const generateNewLosingBoard = (remainingTrials = 50) => {
+const generateLosingStartBoard = (remainingTrials = 50) => {
   const board = [random(5, 12), random(5, 12), random(5, 12), random(5, 12)];
   if (isWinningState(board)) {
     if (remainingTrials > 0) {
-      return generateNewLosingBoard(remainingTrials - 1);
+      return generateLosingStartBoard(remainingTrials - 1);
     }
     return board;
   }
@@ -45,22 +45,22 @@ const generateNewLosingBoard = (remainingTrials = 50) => {
 const isGameEnd = (board) => isEqual(board, [1, 1, 1, 1]);
 
 const getGameStateAfterAiTurn = ({ board }) => {
-  const { newBoard, intermediateBoard } = getBoardAfterAiTurn(board);
-  return { newBoard, intermediateBoard, isGameEnd: isGameEnd(newBoard), winnerIndex: null };
+  const { nextBoard, intermediateBoard } = getBoardAfterAiTurn(board);
+  return { nextBoard, intermediateBoard, isGameEnd: isGameEnd(nextBoard), winnerIndex: null };
 };
 
 const getBoardAfterMove = (board, { removedPileId, splitPileId, pieceId }) => {
-  const newBoard = [...board];
+  const nextBoard = [...board];
   const intermediateBoard = [...board];
   intermediateBoard[removedPileId] = 0;
   if (removedPileId < splitPileId) {
-    newBoard[removedPileId] = pieceId + 1;
-    newBoard[splitPileId] = newBoard[splitPileId] - pieceId - 1;
+    nextBoard[removedPileId] = pieceId + 1;
+    nextBoard[splitPileId] = nextBoard[splitPileId] - pieceId - 1;
   } else {
-    newBoard[removedPileId] = newBoard[splitPileId] - pieceId - 1;
-    newBoard[splitPileId] = pieceId + 1;
+    nextBoard[removedPileId] = nextBoard[splitPileId] - pieceId - 1;
+    nextBoard[splitPileId] = pieceId + 1;
   }
-  return { intermediateBoard, newBoard };
+  return { intermediateBoard, nextBoard };
 };
 
 const GameBoard = ({ board, setBoard,  ctx }) => {
@@ -86,7 +86,7 @@ const GameBoard = ({ board, setBoard,  ctx }) => {
     }
     if (pieceId === board[pileId] - 1) return;
 
-    const { intermediateBoard, newBoard } = getBoardAfterMove(board, {
+    const { intermediateBoard, nextBoard } = getBoardAfterMove(board, {
       removedPileId: removedPileId,
       splitPileId: pileId,
       pieceId
@@ -95,7 +95,7 @@ const GameBoard = ({ board, setBoard,  ctx }) => {
     setBoard(intermediateBoard);
 
     setTimeout(() => {
-      ctx.endPlayerTurn({ newBoard, isGameEnd: isGameEnd(newBoard), winnerIndex: null });
+      ctx.endPlayerTurn({ nextBoard, isGameEnd: isGameEnd(nextBoard), winnerIndex: null });
 
       setRemovedPileId(null);
       setHoveredPiece(null);
@@ -203,13 +203,13 @@ const Game = strategyGameFactory({
   GameBoard,
   G: {
     getPlayerStepDescription,
-    generateNewBoard,
+    generateStartBoard,
     getGameStateAfterAiTurn
   }
 });
 
 export const PileSplitter4 = () => {
-  const [board, setBoard] = useState(generateNewBoard());
+  const [board, setBoard] = useState(generateStartBoard());
 
   return <Game board={board} setBoard={setBoard} />;
 };

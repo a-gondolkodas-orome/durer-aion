@@ -19,7 +19,7 @@ const Game = strategyGameFactory({
   GameBoard,
   G: {
     getPlayerStepDescription,
-    generateNewBoard: () => ([3, 5, 7]),
+    generateStartBoard: () => ([3, 5, 7]),
     getGameStateAfterAiTurn
   }
 });

@@ -4,7 +4,7 @@ import { range } from 'lodash';
 import { getOptimalAiStep } from './strategy';
 import { ChessBishopSvg } from '../chess-bishops/chess-bishop-svg';
 
-const generateNewBoard = () => {
+const generateStartBoard = () => {
   return { left: 1, right: 12 };
 };
 
@@ -22,7 +22,7 @@ const getGameStateAfterMove = (board, step, moverIndex) => {
   const isGameEnd = l > r;
 
   return {
-	  newBoard: { left: l, right: r },
+	  nextBoard: { left: l, right: r },
 	  isGameEnd,
 	  winnerIndex: isGameEnd ? moverIndex : null
   };
@@ -101,13 +101,13 @@ const Game = strategyGameFactory({
 	  getPlayerStepDescription: ({ playerIndex }) => playerIndex === 0
       ? 'Kattints a mezőre ahova lépni szeretnél a bal oldali bábuval.'
       : 'Kattints a mezőre ahova lépni szeretnél a jobb oldali bábuval.',
-	  generateNewBoard,
+	  generateStartBoard,
 	  getGameStateAfterAiTurn
   }
 });
 
 export const TwelveSquares = () => {
-  const [board, setBoard] = useState(generateNewBoard());
+  const [board, setBoard] = useState(generateStartBoard());
 
   return <Game board={board} setBoard={setBoard} />;
 };

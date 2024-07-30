@@ -3,7 +3,7 @@ import { range, isEqual, some } from 'lodash';
 import { strategyGameFactory } from '../strategy-game';
 import { ChessBishopSvg } from './chess-bishop-svg';
 import {
-  getGameStateAfterAiTurn, getGameStateAfterMove, getAllowedMoves, generateNewBoard,
+  getGameStateAfterAiTurn, getGameStateAfterMove, getAllowedMoves, generateStartBoard,
   BISHOP, FORBIDDEN
 } from './strategy/strategy';
 
@@ -104,13 +104,13 @@ const Game = strategyGameFactory({
   GameBoard,
   G: {
     getPlayerStepDescription: () => 'Kattints egy mezőre, amit nem üt egyik futó sem.',
-    generateNewBoard,
+    generateStartBoard,
     getGameStateAfterAiTurn
   }
 });
 
 export const ChessBishops = () => {
-  const [board, setBoard] = useState(generateNewBoard());
+  const [board, setBoard] = useState(generateStartBoard());
 
   return <Game board={board} setBoard={setBoard} />;
 };

@@ -14,11 +14,11 @@ const GameBoard = ({ board, setBoard, ctx }) => {
   const clickField = (id) => {
     if (!isMoveAllowed(id)) return;
 
-    const newBoard = cloneDeep(board);
-    newBoard[id] = playerColor(ctx.playerIndex);
-    setBoard(newBoard);
-    if (isDuringFirstMove(newBoard)) return;
-    ctx.endPlayerTurn(getGameStateAfterMove(newBoard));
+    const nextBoard = cloneDeep(board);
+    nextBoard[id] = playerColor(ctx.playerIndex);
+    setBoard(nextBoard);
+    if (isDuringFirstMove(nextBoard)) return;
+    ctx.endPlayerTurn(getGameStateAfterMove(nextBoard));
   };
   const pieceColor = (id) => {
     const colorCode = board[id];
@@ -72,7 +72,7 @@ const Game = strategyGameFactory({
   GameBoard,
   G: {
     getPlayerStepDescription,
-    generateNewBoard: generateEmptyTicTacToeBoard,
+    generateStartBoard: generateEmptyTicTacToeBoard,
     getGameStateAfterAiTurn
   }
 });

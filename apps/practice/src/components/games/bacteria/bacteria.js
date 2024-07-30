@@ -14,7 +14,7 @@ import {
 
 const boardWidth = 11;
 
-const generateNewBoard = () => {
+const generateStartBoard = () => {
   const bacteria = Array(9).fill([]);
   range(bacteria.length).forEach((rowIndex) => {
     const rowSize = rowIndex % 2 === 0 ? boardWidth : boardWidth - 1;
@@ -63,7 +63,7 @@ const GameBoard = ({ board: { bacteria, goals }, ctx }) => {
   const [attackRow, setAttackRow] = useState(null);
   const [attackCol, setAttackCol] = useState(null);
 
-  const newBoard = { bacteria: cloneDeep(bacteria), goals };
+  const nextBoard = { bacteria: cloneDeep(bacteria), goals };
   const isPlayerAttacker = ctx.playerIndex === 0;
 
   const isAllowedAttack = ({ row, col }) => {
@@ -91,12 +91,12 @@ const GameBoard = ({ board: { bacteria, goals }, ctx }) => {
 
 
     if (!isPlayerAttacker) {
-      newBoard.bacteria[row][col] -= 1;
-      if (areAllBacteriaRemoved(newBoard.bacteria)) {
-        ctx.endPlayerTurn({ newBoard, isGameEnd: true, winnerIndex: 1 });
+      nextBoard.bacteria[row][col] -= 1;
+      if (areAllBacteriaRemoved(nextBoard.bacteria)) {
+        ctx.endPlayerTurn({ nextBoard, isGameEnd: true, winnerIndex: 1 });
         return;
       }
-      ctx.endPlayerTurn({ newBoard, isGameEnd: false });
+      ctx.endPlayerTurn({ nextBoard, isGameEnd: false });
       return;
     }
 
@@ -111,15 +111,15 @@ const GameBoard = ({ board: { bacteria, goals }, ctx }) => {
     const goalsReached = reachedFields.filter(([row, col]) => isGoal({ row, col }));
 
     if (isJump({ attackRow, attackCol, row, col })) {
-      newBoard.bacteria = makeJump(bacteria, attackRow, attackCol);
+      nextBoard.bacteria = makeJump(bacteria, attackRow, attackCol);
     } else {
-      newBoard.bacteria = makeShiftOrSpread(bacteria, attackRow, attackCol, reachedFields);
+      nextBoard.bacteria = makeShiftOrSpread(bacteria, attackRow, attackCol, reachedFields);
     }
 
     if (goalsReached.length >= 1) {
-      ctx.endPlayerTurn({ newBoard, isGameEnd: true, winnerIndex: 0 });
+      ctx.endPlayerTurn({ nextBoard, isGameEnd: true, winnerIndex: 0 });
     } else {
-      ctx.endPlayerTurn({ newBoard, isGameEnd: false });
+      ctx.endPlayerTurn({ nextBoard, isGameEnd: false });
     }
 
     setAttackRow(null);
@@ -164,7 +164,7 @@ const GameBoard = ({ board: { bacteria, goals }, ctx }) => {
                       aspect-[4/3] w-full
                       ${row % 2 === 1 && col === boardWidth - 1 ? "" : "border-2"}
                       ${isGoal({ row, col }) ? "bg-blue-800" : ""}
-                      ${isDangerous(newBoard, { row, col }) ? "" : ""}
+                      ${isDangerous(nextBoard, { row, col }) ? "" : ""}
                       ${row === attackRow && col === attackCol ? "border-green-800": ""}
                       ${attackRow !== null && isAllowedAttack({ row, col }) ? "bg-teal-400" : ""}
                       ${isForbidden({ row, col }) ? "cursor-not-allowed" : ""}
@@ -225,13 +225,13 @@ const Game = strategyGameFactory({
   GameBoard,
   G: {
     getPlayerStepDescription,
-    generateNewBoard,
+    generateStartBoard,
     getGameStateAfterAiTurn
   }
 });
 
 export const Bacteria = () => {
-  const [board, setBoard] = useState(generateNewBoard());
+  const [board, setBoard] = useState(generateStartBoard());
 
   return <Game board={board} setBoard={setBoard} />;
 };

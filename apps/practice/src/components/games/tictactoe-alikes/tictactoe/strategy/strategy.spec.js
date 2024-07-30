@@ -21,7 +21,7 @@ describe('TicTacToe strategy', () => {
         ];
 
         const result = getGameStateAfterAiTurn({ board });
-        expect(result.newBoard[2]).toEqual('red');
+        expect(result.nextBoard[2]).toEqual('red');
         expect(result.isGameEnd).toBe(true);
       });
 
@@ -33,7 +33,7 @@ describe('TicTacToe strategy', () => {
         ];
 
         const result = getGameStateAfterAiTurn({ board });
-        expect(result.newBoard[0]).toEqual('red');
+        expect(result.nextBoard[0]).toEqual('red');
         expect(result.isGameEnd).toBe(true);
       });
 
@@ -45,7 +45,7 @@ describe('TicTacToe strategy', () => {
         ];
 
         const result = getGameStateAfterAiTurn({ board });
-        expect(result.newBoard[6]).toEqual('red');
+        expect(result.nextBoard[6]).toEqual('red');
         expect(result.isGameEnd).toBe(true);
       });
 
@@ -57,7 +57,7 @@ describe('TicTacToe strategy', () => {
         ];
 
         const result = getGameStateAfterAiTurn({ board });
-        expect(result.newBoard[6]).toEqual('red');
+        expect(result.nextBoard[6]).toEqual('red');
         expect(result.isGameEnd).toBe(false);
       });
 
@@ -69,7 +69,7 @@ describe('TicTacToe strategy', () => {
         ];
 
         const result = getGameStateAfterAiTurn({ board });
-        expect(result.newBoard[4]).toEqual('red');
+        expect(result.nextBoard[4]).toEqual('red');
         expect(result.isGameEnd).toBe(false);
       });
 
@@ -82,8 +82,8 @@ describe('TicTacToe strategy', () => {
 
         const result = getGameStateAfterAiTurn({ board });
         expect(
-          result.newBoard[0] === 'red' || result.newBoard[2] === 'red' ||
-          result.newBoard[6] === 'red' || result.newBoard[8] === 'red'
+          result.nextBoard[0] === 'red' || result.nextBoard[2] === 'red' ||
+          result.nextBoard[6] === 'red' || result.nextBoard[8] === 'red'
         ).toBe(true);
         expect(result.isGameEnd).toBe(false);
       });
@@ -96,7 +96,7 @@ describe('TicTacToe strategy', () => {
         ];
 
         const result = getGameStateAfterAiTurn({ board });
-        expect(result.newBoard[2] === 'red' || result.newBoard[6] === 'red').toBe(true);
+        expect(result.nextBoard[2] === 'red' || result.nextBoard[6] === 'red').toBe(true);
         expect(result.isGameEnd).toBe(false);
       });
     });
@@ -110,7 +110,7 @@ describe('TicTacToe strategy', () => {
         ];
 
         const result = getGameStateAfterAiTurn({ board });
-        expect(result.newBoard[4]).toEqual('white');
+        expect(result.nextBoard[4]).toEqual('white');
         expect(result.isGameEnd).toBe(false);
       });
 
@@ -122,7 +122,7 @@ describe('TicTacToe strategy', () => {
         ];
 
         const result = getGameStateAfterAiTurn({ board });
-        expect(result.newBoard[5]).toEqual('white');
+        expect(result.nextBoard[5]).toEqual('white');
         expect(result.isGameEnd).toBe(true);
       });
 
@@ -132,14 +132,14 @@ describe('TicTacToe strategy', () => {
             'red', 'blue', 'red',
             'blue', 'red', 'blue',
             'blue', 'red', 'blue'
-          ] }).newBoard;
+          ] }).nextBoard;
           expect(res1[3] === 'white' || res1[5] === 'white').toBe(true);
 
           const res2 = getGameStateAfterAiTurn({ board: [
             'red', 'blue', 'blue',
             'blue', 'red', 'red',
             'red', 'blue', 'blue'
-          ] }).newBoard;
+          ] }).nextBoard;
           expect(res2[7] === 'white' || res2[1] === 'white').toBe(true);
         });
 
@@ -148,45 +148,45 @@ describe('TicTacToe strategy', () => {
             'red', 'blue', 'white',
             'white', 'red', 'blue',
             'blue', 'red', 'blue'
-          ] }).newBoard[8]).toEqual('white');
+          ] }).nextBoard[8]).toEqual('white');
           expect(getGameStateAfterAiTurn({ board: [
             'red', 'blue', 'red',
             'white', 'red', 'blue',
             'blue', 'white', 'blue'
-          ] }).newBoard[8]).toEqual('white');
+          ] }).nextBoard[8]).toEqual('white');
 
           expect(getGameStateAfterAiTurn({ board: [
             'blue', 'white', 'red',
             'white', 'red', 'blue',
             'blue', 'blue', 'red'
-          ] }).newBoard[6]).toEqual('white');
+          ] }).nextBoard[6]).toEqual('white');
           expect(getGameStateAfterAiTurn({ board: [
             'blue', 'white', 'red',
             'red', 'red', 'blue',
             'blue', 'blue', 'white'
-          ] }).newBoard[6]).toEqual('white');
+          ] }).nextBoard[6]).toEqual('white');
 
           expect(getGameStateAfterAiTurn({ board: [
             'blue', 'white', 'blue',
             'blue', 'red', 'white',
             'red', 'blue', 'red'
-          ] }).newBoard[0]).toEqual('white');
+          ] }).nextBoard[0]).toEqual('white');
           expect(getGameStateAfterAiTurn({ board: [
             'blue', 'red', 'blue',
             'blue', 'red', 'white',
             'white', 'blue', 'red'
-          ] }).newBoard[0]).toEqual('white');
+          ] }).nextBoard[0]).toEqual('white');
 
           expect(getGameStateAfterAiTurn({ board: [
             'red', 'blue', 'blue',
             'blue', 'red', 'white',
             'red', 'white', 'blue'
-          ] }).newBoard[2]).toEqual('white');
+          ] }).nextBoard[2]).toEqual('white');
           expect(getGameStateAfterAiTurn({ board: [
             'white', 'blue', 'blue',
             'blue', 'red', 'red',
             'red', 'white', 'blue'
-          ] }).newBoard[2]).toEqual('white');
+          ] }).nextBoard[2]).toEqual('white');
         });
       });
 
@@ -196,7 +196,7 @@ describe('TicTacToe strategy', () => {
             'red', 'blue', 'blue',
             'blue', 'red', 'red',
             'blue', 'red', 'blue'
-          ] }).newBoard;
+          ] }).nextBoard;
           expect(res[2] === 'white' || res[6] === 'white').toBe(true);
         });
 
@@ -205,25 +205,25 @@ describe('TicTacToe strategy', () => {
             'red', 'blue', 'white',
             'blue', 'red', 'red',
             'blue', 'white', 'blue'
-          ] }).newBoard[3]).toEqual('white');
+          ] }).nextBoard[3]).toEqual('white');
 
           expect(getGameStateAfterAiTurn({ board: [
             'blue', 'blue', 'red',
             'white', 'red', 'blue',
             'blue', 'red', 'white'
-          ] }).newBoard[1]).toEqual('white');
+          ] }).nextBoard[1]).toEqual('white');
 
           expect(getGameStateAfterAiTurn({ board: [
             'blue', 'white', 'blue',
             'red', 'red', 'blue',
             'white', 'blue', 'red'
-          ] }).newBoard[5]).toEqual('white');
+          ] }).nextBoard[5]).toEqual('white');
 
           expect(getGameStateAfterAiTurn({ board: [
             'white', 'red', 'blue',
             'blue', 'red', 'white',
             'red', 'blue', 'blue'
-          ] }).newBoard[7]).toEqual('white');
+          ] }).nextBoard[7]).toEqual('white');
         });
       });
     });

@@ -46,9 +46,9 @@ export const getAllowedSuperset = (board, { from, to }) => {
 
 export const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
   const move = getOptimalAiMove({ board, playerIndex });
-  const newBoard = [...board];
-  newBoard.push(move);
-  return { newBoard, isGameEnd: isGameEnd(newBoard), winnerIndex: null };
+  const nextBoard = [...board];
+  nextBoard.push(move);
+  return { nextBoard, isGameEnd: isGameEnd(nextBoard), winnerIndex: null };
 };
 
 const oneLengthEdges = [

@@ -6,9 +6,9 @@ const GameBoard = ({ board, ctx }) => {
 
     const clickNumber = (number) => {
         if (ctx.shouldPlayerMoveNext) {
-            let newBoard = [...board];
-            newBoard[number-1] = -1;
-            ctx.endPlayerTurn(getGameStateAfterMove(newBoard));
+            let nextBoard = [...board];
+            nextBoard[number-1] = -1;
+            ctx.endPlayerTurn(getGameStateAfterMove(nextBoard));
         }
     };
 
@@ -33,35 +33,35 @@ const GameBoard = ({ board, ctx }) => {
     );
 };
 
-const getGameStateAfterMove = (newBoard) => {
-    let remaining = newBoard.filter(i => i>0);
+const getGameStateAfterMove = (nextBoard) => {
+    let remaining = nextBoard.filter(i => i>0);
     let isGameEnd = false;
     let winnerIndex = null;
     if (remaining.length === 2) {
         isGameEnd = true;
         winnerIndex = (remaining[0]+remaining[1])%2;
     }
-    return { newBoard: newBoard, isGameEnd: isGameEnd, winnerIndex: winnerIndex };
+    return { nextBoard: nextBoard, isGameEnd: isGameEnd, winnerIndex: winnerIndex };
 };
 
 const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
-    let newBoard = [...board];
-    const notCovered = newBoard.filter(i => i!==-1);
-    const evens = newBoard.filter(i => i%2===0);
-    const odds = newBoard.filter(i => i%2===1 && i!==-1);
+    let nextBoard = [...board];
+    const notCovered = nextBoard.filter(i => i!==-1);
+    const evens = nextBoard.filter(i => i%2===0);
+    const odds = nextBoard.filter(i => i%2===1 && i!==-1);
     if (evens.length===odds.length || evens.length === 0 || odds.length === 0) {
-        newBoard[notCovered[Math.floor(Math.random() * (notCovered.length))]-1] = -1;
+        nextBoard[notCovered[Math.floor(Math.random() * (notCovered.length))]-1] = -1;
     } else {
         if (playerIndex===0){
             let ch = Math.floor(Math.random() * (evens.length>odds.length ? evens.length : odds.length));
-            newBoard[(evens.length>odds.length ? evens : odds)[ch]-1] = -1;
+            nextBoard[(evens.length>odds.length ? evens : odds)[ch]-1] = -1;
         } else {
             let ch = Math.floor(Math.random() * (evens.length<odds.length ? evens.length : odds.length));
-            newBoard[(evens.length<odds.length ? evens : odds)[ch]-1] = -1;
+            nextBoard[(evens.length<odds.length ? evens : odds)[ch]-1] = -1;
         }
     }
 
-    return (getGameStateAfterMove(newBoard));
+    return (getGameStateAfterMove(nextBoard));
 };
 
 const rule8 = <>
@@ -82,7 +82,7 @@ const Game8 = strategyGameFactory({
     GameBoard,
     G: {
         getPlayerStepDescription: () => 'Kattints egy számra, hogy lefedd',
-        generateNewBoard: () => [1,2,3,4,5,6,7,8],
+        generateStartBoard: () => [1,2,3,4,5,6,7,8],
         getGameStateAfterAiTurn
     }
 });
@@ -93,7 +93,7 @@ const Game10 = strategyGameFactory({
     GameBoard,
     G: {
         getPlayerStepDescription: () => 'Kattints egy számra, hogy lefedd',
-        generateNewBoard: () => [1,2,3,4,5,6,7,8,9,10],
+        generateStartBoard: () => [1,2,3,4,5,6,7,8,9,10],
         getGameStateAfterAiTurn
     }
 });

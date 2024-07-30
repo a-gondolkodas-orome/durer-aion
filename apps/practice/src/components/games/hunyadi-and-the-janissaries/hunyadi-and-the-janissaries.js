@@ -3,7 +3,7 @@ import { strategyGameFactory } from '../strategy-game';
 import { CastleSvg } from './castle-svg';
 import { SoldierSvg } from './soldier-svg';
 import {
-  generateNewBoard,
+  generateStartBoard,
   getGameStateAfterKillingGroup,
   getGameStateAfterAiTurn
 } from './strategy/strategy';
@@ -27,15 +27,15 @@ const GameBoard = ({ board, setBoard, ctx }) => {
     if (!ctx.shouldPlayerMoveNext) return;
 
     if (isPlayerSultan) {
-      const newBoard = cloneDeep(board);
-      newBoard[rowIndex][pieceIndex] = board[rowIndex][pieceIndex] === 'blue' ? 'red' : 'blue';
-      setBoard(newBoard);
+      const nextBoard = cloneDeep(board);
+      nextBoard[rowIndex][pieceIndex] = board[rowIndex][pieceIndex] === 'blue' ? 'red' : 'blue';
+      setBoard(nextBoard);
     } else {
       const group = board[rowIndex][pieceIndex];
-      const { newBoard, intermediateBoard, isGameEnd, winnerIndex } = getGameStateAfterKillingGroup(board, group);
+      const { nextBoard, intermediateBoard, isGameEnd, winnerIndex } = getGameStateAfterKillingGroup(board, group);
       setBoard(intermediateBoard);
       setTimeout(() => {
-        ctx.endPlayerTurn({ newBoard, isGameEnd, winnerIndex });
+        ctx.endPlayerTurn({ nextBoard, isGameEnd, winnerIndex });
       }, 750);
     }
   };
@@ -80,7 +80,7 @@ const GameBoard = ({ board, setBoard, ctx }) => {
       {isPlayerSultan && (
         <button
           className={`cta-button ${ctx.shouldPlayerMoveNext ? '' : 'opacity-50' }`}
-          onClick={() => ctx.endPlayerTurn({ newBoard: board, isGameEnd: false })}
+          onClick={() => ctx.endPlayerTurn({ nextBoard: board, isGameEnd: false })}
         >
           Befejezem a kettéosztást
         </button>
@@ -115,13 +115,13 @@ const Game = strategyGameFactory({
   GameBoard,
   G: {
     getPlayerStepDescription,
-    generateNewBoard,
+    generateStartBoard,
     getGameStateAfterAiTurn
   }
 });
 
 export const HunyadiAndTheJanissaries = () => {
-  const [board, setBoard] = useState(generateNewBoard());
+  const [board, setBoard] = useState(generateStartBoard());
 
   return <Game board={board} setBoard={setBoard} />;
 };

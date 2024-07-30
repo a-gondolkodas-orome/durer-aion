@@ -24,8 +24,8 @@ export const getBoardAfterAiTurn = function (board) {
     //this is the case where all piles have even number of pieces
     //should not occur in an optimal game with 37 pieces
     //with this the enemy also has a strategy when the game starts with 36 pieces
-    const { newBoard, intermediateBoard } = getBoardAfterAiTurn(board.map((x) => x / 2));
-    return { newBoard: newBoard.map((x) => x * 2), intermediateBoard: intermediateBoard.map(x => x * 2) };
+    const { nextBoard, intermediateBoard } = getBoardAfterAiTurn(board.map((x) => x / 2));
+    return { nextBoard: nextBoard.map((x) => x * 2), intermediateBoard: intermediateBoard.map(x => x * 2) };
   }
 };
 
@@ -35,17 +35,17 @@ const getOptimalDivision = function (board, first, second) {
   const intermediateBoard = [...board];
   intermediateBoard[second] = 0;
 
-  const newBoard = [...board];
+  const nextBoard = [...board];
 
   if (sum === 2) {
-    newBoard[first] = 1;
-    newBoard[second] = 1;
-    return { newBoard, intermediateBoard };
+    nextBoard[first] = 1;
+    nextBoard[second] = 1;
+    return { nextBoard, intermediateBoard };
   }
 
   const firstPile = 1 + 2 * Math.ceil(Math.random() * Math.floor((sum - 2) / 2));
-  newBoard[first] = firstPile;
-  newBoard[second] = sum - firstPile;
+  nextBoard[first] = firstPile;
+  nextBoard[second] = sum - firstPile;
 
-  return { intermediateBoard, newBoard };
+  return { intermediateBoard, nextBoard };
 };

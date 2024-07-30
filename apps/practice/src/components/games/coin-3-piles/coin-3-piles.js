@@ -18,18 +18,18 @@ export const GameBoard = ({ board, setBoard, ctx }) => {
 
     setValueOfRemovedCoin(coinValue);
     ctx.setTurnStage('placeBack');
-    const newBoard = [...board];
-    newBoard[coinValue] -= 1;
-    setBoard(newBoard);
-    if (coinValue === 0) endTurn(newBoard);
+    const nextBoard = [...board];
+    nextBoard[coinValue] -= 1;
+    setBoard(nextBoard);
+    if (coinValue === 0) endTurn(nextBoard);
   };
 
   const addToPile = (coinValue) => {
     if (!isMoveAllowed(coinValue)) return;
 
-    const newBoard = [...board];
-    newBoard[coinValue] += 1;
-    endTurn(newBoard);
+    const nextBoard = [...board];
+    nextBoard[coinValue] += 1;
+    endTurn(nextBoard);
   };
 
   const resetTurnState = () => {
@@ -37,8 +37,8 @@ export const GameBoard = ({ board, setBoard, ctx }) => {
     setValueOfRemovedCoin(null);
     ctx.setTurnStage(null);
   };
-  const endTurn = (newBoard) => {
-    ctx.endPlayerTurn(getGameStateAfterMove(newBoard));
+  const endTurn = (nextBoard) => {
+    ctx.endPlayerTurn(getGameStateAfterMove(nextBoard));
     resetTurnState();
   };
   const getCoinColor = (coinValue) => {
