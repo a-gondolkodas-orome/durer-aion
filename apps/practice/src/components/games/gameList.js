@@ -165,7 +165,7 @@ export const gameList = {
     year: 9,
     round: 'döntő',
     category: ['A'],
-    name: 'rendőr, rabló'
+    name: 'rendőr, tolvaj'
   },
   SharkChase: {
     year: 17,

@@ -222,7 +222,7 @@ const rule = (
     rendőrt ábrázoló (kék) korongot. Egy körben előbb a rendőrök mennek át
     egy-egy szomszédos útkereszteződésbe egy út mentén (szét is válhatnak), majd
     a tolvaj is hasonlóan lép. Minden körben kötelező mindenkinek helyet
-    változtatnia, és a két rendőr különválhat. A rendőrök nyernek, ha a rabló
+    változtatnia, és a két rendőr különválhat. A rendőrök nyernek, ha a tolvaj
     bármikor azonos kereszteződésben van egy rendőrrel. A tolvaj nyer, ha a
     harmadik kör végéig nem kapták el.
   </>
