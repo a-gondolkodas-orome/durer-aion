@@ -1,49 +1,44 @@
 import React, { useState } from 'react';
 import { strategyGameFactory } from '../strategy-game';
-import { range } from 'lodash';
+import { range, random } from 'lodash';
 
 const GameBoard = ({board, ctx}) => {
 
     const clickNumber = (number) => {
-        if (ctx.shouldPlayerMoveNext) {
-            let nextBoard = board + number;
-            ctx.endPlayerTurn(getGameStateAfterMove(nextBoard, ctx.playerIndex));
-        }
+        if (!ctx.shouldPlayerMoveNext) return;
+        ctx.endPlayerTurn(getGameStateAfterMove(board + number, ctx.playerIndex));
     };
 
     return(
         <section className="p-2 shrink-0 grow basis-2/3">
             <p className='text-center text-[30px]'>Jelenlegi szám: {board}</p>
-            <table className="m-2 border-collapse table-fixed w-full"><tbody>
-                <tr>
-                    {range(3).map(i => (
-                        <td className={`text-center text-[20px] border-4 aspect-square ${ctx.shouldPlayerMoveNext && 'hover:bg-gray-400'}`}
-                        key = {i}
-                        onClick={() => clickNumber(i+1)}>
-                        +{i+1}</td>
-                    ))}
-                </tr>
-            </tbody></table>
+            <div className="flex">
+                {range(1, 4).map(i => (
+                    <button
+                        className={`
+                            text-center w-full text-xl m-2 rounded border-4
+                            ${ctx.shouldPlayerMoveNext && 'hover:bg-blue-400 focus:bg-blue-400'}
+                        `}
+                        key={`${board}+${i}`}
+                        onClick={() => clickNumber(i)}
+                    >+{i}</button>
+                ))}
+            </div>
         </section>
         );
 };
 
 const getGameStateAfterMove = (nextBoard, moverIndex) => {
-    let isGameEnd = false;
-    let innerIndex = null;
-    if (nextBoard>40) {
-        isGameEnd = true;
+    if (nextBoard > 40) {
+        return { nextBoard, isGameEnd: true, winnerIndex: 1 - moverIndex };
     }
-    return { nextBoard: nextBoard, isGameEnd: isGameEnd, winnerIndex: 1-moverIndex };
+    return { nextBoard, isGameEnd: false }
 };
 
 const getGameStateAfterAiTurn = ({board, playerIndex}) => {
-    let nextBoard;
-    if (board%4 !== 0) {
-        nextBoard = board + 4 - board % 4;
-    } else {
-        nextBoard = board + Math.floor(Math.random()*3 + 1)
-    }
+    const nextBoard = board % 4 !== 0
+        ? board + 4 - board % 4
+        : board + random(1, 3);
     return (getGameStateAfterMove(nextBoard, 1-playerIndex));
 };
 
@@ -59,7 +54,7 @@ const Game = strategyGameFactory({
     title: '+1, +2, +3',
     GameBoard,
     G: {
-        getPlayerStepDescription: () => 'Válaszd ki mennyivel szeretnéd növelni a számot.',
+        getPlayerStepDescription: () => 'Válaszd ki, hogy mennyivel szeretnéd növelni a számot.',
         generateStartBoard: () => 0,
         getGameStateAfterAiTurn
     }
