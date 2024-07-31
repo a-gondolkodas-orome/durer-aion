@@ -156,7 +156,9 @@ such an object.
 - are the starting positions representative of the game complexity?
 - can the player win with a not-winning strategy?
 - is the game (mostly) mobile-friendly?
+- is the game usable only with keyboard (without a mouse)?
 - is it clear what the player should do next?
+- can the player undo their last interaction in turns with multiple stages?
 - is it easy to guess the winning strategy from wathing the AI play?
 - do not allow the player interacting with the game while the other player's step is in progress, use `ctx.shouldPlayerMoveNext`
 - never modify react state (e.g. the board) in place
