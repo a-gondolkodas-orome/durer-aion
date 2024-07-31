@@ -104,12 +104,15 @@ const GameBoard = ({ board, setBoard, ctx }) => {
         <button
           key={id}
           onClick={() => clickField(id)}
-          className="aspect-square p-[0%] border-2 relative"
+          className={`
+            aspect-square p-[0%] border-2 relative flex justify-center items-center
+            ${possibleMoves.includes(id) && ctx.playerIndex === 1 && board.submarines[id] && 'border-red-600'}
+          `}
         >
           {possibleMoves.includes(id) && ctx.playerIndex === 0 && (
             <OptionalNextSubmarine existingSubmarineCount={board.submarines[id]} />
           )}
-         {possibleMoves.includes(id) && ctx.playerIndex === 1 && (
+          {possibleMoves.includes(id) && ctx.playerIndex === 1 && (
             <OptionalNextShark />
           )}
           {board.submarines[id] >= 1 && (
@@ -119,6 +122,11 @@ const GameBoard = ({ board, setBoard, ctx }) => {
             <svg className="aspect-square top-0 absolute z-10 opacity-80">
               <use xlinkHref="#shark" />
             </svg>
+          )}
+          {board.shark === id && ctx.playerIndex === 1 && ctx.shouldPlayerMoveNext && (
+            <span
+              className="absolute z-50 w-[75%] text-black border-2 rounded bg-white opacity-80"
+            >Itt maradok</span>
           )}
       </button>
       ))}
