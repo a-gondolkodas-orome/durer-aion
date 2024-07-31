@@ -56,7 +56,13 @@ const GameBoard = ({ board, setBoard, ctx }) => {
         setChosenPiece(id)
         ctx.setTurnStage('movePiece');
       } else if (ctx.turnStage === 'movePiece') {
-        if (!isAllowed_movePiece(id)) return;
+        if (!isAllowed_movePiece(id)) {
+          if (id === chosenPiece) {
+            ctx.setTurnStage('choosePiece');
+            setChosenPiece(null);
+          }
+          return;
+        };
         const nextBoard = cloneDeep(board);
         nextBoard.submarines[chosenPiece] -= 1;
         nextBoard.submarines[id] += 1;
