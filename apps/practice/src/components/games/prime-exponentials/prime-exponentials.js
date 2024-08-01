@@ -138,31 +138,27 @@ const PrimesTable = ({ board, choosePrime, hovered, setHovered }) => {
 }
 
 const GameBoard = ({ board, ctx }) => {
-  const [firstTurnPhase, setFirstTurnPhase] = useState(true);
   const [playerPrime, setPlayerPrime] = useState(null);
   const [hovered, setHovered] = useState(null);
 
   const choosePrime = (p) => {
     setPlayerPrime(p);
-    setFirstTurnPhase(false);
     ctx.setTurnStage("e");
     setHovered(null);
   }
 
   const resetChosenPrime = () => {
     setPlayerPrime(null);
-    setFirstTurnPhase(true);
     ctx.setTurnStage("p");
   }
 
   const chooseExponential = (e) => {
     setPlayerPrime(null);
-    setFirstTurnPhase(true);
     ctx.setTurnStage("p");
     ctx.endPlayerTurn(getGameStateAfterMove(board - playerPrime ** e));
   }
 
-  const PlayerOptions = firstTurnPhase
+  const PlayerOptions = ctx.turnStage !== "e"
     ? <PrimesTable
       board={board}
       choosePrime={choosePrime}
