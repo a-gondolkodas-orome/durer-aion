@@ -49,7 +49,7 @@ const getOptimalAiPlacingPosition = (board, playerIndex) => {
     if (rand === 2) return 8;
   }
 
-  // as a first player still try to win if first player may not play optimally
+  // as a first player still try to win if second player may not play optimally
   if (playerIndex === 1) {
     // pairs to still have chance
     const pairs = [[0, 8], [3, 2], [6, 5], [0, 2], [3, 5], [6, 8]];
