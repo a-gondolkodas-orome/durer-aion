@@ -2,45 +2,51 @@ import React, { useState } from "react";
 import { strategyGameFactory } from "../strategy-game";
 import { range, isEqual, random, sample, difference, filter } from "lodash";
 
-const generateStartBoard6 = () => {
-  const discCount = random(3, 6);
+const generateStartBoard = (maxDiscs) => () => {
+  const discCount = random(Math.floor(maxDiscs/2), maxDiscs);
   if (random(0, 1)) {
     const blueCount = sample(range(0, discCount + 1, 3));
     return [blueCount, discCount - blueCount];
   } else {
+    const nextDivisibleBy3 = 3 * (Math.floor(maxDiscs/3) + 1);
     const blueCount = sample(
-      difference(range(0, discCount + 1), range(0, 9, 3))
+      difference(range(0, discCount + 1), range(0, nextDivisibleBy3, 3))
     );
     return [blueCount, discCount - blueCount];
   }
 };
 
-const generateStartBoard10 = () => {
-  const discCount = random(4, 10);
-  if (random(0, 1)) {
-    const blueCount = sample(range(0, discCount + 1, 3));
-    return [blueCount, discCount - blueCount];
-  } else {
-    const blueCount = sample(
-      difference(range(0, discCount + 1), range(0, 12, 3))
-    );
-    return [blueCount, discCount - blueCount];
-  }
+const DisabledDisc = ({ bgColor }) => {
+  return (
+    <td className="text-center aspect-square">
+      <button
+        className="aspect-square w-full p-[5%] cursor-not-allowed"
+        disabled
+      >
+        <span
+          className={`w-[100%] aspect-square inline-block rounded-full mr-0.5 ${bgColor}`}
+        ></span>
+      </button>
+    </td>
+  );
 };
+
 
 const gameBoardFactory = (maxDiscs) => {
   return ({ board, ctx }) => {
     const [hovered, setHovered] = useState(null);
 
-    const select = (a, i) => {
+    const select = (pile, i) => {
       if (ctx.shouldPlayerMoveNext) {
-        let nextBoard = [...board];
-        let d = nextBoard[a] - i;
-        nextBoard[a] = i;
-        if (a === 1) nextBoard[0] += d;
+        const nextBoard = [...board];
+        const d = nextBoard[pile] - i;
+        nextBoard[pile] = i;
+        if (pile === 1) nextBoard[0] += d;
         ctx.endPlayerTurn(getGameStateAfterMove(nextBoard));
       }
     };
+
+    const isSelected = (pile, i) => isEqual(hovered, [pile, i]) || isEqual(hovered, [pile, i - 1]);
 
     const nextBoardDescription = () => {
       if (hovered === null) return '';
@@ -57,96 +63,66 @@ const gameBoardFactory = (maxDiscs) => {
       return ` --> ${board[1] - 2} piros és ${board[0] + 2} kék korong`
     }
 
+
     return (
       <section className="p-2 shrink-0 grow basis-2/3">
         <table className="table-fixed w-full">
           <tbody>
             <tr>
               {range(board[1]).map((i) =>
-                board[1] > i + 2 ? (
-                  <td
-                    className="text-center aspect-square"
-                    key={`red-disabled-${i}`}
-                  >
-                    <button
-                      className="aspect-square w-full p-[5%] cursor-not-allowed"
-                      disabled
+                board[1] > i + 2
+                  ? <DisabledDisc key={`red-disabled-${i}`} bgColor="bg-red-800"/>
+                  : (
+                    <td
+                      className="text-center aspect-square"
+                      key={`red-${i}-${board[0]}-${board[1]}`}
+                      onClick={() => select(1, i)}
                     >
-                      <span
-                        className={`w-[100%] aspect-square inline-block rounded-full mr-0.5 bg-red-800`}
-                      ></span>
-                    </button>
-                  </td>
-                ) : (
-                  <td
-                    className="text-center aspect-square"
-                    key={`red-${i}`}
-                    onClick={() => select(1, i)}
-                  >
-                    <button
-                      className="aspect-square w-full p-[5%]"
-                      disabled={!ctx.shouldPlayerMoveNext}
-                      onMouseOver={() => setHovered([1, i])}
-                      onMouseOut={() => setHovered(null)}
-                      onFocus={() => setHovered([1, i])}
-                      onBlur={() => setHovered(null)}
-                    >
-                      <span
-                        className={`
-                          w-[100%] aspect-square inline-block rounded-full mr-0.5
-                          ${
-                            ctx.shouldPlayerMoveNext && (isEqual(hovered, [1, i]) || isEqual(hovered, [1, i - 1]))
-                              ? "opacity-75 bg-blue-800"
-                              : "bg-red-800"
-                          }
+                      <button
+                        className="aspect-square w-full p-[5%]"
+                        disabled={!ctx.shouldPlayerMoveNext}
+                        onMouseOver={() => setHovered([1, i])}
+                        onMouseOut={() => setHovered(null)}
+                        onFocus={() => setHovered([1, i])}
+                        onBlur={() => setHovered(null)}
+                      >
+                        <span
+                          className={`
+                            w-[100%] aspect-square inline-block rounded-full mr-0.5
+                            ${ctx.shouldPlayerMoveNext && isSelected(1, i) ? "opacity-75 bg-blue-800" : "bg-red-800"}
                           `}
-                      ></span>
-                    </button>
-                  </td>
-                )
+                        ></span>
+                      </button>
+                    </td>
+                  )
               )}
 
               {range(board[0]).map((i) =>
-                board[0] > i + 2 ? (
-                  <td
-                    className="text-center aspect-square"
-                    key={`blue-disabled-${i}`}
-                  >
-                    <button
-                      className="aspect-square w-full p-[5%] cursor-not-allowed"
-                      disabled
+                board[0] > i + 2
+                  ? <DisabledDisc key={`blue-disabled-${i}`} bgColor="bg-blue-800"/>
+                  : (
+                    <td
+                      className="text-center aspect-square"
+                      key={`blue-${i}-${board[0]}-${board[1]}`}
+                      onClick={() => select(0, i)}
                     >
-                      <span
-                        className={`w-[100%] aspect-square inline-block rounded-full mr-0.5 bg-blue-800`}
-                      ></span>
-                    </button>
-                  </td>
-                ) : (
-                  <td
-                    className="text-center aspect-square"
-                    key={`blue-${i}`}
-                    onClick={() => select(0, i)}
-                  >
-                    <button
-                      className="aspect-square w-full p-[5%]"
-                      disabled={!ctx.shouldPlayerMoveNext}
-                      onMouseOver={() => setHovered([0, i])}
-                      onMouseOut={() => setHovered(null)}
-                      onFocus={() => setHovered([0, i])}
-                      onBlur={() => setHovered(null)}
-                    >
-                      <span
-                        className={`
-                          w-[100%] aspect-square inline-block rounded-full mr-0.5
-                          ${
-                            ctx.shouldPlayerMoveNext && (isEqual(hovered, [0, i]) || isEqual(hovered, [0, i - 1]))
-                              ? "opacity-50 bg-slate-600"
-                              : "bg-blue-800"
-                          }`}
-                      ></span>
-                    </button>
-                  </td>
-                )
+                      <button
+                        className="aspect-square w-full p-[5%]"
+                        disabled={!ctx.shouldPlayerMoveNext}
+                        onMouseOver={() => setHovered([0, i])}
+                        onMouseOut={() => setHovered(null)}
+                        onFocus={() => setHovered([0, i])}
+                        onBlur={() => setHovered(null)}
+                      >
+                        <span
+                          className={`
+                            w-[100%] aspect-square inline-block rounded-full mr-0.5
+                            ${ctx.shouldPlayerMoveNext && isSelected(0, i) ? "opacity-50 bg-slate-600" : "bg-blue-800"}
+                          `}
+                        ></span>
+                      </button>
+                    </td>
+                  )
               )}
 
               {/* dummy cells to ensure stable piece width */}
@@ -163,7 +139,7 @@ const gameBoardFactory = (maxDiscs) => {
 };
 
 const getGameStateAfterAiTurn = ({ board }) => {
-  let nextBoard = [...board];
+  const nextBoard = [...board];
   const rem = nextBoard[0] % 3;
   if (rem === 0) {
     const randomNonEmptyPile = sample(filter([0, 1], (i) => nextBoard[i] > 0));
@@ -198,9 +174,9 @@ const getPlayerStepDescription = () => {
   return "Kattints egy korongra, hogy eltávolítsd vagy átfordítsd az adott és tőle jobbra levő korongo(ka)t az adott színből.";
 };
 
-const rule6 = (
+const rule = (maxDiscs) => (
   <>
-    A játék kezdetén a szervezők néhány, de legfeljebb 6 korongot letesznek az
+    A játék kezdetén a szervezők néhány, de legfeljebb {maxDiscs} korongot letesznek az
     asztalra, mindegyiket a piros vagy a kék oldalával felfelé. A soron
     következő játékos összesen négyfélét léphet:
     <br />
@@ -211,54 +187,37 @@ const rule6 = (
     Aki már nem tud lépni, az elveszíti a játékot.
   </>
 );
-
-const rule10 = (
-  <>
-    A játék kezdetén a szervezők néhány, de legfeljebb 10 korongot letesznek az
-    asztalra, mindegyiket a piros vagy a kék oldalával felfelé. A soron
-    következő játékos összesen négyfélét léphet:
-    <br />
-    • 1 vagy 2 kék korongot elvehet az asztalról.
-    <br />
-    • 1 vagy 2 piros korongot átfordíthat kékké.
-    <br />
-    Aki már nem tud lépni, az elveszíti a játékot.
-  </>
-);
-
-const GameBoard6 = gameBoardFactory(6);
-const GameBoard10 = gameBoardFactory(10);
 
 const Game6 = strategyGameFactory({
-  rule: rule6,
+  rule: rule(6),
   title: "6 korong",
-  GameBoard: GameBoard6,
+  GameBoard: gameBoardFactory(6),
   G: {
     getPlayerStepDescription,
-    generateStartBoard: generateStartBoard6,
+    generateStartBoard: generateStartBoard(6),
     getGameStateAfterAiTurn
   }
 });
 
 const Game10 = strategyGameFactory({
-  rule: rule10,
+  rule: rule(10),
   title: "10 korong",
-  GameBoard: GameBoard10,
+  GameBoard: gameBoardFactory(10),
   G: {
     getPlayerStepDescription,
-    generateStartBoard: generateStartBoard10,
+    generateStartBoard: generateStartBoard(10),
     getGameStateAfterAiTurn
   }
 });
 
 export const SixDiscs = () => {
-  const [board, setBoard] = useState(generateStartBoard6());
+  const [board, setBoard] = useState(generateStartBoard(6));
 
   return <Game6 board={board} setBoard={setBoard} />;
 };
 
 export const TenDiscs = () => {
-  const [board, setBoard] = useState(generateStartBoard10());
+  const [board, setBoard] = useState(generateStartBoard(10));
 
   return <Game10 board={board} setBoard={setBoard} />;
 };
