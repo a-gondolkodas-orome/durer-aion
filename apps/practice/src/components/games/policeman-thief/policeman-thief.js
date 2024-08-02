@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { Fragment, useState } from "react";
 import { range, random } from "lodash";
 import { strategyGameFactory } from "../strategy-game";
 import { getGameStateAfterAiTurn, getGameStateAfterMove } from "./strategy";
@@ -173,16 +173,11 @@ const GameBoard = ({ board, setBoard, ctx }) => {
         <line x1="90%" y1="10%" x2="70%" y2="30%" />
 
         {range(8).map((nodeId) => (
-          <>
+          <Fragment key={nodeId}>
             <circle
-              key={nodeId}
               cx={cubeCoords[nodeId].cx}
               cy={cubeCoords[nodeId].cy}
-              className={
-                isDuringMove(nodeId) &&
-                board.blue1 !== board.blue2 &&
-                "opacity-50"
-              }
+              className={isDuringMove(nodeId) && board.blue1 !== board.blue2 ? "opacity-50" : undefined}
               r="4%"
               stroke={toBeChosenToMove(nodeId) ? "orange" : ""}
               fill={getColor(nodeId)}
@@ -207,7 +202,7 @@ const GameBoard = ({ board, setBoard, ctx }) => {
                 T+R
               </text>
             )}
-          </>
+          </Fragment>
         ))}
       </svg>
     </section>
