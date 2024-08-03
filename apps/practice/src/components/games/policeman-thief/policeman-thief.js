@@ -39,30 +39,20 @@ const neighbours = {
   7: [3, 5, 6]
 };
 
-const isAllowedStep = (currentVertex, targetVertex) => {
-  if (
-    !neighbours[currentVertex] ||
-    !neighbours[currentVertex].includes(targetVertex)
-  ) return false;
-  return true;
-};
-
 const GameBoard = ({ board, setBoard, ctx }) => {
-  const currentPlayer = () => {
-    return ctx.playerIndex === 0 ? "blue" : "red";
-  };
+  const currentPlayer = ctx.playerIndex === 0 ? "blue" : "red";
 
   const [isBlue1Moved, setIsBlue1Moved] = useState(false);
   const [isBlue2Moved, setIsBlue2Moved] = useState(false);
   const [turnStage, setTurnStage] = useState("choose");
 
   const handleMove = (circle, targetVertex, currentVertex) => {
-    if (!isAllowedStep(currentVertex, targetVertex, board.board)) {
+    if (!neighbours[currentVertex].includes(targetVertex)) {
       return null;
     }
 
     const nextBoard = { ...board, ...circle };
-    if (currentPlayer() === "red") {
+    if (currentPlayer === "red") {
       nextBoard.turnCount++;
       ctx.endPlayerTurn(getGameStateAfterMove(nextBoard));
     } else {
@@ -92,7 +82,7 @@ const GameBoard = ({ board, setBoard, ctx }) => {
 
   const handleCircleClick = (vertex) => {
     if (!ctx.shouldPlayerMoveNext) return;
-    if (currentPlayer() === "red" && board.red !== vertex) {
+    if (currentPlayer === "red" && board.red !== vertex) {
       handleMove({ red: vertex }, vertex, board.red);
     }
     if (turnStage === "choose") {
@@ -104,16 +94,35 @@ const GameBoard = ({ board, setBoard, ctx }) => {
       return;
     } else {
       if (turnStage === "move1") {
-        if (currentPlayer() === "blue" && board.blue1 !== vertex) {
+        if (currentPlayer === "blue" && board.blue1 !== vertex) {
           handleMove({ blue1: vertex }, vertex, board.blue1);
         }
       } else if (turnStage === "move2") {
-        if (currentPlayer() === "blue" && board.blue2 !== vertex) {
+        if (currentPlayer === "blue" && board.blue2 !== vertex) {
           handleMove({ blue2: vertex }, vertex, board.blue2);
         }
       }
     }
   };
+
+  const isClickable = (nodeId) => {
+    if (!ctx.shouldPlayerMoveNext) return false;
+    if (currentPlayer === "red") {
+      return neighbours[board.red].includes(nodeId);
+    }
+    if (turnStage === "choose") {
+      if (isBlue1Moved) return nodeId === board.blue2;
+      if (isBlue2Moved) return nodeId === board.blue1;
+      return nodeId === board.blue1 || nodeId === board.blue2;
+    }
+    if (turnStage === "move1") {
+      return neighbours[board.blue1].includes(nodeId)
+    }
+    if (turnStage === "move2") {
+      return neighbours[board.blue2].includes(nodeId)
+    }
+    return false;
+  }
 
   const getColor = (nodeId) => {
     if (board.blue1 === nodeId) {
@@ -182,6 +191,10 @@ const GameBoard = ({ board, setBoard, ctx }) => {
               stroke={toBeChosenToMove(nodeId) ? "orange" : ""}
               fill={getColor(nodeId)}
               onClick={() => handleCircleClick(nodeId)}
+              onKeyUp={(event) => {
+                if (event.key === 'Enter') handleCircleClick(nodeId);
+              }}
+              tabIndex={isClickable(nodeId) ? 0 : 'none'}
             />
             {nodeId === board.blue1 && nodeId === board.blue2 && (
               <text
