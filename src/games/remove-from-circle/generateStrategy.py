@@ -1,6 +1,6 @@
 # %%
 # Initializing
-n = 7
+n = 10
 
 # %%
 # Generate the possible board states 
