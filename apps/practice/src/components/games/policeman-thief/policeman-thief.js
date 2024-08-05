@@ -1,14 +1,12 @@
 import React, { Fragment, useState } from "react";
-import { range, random } from "lodash";
+import { range, random, sample, difference } from "lodash";
 import { strategyGameFactory } from "../strategy-game";
 import { getGameStateAfterAiTurn, getGameStateAfterMove } from "./strategy";
 
 const generateStartBoard = () => {
   const blueStartPosition = random(0, 7);
-  let redStartPosition = random(0, 7);
-  while (blueStartPosition === redStartPosition) {
-    redStartPosition = random(0, 7);
-  }
+  const immediateBlueWinPositions = [blueStartPosition, ...neighbours[blueStartPosition]];
+  const redStartPosition = sample(difference(range(0, 8), immediateBlueWinPositions));
   return {
     turnCount: 0,
     blue1: blueStartPosition, // Start positions for blue pieces
