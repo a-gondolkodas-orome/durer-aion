@@ -1,8 +1,8 @@
 "use strict";
 
-import { cloneDeep } from "lodash";
+import { cloneDeep, random } from "lodash";
 
-const neighbours = {
+export const neighbours = {
   0: [1, 2, 4],
   1: [0, 3, 5],
   2: [0, 3, 6],
@@ -14,125 +14,111 @@ const neighbours = {
 };
 
 export const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
-  let nextBoard = { ...board };
-  // TODO: instead of using let, make below functions not changing their argument
-  nextBoard =
-    playerIndex === 0
-      ? makeOptimalStepAsSecond(nextBoard)
-      : makeOptimalStepAsFirst(nextBoard);
+  const nextBoard = playerIndex === 0
+    ? makeOptimalStepAsSecond(board)
+    : makeOptimalStepAsFirst(board);
   return getGameStateAfterMove(nextBoard);
 };
 
 export const getGameStateAfterMove = (nextBoard) => {
-  const state = {
+  return {
     nextBoard,
     isGameEnd: isGameEnd(nextBoard),
     winnerIndex: hasFirstPlayerWon(nextBoard) ? 0 : 1
   };
-  return state;
 };
 
 const isGameEnd = (board) => {
   if (board.turnCount === 3) {
     return true;
-  } else if (board.red === board.blue1 || board.red === board.blue2) {
+  } else if (board.thief === board.policemen[0] || board.thief === board.policemen[1]) {
     return true;
   }
   return false;
 };
 
 const hasFirstPlayerWon = (board) => {
-  if (
-    (board.red === board.blue1 || board.red === board.blue2) &&
-    board.turnCount < 4
-  ) {
-    return true;
-  }
-  return false;
-};
-const getRandomInt = (max) => {
-  return Math.floor(Math.random() * max);
+  return board.turnCount < 4 && board.policemen.includes(board.thief);
 };
 
 const makeOptimalStepAsFirst = (board) => {
-  //blue1Step
-  let index1 = board.blue1;
-  let canWeCatch1 = false;
-  let nextBoard = cloneDeep(board);
+  const nextBoard = cloneDeep(board);
+
+  //policeman0 Step
+  let index0 = board.policemen[0];
+  let canWeCatch0 = false;
   for (let i = 0; i < 3; i++) {
-    if (neighbours[board.blue1][i] === board.red) {
-      index1 = neighbours[board.blue1][i];
-      let piece1 = { blue1: index1 };
-      nextBoard = { ...nextBoard, ...piece1 };
+    if (neighbours[board.policemen[0]][i] === board.thief) {
+      index0 = neighbours[board.policemen[0]][i];
+      nextBoard.policemen[0] = index0;
+      canWeCatch0 = true;
+    } else {
+      for (let j = 0; j < 3; j++) {
+        if (neighbours[neighbours[board.policemen[0]][i]][j] === board.thief) {
+          index0 = neighbours[board.policemen[0]][i];
+        }
+      }
+    }
+  }
+  if (index0 === board.policemen[0]) {
+    index0 = neighbours[board.policemen[0]][random(0, 2)];
+  }
+  if (!canWeCatch0) {
+    nextBoard.policemen[0] = index0;
+  }
+
+  //policeman1 Step
+  let index1 = board.policemen[1];
+  let canWeCatch1 = false;
+  for (let i = 0; i < 3; i++) {
+    if (
+      neighbours[board.policemen[1]][i] === board.thief &&
+      index0 !== neighbours[board.policemen[1]][i]
+    ) {
+      index1 = neighbours[board.policemen[1]][i];
+      nextBoard.policemen[1] = index1;
       canWeCatch1 = true;
     } else {
       for (let j = 0; j < 3; j++) {
-        if (neighbours[neighbours[board.blue1][i]][j] === board.red) {
-          index1 = neighbours[board.blue1][i];
+        if (
+          neighbours[neighbours[board.policemen[1]][i]][j] === board.thief &&
+          index0 !== neighbours[board.policemen[1]][i]
+        ) {
+          index1 = neighbours[board.policemen[1]][i];
         }
       }
     }
   }
-  if (index1 === board.blue1) {
-    index1 = neighbours[board.blue1][getRandomInt(3)];
+  if (index1 === board.policemen[1]) {
+    while (index1 === index0 || index1 === board.policemen[1]) {
+      index1 = neighbours[board.policemen[1]][random(0, 2)];
+    }
   }
   if (!canWeCatch1) {
-    let piece1 = { blue1: index1 };
-    nextBoard = { ...nextBoard, ...piece1 };
-  }
-
-  //blue2Step
-  let index2 = board.blue2;
-  let canWeCatch2 = false;
-  for (let i = 0; i < 3; i++) {
-    if (
-      neighbours[board.blue2][i] === board.red &&
-      index1 !== neighbours[board.blue2][i]
-    ) {
-      index2 = neighbours[board.blue2][i];
-      let piece2 = { blue2: index2 };
-      nextBoard = { ...nextBoard, ...piece2 };
-      canWeCatch2 = true;
-    } else {
-      for (let j = 0; j < 3; j++) {
-        if (
-          neighbours[neighbours[board.blue2][i]][j] === board.red &&
-          index1 !== neighbours[board.blue2][i]
-        ) {
-          index2 = neighbours[board.blue2][i];
-        }
-      }
-    }
-  }
-  if (index2 === board.blue2) {
-    while (index2 === index1 || index2 === board.blue2) {
-      index2 = neighbours[board.blue2][getRandomInt(3)];
-    }
-  }
-  if (!canWeCatch2) {
-    let piece2 = { blue2: index2 };
-    nextBoard = { ...nextBoard, ...piece2 };
+    nextBoard.policemen[1] = index1;
   }
   return nextBoard;
 };
 
 const makeOptimalStepAsSecond = (board) => {
-  let index = board.red;
+  const nextBoard = cloneDeep(board);
+  let index = board.thief;
   for (let i = 0; i < 3; i++) {
     if (
-      neighbours[board.red][i] !== board.blue1 &&
-      neighbours[board.red][i] !== board.blue2
+      neighbours[board.thief][i] !== board.policemen[0] &&
+      neighbours[board.thief][i] !== board.policemen[1]
     ) {
       for (let j = 0; j < 3; j++) {
-        const fieldToCheck = neighbours[neighbours[board.red][i]][j];
-        if (fieldToCheck !== board.blue1 && fieldToCheck !== board.blue2) {
-          index = neighbours[board.red][i];
+        const fieldToCheck = neighbours[neighbours[board.thief][i]][j];
+        if (fieldToCheck !== board.policemen[0] && fieldToCheck !== board.policemen[1]) {
+          index = neighbours[board.thief][i];
         }
       }
     }
   }
-  if (index === board.red) {
-    index = neighbours[board.red][getRandomInt(3)];
+  if (index === board.thief) {
+    index = neighbours[board.thief][random(0, 2)];
   }
-  return { ...cloneDeep(board), red: index };
+  nextBoard.thief = index;
+  return nextBoard;
 };

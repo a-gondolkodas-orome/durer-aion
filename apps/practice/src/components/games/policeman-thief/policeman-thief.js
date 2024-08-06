@@ -1,17 +1,16 @@
 import React, { Fragment, useState } from "react";
 import { range, random, sample, difference } from "lodash";
 import { strategyGameFactory } from "../strategy-game";
-import { getGameStateAfterAiTurn, getGameStateAfterMove } from "./strategy";
+import { neighbours, getGameStateAfterAiTurn, getGameStateAfterMove } from "./strategy";
 
 const generateStartBoard = () => {
-  const blueStartPosition = random(0, 7);
-  const immediateBlueWinPositions = [blueStartPosition, ...neighbours[blueStartPosition]];
-  const redStartPosition = sample(difference(range(0, 8), immediateBlueWinPositions));
+  const policeStartPosition = random(0, 7);
+  const immediatePoliceWinPositions = [policeStartPosition, ...neighbours[policeStartPosition]];
+  const thiefStartPosition = sample(difference(range(0, 8), immediatePoliceWinPositions));
   return {
     turnCount: 0,
-    blue1: blueStartPosition, // Start positions for blue pieces
-    blue2: blueStartPosition,
-    red: redStartPosition // Start position for red piece
+    policemen: [policeStartPosition, policeStartPosition],
+    thief: thiefStartPosition
   };
 };
 
@@ -26,134 +25,77 @@ const cubeCoords = [
   { cx: "90%", cy: "90%" }
 ];
 
-const neighbours = {
-  0: [1, 2, 4],
-  1: [0, 3, 5],
-  2: [0, 3, 6],
-  3: [1, 2, 7],
-  4: [0, 5, 6],
-  5: [1, 4, 7],
-  6: [2, 4, 7],
-  7: [3, 5, 6]
-};
-
 const GameBoard = ({ board, setBoard, ctx }) => {
-  const currentPlayer = ctx.playerIndex === 0 ? "blue" : "red";
-
-  const [isBlue1Moved, setIsBlue1Moved] = useState(false);
-  const [isBlue2Moved, setIsBlue2Moved] = useState(false);
+  const [firstMovedPoliceman, setFirstMovedPoliceman] = useState(null);
   const [turnStage, setTurnStage] = useState("choose");
 
-  const handleMove = (circle, targetVertex, currentVertex) => {
-    if (!neighbours[currentVertex].includes(targetVertex)) {
-      return null;
-    }
-
-    const nextBoard = { ...board, ...circle };
-    if (currentPlayer === "red") {
-      nextBoard.turnCount++;
-      ctx.endPlayerTurn(getGameStateAfterMove(nextBoard));
-    } else {
-      let isTurnEnd = false;
-      setBoard(nextBoard);
-      setTurnStage("choose");
-      if (currentVertex === board.blue1) {
-        setIsBlue1Moved(true);
-        if (isBlue2Moved) {
-          isTurnEnd = true;
-        }
-      } else if (currentVertex === board.blue2) {
-        setIsBlue2Moved(true);
-        if (isBlue1Moved) {
-          isTurnEnd = true;
-        }
-      }
-      if (isTurnEnd) {
-        nextBoard.turnCount++;
-        setIsBlue1Moved(false);
-        setIsBlue2Moved(false);
-        setTurnStage("choose");
-        ctx.endPlayerTurn(getGameStateAfterMove(nextBoard));
-      }
-    }
-  };
-
   const handleCircleClick = (vertex) => {
-    if (!ctx.shouldPlayerMoveNext) return;
-    if (currentPlayer === "red" && board.red !== vertex) {
-      handleMove({ red: vertex }, vertex, board.red);
-    }
-    if (turnStage === "choose") {
-      if (board.blue1 === vertex && !isBlue1Moved) {
-        setTurnStage("move1");
-      } else if (board.blue2 === vertex && !isBlue2Moved) {
-        setTurnStage("move2");
-      }
+    if (!isClickable(vertex)) return;
+    if (ctx.playerIndex === 1) {
+      const nextBoard = { ...board, thief: vertex, turnCount: board.turnCount + 1 };
+      ctx.endPlayerTurn(getGameStateAfterMove(nextBoard));
       return;
-    } else {
-      if (turnStage === "move1") {
-        if (currentPlayer === "blue" && board.blue1 !== vertex) {
-          handleMove({ blue1: vertex }, vertex, board.blue1);
-        }
-      } else if (turnStage === "move2") {
-        if (currentPlayer === "blue" && board.blue2 !== vertex) {
-          handleMove({ blue2: vertex }, vertex, board.blue2);
-        }
-      }
-    }
-  };
-
-  const isClickable = (nodeId) => {
-    if (!ctx.shouldPlayerMoveNext) return false;
-    if (currentPlayer === "red") {
-      return neighbours[board.red].includes(nodeId);
     }
     if (turnStage === "choose") {
-      if (isBlue1Moved) return nodeId === board.blue2;
-      if (isBlue2Moved) return nodeId === board.blue1;
-      return nodeId === board.blue1 || nodeId === board.blue2;
+      setTurnStage(vertex === board.policemen[0] ? "move0" : "move1");
+      return;
+    }
+    const nextBoard = { ...board }
+    if (turnStage === "move0") {
+      nextBoard.policemen[0] = vertex;
+      setFirstMovedPoliceman(0);
     }
     if (turnStage === "move1") {
-      return neighbours[board.blue1].includes(nodeId)
+      nextBoard.policemen[1] = vertex;
+      setFirstMovedPoliceman(1);
     }
-    if (turnStage === "move2") {
-      return neighbours[board.blue2].includes(nodeId)
+    setBoard(nextBoard);
+    setTurnStage("choose");
+
+    const isMoveOfPoliceman0AsSecond = (firstMovedPoliceman === 1 && turnStage === "move0");
+    const isMoveOfPoliceman1AsSecond = (firstMovedPoliceman === 0 && turnStage === "move1");
+    if (isMoveOfPoliceman0AsSecond || isMoveOfPoliceman1AsSecond) {
+      nextBoard.turnCount++;
+      setFirstMovedPoliceman(null);
+      ctx.endPlayerTurn(getGameStateAfterMove(nextBoard));
+    }
+  };
+
+  const isClickable = (vertex) => {
+    if (!ctx.shouldPlayerMoveNext) return false;
+    if (ctx.playerIndex === 1) {
+      return neighbours[board.thief].includes(vertex);
+    }
+    if (turnStage === "choose") {
+      if (firstMovedPoliceman === 0) return vertex === board.policemen[1];
+      if (firstMovedPoliceman === 1) return vertex === board.policemen[0];
+      return board.policemen.includes(vertex);
+    }
+    if (turnStage === "move0") {
+      return neighbours[board.policemen[0]].includes(vertex)
+    }
+    if (turnStage === "move1") {
+      return neighbours[board.policemen[1]].includes(vertex)
     }
     return false;
   }
 
-  const getColor = (nodeId) => {
-    if (board.blue1 === nodeId) {
-      return "blue";
-    } else if (board.blue2 === nodeId) {
-      return "blue";
-    } else if (board.red === nodeId) {
-      return "red";
-    } else {
-      return "white";
-    }
+  const getColor = (vertex) => {
+    if (board.thief === vertex) return "red";
+    if (board.policemen.includes(vertex)) return "blue";
+    return "white";
   };
 
-  const toBeChosenToMove = (nodeId) => {
-    if (!ctx.shouldPlayerMoveNext) return false;
-    if (ctx.playerIndex !== 0) return false;
-    if (board.blue1 === nodeId && turnStage === "choose" && !isBlue1Moved) {
-      return true;
-    }
-    if (board.blue2 === nodeId && turnStage === "choose" && !isBlue2Moved) {
-      return true;
-    }
+  const toBeChosenToMove = (vertex) => {
+    return isClickable(vertex) && ctx.playerIndex === 0 && turnStage === "choose";
   };
 
-  const isDuringMove = (nodeId) => {
+  const isDuringMove = (vertex) => {
     if (!ctx.shouldPlayerMoveNext) return false;
     if (ctx.playerIndex !== 0) return false;
-    if (board.blue1 === nodeId && turnStage === "move1" && !isBlue1Moved) {
-      return true;
-    }
-    if (board.blue2 === nodeId && turnStage === "move2" && !isBlue2Moved) {
-      return true;
-    }
+    if (board.policemen[0] === vertex && turnStage === "move0") return true;
+    if (board.policemen[1] === vertex && turnStage === "move1") return true;
+    return false;
   };
 
   return (
@@ -179,36 +121,36 @@ const GameBoard = ({ board, setBoard, ctx }) => {
         <line x1="10%" y1="90%" x2="30%" y2="70%" />
         <line x1="90%" y1="10%" x2="70%" y2="30%" />
 
-        {range(8).map((nodeId) => (
-          <Fragment key={nodeId}>
+        {range(8).map((vertex) => (
+          <Fragment key={vertex}>
             <circle
-              cx={cubeCoords[nodeId].cx}
-              cy={cubeCoords[nodeId].cy}
-              className={isDuringMove(nodeId) && board.blue1 !== board.blue2 ? "opacity-50" : undefined}
+              cx={cubeCoords[vertex].cx}
+              cy={cubeCoords[vertex].cy}
+              className={isDuringMove(vertex) && board.policemen[0] !== board.policemen[1] ? "opacity-50" : undefined}
               r="4%"
-              stroke={toBeChosenToMove(nodeId) ? "orange" : ""}
-              fill={getColor(nodeId)}
-              onClick={() => handleCircleClick(nodeId)}
+              stroke={toBeChosenToMove(vertex) ? "orange" : ""}
+              fill={getColor(vertex)}
+              onClick={() => handleCircleClick(vertex)}
               onKeyUp={(event) => {
-                if (event.key === 'Enter') handleCircleClick(nodeId);
+                if (event.key === 'Enter') handleCircleClick(vertex);
               }}
-              tabIndex={isClickable(nodeId) ? 0 : 'none'}
+              tabIndex={isClickable(vertex) ? 0 : 'none'}
             />
-            {nodeId === board.blue1 && nodeId === board.blue2 && (
+            {vertex === board.policemen[0] && vertex === board.policemen[1] && (
               <text
                 style={{ transform: "translate(-1%,1%)" }}
-                x={cubeCoords[nodeId].cx}
-                y={cubeCoords[nodeId].cy}
-                onClick={() => handleCircleClick(nodeId)}
+                x={cubeCoords[vertex].cx}
+                y={cubeCoords[vertex].cy}
+                onClick={() => handleCircleClick(vertex)}
               >
                 2x
               </text>
             )}
-            {nodeId === board.red && (nodeId === board.blue1 || nodeId === board.blue2) && (
+            {vertex === board.thief && (vertex === board.policemen[0] || vertex === board.policemen[1]) && (
               <text
                 style={{ transform: "translate(-2%,1%)" }}
-                x={cubeCoords[nodeId].cx}
-                y={cubeCoords[nodeId].cy}
+                x={cubeCoords[vertex].cx}
+                y={cubeCoords[vertex].cy}
               >
                 T+R
               </text>
