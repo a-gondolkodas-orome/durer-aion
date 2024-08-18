@@ -26,9 +26,6 @@ const cubeCoords = [
 ];
 
 const GameBoard = ({ board, setBoard, ctx }) => {
-  const [firstMovedPoliceman, setFirstMovedPoliceman] = useState(null);
-  const [turnStage, setTurnStage] = useState("choose");
-
   const handleCircleClick = (vertex) => {
     if (!isClickable(vertex)) return;
     if (ctx.playerIndex === 1) {
@@ -36,29 +33,17 @@ const GameBoard = ({ board, setBoard, ctx }) => {
       ctx.endPlayerTurn(getGameStateAfterMove(nextBoard));
       return;
     }
-    if (turnStage === "choose") {
-      setTurnStage(vertex === board.policemen[0] ? "move0" : "move1");
+    const nextBoard = { ...board }
+    if (ctx.turnStage === "greenMove") {
+      nextBoard.policemen[1] = vertex;
+      nextBoard.turnCount++;
+      ctx.setTurnStage("move")
+      ctx.endPlayerTurn(getGameStateAfterMove(nextBoard));
       return;
     }
-    const nextBoard = { ...board }
-    if (turnStage === "move0") {
-      nextBoard.policemen[0] = vertex;
-      setFirstMovedPoliceman(0);
-    }
-    if (turnStage === "move1") {
-      nextBoard.policemen[1] = vertex;
-      setFirstMovedPoliceman(1);
-    }
+    nextBoard.policemen[0] = vertex;
+    ctx.setTurnStage("greenMove")
     setBoard(nextBoard);
-    setTurnStage("choose");
-
-    const isMoveOfPoliceman0AsSecond = (firstMovedPoliceman === 1 && turnStage === "move0");
-    const isMoveOfPoliceman1AsSecond = (firstMovedPoliceman === 0 && turnStage === "move1");
-    if (isMoveOfPoliceman0AsSecond || isMoveOfPoliceman1AsSecond) {
-      nextBoard.turnCount++;
-      setFirstMovedPoliceman(null);
-      ctx.endPlayerTurn(getGameStateAfterMove(nextBoard));
-    }
   };
 
   const isClickable = (vertex) => {
@@ -66,41 +51,54 @@ const GameBoard = ({ board, setBoard, ctx }) => {
     if (ctx.playerIndex === 1) {
       return neighbours[board.thief].includes(vertex);
     }
-    if (turnStage === "choose") {
-      if (firstMovedPoliceman === 0) return vertex === board.policemen[1];
-      if (firstMovedPoliceman === 1) return vertex === board.policemen[0];
-      return board.policemen.includes(vertex);
-    }
-    if (turnStage === "move0") {
-      return neighbours[board.policemen[0]].includes(vertex)
-    }
-    if (turnStage === "move1") {
+    if (ctx.turnStage === "greenMove") {
       return neighbours[board.policemen[1]].includes(vertex)
     }
-    return false;
+    return neighbours[board.policemen[0]].includes(vertex)
   }
 
   const getColor = (vertex) => {
+    if (isClickable(vertex)) {
+      if (ctx.playerIndex === 1) {
+        if (board.policemen[0] === vertex) return "url(#thief-and-blue-policeman)";
+        if (board.policemen[1] === vertex) return "url(#thief-and-green-policeman)";
+        return "red";
+      }
+      if (ctx.playerIndex === 0) {
+        if (ctx.turnStage === "greenMove") {
+          if (board.thief === vertex) return "url(#thief-and-green-policeman)";
+          if (board.policemen[0] === vertex) return "url(#2policemen)";
+          return "green";
+        }
+        if (board.thief === vertex) return "url(#thief-and-blue-policeman)";
+        if (board.policemen[1] === vertex) return "url(#2policemen)";
+        return "blue";
+      }
+    }
+    if (board.thief === vertex && board.policemen[0] === vertex) return "url(#thief-and-blue-policeman)";
+    if (board.thief === vertex && board.policemen[1] === vertex) return "url(#thief-and-green-policeman)";
     if (board.thief === vertex) return "red";
-    if (board.policemen.includes(vertex)) return "blue";
+    if (board.policemen[0] === vertex && board.policemen[1] === vertex) return "url(#2policemen)";
+    if (board.policemen[0] === vertex) return "blue";
+    if (board.policemen[1] === vertex) return "green";
     return "white";
-  };
-
-  const toBeChosenToMove = (vertex) => {
-    return isClickable(vertex) && ctx.playerIndex === 0 && turnStage === "choose";
-  };
-
-  const isDuringMove = (vertex) => {
-    if (!ctx.shouldPlayerMoveNext) return false;
-    if (ctx.playerIndex !== 0) return false;
-    if (board.policemen[0] === vertex && turnStage === "move0") return true;
-    if (board.policemen[1] === vertex && turnStage === "move1") return true;
-    return false;
   };
 
   return (
     <section className="p-2 shrink-0 grow basis-2/3">
       <svg className="aspect-square stroke-black stroke-[3]">
+        <pattern id="2policemen" patternUnits="userSpaceOnUse" width="8" height="8">
+          <rect x="0" y="0" style={{ stroke: "blue", strokeWidth: 8 }} width="8" height="8"></rect>
+          <path d="M-2,2 l4,-4 M0,8 l8,-8 M6,10 l4,-4" style={{stroke:"green", strokeWidth:3}}></path>
+        </pattern>
+        <pattern id="thief-and-blue-policeman" patternUnits="userSpaceOnUse" width="8" height="8">
+          <rect x="0" y="0" style={{ stroke: "red", strokeWidth: 8 }} width="8" height="8"></rect>
+          <path d="M-2,2 l4,-4 M0,8 l8,-8 M6,10 l4,-4" style={{stroke:"blue", strokeWidth:3}}></path>
+        </pattern>
+        <pattern id="thief-and-green-policeman" patternUnits="userSpaceOnUse" width="8" height="8">
+          <rect x="0" y="0" style={{ stroke: "red", strokeWidth: 8 }} width="8" height="8"></rect>
+          <path d="M-2,2 l4,-4 M0,8 l8,-8 M6,10 l4,-4" style={{stroke:"green", strokeWidth:3}}></path>
+        </pattern>
         <rect
           x="30%"
           y="30%"
@@ -126,35 +124,15 @@ const GameBoard = ({ board, setBoard, ctx }) => {
             <circle
               cx={cubeCoords[vertex].cx}
               cy={cubeCoords[vertex].cy}
-              className={isDuringMove(vertex) && board.policemen[0] !== board.policemen[1] ? "opacity-50" : undefined}
               r="4%"
-              stroke={toBeChosenToMove(vertex) ? "orange" : ""}
               fill={getColor(vertex)}
               onClick={() => handleCircleClick(vertex)}
               onKeyUp={(event) => {
                 if (event.key === 'Enter') handleCircleClick(vertex);
               }}
               tabIndex={isClickable(vertex) ? 0 : 'none'}
+              className={isClickable(vertex) ? 'opacity-50' : ''}
             />
-            {vertex === board.policemen[0] && vertex === board.policemen[1] && (
-              <text
-                style={{ transform: "translate(-1%,1%)" }}
-                x={cubeCoords[vertex].cx}
-                y={cubeCoords[vertex].cy}
-                onClick={() => handleCircleClick(vertex)}
-              >
-                2x
-              </text>
-            )}
-            {vertex === board.thief && (vertex === board.policemen[0] || vertex === board.policemen[1]) && (
-              <text
-                style={{ transform: "translate(-2%,1%)" }}
-                x={cubeCoords[vertex].cx}
-                y={cubeCoords[vertex].cy}
-              >
-                T+R
-              </text>
-            )}
           </Fragment>
         ))}
       </svg>
@@ -167,10 +145,10 @@ const rule = (
     Az ábrán egy kisváros úthálózata látható, ahol az útkereszteződéseket
     pöttyök jelölik. A játék kezdetén a szervezők az egyik útkereszteződésbe
     letesznek egy tolvajt ábrázoló (piros) korongot, egy másikba pedig két
-    rendőrt ábrázoló (kék) korongot. Egy körben előbb a rendőrök mennek át
+    rendőrt ábrázoló (kék illetve zöld) korongot. Egy körben előbb a rendőrök (a kék majd a zöld) mennek át
     egy-egy szomszédos útkereszteződésbe egy út mentén (szét is válhatnak), majd
     a tolvaj is hasonlóan lép. Minden körben kötelező mindenkinek helyet
-    változtatnia, és a két rendőr különválhat. A rendőrök nyernek, ha a tolvaj
+    változtatnia. A rendőrök nyernek, ha a tolvaj
     bármikor azonos kereszteződésben van egy rendőrrel. A tolvaj nyer, ha a
     harmadik kör végéig nem kapták el.
   </>
@@ -183,9 +161,9 @@ const Game = strategyGameFactory({
   secondRoleLabel: "Tolvaj",
   GameBoard,
   G: {
-    getPlayerStepDescription: ({ playerIndex }) => {
+    getPlayerStepDescription: ({ playerIndex, turnStage }) => {
       if (playerIndex === 0) {
-        return "Kattints először az egyik rendőrre, majd arra az útkereszteződésre, ahová lépni szeretnél vele, majd hasonlóan a másik rendőrrel.";
+        return `Kattints arra az útkereszteződésre, ahová a ${turnStage === "greenMove" ? "zöld" : "kék"} rendőrrel lépni szeretnél.`;
       } else {
         return "Kattints arra az útkereszteződésre, ahová a tolvajjal lépni szeretnél.";
       }
