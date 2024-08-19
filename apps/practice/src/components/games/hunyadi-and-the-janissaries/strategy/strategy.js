@@ -48,7 +48,8 @@ export const generateStartBoard = () => {
     return generateStartBoard();
   }
 
-  return board;
+  // first pile: for soldiers who reached the castle
+  return [[], ...board];
 };
 
 export const getGameStateAfterKillingGroup = (board, group) => {
@@ -57,15 +58,14 @@ export const getGameStateAfterKillingGroup = (board, group) => {
   const intermediateBoard = cloneDeep(board);
   const nextBoard = cloneDeep(board);
 
-  for (let i = 0; i < nextBoard.length; i++) {
+  for (let i = 1; i < nextBoard.length; i++) {
     const remainingSoldiersInRow = nextBoard[i].filter((soldier) => soldier !== group);
     if (remainingSoldiersInRow.length > 0) {
-      if (i === 0) {
+      if (i === 1) {
         isGameEnd = true;
         hasFirstPlayerWon = true;
-      } else {
-        nextBoard[i - 1].push(...remainingSoldiersInRow);
       }
+      nextBoard[i - 1].push(...remainingSoldiersInRow);
     }
     intermediateBoard[i] = remainingSoldiersInRow;
     nextBoard[i] = [];
@@ -88,11 +88,11 @@ const colorBoardOptimally = (board) => {
   const secondColor = firstColor === 'blue' ? 'red' : 'blue';
   const nextBoard = cloneDeep(board);
 
-  for (let i = 0; i < nextBoard.length; i++) {
+  for (let i = 1; i < nextBoard.length; i++) {
     for (let j = 0; j < nextBoard[i].length; j++) {
       const nextGroup = groupScores[firstColor] < groupScores[secondColor] ? firstColor : secondColor;
       nextBoard[i][j] = nextGroup;
-      groupScores[nextGroup] += (1 / 2) ** i;
+      groupScores[nextGroup] += (1 / 2) ** (i - 1);
     }
   }
 
@@ -100,14 +100,14 @@ const colorBoardOptimally = (board) => {
 };
 
 const getOptimalGroupToKill = (board) => {
-  if (board[0].length > 0) {
-    return board[0][0];
+  if (board[1].length > 0) {
+    return board[1][0];
   }
 
   const groupScores = { blue: 0, red: 0 };
-  for (let i = 0; i < board.length; i++) {
+  for (let i = 1; i < board.length; i++) {
     for (const soldier of board[i]) {
-      groupScores[soldier] += (1 / 2) ** i;
+      groupScores[soldier] += (1 / 2) ** (i - 1);
     }
   }
 

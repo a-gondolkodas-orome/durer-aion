@@ -44,13 +44,28 @@ const GameBoard = ({ board, setBoard, ctx }) => {
     <section className="p-2 shrink-0 grow basis-2/3">
       <SoldierSvg />
       <CastleSvg />
-      <svg className="block m-auto w-[40%] fill-slate-600">
+      <svg className={`m-auto w-[40%] fill-slate-600 ${board[0].length > 0 ? 'opacity-50' : ''}`}>
         <use xlinkHref="#game-castle" />
       </svg>
-      {[0, 1, 2, 3, 4, 5].map(rowIndex => (
+      <div className="relative">
+        <div className="absolute z-20 left-0 right-0 bottom-0 mx-20 flex justify-center">
+            {board[0].map((group, pieceIndex) => (
+              <svg
+                className={`
+                  w-[10%] aspect-square inline-block mx-1
+                  ${group === 'blue' ? 'fill-blue-600' : 'fill-red-600'}
+                `}
+                key={pieceIndex}
+              >
+                <use xlinkHref="#game-soldier-icon" />
+              </svg>
+            ))}
+        </div>
+      </div>
+      {[1, 2, 3, 4, 5, 6].map(rowIndex => (
         <div
           key={rowIndex}
-          style={{ 'aspectRatio': rowIndex === 5 ? 24 : 8, 'marginLeft': (5-rowIndex) + 'rem', 'marginRight': (5-rowIndex) + 'rem' }}
+          style={{ 'aspectRatio': rowIndex === 6 ? 24 : 8, 'marginLeft': (6-rowIndex) + 'rem', 'marginRight': (6-rowIndex) + 'rem' }}
           className="border-t-black border-t-2 p-0.5 text-center whitespace-nowrap"
         >
           {board[rowIndex] && board[rowIndex].map((group, pieceIndex) => (
