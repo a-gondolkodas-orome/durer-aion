@@ -34,7 +34,7 @@ const GameBoard = ({ board, setBoard, ctx }) => {
       return;
     }
     const nextBoard = { ...board }
-    if (ctx.turnStage === "greenMove") {
+    if (ctx.turnStage === "secondMove") {
       nextBoard.policemen[1] = vertex;
       nextBoard.turnCount++;
       ctx.setTurnStage("move")
@@ -42,7 +42,7 @@ const GameBoard = ({ board, setBoard, ctx }) => {
       return;
     }
     nextBoard.policemen[0] = vertex;
-    ctx.setTurnStage("greenMove")
+    ctx.setTurnStage("secondMove")
     setBoard(nextBoard);
   };
 
@@ -51,7 +51,7 @@ const GameBoard = ({ board, setBoard, ctx }) => {
     if (ctx.playerIndex === 1) {
       return neighbours[board.thief].includes(vertex);
     }
-    if (ctx.turnStage === "greenMove") {
+    if (ctx.turnStage === "secondMove") {
       return neighbours[board.policemen[1]].includes(vertex)
     }
     return neighbours[board.policemen[0]].includes(vertex)
@@ -60,44 +60,44 @@ const GameBoard = ({ board, setBoard, ctx }) => {
   const getColor = (vertex) => {
     if (isClickable(vertex)) {
       if (ctx.playerIndex === 1) {
-        if (board.policemen[0] === vertex) return "url(#thief-and-blue-policeman)";
-        if (board.policemen[1] === vertex) return "url(#thief-and-green-policeman)";
+        if (board.policemen[0] === vertex) return "url(#thief-and-first-policeman)";
+        if (board.policemen[1] === vertex) return "url(#thief-and-second-policeman)";
         return "red";
       }
       if (ctx.playerIndex === 0) {
-        if (ctx.turnStage === "greenMove") {
-          if (board.thief === vertex) return "url(#thief-and-green-policeman)";
+        if (ctx.turnStage === "secondMove") {
+          if (board.thief === vertex) return "url(#thief-and-second-policeman)";
           if (board.policemen[0] === vertex) return "url(#2policemen)";
-          return "green";
+          return "forestgreen";
         }
-        if (board.thief === vertex) return "url(#thief-and-blue-policeman)";
+        if (board.thief === vertex) return "url(#thief-and-first-policeman)";
         if (board.policemen[1] === vertex) return "url(#2policemen)";
-        return "blue";
+        return "navy";
       }
     }
-    if (board.thief === vertex && board.policemen[0] === vertex) return "url(#thief-and-blue-policeman)";
-    if (board.thief === vertex && board.policemen[1] === vertex) return "url(#thief-and-green-policeman)";
+    if (board.thief === vertex && board.policemen[0] === vertex) return "url(#thief-and-first-policeman)";
+    if (board.thief === vertex && board.policemen[1] === vertex) return "url(#thief-and-second-policeman)";
     if (board.thief === vertex) return "red";
     if (board.policemen[0] === vertex && board.policemen[1] === vertex) return "url(#2policemen)";
-    if (board.policemen[0] === vertex) return "blue";
-    if (board.policemen[1] === vertex) return "green";
+    if (board.policemen[0] === vertex) return "navy";
+    if (board.policemen[1] === vertex) return "forestgreen";
     return "white";
   };
 
   return (
     <section className="p-2 shrink-0 grow basis-2/3">
       <svg className="aspect-square stroke-black stroke-[3]">
-        <pattern id="2policemen" patternUnits="userSpaceOnUse" width="8" height="8">
-          <rect x="0" y="0" style={{ stroke: "blue", strokeWidth: 8 }} width="8" height="8"></rect>
-          <path d="M-2,2 l4,-4 M0,8 l8,-8 M6,10 l4,-4" style={{stroke:"green", strokeWidth:3}}></path>
+        <pattern id="2policemen" patternUnits="userSpaceOnUse" patternTransform="rotate(45 0 0)" width="12" height="12">
+          <rect x="0" y="0" fill="navy" stroke="navy" width="12" height="12"></rect>
+          <line x1="0" y1="0" x2="0" y2="12" style={{ stroke: "forestgreen", strokeWidth: "12" }} />
         </pattern>
-        <pattern id="thief-and-blue-policeman" patternUnits="userSpaceOnUse" width="8" height="8">
-          <rect x="0" y="0" style={{ stroke: "red", strokeWidth: 8 }} width="8" height="8"></rect>
-          <path d="M-2,2 l4,-4 M0,8 l8,-8 M6,10 l4,-4" style={{stroke:"blue", strokeWidth:3}}></path>
+        <pattern id="thief-and-first-policeman" patternUnits="userSpaceOnUse" patternTransform="rotate(45 0 0)" width="12" height="12">
+          <rect x="0" y="0" fill="red" stroke="red" width="12" height="12"></rect>
+          <line x1="0" y1="0" x2="0" y2="12" style={{ stroke: "navy", strokeWidth: "12" }} />
         </pattern>
-        <pattern id="thief-and-green-policeman" patternUnits="userSpaceOnUse" width="8" height="8">
-          <rect x="0" y="0" style={{ stroke: "red", strokeWidth: 8 }} width="8" height="8"></rect>
-          <path d="M-2,2 l4,-4 M0,8 l8,-8 M6,10 l4,-4" style={{stroke:"green", strokeWidth:3}}></path>
+        <pattern id="thief-and-second-policeman" patternUnits="userSpaceOnUse" patternTransform="rotate(45 0 0)" width="12" height="12">
+          <rect x="0" y="0" fill="red" stroke="red" width="12" height="12"></rect>
+          <line x1="0" y1="0" x2="0" y2="12" style={{ stroke: "forestgreen", strokeWidth: "12" }} />
         </pattern>
         <rect
           x="30%"
@@ -163,7 +163,7 @@ const Game = strategyGameFactory({
   G: {
     getPlayerStepDescription: ({ playerIndex, turnStage }) => {
       if (playerIndex === 0) {
-        return `Kattints arra az útkereszteződésre, ahová a ${turnStage === "greenMove" ? "zöld" : "kék"} rendőrrel lépni szeretnél.`;
+        return `Kattints arra az útkereszteződésre, ahová a ${turnStage === "secondMove" ? "zöld" : "kék"} rendőrrel lépni szeretnél.`;
       } else {
         return "Kattints arra az útkereszteződésre, ahová a tolvajjal lépni szeretnél.";
       }
