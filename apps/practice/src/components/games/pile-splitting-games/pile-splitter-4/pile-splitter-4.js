@@ -129,18 +129,20 @@ const GameBoard = ({ board, setBoard,  ctx }) => {
   const currentChoiceDescription = (pileId) => {
     const pieceCountInPile = board[pileId];
 
-    if (!ctx.shouldPlayerMoveNext) return pieceCountInPile;
+    // pieceCountInPile can be 0 in intermediateBoard during AI turn
+    if (!ctx.shouldPlayerMoveNext) return pieceCountInPile || '🗑️';
     if (pileId === removedPileId) {
       if (hoveredPiece && hoveredPiece.pileId === pileId) {
         return 'Mégse?';
       }
-      return `${pieceCountInPile} → 🗑️`;
+      // pieceCountInPile can be 0 in intermediateBoard
+      return pieceCountInPile ? `${pieceCountInPile} → 🗑️` : '🗑️';
     }
-    if (!hoveredPiece) return pieceCountInPile;
+    if (!hoveredPiece) return pieceCountInPile || '🗑️';
     if (removedPileId === null && hoveredPiece.pileId === pileId) {
       return `${pieceCountInPile} → 🗑️`;
     }
-    if (hoveredPiece.pileId !== pileId) return pieceCountInPile;
+    if (hoveredPiece.pileId !== pileId) return pieceCountInPile || '🗑️';
 
     return `${pieceCountInPile} → ${hoveredPiece.pieceId + 1}, ${pieceCountInPile - hoveredPiece.pieceId - 1}`;
   };
