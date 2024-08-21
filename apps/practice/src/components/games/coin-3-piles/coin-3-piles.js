@@ -107,6 +107,15 @@ export const GameBoard = ({ board, setBoard, ctx }) => {
     <table className="mx-2 table-fixed w-full">
       <tbody>
         <tr>
+          <td key="nothing" className="px-2">
+            <button
+              disabled={!wasCoinAlreadyRemovedInTurn}
+              className="cta-button text-sm px-1"
+              onClick={() => endTurn(board)}
+            >
+              Semmit se rakok be
+            </button>
+          </td>
           {[0, 1].map(coinValue =>
             <td key={coinValue} className="text-center">
               <button
@@ -124,27 +133,17 @@ export const GameBoard = ({ board, setBoard, ctx }) => {
               >{coinValue+1}</button>
             </td>
           )}
-          <td key="undo" className="px-2">
-            <button
-              disabled={!wasCoinAlreadyRemovedInTurn}
-              className="cta-button text-sm px-1"
-              onClick={undoCoinRemoval}
-            >
-              Visszavonás
-            </button>
-          </td>
-          <td key="nothing" className="px-2">
-            <button
-              disabled={!wasCoinAlreadyRemovedInTurn}
-              className="cta-button text-sm px-1"
-              onClick={() => endTurn(board)}
-            >
-              Semmit se rakok be
-            </button>
-          </td>
         </tr>
       </tbody>
     </table>
+    <hr className="my-4"></hr>
+    <button
+      disabled={!wasCoinAlreadyRemovedInTurn}
+      className="w-[30%] m-auto cta-button text-sm px-1"
+      onClick={undoCoinRemoval}
+    >
+      ↶ Visszavonás
+    </button>
   </section>
   );
 };
