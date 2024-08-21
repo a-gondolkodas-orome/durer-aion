@@ -139,7 +139,7 @@ export const GameBoard = ({ board, setBoard, ctx }) => {
     <hr className="my-4"></hr>
     <button
       disabled={!wasCoinAlreadyRemovedInTurn}
-      className="w-[30%] m-auto cta-button text-sm px-1"
+      className="w-[30%] m-auto cta-button bg-slate-400 text-sm px-1"
       onClick={undoCoinRemoval}
     >
       ↶ Visszavonás

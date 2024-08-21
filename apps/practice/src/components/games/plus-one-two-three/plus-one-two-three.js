@@ -15,9 +15,10 @@ const GameBoard = ({board, ctx}) => {
       <div className="flex">
         {range(1, 4).map(i => (
           <button
+            disabled={!ctx.shouldPlayerMoveNext}
             className={`
               text-center w-full text-xl m-2 rounded border-4
-              ${ctx.shouldPlayerMoveNext && 'hover:bg-blue-400 focus:bg-blue-400'}
+              enabled:hover:bg-blue-400 enabled:focus:bg-blue-400
             `}
             key={`${board}+${i}`}
             onClick={() => clickNumber(i)}
