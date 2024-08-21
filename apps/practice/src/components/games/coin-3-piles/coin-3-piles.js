@@ -13,6 +13,14 @@ export const GameBoard = ({ board, setBoard, ctx }) => {
     return !isCoinActionInvalid(coinValue);
   };
 
+  const undoCoinRemoval = () => {
+    const nextBoard = [...board];
+    nextBoard[valueOfRemovedCoin] += 1;
+    setBoard(nextBoard);
+    ctx.setTurnStage(null);
+    setValueOfRemovedCoin(null);
+  }
+
   const removeFromPile = coinValue => {
     if (!isMoveAllowed(coinValue)) return;
 
@@ -116,10 +124,19 @@ export const GameBoard = ({ board, setBoard, ctx }) => {
               >{coinValue+1}</button>
             </td>
           )}
+          <td key="undo" className="px-2">
+            <button
+              disabled={!wasCoinAlreadyRemovedInTurn}
+              className="cta-button text-sm px-1"
+              onClick={undoCoinRemoval}
+            >
+              Visszavonás
+            </button>
+          </td>
           <td key="nothing" className="px-2">
             <button
               disabled={!wasCoinAlreadyRemovedInTurn}
-              className="cta-button"
+              className="cta-button text-sm px-1"
               onClick={() => endTurn(board)}
             >
               Semmit se rakok be
