@@ -84,7 +84,7 @@ const rule = <>
 
 const Game = strategyGameFactory({
   rule,
-  title: 'Babonás számoló',
+  title: 'Babonás lépkedés',
   GameBoard,
   G: {
     getPlayerStepDescription: () => 'Kattints a mezőre ahova lépni szeretnél.',

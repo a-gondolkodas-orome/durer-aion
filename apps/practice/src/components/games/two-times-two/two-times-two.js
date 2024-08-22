@@ -80,7 +80,7 @@ const rule = <>
 
 const Game = strategyGameFactory({
   rule,
-  title: '2x2-es játék',
+  title: '4 mezőbe különbözőt',
   GameBoard,
   G: {
     getPlayerStepDescription,

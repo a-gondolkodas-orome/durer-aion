@@ -78,7 +78,7 @@ const rule = <>
 
 const Game = strategyGameFactory({
   rule,
-  title: 'Átszínezős Tic Tac Toe',
+  title: 'Átszínezős tic-tac-toe',
   GameBoard,
   G: {
     getPlayerStepDescription,

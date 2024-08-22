@@ -69,7 +69,7 @@ aki kezdte a játékot). Sok sikert :)
 
 const Game = strategyGameFactory({
   rule,
-  title: 'Öt-öt lap',
+  title: 'Párbaj 5 lappal',
   GameBoard,
   G: {
     getPlayerStepDescription: () => 'Vegyél el egy kártyát az ellenfél elől.',

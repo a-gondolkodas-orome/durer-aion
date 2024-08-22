@@ -37,7 +37,7 @@ const rule = <>
 
 const Game = strategyGameFactory({
   rule,
-  title: '3, 2, 1 érmék',
+  title: 'Érmék beváltása',
   GameBoard,
   G: {
     getPlayerStepDescription,

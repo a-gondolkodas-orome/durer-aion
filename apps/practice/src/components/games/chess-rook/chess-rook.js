@@ -71,7 +71,7 @@ const rule = <>
 
 const Game = strategyGameFactory({
   rule,
-  title: 'Sakktáblán egy bástya',
+  title: 'Barangolás bástyával',
   GameBoard,
   G: {
     getPlayerStepDescription: () => 'Kattints egy szabad mezőre a bástyával egy sorban vagy oszlopban, ahova a bástyával mozogni szeretnél.',

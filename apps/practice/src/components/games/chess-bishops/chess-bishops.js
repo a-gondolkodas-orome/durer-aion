@@ -100,7 +100,7 @@ const rule = <>
 
 const Game = strategyGameFactory({
   rule,
-  title: 'Sakktáblán futók',
+  title: 'Futók lerakása',
   GameBoard,
   G: {
     getPlayerStepDescription: () => 'Kattints egy mezőre, amit nem üt egyik futó sem.',

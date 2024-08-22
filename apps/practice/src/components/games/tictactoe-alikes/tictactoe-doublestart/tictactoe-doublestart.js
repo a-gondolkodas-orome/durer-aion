@@ -68,7 +68,7 @@ const rule = <>
 
 const Game = strategyGameFactory({
   rule,
-  title: 'Duplán kezdő 3x3 amőba',
+  title: 'Duplánkezdő 3x3 amőba',
   GameBoard,
   G: {
     getPlayerStepDescription,

@@ -3,25 +3,25 @@ export const gameList = {
     year: 7,
     round: 'döntő',
     category: ['B'],
-    name: 'Öt-öt lap'
+    name: 'Párbaj 5 lappal'
   },
   RockPaperScissor: {
     year: 7,
     round: 'döntő',
     category: ['A'],
-    name: 'Kő papír olló'
+    name: 'Kő-papír-olló'
   },
   ChessBishops: {
     year: 1,
     round: 'döntő',
     category: ['B'],
-    name: 'Sakktáblán futók'
+    name: 'Futók lerakása'
   },
   ChessRook: {
     year: 1,
     round: 'döntő',
     category: ['C'],
-    name: 'Sakktáblán egy bástya'
+    name: 'Barangolás bástyával'
   },
   HunyadiAndTheJanissaries: {
     year: 6,
@@ -45,37 +45,37 @@ export const gameList = {
     year: 12,
     round: 'döntő',
     category: ['A'],
-    name: 'Duplán kezdő 3x3 amőba'
+    name: 'Duplánkezdő 3x3 amőba'
   },
   AntiTicTacToe: {
     year: 12,
     round: 'döntő',
     category: ['B'],
-    name: '3x3 Anti-amőba'
+    name: '3x3-as antiamőba'
   },
   TwoTimesTwo: {
     year: 13,
     round: 'döntő',
     category: ['A'],
-    name: '2x2-es játék'
+    name: '4 mezőbe különbözőt'
   },
   FiveSquares: {
     year: 13,
     round: 'döntő',
     category: ['B'],
-    name: '5 mezős játék'
+    name: '5 mezőbe különbözőt'
   },
   TicTacToe: {
     year: 13,
     round: 'döntő',
     category: ['C'],
-    name: 'Átszínezős Tic Tac Toe'
+    name: 'Átszínezős tic-tac-toe'
   },
   SuperstitiousCounting: {
     year: 13,
     round: 'döntő',
     category: ['D', 'E'],
-    name: 'Babonás számoló'
+    name: 'Babonás lépkedés'
   },
   PileSplitter4: {
     year: 13,
@@ -93,13 +93,13 @@ export const gameList = {
     year: 15,
     round: 'döntő',
     category: ['A'],
-    name: '3 db 1, 5 db 2 és 7 db 3 pengős'
+    name: '15 érme beváltása'
   },
   Coin123: {
     year: 15,
     round: 'döntő',
     category: ['B'],
-    name: '3, 2, 1 érmék'
+    name: 'Érmék beváltása'
   },
   CubeColoring: {
     year: 15,
@@ -147,13 +147,13 @@ export const gameList = {
     year: 10,
     round: 'döntő',
     category: ['A'],
-    name: '6 korong'
+    name: 'Átfordítás, elvétel (6 korong)'
   },
   TenDiscs: {
     year: 10,
     round: 'döntő',
     category: ['B'],
-    name: '10 korong'
+    name: 'Átfordítás, elvétel (10 korong)'
   },
   PrimeExponentials: {
     year: 1,

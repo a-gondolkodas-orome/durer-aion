@@ -55,7 +55,7 @@ const rule = <>
 
 const Game = strategyGameFactory({
   rule,
-  title: '3x3 Anti-amőba',
+  title: '3x3-as antiamőba',
   GameBoard,
   G: {
     getPlayerStepDescription: () => 'Helyezz le egy korongot egy üres mezőre kattintással.',

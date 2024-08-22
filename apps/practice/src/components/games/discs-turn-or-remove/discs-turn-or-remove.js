@@ -191,7 +191,7 @@ const rule = (maxDiscs) => (
 
 const Game6 = strategyGameFactory({
   rule: rule(6),
-  title: "6 korong",
+  title: "Átfordítás, elvétel (6 korong)",
   GameBoard: gameBoardFactory(6),
   G: {
     getPlayerStepDescription,
@@ -202,7 +202,7 @@ const Game6 = strategyGameFactory({
 
 const Game10 = strategyGameFactory({
   rule: rule(10),
-  title: "10 korong",
+  title: "Átfordítás, elvétel (10 korong)",
   GameBoard: gameBoardFactory(10),
   G: {
     getPlayerStepDescription,

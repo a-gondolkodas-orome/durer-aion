@@ -15,7 +15,7 @@ const rule = <>
 
 const Game = strategyGameFactory({
   rule,
-  title: '3 db 1, 5 db 2 és 7 db 3 pengős',
+  title: '15 érme beváltása',
   GameBoard,
   G: {
     getPlayerStepDescription,

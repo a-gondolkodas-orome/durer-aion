@@ -89,7 +89,7 @@ const rule = <>
 
 const Game = strategyGameFactory({
   rule,
-  title: '5 mezős játék',
+  title: '5 mezőbe különbözőt',
   GameBoard,
   G: {
     getPlayerStepDescription,

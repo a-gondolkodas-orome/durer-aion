@@ -73,7 +73,7 @@ kártyán ugyanaz van, akkor a Kezdő nyert. Sok sikert :)
 
 const Game = strategyGameFactory({
   rule,
-  title: 'Kő Papír Olló',
+  title: 'Kő-papír-olló',
   GameBoard,
   G: {
     getPlayerStepDescription: () => 'Távolíts el egy kártyát az ellenfél elől.',
