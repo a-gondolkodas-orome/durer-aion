@@ -59,7 +59,7 @@ export const GameHeader = ({ title }) => {
     <header className="flex flex-wrap items-baseline">
       <Link
         to='/'
-        className="rounded-lg px-2 md:px-4 bg-blue-400 hover:bg-blue-600 md:basis-44 text-black no-underline"
+        className="rounded-lg px-2 md:px-4 bg-blue-400 hover:bg-blue-600 focus:bg-blue-600 md:basis-44 text-black no-underline"
       >← <span className="hidden md:inline">Vissza a listához</span></Link>
       <h1 className="grow text-blue-600 font-bold pb-4 text-center">
         {title}

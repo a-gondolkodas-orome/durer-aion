@@ -48,7 +48,7 @@ const GameBoard = ({ board, ctx }) => {
 
   const cellBackground = (i) => {
     if (isMoveAllowed(potentialStep(i))) {
-      return 'bg-green-200 hover:bg-green-400';
+      return 'bg-green-200 hover:bg-green-400 focus:bg-green-400';
     }
     if (( i === board.left && ctx.playerIndex === 0) || (i === board.right && ctx.playerIndex === 1)) {
       return 'bg-green-400';

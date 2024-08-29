@@ -19,7 +19,7 @@ const GameBoard = ({ board, ctx }) => {
             <tr>
                 {range(board.length).map(i => (
                     board[i]!==-1 ?
-                    <td className={`text-center border-4 aspect-square ${ctx.shouldPlayerMoveNext && 'hover:bg-gray-400'}`}
+                    <td className={`text-center border-4 aspect-square ${ctx.shouldPlayerMoveNext && 'hover:bg-gray-400 focus:bg-gray-400'}`}
                     key = {i}
                     onClick={() => clickNumber(i+1)}>
                     {board[i]}</td> :

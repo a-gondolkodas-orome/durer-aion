@@ -22,8 +22,9 @@
 
 @layer components {
     .cta-button {
-        @apply bg-teal-400 disabled:opacity-50 disabled:cursor-not-allowed enabled:hover:bg-teal-500;
         @apply border-none rounded block my-1 py-1 px-2 w-full;
         @apply text-center text-xl whitespace-normal;
+        @apply disabled:opacity-50 disabled:cursor-not-allowed;
+        @apply bg-teal-400 enabled:hover:bg-teal-500 enabled:focus:bg-teal-500;
     }
 }
