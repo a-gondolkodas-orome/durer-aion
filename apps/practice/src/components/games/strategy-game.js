@@ -4,7 +4,15 @@ import {
 } from './game-parts';
 import { v4 as uuidv4 } from 'uuid';
 
-export const strategyGameFactory = ({ rule, title, firstRoleLabel, secondRoleLabel, GameBoard, G }) => {
+export const strategyGameFactory = ({
+  rule,
+  title,
+  firstRoleLabel,
+  secondRoleLabel,
+  initialTurnStages,
+  GameBoard,
+  G
+}) => {
   return ({ board, setBoard }) => {
     const [phase, setPhase] = useState('roleSelection');
     const [playerIndex, setPlayerIndex] = useState(null);
@@ -73,6 +81,9 @@ export const strategyGameFactory = ({ rule, title, firstRoleLabel, secondRoleLab
       setPhase('play');
       setNext(0);
       setPlayerIndex(playerIdx);
+      if (initialTurnStages !== undefined) {
+        setTurnStage(initialTurnStages[playerIdx]);
+      }
       if (playerIdx === 1) {
         doAiTurn({ currentBoard: board });
       }

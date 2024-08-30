@@ -37,7 +37,7 @@ const GameBoard = ({ board, setBoard, ctx }) => {
     if (ctx.turnStage === "secondMove") {
       nextBoard.policemen[1] = vertex;
       nextBoard.turnCount++;
-      ctx.setTurnStage("move")
+      ctx.setTurnStage(null)
       ctx.endPlayerTurn(getGameStateAfterMove(nextBoard));
       return;
     }

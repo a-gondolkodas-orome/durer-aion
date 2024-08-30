@@ -25,10 +25,6 @@ const distance = (fieldA, fieldB) => {
 const GameBoard = ({ board, setBoard, ctx }) => {
   const [chosenPiece, setChosenPiece] = useState(null);
 
-  if (ctx.phase === 'play' && ctx.turnStage === null) {
-    ctx.setTurnStage(ctx.playerIndex === 0 ? 'choosePiece' : 'firstSharkMove');
-  }
-
   let possibleMoves=[]
   if (ctx.shouldPlayerMoveNext) {
     if (ctx.playerIndex === 1) {
@@ -226,6 +222,7 @@ const Game = strategyGameFactory({
   title: 'Cápa üldözés',
   firstRoleLabel: 'Kutató leszek!',
   secondRoleLabel: 'Cápa leszek!',
+  initialTurnStages: ['choosePiece', 'firstSharkMove'],
   GameBoard,
   G: {
     getPlayerStepDescription,

@@ -143,22 +143,22 @@ const GameBoard = ({ board, ctx }) => {
 
   const choosePrime = (p) => {
     setPlayerPrime(p);
-    ctx.setTurnStage("e");
+    ctx.setTurnStage("chooseExponent");
     setHovered(null);
   }
 
   const resetChosenPrime = () => {
     setPlayerPrime(null);
-    ctx.setTurnStage("p");
+    ctx.setTurnStage(null);
   }
 
   const chooseExponential = (e) => {
     setPlayerPrime(null);
-    ctx.setTurnStage("p");
+    ctx.setTurnStage(null);
     ctx.endPlayerTurn(getGameStateAfterMove(board - playerPrime ** e));
   }
 
-  const PlayerOptions = ctx.turnStage !== "e"
+  const PlayerOptions = ctx.turnStage !== "chooseExponent"
     ? <PrimesTable
       board={board}
       choosePrime={choosePrime}
@@ -218,7 +218,7 @@ const getAvailableExponents = (num, prime) => {
 }
 
 const getPlayerStepDescription = ({ turnStage }) => {
-  return !(turnStage === "e")
+  return !(turnStage === "chooseExponent")
     ? 'Válaszd ki a prímet, aminek a hatványát ki szeretnéd vonni.'
     : 'Válaszd ki a kitevőt, amelyre a prímet emelnéd.';
 }
