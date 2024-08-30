@@ -15,6 +15,7 @@ export const generateStartBoard = () => {
 }
 
 const distance = (fieldA, fieldB) => {
+  if (fieldA === null || fieldB === null) return null;
   return (
     Math.abs((fieldA % 4) - (fieldB % 4)) +
     Math.abs(Math.floor(fieldA / 4) - Math.floor(fieldB / 4))
@@ -22,7 +23,7 @@ const distance = (fieldA, fieldB) => {
 };
 
 const GameBoard = ({ board, setBoard, ctx }) => {
-  const [chosenPiece, setChosenPiece] = useState(12);
+  const [chosenPiece, setChosenPiece] = useState(null);
 
   if (ctx.phase === 'play' && ctx.turnStage === null) {
     ctx.setTurnStage(ctx.playerIndex === 0 ? 'choosePiece' : 'firstSharkMove');
@@ -46,7 +47,7 @@ const GameBoard = ({ board, setBoard, ctx }) => {
   const isAllowed_movePiece = (id) => {
     if (!ctx.shouldPlayerMoveNext) return false;
     if (ctx.playerIndex === 0) return distance(chosenPiece, id) === 1;
-    else return distance(board.shark, id) <= 1;
+    if (ctx.playerIndex === 1) return distance(board.shark, id) <= 1;
   }
 
   const clickField = (id) => {
@@ -67,6 +68,7 @@ const GameBoard = ({ board, setBoard, ctx }) => {
         nextBoard.submarines[chosenPiece] -= 1;
         nextBoard.submarines[id] += 1;
         nextBoard.turn += 1;
+        setChosenPiece(null);
         ctx.setTurnStage('choosePiece');
         ctx.endPlayerTurn(getGameStateAfterMove(nextBoard));
       }
@@ -88,15 +90,16 @@ const GameBoard = ({ board, setBoard, ctx }) => {
         }
       }
 
-      ctx.setTurnStage('firstSharkMove');
       nextBoard.turn += 1;
+      setChosenPiece(null);
+      ctx.setTurnStage('firstSharkMove');
       ctx.endPlayerTurn(getGameStateAfterMove(nextBoard));
     }
   };
 
   return (
   <section className="p-2 shrink-0 grow basis-2/3">
-    <b><font size="4">Hátralévő lépések száma: {12-board.turn}</font></b>
+    <p className='font-bold text-lg'>Hátralévő lépések száma: {12-board.turn}</p>
     <SubmarineSvg/>
     <SharkSvg/>
     <div className="grid grid-cols-4 gap-0 border-2">
@@ -104,6 +107,7 @@ const GameBoard = ({ board, setBoard, ctx }) => {
         <button
           key={id}
           onClick={() => clickField(id)}
+          disabled={!isAllowed_choosePiece(id) && !isAllowed_movePiece(id)}
           className={`
             aspect-square p-[0%] border-2 relative flex justify-center items-center
             ${possibleMoves.includes(id) && ctx.playerIndex === 1 && board.submarines[id] && 'border-red-600'}
