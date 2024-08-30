@@ -145,6 +145,12 @@ const GameBoard = ({ board: { bacteria, goals }, ctx }) => {
     return false;
   };
 
+  const isDisabled = ({ row, col }) => (
+    !ctx.shouldPlayerMoveNext
+    || isForbidden({ row, col })
+    || (row % 2 === 1 && col === (boardWidth - 1))
+  );
+
   return (
     <section className="p-2 shrink-0 grow basis-2/3">
       <table
@@ -160,6 +166,7 @@ const GameBoard = ({ board: { bacteria, goals }, ctx }) => {
               {range(boardWidth).map((col) => (
                 <td key={col} onClick={() => clickField({ row, col })}>
                   <button
+                    disabled={isDisabled({ row, col })}
                     className={`
                       aspect-[4/3] w-full
                       ${row % 2 === 1 && col === boardWidth - 1 ? "" : "border-2"}
