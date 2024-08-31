@@ -8,9 +8,16 @@ export const GameBoard = ({ board, setBoard, ctx }) => {
 
   const wasCoinAlreadyRemovedInTurn = valueOfRemovedCoin !== null;
 
-  const isMoveAllowed = (coinValue) => {
+  const isRemovalAllowed = coinValue => {
     if (!ctx.shouldPlayerMoveNext) return false;
-    return !isCoinActionInvalid(coinValue);
+    if (wasCoinAlreadyRemovedInTurn) return false;
+    return board[coinValue] !== 0;
+  };
+
+  const isAddAllowed = coinValue => {
+    if (!ctx.shouldPlayerMoveNext) return false;
+    if (!wasCoinAlreadyRemovedInTurn) return false;
+    return coinValue < valueOfRemovedCoin;
   };
 
   const undoCoinRemoval = () => {
@@ -19,10 +26,10 @@ export const GameBoard = ({ board, setBoard, ctx }) => {
     setBoard(nextBoard);
     ctx.setTurnStage(null);
     setValueOfRemovedCoin(null);
-  }
+  };
 
   const removeFromPile = coinValue => {
-    if (!isMoveAllowed(coinValue)) return;
+    if (!isRemovalAllowed(coinValue)) return;
 
     setValueOfRemovedCoin(coinValue);
     ctx.setTurnStage('placeBack');
@@ -33,7 +40,7 @@ export const GameBoard = ({ board, setBoard, ctx }) => {
   };
 
   const addToPile = (coinValue) => {
-    if (!isMoveAllowed(coinValue)) return;
+    if (!isAddAllowed(coinValue)) return;
 
     const nextBoard = [...board];
     nextBoard[coinValue] += 1;
@@ -63,12 +70,6 @@ export const GameBoard = ({ board, setBoard, ctx }) => {
     if (!wasCoinAlreadyRemovedInTurn) return false;
     return valueOfRemovedCoin > coinValue && coinValue === hoveredPile;
   };
-  const isCoinActionInvalid = (coinValue) => {
-    if (wasCoinAlreadyRemovedInTurn) {
-      return valueOfRemovedCoin <= coinValue;
-    }
-    return board[coinValue] === 0;
-  };
 
   return (
   <section className="p-2 shrink-0 grow basis-2/3">
@@ -76,8 +77,9 @@ export const GameBoard = ({ board, setBoard, ctx }) => {
     {[0, 1, 2].map(coinValue => (
       <span key={coinValue}>
         {range(board[coinValue]).map(i => (
-          <span
+          <button
             key={`${i}-${shouldShowCoinToBeAdded(coinValue)}`}
+            disabled={!isRemovalAllowed(coinValue)}
             className={`
               w-[15%] aspect-square inline-block rounded-full mr-0.5 mt-0.5
               ${getCoinColor(coinValue)}
@@ -89,17 +91,18 @@ export const GameBoard = ({ board, setBoard, ctx }) => {
             onMouseOut={() => setHoveredPile(null)}
             onFocus={() => {if (!wasCoinAlreadyRemovedInTurn) setHoveredPile(coinValue)}}
             onBlur={() => setHoveredPile(null)}
-          ><span className='relative top-[25%]'>{coinValue+1}</span></span>
+          >{coinValue+1}</button>
         ))}
         {shouldShowCoinToBeAdded(coinValue) && (
-          <span
+          <button
+            disabled
             key="to-be-added"
             className={`
               w-[15%] aspect-square inline-block rounded-full mr-0.5 mt-0.5 opacity-50
               ${getCoinColor(coinValue)}
             `}
             style={{ transform: 'scaleY(-1)' }}
-          ><span className='relative top-[25%]'>{coinValue+1}</span></span>
+          >{coinValue+1}</button>
         )}
       </span>))}
     </div>
@@ -109,7 +112,7 @@ export const GameBoard = ({ board, setBoard, ctx }) => {
         <tr>
           <td key="nothing" className="px-2">
             <button
-              disabled={!wasCoinAlreadyRemovedInTurn}
+              disabled={!isAddAllowed(0)}
               className="cta-button text-sm px-1"
               onClick={() => endTurn(board)}
             >
@@ -119,12 +122,12 @@ export const GameBoard = ({ board, setBoard, ctx }) => {
           {[0, 1].map(coinValue =>
             <td key={coinValue} className="text-center">
               <button
+                disabled={!isAddAllowed(coinValue)}
                 className={`
                   inline-block w-[30%] aspect-square rounded-full mx-0.5
                   ${getCoinColor(coinValue)}
-                  ${(!wasCoinAlreadyRemovedInTurn || valueOfRemovedCoin <= coinValue) && 'opacity-50 cursor-not-allowed'}
+                  disabled:opacity-50 disabled:cursor-not-allowed
                 `}
-                disabled={!wasCoinAlreadyRemovedInTurn || valueOfRemovedCoin <= coinValue}
                 onClick={() => addToPile(coinValue)}
                 onMouseOver={() => {if (wasCoinAlreadyRemovedInTurn) setHoveredPile(coinValue)}}
                 onMouseOut={() => setHoveredPile(null)}
