@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { strategyGameFactory } from '../strategy-game';
-import { range, sum } from 'lodash';
+import { range, sum, sample } from 'lodash';
 
 const GameBoard = ({ board, ctx }) => {
 
@@ -15,53 +15,61 @@ const GameBoard = ({ board, ctx }) => {
 
   return(
     <section className="p-2 shrink-0 grow basis-2/3">
-    <table className="m-2 border-collapse table-fixed w-full"><tbody>
-    <tr>
-    {range(board.length).map(i => (
-      board[i]!==-1 ?
-      <td className={`text-center border-4 aspect-square ${ctx.shouldPlayerMoveNext && 'hover:bg-gray-400 focus:bg-gray-400'}`}
-      key = {i}
-      onClick={() => clickNumber(i+1)}>
-      {board[i]}</td> :
-      <td className='text-center border-4 bg-gray-600'
-      key = {i}>X</td>
-    ))}
-    </tr>
-    </tbody></table>
-    Megmaradt számok összege: {sum(board.filter(i => i > 0))}
+    <table className="border-collapse table-fixed w-full">
+      <tbody>
+        <tr>
+        {range(board.length).map(i => (
+          board[i]!==-1
+          ? <td
+              className='border-4 aspect-square text-center'
+              key = {i}
+            >
+              <button
+                disabled={!ctx.shouldPlayerMoveNext}
+                className='w-full enabled:hover:bg-gray-400 enabled:focus:bg-gray-400'
+                onClick={() => clickNumber(i+1)}
+              >
+                {board[i]}
+              </button>
+            </td>
+          : <td
+              className='text-center border-4 bg-gray-600'
+              key = {i}
+            >X</td>
+        ))}
+        </tr>
+      </tbody>
+    </table>
+    <p>Megmaradt számok összege: {sum(board.filter(i => i > 0))}</p>
     </section>
   );
 };
 
 const getGameStateAfterMove = (nextBoard) => {
-  let remaining = nextBoard.filter(i => i>0);
-  let isGameEnd = false;
-  let winnerIndex = null;
-  if (remaining.length === 2) {
-    isGameEnd = true;
-    winnerIndex = (remaining[0]+remaining[1])%2;
-  }
-  return { nextBoard: nextBoard, isGameEnd: isGameEnd, winnerIndex: winnerIndex };
+  const remaining = nextBoard.filter(i => i>0);
+  const isGameEnd = remaining.length === 2;
+  const winnerIndex = isGameEnd ? sum(remaining) % 2 : null;
+  return { nextBoard, isGameEnd, winnerIndex };
 };
 
 const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
   let nextBoard = [...board];
-  const notCovered = nextBoard.filter(i => i!==-1);
-  const evens = nextBoard.filter(i => i%2===0);
-  const odds = nextBoard.filter(i => i%2===1 && i!==-1);
+  const notCovered = nextBoard.filter(i => i !== -1);
+  const evens = notCovered.filter(i => i%2 === 0);
+  const odds = notCovered.filter(i => i%2 === 1);
   if (evens.length===odds.length || evens.length === 0 || odds.length === 0) {
-    nextBoard[notCovered[Math.floor(Math.random() * (notCovered.length))]-1] = -1;
+    nextBoard[sample(notCovered) - 1] = -1;
   } else {
     if (playerIndex===0){
-      let ch = Math.floor(Math.random() * (evens.length>odds.length ? evens.length : odds.length));
-      nextBoard[(evens.length>odds.length ? evens : odds)[ch]-1] = -1;
+      const candidates = evens.length > odds.length ? evens : odds;
+      nextBoard[sample(candidates) - 1] = -1;
     } else {
-      let ch = Math.floor(Math.random() * (evens.length<odds.length ? evens.length : odds.length));
-      nextBoard[(evens.length<odds.length ? evens : odds)[ch]-1] = -1;
+      const candidates = evens.length > odds.length ? odds : evens;
+      nextBoard[sample(candidates) - 1] = -1;
     }
   }
 
-  return (getGameStateAfterMove(nextBoard));
+  return getGameStateAfterMove(nextBoard);
 };
 
 const rule8 = <>
@@ -82,7 +90,7 @@ const Game8 = strategyGameFactory({
   GameBoard,
   G: {
     getPlayerStepDescription: () => 'Kattints egy számra, hogy lefedd',
-    generateStartBoard: () => [1,2,3,4,5,6,7,8],
+    generateStartBoard: () => range(1, 9),
     getGameStateAfterAiTurn
   }
 });
@@ -93,19 +101,19 @@ const Game10 = strategyGameFactory({
   GameBoard,
   G: {
     getPlayerStepDescription: () => 'Kattints egy számra, hogy lefedd',
-    generateStartBoard: () => [1,2,3,4,5,6,7,8,9,10],
+    generateStartBoard: () => range(1, 11),
     getGameStateAfterAiTurn
   }
 });
 
 export const NumberCovering8 = () => {
-  const [board, setBoard] = useState([1,2,3,4,5,6,7,8]);
+  const [board, setBoard] = useState(range(1, 9));
 
   return <Game8 board={board} setBoard={setBoard} />;
 };
 
 export const NumberCovering10 = () => {
-  const [board, setBoard] = useState([1,2,3,4,5,6,7,8,9,10]);
+  const [board, setBoard] = useState(range(1, 11));
 
   return <Game10 board={board} setBoard={setBoard} />;
 };
