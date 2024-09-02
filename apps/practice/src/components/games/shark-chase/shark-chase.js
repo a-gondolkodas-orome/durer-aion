@@ -220,8 +220,7 @@ const getPlayerStepDescription = ({ playerIndex, turnStage }) => {
 const Game = strategyGameFactory({
   rule,
   title: 'Cápa üldözés',
-  firstRoleLabel: 'Kutató leszek!',
-  secondRoleLabel: 'Cápa leszek!',
+  roleLabels: ['Kutató leszek!', 'Cápa leszek!'],
   initialTurnStages: ['choosePiece', 'firstSharkMove'],
   GameBoard,
   G: {

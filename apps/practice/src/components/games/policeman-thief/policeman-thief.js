@@ -157,8 +157,7 @@ const rule = (
 const Game = strategyGameFactory({
   rule,
   title: "Rendőr-tolvaj",
-  firstRoleLabel: "Rendőrök",
-  secondRoleLabel: "Tolvaj",
+  roleLabels: ["Rendőrök", "Tolvaj"],
   GameBoard,
   G: {
     getPlayerStepDescription: ({ playerIndex, turnStage }) => {

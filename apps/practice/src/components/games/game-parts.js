@@ -7,8 +7,7 @@ import {
 } from '@headlessui/react';
 
 export const GameSidebar = ({
-  firstRoleLabel,
-  secondRoleLabel,
+  roleLabels,
   stepDescription,
   ctx,
   moves
@@ -34,13 +33,13 @@ export const GameSidebar = ({
             className="cta-button"
             onClick={() => moves.chooseRole(0)}
           >
-            {firstRoleLabel || "Kezdő leszek"}
+            {roleLabels ? roleLabels[0] : "Kezdő leszek"}
           </button>
           <button
             className="cta-button"
             onClick={() => moves.chooseRole(1)}
           >
-            {secondRoleLabel || "Második leszek"}
+            {roleLabels ? roleLabels[1] : "Második leszek"}
           </button>
         </span>
       )}

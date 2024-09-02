@@ -227,8 +227,7 @@ const rule = (
 const Game = strategyGameFactory({
   rule,
   title: "Baktérimok terjedése",
-  firstRoleLabel: "Támadó leszek",
-  secondRoleLabel: "Védekező leszek",
+  roleLabels: ["Támadó leszek", "Védekező leszek"],
   GameBoard,
   G: {
     getPlayerStepDescription,

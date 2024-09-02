@@ -7,8 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 export const strategyGameFactory = ({
   rule,
   title,
-  firstRoleLabel,
-  secondRoleLabel,
+  roleLabels,
   initialTurnStages,
   GameBoard,
   G
@@ -110,8 +109,7 @@ export const strategyGameFactory = ({
               }}
             />
             <GameSidebar
-              firstRoleLabel={firstRoleLabel}
-              secondRoleLabel={secondRoleLabel}
+              roleLabels={roleLabels}
               stepDescription={G.getPlayerStepDescription({ board, playerIndex, turnStage })}
               ctx={{ phase, shouldPlayerMoveNext, isPlayerWinner }}
               moves={{ chooseRole, startNewGame }}
