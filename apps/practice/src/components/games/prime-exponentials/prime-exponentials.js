@@ -26,11 +26,11 @@ const generateStartBoard = () => {
 
 const ExponentCell = ({ e, playerPrime, chooseExponential, hovered, setHovered }) => {
   return <td
-    className={`border-4 aspect-square ${hovered === e ? 'bg-gray-300' : ''}`}
+    className={`border-4 ${hovered === e ? 'bg-gray-300' : ''}`}
     key={e}
     onClick={() => chooseExponential(e)}>
     <button
-      className={`w-full p-[5%] aspect-square`}
+      className={`w-full p-[5%] aspect-video`}
       onMouseOver={() => setHovered(e)}
       onMouseOut={() => setHovered(null)}
       onFocus={() => setHovered(e)}
@@ -97,7 +97,7 @@ const PrimeCell = ({ p, choosePrime, hovered, setHovered }) => {
     key={p}
   >
     <button
-      className='w-full p-[5%] aspect-square'
+      className='w-full p-[5%] aspect-video'
       onMouseOver={() => setHovered(p)}
       onMouseOut={() => setHovered(null)}
       onFocus={() => setHovered(p)}
