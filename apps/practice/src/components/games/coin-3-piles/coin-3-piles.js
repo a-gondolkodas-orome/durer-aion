@@ -56,10 +56,15 @@ export const GameBoard = ({ board, setBoard, ctx }) => {
     ctx.endPlayerTurn(getGameStateAfterMove(nextBoard));
     resetTurnState();
   };
-  const getCoinColor = (coinValue) => {
+  const getCoinBgColor = (coinValue) => {
     if (coinValue === 0) return 'bg-yellow-700';
     if (coinValue === 1) return 'bg-slate-500';
     return 'bg-yellow-400';
+  };
+  const getCoinShadowColor = (coinValue) => {
+    if (coinValue === 0) return 'shadow-yellow-700';
+    if (coinValue === 1) return 'shadow-slate-500';
+    return 'shadow-yellow-400';
   };
   const shouldShowCoinToBeRemoved = (coinValue) => {
     if (!ctx.shouldPlayerMoveNext) return false;
@@ -81,8 +86,8 @@ export const GameBoard = ({ board, setBoard, ctx }) => {
             key={`${i}-${shouldShowCoinToBeAdded(coinValue)}`}
             disabled={!isRemovalAllowed(coinValue)}
             className={`
-              w-[15%] aspect-square inline-block rounded-full mr-0.5 mt-0.5
-              ${getCoinColor(coinValue)}
+              w-[15%] aspect-square inline-block rounded-full mr-0.5 mt-1
+              ${getCoinBgColor(coinValue)} shadow-md ${getCoinShadowColor(coinValue)}
               ${shouldShowCoinToBeRemoved(coinValue) && i === (board[coinValue] - 1) ? 'opacity-50' : ''}
             `}
             style={{ transform: 'scaleY(-1)' }}
@@ -98,8 +103,8 @@ export const GameBoard = ({ board, setBoard, ctx }) => {
             disabled
             key="to-be-added"
             className={`
-              w-[15%] aspect-square inline-block rounded-full mr-0.5 mt-0.5 opacity-50
-              ${getCoinColor(coinValue)}
+              w-[15%] aspect-square inline-block rounded-full mr-0.5 mt-1 opacity-50
+              ${getCoinBgColor(coinValue)} shadow-md ${getCoinShadowColor(coinValue)}
             `}
             style={{ transform: 'scaleY(-1)' }}
           >{coinValue+1}</button>
@@ -125,7 +130,7 @@ export const GameBoard = ({ board, setBoard, ctx }) => {
                 disabled={!isAddAllowed(coinValue)}
                 className={`
                   inline-block w-[30%] aspect-square rounded-full mx-0.5
-                  ${getCoinColor(coinValue)}
+                  ${getCoinBgColor(coinValue)} shadow-md ${getCoinShadowColor(coinValue)}
                   disabled:opacity-50 disabled:cursor-not-allowed
                 `}
                 onClick={() => addToPile(coinValue)}
