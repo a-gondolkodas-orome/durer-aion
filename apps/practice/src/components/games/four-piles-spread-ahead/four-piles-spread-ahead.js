@@ -120,7 +120,7 @@ const rule = <>
   Adott négy, korongokból álló kupac, melyek 1-től 4-ig vannak számozva. Egy lépésben a
   soron következő játékos választ m és n egész számokat, melyekre 1 ≤ m &lt; n ≤ 4, majd az n sorszámú
   kupacból elvesz m korongot, és az n − 1, n − 2, . . . , n − m sorszámú kupacokba egyesével szétosztja az
-  elvett korongokat. Az veszít, aki nem tud a szabályoknak megfelelően lépni.
+  elvett korongokat. Az veszít, aki nem tud lépni.
 </>;
 
 const Game = strategyGameFactory({

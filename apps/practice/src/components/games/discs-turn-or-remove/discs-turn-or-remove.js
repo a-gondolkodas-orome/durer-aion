@@ -177,15 +177,14 @@ const getPlayerStepDescription = () => {
 
 const rule = (maxDiscs) => (
   <>
-    A játék kezdetén a szervezők néhány, de legfeljebb {maxDiscs} korongot letesznek az
-    asztalra, mindegyiket a piros vagy a kék oldalával felfelé. A soron
-    következő játékos összesen négyfélét léphet:
+    A játék kezdetén néhány, de legfeljebb {maxDiscs} piros vagy kék korong van az asztalon.
+    A soron következő játékos összesen négyfélét léphet:
     <br />
     • 1 vagy 2 kék korongot elvehet az asztalról.
     <br />
     • 1 vagy 2 piros korongot átfordíthat kékké.
     <br />
-    Aki már nem tud lépni, az elveszíti a játékot.
+    Az veszít, aki nem tud lépni.
   </>
 );
 

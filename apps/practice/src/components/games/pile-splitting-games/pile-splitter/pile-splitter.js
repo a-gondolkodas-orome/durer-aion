@@ -102,7 +102,7 @@ const rule = <>
   A pályán mindig két kupac korong található.
   A soron következő játékos választ egy kupacot, és azt szétosztja két kisebb kupacra (mindkettőbe
   legalább 1 korongnak kerülnie kell), a másik kupacot pedig kidobjuk.
-  Az a játékos veszít, aki nem tud szabályosan lépni (azaz egyik kupacot se tudja szétosztani).
+  Az veszít, aki nem tud lépni.
 </>;
 
 const Game = strategyGameFactory({

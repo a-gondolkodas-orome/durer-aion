@@ -123,8 +123,9 @@ const GameBoard = ({ board, setBoard, ctx }) => {
 
 const rule = <>
   Adott egy téglatest rácsa, aminek be van húzva az egyik testátlója.
-  Egy lépésben az éppen soron lévő játékos megszínezi valamelyik még színezetlen csúcsot három szín valamelyikével
-  (azaz piros, sárga vagy kék korongot tesz rá) úgy, hogy ne keletkezzen két szomszédos csúcs, amik azonos színűek.
+  Egy lépésben az éppen soron lévő játékos megszínezi valamelyik még színezetlen csúcsot
+  pirosra, sárgára vagy kékre úgy,
+  hogy ne keletkezzen két szomszédos csúcs, amik azonos színűek.
   Ha valamelyik játékos nem tud lépni, akkor véget ér a játék.
   A kezdő játékos nyer, ha minden csúcs meg lett színezve, míg a második akkor nyer,
   ha van olyan csúcs ami nem lett kiszínezve.

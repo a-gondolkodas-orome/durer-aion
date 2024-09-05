@@ -192,8 +192,7 @@ const rule = <>
   A pályán kezdetben négy kupac korong van.
   A soron következő játékos először az egyik kupacot teljes egészében kiveszi a játékból;
   majd egy másik kupacot kettéoszt két kisebb kupacra (mindkettőbe legalább 1 korongnak kerülnie kell).
-  Egy lépést követően tehát újra 4 kupac marad. Az a játékos veszít, aki nem tud szabályosan
-  lépni (azaz egyik kupacot se tudja szétosztani).
+  Egy lépést követően tehát újra 4 kupac marad. Az veszít, aki nem tud lépni.
 </>;
 
 const Game = strategyGameFactory({

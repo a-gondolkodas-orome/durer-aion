@@ -62,7 +62,7 @@ const rule = <>
   A játékosok felváltva lépnek egy bástyával, amely a sakktábla bal felső sarkából indul. A
   bástya vízszintesen vagy függőlegesen bármennyit (legalább egyet) léphet, de egyszerre csak az
   egyik irányba. Azokat a mezőket amikre a bástya lép, illetve a lépés közben áthalad, megjelöljük,
-  ezekre a mezőkre már nem léphetünk (át sem haladhatunk felettük). Az a játékos veszít, aki
+  ezekre a mezőkre már nem léphetünk később (át sem haladhatunk felettük). Az a játékos veszít, aki
   nem tud lépni.
 </>;
 

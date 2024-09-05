@@ -71,8 +71,7 @@ const rule = <>
   Adott egy 2 × 2-es táblázat, és hozzá mindkét játékosnak van 3 db korongja. A
   játék során felváltva tesznek le ezekből egyet-egyet a táblázat tetszőleges mezőjére. A második
   játékos akkor nyer, ha a játék végén minden mezőben különböző számú korong található. (Azaz
-  0, 1, 2, 3 a kiosztás a végén valamilyen sorrendben). Minden egyéb esetben pedig a kezdő játékos
-  nyer.
+  0, 1, 2, 3 a kiosztás a végén valamilyen sorrendben).
 </>;
 
 const Game = strategyGameFactory({

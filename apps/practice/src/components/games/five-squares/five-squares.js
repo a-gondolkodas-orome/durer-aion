@@ -75,13 +75,11 @@ const getPlayerStepDescription = () =>
   'Kattints arra a mezőre, ahova korongot szeretnél lerakni.';
 
 const rule = <>
-  A játék során egy öt mezőből álló táblára fogunk elhelyezni tíz korongot. A játék
-  elején a szervező egy korongot felhelyez az egyik mezőre, és ezután kezdődik a játék. Minden
-  körben a kezdőjátékos egy korongot helyez a táblára, majd ezután a második játékos tesz le két
-  korongot. (A két korongot lehet azonos, illetve különböző mezőkre is tenni.) A játék akkor ér
-  véget, amikor a 10. korong felkerül a táblára. A második játékos akkor nyer, ha a játék végén
-  minden mezőn különböző számú korong áll. A kezdő pedig akkor nyer, ha van két olyan mező,
-  amelyen azonos számú korong áll.
+  A játék során egy öt mezőből álló táblára helyezünk korongokat. Kezdetben egy korong van a táblán.
+  Ezután minden körben a kezdőjátékos egy korongot helyez a táblára, majd ezután a második játékos tesz le két
+  korongot. (A két korongot lehet azonos, illetve különböző mezőkre is tenni.) A játék 3 kör után ér véget,
+  amikor a 10. korong felkerül a táblára. A második játékos akkor nyer, ha a játék végén
+  minden mezőn különböző számú korong áll.
 </>;
 
 const Game = strategyGameFactory({

@@ -89,10 +89,9 @@ const GameBoard = ({ board, ctx }) => {
 };
 
 const rule = <>
-  Két játékos felváltva tesz le (a kezdetben üres) sakktáblára futókat. Egy új futót mindig
+  Két játékos felváltva tesz le a sakktáblára futókat. Egy új futót mindig
   csak olyan mezőre tehetünk, amin még nem áll futó, és azt a mezőt nem is támadja futó. Az
-  veszít, aki nem tud lerakni futót. (Futó támad egy mezőt: ha a sakk szabályai szerint a futóval
-  arra a mezőre tudnánk lépni, azaz a futóhoz képest átlósan helyezkedik el.)
+  veszít, aki nem tud lerakni futót.
 </>;
 
 const Game = strategyGameFactory({
