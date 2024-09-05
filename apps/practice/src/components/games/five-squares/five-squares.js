@@ -82,9 +82,6 @@ const rule = <>
   véget, amikor a 10. korong felkerül a táblára. A második játékos akkor nyer, ha a játék végén
   minden mezőn különböző számú korong áll. A kezdő pedig akkor nyer, ha van két olyan mező,
   amelyen azonos számú korong áll.
-
-  Te döntheteted el, hogy a kezdő vagy a második játékos bőrébe szeretnél e bújni.
-  Sok sikert! :)
 </>;
 
 const Game = strategyGameFactory({

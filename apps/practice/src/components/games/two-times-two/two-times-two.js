@@ -73,9 +73,6 @@ const rule = <>
   játékos akkor nyer, ha a játék végén minden mezőben különböző számú korong található. (Azaz
   0, 1, 2, 3 a kiosztás a végén valamilyen sorrendben). Minden egyéb esetben pedig a kezdő játékos
   nyer.
-
-  Te döntheteted el, hogy a kezdő vagy a második játékos bőrébe szeretnél e bújni.
-  Sok sikert! :)
 </>;
 
 const Game = strategyGameFactory({

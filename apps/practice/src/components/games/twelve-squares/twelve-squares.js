@@ -97,7 +97,6 @@ const rule = <>
 	Van 12 mező egymás mellett. A két szélsőbe lerakunk egy-egy bábut. Ezután a játékosok
 	felváltva lépnek egyet vagy kettőt a saját bábujukkal a másik irányába. A másik bábujára rálépni nem
 	szabad. Az nyer, aki átugorja az ellenfél bábuját.
-  Sok sikert! :)
 </>;
 
 const Game = strategyGameFactory({

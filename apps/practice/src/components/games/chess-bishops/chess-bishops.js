@@ -93,9 +93,6 @@ const rule = <>
   csak olyan mezőre tehetünk, amin még nem áll futó, és azt a mezőt nem is támadja futó. Az
   veszít, aki nem tud lerakni futót. (Futó támad egy mezőt: ha a sakk szabályai szerint a futóval
   arra a mezőre tudnánk lépni, azaz a futóhoz képest átlósan helyezkedik el.)
-
-  Te döntheted el, hogy kezdeni szeretnél-e, vagy második játékos lenni.
-  Sok sikert! :)
 </>;
 
 const Game = strategyGameFactory({

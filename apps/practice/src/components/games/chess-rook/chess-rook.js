@@ -64,9 +64,6 @@ const rule = <>
   egyik irányba. Azokat a mezőket amikre a bástya lép, illetve a lépés közben áthalad, megjelöljük,
   ezekre a mezőkre már nem léphetünk (át sem haladhatunk felettük). Az a játékos veszít, aki
   nem tud lépni.
-
-  Te döntheted el, hogy kezdeni szeretnél-e, vagy második játékos lenni.
-  Sok sikert! :)
 </>;
 
 const Game = strategyGameFactory({

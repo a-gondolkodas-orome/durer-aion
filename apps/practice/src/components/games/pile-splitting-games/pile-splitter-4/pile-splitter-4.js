@@ -194,9 +194,6 @@ const rule = <>
   majd egy másik kupacot kettéoszt két kisebb kupacra (mindkettőbe legalább 1 korongnak kerülnie kell).
   Egy lépést követően tehát újra 4 kupac marad. Az a játékos veszít, aki nem tud szabályosan
   lépni (azaz egyik kupacot se tudja szétosztani).
-
-  A kezdőállás ismeretében te döntheted el, hogy kezdeni szeretnél-e, vagy második játékos lenni.
-  Sok sikert! :)
 </>;
 
 const Game = strategyGameFactory({

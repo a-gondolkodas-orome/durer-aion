@@ -88,9 +88,6 @@ const rule = <>
   Ezenkívül ha a jelenleg kifeszített kötél helyett annak egy egyenes vonalú meghosszabbítása is kifeszíthető
   a fenti feltételek mellett, akkor azt kell kifeszíteniük. Az veszít, amelyikőjük már nem tud a
   szabályoknak megfelelően több kötelet kifeszíteni.
-
-  Te döntheted el, hogy kezdeni szeretnél-e, vagy második játékos lenni.
-  Sok sikert! :)
 </>;
 
 const Game = strategyGameFactory({

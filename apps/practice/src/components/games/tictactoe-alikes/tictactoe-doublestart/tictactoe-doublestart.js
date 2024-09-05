@@ -61,9 +61,6 @@ const rule = <>
   be nem telik a tábla. A kezdő nyer, ha a játék végén van valahol három piros egy sorban, oszlopban
   vagy átlóban, de sehol sincs három kék egy sorban, oszlopban vagy átlóban; egyébként a második
   nyer.
-
-  Te döntheted el, hogy kezdeni szeretnél-e, vagy második játékos lenni.
-  Sok sikert! :)
 </>;
 
 const Game = strategyGameFactory({

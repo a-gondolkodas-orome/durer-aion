@@ -64,7 +64,7 @@ szerepelnek. A játékosok felváltva elvesznek egy-egy lapot az ellenfelük el�
 már csak egy-egy lap marad marad előttük. Ekkor vége van a játéknak. Ha a két megmaradt
 szám összege páratlan, akkor az nyer, aki előtt a nagyobbik van; ha páros az összeg, akkor
 pedig az, aki előtt a kisebbik (ha ugyanaz a szám marad meg a két játékos előtt, akkor az nyer,
-aki kezdte a játékot). Sok sikert :)
+aki kezdte a játékot).
 
 </>;
 

@@ -128,9 +128,6 @@ const rule = <>
   Ha valamelyik játékos nem tud lépni, akkor véget ér a játék.
   A kezdő játékos nyer, ha minden csúcs meg lett színezve, míg a második akkor nyer,
   ha van olyan csúcs ami nem lett kiszínezve.
-
-  Te döntheted el, hogy kezdeni szeretnél-e, vagy második játékos lenni.
-  Sok sikert! :)
 </>;
 
 const Game = strategyGameFactory({

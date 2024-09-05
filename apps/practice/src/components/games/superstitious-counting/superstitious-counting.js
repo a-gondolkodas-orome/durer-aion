@@ -77,9 +77,6 @@ const rule = <>
   0-ról kezdenek, a két játékos felváltva adhat hozzá egy 13-nál kisebb pozitív egészet a korábbi
   számhoz, azonban a babonájuk miatt ha egyikük x-et adott hozzá, akkor másikuk a következő
   lépésben nem adhat hozzá <code>13-x</code>-et. Az veszít, aki eléri (vagy átlépi) <code>m</code>-et.
-
-  Az <code>m</code> szám ismeretében te döntheted el, hogy a kezdő vagy a második játékos bőrébe szeretnél e bújni.
-  Sok sikert! :)
 </>;
 
 const Game = strategyGameFactory({

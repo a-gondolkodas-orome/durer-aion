@@ -219,8 +219,7 @@ const rule = (
     <br />A Támadó akkor nyer, ha legalább egy baktérium bejut valamelyik CÉL
     mezőbe; a Védekező pedig akkor, ha az összes baktérium eltűnt a pályáról. Ha
     egy baktérium a pályán kívülre kerül egy lépéssel, akkor eltávolítottnak
-    minősül. Te választhatod meg, hogy Támadó, vagy Védekező játékos szeretnél
-    lenni. Sok sikert! :)
+    minősül.
   </>
 );
 

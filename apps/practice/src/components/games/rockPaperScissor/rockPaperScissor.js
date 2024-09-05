@@ -68,8 +68,7 @@ const rule = <>
 másik papírt, a harmadik ollót ábrázol. Ezután a játékosok felváltva elvesznek egy-egy kártyát az
 ellenfelük elől, egészen addig, amíg már csak egy-egy kártya marad. Ekkor a megmaradt kártyákat
 ütköztetik a „kő-papír-olló” játék szabályai szerint, így eldöntve, hogy ki a győztes; ha mindkét
-kártyán ugyanaz van, akkor a Kezdő nyert. Sok sikert :)
-
+kártyán ugyanaz van, akkor a Kezdő nyert.
 </>;
 
 const Game = strategyGameFactory({

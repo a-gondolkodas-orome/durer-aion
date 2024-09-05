@@ -118,9 +118,6 @@ const rule = <>
   janicsár egy lépcsőfokot fellép.
   Hunyadi nyer, ha a szultán egész seregét megsemmisítette.
   A szultán nyer, ha lesz olyan janicsár, aki felér a várhoz.
-
-  A kezdőállás ismeretében te döntheted e, hogy Hunyadiként vagy a török szultánként szeretnél-e játszani.
-  Sok sikert! :)
 </>;
 
 const Game = strategyGameFactory({

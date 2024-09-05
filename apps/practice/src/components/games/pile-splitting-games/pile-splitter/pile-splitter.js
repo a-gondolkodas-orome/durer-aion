@@ -103,9 +103,6 @@ const rule = <>
   A soron következő játékos választ egy kupacot, és azt szétosztja két kisebb kupacra (mindkettőbe
   legalább 1 korongnak kerülnie kell), a másik kupacot pedig kidobjuk.
   Az a játékos veszít, aki nem tud szabályosan lépni (azaz egyik kupacot se tudja szétosztani).
-
-  A kezdőállás ismeretében te döntheted el, hogy kezdeni szeretnél-e, vagy második játékos lenni.
-  Sok sikert! :)
 </>;
 
 const Game = strategyGameFactory({

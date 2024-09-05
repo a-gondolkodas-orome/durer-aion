@@ -8,9 +8,6 @@ const rule = <>
   éppen soron lévő játékos elvesz egy érmét a kupacból, és helyette berakhat egy darab kisebb
   értékű érmét, vagy dönthet úgy, hogy nem tesz be semmit. Az nyer, aki elveszi az utolsó érmét
   a kupacból.
-
-  Te döntheted el, hogy kezdeni szeretnél-e, vagy második játékos lenni.
-  Sok sikert! :)
 </>;
 
 const Game = strategyGameFactory({

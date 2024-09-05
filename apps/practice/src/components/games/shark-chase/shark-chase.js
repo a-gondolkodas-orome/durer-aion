@@ -200,9 +200,7 @@ const rule = <>
   éjszaka legfeljebb kétszer átúszik egy oldalszomszédos szektorba. A kutatók az első
   nap az alábbi kezdőhelyzetből mozognak először. A kutatók akkor nyernek, ha a 11.
   napig valamikor egy tengeralattjáró egy szektorba kerül a cápával, míg a cápa akkor
-  nyer, ha még a 11. nap végén is szabad.<br></br>
-  Ti dönthetitek el, hogy a kutatók vagy a cápa bőrébe szeretnétek bújni.
-  <br></br>Sok sikert! :)
+  nyer, ha még a 11. nap végén is szabad.
 </>;
 
 const getPlayerStepDescription = ({ playerIndex, turnStage }) => {

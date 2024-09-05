@@ -115,9 +115,6 @@ const rule = <>
   A pályán mindig két kupac korong található. Egy lépésben az éppen soron következő játékos az egyik
   kupacból elvesz páros sok korongot (legalább kettőt), és a másik kupachoz hozzáad feleannyit.
   Az veszít, aki nem tud a szabályoknak megfelően lépni.
-
-  A kezdőállás ismeretében te döntheted el, hogy kezdeni szeretnél-e, vagy második játékos lenni.
-  Sok sikert! :)
 </>;
 
 const Game = strategyGameFactory({

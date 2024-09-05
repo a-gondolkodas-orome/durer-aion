@@ -71,9 +71,6 @@ const rule = <>
   után döntetlen az állás (azaz egyik játékos sem nyert), akkor tovább folytatják a játékot, a soron
   következő játékos az ellenfél egy már lehelyezett korongját fehérre színezheti. Ezek után az nyer,
   aki először hoz létre három fehér korongot egy sorban, oszlopban vagy átlóban.
-
-  Te döntheted el, hogy kezdeni szeretnél-e, vagy második játékos lenni.
-  Sok sikert! :)
 </>;
 
 const Game = strategyGameFactory({

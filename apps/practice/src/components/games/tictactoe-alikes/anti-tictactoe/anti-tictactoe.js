@@ -48,9 +48,6 @@ const rule = <>
   A 3×3-as antiamőba játékban a kezdő piros, a második kék korongokat rak le. Felváltva
   lépnek, és az veszít, akinek először lesz a saját színéből három korongja egy sorban, oszlopban vagy
   átlóban. Ha mind a kilenc mező foglalt és nincs ilyen koronghármas, akkor a kezdő nyer.
-
-  Te döntheted el, hogy kezdeni szeretnél-e, vagy második játékos lenni.
-  Sok sikert! :)
 </>;
 
 const Game = strategyGameFactory({
