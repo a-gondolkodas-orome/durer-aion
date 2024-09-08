@@ -96,7 +96,7 @@ const GameBoard = ({ board, setBoard, ctx }) => {
 };
 
 const getPlayerStepDescription = () =>
-  'Kattints egy korongra, hogy azzal kettéosztd azt a kupacot.';
+  'Kattints a korongra, ahol ketté akarod vágni a kupacot.';
 
 const rule = <>
   A pályán mindig két kupac korong található.

@@ -60,7 +60,7 @@ const GameBoard = ({ board, ctx }) => {
 
 const getPlayerStepDescription = ({ board }) => {
   return inPlacingPhase(board)
-    ? 'Kattints egy üres mezőre.'
+    ? 'Helyezz le egy korongot egy üres mezőre kattintással.'
     : 'Kattints egy piros korongra.';
 };
 

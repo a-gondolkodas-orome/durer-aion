@@ -158,7 +158,7 @@ export const GameBoard = ({ board, setBoard, ctx }) => {
 
 export const getPlayerStepDescription = ({ turnStage }) => {
   if (turnStage === 'placeBack') {
-    return 'Kattints egy érmére a kupac alatt, hogy visszatégy egy olyan pénzérmét';
+    return 'Kattints egy érmére a kupac alatt, hogy visszatégy egy olyan pénzérmét.';
   }
-  return 'Kattints egy érmére, hogy elvegyél egy olyan pénzérmét';
+  return 'Kattints egy érmére, hogy elvegyél egy olyan pénzérmét.';
 };

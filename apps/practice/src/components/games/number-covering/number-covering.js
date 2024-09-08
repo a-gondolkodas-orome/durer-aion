@@ -89,7 +89,7 @@ const Game8 = strategyGameFactory({
   title: 'Számok lefedés 1-től 8-ig',
   GameBoard,
   G: {
-    getPlayerStepDescription: () => 'Kattints egy számra, hogy lefedd',
+    getPlayerStepDescription: () => 'Kattints egy számra, hogy lefedd.',
     generateStartBoard: () => range(1, 9),
     getGameStateAfterAiTurn
   }
@@ -100,7 +100,7 @@ const Game10 = strategyGameFactory({
   title: 'Számok lefedés 1-től 10-ig',
   GameBoard,
   G: {
-    getPlayerStepDescription: () => 'Kattints egy számra, hogy lefedd',
+    getPlayerStepDescription: () => 'Kattints egy számra, hogy lefedd.',
     generateStartBoard: () => range(1, 11),
     getGameStateAfterAiTurn
   }

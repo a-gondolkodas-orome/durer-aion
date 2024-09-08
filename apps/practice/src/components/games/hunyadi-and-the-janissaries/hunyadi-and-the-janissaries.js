@@ -107,7 +107,7 @@ const GameBoard = ({ board, setBoard, ctx }) => {
 
 const getPlayerStepDescription = ({ playerIndex }) => {
   return playerIndex === 0
-  ? 'Kattints a katonákra és válaszd két részre a seregedet'
+  ? 'Kattints a katonákra és válaszd két részre a seregedet.'
   : 'Kattints egy katonára, hogy megsemmisítsd a vele azonos színű sereget.';
 };
 

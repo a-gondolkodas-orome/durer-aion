@@ -84,7 +84,7 @@ const Game = strategyGameFactory({
   title: 'Babonás lépkedés',
   GameBoard,
   G: {
-    getPlayerStepDescription: () => 'Kattints a mezőre ahova lépni szeretnél.',
+    getPlayerStepDescription: () => 'Kattints a számra ahova lépni szeretnél.',
     generateStartBoard,
     getGameStateAfterAiTurn
   }

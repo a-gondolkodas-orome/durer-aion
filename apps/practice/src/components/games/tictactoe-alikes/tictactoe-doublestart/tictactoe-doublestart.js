@@ -51,7 +51,7 @@ const GameBoard = ({ board, setBoard, ctx }) => {
 const getPlayerStepDescription = ({ board }) => {
   const isDuringFirstMove = board.filter(c => c).length <= 1;
   return isDuringFirstMove
-    ? 'Helyezz le két korongot (kattints a mezőkre)'
+    ? 'Helyezz le két korongot egy-egy üres mezőre kattintással.'
     : 'Helyezz le egy korongot egy üres mezőre kattintással.';
 };
 
