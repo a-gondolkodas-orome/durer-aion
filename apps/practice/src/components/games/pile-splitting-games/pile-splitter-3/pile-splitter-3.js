@@ -85,9 +85,6 @@ const GameBoard = ({ board, setBoard, ctx }) => {
     // pieceCountInPile can be 0 in intermediateBoard during AI turn
     if (!ctx.shouldPlayerMoveNext) return pieceCountInPile || '🗑️';
     if (pileId === removedPileId) {
-      if (hoveredPiece && hoveredPiece.pileId === pileId) {
-        return 'Mégse?';
-      }
       // pieceCountInPile can be 0 in intermediateBoard
       return pieceCountInPile ? `${pieceCountInPile} → 🗑️` : '🗑️';
     }
