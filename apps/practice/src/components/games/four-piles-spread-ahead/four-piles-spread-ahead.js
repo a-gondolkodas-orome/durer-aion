@@ -97,11 +97,11 @@ const GameBoard = ({ board, setBoard, ctx }) => {
               disabled={isDisabled({ pileId, pieceId })}
               className={`
                 inline-block w-[20%] aspect-square rounded-full mx-0.5
-                ${isDisabled({ pileId, pieceId }) && 'cursor-not-allowed'}
-                ${toAppear({ pileId, pieceId }) ? 'bg-blue-900 opacity-30' : ''}
+                ${toAppear({ pileId, pieceId }) ? 'bg-blue-600 opacity-50' : ''}
+                ${isDisabled({ pileId, pieceId }) && 'cursor-not-allowed bg-blue-600'}
                 ${toBeRemoved({ pileId, pieceId }) ? 'bg-red-600 opacity-50' : ''}
-                ${(nonExistent({ pileId, pieceId }) && !toAppear({ pileId, pieceId })) ? 'bg-white' : ''}
-                ${!nonExistent({ pileId, pieceId }) && !toBeRemoved({ pileId, pieceId }) ? 'bg-blue-900' : ''}
+                ${(nonExistent({ pileId, pieceId }) && !toAppear({ pileId, pieceId })) ? 'invisible' : ''}
+                ${!nonExistent({ pileId, pieceId }) && !isDisabled({ pileId, pieceId }) && !toBeRemoved({ pileId, pieceId }) ? 'bg-blue-900' : ''}
               `}
               onClick={() => clickPiece({ pileId, pieceId })}
               onFocus={() => hoverPiece({ pileId, pieceId })}
