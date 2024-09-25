@@ -1,8 +1,8 @@
 export const dictionary = {
   disclaimer: {
     start:
-      "Az online fordulón a csapatoknak önállóan kell dolgozniuk, külső segítséget nem fogadhatnak el, " +
-      "másokkal nem kommunikálhatnak egészen a versenyzési időszak végéig (21:30-ig).",
+      "Az online fordulón a csapatoknak önállóan kell dolgozniuk, más emberektől nem kérhetnek segítséget" +
+      "a versenyzési időszak végéig (21:30-ig). A mesterséges intelligencia használata is tilos.",
     progress: "Továbbjutás",
     progressDescription:
       "Azok a csapatok, amelyek az online forduló során a megszerezhető 52 pontból legalább 25 pontot " +
@@ -20,7 +20,7 @@ export const dictionary = {
   chooser: {
     finish: {
       title: "Vége a versenynek!",
-      content: "Köszönjük a részvételeteket, reméljük, hogy tetszett nektek a verseny. Kíváncsiak vagyunk a fordulóval kapcsolatos véleményetekre, így kérjük, <a href=\"https://forms.gle/XDb8tt2RvCJv459A8\" target=\"_blank\" rel=\"noopener noreferrer\">töltsétek ki ezt az űrlapot</a>. Várhatóan szombatig közzétesszük az eredményeket és a továbbjutó csapatok listáját, és erről emailben is fogunk nektek értesítést küldeni.",
+      content: "Köszönjük a részvételeteket, reméljük, hogy tetszett nektek a verseny. Kíváncsiak vagyunk a fordulóval kapcsolatos véleményetekre, így kérjük, <a href=\"https://forms.gle/TQFC1N8vqRe1meyz8\" target=\"_blank\" rel=\"noopener noreferrer\">töltsétek ki ezt az űrlapot</a>. Várhatóan szombatig közzétesszük az eredményeket és a továbbjutó csapatok listáját, és erről emailben is fogunk nektek értesítést küldeni.",
       final: "Végső pontszám",
     },
     gameDescriptionHtml: `<p>Ebben a feladatban egy kétszemélyes stratégiás játékot játszhattok, ahol az egyik játékos Ti lesztek, a másik játékos pedig a gép. Győzzétek le a gépet <b>kétszer egymás után</b> ebben a játékban! A kezdő helyzet ismeretében Ti dönthetitek el, hogy a kezdő vagy a második játékos bőrébe szeretnétek bújni.</p>         
