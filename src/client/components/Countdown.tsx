@@ -44,7 +44,8 @@ export function Countdown(
           }
           handle = null;
       };
-    }, [setMsRemaining, endTime, getServerTimer, serverRemainingMs]);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [serverRemainingMs]);
 
     useEffect(() => {
         if (msRemaining === null) {

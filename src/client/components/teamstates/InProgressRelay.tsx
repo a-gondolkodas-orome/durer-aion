@@ -29,7 +29,8 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
       moves.startGame();
       console.log("Start Game!");
     }
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   useEffect(() => {
     setMsRemaining(G.milisecondsRemaining);
   }, [G.milisecondsRemaining]);
