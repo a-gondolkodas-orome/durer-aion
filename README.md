@@ -90,7 +90,7 @@ Frontend needs to be built after every change, but the server auto-reloads.
 ### Setting up the server
 
 ```
-docker-compose --env-file=.env.docker up --build 
+docker compose --env-file=.env.docker up --build 
 ```
 
 (before first run, you will need `npm run build`)
