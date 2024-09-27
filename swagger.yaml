@@ -15,15 +15,15 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Successful response
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/LogEntry'
-        '404':
+                  $ref: "#/components/schemas/LogEntry"
+        "404":
           description: Match not found
 
   /game/admin/{matchId}/state:
@@ -36,13 +36,13 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Successful response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/State'
-        '404':
+                $ref: "#/components/schemas/State"
+        "404":
           description: Match not found
 
   /game/admin/{matchId}/addminutes/{minutes}:
@@ -60,17 +60,17 @@ paths:
           schema:
             type: integer
       responses:
-        '200':
+        "200":
           description: Successful response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AddMinutesResponse'
-        '404':
+                $ref: "#/components/schemas/AddMinutesResponse"
+        "404":
           description: Match not found
-        '500':
+        "500":
           description: Team not found
-        '501':
+        "501":
           description: Restarting finished match not supported
 
   /game/admin/{matchId}/metadata:
@@ -83,13 +83,13 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Successful response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MatchData'
-        '404':
+                $ref: "#/components/schemas/MatchData"
+        "404":
           description: Match not found
 
   /team/admin/{teamID}/reset/strategy:
@@ -100,15 +100,15 @@ paths:
           in: path
           required: true
           schema:
-            $ref: '#/components/schemas/GUID'
+            $ref: "#/components/schemas/GUID"
       responses:
-        '200':
+        "200":
           description: Successful response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TeamModel'
-        '404':
+                $ref: "#/components/schemas/TeamModel"
+        "404":
           description: Team not found
 
   /team/admin/{teamID}/reset/relay:
@@ -119,15 +119,15 @@ paths:
           in: path
           required: true
           schema:
-            $ref: '#/components/schemas/GUID'
+            $ref: "#/components/schemas/GUID"
       responses:
-        '200':
+        "200":
           description: Successful response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TeamModel'
-        '404':
+                $ref: "#/components/schemas/TeamModel"
+        "404":
           description: Team not found
 
   /team/admin/filter:
@@ -141,27 +141,27 @@ paths:
             items:
               type: string
       responses:
-        '200':
+        "200":
           description: Successful response
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/TeamModel'
+                  $ref: "#/components/schemas/TeamModel"
 
   /team/admin/all:
     get:
       summary: Get all teams as full objects
       responses:
-        '200':
+        "200":
           description: Successful response
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/TeamModel'
+                  $ref: "#/components/schemas/TeamModel"
 
   /team/join/{token}:
     get:
@@ -173,13 +173,13 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Successful response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GUID'
-        '404':
+                $ref: "#/components/schemas/GUID"
+        "404":
           description: Team not found
 
   /team/{GUID}:
@@ -190,15 +190,15 @@ paths:
           in: path
           required: true
           schema:
-                $ref: '#/components/schemas/GUID'
+            $ref: "#/components/schemas/GUID"
       responses:
-        '200':
+        "200":
           description: Successful response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TeamModel'
-        '404':
+                $ref: "#/components/schemas/TeamModel"
+        "404":
           description: Team not found
 
   /team/{GUID}/relay/play:
@@ -209,14 +209,14 @@ paths:
           in: path
           required: true
           schema:
-            $ref: '#/components/schemas/GUID'
+            $ref: "#/components/schemas/GUID"
       responses:
-        '200':
+        "200":
           description: Successful response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CreatedMatch'
+                $ref: "#/components/schemas/CreatedMatch"
 
   /team/{GUID}/strategy/play:
     get:
@@ -226,14 +226,14 @@ paths:
           in: path
           required: true
           schema:
-            $ref: '#/components/schemas/GUID'
+            $ref: "#/components/schemas/GUID"
       responses:
-        '200':
+        "200":
           description: Successful response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CreatedMatch'
+                $ref: "#/components/schemas/CreatedMatch"
 
   /team/{GUID}/gohome:
     get:
@@ -243,15 +243,15 @@ paths:
           in: path
           required: true
           schema:
-            $ref: '#/components/schemas/GUID'
+            $ref: "#/components/schemas/GUID"
       responses:
-        '200':
+        "200":
           description: Successful response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TeamModel'
-        '403':
+                $ref: "#/components/schemas/TeamModel"
+        "403":
           description: Not allowed, match in progress
 
   /team/{GUID}/relay/result:
@@ -262,9 +262,9 @@ paths:
           in: path
           required: true
           schema:
-            $ref: '#/components/schemas/GUID'
+            $ref: "#/components/schemas/GUID"
       responses:
-        '501':
+        "501":
           description: Not implemented yet
 
   /team/{GUID}/strategy/result:
@@ -275,9 +275,9 @@ paths:
           in: path
           required: true
           schema:
-            $ref: '#/components/schemas/GUID'
+            $ref: "#/components/schemas/GUID"
       responses:
-        '501':
+        "501":
           description: Not implemented yet
 
   /games/{nameid}/create:
@@ -290,39 +290,39 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Successful response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CreatedMatch'
+                $ref: "#/components/schemas/CreatedMatch"
 
 components:
   schemas:
     GUID:
       type: string
-      pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
-      example: '8eae8669-125c-42e5-8b49-89afbac31679'
-      
+      pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+      example: "8eae8669-125c-42e5-8b49-89afbac31679"
+
     MatchStatus:
       oneOf:
-        - $ref: '#/components/schemas/NotStartedMatchStatus'
-        - $ref: '#/components/schemas/InProgressMatchStatus'
-        - $ref: '#/components/schemas/FinishedMatchStatus'
-      
+        - $ref: "#/components/schemas/NotStartedMatchStatus"
+        - $ref: "#/components/schemas/InProgressMatchStatus"
+        - $ref: "#/components/schemas/FinishedMatchStatus"
+
     NotStartedMatchStatus:
       type: object
       properties:
         state:
           type: string
-          enum: ['NOT STARTED']
+          enum: ["NOT STARTED"]
 
     InProgressMatchStatus:
       type: object
       properties:
         state:
           type: string
-          enum: ['IN PROGRESS']
+          enum: ["IN PROGRESS"]
         startAt:
           type: string
           format: date-time
@@ -337,7 +337,7 @@ components:
       properties:
         state:
           type: string
-          enum: ['FINISHED']
+          enum: ["FINISHED"]
         startAt:
           type: string
           format: date-time
@@ -348,7 +348,6 @@ components:
           type: string
         score:
           type: number
-
 
     TeamModel:
       type: object
@@ -367,11 +366,11 @@ components:
           type: string
         pageState:
           type: string
-          enum: ['DISCLAIMER', 'HOME', 'RELAY', 'STRATEGY']
+          enum: ["DISCLAIMER", "HOME", "RELAY", "STRATEGY"]
         relayMatch:
-          $ref: '#/components/schemas/MatchStatus'
+          $ref: "#/components/schemas/MatchStatus"
         strategyMatch:
-          $ref: '#/components/schemas/MatchStatus'
+          $ref: "#/components/schemas/MatchStatus"
         other:
           type: string
         createdAt:
@@ -381,13 +380,84 @@ components:
           type: string
           format: date-time
 
+    ActionShape:
+      type: string
+      enum: ["MAKE_MOVE", "GAME_EVENT", "UNDO", "REDO"]
+
+    Operation:
+      type: object
+      # Define properties for Operation if known
+
     LogEntry:
       type: object
-      # Define properties for LogEntry
+      properties:
+        action:
+          $ref: "#/components/schemas/ActionShape"
+        _stateID:
+          type: integer
+        turn:
+          type: integer
+        phase:
+          type: string
+        redact:
+          type: boolean
+        automatic:
+          type: boolean
+        metadata:
+          type: object
+        patch:
+          type: array
+          items:
+            $ref: "#/components/schemas/Operation"
+      required:
+        - action
+        - _stateID
+        - turn
+        - phase
+
+    Ctx:
+      type: object
+      # Define properties for Ctx if known
+
+    PluginState:
+      type: object
+      # Define properties for PluginState if known
+
+    Undo:
+      type: object
+      # Define properties for Undo if known
 
     State:
       type: object
-      # Define properties for State
+      properties:
+        G:
+          type: object
+          description: The game state. Structure depends on the specific game implementation.
+        ctx:
+          $ref: "#/components/schemas/Ctx"
+        deltalog:
+          type: array
+          items:
+            $ref: "#/components/schemas/LogEntry"
+        plugins:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/PluginState"
+        _undo:
+          type: array
+          items:
+            $ref: "#/components/schemas/Undo"
+        _redo:
+          type: array
+          items:
+            $ref: "#/components/schemas/Undo"
+        _stateID:
+          type: integer
+      required:
+        - G
+        - ctx
+        - plugins
+        - _stateID
 
     AddMinutesResponse:
       type: object
@@ -398,7 +468,7 @@ components:
         matchID:
           type: string
         team:
-          $ref: '#/components/schemas/TeamModel'
+          $ref: "#/components/schemas/TeamModel"
 
     CreatedMatch:
       type: object
@@ -420,7 +490,7 @@ components:
         players:
           type: object
           additionalProperties:
-            $ref: '#/components/schemas/PlayerMetadata'
+            $ref: "#/components/schemas/PlayerMetadata"
           description: A map of player IDs to their metadata.
         setupData:
           type: object
@@ -451,4 +521,3 @@ components:
         - players
         - createdAt
         - updatedAt
-      
