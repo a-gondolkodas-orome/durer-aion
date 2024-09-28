@@ -1,6 +1,6 @@
 import { GameRelay } from './games/relay/game';
 import { MyGame as StrategyGame17oe } from './games/17o/game';
-//import { MyGame as TenCoinsGame } from './games/ten-coins/game';
+import { strategyWrapper as StrategyStrategy17oe } from './games/17o/strategy';
 import { PostgresStore } from 'bgio-postgres';
 import { argv, env, exit } from 'process';
 import { gameWrapper } from './common/gamewrapper';
@@ -8,8 +8,6 @@ import { SocketIOButBotMoves } from './socketio_botmoves';
 import { Server } from 'boardgame.io/server';
 import botWrapper from './common/botwrapper';
 import { strategy as RelayStrategy } from './games/relay/strategy';
-import { strategyWrapper as TenCoinsStrategy } from './games/ten-coins/strategy';
-import { strategyWrapper as StrategyStrategy17oe } from './games/17o/strategy';
 import { configureTeamsRouter } from './server/router';
 import { TeamsRepository } from './server/db';
 import { importer } from './server/team_import';
@@ -147,8 +145,8 @@ if (argv[2] === "import") {
   Sentry.init({ dsn: "https://1f4c47a1692b4936951908e2669a1e99@sentry.durerinfo.hu/4" });
 
   server.app.on("error", (err, ctx) => {
-    Sentry.withScope(function (scope:any) {
-      scope.addEventProcessor(function (event:any) {
+    Sentry.withScope(function (scope: any) {
+      scope.addEventProcessor(function (event: any) {
         return Sentry.addRequestDataToEvent(event, ctx.request);
       });
       Sentry.captureException(err);
