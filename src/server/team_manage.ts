@@ -124,8 +124,6 @@ export async function endMatchStatus(progressStatus: InProgressMatchStatus, fina
 }
 
 export async function allowedToStart(team: TeamModel, gameType: 'RELAY' | 'STRATEGY') {
-  if (team.pageState === 'HOME') // no one played before
-    return true;
   if (team.pageState === 'DISCLAIMER') //no start from this point
     return false;
   if (team.pageState === gameType) //restart attempt
