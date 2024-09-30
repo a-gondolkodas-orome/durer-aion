@@ -44,6 +44,12 @@ export const useRefreshTeamState = () => {
   };
 };
 
+export const useAll = () => {
+  return async () => {
+    return await userModel.adminAll();
+  };
+};
+
 export const useLogin = () => {
   const [teamState, setTeamState] = useRecoilState(currentStateAtom);
   return async (joinCode: string) => {

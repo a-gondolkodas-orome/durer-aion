@@ -41,6 +41,14 @@ export class UserModel {
     return res;
   }
 
+  async adminAll(): Promise<TeamModelDto[] | null> {
+    const repo = new ClientRepository();
+
+    const res = await repo.getAll();
+
+    return res;
+  }
+
   async startRelay(): Promise<void> {
     const guid = this.getGuid();
 

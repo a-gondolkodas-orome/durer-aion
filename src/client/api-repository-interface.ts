@@ -151,6 +151,23 @@ export class RealClientRepository implements ClientRepository {
 
     return result.data as string;
   }
+
+  async getAll(): Promise<any> {
+    const url = urlcat('/team/admin/all', {
+    });
+    let result;
+    try {
+      result = await ApiAxios.instance().get(url);
+    } catch (e: any) {
+      const err = makeAxiosError(e);
+      console.log(err.message)
+      // here we can set message according to status (or data)
+      throw new Error('Váratlan hiba történt');
+    }
+
+    console.log(result.data)
+    return result.data;
+  }
 }
 
 
@@ -420,11 +437,14 @@ export class OfflineClientRepository implements ClientRepository {
     return Promise.resolve(teamState) as Promise<TeamModelDto>;
   }
 
+  async getAll(): Promise<any> {
+    return null;
+  }
+
   joinWithCode(joinCode: string): Promise<string> {
     // return the  if it is in the teamData.ts file
 
     const i = teamData.findIndex(e => e.join_code === joinCode);
-    const currentTeamData = teamData[i];
     let pageState = "DISCLAIMER"
     if (typeof localStorage !== "undefined") {
       const teamStateString = localStorage.getItem(LOCAL_STORAGE_TEAMSTATE);
