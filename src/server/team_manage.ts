@@ -94,21 +94,25 @@ export async function createGame(
 
 export async function startMatchStatus(matchId: string, ctx: Server.AppCtx): Promise<InProgressMatchStatus> {
   const currentMatch = await ctx.db.fetch(matchId, { state: true });
+  let end_date = new Date(currentMatch.state.G.end)
+  end_date.setSeconds(end_date.getSeconds() + 10) // add the extra 10 seconds of timeout as well
   return {
     state: 'IN PROGRESS',
     matchID: matchId,
     startAt: new Date(currentMatch.state.G.start),
-    endAt: new Date(currentMatch.state.G.end + 10 * 1000), // add the extra 10 minutes of timeout as well
+    endAt: end_date
   }
 }
 
 export async function endMatchStatusFromScratch(matchId: string, ctx: Server.AppCtx): Promise<FinishedMatchStatus> {
   const currentMatch = await ctx.db.fetch(matchId, { state: true });
+  let end_date = new Date(currentMatch.state.G.end)
+  end_date.setSeconds(end_date.getSeconds() + 10) // add the extra 10 seconds of timeout as well
   return {
     state: 'FINISHED',
     matchID: matchId,
     startAt: new Date(currentMatch.state.G.start),
-    endAt: new Date(currentMatch.state.G.end + 10 * 1000),
+    endAt: end_date,
     score: currentMatch.state.G.score,
   }
 }
