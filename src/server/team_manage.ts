@@ -5,7 +5,7 @@ import { Game, LobbyAPI, Server, StorageAPI } from "boardgame.io";
 import { relayNames, strategyNames } from "../server";
 import { TeamsRepository } from "./db";
 import { FinishedMatchStatus, InProgressMatchStatus, TeamModel } from "./entities/model";
-import {fetch} from  '../socketio_botmoves';
+import { fetch } from '../socketio_botmoves';
 
 
 /** Joins a player to a match where the bot's side is not connected.
@@ -19,7 +19,7 @@ export const injectPlayer = async (db: StorageAPI.Async | StorageAPI.Sync, match
   playerID,
   name,
   credentials
-}:{
+}: {
   playerID: any, //TODO: fix to correct type
   name: string,
   credentials: string,
@@ -40,7 +40,7 @@ export const injectPlayer = async (db: StorageAPI.Async | StorageAPI.Sync, match
  * This should be in line with boardgame.io/src/server/api.ts
  * path would be '/games/:name/:id/join'.
  */
- export const injectBot = async (db: StorageAPI.Async | StorageAPI.Sync, matchId: string, bot_id: string) => {
+export const injectBot = async (db: StorageAPI.Async | StorageAPI.Sync, matchId: string, bot_id: string) => {
   await injectPlayer(db, matchId, {
     playerID: bot_id,
     name: 'Bot',
@@ -53,14 +53,14 @@ export const injectPlayer = async (db: StorageAPI.Async | StorageAPI.Sync, match
  * TODO: implement usage
  * @returns {"WAITING"|"FINISHED"|undefined} - status of global game
  */
-export function checkGlobalTime():"WAITING"|"FINISHED"|undefined{
+export function checkGlobalTime(): "WAITING" | "FINISHED" | undefined {
   const now = new Date()
-  const {globalStartAt,globalEndAt} = getGameStartAndEndTime();
+  const { globalStartAt, globalEndAt } = getGameStartAndEndTime();
 
-  if(now.getTime() < globalStartAt.getTime()){
+  if (now.getTime() < globalStartAt.getTime()) {
     return "WAITING"
   }
-  if(globalEndAt.getTime() < now.getTime()){
+  if (globalEndAt.getTime() < now.getTime()) {
     return "FINISHED"
   }
   return undefined
@@ -98,7 +98,7 @@ export async function startMatchStatus(matchId: string, ctx: Server.AppCtx): Pro
     state: 'IN PROGRESS',
     matchID: matchId,
     startAt: new Date(currentMatch.state.G.start),
-    endAt: new Date(currentMatch.state.G.end),
+    endAt: new Date(currentMatch.state.G.end + 10 * 1000), // add the extra 10 minutes of timeout as well
   }
 }
 
@@ -108,7 +108,7 @@ export async function endMatchStatusFromScratch(matchId: string, ctx: Server.App
     state: 'FINISHED',
     matchID: matchId,
     startAt: new Date(currentMatch.state.G.start),
-    endAt: new Date(currentMatch.state.G.end),
+    endAt: new Date(currentMatch.state.G.end + 10 * 1000),
     score: currentMatch.state.G.score,
   }
 }
@@ -141,17 +141,17 @@ export async function checkStaleMatch(team: TeamModel): Promise<{ isStale: boole
   // Find if boardgame match is already timed out, but not registered
   const now = new Date(Date());
   console.log(`Stale check performed at: ${now}/${Date()}`)
-  if (team.relayMatch.state === 'IN PROGRESS'){
-    if(typeof team.relayMatch.endAt === 'string')
+  if (team.relayMatch.state === 'IN PROGRESS') {
+    if (typeof team.relayMatch.endAt === 'string')
       team.relayMatch.endAt = new Date(team.relayMatch.endAt);
-    console.log(typeof team.relayMatch.endAt,team.relayMatch.endAt,now)
-    console.log(team.relayMatch.endAt.getTime() , now.getTime())
+    console.log(typeof team.relayMatch.endAt, team.relayMatch.endAt, now)
+    console.log(team.relayMatch.endAt.getTime(), now.getTime())
     if (team.relayMatch.endAt.getTime() < now.getTime())
       return { isStale: true, gameState: 'relayMatch' };
   }
 
   if (team.strategyMatch.state === 'IN PROGRESS') {
-    if(typeof team.strategyMatch.endAt === 'string')
+    if (typeof team.strategyMatch.endAt === 'string')
       team.strategyMatch.endAt = new Date(team.strategyMatch.endAt);
     if (team.strategyMatch.endAt.getTime() < now.getTime())
       return { isStale: true, gameState: 'strategyMatch' };
@@ -176,7 +176,7 @@ function inferenceGameType(gameName: string) {
 export async function closeMatch(matchId: string, teams: TeamsRepository, db: StorageAPI.Async | StorageAPI.Sync) {
   const currentMatch = await db.fetch(matchId, { state: true, metadata: true });
   const teamId = currentMatch.metadata.players[0].name;
-  if(!teamId)
+  if (!teamId)
     throw new Error(`Match teamId is not valid, the match has the following players:${currentMatch.metadata.players}`);
   const team: TeamModel | null = await teams.getTeam({ teamId }) ?? null;
   if (team == null)
@@ -193,14 +193,14 @@ export async function closeMatch(matchId: string, teams: TeamsRepository, db: St
 export async function getNewGame(ctx: Server.AppCtx, teams: TeamsRepository, games: Game<any, Record<string, unknown>, any>[], gameType: 'RELAY' | 'STRATEGY') {
   const GUID = ctx.params.GUID;
   const team: TeamModel = await teams.getTeam({ teamId: GUID }) ?? ctx.throw(404, `Team with {id:${GUID}} not found.`)
-  
+
   //if middelware setup was better understand, this should be in a separated midleware
-  const staleInfo =  await checkStaleMatch(team);
-  if(staleInfo.isStale){
-    await closeMatch((team[staleInfo.gameState!] as InProgressMatchStatus).matchID,teams,ctx.db);
+  const staleInfo = await checkStaleMatch(team);
+  if (staleInfo.isStale) {
+    await closeMatch((team[staleInfo.gameState!] as InProgressMatchStatus).matchID, teams, ctx.db);
   }
-  
-  if (! await allowedToStart(team, gameType)){
+
+  if (! await allowedToStart(team, gameType)) {
     ctx.throw(403, "Team is not allowed to start game.")
   }
   //find gameName based on team category
