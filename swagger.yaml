@@ -115,6 +115,7 @@ paths:
   /team/admin/{teamID}/reset/strategy:
     get:
       summary: Reset team's strategy
+      description: Note that this request only resets this game's field in teamState. The user will not notice anything during the game, unless he refreshes the page.
       parameters:
         - name: teamID
           in: path
@@ -138,6 +139,7 @@ paths:
   /team/admin/{teamID}/reset/relay:
     get:
       summary: Reset team's relay
+      description: Note that this request only resets this game's field in teamState. The user will not notice anything during the game, unless he refreshes the page.
       parameters:
         - name: teamID
           in: path
