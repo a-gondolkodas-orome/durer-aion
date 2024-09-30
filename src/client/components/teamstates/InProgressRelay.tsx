@@ -18,14 +18,18 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
   const toHome = useToHome();
 
   const teamState = useTeamState();
+  const gameNotStarted = G.numberOfTry === 0;
   useEffect(()=>{
-    if (!ctx.gameover) {
+    if (!ctx.gameover && !gameNotStarted) {
       moves.getTime();
     }
     setGameover(ctx.gameover)
-  }, [ctx.gameover, moves]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ctx.gameover]);
   useEffect(()=>{
-    if (G.numberOfTry === 0) {
+    if (gameNotStarted) {
+      // If the game not started yet, start it.
+      // This function runs only once because it is inside a useEffect. Otherwise, it would run on every render.
       moves.startGame();
       console.log("Start Game!");
     }
