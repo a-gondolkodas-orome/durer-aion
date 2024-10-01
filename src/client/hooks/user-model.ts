@@ -4,7 +4,7 @@ import { TeamModelDto } from "../dto/TeamStateDto";
 const LOCAL_STORAGE_GUID = "kjqAEKeFkMpOvOZrzcvp";
 
 let ClientRepository = RealClientRepository;
-if (process.env.REACT_APP_WHICH_VERSION === "b"){
+if (process.env.REACT_APP_WHICH_VERSION === "b") {
   ClientRepository = OfflineClientRepository;
 }
 
@@ -49,8 +49,13 @@ export class UserModel {
     }
 
     const repo = new ClientRepository();
-
-    await repo.startRelay(guid);
+    try {
+      await repo.startRelay(guid);
+    }
+    catch (e) {
+      console.log(e);
+      window.location.reload();
+    }
   }
 
   async starStrategy(): Promise<void> {
@@ -62,7 +67,13 @@ export class UserModel {
 
     const repo = new ClientRepository();
 
-    await repo.startStrategy(guid);
+    try {
+      await repo.startStrategy(guid);
+    }
+    catch (e) {
+      console.log(e);
+      window.location.reload();
+    }
   }
 
   isUserLoggedIn(): boolean {
@@ -97,8 +108,13 @@ export class UserModel {
     }
 
     const repo = new ClientRepository();
-
-    await repo.toHome(guid);
+    try {
+      await repo.toHome(guid);
+    }
+    catch (e) {
+      console.log(e);
+      window.location.reload();
+    }
   }
 
   private static wasListenerAddedYet = false;
