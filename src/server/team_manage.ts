@@ -132,7 +132,7 @@ export async function allowedToStart(team: TeamModel, gameType: 'RELAY' | 'STRAT
     return false;
   if (gameType == 'STRATEGY' && team.strategyMatch.state === 'FINISHED') // they are already finished the strategy
     return false;
-  if (gameType == 'RELAY' && team.strategyMatch.state === 'FINISHED') // they are already finished the relay
+  if (gameType == 'RELAY' && team.relayMatch.state === 'FINISHED') // they are already finished the relay
     return false;
 
   //default
