@@ -2,52 +2,64 @@ import React, { useState } from 'react';
 import { strategyGameFactory } from '../strategy-game';
 import { range, random } from 'lodash';
 
+const target = 40;
+const maxStep = 3;
+
 const GameBoard = ({board, ctx}) => {
 
+  const isMoveAllowed = number => {
+    if (!ctx.shouldPlayerMoveNext) return false;
+    if (number <= board) return false;
+    return (number - board) <= maxStep;
+  }
+
   const clickNumber = (number) => {
-    if (!ctx.shouldPlayerMoveNext) return;
-    ctx.endPlayerTurn(getGameStateAfterMove(board + number, ctx.playerIndex));
+    if (!isMoveAllowed(number)) return;
+    ctx.endPlayerTurn(getGameStateAfterMove(number, ctx.playerIndex));
   };
 
   return(
     <section className="p-2 shrink-0 grow basis-2/3">
-      <p className='text-center text-[30px]'>Jelenlegi szám: {board}</p>
-      <div className="flex">
-        {range(1, 4).map(i => (
-          <button
-            disabled={!ctx.shouldPlayerMoveNext}
-            className={`
-              text-center w-full text-xl m-2 rounded border-4
-              enabled:hover:bg-blue-400 enabled:focus:bg-blue-400
-            `}
-            key={`${board}+${i}`}
-            onClick={() => clickNumber(i)}
-          >+{i}</button>
-        ))}
-      </div>
+      <div className="flex flex-wrap mb-1">
+      {range(target + maxStep + 1).map(i =>
+        <button
+          key={i}
+          disabled={!isMoveAllowed(i)}
+          onClick={() => clickNumber(i)}
+          className={`
+            border-2 text-2xl min-w-[4ch] text-center p-1 my-1 font-bold
+            enabled:bg-emerald-200 enabled:hover:bg-emerald-400 enabled:focus:bg-emerald-400
+            ${i === target ? 'border-8 border-black' : '' }
+            ${i < board ? 'bg-slate-400' : ''}
+            ${i === board ? 'bg-slate-200' : ''}
+            ${i > target ? 'text-slate-400 border-rose-600' : ''}
+          `}
+        >{ i === board ? 'X' : i }
+      </button>
+      )}
+    </div>
     </section>
   );
 };
 
 const getGameStateAfterMove = (nextBoard, moverIndex) => {
-  if (nextBoard > 40) {
+  if (nextBoard > target) {
     return { nextBoard, isGameEnd: true, winnerIndex: 1 - moverIndex };
   }
   return { nextBoard, isGameEnd: false };
 };
 
 const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
-  const nextBoard = board % 4 !== 0
-    ? board + 4 - board % 4
-    : board + random(1, 3);
+  const nextBoard = board % (1 + maxStep) !== 0
+    ? board + (1 + maxStep) - board % (1 + maxStep)
+    : board + random(1, maxStep);
   return (getGameStateAfterMove(nextBoard, 1-playerIndex));
 };
 
 const rule = <>
   A játék a nullával indul. A játékosok felváltva
-  mondhatnak (pozitív egész) számokat: a soron következő játékos mindig 1-gyel, 2-vel vagy 3-mal
-  nagyobb számot mondhat, mint amit az előző mondott. Az veszít, aki először nagyobbat mond
-  40-nél.
+  lépnek a pozitív egész számokon: a soron következő játékos mindig 1-gyel, 2-vel vagy 3-mal
+  léphet előre. Az veszít, aki először lép {target}-nél nagyobb számra.
 </>;
 
 const Game = strategyGameFactory({
@@ -55,7 +67,7 @@ const Game = strategyGameFactory({
   title: '+1, +2, +3',
   GameBoard,
   G: {
-    getPlayerStepDescription: () => 'Válaszd ki, hogy mennyivel szeretnéd növelni a számot.',
+    getPlayerStepDescription: () => 'Válaszd ki, hogy melyik számra lépsz.',
     generateStartBoard: () => 0,
     getGameStateAfterAiTurn
   }
