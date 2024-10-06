@@ -40,8 +40,8 @@ npm ci
 npm run dev
 ```
 
-Known issue: sometimes weird bugs happen (i.e. the app does not start at all with `npm run dev`) which disappear if you delete the `.parcel-cache`
-directory manually and re-load or you can use the slightly slower but more robust `npm run dev:nocache` command to start the app.
+Known issue: sometimes weird bugs happen with parcel caching (i.e. the app does not start at all with `npm run dev:withcache`) which disappear if you delete the `.parcel-cache`
+directory manually and re-load. Therefore `npm run dev` uses the slightly slower but more robust dev server without caching.
 
 If you are using Windows and you see `Error: The specified module could not be found. ... code: 'ERR_DLOPEN_FAILED'`
 https://github.com/parcel-bundler/parcel/issues/7104#issuecomment-967260755 might help you.
