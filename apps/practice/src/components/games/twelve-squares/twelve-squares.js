@@ -103,11 +103,9 @@ export const TwelveSquares = strategyGameFactory({
   rule,
   title: 'Tizenkét mező',
   GameBoard,
-  G: {
-	  getPlayerStepDescription: ({ ctx: { playerIndex } }) => playerIndex === 0
-      ? 'Kattints a mezőre ahova lépni szeretnél a bal oldali bábuval.'
-      : 'Kattints a mezőre ahova lépni szeretnél a jobb oldali bábuval.',
-	  generateStartBoard,
-	  getGameStateAfterAiTurn
-  }
+  getPlayerStepDescription: ({ ctx: { playerIndex } }) => playerIndex === 0
+    ? 'Kattints a mezőre ahova lépni szeretnél a bal oldali bábuval.'
+    : 'Kattints a mezőre ahova lépni szeretnél a jobb oldali bábuval.',
+  generateStartBoard,
+  getGameStateAfterAiTurn
 });

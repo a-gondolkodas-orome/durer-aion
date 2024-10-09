@@ -98,9 +98,7 @@ export const ChessBishops = strategyGameFactory({
   rule,
   title: 'Futók lerakása',
   GameBoard,
-  G: {
-    getPlayerStepDescription: () => 'Kattints egy mezőre, amit nem üt egyik futó sem.',
-    generateStartBoard,
-    getGameStateAfterAiTurn
-  }
+  getPlayerStepDescription: () => 'Kattints egy mezőre, amit nem üt egyik futó sem.',
+  generateStartBoard,
+  getGameStateAfterAiTurn
 });

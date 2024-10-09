@@ -127,9 +127,7 @@ export const FourPilesSpreadAhead = strategyGameFactory({
   rule,
   title: '4 kupacban előrepakolás',
   GameBoard,
-  G: {
-    getPlayerStepDescription: () => 'Kattints egy korongra, hogy jelezd, hány korongot szeretnél elvenni a kupacból.',
-    generateStartBoard,
-    getGameStateAfterAiTurn: ({ board }) => getGameStateAfterMove(board, getOptimalAiMove(board))
-  }
+  getPlayerStepDescription: () => 'Kattints egy korongra, hogy jelezd, hány korongot szeretnél elvenni a kupacból.',
+  generateStartBoard,
+  getGameStateAfterAiTurn: ({ board }) => getGameStateAfterMove(board, getOptimalAiMove(board))
 });

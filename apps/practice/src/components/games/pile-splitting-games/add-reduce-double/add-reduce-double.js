@@ -121,9 +121,7 @@ export const AddReduceDouble = strategyGameFactory({
   rule,
   title: 'Kettőt vesz, egyet kap',
   GameBoard,
-  G: {
-    getPlayerStepDescription: () => 'Kattints egy korongra, hogy jelezd, hány korongot szeretnél elvenni a kupacból.',
-    generateStartBoard,
-    getGameStateAfterAiTurn: ({ board }) => getGameStateAfterMove(board, getOptimalAiMove(board))
-  }
+  getPlayerStepDescription: () => 'Kattints egy korongra, hogy jelezd, hány korongot szeretnél elvenni a kupacból.',
+  generateStartBoard,
+  getGameStateAfterAiTurn: ({ board }) => getGameStateAfterMove(board, getOptimalAiMove(board))
 });

@@ -159,15 +159,13 @@ export const Policemanthief = strategyGameFactory({
   title: "Rendőr-tolvaj",
   roleLabels: ["Rendőrök", "Tolvaj"],
   GameBoard,
-  G: {
-    getPlayerStepDescription: ({ ctx }) => {
-      if (ctx.playerIndex === 0) {
-        return `Kattints arra az útkereszteződésre, ahová a ${ctx.turnStage === "secondMove" ? "zöld" : "kék"} rendőrrel lépni szeretnél.`;
-      } else {
-        return "Kattints arra az útkereszteződésre, ahová a tolvajjal lépni szeretnél.";
-      }
-    },
-    generateStartBoard,
-    getGameStateAfterAiTurn
-  }
+  getPlayerStepDescription: ({ ctx }) => {
+    if (ctx.playerIndex === 0) {
+      return `Kattints arra az útkereszteződésre, ahová a ${ctx.turnStage === "secondMove" ? "zöld" : "kék"} rendőrrel lépni szeretnél.`;
+    } else {
+      return "Kattints arra az útkereszteződésre, ahová a tolvajjal lépni szeretnél.";
+    }
+  },
+  generateStartBoard,
+  getGameStateAfterAiTurn
 });

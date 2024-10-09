@@ -233,9 +233,7 @@ export const PrimeExponentials = strategyGameFactory({
   rule,
   title: 'Prímhatványok kivonása',
   GameBoard,
-  G: {
-    getPlayerStepDescription,
-    generateStartBoard,
-    getGameStateAfterAiTurn
-  }
+  getPlayerStepDescription,
+  generateStartBoard,
+  getGameStateAfterAiTurn
 })

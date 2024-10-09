@@ -78,9 +78,7 @@ export const TwoTimesTwo = strategyGameFactory({
   rule,
   title: '4 mezőbe különbözőt',
   GameBoard,
-  G: {
-    getPlayerStepDescription,
-    generateStartBoard,
-    getGameStateAfterAiTurn
-  }
+  getPlayerStepDescription,
+  generateStartBoard,
+  getGameStateAfterAiTurn
 });

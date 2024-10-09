@@ -83,9 +83,7 @@ export const SuperstitiousCounting = strategyGameFactory({
   rule,
   title: 'Babonás lépkedés',
   GameBoard,
-  G: {
-    getPlayerStepDescription: () => 'Kattints a számra ahova lépni szeretnél.',
-    generateStartBoard,
-    getGameStateAfterAiTurn
-  }
+  getPlayerStepDescription: () => 'Kattints a számra ahova lépni szeretnél.',
+  generateStartBoard,
+  getGameStateAfterAiTurn
 });

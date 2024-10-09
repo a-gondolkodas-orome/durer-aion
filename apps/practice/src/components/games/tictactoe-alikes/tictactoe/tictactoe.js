@@ -77,9 +77,7 @@ export const TicTacToe = strategyGameFactory({
   rule,
   title: 'Átszínezős tic-tac-toe',
   GameBoard,
-  G: {
-    getPlayerStepDescription,
-    generateStartBoard: generateEmptyTicTacToeBoard,
-    getGameStateAfterAiTurn
-  }
+  getPlayerStepDescription,
+  generateStartBoard: generateEmptyTicTacToeBoard,
+  getGameStateAfterAiTurn
 });

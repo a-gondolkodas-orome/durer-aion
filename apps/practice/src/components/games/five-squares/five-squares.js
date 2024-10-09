@@ -86,9 +86,7 @@ export const FiveSquares = strategyGameFactory({
   rule,
   title: '5 mezőbe különbözőt',
   GameBoard,
-  G: {
-    getPlayerStepDescription,
-    generateStartBoard,
-    getGameStateAfterAiTurn
-  }
+  getPlayerStepDescription,
+  generateStartBoard,
+  getGameStateAfterAiTurn
 });

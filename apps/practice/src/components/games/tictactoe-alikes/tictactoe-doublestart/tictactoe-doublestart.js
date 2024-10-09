@@ -67,9 +67,7 @@ export const TicTacToeDoubleStart = strategyGameFactory({
   rule,
   title: 'Duplánkezdő 3x3 amőba',
   GameBoard,
-  G: {
-    getPlayerStepDescription,
-    generateStartBoard: generateEmptyTicTacToeBoard,
-    getGameStateAfterAiTurn
-  }
+  getPlayerStepDescription,
+  generateStartBoard: generateEmptyTicTacToeBoard,
+  getGameStateAfterAiTurn
 });

@@ -221,9 +221,7 @@ export const SharkChase = strategyGameFactory({
   roleLabels: ['Kutató leszek!', 'Cápa leszek!'],
   initialTurnStages: ['choosePiece', 'firstSharkMove'],
   GameBoard,
-  G: {
-    getPlayerStepDescription,
-    generateStartBoard,
-    getGameStateAfterAiTurn
-  }
+  getPlayerStepDescription,
+  generateStartBoard,
+  getGameStateAfterAiTurn
 });

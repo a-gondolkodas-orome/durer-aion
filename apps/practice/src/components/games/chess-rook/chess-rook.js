@@ -70,9 +70,7 @@ export const ChessRook = strategyGameFactory({
   rule,
   title: 'Barangolás bástyával',
   GameBoard,
-  G: {
-    getPlayerStepDescription: () => 'Kattints egy szabad mezőre a bástyával egy sorban vagy oszlopban.',
-    generateStartBoard,
-    getGameStateAfterAiTurn
-  }
+  getPlayerStepDescription: () => 'Kattints egy szabad mezőre a bástyával egy sorban vagy oszlopban.',
+  generateStartBoard,
+  getGameStateAfterAiTurn
 });

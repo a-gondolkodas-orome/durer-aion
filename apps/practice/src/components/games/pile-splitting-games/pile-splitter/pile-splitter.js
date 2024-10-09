@@ -109,9 +109,7 @@ export const PileSplitter = strategyGameFactory({
   rule,
   title: 'Kupac kettéosztó',
   GameBoard,
-  G: {
-    getPlayerStepDescription,
-    generateStartBoard,
-    getGameStateAfterAiTurn
-  }
+  getPlayerStepDescription,
+  generateStartBoard,
+  getGameStateAfterAiTurn
 });

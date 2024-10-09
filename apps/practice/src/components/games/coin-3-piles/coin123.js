@@ -35,9 +35,7 @@ export const Coin123 = strategyGameFactory({
   rule,
   title: 'Érmék beváltása',
   GameBoard,
-  G: {
-    getPlayerStepDescription,
-    generateStartBoard,
-    getGameStateAfterAiTurn
-  }
+  getPlayerStepDescription,
+  generateStartBoard,
+  getGameStateAfterAiTurn
 });

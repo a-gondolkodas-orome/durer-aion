@@ -71,9 +71,7 @@ export const FiveFiveCard = strategyGameFactory({
   rule,
   title: 'Párbaj 5 lappal',
   GameBoard,
-  G: {
-    getPlayerStepDescription: () => 'Vegyél el egy kártyát az ellenfél elől.',
-    generateStartBoard: () => Array(15).fill(null),
-    getGameStateAfterAiTurn
-  }
+  getPlayerStepDescription: () => 'Vegyél el egy kártyát az ellenfél elől.',
+  generateStartBoard: () => Array(15).fill(null),
+  getGameStateAfterAiTurn
 });

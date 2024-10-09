@@ -135,9 +135,7 @@ export const CubeColoring = strategyGameFactory({
   rule,
   title: 'Kockaszínezés',
   GameBoard,
-  G: {
-    getPlayerStepDescription: () => 'Válassz színt, majd színezz meg egy csúcsot!',
-    generateStartBoard,
-    getGameStateAfterAiTurn
-  }
+  getPlayerStepDescription: () => 'Válassz színt, majd színezz meg egy csúcsot!',
+  generateStartBoard,
+  getGameStateAfterAiTurn
 });

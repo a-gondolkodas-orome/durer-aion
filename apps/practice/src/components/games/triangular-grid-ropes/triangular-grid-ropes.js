@@ -94,9 +94,7 @@ export const TriangularGridRopes = strategyGameFactory({
   rule,
   title: '10 totemoszlop',
   GameBoard,
-  G: {
-    getPlayerStepDescription: () => 'Kattints két oszlopra, amik között kötelet szeretnél kifeszíteni.',
-    generateStartBoard: () => [],
-    getGameStateAfterAiTurn
-  }
+  getPlayerStepDescription: () => 'Kattints két oszlopra, amik között kötelet szeretnél kifeszíteni.',
+  generateStartBoard: () => [],
+  getGameStateAfterAiTurn
 });

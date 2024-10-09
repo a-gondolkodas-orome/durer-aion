@@ -192,20 +192,16 @@ export const SixDiscs = strategyGameFactory({
   rule: rule(6),
   title: "Átfordítás, elvétel (6 korong)",
   GameBoard: gameBoardFactory(6),
-  G: {
-    getPlayerStepDescription,
-    generateStartBoard: generateStartBoard(6),
-    getGameStateAfterAiTurn
-  }
+  getPlayerStepDescription,
+  generateStartBoard: generateStartBoard(6),
+  getGameStateAfterAiTurn
 });
 
 export const TenDiscs = strategyGameFactory({
   rule: rule(10),
   title: "Átfordítás, elvétel (10 korong)",
   GameBoard: gameBoardFactory(10),
-  G: {
-    getPlayerStepDescription,
-    generateStartBoard: generateStartBoard(10),
-    getGameStateAfterAiTurn
-  }
+  getPlayerStepDescription,
+  generateStartBoard: generateStartBoard(10),
+  getGameStateAfterAiTurn
 });

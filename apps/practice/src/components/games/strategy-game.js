@@ -10,10 +10,13 @@ export const strategyGameFactory = ({
   roleLabels,
   initialTurnStages,
   GameBoard,
-  G
+  generateStartBoard,
+  moves,
+  getGameStateAfterAiTurn,
+  getPlayerStepDescription
 }) => {
   return () => {
-    const [board, setBoard] = useState(G.generateStartBoard())
+    const [board, setBoard] = useState(generateStartBoard())
     const [phase, setPhase] = useState('roleSelection');
     const [playerIndex, setPlayerIndex] = useState(null);
     const [next, setNext] = useState(null);
@@ -23,7 +26,7 @@ export const strategyGameFactory = ({
     const [turnStage, setTurnStage] = useState(null);
 
     const startNewGame = () => {
-      setBoard(G.generateStartBoard());
+      setBoard(generateStartBoard());
       setPhase('roleSelection');
       setPlayerIndex(null);
       setNext(null);
@@ -67,13 +70,6 @@ export const strategyGameFactory = ({
       }
     };
 
-    const moves = {
-      // general move, should not be needed if specialized functions
-      // are provided for each move in G
-      setBoard,
-      ...G.moves
-    };
-
     const ctx = {
       shouldPlayerMoveNext,
       playerIndex,
@@ -90,11 +86,16 @@ export const strategyGameFactory = ({
       const localPlayerIndex = playerIndex === null ? 1 : playerIndex;
       const time = Math.floor(Math.random() * 500 + 1000);
       setTimeout(() => {
-        const { intermediateBoard, nextBoard, isGameEnd, winnerIndex } = G.getGameStateAfterAiTurn({
+        const { intermediateBoard, nextBoard, isGameEnd, winnerIndex } = getGameStateAfterAiTurn({
           board: currentBoard,
           ctx,
           events,
-          moves
+          moves: {
+            // FIXME: general move, should not be needed if specialized functions
+            // are provided for each move
+            setBoard,
+            ...moves
+          }
         });
         const stageTimeout = intermediateBoard !== undefined ? 750 : 0;
         if (intermediateBoard !== undefined) {
@@ -123,11 +124,11 @@ export const strategyGameFactory = ({
               board={board}
               ctx={ctx}
               events={events}
-              moves={moves}
+              moves={{ setBoard, ...moves }}
             />
             <GameSidebar
               roleLabels={roleLabels}
-              stepDescription={G.getPlayerStepDescription({ board, ctx })}
+              stepDescription={getPlayerStepDescription({ board, ctx })}
               ctx={{ phase, shouldPlayerMoveNext, isPlayerWinner }}
               moves={{ chooseRole, startNewGame }}
             />

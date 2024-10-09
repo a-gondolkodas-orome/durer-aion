@@ -75,9 +75,7 @@ export const RockPaperScissor = strategyGameFactory({
   rule,
   title: 'Kő-papír-olló',
   GameBoard,
-  G: {
-    getPlayerStepDescription: () => 'Távolíts el egy kártyát az ellenfél elől.',
-    generateStartBoard: () => Array(9).fill(null),
-    getGameStateAfterAiTurn
-  }
+  getPlayerStepDescription: () => 'Távolíts el egy kártyát az ellenfél elől.',
+  generateStartBoard: () => Array(9).fill(null),
+  getGameStateAfterAiTurn
 });

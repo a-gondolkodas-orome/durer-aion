@@ -14,9 +14,7 @@ export const Coin357 = strategyGameFactory({
   rule,
   title: '15 érme beváltása',
   GameBoard,
-  G: {
-    getPlayerStepDescription,
-    generateStartBoard: () => ([3, 5, 7]),
-    getGameStateAfterAiTurn
-  }
+  getPlayerStepDescription,
+  generateStartBoard: () => ([3, 5, 7]),
+  getGameStateAfterAiTurn
 });

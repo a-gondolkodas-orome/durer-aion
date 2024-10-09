@@ -125,9 +125,7 @@ export const HunyadiAndTheJanissaries = strategyGameFactory({
   title: 'Hunyadi és a janicsárok',
   roleLabels: ['Szultán leszek', 'Hunyadi leszek'],
   GameBoard,
-  G: {
-    getPlayerStepDescription,
-    generateStartBoard,
-    getGameStateAfterAiTurn
-  }
+  getPlayerStepDescription,
+  generateStartBoard,
+  getGameStateAfterAiTurn
 });

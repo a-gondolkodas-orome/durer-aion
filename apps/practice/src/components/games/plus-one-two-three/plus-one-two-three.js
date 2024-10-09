@@ -66,9 +66,7 @@ export const PlusOneTwoThree = strategyGameFactory({
   rule: rule,
   title: '+1, +2, +3',
   GameBoard,
-  G: {
-    getPlayerStepDescription: () => 'Válaszd ki, hogy melyik számra lépsz.',
-    generateStartBoard: () => 0,
-    getGameStateAfterAiTurn
-  }
+  getPlayerStepDescription: () => 'Válaszd ki, hogy melyik számra lépsz.',
+  generateStartBoard: () => 0,
+  getGameStateAfterAiTurn
 });

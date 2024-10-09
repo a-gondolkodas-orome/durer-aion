@@ -54,9 +54,7 @@ export const AntiTicTacToe = strategyGameFactory({
   rule,
   title: '3x3-as antiamőba',
   GameBoard,
-  G: {
-    getPlayerStepDescription: () => 'Helyezz le egy korongot egy üres mezőre kattintással.',
-    generateStartBoard: generateEmptyTicTacToeBoard,
-    getGameStateAfterAiTurn
-  }
+  getPlayerStepDescription: () => 'Helyezz le egy korongot egy üres mezőre kattintással.',
+  generateStartBoard: generateEmptyTicTacToeBoard,
+  getGameStateAfterAiTurn
 });

@@ -88,20 +88,16 @@ export const NumberCovering8 = strategyGameFactory({
   rule: rule8,
   title: 'Számok lefedés 1-től 8-ig',
   GameBoard,
-  G: {
-    getPlayerStepDescription: () => 'Kattints egy számra, hogy lefedd.',
-    generateStartBoard: () => range(1, 9),
-    getGameStateAfterAiTurn
-  }
+  getPlayerStepDescription: () => 'Kattints egy számra, hogy lefedd.',
+  generateStartBoard: () => range(1, 9),
+  getGameStateAfterAiTurn
 });
 
 export const NumberCovering10 = strategyGameFactory({
   rule: rule10,
   title: 'Számok lefedés 1-től 10-ig',
   GameBoard,
-  G: {
-    getPlayerStepDescription: () => 'Kattints egy számra, hogy lefedd.',
-    generateStartBoard: () => range(1, 11),
-    getGameStateAfterAiTurn
-  }
+  getPlayerStepDescription: () => 'Kattints egy számra, hogy lefedd.',
+  generateStartBoard: () => range(1, 11),
+  getGameStateAfterAiTurn
 });

@@ -226,9 +226,7 @@ export const Bacteria = strategyGameFactory({
   title: "Baktérimok terjedése",
   roleLabels: ["Támadó leszek", "Védekező leszek"],
   GameBoard,
-  G: {
-    getPlayerStepDescription,
-    generateStartBoard,
-    getGameStateAfterAiTurn
-  }
+  getPlayerStepDescription,
+  generateStartBoard,
+  getGameStateAfterAiTurn
 });
