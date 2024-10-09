@@ -59,7 +59,7 @@ const generateStartBoard = () => {
   }
 };
 
-const GameBoard = ({ board: { bacteria, goals }, ctx }) => {
+const GameBoard = ({ board: { bacteria, goals }, ctx, events }) => {
   const [attackRow, setAttackRow] = useState(null);
   const [attackCol, setAttackCol] = useState(null);
 
@@ -93,10 +93,10 @@ const GameBoard = ({ board: { bacteria, goals }, ctx }) => {
     if (!isPlayerAttacker) {
       nextBoard.bacteria[row][col] -= 1;
       if (areAllBacteriaRemoved(nextBoard.bacteria)) {
-        ctx.endPlayerTurn({ nextBoard, isGameEnd: true, winnerIndex: 1 });
+        events.endPlayerTurn({ nextBoard, isGameEnd: true, winnerIndex: 1 });
         return;
       }
-      ctx.endPlayerTurn({ nextBoard, isGameEnd: false });
+      events.endPlayerTurn({ nextBoard, isGameEnd: false });
       return;
     }
 
@@ -117,9 +117,9 @@ const GameBoard = ({ board: { bacteria, goals }, ctx }) => {
     }
 
     if (goalsReached.length >= 1) {
-      ctx.endPlayerTurn({ nextBoard, isGameEnd: true, winnerIndex: 0 });
+      events.endPlayerTurn({ nextBoard, isGameEnd: true, winnerIndex: 0 });
     } else {
-      ctx.endPlayerTurn({ nextBoard, isGameEnd: false });
+      events.endPlayerTurn({ nextBoard, isGameEnd: false });
     }
 
     setAttackRow(null);
@@ -221,7 +221,7 @@ const rule = (
   </>
 );
 
-const Game = strategyGameFactory({
+export const Bacteria = strategyGameFactory({
   rule,
   title: "Baktérimok terjedése",
   roleLabels: ["Támadó leszek", "Védekező leszek"],
@@ -232,9 +232,3 @@ const Game = strategyGameFactory({
     getGameStateAfterAiTurn
   }
 });
-
-export const Bacteria = () => {
-  const [board, setBoard] = useState(generateStartBoard());
-
-  return <Game board={board} setBoard={setBoard} />;
-};

@@ -2,9 +2,9 @@
 
 import { isNull, cloneDeep } from 'lodash';
 
-export const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
+export const getGameStateAfterAiTurn = ({ board, ctx }) => {
   const nextBoard = cloneDeep(board);
-  nextBoard[getOptimalAiPlacingPosition(board, playerIndex)] = 'removed';
+  nextBoard[getOptimalAiPlacingPosition(board, ctx.playerIndex)] = 'removed';
   return getGameStateAfterMove(nextBoard);
 };
 

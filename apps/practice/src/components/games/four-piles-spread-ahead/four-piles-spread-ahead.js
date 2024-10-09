@@ -19,7 +19,7 @@ const getGameStateAfterMove = (board, { pileId, pieceId }) => {
   return { nextBoard, intermediateBoard, isGameEnd, winnerIndex: null };
 };
 
-const GameBoard = ({ board, setBoard, ctx }) => {
+const GameBoard = ({ board, ctx, events }) => {
   const [hoveredPiece, setHoveredPiece] = useState(null);
 
   const nonExistent = ({ pileId, pieceId }) => {
@@ -43,7 +43,7 @@ const GameBoard = ({ board, setBoard, ctx }) => {
   const clickPiece = ({ pileId, pieceId }) => {
     if (isDisabled({ pileId, pieceId })) return;
 
-    ctx.endPlayerTurn(getGameStateAfterMove(board, { pileId, pieceId }));
+    events.endPlayerTurn(getGameStateAfterMove(board, { pileId, pieceId }));
 
     setHoveredPiece(null);
   };
@@ -123,7 +123,7 @@ const rule = <>
   elvett korongokat. Az veszít, aki nem tud lépni.
 </>;
 
-const Game = strategyGameFactory({
+export const FourPilesSpreadAhead = strategyGameFactory({
   rule,
   title: '4 kupacban előrepakolás',
   GameBoard,
@@ -133,9 +133,3 @@ const Game = strategyGameFactory({
     getGameStateAfterAiTurn: ({ board }) => getGameStateAfterMove(board, getOptimalAiMove(board))
   }
 });
-
-export const FourPilesSpreadAhead = () => {
-  const [board, setBoard] = useState(generateStartBoard());
-
-  return <Game board={board} setBoard={setBoard} />;
-};

@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import { strategyGameFactory } from '../strategy-game';
 import { range, sum, sample } from 'lodash';
 
-const GameBoard = ({ board, ctx }) => {
+const GameBoard = ({ board, ctx, events }) => {
 
   const clickNumber = (number) => {
     if (ctx.shouldPlayerMoveNext) {
       let nextBoard = [...board];
       nextBoard[number-1] = -1;
-      ctx.endPlayerTurn(getGameStateAfterMove(nextBoard));
+      events.endPlayerTurn(getGameStateAfterMove(nextBoard));
     }
   };
 
@@ -52,7 +52,7 @@ const getGameStateAfterMove = (nextBoard) => {
   return { nextBoard, isGameEnd, winnerIndex };
 };
 
-const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
+const getGameStateAfterAiTurn = ({ board, ctx }) => {
   let nextBoard = [...board];
   const notCovered = nextBoard.filter(i => i !== -1);
   const evens = notCovered.filter(i => i%2 === 0);
@@ -60,7 +60,7 @@ const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
   if (evens.length===odds.length || evens.length === 0 || odds.length === 0) {
     nextBoard[sample(notCovered) - 1] = -1;
   } else {
-    if (playerIndex===0){
+    if (ctx.playerIndex === 0){
       const candidates = evens.length > odds.length ? evens : odds;
       nextBoard[sample(candidates) - 1] = -1;
     } else {
@@ -84,7 +84,7 @@ számot addig, amíg csak két szám marad. Ha a megmaradt két szám összege p
 nyer, ha pedig páratlan, akkor a második.
 </>;
 
-const Game8 = strategyGameFactory({
+export const NumberCovering8 = strategyGameFactory({
   rule: rule8,
   title: 'Számok lefedés 1-től 8-ig',
   GameBoard,
@@ -95,7 +95,7 @@ const Game8 = strategyGameFactory({
   }
 });
 
-const Game10 = strategyGameFactory({
+export const NumberCovering10 = strategyGameFactory({
   rule: rule10,
   title: 'Számok lefedés 1-től 10-ig',
   GameBoard,
@@ -105,15 +105,3 @@ const Game10 = strategyGameFactory({
     getGameStateAfterAiTurn
   }
 });
-
-export const NumberCovering8 = () => {
-  const [board, setBoard] = useState(range(1, 9));
-
-  return <Game8 board={board} setBoard={setBoard} />;
-};
-
-export const NumberCovering10 = () => {
-  const [board, setBoard] = useState(range(1, 11));
-
-  return <Game10 board={board} setBoard={setBoard} />;
-};

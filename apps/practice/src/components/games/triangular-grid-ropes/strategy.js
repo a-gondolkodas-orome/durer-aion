@@ -44,8 +44,8 @@ export const getAllowedSuperset = (board, { from, to }) => {
   return { from, to };
 };
 
-export const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
-  const move = getOptimalAiMove({ board, playerIndex });
+export const getGameStateAfterAiTurn = ({ board, ctx }) => {
+  const move = getOptimalAiMove({ board, playerIndex: ctx.playerIndex });
   const nextBoard = [...board];
   nextBoard.push(move);
   return { nextBoard, isGameEnd: isGameEnd(nextBoard), winnerIndex: null };

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { range } from 'lodash';
 import { getGameStateAfterMove  } from './strategy/strategy';
 
-export const GameBoard = ({ board, setBoard, ctx }) => {
+export const GameBoard = ({ board, ctx, events, moves }) => {
   const [valueOfRemovedCoin, setValueOfRemovedCoin] = useState(null);
   const [hoveredPile, setHoveredPile] = useState(null);
 
@@ -23,8 +23,8 @@ export const GameBoard = ({ board, setBoard, ctx }) => {
   const undoCoinRemoval = () => {
     const nextBoard = [...board];
     nextBoard[valueOfRemovedCoin] += 1;
-    setBoard(nextBoard);
-    ctx.setTurnStage(null);
+    moves.setBoard(nextBoard);
+    events.setTurnStage(null);
     setValueOfRemovedCoin(null);
   };
 
@@ -32,10 +32,10 @@ export const GameBoard = ({ board, setBoard, ctx }) => {
     if (!isRemovalAllowed(coinValue)) return;
 
     setValueOfRemovedCoin(coinValue);
-    ctx.setTurnStage('placeBack');
+    events.setTurnStage('placeBack');
     const nextBoard = [...board];
     nextBoard[coinValue] -= 1;
-    setBoard(nextBoard);
+    moves.setBoard(nextBoard);
     if (coinValue === 0) endTurn(nextBoard);
   };
 
@@ -50,10 +50,10 @@ export const GameBoard = ({ board, setBoard, ctx }) => {
   const resetTurnState = () => {
     setHoveredPile(null);
     setValueOfRemovedCoin(null);
-    ctx.setTurnStage(null);
+    events.setTurnStage(null);
   };
   const endTurn = (nextBoard) => {
-    ctx.endPlayerTurn(getGameStateAfterMove(nextBoard));
+    events.endPlayerTurn(getGameStateAfterMove(nextBoard));
     resetTurnState();
   };
   const getCoinBgColor = (coinValue) => {

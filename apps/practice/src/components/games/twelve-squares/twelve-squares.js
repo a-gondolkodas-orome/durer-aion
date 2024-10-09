@@ -11,9 +11,9 @@ const getGameStateAfterMove = (nextBoard) => {
 	return { nextBoard, isGameEnd: nextBoard.right < nextBoard.left, winnerIndex: null };
 };
 
-const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
+const getGameStateAfterAiTurn = ({ board, ctx }) => {
   const step = getOptimalAiStep(board);
-  const nextBoard = playerIndex === 0
+  const nextBoard = ctx.playerIndex === 0
     ? { left: board.left, right: board.right - step }
     : { left: board.left + step, right: board.right };
   return getGameStateAfterMove(nextBoard);
@@ -27,7 +27,7 @@ const getOptimalAiStep = ({ left, right }) => {
   return (dst+1) % 3;
 };
 
-const GameBoard = ({ board, ctx }) => {
+const GameBoard = ({ board, ctx, events }) => {
   const isMoveAllowed = (step) => {
 	  if(!ctx.shouldPlayerMoveNext) return false;
     if (step === board.right - board.left) return false;
@@ -39,7 +39,7 @@ const GameBoard = ({ board, ctx }) => {
     const nextBoard = ctx.playerIndex === 0
       ? { left: board.left + step, right: board.right }
       : { left: board.left, right: board.right - step };
-	  ctx.endPlayerTurn(getGameStateAfterMove(nextBoard));
+	  events.endPlayerTurn(getGameStateAfterMove(nextBoard));
   };
 
   const potentialStep = i => {
@@ -99,7 +99,7 @@ const rule = <>
 	szabad. Az nyer, aki átugorja az ellenfél bábuját.
 </>;
 
-const Game = strategyGameFactory({
+export const TwelveSquares = strategyGameFactory({
   rule,
   title: 'Tizenkét mező',
   GameBoard,
@@ -111,9 +111,3 @@ const Game = strategyGameFactory({
 	  getGameStateAfterAiTurn
   }
 });
-
-export const TwelveSquares = () => {
-  const [board, setBoard] = useState(generateStartBoard());
-
-  return <Game board={board} setBoard={setBoard} />;
-};

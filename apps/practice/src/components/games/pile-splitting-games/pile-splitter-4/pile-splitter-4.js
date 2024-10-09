@@ -63,7 +63,7 @@ const getBoardAfterMove = (board, { removedPileId, splitPileId, pieceId }) => {
   return { intermediateBoard, nextBoard };
 };
 
-const GameBoard = ({ board, setBoard,  ctx }) => {
+const GameBoard = ({ board, ctx, events, moves }) => {
   const [removedPileId, setRemovedPileId] = useState(null);
   const [hoveredPiece, setHoveredPiece] = useState(null);
 
@@ -92,10 +92,10 @@ const GameBoard = ({ board, setBoard,  ctx }) => {
       pieceId
     });
 
-    setBoard(intermediateBoard);
+    moves.setBoard(intermediateBoard);
 
     setTimeout(() => {
-      ctx.endPlayerTurn({ nextBoard, isGameEnd: isGameEnd(nextBoard), winnerIndex: null });
+      events.endPlayerTurn({ nextBoard, isGameEnd: isGameEnd(nextBoard), winnerIndex: null });
 
       setRemovedPileId(null);
       setHoveredPiece(null);
@@ -192,7 +192,7 @@ const rule = <>
   Egy lépést követően tehát újra 4 kupac marad. Az veszít, aki nem tud lépni.
 </>;
 
-const Game = strategyGameFactory({
+export const PileSplitter4 = strategyGameFactory({
   rule,
   title: 'Kupac kettéosztó 4 kupaccal',
   GameBoard,
@@ -202,9 +202,3 @@ const Game = strategyGameFactory({
     getGameStateAfterAiTurn
   }
 });
-
-export const PileSplitter4 = () => {
-  const [board, setBoard] = useState(generateStartBoard());
-
-  return <Game board={board} setBoard={setBoard} />;
-};

@@ -31,10 +31,10 @@ const getGameStateAfterAiTurn = ({ board }) => {
   return getGameState(nextBoard);
 };
 
-const GameBoard = ({ board, ctx }) => {
+const GameBoard = ({ board, ctx, events }) => {
   const placePiece = id => {
     const nextBoard = addPiece(board, id);
-    ctx.endPlayerTurn(getGameState(nextBoard));
+    events.endPlayerTurn(getGameState(nextBoard));
   };
 
   return (
@@ -74,7 +74,7 @@ const rule = <>
   0, 1, 2, 3 a kiosztás a végén valamilyen sorrendben).
 </>;
 
-const Game = strategyGameFactory({
+export const TwoTimesTwo = strategyGameFactory({
   rule,
   title: '4 mezőbe különbözőt',
   GameBoard,
@@ -84,9 +84,3 @@ const Game = strategyGameFactory({
     getGameStateAfterAiTurn
   }
 });
-
-export const TwoTimesTwo = () => {
-  const [board, setBoard] = useState(generateStartBoard());
-
-  return <Game board={board} setBoard={setBoard} />;
-};

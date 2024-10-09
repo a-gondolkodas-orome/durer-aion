@@ -12,7 +12,7 @@ const getGameStateAfterAiTurn = ({ board }) => {
   return { intermediateBoard, nextBoard, isGameEnd: isGameEnd(nextBoard), winnerIndex: null };
 };
 
-const GameBoard = ({ board, setBoard, ctx }) => {
+const GameBoard = ({ board, ctx, events, moves }) => {
   const [hoveredPiece, setHoveredPiece] = useState(null);
 
   const isDisabled = ({ pileId, pieceId }) => {
@@ -23,11 +23,11 @@ const GameBoard = ({ board, setBoard, ctx }) => {
   const clickPiece = ({ pileId, pieceId }) => {
     if (isDisabled({ pileId, pieceId })) return;
 
-    setBoard(pileId === 0 ? [board[0], 0] : [0, board[1]]);
+    moves.setBoard(pileId === 0 ? [board[0], 0] : [0, board[1]]);
 
     setTimeout(() => {
       const nextBoard = [pieceId + 1, board[pileId] - pieceId - 1];
-      ctx.endPlayerTurn({ nextBoard, isGameEnd: isGameEnd(nextBoard), winnerIndex: null });
+      events.endPlayerTurn({ nextBoard, isGameEnd: isGameEnd(nextBoard), winnerIndex: null });
 
       setHoveredPiece(null);
     }, 750);
@@ -105,7 +105,7 @@ const rule = <>
   Az veszít, aki nem tud lépni.
 </>;
 
-const Game = strategyGameFactory({
+export const PileSplitter = strategyGameFactory({
   rule,
   title: 'Kupac kettéosztó',
   GameBoard,
@@ -115,9 +115,3 @@ const Game = strategyGameFactory({
     getGameStateAfterAiTurn
   }
 });
-
-export const PileSplitter = () => {
-  const [board, setBoard] = useState(generateStartBoard());
-
-  return <Game board={board} setBoard={setBoard} />;
-};

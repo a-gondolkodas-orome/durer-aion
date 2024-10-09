@@ -5,7 +5,7 @@ describe('Anti TicTacToe strategy', () => {
     it('should place to middle place as a starting move', () => {
       const board = Array(9).fill(null);
 
-      const result = getGameStateAfterAiTurn({ board, playerIndex: 1 });
+      const result = getGameStateAfterAiTurn({ board, ctx: { playerIndex: 1 } });
       expect(result.nextBoard[4]).toEqual('red');
     });
 
@@ -14,13 +14,13 @@ describe('Anti TicTacToe strategy', () => {
         'blue', null, null,
         null, 'red', null,
         null, null, null
-      ], playerIndex: 1 }).nextBoard[8]).toEqual('red');
+      ], ctx: { playerIndex: 1 } }).nextBoard[8]).toEqual('red');
 
       expect(getGameStateAfterAiTurn({ board: [
         'blue', null, null,
         null, 'red', 'blue',
         null, null, 'red'
-      ], playerIndex: 1 }).nextBoard[3]).toEqual('red');
+      ], ctx: { playerIndex: 1 } }).nextBoard[3]).toEqual('red');
     });
 
     it('should not place to achieve 3 in a row if possible', () => {
@@ -29,7 +29,7 @@ describe('Anti TicTacToe strategy', () => {
         'blue', 'red', 'red',
         'red', null, 'red'
       ];
-      const result = getGameStateAfterAiTurn({ board, playerIndex: 0 });
+      const result = getGameStateAfterAiTurn({ board, ctx: { playerIndex: 0 } });
       expect(result.nextBoard[1]).not.toEqual('blue');
     });
   });

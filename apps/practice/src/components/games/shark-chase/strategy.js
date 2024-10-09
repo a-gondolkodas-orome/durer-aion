@@ -10,10 +10,10 @@ export const getGameStateAfterMove = (nextBoard) => {
   };
 };
 
-export const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
+export const getGameStateAfterAiTurn = ({ board, ctx }) => {
   const nextBoard = cloneDeep(board);
 
-  if (playerIndex === 0) {
+  if (ctx.playerIndex === 0) {
     nextBoard.shark = getNextSharkPositionByAI(board.submarines, board.shark);
   } else {
     const { from, to } = getOptimalSubmarineMoveByAi(board);

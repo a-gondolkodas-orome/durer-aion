@@ -9,7 +9,7 @@ import {
 } from './strategy/strategy';
 import { cloneDeep } from 'lodash';
 
-const GameBoard = ({ board, setBoard, ctx }) => {
+const GameBoard = ({ board, ctx, events, moves }) => {
   const [hoveredPiece, setHoveredPiece] = useState(null);
 
   const isPlayerSultan = ctx.playerIndex === 0;
@@ -29,13 +29,13 @@ const GameBoard = ({ board, setBoard, ctx }) => {
     if (isPlayerSultan) {
       const nextBoard = cloneDeep(board);
       nextBoard[rowIndex][pieceIndex] = board[rowIndex][pieceIndex] === 'blue' ? 'red' : 'blue';
-      setBoard(nextBoard);
+      moves.setBoard(nextBoard);
     } else {
       const group = board[rowIndex][pieceIndex];
       const { nextBoard, intermediateBoard, isGameEnd, winnerIndex } = getGameStateAfterKillingGroup(board, group);
-      setBoard(intermediateBoard);
+      moves.setBoard(intermediateBoard);
       setTimeout(() => {
-        ctx.endPlayerTurn({ nextBoard, isGameEnd, winnerIndex });
+        events.endPlayerTurn({ nextBoard, isGameEnd, winnerIndex });
       }, 750);
     }
   };
@@ -96,7 +96,7 @@ const GameBoard = ({ board, setBoard, ctx }) => {
         <button
           className="cta-button"
           disabled={!ctx.shouldPlayerMoveNext}
-          onClick={() => ctx.endPlayerTurn({ nextBoard: board, isGameEnd: false })}
+          onClick={() => events.endPlayerTurn({ nextBoard: board, isGameEnd: false })}
         >
           Befejezem a kettéosztást
         </button>
@@ -120,7 +120,7 @@ const rule = <>
   A szultán nyer, ha lesz olyan janicsár, aki felér a várhoz.
 </>;
 
-const Game = strategyGameFactory({
+export const HunyadiAndTheJanissaries = strategyGameFactory({
   rule,
   title: 'Hunyadi és a janicsárok',
   roleLabels: ['Szultán leszek', 'Hunyadi leszek'],
@@ -131,9 +131,3 @@ const Game = strategyGameFactory({
     getGameStateAfterAiTurn
   }
 });
-
-export const HunyadiAndTheJanissaries = () => {
-  const [board, setBoard] = useState(generateStartBoard());
-
-  return <Game board={board} setBoard={setBoard} />;
-};

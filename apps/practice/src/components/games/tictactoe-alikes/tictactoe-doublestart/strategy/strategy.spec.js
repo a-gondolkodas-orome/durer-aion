@@ -7,7 +7,7 @@ describe('Double starter TicTacToe strategy', () => {
       it('should place to two corners in same row as a starting move', () => {
         const board = Array(9).fill(null);
 
-        const result = getGameStateAfterAiTurn({ board, playerIndex: 1 });
+        const result = getGameStateAfterAiTurn({ board, ctx: { playerIndex: 1 } });
 
         expect([[0, 2], [2, 8], [6, 8], [0, 6]]).toContainEqual(
           range(0, 9).filter(i => result.nextBoard[i] === 'red')
@@ -21,7 +21,7 @@ describe('Double starter TicTacToe strategy', () => {
           null, null, null
         ];
 
-        const result = getGameStateAfterAiTurn({ board, playerIndex: 1 });
+        const result = getGameStateAfterAiTurn({ board, ctx: { playerIndex: 1 } });
         expect(result.nextBoard[4]).toEqual('red');
       });
 
@@ -32,7 +32,7 @@ describe('Double starter TicTacToe strategy', () => {
           null, null, 'blue'
         ];
 
-        const result = getGameStateAfterAiTurn({ board, playerIndex: 1 });
+        const result = getGameStateAfterAiTurn({ board, ctx: { playerIndex: 1 } });
         expect(result.nextBoard[6]).toEqual('red');
         expect(result.isGameEnd).toBe(false);
       });
@@ -44,7 +44,7 @@ describe('Double starter TicTacToe strategy', () => {
           null, 'blue', 'blue'
         ];
 
-        const result = getGameStateAfterAiTurn({ board, playerIndex: 1 });
+        const result = getGameStateAfterAiTurn({ board, ctx: { playerIndex: 1 } });
         expect(result.nextBoard[6]).toEqual('red');
         expect(result.isGameEnd).toBe(false);
       });
@@ -58,7 +58,7 @@ describe('Double starter TicTacToe strategy', () => {
           null, 'blue', 'blue'
         ];
 
-        const result = getGameStateAfterAiTurn({ board, playerIndex: 0 });
+        const result = getGameStateAfterAiTurn({ board, ctx: { playerIndex: 0 } });
         expect(result.nextBoard[6]).toEqual('blue');
         expect(result.isGameEnd).toBe(true);
       });
@@ -70,7 +70,7 @@ describe('Double starter TicTacToe strategy', () => {
           null, null, null
         ];
 
-        const result = getGameStateAfterAiTurn({ board, playerIndex: 0 });
+        const result = getGameStateAfterAiTurn({ board, ctx: { playerIndex: 0 } });
         expect(result.nextBoard[8]).toEqual('blue');
       });
     });

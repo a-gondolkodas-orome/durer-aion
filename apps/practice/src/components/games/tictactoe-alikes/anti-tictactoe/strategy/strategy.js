@@ -8,9 +8,9 @@ const roleColors = ['red', 'blue'];
 export const playerColor = playerIndex => playerIndex === 0 ? roleColors[0] : roleColors[1];
 const aiColor = playerIndex => playerIndex === 0 ? roleColors[1] : roleColors[0];
 
-export const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
+export const getGameStateAfterAiTurn = ({ board, ctx }) => {
   const nextBoard = cloneDeep(board);
-  nextBoard[getOptimalAiPlacingPosition(board, playerIndex)] = aiColor(playerIndex);
+  nextBoard[getOptimalAiPlacingPosition(board, ctx.playerIndex)] = aiColor(ctx.playerIndex);
   return getGameStateAfterMove(nextBoard);
 };
 

@@ -6,7 +6,7 @@ import { RockSvg } from './rock-svg';
 import { PaperSvg } from './paper-svg';
 import { ScissorSvg } from './scissor-svg';
 
-const GameBoard = ({ board, ctx }) => {
+const GameBoard = ({ board, ctx, events }) => {
   const isMoveAllowed = (id) => {
     if (!ctx.shouldPlayerMoveNext) return false;
     return board[id] === null;
@@ -16,7 +16,7 @@ const GameBoard = ({ board, ctx }) => {
 
     const nextBoard = cloneDeep(board);
     nextBoard[id] = 'removed';
-    ctx.endPlayerTurn(getGameStateAfterMove(nextBoard));
+    events.endPlayerTurn(getGameStateAfterMove(nextBoard));
   };
   const isDisabled = (id) => {
     if (!isMoveAllowed(id)) return true;
@@ -71,7 +71,7 @@ ellenfelük elől, egészen addig, amíg már csak egy-egy kártya marad. Ekkor 
 kártyán ugyanaz van, akkor a Kezdő nyert.
 </>;
 
-const Game = strategyGameFactory({
+export const RockPaperScissor = strategyGameFactory({
   rule,
   title: 'Kő-papír-olló',
   GameBoard,
@@ -81,9 +81,3 @@ const Game = strategyGameFactory({
     getGameStateAfterAiTurn
   }
 });
-
-export const RockPaperScissor = () => {
-  const [board, setBoard] = useState(Array(9).fill(null));
-
-  return <Game board={board} setBoard={setBoard} />;
-};

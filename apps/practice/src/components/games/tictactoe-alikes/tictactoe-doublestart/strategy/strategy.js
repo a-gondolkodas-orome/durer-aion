@@ -9,7 +9,7 @@ export const playerColor = playerIndex => playerIndex === 0 ? roleColors[0] : ro
 const aiColor = playerIndex => playerIndex === 0 ? roleColors[1] : roleColors[0];
 
 
-export const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
+export const getGameStateAfterAiTurn = ({ board, ctx }) => {
   const nextBoard = cloneDeep(board);
   if (nextBoard.filter(c => c).length === 0) {
     // choose two neighboring corners randomly
@@ -17,7 +17,7 @@ export const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
     nextBoard[firstStep[0]] = roleColors[0];
     nextBoard[firstStep[1]] = roleColors[0];
   } else {
-    nextBoard[getOptimalAiPlacingPosition(nextBoard, playerIndex)] = aiColor(playerIndex);
+    nextBoard[getOptimalAiPlacingPosition(nextBoard, ctx.playerIndex)] = aiColor(ctx.playerIndex);
   }
   return getGameStateAfterMove(nextBoard);
 };

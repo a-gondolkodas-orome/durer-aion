@@ -5,7 +5,7 @@ import { range, random } from 'lodash';
 const target = 40;
 const maxStep = 3;
 
-const GameBoard = ({board, ctx}) => {
+const GameBoard = ({ board, ctx, events }) => {
 
   const isMoveAllowed = number => {
     if (!ctx.shouldPlayerMoveNext) return false;
@@ -15,7 +15,7 @@ const GameBoard = ({board, ctx}) => {
 
   const clickNumber = (number) => {
     if (!isMoveAllowed(number)) return;
-    ctx.endPlayerTurn(getGameStateAfterMove(number, ctx.playerIndex));
+    events.endPlayerTurn(getGameStateAfterMove(number, ctx.playerIndex));
   };
 
   return(
@@ -49,11 +49,11 @@ const getGameStateAfterMove = (nextBoard, moverIndex) => {
   return { nextBoard, isGameEnd: false };
 };
 
-const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
+const getGameStateAfterAiTurn = ({ board, ctx }) => {
   const nextBoard = board % (1 + maxStep) !== 0
     ? board + (1 + maxStep) - board % (1 + maxStep)
     : board + random(1, maxStep);
-  return (getGameStateAfterMove(nextBoard, 1-playerIndex));
+  return (getGameStateAfterMove(nextBoard, 1 - ctx.playerIndex));
 };
 
 const rule = <>
@@ -62,7 +62,7 @@ const rule = <>
   léphet előre. Az veszít, aki először lép {target}-nél nagyobb számra.
 </>;
 
-const Game = strategyGameFactory({
+export const PlusOneTwoThree = strategyGameFactory({
   rule: rule,
   title: '+1, +2, +3',
   GameBoard,
@@ -72,9 +72,3 @@ const Game = strategyGameFactory({
     getGameStateAfterAiTurn
   }
 });
-
-export const PlusOneTwoThree = () => {
-  const [board, setBoard] = useState(0);
-
-  return <Game board={board} setBoard={setBoard}/>;
-}

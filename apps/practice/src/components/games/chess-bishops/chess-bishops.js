@@ -7,12 +7,12 @@ import {
   BISHOP, FORBIDDEN
 } from './strategy/strategy';
 
-const GameBoard = ({ board, ctx }) => {
+const GameBoard = ({ board, ctx, events }) => {
   const [hoveredField, setHoveredField] = useState(null);
   const clickField = (field) => {
     if (!isMoveAllowed(field)) return;
 
-    ctx.endPlayerTurn(getGameStateAfterMove(board, field));
+    events.endPlayerTurn(getGameStateAfterMove(board, field));
   };
 
   const isPotentialNextStep = (field) => {
@@ -94,7 +94,7 @@ const rule = <>
   veszít, aki nem tud lerakni futót.
 </>;
 
-const Game = strategyGameFactory({
+export const ChessBishops = strategyGameFactory({
   rule,
   title: 'Futók lerakása',
   GameBoard,
@@ -104,9 +104,3 @@ const Game = strategyGameFactory({
     getGameStateAfterAiTurn
   }
 });
-
-export const ChessBishops = () => {
-  const [board, setBoard] = useState(generateStartBoard());
-
-  return <Game board={board} setBoard={setBoard} />;
-};

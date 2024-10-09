@@ -4,10 +4,10 @@ import { isNull, every, some, difference, range, shuffle, sample } from 'lodash'
 
 const allColors = ['#dc2626', '#eab308', '#2563eb'];
 
-export const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
+export const getGameStateAfterAiTurn = ({ board, ctx }) => {
   let nextBoard = [...board];
   // TODO: instead of using let, make below functions not changing their argument
-  nextBoard = playerIndex === 0 ? makeOptimalStepAsSecond(nextBoard) : makeOptimalStepAsFirst(nextBoard);
+  nextBoard = ctx.playerIndex === 0 ? makeOptimalStepAsSecond(nextBoard) : makeOptimalStepAsFirst(nextBoard);
   return getGameStateAfterMove(nextBoard);
 };
 

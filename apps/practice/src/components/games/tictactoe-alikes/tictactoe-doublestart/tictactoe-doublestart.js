@@ -4,7 +4,7 @@ import { strategyGameFactory } from '../../strategy-game';
 import { getGameStateAfterMove, getGameStateAfterAiTurn, playerColor } from './strategy/strategy';
 import { generateEmptyTicTacToeBoard } from '../helpers';
 
-const GameBoard = ({ board, setBoard, ctx }) => {
+const GameBoard = ({ board, ctx, events, moves }) => {
   const isDuringFirstMove = board => board.filter(c => c).length <= 1;
 
   const isMoveAllowed = (id) => {
@@ -16,9 +16,9 @@ const GameBoard = ({ board, setBoard, ctx }) => {
 
     const nextBoard = cloneDeep(board);
     nextBoard[id] = playerColor(ctx.playerIndex);
-    setBoard(nextBoard);
+    moves.setBoard(nextBoard);
     if (isDuringFirstMove(nextBoard)) return;
-    ctx.endPlayerTurn(getGameStateAfterMove(nextBoard));
+    events.endPlayerTurn(getGameStateAfterMove(nextBoard));
   };
   const pieceColor = (id) => {
     const colorCode = board[id];
@@ -63,7 +63,7 @@ const rule = <>
   nyer.
 </>;
 
-const Game = strategyGameFactory({
+export const TicTacToeDoubleStart = strategyGameFactory({
   rule,
   title: 'Duplánkezdő 3x3 amőba',
   GameBoard,
@@ -73,9 +73,3 @@ const Game = strategyGameFactory({
     getGameStateAfterAiTurn
   }
 });
-
-export const TicTacToeDoubleStart = () => {
-  const [board, setBoard] = useState(generateEmptyTicTacToeBoard());
-
-  return <Game board={board} setBoard={setBoard} />;
-};

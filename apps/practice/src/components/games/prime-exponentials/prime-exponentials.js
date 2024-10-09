@@ -137,25 +137,25 @@ const PrimesTable = ({ board, choosePrime, hovered, setHovered }) => {
   </table>;
 }
 
-const GameBoard = ({ board, ctx }) => {
+const GameBoard = ({ board, ctx, events }) => {
   const [playerPrime, setPlayerPrime] = useState(null);
   const [hovered, setHovered] = useState(null);
 
   const choosePrime = (p) => {
     setPlayerPrime(p);
-    ctx.setTurnStage("chooseExponent");
+    events.setTurnStage("chooseExponent");
     setHovered(null);
   }
 
   const resetChosenPrime = () => {
     setPlayerPrime(null);
-    ctx.setTurnStage(null);
+    events.setTurnStage(null);
   }
 
   const chooseExponential = (e) => {
     setPlayerPrime(null);
-    ctx.setTurnStage(null);
-    ctx.endPlayerTurn(getGameStateAfterMove(board - playerPrime ** e));
+    events.setTurnStage(null);
+    events.endPlayerTurn(getGameStateAfterMove(board - playerPrime ** e));
   }
 
   const PlayerOptions = ctx.turnStage !== "chooseExponent"
@@ -229,7 +229,7 @@ ebből a játékosok felváltva vonnak le egy tetszőleges
 prímhatványt. Az nyer, aki a nullát mondja!
 </>
 
-const Game = strategyGameFactory({
+export const PrimeExponentials = strategyGameFactory({
   rule,
   title: 'Prímhatványok kivonása',
   GameBoard,
@@ -239,9 +239,3 @@ const Game = strategyGameFactory({
     getGameStateAfterAiTurn
   }
 })
-
-export const PrimeExponentials = () => {
-  const [board, setBoard] = useState(generateStartBoard());
-
-  return <Game board={board} setBoard={setBoard} />;
-};

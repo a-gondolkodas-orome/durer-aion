@@ -16,7 +16,7 @@ const cubeCoords = [
   { cx: '25%', cy: '74%' }
 ];
 
-const GameBoard = ({ board, setBoard, ctx }) => {
+const GameBoard = ({ board, ctx, events, moves }) => {
   const [color, setColor] = useState('');
   const [show, setShow] = useState(false);
   const [x, setX] = useState(0);
@@ -47,9 +47,9 @@ const GameBoard = ({ board, setBoard, ctx }) => {
     if (!isMoveAllowed(vertex)) return;
     const nextBoard = [...board];
     nextBoard[vertex] = color;
-    setBoard(nextBoard);
+    moves.setBoard(nextBoard);
     setShow(false);
-    ctx.endPlayerTurn(getGameStateAfterMove(nextBoard));
+    events.endPlayerTurn(getGameStateAfterMove(nextBoard));
   };
 
   return (
@@ -131,7 +131,7 @@ const rule = <>
   ha van olyan csúcs ami nem lett kiszínezve.
 </>;
 
-const Game = strategyGameFactory({
+export const CubeColoring = strategyGameFactory({
   rule,
   title: 'Kockaszínezés',
   GameBoard,
@@ -141,9 +141,3 @@ const Game = strategyGameFactory({
     getGameStateAfterAiTurn
   }
 });
-
-export const CubeColoring = () => {
-  const [board, setBoard] = useState(generateStartBoard());
-
-  return <Game board={board} setBoard={setBoard} />;
-};

@@ -4,14 +4,14 @@ import { strategyGameFactory } from '../../strategy-game';
 import { generateEmptyTicTacToeBoard } from '../helpers';
 import { inPlacingPhase, pColor, aiColor, getGameStateAfterMove, getGameStateAfterAiTurn } from './strategy/strategy';
 
-const GameBoard = ({ board, ctx }) => {
+const GameBoard = ({ board, ctx, events }) => {
   const gameIsInPlacingPhase = inPlacingPhase(board);
   const clickField = (id) => {
     if (!isMoveAllowed(id)) return;
 
     const nextBoard = cloneDeep(board);
     nextBoard[id] = gameIsInPlacingPhase ? pColor : 'white';
-    ctx.endPlayerTurn(getGameStateAfterMove(nextBoard));
+    events.endPlayerTurn(getGameStateAfterMove(nextBoard));
   };
   const isMoveAllowed = (id) => {
     if (!ctx.shouldPlayerMoveNext) return false;
@@ -73,7 +73,7 @@ const rule = <>
   aki először hoz létre három fehér korongot egy sorban, oszlopban vagy átlóban.
 </>;
 
-const Game = strategyGameFactory({
+export const TicTacToe = strategyGameFactory({
   rule,
   title: 'Átszínezős tic-tac-toe',
   GameBoard,
@@ -83,9 +83,3 @@ const Game = strategyGameFactory({
     getGameStateAfterAiTurn
   }
 });
-
-export const TicTacToe = () => {
-  const [board, setBoard] = useState(generateEmptyTicTacToeBoard());
-
-  return <Game board={board} setBoard={setBoard} />;
-};

@@ -2,8 +2,8 @@
 
 import { random, flatten, cloneDeep, sum } from 'lodash';
 
-export const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
-  if (playerIndex === 0) {
+export const getGameStateAfterAiTurn = ({ board, ctx }) => {
+  if (ctx.playerIndex === 0) {
     const optimalGroupToKill = getOptimalGroupToKill(board);
     return getGameStateAfterKillingGroup(board, optimalGroupToKill);
   } else {

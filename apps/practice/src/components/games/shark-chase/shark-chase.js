@@ -22,7 +22,7 @@ const distance = (fieldA, fieldB) => {
   );
 };
 
-const GameBoard = ({ board, setBoard, ctx }) => {
+const GameBoard = ({ board, ctx, events, moves }) => {
   const [chosenPiece, setChosenPiece] = useState(null);
 
   let possibleMoves=[]
@@ -51,11 +51,11 @@ const GameBoard = ({ board, setBoard, ctx }) => {
       if (ctx.turnStage === 'choosePiece') {
         if (!isAllowed_choosePiece(id)) return;
         setChosenPiece(id)
-        ctx.setTurnStage('movePiece');
+        events.setTurnStage('movePiece');
       } else if (ctx.turnStage === 'movePiece') {
         if (!isAllowed_movePiece(id)) {
           if (id === chosenPiece) {
-            ctx.setTurnStage('choosePiece');
+            events.setTurnStage('choosePiece');
             setChosenPiece(null);
           }
           return;
@@ -65,8 +65,8 @@ const GameBoard = ({ board, setBoard, ctx }) => {
         nextBoard.submarines[id] += 1;
         nextBoard.turn += 1;
         setChosenPiece(null);
-        ctx.setTurnStage('choosePiece');
-        ctx.endPlayerTurn(getGameStateAfterMove(nextBoard));
+        events.setTurnStage('choosePiece');
+        events.endPlayerTurn(getGameStateAfterMove(nextBoard));
       }
     }
     if (ctx.playerIndex === 1) {
@@ -76,20 +76,20 @@ const GameBoard = ({ board, setBoard, ctx }) => {
       if (ctx.turnStage !== 'secondSharkMove') {
         if (nextBoard.submarines[id] >= 1) {
           // instant lose
-          ctx.endPlayerTurn(getGameStateAfterMove(nextBoard));
+          events.endPlayerTurn(getGameStateAfterMove(nextBoard));
           return;
         }
         if (id !== board.shark) {
-          setBoard(nextBoard);
-          ctx.setTurnStage('secondSharkMove');
+          moves.setBoard(nextBoard);
+          events.setTurnStage('secondSharkMove');
           return;
         }
       }
 
       nextBoard.turn += 1;
       setChosenPiece(null);
-      ctx.setTurnStage('firstSharkMove');
-      ctx.endPlayerTurn(getGameStateAfterMove(nextBoard));
+      events.setTurnStage('firstSharkMove');
+      events.endPlayerTurn(getGameStateAfterMove(nextBoard));
     }
   };
 
@@ -215,7 +215,7 @@ const getPlayerStepDescription = ({ playerIndex, turnStage }) => {
   </>;
 };
 
-const Game = strategyGameFactory({
+export const SharkChase = strategyGameFactory({
   rule,
   title: 'Cápa üldözés',
   roleLabels: ['Kutató leszek!', 'Cápa leszek!'],
@@ -227,9 +227,3 @@ const Game = strategyGameFactory({
     getGameStateAfterAiTurn
   }
 });
-
-export const SharkChase = () => {
-  const [board, setBoard] = useState(generateStartBoard());
-
-  return <Game board={board} setBoard={setBoard} />;
-};

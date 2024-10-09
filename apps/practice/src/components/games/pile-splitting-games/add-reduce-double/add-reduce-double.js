@@ -17,7 +17,7 @@ const getGameStateAfterMove = (board, { pileId, pieceId }) => {
   return { nextBoard, intermediateBoard, isGameEnd, winnerIndex: null };
 };
 
-const GameBoard = ({ board, ctx }) => {
+const GameBoard = ({ board, ctx, events }) => {
   const [hoveredPiece, setHoveredPiece] = useState(null);
 
   const nonExistent = ({ pileId, pieceId }) => {
@@ -41,7 +41,7 @@ const GameBoard = ({ board, ctx }) => {
   const clickPiece = ({ pileId, pieceId }) => {
     if (isDisabled({ pileId, pieceId })) return;
 
-    ctx.endPlayerTurn(getGameStateAfterMove(board, { pileId, pieceId }));
+    events.endPlayerTurn(getGameStateAfterMove(board, { pileId, pieceId }));
 
     setHoveredPiece(null);
   };
@@ -117,7 +117,7 @@ const rule = <>
   Az veszít, aki nem tud lépni.
 </>;
 
-const Game = strategyGameFactory({
+export const AddReduceDouble = strategyGameFactory({
   rule,
   title: 'Kettőt vesz, egyet kap',
   GameBoard,
@@ -127,9 +127,3 @@ const Game = strategyGameFactory({
     getGameStateAfterAiTurn: ({ board }) => getGameStateAfterMove(board, getOptimalAiMove(board))
   }
 });
-
-export const AddReduceDouble = () => {
-  const [board, setBoard] = useState(generateStartBoard());
-
-  return <Game board={board} setBoard={setBoard} />;
-};

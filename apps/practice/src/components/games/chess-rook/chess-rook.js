@@ -6,11 +6,11 @@ import {
 } from './strategy/strategy';
 import { ChessRookSvg } from './chess-rook-svg';
 
-const GameBoard = ({ board, ctx }) => {
+const GameBoard = ({ board, ctx, events }) => {
   const clickField = (field) => {
     if (!isMoveAllowed(field)) return;
 
-    ctx.endPlayerTurn(getGameStateAfterMove(board, field));
+    events.endPlayerTurn(getGameStateAfterMove(board, field));
   };
   const isMoveAllowed = (targetField) => {
     if (!ctx.shouldPlayerMoveNext) return false;
@@ -66,7 +66,7 @@ const rule = <>
   nem tud lépni.
 </>;
 
-const Game = strategyGameFactory({
+export const ChessRook = strategyGameFactory({
   rule,
   title: 'Barangolás bástyával',
   GameBoard,
@@ -76,9 +76,3 @@ const Game = strategyGameFactory({
     getGameStateAfterAiTurn
   }
 });
-
-export const ChessRook = () => {
-  const [board, setBoard] = useState(generateStartBoard());
-
-  return <Game board={board} setBoard={setBoard} />;
-};

@@ -20,12 +20,12 @@ const getGameStateAfterMove = (board, step, moverIndex) => {
   };
 };
 
-const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
+const getGameStateAfterAiTurn = ({ board, ctx }) => {
   const step = getOptimalAiStep(board);
-  return getGameStateAfterMove(board, step, 1 - playerIndex);
+  return getGameStateAfterMove(board, step, 1 - ctx.playerIndex);
 };
 
-const GameBoard = ({ board, ctx }) => {
+const GameBoard = ({ board, ctx, events }) => {
   const fields = range(board.target + 14);
 
   const isMoveAllowed = (step) => {
@@ -38,7 +38,7 @@ const GameBoard = ({ board, ctx }) => {
 
   const makeStep = (step) => {
     if (!isMoveAllowed(step)) return;
-    ctx.endPlayerTurn(getGameStateAfterMove(board, step, ctx.playerIndex));
+    events.endPlayerTurn(getGameStateAfterMove(board, step, ctx.playerIndex));
   };
 
   return (
@@ -79,7 +79,7 @@ const rule = <>
   lépésben nem adhat hozzá <code>13-x</code>-et. Az veszít, aki eléri (vagy átlépi) <code>m</code>-et.
 </>;
 
-const Game = strategyGameFactory({
+export const SuperstitiousCounting = strategyGameFactory({
   rule,
   title: 'Babonás lépkedés',
   GameBoard,
@@ -89,9 +89,3 @@ const Game = strategyGameFactory({
     getGameStateAfterAiTurn
   }
 });
-
-export const SuperstitiousCounting = () => {
-  const [board, setBoard] = useState(generateStartBoard());
-
-  return <Game board={board} setBoard={setBoard} />;
-};

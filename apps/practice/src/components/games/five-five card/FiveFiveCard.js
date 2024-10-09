@@ -3,7 +3,7 @@ import { range, cloneDeep, isNull } from 'lodash';
 import { strategyGameFactory } from '../strategy-game';
 import { getGameStateAfterMove, getGameStateAfterAiTurn } from './strategy';
 
-const GameBoard = ({ board, ctx }) => {
+const GameBoard = ({ board, ctx, events }) => {
   const isMoveAllowed = (id) => {
     if (!ctx.shouldPlayerMoveNext) return false;
     return board[id] === null;
@@ -13,7 +13,7 @@ const GameBoard = ({ board, ctx }) => {
 
     const nextBoard = cloneDeep(board);
     nextBoard[id] = 'removed';
-    ctx.endPlayerTurn(getGameStateAfterMove(nextBoard));
+    events.endPlayerTurn(getGameStateAfterMove(nextBoard));
   };
 
   const isDisabled = id => {
@@ -67,7 +67,7 @@ pedig az, aki előtt a kisebbik (ha ugyanaz a szám marad meg a két játékos e
 aki kezdte a játékot).
 </>;
 
-const Game = strategyGameFactory({
+export const FiveFiveCard = strategyGameFactory({
   rule,
   title: 'Párbaj 5 lappal',
   GameBoard,
@@ -77,9 +77,3 @@ const Game = strategyGameFactory({
     getGameStateAfterAiTurn
   }
 });
-
-export const FiveFiveCard = () => {
-  const [board, setBoard] = useState(Array(15).fill(null));
-
-  return <Game board={board} setBoard={setBoard} />;
-};

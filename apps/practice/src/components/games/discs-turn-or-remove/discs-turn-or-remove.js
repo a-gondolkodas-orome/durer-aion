@@ -33,7 +33,7 @@ const DisabledDisc = ({ bgColor }) => {
 
 
 const gameBoardFactory = (maxDiscs) => {
-  return ({ board, ctx }) => {
+  return ({ board, ctx, events }) => {
     const [hovered, setHovered] = useState(null);
 
     const select = (pile, i) => {
@@ -43,7 +43,7 @@ const gameBoardFactory = (maxDiscs) => {
         nextBoard[pile] = i;
         if (pile === 1) nextBoard[0] += d;
         setHovered(null);
-        ctx.endPlayerTurn(getGameStateAfterMove(nextBoard));
+        events.endPlayerTurn(getGameStateAfterMove(nextBoard));
       }
     };
 
@@ -188,7 +188,7 @@ const rule = (maxDiscs) => (
   </>
 );
 
-const Game6 = strategyGameFactory({
+export const SixDiscs = strategyGameFactory({
   rule: rule(6),
   title: "Átfordítás, elvétel (6 korong)",
   GameBoard: gameBoardFactory(6),
@@ -199,7 +199,7 @@ const Game6 = strategyGameFactory({
   }
 });
 
-const Game10 = strategyGameFactory({
+export const TenDiscs = strategyGameFactory({
   rule: rule(10),
   title: "Átfordítás, elvétel (10 korong)",
   GameBoard: gameBoardFactory(10),
@@ -209,15 +209,3 @@ const Game10 = strategyGameFactory({
     getGameStateAfterAiTurn
   }
 });
-
-export const SixDiscs = () => {
-  const [board, setBoard] = useState(generateStartBoard(6));
-
-  return <Game6 board={board} setBoard={setBoard} />;
-};
-
-export const TenDiscs = () => {
-  const [board, setBoard] = useState(generateStartBoard(10));
-
-  return <Game10 board={board} setBoard={setBoard} />;
-};

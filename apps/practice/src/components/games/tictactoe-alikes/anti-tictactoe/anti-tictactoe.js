@@ -4,7 +4,7 @@ import { strategyGameFactory } from '../../strategy-game';
 import { getGameStateAfterMove, getGameStateAfterAiTurn, playerColor } from './strategy/strategy';
 import { generateEmptyTicTacToeBoard } from '../helpers';
 
-const GameBoard = ({ board, ctx }) => {
+const GameBoard = ({ board, ctx, events }) => {
   const isMoveAllowed = (id) => {
     if (!ctx.shouldPlayerMoveNext) return false;
     return board[id] === null;
@@ -14,7 +14,7 @@ const GameBoard = ({ board, ctx }) => {
 
     const nextBoard = cloneDeep(board);
     nextBoard[id] = playerColor(ctx.playerIndex);
-    ctx.endPlayerTurn(getGameStateAfterMove(nextBoard));
+    events.endPlayerTurn(getGameStateAfterMove(nextBoard));
   };
   const pieceColor = (id) => {
     const colorCode = board[id];
@@ -50,7 +50,7 @@ const rule = <>
   átlóban. Ha mind a kilenc mező foglalt és nincs ilyen koronghármas, akkor a kezdő nyer.
 </>;
 
-const Game = strategyGameFactory({
+export const AntiTicTacToe = strategyGameFactory({
   rule,
   title: '3x3-as antiamőba',
   GameBoard,
@@ -60,9 +60,3 @@ const Game = strategyGameFactory({
     getGameStateAfterAiTurn
   }
 });
-
-export const AntiTicTacToe = () => {
-  const [board, setBoard] = useState(generateEmptyTicTacToeBoard());
-
-  return <Game board={board} setBoard={setBoard} />;
-};

@@ -10,7 +10,7 @@ const rule = <>
   a kupacból.
 </>;
 
-const Game = strategyGameFactory({
+export const Coin357 = strategyGameFactory({
   rule,
   title: '15 érme beváltása',
   GameBoard,
@@ -20,9 +20,3 @@ const Game = strategyGameFactory({
     getGameStateAfterAiTurn
   }
 });
-
-export const Coin357 = () => {
-  const [board, setBoard] = useState([3, 5, 7]);
-
-  return <Game board={board} setBoard={setBoard} />;
-};

@@ -12,7 +12,8 @@ export const strategyGameFactory = ({
   GameBoard,
   G
 }) => {
-  return ({ board, setBoard }) => {
+  return () => {
+    const [board, setBoard] = useState(G.generateStartBoard())
     const [phase, setPhase] = useState('roleSelection');
     const [playerIndex, setPlayerIndex] = useState(null);
     const [next, setNext] = useState(null);
@@ -41,28 +42,6 @@ export const strategyGameFactory = ({
       setIsGameEndDialogOpen(true);
     };
 
-    const doAiTurn = ({ currentBoard }) => {
-      const localPlayerIndex = playerIndex === null ? 1 : playerIndex;
-      const time = Math.floor(Math.random() * 500 + 1000);
-      setTimeout(() => {
-        const { intermediateBoard, nextBoard, isGameEnd, winnerIndex } = G.getGameStateAfterAiTurn(
-          { board: currentBoard, setBoard, playerIndex: localPlayerIndex }
-        );
-        const stageTimeout = intermediateBoard !== undefined ? 750 : 0;
-        if (intermediateBoard !== undefined) {
-          setBoard(intermediateBoard);
-        }
-        setTimeout(() => {
-          setBoard(nextBoard);
-          setNext(next => 1 - next);
-          if (isGameEnd) {
-            // default: last player to move is the winner
-            endGame(winnerIndex === null ? (1 - localPlayerIndex) : winnerIndex);
-          }
-        }, stageTimeout);
-      }, time);
-    };
-
     const endPlayerTurn = ({ nextBoard, isGameEnd, winnerIndex }) => {
       setBoard(nextBoard);
       setNext(next => 1 - next);
@@ -88,6 +67,50 @@ export const strategyGameFactory = ({
       }
     };
 
+    const moves = {
+      // general move, should not be needed if specialized functions
+      // are provided for each move in G
+      setBoard,
+      ...G.moves
+    };
+
+    const ctx = {
+      shouldPlayerMoveNext,
+      playerIndex,
+      phase,
+      turnStage
+    };
+
+    const events = {
+      endPlayerTurn,
+      setTurnStage
+    };
+
+    const doAiTurn = ({ currentBoard }) => {
+      const localPlayerIndex = playerIndex === null ? 1 : playerIndex;
+      const time = Math.floor(Math.random() * 500 + 1000);
+      setTimeout(() => {
+        const { intermediateBoard, nextBoard, isGameEnd, winnerIndex } = G.getGameStateAfterAiTurn({
+          board: currentBoard,
+          ctx,
+          events,
+          moves
+        });
+        const stageTimeout = intermediateBoard !== undefined ? 750 : 0;
+        if (intermediateBoard !== undefined) {
+          setBoard(intermediateBoard);
+        }
+        setTimeout(() => {
+          setBoard(nextBoard);
+          setNext(next => 1 - next);
+          if (isGameEnd) {
+            // default: last player to move is the winner
+            endGame(winnerIndex === null ? (1 - localPlayerIndex) : winnerIndex);
+          }
+        }, stageTimeout);
+      }, time);
+    };
+
     return (
     <main className="p-2">
       <GameHeader title={title} />
@@ -98,15 +121,9 @@ export const strategyGameFactory = ({
             <GameBoard
               key={gameUuid}
               board={board}
-              setBoard={setBoard}
-              ctx={{
-                shouldPlayerMoveNext,
-                endPlayerTurn,
-                playerIndex,
-                phase,
-                turnStage,
-                setTurnStage
-              }}
+              ctx={ctx}
+              events={events}
+              moves={moves}
             />
             <GameSidebar
               roleLabels={roleLabels}

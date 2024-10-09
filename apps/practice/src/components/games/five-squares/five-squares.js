@@ -24,22 +24,22 @@ const getGameState = nextBoard => ({
   winnerIndex: getWinnerIndex(nextBoard)
 });
 
-const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
-  const nextBoard = getBoardAfterAiTurn({ board, playerIndex });
+const getGameStateAfterAiTurn = ({ board, ctx }) => {
+  const nextBoard = getBoardAfterAiTurn({ board, playerIndex: ctx.playerIndex });
   return getGameState(nextBoard);
 };
 
-const GameBoard = ({ board, setBoard, ctx }) => {
+const GameBoard = ({ board, ctx, events, moves }) => {
   const [oneMoveDone, setOneMoveDone] = useState(false);
 
   const placePiece = id => {
     const nextBoard = [...board];
     nextBoard[id] += 1;
     if (ctx.playerIndex !== 0 && !oneMoveDone) {
-      setBoard(nextBoard);
+      moves.setBoard(nextBoard);
       setOneMoveDone(true);
     } else {
-      ctx.endPlayerTurn(getGameState(nextBoard));
+      events.endPlayerTurn(getGameState(nextBoard));
       setOneMoveDone(false);
     }
   };
@@ -82,7 +82,7 @@ const rule = <>
   minden mezőn különböző számú korong áll.
 </>;
 
-const Game = strategyGameFactory({
+export const FiveSquares = strategyGameFactory({
   rule,
   title: '5 mezőbe különbözőt',
   GameBoard,
@@ -92,9 +92,3 @@ const Game = strategyGameFactory({
     getGameStateAfterAiTurn
   }
 });
-
-export const FiveSquares = () => {
-  const [board, setBoard] = useState(generateStartBoard());
-
-  return <Game board={board} setBoard={setBoard} />;
-};

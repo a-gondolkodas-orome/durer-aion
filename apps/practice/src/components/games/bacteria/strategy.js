@@ -22,8 +22,8 @@ import {
 } from "./helpers";
 
 /* Currently only implemented for the case of adjacent goal fields */
-export const getGameStateAfterAiTurn = ({ board, playerIndex }) => {
-  if (playerIndex === 0) {
+export const getGameStateAfterAiTurn = ({ board, ctx }) => {
+  if (ctx.playerIndex === 0) {
     return aiDefense(board);
   } else {
     return aiAttack(board);
