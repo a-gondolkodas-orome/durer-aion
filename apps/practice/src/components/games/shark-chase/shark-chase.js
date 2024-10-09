@@ -203,7 +203,7 @@ const rule = <>
   nyer, ha még a 11. nap végén is szabad.
 </>;
 
-const getPlayerStepDescription = ({ playerIndex, turnStage }) => {
+const getPlayerStepDescription = ({ ctx: { playerIndex, turnStage } }) => {
   if (playerIndex === 0) {
     return 'Válassz ki egy tengeralattjárót, majd válassz egy szomszédos szektort.'
   }

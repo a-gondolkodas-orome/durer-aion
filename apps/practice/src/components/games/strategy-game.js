@@ -127,7 +127,7 @@ export const strategyGameFactory = ({
             />
             <GameSidebar
               roleLabels={roleLabels}
-              stepDescription={G.getPlayerStepDescription({ board, playerIndex, turnStage })}
+              stepDescription={G.getPlayerStepDescription({ board, ctx })}
               ctx={{ phase, shouldPlayerMoveNext, isPlayerWinner }}
               moves={{ chooseRole, startNewGame }}
             />

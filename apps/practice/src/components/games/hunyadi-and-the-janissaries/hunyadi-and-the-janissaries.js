@@ -105,7 +105,7 @@ const GameBoard = ({ board, ctx, events, moves }) => {
   );
 };
 
-const getPlayerStepDescription = ({ playerIndex }) => {
+const getPlayerStepDescription = ({ ctx: { playerIndex } }) => {
   return playerIndex === 0
   ? 'Kattints a katonákra és válaszd két részre a seregedet.'
   : 'Kattints egy katonára, hogy megsemmisítsd a vele azonos színű sereget.';

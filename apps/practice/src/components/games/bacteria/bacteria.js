@@ -190,7 +190,7 @@ const GameBoard = ({ board: { bacteria, goals }, ctx, events }) => {
   );
 };
 
-const getPlayerStepDescription = (ctx) => {
+const getPlayerStepDescription = ({ ctx }) => {
   if (ctx.playerIndex === 0) {
     return "".concat(
       "Kattints egy mezőre, amin van baktérium és hajtsd végre ",

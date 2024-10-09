@@ -217,7 +217,7 @@ const getAvailableExponents = (num, prime) => {
   return range(0, maxExponent + 1);
 }
 
-const getPlayerStepDescription = ({ turnStage }) => {
+const getPlayerStepDescription = ({ ctx: { turnStage } }) => {
   return !(turnStage === "chooseExponent")
     ? 'Válaszd ki a prímet, aminek a hatványát ki szeretnéd vonni.'
     : 'Válaszd ki a kitevőt, amelyre a prímet emelnéd.';

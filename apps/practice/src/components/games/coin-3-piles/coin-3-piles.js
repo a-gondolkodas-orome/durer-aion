@@ -156,7 +156,7 @@ export const GameBoard = ({ board, ctx, events, moves }) => {
   );
 };
 
-export const getPlayerStepDescription = ({ turnStage }) => {
+export const getPlayerStepDescription = ({ ctx: { turnStage } }) => {
   if (turnStage === 'placeBack') {
     return 'Kattints egy érmére a kupac alatt, hogy visszatégy egy olyan pénzérmét.';
   }

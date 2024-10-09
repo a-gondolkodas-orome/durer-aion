@@ -126,7 +126,7 @@ export const HunyadiAndTheJanissaries = strategyGameFactory({
   title: 'Hunyadi és a janicsárok',
   GameBoard,
   G: {
-    // a function returning a string with 1 optional parameter: an object containing `playerIndex`, `turnStage`, etc.
+    // a function returning a string, receives { board, ctx: { playerIndex, turnStage, ... } }
     getPlayerStepDescription,
     // a function returning a new, possibly random starting board object
     generateStartBoard,
