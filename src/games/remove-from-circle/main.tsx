@@ -21,6 +21,6 @@ let descriptionE = <p className="text-justify">
 
 </p>
 
-export const { Client: Client_C, ClientWithBot: ClientWithBot_C, OnlineClient: OnlineClient_C } = ClientFactory({...MyGame, name: "circle"}, MyBoard, strategyWrapper("C"), descriptionC);
-export const { Client: Client_D, ClientWithBot: ClientWithBot_D, OnlineClient: OnlineClient_D } = ClientFactory({...MyGame, name: "circle"}, MyBoard, strategyWrapper("D"), descriptionD);
-export const { Client: Client_E, ClientWithBot: ClientWithBot_E, OnlineClient: OnlineClient_E } = ClientFactory({...MyGame, name: "circle"}, MyBoard, strategyWrapper("E"), descriptionE);
+export const { Client: Client_C, ClientWithBot: ClientWithBot_C, OnlineClient: OnlineClient_C } = ClientFactory({...MyGame, name: "remove-from-circle_c"}, MyBoard, strategyWrapper("C"), descriptionC);
+export const { Client: Client_D, ClientWithBot: ClientWithBot_D, OnlineClient: OnlineClient_D } = ClientFactory({...MyGame, name: "remove-from-circle_d"}, MyBoard, strategyWrapper("D"), descriptionD);
+export const { Client: Client_E, ClientWithBot: ClientWithBot_E, OnlineClient: OnlineClient_E } = ClientFactory({...MyGame, name: "remove-from-circle_e"}, MyBoard, strategyWrapper("E"), descriptionE);

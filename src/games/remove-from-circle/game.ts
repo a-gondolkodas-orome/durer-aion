@@ -14,7 +14,7 @@ const lengthOfCompetition = 30*60; // seconds
 
 
 export const MyGame: GameType<MyGameState> = {
-  name: 'removefromcircle',
+  name: 'remove-from-circle',
   setup: () => {
     return {
       circle: [],
