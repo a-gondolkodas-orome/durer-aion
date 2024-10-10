@@ -23,6 +23,36 @@ export interface MyGameState {
   url: string;
 }
 
+function game_state_from_json(json: string): MyGameState {
+  const parsed = JSON.parse(json);
+  
+  // Validate the parsed object
+  if (typeof parsed !== 'object' || parsed === null) {
+    throw new Error('relay: game_state_from_json: Invalid JSON: not an object');
+  }
+
+  // Type assertion to avoid repetitive type checks
+  const state = parsed as MyGameState;
+
+  // Validate required fields and types
+  if (typeof state.currentProblem !== 'number' ||
+      typeof state.problemText !== 'string' ||
+      (state.answer !== null && typeof state.answer !== 'number') ||
+      typeof state.points !== 'number' ||
+      (state.correctnessPreviousAnswer !== null && typeof state.correctnessPreviousAnswer !== 'boolean') ||
+      !Array.isArray(state.previousAnswers) ||
+      !Array.isArray(state.previousPoints) ||
+      typeof state.currentProblemMaxPoints !== 'number' ||
+      typeof state.numberOfTry !== 'number' ||
+      typeof state.milisecondsRemaining !== 'number' ||
+      typeof state.start !== 'string' ||
+      typeof state.end !== 'string' ||
+      typeof state.url !== 'string') {
+    throw new Error('relay: game_state_from_json: Invalid JSON: missing or incorrect fields');
+  }
+  return state;
+}
+
 const lengthOfCompetition = 60 * 60; // seconds
 
 const GUESSER_PLAYER = '0';
@@ -31,25 +61,41 @@ const JUDGE_PLAYER = '1';
 export const GameRelay: Game<MyGameState> = {
   setup: () => {
     return {
-    currentProblem: 0,
-    problemText: "", // TODO: get from the problem list
-    answer: null,
-    points: 0,
-    correctnessPreviousAnswer: null,
-    previousAnswers: [[]],
-    previousPoints: [],
-    currentProblemMaxPoints: 3, // TODO: get from the problem list, TODO: rename this function to currentProblemAvailablePoints
-    numberOfTry: 0,
-    milisecondsRemaining: 1000 * lengthOfCompetition,
-    start: new Date().toISOString(),
-    end: new Date(Date.now() + 1000 * lengthOfCompetition).toISOString(),
-    url: "",
-  }},
+      currentProblem: 0,
+      problemText: "", // TODO: get from the problem list
+      answer: null,
+      points: 0,
+      correctnessPreviousAnswer: null,
+      previousAnswers: [[]],
+      previousPoints: [],
+      currentProblemMaxPoints: 3, // TODO: get from the problem list, TODO: rename this function to currentProblemAvailablePoints
+      numberOfTry: 0,
+      milisecondsRemaining: 1000 * lengthOfCompetition,
+      start: new Date().toISOString(),
+      end: new Date(Date.now() + 1000 * lengthOfCompetition).toISOString(),
+      url: "",
+    };
+  },
   phases:
   {
     startNewGame: {
       moves: {
         startGame: ({ G, ctx, playerID, events }) => {
+          let phase = localStorage.getItem("RelayGamePhase");
+          let game_state_json = localStorage.getItem("RelayGameState");
+          if (process.env.REACT_APP_WHICH_VERSION === "b" && phase !== null && game_state_json !== null) {
+            try { // if the json is bad, continue as if we didnt even have it
+              const state = game_state_from_json(game_state_json);
+              const newG = {
+                ...state,
+                milisecondsRemaining: Date.parse(state.end) - Date.now(),
+              };
+              events.setPhase(phase);
+              return newG;
+            } catch {
+              console.error("could not load game phase from json, invalid json");
+            }
+          }
           if (playerID !== GUESSER_PLAYER || G.numberOfTry !== 0) {
             return INVALID_MOVE;
           }
@@ -64,13 +110,11 @@ export const GameRelay: Game<MyGameState> = {
           G.problemText = problemText;
           G.numberOfTry = 1;
           events.endTurn();
-          console.log("end")
         },
       },
-      turn: {  
+      turn: {
         order: TurnOrder.ONCE,
         onMove: ({G, ctx, playerID, events }) => {
-          console.log("onMove")
           if(playerID === GUESSER_PLAYER) {
             let currentTime = new Date();
             if(currentTime.getTime() - new Date(G.end).getTime() > 1000*10){
@@ -158,18 +202,21 @@ export const GameRelay: Game<MyGameState> = {
   turn: {
     onMove: ({G, ctx, playerID, events }) => {
       if(playerID === GUESSER_PLAYER) {
-        console.log("onMove")
         let currentTime = new Date();
         if(currentTime.getTime() - new Date(G.end).getTime() > 1000*10){
           // Do not accept any answer if the time is over since more than 10 seconds
           events.endGame();
         }
       }
-    },    
+    },
     onEnd: ({ G, ctx, events }) => {
       // playerID is not available here
+      if (ctx.currentPlayer.toString() === GUESSER_PLAYER) {
+        const state_str = JSON.stringify(G);
+        localStorage.setItem("RelayGamePhase", ctx.phase);
+        localStorage.setItem("RelayGameState", state_str);
+      }
       if (ctx.currentPlayer.toString() === JUDGE_PLAYER) {
-        console.log("onEnd")
         let currentTime = new Date();
         if (currentTime.getTime() - new Date(G.end).getTime() >= 0) {
           // Do not accept any answer if the time is over
@@ -177,7 +224,7 @@ export const GameRelay: Game<MyGameState> = {
         }
       }
     },
-  },  
+  },
 
   ai: {
     enumerate: (G, ctx, playerID) => {
