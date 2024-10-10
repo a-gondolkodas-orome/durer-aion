@@ -91,8 +91,8 @@ typically following a click from the user. Typically the user clicks, new state 
 the BoardClient component and then as a final step `events.endPlayerTurn` is called with a
 `{ nextBoard, isGameEnd }` object (see more details in section "Game end, determining winner")
 
-Concept: `board` holds the state necessary to know the game state, that the next player
-needs to know. Additional state variables may be created within the `BoardClient` component
+Concept: `board` holds the state necessary to know the game state, specific to each game, that the next player
+needs to know. Common state, managed by the framework is stored in ctx such as playerIdx. Additional state variables may be created within the `BoardClient` component
 that is relevant only during a turn, not between turns, such as reacting to hover events.
 
 You should use `moves.setBoard` if you need to change the board before ending player turn.
