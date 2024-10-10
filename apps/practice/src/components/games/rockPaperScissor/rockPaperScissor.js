@@ -6,7 +6,7 @@ import { RockSvg } from './rock-svg';
 import { PaperSvg } from './paper-svg';
 import { ScissorSvg } from './scissor-svg';
 
-const GameBoard = ({ board, ctx, events }) => {
+const BoardClient = ({ board, ctx, events }) => {
   const isMoveAllowed = (id) => {
     if (!ctx.shouldPlayerMoveNext) return false;
     return board[id] === null;
@@ -74,7 +74,7 @@ kártyán ugyanaz van, akkor a Kezdő nyert.
 export const RockPaperScissor = strategyGameFactory({
   rule,
   title: 'Kő-papír-olló',
-  GameBoard,
+  BoardClient,
   getPlayerStepDescription: () => 'Távolíts el egy kártyát az ellenfél elől.',
   generateStartBoard: () => Array(9).fill(null),
   getGameStateAfterAiTurn

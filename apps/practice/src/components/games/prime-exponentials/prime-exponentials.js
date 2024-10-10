@@ -137,7 +137,7 @@ const PrimesTable = ({ board, choosePrime, hovered, setHovered }) => {
   </table>;
 }
 
-const GameBoard = ({ board, ctx, events }) => {
+const BoardClient = ({ board, ctx, events }) => {
   const [playerPrime, setPlayerPrime] = useState(null);
   const [hovered, setHovered] = useState(null);
 
@@ -232,7 +232,7 @@ prímhatványt. Az nyer, aki a nullát mondja!
 export const PrimeExponentials = strategyGameFactory({
   rule,
   title: 'Prímhatványok kivonása',
-  GameBoard,
+  BoardClient,
   getPlayerStepDescription,
   generateStartBoard,
   getGameStateAfterAiTurn

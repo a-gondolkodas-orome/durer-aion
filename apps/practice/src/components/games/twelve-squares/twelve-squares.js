@@ -27,7 +27,7 @@ const getOptimalAiStep = ({ left, right }) => {
   return (dst+1) % 3;
 };
 
-const GameBoard = ({ board, ctx, events }) => {
+const BoardClient = ({ board, ctx, events }) => {
   const isMoveAllowed = (step) => {
 	  if(!ctx.shouldPlayerMoveNext) return false;
     if (step === board.right - board.left) return false;
@@ -102,7 +102,7 @@ const rule = <>
 export const TwelveSquares = strategyGameFactory({
   rule,
   title: 'Tizenkét mező',
-  GameBoard,
+  BoardClient,
   getPlayerStepDescription: ({ ctx: { playerIndex } }) => playerIndex === 0
     ? 'Kattints a mezőre ahova lépni szeretnél a bal oldali bábuval.'
     : 'Kattints a mezőre ahova lépni szeretnél a jobb oldali bábuval.',

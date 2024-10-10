@@ -9,7 +9,7 @@ export const strategyGameFactory = ({
   title,
   roleLabels,
   initialTurnStages,
-  GameBoard,
+  BoardClient,
   generateStartBoard,
   moves,
   getGameStateAfterAiTurn,
@@ -119,7 +119,7 @@ export const strategyGameFactory = ({
         <div className="max-w-[100ch] w-full">
           <GameRule ruleDescription={rule} />
           <div className="flex flex-wrap">
-            <GameBoard
+            <BoardClient
               key={gameUuid}
               board={board}
               ctx={ctx}

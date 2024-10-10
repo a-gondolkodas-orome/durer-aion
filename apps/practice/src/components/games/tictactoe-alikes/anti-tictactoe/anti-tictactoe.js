@@ -4,7 +4,7 @@ import { strategyGameFactory } from '../../strategy-game';
 import { getGameStateAfterMove, getGameStateAfterAiTurn, playerColor } from './strategy/strategy';
 import { generateEmptyTicTacToeBoard } from '../helpers';
 
-const GameBoard = ({ board, ctx, events }) => {
+const BoardClient = ({ board, ctx, events }) => {
   const isMoveAllowed = (id) => {
     if (!ctx.shouldPlayerMoveNext) return false;
     return board[id] === null;
@@ -53,7 +53,7 @@ const rule = <>
 export const AntiTicTacToe = strategyGameFactory({
   rule,
   title: '3x3-as antiamőba',
-  GameBoard,
+  BoardClient,
   getPlayerStepDescription: () => 'Helyezz le egy korongot egy üres mezőre kattintással.',
   generateStartBoard: generateEmptyTicTacToeBoard,
   getGameStateAfterAiTurn

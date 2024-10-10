@@ -4,7 +4,7 @@ import { strategyGameFactory } from '../../strategy-game';
 import { generateEmptyTicTacToeBoard } from '../helpers';
 import { inPlacingPhase, pColor, aiColor, getGameStateAfterMove, getGameStateAfterAiTurn } from './strategy/strategy';
 
-const GameBoard = ({ board, ctx, events }) => {
+const BoardClient = ({ board, ctx, events }) => {
   const gameIsInPlacingPhase = inPlacingPhase(board);
   const clickField = (id) => {
     if (!isMoveAllowed(id)) return;
@@ -76,7 +76,7 @@ const rule = <>
 export const TicTacToe = strategyGameFactory({
   rule,
   title: 'Átszínezős tic-tac-toe',
-  GameBoard,
+  BoardClient,
   getPlayerStepDescription,
   generateStartBoard: generateEmptyTicTacToeBoard,
   getGameStateAfterAiTurn

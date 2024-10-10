@@ -7,7 +7,7 @@ import {
   BISHOP, FORBIDDEN
 } from './strategy/strategy';
 
-const GameBoard = ({ board, ctx, events }) => {
+const BoardClient = ({ board, ctx, events }) => {
   const [hoveredField, setHoveredField] = useState(null);
   const clickField = (field) => {
     if (!isMoveAllowed(field)) return;
@@ -97,7 +97,7 @@ const rule = <>
 export const ChessBishops = strategyGameFactory({
   rule,
   title: 'Futók lerakása',
-  GameBoard,
+  BoardClient,
   getPlayerStepDescription: () => 'Kattints egy mezőre, amit nem üt egyik futó sem.',
   generateStartBoard,
   getGameStateAfterAiTurn

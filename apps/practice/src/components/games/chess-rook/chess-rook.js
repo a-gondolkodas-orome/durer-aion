@@ -6,7 +6,7 @@ import {
 } from './strategy/strategy';
 import { ChessRookSvg } from './chess-rook-svg';
 
-const GameBoard = ({ board, ctx, events }) => {
+const BoardClient = ({ board, ctx, events }) => {
   const clickField = (field) => {
     if (!isMoveAllowed(field)) return;
 
@@ -69,7 +69,7 @@ const rule = <>
 export const ChessRook = strategyGameFactory({
   rule,
   title: 'Barangolás bástyával',
-  GameBoard,
+  BoardClient,
   getPlayerStepDescription: () => 'Kattints egy szabad mezőre a bástyával egy sorban vagy oszlopban.',
   generateStartBoard,
   getGameStateAfterAiTurn

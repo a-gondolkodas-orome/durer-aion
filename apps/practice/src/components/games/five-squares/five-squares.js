@@ -29,7 +29,7 @@ const getGameStateAfterAiTurn = ({ board, ctx }) => {
   return getGameState(nextBoard);
 };
 
-const GameBoard = ({ board, ctx, events, moves }) => {
+const BoardClient = ({ board, ctx, events, moves }) => {
   const [oneMoveDone, setOneMoveDone] = useState(false);
 
   const placePiece = id => {
@@ -85,7 +85,7 @@ const rule = <>
 export const FiveSquares = strategyGameFactory({
   rule,
   title: '5 mezőbe különbözőt',
-  GameBoard,
+  BoardClient,
   getPlayerStepDescription,
   generateStartBoard,
   getGameStateAfterAiTurn

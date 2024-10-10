@@ -191,7 +191,7 @@ const rule = (maxDiscs) => (
 export const SixDiscs = strategyGameFactory({
   rule: rule(6),
   title: "Átfordítás, elvétel (6 korong)",
-  GameBoard: gameBoardFactory(6),
+  BoardClient: gameBoardFactory(6),
   getPlayerStepDescription,
   generateStartBoard: generateStartBoard(6),
   getGameStateAfterAiTurn
@@ -200,7 +200,7 @@ export const SixDiscs = strategyGameFactory({
 export const TenDiscs = strategyGameFactory({
   rule: rule(10),
   title: "Átfordítás, elvétel (10 korong)",
-  GameBoard: gameBoardFactory(10),
+  BoardClient: gameBoardFactory(10),
   getPlayerStepDescription,
   generateStartBoard: generateStartBoard(10),
   getGameStateAfterAiTurn

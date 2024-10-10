@@ -12,7 +12,7 @@ const getGameStateAfterAiTurn = ({ board }) => {
   return { intermediateBoard, nextBoard, isGameEnd: isGameEnd(nextBoard), winnerIndex: null };
 };
 
-const GameBoard = ({ board, ctx, events, moves }) => {
+const BoardClient = ({ board, ctx, events, moves }) => {
   const [hoveredPiece, setHoveredPiece] = useState(null);
 
   const isDisabled = ({ pileId, pieceId }) => {
@@ -108,7 +108,7 @@ const rule = <>
 export const PileSplitter = strategyGameFactory({
   rule,
   title: 'Kupac kettéosztó',
-  GameBoard,
+  BoardClient,
   getPlayerStepDescription,
   generateStartBoard,
   getGameStateAfterAiTurn

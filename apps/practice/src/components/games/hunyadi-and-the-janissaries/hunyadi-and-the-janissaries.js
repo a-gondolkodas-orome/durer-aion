@@ -9,7 +9,7 @@ import {
 } from './strategy/strategy';
 import { cloneDeep } from 'lodash';
 
-const GameBoard = ({ board, ctx, events, moves }) => {
+const BoardClient = ({ board, ctx, events, moves }) => {
   const [hoveredPiece, setHoveredPiece] = useState(null);
 
   const isPlayerSultan = ctx.playerIndex === 0;
@@ -124,7 +124,7 @@ export const HunyadiAndTheJanissaries = strategyGameFactory({
   rule,
   title: 'Hunyadi és a janicsárok',
   roleLabels: ['Szultán leszek', 'Hunyadi leszek'],
-  GameBoard,
+  BoardClient,
   getPlayerStepDescription,
   generateStartBoard,
   getGameStateAfterAiTurn

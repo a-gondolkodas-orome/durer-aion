@@ -3,7 +3,7 @@ import { range, cloneDeep, isNull } from 'lodash';
 import { strategyGameFactory } from '../strategy-game';
 import { getGameStateAfterMove, getGameStateAfterAiTurn } from './strategy';
 
-const GameBoard = ({ board, ctx, events }) => {
+const BoardClient = ({ board, ctx, events }) => {
   const isMoveAllowed = (id) => {
     if (!ctx.shouldPlayerMoveNext) return false;
     return board[id] === null;
@@ -70,7 +70,7 @@ aki kezdte a játékot).
 export const FiveFiveCard = strategyGameFactory({
   rule,
   title: 'Párbaj 5 lappal',
-  GameBoard,
+  BoardClient,
   getPlayerStepDescription: () => 'Vegyél el egy kártyát az ellenfél elől.',
   generateStartBoard: () => Array(15).fill(null),
   getGameStateAfterAiTurn

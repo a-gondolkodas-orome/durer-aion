@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { strategyGameFactory } from '../strategy-game';
 import { getGameStateAfterAiTurn  } from './strategy/strategy';
-import { GameBoard, getPlayerStepDescription } from './coin-3-piles';
+import { BoardClient, getPlayerStepDescription } from './coin-3-piles';
 
 const rule = <>
   Egy kupacban 3 darab 1, 5 darab 2 és 7 darab 3 pengős érme van. Egy lépésben az
@@ -13,7 +13,7 @@ const rule = <>
 export const Coin357 = strategyGameFactory({
   rule,
   title: '15 érme beváltása',
-  GameBoard,
+  BoardClient,
   getPlayerStepDescription,
   generateStartBoard: () => ([3, 5, 7]),
   getGameStateAfterAiTurn

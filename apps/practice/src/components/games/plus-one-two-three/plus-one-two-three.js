@@ -5,7 +5,7 @@ import { range, random } from 'lodash';
 const target = 40;
 const maxStep = 3;
 
-const GameBoard = ({ board, ctx, events }) => {
+const BoardClient = ({ board, ctx, events }) => {
 
   const isMoveAllowed = number => {
     if (!ctx.shouldPlayerMoveNext) return false;
@@ -65,7 +65,7 @@ const rule = <>
 export const PlusOneTwoThree = strategyGameFactory({
   rule: rule,
   title: '+1, +2, +3',
-  GameBoard,
+  BoardClient,
   getPlayerStepDescription: () => 'Válaszd ki, hogy melyik számra lépsz.',
   generateStartBoard: () => 0,
   getGameStateAfterAiTurn

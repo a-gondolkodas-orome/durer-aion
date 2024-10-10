@@ -25,7 +25,7 @@ const cubeCoords = [
   { cx: "90%", cy: "90%" }
 ];
 
-const GameBoard = ({ board, ctx, events, moves }) => {
+const BoardClient = ({ board, ctx, events, moves }) => {
   const handleCircleClick = (vertex) => {
     if (!isClickable(vertex)) return;
     if (ctx.playerIndex === 1) {
@@ -158,7 +158,7 @@ export const Policemanthief = strategyGameFactory({
   rule,
   title: "Rendőr-tolvaj",
   roleLabels: ["Rendőrök", "Tolvaj"],
-  GameBoard,
+  BoardClient,
   getPlayerStepDescription: ({ ctx }) => {
     if (ctx.playerIndex === 0) {
       return `Kattints arra az útkereszteződésre, ahová a ${ctx.turnStage === "secondMove" ? "zöld" : "kék"} rendőrrel lépni szeretnél.`;

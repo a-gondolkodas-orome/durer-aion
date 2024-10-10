@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { random, sum } from 'lodash';
 import { strategyGameFactory } from '../strategy-game';
 import { getGameStateAfterAiTurn, isWinningState  } from './strategy/strategy';
-import { GameBoard, getPlayerStepDescription } from './coin-3-piles';
+import { BoardClient, getPlayerStepDescription } from './coin-3-piles';
 
 const generateStartBoard = () => {
   if (random(0, 1)) {
@@ -34,7 +34,7 @@ const rule = <>
 export const Coin123 = strategyGameFactory({
   rule,
   title: 'Érmék beváltása',
-  GameBoard,
+  BoardClient,
   getPlayerStepDescription,
   generateStartBoard,
   getGameStateAfterAiTurn

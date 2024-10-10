@@ -25,7 +25,7 @@ const getGameStateAfterAiTurn = ({ board, ctx }) => {
   return getGameStateAfterMove(board, step, 1 - ctx.playerIndex);
 };
 
-const GameBoard = ({ board, ctx, events }) => {
+const BoardClient = ({ board, ctx, events }) => {
   const fields = range(board.target + 14);
 
   const isMoveAllowed = (step) => {
@@ -82,7 +82,7 @@ const rule = <>
 export const SuperstitiousCounting = strategyGameFactory({
   rule,
   title: 'Babonás lépkedés',
-  GameBoard,
+  BoardClient,
   getPlayerStepDescription: () => 'Kattints a számra ahova lépni szeretnél.',
   generateStartBoard,
   getGameStateAfterAiTurn

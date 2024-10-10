@@ -31,7 +31,7 @@ const getGameStateAfterAiTurn = ({ board }) => {
   return getGameState(nextBoard);
 };
 
-const GameBoard = ({ board, ctx, events }) => {
+const BoardClient = ({ board, ctx, events }) => {
   const placePiece = id => {
     const nextBoard = addPiece(board, id);
     events.endPlayerTurn(getGameState(nextBoard));
@@ -77,7 +77,7 @@ const rule = <>
 export const TwoTimesTwo = strategyGameFactory({
   rule,
   title: '4 mezőbe különbözőt',
-  GameBoard,
+  BoardClient,
   getPlayerStepDescription,
   generateStartBoard,
   getGameStateAfterAiTurn

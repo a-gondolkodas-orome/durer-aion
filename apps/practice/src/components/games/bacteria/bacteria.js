@@ -59,7 +59,7 @@ const generateStartBoard = () => {
   }
 };
 
-const GameBoard = ({ board: { bacteria, goals }, ctx, events }) => {
+const BoardClient = ({ board: { bacteria, goals }, ctx, events }) => {
   const [attackRow, setAttackRow] = useState(null);
   const [attackCol, setAttackCol] = useState(null);
 
@@ -225,7 +225,7 @@ export const Bacteria = strategyGameFactory({
   rule,
   title: "Baktérimok terjedése",
   roleLabels: ["Támadó leszek", "Védekező leszek"],
-  GameBoard,
+  BoardClient,
   getPlayerStepDescription,
   generateStartBoard,
   getGameStateAfterAiTurn

@@ -22,7 +22,7 @@ const distance = (fieldA, fieldB) => {
   );
 };
 
-const GameBoard = ({ board, ctx, events, moves }) => {
+const BoardClient = ({ board, ctx, events, moves }) => {
   const [chosenPiece, setChosenPiece] = useState(null);
 
   let possibleMoves=[]
@@ -220,7 +220,7 @@ export const SharkChase = strategyGameFactory({
   title: 'Cápa üldözés',
   roleLabels: ['Kutató leszek!', 'Cápa leszek!'],
   initialTurnStages: ['choosePiece', 'firstSharkMove'],
-  GameBoard,
+  BoardClient,
   getPlayerStepDescription,
   generateStartBoard,
   getGameStateAfterAiTurn

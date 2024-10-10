@@ -4,7 +4,7 @@ import { strategyGameFactory } from '../../strategy-game';
 import { getGameStateAfterMove, getGameStateAfterAiTurn, playerColor } from './strategy/strategy';
 import { generateEmptyTicTacToeBoard } from '../helpers';
 
-const GameBoard = ({ board, ctx, events, moves }) => {
+const BoardClient = ({ board, ctx, events, moves }) => {
   const isDuringFirstMove = board => board.filter(c => c).length <= 1;
 
   const isMoveAllowed = (id) => {
@@ -66,7 +66,7 @@ const rule = <>
 export const TicTacToeDoubleStart = strategyGameFactory({
   rule,
   title: 'Duplánkezdő 3x3 amőba',
-  GameBoard,
+  BoardClient,
   getPlayerStepDescription,
   generateStartBoard: generateEmptyTicTacToeBoard,
   getGameStateAfterAiTurn

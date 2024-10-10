@@ -16,7 +16,7 @@ const cubeCoords = [
   { cx: '25%', cy: '74%' }
 ];
 
-const GameBoard = ({ board, ctx, events, moves }) => {
+const BoardClient = ({ board, ctx, events, moves }) => {
   const [color, setColor] = useState('');
   const [show, setShow] = useState(false);
   const [x, setX] = useState(0);
@@ -134,7 +134,7 @@ const rule = <>
 export const CubeColoring = strategyGameFactory({
   rule,
   title: 'Kockaszínezés',
-  GameBoard,
+  BoardClient,
   getPlayerStepDescription: () => 'Válassz színt, majd színezz meg egy csúcsot!',
   generateStartBoard,
   getGameStateAfterAiTurn

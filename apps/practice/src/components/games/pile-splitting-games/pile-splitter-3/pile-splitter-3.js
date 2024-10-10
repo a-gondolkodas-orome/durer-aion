@@ -30,7 +30,7 @@ const getBoardAfterMove = (board, { removedPileId, splitPileId, pieceId }) => {
   return { intermediateBoard, nextBoard };
 };
 
-const GameBoard = ({ board, ctx, events, moves }) => {
+const BoardClient = ({ board, ctx, events, moves }) => {
   const [removedPileId, setRemovedPileId] = useState(null);
   const [hoveredPiece, setHoveredPiece] = useState(null);
 
@@ -149,7 +149,7 @@ const rule = <>
 export const PileSplitter3 = strategyGameFactory({
   rule,
   title: 'Kupac kettéosztó 3 kupaccal',
-  GameBoard,
+  BoardClient,
   getPlayerStepDescription,
   generateStartBoard,
   getGameStateAfterAiTurn

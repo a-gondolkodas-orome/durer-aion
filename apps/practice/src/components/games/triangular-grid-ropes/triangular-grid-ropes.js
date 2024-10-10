@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { strategyGameFactory } from '../strategy-game';
 import { getGameStateAfterAiTurn, isAllowed, getAllowedSuperset, isGameEnd, vertices } from './strategy';
 
-const GameBoard = ({ board, ctx, events }) => {
+const BoardClient = ({ board, ctx, events }) => {
   const [firstNode, setFirstNode] = useState(null);
   const [hoveredNode, setHoveredNode] = useState(null);
 
@@ -93,7 +93,7 @@ const rule = <>
 export const TriangularGridRopes = strategyGameFactory({
   rule,
   title: '10 totemoszlop',
-  GameBoard,
+  BoardClient,
   getPlayerStepDescription: () => 'Kattints két oszlopra, amik között kötelet szeretnél kifeszíteni.',
   generateStartBoard: () => [],
   getGameStateAfterAiTurn

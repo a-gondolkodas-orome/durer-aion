@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { strategyGameFactory } from '../strategy-game';
 import { range, sum, sample } from 'lodash';
 
-const GameBoard = ({ board, ctx, events }) => {
+const BoardClient = ({ board, ctx, events }) => {
 
   const clickNumber = (number) => {
     if (ctx.shouldPlayerMoveNext) {
@@ -87,7 +87,7 @@ nyer, ha pedig páratlan, akkor a második.
 export const NumberCovering8 = strategyGameFactory({
   rule: rule8,
   title: 'Számok lefedés 1-től 8-ig',
-  GameBoard,
+  BoardClient,
   getPlayerStepDescription: () => 'Kattints egy számra, hogy lefedd.',
   generateStartBoard: () => range(1, 9),
   getGameStateAfterAiTurn
@@ -96,7 +96,7 @@ export const NumberCovering8 = strategyGameFactory({
 export const NumberCovering10 = strategyGameFactory({
   rule: rule10,
   title: 'Számok lefedés 1-től 10-ig',
-  GameBoard,
+  BoardClient,
   getPlayerStepDescription: () => 'Kattints egy számra, hogy lefedd.',
   generateStartBoard: () => range(1, 11),
   getGameStateAfterAiTurn
