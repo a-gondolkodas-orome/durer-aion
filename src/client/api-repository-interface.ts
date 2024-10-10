@@ -1,6 +1,6 @@
 import urlcat from "urlcat";
 import axios, { AxiosInstance,AxiosError } from 'axios';
-import { TeamModelDto } from "./dto/TeamStateDto";
+import { MatchStateDto, TeamModelDto } from "./dto/TeamStateDto";
 import { teamData } from "../teamData";
 import { sendDataLogin, sendDataRelayEnd, sendDataRelayStart, sendDataStrategyStart } from "../common/sendData";
 
@@ -152,7 +152,7 @@ export class RealClientRepository implements ClientRepository {
     return result.data as string;
   }
 
-  async getAll(): Promise<any> {
+  async getAll(): Promise<TeamModelDto[]> {
     const url = urlcat('/team/admin/all', {
     });
     let result;
@@ -166,7 +166,75 @@ export class RealClientRepository implements ClientRepository {
     }
 
     console.log(result.data)
+    return result.data as TeamModelDto[];
+  }
+
+  async resetRelay(teamId: String): Promise<TeamModelDto> {
+    const url = urlcat('/team/admin/:teamId/reset/relay', {
+      teamId,
+    });
+    let result;
+    try {
+      result = await ApiAxios.instance().get(url);
+    } catch (e: any) {
+      const err = makeAxiosError(e);
+      console.log(err.message)
+      // here we can set message according to status (or data)
+      throw new Error('Váratlan hiba történt');
+    }
+    return result.data as TeamModelDto;
+  }
+
+  async resetStrategy(teamId: String): Promise<TeamModelDto> {
+    const url = urlcat('/team/admin/:teamId/reset/strategy', {
+      teamId,
+    });
+    let result;
+    try {
+      result = await ApiAxios.instance().get(url);
+    } catch (e: any) {
+      const err = makeAxiosError(e);
+      console.log(err.message)
+      // here we can set message according to status (or data)
+      throw new Error('Váratlan hiba történt');
+    }
+    return result.data as TeamModelDto;
+  }
+
+  async addMinutes(matchId: String, minutes: number): Promise<String> {
+    const url = urlcat('/game/admin/:matchId/addminutes/:minutes', {
+      matchId,
+      minutes,
+    });
+    let result;
+    try {
+      result = await ApiAxios.instance().get(url);
+    } catch (e: any) {
+      const err = makeAxiosError(e);
+      console.log(err.message)
+      // here we can set message according to status (or data)
+      if (err.code === "501") {
+        throw new Error('Lejárt játékot már nem lehet módosítani');
+      }
+      throw new Error('Váratlan hiba történt');
+    }
     return result.data;
+  }
+
+  async getMatchState(matchId: String): Promise<MatchStateDto> {
+    const url = urlcat('/game/admin/:matchId/state', {
+      matchId,
+    });
+    let result;
+    try {
+      result = await ApiAxios.instance().get(url);
+    } catch (e: any) {
+      const err = makeAxiosError(e);
+      console.log(err.message)
+      // here we can set message according to status (or data)
+      throw new Error('Váratlan hiba történt');
+    }
+    return result.data as MatchStateDto;
   }
 }
 
@@ -185,7 +253,7 @@ export class MockClientRepository implements ClientRepository {
     if (guid === "1") {
       return Promise.resolve(
         {
-          id: "1",
+          teamId: "1",
           joinCode: "1",
           teamName: "TEAM 1",
           category: "C kat",
@@ -204,7 +272,7 @@ export class MockClientRepository implements ClientRepository {
     if (guid === "2") {
       return Promise.resolve(
         {
-          id: "1",
+          teamId: "1",
           joinCode: "1",
           teamName: "TEAM 1",
           category: "C",
@@ -226,7 +294,7 @@ export class MockClientRepository implements ClientRepository {
     if (guid === "3") {
       return Promise.resolve(
         {
-          id: "1",
+          teamId: "1",
           joinCode: "1",
           teamName: "TEAM 1",
           category: "C kat",
@@ -248,7 +316,7 @@ export class MockClientRepository implements ClientRepository {
     if (guid === "4") {
       return Promise.resolve(
         {
-          id: "1",
+          teamId: "1",
           joinCode: "1",
           teamName: "TEAM 1",
           category: "C kat",
@@ -274,7 +342,7 @@ export class MockClientRepository implements ClientRepository {
     if (guid === "5") {
       return Promise.resolve(
         {
-          id: "1",
+          teamId: "1",
           joinCode: "1",
           teamName: "TEAM 1",
           category: "C kat",
@@ -299,7 +367,7 @@ export class MockClientRepository implements ClientRepository {
     if (guid === "6") {
       return Promise.resolve(
         {
-          id: "1",
+          teamId: "1",
           joinCode: "1",
           teamName: "TEAM 1",
           category: "C kat",
@@ -325,7 +393,7 @@ export class MockClientRepository implements ClientRepository {
     if (guid === "7") {
       return Promise.resolve(
         {
-          id: "1",
+          teamId: "1",
           joinCode: "1",
           teamName: "TEAM 1",
           category: "C kat",
@@ -441,6 +509,22 @@ export class OfflineClientRepository implements ClientRepository {
     return null;
   }
 
+  async resetRelay(teamId: String): Promise<TeamModelDto> {
+    throw Error("NOT call this");
+  }
+
+  async resetStrategy(teamId: String): Promise<TeamModelDto> {
+    throw Error("NOT call this");
+  }
+
+  async addMinutes(matchId: String, minutes: number): Promise<String> {
+    return Promise.resolve("OK");
+  }
+
+  async getMatchState(matchId: String): Promise<MatchStateDto> {
+    throw Error("NOT call this");
+  }
+
   joinWithCode(joinCode: string): Promise<string> {
     // return the  if it is in the teamData.ts file
 
@@ -458,7 +542,7 @@ export class OfflineClientRepository implements ClientRepository {
       const i = teamData.findIndex(e => e.join_code === joinCode);
       const currentTeamData = teamData[i];
       const teamState = {
-        id: "1",
+        teamId: "1",
         joinCode: joinCode,
         teamName: currentTeamData.teamname,
         category: currentTeamData.category,
