@@ -111,8 +111,6 @@ if (argv[2] === "import") {
   const filename = argv[3];
   importer(teams, filename).then(() => exit(0));
 } else {
-  console.log("!!!!!!!!!! Valami")
-
   const botSetup = Object.fromEntries(
     games.map((game, idx) =>
       [game.name,
