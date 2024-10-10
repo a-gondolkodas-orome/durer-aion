@@ -62,6 +62,8 @@ export function Header(props: { teamName: string | null }) {
               textOverflow: 'ellipsis',
             }}>{props.teamName}</Stack>
             <Stack onClick={()=>{
+              localStorage.removeItem("RelayGamePhase");
+              localStorage.removeItem("RelayGameState");
               logout();
               if (process.env.REACT_APP_WHICH_VERSION === "b"){
                 window.location.reload();
@@ -118,7 +120,7 @@ export function Header(props: { teamName: string | null }) {
               paddingTop: '10px',
               paddingBottom: '20px',
             }}>{props.teamName}</Stack>
-            <Stack onClick={()=>{  
+            <Stack onClick={()=>{
               setMobileMenuOpen(false);
               logout();
             }} sx={{
