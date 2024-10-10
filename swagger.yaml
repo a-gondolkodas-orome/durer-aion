@@ -1,0 +1,581 @@
+openapi: 3.0.0
+info:
+  title: Teams and Games API
+  version: 1.0.0
+  description: API for managing teams, games, and matches
+
+servers:
+  - url: http://localhost:8000
+    description: Local development server
+
+paths:
+  /game/admin/{matchId}/logs:
+    get:
+      summary: Get log data for a specific match
+      parameters:
+        - name: matchId
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+      - basicAdminAuth: []
+      tags:
+      - admin
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LogEntry"
+        "404":
+          description: Match not found
+
+  /game/admin/{matchId}/state:
+    get:
+      summary: Get state data for a specific match
+      parameters:
+        - name: matchId
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+      - basicAdminAuth: []
+      tags:
+      - admin
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/State"
+        "404":
+          description: Match not found
+
+  /game/admin/{matchId}/addminutes/{minutes}:
+    get:
+      summary: Add extra time to a specific match
+      parameters:
+        - name: matchId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: minutes
+          in: path
+          required: true
+          schema:
+            type: integer
+      security:
+      - basicAdminAuth: []
+      tags:
+      - admin
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AddMinutesResponse"
+        "404":
+          description: Match not found
+        "500":
+          description: Team not found
+        "501":
+          description: Restarting finished match not supported
+
+  /game/admin/{matchId}/metadata:
+    get:
+      summary: Get metadata for a specific match
+      parameters:
+        - name: matchId
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+      - basicAdminAuth: []
+      tags:
+      - admin
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MatchData"
+        "404":
+          description: Match not found
+
+  /team/admin/{teamID}/reset/strategy:
+    get:
+      summary: Reset team's strategy
+      description: Note that this request only resets this game's field in teamState. The user will not notice anything during the game, unless he refreshes the page.
+      parameters:
+        - name: teamID
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/GUID"
+      security:
+      - basicAdminAuth: []
+      tags:
+      - admin
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeamModel"
+        "404":
+          description: Team not found
+
+  /team/admin/{teamID}/reset/relay:
+    get:
+      summary: Reset team's relay
+      description: Note that this request only resets this game's field in teamState. The user will not notice anything during the game, unless he refreshes the page.
+      parameters:
+        - name: teamID
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/GUID"
+      security:
+      - basicAdminAuth: []
+      tags:
+      - admin
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeamModel"
+        "404":
+          description: Team not found
+
+  /team/admin/filter:
+    get:
+      summary: Run a user-defined filter query on teams
+      parameters:
+        - name: filter
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+      security:
+      - basicAdminAuth: []
+      tags:
+      - admin
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TeamModel"
+
+  /team/admin/all:
+    get:
+      summary: Get all teams as full objects
+      security:
+      - basicAdminAuth: []
+      tags:
+      - admin
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TeamModel"
+
+  /team/join/{token}:
+    get:
+      summary: Get team ID based on login token
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      tags:
+      - user
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GUID"
+        "404":
+          description: Team not found
+
+  /team/{GUID}:
+    get:
+      summary: Get team data
+      parameters:
+        - name: GUID
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/GUID"
+      tags:
+      - user
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeamModel"
+        "404":
+          description: Team not found
+
+  /team/{GUID}/relay/play:
+    get:
+      summary: Let a team start a RELAY match
+      parameters:
+        - name: GUID
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/GUID"
+      tags:
+      - user
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreatedMatch"
+
+  /team/{GUID}/strategy/play:
+    get:
+      summary: Let a team start a STRATEGY match
+      parameters:
+        - name: GUID
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/GUID"
+      tags:
+      - user
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreatedMatch"
+
+  /team/{GUID}/gohome:
+    get:
+      summary: Let a team set their PageState to HOME
+      parameters:
+        - name: GUID
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/GUID"
+      tags:
+      - user
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeamModel"
+        "403":
+          description: Not allowed, match in progress
+
+  /team/{GUID}/relay/result:
+    get:
+      summary: Let a team get their relay results
+      parameters:
+        - name: GUID
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/GUID"
+      tags:
+      - user
+      responses:
+        "501":
+          description: Not implemented yet
+
+  /team/{GUID}/strategy/result:
+    get:
+      summary: Let a team get their strategy results
+      parameters:
+        - name: GUID
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/GUID"
+      tags:
+      - user
+      responses:
+        "501":
+          description: Not implemented yet
+
+  /games/{nameid}/create:
+    post:
+      summary: Create a new BGio game
+      parameters:
+        - name: nameid
+          in: path
+          required: true
+          schema:
+            type: string
+      tags:
+      - internal
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreatedMatch"
+
+components:
+  securitySchemes:
+   basicAdminAuth:
+    type: http
+    scheme: basic
+  schemas:
+    GUID:
+      type: string
+      pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+      example: "8eae8669-125c-42e5-8b49-89afbac31679"
+
+    MatchStatus:
+      oneOf:
+        - $ref: "#/components/schemas/NotStartedMatchStatus"
+        - $ref: "#/components/schemas/InProgressMatchStatus"
+        - $ref: "#/components/schemas/FinishedMatchStatus"
+
+    NotStartedMatchStatus:
+      type: object
+      properties:
+        state:
+          type: string
+          enum: ["NOT STARTED"]
+
+    InProgressMatchStatus:
+      type: object
+      properties:
+        state:
+          type: string
+          enum: ["IN PROGRESS"]
+        startAt:
+          type: string
+          format: date-time
+        endAt:
+          type: string
+          format: date-time
+        matchID:
+          type: string
+
+    FinishedMatchStatus:
+      type: object
+      properties:
+        state:
+          type: string
+          enum: ["FINISHED"]
+        startAt:
+          type: string
+          format: date-time
+        endAt:
+          type: string
+          format: date-time
+        matchID:
+          type: string
+        score:
+          type: number
+
+    TeamModel:
+      type: object
+      properties:
+        teamId:
+          type: string
+        joinCode:
+          type: string
+        teamName:
+          type: string
+        category:
+          type: string
+        credentials:
+          type: string
+        email:
+          type: string
+        pageState:
+          type: string
+          enum: ["DISCLAIMER", "HOME", "RELAY", "STRATEGY"]
+        relayMatch:
+          $ref: "#/components/schemas/MatchStatus"
+        strategyMatch:
+          $ref: "#/components/schemas/MatchStatus"
+        other:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ActionShape:
+      type: string
+      enum: ["MAKE_MOVE", "GAME_EVENT", "UNDO", "REDO"]
+
+    Operation:
+      type: object
+      # Define properties for Operation if known
+
+    LogEntry:
+      type: object
+      properties:
+        action:
+          $ref: "#/components/schemas/ActionShape"
+        _stateID:
+          type: integer
+        turn:
+          type: integer
+        phase:
+          type: string
+        redact:
+          type: boolean
+        automatic:
+          type: boolean
+        metadata:
+          type: object
+        patch:
+          type: array
+          items:
+            $ref: "#/components/schemas/Operation"
+      required:
+        - action
+        - _stateID
+        - turn
+        - phase
+
+    Ctx:
+      type: object
+      # Define properties for Ctx if known
+
+    PluginState:
+      type: object
+      # Define properties for PluginState if known
+
+    Undo:
+      type: object
+      # Define properties for Undo if known
+
+    State:
+      type: object
+      properties:
+        G:
+          type: object
+          description: The game state. Structure depends on the specific game implementation.
+        ctx:
+          $ref: "#/components/schemas/Ctx"
+        deltalog:
+          type: array
+          items:
+            $ref: "#/components/schemas/LogEntry"
+        plugins:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/PluginState"
+        _undo:
+          type: array
+          items:
+            $ref: "#/components/schemas/Undo"
+        _redo:
+          type: array
+          items:
+            $ref: "#/components/schemas/Undo"
+        _stateID:
+          type: integer
+      required:
+        - G
+        - ctx
+        - plugins
+        - _stateID
+
+    AddMinutesResponse:
+      type: object
+      properties:
+        updatedEndTime:
+          type: string
+          format: date-time
+        matchID:
+          type: string
+        team:
+          $ref: "#/components/schemas/TeamModel"
+
+    CreatedMatch:
+      type: object
+      properties:
+        matchID:
+          type: string
+
+    PlayerMetadata:
+      type: object
+      additionalProperties: true
+      description: Player metadata. Structure depends on the specific game implementation.
+
+    MatchData:
+      type: object
+      properties:
+        gameName:
+          type: string
+          description: The name of the game.
+        players:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/PlayerMetadata"
+          description: A map of player IDs to their metadata.
+        setupData:
+          type: object
+          nullable: true
+          description: Optional setup data for the game.
+        gameover:
+          type: object
+          nullable: true
+          description: Information about the game end state, if the game is over.
+        nextMatchID:
+          type: string
+          nullable: true
+          description: ID of the next match, if applicable.
+        unlisted:
+          type: boolean
+          nullable: true
+          description: Whether the match is unlisted.
+        createdAt:
+          type: integer
+          format: int64
+          description: Timestamp of when the match was created.
+        updatedAt:
+          type: integer
+          format: int64
+          description: Timestamp of when the match was last updated.
+      required:
+        - gameName
+        - players
+        - createdAt
+        - updatedAt

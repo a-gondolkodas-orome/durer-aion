@@ -9,6 +9,6 @@ jest.mock('./client/hooks/user-hooks', () => {
 
 test('renders', () => {
   render(<App />);
-  const linkElement = screen.getByText(/Üdvözlünk a XVI. Dürer/);
+  const linkElement = screen.getByText(/Üdvözlünk a XVII. Dürer/);
   expect(linkElement).toBeInTheDocument();
 });

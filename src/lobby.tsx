@@ -5,6 +5,8 @@ import { MyGame as TicTacToeGame } from './games/tictactoe/game';
 import { MyBoard as TicTacToeBoard } from './games/tictactoe/board';
 import { MyGame as TenCoinsGame } from './games/ten-coins/game';
 import { MyBoard as TenCoinsBoard } from './games/ten-coins/board';
+import { MyGame as StrategyGame17o } from './games/17o/game';
+import { MyBoard as StrategyBoard17o } from './games/17o/board';
 import { MyGame as SuperstitiousCountingGame } from './games/superstitious-counting/game';
 import { MyBoard as SuperstitiousCountingBoard } from './games/superstitious-counting/board';
 import { gameWrapper } from './common/gamewrapper';
@@ -57,6 +59,18 @@ export default function () {
         {
           game: {...gameWrapper(TenCoinsGame), name: "tencoins_e"},
           board: boardWrapper(TenCoinsBoard, "Kezdetben van 10 érme az asztalon, melyek értékei 1 és 5 közé eső egészek lehetnek. A két játékos felváltva lép. A soron lévő játékos kiválaszt egy K értéket, amire igaz, hogy van az asztalon K értékű érme, és az összes K értékű érmét átváltoztatja valamilyen kisebb L értékűre (mindet ugyanarra az L értékre, ahol az L érték 1 és K-1 közötti). Az nyer, akinek a lépése után minden érme azonos értékű lesz. A kezdőállás ismeretében Ti dönthetitek el, hogy a kezdő vagy a második játékos bőrébe szeretnétek-e bújni. (K: Melyik típusú érmét változtatjátok meg?; L: Mi legyen az új érme)")
+        },
+        {
+          game: {...gameWrapper(StrategyGame17o), name: "17o_c"},
+          board: boardWrapper(StrategyBoard17o, "Kezdetben van 10 érme az asztalon, melyek értékei 1 és 5 közé eső egészek lehetnek. A két játékos felváltva lép. A soron lévő játékos kiválaszt egy K értéket, amire igaz, hogy van az asztalon K értékű érme, és az összes K értékű érmét átváltoztatja valamilyen kisebb L értékűre (mindet ugyanarra az L értékre, ahol az L érték 1 és K-1 közötti). Az nyer, akinek a lépése után minden érme azonos értékű lesz. A kezdőállás ismeretében Ti dönthetitek el, hogy a kezdő vagy a második játékos bőrébe szeretnétek-e bújni. (K: Melyik típusú érmét változtatjátok meg?; L: Mi legyen az új érme)")
+        },
+        {
+          game: {...gameWrapper(StrategyGame17o), name: "17o_d"},
+          board: boardWrapper(StrategyBoard17o, "Kezdetben van 10 érme az asztalon, melyek értékei 1 és 5 közé eső egészek lehetnek. A két játékos felváltva lép. A soron lévő játékos kiválaszt egy K értéket, amire igaz, hogy van az asztalon K értékű érme, és az összes K értékű érmét átváltoztatja valamilyen kisebb L értékűre (mindet ugyanarra az L értékre, ahol az L érték 1 és K-1 közötti). Az nyer, akinek a lépése után minden érme azonos értékű lesz. A kezdőállás ismeretében Ti dönthetitek el, hogy a kezdő vagy a második játékos bőrébe szeretnétek-e bújni. (K: Melyik típusú érmét változtatjátok meg?; L: Mi legyen az új érme)")
+        },
+        {
+          game: {...gameWrapper(StrategyGame17o), name: "17o_e"},
+          board: boardWrapper(StrategyBoard17o, "Kezdetben van 10 érme az asztalon, melyek értékei 1 és 5 közé eső egészek lehetnek. A két játékos felváltva lép. A soron lévő játékos kiválaszt egy K értéket, amire igaz, hogy van az asztalon K értékű érme, és az összes K értékű érmét átváltoztatja valamilyen kisebb L értékűre (mindet ugyanarra az L értékre, ahol az L érték 1 és K-1 közötti). Az nyer, akinek a lépése után minden érme azonos értékű lesz. A kezdőállás ismeretében Ti dönthetitek el, hogy a kezdő vagy a második játékos bőrébe szeretnétek-e bújni. (K: Melyik típusú érmét változtatjátok meg?; L: Mi legyen az új érme)")
         },
       ]} />
     </div>

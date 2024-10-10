@@ -1,7 +1,12 @@
-import { RealClientRepository } from "../api-repository-interface";
+import { LOCAL_STORAGE_TEAMSTATE, OfflineClientRepository, RealClientRepository } from "../api-repository-interface";
 import { TeamModelDto } from "../dto/TeamStateDto";
 
 const LOCAL_STORAGE_GUID = "kjqAEKeFkMpOvOZrzcvp";
+
+let ClientRepository = RealClientRepository;
+if (process.env.REACT_APP_WHICH_VERSION === "b"){
+  ClientRepository = OfflineClientRepository;
+}
 
 export class UserModel {
   private async saveGUID(guid: string) {
@@ -29,7 +34,7 @@ export class UserModel {
       return null;
     }
 
-    const repo = new RealClientRepository();
+    const repo = new ClientRepository();
 
     const res = await repo.getTeamState(guid);
 
@@ -43,7 +48,7 @@ export class UserModel {
       return;
     }
 
-    const repo = new RealClientRepository();
+    const repo = new ClientRepository();
 
     await repo.startRelay(guid);
   }
@@ -55,7 +60,7 @@ export class UserModel {
       return;
     }
 
-    const repo = new RealClientRepository();
+    const repo = new ClientRepository();
 
     await repo.startStrategy(guid);
   }
@@ -72,10 +77,13 @@ export class UserModel {
 
   logout() {
     localStorage.removeItem(LOCAL_STORAGE_GUID);
+    localStorage.removeItem(LOCAL_STORAGE_TEAMSTATE);
+    localStorage.removeItem("RelayPoints");
+    localStorage.removeItem("StrategyPoints");
   }
 
   async login(joinCode: string): Promise<string | null> {
-    const repo = new RealClientRepository();
+    const repo = new ClientRepository();
     const guid = await repo.joinWithCode(joinCode);
     this.saveGUID(guid);
     return null;
@@ -88,7 +96,7 @@ export class UserModel {
       return;
     }
 
-    const repo = new RealClientRepository();
+    const repo = new ClientRepository();
 
     await repo.toHome(guid);
   }

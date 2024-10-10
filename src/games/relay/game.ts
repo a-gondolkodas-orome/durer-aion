@@ -1,5 +1,6 @@
 import { Game } from "boardgame.io";
 import { INVALID_MOVE, TurnOrder } from "boardgame.io/core";
+import { sendDataRelayEnd } from "../../common/sendData";
 
 type Answer = {
   answer: number;
@@ -22,7 +23,7 @@ export interface MyGameState {
   url: string;
 }
 
-const lengthOfCompetition = 1 * 10; // seconds
+const lengthOfCompetition = 60 * 60; // seconds
 
 const GUESSER_PLAYER = '0';
 const JUDGE_PLAYER = '1';
@@ -37,7 +38,7 @@ export const GameRelay: Game<MyGameState> = {
     correctnessPreviousAnswer: null,
     previousAnswers: [[]],
     previousPoints: [],
-    currentProblemMaxPoints: 3, // TODO: get from the problem list
+    currentProblemMaxPoints: 3, // TODO: get from the problem list, TODO: rename this function to currentProblemAvailablePoints
     numberOfTry: 0,
     milisecondsRemaining: 1000 * lengthOfCompetition,
     start: new Date().toISOString(),
@@ -96,6 +97,9 @@ export const GameRelay: Game<MyGameState> = {
           G.correctnessPreviousAnswer = correctnessPreviousAnswer;
           if (correctnessPreviousAnswer) {
             G.points += G.currentProblemMaxPoints;
+            if (process.env.REACT_APP_WHICH_VERSION === "b") {
+              localStorage.setItem("RelayPoints", G.points.toString());
+            }
             G.previousPoints[G.currentProblem] = G.currentProblemMaxPoints;
           } else {
             G.previousPoints[G.currentProblem] = 0;
@@ -125,10 +129,21 @@ export const GameRelay: Game<MyGameState> = {
           events.endTurn();
         },
         endGame({ G, ctx, playerID, events }, correctnessPreviousAnswer: boolean) {
-          if (playerID !== JUDGE_PLAYER) {
+          if (playerID !== JUDGE_PLAYER || G.answer === null) {
             return INVALID_MOVE;
           }
+          G.previousAnswers[G.currentProblem].push({answer: G.answer, date: new Date().toISOString()});
+          G.correctnessPreviousAnswer = correctnessPreviousAnswer;
+          if (correctnessPreviousAnswer) {
             G.points += G.currentProblemMaxPoints;
+            if (process.env.REACT_APP_WHICH_VERSION === "b") {
+              localStorage.setItem("RelayPoints", G.points.toString());
+              sendDataRelayEnd(null, G, ctx);
+            }
+            G.previousPoints[G.currentProblem] = G.currentProblemMaxPoints;
+          } else {
+            G.previousPoints[G.currentProblem] = 0;
+          }
             events.endGame();
         },
         getTime({ G, ctx, playerID, events }) {

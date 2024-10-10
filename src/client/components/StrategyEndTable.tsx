@@ -17,6 +17,7 @@ export function StrategyEndTable(props: {allPoints: number, numOfTries: number})
     <Stack sx={{
       display: 'flex',
       width: "750px",
+      maxWidth: '100%',
       marginTop: '30px',
       marginBottom: '30px',
       borderRadius: '30px',

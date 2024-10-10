@@ -10,12 +10,27 @@ export function Disclaimer() {
     <Stack
       sx={{
         display: "flex",
-        height: "",
-        width: "100%",
-        padding: "40px",
-        margin: "40px",
+        height: {
+          xs: "100%",
+          md: "auto",
+        },
+        width: {
+          xs: "100%",
+          md: "calc(100% - 80px)",
+        },
+        padding: {
+          xs: "10px",
+          md: "40px"
+        },
+        margin: {
+          xs: 0,
+          md: "40px"
+        },
         backgroundColor: "#fff",
-        borderRadius: "30px",
+        borderRadius: {
+          xs: 0,
+          md: "30px",
+        }
       }}
       data-testId={"disclaimerRoot"}
     >
@@ -30,7 +45,7 @@ export function Disclaimer() {
 
       <Stack
         sx={{
-          fontSize: 36,
+          fontSize: 24,
           marginBottom: "10px",
           fontStyle: "italic",
         }}
@@ -41,15 +56,45 @@ export function Disclaimer() {
       <Stack
         sx={{
           fontSize: 16,
-          marginBottom: "150px",
+          marginBottom: {
+            xs: "15px",
+            md: "15px",
+          }
         }}
       >
         {dictionary.disclaimer.progressDescription}
       </Stack>
 
+      <Stack
+        sx={{
+          fontSize: 24,
+          marginBottom: "10px",
+          fontStyle: "italic",
+        }}
+      >
+        {dictionary.disclaimer.interface}
+      </Stack>
+
+      <Stack
+        sx={{
+          fontSize: 16,
+          marginBottom: {
+            xs: "15px",
+            md: "150px",
+          }
+        }}
+      >
+        <span dangerouslySetInnerHTML={{ __html: (process.env.REACT_APP_WHICH_VERSION === "b" ? dictionary.disclaimer.interfaceDescriptionBHTML : dictionary.disclaimer.interfaceDescription) }}></span>
+      </Stack>
+
+
+
       <Button
         sx={{
-          width: "350px",
+          width: {
+            xs: "100%",
+            sm: "350px",
+          },
           height: "60px",
           fontSize: "26px",
           alignSelf: "center",

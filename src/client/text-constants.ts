@@ -1,22 +1,29 @@
 export const dictionary = {
   disclaimer: {
     start:
-      "Az online fordulón a csapatoknak önállóan kell dolgozniuk, külső segítséget nem fogadhatnak el, " +
-      "másokkal nem kommunikálhatnak egészen a versenyzési időszak végéig.",
+      "Az online fordulón a csapatoknak önállóan kell dolgozniuk, más emberektől nem kérhetnek segítséget" +
+      "a versenyzési időszak végéig (21:30-ig). A mesterséges intelligencia használata is tilos.",
     progress: "Továbbjutás",
     progressDescription:
       "Azok a csapatok, amelyek az online forduló során a megszerezhető 52 pontból legalább 25 pontot " +
       "elérnek, továbbjutnak a helyi fordulóba. (Fenntartjuk a jogot, hogy a ponthatárt esetleg csökkentsük, " +
       "növelni biztosan nem fogjuk.) Az online fordulón szerzett pontszám nem számít bele a további eredményekbe.",
+    interface: "A felület",
+    interfaceDescription:
+      "A felület mobilon is gépen is kitölthető, egyszerre akár több eszközzel is bejelentkezhettek.",
+    interfaceDescriptionBHTML:
+      "A felület mobilon is gépen is kitölthető. Kérünk bennetek, hogy <b>legfeljebb 1 eszközről</b> töltsétek ki az online fordulót, továbbá <b>ne frissítsétek le az oldalt</b> a verseny során.<br>" +
+      "<small>(Ha mégis frissítitek az oldalt, akkor a verseny újraindul (de az eddigi eredményeitek megmaradnak). Ekkor - minél gyorsabban - menjetek vissza ahhoz a feladathoz, ahol jártatok. " +
+      "Figyeljetek arra, hogy bár az időzítő újraindul a frissítés után, de így is csak az időben beérkezett válaszokat fogjuk figyelembe venni.)</small>",
     continue: "Tovább a versenyhez",
   },
   chooser: {
     finish: {
-      title: "Gratulálunk sikeresen befejezted a versenyt!",
-      content: "Leiras a vegerol varunk a donton, valamikor ki is derul bejutottal, kicsit hosszabban, hogy jobban nezzen ki",
+      title: "Vége a versenynek!",
+      content: "Köszönjük a részvételeteket, reméljük, hogy tetszett nektek a verseny. Kíváncsiak vagyunk a fordulóval kapcsolatos véleményetekre, így kérjük, <a href=\"https://forms.gle/TQFC1N8vqRe1meyz8\" target=\"_blank\" rel=\"noopener noreferrer\">töltsétek ki ezt az űrlapot</a>. Várhatóan szombatig közzétesszük az eredményeket és a továbbjutó csapatok listáját, és erről emailben is fogunk nektek értesítést küldeni.",
       final: "Végső pontszám",
     },
-    gameDescriptionHtml: `<p>Ebben a feladatban egy kétszemélyes stratégiás játékot játszhattok, ahol az egyik játékos Ti lesztek, a másik játékos pedig a gép. Győzzétek le a gépet <b>kétszer egymás</b> után ebben a játékban! A kezdő helyzet ismeretében Ti dönthetitek el, hogy a kezdő vagy a második játékos bőrébe szeretnétek bújni.</p>         
+    gameDescriptionHtml: `<p>Ebben a feladatban egy kétszemélyes stratégiás játékot játszhattok, ahol az egyik játékos Ti lesztek, a másik játékos pedig a gép. Győzzétek le a gépet <b>kétszer egymás után</b> ebben a játékban! A kezdő helyzet ismeretében Ti dönthetitek el, hogy a kezdő vagy a második játékos bőrébe szeretnétek bújni.</p>         
     <p>A sikeres teljesítésért az alábbiak szerint kaptok pontot:
       <ul>
         <li>Ha egyszer sem veszítetek, akkor 12 pontot kaptok.</li>
@@ -52,22 +59,24 @@ export const dictionary = {
     badCategory: "ROSSZ KATEGÓRIA",
     remainingTime: "Hátralevő idő",
     name: "Váltófeladatok",
+    guess: "Tipp:",
+    send: "Küldés",
   },
   general: {
-    task: "Feladat",
+    task: "feladat",
     point: "pont",
   },
   header: {
-    logout: "kijelentkezés",
+    logout: "kilépés",
     subtitle: "Online forduló",
-    title: "XVI. Dürer Verseny",
+    title: "XVII. Dürer Verseny",
   },
   login: {
     greeting: "Kedves Versenyző!",
     beforeTitle: "Üdvözlünk a",
     afterTitle: "online fordulójának felületén.",
-    loginInstraction: "Belépéshez nézd meg az emailjeidet, nyisd meg az ott található linket vagy üsd be a kódot ide:",
-    fallback: "Ha nem találjátok az emailt, akkor írjatok nekünk a durerinfo@gmail.com email címre.",
+    loginInstraction: "Belépéshez nézd meg az emailjeidet, és üsd be az ott található kódot ide:",
+    fallback: "Ha nem találjátok az emailt, akkor írjatok nekünk a verseny [K] durerinfo [P] hu email címre.",
   },
   waitingRoom: {
     soon: "Az online forduló hamarosan kezdődik!",
@@ -90,5 +99,8 @@ export const dictionary = {
   },
   error: {
     unsuspected: "Váratlan hiba történt",
+  },
+  warnings: {
+    timeNotMatch: "A számítógép órája nincs szinkronban a szerver órájával, a jelzett hátralevő idő nem tökéletes, az oldal újra töltése megoldhatja a problémát",
   }
 };
