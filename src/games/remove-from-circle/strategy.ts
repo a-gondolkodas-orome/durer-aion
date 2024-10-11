@@ -78,7 +78,7 @@ function startingPosition({ G, ctx }: any, category: "C" | "D" | "E"): { circle:
         ).fill(true), firstMove:-1, lastMove:-1};
       }
     } else {
-      return { circle: Array(Math.floor(Math.random()*4+7)).fill(true), firstMove:-1, lastMove:-1};
+      return { circle: Array(Math.floor(Math.random()*8+3)).fill(true), firstMove:-1, lastMove:-1};
     }
   }
   //just in case
