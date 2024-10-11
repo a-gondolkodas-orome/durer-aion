@@ -1,5 +1,5 @@
 import { GameRelay } from './games/relay/game';
-import { MyGame as StrategyGameremovefromcirclee } from './games/remove-from-circle/game';
+import { myGameWrapper as strategyGameWrapper } from './games/remove-from-circle/game';
 import { strategyWrapper as StrategyStrategyremovefromcirclee } from './games/remove-from-circle/strategy';
 import { PostgresStore } from 'bgio-postgres';
 import { argv, env, exit } from 'process';
@@ -80,9 +80,9 @@ const games = [
   { ...GameRelay, name: relayNames.C },
   { ...GameRelay, name: relayNames.D },
   { ...GameRelay, name: relayNames.E },
-  { ...gameWrapper(StrategyGameremovefromcirclee), name: strategyNames.C },
-  { ...gameWrapper(StrategyGameremovefromcirclee), name: strategyNames.D },
-  { ...gameWrapper(StrategyGameremovefromcirclee), name: strategyNames.E },
+  { ...gameWrapper(strategyGameWrapper("C")), name: strategyNames.C },
+  { ...gameWrapper(strategyGameWrapper("D")), name: strategyNames.D },
+  { ...gameWrapper(strategyGameWrapper("E")), name: strategyNames.E },
 ];
 
 
