@@ -241,3 +241,9 @@ npm run deploy
 ```
 
 After this the site should be available on github.io.
+
+# Trubleshoot
+
+## npm ci
+If the `npm ci` command returns with EACCESS error message, try 
+sudo chown -R `whoami` node_modules
