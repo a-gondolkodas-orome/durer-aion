@@ -153,32 +153,30 @@ export const GameRelay: Game<MyGameState> = {
           G.milisecondsRemaining = new Date(G.end).getTime() - new Date().getTime();
         }
       },
-      turn: {
-        onMove: ({G, ctx, playerID, events }) => {
-          console.log("onMove")
-          if(playerID === GUESSER_PLAYER) {
-            let currentTime = new Date();
-            if(currentTime.getTime() - new Date(G.end).getTime() > 1000*10){
-              // Do not accept any answer if the time is over since more than 10 seconds
-              events.endGame();
-            }
-          }
-        },    
+    },
+  },
+  turn: {
+    onMove: ({G, ctx, playerID, events }) => {
+      if(playerID === GUESSER_PLAYER) {
+        console.log("onMove")
+        let currentTime = new Date();
+        if(currentTime.getTime() - new Date(G.end).getTime() > 1000*10){
+          // Do not accept any answer if the time is over since more than 10 seconds
+          events.endGame();
+        }
+      }
+    },    
+    onEnd: ({ G, ctx, playerID, events }) => {
+      if (playerID === JUDGE_PLAYER) {
+        let currentTime = new Date();
+        if (currentTime.getTime() - new Date(G.end).getTime() <= 0) {
+          console.log("onEnd")
+          // Do not accept any answer if the time is over
+          events.endGame();
+        }
       }
     },
-    turn: {
-      onEnd: ({ G, ctx, playerID, events }) => {
-        if (playerID === JUDGE_PLAYER) {
-          let currentTime = new Date();
-          if (currentTime.getTime() - new Date(G.end).getTime() <= 0) {
-            console.log("onEnd")
-            // Do not accept any answer if the time is over
-            events.endGame();
-          }
-        }
-      },
-    },  
-  },
+  },  
 
   ai: {
     enumerate: (G, ctx, playerID) => {
