@@ -13,18 +13,16 @@ export interface MyGameState {
 const lengthOfCompetition = 30*60; // seconds
 
 export function myGameWrapper(category: "C" | "D" | "E") {
-  if (category === "C") {
-    const init_circle = [true,true,true,true,true,true,true]
-  } else if (category === "D") {
-    const init_circle = [true,true,true,true,true,true,true,true,true]
-  } else if (category === "E") {
-    const init_circle = [true,true,true,true,true]
-  }
+  const init_circle: Array<boolean> = 
+    category === "C" ? [true, true, true, true, true, true, true] :
+    category === "D" ? [true, true, true, true, true, true, true, true, true] :
+    category === "E" ? [true, true, true, true, true] :
+    [];
   const MyGame: GameType<MyGameState> = {
     name: 'remove-from-circle_' + category.toLowerCase(),
     setup: () => {
       return {
-        circle: [],
+        circle: init_circle,
         firstMove: -1,
         lastMove: -1,
         milisecondsRemaining: 1000*lengthOfCompetition,
