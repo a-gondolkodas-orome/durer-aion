@@ -2,7 +2,7 @@ export const dictionary = {
   disclaimer: {
     start:
       "Az online fordulón a csapatoknak önállóan kell dolgozniuk, más emberektől nem kérhetnek segítséget" +
-      "a versenyzési időszak végéig (21:30-ig). A mesterséges intelligencia használata is tilos.",
+      " a versenyzési időszak végéig (21:30-ig). A mesterséges intelligencia használata is tilos.",
     progress: "Továbbjutás",
     progressDescription:
       "Azok a csapatok, amelyek az online forduló során a megszerezhető 52 pontból legalább 25 pontot " +
@@ -10,9 +10,9 @@ export const dictionary = {
       "növelni biztosan nem fogjuk.) Az online fordulón szerzett pontszám nem számít bele a további eredményekbe.",
     interface: "A felület",
     interfaceDescription:
-      "A felület mobilon is gépen is kitölthető, egyszerre akár több eszközzel is bejelentkezhettek.",
+      "A felület mobilon és gépen is kitölthető, egyszerre akár több eszközzel is bejelentkezhettek.",
     interfaceDescriptionBHTML:
-      "A felület mobilon is gépen is kitölthető. Kérünk bennetek, hogy <b>legfeljebb 1 eszközről</b> töltsétek ki az online fordulót, továbbá <b>ne frissítsétek le az oldalt</b> a verseny során.<br>" +
+      "A felület mobilon és gépen is kitölthető. Kérünk bennetek, hogy <b>legfeljebb 1 eszközről</b> töltsétek ki az online fordulót, továbbá <b>ne frissítsétek le az oldalt</b> a verseny során.<br>" +
       "<small>(Ha mégis frissítitek az oldalt, akkor a verseny újraindul (de az eddigi eredményeitek megmaradnak). Ekkor - minél gyorsabban - menjetek vissza ahhoz a feladathoz, ahol jártatok. " +
       "Figyeljetek arra, hogy bár az időzítő újraindul a frissítés után, de így is csak az időben beérkezett válaszokat fogjuk figyelembe venni.)</small>",
     continue: "Tovább a versenyhez",
