@@ -1,6 +1,6 @@
 import { Stack } from '@mui/system';
 import { useAddMinutes, useAll } from '../hooks/user-hooks';
-import { Button, Dialog } from '@mui/material';
+import { Button, Dialog, Table, TableCell, TableRow } from '@mui/material';
 import { Dispatch, useState } from 'react';
 import useSWR from 'swr';
 import { DataGrid } from '@mui/x-data-grid';
@@ -10,6 +10,8 @@ import Form from './form';
 import { Field } from 'formik';
 import theme from './theme';
 import { useSnackbar } from 'notistack';
+import { strategy } from '../../games/relay/strategy';
+import { FinishedMatchStatus } from '../../server/entities/model';
 
 
 export function Admin(props: {setAdmin: Dispatch<boolean>}) {
@@ -58,14 +60,20 @@ export function Admin(props: {setAdmin: Dispatch<boolean>}) {
            }}>
           {selectedRow && <TeamDetailDialog data={selectedRow!!}/>}
         </Dialog>
-        Admin felület 
-        <Button
-          color='primary'
-          variant='contained'
-          onClick={()=>{props.setAdmin(false)}}
-        >
+        
+        <Stack sx={{width: "100%", display:"flex", flexDirection: "row"}}>
+          <Stack sx={{fontSize:"32px", width: "100%", textAlign: "center"}}>Admin felület </Stack>
+          <Button
+          sx={{width:"100px", height: "35px", alignSelf: "center"}}
+            color='primary'
+            variant='contained'
+            onClick={()=>{props.setAdmin(false)}}
+          >
           Kilépés
         </Button>
+        </Stack>
+        <Stack sx={{padding: "10px"}}>
+        idő hozzáadása minden aktív játékosnak:
         <Form
         initialValues={{ time: '' }}
         onSubmit={async (values) => { 
@@ -83,6 +91,7 @@ export function Admin(props: {setAdmin: Dispatch<boolean>}) {
             enqueueSnackbar(e?.message || "Hiba történt", { variant: 'error' });
           }
         }}>
+        <Stack sx={{display: "flex", flexDirection: "row", margin: "15px"}}>
         <Field
           name="time"
         >
@@ -93,48 +102,44 @@ export function Admin(props: {setAdmin: Dispatch<boolean>}) {
           }: any) => <input
             {...field}
             className="text-input"
+            placeholder="perc"
             style={{
-              width: '100%',
-              height: '40px',
+              width: '200px',
               borderWidth: '2px',
-              borderRadius: '5px',
               borderColor: theme.palette.primary.main,
-              fontSize: '18px',
             }}
           />
         }</Field>
         <Button sx={{
-          width: '100%',
-          height: '60px',
-          fontSize: '26px',
+          width: '150px',
           alignSelf: 'center',
           textTransform: 'none',
-          borderRadius: '10px',
-          marginTop: '40px',
         }} variant='contained' color='primary' type="submit">
-          idő hozzáadása minden aktív játékosnak
+          hozzáadás
         </Button>
+        </Stack>
       </ Form>
+      </Stack>
       <Stack sx={{
-        height: "600px",
+        height: "635px",
       }}>
         {data && <DataGrid columns={[
           {
             field: 'id',
             headerName: 'ID',
-            width: 150,
+            width: 75,
             editable: false,
           },
           {
             field: 'teamName',
             headerName: 'Csapanév',
-            width: 150,
+            width: 200,
             editable: false,
           },
           {
             field: 'category',
             headerName: 'Kategória',
-            width: 50,
+            width: 100,
             editable: false,
           },
           {
@@ -163,6 +168,7 @@ export function Admin(props: {setAdmin: Dispatch<boolean>}) {
           },
           {
             field: 'view',
+            width: 170,
             headerName: '',
             renderCell: (renderData) => {
               return (
@@ -202,6 +208,55 @@ export function Admin(props: {setAdmin: Dispatch<boolean>}) {
         }}
         />}
       </Stack>
+     {data && <Stats data={data}/>}
     </Stack>
   )
+}
+
+function Stats(props: {data: TeamModelDto[]}) {
+  const categories = Array.from(new Set(props.data.map(it=>it.category)));
+  const stat = categories.map(cat=>{
+    const current = props.data.filter(it=>it.category==cat);
+    const finishedRelayScores = current.filter(it=>it.relayMatch.state == "FINISHED").map(it=>(it.relayMatch as FinishedMatchStatus).score);
+    const finishedStrategyScores = current.filter(it=>it.strategyMatch.state == "FINISHED").map(it=>(it.strategyMatch as FinishedMatchStatus).score);
+    const strategyPoints = Array.from(new Set(finishedStrategyScores));
+    const relayPoints = Array.from(new Set(finishedRelayScores));
+    return {
+      category: cat,
+      all: current.length,
+      relay: finishedRelayScores.length,
+      strategy: finishedStrategyScores.length,
+      finished: current.filter(it=>it.strategyMatch.state == "FINISHED" && it.relayMatch.state == "FINISHED").length,
+      strategyPoints: strategyPoints.map(it=> ({
+        point: it,
+        count: finishedStrategyScores.filter(s=>s==it).length
+      })),
+      relayPoints: relayPoints.map(it=> ({
+        point: it,
+        count: finishedRelayScores.filter(s=>s==it).length
+      })),
+    }
+  })
+  return <Table>
+    <TableRow>
+      <TableCell>Kategória</TableCell>
+      <TableCell>Összesen</TableCell>
+      <TableCell>Befejezte a váltót</TableCell>
+      <TableCell>Befejezte a stratégiáss</TableCell>
+      <TableCell>Befejezte</TableCell>
+      <TableCell>Relay-Pontszámok</TableCell>
+      <TableCell>Strategy-Pontszámok</TableCell>
+    </TableRow>
+    {stat.map(s=> (
+      <TableRow>
+        <TableCell>{s.category}</TableCell>
+        <TableCell>{s.all}</TableCell>
+        <TableCell>{s.relay}</TableCell>
+        <TableCell>{s.strategy}</TableCell>
+        <TableCell>{s.finished}</TableCell>
+        <TableCell>{s.relayPoints.map(it=><>{it.point}: {it.count} db <br/></>)}</TableCell>
+        <TableCell>{s.strategyPoints.map(it=><>{it.point}: {it.count} db <br/></>)}</TableCell>
+      </TableRow>
+    ))}
+  </Table>
 }

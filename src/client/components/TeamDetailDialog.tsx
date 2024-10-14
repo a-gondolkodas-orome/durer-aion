@@ -1,4 +1,4 @@
-import { Stack, width } from '@mui/system';
+import { display, Stack, width } from '@mui/system';
 import { useAddMinutes, useAll, useMatchState, useResetRelay, useResetStrategy } from '../hooks/user-hooks';
 import { Button, Dialog } from '@mui/material';
 import { Dispatch, useState } from 'react';
@@ -10,12 +10,22 @@ import { Field } from 'formik';
 import Form from "./form";
 import theme from './theme';
 import { useSnackbar } from 'notistack';
+import { Countdown } from './Countdown';
+import { RelayEndTableData } from './RelayEndTable';
 
 
 export function TeamDetailDialog(props: {data: TeamModelDto}) {
   const resetRelay = useResetRelay();
   const resetStrategy = useResetStrategy();
   const [teamState, setTeamState] = useState(props.data);
+
+  let sum = 0;
+  switch (props.data.relayMatch.state) {
+    case "FINISHED": { sum+= props.data.relayMatch.score}
+  }
+  switch (props.data.strategyMatch.state) {
+    case "FINISHED": { sum+= props.data.strategyMatch.score}
+  }
 
   return (
     <Stack
@@ -26,26 +36,29 @@ export function TeamDetailDialog(props: {data: TeamModelDto}) {
         fontSize: 14,
       }}>
       <Stack sx={{fontSize: 24, paddingBottom: "24px"}}>{teamState.teamName}</Stack>
-      <Stack>relay: <br/>
-        <MatchStatusField data={teamState.relayMatch} isRelay={true}/>
-      </Stack>
-      <Button
+      <Stack sx={{fontSize: 16}}>Relay:</Stack>
+      <MatchStatusField data={teamState.relayMatch} isRelay={true}/>
+        <Button sx={{
+        maxWidth: "125px",
+      }}
           onClick={async ()=>{
             const changed = await resetRelay(teamState.teamId);
             setTeamState(changed);
           }}
-          >resetRelay
-      </Button>
-      <Stack>strategy: <br/>
+        >reset</Button>
+      
+      <Stack sx={{fontSize: 16, marginTop: "24px"}}>Strategy:</Stack>
         <MatchStatusField data={teamState.strategyMatch} isRelay={false}/>
-      </Stack>
-      <Button
+      <Button sx={{
+        maxWidth: "125px",
+      }}
           onClick={async ()=>{
             const changed = await resetStrategy(teamState.teamId);
             setTeamState(changed);
           }}
-          >resetStrategy
+          >reset
       </Button>
+      <Stack sx={{fontSize: 24, marginTop: "24px"}}>Összesen: {sum} pont</Stack>
     </Stack>
   )
 }
@@ -62,9 +75,8 @@ function MatchStatusField(props: {data: MatchStatus, isRelay: boolean}) {
           Folyamatban <br/>
           team-state-start: {formatTime(inProgressState.startAt)}<br/>
           team-state-end: {formatTime(inProgressState.endAt)}<br/>
-          matchId: {inProgressState.matchID}<br/>
         </Stack>
-        <Stack><MatchStatusDataField matchId={inProgressState.matchID}/></Stack>
+        <Stack><MatchStatusDataField matchId={inProgressState.matchID} isRelay={props.isRelay}/></Stack>
         <Form
         initialValues={{ time: '' }}
         onSubmit={async (values) => { 
@@ -75,6 +87,7 @@ function MatchStatusField(props: {data: MatchStatus, isRelay: boolean}) {
             enqueueSnackbar(e?.message || "Hiba történt", { variant: 'error' });
           }
         }}>
+        <Stack sx={{display: "flex", flexDirection: "row", margin: "15px"}}>
         <Field
           name="time"
         >
@@ -85,28 +98,23 @@ function MatchStatusField(props: {data: MatchStatus, isRelay: boolean}) {
           }: any) => <input
             {...field}
             className="text-input"
+            placeholder="perc"
             style={{
-              width: '100%',
-              height: '40px',
+              width: '200px',
               borderWidth: '2px',
-              borderRadius: '5px',
               borderColor: theme.palette.primary.main,
-              fontSize: '18px',
             }}
           />
         }</Field>
         <Button sx={{
-          width: '100%',
-          height: '60px',
-          fontSize: '26px',
+          width: '150px',
           alignSelf: 'center',
           textTransform: 'none',
-          borderRadius: '10px',
-          marginTop: '40px',
         }} variant='contained' color='primary' type="submit">
-          hozzáadás
-        </Button>
-      </Form></>
+          idő hozzáadása
+        </Button></Stack>
+      </Form>
+      </>
       )
     case "FINISHED":
       let finishedState = props.data as FinishedMatchStatus 
@@ -116,7 +124,7 @@ function MatchStatusField(props: {data: MatchStatus, isRelay: boolean}) {
           start: {formatTime(finishedState.startAt)}<br/>
           end: {formatTime(finishedState.endAt)}<br/>
           
-          <Stack><MatchStatusDataField matchId={finishedState.matchID}/></Stack>
+          <Stack><MatchStatusDataField matchId={finishedState.matchID} isRelay={props.isRelay}/></Stack>
           teamStateScore: {finishedState.score}<br/>
         </Stack>
       )
@@ -129,11 +137,35 @@ function MatchStatusField(props: {data: MatchStatus, isRelay: boolean}) {
   }
 }
 
-function MatchStatusDataField(props: {matchId: string}) {
-
+function MatchStatusDataField(props: {matchId: string, isRelay: boolean}) {
   const matchState = useMatchState();
+  const [msRemaining, setMsRemaining] = useState<number>(10000);
   const { data } = useSWR([`users/${props.matchId}`, props.matchId], ([, matchId]) => matchState(matchId))
   return (<>
-  {data && JSON.stringify(data)}
+  {data && <Stack>
+      { props.isRelay && <Stack>Aktuális feladatszám: {data.G.currentProblem}</Stack>}
+      { !props.isRelay && <Stack>próbálkozások száma: {(data.G as any).numberOfTries}</Stack>}
+      { !props.isRelay && <Stack>Éles játékok eddigi eredményei: {(data.G as any).numberOfTries-(data.G as any).numberOfLoss-Number((data.G as any).winner===null && (data.G as any).difficulty==="live")} győzelem, {(data.G as any).numberOfLoss} vereség</Stack>}
+      <Stack>Befejezés dátuma: {formatTime(new Date(data.G.end))}</Stack>
+      <Stack>pontszám: { data.G.points }</Stack>
+      <Stack>Hátralévő idő: <Countdown
+        msRemaining={msRemaining ?? null}
+        setMsRemaining={setMsRemaining}
+        endTime={new Date(data.G.end)}
+        getServerTimer={()=>{}}
+        serverRemainingMs={new Date(data.G.end).getTime() - new Date().getTime()}
+      /></Stack>
+      { props.isRelay && <Stack>
+      <RelayEndTableData allPoints={data.G.points} task={
+           // TODO .maxpoints
+           [3, 3, 4, 4, 4, 5, 5, 6, 6].map((it, idx)=>({
+            max: it,
+            got: data.G.previousPoints[idx] ?? null,
+            answers: data.G.previousAnswers[idx]?.map(a=>a.answer) ?? [],
+           })
+           ) 
+          }/>
+      </Stack>}
+    </Stack>}
   </>)
 }
