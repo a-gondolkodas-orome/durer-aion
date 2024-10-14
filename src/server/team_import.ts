@@ -19,8 +19,14 @@ function arraysEqual(a: string[], b: string[]) {
   return true;
 }
 
+function randomDigits(numDigits: number) {
+  var result = "";
+  for (var i = 0; i < numDigits; i++) { result += `${randomInt(0,10)}`; }
+  return result;
+}
+
 function generateLoginCode() {
-  return `${randomInt(1, 1000)}-${randomInt(1, 10000)}-${randomInt(1, 1000)}`;
+  return `${randomDigits(3)}-${randomDigits(4)}-${randomDigits(3)}`;
 }
 
 export async function importer(teams: TeamsRepository, filename: string) {
@@ -82,14 +88,18 @@ export async function importer(teams: TeamsRepository, filename: string) {
       console.warn(`"Other" field not set for team ${teamname}`);
       console.warn(`  The other field should include any info which could help identify a team. (team name, contestant names, school, email addresses, etc.)`);
     }
+    if(other !== undefined &&  other.length > 700){
+      console.error(`"Other" filed is too long (${other.length} to be exact)`);
+      ok = false;
+    }
 
     if (teamId === undefined || teamId === "") {
       teamId = randomUUID();
-    } else if (teamId.match(/^[0-9a-f\-]+$/) === null) {
+    } else if (teamId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/) === null) {
       ok = false;
       console.error(`ID is not a GUID for team ${teamname}`);
       console.error(`  Found: ${teamId}`);
-      console.error(`  Expected format is usually: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`);
+      console.error(`  Expected format is exactly: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`);
     }
 
     if (found_ids.has(teamId)) {
@@ -133,6 +143,7 @@ export async function importer(teams: TeamsRepository, filename: string) {
           console.error(`Failed to validate team when adding to DB: ${err}`);
           ok = false;
         } else {
+          console.log('We experienced an unexpected error during import. This type of error is not handled in the import scritp, please file a bug report in the GitHub repository!')
           throw err;
         }
       }

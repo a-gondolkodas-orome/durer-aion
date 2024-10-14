@@ -46,8 +46,17 @@ export class TeamModel extends Model {
 export const teamAttributes: ModelAttributes = {
   teamId: {
     type: DataTypes.STRING,
-    unique: true,
+    unique: {
+      name: "teamID",
+      msg: 'TeamId already exists.'
+    },
     primaryKey: true,
+    validate:{
+      isUUID: {
+        args:4,
+        msg: 'TeamId must be a UUIDv4.'
+      }
+    }
   },
   // metadata
   category: {
@@ -55,12 +64,38 @@ export const teamAttributes: ModelAttributes = {
   },
   email: {
     type: DataTypes.STRING,
+    validate:{
+      len: {
+        args: [0,255],
+        msg: 'Email must be between 0 and 255 characters.'
+      }
+    }
   },
   joinCode: {
     type: DataTypes.STRING,
+    unique: {
+      name: "joinCode",
+      msg: 'JoinCode already exists.'
+    },
+    validate:{
+      is: {
+        args: /^[0-9]{3}-[0-9]{4}-[0-9]{3}$/,
+        msg: 'JoinCode must be in the format 111-2222-333.'
+      }
+    }
   },
   teamName: {
     type: DataTypes.STRING,
+    unique: {
+      name: "teamName",
+      msg: 'Teamname already exists.'
+    },
+    validate:{
+      len: {
+        args: [1,255],
+        msg: 'Teamname must be between 1 and 255 characters.'
+      }
+    }
   },
   credentials: {
     type: DataTypes.STRING,
@@ -75,6 +110,12 @@ export const teamAttributes: ModelAttributes = {
     type: DataTypes.JSON,
   },
   other: {
-    type: DataTypes.STRING,
+    type: DataTypes.STRING(1024),
+    validate:{
+      len: {
+        args: [0,700], 
+        msg: 'Other field must be between 0 and 700 characters.'
+      },
+    }
   },
 };
