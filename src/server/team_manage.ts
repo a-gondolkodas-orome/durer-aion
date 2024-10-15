@@ -140,22 +140,24 @@ export async function allowedToStart(team: TeamModel, gameType: 'RELAY' | 'STRAT
 }
 
 export async function checkStaleMatch(team: TeamModel): Promise<{ isStale: boolean, gameState?: 'relayMatch' | 'strategyMatch' }> {
+
+  const leeway = 15 * 1000; // 5 seconds leeway
+
   // Find if boardgame match is already timed out, but not registered
   const now = new Date(Date());
   console.log(`Stale check performed at: ${now}/${Date()}`)
   if (team.relayMatch.state === 'IN PROGRESS') {
     if (typeof team.relayMatch.endAt === 'string')
       team.relayMatch.endAt = new Date(team.relayMatch.endAt);
-    console.log(typeof team.relayMatch.endAt, team.relayMatch.endAt, now)
     console.log(team.relayMatch.endAt.getTime(), now.getTime())
-    if (team.relayMatch.endAt.getTime() < now.getTime())
+    if (team.relayMatch.endAt.getTime() + leeway < now.getTime())
       return { isStale: true, gameState: 'relayMatch' };
   }
 
   if (team.strategyMatch.state === 'IN PROGRESS') {
     if (typeof team.strategyMatch.endAt === 'string')
       team.strategyMatch.endAt = new Date(team.strategyMatch.endAt);
-    if (team.strategyMatch.endAt.getTime() < now.getTime())
+    if (team.strategyMatch.endAt.getTime() + leeway < now.getTime())
       return { isStale: true, gameState: 'strategyMatch' };
   }
 
