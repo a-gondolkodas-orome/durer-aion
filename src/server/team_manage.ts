@@ -185,8 +185,8 @@ export async function closeMatch(matchId: string, teams: TeamsRepository, db: St
     throw new Error(`Match team is not found, the match has the following players:${currentMatch.metadata.players}`);
 
   const type = inferenceGameType(currentMatch.metadata.gameName);
-  if (team[type].state !== "IN PROGRESS")
-    throw new Error(`The match{${matchId}} is not in progress, you can't close it`)
+  if (team[type].state == "NOT STARTED")
+    throw new Error(`The match{${matchId}} is not started yet, you can't close it`)
   const mStat = team[type] as InProgressMatchStatus;
   const finishState = await endMatchStatus(mStat, currentMatch.state.G.points);
   await team.update({ [type]: finishState });
