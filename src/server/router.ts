@@ -253,7 +253,6 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
       console.log(`Stale found: ${JSON.stringify(staleInfo)}`)
       await closeMatch((team[staleInfo.gameState!] as InProgressMatchStatus).matchID, teams, ctx.db);
       team = await teams.getTeam({ teamId: GUID }) ?? ctx.throw(404, `Team with {teamId:${GUID}} not found.`)
-      console.log(JSON.stringify(team))
     }
     ctx.body = team;
   });
