@@ -5,6 +5,10 @@ import { TeamsRepository } from './db';
 import { InProgressMatchStatus, TeamModel } from './entities/model';
 import { BOT_ID } from '../socketio_botmoves';
 import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus, createGame, injectBot, injectPlayer } from './team_manage';
+import { assert } from 'console';
+import fs from 'fs';
+import { import_teams_from_tsv } from './team_import';
+
 
 
 /**
@@ -221,6 +225,30 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
     ctx.body = await teams.listTeams();
   })
 
+  /**
+ * Get all teams as a full object
+ * @returns {TeamModel[]} - List of the selected teams 
+ */
+  router.put('/team/admin/import', koaBody({ multipart: true }), async (ctx) => {
+    const { file } = ctx.request.files ?? ctx.throw(400, 'No files uploaded!');
+    // Check if multiple files are uploded
+    if (Array.isArray(file)) {
+      ctx.throw(400, 'Multiple files are not supported.');
+      return;
+    }
+    assert(file instanceof File);// FU linter
+
+    // Check if the file is a TSV file
+    if (!file || !file.name?.endsWith('.tsv')) {
+      ctx.status = 400;
+      ctx.body = { error: 'Invalid file format. Only TSV files are allowed.' };
+      return;
+    }
+
+    await import_teams_from_tsv(teams, file.path)
+
+    ctx.body = await teams.listTeams();
+  })
 
   /**
    * Get team ID based on login token

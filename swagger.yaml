@@ -200,7 +200,26 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/TeamModel"
-
+  /team/admin/import:
+    put:
+      summary: Create new teams
+      security:
+      - basicAdminAuth: []
+      tags:
+      - admin
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: A TSV file to be uploaded
+              required:
+                - file
   /team/join/{token}:
     get:
       summary: Get team ID based on login token
