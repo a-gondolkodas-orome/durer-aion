@@ -246,14 +246,13 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
    */
   router.get(/^\/team\/(?<GUID>[^-]{8}-[^-]{4}-[^-]{4}-[^-]{4}-[^-]{12}$)/, koaBody(), async (ctx) => {
     const GUID = ctx.params.GUID ?? ctx.throw(400)
-    console.log(GUID);
+    console.log("team-data-access: ", GUID);
     let team = await teams.getTeam({ teamId: GUID }) ?? ctx.throw(404, `Team with {teamId:${GUID}} not found.`)
     const staleInfo = await checkStaleMatch(team);
     if (staleInfo.isStale) {
       console.log(`Stale found: ${JSON.stringify(staleInfo)}`)
       await closeMatch((team[staleInfo.gameState!] as InProgressMatchStatus).matchID, teams, ctx.db);
       team = await teams.getTeam({ teamId: GUID }) ?? ctx.throw(404, `Team with {teamId:${GUID}} not found.`)
-      console.log(JSON.stringify(team))
     }
     ctx.body = team;
   });
