@@ -22,7 +22,7 @@ const problems : RelayProblems ={
       points: 3,
     },
     {
-      problemText: "Anita és Bori, a két maffiózó az ábrán látható, szigetekre épült város különöző szigetein garázdálkodnak (Anita az A, Bori a B betűvel jelölt szigeten). Egy nap a rendőrség szigorú ellenőrzést vezetett be néhány hídon. Legalább hány hídra kellett kivonulnia a rendőröknek ahhoz, hogy a két maffiózó ne tudjon találkozni? \\newline \\textit{A maffiózók csak akkor tudnak találkozni, ha az egyikük el tud jutni a másikhoz kizárólag nem ellenőrzött hidakat használva.}",
+      problemText: "Anita és Bori, a két maffiózó az ábrán látható, szigetekre épült város különböző szigetein garázdálkodnak (Anita az A, Bori a B betűvel jelölt szigeten). Egy nap a rendőrség szigorú ellenőrzést vezetett be néhány hídon. Legalább hány hídra kellett kivonulnia a rendőröknek ahhoz, hogy a két maffiózó ne tudjon találkozni? \\newline \\textit{A maffiózók csak akkor tudnak találkozni, ha az egyikük el tud jutni a másikhoz kizárólag nem ellenőrzött hidakat használva.}",
       answer: 3,
       points: 3,
       url: "https://durerimages.s3.eu-north-1.amazonaws.com/18o/uIDqvMSMIGiNaAPH-szigetek.png"
@@ -34,7 +34,7 @@ const problems : RelayProblems ={
       url: "https://durerimages.s3.eu-north-1.amazonaws.com/18o/eXdSScpPVGdGgHKM-torta.png",
     },
     {
-      problemText: "Peti, Zoli, Marci és Zsoma 72 kilométer hosszú biciklitúrára indultak. Peti minden negyedik, Zoli minden ötödik, Marci pedig minden hetedik kilométer megkezdésekor ivott a kulacsából. (Tehát például Peti a 4., 8., 12., ... kilométerek elején ivott.) Peti éppen ivott, amikor Zsomának eszébe jutott, hogy elfelejtette hányadik kilométernél tartanak. Elkezdte figyelni a társait: következőként Zoli vette elő a kulacsát egyedül, három kilométerrel Peti után. Hány kilométer volt ekkor (mikor Zoli ivott) hátra a túrából?",
+      problemText: "Peti, Zoli, Marci és Zsoma 72 kilométer hosszú biciklitúrára indultak. Peti minden negyedik, Zoli minden ötödik, Marci pedig minden hetedik kilométer megkezdésekor ivott a kulacsából a túra kezdetétől számítva. (Tehát például Peti a 4., 8., 12., ... kilométerek elején ivott.) Peti éppen ivott, amikor Zsomának eszébe jutott, hogy elfelejtette hányadik kilométernél tartanak. Elkezdte figyelni a társait: következőként Zoli vette elő a kulacsát egyedül, három kilométerrel Peti után. Hány kilométer volt ekkor (amikor Zoli ivott) hátra a túrából?",
       answer: 18,
       points: 4,
     },
@@ -73,7 +73,7 @@ const problems : RelayProblems ={
       points: 3,      
     },
     {
-      problemText: "Anita és Bori, a két maffiózó az ábrán látható, szigetekre épült város különöző szigetein garázdálkodnak (Anita az A, Bori a B betűvel jelölt szigeten). Egy nap a rendőrség szigorú ellenőrzést vezetett be néhány hídon. Legalább hány hídra kellett kivonulnia a rendőröknek ahhoz, hogy a két maffiózó ne tudjon találkozni? \\newline \\textit{A maffiózók csak akkor tudnak találkozni, ha az egyikük el tud jutni a másikhoz kizárólag nem ellenőrzött hidakat használva.}",
+      problemText: "Anita és Bori, a két maffiózó az ábrán látható, szigetekre épült város különböző szigetein garázdálkodnak (Anita az A, Bori a B betűvel jelölt szigeten). Egy nap a rendőrség szigorú ellenőrzést vezetett be néhány hídon. Legalább hány hídra kellett kivonulnia a rendőröknek ahhoz, hogy a két maffiózó ne tudjon találkozni? \\newline \\textit{A maffiózók csak akkor tudnak találkozni, ha az egyikük el tud jutni a másikhoz kizárólag nem ellenőrzött hidakat használva.}",
       answer: 3,
       points: 3,
       url: "https://durerimages.s3.eu-north-1.amazonaws.com/18o/uIDqvMSMIGiNaAPH-szigetek.png",
@@ -85,7 +85,7 @@ const problems : RelayProblems ={
       url: "https://durerimages.s3.eu-north-1.amazonaws.com/18o/KxwXqgNaDDxdyRUe-torta2.png",
     },
     {
-      problemText: "Ági, Bálint, Csilla, Dénes, Enikő, Feri és Gréta, a hét barát eltervezte, hogy a Balatonnál töltik a hétvégét és ehhez le is foglaltak 4 kétfős szobát. A szobák számozva vannak. Az utolsó pillanatban ketten úgy döntöttek, hogy inkább kempingeznek. A többiek elfoglalták a szobákat úgy, hogy egyik sem maradt üresen. Hányféle lehetett a szobabeosztás? \\textit{Két beosztás eltérő, ha van olyan szoba, ahol más az ott alvók halmaza.}",
+      problemText: "Ági, Bálint, Csilla, Dénes, Enikő, Feri és Gréta, a hét barát eltervezte, hogy a Balatonnál töltik a hétvégét és ehhez le is foglaltak 4 kétfős szobát. A szobák számozva vannak. Az utolsó pillanatban ketten úgy döntöttek, hogy inkább kempingeznek. A többiek elfoglalták a szobákat úgy, hogy egyik sem maradt üresen. Hányféle lehetett a szobabeosztás?\\newline \\textit{Két beosztás eltérő, ha van olyan szoba, ahol más az ott alvók halmaza.}",
       answer: 5040,
       points: 4,
     },
@@ -130,7 +130,7 @@ const problems : RelayProblems ={
       url: "https://durerimages.s3.eu-north-1.amazonaws.com/18o/PyqzrGpHuowfBudr-konnyucsomo.png",
     },
     {
-      problemText: "Peti, Zoli, Marci és Zsoma 72 kilométer hosszú biciklitúrára indultak. Peti minden negyedik, Zoli minden ötödik, Marci pedig minden hetedik kilométer megkezdésekor ivott a kulacsából. (Tehát például Peti a 4., 8., 12., ... kilométerek elején ivott.) Peti éppen ivott, amikor Zsomának eszébe jutott, hogy elfelejtette hányadik kilométernél tartanak. Elkezdte figyelni a társait: következőként Zoli vette elő a kulacsát egyedül, három kilométerrel Peti után. Hány kilométer volt ekkor (mikor Zoli ivott) hátra a túrából?",
+      problemText: "Peti, Zoli, Marci és Zsoma 72 kilométer hosszú biciklitúrára indultak. Peti minden negyedik, Zoli minden ötödik, Marci pedig minden hetedik kilométer megkezdésekor ivott a kulacsából a túra kezdetétől számítva. (Tehát például Peti a 4., 8., 12., ... kilométerek elején ivott.) Peti éppen ivott, amikor Zsomának eszébe jutott, hogy elfelejtette hányadik kilométernél tartanak. Elkezdte figyelni a társait: következőként Zoli vette elő a kulacsát egyedül, három kilométerrel Peti után. Hány kilométer volt ekkor (amikor Zoli ivott) hátra a túrából?",
       answer: 18,
       points: 4,
     },
