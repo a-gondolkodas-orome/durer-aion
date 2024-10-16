@@ -21,7 +21,7 @@ export function MyBoard({ G, ctx, moves }: MyGameProps) {
   };
 
   return (
-    <svg viewBox='0 0 200 200'>
+    <svg width="100%" height="100%" viewBox='0 0 200 200'>
       {
         range(G.circle.length).map(index => (
           <line
