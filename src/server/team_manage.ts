@@ -147,7 +147,6 @@ export async function checkStaleMatch(team: TeamModel): Promise<{ isStale: boole
   if (team.relayMatch.state === 'IN PROGRESS') {
     if (typeof team.relayMatch.endAt === 'string')
       team.relayMatch.endAt = new Date(team.relayMatch.endAt);
-    console.log(team.relayMatch.endAt.getTime(), now.getTime())
     if (team.relayMatch.endAt.getTime() < now.getTime())
       return { isStale: true, gameState: 'relayMatch' };
   }
