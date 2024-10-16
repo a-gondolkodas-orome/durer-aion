@@ -141,23 +141,21 @@ export async function allowedToStart(team: TeamModel, gameType: 'RELAY' | 'STRAT
 
 export async function checkStaleMatch(team: TeamModel): Promise<{ isStale: boolean, gameState?: 'relayMatch' | 'strategyMatch' }> {
 
-  const leeway = 15 * 1000; // 5 seconds leeway
 
   // Find if boardgame match is already timed out, but not registered
   const now = new Date(Date());
-  console.log(`Stale check performed at: ${now}/${Date()}`)
   if (team.relayMatch.state === 'IN PROGRESS') {
     if (typeof team.relayMatch.endAt === 'string')
       team.relayMatch.endAt = new Date(team.relayMatch.endAt);
     console.log(team.relayMatch.endAt.getTime(), now.getTime())
-    if (team.relayMatch.endAt.getTime() + leeway < now.getTime())
+    if (team.relayMatch.endAt.getTime() < now.getTime())
       return { isStale: true, gameState: 'relayMatch' };
   }
 
   if (team.strategyMatch.state === 'IN PROGRESS') {
     if (typeof team.strategyMatch.endAt === 'string')
       team.strategyMatch.endAt = new Date(team.strategyMatch.endAt);
-    if (team.strategyMatch.endAt.getTime() + leeway < now.getTime())
+    if (team.strategyMatch.endAt.getTime() < now.getTime())
       return { isStale: true, gameState: 'strategyMatch' };
   }
 
@@ -187,10 +185,13 @@ export async function closeMatch(matchId: string, teams: TeamsRepository, db: St
     throw new Error(`Match team is not found, the match has the following players:${currentMatch.metadata.players}`);
 
   const type = inferenceGameType(currentMatch.metadata.gameName);
+  //check if the match is already started. We are allowing to close the gamestate even if teamstate id FINISHED, because it may happen, 
+  //that the game is closed before the GBIO backend closes the game. (Even tought it should not happen, and we made some progress to prevent it)
   if (team[type].state == "NOT STARTED")
     throw new Error(`The match{${matchId}} is not started yet, you can't close it`)
   const mStat = team[type] as InProgressMatchStatus;
   const finishState = await endMatchStatus(mStat, currentMatch.state.G.points);
+  console.log(`Closing match: ${matchId}, points: ${currentMatch.state.G.points}`);
   await team.update({ [type]: finishState });
 }
 

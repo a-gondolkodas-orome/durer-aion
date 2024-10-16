@@ -126,6 +126,7 @@ if (argv[2] === "import") {
       { https: undefined },
       botSetup,
       async function onFinishedMatch(matchID) {
+        console.log(matchID, "finished");
         await closeMatch(matchID, teams, db);
       }
     ),
