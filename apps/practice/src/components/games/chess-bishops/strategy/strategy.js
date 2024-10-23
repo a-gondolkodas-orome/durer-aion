@@ -189,6 +189,7 @@ const getOptimalThirdStep = (board) => {
 
 const invertTransformation = (stepCoords, type) => {
   switch (type) {
+    case 'original': return stepCoords;
     case 'rotate90': return rotate90(rotate90(rotate90(stepCoords)));
     case 'rotate180': return rotate90(rotate90(stepCoords));
     case 'rotate270': return rotate90(stepCoords);
