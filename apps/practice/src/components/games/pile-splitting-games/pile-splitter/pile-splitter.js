@@ -16,7 +16,7 @@ const BoardClient = ({ board, ctx, events, moves }) => {
   const [hoveredPiece, setHoveredPiece] = useState(null);
 
   const isDisabled = ({ pileId, pieceId }) => {
-    if (!ctx.shouldPlayerMoveNext) return true;
+    if (!ctx.shouldRoleSelectorMoveNext) return true;
     return pieceId === board[pileId] - 1;
   };
 
@@ -27,14 +27,18 @@ const BoardClient = ({ board, ctx, events, moves }) => {
 
     setTimeout(() => {
       const nextBoard = [pieceId + 1, board[pileId] - pieceId - 1];
-      events.endPlayerTurn({ nextBoard, isGameEnd: isGameEnd(nextBoard), winnerIndex: null });
+      moves.setBoard(nextBoard);
+      events.endTurn();
+      if (isGameEnd(nextBoard)) {
+        events.endGame();
+      }
 
       setHoveredPiece(null);
     }, 750);
   };
 
   const toBeLeft = ({ pileId, pieceId }) => {
-    if (!ctx.shouldPlayerMoveNext) return false;
+    if (!ctx.shouldRoleSelectorMoveNext) return false;
     if (hoveredPiece === null) return false;
     if (pileId !== hoveredPiece.pileId) return false;
     if (hoveredPiece.pieceId === board[pileId] - 1) return false;
@@ -43,7 +47,7 @@ const BoardClient = ({ board, ctx, events, moves }) => {
   };
 
   const toBeRemoved = ({ pileId }) => {
-    if (!ctx.shouldPlayerMoveNext) return false;
+    if (!ctx.shouldRoleSelectorMoveNext) return false;
     if (hoveredPiece === null) return false;
     return hoveredPiece.pileId !== pileId;
   };
@@ -51,7 +55,7 @@ const BoardClient = ({ board, ctx, events, moves }) => {
   const currentChoiceDescription = (pileId) => {
     const pieceCountInPile = board[pileId];
 
-    if (!ctx.shouldPlayerMoveNext) return pieceCountInPile;
+    if (!ctx.shouldRoleSelectorMoveNext) return pieceCountInPile;
     if (!hoveredPiece) return pieceCountInPile;
     if (hoveredPiece.pileId !== pileId) return `${pieceCountInPile} → 🗑️`;
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { range, cloneDeep, isNull } from 'lodash';
 import { strategyGameFactory } from '../strategy-game';
 import { getGameStateAfterMove, getGameStateAfterAiTurn } from './strategy';
@@ -6,9 +6,9 @@ import { RockSvg } from './rock-svg';
 import { PaperSvg } from './paper-svg';
 import { ScissorSvg } from './scissor-svg';
 
-const BoardClient = ({ board, ctx, events }) => {
+const BoardClient = ({ board, ctx, events, moves }) => {
   const isMoveAllowed = (id) => {
-    if (!ctx.shouldPlayerMoveNext) return false;
+    if (!ctx.shouldRoleSelectorMoveNext) return false;
     return board[id] === null;
   };
   const clickField = (id) => {
@@ -16,13 +16,18 @@ const BoardClient = ({ board, ctx, events }) => {
 
     const nextBoard = cloneDeep(board);
     nextBoard[id] = 'removed';
-    events.endPlayerTurn(getGameStateAfterMove(nextBoard));
+    moves.setBoard(nextBoard);
+    const { isGameEnd, winnerIndex } = getGameStateAfterMove(nextBoard);
+    events.endTurn();
+    if (isGameEnd) {
+      events.endGame({ winnerIndex });
+    }
   };
   const isDisabled = (id) => {
     if (!isMoveAllowed(id)) return true;
     if ([1, 4, 7].includes(id)) return true;
-    if (ctx.playerIndex === 1) return [2, 5, 8].includes(id);
-    if (ctx.playerIndex === 0) return [0, 3, 6].includes(id);
+    if (ctx.chosenRoleIndex === 1) return [2, 5, 8].includes(id);
+    if (ctx.chosenRoleIndex === 0) return [0, 3, 6].includes(id);
   };
 
   return (

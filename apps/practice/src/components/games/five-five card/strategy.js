@@ -4,7 +4,7 @@ import { isNull, cloneDeep } from 'lodash';
 
 export const getGameStateAfterAiTurn = ({ board, ctx }) => {
   const nextBoard = cloneDeep(board);
-  nextBoard[getOptimalAiPlacingPosition(board, ctx.playerIndex)] = 'removed';
+  nextBoard[getOptimalAiPlacingPosition(board, ctx.chosenRoleIndex)] = 'removed';
   return getGameStateAfterMove(nextBoard);
 };
 
@@ -40,9 +40,9 @@ const hasFirstPlayerWon = (board) => {
   }
 };
 
-const getIfWinningPosition = (i, j, playerIndex) => {
+const getIfWinningPosition = (i, j, chosenRoleIndex) => {
   if (i == j){
-    return playerIndex == 1;
+    return chosenRoleIndex == 1;
   }
   if ((i + j) % 2 == 0){
     return i < j;
@@ -52,7 +52,7 @@ const getIfWinningPosition = (i, j, playerIndex) => {
   }
 }
 
-const getOptimalAiPlacingPosition = (board, playerIndex) => {
+const getOptimalAiPlacingPosition = (board, chosenRoleIndex) => {
   let firstPlayersPossibleMoves = [];
   let secondPlayersPossibleMoves = [];
   for (let i = 0; i < 15; i++){
@@ -68,12 +68,12 @@ const getOptimalAiPlacingPosition = (board, playerIndex) => {
     }
   }
   // as a first player still try to win if second player may not play optimally
-  if (playerIndex === 1) {
+  if (chosenRoleIndex === 1) {
     let possibleWinningMoves = [];
     for (const i of firstPlayersPossibleMoves){
       let isIsolatedPoint = true;
       for (const j of secondPlayersPossibleMoves){
-        if (getIfWinningPosition(i, j, 1 - playerIndex)){
+        if (getIfWinningPosition(i, j, 1 - chosenRoleIndex)){
           isIsolatedPoint = false;
         }
       }
@@ -93,14 +93,14 @@ const getOptimalAiPlacingPosition = (board, playerIndex) => {
 
   // as a second player proceed with placing at an empty place symmetrical to player's piece
 
-  if (playerIndex === 0) {
+  if (chosenRoleIndex === 0) {
     let winningMoves = [];
     let badMoves = [];
     // calculate wrong moves
     for (const j of firstPlayersPossibleMoves){
       let winningPairs = [];
       for (const i of secondPlayersPossibleMoves){
-        if (getIfWinningPosition(j, i, playerIndex)){
+        if (getIfWinningPosition(j, i, chosenRoleIndex)){
           winningPairs.push(i);
         }
       }

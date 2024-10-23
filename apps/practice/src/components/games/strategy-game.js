@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   GameSidebar, GameFooter, GameHeader, GameRule, GameEndDialog
 } from './game-parts';
@@ -18,72 +18,75 @@ export const strategyGameFactory = ({
   return () => {
     const [board, setBoard] = useState(generateStartBoard())
     const [phase, setPhase] = useState('roleSelection');
-    const [playerIndex, setPlayerIndex] = useState(null);
-    const [next, setNext] = useState(null);
+    const [chosenRoleIndex, setChosenRoleIndex] = useState(null);
+    const [currentPlayer, setCurrentPlayer] = useState(null);
     const [isGameEndDialogOpen, setIsGameEndDialogOpen] = useState(false);
     const [winnerIndex, setWinnerIndex] = useState(null);
     const [gameUuid, setGameUuid] = useState(uuidv4());
     const [turnStage, setTurnStage] = useState(null);
 
+    const gameOverRef = useRef(winnerIndex !== null)
+
+    useEffect(() => {
+      if (phase === 'play' && currentPlayer === (1 - chosenRoleIndex)) {
+        doAiTurn({ currentBoard: board });
+      }
+    }, [currentPlayer])
+
     const startNewGame = () => {
       setBoard(generateStartBoard());
       setPhase('roleSelection');
-      setPlayerIndex(null);
-      setNext(null);
+      setChosenRoleIndex(null);
+      setCurrentPlayer(null);
       setIsGameEndDialogOpen(false);
       setWinnerIndex(null);
+      gameOverRef.current = false;
       setGameUuid(uuidv4());
       setTurnStage(null);
     };
 
-    const shouldPlayerMoveNext = (phase === 'play' && next === playerIndex);
-    const isPlayerWinner = winnerIndex === playerIndex;
+    const shouldRoleSelectorMoveNext = (phase === 'play' && currentPlayer === chosenRoleIndex);
+    const isRoleSelectorWinner = winnerIndex === chosenRoleIndex;
 
-    const endGame = (winnerIndex) => {
+    const endGame = ({ winnerIndex } = { winnerIndex: null }) => {
       setPhase('gameEnd');
-      setWinnerIndex(winnerIndex);
+      // default: last player to move is the winner
+      setWinnerIndex(winnerIndex === null ? currentPlayer : winnerIndex);
+      gameOverRef.current = true;
       setIsGameEndDialogOpen(true);
     };
 
-    const endPlayerTurn = ({ nextBoard, isGameEnd, winnerIndex }) => {
-      setBoard(nextBoard);
-      setNext(next => 1 - next);
-
-      if (isGameEnd) {
-        // default: last player to move is the winner
-        endGame(winnerIndex === null ? playerIndex : winnerIndex);
-        return;
-      }
-
-      doAiTurn({ currentBoard: nextBoard });
+    const endTurn = () => {
+      setCurrentPlayer(currentPlayer => 1 - currentPlayer);
     };
 
     const chooseRole = (playerIdx) => {
       setPhase('play');
-      setNext(0);
-      setPlayerIndex(playerIdx);
+      setCurrentPlayer(0);
+      setChosenRoleIndex(playerIdx);
       if (initialTurnStages !== undefined) {
         setTurnStage(initialTurnStages[playerIdx]);
-      }
-      if (playerIdx === 1) {
-        doAiTurn({ currentBoard: board });
       }
     };
 
     const ctx = {
-      shouldPlayerMoveNext,
-      playerIndex,
+      shouldRoleSelectorMoveNext,
+      chosenRoleIndex,
       phase,
       turnStage
     };
 
     const events = {
-      endPlayerTurn,
+      endTurn,
+      endGame,
       setTurnStage
     };
 
     const doAiTurn = ({ currentBoard }) => {
-      const localPlayerIndex = playerIndex === null ? 1 : playerIndex;
+      if (gameOverRef.current) {
+        return;
+      }
+
       const time = Math.floor(Math.random() * 500 + 1000);
       setTimeout(() => {
         const { intermediateBoard, nextBoard, isGameEnd, winnerIndex } = getGameStateAfterAiTurn({
@@ -103,11 +106,10 @@ export const strategyGameFactory = ({
         }
         setTimeout(() => {
           setBoard(nextBoard);
-          setNext(next => 1 - next);
           if (isGameEnd) {
-            // default: last player to move is the winner
-            endGame(winnerIndex === null ? (1 - localPlayerIndex) : winnerIndex);
+            endGame({ winnerIndex });
           }
+          setCurrentPlayer(currentPlayer => 1 - currentPlayer);
         }, stageTimeout);
       }, time);
     };
@@ -129,7 +131,7 @@ export const strategyGameFactory = ({
             <GameSidebar
               roleLabels={roleLabels}
               stepDescription={getPlayerStepDescription({ board, ctx })}
-              ctx={{ phase, shouldPlayerMoveNext, isPlayerWinner }}
+              ctx={{ phase, shouldRoleSelectorMoveNext, isRoleSelectorWinner }}
               moves={{ chooseRole, startNewGame }}
             />
           </div>
@@ -140,7 +142,7 @@ export const strategyGameFactory = ({
         isOpen={isGameEndDialogOpen}
         setIsOpen={setIsGameEndDialogOpen}
         startNewGame={startNewGame}
-        isPlayerWinner={isPlayerWinner}
+        isRoleSelectorWinner={isRoleSelectorWinner}
       />
     </main>
     );

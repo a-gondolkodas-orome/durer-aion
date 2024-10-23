@@ -12,19 +12,19 @@ import { cloneDeep } from 'lodash';
 const BoardClient = ({ board, ctx, events, moves }) => {
   const [hoveredPiece, setHoveredPiece] = useState(null);
 
-  const isPlayerSultan = ctx.playerIndex === 0;
+  const isPlayerSultan = ctx.chosenRoleIndex === 0;
   const groupOfHoveredPiece = hoveredPiece
     ? board[hoveredPiece.rowIndex][hoveredPiece.pieceIndex]
     : null;
 
   const showToBeKilled = (group) => {
-    if (!ctx.shouldPlayerMoveNext || isPlayerSultan) return false;
+    if (!ctx.shouldRoleSelectorMoveNext || isPlayerSultan) return false;
     if (!hoveredPiece) return false;
     return group === groupOfHoveredPiece;
   };
 
   const clickOnSoldier = (rowIndex, pieceIndex) => {
-    if (!ctx.shouldPlayerMoveNext) return;
+    if (!ctx.shouldRoleSelectorMoveNext) return;
 
     if (isPlayerSultan) {
       const nextBoard = cloneDeep(board);
@@ -35,10 +35,19 @@ const BoardClient = ({ board, ctx, events, moves }) => {
       const { nextBoard, intermediateBoard, isGameEnd, winnerIndex } = getGameStateAfterKillingGroup(board, group);
       moves.setBoard(intermediateBoard);
       setTimeout(() => {
-        events.endPlayerTurn({ nextBoard, isGameEnd, winnerIndex });
+        moves.setBoard(nextBoard);
+        events.endTurn();
+        if (isGameEnd) {
+          events.endGame({ winnerIndex });
+        }
       }, 750);
     }
   };
+
+  const finishSeparation = () => {
+    moves.setBoard(board);
+    events.endTurn();
+  }
 
   return (
     <section className="p-2 shrink-0 grow basis-2/3">
@@ -71,7 +80,7 @@ const BoardClient = ({ board, ctx, events, moves }) => {
           {board[rowIndex] && board[rowIndex].map((group, pieceIndex) => (
             <button
               key={pieceIndex}
-              disabled={!ctx.shouldPlayerMoveNext}
+              disabled={!ctx.shouldRoleSelectorMoveNext}
               className="aspect-square w-[10%] inline-block mx-1"
               onClick={() => clickOnSoldier(rowIndex, pieceIndex)}
               onFocus={() => setHoveredPiece({ rowIndex, pieceIndex })}
@@ -95,8 +104,8 @@ const BoardClient = ({ board, ctx, events, moves }) => {
       {isPlayerSultan && (
         <button
           className="cta-button"
-          disabled={!ctx.shouldPlayerMoveNext}
-          onClick={() => events.endPlayerTurn({ nextBoard: board, isGameEnd: false })}
+          disabled={!ctx.shouldRoleSelectorMoveNext}
+          onClick={finishSeparation}
         >
           Befejezem a kettéosztást
         </button>
@@ -105,8 +114,8 @@ const BoardClient = ({ board, ctx, events, moves }) => {
   );
 };
 
-const getPlayerStepDescription = ({ ctx: { playerIndex } }) => {
-  return playerIndex === 0
+const getPlayerStepDescription = ({ ctx: { chosenRoleIndex } }) => {
+  return chosenRoleIndex === 0
   ? 'Kattints a katonákra és válaszd két részre a seregedet.'
   : 'Kattints egy katonára, hogy megsemmisítsd a vele azonos színű sereget.';
 };

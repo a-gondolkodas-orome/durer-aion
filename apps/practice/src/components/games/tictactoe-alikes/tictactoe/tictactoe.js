@@ -1,20 +1,24 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { range, cloneDeep } from 'lodash';
 import { strategyGameFactory } from '../../strategy-game';
 import { generateEmptyTicTacToeBoard } from '../helpers';
-import { inPlacingPhase, pColor, aiColor, getGameStateAfterMove, getGameStateAfterAiTurn } from './strategy/strategy';
+import { inPlacingPhase, pColor, aiColor, isGameEnd, getGameStateAfterAiTurn } from './strategy/strategy';
 
-const BoardClient = ({ board, ctx, events }) => {
+const BoardClient = ({ board, ctx, events, moves }) => {
   const gameIsInPlacingPhase = inPlacingPhase(board);
   const clickField = (id) => {
     if (!isMoveAllowed(id)) return;
 
     const nextBoard = cloneDeep(board);
     nextBoard[id] = gameIsInPlacingPhase ? pColor : 'white';
-    events.endPlayerTurn(getGameStateAfterMove(nextBoard));
+    moves.setBoard(nextBoard);
+    events.endTurn();
+    if (isGameEnd(nextBoard)) {
+      events.endGame();
+    }
   };
   const isMoveAllowed = (id) => {
-    if (!ctx.shouldPlayerMoveNext) return false;
+    if (!ctx.shouldRoleSelectorMoveNext) return false;
     if (gameIsInPlacingPhase) {
       return board[id] === null;
     } else {
@@ -38,7 +42,7 @@ const BoardClient = ({ board, ctx, events }) => {
           onClick={() => clickField(id)}
           className={`
             aspect-square p-[25%] border-2
-            ${!isMoveAllowed(id) && ctx.shouldPlayerMoveNext ? 'cursor-not-allowed' : ''}
+            ${!isMoveAllowed(id) && ctx.shouldRoleSelectorMoveNext ? 'cursor-not-allowed' : ''}
             ${!gameIsInPlacingPhase && isMoveAllowed(id) ? 'bg-green-100' : ''}
           `}
         >

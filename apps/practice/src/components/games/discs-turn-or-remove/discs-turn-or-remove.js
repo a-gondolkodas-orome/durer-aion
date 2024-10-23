@@ -33,17 +33,21 @@ const DisabledDisc = ({ bgColor }) => {
 
 
 const gameBoardFactory = (maxDiscs) => {
-  return ({ board, ctx, events }) => {
+  return ({ board, ctx, events, moves }) => {
     const [hovered, setHovered] = useState(null);
 
     const select = (pile, i) => {
-      if (ctx.shouldPlayerMoveNext) {
+      if (ctx.shouldRoleSelectorMoveNext) {
         const nextBoard = [...board];
         const d = nextBoard[pile] - i;
         nextBoard[pile] = i;
         if (pile === 1) nextBoard[0] += d;
         setHovered(null);
-        events.endPlayerTurn(getGameStateAfterMove(nextBoard));
+        moves.setBoard(nextBoard);
+        events.endTurn();
+        if (isEqual(nextBoard, [0, 0])) {
+          events.endGame();
+        }
       }
     };
 
@@ -51,7 +55,7 @@ const gameBoardFactory = (maxDiscs) => {
 
     const nextBoardDescription = () => {
       if (hovered === null) return '';
-      if (!ctx.shouldPlayerMoveNext) return '';
+      if (!ctx.shouldRoleSelectorMoveNext) return '';
       if (hovered[0] === 0) {
         if (hovered[1] === board[0] - 1) {
           return ` --> ${board[1]} piros és ${board[0] - 1} kék korong`
@@ -81,7 +85,7 @@ const gameBoardFactory = (maxDiscs) => {
                     >
                       <button
                         className="aspect-square w-full p-[5%]"
-                        disabled={!ctx.shouldPlayerMoveNext}
+                        disabled={!ctx.shouldRoleSelectorMoveNext}
                         onMouseOver={() => setHovered([1, i])}
                         onMouseOut={() => setHovered(null)}
                         onFocus={() => setHovered([1, i])}
@@ -90,7 +94,7 @@ const gameBoardFactory = (maxDiscs) => {
                         <span
                           className={`
                             w-[100%] aspect-square inline-block rounded-full mr-0.5
-                            ${ctx.shouldPlayerMoveNext && isSelected(1, i) ? "opacity-75 bg-blue-800" : "bg-red-800"}
+                            ${ctx.shouldRoleSelectorMoveNext && isSelected(1, i) ? "opacity-75 bg-blue-800" : "bg-red-800"}
                           `}
                         ></span>
                       </button>
@@ -109,7 +113,7 @@ const gameBoardFactory = (maxDiscs) => {
                     >
                       <button
                         className="aspect-square w-full p-[5%]"
-                        disabled={!ctx.shouldPlayerMoveNext}
+                        disabled={!ctx.shouldRoleSelectorMoveNext}
                         onMouseOver={() => setHovered([0, i])}
                         onMouseOut={() => setHovered(null)}
                         onFocus={() => setHovered([0, i])}
@@ -118,7 +122,7 @@ const gameBoardFactory = (maxDiscs) => {
                         <span
                           className={`
                             w-[100%] aspect-square inline-block rounded-full mr-0.5
-                            ${ctx.shouldPlayerMoveNext && isSelected(0, i) ? "opacity-50 bg-slate-600" : "bg-blue-800"}
+                            ${ctx.shouldRoleSelectorMoveNext && isSelected(0, i) ? "opacity-50 bg-slate-600" : "bg-blue-800"}
                           `}
                         ></span>
                       </button>
@@ -160,10 +164,6 @@ const getGameStateAfterAiTurn = ({ board }) => {
       nextBoard[0] -= rem;
     }
   }
-  return getGameStateAfterMove(nextBoard);
-};
-
-const getGameStateAfterMove = (nextBoard) => {
   return {
     nextBoard: nextBoard,
     isGameEnd: isEqual(nextBoard, [0, 0]),

@@ -4,7 +4,7 @@ import { isNull, range, cloneDeep } from 'lodash';
 
 export const getGameStateAfterAiTurn = ({ board, ctx }) => {
   const nextBoard = cloneDeep(board);
-  nextBoard[getOptimalAiPlacingPosition(board, ctx.playerIndex)] = 'removed';
+  nextBoard[getOptimalAiPlacingPosition(board, ctx.chosenRoleIndex)] = 'removed';
   return getGameStateAfterMove(nextBoard);
 };
 
@@ -30,7 +30,7 @@ const hasFirstPlayerWon = (board) => {
   return true;
 };
 
-const getOptimalAiPlacingPosition = (board, playerIndex) => {
+const getOptimalAiPlacingPosition = (board, chosenRoleIndex) => {
   const allowedPlaces = range(0, 9).filter(i => i !== 1 && i !== 4 && i !== 7 && isNull(board[i]));
 
   let freePlaces = [];
@@ -50,7 +50,7 @@ const getOptimalAiPlacingPosition = (board, playerIndex) => {
   }
 
   // as a first player still try to win if second player may not play optimally
-  if (playerIndex === 1) {
+  if (chosenRoleIndex === 1) {
     // pairs to still have chance
     const pairs = [[0, 8], [3, 2], [6, 5], [0, 2], [3, 5], [6, 8]];
     for (const p of pairs) {
@@ -64,7 +64,7 @@ const getOptimalAiPlacingPosition = (board, playerIndex) => {
 
   // as a second player proceed with chosing useless player's piece
 
-  if (playerIndex === 0) {
+  if (chosenRoleIndex === 0) {
     // pairs beating each other
     const pairs = [[0, 5], [3, 8], [6, 2]];
     for (const p of pairs) {

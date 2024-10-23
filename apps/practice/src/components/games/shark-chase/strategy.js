@@ -13,7 +13,7 @@ export const getGameStateAfterMove = (nextBoard) => {
 export const getGameStateAfterAiTurn = ({ board, ctx }) => {
   const nextBoard = cloneDeep(board);
 
-  if (ctx.playerIndex === 0) {
+  if (ctx.chosenRoleIndex === 0) {
     nextBoard.shark = getNextSharkPositionByAI(board.submarines, board.shark);
   } else {
     const { from, to } = getOptimalSubmarineMoveByAi(board);

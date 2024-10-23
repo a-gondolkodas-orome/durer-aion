@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { range, cloneDeep } from 'lodash';
 import { strategyGameFactory } from '../../strategy-game';
 import { getGameStateAfterMove, getGameStateAfterAiTurn, playerColor } from './strategy/strategy';
@@ -8,17 +8,21 @@ const BoardClient = ({ board, ctx, events, moves }) => {
   const isDuringFirstMove = board => board.filter(c => c).length <= 1;
 
   const isMoveAllowed = (id) => {
-    if (!ctx.shouldPlayerMoveNext) return false;
+    if (!ctx.shouldRoleSelectorMoveNext) return false;
     return board[id] === null;
   };
   const clickField = (id) => {
     if (!isMoveAllowed(id)) return;
 
     const nextBoard = cloneDeep(board);
-    nextBoard[id] = playerColor(ctx.playerIndex);
+    nextBoard[id] = playerColor(ctx.chosenRoleIndex);
     moves.setBoard(nextBoard);
     if (isDuringFirstMove(nextBoard)) return;
-    events.endPlayerTurn(getGameStateAfterMove(nextBoard));
+    const { isGameEnd, winnerIndex } = getGameStateAfterMove(nextBoard);
+    events.endTurn();
+    if (isGameEnd) {
+      events.endGame({ winnerIndex });
+    }
   };
   const pieceColor = (id) => {
     const colorCode = board[id];

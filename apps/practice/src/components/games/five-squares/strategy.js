@@ -2,9 +2,9 @@
 
 import { sum, random, cloneDeep } from 'lodash';
 
-export const getBoardAfterAiTurn = ({ board, playerIndex }) => {
+export const getBoardAfterAiTurn = ({ board, chosenRoleIndex }) => {
   const nextBoard = [...board];
-  if (playerIndex === 0) {
+  if (chosenRoleIndex === 0) {
     const tileIndices = getOptimalTileIndices(nextBoard);
     nextBoard[tileIndices[0]] += 1;
     nextBoard[tileIndices[1]] += 1;

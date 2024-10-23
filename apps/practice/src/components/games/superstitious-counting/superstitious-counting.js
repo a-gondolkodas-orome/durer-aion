@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { range, sample, difference } from 'lodash';
 import { strategyGameFactory } from '../strategy-game';
 import { getOptimalAiStep } from './strategy';
@@ -22,14 +22,14 @@ const getGameStateAfterMove = (board, step, moverIndex) => {
 
 const getGameStateAfterAiTurn = ({ board, ctx }) => {
   const step = getOptimalAiStep(board);
-  return getGameStateAfterMove(board, step, 1 - ctx.playerIndex);
+  return getGameStateAfterMove(board, step, 1 - ctx.chosenRoleIndex);
 };
 
-const BoardClient = ({ board, ctx, events }) => {
+const BoardClient = ({ board, ctx, events, moves }) => {
   const fields = range(board.target + 14);
 
   const isMoveAllowed = (step) => {
-    if (!ctx.shouldPlayerMoveNext) return false;
+    if (!ctx.shouldRoleSelectorMoveNext) return false;
     if(step === board.restricted || step <= 0 || step >= 13) {
       return false;
     }
@@ -38,7 +38,12 @@ const BoardClient = ({ board, ctx, events }) => {
 
   const makeStep = (step) => {
     if (!isMoveAllowed(step)) return;
-    events.endPlayerTurn(getGameStateAfterMove(board, step, ctx.playerIndex));
+    const { nextBoard, isGameEnd, winnerIndex } = getGameStateAfterMove(board, step, ctx.chosenRoleIndex);
+    moves.setBoard(nextBoard);
+    events.endTurn();
+    if (isGameEnd) {
+      events.endGame({ winnerIndex });
+    }
   };
 
   return (
@@ -63,7 +68,7 @@ const BoardClient = ({ board, ctx, events }) => {
       )}
     </div>
     <span className = "text-xl"><code>m</code> értéke: { board.target }</span>
-    {ctx.shouldPlayerMoveNext && (
+    {ctx.shouldRoleSelectorMoveNext && (
       <p className="text-xl">
         Előző lépés: { board.restricted ? (13 - board.restricted) : '-' }. Tiltott: { board.restricted || '-' }.
       </p>

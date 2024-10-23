@@ -3,7 +3,7 @@
 import { random, flatten, cloneDeep, sum } from 'lodash';
 
 export const getGameStateAfterAiTurn = ({ board, ctx }) => {
-  if (ctx.playerIndex === 0) {
+  if (ctx.chosenRoleIndex === 0) {
     const optimalGroupToKill = getOptimalGroupToKill(board);
     return getGameStateAfterKillingGroup(board, optimalGroupToKill);
   } else {

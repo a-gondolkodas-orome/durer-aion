@@ -45,7 +45,7 @@ export const getAllowedSuperset = (board, { from, to }) => {
 };
 
 export const getGameStateAfterAiTurn = ({ board, ctx }) => {
-  const move = getOptimalAiMove({ board, playerIndex: ctx.playerIndex });
+  const move = getOptimalAiMove({ board, chosenRoleIndex: ctx.chosenRoleIndex });
   const nextBoard = [...board];
   nextBoard.push(move);
   return { nextBoard, isGameEnd: isGameEnd(nextBoard), winnerIndex: null };
@@ -155,9 +155,9 @@ const getTrivialMoves = (board) => {
   return trivialMoves;
 };
 
-const getOptimalAiMove = ({ board, playerIndex }) => {
+const getOptimalAiMove = ({ board, chosenRoleIndex }) => {
   const allowedMoves = getAllowedMoves(board);
-  if (playerIndex === 1) {
+  if (chosenRoleIndex === 1) {
     if (board.length === 0) {
       return sample([{ from: 3, to: 5 }, { from: 1, to: 8 }, { from: 2, to: 7 }]);
     } else {

@@ -28,17 +28,27 @@ const cubeCoords = [
 const BoardClient = ({ board, ctx, events, moves }) => {
   const handleCircleClick = (vertex) => {
     if (!isClickable(vertex)) return;
-    if (ctx.playerIndex === 1) {
+    if (ctx.chosenRoleIndex === 1) {
       const nextBoard = { ...board, thief: vertex, turnCount: board.turnCount + 1 };
-      events.endPlayerTurn(getGameStateAfterMove(nextBoard));
+      moves.setBoard(nextBoard);
+      const { isGameEnd, winnerIndex } = getGameStateAfterMove(nextBoard);
+      events.endTurn();
+      if (isGameEnd) {
+        events.endGame({ winnerIndex });
+      }
       return;
     }
     const nextBoard = { ...board }
     if (ctx.turnStage === "secondMove") {
       nextBoard.policemen[1] = vertex;
       nextBoard.turnCount++;
-      events.setTurnStage(null)
-      events.endPlayerTurn(getGameStateAfterMove(nextBoard));
+      events.setTurnStage(null);
+      moves.setBoard(nextBoard);
+      const { isGameEnd, winnerIndex } = getGameStateAfterMove(nextBoard);
+      events.endTurn();
+      if (isGameEnd) {
+        events.endGame({ winnerIndex });
+      }
       return;
     }
     nextBoard.policemen[0] = vertex;
@@ -47,8 +57,8 @@ const BoardClient = ({ board, ctx, events, moves }) => {
   };
 
   const isClickable = (vertex) => {
-    if (!ctx.shouldPlayerMoveNext) return false;
-    if (ctx.playerIndex === 1) {
+    if (!ctx.shouldRoleSelectorMoveNext) return false;
+    if (ctx.chosenRoleIndex === 1) {
       return neighbours[board.thief].includes(vertex);
     }
     if (ctx.turnStage === "secondMove") {
@@ -59,12 +69,12 @@ const BoardClient = ({ board, ctx, events, moves }) => {
 
   const getColor = (vertex) => {
     if (isClickable(vertex)) {
-      if (ctx.playerIndex === 1) {
+      if (ctx.chosenRoleIndex === 1) {
         if (board.policemen[0] === vertex) return "url(#thief-and-first-policeman)";
         if (board.policemen[1] === vertex) return "url(#thief-and-second-policeman)";
         return "red";
       }
-      if (ctx.playerIndex === 0) {
+      if (ctx.chosenRoleIndex === 0) {
         if (ctx.turnStage === "secondMove") {
           if (board.thief === vertex) return "url(#thief-and-second-policeman)";
           if (board.policemen[0] === vertex) return "url(#2policemen)";
@@ -160,7 +170,7 @@ export const Policemanthief = strategyGameFactory({
   roleLabels: ["Rendőrök", "Tolvaj"],
   BoardClient,
   getPlayerStepDescription: ({ ctx }) => {
-    if (ctx.playerIndex === 0) {
+    if (ctx.chosenRoleIndex === 0) {
       return `Kattints arra az útkereszteződésre, ahová a ${ctx.turnStage === "secondMove" ? "zöld" : "kék"} rendőrrel lépni szeretnél.`;
     } else {
       return "Kattints arra az útkereszteződésre, ahová a tolvajjal lépni szeretnél.";

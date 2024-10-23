@@ -7,7 +7,7 @@ const allColors = ['#dc2626', '#eab308', '#2563eb'];
 export const getGameStateAfterAiTurn = ({ board, ctx }) => {
   let nextBoard = [...board];
   // TODO: instead of using let, make below functions not changing their argument
-  nextBoard = ctx.playerIndex === 0 ? makeOptimalStepAsSecond(nextBoard) : makeOptimalStepAsFirst(nextBoard);
+  nextBoard = ctx.chosenRoleIndex === 0 ? makeOptimalStepAsSecond(nextBoard) : makeOptimalStepAsFirst(nextBoard);
   return getGameStateAfterMove(nextBoard);
 };
 

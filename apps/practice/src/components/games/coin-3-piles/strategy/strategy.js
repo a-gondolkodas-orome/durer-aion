@@ -14,7 +14,7 @@ export const getGameStateAfterAiTurn = ({ board }) => {
   if (oddPiles.length === 1) {
     nextBoard[oddPiles[0]] -= 1;
   }
-  return getGameStateAfterMove(nextBoard);
+  return { nextBoard, isGameEnd: isGameEnd(nextBoard), winnerIndex: null };
 };
 
 export const isWinningState = ({ board }) => {
@@ -23,8 +23,4 @@ export const isWinningState = ({ board }) => {
   return (oddPiles.length === 3 || oddPiles.length === 0);
 }
 
-export const getGameStateAfterMove = (nextBoard) => {
-  return { nextBoard, isGameEnd: isGameEnd(nextBoard), winnerIndex: null };
-};
-
-const isGameEnd = (nextBoard) => nextBoard[0] === 0 && nextBoard[1] === 0 && nextBoard[2] === 0;
+export const isGameEnd = (nextBoard) => nextBoard[0] === 0 && nextBoard[1] === 0 && nextBoard[2] === 0;

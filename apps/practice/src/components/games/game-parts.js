@@ -17,12 +17,12 @@ export const GameSidebar = ({
       <p className="text-center font-bold text-lg basis-[3.5rem]">
         {getCtaText(ctx)}
       </p>
-      {ctx.phase === 'play' && ctx.shouldPlayerMoveNext === false && (
+      {ctx.phase === 'play' && ctx.shouldRoleSelectorMoveNext === false && (
         <div
           className="animate-spin h-8 w-8 place-self-center border-t-blue-600 rounded-full border-4 mb-[4rem]"
         ></div>
       )}
-      {ctx.phase === 'play' && ctx.shouldPlayerMoveNext && (
+      {ctx.phase === 'play' && ctx.shouldRoleSelectorMoveNext && (
         <p className="italic text-justify basis-[6rem]">
           {stepDescription}
         </p>
@@ -112,7 +112,7 @@ export const GameRule = ({ ruleDescription }) => {
   </section>;
 };
 
-export const GameEndDialog = ({ isOpen, setIsOpen, startNewGame, isPlayerWinner }) => {
+export const GameEndDialog = ({ isOpen, setIsOpen, startNewGame, isRoleSelectorWinner }) => {
   return (
     <Dialog
       open={isOpen}
@@ -132,7 +132,7 @@ export const GameEndDialog = ({ isOpen, setIsOpen, startNewGame, isPlayerWinner 
             >×</button>
           </header>
           <Description className="text-lg block text-justify">
-            {getResultDescription(isPlayerWinner)}
+            {getResultDescription(isRoleSelectorWinner)}
           </Description>
 
           <button onClick={() => startNewGame()} className="cta-button mt-2">
@@ -144,12 +144,12 @@ export const GameEndDialog = ({ isOpen, setIsOpen, startNewGame, isPlayerWinner 
   );
 };
 
-const getCtaText = ({ phase, shouldPlayerMoveNext, isPlayerWinner }) => {
+const getCtaText = ({ phase, shouldRoleSelectorMoveNext, isRoleSelectorWinner }) => {
   if (phase === 'roleSelection') return 'Válassz szerepet, utána indul a játék!';
-  if (phase === 'play') return shouldPlayerMoveNext ? 'Te jössz' : 'Mi jövünk';
-  if (phase === 'gameEnd') return getResultDescription(isPlayerWinner);
+  if (phase === 'play') return shouldRoleSelectorMoveNext ? 'Te jössz' : 'Mi jövünk';
+  if (phase === 'gameEnd') return getResultDescription(isRoleSelectorWinner);
 };
 
-const getResultDescription = isPlayerWinner => isPlayerWinner
+const getResultDescription = isRoleSelectorWinner => isRoleSelectorWinner
   ? 'Nyertél. Gratulálunk! :)'
   : 'Sajnos, most nem nyertél, de ne add fel.';

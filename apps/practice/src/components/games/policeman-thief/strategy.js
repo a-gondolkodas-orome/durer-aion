@@ -14,7 +14,7 @@ export const neighbours = {
 };
 
 export const getGameStateAfterAiTurn = ({ board, ctx }) => {
-  const nextBoard = ctx.playerIndex === 0
+  const nextBoard = ctx.chosenRoleIndex === 0
     ? makeOptimalStepAsSecond(board)
     : makeOptimalStepAsFirst(board);
   return getGameStateAfterMove(nextBoard);

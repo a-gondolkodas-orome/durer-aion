@@ -7,12 +7,17 @@ import {
   BISHOP, FORBIDDEN
 } from './strategy/strategy';
 
-const BoardClient = ({ board, ctx, events }) => {
+const BoardClient = ({ board, ctx, events, moves }) => {
   const [hoveredField, setHoveredField] = useState(null);
   const clickField = (field) => {
     if (!isMoveAllowed(field)) return;
 
-    events.endPlayerTurn(getGameStateAfterMove(board, field));
+    const { nextBoard, isGameEnd } = getGameStateAfterMove(board, field);
+    moves.setBoard(nextBoard);
+    events.endTurn();
+    if (isGameEnd) {
+      events.endGame();
+    }
   };
 
   const isPotentialNextStep = (field) => {
@@ -21,7 +26,7 @@ const BoardClient = ({ board, ctx, events }) => {
     return isEqual(hoveredField, field);
   };
   const isMoveAllowed = (targetField) => {
-    if (!ctx.shouldPlayerMoveNext) return false;
+    if (!ctx.shouldRoleSelectorMoveNext) return false;
     return some(getAllowedMoves(board), field => isEqual(field, targetField));
   };
   const isForbidden = ({ row, col }) => {
@@ -31,7 +36,7 @@ const BoardClient = ({ board, ctx, events }) => {
     return board[row][col] === BISHOP;
   };
   const wouldBeForbidden = ({ row, col }) => {
-    if (!ctx.shouldPlayerMoveNext) return false;
+    if (!ctx.shouldRoleSelectorMoveNext) return false;
     if (!hoveredField) return false;
     if (!isMoveAllowed(hoveredField)) return false;
     if (!isMoveAllowed({ row, col })) return false;

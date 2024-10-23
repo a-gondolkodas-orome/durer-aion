@@ -5,8 +5,8 @@ import { hasWinningSubset } from '../../helpers';
 
 const roleColors = ['red', 'blue'];
 
-export const playerColor = playerIndex => playerIndex === 0 ? roleColors[0] : roleColors[1];
-const aiColor = playerIndex => playerIndex === 0 ? roleColors[1] : roleColors[0];
+export const playerColor = chosenRoleIndex => chosenRoleIndex === 0 ? roleColors[0] : roleColors[1];
+const aiColor = chosenRoleIndex => chosenRoleIndex === 0 ? roleColors[1] : roleColors[0];
 
 
 export const getGameStateAfterAiTurn = ({ board, ctx }) => {
@@ -17,7 +17,7 @@ export const getGameStateAfterAiTurn = ({ board, ctx }) => {
     nextBoard[firstStep[0]] = roleColors[0];
     nextBoard[firstStep[1]] = roleColors[0];
   } else {
-    nextBoard[getOptimalAiPlacingPosition(nextBoard, ctx.playerIndex)] = aiColor(ctx.playerIndex);
+    nextBoard[getOptimalAiPlacingPosition(nextBoard, ctx.chosenRoleIndex)] = aiColor(ctx.chosenRoleIndex);
   }
   return getGameStateAfterMove(nextBoard);
 };
@@ -36,19 +36,19 @@ const isGameEnd = (board) => board.filter(c => c).length === 9 || hasWinningSubs
 const hasWinningSubsetForPlayer = (board, roleIndex) =>
   hasWinningSubset(range(0, 9).filter(i => board[i] === roleColors[roleIndex]));
 
-const getOptimalAiPlacingPosition = (board, playerIndex) => {
+const getOptimalAiPlacingPosition = (board, chosenRoleIndex) => {
   const allowedPlaces = range(0, 9).filter(i => isNull(board[i]));
 
   const optimalPlaces = allowedPlaces.filter(i => {
     const boardCopy = cloneDeep(board);
-    boardCopy[i] = aiColor(playerIndex);
-    return isWinningState(boardCopy, playerIndex === 1);
+    boardCopy[i] = aiColor(chosenRoleIndex);
+    return isWinningState(boardCopy, chosenRoleIndex === 1);
   });
 
   if (optimalPlaces.length > 0) return sample(optimalPlaces);
 
   // even if we are gonna lose, try to prolong it
-  const playerPieces = range(0, 9).filter(i => board[i] === playerColor(playerIndex));
+  const playerPieces = range(0, 9).filter(i => board[i] === playerColor(chosenRoleIndex));
   const defendingPlaces = allowedPlaces.filter(i => hasWinningSubset([...playerPieces, i]));
   if (defendingPlaces.length > 0) return sample(defendingPlaces);
 

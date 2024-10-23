@@ -10,7 +10,7 @@ describe('test ai strategy', () => {
         [0, 0, 1]
       ]);
       const board = { bacteria, goals: [1] };
-      const { nextBoard, isGameEnd } = getGameStateAfterAiTurn({ board, ctx: { playerIndex: 0 } });
+      const { nextBoard, isGameEnd } = getGameStateAfterAiTurn({ board, ctx: { chosenRoleIndex: 0 } });
       expect(nextBoard.bacteria[2][0]).toEqual(0);
       expect(isGameEnd).toBe(false);
     });
@@ -22,7 +22,7 @@ describe('test ai strategy', () => {
         [0, 0, 1]
       ]);
       const board = { bacteria, goals: [2] };
-      const { nextBoard } = getGameStateAfterAiTurn({ board, ctx: { playerIndex: 0 } });
+      const { nextBoard } = getGameStateAfterAiTurn({ board, ctx: { chosenRoleIndex: 0 } });
       expect(nextBoard.bacteria[0][2]).toEqual(0);
     });
 
@@ -35,7 +35,7 @@ describe('test ai strategy', () => {
         [0, 0, 0, 0]
       ]);
       const board = { bacteria, goals: [2, 3, 4] };
-      const { nextBoard } = getGameStateAfterAiTurn({ board, ctx: { playerIndex: 0 } });
+      const { nextBoard } = getGameStateAfterAiTurn({ board, ctx: { chosenRoleIndex: 0 } });
       expect(nextBoard.bacteria[2][4]).toEqual(0);
     });
 
@@ -46,7 +46,7 @@ describe('test ai strategy', () => {
         [0, 0, 0]
       ]);
       const board = { bacteria, goals: [1] };
-      const { nextBoard, isGameEnd } = getGameStateAfterAiTurn({ board, ctx: { playerIndex: 0 } });
+      const { nextBoard, isGameEnd } = getGameStateAfterAiTurn({ board, ctx: { chosenRoleIndex: 0 } });
       expect(nextBoard.bacteria[2][0]).toEqual(1);
       expect(isGameEnd).toBe(false);
     });
@@ -58,7 +58,7 @@ describe('test ai strategy', () => {
         [0, 0, 0]
       ]);
       const board = { bacteria, goals: [1] };
-      const { isGameEnd } = getGameStateAfterAiTurn({ board, ctx: { playerIndex: 0 } });
+      const { isGameEnd } = getGameStateAfterAiTurn({ board, ctx: { chosenRoleIndex: 0 } });
       expect(isGameEnd).toBe(true);
     });
 
@@ -69,7 +69,7 @@ describe('test ai strategy', () => {
         [1, 0, 0, 1, 0]
       ]);
       const board = { bacteria, goals: [2] };
-      const { nextBoard } = getGameStateAfterAiTurn({ board, ctx: { playerIndex: 0 } });
+      const { nextBoard } = getGameStateAfterAiTurn({ board, ctx: { chosenRoleIndex: 0 } });
       expect(nextBoard.bacteria[0][3]).toEqual(0);
     });
 
@@ -82,7 +82,7 @@ describe('test ai strategy', () => {
         [0, 0, 0, 1, 0, 0, 0]
       ]);
       const board = { bacteria, goals: [2, 3, 4] };
-      const { nextBoard } = getGameStateAfterAiTurn({ board, ctx: { playerIndex: 0 } });
+      const { nextBoard } = getGameStateAfterAiTurn({ board, ctx: { chosenRoleIndex: 0 } });
       expect(nextBoard.bacteria[0][3]).toEqual(0);
     });
 
@@ -93,7 +93,7 @@ describe('test ai strategy', () => {
         [0, 2, 0, 1, 0]
       ]);
       const board = { bacteria, goals: [2] };
-      const { nextBoard } = getGameStateAfterAiTurn({ board, ctx: { playerIndex: 0 } });
+      const { nextBoard } = getGameStateAfterAiTurn({ board, ctx: { chosenRoleIndex: 0 } });
       expect(nextBoard.bacteria[0][1]).toEqual(1);
     });
 
@@ -104,7 +104,7 @@ describe('test ai strategy', () => {
         [0, 0, 1, 0, 0]
       ]);
       const board = { bacteria, goals: [4] };
-      const { nextBoard } = getGameStateAfterAiTurn({ board, ctx: { playerIndex: 0 } });
+      const { nextBoard } = getGameStateAfterAiTurn({ board, ctx: { chosenRoleIndex: 0 } });
       expect(nextBoard.bacteria[1][1] === 0 || nextBoard.bacteria[0][2] === 0).toBe(true);
     });
 
@@ -115,7 +115,7 @@ describe('test ai strategy', () => {
         [0, 0, 1, 0, 0]
       ]);
       const board = { bacteria, goals: [0] };
-      const { nextBoard } = getGameStateAfterAiTurn({ board, ctx: { playerIndex: 0 } });
+      const { nextBoard } = getGameStateAfterAiTurn({ board, ctx: { chosenRoleIndex: 0 } });
       expect(nextBoard.bacteria[1][2] === 0 || nextBoard.bacteria[0][2] === 0).toBe(true);
     });
 
@@ -126,7 +126,7 @@ describe('test ai strategy', () => {
         [0, 0, 1, 0, 0]
       ]);
       const board = { bacteria, goals: [2] };
-      const { nextBoard } = getGameStateAfterAiTurn({ board, ctx: { playerIndex: 0 } });
+      const { nextBoard } = getGameStateAfterAiTurn({ board, ctx: { chosenRoleIndex: 0 } });
       expect(nextBoard.bacteria[0][2]).toEqual(0);
     });
 
@@ -137,7 +137,7 @@ describe('test ai strategy', () => {
         [2, 0, 1, 0, 0]
       ]);
       const board = { bacteria, goals: [2] };
-      const { nextBoard } = getGameStateAfterAiTurn({ board, ctx: { playerIndex: 0 } });
+      const { nextBoard } = getGameStateAfterAiTurn({ board, ctx: { chosenRoleIndex: 0 } });
       expect(nextBoard.bacteria[0][2]).toEqual(0);
     });
   });
@@ -150,7 +150,7 @@ describe('test ai strategy', () => {
         [0, 0, 1]
       ]);
       const board = { bacteria, goals: [1] };
-      const { nextBoard, isGameEnd } = getGameStateAfterAiTurn({ board, ctx: { playerIndex: 1 } });
+      const { nextBoard, isGameEnd } = getGameStateAfterAiTurn({ board, ctx: { chosenRoleIndex: 1 } });
       expect(nextBoard.bacteria[2][1]).toEqual(1);
       expect(isGameEnd).toBe(true);
     });
@@ -162,7 +162,7 @@ describe('test ai strategy', () => {
         [0, 0, 1]
       ]);
       const board = { bacteria, goals: [1] };
-      const { nextBoard, isGameEnd } = getGameStateAfterAiTurn({ board, ctx: { playerIndex: 1 } });
+      const { nextBoard, isGameEnd } = getGameStateAfterAiTurn({ board, ctx: { chosenRoleIndex: 1 } });
       expect(nextBoard.bacteria[2][1]).toEqual(1);
       expect(isGameEnd).toBe(true);
     });
@@ -174,7 +174,7 @@ describe('test ai strategy', () => {
         [0, 0, 1]
       ]);
       const board = { bacteria, goals: [1] };
-      const { nextBoard, isGameEnd } = getGameStateAfterAiTurn({ board, ctx: { playerIndex: 1 } });
+      const { nextBoard, isGameEnd } = getGameStateAfterAiTurn({ board, ctx: { chosenRoleIndex: 1 } });
       expect(nextBoard.bacteria[2][1]).toEqual(1);
       expect(isGameEnd).toBe(true);
     });
@@ -186,7 +186,7 @@ describe('test ai strategy', () => {
         [0, 0, 1]
       ]);
       const board = { bacteria, goals: [2] };
-      const { nextBoard } = getGameStateAfterAiTurn({ board, ctx: { playerIndex: 1 } });
+      const { nextBoard } = getGameStateAfterAiTurn({ board, ctx: { chosenRoleIndex: 1 } });
       expect(nextBoard.bacteria[2][2]).toEqual(1);
     });
 
@@ -200,7 +200,7 @@ describe('test ai strategy', () => {
       ]);
       const board = { bacteria, goals: [2, 3, 4] };
 
-      const { nextBoard, isGameEnd } = getGameStateAfterAiTurn({ board, ctx: { playerIndex: 1 } });
+      const { nextBoard, isGameEnd } = getGameStateAfterAiTurn({ board, ctx: { chosenRoleIndex: 1 } });
 
       const expectedBacteria = reverse([
         [1, 0, 0, 0, 0, 0, 0],
@@ -221,7 +221,7 @@ describe('test ai strategy', () => {
       ]);
       const board = { bacteria, goals: [1] }
 
-      const { nextBoard, isGameEnd } = getGameStateAfterAiTurn({ board, ctx: { playerIndex: 1 } });
+      const { nextBoard, isGameEnd } = getGameStateAfterAiTurn({ board, ctx: { chosenRoleIndex: 1 } });
 
       const variantA = reverse([
         [0, 0, 0],
@@ -253,7 +253,7 @@ describe('test ai strategy', () => {
         [0, 0, 0, 0, 1]
       ]);
       const board = { bacteria, goals: [3] };
-      const { nextBoard } = getGameStateAfterAiTurn({ board, ctx: { playerIndex: 1 } });
+      const { nextBoard } = getGameStateAfterAiTurn({ board, ctx: { chosenRoleIndex: 1 } });
       expect(nextBoard.bacteria[2][1]).toEqual(2);
     });
 
@@ -266,7 +266,7 @@ describe('test ai strategy', () => {
         [0, 0, 1, 0, 0]
       ]);
       const board = { bacteria, goals: [1, 2, 3] };
-      const { nextBoard } = getGameStateAfterAiTurn({ board, ctx: { playerIndex: 1 } });
+      const { nextBoard } = getGameStateAfterAiTurn({ board, ctx: { chosenRoleIndex: 1 } });
       expect(nextBoard.bacteria[4][2]).toEqual(1);
     });
   });

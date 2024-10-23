@@ -26,8 +26,8 @@ const BoardClient = ({ board, ctx, events, moves }) => {
   const [chosenPiece, setChosenPiece] = useState(null);
 
   let possibleMoves=[]
-  if (ctx.shouldPlayerMoveNext) {
-    if (ctx.playerIndex === 1) {
+  if (ctx.shouldRoleSelectorMoveNext) {
+    if (ctx.chosenRoleIndex === 1) {
       possibleMoves = range(16).filter(i => distance(board.shark, i) <= 1)
     } else if (ctx.turnStage === 'movePiece') {
       possibleMoves = range(16).filter(i => distance(chosenPiece, i) === 1)
@@ -35,19 +35,19 @@ const BoardClient = ({ board, ctx, events, moves }) => {
   }
 
   const isAllowed_choosePiece = (id) => {
-    if (!ctx.shouldPlayerMoveNext) return false;
-    if (ctx.playerIndex === 0) return board.submarines[id] >= 1;
-    if (ctx.playerIndex === 1) return board.shark === id;
+    if (!ctx.shouldRoleSelectorMoveNext) return false;
+    if (ctx.chosenRoleIndex === 0) return board.submarines[id] >= 1;
+    if (ctx.chosenRoleIndex === 1) return board.shark === id;
   }
 
   const isAllowed_movePiece = (id) => {
-    if (!ctx.shouldPlayerMoveNext) return false;
-    if (ctx.playerIndex === 0) return distance(chosenPiece, id) === 1;
-    if (ctx.playerIndex === 1) return distance(board.shark, id) <= 1;
+    if (!ctx.shouldRoleSelectorMoveNext) return false;
+    if (ctx.chosenRoleIndex === 0) return distance(chosenPiece, id) === 1;
+    if (ctx.chosenRoleIndex === 1) return distance(board.shark, id) <= 1;
   }
 
   const clickField = (id) => {
-    if (ctx.playerIndex === 0) {
+    if (ctx.chosenRoleIndex === 0) {
       if (ctx.turnStage === 'choosePiece') {
         if (!isAllowed_choosePiece(id)) return;
         setChosenPiece(id)
@@ -66,17 +66,27 @@ const BoardClient = ({ board, ctx, events, moves }) => {
         nextBoard.turn += 1;
         setChosenPiece(null);
         events.setTurnStage('choosePiece');
-        events.endPlayerTurn(getGameStateAfterMove(nextBoard));
+        moves.setBoard(nextBoard);
+        const { isGameEnd, winnerIndex } = getGameStateAfterMove(nextBoard);
+        events.endTurn();
+        if (isGameEnd) {
+          events.endGame({ winnerIndex });
+        }
       }
     }
-    if (ctx.playerIndex === 1) {
+    if (ctx.chosenRoleIndex === 1) {
       if (!isAllowed_movePiece(id)) return;
       const nextBoard = cloneDeep(board);
       nextBoard.shark = id;
       if (ctx.turnStage !== 'secondSharkMove') {
         if (nextBoard.submarines[id] >= 1) {
           // instant lose
-          events.endPlayerTurn(getGameStateAfterMove(nextBoard));
+          moves.setBoard(nextBoard);
+          const { isGameEnd, winnerIndex } = getGameStateAfterMove(nextBoard);
+          events.endTurn();
+          if (isGameEnd) {
+            events.endGame({ winnerIndex });
+          }
           return;
         }
         if (id !== board.shark) {
@@ -89,7 +99,12 @@ const BoardClient = ({ board, ctx, events, moves }) => {
       nextBoard.turn += 1;
       setChosenPiece(null);
       events.setTurnStage('firstSharkMove');
-      events.endPlayerTurn(getGameStateAfterMove(nextBoard));
+      moves.setBoard(nextBoard);
+      const { isGameEnd, winnerIndex } = getGameStateAfterMove(nextBoard);
+      events.endTurn();
+      if (isGameEnd) {
+        events.endGame({ winnerIndex });
+      }
     }
   };
 
@@ -106,13 +121,13 @@ const BoardClient = ({ board, ctx, events, moves }) => {
           disabled={!isAllowed_choosePiece(id) && !isAllowed_movePiece(id)}
           className={`
             aspect-square p-[0%] border-2 relative flex justify-center items-center
-            ${possibleMoves.includes(id) && ctx.playerIndex === 1 && board.submarines[id] && 'border-red-600'}
+            ${possibleMoves.includes(id) && ctx.chosenRoleIndex === 1 && board.submarines[id] && 'border-red-600'}
           `}
         >
-          {possibleMoves.includes(id) && ctx.playerIndex === 0 && (
+          {possibleMoves.includes(id) && ctx.chosenRoleIndex === 0 && (
             <OptionalNextSubmarine existingSubmarineCount={board.submarines[id]} />
           )}
-          {possibleMoves.includes(id) && ctx.playerIndex === 1 && (
+          {possibleMoves.includes(id) && ctx.chosenRoleIndex === 1 && (
             <OptionalNextShark />
           )}
           {board.submarines[id] >= 1 && (
@@ -123,7 +138,7 @@ const BoardClient = ({ board, ctx, events, moves }) => {
               <use xlinkHref="#shark" />
             </svg>
           )}
-          {board.shark === id && ctx.playerIndex === 1 && ctx.shouldPlayerMoveNext && (
+          {board.shark === id && ctx.chosenRoleIndex === 1 && ctx.shouldRoleSelectorMoveNext && (
             <span
               className="absolute z-50 w-[75%] text-black border-2 rounded bg-white opacity-80"
             >Itt maradok</span>
@@ -203,8 +218,8 @@ const rule = <>
   nyer, ha még a 11. nap végén is szabad.
 </>;
 
-const getPlayerStepDescription = ({ ctx: { playerIndex, turnStage } }) => {
-  if (playerIndex === 0) {
+const getPlayerStepDescription = ({ ctx: { chosenRoleIndex, turnStage } }) => {
+  if (chosenRoleIndex === 0) {
     return 'Válassz ki egy tengeralattjárót, majd válassz egy szomszédos szektort.'
   }
   return <>Válassz ki egy cápával oldalszomszédos szektort. Kattints a cápára,

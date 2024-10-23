@@ -25,7 +25,7 @@ const getGameState = nextBoard => ({
 });
 
 const getGameStateAfterAiTurn = ({ board, ctx }) => {
-  const nextBoard = getBoardAfterAiTurn({ board, playerIndex: ctx.playerIndex });
+  const nextBoard = getBoardAfterAiTurn({ board, chosenRoleIndex: ctx.chosenRoleIndex });
   return getGameState(nextBoard);
 };
 
@@ -35,11 +35,15 @@ const BoardClient = ({ board, ctx, events, moves }) => {
   const placePiece = id => {
     const nextBoard = [...board];
     nextBoard[id] += 1;
-    if (ctx.playerIndex !== 0 && !oneMoveDone) {
+    if (ctx.chosenRoleIndex !== 0 && !oneMoveDone) {
       moves.setBoard(nextBoard);
       setOneMoveDone(true);
     } else {
-      events.endPlayerTurn(getGameState(nextBoard));
+      moves.setBoard(nextBoard);
+      events.endTurn();
+      if (isGameEnd(nextBoard)) {
+        events.endGame({ winnerIndex: getWinnerIndex(nextBoard) });
+      }
       setOneMoveDone(false);
     }
   };
@@ -50,7 +54,7 @@ const BoardClient = ({ board, ctx, events, moves }) => {
       {range(board.length).map(id =>
         <button
           key={id}
-          disabled={!ctx.shouldPlayerMoveNext}
+          disabled={!ctx.shouldRoleSelectorMoveNext}
           onClick={() => placePiece(id)}
           className="aspect-square border-r-4 border-b-4 p-[3%]"
         >

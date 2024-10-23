@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { range, sum, isEqual } from 'lodash';
 import { strategyGameFactory } from '../strategy-game';
 import { getOptimalTileIndex } from './strategy';
@@ -31,10 +31,14 @@ const getGameStateAfterAiTurn = ({ board }) => {
   return getGameState(nextBoard);
 };
 
-const BoardClient = ({ board, ctx, events }) => {
+const BoardClient = ({ board, ctx, events, moves }) => {
   const placePiece = id => {
     const nextBoard = addPiece(board, id);
-    events.endPlayerTurn(getGameState(nextBoard));
+    moves.setBoard(nextBoard);
+    events.endTurn();
+    if (isGameEnd(nextBoard)) {
+      events.endGame({ winnerIndex: getWinnerIndex(nextBoard) });
+    }
   };
 
   return (
@@ -43,7 +47,7 @@ const BoardClient = ({ board, ctx, events }) => {
       {range(board.length).map(id =>
         <button
           key={id}
-          disabled={!ctx.shouldPlayerMoveNext}
+          disabled={!ctx.shouldRoleSelectorMoveNext}
           onClick={() => placePiece(id)}
           className="aspect-square border-2 p-[4%]"
         >

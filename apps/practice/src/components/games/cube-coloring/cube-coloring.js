@@ -23,13 +23,13 @@ const BoardClient = ({ board, ctx, events, moves }) => {
   const [y, setY] = useState(0);
 
   const isMoveAllowed = (vertex) => {
-    if (!ctx.shouldPlayerMoveNext) return false;
+    if (!ctx.shouldRoleSelectorMoveNext) return false;
     if (!show) return false;
     return isAllowedStep(board, vertex, color);
   };
 
   const pick = (pickedColor) => {
-    if (!ctx.shouldPlayerMoveNext) return;
+    if (!ctx.shouldRoleSelectorMoveNext) return;
     if (pickedColor === color) {
       setShow(!show);
     } else {
@@ -49,14 +49,18 @@ const BoardClient = ({ board, ctx, events, moves }) => {
     nextBoard[vertex] = color;
     moves.setBoard(nextBoard);
     setShow(false);
-    events.endPlayerTurn(getGameStateAfterMove(nextBoard));
+    const { isGameEnd, winnerIndex } = getGameStateAfterMove(nextBoard);
+    events.endTurn();
+    if (isGameEnd) {
+      events.endGame({ winnerIndex });
+    }
   };
 
   return (
   <section className="p-2 shrink-0 grow basis-2/3">
     <header>
       <button
-        disabled={!ctx.shouldPlayerMoveNext}
+        disabled={!ctx.shouldRoleSelectorMoveNext}
         className={`
           w-[30%] mx-[1%] rounded text-xl bg-red-600
           ${!show || color !== '#dc2626' ? 'bg-opacity-50' : ''}
@@ -64,7 +68,7 @@ const BoardClient = ({ board, ctx, events, moves }) => {
         onClick={() => pick('#dc2626')}
       >Piros</button>
       <button
-        disabled={!ctx.shouldPlayerMoveNext}
+        disabled={!ctx.shouldRoleSelectorMoveNext}
         className={`
           w-[30%] mx-[1%] rounded text-xl bg-yellow-600
           ${!show || color !== '#eab308' ? 'bg-opacity-50' : ''}
@@ -72,7 +76,7 @@ const BoardClient = ({ board, ctx, events, moves }) => {
         onClick={() => pick('#eab308')}
       >Sárga</button>
       <button
-        disabled={!ctx.shouldPlayerMoveNext}
+        disabled={!ctx.shouldRoleSelectorMoveNext}
         className={`
           w-[30%] mx-[1%] rounded text-xl bg-blue-600
           ${!show || color !== '#2563eb' ? 'bg-opacity-50' : ''}
