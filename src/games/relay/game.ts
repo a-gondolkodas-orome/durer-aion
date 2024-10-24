@@ -23,34 +23,13 @@ export interface MyGameState {
   url: string;
 }
 
-function game_state_from_json(json: string): MyGameState {
+function parseGameState(json: string): MyGameState {
   const parsed = JSON.parse(json);
-  
-  // Validate the parsed object
+
   if (typeof parsed !== 'object' || parsed === null) {
     throw new Error('relay: game_state_from_json: Invalid JSON: not an object');
   }
-
-  // Type assertion to avoid repetitive type checks
-  const state = parsed as MyGameState;
-
-  // Validate required fields and types
-  if (typeof state.currentProblem !== 'number' ||
-      typeof state.problemText !== 'string' ||
-      (state.answer !== null && typeof state.answer !== 'number') ||
-      typeof state.points !== 'number' ||
-      (state.correctnessPreviousAnswer !== null && typeof state.correctnessPreviousAnswer !== 'boolean') ||
-      !Array.isArray(state.previousAnswers) ||
-      !Array.isArray(state.previousPoints) ||
-      typeof state.currentProblemMaxPoints !== 'number' ||
-      typeof state.numberOfTry !== 'number' ||
-      typeof state.milisecondsRemaining !== 'number' ||
-      typeof state.start !== 'string' ||
-      typeof state.end !== 'string' ||
-      typeof state.url !== 'string') {
-    throw new Error('relay: game_state_from_json: Invalid JSON: missing or incorrect fields');
-  }
-  return state;
+  return parsed as MyGameState;
 }
 
 const lengthOfCompetition = 60 * 60; // seconds
@@ -81,25 +60,30 @@ export const GameRelay: Game<MyGameState> = {
     startNewGame: {
       moves: {
         startGame: ({ G, ctx, playerID, events }) => {
-          let phase = localStorage.getItem("RelayGamePhase");
-          let game_state_json = localStorage.getItem("RelayGameState");
-          if (process.env.REACT_APP_WHICH_VERSION === "b" && phase !== null && game_state_json !== null) {
-            try { // if the json is bad, continue as if we didnt even have it
-              const state = game_state_from_json(game_state_json);
-              const newG = {
-                ...state,
-                milisecondsRemaining: Date.parse(state.end) - Date.now(),
-              };
-              events.setPhase(phase);
-              return newG;
-            } catch {
-              console.error("could not load game phase from json, invalid json");
+          if (process.env.REACT_APP_WHICH_VERSION === "a") {
+            if (playerID !== GUESSER_PLAYER || G.numberOfTry !== 0) {
+              return INVALID_MOVE;
             }
+            events.endTurn();
           }
-          if (playerID !== GUESSER_PLAYER || G.numberOfTry !== 0) {
-            return INVALID_MOVE;
+
+          const phase = localStorage.getItem("RelayGamePhase");
+          const gameStateJSON = localStorage.getItem("RelayGameState");
+          if (phase === null || gameStateJSON === null) {
+            events.endTurn();
+            return;
           }
-          events.endTurn();
+          try { // if the json is bad, continue as if we didnt even have it
+            let state = parseGameState(gameStateJSON);
+            console.log(state);
+            events.setPhase(phase);
+            console.log("startGame CP: ", ctx.currentPlayer);
+            state.milisecondsRemaining = Date.parse(state.end) - Date.now();
+            return state;
+          } catch {
+            events.endTurn();
+            console.error("could not load game phase from json, invalid json");
+          }
         },
         firstProblem({ G, ctx, playerID, events }, problemText: string, nextProblemMaxPoints: number, url: string) {
           if (playerID !== JUDGE_PLAYER) {
@@ -211,10 +195,10 @@ export const GameRelay: Game<MyGameState> = {
     },
     onEnd: ({ G, ctx, events }) => {
       // playerID is not available here
-      if (ctx.currentPlayer.toString() === GUESSER_PLAYER) {
-        const state_str = JSON.stringify(G);
+      if (ctx.currentPlayer.toString() === GUESSER_PLAYER && process.env.REACT_APP_WHICH_VERSION === "b") {
+        const stateJSON = JSON.stringify(G);
         localStorage.setItem("RelayGamePhase", ctx.phase);
-        localStorage.setItem("RelayGameState", state_str);
+        localStorage.setItem("RelayGameState", stateJSON);
       }
       if (ctx.currentPlayer.toString() === JUDGE_PLAYER) {
         let currentTime = new Date();

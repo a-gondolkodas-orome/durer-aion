@@ -169,6 +169,7 @@ const problems : RelayProblems ={
 
 export function strategy(category: "C" | "D" | "E"){
   return (state: State<MyGameState>, botID: string): [any[] | undefined, string] => {
+    console.log("strategy", state.ctx.phase);
     if (state.G.numberOfTry === 0) {
       let url = problems[category][state.G.currentProblem].url;
       if(url === undefined){
@@ -190,8 +191,8 @@ export function strategy(category: "C" | "D" | "E"){
       if(url === undefined){
         url = "";
       }
-      let next_prob = problems[category][state.G.currentProblem+1];
-      return [[next_prob.problemText, next_prob.points, correctnessPreviousAnswer, url], "newProblem"];
+      let nextProblem = problems[category][state.G.currentProblem+1];
+      return [[nextProblem.problemText, nextProblem.points, correctnessPreviousAnswer, url], "newProblem"];
     }
     // End of the game
     return [[correctnessPreviousAnswer], "endGame"];
