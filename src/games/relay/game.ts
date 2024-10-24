@@ -26,22 +26,11 @@ export interface MyGameState {
 
 function parseGameState(json: string): MyGameState {
   const parsed = JSON.parse(json);
-  
-  // Validate the parsed object
+
   if (typeof parsed !== 'object' || parsed === null) {
     throw new Error('relay: game_state_from_json: Invalid JSON: not an object');
   }
-
-  // Type assertion to avoid repetitive type checks
-  const state = parsed as MyGameState;
-
-  return state;
-}
-
-function saveState(state: MyGameState, ctx: any) {
-  const stateString = JSON.stringify(state);
-  localStorage.setItem("RelayGamePhase", ctx.phase);
-  localStorage.setItem("RelayGameState", stateString);
+  return parsed as MyGameState;
 }
 
 const lengthOfCompetition = 60 * 60; // seconds
@@ -72,39 +61,30 @@ export const GameRelay: Game<MyGameState> = {
     startNewGame: {
       moves: {
         startGame: ({ G, ctx, playerID, events }) => {
-          if (isOfflineMode()) {
-            let phase = localStorage.getItem("RelayGamePhase");
-            let game_state_json = localStorage.getItem("RelayGameState");
-            let end = localStorage.getItem("RelayEnd");
-            if (phase && game_state_json) {
-              try { // if the json is bad, continue as if we didnt even have it
-                const state = parseGameState(game_state_json);
-                const newGame = {
-                  ...state,
-                  milisecondsRemaining: Date.parse(state.end) - Date.now(),
-                };
-                events.setPhase(phase);
-                return newGame;
-              } catch {
-                console.error("could not load game phase from json, invalid json");
-                // move on as if we didnt have saved state
-              }
+          if (process.env.REACT_APP_WHICH_VERSION === "a") {
+            if (playerID !== guesserPlayer || G.numberOfTry !== 0) {
+              return INVALID_MOVE;
             }
+            events.endTurn();
+          }
 
-            // so the clock works even if they reload the page before submitting
-            // an answer (which is when we normally save the state)
-            if (end) {
-              G.end = end;
-              G.milisecondsRemaining = Date.parse(G.end) - Date.now();
-            }
-            else {
-              localStorage.setItem("RelayEnd", G.end);
-            }
+          const phase = localStorage.getItem("RelayGamePhase");
+          const gameStateJSON = localStorage.getItem("RelayGameState");
+          if (phase === null || gameStateJSON === null) {
+            events.endTurn();
+            return;
           }
-          if (playerID !== guesserPlayer || G.numberOfTry !== 0) {
-            return INVALID_MOVE;
+          try { // if the json is bad, continue as if we didnt even have it
+            let state = parseGameState(gameStateJSON);
+            console.log(state);
+            events.setPhase(phase);
+            console.log("startGame CP: ", ctx.currentPlayer);
+            state.milisecondsRemaining = Date.parse(state.end) - Date.now();
+            return state;
+          } catch {
+            events.endTurn();
+            console.error("could not load game phase from json, invalid json");
           }
-          events.endTurn();
         },
         firstProblem({ G, ctx, playerID, events }, problemText: string, nextProblemMaxPoints: number, url: string) {
           if (playerID !== judgePlayer) {
@@ -216,8 +196,10 @@ export const GameRelay: Game<MyGameState> = {
     },
     onEnd: ({ G, ctx, events }) => {
       // playerID is not available here
-      if (ctx.currentPlayer.toString() === guesserPlayer && isOfflineMode()) {
-        saveState(G, ctx);
+      if (ctx.currentPlayer.toString() === guesserPlayer && process.env.REACT_APP_WHICH_VERSION === "b") {
+        const stateJSON = JSON.stringify(G);
+        localStorage.setItem("RelayGamePhase", ctx.phase);
+        localStorage.setItem("RelayGameState", stateJSON);
       }
       if (ctx.currentPlayer.toString() === judgePlayer) {
         let currentTime = new Date();

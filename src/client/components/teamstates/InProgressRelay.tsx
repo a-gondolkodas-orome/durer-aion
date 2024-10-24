@@ -60,8 +60,8 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
         }}
         open={
           finished
-        } onClose={async () => {
-          refreshState();
+        } onClose={async () => { 
+          refreshState()
           await toHome();
           window.location.reload(); 
            }}>
@@ -146,7 +146,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
             previousCorrectness={!finished ? G.correctnessPreviousAnswer : null}
             attempt={(G.currentProblem+1)*3+G.numberOfTry}
             onSubmit={(input) => {
-              moves.submitAnswer(parseInt(input));
+              moves.submitAnswer(parseInt(input))
               sendDataRelayStep(teamState, G, ctx, parseInt(input));
             }}
           />
@@ -171,7 +171,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
               width: '250px',
               fontSize: '10px',
             }}>
-            ("Az óra csak tájékoztató jellegű, más eszközökön más időt mutathat, de így is csak az időben érkezett megoldásokat fogjuk figyelembe venni.")
+            (Az óra csak tájékoztató jellegű. Más eszközökön és böngészőkben más időt fogtok látni, de így is csak az időben beérkezett válaszokat fogjuk figyelembe venni.)
             </Stack>
           }
         </Stack>
