@@ -1,18 +1,8 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment } from "react";
 import { range, random, sample, difference } from "lodash";
 import { strategyGameFactory } from "../strategy-game";
-import { neighbours, getGameStateAfterAiTurn, getGameStateAfterMove } from "./strategy";
-
-const generateStartBoard = () => {
-  const policeStartPosition = random(0, 7);
-  const immediatePoliceWinPositions = [policeStartPosition, ...neighbours[policeStartPosition]];
-  const thiefStartPosition = sample(difference(range(0, 8), immediatePoliceWinPositions));
-  return {
-    turnCount: 0,
-    policemen: [policeStartPosition, policeStartPosition],
-    thief: thiefStartPosition
-  };
-};
+import { neighbours } from "./helpers";
+import { aiBotStrategy } from "./bot-strategy";
 
 const cubeCoords = [
   { cx: "30%", cy: "30%" },
@@ -25,35 +15,18 @@ const cubeCoords = [
   { cx: "90%", cy: "90%" }
 ];
 
-const BoardClient = ({ board, ctx, events, moves }) => {
+const BoardClient = ({ board, ctx, moves }) => {
   const handleCircleClick = (vertex) => {
     if (!isClickable(vertex)) return;
     if (ctx.chosenRoleIndex === 1) {
-      const nextBoard = { ...board, thief: vertex, turnCount: board.turnCount + 1 };
-      moves.setBoard(nextBoard);
-      const { isGameEnd, winnerIndex } = getGameStateAfterMove(nextBoard);
-      events.endTurn();
-      if (isGameEnd) {
-        events.endGame({ winnerIndex });
-      }
+      moves.moveThief(vertex);
       return;
     }
-    const nextBoard = { ...board }
     if (ctx.turnStage === "secondMove") {
-      nextBoard.policemen[1] = vertex;
-      nextBoard.turnCount++;
-      events.setTurnStage(null);
-      moves.setBoard(nextBoard);
-      const { isGameEnd, winnerIndex } = getGameStateAfterMove(nextBoard);
-      events.endTurn();
-      if (isGameEnd) {
-        events.endGame({ winnerIndex });
-      }
+      moves.moveSecondPoliceman(vertex);
       return;
     }
-    nextBoard.policemen[0] = vertex;
-    events.setTurnStage("secondMove")
-    moves.setBoard(nextBoard);
+    moves.moveFirstPoliceman(vertex);
   };
 
   const isClickable = (vertex) => {
@@ -150,6 +123,57 @@ const BoardClient = ({ board, ctx, events, moves }) => {
   );
 };
 
+const generateStartBoard = () => {
+  const policeStartPosition = random(0, 7);
+  const immediatePoliceWinPositions = [policeStartPosition, ...neighbours[policeStartPosition]];
+  const thiefStartPosition = sample(difference(range(0, 8), immediatePoliceWinPositions));
+  return {
+    turnCount: 0,
+    policemen: [policeStartPosition, policeStartPosition],
+    thief: thiefStartPosition
+  };
+};
+
+const moves = {
+  moveThief: ({ board, setBoard, events }, vertex) => {
+    const nextBoard = { ...board, thief: vertex, turnCount: board.turnCount + 1 };
+    setBoard(nextBoard);
+    events.endTurn();
+    if (isGameEnd(nextBoard)) {
+      events.endGame({ winnerIndex: hasFirstPlayerWon(nextBoard) ? 0 : 1 });
+    }
+  },
+  moveFirstPoliceman: ({ board, setBoard, events }, vertex) => {
+    const nextBoard = { ...board };
+    nextBoard.policemen[0] = vertex;
+    events.setTurnStage("secondMove");
+    setBoard(nextBoard);
+  },
+  moveSecondPoliceman: ({ board, setBoard, events }, vertex) => {
+    const nextBoard = { ...board };
+    nextBoard.policemen[1] = vertex;
+    events.setTurnStage(null);
+    setBoard(nextBoard);
+    events.endTurn();
+    if (isGameEnd(nextBoard)) {
+      events.endGame({ winnerIndex: hasFirstPlayerWon(nextBoard) ? 0 : 1 });
+    }
+  }
+};
+
+const isGameEnd = (board) => {
+  if (board.turnCount === 3) {
+    return true;
+  } else if (board.thief === board.policemen[0] || board.thief === board.policemen[1]) {
+    return true;
+  }
+  return false;
+};
+
+const hasFirstPlayerWon = (board) => {
+  return board.turnCount < 4 && board.policemen.includes(board.thief);
+};
+
 const rule = (
   <>
     Az ábrán egy kisváros úthálózata látható, ahol az útkereszteződéseket
@@ -177,5 +201,6 @@ export const Policemanthief = strategyGameFactory({
     }
   },
   generateStartBoard,
-  getGameStateAfterAiTurn
+  aiBotStrategy,
+  moves
 });

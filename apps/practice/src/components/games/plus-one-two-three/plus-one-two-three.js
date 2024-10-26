@@ -5,21 +5,16 @@ import { range, random } from 'lodash';
 const target = 40;
 const maxStep = 3;
 
-const BoardClient = ({ board, ctx, events, moves }) => {
+const BoardClient = ({ board, ctx, moves }) => {
 
   const isMoveAllowed = number => {
     if (!ctx.shouldRoleSelectorMoveNext) return false;
-    if (number <= board) return false;
-    return (number - board) <= maxStep;
+    return isIncreaseValid({ board, number });
   }
 
   const clickNumber = (number) => {
     if (!isMoveAllowed(number)) return;
-    moves.setBoard(number);
-    events.endTurn();
-    if (number > target) {
-      events.endGame({ winnerIndex: 1 - ctx.chosenRoleIndex })
-    }
+    moves.increaseTo(number);
   };
 
   return(
@@ -46,18 +41,29 @@ const BoardClient = ({ board, ctx, events, moves }) => {
   );
 };
 
-const getGameStateAfterMove = (nextBoard, moverIndex) => {
-  if (nextBoard > target) {
-    return { nextBoard, isGameEnd: true, winnerIndex: 1 - moverIndex };
+const isIncreaseValid = ({ board, number }) => {
+  if (number <= board) return false;
+  return (number - board) <= maxStep;
+}
+
+const moves = {
+  increaseTo: ({ board, setBoard, ctx, events }, number) => {
+    if (!isIncreaseValid({ board, number })) {
+      console.error('invalid_move');
+    }
+    setBoard(number);
+    events.endTurn();
+    if (number > target) {
+      events.endGame({ winnerIndex: 1 - ctx.currentPlayer })
+    }
   }
-  return { nextBoard, isGameEnd: false };
 };
 
-const getGameStateAfterAiTurn = ({ board, ctx }) => {
+const aiBotStrategy = ({ board, moves }) => {
   const nextBoard = board % (1 + maxStep) !== 0
     ? board + (1 + maxStep) - board % (1 + maxStep)
     : board + random(1, maxStep);
-  return (getGameStateAfterMove(nextBoard, 1 - ctx.chosenRoleIndex));
+  moves.increaseTo(nextBoard);
 };
 
 const rule = <>
@@ -67,10 +73,11 @@ const rule = <>
 </>;
 
 export const PlusOneTwoThree = strategyGameFactory({
-  rule: rule,
+  rule,
   title: '+1, +2, +3',
   BoardClient,
   getPlayerStepDescription: () => 'Válaszd ki, hogy melyik számra lépsz.',
   generateStartBoard: () => 0,
-  getGameStateAfterAiTurn
+  aiBotStrategy,
+  moves
 });
