@@ -20,7 +20,7 @@ export const dictionary = {
   chooser: {
     finish: {
       title: "Vége a versenynek!",
-      content: "Köszönjük a részvételeteket, reméljük, hogy tetszett nektek a verseny. Kíváncsiak vagyunk a fordulóval kapcsolatos véleményetekre, így kérjük, <a href=\"https://forms.gle/TQFC1N8vqRe1meyz8\" target=\"_blank\" rel=\"noopener noreferrer\">töltsétek ki ezt az űrlapot</a>. Várhatóan szombatig közzétesszük az eredményeket és a továbbjutó csapatok listáját, és erről emailben is fogunk nektek értesítést küldeni.",
+      content: "Köszönjük a részvételeteket, reméljük, hogy tetszett nektek a verseny. Kíváncsiak vagyunk a fordulóval kapcsolatos véleményetekre, így kérjük, <a href=\"" + process.env.REACT_APP_FEEDBACK_FORM_URL + "\" target=\"_blank\" rel=\"noopener noreferrer\">töltsétek ki ezt az űrlapot</a>. Várhatóan csütörtökig közzétesszük az eredményeket és a továbbjutó csapatok listáját, és erről emailben is fogunk nektek értesítést küldeni.",
       final: "Végső pontszám",
     },
     gameDescriptionHtml: `<p>Ebben a feladatban egy kétszemélyes stratégiás játékot játszhattok, ahol az egyik játékos Ti lesztek, a másik játékos pedig a gép. Győzzétek le a gépet <b>kétszer egymás után</b> ebben a játékban! A kezdő helyzet ismeretében Ti dönthetitek el, hogy a kezdő vagy a második játékos bőrébe szeretnétek bújni.</p>         
@@ -75,7 +75,7 @@ export const dictionary = {
     greeting: "Kedves Versenyző!",
     beforeTitle: "Üdvözlünk a",
     afterTitle: "online fordulójának felületén.",
-    loginInstraction: "Belépéshez nézd meg az emailjeidet, és üsd be az ott található kódot ide:",
+    loginInstraction: "Belépéshez nézd meg az emailjeidet, és üsd be az ott található "+ process.env.REACT_APP_FEEDBACK_FORM_URL+" kódot ide:",
     fallback: "Ha nem találjátok az emailt, akkor írjatok nekünk a verseny [K] durerinfo [P] hu email címre.",
   },
   waitingRoom: {
