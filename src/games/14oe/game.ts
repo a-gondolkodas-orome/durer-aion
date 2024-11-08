@@ -26,14 +26,10 @@ export const MyGame: GameType<MyGameState> = {
       } else {
         G.enemyNumbers.push(n);
       }
-      G.remainingNumbers = G.remainingNumbers.filter((x) => x !== n);
-      let winner = getWinner(
-        G.playerNumbers,
-        G.enemyNumbers,
-        G.remainingNumbers
-      );
-      if (winner === "0" || winner === "1") {
-        G.winner = winner;
+      G.remainingNumbers = G.remainingNumbers.filter(x => x !== n);
+      let winner = getWinner(G.playerNumbers, G.enemyNumbers, G.remainingNumbers);
+      if (winner !== "") {
+        G.winner = winner as PlayerIDType;
         if(winner === "0"){
           G.winningStreak = G.winningStreak + 1;
           if(G.winningStreak >= 2){

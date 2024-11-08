@@ -1,9 +1,12 @@
 import { Ctx, MoveMap, TurnConfig } from "boardgame.io";
 
-export type PlayerIDType = "0" | "1";
+export enum PlayerIDType {
+  GUESSER_PLAYER = '0',
+  JUDGE_PLAYER = '1',
+};
 
 export interface GameStateMixin {
-  firstPlayer: null | 0 | 1;
+  firstPlayer: null | PlayerIDType;
   winner: PlayerIDType | "draw" | null;
   difficulty: null | undefined | string;
   numberOfTries: number;
@@ -53,6 +56,6 @@ export interface Game<
 export type GameType<G> = WrappableGame<G & GameStateMixin> & GameMixin<G>;
 
 /// Allows typing: change ctx.currentPlayer -> currentPlayer(ctx)
-export function currentPlayer(ctx: Ctx): "0" | "1" {
-  return ctx.currentPlayer as "0" | "1";
+export function currentPlayer(ctx: Ctx): PlayerIDType {
+  return ctx.currentPlayer as PlayerIDType;
 }

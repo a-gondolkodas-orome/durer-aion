@@ -1,7 +1,8 @@
 import { INVALID_MOVE } from 'boardgame.io/core';
-import { GameType } from '../../common/types';
+import { GameType, PlayerIDType } from '../../common/types';
 import { sendDataStrategyEnd } from '../../common/sendData';
 import { isOfflineMode } from '../../client/utils/appMode';
+
 
 export interface MyGameState {
   pile: number;
@@ -37,7 +38,7 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<
         G.pile /= 2;
       }
       if (G.pile === 0) {
-        G.winner = ctx.currentPlayer === "0" ? "0" : "1";
+        G.winner = ctx.currentPlayer as PlayerIDType;
       }
 
       if (G.difficulty === "live") {
@@ -88,7 +89,7 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<
   possibleMoves: (G, ctx, playerID) => {
     let moves = [{ move: 'changePile', args: [0] }];
     if (G.pile % 2 === 0) {
-      moves.push({ move: 'changePile', args: [1] })
+      moves.push({ move: 'changePile', args: [1] });
     }
 
 

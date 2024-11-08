@@ -1,5 +1,5 @@
 import { INVALID_MOVE } from 'boardgame.io/core';
-import { GameType } from '../../common/types';
+import { GameType, PlayerIDType } from '../../common/types';
 
 export interface MyGameState {
   coins: Array<number>;
@@ -29,7 +29,7 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<
       }
       const firstCoin = G.coins[0];
       if(G.coins.every(c => c === firstCoin)){
-        G.winner = ctx.currentPlayer === "0" ? "0" : "1";
+        G.winner = ctx.currentPlayer as PlayerIDType;
       }
       if(G.difficulty === "live")
         {

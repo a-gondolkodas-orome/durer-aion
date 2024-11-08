@@ -1,10 +1,8 @@
 import { Ctx, Game } from 'boardgame.io';
 import { INVALID_MOVE, TurnOrder } from 'boardgame.io/core';
-import { GameStateMixin, GameType } from './types';
-import { GasMeterRounded } from '@mui/icons-material';
+import { GameStateMixin, GameType, PlayerIDType } from './types';
 
-const GUESSER_PLAYER = '0';
-const JUDGE_PLAYER = '1';
+const { GUESSER_PLAYER, JUDGE_PLAYER } = PlayerIDType;
 
 function parseGameState<T_SpecificGameState>(json: string): T_SpecificGameState {
   const parsed = JSON.parse(json);
@@ -67,10 +65,16 @@ function loadGameState<T_SpecificGameState>({ events, ctx }:any) {
     if (phase === "startNewGame") {
       events.endPhase();
     }
-    console.log("loadstate: CP: ", ctx.currentPlayer);
-    events.endTurn();
+    if (ctx.currentPlayer === GUESSER_PLAYER) {
+      events.endTurn();
+    }
+    if (ctx.currentPlayer !== JUDGE_PLAYER) {
+      console.error("nem a judge van!?")
+    }
     return state;
   } catch {
+    localStorage.removeItem("StrategyPhase");
+    localStorage.removeItem("StrategyGameState");
     console.error("could not load game phase from json, invalid json");
   }
 }
@@ -119,7 +123,7 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
         next: "startNewGame",
         turn: {
           order: {
-            first: ({ G, ctx }) => G.firstPlayer === 0 ? 0 : 1,
+            first: ({ G, ctx }) => G.firstPlayer === GUESSER_PLAYER ? 0 : 1,
             next: ({ G, ctx }) => {
               return (ctx.playOrderPos + 1) % ctx.numPlayers
             },
@@ -136,7 +140,7 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
             
             console.log("onEnd", ctx.currentPlayer, process.env.REACT_APP_WHICH_VERSION);
             if (process.env.REACT_APP_WHICH_VERSION === "b" && ctx.currentPlayer === GUESSER_PLAYER) {
-              console.log("asdfasdf");
+              console.log("saving game state");
               localStorage.setItem("StrategyGameState", JSON.stringify(G));
               localStorage.setItem("StrategyPhase", ctx.phase);
             }

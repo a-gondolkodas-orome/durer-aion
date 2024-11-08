@@ -1,5 +1,5 @@
 import { State } from 'boardgame.io';
-import { GameStateMixin } from '../../common/types';
+import { GameStateMixin, PlayerIDType } from '../../common/types';
 import { MyGameState } from './game';
 
 const buvosbolRendes=[0,8,3,4,1,5,9,6,7,2];
@@ -88,12 +88,12 @@ let megadottValaszlepesek = new Map<string,string>([
 export function strategy(state: State<MyGameState & GameStateMixin>, botID: string): [number | undefined, string] {
   if (state.G.difficulty === "live") {
     let rEddigiek:number[] = [];
-    if(state.G.firstPlayer === 0){
+    if(state.G.firstPlayer === PlayerIDType.GUESSER_PLAYER){
       rEddigiek = state.G.playerNumbers.flatMap(
         (element, index) => [rendesbolBuvos[element], rendesbolBuvos[state.G.enemyNumbers[index]]]
       );
     }
-    else if (state.G.firstPlayer === 1){
+    else if (state.G.firstPlayer === PlayerIDType.JUDGE_PLAYER){
       rEddigiek = state.G.enemyNumbers.flatMap(
         (element, index) => [rendesbolBuvos[element], rendesbolBuvos[state.G.playerNumbers[index]]]
       );

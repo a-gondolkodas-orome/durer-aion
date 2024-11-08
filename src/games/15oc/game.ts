@@ -21,8 +21,8 @@ export const MyGame: GameType<MyGameState> = {
       }
       
       let winner = getWinner();
-      if (winner === "0" || winner === "1") {
-        G.winner = winner;
+      if (winner !== "") {
+        G.winner = winner as PlayerIDType;
         if(winner === "0"){
           G.winningStreak = G.winningStreak + 1;
           if(G.winningStreak >= 2){

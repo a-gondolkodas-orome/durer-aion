@@ -1,7 +1,9 @@
 import { Game } from "boardgame.io";
 import { INVALID_MOVE, TurnOrder } from "boardgame.io/core";
 import { sendDataRelayEnd } from "../../common/sendData";
-import { isOfflineMode } from "../../client/utils/appMode";
+import { PlayerIDType } from "../../common/types";
+
+const { GUESSER_PLAYER, JUDGE_PLAYER } = PlayerIDType;
 
 type Answer = {
   answer: number;
@@ -34,9 +36,6 @@ function parseGameState(json: string): MyGameState {
 }
 
 const lengthOfCompetition = 60 * 60; // seconds
-
-const guesserPlayer = '0';
-const judgePlayer = '1';
 
 export const GameRelay: Game<MyGameState> = {
   setup: () => {
