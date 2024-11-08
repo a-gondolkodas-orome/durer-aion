@@ -14,6 +14,9 @@ export interface GameStateMixin {
   winningStreak: number;
   points: number;
   gameStateLoadedFromStorage: boolean;
+  milisecondsRemaining: number;
+  start: string;
+  end: string;
 }
 
 export type SetupFunction<G> = () => G;

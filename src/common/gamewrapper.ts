@@ -76,15 +76,11 @@ function loadGameState<T_SpecificGameState>({ events }:any) {
     events.endPhase();
   }
   state.gameStateLoadedFromStorage = true;
+  state.milisecondsRemaining = new Date(state.end).getTime() - new Date().getTime();
   return state;
 }
 
-function getTime({ G, ctx, playerID, events }:any){
-  if (playerID !== "0") {
-    return INVALID_MOVE;
-  };
-  G.milisecondsRemaining = new Date(G.end).getTime() - new Date().getTime();
-};
+const lengthOfCompetition = 30 * 60; // seconds
 
 // This is *very important*, so as not to spam
 export function isMakeMovePayloadReadOnly(payload_type: string) {
@@ -93,7 +89,20 @@ export function isMakeMovePayloadReadOnly(payload_type: string) {
 
 export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameState>): Game<T_SpecificGameState & GameStateMixin> { // TODO: solve types
   return {
-    setup: () => ({ ...game.setup(), gameStateLoadedFromStorage: false, firstPlayer: null, difficulty: null, winner: null, numberOfTries: 0, numberOfLoss: 0, winningStreak: 0, points: 0}),
+    setup: () => ({
+      ...game.setup(),
+      milisecondsRemaining: 1000 * lengthOfCompetition,
+      start: new Date().toISOString(),
+      end: new Date(Date.now() + 1000 * lengthOfCompetition).toISOString(),
+      gameStateLoadedFromStorage: false,
+      firstPlayer: null,
+      difficulty: null,
+      winner: null,
+      numberOfTries: 0,
+      numberOfLoss: 0,
+      winningStreak: 0,
+      points: 0
+    }),
     turn: {
       minMoves: 1,
       maxMoves: 1,
@@ -101,9 +110,17 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
     name: game.name,
     minPlayers: 2,
     maxPlayers: 2,
+    moves: {
+      getTime({ G, ctx, playerID, events }) {
+        if (playerID !== "0") {
+          return INVALID_MOVE;
+        }
+        G.milisecondsRemaining = new Date(G.end).getTime() - new Date().getTime();
+      }
+    },
     phases: {
       startNewGame: {
-        moves: { chooseNewGameType, setStartingPosition, getTime, loadGameState: loadGameState as loadGameFn },
+        moves: { chooseNewGameType, setStartingPosition, loadGameState: loadGameState as loadGameFn },
         endIf: ({ G, ctx, playerID }) => { return G.difficulty !== null && G.winner === null && 'startingPosition' in game },
         next: "chooseRole",
         turn: {
@@ -112,13 +129,13 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
         start: true,
       },
       chooseRole: {
-        moves: { chooseRole, getTime },
+        moves: { chooseRole },
         endIf: ({ G, ctx, playerID }) => { return G.firstPlayer !== null },
         next: "play",
         turn: { order: TurnOrder.RESET }
       },
       play: {
-        moves: { ...game.moves, getTime },
+        moves: { ...game.moves },
         endIf: ({ G, ctx, playerID }) => { return G.winner !== null },
         next: "startNewGame",
         turn: {

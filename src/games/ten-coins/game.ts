@@ -3,9 +3,6 @@ import { GameType, PlayerIDType } from '../../common/types';
 
 export interface MyGameState {
   coins: Array<number>;
-  milisecondsRemaining: number;
-  start: string;
-  end: string;
 }
 const lengthOfCompetition = 30*60; // seconds
 
@@ -65,12 +62,6 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<
       }
       events.endTurn();
     },
-    getTime({ G, ctx, playerID, events }){
-      if (playerID !== "0") {
-        return INVALID_MOVE;
-      }
-      G.milisecondsRemaining = new Date(G.end).getTime() - new Date().getTime();
-    }
   },
 
   possibleMoves: (G, ctx, playerID) => {

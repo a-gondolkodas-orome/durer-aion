@@ -1,5 +1,5 @@
-import { INVALID_MOVE } from "boardgame.io/core";
-import { currentPlayer, GameType } from "../../common/types";
+import { INVALID_MOVE } from 'boardgame.io/core';
+import { currentPlayer, GameType } from '../../common/types';
 
 export type Position = [number, number];
 
