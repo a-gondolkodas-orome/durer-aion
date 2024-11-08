@@ -1,8 +1,8 @@
 import { Ctx, MoveMap, TurnConfig } from "boardgame.io";
 
 export enum PlayerIDType {
-  GUESSER_PLAYER = '0',
-  JUDGE_PLAYER = '1',
+  guesserPlayer = '0',
+  judgePlayer = '1',
 };
 
 export interface GameStateMixin {
@@ -13,6 +13,7 @@ export interface GameStateMixin {
   numberOfLoss: number;
   winningStreak: number;
   points: number;
+  gameStateLoadedFromStorage: boolean;
 }
 
 export type SetupFunction<G> = () => G;

@@ -1268,12 +1268,12 @@ export function strategy(
 ): [string | undefined, string] {
   if(state.G.difficulty === "live"){
     let rEddigiek:string[] = [];
-    if(state.G.firstPlayer === PlayerIDType.GUESSER_PLAYER){
+    if(state.G.firstPlayer === PlayerIDType.guesserPlayer){
       rEddigiek = state.G.playerLetters.flatMap(
         (element, index) => [element, state.G.enemyLetters[index]]
       );
     }
-    else if (state.G.firstPlayer === PlayerIDType.JUDGE_PLAYER){
+    else if (state.G.firstPlayer === PlayerIDType.judgePlayer){
       rEddigiek = state.G.enemyLetters.flatMap(
         (element, index) => [element, state.G.playerLetters[index]]
       );

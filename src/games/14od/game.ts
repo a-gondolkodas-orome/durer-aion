@@ -93,7 +93,7 @@ function getWinner(
   firstPlayer: number | null
 ): string {
   if(remaining.length === 0){
-    if(firstPlayer === PlayerIDType.GUESSER_PLAYER){
+    if(firstPlayer === PlayerIDType.guesserPlayer){
       return "1";
     } // Enemy wins
     return "0"; //Player wins

@@ -5,9 +5,6 @@ import { StrategyEndTable } from "../client/components/StrategyEndTable";
 import { useRefreshTeamState, useToHome } from "../client/hooks/user-hooks";
 import { isOfflineMode } from "../client/utils/appMode";
 
-const GUESSER_PLAYER = '0';
-const JUDGE_PLAYER = '1';
-
 export function boardWrapper(board: any, description: any) { //<please> TODO: solve types with BoardProps<MyGameState>
   return ({ G, ctx, moves, log }: any) => {
     const [msRemaining, setMsRemaining] = useState(G.milisecondsRemaining as number); // asked from the server

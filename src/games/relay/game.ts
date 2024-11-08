@@ -1,9 +1,9 @@
-import { Game } from "boardgame.io";
+import { Game, TurnConfig } from "boardgame.io";
 import { INVALID_MOVE, TurnOrder } from "boardgame.io/core";
 import { sendDataRelayEnd } from "../../common/sendData";
 import { PlayerIDType } from "../../common/types";
 
-const { GUESSER_PLAYER, JUDGE_PLAYER } = PlayerIDType;
+const { guesserPlayer, judgePlayer } = PlayerIDType;
 
 type Answer = {
   answer: number;
@@ -73,17 +73,19 @@ export const GameRelay: Game<MyGameState> = {
             events.endTurn();
             return;
           }
+
+          let state;
           try { // if the json is bad, continue as if we didnt even have it
-            let state = parseGameState(gameStateJSON);
-            console.log(state);
-            events.setPhase(phase);
-            console.log("startGame CP: ", ctx.currentPlayer);
-            state.milisecondsRemaining = Date.parse(state.end) - Date.now();
-            return state;
+            state = parseGameState(gameStateJSON);
           } catch {
             events.endTurn();
             console.error("could not load game phase from json, invalid json");
+            return;
           }
+
+          events.setPhase(phase);
+          state.milisecondsRemaining = Date.parse(state.end) - Date.now();
+          return state;
         },
         firstProblem({ G, ctx, playerID, events }, problemText: string, nextProblemMaxPoints: number, url: string) {
           if (playerID !== judgePlayer) {
@@ -112,6 +114,41 @@ export const GameRelay: Game<MyGameState> = {
       next: "play",
     },
     play: {
+      turn: {
+        order: {
+          first: () => {
+            return 0;
+          },
+          next: ({ctx}) => {
+            return ctx.currentPlayer === guesserPlayer ? 1 : 0;
+          }
+        },
+        onMove: ({G, ctx, playerID, events }) => {
+          if(playerID === guesserPlayer) {
+            let currentTime = new Date();
+            if(currentTime.getTime() - new Date(G.end).getTime() > 1000*10){
+              // Do not accept any answer if the time is over since more than 10 seconds
+              events.endGame();
+            }
+          }
+        },
+        onEnd: ({G, ctx, playerID, events}) => {
+          if (ctx.currentPlayer === judgePlayer && process.env.REACT_APP_WHICH_VERSION === "b") {
+            const stateJSON = JSON.stringify(G);
+            console.log("G ", G);
+            localStorage.setItem("RelayGamePhase", ctx.phase);
+            localStorage.setItem("RelayGameState", stateJSON);
+          }
+
+          if (ctx.currentPlayer.toString() === judgePlayer) {
+            let currentTime = new Date();
+            if (currentTime.getTime() - new Date(G.end).getTime() >= 0) {
+              // Do not accept any answer if the time is over
+              events.endGame();
+            }
+          }
+        }
+      },
       moves: {
         newProblem({ G, ctx, playerID, events }, problemText: string, nextProblemMaxPoints: number, correctnessPreviousAnswer: boolean, url: string) {
           if (playerID !== judgePlayer || G.answer === null) {
@@ -181,32 +218,6 @@ export const GameRelay: Game<MyGameState> = {
           G.milisecondsRemaining = new Date(G.end).getTime() - new Date().getTime();
         }
       },
-    },
-  },
-  turn: {
-    onMove: ({G, ctx, playerID, events }) => {
-      if(playerID === guesserPlayer) {
-        let currentTime = new Date();
-        if(currentTime.getTime() - new Date(G.end).getTime() > 1000*10){
-          // Do not accept any answer if the time is over since more than 10 seconds
-          events.endGame();
-        }
-      }
-    },
-    onEnd: ({ G, ctx, events }) => {
-      // playerID is not available here
-      if (ctx.currentPlayer.toString() === guesserPlayer && process.env.REACT_APP_WHICH_VERSION === "b") {
-        const stateJSON = JSON.stringify(G);
-        localStorage.setItem("RelayGamePhase", ctx.phase);
-        localStorage.setItem("RelayGameState", stateJSON);
-      }
-      if (ctx.currentPlayer.toString() === judgePlayer) {
-        let currentTime = new Date();
-        if (currentTime.getTime() - new Date(G.end).getTime() >= 0) {
-          // Do not accept any answer if the time is over
-          events.endGame();
-        }
-      }
     },
   },
 
