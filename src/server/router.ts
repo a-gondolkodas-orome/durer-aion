@@ -93,7 +93,10 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
 
     //Update team
     //TODO: review super duper forced update alternatives
-    if (team.strategyMatch.state == "IN PROGRESS")
+    if (team.strategyMatch.state == "IN PROGRESS") {
+      if (team.strategyMatch.matchID != matchID) {
+        ctx.throw(501, 'Match found, and team found, but incorrect MatchId. We don\'t support MatchID deduction. (Probabaly using old one.)');
+      }
       await team.update({
         strategyMatch: {
           state: 'IN PROGRESS',
@@ -102,7 +105,11 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
           endAt: upDate,
         }
       })
-    else if (team.relayMatch.state == "IN PROGRESS")
+    }
+    else if (team.relayMatch.state == "IN PROGRESS") {
+      if (team.relayMatch.matchID != matchID) {
+        ctx.throw(501, 'Match found, and team found, but incorrect MatchId. We don\'t support MatchID deduction. (Probabaly using old one.)');
+      }
       await team.update({
         relayMatch: {
           state: 'IN PROGRESS',
