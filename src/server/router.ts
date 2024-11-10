@@ -3,7 +3,8 @@ import * as Router from '@koa/router';
 import type { Game, LobbyAPI, Server, StorageAPI } from 'boardgame.io';
 import { TeamsRepository } from './db';
 import { InProgressMatchStatus, TeamModel } from './entities/model';
-import { BOT_ID } from '../socketio_botmoves';
+import { BOT_ID, TransportAPI } from '../socketio_botmoves';
+import { getFilterPlayerView } from "boardgame.io/internal";
 import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus, createGame, injectBot, injectPlayer } from './team_manage';
 
 
@@ -87,6 +88,7 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
     state.G.milisecondsRemaining = upDate.getTime() - new Date().getTime();
     //manually increment stateID
     //really hope this doesn't breaky anything
+    /// TODO: let state = {...state, _stateID : state._stateID+ 1}; eg modify immutabely
     state._stateID += 1
 
     //Update team
@@ -109,11 +111,34 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
           endAt: upDate,
         }
       })
+    }
     else
       ctx.throw(501, 'Restarting an already finished match is not supported right now.');
 
-
     await ctx.db.setState(matchID, state);
+
+    //Reconstruct game name from metadata
+    let game = games.find(g => g.name === metadata.gameName);
+    if (!game) {
+      ctx.throw(404, `Match found, but game ${metadata.gameName} was not found.`);
+      return
+    }
+
+    // Hijacking the internal transport API used ot send backend updates to the frontend to send an update to the frontend
+    // This is a bit hacky, but it mainly simulates a similar effect as what would happen if a different user changes teh gamestate irl
+    // This is generally equal to what would happen if multiple players play the game, and one does some actions.
+    // The other players would see the updated gamestate, and the frontend would update accordingly.
+    // The normal way to use this, is to create a Master authorative object, which handels validations, and other logics.
+    // Here we already handeled the validation, and uploded it to the database, so we can just send the updated gamestate to the frontend.
+    // This is possible, because the publish functionality of the PubSub implementation,if we use a SendAll function, can be reconstructed easily from the transport layer we defined from the botmoves already.
+    const my_transportAPI = TransportAPI(matchID, null /* we are only using sendAll */, getFilterPlayerView(game), ctx.durer_transport.pubSub)
+
+    my_transportAPI.sendAll(
+      {
+        type: 'update',
+        args: [matchID, state]
+      }
+    )
 
     team.other += ` te[${matchID}]:${minutes}`
     team.save()
