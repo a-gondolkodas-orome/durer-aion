@@ -82,7 +82,7 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
     const new_state = {
       ...state,
       //manually increment stateID
-      _stateID: state._stateID += 1
+      _stateID: state._stateID + 1
     }
 
     //Update  new_state
