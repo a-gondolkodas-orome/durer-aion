@@ -79,17 +79,18 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
       return
     }
 
+    const new_state = {
+      ...state,
+      //manually increment stateID
+      _stateID: state._stateID += 1
+    }
+
+    //Update  new_state
     const upDate = new Date(state.G.end)
     upDate.setMinutes(upDate.getMinutes() + minutes)
-
-    //Update state
-    state.G.end = upDate.toISOString();
+    new_state.G.end = upDate.toISOString();
     const upd = state.G.end;
-    state.G.milisecondsRemaining = upDate.getTime() - new Date().getTime();
-    //manually increment stateID
-    //really hope this doesn't breaky anything
-    /// TODO: let state = {...state, _stateID : state._stateID+ 1}; eg modify immutabely
-    state._stateID += 1
+    new_state.G.milisecondsRemaining = upDate.getTime() - new Date().getTime();
 
     //Update team
     //TODO: review super duper forced update alternatives
@@ -101,7 +102,7 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
         strategyMatch: {
           state: 'IN PROGRESS',
           matchID: matchID,
-          startAt: new Date(state.G.start),
+          startAt: new Date(new_state.G.start),
           endAt: upDate,
         }
       })
@@ -114,7 +115,7 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
         relayMatch: {
           state: 'IN PROGRESS',
           matchID: matchID,
-          startAt: new Date(state.G.start),
+          startAt: new Date(new_state.G.start),
           endAt: upDate,
         }
       })
@@ -123,7 +124,7 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
       ctx.throw(501, 'Restarting an already finished match is not supported right now.');
     }
 
-    await ctx.db.setState(matchID, state);
+    await ctx.db.setState(matchID, new_state);
 
     //Reconstruct game name from metadata
     let game = games.find(g => g.name === metadata.gameName);
@@ -144,7 +145,7 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
     my_transportAPI.sendAll(
       {
         type: 'update',
-        args: [matchID, state]
+        args: [matchID, new_state]
       }
     )
 
