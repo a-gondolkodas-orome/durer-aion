@@ -93,8 +93,8 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
 
     //Update team
     //TODO: review super duper forced update alternatives
-    if (team.strategyMatch.state == "IN PROGRESS") {
-      if (team.strategyMatch.matchID != matchID) {
+    if (team.strategyMatch.state === "IN PROGRESS") {
+      if (team.strategyMatch.matchID !== matchID) {
         ctx.throw(501, 'Match found, and team found, but incorrect MatchId. We don\'t support MatchID deduction. (Probabaly using old one.)');
       }
       await team.update({
@@ -106,8 +106,8 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
         }
       })
     }
-    else if (team.relayMatch.state == "IN PROGRESS") {
-      if (team.relayMatch.matchID != matchID) {
+    else if (team.relayMatch.state === "IN PROGRESS") {
+      if (team.relayMatch.matchID !== matchID) {
         ctx.throw(501, 'Match found, and team found, but incorrect MatchId. We don\'t support MatchID deduction. (Probabaly using old one.)');
       }
       await team.update({
@@ -119,8 +119,9 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
         }
       })
     }
-    else
+    else {
       ctx.throw(501, 'Restarting an already finished match is not supported right now.');
+    }
 
     await ctx.db.setState(matchID, state);
 
@@ -186,11 +187,11 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
       return
     }
     // reset the strategy game while playing
-    if (team.pageState == 'STRATEGY')
+    if (team.pageState === 'STRATEGY')
       team.pageState = 'HOME'
 
     //log earlier matchid
-    if (team.strategyMatch.state != 'NOT STARTED')
+    if (team.strategyMatch.state !== 'NOT STARTED')
       team.other += ` prevstratid:${team.strategyMatch.matchID}`
     team.strategyMatch = { state: 'NOT STARTED' }
     team.save();
@@ -212,11 +213,11 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
       return
     }
     // reset the strategy game while playing
-    if (team.pageState == 'RELAY')
+    if (team.pageState === 'RELAY')
       team.pageState = 'HOME'
 
     //log earlier matchid
-    if (team.relayMatch.state != 'NOT STARTED')
+    if (team.relayMatch.state !== 'NOT STARTED')
       team.other += ` prevrelayid:${team.relayMatch.matchID}`
     team.relayMatch = { state: 'NOT STARTED' }
     team.save();
@@ -264,7 +265,7 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
     const connect_token: string = ctx.params.token ?? 'no-token';
     const team = await teams.getTeam({ joinCode: connect_token });
     ctx.body = team?.teamId;
-    if (team == null)
+    if (team === null)
       ctx.throw(404, "Team not found!")
   })
 
@@ -353,7 +354,7 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
     //check if in progress, it is not allowed to play
     //check if it can be started, throw error if not
     const team: TeamModel = await teams.getTeam({ teamId: GUID }) ?? ctx.throw(404, `Team with {id:${GUID}} not found.`)
-    if (team.relayMatch.state == 'IN PROGRESS' || team.strategyMatch.state == 'IN PROGRESS')
+    if (team.relayMatch.state === 'IN PROGRESS' || team.strategyMatch.state === 'IN PROGRESS')
       ctx.throw(403, "Not allowed, match in progress.")
 
     //update team state to go home
