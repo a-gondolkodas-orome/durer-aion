@@ -15,11 +15,12 @@ const movePolicemenOptimally = ({ board, moves }) => {
   //policeman0 Step
   let index0 = board.policemen[0];
   let canWeCatch0 = false;
+  let nextBoard;
   for (let i = 0; i < 3; i++) {
     if (neighbours[board.policemen[0]][i] === board.thief) {
       index0 = neighbours[board.policemen[0]][i];
 
-      moves.moveFirstPoliceman(index0);
+      nextBoard = moves.moveFirstPoliceman(board, index0).nextBoard;
       canWeCatch0 = true;
     } else {
       for (let j = 0; j < 3; j++) {
@@ -33,7 +34,7 @@ const movePolicemenOptimally = ({ board, moves }) => {
     index0 = neighbours[board.policemen[0]][random(0, 2)];
   }
   if (!canWeCatch0) {
-    moves.moveFirstPoliceman(index0);
+    nextBoard = moves.moveFirstPoliceman(board, index0).nextBoard;
   }
 
   // timeout so that AI bot seems to be thinking between moves as well
@@ -47,7 +48,7 @@ const movePolicemenOptimally = ({ board, moves }) => {
         index0 !== neighbours[board.policemen[1]][i]
       ) {
         index1 = neighbours[board.policemen[1]][i];
-        moves.moveSecondPoliceman(index1);
+        moves.moveSecondPoliceman(nextBoard, index1);
         canWeCatch1 = true;
       } else {
         for (let j = 0; j < 3; j++) {
@@ -66,7 +67,7 @@ const movePolicemenOptimally = ({ board, moves }) => {
       }
     }
     if (!canWeCatch1) {
-      moves.moveSecondPoliceman(index1);
+      moves.moveSecondPoliceman(nextBoard, index1);
     }
   }, 750);
 
@@ -90,5 +91,5 @@ const moveThiefOptimally = ({ board, moves }) => {
   if (index === board.thief) {
     index = neighbours[board.thief][random(0, 2)];
   }
-  moves.moveThief(index);
+  moves.moveThief(board, index);
 };

@@ -7,13 +7,12 @@ The deployed version is here: https://a-gondolkodas-orome.github.io/durer-jateko
 # Development
 
 Feel free to commit directly to the default (master) branch. If in doubt, send a pull request instead.
-Goal: only commit to the master branch if existing games keep working :)
 
-When you push to the default (master) branch, the tests are run, and if they are successful, the project is deployed to the live website.
+When you push to the default (master) branch, the tests are run, and if they are successful, the project is deployed to the live website within a few minutes.
 
 ## Adding a new game
 
-To keep track of who works on which game, use [this table](https://docs.google.com/spreadsheets/d/1-6u9PCtvf_gDHrs65x36pmDzFt4nZZx_IUuXrgS2aZk/edit#gid=0) to track it.
+To keep track of who works on which game, use [this table](https://docs.google.com/spreadsheets/d/1-6u9PCtvf_gDHrs65x36pmDzFt4nZZx_IUuXrgS2aZk/edit#gid=0).
 
 TL;DR;
 
@@ -25,12 +24,8 @@ TL;DR;
 
 ## Project setup
 
-- install Node.js on your computer globally
-- in the project directory terminal run
-
-```bash
-npm ci
-```
+- install Node.js on your computer globally (or use nvm)
+- in the project directory terminal run `npm ci`
 
 ## Useful npm commands
 
@@ -90,13 +85,17 @@ If you need a new, common parameter, you can create it and pass it down from `st
 
 BoardClient: a React component with `board`, `ctx` `events` and `moves` props which calls `events.endTurn`,
 typically following a click from the user. Typically the user clicks, new state is calculated within
-the BoardClient component and then as a final step `events.endTurn` is called possibly followed by `events.endGame()`
+the BoardClient component and then as a final step `events.endTurn` is called possibly followed by `events.endGame()`, wrapped in an appropriate move function.
 
 Concept: `board` holds the state necessary to know the game state, specific to each game, that the next player
-needs to know. Common state, managed by the framework is stored in ctx such as playerIdx. Additional state variables may be created within the `BoardClient` component
+needs to know. Common state, managed by the framework is stored in `ctx` such as `chosenRoleIndex`. Additional state variables may be created within the `BoardClient` component
 that is relevant only during a turn, not between turns, such as reacting to hover events.
 
-You should use `moves.setBoard` if you need to change the board before ending player turn.
+A `move` is a unit that captures a change in the board initiated by a player. Moves help
+ensure that the game is played according to rules by all players.
+
+Each move must return an object with nextBoard, the framework will call setBoard(nextBoard).
+In the Ai strategy due to the possible case of multiple moves one must provide board param to moves yourself.
 
 ```js
 // `ctx` is an object and will contain the following (extendable):
@@ -111,10 +110,10 @@ You should use `moves.setBoard` if you need to change the board before ending pl
 const BoardClient = ({ board, ctx, events, moves }) => {
   const click = () => {
     // const nextBoard = ...
-    moves.setBoard(nextBoard);
     events.endTurn();
     // optionally
     // events.endGame();
+    return { nextBoard };
   }
   return (
     <section className="p-2 shrink-0 grow basis-2/3">   
@@ -140,7 +139,7 @@ export const HunyadiAndTheJanissaries = strategyGameFactory({
   generateStartBoard,
   // TODO: deprecated, a function with `{ board, ctx, events, moves }` parameter returning `{ nextBoard, isGameEnd, winnerIndex }`
   getGameStateAfterAiTurn,
-  // TODO: and object with functions. TBD
+  // TODO: an object with functions. TBD
   moves,
   // TODO: TBD, new alternative of getGameStateAfterAiTurn
   aiBotStrategy

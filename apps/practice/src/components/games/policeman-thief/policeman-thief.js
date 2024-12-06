@@ -1,5 +1,5 @@
 import React, { Fragment } from "react";
-import { range, random, sample, difference } from "lodash";
+import { range, random, sample, difference, cloneDeep } from "lodash";
 import { strategyGameFactory } from "../strategy-game";
 import { neighbours } from "./helpers";
 import { aiBotStrategy } from "./bot-strategy";
@@ -135,29 +135,29 @@ const generateStartBoard = () => {
 };
 
 const moves = {
-  moveThief: ({ board, setBoard, events }, vertex) => {
-    const nextBoard = { ...board, thief: vertex, turnCount: board.turnCount + 1 };
-    setBoard(nextBoard);
+  moveThief: (board, { events }, vertex) => {
+    const nextBoard = { ...cloneDeep(board), thief: vertex, turnCount: board.turnCount + 1 };
     events.endTurn();
     if (isGameEnd(nextBoard)) {
       events.endGame({ winnerIndex: hasFirstPlayerWon(nextBoard) ? 0 : 1 });
     }
+    return { nextBoard };
   },
-  moveFirstPoliceman: ({ board, setBoard, events }, vertex) => {
-    const nextBoard = { ...board };
+  moveFirstPoliceman: (board, { events }, vertex) => {
+    const nextBoard = cloneDeep(board);
     nextBoard.policemen[0] = vertex;
     events.setTurnStage("secondMove");
-    setBoard(nextBoard);
+    return { nextBoard };
   },
-  moveSecondPoliceman: ({ board, setBoard, events }, vertex) => {
-    const nextBoard = { ...board };
+  moveSecondPoliceman: (board, { events }, vertex) => {
+    const nextBoard = cloneDeep(board);
     nextBoard.policemen[1] = vertex;
     events.setTurnStage(null);
-    setBoard(nextBoard);
     events.endTurn();
     if (isGameEnd(nextBoard)) {
       events.endGame({ winnerIndex: hasFirstPlayerWon(nextBoard) ? 0 : 1 });
     }
+    return { nextBoard };
   }
 };
 

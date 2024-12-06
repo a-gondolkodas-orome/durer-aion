@@ -47,15 +47,15 @@ const isIncreaseValid = ({ board, number }) => {
 }
 
 const moves = {
-  increaseTo: ({ board, setBoard, ctx, events }, number) => {
+  increaseTo: (board, { ctx, events }, number) => {
     if (!isIncreaseValid({ board, number })) {
       console.error('invalid_move');
     }
-    setBoard(number);
     events.endTurn();
     if (number > target) {
       events.endGame({ winnerIndex: 1 - ctx.currentPlayer })
     }
+    return { nextBoard: number }
   }
 };
 
@@ -63,7 +63,7 @@ const aiBotStrategy = ({ board, moves }) => {
   const nextBoard = board % (1 + maxStep) !== 0
     ? board + (1 + maxStep) - board % (1 + maxStep)
     : board + random(1, maxStep);
-  moves.increaseTo(nextBoard);
+  moves.increaseTo(board, nextBoard);
 };
 
 const rule = <>
