@@ -2,19 +2,18 @@ import React from 'react';
 import { range, cloneDeep } from 'lodash';
 import { strategyGameFactory } from '../../strategy-game';
 import { generateEmptyTicTacToeBoard } from '../helpers';
-import { inPlacingPhase, pColor, aiColor, isGameEnd, getGameStateAfterAiTurn } from './strategy/strategy';
+import { aiBotStrategy } from './bot-strategy';
+import { inPlacingPhase, aiColor, isGameEnd } from './helpers';
 
-const BoardClient = ({ board, ctx, events, moves }) => {
+const BoardClient = ({ board, ctx, moves }) => {
   const gameIsInPlacingPhase = inPlacingPhase(board);
   const clickField = (id) => {
     if (!isMoveAllowed(id)) return;
 
-    const nextBoard = cloneDeep(board);
-    nextBoard[id] = gameIsInPlacingPhase ? pColor : 'white';
-    moves.setBoard(nextBoard);
-    events.endTurn();
-    if (isGameEnd(nextBoard)) {
-      events.endGame();
+    if (gameIsInPlacingPhase) {
+      moves.placePiece(id);
+    } else {
+      moves.whitenPiece(id);
     }
   };
   const isMoveAllowed = (id) => {
@@ -62,6 +61,27 @@ const BoardClient = ({ board, ctx, events, moves }) => {
   );
 };
 
+const moves = {
+  placePiece: (board, { ctx, events }, id) => {
+    const nextBoard = cloneDeep(board);
+    nextBoard[id] = ctx.currentPlayer === ctx.chosenRoleIndex ? 'blue' : 'red';
+    events.endTurn();
+    if (isGameEnd(nextBoard)) {
+      events.endGame();
+    }
+    return { nextBoard };
+  },
+  whitenPiece: (board, { events }, id) => {
+    const nextBoard = cloneDeep(board);
+    nextBoard[id] = 'white';
+    events.endTurn();
+    if (isGameEnd(nextBoard)) {
+      events.endGame();
+    }
+    return { nextBoard };
+  }
+}
+
 const getPlayerStepDescription = ({ board }) => {
   return inPlacingPhase(board)
     ? 'Helyezz le egy korongot egy üres mezőre kattintással.'
@@ -83,5 +103,6 @@ export const TicTacToe = strategyGameFactory({
   BoardClient,
   getPlayerStepDescription,
   generateStartBoard: generateEmptyTicTacToeBoard,
-  getGameStateAfterAiTurn
+  moves,
+  aiBotStrategy
 });

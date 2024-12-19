@@ -1,10 +1,11 @@
 import React from 'react';
 import { range, cloneDeep } from 'lodash';
 import { strategyGameFactory } from '../../strategy-game';
-import { getGameStateAfterMove, getGameStateAfterAiTurn, playerColor } from './strategy/strategy';
 import { generateEmptyTicTacToeBoard } from '../helpers';
+import { isGameEnd, hasFirstPlayerWon } from './helpers';
+import { aiBotStrategy } from './bot-strategy';
 
-const BoardClient = ({ board, ctx, events, moves }) => {
+const BoardClient = ({ board, ctx, moves }) => {
   const isMoveAllowed = (id) => {
     if (!ctx.shouldRoleSelectorMoveNext) return false;
     return board[id] === null;
@@ -12,14 +13,7 @@ const BoardClient = ({ board, ctx, events, moves }) => {
   const clickField = (id) => {
     if (!isMoveAllowed(id)) return;
 
-    const nextBoard = cloneDeep(board);
-    nextBoard[id] = playerColor(ctx.chosenRoleIndex);
-    moves.setBoard(nextBoard);
-    const { isGameEnd, winnerIndex } = getGameStateAfterMove(nextBoard);
-    events.endTurn();
-    if (isGameEnd) {
-      events.endGame({ winnerIndex });
-    }
+    moves.placePiece(id);
   };
   const pieceColor = (id) => {
     const colorCode = board[id];
@@ -49,6 +43,18 @@ const BoardClient = ({ board, ctx, events, moves }) => {
   );
 };
 
+const moves = {
+  placePiece: (board, { ctx, events }, id) => {
+    const nextBoard = cloneDeep(board);
+    nextBoard[id] = ctx.currentPlayer === 0 ? 'red' : 'blue';
+    events.endTurn();
+    if (isGameEnd(nextBoard)) {
+      events.endGame({ winnerIndex: hasFirstPlayerWon(nextBoard) ? 0 : 1 });
+    }
+    return { nextBoard };
+  }
+}
+
 const rule = <>
   A 3×3-as antiamőba játékban a kezdő piros, a második kék korongokat rak le. Felváltva
   lépnek, és az veszít, akinek először lesz a saját színéből három korongja egy sorban, oszlopban vagy
@@ -61,5 +67,6 @@ export const AntiTicTacToe = strategyGameFactory({
   BoardClient,
   getPlayerStepDescription: () => 'Helyezz le egy korongot egy üres mezőre kattintással.',
   generateStartBoard: generateEmptyTicTacToeBoard,
-  getGameStateAfterAiTurn
+  moves,
+  aiBotStrategy
 });

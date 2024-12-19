@@ -1,36 +1,12 @@
 'use strict';
 
-import { isNull, some, range, groupBy, sample, cloneDeep } from 'lodash';
-import { hasWinningSubset } from '../../helpers';
+import { isNull, range, sample, cloneDeep } from 'lodash';
+import { hasWinningSubset } from '../helpers';
+import { roleColors, botColor, hasFirstPlayerWon, isGameEnd } from './helpers';
 
-const roleColors = ['red', 'blue'];
-
-export const playerColor = chosenRoleIndex => chosenRoleIndex === 0 ? roleColors[0] : roleColors[1];
-const aiColor = chosenRoleIndex => chosenRoleIndex === 0 ? roleColors[1] : roleColors[0];
-
-export const getGameStateAfterAiTurn = ({ board, ctx }) => {
-  const nextBoard = cloneDeep(board);
-  nextBoard[getOptimalAiPlacingPosition(board, ctx.chosenRoleIndex)] = aiColor(ctx.chosenRoleIndex);
-  return getGameStateAfterMove(nextBoard);
-};
-
-export const getGameStateAfterMove = (nextBoard) => {
-  return { nextBoard, isGameEnd: isGameEnd(nextBoard), winnerIndex: hasFirstPlayerWon(nextBoard) ? 0 : 1 };
-};
-
-const isGameEnd = (board) => {
-  if (board.filter(c => c).length === 9) return true;
-  const occupiedPlaces = range(0, 9).filter((i) => board[i]);
-  const boardIndicesByPieceColor = groupBy(occupiedPlaces, (i) => board[i]);
-  return some(boardIndicesByPieceColor, hasWinningSubset);
-};
-
-const hasFirstPlayerWon = (board) => {
-  if (!isGameEnd(board)) return undefined;
-  if (board.filter(c => c).length === 9) {
-    return !hasWinningSubset(range(0, 9).filter(i => board[i] === roleColors[0]));
-  }
-  return board.filter(c => c).length % 2 === 0;
+export const aiBotStrategy = ({ board, ctx, moves }) => {
+  const id = getOptimalAiPlacingPosition(board, ctx.chosenRoleIndex);
+  moves.placePiece(board, id);
 };
 
 const getOptimalAiPlacingPosition = (board, chosenRoleIndex) => {
@@ -54,14 +30,14 @@ const getOptimalAiPlacingPosition = (board, chosenRoleIndex) => {
   // as a second player still try to win if first player may not play optimally
   const optimalPlaces = allowedPlaces.filter(i => {
     const boardCopy = cloneDeep(board);
-    boardCopy[i] = aiColor(chosenRoleIndex);
+    boardCopy[i] = botColor(chosenRoleIndex);
     return isWinningState(boardCopy, chosenRoleIndex === 1);
   });
 
   if (optimalPlaces.length > 0) return sample(optimalPlaces);
 
   // even if we are gonna lose, try to prolong it
-  const aiPieces = range(0, 9).filter(i => board[i] === aiColor(chosenRoleIndex));
+  const aiPieces = range(0, 9).filter(i => board[i] === botColor(chosenRoleIndex));
   const notInstantLosingPlaces = allowedPlaces.filter(i => !hasWinningSubset([...aiPieces, i]));
   if (notInstantLosingPlaces.length > 0) return sample(notInstantLosingPlaces);
 
