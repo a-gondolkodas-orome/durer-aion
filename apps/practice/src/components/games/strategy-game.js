@@ -126,7 +126,7 @@ export const strategyGameFactory = ({
     };
 
     const clientSideMoves = {
-      ...mapValues(moves, f => wrap(partial(f, board, { ctx, events }), moveWrapper)),
+      ...mapValues(moves, f => wrap(partial(f, _, { ctx, events }), moveWrapper)),
       // FIXME: general move, should not be needed if specialized functions
       // are provided for each move
       setBoard

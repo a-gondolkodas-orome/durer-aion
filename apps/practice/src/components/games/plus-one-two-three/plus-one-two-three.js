@@ -14,7 +14,7 @@ const BoardClient = ({ board, ctx, moves }) => {
 
   const clickNumber = (number) => {
     if (!isMoveAllowed(number)) return;
-    moves.increaseTo(number);
+    moves.increaseTo(board, number);
   };
 
   return(

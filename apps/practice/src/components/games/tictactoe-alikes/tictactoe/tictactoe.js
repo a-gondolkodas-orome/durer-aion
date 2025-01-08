@@ -11,9 +11,9 @@ const BoardClient = ({ board, ctx, moves }) => {
     if (!isMoveAllowed(id)) return;
 
     if (gameIsInPlacingPhase) {
-      moves.placePiece(id);
+      moves.placePiece(board, id);
     } else {
-      moves.whitenPiece(id);
+      moves.whitenPiece(board, id);
     }
   };
   const isMoveAllowed = (id) => {

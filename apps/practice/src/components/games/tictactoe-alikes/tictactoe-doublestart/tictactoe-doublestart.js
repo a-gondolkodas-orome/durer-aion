@@ -12,7 +12,7 @@ const BoardClient = ({ board, ctx, moves }) => {
   };
   const clickField = (id) => {
     if (!isMoveAllowed(id)) return;
-    moves.placePiece(id);
+    moves.placePiece(board, id);
   };
   const pieceColor = (id) => {
     const colorCode = board[id];

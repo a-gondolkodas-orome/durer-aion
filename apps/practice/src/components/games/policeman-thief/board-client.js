@@ -17,14 +17,14 @@ export const BoardClient = ({ board, ctx, moves }) => {
   const handleCircleClick = (vertex) => {
     if (!isClickable(vertex)) return;
     if (ctx.chosenRoleIndex === 1) {
-      moves.moveThief(vertex);
+      moves.moveThief(board, vertex);
       return;
     }
     if (ctx.turnStage === "secondMove") {
-      moves.moveSecondPoliceman(vertex);
+      moves.moveSecondPoliceman(board, vertex);
       return;
     }
-    moves.moveFirstPoliceman(vertex);
+    moves.moveFirstPoliceman(board, vertex);
   };
 
   const isClickable = (vertex) => {

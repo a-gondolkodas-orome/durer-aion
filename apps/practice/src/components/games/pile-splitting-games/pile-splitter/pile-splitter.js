@@ -1,18 +1,9 @@
 import React, { useState } from 'react';
-import { range, isEqual, random } from 'lodash';
+import { range, isEqual, random, _, cloneDeep } from 'lodash';
 import { strategyGameFactory } from '../../strategy-game';
-import { getBoardAfterAiTurn } from './strategy';
+import { aiBotStrategy } from './bot-strategy';
 
-const generateStartBoard = () => ([random(3, 10), random(3, 10)]);
-
-const isGameEnd = (board) => isEqual(board, [1, 1]);
-
-const getGameStateAfterAiTurn = ({ board }) => {
-  const { intermediateBoard, nextBoard } = getBoardAfterAiTurn(board);
-  return { intermediateBoard, nextBoard, isGameEnd: isGameEnd(nextBoard), winnerIndex: null };
-};
-
-const BoardClient = ({ board, ctx, events, moves }) => {
+const BoardClient = ({ board, ctx, moves }) => {
   const [hoveredPiece, setHoveredPiece] = useState(null);
 
   const isDisabled = ({ pileId, pieceId }) => {
@@ -23,16 +14,10 @@ const BoardClient = ({ board, ctx, events, moves }) => {
   const clickPiece = ({ pileId, pieceId }) => {
     if (isDisabled({ pileId, pieceId })) return;
 
-    moves.setBoard(pileId === 0 ? [board[0], 0] : [0, board[1]]);
+    const { nextBoard } = moves.removePile(board, 1 - pileId);
 
     setTimeout(() => {
-      const nextBoard = [pieceId + 1, board[pileId] - pieceId - 1];
-      moves.setBoard(nextBoard);
-      events.endTurn();
-      if (isGameEnd(nextBoard)) {
-        events.endGame();
-      }
-
+      moves.splitPile(nextBoard, { pileId, pieceId });
       setHoveredPiece(null);
     }, 750);
   };
@@ -102,6 +87,22 @@ const BoardClient = ({ board, ctx, events, moves }) => {
 const getPlayerStepDescription = () =>
   'Kattints a korongra, ahol ketté akarod vágni a kupacot.';
 
+const moves = {
+  removePile: (board, _, pileId) => {
+    const nextBoard = cloneDeep(board);
+    nextBoard[pileId] = 0;
+    return { nextBoard };
+  },
+  splitPile: (board, { events }, { pileId, pieceId }) => {
+    const nextBoard = [pieceId + 1, board[pileId] - pieceId - 1];
+    events.endTurn();
+    if (isEqual(nextBoard, [1, 1])) {
+      events.endGame();
+    }
+    return { nextBoard };
+  }
+}
+
 const rule = <>
   A pályán mindig két kupac korong található.
   A soron következő játékos választ egy kupacot, és azt szétosztja két kisebb kupacra (mindkettőbe
@@ -114,6 +115,7 @@ export const PileSplitter = strategyGameFactory({
   title: 'Kupac kettéosztó',
   BoardClient,
   getPlayerStepDescription,
-  generateStartBoard,
-  getGameStateAfterAiTurn
+  generateStartBoard: () => ([random(3, 10), random(3, 10)]),
+  moves,
+  aiBotStrategy
 });
