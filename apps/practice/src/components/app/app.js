@@ -10,7 +10,7 @@ import { Coin123 } from '../games/coin-3-piles/coin123';
 import { Coin357 } from '../games/coin-3-piles/coin357';
 import { CubeColoring } from '../games/cube-coloring/cube-coloring';
 import { FiveSquares } from '../games/five-squares/five-squares';
-import { FourPilesSpreadAhead } from '../games/four-piles-spread-ahead/four-piles-spread-ahead';
+import { FourPilesSpreadAhead } from '../games/pile-splitting-games/four-piles-spread-ahead/four-piles-spread-ahead';
 import { HunyadiAndTheJanissaries } from '../games/hunyadi-and-the-janissaries/hunyadi-and-the-janissaries';
 import { PileSplitter } from '../games/pile-splitting-games/pile-splitter/pile-splitter';
 import { PileSplitter3 } from '../games/pile-splitting-games/pile-splitter-3/pile-splitter-3';

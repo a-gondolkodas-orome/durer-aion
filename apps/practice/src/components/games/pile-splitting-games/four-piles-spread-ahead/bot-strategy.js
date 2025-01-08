@@ -2,7 +2,7 @@
 
 import { random } from 'lodash';
 
-export const getOptimalAiMove = (board) => {
+export const aiBotStrategy = ({ board, moves }) => {
   let pileId, pieceId;
     if((board[1] % 2 === 0) && (board[3] % 5 === 3)){
       pileId=3;
@@ -87,5 +87,5 @@ export const getOptimalAiMove = (board) => {
       }
   }
 
-  return { pileId, pieceId };
+  return moves.spreadPieces(board, { pileId, pieceCount: pieceId + 1 });
 };

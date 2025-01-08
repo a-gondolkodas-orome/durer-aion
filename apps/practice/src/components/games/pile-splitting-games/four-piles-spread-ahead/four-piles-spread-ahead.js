@@ -1,25 +1,11 @@
 import React, { useState } from 'react';
-import { range, random } from 'lodash';
-import { strategyGameFactory } from '../strategy-game';
-import { getOptimalAiMove } from './strategy';
+import { range, random, cloneDeep } from 'lodash';
+import { strategyGameFactory } from '../../strategy-game';
+import { aiBotStrategy } from './bot-strategy';
 
 const generateStartBoard = () => ([random(0, 9), random(0, 9), random(0, 9), random(4, 9)]);
 
-const getGameStateAfterMove = (board, { pileId, pieceId }) => {
-  const intermediateBoard = [...board];
-  intermediateBoard[pileId]=board[pileId]-pieceId-1;
-
-  const nextBoard = [...board];
-  nextBoard[pileId]=board[pileId]-pieceId-1;
-  for (let i=pileId-pieceId-1; i<pileId; i++){
-    nextBoard[i]=board[i]+1;
-  }
-  const isGameEnd = nextBoard[1]===0 && nextBoard[2]===0 && nextBoard[3]===0;
-
-  return { nextBoard, intermediateBoard, isGameEnd, winnerIndex: null };
-};
-
-const BoardClient = ({ board, ctx, events, moves }) => {
+const BoardClient = ({ board, ctx, moves }) => {
   const [hoveredPiece, setHoveredPiece] = useState(null);
 
   const nonExistent = ({ pileId, pieceId }) => {
@@ -43,19 +29,8 @@ const BoardClient = ({ board, ctx, events, moves }) => {
   const clickPiece = ({ pileId, pieceId }) => {
     if (isDisabled({ pileId, pieceId })) return;
 
-    const { intermediateBoard, nextBoard, isGameEnd } = getGameStateAfterMove(board, { pileId, pieceId });
-
-    moves.setBoard(intermediateBoard);
-
-    setTimeout(() => {
-      moves.setBoard(nextBoard);
-      events.endTurn();
-      if (isGameEnd) {
-        events.endGame();
-      }
-
-      setHoveredPiece(null);
-    }, 750);
+    moves.spreadPieces(board, { pileId, pieceCount: pieceId + 1 });
+    setHoveredPiece(null);
   };
 
   const toBeRemoved = ({ pileId, pieceId }) => {
@@ -126,6 +101,23 @@ const BoardClient = ({ board, ctx, events, moves }) => {
   );
 };
 
+const moves = {
+  spreadPieces: (board, { events }, { pileId, pieceCount }) => {
+    if (pieceCount > pileId) console.error('invalid_move');
+    const nextBoard = cloneDeep(board);
+    nextBoard[pileId] = board[pileId] - pieceCount;
+    for (let i = pileId - pieceCount; i < pileId; i++) {
+      nextBoard[i] = board[i] + 1;
+    }
+    const isGameEnd = nextBoard[1]===0 && nextBoard[2]===0 && nextBoard[3]===0;
+    events.endTurn();
+    if (isGameEnd) {
+      events.endGame();
+    }
+    return { nextBoard };
+  }
+}
+
 const rule = <>
   Adott négy, korongokból álló kupac, melyek 1-től 4-ig vannak számozva. Egy lépésben a
   soron következő játékos választ m és n egész számokat, melyekre 1 ≤ m &lt; n ≤ 4, majd az n sorszámú
@@ -139,5 +131,6 @@ export const FourPilesSpreadAhead = strategyGameFactory({
   BoardClient,
   getPlayerStepDescription: () => 'Kattints egy korongra, hogy jelezd, hány korongot szeretnél elvenni a kupacból.',
   generateStartBoard,
-  getGameStateAfterAiTurn: ({ board }) => getGameStateAfterMove(board, getOptimalAiMove(board))
+  moves,
+  aiBotStrategy
 });
