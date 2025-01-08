@@ -3,11 +3,11 @@
 import { random } from 'lodash';
 
 export const aiBotStrategy = ({ board, moves }) => {
-  const { pileId, pieceId } = getAiStep(board);
+  const { pileId, pieceCount } = getAiStep(board);
   // 1 - pileId is the other pile. we split one and remove the other pile
   const { nextBoard } = moves.removePile(board, 1 - pileId);
   setTimeout(() => {
-    moves.splitPile(nextBoard, { pileId, pieceId });
+    moves.splitPile(nextBoard, { pileId, pieceCount });
   }, 750)
 };
 
@@ -18,16 +18,16 @@ const getAiStep = (board) => {
     ? randomPileIndex
     : 1 - randomPileIndex;
 
-  const pieceId = getOptimalDivision(board[pileIndexToSplit]);
-  return { pileId: pileIndexToSplit, pieceId };
+  const pieceCount = getOptimalDivision(board[pileIndexToSplit]);
+  return { pileId: pileIndexToSplit, pieceCount };
 };
 
 const getOptimalDivision = (pieceCountInPile) => {
-  if (pieceCountInPile === 2) return 0;
+  if (pieceCountInPile === 2) return 1;
 
-  return generateRandomEvenBetween(0, pieceCountInPile - 2);
+  return generateRandomOddBetween(1, pieceCountInPile - 1);
 };
 
-const generateRandomEvenBetween = (low, high) => {
-  return 2 * random(Math.ceil(low / 2), Math.floor(high / 2));
+const generateRandomOddBetween = (low, high) => {
+  return 1 + 2 * random(Math.ceil((low - 1) / 2), Math.floor((high - 1) / 2));
 };

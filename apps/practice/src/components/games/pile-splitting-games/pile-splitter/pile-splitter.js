@@ -17,7 +17,7 @@ const BoardClient = ({ board, ctx, moves }) => {
     const { nextBoard } = moves.removePile(board, 1 - pileId);
 
     setTimeout(() => {
-      moves.splitPile(nextBoard, { pileId, pieceId });
+      moves.splitPile(nextBoard, { pileId, pieceCount: pieceId + 1 });
       setHoveredPiece(null);
     }, 750);
   };
@@ -93,8 +93,8 @@ const moves = {
     nextBoard[pileId] = 0;
     return { nextBoard };
   },
-  splitPile: (board, { events }, { pileId, pieceId }) => {
-    const nextBoard = [pieceId + 1, board[pileId] - pieceId - 1];
+  splitPile: (board, { events }, { pileId, pieceCount }) => {
+    const nextBoard = [pieceCount, board[pileId] - pieceCount];
     events.endTurn();
     if (isEqual(nextBoard, [1, 1])) {
       events.endGame();

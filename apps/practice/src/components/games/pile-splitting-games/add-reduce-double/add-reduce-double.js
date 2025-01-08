@@ -1,23 +1,9 @@
 import React, { useState } from 'react';
-import { range, isEqual, random } from 'lodash';
+import { range, isEqual, random, cloneDeep } from 'lodash';
 import { strategyGameFactory } from '../../strategy-game';
-import { getOptimalAiMove } from './strategy';
+import { aiBotStrategy } from './bot-strategy';
 
-const generateStartBoard = () => ([random(3, 10), random(3, 10)]);
-
-const getGameStateAfterMove = (board, { pileId, pieceId }) => {
-  const intermediateBoard = pileId === 0
-    ? [board[0] - pieceId - 1, board[1]]
-    : [board[0], board[1]-pieceId-1];
-  const nextBoard = pileId === 0
-    ? [board[0] - pieceId - 1, board[1]+(pieceId+1)/2]
-    : [board[0] +(pieceId+1)/2, board[1]-pieceId-1];
-  const isGameEnd = isEqual(nextBoard, [1, 1]) || isEqual(nextBoard, [0, 1]) || isEqual(nextBoard, [1, 0]);
-
-  return { nextBoard, intermediateBoard, isGameEnd, winnerIndex: null };
-};
-
-const BoardClient = ({ board, ctx, events, moves }) => {
+const BoardClient = ({ board, ctx, moves }) => {
   const [hoveredPiece, setHoveredPiece] = useState(null);
 
   const nonExistent = ({ pileId, pieceId }) => {
@@ -41,19 +27,8 @@ const BoardClient = ({ board, ctx, events, moves }) => {
   const clickPiece = ({ pileId, pieceId }) => {
     if (isDisabled({ pileId, pieceId })) return;
 
-    const { intermediateBoard, nextBoard, isGameEnd } = getGameStateAfterMove(board, { pileId, pieceId });
-
-    moves.setBoard(intermediateBoard);
-
-    setTimeout(() => {
-      moves.setBoard(nextBoard);
-      events.endTurn();
-      if (isGameEnd) {
-        events.endGame();
-      }
-
-      setHoveredPiece(null);
-    }, 750);
+    moves.moveHalvedPieces(board, { pileId, pieceCount: pieceId + 1 });
+    setHoveredPiece(null);
   };
 
   const toBeRemoved = ({ pileId, pieceId }) => {
@@ -121,6 +96,21 @@ const BoardClient = ({ board, ctx, events, moves }) => {
   );
 };
 
+const moves = {
+  moveHalvedPieces: (board, { events }, { pileId, pieceCount }) => {
+    if (pieceCount % 2 !== 0) console.error('invalid_move');
+    const nextBoard = cloneDeep(board);
+    nextBoard[pileId] -= pieceCount;
+    nextBoard[1 - pileId] += pieceCount / 2;
+    events.endTurn();
+    const isGameEnd = isEqual(nextBoard, [1, 1]) || isEqual(nextBoard, [0, 1]) || isEqual(nextBoard, [1, 0]);
+    if (isGameEnd) {
+      events.endGame();
+    }
+    return { nextBoard };
+  }
+}
+
 const rule = <>
   A pályán mindig két kupac korong található. Egy lépésben az éppen soron következő játékos az egyik
   kupacból elvesz páros sok korongot (legalább kettőt), és a másik kupachoz hozzáad feleannyit.
@@ -132,6 +122,7 @@ export const AddReduceDouble = strategyGameFactory({
   title: 'Kettőt vesz, egyet kap',
   BoardClient,
   getPlayerStepDescription: () => 'Kattints egy korongra, hogy jelezd, hány korongot szeretnél elvenni a kupacból.',
-  generateStartBoard,
-  getGameStateAfterAiTurn: ({ board }) => getGameStateAfterMove(board, getOptimalAiMove(board))
+  generateStartBoard: () => ([random(3, 10), random(3, 10)]),
+  moves,
+  aiBotStrategy
 });
