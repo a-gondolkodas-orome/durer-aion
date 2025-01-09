@@ -20,7 +20,7 @@ import { TicTacToe } from '../games/tictactoe-alikes/tictactoe/tictactoe';
 import { TicTacToeDoubleStart } from '../games/tictactoe-alikes/tictactoe-doublestart/tictactoe-doublestart';
 import { TriangularGridRopes } from '../games/triangular-grid-ropes/triangular-grid-ropes';
 import { TwoTimesTwo } from '../games/two-times-two/two-times-two';
-import { RockPaperScissor } from '../games/rockPaperScissor/rockPaperScissor';
+import { RockPaperScissor } from '../games/rock-paper-scissor/rock-paper-scissor';
 import { FiveFiveCard } from '../games/five-five card/FiveFiveCard';
 import { NumberCovering8, NumberCovering10 } from '../games/number-covering/number-covering';
 import { TwelveSquares } from '../games/twelve-squares/twelve-squares';
