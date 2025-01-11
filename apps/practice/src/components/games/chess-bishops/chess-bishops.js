@@ -1,23 +1,16 @@
 import React, { useState } from 'react';
-import { range, isEqual, some } from 'lodash';
+import { range, isEqual, some, cloneDeep } from 'lodash';
 import { strategyGameFactory } from '../strategy-game';
 import { ChessBishopSvg } from './chess-bishop-svg';
-import {
-  getGameStateAfterAiTurn, getGameStateAfterMove, getAllowedMoves, generateStartBoard,
-  BISHOP, FORBIDDEN
-} from './strategy/strategy';
+import { aiBotStrategy } from './bot-strategy';
+import { generateStartBoard, getAllowedMoves, BISHOP, FORBIDDEN, markForbiddenFields } from './helpers';
 
-const BoardClient = ({ board, ctx, events, moves }) => {
+const BoardClient = ({ board, ctx, moves }) => {
   const [hoveredField, setHoveredField] = useState(null);
   const clickField = (field) => {
     if (!isMoveAllowed(field)) return;
 
-    const { nextBoard, isGameEnd } = getGameStateAfterMove(board, field);
-    moves.setBoard(nextBoard);
-    events.endTurn();
-    if (isGameEnd) {
-      events.endGame();
-    }
+    moves.placeBishop(board, field);
   };
 
   const isPotentialNextStep = (field) => {
@@ -93,6 +86,19 @@ const BoardClient = ({ board, ctx, events, moves }) => {
   );
 };
 
+const moves = {
+  placeBishop: (board, { events }, { row, col }) => {
+    const nextBoard = cloneDeep(board);
+    markForbiddenFields(nextBoard, { row, col });
+    nextBoard[row][col] = BISHOP;
+    events.endTurn();
+    if (getAllowedMoves(nextBoard).length === 0) {
+      events.endGame();
+    }
+    return { nextBoard };
+  }
+}
+
 const rule = <>
   Két játékos felváltva tesz le a sakktáblára futókat. Egy új futót mindig
   csak olyan mezőre tehetünk, amin még nem áll futó, és azt a mezőt nem is támadja futó. Az
@@ -105,5 +111,6 @@ export const ChessBishops = strategyGameFactory({
   BoardClient,
   getPlayerStepDescription: () => 'Kattints egy mezőre, amit nem üt egyik futó sem.',
   generateStartBoard,
-  getGameStateAfterAiTurn
+  moves,
+  aiBotStrategy
 });

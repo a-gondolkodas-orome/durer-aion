@@ -1,21 +1,15 @@
-import React, { useState } from 'react';
-import { range, some, isEqual } from 'lodash';
+import React from 'react';
+import { range, some, isEqual, cloneDeep } from 'lodash';
 import { strategyGameFactory } from '../strategy-game';
-import {
-  getAllowedMoves, getGameStateAfterAiTurn, getGameStateAfterMove, generateStartBoard
-} from './strategy/strategy';
+import { aiBotStrategy } from './bot-strategy';
+import { getAllowedMoves, generateStartBoard, markVisitedFields } from './helpers';
 import { ChessRookSvg } from './chess-rook-svg';
 
-const BoardClient = ({ board, ctx, events, moves }) => {
+const BoardClient = ({ board, ctx, moves }) => {
   const clickField = (field) => {
     if (!isMoveAllowed(field)) return;
 
-    const { nextBoard, isGameEnd } = getGameStateAfterMove(board, field);
-    moves.setBoard(nextBoard);
-    events.endTurn();
-    if (isGameEnd) {
-      events.endGame();
-    }
+    moves.moveRook(board, field);
   };
   const isMoveAllowed = (targetField) => {
     if (!ctx.shouldRoleSelectorMoveNext) return false;
@@ -63,6 +57,22 @@ const BoardClient = ({ board, ctx, events, moves }) => {
   );
 };
 
+const moves = {
+  moveRook: (board, { events }, { row, col }) => {
+    const nextBoard = cloneDeep(board);
+    markVisitedFields(nextBoard, nextBoard.rookPosition, { row, col });
+
+    nextBoard.chessBoard[row][col] = 'rook';
+    nextBoard.rookPosition = { row, col };
+
+    events.endTurn();
+    if (getAllowedMoves(nextBoard).length === 0) {
+      events.endGame();
+    }
+    return { nextBoard };
+  }
+}
+
 const rule = <>
   A játékosok felváltva lépnek egy bástyával, amely a sakktábla bal felső sarkából indul. A
   bástya vízszintesen vagy függőlegesen bármennyit (legalább egyet) léphet, de egyszerre csak az
@@ -77,5 +87,6 @@ export const ChessRook = strategyGameFactory({
   BoardClient,
   getPlayerStepDescription: () => 'Kattints egy szabad mezőre a bástyával egy sorban vagy oszlopban.',
   generateStartBoard,
-  getGameStateAfterAiTurn
+  moves,
+  aiBotStrategy
 });
