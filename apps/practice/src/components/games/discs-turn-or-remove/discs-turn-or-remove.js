@@ -31,23 +31,18 @@ const DisabledDisc = ({ bgColor }) => {
   );
 };
 
-
 const gameBoardFactory = (maxDiscs) => {
-  return ({ board, ctx, events, moves }) => {
+  return ({ board, ctx, moves }) => {
     const [hovered, setHovered] = useState(null);
 
     const select = (pile, i) => {
       if (!ctx.shouldRoleSelectorMoveNext) return;
-      const nextBoard = cloneDeep(board);
-      const d = nextBoard[pile] - i;
-      nextBoard[pile] = i;
-      if (pile === 1) nextBoard[0] += d;
-      setHovered(null);
-      moves.setBoard(nextBoard);
-      events.endTurn();
-      if (isEqual(nextBoard, [0, 0])) {
-        events.endGame();
+      if (pile === 0) {
+        moves.removeDiscs(board, board[0] - i);
+      } else {
+        moves.turnDiscs(board, board[1] - i);
       }
+      setHovered(null);
     };
 
     const isSelected = (pile, i) => isEqual(hovered, [pile, i]) || isEqual(hovered, [pile, i - 1]);
@@ -142,32 +137,46 @@ const gameBoardFactory = (maxDiscs) => {
   };
 };
 
-const getGameStateAfterAiTurn = ({ board }) => {
-  const nextBoard = cloneDeep(board);
-  const rem = nextBoard[0] % 3;
+const moves = {
+  removeDiscs: (board, { events }, count) => {
+    const nextBoard = cloneDeep(board);
+    nextBoard[0] -= count;
+    events.endTurn();
+    if (isEqual(nextBoard, [0, 0])) {
+      events.endGame();
+    }
+    return { nextBoard };
+  },
+  turnDiscs: (board, { events }, count) => {
+    const nextBoard = cloneDeep(board);
+    nextBoard[1] -= count;
+    nextBoard[0] += count;
+    events.endTurn();
+    if (isEqual(nextBoard, [0, 0])) {
+      events.endGame();
+    }
+    return { nextBoard };
+  }
+};
+
+const aiBotStrategy = ({ board, moves }) => {
+  const rem = board[0] % 3;
   if (rem === 0) {
-    const randomNonEmptyPile = sample(filter([0, 1], (i) => nextBoard[i] > 0));
-    const amount = nextBoard[randomNonEmptyPile] > 1 ? sample([1, 2]) : 1;
+    const randomNonEmptyPile = sample(filter([0, 1], (i) => board[i] > 0));
+    const amount = board[randomNonEmptyPile] > 1 ? sample([1, 2]) : 1;
     if (randomNonEmptyPile === 0) {
-      nextBoard[0] -= amount;
+      moves.removeDiscs(board, amount);
     } else {
-      nextBoard[0] += amount;
-      nextBoard[1] -= amount;
+      moves.turnDiscs(board, amount);
     }
   } else {
     const amount = 3 - rem;
-    if (nextBoard[1] >= amount && random(0, 1) === 1) {
-      nextBoard[0] += amount;
-      nextBoard[1] -= amount;
+    if (board[1] >= amount && random(0, 1) === 1) {
+      moves.turnDiscs(board, amount);
     } else {
-      nextBoard[0] -= rem;
+      moves.removeDiscs(board, rem);
     }
   }
-  return {
-    nextBoard: nextBoard,
-    isGameEnd: isEqual(nextBoard, [0, 0]),
-    winnerIndex: null
-  };
 };
 
 const getPlayerStepDescription = () => {
@@ -193,7 +202,8 @@ export const SixDiscs = strategyGameFactory({
   BoardClient: gameBoardFactory(6),
   getPlayerStepDescription,
   generateStartBoard: generateStartBoard(6),
-  getGameStateAfterAiTurn
+  aiBotStrategy,
+  moves
 });
 
 export const TenDiscs = strategyGameFactory({
@@ -202,5 +212,6 @@ export const TenDiscs = strategyGameFactory({
   BoardClient: gameBoardFactory(10),
   getPlayerStepDescription,
   generateStartBoard: generateStartBoard(10),
-  getGameStateAfterAiTurn
+  aiBotStrategy,
+  moves
 });

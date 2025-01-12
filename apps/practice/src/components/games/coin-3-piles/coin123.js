@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { random, sum } from 'lodash';
 import { strategyGameFactory } from '../strategy-game';
-import { getGameStateAfterAiTurn, isWinningState  } from './strategy/strategy';
+import { getGameStateAfterAiTurn, isWinningState  } from './strategy';
 import { BoardClient, getPlayerStepDescription } from './coin-3-piles';
 
 const generateStartBoard = () => {

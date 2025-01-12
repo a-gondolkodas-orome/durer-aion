@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { strategyGameFactory } from '../strategy-game';
-import { getGameStateAfterAiTurn  } from './strategy/strategy';
+import { getGameStateAfterAiTurn  } from './strategy';
 import { BoardClient, getPlayerStepDescription } from './coin-3-piles';
 
 const rule = <>

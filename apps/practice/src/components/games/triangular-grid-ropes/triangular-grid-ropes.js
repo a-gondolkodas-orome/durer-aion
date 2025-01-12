@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { strategyGameFactory } from '../strategy-game';
-import { getGameStateAfterAiTurn, isAllowed, getAllowedSuperset, isGameEnd, vertices } from './strategy';
+import { aiBotStrategy } from './bot-strategy';
+import { isAllowed, getAllowedSuperset, isGameEnd, vertices } from './helpers';
+import { cloneDeep } from 'lodash';
 
-const BoardClient = ({ board, ctx, events, moves }) => {
+const BoardClient = ({ board, ctx, moves }) => {
   const [firstNode, setFirstNode] = useState(null);
   const [hoveredNode, setHoveredNode] = useState(null);
 
@@ -14,13 +16,7 @@ const BoardClient = ({ board, ctx, events, moves }) => {
       setFirstNode(null);
     } else {
       if (!isAllowed(board, { from: firstNode, to: node })) return;
-      const nextBoard = [...board];
-      nextBoard.push(getAllowedSuperset(board, { from: firstNode, to: node }));
-      moves.setBoard(nextBoard);
-      events.endTurn();
-      if (isGameEnd(nextBoard)) {
-        events.endGame();
-      }
+      moves.stretchRope(board, { from: firstNode, to: node });
       setFirstNode(null);
     }
   };
@@ -84,6 +80,18 @@ const BoardClient = ({ board, ctx, events, moves }) => {
   );
 };
 
+const moves = {
+  stretchRope: (board, { events }, { from, to }) => {
+    const nextBoard = cloneDeep(board);
+    nextBoard.push(getAllowedSuperset(board, { from, to }));
+    events.endTurn();
+    if (isGameEnd(nextBoard)) {
+      events.endGame();
+    }
+    return { nextBoard };
+  }
+}
+
 const rule = <>
   Egy indiánrezervátumban 10 totemoszlopot állítottak fel az ábrán látható háromszögrács szerint.
   Csendes Patak és Vörös Tűz a következő játékot szokták itt játszani: felváltva feszítenek ki köteleket két-két oszlop
@@ -100,5 +108,6 @@ export const TriangularGridRopes = strategyGameFactory({
   BoardClient,
   getPlayerStepDescription: () => 'Kattints két oszlopra, amik között kötelet szeretnél kifeszíteni.',
   generateStartBoard: () => [],
-  getGameStateAfterAiTurn
+  moves,
+  aiBotStrategy
 });

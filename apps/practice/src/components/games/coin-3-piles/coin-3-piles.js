@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { range } from 'lodash';
-import { isGameEnd  } from './strategy/strategy';
+import { isGameEnd  } from './strategy';
 
 export const BoardClient = ({ board, ctx, events, moves }) => {
   const [valueOfRemovedCoin, setValueOfRemovedCoin] = useState(null);
