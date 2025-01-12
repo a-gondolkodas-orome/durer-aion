@@ -3,27 +3,7 @@ import { strategyGameFactory } from '../strategy-game';
 import { range, random } from 'lodash';
 import { ChessBishopSvg } from '../chess-bishops/chess-bishop-svg';
 
-const generateStartBoard = () => {
-  return { left: 1, right: 12 };
-};
-
-const getGameStateAfterAiTurn = ({ board, ctx }) => {
-  const step = getOptimalAiStep(board);
-  const nextBoard = ctx.chosenRoleIndex === 0
-    ? { left: board.left, right: board.right - step }
-    : { left: board.left + step, right: board.right };
-  return { nextBoard, isGameEnd: nextBoard.right < nextBoard.left, winnerIndex: null };
-};
-
-const getOptimalAiStep = ({ left, right }) => {
-  let dst = right-left;
-  if(dst === 1) return 2;
-  if(dst === 2) return 1;
-  if(dst % 3 === 2) return random(1,2);
-  return (dst+1) % 3;
-};
-
-const BoardClient = ({ board, ctx, events, moves }) => {
+const BoardClient = ({ board, ctx, moves }) => {
   const isMoveAllowed = (step) => {
 	  if(!ctx.shouldRoleSelectorMoveNext) return false;
     if (step === board.right - board.left) return false;
@@ -32,14 +12,7 @@ const BoardClient = ({ board, ctx, events, moves }) => {
 
   const makeStep = (step) => {
     if (!isMoveAllowed(step)) return;
-    const nextBoard = ctx.chosenRoleIndex === 0
-      ? { left: board.left + step, right: board.right }
-      : { left: board.left, right: board.right - step };
-    moves.setBoard(nextBoard);
-    events.endTurn();
-    if (nextBoard.right < nextBoard.left) {
-      events.endGame();
-    }
+    moves.step(board, step);
   };
 
   const potentialStep = i => {
@@ -93,6 +66,32 @@ const BoardClient = ({ board, ctx, events, moves }) => {
   );
 };
 
+const aiBotStrategy = ({ board, moves }) => {
+  const step = getOptimalAiStep(board);
+  moves.step(board, step);
+};
+
+const getOptimalAiStep = ({ left, right }) => {
+  let dst = right-left;
+  if(dst === 1) return 2;
+  if(dst === 2) return 1;
+  if(dst % 3 === 2) return random(1,2);
+  return (dst+1) % 3;
+};
+
+const moves = {
+  step: (board, { ctx, events }, step) => {
+    const nextBoard = ctx.currentPlayer === 0
+      ? { left: board.left + step, right: board.right }
+      : { left: board.left, right: board.right - step };
+    events.endTurn();
+    if (nextBoard.right < nextBoard.left) {
+      events.endGame();
+    }
+    return { nextBoard };
+  }
+};
+
 const rule = <>
 	Van 12 mező egymás mellett. A két szélsőbe lerakunk egy-egy bábut. Ezután a játékosok
 	felváltva lépnek egyet vagy kettőt a saját bábujukkal a másik irányába. A másik bábujára rálépni nem
@@ -106,6 +105,7 @@ export const TwelveSquares = strategyGameFactory({
   getPlayerStepDescription: ({ ctx: { chosenRoleIndex } }) => chosenRoleIndex === 0
     ? 'Kattints a mezőre ahova lépni szeretnél a bal oldali bábuval.'
     : 'Kattints a mezőre ahova lépni szeretnél a jobb oldali bábuval.',
-  generateStartBoard,
-  getGameStateAfterAiTurn
+  generateStartBoard: () => ({ left: 1, right: 12 }),
+  aiBotStrategy,
+  moves
 });

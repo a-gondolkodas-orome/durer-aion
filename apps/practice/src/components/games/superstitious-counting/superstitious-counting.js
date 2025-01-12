@@ -1,7 +1,7 @@
 import React from 'react';
 import { range, sample, difference } from 'lodash';
 import { strategyGameFactory } from '../strategy-game';
-import { getOptimalAiStep } from './strategy';
+import { aiBotStrategy } from './bot-strategy';
 
 const generateStartBoard = () => {
   const losingPositions = range(29, 127, 14);
@@ -10,22 +10,7 @@ const generateStartBoard = () => {
   return { current: 0, target, restricted: null };
 };
 
-const getGameStateAfterMove = (board, step, moverIndex) => {
-  const numberAfterStep = board.current + step;
-  const isGameEnd = numberAfterStep >= board.target;
-  return {
-    nextBoard: { current: numberAfterStep, target: board.target, restricted: 13 - step },
-    isGameEnd,
-    winnerIndex: isGameEnd ? (1 - moverIndex) : null
-  };
-};
-
-const getGameStateAfterAiTurn = ({ board, ctx }) => {
-  const step = getOptimalAiStep(board);
-  return getGameStateAfterMove(board, step, 1 - ctx.chosenRoleIndex);
-};
-
-const BoardClient = ({ board, ctx, events, moves }) => {
+const BoardClient = ({ board, ctx, moves }) => {
   const fields = range(board.target + 14);
 
   const isMoveAllowed = (step) => {
@@ -38,12 +23,7 @@ const BoardClient = ({ board, ctx, events, moves }) => {
 
   const makeStep = (step) => {
     if (!isMoveAllowed(step)) return;
-    const { nextBoard, isGameEnd, winnerIndex } = getGameStateAfterMove(board, step, ctx.chosenRoleIndex);
-    moves.setBoard(nextBoard);
-    events.endTurn();
-    if (isGameEnd) {
-      events.endGame({ winnerIndex });
-    }
+    moves.step(board, step);
   };
 
   return (
@@ -77,6 +57,18 @@ const BoardClient = ({ board, ctx, events, moves }) => {
   );
 };
 
+const moves = {
+  step: (board, { ctx, events }, step) => {
+    const numberAfterStep = board.current + step;
+    const nextBoard = { current: numberAfterStep, target: board.target, restricted: 13 - step };
+    events.endTurn();
+    if (numberAfterStep >= board.target) {
+      events.endGame({ winnerIndex: 1 - ctx.currentPlayer })
+    }
+    return { nextBoard };
+  }
+};
+
 const rule = <>
   Károly és Dezső <code>m</code>-ig szeretnének elszámolni, és közben a következő játékot játsszák:
   0-ról kezdenek, a két játékos felváltva adhat hozzá egy 13-nál kisebb pozitív egészet a korábbi
@@ -90,5 +82,6 @@ export const SuperstitiousCounting = strategyGameFactory({
   BoardClient,
   getPlayerStepDescription: () => 'Kattints a számra ahova lépni szeretnél.',
   generateStartBoard,
-  getGameStateAfterAiTurn
+  moves,
+  aiBotStrategy
 });

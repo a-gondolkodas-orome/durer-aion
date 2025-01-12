@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { strategyGameFactory } from "../strategy-game";
-import { range, isEqual, random, sample, difference, filter } from "lodash";
+import { range, isEqual, random, sample, difference, filter, cloneDeep } from "lodash";
 
 const generateStartBoard = (maxDiscs) => () => {
   const discCount = random(Math.floor(maxDiscs/2), maxDiscs);
@@ -37,17 +37,16 @@ const gameBoardFactory = (maxDiscs) => {
     const [hovered, setHovered] = useState(null);
 
     const select = (pile, i) => {
-      if (ctx.shouldRoleSelectorMoveNext) {
-        const nextBoard = [...board];
-        const d = nextBoard[pile] - i;
-        nextBoard[pile] = i;
-        if (pile === 1) nextBoard[0] += d;
-        setHovered(null);
-        moves.setBoard(nextBoard);
-        events.endTurn();
-        if (isEqual(nextBoard, [0, 0])) {
-          events.endGame();
-        }
+      if (!ctx.shouldRoleSelectorMoveNext) return;
+      const nextBoard = cloneDeep(board);
+      const d = nextBoard[pile] - i;
+      nextBoard[pile] = i;
+      if (pile === 1) nextBoard[0] += d;
+      setHovered(null);
+      moves.setBoard(nextBoard);
+      events.endTurn();
+      if (isEqual(nextBoard, [0, 0])) {
+        events.endGame();
       }
     };
 
@@ -144,7 +143,7 @@ const gameBoardFactory = (maxDiscs) => {
 };
 
 const getGameStateAfterAiTurn = ({ board }) => {
-  const nextBoard = [...board];
+  const nextBoard = cloneDeep(board);
   const rem = nextBoard[0] % 3;
   if (rem === 0) {
     const randomNonEmptyPile = sample(filter([0, 1], (i) => nextBoard[i] > 0));

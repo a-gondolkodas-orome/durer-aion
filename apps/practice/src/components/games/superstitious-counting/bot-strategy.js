@@ -2,7 +2,12 @@
 
 import { random } from 'lodash';
 
-export const getOptimalAiStep = ({ current, target, restricted }) => {
+export const aiBotStrategy = ({ board, moves }) => {
+  const step = getOptimalAiStep(board);
+  moves.step(board, step);
+};
+
+const getOptimalAiStep = ({ current, target, restricted }) => {
   if ((target - current) % 14 === 0) { //any step wins
     return randomStep(restricted);
   }

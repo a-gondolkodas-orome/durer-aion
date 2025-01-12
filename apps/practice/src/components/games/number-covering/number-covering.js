@@ -1,22 +1,13 @@
 import React from 'react';
 import { strategyGameFactory } from '../strategy-game';
-import { range, sum, sample } from 'lodash';
+import { range, sum, sample, cloneDeep } from 'lodash';
 
-const BoardClient = ({ board, ctx, events, moves }) => {
+const BoardClient = ({ board, ctx, moves }) => {
 
   const clickNumber = (number) => {
-    if (ctx.shouldRoleSelectorMoveNext) {
-      let nextBoard = [...board];
-      nextBoard[number-1] = -1;
-      const { isGameEnd, winnerIndex } = getGameStateAfterMove(nextBoard);
-      moves.setBoard(nextBoard);
-      events.endTurn();
-      if (isGameEnd) {
-        events.endGame({ winnerIndex });
-      }
-    }
+    if (!ctx.shouldRoleSelectorMoveNext) return;
+    moves.coverNumber(board, number);
   };
-
 
   return(
     <section className="p-2 shrink-0 grow basis-2/3">
@@ -50,31 +41,26 @@ const BoardClient = ({ board, ctx, events, moves }) => {
   );
 };
 
-const getGameStateAfterMove = (nextBoard) => {
-  const remaining = nextBoard.filter(i => i>0);
-  const isGameEnd = remaining.length === 2;
-  const winnerIndex = isGameEnd ? sum(remaining) % 2 : null;
-  return { nextBoard, isGameEnd, winnerIndex };
+const aiBotStrategy = ({ board, ctx, moves }) => {
+  const aiMove = getOptimalAiMove(board, ctx.chosenRoleIndex);
+  moves.coverNumber(board, aiMove);
 };
 
-const getGameStateAfterAiTurn = ({ board, ctx }) => {
-  let nextBoard = [...board];
-  const notCovered = nextBoard.filter(i => i !== -1);
+const getOptimalAiMove = (board, chosenRoleIndex) => {
+  const notCovered = board.filter(i => i !== -1);
   const evens = notCovered.filter(i => i%2 === 0);
   const odds = notCovered.filter(i => i%2 === 1);
-  if (evens.length===odds.length || evens.length === 0 || odds.length === 0) {
-    nextBoard[sample(notCovered) - 1] = -1;
+  if (evens.length === odds.length || evens.length === 0 || odds.length === 0) {
+    return sample(notCovered);
   } else {
-    if (ctx.chosenRoleIndex === 0){
+    if (chosenRoleIndex === 0){
       const candidates = evens.length > odds.length ? evens : odds;
-      nextBoard[sample(candidates) - 1] = -1;
+      return sample(candidates);
     } else {
       const candidates = evens.length > odds.length ? odds : evens;
-      nextBoard[sample(candidates) - 1] = -1;
+      return sample(candidates);
     }
   }
-
-  return getGameStateAfterMove(nextBoard);
 };
 
 const rule8 = <>
@@ -89,13 +75,28 @@ számot addig, amíg csak két szám marad. Ha a megmaradt két szám összege p
 nyer, ha pedig páratlan, akkor a második.
 </>;
 
+const moves = {
+  coverNumber: (board, { events }, number) => {
+    const nextBoard = cloneDeep(board);
+    nextBoard[number-1] = -1;
+    events.endTurn();
+
+    const remaining = nextBoard.filter(i => i>0);
+    if (remaining.length === 2) {
+      events.endGame({ winnerIndex: sum(remaining) % 2 });
+    }
+    return { nextBoard };
+  }
+}
+
 export const NumberCovering8 = strategyGameFactory({
   rule: rule8,
   title: 'Számok lefedés 1-től 8-ig',
   BoardClient,
   getPlayerStepDescription: () => 'Kattints egy számra, hogy lefedd.',
   generateStartBoard: () => range(1, 9),
-  getGameStateAfterAiTurn
+  moves,
+  aiBotStrategy
 });
 
 export const NumberCovering10 = strategyGameFactory({
@@ -104,5 +105,6 @@ export const NumberCovering10 = strategyGameFactory({
   BoardClient,
   getPlayerStepDescription: () => 'Kattints egy számra, hogy lefedd.',
   generateStartBoard: () => range(1, 11),
-  getGameStateAfterAiTurn
+  moves,
+  aiBotStrategy
 });
