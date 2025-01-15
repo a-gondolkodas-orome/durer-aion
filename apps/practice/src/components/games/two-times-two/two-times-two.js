@@ -1,44 +1,27 @@
 import React from 'react';
-import { range, sum, isEqual } from 'lodash';
+import { range, sum, isEqual, cloneDeep } from 'lodash';
 import { strategyGameFactory } from '../strategy-game';
-import { getOptimalTileIndex } from './strategy';
+import { aiBotStrategy } from './bot-strategy';
 
 const generateStartBoard = () => [0, 0, 0, 0];
 
-const isGameEnd = board => sum(board) === 6;
-
-const getWinnerIndex = (board) => {
-  if (!isGameEnd(board)) return null;
-  const isAllDifferent = isEqual([...board].sort(), [0, 1, 2, 3]);
-  return isAllDifferent ? 1 : 0;
-};
-
-const addPiece = (board, pileId) => {
-  const nextBoard = [...board];
-  nextBoard[pileId] += 1;
-  return nextBoard;
-};
-
-const getGameState = nextBoard => ({
-  nextBoard,
-  isGameEnd: isGameEnd(nextBoard),
-  winnerIndex: getWinnerIndex(nextBoard)
-});
-
-const getGameStateAfterAiTurn = ({ board }) => {
-  const pileId = getOptimalTileIndex(board);
-  const nextBoard = addPiece(board, pileId);
-  return getGameState(nextBoard);
-};
-
-const BoardClient = ({ board, ctx, events, moves }) => {
-  const placePiece = id => {
-    const nextBoard = addPiece(board, id);
-    moves.setBoard(nextBoard);
+const moves = {
+  addPiece: (board, { events }, pileId) => {
+    const nextBoard = cloneDeep(board);
+    nextBoard[pileId] += 1;
     events.endTurn();
-    if (isGameEnd(nextBoard)) {
-      events.endGame({ winnerIndex: getWinnerIndex(nextBoard) });
+    if (sum(nextBoard) === 6) {
+      const winnerIndex = isEqual(cloneDeep(nextBoard).sort(), [0, 1, 2, 3]) ? 1 : 0;
+      events.endGame({ winnerIndex });
     }
+    return { nextBoard };
+  }
+}
+
+const BoardClient = ({ board, ctx, moves }) => {
+  const placePiece = id => {
+    if (!ctx.shouldRoleSelectorMoveNext) return;
+    moves.addPiece(board, id);
   };
 
   return (
@@ -84,5 +67,6 @@ export const TwoTimesTwo = strategyGameFactory({
   BoardClient,
   getPlayerStepDescription,
   generateStartBoard,
-  getGameStateAfterAiTurn
+  moves,
+  aiBotStrategy
 });

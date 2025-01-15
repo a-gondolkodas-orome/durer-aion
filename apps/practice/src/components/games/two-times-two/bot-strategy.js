@@ -2,7 +2,12 @@
 
 import { sum, random } from 'lodash';
 
-export const getOptimalTileIndex = (board) => {
+export const aiBotStrategy = ({ board, moves }) => {
+  const id = getOptimalTileIndex(board);
+  moves.addPiece(board, id);
+}
+
+const getOptimalTileIndex = (board) => {
   const pieces = sum(board);
 
   if (pieces % 2 === 0) { //following the strategy
