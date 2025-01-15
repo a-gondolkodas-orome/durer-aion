@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { range } from 'lodash';
+import { range, cloneDeep, every, some, isNull } from 'lodash';
 import { strategyGameFactory } from '../strategy-game';
-import { isAllowedStep, getGameStateAfterMove, getGameStateAfterAiTurn } from './strategy';
+import { aiBotStrategy } from './bot-strategy';
+import { isAllowedStep, allColors } from './helpers';
 
 const generateStartBoard = () => Array(8).fill(null);
 
@@ -16,7 +17,7 @@ const cubeCoords = [
   { cx: '25%', cy: '74%' }
 ];
 
-const BoardClient = ({ board, ctx, events, moves }) => {
+const BoardClient = ({ board, ctx, moves }) => {
   const [color, setColor] = useState('');
   const [show, setShow] = useState(false);
   const [x, setX] = useState(0);
@@ -45,15 +46,8 @@ const BoardClient = ({ board, ctx, events, moves }) => {
 
   const setVertexColor = (vertex) => {
     if (!isMoveAllowed(vertex)) return;
-    const nextBoard = [...board];
-    nextBoard[vertex] = color;
-    moves.setBoard(nextBoard);
+    moves.colorVertex(board, { vertex, color });
     setShow(false);
-    const { isGameEnd, winnerIndex } = getGameStateAfterMove(nextBoard);
-    events.endTurn();
-    if (isGameEnd) {
-      events.endGame({ winnerIndex });
-    }
   };
 
   return (
@@ -125,6 +119,24 @@ const BoardClient = ({ board, ctx, events, moves }) => {
   );
 };
 
+const isGameEnd = board => {
+  const canUseColor = color => some(range(0, 8), v => isAllowedStep(board, v, color));
+  return every(allColors, color => !canUseColor(color));
+};
+
+const moves = {
+  colorVertex: (board, { events }, { vertex, color }) => {
+    const nextBoard = cloneDeep(board);
+    nextBoard[vertex] = color;
+    events.endTurn();
+    if (isGameEnd(nextBoard)) {
+      const winnerIndex = every(nextBoard, v => !isNull(v)) ? 0 : 1;
+      events.endGame({ winnerIndex })
+    }
+    return { nextBoard };
+  }
+}
+
 const rule = <>
   Adott egy téglatest rácsa, aminek be van húzva az egyik testátlója.
   Egy lépésben az éppen soron lévő játékos megszínezi valamelyik még színezetlen csúcsot
@@ -141,5 +153,6 @@ export const CubeColoring = strategyGameFactory({
   BoardClient,
   getPlayerStepDescription: () => 'Válassz színt, majd színezz meg egy csúcsot!',
   generateStartBoard,
-  getGameStateAfterAiTurn
+  moves,
+  aiBotStrategy
 });

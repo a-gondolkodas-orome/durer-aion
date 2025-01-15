@@ -1,54 +1,21 @@
 'use strict';
 
-import { isNull, every, some, difference, range, shuffle, sample } from 'lodash';
+import { isNull, difference, range, shuffle, sample } from 'lodash';
+import { allColors, isAllowedStep, neighbours } from './helpers';
 
-const allColors = ['#dc2626', '#eab308', '#2563eb'];
-
-export const getGameStateAfterAiTurn = ({ board, ctx }) => {
-  let nextBoard = [...board];
-  // TODO: instead of using let, make below functions not changing their argument
-  nextBoard = ctx.chosenRoleIndex === 0 ? makeOptimalStepAsSecond(nextBoard) : makeOptimalStepAsFirst(nextBoard);
-  return getGameStateAfterMove(nextBoard);
+export const aiBotStrategy = ({ board, ctx, moves }) => {
+  const { vertex, color } = ctx.chosenRoleIndex === 0
+    ? makeOptimalStepAsSecond(board)
+    : makeOptimalStepAsFirst(board);
+  moves.colorVertex(board, { vertex, color });
 };
-
-export const getGameStateAfterMove = (nextBoard) => {
-  return {
-    nextBoard,
-    isGameEnd: isGameEnd(nextBoard),
-    winnerIndex: hasFirstPlayerWon(nextBoard) ? 0 : 1
-  };
-};
-
-export const isAllowedStep = (board, vertex, color) => {
-  if (!isNull(board[vertex])) return false;
-  return every(neighbours[vertex], i => isNull(board[i]) || board[i] !== color);
-};
-
-const neighbours = {
-  0: [1, 3, 4],
-  1: [0, 2, 5],
-  2: [1, 3, 4, 6],
-  3: [0, 2, 7],
-  4: [0, 2, 5, 7],
-  5: [1, 4, 6],
-  6: [2, 5, 7],
-  7: [3, 4, 6]
-};
-
-const isGameEnd = board => {
-  const canUseColor = color => some(range(0, 8), v => isAllowedStep(board, v, color));
-  return every(allColors, color => !canUseColor(color));
-};
-
-const hasFirstPlayerWon = board => every(board, v => !isNull(v));
 
 const makeOptimalStepAsFirst = (board) => {
   const mainDiagonal = shuffle([2, 4]);
   const otherVertices = shuffle([0, 1, 3, 5, 6, 7]);
   const vertexToColor = [...mainDiagonal, ...otherVertices].find(v => isNull(board[v]));
   const colors = allColors.filter(c => isAllowedStep(board, vertexToColor, c));
-  board[vertexToColor] = sample(colors);
-  return board;
+  return { vertex: vertexToColor, color: sample(colors) };
 };
 
 const makeOptimalStepAsSecond = (board) => {
@@ -61,7 +28,7 @@ const makeOptimalStepAsSecond = (board) => {
       for (const v of getEmptyNeighbours(board, vertex)) {
         if (isAllowedStep(board, v, missingColors[0])) {
           board[v] = missingColors[0];
-          return board;
+          return { vertex: v, color: missingColors[0] };
         }
       }
     }
@@ -72,7 +39,7 @@ const makeOptimalStepAsSecond = (board) => {
   for (const p of pairs) {
     if (!isNull(board[p[0]]) && isAllowedStep(board, p[1], board[p[0]])) {
       board[p[1]] = board[p[0]];
-      return board;
+      return { vertex: p[1], color: board[p[0]] };
     }
   }
 
@@ -83,7 +50,7 @@ const makeOptimalStepAsSecond = (board) => {
       for (const v of getEmptyNeighbours(board, vertex)) {
         if (isAllowedStep(board, v, missingColors[0])) {
           board[v] = missingColors[0];
-          return board;
+          return { vertex: v, color: missingColors[0] };
         }
       }
     }
@@ -93,7 +60,7 @@ const makeOptimalStepAsSecond = (board) => {
     for (const color of shuffle(allColors)) {
       if (isAllowedStep(board, vertex, color)) {
         board[vertex] = color;
-        return board;
+        return { vertex, color };
       }
     }
   }
