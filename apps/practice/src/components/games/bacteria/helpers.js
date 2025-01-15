@@ -2,28 +2,95 @@
 
 import { cloneDeep, last } from "lodash";
 
-export const reachedFieldsWithAttack = (move, { bacteria, attackRow, attackCol }) => {
-  if (move === "shiftRight") return [[attackRow, attackCol + 1]];
-  if (move === "shiftLeft") return [[attackRow, attackCol - 1]];
-  if (move === "jump") return [[attackRow + 2, attackCol]];
-  if (move === "spread") {
-    return [
-      [attackRow + 1, attackCol],
-      [attackRow + 1, attackCol + (-1) ** (1 + attackRow)]
-    ].filter(([row, col]) => bacteria[row][col] !== undefined);
+export const moves = {
+  defend: (board, { events }, { row, col }) => {
+    const nextBoard = cloneDeep(board);
+
+    nextBoard.bacteria[row][col] -= 1;
+    events.endTurn();
+
+    if (areAllBacteriaRemoved(nextBoard.bacteria)) {
+      events.endGame();
+    }
+
+    return { nextBoard };
+  },
+  shiftRight: (board, { events }, { row, col }) => {
+    const nextBoard = cloneDeep(board);
+
+    const reachedFields = [[row, col + 1]];
+    nextBoard.bacteria = makeShiftOrSpread(nextBoard.bacteria, row, col, reachedFields);
+    events.endTurn();
+
+    const goalsReached = reachedFields.filter(([row, col]) => isGoal(board, row, col));
+    if (goalsReached.length >= 1) {
+      events.endGame();
+    }
+
+    return { nextBoard };
+  },
+  shiftLeft: (board, { events }, { row, col }) => {
+    const nextBoard = cloneDeep(board);
+
+    const reachedFields = [[row, col - 1]];
+    nextBoard.bacteria = makeShiftOrSpread(nextBoard.bacteria, row, col, reachedFields);
+    events.endTurn();
+
+    const goalsReached = reachedFields.filter(([row, col]) => isGoal(board, row, col));
+    if (goalsReached.length >= 1) {
+      events.endGame();
+    }
+
+    return { nextBoard };
+  },
+  jump: (board, { events }, { row, col }) => {
+    const nextBoard = cloneDeep(board);
+
+    nextBoard.bacteria = makeJump(nextBoard.bacteria, row, col);
+    events.endTurn();
+
+    const reachedFields = [[row + 2, col]];
+    const goalsReached = reachedFields.filter(([row, col]) => isGoal(board, row, col));
+    if (goalsReached.length >= 1) {
+      events.endGame();
+    }
+
+    return { nextBoard };
+  },
+  spread: (board, { events }, { row, col }) => {
+    const nextBoard = cloneDeep(board);
+
+    const reachedFields = reachedFieldsWithSpread(
+      { bacteria: nextBoard.bacteria, attackRow: row, attackCol: col }
+    );
+    nextBoard.bacteria = makeShiftOrSpread(nextBoard.bacteria, row, col, reachedFields);
+    events.endTurn();
+
+    const goalsReached = reachedFields.filter(([row, col]) => isGoal(board, row, col));
+    if (goalsReached.length >= 1) {
+      events.endGame();
+    }
+
+    return { nextBoard };
   }
-  console.error("move not recognized");
 };
 
-const isShiftRight = ({ attackRow, attackCol, row, col }) => {
+const reachedFieldsWithSpread = ({ bacteria, attackRow, attackCol }) => {
+  return [
+    [attackRow + 1, attackCol],
+    [attackRow + 1, attackCol + (-1) ** (1 + attackRow)]
+  ].filter(([row, col]) => bacteria[row][col] !== undefined);
+};
+
+export const isShiftRight = ({ attackRow, attackCol, row, col }) => {
   return attackRow === row && (col === (attackCol + 1));
 };
 
-const isShiftLeft = ({ attackRow, attackCol, row, col }) => {
+export const isShiftLeft = ({ attackRow, attackCol, row, col }) => {
   return attackRow === row && (col === (attackCol - 1));
 };
 
-const isSpread = ({ attackRow, attackCol, row, col }) => {
+export const isSpread = ({ attackRow, attackCol, row, col }) => {
   return (
     row === attackRow + 1 &&
     (col === attackCol || col === attackCol + (-1) ** (1 + attackRow))
@@ -34,29 +101,13 @@ export const isJump = ({ attackRow, attackCol, row, col }) => {
   return row === attackRow + 2 && col === attackCol;
 };
 
-export const reachedFieldsAfterClick = ({ bacteria, attackRow, attackCol, row, col }) => {
-  const attack = { attackRow, attackCol, row, col };
-  if (isShiftRight(attack)) {
-    return reachedFieldsWithAttack("shiftRight", { bacteria, attackRow, attackCol });
-  }
-  if (isShiftLeft(attack)) {
-    return reachedFieldsWithAttack("shiftLeft", { bacteria, attackRow, attackCol });
-  }
-  if (isJump(attack)) {
-    return reachedFieldsWithAttack("jump", { bacteria, attackRow, attackCol });
-  }
-  if (isSpread(attack)) {
-    return reachedFieldsWithAttack("spread", { bacteria, attackRow, attackCol });
-  }
-};
-
 export const isAllowedAttackClick = (attack) => {
   return (
     isShiftRight(attack) || isShiftLeft(attack) || isSpread(attack) || isJump(attack)
   );
 };
 
-export const areAllBacteriaRemoved = (bacteria) => {
+const areAllBacteriaRemoved = (bacteria) => {
   for (let row = 0; row < bacteria.length; row++) {
     for (let col = 0; col <= lastCol(bacteria, row); col++) {
       if (bacteria[row][col] > 0) return false;
@@ -71,14 +122,14 @@ export const isGoal = (board, row, col) => {
 
 export const lastCol = (bacteria, row) => bacteria[0].length - 0.5 - 0.5 * (-1) ** row;
 
-export const makeJump = (bacteria, attackRow, attackCol) => {
+const makeJump = (bacteria, attackRow, attackCol) => {
   const nextBacteria = cloneDeep(bacteria);
   nextBacteria[attackRow][attackCol] -= 1;
   nextBacteria[attackRow + 2][attackCol] += 1;
   return nextBacteria;
 };
 
-export const makeShiftOrSpread = (bacteria, attackRow, attackCol, reachedFields) => {
+const makeShiftOrSpread = (bacteria, attackRow, attackCol, reachedFields) => {
   const nextBacteria = cloneDeep(bacteria);
   nextBacteria[attackRow][attackCol] = 0;
   reachedFields.forEach(([row, col]) => {

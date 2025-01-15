@@ -1,4 +1,5 @@
-import { distanceFromDangerousAttackZone, isDangerous } from "./helpers";
+import { distanceFromDangerousAttackZone, isDangerous, moves } from "./helpers";
+import { reverse } from 'lodash';
 
 describe('distanceFromDangerousAttackZone', () => {
   it('returns 0 for winning attack position', () => {
@@ -42,3 +43,38 @@ describe('isDangerous', () => {
     expect(isDangerous(board, { row: 2, col: 0 })).toBe(true);
   });
 });
+
+describe('moves', () => {
+  it('defend move only removes one bacteria', () => {
+    const bacteria = reverse([
+      [2, 0, 0],
+        [0, 0],
+      [0, 0, 0]
+    ]);
+    const board = { bacteria, goals: [1] };
+    let callMock = false;
+    const events = {
+      endTurn: () => {},
+      endGame: () => { callMock = true; }
+    }
+    const { nextBoard } = moves.defend(board, { events }, { row: 2, col: 0 });
+    expect(nextBoard.bacteria[2][0]).toEqual(1);
+    expect(callMock).toBe(false);
+  });
+
+  it('defend move ends game if no more bacteria', () => {
+    const bacteria = reverse([
+      [1, 0, 0],
+        [0, 0],
+      [0, 0, 0]
+    ]);
+    const board = { bacteria, goals: [1] };
+    let callMock = false;
+    const events = {
+      endTurn: () => {},
+      endGame: () => { callMock = true; }
+    }
+    moves.defend(board, { events }, { row: 2, col: 0 });
+    expect(callMock).toBe(true);
+  });
+})

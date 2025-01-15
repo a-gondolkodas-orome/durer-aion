@@ -1,7 +1,6 @@
 "use strict";
 
 import {
-  cloneDeep,
   sample,
   minBy,
   shuffle,
@@ -10,28 +9,29 @@ import {
   sum
 } from "lodash";
 import {
-  areAllBacteriaRemoved,
-  isGoal,
   lastCol,
-  makeJump,
-  makeShiftOrSpread,
-  reachedFieldsWithAttack,
   isDangerous,
   distanceFromDangerousAttackZone,
   isOddEdge
 } from "./helpers";
 
 /* Currently only implemented for the case of adjacent goal fields */
-export const getGameStateAfterAiTurn = ({ board, ctx }) => {
+export const aiBotStrategy = ({ board, ctx, moves }) => {
   if (ctx.chosenRoleIndex === 0) {
-    return aiDefense(board);
+    const { defenseRow, defenseCol } = aiDefense(board);
+    moves.defend(board, { row: defenseRow, col: defenseCol });
   } else {
-    return aiAttack(board);
+    const { attackChoice, attackRow, attackCol } = aiAttack(board);
+    switch(attackChoice) {
+      case 'shiftRight': moves.shiftRight(board, { row: attackRow, col: attackCol });
+      case 'shiftLeft': moves.shiftLeft(board, { row: attackRow, col: attackCol });
+      case 'jump': moves.jump(board, { row: attackRow, col: attackCol });
+      case 'spread': moves.spread(board, { row: attackRow, col: attackCol });
+    }
   }
 };
 
-const aiDefense = (board) => {
-  const nextBoard = cloneDeep(board);
+export const aiDefense = (board) => {
   let defenseRow, defenseCol;
 
   const bacteriaCoords = getBacteriaCoords(board.bacteria);
@@ -68,13 +68,10 @@ const aiDefense = (board) => {
     );
   }
 
-  nextBoard.bacteria[defenseRow][defenseCol] -= 1;
-  const isGameEnd = areAllBacteriaRemoved(nextBoard.bacteria);
-  return { nextBoard, isGameEnd };
+  return { defenseRow, defenseCol };
 };
 
-const aiAttack = (board) => {
-  const nextBoard = cloneDeep(board);
+export const aiAttack = (board) => {
   const { bacteria, goals } = board;
 
   const goalRowIdx = bacteria.length - 1;
@@ -128,17 +125,7 @@ const aiAttack = (board) => {
     }
   }
 
-  const reachedFields = reachedFieldsWithAttack(attackChoice, { bacteria, attackRow, attackCol });
-  const goalsReached = reachedFields.filter(([row, col]) => isGoal(board, row, col));
-  const isGameEnd = goalsReached.length >= 1;
-
-  if (attackChoice === "jump") {
-    nextBoard.bacteria = makeJump(bacteria, attackRow, attackCol);
-  } else {
-    nextBoard.bacteria = makeShiftOrSpread(bacteria, attackRow, attackCol, reachedFields);
-  }
-
-  return { nextBoard, isGameEnd };
+  return { attackChoice, attackRow, attackCol };
 };
 
 const getBacteriaCoords = (bacteria) => {

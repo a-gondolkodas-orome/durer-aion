@@ -1,15 +1,15 @@
 import React, { useState } from "react";
 import { range, cloneDeep, random } from "lodash";
 import { strategyGameFactory } from "../strategy-game";
-import { getGameStateAfterAiTurn } from "./strategy";
+import { aiBotStrategy } from "./bot-strategy";
 import {
   isJump,
-  reachedFieldsAfterClick,
+  isSpread,
+  isShiftRight,
+  isShiftLeft,
   isAllowedAttackClick,
-  areAllBacteriaRemoved,
-  makeJump,
-  makeShiftOrSpread,
-  isDangerous
+  isDangerous,
+  moves
 } from "./helpers";
 
 const boardWidth = 11;
@@ -59,7 +59,7 @@ const generateStartBoard = () => {
   }
 };
 
-const BoardClient = ({ board: { bacteria, goals }, ctx, events, moves }) => {
+const BoardClient = ({ board: { bacteria, goals }, ctx, moves }) => {
   const [attackRow, setAttackRow] = useState(null);
   const [attackCol, setAttackCol] = useState(null);
 
@@ -91,35 +91,22 @@ const BoardClient = ({ board: { bacteria, goals }, ctx, events, moves }) => {
 
 
     if (!isPlayerAttacker) {
-      nextBoard.bacteria[row][col] -= 1;
-      moves.setBoard(nextBoard);
-      events.endTurn();
-      if (areAllBacteriaRemoved(nextBoard.bacteria)) {
-        events.endGame({ winnerIndex: 1 });
-      }
+      moves.defend({ bacteria, goals }, { row, col });
       return;
     }
 
-    const reachedFields = reachedFieldsAfterClick({
-      bacteria,
-      attackRow,
-      attackCol,
-      row,
-      col
-    });
-
-    const goalsReached = reachedFields.filter(([row, col]) => isGoal({ row, col }));
-
-    if (isJump({ attackRow, attackCol, row, col })) {
-      nextBoard.bacteria = makeJump(bacteria, attackRow, attackCol);
-    } else {
-      nextBoard.bacteria = makeShiftOrSpread(bacteria, attackRow, attackCol, reachedFields);
+    const attack = { attackRow, attackCol, row, col };
+    if (isJump(attack)) {
+      moves.jump({ bacteria, goals }, { row: attackRow, col: attackCol });
     }
-
-    moves.setBoard(nextBoard);
-    events.endTurn();
-    if (goalsReached.length >= 1) {
-      events.endGame({ winnerIndex: 0 });
+    if (isSpread(attack)) {
+      moves.spread({ bacteria, goals }, { row: attackRow, col: attackCol });
+    }
+    if (isShiftRight(attack)) {
+      moves.shiftRight({ bacteria, goals }, { row: attackRow, col: attackCol });
+    }
+    if (isShiftLeft(attack)) {
+      moves.shiftLeft({ bacteria, goals }, { row: attackRow, col: attackCol });
     }
 
     setAttackRow(null);
@@ -228,5 +215,6 @@ export const Bacteria = strategyGameFactory({
   BoardClient,
   getPlayerStepDescription,
   generateStartBoard,
-  getGameStateAfterAiTurn
+  aiBotStrategy,
+  moves
 });
