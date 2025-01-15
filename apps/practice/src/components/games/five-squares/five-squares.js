@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { range, sum, isEqual, random } from 'lodash';
+import React from 'react';
+import { range, sum, isEqual, random, cloneDeep } from 'lodash';
 import { strategyGameFactory } from '../strategy-game';
-import { getBoardAfterAiTurn } from './strategy';
+import { aiBotStrategy } from './bot-strategy';
 
 const generateStartBoard = () => {
   const board = Array(5).fill(0);
@@ -10,42 +10,27 @@ const generateStartBoard = () => {
   return board;
 };
 
-const isGameEnd = board => sum(board) === 10;
-
-const getWinnerIndex = (board) => {
-  if (!isGameEnd(board)) return null;
-  const isAllDifferent = isEqual([...board].sort(), [0, 1, 2, 3, 4]);
-  return isAllDifferent ? 1 : 0;
-};
-
-const getGameState = nextBoard => ({
-  nextBoard,
-  isGameEnd: isGameEnd(nextBoard),
-  winnerIndex: getWinnerIndex(nextBoard)
-});
-
-const getGameStateAfterAiTurn = ({ board, ctx }) => {
-  const nextBoard = getBoardAfterAiTurn({ board, chosenRoleIndex: ctx.chosenRoleIndex });
-  return getGameState(nextBoard);
-};
-
-const BoardClient = ({ board, ctx, events, moves }) => {
-  const [oneMoveDone, setOneMoveDone] = useState(false);
-
-  const placePiece = id => {
-    const nextBoard = [...board];
-    nextBoard[id] += 1;
-    if (ctx.chosenRoleIndex !== 0 && !oneMoveDone) {
-      moves.setBoard(nextBoard);
-      setOneMoveDone(true);
-    } else {
-      moves.setBoard(nextBoard);
-      events.endTurn();
-      if (isGameEnd(nextBoard)) {
-        events.endGame({ winnerIndex: getWinnerIndex(nextBoard) });
-      }
-      setOneMoveDone(false);
+const moves = {
+  addPiece: (board, { ctx, events }, pileId) => {
+    const nextBoard = cloneDeep(board);
+    nextBoard[pileId] += 1;
+    if (ctx.currentPlayer === 1 && [3, 6, 9].includes(sum(nextBoard))) {
+      // player still has one more piece to place in their turn
+      return { nextBoard };
     }
+    events.endTurn();
+    if (sum(nextBoard) === 10) {
+      const winnerIndex = isEqual(cloneDeep(nextBoard).sort(), [0, 1, 2, 3, 4]) ? 1 : 0;
+      events.endGame({ winnerIndex });
+    }
+    return { nextBoard };
+  }
+}
+
+const BoardClient = ({ board, ctx, moves }) => {
+  const placePiece = id => {
+    if (!ctx.shouldRoleSelectorMoveNext) return;
+    moves.addPiece(board, id);
   };
 
   return (
@@ -92,5 +77,6 @@ export const FiveSquares = strategyGameFactory({
   BoardClient,
   getPlayerStepDescription,
   generateStartBoard,
-  getGameStateAfterAiTurn
+  moves,
+  aiBotStrategy
 });

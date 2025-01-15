@@ -2,17 +2,17 @@
 
 import { sum, random, cloneDeep } from 'lodash';
 
-export const getBoardAfterAiTurn = ({ board, chosenRoleIndex }) => {
-  const nextBoard = [...board];
-  if (chosenRoleIndex === 0) {
-    const tileIndices = getOptimalTileIndices(nextBoard);
-    nextBoard[tileIndices[0]] += 1;
-    nextBoard[tileIndices[1]] += 1;
+export const aiBotStrategy = ({ board, ctx, moves }) => {
+  if (ctx.chosenRoleIndex === 0) {
+    const tileIndices = getOptimalTileIndices(board);
+    const { nextBoard } = moves.addPiece(board, tileIndices[0]);
+    setTimeout(() => {
+      moves.addPiece(nextBoard, tileIndices[1]);
+    }, 750)
   } else {
-    const tileIndex = getOptimalTileIndex(nextBoard);
-    nextBoard[tileIndex] += 1;
+    const tileIndex = getOptimalTileIndex(board);
+    moves.addPiece(board, tileIndex);
   }
-  return nextBoard;
 };
 
 //following the strategy
