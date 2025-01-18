@@ -144,6 +144,7 @@ export const HunyadiAndTheJanissaries = strategyGameFactory({
   // TODO: TBD, new alternative of getGameStateAfterAiTurn
   aiBotStrategy
 });
+```
 
 ### Game end, determining winner
 
