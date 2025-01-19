@@ -28,6 +28,8 @@ const BoardClient = ({ board, ctx, moves }) => {
     } else {
       const group = board[rowIndex][pieceIndex];
       const { nextBoard, isGameEnd } = moves.killGroup(board, group);
+      // TODO: ideally this is not a player initiated move but something that happens at the
+      // end of turn by game engine
       if (!isGameEnd) {
         setTimeout(() => {
           moves.stepUp(nextBoard);
