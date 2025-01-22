@@ -1,26 +1,21 @@
 'use strict';
 
-import { cloneDeep, sample } from 'lodash';
+import { sample } from 'lodash';
 
-export const getGameStateAfterMove = (nextBoard) => {
-  return {
-    nextBoard,
-    isGameEnd: nextBoard.submarines[nextBoard.shark] >= 1 || nextBoard.turn > 11,
-    winnerIndex: nextBoard.submarines[nextBoard.shark] >= 1 ? 0 : 1
-  };
-};
-
-export const getGameStateAfterAiTurn = ({ board, ctx }) => {
-  const nextBoard = cloneDeep(board);
-
+export const aiBotStrategy = ({ board, ctx, moves }) => {
   if (ctx.chosenRoleIndex === 0) {
-    nextBoard.shark = getNextSharkPositionByAI(board.submarines, board.shark);
+    const finalPos = getNextSharkPositionByAI(board.submarines, board.shark);
+    const firstPos = getIntermediateSharkPosition(board.submarines, board.shark, finalPos);
+    const { nextBoard } = moves.moveShark(board, firstPos);
+    if (finalPos !== board.shark) {
+      setTimeout(() => {
+        moves.moveShark(nextBoard, finalPos);
+      }, firstPos === finalPos ? 0 : 750);
+    }
   } else {
     const { from, to } = getOptimalSubmarineMoveByAi(board);
-    nextBoard.submarines[from] -= 1;
-    nextBoard.submarines[to] += 1;
+    moves.moveSubmarine(board, { from, to });
   }
-  return getGameStateAfterMove(nextBoard);
 };
 
 const getOptimalSubmarineMoveByAi = (board) => {
@@ -146,12 +141,32 @@ const isReachableWithoutDeath = (submarines, shark, id) => {
     if (id === shark + 2 && submarines[shark + 1] >= 1) return false;
     if (id === shark + 8 && submarines[shark + 4] >= 1) return false;
     if (id === shark - 8 && submarines[shark - 4] >= 1) return false;
-    if (id === shark - 5 && (submarines[shark - 4] >= 1 || submarines[shark - 1] >= 1)) return false;
-    if (id === shark + 3 && (submarines[shark + 4] >= 1 || submarines[shark - 1] >= 1)) return false;
-    if (id === shark + 5 && (submarines[shark + 4] >= 1 || submarines[shark + 1] >= 1)) return false;
-    if (id === shark - 3 && (submarines[shark - 4] >= 1 || submarines[shark + 1] >= 1)) return false;
+    if (id === shark - 5 && (submarines[shark - 4] >= 1 && submarines[shark - 1] >= 1)) return false;
+    if (id === shark + 3 && (submarines[shark + 4] >= 1 && submarines[shark - 1] >= 1)) return false;
+    if (id === shark + 5 && (submarines[shark + 4] >= 1 && submarines[shark + 1] >= 1)) return false;
+    if (id === shark - 3 && (submarines[shark - 4] >= 1 && submarines[shark + 1] >= 1)) return false;
   }
   return true;
+}
+
+const getIntermediateSharkPosition = (submarines, shark, id) => {
+  if (id === shark - 2) return shark - 1;
+  if (id === shark + 2) return shark + 1;
+  if (id === shark + 8) return shark + 4;
+  if (id === shark - 8) return shark - 4;
+  if (id === shark - 5 && submarines[shark - 4] >= 1) return shark - 1;
+  if (id === shark + 3 && submarines[shark + 4] >= 1) return shark - 1;
+  if (id === shark + 5 && submarines[shark + 4] >= 1) return shark + 1;
+  if (id === shark - 3 && submarines[shark - 4] >= 1) return shark + 1;
+  if (id === shark - 5 && submarines[shark - 1] >= 1) return shark - 4;
+  if (id === shark + 3 && submarines[shark - 1] >= 1) return shark + 4;
+  if (id === shark + 5 && submarines[shark + 1] >= 1) return shark + 4;
+  if (id === shark - 3 && submarines[shark + 1] >= 1) return shark - 4;
+  if (id === shark - 5) return shark - 4;
+  if (id === shark + 3) return shark + 4;
+  if (id === shark + 5) return shark + 4;
+  if (id === shark - 3) return shark - 4;
+  return id;
 }
 
 // osszefuggosegi komponensek a tengeralattjarokkal nem kozvetlen szomszedos mezokbol

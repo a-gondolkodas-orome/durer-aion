@@ -9,7 +9,6 @@ export const strategyGameFactory = ({
   rule,
   title,
   roleLabels,
-  initialTurnStages,
   BoardClient,
   generateStartBoard,
   moves,
@@ -68,9 +67,6 @@ export const strategyGameFactory = ({
       setPhase('play');
       setCurrentPlayer(0);
       setChosenRoleIndex(playerIdx);
-      if (initialTurnStages !== undefined) {
-        setTurnStage(initialTurnStages[playerIdx]);
-      }
     };
 
     const ctx = {

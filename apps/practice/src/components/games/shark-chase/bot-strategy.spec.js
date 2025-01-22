@@ -1,4 +1,4 @@
-import { getNextSharkPositionByAI } from "./strategy";
+import { getNextSharkPositionByAI } from "./bot-strategy";
 
 describe('getNextSharkPositionByAI', () => {
   it('avoid losing in next step if possible', () => {
