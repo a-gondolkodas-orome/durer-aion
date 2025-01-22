@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { strategyGameFactory } from '../strategy-game';
-import { range, sample, random } from 'lodash';
+import { range, sample, random, cloneDeep } from 'lodash';
 
 const primeList = [
   2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71,
@@ -155,12 +155,7 @@ const BoardClient = ({ board, ctx, events, moves }) => {
   const chooseExponential = (e) => {
     setPlayerPrime(null);
     events.setTurnStage(null);
-    const nextBoard = board - playerPrime ** e;
-    moves.setBoard(nextBoard);
-    events.endTurn();
-    if (nextBoard === 0) {
-      events.endGame();
-    }
+    moves.subtractPrimeExponent(board, { prime: playerPrime, exponent: e });
   }
 
   const PlayerOptions = ctx.turnStage !== "chooseExponent"
@@ -187,12 +182,11 @@ const BoardClient = ({ board, ctx, events, moves }) => {
   );
 }
 
-const getGameStateAfterMove = (nextBoard) => {
-  return { nextBoard, isGameEnd: nextBoard === 0, winnerIndex: null };
-}
-
-const getGameStateAfterAiTurn = ({ board }) => {
-  if (board === 1) return getGameStateAfterMove(0);
+const aiBotStrategy = ({ board, moves }) => {
+  if (board === 1) {
+    moves.subtractPrimeExponent(board, { prime: 2, exponent: 0 });
+    return;
+  }
 
   const availablePrimes = primeList.filter(p => p <= board);
 
@@ -213,7 +207,8 @@ const getGameStateAfterAiTurn = ({ board }) => {
     }
     [chosenPrime, chosenExponent] = sample(possibleMoves);
   }
-  return getGameStateAfterMove(board - chosenPrime**chosenExponent);
+  moves.subtractPrimeExponent(board, { prime: chosenPrime, exponent: chosenExponent });
+  return;
 }
 
 const getAvailableExponents = (num, prime) => {
@@ -228,6 +223,17 @@ const getPlayerStepDescription = ({ ctx: { turnStage } }) => {
     : 'Válaszd ki a kitevőt, amelyre a prímet emelnéd.';
 }
 
+const moves = {
+  subtractPrimeExponent: (board, { events }, { prime, exponent }) => {
+    const nextBoard = board - prime ** exponent;
+    events.endTurn();
+    if (nextBoard === 0) {
+      events.endGame();
+    }
+    return { nextBoard };
+  }
+}
+
 const rule = <>
 Egy 1000-nél kisebb, (gép által meghatározott) pozitív egész számtól kezdődik a játék,
 ebből a játékosok felváltva vonnak le egy tetszőleges
@@ -240,5 +246,6 @@ export const PrimeExponentials = strategyGameFactory({
   BoardClient,
   getPlayerStepDescription,
   generateStartBoard,
-  getGameStateAfterAiTurn
+  moves,
+  aiBotStrategy
 })
