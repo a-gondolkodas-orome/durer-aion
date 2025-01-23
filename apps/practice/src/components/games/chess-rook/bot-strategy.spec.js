@@ -3,7 +3,7 @@ import { generateStartBoard, markVisitedFields } from './helpers';
 import { isEqual, cloneDeep } from 'lodash';
 
 describe('chess rook', () => {
-  describe('getGameStateAfterAiTurn()', () => {
+  describe('getOptimalAiMove()', () => {
     it('should move to end of row or column as a first step', () => {
       const board = generateStartBoard();
       const rookPosition = getOptimalAiMove(board);

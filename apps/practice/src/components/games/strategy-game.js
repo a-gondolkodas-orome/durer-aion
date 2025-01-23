@@ -12,7 +12,6 @@ export const strategyGameFactory = ({
   BoardClient,
   generateStartBoard,
   moves,
-  getGameStateAfterAiTurn,
   aiBotStrategy,
   getPlayerStepDescription
 }) => {
@@ -83,49 +82,18 @@ export const strategyGameFactory = ({
       setTurnStage
     };
 
+    // only second argument of move's is fixed here (_ special syntax)
+    // board (first argument) needs to be handled by ai strategy as
+    // it may change between moves but for AI strategy there is no re-render between moves
+    // in some cases there are multiple moves following single user event in that
+    // case there is also no re-render on client side between moves
+    const wrappedMoves = mapValues(moves, f => wrap(partial(f, _, { ctx, events }), moveWrapper));
+
     const doAiTurn = () => {
       const time = Math.floor(Math.random() * 500 + 1000);
       setTimeout(() => {
-        if (aiBotStrategy !== undefined) {
-          aiBotStrategy({
-            board,
-            ctx,
-            // only second argument of move's is fixed here (_ special syntax)
-            // board (first argument) needs to be handled by ai strategy as
-            // it may change between moves but for AI strategy there is no re-render between moves
-            moves: mapValues(moves, f => wrap(partial(f, _, { ctx, events }), moveWrapper))
-          });
-        } else {
-          oldAiMove();
-        }
+        aiBotStrategy({ board, ctx, moves: wrappedMoves });
       }, time);
-    };
-
-    const oldAiMove = () => {
-      const { intermediateBoard, nextBoard, isGameEnd, winnerIndex } = getGameStateAfterAiTurn({
-        board,
-        ctx,
-        events,
-        moves: { setBoard }
-      });
-      const stageTimeout = intermediateBoard !== undefined ? 750 : 0;
-      if (intermediateBoard !== undefined) {
-        setBoard(intermediateBoard);
-      }
-      setTimeout(() => {
-        setBoard(nextBoard);
-        if (isGameEnd) {
-          endGame({ winnerIndex });
-        }
-        setCurrentPlayer(currentPlayer => 1 - currentPlayer);
-      }, stageTimeout);
-    };
-
-    const clientSideMoves = {
-      ...mapValues(moves, f => wrap(partial(f, _, { ctx, events }), moveWrapper)),
-      // FIXME: general move, should not be needed if specialized functions
-      // are provided for each move
-      setBoard
     };
 
     return (
@@ -140,7 +108,7 @@ export const strategyGameFactory = ({
               board={board}
               ctx={ctx}
               events={events}
-              moves={clientSideMoves}
+              moves={wrappedMoves}
             />
             <GameSidebar
               roleLabels={roleLabels}
