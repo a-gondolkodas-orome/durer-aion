@@ -1,7 +1,8 @@
 import React from 'react';
 import { strategyGameFactory } from '../strategy-game';
-import { getGameStateAfterAiTurn  } from './strategy';
-import { BoardClient, getPlayerStepDescription } from './coin-3-piles';
+import { aiBotStrategy  } from './bot-strategy';
+import { BoardClient } from './board-client';
+import { getPlayerStepDescription, moves } from './helpers';
 
 const rule = <>
   Egy kupacban 3 darab 1, 5 darab 2 és 7 darab 3 pengős érme van. Egy lépésben az
@@ -16,5 +17,6 @@ export const Coin357 = strategyGameFactory({
   BoardClient,
   getPlayerStepDescription,
   generateStartBoard: () => ([3, 5, 7]),
-  getGameStateAfterAiTurn
+  aiBotStrategy,
+  moves
 });
