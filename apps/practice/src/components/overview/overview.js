@@ -106,7 +106,7 @@ const YearFilter = ({ selectedYears, setSelectedYears }) => {
 
 const OverviewHeader = () => {
   return <div className="pb-2"><div className="flex flex-wrap items-baseline">
-    <h1 className="text-blue-600 font-bold pb-4 grow">Dürer játékok</h1>
+    <h1 className="text-blue-600 font-bold pb-4 grow">Dürer stratégiás játékok</h1>
     <span className="text-right">
       <a
         href="https://forms.gle/7DwugmXNrvKgkiiu8"
@@ -117,7 +117,7 @@ const OverviewHeader = () => {
       </a>
     </span>
   </div>
-  A <i>stratégiás játék</i> egy interaktív játék, amelyet egy gép ellen játszhattok. Az alábbiakban a <a href="https://durerinfo.hu">Dürer Versenyen</a> feladott játékokat próbálhatjátok ki. A feladatok fokozatosan nehezednek az A kategóriától az E+ kategóriáig.
+  A <i>stratégiás játék</i> egy interaktív két szereplős játék, amelyet egy gép ellen játszhattok. Az alábbiakban a <a href="https://durerinfo.hu">Dürer Versenyen</a> feladott játékokat próbálhatjátok ki. A feladatok fokozatosan nehezednek az A kategóriától az E+ kategóriáig.
   </div>;
 };
 
