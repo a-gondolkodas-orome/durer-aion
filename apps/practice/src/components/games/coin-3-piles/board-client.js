@@ -69,7 +69,40 @@ export const BoardClient = ({ board, ctx, moves }) => {
 
   return (
   <section className="p-2 shrink-0 grow basis-2/3">
-    <div className="text-center" style={{ transform: 'scaleY(-1)' }}>
+    <table id="placeback" className="mx-2 table-fixed w-full">
+      <tbody>
+        <tr>
+          <td key="nothing" className="px-2">
+            <button
+              disabled={!isAddAllowed(1)}
+              className="cta-button text-sm px-1"
+              onClick={passAddition}
+            >
+              Semmit se rakok be
+            </button>
+          </td>
+          {[1, 2].map(coinValue =>
+            <td key={coinValue} className="text-center">
+              <button
+                disabled={!isAddAllowed(coinValue)}
+                className={`
+                  inline-block w-[30%] aspect-square rounded-full mx-0.5
+                  ${getCoinBgColor(coinValue)} shadow-md ${getCoinShadowColor(coinValue)}
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                `}
+                onClick={() => addToPile(coinValue)}
+                onMouseOver={() => {if (wasCoinAlreadyRemovedInTurn) setHoveredPile(coinValue)}}
+                onMouseOut={() => setHoveredPile(null)}
+                onFocus={() => {if (wasCoinAlreadyRemovedInTurn) setHoveredPile(coinValue)}}
+                onBlur={() => setHoveredPile(null)}
+              >{coinValue}</button>
+            </td>
+          )}
+        </tr>
+      </tbody>
+    </table>
+    <hr className="my-8 border-t-2 border-dashed border-gray-800"></hr>
+    <div id="pile" className="text-center" style={{ transform: 'scaleY(-1)' }}>
     {[1, 2, 3].map(coinValue => (
       <span key={coinValue}>
         {range(board[coinValue - 1]).map(i => (
@@ -102,39 +135,6 @@ export const BoardClient = ({ board, ctx, moves }) => {
         )}
       </span>))}
     </div>
-    <hr className="my-4"></hr>
-    <table className="mx-2 table-fixed w-full">
-      <tbody>
-        <tr>
-          <td key="nothing" className="px-2">
-            <button
-              disabled={!isAddAllowed(1)}
-              className="cta-button text-sm px-1"
-              onClick={passAddition}
-            >
-              Semmit se rakok be
-            </button>
-          </td>
-          {[1, 2].map(coinValue =>
-            <td key={coinValue} className="text-center">
-              <button
-                disabled={!isAddAllowed(coinValue)}
-                className={`
-                  inline-block w-[30%] aspect-square rounded-full mx-0.5
-                  ${getCoinBgColor(coinValue)} shadow-md ${getCoinShadowColor(coinValue)}
-                  disabled:opacity-50 disabled:cursor-not-allowed
-                `}
-                onClick={() => addToPile(coinValue)}
-                onMouseOver={() => {if (wasCoinAlreadyRemovedInTurn) setHoveredPile(coinValue)}}
-                onMouseOut={() => setHoveredPile(null)}
-                onFocus={() => {if (wasCoinAlreadyRemovedInTurn) setHoveredPile(coinValue)}}
-                onBlur={() => setHoveredPile(null)}
-              >{coinValue}</button>
-            </td>
-          )}
-        </tr>
-      </tbody>
-    </table>
     <hr className="my-4"></hr>
     <button
       disabled={!wasCoinAlreadyRemovedInTurn}

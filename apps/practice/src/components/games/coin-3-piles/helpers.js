@@ -4,7 +4,7 @@ import { cloneDeep, isEqual } from "lodash";
 
 export const getPlayerStepDescription = ({ ctx: { turnStage } }) => {
   if (turnStage === 'placeBack') {
-    return 'Kattints egy érmére a kupac alatt, hogy betegyél egy olyan pénzérmét.';
+    return 'Kattints egy érmére a kupac mellett, hogy betegyél egy olyan pénzérmét.';
   }
   return 'Kattints egy érmére, hogy elvegyél egy olyan pénzérmét.';
 };
