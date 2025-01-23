@@ -7,8 +7,6 @@ export const aiBotStrategy = ({ board, ctx, moves }) => {
     const optimalGroupToKill = getOptimalGroupToKill(board);
     const { nextBoard, isGameEnd } = moves.killGroup(board, optimalGroupToKill);
     if (!isGameEnd) {
-      // TODO: ideally this is not a player initiated move but something that happens at the
-      // end of turn by game engine
       setTimeout(() => {
         moves.stepUp(nextBoard);
       }, 750);

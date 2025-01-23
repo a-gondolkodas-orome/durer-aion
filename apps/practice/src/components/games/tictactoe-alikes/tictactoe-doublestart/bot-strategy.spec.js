@@ -9,7 +9,6 @@ describe('Double starter TicTacToe strategy', () => {
 
       aiBotStrategy({ board, ctx: { chosenRoleIndex: 1 }, moves });
 
-      // TODO: should not need to wait for timeout in ai bot strategy for tests!
       setTimeout(() => {
         expect([[0, 2], [2, 8], [6, 8], [0, 6]]).toContainEqual(
           range(0, 9).filter(i => board[i] === 'new_piece')
