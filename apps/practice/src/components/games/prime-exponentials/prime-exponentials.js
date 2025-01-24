@@ -64,7 +64,7 @@ const ExponentsTable = ({
   return <>
     <p className="pb-4">Választott prím: {playerPrime}.</p>
     <p>Lehetséges hatványok:</p>
-    <table id="exponentsTable" className={`m-2 border-collapse table-fixed ${widthClassNames}`}>
+    <table className={`m-2 border-collapse table-fixed ${widthClassNames}`}>
       <tbody><tr>
         {availableExponents.map(e =>
           <ExponentCell

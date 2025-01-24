@@ -69,7 +69,7 @@ export const BoardClient = ({ board, ctx, moves }) => {
 
   return (
   <section className="p-2 shrink-0 grow basis-2/3">
-    <table id="placeback" className="mx-2 table-fixed w-full">
+    <table className="mx-2 table-fixed w-full">
       <tbody>
         <tr>
           <td key="nothing" className="px-2">
@@ -102,7 +102,7 @@ export const BoardClient = ({ board, ctx, moves }) => {
       </tbody>
     </table>
     <hr className="my-8 border-t-2 border-dashed border-gray-800"></hr>
-    <div id="pile" className="text-center" style={{ transform: 'scaleY(-1)' }}>
+    <div className="text-center" style={{ transform: 'scaleY(-1)' }}>
     {[1, 2, 3].map(coinValue => (
       <span key={coinValue}>
         {range(board[coinValue - 1]).map(i => (
