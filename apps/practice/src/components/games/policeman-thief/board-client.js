@@ -20,7 +20,7 @@ export const BoardClient = ({ board, ctx, moves }) => {
       moves.moveThief(board, vertex);
       return;
     }
-    if (ctx.turnStage === "secondMove") {
+    if (board.firstPolicemanMoved) {
       moves.moveSecondPoliceman(board, vertex);
       return;
     }
@@ -32,7 +32,7 @@ export const BoardClient = ({ board, ctx, moves }) => {
     if (ctx.chosenRoleIndex === 1) {
       return neighbours[board.thief].includes(vertex);
     }
-    if (ctx.turnStage === "secondMove") {
+    if (board.firstPolicemanMoved) {
       return neighbours[board.policemen[1]].includes(vertex)
     }
     return neighbours[board.policemen[0]].includes(vertex)
@@ -46,7 +46,7 @@ export const BoardClient = ({ board, ctx, moves }) => {
         return "red";
       }
       if (ctx.chosenRoleIndex === 0) {
-        if (ctx.turnStage === "secondMove") {
+        if (board.firstPolicemanMoved) {
           if (board.thief === vertex) return "url(#thief-and-second-policeman)";
           if (board.policemen[0] === vertex) return "url(#2policemen)";
           return "forestgreen";

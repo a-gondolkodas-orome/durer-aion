@@ -12,7 +12,8 @@ const generateStartBoard = () => {
   return {
     turnCount: 0,
     policemen: [policeStartPosition, policeStartPosition],
-    thief: thiefStartPosition
+    thief: thiefStartPosition,
+    firstPolicemanMoved: false
   };
 };
 
@@ -28,13 +29,13 @@ const moves = {
   moveFirstPoliceman: (board, { events }, vertex) => {
     const nextBoard = cloneDeep(board);
     nextBoard.policemen[0] = vertex;
-    events.setTurnStage("secondMove");
+    nextBoard.firstPolicemanMoved = true;
     return { nextBoard };
   },
   moveSecondPoliceman: (board, { events }, vertex) => {
     const nextBoard = cloneDeep(board);
     nextBoard.policemen[1] = vertex;
-    events.setTurnStage(null);
+    nextBoard.firstPolicemanMoved = false;
     events.endTurn();
     if (isGameEnd(nextBoard)) {
       events.endGame({ winnerIndex: hasFirstPlayerWon(nextBoard) ? 0 : 1 });
@@ -75,9 +76,9 @@ export const Policemanthief = strategyGameFactory({
   title: "Rendőr-tolvaj",
   roleLabels: ["Rendőrök", "Tolvaj"],
   BoardClient,
-  getPlayerStepDescription: ({ ctx }) => {
+  getPlayerStepDescription: ({ board, ctx }) => {
     if (ctx.chosenRoleIndex === 0) {
-      return `Kattints arra az útkereszteződésre, ahová a ${ctx.turnStage === "secondMove" ? "zöld" : "kék"} rendőrrel lépni szeretnél.`;
+      return `Kattints arra az útkereszteződésre, ahová a ${board.firstPolicemanMoved ? "zöld" : "kék"} rendőrrel lépni szeretnél.`;
     } else {
       return "Kattints arra az útkereszteződésre, ahová a tolvajjal lépni szeretnél.";
     }

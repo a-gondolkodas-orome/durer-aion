@@ -24,9 +24,9 @@ const generateStartBoard = () => {
   }
 };
 
-const ExponentCell = ({ e, playerPrime, chooseExponential, hovered, setHovered }) => {
+const ExponentCell = ({ e, playerPrime, chooseExponential, setHovered }) => {
   return <td
-    className={`border-4 ${hovered === e ? 'bg-gray-300' : ''}`}
+    className="border-4 hover:bg-gray-300"
     key={e}
     onClick={() => chooseExponential(e)}>
     <button
@@ -90,25 +90,19 @@ const ExponentsTable = ({
   </>;
 }
 
-const PrimeCell = ({ p, choosePrime, hovered, setHovered }) => {
+const PrimeCell = ({ p, choosePrime }) => {
   return <td
-    className={`max-w-[10%] border-4 ${hovered === p ? `bg-gray-300` : ''}`}
+    className="max-w-[10%] border-4 hover:bg-gray-300"
     onClick={() => choosePrime(p)}
     key={p}
   >
-    <button
-      className='w-full p-[5%] aspect-video'
-      onMouseOver={() => setHovered(p)}
-      onMouseOut={() => setHovered(null)}
-      onFocus={() => setHovered(p)}
-      onBlur={() => setHovered(null)}
-    >
+    <button className='w-full p-[5%] aspect-video'>
       {p}
     </button>
   </td>
 }
 
-const PrimesTable = ({ board, choosePrime, hovered, setHovered }) => {
+const PrimesTable = ({ board, choosePrime }) => {
   let choosablePrimesList = primeList.filter(i => i <= board);
   if (choosablePrimesList.length === 0) {
     choosablePrimesList = [2];
@@ -127,8 +121,6 @@ const PrimesTable = ({ board, choosePrime, hovered, setHovered }) => {
             key={10*i + j}
             p={primeList[10*i+j]}
             choosePrime={choosePrime}
-            hovered={hovered}
-            setHovered={setHovered}
           ></PrimeCell>
         ))}
       </tr>
@@ -137,41 +129,27 @@ const PrimesTable = ({ board, choosePrime, hovered, setHovered }) => {
   </table>;
 }
 
-const BoardClient = ({ board, ctx, events, moves }) => {
+const BoardClient = ({ board, ctx, moves }) => {
   const [playerPrime, setPlayerPrime] = useState(null);
-  const [hovered, setHovered] = useState(null);
-
-  const choosePrime = (p) => {
-    setPlayerPrime(p);
-    events.setTurnStage("chooseExponent");
-    setHovered(null);
-  }
-
-  const resetChosenPrime = () => {
-    setPlayerPrime(null);
-    events.setTurnStage(null);
-  }
+  const [hoveredExponent, setHoveredExponent] = useState(null);
 
   const chooseExponential = (e) => {
     setPlayerPrime(null);
-    events.setTurnStage(null);
     moves.subtractPrimeExponent(board, { prime: playerPrime, exponent: e });
   }
 
-  const PlayerOptions = ctx.turnStage !== "chooseExponent"
+  const PlayerOptions = playerPrime === null
     ? <PrimesTable
       board={board}
-      choosePrime={choosePrime}
-      hovered={hovered}
-      setHovered={setHovered}
+      choosePrime={setPlayerPrime}
     ></PrimesTable>
     : <ExponentsTable
         board={board}
         playerPrime={playerPrime}
-        resetChosenPrime={resetChosenPrime}
+        resetChosenPrime={() => setPlayerPrime(null)}
         chooseExponential={chooseExponential}
-        hovered={hovered}
-        setHovered={setHovered}
+        hovered={hoveredExponent}
+        setHovered={setHoveredExponent}
       ></ExponentsTable>;
 
   return (
@@ -217,10 +195,8 @@ const getAvailableExponents = (num, prime) => {
   return range(0, maxExponent + 1);
 }
 
-const getPlayerStepDescription = ({ ctx: { turnStage } }) => {
-  return !(turnStage === "chooseExponent")
-    ? 'Válaszd ki a prímet, aminek a hatványát ki szeretnéd vonni.'
-    : 'Válaszd ki a kitevőt, amelyre a prímet emelnéd.';
+const getPlayerStepDescription = () => {
+  return 'Válaszd ki a prímet, aminek a hatványát ki szeretnéd vonni, majd a hatványt.';
 }
 
 const moves = {
