@@ -71,7 +71,7 @@ const moves = {
 
 const rule = <>
   Károly és Dezső <code>m</code>-ig szeretnének elszámolni, és közben a következő játékot játsszák:
-  0-ról kezdenek, a két játékos felváltva adhat hozzá egy 13-nál kisebb pozitív egészet a korábbi
+  0-ról kezdenek, a két játékos felváltva adhat hozzá egy 13-nál (szigorúan) kisebb pozitív egészet a korábbi
   számhoz, azonban a babonájuk miatt ha egyikük x-et adott hozzá, akkor másikuk a következő
   lépésben nem adhat hozzá <code>13-x</code>-et. Az veszít, aki eléri (vagy átlépi) <code>m</code>-et.
 </>;
