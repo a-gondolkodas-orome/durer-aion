@@ -96,7 +96,7 @@ const rule = <>
 </>;
 
 const generateStartBoard = () => {
-  const n = random(0, 2) === 0 ? sample([6, 8, 10]) : sample([7, 9]);
+  const n = random(0, 2) === 0 ? sample([8, 10]) : sample([7, 9]);
   return {
     circle: Array(n).fill(true),
     lastMove: null,
