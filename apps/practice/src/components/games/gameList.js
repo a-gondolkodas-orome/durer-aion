@@ -178,5 +178,11 @@ export const gameList = {
     round: 'döntő',
     category: ['A'],
     name: '+1, +2, +3'
+  },
+  BankRobbers: {
+    year: 18,
+    round: 'online',
+    category: ['C', 'D', 'E'],
+    name: 'Bankrablók (7-10 bank)'
   }
 };
