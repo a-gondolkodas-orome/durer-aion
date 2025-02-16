@@ -3,8 +3,8 @@ import requests
 from requests.auth import HTTPBasicAuth
 import json
 from tqdm import tqdm
-ADMIN_PASSWORD = "Drearily-Gesture-Citation8-Backed"
-BASE_URL = "https://verseny.durerinfo.hu" # 'http://localhost:8000'
+ADMIN_PASSWORD = "TODO"
+BASE_URL = 'http://localhost:8000' # 'https://verseny.durerinfo.hu'
 FORCE_DOWNLOAD = False
 
 # %%
