@@ -14,6 +14,8 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<
   name: "17o",
   setup: () => {
     return {
+      // Add a state here that is visually appealing at the start.
+      // it will be reset later, when starting position is selected.
       pile: 0,
       milisecondsRemaining: 1000 * lengthOfCompetition,
       start: new Date().toISOString(),

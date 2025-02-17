@@ -1,10 +1,17 @@
 import { State } from 'boardgame.io';
+import { MyGameState } from './game';
 import { GameStateMixin } from '../../common/types';
 
-export function strategy(state: State<GameStateMixin>, botID: string): [undefined, string] {
-  return [undefined, ""];
+/// Strategy for frontend-only
+export function strategyWrapper(category: "C" | "D" | "E") {
+  return (state: State<MyGameState>, botID: string): [number | {pile: number} | undefined, string] => {
+    if(state.ctx.phase === "startNewGame") {
+      return [startingPosition({G: state.G, ctx: state.ctx}, category), "setStartingPosition"];
+    }
+    return [undefined, "changePile"];
+  }
 }
 
-export function startingPosition({ G, ctx}: any): {pile: number} {
+function startingPosition({ G, ctx }: any, category: "C" | "D" | "E"): { pile: number } {
   return {pile: 17};
 }
