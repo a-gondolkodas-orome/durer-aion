@@ -184,5 +184,11 @@ export const gameList = {
     round: 'online',
     category: ['C', 'D', 'E'],
     name: 'Bankrablók (7-10 bank)'
+  },
+  Take1OrHalve: {
+    year: 17,
+    round: 'online',
+    category: ['C', 'D', 'E'],
+    name: 'Egyet vegyél vagy felezz'
   }
 };

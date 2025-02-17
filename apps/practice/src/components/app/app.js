@@ -24,6 +24,7 @@ import { TwoTimesTwo } from '../games/two-times-two/two-times-two';
 import { RockPaperScissor } from '../games/rock-paper-scissor/rock-paper-scissor';
 import { FiveFiveCard } from '../games/five-five-card/five-five-card';
 import { NumberCovering8, NumberCovering10 } from '../games/number-covering/number-covering';
+import { Take1OrHalve } from '../games/take-1-or-halve/take-1-or-halve';
 import { TwelveSquares } from '../games/twelve-squares/twelve-squares';
 import { Bacteria } from '../games/bacteria/bacteria';
 import { SixDiscs, TenDiscs } from '../games/discs-turn-or-remove/discs-turn-or-remove';
@@ -58,6 +59,7 @@ export const App = () => {
     { path: '/game/FiveFiveCard', element: <FiveFiveCard /> },
     { path: '/game/NumberCovering8', element: <NumberCovering8 /> },
     { path: '/game/NumberCovering10', element: <NumberCovering10 /> },
+    { path: '/game/Take1OrHalve', element: <Take1OrHalve /> },
     { path: '/game/TwelveSquares', element: <TwelveSquares />},
     { path: '/game/Bacteria', element: <Bacteria />},
     { path: '/game/SixDiscs', element: <SixDiscs />},
