@@ -170,6 +170,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
               width: '250px',
               fontSize: '10px',
             }}>
+            ("Az óra csak tájékoztató jellegű, más eszközökön más időt mutathat, de így is csak az időben érkezett megoldásokat fogjuk figyelembe venni.")
             </Stack>
           }
         </Stack>

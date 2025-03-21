@@ -23,7 +23,7 @@ export interface MyGameState {
   url: string;
 }
 
-function game_state_from_json(json: string): MyGameState {
+function parse_game_state(json: string): MyGameState {
   const parsed = JSON.parse(json);
   
   // Validate the parsed object
@@ -34,22 +34,6 @@ function game_state_from_json(json: string): MyGameState {
   // Type assertion to avoid repetitive type checks
   const state = parsed as MyGameState;
 
-  // Validate required fields and types
-  if (typeof state.currentProblem !== 'number' ||
-      typeof state.problemText !== 'string' ||
-      (state.answer !== null && typeof state.answer !== 'number') ||
-      typeof state.points !== 'number' ||
-      (state.correctnessPreviousAnswer !== null && typeof state.correctnessPreviousAnswer !== 'boolean') ||
-      !Array.isArray(state.previousAnswers) ||
-      !Array.isArray(state.previousPoints) ||
-      typeof state.currentProblemMaxPoints !== 'number' ||
-      typeof state.numberOfTry !== 'number' ||
-      typeof state.milisecondsRemaining !== 'number' ||
-      typeof state.start !== 'string' ||
-      typeof state.end !== 'string' ||
-      typeof state.url !== 'string') {
-    throw new Error('relay: game_state_from_json: Invalid JSON: missing or incorrect fields');
-  }
   return state;
 }
 
@@ -85,13 +69,13 @@ export const GameRelay: Game<MyGameState> = {
           let game_state_json = localStorage.getItem("RelayGameState");
           if (process.env.REACT_APP_WHICH_VERSION === "b" && phase !== null && game_state_json !== null) {
             try { // if the json is bad, continue as if we didnt even have it
-              const state = game_state_from_json(game_state_json);
-              const newG = {
+              const state = parse_game_state(game_state_json);
+              const newGame = {
                 ...state,
                 milisecondsRemaining: Date.parse(state.end) - Date.now(),
               };
               events.setPhase(phase);
-              return newG;
+              return newGame;
             } catch {
               console.error("could not load game phase from json, invalid json");
             }
