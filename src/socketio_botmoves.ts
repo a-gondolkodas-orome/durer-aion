@@ -67,14 +67,23 @@ const TransportAPI = (
 };
 
 /** Copied from boardgame.io/dist/src/master/master.ts */
-export async function fetch(db: StorageAPI.Async | StorageAPI.Sync, matchID: string, partial: Partial<{ state: boolean, metadata: boolean, logs: boolean, initialState: boolean }>) {
+export async function fetch(
+  db: StorageAPI.Async | StorageAPI.Sync,
+  matchID: string,
+  partial: Partial<{
+    state: boolean;
+    metadata: boolean;
+    logs: boolean;
+    initialState: boolean;
+  }>
+) {
   return isSynchronous(db)
       ? db.fetch(matchID, partial)
       : await db.fetch(matchID, partial);
 }
 
 /// Bot's playerID is '1', because the gameWrapper uses player '0' for the human player. 
-export const BOT_ID = '1';
+export const BOT_ID = "1";
 
 /** This is a special transport specifically designed for replacing a player's move
  * with a bot's move.
@@ -87,16 +96,16 @@ export class SocketIOButBotMoves extends SocketIO {
   bots: Record<string, any>;
   onFinishedMatch: (matchID: string) => Promise<void>;
   unFinishedMatches = new Set<string>();
-  constructor(anything: any, bots: Record<string, any>, onFinishedMatch: (matchID: string)=>Promise<void> = async ()=>{}) {
+  constructor(
+    anything: any,
+    bots: Record<string, any>,
+    onFinishedMatch: (matchID: string) => Promise<void> = async () => {}
+  ) {
     super(anything);
     this.bots = bots;
     this.onFinishedMatch = onFinishedMatch;
   }
-  init(
-    app: any,
-    games: Game[],
-    origins: any
-  ) {
+  init(app: any, games: Game[], origins: any) {
     super.init(app, games, origins);
 
     for (const game of games) {
@@ -106,17 +115,18 @@ export class SocketIOButBotMoves extends SocketIO {
       /** This should be in sync with how socket data is communicated.
        * See boardgame.io/dist/src/server/transport/socketio.ts
        */
-      nsp.on('connection', (socket: any) => {
-        socket.on('update', async (...args: Parameters<any>) => {
+      nsp.on("connection", (socket: any) => {
+        socket.on("update", async (...args: Parameters<any>) => {
         // The arguments are stale: we react to a player's step
         // But we are on the same API that reacts to it
         // Basically we assume that a socket.on('update', ...)
         // already updated the game state, making StateID and PlayerID stale
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const [actionData, _, matchID, stalePlayerID] : any[] = args;
         //this in theory means, that the match already exist
         //also we assume, this event can't happen, after the game is finished
-        this.unFinishedMatches.add(matchID)
-        if (actionData.type !== 'MAKE_MOVE') {
+          this.unFinishedMatches.add(matchID);
+          if (actionData.type !== "MAKE_MOVE") {
           // skip if alma type is not 'MAKE_MOVE'
           return;
         }
@@ -137,7 +147,9 @@ export class SocketIOButBotMoves extends SocketIO {
             // TODO: try do not send an authorative state to the player...?
             console.log("Bot moves");
 
-            const {state} = await fetch(app.context.db, matchID, {state: true});
+            const { state } = await fetch(app.context.db, matchID, {
+              state: true,
+            });
             if (currentPlayer(state.ctx) !== BOT_ID) {
               // Not a real action, possibly a failed move.
               return;
@@ -147,7 +159,10 @@ export class SocketIOButBotMoves extends SocketIO {
               return;
             }
             let botAction = undefined;
-            if (state.ctx.phase === 'play' || state.ctx.phase === 'startNewGame'){
+            if (
+              state.ctx.phase === "play" ||
+              state.ctx.phase === "startNewGame"
+            ) {
               botAction = await bot.play(
                 state,
                 GetBotPlayer(state, {[BOT_ID]: bot}) as any
@@ -159,15 +174,33 @@ export class SocketIOButBotMoves extends SocketIO {
             const master = new Master(
               game,
               app.context.db,
-              TransportAPI(matchID, socket, getFilterPlayerView(game), this.pubSub),
+              TransportAPI(
+                matchID,
+                socket,
+                getFilterPlayerView(game),
+                this.pubSub
+              ),
               app.context.auth
             );
 
             let nextStateID = state._stateID;
-            await master.onUpdate({type: 'MAKE_MOVE', payload: {...botAction.action.payload, credentials: getBotCredentials()}}, nextStateID, matchID, BOT_ID);
+            await master.onUpdate(
+              {
+                type: "MAKE_MOVE",
+                payload: {
+                  ...botAction.action.payload,
+                  credentials: getBotCredentials(),
+                },
+              },
+              nextStateID,
+              matchID,
+              BOT_ID
+            );
           });
           await matchQueue.add(async () => {
-            const {state} = await fetch(app.context.db, matchID, {state: true});
+            const { state } = await fetch(app.context.db, matchID, {
+              state: true,
+            });
             if (state.ctx.gameover) {
               if (this.unFinishedMatches.has(matchID)) {
                 this.unFinishedMatches.delete(matchID);

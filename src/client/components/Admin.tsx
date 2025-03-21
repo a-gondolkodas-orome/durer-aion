@@ -4,13 +4,12 @@ import { Button, Dialog, Table, TableCell, TableRow } from '@mui/material';
 import { Dispatch, useState } from 'react';
 import useSWR from 'swr';
 import { DataGrid } from '@mui/x-data-grid';
-import { InProgressMatchStatus, TeamModelDto } from '../dto/TeamStateDto';
+import { TeamModelDto } from '../dto/TeamStateDto';
 import { TeamDetailDialog } from './TeamDetailDialog';
 import Form from './form';
 import { Field } from 'formik';
 import theme from './theme';
 import { useSnackbar } from 'notistack';
-import { strategy } from '../../games/relay/strategy';
 import { FinishedMatchStatus } from '../../server/entities/model';
 
 
@@ -79,10 +78,10 @@ export function Admin(props: {setAdmin: Dispatch<boolean>}) {
         onSubmit={async (values) => { 
           try {
             data?.forEach(async a=>{
-              if(a.relayMatch.state == "IN PROGRESS") {
+              if(a.relayMatch.state === "IN PROGRESS") {
                 await addMinutes(a.relayMatch.matchID, values.time);
               }
-              if(a.strategyMatch.state == "IN PROGRESS") {
+              if(a.strategyMatch.state === "IN PROGRESS") {
                 await addMinutes(a.strategyMatch.matchID, values.time);
               }
             })
@@ -216,9 +215,9 @@ export function Admin(props: {setAdmin: Dispatch<boolean>}) {
 function Stats(props: {data: TeamModelDto[]}) {
   const categories = Array.from(new Set(props.data.map(it=>it.category)));
   const stat = categories.map(cat=>{
-    const current = props.data.filter(it=>it.category==cat);
-    const finishedRelayScores = current.filter(it=>it.relayMatch.state == "FINISHED").map(it=>(it.relayMatch as FinishedMatchStatus).score);
-    const finishedStrategyScores = current.filter(it=>it.strategyMatch.state == "FINISHED").map(it=>(it.strategyMatch as FinishedMatchStatus).score);
+    const current = props.data.filter(it=>it.category === cat);
+    const finishedRelayScores = current.filter(it=>it.relayMatch.state === "FINISHED").map(it=>(it.relayMatch as FinishedMatchStatus).score);
+    const finishedStrategyScores = current.filter(it=>it.strategyMatch.state === "FINISHED").map(it=>(it.strategyMatch as FinishedMatchStatus).score);
     const strategyPoints = Array.from(new Set(finishedStrategyScores));
     const relayPoints = Array.from(new Set(finishedRelayScores));
     return {
@@ -226,14 +225,14 @@ function Stats(props: {data: TeamModelDto[]}) {
       all: current.length,
       relay: finishedRelayScores.length,
       strategy: finishedStrategyScores.length,
-      finished: current.filter(it=>it.strategyMatch.state == "FINISHED" && it.relayMatch.state == "FINISHED").length,
+      finished: current.filter(it=>it.strategyMatch.state === "FINISHED" && it.relayMatch.state === "FINISHED").length,
       strategyPoints: strategyPoints.map(it=> ({
         point: it,
-        count: finishedStrategyScores.filter(s=>s==it).length
+        count: finishedStrategyScores.filter(s=>s === it).length
       })),
       relayPoints: relayPoints.map(it=> ({
         point: it,
-        count: finishedRelayScores.filter(s=>s==it).length
+        count: finishedRelayScores.filter(s=>s === it).length
       })),
     }
   })

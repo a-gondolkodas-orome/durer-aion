@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { DurerXVIRelayClient } from './client/components/ReactClient';
+//import { DurerXVIRelayClient } from './client/components/ReactClient';
 
 type LoginFormProps = {
   matchID?: string;
