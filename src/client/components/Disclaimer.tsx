@@ -2,6 +2,7 @@ import { Button } from "@mui/material";
 import { Stack } from "@mui/system";
 import { dictionary } from "../text-constants";
 import { useToHome } from "../hooks/user-hooks";
+import { isOfflineMode } from "../utils/appMode";
 
 export function Disclaimer() {
   const goHome = useToHome();
@@ -84,7 +85,7 @@ export function Disclaimer() {
           }
         }}
       >
-        <span dangerouslySetInnerHTML={{ __html: (process.env.REACT_APP_WHICH_VERSION === "b" ? dictionary.disclaimer.interfaceDescriptionBHTML : dictionary.disclaimer.interfaceDescription) }}></span>
+        <span dangerouslySetInnerHTML={{ __html: (isOfflineMode() ? dictionary.disclaimer.interfaceDescriptionBHTML : dictionary.disclaimer.interfaceDescription) }}></span>
       </Stack>
 
 

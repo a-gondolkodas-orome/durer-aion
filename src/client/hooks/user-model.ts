@@ -1,10 +1,11 @@
 import { LOCAL_STORAGE_TEAMSTATE, OfflineClientRepository, RealClientRepository } from "../api-repository-interface";
 import { MatchStateDto, TeamModelDto } from "../dto/TeamStateDto";
+import { isOfflineMode } from "../utils/appMode";
 
 const LOCAL_STORAGE_GUID = "kjqAEKeFkMpOvOZrzcvp";
 
 let ClientRepository = RealClientRepository;
-if (process.env.REACT_APP_WHICH_VERSION === "b") {
+if (isOfflineMode()) {
   ClientRepository = OfflineClientRepository;
 }
 
