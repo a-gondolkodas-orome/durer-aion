@@ -128,6 +128,7 @@ export class UserModel {
     localStorage.removeItem("StrategyPoints");
     localStorage.removeItem("RelayGamePhase");
     localStorage.removeItem("RelayGameState");
+    localStorage.removeItem("RelayEnd");
   }
 
   async login(joinCode: string): Promise<string | null> {

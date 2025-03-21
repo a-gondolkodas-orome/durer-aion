@@ -75,6 +75,7 @@ export const GameRelay: Game<MyGameState> = {
           if (isOfflineMode()) {
             let phase = localStorage.getItem("RelayGamePhase");
             let game_state_json = localStorage.getItem("RelayGameState");
+            let end = localStorage.getItem("RelayEnd");
             if (phase && game_state_json) {
               try { // if the json is bad, continue as if we didnt even have it
                 const state = parseGameState(game_state_json);
@@ -86,11 +87,18 @@ export const GameRelay: Game<MyGameState> = {
                 return newGame;
               } catch {
                 console.error("could not load game phase from json, invalid json");
-                saveState(G, ctx); // overwrite corrupted or missing json
+                // move on as if we didnt have saved state
               }
-            } else {
-              // save the initial state because 
-              saveState(G, ctx);
+            }
+
+            // so the clock works even if they reload the page before submitting
+            // an answer (which is when we normally save the state)
+            if (end) {
+              G.end = end;
+              G.milisecondsRemaining = Date.parse(G.end) - Date.now();
+            }
+            else {
+              localStorage.setItem("RelayEnd", G.end);
             }
           }
           if (playerID !== guesserPlayer || G.numberOfTry !== 0) {
