@@ -192,8 +192,8 @@ export function strategy(category: "C" | "D" | "E"){
       if(url === undefined){
         url = "";
       }
-      let next_prob = problems[category][state.G.currentProblem+1];
-      return [[next_prob.problemText, next_prob.points, correctnessPreviousAnswer, url], "newProblem"];
+      let nextProblem = problems[category][state.G.currentProblem+1];
+      return [[nextProblem.problemText, nextProblem.points, correctnessPreviousAnswer, url], "newProblem"];
     }
     // End of the game
     return [[correctnessPreviousAnswer], "endGame"];
