@@ -1,6 +1,7 @@
 import { INVALID_MOVE } from 'boardgame.io/core';
 import { GameType } from '../../common/types';
 import { sendDataStrategyEnd } from '../../common/sendData';
+import { isOfflineMode } from '../../client/utils/appMode';
 
 export interface MyGameState {
   pile: number;
@@ -63,7 +64,7 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<
                 G.points = 2;
                 break;
             }
-            if (process.env.REACT_APP_WHICH_VERSION === "b") {
+            if (isOfflineMode()) {
               localStorage.setItem("StrategyPoints", G.points.toString());
               sendDataStrategyEnd(null, G, ctx);
             }
