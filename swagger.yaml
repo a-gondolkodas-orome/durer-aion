@@ -202,11 +202,13 @@ paths:
                   $ref: "#/components/schemas/TeamModel"
   /team/admin/import:
     put:
-      summary: Create new teams
+      summary: Import teams from a TSV file
+      description: |
+        This endpoint allows admins to upload a TSV file with team information. The file must be UTF-8 encoded and contain the following columns: "Teamname", "Category", "Email", "Other", "ID", "Login Code", "Credentials".
       security:
-      - basicAdminAuth: []
+        - basicAdminAuth: []
       tags:
-      - admin
+        - admin
       requestBody:
         required: true
         content:
@@ -217,9 +219,53 @@ paths:
                 file:
                   type: string
                   format: binary
-                  description: A TSV file to be uploaded
+                  description: The TSV file to be uploaded
               required:
                 - file
+      responses:
+        "200":
+          description: Teams imported successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  successful:
+                    type: integer
+                    description: The number of successfully imported teams
+                  failed:
+                    type: integer
+                    description: The number of teams that failed to import
+                  export_table:
+                    type: array
+                    items:
+                      type: array
+                      items:
+                        type: string
+                  logs:
+                    type: object
+                    properties:
+                      sev:
+                        type: array
+                        items:
+                          type: string
+                          enum: ["info", "warn", "error"]
+                          description: Severity level of log messages
+                      value:
+                        type: array
+                        items:
+                          type: string
+                        description: Log messages
+        "400":
+          description: Invalid file format or multiple files uploaded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Description of the import error
   /team/join/{token}:
     get:
       summary: Get team ID based on login token

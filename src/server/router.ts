@@ -245,9 +245,9 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
       return;
     }
 
-    await import_teams_from_tsv(teams, file.path)
+    const import_results = await import_teams_from_tsv(teams, file.path)
 
-    ctx.body = await teams.listTeams();
+    ctx.body = import_results;  
   })
 
   /**

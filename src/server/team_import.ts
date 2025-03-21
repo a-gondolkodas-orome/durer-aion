@@ -95,7 +95,7 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
       ok = false;
     }
 
-    // TODO: hard-coded values
+    // TODO: remove hard-coded values
     if (!['C', 'D', 'E'].includes(category)) {
       onerror(`ERROR: Invalid category [${category}] for team ${teamname}.`);
       ok = false;
