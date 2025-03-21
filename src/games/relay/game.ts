@@ -1,9 +1,8 @@
 import { Game, TurnConfig } from "boardgame.io";
 import { INVALID_MOVE, TurnOrder } from "boardgame.io/core";
 import { sendDataRelayEnd } from "../../common/sendData";
-import { PlayerIDType } from "../../common/types";
-
-const { guesserPlayer, judgePlayer } = PlayerIDType;
+import { guesserPlayer, judgePlayer } from "../../common/types";
+import { isOfflineMode } from "../../client/utils/appMode";
 
 type Answer = {
   answer: number;

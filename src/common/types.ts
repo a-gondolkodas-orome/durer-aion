@@ -4,7 +4,7 @@ export enum PlayerIDType {
   guesserPlayer = '0',
   judgePlayer = '1',
 };
-
+export const { guesserPlayer, judgePlayer } = PlayerIDType;
 export interface GameStateMixin {
   firstPlayer: null | PlayerIDType;
   winner: PlayerIDType | "draw" | null;

@@ -1,5 +1,5 @@
 import { INVALID_MOVE } from 'boardgame.io/core';
-import { GameType } from '../../common/types';
+import { GameType, guesserPlayer, judgePlayer } from '../../common/types';
 import { sendDataStrategyEnd } from '../../common/sendData';
 import { isOfflineMode } from '../../client/utils/appMode';
 
@@ -58,7 +58,7 @@ export function myGameWrapper(category: "C" | "D" | "E") {
         }
 
         if (isGameEnd) {
-          G.winner = ctx.currentPlayer === "0" ? "0" : "1";
+          G.winner = ctx.currentPlayer === guesserPlayer ? guesserPlayer : judgePlayer;
         }
 
         if (G.difficulty === "live") {
