@@ -44,10 +44,10 @@ function saveState(state: MyGameState, ctx: any) {
   localStorage.setItem("RelayGameState", stateString);
 }
 
-const lengthOfCompetition = 60 * 60; // seconds
+const COMPETITION_LENGTH_SECS = 60 * 60; // seconds
 
-const guesserPlayer = '0';
-const judgePlayer = '1';
+const GUESSER_PLAYER = '0';
+const JUDGE_PLAYER = '1';
 
 export const GameRelay: Game<MyGameState> = {
   setup: () => {
@@ -61,9 +61,9 @@ export const GameRelay: Game<MyGameState> = {
       previousPoints: [],
       currentProblemMaxPoints: 3, // TODO: get from the problem list, TODO: rename this function to currentProblemAvailablePoints
       numberOfTry: 0,
-      milisecondsRemaining: 1000 * lengthOfCompetition,
+      milisecondsRemaining: 1000 * COMPETITION_LENGTH_SECS,
       start: new Date().toISOString(),
-      end: new Date(Date.now() + 1000 * lengthOfCompetition).toISOString(),
+      end: new Date(Date.now() + 1000 * COMPETITION_LENGTH_SECS).toISOString(),
       url: "",
     };
   },
@@ -101,13 +101,13 @@ export const GameRelay: Game<MyGameState> = {
               localStorage.setItem("RelayEnd", G.end);
             }
           }
-          if (playerID !== guesserPlayer || G.numberOfTry !== 0) {
+          if (playerID !== GUESSER_PLAYER || G.numberOfTry !== 0) {
             return INVALID_MOVE;
           }
           events.endTurn();
         },
         firstProblem({ G, ctx, playerID, events }, problemText: string, nextProblemMaxPoints: number, url: string) {
-          if (playerID !== judgePlayer) {
+          if (playerID !== JUDGE_PLAYER) {
             // He is not the bot OR G.answer is null (and it is not the first question)
             return INVALID_MOVE;
           }
@@ -120,7 +120,7 @@ export const GameRelay: Game<MyGameState> = {
       turn: {
         order: TurnOrder.ONCE,
         onMove: ({G, ctx, playerID, events }) => {
-          if(playerID === guesserPlayer) {
+          if(playerID === GUESSER_PLAYER) {
             let currentTime = new Date();
             if(currentTime.getTime() - new Date(G.end).getTime() > 1000*10){
               // Do not accept any answer if the time is over since more than 10 seconds
@@ -135,7 +135,7 @@ export const GameRelay: Game<MyGameState> = {
     play: {
       moves: {
         newProblem({ G, ctx, playerID, events }, problemText: string, nextProblemMaxPoints: number, correctnessPreviousAnswer: boolean, url: string) {
-          if (playerID !== judgePlayer || G.answer === null) {
+          if (playerID !== JUDGE_PLAYER || G.answer === null) {
             // He is not the bot OR G.answer is null (and it is not the first question)
             return INVALID_MOVE;
           }
@@ -160,7 +160,7 @@ export const GameRelay: Game<MyGameState> = {
           events.endTurn();
         },
         nextTry({ G, ctx, playerID, events }, maxPoints: number) {
-          if (playerID !== judgePlayer || G.answer === null) {
+          if (playerID !== JUDGE_PLAYER || G.answer === null) {
             return INVALID_MOVE;
           }
           G.previousAnswers[G.currentProblem].push({answer: G.answer, date: new Date().toISOString()});
@@ -171,14 +171,14 @@ export const GameRelay: Game<MyGameState> = {
           events.endTurn();
         },
         submitAnswer({ G, ctx, playerID, events }, answer: number) {
-          if (playerID !== guesserPlayer || !Number.isInteger(answer) || answer < 0 || answer > 9999) {
+          if (playerID !== GUESSER_PLAYER || !Number.isInteger(answer) || answer < 0 || answer > 9999) {
             return INVALID_MOVE;
           }
           G.answer = answer;
           events.endTurn();
         },
         endGame({ G, ctx, playerID, events }, correctnessPreviousAnswer: boolean) {
-          if (playerID !== judgePlayer || G.answer === null) {
+          if (playerID !== JUDGE_PLAYER || G.answer === null) {
             return INVALID_MOVE;
           }
           G.previousAnswers[G.currentProblem].push({answer: G.answer, date: new Date().toISOString()});
@@ -196,7 +196,7 @@ export const GameRelay: Game<MyGameState> = {
             events.endGame();
         },
         getTime({ G, ctx, playerID, events }) {
-          if (playerID !== guesserPlayer) {
+          if (playerID !== GUESSER_PLAYER) {
             return INVALID_MOVE;
           }
           G.milisecondsRemaining = new Date(G.end).getTime() - new Date().getTime();
@@ -206,7 +206,7 @@ export const GameRelay: Game<MyGameState> = {
   },
   turn: {
     onMove: ({G, ctx, playerID, events }) => {
-      if(playerID === guesserPlayer) {
+      if(playerID === GUESSER_PLAYER) {
         let currentTime = new Date();
         if(currentTime.getTime() - new Date(G.end).getTime() > 1000*10){
           // Do not accept any answer if the time is over since more than 10 seconds
@@ -216,10 +216,10 @@ export const GameRelay: Game<MyGameState> = {
     },
     onEnd: ({ G, ctx, events }) => {
       // playerID is not available here
-      if (ctx.currentPlayer.toString() === guesserPlayer && isOfflineMode()) {
+      if (ctx.currentPlayer.toString() === GUESSER_PLAYER && isOfflineMode()) {
         saveState(G, ctx);
       }
-      if (ctx.currentPlayer.toString() === judgePlayer) {
+      if (ctx.currentPlayer.toString() === JUDGE_PLAYER) {
         let currentTime = new Date();
         if (currentTime.getTime() - new Date(G.end).getTime() >= 0) {
           // Do not accept any answer if the time is over
