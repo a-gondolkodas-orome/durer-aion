@@ -86,37 +86,35 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
     }
 
     //Update  new_state
-    const upDate = new Date(state.G.end)
-    upDate.setMinutes(upDate.getMinutes() + minutes)
-    new_state.G.end = upDate.toISOString();
-    const upd = state.G.end;
-    new_state.G.milisecondsRemaining = upDate.getTime() - new Date().getTime();
+    const newEndDate = new Date(state.G.end)
+    newEndDate.setMinutes(newEndDate.getMinutes() + minutes)
+    new_state.G.end = newEndDate.toISOString();
+    new_state.G.milisecondsRemaining = newEndDate.getTime() - new Date().getTime();
 
     //Update team
-    //TODO: review super duper forced update alternatives
     if (team.strategyMatch.state === "IN PROGRESS") {
       if (team.strategyMatch.matchID !== matchID) {
-        ctx.throw(501, 'Match found, and team found, but incorrect MatchId. We don\'t support MatchID deduction. (Probabaly using old one.)');
+        ctx.throw(501, `IN PROGRESS strategy match found (${team.strategyMatch.matchID}), but it does not match with matchID (${matchID}). (Probabaly you are using an old matchID.)`);
       }
       await team.update({
         strategyMatch: {
           state: 'IN PROGRESS',
           matchID: matchID,
           startAt: new Date(new_state.G.start),
-          endAt: upDate,
+          endAt: newEndDate,
         }
       })
     }
     else if (team.relayMatch.state === "IN PROGRESS") {
       if (team.relayMatch.matchID !== matchID) {
-        ctx.throw(501, 'Match found, and team found, but incorrect MatchId. We don\'t support MatchID deduction. (Probabaly using old one.)');
+        ctx.throw(501, `IN PROGRESS relay match found (${team.relayMatch.matchID}), but it does not match with matchID (${matchID}). (Probabaly you are using an old matchID.)`);
       }
       await team.update({
         relayMatch: {
           state: 'IN PROGRESS',
           matchID: matchID,
           startAt: new Date(new_state.G.start),
-          endAt: upDate,
+          endAt: newEndDate,
         }
       })
     }
@@ -133,13 +131,13 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
       return
     }
 
-    // Hijacking the internal transport API used ot send backend updates to the frontend to send an update to the frontend
-    // This is a bit hacky, but it mainly simulates a similar effect as what would happen if a different user changes teh gamestate irl
-    // This is generally equal to what would happen if multiple players play the game, and one does some actions.
-    // The other players would see the updated gamestate, and the frontend would update accordingly.
-    // The normal way to use this, is to create a Master authorative object, which handels validations, and other logics.
-    // Here we already handeled the validation, and uploded it to the database, so we can just send the updated gamestate to the frontend.
-    // This is possible, because the publish functionality of the PubSub implementation,if we use a SendAll function, can be reconstructed easily from the transport layer we defined from the botmoves already.
+    /* Hijacking the internal transport API used ot send backend updates to the frontend to send an update to the frontend
+    This is a bit hacky, but it mainly simulates a similar effect as what would happen if a different user changes teh gamestate irl
+    This is generally equal to what would happen if multiple players play the game, and one does some actions.
+    The other players would see the updated gamestate, and the frontend would update accordingly.
+    The normal way to use this, is to create a Master authorative object, which handels validations, and other logics.
+    Here we already handeled the validation, and uploded it to the database, so we can just send the updated gamestate to the frontend.
+    This is possible, because the publish functionality of the PubSub implementation,if we use a SendAll function, can be reconstructed easily from the transport layer we defined from the botmoves already. */
     const my_transportAPI = TransportAPI(matchID, null /* we are only using sendAll */, getFilterPlayerView(game), ctx.durer_transport.pubSub)
 
     my_transportAPI.sendAll(
@@ -152,7 +150,7 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
     team.other += ` te[${matchID}]:${minutes}`
     team.save()
 
-    ctx.body = { updatedEndTime: upDate, matchID: matchID, team: team };
+    ctx.body = { updatedEndTime: newEndDate, matchID: matchID, team: team };
 
   });
 
