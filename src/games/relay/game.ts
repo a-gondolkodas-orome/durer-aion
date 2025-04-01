@@ -1,6 +1,7 @@
 import { Game } from "boardgame.io";
 import { INVALID_MOVE, TurnOrder } from "boardgame.io/core";
 import { sendDataRelayEnd } from "../../common/sendData";
+import { isOfflineMode } from "../../client/utils/appMode";
 
 type Answer = {
   answer: number;
@@ -23,7 +24,27 @@ export interface MyGameState {
   url: string;
 }
 
-const lengthOfCompetition = 60 * 60; // seconds
+function parseGameState(json: string): MyGameState {
+  const parsed = JSON.parse(json);
+  
+  // Validate the parsed object
+  if (typeof parsed !== 'object' || parsed === null) {
+    throw new Error('relay: game_state_from_json: Invalid JSON: not an object');
+  }
+
+  // Type assertion to avoid repetitive type checks
+  const state = parsed as MyGameState;
+
+  return state;
+}
+
+function saveState(state: MyGameState, ctx: any) {
+  const stateString = JSON.stringify(state);
+  localStorage.setItem("RelayGamePhase", ctx.phase);
+  localStorage.setItem("RelayGameState", stateString);
+}
+
+const COMPETITION_LENGTH_SECS = 60 * 60; // seconds
 
 const GUESSER_PLAYER = '0';
 const JUDGE_PLAYER = '1';
@@ -31,25 +52,55 @@ const JUDGE_PLAYER = '1';
 export const GameRelay: Game<MyGameState> = {
   setup: () => {
     return {
-    currentProblem: 0,
-    problemText: "", // TODO: get from the problem list
-    answer: null,
-    points: 0,
-    correctnessPreviousAnswer: null,
-    previousAnswers: [[]],
-    previousPoints: [],
-    currentProblemMaxPoints: 3, // TODO: get from the problem list, TODO: rename this function to currentProblemAvailablePoints
-    numberOfTry: 0,
-    milisecondsRemaining: 1000 * lengthOfCompetition,
-    start: new Date().toISOString(),
-    end: new Date(Date.now() + 1000 * lengthOfCompetition).toISOString(),
-    url: "",
-  }},
+      currentProblem: 0,
+      problemText: "", // TODO: get from the problem list
+      answer: null,
+      points: 0,
+      correctnessPreviousAnswer: null,
+      previousAnswers: [[]],
+      previousPoints: [],
+      currentProblemMaxPoints: 3, // TODO: get from the problem list, TODO: rename this function to currentProblemAvailablePoints
+      numberOfTry: 0,
+      milisecondsRemaining: 1000 * COMPETITION_LENGTH_SECS,
+      start: new Date().toISOString(),
+      end: new Date(Date.now() + 1000 * COMPETITION_LENGTH_SECS).toISOString(),
+      url: "",
+    };
+  },
   phases:
   {
     startNewGame: {
       moves: {
         startGame: ({ G, ctx, playerID, events }) => {
+          if (isOfflineMode()) {
+            let phase = localStorage.getItem("RelayGamePhase");
+            let game_state_json = localStorage.getItem("RelayGameState");
+            let end = localStorage.getItem("RelayEnd");
+            if (phase && game_state_json) {
+              try { // if the json is bad, continue as if we didnt even have it
+                const state = parseGameState(game_state_json);
+                const newGame = {
+                  ...state,
+                  milisecondsRemaining: Date.parse(state.end) - Date.now(),
+                };
+                events.setPhase(phase);
+                return newGame;
+              } catch {
+                console.error("could not load game phase from json, invalid json");
+                // move on as if we didnt have saved state
+              }
+            }
+
+            // so the clock works even if they reload the page before submitting
+            // an answer (which is when we normally save the state)
+            if (end) {
+              G.end = end;
+              G.milisecondsRemaining = Date.parse(G.end) - Date.now();
+            }
+            else {
+              localStorage.setItem("RelayEnd", G.end);
+            }
+          }
           if (playerID !== GUESSER_PLAYER || G.numberOfTry !== 0) {
             return INVALID_MOVE;
           }
@@ -64,13 +115,11 @@ export const GameRelay: Game<MyGameState> = {
           G.problemText = problemText;
           G.numberOfTry = 1;
           events.endTurn();
-          console.log("end")
         },
       },
-      turn: {  
+      turn: {
         order: TurnOrder.ONCE,
         onMove: ({G, ctx, playerID, events }) => {
-          console.log("onMove")
           if(playerID === GUESSER_PLAYER) {
             let currentTime = new Date();
             if(currentTime.getTime() - new Date(G.end).getTime() > 1000*10){
@@ -97,7 +146,7 @@ export const GameRelay: Game<MyGameState> = {
           G.correctnessPreviousAnswer = correctnessPreviousAnswer;
           if (correctnessPreviousAnswer) {
             G.points += G.currentProblemMaxPoints;
-            if (process.env.REACT_APP_WHICH_VERSION === "b") {
+            if (isOfflineMode()) {
               localStorage.setItem("RelayPoints", G.points.toString());
             }
             G.previousPoints[G.currentProblem] = G.currentProblemMaxPoints;
@@ -136,7 +185,7 @@ export const GameRelay: Game<MyGameState> = {
           G.correctnessPreviousAnswer = correctnessPreviousAnswer;
           if (correctnessPreviousAnswer) {
             G.points += G.currentProblemMaxPoints;
-            if (process.env.REACT_APP_WHICH_VERSION === "b") {
+            if (isOfflineMode()) {
               localStorage.setItem("RelayPoints", G.points.toString());
               sendDataRelayEnd(null, G, ctx);
             }
@@ -158,18 +207,19 @@ export const GameRelay: Game<MyGameState> = {
   turn: {
     onMove: ({G, ctx, playerID, events }) => {
       if(playerID === GUESSER_PLAYER) {
-        console.log("onMove")
         let currentTime = new Date();
         if(currentTime.getTime() - new Date(G.end).getTime() > 1000*10){
           // Do not accept any answer if the time is over since more than 10 seconds
           events.endGame();
         }
       }
-    },    
+    },
     onEnd: ({ G, ctx, events }) => {
       // playerID is not available here
+      if (ctx.currentPlayer.toString() === GUESSER_PLAYER && isOfflineMode()) {
+        saveState(G, ctx);
+      }
       if (ctx.currentPlayer.toString() === JUDGE_PLAYER) {
-        console.log("onEnd")
         let currentTime = new Date();
         if (currentTime.getTime() - new Date(G.end).getTime() >= 0) {
           // Do not accept any answer if the time is over
@@ -177,7 +227,7 @@ export const GameRelay: Game<MyGameState> = {
         }
       }
     },
-  },  
+  },
 
   ai: {
     enumerate: (G, ctx, playerID) => {

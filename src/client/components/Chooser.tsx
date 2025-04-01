@@ -2,6 +2,7 @@ import { Stack } from "@mui/system";
 import { FinishedMatchStatus, TeamModelDto } from "../dto/TeamStateDto";
 import { ChooserItem } from "./ChooserItem";
 import { dictionary } from "../text-constants";
+import { isOfflineMode } from "../utils/appMode";
 
 export function Chooser(props: {
   state: TeamModelDto;
@@ -58,7 +59,7 @@ export function Chooser(props: {
           >
             {dictionary.chooser.finish.final}: <b>{finalPoints}</b>
           </p>
-          {process.env.REACT_APP_WHICH_VERSION === "b" && "A pontszámotok csak tájékoztató jellegű, a végleges pontszámotokat a beküldött válaszok alapján újraértékeljük."}
+          {isOfflineMode() && "A pontszámotok csak tájékoztató jellegű, a végleges pontszámotokat a beküldött válaszok alapján újraértékeljük."}
         </Stack>
       )}
       <Stack
