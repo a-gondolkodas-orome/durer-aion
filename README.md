@@ -31,12 +31,30 @@ Frontend needs to be built after every change, but the server auto-reloads.
 
 ### Setting up the server
 
+```bash
+sudo docker-compose --env-file=.env.docker up --build 
 ```
+
+ vagy 
+ 
+```bash
 docker compose --env-file=.env.docker up --build 
 ```
 
 (before first run, you will need `npm run build`)
 Also pay attention to create a correct `.env.docker` file based on the `.env.docker.sample` file.
+
+Note: Some newer docker installs have a different compose interface, you may use the compose command like this:
+
+```bash
+sudo docker compose up --build
+```
+
+Note: Some newer docker installs have a different compose interface, you may use the compose command like this:
+
+```bash
+docker compose up --build
+```
 
 You should be up and running the application on `localhost`.
 
