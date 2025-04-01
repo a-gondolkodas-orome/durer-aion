@@ -1,25 +1,23 @@
-import { INVALID_MOVE } from 'boardgame.io/core';
-import { currentPlayer, GameType, PlayerIDType } from '../../common/types';
+import { INVALID_MOVE } from "boardgame.io/core";
+import { GameType } from "../../common/types";
 
-export interface MyGameState {
-  
-}
+export interface MyGameState {}
 
 export type Position = [number, number];
 
-export const MyGame: GameType<MyGameState> = { // TOOO: solve type
+export const MyGame: GameType<MyGameState> = {
+  // TOOO: solve type
   name: "15oc",
   setup: () => ({ }),
 
   moves: {
     clickCell: ({ G, ctx, playerID, events }, s: string) => {
-      if (false) { // TODO: more checks
+      if (false) {
+        // TODO: more checks
         return INVALID_MOVE;
       }
       if (playerID === "0") {
-        
       } else {
-        
       }
       
       let winner = getWinner();
@@ -36,8 +34,7 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type
           G.numberOfLoss += 1;
         }
       }
-
-    }
+    },
   },
 
   possibleMoves: (G, ctx, playerID) => {
@@ -49,5 +46,4 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type
 
 function getWinner(): string {
   return "";
-
 }

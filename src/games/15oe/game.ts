@@ -1,5 +1,5 @@
 import { INVALID_MOVE } from 'boardgame.io/core';
-import { currentPlayer, GameType, PlayerIDType } from '../../common/types';
+import { GameType } from '../../common/types';
 
 export interface MyGameState {
   
