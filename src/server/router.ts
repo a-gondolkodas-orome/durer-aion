@@ -1,18 +1,12 @@
-import koaBody from "koa-body";
-import * as Router from "@koa/router";
-import type { Game, LobbyAPI, Server, StorageAPI } from "boardgame.io";
-import { TeamsRepository } from "./db";
-import { InProgressMatchStatus, TeamModel } from "./entities/model";
-import { BOT_ID } from "../socketio_botmoves";
-import {
-  closeMatch,
-  getNewGame,
-  checkStaleMatch,
-  startMatchStatus,
-  createGame,
-  injectBot,
-  injectPlayer,
-} from "./team_manage";
+import koaBody from 'koa-body';
+import * as Router from '@koa/router';
+import type { Game, LobbyAPI, Server, StorageAPI } from 'boardgame.io';
+import { TeamsRepository } from './db';
+import { InProgressMatchStatus, TeamModel } from './entities/model';
+import { BOT_ID, TransportAPI } from '../socketio_botmoves';
+import { getFilterPlayerView } from "boardgame.io/internal";
+import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus, createGame, injectBot, injectPlayer } from './team_manage';
+
 
 /**
  * 
@@ -91,48 +85,79 @@ export function configureTeamsRouter(
       return;
     }
 
-    const upDate = new Date(state.G.end);
-    upDate.setMinutes(upDate.getMinutes() + minutes);
+    const new_state = {
+      ...state,
+      //manually increment stateID
+      _stateID: state._stateID + 1
+    }
 
-    //Update state
-    state.G.end = upDate.toISOString();
-    state.G.milisecondsRemaining = upDate.getTime() - new Date().getTime();
-    //manually increment stateID
-    //really hope this doesn't breaky anything
-    state._stateID += 1;
+    //Update  new_state
+    const newEndDate = new Date(state.G.end)
+    newEndDate.setMinutes(newEndDate.getMinutes() + minutes)
+    new_state.G.end = newEndDate.toISOString();
+    new_state.G.milisecondsRemaining = newEndDate.getTime() - new Date().getTime();
 
     //Update team
-    //TODO: review super duper forced update alternatives
-    if (team.strategyMatch.state === "IN PROGRESS")
+    if (team.strategyMatch.state === "IN PROGRESS") {
+      if (team.strategyMatch.matchID !== matchID) {
+        ctx.throw(501, `IN PROGRESS strategy match found (${team.strategyMatch.matchID}), but it does not match with matchID (${matchID}). (Probabaly you are using an old matchID.)`);
+      }
       await team.update({
         strategyMatch: {
           state: "IN PROGRESS",
           matchID: matchID,
-          startAt: new Date(state.G.start),
-          endAt: upDate,
-        },
-      });
-    else if (team.relayMatch.state === "IN PROGRESS")
+          startAt: new Date(new_state.G.start),
+          endAt: newEndDate,
+        }
+      })
+    }
+    else if (team.relayMatch.state === "IN PROGRESS") {
+      if (team.relayMatch.matchID !== matchID) {
+        ctx.throw(501, `IN PROGRESS relay match found (${team.relayMatch.matchID}), but it does not match with matchID (${matchID}). (Probabaly you are using an old matchID.)`);
+      }
       await team.update({
         relayMatch: {
           state: "IN PROGRESS",
           matchID: matchID,
-          startAt: new Date(state.G.start),
-          endAt: upDate,
-        },
-      });
-    else
-      ctx.throw(
-        501,
-        "Restarting an already finished match is not supported right now."
-      );
+          startAt: new Date(new_state.G.start),
+          endAt: newEndDate,
+        }
+      })
+    }
+    else {
+      ctx.throw(501, 'Restarting an already finished match is not supported right now.');
+    }
 
-    await ctx.db.setState(matchID, state);
+    await ctx.db.setState(matchID, new_state);
+
+    //Reconstruct game name from metadata
+    let game = games.find(g => g.name === metadata.gameName);
+    if (!game) {
+      ctx.throw(404, `Match found, but game ${metadata.gameName} was not found.`);
+      return
+    }
+
+    /* Hijacking the internal transport API used ot send backend updates to the frontend to send an update to the frontend
+    This is a bit hacky, but it mainly simulates a similar effect as what would happen if a different user changes teh gamestate irl
+    This is generally equal to what would happen if multiple players play the game, and one does some actions.
+    The other players would see the updated gamestate, and the frontend would update accordingly.
+    The normal way to use this, is to create a Master authorative object, which handels validations, and other logics.
+    Here we already handeled the validation, and uploded it to the database, so we can just send the updated gamestate to the frontend.
+    This is possible, because the publish functionality of the PubSub implementation,if we use a SendAll function, can be reconstructed easily from the transport layer we defined from the botmoves already. */
+    const my_transportAPI = TransportAPI(matchID, null /* we are only using sendAll */, getFilterPlayerView(game), ctx.durer_transport.pubSub)
+
+    my_transportAPI.sendAll(
+      {
+        type: 'update',
+        args: [matchID, new_state]
+      }
+    )
 
     team.other += ` te[${matchID}]:${minutes}`;
     team.save();
 
-    ctx.body = { updatedEndTime: upDate, matchID: matchID, team: team };
+    ctx.body = { updatedEndTime: newEndDate, matchID: matchID, team: team };
+
   });
 
   /**
@@ -167,12 +192,13 @@ export function configureTeamsRouter(
       return;
     }
     // reset the strategy game while playing
-    if (team.pageState === "STRATEGY") team.pageState = "HOME";
+    if (team.pageState === 'STRATEGY')
+      team.pageState = 'HOME'
 
     //log earlier matchid
-    if (team.strategyMatch.state !== "NOT STARTED")
-      team.other += ` prevstratid:${team.strategyMatch.matchID}`;
-    team.strategyMatch = { state: "NOT STARTED" };
+    if (team.strategyMatch.state !== 'NOT STARTED')
+      team.other += ` prevstratid:${team.strategyMatch.matchID}`
+    team.strategyMatch = { state: 'NOT STARTED' }
     team.save();
     ctx.body = team;
   });
@@ -192,12 +218,13 @@ export function configureTeamsRouter(
       return;
     }
     // reset the strategy game while playing
-    if (team.pageState === "RELAY") team.pageState = "HOME";
+    if (team.pageState === 'RELAY')
+      team.pageState = 'HOME'
 
     //log earlier matchid
-    if (team.relayMatch.state !== "NOT STARTED")
-      team.other += ` prevrelayid:${team.relayMatch.matchID}`;
-    team.relayMatch = { state: "NOT STARTED" };
+    if (team.relayMatch.state !== 'NOT STARTED')
+      team.other += ` prevrelayid:${team.relayMatch.matchID}`
+    team.relayMatch = { state: 'NOT STARTED' }
     team.save();
     ctx.body = team;
   });
@@ -242,8 +269,9 @@ export function configureTeamsRouter(
     const connect_token: string = ctx.params.token ?? "no-token";
     const team = await teams.getTeam({ joinCode: connect_token });
     ctx.body = team?.teamId;
-    if (team === null) ctx.throw(404, "Team not found!");
-  });
+    if (team === null)
+      ctx.throw(404, "Team not found!")
+  })
 
   /**
    * ROUTING FOR TEAM DATA is handled here. If wrong team then returns 400
@@ -350,14 +378,9 @@ export function configureTeamsRouter(
     const GUID = ctx.params.GUID;
     //check if in progress, it is not allowed to play
     //check if it can be started, throw error if not
-    const team: TeamModel =
-      (await teams.getTeam({ teamId: GUID })) ??
-      ctx.throw(404, `Team with {id:${GUID}} not found.`);
-    if (
-      team.relayMatch.state === "IN PROGRESS" ||
-      team.strategyMatch.state === "IN PROGRESS"
-    )
-      ctx.throw(403, "Not allowed, match in progress.");
+    const team: TeamModel = await teams.getTeam({ teamId: GUID }) ?? ctx.throw(404, `Team with {id:${GUID}} not found.`)
+    if (team.relayMatch.state === 'IN PROGRESS' || team.strategyMatch.state === 'IN PROGRESS')
+      ctx.throw(403, "Not allowed, match in progress.")
 
     //update team state to go home
     team.update({
