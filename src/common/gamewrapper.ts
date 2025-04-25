@@ -50,7 +50,6 @@ type loadGameFn = ({ G, playerID, events }:any) => any;
 // called from a useeffect in boardwrapper.tsx
 // state is saved in onEnd()
 function loadGameState<T_SpecificGameState>({ events }:any) {
-  console.log("loadGame");
   if (process.env.REACT_APP_WHICH_VERSION === "a") {
     return;
   }
@@ -75,7 +74,6 @@ function loadGameState<T_SpecificGameState>({ events }:any) {
   if (phase === "startNewGame") {
     events.endPhase();
   }
-  state.gameStateLoadedFromStorage = true;
   state.milisecondsRemaining = new Date(state.end).getTime() - new Date().getTime();
   return state;
 }
@@ -94,7 +92,6 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
       milisecondsRemaining: 1000 * lengthOfCompetition,
       start: new Date().toISOString(),
       end: new Date(Date.now() + 1000 * lengthOfCompetition).toISOString(),
-      gameStateLoadedFromStorage: false,
       firstPlayer: null,
       difficulty: null,
       winner: null,
@@ -141,9 +138,6 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
         turn: {
           order: {
             first: ({ G, ctx }) => {
-              if (G.gameStateLoadedFromStorage) {
-                return 0; // game state is saved at the end of the judge's turn
-              }
               return G.firstPlayer === GUESSER_PLAYER ? 0 : 1;
             },
             next: ({ G, ctx }) => {
@@ -163,6 +157,7 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
             console.log("onEnd", ctx.currentPlayer, process.env.REACT_APP_WHICH_VERSION);
             if (process.env.REACT_APP_WHICH_VERSION === "b" && ctx.currentPlayer === JUDGE_PLAYER) {
               console.log("saving game state");
+              G.firstPlayer = GUESSER_PLAYER;
               localStorage.setItem("StrategyGameState", JSON.stringify(G));
               localStorage.setItem("StrategyPhase", ctx.phase);
             }

@@ -13,7 +13,6 @@ export interface GameStateMixin {
   numberOfLoss: number;
   winningStreak: number;
   points: number;
-  gameStateLoadedFromStorage: boolean;
   milisecondsRemaining: number;
   start: string;
   end: string;
