@@ -1,5 +1,5 @@
 import { INVALID_MOVE } from 'boardgame.io/core';
-import { GameType, PlayerIDType } from '../../common/types';
+import { GameType, guesserPlayer, judgePlayer, PlayerIDType } from '../../common/types';
 
 export type Position = (0|1|null)[][];
 
@@ -61,7 +61,7 @@ export const MyGame: GameType<MyGameState> = {
         G.remainingLetters,
         G.firstPlayer
       );
-      if (winner === "0" || winner === "1") {
+      if (winner === guesserPlayer || winner === judgePlayer) {
         G.winner = winner;
         if(winner === "0"){
           G.winningStreak = G.winningStreak + 1;
@@ -90,13 +90,13 @@ function getWinner(
   first: string[],
   second: string[],
   remaining: string[],
-  firstPlayer: number | null
+  firstPlayer: PlayerIDType | null
 ): string {
   if(remaining.length === 0){
     if(firstPlayer === PlayerIDType.guesserPlayer){
-      return "1";
+      return judgePlayer;
     } // Enemy wins
-    return "0"; //Player wins
+    return guesserPlayer; //Player wins
   }
 
   const SOROK = [
