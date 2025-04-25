@@ -222,12 +222,12 @@ export function Admin(props: {setAdmin: Dispatch<boolean>}) {
 function Stats(props: {data: TeamModelDto[]}) {
   const categories = Array.from(new Set(props.data.map(it=>it.category)));
   const stat = categories.sort().map(cat=>{
-    const current = props.data.filter(it=>it.category==cat);
-    const bothNotStarted = current.filter(it=>it.strategyMatch.state == "NOT STARTED" && it.relayMatch.state == "NOT STARTED").length;
-    const relayInProgress = current.filter(it=>it.relayMatch.state == "IN PROGRESS").length;
-    const strategyInProgress = current.filter(it=>it.strategyMatch.state == "IN PROGRESS").length;
-    const finishedRelayScores = current.filter(it=>it.relayMatch.state == "FINISHED").map(it=>(it.relayMatch as FinishedMatchStatus).score);
-    const finishedStrategyScores = current.filter(it=>it.strategyMatch.state == "FINISHED").map(it=>(it.strategyMatch as FinishedMatchStatus).score);
+    const current = props.data.filter(it=>it.category===cat);
+    const bothNotStarted = current.filter(it=>it.strategyMatch.state == "NOT STARTED" && it.relayMatch.state === "NOT STARTED").length;
+    const relayInProgress = current.filter(it=>it.relayMatch.state === "IN PROGRESS").length;
+    const strategyInProgress = current.filter(it=>it.strategyMatch.state === "IN PROGRESS").length;
+    const finishedRelayScores = current.filter(it=>it.relayMatch.state === "FINISHED").map(it=>(it.relayMatch as FinishedMatchStatus).score);
+    const finishedStrategyScores = current.filter(it=>it.strategyMatch.state === "FINISHED").map(it=>(it.strategyMatch as FinishedMatchStatus).score);
     const strategyPoints = Array.from(new Set(finishedStrategyScores));
     const relayPoints = Array.from(new Set(finishedRelayScores));
     return {
@@ -238,14 +238,14 @@ function Stats(props: {data: TeamModelDto[]}) {
       strategyInProgress: strategyInProgress,
       relay: finishedRelayScores.length,
       strategy: finishedStrategyScores.length,
-      finished: current.filter(it=>it.strategyMatch.state == "FINISHED" && it.relayMatch.state == "FINISHED").length,
+      finished: current.filter(it=>it.strategyMatch.state === "FINISHED" && it.relayMatch.state === "FINISHED").length,
       strategyPoints: strategyPoints.map(it=> ({
         point: it,
-        count: finishedStrategyScores.filter(s=>s==it).length
+        count: finishedStrategyScores.filter(s=>s === it).length
       })),
       relayPoints: relayPoints.map(it=> ({
         point: it,
-        count: finishedRelayScores.filter(s=>s==it).length
+        count: finishedRelayScores.filter(s=>s === it).length
       })),
     }
   })

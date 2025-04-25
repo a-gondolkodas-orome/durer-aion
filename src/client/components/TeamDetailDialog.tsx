@@ -1,10 +1,9 @@
-import { display, Stack, width } from '@mui/system';
-import { useAddMinutes, useAll, useMatchState, useResetRelay, useResetStrategy } from '../hooks/user-hooks';
-import { Button, Dialog } from '@mui/material';
-import { Dispatch, useState } from 'react';
+import { Stack } from '@mui/system';
+import { useAddMinutes, useMatchState, useResetRelay, useResetStrategy } from '../hooks/user-hooks';
+import { Button } from '@mui/material';
+import { useState } from 'react';
 import useSWR from 'swr';
-import { DataGrid } from '@mui/x-data-grid';
-import { MatchStateDto, TeamModelDto, InProgressMatchStatus, FinishedMatchStatus, MatchStatus, NotStartedMatchStatus } from '../dto/TeamStateDto';
+import { TeamModelDto, InProgressMatchStatus, FinishedMatchStatus, MatchStatus } from '../dto/TeamStateDto';
 import { formatTime } from '../utils/DateFormatter';
 import { Field } from 'formik';
 import Form from "./form";

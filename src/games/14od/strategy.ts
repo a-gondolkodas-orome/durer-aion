@@ -1,6 +1,6 @@
-import { State } from 'boardgame.io';
-import { GameStateMixin } from '../../common/types';
-import { MyGameState, Position } from './game';
+import { State } from "boardgame.io";
+import { GameStateMixin } from "../../common/types";
+import { MyGameState } from "./game";
 
 let megadottValaszlepesek=new Map<string,string>([
   ["", "S"],
@@ -1191,49 +1191,147 @@ let megadottValaszlepesek=new Map<string,string>([
   ["X", "VA"],
   ]);
 
-  const SOROK=["ABC","DEF","GHI","AJV","DKS","GLP","PQR","STU","VWX","IMR","FNU","COX","ADG","CFI","PSV","RUX"];
-  const VILLAK=["ABCDG","ABCJV","ADGJV","CABFI","CABOX","CFIOX","DAGEF","DAGKS","DEFKS","FCIDE","FCINU","FDENU","GADHI","GADLP","GHILP","ICFGH","ICFMR","IGHMR","PGLQR","PGLSV","PQRSV","RIMPQ","RIMUX","RPQUX","SDKPV","SDKTU","SPVTU","UFNST","UFNRX","USTRX","VAJPS","VAJWX","VPSWX","XCORU","XCOVW","XRUVW"];
-  const ATLOSVILLAK=["ADGBCJV","CFIABOX","DAGEFKS","FCIDENU","GADHILP","ICFGHMR","PSVGLQR","RUXIMPQ","SPVDKTU","URXFNST","VPSAJWX","XRUCOVW"];
+const SOROK = [
+  "ABC",
+  "DEF",
+  "GHI",
+  "AJV",
+  "DKS",
+  "GLP",
+  "PQR",
+  "STU",
+  "VWX",
+  "IMR",
+  "FNU",
+  "COX",
+  "ADG",
+  "CFI",
+  "PSV",
+  "RUX",
+];
+const VILLAK = [
+  "ABCDG",
+  "ABCJV",
+  "ADGJV",
+  "CABFI",
+  "CABOX",
+  "CFIOX",
+  "DAGEF",
+  "DAGKS",
+  "DEFKS",
+  "FCIDE",
+  "FCINU",
+  "FDENU",
+  "GADHI",
+  "GADLP",
+  "GHILP",
+  "ICFGH",
+  "ICFMR",
+  "IGHMR",
+  "PGLQR",
+  "PGLSV",
+  "PQRSV",
+  "RIMPQ",
+  "RIMUX",
+  "RPQUX",
+  "SDKPV",
+  "SDKTU",
+  "SPVTU",
+  "UFNST",
+  "UFNRX",
+  "USTRX",
+  "VAJPS",
+  "VAJWX",
+  "VPSWX",
+  "XCORU",
+  "XCOVW",
+  "XRUVW",
+];
+const ATLOSVILLAK = [
+  "ADGBCJV",
+  "CFIABOX",
+  "DAGEFKS",
+  "FCIDENU",
+  "GADHILP",
+  "ICFGHMR",
+  "PSVGLQR",
+  "RUXIMPQ",
+  "SPVDKTU",
+  "URXFNST",
+  "VPSAJWX",
+  "XRUCOVW",
+];
   const JOKOZEPSOK=["B","E","H","J","K","L","M","N","O","Q","T","W"];
-export function strategy(state: State<MyGameState & GameStateMixin>, botID: string): [string | undefined, string] {
+export function strategy(
+  state: State<MyGameState & GameStateMixin>,
+  botID: string
+): [string | undefined, string] {
   if(state.G.difficulty === "live"){
     let rEddigiek:string[] = [];
     if(state.G.firstPlayer === 0){
-      rEddigiek = state.G.playerLetters.flatMap(
-        (element, index) => [element, state.G.enemyLetters[index]]
-      );
-    }
-    else if (state.G.firstPlayer === 1){
-      rEddigiek = state.G.enemyLetters.flatMap(
-        (element, index) => [element, state.G.playerLetters[index]]
-      );
+      rEddigiek = state.G.playerLetters.flatMap((element, index) => [
+        element,
+        state.G.enemyLetters[index],
+      ]);
+    } else if (state.G.firstPlayer === 1) {
+      rEddigiek = state.G.enemyLetters.flatMap((element, index) => [
+        element,
+        state.G.playerLetters[index],
+      ]);
     }
     let rEddigiekString = rEddigiek.join("");
-    for (let i of SOROK){ //nyerés
-      if( state.G.enemyLetters.includes(i[0]) && state.G.enemyLetters.includes(i[1]) && state.G.remainingLetters.includes(i[2])){
+    for (let i of SOROK) {
+      //nyerés
+      if (
+        state.G.enemyLetters.includes(i[0]) &&
+        state.G.enemyLetters.includes(i[1]) &&
+        state.G.remainingLetters.includes(i[2])
+      ) {
         return [i[2], "clickCell"];
       }
-      if( state.G.enemyLetters.includes(i[0]) && state.G.enemyLetters.includes(i[2]) && state.G.remainingLetters.includes(i[1])){
+      if (
+        state.G.enemyLetters.includes(i[0]) &&
+        state.G.enemyLetters.includes(i[2]) &&
+        state.G.remainingLetters.includes(i[1])
+      ) {
         return [i[1], "clickCell"];
       }
-      if( state.G.enemyLetters.includes(i[2]) && state.G.enemyLetters.includes(i[1]) && state.G.remainingLetters.includes(i[0])){
+      if (
+        state.G.enemyLetters.includes(i[2]) &&
+        state.G.enemyLetters.includes(i[1]) &&
+        state.G.remainingLetters.includes(i[0])
+      ) {
         return [i[0], "clickCell"];
       }
     }
 
-    for (let i of SOROK){ //blokkolás
-      if( state.G.playerLetters.includes(i[0]) && state.G.playerLetters.includes(i[1]) && state.G.remainingLetters.includes(i[2])){
+    for (let i of SOROK) {
+      //blokkolás
+      if (
+        state.G.playerLetters.includes(i[0]) &&
+        state.G.playerLetters.includes(i[1]) &&
+        state.G.remainingLetters.includes(i[2])
+      ) {
         return [i[2], "clickCell"];
       }
-      if( state.G.playerLetters.includes(i[0]) && state.G.playerLetters.includes(i[2]) && state.G.remainingLetters.includes(i[1])){
+      if (
+        state.G.playerLetters.includes(i[0]) &&
+        state.G.playerLetters.includes(i[2]) &&
+        state.G.remainingLetters.includes(i[1])
+      ) {
         return [i[1], "clickCell"];
       }
-      if( state.G.playerLetters.includes(i[2]) && state.G.playerLetters.includes(i[1]) && state.G.remainingLetters.includes(i[0])){
+      if (
+        state.G.playerLetters.includes(i[2]) &&
+        state.G.playerLetters.includes(i[1]) &&
+        state.G.remainingLetters.includes(i[0])
+      ) {
         return [i[0], "clickCell"];
       }
     }
 
-    if (megadottValaszlepesek.has(rEddigiekString)){ //megadott válasz
+    if (megadottValaszlepesek.has(rEddigiekString)) {
+      //megadott válasz
       let valasz=megadottValaszlepesek.get(rEddigiekString) as string;
       if (valasz.length>1){
         valasz=valasz[Math.floor(Math.random()*valasz.length)];
@@ -1241,17 +1339,42 @@ export function strategy(state: State<MyGameState & GameStateMixin>, botID: stri
       return [valasz,"clickCell"];
     }
 
-    for (let i of VILLAK){ //villa
-      if( state.G.remainingLetters.includes(i[0]) && state.G.playerLetters.includes(i[1]) && state.G.playerLetters.includes(i[3]) && state.G.remainingLetters.includes(i[2]) && state.G.remainingLetters.includes(i[4])){
+    for (let i of VILLAK) {
+      //villa
+      if (
+        state.G.remainingLetters.includes(i[0]) &&
+        state.G.playerLetters.includes(i[1]) &&
+        state.G.playerLetters.includes(i[3]) &&
+        state.G.remainingLetters.includes(i[2]) &&
+        state.G.remainingLetters.includes(i[4])
+      ) {
         return [i[0], "clickCell"];
       }
-      if( state.G.remainingLetters.includes(i[0]) && state.G.playerLetters.includes(i[1]) && state.G.playerLetters.includes(i[4]) && state.G.remainingLetters.includes(i[2]) && state.G.remainingLetters.includes(i[3])){
+      if (
+        state.G.remainingLetters.includes(i[0]) &&
+        state.G.playerLetters.includes(i[1]) &&
+        state.G.playerLetters.includes(i[4]) &&
+        state.G.remainingLetters.includes(i[2]) &&
+        state.G.remainingLetters.includes(i[3])
+      ) {
         return [i[0], "clickCell"];
       }
-      if( state.G.remainingLetters.includes(i[0]) && state.G.playerLetters.includes(i[2]) && state.G.playerLetters.includes(i[3]) && state.G.remainingLetters.includes(i[1]) && state.G.remainingLetters.includes(i[4])){
+      if (
+        state.G.remainingLetters.includes(i[0]) &&
+        state.G.playerLetters.includes(i[2]) &&
+        state.G.playerLetters.includes(i[3]) &&
+        state.G.remainingLetters.includes(i[1]) &&
+        state.G.remainingLetters.includes(i[4])
+      ) {
         return [i[0], "clickCell"];
       }
-      if( state.G.remainingLetters.includes(i[0]) && state.G.playerLetters.includes(i[2]) && state.G.playerLetters.includes(i[4]) && state.G.remainingLetters.includes(i[1]) && state.G.remainingLetters.includes(i[3])){
+      if (
+        state.G.remainingLetters.includes(i[0]) &&
+        state.G.playerLetters.includes(i[2]) &&
+        state.G.playerLetters.includes(i[4]) &&
+        state.G.remainingLetters.includes(i[1]) &&
+        state.G.remainingLetters.includes(i[3])
+      ) {
         return [i[0], "clickCell"];
       }
     }
@@ -1260,10 +1383,18 @@ export function strategy(state: State<MyGameState & GameStateMixin>, botID: stri
     //(minden vízsz/függ. sor középső eleme mindkét irányban --> 24 eset)
     for(let i of SOROK){
       if(JOKOZEPSOK.includes(i[1])){
-        if(state.G.enemyLetters.includes(i[0]) && state.G.remainingLetters.includes(i[1]) && state.G.remainingLetters.includes(i[2])){
+        if (
+          state.G.enemyLetters.includes(i[0]) &&
+          state.G.remainingLetters.includes(i[1]) &&
+          state.G.remainingLetters.includes(i[2])
+        ) {
           return [i[2], "clickCell"];
         }
-        if(state.G.enemyLetters.includes(i[2]) && state.G.remainingLetters.includes(i[1]) && state.G.remainingLetters.includes(i[0])){
+        if (
+          state.G.enemyLetters.includes(i[2]) &&
+          state.G.remainingLetters.includes(i[1]) &&
+          state.G.remainingLetters.includes(i[0])
+        ) {
           return [i[0], "clickCell"];
         }
       }
@@ -1271,27 +1402,75 @@ export function strategy(state: State<MyGameState & GameStateMixin>, botID: stri
 
     //tetszőleges támadás úgy, hogy az ellenfélnek ne legyen 2-ese
     for(let i of ATLOSVILLAK){
-      if(!(state.G.playerLetters.includes(i[3]) && state.G.remainingLetters.includes(i[4])) && !(state.G.playerLetters.includes(i[4]) && state.G.remainingLetters.includes(i[3])) && !(state.G.playerLetters.includes(i[5]) && state.G.remainingLetters.includes(i[6])) && !(state.G.playerLetters.includes(i[6]) && state.G.remainingLetters.includes(i[5]))){
-        if(state.G.enemyLetters.includes(i[1]) && state.G.remainingLetters.includes(i[2])){
+      if (
+        !(
+          state.G.playerLetters.includes(i[3]) &&
+          state.G.remainingLetters.includes(i[4])
+        ) &&
+        !(
+          state.G.playerLetters.includes(i[4]) &&
+          state.G.remainingLetters.includes(i[3])
+        ) &&
+        !(
+          state.G.playerLetters.includes(i[5]) &&
+          state.G.remainingLetters.includes(i[6])
+        ) &&
+        !(
+          state.G.playerLetters.includes(i[6]) &&
+          state.G.remainingLetters.includes(i[5])
+        )
+      ) {
+        if (
+          state.G.enemyLetters.includes(i[1]) &&
+          state.G.remainingLetters.includes(i[2])
+        ) {
           return [i[2], "clickCell"];
         }
-        if(state.G.enemyLetters.includes(i[2]) && state.G.remainingLetters.includes(i[1])){
+        if (
+          state.G.enemyLetters.includes(i[2]) &&
+          state.G.remainingLetters.includes(i[1])
+        ) {
           return [i[1], "clickCell"];
         }
       }
     }
 
-    for (let i of VILLAK){ //villablokkolás
-      if( state.G.remainingLetters.includes(i[0]) && state.G.enemyLetters.includes(i[1]) && state.G.enemyLetters.includes(i[3]) && state.G.remainingLetters.includes(i[2]) && state.G.remainingLetters.includes(i[4])){
+    for (let i of VILLAK) {
+      //villablokkolás
+      if (
+        state.G.remainingLetters.includes(i[0]) &&
+        state.G.enemyLetters.includes(i[1]) &&
+        state.G.enemyLetters.includes(i[3]) &&
+        state.G.remainingLetters.includes(i[2]) &&
+        state.G.remainingLetters.includes(i[4])
+      ) {
         return [i[0], "clickCell"];
       }
-      if( state.G.remainingLetters.includes(i[0]) && state.G.enemyLetters.includes(i[1]) && state.G.enemyLetters.includes(i[4]) && state.G.remainingLetters.includes(i[2]) && state.G.remainingLetters.includes(i[3])){
+      if (
+        state.G.remainingLetters.includes(i[0]) &&
+        state.G.enemyLetters.includes(i[1]) &&
+        state.G.enemyLetters.includes(i[4]) &&
+        state.G.remainingLetters.includes(i[2]) &&
+        state.G.remainingLetters.includes(i[3])
+      ) {
         return [i[0], "clickCell"];
       }
-      if( state.G.remainingLetters.includes(i[0]) && state.G.enemyLetters.includes(i[2]) && state.G.enemyLetters.includes(i[3]) && state.G.remainingLetters.includes(i[1]) && state.G.remainingLetters.includes(i[4])){
+      if (
+        state.G.remainingLetters.includes(i[0]) &&
+        state.G.enemyLetters.includes(i[2]) &&
+        state.G.enemyLetters.includes(i[3]) &&
+        state.G.remainingLetters.includes(i[1]) &&
+        state.G.remainingLetters.includes(i[4])
+      ) {
         return [i[0], "clickCell"];
       }
-      if( state.G.remainingLetters.includes(i[0]) && state.G.enemyLetters.includes(i[2]) && state.G.enemyLetters.includes(i[4]) && state.G.remainingLetters.includes(i[1]) && state.G.remainingLetters.includes(i[3])){
+      if (
+        state.G.remainingLetters.includes(i[0]) &&
+        state.G.enemyLetters.includes(i[2]) &&
+        state.G.enemyLetters.includes(i[4]) &&
+        state.G.remainingLetters.includes(i[1]) &&
+        state.G.remainingLetters.includes(i[3])
+      ) {
         return [i[0], "clickCell"];
       }
     }
@@ -1302,9 +1481,17 @@ export function strategy(state: State<MyGameState & GameStateMixin>, botID: stri
     }
     let hanyban = new Array<number>(state.G.remainingLetters.length).fill(0);
     for(let i in SOROK){
-      if(!(state.G.enemyLetters.includes(i[0])) && !(state.G.enemyLetters.includes(i[1])) && !(state.G.enemyLetters.includes(i[2]))){
+      if (
+        !state.G.enemyLetters.includes(i[0]) &&
+        !state.G.enemyLetters.includes(i[1]) &&
+        !state.G.enemyLetters.includes(i[2])
+      ) {
         for (let j=0; j<state.G.remainingLetters.length; j++){
-					if ((state.G.remainingLetters[j] === i[0]) || (state.G.remainingLetters[j] === i[1]) || (state.G.remainingLetters[j] === i[2])){
+          if (
+            state.G.remainingLetters[j] === i[0] ||
+            state.G.remainingLetters[j] === i[1] ||
+            state.G.remainingLetters[j] === i[2]
+          ) {
 						hanyban[j]++;
 					}
 				}
@@ -1319,9 +1506,13 @@ export function strategy(state: State<MyGameState & GameStateMixin>, botID: stri
       }
     }
 
-    return [state.G.remainingLetters[indexes[Math.floor(Math.random()*indexes.length)]], "clickCell"];
-  }
-  else{
+    return [
+      state.G.remainingLetters[
+        indexes[Math.floor(Math.random() * indexes.length)]
+      ],
+      "clickCell",
+    ];
+  } else {
     return [undefined, "clickCell"];
   } 
 }

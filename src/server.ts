@@ -120,20 +120,23 @@ if (argv[2] === "import") {
       })]
     ));
 
+  const socketio = new SocketIOButBotMoves(
+    { https: undefined },
+    botSetup,
+    async function onFinishedMatch(matchID) {
+      await closeMatch(matchID, teams, db);
+    },
+  );
   const server = Server({
     games: games,
-    transport: new SocketIOButBotMoves(
-      { https: undefined },
-      botSetup,
-      async function onFinishedMatch(matchID) {
-        console.log(matchID, "finished");
-        await closeMatch(matchID, teams, db);
-      }
-    ),
+    transport: socketio,
     db,
   });
 
   const PORT = parseInt(env.PORT || "8000");
+
+  // Set up transport layer for updates
+  server.app.context.durer_transport = socketio;
 
   //Admin page auth setup
   server.app.use(mount('/team/admin', auth({ name: 'admin', pass: getAdminCredentials() })));
