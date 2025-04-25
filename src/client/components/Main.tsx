@@ -21,7 +21,7 @@ export function Main() {
     } else {
       setAdmin(false);
     }
-  }, [window.location.search])
+  }, [window.location.pathname])
 
   return (
     <Layout>
