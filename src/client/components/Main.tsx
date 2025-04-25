@@ -21,7 +21,7 @@ export function Main() {
     } else {
       setAdmin(false);
     }
-  })
+  }, [])
 
   return (
     <Layout>
