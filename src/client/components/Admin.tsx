@@ -11,7 +11,7 @@ import { Field } from 'formik';
 import theme from './theme';
 import { useSnackbar } from 'notistack';
 import { FinishedMatchStatus } from '../../server/entities/model';
-import { ConfirmDialog } from './ConfirmDialog';
+import { ConfirmDialogInterface, ConfirmDialog } from './ConfirmDialog';
 
 export function Admin(props: {setAdmin: Dispatch<boolean>}) {
   const getAll = useAll();
@@ -19,7 +19,7 @@ export function Admin(props: {setAdmin: Dispatch<boolean>}) {
   const { enqueueSnackbar } = useSnackbar();
   const { data } = useSWR("users/all", getAll)
   const [selectedRow, setSelectedRow] = useState<TeamModelDto | null>(null);
-  const [confirmDialog, setConfirmDialog] = useState<ConfirmDialog | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogInterface | null>(null);
 
   return (
     <Stack sx={{
@@ -171,10 +171,10 @@ export function Admin(props: {setAdmin: Dispatch<boolean>}) {
             confirm: () => {
               try {
                 data?.forEach(async a=>{
-                  if(a.relayMatch.state == "IN PROGRESS") {
+                  if(a.relayMatch.state === "IN PROGRESS") {
                     await addMinutes(a.relayMatch.matchID, values.time);
                   }
-                  if(a.strategyMatch.state == "IN PROGRESS") {
+                  if(a.strategyMatch.state === "IN PROGRESS") {
                     await addMinutes(a.strategyMatch.matchID, values.time);
                   }
                 })
@@ -223,7 +223,7 @@ function Stats(props: {data: TeamModelDto[]}) {
   const categories = Array.from(new Set(props.data.map(it=>it.category)));
   const stat = categories.sort().map(cat=>{
     const current = props.data.filter(it=>it.category===cat);
-    const bothNotStarted = current.filter(it=>it.strategyMatch.state == "NOT STARTED" && it.relayMatch.state === "NOT STARTED").length;
+    const bothNotStarted = current.filter(it=>it.strategyMatch.state === "NOT STARTED" && it.relayMatch.state === "NOT STARTED").length;
     const relayInProgress = current.filter(it=>it.relayMatch.state === "IN PROGRESS").length;
     const strategyInProgress = current.filter(it=>it.strategyMatch.state === "IN PROGRESS").length;
     const finishedRelayScores = current.filter(it=>it.relayMatch.state === "FINISHED").map(it=>(it.relayMatch as FinishedMatchStatus).score);

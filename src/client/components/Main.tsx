@@ -16,12 +16,12 @@ export function Main() {
   const [admin, setAdmin] = useState<boolean>(false);
 
   useEffect(() => {
-    if (window.location.pathname == '/admin') {
+    if (window.location.pathname === '/admin') {
       setAdmin(true);
     } else {
       setAdmin(false);
     }
-  }, [window.location.pathname])
+  })
 
   return (
     <Layout>

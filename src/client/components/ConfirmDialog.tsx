@@ -3,12 +3,12 @@ import { Button, Dialog } from '@mui/material';
 import { Dispatch } from 'react';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 
-export interface ConfirmDialog {
+export interface ConfirmDialogInterface {
   text: String;
   confirm: Function;
 }
 
-export function ConfirmDialog(props: {confirmDialog: ConfirmDialog | null, setConfirmDialog: Dispatch<ConfirmDialog|null>}) {
+export function ConfirmDialog(props: {confirmDialog: ConfirmDialogInterface | null, setConfirmDialog: Dispatch<ConfirmDialogInterface|null>}) {
   const [confirmDialog, setConfirmDialog] = [props.confirmDialog, props.setConfirmDialog];
   return <Dialog 
   maxWidth={false} 
