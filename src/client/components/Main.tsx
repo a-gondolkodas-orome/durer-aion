@@ -1,5 +1,5 @@
 import { Container } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useTeamState, LoadTeamState } from "../hooks/user-hooks";
 import { Header } from "./Header";
 import { Layout } from "./layout";
@@ -14,6 +14,14 @@ export function Main() {
   const teamState = useTeamState();
   const [frontendState, setFrontEndState] = useState<"R" | "S" | null>(null);
   const [admin, setAdmin] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (window.location.pathname == '/admin') {
+      setAdmin(true);
+    } else {
+      setAdmin(false);
+    }
+  }, [window.location.search])
 
   return (
     <Layout>
@@ -39,7 +47,7 @@ export function Main() {
         data-testId="mainRoot"
       >
         {admin && <Admin setAdmin={setAdmin} />}
-        {!teamState && !admin && <Login setAdmin={setAdmin} />}
+        {!teamState && !admin && <Login />}
         {teamState && teamState.pageState === "DISCLAIMER" && (
           <Disclaimer />
         )}

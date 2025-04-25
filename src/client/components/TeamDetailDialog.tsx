@@ -143,7 +143,7 @@ function MatchStatusDataField(props: {matchId: string, isRelay: boolean}) {
   const { data } = useSWR([`users/${props.matchId}`, props.matchId], ([, matchId]) => matchState(matchId))
   return (<>
   {data && <Stack>
-      { props.isRelay && <Stack>Aktuális feladatszám: {data.G.currentProblem}</Stack>}
+      { props.isRelay && <Stack>Aktuális feladatszám: {data.G.currentProblem + 1}</Stack>}
       { !props.isRelay && <Stack>próbálkozások száma: {(data.G as any).numberOfTries}</Stack>}
       { !props.isRelay && <Stack>Éles játékok eddigi eredményei: {(data.G as any).numberOfTries-(data.G as any).numberOfLoss-Number((data.G as any).winner===null && (data.G as any).difficulty==="live")} győzelem, {(data.G as any).numberOfLoss} vereség</Stack>}
       <Stack>Befejezés dátuma: {formatTime(new Date(data.G.end))}</Stack>
