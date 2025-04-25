@@ -2,7 +2,7 @@ import { Game, TurnConfig } from "boardgame.io";
 import { INVALID_MOVE, TurnOrder } from "boardgame.io/core";
 import { sendDataRelayEnd } from "../../common/sendData";
 import { guesserPlayer, judgePlayer } from "../../common/types";
-import { isOfflineMode } from "../../client/utils/appMode";
+import { IS_OFFLINE_MODE } from "../../client/utils/appMode";
 
 type Answer = {
   answer: number;
@@ -161,7 +161,7 @@ export const GameRelay: Game<MyGameState> = {
           G.correctnessPreviousAnswer = correctnessPreviousAnswer;
           if (correctnessPreviousAnswer) {
             G.points += G.currentProblemMaxPoints;
-            if (isOfflineMode()) {
+            if (IS_OFFLINE_MODE) {
               localStorage.setItem("RelayPoints", G.points.toString());
             }
             G.previousPoints[G.currentProblem] = G.currentProblemMaxPoints;
@@ -200,7 +200,7 @@ export const GameRelay: Game<MyGameState> = {
           G.correctnessPreviousAnswer = correctnessPreviousAnswer;
           if (correctnessPreviousAnswer) {
             G.points += G.currentProblemMaxPoints;
-            if (isOfflineMode()) {
+            if (IS_OFFLINE_MODE) {
               localStorage.setItem("RelayPoints", G.points.toString());
               sendDataRelayEnd(null, G, ctx);
             }

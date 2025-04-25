@@ -2,7 +2,7 @@ import { MyGameState } from './game';
 import { BoardProps } from 'boardgame.io/react';
 import { sendDataStrategyStep } from '../../common/sendData';
 import { range } from "lodash";
-import { isOfflineMode } from '../../client/utils/appMode';
+import { IS_OFFLINE_MODE } from '../../client/utils/appMode';
 
 
 interface MyGameProps extends BoardProps<MyGameState> { }
@@ -10,7 +10,7 @@ interface MyGameProps extends BoardProps<MyGameState> { }
 export function MyBoard({ G, ctx, moves }: MyGameProps) {
 
   const onClick = (index: number) => {
-    if(isOfflineMode()){
+    if(IS_OFFLINE_MODE){
       sendDataStrategyStep(null, index, G, ctx);
     }
     moves.removePoint(index)

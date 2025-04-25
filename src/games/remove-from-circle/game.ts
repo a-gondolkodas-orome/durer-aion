@@ -1,7 +1,7 @@
 import { INVALID_MOVE } from 'boardgame.io/core';
 import { GameType, guesserPlayer, judgePlayer } from '../../common/types';
 import { sendDataStrategyEnd } from '../../common/sendData';
-import { isOfflineMode } from '../../client/utils/appMode';
+import { IS_OFFLINE_MODE } from '../../client/utils/appMode';
 
 export interface MyGameState {
   circle: Array<boolean>;
@@ -85,7 +85,7 @@ export function myGameWrapper(category: "C" | "D" | "E") {
                   G.points = 2;
                   break;
               }
-              if (isOfflineMode()) {
+              if (IS_OFFLINE_MODE) {
                 localStorage.setItem("StrategyPoints", G.points.toString());
                 sendDataStrategyEnd(null, G, ctx);
               }

@@ -1,7 +1,1 @@
-export const isOfflineMode = (): boolean => {
-  return process.env.REACT_APP_WHICH_VERSION === "b";
-};
-
-export const isOnlineMode = (): boolean => {
-  return !isOfflineMode();
-};
+export const IS_OFFLINE_MODE = process.env.REACT_APP_WHICH_VERSION === "b"
