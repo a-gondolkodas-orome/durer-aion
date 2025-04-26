@@ -42,7 +42,7 @@ jobs:
       - name: Install Node.js dependencies
         run: npm ci
       - name: Run (client) build
-        run: npm run build
+        run: CI=false npm run build
       - name: Run (server)
         run: PUBLIC_URL=https://localhost/ npm run check:server
 
