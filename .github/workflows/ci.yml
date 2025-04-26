@@ -28,6 +28,7 @@ jobs:
           commit: false
           eslint_dir: "src/"
           eslint_extensions: "js,ts,jsx,tsx"
+          eslint_args: "--max-warnings=19" # TODO: change it to 0 after the big refactor
 
   build:
     name: build
