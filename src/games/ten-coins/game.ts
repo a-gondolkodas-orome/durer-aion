@@ -11,9 +11,6 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<
   setup: () => {
     return {
       coins: [1,1,1,1,1,1,1,1,1,1],
-      milisecondsRemaining: 1000*lengthOfCompetition,
-      start: new Date().toISOString(),
-      end: new Date(Date.now()+1000*lengthOfCompetition).toISOString(),
     }},
 
   moves: {

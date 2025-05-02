@@ -2,7 +2,6 @@ import { Ctx, Game } from 'boardgame.io';
 import { INVALID_MOVE, TurnOrder } from 'boardgame.io/core';
 import { GameStateMixin, GameType, GUESSER_PLAYER, JUDGE_PLAYER } from './types';
 import { IS_OFFLINE_MODE } from '../client/utils/appMode';
-import { isForOfStatement } from 'typescript';
 
 function parseGameState<T_SpecificGameState>(json: string): T_SpecificGameState {
   const parsed = JSON.parse(json);
@@ -85,6 +84,14 @@ export function isMakeMovePayloadReadOnly(payload_type: string) {
   return payload_type === "getTime";
 }
 
+function getTime({ G, ctx, playerID, events }: any) {
+  console.log("getTime");
+  if (playerID !== GUESSER_PLAYER) {
+    return INVALID_MOVE;
+  }
+  G.milisecondsRemaining = new Date(G.end).getTime() - new Date().getTime();
+}
+
 export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameState>): Game<T_SpecificGameState & GameStateMixin> { // TODO: solve types
   return {
     setup: () => ({
@@ -107,17 +114,9 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
     name: game.name,
     minPlayers: 2,
     maxPlayers: 2,
-    moves: {
-      getTime({ G, ctx, playerID, events }) {
-        if (playerID !== "0") {
-          return INVALID_MOVE;
-        }
-        G.milisecondsRemaining = new Date(G.end).getTime() - new Date().getTime();
-      }
-    },
     phases: {
       startNewGame: {
-        moves: { chooseNewGameType, setStartingPosition, loadGameState: loadGameState as loadGameFn },
+        moves: { chooseNewGameType, setStartingPosition, loadGameState: loadGameState as loadGameFn, getTime },
         endIf: ({ G, ctx, playerID }) => { return G.difficulty !== null && G.winner === null && 'startingPosition' in game },
         next: "chooseRole",
         turn: {
@@ -126,13 +125,13 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
         start: true,
       },
       chooseRole: {
-        moves: { chooseRole },
+        moves: { chooseRole, getTime },
         endIf: ({ G, ctx, playerID }) => { return G.firstPlayer !== null },
         next: "play",
         turn: { order: TurnOrder.RESET }
       },
       play: {
-        moves: { ...game.moves },
+        moves: { ...game.moves, getTime },
         endIf: ({ G, ctx, playerID }) => { return G.winner !== null },
         next: "startNewGame",
         turn: {
