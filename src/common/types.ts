@@ -17,7 +17,7 @@ export interface GameStateMixin {
   numberOfLoss: number;
   winningStreak: number;
   points: number;
-  milisecondsRemaining: number;
+  millisecondsRemaining: number;
   start: string;
   end: string;
 }

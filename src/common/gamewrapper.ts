@@ -45,6 +45,7 @@ function setStartingPosition({ G, ctx, playerID, random, events }: any, starting
 };
 
 type loadGameFn = ({ G, playerID, events }:any) => any;
+let loadingPhase = false;
 
 // called from a useeffect in boardwrapper.tsx
 // state is saved in onEnd()
@@ -52,9 +53,9 @@ function loadGameState<T_SpecificGameState>({ events }:any) {
   if (!IS_OFFLINE_MODE) {
     return;
   }
-
   const phase = localStorage.getItem("StrategyPhase");
   const gameStateJSON = localStorage.getItem("StrategyGameState");
+  console.log(gameStateJSON)
   if (phase === null || gameStateJSON === null) {
     return;
   }
@@ -69,16 +70,24 @@ function loadGameState<T_SpecificGameState>({ events }:any) {
     return;
   }
 
-  events.setPhase(phase);
-  console.log("loaded game phase", phase);
-  if (phase === "startNewGame") {
-    events.endPhase();
+  console.log("setting phase");
+  if (phase !== "startNewGame") {
+    // This avoids an infinity loop on onBegin event on startNewGame phase.
+    events.setPhase(phase);
+    //events.endTurn({ next: GUESSER_PLAYER })
   }
-  state.milisecondsRemaining = new Date(state.end).getTime() - new Date().getTime();
+  if (phase === "play"){
+    loadingPhase = true;
+  }
+  console.log("loaded game phase", phase);
+  // if (phase === "startNewGame") {
+  //   events.endPhase();
+  // }
+  state.millisecondsRemaining = new Date(state.end).getTime() - new Date().getTime();
   return state;
 }
 
-function saveGameState({ G, ctx, playerID, events }: any) {
+function saveGameState({ G, ctx }: any) { // TODO: type
   console.log("saveGameState");
   if (!IS_OFFLINE_MODE) {
     return;
@@ -96,6 +105,7 @@ export function isMakeMovePayloadReadOnly(payload_type: string) {
 
 function getTime({ G, ctx, playerID, events }: any) {
   console.log("getTime");
+  // saveGameState({G, ctx, playerID, events})
   if (playerID !== GUESSER_PLAYER) {
     return INVALID_MOVE;
   }
@@ -106,7 +116,7 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
   return {
     setup: () => ({
       ...game.setup(),
-      milisecondsRemaining: 1000 * lengthOfCompetition,
+      millisecondsRemaining: 1000 * lengthOfCompetition,
       start: new Date().toISOString(),
       end: new Date(Date.now() + 1000 * lengthOfCompetition).toISOString(),
       firstPlayer: null,
@@ -131,7 +141,11 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
         next: "chooseRole",
         turn: {
           order: TurnOrder.ONCE,
-          onEnd: saveGameState
+          onEnd: ({G, ctx}) => {
+            console.log("StartNewGame saveGame");
+            saveGameState({G, ctx});
+          },
+          onBegin: loadGameState,
         },
         start: true,
       },
@@ -141,7 +155,10 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
         next: "play",
         turn: {
           order: TurnOrder.RESET,
-          onEnd: saveGameState
+          onBegin: ({G, ctx}) => {
+            console.log("chooseRole.turn.onBegin saveGame");
+            saveGameState({G, ctx});
+          }
         }
       },
       play: {
@@ -151,6 +168,12 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
         turn: {
           order: {
             first: ({ G, ctx }) => {
+              console.log("loadingPhase1", loadingPhase)
+              if (loadingPhase){
+                loadingPhase = false;
+                console.log("loadingPhase2", loadingPhase)
+                return Number(GUESSER_PLAYER);
+              }
               return G.firstPlayer === GUESSER_PLAYER ? 0 : 1;
             },
             next: ({ G, ctx }) => {
@@ -168,10 +191,15 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
             }
 
             if (ctx.currentPlayer === JUDGE_PLAYER) {
+              console.log("saveGameState judge end");
               saveGameState({ G, ctx, playerID, events });
             }
           },
         },
+        onBegin: ({G, ctx, playerID, events, random, log}) => {
+          console.log("saveGameState on play phase Begin");
+          saveGameState({ G, ctx, playerID, events });
+        }
       },
     },
     // conflict with boardgameio type, where id is string, instead of playerIDType
