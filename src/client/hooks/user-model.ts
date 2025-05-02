@@ -57,7 +57,7 @@ export class UserModel {
     return res;
   }
 
-  async adminGetLogs(matchId: String): Promise<unknown | null> {
+  async adminGetLogs(matchId: string): Promise<unknown | null> {
     const repo = new ClientRepository();
 
     const res = await repo.getMatchLogs(matchId);

@@ -112,7 +112,7 @@ function MatchStatusField(props: {name: string, data: MatchStatus, isRelay: bool
           })}
         onSubmit={async (values) => { 
           props.setConfirmDialog({
-            text: `Erősítsd meg, hogy ${props.name} csapatnak meg akaorod növelni az idejét ${values.time} perccel`,
+            text: `Erősítsd meg, hogy ${props.name} csapatnak meg akarod növelni az idejét ${values.time} perccel`,
             confirm: async () => {
               try {
                 await addMinutes(inProgressState.matchID, values.time);
