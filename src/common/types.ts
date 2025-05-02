@@ -5,7 +5,7 @@ export enum PlayerIDType {
   JUDGE_PLAYER = '1',
 };
 export function otherPlayer(playerID: PlayerIDType): PlayerIDType {
-  return playerID === PlayerIDType.GUESSER_PLAYER ? PlayerIDType.JUDGE_PLAYER : PlayerIDType.GUESSER_PLAYER;
+  return playerID === GUESSER_PLAYER ? JUDGE_PLAYER : GUESSER_PLAYER;
 }
 
 export const { GUESSER_PLAYER, JUDGE_PLAYER } = PlayerIDType;

@@ -1,9 +1,9 @@
-import { PlayerIDType } from "../../common/types";
+import { GUESSER_PLAYER, JUDGE_PLAYER, PlayerIDType } from "../../common/types";
 
 export const IS_OFFLINE_MODE = process.env.REACT_APP_WHICH_VERSION === "b"
 
 export function otherPlayer(playerID: PlayerIDType): PlayerIDType {
-  return playerID === PlayerIDType.GUESSER_PLAYER ? PlayerIDType.JUDGE_PLAYER : PlayerIDType.GUESSER_PLAYER;
+  return playerID === GUESSER_PLAYER ? JUDGE_PLAYER : GUESSER_PLAYER;
 }
 
 export function parseGameState<T_SpecificGameState>(json: string): T_SpecificGameState {

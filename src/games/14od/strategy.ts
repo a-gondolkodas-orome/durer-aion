@@ -1,5 +1,5 @@
 import { State } from 'boardgame.io';
-import { GameStateMixin, PlayerIDType } from '../../common/types';
+import { GameStateMixin, GUESSER_PLAYER, JUDGE_PLAYER } from '../../common/types';
 import { MyGameState } from './game';
 
 let megadottValaszlepesek=new Map<string,string>([
@@ -1268,12 +1268,12 @@ export function strategy(
 ): [string | undefined, string] {
   if(state.G.difficulty === "live"){
     let rEddigiek:string[] = [];
-    if(state.G.firstPlayer === PlayerIDType.GUESSER_PLAYER){
+    if(state.G.firstPlayer === GUESSER_PLAYER){
       rEddigiek = state.G.playerLetters.flatMap(
         (element, index) => [element, state.G.enemyLetters[index]]
       );
     }
-    else if (state.G.firstPlayer === PlayerIDType.JUDGE_PLAYER){
+    else if (state.G.firstPlayer === JUDGE_PLAYER){
       rEddigiek = state.G.enemyLetters.flatMap(
         (element, index) => [element, state.G.playerLetters[index]]
       );
