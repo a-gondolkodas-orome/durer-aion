@@ -6,8 +6,6 @@ import { InProgressMatchStatus, TeamModel } from './entities/model';
 import { BOT_ID, TransportAPI } from '../socketio_botmoves';
 import { getFilterPlayerView } from "boardgame.io/internal";
 import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus, createGame, injectBot, injectPlayer } from './team_manage';
-import { assert } from 'console';
-import fs from 'fs';
 import { import_teams_from_tsv } from './team_import';
 
 
