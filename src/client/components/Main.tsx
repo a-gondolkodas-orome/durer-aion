@@ -16,7 +16,7 @@ export function Main() {
   const [admin, setAdmin] = useState<boolean>(false);
 
   useEffect(() => {
-    if (window.location.pathname === '/admin') {
+    if (window.location.pathname.includes('/admin')) {
       setAdmin(true);
     } else {
       setAdmin(false);
@@ -46,7 +46,7 @@ export function Main() {
         }}
         data-testId="mainRoot"
       >
-        {admin && <Admin setAdmin={setAdmin} />}
+        {admin && <Admin teamId={window.location.pathname.split('/').at(2)}/>}
         {!teamState && !admin && <Login />}
         {teamState && teamState.pageState === "DISCLAIMER" && (
           <Disclaimer />

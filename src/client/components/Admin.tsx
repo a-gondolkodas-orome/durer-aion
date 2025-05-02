@@ -1,25 +1,38 @@
 import { Stack } from '@mui/system';
 import { useAddMinutes, useAll } from '../hooks/user-hooks';
 import { Button, Dialog, Table, TableCell, TableRow } from '@mui/material';
-import { Dispatch, useState } from 'react';
+import { useEffect, useState } from 'react';
 import useSWR from 'swr';
 import { DataGrid } from '@mui/x-data-grid';
 import { TeamModelDto } from '../dto/TeamStateDto';
 import { TeamDetailDialog } from './TeamDetailDialog';
 import Form from './form';
-import { Field } from 'formik';
+import { ErrorMessage, Field } from 'formik';
 import theme from './theme';
 import { useSnackbar } from 'notistack';
 import { FinishedMatchStatus } from '../../server/entities/model';
 import { ConfirmDialogInterface, ConfirmDialog } from './ConfirmDialog';
+import * as Yup from 'yup';
 
-export function Admin(props: {setAdmin: Dispatch<boolean>}) {
+export function Admin(props: {teamId?: String}) {
   const getAll = useAll();
   const addMinutes = useAddMinutes();
   const { enqueueSnackbar } = useSnackbar();
   const { data } = useSWR("users/all", getAll)
   const [selectedRow, setSelectedRow] = useState<TeamModelDto | null>(null);
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogInterface | null>(null);
+  const [teamFromPath, setTeamFromPath] = useState<TeamModelDto | null>(null);
+
+  useEffect(()=>{
+    if (props.teamId) {
+      const current = data?.find(d=>d.teamId === props.teamId)
+      if (current) {
+        setTeamFromPath(current);
+      }
+    } else if (teamFromPath) {
+      setTeamFromPath(null);
+    }
+  }, [data, props.teamId]);
 
   return (
     <Stack sx={{
@@ -58,22 +71,14 @@ export function Admin(props: {setAdmin: Dispatch<boolean>}) {
         } onClose={async () => {
             setSelectedRow(null); 
            }}>
-          {selectedRow && <TeamDetailDialog data={selectedRow!!}/>}
-        </Dialog>
-        <ConfirmDialog confirmDialog={confirmDialog}  setConfirmDialog={setConfirmDialog}/>
-        <Stack sx={{width: "100%", display:"flex", flexDirection: "row"}}>
-          <Stack sx={{fontSize:"32px", width: "100%", textAlign: "center"}}>Admin felület </Stack>
-          <Button
-            sx={{width:"100px", height: "35px", alignSelf: "center"}}
-            color='primary'
-            variant='contained'
-            onClick={()=>{props.setAdmin(false)}}
-          >
-          Kilépés
-        </Button>
-        </Stack>
-        
-      <Stack sx={{
+          {selectedRow && <TeamDetailDialog data={selectedRow!!} setConfirmDialog={setConfirmDialog}/>}
+      </Dialog>
+      <ConfirmDialog confirmDialog={confirmDialog}  setConfirmDialog={setConfirmDialog}/>
+      <Stack sx={{width: "100%", display:"flex", flexDirection: "row"}}>
+        <Stack sx={{fontSize:"32px", width: "100%", textAlign: "center"}}>Admin felület </Stack>
+      </Stack>
+      {teamFromPath && <TeamDetailDialog data={teamFromPath!!} setConfirmDialog={setConfirmDialog}/>}
+      {!teamFromPath && <Stack sx={{
         height: "635px",
       }}>
         {data && <DataGrid columns={[
@@ -133,6 +138,23 @@ export function Admin(props: {setAdmin: Dispatch<boolean>}) {
                 </Button>
               )
             }
+          },
+          {
+            field: 'view_tab',
+            width: 170,
+            headerName: '',
+            renderCell: (renderData) => {
+              return (
+                <Button
+                  color='primary'
+                  variant='contained'
+                  onClick={()=>{
+                    window.open("/admin/"+renderData.row.teamId, '_blank', 'noopener,noreferrer')
+                  }}>
+                    + új tab
+                </Button>
+              )
+            }
           }
         ]}
         rows={data.map((a)=>{
@@ -160,11 +182,17 @@ export function Admin(props: {setAdmin: Dispatch<boolean>}) {
           height: "auto",
         }}
         />}
-      </Stack>
-      {data && <Stack sx={{padding: "10px"}}>
+      </Stack>}
+      {!teamFromPath && data && <Stack sx={{padding: "10px"}}>
         idő hozzáadása minden aktív játékosnak:
         <Form
         initialValues={{ time: '' }}
+        validationSchema={Yup.object().shape({
+          time: Yup.number()
+            .integer('Egész számot kell írni')
+            .typeError('Számot kell írni')
+            .required('Nincs megadva érték')
+          })}
         onSubmit={async (values) => { 
           setConfirmDialog({
             text: `Erősítsd meg, hogy minden aktuális csapatnak meg akaorod növelni az idejét ${values.time} perccel`,
@@ -212,9 +240,10 @@ export function Admin(props: {setAdmin: Dispatch<boolean>}) {
           hozzáadás
         </Button>
         </Stack>
+        <ErrorMessage name="time" sx={{color:'red'}}/>
       </ Form>
       </Stack>}
-     {data && <Stats data={data}/>}
+     {!teamFromPath && data && <Stats data={data}/>}
     </Stack>
   )
 }
