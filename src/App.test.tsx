@@ -4,6 +4,9 @@ import { render, screen } from '@testing-library/react';
 import App from './App';
 import { dictionary } from './client/text-constants';
 
+jest.mock('react-syntax-highlighter/dist/esm/styles/prism', () => ({
+  tomorrow: {},
+}));
 jest.mock('./client/hooks/user-hooks', () => {
   return MockTeamState.mockHook;
 });

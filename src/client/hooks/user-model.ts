@@ -57,6 +57,14 @@ export class UserModel {
     return res;
   }
 
+  async adminGetLogs(matchId: string): Promise<unknown | null> {
+    const repo = new ClientRepository();
+
+    const res = await repo.getMatchLogs(matchId);
+
+    return res;
+  }
+
   async resetRealy(teamId: String): Promise<TeamModelDto> {
     const repo = new ClientRepository();
 

@@ -50,6 +50,12 @@ export const useAll = () => {
   };
 };
 
+export const useGetLogs = () => {
+  return async (matchId: string) => {
+    return await userModel.adminGetLogs(matchId);
+  };
+};
+
 export const useMatchState = () => {
   return async (matchId: string) => {
     return await userModel.adminMatchState(matchId);

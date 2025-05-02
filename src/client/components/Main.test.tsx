@@ -3,6 +3,10 @@ import { MockTeamState } from '../hooks/mock-user-hooks';
 import { render, screen } from '@testing-library/react';
 import { Main } from './Main';
 
+jest.mock('react-syntax-highlighter/dist/esm/styles/prism', () => ({
+  tomorrow: {},
+}));
+
 jest.mock('../hooks/user-hooks', () => {
   return MockTeamState.mockHook;
 });
