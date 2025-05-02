@@ -5,7 +5,9 @@ I used AWS for deployment, but generally, the deployment is done in a virtual ma
 
 ## Create an EC2
 
-Create a simple EC2 instance, and set up ssh to it. If your VM has less memory than 1GBt my recommnedation is to add a swap file, to handle extensive memory usage. In clud enviroment this is unusual, as the storage is high latency due to networkind, and virtualisation. This is only a cost saving measure, but can be effective, if your working memory doesn't exceeds the limit, and you have temporary memory limitations for example during compilations.
+Create a simple EC2 instance, and set up ssh to it. If your VM has less memory than 1GBt my recommnedation is to add a swap file, to handle extensive memory usage.
+
+ **In clud enviroment this is unusual, as the storage is high latency due to networkind, and virtualisation. This is only a cost saving measure, but can be effective, if your working memory doesn't exceeds the limit, and you have temporary memory limitations for example during compilations**.
 
 ```bash
 sudo dd if=/dev/zero of=/swapfile bs=1M count=2048
@@ -91,7 +93,9 @@ Host git github.com
 ```
 
 After this step, add deploy_key.pub to the deploy keys in the repository.
-(Image maybe?)
+[ Add the key here](https://github.com/a-gondolkodas-orome/durer-aion/settings/keys)
+
+> Note: you may not have privileges to add the key, here, ask for help from the current admin of the repository if this happens.
 
 Then you can clone the repository:
 
