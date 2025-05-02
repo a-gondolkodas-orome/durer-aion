@@ -108,11 +108,12 @@ Note: Some newer docker installs have a different compose interface, you may use
 sudo docker compose up --build
 ```
 
-Note: Some newer docker installs have a different compose interface, you may use the compose command like this:
-
-```bash
-docker compose up --build
-```
+> Note: 
+> To use this newer docker compose interface please follow the install instructions form the official docker install page: [ linux docker install](https://docs.docker.com/desktop/setup/install/linux/)
+> Otherwise you may use this syntax:
+> ```bash
+> docker-compose up --build
+> ```
 
 You should be up and running the application on `localhost`.
 
