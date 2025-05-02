@@ -32,7 +32,7 @@ export function Admin(props: {teamId?: String}) {
     } else if (teamFromPath) {
       setTeamFromPath(null);
     }
-  }, [data, props.teamId]);
+  }, [data, props.teamId, teamFromPath]);
 
   return (
     <Stack sx={{
