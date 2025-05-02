@@ -1,4 +1,3 @@
-import React from "react";
 import { UserModel } from "./user-model";
 import { useRecoilState } from 'recoil';
 import { currentStateAtom } from "./user-atom";
@@ -8,13 +7,13 @@ import { useEffect } from "react";
 const userModel = new UserModel();
 
 export const useTeamState = (): TeamModelDto | null => {
-  const [teamState, setTeamState] = useRecoilState(currentStateAtom);
+  const [teamState, ] = useRecoilState(currentStateAtom);
 
   return teamState;
 };
 
 export const LoadTeamState = () => {
-  const [teamState, setTeamState] = useRecoilState(currentStateAtom);
+  const [, setTeamState] = useRecoilState(currentStateAtom);
 
   useEffect(() => {
       if (typeof window === 'undefined') {
@@ -31,21 +30,52 @@ export const LoadTeamState = () => {
 
       
           userModel.addListener(setTeamState);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return null;
 };
 
 export const useRefreshTeamState = () => {
-  const [teamState, setTeamState] = useRecoilState(currentStateAtom);
+  const [, setTeamState] = useRecoilState(currentStateAtom);
   return async () => {
     const state = await userModel.getTeamState();
     setTeamState(state);
   };
 };
 
+export const useAll = () => {
+  return async () => {
+    return await userModel.adminAll();
+  };
+};
+
+export const useMatchState = () => {
+  return async (matchId: string) => {
+    return await userModel.adminMatchState(matchId);
+  };
+};
+
+export const useResetRelay = () => {
+  return async (teamId: string) => {
+    return await userModel.resetRealy(teamId);
+  };
+};
+
+export const useResetStrategy = () => {
+  return async (teamId: string) => {
+    return await userModel.resetStrategy(teamId);
+  };
+};
+
+export const useAddMinutes = () => {
+  return async (matchId: string, minutes: number) => {
+    return await userModel.addMinutes(matchId, minutes);
+  };
+};
+
 export const useLogin = () => {
-  const [teamState, setTeamState] = useRecoilState(currentStateAtom);
+  const [, setTeamState] = useRecoilState(currentStateAtom);
   return async (joinCode: string) => {
     await userModel.login(joinCode);
 
@@ -55,7 +85,7 @@ export const useLogin = () => {
 };
 
 export const useLogout = () => {
-  const [teamState, setTeamState] = useRecoilState(currentStateAtom);
+  const [, setTeamState] = useRecoilState(currentStateAtom);
   return () => {
     userModel.logout();
     setTeamState(null);
@@ -63,7 +93,7 @@ export const useLogout = () => {
 };
 
 export const useStartRelay = () => {
-  const [teamState, setTeamState] = useRecoilState(currentStateAtom);
+  const [, setTeamState] = useRecoilState(currentStateAtom);
   return async () => {
     await userModel.startRelay()
     const state = await userModel.getTeamState();
@@ -72,7 +102,7 @@ export const useStartRelay = () => {
 };
 
 export const useToHome = () => {
-  const [teamState, setTeamState] = useRecoilState(currentStateAtom);
+  const [, setTeamState] = useRecoilState(currentStateAtom);
   return async () => {
     await userModel.toHome()
     const state = await userModel.getTeamState();
@@ -81,7 +111,7 @@ export const useToHome = () => {
 };
 
 export const useStartStrategy = () => {
-  const [teamState, setTeamState] = useRecoilState(currentStateAtom);
+  const [, setTeamState] = useRecoilState(currentStateAtom);
   return async () => {
     await userModel.starStrategy()
     const state = await userModel.getTeamState();

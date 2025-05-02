@@ -1,9 +1,8 @@
 import React from 'react';
-import { Button, Table, TableCell, TableRow } from '@mui/material';
+import { Button } from '@mui/material';
 import { Stack } from '@mui/system';
 import { dictionary } from '../text-constants';
 import { useRefreshTeamState, useToHome } from '../hooks/user-hooks';
-import theme from './theme';
 
 /**
  * Component to display an end game screen with close button, and score

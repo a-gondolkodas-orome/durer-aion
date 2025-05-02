@@ -1,7 +1,7 @@
 import { TeamModelDto } from "../dto/TeamStateDto";
 
 export const mockTeamState: TeamModelDto = {
-  id: "Long Id",
+  teamId: "Long Id",
   joinCode: "111-1111-111",
   teamName: "test team",
   category: "C",

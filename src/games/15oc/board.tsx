@@ -1,4 +1,4 @@
-import { MyGameState, Position } from './game';
+import { MyGameState } from './game';
 import { BoardProps } from 'boardgame.io/react';
 import './style.css';
 

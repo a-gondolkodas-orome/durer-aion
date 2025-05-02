@@ -1,5 +1,5 @@
-import { INVALID_MOVE } from 'boardgame.io/core';
-import { currentPlayer, GameType, PlayerIDType } from '../../common/types';
+import { INVALID_MOVE } from "boardgame.io/core";
+import { currentPlayer, GameType } from "../../common/types";
 
 export type Position = [number, number];
 
@@ -9,26 +9,36 @@ export interface MyGameState {
   rookPosition: Position;
 }
 
-export const MyGame: GameType<MyGameState> = { // TOOO: solve type
+export const MyGame: GameType<MyGameState> = {
+  // TOOO: solve type
   name: "14oc",
   setup: () => ({ rookPosition: [-1, -1] }),
 
   moves: {
     clickCell: ({ G, ctx }, cellID: Position) => {
-      if (!(G.rookPosition <= cellID && cellID <= tableSize &&
-        (G.rookPosition[0] === cellID[0]) !== (G.rookPosition[1] === cellID[1]))) {
+      if (
+        !(
+          G.rookPosition <= cellID &&
+          cellID <= tableSize &&
+          (G.rookPosition[0] === cellID[0]) !==
+            (G.rookPosition[1] === cellID[1])
+        )
+      ) {
         return INVALID_MOVE;
       }
       G.rookPosition = cellID;
 
-      if (G.rookPosition[0] === tableSize[0] && G.rookPosition[1] === tableSize[1]) {
+      if (
+        G.rookPosition[0] === tableSize[0] &&
+        G.rookPosition[1] === tableSize[1]
+      ) {
         G.winner = currentPlayer(ctx);
       }
-    }
+    },
   },
 
   startingPosition: ({G, ctx, playerID, random}) => {
-    let rookPosition:Position = [0,0]
+    let rookPosition: Position = [0, 0];
     if(G.difficulty === "live"){
       if(G.numberOfTries === 1){
         rookPosition = [0,1];
@@ -43,20 +53,19 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type
         rookPosition[0] = random.Die(3)-1;
         rookPosition[1] = rookPosition[0];
       }
+    } else {
+      rookPosition = [random.Die(7) - 1, random.Die(7) - 1];
     }
-    else{
-      rookPosition = [random.Die(7)-1, random.Die(7)-1]
-    }
-    return {rookPosition: rookPosition}
+    return { rookPosition: rookPosition };
   },
 
   possibleMoves: (G, ctx, playerID) => {
     let moves = [];
     for (let i = G.rookPosition[0] + 1; i <= tableSize[0]; i++) {
-      moves.push({ move: 'clickCell', args: [[i, G.rookPosition[1]]] });
+      moves.push({ move: "clickCell", args: [[i, G.rookPosition[1]]] });
     }
     for (let i = G.rookPosition[1] + 1; i <= tableSize[1]; i++) {
-      moves.push({ move: 'clickCell', args: [[G.rookPosition[0], i]] });
+      moves.push({ move: "clickCell", args: [[G.rookPosition[0], i]] });
     }
     return moves;
   },
