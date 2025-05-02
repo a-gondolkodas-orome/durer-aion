@@ -1,8 +1,9 @@
-import { Game, TurnConfig } from "boardgame.io";
+import { Game } from "boardgame.io";
 import { INVALID_MOVE, TurnOrder } from "boardgame.io/core";
 import { sendDataRelayEnd } from "../../common/sendData";
 import { GUESSER_PLAYER, JUDGE_PLAYER, otherPlayer, PlayerIDType } from "../../common/types";
 import { IS_OFFLINE_MODE } from "../../client/utils/appMode";
+import { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
 
 type Answer = {
   answer: number;
@@ -34,6 +35,27 @@ function parseGameState(json: string): MyGameState {
   return parsed as MyGameState;
 }
 
+function loadGameState(events: EventsAPI): MyGameState | null {
+  const phase = localStorage.getItem("RelayGamePhase");
+  const gameStateJSON = localStorage.getItem("RelayGameState");
+  if (phase === null || gameStateJSON === null) {
+    events.endTurn();
+    return null;
+  }
+
+  let state;
+  try { // if the json is bad, continue as if we didnt even have it
+    state = parseGameState(gameStateJSON);
+  } catch {
+    events.endTurn();
+    console.error("could not load game phase from json, invalid json");
+    return null;
+  }
+
+  events.setPhase(phase);
+  state.milisecondsRemaining = Date.parse(state.end) - Date.now();
+  return state;
+}
 const lengthOfCompetition = 60 * 60; // seconds
 
 export const GameRelay: Game<MyGameState> = {
@@ -66,24 +88,10 @@ export const GameRelay: Game<MyGameState> = {
             events.endTurn();
           }
 
-          const phase = localStorage.getItem("RelayGamePhase");
-          const gameStateJSON = localStorage.getItem("RelayGameState");
-          if (phase === null || gameStateJSON === null) {
-            events.endTurn();
+          let state = loadGameState(events);
+          if (state === null) {
             return;
           }
-
-          let state;
-          try { // if the json is bad, continue as if we didnt even have it
-            state = parseGameState(gameStateJSON);
-          } catch {
-            events.endTurn();
-            console.error("could not load game phase from json, invalid json");
-            return;
-          }
-
-          events.setPhase(phase);
-          state.milisecondsRemaining = Date.parse(state.end) - Date.now();
           return state;
         },
         firstProblem({ G, ctx, playerID, events }, problemText: string, nextProblemMaxPoints: number, url: string) {
@@ -132,7 +140,7 @@ export const GameRelay: Game<MyGameState> = {
           }
         },
         onEnd: ({G, ctx, playerID, events}) => {
-          if (ctx.currentPlayer === JUDGE_PLAYER && process.env.REACT_APP_WHICH_VERSION === "b") {
+          if (ctx.currentPlayer === JUDGE_PLAYER && IS_OFFLINE_MODE) {
             const stateJSON = JSON.stringify(G);
             localStorage.setItem("RelayGamePhase", ctx.phase);
             localStorage.setItem("RelayGameState", stateJSON);
