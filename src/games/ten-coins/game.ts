@@ -4,7 +4,6 @@ import { GameType, GUESSER_PLAYER, JUDGE_PLAYER, PlayerIDType } from '../../comm
 export interface MyGameState {
   coins: Array<number>;
 }
-const lengthOfCompetition = 30*60; // seconds
 
 export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<MyGameState>)
   name: "ten-coins",

@@ -1,6 +1,5 @@
 import { INVALID_MOVE } from 'boardgame.io/core';
-import { GameType, PlayerIDType, GUESSER_PLAYER, JUDGE_PLAYER } from '../../common/types';
-import { nlNL } from '@mui/material/locale';
+import { GameType, PlayerIDType, GUESSER_PLAYER } from '../../common/types';
 
 export interface MyGameState { }
 

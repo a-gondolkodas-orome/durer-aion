@@ -1,6 +1,6 @@
 import { State } from 'boardgame.io';
 import { GameStateMixin, PlayerIDType } from '../../common/types';
-import { MyGameState, Position } from './game';
+import { MyGameState } from './game';
 
 let megadottValaszlepesek=new Map<string,string>([
   ["", "S"],
