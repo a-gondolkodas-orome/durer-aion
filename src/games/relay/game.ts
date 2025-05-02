@@ -1,7 +1,7 @@
 import { Game, TurnConfig } from "boardgame.io";
 import { INVALID_MOVE, TurnOrder } from "boardgame.io/core";
 import { sendDataRelayEnd } from "../../common/sendData";
-import { guesserPlayer, judgePlayer } from "../../common/types";
+import { GUESSER_PLAYER, JUDGE_PLAYER, otherPlayer, PlayerIDType } from "../../common/types";
 import { IS_OFFLINE_MODE } from "../../client/utils/appMode";
 
 type Answer = {
@@ -59,8 +59,8 @@ export const GameRelay: Game<MyGameState> = {
     startNewGame: {
       moves: {
         startGame: ({ G, ctx, playerID, events }) => {
-          if (process.env.REACT_APP_WHICH_VERSION === "a") {
-            if (playerID !== guesserPlayer || G.numberOfTry !== 0) {
+          if (!IS_OFFLINE_MODE) {
+            if (playerID !== GUESSER_PLAYER || G.numberOfTry !== 0) {
               return INVALID_MOVE;
             }
             events.endTurn();
@@ -87,7 +87,7 @@ export const GameRelay: Game<MyGameState> = {
           return state;
         },
         firstProblem({ G, ctx, playerID, events }, problemText: string, nextProblemMaxPoints: number, url: string) {
-          if (playerID !== judgePlayer) {
+          if (playerID !== JUDGE_PLAYER) {
             // He is not the bot OR G.answer is null (and it is not the first question)
             return INVALID_MOVE;
           }
@@ -100,7 +100,7 @@ export const GameRelay: Game<MyGameState> = {
       turn: {
         order: TurnOrder.ONCE,
         onMove: ({G, ctx, playerID, events }) => {
-          if(playerID === guesserPlayer) {
+          if(playerID === GUESSER_PLAYER) {
             let currentTime = new Date();
             if(currentTime.getTime() - new Date(G.end).getTime() > 1000*10){
               // Do not accept any answer if the time is over since more than 10 seconds
@@ -119,11 +119,11 @@ export const GameRelay: Game<MyGameState> = {
             return 0;
           },
           next: ({ctx}) => {
-            return ctx.currentPlayer === guesserPlayer ? 1 : 0;
+            return Number(otherPlayer(ctx.currentPlayer as PlayerIDType));
           }
         },
         onMove: ({G, ctx, playerID, events }) => {
-          if(playerID === guesserPlayer) {
+          if(playerID === GUESSER_PLAYER) {
             let currentTime = new Date();
             if(currentTime.getTime() - new Date(G.end).getTime() > 1000*10){
               // Do not accept any answer if the time is over since more than 10 seconds
@@ -132,14 +132,13 @@ export const GameRelay: Game<MyGameState> = {
           }
         },
         onEnd: ({G, ctx, playerID, events}) => {
-          if (ctx.currentPlayer === judgePlayer && process.env.REACT_APP_WHICH_VERSION === "b") {
+          if (ctx.currentPlayer === JUDGE_PLAYER && process.env.REACT_APP_WHICH_VERSION === "b") {
             const stateJSON = JSON.stringify(G);
-            console.log("G ", G);
             localStorage.setItem("RelayGamePhase", ctx.phase);
             localStorage.setItem("RelayGameState", stateJSON);
           }
 
-          if (ctx.currentPlayer.toString() === judgePlayer) {
+          if (ctx.currentPlayer.toString() === JUDGE_PLAYER) {
             let currentTime = new Date();
             if (currentTime.getTime() - new Date(G.end).getTime() >= 0) {
               // Do not accept any answer if the time is over
@@ -150,7 +149,7 @@ export const GameRelay: Game<MyGameState> = {
       },
       moves: {
         newProblem({ G, ctx, playerID, events }, problemText: string, nextProblemMaxPoints: number, correctnessPreviousAnswer: boolean, url: string) {
-          if (playerID !== judgePlayer || G.answer === null) {
+          if (playerID !== JUDGE_PLAYER || G.answer === null) {
             // He is not the bot OR G.answer is null (and it is not the first question)
             return INVALID_MOVE;
           }
@@ -175,7 +174,7 @@ export const GameRelay: Game<MyGameState> = {
           events.endTurn();
         },
         nextTry({ G, ctx, playerID, events }, maxPoints: number) {
-          if (playerID !== judgePlayer || G.answer === null) {
+          if (playerID !== JUDGE_PLAYER || G.answer === null) {
             return INVALID_MOVE;
           }
           G.previousAnswers[G.currentProblem].push({answer: G.answer, date: new Date().toISOString()});
@@ -186,14 +185,14 @@ export const GameRelay: Game<MyGameState> = {
           events.endTurn();
         },
         submitAnswer({ G, ctx, playerID, events }, answer: number) {
-          if (playerID !== guesserPlayer || !Number.isInteger(answer) || answer < 0 || answer > 9999) {
+          if (playerID !== GUESSER_PLAYER || !Number.isInteger(answer) || answer < 0 || answer > 9999) {
             return INVALID_MOVE;
           }
           G.answer = answer;
           events.endTurn();
         },
         endGame({ G, ctx, playerID, events }, correctnessPreviousAnswer: boolean) {
-          if (playerID !== judgePlayer || G.answer === null) {
+          if (playerID !== JUDGE_PLAYER || G.answer === null) {
             return INVALID_MOVE;
           }
           G.previousAnswers[G.currentProblem].push({answer: G.answer, date: new Date().toISOString()});
@@ -211,7 +210,7 @@ export const GameRelay: Game<MyGameState> = {
             events.endGame();
         },
         getTime({ G, ctx, playerID, events }) {
-          if (playerID !== guesserPlayer) {
+          if (playerID !== GUESSER_PLAYER) {
             return INVALID_MOVE;
           }
           G.milisecondsRemaining = new Date(G.end).getTime() - new Date().getTime();

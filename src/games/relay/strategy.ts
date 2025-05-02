@@ -171,7 +171,6 @@ const problems : RelayProblems ={
 
 export function strategy(category: "C" | "D" | "E"){
   return (state: State<MyGameState>, botID: string): [any[] | undefined, string] => {
-    console.log("strategy", state.ctx.phase);
     if (state.G.numberOfTry === 0) {
       let url = problems[category][state.G.currentProblem].url;
       if(url === undefined){

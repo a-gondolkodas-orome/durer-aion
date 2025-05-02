@@ -26,7 +26,6 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
       const gameNotStarted = G.numberOfTry === 0;
       if (gameNotStarted) {
         moves.startGame();
-        console.log("Start Game!");
       } else {
         moves.getTime();
       }

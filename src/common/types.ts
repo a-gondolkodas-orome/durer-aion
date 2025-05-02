@@ -1,10 +1,14 @@
 import { Ctx, MoveMap, TurnConfig } from "boardgame.io";
 
 export enum PlayerIDType {
-  guesserPlayer = '0',
-  judgePlayer = '1',
+  GUESSER_PLAYER = '0',
+  JUDGE_PLAYER = '1',
 };
-export const { guesserPlayer, judgePlayer } = PlayerIDType;
+export function otherPlayer(playerID: PlayerIDType): PlayerIDType {
+  return playerID === PlayerIDType.GUESSER_PLAYER ? PlayerIDType.JUDGE_PLAYER : PlayerIDType.GUESSER_PLAYER;
+}
+
+export const { GUESSER_PLAYER, JUDGE_PLAYER } = PlayerIDType;
 export interface GameStateMixin {
   firstPlayer: null | PlayerIDType;
   winner: PlayerIDType | "draw" | null;

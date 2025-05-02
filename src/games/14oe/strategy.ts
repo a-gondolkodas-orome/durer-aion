@@ -88,12 +88,12 @@ let megadottValaszlepesek = new Map<string,string>([
 export function strategy(state: State<MyGameState & GameStateMixin>, botID: string): [number | undefined, string] {
   if (state.G.difficulty === "live") {
     let rEddigiek:number[] = [];
-    if(state.G.firstPlayer === PlayerIDType.guesserPlayer){
+    if(state.G.firstPlayer === PlayerIDType.GUESSER_PLAYER){
       rEddigiek = state.G.playerNumbers.flatMap(
         (element, index) => [rendesbolBuvos[element], rendesbolBuvos[state.G.enemyNumbers[index]]]
       );
     }
-    else if (state.G.firstPlayer === PlayerIDType.judgePlayer){
+    else if (state.G.firstPlayer === PlayerIDType.JUDGE_PLAYER){
       rEddigiek = state.G.enemyNumbers.flatMap(
         (element, index) => [rendesbolBuvos[element], rendesbolBuvos[state.G.playerNumbers[index]]]
       );

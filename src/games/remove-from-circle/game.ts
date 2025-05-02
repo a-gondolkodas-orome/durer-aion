@@ -1,5 +1,5 @@
 import { INVALID_MOVE } from 'boardgame.io/core';
-import { GameType, guesserPlayer, judgePlayer } from '../../common/types';
+import { GameType, GUESSER_PLAYER, JUDGE_PLAYER } from '../../common/types';
 import { sendDataStrategyEnd } from '../../common/sendData';
 import { IS_OFFLINE_MODE } from '../../client/utils/appMode';
 
@@ -58,11 +58,11 @@ export function myGameWrapper(category: "C" | "D" | "E") {
         }
 
         if (isGameEnd) {
-          G.winner = ctx.currentPlayer === guesserPlayer ? guesserPlayer : judgePlayer;
+          G.winner = ctx.currentPlayer === GUESSER_PLAYER ? GUESSER_PLAYER : JUDGE_PLAYER;
         }
 
         if (G.difficulty === "live") {
-          if (G.winner === "0") {
+          if (G.winner === GUESSER_PLAYER) {
             G.winningStreak = G.winningStreak + 1;
             if (G.winningStreak >= 2) {
               switch (G.numberOfLoss) {
@@ -91,7 +91,7 @@ export function myGameWrapper(category: "C" | "D" | "E") {
               }
               events.endGame();
             }
-          } else if (G.winner === "1") {
+          } else if (G.winner === JUDGE_PLAYER) {
             G.winningStreak = 0;
             G.numberOfLoss += 1;
           }
@@ -122,8 +122,7 @@ export function myGameWrapper(category: "C" | "D" | "E") {
 
     turn: {
       onMove: ({ G, ctx, playerID, events }) => {
-        console.log("onMove")
-        if (playerID === "0") {
+        if (playerID === GUESSER_PLAYER) {
           let currentTime = new Date();
           if (currentTime.getTime() - new Date(G.end).getTime() > 1000 * 10) {
             // Do not accept any answer if the time is over since more than 10 seconds
@@ -132,8 +131,7 @@ export function myGameWrapper(category: "C" | "D" | "E") {
         }
       },
       onEnd: ({ G, ctx, playerID, events }) => {
-        console.log("onEnd")
-        if (playerID === "1") {
+        if (playerID === JUDGE_PLAYER) {
           let currentTime = new Date();
           if (currentTime.getTime() - new Date(G.end).getTime() >= 0) {
             // Do not accept any answer if the time is over

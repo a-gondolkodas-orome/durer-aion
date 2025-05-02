@@ -1,5 +1,5 @@
 import { INVALID_MOVE } from 'boardgame.io/core';
-import { currentPlayer, GameType, PlayerIDType } from '../../common/types';
+import { currentPlayer, GameType, GUESSER_PLAYER, PlayerIDType } from '../../common/types';
 
 type Cell = Array<null | PlayerIDType>;
 
@@ -20,7 +20,7 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type
 
       if (IsVictory(G.cells) || IsDraw(G.cells)) {
         G.winner = currentPlayer(ctx);
-        if(currentPlayer(ctx) === "0"){
+        if(currentPlayer(ctx) === GUESSER_PLAYER){
           G.winningStreak = G.winningStreak + 1;
           if(G.winningStreak >= 2){
             G.points = 12-G.numberOfLoss*2;

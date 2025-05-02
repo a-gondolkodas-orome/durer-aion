@@ -1,5 +1,5 @@
 import { INVALID_MOVE } from 'boardgame.io/core';
-import { GameType, PlayerIDType } from '../../common/types';
+import { GameType, GUESSER_PLAYER, PlayerIDType } from '../../common/types';
 
 export interface MyGameState { }
 
@@ -14,16 +14,16 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type
       if (false) { // TODO: more checks
         return INVALID_MOVE;
       }
-      if (playerID === "0") {
+      if (playerID === GUESSER_PLAYER) {
         
       } else {
         
       }
       
       let winner = getWinner();
-      if (winner !== "") {
-        G.winner = winner as PlayerIDType;
-        if(winner === "0"){
+      if (winner !== null) {
+        G.winner = winner;
+        if(winner === GUESSER_PLAYER){
           G.winningStreak = G.winningStreak + 1;
           if(G.winningStreak >= 2){
             G.points = 12-G.numberOfLoss*2; // TODO
@@ -45,7 +45,7 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type
   },
 };
 
-function getWinner(): string {
-  return "";
+function getWinner(): PlayerIDType | null {
+  return null;
 
 }

@@ -4,7 +4,7 @@ import { Countdown } from "../client/components/Countdown";
 import { StrategyEndTable } from "../client/components/StrategyEndTable";
 import { useRefreshTeamState, useToHome } from "../client/hooks/user-hooks";
 import { IS_OFFLINE_MODE } from "../client/utils/appMode";
-import { guesserPlayer, judgePlayer } from "./types";
+import { GUESSER_PLAYER, JUDGE_PLAYER } from "./types";
 
 export function boardWrapper(board: any, description: any) { //<please> TODO: solve types with BoardProps<MyGameState>
   return ({ G, ctx, moves, log }: any) => {
@@ -186,7 +186,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
                     textTransform: 'none',
                     borderRadius: '10px',
                   }} variant='contained' color='primary' onClick={() => {
-                    moves.chooseRole(guesserPlayer);
+                    moves.chooseRole(GUESSER_PLAYER);
                   }}>
                     Kezdő leszek
                   </Button>
@@ -199,8 +199,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
                     textTransform: 'none',
                     borderRadius: '10px',
                   }} variant='contained' color='primary' onClick={() => {
-                    console.log("chooseRole 1");
-                    moves.chooseRole(judgePlayer);
+                    moves.chooseRole(JUDGE_PLAYER);
                   }}>
                     Második leszek
                   </Button>

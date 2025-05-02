@@ -1,8 +1,7 @@
 import { Ctx, Game } from 'boardgame.io';
 import { INVALID_MOVE, TurnOrder } from 'boardgame.io/core';
-import { GameStateMixin, GameType, PlayerIDType } from './types';
-
-const { guesserPlayer: GUESSER_PLAYER, judgePlayer: JUDGE_PLAYER } = PlayerIDType;
+import { GameStateMixin, GameType } from './types';
+import { IS_OFFLINE_MODE } from '../client/utils/appMode';
 
 function parseGameState<T_SpecificGameState>(json: string): T_SpecificGameState {
   const parsed = JSON.parse(json);
@@ -50,7 +49,7 @@ type loadGameFn = ({ G, playerID, events }:any) => any;
 // called from a useeffect in boardwrapper.tsx
 // state is saved in onEnd()
 function loadGameState<T_SpecificGameState>({ events }:any) {
-  if (process.env.REACT_APP_WHICH_VERSION === "a") {
+  if (!IS_OFFLINE_MODE) {
     return;
   }
 
@@ -154,9 +153,7 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
               game.turn.onEnd({G, ctx, playerID, events, log, random});
             }
 
-            console.log("onEnd", ctx.currentPlayer, process.env.REACT_APP_WHICH_VERSION);
             if (process.env.REACT_APP_WHICH_VERSION === "b" && ctx.currentPlayer === JUDGE_PLAYER) {
-              console.log("saving game state");
               G.firstPlayer = GUESSER_PLAYER;
               localStorage.setItem("StrategyGameState", JSON.stringify(G));
               localStorage.setItem("StrategyPhase", ctx.phase);
