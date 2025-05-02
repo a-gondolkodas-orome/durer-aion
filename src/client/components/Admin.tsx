@@ -195,7 +195,7 @@ export function Admin(props: {teamId?: String}) {
           })}
         onSubmit={async (values) => { 
           setConfirmDialog({
-            text: `Erősítsd meg, hogy minden aktuális csapatnak meg akaorod növelni az idejét ${values.time} perccel`,
+            text: `Erősítsd meg, hogy minden aktuális csapatnak meg akarod növelni az idejét ${values.time} perccel`,
             confirm: () => {
               try {
                 data?.forEach(async a=>{
