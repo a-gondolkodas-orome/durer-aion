@@ -54,7 +54,7 @@ export class RealClientRepository implements ClientRepository {
     try {
       result = await ApiAxios.instance().get(url);
     } catch (e: any) {
-      console.log(e)
+      console.error(e)
       // here we can set message according to status (or data)
       throw new Error('Váratlan hiba történt');
     }
@@ -106,7 +106,7 @@ export class RealClientRepository implements ClientRepository {
       result = await ApiAxios.instance().get(url);
     } catch (e: any) {
       const err = makeAxiosError(e)
-      console.log(err.message)
+      console.error(err.message)
       // here we can set message according to status (or data)
       throw new Error('Váratlan hiba történt');
     }
@@ -125,7 +125,7 @@ export class RealClientRepository implements ClientRepository {
       result = await ApiAxios.instance().get(url);
     } catch (e: any) {
       const err = makeAxiosError(e);
-      console.log(err.message)
+      console.error(err.message)
       // here we can set message according to status (or data)
       throw new Error('Váratlan hiba történt');
     }
@@ -144,7 +144,7 @@ export class RealClientRepository implements ClientRepository {
       result = await ApiAxios.instance().get(url);
     } catch (e: any) {
       const err = makeAxiosError(e);
-      console.log(err.message)
+      console.error(err.message)
       // here we can set message according to status (or data)
       throw new Error('Váratlan hiba történt');
     }
@@ -160,12 +160,11 @@ export class RealClientRepository implements ClientRepository {
       result = await ApiAxios.instance().get(url);
     } catch (e: any) {
       const err = makeAxiosError(e);
-      console.log(err.message)
+      console.error(err.message)
       // here we can set message according to status (or data)
       throw new Error('Váratlan hiba történt');
     }
 
-    console.log(result.data)
     return result.data as TeamModelDto[];
   }
 
@@ -178,7 +177,7 @@ export class RealClientRepository implements ClientRepository {
       result = await ApiAxios.instance().get(url);
     } catch (e: any) {
       const err = makeAxiosError(e);
-      console.log(err.message)
+      console.error(err.message)
       // here we can set message according to status (or data)
       throw new Error('Váratlan hiba történt');
     }
@@ -194,7 +193,7 @@ export class RealClientRepository implements ClientRepository {
       result = await ApiAxios.instance().get(url);
     } catch (e: any) {
       const err = makeAxiosError(e);
-      console.log(err.message)
+      console.error(err.message)
       // here we can set message according to status (or data)
       throw new Error('Váratlan hiba történt');
     }
@@ -211,7 +210,7 @@ export class RealClientRepository implements ClientRepository {
       result = await ApiAxios.instance().get(url);
     } catch (e: any) {
       const err = makeAxiosError(e);
-      console.log(err.message)
+      console.error(err.message)
       // here we can set message according to status (or data)
       if (err.code === "501") {
         throw new Error('Lejárt játékot már nem lehet módosítani');
@@ -230,7 +229,7 @@ export class RealClientRepository implements ClientRepository {
       result = await ApiAxios.instance().get(url);
     } catch (e: any) {
       const err = makeAxiosError(e);
-      console.log(err.message)
+      console.error(err.message)
       // here we can set message according to status (or data)
       throw new Error('Váratlan hiba történt');
     }
@@ -246,7 +245,7 @@ export class RealClientRepository implements ClientRepository {
       result = await ApiAxios.instance().get(url);
     } catch (e: any) {
       const err = makeAxiosError(e);
-      console.log(err.message)
+      console.error(err.message)
       // here we can set message according to status (or data)
       throw new Error('Váratlan hiba történt');
     }
