@@ -140,8 +140,21 @@ After assigning a static ip address to the instatnce, you can use DNS to resolve
 * Set up an A record for the static IP adress. (This actually breaks the ssh connection, and you have to modify the trusted hosts list, if the instance is swapped)
 
 ## Add SSL
+This is subject to change, will be updated by @hajosb144.
+
+### Use letsencript to get a ssl certificate for the virtual machine:
+
+Install certbot ([example installation here](https://certbot.eff.org/instructions?ws=nginx&os=snap))
+
+After installing, get a certificate like this:
+```bash
+sudo certbot --nginx -d <your_server_url name>
+```
+
 
 ### Mount a directory to store the certs
+If you want to set up the SSL termiantaion from the inside of the docker enviroment, you have to copy the setup from the local settings.
+
 
 Make directory
 ```bash
