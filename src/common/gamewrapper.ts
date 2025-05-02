@@ -17,7 +17,7 @@ function chooseRole({ G, ctx, playerID }: any, firstPlayer: string):void { // TO
 }
 
 function chooseNewGameType({ G, ctx, playerID, random, events }: any, difficulty: string) {
-  if (playerID !== "0") {
+  if (playerID !== GUESSER_PLAYER) {
     return INVALID_MOVE;
   };
   let newG = {
@@ -34,7 +34,7 @@ function chooseNewGameType({ G, ctx, playerID, random, events }: any, difficulty
 };
 
 function setStartingPosition({ G, ctx, playerID, random, events }: any, startingPosition: any) { // TODO: type
-  if (playerID !== "1") {
+  if (playerID !== JUDGE_PLAYER) {
     return INVALID_MOVE;
   };
   events.endTurn();
@@ -70,11 +70,21 @@ function loadGameState<T_SpecificGameState>({ events }:any) {
   }
 
   events.setPhase(phase);
+  console.log("loaded game phase", phase);
   if (phase === "startNewGame") {
     events.endPhase();
   }
   state.milisecondsRemaining = new Date(state.end).getTime() - new Date().getTime();
   return state;
+}
+
+function saveGameState({ G, ctx, playerID, events }: any) {
+  console.log("saveGameState");
+  if (!IS_OFFLINE_MODE) {
+    return;
+  }
+  localStorage.setItem("StrategyGameState", JSON.stringify(G));
+  localStorage.setItem("StrategyPhase", ctx.phase);
 }
 
 const lengthOfCompetition = 30 * 60; // seconds
@@ -121,6 +131,7 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
         next: "chooseRole",
         turn: {
           order: TurnOrder.ONCE,
+          onEnd: saveGameState
         },
         start: true,
       },
@@ -128,7 +139,10 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
         moves: { chooseRole, getTime },
         endIf: ({ G, ctx, playerID }) => { return G.firstPlayer !== null },
         next: "play",
-        turn: { order: TurnOrder.RESET }
+        turn: {
+          order: TurnOrder.RESET,
+          onEnd: saveGameState
+        }
       },
       play: {
         moves: { ...game.moves, getTime },
@@ -153,10 +167,8 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
               game.turn.onEnd({G, ctx, playerID, events, log, random});
             }
 
-            if (IS_OFFLINE_MODE && ctx.currentPlayer === JUDGE_PLAYER) {
-              G.firstPlayer = GUESSER_PLAYER;
-              localStorage.setItem("StrategyGameState", JSON.stringify(G));
-              localStorage.setItem("StrategyPhase", ctx.phase);
+            if (ctx.currentPlayer === JUDGE_PLAYER) {
+              saveGameState({ G, ctx, playerID, events });
             }
           },
         },
