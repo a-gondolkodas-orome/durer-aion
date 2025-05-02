@@ -26,12 +26,12 @@ export interface MyGameState {
   url: string;
 }
 
-function loadGameState(events: EventsAPI): MyGameState | null {
+function loadGameState(events: EventsAPI): MyGameState | undefined {
   const phase = localStorage.getItem("RelayGamePhase");
   const gameStateJSON = localStorage.getItem("RelayGameState");
   if (phase === null || gameStateJSON === null) {
     events.endTurn();
-    return null;
+    return;
   }
 
   let state;
@@ -40,7 +40,7 @@ function loadGameState(events: EventsAPI): MyGameState | null {
   } catch {
     events.endTurn();
     console.error("could not load game phase from json, invalid json");
-    return null;
+    return;
   }
 
   events.setPhase(phase);
@@ -79,11 +79,7 @@ export const GameRelay: Game<MyGameState> = {
             events.endTurn();
           }
 
-          let state = loadGameState(events);
-          if (state === null) {
-            return;
-          }
-          return state;
+          return loadGameState(events);
         },
         firstProblem({ G, ctx, playerID, events }, problemText: string, nextProblemMaxPoints: number, url: string) {
           if (playerID !== JUDGE_PLAYER) {
