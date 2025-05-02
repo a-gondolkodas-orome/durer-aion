@@ -90,7 +90,7 @@ Frontend needs to be built after every change, but the server auto-reloads.
 ### Setting up the server
 
 ```bash
-sudo docker-compose --env-file=.env.docker up --build 
+sudo docker compose --env-file=.env.docker up --build 
 ```
 
  vagy 
