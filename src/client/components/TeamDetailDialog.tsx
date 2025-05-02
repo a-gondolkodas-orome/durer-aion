@@ -1,7 +1,7 @@
 import { Stack } from '@mui/system';
-import { useAddMinutes, useMatchState, useResetRelay, useResetStrategy } from '../hooks/user-hooks';
+import { useAddMinutes, useGetLogs, useMatchState, useResetRelay, useResetStrategy } from '../hooks/user-hooks';
 import { Button } from '@mui/material';
-import { Dispatch, useState } from 'react';
+import { Dispatch, useEffect, useState } from 'react';
 import useSWR from 'swr';
 import { TeamModelDto, InProgressMatchStatus, FinishedMatchStatus, MatchStatus } from '../dto/TeamStateDto';
 import { formatTime } from '../utils/DateFormatter';
@@ -13,6 +13,8 @@ import { ConfirmDialogInterface } from './ConfirmDialog';
 import { Countdown } from './Countdown';
 import { RelayEndTableData } from './RelayEndTable';
 import * as Yup from 'yup';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 export function TeamDetailDialog(props: {data: TeamModelDto, setConfirmDialog: Dispatch<ConfirmDialogInterface | null>}) {
   const resetRelay = useResetRelay();
@@ -87,6 +89,8 @@ export function TeamDetailDialog(props: {data: TeamModelDto, setConfirmDialog: D
 function MatchStatusField(props: {name: string, data: MatchStatus, isRelay: boolean, setConfirmDialog: Dispatch<ConfirmDialogInterface | null>}) {
   const addMinutes = useAddMinutes();
   const { enqueueSnackbar } = useSnackbar();
+  const getLogs = useGetLogs();
+  const [matchLogs, setMatchLogs] = useState<unknown|null>(null);
 
   switch (props.data.state) {
     case "IN PROGRESS":
@@ -147,6 +151,31 @@ function MatchStatusField(props: {name: string, data: MatchStatus, isRelay: bool
         </Button></Stack>
         <ErrorMessage name="time" sx={{color:'red'}}/>
       </Form>
+      <Button
+      sx={{
+        width: '200px',
+        textTransform: 'none',
+      }}
+      variant='contained'
+      color='primary'
+      onClick={()=>{
+        getLogs(inProgressState.matchID).then(logs=>{
+          setMatchLogs(logs);
+        });
+      }}>logok Lekérése</Button>
+      <Button
+      sx={{
+        width: '200px',
+        textTransform: 'none',
+      }}
+      variant='contained'
+      color='secondary'
+      onClick={()=>{
+        setMatchLogs(null);
+      }}>logok elrejtése</Button>
+      {matchLogs && <SyntaxHighlighter language="json" style={tomorrow}>
+      {JSON.stringify(matchLogs, null, 2)}
+    </SyntaxHighlighter>}
       </>
       )
     case "FINISHED":
@@ -159,6 +188,31 @@ function MatchStatusField(props: {name: string, data: MatchStatus, isRelay: bool
           
           <Stack><MatchStatusDataField matchId={finishedState.matchID} isRelay={props.isRelay}/></Stack>
           teamStateScore: {finishedState.score}<br/>
+          <Button
+          sx={{
+            width: '200px',
+            textTransform: 'none',
+          }}
+          variant='contained'
+          color='primary'
+          onClick={()=>{
+            getLogs(finishedState.matchID).then(logs=>{
+              setMatchLogs(logs);
+            });
+          }}>logok Lekérése</Button>
+          <Button
+          sx={{
+            width: '200px',
+            textTransform: 'none',
+          }}
+          variant='contained'
+          color='secondary'
+          onClick={()=>{
+            setMatchLogs(null);
+          }}>logok elrejtése</Button>
+          <>{matchLogs && <SyntaxHighlighter language="json" style={tomorrow}>
+      {JSON.stringify(matchLogs, null, 2)}
+    </SyntaxHighlighter>}</>
         </Stack>
       )
       case "NOT STARTED": 
