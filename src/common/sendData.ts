@@ -1,6 +1,6 @@
 import { LOCAL_STORAGE_TEAMSTATE } from "../client/api-repository-interface";
 import { TeamModelDto } from "../client/dto/TeamStateDto";
-import { IS_OFFLINE_MODE } from "../client/utils/appMode";
+import { IS_OFFLINE_MODE } from "../client/utils/util";
 
 function sendData(fileName: string, data: string){
   if (!IS_OFFLINE_MODE){

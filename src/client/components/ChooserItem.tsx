@@ -6,7 +6,7 @@ import { formatTime } from '../utils/DateFormatter';
 import { dictionary } from '../text-constants';
 import { useState } from 'react';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { IS_OFFLINE_MODE } from '../utils/appMode';
+import { IS_OFFLINE_MODE } from '../utils/util';
 
 export function ChooserItem(props: {
   status: MatchStatus,

@@ -1,6 +1,6 @@
 import { LOCAL_STORAGE_TEAMSTATE, OfflineClientRepository, RealClientRepository } from "../api-repository-interface";
 import { MatchStateDto, TeamModelDto } from "../dto/TeamStateDto";
-import { IS_OFFLINE_MODE } from "../utils/appMode";
+import { IS_OFFLINE_MODE } from "../utils/util";
 
 const LOCAL_STORAGE_GUID = "kjqAEKeFkMpOvOZrzcvp";
 

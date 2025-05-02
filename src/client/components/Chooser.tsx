@@ -2,7 +2,7 @@ import { Stack } from "@mui/system";
 import { FinishedMatchStatus, TeamModelDto } from "../dto/TeamStateDto";
 import { ChooserItem } from "./ChooserItem";
 import { dictionary } from "../text-constants";
-import { IS_OFFLINE_MODE } from "../utils/appMode";
+import { IS_OFFLINE_MODE } from "../utils/util";
 
 export function Chooser(props: {
   state: TeamModelDto;

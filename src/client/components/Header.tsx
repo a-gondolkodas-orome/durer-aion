@@ -4,7 +4,7 @@ import { useLogout } from '../hooks/user-hooks';
 import theme from './theme';
 import { dictionary } from '../text-constants';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
-import { IS_OFFLINE_MODE } from '../utils/appMode';
+import { IS_OFFLINE_MODE } from '../utils/util';
 
 export function Header(props: { teamName: string | null }) {
   const logout = useLogout()

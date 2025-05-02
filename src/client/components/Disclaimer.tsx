@@ -2,7 +2,7 @@ import { Button } from "@mui/material";
 import { Stack } from "@mui/system";
 import { dictionary } from "../text-constants";
 import { useToHome } from "../hooks/user-hooks";
-import { IS_OFFLINE_MODE } from "../utils/appMode";
+import { IS_OFFLINE_MODE } from "../utils/util";
 
 export function Disclaimer() {
   const goHome = useToHome();

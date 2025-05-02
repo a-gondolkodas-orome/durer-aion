@@ -1,7 +1,7 @@
 import { INVALID_MOVE } from 'boardgame.io/core';
 import { GameType, GUESSER_PLAYER, JUDGE_PLAYER } from '../../common/types';
 import { sendDataStrategyEnd } from '../../common/sendData';
-import { IS_OFFLINE_MODE } from '../../client/utils/appMode';
+import { IS_OFFLINE_MODE } from '../../client/utils/util';
 
 export interface MyGameState {
   circle: Array<boolean>;

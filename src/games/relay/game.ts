@@ -2,7 +2,7 @@ import { Game } from "boardgame.io";
 import { INVALID_MOVE, TurnOrder } from "boardgame.io/core";
 import { sendDataRelayEnd } from "../../common/sendData";
 import { GUESSER_PLAYER, JUDGE_PLAYER, otherPlayer, PlayerIDType } from "../../common/types";
-import { IS_OFFLINE_MODE } from "../../client/utils/appMode";
+import { IS_OFFLINE_MODE, parseGameState, saveGameState } from "../../client/utils/util";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
 
 type Answer = {
@@ -26,15 +26,6 @@ export interface MyGameState {
   url: string;
 }
 
-function parseGameState(json: string): MyGameState {
-  const parsed = JSON.parse(json);
-
-  if (typeof parsed !== 'object' || parsed === null) {
-    throw new Error('relay: game_state_from_json: Invalid JSON: not an object');
-  }
-  return parsed as MyGameState;
-}
-
 function loadGameState(events: EventsAPI): MyGameState | null {
   const phase = localStorage.getItem("RelayGamePhase");
   const gameStateJSON = localStorage.getItem("RelayGameState");
@@ -45,7 +36,7 @@ function loadGameState(events: EventsAPI): MyGameState | null {
 
   let state;
   try { // if the json is bad, continue as if we didnt even have it
-    state = parseGameState(gameStateJSON);
+    state = parseGameState<MyGameState>(gameStateJSON);
   } catch {
     events.endTurn();
     console.error("could not load game phase from json, invalid json");
@@ -141,9 +132,7 @@ export const GameRelay: Game<MyGameState> = {
         },
         onEnd: ({G, ctx, playerID, events}) => {
           if (ctx.currentPlayer === JUDGE_PLAYER && IS_OFFLINE_MODE) {
-            const stateJSON = JSON.stringify(G);
-            localStorage.setItem("RelayGamePhase", ctx.phase);
-            localStorage.setItem("RelayGameState", stateJSON);
+            saveGameState(G, ctx, "Relay");
           }
 
           if (ctx.currentPlayer.toString() === JUDGE_PLAYER) {

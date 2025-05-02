@@ -3,7 +3,7 @@ import { BoardProps } from 'boardgame.io/react';
 import Stack from '@mui/material/Stack';
 import { Button } from '@mui/material';
 import { sendDataStrategyStep } from '../../common/sendData';
-import { IS_OFFLINE_MODE } from '../../client/utils/appMode';
+import { IS_OFFLINE_MODE } from '../../client/utils/util';
 
 
 interface MyGameProps extends BoardProps<MyGameState> { }

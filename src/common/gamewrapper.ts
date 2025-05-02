@@ -1,16 +1,7 @@
 import { Ctx, Game } from 'boardgame.io';
 import { INVALID_MOVE, TurnOrder } from 'boardgame.io/core';
 import { GameStateMixin, GameType, GUESSER_PLAYER, JUDGE_PLAYER } from './types';
-import { IS_OFFLINE_MODE } from '../client/utils/appMode';
-
-function parseGameState<T_SpecificGameState>(json: string): T_SpecificGameState {
-  const parsed = JSON.parse(json);
-
-  if (typeof parsed !== 'object' || parsed === null) {
-    throw new Error('relay: game_state_from_json: Invalid JSON: not an object');
-  }
-  return parsed as T_SpecificGameState;
-}
+import { IS_OFFLINE_MODE, parseGameState, saveGameState } from '../client/utils/util';
 
 function chooseRole({ G, ctx, playerID }: any, firstPlayer: string):void { // TODO: type
   G.firstPlayer = firstPlayer;
@@ -87,15 +78,6 @@ function loadGameState<T_SpecificGameState>({ events }:any) {
   return state;
 }
 
-function saveGameState({ G, ctx }: any) { // TODO: type
-  console.log("saveGameState");
-  if (!IS_OFFLINE_MODE) {
-    return;
-  }
-  localStorage.setItem("StrategyGameState", JSON.stringify(G));
-  localStorage.setItem("StrategyPhase", ctx.phase);
-}
-
 const lengthOfCompetition = 30 * 60; // seconds
 
 // This is *very important*, so as not to spam
@@ -143,7 +125,7 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
           order: TurnOrder.ONCE,
           onEnd: ({G, ctx}) => {
             console.log("StartNewGame saveGame");
-            saveGameState({G, ctx});
+            saveGameState(G, ctx, "Strategy");
           },
           onBegin: loadGameState,
         },
@@ -157,7 +139,7 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
           order: TurnOrder.RESET,
           onBegin: ({G, ctx}) => {
             console.log("chooseRole.turn.onBegin saveGame");
-            saveGameState({G, ctx});
+            saveGameState(G, ctx, "Strategy");
           }
         }
       },
@@ -192,13 +174,13 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
 
             if (ctx.currentPlayer === JUDGE_PLAYER) {
               console.log("saveGameState judge end");
-              saveGameState({ G, ctx, playerID, events });
+              saveGameState(G, ctx, "Strategy");
             }
           },
         },
         onBegin: ({G, ctx, playerID, events, random, log}) => {
           console.log("saveGameState on play phase Begin");
-          saveGameState({ G, ctx, playerID, events });
+          saveGameState(G, ctx, "Strategy");
         }
       },
     },

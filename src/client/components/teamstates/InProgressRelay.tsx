@@ -10,7 +10,7 @@ import { ExcerciseForm } from '../ExcerciseForm';
 import { sendDataRelayStep } from '../../../common/sendData';
 import { dictionary } from '../../text-constants';
 import { RelayEndTable } from '../RelayEndTable';
-import { IS_OFFLINE_MODE } from '../../utils/appMode';
+import { IS_OFFLINE_MODE } from '../../utils/util';
 interface MyGameProps extends BoardProps<MyGameState> { };
 export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
   const [msRemaining, setMsRemaining] = useState(G.milisecondsRemaining);

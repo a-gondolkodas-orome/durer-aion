@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Countdown } from "../client/components/Countdown";
 import { StrategyEndTable } from "../client/components/StrategyEndTable";
 import { useRefreshTeamState, useToHome } from "../client/hooks/user-hooks";
-import { IS_OFFLINE_MODE } from "../client/utils/appMode";
+import { IS_OFFLINE_MODE } from "../client/utils/util";
 import { GUESSER_PLAYER, JUDGE_PLAYER } from "./types";
 
 export function boardWrapper(board: any, description: any) { //<please> TODO: solve types with BoardProps<MyGameState>
