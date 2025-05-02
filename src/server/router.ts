@@ -274,7 +274,6 @@ export function configureTeamsRouter(
       ctx.throw(400, 'Multiple files are not supported.');
       return;
     }
-    assert(file instanceof File);// FU linter
 
     // Check if the file is a TSV file
     if (!file || !file.name?.endsWith('.tsv')) {
