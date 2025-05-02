@@ -4,8 +4,6 @@ import { useRef} from 'react';
 import Stack from '@mui/material/Stack';
 import { Button } from '@mui/material';
 import theme from '../../client/components/theme';
-import { useTeamState } from '../../client/hooks/user-hooks';
-import { sendDataStrategyStep } from '../../common/sendData';
 
 import KeyboardDoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
 
@@ -16,7 +14,6 @@ export function MyBoard({ G, ctx, moves }: MyGameProps) {
   // create refs to store the text input elements
   const inputK = useRef<HTMLInputElement>(null);
   const inputL = useRef<HTMLInputElement>(null);
-  const teamState = useTeamState();
 
 
   const onClick = () => {

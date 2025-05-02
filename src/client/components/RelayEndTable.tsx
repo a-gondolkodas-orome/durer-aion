@@ -176,3 +176,100 @@ export function RelayEndTable(props: {allPoints: number, task: {max: number, got
     </Stack>
   )
 }
+
+export function RelayEndTableData(props: {allPoints: number, task: {max: number, got: number | null, answers: number[]}[]}) {
+  return (
+        <Table sx={{
+        marginTop: '20px',
+        marginLeft:'10px',
+        borderCollapse: 'collapse',
+        fontSize: '18px',
+        '& td':{
+            borderStyle: 'solid',
+            borderColor: '#000',
+            borderWidth: '1px',
+            textAlign: 'center',
+            padding: '5px',
+            minWidth: '40px',
+            [theme.breakpoints.down(800)]:{
+                minWidth: '0px',
+                padding: '0px',
+            }
+        },
+        [theme.breakpoints.down(1200)]:{
+            width: '100%',
+            marginLeft:'0px',
+        },
+        [theme.breakpoints.down(800)]:{
+            fontSize: '11px',
+        }
+    }}>
+            <TableRow>
+                <TableCell>{dictionary.relay.endTable.task}</TableCell>
+                {props.task.slice(0, 10).map((data, idx)=><TableCell>
+                    {idx+1}.
+                </TableCell>)}
+            </TableRow>
+            <TableRow>
+                <TableCell>{dictionary.relay.endTable.point}</TableCell>
+                {props.task.slice(0, 10).map((data, idx)=>{
+                    let currStyle = { backgroundColor: '#fff' };
+                    if(data.got !== null){
+                        switch(data.max - data.got){
+                            case 0: 
+                              currStyle = { backgroundColor: '#3fc523' }; break;
+                            case 1: 
+                              currStyle = { backgroundColor: '#9beb53' }; break;
+                            case 2: 
+                              currStyle = { backgroundColor: '#d5eb42' }; break;
+                            default:
+                              currStyle = { backgroundColor: '#ee5555' };
+                        }
+                    }
+                return <TableCell sx={currStyle}>
+                    {data.got}
+                </TableCell>})}
+            </TableRow><TableRow>
+                <TableCell>Válaszok</TableCell>
+                {props.task.slice(0, 10).map((data, idx)=>{
+                return <TableCell>
+                    {data.answers.join(", ")}
+                </TableCell>})}
+            </TableRow>
+            {props.task.length > 10 && <>
+              <TableRow>
+                <TableCell>{dictionary.relay.endTable.task}</TableCell>
+                {props.task.slice(10).map((data, idx)=><TableCell>
+                    {idx+11}.
+                </TableCell>)}
+            </TableRow>
+            <TableRow>
+                <TableCell>{dictionary.relay.endTable.point}</TableCell>
+                {props.task.slice(10).map((data, idx)=>{
+                    let currStyle = { backgroundColor: '#fff' };
+                    if(data.got !== null){
+                        switch(data.max - data.got){
+                            case 0: 
+                              currStyle = { backgroundColor: '#3fc523' }; break;
+                            case 1: 
+                              currStyle = { backgroundColor: '#9beb53' }; break;
+                            case 2: 
+                              currStyle = { backgroundColor: '#d5eb42' }; break;
+                            default:
+                              currStyle = { backgroundColor: '#ee5555' };
+                        }
+                    }
+                return <TableCell sx={currStyle}>
+                    {data.got}
+                </TableCell>})}
+            </TableRow><TableRow>
+                <TableCell>Válaszok</TableCell>
+                {props.task.slice(10).map((data, idx)=>{
+                return <TableCell>
+                    {data.answers.join(", ")}
+                </TableCell>})}
+            </TableRow>
+            </>}
+        </Table>
+  )
+}

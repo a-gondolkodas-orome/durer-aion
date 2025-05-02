@@ -1,19 +1,18 @@
-import { render, screen } from '@testing-library/react';
-import { gameWrapper } from './gamewrapper';
-import { RecoilRoot } from 'recoil';
-import { GameStateMixin, GameType } from './types';
-import { Ctx, DefaultPluginAPIs } from 'boardgame.io';
-import { Client } from 'boardgame.io/client';
-import { createGameWithoutStartingPosition, createGameWithMoveWithoutStartingPosition } from './game_for_testing';
+import { gameWrapper } from "./gamewrapper";
+import { Client } from "boardgame.io/client";
+import {
+  createGameWithoutStartingPosition,
+  createGameWithMoveWithoutStartingPosition,
+} from "./game_for_testing";
 
-type G = { data: string };
-
-describe('gameWrapper', () => {
+describe("gameWrapper", () => {
   const setup = jest.fn();
 
   const move = jest.fn();
   const startingPosition = jest.fn();
-  const wrappedGame = gameWrapper(createGameWithMoveWithoutStartingPosition(setup, move));
+  const wrappedGame = gameWrapper(
+    createGameWithMoveWithoutStartingPosition(setup, move)
+  );
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -22,12 +21,12 @@ describe('gameWrapper', () => {
     startingPosition.mockReturnValue({ data: "startingPosition" });
   });
 
-  test('whether client calls into wrapped setup', () => {
+  test("whether client calls into wrapped setup", () => {
     Client({ game: wrappedGame, numPlayers: 2 });
     expect(setup).toBeCalled();
   });
 
-  test('whether default state is consistent', () => {
+  test("whether default state is consistent", () => {
     const client = Client({ game: wrappedGame, numPlayers: 2 });
     client.start();
 
@@ -35,7 +34,7 @@ describe('gameWrapper', () => {
     expect(client.getState()?.G.data).toStrictEqual("setup");
   });
 
-  test('chooseNewGameType', () => {
+  test("chooseNewGameType", () => {
     const client = Client({ game: wrappedGame, numPlayers: 2 });
     client.start();
 
@@ -46,28 +45,28 @@ describe('gameWrapper', () => {
     expect(client.getState()?.G.data).toStrictEqual("startingPosition");
   });
 
-  test('chooseRole', () => {
+  test("chooseRole", () => {
     const client = Client({ game: wrappedGame, numPlayers: 2 });
     client.start();
-    client.moves.chooseNewGameType('live');
+    client.moves.chooseNewGameType("live");
     client.moves.setStartingPosition({ data: "startingPosition" });
 
-    client.moves.chooseRole('0');
+    client.moves.chooseRole("0");
     expect(client.getState()?.ctx.phase).toStrictEqual("play");
-
   });
 
-  test('move', () => {
+  test("move", () => {
     const client = Client({ game: wrappedGame, numPlayers: 2 });
     client.start();
-    client.moves.chooseNewGameType('live');
+    client.moves.chooseNewGameType("live");
     client.moves.setStartingPosition({ data: "startingPosition" });
-    client.moves.chooseRole('0');
+    client.moves.chooseRole("0");
 
     move.mockImplementation(({ G }, newData) => {
       return {
-        ...G, data: newData
-      }
+        ...G,
+        data: newData,
+      };
     });
     client.moves.move("move");
 
@@ -76,7 +75,7 @@ describe('gameWrapper', () => {
   });
 });
 
-describe('gameWrapper high-level logic', () => {
+describe("gameWrapper high-level logic", () => {
   const setup = () => ({ data: "asd" });
   const wrappedGame = gameWrapper(createGameWithoutStartingPosition(setup));
 
@@ -84,12 +83,12 @@ describe('gameWrapper high-level logic', () => {
     jest.resetAllMocks();
   });
 
-  test('win once', () => {
+  test("win once", () => {
     const client = Client({ game: wrappedGame, numPlayers: 2 });
     client.start();
-    client.moves.chooseNewGameType('live');
+    client.moves.chooseNewGameType("live");
     client.moves.setStartingPosition({ data: "startingPosition" });
-    client.moves.chooseRole('0');
+    client.moves.chooseRole("0");
 
     client.moves.win();
 
@@ -100,12 +99,12 @@ describe('gameWrapper high-level logic', () => {
     expect(client.getState()?.G.points).toStrictEqual(0);
   });
 
-  test('lose once', () => {
+  test("lose once", () => {
     const client = Client({ game: wrappedGame, numPlayers: 2 });
     client.start();
-    client.moves.chooseNewGameType('live');
+    client.moves.chooseNewGameType("live");
     client.moves.setStartingPosition({ data: "startingPosition" });
-    client.moves.chooseRole('0');
+    client.moves.chooseRole("0");
 
     client.moves.lose();
 
@@ -116,18 +115,18 @@ describe('gameWrapper high-level logic', () => {
     expect(client.getState()?.G.points).toStrictEqual(0);
   });
 
-  test('win twice', () => {
+  test("win twice", () => {
     const client = Client({ game: wrappedGame, numPlayers: 2 });
     client.start();
-    client.moves.chooseNewGameType('live');
+    client.moves.chooseNewGameType("live");
     client.moves.setStartingPosition({ data: "startingPosition" });
-    client.moves.chooseRole('0');
+    client.moves.chooseRole("0");
 
     client.moves.win();
 
-    client.moves.chooseNewGameType('live');
+    client.moves.chooseNewGameType("live");
     client.moves.setStartingPosition({ data: "startingPosition" });
-    client.moves.chooseRole('0');
+    client.moves.chooseRole("0");
 
     client.moves.win();
 
@@ -140,12 +139,12 @@ describe('gameWrapper high-level logic', () => {
     expect(client.getState()?.G.points).toStrictEqual(12);
   });
 
-  test('win in test', () => {
+  test("win in test", () => {
     const client = Client({ game: wrappedGame, numPlayers: 2 });
     client.start();
-    client.moves.chooseNewGameType('test');
+    client.moves.chooseNewGameType("test");
     client.moves.setStartingPosition({ data: "startingPosition" });
-    client.moves.chooseRole('0');
+    client.moves.chooseRole("0");
 
     client.moves.lose();
 

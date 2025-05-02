@@ -1,5 +1,8 @@
+import { Ctx } from "boardgame.io";
+import { MyGameState } from "../../games/relay/game";
+
 export interface TeamModelDto {
-  id: string;
+  teamId: string;
   joinCode: string;
   teamName: string;
   category: string;
@@ -8,6 +11,21 @@ export interface TeamModelDto {
   pageState: 'DISCLAIMER'|'HOME'|'RELAY'|'STRATEGY'
   relayMatch: MatchStatus;
   strategyMatch: MatchStatus;
+}
+
+export interface MatchStateDto {
+  G: MyGameState;
+  ctx:	Ctx;
+  deltalog:	MatchStateLogDto[];
+}
+
+export interface MatchStateLogDto {
+  action: 'MAKE_MOVE' | 'GAME_EVENT' | 'UNDO' | 'REDO';
+  _stateID:	number;
+  turn:	number;
+  phase: string;
+  redact: boolean;
+  automatic: boolean;
 }
 
 export interface FinishedMatchStatus {

@@ -17,6 +17,9 @@ import { Client as Game15OnlineEClient, ClientWithBot as Game15OnlineEWithBotCli
 import { Client_C as TenCoinsClient_C, ClientWithBot_C as TenCoinsWithBotClient_C } from './games/ten-coins/main';
 import { Client_D as TenCoinsClient_D, ClientWithBot_D as TenCoinsWithBotClient_D } from './games/ten-coins/main';
 import { Client_E as TenCoinsClient_E, ClientWithBot_E as TenCoinsWithBotClient_E } from './games/ten-coins/main';
+import { Client_C as RemoveFromCircleClient_C, ClientWithBot_C as RemoveFromCircleWithBotClient_C } from './games/remove-from-circle/main';
+import { Client_D as RemoveFromCircleClient_D, ClientWithBot_D as RemoveFromCircleWithBotClient_D } from './games/remove-from-circle/main';
+import { Client_E as RemoveFromCircleClient_E, ClientWithBot_E as RemoveFromCircleWithBotClient_E } from './games/remove-from-circle/main';
 import Lobby from './lobby';
 
 import NotFound from './pages/NotFound';
@@ -73,6 +76,12 @@ if (process.env.REACT_APP_PAGE_CONFIG === 'gh-pages') {
               <Route path="/ten-coins-with-bot-d" element={<TenCoinsWithBotClient_D />} />
               <Route path="/ten-coins-e" element={<TenCoinsClient_E />} />
               <Route path="/ten-coins-with-bot-e" element={<TenCoinsWithBotClient_E />} />
+              <Route path="/remove-from-circle-c" element={<RemoveFromCircleClient_C />} />
+              <Route path="/remove-from-circle-with-bot-c" element={<RemoveFromCircleWithBotClient_C />} />
+              <Route path="/remove-from-circle-d" element={<RemoveFromCircleClient_D />} />
+              <Route path="/remove-from-circle-with-bot-d" element={<RemoveFromCircleWithBotClient_D />} />
+              <Route path="/remove-from-circle-e" element={<RemoveFromCircleClient_E />} />
+              <Route path="/remove-from-circle-with-bot-e" element={<RemoveFromCircleWithBotClient_E />} />
               <Route path='*' element={<NotFound />}></Route>
             </Routes>
           </HashRouter>

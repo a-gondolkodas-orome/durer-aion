@@ -5,12 +5,20 @@ function sendData(fileName: string, data: string){
   if (process.env.REACT_APP_WHICH_VERSION !== "b"){
     return;
   }
+  const bucketName = process.env.REACT_APP_S3_BUCKET_NAME;
+  const folder = process.env.REACT_APP_S3_FOLDER;
+  if (bucketName === undefined || folder === undefined) {
+    throw new Error('S3 bucket name or folder is not defined.');
+  }
   const fd = new FormData();
-  fd.append('key', "titok/"+fileName);
+  fd.append('key', folder + '/' + fileName);
   fd.append('file', data);
   // utf8 charset
   fd.append('Content-Type', 'text/plain; charset=utf-8');
-  fetch('https://adamprobalkozik.s3.eu-central-1.amazonaws.com', { method: 'POST', body: fd, mode: 'cors'}).then(res => console.log(res.status));
+  fetch(
+    bucketName,
+    { method: 'POST', body: fd, mode: 'cors'}).then(res => console.log(res.status)
+  );
 }
 
 const randomID = Math.floor(Math.random() * 900000)+100000;

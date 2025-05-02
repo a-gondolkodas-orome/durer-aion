@@ -88,6 +88,7 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
             form: { handleChange },
           }: any) => <input
             autoFocus={sentAnswer>0}
+            autoComplete="off"
             {...field}
             onChange={(e)=>{
                 e.preventDefault();

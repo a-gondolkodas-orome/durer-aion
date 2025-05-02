@@ -3,7 +3,8 @@ import * as Router from '@koa/router';
 import type { Game, LobbyAPI, Server, StorageAPI } from 'boardgame.io';
 import { TeamsRepository } from './db';
 import { InProgressMatchStatus, TeamModel } from './entities/model';
-import { BOT_ID } from '../socketio_botmoves';
+import { BOT_ID, TransportAPI } from '../socketio_botmoves';
+import { getFilterPlayerView } from "boardgame.io/internal";
 import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus, createGame, injectBot, injectPlayer } from './team_manage';
 import { assert } from 'console';
 import fs from 'fs';
@@ -19,22 +20,25 @@ import { import_teams_from_tsv } from './team_import';
  * @param teams - List of teams, provided as a TeamsRepository
  * @param games - List of possible games for teams
  */
-export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: TeamsRepository, games: Game<any, Record<string, unknown>, any>[]) {
-
+export function configureTeamsRouter(
+  router: Router<any, Server.AppCtx>,
+  teams: TeamsRepository,
+  games: Game<any, Record<string, unknown>, any>[]
+) {
   /**
    * Get the log data about a specific match.
    *
    * @param {string} matchId - The ID of the match.
    * @returns {LogEntry[]} - A list of log objects.
    */
-  router.get('/game/admin/:matchId/logs', async (ctx) => {
+  router.get("/game/admin/:matchId/logs", async (ctx) => {
     //It is already authenticated by the admin mount routing
     const matchID = ctx.params.matchId;
     const { log } = await (ctx.db as StorageAPI.Async).fetch(matchID, {
       log: true,
     });
     if (!log) {
-      ctx.throw(404, 'Match ' + matchID + ' not found');
+      ctx.throw(404, "Match " + matchID + " not found");
     }
     ctx.body = log;
   });
@@ -45,13 +49,13 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
    * @param {string} matchId - The ID of the match.
    * @returns {State<any>} - A match state object object.
    */
-  router.get('/game/admin/:matchId/state', async (ctx) => {
+  router.get("/game/admin/:matchId/state", async (ctx) => {
     const matchID = ctx.params.matchId;
     const { state } = await (ctx.db as StorageAPI.Async).fetch(matchID, {
       state: true,
     });
     if (!state) {
-      ctx.throw(404, 'Match ' + matchID + ' not found');
+      ctx.throw(404, "Match " + matchID + " not found");
     }
     ctx.body = state;
   });
@@ -63,66 +67,100 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
  * @param {integer} minutes - How many minutes to add
  * @returns {State<any>} - A match state object object.
  */
-  router.get('/game/admin/:matchId/addminutes/:minutes', async (ctx) => {
+  router.get("/game/admin/:matchId/addminutes/:minutes", async (ctx) => {
     const matchID = ctx.params.matchId;
     const minutes = Number(ctx.params.minutes);
-    const { state, metadata } = await (ctx.db as StorageAPI.Async).fetch(matchID, {
+    const { state, metadata } = await (ctx.db as StorageAPI.Async).fetch(
+      matchID,
+      {
       state: true,
-      metadata: true
-    });
+        metadata: true,
+      }
+    );
     if (!state) {
-      ctx.throw(404, 'Match ' + matchID + ' not found');
+      ctx.throw(404, "Match " + matchID + " not found");
     }
     // Fetch team
     const teamId = metadata.players[0].name;
-    const team = await teams.getTeam({ teamId })
+    const team = await teams.getTeam({ teamId });
 
     if (!team) {
       ctx.throw(500, `Match found, but assigned team ${teamId} was not found.`);
+      return;
+    }
+
+    const new_state = {
+      ...state,
+      //manually increment stateID
+      _stateID: state._stateID + 1
+    }
+
+    //Update  new_state
+    const newEndDate = new Date(state.G.end)
+    newEndDate.setMinutes(newEndDate.getMinutes() + minutes)
+    new_state.G.end = newEndDate.toISOString();
+    new_state.G.milisecondsRemaining = newEndDate.getTime() - new Date().getTime();
+
+    //Update team
+    if (team.strategyMatch.state === "IN PROGRESS") {
+      if (team.strategyMatch.matchID !== matchID) {
+        ctx.throw(501, `IN PROGRESS strategy match found (${team.strategyMatch.matchID}), but it does not match with matchID (${matchID}). (Probabaly you are using an old matchID.)`);
+      }
+      await team.update({
+        strategyMatch: {
+          state: "IN PROGRESS",
+          matchID: matchID,
+          startAt: new Date(new_state.G.start),
+          endAt: newEndDate,
+        }
+      })
+    }
+    else if (team.relayMatch.state === "IN PROGRESS") {
+      if (team.relayMatch.matchID !== matchID) {
+        ctx.throw(501, `IN PROGRESS relay match found (${team.relayMatch.matchID}), but it does not match with matchID (${matchID}). (Probabaly you are using an old matchID.)`);
+      }
+      await team.update({
+        relayMatch: {
+          state: "IN PROGRESS",
+          matchID: matchID,
+          startAt: new Date(new_state.G.start),
+          endAt: newEndDate,
+        }
+      })
+    }
+    else {
+      ctx.throw(501, 'Restarting an already finished match is not supported right now.');
+    }
+
+    await ctx.db.setState(matchID, new_state);
+
+    //Reconstruct game name from metadata
+    let game = games.find(g => g.name === metadata.gameName);
+    if (!game) {
+      ctx.throw(404, `Match found, but game ${metadata.gameName} was not found.`);
       return
     }
 
-    const upDate = new Date(state.G.end)
-    upDate.setMinutes(upDate.getMinutes() + minutes)
+    /* Hijacking the internal transport API used ot send backend updates to the frontend to send an update to the frontend
+    This is a bit hacky, but it mainly simulates a similar effect as what would happen if a different user changes teh gamestate irl
+    This is generally equal to what would happen if multiple players play the game, and one does some actions.
+    The other players would see the updated gamestate, and the frontend would update accordingly.
+    The normal way to use this, is to create a Master authorative object, which handels validations, and other logics.
+    Here we already handeled the validation, and uploded it to the database, so we can just send the updated gamestate to the frontend.
+    This is possible, because the publish functionality of the PubSub implementation,if we use a SendAll function, can be reconstructed easily from the transport layer we defined from the botmoves already. */
+    const my_transportAPI = TransportAPI(matchID, null /* we are only using sendAll */, getFilterPlayerView(game), ctx.durer_transport.pubSub)
 
-    //Update state
-    state.G.end = upDate.toISOString();
-    const upd = state.G.end;
-    state.G.milisecondsRemaining = upDate.getTime() - new Date().getTime();
-    //manually increment stateID
-    //really hope this doesn't breaky anything
-    state._stateID += 1
+    my_transportAPI.sendAll(
+      {
+        type: 'update',
+        args: [matchID, new_state]
+      }
+    )
 
-    //Update team
-    //TODO: review super duper forced update alternatives
-    if (team.strategyMatch.state == "IN PROGRESS")
-      await team.update({
-        strategyMatch: {
-          state: 'IN PROGRESS',
-          matchID: matchID,
-          startAt: new Date(state.G.start),
-          endAt: upDate,
-        }
-      })
-    else if (team.relayMatch.state == "IN PROGRESS")
-      await team.update({
-        relayMatch: {
-          state: 'IN PROGRESS',
-          matchID: matchID,
-          startAt: new Date(state.G.start),
-          endAt: upDate,
-        }
-      })
-    else
-      ctx.throw(501, 'Restarting an already finished match is not supported right now.');
+    team.other += ` te[${matchID}]:${minutes}`;
+    team.save();
 
-
-    await ctx.db.setState(matchID, state);
-
-    team.other += ` te[${matchID}]:${minutes}`
-    team.save()
-
-    ctx.body = { updatedEndTime: upDate, matchID: matchID, team: team };
+    ctx.body = { updatedEndTime: newEndDate, matchID: matchID, team: team };
 
   });
 
@@ -132,13 +170,13 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
    * @param {string} matchId - The ID of the match.
    * @returns {Server.MatchData} - A match object.
    */
-  router.get('/game/admin/:matchId/metadata', async (ctx) => {
+  router.get("/game/admin/:matchId/metadata", async (ctx) => {
     const matchID = ctx.params.matchId;
     const { metadata } = await (ctx.db as StorageAPI.Async).fetch(matchID, {
       metadata: true,
     });
     if (!metadata) {
-      ctx.throw(404, 'Match ' + matchID + ' not found');
+      ctx.throw(404, "Match " + matchID + " not found");
     }
     ctx.body = metadata;
   });
@@ -149,24 +187,24 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
      * @param {string} teamID - The ID of the team.
      * @returns {TeamModel} - Returns the modified team model.
      */
-  router.get('/team/admin/:teamID/reset/strategy', async (ctx) => {
+  router.get("/team/admin/:teamID/reset/strategy", async (ctx) => {
     const teamId = ctx.params.teamID;
-    const team = await teams.getTeam({ teamId })
+    const team = await teams.getTeam({ teamId });
 
     if (!team) {
       ctx.throw(404, `Team not found with teamID ${teamId}.`);
-      return
+      return;
     }
     // reset the strategy game while playing
-    if (team.pageState == 'STRATEGY')
+    if (team.pageState === 'STRATEGY')
       team.pageState = 'HOME'
 
     //log earlier matchid
-    if (team.strategyMatch.state != 'NOT STARTED')
+    if (team.strategyMatch.state !== 'NOT STARTED')
       team.other += ` prevstratid:${team.strategyMatch.matchID}`
     team.strategyMatch = { state: 'NOT STARTED' }
     team.save();
-    ctx.body = team
+    ctx.body = team;
   });
 
   /**
@@ -175,24 +213,24 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
      * @param {string} teamID - The ID of the team.
      * @returns {TeamModel} - Returns the modified team model.
      */
-  router.get('/team/admin/:teamID/reset/relay', async (ctx) => {
+  router.get("/team/admin/:teamID/reset/relay", async (ctx) => {
     const teamId = ctx.params.teamID;
-    const team = await teams.getTeam({ teamId })
+    const team = await teams.getTeam({ teamId });
 
     if (!team) {
       ctx.throw(404, `Team not found with teamID ${teamId}.`);
-      return
+      return;
     }
     // reset the strategy game while playing
-    if (team.pageState == 'RELAY')
+    if (team.pageState === 'RELAY')
       team.pageState = 'HOME'
 
     //log earlier matchid
-    if (team.relayMatch.state != 'NOT STARTED')
+    if (team.relayMatch.state !== 'NOT STARTED')
       team.other += ` prevrelayid:${team.relayMatch.matchID}`
     team.relayMatch = { state: 'NOT STARTED' }
     team.save();
-    ctx.body = team
+    ctx.body = team;
   });
 
   /**
@@ -201,27 +239,27 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
    * @param {string|string[]} filter - Get parameter to pass the filter
    * @returns {TeamModel[]} - List of the selected teams 
    */
-  router.get('/team/admin/filter', koaBody(), async (ctx) => {
-    const filter_string: string | string[] | undefined = ctx.request.query['filter'];
+  router.get("/team/admin/filter", koaBody(), async (ctx) => {
+    const filter_string: string | string[] | undefined =
+      ctx.request.query["filter"];
     let filters: string[];
     if (filter_string === undefined) {
-      filters = []
-    } else if (typeof (filter_string) === 'string') {
-      filters = filter_string.split(',');
-    }
-    else {
+      filters = [];
+    } else if (typeof filter_string === "string") {
+      filters = filter_string.split(",");
+    } else {
       filters = filter_string;
     }
     //TODO: fix the return type value
     ctx.body = await teams.fetch(filters);
     //    ctx.body = ['8eae8669-125c-42e5-8b49-89afbac31679', '18c3a69d-c477-4578-8dc1-6e430fbb4e80', '48df4969-a834-4131-ab75-24069a56d2d6'];
-  })
+  });
 
   /**
    * Get all teams as a full object
    * @returns {TeamModel[]} - List of the selected teams 
    */
-  router.get('/team/admin/all', koaBody(), async (ctx) => {
+  router.get("/team/admin/all", koaBody(), async (ctx) => {
     ctx.body = await teams.listTeams();
   })
 
@@ -229,7 +267,7 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
  * Get all teams as a full object
  * @returns {TeamModel[]} - List of the selected teams 
  */
-  router.put('/team/admin/import', koaBody({ multipart: true }), async (ctx) => {
+  router.put("/team/admin/import", koaBody({ multipart: true }), async (ctx) => {
     const { file } = ctx.request.files ?? ctx.throw(400, 'No files uploaded!');
     // Check if multiple files are uploded
     if (Array.isArray(file)) {
@@ -256,11 +294,11 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
    * @param {string} token: Login token
    * @returns {srting } - TeamId for the team
    */
-  router.get('/team/join/:token', koaBody(), async (ctx) => {
-    const connect_token: string = ctx.params.token ?? 'no-token';
+  router.get("/team/join/:token", koaBody(), async (ctx) => {
+    const connect_token: string = ctx.params.token ?? "no-token";
     const team = await teams.getTeam({ joinCode: connect_token });
     ctx.body = team?.teamId;
-    if (team == null)
+    if (team === null)
       ctx.throw(404, "Team not found!")
   })
 
@@ -272,32 +310,42 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
    * @returns {TeamModel} - raw TeamModell if called directly
    * 
    */
-  router.get(/^\/team\/(?<GUID>[^-]{8}-[^-]{4}-[^-]{4}-[^-]{4}-[^-]{12}$)/, koaBody(), async (ctx) => {
-    const GUID = ctx.params.GUID ?? ctx.throw(400)
-    console.log(GUID);
-    let team = await teams.getTeam({ teamId: GUID }) ?? ctx.throw(404, `Team with {teamId:${GUID}} not found.`)
+  router.get(
+    /^\/team\/(?<GUID>[^-]{8}-[^-]{4}-[^-]{4}-[^-]{4}-[^-]{12}$)/,
+    koaBody(),
+    async (ctx) => {
+      const GUID = ctx.params.GUID ?? ctx.throw(400);
+    console.log("team-data-access: ", GUID);
+      let team =
+        (await teams.getTeam({ teamId: GUID })) ??
+        ctx.throw(404, `Team with {teamId:${GUID}} not found.`);
     const staleInfo = await checkStaleMatch(team);
     if (staleInfo.isStale) {
-      console.log(`Stale found: ${JSON.stringify(staleInfo)}`)
-      await closeMatch((team[staleInfo.gameState!] as InProgressMatchStatus).matchID, teams, ctx.db);
-      team = await teams.getTeam({ teamId: GUID }) ?? ctx.throw(404, `Team with {teamId:${GUID}} not found.`)
-      console.log(JSON.stringify(team))
+        console.log(`Stale found: ${JSON.stringify(staleInfo)}`);
+        await closeMatch(
+          (team[staleInfo.gameState!] as InProgressMatchStatus).matchID,
+          teams,
+          ctx.db
+        );
+        team =
+          (await teams.getTeam({ teamId: GUID })) ??
+          ctx.throw(404, `Team with {teamId:${GUID}} not found.`);
     }
     ctx.body = team;
-  });
-
+    }
+  );
 
   /**
    * Let a team strat a RELAY match.
    * 
    * @param {string} GUID - TeamId
    */
-  router.get('/team/:GUID/relay/play', koaBody(), async (ctx) => {
+  router.get("/team/:GUID/relay/play", koaBody(), async (ctx) => {
     const GUID = ctx.params.GUID;
 
     //check if in progress, it is not allowed to play
     //check if it can be started, throw error if not
-    const { game, team } = await getNewGame(ctx, teams, games, 'RELAY');
+    const { game, team } = await getNewGame(ctx, teams, games, "RELAY");
 
     // about to start a game
     const body: LobbyAPI.CreatedMatch = await createGame(game, ctx);
@@ -311,21 +359,21 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
     }
     team.update({
       pageState: "RELAY",
-      relayMatch: match
-    })
+      relayMatch: match,
+    });
     ctx.body = body;
-  })
+  });
 
   /**
    * Let a team strat a STRATEGY match.
    * 
    * @param {string} GUID - TeamId
    */
-  router.get('/team/:GUID/strategy/play', koaBody(), async (ctx) => {
+  router.get("/team/:GUID/strategy/play", koaBody(), async (ctx) => {
     const GUID = ctx.params.GUID;
     //check if in progress, it is not allowed to play
     //check if it can be started, throw error if not
-    const { game, team } = await getNewGame(ctx, teams, games, 'STRATEGY');
+    const { game, team } = await getNewGame(ctx, teams, games, "STRATEGY");
     //about to start
 
     const body: LobbyAPI.CreatedMatch = await createGame(game, ctx);
@@ -334,31 +382,31 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
 
     //created new game, updated team state accordingly
     team.update({
-      pageState: 'STRATEGY',
-      strategyMatch: await startMatchStatus(body.matchID, ctx)
-    })
+      pageState: "STRATEGY",
+      strategyMatch: await startMatchStatus(body.matchID, ctx),
+    });
     ctx.body = body;
-  })
+  });
 
   /**
    * Let a team set their PageState to HOME
    * 
    * @param {string} GUID - TeamId
    */
-  router.get('/team/:GUID/gohome', koaBody(), async (ctx) => {
+  router.get("/team/:GUID/gohome", koaBody(), async (ctx) => {
     const GUID = ctx.params.GUID;
     //check if in progress, it is not allowed to play
     //check if it can be started, throw error if not
     const team: TeamModel = await teams.getTeam({ teamId: GUID }) ?? ctx.throw(404, `Team with {id:${GUID}} not found.`)
-    if (team.relayMatch.state == 'IN PROGRESS' || team.strategyMatch.state == 'IN PROGRESS')
+    if (team.relayMatch.state === 'IN PROGRESS' || team.strategyMatch.state === 'IN PROGRESS')
       ctx.throw(403, "Not allowed, match in progress.")
 
     //update team state to go home
     team.update({
-      pageState: 'HOME',
-    })
+      pageState: "HOME",
+    });
     ctx.body = team;
-  })
+  });
 
   /**
    * Let a team get their relay results
@@ -366,9 +414,9 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
    * 
    * @param {string} GUID - TeamId
    */
-  router.get('/team/:GUID/relay/result', koaBody(), async (ctx) => {
+  router.get("/team/:GUID/relay/result", koaBody(), async (ctx) => {
     ctx.throw(501, "Not implemented yet.");
-  })
+  });
 
   /**
    * Let a team get their strategy results
@@ -376,9 +424,9 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
    * 
    * @param {string} GUID - TeamId
    */
-  router.get('/team/:GUID/strategy/result', koaBody(), async (ctx) => {
+  router.get("/team/:GUID/strategy/result", koaBody(), async (ctx) => {
     ctx.throw(501, "Not implemented yet.");
-  })
+  });
 
   /**
    * Create a new BGio game
@@ -387,13 +435,10 @@ export function configureTeamsRouter(router: Router<any, Server.AppCtx>, teams: 
    * 
    * This should be in line with boardgame.io/src/server/api.ts
    */
-  router.post('/games/:nameid/create', async (ctx, next) => {
+  router.post("/games/:nameid/create", async (ctx, next) => {
     await next();
     //Figured out where match id is stored
-    console.log(`Injecting bot in :${ctx.response.body.matchID}`)
+    console.log(`Injecting bot in :${ctx.response.body.matchID}`);
     await injectBot(ctx.db, ctx.response.body.matchID, BOT_ID);
   });
-
-
 }
-

@@ -8,10 +8,12 @@ import { Relay } from "./teamstates/Relay";
 import { Strategy } from "./teamstates/Strategy";
 import { Disclaimer } from "./Disclaimer";
 import { Chooser } from "./Chooser";
+import { Admin } from "./Admin";
 
 export function Main() {
   const teamState = useTeamState();
   const [frontendState, setFrontEndState] = useState<"R" | "S" | null>(null);
+  const [admin, setAdmin] = useState<boolean>(false);
 
   return (
     <Layout>
@@ -36,7 +38,8 @@ export function Main() {
         }}
         data-testId="mainRoot"
       >
-        {!teamState && <Login />}
+        {admin && <Admin setAdmin={setAdmin} />}
+        {!teamState && !admin && <Login setAdmin={setAdmin} />}
         {teamState && teamState.pageState === "DISCLAIMER" && (
           <Disclaimer />
         )}

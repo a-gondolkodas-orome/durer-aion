@@ -1,4 +1,4 @@
-import { readFileSync, renameSync, writeFileSync } from 'fs';
+import { readFileSync, writeFileSync } from 'fs';
 import { randomInt, randomUUID } from 'crypto';
 import { ValidationError } from 'sequelize';
 import { TeamsRepository } from './db';
@@ -124,6 +124,11 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
     if (credentials === undefined || credentials === "") {
       oninfo('Generating credentials')
       credentials = randomUUID();
+    } else if (credentials.match(/^[0-9a-f-]+$/) === null) {
+      ok = false;
+      console.error(`Credential is not a GUID for team ${teamname}`);
+      console.error(`  Found: ${credentials}`);
+      console.error(`  Expected format is usually: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`);
     }
 
     if (ok) {

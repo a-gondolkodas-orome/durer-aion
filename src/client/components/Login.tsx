@@ -7,12 +7,13 @@ import theme from './theme';
 import { dictionary } from '../text-constants';
 import { Button } from '@mui/material';
 import MaskedInput from "react-text-mask";
+import { Dispatch } from 'react';
 
 const idMask = [/\d/, /\d/,  /\d/, "-", /\d/, /\d/, /\d/, /\d/, "-", /\d/, /\d/, /\d/ ];
 
-export function Login() {
+export function Login(props: {setAdmin: Dispatch<boolean>}) {
   const { enqueueSnackbar } = useSnackbar();
-  const login = useLogin()
+  const login = useLogin();
 
   return (
     <Stack sx={{
@@ -64,6 +65,10 @@ export function Login() {
             onSubmit={(values) => {
               if(!values.joinCode) {
                 enqueueSnackbar("nem adtad meg a kódot", { variant: 'error' });
+                return;
+              }
+              if (values.joinCode==="000-0000-000") {
+                props.setAdmin(true);
                 return;
               }
               login(values.joinCode).catch(err => {

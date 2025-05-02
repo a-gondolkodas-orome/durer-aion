@@ -1,6 +1,6 @@
 import { GameRelay } from './games/relay/game';
-import { MyGame as StrategyGame17oe } from './games/17o/game';
-import { strategyWrapper as StrategyStrategy17oe } from './games/17o/strategy';
+import { myGameWrapper as strategyGameWrapper } from './games/remove-from-circle/game';
+import { strategyWrapper as StrategyStrategyremovefromcirclee } from './games/remove-from-circle/strategy';
 import { PostgresStore } from 'bgio-postgres';
 import { argv, env, exit } from 'process';
 import { gameWrapper } from './common/gamewrapper';
@@ -24,7 +24,7 @@ dotenv.config({ path: '.env.local' });
 function getDb() {
   if (env.DATABASE_URL) {
     const CONNECTION_STRING = env.DATABASE_URL;
-    const db = new PostgresStore(CONNECTION_STRING);
+    const db = new PostgresStore(CONNECTION_STRING, { logging: false });
     return {
       db,
       teams: new TeamsRepository(db),
@@ -71,18 +71,18 @@ export const relayNames = {
 }
 
 export const strategyNames = {
-  C: '17o_c',
-  D: '17o_d',
-  E: '17o_e',
+  C: 'remove-from-circle_c',
+  D: 'remove-from-circle_d',
+  E: 'remove-from-circle_e',
 }
 
 const games = [
   { ...GameRelay, name: relayNames.C },
   { ...GameRelay, name: relayNames.D },
   { ...GameRelay, name: relayNames.E },
-  { ...gameWrapper(StrategyGame17oe), name: strategyNames.C },
-  { ...gameWrapper(StrategyGame17oe), name: strategyNames.D },
-  { ...gameWrapper(StrategyGame17oe), name: strategyNames.E },
+  { ...gameWrapper(strategyGameWrapper("C")), name: strategyNames.C },
+  { ...gameWrapper(strategyGameWrapper("D")), name: strategyNames.D },
+  { ...gameWrapper(strategyGameWrapper("E")), name: strategyNames.E },
 ];
 
 
@@ -90,9 +90,9 @@ const bot_factories = [
   botWrapper(RelayStrategy("C")),
   botWrapper(RelayStrategy("D")),
   botWrapper(RelayStrategy("E")),
-  botWrapper(StrategyStrategy17oe("C")),
-  botWrapper(StrategyStrategy17oe("D")),
-  botWrapper(StrategyStrategy17oe("E")),
+  botWrapper(StrategyStrategyremovefromcirclee("C")),
+  botWrapper(StrategyStrategyremovefromcirclee("D")),
+  botWrapper(StrategyStrategyremovefromcirclee("E")),
 ];
 
 if (argv[2] === "sanity-check") {
@@ -120,19 +120,23 @@ if (argv[2] === "import") {
       })]
     ));
 
+  const socketio = new SocketIOButBotMoves(
+    { https: undefined },
+    botSetup,
+    async function onFinishedMatch(matchID) {
+      await closeMatch(matchID, teams, db);
+    },
+  );
   const server = Server({
     games: games,
-    transport: new SocketIOButBotMoves(
-      { https: undefined },
-      botSetup,
-      async function onFinishedMatch(matchID) {
-        await closeMatch(matchID, teams, db);
-      }
-    ),
+    transport: socketio,
     db,
   });
 
   const PORT = parseInt(env.PORT || "8000");
+
+  // Set up transport layer for updates
+  server.app.context.durer_transport = socketio;
 
   //Admin page auth setup
   server.app.use(mount('/team/admin', auth({ name: 'admin', pass: getAdminCredentials() })));
