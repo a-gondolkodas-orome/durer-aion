@@ -2,7 +2,7 @@ import { Game } from "boardgame.io";
 import { IS_OFFLINE_MODE } from "../client/utils/util";
 import { GameStateTimer, GUESSER_PLAYER } from "./types";
 
-export function parseGameState<T_SpecificGameState>(json: string): T_SpecificGameState {
+function parseGameState<T_SpecificGameState>(json: string): T_SpecificGameState {
   const parsed = JSON.parse(json);
   if (typeof parsed !== 'object' || parsed === null) {
     throw new Error('strategy: game_state_from_json: Invalid JSON: not an object');
@@ -10,7 +10,7 @@ export function parseGameState<T_SpecificGameState>(json: string): T_SpecificGam
   return parsed as T_SpecificGameState;
 }
 
-export function saveGameState({ G, ctx }: any, gameName: string) {
+function saveGameState({ G, ctx }: any, gameName: string) {
   if (!IS_OFFLINE_MODE) {
     return;
   }
