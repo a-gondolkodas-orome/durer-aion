@@ -14,7 +14,6 @@ function saveGameState({ G, ctx }: any, gameName: string) {
   if (!IS_OFFLINE_MODE) {
     return;
   }
-  console.log("saving game state")
   localStorage.setItem(gameName + "GameState", JSON.stringify(G));
   localStorage.setItem(gameName + "Phase", ctx.phase);
 }
