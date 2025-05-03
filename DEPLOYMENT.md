@@ -1,13 +1,19 @@
 
 # Breadcrumbs to how someone may deploy this repository
 
-I used AWS for deployment, but generally, the deployment is done in a virtual machine, generally avaliable almost everywhere. For cross vendor compatibility, please use an Ubuntu installer for your instance. You can use the Amazon Linux 2 as well, but you have to modify the installation in multiple parts.
+We used AWS or Azure for deployment, but generally, the deployment is done in a virtual machine, generally available almost everywhere. For cross vendor compatibility, please use an Ubuntu installer for your instance. You can use the Amazon Linux 2 as well, but you have to modify the installation in multiple parts.
 
-## Create an EC2
+Recommended requirements:
+* 4 GB RAM
+* 2 CPU is recommended
 
-Create a simple EC2 instance, and set up ssh to it. If your VM has less memory than 1GBt my recommnedation is to add a swap file, to handle extensive memory usage.
+(t2.medium in AWS, Standard B2s in Azure)
 
- **In clud enviroment this is unusual, as the storage is high latency due to networkind, and virtualisation. This is only a cost saving measure, but can be effective, if your working memory doesn't exceeds the limit, and you have temporary memory limitations for example during compilations**.
+## Create an EC2 (AWS)
+
+Create a simple EC2 instance, and set up SSH to it. If your VM has less memory than 1 GB my recommendation is to add a swap file, to handle extensive memory usage.
+
+**In cloud environment this is unusual, as the storage is high latency due to networking, and virtualization. This is only a cost saving measure, but can be effective, if your working memory doesn't exceeds the limit, and you have temporary memory limitations for example during compilations**.
 
 ```bash
 sudo dd if=/dev/zero of=/swapfile bs=1M count=2048
@@ -22,7 +28,7 @@ It is also higly recommended to use tmux or any other solution for permanent she
 sudo apt install tmux -y
 tmux new -s deploy
 ```
-  
+
 ## Install docker and npm
 
 To use docker and npm for compilation, you have to install these first.
@@ -54,8 +60,8 @@ sudo apt-get update
 sudo apt install docker-ce docker-compose-plugin
 ```
 
-After this you may need to add yourself to the docekr group, in case you get a [permission error](https://stackoverflow.com/questions/48957195/how-to-fix-docker-got-permission-denied-issue)
-this can be replaced with using sudo with your docekr commands, which is the prefered way
+After this you may need to add yourself to the docker group, in case you get a [permission error](https://stackoverflow.com/questions/48957195/how-to-fix-docker-got-permission-denied-issue)
+this can be replaced with using sudo with your docker commands, which is the preferred way
 
 ```bash
 sudo groupadd docker
@@ -111,7 +117,7 @@ You still need to set up the ssl certificate, and DNS.
 
 ## Access your docker containers
 
-To acces your docker coantainers, you have to find your containers first:
+To access your docker coantainers, you have to find your containers first:
 
 ```bash
 sudo docker ps
@@ -135,7 +141,7 @@ sudo docker exec -t durer-aion-backend-1 ./import_teams.sh test.tsv
 
 ## Add to a custom domain
 
-After assigning a static ip address to the instatnce, you can use DNS to resolve it to the correct URL. You have to add an A record to your DNS, and then you can access the new website trough a fancy url. 
+After assigning a static ip address to the instance, you can use DNS to resolve it to the correct URL. You have to add an A record to your DNS, and then you can access the new website trough a fancy url. 
 * Set up an elastic IP
 * Set up an A record for the static IP adress. (This actually breaks the ssh connection, and you have to modify the trusted hosts list, if the instance is swapped)
 
@@ -259,7 +265,7 @@ npm run deploy
 
 After this the site should be available on github.io.
 
-# Trubleshoot
+# Troubleshoot
 
 ## npm ci
 If the `npm ci` command returns with EACCESS error message, try 
