@@ -8,7 +8,6 @@ export interface MyGameState {
   firstMove: number;
   lastMove: number;
 }
-const lengthOfCompetition = 30*60; // seconds
 
 export function myGameWrapper(category: "C" | "D" | "E") {
   const init_circle: Array<boolean> = 
