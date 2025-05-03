@@ -10,7 +10,7 @@ import botWrapper from './common/botwrapper';
 import { strategy as RelayStrategy } from './games/relay/strategy';
 import { configureTeamsRouter } from './server/router';
 import { TeamsRepository } from './server/db';
-import {import_teams_from_tsv_locally } from './server/team_import';
+import { import_teams_from_tsv_locally } from './server/team_import';
 
 import auth from 'koa-basic-auth';
 import mount from 'koa-mount';
