@@ -3,7 +3,7 @@ import { INVALID_MOVE, TurnOrder } from "boardgame.io/core";
 import { sendDataRelayEnd } from "../../common/sendData";
 import { GUESSER_PLAYER, JUDGE_PLAYER, otherPlayer, PlayerIDType } from "../../common/types";
 import { IS_OFFLINE_MODE } from "../../client/utils/util";
-import { initializeLocalStorageGameState } from "../../common/localStorage";
+import { setupLocalStorageGameState } from "../../common/localStorage";
 
 type Answer = {
   answer: number;
@@ -188,5 +188,5 @@ const GameRelayBase: Game<MyGameState> = {
 }
 
 export const GameRelay = IS_OFFLINE_MODE ? 
-  initializeLocalStorageGameState(GameRelayBase) : 
+  setupLocalStorageGameState(GameRelayBase) : 
   GameRelayBase;
