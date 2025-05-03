@@ -23,9 +23,6 @@ export function myGameWrapper(category: "C" | "D" | "E") {
         circle: init_circle,
         firstMove: -1,
         lastMove: -1,
-        milisecondsRemaining: 1000*lengthOfCompetition,
-        start: new Date().toISOString(),
-        end: new Date(Date.now() + 1000*lengthOfCompetition).toISOString(),
       }
     },
 

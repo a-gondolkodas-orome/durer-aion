@@ -95,7 +95,7 @@ export function configureTeamsRouter(
     const newEndDate = new Date(state.G.end)
     newEndDate.setMinutes(newEndDate.getMinutes() + minutes)
     new_state.G.end = newEndDate.toISOString();
-    new_state.G.milisecondsRemaining = newEndDate.getTime() - new Date().getTime();
+    new_state.G.millisecondsRemaining = newEndDate.getTime() - new Date().getTime();
 
     //Update team
     if (team.strategyMatch.state === "IN PROGRESS") {

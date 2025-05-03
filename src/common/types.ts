@@ -9,7 +9,8 @@ export function otherPlayer(playerID: PlayerIDType): PlayerIDType {
 }
 
 export const { GUESSER_PLAYER, JUDGE_PLAYER } = PlayerIDType;
-export interface GameStateMixin {
+
+export interface GameStateMixin extends GameStateTimer {
   firstPlayer: null | PlayerIDType;
   winner: PlayerIDType | "draw" | null;
   difficulty: null | undefined | string;
@@ -17,6 +18,9 @@ export interface GameStateMixin {
   numberOfLoss: number;
   winningStreak: number;
   points: number;
+}
+
+export interface GameStateTimer {
   millisecondsRemaining: number;
   start: string;
   end: string;

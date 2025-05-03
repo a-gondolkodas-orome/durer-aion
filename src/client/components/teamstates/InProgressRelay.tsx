@@ -13,7 +13,7 @@ import { RelayEndTable } from '../RelayEndTable';
 import { IS_OFFLINE_MODE } from '../../utils/util';
 interface MyGameProps extends BoardProps<MyGameState> { };
 export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
-  const [msRemaining, setMsRemaining] = useState(G.milisecondsRemaining);
+  const [msRemaining, setMsRemaining] = useState(G.millisecondsRemaining);
   const [gameover, setGameover] = useState(ctx.gameover);
   const refreshState = useRefreshTeamState();
   const toHome = useToHome();
@@ -34,8 +34,8 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ctx.gameover]);
   useEffect(() => {
-    setMsRemaining(G.milisecondsRemaining);
-  }, [G.milisecondsRemaining]);
+    setMsRemaining(G.millisecondsRemaining);
+  }, [G.millisecondsRemaining]);
   const finished = msRemaining < - 5000 || gameover === true
   return (
     <>
@@ -99,7 +99,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
               setMsRemaining={()=>{}}
               getServerTimer={()=>{}}
               endTime={new Date(G.end)} 
-              serverRemainingMs={G.milisecondsRemaining}/>
+              serverRemainingMs={G.millisecondsRemaining}/>
           </Stack>
         <Stack sx={{
           width: {
@@ -162,7 +162,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
               setMsRemaining={setMsRemaining}
               getServerTimer={moves.getTime}
               endTime={new Date(G.end)}
-              serverRemainingMs={G.milisecondsRemaining} />}
+              serverRemainingMs={G.millisecondsRemaining} />}
           </Stack>
           {IS_OFFLINE_MODE && 
             <Stack sx={{

@@ -3,8 +3,7 @@ import { INVALID_MOVE, TurnOrder } from "boardgame.io/core";
 import { sendDataRelayEnd } from "../../common/sendData";
 import { GUESSER_PLAYER, JUDGE_PLAYER, otherPlayer, PlayerIDType } from "../../common/types";
 import { IS_OFFLINE_MODE } from "../../client/utils/util";
-import { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
-import { parseGameState, saveGameState } from "../../common/localStorage";
+import { initializeLocalStorageGameState } from "../../common/localStorage";
 
 type Answer = {
   answer: number;
@@ -21,36 +20,16 @@ export interface MyGameState {
   previousPoints: Array<number>;
   currentProblemMaxPoints: number;
   numberOfTry: number;
-  milisecondsRemaining: number;
+  millisecondsRemaining: number;
   start: string;
   end: string;
   url: string;
 }
 
-function loadGameState(events: EventsAPI): MyGameState | undefined {
-  const phase = localStorage.getItem("RelayGamePhase");
-  const gameStateJSON = localStorage.getItem("RelayGameState");
-  if (phase === null || gameStateJSON === null) {
-    events.endTurn();
-    return;
-  }
-
-  let state;
-  try { // if the json is bad, continue as if we didnt even have it
-    state = parseGameState<MyGameState>(gameStateJSON);
-  } catch {
-    events.endTurn();
-    console.error("could not load game phase from json, invalid json");
-    return;
-  }
-
-  events.setPhase(phase);
-  state.milisecondsRemaining = Date.parse(state.end) - Date.now();
-  return state;
-}
 const lengthOfCompetition = 60 * 60; // seconds
 
-export const GameRelay: Game<MyGameState> = {
+const GameRelayBase: Game<MyGameState> = {
+  name: "relay",
   setup: () => {
     return {
       currentProblem: 0,
@@ -62,7 +41,7 @@ export const GameRelay: Game<MyGameState> = {
       previousPoints: [],
       currentProblemMaxPoints: 3, // TODO: get from the problem list, TODO: rename this function to currentProblemAvailablePoints
       numberOfTry: 0,
-      milisecondsRemaining: 1000 * lengthOfCompetition,
+      millisecondsRemaining: 1000 * lengthOfCompetition,
       start: new Date().toISOString(),
       end: new Date(Date.now() + 1000 * lengthOfCompetition).toISOString(),
       url: "",
@@ -73,14 +52,10 @@ export const GameRelay: Game<MyGameState> = {
     startNewGame: {
       moves: {
         startGame: ({ G, ctx, playerID, events }) => {
-          if (!IS_OFFLINE_MODE) {
-            if (playerID !== GUESSER_PLAYER || G.numberOfTry !== 0) {
-              return INVALID_MOVE;
-            }
-            events.endTurn();
+          if (playerID !== GUESSER_PLAYER || G.numberOfTry !== 0) {
+            return INVALID_MOVE;
           }
-
-          return loadGameState(events);
+          events.endTurn();
         },
         firstProblem({ G, ctx, playerID, events }, problemText: string, nextProblemMaxPoints: number, url: string) {
           if (playerID !== JUDGE_PLAYER) {
@@ -128,10 +103,6 @@ export const GameRelay: Game<MyGameState> = {
           }
         },
         onEnd: ({G, ctx, playerID, events}) => {
-          if (ctx.currentPlayer === JUDGE_PLAYER && IS_OFFLINE_MODE) {
-            saveGameState({G, ctx}, "Relay");
-          }
-
           if (ctx.currentPlayer.toString() === JUDGE_PLAYER) {
             let currentTime = new Date();
             if (currentTime.getTime() - new Date(G.end).getTime() >= 0) {
@@ -154,9 +125,6 @@ export const GameRelay: Game<MyGameState> = {
           G.correctnessPreviousAnswer = correctnessPreviousAnswer;
           if (correctnessPreviousAnswer) {
             G.points += G.currentProblemMaxPoints;
-            if (IS_OFFLINE_MODE) {
-              localStorage.setItem("RelayPoints", G.points.toString());
-            }
             G.previousPoints[G.currentProblem] = G.currentProblemMaxPoints;
           } else {
             G.previousPoints[G.currentProblem] = 0;
@@ -194,7 +162,6 @@ export const GameRelay: Game<MyGameState> = {
           if (correctnessPreviousAnswer) {
             G.points += G.currentProblemMaxPoints;
             if (IS_OFFLINE_MODE) {
-              localStorage.setItem("RelayPoints", G.points.toString());
               sendDataRelayEnd(null, G, ctx);
             }
             G.previousPoints[G.currentProblem] = G.currentProblemMaxPoints;
@@ -207,7 +174,7 @@ export const GameRelay: Game<MyGameState> = {
           if (playerID !== GUESSER_PLAYER) {
             return INVALID_MOVE;
           }
-          G.milisecondsRemaining = new Date(G.end).getTime() - new Date().getTime();
+          G.millisecondsRemaining = new Date(G.end).getTime() - new Date().getTime();
         }
       },
     },
@@ -219,3 +186,7 @@ export const GameRelay: Game<MyGameState> = {
     }
   }
 }
+
+export const GameRelay = IS_OFFLINE_MODE ? 
+  initializeLocalStorageGameState(GameRelayBase) : 
+  GameRelayBase;

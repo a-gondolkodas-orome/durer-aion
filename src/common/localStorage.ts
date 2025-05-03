@@ -1,6 +1,6 @@
 import { Game } from "boardgame.io";
 import { IS_OFFLINE_MODE } from "../client/utils/util";
-import { GameStateMixin, GUESSER_PLAYER, JUDGE_PLAYER } from "./types";
+import { GameStateTimer, GUESSER_PLAYER, JUDGE_PLAYER } from "./types";
 
 export function parseGameState<T_SpecificGameState>(json: string): T_SpecificGameState {
   const parsed = JSON.parse(json);
@@ -22,7 +22,7 @@ export function saveGameState({G, ctx}: any, gameName: string) {
 
 // called from a useeffect in boardwrapper.tsx
 // state is saved in onEnd()
-function loadGameStateFromLocalStorage<T_SpecificGameState>(gameName: string): { savedG?: T_SpecificGameState & GameStateMixin, savedPhase?: string } {
+function loadGameStateFromLocalStorage<T_SpecificGameState>(gameName: string): { savedG?: T_SpecificGameState & GameStateTimer, savedPhase?: string } {
   if (!IS_OFFLINE_MODE) {
     return {};
   }
@@ -34,7 +34,7 @@ function loadGameStateFromLocalStorage<T_SpecificGameState>(gameName: string): {
 
   let savedG;
   try { // if the json is bad, continue as if we didnt even have it
-    savedG = parseGameState<T_SpecificGameState & GameStateMixin>(gameStateJSON);
+    savedG = parseGameState<T_SpecificGameState & GameStateTimer>(gameStateJSON);
   } catch {
     localStorage.removeItem(gameName + "Phase");;
     localStorage.removeItem(gameName + "GameState");;
@@ -46,7 +46,7 @@ function loadGameStateFromLocalStorage<T_SpecificGameState>(gameName: string): {
   return { savedG, savedPhase };
 }
 
-export function initializeLocalStorageGameState<T_SpecificGameState>(myGameWrapper: Game<T_SpecificGameState & GameStateMixin>) {
+export function initializeLocalStorageGameState<T_SpecificGameState>(myGameWrapper: Game<T_SpecificGameState & GameStateTimer>) {
   const gameName = myGameWrapper.name;
   if (!gameName){
     throw new Error("Gamename is not defined. Local storage game state save is not possible.");
@@ -57,34 +57,8 @@ export function initializeLocalStorageGameState<T_SpecificGameState>(myGameWrapp
     ...originalSetup!(context),
     ...savedG
   });
-  // Save the game state to localStorage for 1) onBegin of phase 2) onEnd of judge's turn
+  // Save the game state to localStorage for onBegin guesser's turn
   for (const phaseName in myGameWrapper.phases) {
-    // const originalPhase = myGameWrapper.phases[phaseName];
-    // const originalOnBegin = originalPhase.onBegin;
-    // myGameWrapper.phases[phaseName].onBegin = (state) => {
-    //   if (originalOnBegin) {
-    //     originalOnBegin(state);
-    //   }
-    //   console.log("onBegin", state);
-
-    //   if (originalPhase.turn?.order?.first(state) === undefined || 
-    //     originalPhase.turn?.order?.first(state) === Number(GUESSER_PLAYER)) {
-    //     // If judge is the first player, we will save the game state at onEnd
-    //     saveGameState(state, gameName);
-    //   }
-    // };
-    // const originalOnEnd = myGameWrapper.phases[phaseName].turn?.onEnd;
-    // myGameWrapper.phases[phaseName].turn = {
-    //   ...myGameWrapper.phases[phaseName].turn,
-    //   onEnd: (state) => {
-    //     if (originalOnEnd) {
-    //       originalOnEnd(state);
-    //     }
-    //     if (state.ctx.currentPlayer === JUDGE_PLAYER) {
-    //       saveGameState(state, gameName);
-    //     }
-    //   },
-    // }
     const originalOnBeginTurn = myGameWrapper.phases[phaseName].turn?.onBegin;
     myGameWrapper.phases[phaseName].turn = {
       ...myGameWrapper.phases[phaseName].turn,
@@ -101,7 +75,6 @@ export function initializeLocalStorageGameState<T_SpecificGameState>(myGameWrapp
   if (!myGameWrapper.phases || !savedPhase) {
     return myGameWrapper;
   }
-  console.log("new on Phase", myGameWrapper.phases);
 
   // Set all phases start to false by default, then set the one from localStorage to true
   for (const phaseName in myGameWrapper.phases) {

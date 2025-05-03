@@ -48,7 +48,7 @@ function getTime({ G, ctx, playerID, events }: any) {
   if (playerID !== GUESSER_PLAYER) {
     return INVALID_MOVE;
   }
-  G.milisecondsRemaining = new Date(G.end).getTime() - new Date().getTime();
+  G.millisecondsRemaining = new Date(G.end).getTime() - new Date().getTime();
 }
 
 export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameState>): Game<T_SpecificGameState & GameStateMixin> {
