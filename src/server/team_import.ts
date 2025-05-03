@@ -124,11 +124,11 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
     if (credentials === undefined || credentials === "") {
       oninfo('Generating credentials')
       credentials = randomUUID();
-    } else if (credentials.match(/^[0-9a-f-]+$/) === null) {
+    } else if (credentials.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/) === null) {
       ok = false;
-      console.error(`Credential is not a GUID for team ${teamname}`);
-      console.error(`  Found: ${credentials}`);
-      console.error(`  Expected format is usually: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`);
+      onerror(`Credential is not a GUID for team ${teamname}`);
+      onerror(`  Found: ${credentials}`);
+      onerror(`  Expected format is usually: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`);
     }
 
     if (ok) {

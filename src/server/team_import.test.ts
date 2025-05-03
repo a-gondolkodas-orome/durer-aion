@@ -1,4 +1,3 @@
-// tests/team_import.test.ts
 import { TeamsRepository } from './db';
 import { import_teams_from_tsv } from './team_import';
 import { readFileSync } from 'fs';
@@ -7,7 +6,7 @@ jest.mock('fs');
 jest.mock('./db');
 
 describe('import_teams_from_tsv', () => {
-  let mockDb:any;
+  let mockDb: any;
   let mockTeamsRepo: TeamsRepository;
 
   beforeEach(() => {
@@ -65,7 +64,7 @@ describe('import_teams_from_tsv', () => {
   it('should generate default teamId if missing', async () => {
     const fileContent = `
     Teamname\tCategory\tEmail\tOther\tID\tLogin Code\tCredentials
-    Test Team\tC\ttest@example.com\tSome Info\t\tABC-123-XYZ\tcustom-credentials
+    Test Team\tC\ttest@example.com\tSome Info\t\t111-222-111\t67676767-6767-6767-6767-676767676768
     `;
     (readFileSync as jest.Mock).mockReturnValue(fileContent.trim());
 
@@ -82,7 +81,7 @@ describe('import_teams_from_tsv', () => {
   it('should generate default login_code if missing', async () => {
     const fileContent = `
     Teamname\tCategory\tEmail\tOther\tID\tLogin Code\tCredentials
-    Test Team\tC\ttest@example.com\tSome Info\tcustom-id\t\tcustom-credentials
+    Test Team\tC\ttest@example.com\tSome Info\tcustom-id\t\t67676767-6767-6767-6767-676767676768
     `;
     (readFileSync as jest.Mock).mockReturnValue(fileContent.trim());
 
@@ -112,5 +111,19 @@ describe('import_teams_from_tsv', () => {
     );
     expect(result.successful).toBe(1);
   });
-});
 
+  it('should fail if credentials have an invalid format', async () => {
+    const fileContent = `
+    Teamname\tCategory\tEmail\tOther\tID\tLogin Code\tCredentials
+    Test Team\tC\ttest@example.com\tSome Info\tcustom-id\tABC-123-XYZ\tinvalid-credentials
+    `;
+    (readFileSync as jest.Mock).mockReturnValue(fileContent.trim());
+
+    const result = await import_teams_from_tsv(mockTeamsRepo, 'dummy_file.tsv');
+
+    expect(result.failed).toBe(1);
+    expect(result.successful).toBe(0);
+    expect(result.logs.value).toContain('Credential is not a GUID for team Test Team');
+    expect(mockTeamsRepo.insertTeam).not.toHaveBeenCalled();
+  });
+});
