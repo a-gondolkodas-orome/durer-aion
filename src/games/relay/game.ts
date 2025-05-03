@@ -2,8 +2,9 @@ import { Game } from "boardgame.io";
 import { INVALID_MOVE, TurnOrder } from "boardgame.io/core";
 import { sendDataRelayEnd } from "../../common/sendData";
 import { GUESSER_PLAYER, JUDGE_PLAYER, otherPlayer, PlayerIDType } from "../../common/types";
-import { IS_OFFLINE_MODE, parseGameState, saveGameState } from "../../client/utils/util";
+import { IS_OFFLINE_MODE } from "../../client/utils/util";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
+import { parseGameState, saveGameState } from "../../common/localStorage";
 
 type Answer = {
   answer: number;
@@ -128,7 +129,7 @@ export const GameRelay: Game<MyGameState> = {
         },
         onEnd: ({G, ctx, playerID, events}) => {
           if (ctx.currentPlayer === JUDGE_PLAYER && IS_OFFLINE_MODE) {
-            saveGameState(G, ctx, "Relay");
+            saveGameState({G, ctx}, "Relay");
           }
 
           if (ctx.currentPlayer.toString() === JUDGE_PLAYER) {
