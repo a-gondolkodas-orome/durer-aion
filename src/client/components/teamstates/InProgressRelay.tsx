@@ -10,9 +10,10 @@ import { ExcerciseForm } from '../ExcerciseForm';
 import { sendDataRelayStep } from '../../../common/sendData';
 import { dictionary } from '../../text-constants';
 import { RelayEndTable } from '../RelayEndTable';
+import { IS_OFFLINE_MODE } from '../../utils/util';
 interface MyGameProps extends BoardProps<MyGameState> { };
 export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
-  const [msRemaining, setMsRemaining] = useState(G.milisecondsRemaining);
+  const [msRemaining, setMsRemaining] = useState(G.millisecondsRemaining);
   const [gameover, setGameover] = useState(ctx.gameover);
   const refreshState = useRefreshTeamState();
   const toHome = useToHome();
@@ -25,7 +26,6 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
       const gameNotStarted = G.numberOfTry === 0;
       if (gameNotStarted) {
         moves.startGame();
-        console.log("Start Game!");
       } else {
         moves.getTime();
       }
@@ -34,8 +34,8 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ctx.gameover]);
   useEffect(() => {
-    setMsRemaining(G.milisecondsRemaining);
-  }, [G.milisecondsRemaining]);
+    setMsRemaining(G.millisecondsRemaining);
+  }, [G.millisecondsRemaining]);
   const finished = msRemaining < - 5000 || gameover === true
   return (
     <>
@@ -99,7 +99,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
               setMsRemaining={()=>{}}
               getServerTimer={()=>{}}
               endTime={new Date(G.end)} 
-              serverRemainingMs={G.milisecondsRemaining}/>
+              serverRemainingMs={G.millisecondsRemaining}/>
           </Stack>
         <Stack sx={{
           width: {
@@ -162,15 +162,15 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
               setMsRemaining={setMsRemaining}
               getServerTimer={moves.getTime}
               endTime={new Date(G.end)}
-              serverRemainingMs={G.milisecondsRemaining} />}
+              serverRemainingMs={G.millisecondsRemaining} />}
           </Stack>
-          {process.env.REACT_APP_WHICH_VERSION === "b" && 
+          {IS_OFFLINE_MODE && 
             <Stack sx={{
               flexDirection: 'row',
               width: '250px',
               fontSize: '10px',
             }}>
-            ("Az óra csak tájékoztató jellegű. Ha lefrissítitek az oldalt, akkor az óra újraindul, de így is csak az időben beérkezett válaszokat fogjuk figyelembe venni.")
+            (Az óra csak tájékoztató jellegű. Más eszközökön és böngészőkben más időt fogtok látni, de így is csak az időben beérkezett válaszokat fogjuk figyelembe venni.)
             </Stack>
           }
         </Stack>

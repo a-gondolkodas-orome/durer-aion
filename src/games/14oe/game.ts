@@ -1,5 +1,5 @@
-import { INVALID_MOVE } from "boardgame.io/core";
-import { GameType } from "../../common/types";
+import { INVALID_MOVE } from 'boardgame.io/core';
+import { GameType, GUESSER_PLAYER, JUDGE_PLAYER, PlayerIDType } from '../../common/types';
 
 export interface MyGameState {
   playerNumbers: number[];
@@ -21,20 +21,16 @@ export const MyGame: GameType<MyGameState> = {
       if (!G.remainingNumbers.includes(n)) {
         return INVALID_MOVE;
       }
-      if (playerID === "0") {
+      if (playerID === GUESSER_PLAYER) {
         G.playerNumbers.push(n);
       } else {
         G.enemyNumbers.push(n);
       }
-      G.remainingNumbers = G.remainingNumbers.filter((x) => x !== n);
-      let winner = getWinner(
-        G.playerNumbers,
-        G.enemyNumbers,
-        G.remainingNumbers
-      );
-      if (winner === "0" || winner === "1") {
+      G.remainingNumbers = G.remainingNumbers.filter(x => x !== n);
+      let winner = getWinner(G.playerNumbers, G.enemyNumbers, G.remainingNumbers);
+      if (winner !== null) {
         G.winner = winner;
-        if(winner === "0"){
+        if(winner === GUESSER_PLAYER){
           G.winningStreak = G.winningStreak + 1;
           if(G.winningStreak >= 2){
             G.points = 12-G.numberOfLoss*2; // TODO
@@ -62,14 +58,12 @@ function getWinner(
   first: number[],
   second: number[],
   remaining: number[]
-): string {
-  console.log(first, second, remaining);
-
+): PlayerIDType | null {
   if(remaining.length === 0){
     if(first.length === 5){
-      return "1";
+      return JUDGE_PLAYER;
     } // Enemy wins
-    return "0"; //Player wins
+    return GUESSER_PLAYER; //Player wins
   }
 
   const RSOROK = [
@@ -85,7 +79,7 @@ function getWinner(
 
   for(let i of RSOROK){
     if(first.includes(i[0]) && first.includes(i[1]) && first.includes(i[2])){
-      return "0"; // Player wins
+      return GUESSER_PLAYER; // Player wins
     }
 
     if (
@@ -93,9 +87,9 @@ function getWinner(
       second.includes(i[1]) &&
       second.includes(i[2])
     ) {
-      return "1"; // Enemy wins
+      return JUDGE_PLAYER; // Enemy wins
     }
   }
 
-  return ""; // No winner yet
+  return null; // No winner yet
 }

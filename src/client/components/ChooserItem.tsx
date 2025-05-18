@@ -6,6 +6,7 @@ import { formatTime } from '../utils/DateFormatter';
 import { dictionary } from '../text-constants';
 import { useState } from 'react';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { IS_OFFLINE_MODE } from '../utils/util';
 
 export function ChooserItem(props: {
   status: MatchStatus,
@@ -127,7 +128,7 @@ export function ChooserItem(props: {
       }} disabled={props.status.state !== "NOT STARTED"}>
         {dictionary.chooser.start}
       </Button>
-      {process.env.REACT_APP_WHICH_VERSION !== "b" &&
+      {!IS_OFFLINE_MODE &&
       <Button sx={{
         width: '70%',
         maxWidth: "400px",

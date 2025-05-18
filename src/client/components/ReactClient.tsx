@@ -1,5 +1,6 @@
 import { RelayOnlineClient_C, RelayOnlineClient_D, RelayOnlineClient_E, RelayClientWithBot_C, RelayClientWithBot_D, RelayClientWithBot_E } from "../../games/relay/main";
 import { OnlineClient_C as StrategyOnlineClient_C, OnlineClient_D as StrategyOnlineClient_D, OnlineClient_E as StrategyOnlineClient_E, ClientWithBot_C as StrategyClientWithBot_C, ClientWithBot_D as StrategyClientWithBot_D, ClientWithBot_E as StrategyClientWithBot_E,  } from "../../games/remove-from-circle/main";
+import { IS_OFFLINE_MODE } from "../utils/util";
 
 const DURER_XVI_CLIENT_C_RELAY = RelayOnlineClient_C;
 const DURER_XVI_CLIENT_D_RELAY = RelayOnlineClient_D;
@@ -12,7 +13,7 @@ export function DurerXVIRelayClient({ category, matchID, credentials }: {
   category: undefined | 'C' | 'D' | 'E', matchID: string,
   credentials: string
 }) {
-  if (process.env.REACT_APP_WHICH_VERSION === "b"){
+  if (IS_OFFLINE_MODE){
     return (
       <>
       {category === 'C' && (
@@ -53,7 +54,7 @@ export function DurerXVIStrategyClient({ category, matchID, credentials }: {
   category: undefined | 'C' | 'D' | 'E', matchID: string,
   credentials: string
 }) {
-  if (process.env.REACT_APP_WHICH_VERSION === "b"){
+  if (IS_OFFLINE_MODE){
     return (
       <>
       {category === 'C' && (

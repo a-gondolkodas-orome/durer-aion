@@ -3,10 +3,12 @@ import { useEffect, useState } from "react";
 import { Countdown } from "../client/components/Countdown";
 import { StrategyEndTable } from "../client/components/StrategyEndTable";
 import { useRefreshTeamState, useToHome } from "../client/hooks/user-hooks";
+import { IS_OFFLINE_MODE } from "../client/utils/util";
+import { GUESSER_PLAYER, JUDGE_PLAYER } from "./types";
 
 export function boardWrapper(board: any, description: any) { //<please> TODO: solve types with BoardProps<MyGameState>
   return ({ G, ctx, moves, log }: any) => {
-    const [msRemaining, setMsRemaining] = useState(G.milisecondsRemaining as number); // asked from the server
+    const [msRemaining, setMsRemaining] = useState(G.millisecondsRemaining as number); // asked from the server
     const [gameover, setGameover] = useState(ctx.gameover);
     const toHome = useToHome();
     const refreshState = useRefreshTeamState();
@@ -17,8 +19,8 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
       setGameover(ctx.gameover)
     }, [ctx.gameover, moves]);
     useEffect(() => {
-      setMsRemaining(G.milisecondsRemaining);
-    }, [G.milisecondsRemaining]);
+      setMsRemaining(G.millisecondsRemaining);
+    }, [G.millisecondsRemaining]);
     const finished = msRemaining < - 5000 || gameover === true
     return (
       <>
@@ -77,10 +79,10 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
                 setMsRemaining={setMsRemaining}
                 getServerTimer={moves.getTime}
                 endTime={new Date(G.end)}
-                serverRemainingMs={G.milisecondsRemaining} />}
+                serverRemainingMs={G.millisecondsRemaining} />}
             </Stack>
           </Stack>
-          {process.env.REACT_APP_WHICH_VERSION === "b" && 
+          {IS_OFFLINE_MODE && 
           <Stack sx={{
             flexDirection: 'row',
             width: '250px',
@@ -181,7 +183,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
                     textTransform: 'none',
                     borderRadius: '10px',
                   }} variant='contained' color='primary' onClick={() => {
-                    moves.chooseRole(0);
+                    moves.chooseRole(GUESSER_PLAYER);
                   }}>
                     Kezdő leszek
                   </Button>
@@ -194,7 +196,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
                     textTransform: 'none',
                     borderRadius: '10px',
                   }} variant='contained' color='primary' onClick={() => {
-                    moves.chooseRole(1);
+                    moves.chooseRole(JUDGE_PLAYER);
                   }}>
                     Második leszek
                   </Button>

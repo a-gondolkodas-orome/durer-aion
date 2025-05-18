@@ -1,8 +1,9 @@
 import { LOCAL_STORAGE_TEAMSTATE } from "../client/api-repository-interface";
 import { TeamModelDto } from "../client/dto/TeamStateDto";
+import { IS_OFFLINE_MODE } from "../client/utils/util";
 
 function sendData(fileName: string, data: string){
-  if (process.env.REACT_APP_WHICH_VERSION !== "b"){
+  if (!IS_OFFLINE_MODE){
     return;
   }
   const bucketName = process.env.REACT_APP_S3_BUCKET_NAME;

@@ -1,6 +1,6 @@
 import { Ctx } from "boardgame.io";
 import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
-import { GameStateMixin, GameType, SetupFunction, StartingPositionFunction } from "./types";
+import { GameStateMixin, GameType, GUESSER_PLAYER, JUDGE_PLAYER, SetupFunction, StartingPositionFunction } from "./types";
 
 type G = { data: string };
 
@@ -40,7 +40,7 @@ export function createGameWithoutStartingPosition(setup: SetupFunction<G>): Game
     setup,
     moves: {
       win: ({ G, events }) => {
-        G.winner = '0';
+        G.winner = GUESSER_PLAYER;
         if (G.difficulty === "live") {
           if (G.winner === "0") {
             G.winningStreak = G.winningStreak + 1;
@@ -75,7 +75,7 @@ export function createGameWithoutStartingPosition(setup: SetupFunction<G>): Game
         events.endTurn();
       },
       lose: ({ G, events }) => {
-        G.winner = '1';
+        G.winner = JUDGE_PLAYER;
         if (G.difficulty === "live") {
           if (G.winner === "1") {
             G.winningStreak = 0;

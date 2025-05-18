@@ -1,22 +1,15 @@
 import { INVALID_MOVE } from 'boardgame.io/core';
-import { GameType } from '../../common/types';
+import { GameType, GUESSER_PLAYER, JUDGE_PLAYER, PlayerIDType } from '../../common/types';
 
 export interface MyGameState {
   coins: Array<number>;
-  milisecondsRemaining: number;
-  start: string;
-  end: string;
 }
-const lengthOfCompetition = 30*60; // seconds
 
 export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<MyGameState>)
   name: "ten-coins",
   setup: () => {
     return {
       coins: [1,1,1,1,1,1,1,1,1,1],
-      milisecondsRemaining: 1000*lengthOfCompetition,
-      start: new Date().toISOString(),
-      end: new Date(Date.now()+1000*lengthOfCompetition).toISOString(),
     }},
 
   moves: {
@@ -29,11 +22,11 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<
       }
       const firstCoin = G.coins[0];
       if(G.coins.every(c => c === firstCoin)){
-        G.winner = ctx.currentPlayer === "0" ? "0" : "1";
+        G.winner = ctx.currentPlayer as PlayerIDType;
       }
       if(G.difficulty === "live")
         {
-        if(G.winner === "0"){
+        if(G.winner === GUESSER_PLAYER){
           G.winningStreak = G.winningStreak + 1;
           if(G.winningStreak >= 2){
             switch(G.numberOfLoss){
@@ -58,19 +51,13 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<
             }
             events.endGame();
           }
-        } else if (G.winner === "1") {
+        } else if (G.winner === JUDGE_PLAYER) {
           G.winningStreak = 0;
           G.numberOfLoss += 1;
         }
       }
       events.endTurn();
     },
-    getTime({ G, ctx, playerID, events }){
-      if (playerID !== "0") {
-        return INVALID_MOVE;
-      }
-      G.milisecondsRemaining = new Date(G.end).getTime() - new Date().getTime();
-    }
   },
 
   possibleMoves: (G, ctx, playerID) => {
@@ -91,8 +78,7 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<
 
   turn: {
     onMove: ({G, ctx, playerID, events }) => {
-      console.log("onMove")
-      if(playerID === "0") {
+      if(playerID === GUESSER_PLAYER) {
         let currentTime = new Date();
         if(currentTime.getTime() - new Date(G.end).getTime() > 1000*10){
           // Do not accept any answer if the time is over since more than 10 seconds
@@ -101,8 +87,7 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<
       }
     },
     onEnd: ({G, ctx, playerID, events }) => {
-      console.log("onEnd")
-      if(playerID === "1") {
+      if(playerID === JUDGE_PLAYER) {
         let currentTime = new Date();
         if(currentTime.getTime() - new Date(G.end).getTime() <= 0){
           // Do not accept any answer if the time is over
@@ -111,5 +96,4 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<
       }
     }
   },
-
 };

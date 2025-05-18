@@ -3,6 +3,7 @@ import { BoardProps } from 'boardgame.io/react';
 import Stack from '@mui/material/Stack';
 import { Button } from '@mui/material';
 import { sendDataStrategyStep } from '../../common/sendData';
+import { IS_OFFLINE_MODE } from '../../client/utils/util';
 
 
 interface MyGameProps extends BoardProps<MyGameState> { }
@@ -13,7 +14,7 @@ export function MyBoard({ G, ctx, moves }: MyGameProps) {
 
 
   const onClick = (pile: number) => {
-    if(process.env.REACT_APP_WHICH_VERSION === "b"){
+    if(IS_OFFLINE_MODE){
       sendDataStrategyStep(null, pile, G, ctx);
     }
     moves.changePile(pile)

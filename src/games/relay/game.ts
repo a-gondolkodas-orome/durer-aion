@@ -1,6 +1,8 @@
 import { Game } from "boardgame.io";
 import { INVALID_MOVE, TurnOrder } from "boardgame.io/core";
 import { sendDataRelayEnd } from "../../common/sendData";
+import { GUESSER_PLAYER, JUDGE_PLAYER, otherPlayer, PlayerIDType } from "../../common/types";
+import { IS_OFFLINE_MODE } from "../../client/utils/util";
 
 type Answer = {
   answer: number;
@@ -17,7 +19,7 @@ export interface MyGameState {
   previousPoints: Array<number>;
   currentProblemMaxPoints: number;
   numberOfTry: number;
-  milisecondsRemaining: number;
+  millisecondsRemaining: number;
   start: string;
   end: string;
   url: string;
@@ -25,26 +27,25 @@ export interface MyGameState {
 
 const lengthOfCompetition = 60 * 60; // seconds
 
-const GUESSER_PLAYER = '0';
-const JUDGE_PLAYER = '1';
-
 export const GameRelay: Game<MyGameState> = {
+  name: "relay",
   setup: () => {
     return {
-    currentProblem: 0,
-    problemText: "", // TODO: get from the problem list
-    answer: null,
-    points: 0,
-    correctnessPreviousAnswer: null,
-    previousAnswers: [[]],
-    previousPoints: [],
-    currentProblemMaxPoints: 3, // TODO: get from the problem list, TODO: rename this function to currentProblemAvailablePoints
-    numberOfTry: 0,
-    milisecondsRemaining: 1000 * lengthOfCompetition,
-    start: new Date().toISOString(),
-    end: new Date(Date.now() + 1000 * lengthOfCompetition).toISOString(),
-    url: "",
-  }},
+      currentProblem: 0,
+      problemText: "", // TODO: get from the problem list
+      answer: null,
+      points: 0,
+      correctnessPreviousAnswer: null,
+      previousAnswers: [[]],
+      previousPoints: [],
+      currentProblemMaxPoints: 3, // TODO: get from the problem list, TODO: rename this function to currentProblemAvailablePoints
+      numberOfTry: 0,
+      millisecondsRemaining: 1000 * lengthOfCompetition,
+      start: new Date().toISOString(),
+      end: new Date(Date.now() + 1000 * lengthOfCompetition).toISOString(),
+      url: "",
+    };
+  },
   phases:
   {
     startNewGame: {
@@ -64,13 +65,11 @@ export const GameRelay: Game<MyGameState> = {
           G.problemText = problemText;
           G.numberOfTry = 1;
           events.endTurn();
-          console.log("end")
         },
       },
-      turn: {  
+      turn: {
         order: TurnOrder.ONCE,
         onMove: ({G, ctx, playerID, events }) => {
-          console.log("onMove")
           if(playerID === GUESSER_PLAYER) {
             let currentTime = new Date();
             if(currentTime.getTime() - new Date(G.end).getTime() > 1000*10){
@@ -84,6 +83,34 @@ export const GameRelay: Game<MyGameState> = {
       next: "play",
     },
     play: {
+      turn: {
+        order: {
+          first: () => {
+            return 0;
+          },
+          next: ({ctx}) => {
+            return Number(otherPlayer(ctx.currentPlayer as PlayerIDType));
+          }
+        },
+        onMove: ({G, ctx, playerID, events }) => {
+          if(playerID === GUESSER_PLAYER) {
+            let currentTime = new Date();
+            if(currentTime.getTime() - new Date(G.end).getTime() > 1000*10){
+              // Do not accept any answer if the time is over since more than 10 seconds
+              events.endGame();
+            }
+          }
+        },
+        onEnd: ({G, ctx, playerID, events}) => {
+          if (ctx.currentPlayer.toString() === JUDGE_PLAYER) {
+            let currentTime = new Date();
+            if (currentTime.getTime() - new Date(G.end).getTime() >= 0) {
+              // Do not accept any answer if the time is over
+              events.endGame();
+            }
+          }
+        }
+      },
       moves: {
         newProblem({ G, ctx, playerID, events }, problemText: string, nextProblemMaxPoints: number, correctnessPreviousAnswer: boolean, url: string) {
           if (playerID !== JUDGE_PLAYER || G.answer === null) {
@@ -97,9 +124,6 @@ export const GameRelay: Game<MyGameState> = {
           G.correctnessPreviousAnswer = correctnessPreviousAnswer;
           if (correctnessPreviousAnswer) {
             G.points += G.currentProblemMaxPoints;
-            if (process.env.REACT_APP_WHICH_VERSION === "b") {
-              localStorage.setItem("RelayPoints", G.points.toString());
-            }
             G.previousPoints[G.currentProblem] = G.currentProblemMaxPoints;
           } else {
             G.previousPoints[G.currentProblem] = 0;
@@ -136,8 +160,7 @@ export const GameRelay: Game<MyGameState> = {
           G.correctnessPreviousAnswer = correctnessPreviousAnswer;
           if (correctnessPreviousAnswer) {
             G.points += G.currentProblemMaxPoints;
-            if (process.env.REACT_APP_WHICH_VERSION === "b") {
-              localStorage.setItem("RelayPoints", G.points.toString());
+            if (IS_OFFLINE_MODE) {
               sendDataRelayEnd(null, G, ctx);
             }
             G.previousPoints[G.currentProblem] = G.currentProblemMaxPoints;
@@ -150,34 +173,11 @@ export const GameRelay: Game<MyGameState> = {
           if (playerID !== GUESSER_PLAYER) {
             return INVALID_MOVE;
           }
-          G.milisecondsRemaining = new Date(G.end).getTime() - new Date().getTime();
+          G.millisecondsRemaining = new Date(G.end).getTime() - new Date().getTime();
         }
       },
     },
   },
-  turn: {
-    onMove: ({G, ctx, playerID, events }) => {
-      if(playerID === GUESSER_PLAYER) {
-        console.log("onMove")
-        let currentTime = new Date();
-        if(currentTime.getTime() - new Date(G.end).getTime() > 1000*10){
-          // Do not accept any answer if the time is over since more than 10 seconds
-          events.endGame();
-        }
-      }
-    },    
-    onEnd: ({ G, ctx, events }) => {
-      // playerID is not available here
-      if (ctx.currentPlayer.toString() === JUDGE_PLAYER) {
-        console.log("onEnd")
-        let currentTime = new Date();
-        if (currentTime.getTime() - new Date(G.end).getTime() >= 0) {
-          // Do not accept any answer if the time is over
-          events.endGame();
-        }
-      }
-    },
-  },  
 
   ai: {
     enumerate: (G, ctx, playerID) => {

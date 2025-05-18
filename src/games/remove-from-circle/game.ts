@@ -1,16 +1,13 @@
 import { INVALID_MOVE } from 'boardgame.io/core';
-import { GameType } from '../../common/types';
+import { GameType, GUESSER_PLAYER, JUDGE_PLAYER } from '../../common/types';
 import { sendDataStrategyEnd } from '../../common/sendData';
+import { IS_OFFLINE_MODE } from '../../client/utils/util';
 
 export interface MyGameState {
   circle: Array<boolean>;
   firstMove: number;
   lastMove: number;
-  milisecondsRemaining: number;
-  start: string;
-  end: string;
 }
-const lengthOfCompetition = 30*60; // seconds
 
 export function myGameWrapper(category: "C" | "D" | "E") {
   const init_circle: Array<boolean> = 
@@ -25,9 +22,6 @@ export function myGameWrapper(category: "C" | "D" | "E") {
         circle: init_circle,
         firstMove: -1,
         lastMove: -1,
-        milisecondsRemaining: 1000*lengthOfCompetition,
-        start: new Date().toISOString(),
-        end: new Date(Date.now() + 1000*lengthOfCompetition).toISOString(),
       }
     },
 
@@ -57,11 +51,11 @@ export function myGameWrapper(category: "C" | "D" | "E") {
         }
 
         if (isGameEnd) {
-          G.winner = ctx.currentPlayer === "0" ? "0" : "1";
+          G.winner = ctx.currentPlayer === GUESSER_PLAYER ? GUESSER_PLAYER : JUDGE_PLAYER;
         }
 
         if (G.difficulty === "live") {
-          if (G.winner === "0") {
+          if (G.winner === GUESSER_PLAYER) {
             G.winningStreak = G.winningStreak + 1;
             if (G.winningStreak >= 2) {
               switch (G.numberOfLoss) {
@@ -84,26 +78,19 @@ export function myGameWrapper(category: "C" | "D" | "E") {
                   G.points = 2;
                   break;
               }
-              if (process.env.REACT_APP_WHICH_VERSION === "b") {
+              if (IS_OFFLINE_MODE) {
                 localStorage.setItem("StrategyPoints", G.points.toString());
                 sendDataStrategyEnd(null, G, ctx);
               }
               events.endGame();
             }
-          } else if (G.winner === "1") {
+          } else if (G.winner === JUDGE_PLAYER) {
             G.winningStreak = 0;
             G.numberOfLoss += 1;
           }
         }
         events.endTurn();
       },
-
-      getTime({ G, ctx, playerID, events }) {
-        if (playerID !== "0") {
-          return INVALID_MOVE;
-        }
-        G.milisecondsRemaining = new Date(G.end).getTime() - new Date().getTime();
-      }
     },
     
     possibleMoves: (G, ctx, playerID) => {
@@ -121,8 +108,7 @@ export function myGameWrapper(category: "C" | "D" | "E") {
 
     turn: {
       onMove: ({ G, ctx, playerID, events }) => {
-        console.log("onMove")
-        if (playerID === "0") {
+        if (playerID === GUESSER_PLAYER) {
           let currentTime = new Date();
           if (currentTime.getTime() - new Date(G.end).getTime() > 1000 * 10) {
             // Do not accept any answer if the time is over since more than 10 seconds
@@ -131,8 +117,7 @@ export function myGameWrapper(category: "C" | "D" | "E") {
         }
       },
       onEnd: ({ G, ctx, playerID, events }) => {
-        console.log("onEnd")
-        if (playerID === "1") {
+        if (playerID === JUDGE_PLAYER) {
           let currentTime = new Date();
           if (currentTime.getTime() - new Date(G.end).getTime() >= 0) {
             // Do not accept any answer if the time is over

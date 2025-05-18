@@ -4,6 +4,7 @@ import { useLogout } from '../hooks/user-hooks';
 import theme from './theme';
 import { dictionary } from '../text-constants';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
+import { IS_OFFLINE_MODE } from '../utils/util';
 
 export function Header(props: { teamName: string | null }) {
   const logout = useLogout()
@@ -63,7 +64,7 @@ export function Header(props: { teamName: string | null }) {
             }}>{props.teamName}</Stack>
             <Stack onClick={()=>{
               logout();
-              if (process.env.REACT_APP_WHICH_VERSION === "b"){
+              if (IS_OFFLINE_MODE){
                 window.location.reload();
               }            
             }} sx={{
@@ -118,7 +119,7 @@ export function Header(props: { teamName: string | null }) {
               paddingTop: '10px',
               paddingBottom: '20px',
             }}>{props.teamName}</Stack>
-            <Stack onClick={()=>{  
+            <Stack onClick={()=>{
               setMobileMenuOpen(false);
               logout();
             }} sx={{

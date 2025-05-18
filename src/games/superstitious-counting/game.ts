@@ -1,5 +1,5 @@
 import { INVALID_MOVE } from 'boardgame.io/core';
-import { GameType } from '../../common/types';
+import { GameType, PlayerIDType } from '../../common/types';
 
 export interface MyGameState {
   current: number;
@@ -20,7 +20,7 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<
       G.current = G.current + numberToAdd;
       G.restricted = 13 - numberToAdd;
       if (G.current >= G.target) {
-        G.winner = ctx.currentPlayer === "0" ? "1" : "0";
+        G.winner = ctx.currentPlayer as PlayerIDType;
       }
     }
   },
