@@ -99,6 +99,12 @@ export const teamAttributes: ModelAttributes = {
   },
   credentials: {
     type: DataTypes.STRING,
+    validate:{
+      is: {
+        args:/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
+        msg: 'Credentials must be a valid UUIDv4.'
+      }
+    }
   },
   pageState:{
     type: DataTypes.STRING,

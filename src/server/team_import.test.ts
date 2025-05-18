@@ -111,19 +111,4 @@ describe('import_teams_from_tsv', () => {
     );
     expect(result.successful).toBe(1);
   });
-
-  it('should fail if credentials have an invalid format', async () => {
-    const fileContent = `
-    Teamname\tCategory\tEmail\tOther\tID\tLogin Code\tCredentials
-    Test Team\tC\ttest@example.com\tSome Info\tcustom-id\tABC-123-XYZ\tinvalid-credentials
-    `;
-    (readFileSync as jest.Mock).mockReturnValue(fileContent.trim());
-
-    const result = await import_teams_from_tsv(mockTeamsRepo, 'dummy_file.tsv');
-
-    expect(result.failed).toBe(1);
-    expect(result.successful).toBe(0);
-    expect(result.logs.value).toContain('Credential is not a GUID for team Test Team');
-    expect(mockTeamsRepo.insertTeam).not.toHaveBeenCalled();
-  });
 });

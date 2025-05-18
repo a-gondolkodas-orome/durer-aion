@@ -107,7 +107,7 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
     }
     //this is stricter than the modell definition, because other can increase it's size
     if (other !== undefined && other.length > 700) {
-      onerror(`"Other" filed is too long (${other.length} to be exact)`);
+      onerror(`"Other" filed is too long (${other.length} to be exact, expecting < 700)`);
       ok = false;
     }
 
@@ -124,12 +124,7 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
     if (credentials === undefined || credentials === "") {
       oninfo('Generating credentials')
       credentials = randomUUID();
-    } else if (credentials.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/) === null) {
-      ok = false;
-      onerror(`Credential is not a GUID for team ${teamname}`);
-      onerror(`  Found: ${credentials}`);
-      onerror(`  Expected format is usually: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`);
-    }
+    } 
 
     if (ok) {
       oninfo(`Adding ${teamname} to DB.`);
