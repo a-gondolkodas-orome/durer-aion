@@ -126,11 +126,6 @@ export class UserModel {
     localStorage.removeItem(LOCAL_STORAGE_TEAMSTATE);
     localStorage.removeItem("RelayPoints");
     localStorage.removeItem("StrategyPoints");
-    localStorage.removeItem("RelayGamePhase");
-    localStorage.removeItem("RelayGameState");
-    localStorage.removeItem("RelayEnd");
-    localStorage.removeItem("StrategyGameState");
-    localStorage.removeItem("StrategyPhase");
   }
 
   async login(joinCode: string): Promise<string | null> {

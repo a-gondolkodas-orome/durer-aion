@@ -1,8 +1,6 @@
 import { Ctx, Game } from 'boardgame.io';
 import { INVALID_MOVE, TurnOrder } from 'boardgame.io/core';
 import { GameStateMixin, GameType, GUESSER_PLAYER, JUDGE_PLAYER } from './types';
-import { IS_OFFLINE_MODE } from '../client/utils/util';
-import { setupLocalStorageGameState } from './localStorage';
 
 function chooseRole({ G, ctx, playerID }: any, firstPlayer: string):void { // TODO: type
   G.firstPlayer = firstPlayer;
@@ -121,8 +119,5 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
     ai: { enumerate: game.possibleMoves as (G:T_SpecificGameState,ctx:Ctx,playerID:string)=>any[] }
   };
 
-  if (!IS_OFFLINE_MODE){
-    return myGameWrapper;
-  }
-  return setupLocalStorageGameState(myGameWrapper);
+  return myGameWrapper;
 };
