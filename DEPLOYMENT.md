@@ -248,13 +248,13 @@ The b) version is deplyod on github pages. The site will be available at https:/
 Find the 
 ```
   "scripts": {
-    "predeploy": "cross-env PUBLIC_URL=/durer-aion REACT_APP_PAGE_CONFIG=gh-pages npm run build",
+    "predeploy": "cross-env PUBLIC_URL=/durer-aion REACT_APP_WHICH_VERSION=c npm run build",
 ```
 lines in the package.json file, and change the predeploy line to 
 ```
-    "predeploy": "cross-env PUBLIC_URL=/repository-name REACT_APP_PAGE_CONFIG=gh-pages-live REACT_APP_WHICH_VERSION=\"b\" npm run build",
+    "predeploy": "cross-env PUBLIC_URL=/repository-name REACT_APP_WHICH_VERSION=c npm run build",
 ```
-*Note: REACT_APP_PAGE_CONFIG can be anything else than 'gh-pages'. If it's set to 'gh pages' the site will display a list of links to games, determined by src/index.tsx*
+*Note: REACT_APP_WHICH_VERSION can be anything else than 'gh-pages'. If it's set to 'gh pages' the site will display a list of links to games, determined by src/index.tsx*
 <br>You do **not** need to commit the change just save it locally.
 ## Deploy to pages
 

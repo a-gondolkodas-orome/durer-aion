@@ -29,6 +29,7 @@ import * as Sentry from "@sentry/react";
 import { BrowserTracing } from "@sentry/tracing";
 import { Layout } from './client/components/layout';
 import GithubPagesMain from './pages/GithubPagesMain';
+import { IS_COMPETETIVE_MODE } from './client/utils/util';
 
 Sentry.init({
   // TODO: DSN only works when we give sentry to the people...
@@ -42,7 +43,7 @@ Sentry.init({
 });
 
 const root = document.getElementById('root');
-if (process.env.REACT_APP_PAGE_CONFIG === 'gh-pages') {
+if (!IS_COMPETETIVE_MODE) {
   render(
     <React.StrictMode>
       <RecoilRoot>

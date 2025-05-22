@@ -49,12 +49,12 @@
     "yup": "^0.32.11"
   },
   "scripts": {
-    "predeploy": "cross-env PUBLIC_URL=/durer-aion REACT_APP_PAGE_CONFIG=gh-pages npm run build",
+    "predeploy": "cross-env PUBLIC_URL=/durer-aion REACT_APP_WHICH_VERSION=c npm run build",
     "deploy": "gh-pages -d build",
     "lint": "eslint src/ --ext js,ts,jsx,tsx",
     "check:server": "babel-node --extensions \".ts\" --presets=@babel/preset-typescript --plugins=@babel/plugin-transform-modules-commonjs src/server.ts sanity-check",
     "dev:server": "nodemon -e js,ts --exec babel-node --extensions \".ts\" --presets=@babel/preset-typescript --plugins=@babel/plugin-transform-modules-commonjs src/server.ts",
-    "start": "cross-env REACT_APP_PAGE_CONFIG=gh-pages react-scripts start",
+    "start": "cross-env REACT_APP_WHICH_VERSION=c react-scripts start",
     "build": "react-scripts build",
     "test": "cross-env react-scripts test . --coverage",
     "spell-check": "cspell \"**/*.{ts,tsx}\" --no-progress",
