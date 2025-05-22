@@ -44,7 +44,9 @@ export function MyClientWithBot<T_SpecificGameState,T_SpecificPosition>(
     board: boardWrapper(board, description),
     multiplayer: Local(
       {
-        bots: { '1': botWrapper(strategy) }
+        bots: { '1': botWrapper(strategy) },
+        persist: true,
+        storageKey: 'strategy_' + game.name,
       }
     ),
     numPlayers: 2,
@@ -62,7 +64,9 @@ export function MyClientRelayWithBot(
     board: board,
     multiplayer: Local(
       {
-        bots: { '1': botWrapper(strategy) }
+        bots: { '1': botWrapper(strategy) },
+        persist: true,
+        storageKey: 'relay_' + game.name,
       }
     ),
     numPlayers: 2,
