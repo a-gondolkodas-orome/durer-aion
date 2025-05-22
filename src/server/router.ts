@@ -6,6 +6,8 @@ import { InProgressMatchStatus, TeamModel } from './entities/model';
 import { BOT_ID, TransportAPI } from '../socketio_botmoves';
 import { getFilterPlayerView } from "boardgame.io/internal";
 import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus, createGame, injectBot, injectPlayer } from './team_manage';
+import { import_teams_from_tsv } from './team_import';
+
 
 
 /**
@@ -257,7 +259,31 @@ export function configureTeamsRouter(
    */
   router.get("/team/admin/all", koaBody(), async (ctx) => {
     ctx.body = await teams.listTeams();
-  });
+  })
+
+  /**
+ * Get all teams as a full object
+ * @returns {TeamModel[]} - List of the selected teams 
+ */
+  router.put("/team/admin/import", koaBody({ multipart: true }), async (ctx) => {
+    const { file } = ctx.request.files ?? ctx.throw(400, 'No files uploaded!');
+    // Check if multiple files are uploded
+    if (Array.isArray(file)) {
+      ctx.throw(400, 'Multiple files are not supported.');
+      return;
+    }
+
+    // Check if the file is a TSV file
+    if (!file || !file.name?.endsWith('.tsv')) {
+      ctx.status = 400;
+      ctx.body = { error: 'Invalid file format. Only TSV files are allowed.' };
+      return;
+    }
+
+    const import_results = await import_teams_from_tsv(teams, file.path)
+
+    ctx.body = import_results;  
+  })
 
   /**
    * Get team ID based on login token
@@ -320,19 +346,13 @@ export function configureTeamsRouter(
 
     // about to start a game
     const body: LobbyAPI.CreatedMatch = await createGame(game, ctx);
-    await injectPlayer(ctx.db, body.matchID, {
-      playerID: "0",
-      name: GUID,
-      credentials: team.credentials,
-    });
+    await injectPlayer(ctx.db, body.matchID, { playerID: '0', name: GUID, credentials: team.credentials });
     await injectBot(ctx.db, body.matchID, BOT_ID);
 
     //created new game, updated team state accordingly
     const match = await startMatchStatus(body.matchID, ctx);
     if (match.startAt === null || match.endAt === null) {
-      console.error(
-        `GAME [${game.name}] initialiser doesn't initialise the timer!!!`
-      );
+      console.error(`GAME [${game.name}] initialiser doesn't initialise the timer!!!`)
     }
     team.update({
       pageState: "RELAY",
@@ -354,11 +374,7 @@ export function configureTeamsRouter(
     //about to start
 
     const body: LobbyAPI.CreatedMatch = await createGame(game, ctx);
-    await injectPlayer(ctx.db, body.matchID, {
-      playerID: "0",
-      name: GUID,
-      credentials: team.credentials,
-    });
+    await injectPlayer(ctx.db, body.matchID, { playerID: '0', name: GUID, credentials: team.credentials });
     await injectBot(ctx.db, body.matchID, BOT_ID);
 
     //created new game, updated team state accordingly

@@ -10,7 +10,7 @@ import botWrapper from './common/botwrapper';
 import { strategy as RelayStrategy } from './games/relay/strategy';
 import { configureTeamsRouter } from './server/router';
 import { TeamsRepository } from './server/db';
-import { importer } from './server/team_import';
+import { import_teams_from_tsv_locally } from './server/team_import';
 
 import auth from 'koa-basic-auth';
 import mount from 'koa-mount';
@@ -109,7 +109,7 @@ let { db, teams } = getDb();
 // node: argv[0] vs server.ts: argv[1]
 if (argv[2] === "import") {
   const filename = argv[3];
-  importer(teams, filename).then(() => exit(0));
+  import_teams_from_tsv_locally(teams, filename).then(() => exit(0));
 } else {
   const botSetup = Object.fromEntries(
     games.map((game, idx) =>

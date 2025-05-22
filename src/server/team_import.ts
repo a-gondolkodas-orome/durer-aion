@@ -21,17 +21,43 @@ function arraysEqual(a: string[], b: string[]) {
 
 function randomDigits(numDigits: number) {
   var result = "";
-  for (var i = 0; i < numDigits; i++) { result += `${randomInt(0,10)}`; }
+  for (var i = 0; i < numDigits; i++) { result += `${randomInt(0, 10)}`; }
   return result;
 }
 
 function generateLoginCode() {
   return `${randomDigits(3)}-${randomDigits(4)}-${randomDigits(3)}`;
 }
+export async function import_teams_from_tsv_locally(teams: TeamsRepository, filename: string) {
+  const expected_header = ["Teamname", "Category", "Email", "Other", "ID", "Login Code", "Credentials"];
+  const { successful, failed, export_table, logs } = await import_teams_from_tsv(teams, filename);
+  //wrap out logs
+  for (let i = 0; i < logs.value.length; i++) {
+    console[logs.sev[i]](logs.value[i]);
+  }
+  console.info("Summary:");
+  console.info(`Successfully imported ${successful} teams, failed ${failed} times.`);
+  // TODO: Move the file
+  export_table.unshift(expected_header);
+  writeFileSync(`${filename}.export`, export_table.map(row => row.join('\t')).join('\n'), { 'encoding': 'utf-8' });
+}
 
-export async function importer(teams: TeamsRepository, filename: string) {
-  console.info("Importing teams.");
-  console.info("  Use a .tsv file (UTF-8 format, no quoted strings, no tab characters)");
+export async function import_teams_from_tsv(teams: TeamsRepository, filename: string) {
+  const logs: {
+    sev: ('info' | 'warn' | 'error')[];
+    value: string[];
+  } = {
+    sev: [],
+    value: [],
+  };
+
+  function oninfo(msg: string) { logs.value.push(msg); logs.sev.push('info') }
+  function onwarn(msg: string) { logs.value.push(msg); logs.sev.push('warn') }
+  function onerror(msg: string) { logs.value.push(msg); logs.sev.push('error') }
+
+
+  oninfo("Importing teams.");
+  oninfo("  Use a .tsv file (UTF-8 format, no quoted strings, no tab characters)");
   const untrimmed_rows = readFileSync(filename, 'utf-8').split('\n');
   const rows = untrimmed_rows;
   if (rows[rows.length - 1].trim() === "") {
@@ -41,14 +67,12 @@ export async function importer(teams: TeamsRepository, filename: string) {
   const header = table.shift()!;
   const expected_header = ["Teamname", "Category", "Email", "Other", "ID", "Login Code", "Credentials"];
   if (!arraysEqual(header, expected_header)) {
-    console.warn("WARNING: Header not exactly how we defined it. This is not always a problem.");
-    console.warn(`Found: ${header.join(', ')}`);
-    console.warn(`Expected: ${expected_header.join(', ')}`);
+    onwarn("WARNING: Header not exactly how we defined it. This is not always a problem.");
+    onwarn(`Found: ${header.join(', ')}`);
+    onwarn(`Expected: ${expected_header.join(', ')}`);
   }
-  var export_table : string[][] = [];
-  var found_teamNames = new Set();
-  var found_ids = new Set();
-  var found_login_codes = new Set();
+  var export_table: string[][] = [];
+
   let successful = 0;
   let failed = 0; // not counting empty rows...
   await teams.connect();
@@ -61,86 +85,54 @@ export async function importer(teams: TeamsRepository, filename: string) {
     let credentials = extra_columns[2];
 
     if (category === undefined) {
-      console.warn('Skipping empty row...');
+      onwarn('Skipping empty row...');
       // Do not print more error messages lol
       continue;
     }
 
     if (teamname === undefined || teamname === "") {
-      console.error(`Empty teamname`);
+      onerror(`Empty teamname`);
       ok = false;
     }
 
-    if (found_teamNames.has(teamname)) {
-      console.error('Duplicate team name');
-      ok = false;
-    } else {
-      found_teamNames.add(teamname);
-    }
-
-    // TODO: hard-coded values
+    // TODO: remove hard-coded values
     if (!['C', 'D', 'E'].includes(category)) {
-      console.error(`ERROR: Invalid category [${category}] for team ${teamname}.`);
+      onerror(`ERROR: Invalid category [${category}] for team ${teamname}.`);
       ok = false;
     }
 
     if (other === undefined || other === "") {
-      console.warn(`"Other" field not set for team ${teamname}`);
-      console.warn(`  The other field should include any info which could help identify a team. (team name, contestant names, school, email addresses, etc.)`);
+      onwarn(`"Other" field not set for team ${teamname}`);
+      onwarn(`  The other field should include any info which could help identify a team. (team name, contestant names, school, email addresses, etc.)`);
     }
-    if(other !== undefined &&  other.length > 700){
-      console.error(`"Other" filed is too long (${other.length} to be exact)`);
+    //this is stricter than the modell definition, because other can increase it's size
+    if (other !== undefined && other.length > 700) {
+      onerror(`"Other" filed is too long (${other.length} to be exact, expecting < 700)`);
       ok = false;
     }
 
     if (teamId === undefined || teamId === "") {
+      oninfo('Generating teamId')
       teamId = randomUUID();
-    } else if (teamId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/) === null) {
-      ok = false;
-      console.error(`ID is not a GUID for team ${teamname}`);
-      console.error(`  Found: ${teamId}`);
-      console.error(`  Expected format is exactly: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`);
-    }
-
-    if (found_ids.has(teamId)) {
-      console.error('Duplicate ID');
-      ok = false;
-    } else {
-      found_ids.add(teamId);
     }
 
     if (login_code === undefined || login_code === "") {
+      oninfo('Generating login code')
       login_code = generateLoginCode();
-    } else if (login_code.match(/^[0-9]{3}-[0-9]{4}-[0-9]{3}$/) === null) {
-      ok = false;
-      console.error(`Login Code is not valid for team ${teamname}`);
-      console.error(`Found: ${login_code}`);
-      console.error(`Expected format: 111-2222-333`);
-    }
-
-    if (found_login_codes.has(login_code)) {
-      console.error('Duplicate Login Code');
-      ok = false;
-    } else {
-      found_login_codes.add(login_code);
     }
 
     if (credentials === undefined || credentials === "") {
+      oninfo('Generating credentials')
       credentials = randomUUID();
-    } else if (credentials.match(/^[0-9a-f-]+$/) === null) {
-      ok = false;
-      console.error(`Credential is not a GUID for team ${teamname}`);
-      console.error(`  Found: ${credentials}`);
-      console.error(`  Expected format is usually: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`);
-    }
+    } 
 
     if (ok) {
-      console.info(`Adding ${teamname} to DB.`);
+      oninfo(`Adding ${teamname} to DB.`);
       try {
-        await teams.insertTeam({teamname, category, email, other, teamId, joinCode: login_code, credentials});
+        await teams.insertTeam({ teamname, category, email, other, teamId, joinCode: login_code, credentials });
       } catch (err) {
         if (err instanceof ValidationError) {
-          console.error(`Failed to validate team when adding to DB: ${err}`);
+          onerror(`Failed to validate team when adding to DB: ${err.errors.map(e => e.message).join(', ')}`);
           ok = false;
         } else {
           console.log('We experienced an unexpected error during import. This type of error is not handled in the import scritp, please file a bug report in the GitHub repository!')
@@ -150,20 +142,16 @@ export async function importer(teams: TeamsRepository, filename: string) {
     }
 
     if (ok) {
-      console.info(`Successfully imported team ${teamname}.`);
+      oninfo(`Successfully imported team ${teamname}.`);
       const row_to_export = [teamname, category, email, other, teamId, login_code, credentials];
       export_table.push(row_to_export);
       successful++;
     } else {
-      console.error(`Failed to import team ${teamname}. See reasons above.`);
-      console.error(''); // separate errors
+      onerror(`Failed to import team ${teamname}. See reasons above.`);
+      onerror('-----------------------------------------------------'); // separate errors
       failed++;
     }
   }
-  console.info("Summary:");
-  console.info(`Successfully imported ${successful} teams, failed ${failed} times.`);
-  // TODO: Move the file
-  export_table.unshift(expected_header);
-  writeFileSync(`${filename}.export`, export_table.map(row => row.join('\t')).join('\n'), { 'encoding': 'utf-8' });
 
+  return { successful, failed, export_table, logs };
 }
