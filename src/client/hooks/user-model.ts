@@ -132,8 +132,17 @@ export class UserModel {
   logout() {
     localStorage.removeItem(LOCAL_STORAGE_GUID);
     localStorage.removeItem(LOCAL_STORAGE_TEAMSTATE);
-    localStorage.removeItem("RelayPoints");
-    localStorage.removeItem("StrategyPoints");
+
+    // remove stored game state. keys set in src/common/myclient.ts
+    let idx = 0;
+    let key = localStorage.key(idx);
+    while (key != null) {
+      if (key.startsWith("relay_") || key.startsWith("strategy_")) {
+        localStorage.removeItem(key);
+      }
+      idx++;
+      key = localStorage.key(idx);
+    }
   }
 
   async login(joinCode: string): Promise<string | null> {
