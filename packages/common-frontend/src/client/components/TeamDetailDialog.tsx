@@ -15,12 +15,14 @@ import { RelayEndTableData } from './RelayEndTable';
 import * as Yup from 'yup';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { RealClientRepository } from '../api-repository-interface';
 
 export function TeamDetailDialog(props: {data: TeamModelDto, setConfirmDialog: Dispatch<ConfirmDialogInterface | null>}) {
   const resetRelay = useResetRelay();
   const resetStrategy = useResetStrategy();
   const { enqueueSnackbar } = useSnackbar();
   const [teamState, setTeamState] = useState(props.data);
+  const [removing, setRemoving] = useState(false);
 
   let sum = 0;
   switch (props.data.relayMatch.state) {
@@ -29,6 +31,20 @@ export function TeamDetailDialog(props: {data: TeamModelDto, setConfirmDialog: D
   switch (props.data.strategyMatch.state) {
     case "FINISHED": { sum+= props.data.strategyMatch.score}
   }
+
+  const removeTeam = async (teamId: string) => {
+    setRemoving(true);
+    try {
+      // Dynamically import to avoid circular deps
+      const repo = new RealClientRepository();
+      await repo.removeTeam(teamId);
+      enqueueSnackbar('Csapat törölve', { variant: 'success' });
+    } catch (e: any) {
+      enqueueSnackbar(e?.message || 'Hiba történt', { variant: 'error' });
+    } finally {
+      setRemoving(false);
+    }
+  };
 
   return (
     <Stack
@@ -39,6 +55,20 @@ export function TeamDetailDialog(props: {data: TeamModelDto, setConfirmDialog: D
         fontSize: 14,
       }}>
       <Stack sx={{fontSize: 24, paddingBottom: "24px"}}>{teamState.teamName}</Stack>
+      <Button
+        sx={{ maxWidth: "200px", marginBottom: "16px" }}
+        color="error"
+        variant="contained"
+        disabled={removing}
+        onClick={() => {
+          props.setConfirmDialog({
+            text: `Biztosan törlöd a(z) ${teamState.teamName} csapatot?`,
+            confirm: async () => removeTeam(teamState.teamId),
+          });
+        }}
+      >
+        Csapat törlése
+      </Button>
       <Stack sx={{fontSize: 16}}>Relay:</Stack>
       <MatchStatusField name={teamState.teamName} data={teamState.relayMatch} isRelay={true} setConfirmDialog={props.setConfirmDialog}/>
       {teamState.relayMatch.state !== "NOT STARTED" && <Button sx={{
