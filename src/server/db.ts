@@ -1,9 +1,7 @@
 import type { PostgresStore } from 'bgio-postgres';
 import { InProgressMatchStatus, teamAttributes, TeamModel } from './entities/model';
-import { EventModel, eventAttributes } from './entities/event';
 import { DeletedTeamModel, deletedTeamAttributes } from './entities/deletedTeam';
 import { Sequelize, Op, WhereOptions } from 'sequelize';
-import { create } from 'domain';
 
 export class TeamsRepository {
   sequelize: Sequelize;

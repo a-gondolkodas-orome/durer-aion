@@ -33,6 +33,9 @@ export interface ClientRepository {
   toHome(
     code: string,
   ): Promise<string>
+  removeTeam(
+    teamId: string,
+  ): Promise<{ removed: boolean; teamId: string }>;
 }
 
 function makeAxiosError(any_error:any): AxiosError {
@@ -251,6 +254,21 @@ export class RealClientRepository implements ClientRepository {
     }
     return result.data;
   }
+
+  async removeTeam(teamId: string): Promise<{ removed: boolean; teamId: string }> {
+    const url = urlcat('/team/admin/:teamId/remove', { teamId });
+    let result;
+    try {
+      result = await ApiAxios.instance().delete(url);
+    } catch (e: any) {
+      const err = makeAxiosError(e);
+      if (err.response?.status === 404) {
+        throw new Error('A csapat nem található');
+      }
+      throw new Error('Váratlan hiba történt');
+    }
+    return result.data;
+  }
 }
 
 
@@ -443,6 +461,10 @@ export class MockClientRepository implements ClientRepository {
     }
     throw new Error("BAD CODE");
   }
+
+  removeTeam(teamId: string): Promise<{ removed: boolean; teamId: string }> {
+    return Promise.resolve({ removed: true, teamId });
+  }
 }
 
 export class OfflineClientRepository implements ClientRepository {
@@ -583,6 +605,10 @@ export class OfflineClientRepository implements ClientRepository {
     }
 
     throw new Error("Rossz belépési kód!");
+  }
+
+  removeTeam(teamId: string): Promise<{ removed: boolean; teamId: string }> {
+    return Promise.resolve({ removed: true, teamId });
   }
 }
 
