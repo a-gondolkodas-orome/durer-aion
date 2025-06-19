@@ -69,15 +69,10 @@ export class TeamsRepository {
   async removeTeam(teamId: string): Promise<number> {
     const team = await TeamModel.findOne({ where: { teamId } });
     if (!team) return 0;
-    try {
-      await DeletedTeamModel.create({
+    await DeletedTeamModel.create({
       ...team.toJSON(),
       deletedAt: new Date(),
     });
-    }catch (e) {
-      console.error('Failed to create DeletedTeamModel entry:', e);
-      
-    }
     return await TeamModel.destroy({ where: { teamId } });
   }
 }
