@@ -233,7 +233,6 @@ export function configureTeamsRouter(
    * Remove a team by teamId.
    *
    * @param {string} teamID - The ID of the team.
-   * @returns {object} - Result of the deletion.
    */
   router.delete("/team/admin/:teamID/remove", async (ctx) => {
     const teamId = ctx.params.teamID;
@@ -241,7 +240,7 @@ export function configureTeamsRouter(
     if (await deleted === 0) {
       ctx.throw(404, `team with teamId ${teamId} not found.`);
     }
-    ctx.body = { removed: true, teamId };
+    ctx.body = {};
   });
 
   /**
