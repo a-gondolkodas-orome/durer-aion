@@ -13,6 +13,8 @@ import { useSnackbar } from 'notistack';
 import { FinishedMatchStatus } from 'schemas';
 import { ConfirmDialogInterface, ConfirmDialog } from './ConfirmDialog';
 import * as Yup from 'yup';
+import { RealClientRepository } from '../api-repository-interface';
+import { mutate } from 'swr';
 
 export function Admin(props: {teamId?: String}) {
   const getAll = useAll();
@@ -247,6 +249,32 @@ export function Admin(props: {teamId?: String}) {
         )}/>
       </ Form>
       </Stack>}
+      {!teamFromPath && data &&
+        <Button
+          color="error"
+          variant="contained"
+          sx={{ margin: '10px 0', maxWidth: 300 }}
+          onClick={() => {
+            setConfirmDialog({
+              text: `Biztosan törlöd az összes csapatot? Ez a művelet nem visszavonható!`,
+              confirm: async () => {
+                try {
+                  const repo = new RealClientRepository();
+                  await Promise.all(data.map(team => repo.removeTeam(team.teamId)));
+                  enqueueSnackbar('Összes csapat törölve', { variant: 'success' });
+                  // Refresh the list
+                  if (typeof window !== 'undefined') {
+                    mutate('users/all');
+                  }
+                } catch (e: any) {
+                  enqueueSnackbar(e?.message || 'Hiba történt', { variant: 'error' });
+                }
+              }
+            });
+          }}
+        >
+          Összes csapat törlése
+        </Button>}
      {!teamFromPath && data && <Stats data={data}/>}
     </Stack>
   )
