@@ -151,3 +151,9 @@ export const useStartStrategy = () => {
     setTeamState(state);
   };
 };
+
+export const useRemoveTeam = () => {
+  return async (guid: string) => {
+    await userModel.removeTeam(guid);
+  };
+};

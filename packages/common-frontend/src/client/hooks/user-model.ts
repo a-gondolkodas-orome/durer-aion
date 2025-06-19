@@ -99,6 +99,17 @@ export class UserModel {
     }
   }
 
+  async removeTeam(guid: string): Promise<void> {
+    const repo = new ClientRepository();
+    try {
+      await repo.removeTeam(guid);
+    }
+    catch (e) {
+      console.log(e);
+      window.location.reload();
+    }
+  }
+
   isUserLoggedIn(): boolean {
     const guid = this.getGuid();
 
