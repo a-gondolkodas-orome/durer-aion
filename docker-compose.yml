@@ -32,6 +32,8 @@ services:
     depends_on:
       - postgres
   postgres:
+    ports:
+      - 5432:5432
     image: bitnami/postgresql
     volumes:
       - postgresdb:/var/lib/postgresql/data

@@ -1,7 +1,10 @@
 import type { PostgresStore } from 'bgio-postgres';
 import { InProgressMatchStatus } from 'schemas';
-import { teamAttributes, TeamModel } from './model';
+import { teamAttributes, TeamModel } from './entities/model';
+import { EventModel, eventAttributes } from './entities/event';
+import { DeletedTeamModel, deletedTeamAttributes } from './entities/deletedTeam';
 import { Sequelize, Op, WhereOptions } from 'sequelize';
+import { create } from 'domain';
 
 export class TeamsRepository {
   sequelize: Sequelize;
@@ -10,6 +13,10 @@ export class TeamsRepository {
     TeamModel.init(teamAttributes, {
       sequelize: db.sequelize,
       tableName: "Teams",
+    });
+    DeletedTeamModel.init(deletedTeamAttributes, {
+      sequelize: db.sequelize,
+      tableName: "DeletedTeams",
     });
   }
   async connect() {
@@ -58,5 +65,15 @@ export class TeamsRepository {
       teamName: teamname,
       pageState: 'DISCLAIMER',
     });
+  }
+
+  async removeTeam(teamId: string): Promise<number> {
+    const team = await TeamModel.findOne({ where: { teamId } });
+    if (!team) return 0;
+    await DeletedTeamModel.create({
+      ...team.toJSON(),
+      deletedAt: new Date(),
+    });
+    return await TeamModel.destroy({ where: { teamId } });
   }
 }
