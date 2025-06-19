@@ -1,5 +1,5 @@
 import { Stack } from '@mui/system';
-import { useAddMinutes, useGetLogs, useMatchState, useResetRelay, useResetStrategy } from '../hooks/user-hooks';
+import { useAddMinutes, useGetLogs, useMatchState, useResetRelay, useResetStrategy, useRemoveTeam } from '../hooks/user-hooks';
 import { Button } from '@mui/material';
 import { Dispatch, useState } from 'react';
 import useSWR from 'swr';
@@ -15,12 +15,11 @@ import { RelayEndTableData } from './RelayEndTable';
 import * as Yup from 'yup';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { RealClientRepository } from '../api-repository-interface';
-import { mutate } from 'swr';
 
 export function TeamDetailDialog(props: {data: TeamModelDto, setConfirmDialog: Dispatch<ConfirmDialogInterface | null>}) {
   const resetRelay = useResetRelay();
   const resetStrategy = useResetStrategy();
+  const repoRemoveTeam = useRemoveTeam();
   const { enqueueSnackbar } = useSnackbar();
   const [teamState, setTeamState] = useState(props.data);
   const [removing, setRemoving] = useState(false);
@@ -37,12 +36,8 @@ export function TeamDetailDialog(props: {data: TeamModelDto, setConfirmDialog: D
     setRemoving(true);
     try {
       // Dynamically import to avoid circular deps
-      const repo = new RealClientRepository();
-      await repo.removeTeam(teamId);
+      await repoRemoveTeam(teamId);
       enqueueSnackbar('Csapat törölve', { variant: 'success' });
-      if (typeof window !== 'undefined') {
-        mutate('users/all');
-      }
     } catch (e: any) {
       enqueueSnackbar(e?.message || 'Hiba történt', { variant: 'error' });
     } finally {

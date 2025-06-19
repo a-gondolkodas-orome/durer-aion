@@ -1,5 +1,5 @@
 import { Stack } from '@mui/system';
-import { useAddMinutes, useAll } from '../hooks/user-hooks';
+import { useAddMinutes, useAll, useRemoveTeam } from '../hooks/user-hooks';
 import { Button, Dialog, Table, TableCell, TableRow } from '@mui/material';
 import { useEffect, useState } from 'react';
 import useSWR from 'swr';
@@ -13,12 +13,11 @@ import { useSnackbar } from 'notistack';
 import { FinishedMatchStatus } from '../../server/entities/model';
 import { ConfirmDialogInterface, ConfirmDialog } from './ConfirmDialog';
 import * as Yup from 'yup';
-import { RealClientRepository } from '../api-repository-interface';
-import { mutate } from 'swr';
 
 export function Admin(props: {teamId?: String}) {
   const getAll = useAll();
   const addMinutes = useAddMinutes();
+  const removeTeam = useRemoveTeam();
   const { enqueueSnackbar } = useSnackbar();
   const { data } = useSWR("users/all", getAll)
   const [selectedRow, setSelectedRow] = useState<TeamModelDto | null>(null);
@@ -243,7 +242,7 @@ export function Admin(props: {teamId?: String}) {
         </Button>
         </Stack>
         <ErrorMessage name="time" sx={{color:'red'}}/>
-      </ Form>
+      </Form>
       </Stack>}
       {!teamFromPath && data &&
         <Button
@@ -255,12 +254,11 @@ export function Admin(props: {teamId?: String}) {
               text: `Biztosan törlöd az összes csapatot? Ez a művelet nem visszavonható!`,
               confirm: async () => {
                 try {
-                  const repo = new RealClientRepository();
-                  await Promise.all(data.map(team => repo.removeTeam(team.teamId)));
+                  data.forEach(team => removeTeam(team.teamId));
                   enqueueSnackbar('Összes csapat törölve', { variant: 'success' });
                   // Refresh the list
                   if (typeof window !== 'undefined') {
-                    mutate('users/all');
+                    getAll();
                   }
                 } catch (e: any) {
                   enqueueSnackbar(e?.message || 'Hiba történt', { variant: 'error' });
