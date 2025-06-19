@@ -8,8 +8,6 @@ import { getFilterPlayerView } from "boardgame.io/internal";
 import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus, createGame, injectBot, injectPlayer } from './team_manage';
 import { import_teams_from_tsv } from './team_import';
 
-
-
 /**
  * 
  * Big factory to set up the Router for the API, anso contains API function implementations.
@@ -229,6 +227,21 @@ export function configureTeamsRouter(
     team.relayMatch = { state: 'NOT STARTED' }
     team.save();
     ctx.body = team;
+  });
+
+  /**
+   * Remove a team by teamId.
+   *
+   * @param {string} teamID - The ID of the team.
+   * @returns {object} - Result of the deletion.
+   */
+  router.delete("/team/admin/:teamID/remove", async (ctx) => {
+    const teamId = ctx.params.teamID;
+    const deleted = teams.removeTeam(teamId);
+    if (await deleted === 0) {
+      ctx.throw(404, `team with teamId ${teamId} not found.`);
+    }
+    ctx.body = { removed: true, teamId };
   });
 
   /**
