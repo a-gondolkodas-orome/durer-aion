@@ -4,26 +4,19 @@ import { TeamModel, teamAttributes } from "./model";
 export class DeletedTeamModel extends TeamModel {
   public deletedAt!: Date;
 }
+const teamAttributesWithNoUnique = Object.fromEntries(
+  Object.entries(teamAttributes).map(([key, value]) => [
+    key,
+    typeof value === "object" && value !== null
+      ? { ...value, unique: false }
+      : value,
+  ])
+);
 
 export const deletedTeamAttributes: ModelAttributes = {
-  ...teamAttributes,
+  ...teamAttributesWithNoUnique,
   deletedAt: {
     type: DataTypes.DATE,
-    allowNull: false,
-    primaryKey: true,
-  },
-  teamId: {
-    type: DataTypes.STRING,
-    unique: {
-      name: "teamID",
-      msg: 'TeamId already exists.'
-    },
-    validate:{
-      isUUID: {
-        args:4,
-        msg: 'TeamId must be a UUIDv4.'
-      }
-    },
     primaryKey: true,
   },
 };
