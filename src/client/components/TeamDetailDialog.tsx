@@ -16,6 +16,7 @@ import * as Yup from 'yup';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { RealClientRepository } from '../api-repository-interface';
+import { mutate } from 'swr';
 
 export function TeamDetailDialog(props: {data: TeamModelDto, setConfirmDialog: Dispatch<ConfirmDialogInterface | null>}) {
   const resetRelay = useResetRelay();
@@ -39,6 +40,9 @@ export function TeamDetailDialog(props: {data: TeamModelDto, setConfirmDialog: D
       const repo = new RealClientRepository();
       await repo.removeTeam(teamId);
       enqueueSnackbar('Csapat törölve', { variant: 'success' });
+      if (typeof window !== 'undefined') {
+        mutate('users/all');
+      }
     } catch (e: any) {
       enqueueSnackbar(e?.message || 'Hiba történt', { variant: 'error' });
     } finally {
