@@ -494,8 +494,8 @@ export class OfflineClientRepository implements ClientRepository {
     const teamState = getTeamStateFromLocal();
     const newState = {...teamState, pageState: 'HOME'}
     if (teamState.relayMatch.state === "IN PROGRESS"){
-      const score = Number(localStorage.getItem("RelayPoints"))
-      sendDataRelayEnd(null, {points: score}, null)
+      const score = Number(localStorage.getItem("RelayPoints"));
+      sendDataRelayEnd(null, {points: score}, null);
       newState.relayMatch = {
         ...teamState.relayMatch,
         state: "FINISHED",
