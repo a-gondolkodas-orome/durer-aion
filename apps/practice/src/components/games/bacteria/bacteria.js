@@ -155,7 +155,7 @@ const BoardClient = ({ board: { bacteria, goals }, ctx, moves }) => {
                   <button
                     disabled={isDisabled({ row, col })}
                     className={`
-                      aspect-[4/3] w-full
+                      aspect-4/3 w-full
                       ${row % 2 === 1 && col === boardWidth - 1 ? "" : "border-2"}
                       ${isGoal({ row, col }) ? "bg-blue-800" : ""}
                       ${isDangerous(nextBoard, { row, col }) ? "" : ""}

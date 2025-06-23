@@ -24,7 +24,7 @@ const DisabledDisc = ({ bgColor }) => {
         disabled
       >
         <span
-          className={`w-[100%] aspect-square inline-block rounded-full mr-0.5 ${bgColor}`}
+          className={`w-full aspect-square inline-block rounded-full mr-0.5 ${bgColor}`}
         ></span>
       </button>
     </td>
@@ -87,7 +87,7 @@ const gameBoardFactory = (maxDiscs) => {
                       >
                         <span
                           className={`
-                            w-[100%] aspect-square inline-block rounded-full mr-0.5
+                            w-full aspect-square inline-block rounded-full mr-0.5
                             ${ctx.shouldRoleSelectorMoveNext && isSelected(1, i) ? "opacity-75 bg-blue-800" : "bg-red-800"}
                           `}
                         ></span>
@@ -115,7 +115,7 @@ const gameBoardFactory = (maxDiscs) => {
                       >
                         <span
                           className={`
-                            w-[100%] aspect-square inline-block rounded-full mr-0.5
+                            w-full aspect-square inline-block rounded-full mr-0.5
                             ${ctx.shouldRoleSelectorMoveNext && isSelected(0, i) ? "opacity-50 bg-slate-600" : "bg-blue-800"}
                           `}
                         ></span>

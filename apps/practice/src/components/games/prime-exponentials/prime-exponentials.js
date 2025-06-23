@@ -58,7 +58,7 @@ const ExponentsTable = ({
     "w-[70%] min-w-[70%]",
     "w-[80%] min-w-[80%]",
     "w-[90%] min-w-[90%]",
-    "w-[100%] min-w-[100%]"
+    "w-full min-w-full"
   ][availableExponents.length]
 
   return <>
@@ -108,7 +108,9 @@ const PrimesTable = ({ board, choosePrime }) => {
     choosablePrimesList = [2];
   }
 
-  const widthClassName = `w-[${(Math.min(choosablePrimesList.length, 10))*10}%]`;
+  const widthClassName = choosablePrimesList.length >= 10
+    ? 'w-full'
+    : `w-[${choosablePrimesList.length*10}%]`;
 
   return <table
     className={`m-2 border-collapse table-fixed max-w-full ${widthClassName}`}

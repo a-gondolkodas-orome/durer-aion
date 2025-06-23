@@ -82,7 +82,7 @@ export const BoardClient = ({ board, ctx, moves }) => {
           )}
           {board.shark === id && ctx.chosenRoleIndex === 1 && ctx.shouldRoleSelectorMoveNext && (
             <span
-              className="absolute z-50 w-[75%] text-black border-2 rounded bg-white opacity-80"
+              className="absolute z-50 w-[75%] text-black border-2 rounded-sm bg-white opacity-80"
             >Itt maradok</span>
           )}
       </button>

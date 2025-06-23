@@ -56,7 +56,7 @@ const BoardClient = ({ board, ctx, moves }) => {
       <button
         disabled={!ctx.shouldRoleSelectorMoveNext}
         className={`
-          w-[30%] mx-[1%] rounded text-xl bg-red-600
+          w-[30%] mx-[1%] rounded-sm text-xl bg-red-600
           ${!show || color !== '#dc2626' ? 'bg-opacity-50' : ''}
         `}
         onClick={() => pick('#dc2626')}
@@ -64,7 +64,7 @@ const BoardClient = ({ board, ctx, moves }) => {
       <button
         disabled={!ctx.shouldRoleSelectorMoveNext}
         className={`
-          w-[30%] mx-[1%] rounded text-xl bg-yellow-600
+          w-[30%] mx-[1%] rounded-sm text-xl bg-yellow-600
           ${!show || color !== '#eab308' ? 'bg-opacity-50' : ''}
         `}
         onClick={() => pick('#eab308')}
@@ -72,7 +72,7 @@ const BoardClient = ({ board, ctx, moves }) => {
       <button
         disabled={!ctx.shouldRoleSelectorMoveNext}
         className={`
-          w-[30%] mx-[1%] rounded text-xl bg-blue-600
+          w-[30%] mx-[1%] rounded-sm text-xl bg-blue-600
           ${!show || color !== '#2563eb' ? 'bg-opacity-50' : ''}
         `}
         onClick={() => pick('#2563eb')}
@@ -81,7 +81,7 @@ const BoardClient = ({ board, ctx, moves }) => {
 
     <svg
       onMouseMove={(event) => drawPickedColor(event)}
-      className="aspect-square stroke-black stroke-[3]"
+      className="aspect-square stroke-black stroke-3"
     >
       {/* <!-- front and back face --> */}
       <rect x="8%" y="25%" width="66%" height="66%" className="fill-transparent" />

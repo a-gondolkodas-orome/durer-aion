@@ -95,7 +95,7 @@ export const GameRule = ({ ruleDescription }) => {
   return <section className="flex justify-center mb-4 mt-1 max-w-[100ch]">
     <Disclosure defaultOpen>
       {({ open }) => (
-        <div className="border-2 rounded grow">
+        <div className="border-2 rounded-sm grow">
           <DisclosureButton className="w-full bg-slate-200 text-xl flex justify-center">
             <span className="grow">Játékszabályok</span>
             { !open && <span className="text-right pr-4">⛛</span>}
@@ -121,14 +121,14 @@ export const GameEndDialog = ({ isOpen, setIsOpen, startNewGame, isRoleSelectorW
     >
       <div className="fixed inset-0 bg-black/50" aria-hidden="true"></div>
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel className="rounded bg-white max-w-sm w-full p-2">
+        <DialogPanel className="rounded-sm bg-white max-w-sm w-full p-2">
           <header className="flex items-baseline mb-2">
             <DialogTitle className="grow block text-2xl text-center">
               A játék véget ért
             </DialogTitle>
             <button
               onClick={() => setIsOpen(false)}
-              className="bg-slate-200 rounded text-2xl px-1"
+              className="bg-slate-200 rounded-sm text-2xl px-1"
             >×</button>
           </header>
           <Description className="text-lg block text-justify">

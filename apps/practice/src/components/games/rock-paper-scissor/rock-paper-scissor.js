@@ -29,13 +29,13 @@ const BoardClient = ({ board, ctx, moves }) => {
       {[0, 1, 2].map(symbolIdx => (
         [0, null, 1].map(playerIdx => (
           playerIdx === null || board[playerIdx][symbolIdx] === null
-          ? <span className="aspect-[4/5] m-2" key={`${playerIdx}-${symbolIdx}`}></span>
+          ? <span className="aspect-4/5 m-2" key={`${playerIdx}-${symbolIdx}`}></span>
           : <button
               key={`${playerIdx}-${symbolIdx}`}
               disabled={playerIdx === ctx.chosenRoleIndex || !isMoveAllowed(symbolIdx)}
               onClick={() => clickField(symbolIdx)}
               className={`
-                p-2 m-2 aspect-[4/5] border-4 rounded-xl shadow-md
+                p-2 m-2 aspect-4/5 border-4 rounded-xl shadow-md
                 disabled:cursor-not-allowed
                 enabled:border-emerald-400 enabled:border-dashed
                 enabled:hover:border-solid enabled:focus:border-solid

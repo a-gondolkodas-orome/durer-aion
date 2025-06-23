@@ -67,7 +67,7 @@ export const BoardClient = ({ board, ctx, moves }) => {
 
   return (
     <section className="p-2 shrink-0 grow basis-2/3">
-      <svg className="aspect-square stroke-black stroke-[3]">
+      <svg className="aspect-square stroke-black stroke-3">
         <pattern id="2policemen" patternUnits="userSpaceOnUse" patternTransform="rotate(45 0 0)" width="12" height="12">
           <rect x="0" y="0" fill="navy" stroke="navy" width="12" height="12"></rect>
           <line x1="0" y1="0" x2="0" y2="12" style={{ stroke: "forestgreen", strokeWidth: "12" }} />
