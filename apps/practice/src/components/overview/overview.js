@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { gameList } from '../games/gameList';
 import { Listbox, ListboxButton, ListboxOptions, ListboxOption } from '@headlessui/react';
 import { uniq, every } from 'lodash';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 
 export const Overview = () => {
   const [selectedCategories, setSelectedCategories] = useState([]);

@@ -1,5 +1,5 @@
 import React, { StrictMode } from 'react';
-import { createHashRouter, RouterProvider } from 'react-router-dom';
+import { createHashRouter, RouterProvider } from 'react-router';
 import { Overview } from '../overview/overview';
 import { ErrorPage } from '../error-page';
 import { AddReduceDouble } from '../games/pile-splitting-games/add-reduce-double/add-reduce-double';
