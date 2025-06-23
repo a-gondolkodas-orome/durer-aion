@@ -1,12 +1,24 @@
 import { LOCAL_STORAGE_TEAMSTATE, OfflineClientRepository, RealClientRepository } from "../api-repository-interface";
 import { MatchStateDto, TeamModelDto } from "../dto/TeamStateDto";
-import { IS_OFFLINE_MODE } from "../utils/util";
+import { BGIO_LOCALSTORAGE_PREFIX, IS_OFFLINE_MODE } from "../utils/util";
 
 const LOCAL_STORAGE_GUID = "kjqAEKeFkMpOvOZrzcvp";
 
 let ClientRepository = RealClientRepository;
 if (IS_OFFLINE_MODE) {
   ClientRepository = OfflineClientRepository;
+}
+
+function removeGameStateLocalStorage() {
+  let idx = 0;
+  let key = localStorage.key(idx);
+  while (key != null) {
+    if (key.startsWith(BGIO_LOCALSTORAGE_PREFIX)) {
+      localStorage.removeItem(key);
+    }
+    idx++;
+    key = localStorage.key(idx);
+  }
 }
 
 export class UserModel {
@@ -132,8 +144,7 @@ export class UserModel {
   logout() {
     localStorage.removeItem(LOCAL_STORAGE_GUID);
     localStorage.removeItem(LOCAL_STORAGE_TEAMSTATE);
-    localStorage.removeItem("RelayPoints");
-    localStorage.removeItem("StrategyPoints");
+    removeGameStateLocalStorage();
   }
 
   async login(joinCode: string): Promise<string | null> {

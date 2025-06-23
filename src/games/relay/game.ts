@@ -128,6 +128,10 @@ export const GameRelay: Game<MyGameState> = {
           } else {
             G.previousPoints[G.currentProblem] = 0;
           }
+          if (IS_OFFLINE_MODE) {
+            localStorage.setItem("RelayPoints", G.points.toString());
+            sendDataRelayEnd(null, G, ctx);
+          }
           G.currentProblemMaxPoints = nextProblemMaxPoints;
           G.answer = null;
           G.currentProblem++;

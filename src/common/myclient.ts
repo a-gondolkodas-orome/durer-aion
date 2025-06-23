@@ -6,6 +6,7 @@ import { boardWrapper } from './boardwrapper';
 import { GameStateMixin, GameType } from './types';
 import type {GameRelay} from '../games/relay/game';
 import { State } from 'boardgame.io';
+import { BGIO_LOCALSTORAGE_PREFIX } from '../client/utils/util';
 //import { Debug } from 'boardgame.io/debug';
 
 export function MyClient<T_SpecificGameState>(
@@ -44,7 +45,9 @@ export function MyClientWithBot<T_SpecificGameState,T_SpecificPosition>(
     board: boardWrapper(board, description),
     multiplayer: Local(
       {
-        bots: { '1': botWrapper(strategy) }
+        bots: { '1': botWrapper(strategy) },
+        persist: true,
+        storageKey: BGIO_LOCALSTORAGE_PREFIX + game.name,
       }
     ),
     numPlayers: 2,
@@ -62,7 +65,9 @@ export function MyClientRelayWithBot(
     board: board,
     multiplayer: Local(
       {
-        bots: { '1': botWrapper(strategy) }
+        bots: { '1': botWrapper(strategy) },
+        persist: true,
+        storageKey: BGIO_LOCALSTORAGE_PREFIX + game.name,
       }
     ),
     numPlayers: 2,
