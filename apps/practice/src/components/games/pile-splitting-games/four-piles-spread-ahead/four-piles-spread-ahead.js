@@ -65,12 +65,31 @@ const BoardClient = ({ board, ctx, moves }) => {
     return `${pileId+1}. kupac: ${pieceCountInPile} `;
   };
 
+  const leftBorder = (pileId) => {
+    return (
+      (pileId === 1 && board[1] > board[0]) ||
+      (pileId === 3 && board[3] > board[2])
+    );
+  };
+
+  const rightBorder = (pileId) => {
+    return (
+      (pileId === 0 && board[1] <= board[0]) ||
+      (pileId === 2 && board[3] <= board[2])
+    );
+  };
+
   return (
   <section className="p-2 shrink-0 grow basis-2/3">
     {[0, 1, 2, 3].map(pileId => (
       <div
         key={pileId}
-        className={`w-[50%] pl-1 inline-block text-center`}
+        className={`
+          w-[50%] pl-1 inline-block text-center
+          ${pileId < 2 ? 'border-t-2': ''}
+          ${rightBorder(pileId) ? 'border-r-2' : ''}
+          ${leftBorder(pileId) ? 'border-l-2' : ''}
+        `}
         style={{ transform: 'scaleY(-1)' }}
       >
         <p className="text-xl" style={{ transform: 'scaleY(-1)' }}>
@@ -81,11 +100,11 @@ const BoardClient = ({ board, ctx, moves }) => {
               key={pieceId}
               disabled={isDisabled({ pileId, pieceId })}
               className={`
-                inline-block w-[20%] aspect-square rounded-full mx-0.5 mt-0.5
+                w-[18%] aspect-square rounded-full mx-0.5 mt-0.5
                 ${toAppear({ pileId, pieceId }) ? 'bg-blue-600 opacity-50' : ''}
                 ${isDisabled({ pileId, pieceId }) && 'cursor-not-allowed bg-blue-600'}
                 ${toBeRemoved({ pileId, pieceId }) ? 'bg-red-600 opacity-50' : ''}
-                ${(nonExistent({ pileId, pieceId }) && !toAppear({ pileId, pieceId })) ? 'invisible' : ''}
+                ${(nonExistent({ pileId, pieceId }) && !toAppear({ pileId, pieceId })) ? 'invisible inline-block' : 'inline-block'}
                 ${!nonExistent({ pileId, pieceId }) && !isDisabled({ pileId, pieceId }) && !toBeRemoved({ pileId, pieceId }) ? 'bg-blue-900' : ''}
               `}
               onClick={() => clickPiece({ pileId, pieceId })}
