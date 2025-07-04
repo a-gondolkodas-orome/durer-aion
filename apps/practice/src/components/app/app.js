@@ -32,6 +32,7 @@ import { PrimeExponentials } from '../games/prime-exponentials/prime-exponential
 import { Policemanthief } from '../games/policeman-thief/policeman-thief';
 import { SharkChase } from '../games/shark-chase/shark-chase';
 import { PlusOneTwoThree } from '../games/plus-one-two-three/plus-one-two-three';
+import { ChessDucksC, ChessDucksE } from '../games/chess-ducks/chess-ducks';
 
 export const App = () => {
   const routes = [
@@ -67,7 +68,9 @@ export const App = () => {
     { path: '/game/PrimeExponentials', element: <PrimeExponentials />},
     { path: '/game/Policemanthief', element: <Policemanthief />},
     { path: '/game/SharkChase', element: <SharkChase />},
-    { path: '/game/PlusOneTwoThree', element: <PlusOneTwoThree />}
+    { path: '/game/PlusOneTwoThree', element: <PlusOneTwoThree />},
+    { path: '/game/ChessDucksC', element: <ChessDucksC />},
+    { path: '/game/ChessDucksE', element: <ChessDucksE />}
   ];
   const router = createHashRouter(
     routes.map(route => ({...route, errorElement: <ErrorPage /> }))
