@@ -34,8 +34,8 @@ import { SharkChase } from '../games/shark-chase/shark-chase';
 import { PlusOneTwoThree } from '../games/plus-one-two-three/plus-one-two-three';
 
 export const App = () => {
-  const router = createHashRouter([
-    { path: '/', element: <Overview />, errorElement: <ErrorPage /> },
+  const routes = [
+    { path: '/', element: <Overview /> },
     { path: '/game/AddReduceDouble', element: <AddReduceDouble /> },
     { path: '/game/AntiTicTacToe', element: <AntiTicTacToe /> },
     { path: '/game/BankRobbers', element: <BankRobbers /> },
@@ -68,7 +68,10 @@ export const App = () => {
     { path: '/game/Policemanthief', element: <Policemanthief />},
     { path: '/game/SharkChase', element: <SharkChase />},
     { path: '/game/PlusOneTwoThree', element: <PlusOneTwoThree />}
-  ]);
+  ];
+  const router = createHashRouter(
+    routes.map(route => ({...route, errorElement: <ErrorPage /> }))
+  );
   return <StrictMode>
     <RouterProvider router={router}></RouterProvider>
   </StrictMode>;
