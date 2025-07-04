@@ -81,7 +81,7 @@ const BoardClient = ({ board, ctx, moves }) => {
               key={pieceId}
               disabled={isDisabled({ pileId, pieceId })}
               className={`
-                inline-block w-[20%] aspect-square rounded-full mx-0.5
+                inline-block w-[20%] aspect-square rounded-full mx-0.5 mt-0.5
                 ${toAppear({ pileId, pieceId }) ? 'bg-blue-600 opacity-50' : ''}
                 ${isDisabled({ pileId, pieceId }) && 'cursor-not-allowed bg-blue-600'}
                 ${toBeRemoved({ pileId, pieceId }) ? 'bg-red-600 opacity-50' : ''}
