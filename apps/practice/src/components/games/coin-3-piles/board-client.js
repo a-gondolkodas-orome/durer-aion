@@ -110,7 +110,7 @@ export const BoardClient = ({ board, ctx, moves }) => {
             key={`${i}-${shouldShowCoinToBeAdded(coinValue)}`}
             disabled={!isRemovalAllowed(coinValue)}
             className={`
-              w-[15%] aspect-square inline-block rounded-full mr-0.5 mt-1
+              w-[15%] aspect-square inline-block rounded-full mr-0.5 mt-2
               ${getCoinBgColor(coinValue)} shadow-md ${getCoinShadowColor(coinValue)}
               ${shouldShowCoinToBeRemoved(coinValue) && i === (board[coinValue - 1] - 1) ? 'opacity-50' : ''}
             `}
@@ -127,7 +127,7 @@ export const BoardClient = ({ board, ctx, moves }) => {
             disabled
             key="to-be-added"
             className={`
-              w-[15%] aspect-square inline-block rounded-full mr-0.5 mt-1 opacity-50
+              w-[15%] aspect-square inline-block rounded-full mr-0.5 mt-2 opacity-50
               ${getCoinBgColor(coinValue)} shadow-md ${getCoinShadowColor(coinValue)}
             `}
             style={{ transform: 'scaleY(-1)' }}
