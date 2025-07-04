@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { gameList } from '../games/gameList';
 import { Listbox, ListboxButton, ListboxOptions, ListboxOption } from '@headlessui/react';
-import { uniq, every } from 'lodash';
+import { uniqBy, every, sortBy } from 'lodash';
 import { Link } from 'react-router';
 
 export const Overview = () => {
@@ -10,19 +10,19 @@ export const Overview = () => {
 
   const shouldShow = game => {
     if (selectedCategories.length > 0 && every(game.category, c => !selectedCategories.includes(c))) return false;
-    if (selectedYears.length > 0 && !selectedYears.includes(game.year)) return false;
+    if (selectedYears.length > 0 && !selectedYears.includes(game.year.v)) return false;
     return true;
   };
 
-  // order by year and then by category regardless of order in gameList.js
+  // order by category and then by year regardless of order in gameList.js
   const gamesToShow = Object.keys(gameList)
     .filter(id => shouldShow(gameList[id]))
+    .sort((a, b) => gameList[a].year.v - gameList[b].year.v)
     .sort((a, b) =>
       gameList[a].category[0] > gameList[b].category[0]
       ? 1
       : (gameList[a].category[0] < gameList[b].category[0] ? -1 : 0)
-    )
-    .sort((a, b) => gameList[a].year - gameList[b].year);
+    );
 
   return <main className="p-2">
     <OverviewHeader></OverviewHeader>
@@ -36,8 +36,13 @@ export const Overview = () => {
         setSelectedYears={setSelectedYears}
       ></YearFilter>
     </div>
+    <h2 className="font-bold my-4 text-center">5-8. osztályosoknak (A-B kategória)</h2>
     <div className="flex flex-wrap">
-      {gamesToShow.map(id => Game(id, gameList[id]))}
+      {gamesToShow.filter(id => gameList[id].category[0] <= "B").map(id => Game(id, gameList[id]))}
+    </div>
+    <h2 className="font-bold my-4 text-center">9-12. osztályosoknak (C-D-E kategória)</h2>
+    <div className="flex flex-wrap">
+      {gamesToShow.filter(id => gameList[id].category[0] > "B").map(id => Game(id, gameList[id]))}
     </div>
   </main>;
 };
@@ -49,8 +54,8 @@ const OverviewFilterOptions = ({ options }) => {
   >
     {options.map(option =>
       <ListboxOption
-        key={option}
-        value={option}
+        key={option.k}
+        value={option.v}
         className="inline-block"
       >{({ focus, selected }) =>
         <span className={`
@@ -58,7 +63,7 @@ const OverviewFilterOptions = ({ options }) => {
           ${selected ? 'bg-blue-200' : 'bg-white'}
           ${focus ? 'outline' : ''}
         `}>
-          <span className={selected ? '' : 'text-transparent'}>✓</span>{option}
+          <span className={selected ? '' : 'text-transparent'}>✓</span>{option.k}
         </span>
       }</ListboxOption>
     )}
@@ -66,7 +71,16 @@ const OverviewFilterOptions = ({ options }) => {
 };
 
 const CategoryFilter = ({ selectedCategories, setSelectedCategories }) => {
-  const allCategories = ['A', 'B', 'C', 'C+', 'D', 'D+', 'E', 'E+'];
+  const allCategories = [
+    { k: 'A (5-6.o)', v: 'A'},
+    { k: 'B (7-8.o)', v: 'B'},
+    { k: 'C (9-10.o)', v: 'C'},
+    { k: 'C+ (9-12.o)', v: 'C+'},
+    { k: 'D (9-12.o)', v: 'D'},
+    { k: 'D+ (9-12.o)', v: 'D+'},
+    { k: 'E (9-12.o)', v: 'E'},
+    { k: 'E+ (9-12.o)', v: 'E+'}
+  ];
 
   return <Listbox
     value={selectedCategories} onChange={setSelectedCategories}
@@ -86,7 +100,7 @@ const CategoryFilter = ({ selectedCategories, setSelectedCategories }) => {
 
 const YearFilter = ({ selectedYears, setSelectedYears }) => {
   const allGames = Object.values(gameList);
-  const allYears = uniq(allGames.map(game => game.year)).sort((a, b) => Number(a) - Number(b));
+  const allYears = sortBy(uniqBy(allGames.map(game => game.year), y => y.v), a => a.v);
 
   return <Listbox
     value={selectedYears} onChange={setSelectedYears}
@@ -98,7 +112,7 @@ const YearFilter = ({ selectedYears, setSelectedYears }) => {
       id="year-selector"
       className="border-2 border-slate-600 rounded-sm w-full bg-slate-100"
     >
-      {selectedYears.sort((a, b) => Number(a) - Number(b)).join(', ') || 'Válassz éveket'}
+      {selectedYears.sort().join(', ') || 'Válassz éveket'}
     </ListboxButton>
     <OverviewFilterOptions options={allYears}></OverviewFilterOptions>
   </Listbox>;
@@ -129,7 +143,7 @@ const Game = (gameId, gameProps) => {
     <h2 className="font-bold mb-4 text-center">{gameProps.name}</h2>
     <div className="grow"></div>
     <div className="flex items-baseline">
-      <span className="rounded-lg bg-orange-200 px-1 m-0.5">{gameProps.year}.</span>
+      <span className="rounded-lg bg-orange-200 px-1 m-0.5">{gameProps.year.v}</span>
       <span className="rounded-lg bg-blue-200 px-1 m-0.5">{gameProps.category.join(', ')}</span>
       <span className="rounded-lg bg-amber-200 px-1 m-0.5">{gameProps.round}</span>
       <span className="grow"></span>

@@ -1,192 +1,192 @@
 export const gameList = {
   FiveFiveCard: {
-    year: 7,
+    year: { k: 'VII. (13/14)', v: '13/14' },
     round: 'döntő',
     category: ['B'],
     name: 'Párbaj 5 lappal'
   },
   RockPaperScissor: {
-    year: 7,
+    year: { k: 'VII. (13/14)', v: '13/14' },
     round: 'döntő',
     category: ['A'],
     name: 'Kő-papír-olló'
   },
   ChessBishops: {
-    year: 1,
+    year: { k: 'I. (07/08)', v: '07/08' },
     round: 'döntő',
     category: ['B'],
     name: 'Futók lerakása'
   },
   ChessRook: {
-    year: 1,
+    year: { k: 'I. (07/08)', v: '07/08' },
     round: 'döntő',
     category: ['C'],
     name: 'Barangolás bástyával'
   },
   HunyadiAndTheJanissaries: {
-    year: 6,
+    year: { k: 'VI. (12/13)', v: '12/13' },
     round: 'döntő',
     category: ['D'],
     name: 'Hunyadi és a janicsárok'
   },
   PileSplitter: {
-    year: 8,
+    year: { k: 'VIII. (14/15)', v: '14/15' },
     round: 'döntő',
     category: ['A'],
     name: 'Kupac kettéosztó'
   },
   PileSplitter3: {
-    year: 8,
+    year: { k: 'VIII. (14/15)', v: '14/15' },
     round: 'döntő',
     category: ['B'],
     name: 'Kupac kettéosztó 3 kupaccal'
   },
   TicTacToeDoubleStart: {
-    year: 12,
+    year: { k: 'XII. (18/19)', v: '18/19' },
     round: 'döntő',
     category: ['A'],
     name: 'Duplánkezdő 3x3 amőba'
   },
   AntiTicTacToe: {
-    year: 12,
+    year: { k: 'XII. (18/19)', v: '18/19' },
     round: 'döntő',
     category: ['B'],
     name: '3x3-as antiamőba'
   },
   TwoTimesTwo: {
-    year: 13,
+    year: { k: 'XIII.(19/20)', v: '19/20' },
     round: 'döntő',
     category: ['A'],
     name: '4 mezőbe különbözőt'
   },
   FiveSquares: {
-    year: 13,
+    year: { k: 'XIII.(19/20)', v: '19/20' },
     round: 'döntő',
     category: ['B'],
     name: '5 mezőbe különbözőt'
   },
   TicTacToe: {
-    year: 13,
+    year: { k: 'XIII.(19/20)', v: '19/20' },
     round: 'döntő',
     category: ['C'],
     name: 'Átszínezős tic-tac-toe'
   },
   SuperstitiousCounting: {
-    year: 13,
+    year: { k: 'XIII.(19/20)', v: '19/20' },
     round: 'döntő',
     category: ['D', 'E'],
     name: 'Babonás lépkedés'
   },
   PileSplitter4: {
-    year: 13,
+    year: { k: 'XIII.(19/20)', v: '19/20' },
     round: 'döntő',
     category: ['E+'],
     name: 'Kupac kettéosztó 4 kupaccal'
   },
   TriangularGridRopes: {
-    year: 14,
+    year: { k: 'XIV. (20/21)', v: '20/21' },
     round: 'döntő',
     category: ['C', 'D'],
     name: '10 totemoszlop'
   },
   Coin357: {
-    year: 15,
+    year: { k: 'XV. (21/22)', v: '21/22' },
     round: 'döntő',
     category: ['A'],
     name: '15 érme beváltása'
   },
   Coin123: {
-    year: 15,
+    year: { k: 'XV. (21/22)', v: '21/22' },
     round: 'döntő',
     category: ['B'],
     name: 'Érmék beváltása'
   },
   CubeColoring: {
-    year: 15,
+    year: { k: 'XV. (21/22)', v: '21/22' },
     round: 'döntő',
     category: ['C', 'D'],
     name: 'Kockaszínezés'
   },
   AddReduceDouble: {
-    year: 16,
+    year: { k: 'XVI. (22/23)', v: '22/23' },
     round: 'döntő',
     category: ['D'],
     name: 'Kettőt vesz, egyet kap'
   },
   FourPilesSpreadAhead: {
-    year: 16,
+    year: { k: 'XVI. (22/23)', v: '22/23' },
     round: 'döntő',
     category: ['E', 'E+'],
     name: '4 kupacban előrepakolás'
   },
   NumberCovering8: {
-    year: 11,
+    year: { k: 'XI. (17/18)', v: '17/18' },
     round: 'döntő',
     category: ['A'],
     name: 'Számok lefedése 1-től 8-ig'
   },
   NumberCovering10: {
-    year: 11,
+    year: { k: 'XI. (17/18)', v: '17/18' },
     round: 'döntő',
     category: ['B'],
     name: 'Számok lefedése 1-től 10-ig'
   },
   TwelveSquares: {
-    year: 6,
+    year: { k: 'VI. (12/13)', v: '12/13' },
     round: 'döntő',
     category: ['A'],
     name: 'Tizenkét mező'
   },
   Bacteria: {
-    year: 10,
+    year: { k: 'X. (16/17)', v: '16/17' },
     round: 'döntő',
     category: ['C', 'D'],
     name: 'Baktériumok terjedése'
   },
   SixDiscs: {
-    year: 10,
+    year: { k: 'X. (16/17)', v: '16/17' },
     round: 'döntő',
     category: ['A'],
     name: 'Átfordítás, elvétel (6 korong)'
   },
   TenDiscs: {
-    year: 10,
+    year: { k: 'X. (16/17)', v: '16/17' },
     round: 'döntő',
     category: ['B'],
     name: 'Átfordítás, elvétel (10 korong)'
   },
   PrimeExponentials: {
-    year: 1,
+    year: { k: 'I. (07/08)', v: '07/08' },
     round: 'döntő',
     category: ['D'],
     name: 'Prímhatványok kivonása'
   },
   Policemanthief: {
-    year: 9,
+    year: { k: 'IX. (15/16)', v: '15/16' },
     round: 'döntő',
     category: ['A'],
     name: 'Rendőr, tolvaj'
   },
   SharkChase: {
-    year: 17,
+    year: { k: 'XVII. (23/24)', v: '23/24' },
     round: 'döntő',
     category: ['C'],
     name: 'Cápa üldözés'
   },
   PlusOneTwoThree: {
-    year: 5,
+    year: { k: 'V. (11/12)', v: '11/12' },
     round: 'döntő',
     category: ['A'],
     name: '+1, +2, +3'
   },
   BankRobbers: {
-    year: 18,
+    year: { k: 'XVIII. (24/25)', v: '24/25' },
     round: 'online',
     category: ['C', 'D', 'E'],
     name: 'Bankrablók (7-10 bank)'
   },
   Take1OrHalve: {
-    year: 17,
+    year: { k: 'XVII. (23/24)', v: '23/24' },
     round: 'online',
     category: ['C', 'D', 'E'],
     name: 'Egyet vegyél vagy felezz'
