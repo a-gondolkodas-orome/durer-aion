@@ -8,9 +8,16 @@ export const Overview = () => {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedYears, setSelectedYears] = useState([]);
 
+  if (selectedCategories.includes('')) {
+    setSelectedCategories([]);
+  }
+  if (selectedYears.includes('')) {
+    setSelectedYears([]);
+  }
+
   const shouldShow = game => {
-    if (selectedCategories.length > 0 && every(game.category, c => !selectedCategories.includes(c))) return false;
-    if (selectedYears.length > 0 && !selectedYears.includes(game.year.v)) return false;
+    if (selectedCategories.length > 0 && !selectedCategories.includes('') && every(game.category, c => !selectedCategories.includes(c))) return false;
+    if (selectedYears.length > 0 && !selectedYears.includes('') && !selectedYears.includes(game.year.v)) return false;
     return true;
   };
 
@@ -63,7 +70,7 @@ const OverviewFilterOptions = ({ options }) => {
           ${selected ? 'bg-blue-200' : 'bg-white'}
           ${focus ? 'outline' : ''}
         `}>
-          <span className={selected ? '' : 'text-transparent'}>✓</span>{option.k}
+          {option.v !== '' && <span className={selected ? '' : 'text-transparent'}>✓</span>}{option.k}
         </span>
       }</ListboxOption>
     )}
@@ -79,7 +86,8 @@ const CategoryFilter = ({ selectedCategories, setSelectedCategories }) => {
     { k: 'D (9-12.o)', v: 'D'},
     { k: 'D+ (9-12.o)', v: 'D+'},
     { k: 'E (9-12.o)', v: 'E'},
-    { k: 'E+ (9-12.o)', v: 'E+'}
+    { k: 'E+ (9-12.o)', v: 'E+'},
+    { k: '↻', v: '' }
   ];
 
   return <Listbox
@@ -101,6 +109,7 @@ const CategoryFilter = ({ selectedCategories, setSelectedCategories }) => {
 const YearFilter = ({ selectedYears, setSelectedYears }) => {
   const allGames = Object.values(gameList);
   const allYears = sortBy(uniqBy(allGames.map(game => game.year), y => y.v), a => a.v);
+  allYears.push({ k: '↻', v: '' });
 
   return <Listbox
     value={selectedYears} onChange={setSelectedYears}
