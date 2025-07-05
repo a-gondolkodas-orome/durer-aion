@@ -98,8 +98,8 @@ export const GameRule = ({ ruleDescription }) => {
         <div className="border-2 rounded-sm grow">
           <DisclosureButton className="w-full bg-slate-200 text-xl flex justify-center">
             <span className="grow">Játékszabályok</span>
-            { !open && <span className="text-right pr-4">⛛</span>}
-            { open && <span className="text-right pr-4" style={{ transform: 'scaleY(-1)' }}>⛛</span>}
+            { !open && <span className="text-right pr-4">▽</span>}
+            { open && <span className="text-right pr-4" style={{ transform: 'scaleY(-1)' }}>▽</span>}
           </DisclosureButton>
             <DisclosurePanel className="w-full p-2">
               <p className="text-justify">
