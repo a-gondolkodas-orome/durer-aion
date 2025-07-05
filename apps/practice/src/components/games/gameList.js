@@ -203,4 +203,10 @@ export const gameList = {
     category: ['E'],
     name: 'Békés kacsák (4 × 7)'
   }
+  , TakePowerOfTwo: {
+    year: { k: 'XV. (21/22)', v: '21/22' },
+    round: 'online',
+    category: ['D'],
+    name: 'Kettőhatványok kivonása'
+  }
 };
