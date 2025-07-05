@@ -30,7 +30,8 @@ import { Bacteria } from '../games/bacteria/bacteria';
 import { SixDiscs, TenDiscs } from '../games/discs-turn-or-remove/discs-turn-or-remove';
 import { PrimeExponentials } from '../games/prime-exponentials/prime-exponentials';
 import { Policemanthief } from '../games/policeman-thief/policeman-thief';
-import { SharkChase } from '../games/shark-chase/shark-chase';
+import { SharkChase4 } from '../games/shark-chase/shark-4-by-4/shark-chase';
+import { SharkChase5 } from '../games/shark-chase/shark-5-by-5/shark-chase';
 import { PlusOneTwoThree } from '../games/plus-one-two-three/plus-one-two-three';
 import { ChessDucksC, ChessDucksE } from '../games/chess-ducks/chess-ducks';
 import { TakePowerOfTwo } from '../games/take-power-of-two/take-power-of-two';
@@ -68,7 +69,8 @@ export const App = () => {
     { path: '/game/TenDiscs', element: <TenDiscs />},
     { path: '/game/PrimeExponentials', element: <PrimeExponentials />},
     { path: '/game/Policemanthief', element: <Policemanthief />},
-    { path: '/game/SharkChase', element: <SharkChase />},
+    { path: '/game/SharkChase4', element: <SharkChase4 />},
+    { path: '/game/SharkChase5', element: <SharkChase5 />},
     { path: '/game/PlusOneTwoThree', element: <PlusOneTwoThree />},
     { path: '/game/ChessDucksC', element: <ChessDucksC />},
     { path: '/game/ChessDucksE', element: <ChessDucksE />},

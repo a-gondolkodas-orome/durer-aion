@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { range } from 'lodash';
-import { SharkSvg } from './assets/shark-chase-shark-svg';
-import { SubmarineSvg } from './assets/shark-chase-submarine-svg';
+import { SharkSvg } from '../assets/shark-chase-shark-svg';
+import { SubmarineSvg } from '../assets/shark-chase-submarine-svg';
 
 export const BoardClient = ({ board, ctx, moves }) => {
   const [chosenPiece, setChosenPiece] = useState(null);
@@ -9,9 +9,9 @@ export const BoardClient = ({ board, ctx, moves }) => {
   let possibleMoves=[]
   if (ctx.shouldRoleSelectorMoveNext) {
     if (ctx.chosenRoleIndex === 1) {
-      possibleMoves = range(16).filter(i => distance(board.shark, i) <= 1)
+      possibleMoves = range(25).filter(i => distance(board.shark, i) <= 1)
     } else if (chosenPiece !== null) {
-      possibleMoves = range(16).filter(i => distance(chosenPiece, i) === 1)
+      possibleMoves = range(25).filter(i => distance(chosenPiece, i) === 1)
     }
   }
 
@@ -52,11 +52,11 @@ export const BoardClient = ({ board, ctx, moves }) => {
 
   return (
   <section className="p-2 shrink-0 grow basis-2/3">
-    <p className='font-bold text-lg'>Hátralévő lépések száma: {12-board.turn}</p>
+    <p className='font-bold text-lg'>Hátralévő lépések száma: {16-board.turn}</p>
     <SubmarineSvg/>
     <SharkSvg/>
-    <div className="grid grid-cols-4 gap-0 border-2">
-      {range(16).map(id => (
+    <div className="grid grid-cols-5 gap-0 border-2">
+      {range(25).map(id => (
         <button
           key={id}
           onClick={() => clickField(id)}
@@ -95,8 +95,8 @@ export const BoardClient = ({ board, ctx, moves }) => {
 const distance = (fieldA, fieldB) => {
   if (fieldA === null || fieldB === null) return null;
   return (
-    Math.abs((fieldA % 4) - (fieldB % 4)) +
-    Math.abs(Math.floor(fieldA / 4) - Math.floor(fieldB / 4))
+    Math.abs((fieldA % 5) - (fieldB % 5)) +
+    Math.abs(Math.floor(fieldA / 5) - Math.floor(fieldB / 5))
   );
 };
 
@@ -147,6 +147,22 @@ const SubmarinesInCell = ({ count }) => {
           <use xlinkHref="#submarine" />
         </svg>
         <svg className="aspect-square top-[10%] absolute z-20 opacity-80">
+          <use xlinkHref="#submarine" />
+        </svg>
+      </>
+    )}
+    {count === 4 && (
+      <>
+        <svg className="aspect-square top-[-15%] absolute z-20 opacity-80">
+          <use xlinkHref="#submarine" />
+        </svg>
+        <svg className="aspect-square top-[-5%] absolute z-20 opacity-80">
+          <use xlinkHref="#submarine" />
+        </svg>
+        <svg className="aspect-square top-[5%] absolute z-20 opacity-80">
+          <use xlinkHref="#submarine" />
+        </svg>
+        <svg className="aspect-square top-[15%] absolute z-20 opacity-80">
           <use xlinkHref="#submarine" />
         </svg>
       </>

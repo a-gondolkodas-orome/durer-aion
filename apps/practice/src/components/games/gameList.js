@@ -167,11 +167,17 @@ export const gameList = {
     category: ['A'],
     name: 'Rendőr, tolvaj'
   },
-  SharkChase: {
+  SharkChase4: {
     year: { k: 'XVII. (23/24)', v: '23/24' },
     round: 'döntő',
     category: ['C'],
-    name: 'Cápa üldözés'
+    name: 'Cápa üldözés (4 x 4)'
+  },
+  SharkChase5: {
+    year: { k: 'XVII. (23/24)', v: '23/24' },
+    round: 'döntő',
+    category: ['D'],
+    name: 'Cápa üldözés (5 x 5)'
   },
   PlusOneTwoThree: {
     year: { k: 'V. (11/12)', v: '11/12' },
