@@ -55,10 +55,12 @@ const getOptimalSubmarineMoveByAi = (board) => {
           case 13:
             return { from: 6, to: 5 };
 					case 14:
-						if ( board.shark == 15 )
+						if ( board.shark == 15 ) {
 							return { from: 5, to: 10 };
-						else
+						}
+						else {
 							return { from: 3, to: 2 };
+						}
         }
       } else {
         switch(board.turn){
@@ -143,9 +145,9 @@ export const getNextSharkPositionByAI = (submarines, shark) => {
       if (componentSizes[i] == maxi && isReachableWithoutDeath(submarines, shark, i)) {
         possibleMoves.push(i);
       }
-    }
-  }
-	
+		}
+	}
+
   // kulso kor masodik es negyedik mezoi
   if (possibleMoves.length === 0) {
     for (let ind = 0; ind < 8; ind++) {
