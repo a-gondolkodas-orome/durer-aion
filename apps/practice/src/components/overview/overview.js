@@ -22,9 +22,10 @@ export const Overview = () => {
   };
 
   // order by category and then by year regardless of order in gameList.js
-  const gamesToShow = Object.keys(gameList)
-    .filter(id => shouldShow(gameList[id]))
-    .sort((a, b) => gameList[a].year.v - gameList[b].year.v)
+  const gamesToShow = sortBy(
+    Object.keys(gameList).filter(id => shouldShow(gameList[id])),
+    a => gameList[a].year.v
+  )
     .sort((a, b) =>
       gameList[a].category[0] > gameList[b].category[0]
       ? 1
