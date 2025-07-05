@@ -153,7 +153,7 @@ const Game = (gameId, gameProps) => {
     <h2 className="font-bold mb-4 text-center">{gameProps.name}</h2>
     <div className="grow"></div>
     <div className="flex items-baseline">
-      <span className="rounded-lg bg-orange-200 px-1 m-0.5">{gameProps.year.v}</span>
+      <span className="rounded-lg bg-orange-200 px-1 m-0.5" title={gameProps.year.k}>{gameProps.year.v}</span>
       <span className="rounded-lg bg-blue-200 px-1 m-0.5">{gameProps.category.join(', ')}</span>
       <span className="rounded-lg bg-amber-200 px-1 m-0.5">{gameProps.round}</span>
       <span className="grow"></span>
