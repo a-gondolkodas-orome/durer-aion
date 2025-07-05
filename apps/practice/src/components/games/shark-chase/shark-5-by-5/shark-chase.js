@@ -1,5 +1,5 @@
 import React from 'react';
-import { strategyGameFactory } from '../strategy-game';
+import { strategyGameFactory } from '../../strategy-game';
 import { aiBotStrategy } from './bot-strategy';
 import { BoardClient } from './board-client';
 import { isGameEnd, getWinnerIndex } from './helpers';
@@ -7,8 +7,12 @@ import { cloneDeep } from 'lodash';
 
 const generateStartBoard = () => {
   return {
-    submarines: [0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-    shark: 12,
+    submarines: [	0, 0, 0, 1, 1,
+									0, 0, 0, 1, 1,
+									0, 0, 0, 0, 0,
+									0, 0, 0, 0, 0,
+									0, 0, 0, 0, 0],
+    shark: 20,
     turn: 1,
     sharkMovesInTurn: 0
   };
@@ -54,13 +58,13 @@ const rule = <>
   egy nőstény példányát. Az állat a víz mélyén mozog, így
   befogásához három tengeralattjárót használnak. A kutatók kommunikálnak egymással
   és látják a cápát, továbbá a cápa is látja a kutatókat. A tó négyzet alakú és
-  fel van osztva 4 × 4 darab négyzet alakú szektorra. Minden nap délben az egyik
-  tengeralattjáró átúszik egy oldalszomszédos szektorba. A cápa 11 nap múlva nyugodt
+  fel van osztva 5 × 5 darab négyzet alakú szektorra. Minden nap délben az egyik
+  tengeralattjáró átúszik egy oldalszomszédos szektorba. A cápa 15 nap múlva nyugodt
   körülmények között tenné le a tojását, így addig menekülni próbál, ehhez minden
   éjszaka legfeljebb kétszer átúszik egy oldalszomszédos szektorba. A kutatók az első
-  nap az alábbi kezdőhelyzetből mozognak először. A kutatók akkor nyernek, ha a 11.
+  nap az alábbi kezdőhelyzetből mozognak először. A kutatók akkor nyernek, ha a 15.
   napig valamikor egy tengeralattjáró egy szektorba kerül a cápával, míg a cápa akkor
-  nyer, ha még a 11. nap végén is szabad.
+  nyer, ha még a 15. nap végén is szabad.
 </>;
 
 const getPlayerStepDescription = ({ board, ctx: { chosenRoleIndex } }) => {
@@ -75,7 +79,7 @@ const getPlayerStepDescription = ({ board, ctx: { chosenRoleIndex } }) => {
   </>;
 };
 
-export const SharkChase = strategyGameFactory({
+export const SharkChase5 = strategyGameFactory({
   rule,
   title: 'Cápa üldözés',
   roleLabels: ['Kutató leszek!', 'Cápa leszek!'],
