@@ -1,36 +1,20 @@
 import React from 'react';
 import { strategyGameFactory } from '../strategy-game';
-import { cloneDeep, some, flatMap, range, isEqual, sample, shuffle } from 'lodash';
+import { some, range, isEqual } from 'lodash';
 import { DuckSvg } from './rubber-duck-svg';
+import { aiBotStrategy } from './bot-strategy';
+import {
+  getAllowedMoves,
+  DUCK,
+  FORBIDDEN,
+  moves
+} from './helpers';
 
 const chessDucksGameFactory = ({ ROWS, COLS }) => {
-  const [DUCK, FORBIDDEN] = [1, 2]
 
   const generateStartBoard = () => {
     return range(0, ROWS).map(() => range(0, COLS).map(() => null));
   };
-
-  const boardIndices = flatMap(range(0, ROWS), row => range(0, COLS).map(col => ({ row, col })));
-
-  const getAllowedMoves = (board) => {
-    return boardIndices.filter(({ row, col }) => board[row][col] === null);
-  };
-
-  const markForbiddenFields = (board, { row, col }) => {
-    if (row - 1 >= 0) {
-      board[(row - 1)][col] = FORBIDDEN;
-    }
-    if (row + 1 <= (ROWS - 1)) {
-      board[(row + 1)][col] = FORBIDDEN;
-    }
-    if (col - 1 >= 0) {
-      board[(row)][col - 1] = FORBIDDEN;
-    }
-    if (col + 1 <= (COLS - 1)) {
-      board[(row)][col + 1] = FORBIDDEN;
-    }
-  };
-
 
   const BoardClient = ({ board, ctx, moves }) => {
     const clickField = (field) => {
@@ -89,67 +73,6 @@ const chessDucksGameFactory = ({ ROWS, COLS }) => {
     );
   };
 
-  const moves = {
-    placeDuck: (board, { events }, { row, col }) => {
-      const nextBoard = cloneDeep(board);
-      nextBoard[row][col] = DUCK;
-      markForbiddenFields(nextBoard, { row, col });
-      events.endTurn();
-      if (getAllowedMoves(nextBoard).length === 0) {
-        events.endGame();
-      }
-      return { nextBoard }
-    }
-  };
-
-  const aiBotStrategy = ({ board, moves }) => {
-    const aiMove = getOptimalAiMove(board);
-    moves.placeDuck(board, aiMove);
-  };
-
-  const getOptimalAiMove = (board) => {
-    const allowedMoves = getAllowedMoves(board);
-
-    const duckCount = boardIndices.filter(({ row, col }) => board[row][col] === DUCK).length;
-
-    // live search is too slow and there is no optimal first step anyways
-    if (duckCount === 0) {
-      return sample(allowedMoves);
-    }
-
-    // sample + find has the same effect as filter + sample: find a random
-    // from the optimal moves
-    const optimalPlace = shuffle(allowedMoves).find(({ row, col }) => {
-      const boardCopy = cloneDeep(board);
-      markForbiddenFields(boardCopy, { row, col });
-      boardCopy[row][col] = DUCK;
-      return isWinningState(boardCopy, false);
-    });
-
-
-    if (optimalPlace !== undefined) {
-      return optimalPlace;
-    }
-    return sample(allowedMoves);
-  };
-
-  // given board *after* your step, are you set up to win the game for sure?
-  const isWinningState = (board, amIPlayer) => {
-    if (getAllowedMoves(board).length === 0) {
-      return true;
-    }
-
-    const allowedPlacesForOther = getAllowedMoves(board);
-
-    const optimalPlaceForOther = allowedPlacesForOther.find(({ row, col }) => {
-      const boardCopy = cloneDeep(board);
-      markForbiddenFields(boardCopy, { row, col });
-      boardCopy[row][col] = DUCK;
-      return isWinningState(boardCopy, !amIPlayer);
-    });
-    return optimalPlaceForOther === undefined;
-  };
-
   const rule = <>
     Azt sokan tudják, hogy egy ló hogy lép a sakktáblán, de azt már nagyon kevesen, hogy
   egy kacsa hogyan: a négy oldalszomszédos mezőre tud lépni. A két játékos felváltva rak le a {ROWS} × {COLS}-os
@@ -166,7 +89,7 @@ const chessDucksGameFactory = ({ ROWS, COLS }) => {
     aiBotStrategy,
     moves
   });
-}
+};
 
 export const ChessDucksC = chessDucksGameFactory({ ROWS: 4, COLS: 6 });
 export const ChessDucksE = chessDucksGameFactory({ ROWS: 4, COLS: 7 });

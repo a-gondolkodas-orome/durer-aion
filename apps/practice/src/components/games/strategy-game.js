@@ -130,3 +130,9 @@ export const strategyGameFactory = ({
     );
   };
 };
+
+export const dummyEvents = {
+  endTurn: () => {},
+  endGame: () => {},
+  setTurnStage: () => {}
+}
