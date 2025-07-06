@@ -147,13 +147,13 @@ export const gameList = {
     year: { k: 'X. (16/17)', v: '16/17' },
     round: 'döntő',
     category: ['A'],
-    name: 'Átfordítás, elvétel (6 korong)'
+    name: 'Átfordítás, elvétel (6)'
   },
   TenDiscs: {
     year: { k: 'X. (16/17)', v: '16/17' },
     round: 'döntő',
     category: ['B'],
-    name: 'Átfordítás, elvétel (10 korong)'
+    name: 'Átfordítás, elvétel (10)'
   },
   PrimeExponentials: {
     year: { k: 'I. (07/08)', v: '07/08' },
