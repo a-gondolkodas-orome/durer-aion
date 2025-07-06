@@ -215,6 +215,12 @@ export const gameList = {
     category: ['D'],
     name: 'Kettőhatványok kivonása'
   }
+  , ThievesMean: {
+    year: { k: 'XVIII. (24/25)', v: '24/25' },
+    round: 'döntő',
+    category: ['A'],
+    name: 'Tolvajnál átlag'
+  }
   , TriangleColoring: {
     year: { k: 'VII. (13/14)', v: '13/14' },
     round: 'döntő',
