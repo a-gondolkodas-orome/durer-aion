@@ -56,7 +56,7 @@ const moves = {
 const rule = <>
   Kutatók a Dürerencicás-tóban felfedezték a kihalófélben lévő egyenesenmozgó macskacápa faj
   egy nőstény példányát. Az állat a víz mélyén mozog, így
-  befogásához három tengeralattjárót használnak. A kutatók kommunikálnak egymással
+  befogásához négy tengeralattjárót használnak. A kutatók kommunikálnak egymással
   és látják a cápát, továbbá a cápa is látja a kutatókat. A tó négyzet alakú és
   fel van osztva 5 × 5 darab négyzet alakú szektorra. Minden nap délben az egyik
   tengeralattjáró átúszik egy oldalszomszédos szektorba. A cápa 15 nap múlva nyugodt
