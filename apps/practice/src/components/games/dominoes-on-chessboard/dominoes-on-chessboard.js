@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { range, cloneDeep, isEqual, flatMap, sample, last } from 'lodash';
-import { strategyGameFactory } from '../strategy-game';
+import { range, cloneDeep, isEqual, flatMap, sample, last, shuffle } from 'lodash';
+import { strategyGameFactory, dummyEvents } from '../strategy-game';
 
 const BOARDSIZE = 6;
 const getId = ({ row, col }) => row * BOARDSIZE + col;
@@ -147,14 +147,8 @@ const getPossibleMoves = board => {
     if (col < (BOARDSIZE - 1) && !isCovered({ row, col: col + 1 })) {
       possibleMoves.push([getId({row, col }), getId({ row, col: col + 1 })])
     };
-    if (col >= 1 && !isCovered({ row, col: col -1 })) {
-      possibleMoves.push([getId({row, col }), getId({ row, col: col -1 })])
-    };
     if (row < (BOARDSIZE - 1) && !isCovered({ row: row + 1, col })) {
       possibleMoves.push([getId({row, col }), getId({ row: row + 1, col })])
-    };
-    if (row >= 1 && !isCovered({ row: row - 1, col })) {
-      possibleMoves.push([getId({row, col }), getId({ row: row - 1, col })])
     };
     return;
   });
@@ -174,16 +168,51 @@ const moves = {
   }
 }
 
+// Note: Currently the AI may not win even from a winning position if the player
+// selected winning role but then did not follow winning strategy due to intractability
 const aiBotStrategy = ({ board, moves, ctx }) => {
-  if (ctx.chosenRoleIndex === 1) {
-    const randomDomino = sample(getPossibleMoves(board));
-    moves.placeDomino(board, randomDomino);
+  const possibleMoves = getPossibleMoves(board);
+  if (possibleMoves.length >= 20) {
+    if (ctx.chosenRoleIndex === 1) {
+      const randomDomino = sample(getPossibleMoves(board));
+      moves.placeDomino(board, randomDomino);
+    } else {
+      const lastDomino = last(board);
+      const mirrorImage = [BOARDSIZE * BOARDSIZE - 1 - lastDomino[0], BOARDSIZE * BOARDSIZE - 1 - lastDomino[1]];
+      moves.placeDomino(board, mirrorImage);
+    }
   } else {
-    const lastDomino = last(board);
-    const mirrorImage = [BOARDSIZE * BOARDSIZE - 1 - lastDomino[0], BOARDSIZE * BOARDSIZE - 1 - lastDomino[1]];
-    moves.placeDomino(board, mirrorImage);
+    const optimalMove = getOptimalAiMove(board);
+    moves.placeDomino(board, optimalMove);
   }
 }
+
+const getOptimalAiMove = board => {
+  const allowedMoves = getPossibleMoves(board);
+  const optimalPlace = shuffle(allowedMoves).find(i => {
+    const { nextBoard } = moves.placeDomino(board, { events: dummyEvents }, i);
+    return isWinningState(nextBoard, false);
+  });
+
+  if (optimalPlace !== undefined) {
+    return optimalPlace;
+  }
+  return sample(allowedMoves);
+};
+
+// given board *after* your step, are you set up to win the game for sure?
+const isWinningState = (board, amIPlayer) => {
+  const allowedPlacesForOther = getPossibleMoves(board);
+  if (allowedPlacesForOther.length === 0) {
+    return true;
+  }
+
+  const optimalPlaceForOther = allowedPlacesForOther.find(i => {
+    const { nextBoard } = moves.placeDomino(board, { events: dummyEvents }, i);
+    return isWinningState(nextBoard, !amIPlayer);
+  });
+  return optimalPlaceForOther === undefined;
+};
 
 const toldalek = {
   '4': 'e',
