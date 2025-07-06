@@ -35,6 +35,7 @@ import { SharkChase5 } from '../games/shark-chase/shark-5-by-5/shark-chase';
 import { PlusOneTwoThree } from '../games/plus-one-two-three/plus-one-two-three';
 import { ChessDucksC, ChessDucksE } from '../games/chess-ducks/chess-ducks';
 import { TakePowerOfTwo } from '../games/take-power-of-two/take-power-of-two';
+import { TriangleColoring } from '../games/triangle-coloring/triangle-coloring';
 
 export const App = () => {
   const routes = [
@@ -74,7 +75,8 @@ export const App = () => {
     { path: '/game/PlusOneTwoThree', element: <PlusOneTwoThree />},
     { path: '/game/ChessDucksC', element: <ChessDucksC />},
     { path: '/game/ChessDucksE', element: <ChessDucksE />},
-    { path: '/game/TakePowerOfTwo', element: <TakePowerOfTwo />}
+    { path: '/game/TakePowerOfTwo', element: <TakePowerOfTwo />},
+    { path: '/game/TriangleColoring', element: <TriangleColoring />}
   ];
   const router = createHashRouter(
     routes.map(route => ({...route, errorElement: <ErrorPage /> }))

@@ -215,4 +215,10 @@ export const gameList = {
     category: ['D'],
     name: 'Kettőhatványok kivonása'
   }
+  , TriangleColoring: {
+    year: { k: 'VII. (13/14)', v: '13/14' },
+    round: 'döntő',
+    category: ['C'],
+    name: 'Háromszög színezés'
+  }
 };
