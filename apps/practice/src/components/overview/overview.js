@@ -152,14 +152,19 @@ const Game = (gameId, gameProps) => {
   >
     <h2 className="font-bold mb-4 text-center">{gameProps.name}</h2>
     <div className="grow"></div>
-    <div className="flex items-baseline">
-      <span className="rounded-lg bg-orange-200 px-1 m-0.5" title={gameProps.year.k}>{gameProps.year.v}</span>
-      <span className="rounded-lg bg-blue-200 px-1 m-0.5">{gameProps.category.join(', ')}</span>
+    <div className="flex flex-wrap items-baseline">
+      <span
+        className="rounded-lg bg-orange-200 px-1 m-0.5 whitespace-nowrap"
+        title={gameProps.year.k}
+      >{gameProps.year.v}</span>
+      <span
+        className="rounded-lg bg-blue-200 px-1 m-0.5 whitespace-nowrap"
+      >{gameProps.category.join(', ')}</span>
       <span className="rounded-lg bg-amber-200 px-1 m-0.5">{gameProps.round}</span>
       <span className="grow"></span>
       <Link
         to={`/game/${gameId}`}
-        className="cta-button rounded-lg py-0 px-1 underline m-0.5 text-base w-auto text-black"
+        className="cta-button rounded-lg py-0 px-1 underline m-0.5 text-base w-auto text-black ml-auto"
       >Kipróbálom!</Link>
     </div>
   </span>;
