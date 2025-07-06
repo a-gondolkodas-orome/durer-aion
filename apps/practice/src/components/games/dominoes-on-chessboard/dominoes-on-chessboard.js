@@ -169,7 +169,8 @@ const moves = {
 }
 
 // Note: Currently the AI may not win even from a winning position if the player
-// selected winning role but then did not follow winning strategy due to intractability
+// selected winning role but then did not follow winning strategy due to intractability.
+// We may improve AI with some heuristic and leveraging equivalent positions.
 const aiBotStrategy = ({ board, moves, ctx }) => {
   const possibleMoves = getPossibleMoves(board);
   if (possibleMoves.length >= 20) {
