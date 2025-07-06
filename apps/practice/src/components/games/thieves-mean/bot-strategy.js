@@ -4,7 +4,6 @@ const Nobody = 2;
 
 export const aiBotStrategy = ({ board, moves, ctx }) => {
     const move = getMove(board, ctx.chosenRoleIndex);
-    console.log(move);
     moves.takeCard(board, [move]);
 }
 
@@ -16,15 +15,15 @@ function getMove(board) {
   board.thiefCards.forEach(card => {
     cards[card - 1] = Thief;
   });
-  const meanCounts = getMeanCounts(cards);
-  const maxCount = Math.max(...meanCounts);
+  const meanCounts = getMeanCounts(cards)
+    .map((count, idx) => [count, idx])
+    .filter((count, idx) => cards[idx] === Nobody);
+  // find max count that is not taken by sheriff or thief
+  const maxCount = Math.max(...meanCounts.map(([count, idx]) => count));
   // return the card that participates in the most good sets of three cards
-  let maxIndices = meanCounts.reduce((acc, count, index) => {
-    if (count === maxCount && cards[index] === Nobody) {
-      acc.push(index);
-    }
-    return acc;
-  }, []);
+  // take only ones with max value
+  let maxIndices = meanCounts.filter(([count, idx]) => count === maxCount)
+    .map(([count, idx]) => idx);
   return choose(maxIndices) + 1;
 }
 

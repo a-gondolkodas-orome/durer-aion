@@ -70,7 +70,6 @@ const moves = {
     const nextBoard = cloneDeep(board);
 
     indices.forEach(idx => {
-      // console.log(idx)
       if (ctx.currentPlayer === 0) {
         nextBoard.sheriffCards.push(idx);
       }
@@ -89,7 +88,6 @@ const moves = {
         }
       });
       const winner = getWinner(nextBoard.thiefCards);
-      console.log('winner', winner, "chosenRoleIndex", ctx.chosenRoleIndex);
       events.endGame({ winnerIndex: winner });
     }
     events.endTurn();
