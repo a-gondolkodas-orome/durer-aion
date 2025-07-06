@@ -121,8 +121,7 @@ const rule = <>
     Tolvaj akkor nyer, ha a játék végéig összegyűjt három olyan kártyát, melyek közül az egyiken lévő szám a másik
     kettőnek az átlaga. Nyomozó pedig akkor nyer, ha Tolvaj nem gyűjt össze három ilyen kártyát.
     <br></br>
-    <i>Győzzétek le a szervezőket kétszer egymás után ebben a játékban! A játék elején
-        ti dönthetitek el, hogy Nyomozó vagy Tolvaj bőrébe szeretnétek bújni.</i></>;
+</>;
 
 const generateStartBoard = () => {
   return {
