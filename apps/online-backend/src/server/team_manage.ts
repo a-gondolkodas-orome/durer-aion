@@ -7,6 +7,7 @@ import {
   FinishedMatchStatus,
   InProgressMatchStatus,
 } from "schemas";
+import { TeamModel } from "./entities/teamModel";
 import { fetch } from "../socketio_botmoves";
 import { TeamModel } from "./model";
 

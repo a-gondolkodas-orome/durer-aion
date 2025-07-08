@@ -1,7 +1,10 @@
 import type { PostgresStore } from 'bgio-postgres';
+import { teamAttributes, TeamModel } from './entities/teamModel';
 import { InProgressMatchStatus } from 'schemas';
 import { teamAttributes, TeamModel } from './model';
 import { Sequelize, Op, WhereOptions } from 'sequelize';
+import { relayProblemAttributes, RelayProblemModel } from './entities/relayProblemModel';
+import { parseProblemTOML } from './problemTOMLParse';
 
 export class TeamsRepository {
   sequelize: Sequelize;
@@ -58,5 +61,57 @@ export class TeamsRepository {
       teamName: teamname,
       pageState: 'DISCLAIMER',
     });
+  }
+}
+
+function relayImageNameToUrl(name: string): string {
+  return `https://durerimages.s3.eu-north-1.amazonaws.com/` + name; // TODO idk what this should be
+}
+
+export class RelayProblemsRepository {
+  sequelize: Sequelize;
+  
+  constructor(db: PostgresStore) {
+    this.sequelize = db.sequelize;
+    RelayProblemModel.init(relayProblemAttributes, {
+      sequelize: db.sequelize,
+      tableName: "RelayProblems",
+    });
+  }
+
+  async connect() {
+    await this.sequelize.sync();
+  }
+
+  async getProblems(category: string): Promise<RelayProblemModel[]> {
+    return await RelayProblemModel.findAll({
+      where: {
+        category: category
+      },
+      order: [['index', 'ASC']]
+    });
+  }
+
+  async addProblem(
+      { category, index, problemText, answer, points, imageUrls } : 
+      { category: string, index: number, problemText: string, answer: string, points: number, imageUrls: string[] }) {
+    return await RelayProblemModel.create({
+      category, index, problemText, answer, points, imageUrls
+    });
+  }
+
+  async addFromTOML(toml: string, imgNames: string[]) {
+    const parsedProblems = parseProblemTOML(toml, imgNames);
+    const promises = parsedProblems.map(problem => {
+      return RelayProblemModel.create({
+        category: problem.category,
+        index: problem.index,
+        problemText: problem.problemText,
+        answer: problem.answer,
+        points: problem.points,
+        imageUrl: problem.attachment ? relayImageNameToUrl(problem.attachment) : null,
+      });
+    });
+    return await Promise.all(promises);
   }
 }
