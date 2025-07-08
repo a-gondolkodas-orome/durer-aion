@@ -8,7 +8,7 @@ import {
   FinishedMatchStatus,
   InProgressMatchStatus,
   TeamModel,
-} from "./entities/model";
+} from "./entities/teamModel";
 import { fetch } from "../socketio_botmoves";
 
 /** Joins a player to a match where the bot's side is not connected.

@@ -1,5 +1,5 @@
 import { Stack } from '@mui/system';
-import { FinishedMatchStatus } from '../../../server/entities/model';
+import { FinishedMatchStatus } from '../../../server/entities/teamModel';
 import { TeamModelDto } from '../../dto/TeamStateDto';
 
 

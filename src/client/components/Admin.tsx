@@ -10,7 +10,7 @@ import Form from './form';
 import { ErrorMessage, Field } from 'formik';
 import theme from './theme';
 import { useSnackbar } from 'notistack';
-import { FinishedMatchStatus } from '../../server/entities/model';
+import { FinishedMatchStatus } from '../../server/entities/teamModel';
 import { ConfirmDialogInterface, ConfirmDialog } from './ConfirmDialog';
 import * as Yup from 'yup';
 
