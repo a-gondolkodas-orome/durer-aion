@@ -25,6 +25,7 @@
     "@types/node": "^16.11.41",
     "@types/react": "^18.0.14",
     "@types/react-dom": "^18.0.5",
+    "@vitejs/plugin-react": "^4.6.0",
     "axios": "^1.4.0",
     "bgio-postgres": "^1.0.13",
     "boardgame.io": "^0.50.0-alpha.2",
@@ -38,24 +39,23 @@
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-router-dom": "^6.3.0",
-    "react-scripts": "5.0.1",
     "react-syntax-highlighter": "^15.6.1",
     "react-text-mask": "^5.5.0",
     "recoil": "^0.7.7",
     "swr": "^2.2.5",
-    "typescript": "^4.7.4",
     "urlcat": "^2.0.4",
+    "vite": "^7.0.3",
     "web-vitals": "^2.1.4",
     "yup": "^0.32.11"
   },
   "scripts": {
     "predeploy": "cross-env PUBLIC_URL=/durer-aion REACT_APP_WHICH_VERSION=c npm run build",
     "deploy": "gh-pages -d build",
-    "lint": "eslint src/ --ext js,ts,jsx,tsx",
+    "lint": "turbo lint",
     "check:server": "babel-node --extensions \".ts\" --presets=@babel/preset-typescript --plugins=@babel/plugin-transform-modules-commonjs src/server.ts sanity-check",
     "dev:server": "nodemon -e js,ts --exec babel-node --extensions \".ts\" --presets=@babel/preset-typescript --plugins=@babel/plugin-transform-modules-commonjs src/server.ts",
-    "start": "cross-env REACT_APP_WHICH_VERSION=c react-scripts start",
-    "build": "react-scripts build",
+    "start": "turbo start",
+    "build": "turbo build",
     "test": "cross-env react-scripts test . --coverage",
     "spell-check": "cspell \"**/*.{ts,tsx}\" --no-progress",
     "eject": "react-scripts eject"
@@ -96,6 +96,11 @@
       "last 1 safari version"
     ]
   },
+  "packageManager": "npm@8.5.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "devDependencies": {
     "@sentry/types": "^7.57.0",
     "@types/pg": "^8.6.5",
@@ -103,6 +108,10 @@
     "@types/react-text-mask": "^5.4.14",
     "cspell": "^6.31.1",
     "gh-pages": "^4.0.0",
-    "nodemon": "^2.0.18"
+    "nodemon": "^2.0.18",
+    "ts-node": "^10.9.2",
+    "tsup": "^8.5.0",
+    "turbo": "^2.5.3",
+    "typescript": "^5.8.3"
   }
 }

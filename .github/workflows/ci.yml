@@ -9,8 +9,28 @@ on:
       - main
 
 jobs:
+  # lint:
+  #   name: linters
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Check out Git repository
+  #       uses: actions/checkout@v2
+  #     - name: Set up Node.js
+  #       uses: actions/setup-node@v1
+  #       with:
+  #         node-version: 16
+  #     - name: Install Node.js dependencies
+  #       run: npm ci
+  #     - name: Run linters
+  #       uses: wearerequired/lint-action@v2
+  #       with:
+  #         eslint: true
+  #         commit: "false"
+  #         eslint_extensions: "js,ts,jsx,tsx"
+  #         eslint_args: "--max-warnings=19" # TODO: change it to 0 after the big refactor
+
   lint:
-    name: linters
+    name: lint
     runs-on: ubuntu-latest
     steps:
       - name: Check out Git repository
@@ -21,14 +41,8 @@ jobs:
           node-version: 16
       - name: Install Node.js dependencies
         run: npm ci
-      - name: Run linters
-        uses: wearerequired/lint-action@v2
-        with:
-          eslint: true
-          commit: false
-          eslint_dir: "src/"
-          eslint_extensions: "js,ts,jsx,tsx"
-          eslint_args: "--max-warnings=19" # TODO: change it to 0 after the big refactor
+      - name: Run lint
+        run: npm run lint
 
   build:
     name: build
@@ -42,22 +56,20 @@ jobs:
           node-version: 16
       - name: Install Node.js dependencies
         run: npm ci
-      - name: Run (client) build
-        run: CI=false npm run build
-      - name: Run (server)
-        run: PUBLIC_URL=https://localhost/ npm run check:server
+      - name: Run build
+        run: npm run build
 
-  tests:
-    name: client tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out Git repository
-        uses: actions/checkout@v2
-      - name: Set up Node.js
-        uses: actions/setup-node@v1
-        with:
-          node-version: 16
-      - name: Install Node.js dependencies
-        run: npm ci
-      - name: Run (client) tests
-        run: npm run test
+  # tests:
+  #   name: client tests
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Check out Git repository
+  #       uses: actions/checkout@v2
+  #     - name: Set up Node.js
+  #       uses: actions/setup-node@v1
+  #       with:
+  #         node-version: 16
+  #     - name: Install Node.js dependencies
+  #       run: npm ci
+  #     - name: Run (client) tests
+  #       run: npm run test

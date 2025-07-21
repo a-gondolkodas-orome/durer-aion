@@ -1,0 +1,29 @@
+{
+  "name": "schemas",
+  "version": "1.0.0",
+  "description": "",
+  "files": [
+    "dist/**"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "lint": "TIMING=1 eslint \"src/**/*.ts*\" --max-warnings=0",
+    "test": "jest --passWithNoTests",
+    "build": "npx tsc",
+    "dev": "npx tsc -w"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ],
+    "rules": {
+      "import/no-anonymous-default-export": 0
+    }
+  }
+}
