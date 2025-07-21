@@ -4,12 +4,12 @@
   "files": [
     "dist/**"
   ],
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "license": "MIT",
   "scripts": {
-    "lint": "TIMING=1 eslint \"src/**/*.ts*\" --max-warnings=0",
+    "lint": "TIMING=1 eslint \"**/*.ts*\"",
     "test": "jest --passWithNoTests",
     "build": "npx tsc",
     "dev": "npx tsc -w"
