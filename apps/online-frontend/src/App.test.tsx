@@ -17,3 +17,7 @@ test('renders', () => {
   expect(linkElement).toBeInTheDocument();
 });
 */
+export const test = 
+() => {
+  console.log("tests will be here soon");
+}
