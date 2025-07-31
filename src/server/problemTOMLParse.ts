@@ -1,17 +1,9 @@
 import { parse, TomlTable } from 'smol-toml';
+import { RelayProblemModel } from './entities/relayProblemModel';
 
 const CATEGORIES: string[] = ["C", "D", "E"] as const;
 
-type Problem = {
-  problemText: string;
-  index: number;
-  answer: string | number;
-  points: number;
-  attachment: string;
-  category?: "C" | "D" | "E";
-};
-
-function validateProblem(problem: any, index: number, category: string, imgNames: string[]): asserts problem is Problem {
+function validateProblem(problem: any, index: number, category: string, imgNames: string[]): asserts problem is RelayProblemModel {
   const errPrefix = `Problem at index ${index} in category ${category} `;
   if (typeof problem !== 'object' || problem === null) {
     throw new Error(errPrefix + `is not an object.`);
@@ -26,23 +18,25 @@ function validateProblem(problem: any, index: number, category: string, imgNames
   if (!problemKeys.includes('points') || typeof problem['points'] !== 'number') {
     throw new Error(errPrefix + `is missing 'points' or it is not a number.`);
   }
-  if (!problemKeys.includes('attachment') || typeof problem['attachment'] !== 'string') {
-    throw new Error(errPrefix + `is missing 'attachment' or it is not an array of strings.`);
+  if (problemKeys.includes('attachment') && typeof problem['attachment'] !== 'string') {
+    throw new Error(errPrefix + `field 'attachment' is not a string.`);
   }
-  if (!imgNames.includes(problem['attachment'])) {
+  if (problemKeys.includes('attachment') && !imgNames.includes(problem['attachment'])) {
     throw new Error(errPrefix + `has a missing 'attachment': ${problem['attachment']}. Expected one of: ${imgNames.join(', ')}.`);
   }
-  if (problemKeys.length !== 4) {
-    throw new Error(errPrefix + `has unexpected keys: ${problemKeys.join(', ')}. Expected keys are 'problemText', 'answer', 'points', and 'attachment'.`);
-  }
+  problemKeys.forEach(key => {
+    if (!['problemText', 'answer', 'points', 'attachment', 'category', 'index'].includes(key)) {
+      throw new Error(errPrefix + `has an unexpected key: ${key}. Expected keys are: problemText, answer, points, attachment.`);
+    }
+  });
 }
 
-function TOMLToProblemList(parsedData: TomlTable, imgNames: string[]): Problem[] {
+function TOMLToProblemList(parsedData: TomlTable, imgNames: string[]): RelayProblemModel[] {
   const categories = Object.keys(parsedData);
   if (categories.length === 0) {
     throw new Error("Empty TOML.");
   }
-  let parsedProblems: Problem[] = [];
+  let parsedProblems: RelayProblemModel[] = [];
 
   categories.forEach(category => {
     if (!CATEGORIES.includes(category)) {
@@ -55,19 +49,19 @@ function TOMLToProblemList(parsedData: TomlTable, imgNames: string[]): Problem[]
     }
 
     problems.forEach((problem, index) => {
-      validateProblem(problem, index, category, imgNames);
-
-      parsedProblems.push({
-        ...problem,
-        category: category as "C" | "D" | "E",
+      problem = {
+        ...problem as object,
+        category: category,
         index: index,
-      });
+      }
+      validateProblem(problem, index, category, imgNames); // asserts problem is RelayProblemModel
+      parsedProblems.push(problem);
     });
   });
   return parsedProblems;
 }
 
-export function parseProblemTOML(tomlString: string, imgNames: string[]): Problem[] {
+export function parseProblemTOML(tomlString: string, imgNames: string[]): RelayProblemModel[] {
   const parsedData = parse(tomlString);
   return TOMLToProblemList(parsedData, imgNames);
 }

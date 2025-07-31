@@ -4,9 +4,9 @@ export class RelayProblemModel extends Model {
   public category!: string;
   public index!: number;
   public problemText!: string;
-  public answer!: string;
+  public answer!: number | string;
   public points!: number;
-  public imageUrls!: string[];
+  public attachment?: string;
 }
 
 export const relayProblemAttributes: ModelAttributes = {
@@ -32,8 +32,8 @@ export const relayProblemAttributes: ModelAttributes = {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
-  imageUrls: {
-    type: DataTypes.ARRAY(DataTypes.STRING),
+  attachment: {
+    type: DataTypes.STRING,
     allowNull: true,
   },
 };
