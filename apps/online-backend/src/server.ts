@@ -11,8 +11,8 @@ import { SocketIOButBotMoves } from './socketio_botmoves';
 import { Server } from 'boardgame.io/server';
 import botWrapper from './botwrapper';
 import { configureTeamsRouter } from './server/router';
-import { TeamsRepository } from './server/db';
 import { getBotCredentials, getGameStartAndEndTime, relayNames, strategyNames  } from './server/common';
+import { TeamsRepository, RelayProblemsRepository } from './server/db';
 import { import_teams_from_tsv_locally } from './server/team_import';
 
 import auth from 'koa-basic-auth';
@@ -31,6 +31,7 @@ function getDb() {
     return {
       db,
       teams: new TeamsRepository(db),
+      problems: new RelayProblemsRepository(db),
     }
   } else {
     throw new Error('Failed to load DB data. Only postgres is supported!');
@@ -72,7 +73,7 @@ getBotCredentials(); // give love if no creds are supplied
 getAdminCredentials(); // give love if no creds are supplied
 getGameStartAndEndTime(); // give love if no creds are supplied
 
-let { db, teams } = getDb();
+let { db, teams, problems } = getDb();
 
 // node: argv[0] vs server.ts: argv[1]
 if (argv[2] === "import") {
@@ -112,7 +113,7 @@ if (argv[2] === "import") {
 
   //TODO regex mount protection for Boardgame.io endpoints
 
-  configureTeamsRouter(server.router, teams, games);
+  configureTeamsRouter(server.router, teams, problems, games);
 
   Sentry.init({ dsn: "https://1f4c47a1692b4936951908e2669a1e99@sentry.durerinfo.hu/4" });
 

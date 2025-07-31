@@ -64,10 +64,6 @@ export class TeamsRepository {
   }
 }
 
-function relayImageNameToUrl(name: string): string {
-  return `https://durerimages.s3.eu-north-1.amazonaws.com/` + name; // TODO idk what this should be
-}
-
 export class RelayProblemsRepository {
   sequelize: Sequelize;
   
@@ -93,24 +89,22 @@ export class RelayProblemsRepository {
   }
 
   async addProblem(
-      { category, index, problemText, answer, points, imageUrls } : 
-      { category: string, index: number, problemText: string, answer: string, points: number, imageUrls: string[] }) {
+      { category, index, problemText, answer, points, attachment } : 
+      { category: string, index: number, problemText: string, answer: string, points: number, attachment: string }) {
     return await RelayProblemModel.create({
-      category, index, problemText, answer, points, imageUrls
+      category, index, problemText, answer, points, attachment
     });
   }
 
   async addFromTOML(toml: string, imgNames: string[]) {
     const parsedProblems = parseProblemTOML(toml, imgNames);
-    const promises = parsedProblems.map(problem => {
-      return RelayProblemModel.create({
-        category: problem.category,
-        index: problem.index,
-        problemText: problem.problemText,
-        answer: problem.answer,
-        points: problem.points,
-        imageUrl: problem.attachment ? relayImageNameToUrl(problem.attachment) : null,
-      });
+    const promises = parsedProblems.map(async problem => {
+      const problemData = {
+        ...problem,
+      }
+      const [instance] = await RelayProblemModel.upsert(problemData);
+      return instance;
+
     });
     return await Promise.all(promises);
   }
