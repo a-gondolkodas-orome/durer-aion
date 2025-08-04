@@ -1,3 +1,5 @@
+import { sample } from "lodash";
+
 const Sheriff = 0;
 const Thief = 1;
 const Nobody = 2;
@@ -24,20 +26,7 @@ function getMove(board) {
   // take only ones with max value
   let maxIndices = meanCounts.filter(([count, idx]) => count === maxCount)
     .map(([count, idx]) => idx);
-  return choose(maxIndices) + 1;
-}
-
-function choose(choices) {
-  let index = Math.floor(Math.random() * choices.length);
-  return choices[index];
-}
-
-function arraysEqual(a, b) {
-  if (a.length !== b.length) return false;
-  for (let i = 0; i < a.length; i++) {
-    if (a[i] !== b[i]) return false;
-  }
-  return true;
+  return sample(maxIndices) + 1;
 }
 
 function findPossibleMeans(cards) {

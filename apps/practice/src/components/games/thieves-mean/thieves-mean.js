@@ -1,15 +1,15 @@
 import React from 'react';
 import { strategyGameFactory } from '../strategy-game';
-import { range, cloneDeep } from 'lodash';
+import { range, cloneDeep, difference } from 'lodash';
 import { aiBotStrategy } from './bot-strategy';
 
 const BoardClient = ({ board, ctx, moves }) => {
   const isAllowedMove = index => {
     if (!ctx.shouldRoleSelectorMoveNext) return false;
-    return isAllowedBank(index);
+    return isAllowedCard(index);
   }
 
-  const isAllowedBank = index => {
+  const isAllowedCard = index => {
     return !board.thiefCards.includes(index) && !board.sheriffCards.includes(index)
   }
 
@@ -18,49 +18,34 @@ const BoardClient = ({ board, ctx, moves }) => {
     moves.takeCard(board, [index]);
   }
 
-  const getCardColor = index => {
-    if (board.thiefCards.includes(index + 1)) return "#fc031c";
-    if (board.sheriffCards.includes(index + 1)) return "#0307fc";
-    return "#1cfc03";
+  const getCardColor = num => {
+    if (board.thiefCards.includes(num)) return "bg-red-600";
+    if (board.sheriffCards.includes(num)) return "bg-blue-600";
+    return "bg-white";
   }
 
   return(
-    <section className="p-2 shrink-0 grow basis-2/3">
-        <svg width="100%" height="100%" viewBox='0 0 100 100'>
-            {range(7).map(i => {
-            const num = i + 1;
-            const row = Math.floor(i / 4);
-            const col = i % 4;
-            const x = 5 + col * 21;
-            const y = 15 + row * 30;
-
-            return (
-                <g key={num}>
-                <rect
-                    x={`${x}%`}
-                    y={`${y}%`}
-                    width="18%"
-                    height="25%"
-                    fill={`${getCardColor(i)}`}
-                    stroke="#1e40af"
-                    strokeWidth="0.5%"
-                    rx="3"
-                    onClick={() => clickCard(i + 1)}
-                />
-                <text
-                    x={`${x + 9}%`}
-                    y={`${y + 12.5}%`}
-                    textAnchor="middle"
-                    fill="white"
-                    fontSize="30%"
-                    fontWeight="bold"
-                >
-                    {num}
-                </text>
-                </g>
-            );
-            })}
-        </svg>
+    <section className="p-2 shrink-0 basis-2/3">
+      <div className="flex flex-wrap">
+        {range(1, 8).map(num =>
+        <button
+          key={num}
+          disabled={!isAllowedMove(num)}
+          onClick={() => clickCard(num)}
+          className={`
+            shrink-0 grow mx-1 min-h-28
+            border-2 shadow-md border-slate-800 rounded-xl text-4xl
+            text-center font-bold
+            ${ctx.chosenRoleIndex === 1
+              ? "enabled:hover:bg-red-400 enabled:focus:bg-red-400"
+              : "enabled:hover:bg-blue-400 enabled:focus:bg-blue-400"
+            }
+            ${getCardColor(num)}
+          `}
+        >
+          {num}
+        </button>)}
+      </div>
     </section>
     );
 };
@@ -80,12 +65,7 @@ const moves = {
     nextBoard.numTurns += 1;
     if (nextBoard.numTurns >= 5) {
       findLastTwo(nextBoard).forEach(idx => {
-        if (ctx.currentPlayer === 1) {
-          nextBoard.sheriffCards.push(idx);
-        }
-        else {
-          nextBoard.thiefCards.push(idx);
-        }
+        nextBoard.thiefCards.push(idx);
       });
       const winner = getWinner(nextBoard.thiefCards);
       events.endGame({ winnerIndex: winner });
@@ -96,16 +76,10 @@ const moves = {
 }
 
 function findLastTwo(board) {
-  let ret = []
-  for (let i = 1; i <= 7; i++) {
-    if (board.thiefCards.includes(i) || board.sheriffCards.includes(i)) continue;
-    ret.push(i);
-  }
-  if (ret.length > 2) {
-      console.error("Too many cards found after start", ret);
-      return [ret[0], ret[1]];
-    }
-  return ret;
+  return difference(
+    range(1, 8),
+    [...board.thiefCards, ...board.sheriffCards]
+  );
 }
 
 const rule = <>
@@ -150,7 +124,8 @@ export const ThievesMean = strategyGameFactory({
   rule,
   title: 'Tolvajnál átlag',
   BoardClient,
-  getPlayerStepDescription: () => 'Válassz egy kártyát',
+  getPlayerStepDescription: () => 'Válassz egy kártyát.',
+  roleLabels: ["Nyomozó leszek", "Tolvaj leszek"],
   generateStartBoard,
   moves,
   aiBotStrategy
