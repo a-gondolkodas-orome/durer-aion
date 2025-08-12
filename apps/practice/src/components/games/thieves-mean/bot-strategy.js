@@ -1,4 +1,4 @@
-import { sample } from "lodash";
+import { sample } from 'lodash';
 
 const Sheriff = 0;
 const Thief = 1;
@@ -9,7 +9,7 @@ export const aiBotStrategy = ({ board, moves, ctx }) => {
     moves.takeCard(board, [move]);
 }
 
-function getMove(board) {
+const getMove = (board) => {
   let cards = Array(7).fill(Nobody);
   board.sheriffCards.forEach(card => {
     cards[card - 1] = Sheriff;
@@ -29,7 +29,7 @@ function getMove(board) {
   return sample(maxIndices) + 1;
 }
 
-function findPossibleMeans(cards) {
+const findPossibleMeans = (cards) => {
   // get all good sets of three cards
   let means = [];
   for (let i = 0; i < 5; i++) {
@@ -47,7 +47,7 @@ function findPossibleMeans(cards) {
   return means;
 }
 
-function getMeanCounts(cards) {
+const getMeanCounts = (cards) => {
   let counts = Array(7).fill(0);
   findPossibleMeans(cards).forEach(mean => {
     counts[mean[0]]++;

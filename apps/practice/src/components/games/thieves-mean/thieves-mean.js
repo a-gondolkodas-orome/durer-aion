@@ -19,9 +19,9 @@ const BoardClient = ({ board, ctx, moves }) => {
   }
 
   const getCardColor = num => {
-    if (board.thiefCards.includes(num)) return "bg-red-600";
-    if (board.sheriffCards.includes(num)) return "bg-blue-600";
-    return "bg-white";
+    if (board.thiefCards.includes(num)) return 'bg-red-600';
+    if (board.sheriffCards.includes(num)) return 'bg-blue-600';
+    return 'bg-white';
   }
 
   return(
@@ -87,9 +87,11 @@ const rule = <>
     az 1, 2, ..., 7 számokkal jelölve. A játék 7 lépésből áll, minden lépésben az egyik
     játékos kezébe vesz egyet az asztalon lévő kártyák
     közül. Az alábbi sorrend szerint lépnek a játékosok:
-    <br></br><b>
+    <br></br>
+    <b>
     1. Nyomozó, 2. Tolvaj, 3. Nyomozó, 4. Tolvaj, 5. Nyomozó, 6. Tolvaj, 7. Tolvaj.
-    </b><br></br>
+    </b>
+    <br></br>
     Tolvaj akkor nyer, ha a játék végéig összegyűjt három olyan kártyát, melyek közül az egyiken lévő szám a másik
     kettőnek az átlaga. Nyomozó pedig akkor nyer, ha Tolvaj nem gyűjt össze három ilyen kártyát.
     <br></br>
@@ -103,7 +105,7 @@ const generateStartBoard = () => {
   };
 }
 
-function getWinner(thiefCards) {
+const getWinner = (thiefCards) => {
   const thiefCardsSort = thiefCards.slice().sort((a, b) => a - b);
   for (let a = 0; a <= 2; a++) {
     for (let b = a + 1; b <= 2; b++) {
@@ -125,7 +127,7 @@ export const ThievesMean = strategyGameFactory({
   title: 'Tolvajnál átlag',
   BoardClient,
   getPlayerStepDescription: () => 'Válassz egy kártyát.',
-  roleLabels: ["Nyomozó leszek", "Tolvaj leszek"],
+  roleLabels: ['Nyomozó leszek', 'Tolvaj leszek'],
   generateStartBoard,
   moves,
   aiBotStrategy
