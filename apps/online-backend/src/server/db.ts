@@ -1,5 +1,6 @@
 import type { PostgresStore } from 'bgio-postgres';
-import { InProgressMatchStatus, teamAttributes, TeamModel } from 'schemas';
+import { InProgressMatchStatus } from 'schemas';
+import { teamAttributes, TeamModel } from './model';
 import { Sequelize, Op, WhereOptions } from 'sequelize';
 
 export class TeamsRepository {

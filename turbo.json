@@ -22,10 +22,12 @@
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist", "build"],
+      "cache": false,
       "env": []
     },
     "lint": {},
     "dev": {
+      "dependsOn": ["^build"],
       "cache": false,
       "persistent": true
     }
