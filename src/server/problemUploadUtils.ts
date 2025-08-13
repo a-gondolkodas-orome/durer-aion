@@ -76,7 +76,7 @@ function getS3Url(fileName: string): string {
 
 export async function uploadToS3(filePath: string, fileName: string, contentType: string): Promise<string> {
   const s3Client = new S3Client({
-    region: process.env.AWS_REGION || 'eu-north-1',
+    region: process.env.PROBLEMS_S3_REGION || 'eu-north-1',
     credentials: {
       accessKeyId: process.env.PROBLEMS_S3_KEY_ID!,
       secretAccessKey: process.env.PROBLEMS_S3_SECRET_KEY!,
