@@ -1,13 +1,18 @@
-import { parse, TomlTable } from 'smol-toml';
+import { parse } from 'smol-toml';
 import { extname } from 'path';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-
-import { RelayProblemModel } from './entities/relayProblemModel';
 import { readFileSync } from 'fs';
 
-const CATEGORIES: string[] = ["C", "D", "E"] as const;
+export interface RelayProblem {
+  category: string;
+  index: number;
+  problemText: string;
+  answer: number | string;
+  points: number;
+  attachment?: string;
+}
 
-function validateProblem(problem: any, index: number, category: string, imgNames: string[]): asserts problem is RelayProblemModel {
+function validateProblem(problem: any, index: number, category: string, imgNames: string[]): asserts problem is RelayProblem {
   const errPrefix = `Problem at index ${index} in category ${category} `;
   if (typeof problem !== 'object' || problem === null) {
     throw new Error(errPrefix + `is not an object.`);
@@ -35,17 +40,16 @@ function validateProblem(problem: any, index: number, category: string, imgNames
   });
 }
 
-function TOMLToProblemList(parsedData: TomlTable, imgNames: string[]): RelayProblemModel[] {
+export function parseProblemTOML(tomlString: string, imgNames: string[]): RelayProblem[] {
+  const parsedData = parse(tomlString);
   const categories = Object.keys(parsedData);
   if (categories.length === 0) {
     throw new Error("Empty TOML.");
   }
-  let parsedProblems: RelayProblemModel[] = [];
+  let parsedProblems: RelayProblem[] = [];
 
   categories.forEach(category => {
-    if (!CATEGORIES.includes(category)) {
-      throw new Error(`Invalid category: ${category}. Expected one of ${CATEGORIES.join(', ')}.`);
-    }
+    validateProblemCategory(category);
 
     const problems = parsedData[category];
     if (!Array.isArray(problems)) {
@@ -58,18 +62,12 @@ function TOMLToProblemList(parsedData: TomlTable, imgNames: string[]): RelayProb
         category: category,
         index: index,
       }
-      validateProblem(problem, index, category, imgNames); // asserts problem is RelayProblemModel
+      validateProblem(problem, index, category, imgNames); // asserts problem is RelayProblem
       parsedProblems.push(problem);
     });
   });
   return parsedProblems;
 }
-
-export function parseProblemTOML(tomlString: string, imgNames: string[]): RelayProblemModel[] {
-  const parsedData = parse(tomlString);
-  return TOMLToProblemList(parsedData, imgNames);
-}
-
 
 function getS3Url(fileName: string): string {
   const bucketName = process.env.PROBLEMS_S3_BUCKET_NAME!;

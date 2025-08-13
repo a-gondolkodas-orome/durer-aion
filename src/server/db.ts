@@ -2,7 +2,6 @@ import type { PostgresStore } from 'bgio-postgres';
 import { InProgressMatchStatus, teamAttributes, TeamModel } from './entities/teamModel';
 import { Sequelize, Op, WhereOptions } from 'sequelize';
 import { relayProblemAttributes, RelayProblemModel } from './entities/relayProblemModel';
-import { parseProblemTOML } from './problemUploadUtils';
 
 export class TeamsRepository {
   sequelize: Sequelize;
@@ -86,23 +85,9 @@ export class RelayProblemsRepository {
     });
   }
 
-  async addProblem(
-      { category, index, problemText, answer, points, attachment } : 
-      { category: string, index: number, problemText: string, answer: string, points: number, attachment: string }) {
-    return await RelayProblemModel.create({
-      category, index, problemText, answer, points, attachment
-    });
-  }
-
-  async addFromTOML(toml: string, imgNames: string[]) {
-    const parsedProblems = parseProblemTOML(toml, imgNames);
-    const promises = parsedProblems.map(async problem => {
-      const problemData = {
-        ...problem,
-      }
-      const [instance] = await RelayProblemModel.upsert(problemData);
-      return instance;
-
+  async addProblems(problems: any[]) {
+    const promises = problems.map(problem => {
+      return RelayProblemModel.upsert(problem);
     });
     return await Promise.all(promises);
   }
