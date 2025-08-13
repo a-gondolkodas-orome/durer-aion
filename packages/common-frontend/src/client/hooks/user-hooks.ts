@@ -99,9 +99,12 @@ export const useLogin = () => {
   const [, setTeamState] = useRecoilState(currentStateAtom);
   return async (joinCode: string) => {
     const userModel = new UserModel(repo);
-    await userModel.login(joinCode);
+    console.log("joinCode", joinCode);
+    const res = await userModel.login(joinCode);
+    console.log("res", res);
 
     const state = await userModel.getTeamState();
+    console.log("useLogin", state);
     setTeamState(state);
   }
 };

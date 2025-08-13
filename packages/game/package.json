@@ -4,15 +4,15 @@
   "files": [
     "dist/**"
   ],
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "license": "MIT",
   "scripts": {
     "lint": "TIMING=1 eslint \"src/**/*.ts*\" --max-warnings=0",
     "test": "jest --passWithNoTests",
-    "build": "npx tsc",
-    "dev": "npx tsc -w"
+    "build": "npx tsup",
+    "dev": "npx tsup"
   },
   "dependencies": {
     "@babel/cli": "^7.18.6",

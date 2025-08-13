@@ -58,6 +58,7 @@ export class RealClientRepository implements ClientRepository {
     const url = urlcat('team/join/:code', {
       code,
     });
+    console.log("joinWithCode url", url);
     let result;
     try {
       result = await ApiAxios.instance().get(url);
@@ -69,6 +70,8 @@ export class RealClientRepository implements ClientRepository {
       // here we can set message according to status (or data)
       throw new Error('Váratlan hiba történt');
     }
+    
+    console.log("joinWithCode result", result);
 
     return result.data as string;
   }

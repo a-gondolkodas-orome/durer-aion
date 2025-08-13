@@ -53,12 +53,12 @@
     "deploy": "gh-pages -d build",
     "lint": "turbo lint",
     "check:server": "babel-node --extensions \".ts\" --presets=@babel/preset-typescript --plugins=@babel/plugin-transform-modules-commonjs src/server.ts sanity-check",
-    "dev:server": "nodemon -e js,ts --exec babel-node --extensions \".ts\" --presets=@babel/preset-typescript --plugins=@babel/plugin-transform-modules-commonjs src/server.ts",
     "start": "turbo start",
     "build": "turbo build",
     "test": "cross-env react-scripts test . --coverage",
     "spell-check": "cspell \"**/*.{ts,tsx}\" --no-progress",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "dev:server": "turbo dev --filter=online-backend"
   },
   "eslintConfig": {
     "extends": [
@@ -106,6 +106,7 @@
     "@types/pg": "^8.6.5",
     "@types/react-syntax-highlighter": "^15.5.13",
     "@types/react-text-mask": "^5.4.14",
+    "concurrently": "^9.2.0",
     "cspell": "^6.31.1",
     "gh-pages": "^4.0.0",
     "nodemon": "^2.0.18",
