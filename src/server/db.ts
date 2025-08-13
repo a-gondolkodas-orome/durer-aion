@@ -2,7 +2,7 @@ import type { PostgresStore } from 'bgio-postgres';
 import { InProgressMatchStatus, teamAttributes, TeamModel } from './entities/teamModel';
 import { Sequelize, Op, WhereOptions } from 'sequelize';
 import { relayProblemAttributes, RelayProblemModel } from './entities/relayProblemModel';
-import { parseProblemTOML } from './problemTOMLParse';
+import { parseProblemTOML } from './problemUploadUtils';
 
 export class TeamsRepository {
   sequelize: Sequelize;
@@ -105,5 +105,9 @@ export class RelayProblemsRepository {
 
     });
     return await Promise.all(promises);
+  }
+
+  async clearProblems() {
+    return await RelayProblemModel.truncate();
   }
 }

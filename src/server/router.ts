@@ -8,10 +8,7 @@ import { getFilterPlayerView } from "boardgame.io/internal";
 import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus, createGame, injectBot, injectPlayer } from './team_manage';
 import { import_teams_from_tsv } from './team_import';
 import { readFileSync } from 'fs';
-import { extname } from 'path';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-
-
+import { uploadToS3, extractUploadedFiles, uploadImagesS3, validateProblemCategory, formatProblemsWithAttachments } from './problemUploadUtils';
 
 /**
  * 
@@ -304,70 +301,17 @@ export function configureTeamsRouter(
       return;
     }
 
-    // Handle both single file and multiple files cases
-    let fileList: any[] = [];
-    if (files.file) {
-      fileList = Array.isArray(files.file) ? files.file : [files.file];
-    } else {
-      // Handle case where files are uploaded with different field names
-      fileList = Object.values(files).flat();
-    }
-
-    if (fileList.length === 0) {
-      ctx.throw(400, 'No files uploaded!');
-      return;
-    }
-
-    // Separate TOML and image files
-    let tomlFile: any = null;
-    const imageFiles: any[] = [];
-    const allowedImageExtensions = ['.png', '.jpg', '.jpeg', '.gif'];
-
-    for (const file of fileList) {
-      const ext = extname(file.name || '').toLowerCase();
-      
-      if (ext === '.toml') {
-        if (tomlFile) {
-          ctx.throw(400, 'Multiple TOML files are not allowed. Please upload only one TOML file.');
-          return;
-        }
-        tomlFile = file;
-      } else if (allowedImageExtensions.includes(ext)) {
-        imageFiles.push(file);
-      } else {
-        ctx.throw(400, `Invalid file format: ${file.name}. Only TOML files and image files (.png, .jpg, .jpeg, .gif) are allowed.`);
-        return;
-      }
-    }
-
-    if (!tomlFile) {
-      ctx.throw(400, 'TOML file is required.');
-      return;
-    }
-
     try {
-      // Read TOML file content
-      const tomlContent = readFileSync(tomlFile.path, 'utf-8');
-
-      // Upload TOML file to S3
+      const { tomlFile, imageFiles } = extractUploadedFiles(files);
       const tomlS3Url = await uploadToS3(tomlFile.path, "problems.toml", 'application/toml');
+      const uploadedImages = await uploadImagesS3(imageFiles);
 
-      // Upload image files to S3
-      const uploadedImages: { name: string; s3Url: string }[] = [];
-      for (const imageFile of imageFiles) {
-        const contentType = `image/${extname(imageFile.name).slice(1)}`;
-        const s3Url = await uploadToS3(imageFile.path, 'images/' + imageFile.name, contentType);
-        uploadedImages.push({ name: imageFile.name, s3Url });
-      }
-      
-      // Extract image file names for validation
-      const imageNames = imageFiles.map(file => file.name);
-      
-      // Connect to problems repository
       await problems.connect();
-      
-      // Parse and add problems from TOML
-      const addedProblems = await problems.addFromTOML(tomlContent, imageNames);
+      await problems.clearProblems();
+      const addedProblems = await problems.addFromTOML(
+        readFileSync(tomlFile.path, 'utf-8'), 
+        imageFiles.map(file => file.name)
+      );
 
       ctx.body = {
         success: true,
@@ -397,33 +341,16 @@ export function configureTeamsRouter(
   router.get("/game/admin/problems/get/:category", koaBody(), async (ctx) => {
     const category = ctx.params.category;
     
-    // Validate category
-    const validCategories = ['C', 'D', 'E'];
-    if (!validCategories.includes(category)) {
-      ctx.status = 400;
-      ctx.body = {
-        success: false,
-        error: `Invalid category: ${category}. Valid categories are: ${validCategories.join(', ')}`
-      };
-      return;
-    }
-
     try {
+      // Validate category parameter
+      validateProblemCategory(category);
+
+      // Fetch problems from repository
       await problems.connect();
       const probs = await problems.getProblems(category);
       
-      // Convert problems to the response format with S3 URLs for attachments
-      const problemsWithAttachments = probs.map(problem => {
-        const problemData = {
-          category: problem.category,
-          index: problem.index,
-          problemText: problem.problemText,
-          answer: problem.answer,
-          points: problem.points,
-          attachment: problem.attachment ?? getS3Url(`images/${problem.attachment}`),
-        };
-        return problemData;
-      });
+      // Format problems with S3 attachment URLs
+      const problemsWithAttachments = formatProblemsWithAttachments(probs);
       
       ctx.body = {
         success: true,
@@ -432,10 +359,13 @@ export function configureTeamsRouter(
         problems: problemsWithAttachments
       };
     } catch (error: any) {
-      ctx.status = 500;
+      const isValidationError = error.message.includes('Invalid category');
+      ctx.status = isValidationError ? 400 : 500;
       ctx.body = {
         success: false,
-        error: `Failed to fetch problems: ${error?.message || 'Unknown error'}`
+        error: isValidationError 
+          ? error.message 
+          : `Failed to fetch problems: ${error?.message || 'Unknown error'}`
       };
     }
   });
@@ -593,35 +523,4 @@ export function configureTeamsRouter(
     console.log(`Injecting bot in :${ctx.response.body.matchID}`);
     await injectBot(ctx.db, ctx.response.body.matchID, BOT_ID);
   });
-}
-
-// Helper function to construct S3 URL for files
-function getS3Url(fileName: string): string {
-  const bucketName = process.env.PROBLEMS_S3_BUCKET_NAME!;
-  return `https://${bucketName}.s3.amazonaws.com/${fileName}`;
-}
-
-// Helper function to upload file to S3
-async function uploadToS3(filePath: string, fileName: string, contentType: string): Promise<string> {
-  const s3Client = new S3Client({
-    region: process.env.AWS_REGION || 'eu-north-1',
-    credentials: {
-      accessKeyId: process.env.PROBLEMS_S3_KEY_ID!,
-      secretAccessKey: process.env.PROBLEMS_S3_SECRET_KEY!,
-    },
-  });
-
-  const bucketName = process.env.PROBLEMS_S3_BUCKET_NAME!;
-  const fileContent = readFileSync(filePath);
-
-  const command = new PutObjectCommand({
-    Bucket: bucketName,
-    Key: fileName,
-    Body: fileContent,
-    ContentType: contentType,
-  });
-
-  await s3Client.send(command);
-
-  return getS3Url(fileName);
 }
