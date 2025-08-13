@@ -3,6 +3,23 @@ import { extname } from 'path';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { readFileSync } from 'fs';
 
+const PROBLEMS_S3_BUCKET_NAME = process.env.REACT_APP_PROBLEMS_S3_BUCKET_NAME!;
+if (!PROBLEMS_S3_BUCKET_NAME) {
+  throw new Error('REACT_APP_PROBLEMS_S3_BUCKET_NAME environment variable is required');
+}
+
+const PROBLEMS_S3_KEY_ID = process.env.REACT_APP_PROBLEMS_S3_KEY_ID!;
+if (!PROBLEMS_S3_KEY_ID) {
+  throw new Error('REACT_APP_PROBLEMS_S3_KEY_ID environment variable is required');
+}
+
+const PROBLEMS_S3_SECRET_KEY = process.env.REACT_APP_PROBLEMS_S3_SECRET_KEY!;
+if (!PROBLEMS_S3_SECRET_KEY) {
+  throw new Error('REACT_APP_PROBLEMS_S3_SECRET_KEY environment variable is required');
+}
+
+const PROBLEMS_S3_REGION = process.env.REACT_APP_PROBLEMS_S3_REGION || 'eu-north-1';
+
 export interface RelayProblem {
   category: string;
   index: number;
@@ -70,31 +87,27 @@ export function parseProblemTOML(tomlString: string, imgNames: string[]): RelayP
 }
 
 function getS3Url(fileName: string): string {
-  const bucketName = process.env.PROBLEMS_S3_BUCKET_NAME!;
-  return `https://${bucketName}.s3.amazonaws.com/${fileName}`;
+  return `https://${PROBLEMS_S3_BUCKET_NAME}.s3.amazonaws.com/${fileName}`;
 }
 
 export async function uploadToS3(filePath: string, fileName: string, contentType: string): Promise<string> {
   const s3Client = new S3Client({
-    region: process.env.PROBLEMS_S3_REGION || 'eu-north-1',
+    region: PROBLEMS_S3_REGION,
     credentials: {
-      accessKeyId: process.env.PROBLEMS_S3_KEY_ID!,
-      secretAccessKey: process.env.PROBLEMS_S3_SECRET_KEY!,
+      accessKeyId: PROBLEMS_S3_KEY_ID,
+      secretAccessKey: PROBLEMS_S3_SECRET_KEY,
     },
   });
 
-  const bucketName = process.env.PROBLEMS_S3_BUCKET_NAME!;
   const fileContent = readFileSync(filePath);
-
   const command = new PutObjectCommand({
-    Bucket: bucketName,
+    Bucket: PROBLEMS_S3_BUCKET_NAME,
     Key: fileName,
     Body: fileContent,
     ContentType: contentType,
   });
 
   await s3Client.send(command);
-
   return getS3Url(fileName);
 }
 
