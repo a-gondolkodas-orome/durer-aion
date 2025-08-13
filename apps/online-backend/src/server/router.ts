@@ -9,7 +9,7 @@ import { getFilterPlayerView } from "boardgame.io/internal";
 import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus, createGame, injectBot, injectPlayer } from './team_manage';
 import { import_teams_from_tsv } from './team_import';
 import { readFileSync } from 'fs';
-import { uploadToS3, extractUploadedFiles, uploadImagesS3, validateProblemCategory, formatProblemsWithAttachments } from './problemUploadUtils';
+import { uploadToS3, extractUploadedFiles, uploadImagesS3, validateProblemCategory, formatProblemsWithAttachments, parseProblemTOML } from './problemUploadUtils';
 
 /**
  * 
@@ -304,15 +304,18 @@ export function configureTeamsRouter(
 
     try {
       const { tomlFile, imageFiles } = extractUploadedFiles(files);
-      const tomlS3Url = await uploadToS3(tomlFile.path, "problems.toml", 'application/toml');
-      const uploadedImages = await uploadImagesS3(imageFiles);
+
+      const parsedProblems = parseProblemTOML(
+        readFileSync(tomlFile.path, 'utf-8'),
+        imageFiles.map(file => file.name)
+      );
 
       await problems.connect();
       await problems.clearProblems();
-      const addedProblems = await problems.addFromTOML(
-        readFileSync(tomlFile.path, 'utf-8'), 
-        imageFiles.map(file => file.name)
-      );
+      const addedProblems = await problems.addProblems(parsedProblems);
+
+      const tomlS3Url = await uploadToS3(tomlFile.path, "problems.toml", 'application/toml');
+      const uploadedImages = await uploadImagesS3(imageFiles);
 
       ctx.body = {
         success: true,
