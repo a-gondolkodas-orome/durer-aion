@@ -294,10 +294,7 @@ export function configureTeamsRouter(
   router.get("/team/join/:token", koaBody(), async (ctx) => {
     const connect_token: string = ctx.params.token ?? "no-token";
     const team = await teams.getTeam({ joinCode: connect_token });
-    ctx.throw(404, `${team?.teamId}`);
-    console.log("team found", team);
     ctx.body = team?.teamId;
-    console.log("ctx", ctx.body);
     if (team === null)
       ctx.throw(404, "Team not found!")
   })
