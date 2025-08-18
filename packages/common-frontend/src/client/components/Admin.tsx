@@ -508,14 +508,14 @@ function ProblemsViewer({ refreshTrigger }: { refreshTrigger: number }) {
                   <TableCell>{problem.answer}</TableCell>
                   <TableCell>{problem.points}</TableCell>
                   <TableCell>
-                    {problem.attachment ? (
+                    {problem.attachmentUrl ? (
                       <a 
-                        href={problem.attachment.url} 
+                        href={problem.attachmentUrl} 
                         target="_blank" 
                         rel="noopener noreferrer"
                         style={{ color: theme.palette.primary.main }}
                       >
-                        {problem.attachment.filename}
+                        {problem.attachmentFileName}
                       </a>
                     ) : (
                       <span style={{ color: '#666' }}>Nincs</span>
