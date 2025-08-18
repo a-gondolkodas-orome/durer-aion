@@ -2,7 +2,7 @@ import koaBody from 'koa-body';
 import * as Router from '@koa/router';
 import type { Game, LobbyAPI, Server, StorageAPI } from 'boardgame.io';
 import { TeamsRepository } from './db';
-import { InProgressMatchStatus, TeamModel } from 'schemas';
+import { InProgressMatchStatus } from 'schemas';
 import { BOT_ID, TransportAPI } from '../socketio_botmoves';
 import { getFilterPlayerView } from "boardgame.io/internal";
 import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus, createGame, injectBot, injectPlayer } from './team_manage';
@@ -397,7 +397,7 @@ export function configureTeamsRouter(
     const GUID = ctx.params.GUID;
     //check if in progress, it is not allowed to play
     //check if it can be started, throw error if not
-    const team: TeamModel = await teams.getTeam({ teamId: GUID }) ?? ctx.throw(404, `Team with {id:${GUID}} not found.`)
+    const team = await teams.getTeam({ teamId: GUID }) ?? ctx.throw(404, `Team with {id:${GUID}} not found.`)
     if (team.relayMatch.state === 'IN PROGRESS' || team.strategyMatch.state === 'IN PROGRESS')
       ctx.throw(403, "Not allowed, match in progress.")
 
