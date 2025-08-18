@@ -1,3 +1,4 @@
+import './dotenv_helper'; // should be first
 import { 
   GameRelay,
   RelayStrategy,
@@ -20,9 +21,6 @@ import mount from 'koa-mount';
 import { closeMatch } from './server/team_manage';
 
 import * as Sentry from '@sentry/node';
-import dotenv from 'dotenv';
-
-dotenv.config({ path: '.env.local' });
 
 function getDb() {
   if (env.DATABASE_URL) {
