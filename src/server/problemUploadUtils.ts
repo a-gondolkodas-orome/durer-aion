@@ -11,10 +11,14 @@ function requireEnv(name: string): string {
   return value;
 }
 
-const PROBLEMS_S3_BUCKET_NAME = requireEnv('PROBLEMS_S3_BUCKET_NAME');
-const PROBLEMS_S3_KEY_ID = requireEnv('PROBLEMS_S3_KEY_ID');
-const PROBLEMS_S3_SECRET_KEY = requireEnv('PROBLEMS_S3_SECRET_KEY');
-const PROBLEMS_S3_REGION = process.env.PROBLEMS_S3_REGION || 'eu-north-1';
+function getConfig() {
+  return {
+    PROBLEMS_S3_BUCKET_NAME: requireEnv('PROBLEMS_S3_BUCKET_NAME'),
+    PROBLEMS_S3_KEY_ID: requireEnv('PROBLEMS_S3_KEY_ID'),
+    PROBLEMS_S3_SECRET_KEY: requireEnv('PROBLEMS_S3_SECRET_KEY'),
+    PROBLEMS_S3_REGION: process.env.PROBLEMS_S3_REGION || 'eu-north-1',
+  };
+}
 
 export interface RelayProblem {
   category: string;
@@ -83,21 +87,21 @@ export function parseProblemTOML(tomlString: string, imgNames: string[]): RelayP
 }
 
 function getS3Url(fileName: string): string {
-  return `https://${PROBLEMS_S3_BUCKET_NAME}.s3.amazonaws.com/${fileName}`;
+  return `https://${getConfig().PROBLEMS_S3_BUCKET_NAME}.s3.amazonaws.com/${fileName}`;
 }
 
 export async function uploadToS3(filePath: string, fileName: string, contentType: string): Promise<string> {
   const s3Client = new S3Client({
-    region: PROBLEMS_S3_REGION,
+    region: getConfig().PROBLEMS_S3_REGION,
     credentials: {
-      accessKeyId: PROBLEMS_S3_KEY_ID,
-      secretAccessKey: PROBLEMS_S3_SECRET_KEY,
+      accessKeyId: getConfig().PROBLEMS_S3_KEY_ID,
+      secretAccessKey: getConfig().PROBLEMS_S3_SECRET_KEY,
     },
   });
 
   const fileContent = readFileSync(filePath);
   const command = new PutObjectCommand({
-    Bucket: PROBLEMS_S3_BUCKET_NAME,
+    Bucket: getConfig().PROBLEMS_S3_BUCKET_NAME,
     Key: fileName,
     Body: fileContent,
     ContentType: contentType,
