@@ -1,0 +1,80 @@
+{
+  "name": "common-frontend",
+  "version": "0.0.0",
+  "files": [
+    "dist/**"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "license": "MIT",
+  "scripts": {
+    "lint": "TIMING=1 eslint \"src/**/*.ts*\" --max-warnings=0",
+    "test": "jest --passWithNoTests",
+    "build": "npx tsc",
+    "dev": "npx tsc -w"
+  },
+  "dependencies": {
+    "@babel/cli": "^7.18.6",
+    "@babel/node": "^7.18.6",
+    "@babel/plugin-transform-modules-commonjs": "^7.18.6",
+    "@babel/preset-typescript": "^7.18.6",
+    "@emotion/react": "^11.13.3",
+    "@emotion/styled": "^11.13.0",
+    "@mui/icons-material": "^5.11.16",
+    "@mui/material": "^5.16.7",
+    "@mui/x-data-grid": "^7.16.0",
+    "@sentry/node": "^7.58.1",
+    "@sentry/react": "^7.16.0",
+    "@sentry/tracing": "^7.16.0",
+    "@testing-library/jest-dom": "^5.16.4",
+    "@testing-library/react": "^12.1.5",
+    "@testing-library/user-event": "^13.5.0",
+    "@types/jest": "^27.5.2",
+    "@types/node": "^16.11.41",
+    "@types/react": "^18.0.14",
+    "@types/react-dom": "^18.0.5",
+    "axios": "^1.4.0",
+    "boardgame.io": "^0.50.0-alpha.2",
+    "cross-env": "^7.0.3",
+    "dotenv": "^16.3.1",
+    "formik": "^2.4.2",
+    "notistack": "^2.0.8",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-router-dom": "^6.3.0",
+    "react-scripts": "5.0.1",
+    "react-syntax-highlighter": "^15.6.1",
+    "react-text-mask": "^5.5.0",
+    "recoil": "^0.7.7",
+    "swr": "^2.2.5",
+    "typescript": "^4.7.4",
+    "urlcat": "^2.0.4",
+    "web-vitals": "^2.1.4",
+    "yup": "^0.32.11",
+    "game": "*",
+    "schemas": "*"
+  },
+  "devDependencies": {
+    "@sentry/types": "^7.57.0",
+    "@types/react-syntax-highlighter": "^15.5.13",
+    "@types/react-text-mask": "^5.4.14",
+    "cspell": "^6.31.1",
+    "gh-pages": "^4.0.0",
+    "nodemon": "^2.0.18",
+    "turbo": "^2.5.3"
+  },
+  "peerDependencies": {
+    "react": "^18.x.x"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ],
+    "rules": {
+      "import/no-anonymous-default-export": 0
+    }
+  }
+
+}
