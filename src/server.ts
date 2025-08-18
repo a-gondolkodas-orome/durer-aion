@@ -84,32 +84,35 @@ const games = [
   { ...gameWrapper(strategyGameWrapper("E")), name: strategyNames.E },
 ];
 
-
-const bot_factories = [
-  botWrapper(RelayStrategy("C")),
-  botWrapper(RelayStrategy("D")),
-  botWrapper(RelayStrategy("E")),
-  botWrapper(StrategyStrategyremovefromcirclee("C")),
-  botWrapper(StrategyStrategyremovefromcirclee("D")),
-  botWrapper(StrategyStrategyremovefromcirclee("E")),
-];
-
-if (argv[2] === "sanity-check") {
-  console.log("OK");
-  exit(0);
+async function createBotFactories(problems: RelayProblemsRepository) {
+  return [
+    botWrapper(await RelayStrategy("C", problems)),
+    botWrapper(await RelayStrategy("D", problems)),
+    botWrapper(await RelayStrategy("E", problems)),
+    botWrapper(StrategyStrategyremovefromcirclee("C")),
+    botWrapper(StrategyStrategyremovefromcirclee("D")),
+    botWrapper(StrategyStrategyremovefromcirclee("E")),
+  ];
 }
 
-getBotCredentials(); // give love if no creds are supplied
-getAdminCredentials(); // give love if no creds are supplied
-getGameStartAndEndTime(); // give love if no creds are supplied
+async function main() {
+  let { db, teams, problems } = getDb();
 
-let { db, teams, problems } = getDb();
+  if (argv[2] === "sanity-check") {
+    console.log("OK");
+    exit(0);
+  }
 
-// node: argv[0] vs server.ts: argv[1]
-if (argv[2] === "import") {
-  const filename = argv[3];
-  import_teams_from_tsv_locally(teams, filename).then(() => exit(0));
-} else {
+  getBotCredentials(); // give love if no creds are supplied
+  getAdminCredentials(); // give love if no creds are supplied
+  getGameStartAndEndTime(); // give love if no creds are supplied
+
+  // node: argv[0] vs server.ts: argv[1]
+  if (argv[2] === "import") {
+    const filename = argv[3];
+    import_teams_from_tsv_locally(teams, filename).then(() => exit(0));
+  } else {
+    const bot_factories = await createBotFactories(problems);
   const botSetup = Object.fromEntries(
     games.map((game, idx) =>
       [game.name,
@@ -157,4 +160,7 @@ if (argv[2] === "import") {
   });
 
   server.run(PORT);
+  }
 }
+
+main().catch(console.error);

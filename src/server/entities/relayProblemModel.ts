@@ -4,9 +4,10 @@ export class RelayProblemModel extends Model {
   public category!: string;
   public index!: number;
   public problemText!: string;
-  public answer!: number | string;
+  public answer!: number;
   public points!: number;
-  public attachment?: string;
+  public attachmentUrl?: string;
+  public attachmentFileName?: string;
 }
 
 export const relayProblemAttributes: ModelAttributes = {
@@ -25,14 +26,18 @@ export const relayProblemAttributes: ModelAttributes = {
     allowNull: false,
   },
   answer: {
-    type: DataTypes.STRING,
+    type: DataTypes.INTEGER,
     allowNull: false,
   },
   points: {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
-  attachment: {
+  attachmentUrl: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  attachmentFileName: {
     type: DataTypes.STRING,
     allowNull: true,
   },

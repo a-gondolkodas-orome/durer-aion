@@ -8,7 +8,7 @@ import { getFilterPlayerView } from "boardgame.io/internal";
 import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus, createGame, injectBot, injectPlayer } from './team_manage';
 import { import_teams_from_tsv } from './team_import';
 import { readFileSync } from 'fs';
-import { uploadToS3, extractUploadedFiles, uploadImagesS3, validateProblemCategory, formatProblemsWithAttachments, parseProblemTOML } from './problemUploadUtils';
+import { uploadToS3, extractUploadedFiles, uploadImagesS3, validateProblemCategory, parseProblemTOML } from './problemUploadUtils';
 
 /**
  * 
@@ -309,7 +309,6 @@ export function configureTeamsRouter(
         imageFiles.map(file => file.name)
       );
 
-      await problems.connect();
       await problems.clearProblems();
       const addedProblems = await problems.addProblems(parsedProblems);
 
@@ -349,17 +348,13 @@ export function configureTeamsRouter(
       validateProblemCategory(category);
 
       // Fetch problems from repository
-      await problems.connect();
       const probs = await problems.getProblems(category);
-      
-      // Format problems with S3 attachment URLs
-      const problemsWithAttachments = formatProblemsWithAttachments(probs);
       
       ctx.body = {
         success: true,
         category: category,
-        count: problemsWithAttachments.length,
-        problems: problemsWithAttachments
+        count: probs.length,
+        problems: probs
       };
     } catch (error: any) {
       const isValidationError = error.message.includes('Invalid category');
