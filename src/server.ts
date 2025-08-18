@@ -1,3 +1,4 @@
+import './dotenv_helper'; // should be first
 import { GameRelay } from './games/relay/game';
 import { myGameWrapper as strategyGameWrapper } from './games/remove-from-circle/game';
 import { strategyWrapper as StrategyStrategyremovefromcirclee } from './games/remove-from-circle/strategy';
@@ -17,9 +18,6 @@ import mount from 'koa-mount';
 import { closeMatch } from './server/team_manage';
 
 import * as Sentry from '@sentry/node';
-import dotenv from 'dotenv';
-
-dotenv.config({ path: '.env.local' });
 
 function getDb() {
   if (env.DATABASE_URL) {

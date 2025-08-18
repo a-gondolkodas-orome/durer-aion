@@ -3,22 +3,22 @@ import { extname } from 'path';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { readFileSync } from 'fs';
 
-const PROBLEMS_S3_BUCKET_NAME = process.env.REACT_APP_PROBLEMS_S3_BUCKET_NAME!;
+const PROBLEMS_S3_BUCKET_NAME = process.env.PROBLEMS_S3_BUCKET_NAME!;
 if (!PROBLEMS_S3_BUCKET_NAME) {
-  throw new Error('REACT_APP_PROBLEMS_S3_BUCKET_NAME environment variable is required');
+  throw new Error('PROBLEMS_S3_BUCKET_NAME environment variable is required');
 }
 
-const PROBLEMS_S3_KEY_ID = process.env.REACT_APP_PROBLEMS_S3_KEY_ID!;
+const PROBLEMS_S3_KEY_ID = process.env.PROBLEMS_S3_KEY_ID!;
 if (!PROBLEMS_S3_KEY_ID) {
-  throw new Error('REACT_APP_PROBLEMS_S3_KEY_ID environment variable is required');
+  throw new Error('PROBLEMS_S3_KEY_ID environment variable is required');
 }
 
-const PROBLEMS_S3_SECRET_KEY = process.env.REACT_APP_PROBLEMS_S3_SECRET_KEY!;
+const PROBLEMS_S3_SECRET_KEY = process.env.PROBLEMS_S3_SECRET_KEY!;
 if (!PROBLEMS_S3_SECRET_KEY) {
-  throw new Error('REACT_APP_PROBLEMS_S3_SECRET_KEY environment variable is required');
+  throw new Error('PROBLEMS_S3_SECRET_KEY environment variable is required');
 }
 
-const PROBLEMS_S3_REGION = process.env.REACT_APP_PROBLEMS_S3_REGION || 'eu-north-1';
+const PROBLEMS_S3_REGION = process.env.PROBLEMS_S3_REGION || 'eu-north-1';
 
 export interface RelayProblem {
   category: string;
