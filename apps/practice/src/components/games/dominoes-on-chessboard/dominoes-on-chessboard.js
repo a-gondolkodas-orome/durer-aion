@@ -222,7 +222,7 @@ const toldalek = {
 }
 
 const rule = <>
-  Két játékos felváltva tesz egy egy dominót egy {BOARDSIZE} × {BOARDSIZE}-{toldalek[BOARDSIZE]}s
+  Két játékos felváltva tesz egy-egy dominót egy {BOARDSIZE} × {BOARDSIZE}-{toldalek[BOARDSIZE]}s
   sakktáblára úgy, hogy két
   élszomszédos üres mezőt fedjen le. Az veszít aki nem tud tenni.
 </>;
