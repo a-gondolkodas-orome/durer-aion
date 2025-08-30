@@ -239,4 +239,10 @@ export const gameList = {
     category: ['C'],
     name: 'Sakktáblára Dominók'
   }
+  , PairsOfNumbers: {
+    year: { k: 'XVIII. (24/25)', v: '24/25' },
+    round: 'döntő',
+    category: ['E', 'E+'],
+    name: 'Számpár módosítás'
+  }
 };
