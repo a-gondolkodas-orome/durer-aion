@@ -3,6 +3,11 @@ import { teamData } from "./teamData";
 import { sendDataLogin, sendDataRelayEnd, sendDataRelayStart, sendDataStrategyStart } from "./sendData";
 
 export class OfflineClientRepository implements ClientRepository {
+  
+  getVersion(): Promise<string> {
+    return Promise.resolve("OFFLINE");
+  }
+  
   startRelay(joinCode: string): Promise<string> {
     const teamState = getTeamStateFromLocal();
     if (!(teamState.pageState === 'HOME' && teamState.relayMatch.state === 'NOT STARTED' && teamState.strategyMatch.state !== 'IN PROGRESS')) {
@@ -40,6 +45,7 @@ export class OfflineClientRepository implements ClientRepository {
         matchID: "",
       },
     }
+    
     sendDataStrategyStart(newState as TeamModelDto); // TODO remove "as"
     localStorage.setItem(LOCAL_STORAGE_TEAMSTATE,
       JSON.stringify(newState)

@@ -20,6 +20,7 @@ export interface ClientRepository {
   toHome(
     code: string,
   ): Promise<string>
+  getVersion(): Promise<string>
   getAll(): Promise<TeamModelDto[]>
   getMatchState(matchId: String): Promise<MatchStateDto>
   getMatchLogs(matchId: String): Promise<MatchStateDto>
@@ -30,6 +31,9 @@ export interface ClientRepository {
 
 
 export class MockClientRepository implements ClientRepository {
+  getVersion(): Promise<string> {
+    return Promise.resolve("MOCK");
+  }
   startRelay(code: string): Promise<string> {
     return Promise.resolve("ok");
   }
