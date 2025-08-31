@@ -19,7 +19,7 @@ const BoardClient = ({ board, ctx, moves }) => {
   return (
   <section className="p-2 shrink-0 grow basis-2/3">
     <ChessRookSvg />
-    <table className="m-2 border-collapse w-full table-fixed">
+    <table className="border-collapse w-full table-fixed">
       <tbody>
         {range(8).map(row => (
           <tr key={row}>

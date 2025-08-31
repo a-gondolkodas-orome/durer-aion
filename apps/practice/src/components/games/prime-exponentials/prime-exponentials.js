@@ -64,7 +64,7 @@ const ExponentsTable = ({
   return <>
     <p className="pb-4">Választott prím: {playerPrime}.</p>
     <p>Lehetséges hatványok:</p>
-    <table className={`m-2 border-collapse table-fixed ${widthClassNames}`}>
+    <table className={`border-collapse table-fixed ${widthClassNames}`}>
       <tbody><tr>
         {availableExponents.map(e =>
           <ExponentCell
@@ -113,7 +113,7 @@ const PrimesTable = ({ board, choosePrime }) => {
     : `w-[${choosablePrimesList.length*10}%]`;
 
   return <table
-    className={`m-2 border-collapse table-fixed max-w-full ${widthClassName}`}
+    className={`border-collapse table-fixed max-w-full ${widthClassName}`}
   >
     <tbody>
     {range(Math.floor(choosablePrimesList.length/10)+1).map(i => (

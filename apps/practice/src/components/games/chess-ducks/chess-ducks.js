@@ -38,7 +38,7 @@ const chessDucksGameFactory = ({ ROWS, COLS }) => {
     return(
       <section className="p-2 shrink-0 grow basis-2/3">
         <DuckSvg />
-        <table className="m-2 w-full border-collapse table-fixed">
+        <table className="w-full border-collapse table-fixed">
         <tbody>
           {range(ROWS).map(row => (
             <tr key={row}>

@@ -30,7 +30,7 @@ const BoardClient = ({ board, ctx, moves }) => {
   }
 
   return(
-    <section className="p-2 shrink-0 basis-2/3">
+    <section className="p-2 shrink-0 grow basis-2/3">
       <div>
         {range(1, CARD_COUNT + 1).map(num =>
         <button

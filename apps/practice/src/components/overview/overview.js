@@ -45,11 +45,11 @@ export const Overview = () => {
       ></YearFilter>
     </div>
     <h2 className="font-bold my-4 text-center">5-8. osztályosoknak (A-B kategória)</h2>
-    <div className="flex flex-wrap">
+    <div className="flex flex-wrap justify-center">
       {gamesToShow.filter(id => gameList[id].category[0] <= "B").map(id => Game(id, gameList[id]))}
     </div>
     <h2 className="font-bold my-4 text-center">9-12. osztályosoknak (C-D-E kategória)</h2>
-    <div className="flex flex-wrap">
+    <div className="flex flex-wrap justify-center">
       {gamesToShow.filter(id => gameList[id].category[0] > "B").map(id => Game(id, gameList[id]))}
     </div>
   </main>;

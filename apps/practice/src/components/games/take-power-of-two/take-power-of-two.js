@@ -49,7 +49,7 @@ const ExponentsTable = ({
 
   return <>
     <p>Lehetséges hatványok:</p>
-    <table className={`m-2 border-collapse table-fixed ${widthClassNames}`}>
+    <table className={`border-collapse table-fixed ${widthClassNames}`}>
       <tbody><tr>
         {availableExponents.map(e =>
           <ExponentCell

@@ -141,7 +141,7 @@ const BoardClient = ({ board: { bacteria, goals }, ctx, moves }) => {
   return (
     <section className="p-2 shrink-0 grow basis-2/3">
       <table
-        className="m-2 w-[95%] table-fixed"
+        className="w-[95%] table-fixed"
         style={{ transform: "scaleY(-1)" }}
       >
         <tbody>
