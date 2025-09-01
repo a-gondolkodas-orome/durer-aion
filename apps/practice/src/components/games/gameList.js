@@ -245,4 +245,10 @@ export const gameList = {
     category: ['E', 'E+'],
     name: 'Számpár módosítás'
   }
+  , ChessKnight: {
+    year: { k: 'XVIII. (24/25)', v: '24/25' },
+    round: 'döntő',
+    category: ['C', 'D'],
+    name: 'Barangolás huszárral'
+  }
 };
