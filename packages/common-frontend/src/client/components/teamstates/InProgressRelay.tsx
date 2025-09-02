@@ -9,7 +9,7 @@ import { ExcerciseTask } from '../ExcerciseTask';
 import { ExcerciseForm } from '../ExcerciseForm';
 import { dictionary } from '../../text-constants';
 import { RelayEndTable } from '../RelayEndTable';
-import { IS_OFFLINE_MODE } from '../../utils/util';
+import { useClientRepo } from '../../api-repository-interface';
 
 interface MyGameProps extends BoardProps<MyGameState> { };
 export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
@@ -164,7 +164,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
               endTime={new Date(G.end)}
               serverRemainingMs={G.millisecondsRemaining} />}
           </Stack>
-          {IS_OFFLINE_MODE && 
+          { useClientRepo().getVersion() == "OFFLINE" && 
             <Stack sx={{
               flexDirection: 'row',
               width: '250px',

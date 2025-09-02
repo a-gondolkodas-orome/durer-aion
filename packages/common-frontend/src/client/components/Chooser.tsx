@@ -2,7 +2,7 @@ import { Stack } from "@mui/system";
 import { FinishedMatchStatus, TeamModelDto } from "../dto/TeamStateDto";
 import { ChooserItem } from "./ChooserItem";
 import { dictionary } from "../text-constants";
-import { IS_OFFLINE_MODE } from "../utils/util";
+import { useClientRepo } from "../api-repository-interface";
 
 export function Chooser(props: {
   state: TeamModelDto;
@@ -59,7 +59,7 @@ export function Chooser(props: {
           >
             {dictionary.chooser.finish.final}: <b>{finalPoints}</b>
           </p>
-          {IS_OFFLINE_MODE && "A pontszámotok csak tájékoztató jellegű, a végleges pontszámotokat a beküldött válaszok alapján újraértékeljük."}
+          { useClientRepo().getVersion() == "OFFLINE" && "A pontszámotok csak tájékoztató jellegű, a végleges pontszámotokat a beküldött válaszok alapján újraértékeljük."}
         </Stack>
       )}
       <Stack

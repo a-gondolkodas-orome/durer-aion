@@ -6,7 +6,7 @@ import { formatTime } from '../utils/DateFormatter';
 import { dictionary } from '../text-constants';
 import { useState } from 'react';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { IS_OFFLINE_MODE } from '../utils/util';
+import { useClientRepo } from '../api-repository-interface';
 
 export function ChooserItem(props: {
   status: MatchStatus,
@@ -128,7 +128,7 @@ export function ChooserItem(props: {
       }} disabled={props.status.state !== "NOT STARTED"}>
         {dictionary.chooser.start}
       </Button>
-      {!IS_OFFLINE_MODE &&
+      { useClientRepo().getVersion() != "OFFLINE" &&
       <Button sx={{
         width: '70%',
         maxWidth: "400px",
