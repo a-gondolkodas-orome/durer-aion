@@ -1,9 +1,6 @@
-import { LOCAL_STORAGE_TEAMSTATE, TeamModelDto, IS_OFFLINE_MODE } from "common-frontend";
+import { LOCAL_STORAGE_TEAMSTATE, TeamModelDto } from "common-frontend";
 
 function sendData(fileName: string, data: string){
-  if (!IS_OFFLINE_MODE){
-    return;
-  }
   const bucketName = process.env.REACT_APP_S3_BUCKET_NAME;
   const folder = process.env.REACT_APP_S3_FOLDER;
   if (bucketName === undefined || folder === undefined) {
