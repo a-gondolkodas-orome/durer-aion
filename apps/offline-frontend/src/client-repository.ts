@@ -4,8 +4,8 @@ import { sendDataLogin, sendDataRelayEnd, sendDataRelayStart, sendDataStrategySt
 
 export class OfflineClientRepository implements ClientRepository {
   
-  getVersion(): Promise<string> {
-    return Promise.resolve("OFFLINE");
+  getVersion(): string {
+    return "OFFLINE";
   }
   
   startRelay(joinCode: string): Promise<string> {
