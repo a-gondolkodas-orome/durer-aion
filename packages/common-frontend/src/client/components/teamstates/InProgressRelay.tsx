@@ -4,7 +4,7 @@ import { Countdown } from '../Countdown';
 import { BoardProps } from 'boardgame.io/react';
 import { MyGameState } from 'game';
 import { Dialog } from '@mui/material';
-import { useRefreshTeamState, useTeamState, useToHome } from '../../hooks/user-hooks';
+import { useRefreshTeamState, useToHome } from '../../hooks/user-hooks';
 import { ExcerciseTask } from '../ExcerciseTask';
 import { ExcerciseForm } from '../ExcerciseForm';
 import { dictionary } from '../../text-constants';
