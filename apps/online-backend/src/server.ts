@@ -1,9 +1,9 @@
 import './dotenv_helper'; // should be first
 import { 
   GameRelay,
-  RelayStrategy,
   MyGameWrapper as strategyGameWrapper,
   strategyWrapper as StrategyStrategyremovefromcirclee,
+  RelayStrategy,
   gameWrapper,
 } from 'game';
 import { PostgresStore } from 'bgio-postgres';
@@ -54,9 +54,9 @@ const games = [
 
 async function createBotFactories(problems: RelayProblemsRepository) {
   return [
-    botWrapper(await RelayStrategy("C", problems)),
-    botWrapper(await RelayStrategy("D", problems)),
-    botWrapper(await RelayStrategy("E", problems)),
+    botWrapper(await RelayStrategy(() => problems.getProblems("C"))),
+    botWrapper(await RelayStrategy(() => problems.getProblems("D"))),
+    botWrapper(await RelayStrategy(() => problems.getProblems("E"))),
     botWrapper(StrategyStrategyremovefromcirclee("C")),
     botWrapper(StrategyStrategyremovefromcirclee("D")),
     botWrapper(StrategyStrategyremovefromcirclee("E")),

@@ -2,6 +2,7 @@ import { parse } from 'smol-toml';
 import { extname } from 'path';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { readFileSync } from 'fs';
+import { RelayProblem } from 'game';
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -48,7 +49,7 @@ function validateProblem(problem: any, index: number, category: string, imgNames
   });
 }
 
-export function parseProblemTOML(tomlString: string, imgNames: string[]): any[] {
+export function parseProblemTOML(tomlString: string, imgNames: string[]): RelayProblem[] {
   const parsedData = parse(tomlString);
   const categories = Object.keys(parsedData);
   if (categories.length === 0) {
@@ -77,7 +78,7 @@ export function parseProblemTOML(tomlString: string, imgNames: string[]): any[] 
   return formatProblemsWithAttachments(parsedProblems);
 }
 
-function getS3Url(fileName: string): string {
+export function getS3Url(fileName: string): string {
   return `https://${getConfig().PROBLEMS_S3_BUCKET_NAME}.s3.amazonaws.com/${fileName}`;
 }
 
@@ -163,7 +164,7 @@ export function validateProblemCategory(category: string): void {
   }
 }
 
-function formatProblemsWithAttachments(problems: any[]): any[] {
+function formatProblemsWithAttachments(problems: any[]): RelayProblem[] {
   return problems.map(problem => ({
     category: problem.category,
     index: problem.index,
@@ -172,5 +173,5 @@ function formatProblemsWithAttachments(problems: any[]): any[] {
     points: problem.points,
     attachmentFileName: problem.attachment,
     attachmentUrl: problem.attachment ? getS3Url(`images/${problem.attachment}`) : null
-  }));
+  }) as RelayProblem);
 }

@@ -78,18 +78,19 @@ export class RelayProblemsRepository {
     await this.sequelize.sync();
   }
 
-  async getProblems(category: string): Promise<RelayProblemModel[]> {
-    return await RelayProblemModel.findAll({
+  async getProblems(category: string): Promise<RelayProblem[]> {
+    const problems = await RelayProblemModel.findAll({
       where: {
         category: category
       },
       order: [['index', 'ASC']]
     });
+    return problems.map(problem => problem.get({ plain: true }) as RelayProblem);
   }
 
-  async addProblems(problems: any[]) {
+  async addProblems(problems: RelayProblem[]) {
     const promises = problems.map(problem => {
-      return RelayProblemModel.upsert(problem);
+      return RelayProblemModel.upsert(problem as any);
     });
     return await Promise.all(promises);
   }
