@@ -11,8 +11,8 @@
   "scripts": {
     "lint": "TIMING=1 eslint \"src/**/*.ts*\" --max-warnings=0",
     "test": "jest --passWithNoTests",
-    "build": "npx tsc",
-    "dev": "npx tsc -w"
+    "build": "npx tsup",
+    "dev": "npx tsup --watch --onSuccess \"echo rebuilt strategy\""
   },
   "dependencies": {
     "@babel/cli": "^7.18.6",

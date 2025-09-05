@@ -9,6 +9,7 @@
     "deploy": "gh-pages -d build",
     "lint": "TIMING=1 eslint \"**/*.ts*\" --max-warnings=0",
     "start": "cross-env REACT_APP_WHICH_VERSION=b vite",
+    "dev": "cross-env REACT_APP_WHICH_VERSION=b vite",
     "build": "tsc && vite build",
     "test": "cross-env react-scripts test . --coverage",
     "spell-check": "cspell \"**/*.{ts,tsx}\" --no-progress"
