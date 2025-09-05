@@ -147,6 +147,13 @@ export class OfflineClientRepository implements ClientRepository {
 
     throw new Error("Rossz belépési kód!");
   }
+  
+  sendDataRelayEnd(teamState: TeamModelDto | null): void {
+    sendDataRelayEnd(teamState, null, null);
+  }
+  sendDataRelayStep(teamState: TeamModelDto | null): void {}
+  sendDataStrategyEnd(teamState: TeamModelDto | null): void {}
+  sendDataStrategyStep(teamState: TeamModelDto | null): void {}
 }
 
 

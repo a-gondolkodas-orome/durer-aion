@@ -4,7 +4,7 @@ import { Countdown } from '../Countdown';
 import { BoardProps } from 'boardgame.io/react';
 import { MyGameState } from 'game';
 import { Dialog } from '@mui/material';
-import { useRefreshTeamState, useToHome } from '../../hooks/user-hooks';
+import { useRefreshTeamState, useTeamState, useToHome } from '../../hooks/user-hooks';
 import { ExcerciseTask } from '../ExcerciseTask';
 import { ExcerciseForm } from '../ExcerciseForm';
 import { dictionary } from '../../text-constants';
@@ -144,9 +144,9 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
             previousCorrectness={!finished ? G.correctnessPreviousAnswer : null}
             attempt={(G.currentProblem+1)*3+G.numberOfTry}
             onSubmit={(input) => {
-              moves.submitAnswer(parseInt(input))
+              moves.submitAnswer(parseInt(input));
               // TODO this should be done in repository
-              // sendDataRelayStep(teamState, G, ctx, parseInt(input));
+              useClientRepo().sendDataRelayStep(useTeamState(), G, ctx, parseInt(input));
             }}
           />
           <Stack sx={{
