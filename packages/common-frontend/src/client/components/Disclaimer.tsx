@@ -6,6 +6,7 @@ import { useClientRepo } from "../api-repository-interface";
 
 export function Disclaimer() {
   const goHome = useToHome();
+  const isOffline = useClientRepo().getVersion() == "OFFLINE";
 
   return (
     <Stack
@@ -85,7 +86,7 @@ export function Disclaimer() {
           }
         }}
       >
-        <span dangerouslySetInnerHTML={{ __html: ( useClientRepo().getVersion() == "OFFLINE" ? dictionary.disclaimer.interfaceDescriptionBHTML : dictionary.disclaimer.interfaceDescription) }}></span>
+        <span dangerouslySetInnerHTML={{ __html: ( isOffline ? dictionary.disclaimer.interfaceDescriptionBHTML : dictionary.disclaimer.interfaceDescription) }}></span>
       </Stack>
 
 
