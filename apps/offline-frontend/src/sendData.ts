@@ -1,8 +1,8 @@
 import { LOCAL_STORAGE_TEAMSTATE, TeamModelDto } from "common-frontend";
 
 function sendData(fileName: string, data: string){
-  const bucketName = process.env.REACT_APP_S3_BUCKET_NAME;
-  const folder = process.env.REACT_APP_S3_FOLDER;
+  const bucketName = import.meta.env.VITE_S3_BUCKET_NAME;
+  const folder = import.meta.env.VITE_S3_FOLDER;
   if (bucketName === undefined || folder === undefined) {
     throw new Error('S3 bucket name or folder is not defined.');
   }
