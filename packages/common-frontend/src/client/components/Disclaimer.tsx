@@ -6,7 +6,7 @@ import { useClientRepo } from "../api-repository-interface";
 
 export function Disclaimer() {
   const goHome = useToHome();
-  const isOffline = useClientRepo().getVersion() == "OFFLINE";
+  const isOffline = useClientRepo().getVersion() === "OFFLINE";
 
   return (
     <Stack
