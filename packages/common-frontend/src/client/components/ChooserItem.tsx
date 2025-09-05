@@ -129,7 +129,7 @@ export function ChooserItem(props: {
       }} disabled={props.status.state !== "NOT STARTED"}>
         {dictionary.chooser.start}
       </Button>
-      { isOffline &&
+      { !isOffline &&
       <Button sx={{
         width: '70%',
         maxWidth: "400px",
