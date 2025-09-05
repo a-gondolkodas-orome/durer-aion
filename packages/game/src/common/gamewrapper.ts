@@ -1,7 +1,6 @@
 import { Ctx, Game } from 'boardgame.io';
 import { INVALID_MOVE, TurnOrder } from 'boardgame.io/core';
 import { GameStateMixin, GameType, GUESSER_PLAYER, JUDGE_PLAYER } from './types';
-import { send } from 'process';
 
 function chooseRole({ G, ctx, playerID }: any, firstPlayer: string):void { // TODO: type
   G.firstPlayer = firstPlayer;
