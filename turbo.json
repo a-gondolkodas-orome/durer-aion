@@ -1,0 +1,35 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": ["**/.env.*"],
+  "globalEnv": [
+    "NEXT_PUBLIC_API_URL",
+    "NEXT_PUBLIC_MAPBOX_TOKEN",
+    "BOT_CREDENTIALS",
+    "ADMIN_CREDENTIALS",
+    "DATABASE_URL",
+    "GAME_GLOBAL_START_T",
+    "GAME_GLOBAL_END_T"
+  ],
+  "tasks": {
+    "start": {
+      "dependsOn": ["^build"],
+      "persistent": true
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist", "build"]
+    },
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist", "build"],
+      "cache": false,
+      "env": []
+    },
+    "lint": {},
+    "dev": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "persistent": true
+    }
+  }
+}
