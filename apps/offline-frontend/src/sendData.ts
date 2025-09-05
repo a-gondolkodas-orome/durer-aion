@@ -44,27 +44,27 @@ export function sendDataLogin(teamState: TeamModelDto | null){
   sendData(code+"_"+randomID+"_login_"+now(), "code");
 }
 
-
-export function sendDataRelayStart(teamState: TeamModelDto | null){
-  let code = getJoinCode(teamState);
-  sendData(code+"_"+randomID+"_relaystart_"+now(), "");
-}
-
-export function sendDataRelayStep(teamState: TeamModelDto | null, G: any, ctx: any, answer: number){
-  let code = getJoinCode(teamState);
-  let problemNumber = G.currentProblem;
-  sendData(code+"_"+randomID+"_relay_"+problemNumber+"_"+answer+"_"+now(), JSON.stringify({G, ctx}));
-}
-
-export function sendDataRelayEnd(teamState: TeamModelDto | null, G: any, ctx: any){
-  console.log("asd2")
-  let code = getJoinCode(teamState);
-  let points = G.points;
-  sendData(code+"_"+randomID+"_relayend_"+points+"_"+now(), JSON.stringify({G, ctx}));
+export function sendDataRelay(phase: string, answer: number | null = null, G: any = null, ctx: any = null) {
+  const joinCode = getJoinCode(null); // TODO other solutition?
+  switch (phase) {
+    case "start":
+      sendData(joinCode+"_"+randomID+"_relaystart_"+now(), "");
+      break;
+    case "step":
+      let problemNumber = G.currentProblem;
+      sendData(joinCode+"_"+randomID+"_relay_"+problemNumber+"_"+answer+"_"+now(), JSON.stringify({G, ctx}));
+      break;
+    case "end":
+      let points = G.points;
+      sendData(joinCode+"_"+randomID+"_relayend_"+points+"_"+now(), JSON.stringify({G, ctx}));
+      break;
+    default:
+      break;
+  }
 }
 
 export function sendDataStrategy(phase: string, G: any = null, ctx: any = null, log: any = null){
-  const joinCode = getJoinCode(null); // TODO fix
+  const joinCode = getJoinCode(null); // TODO other solutition?
   switch (phase) {
     case "start":
       sendData(joinCode+"_"+randomID+"_stratstart_"+now(), "");

@@ -237,8 +237,4 @@ export class RealClientRepository implements ClientRepository {
     return result.data;
   }
 
-  sendDataRelayEnd(teamState: TeamModelDto | null): void {}
-  sendDataRelayStep(teamState: TeamModelDto | null): void {}
-  sendDataStrategyEnd(teamState: TeamModelDto | null): void {}
-  sendDataStrategyStep(teamState: TeamModelDto | null): void {}
 }

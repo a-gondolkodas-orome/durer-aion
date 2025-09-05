@@ -28,8 +28,6 @@ export interface ClientRepository {
   resetStrategy(teamId: String): Promise<TeamModelDto>
   addMinutes(matchId: String, minutes: number): Promise<String>
 
-  sendDataRelayStep(teamState: TeamModelDto | null, G: any, ctx: any, answer: number): void;
-  sendDataRelayEnd(teamState: TeamModelDto | null, G: any, ctx: any): void;
 }
 
 
@@ -244,8 +242,6 @@ export class MockClientRepository implements ClientRepository {
     return Promise.resolve("OK");
   }
 
-  sendDataRelayEnd(teamState: TeamModelDto | null): void {}
-  sendDataRelayStep(teamState: TeamModelDto | null): void {}
 }
 
 export const ClientRepoContext = createContext<ClientRepository | null>(null);

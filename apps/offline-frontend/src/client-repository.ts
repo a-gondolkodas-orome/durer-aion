@@ -1,6 +1,6 @@
 import { ClientRepository, LOCAL_STORAGE_TEAMSTATE, TeamModelDto, MatchStateDto } from "common-frontend";
 import { teamData } from "./teamData";
-import { sendDataLogin, sendDataRelayEnd, sendDataRelayStart, sendDataRelayStep, sendDataStrategy} from "./sendData";
+import { sendDataLogin, sendDataRelay, sendDataStrategy} from "./sendData";
 
 export class OfflineClientRepository implements ClientRepository {
   
@@ -23,7 +23,7 @@ export class OfflineClientRepository implements ClientRepository {
         matchID: "",
       },
     }
-    sendDataRelayStart(newState as TeamModelDto);
+    sendDataRelay("start");
     localStorage.setItem(LOCAL_STORAGE_TEAMSTATE,
       JSON.stringify(newState)
     );
@@ -58,7 +58,7 @@ export class OfflineClientRepository implements ClientRepository {
     const newState = {...teamState, pageState: 'HOME'}
     if (teamState.relayMatch.state === "IN PROGRESS"){
       const score = Number(localStorage.getItem("RelayPoints"))
-      sendDataRelayEnd(null, {points: score}, null)
+      sendDataRelay("end", null, {points: score}, null)
       newState.relayMatch = {
         ...teamState.relayMatch,
         state: "FINISHED",
@@ -148,12 +148,6 @@ export class OfflineClientRepository implements ClientRepository {
     throw new Error("Rossz belépési kód!");
   }
 
-  sendDataRelayEnd(teamState: TeamModelDto | null, G: any, ctx: any): void {
-    sendDataRelayEnd(teamState, G, ctx);
-  }
-  sendDataRelayStep(teamState: TeamModelDto | null, G: any, ctx: any, answer: number): void {
-    sendDataRelayStep(teamState, G, ctx, answer);
-  }
 }
 
 
