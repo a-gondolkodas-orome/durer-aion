@@ -2,13 +2,14 @@ import { GameRelay, descriptionC, descriptionD, descriptionE, MyBoard, MyGameWra
 import { InProgressRelay } from "common-frontend";
 import { ClientFactory, ClientFactoryRelay } from "./client_factory";
 import { RelayProblem } from "game";
+import { getS3Url, parseProblemTOML } from "strategy";
 
 const GameCircleC = MyGameWrapper("C");
 const GameCircleD = MyGameWrapper("D");
 const GameCircleE = MyGameWrapper("E");
 
 function getProblems(category: 'C' | 'D' | 'E'): () => Promise<RelayProblem[]> {
-  return async () => [];
+  throw new Error("Not implemented.");
 }
 
 let description = <p className="text-justify"></p>
