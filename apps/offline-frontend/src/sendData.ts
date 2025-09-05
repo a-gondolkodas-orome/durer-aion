@@ -4,7 +4,7 @@ import { get } from "http";
 function sendData(fileName: string, data: string){
   const bucketName = import.meta.env.VITE_S3_BUCKET_NAME;
   const folder = import.meta.env.VITE_S3_FOLDER;
-  if (bucketName === undefined || folder === undefined) {
+  if (!bucketName || !folder) {
     throw new Error('S3 bucket name or folder is not defined.');
   }
   const fd = new FormData();
