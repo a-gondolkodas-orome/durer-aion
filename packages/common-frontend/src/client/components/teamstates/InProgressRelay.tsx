@@ -36,6 +36,8 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
     setMsRemaining(G.millisecondsRemaining);
   }, [G.millisecondsRemaining]);
   const finished = msRemaining < - 5000 || gameover === true
+  const ClientRepository = useClientRepo();
+  const teamState = useTeamState();
   return (
     <>
       <Dialog 
@@ -146,7 +148,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
             onSubmit={(input) => {
               moves.submitAnswer(parseInt(input));
               // TODO this should be done in repository
-              useClientRepo().sendDataRelayStep(useTeamState(), G, ctx, parseInt(input));
+              ClientRepository.sendDataRelayStep(teamState, G, ctx, parseInt(input));
             }}
           />
           <Stack sx={{
