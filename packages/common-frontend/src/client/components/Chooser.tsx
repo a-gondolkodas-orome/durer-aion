@@ -14,6 +14,7 @@ export function Chooser(props: {
   const finished =
     props.state.relayMatch.state === "FINISHED" &&
     props.state.strategyMatch.state === "FINISHED";
+  const clientRepository = useClientRepo();
   return (
     <Stack
       sx={{
@@ -59,7 +60,7 @@ export function Chooser(props: {
           >
             {dictionary.chooser.finish.final}: <b>{finalPoints}</b>
           </p>
-          { useClientRepo().getVersion() == "OFFLINE" && "A pontszámotok csak tájékoztató jellegű, a végleges pontszámotokat a beküldött válaszok alapján újraértékeljük."}
+          { clientRepository.getVersion() == "OFFLINE" && "A pontszámotok csak tájékoztató jellegű, a végleges pontszámotokat a beküldött válaszok alapján újraértékeljük."}
         </Stack>
       )}
       <Stack
