@@ -1,6 +1,6 @@
 import { ClientRepository, LOCAL_STORAGE_TEAMSTATE, TeamModelDto, MatchStateDto } from "common-frontend";
 import { teamData } from "./teamData";
-import { sendDataLogin, sendDataRelayEnd, sendDataRelayStart, sendDataStrategyStart, sendDataRelayStep, sendDataStrategyStep} from "./sendData";
+import { sendDataLogin, sendDataRelayEnd, sendDataRelayStart, sendDataStrategyStart, sendDataRelayStep, sendDataStrategyStep, sendDataStrategyEnd} from "./sendData";
 
 export class OfflineClientRepository implements ClientRepository {
   
@@ -155,7 +155,7 @@ export class OfflineClientRepository implements ClientRepository {
     sendDataRelayStep(teamState, G, ctx, answer);
   }
   sendDataStrategyEnd(teamState: TeamModelDto | null, G: any, ctx: any): void {
-    sendDataRelayEnd(teamState, G, ctx);
+    sendDataStrategyEnd(teamState, G, ctx);
   }
   sendDataStrategyStep(teamState: TeamModelDto | null, pile: number, G: any, ctx: any): void {
     sendDataStrategyStep(teamState, pile, G, ctx);

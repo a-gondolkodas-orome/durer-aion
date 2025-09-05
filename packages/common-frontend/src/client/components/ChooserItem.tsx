@@ -18,6 +18,7 @@ export function ChooserItem(props: {
   const startStrategy = useStartStrategy();
 
   const [mobileDescOpen, setMobileDescOpen] = useState(props.status.state !== "FINISHED");
+  const isOffline = useClientRepo().getVersion() === "OFFLINE";
 
   return (
     <Stack sx={{
@@ -128,7 +129,7 @@ export function ChooserItem(props: {
       }} disabled={props.status.state !== "NOT STARTED"}>
         {dictionary.chooser.start}
       </Button>
-      { useClientRepo().getVersion() != "OFFLINE" &&
+      { isOffline &&
       <Button sx={{
         width: '70%',
         maxWidth: "400px",
