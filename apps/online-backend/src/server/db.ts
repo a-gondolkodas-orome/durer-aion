@@ -1,8 +1,8 @@
 import type { PostgresStore } from 'bgio-postgres';
-import { teamAttributes, TeamModel } from './model';
-import { InProgressMatchStatus, teamAttributes, TeamModel } from 'schemas';
+import { teamAttributes, TeamModel, RelayProblemModel, relayProblemAttributes } from './model';
+import { InProgressMatchStatus } from 'schemas';
 import { Sequelize, Op, WhereOptions } from 'sequelize';
-import { relayProblemAttributes, RelayProblemModel } from 'schemas';
+import { RelayProblem } from 'game';
 
 export class TeamsRepository {
   sequelize: Sequelize;
@@ -77,18 +77,19 @@ export class RelayProblemsRepository {
     await this.sequelize.sync();
   }
 
-  async getProblems(category: string): Promise<RelayProblemModel[]> {
-    return await RelayProblemModel.findAll({
+  async getProblems(category: string): Promise<RelayProblem[]> {
+    const problems = await RelayProblemModel.findAll({
       where: {
         category: category
       },
       order: [['index', 'ASC']]
     });
+    return problems.map(problem => problem.get({ plain: true }) as RelayProblem);
   }
 
-  async addProblems(problems: any[]) {
+  async addProblems(problems: RelayProblem[]) {
     const promises = problems.map(problem => {
-      return RelayProblemModel.upsert(problem);
+      return RelayProblemModel.upsert(problem as any);
     });
     return await Promise.all(promises);
   }

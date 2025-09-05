@@ -6,7 +6,6 @@ import { TeamsRepository } from "./db";
 import {
   FinishedMatchStatus,
   InProgressMatchStatus,
-  TeamModel,
 } from "schemas";
 import { fetch } from "../socketio_botmoves";
 import { TeamModel } from "./model";
