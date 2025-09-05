@@ -1,4 +1,5 @@
-import { LOCAL_STORAGE_TEAMSTATE, TeamModelDto } from "common-frontend";
+import { LOCAL_STORAGE_TEAMSTATE, TeamModelDto, useTeamState } from "common-frontend";
+import { get } from "http";
 
 function sendData(fileName: string, data: string){
   const bucketName = import.meta.env.VITE_S3_BUCKET_NAME;
@@ -62,18 +63,20 @@ export function sendDataRelayEnd(teamState: TeamModelDto | null, G: any, ctx: an
   sendData(code+"_"+randomID+"_relayend_"+points+"_"+now(), JSON.stringify({G, ctx}));
 }
 
-export function sendDataStrategyStart(teamState: TeamModelDto | null){
-  let code = getJoinCode(teamState);
-  sendData(code+"_"+randomID+"_stratstart_"+now(), "");
-}
-
-export function sendDataStrategyStep(teamState: TeamModelDto | null, pile:number,  G: any, ctx: any){
-  let code = getJoinCode(teamState);
-  sendData(code+"_"+randomID+"_strat_"+pile+"_"+now(), JSON.stringify({G, ctx}));
-}
-
-export function sendDataStrategyEnd(teamState: TeamModelDto | null, G: any, ctx: any){
-  let code = getJoinCode(teamState);
-  let points = G.points;
-  sendData(code+"_"+randomID+"_stratend_"+points+"_"+now(), JSON.stringify({G, ctx}));
+export function sendDataStrategy(phase: string, G: any = null, ctx: any = null, log: any = null){
+  const joinCode = getJoinCode(null); // TODO fix
+  switch (phase) {
+    case "start":
+      sendData(joinCode+"_"+randomID+"_stratstart_"+now(), "");
+      break;
+    case "step":
+      sendData(joinCode+"_"+randomID+"_stratstep_"+"_"+now(), JSON.stringify({G, ctx, log}));
+      break;
+    case "end":
+        let points = G.points;
+        sendData(joinCode+"_"+randomID+"_stratend_"+points+"_"+now(), JSON.stringify({G, ctx}));
+      break;
+    default:
+      break;
+  }
 }

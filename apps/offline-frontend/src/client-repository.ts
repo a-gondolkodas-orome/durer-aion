@@ -1,6 +1,6 @@
 import { ClientRepository, LOCAL_STORAGE_TEAMSTATE, TeamModelDto, MatchStateDto } from "common-frontend";
 import { teamData } from "./teamData";
-import { sendDataLogin, sendDataRelayEnd, sendDataRelayStart, sendDataStrategyStart, sendDataRelayStep, sendDataStrategyStep, sendDataStrategyEnd} from "./sendData";
+import { sendDataLogin, sendDataRelayEnd, sendDataRelayStart, sendDataRelayStep, sendDataStrategy} from "./sendData";
 
 export class OfflineClientRepository implements ClientRepository {
   
@@ -46,7 +46,7 @@ export class OfflineClientRepository implements ClientRepository {
       },
     }
     
-    sendDataStrategyStart(newState as TeamModelDto); // TODO remove "as"
+  sendDataStrategy("start"); // TODO remove "as"
     localStorage.setItem(LOCAL_STORAGE_TEAMSTATE,
       JSON.stringify(newState)
     );
@@ -147,18 +147,12 @@ export class OfflineClientRepository implements ClientRepository {
 
     throw new Error("Rossz belépési kód!");
   }
-  
+
   sendDataRelayEnd(teamState: TeamModelDto | null, G: any, ctx: any): void {
     sendDataRelayEnd(teamState, G, ctx);
   }
   sendDataRelayStep(teamState: TeamModelDto | null, G: any, ctx: any, answer: number): void {
     sendDataRelayStep(teamState, G, ctx, answer);
-  }
-  sendDataStrategyEnd(teamState: TeamModelDto | null, G: any, ctx: any): void {
-    sendDataStrategyEnd(teamState, G, ctx);
-  }
-  sendDataStrategyStep(teamState: TeamModelDto | null, pile: number, G: any, ctx: any): void {
-    sendDataStrategyStep(teamState, pile, G, ctx);
   }
 }
 

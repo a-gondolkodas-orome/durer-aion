@@ -30,8 +30,6 @@ export interface ClientRepository {
 
   sendDataRelayStep(teamState: TeamModelDto | null, G: any, ctx: any, answer: number): void;
   sendDataRelayEnd(teamState: TeamModelDto | null, G: any, ctx: any): void;
-  sendDataStrategyStep(teamState: TeamModelDto | null, pile: number, G: any, ctx: any): void;
-  sendDataStrategyEnd(teamState: TeamModelDto | null, G: any, ctx: any): void;
 }
 
 
@@ -248,8 +246,6 @@ export class MockClientRepository implements ClientRepository {
 
   sendDataRelayEnd(teamState: TeamModelDto | null): void {}
   sendDataRelayStep(teamState: TeamModelDto | null): void {}
-  sendDataStrategyEnd(teamState: TeamModelDto | null): void {}
-  sendDataStrategyStep(teamState: TeamModelDto | null): void {}
 }
 
 export const ClientRepoContext = createContext<ClientRepository | null>(null);

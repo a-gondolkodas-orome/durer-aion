@@ -1,6 +1,7 @@
 import { Ctx, Game } from 'boardgame.io';
 import { INVALID_MOVE, TurnOrder } from 'boardgame.io/core';
 import { GameStateMixin, GameType, GUESSER_PLAYER, JUDGE_PLAYER } from './types';
+import { send } from 'process';
 
 function chooseRole({ G, ctx, playerID }: any, firstPlayer: string):void { // TODO: type
   G.firstPlayer = firstPlayer;
@@ -49,7 +50,9 @@ function getTime({ G, ctx, playerID, events }: any) {
   G.millisecondsRemaining = new Date(G.end).getTime() - new Date().getTime();
 }
 
-export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameState>): Game<T_SpecificGameState & GameStateMixin> {
+export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameState>, 
+                                                 sendStrategyFunction = (...inputs: any[]): void => {},
+                                                ): Game<T_SpecificGameState & GameStateMixin> {
   const myGameWrapper: Game<T_SpecificGameState & GameStateMixin> = {
     setup: () => ({
       ...game.setup(),
@@ -111,8 +114,12 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
             if (game.turn?.onEnd !== undefined) {
               game.turn.onEnd({G, ctx, playerID, events, log, random});
             }
+            sendStrategyFunction("step", G, ctx, JSON.stringify({log}));
           },
         },
+        onEnd: ({G, ctx, playerID, events, random, log}) => {
+          sendStrategyFunction("end", G, ctx);
+        }
       },
     },
     // conflict with boardgameio type, where id is string, instead of playerIDType

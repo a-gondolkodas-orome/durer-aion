@@ -5,6 +5,7 @@ import { boardWrapper } from 'common-frontend';
 import type {GameRelay} from 'game';
 import { State } from 'boardgame.io';
 import botWrapper from './botwrapper';
+import { sendDataStrategy } from './sendData';
 //import { Debug } from 'boardgame.io/debug';
 
 export function ClientWithBot<T_SpecificGameState,T_SpecificPosition>(
@@ -14,7 +15,7 @@ export function ClientWithBot<T_SpecificGameState,T_SpecificPosition>(
   description: string
   ){ // TODO: types
   return Client({
-    game: gameWrapper(game),
+    game: gameWrapper(game, sendDataStrategy),
     board: boardWrapper(board, description),
     multiplayer: Local(
       {
