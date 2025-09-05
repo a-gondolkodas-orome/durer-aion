@@ -1,5 +1,5 @@
-import { LOCAL_STORAGE_TEAMSTATE, TeamModelDto, useTeamState } from "common-frontend";
-import { get } from "http";
+import { LOCAL_STORAGE_TEAMSTATE, TeamModelDto } from "common-frontend";
+
 
 function sendData(fileName: string, data: string){
   const bucketName = import.meta.env.VITE_S3_BUCKET_NAME;
@@ -70,7 +70,7 @@ export function sendDataStrategy(phase: string, G: any = null, ctx: any = null, 
       sendData(joinCode+"_"+randomID+"_stratstart_"+now(), "");
       break;
     case "step":
-      sendData(joinCode+"_"+randomID+"_stratstep_"+"_"+now(), JSON.stringify({G, ctx, log}));
+      sendData(joinCode+"_"+randomID+"_stratstep_"+now(), JSON.stringify({G, ctx, log}));
       break;
     case "end":
         let points = G.points;
