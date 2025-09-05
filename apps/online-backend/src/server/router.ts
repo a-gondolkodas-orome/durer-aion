@@ -9,7 +9,8 @@ import { getFilterPlayerView } from "boardgame.io/internal";
 import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus, createGame, injectBot, injectPlayer } from './team_manage';
 import { import_teams_from_tsv } from './team_import';
 import { readFileSync } from 'fs';
-import { uploadToS3, extractUploadedFiles, uploadImagesS3, validateProblemCategory, parseProblemTOML } from './problemUploadUtils';
+import { uploadToS3, extractUploadedFiles, uploadImagesS3, requireEnv } from './problemUploadUtils';
+import { validateProblemCategory, parseProblemTOML } from 'strategy/';
 
 /**
  * 
@@ -307,7 +308,8 @@ export function configureTeamsRouter(
 
       const parsedProblems = parseProblemTOML(
         readFileSync(tomlFile.path, 'utf-8'),
-        imageFiles.map(file => file.name)
+        imageFiles.map(file => file.name),
+        requireEnv('PROBLEMS_S3_BUCKET_NAME')
       );
 
       await problems.clearProblems();

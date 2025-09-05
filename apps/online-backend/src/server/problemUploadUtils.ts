@@ -1,10 +1,10 @@
-import { parse } from 'smol-toml';
 import { extname } from 'path';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { readFileSync } from 'fs';
-import { RelayProblem } from 'game';
+import { S3ClientConfig } from '@aws-sdk/client-s3';
+import { getS3Url } from 'strategy';
 
-function requireEnv(name: string): string {
+export function requireEnv(name: string): string {
   const value = process.env[name];
   if (!value) {
     throw new Error(`${name} environment variable is required`);
@@ -12,95 +12,29 @@ function requireEnv(name: string): string {
   return value;
 }
 
-function getConfig() {
+function getS3Config(): S3ClientConfig {
   return {
-    PROBLEMS_S3_BUCKET_NAME: requireEnv('PROBLEMS_S3_BUCKET_NAME'),
-    PROBLEMS_S3_KEY_ID: requireEnv('PROBLEMS_S3_KEY_ID'),
-    PROBLEMS_S3_SECRET_KEY: requireEnv('PROBLEMS_S3_SECRET_KEY'),
-    PROBLEMS_S3_REGION: process.env.PROBLEMS_S3_REGION || 'eu-north-1',
+    region: process.env.PROBLEMS_S3_REGION || 'eu-north-1',
+    credentials: {
+      accessKeyId: requireEnv('PROBLEMS_S3_KEY_ID'),
+      secretAccessKey: requireEnv('PROBLEMS_S3_SECRET_KEY'),
+    },
   };
 }
 
-function validateProblem(problem: any, index: number, category: string, imgNames: string[]): void {
-  const errPrefix = `Problem at index ${index} in category ${category} `;
-  if (typeof problem !== 'object' || problem === null) {
-    throw new Error(errPrefix + `is not an object.`);
-  }
-  const problemKeys = Object.keys(problem);
-  if (!problemKeys.includes('problemText') || typeof problem.problemText !== 'string') {
-    throw new Error(errPrefix + `is missing 'problemText' or it is not a string.`);
-  }
-  if (!problemKeys.includes('answer') || typeof problem['answer'] !== 'number') {
-    throw new Error(errPrefix + `is missing 'answer' or it is not a number.`);
-  }
-  if (!problemKeys.includes('points') || typeof problem['points'] !== 'number') {
-    throw new Error(errPrefix + `is missing 'points' or it is not a number.`);
-  }
-  if (problemKeys.includes('attachment') && typeof problem['attachment'] !== 'string') {
-    throw new Error(errPrefix + `field 'attachment' is not a string.`);
-  }
-  if (problemKeys.includes('attachment') && !imgNames.includes(problem['attachment'])) {
-    throw new Error(errPrefix + `has a missing 'attachment': ${problem['attachment']}. Expected one of: ${imgNames.join(', ')}.`);
-  }
-  problemKeys.forEach(key => {
-    if (!['problemText', 'answer', 'points', 'attachment', 'category', 'index'].includes(key)) {
-      throw new Error(errPrefix + `has an unexpected key: ${key}. Expected keys are: problemText, answer, points, attachment.`);
-    }
-  });
-}
-
-export function parseProblemTOML(tomlString: string, imgNames: string[]): RelayProblem[] {
-  const parsedData = parse(tomlString);
-  const categories = Object.keys(parsedData);
-  if (categories.length === 0) {
-    throw new Error("Empty TOML.");
-  }
-  let parsedProblems: any[] = [];
-
-  categories.forEach(category => {
-    validateProblemCategory(category);
-
-    const problems = parsedData[category];
-    if (!Array.isArray(problems)) {
-      throw new Error(`Category ${category} should contain an array of problems (e.g. [[C]]).`);
-    }
-
-    problems.forEach((problem, index) => {
-      problem = {
-        ...problem as object,
-        category: category,
-        index: index,
-      }
-      validateProblem(problem, index, category, imgNames);
-      parsedProblems.push(problem);
-    });
-  });
-  return formatProblemsWithAttachments(parsedProblems);
-}
-
-export function getS3Url(fileName: string): string {
-  return `https://${getConfig().PROBLEMS_S3_BUCKET_NAME}.s3.amazonaws.com/${fileName}`;
-}
-
 export async function uploadToS3(filePath: string, fileName: string, contentType: string): Promise<string> {
-  const s3Client = new S3Client({
-    region: getConfig().PROBLEMS_S3_REGION,
-    credentials: {
-      accessKeyId: getConfig().PROBLEMS_S3_KEY_ID,
-      secretAccessKey: getConfig().PROBLEMS_S3_SECRET_KEY,
-    },
-  });
+  const s3Client = new S3Client(getS3Config());
 
   const fileContent = readFileSync(filePath);
   const command = new PutObjectCommand({
-    Bucket: getConfig().PROBLEMS_S3_BUCKET_NAME,
+    Bucket: requireEnv('PROBLEMS_S3_BUCKET_NAME'),
     Key: fileName,
     Body: fileContent,
     ContentType: contentType,
   });
 
   await s3Client.send(command);
-  return getS3Url(fileName);
+  return getS3Url(fileName, requireEnv('PROBLEMS_S3_BUCKET_NAME'));
 }
 
 // Helper function to extract and validate uploaded files
@@ -157,21 +91,3 @@ export async function uploadImagesS3(imageFiles: any[]): Promise<{ name: string;
   return uploadedImages;
 }
 
-export function validateProblemCategory(category: string): void {
-  const validCategories = ['C', 'D', 'E'];
-  if (!validCategories.includes(category)) {
-    throw new Error(`Invalid category: ${category}. Valid categories are: ${validCategories.join(', ')}`);
-  }
-}
-
-function formatProblemsWithAttachments(problems: any[]): RelayProblem[] {
-  return problems.map(problem => ({
-    category: problem.category,
-    index: problem.index,
-    problemText: problem.problemText,
-    answer: problem.answer,
-    points: problem.points,
-    attachmentFileName: problem.attachment,
-    attachmentUrl: problem.attachment ? getS3Url(`images/${problem.attachment}`) : null
-  }) as RelayProblem);
-}
