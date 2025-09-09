@@ -74,7 +74,7 @@ export function parseProblemTOML(tomlString: string, imgNames: string[], S3Bucke
   return formatProblemsWithAttachments(parsedProblems, S3BucketName);
 }
 
-function validateProblemCategory(category: string): void {
+export function validateProblemCategory(category: string): void {
   const validCategories = ['C', 'D', 'E'];
   if (!validCategories.includes(category)) {
     throw new Error(`Invalid category: ${category}. Valid categories are: ${validCategories.join(', ')}`);

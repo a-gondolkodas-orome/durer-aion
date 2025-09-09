@@ -13,10 +13,6 @@ export function requireEnv(name: string): string {
 function getS3Config(): S3ClientConfig {
   return {
     region: process.env.PROBLEMS_S3_REGION || 'eu-north-1',
-    credentials: {
-      accessKeyId: requireEnv('PROBLEMS_S3_KEY_ID'),
-      secretAccessKey: requireEnv('PROBLEMS_S3_SECRET_KEY'),
-    },
   }
 }
 
