@@ -8,7 +8,7 @@ import { getFilterPlayerView } from "boardgame.io/internal";
 import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus, createGame, injectBot, injectPlayer } from './team_manage';
 import { import_teams_from_tsv } from './team_import';
 import { readFileSync } from 'fs';
-import { uploadToS3, extractUploadedFiles, uploadImagesS3, requireEnv } from './problemUploadUtils';
+import { uploadToS3, extractUploadedFiles, uploadImagesS3, requireEnv } from './relayProblemUploadUtils';
 import { validateProblemCategory, parseProblemTOML } from 'strategy/';
 
 /**
