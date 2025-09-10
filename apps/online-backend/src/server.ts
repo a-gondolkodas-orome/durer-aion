@@ -1,8 +1,9 @@
+import './dotenv_helper'; // should be first
 import { 
   GameRelay,
-  RelayStrategy,
   MyGameWrapper as strategyGameWrapper,
   strategyWrapper as StrategyStrategyremovefromcirclee,
+  RelayStrategy,
   gameWrapper,
 } from 'game';
 import { PostgresStore } from 'bgio-postgres';
@@ -11,8 +12,8 @@ import { SocketIOButBotMoves } from './socketio_botmoves';
 import { Server } from 'boardgame.io/server';
 import botWrapper from './botwrapper';
 import { configureTeamsRouter } from './server/router';
-import { TeamsRepository } from './server/db';
 import { getBotCredentials, getGameStartAndEndTime, relayNames, strategyNames  } from './server/common';
+import { TeamsRepository, RelayProblemsRepository } from './server/db';
 import { import_teams_from_tsv_locally } from './server/team_import';
 
 import auth from 'koa-basic-auth';
@@ -20,9 +21,6 @@ import mount from 'koa-mount';
 import { closeMatch } from './server/team_manage';
 
 import * as Sentry from '@sentry/node';
-import dotenv from 'dotenv';
-
-dotenv.config({ path: '.env.local' });
 
 function getDb() {
   if (env.DATABASE_URL) {
@@ -31,6 +29,7 @@ function getDb() {
     return {
       db,
       teams: new TeamsRepository(db),
+      problems: new RelayProblemsRepository(db),
     }
   } else {
     throw new Error('Failed to load DB data. Only postgres is supported!');
@@ -53,32 +52,35 @@ const games = [
   { ...gameWrapper(strategyGameWrapper("E")), name: strategyNames.E },
 ];
 
-
-const bot_factories = [
-  botWrapper(RelayStrategy("C")),
-  botWrapper(RelayStrategy("D")),
-  botWrapper(RelayStrategy("E")),
-  botWrapper(StrategyStrategyremovefromcirclee("C")),
-  botWrapper(StrategyStrategyremovefromcirclee("D")),
-  botWrapper(StrategyStrategyremovefromcirclee("E")),
-];
-
-if (argv[2] === "sanity-check") {
-  console.log("OK");
-  exit(0);
+async function createBotFactories(problems: RelayProblemsRepository) {
+  return [
+    botWrapper(await RelayStrategy(() => problems.getProblems("C"))),
+    botWrapper(await RelayStrategy(() => problems.getProblems("D"))),
+    botWrapper(await RelayStrategy(() => problems.getProblems("E"))),
+    botWrapper(StrategyStrategyremovefromcirclee("C")),
+    botWrapper(StrategyStrategyremovefromcirclee("D")),
+    botWrapper(StrategyStrategyremovefromcirclee("E")),
+  ];
 }
 
-getBotCredentials(); // give love if no creds are supplied
-getAdminCredentials(); // give love if no creds are supplied
-getGameStartAndEndTime(); // give love if no creds are supplied
+async function main() {
+  let { db, teams, problems } = getDb();
 
-let { db, teams } = getDb();
+  if (argv[2] === "sanity-check") {
+    console.log("OK");
+    exit(0);
+  }
 
-// node: argv[0] vs server.ts: argv[1]
-if (argv[2] === "import") {
-  const filename = argv[3];
-  import_teams_from_tsv_locally(teams, filename).then(() => exit(0));
-} else {
+  getBotCredentials(); // give love if no creds are supplied
+  getAdminCredentials(); // give love if no creds are supplied
+  getGameStartAndEndTime(); // give love if no creds are supplied
+
+  // node: argv[0] vs server.ts: argv[1]
+  if (argv[2] === "import") {
+    const filename = argv[3];
+    import_teams_from_tsv_locally(teams, filename).then(() => exit(0));
+  } else {
+    const bot_factories = await createBotFactories(problems);
   const botSetup = Object.fromEntries(
     games.map((game, idx) =>
       [game.name,
@@ -112,7 +114,7 @@ if (argv[2] === "import") {
 
   //TODO regex mount protection for Boardgame.io endpoints
 
-  configureTeamsRouter(server.router, teams, games);
+  configureTeamsRouter(server.router, teams, problems, games);
 
   Sentry.init({ dsn: "https://1f4c47a1692b4936951908e2669a1e99@sentry.durerinfo.hu/4" });
 
@@ -126,4 +128,7 @@ if (argv[2] === "import") {
   });
 
   server.run(PORT);
+  }
 }
+
+main().catch(console.error);

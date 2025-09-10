@@ -1,15 +1,16 @@
 import { GameRelay, descriptionC, descriptionD, descriptionE, MyBoard, MyGameWrapper, RelayStrategy,strategyWrapper } from "game";
 import { InProgressRelay } from "common-frontend";
 import { ClientFactory, ClientFactoryRelay } from "./client_factory";
+import { getProblems } from "./relayProblemDownload";
 
 const GameCircleC = MyGameWrapper("C");
 const GameCircleD = MyGameWrapper("D");
 const GameCircleE = MyGameWrapper("E");
 
 let description = <p className="text-justify"></p>
-export const { ClientWithBot: RelayClientWithBotC } = ClientFactoryRelay({...GameRelay, name: "relay_c"}, InProgressRelay, RelayStrategy("C"), description);
-export const { ClientWithBot: RelayClientWithBotD } = ClientFactoryRelay({...GameRelay, name: "relay_d"}, InProgressRelay, RelayStrategy("D"), description);
-export const { ClientWithBot: RelayClientWithBotE } = ClientFactoryRelay({...GameRelay, name: "relay_e"}, InProgressRelay, RelayStrategy("E"), description);
+export const { ClientWithBot: RelayClientWithBotC } = ClientFactoryRelay({...GameRelay, name: "relay_c"}, InProgressRelay, RelayStrategy(() => getProblems("C")), description);
+export const { ClientWithBot: RelayClientWithBotD } = ClientFactoryRelay({...GameRelay, name: "relay_d"}, InProgressRelay, RelayStrategy(() => getProblems("D")), description);
+export const { ClientWithBot: RelayClientWithBotE } = ClientFactoryRelay({...GameRelay, name: "relay_e"}, InProgressRelay, RelayStrategy(() => getProblems("E")), description);
 export const { ClientWithBot: StrategyClientWithBotC } = ClientFactory({...GameCircleC, name: "remove-from-circle_c"}, MyBoard, strategyWrapper("C"), descriptionC);
 export const { ClientWithBot: StrategyClientWithBotD } = ClientFactory({...GameCircleD, name: "remove-from-circle_d"}, MyBoard, strategyWrapper("D"), descriptionD);
 export const { ClientWithBot: StrategyClientWithBotE } = ClientFactory({...GameCircleE, name: "remove-from-circle_e"}, MyBoard, strategyWrapper("E"), descriptionE);

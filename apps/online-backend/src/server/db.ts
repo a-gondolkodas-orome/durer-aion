@@ -1,7 +1,8 @@
 import type { PostgresStore } from 'bgio-postgres';
+import { teamAttributes, TeamModel, RelayProblemModel, relayProblemAttributes } from './model';
 import { InProgressMatchStatus } from 'schemas';
-import { teamAttributes, TeamModel } from './model';
 import { Sequelize, Op, WhereOptions } from 'sequelize';
+import { RelayProblem } from 'game';
 
 export class TeamsRepository {
   sequelize: Sequelize;
@@ -58,5 +59,42 @@ export class TeamsRepository {
       teamName: teamname,
       pageState: 'DISCLAIMER',
     });
+  }
+}
+
+export class RelayProblemsRepository {
+  sequelize: Sequelize;
+  
+  constructor(db: PostgresStore) {
+    this.sequelize = db.sequelize;
+    RelayProblemModel.init(relayProblemAttributes, {
+      sequelize: db.sequelize,
+      tableName: "RelayProblems",
+    });
+  }
+
+  async connect() {
+    await this.sequelize.sync();
+  }
+
+  async getProblems(category: string): Promise<RelayProblem[]> {
+    const problems = await RelayProblemModel.findAll({
+      where: {
+        category: category
+      },
+      order: [['index', 'ASC']]
+    });
+    return problems.map(problem => problem.get({ plain: true }) as RelayProblem);
+  }
+
+  async addProblems(problems: RelayProblem[]) {
+    const promises = problems.map(problem => {
+      return RelayProblemModel.upsert(problem as any);
+    });
+    return await Promise.all(promises);
+  }
+
+  async clearProblems() {
+    return await RelayProblemModel.truncate();
   }
 }
