@@ -96,7 +96,7 @@ export function RelayWrapper(sendRelayFunction = (...inputs: any[]) => {}): Game
           onMove: ({G, ctx, playerID, events }) => {
             if(playerID === GUESSER_PLAYER) {
               let currentTime = new Date();
-              sendRelayFunction("step", G.answer, G, ctx);
+              sendRelayFunction("relay", "step", G.answer, G, ctx);
               if(currentTime.getTime() - new Date(G.end).getTime() > 1000*10){
                 // Do not accept any answer if the time is over since more than 10 seconds
                 events.endGame();

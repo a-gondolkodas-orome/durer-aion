@@ -27,8 +27,8 @@ function now(){
   return result;
 }
 
-function getJoinCode(teamState: TeamModelDto | null){
-  if (teamState !== null) {
+function getJoinCode(teamState?: TeamModelDto | null){
+  if (teamState !== undefined && teamState !== null) {
     return teamState.joinCode;
   }
   const teamstateString = localStorage.getItem(LOCAL_STORAGE_TEAMSTATE);
@@ -44,37 +44,28 @@ export function sendDataLogin(teamState: TeamModelDto | null){
   sendData(code+"_"+randomID+"_login_"+now(), "code");
 }
 
-export function sendDataRelay(phase: string, answer: number | null = null, G: any = null, ctx: any = null) {
-  const joinCode = getJoinCode(null); // TODO other solutition?
+export function sendGameData(component: "relay" | "strategy", phase: "start" | "step" | "end", answer?: number, G?: any, ctx?: any, log?: any) {
+  const joinCode = getJoinCode(null);
   switch (phase) {
     case "start":
-      sendData(joinCode+"_"+randomID+"_relaystart_"+now(), "");
+      sendData(joinCode+"_"+randomID+"_"+component+"start_"+now(), "");
       break;
     case "step":
-      let problemNumber = G.currentProblem;
-      sendData(joinCode+"_"+randomID+"_relay_"+problemNumber+"_"+answer+"_"+now(), JSON.stringify({G, ctx}));
+      switch (component) {
+        case "relay":
+          let problemNumber = G.currentProblem;
+          sendData(joinCode+"_"+randomID+"_"+component+"_"+problemNumber+"_"+answer+"_"+now(), JSON.stringify({G, ctx}));
+          break;
+        case "strategy":
+          sendData(joinCode+"_"+randomID+"_stratstep_"+now(), JSON.stringify({G, ctx, log}));
+          break;
+        default:
+          break;
+      }
       break;
     case "end":
       let points = G.points;
-      sendData(joinCode+"_"+randomID+"_relayend_"+points+"_"+now(), JSON.stringify({G, ctx}));
-      break;
-    default:
-      break;
-  }
-}
-
-export function sendDataStrategy(phase: string, G: any = null, ctx: any = null, log: any = null){
-  const joinCode = getJoinCode(null); // TODO other solutition?
-  switch (phase) {
-    case "start":
-      sendData(joinCode+"_"+randomID+"_stratstart_"+now(), "");
-      break;
-    case "step":
-      sendData(joinCode+"_"+randomID+"_stratstep_"+now(), JSON.stringify({G, ctx, log}));
-      break;
-    case "end":
-        let points = G.points;
-        sendData(joinCode+"_"+randomID+"_stratend_"+points+"_"+now(), JSON.stringify({G, ctx}));
+      sendData(joinCode+"_"+randomID+"_"+component+"end_"+points+"_"+now(), JSON.stringify({G, ctx}));
       break;
     default:
       break;

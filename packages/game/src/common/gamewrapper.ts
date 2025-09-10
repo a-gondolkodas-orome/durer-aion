@@ -113,11 +113,11 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
             if (game.turn?.onEnd !== undefined) {
               game.turn.onEnd({G, ctx, playerID, events, log, random});
             }
-            sendStrategyFunction("step", G, ctx, JSON.stringify({log}));
+            sendStrategyFunction("strategy", "step", G, ctx, JSON.stringify({log}));
           },
         },
         onEnd: ({G, ctx, playerID, events, random, log}) => {
-          sendStrategyFunction("end", G, ctx);
+          sendStrategyFunction("strategy", "end", G, ctx);
         }
       },
     },
