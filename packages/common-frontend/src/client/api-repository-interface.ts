@@ -5,6 +5,7 @@ import { createContext, useContext } from 'react';
 export const LOCAL_STORAGE_TEAMSTATE = "aegnjrlearnjla";
 
 export interface ClientRepository {
+  version: "MOCK" | "OFFLINE" | "ONLINE"
   getTeamState(
     guid: string,
   ): Promise<TeamModelDto>;
@@ -20,7 +21,6 @@ export interface ClientRepository {
   toHome(
     code: string,
   ): Promise<string>
-  getVersion(): string
   getAll(): Promise<TeamModelDto[]>
   getMatchState(matchId: String): Promise<MatchStateDto>
   getMatchLogs(matchId: String): Promise<MatchStateDto>
@@ -32,9 +32,7 @@ export interface ClientRepository {
 
 
 export class MockClientRepository implements ClientRepository {
-  getVersion(): string {
-    return "MOCK";
-  }
+  version = "MOCK" as const;
   startRelay(code: string): Promise<string> {
     return Promise.resolve("ok");
   }

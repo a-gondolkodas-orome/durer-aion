@@ -36,7 +36,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
     setMsRemaining(G.millisecondsRemaining);
   }, [G.millisecondsRemaining]);
   const finished = msRemaining < - 5000 || gameover === true
-  const isOffline = useClientRepo().getVersion() === "OFFLINE";
+  const isOffline = useClientRepo().version === "OFFLINE";
   return (
     <>
       <Dialog 

@@ -22,9 +22,8 @@ function makeAxiosError(any_error:any): AxiosError {
 }
 
 export class RealClientRepository implements ClientRepository {
-  getVersion(): string {
-    return "ONLINE";
-  }
+  
+  version = "ONLINE" as const;
 
   async getTeamState(
     guid: string,

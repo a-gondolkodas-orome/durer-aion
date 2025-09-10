@@ -4,9 +4,7 @@ import { sendDataLogin, sendDataRelay, sendDataStrategy} from "./sendData";
 
 export class OfflineClientRepository implements ClientRepository {
   
-  getVersion(): string {
-    return "OFFLINE";
-  }
+  version = "OFFLINE" as const;
   
   startRelay(joinCode: string): Promise<string> {
     const teamState = getTeamStateFromLocal();

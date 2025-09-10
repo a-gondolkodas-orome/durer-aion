@@ -14,7 +14,7 @@ export function Chooser(props: {
   const finished =
     props.state.relayMatch.state === "FINISHED" &&
     props.state.strategyMatch.state === "FINISHED";
-  const isOffline = useClientRepo().getVersion() === "OFFLINE";
+  const isOffline = useClientRepo().version === "OFFLINE";
   return (
     <Stack
       sx={{

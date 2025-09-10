@@ -18,7 +18,7 @@ export function ChooserItem(props: {
   const startStrategy = useStartStrategy();
 
   const [mobileDescOpen, setMobileDescOpen] = useState(props.status.state !== "FINISHED");
-  const isOffline = useClientRepo().getVersion() === "OFFLINE";
+  const isOffline = useClientRepo().version === "OFFLINE";
 
   return (
     <Stack sx={{

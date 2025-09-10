@@ -12,7 +12,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
     const [gameover, setGameover] = useState(ctx.gameover);
     const toHome = useToHome();
     const refreshState = useRefreshTeamState();
-    const isOffline = useClientRepo().getVersion() === "OFFLINE";
+    const isOffline = useClientRepo().version === "OFFLINE";
     useEffect(() => {
       if (!ctx.gameover) {
         moves.getTime();

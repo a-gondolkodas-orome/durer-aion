@@ -65,7 +65,7 @@ export function Header(props: { teamName: string | null }) {
             }}>{props.teamName}</Stack>
             <Stack onClick={()=>{
               logout();
-              if ( clientRepository.getVersion() === "OFFLINE") {
+              if ( clientRepository.version === "OFFLINE") {
                 window.location.reload();
               }            
             }} sx={{
