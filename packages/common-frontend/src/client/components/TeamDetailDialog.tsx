@@ -149,7 +149,11 @@ function MatchStatusField(props: {name: string, data: MatchStatus, isRelay: bool
         }} variant='contained' color='primary' type="submit">
           idő hozzáadása
         </Button></Stack>
-        <ErrorMessage name="time" sx={{color:'red'}}/>
+        <ErrorMessage name="time" render={msg => (
+          <Stack sx={{ color: 'red', fontSize: '0.875rem' }}>
+            {msg}
+          </Stack>
+        )}/>
       </Form>
       <Button
       sx={{
