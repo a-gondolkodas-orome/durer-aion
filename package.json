@@ -17,7 +17,7 @@
     "@sentry/react": "^7.16.0",
     "@sentry/tracing": "^7.16.0",
     "@testing-library/jest-dom": "^5.16.4",
-    "@testing-library/react": "^12.1.5",
+    "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^13.5.0",
     "@types/jest": "^27.5.2",
     "@types/koa-basic-auth": "^2.0.4",
@@ -28,7 +28,7 @@
     "@vitejs/plugin-react": "^4.6.0",
     "axios": "^1.4.0",
     "bgio-postgres": "^1.0.13",
-    "boardgame.io": "^0.50.0-alpha.2",
+    "boardgame.io": "^0.50.2",
     "cross-env": "^7.0.3",
     "dotenv": "^16.3.1",
     "formik": "^2.4.2",
@@ -36,8 +36,8 @@
     "koa-mount": "^4.0.0",
     "nanoid": "^3.0.0",
     "notistack": "^2.0.8",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "react-router-dom": "^6.3.0",
     "react-syntax-highlighter": "^15.6.1",
     "react-text-mask": "^5.5.0",
@@ -55,10 +55,9 @@
     "check:server": "babel-node --extensions \".ts\" --presets=@babel/preset-typescript --plugins=@babel/plugin-transform-modules-commonjs src/server.ts sanity-check",
     "start": "turbo start",
     "build": "turbo build",
-    "test": "cross-env react-scripts test . --coverage",
     "spell-check": "cspell \"**/*.{ts,tsx}\" --no-progress",
     "dev:server": "turbo dev --filter=online-backend --filter=game --filter=schemas --filter=strategy",
-    "dev:offline": "turbo dev --filter=offline-frontend --filter=game --filter=schemas --filter=strategy --filter=common-frontend"
+    "dev:offline": "turbo dev --filter=offline-frontend --filter=game --filter=strategy --filter=common-frontend"
   },
   "eslintConfig": {
     "extends": [

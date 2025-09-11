@@ -33,5 +33,10 @@
     "../../packages/*/src",
     "../../packages/*/index.d.ts", 
     "../../packages/*/index.ts"
+  ],
+  "exclude": [
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/__tests__/**"
   ]
 }

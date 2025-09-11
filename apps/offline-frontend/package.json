@@ -10,8 +10,7 @@
     "lint": "TIMING=1 eslint \"**/*.ts*\" --max-warnings=0",
     "start": "cross-env REACT_APP_WHICH_VERSION=b vite",
     "dev": "cross-env REACT_APP_WHICH_VERSION=b vite",
-    "build": "tsc && vite build",
-    "test": "cross-env react-scripts test . --coverage",
+    "build": "vite build",
     "spell-check": "cspell \"**/*.{ts,tsx}\" --no-progress"
   },
   "license": "MIT",
@@ -29,14 +28,13 @@
     "@sentry/react": "^7.16.0",
     "@sentry/tracing": "^7.16.0",
     "@testing-library/jest-dom": "^5.16.4",
-    "@testing-library/react": "^12.1.5",
+    "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^13.5.0",
     "@types/jest": "^27.5.2",
     "@types/node": "^16.11.41",
     "@types/react": "^18.0.14",
     "@types/react-dom": "^18.0.5",
     "axios": "^1.4.0",
-    "boardgame.io": "^0.50.0-alpha.2",
     "common-frontend": "*",
     "cross-env": "^7.0.3",
     "dotenv": "^16.3.1",
@@ -45,8 +43,6 @@
     "install": "^0.13.0",
     "notistack": "^2.0.8",
     "npm": "^11.4.2",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
     "react-router-dom": "^6.3.0",
     "react-syntax-highlighter": "^15.6.1",
     "react-text-mask": "^5.5.0",
@@ -68,6 +64,10 @@
     "nodemon": "^2.0.18",
     "process": "^0.11.10",
     "turbo": "^2.5.3"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "boardgame.io": "0.50.*"
   }
-
 }

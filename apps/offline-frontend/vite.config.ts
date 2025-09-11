@@ -6,11 +6,13 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
+      "boardgame.io": path.resolve(__dirname, "../../node_modules/boardgame.io"),
       game: path.resolve(__dirname, "../../packages/game"),
       schemas: path.resolve(__dirname, "../../packages/schemas"),
       strategy: path.resolve(__dirname, "../../packages/strategy"),
       "common-frontend": path.resolve(__dirname, "../../packages/common-frontend"),
     },
+    dedupe: ["react", "react-dom", "boardgame.io"], // ✅ avoid duplicate instances
     preserveSymlinks: true, // this is needed to make sure that linked packages are properly resolved (like game and schemas
   },
   server: {
@@ -21,6 +23,13 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    exclude: ["game", "schemas", "strategy", "common-frontend"],
+    exclude: ["game", "schemas", "strategy", "common-frontend"], 
+    include: ["boardgame.io"], 
+  },
+  build: {
+    rollupOptions: {
+      // Don’t bundle test files
+      external: [/\.test\.(t|j)sx?$/],
+    },
   },
 })

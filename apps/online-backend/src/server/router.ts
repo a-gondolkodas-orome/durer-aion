@@ -274,13 +274,13 @@ export function configureTeamsRouter(
     }
 
     // Check if the file is a TSV file
-    if (!file || !file.name?.endsWith('.tsv')) {
+    if (!file || !file.filepath?.endsWith('.tsv')) {
       ctx.status = 400;
       ctx.body = { error: 'Invalid file format. Only TSV files are allowed.' };
       return;
     }
 
-    const import_results = await import_teams_from_tsv(teams, file.path)
+    const import_results = await import_teams_from_tsv(teams, file.filepath)
 
     ctx.body = import_results;  
   })

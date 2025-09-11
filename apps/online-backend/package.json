@@ -19,7 +19,7 @@
     "@babel/preset-typescript": "^7.18.6",
     "@types/jest": "^27.5.2",
     "@types/node": "^16.11.41",
-    "boardgame.io": "^0.50.0-alpha.2",
+    "boardgame.io": "^0.50.2",
     "web-vitals": "^2.1.4",
     "yup": "^0.32.11",
     "game": "*",
