@@ -1,0 +1,23 @@
+name: Sync2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Sync with private repository
+        run: |
+            git config --global user.name 'github-actions[bot]'
+            git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+            git clone https://github.com/a-gondolkoda-orome/durer-aion.git public-repo
+            cd public-repo
+            git remote add private https://x-access-token:${{ secrets.PRIVATE_PAT }}@github.com/${{ secrets.PRIVATE_REPO_NAME }}.git
+            git remote update
+            git merge private/main -X ours -m "Sync from public repository"
+            git push private main
