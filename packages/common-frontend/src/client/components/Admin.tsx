@@ -240,7 +240,11 @@ export function Admin(props: {teamId?: String}) {
           hozzáadás
         </Button>
         </Stack>
-        <ErrorMessage name="time" sx={{color:'red'}}/>
+        <ErrorMessage name="time" render={msg => (
+          <Stack sx={{ color: 'red', fontSize: '0.875rem' }}>
+            {msg}
+          </Stack>
+        )}/>
       </ Form>
       </Stack>}
      {!teamFromPath && data && <Stats data={data}/>}
