@@ -14,7 +14,10 @@
     "noEmit": false,
     "baseUrl": ".",            // so you can use paths if needed
     "paths": {
-      "@/*": ["./*"]
+      "game": ["../../packages/game"],
+      "strategy": ["../../packages/strategy"],
+      "schemas": ["../../packages/schemas"],
+      "common-frontend": ["../../packages/common-frontend"]
     },
     "outDir": "dist",
     "skipLibCheck": true,

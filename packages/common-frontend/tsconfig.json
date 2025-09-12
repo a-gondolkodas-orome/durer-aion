@@ -11,17 +11,13 @@
     "isolatedModules": true,
     "module": "ESNext",
     "target": "ES6",
-    "jsx": "react-jsx",
     "moduleResolution": "node",
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "preserveWatchOutput": true,
     "skipLibCheck": true,
     "strict": true,
-    "paths": {
-      "@/*": ["./*"]
-    },
-    "outDir": "dist",
-    "baseUrl": "."
+    "jsx": "react-jsx",
+    "outDir": "./dist"
   }
 }

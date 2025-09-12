@@ -27,7 +27,7 @@
     },
     "lint": {},
     "dev": {
-      "dependsOn": ["^build"],
+      "dependsOn": [],
       "cache": false,
       "persistent": true
     }
