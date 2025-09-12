@@ -28,6 +28,7 @@ jobs:
             git checkout ${{ github.ref_name }}
             git remote add private https://x-access-token:${{ secrets.PRIVATE_PAT }}@github.com/${{ secrets.PRIVATE_REPO_NAME }}.git
             git remote update
+            
             if git show-ref --quiet refs/remotes/private/${{ github.ref_name }}; then
               git merge private/${{ github.ref_name }} -X ours -m "Sync from public repository"
             fi
