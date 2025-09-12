@@ -11,8 +11,8 @@
   "scripts": {
     "lint": "TIMING=1 eslint \"src/**/*.ts*\" --max-warnings=0",
     "test": "jest --passWithNoTests",
-    "build": "npx tsc",
-    "dev": "npx tsc -w"
+    "build": "npx tsup",
+    "dev": "npx tsup --watch --onSuccess \"echo rebuilt strategy\""
   },
   "dependencies": {
     "@babel/cli": "^7.18.6",
@@ -21,7 +21,7 @@
     "@babel/preset-typescript": "^7.18.6",
     "@types/jest": "^27.5.2",
     "@types/node": "^16.11.41",
-    "boardgame.io": "^0.50.0-alpha.2",
+    "boardgame.io": "^0.50.2",
     "typescript": "^4.7.4"
   },
   "devDependencies": {

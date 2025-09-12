@@ -6,7 +6,7 @@
     "lint": "TIMING=1 eslint \"**/*.ts*\" --max-warnings=0",
     "build": "npx tsc",
     "start": "node dist/src/server.js",
-    "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/src/server.js\"",
+    "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/src/server.js --watch ../packages\"",
     "build_old": "babel-node --extensions \".ts\" --presets=@babel/preset-typescript --plugins=@babel/plugin-transform-modules-commonjs src/server.ts sanity-check",
     "start_old": "nodemon -e js,ts --exec babel-node --extensions \".ts\" --presets=@babel/preset-typescript --plugins=@babel/plugin-transform-modules-commonjs src/server.ts",
     "spell-check": "cspell \"**/*.{ts,tsx}\" --no-progress"
@@ -19,7 +19,7 @@
     "@babel/preset-typescript": "^7.18.6",
     "@types/jest": "^27.5.2",
     "@types/node": "^16.11.41",
-    "boardgame.io": "^0.50.0-alpha.2",
+    "boardgame.io": "^0.50.2",
     "web-vitals": "^2.1.4",
     "yup": "^0.32.11",
     "game": "*",

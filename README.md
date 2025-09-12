@@ -16,7 +16,7 @@ All demos are in Hungarian.
 
 ## Requirements
 
-- [Node.js](https://nodejs.org/) version 16 or above (which can be checked by running `node -v`).
+- [Node.js](https://nodejs.org/) version 19 or above (which can be checked by running `node -v`).
 - [Docker](https://www.docker.com/)
 
 ## Installation
