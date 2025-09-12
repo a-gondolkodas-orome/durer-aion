@@ -21,7 +21,7 @@ export class OfflineClientRepository implements ClientRepository {
         matchID: "",
       },
     }
-    sendGameData("relay", "start");
+    sendGameData({component: "relay", phase: "start"});
     localStorage.setItem(LOCAL_STORAGE_TEAMSTATE,
       JSON.stringify(newState)
     );
@@ -44,7 +44,7 @@ export class OfflineClientRepository implements ClientRepository {
       },
     }
     
-  sendGameData("strategy", "start");
+  sendGameData({component: "strategy", phase: "start"});
     localStorage.setItem(LOCAL_STORAGE_TEAMSTATE,
       JSON.stringify(newState)
     );
@@ -56,7 +56,7 @@ export class OfflineClientRepository implements ClientRepository {
     const newState = {...teamState, pageState: 'HOME'}
     if (teamState.relayMatch.state === "IN PROGRESS"){
       const score = Number(localStorage.getItem("RelayPoints"))
-      sendGameData("relay", "end", undefined, {points: score})
+      sendGameData({component: "relay", phase: "end", G: {points: score}})
       newState.relayMatch = {
         ...teamState.relayMatch,
         state: "FINISHED",

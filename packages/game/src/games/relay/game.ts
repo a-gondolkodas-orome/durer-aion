@@ -2,6 +2,7 @@ import { Game } from "boardgame.io";
 import { INVALID_MOVE, TurnOrder } from "boardgame.io/core";
 // import { sendDataRelayEnd } from "../../common/sendData";
 import { GUESSER_PLAYER, JUDGE_PLAYER, otherPlayer, PlayerIDType } from "../../common/types";
+import { Component } from "react";
 // import { IS_OFFLINE_MODE } from "../../client/utils/util";
 
 type Answer = {
@@ -96,7 +97,7 @@ export function RelayWrapper(sendRelayFunction = (...inputs: any[]) => {}): Game
           onMove: ({G, ctx, playerID, events }) => {
             if(playerID === GUESSER_PLAYER) {
               let currentTime = new Date();
-              sendRelayFunction("relay", "step", G.answer, G, ctx);
+              sendRelayFunction({component: "relay", phase: "step", answer: G.answer, G: G, ctx: ctx});
               if(currentTime.getTime() - new Date(G.end).getTime() > 1000*10){
                 // Do not accept any answer if the time is over since more than 10 seconds
                 events.endGame();

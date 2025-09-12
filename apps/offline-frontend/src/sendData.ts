@@ -27,8 +27,8 @@ function now(){
   return result;
 }
 
-function getJoinCode(teamState?: TeamModelDto | null){
-  if (teamState !== undefined && teamState !== null) {
+function getJoinCode(teamState?: TeamModelDto){
+  if (teamState !== undefined) {
     return teamState.joinCode;
   }
   const teamstateString = localStorage.getItem(LOCAL_STORAGE_TEAMSTATE);
@@ -39,13 +39,23 @@ function getJoinCode(teamState?: TeamModelDto | null){
   return teamStateStorage.joinCode;
 }
 
-export function sendDataLogin(teamState: TeamModelDto | null){
+export function sendDataLogin(teamState: TeamModelDto){
   let code = getJoinCode(teamState);
   sendData(code+"_"+randomID+"_login_"+now(), "code");
 }
 
-export function sendGameData(component: "relay" | "strategy", phase: "start" | "step" | "end", answer?: number, G?: any, ctx?: any, log?: any) {
-  const joinCode = getJoinCode(null);
+interface SendGameDataParams {
+  component: "relay" | "strategy";
+  phase: "start" | "step" | "end";
+  answer?: number;
+  G?: any;
+  ctx?: any;
+  log?: any;
+}
+
+export function sendGameData(params: SendGameDataParams){
+  const {component, phase, answer, G, ctx, log} = params;
+  const joinCode = getJoinCode();
   switch (phase) {
     case "start":
       sendData(joinCode+"_"+randomID+"_"+component+"start_"+now(), "");
