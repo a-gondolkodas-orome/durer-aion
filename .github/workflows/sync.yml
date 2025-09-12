@@ -15,7 +15,7 @@ jobs:
         run: |
             git config --global user.name 'github-actions[bot]'
             git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-            git clone https://github.com/a-gondolkoda-orome/durer-aion.git public-repo
+            git clone https://github.com/a-gondolkodas-orome/durer-aion.git public-repo
             cd public-repo
             git remote add private https://x-access-token:${{ secrets.PRIVATE_PAT }}@github.com/${{ secrets.PRIVATE_REPO_NAME }}.git
             git remote update
