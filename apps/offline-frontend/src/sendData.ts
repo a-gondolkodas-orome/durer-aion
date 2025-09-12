@@ -1,12 +1,10 @@
-import { LOCAL_STORAGE_TEAMSTATE, TeamModelDto, IS_OFFLINE_MODE } from "common-frontend";
+import { LOCAL_STORAGE_TEAMSTATE, TeamModelDto } from "common-frontend";
+
 
 function sendData(fileName: string, data: string){
-  if (!IS_OFFLINE_MODE){
-    return;
-  }
-  const bucketName = process.env.REACT_APP_S3_BUCKET_NAME;
-  const folder = process.env.REACT_APP_S3_FOLDER;
-  if (bucketName === undefined || folder === undefined) {
+  const bucketName = import.meta.env.VITE_S3_BUCKET_NAME;
+  const folder = import.meta.env.VITE_S3_FOLDER;
+  if (!bucketName || !folder) {
     throw new Error('S3 bucket name or folder is not defined.');
   }
   const fd = new FormData();
@@ -29,8 +27,8 @@ function now(){
   return result;
 }
 
-function getJoinCode(teamState: TeamModelDto | null){
-  if (teamState !== null) {
+function getJoinCode(teamState?: TeamModelDto){
+  if (teamState !== undefined) {
     return teamState.joinCode;
   }
   const teamstateString = localStorage.getItem(LOCAL_STORAGE_TEAMSTATE);
@@ -41,42 +39,45 @@ function getJoinCode(teamState: TeamModelDto | null){
   return teamStateStorage.joinCode;
 }
 
-export function sendDataLogin(teamState: TeamModelDto | null){
+export function sendDataLogin(teamState: TeamModelDto){
   let code = getJoinCode(teamState);
   sendData(code+"_"+randomID+"_login_"+now(), "code");
 }
 
-
-export function sendDataRelayStart(teamState: TeamModelDto | null){
-  let code = getJoinCode(teamState);
-  sendData(code+"_"+randomID+"_relaystart_"+now(), "");
+interface SendGameDataParams {
+  component: "relay" | "strategy";
+  phase: "start" | "step" | "end";
+  answer?: number;
+  G?: any;
+  ctx?: any;
+  log?: any;
 }
 
-export function sendDataRelayStep(teamState: TeamModelDto | null, G: any, ctx: any, answer: number){
-  let code = getJoinCode(teamState);
-  let problemNumber = G.currentProblem;
-  sendData(code+"_"+randomID+"_relay_"+problemNumber+"_"+answer+"_"+now(), JSON.stringify({G, ctx}));
-}
-
-export function sendDataRelayEnd(teamState: TeamModelDto | null, G: any, ctx: any){
-  console.log("asd2")
-  let code = getJoinCode(teamState);
-  let points = G.points;
-  sendData(code+"_"+randomID+"_relayend_"+points+"_"+now(), JSON.stringify({G, ctx}));
-}
-
-export function sendDataStrategyStart(teamState: TeamModelDto | null){
-  let code = getJoinCode(teamState);
-  sendData(code+"_"+randomID+"_stratstart_"+now(), "");
-}
-
-export function sendDataStrategyStep(teamState: TeamModelDto | null, pile:number,  G: any, ctx: any){
-  let code = getJoinCode(teamState);
-  sendData(code+"_"+randomID+"_strat_"+pile+"_"+now(), JSON.stringify({G, ctx}));
-}
-
-export function sendDataStrategyEnd(teamState: TeamModelDto | null, G: any, ctx: any){
-  let code = getJoinCode(teamState);
-  let points = G.points;
-  sendData(code+"_"+randomID+"_stratend_"+points+"_"+now(), JSON.stringify({G, ctx}));
+export function sendGameData(params: SendGameDataParams){
+  const {component, phase, answer, G, ctx, log} = params;
+  const joinCode = getJoinCode();
+  switch (phase) {
+    case "start":
+      sendData(joinCode+"_"+randomID+"_"+component+"start_"+now(), "");
+      break;
+    case "step":
+      switch (component) {
+        case "relay":
+          let problemNumber = G.currentProblem;
+          sendData(joinCode+"_"+randomID+"_"+component+"_"+problemNumber+"_"+answer+"_"+now(), JSON.stringify({G, ctx}));
+          break;
+        case "strategy":
+          sendData(joinCode+"_"+randomID+"_stratstep_"+now(), JSON.stringify({G, ctx, log}));
+          break;
+        default:
+          break;
+      }
+      break;
+    case "end":
+      let points = G.points;
+      sendData(joinCode+"_"+randomID+"_"+component+"end_"+points+"_"+now(), JSON.stringify({G, ctx}));
+      break;
+    default:
+      break;
+  }
 }

@@ -27,162 +27,169 @@ export interface MyGameState {
 
 const lengthOfCompetition = 60 * 60; // seconds
 
-export const GameRelay: Game<MyGameState> = {
-  name: "relay",
-  setup: () => {
-    return {
-      currentProblem: 0,
-      problemText: "", // TODO: get from the problem list
-      answer: null,
-      points: 0,
-      correctnessPreviousAnswer: null,
-      previousAnswers: [[]],
-      previousPoints: [],
-      currentProblemMaxPoints: 3, // TODO: get from the problem list, TODO: rename this function to currentProblemAvailablePoints
-      numberOfTry: 0,
-      millisecondsRemaining: 1000 * lengthOfCompetition,
-      start: new Date().toISOString(),
-      end: new Date(Date.now() + 1000 * lengthOfCompetition).toISOString(),
-      url: "",
-    };
-  },
-  phases:
-  {
-    startNewGame: {
-      moves: {
-        startGame: ({ G, ctx, playerID, events }) => {
-          if (playerID !== GUESSER_PLAYER || G.numberOfTry !== 0) {
-            return INVALID_MOVE;
-          }
-          events.endTurn();
-        },
-        firstProblem({ G, ctx, playerID, events }, problemText: string, nextProblemMaxPoints: number, url: string) {
-          if (playerID !== JUDGE_PLAYER) {
-            // He is not the bot OR G.answer is null (and it is not the first question)
-            return INVALID_MOVE;
-          }
-          G.url = url;
-          G.problemText = problemText;
-          G.numberOfTry = 1;
-          events.endTurn();
-        },
-      },
-      turn: {
-        order: TurnOrder.ONCE,
-        onMove: ({G, ctx, playerID, events }) => {
-          if(playerID === GUESSER_PLAYER) {
-            let currentTime = new Date();
-            if(currentTime.getTime() - new Date(G.end).getTime() > 1000*10){
-              // Do not accept any answer if the time is over since more than 10 seconds
-              events.endGame();
-            }
-          }
-        }
-      },
-      start: true,
-      next: "play",
+export function RelayWrapper(sendRelayFunction = (...inputs: any[]) => {}): Game<MyGameState> {
+  const GameRelay: Game<MyGameState> = {
+    name: "relay",
+    setup: () => {
+      return {
+        currentProblem: 0,
+        problemText: "", // TODO: get from the problem list
+        answer: null,
+        points: 0,
+        correctnessPreviousAnswer: null,
+        previousAnswers: [[]],
+        previousPoints: [],
+        currentProblemMaxPoints: 3, // TODO: get from the problem list, TODO: rename this function to currentProblemAvailablePoints
+        numberOfTry: 0,
+        millisecondsRemaining: 1000 * lengthOfCompetition,
+        start: new Date().toISOString(),
+        end: new Date(Date.now() + 1000 * lengthOfCompetition).toISOString(),
+        url: "",
+      };
     },
-    play: {
-      turn: {
-        order: {
-          first: () => {
-            return 0;
+    phases:
+    {
+      startNewGame: {
+        moves: {
+          startGame: ({ G, ctx, playerID, events }) => {
+            if (playerID !== GUESSER_PLAYER || G.numberOfTry !== 0) {
+              return INVALID_MOVE;
+            }
+            events.endTurn();
           },
-          next: ({ctx}) => {
-            return Number(otherPlayer(ctx.currentPlayer as PlayerIDType));
-          }
+          firstProblem({ G, ctx, playerID, events }, problemText: string, nextProblemMaxPoints: number, url: string) {
+            if (playerID !== JUDGE_PLAYER) {
+              // He is not the bot OR G.answer is null (and it is not the first question)
+              return INVALID_MOVE;
+            }
+            G.url = url;
+            G.problemText = problemText;
+            G.numberOfTry = 1;
+            events.endTurn();
+          },
         },
-        onMove: ({G, ctx, playerID, events }) => {
-          if(playerID === GUESSER_PLAYER) {
-            let currentTime = new Date();
-            if(currentTime.getTime() - new Date(G.end).getTime() > 1000*10){
-              // Do not accept any answer if the time is over since more than 10 seconds
-              events.endGame();
+        turn: {
+          order: TurnOrder.ONCE,
+          onMove: ({G, ctx, playerID, events }) => {
+            if(playerID === GUESSER_PLAYER) {
+              let currentTime = new Date();
+              if(currentTime.getTime() - new Date(G.end).getTime() > 1000*10){
+                // Do not accept any answer if the time is over since more than 10 seconds
+                events.endGame();
+              }
             }
           }
         },
-        onEnd: ({G, ctx, playerID, events}) => {
-          if (ctx.currentPlayer.toString() === JUDGE_PLAYER) {
-            let currentTime = new Date();
-            if (currentTime.getTime() - new Date(G.end).getTime() >= 0) {
-              // Do not accept any answer if the time is over
-              events.endGame();
-            }
-          }
-        }
+        start: true,
+        next: "play",
       },
-      moves: {
-        newProblem({ G, ctx, playerID, events }, problemText: string, nextProblemMaxPoints: number, correctnessPreviousAnswer: boolean, url: string) {
-          if (playerID !== JUDGE_PLAYER || G.answer === null) {
-            // He is not the bot OR G.answer is null (and it is not the first question)
-            return INVALID_MOVE;
+      play: {
+        turn: {
+          order: {
+            first: () => {
+              return 0;
+            },
+            next: ({ctx}) => {
+              return Number(otherPlayer(ctx.currentPlayer as PlayerIDType));
+            }
+          },
+          onMove: ({G, ctx, playerID, events }) => {
+            if(playerID === GUESSER_PLAYER) {
+              let currentTime = new Date();
+              sendRelayFunction({component: "relay", phase: "step", answer: G.answer, G: G, ctx: ctx});
+              if(currentTime.getTime() - new Date(G.end).getTime() > 1000*10){
+                // Do not accept any answer if the time is over since more than 10 seconds
+                events.endGame();
+              }
+            }
+          },
+          onEnd: ({G, ctx, playerID, events}) => {
+            if (ctx.currentPlayer.toString() === JUDGE_PLAYER) {
+              let currentTime = new Date();
+              if (currentTime.getTime() - new Date(G.end).getTime() >= 0) {
+                // Do not accept any answer if the time is over
+                events.endGame();
+              }
+            }
           }
-          G.url = url;
-          G.previousAnswers[G.currentProblem].push({answer: G.answer, date: new Date().toISOString()});
-          G.problemText = problemText;
-          G.previousAnswers.push(Array(0));
-          G.correctnessPreviousAnswer = correctnessPreviousAnswer;
-          if (correctnessPreviousAnswer) {
-            G.points += G.currentProblemMaxPoints;
-            G.previousPoints[G.currentProblem] = G.currentProblemMaxPoints;
-          } else {
-            G.previousPoints[G.currentProblem] = 0;
-          }
-          G.currentProblemMaxPoints = nextProblemMaxPoints;
-          G.answer = null;
-          G.currentProblem++;
-          G.numberOfTry = 1;
-          events.endTurn();
         },
-        nextTry({ G, ctx, playerID, events }, maxPoints: number) {
-          if (playerID !== JUDGE_PLAYER || G.answer === null) {
-            return INVALID_MOVE;
+        moves: {
+          newProblem({ G, ctx, playerID, events }, problemText: string, nextProblemMaxPoints: number, correctnessPreviousAnswer: boolean, url: string) {
+            if (playerID !== JUDGE_PLAYER || G.answer === null) {
+              // He is not the bot OR G.answer is null (and it is not the first question)
+              return INVALID_MOVE;
+            }
+            G.url = url;
+            G.previousAnswers[G.currentProblem].push({answer: G.answer, date: new Date().toISOString()});
+            G.problemText = problemText;
+            G.previousAnswers.push(Array(0));
+            G.correctnessPreviousAnswer = correctnessPreviousAnswer;
+            if (correctnessPreviousAnswer) {
+              G.points += G.currentProblemMaxPoints;
+              G.previousPoints[G.currentProblem] = G.currentProblemMaxPoints;
+            } else {
+              G.previousPoints[G.currentProblem] = 0;
+            }
+            G.currentProblemMaxPoints = nextProblemMaxPoints;
+            G.answer = null;
+            G.currentProblem++;
+            G.numberOfTry = 1;
+            events.endTurn();
+          },
+          nextTry({ G, ctx, playerID, events }, maxPoints: number) {
+            if (playerID !== JUDGE_PLAYER || G.answer === null) {
+              return INVALID_MOVE;
+            }
+            G.previousAnswers[G.currentProblem].push({answer: G.answer, date: new Date().toISOString()});
+            G.answer = null;
+            G.correctnessPreviousAnswer = false;
+            G.numberOfTry++;
+            G.currentProblemMaxPoints = maxPoints;
+            events.endTurn();
+          },
+          submitAnswer({ G, ctx, playerID, events }, answer: number) {
+            if (playerID !== GUESSER_PLAYER || !Number.isInteger(answer) || answer < 0 || answer > 9999) {
+              return INVALID_MOVE;
+            }
+            G.answer = answer;
+            events.endTurn();
+          },
+          endGame({ G, ctx, playerID, events }, correctnessPreviousAnswer: boolean) {
+            if (playerID !== JUDGE_PLAYER || G.answer === null) {
+              return INVALID_MOVE;
+            }
+            G.previousAnswers[G.currentProblem].push({answer: G.answer, date: new Date().toISOString()});
+            G.correctnessPreviousAnswer = correctnessPreviousAnswer;
+            if (correctnessPreviousAnswer) {
+              G.points += G.currentProblemMaxPoints;
+              /* TODO refactor so offline works properly send data should not be here
+              if (IS_OFFLINE_MODE) {
+                sendDataRelayEnd(null, G, ctx);
+              }*/
+              G.previousPoints[G.currentProblem] = G.currentProblemMaxPoints;
+            } else {
+              G.previousPoints[G.currentProblem] = 0;
+            }
+              events.endGame();
+          },
+          getTime({ G, ctx, playerID, events }) {
+            if (playerID !== GUESSER_PLAYER) {
+              return INVALID_MOVE;
+            }
+            G.millisecondsRemaining = new Date(G.end).getTime() - new Date().getTime();
           }
-          G.previousAnswers[G.currentProblem].push({answer: G.answer, date: new Date().toISOString()});
-          G.answer = null;
-          G.correctnessPreviousAnswer = false;
-          G.numberOfTry++;
-          G.currentProblemMaxPoints = maxPoints;
-          events.endTurn();
         },
-        submitAnswer({ G, ctx, playerID, events }, answer: number) {
-          if (playerID !== GUESSER_PLAYER || !Number.isInteger(answer) || answer < 0 || answer > 9999) {
-            return INVALID_MOVE;
-          }
-          G.answer = answer;
-          events.endTurn();
-        },
-        endGame({ G, ctx, playerID, events }, correctnessPreviousAnswer: boolean) {
-          if (playerID !== JUDGE_PLAYER || G.answer === null) {
-            return INVALID_MOVE;
-          }
-          G.previousAnswers[G.currentProblem].push({answer: G.answer, date: new Date().toISOString()});
-          G.correctnessPreviousAnswer = correctnessPreviousAnswer;
-          if (correctnessPreviousAnswer) {
-            G.points += G.currentProblemMaxPoints;
-            /* TODO refactor so offline works properly send data should not be here
-            if (IS_OFFLINE_MODE) {
-              sendDataRelayEnd(null, G, ctx);
-            }*/
-            G.previousPoints[G.currentProblem] = G.currentProblemMaxPoints;
-          } else {
-            G.previousPoints[G.currentProblem] = 0;
-          }
-            events.endGame();
-        },
-        getTime({ G, ctx, playerID, events }) {
-          if (playerID !== GUESSER_PLAYER) {
-            return INVALID_MOVE;
-          }
-          G.millisecondsRemaining = new Date(G.end).getTime() - new Date().getTime();
-        }
       },
     },
-  },
 
-  ai: {
-    enumerate: (G, ctx, playerID) => {
-      return [];
+    ai: {
+      enumerate: (G, ctx, playerID) => {
+        return [];
+      }
     }
   }
+
+  return GameRelay;
 }
+
+export const GameRelay = RelayWrapper();

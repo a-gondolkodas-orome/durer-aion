@@ -9,7 +9,7 @@ import { ExcerciseTask } from '../ExcerciseTask';
 import { ExcerciseForm } from '../ExcerciseForm';
 import { dictionary } from '../../text-constants';
 import { RelayEndTable } from '../RelayEndTable';
-import { IS_OFFLINE_MODE } from '../../utils/util';
+import { useClientRepo } from '../../api-repository-interface';
 
 interface MyGameProps extends BoardProps<MyGameState> { };
 export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
@@ -36,6 +36,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
     setMsRemaining(G.millisecondsRemaining);
   }, [G.millisecondsRemaining]);
   const finished = msRemaining < - 5000 || gameover === true
+  const isOffline = useClientRepo().version === "OFFLINE";
   return (
     <>
       <Dialog 
@@ -144,9 +145,8 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
             previousCorrectness={!finished ? G.correctnessPreviousAnswer : null}
             attempt={(G.currentProblem+1)*3+G.numberOfTry}
             onSubmit={(input) => {
-              moves.submitAnswer(parseInt(input))
+              moves.submitAnswer(parseInt(input));
               // TODO this should be done in repository
-              // sendDataRelayStep(teamState, G, ctx, parseInt(input));
             }}
           />
           <Stack sx={{
@@ -164,7 +164,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
               endTime={new Date(G.end)}
               serverRemainingMs={G.millisecondsRemaining} />}
           </Stack>
-          {IS_OFFLINE_MODE && 
+          { isOffline && 
             <Stack sx={{
               flexDirection: 'row',
               width: '250px',

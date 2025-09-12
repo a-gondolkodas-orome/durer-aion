@@ -49,7 +49,9 @@ function getTime({ G, ctx, playerID, events }: any) {
   G.millisecondsRemaining = new Date(G.end).getTime() - new Date().getTime();
 }
 
-export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameState>): Game<T_SpecificGameState & GameStateMixin> {
+export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameState>, 
+                                                 sendStrategyFunction = (...inputs: any[]): void => {},
+                                                ): Game<T_SpecificGameState & GameStateMixin> {
   const myGameWrapper: Game<T_SpecificGameState & GameStateMixin> = {
     setup: () => ({
       ...game.setup(),
@@ -111,8 +113,12 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
             if (game.turn?.onEnd !== undefined) {
               game.turn.onEnd({G, ctx, playerID, events, log, random});
             }
+            sendStrategyFunction({component: "strategy", phase: "step", G: G, ctx: ctx, log: log});
           },
         },
+        onEnd: ({G, ctx, playerID, events, random, log}) => {
+          sendStrategyFunction({component: "strategy", phase: "end", G: G, ctx: ctx});
+        }
       },
     },
     // conflict with boardgameio type, where id is string, instead of playerIDType

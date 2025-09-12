@@ -3,8 +3,10 @@ import { Local } from 'boardgame.io/multiplayer';
 import { gameWrapper, GameStateMixin, GameType } from 'game';
 import { boardWrapper } from 'common-frontend';
 import type {GameRelay} from 'game';
+import { RelayWrapper } from 'game';
 import { State } from 'boardgame.io';
 import botWrapper from './botwrapper';
+import { sendGameData } from './sendData';
 //import { Debug } from 'boardgame.io/debug';
 
 export function ClientWithBot<T_SpecificGameState,T_SpecificPosition>(
@@ -14,7 +16,7 @@ export function ClientWithBot<T_SpecificGameState,T_SpecificPosition>(
   description: string
   ){ // TODO: types
   return Client({
-    game: gameWrapper(game),
+    game: gameWrapper(game, sendGameData),
     board: boardWrapper(board, description),
     multiplayer: Local(
       {
@@ -32,7 +34,7 @@ export function ClientRelayWithBot(
   strategy: any, //TODO: type (?)
   description: string){ // TODO: types
   return Client({
-    game: game,
+    game: RelayWrapper(sendGameData),
     board: board,
     multiplayer: Local(
       {

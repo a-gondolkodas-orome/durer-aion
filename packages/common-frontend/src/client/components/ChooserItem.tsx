@@ -6,7 +6,7 @@ import { formatTime } from '../utils/DateFormatter';
 import { dictionary } from '../text-constants';
 import { useState } from 'react';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { IS_OFFLINE_MODE } from '../utils/util';
+import { useClientRepo } from '../api-repository-interface';
 
 export function ChooserItem(props: {
   status: MatchStatus,
@@ -18,6 +18,7 @@ export function ChooserItem(props: {
   const startStrategy = useStartStrategy();
 
   const [mobileDescOpen, setMobileDescOpen] = useState(props.status.state !== "FINISHED");
+  const isOffline = useClientRepo().version === "OFFLINE";
 
   return (
     <Stack sx={{
@@ -128,7 +129,7 @@ export function ChooserItem(props: {
       }} disabled={props.status.state !== "NOT STARTED"}>
         {dictionary.chooser.start}
       </Button>
-      {!IS_OFFLINE_MODE &&
+      { !isOffline &&
       <Button sx={{
         width: '70%',
         maxWidth: "400px",

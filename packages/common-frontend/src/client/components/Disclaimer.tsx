@@ -2,10 +2,11 @@ import { Button } from "@mui/material";
 import { Stack } from "@mui/system";
 import { dictionary } from "../text-constants";
 import { useToHome } from "../hooks/user-hooks";
-import { IS_OFFLINE_MODE } from "../utils/util";
+import { useClientRepo } from "../api-repository-interface";
 
 export function Disclaimer() {
   const goHome = useToHome();
+  const isOffline = useClientRepo().version === "OFFLINE";
 
   return (
     <Stack
@@ -85,7 +86,7 @@ export function Disclaimer() {
           }
         }}
       >
-        <span dangerouslySetInnerHTML={{ __html: (IS_OFFLINE_MODE ? dictionary.disclaimer.interfaceDescriptionBHTML : dictionary.disclaimer.interfaceDescription) }}></span>
+        <span dangerouslySetInnerHTML={{ __html: ( isOffline ? dictionary.disclaimer.interfaceDescriptionBHTML : dictionary.disclaimer.interfaceDescription) }}></span>
       </Stack>
 
 

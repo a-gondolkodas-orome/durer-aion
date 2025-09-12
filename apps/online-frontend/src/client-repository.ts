@@ -22,6 +22,9 @@ function makeAxiosError(any_error:any): AxiosError {
 }
 
 export class RealClientRepository implements ClientRepository {
+  
+  version = "ONLINE" as const;
+
   async getTeamState(
     guid: string,
   ): Promise<TeamModelDto> {
@@ -232,4 +235,5 @@ export class RealClientRepository implements ClientRepository {
     }
     return result.data;
   }
+
 }
