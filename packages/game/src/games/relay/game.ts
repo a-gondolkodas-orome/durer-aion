@@ -2,7 +2,6 @@ import { Game } from "boardgame.io";
 import { INVALID_MOVE, TurnOrder } from "boardgame.io/core";
 // import { sendDataRelayEnd } from "../../common/sendData";
 import { GUESSER_PLAYER, JUDGE_PLAYER, otherPlayer, PlayerIDType } from "../../common/types";
-import { Component } from "react";
 // import { IS_OFFLINE_MODE } from "../../client/utils/util";
 
 type Answer = {
