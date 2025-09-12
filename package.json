@@ -49,7 +49,7 @@
     "yup": "^0.32.11"
   },
   "scripts": {
-    "predeploy": "cross-env PUBLIC_URL=/durer-aion REACT_APP_WHICH_VERSION=c npm run build",
+    "predeploy": "cross-env PUBLIC_URL=/durer-aion npm run build",
     "deploy": "gh-pages -d build",
     "lint": "turbo lint",
     "check:server": "babel-node --extensions \".ts\" --presets=@babel/preset-typescript --plugins=@babel/plugin-transform-modules-commonjs src/server.ts sanity-check",
