@@ -75,7 +75,7 @@ export const dictionary = {
     greeting: "Kedves Versenyző!",
     beforeTitle: "Üdvözlünk a",
     afterTitle: "online fordulójának felületén.",
-    loginInstraction: "Belépéshez nézd meg az emailjeidet, és üsd be az ott található "+ process.env.REACT_APP_FEEDBACK_FORM_URL+" kódot ide:",
+    loginInstraction: "Belépéshez nézd meg az emailjeidet, és üsd be az ott található "+ process.env.VITE_TEST +" kódot ide:",
     fallback: "Ha nem találjátok az emailt, akkor írjatok nekünk a verseny [K] durerinfo [P] hu email címre.",
   },
   waitingRoom: {
