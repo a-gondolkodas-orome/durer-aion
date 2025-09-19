@@ -117,6 +117,7 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
           },
         },
         onEnd: ({G, ctx, playerID, events, random, log}) => {
+          localStorage.setItem("StrategyPoints", G.points.toString());
           sendStrategyFunction({component: "strategy", phase: "end", G: G, ctx: ctx});
         }
       },
