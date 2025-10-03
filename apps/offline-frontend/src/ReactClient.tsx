@@ -1,4 +1,5 @@
-import { GameRelay, descriptionC, descriptionD, descriptionE, MyBoard, MyGameWrapper, RelayStrategy,strategyWrapper } from "game";
+import { GameRelay, descriptionC, descriptionD, descriptionE, MyBoard, MyGameWrapper } from "game";
+import { RelayStrategy, strategyWrapper } from "strategy";
 import { InProgressRelay } from "common-frontend";
 import { ClientFactory, ClientFactoryRelay } from "./client_factory";
 

@@ -3,7 +3,7 @@ import { GameType, GUESSER_PLAYER, JUDGE_PLAYER } from '../../common/types';
 // import { sendDataStrategyEnd } from '../../common/sendData';
 // import { IS_OFFLINE_MODE } from '../../client/utils/util';
 
-export interface MyGameState {
+export interface RemoveFromCircleGameState {
   circle: Array<boolean>;
   firstMove: number;
   lastMove: number;
@@ -15,7 +15,7 @@ export const MyGameWrapper = function (category: "C" | "D" | "E") {
     category === "D" ? [true, true, true, true, true, true, true, true, true] :
     category === "E" ? [true, true, true, true, true] :
     [];
-  const MyGame: GameType<MyGameState> = {
+  const MyGame: GameType<RemoveFromCircleGameState> = {
     name: 'remove-from-circle_' + category.toLowerCase(),
     setup: () => {
       return {

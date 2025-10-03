@@ -1,5 +1,5 @@
 import { State } from 'boardgame.io';
-import { MyGameState } from './game';
+import { MyGameState } from 'game';
 
 type Problem = {
   problemText: string;
