@@ -1,6 +1,5 @@
 import { State } from 'boardgame.io';
-import { MyGameState } from './game';
-import { GameStateMixin } from '../../common/types';
+import { GameStateMixin, RemoveFromCircleGameState } from 'game';
 
 
 const strategy = [[[], [], [], [4, 5], [], [], [3, 4], [4], [], [], [], [4, 5], [2, 3], [2, 3], [3], [2, 5], [], [], [], [4, 5], [], [], [3, 4], [4], [1, 2], [1, 2], [1, 2], [1, 2, 4, 5], [2], [2], [1, 4], [1, 3, 5], [], [], [], [4, 5], [], [], [3, 4], [4], [], [], [], [4, 5], [2, 3], [2, 3], [3], [2, 5], [0, 1], [0, 1], [0, 1], [0, 1, 4, 5], [0, 1], [0, 1], [0, 1, 3, 4], [3, 5], [1], [1], [1], [0, 2], [0, 3], [0, 3], [0, 2, 4], [1, 4]],
@@ -16,7 +15,7 @@ function convertToBinary(L: Array<boolean>) {
   return index;
 }
 
-function possibleMoves(G: MyGameState) {
+function possibleMoves(G: RemoveFromCircleGameState) {
   let moves = [];
   if ((G.circle[1] || G.circle[G.circle.length-1]) && G.circle[0]) {
     moves.push({move: 'removePoint', args: [0]});
@@ -33,7 +32,7 @@ function possibleMoves(G: MyGameState) {
 }
 
 export function strategyWrapper(category: "C" | "D" | "E") {
-  return (state: State<MyGameState & GameStateMixin>, botID: string): [number | { circle: Array<boolean> } | undefined, string] => {
+  return (state: State<RemoveFromCircleGameState & GameStateMixin>, botID: string): [number | { circle: Array<boolean> } | undefined, string] => {
     if (state.ctx.phase === "startNewGame") {
       return [startingPosition({ G: state.G, ctx: state.ctx }, category), "setStartingPosition"];
     }
@@ -85,13 +84,13 @@ function startingPosition({ G, ctx }: any, category: "C" | "D" | "E"): { circle:
   return {circle: Array(7).fill(true), firstMove:-1, lastMove:-1};
 }
 
-function randomStrategy(G: MyGameState): [number, string] {
+function randomStrategy(G: RemoveFromCircleGameState): [number, string] {
   let pMoves =  possibleMoves(G);
   let i = Math.floor(Math.random()*pMoves.length);
   return [pMoves[i].args[0], pMoves[i].move];
 }
 
-function winningStrategy(G: MyGameState): [number, string] {
+function winningStrategy(G: RemoveFromCircleGameState): [number, string] {
   let move = 0;
   if (G.firstMove === -1) {
     move = Math.floor(Math.random()*G.circle.length)
