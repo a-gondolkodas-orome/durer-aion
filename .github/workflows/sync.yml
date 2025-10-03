@@ -11,16 +11,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
-      - name: Check if PRIVATE_REPO_NAME is set
-        run: |
-          if [ -z "${{ secrets.PRIVATE_REPO_NAME }}" ]; then
-            echo "Error: PRIVATE_REPO_NAME secret is not set"
-            exit 0
-          fi
-
       - name: Sync with private repository
         run: |
+            # Check if PRIVATE_REPO_NAME is set
+            if [ -z "${{ secrets.PRIVATE_REPO_NAME }}" ]; then
+              echo "Error: PRIVATE_REPO_NAME secret is not set"
+              exit 0
+            fi
             git config --global user.name 'github-actions[bot]'
             git config --global user.email 'github-actions[bot]@users.noreply.github.com'
             git clone https://github.com/a-gondolkodas-orome/durer-aion.git public-repo
@@ -33,3 +30,4 @@ jobs:
               git merge private/${{ github.ref_name }} -X ours -m "Sync from public repository"
             fi
             git push private ${{ github.ref_name }}
+
