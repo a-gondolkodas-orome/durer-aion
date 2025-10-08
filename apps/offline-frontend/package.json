@@ -8,8 +8,8 @@
     "predeploy": "cross-env PUBLIC_URL=/durer-aion npm run build",
     "deploy": "gh-pages -d build",
     "lint": "TIMING=1 eslint \"**/*.ts*\" --max-warnings=0",
-    "start": "cross-env REACT_APP_WHICH_VERSION=b vite",
-    "dev": "cross-env REACT_APP_WHICH_VERSION=b vite",
+    "start": "cross-env vite",
+    "dev": "cross-env vite",
     "build": "vite build",
     "spell-check": "cspell \"**/*.{ts,tsx}\" --no-progress"
   },
