@@ -1,9 +1,10 @@
 import { 
   GameRelay,
   RelayStrategy,
-  MyGameWrapper as strategyGameWrapper,
-  strategyWrapper as StrategyStrategyremovefromcirclee,
+  MyGameWrappers as strategyGameWrappers,
+  StrategyWrappers as StrategyStrategy,
   gameWrapper,
+  strategyNames,
 } from 'game';
 import { PostgresStore } from 'bgio-postgres';
 import { argv, env, exit } from 'process';
@@ -12,7 +13,7 @@ import { Server } from 'boardgame.io/server';
 import botWrapper from './botwrapper';
 import { configureTeamsRouter } from './server/router';
 import { TeamsRepository } from './server/db';
-import { getBotCredentials, getGameStartAndEndTime, relayNames, strategyNames  } from './server/common';
+import { getBotCredentials, getGameStartAndEndTime, relayNames } from './server/common';
 import { import_teams_from_tsv_locally } from './server/team_import';
 
 import auth from 'koa-basic-auth';
@@ -48,9 +49,9 @@ const games = [
   { ...GameRelay, name: relayNames.C },
   { ...GameRelay, name: relayNames.D },
   { ...GameRelay, name: relayNames.E },
-  { ...gameWrapper(strategyGameWrapper("C")), name: strategyNames.C },
-  { ...gameWrapper(strategyGameWrapper("D")), name: strategyNames.D },
-  { ...gameWrapper(strategyGameWrapper("E")), name: strategyNames.E },
+  { ...gameWrapper(strategyGameWrappers.C()), name: strategyNames.C },
+  { ...gameWrapper(strategyGameWrappers.D()), name: strategyNames.D },
+  { ...gameWrapper(strategyGameWrappers.E()), name: strategyNames.E },
 ];
 
 
@@ -58,9 +59,9 @@ const bot_factories = [
   botWrapper(RelayStrategy("C")),
   botWrapper(RelayStrategy("D")),
   botWrapper(RelayStrategy("E")),
-  botWrapper(StrategyStrategyremovefromcirclee("C")),
-  botWrapper(StrategyStrategyremovefromcirclee("D")),
-  botWrapper(StrategyStrategyremovefromcirclee("E")),
+  botWrapper(StrategyStrategy.C()),
+  botWrapper(StrategyStrategy.D()),
+  botWrapper(StrategyStrategy.E()),
 ];
 
 if (argv[2] === "sanity-check") {

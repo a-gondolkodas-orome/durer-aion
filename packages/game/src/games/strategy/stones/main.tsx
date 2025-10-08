@@ -1,0 +1,4 @@
+export const descriptionE = <p className="text-justify">
+<strong>Feladat leírása:</strong> Két kupacban kavicsok vannak elhelyezve, a bal oldaliban n, a jobb oldaliban k darab, amelyekkel két játékos játszik. Felváltva lépnek, és minden lépés során egy kavicsot kell elvenniük valamelyik kupacból. Egy játékos azonban nem vehet el két egymást követő lépésben a bal oldali kupacból. Az veszít, aki nem tud lépni. Döntsétek el a különböző n és k számok esetén, hogy az első vagy a második játékos szeretnétek-e lenni, és győzzétek le egymás után kétszer
+a szervez˝oket!
+</p>

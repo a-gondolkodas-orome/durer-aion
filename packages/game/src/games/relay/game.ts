@@ -104,7 +104,7 @@ export function RelayWrapper(sendRelayFunction = (...inputs: any[]) => {}): Game
             }
           },
           onEnd: ({G, ctx, playerID, events}) => {
-            if (ctx.currentPlayer.toString() === JUDGE_PLAYER) {
+            if (ctx.currentPlayer === JUDGE_PLAYER) {
               let currentTime = new Date();
               if (currentTime.getTime() - new Date(G.end).getTime() >= 0) {
                 // Do not accept any answer if the time is over
