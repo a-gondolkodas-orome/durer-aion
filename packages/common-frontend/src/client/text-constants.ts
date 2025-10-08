@@ -69,7 +69,7 @@ export const dictionary = {
   header: {
     logout: "kilépés",
     subtitle: "Online forduló",
-    title: "XVIII. Dürer Verseny",
+    title: "XIX. Dürer Verseny",
   },
   login: {
     greeting: "Kedves Versenyző!",
