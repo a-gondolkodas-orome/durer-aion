@@ -41,7 +41,9 @@ export const MyGameWrappers = {
 }
 
 export const strategyNames = {
-  C: "19ocd",
-  D: "19ocd",
+  // need to be unique even if the game is the same
+  // should also match up with the name defined in game.ts
+  C: "19oc",
+  D: "19od",
   E: "stones_e",
 }

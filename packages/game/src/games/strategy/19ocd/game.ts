@@ -20,7 +20,7 @@ export function possibleMoves(G: MyGameState) {
 export const MyGameWrapper = function (category: "C" | "D") {
 
   const MyGame: GameType<MyGameState> = {
-    name: '19ocd',
+    name: '19o' + category, 
     setup: () => {
       return {
         numbersOnTable: Array(7).fill(true),
