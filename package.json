@@ -49,8 +49,8 @@
     "yup": "^0.32.11"
   },
   "scripts": {
-    "predeploy": "cross-env PUBLIC_URL=/durer-aion npm run build",
-    "deploy": "gh-pages -d build",
+    "predeploy": "npx turbo run build --filter=offline-frontend && npm run predeploy --workspace=offline-frontend",
+    "deploy": "gh-pages -d apps/offline-frontend/dist",
     "lint": "turbo lint",
     "check:server": "babel-node --extensions \".ts\" --presets=@babel/preset-typescript --plugins=@babel/plugin-transform-modules-commonjs src/server.ts sanity-check",
     "start": "turbo start",
