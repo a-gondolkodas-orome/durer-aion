@@ -118,7 +118,7 @@ export function MyBoard({ G, ctx, moves }: MyGameProps, theme: any) {
         
         <Button 
           variant='contained' 
-          color='secondary'
+          color='primary'
           disabled={ctx.phase !== 'play' || !canTakeFromRight || ctx.currentPlayer !== GUESSER_PLAYER} 
           onClick={() => moves.takeStone(false)}
           sx={{ minWidth: '150px' }}

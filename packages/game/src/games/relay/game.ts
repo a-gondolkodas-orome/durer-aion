@@ -114,7 +114,9 @@ export function RelayWrapper(sendRelayFunction = (...inputs: any[]) => {}): Game
           }
         },
         onEnd: ({G, ctx, playerID, events, random, log}) => {
-          localStorage.setItem("RelayPoints", G.points.toString());
+          if (typeof localStorage !== "undefined") {
+            localStorage.setItem("RelayPoints", G.points.toString());
+          }
         },
         moves: {
           newProblem({ G, ctx, playerID, events }, problemText: string, nextProblemMaxPoints: number, correctnessPreviousAnswer: boolean, url: string) {
