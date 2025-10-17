@@ -9,7 +9,7 @@ export interface MyGameState {
 
 export const MyGameWrapper = (category: "E") => {
   // Set initial stones based on category
-  const initialConfig = {left: 9, right: 10};
+  const initialConfig = {left: 0, right: 0};
 
   const MyGame: GameType<MyGameState> = {
     name: "stones_e",
