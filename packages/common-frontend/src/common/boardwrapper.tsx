@@ -101,7 +101,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
             // fontWeight: 'bold',
           }}>
             {description}
-            <strong>Tudnivalók: </strong>Az "Új próbajáték" gombra kattintva próbajáték indul, ami a pontozásba nem számít bele. Bátran kérjetek próbajátékot, hiszen ezzel tudjátok tesztelni, hogy jól értitek-e a játék működését. Az "Új éles játék" gombra kattintva indul a valódi játék, ami már pontért megy.
+            <strong>Tudnivalók: </strong>Az "Új próbajáték kezdése" gombra kattintva próbajáték indul, ami a pontozásba nem számít bele. Bátran kérjetek próbajátékot, hiszen ezzel tudjátok tesztelni, hogy jól értitek-e a játék működését. Az "Új éles játék kezdése" gombra kattintva indul a valódi játék, ami már pontért megy.
 
           </Stack>
 

@@ -60,7 +60,7 @@ const problems : RelayProblems ={
       url: "https://durerimages.s3.eu-north-1.amazonaws.com/19o/UpvXdoGFEJHZA56V-3x3.png",
     },
     {
-      problemText: "Az ábrán látható kék hatszög minden szöge ugyanakkora, területe $1820$ egység, az oldalainak aránya sorban $1:2:1:2:1:2$. Az oldalegyenesek metszéspontjait az ábrán látható módon összekötve kapunk egy nagyobb hatszöget. Hány egység a nagy hatszög területe?",
+      problemText: "Az ábrán látható kék hatszög minden szöge ugyanakkora, területe $1820$ egység, az oldalainak aránya sorban a következő: $$1:2:1:2:1:2$$. Az oldalegyenesek metszéspontjait az ábrán látható módon összekötve kapunk egy nagyobb hatszöget. Hány egység a nagy hatszög területe?",
       answer: 5600,
       points: 6,
       url: "https://durerimages.s3.eu-north-1.amazonaws.com/19o/SPHlriToBM5z92YK-hatszog_terulet.png",
@@ -101,7 +101,7 @@ const problems : RelayProblems ={
       url: "https://durerimages.s3.eu-north-1.amazonaws.com/19o/UpvXdoGFEJHZA56V-3x3.png",
     },
     {
-      problemText: "Az ábrán látható kék hatszög minden szöge ugyanakkora, területe $1820$ egység, az oldalainak aránya sorban $1:2:1:2:1:2$. Az oldalegyenesek metszéspontjait az ábrán látható módon összekötve kapunk egy nagyobb hatszöget. Hány egység a nagy hatszög területe?",
+      problemText: "Az ábrán látható kék hatszög minden szöge ugyanakkora, területe $1820$ egység, az oldalainak aránya sorban a következő $$1:2:1:2:1:2$$. Az oldalegyenesek metszéspontjait az ábrán látható módon összekötve kapunk egy nagyobb hatszöget. Hány egység a nagy hatszög területe?",
       answer: 5600,
       points: 5,
       url: "https://durerimages.s3.eu-north-1.amazonaws.com/19o/SPHlriToBM5z92YK-hatszog_terulet.png",
@@ -142,7 +142,7 @@ const problems : RelayProblems ={
       url: "https://durerimages.s3.eu-north-1.amazonaws.com/19o/UpvXdoGFEJHZA56V-3x3.png",
     },
     {
-      problemText: "Az ábrán látható kék hatszög minden szöge ugyanakkora, területe $1820$ egység, az oldalainak aránya sorban $1:2:1:2:1:2$. Az oldalegyenesek metszéspontjait az ábrán látható módon összekötve kapunk egy nagyobb hatszöget. Hány egység a nagy hatszög területe?",
+      problemText: "Az ábrán látható kék hatszög minden szöge ugyanakkora, területe $1820$ egység, az oldalainak aránya sorban a következő: $$1:2:1:2:1:2$$. Az oldalegyenesek metszéspontjait az ábrán látható módon összekötve kapunk egy nagyobb hatszöget. Hány egység a nagy hatszög területe?",
       answer: 5600,
       points: 4,
       url: "https://durerimages.s3.eu-north-1.amazonaws.com/19o/SPHlriToBM5z92YK-hatszog_terulet.png",

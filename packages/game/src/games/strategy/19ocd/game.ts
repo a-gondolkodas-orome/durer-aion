@@ -23,7 +23,7 @@ export const MyGameWrapper = function (category: "C" | "D") {
     name: '19o' + category, 
     setup: () => {
       return {
-        numbersOnTable: Array(7).fill(true),
+        numbersOnTable: Array(8).fill(true),
         previousMove: -1,
       }
     },

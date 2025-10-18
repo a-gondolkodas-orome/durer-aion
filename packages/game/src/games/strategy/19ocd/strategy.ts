@@ -27,7 +27,7 @@ function startingPosition({ G, ctx }: any, category: "C" | "D"): MyGameState | u
         return { numbersOnTable: Array(7).fill(true), previousMove:-1};
       }
     } else {
-      return { numbersOnTable: Array(Math.floor(Math.random()*2+6)).fill(true), previousMove:-1};
+      return { numbersOnTable: Array([3,4,5,8,9][Math.floor(Math.random()*5)]).fill(true), previousMove:-1};
     }
   }
   if (category === "D") {
@@ -38,7 +38,7 @@ function startingPosition({ G, ctx }: any, category: "C" | "D"): MyGameState | u
         return { numbersOnTable: Array(11).fill(true), previousMove:-1};
       }
     } else {
-      return { numbersOnTable: Array(Math.floor(Math.random()*2+10)).fill(true), previousMove:-1};
+      return { numbersOnTable: Array([3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13][Math.floor(Math.random()*11)]).fill(true), previousMove:-1};
     }
   }
   
