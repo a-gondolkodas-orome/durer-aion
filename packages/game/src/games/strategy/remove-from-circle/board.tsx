@@ -1,11 +1,11 @@
-import { MyGameState } from './game';
+import { RemoveFromCircleGameState } from './game';
 import { BoardProps } from 'boardgame.io/react';
 // import { sendDataStrategyStep } from '../../common/sendData';
 import { range } from "lodash";
 // import { IS_OFFLINE_MODE } from '../../client/utils/util';
 
 
-interface MyGameProps extends BoardProps<MyGameState> { }
+interface MyGameProps extends BoardProps<RemoveFromCircleGameState> { }
 
 export function MyBoard({ G, ctx, moves }: MyGameProps) {
 
