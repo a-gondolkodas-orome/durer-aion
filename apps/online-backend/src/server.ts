@@ -1,11 +1,11 @@
 import { 
   GameRelay,
-  RelayStrategy,
   MyGameWrappers as strategyGameWrappers,
   StrategyWrappers as StrategyStrategy,
   gameWrapper,
   strategyNames,
 } from 'game';
+import { RelayStrategy } from 'strategy';
 //import { 
 //  RelayStrategy,
 //  strategyWrapper as StrategyStrategyremovefromcirclee,

@@ -1,10 +1,5 @@
 import { State } from 'boardgame.io';
-<<<<<<<< HEAD:packages/game/src/games/strategy/remove-from-circle/strategy.ts
-import { MyGameState } from './game';
-import { GameStateMixin } from '../../../common/types';
-========
 import { GameStateMixin, RemoveFromCircleGameState } from 'game';
->>>>>>>> origin/main:packages/strategy/src/games/remove-from-circle/strategy.ts
 
 
 const strategy = [[[], [], [], [4, 5], [], [], [3, 4], [4], [], [], [], [4, 5], [2, 3], [2, 3], [3], [2, 5], [], [], [], [4, 5], [], [], [3, 4], [4], [1, 2], [1, 2], [1, 2], [1, 2, 4, 5], [2], [2], [1, 4], [1, 3, 5], [], [], [], [4, 5], [], [], [3, 4], [4], [], [], [], [4, 5], [2, 3], [2, 3], [3], [2, 5], [0, 1], [0, 1], [0, 1], [0, 1, 4, 5], [0, 1], [0, 1], [0, 1, 3, 4], [3, 5], [1], [1], [1], [0, 2], [0, 3], [0, 3], [0, 2, 4], [1, 4]],
