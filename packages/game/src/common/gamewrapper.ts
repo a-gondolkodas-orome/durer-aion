@@ -101,7 +101,7 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
               return G.firstPlayer === GUESSER_PLAYER ? 0 : 1;
             },
             next: ({ ctx }) => {
-              return (ctx.playOrderPos + 1) % ctx.numPlayers
+              return (ctx.playOrderPos + 1) % ctx.numPlayers;
             },
           },
           ...(!("turn" in game) && {
@@ -117,7 +117,9 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
           },
         },
         onEnd: ({G, ctx, playerID, events, random, log}) => {
-          localStorage.setItem("StrategyPoints", G.points.toString());
+          if (typeof localStorage !== "undefined") {
+            localStorage.setItem("StrategyPoints", G.points.toString());
+          }
           sendStrategyFunction({component: "strategy", phase: "end", G: G, ctx: ctx});
         }
       },

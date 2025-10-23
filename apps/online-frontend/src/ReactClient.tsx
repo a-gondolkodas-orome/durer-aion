@@ -1,18 +1,17 @@
-import React from "react";
-import { GameRelay, descriptionC, descriptionD, descriptionE, MyBoard, MyGameWrapper } from "game";
+import { GameRelay, descriptionC, descriptionD, descriptionE, MyBoardWrapper, MyGameWrappers, strategyNames } from "game";
 import { ClientFactory, ClientFactoryRelay, InProgressRelay } from "common-frontend";
 
-const GameCircleC = MyGameWrapper("C");
-const GameCircleD = MyGameWrapper("D");
-const GameCircleE = MyGameWrapper("E");
+const GameC = MyGameWrappers.C();
+const GameD = MyGameWrappers.D();
+const GameE = MyGameWrappers.E();
 
 let description = <p className="text-justify"></p>
 export const { Client:RelayClient_C, OnlineClient:RelayOnlineClient_C } = ClientFactoryRelay({...GameRelay, name: "relay_c"}, InProgressRelay, description);
 export const { Client:RelayClient_D, OnlineClient:RelayOnlineClient_D } = ClientFactoryRelay({...GameRelay, name: "relay_d"}, InProgressRelay, description);
 export const { Client:RelayClient_E, OnlineClient:RelayOnlineClient_E } = ClientFactoryRelay({...GameRelay, name: "relay_e"}, InProgressRelay, description);
-export const { Client: Client_C, OnlineClient: StrategyOnlineClient_C } = ClientFactory({...GameCircleC, name: "remove-from-circle_c"}, MyBoard, descriptionC);
-export const { Client: Client_D, OnlineClient: StrategyOnlineClient_D } = ClientFactory({...GameCircleD, name: "remove-from-circle_d"}, MyBoard, descriptionD);
-export const { Client: Client_E, OnlineClient: StrategyOnlineClient_E } = ClientFactory({...GameCircleE, name: "remove-from-circle_e"}, MyBoard, descriptionE);
+export const { Client: Client_C, OnlineClient: StrategyOnlineClient_C } = ClientFactory({...GameC, name: strategyNames.C}, MyBoardWrapper("C"), descriptionC);
+export const { Client: Client_D, OnlineClient: StrategyOnlineClient_D } = ClientFactory({...GameD, name: strategyNames.D}, MyBoardWrapper("D"), descriptionD);
+export const { Client: Client_E, OnlineClient: StrategyOnlineClient_E } = ClientFactory({...GameE, name: strategyNames.E}, MyBoardWrapper("E"), descriptionE);
 
 
 const DURER_XVI_CLIENT_C_RELAY = RelayOnlineClient_C;
