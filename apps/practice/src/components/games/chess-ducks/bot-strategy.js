@@ -4,7 +4,7 @@ import { shuffle, sample } from "lodash";
 
 /* This strategy file is relevant for the 4x7 case */
 const [ROWS, COLS] = [4, 7];
-const [DUCK] = [1, 2];
+const [DUCK] = [1];
 
 const flipH = ([r, c]) => [ROWS - 1 - r, c];
 const flipV = ([r, c]) => [r, COLS - 1 - c];
@@ -18,6 +18,8 @@ const getOptimalAiMove = (board) => {
   const allowedMoves = getAllowedMoves(board);
   const boardIndices = getBoardIndices(board.length, board[0].length);
 
+  const colCount = board[0].length;
+
   const ducks = boardIndices.filter(({ row, col }) => board[row][col] === DUCK);
   const duckCount = ducks.length;
 
@@ -27,19 +29,19 @@ const getOptimalAiMove = (board) => {
   }
 
   // live search is too slow
-  if (duckCount === 1 && COLS === 7) {
+  if (duckCount === 1 && colCount === 7) {
     return aiOptimalSecondSteps[`${ducks[0].row};${ducks[0].col}`];
   }
 
   // use pre-calculated optimal 3rd moves as live calculation would be too slow
-  if (duckCount == 2 && COLS === 7) {
+  if (duckCount == 2 && colCount === 7) {
     const optimalPlace = getOptimalThirdStep(board);
     if (optimalPlace !== undefined) {
       return optimalPlace;
     }
   }
 
-  if (duckCount >= 3 || COLS === 6) {
+  if (duckCount >= 3 || colCount === 6) {
     // sample + find has the same effect as filter + sample: find a random
     // from the optimal moves
     const optimalPlace = shuffle(allowedMoves).find(({ row, col }) => {
