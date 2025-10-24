@@ -10,14 +10,10 @@ export default defineConfig(
     files: ['**/*.{js,mjs,cjs,ts,tsx}'],
     extends: [
       eslint.configs.recommended,
-      tseslint.configs.strict,
+      tseslint.configs.recommended,
       tseslint.configs.stylistic,
+      tseslint.configs.strict,
     ],
-  },
-  // Apply stylistic rules to source files
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [...tseslint.configs.stylistic],
   },
   // Type-aware linting for source TypeScript files
   {
