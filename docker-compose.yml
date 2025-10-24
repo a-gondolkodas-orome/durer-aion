@@ -24,6 +24,8 @@ services:
       - ./packages/game:/usr/src/app/packages/game
       - ./packages/schemas:/usr/src/app/packages/schemas
       - ./packages/strategy:/usr/src/app/packages/strategy
+      # Mount scripts folder
+      - ./scripts:/usr/src/app/scripts
       # Keep node_modules from image (avoid reinstall each time)
       # - /usr/src/app/node_modules
       # Keep dist from image (so build output survives)

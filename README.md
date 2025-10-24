@@ -73,7 +73,7 @@ You should be up and running the application on `localhost`.
 ### Importing teams
 
 ```bash
-docker exec -t durer-aion_backend_1 ./import_teams.sh ./test.tsv
+docker exec -t durer-aion_backend_1 ./scripts/import_teams.sh ./scripts/test.tsv
 ```
 
 ### Reload frontend manually
@@ -111,11 +111,11 @@ sudo docker run -it --rm -e POSTGRESQL_PASSWORD=postgres -p 127.0.0.1:5432:5432 
 
 On linux/unix
 ```bash
-./import_teams.sh test.tsv
+./scripts/import_teams.sh scripts/test.tsv
 ```
 On Windows
 ```powershell
-.\import_teams.ps1 test.tsv
+.\scripts\import_teams.ps1 scripts\test.tsv
 ```
 
 
