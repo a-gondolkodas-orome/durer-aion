@@ -59,7 +59,6 @@ export class RealClientRepository implements ClientRepository {
   async joinWithCode(
     code: string,
   ): Promise<string> {
-    console.log('Server URL:', import.meta.env.VITE_SERVER_URL);
     const url = urlcat('team/join/:code', {
       code,
     });
