@@ -2,9 +2,10 @@ import urlcat from "urlcat";
 import axios, { AxiosInstance,AxiosError } from 'axios';
 import { ClientRepository, TeamModelDto, MatchStateDto } from "common-frontend";
 
+const serverUrl = import.meta.env.VITE_SERVER_URL || '/';
 class ApiAxios {
   static instance(): AxiosInstance {
-    let apiUrl = '/'; // TODO: env or something
+    let apiUrl = serverUrl; // TODO: env or something
 
     return axios.create({
       baseURL: apiUrl,
