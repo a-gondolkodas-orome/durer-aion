@@ -25,6 +25,16 @@ All demos are in Hungarian.
 npm ci
 ```
 
+## Running offline-frontend
+
+Create the `apps/offline-frontend/.env` file by copying the `.env.sample` in that folder. Then run:
+
+```
+npm run dev-offline
+```
+
+Offline frontend reloads automatically (except if you change `.env` file), but does not have a debugger yet.
+
 ## Running developer environment -- Docker way
 
 Frontend needs to be built after every change, but the server auto-reloads.

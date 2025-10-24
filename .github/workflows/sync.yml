@@ -3,7 +3,6 @@ name: sync
 on:
   push:
     branches:
-      - main
       - sync-*
 
 jobs:
@@ -30,4 +29,3 @@ jobs:
               git merge private/${{ github.ref_name }} -X ours -m "Sync from public repository"
             fi
             git push private ${{ github.ref_name }}
-

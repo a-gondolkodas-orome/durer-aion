@@ -8,8 +8,8 @@
     "predeploy": "cross-env PUBLIC_URL=/durer19o-xn7ElDP7nQm2M1 npm run build",
     "deploy": "gh-pages -d dist",
     "lint": "TIMING=1 eslint \"**/*.ts*\" --max-warnings=0",
-    "start": "cross-env REACT_APP_WHICH_VERSION=b vite",
-    "dev": "cross-env REACT_APP_WHICH_VERSION=b vite",
+    "start": "vite",
+    "dev": "vite",
     "build": "vite build",
     "spell-check": "cspell \"**/*.{ts,tsx}\" --no-progress"
   },
