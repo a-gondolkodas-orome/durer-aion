@@ -118,11 +118,11 @@ npm run dev:server
 ```
 > This starts the backend with the earlier started db. Changing the code of server it auto-reloads itself.
 ```bash
-npx react-scripts start
+npm run dev:online
 ```
 > This starts the frontend. Changing the code of frontend it auto-reloads itself. Note: you can use the backend without the frontend.
 
-You should be up and running the application on `localhost:3000`.
+You should be up and running the application on `localhost:5173`.
 
 ### Debugging
 VS code gives you two options to debug the application. Both of them needs some setup first, and they can't be used at the same time.

@@ -6,12 +6,13 @@ const GameD = MyGameWrappers.D();
 const GameE = MyGameWrappers.E();
 
 let description = <p className="text-justify"></p>
-export const { Client:RelayClient_C, OnlineClient:RelayOnlineClient_C } = ClientFactoryRelay({...GameRelay, name: "relay_c"}, InProgressRelay, description);
-export const { Client:RelayClient_D, OnlineClient:RelayOnlineClient_D } = ClientFactoryRelay({...GameRelay, name: "relay_d"}, InProgressRelay, description);
-export const { Client:RelayClient_E, OnlineClient:RelayOnlineClient_E } = ClientFactoryRelay({...GameRelay, name: "relay_e"}, InProgressRelay, description);
-export const { Client: Client_C, OnlineClient: StrategyOnlineClient_C } = ClientFactory({...GameC, name: strategyNames.C}, MyBoardWrapper("C"), descriptionC);
-export const { Client: Client_D, OnlineClient: StrategyOnlineClient_D } = ClientFactory({...GameD, name: strategyNames.D}, MyBoardWrapper("D"), descriptionD);
-export const { Client: Client_E, OnlineClient: StrategyOnlineClient_E } = ClientFactory({...GameE, name: strategyNames.E}, MyBoardWrapper("E"), descriptionE);
+const serverUrl = import.meta.env.VITE_SERVER_URL;
+export const { Client:RelayClient_C, OnlineClient:RelayOnlineClient_C } = ClientFactoryRelay({...GameRelay, name: "relay_c"}, InProgressRelay, description, serverUrl);
+export const { Client:RelayClient_D, OnlineClient:RelayOnlineClient_D } = ClientFactoryRelay({...GameRelay, name: "relay_d"}, InProgressRelay, description, serverUrl);
+export const { Client:RelayClient_E, OnlineClient:RelayOnlineClient_E } = ClientFactoryRelay({...GameRelay, name: "relay_e"}, InProgressRelay, description, serverUrl);
+export const { Client: Client_C, OnlineClient: StrategyOnlineClient_C } = ClientFactory({...GameC, name: strategyNames.C}, MyBoardWrapper("C"), descriptionC, serverUrl);
+export const { Client: Client_D, OnlineClient: StrategyOnlineClient_D } = ClientFactory({...GameD, name: strategyNames.D}, MyBoardWrapper("D"), descriptionD, serverUrl);
+export const { Client: Client_E, OnlineClient: StrategyOnlineClient_E } = ClientFactory({...GameE, name: strategyNames.E}, MyBoardWrapper("E"), descriptionE, serverUrl);
 
 
 const DURER_XVI_CLIENT_C_RELAY = RelayOnlineClient_C;
