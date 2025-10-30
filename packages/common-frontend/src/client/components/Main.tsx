@@ -4,13 +4,22 @@ import { useTeamState, LoadTeamState } from "../hooks/user-hooks";
 import { Header } from "./Header";
 import { Layout } from "./Layout";
 import { Login } from "./Login";
-import { Relay } from "./teamstates/Relay";
-import { Strategy } from "./teamstates/Strategy";
 import { Disclaimer } from "./Disclaimer";
 import { Chooser } from "./Chooser";
 import { Admin } from "./Admin";
+import { TeamModelDto } from "../dto/TeamStateDto";
 
-export function Main() {
+type MainProps = {
+  Strategy: React.ComponentType<{ state: TeamModelDto }>;
+  Relay: React.ComponentType<{ state: TeamModelDto }>;
+};
+
+export function Main(
+{
+  Strategy,
+  Relay,
+}: MainProps
+) {
   const teamState = useTeamState();
   const [frontendState, setFrontEndState] = useState<"R" | "S" | null>(null);
   const [admin, setAdmin] = useState<boolean>(false);

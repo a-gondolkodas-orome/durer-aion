@@ -5,7 +5,7 @@ import React from "react";
 
 const testId = "strategyRoot";
 
-export function Strategy(props: { state: TeamModelDto }) {
+function Strategy(props: { state: TeamModelDto }) {
   const StrategyClient = useGame().StrategyClient;
   switch (props.state.strategyMatch.state) {
     case "FINISHED":
@@ -24,3 +24,5 @@ export function Strategy(props: { state: TeamModelDto }) {
       return <div data-testId={testId}>{dictionary.strategy.notSupported}</div>;
   }
 }
+
+export default Strategy;

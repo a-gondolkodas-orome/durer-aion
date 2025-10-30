@@ -5,7 +5,7 @@ import React from "react";
 
 const testId = "relayRoot";
 
-export function Relay(props: { state: TeamModelDto }) {
+function Relay(props: { state: TeamModelDto }) {
   const { RelayClient } = useGame();
   switch (props.state.relayMatch.state) {
     case "FINISHED":
@@ -24,3 +24,5 @@ export function Relay(props: { state: TeamModelDto }) {
       return <div data-testId={testId}>{dictionary.relay.badCategory}</div>;
   }
 }
+
+export default Relay;

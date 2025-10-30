@@ -14,9 +14,20 @@ function App() {
     }}>
       <ClientRepoProvider 
         value={new OfflineClientRepository()}>
-        <Main />
+        <MainWrap />
       </ClientRepoProvider>
     </GameProvider>
+  )
+}
+
+function MainWrap() {
+  const Strategy = React.lazy(() => import('common-frontend').then(module => ({ default: module.Strategy })));
+  const Relay = React.lazy(() => import('common-frontend').then(module => ({ default: module.Relay })));
+  
+  return (
+    <React.Suspense fallback={<div>Loading...</div>}>
+      <Main Strategy={Strategy} Relay={Relay} />
+    </React.Suspense>
   )
 }
 
