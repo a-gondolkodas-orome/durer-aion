@@ -8,6 +8,23 @@
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "license": "MIT",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./Strategy": {
+      "import": "./dist/Strategy.mjs",
+      "require": "./dist/Strategy.js",
+      "types": "./dist/Strategy.d.ts"
+    },
+    "./Relay": {
+      "import": "./dist/Relay.mjs",
+      "require": "./dist/Relay.js",
+      "types": "./dist/Relay.d.ts"
+    }
+  },
   "scripts": {
     "lint": "TIMING=1 eslint \"src/**/*.ts*\" --max-warnings=0",
     "test": "jest --passWithNoTests",

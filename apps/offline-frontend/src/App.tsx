@@ -21,8 +21,8 @@ function App() {
 }
 
 function MainWrap() {
-  const Strategy = React.lazy(() => import('common-frontend').then(module => ({ default: module.Strategy })));
-  const Relay = React.lazy(() => import('common-frontend').then(module => ({ default: module.Relay })));
+  const Strategy = React.lazy(() => import('common-frontend/Strategy'));
+  const Relay = React.lazy(() => import('common-frontend/Relay'));
   
   return (
     <React.Suspense fallback={<div>Loading...</div>}>

@@ -11,7 +11,7 @@ const envVars = Object.keys(process.env)
   }, {} as Record<string, string>);
 
 export default defineConfig({
-  entry: ['index.ts'],
+  entry: ['index.ts', 'relay.tsx', 'strategy.tsx'],
   format: ['esm', 'cjs'],
   dts: true,
   outDir: 'dist',

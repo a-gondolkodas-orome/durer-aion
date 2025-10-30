@@ -20,8 +20,6 @@ export * from './components/theme';
 export * from './components/WaitingRoom';
 export * from './components/teamstates/Finished';
 export * from './components/teamstates/InProgressRelay';
-export * from './components/teamstates/Relay';
-export * from './components/teamstates/Strategy';
 export * from './components/teamstates/GameContext';
 export * from './dto/TeamStateDto';
 export * from './hooks/user-atom';
