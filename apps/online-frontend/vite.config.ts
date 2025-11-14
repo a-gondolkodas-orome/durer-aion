@@ -8,14 +8,13 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          // Split description files into a separate chunk
-          if (id.includes('packages/game/src/games/strategy') &&
-              (id.includes('/main.tsx') || id.includes('/main.ts'))) {
+          // Split game description files into a separate chunk
+          // These contain the problem text that should only load when the game starts
+          if (id.includes('/game/src/games/strategy/') && id.includes('/main.')) {
             return 'game-descriptions';
           }
-          // Split the descriptions wrapper into its own chunk
-          if (id.includes('apps/online-frontend/src/descriptions')) {
-            return 'descriptions';
+          if (id.includes('/ReactClient.')) {
+            return 'react-client';
           }
         }
       }
