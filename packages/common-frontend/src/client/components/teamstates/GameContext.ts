@@ -1,8 +1,8 @@
 import { createContext, ReactNode, useContext } from "react";
 
 type GameContextType = {
-  RelayClient?: ReactNode,
-  StrategyClient?: ReactNode,
+  RelayClient?: React.ComponentType<any>,
+  StrategyClient?: React.ComponentType<any>,
 }
 
 const GameContext = createContext<GameContextType>({});

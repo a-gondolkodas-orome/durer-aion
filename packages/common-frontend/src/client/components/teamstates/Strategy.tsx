@@ -1,7 +1,7 @@
 import { InProgressMatchStatus, TeamModelDto } from "../../dto/TeamStateDto";
 import { useGame } from "./GameContext";
 import { dictionary } from "../../text-constants";
-import React from "react";
+import React, { Suspense } from "react";
 
 const testId = "strategyRoot";
 
@@ -12,11 +12,14 @@ function Strategy(props: { state: TeamModelDto }) {
     case "IN PROGRESS":
       return (
         <div data-testId={testId}>
-          {StrategyClient ? React.cloneElement(StrategyClient as React.ReactElement, {
-            "category": props.state.category as "C" | "D" | "E",
-            "credentials": props.state.credentials,
-            "matchID": (props.state.strategyMatch as InProgressMatchStatus).matchID,
-          }) : <>no strategy client in game context</>}
+          
+          {StrategyClient ? <Suspense fallback={<div>Játék betöltése…</div>}>
+            <StrategyClient
+              category={props.state.category as "C" | "D" | "E"}
+              credentials={props.state.credentials}
+              matchID={(props.state.strategyMatch  as InProgressMatchStatus).matchID}
+            />
+          </Suspense> : <>no strategy client in game context</>}
         </div>
       );
     case "NOT STARTED":
