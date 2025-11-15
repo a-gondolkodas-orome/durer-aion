@@ -10,9 +10,6 @@ export default defineConfig({
         manualChunks(id) {
           // Split game description files into a separate chunk
           // These contain the problem text that should only load when the game starts
-          if (id.includes('/game/src/games/strategy/') && id.includes('/main.')) {
-            return 'game-descriptions';
-          }
           if (id.includes('/ReactClient.')) {
             return 'react-client';
           }
