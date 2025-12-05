@@ -151,3 +151,10 @@ export const useStartStrategy = () => {
     setTeamState(state);
   };
 };
+
+export const useRemoveTeam = () => {
+  const repo = useClientRepo();
+  return async (teamId: string) => {
+    await repo.removeTeam(teamId);
+  };
+};

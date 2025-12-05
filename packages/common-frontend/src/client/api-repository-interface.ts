@@ -27,9 +27,8 @@ export interface ClientRepository {
   resetRelay(teamId: String): Promise<TeamModelDto>
   resetStrategy(teamId: String): Promise<TeamModelDto>
   addMinutes(matchId: String, minutes: number): Promise<String>
-
+  removeTeam(teamId: string): Promise<void>;
 }
-
 
 export class MockClientRepository implements ClientRepository {
   version = "MOCK" as const;
@@ -239,7 +238,9 @@ export class MockClientRepository implements ClientRepository {
   addMinutes(matchId: String, minutes: number): Promise<String> {
     return Promise.resolve("OK");
   }
-
+  removeTeam(teamId: string): Promise<void> {
+    throw Error("NOT call this");
+  }
 }
 
 export const ClientRepoContext = createContext<ClientRepository | null>(null);

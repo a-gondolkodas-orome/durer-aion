@@ -237,4 +237,16 @@ export class RealClientRepository implements ClientRepository {
     return result.data;
   }
 
+  async removeTeam(teamId: string): Promise<void> {
+    const url = urlcat('/team/admin/:teamId/remove', {
+      teamId: teamId,
+    });
+    try {
+      await ApiAxios.instance().delete(url);
+    } catch (e: any) {
+      const err = makeAxiosError(e);
+      console.error(err.message)
+      throw e;
+    }
+  }
 }
