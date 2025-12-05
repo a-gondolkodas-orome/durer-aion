@@ -1,6 +1,6 @@
 import { LOCAL_STORAGE_TEAMSTATE } from "../api-repository-interface";
-import { ClientRepository } from "../api-repository-interface";
-import { MatchStateDto, TeamModelDto } from "../dto/TeamStateDto";
+import type { ClientRepository } from "../api-repository-interface";
+import type { MatchStateDto, TeamModelDto } from "../dto/TeamStateDto";
 
 const LOCAL_STORAGE_GUID = "kjqAEKeFkMpOvOZrzcvp";
 
@@ -99,10 +99,9 @@ export class UserModel {
     }
   }
 
-  async removeTeam(guid: string): Promise<void> {
-    const repo = new ClientRepository();
+  async removeTeam(teamId: string): Promise<void> {
     try {
-      await repo.removeTeam(guid);
+      await this.repo.removeTeam(teamId);
     }
     catch (e) {
       console.log(e);

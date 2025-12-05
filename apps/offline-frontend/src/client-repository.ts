@@ -103,6 +103,9 @@ export class OfflineClientRepository implements ClientRepository {
   async getMatchLogs(matchId: String): Promise<MatchStateDto> {
     throw Error("NOT call this");
   }
+  async removeTeam(teamId: string): Promise<void> {
+    throw Error("NOT call this");
+  }
 
   joinWithCode(joinCode: string): Promise<string> {
     // return the  if it is in the teamData.ts file

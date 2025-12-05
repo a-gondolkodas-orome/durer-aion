@@ -153,7 +153,8 @@ export const useStartStrategy = () => {
 };
 
 export const useRemoveTeam = () => {
-  return async (guid: string) => {
-    await userModel.removeTeam(guid);
+  const repo = useClientRepo();
+  return async (teamId: string) => {
+    await repo.removeTeam(teamId);
   };
 };

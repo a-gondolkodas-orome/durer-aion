@@ -241,17 +241,8 @@ export function Admin(props: {teamId?: String}) {
           hozzáadás
         </Button>
         </Stack>
-<<<<<<< HEAD:packages/common-frontend/src/client/components/Admin.tsx
-        <ErrorMessage name="time" render={msg => (
-          <Stack sx={{ color: 'red', fontSize: '0.875rem' }}>
-            {msg}
-          </Stack>
-        )}/>
-      </ Form>
-=======
-        <ErrorMessage name="time" sx={{color:'red'}}/>
+        <ErrorMessage name="time"/>
       </Form>
->>>>>>> 5f5ae01 (use the user model and hooks properly to remove teams):src/client/components/Admin.tsx
       </Stack>}
       {!teamFromPath && data &&
         <Button
