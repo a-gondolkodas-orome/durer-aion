@@ -19,4 +19,9 @@ export const deletedTeamAttributes: ModelAttributes = {
     type: DataTypes.DATE,
     primaryKey: true,
   },
+  deletionId: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
+  }
 };

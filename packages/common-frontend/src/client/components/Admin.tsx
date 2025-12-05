@@ -251,7 +251,7 @@ export function Admin(props: {teamId?: String}) {
           sx={{ margin: '10px 0', maxWidth: 300 }}
           onClick={() => {
             setConfirmDialog({
-              text: `Biztosan törlöd az összes csapatot? Ez a művelet nem visszavonható!`,
+              text: 'Biztosan törlöd az összes csapatot? Ez a művelet nem visszavonható!',
               confirm: async () => {
                 try {
                   data.forEach(team => removeTeam(team.teamId));
