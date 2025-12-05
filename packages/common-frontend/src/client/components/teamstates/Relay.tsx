@@ -13,12 +13,12 @@ export function Relay(props: { state: TeamModelDto }) {
       return (
         <div data-testId={testId}>
           {RelayClient ? <Suspense fallback={<div>Játék betöltése…</div>}>
-                      <RelayClient
-                        category={props.state.category as "C" | "D" | "E"}
-                        credentials={props.state.credentials}
-                        matchID={(props.state.strategyMatch  as InProgressMatchStatus).matchID}
-                      />
-                    </Suspense> : <>no relay client in game context</>}
+            <RelayClient
+              category={props.state.category as "C" | "D" | "E"}
+              credentials={props.state.credentials}
+              matchID={(props.state.strategyMatch  as InProgressMatchStatus).matchID}
+            />
+          </Suspense> : <>no relay client in game context</>}
         </div>
       );
     case "NOT STARTED":
