@@ -246,8 +246,7 @@ export class RealClientRepository implements ClientRepository {
     } catch (e: any) {
       const err = makeAxiosError(e);
       console.error(err.message)
-      // here we can set message according to status (or data)
-      throw new Error('Váratlan hiba történt');
+      throw e;
     }
   }
 }

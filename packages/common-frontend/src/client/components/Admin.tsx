@@ -241,7 +241,11 @@ export function Admin(props: {teamId?: String}) {
           hozzáadás
         </Button>
         </Stack>
-        <ErrorMessage name="time"/>
+        <ErrorMessage name="time"/><ErrorMessage name="time" render={msg => (
+          <Stack sx={{ color: 'red', fontSize: '0.875rem' }}>
+            {msg}
+          </Stack>
+        )}/>
       </Form>
       </Stack>}
       {!teamFromPath && data &&
@@ -254,7 +258,9 @@ export function Admin(props: {teamId?: String}) {
               text: 'Biztosan törlöd az összes csapatot? Ez a művelet nem visszavonható!',
               confirm: async () => {
                 try {
-                  data.forEach(team => removeTeam(team.teamId));
+                  data.forEach(team => {
+                    removeTeam(team.teamId);
+                  });
                   enqueueSnackbar('Összes csapat törölve', { variant: 'success' });
                   // Refresh the list
                   if (typeof window !== 'undefined') {

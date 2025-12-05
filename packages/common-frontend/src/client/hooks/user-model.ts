@@ -100,13 +100,7 @@ export class UserModel {
   }
 
   async removeTeam(teamId: string): Promise<void> {
-    try {
-      await this.repo.removeTeam(teamId);
-    }
-    catch (e) {
-      console.log(e);
-      window.location.reload();
-    }
+    await this.repo.removeTeam(teamId);
   }
 
   isUserLoggedIn(): boolean {
