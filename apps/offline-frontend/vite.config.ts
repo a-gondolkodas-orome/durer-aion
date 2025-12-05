@@ -30,6 +30,15 @@ export default defineConfig({
   build: {
     rollupOptions: {
       // Don’t bundle test files
+      output: {
+        manualChunks(id) {
+          // Split game description files into a separate chunk
+          // These contain the problem text that should only load when the game starts
+          if (id.includes('/ReactClient.')) {
+            return 'react-client';
+          }
+        }
+      },
       external: [/\.test\.(t|j)sx?$/],
     },
   },
