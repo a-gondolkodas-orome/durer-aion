@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   GameSidebar, GameFooter, GameHeader, GameRule, GameEndDialog
 } from './game-parts';
-import { v4 as uuidv4 } from 'uuid';
 import { partial, mapValues, wrap, _ } from 'lodash';
 
 export const strategyGameFactory = ({
@@ -22,7 +21,7 @@ export const strategyGameFactory = ({
     const [currentPlayer, setCurrentPlayer] = useState(null);
     const [isGameEndDialogOpen, setIsGameEndDialogOpen] = useState(false);
     const [winnerIndex, setWinnerIndex] = useState(null);
-    const [gameUuid, setGameUuid] = useState(uuidv4());
+    const [gameUuid, setGameUuid] = useState(crypto.randomUUID());
     const [turnStage, setTurnStage] = useState(null);
 
     useEffect(() => {
@@ -44,7 +43,7 @@ export const strategyGameFactory = ({
       setCurrentPlayer(null);
       setIsGameEndDialogOpen(false);
       setWinnerIndex(null);
-      setGameUuid(uuidv4());
+      setGameUuid(crypto.randomUUID());
       setTurnStage(null);
     };
 
