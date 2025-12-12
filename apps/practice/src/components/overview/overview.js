@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { gameList } from '../games/gameList';
 import { Listbox, ListboxButton, ListboxOptions, ListboxOption } from '@headlessui/react';
-import { uniqBy, every, sortBy } from 'lodash';
+import { uniqBy, every, sortBy, orderBy } from 'lodash';
 import { Link } from 'react-router';
 
 export const Overview = () => {
@@ -22,15 +22,16 @@ export const Overview = () => {
   };
 
   // order by category and then by year regardless of order in gameList.js
-  const gamesToShow = sortBy(
-    Object.keys(gameList).filter(id => shouldShow(gameList[id])),
-    a => gameList[a].year.v
+  const gamesToShow = orderBy(
+    Object.keys(gameList).filter(id => shouldShow(gameList[id]))
+      .sort((a, b) =>
+        gameList[a].category[0] > gameList[b].category[0]
+        ? 1
+        : (gameList[a].category[0] < gameList[b].category[0] ? -1 : 0)
+      ),
+    a => gameList[a].year.v,
+    'desc'
   )
-    .sort((a, b) =>
-      gameList[a].category[0] > gameList[b].category[0]
-      ? 1
-      : (gameList[a].category[0] < gameList[b].category[0] ? -1 : 0)
-    );
 
   return <main className="p-2">
     <OverviewHeader></OverviewHeader>
