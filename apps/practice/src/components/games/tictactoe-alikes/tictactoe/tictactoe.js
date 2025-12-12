@@ -48,7 +48,7 @@ const BoardClient = ({ board, ctx, moves }) => {
           {board[id] && (
             <span
               className={`
-                w-full aspect-square inline-block rounded-full mb-[-0.5rem]
+                w-full aspect-square inline-block rounded-full -mb-2
                 ${pieceColor(id)}
                 ${pieceColor(id) === 'bg-white' ? 'border-4 border-slate-600' : ''}
               `}

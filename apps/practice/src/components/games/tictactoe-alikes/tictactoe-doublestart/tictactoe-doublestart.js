@@ -32,7 +32,7 @@ const BoardClient = ({ board, ctx, moves }) => {
         >
           {board[id] && (
             <span
-            className={`w-full aspect-square inline-block rounded-full mb-[-0.5rem] ${pieceColor(id)}`}
+            className={`w-full aspect-square inline-block rounded-full -mb-2 ${pieceColor(id)}`}
             ></span>
           )}
       </button>

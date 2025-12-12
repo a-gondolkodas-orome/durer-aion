@@ -95,7 +95,7 @@ const CategoryFilter = ({ selectedCategories, setSelectedCategories }) => {
   return <Listbox
     value={selectedCategories} onChange={setSelectedCategories}
     as="div" multiple horizontal
-    className="mb-2 w-[28rem] inline-block px-1"
+    className="mb-2 w-md inline-block px-1"
   >
     <label htmlFor="category-selector" className="block">Kategória szűrő:</label>
     <ListboxButton
@@ -116,7 +116,7 @@ const YearFilter = ({ selectedYears, setSelectedYears }) => {
   return <Listbox
     value={selectedYears} onChange={setSelectedYears}
     as="div" multiple horizontal
-    className="mb-2 w-[28rem] inline-block px-1"
+    className="mb-2 w-md inline-block px-1"
   >
     <label htmlFor="year-selector" className="block">Év szűrő:</label>
     <ListboxButton

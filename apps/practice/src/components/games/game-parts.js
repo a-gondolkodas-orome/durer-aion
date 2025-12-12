@@ -14,21 +14,21 @@ export const GameSidebar = ({
 }) => {
   return (
     <div className="p-2 flex flex-col grow shrink-0 basis-64">
-      <p className="text-center font-bold text-lg basis-[3.5rem]">
+      <p className="text-center font-bold text-lg basis-14">
         {getCtaText(ctx)}
       </p>
       {ctx.phase === 'play' && ctx.shouldRoleSelectorMoveNext === false && (
         <div
-          className="animate-spin h-8 w-8 place-self-center border-t-blue-600 rounded-full border-4 mb-[4rem]"
+          className="animate-spin h-8 w-8 place-self-center border-t-blue-600 rounded-full border-4 mb-16"
         ></div>
       )}
       {ctx.phase === 'play' && ctx.shouldRoleSelectorMoveNext && (
-        <p className="italic text-justify basis-[6rem]">
+        <p className="italic text-justify basis-24">
           {stepDescription}
         </p>
       )}
       {ctx.phase === 'roleSelection' && (
-        <span className="basis-[6rem]">
+        <span className="basis-24">
           <button
             className="cta-button"
             onClick={() => moves.chooseRole(0)}
