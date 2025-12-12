@@ -251,4 +251,10 @@ export const gameList = {
     category: ['C', 'D'],
     name: 'Barangolás huszárral'
   }
+  , RemoveDivisorMultiple: {
+    year: { k: 'XIX. (25/26)', v: '25/26' },
+    round: 'online',
+    category: ['C', 'D'],
+    name: 'Osztó/Többszörös Törlés'
+  }
 };
