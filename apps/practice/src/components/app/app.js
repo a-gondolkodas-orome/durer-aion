@@ -42,6 +42,7 @@ import { DominoesOnChessboard } from '../games/dominoes-on-chessboard/dominoes-o
 import { PairsOfNumbers } from '../games/pairs-of-numbers/pairs-of-numbers';
 import { ChessKnight } from '../games/chess-knight/chess-knight';
 import { RemoveDivisorMultiple } from '../games/remove-divisor-multiple/remove-divisor-multiple';
+import { StonesRemoveOneNotTwiceFromLeft } from '../games/stones-remove-one-not-twice-from-left/stones-remove-one-not-twice-from-left';
 
 export const App = () => {
   const routes = [
@@ -88,7 +89,8 @@ export const App = () => {
     { path: '/game/DominoesOnChessboard', element: <DominoesOnChessboard />},
     { path: '/game/PairsOfNumbers', element: <PairsOfNumbers />},
     { path: '/game/ChessKnight', element: <ChessKnight />},
-    { path: '/game/RemoveDivisorMultiple', element: <RemoveDivisorMultiple />}
+    { path: '/game/RemoveDivisorMultiple', element: <RemoveDivisorMultiple />},
+    { path: '/game/StonesRemoveOneNotTwiceFromLeft', element: <StonesRemoveOneNotTwiceFromLeft />}
   ];
   const router = createHashRouter(
     routes.map(route => ({...route, errorElement: <ErrorPage /> }))

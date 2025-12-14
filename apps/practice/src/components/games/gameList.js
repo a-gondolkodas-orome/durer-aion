@@ -257,4 +257,10 @@ export const gameList = {
     category: ['C', 'D'],
     name: 'Osztó/Többszörös Törlés'
   }
+  , StonesRemoveOneNotTwiceFromLeft: {
+    year: { k: 'XIX. (25/26)', v: '25/26' },
+    round: 'online',
+    category: ['E'],
+    name: 'Kavicsgyűjtés egyesével'
+  }
 };
