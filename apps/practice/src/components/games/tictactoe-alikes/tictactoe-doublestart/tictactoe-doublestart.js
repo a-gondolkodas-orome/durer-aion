@@ -4,6 +4,7 @@ import { strategyGameFactory } from '../../strategy-game';
 import { aiBotStrategy } from './bot-strategy';
 import { generateEmptyTicTacToeBoard } from '../helpers';
 import { isGameEnd, hasFirstPlayerWon } from './helpers';
+import { gameList } from '../../gameList';
 
 const BoardClient = ({ board, ctx, moves }) => {
   const isMoveAllowed = (id) => {
@@ -76,7 +77,7 @@ const rule = <>
 
 export const TicTacToeDoubleStart = strategyGameFactory({
   rule,
-  title: 'Duplánkezdő 3x3 amőba',
+  metadata: gameList.TicTacToeDoubleStart,
   BoardClient,
   getPlayerStepDescription,
   generateStartBoard: generateEmptyTicTacToeBoard,

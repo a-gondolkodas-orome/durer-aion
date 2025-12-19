@@ -9,8 +9,9 @@ import {
   FORBIDDEN,
   moves
 } from './helpers';
+import { gameList } from '../gameList';
 
-const chessDucksGameFactory = ({ ROWS, COLS }) => {
+const chessDucksGameFactory = ({ ROWS, COLS }, metadata) => {
 
   const generateStartBoard = () => {
     return range(0, ROWS).map(() => range(0, COLS).map(() => null));
@@ -82,7 +83,7 @@ const chessDucksGameFactory = ({ ROWS, COLS }) => {
 
   return strategyGameFactory({
     rule,
-    title: `Békés kacsák a ${ROWS} × ${COLS}-${COLS === 6 ? 'o' : 'e'}s sakktáblán`,
+    metadata,
     BoardClient,
     getPlayerStepDescription: () => 'Kattints egy mezőre, amit nem üt egyik kacsa sem.',
     generateStartBoard,
@@ -91,5 +92,11 @@ const chessDucksGameFactory = ({ ROWS, COLS }) => {
   });
 };
 
-export const ChessDucksC = chessDucksGameFactory({ ROWS: 4, COLS: 6 });
-export const ChessDucksE = chessDucksGameFactory({ ROWS: 4, COLS: 7 });
+export const ChessDucksC = chessDucksGameFactory(
+  { ROWS: 4, COLS: 6 },
+  gameList.ChessDucksC
+);
+export const ChessDucksE = chessDucksGameFactory(
+  { ROWS: 4, COLS: 7 },
+  gameList.ChessDucksE
+);

@@ -1,6 +1,7 @@
 import React from 'react';
 import { strategyGameFactory } from '../strategy-game';
 import { range, random } from 'lodash';
+import { gameList } from '../gameList';
 
 const target = 40;
 const maxStep = 3;
@@ -74,7 +75,7 @@ const rule = <>
 
 export const PlusOneTwoThree = strategyGameFactory({
   rule,
-  title: '+1, +2, +3',
+  metadata: gameList.PlusOneTwoThree,
   BoardClient,
   getPlayerStepDescription: () => 'Válaszd ki, hogy melyik számra lépsz.',
   generateStartBoard: () => 0,

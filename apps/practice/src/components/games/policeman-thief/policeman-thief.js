@@ -4,6 +4,7 @@ import { strategyGameFactory } from "../strategy-game";
 import { neighbours } from "./helpers";
 import { aiBotStrategy } from "./bot-strategy";
 import { BoardClient } from "./board-client";
+import { gameList } from "../gameList";
 
 const generateStartBoard = () => {
   const policeStartPosition = random(0, 7);
@@ -73,7 +74,7 @@ const rule = (
 
 export const Policemanthief = strategyGameFactory({
   rule,
-  title: "Rendőr-tolvaj",
+  metadata: gameList.Policemanthief,
   roleLabels: ["Rendőrök", "Tolvaj"],
   BoardClient,
   getPlayerStepDescription: ({ board, ctx }) => {

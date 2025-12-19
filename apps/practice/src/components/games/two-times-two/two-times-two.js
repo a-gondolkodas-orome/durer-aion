@@ -2,6 +2,7 @@ import React from 'react';
 import { range, sum, isEqual, cloneDeep } from 'lodash';
 import { strategyGameFactory } from '../strategy-game';
 import { aiBotStrategy } from './bot-strategy';
+import { gameList } from '../gameList';
 
 const generateStartBoard = () => [0, 0, 0, 0];
 
@@ -63,7 +64,7 @@ const rule = <>
 
 export const TwoTimesTwo = strategyGameFactory({
   rule,
-  title: '4 mezőbe különbözőt',
+  metadata: gameList.TwoTimesTwo,
   BoardClient,
   getPlayerStepDescription,
   generateStartBoard,

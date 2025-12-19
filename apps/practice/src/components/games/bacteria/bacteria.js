@@ -11,6 +11,7 @@ import {
   isDangerous,
   moves
 } from "./helpers";
+import { gameList } from "../gameList";
 
 const boardWidth = 11;
 
@@ -210,7 +211,7 @@ const rule = (
 
 export const Bacteria = strategyGameFactory({
   rule,
-  title: "Baktérimok terjedése",
+  metadata: gameList.Bacteria,
   roleLabels: ["Támadó leszek", "Védekező leszek"],
   BoardClient,
   getPlayerStepDescription,

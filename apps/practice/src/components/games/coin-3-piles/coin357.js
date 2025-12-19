@@ -3,6 +3,7 @@ import { strategyGameFactory } from '../strategy-game';
 import { aiBotStrategy  } from './bot-strategy';
 import { BoardClient } from './board-client';
 import { getPlayerStepDescription, moves } from './helpers';
+import { gameList } from '../gameList';
 
 const rule = <>
   Egy kupacban 3 darab 1, 5 darab 2 és 7 darab 3 pengős érme van. Egy lépésben az
@@ -13,7 +14,7 @@ const rule = <>
 
 export const Coin357 = strategyGameFactory({
   rule,
-  title: '15 érme beváltása',
+  metadata: gameList.Coin357,
   BoardClient,
   getPlayerStepDescription,
   generateStartBoard: () => ([3, 5, 7]),

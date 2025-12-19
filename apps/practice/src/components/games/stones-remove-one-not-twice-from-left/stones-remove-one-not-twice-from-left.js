@@ -1,6 +1,7 @@
 import React from 'react';
 import { strategyGameFactory } from '../strategy-game';
 import { cloneDeep, isEqual, sample, random } from 'lodash';
+import { gameList } from '../gameList';
 
 const BoardClient = ({ board, ctx, moves }) => {
   const isMoveAllowed = pileId => {
@@ -164,7 +165,7 @@ const generateStartBoard = () => {
 
 export const StonesRemoveOneNotTwiceFromLeft = strategyGameFactory({
   rule,
-  title: 'Kavicsgyűjtés egyesével',
+  metadata: gameList.StonesRemoveOneNotTwiceFromLeft,
   BoardClient,
   getPlayerStepDescription,
   generateStartBoard,

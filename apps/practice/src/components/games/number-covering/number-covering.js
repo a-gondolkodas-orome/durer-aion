@@ -1,6 +1,7 @@
 import React from 'react';
 import { strategyGameFactory } from '../strategy-game';
 import { range, sum, sample, cloneDeep } from 'lodash';
+import { gameList } from '../gameList';
 
 const BoardClient = ({ board, ctx, moves }) => {
 
@@ -91,7 +92,7 @@ const moves = {
 
 export const NumberCovering8 = strategyGameFactory({
   rule: rule8,
-  title: 'Számok lefedés 1-től 8-ig',
+  metadata: gameList.NumberCovering8,
   BoardClient,
   getPlayerStepDescription: () => 'Kattints egy számra, hogy lefedd.',
   generateStartBoard: () => range(1, 9),
@@ -101,7 +102,7 @@ export const NumberCovering8 = strategyGameFactory({
 
 export const NumberCovering10 = strategyGameFactory({
   rule: rule10,
-  title: 'Számok lefedés 1-től 10-ig',
+  metadata: gameList.NumberCovering10,
   BoardClient,
   getPlayerStepDescription: () => 'Kattints egy számra, hogy lefedd.',
   generateStartBoard: () => range(1, 11),

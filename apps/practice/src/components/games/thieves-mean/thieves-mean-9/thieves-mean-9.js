@@ -9,6 +9,7 @@ import {
   getUntakenCards,
   generateStartBoard
 } from "../helpers";
+import { gameList } from '../../gameList';
 
 const CARD_COUNT = 9;
 
@@ -87,7 +88,7 @@ három ilyen kártyát.
 
 export const ThievesMean9 = strategyGameFactory({
   rule,
-  title: `Tolvajnál átlag (1-${CARD_COUNT})`,
+  metadata: gameList.ThievesMean9,
   BoardClient,
   getPlayerStepDescription: () => 'Válassz egy kártyát.',
   roleLabels: ['Nyomozó leszek', 'Tolvaj leszek'],

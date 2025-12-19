@@ -2,6 +2,7 @@ import React from 'react';
 import { range, sum, isEqual, random, cloneDeep } from 'lodash';
 import { strategyGameFactory } from '../strategy-game';
 import { aiBotStrategy } from './bot-strategy';
+import { gameList } from '../gameList';
 
 const generateStartBoard = () => {
   const board = Array(5).fill(0);
@@ -73,7 +74,7 @@ const rule = <>
 
 export const FiveSquares = strategyGameFactory({
   rule,
-  title: '5 mezőbe különbözőt',
+  metadata: gameList.FiveSquares,
   BoardClient,
   getPlayerStepDescription,
   generateStartBoard,

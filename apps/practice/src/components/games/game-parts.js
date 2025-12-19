@@ -67,7 +67,7 @@ export const GameHeader = ({ title }) => {
         <a
           href="https://forms.gle/7DwugmXNrvKgkiiu8"
           target="_blank"
-          className="px-4"
+          className="px-2"
         >
           Hibabejelentő
         </a>
@@ -77,13 +77,19 @@ export const GameHeader = ({ title }) => {
   </>);
 };
 
-export const GameFooter = () => {
+export const GameFooter = ({ credit }) => {
   return (
-    <footer className="text-right md:hidden">
+    <footer className="text-right">
+      { credit !== undefined && (
+        <p className ="px-2 text-gray-800 font-light text-sm">
+          { (credit.suggestedBy || []).length ? `A játékot javasolta: ${credit.suggestedBy.join(', ')}.` : ''}
+          { (credit.developedBy || []).length ? ` A játékot programozta: ${credit.developedBy.join(', ')}.` : ''}
+        </p>
+      )}
       <a
         href="https://forms.gle/7DwugmXNrvKgkiiu8"
         target="_blank"
-        className="px-4"
+        className="px-2 md:hidden"
       >
         Hibabejelentő
       </a>

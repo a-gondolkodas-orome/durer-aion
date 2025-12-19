@@ -2,6 +2,7 @@ import React from 'react';
 import { strategyGameFactory } from '../strategy-game';
 import { range, cloneDeep, random, sample } from 'lodash';
 import { aiBotStrategy } from './bot-strategy';
+import { gameList } from '../gameList';
 
 const BoardClient = ({ board, ctx, moves }) => {
   const getAngle = (index) => {
@@ -106,7 +107,7 @@ const generateStartBoard = () => {
 
 export const BankRobbers = strategyGameFactory({
   rule,
-  title: 'Bankrablók: 7-10 bank',
+  metadata: gameList.BankRobbers,
   BoardClient,
   getPlayerStepDescription: () => 'Válassz egy kirabolható bankot.',
   generateStartBoard,

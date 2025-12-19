@@ -4,6 +4,7 @@ import { strategyGameFactory } from '../strategy-game';
 import { aiBotStrategy  } from './bot-strategy';
 import { BoardClient } from './board-client';
 import { getPlayerStepDescription, isWinningState, moves } from './helpers';
+import { gameList } from '../gameList';
 
 const generateStartBoard = () => {
   if (random(0, 1)) {
@@ -34,7 +35,7 @@ const rule = <>
 
 export const Coin123 = strategyGameFactory({
   rule,
-  title: 'Érmék beváltása',
+  metadata: gameList.Coin123,
   BoardClient,
   getPlayerStepDescription,
   generateStartBoard,

@@ -2,6 +2,7 @@ import React from 'react';
 import { strategyGameFactory } from '../strategy-game';
 import { range, cloneDeep, sample, random } from 'lodash';
 import { strategyDict } from './bot-strategy';
+import { gameList } from '../gameList';
 
 const isAllowed = (board, n) => {
   if (board.previousMove === null) {
@@ -124,7 +125,7 @@ const generateStartBoard = () => {
 
 export const RemoveDivisorMultiple = strategyGameFactory({
   rule,
-  title: 'Osztó/Többszörös Törlés',
+  metadata: gameList.RemoveDivisorMultiple,
   BoardClient,
   getPlayerStepDescription,
   generateStartBoard,

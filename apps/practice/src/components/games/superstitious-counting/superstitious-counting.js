@@ -2,6 +2,7 @@ import React from 'react';
 import { range, sample, difference } from 'lodash';
 import { strategyGameFactory } from '../strategy-game';
 import { aiBotStrategy } from './bot-strategy';
+import { gameList } from '../gameList';
 
 const generateStartBoard = () => {
   const losingPositions = range(29, 127, 14);
@@ -78,7 +79,7 @@ const rule = <>
 
 export const SuperstitiousCounting = strategyGameFactory({
   rule,
-  title: 'Babonás lépkedés',
+  metadata: gameList.SuperstitiousCounting,
   BoardClient,
   getPlayerStepDescription: () => 'Kattints a számra ahova lépni szeretnél.',
   generateStartBoard,

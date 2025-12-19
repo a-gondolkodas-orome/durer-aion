@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { range, random, cloneDeep } from 'lodash';
 import { strategyGameFactory } from '../../strategy-game';
 import { aiBotStrategy } from './bot-strategy';
+import { gameList } from '../../gameList';
 
 const generateStartBoard = () => ([random(0, 9), random(0, 9), random(0, 9), random(4, 9)]);
 
@@ -146,7 +147,7 @@ const rule = <>
 
 export const FourPilesSpreadAhead = strategyGameFactory({
   rule,
-  title: '4 kupacban előrepakolás',
+  metadata: gameList.FourPilesSpreadAhead,
   BoardClient,
   getPlayerStepDescription: () => 'Kattints egy korongra, hogy jelezd, hány korongot szeretnél elvenni a kupacból.',
   generateStartBoard,

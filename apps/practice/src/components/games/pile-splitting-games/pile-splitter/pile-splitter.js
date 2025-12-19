@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { range, isEqual, random, _, cloneDeep } from 'lodash';
 import { strategyGameFactory } from '../../strategy-game';
 import { aiBotStrategy } from './bot-strategy';
+import { gameList } from '../../gameList';
 
 const BoardClient = ({ board, ctx, moves }) => {
   const [hoveredPiece, setHoveredPiece] = useState(null);
@@ -112,7 +113,7 @@ const rule = <>
 
 export const PileSplitter = strategyGameFactory({
   rule,
-  title: 'Kupac kettéosztó',
+  metadata: gameList.PileSplitter,
   BoardClient,
   getPlayerStepDescription,
   generateStartBoard: () => ([random(3, 10), random(3, 10)]),

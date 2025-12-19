@@ -3,6 +3,7 @@ import { range, cloneDeep, every, some, isNull } from 'lodash';
 import { strategyGameFactory } from '../strategy-game';
 import { aiBotStrategy } from './bot-strategy';
 import { isAllowedStep, allColors } from './helpers';
+import { gameList } from '../gameList';
 
 const generateStartBoard = () => Array(8).fill(null);
 
@@ -149,7 +150,7 @@ const rule = <>
 
 export const CubeColoring = strategyGameFactory({
   rule,
-  title: 'Kockaszínezés',
+  metadata: gameList.CubeColoring,
   BoardClient,
   getPlayerStepDescription: () => 'Válassz színt, majd színezz meg egy csúcsot!',
   generateStartBoard,

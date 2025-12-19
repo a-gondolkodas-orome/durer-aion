@@ -2,6 +2,7 @@ import React from 'react';
 import { range, cloneDeep, compact } from 'lodash';
 import { strategyGameFactory } from '../strategy-game';
 import { aiBotStrategy } from './bot-strategy';
+import { gameList } from '../gameList';
 
 const BoardClient = ({ board, ctx, moves }) => {
   const isMoveAllowed = (id) => {
@@ -86,7 +87,7 @@ aki kezdte a játékot).
 
 export const FiveFiveCard = strategyGameFactory({
   rule,
-  title: 'Párbaj 5 lappal',
+  metadata: gameList.FiveFiveCard,
   BoardClient,
   getPlayerStepDescription: () => 'Vegyél el egy kártyát az ellenfél elől.',
   generateStartBoard: () => [[1, 2, 3, 4, 5], [1, 2, 3, 4, 5]],

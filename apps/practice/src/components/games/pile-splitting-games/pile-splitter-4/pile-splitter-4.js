@@ -3,6 +3,7 @@ import { range, isEqual, cloneDeep } from 'lodash';
 import { strategyGameFactory } from '../../strategy-game';
 import { aiBotStrategy } from './bot-strategy';
 import { generateStartBoard } from './helpers';
+import { gameList } from '../../gameList';
 
 const BoardClient = ({ board, ctx, moves }) => {
   const [removedPileId, setRemovedPileId] = useState(null);
@@ -154,7 +155,7 @@ const rule = <>
 
 export const PileSplitter4 = strategyGameFactory({
   rule,
-  title: 'Kupac kettéosztó 4 kupaccal',
+  metadata: gameList.PileSplitter4,
   BoardClient,
   getPlayerStepDescription,
   generateStartBoard,

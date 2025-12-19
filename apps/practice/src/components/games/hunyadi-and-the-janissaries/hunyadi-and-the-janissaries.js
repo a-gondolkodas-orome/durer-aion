@@ -4,6 +4,7 @@ import { CastleSvg } from './assets/castle-svg';
 import { SoldierSvg } from './assets/soldier-svg';
 import { aiBotStrategy } from './bot-strategy';
 import { generateStartBoard, moves } from './helpers';
+import { gameList } from '../gameList';
 
 const BoardClient = ({ board, ctx, moves }) => {
   const [hoveredPiece, setHoveredPiece] = useState(null);
@@ -120,7 +121,7 @@ const rule = <>
 
 export const HunyadiAndTheJanissaries = strategyGameFactory({
   rule,
-  title: 'Hunyadi és a janicsárok',
+  metadata: gameList.HunyadiAndTheJanissaries,
   roleLabels: ['Szultán leszek', 'Hunyadi leszek'],
   BoardClient,
   getPlayerStepDescription,

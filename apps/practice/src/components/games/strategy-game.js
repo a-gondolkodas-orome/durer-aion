@@ -6,7 +6,7 @@ import { partial, mapValues, wrap, _ } from 'lodash';
 
 export const strategyGameFactory = ({
   rule,
-  title,
+  metadata,
   roleLabels,
   BoardClient,
   generateStartBoard,
@@ -96,9 +96,9 @@ export const strategyGameFactory = ({
     };
 
     return (
-    <main className="p-2">
-      <GameHeader title={title} />
-      <div className="flex justify-center">
+    <main className="flex flex-col p-2 min-h-screen">
+      <GameHeader title={metadata.title || metadata.name} />
+      <div className="flex justify-center grow">
         <div className="max-w-[100ch] w-full">
           <GameRule ruleDescription={rule} />
           <div className="flex flex-wrap">
@@ -118,7 +118,7 @@ export const strategyGameFactory = ({
           </div>
         </div>
       </div>
-      <GameFooter />
+      <GameFooter credit={metadata.credit}/>
       <GameEndDialog
         isOpen={isGameEndDialogOpen}
         setIsOpen={setIsGameEndDialogOpen}

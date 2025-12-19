@@ -1,6 +1,7 @@
 import React from 'react';
 import { strategyGameFactory, dummyEvents } from '../strategy-game';
 import { range, cloneDeep, sample, shuffle } from 'lodash';
+import { gameList } from '../gameList';
 
 const FORBIDDEN = 2;
 // triangles
@@ -155,7 +156,7 @@ már be van satírozva. Az veszít, aki nem tud satírozni.
 
 export const TriangleColoring = strategyGameFactory({
   rule,
-  title: 'Háromszög színezés',
+  metadata: gameList.TriangleColoring,
   BoardClient,
   getPlayerStepDescription: () => 'Kattints egy kis háromszögre.',
   generateStartBoard: () => Array(16).fill(null),

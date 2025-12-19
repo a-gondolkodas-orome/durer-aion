@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { range, isEqual, random, cloneDeep } from 'lodash';
 import { strategyGameFactory } from '../../strategy-game';
 import { aiBotStrategy } from './bot-strategy';
+import { gameList } from '../../gameList';
 
 const generateStartBoard = () => {
   const x = random(2, 8) * 2 + 1;
@@ -146,7 +147,7 @@ const rule = <>
 
 export const PileSplitter3 = strategyGameFactory({
   rule,
-  title: 'Kupac kettéosztó 3 kupaccal',
+  metadata: gameList.PileSplitter3,
   BoardClient,
   getPlayerStepDescription,
   generateStartBoard,

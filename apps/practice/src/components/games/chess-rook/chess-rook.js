@@ -4,6 +4,7 @@ import { strategyGameFactory } from '../strategy-game';
 import { aiBotStrategy } from './bot-strategy';
 import { getAllowedMoves, generateStartBoard, markVisitedFields } from './helpers';
 import { ChessRookSvg } from './chess-rook-svg';
+import { gameList } from '../gameList';
 
 const BoardClient = ({ board, ctx, moves }) => {
   const clickField = (field) => {
@@ -83,7 +84,7 @@ const rule = <>
 
 export const ChessRook = strategyGameFactory({
   rule,
-  title: 'Barangolás bástyával',
+  metadata: gameList.ChessRook,
   BoardClient,
   getPlayerStepDescription: () => 'Kattints egy szabad mezőre a bástyával egy sorban vagy oszlopban.',
   generateStartBoard,

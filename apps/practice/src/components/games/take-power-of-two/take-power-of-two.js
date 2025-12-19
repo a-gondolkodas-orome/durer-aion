@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { strategyGameFactory } from '../strategy-game';
 import { range, random, reverse, sample } from 'lodash';
+import { gameList } from '../gameList';
 
 const generateStartBoard = () => {
   if (random(0, 1)) {
@@ -136,7 +137,7 @@ ebből a játékosok felváltva vonnak le egy tetszőleges
 
 export const TakePowerOfTwo = strategyGameFactory({
   rule,
-  title: 'Kettőhatványok kivonása',
+  metadata: gameList.TakePowerOfTwo,
   BoardClient,
   getPlayerStepDescription,
   generateStartBoard,

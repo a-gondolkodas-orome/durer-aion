@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { range, isEqual, random, cloneDeep } from 'lodash';
 import { strategyGameFactory } from '../../strategy-game';
 import { aiBotStrategy } from './bot-strategy';
+import { gameList } from '../../gameList';
 
 const BoardClient = ({ board, ctx, moves }) => {
   const [hoveredPiece, setHoveredPiece] = useState(null);
@@ -119,7 +120,7 @@ const rule = <>
 
 export const AddReduceDouble = strategyGameFactory({
   rule,
-  title: 'Kettőt vesz, egyet kap',
+  metadata: gameList.AddReduceDouble,
   BoardClient,
   getPlayerStepDescription: () => 'Kattints egy korongra, hogy jelezd, hány korongot szeretnél elvenni a kupacból.',
   generateStartBoard: () => ([random(3, 10), random(3, 10)]),

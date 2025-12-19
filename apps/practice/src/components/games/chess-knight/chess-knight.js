@@ -4,6 +4,7 @@ import { strategyGameFactory } from '../strategy-game';
 import { aiBotStrategy } from './bot-strategy';
 import { getAllowedMoves, generateStartBoard, markVisitedFields } from './helpers';
 import { ChessKnightSvg } from './chess-knight-svg';
+import { gameList } from '../gameList';
 
 const BoardClient = ({ board, ctx, moves }) => {
   const clickField = (field) => {
@@ -81,7 +82,7 @@ lép a huszárral. Nem szabad olyan mezőre lépni, amelyen korábban már járt
 
 export const ChessKnight = strategyGameFactory({
   rule,
-  title: 'Barangolás huszárral',
+  metadata: gameList.ChessKnight,
   BoardClient,
   getPlayerStepDescription: () => 'Lépj egy szabad mezőre a huszárral.',
   generateStartBoard,

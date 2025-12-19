@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { range, cloneDeep, isEqual, flatMap, sample, last, shuffle } from 'lodash';
 import { strategyGameFactory, dummyEvents } from '../strategy-game';
+import { gameList } from '../gameList';
 
 const BOARDSIZE = 6;
 const getId = ({ row, col }) => row * BOARDSIZE + col;
@@ -229,7 +230,7 @@ const rule = <>
 
 export const DominoesOnChessboard = strategyGameFactory({
   rule,
-  title: 'Sakktáblára Dominók',
+  metadata: gameList.DominoesOnChessboard,
   BoardClient,
   getPlayerStepDescription: () => 'Kattints egy üres mezőre, majd egy szomszédjára, hogy lehelyezz egy dominót.',
   generateStartBoard: () => [],

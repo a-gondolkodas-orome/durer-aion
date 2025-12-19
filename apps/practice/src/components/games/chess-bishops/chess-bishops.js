@@ -4,6 +4,7 @@ import { strategyGameFactory } from '../strategy-game';
 import { ChessBishopSvg } from './chess-bishop-svg';
 import { aiBotStrategy } from './bot-strategy';
 import { generateStartBoard, getAllowedMoves, BISHOP, FORBIDDEN, markForbiddenFields } from './helpers';
+import { gameList } from '../gameList';
 
 const BoardClient = ({ board, ctx, moves }) => {
   const [hoveredField, setHoveredField] = useState(null);
@@ -107,7 +108,7 @@ const rule = <>
 
 export const ChessBishops = strategyGameFactory({
   rule,
-  title: 'Futók lerakása',
+  metadata: gameList.ChessBishops,
   BoardClient,
   getPlayerStepDescription: () => 'Kattints egy mezőre, amit nem üt egyik futó sem.',
   generateStartBoard,

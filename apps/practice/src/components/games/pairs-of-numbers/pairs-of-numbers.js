@@ -1,6 +1,7 @@
 import React from 'react';
 import { strategyGameFactory } from '../strategy-game';
 import { random } from 'lodash';
+import { gameList } from '../gameList';
 
 const BoardClient = ({ board, ctx, moves }) => {
   return(
@@ -116,7 +117,7 @@ const generateStartBoard = () => {
 
 export const PairsOfNumbers = strategyGameFactory({
   rule,
-  title: 'Számpár módosítás',
+  metadata: gameList.PairsOfNumbers,
   BoardClient,
   getPlayerStepDescription: () => 'Növeld a második számot eggyel vagy vond ki az elsőből.',
   generateStartBoard,

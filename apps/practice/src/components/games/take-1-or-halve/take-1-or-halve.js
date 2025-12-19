@@ -1,6 +1,7 @@
 import React from 'react';
 import { strategyGameFactory } from '../strategy-game';
 import { random } from 'lodash';
+import { gameList } from '../gameList';
 
 const BoardClient = ({ board, ctx, moves }) => {
   return(
@@ -68,7 +69,7 @@ const getPlayerStepDescription = ({ board }) => {
 
 export const Take1OrHalve = strategyGameFactory({
   rule,
-  title: 'Egyet vegyél vagy felezz',
+  metadata: gameList.Take1OrHalve,
   BoardClient,
   getPlayerStepDescription,
   generateStartBoard: () => random(20, 27),

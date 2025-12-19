@@ -3,6 +3,7 @@ import { strategyGameFactory } from '../strategy-game';
 import { aiBotStrategy } from './bot-strategy';
 import { isAllowed, getAllowedSuperset, isGameEnd, vertices } from './helpers';
 import { cloneDeep } from 'lodash';
+import { gameList } from '../gameList';
 
 const BoardClient = ({ board, ctx, moves }) => {
   const [firstNode, setFirstNode] = useState(null);
@@ -104,7 +105,7 @@ const rule = <>
 
 export const TriangularGridRopes = strategyGameFactory({
   rule,
-  title: '10 totemoszlop',
+  metadata: gameList.TriangularGridRopes,
   BoardClient,
   getPlayerStepDescription: () => 'Kattints két oszlopra, amik között kötelet szeretnél kifeszíteni.',
   generateStartBoard: () => [],

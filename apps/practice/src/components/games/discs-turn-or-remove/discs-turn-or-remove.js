@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { strategyGameFactory } from "../strategy-game";
 import { range, isEqual, random, sample, difference, filter, cloneDeep } from "lodash";
+import { gameList } from "../gameList";
 
 const generateStartBoard = (maxDiscs) => () => {
   const discCount = random(Math.floor(maxDiscs/2), maxDiscs);
@@ -198,7 +199,7 @@ const rule = (maxDiscs) => (
 
 export const SixDiscs = strategyGameFactory({
   rule: rule(6),
-  title: "Átfordítás, elvétel (6 korong)",
+  metadata: gameList.SixDiscs,
   BoardClient: gameBoardFactory(6),
   getPlayerStepDescription,
   generateStartBoard: generateStartBoard(6),
@@ -208,7 +209,7 @@ export const SixDiscs = strategyGameFactory({
 
 export const TenDiscs = strategyGameFactory({
   rule: rule(10),
-  title: "Átfordítás, elvétel (10 korong)",
+  metadata: gameList.TenDiscs,
   BoardClient: gameBoardFactory(10),
   getPlayerStepDescription,
   generateStartBoard: generateStartBoard(10),

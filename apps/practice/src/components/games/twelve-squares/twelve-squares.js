@@ -2,6 +2,7 @@ import React from 'react';
 import { strategyGameFactory } from '../strategy-game';
 import { range, random } from 'lodash';
 import { ChessBishopSvg } from '../chess-bishops/chess-bishop-svg';
+import { gameList } from '../gameList';
 
 const BoardClient = ({ board, ctx, moves }) => {
   const isMoveAllowed = (step) => {
@@ -100,7 +101,7 @@ const rule = <>
 
 export const TwelveSquares = strategyGameFactory({
   rule,
-  title: 'Tizenkét mező',
+  metadata: gameList.TwelveSquares,
   BoardClient,
   getPlayerStepDescription: ({ ctx: { chosenRoleIndex } }) => chosenRoleIndex === 0
     ? 'Kattints a mezőre ahova lépni szeretnél a bal oldali bábuval.'
