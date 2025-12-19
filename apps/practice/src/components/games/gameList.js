@@ -143,21 +143,21 @@ export const gameList = {
     round: 'döntő',
     category: ['C', 'D'],
     name: 'Kockaszínezés',
-    credit: { developedBy: ['Szűcs Gábor'] }
+    credit: { suggestedBy: ['Nagy Kartal'], developedBy: ['Szűcs Gábor'] }
   }
   , AddReduceDouble: {
     year: { k: 'XVI. (22/23)', v: '22/23' },
     round: 'döntő',
     category: ['D'],
     name: 'Kettőt vesz, egyet kap',
-    credit: { developedBy: ['Matolcsi Dávid'] }
+    credit: { suggestedBy: ['Imolay András'], developedBy: ['Matolcsi Dávid'] }
   }
   , FourPilesSpreadAhead: {
     year: { k: 'XVI. (22/23)', v: '22/23' },
     round: 'döntő',
     category: ['E', 'E+'],
     name: '4 kupacban előrepakolás',
-    credit: { developedBy: ['Matolcsi Dávid'] }
+    credit: { suggestedBy: ['Fraknói Ádám'], developedBy: ['Matolcsi Dávid'] }
   }
   , NumberCovering8: {
     year: { k: 'XI. (17/18)', v: '17/18' },
