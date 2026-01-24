@@ -29,7 +29,7 @@ import { PileSplitter } from '../games/pile-splitting-games/pile-splitter/pile-s
 import { PileSplitter3 } from '../games/pile-splitting-games/pile-splitter-3/pile-splitter-3';
 import { PileSplitter4 } from '../games/pile-splitting-games/pile-splitter-4/pile-splitter-4';
 import { PlusOneTwoThree } from '../games/plus-one-two-three/plus-one-two-three';
-import { Policemanthief } from '../games/policeman-thief/policeman-thief';
+import { PolicemanthiefA, PolicemanthiefB } from '../games/policeman-thief/policeman-thief';
 import { PrimeExponentials } from '../games/prime-exponentials/prime-exponentials';
 import { RemoveDivisorMultiple } from '../games/remove-divisor-multiple/remove-divisor-multiple';
 import { RockPaperScissor } from '../games/rock-paper-scissor/rock-paper-scissor';
@@ -76,7 +76,8 @@ export const App = () => {
     { path: '/game/PileSplitter3', element: <PileSplitter3 /> },
     { path: '/game/PileSplitter4', element: <PileSplitter4 /> },
     { path: '/game/PlusOneTwoThree', element: <PlusOneTwoThree />},
-    { path: '/game/Policemanthief', element: <Policemanthief />},
+    { path: '/game/Policemanthief', element: <PolicemanthiefA />},
+    { path: '/game/PolicemanthiefB', element: <PolicemanthiefB />},
     { path: '/game/PrimeExponentials', element: <PrimeExponentials />},
     { path: '/game/RemoveDivisorMultiple', element: <RemoveDivisorMultiple />},
     { path: '/game/rockPaperScissor', element: <RockPaperScissor /> },
