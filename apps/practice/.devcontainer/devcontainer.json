@@ -1,0 +1,22 @@
+{
+  "name": "React Dev Container",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:24",
+  "customizations": {
+    "vscode": {
+      "extensions": ["dbaeumer.vscode-eslint", "bradlc.vscode-tailwindcss"],
+      "settings": {
+        "editor.tabSize": 2,
+        "javascript.updateImportsOnFileMove.enabled": "always",
+        "files.insertFinalNewline": true,
+        "files.trimFinalNewlines": true
+      }
+    }
+  },
+  "postCreateCommand": "npm ci",
+  "forwardPorts": [8012],
+  "portsAttributes": {
+    "8012": {
+      "label": "Parcel Dev Server"
+    }
+  }
+}

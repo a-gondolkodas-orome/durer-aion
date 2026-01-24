@@ -12,6 +12,7 @@
     "lint:fix": "eslint \"src/**/*.js\" --fix",
     "audit": "better-npm-audit audit -- --omit=dev",
     "dev": "parcel serve src/index.html --no-cache --open --port=8012",
+    "dev:container": "parcel serve src/index.html --no-cache --port=8012",
     "dev:withcache": "parcel src/index.html --open --port=8012",
     "local-build": "parcel build src/index.html && http-server ./dist --push-state -o"
   },
@@ -44,5 +45,8 @@
     "plugins": {
       "@tailwindcss/postcss": {}
     }
+  },
+  "prettier": {
+    "trailingComma": "none"
   }
 }

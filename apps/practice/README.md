@@ -24,6 +24,11 @@ TL;DR;
 
 ## Project setup
 
+There is a (fairly minimal) devcontainer setup if you prefer that. Alternatively,
+here are the installation instructions:
+
+### Installing locally 
+
 - install Node.js on your computer globally (or use nvm)
 - in the project directory terminal run `npm ci`
 
@@ -32,7 +37,7 @@ TL;DR;
 ### Compiles and hot-reloads for development
 
 ```bash
-npm run dev
+npm run dev # use npm run dev:container within the devcontainer
 ```
 
 If you are using Windows and you see `Error: The specified module could not be found. ... code: 'ERR_DLOPEN_FAILED'`
