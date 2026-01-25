@@ -3,7 +3,7 @@ import { createTheme } from "@mui/material/styles";
 const theme = createTheme({
     palette: {
         primary: {
-            main: '#11009E',
+            main: process.env.VITE_ACCENT_COLOR || '#11009E',
             //#0b5ac7
             contrastText: '#fff'
         },
