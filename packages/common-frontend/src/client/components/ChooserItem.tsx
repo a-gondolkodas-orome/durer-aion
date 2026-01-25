@@ -7,6 +7,7 @@ import { dictionary } from '../text-constants';
 import { useState } from 'react';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useClientRepo } from '../api-repository-interface';
+import theme from './theme';
 
 export function ChooserItem(props: {
   status: MatchStatus,
@@ -31,7 +32,7 @@ export function ChooserItem(props: {
         xs: "10px",
         md: "40px",
       },
-      backgroundColor: "#fff",
+      backgroundColor: theme.palette.background.paper,
     }}>
       <Stack sx={{
         fontWeight: 'bold',

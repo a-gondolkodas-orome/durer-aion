@@ -5,6 +5,7 @@ import { StrategyEndTable } from "../client/components/StrategyEndTable";
 import { useRefreshTeamState, useToHome } from "../client/hooks/user-hooks";
 import { useClientRepo } from "../client/api-repository-interface";
 import { GUESSER_PLAYER, JUDGE_PLAYER } from "game";
+import theme from "../client/components/theme";
 
 export function boardWrapper(board: any, description: any) { //<please> TODO: solve types with BoardProps<MyGameState>
   return ({ G, ctx, moves, log }: any) => {
@@ -54,7 +55,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
         </Dialog>
         <Stack sx={{
           padding: '20px',
-          backgroundColor: '#FFF',
+          backgroundColor: theme.palette.background.paper,
           borderRadius: "25px",
           display: 'flex',
         }}>

@@ -1,4 +1,5 @@
 import React from 'react';
+import theme from './theme';
 import { Button } from '@mui/material';
 import { Stack } from '@mui/system';
 import { dictionary } from '../text-constants';
@@ -20,7 +21,7 @@ export function StrategyEndTable(props: {allPoints: number, numOfTries: number})
       marginTop: '30px',
       marginBottom: '30px',
       borderRadius: '30px',
-      backgroundColor: '#fff',
+      backgroundColor: theme.palette.background.paper,
       padding: '25px',
     }}>
     <Stack sx={{
