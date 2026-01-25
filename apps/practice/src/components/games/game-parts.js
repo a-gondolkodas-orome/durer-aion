@@ -12,6 +12,7 @@ export const GameSidebar = ({
   ctx,
   moves
 }) => {
+  const isNewGameAllowed = ctx.phase !== 'play' || ctx.shouldRoleSelectorMoveNext;
   return (
     <div className="p-2 flex flex-col grow shrink-0 basis-64">
       <p className="text-center font-bold text-lg basis-14">
@@ -45,7 +46,9 @@ export const GameSidebar = ({
       )}
       <button
         className="cta-button mt-[2vh]"
-        onClick={() => moves.startNewGame()}>
+        disabled={!isNewGameAllowed}
+        onClick={() => moves.startNewGame()}
+      >
         Új játék
       </button>
     </div>
