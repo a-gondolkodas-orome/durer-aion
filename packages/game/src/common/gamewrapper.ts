@@ -6,6 +6,11 @@ function chooseRole({ G, ctx, playerID }: any, firstPlayer: string):void { // TO
   G.firstPlayer = firstPlayer;
 }
 
+function resetRole({ G, ctx, playerID, events }: any): void {
+  events.setPhase('startNewGame');
+  G.numberOfTries = G.numberOfTries - (G.difficulty === "live" ? 1 : 0);
+}
+
 function chooseNewGameType({ G, ctx, playerID, random, events }: any, difficulty: string) {
   if (playerID !== GUESSER_PLAYER) {
     return INVALID_MOVE;
@@ -84,7 +89,7 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
         start: true,
       },
       chooseRole: {
-        moves: { chooseRole, getTime },
+        moves: { chooseRole, resetRole, getTime },
         endIf: ({ G }) => { return G.firstPlayer !== null },
         next: "play",
         turn: {

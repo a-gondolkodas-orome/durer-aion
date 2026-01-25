@@ -178,7 +178,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
                   marginBottom: '20px',
                 }}>
                   <Button sx={{
-                    width: '45%',
+                    width: '38%',
                     height: '60px',
                     fontSize: '18px',
                     alignSelf: 'center',
@@ -189,9 +189,9 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
                   }}>
                     Kezdő leszek
                   </Button>
-                  <Stack sx={{ width: '10%' }} />
+                  <Stack sx={{ width: '4%' }} />
                   <Button sx={{
-                    width: '45%',
+                    width: '38%',
                     height: '60px',
                     fontSize: '18px',
                     alignSelf: 'center',
@@ -201,6 +201,19 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
                     moves.chooseRole(JUDGE_PLAYER);
                   }}>
                     Második leszek
+                  </Button>
+                  <Stack sx={{ width: '5%' }} />
+                  <Button sx={{
+                    width: '15%',
+                    height: '40px',
+                    fontSize: '14px',
+                    alignSelf: 'center',
+                    textTransform: 'none',
+                    borderRadius: '10px',
+                  }} variant='outlined' color='primary' onClick={() => {
+                    moves.resetRole();
+                  }}>
+                    Mégse
                   </Button>
                 </Stack>}
               <Stack sx={{
