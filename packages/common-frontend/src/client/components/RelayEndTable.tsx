@@ -72,7 +72,7 @@ export function RelayEndTable(props: {allPoints: number, task: {max: number, got
             </TableRow>
             <TableRow>
                 <TableCell>{t('relay.endTable.point')}</TableCell>
-                {props.task.slice(0, 10).map((data, idx)=>{
+                {props.task.slice(0, 10).map((data)=>{
                     let currStyle = { backgroundColor: '#fff' };
                     if(data.got !== null){
                       if(0 < data.max - data.got && data.max - data.got < 3) {

@@ -1,12 +1,12 @@
 import { createContext, ReactNode, useContext } from "react";
 
-type ClientProps = {
+interface ClientProps {
   category?: 'C' | 'D' | 'E';
   matchID?: string;
   credentials?: string;
 };
 
-type GameContextType = {
+interface GameContextType {
   RelayClient?: React.ComponentType<ClientProps>,
   StrategyClient?: React.ComponentType<ClientProps>,
 }
