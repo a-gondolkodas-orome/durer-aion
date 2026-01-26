@@ -19,8 +19,8 @@ function sanitizeValue(value: string) {
 
 export interface MyProps {
   previousTries: number[];
-  previousCorrectness: Boolean | null;
-  onSubmit: (result: any) => void;
+  previousCorrectness: boolean | null;
+  onSubmit: (result: number) => void;
   attempt: number;
 }
 
@@ -71,10 +71,12 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
           try{
             props.onSubmit(values.result)
             refreshState()
-          } catch (e: any) {
+          } catch (e: unknown) {
             console.log(e)
-            enqueueSnackbar(e?.message || "Hiba történt", { variant: 'error' });
-            if (e?.message === "cannot make move after game end") {
+            const message = e instanceof Error ? e.message : "Váratlan hiba történt";
+            enqueueSnackbar(message, { variant: 'error' });
+            if (message === "cannot make move after game end") {
+              // TODO: this error should be handled better, currently it never happens
               refreshState();
             }
           }
@@ -87,7 +89,7 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
           ({
             field, 
             form: { handleChange },
-          }: any) => <input
+          }: FieldProps<number>) => <input
             autoFocus={sentAnswer>0}
             autoComplete="off"
             {...field}

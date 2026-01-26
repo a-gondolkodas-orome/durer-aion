@@ -22,23 +22,24 @@ export interface ClientRepository {
     code: string,
   ): Promise<string>
   getAll(): Promise<TeamModelDto[]>
-  getMatchState(matchId: String): Promise<MatchStateDto>
-  getMatchLogs(matchId: String): Promise<MatchStateDto>
-  resetRelay(teamId: String): Promise<TeamModelDto>
-  resetStrategy(teamId: String): Promise<TeamModelDto>
-  addMinutes(matchId: String, minutes: number): Promise<String>
+  getMatchState(matchId: string): Promise<MatchStateDto>
+  getMatchLogs(matchId: string): Promise<MatchStateDto>
+  resetRelay(teamId: string): Promise<TeamModelDto>
+  resetStrategy(teamId: string): Promise<TeamModelDto>
+  addMinutes(matchId: string, minutes: number): Promise<string>
   removeTeam(teamId: string): Promise<void>;
+
 }
 
 export class MockClientRepository implements ClientRepository {
   version = "MOCK" as const;
-  startRelay(code: string): Promise<string> {
+  startRelay(_code: string): Promise<string> {
     return Promise.resolve("ok");
   }
-  startStrategy(code: string): Promise<string> {
+  startStrategy(_code: string): Promise<string> {
     return Promise.resolve("ok");
   }
-  toHome(code: string): Promise<string> {
+  toHome(_code: string): Promise<string> {
     return Promise.resolve("ok");
   }
   getTeamState(guid: string): Promise<TeamModelDto> {
@@ -223,19 +224,19 @@ export class MockClientRepository implements ClientRepository {
   getAll(): Promise<TeamModelDto[]> {
     return Promise.resolve([]);
   }
-  getMatchState(matchId: String): Promise<MatchStateDto> {
+  getMatchState(_matchId: string): Promise<MatchStateDto> {
     throw Error("NOT call this");
   }
-  getMatchLogs(matchId: String): Promise<MatchStateDto> {
+  getMatchLogs(_matchId: string): Promise<MatchStateDto> {
     throw Error("NOT call this");
   }
-  resetRelay(teamId: String): Promise<TeamModelDto> {
+  resetRelay(_teamId: string): Promise<TeamModelDto> {
     throw Error("NOT call this");
   }
-  resetStrategy(teamId: String): Promise<TeamModelDto> {
+  resetStrategy(_teamId: string): Promise<TeamModelDto> {
     throw Error("NOT call this");
   }
-  addMinutes(matchId: String, minutes: number): Promise<String> {
+  addMinutes(_matchId: string, _minutes: number): Promise<string> {
     return Promise.resolve("OK");
   }
   removeTeam(teamId: string): Promise<void> {

@@ -44,7 +44,6 @@ export function Countdown(
           }
           handle = null;
       };
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [serverRemainingMs]);
 
     useEffect(() => {

@@ -14,7 +14,7 @@ import { FinishedMatchStatus } from 'schemas';
 import { ConfirmDialogInterface, ConfirmDialog } from './ConfirmDialog';
 import * as Yup from 'yup';
 
-export function Admin(props: {teamId?: String}) {
+export function Admin(props: {teamId?: string}) {
   const theme = useTheme();
   const getAll = useAll();
   const addMinutes = useAddMinutes();
@@ -209,8 +209,9 @@ export function Admin(props: {teamId?: String}) {
                   }
                 })
                 enqueueSnackbar("Sikeres művelet", { variant: 'success' });
-              } catch (e: any) {
-                enqueueSnackbar(e?.message || "Hiba történt", { variant: 'error' });
+              } catch (e: unknown) {
+                const message = e instanceof Error ? e.message : "Váratlan hiba történt";
+                enqueueSnackbar(message, { variant: 'error' });
               }
             },
           })
@@ -220,10 +221,7 @@ export function Admin(props: {teamId?: String}) {
           name="time"
         >
         {
-          ({
-            field, 
-            form: { handleChange },
-          }: any) => <input
+          ({field}: FieldProps<string | number>) => <input
             {...field}
             className="text-input"
             placeholder="perc"
