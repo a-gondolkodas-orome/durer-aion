@@ -1,6 +1,4 @@
-import { Container, ThemeProvider } from "@mui/material";
-import { createTheme } from "@mui/material/styles";
-import importedTheme from "./theme";
+import { Container } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useTeamState, LoadTeamState } from "../hooks/user-hooks";
 import { Header } from "./Header";
@@ -11,7 +9,6 @@ import { Strategy } from "./teamstates/Strategy";
 import { Disclaimer } from "./Disclaimer";
 import { Chooser } from "./Chooser";
 import { Admin } from "./Admin";
-import { deepMergeObj as deepMerge } from "../utils/ObjectUtils";
 
 export function Main() {
   const teamState = useTeamState();
@@ -27,7 +24,6 @@ export function Main() {
   }, [])
 
   return (
-    <ThemeProvider theme={outerTheme => createTheme(deepMerge({...importedTheme}, outerTheme))}>
       <Layout>
         <LoadTeamState />
         <Header teamName={teamState?.teamName ?? null} />
@@ -72,6 +68,5 @@ export function Main() {
           )}
         </Container>
       </Layout>
-    </ThemeProvider>
   );
 }
