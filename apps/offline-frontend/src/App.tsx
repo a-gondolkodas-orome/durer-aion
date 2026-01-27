@@ -4,10 +4,11 @@ import { Main, GameProvider, ClientRepoProvider } from 'common-frontend';
 import { OfflineClientRepository } from './client-repository';
 import { ThemeProvider } from '@mui/material/styles';
 
-interface ThemeConfig {
+const theme = {
   palette: {
     primary: {
-      main: string,
+      main: import.meta.env.VITE_ACCENT_COLOR || '#11009E',
+      contrastText: '#fff',
     },
   },
 }
@@ -22,13 +23,7 @@ function App() {
         RelayClient: RelayClient,
         StrategyClient: StrategyClient,
     }}>
-      <ThemeProvider<ThemeConfig> theme={{
-          palette: {
-            primary: {
-              main: import.meta.env.VITE_ACCENT_COLOR || '#11009E'
-            },
-          }
-        }}>
+      <ThemeProvider theme={theme}>
         <ClientRepoProvider 
           value={new OfflineClientRepository()}>
           <Main />

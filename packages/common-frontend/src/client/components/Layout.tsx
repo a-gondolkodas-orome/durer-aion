@@ -4,13 +4,13 @@ import { SuperPicture } from './picture-component';
 import { CssBaseline, Stack } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import importedTheme from './theme';
-import { deepMergeObj as deepMerge } from '../utils/ObjectUtils';
+import { deepmerge } from '@mui/utils';
 export interface LayoutProps extends React.HTMLProps<any> {
 }
 
 export const Layout: React.FunctionComponent<LayoutProps> = (props: LayoutProps) => {
     return <React.Fragment>
-        <ThemeProvider theme={outerTheme => createTheme(deepMerge({...importedTheme}, outerTheme))}>
+        <ThemeProvider theme={outerTheme => createTheme(deepmerge(importedTheme, outerTheme))}>
             <CssBaseline/>
             <SnackbarProvider
               maxSnack={3}
