@@ -2,6 +2,8 @@ import React from 'react';
 import './App.css';
 import { Main, GameProvider, ClientRepoProvider } from 'common-frontend';
 import { OfflineClientRepository } from './client-repository';
+import { ThemeProvider } from '@emotion/react';
+import { createTheme } from '@mui/material/styles';
 
 function App() {
   const RelayClient = React.lazy(() => import('./ReactClient').then(module => ({ default: module.RelayClient })));
@@ -15,7 +17,15 @@ function App() {
     }}>
       <ClientRepoProvider 
         value={new OfflineClientRepository()}>
-        <Main />
+        <ThemeProvider theme={createTheme({
+            palette: {
+                primary: {
+                    main: import.meta.env.VITE_ACCENT_COLOR || '#11009E',
+                },
+            },
+        })}>
+          <Main />
+        </ThemeProvider>
       </ClientRepoProvider>
     </GameProvider>
   )
