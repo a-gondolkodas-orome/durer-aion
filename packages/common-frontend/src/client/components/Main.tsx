@@ -11,6 +11,7 @@ import { Strategy } from "./teamstates/Strategy";
 import { Disclaimer } from "./Disclaimer";
 import { Chooser } from "./Chooser";
 import { Admin } from "./Admin";
+import { deepMergeObj as deepMerge } from "../utils/ObjectUtils";
 
 export function Main() {
   const teamState = useTeamState();
@@ -26,7 +27,7 @@ export function Main() {
   }, [])
 
   return (
-    <ThemeProvider theme={outerTheme => createTheme(importedTheme, outerTheme)}>
+    <ThemeProvider theme={outerTheme => createTheme(deepMerge({...importedTheme}, outerTheme))}>
       <Layout>
         <LoadTeamState />
         <Header teamName={teamState?.teamName ?? null} />
