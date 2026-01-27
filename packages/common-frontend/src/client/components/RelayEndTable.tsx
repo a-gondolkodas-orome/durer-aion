@@ -21,7 +21,7 @@ export function RelayEndTable(props: {allPoints: number, task: {max: number, got
       marginTop: '30px',
       marginBottom: '30px',
       borderRadius: '30px',
-      backgroundColor: '#fff',
+      backgroundColor: theme.palette.background.paper,
       padding: '25px',
     }}>
       <Stack sx={{

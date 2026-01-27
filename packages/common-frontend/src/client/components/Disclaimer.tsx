@@ -3,6 +3,7 @@ import { Stack } from "@mui/system";
 import { dictionary } from "../text-constants";
 import { useToHome } from "../hooks/user-hooks";
 import { useClientRepo } from "../api-repository-interface";
+import theme from "./theme";
 
 export function Disclaimer() {
   const goHome = useToHome();
@@ -28,7 +29,7 @@ export function Disclaimer() {
           xs: 0,
           md: "40px"
         },
-        backgroundColor: "#fff",
+        backgroundColor: theme.palette.background.paper,
         borderRadius: {
           xs: 0,
           md: "30px",

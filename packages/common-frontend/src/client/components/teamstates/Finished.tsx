@@ -1,6 +1,7 @@
 import { Stack } from '@mui/system';
 import { FinishedMatchStatus } from 'schemas';
 import { TeamModelDto } from '../../dto/TeamStateDto';
+import theme from '../theme';
 
 
 /**
@@ -19,7 +20,7 @@ export function Finished(props: {state: TeamModelDto}) {
       height: '500px',
       borderRadius: '30px',
       padding: '30px',
-      backgroundColor: "#fff",
+      backgroundColor: theme.palette.background.paper,
       marginTop: "30px",
     }} data-testId="finishedRoot">
       <Stack sx={{

@@ -1,5 +1,6 @@
 import { Stack } from '@mui/system';
 import React from 'react';
+import theme from './theme';
 import { dictionary } from '../text-constants';
 
 export function WaitingRoom() {
@@ -10,7 +11,7 @@ export function WaitingRoom() {
       width: 600,
       padding: "40px",
       marginTop: "40px",
-      backgroundColor: "#fff",
+      backgroundColor: theme.palette.background.paper,
       borderRadius: "25px",
     }}>
       <Stack sx={{

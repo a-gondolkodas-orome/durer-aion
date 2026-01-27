@@ -3,6 +3,7 @@ import { FinishedMatchStatus, TeamModelDto } from "../dto/TeamStateDto";
 import { ChooserItem } from "./ChooserItem";
 import { dictionary } from "../text-constants";
 import { useClientRepo } from "../api-repository-interface";
+import theme from "./theme";
 
 export function Chooser(props: {
   state: TeamModelDto;
@@ -40,7 +41,7 @@ export function Chooser(props: {
               xs: "10px",
               md: "40px",
             },
-            backgroundColor: "#fff",
+            backgroundColor: theme.palette.background.paper,
             marginBottom: "20px",
           }}
         >

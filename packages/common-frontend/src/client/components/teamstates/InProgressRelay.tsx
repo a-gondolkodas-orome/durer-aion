@@ -10,6 +10,7 @@ import { ExcerciseForm } from '../ExcerciseForm';
 import { dictionary } from '../../text-constants';
 import { RelayEndTable } from '../RelayEndTable';
 import { useClientRepo } from '../../api-repository-interface';
+import theme from '../theme';
 
 interface MyGameProps extends BoardProps<MyGameState> { };
 export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
@@ -106,7 +107,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
             xs: '100%',
             md: "calc(100% - 380px)",
           },
-          backgroundColor: "#fff",
+          backgroundColor: theme.palette.background.paper,
           borderRadius: {
             xs: 0,
             md: "25px",
@@ -136,7 +137,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
             md: "350px",
           },
           maxHeight: "min-content",
-          backgroundColor: "#fff",
+          backgroundColor: theme.palette.background.paper,
           borderRadius: "25px",
           padding: '30px',
         }}>
