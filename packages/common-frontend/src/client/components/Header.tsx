@@ -11,12 +11,12 @@ export function Header(props: { teamName: string | null }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const clientRepository = useClientRepo();
   return (
-    <Stack sx={{
+    <Stack sx={(theme) => ({
       backgroundColor: theme.palette.primary.main,
       color: theme.palette.primary.contrastText,
       width: '100%',
       height: 102,
-    }}>
+    })}>
       <Container sx={{
         paddingLeft: '10px',
         paddingRight: '10px',

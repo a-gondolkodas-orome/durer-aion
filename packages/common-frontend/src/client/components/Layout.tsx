@@ -1,33 +1,15 @@
 import React from 'react';
-import importedtheme from './theme';
 import { SnackbarProvider } from 'notistack';
 import { SuperPicture } from './picture-component';
 import { CssBaseline, Stack, ThemeProvider } from '@mui/material';
+import { createTheme } from '@mui/material/styles';
+import importedTheme from './theme';
 export interface LayoutProps extends React.HTMLProps<any> {
 }
 
-const deepMerge = React.useMemo(() => (target: any, source: any, filter: (key: string, value: any) => boolean): any => {
-  if (!source || typeof source !== 'object') {
-    return target;
-  }
-  if (!target || typeof target !== 'object') {
-    target = {...source};
-  }
-  for (const key in source) {
-    if (source.hasOwnProperty(key) && filter(key, source[key])) {
-      if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
-        target[key] = deepMerge(target[key] || {}, source[key], filter);
-      } else {
-        target[key] = source[key];
-      }
-    }
-  }
-  return target;
-}, []);
-
 export const Layout: React.FunctionComponent<LayoutProps> = (props: LayoutProps) => {
     return <React.Fragment>
-        <ThemeProvider theme={(outerTheme) => deepMerge(outerTheme, importedtheme, (key, value) => key !== 'background')} >
+        <ThemeProvider theme={outerTheme => createTheme(importedTheme, outerTheme)}>
             <CssBaseline/>
             <SnackbarProvider
               maxSnack={3}
