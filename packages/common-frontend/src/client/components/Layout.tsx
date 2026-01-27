@@ -1,15 +1,14 @@
 import React from 'react';
 import { SnackbarProvider } from 'notistack';
 import { SuperPicture } from './picture-component';
-import { CssBaseline, Stack, ThemeProvider } from '@mui/material';
-import { createTheme } from '@mui/material/styles';
-import importedTheme from './theme';
+import { CssBaseline, Stack } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 export interface LayoutProps extends React.HTMLProps<any> {
 }
 
 export const Layout: React.FunctionComponent<LayoutProps> = (props: LayoutProps) => {
+    const theme = useTheme();
     return <React.Fragment>
-        <ThemeProvider theme={outerTheme => createTheme(importedTheme, outerTheme)}>
             <CssBaseline/>
             <SnackbarProvider
               maxSnack={3}
@@ -18,7 +17,7 @@ export const Layout: React.FunctionComponent<LayoutProps> = (props: LayoutProps)
                 horizontal: 'right',
               }}            
             >
-                <Stack sx={(theme) => ({backgroundColor: theme.palette.background.default})}>
+                <Stack sx={{backgroundColor: theme.palette.background.default}}>
                   <Stack sx={{
                       position: 'absolute',
                       right: 0, top: 100,
@@ -36,6 +35,5 @@ export const Layout: React.FunctionComponent<LayoutProps> = (props: LayoutProps)
                   </div>
                 </Stack>
             </SnackbarProvider>
-        </ThemeProvider>
     </React.Fragment>;
 };

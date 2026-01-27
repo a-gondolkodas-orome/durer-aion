@@ -1,9 +1,10 @@
 import { Stack } from '@mui/system';
 import React from 'react';
-import theme from './theme';
+import { useTheme } from '@mui/material/styles';
 import { dictionary } from '../text-constants';
 
 export function WaitingRoom() {
+  const theme = useTheme();
   return (
     <Stack sx={{
       display: 'flex',

@@ -7,7 +7,7 @@ import { TeamModelDto, InProgressMatchStatus, FinishedMatchStatus, MatchStatus }
 import { formatTime } from '../utils/DateFormatter';
 import { ErrorMessage, Field } from 'formik';
 import Form from "./form";
-import theme from './theme';
+import { useTheme } from '@mui/material/styles';
 import { useSnackbar } from 'notistack';
 import { ConfirmDialogInterface } from './ConfirmDialog';
 import { Countdown } from './Countdown';
@@ -116,6 +116,7 @@ export function TeamDetailDialog(props: {data: TeamModelDto, setConfirmDialog: D
 }
 
 function MatchStatusField(props: {name: string, data: MatchStatus, isRelay: boolean, setConfirmDialog: Dispatch<ConfirmDialogInterface | null>}) {
+  const theme = useTheme();
   const addMinutes = useAddMinutes();
   const { enqueueSnackbar } = useSnackbar();
   const getLogs = useGetLogs();

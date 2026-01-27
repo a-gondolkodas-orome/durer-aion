@@ -8,13 +8,14 @@ import { TeamModelDto } from '../dto/TeamStateDto';
 import { TeamDetailDialog } from './TeamDetailDialog';
 import Form from './form';
 import { ErrorMessage, Field } from 'formik';
-import theme from './theme';
+import { useTheme } from '@mui/material/styles';
 import { useSnackbar } from 'notistack';
 import { FinishedMatchStatus } from 'schemas';
 import { ConfirmDialogInterface, ConfirmDialog } from './ConfirmDialog';
 import * as Yup from 'yup';
 
 export function Admin(props: {teamId?: String}) {
+  const theme = useTheme();
   const getAll = useAll();
   const addMinutes = useAddMinutes();
   const removeTeam = useRemoveTeam();

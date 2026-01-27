@@ -3,7 +3,6 @@ import './App.css';
 import { Main, GameProvider, ClientRepoProvider } from 'common-frontend';
 import { OfflineClientRepository } from './client-repository';
 import { ThemeProvider } from '@mui/material/styles';
-import { createTheme } from '@mui/material/styles';
 
 export interface ThemeConfig {
   palette: {

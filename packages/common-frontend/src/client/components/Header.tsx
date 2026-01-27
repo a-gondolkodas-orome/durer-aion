@@ -1,22 +1,23 @@
 import { Container, Dialog, Stack } from '@mui/material';
 import React, { useState } from 'react';
 import { useLogout } from '../hooks/user-hooks';
-import theme from './theme';
 import { dictionary } from '../text-constants';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import { useClientRepo } from '../api-repository-interface';
+import { useTheme } from '@mui/material/styles';
 
 export function Header(props: { teamName: string | null }) {
-  const logout = useLogout()
+  const theme = useTheme();
+  const logout = useLogout();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const clientRepository = useClientRepo();
   return (
-    <Stack sx={(theme) => ({
+    <Stack sx={{
       backgroundColor: theme.palette.primary.main,
       color: theme.palette.primary.contrastText,
       width: '100%',
       height: 102,
-    })}>
+    }}>
       <Container sx={{
         paddingLeft: '10px',
         paddingRight: '10px',

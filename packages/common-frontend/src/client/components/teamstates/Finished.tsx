@@ -1,7 +1,7 @@
 import { Stack } from '@mui/system';
 import { FinishedMatchStatus } from 'schemas';
 import { TeamModelDto } from '../../dto/TeamStateDto';
-import theme from '../theme';
+import { useTheme } from '@mui/material/styles';
 
 
 /**
@@ -11,6 +11,7 @@ import theme from '../theme';
  * @returns Aggregated point visualisations
  */
 export function Finished(props: {state: TeamModelDto}) {
+  const theme = useTheme();
   const relayScore = (props.state.relayMatch as FinishedMatchStatus).score;
   const stratScore = (props.state.strategyMatch as FinishedMatchStatus).score;
   return (
