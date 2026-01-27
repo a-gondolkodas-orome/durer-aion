@@ -2,6 +2,15 @@ import React from 'react';
 import './App.css';
 import { Main, GameProvider, ClientRepoProvider } from 'common-frontend';
 import { RealClientRepository } from './client-repository';
+import { ThemeProvider } from '@mui/material/styles';
+
+interface ThemeConfig {
+  palette: {
+    primary: {
+      main: string,
+    },
+  },
+}
 
 function App() {
   const RelayClient = React.lazy(() => import('./ReactClient').then(module => ({ default: module.RelayClient })));
@@ -13,10 +22,18 @@ function App() {
         RelayClient: RelayClient,
         StrategyClient: StrategyClient,
     }}>
-      <ClientRepoProvider 
-        value={new RealClientRepository()}>
-        <Main />
-      </ClientRepoProvider>
+      <ThemeProvider<ThemeConfig> theme={{
+          palette: {
+            primary: {
+              main: import.meta.env.VITE_ACCENT_COLOR || '#11009E'
+            },
+          }
+        }}>
+        <ClientRepoProvider 
+          value={new RealClientRepository()}>
+          <Main />
+        </ClientRepoProvider>
+      </ThemeProvider>
     </GameProvider>
   )
 }

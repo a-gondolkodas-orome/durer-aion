@@ -4,7 +4,7 @@ import { Main, GameProvider, ClientRepoProvider } from 'common-frontend';
 import { OfflineClientRepository } from './client-repository';
 import { ThemeProvider } from '@mui/material/styles';
 
-export interface ThemeConfig {
+interface ThemeConfig {
   palette: {
     primary: {
       main: string,
