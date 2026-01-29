@@ -7,6 +7,7 @@ import { dictionary } from '../text-constants';
 import { useState } from 'react';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useClientRepo } from '../api-repository-interface';
+import { useTheme } from "@mui/material/styles";
 
 export function ChooserItem(props: {
   status: MatchStatus,
@@ -19,9 +20,10 @@ export function ChooserItem(props: {
 
   const [mobileDescOpen, setMobileDescOpen] = useState(props.status.state !== "FINISHED");
   const isOffline = useClientRepo().version === "OFFLINE";
+  const theme = useTheme();
 
   return (
-    <Stack sx={(theme) => ({
+    <Stack sx={{
       display: 'flex',
       width: {
         xs: '100%',
@@ -32,7 +34,7 @@ export function ChooserItem(props: {
         md: "40px",
       },
       backgroundColor: theme.palette.background.paper,
-    })}>
+    }}>
       <Stack sx={{
         fontWeight: 'bold',
         fontSize: 24,
