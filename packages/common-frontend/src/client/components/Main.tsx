@@ -24,49 +24,49 @@ export function Main() {
   }, [])
 
   return (
-      <Layout>
-        <LoadTeamState />
-        <Header teamName={teamState?.teamName ?? null} />
-        <Container
-          sx={{
-            paddingLeft: {
-              xs: "0px",
-              sm: "0px",
-              md: "0px",
-            },
-            paddingRight: {
-              xs: "0px",
-              sm: "0px",
-              md: "0px",
-            },
-            zIndex: 3,
-            position: "relative",
-            paddingBottom: "50px",
-            maxWidth: "1200px",
-          }}
-          data-testId="mainRoot"
-        >
-          {admin && <Admin teamId={window.location.pathname.split('/').at(2)}/>}
-          {!teamState && !admin && <Login />}
-          {teamState && teamState.pageState === "DISCLAIMER" && (
-            <Disclaimer />
-          )}
-          {teamState && teamState.pageState === "HOME" && frontendState === null && (
-            <Chooser state={teamState} setState={setFrontEndState}/>
-          )}
-          {teamState && (
-            teamState.pageState === "RELAY" || 
-            (teamState.pageState === "HOME" && frontendState === "R")
-          ) && (
-            <Relay state={teamState} />
-          )}
-          {teamState && (
-            teamState.pageState === "STRATEGY" || 
-            (teamState.pageState === "HOME" && frontendState === "S")
-          ) && (
-            <Strategy state={teamState} />
-          )}
-        </Container>
-      </Layout>
+    <Layout>
+      <LoadTeamState />
+      <Header teamName={teamState?.teamName ?? null} />
+      <Container
+        sx={{
+          paddingLeft: {
+            xs: "0px",
+            sm: "0px",
+            md: "0px",
+          },
+          paddingRight: {
+            xs: "0px",
+            sm: "0px",
+            md: "0px",
+          },
+          zIndex: 3,
+          position: "relative",
+          paddingBottom: "50px",
+          maxWidth: "1200px",
+        }}
+        data-testId="mainRoot"
+      >
+        {admin && <Admin teamId={window.location.pathname.split('/').at(2)}/>}
+        {!teamState && !admin && <Login />}
+        {teamState && teamState.pageState === "DISCLAIMER" && (
+          <Disclaimer />
+        )}
+        {teamState && teamState.pageState === "HOME" && frontendState === null && (
+          <Chooser state={teamState} setState={setFrontEndState}/>
+        )}
+        {teamState && (
+          teamState.pageState === "RELAY" || 
+          (teamState.pageState === "HOME" && frontendState === "R")
+        ) && (
+          <Relay state={teamState} />
+        )}
+        {teamState && (
+          teamState.pageState === "STRATEGY" || 
+          (teamState.pageState === "HOME" && frontendState === "S")
+        ) && (
+          <Strategy state={teamState} />
+        )}
+      </Container>
+    </Layout>
   );
 }
