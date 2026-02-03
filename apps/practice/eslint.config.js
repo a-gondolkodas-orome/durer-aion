@@ -1,10 +1,9 @@
 import react from 'eslint-plugin-react';
-import jest from 'eslint-plugin-jest';
 
 export default [
   {
     files: ['src/**/*.js'],
-    plugins: { react, jest },
+    plugins: { react },
     languageOptions: {
       parserOptions: {
         ecmaFeatures: {

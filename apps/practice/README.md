@@ -202,7 +202,7 @@ must be wrapped in setTimeout, this is not (yet) handled by the framework.
 - Node.js for the development server and building the application
 - React frontend framework ([official tutorial](https://react.dev/learn) is a good starting point)
 - [optional] Tailwindcss for styling with utility classes
-- [optional] jest for unit testing
+- [optional] vitest for unit testing
 - github actions for CI/CD.
 - github pages as hosting
 - [goatcounter](https://agondolkodasorome.goatcounter.com/) as usage tracker (Ildi has access)

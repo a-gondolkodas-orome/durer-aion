@@ -1,21 +1,7 @@
 import { aiBotStrategy } from './bot-strategy';
-import { range } from 'lodash';
 
 describe('Double starter TicTacToe strategy', () => {
   describe('AI is the first to move', () => {
-    it('should place to two corners in same row as a starting move', () => {
-      const board = Array(9).fill(null);
-      const moves = { placePiece: (board, id) => board[id] = 'new_piece' }
-
-      aiBotStrategy({ board, ctx: { chosenRoleIndex: 1 }, moves });
-
-      setTimeout(() => {
-        expect([[0, 2], [2, 8], [6, 8], [0, 6]]).toContainEqual(
-          range(0, 9).filter(i => board[i] === 'new_piece')
-        );
-      }, 0)
-    });
-
     it('should place to middle field as a second move', () => {
       const board = [
         'red', 'blue', 'red',

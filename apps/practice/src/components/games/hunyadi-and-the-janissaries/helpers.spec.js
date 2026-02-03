@@ -12,9 +12,7 @@ describe('HunyadiAndTheJanissaries helpers', () => {
         endGame: ({ winnerIndex }) => { winnerIndexMock = winnerIndex; }
       }
       moves.killGroup([[], ['red', 'red']], { events }, 'red')
-      setTimeout(() => {
-        expect(winnerIndexMock).toBe(1);
-      }, 0);
+      expect(winnerIndexMock).toBe(1);
     });
 
     it('should claim loss for Hunyadi if a soldier reaches the castle', () => {
@@ -23,10 +21,11 @@ describe('HunyadiAndTheJanissaries helpers', () => {
         endTurn: () => {},
         endGame: ({ winnerIndex }) => { winnerIndexMock = winnerIndex; }
       }
-      moves.killGroup([[], ['red', 'blue'], ['blue']], { events }, 'red');
-      setTimeout(() => {
-        expect(winnerIndexMock).toBe(0);
-      }, 0);
+      const { nextBoard } = moves.killGroup(
+        [[], ['red', 'blue'], ['blue']], { events }, 'red'
+      );
+      moves.stepUp(nextBoard, { events });
+      expect(winnerIndexMock).toBe(0);
     });
 
     it('should report game as still in progress and advance remaining soldiers otherwise', () => {
@@ -37,10 +36,9 @@ describe('HunyadiAndTheJanissaries helpers', () => {
       }
       const board = [[], ['red'], ['blue', 'red'], [], ['blue', 'blue']];
       const { nextBoard } = moves.killGroup(board, { events }, 'red');
-      setTimeout(() => {
-        expect(nextBoard).toEqual([[], ['blue'], [], ['blue', 'blue']])
-        expect(winnerIndexMock).toBe('mock');
-      }, 0);
+      const state = moves.stepUp(nextBoard, { events });
+      expect(state.nextBoard).toEqual([[], ['blue'], [], ['blue', 'blue'], []])
+      expect(winnerIndexMock).toBe('mock');
     });
   });
 
