@@ -16,7 +16,7 @@
   "forwardPorts": [8012],
   "portsAttributes": {
     "8012": {
-      "label": "Parcel Dev Server"
+      "label": "Dev Server"
     }
   }
 }

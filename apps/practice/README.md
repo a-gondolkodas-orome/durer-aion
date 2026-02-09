@@ -40,9 +40,6 @@ here are the installation instructions:
 npm run dev # use npm run dev:container within the devcontainer
 ```
 
-If you are using Windows and you see `Error: The specified module could not be found. ... code: 'ERR_DLOPEN_FAILED'`
-https://github.com/parcel-bundler/parcel/issues/7104#issuecomment-967260755 might help you.
-
 ### Run tests
 
 ```bash
