@@ -3,7 +3,7 @@ import { FinishedMatchStatus, TeamModelDto } from "../dto/TeamStateDto";
 import { ChooserItem } from "./ChooserItem";
 import { dictionary } from "../text-constants";
 import { useClientRepo } from "../api-repository-interface";
-import theme from "./theme";
+import { useTheme } from "@mui/material/styles";
 
 export function Chooser(props: {
   state: TeamModelDto;
@@ -16,6 +16,8 @@ export function Chooser(props: {
     props.state.relayMatch.state === "FINISHED" &&
     props.state.strategyMatch.state === "FINISHED";
   const isOffline = useClientRepo().version === "OFFLINE";
+  const theme = useTheme();
+
   return (
     <Stack
       sx={{

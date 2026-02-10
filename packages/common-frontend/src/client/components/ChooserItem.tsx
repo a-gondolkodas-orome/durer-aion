@@ -7,7 +7,7 @@ import { dictionary } from '../text-constants';
 import { useState } from 'react';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useClientRepo } from '../api-repository-interface';
-import theme from './theme';
+import { useTheme } from "@mui/material/styles";
 
 export function ChooserItem(props: {
   status: MatchStatus,
@@ -20,6 +20,7 @@ export function ChooserItem(props: {
 
   const [mobileDescOpen, setMobileDescOpen] = useState(props.status.state !== "FINISHED");
   const isOffline = useClientRepo().version === "OFFLINE";
+  const theme = useTheme();
 
   return (
     <Stack sx={{

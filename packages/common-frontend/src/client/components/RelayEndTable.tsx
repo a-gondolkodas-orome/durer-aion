@@ -3,7 +3,7 @@ import { Button, Table, TableCell, TableRow } from '@mui/material';
 import { Stack } from '@mui/system';
 import { dictionary } from '../text-constants';
 import { useRefreshTeamState, useToHome } from '../hooks/user-hooks';
-import theme from './theme';
+import { useTheme } from '@mui/material/styles';
 
 /**
  * Component to display an end game screen with close button, and score
@@ -11,6 +11,7 @@ import theme from './theme';
  * @returns End screen
  */
 export function RelayEndTable(props: {allPoints: number, task: {max: number, got: number | null}[]}) {
+  const theme = useTheme();
   const refreshState = useRefreshTeamState();
   const toHome = useToHome();
   return (
@@ -178,6 +179,7 @@ export function RelayEndTable(props: {allPoints: number, task: {max: number, got
 }
 
 export function RelayEndTableData(props: {allPoints: number, task: {max: number, got: number | null, answers: number[]}[]}) {
+  const theme = useTheme();
   return (
         <Table sx={{
         marginTop: '20px',

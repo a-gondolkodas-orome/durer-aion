@@ -5,7 +5,7 @@ import { StrategyEndTable } from "../client/components/StrategyEndTable";
 import { useRefreshTeamState, useToHome } from "../client/hooks/user-hooks";
 import { useClientRepo } from "../client/api-repository-interface";
 import { GUESSER_PLAYER, JUDGE_PLAYER } from "game";
-import theme from "../client/components/theme";
+import { useTheme } from "@mui/material/styles";
 
 export function boardWrapper(board: any, description: any) { //<please> TODO: solve types with BoardProps<MyGameState>
   return ({ G, ctx, moves, log }: any) => {
@@ -14,6 +14,8 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
     const toHome = useToHome();
     const refreshState = useRefreshTeamState();
     const isOffline = useClientRepo().version === "OFFLINE";
+    const theme = useTheme();
+
     useEffect(() => {
       if (!ctx.gameover) {
         moves.getTime();

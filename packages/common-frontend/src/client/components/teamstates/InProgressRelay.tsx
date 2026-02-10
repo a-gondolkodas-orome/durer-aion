@@ -10,7 +10,7 @@ import { ExcerciseForm } from '../ExcerciseForm';
 import { dictionary } from '../../text-constants';
 import { RelayEndTable } from '../RelayEndTable';
 import { useClientRepo } from '../../api-repository-interface';
-import theme from '../theme';
+import { useTheme } from '@mui/material/styles';
 
 interface MyGameProps extends BoardProps<MyGameState> { };
 export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
@@ -18,6 +18,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
   const [gameover, setGameover] = useState(ctx.gameover);
   const refreshState = useRefreshTeamState();
   const toHome = useToHome();
+  const theme = useTheme();
 
   useEffect(()=>{
     if (!ctx.gameover) {

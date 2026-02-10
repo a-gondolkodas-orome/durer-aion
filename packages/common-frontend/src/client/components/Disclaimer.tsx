@@ -3,10 +3,11 @@ import { Stack } from "@mui/system";
 import { dictionary } from "../text-constants";
 import { useToHome } from "../hooks/user-hooks";
 import { useClientRepo } from "../api-repository-interface";
-import theme from "./theme";
+import { useTheme } from "@mui/material/styles";
 
 export function Disclaimer() {
   const goHome = useToHome();
+  const theme = useTheme();
   const isOffline = useClientRepo().version === "OFFLINE";
 
   return (

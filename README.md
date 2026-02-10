@@ -30,7 +30,7 @@ npm ci
 Create the `apps/offline-frontend/.env` file by copying the `.env.sample` in that folder. Then run:
 
 ```
-npm run dev-offline
+npm run dev:offline
 ```
 
 Offline frontend reloads automatically (except if you change `.env` file), but does not have a debugger yet.
@@ -73,7 +73,7 @@ You should be up and running the application on `localhost`.
 ### Importing teams
 
 ```bash
-docker exec -t durer-aion_backend_1 ./scripts/import_teams.sh ./scripts/test.tsv
+docker exec -t durer-aion-backend-1 ./scripts/import_teams.sh ./scripts/test.tsv
 ```
 
 ### Reload frontend manually
