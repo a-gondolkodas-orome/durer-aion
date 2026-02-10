@@ -5,7 +5,7 @@ import { useToHome } from "../hooks/user-hooks";
 import { useClientRepo } from "../api-repository-interface";
 import { useTheme } from "@mui/material/styles";
 
-export function Disclaimer() {
+export function Disclaimer(props: {teamName: string, category: string}) {
   const goHome = useToHome();
   const theme = useTheme();
   const isOffline = useClientRepo().version === "OFFLINE";
@@ -44,6 +44,23 @@ export function Disclaimer() {
           marginBottom: "25px",
         }}
       >
+        <Stack sx={{
+          fontSize: 24,
+          marginBottom: "2px",
+          flexDirection: "row",
+          alignSelf: "center",
+        }}
+        dangerouslySetInnerHTML={{ __html: dictionary.disclaimer.welcome.replace("{teamName}", `<span style="font-style: italic;color:${theme.palette.primary.main}">${props.teamName}</span>`)}}>
+        </Stack>
+        <Stack sx={{
+          fontStyle:"italic",
+          alignSelf: "center",
+          flexDirection: "row",
+          fontSize: 18,
+          marginBottom: "20px",
+        }}
+        dangerouslySetInnerHTML={{ __html: dictionary.disclaimer.category.replace("{category}", `<span style="font-weight: bold;color:${theme.palette.primary.main}">${props.category}</span>`)}}>
+        </Stack>
         {dictionary.disclaimer.start}
       </Stack>
 
@@ -84,7 +101,7 @@ export function Disclaimer() {
           fontSize: 16,
           marginBottom: {
             xs: "15px",
-            md: "150px",
+            md: "50px",
           }
         }}
       >
