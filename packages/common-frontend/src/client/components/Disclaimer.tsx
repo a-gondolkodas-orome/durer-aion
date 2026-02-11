@@ -9,12 +9,14 @@ export function TextComponentWithPlaceholders(props: {fulltext: string, placehol
   // shallow merge the extra styles with default
   const varStyle = Object.assign({color: useTheme().palette.primary.main, fontStyle: "italic", fontWeight: "normal"}, props.extraStyleForVars || {});
   // A RegEx is used to split the text into variables and substrings around them
-  const placeholderregexp = new RegExp(`(.*?)(${Object.keys(props.placeholders).join('|')})(.*?)(?={|$)`, 'g'); 
+  const placeholderregexp = new RegExp(`(.*?)(${Object.keys(props.placeholders).join('|')})(.*?)(?={|$)`, 'g');
+  // Execute RegEx on text if it has placeholders (otherwise keep the text unchanged), then collect groups from matches
+  const textGroups = props.fulltext.match(placeholderregexp) ? [...props.fulltext.matchAll(placeholderregexp)].map((matchlist) => matchlist.slice(1)).flat() : [props.fulltext];
 
   return (
   <div style={{...{textAlign: "center"}, ...props.genStyle}}>
-    {/* Collect groups from matches and assign a span element to each group */
-    [...props.fulltext.matchAll(placeholderregexp)].map((matchlist) => matchlist.slice(1)).flat().map((content, i) => 
+    {/* Assign a span element to each group */
+    textGroups.map((content, i) => 
     <span style={content.includes('{') ? varStyle : {}} key={i}>
       {content.includes('{') ? props.placeholders[content as keyof typeof props.placeholders] : content}
     </span>)}
@@ -130,10 +132,10 @@ export function Disclaimer(props: {teamName: string, category: string}) {
         }}
       >
         <TextComponentWithPlaceholders placeholders={{'{maximumOneDevice}': dictionary.disclaimer.interfaceMaxDevice, '{dontRefresh}': dictionary.disclaimer.interfaceDontRefresh}}
-          fulltext={isOffline ? dictionary.disclaimer.interfaceDescriptionBHTML : dictionary.disclaimer.interfaceDescription} 
+          fulltext={!isOffline ? dictionary.disclaimer.interfaceDescriptionBHTML : dictionary.disclaimer.interfaceDescription} 
           genStyle={{textAlign: "inherit"}} extraStyleForVars={{fontStyle: "normal", fontWeight: "bold"}}
         />
-        {isOffline ? <small>{dictionary.disclaimer.interfaceDescripSmall}</small>: ''}
+        {isOffline ? <small>{dictionary.disclaimer.interfaceDescripSmall}</small> : ''}
       </Stack>
 
 
