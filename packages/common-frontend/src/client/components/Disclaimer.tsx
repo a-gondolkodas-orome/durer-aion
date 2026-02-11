@@ -5,10 +5,27 @@ import { useToHome } from "../hooks/user-hooks";
 import { useClientRepo } from "../api-repository-interface";
 import { useTheme } from "@mui/material/styles";
 
+export function TextComponentWithPlaceholders(props: {fulltext: string, placeholders: object, genStyle?: object, extraStyleForVars?: object}) {
+  // shallow merge the extra styles with default
+  const varStyle = Object.assign({color: useTheme().palette.primary.main, fontStyle: "italic", fontWeight: "normal"}, props.extraStyleForVars || {});
+  // A RegEx is used to split the text into variables and substrings around them
+  const placeholderregexp = new RegExp(`(.*?)(${Object.keys(props.placeholders).join('|')})(.*?)(?={|$)`, 'g'); 
+
+  return (
+  <div style={{...{textAlign: "center"}, ...props.genStyle}}>
+    {/* Collect groups from matches and assign a span element to each group */
+    [...props.fulltext.matchAll(placeholderregexp)].map((matchlist) => matchlist.slice(1)).flat().map((content, i) => 
+    <span style={content.includes('{') ? varStyle : {}} key={i}>
+      {content.includes('{') ? props.placeholders[content as keyof typeof props.placeholders] : content}
+    </span>)}
+  </div>
+)}
+
 export function Disclaimer(props: {teamName: string, category: string}) {
   const goHome = useToHome();
   const theme = useTheme();
   const isOffline = useClientRepo().version === "OFFLINE";
+  const placeholders = {'{teamName}': props.teamName, '{category}': props.category, '{color}': theme.palette.primary.main};
 
   return (
     <Stack
@@ -44,31 +61,15 @@ export function Disclaimer(props: {teamName: string, category: string}) {
           marginBottom: "25px",
         }}
       >
-        <Stack sx={{
+        <TextComponentWithPlaceholders placeholders={placeholders} fulltext={dictionary.disclaimer.welcome} genStyle={{
           fontSize: 24,
-          marginBottom: "2px",
-          flexDirection: "row",
-          alignSelf: "center",
-        }}>
-          <div style={{textAlign: "center"}}>
-            {dictionary.disclaimer.welcome.split('{teamName}')[0]}
-            <span style={{fontStyle: "italic", color: theme.palette.primary.main}}>{props.teamName}</span>
-            {dictionary.disclaimer.welcome.split('{teamName}')[1]}
-          </div>
-        </Stack>
-        <Stack sx={{
-          fontStyle:"italic",
-          alignSelf: "center",
-          flexDirection: "row",
+          marginBottom: "4px",
+        }}/>
+        <TextComponentWithPlaceholders placeholders={placeholders} fulltext={dictionary.disclaimer.category} extraStyleForVars={{fontWeight: "bold"}} genStyle={{
           fontSize: 18,
+          fontStyle:"italic",
           marginBottom: "20px",
-        }}>
-          <div style={{textAlign: "center"}}>
-            {dictionary.disclaimer.category.split('{category}')[0]}
-            <span style={{fontWeight: "bold", color: theme.palette.primary.main}}>{props.category}</span>
-            {dictionary.disclaimer.category.split('{category}')[1]}
-          </div>
-        </Stack>
+        }}/>
         {dictionary.disclaimer.start}
       </Stack>
 
