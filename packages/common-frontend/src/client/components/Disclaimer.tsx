@@ -5,7 +5,7 @@ import { useToHome } from "../hooks/user-hooks";
 import { useClientRepo } from "../api-repository-interface";
 import { useTheme } from "@mui/material/styles";
 
-export function TextComponentWithPlaceholders(props: {fulltext: string, placeholders: object, genStyle?: object, extraStyleForVars?: object}) {
+export function TextComponentWithPlaceholders(props: {fulltext: string, placeholders: object, genStyle?: object, extraStyleForVars?: object}): JSX.Element {
   // shallow merge the extra styles with default
   const varStyle = Object.assign({color: useTheme().palette.primary.main, fontStyle: "italic", fontWeight: "normal"}, props.extraStyleForVars || {});
   // A RegEx is used to split the text into variables and substrings around them
@@ -25,7 +25,7 @@ export function Disclaimer(props: {teamName: string, category: string}) {
   const goHome = useToHome();
   const theme = useTheme();
   const isOffline = useClientRepo().version === "OFFLINE";
-  const placeholders = {'{teamName}': props.teamName, '{category}': props.category, '{color}': theme.palette.primary.main};
+  const placeholders = {'{teamName}': props.teamName, '{category}': props.category, '{maxPoints}': 52, '{minPoints}': 25};
 
   return (
     <Stack
@@ -58,7 +58,10 @@ export function Disclaimer(props: {teamName: string, category: string}) {
       <Stack
         sx={{
           fontSize: 16,
-          marginBottom: "25px",
+          marginBottom: {
+            xs: "10px",
+            md: "25px"
+          },
         }}
       >
         <TextComponentWithPlaceholders placeholders={placeholders} fulltext={dictionary.disclaimer.welcome} genStyle={{
@@ -76,7 +79,10 @@ export function Disclaimer(props: {teamName: string, category: string}) {
       <Stack
         sx={{
           fontSize: 24,
-          marginBottom: "10px",
+          marginBottom: {
+            xs: "0px",
+            md: "10px"
+          },
           fontStyle: "italic",
         }}
       >
@@ -87,18 +93,24 @@ export function Disclaimer(props: {teamName: string, category: string}) {
         sx={{
           fontSize: 16,
           marginBottom: {
-            xs: "15px",
-            md: "15px",
+            xs: "10px",
+            md: "25px"
           }
         }}
       >
-        {dictionary.disclaimer.progressDescription}
+        <TextComponentWithPlaceholders placeholders={placeholders}
+          fulltext={dictionary.disclaimer.progressDescription} 
+          genStyle={{textAlign: "inherit"}} extraStyleForVars={{fontStyle: "normal", fontWeight: "bold"}}
+        />
       </Stack>
 
       <Stack
         sx={{
           fontSize: 24,
-          marginBottom: "10px",
+          marginBottom: {
+            xs: "0px",
+            md: "10px"
+          },
           fontStyle: "italic",
         }}
       >
@@ -109,12 +121,16 @@ export function Disclaimer(props: {teamName: string, category: string}) {
         sx={{
           fontSize: 16,
           marginBottom: {
-            xs: "15px",
-            md: "50px",
+            xs: "20px",
+            md: "40px",
           }
         }}
       >
-        <span dangerouslySetInnerHTML={{ __html: ( isOffline ? dictionary.disclaimer.interfaceDescriptionBHTML : dictionary.disclaimer.interfaceDescription) }}></span>
+        <TextComponentWithPlaceholders placeholders={{'{maximumOneDevice}': dictionary.disclaimer.interfaceMaxDevice, '{dontRefresh}': dictionary.disclaimer.interfaceDontRefresh}}
+          fulltext={isOffline ? dictionary.disclaimer.interfaceDescriptionBHTML : dictionary.disclaimer.interfaceDescription} 
+          genStyle={{textAlign: "inherit"}} extraStyleForVars={{fontStyle: "normal", fontWeight: "bold"}}
+        />
+        {isOffline ? <small>{dictionary.disclaimer.interfaceDescripSmall}</small>: ''}
       </Stack>
 
 
