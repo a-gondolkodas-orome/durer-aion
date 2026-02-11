@@ -49,8 +49,12 @@ export function Disclaimer(props: {teamName: string, category: string}) {
           marginBottom: "2px",
           flexDirection: "row",
           alignSelf: "center",
-        }}
-        dangerouslySetInnerHTML={{ __html: dictionary.disclaimer.welcome.replace("{teamName}", `<span style="font-style: italic;color:${theme.palette.primary.main}">${props.teamName}</span>`)}}>
+        }}>
+          <div style={{textAlign: "center"}}>
+            {dictionary.disclaimer.welcome.split('{teamName}')[0]}
+            <span style={{fontStyle: "italic", color: theme.palette.primary.main}}>{props.teamName}</span>
+            {dictionary.disclaimer.welcome.split('{teamName}')[1]}
+          </div>
         </Stack>
         <Stack sx={{
           fontStyle:"italic",
@@ -58,8 +62,12 @@ export function Disclaimer(props: {teamName: string, category: string}) {
           flexDirection: "row",
           fontSize: 18,
           marginBottom: "20px",
-        }}
-        dangerouslySetInnerHTML={{ __html: dictionary.disclaimer.category.replace("{category}", `<span style="font-weight: bold;color:${theme.palette.primary.main}">${props.category}</span>`)}}>
+        }}>
+          <div style={{textAlign: "center"}}>
+            {dictionary.disclaimer.category.split('{category}')[0]}
+            <span style={{fontWeight: "bold", color: theme.palette.primary.main}}>{props.category}</span>
+            {dictionary.disclaimer.category.split('{category}')[1]}
+          </div>
         </Stack>
         {dictionary.disclaimer.start}
       </Stack>
