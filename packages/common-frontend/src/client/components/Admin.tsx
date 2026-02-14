@@ -198,7 +198,7 @@ export function Admin(props: {teamId?: string}) {
         onSubmit={async (values) => { 
           setConfirmDialog({
             text: `Erősítsd meg, hogy minden aktuális csapatnak meg akarod növelni az idejét ${values.time} perccel`,
-            confirm: () => {
+            confirm: async () => {
               try {
                 data?.forEach(async a=>{
                   if(a.relayMatch.state === "IN PROGRESS") {

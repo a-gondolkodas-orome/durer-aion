@@ -1,7 +1,7 @@
 import { INVALID_MOVE } from 'boardgame.io/core';
 import { currentPlayer, GameType, GUESSER_PLAYER, PlayerIDType } from '../../../common/types';
 
-type Cell = Array<null | PlayerIDType>;
+type Cell = (null | PlayerIDType)[];
 
 export interface MyGameState {
   cells: Cell;
@@ -61,7 +61,7 @@ function IsVictory(cells: Cell) {
 }
 
 // Return true if all `cells` are occupied.
-function IsDraw(cells: Array<null | string>) {
+function IsDraw(cells: (null | string)[]) {
   return cells.filter(c => c === null).length === 0;
 }
 

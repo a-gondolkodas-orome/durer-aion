@@ -62,10 +62,11 @@ export function sendGameData(params: SendGameDataParams){
       break;
     case "step":
       switch (component) {
-        case "relay":
-          let problemNumber = G.currentProblem;
+        case "relay": {
+          const problemNumber = G.currentProblem;
           sendData(joinCode+"_"+randomID+"_"+component+"_"+problemNumber+"_"+answer+"_"+now(), JSON.stringify({G, ctx}));
           break;
+        }
         case "strategy":
           sendData(joinCode+"_"+randomID+"_stratstep_"+now(), JSON.stringify({G, ctx, log}));
           break;
@@ -73,10 +74,11 @@ export function sendGameData(params: SendGameDataParams){
           break;
       }
       break;
-    case "end":
-      let points = G.points;
+    case "end": {
+      const points = G.points;
       sendData(joinCode+"_"+randomID+"_"+component+"end_"+points+"_"+now(), JSON.stringify({G, ctx}));
       break;
+    }
     default:
       break;
   }
