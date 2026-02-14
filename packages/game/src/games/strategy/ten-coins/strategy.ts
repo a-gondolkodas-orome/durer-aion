@@ -1,7 +1,7 @@
 import { State } from 'boardgame.io';
 import { MyGameState } from './game';
 
-const strategyMap = new Map<string, undefined | Array<number>>([
+const strategyMap = new Map<string, undefined | number[]>([
   ["11000", [2,1]],
   ["10100", [3,1]],
   ["10010", [4,1]],
@@ -35,7 +35,7 @@ const strategyMap = new Map<string, undefined | Array<number>>([
 
 export function strategyWrapper(category: "C" | "D" | "E")
 {
-  return (state: State<MyGameState>, botID: string): [Array<number> | {coins: Array<number>} | undefined, string] => {
+  return (state: State<MyGameState>, botID: string): [number[] | {coins: number[]} | undefined, string] => {
     if(state.ctx.phase === "startNewGame") {
       return [startingPosition({G: state.G, ctx: state.ctx}, category), "setStartingPosition"];
     }
@@ -53,7 +53,7 @@ export function strategyWrapper(category: "C" | "D" | "E")
   }
 }
 
-function startingPosition({ G, ctx}: any, category: "C" | "D" | "E"): {coins: Array<number>} {
+function startingPosition({ G, ctx}: any, category: "C" | "D" | "E"): {coins: number[]} {
   if (category === "C"){
     // C Category
     if (G.difficulty === "test") {
@@ -77,7 +77,7 @@ function startingPosition({ G, ctx}: any, category: "C" | "D" | "E"): {coins: Ar
     } else {
       return {coins: getRandomNumbers([1,2,3], 7)};
     }
-  } else if (category === "D" || 'E') {
+  } else if (category === "D" || category === 'E') {
     // D,E Category
     if (G.difficulty === "test") {
       let numbers = [1,2,3,4,5];

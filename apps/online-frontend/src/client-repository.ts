@@ -14,7 +14,7 @@ class ApiAxios {
   }
 }
 
-function makeAxiosError(any_error:any): AxiosError {
+function makeAxiosError(any_error: any): AxiosError {
   if(!axios.isAxiosError(any_error)){
     throw  any_error;
   }
@@ -153,7 +153,7 @@ export class RealClientRepository implements ClientRepository {
     return result.data as TeamModelDto[];
   }
 
-  async resetRelay(teamId: String): Promise<TeamModelDto> {
+  async resetRelay(teamId: string): Promise<TeamModelDto> {
     const url = urlcat('/team/admin/:teamId/reset/relay', {
       teamId,
     });
@@ -169,7 +169,7 @@ export class RealClientRepository implements ClientRepository {
     return result.data as TeamModelDto;
   }
 
-  async resetStrategy(teamId: String): Promise<TeamModelDto> {
+  async resetStrategy(teamId: string): Promise<TeamModelDto> {
     const url = urlcat('/team/admin/:teamId/reset/strategy', {
       teamId,
     });
@@ -185,7 +185,7 @@ export class RealClientRepository implements ClientRepository {
     return result.data as TeamModelDto;
   }
 
-  async addMinutes(matchId: String, minutes: number): Promise<String> {
+  async addMinutes(matchId: string, minutes: number): Promise<string> {
     const url = urlcat('/game/admin/:matchId/addminutes/:minutes', {
       matchId,
       minutes,
@@ -205,7 +205,7 @@ export class RealClientRepository implements ClientRepository {
     return result.data;
   }
 
-  async getMatchState(matchId: String): Promise<MatchStateDto> {
+  async getMatchState(matchId: string): Promise<MatchStateDto> {
     const url = urlcat('/game/admin/:matchId/state', {
       matchId,
     });
@@ -221,7 +221,7 @@ export class RealClientRepository implements ClientRepository {
     return result.data as MatchStateDto;
   }
 
-  async getMatchLogs(matchId: String): Promise<MatchStateDto> {
+  async getMatchLogs(matchId: string): Promise<MatchStateDto> {
     const url = urlcat('/game/admin/:matchId/logs', {
       matchId,
     });

@@ -2,7 +2,7 @@ import { INVALID_MOVE } from 'boardgame.io/core';
 import { GameType, GUESSER_PLAYER, JUDGE_PLAYER, PlayerIDType } from '../../../common/types';
 
 export interface MyGameState {
-  coins: Array<number>;
+  coins: number[];
 }
 
 export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<MyGameState>)

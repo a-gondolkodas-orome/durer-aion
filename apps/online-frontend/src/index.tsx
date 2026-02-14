@@ -39,7 +39,7 @@ Sentry.init({
 const root = document.getElementById('root');
 if (!root) throw new Error('Root container not found');
 
-if ( false ) { /* TODO competitive mode should be another frontend
+/*if ( false ) { /* TODO competitive mode should be another frontend
   render(
     <React.StrictMode>
       <RecoilRoot>
@@ -86,8 +86,8 @@ if ( false ) { /* TODO competitive mode should be another frontend
       </RecoilRoot>
     </React.StrictMode>,
     root
-  ); */
-} else {
+  ); 
+} else {*/
   ReactDOM.createRoot(root).render((
     <React.StrictMode>
       <RecoilRoot>
@@ -95,7 +95,7 @@ if ( false ) { /* TODO competitive mode should be another frontend
       </RecoilRoot>
     </React.StrictMode>
   ));
-}
+//}
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))

@@ -4,7 +4,7 @@ import { INVALID_MOVE, TurnOrder } from "boardgame.io/core";
 import { GUESSER_PLAYER, JUDGE_PLAYER, otherPlayer, PlayerIDType } from "../../common/types";
 // import { IS_OFFLINE_MODE } from "../../client/utils/util";
 
-type Answer = {
+interface Answer {
   answer: number;
   date: string;
 }
@@ -15,8 +15,8 @@ export interface MyGameState {
   answer: number | null;
   points: number;
   correctnessPreviousAnswer: boolean | null;
-  previousAnswers: Array<Array<Answer>>;
-  previousPoints: Array<number>;
+  previousAnswers: Answer[][];
+  previousPoints: number[];
   currentProblemMaxPoints: number;
   numberOfTry: number;
   millisecondsRemaining: number;
