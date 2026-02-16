@@ -4,13 +4,14 @@
   "private": false,
   "proxy": "http://localhost:8000",
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.857.0",
+    "@aws-sdk/client-s3": "^3.990.0",
     "@babel/cli": "^7.18.6",
     "@babel/node": "^7.18.6",
     "@babel/plugin-transform-modules-commonjs": "^7.18.6",
     "@babel/preset-typescript": "^7.18.6",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
+    "@koa/cors": "^5.0.0",
     "@mui/icons-material": "^5.11.16",
     "@mui/material": "^5.16.7",
     "@mui/x-data-grid": "^7.16.0",
@@ -43,7 +44,7 @@
     "react-syntax-highlighter": "^15.6.1",
     "react-text-mask": "^5.5.0",
     "recoil": "^0.7.7",
-    "smol-toml": "^1.4.1",
+    "smol-toml": "^1.6.0",
     "swr": "^2.2.5",
     "urlcat": "^2.0.4",
     "vite": "^7.0.3",
@@ -51,14 +52,15 @@
     "yup": "^0.32.11"
   },
   "scripts": {
-    "predeploy": "cross-env PUBLIC_URL=/durer-aion REACT_APP_WHICH_VERSION=c npm run build",
-    "deploy": "gh-pages -d build",
+    "predeploy": "npx turbo run build --filter=offline-frontend && npm run predeploy --workspace=offline-frontend",
+    "deploy": "gh-pages -d apps/offline-frontend/dist",
     "lint": "turbo lint",
     "check:server": "babel-node --extensions \".ts\" --presets=@babel/preset-typescript --plugins=@babel/plugin-transform-modules-commonjs src/server.ts sanity-check",
     "start": "turbo start",
     "build": "turbo build",
     "spell-check": "cspell \"**/*.{ts,tsx}\" --no-progress",
     "dev:server": "turbo dev --filter=online-backend --filter=game --filter=schemas --filter=strategy",
+    "dev:online": "turbo dev --filter=online-frontend --filter=common-frontend",
     "dev:offline": "turbo dev --filter=offline-frontend --filter=game --filter=strategy --filter=common-frontend"
   },
   "eslintConfig": {
@@ -103,17 +105,21 @@
     "packages/*"
   ],
   "devDependencies": {
+    "@eslint/js": "^9.37.0",
     "@sentry/types": "^7.57.0",
+    "@types/koa__cors": "^5.0.1",
     "@types/pg": "^8.6.5",
     "@types/react-syntax-highlighter": "^15.5.13",
     "@types/react-text-mask": "^5.4.14",
     "concurrently": "^9.2.0",
     "cspell": "^6.31.1",
+    "eslint": "^9.37.0",
     "gh-pages": "^4.0.0",
     "nodemon": "^2.0.18",
     "ts-node": "^10.9.2",
     "tsup": "^8.5.0",
     "turbo": "^2.5.3",
-    "typescript": "^5.8.3"
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.0"
   }
 }

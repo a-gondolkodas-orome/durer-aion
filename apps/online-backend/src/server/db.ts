@@ -1,9 +1,9 @@
 import type { PostgresStore } from 'bgio-postgres';
-import { teamAttributes, TeamModel } from './entities/teamModel';
 import { InProgressMatchStatus } from 'schemas';
 import { teamAttributes, TeamModel } from './model';
 import { Sequelize, Op, WhereOptions } from 'sequelize';
-import { relayProblemAttributes, RelayProblemModel } from './entities/relayProblemModel';
+import { relayProblemAttributes, RelayProblemModel } from './relayProblemModel';
+import { RelayProblem } from 'game';
 
 export class TeamsRepository {
   sequelize: Sequelize;

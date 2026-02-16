@@ -1,5 +1,5 @@
 import { parse, TomlTable } from 'smol-toml';
-import { RelayProblemModel } from './entities/relayProblemModel';
+import { RelayProblemModel } from './relayProblemModel';
 
 const CATEGORIES: string[] = ["C", "D", "E"] as const;
 

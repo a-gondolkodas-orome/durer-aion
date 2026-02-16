@@ -3,7 +3,6 @@ import * as Router from '@koa/router';
 import type { Game, LobbyAPI, Server, StorageAPI } from 'boardgame.io';
 import { TeamsRepository, RelayProblemsRepository } from './db';
 import { InProgressMatchStatus } from 'schemas';
-import { TeamModel } from './entities/teamModel';
 import { BOT_ID, TransportAPI } from '../socketio_botmoves';
 import { getFilterPlayerView } from "boardgame.io/internal";
 import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus, createGame, injectBot, injectPlayer } from './team_manage';
