@@ -41,10 +41,7 @@ export function Disclaimer(props: {teamName: string, category: string}) {
       <Stack
         sx={{
           fontSize: 16,
-          marginBottom: {
-            xs: "10px",
-            md: "25px"
-          },
+          marginBottom: "25px",
         }}
       >
         <Stack sx={{
@@ -78,10 +75,7 @@ export function Disclaimer(props: {teamName: string, category: string}) {
       <Stack
         sx={{
           fontSize: 24,
-          marginBottom: {
-            xs: "0px",
-            md: "10px"
-          },
+          marginBottom: "10px",
           fontStyle: "italic",
         }}
       >
@@ -92,24 +86,18 @@ export function Disclaimer(props: {teamName: string, category: string}) {
         sx={{
           fontSize: 16,
           marginBottom: {
-            xs: "10px",
-            md: "25px"
+            xs: "15px",
+            md: "15px",
           }
         }}
       >
-        <TextComponentWithPlaceholders placeholders={placeholders}
-          fulltext={dictionary.disclaimer.progressDescription} 
-          genStyle={{textAlign: "inherit"}} extraStyleForVars={{fontStyle: "normal", fontWeight: "bold"}}
-        />
+        {dictionary.disclaimer.progressDescription}
       </Stack>
 
       <Stack
         sx={{
           fontSize: 24,
-          marginBottom: {
-            xs: "0px",
-            md: "10px"
-          },
+          marginBottom: "10px",
           fontStyle: "italic",
         }}
       >
@@ -120,16 +108,12 @@ export function Disclaimer(props: {teamName: string, category: string}) {
         sx={{
           fontSize: 16,
           marginBottom: {
-            xs: "20px",
-            md: "40px",
+            xs: "15px",
+            md: "50px",
           }
         }}
       >
-        <TextComponentWithPlaceholders placeholders={{'{maximumOneDevice}': dictionary.disclaimer.interfaceMaxDevice, '{dontRefresh}': dictionary.disclaimer.interfaceDontRefresh}}
-          fulltext={isOffline ? dictionary.disclaimer.interfaceDescriptionBHTML : dictionary.disclaimer.interfaceDescription} 
-          genStyle={{textAlign: "inherit"}} extraStyleForVars={{fontStyle: "normal", fontWeight: "bold"}}
-        />
-        {isOffline ? <small>{dictionary.disclaimer.interfaceDescripSmall}</small>: ''}
+        <span dangerouslySetInnerHTML={{ __html: ( isOffline ? dictionary.disclaimer.interfaceDescriptionBHTML : dictionary.disclaimer.interfaceDescription) }}></span>
       </Stack>
 
 
