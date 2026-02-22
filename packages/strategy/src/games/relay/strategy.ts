@@ -1,14 +1,14 @@
 import { State } from 'boardgame.io';
 import { MyGameState } from 'game';
 
-type Problem = {
+interface Problem {
   problemText: string;
   answer: number;
   points: number;
   url?: string;
 }
 
-type RelayProblems = {
+interface RelayProblems {
   C: Problem[];
   D: Problem[];
   E: Problem[];
@@ -193,7 +193,7 @@ export function strategy(category: "C" | "D" | "E"){
       if(url === undefined){
         url = "";
       }
-      let nextProblem = problems[category][state.G.currentProblem+1];
+      const nextProblem = problems[category][state.G.currentProblem+1];
       return [[nextProblem.problemText, nextProblem.points, correctnessPreviousAnswer, url], "newProblem"];
     }
     // End of the game

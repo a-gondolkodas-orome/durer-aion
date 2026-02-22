@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import * as Yup from 'yup';
 import { Button, Stack } from "@mui/material";
 import Form from "./form";
-import { ErrorMessage, Field } from "formik";
+import { ErrorMessage, Field, FieldProps } from "formik";
 import CloseIcon from '@mui/icons-material/Close';
 import { useSnackbar } from "notistack";
 import { useRefreshTeamState } from "../hooks/user-hooks";
@@ -68,8 +68,8 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
             enqueueSnackbar('Ezt a választ már próbáltátok', { variant: 'error' });
             return;
           }
-          try{
-            props.onSubmit(values.result)
+          try {
+            props.onSubmit(parseInt(values.result))
             refreshState()
           } catch (e: unknown) {
             console.log(e)

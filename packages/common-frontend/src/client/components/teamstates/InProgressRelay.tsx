@@ -32,7 +32,6 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
       }
     }
     setGameover(ctx.gameover)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ctx.gameover]);
   useEffect(() => {
     setMsRemaining(G.millisecondsRemaining);

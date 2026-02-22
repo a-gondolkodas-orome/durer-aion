@@ -1,11 +1,11 @@
 import { State } from 'boardgame.io';
 import { BotAction } from 'boardgame.io/dist/types/src/ai/bot';
-const { Bot } = require('boardgame.io/ai');
+import { Bot } from 'boardgame.io/ai';
 
 // Determine the next move for the bot and which move function to use.
 type BotStrategy<T_SpecificGameState, T_Move> = (state: State<T_SpecificGameState>, botID: string) => [T_Move | undefined, string];
 
-type BotOpts = {
+interface BotOpts {
   enumerate: any;
   seed?: string | number;
 };
@@ -13,7 +13,7 @@ type BotOpts = {
 /// wraps a convenient strategy to a full Boardgame.io Bot class
 /// @param strategy Must calculate the move to be made or `undefined` if a random move is to be made
 /// @result a Boardgame.io Bot class
-export function botWrapper<T_SpecificGameState, T_Move>(botstrategy: BotStrategy<T_SpecificGameState, T_Move>): new (opts: BotOpts) => typeof Bot {
+export function botWrapper<T_SpecificGameState, T_Move>(botstrategy: BotStrategy<T_SpecificGameState, T_Move>): new (opts: BotOpts) => Bot {
   return class extends Bot {
 
     // waits 400 ms for UX
@@ -25,8 +25,8 @@ export function botWrapper<T_SpecificGameState, T_Move>(botstrategy: BotStrategy
       await this.wait();
       const [move, moveName] = botstrategy(state, playerID);
       if (move === undefined) {
-        let possible_moves = this.enumerate(state.G, state.ctx, playerID);
-        let randomIndex = Math.floor(Math.random() * possible_moves.length);
+        const possible_moves = this.enumerate(state.G, state.ctx, playerID);
+        const randomIndex = Math.floor(Math.random() * possible_moves.length);
         return { action: possible_moves[randomIndex] };
       }
       return {
