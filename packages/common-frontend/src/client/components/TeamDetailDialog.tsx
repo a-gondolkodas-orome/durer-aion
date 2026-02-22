@@ -125,8 +125,8 @@ function MatchStatusField(props: {name: string, data: MatchStatus, isRelay: bool
   const [matchLogs, setMatchLogs] = useState<unknown|null>(null);
 
   switch (props.data.state) {
-    case "IN PROGRESS":
-      let inProgressState = props.data as InProgressMatchStatus 
+    case "IN PROGRESS": {
+      const inProgressState = props.data as InProgressMatchStatus 
       return (
         <><Stack>
           Folyamatban <br/>
@@ -214,8 +214,9 @@ function MatchStatusField(props: {name: string, data: MatchStatus, isRelay: bool
     </SyntaxHighlighter>}
       </>
       )
-    case "FINISHED":
-      let finishedState = props.data as FinishedMatchStatus 
+    }
+    case "FINISHED": {
+      const finishedState = props.data as FinishedMatchStatus 
       return (
         <Stack>
           Végzett <br/>
@@ -251,6 +252,7 @@ function MatchStatusField(props: {name: string, data: MatchStatus, isRelay: bool
     </SyntaxHighlighter>}</>
         </Stack>
       )
+    }
       case "NOT STARTED": 
         return (
           <Stack>

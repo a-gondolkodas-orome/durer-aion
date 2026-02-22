@@ -1,14 +1,14 @@
 import { State } from 'boardgame.io';
 import { MyGameState } from 'game';
 
-type Problem = {
+interface Problem {
   problemText: string;
   answer: number;
   points: number;
   url?: string;
 }
 
-type RelayProblems = {
+interface RelayProblems {
   C: Problem[];
   D: Problem[];
   E: Problem[];
@@ -186,8 +186,11 @@ export function strategy(category: "C" | "D" | "E"){
   
     // Next problem if there is one and the time is not over
     if (state.G.currentProblem < 8) { // TODO: it should be 9 if we count from 1 and not from 0. But it is currently 8 because we count from 0.
-      const url = problems[category][state.G.currentProblem+1].url ?? "";
-      let nextProblem = problems[category][state.G.currentProblem+1];
+      let url = problems[category][state.G.currentProblem+1].url ?? "";
+      if(url === undefined){
+        url = "";
+      }
+      const nextProblem = problems[category][state.G.currentProblem+1];
       return [[nextProblem.problemText, nextProblem.points, correctnessPreviousAnswer, url], "newProblem"];
     }
     // End of the game
