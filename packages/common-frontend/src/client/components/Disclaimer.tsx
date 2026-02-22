@@ -126,7 +126,7 @@ export function Disclaimer(props: {teamName: string, category: string}) {
         }}
       >
         <TextComponentWithPlaceholders placeholders={{'{maximumOneDevice}': dictionary.disclaimer.interfaceMaxDevice, '{dontRefresh}': dictionary.disclaimer.interfaceDontRefresh}}
-          fulltext={isOffline ? dictionary.disclaimer.interfaceDescriptionBHTML : dictionary.disclaimer.interfaceDescription} 
+          fulltext={!isOffline ? dictionary.disclaimer.interfaceDescriptionBHTML : dictionary.disclaimer.interfaceDescription} 
           genStyle={{textAlign: "inherit"}} extraStyleForVars={{fontStyle: "normal", fontWeight: "bold"}}
         />
         {isOffline ? <small>{dictionary.disclaimer.interfaceDescripSmall}</small> : ''}
