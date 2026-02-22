@@ -57,6 +57,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
               xs: '100%',
               md: 'calc(100% - 64px)'
             },
+            backgroundColor: '#fff',
           }
         }}
         open={
