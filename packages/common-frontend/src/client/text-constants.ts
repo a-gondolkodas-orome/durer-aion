@@ -1,5 +1,7 @@
 export const dictionary = {
   disclaimer: {
+    welcome: "Kedves {teamName} csapat, üdvözlünk az online fordulón!",
+    category: "Kategória: {category}",
     start:
       "Az online fordulón a csapatoknak önállóan kell dolgozniuk, más emberektől nem kérhetnek segítséget" +
       " a versenyzési időszak végéig (21:30-ig). A mesterséges intelligencia használata is tilos.",
