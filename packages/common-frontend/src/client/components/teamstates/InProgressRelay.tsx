@@ -11,6 +11,7 @@ import { dictionary } from '../../text-constants';
 import { RelayEndTable } from '../RelayEndTable';
 import { useClientRepo } from '../../api-repository-interface';
 import { useTheme } from '@mui/material/styles';
+import { alpha } from "@mui/system/colorManipulator"
 
 interface MyGameProps extends BoardProps<MyGameState> { };
 export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
@@ -57,7 +58,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
               xs: '100%',
               md: 'calc(100% - 64px)'
             },
-            backgroundColor: '#fff',
+              backgroundColor: alpha(theme.palette.background.paper, 1),
           }
         }}
         open={
