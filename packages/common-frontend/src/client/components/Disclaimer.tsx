@@ -109,7 +109,7 @@ export function Disclaimer(props: {teamName: string, category: string}) {
           fontSize: 16,
           marginBottom: {
             xs: "15px",
-            md: "50px",
+            md: "75px",
           }
         }}
       >
