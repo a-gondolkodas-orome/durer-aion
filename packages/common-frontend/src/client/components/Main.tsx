@@ -49,7 +49,7 @@ export function Main() {
         {admin && <Admin teamId={window.location.pathname.split('/').at(2)}/>}
         {!teamState && !admin && <Login />}
         {teamState && teamState.pageState === "DISCLAIMER" && (
-          <Disclaimer teamName={teamState?.teamName ?? null} category={teamState?.category ?? null}/>
+          <Disclaimer teamName={teamState.teamName} category={teamState.category}/>
         )}
         {teamState && teamState.pageState === "HOME" && frontendState === null && (
           <Chooser state={teamState} setState={setFrontEndState}/>
