@@ -1,5 +1,5 @@
 import { Button } from "@mui/material";
-import { Stack } from "@mui/system";
+import { fontWeight, Stack } from "@mui/system";
 import { dictionary } from "../text-constants";
 import { useToHome } from "../hooks/user-hooks";
 import { useClientRepo } from "../api-repository-interface";
