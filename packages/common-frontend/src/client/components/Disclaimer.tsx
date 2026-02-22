@@ -1,5 +1,5 @@
 import { Button } from "@mui/material";
-import { fontWeight, Stack } from "@mui/system";
+import { Stack } from "@mui/system";
 import { dictionary } from "../text-constants";
 import { useToHome } from "../hooks/user-hooks";
 import { useClientRepo } from "../api-repository-interface";
@@ -65,6 +65,7 @@ export function Disclaimer(props: {teamName: string, category: string}) {
           flexDirection: "row",
           fontSize: 18,
           marginBottom: "20px",
+<<<<<<< HEAD
         }}>
           <div style={{textAlign: "center"}}>
             {dictionary.disclaimer.category.split('{category}')[0]}
@@ -72,6 +73,9 @@ export function Disclaimer(props: {teamName: string, category: string}) {
             {dictionary.disclaimer.category.split('{category}')[1]}
           </div>
         </Stack>
+=======
+        }}/>
+>>>>>>> parent of a219c2f (also use my component to emphesise important parts of introduction)
         {dictionary.disclaimer.start}
       </Stack>
 

@@ -1,14 +1,10 @@
-import { start } from "repl";
-
 export const dictionary = {
   disclaimer: {
     welcome: "Kedves {teamName} csapat, üdvözlünk az online fordulón!",
     category: "Kategória: {category}",
     start:
-      "Az online fordulón a csapatoknak {ownWork} kell dolgozniuk, más emberektől nem kérhetnek segítséget" +
-      " {deadline}. A mesterséges intelligencia használata is tilos.",
-    startOwnWork: "önállóan",
-    startDeadline: "a versenyzési időszak végéig (21:30-ig)",
+      "Az online fordulón a csapatoknak önállóan kell dolgozniuk, más emberektől nem kérhetnek segítséget" +
+      " a versenyzési időszak végéig (21:30-ig). A mesterséges intelligencia használata is tilos.",
     progress: "Továbbjutás",
     progressDescription:
       "Azok a csapatok, amelyek az online forduló során a megszerezhető {maxPoints} pontból legalább {minPoints} pontot " +
