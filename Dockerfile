@@ -7,6 +7,7 @@ COPY .npmrc /usr/src/app/
 COPY . .
 
 RUN npm ci
+RUN npx turbo build --filter=online-backend
 
 EXPOSE 8000
 
