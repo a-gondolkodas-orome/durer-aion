@@ -29,7 +29,7 @@
     "@vitejs/plugin-react": "5.1.4",
     "eslint": "9.39.2",
     "eslint-plugin-react": "7.37.5",
-    "jsdom": "27.4.0",
+    "jsdom": "28.1.0",
     "process": "0.11.10",
     "vite": "7.3.1",
     "vitest": "4.0.18"
