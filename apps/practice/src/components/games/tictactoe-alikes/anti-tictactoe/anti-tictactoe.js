@@ -22,19 +22,23 @@ const BoardClient = ({ board, ctx, moves }) => {
     return 'bg-blue-600';
   };
 
+  /*
+  Due to simulating borders with the background peeking through gaps, we need
+  to explicitly give bg-white to children.
+  */
   return (
   <section className="p-2 shrink-0 grow basis-2/3">
-    <div className="grid grid-cols-3 gap-0 border-2">
+    <div className="grid grid-cols-3 bg-slate-200 gap-1 p-1">
       {range(9).map(id => (
         <button
           key={id}
           disabled={!isMoveAllowed(id)}
           onClick={() => clickField(id)}
-          className="aspect-square p-[25%] border-2"
+          className="aspect-square p-[25%] bg-white"
         >
           {board[id] && (
             <span
-              className={`w-full aspect-square inline-block rounded-full -mb-2 ${pieceColor(id)}`}
+              className={`w-full aspect-square block rounded-full ${pieceColor(id)}`}
             ></span>
           )}
       </button>
