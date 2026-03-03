@@ -4,10 +4,11 @@ import { GameType } from "game";
 export const ClientFactory = function<T_SpecificGameState> (
   game: GameType<T_SpecificGameState>, 
   board: any,
-  description: any
+  description: any,
+  serverUrl: string | undefined = undefined,
   ) {
   const Client = MyClient(game, board, description);
-  const OnlineClient = MyOnlineClient(game, board, description);
+  const OnlineClient = MyOnlineClient(game, board, description, serverUrl);
   return {
     Client: function () {
       return (<>
@@ -22,9 +23,9 @@ export const ClientFactory = function<T_SpecificGameState> (
   };
 };
 
-export const ClientFactoryRelay = function (game: any, board: any, description: any) {
+export const ClientFactoryRelay = function (game: any, board: any, description: any, serverUrl: string | undefined = undefined) {
   const Client = MyClientRelay(game, board, description);
-  const OnlineClient = MyOnlineRelayClient(game, board, description);
+  const OnlineClient = MyOnlineRelayClient(game, board, description, serverUrl);
   return {
     Client: function () {
       return (<>

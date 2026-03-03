@@ -3,11 +3,11 @@ import * as Yup from 'yup';
 import { Button, Stack } from "@mui/material";
 import Form from "./form";
 import { ErrorMessage, Field } from "formik";
-import theme from "./theme";
 import CloseIcon from '@mui/icons-material/Close';
 import { useSnackbar } from "notistack";
 import { useRefreshTeamState } from "../hooks/user-hooks";
 import { dictionary } from "../text-constants";
+import { useTheme } from "@mui/material/styles";
 
 function sanitizeValue(value: string) {
   const regex = /^([1-9]*[0-9]*)$/;
@@ -25,6 +25,7 @@ export interface MyProps {
 }
 
 export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) => {
+  const theme = useTheme();
   const { enqueueSnackbar } = useSnackbar();
   const refreshState = useRefreshTeamState();
   const [sentAnswer, setSentAnswer] = useState<number>(0);

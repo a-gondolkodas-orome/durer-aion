@@ -3,8 +3,9 @@ import { useEffect, useState } from "react";
 import { Countdown } from "../client/components/Countdown";
 import { StrategyEndTable } from "../client/components/StrategyEndTable";
 import { useRefreshTeamState, useToHome } from "../client/hooks/user-hooks";
-import { IS_OFFLINE_MODE } from "../client/utils/util";
+import { useClientRepo } from "../client/api-repository-interface";
 import { GUESSER_PLAYER, JUDGE_PLAYER } from "game";
+import { useTheme } from "@mui/material/styles";
 
 export function boardWrapper(board: any, description: any) { //<please> TODO: solve types with BoardProps<MyGameState>
   return ({ G, ctx, moves, log }: any) => {
@@ -12,6 +13,9 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
     const [gameover, setGameover] = useState(ctx.gameover);
     const toHome = useToHome();
     const refreshState = useRefreshTeamState();
+    const isOffline = useClientRepo().version === "OFFLINE";
+    const theme = useTheme();
+
     useEffect(() => {
       if (!ctx.gameover) {
         moves.getTime();
@@ -53,7 +57,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
         </Dialog>
         <Stack sx={{
           padding: '20px',
-          backgroundColor: '#FFF',
+          backgroundColor: theme.palette.background.paper,
           borderRadius: "25px",
           display: 'flex',
         }}>
@@ -82,7 +86,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
                 serverRemainingMs={G.millisecondsRemaining} />}
             </Stack>
           </Stack>
-          {IS_OFFLINE_MODE && 
+          { isOffline && 
           <Stack sx={{
             flexDirection: 'row',
             width: '250px',
@@ -100,7 +104,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
             // fontWeight: 'bold',
           }}>
             {description}
-            <strong>Tudnivalók: </strong>Az "Új próbajáték" gombra kattintva próbajáték indul, ami a pontozásba nem számít bele. Bátran kérjetek próbajátékot, hiszen ezzel tudjátok tesztelni, hogy jól értitek-e a játék működését. Az "Új éles játék" gombra kattintva indul a valódi játék, ami már pontért megy.
+            <strong>Tudnivalók: </strong>Az "Új próbajáték kezdése" gombra kattintva próbajáték indul, ami a pontozásba nem számít bele. Bátran kérjetek próbajátékot, hiszen ezzel tudjátok tesztelni, hogy jól értitek-e a játék működését. Az "Új éles játék kezdése" gombra kattintva indul a valódi játék, ami már pontért megy.
 
           </Stack>
 

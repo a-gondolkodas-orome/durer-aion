@@ -235,6 +235,20 @@ export function configureTeamsRouter(
   });
 
   /**
+   * Remove a team by teamId.
+   *
+   * @param {string} teamID - The ID of the team.
+   */
+  router.delete("/team/admin/:teamID/remove", async (ctx) => {
+    const teamId = ctx.params.teamID;
+    const deleted = teams.removeTeam(teamId);
+    if (await deleted === 0) {
+      ctx.throw(404, `team with teamId ${teamId} not found.`);
+    }
+    ctx.body = {};
+  });
+
+  /**
    * Run a user defined filter query on teams
    * 
    * @param {string|string[]} filter - Get parameter to pass the filter

@@ -1,6 +1,7 @@
 import { createMatch } from "boardgame.io/internal";
 import { nanoid } from "nanoid";
-import { getBotCredentials, getGameStartAndEndTime, relayNames, strategyNames } from "./common";
+import { getBotCredentials, getGameStartAndEndTime, relayNames } from "./common";
+import { strategyNames } from "game";
 import { Game, LobbyAPI, Server, StorageAPI } from "boardgame.io";
 import { TeamsRepository } from "./db";
 import {

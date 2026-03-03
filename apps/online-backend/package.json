@@ -6,7 +6,7 @@
     "lint": "TIMING=1 eslint \"**/*.ts*\" --max-warnings=0",
     "build": "npx tsc",
     "start": "node dist/src/server.js",
-    "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/src/server.js --watch ../packages\"",
+    "dev": "cross-env ALLOW_CORS=true concurrently \"npx tsc --watch\" \"nodemon -q dist/src/server.js --watch ../packages\"",
     "build_old": "babel-node --extensions \".ts\" --presets=@babel/preset-typescript --plugins=@babel/plugin-transform-modules-commonjs src/server.ts sanity-check",
     "start_old": "nodemon -e js,ts --exec babel-node --extensions \".ts\" --presets=@babel/preset-typescript --plugins=@babel/plugin-transform-modules-commonjs src/server.ts",
     "spell-check": "cspell \"**/*.{ts,tsx}\" --no-progress"

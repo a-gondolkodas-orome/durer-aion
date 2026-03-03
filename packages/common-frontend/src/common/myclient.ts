@@ -31,11 +31,14 @@ export function MyClientRelay(
 export function MyOnlineClient<T_SpecificGameState >(
   game: GameType<T_SpecificGameState>,
   board: any,
-  description: string) {
+  description: string,
+  serverUrl: string | undefined = undefined,
+) {
   return Client({
     game: gameWrapper(game),
     board: boardWrapper(board, description),
-    multiplayer: SocketIO(),
+    multiplayer: serverUrl === undefined ? SocketIO() :
+      SocketIO({ server: serverUrl }),
     //debug: { impl: Debug },
   });
 }
@@ -43,11 +46,14 @@ export function MyOnlineClient<T_SpecificGameState >(
 export function MyOnlineRelayClient(
   game: typeof GameRelay,
   board: any,
-  description: string) {
+  description: string,
+  serverUrl: string | undefined = undefined
+) {
   return Client({
     game: game,
     board: board,
-    multiplayer: SocketIO(),
+    multiplayer: serverUrl === undefined ? SocketIO() :
+      SocketIO({ server: serverUrl }),
     //debug: { impl: Debug },
   });
 }

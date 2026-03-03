@@ -136,7 +136,7 @@ This will give you a bash terminal ito that container, with sudo.
 To run the import script use the following:
 
 ```bash
-sudo docker exec -t durer-aion-backend-1 ./import_teams.sh test.tsv
+sudo docker exec -t durer-aion-backend-1 ./scripts/import_teams.sh scripts/test.tsv
 ```
 
 ## Add to a custom domain

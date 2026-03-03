@@ -1,19 +1,24 @@
-import './dotenv_helper'; // should be first
 import { 
   GameRelay,
-  MyGameWrapper as strategyGameWrapper,
-  strategyWrapper as StrategyStrategyremovefromcirclee,
-  RelayStrategy,
+  MyGameWrappers as strategyGameWrappers,
+  StrategyWrappers as StrategyStrategy,
   gameWrapper,
+  strategyNames,
 } from 'game';
+import { RelayStrategy } from 'strategy';
+//import { 
+//  RelayStrategy,
+//  strategyWrapper as StrategyStrategyremovefromcirclee,
+//} from 'strategy';
 import { PostgresStore } from 'bgio-postgres';
 import { argv, env, exit } from 'process';
 import { SocketIOButBotMoves } from './socketio_botmoves';
 import { Server } from 'boardgame.io/server';
 import botWrapper from './botwrapper';
+import cors from '@koa/cors';
 import { configureTeamsRouter } from './server/router';
-import { getBotCredentials, getGameStartAndEndTime, relayNames, strategyNames  } from './server/common';
 import { TeamsRepository, RelayProblemsRepository } from './server/db';
+import { getBotCredentials, getGameStartAndEndTime, relayNames } from './server/common';
 import { import_teams_from_tsv_locally } from './server/team_import';
 
 import auth from 'koa-basic-auth';
@@ -21,6 +26,9 @@ import mount from 'koa-mount';
 import { closeMatch } from './server/team_manage';
 
 import * as Sentry from '@sentry/node';
+import dotenv from 'dotenv';
+
+dotenv.config(); // Loads .env file into process.env
 
 function getDb() {
   if (env.DATABASE_URL) {
@@ -47,9 +55,9 @@ const games = [
   { ...GameRelay, name: relayNames.C },
   { ...GameRelay, name: relayNames.D },
   { ...GameRelay, name: relayNames.E },
-  { ...gameWrapper(strategyGameWrapper("C")), name: strategyNames.C },
-  { ...gameWrapper(strategyGameWrapper("D")), name: strategyNames.D },
-  { ...gameWrapper(strategyGameWrapper("E")), name: strategyNames.E },
+  { ...gameWrapper(strategyGameWrappers.C()), name: strategyNames.C },
+  { ...gameWrapper(strategyGameWrappers.D()), name: strategyNames.D },
+  { ...gameWrapper(strategyGameWrappers.E()), name: strategyNames.E },
 ];
 
 async function createBotFactories(problems: RelayProblemsRepository) {
@@ -57,9 +65,9 @@ async function createBotFactories(problems: RelayProblemsRepository) {
     botWrapper(await RelayStrategy(() => problems.getProblems("C"))),
     botWrapper(await RelayStrategy(() => problems.getProblems("D"))),
     botWrapper(await RelayStrategy(() => problems.getProblems("E"))),
-    botWrapper(StrategyStrategyremovefromcirclee("C")),
-    botWrapper(StrategyStrategyremovefromcirclee("D")),
-    botWrapper(StrategyStrategyremovefromcirclee("E")),
+    botWrapper(StrategyStrategy.C()),
+    botWrapper(StrategyStrategy.D()),
+    botWrapper(StrategyStrategy.E()),
   ];
 }
 
@@ -104,6 +112,10 @@ async function main() {
   });
 
   const PORT = parseInt(env.PORT || "8000");
+
+  if (env.ALLOW_CORS === 'true') {
+    server.app.use(cors({ origin: '*' }));
+  }
 
   // Set up transport layer for updates
   server.app.context.durer_transport = socketio;

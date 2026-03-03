@@ -9,7 +9,8 @@ import { ExcerciseTask } from '../ExcerciseTask';
 import { ExcerciseForm } from '../ExcerciseForm';
 import { dictionary } from '../../text-constants';
 import { RelayEndTable } from '../RelayEndTable';
-import { IS_OFFLINE_MODE } from '../../utils/util';
+import { useClientRepo } from '../../api-repository-interface';
+import { useTheme } from '@mui/material/styles';
 
 interface MyGameProps extends BoardProps<MyGameState> { };
 export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
@@ -17,6 +18,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
   const [gameover, setGameover] = useState(ctx.gameover);
   const refreshState = useRefreshTeamState();
   const toHome = useToHome();
+  const theme = useTheme();
 
   useEffect(()=>{
     if (!ctx.gameover) {
@@ -36,6 +38,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
     setMsRemaining(G.millisecondsRemaining);
   }, [G.millisecondsRemaining]);
   const finished = msRemaining < - 5000 || gameover === true
+  const isOffline = useClientRepo().version === "OFFLINE";
   return (
     <>
       <Dialog 
@@ -105,7 +108,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
             xs: '100%',
             md: "calc(100% - 380px)",
           },
-          backgroundColor: "#fff",
+          backgroundColor: theme.palette.background.paper,
           borderRadius: {
             xs: 0,
             md: "25px",
@@ -135,7 +138,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
             md: "350px",
           },
           maxHeight: "min-content",
-          backgroundColor: "#fff",
+          backgroundColor: theme.palette.background.paper,
           borderRadius: "25px",
           padding: '30px',
         }}>
@@ -144,9 +147,8 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
             previousCorrectness={!finished ? G.correctnessPreviousAnswer : null}
             attempt={(G.currentProblem+1)*3+G.numberOfTry}
             onSubmit={(input) => {
-              moves.submitAnswer(parseInt(input))
+              moves.submitAnswer(parseInt(input));
               // TODO this should be done in repository
-              // sendDataRelayStep(teamState, G, ctx, parseInt(input));
             }}
           />
           <Stack sx={{
@@ -164,7 +166,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
               endTime={new Date(G.end)}
               serverRemainingMs={G.millisecondsRemaining} />}
           </Stack>
-          {IS_OFFLINE_MODE && 
+          { isOffline && 
             <Stack sx={{
               flexDirection: 'row',
               width: '250px',

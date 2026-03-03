@@ -112,6 +112,30 @@ paths:
         "404":
           description: Match not found
 
+  /team/admin/{teamID}/remove:
+    delete:
+      summary: Remove a team
+      description: Remove a team from the system.
+      parameters:
+        - name: teamID
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/GUID"
+      security:
+      - basicAdminAuth: []
+      tags:
+      - admin
+      responses:
+        "200":
+          description: Team successfully removed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeamModel"
+        "404":
+          description: Team not found
+
   /team/admin/{teamID}/reset/strategy:
     get:
       summary: Reset team's strategy

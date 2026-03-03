@@ -6,7 +6,8 @@ import { formatTime } from '../utils/DateFormatter';
 import { dictionary } from '../text-constants';
 import { useState } from 'react';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { IS_OFFLINE_MODE } from '../utils/util';
+import { useClientRepo } from '../api-repository-interface';
+import { useTheme } from "@mui/material/styles";
 
 export function ChooserItem(props: {
   status: MatchStatus,
@@ -18,6 +19,8 @@ export function ChooserItem(props: {
   const startStrategy = useStartStrategy();
 
   const [mobileDescOpen, setMobileDescOpen] = useState(props.status.state !== "FINISHED");
+  const isOffline = useClientRepo().version === "OFFLINE";
+  const theme = useTheme();
 
   return (
     <Stack sx={{
@@ -30,7 +33,7 @@ export function ChooserItem(props: {
         xs: "10px",
         md: "40px",
       },
-      backgroundColor: "#fff",
+      backgroundColor: theme.palette.background.paper,
     }}>
       <Stack sx={{
         fontWeight: 'bold',
@@ -128,7 +131,7 @@ export function ChooserItem(props: {
       }} disabled={props.status.state !== "NOT STARTED"}>
         {dictionary.chooser.start}
       </Button>
-      {!IS_OFFLINE_MODE &&
+      { !isOffline &&
       <Button sx={{
         width: '70%',
         maxWidth: "400px",

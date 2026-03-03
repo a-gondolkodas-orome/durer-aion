@@ -1,8 +1,10 @@
 import { Stack } from '@mui/system';
 import React from 'react';
+import { useTheme } from '@mui/material/styles';
 import { dictionary } from '../text-constants';
 
 export function WaitingRoom() {
+  const theme = useTheme();
   return (
     <Stack sx={{
       display: 'flex',
@@ -10,7 +12,7 @@ export function WaitingRoom() {
       width: 600,
       padding: "40px",
       marginTop: "40px",
-      backgroundColor: "#fff",
+      backgroundColor: theme.palette.background.paper,
       borderRadius: "25px",
     }}>
       <Stack sx={{

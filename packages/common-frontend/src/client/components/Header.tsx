@@ -1,14 +1,16 @@
 import { Container, Dialog, Stack } from '@mui/material';
 import React, { useState } from 'react';
 import { useLogout } from '../hooks/user-hooks';
-import theme from './theme';
 import { dictionary } from '../text-constants';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
-import { IS_OFFLINE_MODE } from '../utils/util';
+import { useClientRepo } from '../api-repository-interface';
+import { useTheme } from '@mui/material/styles';
 
 export function Header(props: { teamName: string | null }) {
-  const logout = useLogout()
+  const theme = useTheme();
+  const logout = useLogout();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const clientRepository = useClientRepo();
   return (
     <Stack sx={{
       backgroundColor: theme.palette.primary.main,
@@ -64,7 +66,7 @@ export function Header(props: { teamName: string | null }) {
             }}>{props.teamName}</Stack>
             <Stack onClick={()=>{
               logout();
-              if (IS_OFFLINE_MODE){
+              if ( clientRepository.version === "OFFLINE") {
                 window.location.reload();
               }            
             }} sx={{

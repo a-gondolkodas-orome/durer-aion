@@ -1,0 +1,8 @@
+{
+  "semi": true,
+  "tabWidth": 2,
+  "printWidth": 120,
+  "allowParens": "always",
+  "trailingComma": "es5",
+  "endOfLine": "auto"
+}

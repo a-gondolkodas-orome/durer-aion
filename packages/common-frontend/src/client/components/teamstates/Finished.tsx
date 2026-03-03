@@ -1,6 +1,7 @@
 import { Stack } from '@mui/system';
 import { FinishedMatchStatus } from 'schemas';
 import { TeamModelDto } from '../../dto/TeamStateDto';
+import { useTheme } from '@mui/material/styles';
 
 
 /**
@@ -10,6 +11,7 @@ import { TeamModelDto } from '../../dto/TeamStateDto';
  * @returns Aggregated point visualisations
  */
 export function Finished(props: {state: TeamModelDto}) {
+  const theme = useTheme();
   const relayScore = (props.state.relayMatch as FinishedMatchStatus).score;
   const stratScore = (props.state.strategyMatch as FinishedMatchStatus).score;
   return (
@@ -19,7 +21,7 @@ export function Finished(props: {state: TeamModelDto}) {
       height: '500px',
       borderRadius: '30px',
       padding: '30px',
-      backgroundColor: "#fff",
+      backgroundColor: theme.palette.background.paper,
       marginTop: "30px",
     }} data-testId="finishedRoot">
       <Stack sx={{

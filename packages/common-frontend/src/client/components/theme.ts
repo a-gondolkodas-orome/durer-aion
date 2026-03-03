@@ -1,19 +1,12 @@
-import { createTheme } from "@mui/material/styles";
-
-
-const theme = createTheme({
+const theme = ({
     palette: {
-        primary: {
-            main: '#11009E',
-            //#0b5ac7
-            contrastText: '#fff'
-        },
         secondary: {
             main: '#fff',
             contrastText: '#000'
         },
         background: {
             default: '#FFF8D7',
+            paper: '#FFFFFFE6'  // Opacity: 90%
         }
     },
     typography: {

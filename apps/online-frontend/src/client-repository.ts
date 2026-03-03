@@ -2,9 +2,10 @@ import urlcat from "urlcat";
 import axios, { AxiosInstance,AxiosError } from 'axios';
 import { ClientRepository, TeamModelDto, MatchStateDto } from "common-frontend";
 
+const serverUrl = import.meta.env.VITE_SERVER_URL || '/';
 class ApiAxios {
   static instance(): AxiosInstance {
-    let apiUrl = '/'; // TODO: env or something
+    let apiUrl = serverUrl; // TODO: env or something
 
     return axios.create({
       baseURL: apiUrl,
@@ -22,6 +23,9 @@ function makeAxiosError(any_error:any): AxiosError {
 }
 
 export class RealClientRepository implements ClientRepository {
+
+  version = "ONLINE" as const;
+
   async getTeamState(
     guid: string,
   ): Promise<TeamModelDto> {
@@ -231,5 +235,18 @@ export class RealClientRepository implements ClientRepository {
       throw new Error('Váratlan hiba történt');
     }
     return result.data;
+  }
+
+  async removeTeam(teamId: string): Promise<void> {
+    const url = urlcat('/team/admin/:teamId/remove', {
+      teamId: teamId,
+    });
+    try {
+      await ApiAxios.instance().delete(url);
+    } catch (e: any) {
+      const err = makeAxiosError(e);
+      console.error(err.message)
+      throw e;
+    }
   }
 }

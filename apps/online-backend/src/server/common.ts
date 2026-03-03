@@ -20,15 +20,8 @@ export function getGameStartAndEndTime() {
   };
 }
 
-
 export const relayNames = {
   C: 'relay_c',
   D: 'relay_d',
   E: 'relay_e',
-}
-
-export const strategyNames = {
-  C: 'remove-from-circle_c',
-  D: 'remove-from-circle_d',
-  E: 'remove-from-circle_e',
 }

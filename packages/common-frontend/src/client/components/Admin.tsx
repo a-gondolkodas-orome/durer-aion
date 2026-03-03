@@ -1,5 +1,5 @@
 import { Stack } from '@mui/system';
-import { useAddMinutes, useAll } from '../hooks/user-hooks';
+import { useAddMinutes, useAll, useRemoveTeam } from '../hooks/user-hooks';
 import { Button, Dialog, Table, TableCell, TableRow } from '@mui/material';
 import { useEffect, useState, useCallback } from 'react';
 import useSWR from 'swr';
@@ -8,15 +8,17 @@ import { TeamModelDto } from '../dto/TeamStateDto';
 import { TeamDetailDialog } from './TeamDetailDialog';
 import Form from './form';
 import { ErrorMessage, Field } from 'formik';
-import theme from './theme';
+import { useTheme } from '@mui/material/styles';
 import { useSnackbar } from 'notistack';
 import { FinishedMatchStatus } from 'schemas';
 import { ConfirmDialogInterface, ConfirmDialog } from './ConfirmDialog';
 import * as Yup from 'yup';
 
 export function Admin(props: {teamId?: String}) {
+  const theme = useTheme();
   const getAll = useAll();
   const addMinutes = useAddMinutes();
+  const removeTeam = useRemoveTeam();
   const { enqueueSnackbar } = useSnackbar();
   const { data } = useSWR("users/all", getAll)
   const [selectedRow, setSelectedRow] = useState<TeamModelDto | null>(null);
@@ -47,7 +49,7 @@ export function Admin(props: {teamId?: String}) {
         xs: '10px',
         md: 0
       },
-      backgroundColor: "#fff",
+      backgroundColor: theme.palette.background.paper,
     }} data-testid="adminRoot">
       <Dialog 
         maxWidth={false} 
@@ -241,13 +243,40 @@ export function Admin(props: {teamId?: String}) {
           hozzáadás
         </Button>
         </Stack>
-        <ErrorMessage name="time" render={msg => (
+        <ErrorMessage name="time"/><ErrorMessage name="time" render={msg => (
           <Stack sx={{ color: 'red', fontSize: '0.875rem' }}>
             {msg}
           </Stack>
         )}/>
-      </ Form>
+      </Form>
       </Stack>}
+      {!teamFromPath && data &&
+        <Button
+          color="error"
+          variant="contained"
+          sx={{ margin: '10px 0', maxWidth: 300 }}
+          onClick={() => {
+            setConfirmDialog({
+              text: 'Biztosan törlöd az összes csapatot? Ez a művelet nem visszavonható!',
+              confirm: async () => {
+                try {
+                  data.forEach(team => {
+                    removeTeam(team.teamId);
+                  });
+                  enqueueSnackbar('Összes csapat törölve', { variant: 'success' });
+                  // Refresh the list
+                  if (typeof window !== 'undefined') {
+                    getAll();
+                  }
+                } catch (e: any) {
+                  enqueueSnackbar(e?.message || 'Hiba történt', { variant: 'error' });
+                }
+              }
+            });
+          }}
+        >
+          Összes csapat törlése
+        </Button>}
       
       {/* Problems Upload Section */}
       {!teamFromPath && <ProblemsUpload onUploadSuccess={() => setRefreshProblems(prev => prev + 1)} />}

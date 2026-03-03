@@ -3,7 +3,7 @@ import { Field } from 'formik';
 import { useSnackbar } from 'notistack';
 import { useLogin } from '../hooks/user-hooks';
 import Form from './form';
-import theme from './theme';
+import { useTheme } from '@mui/material/styles';
 import { dictionary } from '../text-constants';
 import { Button } from '@mui/material';
 import MaskedInput from "react-text-mask";
@@ -11,6 +11,7 @@ import MaskedInput from "react-text-mask";
 const idMask = [/\d/, /\d/,  /\d/, "-", /\d/, /\d/, /\d/, /\d/, "-", /\d/, /\d/, /\d/ ];
 
 export function Login() {
+  const theme = useTheme();
   const { enqueueSnackbar } = useSnackbar();
   const login = useLogin();
 

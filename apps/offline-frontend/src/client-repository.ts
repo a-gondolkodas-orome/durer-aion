@@ -1,8 +1,11 @@
 import { ClientRepository, LOCAL_STORAGE_TEAMSTATE, TeamModelDto, MatchStateDto } from "common-frontend";
 import { teamData } from "./teamData";
-import { sendDataLogin, sendDataRelayEnd, sendDataRelayStart, sendDataStrategyStart } from "./sendData";
+import { sendDataLogin, sendGameData } from "./sendData";
 
 export class OfflineClientRepository implements ClientRepository {
+  
+  version = "OFFLINE" as const;
+  
   startRelay(joinCode: string): Promise<string> {
     const teamState = getTeamStateFromLocal();
     if (!(teamState.pageState === 'HOME' && teamState.relayMatch.state === 'NOT STARTED' && teamState.strategyMatch.state !== 'IN PROGRESS')) {
@@ -18,7 +21,7 @@ export class OfflineClientRepository implements ClientRepository {
         matchID: "",
       },
     }
-    sendDataRelayStart(newState as TeamModelDto);
+    sendGameData({component: "relay", phase: "start"});
     localStorage.setItem(LOCAL_STORAGE_TEAMSTATE,
       JSON.stringify(newState)
     );
@@ -40,7 +43,8 @@ export class OfflineClientRepository implements ClientRepository {
         matchID: "",
       },
     }
-    sendDataStrategyStart(newState as TeamModelDto); // TODO remove "as"
+    
+  sendGameData({component: "strategy", phase: "start"});
     localStorage.setItem(LOCAL_STORAGE_TEAMSTATE,
       JSON.stringify(newState)
     );
@@ -52,7 +56,7 @@ export class OfflineClientRepository implements ClientRepository {
     const newState = {...teamState, pageState: 'HOME'}
     if (teamState.relayMatch.state === "IN PROGRESS"){
       const score = Number(localStorage.getItem("RelayPoints"))
-      sendDataRelayEnd(null, {points: score}, null)
+      sendGameData({component: "relay", phase: "end", G: {points: score}})
       newState.relayMatch = {
         ...teamState.relayMatch,
         state: "FINISHED",
@@ -99,6 +103,9 @@ export class OfflineClientRepository implements ClientRepository {
   async getMatchLogs(matchId: String): Promise<MatchStateDto> {
     throw Error("NOT call this");
   }
+  async removeTeam(teamId: string): Promise<void> {
+    throw Error("NOT call this");
+  }
 
   joinWithCode(joinCode: string): Promise<string> {
     // return the  if it is in the teamData.ts file
@@ -141,6 +148,7 @@ export class OfflineClientRepository implements ClientRepository {
 
     throw new Error("Rossz belépési kód!");
   }
+
 }
 
 

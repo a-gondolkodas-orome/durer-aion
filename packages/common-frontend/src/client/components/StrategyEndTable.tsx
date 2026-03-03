@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTheme } from '@mui/material/styles';
 import { Button } from '@mui/material';
 import { Stack } from '@mui/system';
 import { dictionary } from '../text-constants';
@@ -10,6 +11,7 @@ import { useRefreshTeamState, useToHome } from '../hooks/user-hooks';
  * @returns End screen
  */
 export function StrategyEndTable(props: {allPoints: number, numOfTries: number}) {
+  const theme = useTheme();
   const toHome = useToHome();
   const refreshState = useRefreshTeamState();
   return (
@@ -20,7 +22,7 @@ export function StrategyEndTable(props: {allPoints: number, numOfTries: number})
       marginTop: '30px',
       marginBottom: '30px',
       borderRadius: '30px',
-      backgroundColor: '#fff',
+      backgroundColor: theme.palette.background.paper,
       padding: '25px',
     }}>
     <Stack sx={{

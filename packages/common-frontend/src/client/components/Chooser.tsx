@@ -2,7 +2,8 @@ import { Stack } from "@mui/system";
 import { FinishedMatchStatus, TeamModelDto } from "../dto/TeamStateDto";
 import { ChooserItem } from "./ChooserItem";
 import { dictionary } from "../text-constants";
-import { IS_OFFLINE_MODE } from "../utils/util";
+import { useClientRepo } from "../api-repository-interface";
+import { useTheme } from "@mui/material/styles";
 
 export function Chooser(props: {
   state: TeamModelDto;
@@ -14,6 +15,9 @@ export function Chooser(props: {
   const finished =
     props.state.relayMatch.state === "FINISHED" &&
     props.state.strategyMatch.state === "FINISHED";
+  const isOffline = useClientRepo().version === "OFFLINE";
+  const theme = useTheme();
+
   return (
     <Stack
       sx={{
@@ -39,7 +43,7 @@ export function Chooser(props: {
               xs: "10px",
               md: "40px",
             },
-            backgroundColor: "#fff",
+            backgroundColor: theme.palette.background.paper,
             marginBottom: "20px",
           }}
         >
@@ -59,7 +63,7 @@ export function Chooser(props: {
           >
             {dictionary.chooser.finish.final}: <b>{finalPoints}</b>
           </p>
-          {IS_OFFLINE_MODE && "A pontszámotok csak tájékoztató jellegű, a végleges pontszámotokat a beküldött válaszok alapján újraértékeljük."}
+          { isOffline && "A pontszámotok csak tájékoztató jellegű, a végleges pontszámotokat a beküldött válaszok alapján újraértékeljük."}
         </Stack>
       )}
       <Stack

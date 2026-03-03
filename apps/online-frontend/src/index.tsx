@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
-import { reportWebVitals, IS_COMPETETIVE_MODE } from 'common-frontend';
+import { reportWebVitals } from 'common-frontend';
 // import { Client as TicTacToeClient, ClientWithBot as TicTacToeWithBotClient } from './games/tictactoe/main';
 // import { Client as SuperstitiousCountingClient, ClientWithBot as SuperstitiousCountingWithBotClient } from './games/superstitious-counting/main';
 // import { Client as ChessBishopsClient, ClientWithBot as ChessBishopsWithBotClient } from './games/chess-bishops/main';
@@ -39,7 +39,7 @@ Sentry.init({
 const root = document.getElementById('root');
 if (!root) throw new Error('Root container not found');
 
-if (!IS_COMPETETIVE_MODE) { /* TODO competitive mode should be another frontend
+if ( false ) { /* TODO competitive mode should be another frontend
   render(
     <React.StrictMode>
       <RecoilRoot>
