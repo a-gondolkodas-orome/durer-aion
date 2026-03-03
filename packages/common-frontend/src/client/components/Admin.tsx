@@ -290,6 +290,7 @@ export function Admin(props: {teamId?: String}) {
 }
 
 function ProblemsUpload({ onUploadSuccess }: { onUploadSuccess: () => void }) {
+  const theme = useTheme();
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [uploading, setUploading] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
@@ -419,7 +420,7 @@ function ProblemsUpload({ onUploadSuccess }: { onUploadSuccess: () => void }) {
           </ul>
         </Stack>
       )}
-      
+
       <Stack sx={{ fontSize: "14px", color: "#666", marginTop: "10px" }}>
         <strong>Útmutató:</strong>
         <ul style={{ margin: "5px 0", paddingLeft: "20px" }}>
@@ -433,6 +434,7 @@ function ProblemsUpload({ onUploadSuccess }: { onUploadSuccess: () => void }) {
 }
 
 function ProblemsViewer({ refreshTrigger }: { refreshTrigger: number }) {
+  const theme = useTheme();
   const [selectedCategory, setSelectedCategory] = useState<string>('C');
   const [problems, setProblems] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);

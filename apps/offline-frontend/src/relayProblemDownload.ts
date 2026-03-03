@@ -5,7 +5,7 @@ import { parseProblemTOML } from "strategy";
 export function requireEnv(name: string): string {
   const value = process.env[`REACT_APP_${name}`];
   if (!value) {
-    throw new Error(`${name} environment variable is required`);
+    throw new Error(`REACT_APP_${name} environment variable is required`);
   }
   return value;
 }

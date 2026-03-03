@@ -8,7 +8,7 @@ import { getFilterPlayerView } from "boardgame.io/internal";
 import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus, createGame, injectBot, injectPlayer } from './team_manage';
 import { import_teams_from_tsv } from './team_import';
 import { readFileSync } from 'fs';
-import { uploadToS3, extractUploadedFiles, uploadImagesS3, requireEnv } from './relayProblemUploadUtils';
+import { uploadToS3, extractUploadedFiles, uploadImagesS3, requireEnv, getUploadedFileInfo } from './relayProblemUploadUtils';
 import { validateProblemCategory, parseProblemTOML } from 'strategy/';
 
 /**
@@ -318,17 +318,19 @@ export function configureTeamsRouter(
 
     try {
       const { tomlFile, imageFiles } = extractUploadedFiles(files);
+      const tomlInfo = getUploadedFileInfo(tomlFile);
+      const imageInfos = imageFiles.map(getUploadedFileInfo);
 
       const parsedProblems = parseProblemTOML(
-        readFileSync(tomlFile.path, 'utf-8'),
-        imageFiles.map(file => file.name),
+        readFileSync(tomlInfo.filePath, 'utf-8'),
+        imageInfos.map(info => info.name),
         requireEnv('PROBLEMS_S3_BUCKET_NAME')
       );
 
       await problems.clearProblems();
       const addedProblems = await problems.addProblems(parsedProblems);
 
-      const tomlS3Url = await uploadToS3(tomlFile.path, "problems.toml", 'application/toml');
+      const tomlS3Url = await uploadToS3(tomlInfo.filePath, "problems.toml", 'application/toml');
       const uploadedImages = await uploadImagesS3(imageFiles);
 
       ctx.body = {
@@ -336,7 +338,7 @@ export function configureTeamsRouter(
         message: 'Problems uploaded successfully',
         problemsAdded: addedProblems.length,
         tomlFile: {
-          name: tomlFile.name,
+          name: tomlInfo.name,
           s3Url: tomlS3Url
         },
         imageFiles: uploadedImages

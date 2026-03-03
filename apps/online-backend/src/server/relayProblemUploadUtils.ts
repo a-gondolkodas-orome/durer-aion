@@ -4,6 +4,34 @@ import { readFileSync } from 'fs';
 import { S3ClientConfig } from '@aws-sdk/client-s3';
 import { getS3Url } from 'strategy';
 
+function getUploadedFileName(file: any): string {
+  const name = file?.originalFilename ?? file?.name ?? file?.filename;
+  return typeof name === 'string' ? name : '';
+}
+
+function getUploadedFilePath(file: any): string {
+  const filePath = file?.filepath ?? file?.path;
+  if (typeof filePath !== 'string' || filePath.length === 0) {
+    throw new Error('Uploaded file is missing a filepath.');
+  }
+  return filePath;
+}
+
+function imageContentTypeFromFileName(fileName: string): string {
+  const ext = extname(fileName).toLowerCase();
+  switch (ext) {
+    case '.jpg':
+    case '.jpeg':
+      return 'image/jpeg';
+    case '.png':
+      return 'image/png';
+    case '.gif':
+      return 'image/gif';
+    default:
+      return 'application/octet-stream';
+  }
+}
+
 export function requireEnv(name: string): string {
   const value = process.env[name];
   if (!value) {
@@ -58,7 +86,15 @@ export function extractUploadedFiles(files: any): { tomlFile: any; imageFiles: a
   const allowedImageExtensions = ['.png', '.jpg', '.jpeg', '.gif'];
 
   for (const file of fileList) {
-    const ext = extname(file.name || '').toLowerCase();
+    const name = getUploadedFileName(file);
+    if (!name) {
+      throw new Error('Invalid uploaded file: missing filename (expected originalFilename).');
+    }
+
+    // Ensure we can later read it; fail early with a clear error.
+    getUploadedFilePath(file);
+
+    const ext = extname(name).toLowerCase();
     
     if (ext === '.toml') {
       if (tomlFile) {
@@ -68,7 +104,7 @@ export function extractUploadedFiles(files: any): { tomlFile: any; imageFiles: a
     } else if (allowedImageExtensions.includes(ext)) {
       imageFiles.push(file);
     } else {
-      throw new Error(`Invalid file format: ${file.name}. Only TOML files and image files (.png, .jpg, .jpeg, .gif) are allowed.`);
+      throw new Error(`Invalid file format: ${name}. Only TOML files and image files (.png, .jpg, .jpeg, .gif) are allowed.`);
     }
   }
 
@@ -83,11 +119,22 @@ export async function uploadImagesS3(imageFiles: any[]): Promise<{ name: string;
   const uploadedImages: { name: string; s3Url: string }[] = [];
   
   for (const imageFile of imageFiles) {
-    const contentType = `image/${extname(imageFile.name).slice(1)}`;
-    const s3Url = await uploadToS3(imageFile.path, 'images/' + imageFile.name, contentType);
-    uploadedImages.push({ name: imageFile.name, s3Url });
+    const name = getUploadedFileName(imageFile);
+    const filePath = getUploadedFilePath(imageFile);
+    const contentType = imageContentTypeFromFileName(name);
+    const s3Url = await uploadToS3(filePath, 'images/' + name, contentType);
+    uploadedImages.push({ name, s3Url });
   }
 
   return uploadedImages;
+}
+
+export function getUploadedFileInfo(file: any): { name: string; filePath: string } {
+  const name = getUploadedFileName(file);
+  if (!name) {
+    throw new Error('Invalid uploaded file: missing filename (expected originalFilename).');
+  }
+  const filePath = getUploadedFilePath(file);
+  return { name, filePath };
 }
 

@@ -1,11 +1,14 @@
-import { 
+// Load the .env file before anything else
+// separate file because the linter doesn't like dotenv.config() before other imports
+import "./dotenv_helper";
+import {
   GameRelay,
   MyGameWrappers as strategyGameWrappers,
   StrategyWrappers as StrategyStrategy,
   gameWrapper,
   strategyNames,
+  RelayStrategy
 } from 'game';
-import { RelayStrategy } from 'strategy';
 //import { 
 //  RelayStrategy,
 //  strategyWrapper as StrategyStrategyremovefromcirclee,
@@ -26,9 +29,7 @@ import mount from 'koa-mount';
 import { closeMatch } from './server/team_manage';
 
 import * as Sentry from '@sentry/node';
-import dotenv from 'dotenv';
-
-dotenv.config(); // Loads .env file into process.env
+import { requireEnv } from "./server/relayProblemUploadUtils";
 
 function getDb() {
   if (env.DATABASE_URL) {
