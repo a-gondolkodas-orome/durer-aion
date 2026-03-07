@@ -4,13 +4,13 @@ import { GameType, GUESSER_PLAYER, JUDGE_PLAYER } from '../../../common/types';
 // import { IS_OFFLINE_MODE } from '../../client/utils/util';
 
 export interface RemoveFromCircleGameState {
-  circle: Array<boolean>;
+  circle: boolean[];
   firstMove: number;
   lastMove: number;
 }
 
 export const MyGameWrapper = function (category: "C" | "D" | "E") {
-  const init_circle: Array<boolean> = 
+  const init_circle: boolean[] = 
     category === "C" ? [true, true, true, true, true, true, true] :
     category === "D" ? [true, true, true, true, true, true, true, true, true] :
     category === "E" ? [true, true, true, true, true] :

@@ -4,7 +4,7 @@ import { GameType, GUESSER_PLAYER, JUDGE_PLAYER, otherPlayer, PlayerIDType } fro
 export interface MyGameState {
   stonesLeft: number;
   stonesRight: number;
-  lastMoveFromLeftByPlayer: { [playerID: string]: boolean }; // tracks each player's last move
+  lastMoveFromLeftByPlayer: Record<string, boolean>; // tracks each player's last move (defined with playerID)
 }
 
 export const MyGameWrapper = (category: "E") => {

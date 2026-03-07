@@ -3,7 +3,7 @@ import { GameType, GUESSER_PLAYER, JUDGE_PLAYER, PlayerIDType } from '../../../c
 import { Ctx } from 'boardgame.io';
 
 export interface MyGameState {
-  numbersOnTable: Array<boolean>;
+  numbersOnTable: boolean[];
   previousMove: number;
 }
 
