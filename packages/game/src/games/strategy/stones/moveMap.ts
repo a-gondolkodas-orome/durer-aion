@@ -1,4 +1,4 @@
-export const moveMap: { [state: string]: boolean | undefined } = {
+export const moveMap: Record<string /*state*/, boolean | undefined> = {
     "10-0.[false, true]": true,
     "11-0.[false, false]": undefined,
     "9-1.[true, true]": false,

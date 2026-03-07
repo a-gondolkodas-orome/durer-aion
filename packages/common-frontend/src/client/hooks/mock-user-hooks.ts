@@ -16,6 +16,7 @@ export const mockTeamState: TeamModelDto = {
   },
 }
 
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export class MockTeamState {
   public static teamState: TeamModelDto | null = null;
 

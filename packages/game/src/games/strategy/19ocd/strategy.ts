@@ -51,7 +51,7 @@ function randomStrategy(G: MyGameState): [number, string] {
   return [pMoves[i].args[0], pMoves[i].move];
 }
 
-function generateStateID(numbersOnTable: Array<boolean>, previousMove: number): string {
+function generateStateID(numbersOnTable: boolean[], previousMove: number): string {
   let id = 0
   for (let i = 0; i < numbersOnTable.length; i++) {
     if (numbersOnTable[i]){
