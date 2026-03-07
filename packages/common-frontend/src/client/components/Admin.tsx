@@ -13,8 +13,9 @@ import { useSnackbar } from 'notistack';
 import { FinishedMatchStatus } from 'schemas';
 import { ConfirmDialogInterface, ConfirmDialog } from './ConfirmDialog';
 import * as Yup from 'yup';
+import { FieldProps } from "formik"
 
-export function Admin(props: {teamId?: String}) {
+export function Admin(props: {teamId?: string}) {
   const theme = useTheme();
   const getAll = useAll();
   const addMinutes = useAddMinutes();
@@ -73,13 +74,13 @@ export function Admin(props: {teamId?: String}) {
         } onClose={async () => {
             setSelectedRow(null); 
            }}>
-          {selectedRow && <TeamDetailDialog data={selectedRow!!} setConfirmDialog={setConfirmDialog}/>}
+          {selectedRow && <TeamDetailDialog data={selectedRow} setConfirmDialog={setConfirmDialog}/>}
       </Dialog>
       <ConfirmDialog confirmDialog={confirmDialog}  setConfirmDialog={setConfirmDialog}/>
       <Stack sx={{width: "100%", display:"flex", flexDirection: "row"}}>
         <Stack sx={{fontSize:"32px", width: "100%", textAlign: "center"}}>Admin felület </Stack>
       </Stack>
-      {teamFromPath && <TeamDetailDialog data={teamFromPath!!} setConfirmDialog={setConfirmDialog}/>}
+      {teamFromPath && <TeamDetailDialog data={teamFromPath} setConfirmDialog={setConfirmDialog}/>}
       {!teamFromPath && <Stack sx={{
         height: "635px",
       }}>
@@ -198,7 +199,7 @@ export function Admin(props: {teamId?: String}) {
         onSubmit={async (values) => { 
           setConfirmDialog({
             text: `Erősítsd meg, hogy minden aktuális csapatnak meg akarod növelni az idejét ${values.time} perccel`,
-            confirm: () => {
+            confirm: async () => {
               try {
                 data?.forEach(async a=>{
                   if(a.relayMatch.state === "IN PROGRESS") {
@@ -209,8 +210,9 @@ export function Admin(props: {teamId?: String}) {
                   }
                 })
                 enqueueSnackbar("Sikeres művelet", { variant: 'success' });
-              } catch (e: any) {
-                enqueueSnackbar(e?.message || "Hiba történt", { variant: 'error' });
+              } catch (e: unknown) {
+                const message = e instanceof Error ? e.message : "Váratlan hiba történt";
+                enqueueSnackbar(message, { variant: 'error' });
               }
             },
           })
@@ -220,10 +222,7 @@ export function Admin(props: {teamId?: String}) {
           name="time"
         >
         {
-          ({
-            field, 
-            form: { handleChange },
-          }: any) => <input
+          ({field}: FieldProps<string | number>) => <input
             {...field}
             className="text-input"
             placeholder="perc"

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { MyGameState } from './game';
 import { BoardProps } from 'boardgame.io/react';
 import { useRef} from 'react';

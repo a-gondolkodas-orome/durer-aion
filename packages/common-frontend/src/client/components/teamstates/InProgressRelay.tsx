@@ -32,7 +32,6 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
       }
     }
     setGameover(ctx.gameover)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ctx.gameover]);
   useEffect(() => {
     setMsRemaining(G.millisecondsRemaining);
@@ -146,8 +145,8 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
             previousTries={G.previousAnswers[G.currentProblem].map(it=>it.answer)} 
             previousCorrectness={!finished ? G.correctnessPreviousAnswer : null}
             attempt={(G.currentProblem+1)*3+G.numberOfTry}
-            onSubmit={(input) => {
-              moves.submitAnswer(parseInt(input));
+            onSubmit={(input: number) => {
+              moves.submitAnswer(input);
               // TODO this should be done in repository
             }}
           />

@@ -85,22 +85,22 @@ export class OfflineClientRepository implements ClientRepository {
     return null;
   }
 
-  async resetRelay(teamId: String): Promise<TeamModelDto> {
+  async resetRelay(teamId: string): Promise<TeamModelDto> {
     throw Error("NOT call this");
   }
 
-  async resetStrategy(teamId: String): Promise<TeamModelDto> {
+  async resetStrategy(teamId: string): Promise<TeamModelDto> {
     throw Error("NOT call this");
   }
 
-  async addMinutes(matchId: String, minutes: number): Promise<String> {
+  async addMinutes(matchId: string, minutes: number): Promise<string> {
     return Promise.resolve("OK");
   }
 
-  async getMatchState(matchId: String): Promise<MatchStateDto> {
+  async getMatchState(matchId: string): Promise<MatchStateDto> {
     throw Error("NOT call this");
   }
-  async getMatchLogs(matchId: String): Promise<MatchStateDto> {
+  async getMatchLogs(matchId: string): Promise<MatchStateDto> {
     throw Error("NOT call this");
   }
   async removeTeam(teamId: string): Promise<void> {
