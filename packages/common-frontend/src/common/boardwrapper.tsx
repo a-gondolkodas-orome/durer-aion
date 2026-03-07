@@ -44,7 +44,6 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
                 xs: '100%',
                 md: 'calc(100% - 64px)'
               },
-              backgroundColor: '#fff',
             }
           }}
           open={
