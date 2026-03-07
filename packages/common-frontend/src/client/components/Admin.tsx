@@ -13,6 +13,7 @@ import { useSnackbar } from 'notistack';
 import { FinishedMatchStatus } from 'schemas';
 import { ConfirmDialogInterface, ConfirmDialog } from './ConfirmDialog';
 import * as Yup from 'yup';
+import { FieldProps } from "formik"
 
 export function Admin(props: {teamId?: string}) {
   const theme = useTheme();
@@ -73,13 +74,13 @@ export function Admin(props: {teamId?: string}) {
         } onClose={async () => {
             setSelectedRow(null); 
            }}>
-          {selectedRow && <TeamDetailDialog data={selectedRow!!} setConfirmDialog={setConfirmDialog}/>}
+          {selectedRow && <TeamDetailDialog data={selectedRow} setConfirmDialog={setConfirmDialog}/>}
       </Dialog>
       <ConfirmDialog confirmDialog={confirmDialog}  setConfirmDialog={setConfirmDialog}/>
       <Stack sx={{width: "100%", display:"flex", flexDirection: "row"}}>
         <Stack sx={{fontSize:"32px", width: "100%", textAlign: "center"}}>Admin felület </Stack>
       </Stack>
-      {teamFromPath && <TeamDetailDialog data={teamFromPath!!} setConfirmDialog={setConfirmDialog}/>}
+      {teamFromPath && <TeamDetailDialog data={teamFromPath} setConfirmDialog={setConfirmDialog}/>}
       {!teamFromPath && <Stack sx={{
         height: "635px",
       }}>
