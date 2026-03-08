@@ -1,4 +1,4 @@
-import { Button, Dialog, Stack } from "@mui/material";
+import { Button, Dialog, Stack, alpha } from "@mui/material";
 import { useEffect, useState } from "react";
 import { Countdown } from "../client/components/Countdown";
 import { StrategyEndTable } from "../client/components/StrategyEndTable";
@@ -209,8 +209,9 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
                 width: '100%',
                 display: 'block',
                 borderRadius: '20px',
-                backgroundColor: '#93F272',
-                borderColor: '#2DAD3A',
+                backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                borderColor: theme.palette.primary.main,
+                color: theme.palette.primary.main,
                 borderWidth: '2px',
                 textAlign: 'center',
                 padding: '15px',
