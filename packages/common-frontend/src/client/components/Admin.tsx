@@ -13,7 +13,7 @@ import { useSnackbar } from 'notistack';
 import { FinishedMatchStatus } from 'schemas';
 import { ConfirmDialogInterface, ConfirmDialog } from './ConfirmDialog';
 import * as Yup from 'yup';
-import { alpha } from '@mui/system'
+import { Paper } from './PaperWrapper';
 
 export function Admin(props: {teamId?: String}) {
   const theme = useTheme();
@@ -38,7 +38,7 @@ export function Admin(props: {teamId?: String}) {
   }, [data, props.teamId, teamFromPath]);
 
   return (
-    <Stack sx={{
+    <Paper sx={{
       display: 'flex',
       height: '100%',
       paddingLeft: {
@@ -49,7 +49,6 @@ export function Admin(props: {teamId?: String}) {
         xs: '10px',
         md: 0
       },
-      backgroundColor: alpha(theme.palette.background.paper, theme.opacity.paper),
     }} data-testid="adminRoot">
       <Dialog 
         maxWidth={false} 
@@ -278,7 +277,7 @@ export function Admin(props: {teamId?: String}) {
           Összes csapat törlése
         </Button>}
      {!teamFromPath && data && <Stats data={data}/>}
-    </Stack>
+    </Paper>
   )
 }
 

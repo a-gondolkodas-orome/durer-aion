@@ -6,7 +6,7 @@ import { useRefreshTeamState, useToHome } from "../client/hooks/user-hooks";
 import { useClientRepo } from "../client/api-repository-interface";
 import { GUESSER_PLAYER, JUDGE_PLAYER } from "game";
 import { useTheme } from "@mui/material/styles";
-import { alpha } from "@mui/system/colorManipulator"
+import { Paper } from "../client/components/PaperWrapper";
 
 export function boardWrapper(board: any, description: any) { //<please> TODO: solve types with BoardProps<MyGameState>
   return ({ G, ctx, moves, log }: any) => {
@@ -57,11 +57,9 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
           }}>
           <StrategyEndTable allPoints={G.points} numOfTries={G.numberOfTries} />
         </Dialog>
-        <Stack sx={{
+        <Paper sx={{
           padding: '20px',
-          backgroundColor: alpha(theme.palette.background.paper, theme.opacity.paper),
           borderRadius: "25px",
-          display: 'flex',
         }}>
           <Stack sx={{
             flexDirection: 'row',
@@ -240,7 +238,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
               {board({ G, ctx, moves })}
             </Stack>
           </Stack>
-        </Stack>
+        </Paper>
       </>
     );
   };

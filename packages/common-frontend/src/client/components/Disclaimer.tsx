@@ -1,9 +1,10 @@
 import { Button } from "@mui/material";
-import { Stack, alpha } from "@mui/system";
+import { Stack } from "@mui/system";
 import { dictionary } from "../text-constants";
 import { useToHome } from "../hooks/user-hooks";
 import { useClientRepo } from "../api-repository-interface";
 import { useTheme } from "@mui/material/styles";
+import { Paper } from "./PaperWrapper";
 
 export function Disclaimer(props: {teamName: string, category: string}) {
   const goHome = useToHome();
@@ -11,9 +12,8 @@ export function Disclaimer(props: {teamName: string, category: string}) {
   const isOffline = useClientRepo().version === "OFFLINE";
 
   return (
-    <Stack
+    <Paper
       sx={{
-        display: "flex",
         height: {
           xs: "100%",
           md: "auto",
@@ -30,7 +30,6 @@ export function Disclaimer(props: {teamName: string, category: string}) {
           xs: 0,
           md: "40px"
         },
-        backgroundColor: alpha(theme.palette.background.paper, theme.opacity.paper),
         borderRadius: {
           xs: 0,
           md: "30px",
@@ -137,6 +136,6 @@ export function Disclaimer(props: {teamName: string, category: string}) {
       >
         {dictionary.disclaimer.continue}
       </Button>
-    </Stack>
+    </Paper>
   );
 }

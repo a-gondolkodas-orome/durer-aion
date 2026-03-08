@@ -1,18 +1,14 @@
-import { Stack, alpha } from '@mui/system';
-import React from 'react';
-import { useTheme } from '@mui/material/styles';
+import { Stack } from '@mui/system';
 import { dictionary } from '../text-constants';
+import { Paper } from "./PaperWrapper";
 
 export function WaitingRoom() {
-  const theme = useTheme();
   return (
-    <Stack sx={{
-      display: 'flex',
+    <Paper sx={{
       height: '100%',
       width: 600,
       padding: "40px",
       marginTop: "40px",
-      backgroundColor: alpha(theme.palette.background.paper, theme.opacity.paper),
       borderRadius: "25px",
     }}>
       <Stack sx={{
@@ -36,6 +32,6 @@ export function WaitingRoom() {
         {dictionary.waitingRoom.instruction}
       </Stack>
 
-    </Stack>
+    </Paper>
   )
 }
