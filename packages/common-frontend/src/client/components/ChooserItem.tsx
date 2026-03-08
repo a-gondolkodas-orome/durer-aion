@@ -1,5 +1,5 @@
 import { Button } from '@mui/material';
-import { Stack } from '@mui/system';
+import { Stack, alpha } from '@mui/system';
 import { MatchStatus, FinishedMatchStatus } from '../dto/TeamStateDto';
 import { useStartRelay, useStartStrategy } from '../hooks/user-hooks';
 import { formatTime } from '../utils/DateFormatter';
@@ -33,7 +33,7 @@ export function ChooserItem(props: {
         xs: "10px",
         md: "40px",
       },
-      backgroundColor: theme.palette.background.paper,
+      backgroundColor: alpha(theme.palette.background.paper, theme.opacity.paper),
     }}>
       <Stack sx={{
         fontWeight: 'bold',

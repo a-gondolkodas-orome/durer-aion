@@ -45,7 +45,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
                 xs: '100%',
                 md: 'calc(100% - 64px)'
               },
-              backgroundColor: alpha(theme.palette.background.paper, 1),
+              backgroundColor: theme.palette.background.paper,
             }
           }}
           open={
@@ -59,7 +59,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
         </Dialog>
         <Stack sx={{
           padding: '20px',
-          backgroundColor: theme.palette.background.paper,
+          backgroundColor: alpha(theme.palette.background.paper, theme.opacity.paper),
           borderRadius: "25px",
           display: 'flex',
         }}>
@@ -226,6 +226,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
                 {ctx.phase === 'startNewGame' && G.winner === "0" && G.difficulty === "live" && <p> Gratulálok, nyertetek! Verjétek meg még egyszer a gépet!</p>}
                 {ctx.phase === 'startNewGame' && G.winner === "0" && G.difficulty === "test" && <p> Gratulálok, a próbajátékban nyertetek!</p>}
                 {ctx.phase === 'startNewGame' && G.winner === "1" && <p> Sajnos a gép nyert. </p>}
+                {finished && <p> A játék végetért. </p>}
               </Stack>
             </Stack>
             <Stack sx={{

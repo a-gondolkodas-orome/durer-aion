@@ -1,4 +1,4 @@
-import { Stack } from '@mui/system';
+import { Stack, alpha } from '@mui/system';
 import React from 'react';
 import { useTheme } from '@mui/material/styles';
 import { dictionary } from '../text-constants';
@@ -12,7 +12,7 @@ export function WaitingRoom() {
       width: 600,
       padding: "40px",
       marginTop: "40px",
-      backgroundColor: theme.palette.background.paper,
+      backgroundColor: alpha(theme.palette.background.paper, theme.opacity.paper),
       borderRadius: "25px",
     }}>
       <Stack sx={{

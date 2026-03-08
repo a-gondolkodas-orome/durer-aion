@@ -1,4 +1,4 @@
-import { Stack } from "@mui/system";
+import { Stack, alpha } from "@mui/system";
 import { FinishedMatchStatus, TeamModelDto } from "../dto/TeamStateDto";
 import { ChooserItem } from "./ChooserItem";
 import { dictionary } from "../text-constants";
@@ -43,7 +43,7 @@ export function Chooser(props: {
               xs: "10px",
               md: "40px",
             },
-            backgroundColor: theme.palette.background.paper,
+            backgroundColor: alpha(theme.palette.background.paper, theme.opacity.paper),
             marginBottom: "20px",
           }}
         >
