@@ -22,7 +22,7 @@
     "readme.md",
     "src/teamData.ts",
     "src/client/text-constants.ts",
-    "test.tsv*",
+    "scripts/test.tsv*",
     "src/games/relay/strategy.ts",
     "src/games/14od/strategy.ts",
     "src/lobby.tsx",

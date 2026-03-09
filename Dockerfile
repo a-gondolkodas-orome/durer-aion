@@ -1,13 +1,19 @@
-FROM node:19
+FROM node:24
 
 WORKDIR /usr/src/app
-COPY package*.json /usr/src/app/
-COPY .npmrc /usr/src/app/
 
-RUN npm ci --omit=dev
+# Copy dependency metadata first (root + all workspaces)
+COPY package.json package-lock.json turbo.json .npmrc ./
+COPY --parents apps/*/package.json packages/*/package.json ./
 
-# Code will be mounted, i.e. synced to the container
-# COPY . .
+# Install deps (cached unless package*.json or .npmrc change)
+RUN npm ci
+
+# Copy source code
+COPY . .
+
+# Initial build needed: dev mode (tsc --watch + nodemon) expects dist/ to already exist
+RUN npx turbo build --filter=online-backend
 
 EXPOSE 8000
 

@@ -16,7 +16,7 @@ All demos are in Hungarian.
 
 ## Requirements
 
-- [Node.js](https://nodejs.org/) version 16 or above (which can be checked by running `node -v`).
+- [Node.js](https://nodejs.org/) version 19 or above (which can be checked by running `node -v`).
 - [Docker](https://www.docker.com/)
 
 ## Installation
@@ -24,6 +24,16 @@ All demos are in Hungarian.
 ```
 npm ci
 ```
+
+## Running offline-frontend
+
+Create the `apps/offline-frontend/.env` file by copying the `.env.sample` in that folder. Then run:
+
+```
+npm run dev:offline
+```
+
+Offline frontend reloads automatically (except if you change `.env` file), but does not have a debugger yet.
 
 ## Running developer environment -- Docker way
 
@@ -63,7 +73,7 @@ You should be up and running the application on `localhost`.
 ### Importing teams
 
 ```bash
-docker exec -t durer-aion_backend_1 ./import_teams.sh ./test.tsv
+docker exec -t durer-aion-backend-1 ./scripts/import_teams.sh ./scripts/test.tsv
 ```
 
 ### Reload frontend manually
@@ -83,11 +93,6 @@ If you install a package used by the backend, you will have to `docker-compose b
 
 ## Running developer environment -- without docker (except DB)
 
-> IMPORTANT!
-> 
-> The development enviroment uses a different connection setup to the database, so the .env files are different. 
-> Pay attention to use the .env.local file for development!
-
 Both frontend and server auto-reloads.
 
 - Set up the database (in Windows you can run it without sudo):
@@ -95,21 +100,14 @@ Both frontend and server auto-reloads.
 ```bash
 sudo docker run -it --rm -e POSTGRESQL_PASSWORD=postgres -p 127.0.0.1:5432:5432 bitnami/postgresql
 ```
-
-
 - After that you should import teams.
 
-On linux/unix
 ```bash
-./import_teams.sh test.tsv
-```
-On Windows
-```powershell
-.\import_teams.ps1 test.tsv
+./scripts/import_teams.sh scripts/test.tsv # On linux/unix
+.\scripts\import_teams.ps1 scripts\test.tsv # On Windows
 ```
 
-
-- You should create an `.env` file (see `.env.sample`).
+- Create the `apps/online-backend/.env` file. (see `.env.sample` in that folder)
 
 - Run the following two commands in two separate terminal:
 
@@ -118,13 +116,13 @@ npm run dev:server
 ```
 > This starts the backend with the earlier started db. Changing the code of server it auto-reloads itself.
 ```bash
-npx react-scripts start
+npm run dev:online
 ```
 > This starts the frontend. Changing the code of frontend it auto-reloads itself. Note: you can use the backend without the frontend.
 
-You should be up and running the application on `localhost:3000`.
+You should be up and running the application on `localhost:5173`.
 
-### Debugging
+### Debugging (TODO)
 VS code gives you two options to debug the application. Both of them needs some setup first, and they can't be used at the same time.
 
 Breakpoints work either on the server, or on the frontend, but not on both at the same time. See different debugging options for further references.
