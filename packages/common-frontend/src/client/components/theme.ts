@@ -1,13 +1,12 @@
+import { ThemeOptions } from "@mui/material";
+
 declare module '@mui/material/styles' {
     interface TypeBackground {
         paperOpacity: number;
     }
 }
 
-const themeConfig = ({
-    opacity: {
-        paper: 0.9,
-    },
+const themeConfig: ThemeOptions = ({
     palette: {
         secondary: {
             main: '#fff',
