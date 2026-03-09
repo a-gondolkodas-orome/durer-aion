@@ -109,7 +109,7 @@ export class SocketIOButBotMoves extends SocketIO {
 
     for (const game of games) {
       const nsp = app._io.of(game.name);
-      const bot = this.bots[game.name!];
+      const bot = game.name ? this.bots[game.name] : Object.values(this.bots)[0];
 
       /** This should be in sync with how socket data is communicated.
        * See boardgame.io/dist/src/server/transport/socketio.ts

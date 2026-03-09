@@ -3,15 +3,13 @@ import axios, { AxiosInstance,AxiosError } from 'axios';
 import { ClientRepository, TeamModelDto, MatchStateDto } from "common-frontend";
 
 const serverUrl = import.meta.env.VITE_SERVER_URL || '/';
-class ApiAxios {
-  static instance(): AxiosInstance {
-    let apiUrl = serverUrl; // TODO: env or something
+function apiAxiosInstance(): AxiosInstance {
+  let apiUrl = serverUrl; // TODO: env or something
 
-    return axios.create({
-      baseURL: apiUrl,
-      timeout: 10000,
-    });
-  }
+  return axios.create({
+    baseURL: apiUrl,
+    timeout: 10000,
+  });
 }
 
 function makeAxiosError(any_error: any): AxiosError {
@@ -34,7 +32,7 @@ export class RealClientRepository implements ClientRepository {
     });
     let result;
     try {
-      result = await ApiAxios.instance().get(url);
+      result = await apiAxiosInstance().get(url);
     } catch (e: any) {
       console.error(e)
       // here we can set message according to status (or data)
@@ -65,7 +63,7 @@ export class RealClientRepository implements ClientRepository {
     console.log("joinWithCode url", url);
     let result;
     try {
-      result = await ApiAxios.instance().get(url);
+      result = await apiAxiosInstance().get(url);
     } catch (e: any) {
       const err = makeAxiosError(e);
       if(err.response?.status === 404) {
@@ -88,7 +86,7 @@ export class RealClientRepository implements ClientRepository {
     });
     let result;
     try {
-      result = await ApiAxios.instance().get(url);
+      result = await apiAxiosInstance().get(url);
     } catch (e: any) {
       const err = makeAxiosError(e)
       console.error(err.message)
@@ -107,7 +105,7 @@ export class RealClientRepository implements ClientRepository {
     });
     let result;
     try {
-      result = await ApiAxios.instance().get(url);
+      result = await apiAxiosInstance().get(url);
     } catch (e: any) {
       const err = makeAxiosError(e);
       console.error(err.message)
@@ -126,7 +124,7 @@ export class RealClientRepository implements ClientRepository {
     });
     let result;
     try {
-      result = await ApiAxios.instance().get(url);
+      result = await apiAxiosInstance().get(url);
     } catch (e: any) {
       const err = makeAxiosError(e);
       console.error(err.message)
@@ -142,7 +140,7 @@ export class RealClientRepository implements ClientRepository {
     });
     let result;
     try {
-      result = await ApiAxios.instance().get(url);
+      result = await apiAxiosInstance().get(url);
     } catch (e: any) {
       const err = makeAxiosError(e);
       console.error(err.message)
@@ -159,7 +157,7 @@ export class RealClientRepository implements ClientRepository {
     });
     let result;
     try {
-      result = await ApiAxios.instance().get(url);
+      result = await apiAxiosInstance().get(url);
     } catch (e: any) {
       const err = makeAxiosError(e);
       console.error(err.message)
@@ -175,7 +173,7 @@ export class RealClientRepository implements ClientRepository {
     });
     let result;
     try {
-      result = await ApiAxios.instance().get(url);
+      result = await apiAxiosInstance().get(url);
     } catch (e: any) {
       const err = makeAxiosError(e);
       console.error(err.message)
@@ -192,7 +190,7 @@ export class RealClientRepository implements ClientRepository {
     });
     let result;
     try {
-      result = await ApiAxios.instance().get(url);
+      result = await apiAxiosInstance().get(url);
     } catch (e: any) {
       const err = makeAxiosError(e);
       console.error(err.message)
@@ -211,7 +209,7 @@ export class RealClientRepository implements ClientRepository {
     });
     let result;
     try {
-      result = await ApiAxios.instance().get(url);
+      result = await apiAxiosInstance().get(url);
     } catch (e: any) {
       const err = makeAxiosError(e);
       console.error(err.message)
@@ -227,7 +225,7 @@ export class RealClientRepository implements ClientRepository {
     });
     let result;
     try {
-      result = await ApiAxios.instance().get(url);
+      result = await apiAxiosInstance().get(url);
     } catch (e: any) {
       const err = makeAxiosError(e);
       console.error(err.message)
@@ -242,7 +240,7 @@ export class RealClientRepository implements ClientRepository {
       teamId: teamId,
     });
     try {
-      await ApiAxios.instance().delete(url);
+      await apiAxiosInstance().delete(url);
     } catch (e: any) {
       const err = makeAxiosError(e);
       console.error(err.message)
