@@ -324,7 +324,6 @@ export function configureTeamsRouter(
     koaBody(),
     async (ctx) => {
       const GUID = ctx.params.GUID ?? ctx.throw(400);
-    console.log("team-data-access: ", GUID);
       let team =
         (await teams.getTeam({ teamId: GUID })) ??
         ctx.throw(404, `Team with {teamId:${GUID}} not found.`);

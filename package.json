@@ -58,7 +58,7 @@
     "build": "turbo build",
     "spell-check": "cspell \"**/*.{ts,tsx}\" --no-progress",
     "dev:server": "turbo dev --filter=online-backend --filter=game --filter=schemas --filter=strategy",
-    "dev:online": "turbo dev --filter=online-frontend --filter=common-frontend",
+    "dev:online": "turbo dev --filter=online-frontend --filter=game --filter=common-frontend",
     "dev:offline": "turbo dev --filter=offline-frontend --filter=game --filter=strategy --filter=common-frontend"
   },
   "eslintConfig": {
@@ -116,6 +116,7 @@
     "nodemon": "^2.0.18",
     "ts-node": "^10.9.2",
     "tsup": "^8.5.0",
+    "tsx": "^4.21.0",
     "turbo": "^2.5.3",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.0"

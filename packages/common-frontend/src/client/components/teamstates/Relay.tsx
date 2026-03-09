@@ -16,7 +16,7 @@ export function Relay(props: { state: TeamModelDto }) {
             <RelayClient
               category={props.state.category as "C" | "D" | "E"}
               credentials={props.state.credentials}
-              matchID={(props.state.strategyMatch  as InProgressMatchStatus).matchID}
+              matchID={(props.state.relayMatch  as InProgressMatchStatus).matchID}
             />
           </Suspense> : <>no relay client in game context</>}
         </div>
