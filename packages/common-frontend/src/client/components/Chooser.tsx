@@ -1,10 +1,9 @@
-import { Stack } from "@mui/system";
+import { Stack, alpha } from "@mui/system";
 import { FinishedMatchStatus, TeamModelDto } from "../dto/TeamStateDto";
 import { ChooserItem } from "./ChooserItem";
 import { dictionary } from "../text-constants";
 import { useClientRepo } from "../api-repository-interface";
 import { useTheme } from "@mui/material/styles";
-import { Paper } from "./PaperWrapper";
 
 export function Chooser(props: {
   state: TeamModelDto;
@@ -33,8 +32,9 @@ export function Chooser(props: {
       data-testId={"chooserRoot"}
     >
       {finished && (
-        <Paper
+        <Stack
           sx={{
+            display: "flex",
             width: {
               xs: "100%",
               md: "calc(100% - 81px)",
@@ -43,6 +43,7 @@ export function Chooser(props: {
               xs: "10px",
               md: "40px",
             },
+            backgroundColor: alpha(theme.palette.background.paper, theme.opacity.paper),
             marginBottom: "20px",
           }}
         >
@@ -63,7 +64,7 @@ export function Chooser(props: {
             {dictionary.chooser.finish.final}: <b>{finalPoints}</b>
           </p>
           { isOffline && "A pontszámotok csak tájékoztató jellegű, a végleges pontszámotokat a beküldött válaszok alapján újraértékeljük."}
-        </Paper>
+        </Stack>
       )}
       <Stack
         sx={{

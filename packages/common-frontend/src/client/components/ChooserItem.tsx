@@ -1,5 +1,5 @@
 import { Button } from '@mui/material';
-import { Stack } from '@mui/system';
+import { Stack, alpha } from '@mui/system';
 import { MatchStatus, FinishedMatchStatus } from '../dto/TeamStateDto';
 import { useStartRelay, useStartStrategy } from '../hooks/user-hooks';
 import { formatTime } from '../utils/DateFormatter';
@@ -8,7 +8,6 @@ import { useState } from 'react';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useClientRepo } from '../api-repository-interface';
 import { useTheme } from "@mui/material/styles";
-import { Paper } from './PaperWrapper';
 
 export function ChooserItem(props: {
   status: MatchStatus,
@@ -24,7 +23,8 @@ export function ChooserItem(props: {
   const theme = useTheme();
 
   return (
-    <Paper sx={{
+    <Stack sx={{
+      display: 'flex',
       width: {
         xs: '100%',
         md: 'calc(50% - 50px)',
@@ -33,6 +33,7 @@ export function ChooserItem(props: {
         xs: "10px",
         md: "40px",
       },
+      backgroundColor: alpha(theme.palette.background.paper, theme.opacity.paper),
     }}>
       <Stack sx={{
         fontWeight: 'bold',
@@ -149,6 +150,6 @@ export function ChooserItem(props: {
         {dictionary.chooser.result}
       </Button>
       }
-    </Paper>
+    </Stack>
   )
 }

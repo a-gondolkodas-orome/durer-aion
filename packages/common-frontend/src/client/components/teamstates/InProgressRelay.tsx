@@ -11,7 +11,7 @@ import { dictionary } from '../../text-constants';
 import { RelayEndTable } from '../RelayEndTable';
 import { useClientRepo } from '../../api-repository-interface';
 import { useTheme } from '@mui/material/styles';
-import { Paper } from "../PaperWrapper";
+import { alpha } from "@mui/system/colorManipulator"
 
 interface MyGameProps extends BoardProps<MyGameState> { };
 export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
@@ -105,11 +105,12 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
               endTime={new Date(G.end)} 
               serverRemainingMs={G.millisecondsRemaining}/>
           </Stack>
-        <Paper sx={{
+        <Stack sx={{
           width: {
             xs: '100%',
             md: "calc(100% - 380px)",
           },
+          backgroundColor: alpha(theme.palette.background.paper, theme.opacity.paper),
           borderRadius: {
             xs: 0,
             md: "25px",
@@ -122,7 +123,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
             serial={G.currentProblem+1}
             pictureUrl={G.url}
           />
-        </Paper>
+        </Stack>
         <Stack sx={{
           width: {
             xs: "0px",
@@ -133,12 +134,13 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
             md: "0px"
           },
           }} />
-        <Paper sx={{
+        <Stack sx={{
           width: {
             xs: '100%',
             md: "350px",
           },
           maxHeight: "min-content",
+          backgroundColor: alpha(theme.palette.background.paper, theme.opacity.paper),
           borderRadius: "25px",
           padding: '30px',
         }}>
@@ -175,7 +177,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
             (Az óra csak tájékoztató jellegű. Más eszközökön és böngészőkben más időt fogtok látni, de így is csak az időben beérkezett válaszokat fogjuk figyelembe venni.)
             </Stack>
           }
-        </Paper>
+        </Stack>
       </Stack>
     </>
   )
