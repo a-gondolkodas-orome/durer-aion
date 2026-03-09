@@ -7,7 +7,7 @@ import { RelayWrapper } from 'game';
 import { State } from 'boardgame.io';
 import botWrapper from './botwrapper';
 import { sendGameData } from './sendData';
-import { BGIO_LOCALSTORAGE_PREFIX } from 'common-frontend';
+import { BGIO_LOCALSTORAGE_PREFIX } from 'common-frontend/src/client/utils/util';
 //import { Debug } from 'boardgame.io/debug';
 
 export function ClientWithBot<T_SpecificGameState,T_SpecificPosition>(
