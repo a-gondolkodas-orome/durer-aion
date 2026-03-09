@@ -20,7 +20,7 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type
         
       // }
       
-      let winner = getWinner();
+      const winner = getWinner();
       if (winner !== null) {
         G.winner = winner;
         if(winner === GUESSER_PLAYER){
@@ -39,7 +39,7 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type
   },
 
   possibleMoves: (G, ctx, playerID) => {
-    let moves = [1];
+    const moves = [1];
     
     return moves;
   },

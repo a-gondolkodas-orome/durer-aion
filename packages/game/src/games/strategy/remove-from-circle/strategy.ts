@@ -16,7 +16,7 @@ function convertToBinary(L: boolean[]) {
 }
 
 function possibleMoves(G: RemoveFromCircleGameState) {
-  let moves = [];
+  const moves = [];
   if ((G.circle[1] || G.circle[G.circle.length-1]) && G.circle[0]) {
     moves.push({move: 'removePoint', args: [0]});
   }
@@ -32,7 +32,7 @@ function possibleMoves(G: RemoveFromCircleGameState) {
 }
 
 export function strategyWrapper(category: "C" | "D" | "E") {
-  return (state: State<RemoveFromCircleGameState & GameStateMixin>, botID: string): [number | { circle: boolean[] } | undefined, string] => {
+  return (state: State<RemoveFromCircleGameState & GameStateMixin>, _botID: string): [number | { circle: boolean[] } | undefined, string] => {
     if (state.ctx.phase === "startNewGame") {
       return [startingPosition({ G: state.G, ctx: state.ctx }, category), "setStartingPosition"];
     }
@@ -45,7 +45,7 @@ export function strategyWrapper(category: "C" | "D" | "E") {
   }
 }
 
-function startingPosition({ G, ctx }: any, category: "C" | "D" | "E"): { circle: boolean[], firstMove: number, lastMove: number} {
+function startingPosition({ G, _ctx }: any, category: "C" | "D" | "E"): { circle: boolean[], firstMove: number, lastMove: number} {
   if (category === "C") {
     // C Category
     return { circle: Array(7).fill(true), firstMove:-1, lastMove:-1};
@@ -57,8 +57,8 @@ function startingPosition({ G, ctx }: any, category: "C" | "D" | "E"): { circle:
   if (category === "E") {
     // E Category
     if (G.difficulty === "live") {
-      let NoL = G.numberOfLoss;
-      let WS = G.winningStreak;
+      const NoL = G.numberOfLoss;
+      const WS = G.winningStreak;
       if (NoL === 0 && WS === 0) {
         return { circle: Array(9).fill(true), firstMove:-1, lastMove:-1};
       } else if (NoL === 0 && WS === 1) {
@@ -85,8 +85,8 @@ function startingPosition({ G, ctx }: any, category: "C" | "D" | "E"): { circle:
 }
 
 function randomStrategy(G: RemoveFromCircleGameState): [number, string] {
-  let pMoves =  possibleMoves(G);
-  let i = Math.floor(Math.random()*pMoves.length);
+  const pMoves =  possibleMoves(G);
+  const i = Math.floor(Math.random()*pMoves.length);
   return [pMoves[i].args[0], pMoves[i].move];
 }
 
@@ -95,8 +95,8 @@ function winningStrategy(G: RemoveFromCircleGameState): [number, string] {
   if (G.firstMove === -1) {
     move = Math.floor(Math.random()*G.circle.length)
   } else {
-    let pMoves = strategy[G.circle.length-7][convertToBinary(G.circle)];
-    let i = Math.floor(Math.random()*pMoves.length);
+    const pMoves = strategy[G.circle.length-7][convertToBinary(G.circle)];
+    const i = Math.floor(Math.random()*pMoves.length);
     move = pMoves[i] + 1;
   }
   return [move, "removePoint"];

@@ -60,7 +60,7 @@ export const MyGame: GameType<MyGameState> = {
   },
 
   possibleMoves: (G, ctx, playerID) => {
-    let moves = [];
+    const moves = [];
     for (let i = G.rookPosition[0] + 1; i <= tableSize[0]; i++) {
       moves.push({ move: "clickCell", args: [[i, G.rookPosition[1]]] });
     }

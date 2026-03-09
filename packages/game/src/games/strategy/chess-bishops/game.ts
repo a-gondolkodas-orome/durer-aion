@@ -31,7 +31,7 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type I was Game<My
     },
   },
   possibleMoves: (G, ctx, playerID) => {
-    let moves = [];
+    const moves = [];
     for (let i = 0; i < 64; i++) {
       if (G.board[i] === null) {
         moves.push({ move: 'clickCell', args: [i] });

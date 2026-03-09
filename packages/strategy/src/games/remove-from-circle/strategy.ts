@@ -32,7 +32,7 @@ function possibleMoves(G: RemoveFromCircleGameState) {
 }
 
 export function strategyWrapper(category: "C" | "D" | "E") {
-  return (state: State<RemoveFromCircleGameState & GameStateMixin>, botID: string): [number | { circle: boolean[] } | undefined, string] => {
+  return (state: State<RemoveFromCircleGameState & GameStateMixin>, _botID: string): [number | { circle: boolean[] } | undefined, string] => {
     if (state.ctx.phase === "startNewGame") {
       return [startingPosition({ G: state.G, ctx: state.ctx }, category), "setStartingPosition"];
     }
@@ -45,7 +45,7 @@ export function strategyWrapper(category: "C" | "D" | "E") {
   }
 }
 
-function startingPosition({ G, ctx }: any, category: "C" | "D" | "E"): { circle: boolean[], firstMove: number, lastMove: number} {
+function startingPosition({ G, _ctx }: any, category: "C" | "D" | "E"): { circle: boolean[], firstMove: number, lastMove: number} {
   if (category === "C") {
     // C Category
     return { circle: Array(7).fill(true), firstMove:-1, lastMove:-1};

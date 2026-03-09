@@ -7,9 +7,7 @@ import { Button } from '@mui/material';
 
 import KeyboardDoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
 
-interface MyGameProps extends BoardProps<MyGameState> { }
-
-export function MyBoard({ G, ctx, moves }: MyGameProps, theme: any) {
+export function MyBoard({ G, ctx, moves }: BoardProps<MyGameState>, theme: any) {
   // TODO: use formik
   // create refs to store the text input elements
   const inputK = useRef<HTMLInputElement>(null);

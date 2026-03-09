@@ -27,7 +27,7 @@ export const MyGame: GameType<MyGameState> = {
         G.enemyNumbers.push(n);
       }
       G.remainingNumbers = G.remainingNumbers.filter(x => x !== n);
-      let winner = getWinner(G.playerNumbers, G.enemyNumbers, G.remainingNumbers);
+      const winner = getWinner(G.playerNumbers, G.enemyNumbers, G.remainingNumbers);
       if (winner !== null) {
         G.winner = winner;
         if(winner === GUESSER_PLAYER){
@@ -45,8 +45,8 @@ export const MyGame: GameType<MyGameState> = {
   },
 
   possibleMoves: (G, ctx, playerID) => {
-    let moves = [];
-    for (let i of G.remainingNumbers) {
+    const moves = [];
+    for (const i of G.remainingNumbers) {
       moves.push({ move: "clickCell", args: [i] });
     }
     return moves;
@@ -77,7 +77,7 @@ function getWinner(
     [4, 5, 6],
   ];
 
-  for(let i of RSOROK){
+  for(const i of RSOROK){
     if(first.includes(i[0]) && first.includes(i[1]) && first.includes(i[2])){
       return GUESSER_PLAYER; // Player wins
     }

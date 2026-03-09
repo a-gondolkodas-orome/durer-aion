@@ -46,8 +46,8 @@ function startingPosition({ G, ctx }: any, category: "C" | "D"): MyGameState | u
 }
 
 function randomStrategy(G: MyGameState): [number, string] {
-  let pMoves =  possibleMoves(G);
-  let i = Math.floor(Math.random()*pMoves.length);
+  const pMoves =  possibleMoves(G);
+  const i = Math.floor(Math.random()*pMoves.length);
   return [pMoves[i].args[0], pMoves[i].move];
 }
 
@@ -64,8 +64,8 @@ function generateStateID(numbersOnTable: boolean[], previousMove: number): strin
 
 function winningStrategy(G: MyGameState): [number, string] {
   try {
-    let pMoves = strategyDict[G.numbersOnTable.length][generateStateID(G.numbersOnTable, G.previousMove)];
-    let i = Math.floor(Math.random()*pMoves.length);
+    const pMoves = strategyDict[G.numbersOnTable.length][generateStateID(G.numbersOnTable, G.previousMove)];
+    const i = Math.floor(Math.random()*pMoves.length);
     return [pMoves[i], "removeNumber"];
   } catch (e) {
     console.error("Winning strategy not found, using random strategy instead.");
