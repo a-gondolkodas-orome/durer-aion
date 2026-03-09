@@ -110,7 +110,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
             xs: '100%',
             md: "calc(100% - 380px)",
           },
-          backgroundColor: alpha(theme.palette.background.paper, theme.opacity.paper),
+          backgroundColor: alpha(theme.palette.background.paper, theme.palette.background.paperOpacity),
           borderRadius: {
             xs: 0,
             md: "25px",
@@ -140,7 +140,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
             md: "350px",
           },
           maxHeight: "min-content",
-          backgroundColor: alpha(theme.palette.background.paper, theme.opacity.paper),
+          backgroundColor: alpha(theme.palette.background.paper, theme.palette.background.paperOpacity),
           borderRadius: "25px",
           padding: '30px',
         }}>

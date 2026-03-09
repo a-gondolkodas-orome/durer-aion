@@ -6,7 +6,6 @@ import { useRefreshTeamState, useToHome } from "../client/hooks/user-hooks";
 import { useClientRepo } from "../client/api-repository-interface";
 import { GUESSER_PLAYER, JUDGE_PLAYER } from "game";
 import { useTheme } from "@mui/material/styles";
-import { alpha } from "@mui/system/colorManipulator"
 
 export function boardWrapper(board: any, description: any) { //<please> TODO: solve types with BoardProps<MyGameState>
   return ({ G, ctx, moves, log }: any) => {
@@ -59,7 +58,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
         </Dialog>
         <Stack sx={{
           padding: '20px',
-          backgroundColor: alpha(theme.palette.background.paper, theme.opacity.paper),
+          backgroundColor: alpha(theme.palette.background.paper, theme.palette.background.paperOpacity),
           borderRadius: "25px",
           display: 'flex',
         }}>

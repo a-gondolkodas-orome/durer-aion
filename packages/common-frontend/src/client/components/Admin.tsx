@@ -49,7 +49,7 @@ export function Admin(props: {teamId?: String}) {
         xs: '10px',
         md: 0
       },
-      backgroundColor: alpha(theme.palette.background.paper, theme.opacity.paper),
+      backgroundColor: alpha(theme.palette.background.paper, theme.palette.background.paperOpacity),
     }} data-testid="adminRoot">
       <Dialog 
         maxWidth={false} 

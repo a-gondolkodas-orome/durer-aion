@@ -1,13 +1,6 @@
 declare module '@mui/material/styles' {
-    interface Theme {
-        opacity: opacityOptions
-    }
-    interface opacityOptions {
-        paper: number,
-    }
-    // allow configuration for using `createTheme()`
-    interface ThemeOptions {
-        opacity: opacityOptions;
+    interface TypeBackground {
+        paperOpacity: number;
     }
 }
 
@@ -23,6 +16,7 @@ const themeConfig = ({
         background: {
             default: '#FFF8D7',
             paper: '#fff',
+            paperOpacity: 0.9,
         }
     },
     typography: {

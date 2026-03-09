@@ -33,7 +33,7 @@ export function ChooserItem(props: {
         xs: "10px",
         md: "40px",
       },
-      backgroundColor: alpha(theme.palette.background.paper, theme.opacity.paper),
+      backgroundColor: alpha(theme.palette.background.paper, theme.palette.background.paperOpacity),
     }}>
       <Stack sx={{
         fontWeight: 'bold',

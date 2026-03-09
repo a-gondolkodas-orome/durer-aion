@@ -30,7 +30,7 @@ export function Disclaimer(props: {teamName: string, category: string}) {
           xs: 0,
           md: "40px"
         },
-        backgroundColor: alpha(theme.palette.background.paper, theme.opacity.paper),
+        backgroundColor: alpha(theme.palette.background.paper, theme.palette.background.paperOpacity),
         borderRadius: {
           xs: 0,
           md: "30px",
