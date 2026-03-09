@@ -1,4 +1,4 @@
-export let description = (<>
+export const description = (<>
   <p className="text-justify">
     Ez a játék a XIII. Dürer döntőjén szerepelt E kategóriában.
   </p>

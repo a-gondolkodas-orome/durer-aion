@@ -4,9 +4,7 @@ import Stack from '@mui/material/Stack';
 import { Button, Typography, Box } from '@mui/material';
 import { GUESSER_PLAYER } from '../../../common';
 
-interface MyGameProps extends BoardProps<MyGameState> { }
-
-export function MyBoard({ G, ctx, moves }: MyGameProps, theme: any) {
+export function MyBoard({ G, ctx, moves }: BoardProps<MyGameState>, _theme: any) {
   const currentPlayerLastFromLeft = G.lastMoveFromLeftByPlayer[GUESSER_PLAYER];
   const canTakeFromLeft = G.stonesLeft > 0 && !currentPlayerLastFromLeft;
   const canTakeFromRight = G.stonesRight > 0;

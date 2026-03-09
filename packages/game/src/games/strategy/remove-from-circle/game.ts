@@ -95,7 +95,7 @@ export const MyGameWrapper = function (category: "C" | "D" | "E") {
     },
     
     possibleMoves: (G, ctx, playerID) => {
-      let moves = [];
+      const moves = [];
       for (let i = 1; i<G.circle.length-1; i++) {
         if ((G.circle[i-1] || G.circle[i+1]) && G.circle[i]) {
           moves.push({move: 'removePoint', args: [i]});
@@ -110,7 +110,7 @@ export const MyGameWrapper = function (category: "C" | "D" | "E") {
     turn: {
       onMove: ({ G, ctx, playerID, events }) => {
         if (playerID === GUESSER_PLAYER) {
-          let currentTime = new Date();
+          const currentTime = new Date();
           if (currentTime.getTime() - new Date(G.end).getTime() > 1000 * 10) {
             // Do not accept any answer if the time is over since more than 10 seconds
             events.endGame();
@@ -119,7 +119,7 @@ export const MyGameWrapper = function (category: "C" | "D" | "E") {
       },
       onEnd: ({ G, ctx, playerID, events }) => {
         if (playerID === JUDGE_PLAYER) {
-          let currentTime = new Date();
+          const currentTime = new Date();
           if (currentTime.getTime() - new Date(G.end).getTime() >= 0) {
             // Do not accept any answer if the time is over
             events.endGame();

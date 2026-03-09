@@ -13,7 +13,7 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<
     }},
 
   moves: {
-    changeCoins: ({ G, ctx, playerID, events }, K: number, L: number) => {
+    changeCoins: ({ G, ctx, _playerID, events }, K: number, L: number) => {
       if (!Number.isInteger(L) || !Number.isInteger(K) || K <= L ||L < 1 || !G.coins.includes(K)) {
         return INVALID_MOVE;
       }
@@ -60,12 +60,12 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<
     },
   },
 
-  possibleMoves: (G, ctx, playerID) => {
-    let existingCoins = [false,false,false,false,false];
+  possibleMoves: (G, _ctx, _playerID) => {
+    const existingCoins = [false,false,false,false,false];
     for(let i = 0; i < 10; i++){
       existingCoins[G.coins[i]-1] = true;
     }
-    let moves = [];
+    const moves = [];
     for(let k = 1; k <= 5; k++){
       if(existingCoins[k-1]){
         for(let l = 1; l < k; l++){
@@ -77,18 +77,18 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<
   },
 
   turn: {
-    onMove: ({G, ctx, playerID, events }) => {
+    onMove: ({G, _ctx, playerID, events }) => {
       if(playerID === GUESSER_PLAYER) {
-        let currentTime = new Date();
+        const currentTime = new Date();
         if(currentTime.getTime() - new Date(G.end).getTime() > 1000*10){
           // Do not accept any answer if the time is over since more than 10 seconds
           events.endGame();
         }
       }
     },
-    onEnd: ({G, ctx, playerID, events }) => {
+    onEnd: ({G, _ctx, playerID, events }) => {
       if(playerID === JUDGE_PLAYER) {
-        let currentTime = new Date();
+        const currentTime = new Date();
         if(currentTime.getTime() - new Date(G.end).getTime() <= 0){
           // Do not accept any answer if the time is over
           events.endGame();

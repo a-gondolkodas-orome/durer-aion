@@ -18,7 +18,7 @@ export function MyBoard({ G, ctx, moves }: MyGameProps) {
   };
 
   const getAngle = (index: number) => {
-    let step = Math.PI*2/G.circle.length;
+    const step = Math.PI*2/G.circle.length;
     return index*step + (G.firstMove === -1 ? 0 : G.firstMove*step)
   };
 

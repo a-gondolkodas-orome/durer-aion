@@ -1,9 +1,11 @@
 import { MyGameState } from './game';
 import { BoardProps } from 'boardgame.io/react';
 
-interface MyGameProps extends BoardProps<MyGameState> { };
+interface MyGameProps extends BoardProps<MyGameState> {
+  _ctx: undefined
+};
 
-export function MyBoard({ G, ctx, moves }: MyGameProps) {
+export function MyBoard({ G, _ctx, moves }: MyGameProps) {
   return (
     <div
       style={{

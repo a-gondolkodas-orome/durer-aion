@@ -131,7 +131,7 @@ export function configureTeamsRouter(
     await ctx.db.setState(matchID, new_state);
 
     //Reconstruct game name from metadata
-    let game = games.find(g => g.name === metadata.gameName);
+    const game = games.find(g => g.name === metadata.gameName);
     if (!game) {
       ctx.throw(404, `Match found, but game ${metadata.gameName} was not found.`);
       return

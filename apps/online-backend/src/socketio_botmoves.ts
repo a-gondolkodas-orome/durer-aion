@@ -182,7 +182,7 @@ export class SocketIOButBotMoves extends SocketIO {
               app.context.auth
             );
 
-            let nextStateID = state._stateID;
+            const nextStateID = state._stateID;
             await master.onUpdate(
               {
                 type: "MAKE_MOVE",

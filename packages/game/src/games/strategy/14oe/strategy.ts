@@ -5,7 +5,7 @@ import { MyGameState } from './game';
 const buvosbolRendes=[0,8,3,4,1,5,9,6,7,2];
 const rendesbolBuvos=[0,4,9,2,3,5,7,8,1,6];
 
-let megadottValaszlepesek = new Map<string,string>([
+const megadottValaszlepesek = new Map<string,string>([
   ["", "1379"],
   ["1", "5"],
   ["12", "7"],
@@ -98,7 +98,7 @@ export function strategy(state: State<MyGameState & GameStateMixin>, botID: stri
         (element, index) => [rendesbolBuvos[element], rendesbolBuvos[state.G.playerNumbers[index]]]
       );
     }
-    let rEddigiekString = rEddigiek.join("");
+    const rEddigiekString = rEddigiek.join("");
     if (rEddigiekString === "") { //kezdés
       switch (state.G.numberOfTries % 4) {
         case 0:
@@ -119,7 +119,7 @@ export function strategy(state: State<MyGameState & GameStateMixin>, botID: stri
       return [buvosbolRendes[parseInt(valasz)],"clickCell"];
     }
     const RSOROK=[[8,3,4],[1,5,9],[6,7,2],[8,1,6],[3,5,7],[4,9,2],[8,5,2],[4,5,6]];
-    for (let i of RSOROK){ //nyerés
+    for (const i of RSOROK){ //nyerés
       if( state.G.enemyNumbers.includes(i[0]) && state.G.enemyNumbers.includes(i[1]) && state.G.remainingNumbers.includes(i[2])){
         return [i[2], "clickCell"];
       }
@@ -131,7 +131,7 @@ export function strategy(state: State<MyGameState & GameStateMixin>, botID: stri
       }
     }
 
-    for (let i of RSOROK){ //blokkolás
+    for (const i of RSOROK){ //blokkolás
       if( state.G.playerNumbers.includes(i[0]) && state.G.playerNumbers.includes(i[1]) && state.G.remainingNumbers.includes(i[2])){
         return [i[2], "clickCell"];
       }
@@ -145,7 +145,7 @@ export function strategy(state: State<MyGameState & GameStateMixin>, botID: stri
 
     const RVILLAK=[[8,3,4,1,6],[8,3,4,5,2],[8,1,6,5,2],[3,8,4,5,7],[4,8,3,5,6],[4,8,3,9,2],[4,5,6,9,2],[1,8,6,5,9],[5,8,2,3,7],[5,8,2,4,6],[5,8,2,1,9],[5,3,7,4,6],[5,3,7,1,9],[5,4,6,1,9],[9,1,5,4,2],[6,8,1,4,5],[6,8,1,7,2],[6,4,5,7,2],[7,3,5,6,2],[2,8,5,4,9],[2,8,5,6,7],[2,4,9,6,7]];
 
-    for (let i of RVILLAK){ //villa
+    for (const i of RVILLAK){ //villa
       if( state.G.remainingNumbers.includes(i[0]) && state.G.playerNumbers.includes(i[1]) && state.G.playerNumbers.includes(i[3]) && state.G.remainingNumbers.includes(i[2]) && state.G.remainingNumbers.includes(i[4])){
         return [i[0], "clickCell"];
       }
@@ -160,7 +160,7 @@ export function strategy(state: State<MyGameState & GameStateMixin>, botID: stri
       }
     }
 
-    for (let i of RVILLAK){ //villablokkolás
+    for (const i of RVILLAK){ //villablokkolás
       if( state.G.remainingNumbers.includes(i[0]) && state.G.enemyNumbers.includes(i[1]) && state.G.enemyNumbers.includes(i[3]) && state.G.remainingNumbers.includes(i[2]) && state.G.remainingNumbers.includes(i[4])){
         return [i[0], "clickCell"];
       }

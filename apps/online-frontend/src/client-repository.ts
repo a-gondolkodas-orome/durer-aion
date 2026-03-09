@@ -4,7 +4,7 @@ import { ClientRepository, TeamModelDto, MatchStateDto } from "common-frontend";
 
 const serverUrl = import.meta.env.VITE_SERVER_URL || '/';
 function apiAxiosInstance(): AxiosInstance {
-  let apiUrl = serverUrl; // TODO: env or something
+  const apiUrl = serverUrl; // TODO: env or something
 
   return axios.create({
     baseURL: apiUrl,

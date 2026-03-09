@@ -40,7 +40,7 @@ function getJoinCode(teamState?: TeamModelDto){
 }
 
 export function sendDataLogin(teamState: TeamModelDto){
-  let code = getJoinCode(teamState);
+  const code = getJoinCode(teamState);
   sendData(code+"_"+randomID+"_login_"+now(), "code");
 }
 

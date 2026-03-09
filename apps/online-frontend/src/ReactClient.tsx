@@ -5,7 +5,7 @@ const GameC = MyGameWrappers.C();
 const GameD = MyGameWrappers.D();
 const GameE = MyGameWrappers.E();
 
-let description = <p className="text-justify"></p>
+const description = <p className="text-justify"></p>
 const serverUrl = import.meta.env.VITE_SERVER_URL;
 export const { Client:RelayClient_C, OnlineClient:RelayOnlineClient_C } = ClientFactoryRelay({...GameRelay, name: "relay_c"}, InProgressRelay, description, serverUrl);
 export const { Client:RelayClient_D, OnlineClient:RelayOnlineClient_D } = ClientFactoryRelay({...GameRelay, name: "relay_d"}, InProgressRelay, description, serverUrl);
