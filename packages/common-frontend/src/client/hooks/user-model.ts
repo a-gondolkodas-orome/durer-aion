@@ -1,8 +1,20 @@
 import { LOCAL_STORAGE_TEAMSTATE } from "../api-repository-interface";
 import type { ClientRepository } from "../api-repository-interface";
 import type { MatchStateDto, TeamModelDto } from "../dto/TeamStateDto";
+import { BGIO_LOCALSTORAGE_PREFIX } from "../utils/util";
 
 const LOCAL_STORAGE_GUID = "kjqAEKeFkMpOvOZrzcvp";
+function removeGameStateLocalStorage() {
+  let idx = 0;
+  let key = localStorage.key(idx);
+  while (key !== null) {
+    if (key.startsWith(BGIO_LOCALSTORAGE_PREFIX)) {
+      localStorage.removeItem(key);
+    }
+    idx++;
+    key = localStorage.key(idx);
+  }
+}
 
 export class UserModel {
 
@@ -118,6 +130,7 @@ export class UserModel {
     localStorage.removeItem(LOCAL_STORAGE_TEAMSTATE);
     localStorage.removeItem("RelayPoints");
     localStorage.removeItem("StrategyPoints");
+    removeGameStateLocalStorage();
   }
 
   async login(joinCode: string): Promise<string | null> {
