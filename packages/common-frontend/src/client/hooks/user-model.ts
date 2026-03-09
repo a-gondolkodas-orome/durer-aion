@@ -3,13 +3,11 @@ import type { ClientRepository } from "../api-repository-interface";
 import type { MatchStateDto, TeamModelDto } from "../dto/TeamStateDto";
 import { BGIO_LOCALSTORAGE_PREFIX } from "../utils/util";
 
-// TODO removeGameStateLocalStorage
-
 const LOCAL_STORAGE_GUID = "kjqAEKeFkMpOvOZrzcvp";
 function removeGameStateLocalStorage() {
   let idx = 0;
   let key = localStorage.key(idx);
-  while (key != null) {
+  while (key !== null) {
     if (key.startsWith(BGIO_LOCALSTORAGE_PREFIX)) {
       localStorage.removeItem(key);
     }
