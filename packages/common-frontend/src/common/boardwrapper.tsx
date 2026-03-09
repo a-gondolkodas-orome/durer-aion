@@ -1,4 +1,4 @@
-import { Button, Dialog, Stack } from "@mui/material";
+import { Button, Dialog, Stack, alpha } from "@mui/material";
 import { useEffect, useState } from "react";
 import { Countdown } from "../client/components/Countdown";
 import { StrategyEndTable } from "../client/components/StrategyEndTable";
@@ -44,6 +44,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
                 xs: '100%',
                 md: 'calc(100% - 64px)'
               },
+              backgroundColor: theme.palette.background.paper,
             }
           }}
           open={
@@ -57,7 +58,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
         </Dialog>
         <Stack sx={{
           padding: '20px',
-          backgroundColor: theme.palette.background.paper,
+          backgroundColor: alpha(theme.palette.background.paper, theme.palette.background.paperOpacity),
           borderRadius: "25px",
           display: 'flex',
         }}>
@@ -209,8 +210,9 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
                 width: '100%',
                 display: 'block',
                 borderRadius: '20px',
-                backgroundColor: '#93F272',
-                borderColor: '#2DAD3A',
+                backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                borderColor: theme.palette.primary.main,
+                color: theme.palette.primary.main,
                 borderWidth: '2px',
                 textAlign: 'center',
                 padding: '15px',
@@ -224,6 +226,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
                 {ctx.phase === 'startNewGame' && G.winner === "0" && G.difficulty === "live" && <p> Gratulálok, nyertetek! Verjétek meg még egyszer a gépet!</p>}
                 {ctx.phase === 'startNewGame' && G.winner === "0" && G.difficulty === "test" && <p> Gratulálok, a próbajátékban nyertetek!</p>}
                 {ctx.phase === 'startNewGame' && G.winner === "1" && <p> Sajnos a gép nyert. </p>}
+                {finished && <p> A játék végetért. </p>}
               </Stack>
             </Stack>
             <Stack sx={{

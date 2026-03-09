@@ -1,5 +1,5 @@
 import { Button } from "@mui/material";
-import { Stack } from "@mui/system";
+import { Stack, alpha } from "@mui/system";
 import { dictionary } from "../text-constants";
 import { useToHome } from "../hooks/user-hooks";
 import { useClientRepo } from "../api-repository-interface";
@@ -30,7 +30,7 @@ export function Disclaimer(props: {teamName: string, category: string}) {
           xs: 0,
           md: "40px"
         },
-        backgroundColor: theme.palette.background.paper,
+        backgroundColor: alpha(theme.palette.background.paper, theme.palette.background.paperOpacity),
         borderRadius: {
           xs: 0,
           md: "30px",
