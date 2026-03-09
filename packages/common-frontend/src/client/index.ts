@@ -28,3 +28,4 @@ export * from './hooks/user-atom';
 export * from './hooks/user-hooks';
 export * from './hooks/user-model';
 export * from './utils/DateFormatter';
+export { BGIO_LOCALSTORAGE_PREFIX } from './utils/util';
