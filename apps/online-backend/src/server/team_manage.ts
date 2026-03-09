@@ -252,6 +252,7 @@ export async function getNewGame(
   const staleInfo = await checkStaleMatch(team);
   if (staleInfo.isStale) {
     await closeMatch(
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       (team[staleInfo.gameState!] as InProgressMatchStatus).matchID,
       teams,
       ctx.db
