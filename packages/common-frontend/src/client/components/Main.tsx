@@ -10,7 +10,14 @@ import { Disclaimer } from "./Disclaimer";
 import { Chooser } from "./Chooser";
 import { Admin } from "./Admin";
 
-export function Main() {
+export interface GitInfo {
+  commitHash: string;
+  commitDate?: string;
+  lastCommitMessage?: string;
+  branchName?: string;
+}
+
+export function Main(props: { gitInfo: GitInfo }) {
   const teamState = useTeamState();
   const [frontendState, setFrontEndState] = useState<"R" | "S" | null>(null);
   const [admin, setAdmin] = useState<boolean>(false);
@@ -67,6 +74,14 @@ export function Main() {
           <Strategy state={teamState} />
         )}
       </Container>
+      <footer style={{
+        textAlign: "center",
+        color: "#777",
+        fontSize: '70%',
+        marginBottom: '8px'
+      }}>
+        <div>{props.gitInfo.commitHash}</div>
+      </footer>
     </Layout>
   );
 }

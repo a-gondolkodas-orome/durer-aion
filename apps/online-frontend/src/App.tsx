@@ -1,6 +1,6 @@
 import React from 'react';
 import './App.css';
-import { Main, GameProvider, ClientRepoProvider } from 'common-frontend';
+import { Main, GameProvider, ClientRepoProvider, GitInfo } from 'common-frontend';
 import { RealClientRepository } from './client-repository';
 import { ThemeProvider } from '@mui/material/styles';
 
@@ -12,6 +12,10 @@ const theme = {
     },
   },
 }
+
+const gitCommitInfo: GitInfo = {
+  commitHash: import.meta.env.VITE_GIT_COMMIT_HASH || 'unknown',
+};
 
 function App() {
   const RelayClient = React.lazy(() => import('./ReactClient').then(module => ({ default: module.RelayClient })));
@@ -26,7 +30,7 @@ function App() {
       <ThemeProvider theme={theme}>
         <ClientRepoProvider 
           value={new RealClientRepository()}>
-          <Main />
+          <Main gitInfo={gitCommitInfo}/>
         </ClientRepoProvider>
       </ThemeProvider>
     </GameProvider>
