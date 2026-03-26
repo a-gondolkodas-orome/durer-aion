@@ -3,12 +3,12 @@ import react from '@vitejs/plugin-react'
 import { execSync } from 'child_process'
 
 // https://vite.dev/config/
-export default ({ mode }: ConfigEnv) => {
+export default defineConfig(({ mode }: ConfigEnv) => {
   const commitHash = execSync('git rev-parse HEAD').toString().trimEnd();
 
   process.env.VITE_GIT_COMMIT_HASH = commitHash;
 
-  return defineConfig({
+  return {
     plugins: [react()],
     build: {
       rollupOptions: {
@@ -23,5 +23,5 @@ export default ({ mode }: ConfigEnv) => {
         }
       }
     }
-  })
-}
+  }
+})

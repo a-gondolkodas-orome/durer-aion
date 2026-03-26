@@ -3,12 +3,12 @@ import react from '@vitejs/plugin-react'
 import path from 'path';
 import { execSync } from 'child_process';
 
-export default ({ mode }: ConfigEnv) => {
+export default defineConfig(({ mode }: ConfigEnv) => {
   const commitHash = execSync('git rev-parse HEAD').toString().trimEnd();
 
   process.env.VITE_GIT_COMMIT_HASH = commitHash;
 
-  return defineConfig({
+  return {
     base: process.env.PUBLIC_URL || '/',
     plugins: [react()],
     resolve: {
@@ -48,5 +48,5 @@ export default ({ mode }: ConfigEnv) => {
         external: [/\.test\.(t|j)sx?$/],
       },
     },
-  })
-}
+  }
+})
