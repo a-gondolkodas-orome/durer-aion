@@ -4,9 +4,7 @@ import { execSync } from 'child_process'
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }: ConfigEnv) => {
-  const commitHash = execSync('git rev-parse HEAD').toString().trimEnd();
-
-  process.env.VITE_GIT_COMMIT_HASH = commitHash;
+  process.env.VITE_GIT_COMMIT_HASH = execSync('git rev-parse HEAD').toString().trimEnd();
 
   return {
     plugins: [react()],
