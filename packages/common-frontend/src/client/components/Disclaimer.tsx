@@ -4,11 +4,13 @@ import { dictionary } from "../text-constants";
 import { useToHome } from "../hooks/user-hooks";
 import { useClientRepo } from "../api-repository-interface";
 import { useTheme } from "@mui/material/styles";
+import { useTranslation, Trans } from 'react-i18next';
 
 export function Disclaimer(props: {teamName: string, category: string}) {
   const goHome = useToHome();
   const theme = useTheme();
   const isOffline = useClientRepo().version === "OFFLINE";
+  const { t } = useTranslation();
 
   return (
     <Stack
@@ -51,9 +53,9 @@ export function Disclaimer(props: {teamName: string, category: string}) {
           alignSelf: "center",
         }}>
           <div style={{textAlign: "center"}}>
-            {dictionary.disclaimer.welcome.split('{teamName}')[0]}
-            <span style={{fontStyle: "italic", color: theme.palette.primary.main}}>{props.teamName}</span>
-            {dictionary.disclaimer.welcome.split('{teamName}')[1]}
+            <Trans i18nKey={'disclaimer:welcome'} values={{ tname: props.teamName }}>
+              Kedves <i style={{color: theme.palette.primary.main}}>{props.teamName}</i> csapat, üdvözlünk az online fordulón!
+            </Trans>
           </div>
         </Stack>
         <Stack sx={{
@@ -64,12 +66,12 @@ export function Disclaimer(props: {teamName: string, category: string}) {
           marginBottom: "20px",
         }}>
           <div style={{textAlign: "center"}}>
-            {dictionary.disclaimer.category.split('{category}')[0]}
-            <span style={{fontWeight: "bold", color: theme.palette.primary.main}}>{props.category}</span>
-            {dictionary.disclaimer.category.split('{category}')[1]}
+            <Trans i18nKey={'disclaimer:category'} values={{ category: props.category }}>
+              Kategóriátok: <strong style={{color: theme.palette.primary.main}}>{props.category}</strong>
+            </Trans>
           </div>
         </Stack>
-        {dictionary.disclaimer.start}
+        {t('disclaimer:start')}
       </Stack>
 
       <Stack
@@ -79,7 +81,7 @@ export function Disclaimer(props: {teamName: string, category: string}) {
           fontStyle: "italic",
         }}
       >
-        {dictionary.disclaimer.progress}
+        {t('disclaimer:progress')}
       </Stack>
 
       <Stack
@@ -91,7 +93,7 @@ export function Disclaimer(props: {teamName: string, category: string}) {
           }
         }}
       >
-        {dictionary.disclaimer.progressDescription}
+        {t('disclaimer:progressDescription', {minpoints: 25, maxpoints: 52})}
       </Stack>
 
       <Stack
@@ -101,7 +103,7 @@ export function Disclaimer(props: {teamName: string, category: string}) {
           fontStyle: "italic",
         }}
       >
-        {dictionary.disclaimer.interface}
+        {t('disclaimer:interface')}
       </Stack>
 
       <Stack
