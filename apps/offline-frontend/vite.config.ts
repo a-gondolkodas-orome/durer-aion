@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 import path from 'path';
 import { execSync } from 'child_process';
 
-export default defineConfig(({ mode }: ConfigEnv) => {
+export default defineConfig(() => {
   process.env.VITE_GIT_COMMIT_HASH = execSync('git rev-parse HEAD').toString().trimEnd();
 
   return {
