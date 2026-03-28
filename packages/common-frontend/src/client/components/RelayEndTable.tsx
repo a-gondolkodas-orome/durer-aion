@@ -5,6 +5,8 @@ import { useRefreshTeamState, useToHome } from '../hooks/user-hooks';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 
+const pointColours: string[] = ['#3fc523', '#9beb53', '#d5eb42', '#ee5555'];
+
 /**
  * Component to display an end game screen with close button, and score
  * @param props {{setShow: React.Dispatch<boolean>, points: number}}
@@ -15,6 +17,7 @@ export function RelayEndTable(props: {allPoints: number, task: {max: number, got
   const refreshState = useRefreshTeamState();
   const toHome = useToHome();
   const { t } = useTranslation();
+
   return (
     <Stack sx={{
       display: 'flex',
@@ -72,16 +75,11 @@ export function RelayEndTable(props: {allPoints: number, task: {max: number, got
                 {props.task.slice(0, 10).map((data, idx)=>{
                     let currStyle = { backgroundColor: '#fff' };
                     if(data.got !== null){
-                        switch(data.max - data.got){
-                            case 0: 
-                              currStyle = { backgroundColor: '#3fc523' }; break;
-                            case 1: 
-                              currStyle = { backgroundColor: '#9beb53' }; break;
-                            case 2: 
-                              currStyle = { backgroundColor: '#d5eb42' }; break;
-                            default:
-                              currStyle = { backgroundColor: '#ee5555' };
-                        }
+                      if(0 < data.max - data.got && data.max - data.got < 3) {
+                        currStyle = { backgroundColor: pointColours[data.max - data.got] }
+                      } else {
+                        currStyle = { backgroundColor: pointColours[3] }
+                      }
                     }
                 return <TableCell sx={currStyle}>
                     {data.got}
@@ -99,16 +97,11 @@ export function RelayEndTable(props: {allPoints: number, task: {max: number, got
                 {props.task.slice(10).map((data, idx)=>{
                     let currStyle = { backgroundColor: '#fff' };
                     if(data.got !== null){
-                        switch(data.max - data.got){
-                            case 0: 
-                              currStyle = { backgroundColor: '#3fc523' }; break;
-                            case 1: 
-                              currStyle = { backgroundColor: '#9beb53' }; break;
-                            case 2: 
-                              currStyle = { backgroundColor: '#d5eb42' }; break;
-                            default:
-                              currStyle = { backgroundColor: '#ee5555' };
-                        }
+                      if(0 < data.max - data.got && data.max - data.got < 3) {
+                        currStyle = { backgroundColor: pointColours[data.max - data.got] }
+                      } else {
+                        currStyle = { backgroundColor: pointColours[3] }
+                      }
                     }
                 return <TableCell sx={currStyle}>
                     {data.got}
@@ -133,23 +126,13 @@ export function RelayEndTable(props: {allPoints: number, task: {max: number, got
               marginLeft: '12px',
               marginRight: '12px',
           }
-        }}> 
+        }}>
+          {pointColours.map((colour, attempt) => (
             <Stack sx={{display: 'flex' }}>
-              <Stack sx={{ backgroundColor: '#3fc523' }}></Stack>
-              <span>1. {t('relay:endTable.try')}</span>
+              <Stack sx={{ backgroundColor: colour }}></Stack>
+              <span>{attempt === 3 ? t('relay:endTable.wrong') : t('relay:endTable.try', {count: attempt + 1})}</span>
             </Stack>
-            <Stack sx={{display: 'flex' }}>
-              <Stack sx={{ backgroundColor: '#9beb53' }}></Stack>
-              <span>2. {t('relay:endTable.try')}</span>
-            </Stack>
-            <Stack sx={{display: 'flex' }}>
-              <Stack sx={{ backgroundColor: '#d5eb42' }}></Stack>
-              <span>3. {t('relay:endTable.try')}</span>
-            </Stack>
-            <Stack sx={{display: 'flex' }}>
-              <Stack sx={{ backgroundColor: '#ee5555' }}></Stack>
-              <span>{t('relay:endTable.wrong')}</span>
-            </Stack>
+          ))}
         </Stack>
         </Stack>
         <Stack sx={{
@@ -219,16 +202,11 @@ export function RelayEndTableData(props: {allPoints: number, task: {max: number,
                 {props.task.slice(0, 10).map((data, idx)=>{
                     let currStyle = { backgroundColor: '#fff' };
                     if(data.got !== null){
-                        switch(data.max - data.got){
-                            case 0: 
-                              currStyle = { backgroundColor: '#3fc523' }; break;
-                            case 1: 
-                              currStyle = { backgroundColor: '#9beb53' }; break;
-                            case 2: 
-                              currStyle = { backgroundColor: '#d5eb42' }; break;
-                            default:
-                              currStyle = { backgroundColor: '#ee5555' };
-                        }
+                      if(0 < data.max - data.got && data.max - data.got < 3) {
+                        currStyle = { backgroundColor: pointColours[data.max - data.got] }
+                      } else {
+                        currStyle = { backgroundColor: pointColours[3] }
+                      }
                     }
                 return <TableCell sx={currStyle}>
                     {data.got}
@@ -252,16 +230,11 @@ export function RelayEndTableData(props: {allPoints: number, task: {max: number,
                 {props.task.slice(10).map((data, idx)=>{
                     let currStyle = { backgroundColor: '#fff' };
                     if(data.got !== null){
-                        switch(data.max - data.got){
-                            case 0: 
-                              currStyle = { backgroundColor: '#3fc523' }; break;
-                            case 1: 
-                              currStyle = { backgroundColor: '#9beb53' }; break;
-                            case 2: 
-                              currStyle = { backgroundColor: '#d5eb42' }; break;
-                            default:
-                              currStyle = { backgroundColor: '#ee5555' };
-                        }
+                      if(0 < data.max - data.got && data.max - data.got < 3) {
+                        currStyle = { backgroundColor: pointColours[data.max - data.got] }
+                      } else {
+                        currStyle = { backgroundColor: pointColours[3] }
+                      }
                     }
                 return <TableCell sx={currStyle}>
                     {data.got}

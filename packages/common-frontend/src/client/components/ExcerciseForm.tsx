@@ -33,11 +33,11 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
   useEffect(()=>{
     if(props.previousCorrectness!=null){
       if(props.previousCorrectness){
-        console.log('A válasz helyes volt')
-        enqueueSnackbar('A válasz helyes volt', { variant: 'success' });
+        console.log(t('relay:goodguess'))
+        enqueueSnackbar(t('relay:goodguess'), { variant: 'success' });
       } else {
-        console.log('A válasz sajnos nem volt jó')
-        enqueueSnackbar('A válasz sajnos nem volt jó', { variant: 'error' });
+        console.log(t('relay:wrongguess'))
+        enqueueSnackbar(t('relay:wrongguess'), { variant: 'error' });
       }
     }
     setSentAnswer((p)=>{return p-1;});
@@ -58,15 +58,15 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
         initialValues={{ result: '' }}
         validationSchema={Yup.object().shape({
           result: Yup.number()
-            .integer('Egész számot kell írni')
-            .typeError('Számot kell írnod')
-            .min(0, 'A válasz 0 és 9999 között van')
-            .max(9999, 'A válasz 0 és 9999 között van')
-            .required('Nem írtál semmi választ!')
+            .integer(t('error:integer'))
+            .typeError(t('error:type'))
+            .min(0, t('error:range'))
+            .max(9999, t('error:range'))
+            .required(t('error:empty'))
         })}
         onSubmit={(values) => {
           if (props.previousTries.includes(parseInt(values.result))) {
-            enqueueSnackbar('Ezt a választ már próbáltátok', { variant: 'error' });
+            enqueueSnackbar(t('error:duplicate'), { variant: 'error' });
             return;
           }
           try{

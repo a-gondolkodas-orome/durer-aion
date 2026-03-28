@@ -14,6 +14,10 @@ i18next
     },
     resources: {
       en: {
+        languages: {
+          en: 'English',
+          hu: 'Hungarian',
+        },
         disclaimer: {
           welcome: 'Dear Team <1>{{tname}}</1>, we welcome you in the online round!',
           category: 'Your category: <1>{{category}}</1>',
@@ -63,13 +67,16 @@ i18next
             title: "Relay completed",
             task: "Task",
             point: "Points",
-            try: "attempt",
+            try_one: "in 1 attempt",
+            try_other: "in {{count}} attempts",
             wrong: "Wrong answer",
             all: "Total points",
             pointsGained: "points scored",
             back: "Back to competition",
-            reminder: "Don't forget to play with the strategy game too if you haven't already!",
+            reminder: "Don't forget to play with the strategy game too if you haven't yet!",
           },
+          goodguess: 'Your answer is correct',
+          wrongguess: 'Your guess is sadly wrong',
           badCategory: "WRONG CATEGORY",
           name: "Relay tasks",
           guess: "Guess:",
@@ -136,6 +143,11 @@ i18next
         },
         error: {
           unsuspected: "An unexpected error occurred",
+          duplicate: "You've already tried this guess",
+          integer: 'You must give an integer',
+          type: 'Answer must be a number',
+          range: 'The solution is between 0 and 9999',
+          empty: 'You have not specified any answer!',
         },
         warnings: {
           timeNotMatch: "Your computer's clock is not synchronized with the server's clock, the displayed remaining time is not perfect, reloading the page may solve the problem",
@@ -144,6 +156,10 @@ i18next
         }
       },
       hu: {
+        languages: {
+          en: 'Angol',
+          hu: 'Magyar'
+        },
         disclaimer: {
           welcome: 'Kedves <1>{{tname}}</1> csapat, üdvözlünk az online fordulón!',
           category: 'Kategóriátok: <1>{{category}}</1>',
@@ -197,13 +213,15 @@ i18next
             title: "A váltó befejeződött",
             task: "Feladat",
             point: "Pontszám",
-            try: "próbálkozás",
+            try: "{{count}}. próbálkozásra",
             wrong: "Hibás válasz",
             all: "Összpontszám",
             pointsGained: "pontot szereztél",
             back: "Vissza a versenyhez",
             reminder: "Ne feledkezzetek meg a stratégiás játékról, ha azzal még nem játszottatok!",
           },
+          goodguess: 'A válasz helyes volt',
+          wrongguess: 'A válasz sajnos nem volt jó',
           badCategory: "ROSSZ KATEGÓRIA",
           name: "Váltófeladatok",
           guess: "Tipp:",
@@ -268,6 +286,11 @@ i18next
         },
         error: {
           unsuspected: "Váratlan hiba történt",
+          duplicate: 'Ezt a választ már próbáltátok',
+          integer: 'Egész számot kell írni',
+          type: 'Számot kell írnod',
+          range: 'A megoldás 0 és 9999 között van',
+          empty: 'Nem írtál semmi választ!',
         },
         warnings: {
           timeNotMatch: "A számítógép órája nincs szinkronban a szerver órájával, a jelzett hátralevő idő nem tökéletes, az oldal újra töltése megoldhatja a problémát",
