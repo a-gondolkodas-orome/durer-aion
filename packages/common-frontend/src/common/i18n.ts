@@ -73,7 +73,7 @@ i18next
             all: "Total points",
             pointsGained: "points scored",
             back: "Back to competition",
-            reminder: "Don't forget to play with the strategy game too if you haven't yet!",
+            reminder: "Don't forget to play with the strategy game too if you haven't done yet!",
           },
           goodguess: 'Your answer is correct',
           wrongguess: 'Your guess is sadly wrong',
