@@ -1,11 +1,12 @@
 import { Link } from "react-router-dom";
-import { dictionary } from "common-frontend";
+import { useTranslation } from "react-i18next";
 
 export default function NotFound() {
+  const { t } = useTranslation();
   return (<>
     <h1>
-      {dictionary.notFound.message}
+      {t('notFound:message')}
     </h1>
-    <p><Link to={"/"}>{dictionary.notFound.back}</Link></p>
+    <p><Link to={"/"}>{t('notFound:back')}</Link></p>
   </>);
 }

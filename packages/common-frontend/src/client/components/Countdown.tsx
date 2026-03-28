@@ -1,7 +1,7 @@
 import { Dispatch, PropsWithoutRef, SetStateAction, useEffect, useState } from "react";
 import ReportIcon from '@mui/icons-material/Report';
 import { Tooltip } from "@mui/material";
-import { dictionary } from '../text-constants';
+import { useTranslation } from "react-i18next";
 
 export function Countdown(
   props: PropsWithoutRef<{ 
@@ -15,6 +15,7 @@ export function Countdown(
     const {msRemaining, setMsRemaining, endTime, getServerTimer, serverRemainingMs} = props
     const [countdown, setCountdown] = useState("??:??:??");
     const [offset, setOffset] = useState(0); // to show warning icon
+    const { t } = useTranslation();
     // initializes a timer. Note that it does not need updates, even though it "uses" secondsRemaining
     useEffect(() => {
         let handle: NodeJS.Timeout | null = null;
@@ -67,5 +68,5 @@ export function Countdown(
     return (<><span className="fs-3 mb-3"><code className="mb-2">
         {countdown}
     </code></span>
-    {(offset > 5000 || offset < -5000) && <Tooltip title={dictionary.warnings.timeNotMatch}><ReportIcon color="warning"/></Tooltip>}</>);
+    {(offset > 5000 || offset < -5000) && <Tooltip title={t('warnings:timeNotMatch')}><ReportIcon color="warning"/></Tooltip>}</>);
 }

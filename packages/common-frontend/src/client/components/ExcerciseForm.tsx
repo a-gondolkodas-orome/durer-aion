@@ -6,8 +6,8 @@ import { ErrorMessage, Field } from "formik";
 import CloseIcon from '@mui/icons-material/Close';
 import { useSnackbar } from "notistack";
 import { useRefreshTeamState } from "../hooks/user-hooks";
-import { dictionary } from "../text-constants";
 import { useTheme } from "@mui/material/styles";
+import { useTranslation } from "react-i18next";
 
 function sanitizeValue(value: string) {
   const regex = /^([1-9]*[0-9]*)$/;
@@ -29,6 +29,7 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
   const { enqueueSnackbar } = useSnackbar();
   const refreshState = useRefreshTeamState();
   const [sentAnswer, setSentAnswer] = useState<number>(0);
+  const { t } = useTranslation();
   useEffect(()=>{
     if(props.previousCorrectness!=null){
       if(props.previousCorrectness){
@@ -48,7 +49,7 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
       fontStyle: 'italic',
       marginBottom: '5px',
     }}>
-      {dictionary.relay.guess}
+      {t('relay:guess')}
     </Stack>
     <Stack>
       <Form
@@ -117,7 +118,7 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
               alignItems: 'center',
               fontSize: 16,
             }}>
-              {idx + 1}. próba
+              {t('relay:guessNum', { guessnum: idx + 1 })}
               <Stack sx={{
                 fontSize: '18px',
                 marginLeft: '10px',
@@ -135,7 +136,7 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
           borderRadius: '10px',
           marginTop: '40px',
         }} variant='contained' color='primary' type="submit">
-          {dictionary.relay.send}
+          {t('relay:send')}
         </Button>
       </Form>
     </Stack>

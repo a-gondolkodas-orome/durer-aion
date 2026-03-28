@@ -73,7 +73,8 @@ i18next
           remainingTime: "Remaining time",
           name: "Relay tasks",
           guess: "Guess:",
-          send: "Send",
+          send: "Submit",
+          guessNum: 'guess #{{guessnum}}:'
         },
         general: {
           task: "task",
@@ -105,7 +106,26 @@ i18next
             all: "Total points",
             gained: "Points earned",
             tries: "Number of attempts"
-          }
+          },
+          guide: {
+            newgame: "Start a new game!",
+            iffirstplayer: "Choose whether you want to be the first or second player.",
+            yourturn: "Your turn now!",
+            waitingforserver: "Waiting for server...",
+            realgamewin: "Congratulations, you won! Defeat the computer one more time!",
+            testgamewin: "Congratulations, you won the test game!",
+            botwins: "Unfortunately the computer won.",
+            endofgame: "The game has ended.",
+          },
+          instructions: "Further instructions",
+          instructionDescription: "Clicking on the button “Start a new test game” starts a test game, which is not counted in the scoring. Feel free to play some test games before playing a real round in order to test your understanding of the game's logic. The latter mode can be initialised by clicking “Start a new live game”, which will start a game which now counts for points.", 
+          realresults: "Live game results so far:",
+          wins_one: "win",
+          wins_other: "wins",
+          defeats_one: "defeat",
+          defeats_other: "defeats",
+          testgamebutton: "Start a new test game",
+          realgamebutton: "Start a new live game",
         },
         notFound: {
           message: "This page was not found.",
@@ -179,12 +199,13 @@ i18next
             back: "Vissza a versenyhez",
           },
           badCategory: "ROSSZ KATEGÓRIA",
-          remainingTime: "Hátralevő idő",
           name: "Váltófeladatok",
           guess: "Tipp:",
           send: "Küldés",
+          guessNum: "{{guessnum}}. próba:",
         },
         general: {
+          remainingTime: "Hátralevő idő",
           task: "feladat",
           point: "pont",
         },
@@ -214,7 +235,24 @@ i18next
             all: "Összpontszám",
             gained: "Szerzett pontok",
             tries: "Próbálkozások száma"
-          }
+          },
+          guide: {
+            newgame: "Kezdj új játékot!",
+            iffirstplayer: "Válaszd ki, hogy első vagy második játékos akarsz-e lenni.",
+            yourturn: "Most Te jössz!",
+            waitingforserver: "Várakozás a szerverre...",
+            realgamewin: "Gratulálok, nyertetek! Verjétek meg még egyszer a gépet!",
+            testgamewin: "Gratulálok, a próbajátékban nyertetek!",
+            botwins: "Sajnos a gép nyert.",
+            endofgame: "A játék végetért.",
+          },
+          instructions: "Tudnivalók",
+          instructionDescription: "Az „Új próbajáték kezdése” gombra kattintva próbajáték indul, ami a pontozásba nem számít bele. Bátran kérjetek próbajátékot, hiszen ezzel tudjátok tesztelni, hogy jól értitek-e a játék működését. Az „Új éles játék kezdése” gombra kattintva indul a valódi játék, ami már pontért megy.",
+          realresults: "Éles játékok eddigi eredményei:",
+          wins: "győzelem",
+          defeats: "vereség",
+          testgamebutton: "Új próbajáték kezdése",
+          realgamebutton: "Új éles játék kezdése",
         },
         notFound: {
           message: "Ez az oldal nem található.",
@@ -225,6 +263,7 @@ i18next
         },
         warnings: {
           timeNotMatch: "A számítógép órája nincs szinkronban a szerver órájával, a jelzett hátralevő idő nem tökéletes, az oldal újra töltése megoldhatja a problémát",
+          timeNotReal: "Az óra csak tájékoztató jellegű. Más eszközökön és böngészőkben más időt fogtok látni, de így is csak az időben beérkezett válaszokat fogjuk figyelembe venni.",
         }
       }
     }
