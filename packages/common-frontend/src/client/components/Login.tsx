@@ -65,7 +65,7 @@ export function Login() {
           <Form style={{ position: "relative", zIndex: 2 }} initialValues={{ joinCode: '' }}
             onSubmit={(values) => {
               if(!values.joinCode) {
-                enqueueSnackbar("nem adtad meg a kódot", { variant: 'error' });
+                enqueueSnackbar(t('error:empty'), { variant: 'error' });
                 return;
               }
               login(values.joinCode).catch(err => {
