@@ -68,9 +68,9 @@ i18next
             all: "Total points",
             pointsGained: "points scored",
             back: "Back to competition",
+            reminder: "Don't forget to play with the strategy game too if you haven't already!",
           },
           badCategory: "WRONG CATEGORY",
-          remainingTime: "Remaining time",
           name: "Relay tasks",
           guess: "Guess:",
           send: "Submit",
@@ -79,6 +79,7 @@ i18next
         general: {
           task: "task",
           point: "point",
+          remainingTime: "Remaining time",
         },
         header: {
           logout: "logout",
@@ -126,6 +127,8 @@ i18next
           defeats_other: "defeats",
           testgamebutton: "Start a new test game",
           realgamebutton: "Start a new live game",
+          firstplayer: "I will be the first",
+          secondplayer: "I will be the second"
         },
         notFound: {
           message: "This page was not found.",
@@ -136,6 +139,8 @@ i18next
         },
         warnings: {
           timeNotMatch: "Your computer's clock is not synchronized with the server's clock, the displayed remaining time is not perfect, reloading the page may solve the problem",
+          timeNotReal: "The clock is for informational purposes only. You will see a different time on other devices and browsers, but we will still only consider answers received on time.",
+          pointsNotSettled: "Your final points are only here for informational purposes, these will be reevaluated based on all the submissions we get.",
         }
       },
       hu: {
@@ -183,7 +188,7 @@ i18next
           "következő feladatot. A váltófeladatokra összesen 60 perc áll rendelkezésre, és összesen 40 pont szerezhető " +
           "velük hibátlan teljesítés esetén. (Az egyes feladatokra kapható pontszám 3-tól 6-ig terjed.)",
           filledAt: "Kitöltve ekkor",
-          achievedPoint: "Elért pont",
+          achievedPoint: "Elért pontszám",
           start: "Kezdjük",
           result: "Eredmények",
         },
@@ -197,6 +202,7 @@ i18next
             all: "Összpontszám",
             pointsGained: "pontot szereztél",
             back: "Vissza a versenyhez",
+            reminder: "Ne feledkezzetek meg a stratégiás játékról, ha azzal még nem játszottatok!",
           },
           badCategory: "ROSSZ KATEGÓRIA",
           name: "Váltófeladatok",
@@ -253,6 +259,8 @@ i18next
           defeats: "vereség",
           testgamebutton: "Új próbajáték kezdése",
           realgamebutton: "Új éles játék kezdése",
+          firstplayer: "Kezdő leszek",
+          secondplayer: "Második leszek",
         },
         notFound: {
           message: "Ez az oldal nem található.",
@@ -264,6 +272,7 @@ i18next
         warnings: {
           timeNotMatch: "A számítógép órája nincs szinkronban a szerver órájával, a jelzett hátralevő idő nem tökéletes, az oldal újra töltése megoldhatja a problémát",
           timeNotReal: "Az óra csak tájékoztató jellegű. Más eszközökön és böngészőkben más időt fogtok látni, de így is csak az időben beérkezett válaszokat fogjuk figyelembe venni.",
+          pointsNotSettled: "A pontszámotok csak tájékoztató jellegű, a végleges pontszámotokat a beküldött válaszok alapján újraértékeljük.",
         }
       }
     }

@@ -77,12 +77,12 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
             }}>
               {t('strategy:name')}
             </Stack>
-            <Stack sx={{ width: '100%' }} />
+            <Stack sx={{ flex: 1 }} />
             <Stack sx={{
               flexDirection: 'row',
-              width: '250px'
+              marginRight: '10px'
             }}>
-              <b style={{ marginRight: '5px', width: '135px' }}>{t('general:remainingTime')}:</b>
+              <b style={{ marginRight: '5px' }}>{t('general:remainingTime')}:</b>
               {!finished && <Countdown
                 msRemaining={msRemaining ?? null}
                 setMsRemaining={setMsRemaining}
@@ -157,7 +157,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
                   }} variant='contained' color='primary' onClick={() => {
                     moves.chooseNewGameType("test");
                   }}>
-                    {t('strategy:realgamebutton')}
+                    {t('strategy:testgamebutton')}
                   </Button>
                   <Stack sx={{ width: '10%' }} />
                   <Button sx={{
@@ -173,7 +173,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
                   }} variant='contained' color='primary' onClick={() => {
                     moves.chooseNewGameType("live")
                   }}>
-                    {t('strategy:testgamebutton')}
+                    {t('strategy:realgamebutton')}
                   </Button>
                 </Stack>
               }
@@ -193,7 +193,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
                   }} variant='contained' color='primary' onClick={() => {
                     moves.chooseRole(GUESSER_PLAYER);
                   }}>
-                    Kezdő leszek
+                    {t('strategy:firstplayer')}
                   </Button>
                   <Stack sx={{ width: '10%' }} />
                   <Button sx={{
@@ -206,7 +206,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
                   }} variant='contained' color='primary' onClick={() => {
                     moves.chooseRole(JUDGE_PLAYER);
                   }}>
-                    Második leszek
+                    {t('strategy:secondplayer')}
                   </Button>
                 </Stack>}
               <Stack sx={{
@@ -225,7 +225,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
                 {ctx.phase === 'startNewGame' && G.winner === null && <p> {t('strategy:guide:newgame')} </p>}
                 {ctx.phase === 'chooseRole' && <p> {t('strategy:guide:iffirstplayer')} </p>}
                 {ctx.phase === 'play' && ctx.currentPlayer === "0" && <p> {t('strategy:guide:yourturn')} </p>}
-                {ctx.phase === 'play' && ctx.currentPlayer === "1" && <p> {t('waitingforserver')} </p>}
+                {ctx.phase === 'play' && ctx.currentPlayer === "1" && <p> {t('strategy:guide:waitingforserver')} </p>}
                 {ctx.phase === 'startNewGame' && G.winner === "0" && G.difficulty === "live" && <p> {t('strategy:guide:realgamewin')} </p>}
                 {ctx.phase === 'startNewGame' && G.winner === "0" && G.difficulty === "test" && <p> {t('strategy:guide:testgamewin')}</p>}
                 {ctx.phase === 'startNewGame' && G.winner === "1" && <p> {t('strategy:guide:botwins')} </p>}

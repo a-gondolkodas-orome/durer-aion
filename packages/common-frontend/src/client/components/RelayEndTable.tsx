@@ -160,7 +160,7 @@ export function RelayEndTable(props: {allPoints: number, task: {max: number, got
             marginBottom: '10px',
         }}>
             {t('relay:endTable.all')}: {props.allPoints} <br/>
-            Ne feledkezzetek meg a stratégiás játékról, ha azzal még nem játszottatok!
+            {t('relay:endTable:reminder')}
         </Stack>
       <Button sx={{
         width: '300px',

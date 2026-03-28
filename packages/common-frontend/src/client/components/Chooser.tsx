@@ -64,7 +64,7 @@ export function Chooser(props: {
           >
             {t('chooser:finish:final')}: <b>{finalPoints}</b>
           </p>
-          { isOffline && "A pontszámotok csak tájékoztató jellegű, a végleges pontszámotokat a beküldött válaszok alapján újraértékeljük."}
+          { isOffline && t('warnings:pointsNotSettled')}
         </Stack>
       )}
       <Stack
