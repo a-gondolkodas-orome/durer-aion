@@ -181,6 +181,7 @@ export function RelayEndTable(props: {allPoints: number, task: {max: number, got
 
 export function RelayEndTableData(props: {allPoints: number, task: {max: number, got: number | null, answers: number[]}[]}) {
   const theme = useTheme();
+  const { t } = useTranslation();
   return (
         <Table sx={{
         marginTop: '20px',
