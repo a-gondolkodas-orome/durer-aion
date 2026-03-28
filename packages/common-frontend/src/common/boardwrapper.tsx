@@ -6,6 +6,7 @@ import { useRefreshTeamState, useToHome } from "../client/hooks/user-hooks";
 import { useClientRepo } from "../client/api-repository-interface";
 import { GUESSER_PLAYER, JUDGE_PLAYER } from "game";
 import { useTheme } from "@mui/material/styles";
+import { useTranslation } from "react-i18next";
 
 export function boardWrapper(board: any, description: any) { //<please> TODO: solve types with BoardProps<MyGameState>
   return ({ G, ctx, moves, log }: any) => {
@@ -15,6 +16,9 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
     const refreshState = useRefreshTeamState();
     const isOffline = useClientRepo().version === "OFFLINE";
     const theme = useTheme();
+    const { t } = useTranslation();
+    const wongames = G.numberOfTries-G.numberOfLoss-Number(G.winner===null && G.difficulty==="live");
+    const lostgames = G.numberOfLoss;
 
     useEffect(() => {
       if (!ctx.gameover) {
@@ -71,14 +75,14 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
             <Stack sx={{
               width: '225px',
             }}>
-              Stratégiás játék
+              {t('strategy:name')}
             </Stack>
-            <Stack sx={{ width: '100%' }} />
+            <Stack sx={{ flex: 1 }} />
             <Stack sx={{
               flexDirection: 'row',
-              width: '262px'
+              marginRight: '10px'
             }}>
-              <b style={{ marginRight: '5px', width: '135px' }}>Hátralevő idő:</b>
+              <b style={{ marginRight: '5px' }}>{t('general:remainingTime')}:</b>
               {!finished && <Countdown
                 msRemaining={msRemaining ?? null}
                 setMsRemaining={setMsRemaining}
@@ -94,7 +98,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
             fontSize: '10px',
             marginLeft: 'auto',
           }}>
-          ("Az óra csak tájékoztató jellegű. Ha lefrissítitek az oldalt, akkor az óra újraindul, de így is csak az időben beérkezett válaszokat fogjuk figyelembe venni.")
+          {t('warnings:timeNotReal')}
           </Stack>}
           <Stack sx={{
             marginTop: '10px',
@@ -105,8 +109,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
             // fontWeight: 'bold',
           }}>
             {description}
-            <strong>Tudnivalók: </strong>Az "Új próbajáték kezdése" gombra kattintva próbajáték indul, ami a pontozásba nem számít bele. Bátran kérjetek próbajátékot, hiszen ezzel tudjátok tesztelni, hogy jól értitek-e a játék működését. Az "Új éles játék kezdése" gombra kattintva indul a valódi játék, ami már pontért megy.
-
+            <strong>{t('strategy:instructions')}</strong>{t('strategy:instructionDescription')}
           </Stack>
 
           <Stack sx={{
@@ -117,7 +120,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
             },
             // fontWeight: 'bold',
           }}>
-            Éles játékok eddigi eredményei: {G.numberOfTries-G.numberOfLoss-Number(G.winner===null && G.difficulty==="live")} győzelem, {G.numberOfLoss} vereség
+            {t('strategy:realresults')} {wongames + " " + t('strategy:wins', {count: wongames})}, {lostgames + " " + t('strategy:defeats', {count: lostgames})}
           </Stack>
 
           <Stack sx={{
@@ -154,7 +157,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
                   }} variant='contained' color='primary' onClick={() => {
                     moves.chooseNewGameType("test");
                   }}>
-                    Új próbajáték kezdése
+                    {t('strategy:testgamebutton')}
                   </Button>
                   <Stack sx={{ width: '10%' }} />
                   <Button sx={{
@@ -170,7 +173,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
                   }} variant='contained' color='primary' onClick={() => {
                     moves.chooseNewGameType("live")
                   }}>
-                    Új éles játék kezdése
+                    {t('strategy:realgamebutton')}
                   </Button>
                 </Stack>
               }
@@ -190,7 +193,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
                   }} variant='contained' color='primary' onClick={() => {
                     moves.chooseRole(GUESSER_PLAYER);
                   }}>
-                    Kezdő leszek
+                    {t('strategy:firstplayer')}
                   </Button>
                   <Stack sx={{ width: '10%' }} />
                   <Button sx={{
@@ -203,7 +206,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
                   }} variant='contained' color='primary' onClick={() => {
                     moves.chooseRole(JUDGE_PLAYER);
                   }}>
-                    Második leszek
+                    {t('strategy:secondplayer')}
                   </Button>
                 </Stack>}
               <Stack sx={{
@@ -219,14 +222,14 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
                 fontSize: '14px',
                 borderStyle: 'solid',
               }}>
-                {ctx.phase === 'startNewGame' && G.winner === null && <p> Kezdj új játékot! </p>}
-                {ctx.phase === 'chooseRole' && <p> Válaszd ki, hogy első vagy második játékos akarsz-e lenni. </p>}
-                {ctx.phase === 'play' && ctx.currentPlayer === "0" && <p> Most Te jössz! </p>}
-                {ctx.phase === 'play' && ctx.currentPlayer === "1" && <p> Várakozás a szerverre... </p>}
-                {ctx.phase === 'startNewGame' && G.winner === "0" && G.difficulty === "live" && <p> Gratulálok, nyertetek! Verjétek meg még egyszer a gépet!</p>}
-                {ctx.phase === 'startNewGame' && G.winner === "0" && G.difficulty === "test" && <p> Gratulálok, a próbajátékban nyertetek!</p>}
-                {ctx.phase === 'startNewGame' && G.winner === "1" && <p> Sajnos a gép nyert. </p>}
-                {finished && <p> A játék végetért. </p>}
+                {ctx.phase === 'startNewGame' && G.winner === null && <p> {t('strategy:guide:newgame')} </p>}
+                {ctx.phase === 'chooseRole' && <p> {t('strategy:guide:iffirstplayer')} </p>}
+                {ctx.phase === 'play' && ctx.currentPlayer === "0" && <p> {t('strategy:guide:yourturn')} </p>}
+                {ctx.phase === 'play' && ctx.currentPlayer === "1" && <p> {t('strategy:guide:waitingforserver')} </p>}
+                {ctx.phase === 'startNewGame' && G.winner === "0" && G.difficulty === "live" && <p> {t('strategy:guide:realgamewin')} </p>}
+                {ctx.phase === 'startNewGame' && G.winner === "0" && G.difficulty === "test" && <p> {t('strategy:guide:testgamewin')}</p>}
+                {ctx.phase === 'startNewGame' && G.winner === "1" && <p> {t('strategy:guide:botwins')} </p>}
+                {finished && <p> {t('strategy:guide:endofgame')} </p>}
               </Stack>
             </Stack>
             <Stack sx={{
