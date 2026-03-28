@@ -148,6 +148,7 @@ i18next
           type: 'Answer must be a number',
           range: 'The solution is between 0 and 9999',
           empty: 'You have not specified any answer!',
+          wrongid: 'Incorrect log-in code.'
         },
         warnings: {
           timeNotMatch: "Your computer's clock is not synchronized with the server's clock, the displayed remaining time is not perfect, reloading the page may solve the problem",
@@ -291,6 +292,7 @@ i18next
           type: 'Számot kell írnod',
           range: 'A megoldás 0 és 9999 között van',
           empty: 'Nem írtál semmi választ!',
+          wrongid: 'Rossz belépési kód!'
         },
         warnings: {
           timeNotMatch: "A számítógép órája nincs szinkronban a szerver órájával, a jelzett hátralevő idő nem tökéletes, az oldal újra töltése megoldhatja a problémát",
