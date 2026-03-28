@@ -90,7 +90,7 @@ export function Header(props: { teamName: string | null }) {
             }}>
             </Stack>
             <IconButton
-              onClick={(e) => {
+              onClick={() => {
                 setLanguageSwitcherOpen(!languageSwitcherOpen);
               }}
               sx={{

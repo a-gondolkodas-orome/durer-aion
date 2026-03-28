@@ -89,7 +89,7 @@ i18next
           beforeTitle: "Welcome to the online round interface of the ",
           afterTitle: ".",
           loginInstruction: "To log in, check your emails and enter the code you find there here:",
-          fallback: "If you can't find the email, write to us at the competition [K] durerinfo [P] hu email address.",
+          fallback: "If you can't find the email, write to us at the verseny (at) durerinfo (dot) hu email address.",
           loginButton: "Log in", 
         },
         waitingRoom: {
