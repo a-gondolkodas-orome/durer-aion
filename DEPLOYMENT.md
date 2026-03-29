@@ -241,7 +241,7 @@ After this, apply the following changes to `nginx/nginx.conf`
 
 # Deploy the b) version.
 
-The b) version is deplyod on github pages. The site will be available at https://a-gondolkodas-orome.github.io/repository-name/
+The b) version is deployed on github pages. The site will be available at https://a-gondolkodas-orome.github.io/repository-name/
 
 ## Edit package.json
 
