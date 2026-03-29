@@ -17,8 +17,8 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
     const isOffline = useClientRepo().version === "OFFLINE";
     const theme = useTheme();
     const { t } = useTranslation();
-    const wongames = G.numberOfTries-G.numberOfLoss-Number(G.winner===null && G.difficulty==="live");
-    const lostgames = G.numberOfLoss;
+    const gamesWon = G.numberOfTries-G.numberOfLoss-Number(G.winner===null && G.difficulty==="live");
+    const gamesLost = G.numberOfLoss;
 
     useEffect(() => {
       if (!ctx.gameover) {
@@ -120,7 +120,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
             },
             // fontWeight: 'bold',
           }}>
-            {t('strategy:realresults')} {wongames + " " + t('strategy:wins', {count: wongames})}, {lostgames + " " + t('strategy:defeats', {count: lostgames})}
+            {t('strategy:realresults')} {gamesWon + " " + t('strategy:wins', {count: gamesWon})}, {gamesLost + " " + t('strategy:defeats', {count: gamesLost})}
           </Stack>
 
           <Stack sx={{
