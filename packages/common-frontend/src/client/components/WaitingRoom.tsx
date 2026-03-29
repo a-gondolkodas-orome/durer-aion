@@ -1,9 +1,10 @@
 import { Stack, alpha } from '@mui/system';
 import { useTheme } from '@mui/material/styles';
-import { dictionary } from '../text-constants';
+import { useTranslation } from 'react-i18next';
 
 export function WaitingRoom() {
   const theme = useTheme();
+  const { t } = useTranslation();
   return (
     <Stack sx={{
       display: 'flex',
@@ -19,20 +20,20 @@ export function WaitingRoom() {
         fontWeight: "bold",
         marginBottom: "50px",
       }}>
-        {dictionary.waitingRoom.soon}
+        {t('waitingRoom:soon')}
       </Stack>
       <Stack sx={{
         fontSize: 32,
         marginBottom: "40px",
         marginLeft: "30px",
       }}>
-        {dictionary.waitingRoom.remainingStart} #:##:## {dictionary.waitingRoom.remainingEnd}
+        {t('waitingRoom:remainingStart')} #:##:## {t('waitingRoom:remainingEnd')}
       </Stack>
       <Stack sx={{
         fontSize: 24,
         marginLeft: "30px",
       }}>
-        {dictionary.waitingRoom.instruction}
+        {t('waitingRoom:instruction')}
       </Stack>
 
     </Stack>

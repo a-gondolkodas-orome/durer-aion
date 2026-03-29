@@ -2,8 +2,8 @@ import React from 'react';
 import { useTheme } from '@mui/material/styles';
 import { Button } from '@mui/material';
 import { Stack } from '@mui/system';
-import { dictionary } from '../text-constants';
 import { useRefreshTeamState, useToHome } from '../hooks/user-hooks';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Component to display an end game screen with close button, and score
@@ -14,6 +14,7 @@ export function StrategyEndTable(props: {allPoints: number, numOfTries: number})
   const theme = useTheme();
   const toHome = useToHome();
   const refreshState = useRefreshTeamState();
+  const { t } = useTranslation();
   return (
     <Stack sx={{
       display: 'flex',
@@ -29,15 +30,15 @@ export function StrategyEndTable(props: {allPoints: number, numOfTries: number})
         fontSize: '18px',
         fontWeight: 'bold',
         textAlign: 'center'
-    }}>{dictionary.relay.endTable.all}</Stack>
+    }}>{t('relay:endTable.all')}</Stack>
       <Stack sx={{
           marginTop: '25px',
           display: 'flex',
           alignItems: 'center',
           flexWrap: 'wrap',
         }}>
-        <Stack>{dictionary.strategy.endTable.gained}: {props.allPoints}</Stack>
-        <Stack>{dictionary.strategy.endTable.tries}: {props.numOfTries}</Stack>
+        <Stack>{t('strategy:endTable.gained')}: {props.allPoints}</Stack>
+        <Stack>{t('strategy:endTable.tries')}: {props.numOfTries}</Stack>
       </Stack>
       <Button sx={{
         width: '300px',
@@ -51,7 +52,7 @@ export function StrategyEndTable(props: {allPoints: number, numOfTries: number})
         await toHome();
         window.location.reload(); 
       }}>
-        {dictionary.relay.endTable.back}
+        {t('relay:endTable.back')}
       </Button>
     </Stack>
   )

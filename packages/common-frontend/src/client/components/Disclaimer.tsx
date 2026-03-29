@@ -1,14 +1,15 @@
 import { Button } from "@mui/material";
 import { Stack, alpha } from "@mui/system";
-import { dictionary } from "../text-constants";
 import { useToHome } from "../hooks/user-hooks";
 import { useClientRepo } from "../api-repository-interface";
 import { useTheme } from "@mui/material/styles";
+import { useTranslation, Trans } from 'react-i18next';
 
 export function Disclaimer(props: {teamName: string, category: string}) {
   const goHome = useToHome();
   const theme = useTheme();
   const isOffline = useClientRepo().version === "OFFLINE";
+  const { t } = useTranslation(['disclaimer']);
 
   return (
     <Stack
@@ -51,9 +52,13 @@ export function Disclaimer(props: {teamName: string, category: string}) {
           alignSelf: "center",
         }}>
           <div style={{textAlign: "center"}}>
-            {dictionary.disclaimer.welcome.split('{teamName}')[0]}
-            <span style={{fontStyle: "italic", color: theme.palette.primary.main}}>{props.teamName}</span>
-            {dictionary.disclaimer.welcome.split('{teamName}')[1]}
+            <Trans
+              i18nKey='welcome'
+              ns='disclaimer'
+              values={{ tname: props.teamName }}
+              components={{
+                bold: <i style={{color: theme.palette.primary.main}} />
+              }} />
           </div>
         </Stack>
         <Stack sx={{
@@ -64,12 +69,16 @@ export function Disclaimer(props: {teamName: string, category: string}) {
           marginBottom: "20px",
         }}>
           <div style={{textAlign: "center"}}>
-            {dictionary.disclaimer.category.split('{category}')[0]}
-            <span style={{fontWeight: "bold", color: theme.palette.primary.main}}>{props.category}</span>
-            {dictionary.disclaimer.category.split('{category}')[1]}
+            <Trans
+              i18nKey='category'
+              ns='disclaimer'
+              values={{ category: props.category }}
+              components={{
+                bold: <strong style={{color: theme.palette.primary.main}} />
+              }} />
           </div>
         </Stack>
-        {dictionary.disclaimer.start}
+        {t('start')}
       </Stack>
 
       <Stack
@@ -79,7 +88,7 @@ export function Disclaimer(props: {teamName: string, category: string}) {
           fontStyle: "italic",
         }}
       >
-        {dictionary.disclaimer.progress}
+        {t('progress')}
       </Stack>
 
       <Stack
@@ -91,7 +100,7 @@ export function Disclaimer(props: {teamName: string, category: string}) {
           }
         }}
       >
-        {dictionary.disclaimer.progressDescription}
+        {t('progressDescription', {minpoints: 25, maxpoints: 52})}
       </Stack>
 
       <Stack
@@ -101,7 +110,7 @@ export function Disclaimer(props: {teamName: string, category: string}) {
           fontStyle: "italic",
         }}
       >
-        {dictionary.disclaimer.interface}
+        {t('interface')}
       </Stack>
 
       <Stack
@@ -113,7 +122,16 @@ export function Disclaimer(props: {teamName: string, category: string}) {
           }
         }}
       >
-        <span dangerouslySetInnerHTML={{ __html: ( isOffline ? dictionary.disclaimer.interfaceDescriptionBHTML : dictionary.disclaimer.interfaceDescription) }}></span>
+        <div>
+          <Trans 
+          i18nKey={isOffline ? 'interfaceDescriptionBHTML' : 'interfaceDescription'}
+          ns='disclaimer'
+          components={{
+            bold: <strong />,
+            small: <small />,
+            br: <br />
+          }} />
+        </div>
       </Stack>
 
 
@@ -135,7 +153,7 @@ export function Disclaimer(props: {teamName: string, category: string}) {
           goHome();
         }}
       >
-        {dictionary.disclaimer.continue}
+        {t('continue')}
       </Button>
     </Stack>
   );

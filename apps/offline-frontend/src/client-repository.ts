@@ -1,6 +1,7 @@
 import { ClientRepository, LOCAL_STORAGE_TEAMSTATE, TeamModelDto, MatchStateDto } from "common-frontend";
 import { teamData } from "./teamData";
 import { sendDataLogin, sendGameData } from "./sendData";
+import { useTranslation } from "react-i18next";
 
 export class OfflineClientRepository implements ClientRepository {
   
@@ -8,8 +9,9 @@ export class OfflineClientRepository implements ClientRepository {
   
   startRelay(joinCode: string): Promise<string> {
     const teamState = getTeamStateFromLocal();
+    const { t } = useTranslation();
     if (!(teamState.pageState === 'HOME' && teamState.relayMatch.state === 'NOT STARTED' && teamState.strategyMatch.state !== 'IN PROGRESS')) {
-      throw new Error('Váratlan hiba történt');
+      throw new Error(t('error:unsuspected'));
     }
     const newState = {
       ...teamState,
@@ -31,7 +33,7 @@ export class OfflineClientRepository implements ClientRepository {
   startStrategy(joinCode: string): Promise<string> {
     const teamState = getTeamStateFromLocal();
     if (!(teamState.pageState === 'HOME' && teamState.strategyMatch.state === 'NOT STARTED' && teamState.relayMatch.state !== 'IN PROGRESS')) {
-      throw new Error('Váratlan hiba történt');
+      throw new Error(t('error:unsuspected'));
     }
     const newState = {
       ...teamState,
@@ -146,7 +148,7 @@ export class OfflineClientRepository implements ClientRepository {
       return Promise.resolve(joinCode);
     }
 
-    throw new Error("Rossz belépési kód!");
+    throw new Error(t('error:wrongid'));
   }
 
 }
@@ -154,11 +156,11 @@ export class OfflineClientRepository implements ClientRepository {
 
 const getTeamStateFromLocal = (): TeamModelDto => {
   if (typeof localStorage === "undefined") {
-    throw new Error('Váratlan hiba történt');
+    throw new Error(t('error:unsuspected'));
   }
   const teamstateString = localStorage.getItem(LOCAL_STORAGE_TEAMSTATE);
   if (teamstateString === null) {
-    throw new Error('Váratlan hiba történt');
+    throw new Error(t('unsuspected'));
   }
   return JSON.parse(teamstateString);
 }
