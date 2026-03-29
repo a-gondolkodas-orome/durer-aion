@@ -1,7 +1,7 @@
 import { ClientRepository, LOCAL_STORAGE_TEAMSTATE, TeamModelDto, MatchStateDto } from "common-frontend";
 import { teamData } from "./teamData";
 import { sendDataLogin, sendGameData } from "./sendData";
-import i18n from "i18next";
+import { useTranslation } from "react-i18next";
 
 export class OfflineClientRepository implements ClientRepository {
   
@@ -9,8 +9,9 @@ export class OfflineClientRepository implements ClientRepository {
   
   startRelay(joinCode: string): Promise<string> {
     const teamState = getTeamStateFromLocal();
+    const { t } = useTranslation();
     if (!(teamState.pageState === 'HOME' && teamState.relayMatch.state === 'NOT STARTED' && teamState.strategyMatch.state !== 'IN PROGRESS')) {
-      throw new Error(i18n.t('error:unsuspected'));
+      throw new Error(t('error:unsuspected'));
     }
     const newState = {
       ...teamState,
@@ -32,7 +33,7 @@ export class OfflineClientRepository implements ClientRepository {
   startStrategy(joinCode: string): Promise<string> {
     const teamState = getTeamStateFromLocal();
     if (!(teamState.pageState === 'HOME' && teamState.strategyMatch.state === 'NOT STARTED' && teamState.relayMatch.state !== 'IN PROGRESS')) {
-      throw new Error(i18n.t('error:unsuspected'));
+      throw new Error(t('error:unsuspected'));
     }
     const newState = {
       ...teamState,
@@ -109,7 +110,7 @@ export class OfflineClientRepository implements ClientRepository {
   }
 
   joinWithCode(joinCode: string): Promise<string> {
-    // return the joincode if it is in the teamData.ts file
+    // return the  if it is in the teamData.ts file
 
     const i = teamData.findIndex(e => e.join_code === joinCode);
     let pageState = "DISCLAIMER"
@@ -147,7 +148,7 @@ export class OfflineClientRepository implements ClientRepository {
       return Promise.resolve(joinCode);
     }
 
-    throw new Error(i18n.t('error:wrongid'));
+    throw new Error(t('error:wrongid'));
   }
 
 }
@@ -155,11 +156,11 @@ export class OfflineClientRepository implements ClientRepository {
 
 const getTeamStateFromLocal = (): TeamModelDto => {
   if (typeof localStorage === "undefined") {
-    throw new Error(i18n.t('error:unsuspected'));
+    throw new Error(t('error:unsuspected'));
   }
   const teamstateString = localStorage.getItem(LOCAL_STORAGE_TEAMSTATE);
   if (teamstateString === null) {
-    throw new Error(i18n.t('unsuspected'));
+    throw new Error(t('unsuspected'));
   }
   return JSON.parse(teamstateString);
 }
