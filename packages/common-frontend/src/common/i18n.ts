@@ -19,8 +19,8 @@ i18next
           hu: 'Hungarian',
         },
         disclaimer: {
-          welcome: 'Dear Team <1>{{tname}}</1>, we welcome you in the online round!',
-          category: 'Your category: <1>{{category}}</1>',
+          welcome: 'Dear Team <bold>{{tname}}</bold>, we welcome you in the online round!',
+          category: 'Your category: <bold>{{category}}</bold>',
           start: 
             "In the online round, teams must work on their own; they must not ask for help from other people " +  
             "until the competition ends (at 21:30). The use of artificial intelligence is also forbidden.",
@@ -33,9 +33,9 @@ i18next
           interfaceDescription:
             "The interface can be filled in using your PCs or phones as well. You can even log in from multiple devices.",
           interfaceDescriptionBHTML:
-            "The interface can be filled in on both mobile and computer. Please make sure to complete the online round from <1>at most 1 device</1>, and also <3>do not refresh the page</3> during the competition.<5 />" +  
-            "<6>(If you nevertheless refresh the page, the competition will restart (but your results so far will be kept). In that case, go back as quickly as possible to the task where you left off. " +  
-            "Note that although the timer restarts after refreshing, we will still only take into account answers that arrive within the official time limit.)</6>",
+            "The interface can be filled in on both mobile and computer. Please make sure to complete the online round from <bold>at most 1 device</bold>, and also <bold>do not refresh the page</bold> during the competition.<br />" +  
+            "<small>(If you nevertheless refresh the page, the competition will restart (but your results so far will be kept). In that case, go back as quickly as possible to the task where you left off. " +  
+            "Note that although the timer restarts after refreshing, we will still only take into account answers that arrive within the official time limit.)</small>",
           continue: "Continue to the competition",
         },
         chooser: {
@@ -162,8 +162,8 @@ i18next
           hu: 'Magyar'
         },
         disclaimer: {
-          welcome: 'Kedves <1>{{tname}}</1> csapat, üdvözlünk az online fordulón!',
-          category: 'Kategóriátok: <1>{{category}}</1>',
+          welcome: 'Kedves <bold>{{tname}}</bold> csapat, üdvözlünk az online fordulón!',
+          category: 'Kategóriátok: <bold>{{category}}</bold>',
           start: 
             "Az online fordulón a csapatoknak önállóan kell dolgozniuk, más emberektől nem kérhetnek segítséget" +
             " a versenyzési időszak végéig (21:30-ig). A mesterséges intelligencia használata is tilos.",
@@ -176,9 +176,9 @@ i18next
           interfaceDescription:
             "A felület mobilon és gépen is kitölthető, egyszerre akár több eszközzel is bejelentkezhettek.",
           interfaceDescriptionBHTML:
-            "A felület mobilon és gépen is kitölthető. Kérünk bennetek, hogy <1>legfeljebb 1 eszközről</1> töltsétek ki az online fordulót, továbbá <3>ne frissítsétek le az oldalt</3> a verseny során.<5 />" +
-            "<6>(Ha mégis frissítitek az oldalt, akkor a verseny újraindul (de az eddigi eredményeitek megmaradnak). Ekkor - minél gyorsabban - menjetek vissza ahhoz a feladathoz, ahol jártatok. " +
-            "Figyeljetek arra, hogy bár az időzítő újraindul a frissítés után, de így is csak az időben beérkezett válaszokat fogjuk figyelembe venni.)</6>",
+            "A felület mobilon és gépen is kitölthető. Kérünk bennetek, hogy <bold>legfeljebb 1 eszközről</bold> töltsétek ki az online fordulót, továbbá <bold>ne frissítsétek le az oldalt</bold> a verseny során.<br />" +
+            "<small>(Ha mégis frissítitek az oldalt, akkor a verseny újraindul (de az eddigi eredményeitek megmaradnak). Ekkor - minél gyorsabban - menjetek vissza ahhoz a feladathoz, ahol jártatok. " +
+            "Figyeljetek arra, hogy bár az időzítő újraindul a frissítés után, de így is csak az időben beérkezett válaszokat fogjuk figyelembe venni.)</small>",
           continue: "Tovább a versenyhez",
         },
         chooser: {

@@ -16,7 +16,7 @@ export function RelayEndTable(props: {allPoints: number, task: {max: number, got
   const theme = useTheme();
   const refreshState = useRefreshTeamState();
   const toHome = useToHome();
-  const { t } = useTranslation();
+  const { t } = useTranslation(['relay']);
 
   return (
     <Stack sx={{
@@ -33,7 +33,7 @@ export function RelayEndTable(props: {allPoints: number, task: {max: number, got
           fontSize: '18px',
           fontWeight: 'bold',
           textAlign: 'center'
-      }}>{t('relay:endTable.all')}</Stack>
+      }}>{t('endTable.all')}</Stack>
         <Stack sx={{
           display: 'flex',
           flexFlow: 'column',
@@ -65,13 +65,13 @@ export function RelayEndTable(props: {allPoints: number, task: {max: number, got
         }
     }}>
             <TableRow>
-                <TableCell>{t('relay:endTable.task')}</TableCell>
+                <TableCell>{t('endTable.task')}</TableCell>
                 {props.task.slice(0, 10).map((data, idx)=><TableCell>
                     {idx+1}.
                 </TableCell>)}
             </TableRow>
             <TableRow>
-                <TableCell>{t('relay:endTable.point')}</TableCell>
+                <TableCell>{t('endTable.point')}</TableCell>
                 {props.task.slice(0, 10).map((data, idx)=>{
                     let currStyle = { backgroundColor: '#fff' };
                     if(data.got !== null){
@@ -87,13 +87,13 @@ export function RelayEndTable(props: {allPoints: number, task: {max: number, got
             </TableRow>
             {props.task.length > 10 && <>
               <TableRow>
-                <TableCell>{t('relay:endTable.task')}</TableCell>
+                <TableCell>{t('endTable.task')}</TableCell>
                 {props.task.slice(10).map((data, idx)=><TableCell>
                     {idx+11}.
                 </TableCell>)}
             </TableRow>
             <TableRow>
-                <TableCell>{t('relay:endTable.point')}</TableCell>
+                <TableCell>{t('endTable.point')}</TableCell>
                 {props.task.slice(10).map((data, idx)=>{
                     let currStyle = { backgroundColor: '#fff' };
                     if(data.got !== null){
@@ -130,7 +130,7 @@ export function RelayEndTable(props: {allPoints: number, task: {max: number, got
           {pointColours.map((colour, attempt) => (
             <Stack sx={{display: 'flex' }}>
               <Stack sx={{ backgroundColor: colour }}></Stack>
-              <span>{attempt === 3 ? t('relay:endTable.wrong') : t('relay:endTable.try', {count: attempt + 1})}</span>
+              <span>{attempt === 3 ? t('endTable.wrong') : t('endTable.try', {count: attempt + 1})}</span>
             </Stack>
           ))}
         </Stack>
@@ -142,8 +142,8 @@ export function RelayEndTable(props: {allPoints: number, task: {max: number, got
             marginLeft: '55px',
             marginBottom: '10px',
         }}>
-            {t('relay:endTable.all')}: {props.allPoints} <br/>
-            {t('relay:endTable:reminder')}
+            {t('endTable.all')}: {props.allPoints} <br/>
+            {t('endTable.reminder')}
         </Stack>
       <Button sx={{
         width: '300px',
@@ -156,7 +156,7 @@ export function RelayEndTable(props: {allPoints: number, task: {max: number, got
         await toHome();
         window.location.reload(); 
       }}>
-        {t('relay:endTable.back')}
+        {t('endTable.back')}
       </Button>
     </Stack>
   )
@@ -192,13 +192,13 @@ export function RelayEndTableData(props: {allPoints: number, task: {max: number,
         }
     }}>
             <TableRow>
-                <TableCell>{t('relay:endTable.task')}</TableCell>
+                <TableCell>{t('endTable.task')}</TableCell>
                 {props.task.slice(0, 10).map((data, idx)=><TableCell>
                     {idx+1}.
                 </TableCell>)}
             </TableRow>
             <TableRow>
-                <TableCell>{t('relay:endTable.point')}</TableCell>
+                <TableCell>{t('endTable.point')}</TableCell>
                 {props.task.slice(0, 10).map((data, idx)=>{
                     let currStyle = { backgroundColor: '#fff' };
                     if(data.got !== null){
@@ -220,13 +220,13 @@ export function RelayEndTableData(props: {allPoints: number, task: {max: number,
             </TableRow>
             {props.task.length > 10 && <>
               <TableRow>
-                <TableCell>{t('relay:endTable.task')}</TableCell>
+                <TableCell>{t('endTable.task')}</TableCell>
                 {props.task.slice(10).map((data, idx)=><TableCell>
                     {idx+11}.
                 </TableCell>)}
             </TableRow>
             <TableRow>
-                <TableCell>{t('relay:endTable.point')}</TableCell>
+                <TableCell>{t('endTable.point')}</TableCell>
                 {props.task.slice(10).map((data, idx)=>{
                     let currStyle = { backgroundColor: '#fff' };
                     if(data.got !== null){

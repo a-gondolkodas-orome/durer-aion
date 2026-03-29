@@ -9,7 +9,7 @@ export function Disclaimer(props: {teamName: string, category: string}) {
   const goHome = useToHome();
   const theme = useTheme();
   const isOffline = useClientRepo().version === "OFFLINE";
-  const { t } = useTranslation();
+  const { t } = useTranslation(['disclaimer']);
 
   return (
     <Stack
@@ -52,9 +52,13 @@ export function Disclaimer(props: {teamName: string, category: string}) {
           alignSelf: "center",
         }}>
           <div style={{textAlign: "center"}}>
-            <Trans i18nKey={'disclaimer:welcome'} tOptions={{interpolation: {prefix: "[[", suffix: "]]"}}} values={{ tname: props.teamName }}>
-              Kedves <i style={{color: theme.palette.primary.main}}>[[tname]]</i> csapat, üdvözlünk az online fordulón!
-            </Trans>
+            <Trans
+              i18nKey='welcome'
+              ns='disclaimer'
+              values={{ tname: props.teamName }}
+              components={{
+                bold: <i style={{color: theme.palette.primary.main}} />
+              }} />
           </div>
         </Stack>
         <Stack sx={{
@@ -65,12 +69,16 @@ export function Disclaimer(props: {teamName: string, category: string}) {
           marginBottom: "20px",
         }}>
           <div style={{textAlign: "center"}}>
-            <Trans i18nKey={'disclaimer:category'} tOptions={{interpolation: {prefix: "[[", suffix: "]]"}}} values={{ category: props.category }}>
-              Kategóriátok: <strong style={{color: theme.palette.primary.main}}>[[props.category]]</strong>
-            </Trans>
+            <Trans
+              i18nKey='category'
+              ns='disclaimer'
+              values={{ category: props.category }}
+              components={{
+                bold: <strong style={{color: theme.palette.primary.main}} />
+              }} />
           </div>
         </Stack>
-        {t('disclaimer:start')}
+        {t('start')}
       </Stack>
 
       <Stack
@@ -80,7 +88,7 @@ export function Disclaimer(props: {teamName: string, category: string}) {
           fontStyle: "italic",
         }}
       >
-        {t('disclaimer:progress')}
+        {t('progress')}
       </Stack>
 
       <Stack
@@ -92,7 +100,7 @@ export function Disclaimer(props: {teamName: string, category: string}) {
           }
         }}
       >
-        {t('disclaimer:progressDescription', {minpoints: 25, maxpoints: 52})}
+        {t('progressDescription', {minpoints: 25, maxpoints: 52})}
       </Stack>
 
       <Stack
@@ -102,7 +110,7 @@ export function Disclaimer(props: {teamName: string, category: string}) {
           fontStyle: "italic",
         }}
       >
-        {t('disclaimer:interface')}
+        {t('interface')}
       </Stack>
 
       <Stack
@@ -115,18 +123,14 @@ export function Disclaimer(props: {teamName: string, category: string}) {
         }}
       >
         <div>
-          {isOffline ? 
-            <Trans i18nKey={'disclaimer:interfaceDescriptionBHTML'}>
-              A felület mobilon és gépen is kitölthető. Kérünk bennetek, hogy <strong>legfeljebb 1 eszközről</strong> töltsétek ki az online fordulót,
-              továbbá <strong>ne frissítsétek le az oldalt</strong> a verseny során. <br />
-              <small>
-                (Ha mégis frissítitek az oldalt, akkor a verseny újraindul (de az eddigi eredményeitek megmaradnak). 
-                Ekkor - minél gyorsabban - menjetek vissza ahhoz a feladathoz, ahol jártatok. Figyeljetek arra, hogy bár az időzítő újraindul a frissítés után, de így is csak az időben beérkezett válaszokat fogjuk figyelembe venni.)
-              </small>
-            </Trans>
-          : <Trans i18nKey={'disclaimer:interfaceDescription'}>
-              A felület mobilon és gépen is kitölthető, egyszerre akár több eszközzel is bejelentkezhettek.
-            </Trans>}
+          <Trans 
+          i18nKey={isOffline ? 'interfaceDescriptionBHTML' : 'interfaceDescription'}
+          ns='disclaimer'
+          components={{
+            bold: <strong />,
+            small: <small />,
+            br: <br />
+          }} />
         </div>
       </Stack>
 
@@ -149,7 +153,7 @@ export function Disclaimer(props: {teamName: string, category: string}) {
           goHome();
         }}
       >
-        {t('disclaimer:continue')}
+        {t('continue')}
       </Button>
     </Stack>
   );
