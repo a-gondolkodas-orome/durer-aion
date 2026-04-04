@@ -203,3 +203,12 @@ must be wrapped in setTimeout, this is not (yet) handled by the framework.
 - github actions for CI/CD.
 - github pages as hosting
 - [goatcounter](https://agondolkodasorome.goatcounter.com/) as usage tracker (Ildi has access)
+
+# License
+
+Copyright (c) 2020-present [A Gondolkodás Öröme Alapítvány](https://agondolkodasorome.hu/).
+
+The promblems originate from the [Dürer Math Competition](https://durerinfo.hu/) and remain the intellectual property of their respective authors.
+
+This project is licensed under [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)](https://creativecommons.org/licenses/by-nc-sa/4.0/).
+You may share and adapt this material for non-commercial purposes, provided you give appropriate credit and distribute your contributions under the same license.
