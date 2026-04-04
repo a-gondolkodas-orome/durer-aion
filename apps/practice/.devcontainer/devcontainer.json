@@ -3,7 +3,11 @@
   "image": "mcr.microsoft.com/devcontainers/javascript-node:24",
   "customizations": {
     "vscode": {
-      "extensions": ["dbaeumer.vscode-eslint", "bradlc.vscode-tailwindcss"],
+      "extensions": [
+        "dbaeumer.vscode-eslint"
+        , "bradlc.vscode-tailwindcss"
+        , "esbenp.prettier-vscode"
+      ],
       "settings": {
         "editor.tabSize": 2,
         "javascript.updateImportsOnFileMove.enabled": "always",

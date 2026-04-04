@@ -42,5 +42,6 @@
   },
   "prettier": {
     "trailingComma": "none"
+    , "printWidth": 120
   }
 }
