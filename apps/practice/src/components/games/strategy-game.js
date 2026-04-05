@@ -12,7 +12,8 @@ export const strategyGameFactory = ({
   generateStartBoard,
   moves,
   aiBotStrategy,
-  getPlayerStepDescription
+  getPlayerStepDescription,
+  endOfTurnMove
 }) => {
   return () => {
     const [board, setBoard] = useState(generateStartBoard())
@@ -30,9 +31,16 @@ export const strategyGameFactory = ({
       }
     }, [currentPlayer])
 
+    let wrappedMoves;
+
     const moveWrapper = (moveFunc, ...args) => {
       const moveResult = moveFunc(...args);
       setBoard(moveResult.nextBoard);
+      if (endOfTurnMove && moveResult.autoEndOfTurn) {
+        setTimeout(() => {
+          wrappedMoves[endOfTurnMove](moveResult.nextBoard);
+        }, 750);
+      }
       return moveResult;
     };
 
@@ -86,7 +94,7 @@ export const strategyGameFactory = ({
     // it may change between moves but for AI strategy there is no re-render between moves
     // in some cases there are multiple moves following single user event in that
     // case there is also no re-render on client side between moves
-    const wrappedMoves = mapValues(moves, f => wrap(partial(f, _, { ctx, events }), moveWrapper));
+    wrappedMoves = mapValues(moves, f => wrap(partial(f, _, { ctx, events }), moveWrapper));
 
     const doAiTurn = () => {
       const time = Math.floor(Math.random() * 500 + 1000);

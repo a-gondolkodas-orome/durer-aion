@@ -51,8 +51,9 @@ export const moves = {
     if (isGameEnd) {
       events.endTurn();
       events.endGame({ winnerIndex: 1 });
+      return { nextBoard, isGameEnd };
     }
-    return { nextBoard, isGameEnd };
+    return { nextBoard, isGameEnd, autoEndOfTurn: true };
   },
   finalizeSeparation: (board, { events }) => {
     events.endTurn();
@@ -65,6 +66,7 @@ export const moves = {
     }
     return { nextBoard };
   },
+  // endOfTurn move automatically initiated by game engine
   stepUp: (board, { events }) => {
     const nextBoard = [...tail(board), []];
     events.endTurn();

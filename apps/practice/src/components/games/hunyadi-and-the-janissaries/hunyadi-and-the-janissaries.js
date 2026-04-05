@@ -28,14 +28,7 @@ const BoardClient = ({ board, ctx, moves }) => {
       moves.setGroupOfSoldiers(board, [{ rowIndex, pieceIndex, group }]);
     } else {
       const group = board[rowIndex][pieceIndex];
-      const { nextBoard, isGameEnd } = moves.killGroup(board, group);
-      // TODO: ideally this is not a player initiated move but something that happens at the
-      // end of turn by game engine
-      if (!isGameEnd) {
-        setTimeout(() => {
-          moves.stepUp(nextBoard);
-        }, 750)
-      }
+      moves.killGroup(board, group);
     }
   };
 
@@ -127,5 +120,6 @@ export const HunyadiAndTheJanissaries = strategyGameFactory({
   getPlayerStepDescription,
   generateStartBoard,
   moves,
-  aiBotStrategy
+  aiBotStrategy,
+  endOfTurnMove: 'stepUp'
 });

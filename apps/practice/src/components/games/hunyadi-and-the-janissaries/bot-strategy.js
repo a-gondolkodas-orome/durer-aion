@@ -5,12 +5,7 @@ import { random } from 'lodash';
 export const aiBotStrategy = ({ board, ctx, moves }) => {
   if (ctx.chosenRoleIndex === 0) {
     const optimalGroupToKill = getOptimalGroupToKill(board);
-    const { nextBoard, isGameEnd } = moves.killGroup(board, optimalGroupToKill);
-    if (!isGameEnd) {
-      setTimeout(() => {
-        moves.stepUp(nextBoard);
-      }, 750);
-    }
+    moves.killGroup(board, optimalGroupToKill);
   } else {
     const soldiers = getOptimalSoldierGroups(board);
     const { nextBoard } = moves.setGroupOfSoldiers(board, soldiers);
