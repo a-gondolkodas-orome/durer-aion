@@ -7,7 +7,7 @@ import { useState } from 'react';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useClientRepo } from '../api-repository-interface';
 import { useTheme } from "@mui/material/styles";
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 
 export function ChooserItem(props: {
   status: MatchStatus,
@@ -21,7 +21,7 @@ export function ChooserItem(props: {
   const [mobileDescOpen, setMobileDescOpen] = useState(props.status.state !== "FINISHED");
   const isOffline = useClientRepo().version === "OFFLINE";
   const theme = useTheme();
-  const { t } = useTranslation();
+  const { t } = useTranslation(undefined, { keyPrefix: 'chooser' });
 
   return (
     <Stack sx={{
@@ -50,7 +50,7 @@ export function ChooserItem(props: {
           return !prev
         })
       }}>
-        <span>{props.type==='relay' ? t('relay:name') : t('strategy:name')}  {!props.hideDesc && <ExpandMoreIcon sx={{
+        <span>{props.type==='relay' ? t('name', { keyPrefix: 'relay' }) : t('name', { keyPrefix: 'strategy' })}  {!props.hideDesc && <ExpandMoreIcon sx={{
           fontSize: 33,
           marginBottom: "-9px",
           display: {
@@ -68,7 +68,7 @@ export function ChooserItem(props: {
             md: 0,
           }
         }}>
-          {t('chooser:filledAt')}: {formatTime((props.status as FinishedMatchStatus).startAt)} - {formatTime((props.status as FinishedMatchStatus).endAt)} {t('chooser:achievedPoint')}: {(props.status as FinishedMatchStatus).score}
+          {t('filledAt')}: {formatTime((props.status as FinishedMatchStatus).startAt)} - {formatTime((props.status as FinishedMatchStatus).endAt)} {t('achievedPoint')}: {(props.status as FinishedMatchStatus).score}
         </Stack>
       }
       {props.type === 'relay' &&
@@ -92,7 +92,7 @@ export function ChooserItem(props: {
             md: 0,
             xs: '10px'
           }}}>
-            {!props.hideDesc && t('chooser:relayDescription')}
+            {!props.hideDesc && t('relayDescription')}
           </Stack>
         </Stack>
       }        
@@ -113,7 +113,16 @@ export function ChooserItem(props: {
             marginBlockEnd: 0,
           },
         }}>
-          {!props.hideDesc && <span dangerouslySetInnerHTML={{ __html: t('chooser:gameDescriptionHtml')}}/>}
+          {!props.hideDesc && 
+          <Trans
+            i18nKey='chooser.gameDescriptionHtml'
+            components={{
+              b: <b />,
+              p: <p />,
+              ul: <ul />,
+              li: <li />
+            }}
+          />}
         </Stack>
       }
       <Button sx={{
@@ -130,7 +139,7 @@ export function ChooserItem(props: {
           startStrategy()
         }
       }} disabled={props.status.state !== "NOT STARTED"}>
-        {t('chooser:start')}
+        {t('start')}
       </Button>
       { !isOffline &&
       <Button sx={{
@@ -148,7 +157,7 @@ export function ChooserItem(props: {
           props.setState("S");
         }
       }} disabled={props.status.state === "NOT STARTED"}>
-        {t('chooser:result')}
+        {t('result')}
       </Button>
       }
     </Stack>

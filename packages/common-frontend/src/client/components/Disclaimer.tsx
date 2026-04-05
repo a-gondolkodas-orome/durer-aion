@@ -9,7 +9,7 @@ export function Disclaimer(props: {teamName: string, category: string}) {
   const goHome = useToHome();
   const theme = useTheme();
   const isOffline = useClientRepo().version === "OFFLINE";
-  const { t } = useTranslation(['disclaimer']);
+  const { t } = useTranslation(undefined, { keyPrefix: 'disclaimer' });
 
   return (
     <Stack
@@ -53,11 +53,10 @@ export function Disclaimer(props: {teamName: string, category: string}) {
         }}>
           <div style={{textAlign: "center"}}>
             <Trans
-              i18nKey='welcome'
-              ns='disclaimer'
+              i18nKey='disclaimer.welcome'
               values={{ tname: props.teamName }}
               components={{
-                bold: <i style={{color: theme.palette.primary.main}} />
+                strong: <i style={{color: theme.palette.primary.main}} />
               }} />
           </div>
         </Stack>
@@ -70,11 +69,10 @@ export function Disclaimer(props: {teamName: string, category: string}) {
         }}>
           <div style={{textAlign: "center"}}>
             <Trans
-              i18nKey='category'
-              ns='disclaimer'
+              i18nKey='disclaimer.category'
               values={{ category: props.category }}
               components={{
-                bold: <strong style={{color: theme.palette.primary.main}} />
+                strong: <strong style={{color: theme.palette.primary.main}} />
               }} />
           </div>
         </Stack>
@@ -124,10 +122,9 @@ export function Disclaimer(props: {teamName: string, category: string}) {
       >
         <div>
           <Trans 
-          i18nKey={isOffline ? 'interfaceDescriptionBHTML' : 'interfaceDescription'}
-          ns='disclaimer'
+          i18nKey={isOffline ? 'disclaimer.interfaceDescriptionOfflineMode' : 'disclaimer.interfaceDescription'}
           components={{
-            bold: <strong />,
+            strong: <strong />,
             small: <small />,
             br: <br />
           }} />

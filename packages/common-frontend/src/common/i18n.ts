@@ -9,295 +9,292 @@ i18next
     debug: process.env.NODE_ENV === 'development',
     fallbackLng: 'hu',
     fallbackNS: 'translation',
+    defaultNS: 'translation',
     interpolation: {
       escapeValue: false,
     },
     resources: {
       en: {
-        languages: {
-          en: 'English',
-          hu: 'Hungarian',
-        },
-        disclaimer: {
-          welcome: 'Dear Team <bold>{{tname}}</bold>, we welcome you in the online round!',
-          category: 'Your category: <bold>{{category}}</bold>',
-          start: 
-            "In the online round, teams must work on their own; they must not ask for help from other people " +  
-            "until the competition ends (at 21:30). The use of artificial intelligence is also forbidden.",
-          progress: "Advancing to next rounds",
-          progressDescription:
-            "Teams that earn at least {{minpoints}} points out of the maximum {{maxpoints}} points that can be earned " +  
-            "will proceed to the regional round. (We reserve the right to lower this minimum threshold, but we will not raise it.) " +  
-            "The points earned in the online round do not count towards the later results.", 
-          interface: "The interface",
-          interfaceDescription:
-            "The interface can be filled in using your PCs or phones as well. You can even log in from multiple devices.",
-          interfaceDescriptionBHTML:
-            "The interface can be filled in on both mobile and computer. Please make sure to complete the online round from <bold>at most 1 device</bold>, and also <bold>do not refresh the page</bold> during the competition.<br />" +  
-            "<small>(If you nevertheless refresh the page, the competition will restart (but your results so far will be kept). In that case, go back as quickly as possible to the task where you left off. " +  
-            "Note that although the timer restarts after refreshing, we will still only take into account answers that arrive within the official time limit.)</small>",
-          continue: "Continue to the competition",
-        },
-        chooser: {
-          finish: {
-            title: "Competition ended!",
-            content: "Thank you for participating, we hope you enjoyed the competition. We are curious about your feedback on this round, so please <a href=\""+ process.env.VITE_FEEDBACK_URL +"\" target=\"_blank\" rel=\"noopener noreferrer\">fill out this form</a>. We will publish the results and the list of advancing teams by Thursday, and we will also send you a notification about it by email.",
-            final: "Final score",
+        translation: {
+          languages: {
+            en: 'English',
+            hu: 'Hungarian',
           },
-          gameDescriptionHtml: `<p>In this task, you can play a two-player strategy game where you will be one player and the computer will be the other. Defeat the computer <b>twice in a row</b> in this game! Knowing the starting position, you can decide whether you want to play as the first or second player.</p>
-          <p>You will receive points for successful completion as follows:
-            <ul>
-          <li>If you don't lose at all, you get 12 points.</li>
-          <li>In case of 1, 2, 3, 4, or 5 losses, the points obtained decrease to 9, 6, 4, 3, and 2 respectively.</li>
-          <li>In case of more losses, you still get 2 points if you manage to complete the game.</li>
-          <li>If you fail to defeat the computer twice in a row within 30 minutes, you get 0 points.</li>
-            </ul>
-          </p>
-          <p>
-            When you're ready, click the button below and from then on you have a total of 30 minutes.
-          </p>`,
-          relayDescription: "Relay tasks are short text tasks where the answer is an integer (at least 0 and at most 9999). You can make a maximum of 3 guesses for each relay task, and after each wrong guess, the points you can earn for that task decrease by 1. After a correct guess or three wrong guesses, you will receive the next task. You have a total of 60 minutes for the relay tasks, and you can earn a total of 40 points with error-free performance. (The points available for individual tasks range from 3 to 6.)",
-          filledAt: "Filled at",
-          achievedPoint: "Points achieved",
-          start: "Start",
-          result: "Results",
-        },
-        relay: {
-          endTable: {
-            title: "Relay completed",
-            task: "Task",
-            point: "Points",
-            try_one: "in 1 attempt",
-            try_other: "in {{count}} attempts",
-            wrong: "Wrong answer",
-            all: "Total points",
-            pointsGained: "points scored",
-            back: "Back to competition",
-            reminder: "Don't forget to play with the strategy game too if you haven't done yet!",
+          disclaimer: {
+            welcome: 'Dear Team <strong>{{tname}}</strong>, we welcome you in the online round!',
+            category: 'Your category: <strong>{{category}}</strong>',
+            start: 
+              "In the online round, teams must work on their own; they must not ask for help from other people " +  
+              "until the competition ends (at 21:30). The use of artificial intelligence is also forbidden.",
+            progress: "Advancing to next rounds",
+            progressDescription:
+              "Teams that earn at least {{minpoints}} points out of the maximum {{maxpoints}} points that can be earned " +  
+              "will proceed to the regional round. (We reserve the right to lower this minimum threshold, but we will not raise it.) " +  
+              "The points earned in the online round do not count towards the later results.", 
+            interface: "The interface",
+            interfaceDescription:
+              "The interface can be filled in using your PCs or phones as well. You can even log in from multiple devices.",
+            interfaceDescriptionOfflineMode:
+              "The interface can be filled in on both mobile and computer. Please make sure to complete the online round from <strong>at most 1 device</strong>, and also <strong>do not refresh the page</strong> during the competition.<br />" +  
+              "<small>(If you nevertheless refresh the page, the competition will restart (but your results so far will be kept). In that case, go back as quickly as possible to the task where you left off. " +  
+              "Note that although the timer restarts after refreshing, we will still only take into account answers that arrive within the official time limit.)</small>",
+            continue: "Continue to the competition",
           },
-          goodguess: 'Your answer is correct',
-          wrongguess: 'Your guess is sadly wrong',
-          badCategory: "WRONG CATEGORY",
-          name: "Relay tasks",
-          guess: "Guess:",
-          send: "Submit",
-          guessNum: 'guess #{{guessnum}}:'
-        },
-        general: {
-          task: "task",
-          point: "point",
-          remainingTime: "Remaining time",
-        },
-        header: {
-          logout: "logout",
-          subtitle: "Online round",
-          title: "XIX. Dürer Competition",
-        },
-        login: {
-          greeting: "Dear Competitor!",
-          beforeTitle: "Welcome to the online round interface of the ",
-          afterTitle: ".",
-          loginInstruction: "To log in, check your emails and enter the code you find there here:",
-          fallback: "If you can't find the email, write to us at the verseny (at) durerinfo (dot) hu email address.",
-          loginButton: "Log in", 
-        },
-        waitingRoom: {
-          soon: "The online round will start soon!",
-          remainingStart: "Still",
-          remainingEnd: "left until start!",
-          instruction: "When the competition starts, you will be automatically redirected to the competition interface.",
-        },
-        strategy: {
-          notSupported: "UNSUPPORTED GAME STATE",
-          name: "Strategy game",
-          endTable: {
-            all: "Total points",
-            gained: "Points earned",
-            tries: "Number of attempts"
+          chooser: {
+            finish: {
+              title: "Competition ended!",
+              content: "Thank you for participating, we hope you enjoyed the competition. We are curious about your feedback on this round, so please <a>fill out this form</a>. We will publish the results and the list of advancing teams by Thursday, and we will also send you a notification about it by email.",
+              final: "Final score",
+            },
+            gameDescriptionHtml: `<p>In this task, you can play a two-player strategy game where you will be one player and the computer will be the other. Defeat the computer <b>twice in a row</b> in this game! Knowing the starting position, you can decide whether you want to play as the first or second player.</p>
+            <p>You will receive points for successful completion as follows:
+              <ul>
+            <li>If you don't lose at all, you get 12 points.</li>
+            <li>In case of 1, 2, 3, 4, or 5 losses, the points obtained decrease to 9, 6, 4, 3, and 2 respectively.</li>
+            <li>In case of more losses, you still get 2 points if you manage to complete the game.</li>
+            <li>If you fail to defeat the computer twice in a row within 30 minutes, you get 0 points.</li>
+              </ul>
+            </p>
+            <p>
+              When you're ready, click the button below and from then on you have a total of 30 minutes.
+            </p>`,
+            relayDescription: "Relay tasks are short text tasks where the answer is an integer (at least 0 and at most 9999). You can make a maximum of 3 guesses for each relay task, and after each wrong guess, the points you can earn for that task decrease by 1. After a correct guess or three wrong guesses, you will receive the next task. You have a total of 60 minutes for the relay tasks, and you can earn a total of 40 points with error-free performance. (The points available for individual tasks range from 3 to 6.)",
+            filledAt: "Filled at",
+            achievedPoint: "Points achieved",
+            start: "Start",
+            result: "Results",
           },
-          guide: {
-            newgame: "Start a new game!",
-            iffirstplayer: "Choose whether you want to be the first or second player.",
-            yourturn: "Your turn now!",
-            waitingforserver: "Waiting for server...",
-            realgamewin: "Congratulations, you won! Defeat the computer one more time!",
-            testgamewin: "Congratulations, you won the test game!",
-            botwins: "Unfortunately the computer won.",
-            endofgame: "The game has ended.",
+          relay: {
+            endTable: {
+              title: "Relay completed",
+              task: "Task",
+              point: "Points",
+              try_one: "in 1 attempt",
+              try_other: "in {{count}} attempts",
+              wrong: "Wrong answer",
+              all: "Total points",
+              pointsGained: "points scored",
+              back: "Back to competition",
+              reminder: "Don't forget to play with the strategy game too if you haven't done yet!",
+              taskImage: "Image belonging to the current task (if it didn't load properly, try refreshing the page)",
+            },
+            goodGuess: 'Your answer is correct',
+            wrongGuess: 'Your guess is sadly wrong',
+            badCategory: "WRONG CATEGORY",
+            name: "Relay tasks",
+            guess: "Guess:",
+            send: "Submit",
+            guessNum: 'guess #{{guessnum}}:'
           },
-          instructions: "Further instructions",
-          instructionDescription: "Clicking on the button “Start a new test game” starts a test game, which is not counted in the scoring. Feel free to play some test games before playing a real round in order to test your understanding of the game's logic. The latter mode can be initialised by clicking “Start a new live game”, which will start a game which now counts for points.", 
-          realresults: "Live game results so far:",
-          wins_one: "win",
-          wins_other: "wins",
-          defeats_one: "defeat",
-          defeats_other: "defeats",
-          testgamebutton: "Start a new test game",
-          realgamebutton: "Start a new live game",
-          firstplayer: "I will be the first",
-          secondplayer: "I will be the second"
-        },
-        notFound: {
-          message: "This page was not found.",
-          back: "Back to main page",
-        },
-        error: {
-          unsuspected: "An unexpected error occurred",
-          duplicate: "You've already tried this guess",
-          integer: 'You must give an integer',
-          type: 'Answer must be a number',
-          range: 'The solution is between 0 and 9999',
-          empty: 'You have not specified any answer!',
-          wrongid: 'Incorrect log-in code.'
-        },
-        warnings: {
-          timeNotMatch: "Your computer's clock is not synchronized with the server's clock, the displayed remaining time is not perfect, reloading the page may solve the problem",
-          timeNotReal: "The clock is for informational purposes only. You will see a different time on other devices and browsers, but we will still only consider answers received on time.",
-          pointsNotSettled: "Your final points are only here for informational purposes, these will be reevaluated based on all the submissions we get.",
+          general: {
+            task: "task",
+            point: "point",
+            remainingTime: "Remaining time",
+            returnHome: 'Back to main page',
+          },
+          header: {
+            logout: "logout",
+            subtitle: "Online round",
+            title: "XIX. Dürer Competition",
+          },
+          login: {
+            greeting: "Dear Competitor!",
+            beforeTitle: "Welcome to the online round interface of the ",
+            afterTitle: ".",
+            loginInstruction: "To log in, check your emails and enter the code you find there here:",
+            fallback: "If you can't find the email, write to us at the verseny (at) durerinfo (dot) hu email address.",
+            loginButton: "Log in", 
+          },
+          waitingRoom: {
+            soon: "The online round will start soon!",
+            remainingStart: "Still",
+            remainingEnd: "left until start!",
+            instruction: "When the competition starts, you will be automatically redirected to the competition interface.",
+          },
+          strategy: {
+            notSupported: "UNSUPPORTED GAME STATE",
+            name: "Strategy game",
+            instructions: "Further instructions",
+            instructionDescription: "Clicking on the button “Start a new test game” starts a test game, which is not counted in the scoring. Feel free to play some test games before playing a real round in order to test your understanding of the game's logic. The latter mode can be initialised by clicking “Start a new live game”, which will start a game which now counts for points.", 
+            realResults: "Live game results so far: {{gamesWon}} win(s), {{gamesLost}} defeat(s)",
+            testGameButton: "Start a new test game",
+            realGameButton: "Start a new live game",
+            firstPlayer: "I will be the first",
+            secondPlayer: "I will be the second",
+            endTable: {
+              all: "Total points",
+              gained: "Points earned",
+              tries: "Number of attempts"
+            },
+            guide: {
+              newGame: "Start a new game!",
+              ifFirstPlayer: "Choose whether you want to be the first or second player.",
+              yourTurn: "Your turn now!",
+              waitingForServer: "Waiting for server...",
+              realGameWin: "Congratulations, you won! Defeat the computer one more time!",
+              testGameWin: "Congratulations, you won the test game!",
+              botWins: "Unfortunately the computer won.",
+              endOfGame: "The game has ended.",
+            },
+          },
+          error: {
+            unexpected: "An unexpected error occurred",
+            duplicate: "You've already tried this guess",
+            integer: 'You must give an integer',
+            type: 'Answer must be a number',
+            range: 'The solution is between 0 and 9999',
+            empty: 'You have not specified any answer!',
+            wrongid: 'Incorrect log-in code.',
+            notFound: 'This page was not found.'
+          },
+          warnings: {
+            timeNotMatch: "Your computer's clock is not synchronized with the server's clock, the displayed remaining time is not perfect, reloading the page may solve the problem",
+            timeNotReal: "The clock is for informational purposes only. You will see a different time on other devices and browsers, but we will still only consider answers received on time.",
+            pointsNotSettled: "Your final points are only here for informational purposes, these will be reevaluated based on all the submissions we get.",
+          }
         }
       },
       hu: {
-        languages: {
-          en: 'Angol',
-          hu: 'Magyar'
-        },
-        disclaimer: {
-          welcome: 'Kedves <bold>{{tname}}</bold> csapat, üdvözlünk az online fordulón!',
-          category: 'Kategóriátok: <bold>{{category}}</bold>',
-          start: 
-            "Az online fordulón a csapatoknak önállóan kell dolgozniuk, más emberektől nem kérhetnek segítséget" +
-            " a versenyzési időszak végéig (21:30-ig). A mesterséges intelligencia használata is tilos.",
-          progress: "Továbbjutás",
-          progressDescription:
-            "Azok a csapatok, amelyek az online forduló során a megszerezhető {{maxpoints}} pontból legalább {{minpoints}} pontot " +
-            "elérnek, továbbjutnak a helyi fordulóba. (Fenntartjuk a jogot, hogy a ponthatárt esetleg csökkentsük, " +
-            "növelni biztosan nem fogjuk.) Az online fordulón szerzett pontszám nem számít bele a további eredményekbe.",
-          interface: "A felület",
-          interfaceDescription:
-            "A felület mobilon és gépen is kitölthető, egyszerre akár több eszközzel is bejelentkezhettek.",
-          interfaceDescriptionBHTML:
-            "A felület mobilon és gépen is kitölthető. Kérünk bennetek, hogy <bold>legfeljebb 1 eszközről</bold> töltsétek ki az online fordulót, továbbá <bold>ne frissítsétek le az oldalt</bold> a verseny során.<br />" +
-            "<small>(Ha mégis frissítitek az oldalt, akkor a verseny újraindul (de az eddigi eredményeitek megmaradnak). Ekkor - minél gyorsabban - menjetek vissza ahhoz a feladathoz, ahol jártatok. " +
-            "Figyeljetek arra, hogy bár az időzítő újraindul a frissítés után, de így is csak az időben beérkezett válaszokat fogjuk figyelembe venni.)</small>",
-          continue: "Tovább a versenyhez",
-        },
-        chooser: {
-          finish: {
-            title: "Vége a versenynek!",
-            content: "Köszönjük a részvételeteket, reméljük, hogy tetszett nektek a verseny. Kíváncsiak vagyunk a fordulóval kapcsolatos véleményetekre, így kérjük, <a href=\""+ process.env.VITE_FEEDBACK_URL +"\" target=\"_blank\" rel=\"noopener noreferrer\">töltsétek ki ezt az űrlapot</a>. Várhatóan csütörtökig közzétesszük az eredményeket és a továbbjutó csapatok listáját, és erről emailben is fogunk nektek értesítést küldeni.",
-            final: "Végső pontszám",
+        translation: {
+          languages: {
+            en: 'Angol',
+            hu: 'Magyar'
           },
-          gameDescriptionHtml: `<p>Ebben a feladatban egy kétszemélyes stratégiás játékot játszhattok, ahol az egyik játékos Ti lesztek, a másik játékos pedig a gép. Győzzétek le a gépet <b>kétszer egymás után</b> ebben a játékban! A kezdő helyzet ismeretében Ti dönthetitek el, hogy a kezdő vagy a második játékos bőrébe szeretnétek bújni.</p>         
-          <p>A sikeres teljesítésért az alábbiak szerint kaptok pontot:
-            <ul>
-              <li>Ha egyszer sem veszítetek, akkor 12 pontot kaptok.</li>
-              <li>1, 2, 3, 4, illetve 5 vereség esetén a kapott pontszám 9-re, 6-ra, 4-re, 3-ra, illetve 2-re csökken.</li>
-              <li>Ennél több vereség esetén is 2 pontot kaptok, ha sikerül teljesítenetek a játékot.</li>
-              <li>Ha 30 perc alatt nem győzitek le kétszer egymás után a gépet, akkor 0 pontot kaptok.</li>
-            </ul>
-          </p>
-          <p>
-            Ha készen álltok, kattintsatok a lenti gombra és onnantól kezdve összesen 30 perc áll rendelkezésetekre.
-          </p>`,
-          relayDescription: "A váltófeladatok rövid szöveges feladatok, melyekre a válasz egy egész szám (legalább 0 és " + 
-          "legfeljebb 9999). Minden váltófeladatra maximum 3 tippet adhattok le, egy-egy rossz tipp után az adott " +
-          "feladatra megszerezhető pontszám 1-gyel csökken. Helyes tipp vagy három rossz tipp után megkapjátok a " +
-          "következő feladatot. A váltófeladatokra összesen 60 perc áll rendelkezésre, és összesen 40 pont szerezhető " +
-          "velük hibátlan teljesítés esetén. (Az egyes feladatokra kapható pontszám 3-tól 6-ig terjed.)",
-          filledAt: "Kitöltve ekkor",
-          achievedPoint: "Elért pontszám",
-          start: "Kezdjük",
-          result: "Eredmények",
-        },
-        relay: {
-          endTable: {
-            title: "A váltó befejeződött",
-            task: "Feladat",
-            point: "Pontszám",
-            try: "{{count}}. próbálkozásra",
-            wrong: "Hibás válasz",
-            all: "Összpontszám",
-            pointsGained: "pontot szereztél",
-            back: "Vissza a versenyhez",
-            reminder: "Ne feledkezzetek meg a stratégiás játékról, ha azzal még nem játszottatok!",
+          disclaimer: {
+            welcome: 'Kedves <strong>{{tname}}</strong> csapat, üdvözlünk az online fordulón!',
+            category: 'Kategóriátok: <strong>{{category}}</strong>',
+            start: 
+              "Az online fordulón a csapatoknak önállóan kell dolgozniuk, más emberektől nem kérhetnek segítséget" +
+              " a versenyzési időszak végéig (21:30-ig). A mesterséges intelligencia használata is tilos.",
+            progress: "Továbbjutás",
+            progressDescription:
+              "Azok a csapatok, amelyek az online forduló során a megszerezhető {{maxpoints}} pontból legalább {{minpoints}} pontot " +
+              "elérnek, továbbjutnak a helyi fordulóba. (Fenntartjuk a jogot, hogy a ponthatárt esetleg csökkentsük, " +
+              "növelni biztosan nem fogjuk.) Az online fordulón szerzett pontszám nem számít bele a további eredményekbe.",
+            interface: "A felület",
+            interfaceDescription:
+              "A felület mobilon és gépen is kitölthető, egyszerre akár több eszközzel is bejelentkezhettek.",
+            interfaceDescriptionOfflineMode:
+              "A felület mobilon és gépen is kitölthető. Kérünk bennetek, hogy <strong>legfeljebb 1 eszközről</strong> töltsétek ki az online fordulót, továbbá <strong>ne frissítsétek le az oldalt</strong> a verseny során.<br />" +
+              "<small>(Ha mégis frissítitek az oldalt, akkor a verseny újraindul (de az eddigi eredményeitek megmaradnak). Ekkor - minél gyorsabban - menjetek vissza ahhoz a feladathoz, ahol jártatok. " +
+              "Figyeljetek arra, hogy bár az időzítő újraindul a frissítés után, de így is csak az időben beérkezett válaszokat fogjuk figyelembe venni.)</small>",
+            continue: "Tovább a versenyhez",
           },
-          goodguess: 'A válasz helyes volt',
-          wrongguess: 'A válasz sajnos nem volt jó',
-          badCategory: "ROSSZ KATEGÓRIA",
-          name: "Váltófeladatok",
-          guess: "Tipp:",
-          send: "Küldés",
-          guessNum: "{{guessnum}}. próba:",
-        },
-        general: {
-          remainingTime: "Hátralevő idő",
-          task: "feladat",
-          point: "pont",
-        },
-        header: {
-          logout: "kilépés",
-          subtitle: "Online forduló",
-          title: "XIX. Dürer Verseny",
-        },
-        login: {
-          greeting: "Kedves Versenyző!",
-          beforeTitle: "Üdvözlünk a ",
-          afterTitle: " online fordulójának felületén.",
-          loginInstruction: "Belépéshez nézd meg az emailjeidet, és üsd be az ott található kódot ide:",
-          fallback: "Ha nem találjátok az emailt, akkor írjatok nekünk a verseny [K] durerinfo [P] hu email címre.",
-          loginButton: "Belépés"
-        },
-        waitingRoom: {
-          soon: "Az online forduló hamarosan kezdődik!",
-          remainingStart: "Még",
-          remainingEnd: "van hátra kezdésig!",
-          instruction: "A verseny kezdetekor automatikusan átirányításra kerültök a verseny felületre.",
-        },
-        strategy: {
-          notSupported: "NEM TÁMOGATOTT JÁTÉKÁLLAPOT",
-          name: "Stratégiás játék",
-          endTable: {
-            all: "Összpontszám",
-            gained: "Szerzett pontok",
-            tries: "Próbálkozások száma"
+          chooser: {
+            finish: {
+              title: "Vége a versenynek!",
+              content: "Köszönjük a részvételeteket, reméljük, hogy tetszett nektek a verseny. Kíváncsiak vagyunk a fordulóval kapcsolatos véleményetekre, így kérjük, <a>töltsétek ki ezt az űrlapot</a>. Várhatóan csütörtökig közzétesszük az eredményeket és a továbbjutó csapatok listáját, és erről emailben is fogunk nektek értesítést küldeni.",
+              final: "Végső pontszám",
+            },
+            gameDescriptionHtml: `<p>Ebben a feladatban egy kétszemélyes stratégiás játékot játszhattok, ahol az egyik játékos Ti lesztek, a másik játékos pedig a gép. Győzzétek le a gépet <b>kétszer egymás után</b> ebben a játékban! A kezdő helyzet ismeretében Ti dönthetitek el, hogy a kezdő vagy a második játékos bőrébe szeretnétek bújni.</p>         
+            <p>A sikeres teljesítésért az alábbiak szerint kaptok pontot:
+              <ul>
+                <li>Ha egyszer sem veszítetek, akkor 12 pontot kaptok.</li>
+                <li>1, 2, 3, 4, illetve 5 vereség esetén a kapott pontszám 9-re, 6-ra, 4-re, 3-ra, illetve 2-re csökken.</li>
+                <li>Ennél több vereség esetén is 2 pontot kaptok, ha sikerül teljesítenetek a játékot.</li>
+                <li>Ha 30 perc alatt nem győzitek le kétszer egymás után a gépet, akkor 0 pontot kaptok.</li>
+              </ul>
+            </p>
+            <p>
+              Ha készen álltok, kattintsatok a lenti gombra és onnantól kezdve összesen 30 perc áll rendelkezésetekre.
+            </p>`,
+            relayDescription: "A váltófeladatok rövid szöveges feladatok, melyekre a válasz egy egész szám (legalább 0 és " + 
+            "legfeljebb 9999). Minden váltófeladatra maximum 3 tippet adhattok le, egy-egy rossz tipp után az adott " +
+            "feladatra megszerezhető pontszám 1-gyel csökken. Helyes tipp vagy három rossz tipp után megkapjátok a " +
+            "következő feladatot. A váltófeladatokra összesen 60 perc áll rendelkezésre, és összesen 40 pont szerezhető " +
+            "velük hibátlan teljesítés esetén. (Az egyes feladatokra kapható pontszám 3-tól 6-ig terjed.)",
+            filledAt: "Kitöltve ekkor",
+            achievedPoint: "Elért pontszám",
+            start: "Kezdjük",
+            result: "Eredmények",
           },
-          guide: {
-            newgame: "Kezdj új játékot!",
-            iffirstplayer: "Válaszd ki, hogy első vagy második játékos akarsz-e lenni.",
-            yourturn: "Most Te jössz!",
-            waitingforserver: "Várakozás a szerverre...",
-            realgamewin: "Gratulálok, nyertetek! Verjétek meg még egyszer a gépet!",
-            testgamewin: "Gratulálok, a próbajátékban nyertetek!",
-            botwins: "Sajnos a gép nyert.",
-            endofgame: "A játék végetért.",
+          relay: {
+            endTable: {
+              title: "A váltó befejeződött",
+              task: "Feladat",
+              point: "Pontszám",
+              try: "{{count}}. próbálkozásra",
+              wrong: "Hibás válasz",
+              all: "Összpontszám",
+              pointsGained: "pontot szereztél",
+              back: "Vissza a versenyhez",
+              reminder: "Ne feledkezzetek meg a stratégiás játékról, ha azzal még nem játszottatok!",
+            },
+            goodGuess: 'A válasz helyes volt',
+            wrongGuess: 'A válasz sajnos nem volt jó',
+            badCategory: "ROSSZ KATEGÓRIA",
+            name: "Váltófeladatok",
+            guess: "Tipp:",
+            send: "Küldés",
+            guessNum: "{{guessnum}}. próba:",
+            taskImage: "A feladathoz tartozó kép (ha nem töltött be, próbáld meg frissíteni az oldalt!)"
           },
-          instructions: "Tudnivalók",
-          instructionDescription: "Az „Új próbajáték kezdése” gombra kattintva próbajáték indul, ami a pontozásba nem számít bele. Bátran kérjetek próbajátékot, hiszen ezzel tudjátok tesztelni, hogy jól értitek-e a játék működését. Az „Új éles játék kezdése” gombra kattintva indul a valódi játék, ami már pontért megy.",
-          realresults: "Éles játékok eddigi eredményei:",
-          wins: "győzelem",
-          defeats: "vereség",
-          testgamebutton: "Új próbajáték kezdése",
-          realgamebutton: "Új éles játék kezdése",
-          firstplayer: "Kezdő leszek",
-          secondplayer: "Második leszek",
-        },
-        notFound: {
-          message: "Ez az oldal nem található.",
-          back: "Vissza a főoldalra", 
-        },
-        error: {
-          unsuspected: "Váratlan hiba történt",
-          duplicate: 'Ezt a választ már próbáltátok',
-          integer: 'Egész számot kell írni',
-          type: 'Számot kell írnod',
-          range: 'A megoldás 0 és 9999 között van',
-          empty: 'Nem írtál semmi választ!',
-          wrongid: 'Rossz belépési kód!'
-        },
-        warnings: {
-          timeNotMatch: "A számítógép órája nincs szinkronban a szerver órájával, a jelzett hátralevő idő nem tökéletes, az oldal újra töltése megoldhatja a problémát",
-          timeNotReal: "Az óra csak tájékoztató jellegű. Más eszközökön és böngészőkben más időt fogtok látni, de így is csak az időben beérkezett válaszokat fogjuk figyelembe venni.",
-          pointsNotSettled: "A pontszámotok csak tájékoztató jellegű, a végleges pontszámotokat a beküldött válaszok alapján újraértékeljük.",
+          general: {
+            remainingTime: "Hátralevő idő",
+            task: "feladat",
+            point: "pont",
+            returnHome: 'Vissza a főoldalra',
+          },
+          header: {
+            logout: "kilépés",
+            subtitle: "Online forduló",
+            title: "XIX. Dürer Verseny",
+          },
+          login: {
+            greeting: "Kedves Versenyző!",
+            beforeTitle: "Üdvözlünk a ",
+            afterTitle: " online fordulójának felületén.",
+            loginInstruction: "Belépéshez nézd meg az emailjeidet, és üsd be az ott található kódot ide:",
+            fallback: "Ha nem találjátok az emailt, akkor írjatok nekünk a verseny [K] durerinfo [P] hu email címre.",
+            loginButton: "Belépés"
+          },
+          waitingRoom: {
+            soon: "Az online forduló hamarosan kezdődik!",
+            remainingStart: "Még",
+            remainingEnd: "van hátra kezdésig!",
+            instruction: "A verseny kezdetekor automatikusan átirányításra kerültök a verseny felületre.",
+          },
+          strategy: {
+            notSupported: "NEM TÁMOGATOTT JÁTÉKÁLLAPOT",
+            name: "Stratégiás játék",
+            instructions: "Tudnivalók",
+            instructionDescription: "Az „Új próbajáték kezdése” gombra kattintva próbajáték indul, ami a pontozásba nem számít bele. Bátran kérjetek próbajátékot, hiszen ezzel tudjátok tesztelni, hogy jól értitek-e a játék működését. Az „Új éles játék kezdése” gombra kattintva indul a valódi játék, ami már pontért megy.",
+            realResults: "Éles játékok eddigi eredményei: {{gamesWon}} győzelem, {{gamesLost}} vereség",
+            testGameButton: "Új próbajáték kezdése",
+            realGameButton: "Új éles játék kezdése",
+            firstPlayer: "Kezdő leszek",
+            secondPlayer: "Második leszek",
+            endTable: {
+              all: "Összpontszám",
+              gained: "Szerzett pontok",
+              tries: "Próbálkozások száma"
+            },
+            guide: {
+              newGame: "Kezdj új játékot!",
+              ifFirstPlayer: "Válaszd ki, hogy első vagy második játékos akarsz-e lenni.",
+              yourTurn: "Most Te jössz!",
+              waitingForServer: "Várakozás a szerverre...",
+              realGameWin: "Gratulálok, nyertetek! Verjétek meg még egyszer a gépet!",
+              testGameWin: "Gratulálok, a próbajátékban nyertetek!",
+              botWins: "Sajnos a gép nyert.",
+              endOfGame: "A játék végetért.",
+            },
+          },
+          error: {
+            unexpected: "Váratlan hiba történt",
+            duplicate: 'Ezt a választ már próbáltátok',
+            integer: 'Egész számot kell írni',
+            type: 'Számot kell írnod',
+            range: 'A megoldás 0 és 9999 között van',
+            empty: 'Nem írtál semmi választ!',
+            wrongid: 'Rossz belépési kód!',
+            notFound: 'Ez az oldal nem található',
+          },
+          warnings: {
+            timeNotMatch: "A számítógép órája nincs szinkronban a szerver órájával, a jelzett hátralevő idő nem tökéletes, az oldal újra töltése megoldhatja a problémát",
+            timeNotReal: "Az óra csak tájékoztató jellegű. Más eszközökön és böngészőkben más időt fogtok látni, de így is csak az időben beérkezett válaszokat fogjuk figyelembe venni.",
+            pointsNotSettled: "A pontszámotok csak tájékoztató jellegű, a végleges pontszámotokat a beküldött válaszok alapján újraértékeljük.",
+          }
         }
       }
     }

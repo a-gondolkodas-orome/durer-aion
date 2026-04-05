@@ -15,10 +15,10 @@ export const ExcerciseTask: React.FunctionComponent<ExcerciseTaskProps> = (props
   const { t } = useTranslation();
   return <Stack>
     <Stack sx={{fontSize: '20px'}}>
-      {props.serial}. {t('general:task')} ({props.maxPoints} {t('general:point')}):
+      {props.serial}. {t('general.task')} ({props.maxPoints} {t('general.point')}):
     </Stack>
     <div dangerouslySetInnerHTML={{ __html: completestring }} />
-    {props.pictureUrl && <img src={props.pictureUrl} style={{maxWidth:'80%', display: 'flex', marginLeft:'auto', marginRight: 'auto', marginTop: "30px"}} alt={'feladatKép (ha nem töltött be próbáld frissíteni az oldalt)'}/>}
+    {props.pictureUrl && <img src={props.pictureUrl} style={{maxWidth:'80%', display: 'flex', marginLeft:'auto', marginRight: 'auto', marginTop: "30px"}} alt={t('relay.taskImage')}/>}
   </Stack>
     
 }

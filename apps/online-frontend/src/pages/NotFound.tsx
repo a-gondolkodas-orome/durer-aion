@@ -5,8 +5,8 @@ export default function NotFound() {
   const { t } = useTranslation();
   return (<>
     <h1>
-      {t('notFound:message')}
+      {t('error.notFound')}
     </h1>
-    <p><Link to={"/"}>{t('notFound:back')}</Link></p>
+    <p><Link to={"/"}>{t('general.returnHome')}</Link></p>
   </>);
 }

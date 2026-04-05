@@ -30,15 +30,15 @@ export function StrategyEndTable(props: {allPoints: number, numOfTries: number})
         fontSize: '18px',
         fontWeight: 'bold',
         textAlign: 'center'
-    }}>{t('relay:endTable.all')}</Stack>
+    }}>{t('relay.endTable.all')}</Stack>
       <Stack sx={{
           marginTop: '25px',
           display: 'flex',
           alignItems: 'center',
           flexWrap: 'wrap',
         }}>
-        <Stack>{t('strategy:endTable.gained')}: {props.allPoints}</Stack>
-        <Stack>{t('strategy:endTable.tries')}: {props.numOfTries}</Stack>
+        <Stack>{t('strategy.endTable.gained')}: {props.allPoints}</Stack>
+        <Stack>{t('strategy.endTable.tries')}: {props.numOfTries}</Stack>
       </Stack>
       <Button sx={{
         width: '300px',
@@ -52,7 +52,7 @@ export function StrategyEndTable(props: {allPoints: number, numOfTries: number})
         await toHome();
         window.location.reload(); 
       }}>
-        {t('relay:endTable.back')}
+        {t('relay.endTable.back')}
       </Button>
     </Stack>
   )

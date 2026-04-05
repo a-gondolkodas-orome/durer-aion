@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from './Langswitcher';
 
 export function Header(props: { teamName: string | null }) {
-  const { t } = useTranslation();
+  const { t } = useTranslation(undefined, { keyPrefix: 'header' });
   const theme = useTheme();
   const logout = useLogout();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -42,7 +42,7 @@ export function Header(props: { teamName: string | null }) {
           fontWeight: 'bold',
           paddingTop: '20px',
           whiteSpace: 'nowrap',
-        }}>{t('header:title')}</Stack>
+        }}>{t('title')}</Stack>
         {
           <Stack sx={{
             flexDirection: 'row',
@@ -82,7 +82,7 @@ export function Header(props: { teamName: string | null }) {
                 "&:hover": {
                   opacity: '0.8',
                 }
-              }}>{t('header:logout')}</Stack>
+              }}>{t('logout')}</Stack>
             </>
             }
             <Stack sx={{
@@ -124,7 +124,7 @@ export function Header(props: { teamName: string | null }) {
             md: 'flex'
           },
           whiteSpace: 'nowrap',
-        }}>{t('header:subtitle')}</Stack>
+        }}>{t('subtitle')}</Stack>
         <Dialog
           open={mobileMenuOpen}
           onClose={()=>{
@@ -152,7 +152,7 @@ export function Header(props: { teamName: string | null }) {
               fontSize: 20,
               textTransform: 'capitalize'
             }}
-            >{t('header:logout')}</Button>
+            >{t('logout')}</Button>
             <LanguageSwitcher />
         </Dialog>
       </Container>

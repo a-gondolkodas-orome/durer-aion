@@ -24,6 +24,6 @@ export function Strategy(props: { state: TeamModelDto }) {
       );
     case "NOT STARTED":
     default:
-      return <div data-testId={testId}>{t('strategy:notSupported')}</div>;
+      return <div data-testId={testId}>{t('strategy.notSupported')}</div>;
   }
 }

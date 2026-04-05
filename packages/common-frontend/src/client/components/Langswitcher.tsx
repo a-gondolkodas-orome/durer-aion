@@ -3,6 +3,7 @@ import i18next from 'i18next';
 import { Select, MenuItem, Stack, Button } from '@mui/material';
 import LanguageIcon from '@mui/icons-material/Language';
 import { useTranslation } from 'react-i18next';
+import i18n from 'i18next';
 
 type langNames = Record<string, string>;
 
@@ -10,9 +11,13 @@ export function LanguageSwitcher(props: { direction?: string, style?: string }) 
   const theme = useTheme();
   const { t } = useTranslation();
   const gap = (props.style === 'simple') ? '0px' : '10px';
-  const allLanguages: langNames = {en: '', hu: ''};
-  Object.keys(allLanguages).forEach((lang) => {
-    allLanguages[lang] = t(`languages:${lang}`);
+  const languagesArray = Object.keys(i18n.options.resources ?? {})
+  const allLanguages: langNames = {};
+  languagesArray.forEach(l => {
+    allLanguages[l] = t(`languages.${l}`);
+    if (allLanguages[l] === `languages.${l}`) {
+      allLanguages[l] = l;
+    }
   });
 
   if (props.style === 'dropdown') {

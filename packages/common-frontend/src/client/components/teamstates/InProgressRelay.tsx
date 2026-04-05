@@ -98,7 +98,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
             paddingLeft: "30px",
             marginBottom: '20px'
           }}>
-            <b style={{marginRight: '5px'}}>{t('general:remainingTime')}:</b>
+            <b style={{marginRight: '5px'}}>{t('general.remainingTime')}:</b>
             <Countdown
               msRemaining={msRemaining ?? null}
               setMsRemaining={()=>{}}
@@ -161,7 +161,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
             fontSize: 18,
             flexDirection: 'row',
           }}>
-            <b style={{marginRight: '5px'}}>{t('relay:remainingTime')}:</b>
+            <b style={{marginRight: '5px'}}>{t('general.remainingTime')}:</b>
             {!finished && <Countdown
               msRemaining={msRemaining ?? null}
               setMsRemaining={setMsRemaining}
@@ -175,7 +175,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
               width: '250px',
               fontSize: '10px',
             }}>
-            ({t('warnings:timeNotReal')})
+            ({t('warnings.timeNotReal')})
             </Stack>
           }
         </Stack>

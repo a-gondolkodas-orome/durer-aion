@@ -16,9 +16,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
     const refreshState = useRefreshTeamState();
     const isOffline = useClientRepo().version === "OFFLINE";
     const theme = useTheme();
-    const { t } = useTranslation();
-    const gamesWon = G.numberOfTries-G.numberOfLoss-Number(G.winner===null && G.difficulty==="live");
-    const gamesLost = G.numberOfLoss;
+    const { t } = useTranslation(undefined, { keyPrefix: 'strategy' });
 
     useEffect(() => {
       if (!ctx.gameover) {
@@ -75,14 +73,14 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
             <Stack sx={{
               width: '225px',
             }}>
-              {t('strategy:name')}
+              {t('name')}
             </Stack>
             <Stack sx={{ flex: 1 }} />
             <Stack sx={{
               flexDirection: 'row',
               marginRight: '10px'
             }}>
-              <b style={{ marginRight: '5px' }}>{t('general:remainingTime')}:</b>
+              <b style={{ marginRight: '5px' }}>{t('remainingTime', { keyPrefix: 'general' })}:</b>
               {!finished && <Countdown
                 msRemaining={msRemaining ?? null}
                 setMsRemaining={setMsRemaining}
@@ -98,7 +96,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
             fontSize: '10px',
             marginLeft: 'auto',
           }}>
-          {t('warnings:timeNotReal')}
+          {t('timeNotReal', { keyPrefix: 'warnings' })}
           </Stack>}
           <Stack sx={{
             marginTop: '10px',
@@ -109,7 +107,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
             // fontWeight: 'bold',
           }}>
             {description}
-            <strong>{t('strategy:instructions')}</strong>{t('strategy:instructionDescription')}
+            <strong>{t('instructions')}</strong>{t('instructionDescription')}
           </Stack>
 
           <Stack sx={{
@@ -120,7 +118,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
             },
             // fontWeight: 'bold',
           }}>
-            {t('strategy:realresults')} {gamesWon + " " + t('strategy:wins', {count: gamesWon})}, {gamesLost + " " + t('strategy:defeats', {count: gamesLost})}
+            {t('realResults', { gamesLost: G.numberOfLoss, gamesWon: G.numberOfTries-G.numberOfLoss-Number(G.winner===null && G.difficulty==="live")})}
           </Stack>
 
           <Stack sx={{
@@ -157,7 +155,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
                   }} variant='contained' color='primary' onClick={() => {
                     moves.chooseNewGameType("test");
                   }}>
-                    {t('strategy:testgamebutton')}
+                    {t('testGameButton')}
                   </Button>
                   <Stack sx={{ width: '10%' }} />
                   <Button sx={{
@@ -173,7 +171,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
                   }} variant='contained' color='primary' onClick={() => {
                     moves.chooseNewGameType("live")
                   }}>
-                    {t('strategy:realgamebutton')}
+                    {t('realGameButton')}
                   </Button>
                 </Stack>
               }
@@ -193,7 +191,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
                   }} variant='contained' color='primary' onClick={() => {
                     moves.chooseRole(GUESSER_PLAYER);
                   }}>
-                    {t('strategy:firstplayer')}
+                    {t('firstPlayer')}
                   </Button>
                   <Stack sx={{ width: '10%' }} />
                   <Button sx={{
@@ -206,7 +204,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
                   }} variant='contained' color='primary' onClick={() => {
                     moves.chooseRole(JUDGE_PLAYER);
                   }}>
-                    {t('strategy:secondplayer')}
+                    {t('secondPlayer')}
                   </Button>
                 </Stack>}
               <Stack sx={{
@@ -222,14 +220,14 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
                 fontSize: '14px',
                 borderStyle: 'solid',
               }}>
-                {ctx.phase === 'startNewGame' && G.winner === null && <p> {t('strategy:guide:newgame')} </p>}
-                {ctx.phase === 'chooseRole' && <p> {t('strategy:guide:iffirstplayer')} </p>}
-                {ctx.phase === 'play' && ctx.currentPlayer === "0" && <p> {t('strategy:guide:yourturn')} </p>}
-                {ctx.phase === 'play' && ctx.currentPlayer === "1" && <p> {t('strategy:guide:waitingforserver')} </p>}
-                {ctx.phase === 'startNewGame' && G.winner === "0" && G.difficulty === "live" && <p> {t('strategy:guide:realgamewin')} </p>}
-                {ctx.phase === 'startNewGame' && G.winner === "0" && G.difficulty === "test" && <p> {t('strategy:guide:testgamewin')}</p>}
-                {ctx.phase === 'startNewGame' && G.winner === "1" && <p> {t('strategy:guide:botwins')} </p>}
-                {finished && <p> {t('strategy:guide:endofgame')} </p>}
+                {ctx.phase === 'startNewGame' && G.winner === null && <p> {t('guide.newGame')} </p>}
+                {ctx.phase === 'chooseRole' && <p> {t('guide.ifFirstPlayer')} </p>}
+                {ctx.phase === 'play' && ctx.currentPlayer === "0" && <p> {t('guide.yourTurn')} </p>}
+                {ctx.phase === 'play' && ctx.currentPlayer === "1" && <p> {t('guide.waitingForServer')} </p>}
+                {ctx.phase === 'startNewGame' && G.winner === "0" && G.difficulty === "live" && <p> {t('guide.realGameWin')} </p>}
+                {ctx.phase === 'startNewGame' && G.winner === "0" && G.difficulty === "test" && <p> {t('guide.testGameWin')}</p>}
+                {ctx.phase === 'startNewGame' && G.winner === "1" && <p> {t('guide.botWins')} </p>}
+                {finished && <p> {t('guide.endOfGame')} </p>}
               </Stack>
             </Stack>
             <Stack sx={{

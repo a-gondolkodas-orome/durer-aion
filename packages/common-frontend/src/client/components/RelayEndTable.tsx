@@ -16,7 +16,7 @@ export function RelayEndTable(props: {allPoints: number, task: {max: number, got
   const theme = useTheme();
   const refreshState = useRefreshTeamState();
   const toHome = useToHome();
-  const { t } = useTranslation(['relay']);
+  const { t } = useTranslation(undefined, { keyPrefix: 'relay' });
 
   return (
     <Stack sx={{
@@ -164,7 +164,7 @@ export function RelayEndTable(props: {allPoints: number, task: {max: number, got
 
 export function RelayEndTableData(props: {allPoints: number, task: {max: number, got: number | null, answers: number[]}[]}) {
   const theme = useTheme();
-  const { t } = useTranslation();
+  const { t } = useTranslation(undefined, { keyPrefix: 'relay' });
   return (
         <Table sx={{
         marginTop: '20px',

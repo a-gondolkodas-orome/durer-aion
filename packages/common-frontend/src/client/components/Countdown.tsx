@@ -68,5 +68,5 @@ export function Countdown(
     return (<><span className="fs-3 mb-3"><code className="mb-2">
         {countdown}
     </code></span>
-    {(offset > 5000 || offset < -5000) && <Tooltip title={t('warnings:timeNotMatch')}><ReportIcon color="warning"/></Tooltip>}</>);
+    {(offset > 5000 || offset < -5000) && <Tooltip title={t('warnings.timeNotMatch')}><ReportIcon color="warning"/></Tooltip>}</>);
 }

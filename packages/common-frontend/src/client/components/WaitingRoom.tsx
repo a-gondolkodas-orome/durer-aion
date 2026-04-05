@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 export function WaitingRoom() {
   const theme = useTheme();
-  const { t } = useTranslation();
+  const { t } = useTranslation(undefined, { keyPrefix: 'waitingRoom' });
   return (
     <Stack sx={{
       display: 'flex',
@@ -20,20 +20,20 @@ export function WaitingRoom() {
         fontWeight: "bold",
         marginBottom: "50px",
       }}>
-        {t('waitingRoom:soon')}
+        {t('soon')}
       </Stack>
       <Stack sx={{
         fontSize: 32,
         marginBottom: "40px",
         marginLeft: "30px",
       }}>
-        {t('waitingRoom:remainingStart')} #:##:## {t('waitingRoom:remainingEnd')}
+        {t('remainingStart')} #:##:## {t('remainingEnd')}
       </Stack>
       <Stack sx={{
         fontSize: 24,
         marginLeft: "30px",
       }}>
-        {t('waitingRoom:instruction')}
+        {t('instruction')}
       </Stack>
 
     </Stack>

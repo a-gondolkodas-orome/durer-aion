@@ -24,6 +24,6 @@ export function Relay(props: { state: TeamModelDto }) {
       );
     case "NOT STARTED":
     default:
-      return <div data-testId={testId}>{t('relay:badCategory')}</div>;
+      return <div data-testId={testId}>{t('relay.badCategory')}</div>;
   }
 }

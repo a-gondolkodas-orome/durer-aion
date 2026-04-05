@@ -3,7 +3,7 @@ import { FinishedMatchStatus, TeamModelDto } from "../dto/TeamStateDto";
 import { ChooserItem } from "./ChooserItem";
 import { useClientRepo } from "../api-repository-interface";
 import { useTheme } from "@mui/material/styles";
-import { useTranslation } from "react-i18next";
+import { useTranslation, Trans } from "react-i18next";
 
 export function Chooser(props: {
   state: TeamModelDto;
@@ -17,7 +17,7 @@ export function Chooser(props: {
     props.state.strategyMatch.state === "FINISHED";
   const isOffline = useClientRepo().version === "OFFLINE";
   const theme = useTheme();
-  const { t } = useTranslation();
+  const { t } = useTranslation(undefined, { keyPrefix: 'chooser'});
 
   return (
     <Stack
@@ -54,17 +54,23 @@ export function Chooser(props: {
               fontSize: "24px",
             }}
           >
-            {t('chooser:finish:title')}
+            {t('finish.title')}
           </p>
-          <span dangerouslySetInnerHTML={{ __html: t('chooser:finish:content') }}></span>
+          <span>
+            <Trans 
+              i18nKey='chooser.finish.content'
+              components={{
+                a: <a href={process.env.VITE_FEEDBACK_URL} target="_blank" rel="noopener noreferrer" />
+              }} />
+          </span>
           <p
             style={{
               fontSize: "24px",
             }}
           >
-            {t('chooser:finish:final')}: <b>{finalPoints}</b>
+            {t('finish.final')}: <b>{finalPoints}</b>
           </p>
-          { isOffline && t('warnings:pointsNotSettled')}
+          { isOffline && t('pointsNotSettled', { keyPrefix: 'warnings' })}
         </Stack>
       )}
       <Stack
