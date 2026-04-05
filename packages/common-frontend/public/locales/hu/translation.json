@@ -1,0 +1,117 @@
+{
+  "languages": {
+    "en": "Angol",
+    "hu": "Magyar"
+  },
+  "disclaimer": {
+    "welcome": "Kedves <strong>{{tname}}</strong> csapat, üdvözlünk az online fordulón!",
+    "category": "Kategóriátok: <strong>{{category}}</strong>",
+    "start": "Az online fordulón a csapatoknak önállóan kell dolgozniuk, más emberektől nem kérhetnek segítséget a versenyzési időszak végéig (21:30-ig). A mesterséges intelligencia használata is tilos.",
+    "progress": "Továbbjutás",
+    "progressDescription": "Azok a csapatok, amelyek az online forduló során a megszerezhető {{maxpoints}} pontból legalább {{minpoints}} pontot elérnek, továbbjutnak a helyi fordulóba. (Fenntartjuk a jogot, hogy a ponthatárt esetleg csökkentsük, növelni biztosan nem fogjuk.) Az online fordulón szerzett pontszám nem számít bele a további eredményekbe.",
+    "interface": "A felület",
+    "interfaceDescription": "A felület mobilon és gépen is kitölthető, egyszerre akár több eszközzel is bejelentkezhettek.",
+    "interfaceDescriptionOfflineMode": "A felület mobilon és gépen is kitölthető. Kérünk bennetek, hogy <strong>legfeljebb 1 eszközről</strong> töltsétek ki az online fordulót, továbbá <strong>ne frissítsétek le az oldalt</strong> a verseny során.<br /><small>(Ha mégis frissítitek az oldalt, akkor a verseny újraindul (de az eddigi eredményeitek megmaradnak). Ekkor - minél gyorsabban - menjetek vissza ahhoz a feladathoz, ahol jártatok. Figyeljetek arra, hogy bár az időzítő újraindul a frissítés után, de így is csak az időben beérkezett válaszokat fogjuk figyelembe venni.)</small>",
+    "continue": "Tovább a versenyhez"
+  },
+  "chooser": {
+    "finish": {
+      "title": "Vége a versenynek!",
+      "content": "Köszönjük a részvételeteket, reméljük, hogy tetszett nektek a verseny. Kíváncsiak vagyunk a fordulóval kapcsolatos véleményetekre, így kérjük, <a>töltsétek ki ezt az űrlapot</a>. Várhatóan csütörtökig közzétesszük az eredményeket és a továbbjutó csapatok listáját, és erről emailben is fogunk nektek értesítést küldeni.",
+      "final": "Végső pontszám"
+    },
+    "gameDescriptionHtml": "<p>Ebben a feladatban egy kétszemélyes stratégiás játékot játszhattok, ahol az egyik játékos Ti lesztek, a másik játékos pedig a gép. Győzzétek le a gépet <b>kétszer egymás után</b> ebben a játékban! A kezdő helyzet ismeretében Ti dönthetitek el, hogy a kezdő vagy a második játékos bőrébe szeretnétek bújni.</p>         \n            <p>A sikeres teljesítésért az alábbiak szerint kaptok pontot:\n              <ul>\n                <li>Ha egyszer sem veszítetek, akkor 12 pontot kaptok.</li>\n                <li>1, 2, 3, 4, illetve 5 vereség esetén a kapott pontszám 9-re, 6-ra, 4-re, 3-ra, illetve 2-re csökken.</li>\n                <li>Ennél több vereség esetén is 2 pontot kaptok, ha sikerül teljesítenetek a játékot.</li>\n                <li>Ha 30 perc alatt nem győzitek le kétszer egymás után a gépet, akkor 0 pontot kaptok.</li>\n              </ul>\n            </p>\n            <p>\n              Ha készen álltok, kattintsatok a lenti gombra és onnantól kezdve összesen 30 perc áll rendelkezésetekre.\n            </p>",
+    "relayDescription": "A váltófeladatok rövid szöveges feladatok, melyekre a válasz egy egész szám (legalább 0 és legfeljebb 9999). Minden váltófeladatra maximum 3 tippet adhattok le, egy-egy rossz tipp után az adott feladatra megszerezhető pontszám 1-gyel csökken. Helyes tipp vagy három rossz tipp után megkapjátok a következő feladatot. A váltófeladatokra összesen 60 perc áll rendelkezésre, és összesen 40 pont szerezhető velük hibátlan teljesítés esetén. (Az egyes feladatokra kapható pontszám 3-tól 6-ig terjed.)",
+    "filledAt": "Kitöltve ekkor",
+    "achievedPoint": "Elért pontszám",
+    "start": "Kezdjük",
+    "result": "Eredmények"
+  },
+  "relay": {
+    "endTable": {
+      "title": "A váltó befejeződött",
+      "task": "Feladat",
+      "point": "Pontszám",
+      "try": "{{count}}. próbálkozásra",
+      "wrong": "Hibás válasz",
+      "all": "Összpontszám",
+      "pointsGained": "pontot szereztél",
+      "back": "Vissza a versenyhez",
+      "reminder": "Ne feledkezzetek meg a stratégiás játékról, ha azzal még nem játszottatok!"
+    },
+    "goodGuess": "A válasz helyes volt",
+    "wrongGuess": "A válasz sajnos nem volt jó",
+    "badCategory": "ROSSZ KATEGÓRIA",
+    "name": "Váltófeladatok",
+    "guess": "Tipp:",
+    "send": "Küldés",
+    "guessNum": "{{guessnum}}. próba:",
+    "taskImage": "A feladathoz tartozó kép (ha nem töltött be, próbáld meg frissíteni az oldalt!)"
+  },
+  "general": {
+    "remainingTime": "Hátralevő idő",
+    "task": "feladat",
+    "point": "pont",
+    "returnHome": "Vissza a főoldalra"
+  },
+  "header": {
+    "logout": "kilépés",
+    "subtitle": "Online forduló",
+    "title": "XIX. Dürer Verseny"
+  },
+  "login": {
+    "greeting": "Kedves Versenyző!",
+    "beforeTitle": "Üdvözlünk a ",
+    "afterTitle": " online fordulójának felületén.",
+    "loginInstruction": "Belépéshez nézd meg az emailjeidet, és üsd be az ott található kódot ide:",
+    "fallback": "Ha nem találjátok az emailt, akkor írjatok nekünk a verseny [K] durerinfo [P] hu email címre.",
+    "loginButton": "Belépés"
+  },
+  "waitingRoom": {
+    "soon": "Az online forduló hamarosan kezdődik!",
+    "remainingStart": "Még",
+    "remainingEnd": "van hátra kezdésig!",
+    "instruction": "A verseny kezdetekor automatikusan átirányításra kerültök a verseny felületre."
+  },
+  "strategy": {
+    "notSupported": "NEM TÁMOGATOTT JÁTÉKÁLLAPOT",
+    "name": "Stratégiás játék",
+    "instructions": "Tudnivalók",
+    "instructionDescription": "Az „Új próbajáték kezdése” gombra kattintva próbajáték indul, ami a pontozásba nem számít bele. Bátran kérjetek próbajátékot, hiszen ezzel tudjátok tesztelni, hogy jól értitek-e a játék működését. Az „Új éles játék kezdése” gombra kattintva indul a valódi játék, ami már pontért megy.",
+    "realResults": "Éles játékok eddigi eredményei: {{gamesWon}} győzelem, {{gamesLost}} vereség",
+    "testGameButton": "Új próbajáték kezdése",
+    "realGameButton": "Új éles játék kezdése",
+    "firstPlayer": "Kezdő leszek",
+    "secondPlayer": "Második leszek",
+    "endTable": {
+      "all": "Összpontszám",
+      "gained": "Szerzett pontok",
+      "tries": "Próbálkozások száma"
+    },
+    "guide": {
+      "newGame": "Kezdj új játékot!",
+      "ifFirstPlayer": "Válaszd ki, hogy első vagy második játékos akarsz-e lenni.",
+      "yourTurn": "Most Te jössz!",
+      "waitingForServer": "Várakozás a szerverre...",
+      "realGameWin": "Gratulálok, nyertetek! Verjétek meg még egyszer a gépet!",
+      "testGameWin": "Gratulálok, a próbajátékban nyertetek!",
+      "botWins": "Sajnos a gép nyert.",
+      "endOfGame": "A játék végetért."
+    }
+  },
+  "error": {
+    "unexpected": "Váratlan hiba történt",
+    "duplicate": "Ezt a választ már próbáltátok",
+    "integer": "Egész számot kell írni",
+    "type": "Számot kell írnod",
+    "range": "A megoldás 0 és 9999 között van",
+    "empty": "Nem írtál semmi választ!",
+    "wrongid": "Rossz belépési kód!",
+    "notFound": "Ez az oldal nem található"
+  },
+  "warnings": {
+    "timeNotMatch": "A számítógép órája nincs szinkronban a szerver órájával, a jelzett hátralevő idő nem tökéletes, az oldal újra töltése megoldhatja a problémát",
+    "timeNotReal": "Az óra csak tájékoztató jellegű. Más eszközökön és böngészőkben más időt fogtok látni, de így is csak az időben beérkezett válaszokat fogjuk figyelembe venni.",
+    "pointsNotSettled": "A pontszámotok csak tájékoztató jellegű, a végleges pontszámotokat a beküldött válaszok alapján újraértékeljük."
+  }
+}
