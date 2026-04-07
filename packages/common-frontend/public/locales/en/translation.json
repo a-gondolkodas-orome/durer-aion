@@ -84,6 +84,7 @@
   "strategy": {
     "notSupported": "UNSUPPORTED GAME STATE",
     "name": "Strategy game",
+    "description": "Description",
     "instructions": "Further instructions",
     "instructionDescription": "Clicking on the button “Start a new test game” starts a test game, which is not counted in the scoring. Feel free to play some test games before playing a real round in order to test your understanding of the game's logic. The latter mode can be initialised by clicking “Start a new live game”, which will start a game which now counts for points.",
     "realResults": "Live game results so far: {{wins}}, {{defeats}}",
@@ -108,7 +109,10 @@
       "realGameWin": "Congratulations, you won! Defeat the computer one more time!",
       "testGameWin": "Congratulations, you won the test game!",
       "botWins": "Unfortunately the computer won.",
-      "endOfGame": "The game has ended."
+      "endOfGame": "The game has ended.",
+      "play": "Now play on the board to the right.",
+      "results": "Results",
+      "actions": "Actions"
     }
   },
   "error": {

@@ -102,26 +102,17 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
             marginTop: '10px',
             fontSize: {
               xs: '14px',
-              md: '24px',
+              md: '18px',
             },
           }}>
+            <Stack sx={{ fontWeight: 'bold', marginTop: '10px' }}>
+              {t('description')}:
+            </Stack>
             {description}
-            <strong>{t('instructions')}</strong>{t('instructionDescription')}
-          </Stack>
-
-          <Stack sx={{
-            marginTop: '20px',
-            fontSize: {
-              xs: '14px',
-              md: '24px',
-            },
-            // fontWeight: 'bold',
-          }}>
-            {t('realResults', { 
-                wins: t('wins', {count: G.numberOfTries-G.numberOfLoss-Number(G.winner===null && G.difficulty==="live")}),
-                defeats: t('defeats', {count: G.numberOfLoss})
-              })
-            }
+            <Stack sx={{ fontWeight: 'bold', marginTop: '10px' }}>
+              {t('instructions')}:
+            </Stack>
+            <p>{t('instructionDescription')}</p>
           </Stack>
 
           <Stack sx={{
@@ -133,106 +124,164 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
           }}>
             <Stack sx={{
               width: {
-                xs: '100%',
-                md: '40%',
+              xs: '100%',
+              md: '40%',
               },
-              flexDirection: 'column',
               padding: '15px',
             }}>
-              {ctx.phase === 'startNewGame' &&
-                <Stack sx={{
+              <Stack
+                component="table"
+                sx={{
                   width: '100%',
-                  flexDirection: 'row',
-                  marginBottom: '20px',
-                }}>
-                  <Button sx={{
-                    width: '45%',
-                    height: '60px',
-                    fontSize: {
-                      xs: '14px',
-                      sm: '18px',
-                    },
-                    alignSelf: 'center',
-                    textTransform: 'none',
-                    borderRadius: '10px',
-                  }} variant='contained' color='primary' onClick={() => {
-                    moves.chooseNewGameType("test");
-                  }}>
-                    {t('testGameButton')}
-                  </Button>
-                  <Stack sx={{ width: '10%' }} />
-                  <Button sx={{
-                    width: '45%',
-                    height: '60px',
-                    fontSize: {
-                      xs: '14px',
-                      sm: '18px',
-                    },
-                    alignSelf: 'center',
-                    textTransform: 'none',
-                    borderRadius: '10px',
-                  }} variant='contained' color='primary' onClick={() => {
-                    moves.chooseNewGameType("live")
-                  }}>
-                    {t('realGameButton')}
-                  </Button>
+                  borderCollapse: 'separate',
+                  borderSpacing: 0,
+                  border: `2px solid ${theme.palette.primary.main}`,
+                  borderRadius: '12px',
+                  overflow: 'hidden',
+                  backgroundColor: alpha(theme.palette.primary.main, 0.05),
+                  color: theme.palette.text.primary,
+                }}
+                >
+                <Stack component="tbody">
+                  <Stack component="tr" sx={{ backgroundColor: alpha(theme.palette.primary.main, 0.08) }}>
+                  <Stack
+                    component="td"
+                    sx={{
+                      width: '35%',
+                      fontWeight: 700,
+                      p: '12px',
+                      borderBottom: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
+                    }}
+                  >
+                    {t('result', { keyPrefix: 'chooser' })}
+                  </Stack>
+                  <Stack
+                    component="td"
+                    sx={{
+                      p: '12px',
+                      borderBottom: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
+                      color: theme.palette.primary.main,
+                      fontWeight: 600,
+                      fontSize: {
+                        xs: '14px',
+                        md: '18px',
+                      },
+                    }}
+                  >
+                    {t("realResults", {
+                    wins: t("wins", {
+                      count: G.numberOfTries - G.numberOfLoss - Number(G.winner === null && G.difficulty === "live"),
+                    }),
+                    defeats: t("defeats", { count: G.numberOfLoss }),
+                    })}
+                  </Stack>
+                  </Stack>
+
+                  <Stack component="tr">
+                  <Stack
+                    component="td"
+                    sx={{
+                      fontWeight: 700,
+                      p: '12px',
+                      borderBottom: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
+                    }}
+                  >
+                    {t('guide.actions')}
+                  </Stack>
+                  <Stack
+                    component="td"
+                    sx={{
+                      p: '12px',
+                      borderBottom: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
+                    }}
+                  >
+                    {ctx.phase === 'startNewGame' && (
+                    <Stack sx={{ width: '100%', flexDirection: 'row' }}>
+                      <Button sx={{
+                        width: '48%',
+                        height: '50px',
+                        fontSize: { xs: '14px', sm: '16px' },
+                        textTransform: 'none',
+                        borderRadius: '10px',
+                      }} variant='contained' color='primary' onClick={() => moves.chooseNewGameType("test")}>
+                      {t('testGameButton')}
+                      </Button>
+                      <Stack sx={{ width: '4%' }} />
+                      <Button sx={{
+                        width: '48%',
+                        height: '50px',
+                        fontSize: { xs: '14px', sm: '16px' },
+                        textTransform: 'none',
+                        borderRadius: '10px',
+                      }} variant='contained' color='primary' onClick={() => moves.chooseNewGameType("live")}>
+                      {t('realGameButton')}
+                      </Button>
+                    </Stack>
+                    )}
+
+                    {ctx.phase === 'chooseRole' && (
+                    <Stack sx={{ width: '100%', flexDirection: 'row' }}>
+                      <Button sx={{
+                        width: '48%',
+                        height: '50px',
+                        fontSize: '16px',
+                        textTransform: 'none',
+                        borderRadius: '10px',
+                      }} variant='contained' color='primary' onClick={() => moves.chooseRole(GUESSER_PLAYER)}>
+                      {t('firstPlayer')}
+                      </Button>
+                      <Stack sx={{ width: '4%' }} />
+                      <Button sx={{
+                        width: '48%',
+                        height: '50px',
+                        fontSize: '16px',
+                        textTransform: 'none',
+                        borderRadius: '10px',
+                      }} variant='contained' color='primary' onClick={() => moves.chooseRole(JUDGE_PLAYER)}>
+                      {t('secondPlayer')}
+                      </Button>
+                    </Stack>
+                    )}
+
+                    {ctx.phase !== 'startNewGame' && ctx.phase !== 'chooseRole' &&
+                    <Stack sx={{ width: '100%', flexDirection: 'row' }}>
+                      <Button sx={{
+                        width: '100%',
+                        height: '50px',
+                        fontSize: '16px',
+                        textTransform: 'none',
+                        borderRadius: '10px',
+                      }} variant='contained' color='primary' disabled>
+                      {t('guide.play')}
+                      </Button>
+                    </Stack>
+                    }
+                  </Stack>
+                  </Stack>
+
+                  <Stack component="tr">
+                  <Stack
+                    component="td"
+                    sx={{
+                    p: '12px',
+                    color: theme.palette.primary.main,
+                    fontSize: '16px',
+                    fontWeight: 500,
+                    }}
+                  >
+                    {ctx.phase === 'startNewGame' && G.winner === null && t('guide.newGame')}
+                    {ctx.phase === 'chooseRole' && t('guide.ifFirstPlayer')}
+                    {ctx.phase === 'play' && ctx.currentPlayer === "0" && t('guide.yourTurn')}
+                    {ctx.phase === 'play' && ctx.currentPlayer === "1" && t('guide.waitingForServer')}
+                    {ctx.phase === 'startNewGame' && G.winner === "0" && G.difficulty === "live" && t('guide.realGameWin')}
+                    {ctx.phase === 'startNewGame' && G.winner === "0" && G.difficulty === "test" && t('guide.testGameWin')}
+                    {ctx.phase === 'startNewGame' && G.winner === "1" && t('guide.botWins')}
+                    {finished && t('guide.endOfGame')}
+                  </Stack>
+                  </Stack>
                 </Stack>
-              }
-              {ctx.phase === 'chooseRole' &&
-                <Stack sx={{
-                  width: '100%',
-                  flexDirection: 'row',
-                  marginBottom: '20px',
-                }}>
-                  <Button sx={{
-                    width: '45%',
-                    height: '60px',
-                    fontSize: '18px',
-                    alignSelf: 'center',
-                    textTransform: 'none',
-                    borderRadius: '10px',
-                  }} variant='contained' color='primary' onClick={() => {
-                    moves.chooseRole(GUESSER_PLAYER);
-                  }}>
-                    {t('firstPlayer')}
-                  </Button>
-                  <Stack sx={{ width: '10%' }} />
-                  <Button sx={{
-                    width: '45%',
-                    height: '60px',
-                    fontSize: '18px',
-                    alignSelf: 'center',
-                    textTransform: 'none',
-                    borderRadius: '10px',
-                  }} variant='contained' color='primary' onClick={() => {
-                    moves.chooseRole(JUDGE_PLAYER);
-                  }}>
-                    {t('secondPlayer')}
-                  </Button>
-                </Stack>}
-              <Stack sx={{
-                width: '100%',
-                display: 'block',
-                borderRadius: '20px',
-                backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                borderColor: theme.palette.primary.main,
-                color: theme.palette.primary.main,
-                borderWidth: '2px',
-                textAlign: 'center',
-                padding: '15px',
-                fontSize: '14px',
-                borderStyle: 'solid',
-              }}>
-                {ctx.phase === 'startNewGame' && G.winner === null && <p> {t('guide.newGame')} </p>}
-                {ctx.phase === 'chooseRole' && <p> {t('guide.ifFirstPlayer')} </p>}
-                {ctx.phase === 'play' && ctx.currentPlayer === "0" && <p> {t('guide.yourTurn')} </p>}
-                {ctx.phase === 'play' && ctx.currentPlayer === "1" && <p> {t('guide.waitingForServer')} </p>}
-                {ctx.phase === 'startNewGame' && G.winner === "0" && G.difficulty === "live" && <p> {t('guide.realGameWin')} </p>}
-                {ctx.phase === 'startNewGame' && G.winner === "0" && G.difficulty === "test" && <p> {t('guide.testGameWin')}</p>}
-                {ctx.phase === 'startNewGame' && G.winner === "1" && <p> {t('guide.botWins')} </p>}
-                {finished && <p> {t('guide.endOfGame')} </p>}
+                </Stack>
               </Stack>
-            </Stack>
             <Stack sx={{
               width: {
                 xs: '100%',

@@ -83,6 +83,7 @@
   "strategy": {
     "notSupported": "NEM TÁMOGATOTT JÁTÉKÁLLAPOT",
     "name": "Stratégiás játék",
+    "description": "Feladat leírása",
     "instructions": "Tudnivalók",
     "instructionDescription": "Az „Új próbajáték kezdése” gombra kattintva próbajáték indul, ami a pontozásba nem számít bele. Bátran kérjetek próbajátékot, hiszen ezzel tudjátok tesztelni, hogy jól értitek-e a játék működését. Az „Új éles játék kezdése” gombra kattintva indul a valódi játék, ami már pontért megy.",
     "realResults": "Éles játékok eddigi eredményei: {{wins}}, {{defeats}}",
@@ -105,7 +106,10 @@
       "realGameWin": "Gratulálok, nyertetek! Verjétek meg még egyszer a gépet!",
       "testGameWin": "Gratulálok, a próbajátékban nyertetek!",
       "botWins": "Sajnos a gép nyert.",
-      "endOfGame": "A játék végetért."
+      "endOfGame": "A játék végetért.",
+      "play": "Innentől játssz a jobboldalon található táblán.",
+      "results": "Eredmények",
+      "actions": "Akciók"
     }
   },
   "error": {
