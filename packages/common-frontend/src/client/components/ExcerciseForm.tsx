@@ -29,15 +29,15 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
   const { enqueueSnackbar } = useSnackbar();
   const refreshState = useRefreshTeamState();
   const [sentAnswer, setSentAnswer] = useState<number>(0);
-  const { t } = useTranslation();
+  const { t } = useTranslation(undefined, { keyPrefix: 'relay' });
   useEffect(()=>{
     if(props.previousCorrectness!=null){
       if(props.previousCorrectness){
-        console.log(t('relay.goodGuess'))
-        enqueueSnackbar(t('relay.goodGuess'), { variant: 'success' });
+        console.log(t('goodGuess'))
+        enqueueSnackbar(t('goodGuess'), { variant: 'success' });
       } else {
-        console.log(t('relay.wrongGuess'))
-        enqueueSnackbar(t('relay.wrongGuess'), { variant: 'error' });
+        console.log(t('wrongGuess'))
+        enqueueSnackbar(t('wrongGuess'), { variant: 'error' });
       }
     }
     setSentAnswer((p)=>{return p-1;});
@@ -49,7 +49,7 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
       fontStyle: 'italic',
       marginBottom: '5px',
     }}>
-      {t('relay.guess')}
+      {t('guess')}
     </Stack>
     <Stack>
       <Form
@@ -118,7 +118,7 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
               alignItems: 'center',
               fontSize: 16,
             }}>
-              {t('relay.guessNum', { guessnum: idx + 1 })}
+              {t('guessNum', { guessnum: idx + 1 })}
               <Stack sx={{
                 fontSize: '18px',
                 marginLeft: '10px',
@@ -136,7 +136,7 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
           borderRadius: '10px',
           marginTop: '40px',
         }} variant='contained' color='primary' type="submit">
-          {t('relay.send')}
+          {t('send')}
         </Button>
       </Form>
     </Stack>

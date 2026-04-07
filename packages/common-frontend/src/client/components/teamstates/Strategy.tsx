@@ -13,7 +13,7 @@ export function Strategy(props: { state: TeamModelDto }) {
     case "IN PROGRESS":
       return (
         <div data-testId={testId}>
-         {StrategyClient ? <Suspense fallback={<div>Játék betöltése…</div>}>
+         {StrategyClient ? <Suspense fallback={<div>{t('general.loading')}</div>}>
             <StrategyClient
               category={props.state.category as "C" | "D" | "E"}
               credentials={props.state.credentials}

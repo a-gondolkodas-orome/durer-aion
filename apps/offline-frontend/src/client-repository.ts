@@ -159,7 +159,7 @@ const getTeamStateFromLocal = (): TeamModelDto => {
   }
   const teamstateString = localStorage.getItem(LOCAL_STORAGE_TEAMSTATE);
   if (teamstateString === null) {
-    throw new Error(i18n.t('unexpected'));
+    throw new Error(i18n.t('error.unexpected'));
   }
   return JSON.parse(teamstateString);
 }

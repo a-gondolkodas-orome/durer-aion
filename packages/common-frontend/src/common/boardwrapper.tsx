@@ -104,7 +104,6 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
               xs: '14px',
               md: '24px',
             },
-            // fontWeight: 'bold',
           }}>
             {description}
             <strong>{t('instructions')}</strong>{t('instructionDescription')}
@@ -118,7 +117,11 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
             },
             // fontWeight: 'bold',
           }}>
-            {t('realResults', { gamesLost: G.numberOfLoss, gamesWon: G.numberOfTries-G.numberOfLoss-Number(G.winner===null && G.difficulty==="live")})}
+            {t('realResults', { 
+                wins: t('wins', {count: G.numberOfTries-G.numberOfLoss-Number(G.winner===null && G.difficulty==="live")}),
+                defeats: t('defeats', {count: G.numberOfLoss})
+              })
+            }
           </Stack>
 
           <Stack sx={{

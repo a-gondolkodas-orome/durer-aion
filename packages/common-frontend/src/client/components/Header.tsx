@@ -1,19 +1,16 @@
-import { Container, Dialog, Stack, Button, IconButton } from '@mui/material';
+import { Container, Dialog, Stack, Button } from '@mui/material';
 import { useState } from 'react';
 import { useLogout } from '../hooks/user-hooks';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
-import LanguageIcon from '@mui/icons-material/Language';
 import { useClientRepo } from '../api-repository-interface';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
-import { LanguageSwitcher } from './Langswitcher';
 
 export function Header(props: { teamName: string | null }) {
   const { t } = useTranslation(undefined, { keyPrefix: 'header' });
   const theme = useTheme();
   const logout = useLogout();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [languageSwitcherOpen, setLanguageSwitcherOpen] = useState(false);
   const clientRepository = useClientRepo();
   return (
     <Stack sx={{
@@ -89,20 +86,6 @@ export function Header(props: { teamName: string | null }) {
               flex: 1
             }}>
             </Stack>
-            <IconButton
-              onClick={() => {
-                setLanguageSwitcherOpen(!languageSwitcherOpen);
-              }}
-              sx={{
-                color: theme.palette.primary.contrastText,
-                marginLeft: '10px'
-              }}
-            >
-              <LanguageIcon />
-            </IconButton>
-            {languageSwitcherOpen &&
-            <LanguageSwitcher direction='row' style='dropdown' />
-            }
           </Stack>
         }
         {props.teamName &&<Stack sx={{
@@ -153,7 +136,6 @@ export function Header(props: { teamName: string | null }) {
               textTransform: 'capitalize'
             }}
             >{t('logout')}</Button>
-            <LanguageSwitcher />
         </Dialog>
       </Container>
     </Stack>

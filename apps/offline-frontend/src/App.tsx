@@ -26,7 +26,7 @@ function App() {
       <ThemeProvider theme={theme}>
         <ClientRepoProvider 
           value={new OfflineClientRepository()}>
-          <Main />
+          <Main language={import.meta.env.VITE_LANGUAGE}/>
         </ClientRepoProvider>
       </ThemeProvider>
     </GameProvider>

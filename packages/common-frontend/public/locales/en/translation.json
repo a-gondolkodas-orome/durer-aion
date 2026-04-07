@@ -4,14 +4,14 @@
     "hu": "Hungarian"
   },
   "disclaimer": {
-    "welcome": "Dear Team <strong>{{tname}}</strong>, we welcome you in the online round!",
-    "category": "Your category: <strong>{{category}}</strong>",
+    "welcome": "Dear Team <i>{{tname}}</i>, we welcome you in the online round!",
+    "category": "Your category: <b>{{category}}</b>",
     "start": "In the online round, teams must work on their own; they must not ask for help from other people until the competition ends (at 21:30). The use of artificial intelligence is also forbidden.",
     "progress": "Advancing to next rounds",
     "progressDescription": "Teams that earn at least {{minpoints}} points out of the maximum {{maxpoints}} points that can be earned will proceed to the regional round. (We reserve the right to lower this minimum threshold, but we will not raise it.) The points earned in the online round do not count towards the later results.",
     "interface": "The interface",
     "interfaceDescription": "The interface can be filled in using your PCs or phones as well. You can even log in from multiple devices.",
-    "interfaceDescriptionOfflineMode": "The interface can be filled in on both mobile and computer. Please make sure to complete the online round from <strong>at most 1 device</strong>, and also <strong>do not refresh the page</strong> during the competition.<br /><small>(If you nevertheless refresh the page, the competition will restart (but your results so far will be kept). In that case, go back as quickly as possible to the task where you left off. Note that although the timer restarts after refreshing, we will still only take into account answers that arrive within the official time limit.)</small>",
+    "interfaceDescriptionOfflineMode": "The interface can be filled in on both mobile and computer. Please make sure to complete the online round from <b>at most 1 device</b>, and also <b>do not refresh the page</b> during the competition.<br /><small>(If you nevertheless refresh the page, the competition will restart (but your results so far will be kept). In that case, go back as quickly as possible to the task where you left off. Note that although the timer restarts after refreshing, we will still only take into account answers that arrive within the official time limit.)</small>",
     "continue": "Continue to the competition"
   },
   "chooser": {
@@ -38,18 +38,25 @@
       "all": "Total points",
       "pointsGained": "points scored",
       "back": "Back to competition",
-      "reminder": "Don't forget to play with the strategy game too if you haven't done yet!",
-      "taskImage": "Image belonging to the current task (if it didn't load properly, try refreshing the page)"
+      "reminder": "Don't forget to play with the strategy game too if you haven't done yet!"
+    },
+    "error": {
+      "duplicate": "You've already tried this guess",
+      "integer": "You must give an integer",
+      "type": "Answer must be a number",
+      "range": "The solution is between 0 and 9999",
+      "badCategory": "WRONG CATEGORY"
     },
     "goodGuess": "Your answer is correct",
     "wrongGuess": "Your guess is sadly wrong",
-    "badCategory": "WRONG CATEGORY",
     "name": "Relay tasks",
     "guess": "Guess:",
     "send": "Submit",
-    "guessNum": "guess #{{guessnum}}:"
+    "guessNum": "guess #{{guessnum}}:",
+    "taskImage": "Image belonging to the current task (if it didn't load properly, try refreshing the page)"
   },
   "general": {
+    "loading": "Loading game or task…",
     "task": "task",
     "point": "point",
     "remainingTime": "Remaining time",
@@ -79,7 +86,11 @@
     "name": "Strategy game",
     "instructions": "Further instructions",
     "instructionDescription": "Clicking on the button “Start a new test game” starts a test game, which is not counted in the scoring. Feel free to play some test games before playing a real round in order to test your understanding of the game's logic. The latter mode can be initialised by clicking “Start a new live game”, which will start a game which now counts for points.",
-    "realResults": "Live game results so far: {{gamesWon}} win(s), {{gamesLost}} defeat(s)",
+    "realResults": "Live game results so far: {{wins}}, {{defeats}}",
+    "wins_one": "1 win",
+    "wins_other": "{{count}} wins",
+    "defeats_one": "1 defeat",
+    "defeats_other": "{{count}} defeats",
     "testGameButton": "Start a new test game",
     "realGameButton": "Start a new live game",
     "firstPlayer": "I will be the first",
@@ -102,10 +113,6 @@
   },
   "error": {
     "unexpected": "An unexpected error occurred",
-    "duplicate": "You've already tried this guess",
-    "integer": "You must give an integer",
-    "type": "Answer must be a number",
-    "range": "The solution is between 0 and 9999",
     "empty": "You have not specified any answer!",
     "wrongid": "Incorrect log-in code.",
     "notFound": "This page was not found."

@@ -56,7 +56,7 @@ export function Disclaimer(props: {teamName: string, category: string}) {
               i18nKey='disclaimer.welcome'
               values={{ tname: props.teamName }}
               components={{
-                strong: <i style={{color: theme.palette.primary.main}} />
+                i: <i style={{color: theme.palette.primary.main}} />
               }} />
           </div>
         </Stack>
@@ -72,7 +72,7 @@ export function Disclaimer(props: {teamName: string, category: string}) {
               i18nKey='disclaimer.category'
               values={{ category: props.category }}
               components={{
-                strong: <strong style={{color: theme.palette.primary.main}} />
+                b: <b style={{color: theme.palette.primary.main}} />
               }} />
           </div>
         </Stack>
@@ -124,7 +124,7 @@ export function Disclaimer(props: {teamName: string, category: string}) {
           <Trans 
           i18nKey={isOffline ? 'disclaimer.interfaceDescriptionOfflineMode' : 'disclaimer.interfaceDescription'}
           components={{
-            strong: <strong />,
+            b: <b />,
             small: <small />,
             br: <br />
           }} />

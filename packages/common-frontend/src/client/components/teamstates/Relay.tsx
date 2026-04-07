@@ -13,7 +13,7 @@ export function Relay(props: { state: TeamModelDto }) {
     case "IN PROGRESS":
       return (
         <div data-testId={testId}>
-          {RelayClient ? <Suspense fallback={<div>Játék betöltése…</div>}>
+          {RelayClient ? <Suspense fallback={<div>{t('general.loading')}</div>}>
             <RelayClient
               category={props.state.category as "C" | "D" | "E"}
               credentials={props.state.credentials}
