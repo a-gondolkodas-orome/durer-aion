@@ -45,7 +45,7 @@ jobs:
   #       run: npm run lint
 
   build:
-    name: build & lint
+    name: build
     runs-on: ubuntu-latest
     steps:
       - name: Check out Git repository
