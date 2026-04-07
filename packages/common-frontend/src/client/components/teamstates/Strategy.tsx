@@ -1,7 +1,7 @@
 import { InProgressMatchStatus, TeamModelDto } from "../../dto/TeamStateDto";
 import { useGame } from "./GameContext";
 import { dictionary } from "../../text-constants";
-import React, { Suspense } from "react";
+import { Suspense } from "react";
 
 const testId = "strategyRoot";
 

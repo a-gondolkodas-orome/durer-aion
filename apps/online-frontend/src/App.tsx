@@ -26,7 +26,7 @@ function App() {
       <ThemeProvider theme={theme}>
         <ClientRepoProvider 
           value={new RealClientRepository()}>
-          <Main />
+          <Main gitCommitHash={import.meta.env.VITE_GIT_COMMIT_HASH}/>
         </ClientRepoProvider>
       </ThemeProvider>
     </GameProvider>

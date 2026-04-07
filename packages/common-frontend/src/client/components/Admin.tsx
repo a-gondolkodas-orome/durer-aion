@@ -14,6 +14,7 @@ import { FinishedMatchStatus } from 'schemas';
 import { ConfirmDialogInterface, ConfirmDialog } from './ConfirmDialog';
 import * as Yup from 'yup';
 import { FieldProps } from "formik"
+import { alpha } from '@mui/system'
 
 export function Admin(props: {teamId?: string}) {
   const theme = useTheme();
@@ -49,7 +50,7 @@ export function Admin(props: {teamId?: string}) {
         xs: '10px',
         md: 0
       },
-      backgroundColor: theme.palette.background.paper,
+      backgroundColor: alpha(theme.palette.background.paper, theme.palette.background.paperOpacity),
     }} data-testid="adminRoot">
       <Dialog 
         maxWidth={false} 

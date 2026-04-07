@@ -13,7 +13,7 @@ export function MyClient<T_SpecificGameState>(
     game: gameWrapper(game),
     board: boardWrapper(board, description),
     numPlayers: 2,
-  })
+  });
 }
 
 export function MyClientRelay(
@@ -25,7 +25,7 @@ export function MyClientRelay(
     game: game,
     board: board,
     numPlayers: 2,
-  },)
+  });
 }
 
 export function MyOnlineClient<T_SpecificGameState >(

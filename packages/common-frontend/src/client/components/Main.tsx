@@ -10,7 +10,7 @@ import { Disclaimer } from "./Disclaimer";
 import { Chooser } from "./Chooser";
 import { Admin } from "./Admin";
 
-export function Main() {
+export function Main(props: { gitCommitHash: string }) {
   const teamState = useTeamState();
   const [frontendState, setFrontEndState] = useState<"R" | "S" | null>(null);
   const [admin, setAdmin] = useState<boolean>(false);
@@ -49,7 +49,7 @@ export function Main() {
         {admin && <Admin teamId={window.location.pathname.split('/').at(2)}/>}
         {!teamState && !admin && <Login />}
         {teamState && teamState.pageState === "DISCLAIMER" && (
-          <Disclaimer />
+          <Disclaimer teamName={teamState.teamName} category={teamState.category}/>
         )}
         {teamState && teamState.pageState === "HOME" && frontendState === null && (
           <Chooser state={teamState} setState={setFrontEndState}/>
@@ -67,6 +67,14 @@ export function Main() {
           <Strategy state={teamState} />
         )}
       </Container>
+      <footer style={{
+        textAlign: "center",
+        color: "#777",
+        fontSize: '70%',
+        marginBottom: '8px'
+      }}>
+        <div>{props.gitCommitHash}</div>
+      </footer>
     </Layout>
   );
 }
