@@ -1,5 +1,4 @@
 export * from './api-repository-interface'
-export * from './text-constants';
 export * from './components/Admin';
 export * from './components/Chooser';
 export * from './components/ChooserItem';

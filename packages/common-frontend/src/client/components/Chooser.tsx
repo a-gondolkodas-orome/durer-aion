@@ -1,9 +1,9 @@
 import { Stack, alpha } from "@mui/system";
 import { FinishedMatchStatus, TeamModelDto } from "../dto/TeamStateDto";
 import { ChooserItem } from "./ChooserItem";
-import { dictionary } from "../text-constants";
 import { useClientRepo } from "../api-repository-interface";
 import { useTheme } from "@mui/material/styles";
+import { useTranslation, Trans } from "react-i18next";
 
 export function Chooser(props: {
   state: TeamModelDto;
@@ -17,6 +17,7 @@ export function Chooser(props: {
     props.state.strategyMatch.state === "FINISHED";
   const isOffline = useClientRepo().version === "OFFLINE";
   const theme = useTheme();
+  const { t } = useTranslation(undefined, { keyPrefix: 'chooser'});
 
   return (
     <Stack
@@ -53,17 +54,23 @@ export function Chooser(props: {
               fontSize: "24px",
             }}
           >
-            {dictionary.chooser.finish.title}
+            {t('finish.title')}
           </p>
-          <span dangerouslySetInnerHTML={{ __html: dictionary.chooser.finish.content }}></span>
+          <span>
+            <Trans 
+              i18nKey='chooser.finish.content'
+              components={{
+                a: <a href={process.env.VITE_FEEDBACK_URL} target="_blank" rel="noopener noreferrer" />
+              }} />
+          </span>
           <p
             style={{
               fontSize: "24px",
             }}
           >
-            {dictionary.chooser.finish.final}: <b>{finalPoints}</b>
+            {t('finish.final')}: <b>{finalPoints}</b>
           </p>
-          { isOffline && "A pontszámotok csak tájékoztató jellegű, a végleges pontszámotokat a beküldött válaszok alapján újraértékeljük."}
+          { isOffline && t('pointsNotSettled', { keyPrefix: 'warnings' })}
         </Stack>
       )}
       <Stack

@@ -4,9 +4,9 @@ import { useSnackbar } from 'notistack';
 import { useLogin } from '../hooks/user-hooks';
 import Form from './form';
 import { useTheme } from '@mui/material/styles';
-import { dictionary } from '../text-constants';
 import { Button } from '@mui/material';
 import MaskedInput from "react-text-mask";
+import { useTranslation } from 'react-i18next';
 
 const idMask = [/\d/, /\d/,  /\d/, "-", /\d/, /\d/, /\d/, /\d/, "-", /\d/, /\d/, /\d/ ];
 
@@ -14,6 +14,7 @@ export function Login() {
   const theme = useTheme();
   const { enqueueSnackbar } = useSnackbar();
   const login = useLogin();
+  const { t } = useTranslation(undefined, { keyPrefix: 'login' });
 
   return (
     <Stack sx={{
@@ -45,8 +46,8 @@ export function Login() {
             md: "40px",
           }
         }}>
-          {dictionary.login.greeting}<br/>
-          {dictionary.login.beforeTitle} {dictionary.header.title} {dictionary.login.afterTitle}
+          {t('greeting')}<br/>
+          {t('beforeTitle')}{t('title', { keyPrefix: 'header' })}{t('afterTitle')}
         </Stack>
         <Stack sx={{
           marginTop: {
@@ -58,13 +59,13 @@ export function Login() {
             md: "30px",
           }
         }}>
-          {dictionary.login.loginInstraction}
+          {t('loginInstruction')}
         </Stack>
         <Stack>
           <Form style={{ position: "relative", zIndex: 2 }} initialValues={{ joinCode: '' }}
             onSubmit={(values) => {
               if(!values.joinCode) {
-                enqueueSnackbar("nem adtad meg a kódot", { variant: 'error' });
+                enqueueSnackbar(t('empty', { keyPrefix: 'error' }), { variant: 'error' });
                 return;
               }
               login(values.joinCode).catch(err => {
@@ -119,7 +120,7 @@ export function Login() {
                 }
               }}
             >
-              Belépés
+              {t('loginButton')}
             </Button>
           </Form>
         </Stack>
@@ -133,7 +134,7 @@ export function Login() {
           xs: "20px",
           md: "100px"
         }}}>
-        {dictionary.login.fallback}
+        {t('fallback')}
       </Stack>
     </Stack>
   )

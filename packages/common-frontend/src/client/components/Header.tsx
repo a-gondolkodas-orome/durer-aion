@@ -1,12 +1,13 @@
-import { Container, Dialog, Stack } from '@mui/material';
-import React, { useState } from 'react';
+import { Container, Dialog, Stack, Button } from '@mui/material';
+import { useState } from 'react';
 import { useLogout } from '../hooks/user-hooks';
-import { dictionary } from '../text-constants';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import { useClientRepo } from '../api-repository-interface';
 import { useTheme } from '@mui/material/styles';
+import { useTranslation } from 'react-i18next';
 
 export function Header(props: { teamName: string | null }) {
+  const { t } = useTranslation(undefined, { keyPrefix: 'header' });
   const theme = useTheme();
   const logout = useLogout();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -38,8 +39,8 @@ export function Header(props: { teamName: string | null }) {
           fontWeight: 'bold',
           paddingTop: '20px',
           whiteSpace: 'nowrap',
-        }}>{dictionary.header.title}</Stack>
-        {props.teamName &&
+        }}>{t('title')}</Stack>
+        {
           <Stack sx={{
             flexDirection: 'row',
             display: {
@@ -54,32 +55,37 @@ export function Header(props: { teamName: string | null }) {
             paddingLeft: '10px',
             paddingRight: '10px',
           }}>
+            {props.teamName &&
+              <>
+              <Stack sx={{
+                flex: 1
+              }}></Stack>
+              <Stack sx={{
+                fontSize: 25,
+                display: 'block',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}>{props.teamName}</Stack>
+              <Stack onClick={()=>{
+                logout();
+                if ( clientRepository.version === "OFFLINE") {
+                  window.location.reload();
+                }            
+              }} sx={{
+                fontSize: 20,
+                margin: '0px 15px',
+                cursor: 'pointer',
+                "&:hover": {
+                  opacity: '0.8',
+                }
+              }}>{t('logout')}</Stack>
+            </>
+            }
             <Stack sx={{
               flex: 1
-            }}></Stack>
-            <Stack sx={{
-              fontSize: 25,
-              display: 'block',
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            }}>{props.teamName}</Stack>
-            <Stack onClick={()=>{
-              logout();
-              if ( clientRepository.version === "OFFLINE") {
-                window.location.reload();
-              }            
-            }} sx={{
-              fontSize: 20,
-              marginLeft: '15px',
-              cursor: 'pointer',
-              "&:hover": {
-                opacity: '0.8',
-              }
-            }}>{dictionary.header.logout}</Stack>
-            <Stack sx={{
-              flex: 1
-            }}></Stack>
+            }}>
+            </Stack>
           </Stack>
         }
         {props.teamName &&<Stack sx={{
@@ -101,7 +107,7 @@ export function Header(props: { teamName: string | null }) {
             md: 'flex'
           },
           whiteSpace: 'nowrap',
-        }}>{dictionary.header.subtitle}</Stack>
+        }}>{t('subtitle')}</Stack>
         <Dialog
           open={mobileMenuOpen}
           onClose={()=>{
@@ -121,17 +127,15 @@ export function Header(props: { teamName: string | null }) {
               paddingTop: '10px',
               paddingBottom: '20px',
             }}>{props.teamName}</Stack>
-            <Stack onClick={()=>{
+            <Button onClick={()=>{
               setMobileMenuOpen(false);
               logout();
-            }} sx={{
+            }} variant='outlined'
+            sx={{
               fontSize: 20,
-              marginLeft: '15px',
-              cursor: 'pointer',
-              "&:hover": {
-                opacity: '0.8',
-              }
-            }}>{dictionary.header.logout}</Stack>
+              textTransform: 'capitalize'
+            }}
+            >{t('logout')}</Button>
         </Dialog>
       </Container>
     </Stack>

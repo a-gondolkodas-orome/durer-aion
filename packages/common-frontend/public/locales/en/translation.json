@@ -1,0 +1,129 @@
+{
+  "languages": {
+    "en": "English",
+    "hu": "Hungarian"
+  },
+  "disclaimer": {
+    "welcome": "Dear Team <i>{{tname}}</i>, we welcome you in the online round!",
+    "category": "Your category: <b>{{category}}</b>",
+    "start": "In the online round, teams must work on their own; they must not ask for help from other people until the competition ends (at 21:30). The use of artificial intelligence is also forbidden.",
+    "progress": "Advancing to next rounds",
+    "progressDescription": "Teams that earn at least {{minpoints}} points out of the maximum {{maxpoints}} points that can be earned will proceed to the regional round. (We reserve the right to lower this minimum threshold, but we will not raise it.) The points earned in the online round do not count towards the later results.",
+    "interface": "The interface",
+    "interfaceDescription": "The interface can be filled in using your PCs or phones as well. You can even log in from multiple devices.",
+    "interfaceDescriptionOfflineMode": "The interface can be filled in on both mobile and computer. Please make sure to complete the online round from <b>at most 1 device</b>, and also <b>do not refresh the page</b> during the competition.<br /><small>(If you nevertheless refresh the page, the competition will restart (but your results so far will be kept). In that case, go back as quickly as possible to the task where you left off. Note that although the timer restarts after refreshing, we will still only take into account answers that arrive within the official time limit.)</small>",
+    "continue": "Continue to the competition"
+  },
+  "chooser": {
+    "finish": {
+      "title": "Competition ended!",
+      "content": "Thank you for participating, we hope you enjoyed the competition. We are curious about your feedback on this round, so please <a>fill out this form</a>. We will publish the results and the list of advancing teams by Thursday, and we will also send you a notification about it by email.",
+      "final": "Final score"
+    },
+    "gameDescriptionHtml": "<p>In this task, you can play a two-player strategy game where you will be one player and the computer will be the other. Defeat the computer <b>twice in a row</b> in this game! Knowing the starting position, you can decide whether you want to play as the first or second player.</p>\n            <p>You will receive points for successful completion as follows:\n              <ul>\n            <li>If you don't lose at all, you get 12 points.</li>\n            <li>In case of 1, 2, 3, 4, or 5 losses, the points obtained decrease to 9, 6, 4, 3, and 2 respectively.</li>\n            <li>In case of more losses, you still get 2 points if you manage to complete the game.</li>\n            <li>If you fail to defeat the computer twice in a row within 30 minutes, you get 0 points.</li>\n              </ul>\n            </p>\n            <p>\n              When you're ready, click the button below and from then on you have a total of 30 minutes.\n            </p>",
+    "relayDescription": "Relay tasks are short text tasks where the answer is an integer (at least 0 and at most 9999). You can make a maximum of 3 guesses for each relay task, and after each wrong guess, the points you can earn for that task decrease by 1. After a correct guess or three wrong guesses, you will receive the next task. You have a total of 60 minutes for the relay tasks, and you can earn a total of 40 points with error-free performance. (The points available for individual tasks range from 3 to 6.)",
+    "filledAt": "Filled at",
+    "achievedPoint": "Points achieved",
+    "start": "Start",
+    "result": "Results"
+  },
+  "relay": {
+    "endTable": {
+      "title": "Relay completed",
+      "task": "Task",
+      "point": "Points",
+      "try_one": "in 1 attempt",
+      "try_other": "in {{count}} attempts",
+      "wrong": "Wrong answer",
+      "all": "Total points",
+      "pointsGained": "points scored",
+      "back": "Back to competition",
+      "reminder": "Don't forget to play with the strategy game too if you haven't done yet!"
+    },
+    "error": {
+      "duplicate": "You've already tried this guess",
+      "integer": "You must give an integer",
+      "type": "Answer must be a number",
+      "range": "The solution is between 0 and 9999",
+      "badCategory": "WRONG CATEGORY"
+    },
+    "goodGuess": "Your answer is correct",
+    "wrongGuess": "Your guess is sadly wrong",
+    "name": "Relay tasks",
+    "guess": "Guess:",
+    "send": "Submit",
+    "guessNum": "guess #{{guessnum}}:",
+    "taskImage": "Image belonging to the current task (if it didn't load properly, try refreshing the page)"
+  },
+  "general": {
+    "loading": "Loading game or task…",
+    "task": "task",
+    "point": "point",
+    "remainingTime": "Remaining time",
+    "returnHome": "Back to main page"
+  },
+  "header": {
+    "logout": "logout",
+    "subtitle": "Online round",
+    "title": "XIX. Dürer Competition"
+  },
+  "login": {
+    "greeting": "Dear Competitor!",
+    "beforeTitle": "Welcome to the online round interface of the ",
+    "afterTitle": ".",
+    "loginInstruction": "To log in, check your emails and enter the code you find there here:",
+    "fallback": "If you can't find the email, write to us at the verseny (at) durerinfo (dot) hu email address.",
+    "loginButton": "Log in"
+  },
+  "waitingRoom": {
+    "soon": "The online round will start soon!",
+    "remainingStart": "Still",
+    "remainingEnd": "left until start!",
+    "instruction": "When the competition starts, you will be automatically redirected to the competition interface."
+  },
+  "strategy": {
+    "notSupported": "UNSUPPORTED GAME STATE",
+    "name": "Strategy game",
+    "description": "Description",
+    "instructions": "Further instructions",
+    "instructionDescription": "Clicking on the button “Start a new test game” starts a test game, which is not counted in the scoring. Feel free to play some test games before playing a real round in order to test your understanding of the game's logic. The latter mode can be initialised by clicking “Start a new live game”, which will start a game which now counts for points.",
+    "realResults": "Live game results so far: {{wins}}, {{defeats}}",
+    "wins_one": "1 win",
+    "wins_other": "{{count}} wins",
+    "defeats_one": "1 defeat",
+    "defeats_other": "{{count}} defeats",
+    "testGameButton": "Start a new test game",
+    "realGameButton": "Start a new live game",
+    "firstPlayer": "I will be the first",
+    "secondPlayer": "I will be the second",
+    "endTable": {
+      "all": "Total points",
+      "gained": "Points earned",
+      "tries": "Number of attempts"
+    },
+    "guide": {
+      "newGame": "Start a new game!",
+      "ifFirstPlayer": "Choose whether you want to be the first or second player.",
+      "yourTurn": "Your turn now!",
+      "waitingForServer": "Waiting for server...",
+      "realGameWin": "Congratulations, you won! Defeat the computer one more time!",
+      "testGameWin": "Congratulations, you won the test game!",
+      "botWins": "Unfortunately the computer won.",
+      "endOfGame": "The game has ended.",
+      "play": "Now play on the board to the right.",
+      "results": "Results",
+      "actions": "Actions"
+    }
+  },
+  "error": {
+    "unexpected": "An unexpected error occurred",
+    "empty": "You have not specified any answer!",
+    "wrongid": "Incorrect log-in code.",
+    "notFound": "This page was not found."
+  },
+  "warnings": {
+    "timeNotMatch": "Your computer's clock is not synchronized with the server's clock, the displayed remaining time is not perfect, reloading the page may solve the problem",
+    "timeNotReal": "The clock is for informational purposes only. You will see a different time on other devices and browsers, but we will still only consider answers received on time.",
+    "pointsNotSettled": "Your final points are only here for informational purposes, these will be reevaluated based on all the submissions we get."
+  }
+}

@@ -1,18 +1,19 @@
+import { useTranslation } from "react-i18next";
 import { InProgressMatchStatus, TeamModelDto } from "../../dto/TeamStateDto";
 import { useGame } from "./GameContext";
-import { dictionary } from "../../text-constants";
 import { Suspense } from "react";
 
 const testId = "strategyRoot";
 
 export function Strategy(props: { state: TeamModelDto }) {
+  const { t } = useTranslation();
   const StrategyClient = useGame().StrategyClient;
   switch (props.state.strategyMatch.state) {
     case "FINISHED":
     case "IN PROGRESS":
       return (
         <div data-testId={testId}>
-         {StrategyClient ? <Suspense fallback={<div>Játék betöltése…</div>}>
+         {StrategyClient ? <Suspense fallback={<div>{t('general.loading')}</div>}>
             <StrategyClient
               category={props.state.category as "C" | "D" | "E"}
               credentials={props.state.credentials}
@@ -23,6 +24,6 @@ export function Strategy(props: { state: TeamModelDto }) {
       );
     case "NOT STARTED":
     default:
-      return <div data-testId={testId}>{dictionary.strategy.notSupported}</div>;
+      return <div data-testId={testId}>{t('strategy.notSupported')}</div>;
   }
 }
