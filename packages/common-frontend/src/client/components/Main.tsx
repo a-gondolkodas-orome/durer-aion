@@ -11,7 +11,7 @@ import { Chooser } from "./Chooser";
 import { Admin } from "./Admin";
 import i18next from "i18next";
 
-export function Main(props: { language: string }) {
+export function Main(props: { language: string, gitCommitHash: string }) {
   const teamState = useTeamState();
   const [frontendState, setFrontEndState] = useState<"R" | "S" | null>(null);
   const [admin, setAdmin] = useState<boolean>(false);
@@ -69,6 +69,14 @@ export function Main(props: { language: string }) {
           <Strategy state={teamState} />
         )}
       </Container>
+      <footer style={{
+        textAlign: "center",
+        color: "#777",
+        fontSize: '70%',
+        marginBottom: '8px'
+      }}>
+        <div>{props.gitCommitHash}</div>
+      </footer>
     </Layout>
   );
 }
