@@ -73,7 +73,7 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<
   },
 
   possibleMoves: (G, ctx, playerID) => {
-    let moves = [{ move: 'changePile', args: [0] }];
+    const moves = [{ move: 'changePile', args: [0] }];
     if (G.pile % 2 === 0) {
       moves.push({ move: 'changePile', args: [1] });
     }
@@ -85,7 +85,7 @@ return moves
   turn: {
     onMove: ({ G, ctx, playerID, events }) => {
       if (playerID === GUESSER_PLAYER) {
-        let currentTime = new Date();
+        const currentTime = new Date();
         if (currentTime.getTime() - new Date(G.end).getTime() > 1000 * 10) {
           // Do not accept any answer if the time is over since more than 10 seconds
           events.endGame();
@@ -94,7 +94,7 @@ return moves
     },
     onEnd: ({ G, ctx, playerID, events }) => {
       if (playerID === JUDGE_PLAYER) {
-        let currentTime = new Date();
+        const currentTime = new Date();
         if (currentTime.getTime() - new Date(G.end).getTime() <= 0) {
           // Do not accept any answer if the time is over
           events.endGame();

@@ -5,7 +5,7 @@ import { Dispatch, useState } from 'react';
 import useSWR from 'swr';
 import { TeamModelDto, InProgressMatchStatus, FinishedMatchStatus, MatchStatus } from '../dto/TeamStateDto';
 import { formatTime } from '../utils/DateFormatter';
-import { ErrorMessage, Field } from 'formik';
+import { ErrorMessage, Field, FieldProps } from 'formik';
 import Form from "./form";
 import { useTheme } from '@mui/material/styles';
 import { useSnackbar } from 'notistack';
@@ -81,8 +81,9 @@ export function TeamDetailDialog(props: {data: TeamModelDto, setConfirmDialog: D
                   const changed = await resetRelay(teamState.teamId);
                   setTeamState(changed);
                   enqueueSnackbar("Sikeres művelet", { variant: 'success' });
-                } catch (e: any) {
-                  enqueueSnackbar(e?.message || "Hiba történt", { variant: 'error' });
+                } catch (e: unknown) {
+                  const message = e instanceof Error ? e.message : "Váratlan hiba történt";
+                  enqueueSnackbar(message, { variant: 'error' });
                 }
               },
             })
@@ -102,8 +103,9 @@ export function TeamDetailDialog(props: {data: TeamModelDto, setConfirmDialog: D
                   const changed = await resetStrategy(teamState.teamId);
                   setTeamState(changed);
                   enqueueSnackbar("Sikeres művelet", { variant: 'success' });
-                } catch (e: any) {
-                  enqueueSnackbar(e?.message || "Hiba történt", { variant: 'error' });
+                } catch (e: unknown) {
+                  const message = e instanceof Error ? e.message : "Váratlan hiba történt";
+                  enqueueSnackbar(message, { variant: 'error' });
                 }
               },
             })
@@ -123,8 +125,8 @@ function MatchStatusField(props: {name: string, data: MatchStatus, isRelay: bool
   const [matchLogs, setMatchLogs] = useState<unknown|null>(null);
 
   switch (props.data.state) {
-    case "IN PROGRESS":
-      let inProgressState = props.data as InProgressMatchStatus 
+    case "IN PROGRESS": {
+      const inProgressState = props.data as InProgressMatchStatus 
       return (
         <><Stack>
           Folyamatban <br/>
@@ -147,8 +149,9 @@ function MatchStatusField(props: {name: string, data: MatchStatus, isRelay: bool
               try {
                 await addMinutes(inProgressState.matchID, values.time);
                 enqueueSnackbar("Sikeres művelet", { variant: 'success' });
-              } catch (e: any) {
-                enqueueSnackbar(e?.message || "Hiba történt", { variant: 'error' });
+              } catch (e: unknown) {
+                const message = e instanceof Error ? e.message : "Váratlan hiba történt";
+                enqueueSnackbar(message, { variant: 'error' });
               }
             },
           })
@@ -160,8 +163,7 @@ function MatchStatusField(props: {name: string, data: MatchStatus, isRelay: bool
         {
           ({
             field, 
-            form: { handleChange },
-          }: any) => <input
+          }: FieldProps<string | number>) => <input
             {...field}
             className="text-input"
             placeholder="perc"
@@ -212,8 +214,9 @@ function MatchStatusField(props: {name: string, data: MatchStatus, isRelay: bool
     </SyntaxHighlighter>}
       </>
       )
-    case "FINISHED":
-      let finishedState = props.data as FinishedMatchStatus 
+    }
+    case "FINISHED": {
+      const finishedState = props.data as FinishedMatchStatus 
       return (
         <Stack>
           Végzett <br/>
@@ -249,6 +252,7 @@ function MatchStatusField(props: {name: string, data: MatchStatus, isRelay: bool
     </SyntaxHighlighter>}</>
         </Stack>
       )
+    }
       case "NOT STARTED": 
         return (
           <Stack>

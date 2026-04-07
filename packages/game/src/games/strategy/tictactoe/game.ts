@@ -1,7 +1,7 @@
 import { INVALID_MOVE } from 'boardgame.io/core';
 import { currentPlayer, GameType, GUESSER_PLAYER, PlayerIDType } from '../../../common/types';
 
-type Cell = Array<null | PlayerIDType>;
+type Cell = (null | PlayerIDType)[];
 
 export interface MyGameState {
   cells: Cell;
@@ -12,7 +12,7 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type
   setup: () => ({ cells: Array(9).fill(null) }),
 
   moves: {
-    clickCell: ({ G, ctx, playerID, events }, cellID: number) => {
+    clickCell: ({ G, ctx, _playerID, events }, cellID: number) => {
       if (G.cells[cellID] !== null) {
         return INVALID_MOVE;
       }
@@ -34,8 +34,8 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type
     }
   },
 
-  possibleMoves: (G, ctx, playerID) => {
-    let moves = [];
+  possibleMoves: (G, _ctx, _playerID) => {
+    const moves = [];
     for (let i = 0; i < 9; i++) {
       if (G.cells[i] === null) {
         moves.push({ move: 'clickCell', args: [i] });
@@ -61,7 +61,7 @@ function IsVictory(cells: Cell) {
 }
 
 // Return true if all `cells` are occupied.
-function IsDraw(cells: Array<null | string>) {
+function IsDraw(cells: (null | string)[]) {
   return cells.filter(c => c === null).length === 0;
 }
 

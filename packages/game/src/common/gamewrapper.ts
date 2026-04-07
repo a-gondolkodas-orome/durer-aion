@@ -10,7 +10,7 @@ function chooseNewGameType({ G, ctx, playerID, random, events }: any, difficulty
   if (playerID !== GUESSER_PLAYER) {
     return INVALID_MOVE;
   };
-  let newG = {
+  const newG = {
     ...G,
     difficulty: difficulty,
     firstPlayer: null,

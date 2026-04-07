@@ -2,7 +2,7 @@ import { State } from 'boardgame.io';
 import { GameStateMixin, GUESSER_PLAYER, JUDGE_PLAYER } from '../../../common/types';
 import { MyGameState } from './game';
 
-let megadottValaszlepesek=new Map<string,string>([
+const megadottValaszlepesek=new Map<string,string>([
   ["", "S"],
   ["A", "CX"],
   ["B", "A"],
@@ -1278,8 +1278,8 @@ export function strategy(
         (element, index) => [element, state.G.playerLetters[index]]
       );
     }
-    let rEddigiekString = rEddigiek.join("");
-    for (let i of SOROK) {
+    const rEddigiekString = rEddigiek.join("");
+    for (const i of SOROK) {
       //nyerés
       if (
         state.G.enemyLetters.includes(i[0]) &&
@@ -1304,7 +1304,7 @@ export function strategy(
       }
     }
 
-    for (let i of SOROK) {
+    for (const i of SOROK) {
       //blokkolás
       if (
         state.G.playerLetters.includes(i[0]) &&
@@ -1338,7 +1338,7 @@ export function strategy(
       return [valasz,"clickCell"];
     }
 
-    for (let i of VILLAK) {
+    for (const i of VILLAK) {
       //villa
       if (
         state.G.remainingLetters.includes(i[0]) &&
@@ -1380,7 +1380,7 @@ export function strategy(
 
     //ingyen mezők befoglalása
     //(minden vízsz/függ. sor középső eleme mindkét irányban --> 24 eset)
-    for(let i of SOROK){
+    for(const i of SOROK){
       if(JOKOZEPSOK.includes(i[1])){
         if (
           state.G.enemyLetters.includes(i[0]) &&
@@ -1400,7 +1400,7 @@ export function strategy(
     }
 
     //tetszőleges támadás úgy, hogy az ellenfélnek ne legyen 2-ese
-    for(let i of ATLOSVILLAK){
+    for(const i of ATLOSVILLAK){
       if (
         !(
           state.G.playerLetters.includes(i[3]) &&
@@ -1434,7 +1434,7 @@ export function strategy(
       }
     }
 
-    for (let i of VILLAK) {
+    for (const i of VILLAK) {
       //villablokkolás
       if (
         state.G.remainingLetters.includes(i[0]) &&
@@ -1478,8 +1478,8 @@ export function strategy(
     if(state.G.remainingLetters.length === 1){
       return [state.G.remainingLetters[0], "clickCell"];
     }
-    let hanyban = new Array<number>(state.G.remainingLetters.length).fill(0);
-    for(let i in SOROK){
+    const hanyban = new Array<number>(state.G.remainingLetters.length).fill(0);
+    for(const i in SOROK){
       if (
         !state.G.enemyLetters.includes(i[0]) &&
         !state.G.enemyLetters.includes(i[1]) &&
@@ -1496,8 +1496,8 @@ export function strategy(
 				}
       }
     }
-    let max = Math.max(...hanyban);
-    let indexes:number[] = [];
+    const max = Math.max(...hanyban);
+    const indexes:number[] = [];
 
     for (let index = 0; index < hanyban.length; index++) {
       if (hanyban[index] === max) {

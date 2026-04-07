@@ -4,13 +4,13 @@ import { GameType, GUESSER_PLAYER, JUDGE_PLAYER } from '../../../common/types';
 // import { IS_OFFLINE_MODE } from '../../client/utils/util';
 
 export interface RemoveFromCircleGameState {
-  circle: Array<boolean>;
+  circle: boolean[];
   firstMove: number;
   lastMove: number;
 }
 
 export const MyGameWrapper = function (category: "C" | "D" | "E") {
-  const init_circle: Array<boolean> = 
+  const init_circle: boolean[] = 
     category === "C" ? [true, true, true, true, true, true, true] :
     category === "D" ? [true, true, true, true, true, true, true, true, true] :
     category === "E" ? [true, true, true, true, true] :
@@ -95,7 +95,7 @@ export const MyGameWrapper = function (category: "C" | "D" | "E") {
     },
     
     possibleMoves: (G, ctx, playerID) => {
-      let moves = [];
+      const moves = [];
       for (let i = 1; i<G.circle.length-1; i++) {
         if ((G.circle[i-1] || G.circle[i+1]) && G.circle[i]) {
           moves.push({move: 'removePoint', args: [i]});
@@ -110,7 +110,7 @@ export const MyGameWrapper = function (category: "C" | "D" | "E") {
     turn: {
       onMove: ({ G, ctx, playerID, events }) => {
         if (playerID === GUESSER_PLAYER) {
-          let currentTime = new Date();
+          const currentTime = new Date();
           if (currentTime.getTime() - new Date(G.end).getTime() > 1000 * 10) {
             // Do not accept any answer if the time is over since more than 10 seconds
             events.endGame();
@@ -119,7 +119,7 @@ export const MyGameWrapper = function (category: "C" | "D" | "E") {
       },
       onEnd: ({ G, ctx, playerID, events }) => {
         if (playerID === JUDGE_PLAYER) {
-          let currentTime = new Date();
+          const currentTime = new Date();
           if (currentTime.getTime() - new Date(G.end).getTime() >= 0) {
             // Do not accept any answer if the time is over
             events.endGame();

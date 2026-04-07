@@ -4,8 +4,8 @@ import { Dispatch } from 'react';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 
 export interface ConfirmDialogInterface {
-  text: String;
-  confirm: Function;
+  text: string;
+  confirm: () => Promise<void>;
 }
 
 export function ConfirmDialog(props: {confirmDialog: ConfirmDialogInterface | null, setConfirmDialog: Dispatch<ConfirmDialogInterface|null>}) {

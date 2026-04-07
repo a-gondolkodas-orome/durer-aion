@@ -4,7 +4,7 @@ import { INVALID_MOVE, TurnOrder } from "boardgame.io/core";
 import { GUESSER_PLAYER, JUDGE_PLAYER, otherPlayer, PlayerIDType } from "../../common/types";
 // import { IS_OFFLINE_MODE } from "../../client/utils/util";
 
-type Answer = {
+interface Answer {
   answer: number;
   date: string;
 }
@@ -15,8 +15,8 @@ export interface MyGameState {
   answer: number | null;
   points: number;
   correctnessPreviousAnswer: boolean | null;
-  previousAnswers: Array<Array<Answer>>;
-  previousPoints: Array<number>;
+  previousAnswers: Answer[][];
+  previousPoints: number[];
   currentProblemMaxPoints: number;
   numberOfTry: number;
   millisecondsRemaining: number;
@@ -72,7 +72,7 @@ export function RelayWrapper(sendRelayFunction = (...inputs: any[]) => {}): Game
           order: TurnOrder.ONCE,
           onMove: ({G, ctx, playerID, events }) => {
             if(playerID === GUESSER_PLAYER) {
-              let currentTime = new Date();
+              const currentTime = new Date();
               if(currentTime.getTime() - new Date(G.end).getTime() > 1000*10){
                 // Do not accept any answer if the time is over since more than 10 seconds
                 events.endGame();
@@ -95,7 +95,7 @@ export function RelayWrapper(sendRelayFunction = (...inputs: any[]) => {}): Game
           },
           onMove: ({G, ctx, playerID, events }) => {
             if(playerID === GUESSER_PLAYER) {
-              let currentTime = new Date();
+              const currentTime = new Date();
               sendRelayFunction({component: "relay", phase: "step", answer: G.answer, G: G, ctx: ctx});
               if(currentTime.getTime() - new Date(G.end).getTime() > 1000*10){
                 // Do not accept any answer if the time is over since more than 10 seconds
@@ -105,7 +105,7 @@ export function RelayWrapper(sendRelayFunction = (...inputs: any[]) => {}): Game
           },
           onEnd: ({G, ctx, playerID, events}) => {
             if (ctx.currentPlayer === JUDGE_PLAYER) {
-              let currentTime = new Date();
+              const currentTime = new Date();
               if (currentTime.getTime() - new Date(G.end).getTime() >= 0) {
                 // Do not accept any answer if the time is over
                 events.endGame();

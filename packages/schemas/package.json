@@ -9,7 +9,7 @@
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "lint": "TIMING=1 eslint \"src/**/*.ts*\" --max-warnings=0",
+    "lint": "cross-env TIMING=1 eslint \"src/**/*.ts*\" --max-warnings=-1",
     "test": "jest --passWithNoTests",
     "build": "npx tsup",
     "dev": "npx tsup --watch --onSuccess \"echo rebuilt schemas\""

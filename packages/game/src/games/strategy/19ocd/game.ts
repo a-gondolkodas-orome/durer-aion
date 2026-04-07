@@ -3,12 +3,12 @@ import { GameType, GUESSER_PLAYER, JUDGE_PLAYER, PlayerIDType } from '../../../c
 import { Ctx } from 'boardgame.io';
 
 export interface MyGameState {
-  numbersOnTable: Array<boolean>;
+  numbersOnTable: boolean[];
   previousMove: number;
 }
 
 export function possibleMoves(G: MyGameState) {
-  let moves = [];
+  const moves = [];
   for (let i = 1; i<=G.numbersOnTable.length; i++) {
     if ((G.numbersOnTable[i-1] && (G.previousMove % i === 0 || i % G.previousMove === 0))) {
       moves.push({move: 'removeNumber', args: [i]});
@@ -83,7 +83,7 @@ export const MyGameWrapper = function (category: "C" | "D") {
     turn: {
       onMove: ({ G, ctx, playerID, events }) => {
         if (playerID === GUESSER_PLAYER) {
-          let currentTime = new Date();
+          const currentTime = new Date();
           if (currentTime.getTime() - new Date(G.end).getTime() > 1000 * 10) {
             // Do not accept any answer if the time is over since more than 10 seconds
             events.endGame();
@@ -92,7 +92,7 @@ export const MyGameWrapper = function (category: "C" | "D") {
       },
       onEnd: ({ G, ctx, playerID, events }) => {
         if (playerID === JUDGE_PLAYER) {
-          let currentTime = new Date();
+          const currentTime = new Date();
           if (currentTime.getTime() - new Date(G.end).getTime() >= 0) {
             // Do not accept any answer if the time is over
             events.endGame();

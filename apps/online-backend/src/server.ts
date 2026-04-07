@@ -78,7 +78,7 @@ getBotCredentials(); // give love if no creds are supplied
 getAdminCredentials(); // give love if no creds are supplied
 getGameStartAndEndTime(); // give love if no creds are supplied
 
-let { db, teams } = getDb();
+const { db, teams } = getDb();
 
 // node: argv[0] vs server.ts: argv[1]
 if (argv[2] === "import") {

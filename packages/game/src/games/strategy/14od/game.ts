@@ -55,7 +55,7 @@ export const MyGame: GameType<MyGameState> = {
         G.enemyLetters.push(s);
       }
       G.remainingLetters = G.remainingLetters.filter((x) => x !== s);
-      let winner = getWinner(
+      const winner = getWinner(
         G.playerLetters,
         G.enemyLetters,
         G.remainingLetters,
@@ -78,8 +78,8 @@ export const MyGame: GameType<MyGameState> = {
   },
 
   possibleMoves: (G, ctx, playerID) => {
-    let moves = [];
-    for (let i of G.remainingLetters) {
+    const moves = [];
+    for (const i of G.remainingLetters) {
       moves.push({ move: "clickCell", args: [i] });
     }
     return moves;
@@ -118,7 +118,7 @@ function getWinner(
     "RUX",
   ];
 
-  for(let i of SOROK){
+  for(const i of SOROK){
     if(first.includes(i[0]) && first.includes(i[1]) && first.includes(i[2])){
       return "0"; // Player wins
     }

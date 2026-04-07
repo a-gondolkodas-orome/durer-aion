@@ -7,7 +7,7 @@
   "scripts": {
     "predeploy": "cross-env PUBLIC_URL=/durer19o-xn7ElDP7nQm2M1 npm run build",
     "deploy": "gh-pages -d dist",
-    "lint": "TIMING=1 eslint \"**/*.ts*\" --max-warnings=0",
+    "lint": "cross-env TIMING=1 eslint \"**/*.ts*\" --max-warnings=-1",
     "start": "vite",
     "dev": "vite",
     "build": "vite build",

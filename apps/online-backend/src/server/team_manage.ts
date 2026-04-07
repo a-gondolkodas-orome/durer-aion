@@ -31,7 +31,7 @@ export const injectPlayer = async (
     credentials: string;
 }
 ) => {
-  let match = await fetch(db, matchId, { metadata: true });
+  const match = await fetch(db, matchId, { metadata: true });
   console.log(`Match is indeed empty, and thus in need for a bot!`);
   match.metadata.players[playerID].name = name;
   match.metadata.players[playerID].credentials = credentials;
@@ -252,6 +252,7 @@ export async function getNewGame(
   const staleInfo = await checkStaleMatch(team);
   if (staleInfo.isStale) {
     await closeMatch(
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       (team[staleInfo.gameState!] as InProgressMatchStatus).matchID,
       teams,
       ctx.db

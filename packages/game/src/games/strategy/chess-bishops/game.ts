@@ -4,7 +4,7 @@ import { currentPlayer, GameType } from '../../../common/types';
 type Cell = null | "forbidden";
 
 export interface MyGameState {
-  board: Array<Cell>;
+  board: Cell[];
 }
 
 export const MyGame: GameType<MyGameState> = { // TOOO: solve type I was Game<MyGameState>
@@ -31,7 +31,7 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type I was Game<My
     },
   },
   possibleMoves: (G, ctx, playerID) => {
-    let moves = [];
+    const moves = [];
     for (let i = 0; i < 64; i++) {
       if (G.board[i] === null) {
         moves.push({ move: 'clickCell', args: [i] });
@@ -42,6 +42,6 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type I was Game<My
 };
 
 // Return true if `cells` is in a winning configuration.
-function IsVictory(cells: Array<Cell>) {
+function IsVictory(cells: Cell[]) {
   return !cells.some(i => i === null);
 }

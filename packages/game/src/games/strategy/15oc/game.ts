@@ -12,15 +12,15 @@ export const MyGame: GameType<MyGameState> = {
 
   moves: {
     clickCell: ({ G, ctx, playerID, events }, s: string) => {
-      if (false) {
-        // TODO: more checks
-        return INVALID_MOVE;
-      }
-      if (playerID === GUESSER_PLAYER) {
-      } else {
-      }
+      // if () {
+      //   // TODO: more checks
+      //   return INVALID_MOVE;
+      // }
+      // if (playerID === GUESSER_PLAYER) {
+      // } else {
+      // }
       
-      let winner = getWinner();
+      const winner = getWinner();
       if (winner !== null) {
         G.winner = winner;
         if(winner === GUESSER_PLAYER) {
@@ -38,7 +38,7 @@ export const MyGame: GameType<MyGameState> = {
   },
 
   possibleMoves: (G, ctx, playerID) => {
-    let moves = [1];
+    const moves = [1];
     
     return moves;
   },

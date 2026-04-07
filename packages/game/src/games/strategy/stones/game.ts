@@ -4,10 +4,10 @@ import { GameType, GUESSER_PLAYER, JUDGE_PLAYER, otherPlayer, PlayerIDType } fro
 export interface MyGameState {
   stonesLeft: number;
   stonesRight: number;
-  lastMoveFromLeftByPlayer: { [playerID: string]: boolean }; // tracks each player's last move
+  lastMoveFromLeftByPlayer: Record<string, boolean>; // tracks each player's last move (defined with playerID)
 }
 
-export const MyGameWrapper = (category: "E") => {
+export const MyGameWrapper = (_category: "E") => {
   // Set initial stones based on category
   const initialConfig = {left: 0, right: 0};
 
@@ -22,7 +22,7 @@ export const MyGameWrapper = (category: "E") => {
     },
 
     moves: {
-      takeStone: ({ G, ctx, playerID, events }, fromLeft: boolean) => {
+      takeStone: ({ G, ctx, _playerID, events }, fromLeft: boolean) => {
         if (fromLeft) {
           if (G.lastMoveFromLeftByPlayer[ctx.currentPlayer] || G.stonesLeft <= 0) {
             return INVALID_MOVE;
@@ -78,7 +78,7 @@ export const MyGameWrapper = (category: "E") => {
     },
 
     possibleMoves: (G, ctx) =>  {
-      let moves = [];
+      const moves = [];
       
       if (G.stonesRight > 0) {
         moves.push({ move: 'takeStone', args: [false] });
@@ -90,17 +90,17 @@ export const MyGameWrapper = (category: "E") => {
     },
 
     turn: {
-      onMove: ({ G, ctx, playerID, events }) => {
+      onMove: ({ G, _ctx, playerID, events }) => {
         if (playerID === GUESSER_PLAYER) {
-          let currentTime = new Date();
+          const currentTime = new Date();
           if (currentTime.getTime() - new Date(G.end).getTime() > 1000 * 10) {
             events.endGame();
           }
         }
       },
-      onEnd: ({ G, ctx, playerID, events }) => {
+      onEnd: ({ G, _ctx, playerID, events }) => {
         if (playerID === JUDGE_PLAYER) {
-          let currentTime = new Date();
+          const currentTime = new Date();
           if (currentTime.getTime() - new Date(G.end).getTime() >= 0) {
             events.endGame();
           }
