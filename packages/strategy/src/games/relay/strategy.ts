@@ -171,7 +171,7 @@ const problems : RelayProblems ={
 }
 
 export function strategy(category: "C" | "D" | "E"){
-  return (state: State<MyGameState>, botID: string): [any[] | undefined, string] => {
+  return (state: State<MyGameState>, _botID: string): [(number|string|boolean)[] | undefined, string] => {
     if (state.G.numberOfTry === 0) {
       const url = problems[category][state.G.currentProblem].url ?? "";
       return [[problems[category][state.G.currentProblem].problemText,3,url], "firstProblem"];

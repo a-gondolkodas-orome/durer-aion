@@ -1,11 +1,12 @@
 // Demultiplexes to real transport or bots
-
-import type { Game, State, StorageAPI } from "boardgame.io";
+import type IOTypes from 'socket.io';
+import type { Game, Server, State, StorageAPI } from "boardgame.io";
 import { getFilterPlayerView } from "boardgame.io/internal";
 import { Master } from "boardgame.io/master";
 import { SocketIO } from "boardgame.io/server";
 import { isMakeMovePayloadReadOnly, currentPlayer } from "game";
 import { getBotCredentials } from "./server/common";
+import { CorsOptionsDelegate } from "cors";
 
 /** Copied from boardgame.io/dist/src/client/transport/local.ts */
 function GetBotPlayer(state: State, bots: Record<string, any>) {
@@ -104,11 +105,19 @@ export class SocketIOButBotMoves extends SocketIO {
     this.bots = bots;
     this.onFinishedMatch = onFinishedMatch;
   }
-  init(app: any, games: Game[], origins: any) {
+  init(
+    app: Server.App & { _io: IOTypes.Server; }, 
+    games: Game[], 
+    origins?: Exclude<IOTypes.ServerOptions['cors'], undefined | CorsOptionsDelegate>['origin']
+  ): void {
     super.init(app, games, origins);
 
     for (const game of games) {
-      const nsp = app._io.of(game.name);
+      if (game.name === undefined) {
+        console.log(`There was a game with no name. This is the game object: ${JSON.stringify(game)}.\n We skipped the gameobject, you should fix this!".`)
+        continue
+      }
+      const nsp = app._io?.of(game.name);
       const bot = game.name ? this.bots[game.name] : Object.values(this.bots)[0];
 
       /** This should be in sync with how socket data is communicated.
