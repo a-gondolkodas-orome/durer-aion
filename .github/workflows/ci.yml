@@ -18,7 +18,7 @@ jobs:
   #     - name: Set up Node.js
   #       uses: actions/setup-node@v1
   #       with:
-  #         node-version: 16
+  #         node-version: 22
   #     - name: Install Node.js dependencies
   #       run: npm ci
   #     - name: Run linters
@@ -27,10 +27,25 @@ jobs:
   #         eslint: true
   #         commit: "false"
   #         eslint_extensions: "js,ts,jsx,tsx"
-  #         eslint_args: "--max-warnings=19" # TODO: change it to 0 after the big refactor
+  #         eslint_args: "--max-warnings=20" # TODO: change it to 0 after the big refactor
 
-  lint:
-    name: lint
+  # lint:
+  #   name: lint
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Check out Git repository
+  #       uses: actions/checkout@v2
+  #     - name: Set up Node.js
+  #       uses: actions/setup-node@v1
+  #       with:
+  #         node-version: 22
+  #     - name: Install Node.js dependencies
+  #       run: npm ci
+  #     - name: Run lint
+  #       run: npm run lint
+
+  build:
+    name: build & lint
     runs-on: ubuntu-latest
     steps:
       - name: Check out Git repository
@@ -43,19 +58,6 @@ jobs:
         run: npm ci
       - name: Run lint
         run: npm run lint
-
-  build:
-    name: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out Git repository
-        uses: actions/checkout@v2
-      - name: Set up Node.js
-        uses: actions/setup-node@v1
-        with:
-          node-version: 22
-      - name: Install Node.js dependencies
-        run: npm ci
       - name: Run build
         run: npm run build
 

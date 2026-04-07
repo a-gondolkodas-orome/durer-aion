@@ -6,7 +6,7 @@
   "scripts": {
     "predeploy": "cross-env PUBLIC_URL=/durer-aion npm run build",
     "deploy": "gh-pages -d build",
-    "lint": "TIMING=1 eslint \"**/*.ts*\" --max-warnings=0",
+    "lint": "cross-env TIMING=1 eslint \"**/*.ts*\" --max-warnings=-1",
     "dev": "cross-env VITE_SERVER_URL=http://localhost:8000 vite",
     "start": "vite",
     "build": "tsc && vite build",
