@@ -16,7 +16,10 @@ export const Overview = () => {
   }
 
   const shouldShow = game => {
-    if (selectedCategories.length > 0 && !selectedCategories.includes('') && every(game.category, c => !selectedCategories.includes(c))) return false;
+    const noCategoryMatch = selectedCategories.length > 0
+      && !selectedCategories.includes('')
+      && every(game.category, c => !selectedCategories.includes(c));
+    if (noCategoryMatch) return false;
     if (selectedYears.length > 0 && !selectedYears.includes('') && !selectedYears.includes(game.year.v)) return false;
     return true;
   };

@@ -108,7 +108,15 @@ const BoardClient = ({ board, ctx, moves }) => {
                     ${getDominoBorders({ row, col })}
                     ${isEqual(selectedField, { row, col }) ? 'bg-teal-600' : ''}
                     ${isNeighborOfSelected({ row, col }) && !isCovered({ row, col }) ? 'bg-teal-200' : ''}
-                    ${isNeighborOfSelected({ row, col }) && !isCovered({ row, col }) && isEqual(hoveredField, { row, col }) ? 'bg-teal-400' : ''}
+                    ${
+                      (
+                        isNeighborOfSelected({ row, col }) &&
+                        !isCovered({ row, col }) &&
+                        isEqual(hoveredField, { row, col })
+                      )
+                      ? 'bg-teal-400'
+                      : ''
+                    }
                   `}
                   disabled={!isClickAllowed({ row, col })}
                   onClick={() => clickField({ row, col })}

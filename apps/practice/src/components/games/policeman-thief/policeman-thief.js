@@ -112,7 +112,8 @@ export const PolicemanthiefA = strategyGameFactory({
   BoardClient,
   getPlayerStepDescription: ({ board, ctx }) => {
     if (ctx.chosenRoleIndex === 0) {
-      return `Kattints arra az útkereszteződésre, ahová a ${board.firstPolicemanMoved ? "zöld" : "kék"} rendőrrel lépni szeretnél.`;
+      return 'Kattints arra az útkereszteződésre, ahová a ' +
+      `${board.firstPolicemanMoved ? "zöld" : "kék"} rendőrrel lépni szeretnél.`;
     } else {
       return "Kattints arra az útkereszteződésre, ahová a tolvajjal lépni szeretnél.";
     }
@@ -129,7 +130,8 @@ export const PolicemanthiefB = strategyGameFactory({
   BoardClient,
   getPlayerStepDescription: ({ board, ctx }) => {
     if (ctx.chosenRoleIndex === 0) {
-      return `Kattints arra az útkereszteződésre, ahová a ${board.firstPolicemanMoved ? "zöld" : "kék"} rendőrrel lépni szeretnél.`;
+      return 'Kattints arra az útkereszteződésre, ahová a ' +
+      `${board.firstPolicemanMoved ? "zöld" : "kék"} rendőrrel lépni szeretnél.`;
     } else {
       return "Kattints arra az útkereszteződésre, ahová a tolvajjal lépni szeretnél.";
     }

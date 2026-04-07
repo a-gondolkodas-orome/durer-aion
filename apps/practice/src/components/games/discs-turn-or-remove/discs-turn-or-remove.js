@@ -89,7 +89,10 @@ const gameBoardFactory = (maxDiscs) => {
                         <span
                           className={`
                             w-full aspect-square inline-block rounded-full mr-0.5
-                            ${ctx.shouldRoleSelectorMoveNext && isSelected(1, i) ? "opacity-75 bg-blue-800" : "bg-red-800"}
+                            ${ctx.shouldRoleSelectorMoveNext && isSelected(1, i)
+                              ? "opacity-75 bg-blue-800"
+                              : "bg-red-800"
+                            }
                           `}
                         ></span>
                       </button>
@@ -117,7 +120,10 @@ const gameBoardFactory = (maxDiscs) => {
                         <span
                           className={`
                             w-full aspect-square inline-block rounded-full mr-0.5
-                            ${ctx.shouldRoleSelectorMoveNext && isSelected(0, i) ? "opacity-50 bg-slate-600" : "bg-blue-800"}
+                            ${ctx.shouldRoleSelectorMoveNext && isSelected(0, i)
+                              ? "opacity-50 bg-slate-600"
+                              : "bg-blue-800"
+                            }
                           `}
                         ></span>
                       </button>
@@ -181,7 +187,8 @@ const aiBotStrategy = ({ board, moves }) => {
 };
 
 const getPlayerStepDescription = () => {
-  return "Kattints egy korongra, hogy eltávolítsd vagy átfordítsd az adott és tőle jobbra levő korongo(ka)t az adott színből.";
+  return 'Kattints egy korongra, hogy eltávolítsd vagy átfordítsd' +
+    ' az adott és tőle jobbra levő korongo(ka)t az adott színből.';
 };
 
 const rule = (maxDiscs) => (

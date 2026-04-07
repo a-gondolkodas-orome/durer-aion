@@ -57,7 +57,11 @@ const BoardClient = ({ board, ctx, moves }) => {
       {[1, 2, 3, 4, 5, 6].map(rowIndex => (
         <div
           key={rowIndex}
-          style={{ 'aspectRatio': rowIndex === 6 ? 24 : 8, 'marginLeft': (6-rowIndex) + 'rem', 'marginRight': (6-rowIndex) + 'rem' }}
+          style={{
+            aspectRatio: rowIndex === 6 ? 24 : 8,
+            marginLeft: (6-rowIndex) + 'rem',
+            marginRight: (6-rowIndex) + 'rem'
+          }}
           className="border-t-black border-t-2 p-0.5 text-center whitespace-nowrap"
         >
           {board[rowIndex] && board[rowIndex].map((group, pieceIndex) => (

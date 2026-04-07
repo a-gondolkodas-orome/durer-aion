@@ -36,7 +36,9 @@ import { RockPaperScissor } from '../games/rock-paper-scissor/rock-paper-scissor
 import { SharkChase4 } from '../games/shark-chase/shark-4-by-4/shark-chase';
 import { SharkChase5 } from '../games/shark-chase/shark-5-by-5/shark-chase';
 import { SixDiscs, TenDiscs } from '../games/discs-turn-or-remove/discs-turn-or-remove';
-import { StonesRemoveOneNotTwiceFromLeft } from '../games/stones-remove-one-not-twice-from-left/stones-remove-one-not-twice-from-left';
+import {
+  StonesRemoveOneNotTwiceFromLeft
+} from '../games/stones-remove-one-not-twice-from-left/stones-remove-one-not-twice-from-left';
 import { SuperstitiousCounting } from '../games/superstitious-counting/superstitious-counting';
 import { Take1OrHalve } from '../games/take-1-or-halve/take-1-or-halve';
 import { TakePowerOfTwo } from '../games/take-power-of-two/take-power-of-two';

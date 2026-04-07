@@ -105,8 +105,20 @@ const BoardClient = ({ board, ctx, moves }) => {
                 ${toAppear({ pileId, pieceId }) ? 'bg-blue-600 opacity-50' : ''}
                 ${isDisabled({ pileId, pieceId }) && 'cursor-not-allowed bg-blue-600'}
                 ${toBeRemoved({ pileId, pieceId }) ? 'bg-red-600 opacity-50' : ''}
-                ${(nonExistent({ pileId, pieceId }) && !toAppear({ pileId, pieceId })) ? 'invisible inline-block' : 'inline-block'}
-                ${!nonExistent({ pileId, pieceId }) && !isDisabled({ pileId, pieceId }) && !toBeRemoved({ pileId, pieceId }) ? 'bg-blue-900' : ''}
+                ${
+                  (nonExistent({ pileId, pieceId }) && !toAppear({ pileId, pieceId }))
+                  ? 'invisible inline-block'
+                  : 'inline-block'
+                }
+                ${
+                  (
+                    !nonExistent({ pileId, pieceId }) &&
+                    !isDisabled({ pileId, pieceId }) &&
+                    !toBeRemoved({ pileId, pieceId })
+                  )
+                  ? 'bg-blue-900'
+                  : ''
+                }
               `}
               onClick={() => clickPiece({ pileId, pieceId })}
               onFocus={() => hoverPiece({ pileId, pieceId })}

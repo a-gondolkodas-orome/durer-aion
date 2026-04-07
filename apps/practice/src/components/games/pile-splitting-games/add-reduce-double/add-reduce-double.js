@@ -52,7 +52,9 @@ const BoardClient = ({ board, ctx, moves }) => {
     if (!ctx.shouldRoleSelectorMoveNext) return pieceCountInPile;
     if (!hoveredPiece) return pieceCountInPile;
 
-    if (hoveredPiece.pileId !== pileId) return `${pieceCountInPile} → ${pieceCountInPile + (hoveredPiece.pieceId+1)/2 }`;
+    if (hoveredPiece.pileId !== pileId) {
+      return `${pieceCountInPile} → ${pieceCountInPile + (hoveredPiece.pieceId+1)/2 }`;
+    }
 
     return `${pieceCountInPile} → ${pieceCountInPile - hoveredPiece.pieceId - 1}`;
   };
@@ -81,7 +83,11 @@ const BoardClient = ({ board, ctx, moves }) => {
                 ${isDisabled({ pileId, pieceId }) && 'cursor-not-allowed'}
                 ${toAppear({ pileId, pieceId }) && nonExistent({ pileId, pieceId }) ? 'bg-blue-900 opacity-30' : ''}
                 ${toBeRemoved({ pileId, pieceId }) ? 'bg-red-600 opacity-50' : ''}
-                ${(nonExistent({ pileId, pieceId }) && !toAppear({ pileId, pieceId })) ? 'invisible inline-block' : 'inline-block'}
+                ${
+                  (nonExistent({ pileId, pieceId }) && !toAppear({ pileId, pieceId }))
+                    ? 'invisible inline-block'
+                    : 'inline-block'
+                }
                 ${!nonExistent({ pileId, pieceId }) && !toBeRemoved({ pileId, pieceId }) ? 'bg-blue-900' : ''}
               `}
               onClick={() => clickPiece({ pileId, pieceId })}

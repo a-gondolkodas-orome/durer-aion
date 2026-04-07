@@ -63,7 +63,16 @@ const BoardClient = ({ board, ctx, moves }) => {
         cx={vertex.cx} cy={vertex.cy} r="2%" fill="black"
         className={`
           ${vertex.id === firstNode ? 'fill-blue-500' : ''}
-          ${firstNode !== null && vertex.id === hoveredNode && firstNode !== hoveredNode && !isCandidateAllowed ? 'fill-red-400 cursor-not-allowed' : ''}
+          ${
+            (
+              firstNode !== null &&
+              vertex.id === hoveredNode &&
+              firstNode !== hoveredNode &&
+              !isCandidateAllowed
+            )
+            ? 'fill-red-400 cursor-not-allowed'
+            : ''
+          }
         `}
         onClick={() => connectNode(vertex.id)}
         onKeyUp={(event) => {
