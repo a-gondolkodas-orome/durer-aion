@@ -155,8 +155,9 @@ const rule = {
     már be van satírozva. Az veszít, aki nem tud satírozni.
   </>,
   en: <>
-    Two players colour one small triangle in each turn. A triangle is only
-    allowed if none of its side neighbours are coloured yet. The player who cannot move loses.
+    Two players take turns colouring one small triangle.
+    A triangle may only be coloured if none of its side-adjacent triangles have been coloured yet.
+    The player who cannot move loses.
   </>
 };
 

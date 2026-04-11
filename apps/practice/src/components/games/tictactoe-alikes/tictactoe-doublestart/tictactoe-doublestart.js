@@ -86,12 +86,12 @@ const rule = {
     nyer.
   </>,
   en: <>
-    In the game of doublestarting tic-tac-toe on a 3 × 3 board, the first player starts
-    with placing two red disks in two cells.
-    After that, they alternate turns and place one disk on an empty cell in each turn,
-    the first using red, the second player using blue disks. The game ends when the board is full.
-    The first player wins if there are three red disks in a row, column or diagonal, but there
-    are no three blue disks in a row, column or diagonal. Otherwise, the second player wins.
+    In double-starting tic-tac-toe, played on a 3 × 3 board, the first player begins
+    by placing two red disks on any two cells. Players then alternate turns,
+    each placing one disk on an empty cell — the first player using red disks
+    and the second using blue. The game ends when the board is full.
+    The first player wins if there are three red disks in a row, column, or diagonal,
+    but no three blue disks form such a line. Otherwise, the second player wins.
   </>
 };
 

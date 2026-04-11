@@ -100,10 +100,10 @@ const rule = {
     szabad. Az nyer, aki átugorja az ellenfél bábuját.
   </>,
   en: <>
-    A 1 × 12 board is given with one piece on each end. Players move toward
-    each other taking turns, moving one or two places at a time.
-    You must not move to a square already occupied by the other player's piece.
-    The player jumping over their opponent's piece wins.
+    A 1 × 12 board is given with one piece placed on each end.
+    Players take turns moving their piece toward the other, advancing one or two squares at a time.
+    A player may not move to a square already occupied by the opponent's piece.
+    The player who jumps over their opponent's piece wins.
   </>
 };
 

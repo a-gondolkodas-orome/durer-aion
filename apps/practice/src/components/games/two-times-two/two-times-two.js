@@ -65,9 +65,10 @@ const rule = {
     0, 1, 2, 3 a kiosztás a végén valamilyen sorrendben).
   </>,
   en: <>
-    There is a board with 4 squares. Both players place 3 pieces on any of the squares taking turns.
-    The second player wins if at the end of the game, all squares hold a different number of pieces.
-    I.e., there is a single square with 3, 2, 1, and 0 pieces respectively.
+    There is a board with 4 squares. Both players take turns placing one piece at a time,
+    for a total of 3 pieces each. The second player wins if, at the end of the game,
+    all squares hold a different number of pieces — i.e.,
+    there is exactly one square with 3 pieces, one with 2, one with 1, and one with 0.
   </>
 };
 
