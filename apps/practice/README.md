@@ -218,6 +218,11 @@ to `<game-name>-en.js` to keep the main files more compact.
 Check the [Dürer Archive](https://durerinfo.hu/archivum/feladatsorok/) for
 existing translations.
 
+Example internationalization of existing games:
+- https://github.com/a-gondolkodas-orome/durer-jatekok/pull/213/changes/b574233c4e0c3e7d8c9dde3a2388a47133f93e10
+- https://github.com/a-gondolkodas-orome/durer-jatekok/pull/213/changes/1981715efa316e7bf1608c7b441dc0898ea6ed2f
+- https://github.com/a-gondolkodas-orome/durer-jatekok/pull/213/changes/16158b67ece84ff68f25afbe9365f6650c7273d3
+
 # License
 
 Copyright (c) 2020-present [A Gondolkodás Öröme Alapítvány](https://agondolkodasorome.hu/).
