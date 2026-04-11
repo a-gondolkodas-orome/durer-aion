@@ -10,7 +10,7 @@ export const Overview = () => {
   const { t } = useTranslation();
   const { language } = useLanguage();
   const [selectedCategories, setSelectedCategories] = useState([]);
-  const [enOnly, setEnOnly] = useState(false);
+  const [enOnly, setEnOnly] = useState(() => localStorage.getItem('enOnly') === 'true');
 
   const shouldShow = game => {
     const noCategoryMatch = selectedCategories.length > 0
@@ -40,7 +40,12 @@ export const Overview = () => {
         <>
           <span className="text-slate-300 select-none px-1">|</span>
           <button
-            onClick={() => setEnOnly(v => !v)}
+            onClick={() => setEnOnly(v => {
+              const next = !v;
+              if (next) localStorage.setItem('enOnly', 'true');
+              else localStorage.removeItem('enOnly');
+              return next;
+            })}
             className={`rounded-lg px-2 py-0.5 border text-sm cursor-pointer
               ${enOnly ? 'bg-blue-200 border-blue-400' : 'bg-white border-slate-300'}`}
           >🌐 EN only</button>
@@ -159,7 +164,9 @@ const Game = ({ gameId, gameProps }) => {
     <h2 className="font-bold mb-4 text-center">
       {t(gameProps.name)}
       {language === 'en' && hasEnglish && (
-        <span className="ml-1 text-sm text-gray-400 align-middle" title="English translation available">🌐</span>
+        <span className="ml-1 text-sm text-gray-400 align-middle" title="English translation available">
+          {'\u2060'}🌐
+        </span>
       )}
     </h2>
     <div className="grow"></div>

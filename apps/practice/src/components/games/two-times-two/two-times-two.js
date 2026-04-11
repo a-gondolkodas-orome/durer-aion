@@ -52,15 +52,24 @@ const BoardClient = ({ board, ctx, moves }) => {
   );
 };
 
-const getPlayerStepDescription = () =>
-  'Kattints arra a mezőre, ahova korongot szeretnél lerakni.';
+const getPlayerStepDescription = () => ({
+  hu: 'Kattints arra a mezőre, ahova korongot szeretnél lerakni.',
+  en: 'Click the square where you want to place a piece.'
+});
 
-const rule = <>
-  Adott egy 2 × 2-es táblázat, és hozzá mindkét játékosnak van 3 db korongja. A
-  játék során felváltva tesznek le ezekből egyet-egyet a táblázat tetszőleges mezőjére. A második
-  játékos akkor nyer, ha a játék végén minden mezőben különböző számú korong található. (Azaz
-  0, 1, 2, 3 a kiosztás a végén valamilyen sorrendben).
-</>;
+const rule = {
+  hu: <>
+    Adott egy 2 × 2-es táblázat, és hozzá mindkét játékosnak van 3 db korongja. A
+    játék során felváltva tesznek le ezekből egyet-egyet a táblázat tetszőleges mezőjére. A második
+    játékos akkor nyer, ha a játék végén minden mezőben különböző számú korong található. (Azaz
+    0, 1, 2, 3 a kiosztás a végén valamilyen sorrendben).
+  </>,
+  en: <>
+    There is a board with 4 squares. Both players place 3 pieces on any of the squares taking turns.
+    The second player wins if at the end of the game, all squares hold a different number of pieces.
+    I.e., there is a single square with 3, 2, 1, and 0 pieces respectively.
+  </>
+};
 
 export const TwoTimesTwo = strategyGameFactory({
   rule,

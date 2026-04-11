@@ -2,8 +2,10 @@ import React from 'react';
 import { strategyGameFactory } from '../strategy-game';
 import { range, sum, sample, cloneDeep } from 'lodash';
 import { gameList } from '../gameList';
+import { useTranslation } from '../../language/translate';
 
 const BoardClient = ({ board, ctx, moves }) => {
+  const { t } = useTranslation();
 
   const clickNumber = (number) => {
     if (!ctx.shouldRoleSelectorMoveNext) return;
@@ -37,7 +39,7 @@ const BoardClient = ({ board, ctx, moves }) => {
         </tr>
       </tbody>
     </table>
-    <p>Megmaradt számok összege: {sum(board.filter(i => i > 0))}</p>
+    <p>{t({ hu: 'Megmaradt számok összege', en: 'Sum of remaining numbers' })}: {sum(board.filter(i => i > 0))}</p>
     </section>
   );
 };
@@ -64,17 +66,31 @@ const getOptimalAiMove = (board, chosenRoleIndex) => {
   }
 };
 
-const rule8 = <>
-Egy táblázatban 1-től 8-ig szerepelnek a számok. Két játékos felváltva takar le egy-egy
-számot addig, amíg csak két szám marad. Ha a megmaradt két szám összege páros, akkor a kezdő
-nyer, ha pedig páratlan, akkor a második.
-</>;
+const rule8 = {
+  hu: <>
+    Egy táblázatban 1-től 8-ig szerepelnek a számok. Két játékos felváltva takar le egy-egy
+    számot addig, amíg csak két szám marad. Ha a megmaradt két szám összege páros, akkor a kezdő
+    nyer, ha pedig páratlan, akkor a második.
+  </>,
+  en: <>
+    A table contains the numbers 1 to 8. Two players take turns covering one number at a time
+    until only two numbers remain. If the sum of the two remaining numbers is even, the first
+    player wins; if it is odd, the second player wins.
+  </>
+};
 
-const rule10 = <>
-Egy táblázatban 1-től 10-ig szerepelnek a számok. Két játékos felválva takar le egy-egy
-számot addig, amíg csak két szám marad. Ha a megmaradt két szám összege páros, akkor a kezdő
-nyer, ha pedig páratlan, akkor a második.
-</>;
+const rule10 = {
+  hu: <>
+    Egy táblázatban 1-től 10-ig szerepelnek a számok. Két játékos felválva takar le egy-egy
+    számot addig, amíg csak két szám marad. Ha a megmaradt két szám összege páros, akkor a kezdő
+    nyer, ha pedig páratlan, akkor a második.
+  </>,
+  en: <>
+    A table contains the numbers 1 to 10. Two players take turns covering one number at a time
+    until only two numbers remain. If the sum of the two remaining numbers is even, the first
+    player wins; if it is odd, the second player wins.
+  </>
+};
 
 const moves = {
   coverNumber: (board, { events }, number) => {
@@ -90,11 +106,16 @@ const moves = {
   }
 }
 
+const getPlayerStepDescription = () => ({
+  hu: 'Kattints egy számra, hogy lefedd.',
+  en: 'Click a number to cover it.'
+});
+
 export const NumberCovering8 = strategyGameFactory({
   rule: rule8,
   metadata: gameList.NumberCovering8,
   BoardClient,
-  getPlayerStepDescription: () => 'Kattints egy számra, hogy lefedd.',
+  getPlayerStepDescription,
   generateStartBoard: () => range(1, 9),
   moves,
   aiBotStrategy
@@ -104,7 +125,7 @@ export const NumberCovering10 = strategyGameFactory({
   rule: rule10,
   metadata: gameList.NumberCovering10,
   BoardClient,
-  getPlayerStepDescription: () => 'Kattints egy számra, hogy lefedd.',
+  getPlayerStepDescription,
   generateStartBoard: () => range(1, 11),
   moves,
   aiBotStrategy

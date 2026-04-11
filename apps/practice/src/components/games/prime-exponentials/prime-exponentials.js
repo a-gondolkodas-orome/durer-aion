@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { strategyGameFactory } from '../strategy-game';
 import { range, sample, random } from 'lodash';
 import { gameList } from '../gameList';
+import { useTranslation } from '../../language/translate';
 
 const primeList = [
   2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71,
@@ -44,6 +45,7 @@ const ExponentCell = ({ e, playerPrime, chooseExponential, setHovered }) => {
 const ExponentsTable = ({
   board, playerPrime, chooseExponential, hovered, setHovered, resetChosenPrime
 }) => {
+  const { t } = useTranslation();
   const availableExponents = getAvailableExponents(board, playerPrime);
 
   // https://tailwindcss.com/docs/content-configuration#dynamic-class-names
@@ -63,8 +65,8 @@ const ExponentsTable = ({
   ][availableExponents.length]
 
   return <>
-    <p className="pb-4">Választott prím: {playerPrime}.</p>
-    <p>Lehetséges hatványok:</p>
+    <p className="pb-4">{t({ hu: `Választott prím: ${playerPrime}.`, en: `Chosen prime: ${playerPrime}.` })}</p>
+    <p>{t({ hu: 'Lehetséges hatványok:', en: 'Available powers:' })}</p>
     <table className={`border-collapse table-fixed ${widthClassNames}`}>
       <tbody><tr>
         {availableExponents.map(e =>
@@ -80,13 +82,17 @@ const ExponentsTable = ({
       </tr></tbody>
     </table>
     {hovered === null ? <br></br> : <p>
-      Kivonandó prímhatvány: {playerPrime}^{hovered} = {playerPrime**hovered}.
-      Eredmény: {board-playerPrime**hovered}.
+      {t({
+        hu: `Kivonandó prímhatvány: ${playerPrime}^${hovered} = ${playerPrime**hovered}. ` +
+          `Eredmény: ${board-playerPrime**hovered}.`,
+        en: `Prime power to subtract: ${playerPrime}^${hovered} = ${playerPrime**hovered}. ` +
+          `Result: ${board-playerPrime**hovered}.`
+      })}
     </p>}
     <button
       className="cta-button bg-slate-400 w-auto"
       onClick={() => resetChosenPrime()}
-    >Vissza a prím választáshoz
+    >{t({ hu: 'Vissza a prím választáshoz', en: 'Back to prime selection' })}
     </button>
   </>;
 }
@@ -198,9 +204,10 @@ const getAvailableExponents = (num, prime) => {
   return range(0, maxExponent + 1);
 }
 
-const getPlayerStepDescription = () => {
-  return 'Válaszd ki a prímet, aminek a hatványát ki szeretnéd vonni, majd a hatványt.';
-}
+const getPlayerStepDescription = () => ({
+  hu: 'Válaszd ki a prímet, aminek a hatványát ki szeretnéd vonni, majd a hatványt.',
+  en: 'Choose the prime whose power you want to subtract, then choose the exponent.'
+});
 
 const moves = {
   subtractPrimeExponent: (board, { events }, { prime, exponent }) => {
@@ -213,11 +220,17 @@ const moves = {
   }
 }
 
-const rule = <>
-Egy 1000-nél kisebb, (gép által meghatározott) pozitív egész számtól kezdődik a játék,
-ebből a játékosok felváltva vonnak le egy tetszőleges
-prímhatványt. Az nyer, aki a nullát mondja!
-</>
+const rule = {
+  hu: <>
+    Egy 1000-nél kisebb, (gép által meghatározott) pozitív egész számtól kezdődik a játék,
+    ebből a játékosok felváltva vonnak le egy tetszőleges
+    prímhatványt. Az nyer, aki a nullát mondja!
+  </>,
+  en: <>
+    The game starts from a positive integer less than 1000 (chosen by the computer). Players take
+    turns subtracting any prime power. The player who reaches zero wins!
+  </>
+}
 
 export const PrimeExponentials = strategyGameFactory({
   rule,

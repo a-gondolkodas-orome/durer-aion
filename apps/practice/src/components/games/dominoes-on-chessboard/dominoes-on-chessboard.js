@@ -230,17 +230,25 @@ const toldalek = {
   '8': 'a'
 }
 
-const rule = <>
-  Két játékos felváltva tesz egy-egy dominót egy {BOARDSIZE} × {BOARDSIZE}-{toldalek[BOARDSIZE]}s
-  sakktáblára úgy, hogy két
-  élszomszédos üres mezőt fedjen le. Az veszít aki nem tud tenni.
-</>;
+const rule = {
+  hu: <>
+    Két játékos felváltva tesz egy-egy dominót egy {BOARDSIZE} × {BOARDSIZE}-{toldalek[BOARDSIZE]}s
+    sakktáblára úgy, hogy két élszomszédos üres mezőt fedjen le. Az veszít aki nem tud tenni.
+  </>,
+  en: <>
+    Two players take turns placing a domino on a {BOARDSIZE} × {BOARDSIZE} chessboard so that it
+    covers two adjacent empty squares. The player who cannot place a domino loses.
+  </>
+};
 
 export const DominoesOnChessboard = strategyGameFactory({
   rule,
   metadata: gameList.DominoesOnChessboard,
   BoardClient,
-  getPlayerStepDescription: () => 'Kattints egy üres mezőre, majd egy szomszédjára, hogy lehelyezz egy dominót.',
+  getPlayerStepDescription: () => ({
+    hu: 'Kattints egy üres mezőre, majd egy szomszédjára, hogy lehelyezz egy dominót.',
+    en: 'Click an empty square, then a neighbour of it, to place a domino.'
+  }),
   generateStartBoard: () => [],
   moves,
   aiBotStrategy

@@ -74,17 +74,27 @@ const moves = {
   }
 }
 
-const rule = <>
-  Egy 4 × 4-es tábla egyik mezőjén kezdetben egy huszár áll. Két játékos felváltva
-lép a huszárral. Nem szabad olyan mezőre lépni, amelyen korábban már járt a huszár,
-így a kezdőmezőre sem. Az veszít, aki nem tud lépni.
-</>;
+const rule = {
+  hu: <>
+    Egy 4 × 4-es tábla egyik mezőjén kezdetben egy huszár áll. Két játékos felváltva
+    lép a huszárral. Nem szabad olyan mezőre lépni, amelyen korábban már járt a huszár,
+    így a kezdőmezőre sem. Az veszít, aki nem tud lépni.
+  </>,
+  en: <>
+    A knight is placed on one square of a 4 × 4 board. Two players take turns moving the knight.
+    The knight may not move to any square it has already visited, including the starting square.
+    The player who cannot move loses.
+  </>
+};
 
 export const ChessKnight = strategyGameFactory({
   rule,
   metadata: gameList.ChessKnight,
   BoardClient,
-  getPlayerStepDescription: () => 'Lépj egy szabad mezőre a huszárral.',
+  getPlayerStepDescription: () => ({
+    hu: 'Lépj egy szabad mezőre a huszárral.',
+    en: 'Move the knight to a free square.'
+  }),
   generateStartBoard,
   moves,
   aiBotStrategy

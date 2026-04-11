@@ -100,17 +100,27 @@ const moves = {
   }
 }
 
-const rule = <>
-  Két játékos felváltva tesz le a sakktáblára futókat. Egy új futót mindig
-  csak olyan mezőre tehetünk, amin még nem áll futó, és azt a mezőt nem is támadja futó. Az
-  veszít, aki nem tud lerakni futót.
-</>;
+const rule = {
+  hu: <>
+    Két játékos felváltva tesz le a sakktáblára futókat. Egy új futót mindig
+    csak olyan mezőre tehetünk, amin még nem áll futó, és azt a mezőt nem is támadja futó. Az
+    veszít, aki nem tud lerakni futót.
+  </>,
+  en: <>
+    Two players take turns placing bishops on a chessboard. A new bishop may only be placed on a
+    square that is not already occupied by a bishop and is not attacked by any bishop. The player
+    who cannot place a bishop loses.
+  </>
+};
 
 export const ChessBishops = strategyGameFactory({
   rule,
   metadata: gameList.ChessBishops,
   BoardClient,
-  getPlayerStepDescription: () => 'Kattints egy mezőre, amit nem üt egyik futó sem.',
+  getPlayerStepDescription: () => ({
+    hu: 'Kattints egy mezőre, amit nem üt egyik futó sem.',
+    en: 'Click on a square that is not attacked by any bishop.'
+  }),
   generateStartBoard,
   moves,
   aiBotStrategy

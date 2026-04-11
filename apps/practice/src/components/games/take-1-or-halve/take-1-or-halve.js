@@ -2,8 +2,10 @@ import React from 'react';
 import { strategyGameFactory } from '../strategy-game';
 import { random } from 'lodash';
 import { gameList } from '../gameList';
+import { useTranslation } from '../../language/translate';
 
 const BoardClient = ({ board, ctx, moves }) => {
+  const { t } = useTranslation();
   return(
     <section className="p-2 shrink-0 grow basis-2/3">
       <p className='w-full text-8xl font-bold text-center'>{board}</p>
@@ -13,14 +15,14 @@ const BoardClient = ({ board, ctx, moves }) => {
             className='cta-button'
             disabled={!ctx.shouldRoleSelectorMoveNext}
             onClick={() => moves.take1(board)}
-          >Elveszek egyet</button>
+          >{t({ hu: 'Elveszek egyet', en: 'Take one' })}</button>
         </span>
         <span className='grow px-2'>
           <button
             className="cta-button"
             disabled={!ctx.shouldRoleSelectorMoveNext || board % 2 === 1}
             onClick={() => moves.halve(board)}
-          >Elveszem a felét</button>
+          >{t({ hu: 'Elveszem a felét', en: 'Take half' })}</button>
         </span>
       </div>
     </section>
@@ -53,17 +55,24 @@ const aiBotStrategy = ({ board, moves }) => {
   }
 };
 
-const rule = <>
-  Kezdetben van egy kupac zseton az asztalon. A soron lévő
-játékos elvehet egy zsetont a kupacból, vagy ha páros számú zseton van az asztalon, akkor elveheti a
-zsetonok felét. Az nyer, akinek a lépése után nem marad zseton az asztalon.
-</>;
+const rule = {
+  hu: <>
+    Kezdetben van egy kupac zseton az asztalon. A soron lévő
+    játékos elvehet egy zsetont a kupacból, vagy ha páros számú zseton van az asztalon, akkor elveheti a
+    zsetonok felét. Az nyer, akinek a lépése után nem marad zseton az asztalon.
+  </>,
+  en: <>
+    There is a pile of tokens on the table. On each turn the current player may remove one token,
+    or — if the number of tokens is even — take half of them.
+    The player whose move leaves no tokens on the table wins.
+  </>
+};
 
 const getPlayerStepDescription = ({ board }) => {
   if (board % 2 === 1) {
-    return 'Vegyél el egy zsetont.'
+    return { hu: 'Vegyél el egy zsetont.', en: 'Take one token.' };
   } else {
-    return 'Egy zsetont vegyél el vagy felezz.'
+    return { hu: 'Egy zsetont vegyél el vagy felezz.', en: 'Take one token or take half.' };
   }
 }
 

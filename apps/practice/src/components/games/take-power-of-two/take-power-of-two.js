@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { strategyGameFactory } from '../strategy-game';
 import { range, random, reverse, sample } from 'lodash';
 import { gameList } from '../gameList';
+import { useTranslation } from '../../language/translate';
 
 const generateStartBoard = () => {
   if (random(0, 1)) {
@@ -30,6 +31,7 @@ const ExponentCell = ({ e, choosePower, setHovered }) => {
 const ExponentsTable = ({
   board, choosePower, hovered, setHovered
 }) => {
+  const { t } = useTranslation();
   const availableExponents = getAvailableExponents(board);
 
   // https://tailwindcss.com/docs/content-configuration#dynamic-class-names
@@ -49,7 +51,7 @@ const ExponentsTable = ({
   ][availableExponents.length]
 
   return <>
-    <p>Lehetséges hatványok:</p>
+    <p>{t({ hu: 'Lehetséges hatványok:', en: 'Available powers:' })}</p>
     <table className={`border-collapse table-fixed ${widthClassNames}`}>
       <tbody><tr>
         {availableExponents.map(e =>
@@ -64,8 +66,8 @@ const ExponentsTable = ({
       </tr></tbody>
     </table>
     {hovered === null ? <br></br> : <p>
-      Kivonandó 2-hatvány: {2}^{hovered} = {2**hovered}.
-      Eredmény: {board-2**hovered}.
+      {t({ hu: `Kivonandó 2-hatvány: 2^${hovered} = ${2**hovered}. Eredmény: ${board-2**hovered}.`,
+        en: `Power to subtract: 2^${hovered} = ${2**hovered}. Result: ${board-2**hovered}.` })}
     </p>}
   </>;
 }
@@ -114,9 +116,10 @@ const getAvailableExponents = (num) => {
   return range(0, maxExponent + 1);
 }
 
-const getPlayerStepDescription = () => {
-  return 'Válaszd ki a 2 hatványát amit ki szeretnél vonni.';
-}
+const getPlayerStepDescription = () => ({
+  hu: 'Válaszd ki a 2 hatványát amit ki szeretnél vonni.',
+  en: 'Choose a power of 2 to subtract.'
+});
 
 const moves = {
   subtractPowerOfTwo: (board, { events }, exponent) => {
@@ -129,11 +132,18 @@ const moves = {
   }
 }
 
-const rule = <>
-Egy 300-nál kisebb, (gép által meghatározott) pozitív egész számtól kezdődik a játék,
-ebből a játékosok felváltva vonnak le egy tetszőleges
-2-hatványt. Az nyer, aki a nullát mondja!
-</>
+const rule = {
+  hu: <>
+    Egy 300-nál kisebb, (gép által meghatározott) pozitív egész számtól kezdődik a játék,
+    ebből a játékosok felváltva vonnak le egy tetszőleges
+    2-hatványt. Az nyer, aki a nullát mondja!
+  </>,
+  en: <>
+    The game starts from a positive integer below 300 chosen by the computer.
+    Players alternate subtracting any power of 2.
+    The player who reaches zero wins!
+  </>
+};
 
 export const TakePowerOfTwo = strategyGameFactory({
   rule,

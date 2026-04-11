@@ -2,8 +2,10 @@ import React from 'react';
 import { strategyGameFactory } from '../strategy-game';
 import { cloneDeep, isEqual, sample, random } from 'lodash';
 import { gameList } from '../gameList';
+import { useTranslation } from '../../language/translate';
 
 const BoardClient = ({ board, ctx, moves }) => {
+  const { t } = useTranslation();
   const isMoveAllowed = pileId => {
     if (!ctx.shouldRoleSelectorMoveNext) return false;
     if (board.piles[pileId] === 0) return false;
@@ -20,7 +22,7 @@ const BoardClient = ({ board, ctx, moves }) => {
             onClick = {() => moves.removeStone(board, 0)}
             disabled={!isMoveAllowed(0)}
           >
-            Bal: {board.piles[0]}
+            {t({ hu: 'Bal', en: 'Left' })}: {board.piles[0]}
           </button>
         </span>
         <span className='grow px-2'>
@@ -29,7 +31,7 @@ const BoardClient = ({ board, ctx, moves }) => {
             onClick = {() => moves.removeStone(board, 1)}
             disabled={!isMoveAllowed(1)}
           >
-            Jobb: {board.piles[1]}
+            {t({ hu: 'Jobb', en: 'Right' })}: {board.piles[1]}
           </button>
         </span>
       </div>
@@ -136,16 +138,24 @@ const getPileOfRandomAllowedMove = (board, ctx) => {
   return random(0, 1);
 }
 
-const rule = <>
-  Két kupacban kavicsok vannak elhelyezve, a bal oldaliban <i>b</i>, a jobb
-  oldaliban <i>j</i> darab. A két játékos felváltva
-  lép, és minden lépés során egy kavicsot kell elvenniük valamelyik kupacból.
-  Egy játékos azonban nem vehet el két egymást követő lépésben a bal oldali
-  kupacból. Az veszít, aki nem tud lépni.
-</>;
+const rule = {
+  hu: <>
+    Két kupacban kavicsok vannak elhelyezve. A két játékos felváltva
+    lép, és minden lépés során egy kavicsot kell elvenniük valamelyik kupacból.
+    Egy játékos azonban nem vehet el két egymást követő lépésben a bal oldali
+    kupacból. Az veszít, aki nem tud lépni.
+  </>,
+  en: <>
+    There are two piles of stones. Players alternate turns, and on each turn a player must
+    remove one stone from either pile. However, a player may not take from the
+    left pile on two consecutive turns. The player who cannot move loses.
+  </>
+};
 
-const getPlayerStepDescription = () =>
-  'Kattints a kupacra ahonnan el szeretnél venni egy kavicsot.';
+const getPlayerStepDescription = () => ({
+  hu: 'Kattints a kupacra ahonnan el szeretnél venni egy kavicsot.',
+  en: 'Click the pile you want to remove a stone from.'
+});
 
 const generateStartBoard = () => {
   const piles = sample([

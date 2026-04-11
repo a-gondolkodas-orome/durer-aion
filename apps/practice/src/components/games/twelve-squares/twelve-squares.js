@@ -93,19 +93,33 @@ const moves = {
   }
 };
 
-const rule = <>
-	Van 12 mező egymás mellett. A két szélsőbe lerakunk egy-egy bábut. Ezután a játékosok
-	felváltva lépnek egyet vagy kettőt a saját bábujukkal a másik irányába. A másik bábujára rálépni nem
-	szabad. Az nyer, aki átugorja az ellenfél bábuját.
-</>;
+const rule = {
+  hu: <>
+    Van 12 mező egymás mellett. A két szélsőbe lerakunk egy-egy bábut. Ezután a játékosok
+    felváltva lépnek egyet vagy kettőt a saját bábujukkal a másik irányába. A másik bábujára rálépni nem
+    szabad. Az nyer, aki átugorja az ellenfél bábuját.
+  </>,
+  en: <>
+    A 1 × 12 board is given with one piece on each end. Players move toward
+    each other taking turns, moving one or two places at a time.
+    You must not move to a square already occupied by the other player's piece.
+    The player jumping over their opponent's piece wins.
+  </>
+};
 
 export const TwelveSquares = strategyGameFactory({
   rule,
   metadata: gameList.TwelveSquares,
   BoardClient,
   getPlayerStepDescription: ({ ctx: { chosenRoleIndex } }) => chosenRoleIndex === 0
-    ? 'Kattints a mezőre ahova lépni szeretnél a bal oldali bábuval.'
-    : 'Kattints a mezőre ahova lépni szeretnél a jobb oldali bábuval.',
+    ? {
+      hu: 'Kattints a mezőre ahova lépni szeretnél a bal oldali bábuval.',
+      en: 'Click the square you want to move to with the left piece.'
+    }
+    : {
+      hu: 'Kattints a mezőre ahova lépni szeretnél a jobb oldali bábuval.',
+      en: 'Click the square you want to move to with the right piece.'
+    },
   generateStartBoard: () => ({ left: 1, right: 12 }),
   aiBotStrategy,
   moves

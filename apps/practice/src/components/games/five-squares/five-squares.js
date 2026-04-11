@@ -61,16 +61,26 @@ const BoardClient = ({ board, ctx, moves }) => {
   );
 };
 
-const getPlayerStepDescription = () =>
-  'Kattints arra a mezőre, ahova korongot szeretnél lerakni.';
+const getPlayerStepDescription = () => ({
+  hu: 'Kattints arra a mezőre, ahova korongot szeretnél lerakni.',
+  en: 'Click the square where you want to place a piece.'
+});
 
-const rule = <>
-  A játék során egy öt mezőből álló táblára helyezünk korongokat. Kezdetben egy korong van a táblán.
-  Ezután minden körben a kezdőjátékos egy korongot helyez a táblára, majd ezután a második játékos tesz le két
-  korongot. (A két korongot lehet azonos, illetve különböző mezőkre is tenni.) A játék 3 kör után ér véget,
-  amikor a 10. korong felkerül a táblára. A második játékos akkor nyer, ha a játék végén
-  minden mezőn különböző számú korong áll.
-</>;
+const rule = {
+  hu: <>
+    A játék során egy öt mezőből álló táblára helyezünk korongokat. Kezdetben egy korong van a táblán.
+    Ezután minden körben a kezdőjátékos egy korongot helyez a táblára, majd ezután a második játékos tesz le két
+    korongot. (A két korongot lehet azonos, illetve különböző mezőkre is tenni.) A játék 3 kör után ér véget,
+    amikor a 10. korong felkerül a táblára. A második játékos akkor nyer, ha a játék végén
+    minden mezőn különböző számú korong áll.
+  </>,
+  en: <>
+    Players place pieces on a board of five squares. One piece is on the board at the start.
+    Each round the first player places one piece, then the second player places two pieces (both
+    may go on the same or different squares). The game ends after 3 rounds when the 10th piece is
+    placed. The second player wins if every square has a different number of pieces at the end.
+  </>
+};
 
 export const FiveSquares = strategyGameFactory({
   rule,

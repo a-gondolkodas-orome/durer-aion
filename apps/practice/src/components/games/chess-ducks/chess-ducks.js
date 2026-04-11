@@ -74,18 +74,29 @@ const chessDucksGameFactory = ({ ROWS, COLS }, metadata) => {
     );
   };
 
-  const rule = <>
-    Azt sokan tudják, hogy egy ló hogy lép a sakktáblán, de azt már nagyon kevesen, hogy
-  egy kacsa hogyan: a négy oldalszomszédos mezőre tud lépni. A két játékos felváltva rak le a {ROWS} × {COLS}-os
-  táblára kacsákat úgy, hogy a lerakott bábu ne üsse a táblán levő kacsák egyikét sem. Az veszít, aki
-  nem tud lépni.
-  </>;
+  const rule = {
+    hu: <>
+      Azt sokan tudják, hogy egy ló hogy lép a sakktáblán, de azt már nagyon kevesen, hogy
+      egy kacsa hogyan: a négy oldalszomszédos mezőre tud lépni. A két játékos felváltva rak le a {ROWS} × {COLS}-os
+      táblára kacsákat úgy, hogy a lerakott bábu ne üsse a táblán levő kacsák egyikét sem. Az veszít, aki
+      nem tud lépni.
+    </>,
+    en: <>
+      Many people know how a knight moves in chess, but very few know how a duck moves: it can step
+      to any of its four orthogonal neighbours. Two players take turns placing ducks on the {ROWS} × {COLS} board
+      so that the newly placed piece does not attack any duck already on the board. The player who
+      cannot place a duck loses.
+    </>
+  };
 
   return strategyGameFactory({
     rule,
     metadata,
     BoardClient,
-    getPlayerStepDescription: () => 'Kattints egy mezőre, amit nem üt egyik kacsa sem.',
+    getPlayerStepDescription: () => ({
+      hu: 'Kattints egy mezőre, amit nem üt egyik kacsa sem.',
+      en: 'Click on a square that is not attacked by any duck.'
+    }),
     generateStartBoard,
     aiBotStrategy,
     moves

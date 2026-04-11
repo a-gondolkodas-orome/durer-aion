@@ -74,19 +74,30 @@ const moves = {
   }
 }
 
-const rule = <>
-  A játékosok felváltva lépnek egy bástyával, amely a sakktábla bal felső sarkából indul. A
-  bástya vízszintesen vagy függőlegesen bármennyit (legalább egyet) léphet, de egyszerre csak az
-  egyik irányba. Azokat a mezőket amikre a bástya lép, illetve a lépés közben áthalad, megjelöljük,
-  ezekre a mezőkre már nem léphetünk később (át sem haladhatunk felettük). Az a játékos veszít, aki
-  nem tud lépni.
-</>;
+const rule = {
+  hu: <>
+    A játékosok felváltva lépnek egy bástyával, amely a sakktábla bal felső sarkából indul. A
+    bástya vízszintesen vagy függőlegesen bármennyit (legalább egyet) léphet, de egyszerre csak az
+    egyik irányba. Azokat a mezőket amikre a bástya lép, illetve a lépés közben áthalad, megjelöljük,
+    ezekre a mezőkre már nem léphetünk később (át sem haladhatunk felettük). Az a játékos veszít, aki
+    nem tud lépni.
+  </>,
+  en: <>
+    Players take turns moving a rook that starts in the top-left corner of a chessboard. The rook
+    may move any number of squares (at least one) horizontally or vertically, but only in one
+    direction per move. Every square the rook lands on or passes through is marked and can no longer
+    be entered or passed through later. The player who cannot move loses.
+  </>
+};
 
 export const ChessRook = strategyGameFactory({
   rule,
   metadata: gameList.ChessRook,
   BoardClient,
-  getPlayerStepDescription: () => 'Kattints egy szabad mezőre a bástyával egy sorban vagy oszlopban.',
+  getPlayerStepDescription: () => ({
+    hu: 'Kattints egy szabad mezőre a bástyával egy sorban vagy oszlopban.',
+    en: 'Click on a free square in the same row or column as the rook.'
+  }),
   generateStartBoard,
   moves,
   aiBotStrategy

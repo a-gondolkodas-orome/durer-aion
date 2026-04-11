@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { range } from 'lodash';
 import { SharkSvg } from '../assets/shark-chase-shark-svg';
 import { SubmarineSvg } from '../assets/shark-chase-submarine-svg';
+import { useTranslation } from '../../../language/translate';
 
 export const BoardClient = ({ board, ctx, moves }) => {
+  const { t } = useTranslation();
   const [chosenPiece, setChosenPiece] = useState(null);
 
   let possibleMoves=[]
@@ -52,7 +54,7 @@ export const BoardClient = ({ board, ctx, moves }) => {
 
   return (
   <section className="p-2 shrink-0 grow basis-2/3">
-    <p className='font-bold text-lg'>Hátralévő lépések száma: {12-board.turn}</p>
+    <p className='font-bold text-lg'>{t({ hu: 'Hátralévő lépések száma', en: 'Remaining moves' })}: {12-board.turn}</p>
     <SubmarineSvg/>
     <SharkSvg/>
     <div className="grid grid-cols-4 gap-0 border-2">
@@ -83,7 +85,7 @@ export const BoardClient = ({ board, ctx, moves }) => {
           {board.shark === id && ctx.chosenRoleIndex === 1 && ctx.shouldRoleSelectorMoveNext && (
             <span
               className="absolute z-50 w-[75%] text-black border-2 rounded-sm bg-white opacity-80"
-            >Itt maradok</span>
+            >{t({ hu: 'Itt maradok', en: 'Stay here' })}</span>
           )}
       </button>
       ))}

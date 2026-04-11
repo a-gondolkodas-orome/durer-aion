@@ -3,6 +3,7 @@ import { strategyGameFactory } from '../strategy-game';
 import { range, cloneDeep, sample, random } from 'lodash';
 import { strategyDict } from './bot-strategy';
 import { gameList } from '../gameList';
+import { useTranslation } from '../../language/translate';
 
 const isAllowed = (board, n) => {
   if (board.previousMove === null) {
@@ -18,6 +19,7 @@ const isAllowed = (board, n) => {
 }
 
 const BoardClient = ({ board, ctx, moves }) => {
+  const { t } = useTranslation();
   const isMoveAllowed = n => isAllowed(board, n);
 
   const removeNumber = n => {
@@ -29,10 +31,13 @@ const BoardClient = ({ board, ctx, moves }) => {
   return (
     <section className="p-2 shrink-0 grow basis-2/3">
       <p className = "text-2xl">
-        A mostani játékban n={board.numbersOnTable.length}
+        {t({
+          hu: `A mostani játékban n=${board.numbersOnTable.length}`,
+          en: `In this game n=${board.numbersOnTable.length}`
+        })}
       </p>
       <p className = "text-2xl">
-        Az előző lépés: {board.previousMove === null ? "-" : board.previousMove}
+        {t({ hu: 'Az előző lépés', en: 'Previous move' })}: {board.previousMove === null ? "-" : board.previousMove}
       </p>
       <div>
         {range(1, board.numbersOnTable.length + 1).map(num =>
@@ -102,16 +107,26 @@ const generateStateID = (board) => {
   return (board.previousMove === null ? '-1' : board.previousMove) + "_" +id;
 }
 
-const rule = <>
-  Egy táblára az <i>1</i>, <i>2</i>, <i>...</i>, <i>n</i> számok (<i>n &#8804; 15</i>)
-  vannak felírva. Két játékos játszik, felváltva lépnek. A kezdőjátékos az első
-  lépésében kiválaszt egy tetszőleges számot a tábláról és letörli azt. Ezután
-  minden lépésben egy olyan számot kell letörölni, ami az előző (másik játékos
-  által letörölt) számnak osztója vagy többszöröse. Az veszít, aki nem tud lépni.
-</>;
+const rule = {
+  hu: <>
+    Egy táblára az <i>1</i>, <i>2</i>, <i>...</i>, <i>n</i> számok (<i>n &#8804; 15</i>)
+    vannak felírva. Két játékos játszik, felváltva lépnek. A kezdőjátékos az első
+    lépésében kiválaszt egy tetszőleges számot a tábláról és letörli azt. Ezután
+    minden lépésben egy olyan számot kell letörölni, ami az előző (másik játékos
+    által letörölt) számnak osztója vagy többszöröse. Az veszít, aki nem tud lépni.
+  </>,
+  en: <>
+    The numbers <i>1</i>, <i>2</i>, <i>...</i>, <i>n</i> (<i>n &#8804; 15</i>) are written on a
+    board. Two players take turns. On the first move the first player removes any number from the
+    board. From then on, each move must remove a number that is a divisor or multiple of the
+    previously removed number. The player who cannot move loses.
+  </>
+};
 
-const getPlayerStepDescription = () =>
-  'Válassz egyet a letörölhető számok közül.';
+const getPlayerStepDescription = () => ({
+  hu: 'Válassz egyet a letörölhető számok közül.',
+  en: 'Choose one of the numbers that can be removed.'
+});
 
 const generateStartBoard = () => {
   const numCount = random(0, 2) === 0

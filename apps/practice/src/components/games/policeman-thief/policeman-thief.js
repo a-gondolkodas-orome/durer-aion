@@ -78,8 +78,8 @@ const hasFirstPlayerWon = (board) => {
   return board.turnCount < 4 && board.policemen.includes(board.thief);
 };
 
-const ruleA = (
-  <>
+const ruleA = {
+  hu: <>
     Az ábrán egy kisváros úthálózata látható, ahol az útkereszteződéseket
     pöttyök jelölik. A játék kezdetén a szervezők az egyik útkereszteződésbe
     letesznek egy tolvajt ábrázoló (piros) korongot, egy másikba pedig két
@@ -89,11 +89,19 @@ const ruleA = (
     változtatnia. A rendőrök nyernek, ha a tolvaj
     bármikor azonos kereszteződésben van egy rendőrrel. A tolvaj nyer, ha a
     harmadik kör végéig nem kapták el.
+  </>,
+  en: <>
+    The diagram shows a small town's road network, with intersections marked by dots. At the start,
+    the organisers place a thief (red) piece at one intersection and two policemen (blue and green)
+    at another. Each round the policemen move first (blue then green), each stepping to an adjacent
+    intersection along a road (they may split up), then the thief moves the same way. Everyone must
+    move every round. The policemen win if the thief is ever at the same intersection as a policeman.
+    The thief wins if they are not caught by the end of the third round.
   </>
-);
+};
 
-const ruleB = (
-  <>
+const ruleB = {
+  hu: <>
     Az ábrán egy kisváros úthálózata látható, ahol az útkereszteződéseket pöttyök
     jelölik. A játék kezdetén a szervezők valamely útkereszteződésekbe leteszik a tolvajt
     ábrázoló (piros), valamint a két rendőrt ábrázoló (kék illetve zöld) korongokat; a két rendőr
@@ -102,20 +110,38 @@ const ruleB = (
     tolvaj is hasonlóan lép. Minden körben kötelező mindenkinek helyet változtatnia.
     A rendőrök nyernek, ha a rabló bármikor azonos kereszteződésben van egy rend-
     őrrel. A tolvaj nyer, ha a harmadik kör végéig nem kapták el.
+  </>,
+  en: <>
+    The diagram shows a small town's road network, with intersections marked by dots. At the start,
+    the organisers place the thief (red) and the two policemen (blue and green) at intersections of
+    their choosing; the two policemen may start on the same intersection. Each round the policemen
+    move first (blue then green), each stepping to an adjacent intersection along a road (they may
+    split up), then the thief moves the same way. Everyone must move every round. The policemen win
+    if the thief is ever at the same intersection as a policeman. The thief wins if they are not
+    caught by the end of the third round.
   </>
-)
+}
 
 export const PolicemanthiefA = strategyGameFactory({
   rule: ruleA,
   metadata: gameList.Policemanthief,
-  roleLabels: ["Rendőrök", "Tolvaj"],
+  roleLabels: [
+    { hu: "Rendőrök", en: "Policemen" },
+    { hu: "Tolvaj", en: "Thief" }
+  ],
   BoardClient,
   getPlayerStepDescription: ({ board, ctx }) => {
     if (ctx.chosenRoleIndex === 0) {
-      return 'Kattints arra az útkereszteződésre, ahová a ' +
-      `${board.firstPolicemanMoved ? "zöld" : "kék"} rendőrrel lépni szeretnél.`;
+      return {
+        hu: `Kattints arra az útkereszteződésre, ahová a ` +
+          `${board.firstPolicemanMoved ? "zöld" : "kék"} rendőrrel lépni szeretnél.`,
+        en: `Click the intersection you want to move the ${board.firstPolicemanMoved ? "green" : "blue"} policeman to.`
+      };
     } else {
-      return "Kattints arra az útkereszteződésre, ahová a tolvajjal lépni szeretnél.";
+      return {
+        hu: "Kattints arra az útkereszteződésre, ahová a tolvajjal lépni szeretnél.",
+        en: "Click the intersection you want to move the thief to."
+      };
     }
   },
   generateStartBoard: generateStartBoardA,
@@ -126,14 +152,23 @@ export const PolicemanthiefA = strategyGameFactory({
 export const PolicemanthiefB = strategyGameFactory({
   rule: ruleB,
   metadata: gameList.PolicemanthiefB,
-  roleLabels: ["Rendőrök", "Tolvaj"],
+  roleLabels: [
+    { hu: "Rendőrök", en: "Policemen" },
+    { hu: "Tolvaj", en: "Thief" }
+  ],
   BoardClient,
   getPlayerStepDescription: ({ board, ctx }) => {
     if (ctx.chosenRoleIndex === 0) {
-      return 'Kattints arra az útkereszteződésre, ahová a ' +
-      `${board.firstPolicemanMoved ? "zöld" : "kék"} rendőrrel lépni szeretnél.`;
+      return {
+        hu: `Kattints arra az útkereszteződésre, ahová a ` +
+          `${board.firstPolicemanMoved ? "zöld" : "kék"} rendőrrel lépni szeretnél.`,
+        en: `Click the intersection you want to move the ${board.firstPolicemanMoved ? "green" : "blue"} policeman to.`
+      };
     } else {
-      return "Kattints arra az útkereszteződésre, ahová a tolvajjal lépni szeretnél.";
+      return {
+        hu: "Kattints arra az útkereszteződésre, ahová a tolvajjal lépni szeretnél.",
+        en: "Click the intersection you want to move the thief to."
+      };
     }
   },
   generateStartBoard: generateStartBoardB,

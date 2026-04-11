@@ -76,22 +76,32 @@ const moves = {
   }
 }
 
-const rule = <>
+const rule = {
+  hu: <>
     <b>Nyomozó és Tolvaj</b> az alábbi játékot játssza. Kilenc kártya van az asztalon lévő készletben,
     az 1, 2, ..., {CARD_COUNT} számokkal jelölve. Nyomozó és Tolvaj felváltva vesz a kezébe egyet-egyet
     az asztalon lévő kártyák közül úgy, hogy az első kártyát Nyomozó veszi el.
     Tolvaj akkor nyer, ha a játék végéig összegyűjt három olyan kártyát, melyek közül az egyiken
-lévő szám a másik kettőnek az átlaga. Nyomozó pedig akkor nyer, ha Tolvaj nem gyűjt össze
-három ilyen kártyát.
-    <br></br>
-</>;
+    lévő szám a másik kettőnek az átlaga. Nyomozó pedig akkor nyer, ha Tolvaj nem gyűjt össze
+    három ilyen kártyát.
+  </>,
+  en: <>
+    <b>Sheriff and Thief</b> play the following game. Nine cards numbered 1, 2, …, {CARD_COUNT} are on
+    the table. Sheriff and Thief alternate picking up cards, with the Sheriff going first.
+    The Thief wins if they collect three cards where one number is the average of the other two.
+    The Sheriff wins if the Thief fails to collect such a triple.
+  </>
+};
 
 export const ThievesMean9 = strategyGameFactory({
   rule,
   metadata: gameList.ThievesMean9,
   BoardClient,
-  getPlayerStepDescription: () => 'Válassz egy kártyát.',
-  roleLabels: ['Nyomozó leszek', 'Tolvaj leszek'],
+  getPlayerStepDescription: () => ({ hu: 'Válassz egy kártyát.', en: 'Pick a card.' }),
+  roleLabels: [
+    { hu: 'Nyomozó leszek', en: "I'll be the Sheriff" },
+    { hu: 'Tolvaj leszek', en: "I'll be the Thief" }
+  ],
   generateStartBoard,
   moves,
   aiBotStrategy

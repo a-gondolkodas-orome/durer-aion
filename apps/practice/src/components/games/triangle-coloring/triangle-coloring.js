@@ -148,17 +148,26 @@ const isWinningState = (board, amIPlayer) => {
   return optimalPlaceForOther === undefined;
 };
 
-const rule = <>
-  Két játékos felváltva satíroz be az ábrán egy-egy kis háromszöget.
-Nem szabad olyan háromszöget satírozni, amivel oldalszomszédos
-már be van satírozva. Az veszít, aki nem tud satírozni.
-</>;
+const rule = {
+  hu: <>
+    Két játékos felváltva satíroz be az ábrán egy-egy kis háromszöget.
+    Nem szabad olyan háromszöget satírozni, amivel oldalszomszédos
+    már be van satírozva. Az veszít, aki nem tud satírozni.
+  </>,
+  en: <>
+    Two players colour one small triangle in each turn. A triangle is only
+    allowed if none of its side neighbours are coloured yet. The player who cannot move loses.
+  </>
+};
 
 export const TriangleColoring = strategyGameFactory({
   rule,
   metadata: gameList.TriangleColoring,
   BoardClient,
-  getPlayerStepDescription: () => 'Kattints egy kis háromszögre.',
+  getPlayerStepDescription: () => ({
+    hu: 'Kattints egy kis háromszögre.',
+    en: 'Click on a small triangle.'
+  }),
   generateStartBoard: () => Array(16).fill(null),
   aiBotStrategy,
   moves

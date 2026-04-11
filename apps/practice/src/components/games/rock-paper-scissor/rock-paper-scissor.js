@@ -6,8 +6,10 @@ import { RockSvg } from './symbols/rock-svg';
 import { PaperSvg } from './symbols/paper-svg';
 import { ScissorSvg } from './symbols/scissor-svg';
 import { gameList } from '../gameList';
+import { useTranslation } from '../../language/translate';
 
 const BoardClient = ({ board, ctx, moves }) => {
+  const { t } = useTranslation();
   const isMoveAllowed = (symbolIdx) => {
     if (!ctx.shouldRoleSelectorMoveNext) return false;
     return board[1 - ctx.chosenRoleIndex][symbolIdx] !== null;
@@ -22,9 +24,9 @@ const BoardClient = ({ board, ctx, moves }) => {
   return (
   <section className="p-2 shrink-0 grow basis-2/3">
     <div className="grid grid-cols-3">
-      <span className="text-gray-500 text-xl text-center">Kezdő</span>
+      <span className="text-gray-500 text-xl text-center">{t({ hu: 'Kezdő', en: 'First' })}</span>
       <span></span>
-      <span className="text-gray-500 text-xl text-center">Második</span>
+      <span className="text-gray-500 text-xl text-center">{t({ hu: 'Második', en: 'Second' })}</span>
     </div>
     <div className="grid grid-cols-3">
       {[0, 1, 2].map(symbolIdx => (
@@ -80,19 +82,30 @@ const moves = {
   }
 }
 
-const rule = <>
-  A játék kezdetekor mindkét játékos elé leteszünk három kártyát: az egyik követ, a
-másik papírt, a harmadik ollót ábrázol. Ezután a játékosok felváltva elvesznek egy-egy kártyát az
-ellenfelük elől, egészen addig, amíg már csak egy-egy kártya marad. Ekkor a megmaradt kártyákat
-ütköztetik a „kő-papír-olló” játék szabályai szerint, így eldöntve, hogy ki a győztes; ha mindkét
-kártyán ugyanaz van, akkor a Kezdő nyert.
-</>;
+const rule = {
+  hu: <>
+    A játék kezdetekor mindkét játékos elé leteszünk három kártyát: az egyik követ, a
+    másik papírt, a harmadik ollót ábrázol. Ezután a játékosok felváltva elvesznek egy-egy kártyát az
+    ellenfelük elől, egészen addig, amíg már csak egy-egy kártya marad. Ekkor a megmaradt kártyákat
+    ütköztetik a „kő-papír-olló” játék szabályai szerint, így eldöntve, hogy ki a győztes; ha mindkét
+    kártyán ugyanaz van, akkor a Kezdő nyert.
+  </>,
+  en: <>
+    At the start each player has three cards in front of them: one showing rock, one paper, one
+    scissors. Players take turns removing a card from their opponent until only one card remains
+    for each player. The remaining cards are then compared by rock-paper-scissors rules to determine
+    the winner; if both cards show the same symbol, the first player wins.
+  </>
+};
 
 export const RockPaperScissor = strategyGameFactory({
   rule,
   metadata: gameList.RockPaperScissor,
   BoardClient,
-  getPlayerStepDescription: () => 'Távolíts el egy kártyát az ellenfél elől.',
+  getPlayerStepDescription: () => ({
+    hu: 'Távolíts el egy kártyát az ellenfél elől.',
+    en: 'Remove a card from your opponent.'
+  }),
   generateStartBoard: () => [['rock', 'paper', 'scissor'], ['rock', 'paper', 'scissor']],
   moves,
   aiBotStrategy
