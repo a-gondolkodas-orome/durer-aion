@@ -20,9 +20,9 @@
 
 @layer components {
     .cta-button {
-        @apply border-none rounded-sm block my-1 py-1 px-2 w-full;
-        @apply text-center text-xl whitespace-normal;
+        @apply border-none rounded-lg block my-1 py-1.5 px-3 w-full;
+        @apply text-center text-lg whitespace-normal font-semibold;
         @apply disabled:opacity-50 disabled:cursor-not-allowed;
-        @apply bg-teal-400 enabled:hover:bg-teal-500 enabled:focus:bg-teal-500;
+        @apply bg-blue-500 text-white enabled:hover:bg-blue-600 enabled:focus:bg-blue-600;
     }
 }

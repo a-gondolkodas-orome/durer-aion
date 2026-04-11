@@ -32,23 +32,26 @@ export const GameSidebar = ({
         </p>
       )}
       {ctx.phase === 'roleSelection' && (
-        <span className="basis-24">
-          <button
-            className="cta-button"
-            onClick={() => moves.chooseRole(0)}
-          >
-            {t(roleLabels ? roleLabels[0] : { hu: 'Kezdő leszek', en: "I'll go first" })}
-          </button>
-          <button
-            className="cta-button"
-            onClick={() => moves.chooseRole(1)}
-          >
-            {t(roleLabels ? roleLabels[1] : { hu: 'Második leszek', en: "I'll go second" })}
-          </button>
+        <span className="basis-24 flex flex-col gap-2">
+          {[
+            { hu: 'Kezdő leszek', en: "I'll go first" },
+            { hu: 'Második leszek', en: "I'll go second" }
+          ].map((defaultLabel, i) => (
+            <button
+              key={i}
+              className={`rounded-lg py-2 px-4 w-full text-center font-semibold
+                bg-blue-500 hover:bg-blue-600 focus:bg-blue-600 text-white`}
+              onClick={() => moves.chooseRole(i)}
+            >
+              {t(roleLabels ? roleLabels[i] : defaultLabel)}
+            </button>
+          ))}
         </span>
       )}
       <button
-        className="cta-button mt-[2vh]"
+        className={`mt-[2vh] rounded-lg py-1.5 px-4 w-full text-center border
+          border-slate-300 text-slate-600 hover:bg-slate-50 focus:bg-slate-50
+          disabled:opacity-40 disabled:cursor-not-allowed`}
         disabled={!isNewGameAllowed}
         onClick={() => moves.startNewGame()}
       >
@@ -165,7 +168,10 @@ export const GameEndDialog = ({ isOpen, setIsOpen, startNewGame, isRoleSelectorW
             {t(getResultDescription(isRoleSelectorWinner))}
           </Description>
 
-          <button onClick={() => startNewGame()} className="cta-button mt-2">
+          <button
+            onClick={() => startNewGame()}
+            className="cta-button mt-2"
+          >
             {t({ hu: 'Új játék', en: 'New game' })}
           </button>
         </DialogPanel>
