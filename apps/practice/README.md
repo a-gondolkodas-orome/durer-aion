@@ -32,8 +32,9 @@ here are the installation instructions:
 - install Node.js on your computer globally (or use nvm)
 - in the project directory terminal run `npm ci`
 
+## Useful npm commands
 <details>
-<summary>Useful npm commands</summary>
+<summary>The commands</summary>
 
 ### Compiles and hot-reloads for development
 
@@ -81,9 +82,11 @@ with this factory (so that you can focus on game logic and designing the board i
 
 *It is recommended to copy and modify an existing, similar game.*
 
-<details open>
+## Minimal demonstrative example
 
-<summary>Minimal demonstrative example</summary>
+<details>
+
+<summary>The code</summary>
 
 ```js
 const moves = {
@@ -129,6 +132,9 @@ export const PlusOneTwo = strategyGameFactory({
 </details>
 
 ## Must have for a new game
+
+<details>
+<summary>The details</summary>
 
 ### board object
 
@@ -186,9 +192,9 @@ must be wrapped in setTimeout, this is not (yet) handled by the framework.
 - `endTurn`: a function
 - `endGame`: a function with optional winnerIndex specified, if not, last player to move is the winner
 - `setTurnStage`: a function to set `turnStage`
+</details>
 
-<details>
-<summary>Things to look out for</summary>
+## Things to look out for
 
 - are the starting positions representative of the game complexity?
 - can the player win with a not-winning strategy?
@@ -201,18 +207,6 @@ must be wrapped in setTimeout, this is not (yet) handled by the framework.
 - never modify react state (e.g. the board) in place
 - check for console errors/warnings as well, i.e. missing keys on react components
 - pretend AI is thinking in turns with multiple moves (for one move it is handled by framework)
-
-</details>
-
-## Technologies used
-
-- Node.js for the development server and building the application
-- React frontend framework ([official tutorial](https://react.dev/learn) is a good starting point)
-- [optional] Tailwindcss for styling with utility classes
-- [optional] vitest for unit testing
-- github actions for CI/CD.
-- github pages as hosting
-- [goatcounter](https://agondolkodasorome.goatcounter.com/) as usage tracker (Ildi has access)
 
 ## Internationalisation (i18n)
 
@@ -235,6 +229,20 @@ numbers](https://github.com/a-gondolkodas-orome/durer-jatekok/pull/213/changes/b
 ahead](https://github.com/a-gondolkodas-orome/durer-jatekok/pull/213/changes/1981715efa316e7bf1608c7b441dc0898ea6ed2f),
 [Add N, take
 2N](https://github.com/a-gondolkodas-orome/durer-jatekok/pull/213/changes/16158b67ece84ff68f25afbe9365f6650c7273d3)
+
+## Technologies used
+
+<details>
+
+- Node.js for the development server and building the application
+- React frontend framework ([official tutorial](https://react.dev/learn) is a good starting point)
+- [optional] Tailwindcss for styling with utility classes
+- [optional] vitest for unit testing
+- github actions for CI/CD.
+- github pages as hosting
+- [goatcounter](https://agondolkodasorome.goatcounter.com/) as usage tracker (Ildi has access)
+
+</details>
 
 # License
 
