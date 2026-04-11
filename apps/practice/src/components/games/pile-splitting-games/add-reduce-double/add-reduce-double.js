@@ -118,17 +118,27 @@ const moves = {
   }
 }
 
-const rule = <>
-  A pályán mindig két kupac korong található. Egy lépésben az éppen soron következő játékos az egyik
-  kupacból elvesz páros sok korongot (legalább kettőt), és a másik kupachoz hozzáad feleannyit.
-  Az veszít, aki nem tud lépni.
-</>;
+const rule = {
+  hu: <>
+    A pályán mindig két kupac korong található. Egy lépésben az éppen soron következő játékos az egyik
+    kupacból elvesz páros sok korongot (legalább kettőt), és a másik kupachoz hozzáad feleannyit.
+    Az veszít, aki nem tud lépni.
+  </>,
+  en: <>
+    We have two piles of pucks. In each step, the player in turn adds at least one puck
+    to one of the piles and takes away two times as many pucks from the other pile. The one who
+    cannot make a new step, loses.
+  </>
+};
 
 export const AddReduceDouble = strategyGameFactory({
   rule,
   metadata: gameList.AddReduceDouble,
   BoardClient,
-  getPlayerStepDescription: () => 'Kattints egy korongra, hogy jelezd, hány korongot szeretnél elvenni a kupacból.',
+  getPlayerStepDescription: () => ({
+    hu: 'Kattints egy korongra, hogy jelezd, hány korongot szeretnél elvenni a kupacból.',
+    en: 'Click a piece to indicate how many you want to remove.'
+  }),
   generateStartBoard: () => ([random(3, 10), random(3, 10)]),
   moves,
   aiBotStrategy

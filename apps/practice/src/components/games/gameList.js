@@ -25,7 +25,7 @@ export const gameList = {
     year: { k: "XVI. (22/23)", v: "22/23" },
     round: "döntő",
     category: ["D"],
-    name: "Kettőt vesz, egyet kap",
+    name: { hu: "Kettőt vesz, egyet kap", en: "Add N, take 2N" },
     credit: { suggestedBy: ["Imolay András"], developedBy: ["Matolcsi Dávid"] }
   },
   AntiTicTacToe: {
@@ -93,21 +93,21 @@ export const gameList = {
     year: { k: "XV. (21/22)", v: "21/22" },
     round: "döntő",
     category: ["B"],
-    name: "Érmék beváltása",
+    name: { hu: "Érmék beváltása", en: "Coin change" },
     credit: { developedBy: ["Czeller Ildikó"] }
   },
   Coin357: {
     year: { k: "XV. (21/22)", v: "21/22" },
     round: "döntő",
     category: ["A"],
-    name: "15 érme beváltása",
+    name: { hu: "15 érme beváltása", en: "Change 15 coins" },
     credit: { developedBy: ["Czeller Ildikó"] }
   },
   CubeColoring: {
     year: { k: "XV. (21/22)", v: "21/22" },
     round: "döntő",
     category: ["C", "D"],
-    name: "Kockaszínezés",
+    name: { hu: "Kockaszínezés", en: "Cube colouring" },
     credit: { suggestedBy: ["Nagy Kartal"], developedBy: ["Szűcs Gábor"] }
   },
   DominoesOnChessboard: {
@@ -135,7 +135,7 @@ export const gameList = {
     year: { k: "XVI. (22/23)", v: "22/23" },
     round: "döntő",
     category: ["E", "E+"],
-    name: "4 kupacban előrepakolás",
+    name: { hu: "4 kupacban előrepakolás", en: "4 piles: spread ahead" },
     credit: { suggestedBy: ["Fraknói Ádám"], developedBy: ["Matolcsi Dávid"] }
   },
   HunyadiAndTheJanissaries: {
@@ -163,7 +163,7 @@ export const gameList = {
     year: { k: "XVIII. (24/25)", v: "24/25" },
     round: "döntő",
     category: ["E", "E+"],
-    name: "Számpár módosítás",
+    name: { hu: "Számpár módosítás", en: "Pairs of numbers" },
     credit: { developedBy: ["Czeller Ildikó"] }
   },
   PileSplitter: {
@@ -184,7 +184,7 @@ export const gameList = {
     year: { k: "XIII.(19/20)", v: "19/20" },
     round: "döntő",
     category: ["E+"],
-    name: "Kupac kettéosztó 4 kupaccal",
+    name: { hu: "Kupac kettéosztó 4 kupaccal", en: "Pile splitting (4 piles)" },
     credit: { developedBy: ["Soós Máté"] }
   },
   PlusOneTwoThree: {
@@ -270,7 +270,7 @@ export const gameList = {
     year: { k: "XIII.(19/20)", v: "19/20" },
     round: "döntő",
     category: ["D", "E"],
-    name: "Babonás lépkedés",
+    name: { hu: "Babonás lépkedés", en: "Superstitious counting" },
     credit: { developedBy: ["Soós Máté"] }
   },
   Take1OrHalve: {
@@ -313,7 +313,7 @@ export const gameList = {
     year: { k: "XIII.(19/20)", v: "19/20" },
     round: "döntő",
     category: ["C"],
-    name: "Átszínezős tic-tac-toe",
+    name: { hu: "Átszínezős tic-tac-toe", en: "Recolouring tic-tac-toe" },
     credit: { developedBy: ["Czeller Ildikó"] }
   },
   TicTacToeDoubleStart: {
@@ -334,7 +334,7 @@ export const gameList = {
     year: { k: "XIV. (20/21)", v: "20/21" },
     round: "döntő",
     category: ["C", "D"],
-    name: "10 totemoszlop",
+    name: { hu: "10 totemoszlop", en: "10 totem poles" },
     credit: { developedBy: ["Czeller Ildikó"] }
   },
   TwelveSquares: {

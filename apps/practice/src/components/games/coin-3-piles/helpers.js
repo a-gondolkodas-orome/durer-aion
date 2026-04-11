@@ -4,9 +4,15 @@ import { cloneDeep, isEqual } from "lodash";
 
 export const getPlayerStepDescription = ({ ctx: { turnStage } }) => {
   if (turnStage === 'placeBack') {
-    return 'Kattints egy érmére a kupac mellett, hogy betegyél egy olyan pénzérmét.';
+    return {
+      hu: 'Kattints egy érmére a felső sorban, hogy betedd.',
+      en: 'Click a coin in the top row to place it.'
+    };
   }
-  return 'Kattints egy érmére, hogy elvegyél egy olyan pénzérmét.';
+  return {
+    hu: 'Kattints egy érmére, hogy elvegyél egy olyan pénzérmét.',
+    en: 'Click a coin to remove it.'
+  };
 };
 
 export const isWinningState = ({ board }) => {

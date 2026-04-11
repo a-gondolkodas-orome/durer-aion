@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { range } from 'lodash';
+import { useTranslation } from '../../language/translate';
 
 export const BoardClient = ({ board, ctx, moves }) => {
+  const { t } = useTranslation();
   const [valueOfRemovedCoin, setValueOfRemovedCoin] = useState(null);
   const [hoveredPile, setHoveredPile] = useState(null);
 
@@ -78,7 +80,7 @@ export const BoardClient = ({ board, ctx, moves }) => {
               className="cta-button text-sm px-1"
               onClick={passAddition}
             >
-              Semmit se rakok be
+              {t({ hu: 'Semmit se rakok be', en: 'I place nothing back' })}
             </button>
           </td>
           {[1, 2].map(coinValue =>
@@ -141,7 +143,7 @@ export const BoardClient = ({ board, ctx, moves }) => {
       className="w-[30%] m-auto cta-button bg-slate-400 text-sm px-1"
       onClick={undoCoinRemoval}
     >
-      ↶ Visszavonás
+      {t({ hu: '↶ Visszavonás', en: '↶ Undo' })}
     </button>
   </section>
   );

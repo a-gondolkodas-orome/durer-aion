@@ -1,7 +1,8 @@
 import React, { StrictMode } from 'react';
-import { createHashRouter, RouterProvider } from 'react-router';
+import { createHashRouter, RouterProvider, Outlet } from 'react-router';
 import { Overview } from '../overview/overview';
 import { ErrorPage } from '../error-page';
+import { LanguageProvider } from '../language/language-context';
 
 /*
 Import all the games individually. Aim to keep abc ordering for easy navigation.
@@ -50,6 +51,12 @@ import { TriangleColoring } from '../games/triangle-coloring/triangle-coloring';
 import { TriangularGridRopes } from '../games/triangular-grid-ropes/triangular-grid-ropes';
 import { TwelveSquares } from '../games/twelve-squares/twelve-squares';
 import { TwoTimesTwo } from '../games/two-times-two/two-times-two';
+
+const RootLayout = () => (
+  <LanguageProvider>
+    <Outlet />
+  </LanguageProvider>
+);
 
 export const App = () => {
   const routes = [
@@ -101,9 +108,10 @@ export const App = () => {
     { path: '/game/TwoTimesTwo', element: <TwoTimesTwo /> }
   ];
 
-  const router = createHashRouter(
-    routes.map(route => ({...route, errorElement: <ErrorPage /> }))
-  );
+  const router = createHashRouter([{
+    element: <RootLayout />,
+    children: routes.map(route => ({ ...route, errorElement: <ErrorPage /> }))
+  }]);
 
 return <StrictMode>
     <RouterProvider router={router}></RouterProvider>

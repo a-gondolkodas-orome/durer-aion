@@ -4,6 +4,7 @@ import { strategyGameFactory } from '../strategy-game';
 import { aiBotStrategy } from './bot-strategy';
 import { isAllowedStep, allColors } from './helpers';
 import { gameList } from '../gameList';
+import { useTranslation } from '../../language/translate';
 
 const generateStartBoard = () => Array(8).fill(null);
 
@@ -19,6 +20,7 @@ const cubeCoords = [
 ];
 
 const BoardClient = ({ board, ctx, moves }) => {
+  const { t } = useTranslation();
   const [color, setColor] = useState('');
   const [show, setShow] = useState(false);
   const [x, setX] = useState(0);
@@ -61,7 +63,7 @@ const BoardClient = ({ board, ctx, moves }) => {
           ${!show || color !== '#dc2626' ? 'bg-opacity-50' : ''}
         `}
         onClick={() => pick('#dc2626')}
-      >Piros</button>
+      >{t({ hu: 'Piros', en: 'Red' })}</button>
       <button
         disabled={!ctx.shouldRoleSelectorMoveNext}
         className={`
@@ -69,7 +71,7 @@ const BoardClient = ({ board, ctx, moves }) => {
           ${!show || color !== '#eab308' ? 'bg-opacity-50' : ''}
         `}
         onClick={() => pick('#eab308')}
-      >Sárga</button>
+      >{t({ hu: 'Sárga', en: 'Yellow' })}</button>
       <button
         disabled={!ctx.shouldRoleSelectorMoveNext}
         className={`
@@ -77,7 +79,7 @@ const BoardClient = ({ board, ctx, moves }) => {
           ${!show || color !== '#2563eb' ? 'bg-opacity-50' : ''}
         `}
         onClick={() => pick('#2563eb')}
-      >Kék</button>
+      >{t({ hu: 'Kék', en: 'Blue' })}</button>
     </header>
 
     <svg
@@ -138,21 +140,36 @@ const moves = {
   }
 }
 
-const rule = <>
-  Adott egy téglatest rácsa, aminek be van húzva az egyik testátlója.
-  Egy lépésben az éppen soron lévő játékos megszínezi valamelyik még színezetlen csúcsot
-  pirosra, sárgára vagy kékre úgy,
-  hogy ne keletkezzen két szomszédos csúcs, amik azonos színűek.
-  Ha valamelyik játékos nem tud lépni, akkor véget ér a játék.
-  A kezdő játékos nyer, ha minden csúcs meg lett színezve, míg a második akkor nyer,
-  ha van olyan csúcs ami nem lett kiszínezve.
-</>;
+const rule = {
+  hu: <>
+    Adott egy téglatest rácsa, aminek be van húzva az egyik testátlója.
+    Egy lépésben az éppen soron lévő játékos megszínezi valamelyik még színezetlen csúcsot
+    pirosra, sárgára vagy kékre úgy,
+    hogy ne keletkezzen két szomszédos csúcs, amik azonos színűek.
+    Ha valamelyik játékos nem tud lépni, akkor véget ér a játék.
+    A kezdő játékos nyer, ha minden csúcs meg lett színezve, míg a második akkor nyer,
+    ha van olyan csúcs ami nem lett kiszínezve.
+  </>,
+  en: <>
+    Given is the skeleton of a cuboid in which one of the solid
+    diagonals is drawn. Within a move the upcoming player colours one of
+    the yet uncoloured vertices with one of three colours (meaning that he
+    puts a red, yellow or blue disc on top of the vertex) in a way that no
+    adjacent vertices can have the same colour. The game ends when the
+    next player cannot make a move any longer. The player who started
+    wins if all the vertices have been coloured, whereas the second player
+    wins if there remain uncoloured vertices.
+  </>
+};
 
 export const CubeColoring = strategyGameFactory({
   rule,
   metadata: gameList.CubeColoring,
   BoardClient,
-  getPlayerStepDescription: () => 'Válassz színt, majd színezz meg egy csúcsot!',
+  getPlayerStepDescription: () => ({
+    hu: 'Válassz színt, majd színezz meg egy csúcsot!',
+    en: 'Choose a colour, then colour a vertex.'
+  }),
   generateStartBoard,
   moves,
   aiBotStrategy

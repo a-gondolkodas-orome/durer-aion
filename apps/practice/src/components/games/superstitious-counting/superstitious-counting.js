@@ -3,6 +3,7 @@ import { range, sample, difference } from 'lodash';
 import { strategyGameFactory } from '../strategy-game';
 import { aiBotStrategy } from './bot-strategy';
 import { gameList } from '../gameList';
+import { useTranslation } from '../../language/translate';
 
 const generateStartBoard = () => {
   const losingPositions = range(29, 127, 14);
@@ -12,6 +13,7 @@ const generateStartBoard = () => {
 };
 
 const BoardClient = ({ board, ctx, moves }) => {
+  const { t } = useTranslation();
   const fields = range(board.target + 14);
 
   const isMoveAllowed = (step) => {
@@ -48,10 +50,20 @@ const BoardClient = ({ board, ctx, moves }) => {
       </button>
       )}
     </div>
-    <span className = "text-xl"><code>m</code> értéke: { board.target }</span>
+    <span className = "text-xl">
+      {t({
+        hu: `m értéke: ${board.target}`,
+        en: `Value of m: ${board.target}`
+      })}
+    </span>
     {ctx.shouldRoleSelectorMoveNext && (
       <p className="text-xl">
-        Előző lépés: { board.restricted ? (13 - board.restricted) : '-' }. Tiltott: { board.restricted || '-' }.
+        {t({
+          hu: `Előző lépés: ${board.restricted ? (13 - board.restricted) : '-'}. ` +
+            `Tiltott: ${ board.restricted || '-' }.`,
+          en: `Previous step: ${board.restricted ? (13 - board.restricted) : '-'}. ` +
+            `Forbidden: ${board.restricted || '-'}.`
+        })}
       </p>
     )}
   </section>
@@ -70,18 +82,30 @@ const moves = {
   }
 };
 
-const rule = <>
-  Károly és Dezső <code>m</code>-ig szeretnének elszámolni, és közben a következő játékot játsszák:
-  0-ról kezdenek, a két játékos felváltva adhat hozzá egy 13-nál (szigorúan) kisebb pozitív egészet a korábbi
-  számhoz, azonban a babonájuk miatt ha egyikük x-et adott hozzá, akkor másikuk a következő
-  lépésben nem adhat hozzá <code>13-x</code>-et. Az veszít, aki eléri (vagy átlépi) <code>m</code>-et.
-</>;
+const rule = {
+  hu: <>
+    Károly és Dezső <code>m</code>-ig szeretnének elszámolni, és közben a következő játékot játsszák:
+    0-ról kezdenek, a két játékos felváltva adhat hozzá egy 13-nál (szigorúan) kisebb pozitív egészet a korábbi
+    számhoz, azonban a babonájuk miatt ha egyikük <code>x</code>-et adott hozzá, akkor másikuk a következő
+    lépésben nem adhat hozzá <code>13-x</code>-et. Az veszít, aki eléri (vagy átlépi) <code>m</code>-et.
+  </>,
+  en: <>
+    Károly and Dezső wish to count up to <code>m</code> and play the following game in the
+    meantime: they start from 0 and the two players can add a positive number less than 13 to the
+    previous number, taking turns. However because of their superstition, if one of them added <code>x</code>,
+    then the other one in the next step cannot add <code>13-x</code>. Whoever reaches
+    (or surpasses) <code>m</code> first, loses.
+  </>
+};
 
 export const SuperstitiousCounting = strategyGameFactory({
   rule,
   metadata: gameList.SuperstitiousCounting,
   BoardClient,
-  getPlayerStepDescription: () => 'Kattints a számra ahova lépni szeretnél.',
+  getPlayerStepDescription: () => ({
+    hu: 'Kattints a számra ahova lépni szeretnél.',
+    en: 'Click on a number to step onto it.'
+  }),
   generateStartBoard,
   moves,
   aiBotStrategy

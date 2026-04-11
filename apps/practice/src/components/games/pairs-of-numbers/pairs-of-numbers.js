@@ -2,8 +2,10 @@ import React from 'react';
 import { strategyGameFactory } from '../strategy-game';
 import { random } from 'lodash';
 import { gameList } from '../gameList';
+import { useTranslation } from '../../language/translate';
 
 const BoardClient = ({ board, ctx, moves }) => {
+  const { t } = useTranslation();
   return(
     <section className="p-2 shrink-0 grow basis-2/3">
       <p className='w-full text-8xl font-bold text-center'>
@@ -16,7 +18,7 @@ const BoardClient = ({ board, ctx, moves }) => {
             disabled={!ctx.shouldRoleSelectorMoveNext}
             onClick={() => moves.add1(board)}
           >
-            Növelek {ctx.shouldRoleSelectorMoveNext && <>
+            {t({ hu: 'Növelek', en: 'Increase' })} {ctx.shouldRoleSelectorMoveNext && <>
               (→<code className="text-md">({board[0]},{board[1] + 1})</code>)
             </>}
           </button>
@@ -27,7 +29,7 @@ const BoardClient = ({ board, ctx, moves }) => {
             disabled={!ctx.shouldRoleSelectorMoveNext}
             onClick={() => moves.subtract(board)}
           >
-            Kivonok {ctx.shouldRoleSelectorMoveNext && <>
+            {t({ hu: 'Kivonok', en: 'Subtract' })} {ctx.shouldRoleSelectorMoveNext && <>
               (→<code className="text-md">({board[0] - board[1]},{board[1]})</code>)
             </>}
           </button>
@@ -78,12 +80,24 @@ const aiBotStrategy = ({ board, moves }) => {
   moves.add1(board);
 };
 
-const rule = <>
-  Adott egy pozitív egészekből álló <code>(n, k)</code> rendezett számpár.
-  Két játékos felváltva lép, az <code>(a, b)</code> számpár
-  helyére egy lépésben kerülhet vagy az <code>(a, b + 1)</code>, vagy az <code>(a − b, b)</code> számpár.
-Az nyer, aki először ír fel olyan számpárt, amelyben nem mindkét szám pozitív.
-</>;
+const rule = {
+  hu: <>
+    Adott egy pozitív egészekből álló <code>(n,&nbsp;k)</code> rendezett számpár.
+    Két játékos felváltva lép, az <code>(a,&nbsp;b)</code> számpár
+    helyére egy lépésben kerülhet vagy az <code className="whitespace-nowrap">(a, b + 1)</code>,
+    vagy az <code className="whitespace-nowrap">(a − b, b)</code> számpár.
+    Az nyer, aki először ír fel olyan számpárt, amelyben nem mindkét szám pozitív.
+  </>,
+  en: <>
+    Initially, an ordered pair of positive integers <code>(n,&nbsp;k)</code> is written on a sheet of paper.
+    Two players are playing a game, taking turns alternately. In each turn, if the pair
+    <code>(a,&nbsp;b)</code> is on the sheet and is not crossed out, then the player
+    must cross out <code>(a,&nbsp;b)</code> and instead write
+    <code className="whitespace-nowrap">(a, b + 1)</code> or
+    <code className="whitespace-nowrap">(a − b, b)</code> on the sheet.
+    The winner is the first player to write a pair in which at least one of the numbers is not positive.
+  </>
+};
 
 const generateStartBoard = () => {
   if (random(0, 2) === 0) {
@@ -119,7 +133,10 @@ export const PairsOfNumbers = strategyGameFactory({
   rule,
   metadata: gameList.PairsOfNumbers,
   BoardClient,
-  getPlayerStepDescription: () => 'Növeld a második számot eggyel vagy vond ki az elsőből.',
+  getPlayerStepDescription: () => ({
+    hu: 'Növeld a második számot eggyel vagy vond ki az elsőből.',
+    en: 'Increase the second number by 1 or subtract it from the first.'
+  }),
   generateStartBoard,
   aiBotStrategy,
   moves

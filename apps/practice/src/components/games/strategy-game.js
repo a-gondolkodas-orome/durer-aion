@@ -3,6 +3,7 @@ import {
   GameSidebar, GameFooter, GameHeader, GameRule, GameEndDialog
 } from './game-parts';
 import { partial, mapValues, wrap, _ } from 'lodash';
+import { useTranslation } from '../language/translate';
 
 export const strategyGameFactory = ({
   rule,
@@ -16,6 +17,7 @@ export const strategyGameFactory = ({
   endOfTurnMove
 }) => {
   return () => {
+    const { t } = useTranslation();
     const [board, setBoard] = useState(generateStartBoard())
     const [phase, setPhase] = useState('roleSelection');
     const [chosenRoleIndex, setChosenRoleIndex] = useState(null);
@@ -105,10 +107,10 @@ export const strategyGameFactory = ({
 
     return (
     <main className="flex flex-col p-2 min-h-screen">
-      <GameHeader title={metadata.title || metadata.name} />
+      <GameHeader title={t(metadata.title || metadata.name)} />
       <div className="flex justify-center grow">
         <div className="max-w-[100ch] w-full">
-          <GameRule ruleDescription={rule} />
+          <GameRule ruleDescription={t(rule)} />
           <div className="flex flex-wrap">
             <BoardClient
               key={gameUuid}
@@ -119,7 +121,7 @@ export const strategyGameFactory = ({
             />
             <GameSidebar
               roleLabels={roleLabels}
-              stepDescription={getPlayerStepDescription({ board, ctx })}
+              stepDescription={t(getPlayerStepDescription({ board, ctx }))}
               ctx={{ phase, shouldRoleSelectorMoveNext, isRoleSelectorWinner }}
               moves={{ chooseRole, startNewGame }}
             />

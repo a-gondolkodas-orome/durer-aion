@@ -3,10 +3,12 @@ import { range, random, cloneDeep } from 'lodash';
 import { strategyGameFactory } from '../../strategy-game';
 import { aiBotStrategy } from './bot-strategy';
 import { gameList } from '../../gameList';
+import { useLanguage } from '../../../language/language-context';
 
 const generateStartBoard = () => ([random(0, 9), random(0, 9), random(0, 9), random(4, 9)]);
 
 const BoardClient = ({ board, ctx, moves }) => {
+  const { language } = useLanguage();
   const [hoveredPiece, setHoveredPiece] = useState(null);
 
   const nonExistent = ({ pileId, pieceId }) => {
@@ -52,18 +54,19 @@ const BoardClient = ({ board, ctx, moves }) => {
 
   const currentChoiceDescription = (pileId) => {
     const pieceCountInPile = board[pileId];
+    const pileName = language == 'en' ? 'pile' : 'kupac';
 
     if (!ctx.shouldRoleSelectorMoveNext || !hoveredPiece) {
-      return `${pileId+1}. kupac: ${pieceCountInPile} `;
+      return `${pileId+1}. ${pileName}: ${pieceCountInPile} `;
     }
 
     if (pileId===hoveredPiece.pileId) {
-      return `${pileId+1}. kupac: ${pieceCountInPile} → ${pieceCountInPile - hoveredPiece.pieceId - 1}`;
+      return `${pileId+1}. ${pileName}: ${pieceCountInPile} → ${pieceCountInPile - hoveredPiece.pieceId - 1}`;
     }
     if ((pileId<hoveredPiece.pileId) && (pileId>hoveredPiece.pileId-hoveredPiece.pieceId-2)) {
-      return `${pileId+1}. kupac: ${pieceCountInPile} → ${pieceCountInPile + 1}`;
+      return `${pileId+1}. ${pileName}: ${pieceCountInPile} → ${pieceCountInPile + 1}`;
     }
-    return `${pileId+1}. kupac: ${pieceCountInPile} `;
+    return `${pileId+1}. ${pileName}: ${pieceCountInPile} `;
   };
 
   const leftBorder = (pileId) => {
@@ -150,18 +153,32 @@ const moves = {
   }
 }
 
-const rule = <>
-  Adott négy, korongokból álló kupac, melyek 1-től 4-ig vannak számozva. Egy lépésben a
-  soron következő játékos választ m és n egész számokat, melyekre 1 ≤ m &lt; n ≤ 4, majd az n sorszámú
-  kupacból elvesz m korongot, és az n − 1, n − 2, . . . , n − m sorszámú kupacokba egyesével szétosztja az
-  elvett korongokat. Az veszít, aki nem tud lépni.
-</>;
+const rule = {
+  hu: <>
+    Adott négy, korongokból álló kupac, melyek 1-től 4-ig vannak számozva. Egy lépésben a
+    soron következő játékos választ m és n egész számokat,
+    melyekre <code className="whitespace-nowrap">1 ≤ m &lt; n ≤ 4</code>,
+    majd az n sorszámú kupacból elvesz m korongot, és
+    az <code className="whitespace-nowrap">n − 1, n − 2, . . . , n − m</code> sorszámú
+    kupacokba egyesével szétosztja az elvett korongokat. Az veszít, aki nem tud lépni.
+  </>,
+  en: <>
+    There are four piles of discs given, numbered from 1 to 4. Every turn the current
+    player chooses integers m and n that satisfy <code className="whitespace-nowrap">1 ≤ m &lt; n ≤ 4</code> and
+    takes m discs from pile number n and distributes them into the
+    piles <code className="whitespace-nowrap">n − 1, n − 2, . . . , n − m</code> by
+    adding one disc to every pile. The player that has no available moves loses.
+  </>
+};
 
 export const FourPilesSpreadAhead = strategyGameFactory({
   rule,
   metadata: gameList.FourPilesSpreadAhead,
   BoardClient,
-  getPlayerStepDescription: () => 'Kattints egy korongra, hogy jelezd, hány korongot szeretnél elvenni a kupacból.',
+  getPlayerStepDescription: () => ({
+    hu: 'Kattints egy korongra, hogy jelezd, hány korongot szeretnél elvenni a kupacból.',
+    en: 'Click on a disc to indicate the number of discs you want to remove.'
+  }),
   generateStartBoard,
   moves,
   aiBotStrategy
