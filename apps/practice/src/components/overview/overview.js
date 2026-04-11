@@ -130,6 +130,18 @@ const OverviewHeader = () => {
   </div>;
 };
 
+const categoryColorClass = {
+  'A':  'bg-emerald-200 border-emerald-400 text-emerald-950',
+  'B':  'bg-teal-300 border-teal-500 text-teal-950',
+  'C':  'bg-blue-300 border-blue-400 text-blue-950',
+  'D':  'bg-blue-400 border-blue-500 text-blue-950',
+  'E':  'bg-blue-600 border-blue-700 text-white',
+  'E+': 'bg-blue-800 border-blue-900 text-white'
+};
+
+const chipBase = 'rounded-full border px-2 py-0.5 text-xs whitespace-nowrap';
+const neutralChip = `${chipBase} border-slate-300 bg-white text-slate-800`;
+
 const Game = ({ gameId, gameProps }) => {
   const { t } = useTranslation();
   const { language } = useLanguage();
@@ -139,8 +151,10 @@ const Game = ({ gameId, gameProps }) => {
     ? t({ hu: 'döntő', en: 'final' })
     : gameProps.round;
 
+  const categoryColor = categoryColorClass[gameProps.category[0]] ?? neutralChip;
+
   return <span
-    className="rounded-lg shadow-lg border p-2 m-1 max-w-[32ch] w-full flex flex-col js-game-card"
+    className="rounded-lg shadow-sm border p-2 m-2 max-w-[32ch] w-full flex flex-col js-game-card"
   >
     <h2 className="font-bold mb-4 text-center">
       {t(gameProps.name)}
@@ -149,20 +163,15 @@ const Game = ({ gameId, gameProps }) => {
       )}
     </h2>
     <div className="grow"></div>
-    <div className="flex flex-wrap items-baseline">
-      <span
-        className="rounded-lg bg-orange-200 px-1 m-0.5 whitespace-nowrap"
-        title={gameProps.year.k}
-      >{gameProps.year.v}</span>
-      <span
-        className="rounded-lg bg-blue-200 px-1 m-0.5 whitespace-nowrap"
-      >{gameProps.category.join(', ')}</span>
-      <span className="rounded-lg bg-amber-200 px-1 m-0.5">{round}</span>
+    <div className="flex flex-wrap items-baseline gap-1">
+      <span className={neutralChip} title={gameProps.year.k}>{gameProps.year.v}</span>
+      <span className={`${chipBase} ${categoryColor}`}>{gameProps.category.join(', ')}</span>
+      <span className={neutralChip}>{round}</span>
       <span className="grow"></span>
       <Link
         to={`/game/${gameId}`}
-        className="cta-button rounded-lg py-0 px-1 underline m-0.5 text-base w-auto text-black ml-auto"
-      >{t({ hu: 'Kipróbálom!', en: 'Try it!' })}</Link>
+        className="text-sm text-blue-600 hover:underline ml-auto whitespace-nowrap"
+      >{t({ hu: 'Kipróbálom →', en: 'Try it →' })}</Link>
     </div>
   </span>;
 };
