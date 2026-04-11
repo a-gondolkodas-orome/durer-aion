@@ -81,8 +81,8 @@ const hasFirstPlayerWon = (board) => {
 const ruleA = {
   hu: <>
     Az ábrán egy kisváros úthálózata látható, ahol az útkereszteződéseket
-    pöttyök jelölik. A játék kezdetén a szervezők az egyik útkereszteződésbe
-    letesznek egy tolvajt ábrázoló (piros) korongot, egy másikba pedig két
+    pöttyök jelölik. A játék kezdetén a számítógép az egyik útkereszteződésbe
+    letesz egy tolvajt ábrázoló (piros) korongot, egy másikba pedig két
     rendőrt ábrázoló (kék illetve zöld) korongot. Egy körben előbb a rendőrök (a kék majd a zöld) mennek át
     egy-egy szomszédos útkereszteződésbe egy út mentén (szét is válhatnak), majd
     a tolvaj is hasonlóan lép. Minden körben kötelező mindenkinek helyet
@@ -92,7 +92,7 @@ const ruleA = {
   </>,
   en: <>
     The diagram shows a small town's road network, with intersections marked by dots. At the start,
-    the organisers place a thief (red) piece at one intersection and two policemen (blue and green)
+    the computer places a thief (red) piece at one intersection and two policemen (blue and green)
     at another. Each round the policemen move first (blue then green), each stepping to an adjacent
     intersection along a road (they may split up), then the thief moves the same way. Everyone must
     move every round. The policemen win if the thief is ever at the same intersection as a policeman.
@@ -103,7 +103,7 @@ const ruleA = {
 const ruleB = {
   hu: <>
     Az ábrán egy kisváros úthálózata látható, ahol az útkereszteződéseket pöttyök
-    jelölik. A játék kezdetén a szervezők valamely útkereszteződésekbe leteszik a tolvajt
+    jelölik. A játék kezdetén a számítógép valamely útkereszteződésekbe leteszi a tolvajt
     ábrázoló (piros), valamint a két rendőrt ábrázoló (kék illetve zöld) korongokat; a két rendőr
     esetleg ugyanarra a mezőre is kerülhet. Egy körben előbb a rendőrök (a kék majd a zöld) mennek át
     egy-egy szomszédos útkereszteződésbe egy út mentén (szét is válhatnak), majd a
@@ -113,7 +113,7 @@ const ruleB = {
   </>,
   en: <>
     The diagram shows a small town's road network, with intersections marked by dots. At the start,
-    the organisers place the thief (red) and the two policemen (blue and green) at intersections of
+    the computer places the thief (red) and the two policemen (blue and green) at intersections of
     their choosing; the two policemen may start on the same intersection. Each round the policemen
     move first (blue then green), each stepping to an adjacent intersection along a road (they may
     split up), then the thief moves the same way. Everyone must move every round. The policemen win
