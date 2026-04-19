@@ -15,7 +15,7 @@ const CARD_COUNT = 9;
 
 const BoardClient = ({ board, ctx, moves }) => {
   const isAllowedMove = index => {
-    if (!ctx.shouldRoleSelectorMoveNext) return false;
+    if (!ctx.isClientMoveAllowed) return false;
     return getUntakenCards(board, CARD_COUNT).includes(index);
   }
 
@@ -42,7 +42,7 @@ const BoardClient = ({ board, ctx, moves }) => {
             m-1 min-h-28 w-18
             border-2 shadow-md border-slate-800 rounded-xl text-4xl
             text-center font-bold
-            ${ctx.chosenRoleIndex === Thief
+            ${ctx.currentPlayer === Thief
               ? "enabled:hover:bg-red-400 enabled:focus:bg-red-400"
               : "enabled:hover:bg-blue-400 enabled:focus:bg-blue-400"
             }
@@ -99,8 +99,8 @@ export const ThievesMean9 = strategyGameFactory({
   BoardClient,
   getPlayerStepDescription: () => ({ hu: 'Válassz egy kártyát.', en: 'Pick a card.' }),
   roleLabels: [
-    { hu: 'Nyomozó leszek', en: "I'll be the Sheriff" },
-    { hu: 'Tolvaj leszek', en: "I'll be the Thief" }
+    { hu: 'Nyomozó', en: "Sheriff" },
+    { hu: 'Tolvaj', en: "Thief" }
   ],
   generateStartBoard,
   moves,

@@ -16,7 +16,7 @@ const cubeCoords = [
 export const BoardClient = ({ board, ctx, moves }) => {
   const handleCircleClick = (vertex) => {
     if (!isClickable(vertex)) return;
-    if (ctx.chosenRoleIndex === 1) {
+    if (ctx.currentPlayer === 1) {
       moves.moveThief(board, vertex);
       return;
     }
@@ -28,8 +28,8 @@ export const BoardClient = ({ board, ctx, moves }) => {
   };
 
   const isClickable = (vertex) => {
-    if (!ctx.shouldRoleSelectorMoveNext) return false;
-    if (ctx.chosenRoleIndex === 1) {
+    if (!ctx.isClientMoveAllowed) return false;
+    if (ctx.currentPlayer === 1) {
       return neighbours[board.thief].includes(vertex);
     }
     if (board.firstPolicemanMoved) {
@@ -40,12 +40,12 @@ export const BoardClient = ({ board, ctx, moves }) => {
 
   const getColor = (vertex) => {
     if (isClickable(vertex)) {
-      if (ctx.chosenRoleIndex === 1) {
+      if (ctx.currentPlayer === 1) {
         if (board.policemen[0] === vertex) return "url(#thief-and-first-policeman)";
         if (board.policemen[1] === vertex) return "url(#thief-and-second-policeman)";
         return "red";
       }
-      if (ctx.chosenRoleIndex === 0) {
+      if (ctx.currentPlayer === 0) {
         if (board.firstPolicemanMoved) {
           if (board.thief === vertex) return "url(#thief-and-second-policeman)";
           if (board.policemen[0] === vertex) return "url(#2policemen)";

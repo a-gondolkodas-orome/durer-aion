@@ -13,14 +13,14 @@ const BoardClient = ({ board, ctx, moves }) => {
         <span className="grow px-2">
           <button
             className='cta-button'
-            disabled={!ctx.shouldRoleSelectorMoveNext}
+            disabled={!ctx.isClientMoveAllowed}
             onClick={() => moves.take1(board)}
           >{t({ hu: 'Elveszek egyet', en: 'Take one' })}</button>
         </span>
         <span className='grow px-2'>
           <button
             className="cta-button"
-            disabled={!ctx.shouldRoleSelectorMoveNext || board % 2 === 1}
+            disabled={!ctx.isClientMoveAllowed || board % 2 === 1}
             onClick={() => moves.halve(board)}
           >{t({ hu: 'Elveszem a felét', en: 'Take half' })}</button>
         </span>

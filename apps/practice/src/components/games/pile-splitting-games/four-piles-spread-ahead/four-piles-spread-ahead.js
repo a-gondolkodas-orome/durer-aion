@@ -16,7 +16,7 @@ const BoardClient = ({ board, ctx, moves }) => {
   };
 
   const isDisabled = ({ pileId, pieceId }) => {
-    if (!ctx.shouldRoleSelectorMoveNext) return true;
+    if (!ctx.isClientMoveAllowed) return true;
     return pieceId>pileId-1 || (pieceId>board[pileId]-1);
   };
 
@@ -56,7 +56,7 @@ const BoardClient = ({ board, ctx, moves }) => {
     const pieceCountInPile = board[pileId];
     const pileName = language == 'en' ? 'pile' : 'kupac';
 
-    if (!ctx.shouldRoleSelectorMoveNext || !hoveredPiece) {
+    if (!ctx.isClientMoveAllowed || !hoveredPiece) {
       return `${pileId+1}. ${pileName}: ${pieceCountInPile} `;
     }
 

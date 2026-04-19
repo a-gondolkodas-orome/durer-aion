@@ -81,8 +81,8 @@ const rule = {
   </>
 };
 
-const getPlayerStepDescription = ({ board, ctx: { chosenRoleIndex } }) => {
-  if (chosenRoleIndex === 0) {
+const getPlayerStepDescription = ({ board, ctx }) => {
+  if (ctx.currentPlayer === 0) {
     return {
       hu: 'Válassz ki egy tengeralattjárót, majd válassz egy szomszédos szektort.',
       en: 'Choose a submarine, then choose an adjacent sector.'
@@ -110,8 +110,8 @@ export const SharkChase5 = strategyGameFactory({
   rule,
   metadata: gameList.SharkChase5,
   roleLabels: [
-    { hu: 'Kutató leszek!', en: "I'll be a researcher!" },
-    { hu: 'Cápa leszek!', en: "I'll be the shark!" }
+    { hu: 'Kutató', en: "Researcher" },
+    { hu: 'Cápa', en: "Shark" }
   ],
   BoardClient,
   getPlayerStepDescription,

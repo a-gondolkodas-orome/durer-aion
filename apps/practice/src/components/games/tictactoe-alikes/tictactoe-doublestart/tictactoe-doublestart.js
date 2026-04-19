@@ -8,7 +8,7 @@ import { gameList } from '../../gameList';
 
 const BoardClient = ({ board, ctx, moves }) => {
   const isMoveAllowed = (id) => {
-    if (!ctx.shouldRoleSelectorMoveNext) return false;
+    if (!ctx.isClientMoveAllowed) return false;
     return board[id] === null;
   };
   const clickField = (id) => {

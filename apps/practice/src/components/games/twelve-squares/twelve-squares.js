@@ -6,7 +6,7 @@ import { gameList } from '../gameList';
 
 const BoardClient = ({ board, ctx, moves }) => {
   const isMoveAllowed = (step) => {
-	  if(!ctx.shouldRoleSelectorMoveNext) return false;
+	  if(!ctx.isClientMoveAllowed) return false;
     if (step === board.right - board.left) return false;
     return step === 1 || step === 2;
   };
@@ -17,18 +17,16 @@ const BoardClient = ({ board, ctx, moves }) => {
   };
 
   const potentialStep = i => {
-    return ctx.chosenRoleIndex === 0 ? i - board.left : board.right - i;
+    return ctx.currentPlayer === 0 ? i - board.left : board.right - i;
   }
 
   const cellBackground = (i) => {
+    if (i === board.left) return 'bg-green-400';
+    if (i === board.right) return 'bg-purple-400';
     if (isMoveAllowed(potentialStep(i))) {
-      return 'bg-green-200 hover:bg-green-400 focus:bg-green-400';
-    }
-    if (( i === board.left && ctx.chosenRoleIndex === 0) || (i === board.right && ctx.chosenRoleIndex === 1)) {
-      return 'bg-green-400';
-    }
-    if (( i === board.left && ctx.chosenRoleIndex === 1) || (i === board.right && ctx.chosenRoleIndex === 0)) {
-      return 'bg-purple-400';
+      return ctx.currentPlayer === 0
+        ? 'bg-green-200 hover:bg-green-400 focus:bg-green-400'
+        : 'bg-purple-200 hover:bg-purple-400 focus:bg-purple-400';
     }
     return 'bg-slate-200';
   };
@@ -111,7 +109,7 @@ export const TwelveSquares = strategyGameFactory({
   rule,
   metadata: gameList.TwelveSquares,
   BoardClient,
-  getPlayerStepDescription: ({ ctx: { chosenRoleIndex } }) => chosenRoleIndex === 0
+  getPlayerStepDescription: ({ ctx: { currentPlayer } }) => currentPlayer === 0
     ? {
       hu: 'Kattints a mezőre ahova lépni szeretnél a bal oldali bábuval.',
       en: 'Click the square you want to move to with the left piece.'

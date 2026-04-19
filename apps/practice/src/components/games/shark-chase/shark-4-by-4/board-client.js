@@ -7,10 +7,12 @@ import { useTranslation } from '../../../language/translate';
 export const BoardClient = ({ board, ctx, moves }) => {
   const { t } = useTranslation();
   const [chosenPiece, setChosenPiece] = useState(null);
+  const isCurrentPlayerResearcher = ctx.currentPlayer === 0;
+  const isCurrentPlayerShark = ctx.currentPlayer === 1;
 
   let possibleMoves=[]
-  if (ctx.shouldRoleSelectorMoveNext) {
-    if (ctx.chosenRoleIndex === 1) {
+  if (ctx.isClientMoveAllowed) {
+    if (isCurrentPlayerShark) {
       possibleMoves = range(16).filter(i => distance(board.shark, i) <= 1)
     } else if (chosenPiece !== null) {
       possibleMoves = range(16).filter(i => distance(chosenPiece, i) === 1)
@@ -18,20 +20,20 @@ export const BoardClient = ({ board, ctx, moves }) => {
   }
 
   const isAllowed_choosePiece = (id) => {
-    if (!ctx.shouldRoleSelectorMoveNext) return false;
-    if (ctx.chosenRoleIndex === 0) return board.submarines[id] >= 1;
-    if (ctx.chosenRoleIndex === 1) return board.shark === id;
+    if (!ctx.isClientMoveAllowed) return false;
+    if (isCurrentPlayerResearcher) return board.submarines[id] >= 1;
+    if (isCurrentPlayerShark) return board.shark === id;
   }
 
   const isAllowed_movePiece = (id) => {
-    if (!ctx.shouldRoleSelectorMoveNext) return false;
-    if (ctx.chosenRoleIndex === 0) return distance(chosenPiece, id) === 1;
-    if (ctx.chosenRoleIndex === 1) return distance(board.shark, id) <= 1;
+    if (!ctx.isClientMoveAllowed) return false;
+    if (isCurrentPlayerResearcher) return distance(chosenPiece, id) === 1;
+    if (isCurrentPlayerShark) return distance(board.shark, id) <= 1;
   }
 
   const clickField = (id) => {
-    if (!ctx.shouldRoleSelectorMoveNext) return;
-    if (ctx.chosenRoleIndex === 0) {
+    if (!ctx.isClientMoveAllowed) return;
+    if (isCurrentPlayerResearcher) {
       if (chosenPiece === null) {
         if (!isAllowed_choosePiece(id)) return;
         setChosenPiece(id)
@@ -46,7 +48,7 @@ export const BoardClient = ({ board, ctx, moves }) => {
         setChosenPiece(null);
       }
     }
-    if (ctx.chosenRoleIndex === 1) {
+    if (isCurrentPlayerShark) {
       if (!isAllowed_movePiece(id)) return;
       moves.moveShark(board, id);
     }
@@ -65,13 +67,13 @@ export const BoardClient = ({ board, ctx, moves }) => {
           disabled={!isAllowed_choosePiece(id) && !isAllowed_movePiece(id)}
           className={`
             aspect-square p-[0%] border-2 relative flex justify-center items-center
-            ${possibleMoves.includes(id) && ctx.chosenRoleIndex === 1 && board.submarines[id] && 'border-red-600'}
+            ${possibleMoves.includes(id) && isCurrentPlayerShark && board.submarines[id] && 'border-red-600'}
           `}
         >
-          {possibleMoves.includes(id) && ctx.chosenRoleIndex === 0 && (
+          {possibleMoves.includes(id) && isCurrentPlayerResearcher && (
             <OptionalNextSubmarine existingSubmarineCount={board.submarines[id]} />
           )}
-          {possibleMoves.includes(id) && ctx.chosenRoleIndex === 1 && (
+          {possibleMoves.includes(id) && isCurrentPlayerShark && (
             <OptionalNextShark />
           )}
           {board.submarines[id] >= 1 && (
@@ -82,7 +84,7 @@ export const BoardClient = ({ board, ctx, moves }) => {
               <use xlinkHref="#shark" />
             </svg>
           )}
-          {board.shark === id && ctx.chosenRoleIndex === 1 && ctx.shouldRoleSelectorMoveNext && (
+          {board.shark === id && isCurrentPlayerShark && ctx.isClientMoveAllowed && (
             <span
               className="absolute z-50 w-[75%] text-black border-2 rounded-sm bg-white opacity-80"
             >{t({ hu: 'Itt maradok', en: 'Stay here' })}</span>

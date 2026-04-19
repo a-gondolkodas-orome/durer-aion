@@ -8,8 +8,8 @@ import { useTranslation } from '../../language/translate';
 const BoardClient = ({ board, ctx, moves }) => {
   const { t } = useTranslation();
   const isMoveAllowed = (id) => {
-    if (!ctx.shouldRoleSelectorMoveNext) return false;
-    return board[1 - ctx.chosenRoleIndex][id] !== null;
+    if (!ctx.isClientMoveAllowed) return false;
+    return board[1 - ctx.currentPlayer][id] !== null;
   };
   const clickField = (id) => {
     if (!isMoveAllowed(id)) return;
@@ -35,7 +35,7 @@ const BoardClient = ({ board, ctx, moves }) => {
           ? <span className="aspect-3/2 m-2" key={`${playerIdx}-${id}`}></span>
           : <button
               key={`${playerIdx}-${id}`}
-              disabled={playerIdx === ctx.chosenRoleIndex || !isMoveAllowed(id)}
+              disabled={playerIdx === ctx.currentPlayer || !isMoveAllowed(id)}
               onClick={() => clickField(id)}
               className={`
                 p-2 m-2 aspect-3/2 text-3xl border-4 rounded-xl shadow-md

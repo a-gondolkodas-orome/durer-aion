@@ -84,7 +84,7 @@ const BoardClient = ({ board, ctx, moves }) => {
   return (
     <section className='p-2 shrink-0 grow basis-2/3'>
       <p className='w-full text-8xl font-bold text-center'>{board}</p><br />
-      {!ctx.shouldRoleSelectorMoveNext
+      {!ctx.isClientMoveAllowed
         ? ''
         : <ExponentsTable
           board={board}

@@ -39,7 +39,7 @@ const gameBoardFactory = (maxDiscs) => {
     const [hovered, setHovered] = useState(null);
 
     const select = (pile, i) => {
-      if (!ctx.shouldRoleSelectorMoveNext) return;
+      if (!ctx.isClientMoveAllowed) return;
       if (pile === 0) {
         moves.removeDiscs(board, board[0] - i);
       } else {
@@ -57,7 +57,7 @@ const gameBoardFactory = (maxDiscs) => {
 
     const nextBoardDescription = () => {
       if (hovered === null) return '';
-      if (!ctx.shouldRoleSelectorMoveNext) return '';
+      if (!ctx.isClientMoveAllowed) return '';
       if (hovered[0] === 0) {
         if (hovered[1] === board[0] - 1) return fmt(board[1], board[0] - 1);
         return fmt(board[1], board[0] - 2);
@@ -83,7 +83,7 @@ const gameBoardFactory = (maxDiscs) => {
                     >
                       <button
                         className="aspect-square w-full p-[5%]"
-                        disabled={!ctx.shouldRoleSelectorMoveNext}
+                        disabled={!ctx.isClientMoveAllowed}
                         onMouseOver={() => setHovered([1, i])}
                         onMouseOut={() => setHovered(null)}
                         onFocus={() => setHovered([1, i])}
@@ -92,7 +92,7 @@ const gameBoardFactory = (maxDiscs) => {
                         <span
                           className={`
                             w-full aspect-square inline-block rounded-full mr-0.5
-                            ${ctx.shouldRoleSelectorMoveNext && isSelected(1, i)
+                            ${ctx.isClientMoveAllowed && isSelected(1, i)
                               ? "opacity-75 bg-blue-800"
                               : "bg-red-800"
                             }
@@ -114,7 +114,7 @@ const gameBoardFactory = (maxDiscs) => {
                     >
                       <button
                         className="aspect-square w-full p-[5%]"
-                        disabled={!ctx.shouldRoleSelectorMoveNext}
+                        disabled={!ctx.isClientMoveAllowed}
                         onMouseOver={() => setHovered([0, i])}
                         onMouseOut={() => setHovered(null)}
                         onFocus={() => setHovered([0, i])}
@@ -123,7 +123,7 @@ const gameBoardFactory = (maxDiscs) => {
                         <span
                           className={`
                             w-full aspect-square inline-block rounded-full mr-0.5
-                            ${ctx.shouldRoleSelectorMoveNext && isSelected(0, i)
+                            ${ctx.isClientMoveAllowed && isSelected(0, i)
                               ? "opacity-50 bg-slate-600"
                               : "bg-blue-800"
                             }

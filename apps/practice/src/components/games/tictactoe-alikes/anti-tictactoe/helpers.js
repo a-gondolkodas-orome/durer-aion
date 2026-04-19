@@ -5,8 +5,6 @@ import { hasWinningSubset } from '../helpers';
 
 export const roleColors = ['red', 'blue'];
 
-export const botColor = chosenRoleIndex => chosenRoleIndex === 0 ? roleColors[1] : roleColors[0];
-
 export const isGameEnd = (board) => {
   if (board.filter(c => c).length === 9) return true;
   const occupiedPlaces = range(0, 9).filter((i) => board[i]);

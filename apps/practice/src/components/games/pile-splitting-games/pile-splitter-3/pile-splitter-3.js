@@ -15,13 +15,13 @@ const BoardClient = ({ board, ctx, moves }) => {
   const [hoveredPiece, setHoveredPiece] = useState(null);
 
   const isDisabled = ({ pileId, pieceId }) => {
-    if (!ctx.shouldRoleSelectorMoveNext) return true;
+    if (!ctx.isClientMoveAllowed) return true;
     if (removedPileId === null) return false;
     return pileId !== removedPileId && pieceId === board[pileId] - 1;
   };
 
   const clickPiece = ({ pileId, pieceId }) => {
-    if (!ctx.shouldRoleSelectorMoveNext) return;
+    if (!ctx.isClientMoveAllowed) return;
 
     if (removedPileId === pileId) {
       setRemovedPileId(null);
@@ -57,7 +57,7 @@ const BoardClient = ({ board, ctx, moves }) => {
     const pieceCountInPile = board[pileId];
 
     // pieceCountInPile can be 0 in intermediateBoard during AI turn
-    if (!ctx.shouldRoleSelectorMoveNext) return pieceCountInPile || '🗑️';
+    if (!ctx.isClientMoveAllowed) return pieceCountInPile || '🗑️';
     if (pileId === removedPileId) {
       // pieceCountInPile can be 0 in intermediateBoard
       return pieceCountInPile ? `${pieceCountInPile} → 🗑️` : '🗑️';

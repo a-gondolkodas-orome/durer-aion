@@ -30,7 +30,7 @@ const moves = {
 
 const BoardClient = ({ board, ctx, moves }) => {
   const placePiece = id => {
-    if (!ctx.shouldRoleSelectorMoveNext) return;
+    if (!ctx.isClientMoveAllowed) return;
     moves.addPiece(board, id);
   };
 
@@ -40,7 +40,7 @@ const BoardClient = ({ board, ctx, moves }) => {
       {range(board.length).map(id =>
         <button
           key={id}
-          disabled={!ctx.shouldRoleSelectorMoveNext}
+          disabled={!ctx.isClientMoveAllowed}
           onClick={() => placePiece(id)}
           className="aspect-square border-r-4 border-b-4 p-[3%]"
         >

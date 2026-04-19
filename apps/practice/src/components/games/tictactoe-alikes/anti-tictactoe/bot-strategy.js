@@ -2,7 +2,7 @@
 
 import { isNull, range, sample, cloneDeep } from 'lodash';
 import { hasWinningSubset } from '../helpers';
-import { roleColors, botColor, hasFirstPlayerWon, isGameEnd } from './helpers';
+import { roleColors, hasFirstPlayerWon, isGameEnd } from './helpers';
 
 export const aiBotStrategy = ({ board, ctx, moves }) => {
   const id = getOptimalAiPlacingPosition(board, ctx.chosenRoleIndex);
@@ -27,17 +27,19 @@ const getOptimalAiPlacingPosition = (board, chosenRoleIndex) => {
     }
   }
 
+  const botColor = roleColors[1 - chosenRoleIndex];
+
   // as a second player still try to win if first player may not play optimally
   const optimalPlaces = allowedPlaces.filter(i => {
     const boardCopy = cloneDeep(board);
-    boardCopy[i] = botColor(chosenRoleIndex);
+    boardCopy[i] = botColor;
     return isWinningState(boardCopy, chosenRoleIndex === 1);
   });
 
   if (optimalPlaces.length > 0) return sample(optimalPlaces);
 
   // even if we are gonna lose, try to prolong it
-  const aiPieces = range(0, 9).filter(i => board[i] === botColor(chosenRoleIndex));
+  const aiPieces = range(0, 9).filter(i => board[i] === botColor);
   const notInstantLosingPlaces = allowedPlaces.filter(i => !hasWinningSubset([...aiPieces, i]));
   if (notInstantLosingPlaces.length > 0) return sample(notInstantLosingPlaces);
 

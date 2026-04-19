@@ -11,7 +11,7 @@ const BoardClient = ({ board, ctx, moves }) => {
   };
 
   const isAllowedMove = index => {
-    if (!ctx.shouldRoleSelectorMoveNext) return false;
+    if (!ctx.isClientMoveAllowed) return false;
     return isAllowedBank(index);
   }
 

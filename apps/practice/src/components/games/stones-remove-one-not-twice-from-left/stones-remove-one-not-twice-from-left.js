@@ -7,7 +7,7 @@ import { useTranslation } from '../../language/translate';
 const BoardClient = ({ board, ctx, moves }) => {
   const { t } = useTranslation();
   const isMoveAllowed = pileId => {
-    if (!ctx.shouldRoleSelectorMoveNext) return false;
+    if (!ctx.isClientMoveAllowed) return false;
     if (board.piles[pileId] === 0) return false;
     if (pileId === 0 && board.leftRestriction[ctx.currentPlayer]) return false;
     return true;

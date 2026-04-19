@@ -18,7 +18,7 @@ export const strategyGameFactory = ({
 }) => {
   return () => {
     const { t } = useTranslation();
-    const [board, setBoard] = useState(generateStartBoard())
+    const [board, setBoard] = useState(generateStartBoard());
     const [phase, setPhase] = useState('roleSelection');
     const [chosenRoleIndex, setChosenRoleIndex] = useState(null);
     const [currentPlayer, setCurrentPlayer] = useState(null);
@@ -26,12 +26,16 @@ export const strategyGameFactory = ({
     const [winnerIndex, setWinnerIndex] = useState(null);
     const [gameUuid, setGameUuid] = useState(crypto.randomUUID());
     const [turnStage, setTurnStage] = useState(null);
+    const [mode, setMode] = useState('vsComputer');
+    const [playerNames, setPlayerNames] = useState(['', '']);
+
+    const isHumanVsHumanGame = mode === 'vsHuman';
 
     useEffect(() => {
-      if (phase === 'play' && currentPlayer === (1 - chosenRoleIndex)) {
+      if (!isHumanVsHumanGame && phase === 'play' && currentPlayer === (1 - chosenRoleIndex)) {
         doAiTurn();
       }
-    }, [currentPlayer])
+    }, [currentPlayer]);
 
     let wrappedMoves;
 
@@ -46,7 +50,7 @@ export const strategyGameFactory = ({
       return moveResult;
     };
 
-    const startNewGame = () => {
+    const resetGameState = () => {
       setBoard(generateStartBoard());
       setPhase('roleSelection');
       setChosenRoleIndex(null);
@@ -57,12 +61,17 @@ export const strategyGameFactory = ({
       setTurnStage(null);
     };
 
-    const shouldRoleSelectorMoveNext = (phase === 'play' && currentPlayer === chosenRoleIndex);
-    const isRoleSelectorWinner = winnerIndex === chosenRoleIndex;
+    const startNewGame = () => {
+      resetGameState();
+    };
+
+    const switchMode = (newMode) => {
+      setMode(newMode);
+      resetGameState();
+    };
 
     const endGame = ({ winnerIndex } = { winnerIndex: null }) => {
       setPhase('gameEnd');
-      // default: last player to move is the winner
       setWinnerIndex(winnerIndex === null ? currentPlayer : winnerIndex);
       setIsGameEndDialogOpen(true);
     };
@@ -71,18 +80,35 @@ export const strategyGameFactory = ({
       setCurrentPlayer(currentPlayer => 1 - currentPlayer);
     };
 
-    const chooseRole = (playerIdx) => {
+    const startGame = (roleIndex = null) => {
       setPhase('play');
       setCurrentPlayer(0);
-      setChosenRoleIndex(playerIdx);
+      setChosenRoleIndex(roleIndex);
     };
 
+    const playerNameOf = (index) => {
+      if (index === null) return null;
+      return playerNames[index] || t({
+        hu: index === 0 ? '1. játékos' : '2. játékos',
+        en: index === 0 ? '1st player' : '2nd player'
+      });
+    };
+
+    const isClientMoveAllowed = isHumanVsHumanGame
+      ? phase === 'play'
+      : (phase === 'play' && currentPlayer === chosenRoleIndex);
+
     const ctx = {
-      shouldRoleSelectorMoveNext,
+      isHumanVsHumanGame,
+      playerNames,
       chosenRoleIndex,
-      currentPlayer,
       phase,
-      turnStage
+      turnStage,
+      currentPlayer,
+      currentPlayerName: playerNameOf(currentPlayer),
+      isClientMoveAllowed,
+      isRoleSelectorWinner: (winnerIndex === chosenRoleIndex),
+      winnerName: playerNameOf(winnerIndex)
     };
 
     const events = {
@@ -91,12 +117,17 @@ export const strategyGameFactory = ({
       setTurnStage
     };
 
-    // only second argument of move's is fixed here (_ special syntax)
-    // board (first argument) needs to be handled by ai strategy as
-    // it may change between moves but for AI strategy there is no re-render between moves
-    // in some cases there are multiple moves following single user event in that
-    // case there is also no re-render on client side between moves
-    wrappedMoves = mapValues(moves, f => wrap(partial(f, _, { ctx, events }), moveWrapper));
+    /*
+    Only second argument of move's is fixed here (_ special syntax). board
+    (first argument) needs to be handled by ai strategy as it may change between
+    moves, but for AI strategy there is no re-render between moves. In some
+    cases there are multiple moves following single user event, in that case,
+    there is also no re-render on client side between moves.
+    */
+    wrappedMoves = mapValues(
+      moves,
+      f => wrap(partial(f, _, { ctx, events }), moveWrapper)
+    );
 
     const doAiTurn = () => {
       const time = Math.floor(Math.random() * 500 + 1000);
@@ -122,8 +153,8 @@ export const strategyGameFactory = ({
             <GameSidebar
               roleLabels={roleLabels}
               stepDescription={t(getPlayerStepDescription({ board, ctx }))}
-              ctx={{ phase, shouldRoleSelectorMoveNext, isRoleSelectorWinner }}
-              moves={{ chooseRole, startNewGame }}
+              ctx={ctx}
+              moves={{ startGame, startNewGame, switchMode, setPlayerNames }}
             />
           </div>
         </div>
@@ -133,7 +164,7 @@ export const strategyGameFactory = ({
         isOpen={isGameEndDialogOpen}
         setIsOpen={setIsGameEndDialogOpen}
         startNewGame={startNewGame}
-        isRoleSelectorWinner={isRoleSelectorWinner}
+        ctx={ctx}
       />
     </main>
     );

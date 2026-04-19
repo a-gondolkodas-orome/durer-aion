@@ -17,7 +17,7 @@ const BoardClient = ({ board, ctx, moves }) => {
   const fields = range(board.target + 14);
 
   const isMoveAllowed = (step) => {
-    if (!ctx.shouldRoleSelectorMoveNext) return false;
+    if (!ctx.isClientMoveAllowed) return false;
     if(step === board.restricted || step <= 0 || step >= 13) {
       return false;
     }
@@ -56,7 +56,7 @@ const BoardClient = ({ board, ctx, moves }) => {
         en: `Value of m: ${board.target}`
       })}
     </span>
-    {ctx.shouldRoleSelectorMoveNext && (
+    {ctx.isClientMoveAllowed && (
       <p className="text-xl">
         {t({
           hu: `Előző lépés: ${board.restricted ? (13 - board.restricted) : '-'}. ` +

@@ -23,7 +23,7 @@ const BoardClient = ({ board, ctx, moves }) => {
   const isMoveAllowed = n => isAllowed(board, n);
 
   const removeNumber = n => {
-    if (!ctx.shouldRoleSelectorMoveNext) return;
+    if (!ctx.isClientMoveAllowed) return;
     if (!isMoveAllowed(n)) return;
     moves.removeNumber(board, n);
   }
@@ -43,7 +43,7 @@ const BoardClient = ({ board, ctx, moves }) => {
         {range(1, board.numbersOnTable.length + 1).map(num =>
           <button
             key={num}
-            disabled={!isMoveAllowed(num) || !ctx.shouldRoleSelectorMoveNext}
+            disabled={!isMoveAllowed(num) || !ctx.isClientMoveAllowed}
             onClick={() => removeNumber(num)}
             className={`
               m-1 min-h-28 w-18

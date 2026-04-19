@@ -19,7 +19,7 @@ const BoardClient = ({ board, ctx, moves }) => {
   }
 
   const clickField = (field) => {
-    if (!ctx.shouldRoleSelectorMoveNext) return;
+    if (!ctx.isClientMoveAllowed) return;
     if (isCovered(field)) return;
     if (!hasEmptyNeighbor(field)) return;
     if (selectedField === null) {
@@ -47,7 +47,7 @@ const BoardClient = ({ board, ctx, moves }) => {
   }
 
   const isClickAllowed = (field) => {
-    if (!ctx.shouldRoleSelectorMoveNext) return false;
+    if (!ctx.isClientMoveAllowed) return false;
     if (isCovered(field)) return false;
     if (!hasEmptyNeighbor(field)) return false;
     if (selectedField !== null && isEqual(field, selectedField)) return true;

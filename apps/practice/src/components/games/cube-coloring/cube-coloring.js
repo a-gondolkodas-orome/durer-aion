@@ -27,13 +27,13 @@ const BoardClient = ({ board, ctx, moves }) => {
   const [y, setY] = useState(0);
 
   const isMoveAllowed = (vertex) => {
-    if (!ctx.shouldRoleSelectorMoveNext) return false;
+    if (!ctx.isClientMoveAllowed) return false;
     if (!show) return false;
     return isAllowedStep(board, vertex, color);
   };
 
   const pick = (pickedColor) => {
-    if (!ctx.shouldRoleSelectorMoveNext) return;
+    if (!ctx.isClientMoveAllowed) return;
     if (pickedColor === color) {
       setShow(!show);
     } else {
@@ -57,7 +57,7 @@ const BoardClient = ({ board, ctx, moves }) => {
   <section className="p-2 shrink-0 grow basis-2/3">
     <header>
       <button
-        disabled={!ctx.shouldRoleSelectorMoveNext}
+        disabled={!ctx.isClientMoveAllowed}
         className={`
           w-[30%] mx-[1%] rounded-sm text-xl bg-red-600
           ${!show || color !== '#dc2626' ? 'bg-opacity-50' : ''}
@@ -65,7 +65,7 @@ const BoardClient = ({ board, ctx, moves }) => {
         onClick={() => pick('#dc2626')}
       >{t({ hu: 'Piros', en: 'Red' })}</button>
       <button
-        disabled={!ctx.shouldRoleSelectorMoveNext}
+        disabled={!ctx.isClientMoveAllowed}
         className={`
           w-[30%] mx-[1%] rounded-sm text-xl bg-yellow-600
           ${!show || color !== '#eab308' ? 'bg-opacity-50' : ''}
@@ -73,7 +73,7 @@ const BoardClient = ({ board, ctx, moves }) => {
         onClick={() => pick('#eab308')}
       >{t({ hu: 'Sárga', en: 'Yellow' })}</button>
       <button
-        disabled={!ctx.shouldRoleSelectorMoveNext}
+        disabled={!ctx.isClientMoveAllowed}
         className={`
           w-[30%] mx-[1%] rounded-sm text-xl bg-blue-600
           ${!show || color !== '#2563eb' ? 'bg-opacity-50' : ''}

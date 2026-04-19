@@ -63,7 +63,7 @@ const BoardClient = ({ board, ctx, moves }) => {
   }
 
   const colorTriangle = i => {
-    if (!ctx.shouldRoleSelectorMoveNext) return;
+    if (!ctx.isClientMoveAllowed) return;
     if (board[i] !== null) return;
     moves.colorTriangle(board, i);
   }
@@ -91,7 +91,7 @@ const BoardClient = ({ board, ctx, moves }) => {
             onKeyUp={(event) => {
               if (event.key === 'Enter') colorTriangle(i);
             }}
-            tabIndex={ctx.shouldRoleSelectorMoveNext ? 0 : 'none'}
+            tabIndex={ctx.isClientMoveAllowed ? 0 : 'none'}
           ></polygon>
         ))}
       </svg>

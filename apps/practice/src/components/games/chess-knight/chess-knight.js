@@ -13,7 +13,7 @@ const BoardClient = ({ board, ctx, moves }) => {
     moves.moveKnight(board, field);
   };
   const isMoveAllowed = (targetField) => {
-    if (!ctx.shouldRoleSelectorMoveNext) return false;
+    if (!ctx.isClientMoveAllowed) return false;
     return some(getAllowedMoves(board), field => isEqual(field, targetField));
   };
 

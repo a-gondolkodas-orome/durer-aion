@@ -9,7 +9,7 @@ const maxStep = 3;
 const BoardClient = ({ board, ctx, moves }) => {
 
   const isMoveAllowed = number => {
-    if (!ctx.shouldRoleSelectorMoveNext) return false;
+    if (!ctx.isClientMoveAllowed) return false;
     return isIncreaseValid({ board, number });
   }
 

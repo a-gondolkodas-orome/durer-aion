@@ -3,9 +3,8 @@ import { range, cloneDeep } from 'lodash';
 import { strategyGameFactory } from '../../strategy-game';
 import { generateEmptyTicTacToeBoard } from '../helpers';
 import { aiBotStrategy } from './bot-strategy';
-import { inPlacingPhase, aiColor, isGameEnd } from './helpers';
+import { inPlacingPhase, isGameEnd, currentPlayerColor, otherPlayerColor } from './helpers';
 import { gameList } from '../../gameList';
-import * as en from './tictactoe-en';
 
 const BoardClient = ({ board, ctx, moves }) => {
   const gameIsInPlacingPhase = inPlacingPhase(board);
@@ -19,11 +18,11 @@ const BoardClient = ({ board, ctx, moves }) => {
     }
   };
   const isMoveAllowed = (id) => {
-    if (!ctx.shouldRoleSelectorMoveNext) return false;
+    if (!ctx.isClientMoveAllowed) return false;
     if (gameIsInPlacingPhase) {
       return board[id] === null;
     } else {
-      return board[id] === aiColor;
+      return board[id] === otherPlayerColor(ctx);
     }
   };
   const pieceColor = (id) => {
@@ -47,7 +46,7 @@ const BoardClient = ({ board, ctx, moves }) => {
           onClick={() => clickField(id)}
           className={`
             aspect-square p-[25%]
-            ${!isMoveAllowed(id) && ctx.shouldRoleSelectorMoveNext ? 'cursor-not-allowed' : ''}
+            ${!isMoveAllowed(id) && ctx.isClientMoveAllowed ? 'cursor-not-allowed' : ''}
             ${!gameIsInPlacingPhase && isMoveAllowed(id) ? 'bg-green-100' : 'bg-white'}
           `}
         >
@@ -70,7 +69,7 @@ const BoardClient = ({ board, ctx, moves }) => {
 const moves = {
   placePiece: (board, { ctx, events }, id) => {
     const nextBoard = cloneDeep(board);
-    nextBoard[id] = ctx.currentPlayer === ctx.chosenRoleIndex ? 'blue' : 'red';
+    nextBoard[id] = currentPlayerColor(ctx);
     events.endTurn();
     if (isGameEnd(nextBoard)) {
       events.endGame();
@@ -88,9 +87,17 @@ const moves = {
   }
 }
 
-const getPlayerStepDescription = ({ board }) => inPlacingPhase(board)
-  ? { hu: 'Helyezz le egy korongot egy üres mezőre kattintással.', en: en.stepPlacing }
-  : { hu: 'Kattints egy piros korongra.', en: en.stepWhitening };
+const getPlayerStepDescription = ({ board, ctx }) => {
+  return inPlacingPhase(board)
+    ? {
+      hu: 'Helyezz le egy korongot egy üres mezőre kattintással.',
+      en: 'Click an empty cell to place a piece.'
+    }
+    : {
+      hu: `Kattints egy ${otherPlayerColor(ctx) === 'red' ? 'piros' : 'kék'} korongra.`,
+      en: `Click a ${otherPlayerColor(ctx)} piece.`
+    };
+}
 
 const rule = {
   hu: <>
@@ -101,7 +108,13 @@ const rule = {
     következő játékos az ellenfél egy már lehelyezett korongját fehérre színezheti. Ezek után az nyer,
     aki először hoz létre három fehér korongot egy sorban, oszlopban vagy átlóban.
   </>,
-  en: en.rule
+  en: <>
+    Two players play a game of ordinary tic-tac-toe on a 3 × 3 board with red and
+    blue disks. That is, if there are three disks of the same colour in a row, column or diagonal,
+    then the person placing that colour wins. In case no one wins after the placement of the first
+    9 disks, the subsequent player colours one of the opponent&apos;s already placed disks white. Now
+    whoever first creates three purple disks in a row, column or diagonal, wins.
+  </>
 };
 
 export const TicTacToe = strategyGameFactory({

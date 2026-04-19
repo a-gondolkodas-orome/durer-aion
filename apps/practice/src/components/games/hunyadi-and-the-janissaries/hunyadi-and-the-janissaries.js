@@ -11,19 +11,19 @@ const BoardClient = ({ board, ctx, moves }) => {
   const { t } = useTranslation();
   const [hoveredPiece, setHoveredPiece] = useState(null);
 
-  const isPlayerSultan = ctx.chosenRoleIndex === 0;
+  const isPlayerSultan = ctx.currentPlayer === 0;
   const groupOfHoveredPiece = hoveredPiece
     ? board[hoveredPiece.rowIndex][hoveredPiece.pieceIndex]
     : null;
 
   const showToBeKilled = (group) => {
-    if (!ctx.shouldRoleSelectorMoveNext || isPlayerSultan) return false;
+    if (!ctx.isClientMoveAllowed || isPlayerSultan) return false;
     if (!hoveredPiece) return false;
     return group === groupOfHoveredPiece;
   };
 
   const clickOnSoldier = (rowIndex, pieceIndex) => {
-    if (!ctx.shouldRoleSelectorMoveNext) return;
+    if (!ctx.isClientMoveAllowed) return;
 
     if (isPlayerSultan) {
       const group = board[rowIndex][pieceIndex] === 'red' ? 'blue' : 'red';
@@ -69,7 +69,7 @@ const BoardClient = ({ board, ctx, moves }) => {
           {board[rowIndex] && board[rowIndex].map((group, pieceIndex) => (
             <button
               key={pieceIndex}
-              disabled={!ctx.shouldRoleSelectorMoveNext}
+              disabled={!ctx.isClientMoveAllowed}
               className="aspect-square w-[10%] inline-block mx-1"
               onClick={() => clickOnSoldier(rowIndex, pieceIndex)}
               onFocus={() => setHoveredPiece({ rowIndex, pieceIndex })}
@@ -93,7 +93,7 @@ const BoardClient = ({ board, ctx, moves }) => {
       {isPlayerSultan && (
         <button
           className="cta-button"
-          disabled={!ctx.shouldRoleSelectorMoveNext}
+          disabled={!ctx.isClientMoveAllowed}
           onClick={() => moves.finalizeSeparation(board)}
         >
           {t({ hu: 'Befejezem a kettéosztást', en: 'Finish the split' })}
@@ -103,8 +103,8 @@ const BoardClient = ({ board, ctx, moves }) => {
   );
 };
 
-const getPlayerStepDescription = ({ ctx: { chosenRoleIndex } }) => {
-  return chosenRoleIndex === 0
+const getPlayerStepDescription = ({ ctx }) => {
+  return ctx.currentPlayer === 0
     ? {
       hu: 'Kattints a katonákra és válaszd két részre a seregedet.',
       en: 'Click soldiers to split your army in two.'
@@ -137,8 +137,8 @@ export const HunyadiAndTheJanissaries = strategyGameFactory({
   rule,
   metadata: gameList.HunyadiAndTheJanissaries,
   roleLabels: [
-    { hu: 'Szultán leszek', en: "I'll be the Sultan" },
-    { hu: 'Hunyadi leszek', en: "I'll be Hunyadi" }
+    { hu: 'Szultán', en: "Sultan" },
+    { hu: 'Hunyadi', en: "Hunyadi" }
   ],
   BoardClient,
   getPlayerStepDescription,

@@ -131,7 +131,7 @@ export const PolicemanthiefA = strategyGameFactory({
   ],
   BoardClient,
   getPlayerStepDescription: ({ board, ctx }) => {
-    if (ctx.chosenRoleIndex === 0) {
+    if (ctx.currentPlayer === 0) {
       return {
         hu: `Kattints arra az útkereszteződésre, ahová a ` +
           `${board.firstPolicemanMoved ? "zöld" : "kék"} rendőrrel lépni szeretnél.`,
@@ -158,7 +158,7 @@ export const PolicemanthiefB = strategyGameFactory({
   ],
   BoardClient,
   getPlayerStepDescription: ({ board, ctx }) => {
-    if (ctx.chosenRoleIndex === 0) {
+    if (ctx.currentPlayer === 0) {
       return {
         hu: `Kattints arra az útkereszteződésre, ahová a ` +
           `${board.firstPolicemanMoved ? "zöld" : "kék"} rendőrrel lépni szeretnél.`,

@@ -8,7 +8,7 @@ const BoardClient = ({ board, ctx, moves }) => {
   const { t } = useTranslation();
 
   const clickNumber = (number) => {
-    if (!ctx.shouldRoleSelectorMoveNext) return;
+    if (!ctx.isClientMoveAllowed) return;
     moves.coverNumber(board, number);
   };
 
@@ -24,7 +24,7 @@ const BoardClient = ({ board, ctx, moves }) => {
               key = {i}
             >
               <button
-                disabled={!ctx.shouldRoleSelectorMoveNext}
+                disabled={!ctx.isClientMoveAllowed}
                 className='w-full enabled:hover:bg-gray-400 enabled:focus:bg-gray-400'
                 onClick={() => clickNumber(i+1)}
               >

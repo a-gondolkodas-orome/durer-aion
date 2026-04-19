@@ -20,7 +20,7 @@ const BoardClient = ({ board, ctx, moves }) => {
     return isEqual(hoveredField, field);
   };
   const isMoveAllowed = (targetField) => {
-    if (!ctx.shouldRoleSelectorMoveNext) return false;
+    if (!ctx.isClientMoveAllowed) return false;
     return some(getAllowedMoves(board), field => isEqual(field, targetField));
   };
   const isForbidden = ({ row, col }) => {
@@ -30,7 +30,7 @@ const BoardClient = ({ board, ctx, moves }) => {
     return board[row][col] === BISHOP;
   };
   const wouldBeForbidden = ({ row, col }) => {
-    if (!ctx.shouldRoleSelectorMoveNext) return false;
+    if (!ctx.isClientMoveAllowed) return false;
     if (!hoveredField) return false;
     if (!isMoveAllowed(hoveredField)) return false;
     if (!isMoveAllowed({ row, col })) return false;

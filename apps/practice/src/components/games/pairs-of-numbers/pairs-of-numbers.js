@@ -15,10 +15,10 @@ const BoardClient = ({ board, ctx, moves }) => {
         <span className="grow px-2">
           <button
             className='cta-button'
-            disabled={!ctx.shouldRoleSelectorMoveNext}
+            disabled={!ctx.isClientMoveAllowed}
             onClick={() => moves.add1(board)}
           >
-            {t({ hu: 'Növelek', en: 'Increase' })} {ctx.shouldRoleSelectorMoveNext && <>
+            {t({ hu: 'Növelek', en: 'Increase' })} {ctx.isClientMoveAllowed && <>
               (→<code className="text-md">({board[0]},{board[1] + 1})</code>)
             </>}
           </button>
@@ -26,10 +26,10 @@ const BoardClient = ({ board, ctx, moves }) => {
         <span className='grow px-2'>
           <button
             className="cta-button"
-            disabled={!ctx.shouldRoleSelectorMoveNext}
+            disabled={!ctx.isClientMoveAllowed}
             onClick={() => moves.subtract(board)}
           >
-            {t({ hu: 'Kivonok', en: 'Subtract' })} {ctx.shouldRoleSelectorMoveNext && <>
+            {t({ hu: 'Kivonok', en: 'Subtract' })} {ctx.isClientMoveAllowed && <>
               (→<code className="text-md">({board[0] - board[1]},{board[1]})</code>)
             </>}
           </button>

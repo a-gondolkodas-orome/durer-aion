@@ -10,13 +10,13 @@ export const BoardClient = ({ board, ctx, moves }) => {
   const wasCoinAlreadyRemovedInTurn = valueOfRemovedCoin !== null;
 
   const isRemovalAllowed = coinValue => {
-    if (!ctx.shouldRoleSelectorMoveNext) return false;
+    if (!ctx.isClientMoveAllowed) return false;
     if (wasCoinAlreadyRemovedInTurn) return false;
     return board[coinValue - 1] !== 0;
   };
 
   const isAddAllowed = coinValue => {
-    if (!ctx.shouldRoleSelectorMoveNext) return false;
+    if (!ctx.isClientMoveAllowed) return false;
     if (!wasCoinAlreadyRemovedInTurn) return false;
     return coinValue < valueOfRemovedCoin;
   };
@@ -60,7 +60,7 @@ export const BoardClient = ({ board, ctx, moves }) => {
     return 'shadow-yellow-400';
   };
   const shouldShowCoinToBeRemoved = (coinValue) => {
-    if (!ctx.shouldRoleSelectorMoveNext) return false;
+    if (!ctx.isClientMoveAllowed) return false;
     if (wasCoinAlreadyRemovedInTurn) return false;
     return coinValue === hoveredPile && board[coinValue - 1] !== 0;
   };
