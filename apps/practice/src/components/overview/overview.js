@@ -3,20 +3,16 @@ import { gameList } from '../games/gameList';
 import { every, orderBy } from 'lodash';
 import { Link } from 'react-router';
 import { useTranslation } from '../language/translate';
-import { useLanguage } from '../language/language-context';
 import { LanguageSelector } from '../language/language-selector';
 
 export const Overview = () => {
   const { t } = useTranslation();
-  const { language } = useLanguage();
   const [selectedCategories, setSelectedCategories] = useState([]);
-  const [enOnly, setEnOnly] = useState(() => localStorage.getItem('enOnly') === 'true');
 
   const shouldShow = game => {
     const noCategoryMatch = selectedCategories.length > 0
       && every(game.category, c => !selectedCategories.includes(c));
     if (noCategoryMatch) return false;
-    if (enOnly && !(typeof game.name === 'object' && 'en' in game.name)) return false;
     return true;
   };
 
@@ -36,21 +32,6 @@ export const Overview = () => {
     <OverviewHeader></OverviewHeader>
     <div className="flex flex-wrap items-center gap-1 mb-2">
       <CategoryFilter selected={selectedCategories} onChange={setSelectedCategories} />
-      {language === 'en' && (
-        <>
-          <span className="text-slate-300 select-none px-1">|</span>
-          <button
-            onClick={() => setEnOnly(v => {
-              const next = !v;
-              if (next) localStorage.setItem('enOnly', 'true');
-              else localStorage.removeItem('enOnly');
-              return next;
-            })}
-            className={`rounded-lg px-2 py-0.5 border text-sm cursor-pointer
-              ${enOnly ? 'bg-blue-200 border-blue-400' : 'bg-white border-slate-300'}`}
-          >🌐 EN only</button>
-        </>
-      )}
     </div>
     <h2 className="font-bold my-4 text-center">
       {t({ hu: '5-8. osztályosoknak (A-B kategória)', en: 'For grades 5–8 (A–B category)' })}
@@ -149,8 +130,6 @@ const neutralChip = `${chipBase} border-slate-300 bg-white text-slate-800`;
 
 const Game = ({ gameId, gameProps }) => {
   const { t } = useTranslation();
-  const { language } = useLanguage();
-  const hasEnglish = typeof gameProps.name === 'object' && 'en' in gameProps.name;
 
   const round = gameProps.round === 'döntő'
     ? t({ hu: 'döntő', en: 'final' })
@@ -167,11 +146,6 @@ const Game = ({ gameId, gameProps }) => {
   >
     <h2 className="font-bold mb-4 text-center">
       {t(gameProps.name)}
-      {language === 'en' && hasEnglish && (
-        <span className="ml-1 text-sm text-gray-400 align-middle" title="English translation available">
-          {'\u2060'}🌐
-        </span>
-      )}
     </h2>
     <div className="grow"></div>
     <div className="flex flex-wrap items-baseline gap-1">
