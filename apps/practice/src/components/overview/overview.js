@@ -158,8 +158,12 @@ const Game = ({ gameId, gameProps }) => {
 
   const categoryColor = categoryColorClass[gameProps.category[0]] ?? neutralChip;
 
-  return <span
-    className="rounded-lg shadow-sm border p-2 m-2 max-w-[32ch] w-full flex flex-col js-game-card"
+  return <Link
+    to={`/game/${gameId}`}
+    className={
+      'rounded-lg shadow-sm border p-2 m-2 max-w-[32ch] w-full flex flex-col js-game-card ' +
+      'cursor-pointer hover:shadow-md hover:border-blue-400 transition-shadow no-underline text-inherit'
+    }
   >
     <h2 className="font-bold mb-4 text-center">
       {t(gameProps.name)}
@@ -175,10 +179,7 @@ const Game = ({ gameId, gameProps }) => {
       <span className={`${chipBase} ${categoryColor}`}>{gameProps.category.join(', ')}</span>
       <span className={neutralChip}>{round}</span>
       <span className="grow"></span>
-      <Link
-        to={`/game/${gameId}`}
-        className="text-sm text-blue-600 hover:underline ml-auto whitespace-nowrap"
-      >{t({ hu: 'Kipróbálom →', en: 'Try it →' })}</Link>
+      <span className="text-slate-400 text-sm">→</span>
     </div>
-  </span>;
+  </Link>;
 };
