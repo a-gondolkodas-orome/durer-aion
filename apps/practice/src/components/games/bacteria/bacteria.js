@@ -1,15 +1,13 @@
 import React, { useState } from "react";
-import { range, cloneDeep, random } from "lodash";
+import { range, random } from "lodash";
 import { strategyGameFactory } from "../strategy-game";
 import { aiBotStrategy } from "./bot-strategy";
-import { useLanguage } from '../../language/language-context';
 import {
   isJump,
   isSpread,
   isShiftRight,
   isShiftLeft,
   isAllowedAttackClick,
-  isDangerous,
   moves
 } from "./helpers";
 import { gameList } from "../gameList";
@@ -61,12 +59,29 @@ const generateStartBoard = () => {
   }
 };
 
+const BacteriaDisplay = ({ count, onGoal, dimmed = false }) => {
+  if (count === 0) return null;
+  const dotColor = dimmed
+    ? "bg-transparent border-2 border-green-500"
+    : onGoal ? "bg-green-300" : "bg-green-600";
+  const sizeClass = count === 1 ? "w-[45%]" : count <= 4 ? "w-[35%]" : "w-[25%]";
+  return (
+    <div className="flex flex-wrap justify-center items-center gap-[4%] p-[8%] w-full h-full">
+      {range(count).map(i => (
+        <div key={i} className={`${dotColor} ${sizeClass} rounded-full aspect-square`} />
+      ))}
+    </div>
+  );
+};
+
+const GoalMarker = () => (
+  <span className="text-base leading-none">🚩</span>
+);
+
 const BoardClient = ({ board: { bacteria, goals }, ctx, moves }) => {
-  const { language } = useLanguage();
   const [attackRow, setAttackRow] = useState(null);
   const [attackCol, setAttackCol] = useState(null);
 
-  const nextBoard = { bacteria: cloneDeep(bacteria), goals };
   const isPlayerAttacker = ctx.currentPlayer === 0;
 
   const isAllowedAttack = ({ row, col }) => {
@@ -118,18 +133,6 @@ const BoardClient = ({ board: { bacteria, goals }, ctx, moves }) => {
 
   const rowShift = row => row % 2 === 0 ? "0px" : `${100 / (2 * boardWidth)}%`;
 
-  const goalLabel = language === 'en' ? 'G' : 'C';
-
-  const cellLabel = ({ row, col }) => {
-    if (isGoal({ row, col })) {
-      return bacteria[row][col] ? `${goalLabel}: ${"B".repeat(bacteria[row][col])}` : goalLabel;
-    }
-    if (!bacteria[row][col]) {
-      return row % 2 === 1 && col === boardWidth - 1 ? "" : "-";
-    }
-    return "B".repeat(bacteria[row][col]);
-  };
-
   const isForbidden = ({ row, col }) => {
     if (attackRow !== null && row === attackRow && col === attackCol) return false;
     if (attackRow !== null && !isAllowedAttack({ row, col })) return true;
@@ -142,6 +145,50 @@ const BoardClient = ({ board: { bacteria, goals }, ctx, moves }) => {
     || isForbidden({ row, col })
     || (row % 2 === 1 && col === (boardWidth - 1))
   );
+
+  const isEdgeCell = ({ row, col }) => row % 2 === 1 && col === boardWidth - 1;
+
+  const cellClassName = ({ row, col }) => {
+    if (isEdgeCell({ row, col })) return "aspect-4/3 w-full";
+    const isSelected = row === attackRow && col === attackCol;
+    const isValidTarget = attackRow !== null && isAllowedAttack({ row, col });
+    const goal = isGoal({ row, col });
+    let bg, border;
+    if (isSelected) {
+      bg = "bg-yellow-200"; border = "border-yellow-500";
+    } else if (isValidTarget) {
+      bg = "bg-amber-300"; border = "border-amber-500";
+    } else if (goal) {
+      bg = "bg-blue-700"; border = "border-blue-900";
+    } else {
+      bg = "bg-amber-100"; border = "border-stone-400";
+    }
+    const isDefenderTarget = !isPlayerAttacker && ctx.isClientMoveAllowed && bacteria[row][col] >= 1;
+    return [
+      "aspect-4/3 w-full border-2 rounded-sm flex items-center justify-center",
+      bg, border,
+      isForbidden({ row, col }) ? "opacity-50 cursor-not-allowed" : "",
+      isDefenderTarget ? "enabled:hover:bg-red-100 enabled:hover:border-red-400" : ""
+    ].join(" ");
+  };
+
+  const previewCount = ({ row, col }) => {
+    if (attackRow === null || !isAllowedAttack({ row, col })) return 0;
+    const attack = { attackRow, attackCol, row, col };
+    if (isJump(attack)) return 1;
+    return bacteria[attackRow][attackCol];
+  };
+
+  const cellContent = ({ row, col }) => {
+    if (isEdgeCell({ row, col })) return null;
+    const count = bacteria[row][col] || 0;
+    const goal = isGoal({ row, col });
+    const preview = previewCount({ row, col });
+    if (preview > 0) return <BacteriaDisplay count={preview} onGoal={goal} dimmed />;
+    if (count > 0) return <BacteriaDisplay count={count} onGoal={goal} />;
+    if (goal) return <GoalMarker />;
+    return null;
+  };
 
   return (
     <section className="p-2 shrink-0 grow basis-2/3">
@@ -159,18 +206,10 @@ const BoardClient = ({ board: { bacteria, goals }, ctx, moves }) => {
                 <td key={col} onClick={() => clickField({ row, col })}>
                   <button
                     disabled={isDisabled({ row, col })}
-                    className={`
-                      aspect-4/3 w-full
-                      ${row % 2 === 1 && col === boardWidth - 1 ? "" : "border-2"}
-                      ${isGoal({ row, col }) ? "bg-blue-800" : ""}
-                      ${isDangerous(nextBoard, { row, col }) ? "" : ""}
-                      ${row === attackRow && col === attackCol ? "border-green-800": ""}
-                      ${attackRow !== null && isAllowedAttack({ row, col }) ? "bg-teal-400" : ""}
-                      ${isForbidden({ row, col }) ? "cursor-not-allowed" : ""}
-                    `}
+                    className={cellClassName({ row, col })}
                     style={{ transform: "scaleY(-1)" }}
                   >
-                    {cellLabel({ row, col })}
+                    {cellContent({ row, col })}
                   </button>
                 </td>
               ))}
@@ -199,8 +238,8 @@ const getPlayerStepDescription = ({ ctx }) => {
 
 const rule = {
   hu: <>
-    A tábla B betűvel jelölt mezőin 1-1 baktérium található, a tábla
-    felső sorában a kijelölt (szomszédos) mezők CÉL mezők. A játékban egy Támadó és Védekező
+    A zöld körökkel jelölt mezőkön baktériumok találhatók, a tábla
+    felső sorában a megjelölt (szomszédos) mezők a CÉL mezők. A játékban egy Támadó és Védekező
     játékos felváltva lép. A Védekező játékos minden körében levesz pontosan 1
     baktériumot bármely általa választott mezőről.
     A Támadó játékos a következő háromféle lépés egyikét választhatja:
@@ -216,8 +255,8 @@ const rule = {
     mezőbe; a Védekező pedig akkor, ha az összes baktérium eltűnt a pályáról.
   </>,
   en: <>
-    The squares marked with B each contain one bacterium; the designated (adjacent) squares
-    in the top row are GOAL squares. An Attacker and a Defender take turns. On each turn the
+    Squares with green dots contain bacteria; the marked squares in the top row are GOAL squares.
+    An Attacker and a Defender take turns. On each turn the
     Defender removes exactly 1 bacterium from any square of their choice.
     The Attacker chooses one of the following three moves:
     <br />
