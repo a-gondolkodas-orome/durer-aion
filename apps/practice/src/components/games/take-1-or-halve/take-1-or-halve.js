@@ -1,20 +1,42 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { strategyGameFactory } from '../strategy-game';
-import { random } from 'lodash';
+import { random, range } from 'lodash';
 import { gameList } from '../gameList';
 import { useTranslation } from '../../language/translate';
 
+const CoinPile = ({ count, hoveredAction }) => (
+  <div className="flex flex-wrap justify-center gap-2 p-4" style={{ transform: 'scaleY(-1)' }}>
+    {range(count).map(i => {
+      const isDimmed =
+        (hoveredAction === 'take1' && i === count - 1) ||
+        (hoveredAction === 'halve' && i >= count / 2);
+      return (
+        <div
+          key={i}
+          className={`w-[11%] aspect-square rounded-full bg-yellow-400 shadow-md shadow-yellow-600
+            transition-opacity ${isDimmed ? 'opacity-30' : ''}`}
+          style={{ transform: 'scaleY(-1)' }}
+        />
+      );
+    })}
+  </div>
+);
+
 const BoardClient = ({ board, ctx, moves }) => {
   const { t } = useTranslation();
+  const [hoveredAction, setHoveredAction] = useState(null);
   return(
     <section className="p-2 shrink-0 grow basis-2/3">
-      <p className='w-full text-8xl font-bold text-center'>{board}</p>
+      <p className="text-xl font-semibold text-center text-stone-600">{board}</p>
+      <CoinPile count={board} hoveredAction={hoveredAction} />
       <div className="flex flex-wrap">
         <span className="grow px-2">
           <button
             className='cta-button'
             disabled={!ctx.isClientMoveAllowed}
             onClick={() => moves.take1(board)}
+            onMouseEnter={() => setHoveredAction('take1')}
+            onMouseLeave={() => setHoveredAction(null)}
           >{t({ hu: 'Elveszek egyet', en: 'Take one' })}</button>
         </span>
         <span className='grow px-2'>
@@ -22,6 +44,8 @@ const BoardClient = ({ board, ctx, moves }) => {
             className="cta-button"
             disabled={!ctx.isClientMoveAllowed || board % 2 === 1}
             onClick={() => moves.halve(board)}
+            onMouseEnter={() => setHoveredAction('halve')}
+            onMouseLeave={() => setHoveredAction(null)}
           >{t({ hu: 'Elveszem a felét', en: 'Take half' })}</button>
         </span>
       </div>

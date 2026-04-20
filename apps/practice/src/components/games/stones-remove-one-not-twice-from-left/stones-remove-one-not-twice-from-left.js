@@ -1,11 +1,38 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { strategyGameFactory } from '../strategy-game';
-import { cloneDeep, isEqual, sample, random } from 'lodash';
+import { cloneDeep, isEqual, sample, random, range } from 'lodash';
 import { gameList } from '../gameList';
 import { useTranslation } from '../../language/translate';
 
+const StonePile = ({ count, onClick, disabled, restricted }) => {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <button
+      className={`w-full flex-1 flex flex-wrap content-start justify-center gap-2 p-2
+        disabled:cursor-not-allowed ${restricted ? 'opacity-50' : ''}`}
+      style={{ transform: 'scaleY(-1)' }}
+      onClick={onClick}
+      disabled={disabled}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onFocus={() => setHovered(true)}
+      onBlur={() => setHovered(false)}
+    >
+      {range(count).map(i => (
+        <div
+          key={i}
+          className={`w-[20%] aspect-square rounded-full bg-stone-500 shadow-md shadow-stone-700
+            transition-opacity ${hovered && !disabled && i === count - 1 ? 'opacity-30' : ''}`}
+          style={{ transform: 'scaleY(-1)' }}
+        />
+      ))}
+    </button>
+  );
+};
+
 const BoardClient = ({ board, ctx, moves }) => {
   const { t } = useTranslation();
+
   const isMoveAllowed = pileId => {
     if (!ctx.isClientMoveAllowed) return false;
     if (board.piles[pileId] === 0) return false;
@@ -15,28 +42,24 @@ const BoardClient = ({ board, ctx, moves }) => {
 
   return (
     <section className="p-2 shrink-0 grow basis-2/3">
-      <div className="flex flex-wrap">
-        <span className="grow px-2">
-          <button
-            className="cta-button"
-            onClick = {() => moves.removeStone(board, 0)}
-            disabled={!isMoveAllowed(0)}
-          >
-            {t({ hu: 'Bal', en: 'Left' })}: {board.piles[0]}
-          </button>
-        </span>
-        <span className='grow px-2'>
-          <button
-            className="cta-button"
-            onClick = {() => moves.removeStone(board, 1)}
-            disabled={!isMoveAllowed(1)}
-          >
-            {t({ hu: 'Jobb', en: 'Right' })}: {board.piles[1]}
-          </button>
-        </span>
+      <div className="flex">
+        {[0, 1].map(pileId => (
+          <div key={pileId} className="grow px-2 flex flex-col">
+            <p className="text-xl font-semibold text-center text-stone-600">{board.piles[pileId]}</p>
+            <StonePile
+              count={board.piles[pileId]}
+              onClick={() => moves.removeStone(board, pileId)}
+              disabled={!isMoveAllowed(pileId)}
+              restricted={ctx.isClientMoveAllowed && !isMoveAllowed(pileId)}
+            />
+            <p className="text-center font-semibold text-stone-600">
+              {t(pileId === 0 ? { hu: 'Bal', en: 'Left' } : { hu: 'Jobb', en: 'Right' })}
+            </p>
+          </div>
+        ))}
       </div>
     </section>
-  )
+  );
 };
 
 const moves = {
