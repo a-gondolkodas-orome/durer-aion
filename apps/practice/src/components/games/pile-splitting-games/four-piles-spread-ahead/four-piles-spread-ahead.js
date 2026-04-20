@@ -54,7 +54,7 @@ const BoardClient = ({ board, ctx, moves }) => {
 
   const currentChoiceDescription = (pileId) => {
     const pieceCountInPile = board[pileId];
-    const pileName = language == 'en' ? 'pile' : 'kupac';
+    const pileName = language === 'en' ? 'pile' : 'kupac';
 
     if (!ctx.isClientMoveAllowed || !hoveredPiece) {
       return `${pileId+1}. ${pileName}: ${pieceCountInPile} `;

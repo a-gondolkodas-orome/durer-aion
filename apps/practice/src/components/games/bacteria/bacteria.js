@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { range, cloneDeep, random } from "lodash";
 import { strategyGameFactory } from "../strategy-game";
 import { aiBotStrategy } from "./bot-strategy";
+import { useLanguage } from '../../language/language-context';
 import {
   isJump,
   isSpread,
@@ -61,6 +62,7 @@ const generateStartBoard = () => {
 };
 
 const BoardClient = ({ board: { bacteria, goals }, ctx, moves }) => {
+  const { language } = useLanguage();
   const [attackRow, setAttackRow] = useState(null);
   const [attackCol, setAttackCol] = useState(null);
 
@@ -116,9 +118,11 @@ const BoardClient = ({ board: { bacteria, goals }, ctx, moves }) => {
 
   const rowShift = row => row % 2 === 0 ? "0px" : `${100 / (2 * boardWidth)}%`;
 
+  const goalLabel = language === 'en' ? 'G' : 'C';
+
   const cellLabel = ({ row, col }) => {
     if (isGoal({ row, col })) {
-      return bacteria[row][col] ? `C: ${"B".repeat(bacteria[row][col])}` : "C";
+      return bacteria[row][col] ? `${goalLabel}: ${"B".repeat(bacteria[row][col])}` : goalLabel;
     }
     if (!bacteria[row][col]) {
       return row % 2 === 1 && col === boardWidth - 1 ? "" : "-";
