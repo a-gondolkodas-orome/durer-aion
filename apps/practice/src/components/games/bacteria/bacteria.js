@@ -93,7 +93,7 @@ const BoardClient = ({ board: { bacteria, goals }, ctx, moves }) => {
 
   const clickField = ({ row, col }) => {
     if (!ctx.isClientMoveAllowed) return;
-    if (attackRow === null && !bacteria[row][col] >= 1) return;
+    if (attackRow === null && !(bacteria[row][col] >= 1)) return;
     if (isPlayerAttacker && attackRow === row && attackCol === col) {
       setAttackRow(null);
       setAttackCol(null);
@@ -106,7 +106,6 @@ const BoardClient = ({ board: { bacteria, goals }, ctx, moves }) => {
       setAttackCol(col);
       return;
     }
-
 
     if (!isPlayerAttacker) {
       moves.defend({ bacteria, goals }, { row, col });
@@ -140,13 +139,13 @@ const BoardClient = ({ board: { bacteria, goals }, ctx, moves }) => {
     return false;
   };
 
+  const isEdgeCell = ({ row, col }) => row % 2 === 1 && col === boardWidth - 1;
+
   const isDisabled = ({ row, col }) => (
     !ctx.isClientMoveAllowed
     || isForbidden({ row, col })
-    || (row % 2 === 1 && col === (boardWidth - 1))
+    || isEdgeCell({ row, col })
   );
-
-  const isEdgeCell = ({ row, col }) => row % 2 === 1 && col === boardWidth - 1;
 
   const cellClassName = ({ row, col }) => {
     if (isEdgeCell({ row, col })) return "aspect-4/3 w-full";
@@ -172,19 +171,15 @@ const BoardClient = ({ board: { bacteria, goals }, ctx, moves }) => {
     ].join(" ");
   };
 
-  const previewCount = ({ row, col }) => {
-    if (attackRow === null || !isAllowedAttack({ row, col })) return 0;
-    const attack = { attackRow, attackCol, row, col };
-    if (isJump(attack)) return 1;
-    return bacteria[attackRow][attackCol];
-  };
-
   const cellContent = ({ row, col }) => {
     if (isEdgeCell({ row, col })) return null;
     const count = bacteria[row][col] || 0;
     const goal = isGoal({ row, col });
-    const preview = previewCount({ row, col });
-    if (preview > 0) return <BacteriaDisplay count={preview} onGoal={goal} dimmed />;
+    if (attackRow !== null && isAllowedAttack({ row, col })) {
+      const attack = { attackRow, attackCol, row, col };
+      const previewCount = isJump(attack) ? 1 : bacteria[attackRow][attackCol];
+      return <BacteriaDisplay count={previewCount} onGoal={goal} dimmed />;
+    }
     if (count > 0) return <BacteriaDisplay count={count} onGoal={goal} />;
     if (goal) return <GoalMarker />;
     return null;
@@ -203,9 +198,10 @@ const BoardClient = ({ board: { bacteria, goals }, ctx, moves }) => {
               key={row}
             >
               {range(boardWidth).map((col) => (
-                <td key={col} onClick={() => clickField({ row, col })}>
+                <td key={col}>
                   <button
                     disabled={isDisabled({ row, col })}
+                    onClick={() => clickField({ row, col })}
                     className={cellClassName({ row, col })}
                     style={{ transform: "scaleY(-1)" }}
                   >
