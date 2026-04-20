@@ -5,12 +5,12 @@ import { cloneDeep, isEqual } from "lodash";
 export const getPlayerStepDescription = ({ ctx: { turnStage } }) => {
   if (turnStage === 'placeBack') {
     return {
-      hu: 'Kattints egy érmére a felső sorban, hogy betedd.',
-      en: 'Click a coin in the top row to place it.'
+      hu: 'Válassz a visszarakási lehetőségek közül.',
+      en: 'Choose an option in the place back bar.'
     };
   }
   return {
-    hu: 'Kattints egy érmére, hogy elvegyél egy olyan pénzérmét.',
+    hu: 'Kattints egy érmére, hogy elvegyél egyet.',
     en: 'Click a coin to remove it.'
   };
 };
