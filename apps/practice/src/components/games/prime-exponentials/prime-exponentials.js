@@ -18,6 +18,16 @@ const primeList = [
   919, 929, 937, 941, 947, 953, 967, 971, 977, 983, 991, 997
 ];
 
+const allPrimePowers = (() => {
+  const entries = [{ prime: 2, exponent: 0, value: 1 }];
+  for (const p of primeList) {
+    for (let e = 1; p ** e < 1000; e++) {
+      entries.push({ prime: p, exponent: e, value: p ** e });
+    }
+  }
+  return entries.sort((a, b) => a.value - b.value);
+})();
+
 const generateStartBoard = () => {
   if (random(0, 1)) {
     return random(1, 166) * 6;
@@ -26,148 +36,87 @@ const generateStartBoard = () => {
   }
 };
 
-const ExponentCell = ({ e, playerPrime, chooseExponential, setHovered }) => {
-  return <td
-    className="border-4 hover:bg-gray-300"
-    key={e}
-    onClick={() => chooseExponential(e)}>
+const getAvailableExponents = (num, prime) => {
+  const maxExponent = Math.floor(Math.log(num) / Math.log(prime));
+  return range(0, maxExponent + 1);
+};
+
+const PrimePowerButton = ({ entry, board, isClientMoveAllowed, chooseEntry, setHovered }) => {
+  const { prime, exponent, value } = entry;
+  const isAboveBoard = value > board;
+  const isActive = !isAboveBoard && isClientMoveAllowed;
+  return (
     <button
-      className={`w-full p-[5%] aspect-video`}
-      onMouseOver={() => setHovered(e)}
+      className={`border rounded w-10 py-0.5 text-center leading-tight border-gray-300
+        ${isAboveBoard ? 'opacity-25' : ''}
+        ${isActive ? 'hover:bg-blue-100 hover:border-blue-300 cursor-pointer' : ''}`}
+      onClick={() => isActive && chooseEntry(entry)}
+      onMouseOver={() => isActive && setHovered(entry)}
       onMouseOut={() => setHovered(null)}
-      onFocus={() => setHovered(e)}
+      onFocus={() => isActive && setHovered(entry)}
       onBlur={() => setHovered(null)}
-    >{playerPrime ** e}
+    >
+      <span className="block text-xs text-gray-500" aria-hidden={exponent <= 1}>
+        {exponent > 1 ? <>{prime}<sup>{exponent}</sup></> : <>&nbsp;</>}
+      </span>
+      <span className="block">{value}</span>
     </button>
-  </td>
-}
+  );
+};
 
-const ExponentsTable = ({
-  board, playerPrime, chooseExponential, hovered, setHovered, resetChosenPrime
-}) => {
+const PrimePowerGrid = ({ board, visiblePowers, isClientMoveAllowed, chooseEntry, setHovered }) => {
+  return (
+    <div className="flex flex-wrap gap-1 items-end">
+      {visiblePowers.map(entry => (
+        <PrimePowerButton
+          key={`${entry.prime}-${entry.exponent}`}
+          entry={entry}
+          board={board}
+          isClientMoveAllowed={isClientMoveAllowed}
+          chooseEntry={chooseEntry}
+          setHovered={setHovered}
+        />
+      ))}
+    </div>
+  );
+};
+
+const HoverPreview = ({ hovered, board }) => {
   const { t } = useTranslation();
-  const availableExponents = getAvailableExponents(board, playerPrime);
-
-  // https://tailwindcss.com/docs/content-configuration#dynamic-class-names
-  // if we dynamically generate, tailwind won't recognize them :(
-  const widthClassNames = [
-    "",
-    "w-[10%] min-w-[10%]",
-    "w-[20%] min-w-[20%]",
-    "w-[30%] min-w-[30%]",
-    "w-[40%] min-w-[40%]",
-    "w-[50%] min-w-[50%]",
-    "w-[60%] min-w-[60%]",
-    "w-[70%] min-w-[70%]",
-    "w-[80%] min-w-[80%]",
-    "w-[90%] min-w-[90%]",
-    "w-full min-w-full"
-  ][availableExponents.length]
-
-  return <>
-    <p className="pb-4">{t({ hu: `Választott prím: ${playerPrime}.`, en: `Chosen prime: ${playerPrime}.` })}</p>
-    <p>{t({ hu: 'Lehetséges hatványok:', en: 'Available powers:' })}</p>
-    <table className={`border-collapse table-fixed ${widthClassNames}`}>
-      <tbody><tr>
-        {availableExponents.map(e =>
-          <ExponentCell
-            key={e}
-            playerPrime={playerPrime}
-            e={e}
-            chooseExponential={chooseExponential}
-            hovered={hovered}
-            setHovered={setHovered}
-          ></ExponentCell>
-        )}
-      </tr></tbody>
-    </table>
-    {hovered === null ? <br></br> : <p>
-      {t({
-        hu: `Kivonandó prímhatvány: ${playerPrime}^${hovered} = ${playerPrime**hovered}. ` +
-          `Eredmény: ${board-playerPrime**hovered}.`,
-        en: `Prime power to subtract: ${playerPrime}^${hovered} = ${playerPrime**hovered}. ` +
-          `Result: ${board-playerPrime**hovered}.`
-      })}
-    </p>}
-    <button
-      className="cta-button bg-slate-400 w-auto"
-      onClick={() => resetChosenPrime()}
-    >{t({ hu: 'Vissza a prím választáshoz', en: 'Back to prime selection' })}
-    </button>
-  </>;
-}
-
-const PrimeCell = ({ p, choosePrime }) => {
-  return <td
-    className="max-w-[10%] border-4 hover:bg-gray-300"
-    onClick={() => choosePrime(p)}
-    key={p}
-  >
-    <button className='w-full p-[5%] aspect-video'>
-      {p}
-    </button>
-  </td>
-}
-
-const PrimesTable = ({ board, choosePrime }) => {
-  let choosablePrimesList = primeList.filter(i => i <= board);
-  if (choosablePrimesList.length === 0) {
-    choosablePrimesList = [2];
-  }
-
-  const widthClassName = choosablePrimesList.length >= 10
-    ? 'w-full'
-    : `w-[${choosablePrimesList.length*10}%]`;
-
-  return <table
-    className={`border-collapse table-fixed max-w-full ${widthClassName}`}
-  >
-    <tbody>
-    {range(Math.floor(choosablePrimesList.length/10)+1).map(i => (
-      <tr key={i}>
-        {range(Math.min(10, choosablePrimesList.length - 10*i)).map(j => (
-          <PrimeCell
-            key={10*i + j}
-            p={primeList[10*i+j]}
-            choosePrime={choosePrime}
-          ></PrimeCell>
-        ))}
-      </tr>
-    ))}
-    </tbody>
-  </table>;
-}
+  return (
+    <div className="min-h-6 mb-2">
+      {hovered !== null && <p>
+        {t({ hu: 'Kivonandó prímhatvány:', en: 'Prime power to subtract:' })}{' '}
+        <strong>{hovered.prime}<sup>{hovered.exponent}</sup> = {hovered.value}</strong>.{' '}
+        {t({ hu: 'Eredmény:', en: 'Result:' })}{' '}
+        <strong>{board - hovered.value}</strong>.
+      </p>}
+    </div>
+  );
+};
 
 const BoardClient = ({ board, ctx, moves }) => {
-  const [playerPrime, setPlayerPrime] = useState(null);
-  const [hoveredExponent, setHoveredExponent] = useState(null);
+  const [hovered, setHovered] = useState(null);
+  const [visiblePowers] = useState(() => allPrimePowers.filter(e => e.value <= board));
 
-  const chooseExponential = (e) => {
-    setPlayerPrime(null);
-    moves.subtractPrimeExponent(board, { prime: playerPrime, exponent: e });
-  }
-
-  const PlayerOptions = playerPrime === null
-    ? <PrimesTable
-      board={board}
-      choosePrime={setPlayerPrime}
-    ></PrimesTable>
-    : <ExponentsTable
-        board={board}
-        playerPrime={playerPrime}
-        resetChosenPrime={() => setPlayerPrime(null)}
-        chooseExponential={chooseExponential}
-        hovered={hoveredExponent}
-        setHovered={setHoveredExponent}
-      ></ExponentsTable>;
+  const chooseEntry = ({ prime, exponent }) => {
+    moves.subtractPrimeExponent(board, { prime, exponent });
+  };
 
   return (
     <section className='p-2 shrink-0 grow basis-2/3'>
       <p className='w-full text-8xl font-bold text-center'>{board}</p><br />
-      {!ctx.isClientMoveAllowed ? '' : PlayerOptions}
+      <HoverPreview hovered={hovered} board={board} />
+      <PrimePowerGrid
+        board={board}
+        visiblePowers={visiblePowers}
+        isClientMoveAllowed={ctx.isClientMoveAllowed}
+        chooseEntry={chooseEntry}
+        setHovered={setHovered}
+      />
     </section>
   );
-}
+};
 
 const aiBotStrategy = ({ board, moves }) => {
   if (board === 1) {
@@ -196,17 +145,11 @@ const aiBotStrategy = ({ board, moves }) => {
   }
   moves.subtractPrimeExponent(board, { prime: chosenPrime, exponent: chosenExponent });
   return;
-}
-
-const getAvailableExponents = (num, prime) => {
-  const baseLog = Math.log(num) / Math.log(prime);
-  const maxExponent = Math.floor(baseLog);
-  return range(0, maxExponent + 1);
-}
+};
 
 const getPlayerStepDescription = () => ({
-  hu: 'Válaszd ki a prímet, aminek a hatványát ki szeretnéd vonni, majd a hatványt.',
-  en: 'Choose the prime whose power you want to subtract, then choose the exponent.'
+  hu: 'Válassz egy prímhatványt amit kivonsz.',
+  en: 'Choose a prime power to subtract.'
 });
 
 const moves = {
@@ -218,7 +161,7 @@ const moves = {
     }
     return { nextBoard };
   }
-}
+};
 
 const rule = {
   hu: <>
@@ -230,7 +173,7 @@ const rule = {
     The game starts from a positive integer less than 1000 (chosen by the computer). Players take
     turns subtracting any prime power. The player who reaches zero wins!
   </>
-}
+};
 
 export const PrimeExponentials = strategyGameFactory({
   rule,
@@ -240,4 +183,4 @@ export const PrimeExponentials = strategyGameFactory({
   generateStartBoard,
   moves,
   aiBotStrategy
-})
+});
