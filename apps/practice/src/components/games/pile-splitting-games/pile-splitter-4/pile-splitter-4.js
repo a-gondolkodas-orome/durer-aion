@@ -76,8 +76,8 @@ const BoardClient = ({ board, ctx, moves }) => {
   };
 
   const pieceColor = ({ pileId, pieceId }) => {
-    if (pileId === removedPileId) return 'bg-red-600 opacity-50';
-    if (isHoverPreviewedForRemoval({ pileId })) return 'bg-red-400 opacity-75';
+    if (pileId === removedPileId) return 'bg-slate-600 opacity-75';
+    if (isHoverPreviewedForRemoval({ pileId })) return 'bg-slate-600 opacity-50';
     if (toBeLeft({ pileId, pieceId })) return 'bg-blue-900';
     return 'bg-blue-600';
   };

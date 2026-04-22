@@ -81,8 +81,8 @@ const BoardClient = ({ board, ctx, moves }) => {
               className={`
                 w-[18%] aspect-square rounded-full mx-0.5 mt-0.5
                 ${isDisabled({ pileId, pieceId }) && 'cursor-not-allowed'}
-                ${toAppear({ pileId, pieceId }) && nonExistent({ pileId, pieceId }) ? 'bg-blue-900 opacity-30' : ''}
-                ${toBeRemoved({ pileId, pieceId }) ? 'bg-red-600 opacity-50' : ''}
+                ${toAppear({ pileId, pieceId }) && nonExistent({ pileId, pieceId }) ? 'bg-blue-600 opacity-50' : ''}
+                ${toBeRemoved({ pileId, pieceId }) ? 'bg-slate-600 opacity-50' : ''}
                 ${
                   (nonExistent({ pileId, pieceId }) && !toAppear({ pileId, pieceId }))
                     ? 'invisible inline-block'
