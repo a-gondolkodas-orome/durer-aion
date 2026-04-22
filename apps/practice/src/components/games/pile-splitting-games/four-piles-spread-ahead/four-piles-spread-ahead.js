@@ -69,6 +69,18 @@ const BoardClient = ({ board, ctx, moves }) => {
     return `${pileId+1}. ${pileName}: ${pieceCountInPile} `;
   };
 
+  const pieceVisibility = ({ pileId, pieceId }) => {
+    if (nonExistent({ pileId, pieceId }) && !toAppear({ pileId, pieceId })) return 'invisible inline-block';
+    return 'inline-block';
+  };
+
+  const pieceColor = ({ pileId, pieceId }) => {
+    if (toBeRemoved({ pileId, pieceId })) return 'bg-slate-600 opacity-75';
+    if (toAppear({ pileId, pieceId })) return 'bg-blue-600 opacity-75';
+    if (isDisabled({ pileId, pieceId })) return 'bg-blue-900 cursor-not-allowed';
+    return hoveredPiece ? 'bg-blue-900' : 'bg-blue-600';
+  };
+
   const leftBorder = (pileId) => {
     return (
       (pileId === 1 && board[1] > board[0]) ||
@@ -103,26 +115,11 @@ const BoardClient = ({ board, ctx, moves }) => {
             <button
               key={pieceId}
               disabled={isDisabled({ pileId, pieceId })}
-              className={`
-                w-[18%] aspect-square rounded-full mx-0.5 mt-0.5
-                ${toAppear({ pileId, pieceId }) ? 'bg-blue-600 opacity-50' : ''}
-                ${isDisabled({ pileId, pieceId }) && 'cursor-not-allowed bg-blue-600'}
-                ${toBeRemoved({ pileId, pieceId }) ? 'bg-red-600 opacity-50' : ''}
-                ${
-                  (nonExistent({ pileId, pieceId }) && !toAppear({ pileId, pieceId }))
-                  ? 'invisible inline-block'
-                  : 'inline-block'
-                }
-                ${
-                  (
-                    !nonExistent({ pileId, pieceId }) &&
-                    !isDisabled({ pileId, pieceId }) &&
-                    !toBeRemoved({ pileId, pieceId })
-                  )
-                  ? 'bg-blue-900'
-                  : ''
-                }
-              `}
+              className={[
+                'w-[18%] aspect-square rounded-full mx-0.5 mt-0.5',
+                pieceVisibility({ pileId, pieceId }),
+                pieceColor({ pileId, pieceId })
+              ].join(' ')}
               onClick={() => clickPiece({ pileId, pieceId })}
               onFocus={() => hoverPiece({ pileId, pieceId })}
               onBlur={() => hoverPiece(null)}
