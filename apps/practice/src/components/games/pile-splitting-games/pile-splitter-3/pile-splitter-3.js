@@ -13,6 +13,7 @@ const generateStartBoard = () => {
 const BoardClient = ({ board, ctx, moves }) => {
   const [removedPileId, setRemovedPileId] = useState(null);
   const [hoveredPiece, setHoveredPiece] = useState(null);
+  const [hoveredPileId, setHoveredPileId] = useState(null);
 
   const isDisabled = ({ pileId, pieceId }) => {
     if (!ctx.isClientMoveAllowed) return true;
@@ -53,6 +54,25 @@ const BoardClient = ({ board, ctx, moves }) => {
     return true;
   };
 
+  const isHoverPreviewedForRemoval = ({ pileId }) => {
+    if (!ctx.isClientMoveAllowed) return false;
+    if (removedPileId !== null) return false;
+    return hoveredPileId === pileId;
+  };
+
+  const clickPile = (pileId) => {
+    if (!ctx.isClientMoveAllowed) return;
+    if (removedPileId === pileId) { setRemovedPileId(null); return; }
+    if (removedPileId === null) setRemovedPileId(pileId);
+  };
+
+  const pieceColor = ({ pileId, pieceId }) => {
+    if (pileId === removedPileId) return 'bg-red-600 opacity-50';
+    if (isHoverPreviewedForRemoval({ pileId })) return 'bg-red-400 opacity-75';
+    if (toBeLeft({ pileId, pieceId })) return 'bg-blue-900';
+    return 'bg-blue-600';
+  };
+
   const currentChoiceDescription = (pileId) => {
     const pieceCountInPile = board[pileId];
 
@@ -62,12 +82,10 @@ const BoardClient = ({ board, ctx, moves }) => {
       // pieceCountInPile can be 0 in intermediateBoard
       return pieceCountInPile ? `${pieceCountInPile} → 🗑️` : '🗑️';
     }
-    if (!hoveredPiece) return pieceCountInPile || '🗑️';
-    if (removedPileId === null && hoveredPiece.pileId === pileId) {
-      return `${pieceCountInPile} → 🗑️`;
+    if (removedPileId === null) {
+      return hoveredPileId === pileId ? `${pieceCountInPile} → 🗑️` : pieceCountInPile || '🗑️';
     }
-    if (hoveredPiece.pileId !== pileId) return pieceCountInPile || '🗑️';
-
+    if (!hoveredPiece || hoveredPiece.pileId !== pileId) return pieceCountInPile || '🗑️';
     return `${pieceCountInPile} → ${hoveredPiece.pieceId + 1}, ${pieceCountInPile - hoveredPiece.pieceId - 1}`;
   };
 
@@ -83,6 +101,9 @@ const BoardClient = ({ board, ctx, moves }) => {
           ${pileId === 1 && board[0] < board[1] ? 'border-l-2' : ''}
         `}
         style={{ transform: 'scaleY(-1)' }}
+        onClick={() => clickPile(pileId)}
+        onMouseEnter={() => setHoveredPileId(pileId)}
+        onMouseLeave={() => setHoveredPileId(null)}
       >
         <p className="text-xl" style={{ transform: 'scaleY(-1)' }}>
           {currentChoiceDescription(pileId)}
@@ -92,12 +113,11 @@ const BoardClient = ({ board, ctx, moves }) => {
               key={pieceId}
               disabled={isDisabled({ pileId, pieceId })}
               className={`
-                inline-block bg-blue-600 w-[20%] aspect-square rounded-full mx-0.5 mt-0.5
-                ${pileId === removedPileId ? 'bg-red-600' : ''}
-                ${pileId === removedPileId ? 'opacity-50' : ''}
-                ${toBeLeft({ pileId, pieceId }) ? 'bg-blue-900' : ''}
+                inline-block w-[20%] aspect-square rounded-full mx-0.5 mt-0.5
+                disabled:cursor-not-allowed
+                ${pieceColor({ pileId, pieceId })}
               `}
-              onClick={() => clickPiece({ pileId, pieceId })}
+              onClick={(e) => { e.stopPropagation(); clickPiece({ pileId, pieceId }); }}
               onFocus={() => setHoveredPiece({ pileId, pieceId })}
               onBlur={() => setHoveredPiece(null)}
               onMouseOver={() => setHoveredPiece({ pileId, pieceId })}
