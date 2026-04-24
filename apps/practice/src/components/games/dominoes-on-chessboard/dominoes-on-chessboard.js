@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { range, cloneDeep, isEqual, flatMap, sample, last, shuffle } from 'lodash';
-import { strategyGameFactory, dummyEvents } from '../strategy-game';
+import { strategyGameFactory, dummyEvents } from '../../game-factory/strategy-game';
 import { gameList } from '../gameList';
 
 const BOARDSIZE = 6;

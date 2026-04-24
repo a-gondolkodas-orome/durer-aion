@@ -1,5 +1,5 @@
 import React from 'react';
-import { strategyGameFactory, dummyEvents } from '../strategy-game';
+import { strategyGameFactory, dummyEvents } from '../../game-factory/strategy-game';
 import { range, cloneDeep, sample, shuffle } from 'lodash';
 import { gameList } from '../gameList';
 

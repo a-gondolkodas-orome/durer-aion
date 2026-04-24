@@ -1,6 +1,6 @@
 import React from 'react';
 import { range, cloneDeep } from 'lodash';
-import { strategyGameFactory } from '../../strategy-game';
+import { strategyGameFactory } from '../../../game-factory/strategy-game';
 import { aiBotStrategy } from './bot-strategy';
 import { generateEmptyTicTacToeBoard } from '../helpers';
 import { isGameEnd, hasFirstPlayerWon } from './helpers';

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { strategyGameFactory } from '../strategy-game';
+import { strategyGameFactory } from '../../game-factory/strategy-game';
 import { cloneDeep, isEqual, sample, random, range } from 'lodash';
 import { gameList } from '../gameList';
 import { useTranslation } from '../../language/translate';

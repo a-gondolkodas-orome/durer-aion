@@ -1,6 +1,6 @@
 import React from 'react';
 import { compact, cloneDeep } from 'lodash';
-import { strategyGameFactory } from '../strategy-game';
+import { strategyGameFactory } from '../../game-factory/strategy-game';
 import { aiBotStrategy } from './bot-strategy';
 import { RockSvg } from './symbols/rock-svg';
 import { PaperSvg } from './symbols/paper-svg';

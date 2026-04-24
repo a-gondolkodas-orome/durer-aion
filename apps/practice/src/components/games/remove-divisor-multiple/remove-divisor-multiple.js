@@ -1,5 +1,5 @@
 import React from 'react';
-import { strategyGameFactory } from '../strategy-game';
+import { strategyGameFactory } from '../../game-factory/strategy-game';
 import { range, cloneDeep, sample, random } from 'lodash';
 import { strategyDict } from './bot-strategy';
 import { gameList } from '../gameList';

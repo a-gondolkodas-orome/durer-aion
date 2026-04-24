@@ -1,5 +1,5 @@
 import { getBoardIndices, moves, getAllowedMoves } from "./helpers";
-import { dummyEvents } from "../strategy-game";
+import { dummyEvents } from "../../game-factory/strategy-game";
 import { shuffle, sample } from "lodash";
 
 /* This strategy file is relevant for the 4x7 case */

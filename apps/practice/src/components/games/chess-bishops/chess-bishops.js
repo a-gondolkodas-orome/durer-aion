@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { range, isEqual, some, cloneDeep } from 'lodash';
-import { strategyGameFactory } from '../strategy-game';
+import { strategyGameFactory } from '../../game-factory/strategy-game';
 import { ChessBishopSvg } from './chess-bishop-svg';
 import { aiBotStrategy } from './bot-strategy';
 import { generateStartBoard, getAllowedMoves, BISHOP, FORBIDDEN, markForbiddenFields } from './helpers';

@@ -1,6 +1,6 @@
 import React from 'react';
 import { random, sum } from 'lodash';
-import { strategyGameFactory } from '../strategy-game';
+import { strategyGameFactory } from '../../game-factory/strategy-game';
 import { aiBotStrategy  } from './bot-strategy';
 import { BoardClient } from './board-client';
 import { getPlayerStepDescription, isWinningState, moves } from './helpers';

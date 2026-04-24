@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { range, random, cloneDeep } from 'lodash';
-import { strategyGameFactory } from '../../strategy-game';
+import { strategyGameFactory } from '../../../game-factory/strategy-game';
 import { aiBotStrategy } from './bot-strategy';
 import { gameList } from '../../gameList';
 import { useLanguage } from '../../../language/language-context';

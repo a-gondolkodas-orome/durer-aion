@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { strategyGameFactory } from '../strategy-game';
+import { strategyGameFactory } from '../../game-factory/strategy-game';
 import { CastleSvg } from './assets/castle-svg';
 import { SoldierSvg } from './assets/soldier-svg';
 import { aiBotStrategy } from './bot-strategy';

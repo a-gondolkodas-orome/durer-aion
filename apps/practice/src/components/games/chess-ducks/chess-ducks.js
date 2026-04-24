@@ -1,5 +1,5 @@
 import React from 'react';
-import { strategyGameFactory } from '../strategy-game';
+import { strategyGameFactory } from '../../game-factory/strategy-game';
 import { some, range, isEqual } from 'lodash';
 import { DuckSvg } from './rubber-duck-svg';
 import { aiBotStrategy } from './bot-strategy';
