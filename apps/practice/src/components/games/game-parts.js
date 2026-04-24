@@ -27,9 +27,15 @@ export const GameSidebar = ({
         </p>
 
         {ctx.phase === 'play' && (
-          <div className="h-24 flex justify-center">
-            {!ctx.isHumanVsHumanGame && !ctx.isClientMoveAllowed && <Spinner />}
-            {ctx.isClientMoveAllowed && <p className="italic text-justify">{stepDescription}</p>}
+          <div className="relative flex justify-center">
+            {!ctx.isHumanVsHumanGame && !ctx.isClientMoveAllowed && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Spinner />
+              </div>
+            )}
+            <p className={`italic text-justify ${!ctx.isClientMoveAllowed ? 'invisible' : ''}`}>
+              {stepDescription}
+            </p>
           </div>
         )}
 
