@@ -114,7 +114,7 @@ export const gameList = {
     year: { k: "III. (09/10)", v: "09/10" },
     round: "döntő",
     category: ["C"],
-    name: { hu: "Sakktáblára Dominók", en: "Dominoes on a chessboard" },
+    name: { hu: "Sakktáblára dominók", en: "Dominoes on a chessboard" },
     credit: { developedBy: ["Czeller Ildikó"] }
   },
   FiveFiveCard: {
@@ -221,7 +221,7 @@ export const gameList = {
     year: { k: "XIX. (25/26)", v: "25/26" },
     round: "online",
     category: ["C", "D"],
-    name: { hu: "Osztó/Többszörös Törlés", en: "Remove a divisor/multiple" },
+    name: { hu: "Osztó/többszörös törlés", en: "Remove a divisor/multiple" },
     credit: { developedBy: ["Hajós Balázs"] }
   },
   RockPaperScissor: {
