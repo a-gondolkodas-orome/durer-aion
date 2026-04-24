@@ -30,7 +30,7 @@ export const Overview = () => {
 
   return <main className="p-2">
     <OverviewHeader></OverviewHeader>
-    <div className="flex flex-wrap items-center gap-1 mb-2">
+    <div className="border-t border-slate-200 mt-2 pt-3 flex flex-wrap items-center gap-1 mb-2">
       <CategoryFilter selected={selectedCategories} onChange={setSelectedCategories} />
     </div>
     <h2 className="font-bold my-4 text-center">
@@ -59,7 +59,7 @@ const CategoryFilter = ({ selected, onChange }) => {
   ];
   return (
     <div className="flex flex-wrap items-center gap-1">
-      <span className="text-sm">{t({ hu: 'Kategória:', en: 'Category:' })}</span>
+      <span className="text-sm">{t({ hu: 'Szűrés kategóriákra:', en: 'Filter by category:' })}</span>
       {categories.map(({ k, v }) => {
         const isSelected = selected.includes(v);
         return (
@@ -83,36 +83,37 @@ const CategoryFilter = ({ selected, onChange }) => {
 
 const OverviewHeader = () => {
   const { t } = useTranslation();
-  return <div className="pb-2"><div className="flex flex-wrap items-baseline">
-    <h1 className="text-blue-600 font-bold pb-4 grow">
-      {t({ hu: 'Dürer stratégiás játékok', en: 'Dürer Strategy Games' })}
-    </h1>
-    <span className="text-right flex items-center gap-2">
+  return <div className="pb-2">
+    <div className="flex justify-end items-center gap-2 mb-1">
       <a
         href="https://forms.gle/7DwugmXNrvKgkiiu8"
         target="_blank"
-        className="px-4"
+        className="text-sm text-slate-500 hover:text-slate-700"
       >
         {t({ hu: 'Hibabejelentő', en: 'Bug report' })}
       </a>
       <LanguageSelector />
-    </span>
-  </div>
-  {t({
-    hu: <>
-      A <i>stratégiás játék</i> egy interaktív két szereplős játék,
-      amelyet egy gép ellen játszhattok. Az alábbiakban
-      a <a href="https://durerinfo.hu">Dürer Versenyen</a> feladott
-      játékokat próbálhatjátok ki. A feladatok fokozatosan nehezednek
-      az A kategóriától az E+ kategóriáig.
-    </>,
-    en: <>
-      A <i>strategy game</i> is an interactive two-player game played against a computer.
-      Below you can try the games from
-      the <a href="https://durerinfo.hu">Dürer Competition</a>.
-      The difficulty increases from category A to E+.
-    </>
-  })}
+    </div>
+    <h1 className="text-blue-600 font-bold text-center text-2xl pb-2">
+      {t({ hu: 'Dürer stratégiás játékok', en: 'Dürer Strategy Games' })}
+    </h1>
+    <div className="max-w-[100ch] mx-auto">
+      {t({
+        hu: <>
+          A <i>stratégiás játék</i> egy két szereplős játék,
+          amelyben nincs szerencsefaktor: optimális stratégiával mindig nyerni lehet,
+          így matekfeladatként is tekinthető.
+          Az alábbi, A-tól E+ kategóriáig nehezedő játékok
+          a <a href="https://durerinfo.hu">Dürer Versenyen</a> szerepeltek.
+        </>,
+        en: <>
+          A <i>strategy game</i> is a two-player game with no luck involved:
+          the right strategy always wins, making it essentially a math puzzle.
+          The games below, ranging from category A to E+ in difficulty,
+          all featured in the <a href="https://durerinfo.hu">Dürer Competition</a>.
+        </>
+      })}
+    </div>
   </div>;
 };
 
