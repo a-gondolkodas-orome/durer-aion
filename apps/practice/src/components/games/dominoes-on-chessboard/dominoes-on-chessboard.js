@@ -46,6 +46,21 @@ const BoardClient = ({ board, ctx, moves }) => {
     return false;
   }
 
+  const isPartOfPreview = (field) => {
+    if (selectedField === null || hoveredField === null) return false;
+    if (!isNeighborOfSelected(hoveredField) || isCovered(hoveredField)) return false;
+    return isEqual(field, selectedField) || isEqual(field, hoveredField);
+  };
+
+  const getCellBgClass = (field) => {
+    if (isCovered(field)) return 'bg-slate-600 border-black';
+    if (!ctx.isClientMoveAllowed) return '';
+    if (isPartOfPreview(field)) return 'bg-blue-500';
+    if (isEqual(selectedField, field)) return 'bg-blue-600';
+    if (isNeighborOfSelected(field)) return 'bg-blue-100';
+    return '';
+  };
+
   const isClickAllowed = (field) => {
     if (!ctx.isClientMoveAllowed) return false;
     if (isCovered(field)) return false;
@@ -104,19 +119,8 @@ const BoardClient = ({ board, ctx, moves }) => {
                   className={`
                     aspect-square w-full p-[5%] relative
                     ${!isClickAllowed({ row, col }) ? 'cursor-not-allowed' : ''}
-                    ${isCovered({ row, col }) ? `bg-slate-600 border-black` : ''}
+                    ${getCellBgClass({ row, col })}
                     ${getDominoBorders({ row, col })}
-                    ${isEqual(selectedField, { row, col }) ? 'bg-teal-600' : ''}
-                    ${isNeighborOfSelected({ row, col }) && !isCovered({ row, col }) ? 'bg-teal-200' : ''}
-                    ${
-                      (
-                        isNeighborOfSelected({ row, col }) &&
-                        !isCovered({ row, col }) &&
-                        isEqual(hoveredField, { row, col })
-                      )
-                      ? 'bg-teal-400'
-                      : ''
-                    }
                   `}
                   disabled={!isClickAllowed({ row, col })}
                   onClick={() => clickField({ row, col })}
