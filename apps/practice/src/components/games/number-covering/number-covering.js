@@ -116,9 +116,8 @@ export const NumberCovering8 = strategyGameFactory({
   metadata: gameList.NumberCovering8,
   BoardClient,
   getPlayerStepDescription,
-  generateStartBoard: () => range(1, 9),
   moves,
-  aiBotStrategy
+  variants: [{ botStrategy: aiBotStrategy, generateStartBoard: () => range(1, 9) }]
 });
 
 export const NumberCovering10 = strategyGameFactory({
@@ -126,7 +125,6 @@ export const NumberCovering10 = strategyGameFactory({
   metadata: gameList.NumberCovering10,
   BoardClient,
   getPlayerStepDescription,
-  generateStartBoard: () => range(1, 11),
   moves,
-  aiBotStrategy
+  variants: [{ botStrategy: aiBotStrategy, generateStartBoard: () => range(1, 11) }]
 });

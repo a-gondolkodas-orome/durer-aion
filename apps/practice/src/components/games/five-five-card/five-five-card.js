@@ -108,7 +108,6 @@ export const FiveFiveCard = strategyGameFactory({
     hu: 'Vegyél el egy kártyát az ellenfél elől.',
     en: 'Remove a card from your opponent.'
   }),
-  generateStartBoard: () => [[1, 2, 3, 4, 5], [1, 2, 3, 4, 5]],
   moves,
-  aiBotStrategy
+  variants: [{ botStrategy: aiBotStrategy, generateStartBoard: () => [[1, 2, 3, 4, 5], [1, 2, 3, 4, 5]] }]
 });

@@ -81,7 +81,6 @@ export const AntiTicTacToe = strategyGameFactory({
     hu: 'Helyezz le egy korongot egy üres mezőre kattintással.',
     en: 'Click on an empty square to place a piece.'
   }),
-  generateStartBoard: generateEmptyTicTacToeBoard,
   moves,
-  aiBotStrategy
+  variants: [{ botStrategy: aiBotStrategy, generateStartBoard: generateEmptyTicTacToeBoard }]
 });

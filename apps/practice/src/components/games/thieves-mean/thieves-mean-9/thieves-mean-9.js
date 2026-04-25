@@ -102,7 +102,6 @@ export const ThievesMean9 = strategyGameFactory({
     { hu: 'Nyomozó', en: "Sheriff" },
     { hu: 'Tolvaj', en: "Thief" }
   ],
-  generateStartBoard,
   moves,
-  aiBotStrategy
+  variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
 });

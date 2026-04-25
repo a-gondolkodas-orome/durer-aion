@@ -77,7 +77,6 @@ export const TwoTimesTwo = strategyGameFactory({
   metadata: gameList.TwoTimesTwo,
   BoardClient,
   getPlayerStepDescription,
-  generateStartBoard,
   moves,
-  aiBotStrategy
+  variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
 });

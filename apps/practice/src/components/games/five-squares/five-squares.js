@@ -87,7 +87,6 @@ export const FiveSquares = strategyGameFactory({
   metadata: gameList.FiveSquares,
   BoardClient,
   getPlayerStepDescription,
-  generateStartBoard,
   moves,
-  aiBotStrategy
+  variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
 });

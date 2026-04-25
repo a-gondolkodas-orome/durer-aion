@@ -176,7 +176,6 @@ export const FourPilesSpreadAhead = strategyGameFactory({
     hu: 'Kattints egy korongra, hogy jelezd, hány korongot szeretnél elvenni a kupacból.',
     en: 'Click on a disc to indicate the number of discs you want to remove.'
   }),
-  generateStartBoard,
   moves,
-  aiBotStrategy
+  variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
 });

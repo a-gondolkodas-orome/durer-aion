@@ -122,7 +122,6 @@ export const TicTacToe = strategyGameFactory({
   metadata: gameList.TicTacToe,
   BoardClient,
   getPlayerStepDescription,
-  generateStartBoard: generateEmptyTicTacToeBoard,
   moves,
-  aiBotStrategy
+  variants: [{ botStrategy: aiBotStrategy, generateStartBoard: generateEmptyTicTacToeBoard }]
 });

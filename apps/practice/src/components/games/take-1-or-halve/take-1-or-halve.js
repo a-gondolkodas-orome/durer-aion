@@ -105,7 +105,6 @@ export const Take1OrHalve = strategyGameFactory({
   metadata: gameList.Take1OrHalve,
   BoardClient,
   getPlayerStepDescription,
-  generateStartBoard: () => random(20, 27),
-  aiBotStrategy,
-  moves
+  moves,
+  variants: [{ botStrategy: aiBotStrategy, generateStartBoard: () => random(20, 27) }]
 });

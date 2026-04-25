@@ -12,14 +12,29 @@ export const GameSidebar = ({
   roleLabels,
   stepDescription,
   ctx,
-  moves
+  moves,
+  variants,
+  selectedVariantIndex
 }) => {
   const { t } = useTranslation();
   const isNewGameAllowed = ctx.phase !== 'play' || ctx.isClientMoveAllowed;
+  const activeVariantHasBotStrategy = !!variants.find(v => v.originalIndex === selectedVariantIndex)?.botStrategy;
 
   return (
     <div className="p-2 flex flex-col grow shrink-0 basis-64 gap-3">
-      <ModeSelector isHumanVsHumanGame={ctx.isHumanVsHumanGame} onSwitchMode={moves.switchMode} />
+      <ModeSelector
+        isHumanVsHumanGame={ctx.isHumanVsHumanGame}
+        onSwitchMode={moves.switchMode}
+        disabled={!isNewGameAllowed}
+      />
+      {variants.length > 1 && (
+        <DifficultySelector
+          variants={variants}
+          selectedIndex={selectedVariantIndex}
+          onSelect={moves.setDifficulty}
+          disabled={!isNewGameAllowed}
+        />
+      )}
 
       <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 flex flex-col gap-3">
         <p className="text-center font-bold text-lg">
@@ -50,6 +65,7 @@ export const GameSidebar = ({
             : <RoleSelector
                 roleLabels={roleLabels}
                 onRoleSelection={moves.startGame}
+                disabled={!activeVariantHasBotStrategy}
               />
         )}
       </div>
@@ -187,7 +203,7 @@ export const GameEndDialog = ({
   );
 };
 
-const RoleSelector = ({ roleLabels, onRoleSelection }) => {
+const RoleSelector = ({ roleLabels, onRoleSelection, disabled }) => {
   const { t } = useTranslation();
   return <span className="basis-24 flex flex-col gap-2">
     {[
@@ -198,7 +214,9 @@ const RoleSelector = ({ roleLabels, onRoleSelection }) => {
         key={i}
         data-testid={`role-btn-${i}`}
         className="rounded-lg py-2 px-4 w-full text-center font-semibold
-          bg-blue-500 hover:bg-blue-600 focus:bg-blue-600 text-white"
+          bg-blue-500 hover:bg-blue-600 focus:bg-blue-600 text-white
+          disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-blue-500 disabled:focus:bg-blue-500"
+        disabled={disabled}
         onClick={() => onRoleSelection(i)}
       >
         {t(roleLabels ? roleLabels[i] : defaultLabel)}
@@ -256,12 +274,51 @@ const Spinner = () => (
   <div className="animate-spin h-8 w-8 border-t-blue-600 rounded-full border-4"></div>
 );
 
-const ModeSelector = ({ isHumanVsHumanGame, onSwitchMode }) => {
+const DifficultySelector = ({ variants, selectedIndex, onSelect, disabled: fieldsetDisabled }) => {
   const { t } = useTranslation();
-  const labelClass = (active) => `grow py-1 px-2 text-center cursor-pointer
+  const labelClass = (active, variantDisabled) => `min-w-0 grow py-1 px-2 text-center
+    ${active && !variantDisabled
+      ? `bg-blue-500 text-white font-semibold ${fieldsetDisabled ? 'cursor-not-allowed' : 'cursor-pointer'}`
+      : variantDisabled || fieldsetDisabled
+        ? 'opacity-40 cursor-not-allowed bg-slate-100 text-slate-600'
+        : 'bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer'}`;
+  return (
+    <fieldset className="overflow-hidden">
+      <legend className="text-xs text-slate-500 mb-1.5">
+        {t({ hu: 'Nehézség', en: 'Difficulty' })}
+      </legend>
+      <div className={`flex rounded-lg overflow-hidden border border-slate-300 text-sm
+        has-focus-visible:ring-2 has-focus-visible:ring-red-400 has-focus-visible:ring-offset-1`}>
+        {variants.map(v => (
+          <label
+            key={v.originalIndex}
+            className={labelClass(v.originalIndex === selectedIndex, v.disabled)}
+            title={v.disabled ? t({ hu: 'Nincs gépi stratégia megadva', en: 'No bot strategy defined' }) : undefined}
+          >
+            <input
+              type="radio"
+              name="difficulty"
+              className="sr-only"
+              checked={v.originalIndex === selectedIndex}
+              onChange={() => onSelect(v.originalIndex)}
+              disabled={v.disabled || fieldsetDisabled}
+            />
+            {t(v.label ?? { hu: `${v.originalIndex + 1}. szint`, en: `Level ${v.originalIndex + 1}` })}
+          </label>
+        ))}
+      </div>
+    </fieldset>
+  );
+};
+
+const ModeSelector = ({ isHumanVsHumanGame, onSwitchMode, disabled }) => {
+  const { t } = useTranslation();
+  const labelClass = (active) => `grow py-1 px-2 text-center
     ${active
-      ? 'bg-blue-500 text-white font-semibold'
-      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`;
+      ? `bg-blue-500 text-white font-semibold ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`
+      : disabled
+        ? 'opacity-40 cursor-not-allowed bg-slate-100 text-slate-600'
+        : 'bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer'}`;
   return (
     <fieldset>
       <legend className="text-xs text-slate-500 mb-1.5">
@@ -277,6 +334,7 @@ const ModeSelector = ({ isHumanVsHumanGame, onSwitchMode }) => {
             data-testid="mode-vsComputer"
             checked={!isHumanVsHumanGame}
             onChange={() => onSwitchMode('vsComputer')}
+            disabled={disabled}
           />
           🤖 {t({ hu: 'Gép ellen', en: 'vs Computer' })}
         </label>
@@ -288,6 +346,7 @@ const ModeSelector = ({ isHumanVsHumanGame, onSwitchMode }) => {
             data-testid="mode-vsHuman"
             checked={isHumanVsHumanGame}
             onChange={() => onSwitchMode('vsHuman')}
+            disabled={disabled}
           />
           🤝 {t({ hu: '2 játékos', en: '2 players' })}
         </label>

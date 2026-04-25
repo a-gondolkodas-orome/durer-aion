@@ -170,7 +170,6 @@ export const CubeColoring = strategyGameFactory({
     hu: 'Válassz színt, majd színezz meg egy csúcsot!',
     en: 'Choose a colour, then colour a vertex.'
   }),
-  generateStartBoard,
   moves,
-  aiBotStrategy
+  variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
 });

@@ -1,7 +1,90 @@
 import React from 'react';
 import { render, fireEvent, act } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
-import { strategyGameFactory } from './strategy-game';
+import { strategyGameFactory, resolveVariants } from './strategy-game';
+
+const makeVariant = (overrides = {}) => ({
+  generateStartBoard: () => [],
+  botStrategy: () => {},
+  ...overrides
+});
+
+describe('resolveVariants', () => {
+  it('throws when variants is empty', () => {
+    expect(() => resolveVariants([])).toThrow('variants must be a non-empty array');
+  });
+
+  it('throws when variants is missing', () => {
+    expect(() => resolveVariants(undefined)).toThrow('variants must be a non-empty array');
+  });
+
+  it('throws when multiple variants have no isDefault', () => {
+    expect(() => resolveVariants([makeVariant(), makeVariant()]))
+      .toThrow('exactly one variant must have isDefault: true');
+  });
+
+  it('throws when multiple variants have more than one isDefault', () => {
+    expect(() => resolveVariants([makeVariant({ isDefault: true }), makeVariant({ isDefault: true })]))
+      .toThrow('exactly one variant must have isDefault: true');
+  });
+
+  it('throws when the default variant has no generateStartBoard', () => {
+    expect(() => resolveVariants([{ botStrategy: () => {} }]))
+      .toThrow('the default variant must define generateStartBoard');
+  });
+
+  it('uses the single variant as default without requiring isDefault', () => {
+    const generateStartBoard = () => [];
+    const { defaultVariantIndex } = resolveVariants([makeVariant({ generateStartBoard })]);
+    expect(defaultVariantIndex).toBe(0);
+  });
+
+  it('picks the variant marked isDefault as the default', () => {
+    const generateStartBoard = () => [];
+    const variants = [makeVariant(), makeVariant({ isDefault: true, generateStartBoard })];
+    const { defaultVariantIndex, defaultVariant } = resolveVariants(variants);
+    expect(defaultVariantIndex).toBe(1);
+    expect(defaultVariant.generateStartBoard).toBe(generateStartBoard);
+  });
+
+  it('fills missing botStrategy from the default variant', () => {
+    const defaultBot = () => {};
+    const variants = [
+      makeVariant({ isDefault: true, botStrategy: defaultBot }),
+      makeVariant({ botStrategy: undefined })
+    ];
+    const { resolvedVariants } = resolveVariants(variants);
+    expect(resolvedVariants[1].botStrategy).toBe(defaultBot);
+  });
+
+  it('falls back to first available botStrategy when default has none', () => {
+    const otherBot = () => {};
+    const variants = [
+      makeVariant({ isDefault: true, botStrategy: undefined }),
+      makeVariant({ botStrategy: otherBot })
+    ];
+    const { resolvedVariants } = resolveVariants(variants);
+    expect(resolvedVariants[0].botStrategy).toBe(otherBot);
+    expect(resolvedVariants[1].botStrategy).toBe(otherBot);
+  });
+
+  it('keeps own botStrategy when defined', () => {
+    const ownBot = () => {};
+    const defaultBot = () => {};
+    const variants = [
+      makeVariant({ isDefault: true, botStrategy: defaultBot }),
+      makeVariant({ botStrategy: ownBot })
+    ];
+    const { resolvedVariants } = resolveVariants(variants);
+    expect(resolvedVariants[1].botStrategy).toBe(ownBot);
+  });
+
+  it('leaves botStrategy undefined when no variant has one', () => {
+    const variants = [makeVariant({ botStrategy: undefined })];
+    const { resolvedVariants } = resolveVariants(variants);
+    expect(resolvedVariants[0].botStrategy).toBeUndefined();
+  });
+});
 
 const MinimalBoardClient = ({ board, moves }) => (
   <button data-testid="move-btn" onClick={() => moves.mainMove(board)}>move</button>
@@ -11,9 +94,8 @@ const minimalConfig = (moves, endOfTurnMove) => ({
   rule: <></>,
   metadata: { name: 'Test' },
   BoardClient: MinimalBoardClient,
-  generateStartBoard: () => ['initial'],
   moves,
-  aiBotStrategy: () => {},
+  variants: [{ botStrategy: () => {}, generateStartBoard: () => ['initial'] }],
   getPlayerStepDescription: () => '',
   endOfTurnMove
 });
@@ -31,18 +113,20 @@ const CtxAwareBoardClient = ({ board, ctx, moves }) => (
   >move</button>
 );
 
-const ctxAwareConfig = (overrides = {}) => ({
-  rule: <></>,
-  metadata: { name: 'Test' },
-  BoardClient: CtxAwareBoardClient,
-  generateStartBoard: () => ['initial'],
-  moves: {
-    mainMove: (board, { events }) => { events.endTurn(); return { nextBoard: board }; }
-  },
-  aiBotStrategy: () => {},
-  getPlayerStepDescription: () => '',
-  ...overrides
-});
+const ctxAwareConfig = (overrides = {}) => {
+  const { botStrategy, ...rest } = overrides;
+  return {
+    rule: <></>,
+    metadata: { name: 'Test' },
+    BoardClient: CtxAwareBoardClient,
+    moves: {
+      mainMove: (board, { events }) => { events.endTurn(); return { nextBoard: board }; }
+    },
+    variants: [{ botStrategy: botStrategy ?? (() => {}), generateStartBoard: () => ['initial'] }],
+    getPlayerStepDescription: () => '',
+    ...rest
+  };
+};
 
 describe('isClientMoveAllowed', () => {
   it('allows both players to move in vsHuman mode', () => {
@@ -59,32 +143,32 @@ describe('isClientMoveAllowed', () => {
     const { getByTestId } = renderGame(ctxAwareConfig());
     fireEvent.click(getByTestId('role-btn-0'));
     expect(getByTestId('move-btn').disabled).toBe(false);
-    fireEvent.click(getByTestId('move-btn')); // endTurn → AI's turn
+    fireEvent.click(getByTestId('move-btn')); // endTurn → bot's turn
     expect(getByTestId('move-btn').disabled).toBe(true);
   });
 });
 
-describe('AI behavior by mode', () => {
+describe('Bot behavior by mode', () => {
   beforeEach(() => { vi.useFakeTimers(); });
   afterEach(() => { vi.useRealTimers(); });
 
-  it('does not call aiBotStrategy in vsHuman mode', () => {
-    const aiBotStrategy = vi.fn();
-    const { getByTestId } = renderGame(ctxAwareConfig({ aiBotStrategy }));
+  it('does not call botStrategy in vsHuman mode', () => {
+    const botStrategy = vi.fn();
+    const { getByTestId } = renderGame(ctxAwareConfig({ botStrategy }));
     fireEvent.click(getByTestId('mode-vsHuman'));
     fireEvent.click(getByTestId('start-hh-game'));
     fireEvent.click(getByTestId('move-btn')); // endTurn → currentPlayer 1
     act(() => { vi.advanceTimersByTime(1500); });
-    expect(aiBotStrategy).not.toHaveBeenCalled();
+    expect(botStrategy).not.toHaveBeenCalled();
   });
 
-  it('calls aiBotStrategy when it becomes the computer turn', () => {
-    const aiBotStrategy = vi.fn();
-    const { getByTestId } = renderGame(ctxAwareConfig({ aiBotStrategy }));
+  it('calls botStrategy when it becomes the computer turn', () => {
+    const botStrategy = vi.fn();
+    const { getByTestId } = renderGame(ctxAwareConfig({ botStrategy }));
     fireEvent.click(getByTestId('role-btn-0'));
-    fireEvent.click(getByTestId('move-btn')); // endTurn → AI's turn
+    fireEvent.click(getByTestId('move-btn')); // endTurn → bot's turn
     act(() => { vi.advanceTimersByTime(1500); });
-    expect(aiBotStrategy).toHaveBeenCalledOnce();
+    expect(botStrategy).toHaveBeenCalledOnce();
   });
 });
 

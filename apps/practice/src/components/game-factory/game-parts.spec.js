@@ -52,7 +52,9 @@ describe('getCtaText', () => {
   });
 });
 
-const renderSidebar = (ctxOverrides = {}, movesOverrides = {}) => {
+const defaultVariants = [{ botStrategy: () => {}, generateStartBoard: () => {}, originalIndex: 0, disabled: false }];
+
+const renderSidebar = (ctxOverrides = {}, movesOverrides = {}, variants = defaultVariants) => {
   const ctx = {
     isHumanVsHumanGame: false,
     phase: 'roleSelection',
@@ -68,11 +70,19 @@ const renderSidebar = (ctxOverrides = {}, movesOverrides = {}) => {
     startGame: vi.fn(),
     startNewGame: vi.fn(),
     setPlayerNames: vi.fn(),
+    setDifficulty: vi.fn(),
     ...movesOverrides
   };
   const { container } = render(
     <MemoryRouter>
-      <GameSidebar roleLabels={undefined} stepDescription="" ctx={ctx} moves={moves} />
+      <GameSidebar
+        roleLabels={undefined}
+        stepDescription=""
+        ctx={ctx}
+        moves={moves}
+        variants={variants}
+        selectedVariantIndex={0}
+      />
     </MemoryRouter>
   );
   return { container, moves };

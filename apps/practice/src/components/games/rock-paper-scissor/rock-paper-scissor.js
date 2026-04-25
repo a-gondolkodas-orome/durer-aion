@@ -106,7 +106,11 @@ export const RockPaperScissor = strategyGameFactory({
     hu: 'Távolíts el egy kártyát az ellenfél elől.',
     en: 'Remove a card from your opponent.'
   }),
-  generateStartBoard: () => [['rock', 'paper', 'scissor'], ['rock', 'paper', 'scissor']],
   moves,
-  aiBotStrategy
+  variants: [
+    {
+      botStrategy: aiBotStrategy,
+      generateStartBoard: () => [['rock', 'paper', 'scissor'], ['rock', 'paper', 'scissor']]
+    }
+  ]
 });

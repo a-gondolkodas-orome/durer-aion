@@ -121,7 +121,6 @@ export const ChessBishops = strategyGameFactory({
     hu: 'Kattints egy mezőre, amit nem üt egyik futó sem.',
     en: 'Click on a square that is not attacked by any bishop.'
   }),
-  generateStartBoard,
   moves,
-  aiBotStrategy
+  variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
 });

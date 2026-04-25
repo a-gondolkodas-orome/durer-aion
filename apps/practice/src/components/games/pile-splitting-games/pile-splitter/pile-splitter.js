@@ -125,7 +125,6 @@ export const PileSplitter = strategyGameFactory({
   metadata: gameList.PileSplitter,
   BoardClient,
   getPlayerStepDescription,
-  generateStartBoard: () => ([random(3, 10), random(3, 10)]),
   moves,
-  aiBotStrategy
+  variants: [{ botStrategy: aiBotStrategy, generateStartBoard: () => ([random(3, 10), random(3, 10)]) }]
 });

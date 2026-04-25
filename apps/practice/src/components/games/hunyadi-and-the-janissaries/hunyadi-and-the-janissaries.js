@@ -142,8 +142,7 @@ export const HunyadiAndTheJanissaries = strategyGameFactory({
   ],
   BoardClient,
   getPlayerStepDescription,
-  generateStartBoard,
   moves,
-  aiBotStrategy,
-  endOfTurnMove: 'stepUp'
+  endOfTurnMove: 'stepUp',
+  variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
 });

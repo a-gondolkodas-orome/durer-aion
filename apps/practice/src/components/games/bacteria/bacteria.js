@@ -276,7 +276,6 @@ export const Bacteria = strategyGameFactory({
   ],
   BoardClient,
   getPlayerStepDescription,
-  generateStartBoard,
-  aiBotStrategy,
-  moves
+  moves,
+  variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
 });

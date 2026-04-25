@@ -122,7 +122,6 @@ export const BankRobbers = strategyGameFactory({
     hu: 'Válassz egy kirabolható bankot.',
     en: 'Choose a bank that can be robbed.'
   }),
-  generateStartBoard,
   moves,
-  aiBotStrategy
+  variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
 });

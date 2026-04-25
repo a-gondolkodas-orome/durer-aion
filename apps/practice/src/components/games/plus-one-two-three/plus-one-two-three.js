@@ -87,7 +87,6 @@ export const PlusOneTwoThree = strategyGameFactory({
     hu: 'Válaszd ki, hogy melyik számra lépsz.',
     en: 'Choose which number to step to.'
   }),
-  generateStartBoard: () => 0,
-  aiBotStrategy,
-  moves
+  moves,
+  variants: [{ botStrategy: aiBotStrategy, generateStartBoard: () => 0 }]
 });

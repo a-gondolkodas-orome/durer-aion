@@ -5,20 +5,44 @@ import {
 import { partial, mapValues, wrap, _ } from 'lodash';
 import { useTranslation } from '../language/translate';
 
+export const resolveVariants = (variants) => {
+  if (!variants || variants.length === 0) {
+    throw new Error('strategyGameFactory: variants must be a non-empty array');
+  }
+  if (variants.length > 1 && variants.filter(v => v.isDefault).length !== 1) {
+    throw new Error('strategyGameFactory: exactly one variant must have isDefault: true');
+  }
+  const defaultVariantIndex = Math.max(variants.findIndex(v => v.isDefault), 0);
+  const defaultVariant = variants[defaultVariantIndex];
+  if (!defaultVariant.generateStartBoard) {
+    throw new Error('strategyGameFactory: the default variant must define generateStartBoard');
+  }
+  const fallbackBotStrategy = defaultVariant.botStrategy
+    ?? variants.find(v => v.botStrategy)?.botStrategy;
+  const resolvedVariants = variants.map(v => ({ ...v, botStrategy: v.botStrategy ?? fallbackBotStrategy }));
+  return { defaultVariantIndex, defaultVariant, resolvedVariants };
+};
+
 export const strategyGameFactory = ({
   rule,
   metadata,
   roleLabels,
   BoardClient,
-  generateStartBoard,
   moves,
-  aiBotStrategy,
+  variants,
   getPlayerStepDescription,
   endOfTurnMove
 }) => {
+  const { defaultVariantIndex, defaultVariant, resolvedVariants } = resolveVariants(variants);
+
   return () => {
     const { t } = useTranslation();
-    const [board, setBoard] = useState(generateStartBoard());
+    const [selectedVariantIndex, setSelectedVariantIndex] = useState(defaultVariantIndex);
+    const activeVariant = resolvedVariants[selectedVariantIndex] ?? defaultVariant;
+    const defaultGenerateStartBoard = defaultVariant.generateStartBoard;
+    const activeGenerateStartBoard = activeVariant.generateStartBoard ?? defaultGenerateStartBoard;
+
+    const [board, setBoard] = useState(activeGenerateStartBoard());
     const [phase, setPhase] = useState('roleSelection');
     const [chosenRoleIndex, setChosenRoleIndex] = useState(null);
     const [currentPlayer, setCurrentPlayer] = useState(null);
@@ -33,7 +57,7 @@ export const strategyGameFactory = ({
 
     useEffect(() => {
       if (!isHumanVsHumanGame && phase === 'play' && currentPlayer === (1 - chosenRoleIndex)) {
-        doAiTurn();
+        doBotTurn();
       }
     }, [currentPlayer]);
 
@@ -50,8 +74,8 @@ export const strategyGameFactory = ({
       return moveResult;
     };
 
-    const resetGameState = () => {
-      setBoard(generateStartBoard());
+    const resetGameState = (generateBoard = activeGenerateStartBoard) => {
+      setBoard(generateBoard());
       setPhase('roleSelection');
       setChosenRoleIndex(null);
       setCurrentPlayer(null);
@@ -67,7 +91,18 @@ export const strategyGameFactory = ({
 
     const switchMode = (newMode) => {
       setMode(newMode);
-      resetGameState();
+      if (newMode === 'vsHuman' && !activeVariant.generateStartBoard) {
+        setSelectedVariantIndex(defaultVariantIndex);
+        resetGameState(defaultVariant.generateStartBoard);
+      } else {
+        resetGameState();
+      }
+    };
+
+    const setDifficulty = (index) => {
+      setSelectedVariantIndex(index);
+      const newVariant = resolvedVariants[index] ?? defaultVariant;
+      resetGameState(newVariant.generateStartBoard ?? defaultGenerateStartBoard);
     };
 
     const endGame = ({ winnerIndex } = { winnerIndex: null }) => {
@@ -119,8 +154,8 @@ export const strategyGameFactory = ({
 
     /*
     Only second argument of move's is fixed here (_ special syntax). board
-    (first argument) needs to be handled by ai strategy as it may change between
-    moves, but for AI strategy there is no re-render between moves. In some
+    (first argument) needs to be handled by the bot as it may change between
+    moves, but for the bot there is no re-render between moves. In some
     cases there are multiple moves following single user event, in that case,
     there is also no re-render on client side between moves.
     */
@@ -129,12 +164,18 @@ export const strategyGameFactory = ({
       f => wrap(partial(f, _, { ctx, events }), moveWrapper)
     );
 
-    const doAiTurn = () => {
+    const doBotTurn = () => {
+      const { botStrategy } = activeVariant;
+      if (!botStrategy) throw new Error('strategyGameFactory: no botStrategy available for vsComputer mode');
       const time = Math.floor(Math.random() * 500 + 1000);
       setTimeout(() => {
-        aiBotStrategy({ board, ctx, moves: wrappedMoves });
+        botStrategy({ board, ctx, moves: wrappedMoves });
       }, time);
     };
+
+    const visibleVariants = resolvedVariants
+      .map((v, i) => ({ ...v, originalIndex: i, disabled: !isHumanVsHumanGame && !v.botStrategy }))
+      .filter(v => !isHumanVsHumanGame || !!v.generateStartBoard);
 
     return (
     <main className="flex flex-col p-2 min-h-screen">
@@ -154,7 +195,9 @@ export const strategyGameFactory = ({
               roleLabels={roleLabels}
               stepDescription={t(getPlayerStepDescription({ board, ctx }))}
               ctx={ctx}
-              moves={{ startGame, startNewGame, switchMode, setPlayerNames }}
+              moves={{ startGame, startNewGame, switchMode, setPlayerNames, setDifficulty }}
+              variants={visibleVariants}
+              selectedVariantIndex={selectedVariantIndex}
             />
           </div>
         </div>

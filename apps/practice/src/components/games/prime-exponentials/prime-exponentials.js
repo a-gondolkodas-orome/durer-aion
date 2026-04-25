@@ -180,7 +180,6 @@ export const PrimeExponentials = strategyGameFactory({
   metadata: gameList.PrimeExponentials,
   BoardClient,
   getPlayerStepDescription,
-  generateStartBoard,
   moves,
-  aiBotStrategy
+  variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
 });

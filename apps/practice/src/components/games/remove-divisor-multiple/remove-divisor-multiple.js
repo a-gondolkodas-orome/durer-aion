@@ -143,7 +143,6 @@ export const RemoveDivisorMultiple = strategyGameFactory({
   metadata: gameList.RemoveDivisorMultiple,
   BoardClient,
   getPlayerStepDescription,
-  generateStartBoard,
-  aiBotStrategy,
-  moves
+  moves,
+  variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
 });

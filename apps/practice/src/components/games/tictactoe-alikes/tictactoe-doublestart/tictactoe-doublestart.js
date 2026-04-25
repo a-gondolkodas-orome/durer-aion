@@ -100,7 +100,6 @@ export const TicTacToeDoubleStart = strategyGameFactory({
   metadata: gameList.TicTacToeDoubleStart,
   BoardClient,
   getPlayerStepDescription,
-  generateStartBoard: generateEmptyTicTacToeBoard,
   moves,
-  aiBotStrategy
+  variants: [{ botStrategy: aiBotStrategy, generateStartBoard: generateEmptyTicTacToeBoard }]
 });

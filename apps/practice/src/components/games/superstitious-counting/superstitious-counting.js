@@ -106,7 +106,6 @@ export const SuperstitiousCounting = strategyGameFactory({
     hu: 'Kattints a számra ahova lépni szeretnél.',
     en: 'Click on a number to step onto it.'
   }),
-  generateStartBoard,
   moves,
-  aiBotStrategy
+  variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
 });

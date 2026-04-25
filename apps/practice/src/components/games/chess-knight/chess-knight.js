@@ -95,7 +95,6 @@ export const ChessKnight = strategyGameFactory({
     hu: 'Lépj egy szabad mezőre a huszárral.',
     en: 'Move the knight to a free square.'
   }),
-  generateStartBoard,
   moves,
-  aiBotStrategy
+  variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
 });

@@ -139,7 +139,6 @@ export const AddReduceDouble = strategyGameFactory({
     hu: 'Kattints egy korongra, hogy jelezd, hány korongot szeretnél elvenni a kupacból.',
     en: 'Click a piece to indicate how many you want to remove.'
   }),
-  generateStartBoard: () => ([random(3, 10), random(3, 10)]),
   moves,
-  aiBotStrategy
+  variants: [{ botStrategy: aiBotStrategy, generateStartBoard: () => ([random(3, 10), random(3, 10)]) }]
 });

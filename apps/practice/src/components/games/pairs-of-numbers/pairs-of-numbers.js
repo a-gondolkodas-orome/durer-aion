@@ -137,7 +137,6 @@ export const PairsOfNumbers = strategyGameFactory({
     hu: 'Növeld a második számot eggyel vagy vond ki az elsőből.',
     en: 'Increase the second number by 1 or subtract it from the first.'
   }),
-  generateStartBoard,
-  aiBotStrategy,
-  moves
+  moves,
+  variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
 });

@@ -115,7 +115,6 @@ export const SharkChase5 = strategyGameFactory({
   ],
   BoardClient,
   getPlayerStepDescription,
-  generateStartBoard,
   moves,
-  aiBotStrategy
+  variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
 });

@@ -144,9 +144,8 @@ export const PolicemanthiefA = strategyGameFactory({
       };
     }
   },
-  generateStartBoard: generateStartBoardA,
-  aiBotStrategy,
-  moves
+  moves,
+  variants: [{ botStrategy: aiBotStrategy, generateStartBoard: generateStartBoardA }]
 });
 
 export const PolicemanthiefB = strategyGameFactory({
@@ -171,7 +170,6 @@ export const PolicemanthiefB = strategyGameFactory({
       };
     }
   },
-  generateStartBoard: generateStartBoardB,
-  aiBotStrategy,
-  moves
+  moves,
+  variants: [{ botStrategy: aiBotStrategy, generateStartBoard: generateStartBoardB }]
 });

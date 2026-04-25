@@ -228,9 +228,8 @@ export const SixDiscs = strategyGameFactory({
   metadata: gameList.SixDiscs,
   BoardClient: gameBoardFactory(6),
   getPlayerStepDescription,
-  generateStartBoard: generateStartBoard(6),
-  aiBotStrategy,
-  moves
+  moves,
+  variants: [{ botStrategy: aiBotStrategy, generateStartBoard: generateStartBoard(6) }]
 });
 
 export const TenDiscs = strategyGameFactory({
@@ -238,7 +237,6 @@ export const TenDiscs = strategyGameFactory({
   metadata: gameList.TenDiscs,
   BoardClient: gameBoardFactory(10),
   getPlayerStepDescription,
-  generateStartBoard: generateStartBoard(10),
-  aiBotStrategy,
-  moves
+  moves,
+  variants: [{ botStrategy: aiBotStrategy, generateStartBoard: generateStartBoard(10) }]
 });

@@ -98,7 +98,6 @@ export const ChessRook = strategyGameFactory({
     hu: 'Kattints egy szabad mezőre a bástyával egy sorban vagy oszlopban.',
     en: 'Click on a free square in the same row or column as the rook.'
   }),
-  generateStartBoard,
   moves,
-  aiBotStrategy
+  variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
 });

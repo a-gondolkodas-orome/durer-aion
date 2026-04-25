@@ -112,7 +112,7 @@ const BoardClient = ({ board, ctx, moves }) => {
   </>
 };
 
-const aiBotStrategy = ({ board, moves }) => {
+const botStrategy = ({ board, moves }) => {
   const optimalStep = board % 3 === 0 ? 1 : (3 - board % 3)
   moves.addNumber(board, optimalStep);
 };
@@ -124,9 +124,8 @@ export const PlusOneTwo = strategyGameFactory({
   BoardClient,
   // a function returning a string, receives optional { board, ctx }
   getPlayerStepDescription: () => 'Válaszd ki, hogy hánnyal növelsz.',
-  generateStartBoard: () => 0,
-  aiBotStrategy,
-  moves
+  moves,
+  variants: [{ botStrategy, generateStartBoard: () => 0 }]
 });
 ```
 </details>
@@ -143,7 +142,7 @@ each game, that the next player needs to know. It can be also convenient to
 store temporary state during a turn with multiple moves. Common state, managed
 by the framework is stored in `ctx` (such as `currentPlayer`).
 
-Related factory param: `generateStartBoard`.
+See `generateStartBoard()` inside each variant.
 
 ### possible game moves
 
@@ -180,7 +179,7 @@ Additional state variables may be created within the `BoardClient` component
 that is relevant only during a turn, not between turns, such as reacting to
 hover events.
 
-### (AI) bot strategy
+### Bot strategy
 
 Given `board` and `ctx` what move(s) should the bot make?
 
@@ -218,14 +217,14 @@ framework.
 - can the player win with a not-winning strategy?
 - never modify react state (e.g. the board) in place
 - the game should work both in `vsComputer` and `vsHuman` mode
-- is it easy to guess the winning strategy from watching the AI play?
+- is it easy to guess the winning strategy from watching the bot play?
 - is the game (mostly) mobile-friendly?
 - is the game usable only with keyboard (without a mouse)?
 - is it clear what the player should do next?
 - can the player undo their last interaction in turns with multiple moves?
 - check for console errors/warnings as well, i.e. missing keys on react
   components
-- pretend AI is thinking in turns with multiple moves (for one move it is
+- pretend the bot is thinking in turns with multiple moves (for one move it is
   handled by framework)
 
 ## Internationalisation (i18n)

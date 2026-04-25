@@ -201,7 +201,6 @@ export const StonesRemoveOneNotTwiceFromLeft = strategyGameFactory({
   metadata: gameList.StonesRemoveOneNotTwiceFromLeft,
   BoardClient,
   getPlayerStepDescription,
-  generateStartBoard,
-  aiBotStrategy,
-  moves
+  moves,
+  variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
 });

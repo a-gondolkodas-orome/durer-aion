@@ -135,7 +135,6 @@ export const TriangularGridRopes = strategyGameFactory({
     hu: 'Kattints két oszlopra, amik között kötelet szeretnél kifeszíteni.',
     en: 'Click two poles to connect them.'
   }),
-  generateStartBoard: () => [],
   moves,
-  aiBotStrategy
+  variants: [{ botStrategy: aiBotStrategy, generateStartBoard: () => [] }]
 });

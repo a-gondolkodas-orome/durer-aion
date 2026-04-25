@@ -45,7 +45,6 @@ export const Coin123 = strategyGameFactory({
   metadata: gameList.Coin123,
   BoardClient,
   getPlayerStepDescription,
-  generateStartBoard,
   moves,
-  aiBotStrategy
+  variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
 });

@@ -169,7 +169,6 @@ export const TriangleColoring = strategyGameFactory({
     hu: 'Kattints egy kis háromszögre.',
     en: 'Click on a small triangle.'
   }),
-  generateStartBoard: () => Array(16).fill(null),
-  aiBotStrategy,
-  moves
+  moves,
+  variants: [{ botStrategy: aiBotStrategy, generateStartBoard: () => Array(16).fill(null) }]
 });

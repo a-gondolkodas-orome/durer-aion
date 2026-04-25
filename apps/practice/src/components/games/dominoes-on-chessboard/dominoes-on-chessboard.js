@@ -253,7 +253,6 @@ export const DominoesOnChessboard = strategyGameFactory({
     hu: 'Kattints egy üres mezőre, majd egy szomszédjára, hogy lehelyezz egy dominót.',
     en: 'Click an empty square, then a neighbour of it, to place a domino.'
   }),
-  generateStartBoard: () => [],
   moves,
-  aiBotStrategy
+  variants: [{ botStrategy: aiBotStrategy, generateStartBoard: () => [] }]
 });

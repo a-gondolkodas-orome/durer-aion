@@ -97,9 +97,8 @@ const chessDucksGameFactory = ({ ROWS, COLS }, metadata) => {
       hu: 'Kattints egy mezőre, amit nem üt egyik kacsa sem.',
       en: 'Click on a square that is not attacked by any duck.'
     }),
-    generateStartBoard,
-    aiBotStrategy,
-    moves
+    moves,
+    variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
   });
 };
 
