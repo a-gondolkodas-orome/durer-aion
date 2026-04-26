@@ -13,10 +13,6 @@ export const DEFAULT_PLAYER_NAMES = [
   { hu: '2. játékos', en: '2nd player' }
 ];
 
-const PLAYER_COLORS = [
-  { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-400' },
-  { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-400' }
-];
 
 export const GameSidebar = ({
   roleLabels,
@@ -376,14 +372,14 @@ const PlayerTurnPanel = ({ ctx }) => {
       {[0, 1].map(i => {
         const isActive = !isEnd && ctx.currentPlayer === i;
         const isWinner = isEnd && ctx.winnerIndex === i;
-        const colors = PLAYER_COLORS[i];
+        const highlighted = isActive || isWinner;
         return (
           <div
             key={i}
             className={`flex items-center gap-2 rounded-md px-3 py-2 border-l-4
-              ${isActive || isWinner ? `${colors.bg} ${colors.border}` : 'bg-white border-slate-200'}`}
+              ${highlighted ? 'bg-blue-50 border-blue-400' : 'bg-white border-slate-200'}`}
           >
-            <span className={`flex-1 ${isActive || isWinner ? `font-bold ${colors.text}` : 'text-slate-400'}`}>
+            <span className={`flex-1 ${highlighted ? 'font-bold text-blue-700' : 'text-slate-400'}`}>
               {playerName(i)}
             </span>
             {isWinner && <span>🏆</span>}
