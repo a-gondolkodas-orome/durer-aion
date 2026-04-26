@@ -106,15 +106,19 @@ const getPlayerStepDescription = ({ board, ctx }) => {
   };
 };
 
+const { name, title, credit } = gameList.SharkChase5;
 export const SharkChase5 = strategyGameFactory({
-  rule,
-  metadata: gameList.SharkChase5,
-  roleLabels: [
-    { hu: 'Kutató', en: "Researcher" },
-    { hu: 'Cápa', en: "Shark" }
-  ],
+  presentation: {
+    rule,
+    title: title || name,
+    credit,
+    roleLabels: [
+      { hu: 'Kutató', en: "Researcher" },
+      { hu: 'Cápa', en: "Shark" }
+    ],
+    getPlayerStepDescription
+  },
   BoardClient,
-  getPlayerStepDescription,
-  moves,
+  gameplay: { moves },
   variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
 });

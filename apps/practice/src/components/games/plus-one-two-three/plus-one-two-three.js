@@ -79,14 +79,18 @@ const rule = {
   </>
 };
 
+const { name, title, credit } = gameList.PlusOneTwoThree;
 export const PlusOneTwoThree = strategyGameFactory({
-  rule,
-  metadata: gameList.PlusOneTwoThree,
+  presentation: {
+    rule,
+    title: title || name,
+    credit,
+    getPlayerStepDescription: () => ({
+      hu: 'Válaszd ki, hogy melyik számra lépsz.',
+      en: 'Choose which number to step to.'
+    })
+  },
   BoardClient,
-  getPlayerStepDescription: () => ({
-    hu: 'Válaszd ki, hogy melyik számra lépsz.',
-    en: 'Choose which number to step to.'
-  }),
-  moves,
+  gameplay: { moves },
   variants: [{ botStrategy: aiBotStrategy, generateStartBoard: () => 0 }]
 });

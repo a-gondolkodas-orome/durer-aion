@@ -122,54 +122,64 @@ const ruleB = {
   </>
 }
 
+const { name: nameA, title: titleA } = gameList.Policemanthief;
 export const PolicemanthiefA = strategyGameFactory({
-  rule: ruleA,
-  metadata: gameList.Policemanthief,
-  roleLabels: [
-    { hu: "Rendőrök", en: "Policemen" },
-    { hu: "Tolvaj", en: "Thief" }
-  ],
-  BoardClient,
-  getPlayerStepDescription: ({ board, ctx }) => {
-    if (ctx.currentPlayer === 0) {
-      return {
-        hu: `Kattints arra az útkereszteződésre, ahová a ` +
-          `${board.firstPolicemanMoved ? "zöld" : "kék"} rendőrrel lépni szeretnél.`,
-        en: `Click the intersection you want to move the ${board.firstPolicemanMoved ? "green" : "blue"} policeman to.`
-      };
-    } else {
-      return {
-        hu: "Kattints arra az útkereszteződésre, ahová a tolvajjal lépni szeretnél.",
-        en: "Click the intersection you want to move the thief to."
-      };
+  presentation: {
+    rule: ruleA,
+    title: titleA || nameA,
+    credit: gameList.Policemanthief.credit,
+    roleLabels: [
+      { hu: "Rendőrök", en: "Policemen" },
+      { hu: "Tolvaj", en: "Thief" }
+    ],
+    getPlayerStepDescription: ({ board, ctx }) => {
+      if (ctx.currentPlayer === 0) {
+        return {
+          hu: `Kattints arra az útkereszteződésre, ahová a ` +
+            `${board.firstPolicemanMoved ? "zöld" : "kék"} rendőrrel lépni szeretnél.`,
+          en: `Click the intersection you want to move the ` +
+            `${board.firstPolicemanMoved ? "green" : "blue"} policeman to.`
+        };
+      } else {
+        return {
+          hu: "Kattints arra az útkereszteződésre, ahová a tolvajjal lépni szeretnél.",
+          en: "Click the intersection you want to move the thief to."
+        };
+      }
     }
   },
-  moves,
+  BoardClient,
+  gameplay: { moves },
   variants: [{ botStrategy: aiBotStrategy, generateStartBoard: generateStartBoardA }]
 });
 
+const { name: nameB, title: titleB } = gameList.PolicemanthiefB;
 export const PolicemanthiefB = strategyGameFactory({
-  rule: ruleB,
-  metadata: gameList.PolicemanthiefB,
-  roleLabels: [
-    { hu: "Rendőrök", en: "Policemen" },
-    { hu: "Tolvaj", en: "Thief" }
-  ],
-  BoardClient,
-  getPlayerStepDescription: ({ board, ctx }) => {
-    if (ctx.currentPlayer === 0) {
-      return {
-        hu: `Kattints arra az útkereszteződésre, ahová a ` +
-          `${board.firstPolicemanMoved ? "zöld" : "kék"} rendőrrel lépni szeretnél.`,
-        en: `Click the intersection you want to move the ${board.firstPolicemanMoved ? "green" : "blue"} policeman to.`
-      };
-    } else {
-      return {
-        hu: "Kattints arra az útkereszteződésre, ahová a tolvajjal lépni szeretnél.",
-        en: "Click the intersection you want to move the thief to."
-      };
+  presentation: {
+    rule: ruleB,
+    title: titleB || nameB,
+    credit: gameList.PolicemanthiefB.credit,
+    roleLabels: [
+      { hu: "Rendőrök", en: "Policemen" },
+      { hu: "Tolvaj", en: "Thief" }
+    ],
+    getPlayerStepDescription: ({ board, ctx }) => {
+      if (ctx.currentPlayer === 0) {
+        return {
+          hu: `Kattints arra az útkereszteződésre, ahová a ` +
+            `${board.firstPolicemanMoved ? "zöld" : "kék"} rendőrrel lépni szeretnél.`,
+          en: `Click the intersection you want to move the ` +
+            `${board.firstPolicemanMoved ? "green" : "blue"} policeman to.`
+        };
+      } else {
+        return {
+          hu: "Kattints arra az útkereszteződésre, ahová a tolvajjal lépni szeretnél.",
+          en: "Click the intersection you want to move the thief to."
+        };
+      }
     }
   },
-  moves,
+  BoardClient,
+  gameplay: { moves },
   variants: [{ botStrategy: aiBotStrategy, generateStartBoard: generateStartBoardB }]
 });

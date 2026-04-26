@@ -102,15 +102,19 @@ const rule = {
   </>
 };
 
+const { name, title, credit } = gameList.ThievesMean;
 export const ThievesMean7 = strategyGameFactory({
-  rule,
-  metadata: gameList.ThievesMean,
+  presentation: {
+    rule,
+    title: title || name,
+    credit,
+    roleLabels: [
+      { hu: 'Nyomozó', en: "Sheriff" },
+      { hu: 'Tolvaj', en: "Thief" }
+    ],
+    getPlayerStepDescription: () => ({ hu: 'Válassz egy kártyát.', en: 'Pick a card.' })
+  },
   BoardClient,
-  getPlayerStepDescription: () => ({ hu: 'Válassz egy kártyát.', en: 'Pick a card.' }),
-  roleLabels: [
-    { hu: 'Nyomozó', en: "Sheriff" },
-    { hu: 'Tolvaj', en: "Thief" }
-  ],
-  moves,
+  gameplay: { moves },
   variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
 });

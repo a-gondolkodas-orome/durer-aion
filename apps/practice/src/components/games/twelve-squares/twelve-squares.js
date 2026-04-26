@@ -105,25 +105,29 @@ const rule = {
   </>
 };
 
+const { name, title, credit } = gameList.TwelveSquares;
 export const TwelveSquares = strategyGameFactory({
-  rule,
-  metadata: gameList.TwelveSquares,
+  presentation: {
+    rule,
+    title: title || name,
+    credit,
+    getPlayerStepDescription: ({ ctx: { currentPlayer } }) => currentPlayer === 0
+      ? {
+        hu: 'Kattints a mezőre ahova lépni szeretnél a bal oldali bábuval.',
+        en: 'Click the square you want to move to with the left piece.'
+      }
+      : {
+        hu: 'Kattints a mezőre ahova lépni szeretnél a jobb oldali bábuval.',
+        en: 'Click the square you want to move to with the right piece.'
+      }
+  },
   BoardClient,
-  getPlayerStepDescription: ({ ctx: { currentPlayer } }) => currentPlayer === 0
-    ? {
-      hu: 'Kattints a mezőre ahova lépni szeretnél a bal oldali bábuval.',
-      en: 'Click the square you want to move to with the left piece.'
-    }
-    : {
-      hu: 'Kattints a mezőre ahova lépni szeretnél a jobb oldali bábuval.',
-      en: 'Click the square you want to move to with the right piece.'
-    },
+  gameplay: { moves },
   variants: [
     {
       botStrategy: optimalBotStrategy,
       generateStartBoard: () => ({ left: 1, right: 12 }),
       isDefault: true
     }
-  ],
-  moves
+  ]
 });

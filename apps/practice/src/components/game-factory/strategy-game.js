@@ -24,15 +24,13 @@ export const resolveVariants = (variants) => {
 };
 
 export const strategyGameFactory = ({
-  rule,
-  metadata,
-  roleLabels,
+  presentation,
   BoardClient,
-  moves,
-  variants,
-  getPlayerStepDescription,
-  endOfTurnMove
+  gameplay,
+  variants
 }) => {
+  const { rule, title, credit, roleLabels, getPlayerStepDescription } = presentation;
+  const { moves, endOfTurnMove } = gameplay;
   const { defaultVariantIndex, defaultVariant, resolvedVariants } = resolveVariants(variants);
 
   return () => {
@@ -179,7 +177,7 @@ export const strategyGameFactory = ({
 
     return (
     <main className="flex flex-col p-2 min-h-screen">
-      <GameHeader title={t(metadata.title || metadata.name)} />
+      <GameHeader title={t(title)} />
       <div className="flex justify-center grow">
         <div className="max-w-[100ch] w-full">
           <GameRule ruleDescription={t(rule)} />
@@ -202,7 +200,7 @@ export const strategyGameFactory = ({
           </div>
         </div>
       </div>
-      <GameFooter credit={metadata.credit}/>
+      <GameFooter credit={credit}/>
       <GameEndDialog
         isOpen={isGameEndDialogOpen}
         setIsOpen={setIsGameEndDialogOpen}

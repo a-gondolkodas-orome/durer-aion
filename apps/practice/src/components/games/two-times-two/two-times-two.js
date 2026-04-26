@@ -72,11 +72,15 @@ const rule = {
   </>
 };
 
+const { name, title, credit } = gameList.TwoTimesTwo;
 export const TwoTimesTwo = strategyGameFactory({
-  rule,
-  metadata: gameList.TwoTimesTwo,
+  presentation: {
+    rule,
+    title: title || name,
+    credit,
+    getPlayerStepDescription
+  },
   BoardClient,
-  getPlayerStepDescription,
-  moves,
+  gameplay: { moves },
   variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
 });

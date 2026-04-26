@@ -224,19 +224,25 @@ const rule = (maxDiscs) => ({
 });
 
 export const SixDiscs = strategyGameFactory({
-  rule: rule(6),
-  metadata: gameList.SixDiscs,
+  presentation: {
+    rule: rule(6),
+    title: gameList.SixDiscs.title || gameList.SixDiscs.name,
+    credit: gameList.SixDiscs.credit,
+    getPlayerStepDescription
+  },
   BoardClient: gameBoardFactory(6),
-  getPlayerStepDescription,
-  moves,
+  gameplay: { moves },
   variants: [{ botStrategy: aiBotStrategy, generateStartBoard: generateStartBoard(6) }]
 });
 
 export const TenDiscs = strategyGameFactory({
-  rule: rule(10),
-  metadata: gameList.TenDiscs,
+  presentation: {
+    rule: rule(10),
+    title: gameList.TenDiscs.title || gameList.TenDiscs.name,
+    credit: gameList.TenDiscs.credit,
+    getPlayerStepDescription
+  },
   BoardClient: gameBoardFactory(10),
-  getPlayerStepDescription,
-  moves,
+  gameplay: { moves },
   variants: [{ botStrategy: aiBotStrategy, generateStartBoard: generateStartBoard(10) }]
 });

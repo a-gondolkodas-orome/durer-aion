@@ -100,14 +100,18 @@ const rule = {
   </>
 };
 
+const { name, title, credit } = gameList.FiveFiveCard;
 export const FiveFiveCard = strategyGameFactory({
-  rule,
-  metadata: gameList.FiveFiveCard,
+  presentation: {
+    rule,
+    title: title || name,
+    credit,
+    getPlayerStepDescription: () => ({
+      hu: 'Vegyél el egy kártyát az ellenfél elől.',
+      en: 'Remove a card from your opponent.'
+    })
+  },
   BoardClient,
-  getPlayerStepDescription: () => ({
-    hu: 'Vegyél el egy kártyát az ellenfél elől.',
-    en: 'Remove a card from your opponent.'
-  }),
-  moves,
+  gameplay: { moves },
   variants: [{ botStrategy: aiBotStrategy, generateStartBoard: () => [[1, 2, 3, 4, 5], [1, 2, 3, 4, 5]] }]
 });

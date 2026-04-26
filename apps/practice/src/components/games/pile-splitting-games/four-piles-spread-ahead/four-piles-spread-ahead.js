@@ -168,14 +168,18 @@ const rule = {
   </>
 };
 
+const { name, title, credit } = gameList.FourPilesSpreadAhead;
 export const FourPilesSpreadAhead = strategyGameFactory({
-  rule,
-  metadata: gameList.FourPilesSpreadAhead,
+  presentation: {
+    rule,
+    title: title || name,
+    credit,
+    getPlayerStepDescription: () => ({
+      hu: 'Kattints egy korongra, hogy jelezd, hány korongot szeretnél elvenni a kupacból.',
+      en: 'Click on a disc to indicate the number of discs you want to remove.'
+    })
+  },
   BoardClient,
-  getPlayerStepDescription: () => ({
-    hu: 'Kattints egy korongra, hogy jelezd, hány korongot szeretnél elvenni a kupacból.',
-    en: 'Click on a disc to indicate the number of discs you want to remove.'
-  }),
-  moves,
+  gameplay: { moves },
   variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
 });

@@ -133,16 +133,19 @@ const rule = {
   </>
 };
 
+const { name, title, credit } = gameList.HunyadiAndTheJanissaries;
 export const HunyadiAndTheJanissaries = strategyGameFactory({
-  rule,
-  metadata: gameList.HunyadiAndTheJanissaries,
-  roleLabels: [
-    { hu: 'Szultán', en: "Sultan" },
-    { hu: 'Hunyadi', en: "Hunyadi" }
-  ],
+  presentation: {
+    rule,
+    title: title || name,
+    credit,
+    roleLabels: [
+      { hu: 'Szultán', en: "Sultan" },
+      { hu: 'Hunyadi', en: "Hunyadi" }
+    ],
+    getPlayerStepDescription
+  },
   BoardClient,
-  getPlayerStepDescription,
-  moves,
-  endOfTurnMove: 'stepUp',
+  gameplay: { moves, endOfTurnMove: 'stepUp' },
   variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
 });

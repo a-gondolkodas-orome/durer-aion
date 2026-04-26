@@ -73,14 +73,18 @@ const rule = {
   </>
 };
 
+const { name, title, credit } = gameList.AntiTicTacToe;
 export const AntiTicTacToe = strategyGameFactory({
-  rule,
-  metadata: gameList.AntiTicTacToe,
+  presentation: {
+    rule,
+    title: title || name,
+    credit,
+    getPlayerStepDescription: () => ({
+      hu: 'Helyezz le egy korongot egy üres mezőre kattintással.',
+      en: 'Click on an empty square to place a piece.'
+    })
+  },
   BoardClient,
-  getPlayerStepDescription: () => ({
-    hu: 'Helyezz le egy korongot egy üres mezőre kattintással.',
-    en: 'Click on an empty square to place a piece.'
-  }),
-  moves,
+  gameplay: { moves },
   variants: [{ botStrategy: aiBotStrategy, generateStartBoard: generateEmptyTicTacToeBoard }]
 });

@@ -40,11 +40,15 @@ const rule = {
   </>
 };
 
+const { name, title, credit } = gameList.Coin123;
 export const Coin123 = strategyGameFactory({
-  rule,
-  metadata: gameList.Coin123,
+  presentation: {
+    rule,
+    title: title || name,
+    credit,
+    getPlayerStepDescription
+  },
   BoardClient,
-  getPlayerStepDescription,
-  moves,
+  gameplay: { moves },
   variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
 });

@@ -245,14 +245,18 @@ const rule = {
   </>
 };
 
+const { name, title, credit } = gameList.DominoesOnChessboard;
 export const DominoesOnChessboard = strategyGameFactory({
-  rule,
-  metadata: gameList.DominoesOnChessboard,
+  presentation: {
+    rule,
+    title: title || name,
+    credit,
+    getPlayerStepDescription: () => ({
+      hu: 'Kattints egy üres mezőre, majd egy szomszédjára, hogy lehelyezz egy dominót.',
+      en: 'Click an empty square, then a neighbour of it, to place a domino.'
+    })
+  },
   BoardClient,
-  getPlayerStepDescription: () => ({
-    hu: 'Kattints egy üres mezőre, majd egy szomszédjára, hogy lehelyezz egy dominót.',
-    en: 'Click an empty square, then a neighbour of it, to place a domino.'
-  }),
-  moves,
+  gameplay: { moves },
   variants: [{ botStrategy: aiBotStrategy, generateStartBoard: () => [] }]
 });

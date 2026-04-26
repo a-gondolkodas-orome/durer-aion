@@ -90,14 +90,18 @@ const rule = {
   </>
 };
 
+const { name, title, credit } = gameList.ChessRook;
 export const ChessRook = strategyGameFactory({
-  rule,
-  metadata: gameList.ChessRook,
+  presentation: {
+    rule,
+    title: title || name,
+    credit,
+    getPlayerStepDescription: () => ({
+      hu: 'Kattints egy szabad mezőre a bástyával egy sorban vagy oszlopban.',
+      en: 'Click on a free square in the same row or column as the rook.'
+    })
+  },
   BoardClient,
-  getPlayerStepDescription: () => ({
-    hu: 'Kattints egy szabad mezőre a bástyával egy sorban vagy oszlopban.',
-    en: 'Click on a free square in the same row or column as the rook.'
-  }),
-  moves,
+  gameplay: { moves },
   variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
 });

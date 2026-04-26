@@ -87,14 +87,18 @@ const rule = {
   </>
 };
 
+const { name, title, credit } = gameList.ChessKnight;
 export const ChessKnight = strategyGameFactory({
-  rule,
-  metadata: gameList.ChessKnight,
+  presentation: {
+    rule,
+    title: title || name,
+    credit,
+    getPlayerStepDescription: () => ({
+      hu: 'Lépj egy szabad mezőre a huszárral.',
+      en: 'Move the knight to a free square.'
+    })
+  },
   BoardClient,
-  getPlayerStepDescription: () => ({
-    hu: 'Lépj egy szabad mezőre a huszárral.',
-    en: 'Move the knight to a free square.'
-  }),
-  moves,
+  gameplay: { moves },
   variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
 });

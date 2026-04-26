@@ -131,14 +131,18 @@ const rule = {
   </>
 };
 
+const { name, title, credit } = gameList.AddReduceDouble;
 export const AddReduceDouble = strategyGameFactory({
-  rule,
-  metadata: gameList.AddReduceDouble,
+  presentation: {
+    rule,
+    title: title || name,
+    credit,
+    getPlayerStepDescription: () => ({
+      hu: 'Kattints egy korongra, hogy jelezd, hány korongot szeretnél elvenni a kupacból.',
+      en: 'Click a piece to indicate how many you want to remove.'
+    })
+  },
   BoardClient,
-  getPlayerStepDescription: () => ({
-    hu: 'Kattints egy korongra, hogy jelezd, hány korongot szeretnél elvenni a kupacból.',
-    en: 'Click a piece to indicate how many you want to remove.'
-  }),
-  moves,
+  gameplay: { moves },
   variants: [{ botStrategy: aiBotStrategy, generateStartBoard: () => ([random(3, 10), random(3, 10)]) }]
 });

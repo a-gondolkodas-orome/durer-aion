@@ -120,11 +120,15 @@ const rule = {
   </>
 };
 
+const { name, title, credit } = gameList.PileSplitter;
 export const PileSplitter = strategyGameFactory({
-  rule,
-  metadata: gameList.PileSplitter,
+  presentation: {
+    rule,
+    title: title || name,
+    credit,
+    getPlayerStepDescription
+  },
   BoardClient,
-  getPlayerStepDescription,
-  moves,
+  gameplay: { moves },
   variants: [{ botStrategy: aiBotStrategy, generateStartBoard: () => ([random(3, 10), random(3, 10)]) }]
 });

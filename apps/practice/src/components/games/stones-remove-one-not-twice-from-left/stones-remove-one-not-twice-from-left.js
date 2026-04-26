@@ -196,11 +196,15 @@ const generateStartBoard = () => {
   };
 }
 
+const { name, title, credit } = gameList.StonesRemoveOneNotTwiceFromLeft;
 export const StonesRemoveOneNotTwiceFromLeft = strategyGameFactory({
-  rule,
-  metadata: gameList.StonesRemoveOneNotTwiceFromLeft,
+  presentation: {
+    rule,
+    title: title || name,
+    credit,
+    getPlayerStepDescription
+  },
   BoardClient,
-  getPlayerStepDescription,
-  moves,
+  gameplay: { moves },
   variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
 });

@@ -138,11 +138,15 @@ const generateStartBoard = () => {
   })
 }
 
+const { name, title, credit } = gameList.RemoveDivisorMultiple;
 export const RemoveDivisorMultiple = strategyGameFactory({
-  rule,
-  metadata: gameList.RemoveDivisorMultiple,
+  presentation: {
+    rule,
+    title: title || name,
+    credit,
+    getPlayerStepDescription
+  },
   BoardClient,
-  getPlayerStepDescription,
-  moves,
+  gameplay: { moves },
   variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
 });

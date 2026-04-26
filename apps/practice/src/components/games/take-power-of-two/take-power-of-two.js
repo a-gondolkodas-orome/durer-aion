@@ -145,11 +145,15 @@ const rule = {
   </>
 };
 
+const { name, title, credit } = gameList.TakePowerOfTwo;
 export const TakePowerOfTwo = strategyGameFactory({
-  rule,
-  metadata: gameList.TakePowerOfTwo,
+  presentation: {
+    rule,
+    title: title || name,
+    credit,
+    getPlayerStepDescription
+  },
   BoardClient,
-  getPlayerStepDescription,
-  moves,
+  gameplay: { moves },
   variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
-})
+});

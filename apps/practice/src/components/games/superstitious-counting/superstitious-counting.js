@@ -98,14 +98,18 @@ const rule = {
   </>
 };
 
+const { name, title, credit } = gameList.SuperstitiousCounting;
 export const SuperstitiousCounting = strategyGameFactory({
-  rule,
-  metadata: gameList.SuperstitiousCounting,
+  presentation: {
+    rule,
+    title: title || name,
+    credit,
+    getPlayerStepDescription: () => ({
+      hu: 'Kattints a számra ahova lépni szeretnél.',
+      en: 'Click on a number to step onto it.'
+    })
+  },
   BoardClient,
-  getPlayerStepDescription: () => ({
-    hu: 'Kattints a számra ahova lépni szeretnél.',
-    en: 'Click on a number to step onto it.'
-  }),
-  moves,
+  gameplay: { moves },
   variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
 });

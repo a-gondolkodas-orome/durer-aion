@@ -112,19 +112,25 @@ const getPlayerStepDescription = () => ({
 });
 
 export const NumberCovering8 = strategyGameFactory({
-  rule: rule8,
-  metadata: gameList.NumberCovering8,
+  presentation: {
+    rule: rule8,
+    title: gameList.NumberCovering8.title || gameList.NumberCovering8.name,
+    credit: gameList.NumberCovering8.credit,
+    getPlayerStepDescription
+  },
   BoardClient,
-  getPlayerStepDescription,
-  moves,
+  gameplay: { moves },
   variants: [{ botStrategy: aiBotStrategy, generateStartBoard: () => range(1, 9) }]
 });
 
 export const NumberCovering10 = strategyGameFactory({
-  rule: rule10,
-  metadata: gameList.NumberCovering10,
+  presentation: {
+    rule: rule10,
+    title: gameList.NumberCovering10.title || gameList.NumberCovering10.name,
+    credit: gameList.NumberCovering10.credit,
+    getPlayerStepDescription
+  },
   BoardClient,
-  getPlayerStepDescription,
-  moves,
+  gameplay: { moves },
   variants: [{ botStrategy: aiBotStrategy, generateStartBoard: () => range(1, 11) }]
 });

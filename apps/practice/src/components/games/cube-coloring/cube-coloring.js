@@ -162,14 +162,18 @@ const rule = {
   </>
 };
 
+const { name, title, credit } = gameList.CubeColoring;
 export const CubeColoring = strategyGameFactory({
-  rule,
-  metadata: gameList.CubeColoring,
+  presentation: {
+    rule,
+    title: title || name,
+    credit,
+    getPlayerStepDescription: () => ({
+      hu: 'Válassz színt, majd színezz meg egy csúcsot!',
+      en: 'Choose a colour, then colour a vertex.'
+    })
+  },
   BoardClient,
-  getPlayerStepDescription: () => ({
-    hu: 'Válassz színt, majd színezz meg egy csúcsot!',
-    en: 'Choose a colour, then colour a vertex.'
-  }),
-  moves,
+  gameplay: { moves },
   variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
 });

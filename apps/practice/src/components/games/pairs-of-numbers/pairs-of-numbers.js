@@ -129,14 +129,18 @@ const generateStartBoard = () => {
   return [random(15, 25), random(10, 15)];
 }
 
+const { name, title, credit } = gameList.PairsOfNumbers;
 export const PairsOfNumbers = strategyGameFactory({
-  rule,
-  metadata: gameList.PairsOfNumbers,
+  presentation: {
+    rule,
+    title: title || name,
+    credit,
+    getPlayerStepDescription: () => ({
+      hu: 'Növeld a második számot eggyel vagy vond ki az elsőből.',
+      en: 'Increase the second number by 1 or subtract it from the first.'
+    })
+  },
   BoardClient,
-  getPlayerStepDescription: () => ({
-    hu: 'Növeld a második számot eggyel vagy vond ki az elsőből.',
-    en: 'Increase the second number by 1 or subtract it from the first.'
-  }),
-  moves,
+  gameplay: { moves },
   variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
 });

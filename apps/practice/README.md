@@ -119,12 +119,14 @@ const botStrategy = ({ board, moves }) => {
 
 // React component added to router in app.js
 export const PlusOneTwo = strategyGameFactory({
-  rule: <>0-ról +1/+2 20-ig</>,
-  metadata: { name: '+1, +2' },
+  presentation: {
+    rule: <>0-ról +1/+2 20-ig</>,
+    title: '+1, +2',
+    // a function returning a string, receives optional { board, ctx }
+    getPlayerStepDescription: () => 'Válaszd ki, hogy hánnyal növelsz.'
+  },
   BoardClient,
-  // a function returning a string, receives optional { board, ctx }
-  getPlayerStepDescription: () => 'Válaszd ki, hogy hánnyal növelsz.',
-  moves,
+  gameplay: { moves },
   variants: [{ botStrategy, generateStartBoard: () => 0 }]
 });
 ```

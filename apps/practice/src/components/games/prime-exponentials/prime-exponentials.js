@@ -175,11 +175,15 @@ const rule = {
   </>
 };
 
+const { name, title, credit } = gameList.PrimeExponentials;
 export const PrimeExponentials = strategyGameFactory({
-  rule,
-  metadata: gameList.PrimeExponentials,
+  presentation: {
+    rule,
+    title: title || name,
+    credit,
+    getPlayerStepDescription
+  },
   BoardClient,
-  getPlayerStepDescription,
-  moves,
+  gameplay: { moves },
   variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
 });

@@ -161,14 +161,18 @@ const rule = {
   </>
 };
 
+const { name, title, credit } = gameList.TriangleColoring;
 export const TriangleColoring = strategyGameFactory({
-  rule,
-  metadata: gameList.TriangleColoring,
+  presentation: {
+    rule,
+    title: title || name,
+    credit,
+    getPlayerStepDescription: () => ({
+      hu: 'Kattints egy kis háromszögre.',
+      en: 'Click on a small triangle.'
+    })
+  },
   BoardClient,
-  getPlayerStepDescription: () => ({
-    hu: 'Kattints egy kis háromszögre.',
-    en: 'Click on a small triangle.'
-  }),
-  moves,
+  gameplay: { moves },
   variants: [{ botStrategy: aiBotStrategy, generateStartBoard: () => Array(16).fill(null) }]
 });

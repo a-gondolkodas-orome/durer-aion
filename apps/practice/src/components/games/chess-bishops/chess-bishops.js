@@ -113,14 +113,18 @@ const rule = {
   </>
 };
 
+const { name, title, credit } = gameList.ChessBishops;
 export const ChessBishops = strategyGameFactory({
-  rule,
-  metadata: gameList.ChessBishops,
+  presentation: {
+    rule,
+    title: title || name,
+    credit,
+    getPlayerStepDescription: () => ({
+      hu: 'Kattints egy mezőre, amit nem üt egyik futó sem.',
+      en: 'Click on a square that is not attacked by any bishop.'
+    })
+  },
   BoardClient,
-  getPlayerStepDescription: () => ({
-    hu: 'Kattints egy mezőre, amit nem üt egyik futó sem.',
-    en: 'Click on a square that is not attacked by any bishop.'
-  }),
-  moves,
+  gameplay: { moves },
   variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
 });

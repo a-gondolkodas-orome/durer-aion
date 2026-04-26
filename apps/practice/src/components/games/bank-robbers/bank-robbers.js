@@ -114,14 +114,18 @@ const generateStartBoard = () => {
   }
 }
 
+const { name, title, credit } = gameList.BankRobbers;
 export const BankRobbers = strategyGameFactory({
-  rule,
-  metadata: gameList.BankRobbers,
+  presentation: {
+    rule,
+    title: title || name,
+    credit,
+    getPlayerStepDescription: () => ({
+      hu: 'Válassz egy kirabolható bankot.',
+      en: 'Choose a bank that can be robbed.'
+    })
+  },
   BoardClient,
-  getPlayerStepDescription: () => ({
-    hu: 'Válassz egy kirabolható bankot.',
-    en: 'Choose a bank that can be robbed.'
-  }),
-  moves,
+  gameplay: { moves },
   variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
 });

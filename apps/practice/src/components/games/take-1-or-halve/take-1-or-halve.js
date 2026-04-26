@@ -100,11 +100,15 @@ const getPlayerStepDescription = ({ board }) => {
   }
 }
 
+const { name, title, credit } = gameList.Take1OrHalve;
 export const Take1OrHalve = strategyGameFactory({
-  rule,
-  metadata: gameList.Take1OrHalve,
+  presentation: {
+    rule,
+    title: title || name,
+    credit,
+    getPlayerStepDescription
+  },
   BoardClient,
-  getPlayerStepDescription,
-  moves,
+  gameplay: { moves },
   variants: [{ botStrategy: aiBotStrategy, generateStartBoard: () => random(20, 27) }]
 });

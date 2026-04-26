@@ -127,14 +127,18 @@ const rule = {
   </>
 };
 
+const { name, title, credit } = gameList.TriangularGridRopes;
 export const TriangularGridRopes = strategyGameFactory({
-  rule,
-  metadata: gameList.TriangularGridRopes,
+  presentation: {
+    rule,
+    title: title || name,
+    credit,
+    getPlayerStepDescription: () => ({
+      hu: 'Kattints két oszlopra, amik között kötelet szeretnél kifeszíteni.',
+      en: 'Click two poles to connect them.'
+    })
+  },
   BoardClient,
-  getPlayerStepDescription: () => ({
-    hu: 'Kattints két oszlopra, amik között kötelet szeretnél kifeszíteni.',
-    en: 'Click two poles to connect them.'
-  }),
-  moves,
+  gameplay: { moves },
   variants: [{ botStrategy: aiBotStrategy, generateStartBoard: () => [] }]
 });

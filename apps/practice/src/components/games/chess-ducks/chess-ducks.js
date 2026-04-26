@@ -12,7 +12,6 @@ import {
 import { gameList } from '../gameList';
 
 const chessDucksGameFactory = ({ ROWS, COLS }, metadata) => {
-
   const generateStartBoard = () => {
     return range(0, ROWS).map(() => range(0, COLS).map(() => null));
   };
@@ -89,15 +88,19 @@ const chessDucksGameFactory = ({ ROWS, COLS }, metadata) => {
     </>
   };
 
+  const { name, title, credit } = metadata;
   return strategyGameFactory({
-    rule,
-    metadata,
+    presentation: {
+      rule,
+      title: title || name,
+      credit,
+      getPlayerStepDescription: () => ({
+        hu: 'Kattints egy mezőre, amit nem üt egyik kacsa sem.',
+        en: 'Click on a square that is not attacked by any duck.'
+      })
+    },
     BoardClient,
-    getPlayerStepDescription: () => ({
-      hu: 'Kattints egy mezőre, amit nem üt egyik kacsa sem.',
-      en: 'Click on a square that is not attacked by any duck.'
-    }),
-    moves,
+    gameplay: { moves },
     variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
   });
 };

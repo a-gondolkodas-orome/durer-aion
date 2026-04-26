@@ -91,13 +91,14 @@ const MinimalBoardClient = ({ board, moves }) => (
 );
 
 const minimalConfig = (moves, endOfTurnMove) => ({
-  rule: <></>,
-  metadata: { name: 'Test' },
+  presentation: {
+    rule: <></>,
+    title: 'Test',
+    getPlayerStepDescription: () => ''
+  },
   BoardClient: MinimalBoardClient,
-  moves,
-  variants: [{ botStrategy: () => {}, generateStartBoard: () => ['initial'] }],
-  getPlayerStepDescription: () => '',
-  endOfTurnMove
+  gameplay: { moves, endOfTurnMove },
+  variants: [{ botStrategy: () => {}, generateStartBoard: () => ['initial'] }]
 });
 
 const renderGame = (config) => {
@@ -114,16 +115,21 @@ const CtxAwareBoardClient = ({ board, ctx, moves }) => (
 );
 
 const ctxAwareConfig = (overrides = {}) => {
-  const { botStrategy, ...rest } = overrides;
+  const { botStrategy, endOfTurnMove, ...rest } = overrides;
   return {
-    rule: <></>,
-    metadata: { name: 'Test' },
+    presentation: {
+      rule: <></>,
+      title: 'Test',
+      getPlayerStepDescription: () => ''
+    },
     BoardClient: CtxAwareBoardClient,
-    moves: {
-      mainMove: (board, { events }) => { events.endTurn(); return { nextBoard: board }; }
+    gameplay: {
+      moves: {
+        mainMove: (board, { events }) => { events.endTurn(); return { nextBoard: board }; }
+      },
+      endOfTurnMove
     },
     variants: [{ botStrategy: botStrategy ?? (() => {}), generateStartBoard: () => ['initial'] }],
-    getPlayerStepDescription: () => '',
     ...rest
   };
 };

@@ -82,11 +82,15 @@ const rule = {
   </>
 };
 
+const { name, title, credit } = gameList.FiveSquares;
 export const FiveSquares = strategyGameFactory({
-  rule,
-  metadata: gameList.FiveSquares,
+  presentation: {
+    rule,
+    title: title || name,
+    credit,
+    getPlayerStepDescription
+  },
   BoardClient,
-  getPlayerStepDescription,
-  moves,
+  gameplay: { moves },
   variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
 });

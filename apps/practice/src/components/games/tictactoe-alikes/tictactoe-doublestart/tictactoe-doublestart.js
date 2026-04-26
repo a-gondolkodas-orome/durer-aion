@@ -95,11 +95,15 @@ const rule = {
   </>
 };
 
+const { name, title, credit } = gameList.TicTacToeDoubleStart;
 export const TicTacToeDoubleStart = strategyGameFactory({
-  rule,
-  metadata: gameList.TicTacToeDoubleStart,
+  presentation: {
+    rule,
+    title: title || name,
+    credit,
+    getPlayerStepDescription
+  },
   BoardClient,
-  getPlayerStepDescription,
-  moves,
+  gameplay: { moves },
   variants: [{ botStrategy: aiBotStrategy, generateStartBoard: generateEmptyTicTacToeBoard }]
 });

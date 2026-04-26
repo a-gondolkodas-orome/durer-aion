@@ -98,15 +98,19 @@ const rule = {
   </>
 };
 
+const { name, title, credit } = gameList.RockPaperScissor;
 export const RockPaperScissor = strategyGameFactory({
-  rule,
-  metadata: gameList.RockPaperScissor,
+  presentation: {
+    rule,
+    title: title || name,
+    credit,
+    getPlayerStepDescription: () => ({
+      hu: 'Távolíts el egy kártyát az ellenfél elől.',
+      en: 'Remove a card from your opponent.'
+    })
+  },
   BoardClient,
-  getPlayerStepDescription: () => ({
-    hu: 'Távolíts el egy kártyát az ellenfél elől.',
-    en: 'Remove a card from your opponent.'
-  }),
-  moves,
+  gameplay: { moves },
   variants: [
     {
       botStrategy: aiBotStrategy,

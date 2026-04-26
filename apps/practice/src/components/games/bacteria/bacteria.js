@@ -267,15 +267,19 @@ const rule = {
   </>
 };
 
+const { name, title, credit } = gameList.Bacteria;
 export const Bacteria = strategyGameFactory({
-  rule,
-  metadata: gameList.Bacteria,
-  roleLabels: [
-    { hu: "Támadó", en: "Attacker" },
-    { hu: "Védekező", en: "Defender" }
-  ],
+  presentation: {
+    rule,
+    title: title || name,
+    credit,
+    roleLabels: [
+      { hu: "Támadó", en: "Attacker" },
+      { hu: "Védekező", en: "Defender" }
+    ],
+    getPlayerStepDescription
+  },
   BoardClient,
-  getPlayerStepDescription,
-  moves,
+  gameplay: { moves },
   variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
 });
