@@ -83,10 +83,6 @@ export const strategyGameFactory = ({
       setTurnStage(null);
     };
 
-    const startNewGame = () => {
-      resetGameState();
-    };
-
     const switchMode = (newMode) => {
       setMode(newMode);
       if (newMode === 'vsHuman' && !activeVariant.generateStartBoard) {
@@ -103,7 +99,7 @@ export const strategyGameFactory = ({
       resetGameState(newVariant.generateStartBoard ?? defaultGenerateStartBoard);
     };
 
-    const endGame = ({ winnerIndex } = { winnerIndex: null }) => {
+    const endGame = ({ winnerIndex = null } = {}) => {
       setPhase('gameEnd');
       setWinnerIndex(winnerIndex === null ? currentPlayer : winnerIndex);
       setIsGameEndDialogOpen(true);
@@ -193,7 +189,7 @@ export const strategyGameFactory = ({
               roleLabels={roleLabels}
               stepDescription={t(getPlayerStepDescription({ board, ctx }))}
               ctx={ctx}
-              moves={{ startGame, startNewGame, switchMode, setPlayerNames, setDifficulty }}
+              moves={{ startGame, resetGameState, switchMode, setPlayerNames, setDifficulty }}
               variants={visibleVariants}
               selectedVariantIndex={selectedVariantIndex}
             />
@@ -204,7 +200,7 @@ export const strategyGameFactory = ({
       <GameEndDialog
         isOpen={isGameEndDialogOpen}
         setIsOpen={setIsGameEndDialogOpen}
-        startNewGame={startNewGame}
+        resetGameState={resetGameState}
         ctx={ctx}
       />
     </main>

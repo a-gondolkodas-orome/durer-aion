@@ -75,7 +75,7 @@ export const GameSidebar = ({
           border-slate-300 text-slate-600 hover:bg-slate-50 focus:bg-slate-50
           disabled:opacity-40 disabled:cursor-not-allowed`}
         disabled={!isNewGameAllowed}
-        onClick={moves.startNewGame}
+        onClick={moves.resetGameState}
       >
         {t({ hu: 'Új játék', en: 'New game' })}
       </button>
@@ -167,7 +167,7 @@ export const GameRule = ({ ruleDescription }) => {
 };
 
 export const GameEndDialog = ({
-  isOpen, setIsOpen, startNewGame, ctx
+  isOpen, setIsOpen, resetGameState, ctx
 }) => {
   const { t } = useTranslation();
   return (
@@ -192,7 +192,7 @@ export const GameEndDialog = ({
             {t(getCtaText(ctx))}
           </Description>
           <button
-            onClick={startNewGame}
+            onClick={resetGameState}
             className="cta-button mt-2"
           >
             {t({ hu: 'Új játék', en: 'New game' })}
