@@ -123,9 +123,8 @@ export const strategyGameFactory = ({
       });
     };
 
-    const isClientMoveAllowed = isHumanVsHumanGame
-      ? phase === 'play'
-      : (phase === 'play' && currentPlayer === chosenRoleIndex);
+    const isClientMoveAllowed = phase === 'play'
+      && (isHumanVsHumanGame || currentPlayer === chosenRoleIndex);
 
     const ctx = {
       isHumanVsHumanGame,
