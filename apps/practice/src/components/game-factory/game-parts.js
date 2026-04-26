@@ -8,6 +8,11 @@ import {
 import { useTranslation } from '../language/translate';
 import { LanguageSelector } from '../language/language-selector';
 
+const PLAYER_COLORS = [
+  { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-400' },
+  { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-400' }
+];
+
 export const GameSidebar = ({
   roleLabels,
   stepDescription,
@@ -37,9 +42,10 @@ export const GameSidebar = ({
       )}
 
       <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 flex flex-col gap-3">
-        <p className="text-center font-bold text-lg">
-          {t(getCtaText(ctx))}
-        </p>
+        {ctx.isHumanVsHumanGame && ctx.phase !== 'roleSelection'
+          ? <PlayerTurnPanel ctx={ctx} />
+          : <p className="text-center font-bold text-lg">{t(getCtaText(ctx))}</p>
+        }
 
         {ctx.phase === 'play' && (
           <div className="relative flex justify-center">
@@ -192,7 +198,7 @@ export const GameEndDialog = ({
             {t(getCtaText(ctx))}
           </Description>
           <button
-            onClick={resetGameState}
+            onClick={() => resetGameState()}
             className="cta-button mt-2"
           >
             {t({ hu: 'Új játék', en: 'New game' })}
@@ -352,6 +358,37 @@ const ModeSelector = ({ isHumanVsHumanGame, onSwitchMode, disabled }) => {
         </label>
       </div>
     </fieldset>
+  );
+};
+
+const PlayerTurnPanel = ({ ctx }) => {
+  const { t } = useTranslation();
+  const playerName = (i) => ctx.playerNames[i] || t({
+    hu: i === 0 ? '1. játékos' : '2. játékos',
+    en: i === 0 ? '1st player' : '2nd player'
+  });
+  const isEnd = ctx.phase === 'gameEnd';
+
+  return (
+    <div className="flex flex-col gap-1">
+      {[0, 1].map(i => {
+        const isActive = !isEnd && ctx.currentPlayer === i;
+        const isWinner = isEnd && ctx.winnerIndex === i;
+        const colors = PLAYER_COLORS[i];
+        return (
+          <div
+            key={i}
+            className={`flex items-center gap-2 rounded-md px-3 py-2 border-l-4
+              ${isActive || isWinner ? `${colors.bg} ${colors.border}` : 'bg-white border-slate-200'}`}
+          >
+            <span className={`flex-1 ${isActive || isWinner ? `font-bold ${colors.text}` : 'text-slate-400'}`}>
+              {playerName(i)}
+            </span>
+            {isWinner && <span>🏆</span>}
+          </div>
+        );
+      })}
+    </div>
   );
 };
 

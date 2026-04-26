@@ -136,6 +136,7 @@ export const strategyGameFactory = ({
       currentPlayerName: playerNameOf(currentPlayer),
       isClientMoveAllowed,
       isRoleSelectorWinner: (winnerIndex === chosenRoleIndex),
+      winnerIndex,
       winnerName: playerNameOf(winnerIndex)
     };
 
