@@ -75,7 +75,7 @@ export const GameSidebar = ({
           border-slate-300 text-slate-600 hover:bg-slate-50 focus:bg-slate-50
           disabled:opacity-40 disabled:cursor-not-allowed`}
         disabled={!isNewGameAllowed}
-        onClick={moves.resetGameState}
+        onClick={() => moves.resetGameState()}
       >
         {t({ hu: 'Új játék', en: 'New game' })}
       </button>
