@@ -8,6 +8,11 @@ import {
 import { useTranslation } from '../language/translate';
 import { LanguageSelector } from '../language/language-selector';
 
+export const DEFAULT_PLAYER_NAMES = [
+  { hu: '1. játékos', en: '1st player' },
+  { hu: '2. játékos', en: '2nd player' }
+];
+
 const PLAYER_COLORS = [
   { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-400' },
   { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-400' }
@@ -246,7 +251,7 @@ const PlayerNameSetup = ({ roleLabels, playerNames, setPlayerNames, onStart }) =
         name="name_of_first_player"
         className="border border-slate-300 rounded-md text-slate-700 px-2 py-1 text-sm w-full
           focus:outline-none focus:ring-1 focus:ring-blue-400"
-        placeholder={t({ hu: '1. játékos', en: '1st player' })}
+        placeholder={t(DEFAULT_PLAYER_NAMES[0])}
         value={playerNames[0]}
         onChange={e => setPlayerNames([e.target.value.trim(), playerNames[1]])}
       />
@@ -259,7 +264,7 @@ const PlayerNameSetup = ({ roleLabels, playerNames, setPlayerNames, onStart }) =
         name="name_of_second_player"
         className="border border-slate-300 rounded-md text-slate-700 px-2 py-1 text-sm w-full
           focus:outline-none focus:ring-1 focus:ring-blue-400"
-        placeholder={t({ hu: '2. játékos', en: '2nd player' })}
+        placeholder={t(DEFAULT_PLAYER_NAMES[1])}
         value={playerNames[1]}
         onChange={e => setPlayerNames([playerNames[0], e.target.value.trim()])}
       />
@@ -363,10 +368,7 @@ const ModeSelector = ({ isHumanVsHumanGame, onSwitchMode, disabled }) => {
 
 const PlayerTurnPanel = ({ ctx }) => {
   const { t } = useTranslation();
-  const playerName = (i) => ctx.playerNames[i] || t({
-    hu: i === 0 ? '1. játékos' : '2. játékos',
-    en: i === 0 ? '1st player' : '2nd player'
-  });
+  const playerName = (i) => ctx.playerNames[i] || t(DEFAULT_PLAYER_NAMES[i]);
   const isEnd = ctx.phase === 'gameEnd';
 
   return (

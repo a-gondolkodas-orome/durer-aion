@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  GameSidebar, GameFooter, GameHeader, GameRule, GameEndDialog
+  GameSidebar, GameFooter, GameHeader, GameRule, GameEndDialog, DEFAULT_PLAYER_NAMES
 } from './game-parts';
 import { partial, mapValues, wrap, _ } from 'lodash';
 import { useTranslation } from '../language/translate';
@@ -117,10 +117,7 @@ export const strategyGameFactory = ({
 
     const playerNameOf = (index) => {
       if (index === null) return null;
-      return playerNames[index] || t({
-        hu: index === 0 ? '1. játékos' : '2. játékos',
-        en: index === 0 ? '1st player' : '2nd player'
-      });
+      return playerNames[index] || t(DEFAULT_PLAYER_NAMES[index]);
     };
 
     const isClientMoveAllowed = phase === 'play'
