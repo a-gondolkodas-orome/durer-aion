@@ -43,6 +43,7 @@ import {
 import { SuperstitiousCounting } from '../games/superstitious-counting/superstitious-counting';
 import { Take1OrHalve } from '../games/take-1-or-halve/take-1-or-halve';
 import { TakePowerOfTwo } from '../games/take-power-of-two/take-power-of-two';
+import { TenDigitNumber } from '../games/ten-digit-number/ten-digit-number';
 import { ThievesMean7 } from '../games/thieves-mean/thieves-mean-7/thieves-mean-7';
 import { ThievesMean9 } from '../games/thieves-mean/thieves-mean-9/thieves-mean-9';
 import { TicTacToe } from '../games/tictactoe-alikes/tictactoe/tictactoe';
@@ -97,6 +98,7 @@ export const App = () => {
     { path: '/game/SuperstitiousCounting', element: <SuperstitiousCounting /> },
     { path: '/game/Take1OrHalve', element: <Take1OrHalve /> },
     { path: '/game/TakePowerOfTwo', element: <TakePowerOfTwo />},
+    { path: '/game/TenDigitNumber', element: <TenDigitNumber /> },
     { path: '/game/TenDiscs', element: <TenDiscs />},
     { path: '/game/ThievesMean', element: <ThievesMean7 />},
     { path: '/game/ThievesMean9', element: <ThievesMean9 />},

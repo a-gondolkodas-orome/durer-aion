@@ -41,6 +41,7 @@ Read the chosen reference file in full before writing anything.
 
 ### 4. Create the game file
 Create `src/components/games/<game-name>/<game-name>.js`. Follow the `strategyGameFactory` API from `AGENTS.md`. Key rules:
+- If the user supplied the rule text, use it verbatim in `rule.hu`. Never silently rephrase, correct, or abbreviate it — propose any wording change explicitly and wait for approval before applying it.
 - `board` holds only game-specific state; common state is in `ctx`
 - Every move returns `{ nextBoard }`; pass the current board when chaining moves within a turn
 - Guard all player interactions with `ctx.isClientMoveAllowed`

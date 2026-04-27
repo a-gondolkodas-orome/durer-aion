@@ -287,6 +287,12 @@ export const gameList = {
     name: { hu: "Kettőhatványok kivonása", en: "Subtract 2^n" },
     credit: { developedBy: ["Jánosik Áron"] }
   },
+  TenDigitNumber: {
+    year: { k: "V. (11/12)", v: "11/12" },
+    round: "döntő",
+    category: ["D"],
+    name: { hu: "Párbaj számjegyekkel", en: "Digit duel" }
+  },
   TenDiscs: {
     year: { k: "X. (16/17)", v: "16/17" },
     round: "döntő",
