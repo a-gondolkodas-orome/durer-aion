@@ -29,6 +29,12 @@ Each game folder implements the optimal strategy (computer AI) and game-specific
 
 Traffic is expected to remain low — no scalability concerns.
 
+## Testing
+
+Any logic change (not just styling) to `strategy-game.js` or the overview page must be covered by new unit tests. Prefer adding tests before or alongside the change, not as an afterthought.
+
+Game-specific logic is also worth testing when the winning strategy is non-trivial.
+
 ## Planned future directions
 
 ### Primary (ongoing)
