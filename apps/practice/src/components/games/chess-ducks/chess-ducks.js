@@ -73,12 +73,17 @@ const chessDucksGameFactory = ({ ROWS, COLS }, metadata) => {
     );
   };
 
+  const toldalek = {
+    '6': 'o',
+    '7': 'e'
+  }
+
   const rule = {
     hu: <>
       Azt sokan tudják, hogy egy ló hogy lép a sakktáblán, de azt már nagyon kevesen, hogy
-      egy kacsa hogyan: a négy oldalszomszédos mezőre tud lépni. A két játékos felváltva rak le a {ROWS} × {COLS}-os
-      táblára kacsákat úgy, hogy a lerakott bábu ne üsse a táblán levő kacsák egyikét sem. Az veszít, aki
-      nem tud lépni.
+      egy kacsa hogyan: a négy oldalszomszédos mezőre tud lépni. A két játékos felváltva rak le
+      a {ROWS} × {COLS}-{toldalek[COLS]}s táblára kacsákat úgy, hogy a lerakott bábu ne üsse
+      a táblán levő kacsák egyikét sem. Az veszít, aki nem tud lépni.
     </>,
     en: <>
       Many people know how a knight moves in chess, but very few know how a duck moves: it can step
