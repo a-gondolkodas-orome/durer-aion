@@ -75,3 +75,35 @@ Before declaring the game done, verify each item:
 - [ ] Player can undo within multi-move turns if applicable
 - [ ] No console errors/warnings (e.g. missing React keys)
 - [ ] AI appears to "think" in multi-move turns (uses `setTimeout`)
+
+### 9. Offer a test bot variant (only if optimal AI was implemented)
+If the optimal AI strategy was implemented in step 2, ask the user:
+
+> "Do you want a 'test bot' variant that plays randomly but wins if it can in 1 move?"
+
+**If yes**, update the game file:
+
+1. Add a `randomBotStrategy` function — pick a random valid move, but if any move wins immediately (wins in 1 turn), pick one of those winning moves instead. Follow the pattern in `src/components/games/ten-digit-number/ten-digit-number.js`.
+
+2. Rename the existing optimal bot strategy to `aiBotStrategy` (or a similarly descriptive name).
+
+3. Restructure `variants` to put the test bot first and the smart bot second (marked `isDefault: true`):
+   ```javascript
+   variants: [
+     {
+       botStrategy: randomBotStrategy,
+       label: { hu: 'Teszt 🤖', en: 'Test 🤖' }
+     },
+     {
+       botStrategy: aiBotStrategy,
+       generateStartBoard: ...,
+       label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
+       isDefault: true
+     }
+   ]
+   ```
+   By default `generateStartBoard` stays on the `isDefault` variant only. If the test variant benefits from a simpler starting position, add its own `generateStartBoard` override.
+
+4. Re-run `npm run test` and verify both variants work in the dev server before declaring done.
+
+**If no**, skip and declare the game done.
