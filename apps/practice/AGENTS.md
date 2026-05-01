@@ -79,9 +79,11 @@ strategyGameFactory({
 - `isClientMoveAllowed`: boolean — guard all player interactions with this
 - `isHumanVsHumanGame`: boolean — branch mode-specific rendering if needed
 - `chosenRoleIndex`: null/0/1 — only meaningful in vsComputer mode
-- `turnStage`: use for multi-stage turns if needed
+- `turnState`: use for multi-stage turns or other state that needs to be
+  remembered during a turn if needed, i.e. to expose it from BoardClient to
+  getPlayerStepDescription
 
-**`events`**: `endTurn()`, `endGame({ winnerIndex? })`, `setTurnStage(stage)`.
+**`events`**: `endTurn()`, `endGame({ winnerIndex? })`, `setTurnState(stage)`.
 
 ### New game checklist
 

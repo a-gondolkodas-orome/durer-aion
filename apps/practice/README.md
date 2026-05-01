@@ -174,7 +174,7 @@ Props passed by framework:
 
 - `board` (result of last move),
 - `ctx`, (i.e. to know whose turn it is)
-- `events` (i.e. to `setTurnStage`) and
+- `events` (i.e. to `setTurnState`) and
 - `moves`
 
 Additional state variables may be created within the `BoardClient` component
@@ -201,14 +201,15 @@ framework.
 - `currentPlayer`: 0/1 (whose turn it is — use this for game logic in both modes)
 - `chosenRoleIndex`: null/0/1 (the role the human chose; only meaningful in
   `vsComputer` mode)
-- `turnStage`: in game with multi-stage turns you may use this param to track
-    the stage if you need it in common parts such as step description as well
+- `turnState`: use for multi-stage turns or other state that needs to be
+  remembered during a turn, i.e. to expose it from BoardClient to
+  getPlayerStepDescription
 
 `events` is and objects that will contain the following (extendable):
 - `endTurn`: a function
 - `endGame`: a function with optional winnerIndex specified, if not, last player
   to move is the winner
-- `setTurnStage`: a function to set `turnStage`
+- `setTurnState`: a function to set `turnState`
 </details>
 
 ## Things to look out for

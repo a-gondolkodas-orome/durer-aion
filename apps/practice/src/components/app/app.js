@@ -29,6 +29,7 @@ import { PairsOfNumbers } from '../games/pairs-of-numbers/pairs-of-numbers';
 import { PileSplitter } from '../games/pile-splitting-games/pile-splitter/pile-splitter';
 import { PileSplitter3 } from '../games/pile-splitting-games/pile-splitter-3/pile-splitter-3';
 import { PileSplitter4 } from '../games/pile-splitting-games/pile-splitter-4/pile-splitter-4';
+import { PileUnion } from '../games/pile-union/pile-union';
 import { PlusOneTwoThree } from '../games/plus-one-two-three/plus-one-two-three';
 import { PolicemanthiefA, PolicemanthiefB } from '../games/policeman-thief/policeman-thief';
 import { PrimeExponentials } from '../games/prime-exponentials/prime-exponentials';
@@ -85,6 +86,7 @@ export const App = () => {
     { path: '/game/PileSplitter', element: <PileSplitter /> },
     { path: '/game/PileSplitter3', element: <PileSplitter3 /> },
     { path: '/game/PileSplitter4', element: <PileSplitter4 /> },
+    { path: '/game/PileUnion', element: <PileUnion /> },
     { path: '/game/PlusOneTwoThree', element: <PlusOneTwoThree />},
     { path: '/game/Policemanthief', element: <PolicemanthiefA />},
     { path: '/game/PolicemanthiefB', element: <PolicemanthiefB />},

@@ -187,6 +187,13 @@ export const gameList = {
     name: { hu: "Kupac kettéosztó 4 kupaccal", en: "Pile splitting (4 piles)" },
     credit: { developedBy: ["Soós Máté"] }
   },
+  PileUnion: {
+    year: { k: "VIII. (14/15)", v: "14/15" },
+    round: "döntő",
+    category: ["C"],
+    name: { hu: "Kupac egyesítés", en: "Pile union" },
+    credit: { developedBy: ["Czeller Ildikó"] }
+  },
   PlusOneTwoThree: {
     year: { k: "V. (11/12)", v: "11/12" },
     round: "döntő",

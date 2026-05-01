@@ -47,7 +47,7 @@ export const strategyGameFactory = ({
     const [isGameEndDialogOpen, setIsGameEndDialogOpen] = useState(false);
     const [winnerIndex, setWinnerIndex] = useState(null);
     const [gameUuid, setGameUuid] = useState(crypto.randomUUID());
-    const [turnStage, setTurnStage] = useState(null);
+    const [turnState, setTurnState] = useState(null);
     const [mode, setMode] = useState('vsComputer');
     const [playerNames, setPlayerNames] = useState(['', '']);
 
@@ -80,7 +80,7 @@ export const strategyGameFactory = ({
       setIsGameEndDialogOpen(false);
       setWinnerIndex(null);
       setGameUuid(crypto.randomUUID());
-      setTurnStage(null);
+      setTurnState(null);
     };
 
     const switchMode = (newMode) => {
@@ -128,7 +128,7 @@ export const strategyGameFactory = ({
       playerNames,
       chosenRoleIndex,
       phase,
-      turnStage,
+      turnState,
       currentPlayer,
       currentPlayerName: playerNameOf(currentPlayer),
       isClientMoveAllowed,
@@ -140,7 +140,7 @@ export const strategyGameFactory = ({
     const events = {
       endTurn,
       endGame,
-      setTurnStage
+      setTurnState
     };
 
     /*
@@ -208,5 +208,5 @@ export const strategyGameFactory = ({
 export const dummyEvents = {
   endTurn: () => {},
   endGame: () => {},
-  setTurnStage: () => {}
+  setTurnState: () => {}
 }

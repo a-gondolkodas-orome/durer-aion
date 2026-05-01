@@ -401,7 +401,7 @@ export const getCtaText = ({
   if (phase === 'roleSelection') {
     return isHumanVsHumanGame
       ? { hu: 'Döntsétek el, hogy ki kezd.', en: 'Decide who goes first.' }
-      : { hu: 'Válassz szerepet, utána indul a játék!', en: 'Choose a role to start the game!' };
+      : { hu: 'Válassz szerepet!', en: 'Choose a role!' };
   }
   if (phase === 'play') {
     return isHumanVsHumanGame

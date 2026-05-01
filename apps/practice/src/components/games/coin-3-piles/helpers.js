@@ -2,8 +2,8 @@
 
 import { cloneDeep, isEqual } from "lodash";
 
-export const getPlayerStepDescription = ({ ctx: { turnStage } }) => {
-  if (turnStage === 'placeBack') {
+export const getPlayerStepDescription = ({ ctx: { turnState } }) => {
+  if (turnState === 'placeBack') {
     return {
       hu: 'Válassz a visszarakási lehetőségek közül.',
       en: 'Choose an option in the place back bar.'
@@ -31,14 +31,14 @@ export const moves = {
         events.endGame();
       }
     } else {
-      events.setTurnStage('placeBack');
+      events.setTurnState('placeBack');
     }
     return { nextBoard };
   },
   undoRemoveCoin: (board, { events }, value) => {
     const nextBoard = cloneDeep(board);
     nextBoard[value - 1] += 1;
-    events.setTurnStage(null);
+    events.setTurnState(null);
     return { nextBoard };
   },
   addCoin: (board, { events }, value) => {
@@ -47,7 +47,7 @@ export const moves = {
       nextBoard[value - 1] += 1;
     }
     events.endTurn();
-    events.setTurnStage(null);
+    events.setTurnState(null);
     if (isEqual(nextBoard, [0, 0, 0])) {
       events.endGame();
     }

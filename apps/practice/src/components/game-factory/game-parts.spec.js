@@ -24,7 +24,7 @@ describe('getCtaText', () => {
   describe('vsComputer mode', () => {
     it('roleSelection: returns "Choose a role"', () => {
       expect(getCtaText({ phase: 'roleSelection', isHumanVsHumanGame: false }))
-        .toEqual({ hu: 'Válassz szerepet, utána indul a játék!', en: 'Choose a role to start the game!' });
+        .toEqual({ hu: 'Válassz szerepet!', en: 'Choose a role!' });
     });
 
     it('play: returns "Your turn" when client move is allowed', () => {
