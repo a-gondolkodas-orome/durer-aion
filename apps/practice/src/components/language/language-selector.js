@@ -10,7 +10,7 @@ export const LanguageSelector = () => {
         className={`px-1 ${language === 'hu' ? 'font-bold' : 'opacity-40 hover:opacity-70'}`}
         aria-label="Magyar"
       >HU</button>
-      <span className="opacity-40">|</span>
+      <span className="opacity-40" aria-hidden="true">|</span>
       <button
         onClick={() => setLanguage('en')}
         className={`px-1 ${language === 'en' ? 'font-bold' : 'opacity-40 hover:opacity-70'}`}

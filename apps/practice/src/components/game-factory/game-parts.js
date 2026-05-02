@@ -159,8 +159,8 @@ export const GameRule = ({ ruleDescription }) => {
         <div className="border-2 rounded-sm grow">
           <DisclosureButton className="w-full bg-slate-200 text-xl flex justify-center">
             <span className="grow">{t({ hu: 'Játékszabályok', en: 'Game rules' })}</span>
-            { !open && <span className="text-right pr-4">▽</span>}
-            { open && <span className="text-right pr-4" style={{ transform: 'scaleY(-1)' }}>▽</span>}
+            { !open && <span className="text-right pr-4" aria-hidden="true">▽</span>}
+            { open && <span className="text-right pr-4" aria-hidden="true" style={{ transform: 'scaleY(-1)' }}>▽</span>}
           </DisclosureButton>
             <DisclosurePanel className="w-full p-2">
               <p className="text-justify">
@@ -192,6 +192,7 @@ export const GameEndDialog = ({
             </DialogTitle>
             <button
               onClick={() => setIsOpen(false)}
+              aria-label={t({ hu: 'Bezárás', en: 'Close' })}
               className="bg-slate-200 rounded-sm text-2xl px-1"
             >×</button>
           </header>
@@ -278,7 +279,10 @@ const PlayerNameSetup = ({ roleLabels, playerNames, setPlayerNames, onStart }) =
 };
 
 const Spinner = () => (
-  <div className="animate-spin h-8 w-8 border-t-blue-600 rounded-full border-4"></div>
+  <div
+    role="status" aria-label="Loading"
+    className="animate-spin h-8 w-8 border-t-blue-600 rounded-full border-4"
+  ></div>
 );
 
 const DifficultySelector = ({ variants, selectedIndex, onSelect, disabled: fieldsetDisabled }) => {
@@ -368,7 +372,7 @@ const PlayerTurnPanel = ({ ctx }) => {
   const isEnd = ctx.phase === 'gameEnd';
 
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-1" aria-live="polite">
       {[0, 1].map(i => {
         const isActive = !isEnd && ctx.currentPlayer === i;
         const isWinner = isEnd && ctx.winnerIndex === i;

@@ -91,7 +91,9 @@ const BoardClient = ({ board, ctx, moves }) => {
             onKeyUp={(event) => {
               if (event.key === 'Enter') colorTriangle(i);
             }}
-            tabIndex={ctx.isClientMoveAllowed ? 0 : 'none'}
+            tabIndex={ctx.isClientMoveAllowed ? 0 : undefined}
+            role={ctx.isClientMoveAllowed ? 'button' : undefined}
+            aria-label={ctx.isClientMoveAllowed ? `Triangle ${i + 1}` : undefined}
           ></polygon>
         ))}
       </svg>

@@ -117,7 +117,9 @@ export const BoardClient = ({ board, ctx, moves }) => {
               onKeyUp={(event) => {
                 if (event.key === 'Enter') handleCircleClick(vertex);
               }}
-              tabIndex={isClickable(vertex) ? 0 : 'none'}
+              tabIndex={isClickable(vertex) ? 0 : undefined}
+              role={isClickable(vertex) ? 'button' : undefined}
+              aria-label={isClickable(vertex) ? `Vertex ${vertex + 1}` : undefined}
               className={isClickable(vertex) ? 'opacity-50' : ''}
             />
           </Fragment>

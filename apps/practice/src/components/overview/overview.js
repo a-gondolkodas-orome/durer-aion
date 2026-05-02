@@ -74,6 +74,7 @@ const CategoryFilter = ({ selected, onChange }) => {
       <button
         onClick={() => onChange([])}
         disabled={selected.length === 0}
+        aria-label={t({ hu: 'Szűrés törlése', en: 'Clear filters' })}
         className={`rounded-lg px-2 py-0.5 border border-slate-300 bg-white text-sm
           text-gray-400 cursor-pointer disabled:opacity-0 disabled:cursor-default`}
       >×</button>
@@ -154,7 +155,7 @@ const Game = ({ gameId, gameProps }) => {
       <span className={`${chipBase} ${categoryColor}`}>{gameProps.category.join(', ')}</span>
       <span className={neutralChip}>{round}</span>
       <span className="grow"></span>
-      <span className="text-slate-400 text-sm">→</span>
+      <span className="text-slate-400 text-sm" aria-hidden="true">→</span>
     </div>
   </Link>;
 };

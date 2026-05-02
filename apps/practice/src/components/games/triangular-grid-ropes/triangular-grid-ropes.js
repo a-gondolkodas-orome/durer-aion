@@ -81,7 +81,9 @@ const BoardClient = ({ board, ctx, moves }) => {
         onKeyUp={(event) => {
           if (event.key === 'Enter') connectNode(vertex.id);
         }}
-        tabIndex={ctx.isClientMoveAllowed ? 0 : 'none'}
+        tabIndex={ctx.isClientMoveAllowed ? 0 : undefined}
+        role={ctx.isClientMoveAllowed ? 'button' : undefined}
+        aria-label={ctx.isClientMoveAllowed ? `Node ${vertex.id + 1}` : undefined}
         onFocus={() => setHoveredNode(vertex.id)}
         onBlur={() => setHoveredNode(null)}
         onMouseOver={() => setHoveredNode(vertex.id)}

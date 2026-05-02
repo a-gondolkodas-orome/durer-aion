@@ -107,7 +107,9 @@ const BoardClient = ({ board, ctx, moves }) => {
           onKeyUp={(event) => {
             if (event.key === 'Enter') setVertexColor(nodeId);
           }}
-          tabIndex={isMoveAllowed(nodeId) ? 0 : 'none'}
+          tabIndex={isMoveAllowed(nodeId) ? 0 : undefined}
+          role={isMoveAllowed(nodeId) ? 'button' : undefined}
+          aria-label={isMoveAllowed(nodeId) ? `Node ${nodeId + 1}` : undefined}
           fill={board[nodeId] || (isMoveAllowed(nodeId) || !show ? 'white' : 'gray')}
         />
       ))}

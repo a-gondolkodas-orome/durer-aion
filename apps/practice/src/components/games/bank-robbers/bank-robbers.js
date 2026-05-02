@@ -55,7 +55,9 @@ const BoardClient = ({ board, ctx, moves }) => {
         onKeyUp={(event) => {
           if (event.key === 'Enter') clickBank(index);
         }}
-        tabIndex={isAllowedMove(index) ? 0 : 'none'}
+        tabIndex={isAllowedMove(index) ? 0 : undefined}
+        role={isAllowedMove(index) ? 'button' : undefined}
+        aria-label={isAllowedMove(index) ? `Bank ${index + 1}` : undefined}
       ></circle>
     ))}
     </svg>
