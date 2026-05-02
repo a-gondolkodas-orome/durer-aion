@@ -20,7 +20,9 @@ export const GameSidebar = ({
   ctx,
   moves,
   variants,
-  selectedVariantIndex
+  selectedVariantIndex,
+  stats,
+  onResetStats
 }) => {
   const { t } = useTranslation();
   const isNewGameAllowed = ctx.phase !== 'play' || ctx.isClientMoveAllowed;
@@ -86,6 +88,9 @@ export const GameSidebar = ({
       >
         {t({ hu: 'Új játék', en: 'New game' })}
       </button>
+      {!ctx.isHumanVsHumanGame && stats && (
+        <WinLossCounter stats={stats} onReset={onResetStats} />
+      )}
     </div>
   );
 };
@@ -319,6 +324,27 @@ const DifficultySelector = ({ variants, selectedIndex, onSelect, disabled: field
         ))}
       </div>
     </fieldset>
+  );
+};
+
+const WinLossCounter = ({ stats, onReset }) => {
+  const { t } = useTranslation();
+  return (
+    <div className="flex items-center justify-between text-sm text-slate-500">
+      <span title={t({
+        hu: `Megnyert játékok: ${stats.win}, Elvesztett játékok: ${stats.loss}`,
+        en: `Wins: ${stats.win}, Losses: ${stats.loss}`
+      })}>
+        🏆 {stats.win} · 💀 {stats.loss}
+      </span>
+      <button
+        onClick={onReset}
+        aria-label={t({ hu: 'Számlálók nullázása', en: 'Reset counters' })}
+        className="text-xs hover:text-slate-700"
+      >
+        ↻
+      </button>
+    </div>
   );
 };
 

@@ -106,6 +106,36 @@ const renderGame = (config) => {
   return render(<MemoryRouter><Game /></MemoryRouter>);
 };
 
+const GameEndingBoardClient = ({ board, moves }) => (
+  <>
+    <button data-testid="end-win-btn" onClick={() => moves.endWin(board)}>win</button>
+    <button data-testid="end-lose-btn" onClick={() => moves.endLose(board)}>lose</button>
+  </>
+);
+
+const gameEndingConfig = (overrides = {}) => ({
+  presentation: {
+    rule: <></>,
+    title: 'Test',
+    getPlayerStepDescription: () => ''
+  },
+  BoardClient: GameEndingBoardClient,
+  gameplay: {
+    moves: {
+      endWin: (board, { ctx, events }) => {
+        events.endGame({ winnerIndex: ctx.currentPlayer });
+        return { nextBoard: board };
+      },
+      endLose: (board, { ctx, events }) => {
+        events.endGame({ winnerIndex: 1 - ctx.currentPlayer });
+        return { nextBoard: board };
+      }
+    }
+  },
+  variants: [{ botStrategy: () => {}, generateStartBoard: () => ['initial'] }],
+  ...overrides
+});
+
 const CtxAwareBoardClient = ({ board, ctx, moves }) => (
   <button
     data-testid="move-btn"
@@ -230,5 +260,47 @@ describe('strategyGameFactory endOfTurnMove', () => {
     act(() => { vi.advanceTimersByTime(750); });
 
     expect(autoMove).not.toHaveBeenCalled();
+  });
+});
+
+describe('win/loss tracking', () => {
+  beforeEach(() => { localStorage.clear(); });
+
+  it('records a win when the chosen player wins in vsComputer mode', () => {
+    const { getByTestId } = renderGame(gameEndingConfig());
+    fireEvent.click(getByTestId('role-btn-0')); // choose first player (index 0 = currentPlayer 0)
+    fireEvent.click(getByTestId('end-win-btn')); // currentPlayer wins = player wins
+    const stats = JSON.parse(localStorage.getItem('stats__0'));
+    expect(stats).toEqual({ win: 1, loss: 0 });
+  });
+
+  it('records a loss when the opponent wins in vsComputer mode', () => {
+    const { getByTestId } = renderGame(gameEndingConfig());
+    fireEvent.click(getByTestId('role-btn-0'));
+    fireEvent.click(getByTestId('end-lose-btn')); // other player wins = player loses
+    const stats = JSON.parse(localStorage.getItem('stats__0'));
+    expect(stats).toEqual({ win: 0, loss: 1 });
+  });
+
+  it('does not record in localStorage in vsHuman mode', () => {
+    const { getByTestId } = renderGame(gameEndingConfig());
+    fireEvent.click(getByTestId('mode-vsHuman'));
+    fireEvent.click(getByTestId('start-hh-game'));
+    fireEvent.click(getByTestId('end-win-btn'));
+    expect(localStorage.getItem('stats__0')).toBeNull();
+  });
+
+  it('accumulates results across multiple games', () => {
+    const { getByTestId, unmount } = renderGame(gameEndingConfig());
+    fireEvent.click(getByTestId('role-btn-0'));
+    fireEvent.click(getByTestId('end-win-btn')); // win
+    unmount();
+
+    const { getByTestId: g2 } = renderGame(gameEndingConfig());
+    fireEvent.click(g2('role-btn-0'));
+    fireEvent.click(g2('end-lose-btn')); // loss
+
+    const stats = JSON.parse(localStorage.getItem('stats__0'));
+    expect(stats).toEqual({ win: 1, loss: 1 });
   });
 });

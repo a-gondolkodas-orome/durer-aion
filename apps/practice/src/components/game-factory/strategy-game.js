@@ -4,6 +4,8 @@ import {
 } from './game-parts';
 import { partial, mapValues, wrap, _ } from 'lodash';
 import { useTranslation } from '../language/translate';
+import { useLocation } from 'react-router';
+import { useGameStats } from './use-game-stats';
 
 export const resolveVariants = (variants) => {
   if (!variants || variants.length === 0) {
@@ -53,6 +55,10 @@ export const strategyGameFactory = ({
 
     const isHumanVsHumanGame = mode === 'vsHuman';
 
+    const location = useLocation();
+    const gameId = location.pathname.split('/').pop();
+    const { stats, recordResult, resetStats } = useGameStats(gameId, selectedVariantIndex);
+
     useEffect(() => {
       if (!isHumanVsHumanGame && phase === 'play' && currentPlayer === (1 - chosenRoleIndex)) {
         doBotTurn();
@@ -100,9 +106,13 @@ export const strategyGameFactory = ({
     };
 
     const endGame = ({ winnerIndex = null } = {}) => {
+      const resolvedWinner = winnerIndex === null ? currentPlayer : winnerIndex;
       setPhase('gameEnd');
-      setWinnerIndex(winnerIndex === null ? currentPlayer : winnerIndex);
+      setWinnerIndex(resolvedWinner);
       setIsGameEndDialogOpen(true);
+      if (!isHumanVsHumanGame) {
+        recordResult(resolvedWinner === chosenRoleIndex ? 'win' : 'loss');
+      }
     };
 
     const endTurn = () => {
@@ -189,6 +199,8 @@ export const strategyGameFactory = ({
               moves={{ startGame, resetGameState, switchMode, setPlayerNames, setDifficulty }}
               variants={visibleVariants}
               selectedVariantIndex={selectedVariantIndex}
+              stats={stats}
+              onResetStats={resetStats}
             />
           </div>
         </div>
