@@ -5,14 +5,10 @@ import { gameList } from '../gameList';
 import { BoardClient } from './board-client';
 import { aiBotStrategy } from './bot-strategy';
 
-// Vertices A(0)..H(7) clockwise, each edge 10 km, max 40 km/day
+// Vertices A(0)..J(9) clockwise, each edge 10 km, max 50 km/day
 
 const generateStartBoard = () => {
-  const towers = Array(8).fill(false);
-  /*
-  Workaround to have a tower at the start of day 1, as startOfTurnMove or
-  similar is not supported by framework.
-  */
+  const towers = Array(10).fill(false);
   towers[0] = true;
   return {
     architectPosition: 0,
@@ -42,11 +38,13 @@ const moves = {
     events.endTurn();
     return { nextBoard };
   },
+
   destroyTower: (board, _ctx, vertex) => {
     const nextBoard = cloneDeep(board);
     nextBoard.towers[vertex] = false;
     return { nextBoard, autoEndOfTurn: true };
   },
+
   startNextDay: (board, { events }) => {
     const nextBoard = cloneDeep(board);
     nextBoard.day += 1;
@@ -59,32 +57,32 @@ const moves = {
 
 const rule = {
   hu: <>
-    Óxisz városa egy szabályos nyolcszög alakú fallal van körülvéve, melynek szomszédos csúcsai 10 km-re
-    vannak egymástól. A város építésze szeretne négy nap alatt mind a nyolc csúcsba egy-egy őrtornyot
+    Óxisz városa egy szabályos tízszög alakú fallal van körülvéve, melynek szomszédos csúcsai 10 km-re
+    vannak egymástól. A város építésze szeretne négy nap alatt mind a tíz csúcsba egy-egy őrtornyot
     építeni, ám ezt a banditák szeretnék megakadályozni. Az építész úgy építi a tornyokat, hogy ha
     napközben az útja során (akár az elején vagy a végén) érint egy csúcsot, ahol még nincs torony,
     akkor elhelyez oda egyet.
-    Az építész az A-val jelölt csúcsból indul, csak a várfalakon mozoghat, minden nap legfeljebb 40 km-t
+    Az építész az A-val jelölt csúcsból indul, csak a várfalakon mozoghat, minden nap legfeljebb 50 km-t
     tud megtenni és az éjszakát a várfal egyik csúcsánál kell töltenie. Ezután éjszaka a banditák
     kiválaszthatnak egy csúcsot, és az ott lévő tornyot lerombolhatják. Az építész akkor nyer, ha a
-    negyedik napon napnyugtakor mind a nyolc csúcsban áll egy-egy torony, ellenkező esetben a banditák
+    negyedik napon napnyugtakor mind a tíz csúcsban áll egy-egy torony, ellenkező esetben a banditák
     győznek.
   </>,
   en: <>
-    The city of Óxisz is surrounded by a regular octagon-shaped wall, with adjacent vertices 10 km
-    apart. The city's architect wants to build a watchtower at each of the eight vertices in four days,
+    The city of Óxisz is surrounded by a regular decagon-shaped wall, with adjacent vertices 10 km
+    apart. The city's architect wants to build a watchtower at each of the ten vertices in four days,
     but the bandits want to prevent this. The architect builds a tower whenever their daily journey
     touches a vertex (including at the very start or end of the day) where no tower stands yet.
-    The architect starts from vertex A, can only move along the walls, can travel at most 40 km per
+    The architect starts from vertex A, can only move along the walls, can travel at most 50 km per
     day, and must spend the night at a vertex. Each night the bandits may choose one vertex and destroy
-    the tower there. The architect wins if all eight vertices have a watchtower at sunset on day four;
+    the tower there. The architect wins if all ten vertices have a watchtower at sunset on day four;
     otherwise the bandits win.
   </>
 };
 
-const { name, title, credit } = gameList.ArchitectsAndBandits;
+const { name, title, credit } = gameList.ArchitectAndBanditsB;
 
-export const ArchitectsAndBandits = strategyGameFactory({
+export const ArchitectAndBanditsB = strategyGameFactory({
   presentation: {
     rule,
     title: title || name,
@@ -95,7 +93,7 @@ export const ArchitectsAndBandits = strategyGameFactory({
     ],
     getPlayerStepDescription: ({ board, ctx }) => {
       if (ctx.currentPlayer === 0) {
-        const movesLeft = (40 - board.kmUsedToday) / 10;
+        const movesLeft = (50 - board.kmUsedToday) / 10;
         if (movesLeft === 0) {
           return {
             hu: `${board.day}. nap: Fejezd be a napot!`,

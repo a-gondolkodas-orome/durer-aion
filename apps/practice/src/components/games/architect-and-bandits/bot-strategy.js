@@ -106,28 +106,47 @@ const getOptimalArchitectPath = (board) => {
   return [];
 };
 
-// Bandit heuristic: day 1 random (not architect's vertex), later days farthest from architect.
+// Bandit heuristic: pick the tower that maximises the
+// minimum path the architect needs to cover all missing+newly-destroyed vertices.
+// Destroying the architect's current position is excluded: startNextDay rebuilds it for free.
 const executeBanditStrategy = (board, moves) => {
-  const towered = board.towers.map((t, i) => (t ? i : null)).filter((i) => i !== null);
-  if (towered.length === 0) return;
+  const pos = board.architectPosition;
+  const candidates = board.towers
+    .map((t, i) => (t && i !== pos ? i : null))
+    .filter((i) => i !== null);
+  if (candidates.length === 0) return;
 
-  if (board.day === 1) {
-    const candidates = towered.filter((v) => v !== board.architectPosition);
-    moves.destroyTower(board, sample(candidates.length > 0 ? candidates : towered));
-    return;
-  }
+  const missing = board.towers
+    .map((t, i) => (!t && i !== pos ? i : null))
+    .filter((i) => i !== null);
 
-  const best = towered.reduce(
+  const best = candidates.reduce(
     (acc, v) => {
-      const d = octDist(v, board.architectPosition);
-      return d > acc.dist ? { v, dist: d } : acc;
+      const pathLen = minPathToVisitAll(pos, [...missing, v]);
+      return pathLen > acc.len ? { v, len: pathLen } : acc;
     },
-    { v: null, dist: -1 }
+    { v: null, len: -1 }
   );
   moves.destroyTower(board, best.v);
 };
 
-const octDist = (a, b) => Math.min((b - a + 8) % 8, (a - b + 8) % 8);
+// Minimum moves to visit all targets from pos on an 8-cycle.
+// Tries all k+1 arc splits: j targets covered going CW, the rest going CCW.
+const minPathToVisitAll = (pos, targets) => {
+  if (targets.length === 0) return 0;
+  const cwDists = targets.map((v) => (v - pos + 8) % 8).sort((a, b) => a - b);
+  const k = cwDists.length;
+  let best = Infinity;
+  for (let j = 0; j <= k; j++) {
+    const cwReach = j > 0 ? cwDists[j - 1] : 0;
+    const ccwReach = j < k ? 8 - cwDists[j] : 0;
+    const cost = cwReach === 0 ? ccwReach
+      : ccwReach === 0 ? cwReach
+        : Math.min(2 * cwReach + ccwReach, cwReach + 2 * ccwReach);
+    best = Math.min(best, cost);
+  }
+  return best;
+};
 
 const directedPath = (from, to, step) => {
   const path = [];

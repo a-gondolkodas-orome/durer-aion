@@ -123,12 +123,17 @@ export const BoardClient = ({ board, ctx, moves }) => {
         })}
 
         {/* Day / km info inside SVG */}
-        <text x="50" y="104" textAnchor="middle" fontSize="3.5" fill="#374151">
-          {t({
-            hu: `${board.day}. nap · ${board.kmUsedToday}/40 km`,
-            en: `Day ${board.day} · ${board.kmUsedToday}/40 km`
-          })}
-        </text>
+        {ctx.phase === 'play' &&
+          <text x="50" y="104" textAnchor="middle" fontSize="3.5" fill="#374151">
+            {ctx.currentPlayer === 0
+              ? t({
+                hu: `${board.day}. nap · ${board.kmUsedToday}/40 km`,
+                en: `Day ${board.day} · ${board.kmUsedToday}/40 km`
+              })
+              : t({ hu: `${board.day}. éjszaka`, en: `Night ${board.day}` })
+            }
+          </text>
+        }
       </svg>
 
       {/* End Day button */}
