@@ -35,6 +35,13 @@ export const gameList = {
     name: { hu: "3x3-as antiamőba", en: "3×3 anti-tic-tac-toe" },
     credit: { developedBy: ["Czeller Ildikó"] }
   },
+  ArchitectsAndBandits: {
+    year: { k: "XVII. (23/24)", v: "23/24" },
+    round: "döntő",
+    category: ["A"],
+    name: { hu: "Építészek és banditák", en: "Architects and Bandits" },
+    credit: { developedBy: ["Czeller Ildikó"] }
+  },
   Bacteria: {
     year: { k: "X. (16/17)", v: "16/17" },
     round: "döntő",
