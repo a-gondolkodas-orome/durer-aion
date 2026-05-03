@@ -14,30 +14,9 @@ export const aiBotStrategy = ({ board, moves }) => {
 
 export const getOptimalAiMove = (board) => {
   const { row, col } = board.rookPosition;
-
-  const allowedHorizontalMoves = [];
-  let i = 1;
-  while (col - i >= 0 && board.chessBoard[row ][col - i] === null) {
-    allowedHorizontalMoves.push({ row, col: col - i });
-    i += 1;
-  }
-  i = 1;
-  while (col + i <= 7 && board.chessBoard[row][col + i] === null) {
-    allowedHorizontalMoves.push({ row, col: col + i });
-    i += 1;
-  }
-
-  const allowedVerticalMoves = [];
-  i = 1;
-  while (row - i >= 0 && board.chessBoard[(row - i)][col] === null) {
-    allowedVerticalMoves.push({ row: row - i, col });
-    i += 1;
-  }
-  i = 1;
-  while (row + i <= 7 && board.chessBoard[(row + i)][col] === null) {
-    allowedVerticalMoves.push({ row: row + i, col });
-    i += 1;
-  }
+  const allMoves = getAllowedMoves(board);
+  const allowedHorizontalMoves = allMoves.filter(m => m.row === row);
+  const allowedVerticalMoves = allMoves.filter(m => m.col === col);
 
   if (allowedHorizontalMoves.length < allowedVerticalMoves.length) {
     return last(allowedVerticalMoves);
