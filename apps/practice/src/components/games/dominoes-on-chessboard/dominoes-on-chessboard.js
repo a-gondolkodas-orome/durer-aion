@@ -6,6 +6,23 @@ const BOARDSIZE = 6;
 const getId = ({ row, col }) => row * BOARDSIZE + col;
 const isCovered = (field, board) => flatMap(board).includes(getId(field));
 
+const getDominoDirection = (field, board) => {
+  const domino = board.find(d => d.includes(getId(field)));
+  const neighbor = domino[0] === getId(field) ? domino[1] : domino[0];
+  const nCol = neighbor % BOARDSIZE;
+  const nRow = (neighbor - nCol) / BOARDSIZE;
+  if (field.row === nRow) return field.col < nCol ? 'left' : 'right';
+  return field.row < nRow ? 'top' : 'bottom';
+};
+
+// Each direction: all 4 borders except the opposite side, rounded on its own side.
+const DOMINO_BORDER_CLASSES = {
+  left:   'rounded-l-md border-t-4 border-b-4 border-l-4',
+  right:  'rounded-r-md border-t-4 border-b-4 border-r-4',
+  top:    'rounded-t-md border-t-4 border-l-4 border-r-4',
+  bottom: 'rounded-b-md border-b-4 border-l-4 border-r-4'
+};
+
 const BoardClient = ({ board, ctx, moves }) => {
   const [selectedField, setSelectedField] = useState(null);
   const [hoveredField, setHoveredField] = useState(null);
@@ -56,25 +73,9 @@ const BoardClient = ({ board, ctx, moves }) => {
     return true;
   }
 
-  const getDominoDirection = (field) => {
-    const domino = board.find(d => d.includes(getId(field)));
-    const neighbor = domino[0] === getId(field) ? domino[1] : domino[0];
-    const nCol = neighbor % BOARDSIZE;
-    const nRow = (neighbor - nCol) / BOARDSIZE;
-    if (field.row === nRow) return field.col < nCol ? 'left' : 'right';
-    return field.row < nRow ? 'top' : 'bottom';
-  };
-
-  const DOMINO_BORDER_CLASSES = {
-    left:   'rounded-l-md border-t-4 border-b-4 border-l-4',
-    right:  'rounded-r-md border-t-4 border-b-4 border-r-4',
-    top:    'rounded-t-md border-t-4 border-l-4 border-r-4',
-    bottom: 'rounded-b-md border-b-4 border-l-4 border-r-4'
-  };
-
   const getDominoBorders = (field) => {
     if (!isCovered(field, board)) return '';
-    return DOMINO_BORDER_CLASSES[getDominoDirection(field)];
+    return DOMINO_BORDER_CLASSES[getDominoDirection(field, board)];
   }
 
   return (
@@ -107,12 +108,12 @@ const BoardClient = ({ board, ctx, moves }) => {
                       aspect-square rounded-full bg-yellow-400 inline-block
                       absolute z-20 left-[40%] right-[40%] bottom-[40%]
                     `} />
-                    {getDominoDirection({ row, col }) === 'left' && (
+                    {getDominoDirection({ row, col }, board) === 'left' && (
                       <span className={
                         'absolute right-0 top-0 bottom-0 w-1.5 bg-yellow-400 z-10 translate-x-full'
                       } />
                     )}
-                    {getDominoDirection({ row, col }) === 'top' && (
+                    {getDominoDirection({ row, col }, board) === 'top' && (
                       <span className={
                         'absolute bottom-0 left-0 right-0 h-1.5 bg-yellow-400 z-10 translate-y-full'
                       } />
@@ -142,7 +143,6 @@ const getPossibleMoves = board => {
     if (row < (BOARDSIZE - 1) && !isCovered({ row: row + 1, col }, board)) {
       possibleMoves.push([getId({row, col }), getId({ row: row + 1, col })])
     };
-    return;
   });
 
   return possibleMoves;
