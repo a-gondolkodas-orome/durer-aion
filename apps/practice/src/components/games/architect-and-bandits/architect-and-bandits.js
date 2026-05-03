@@ -1,7 +1,6 @@
 import React from 'react';
 import { cloneDeep } from 'lodash';
 import { strategyGameFactory } from '../../game-factory/strategy-game';
-import { gameList } from '../gameList';
 import { BoardClient } from './board-client';
 import { aiBotStrategy } from './bot-strategy';
 
@@ -82,13 +81,10 @@ const rule = {
   </>
 };
 
-const { name, title, credit } = gameList.ArchitectAndBandits;
 
 export const ArchitectAndBandits = strategyGameFactory({
   presentation: {
     rule,
-    title: title || name,
-    credit,
     roleLabels: [
       { hu: 'Építész', en: 'Architect' },
       { hu: 'Banditák', en: 'Bandits' }

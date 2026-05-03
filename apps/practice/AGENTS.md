@@ -56,8 +56,6 @@ Required params: `presentation`, `BoardClient`, `gameplay`, `variants`.
 strategyGameFactory({
   presentation: {
     rule,                      // i18n rules text shown in collapsible section
-    title,                     // i18n game title — resolve as: gameList.X.title || gameList.X.name
-    credit?,                   // from gameList.X.credit — optional
     roleLabels?,               // optional: [{ hu, en }, { hu, en }] — defaults to "1st/2nd player"
     getPlayerStepDescription,  // ({ board, ctx }) => { hu, en } — shown as turn instruction
   },

@@ -4,7 +4,6 @@ import { CastleSvg } from './assets/castle-svg';
 import { SoldierSvg } from './assets/soldier-svg';
 import { aiBotStrategy } from './bot-strategy';
 import { generateStartBoard, moves } from './helpers';
-import { gameList } from '../gameList';
 import { useTranslation } from '../../language/translate';
 
 const BoardClient = ({ board, ctx, moves }) => {
@@ -133,12 +132,9 @@ const rule = {
   </>
 };
 
-const { name, title, credit } = gameList.HunyadiAndTheJanissaries;
 export const HunyadiAndTheJanissaries = strategyGameFactory({
   presentation: {
     rule,
-    title: title || name,
-    credit,
     roleLabels: [
       { hu: 'Szultán', en: "Sultan" },
       { hu: 'Hunyadi', en: "Hunyadi" }

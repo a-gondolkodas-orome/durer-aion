@@ -4,7 +4,6 @@ import { strategyGameFactory } from '../../../game-factory/strategy-game';
 import { aiBotStrategy } from './bot-strategy';
 import { generateEmptyTicTacToeBoard } from '../helpers';
 import { isGameEnd, hasFirstPlayerWon } from './helpers';
-import { gameList } from '../../gameList';
 
 const BoardClient = ({ board, ctx, moves }) => {
   const isMoveAllowed = (id) => {
@@ -95,12 +94,9 @@ const rule = {
   </>
 };
 
-const { name, title, credit } = gameList.TicTacToeDoubleStart;
 export const TicTacToeDoubleStart = strategyGameFactory({
   presentation: {
     rule,
-    title: title || name,
-    credit,
     getPlayerStepDescription
   },
   BoardClient,

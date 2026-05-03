@@ -1,7 +1,6 @@
 import React from 'react';
 import { strategyGameFactory } from '../../game-factory/strategy-game';
 import { range, sum, sample, cloneDeep } from 'lodash';
-import { gameList } from '../gameList';
 import { useTranslation } from '../../language/translate';
 
 const BoardClient = ({ board, ctx, moves }) => {
@@ -114,8 +113,6 @@ const getPlayerStepDescription = () => ({
 export const NumberCovering8 = strategyGameFactory({
   presentation: {
     rule: rule8,
-    title: gameList.NumberCovering8.title || gameList.NumberCovering8.name,
-    credit: gameList.NumberCovering8.credit,
     getPlayerStepDescription
   },
   BoardClient,
@@ -126,8 +123,6 @@ export const NumberCovering8 = strategyGameFactory({
 export const NumberCovering10 = strategyGameFactory({
   presentation: {
     rule: rule10,
-    title: gameList.NumberCovering10.title || gameList.NumberCovering10.name,
-    credit: gameList.NumberCovering10.credit,
     getPlayerStepDescription
   },
   BoardClient,

@@ -4,7 +4,6 @@ import { strategyGameFactory } from '../../../game-factory/strategy-game';
 import { generateEmptyTicTacToeBoard } from '../helpers';
 import { aiBotStrategy } from './bot-strategy';
 import { inPlacingPhase, isGameEnd, currentPlayerColor, otherPlayerColor } from './helpers';
-import { gameList } from '../../gameList';
 
 const BoardClient = ({ board, ctx, moves }) => {
   const gameIsInPlacingPhase = inPlacingPhase(board);
@@ -117,12 +116,9 @@ const rule = {
   </>
 };
 
-const { name, title, credit } = gameList.TicTacToe;
 export const TicTacToe = strategyGameFactory({
   presentation: {
     rule,
-    title: title || name,
-    credit,
     getPlayerStepDescription
   },
   BoardClient,

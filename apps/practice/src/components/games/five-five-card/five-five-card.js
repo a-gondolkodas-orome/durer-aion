@@ -2,7 +2,6 @@ import React from 'react';
 import { range, cloneDeep, compact } from 'lodash';
 import { strategyGameFactory } from '../../game-factory/strategy-game';
 import { aiBotStrategy } from './bot-strategy';
-import { gameList } from '../gameList';
 import { useTranslation } from '../../language/translate';
 
 const BoardClient = ({ board, ctx, moves }) => {
@@ -100,12 +99,9 @@ const rule = {
   </>
 };
 
-const { name, title, credit } = gameList.FiveFiveCard;
 export const FiveFiveCard = strategyGameFactory({
   presentation: {
     rule,
-    title: title || name,
-    credit,
     getPlayerStepDescription: () => ({
       hu: 'Vegyél el egy kártyát az ellenfél elől.',
       en: 'Remove a card from your opponent.'

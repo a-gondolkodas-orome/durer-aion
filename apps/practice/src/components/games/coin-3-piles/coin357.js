@@ -3,7 +3,6 @@ import { strategyGameFactory } from '../../game-factory/strategy-game';
 import { aiBotStrategy  } from './bot-strategy';
 import { BoardClient } from './board-client';
 import { getPlayerStepDescription, moves } from './helpers';
-import { gameList } from '../gameList';
 
 const rule = {
   hu: <>
@@ -19,12 +18,9 @@ const rule = {
  </>
 };
 
-const { name, title, credit } = gameList.Coin357;
 export const Coin357 = strategyGameFactory({
   presentation: {
     rule,
-    title: title || name,
-    credit,
     getPlayerStepDescription
   },
   BoardClient,

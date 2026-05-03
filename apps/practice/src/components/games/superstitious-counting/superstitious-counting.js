@@ -2,7 +2,6 @@ import React from 'react';
 import { range, sample, difference } from 'lodash';
 import { strategyGameFactory } from '../../game-factory/strategy-game';
 import { aiBotStrategy } from './bot-strategy';
-import { gameList } from '../gameList';
 import { useTranslation } from '../../language/translate';
 
 const generateStartBoard = () => {
@@ -98,12 +97,9 @@ const rule = {
   </>
 };
 
-const { name, title, credit } = gameList.SuperstitiousCounting;
 export const SuperstitiousCounting = strategyGameFactory({
   presentation: {
     rule,
-    title: title || name,
-    credit,
     getPlayerStepDescription: () => ({
       hu: 'Kattints a számra ahova lépni szeretnél.',
       en: 'Click on a number to step onto it.'

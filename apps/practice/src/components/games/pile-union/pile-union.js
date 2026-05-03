@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { range, random } from 'lodash';
 import { strategyGameFactory } from '../../game-factory/strategy-game';
-import { gameList } from '../gameList';
 import { useTranslation } from '../../language/translate';
 import { aiBotStrategy, randomBotStrategy } from './bot-strategy';
 
@@ -210,12 +209,9 @@ const rule = {
   </>
 };
 
-const { name, title, credit } = gameList.PileUnion;
 export const PileUnion = strategyGameFactory({
   presentation: {
     rule,
-    title: title || name,
-    credit,
     getPlayerStepDescription
   },
   BoardClient,

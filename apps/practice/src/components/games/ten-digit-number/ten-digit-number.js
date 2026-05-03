@@ -1,7 +1,6 @@
 import React from 'react';
 import { sample } from 'lodash';
 import { strategyGameFactory } from '../../game-factory/strategy-game';
-import { gameList } from '../gameList';
 import { useTranslation } from '../../language/translate';
 
 const totalDigits = 10;
@@ -151,12 +150,9 @@ const rule = {
   </>
 };
 
-const { name, title, credit } = gameList.TenDigitNumber;
 export const TenDigitNumber = strategyGameFactory({
   presentation: {
     rule,
-    title: title || name,
-    credit,
     roleLabels: [
       { hu: 'Jenő (1.)', en: 'Alice (1st)' },
       { hu: 'Béla (2.)', en: 'Bob (2nd)' }

@@ -4,7 +4,6 @@ import { strategyGameFactory } from '../../game-factory/strategy-game';
 import { aiBotStrategy } from './bot-strategy';
 import { getAllowedMoves, generateStartBoard, markVisitedFields } from './helpers';
 import { ChessRookSvg } from './chess-rook-svg';
-import { gameList } from '../gameList';
 
 const BoardClient = ({ board, ctx, moves }) => {
   const clickField = (field) => {
@@ -90,12 +89,9 @@ const rule = {
   </>
 };
 
-const { name, title, credit } = gameList.ChessRook;
 export const ChessRook = strategyGameFactory({
   presentation: {
     rule,
-    title: title || name,
-    credit,
     getPlayerStepDescription: () => ({
       hu: 'Kattints egy szabad mezőre a bástyával egy sorban vagy oszlopban.',
       en: 'Click on a free square in the same row or column as the rook.'

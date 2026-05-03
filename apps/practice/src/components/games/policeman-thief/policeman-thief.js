@@ -4,7 +4,6 @@ import { strategyGameFactory } from "../../game-factory/strategy-game";
 import { neighbours } from "./helpers";
 import { aiBotStrategy } from "./bot-strategy";
 import { BoardClient } from "./board-client";
-import { gameList } from "../gameList";
 
 const generateStartBoardA = () => {
   const policeStartPosition = random(0, 7);
@@ -122,12 +121,9 @@ const ruleB = {
   </>
 }
 
-const { name: nameA, title: titleA } = gameList.Policemanthief;
 export const PolicemanthiefA = strategyGameFactory({
   presentation: {
     rule: ruleA,
-    title: titleA || nameA,
-    credit: gameList.Policemanthief.credit,
     roleLabels: [
       { hu: "Rendőrök", en: "Policemen" },
       { hu: "Tolvaj", en: "Thief" }
@@ -153,12 +149,9 @@ export const PolicemanthiefA = strategyGameFactory({
   variants: [{ botStrategy: aiBotStrategy, generateStartBoard: generateStartBoardA }]
 });
 
-const { name: nameB, title: titleB } = gameList.PolicemanthiefB;
 export const PolicemanthiefB = strategyGameFactory({
   presentation: {
     rule: ruleB,
-    title: titleB || nameB,
-    credit: gameList.PolicemanthiefB.credit,
     roleLabels: [
       { hu: "Rendőrök", en: "Policemen" },
       { hu: "Tolvaj", en: "Thief" }

@@ -2,7 +2,6 @@ import React from 'react';
 import { strategyGameFactory } from '../../game-factory/strategy-game';
 import { range, cloneDeep, random, sample } from 'lodash';
 import { aiBotStrategy } from './bot-strategy';
-import { gameList } from '../gameList';
 
 const BoardClient = ({ board, ctx, moves }) => {
   const getAngle = (index) => {
@@ -116,12 +115,9 @@ const generateStartBoard = () => {
   }
 }
 
-const { name, title, credit } = gameList.BankRobbers;
 export const BankRobbers = strategyGameFactory({
   presentation: {
     rule,
-    title: title || name,
-    credit,
     getPlayerStepDescription: () => ({
       hu: 'Válassz egy kirabolható bankot.',
       en: 'Choose a bank that can be robbed.'

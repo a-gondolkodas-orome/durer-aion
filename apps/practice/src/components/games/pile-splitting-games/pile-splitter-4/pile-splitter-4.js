@@ -3,7 +3,6 @@ import { range, isEqual, cloneDeep } from 'lodash';
 import { strategyGameFactory } from '../../../game-factory/strategy-game';
 import { aiBotStrategy } from './bot-strategy';
 import { generateStartBoard } from './helpers';
-import { gameList } from '../../gameList';
 
 const BoardClient = ({ board, ctx, moves }) => {
   const [removedPileId, setRemovedPileId] = useState(null);
@@ -183,12 +182,9 @@ const rule = {
   </>
 };
 
-const { name, title, credit } = gameList.PileSplitter4;
 export const PileSplitter4 = strategyGameFactory({
   presentation: {
     rule,
-    title: title || name,
-    credit,
     getPlayerStepDescription
   },
   BoardClient,

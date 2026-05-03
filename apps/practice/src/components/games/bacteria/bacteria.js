@@ -10,7 +10,6 @@ import {
   isAllowedAttackClick,
   moves
 } from "./helpers";
-import { gameList } from "../gameList";
 
 const boardWidth = 11;
 
@@ -267,12 +266,9 @@ const rule = {
   </>
 };
 
-const { name, title, credit } = gameList.Bacteria;
 export const Bacteria = strategyGameFactory({
   presentation: {
     rule,
-    title: title || name,
-    credit,
     roleLabels: [
       { hu: "Támadó", en: "Attacker" },
       { hu: "Védekező", en: "Defender" }

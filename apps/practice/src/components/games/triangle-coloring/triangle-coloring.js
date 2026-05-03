@@ -1,7 +1,6 @@
 import React from 'react';
 import { strategyGameFactory, dummyEvents } from '../../game-factory/strategy-game';
 import { range, cloneDeep, sample, shuffle } from 'lodash';
-import { gameList } from '../gameList';
 
 const FORBIDDEN = 2;
 // triangles
@@ -163,12 +162,9 @@ const rule = {
   </>
 };
 
-const { name, title, credit } = gameList.TriangleColoring;
 export const TriangleColoring = strategyGameFactory({
   presentation: {
     rule,
-    title: title || name,
-    credit,
     getPlayerStepDescription: () => ({
       hu: 'Kattints egy kis háromszögre.',
       en: 'Click on a small triangle.'

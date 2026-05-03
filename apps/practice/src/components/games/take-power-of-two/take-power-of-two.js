@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { strategyGameFactory } from '../../game-factory/strategy-game';
 import { range, random, reverse, sample } from 'lodash';
-import { gameList } from '../gameList';
 import { useTranslation } from '../../language/translate';
 
 const generateStartBoard = () => {
@@ -145,12 +144,9 @@ const rule = {
   </>
 };
 
-const { name, title, credit } = gameList.TakePowerOfTwo;
 export const TakePowerOfTwo = strategyGameFactory({
   presentation: {
     rule,
-    title: title || name,
-    credit,
     getPlayerStepDescription
   },
   BoardClient,

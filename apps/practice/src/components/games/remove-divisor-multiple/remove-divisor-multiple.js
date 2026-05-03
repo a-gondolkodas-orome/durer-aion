@@ -2,7 +2,6 @@ import React from 'react';
 import { strategyGameFactory } from '../../game-factory/strategy-game';
 import { range, cloneDeep, sample, random } from 'lodash';
 import { strategyDict } from './bot-strategy';
-import { gameList } from '../gameList';
 import { useTranslation } from '../../language/translate';
 
 const isAllowed = (board, n) => {
@@ -138,12 +137,9 @@ const generateStartBoard = () => {
   })
 }
 
-const { name, title, credit } = gameList.RemoveDivisorMultiple;
 export const RemoveDivisorMultiple = strategyGameFactory({
   presentation: {
     rule,
-    title: title || name,
-    credit,
     getPlayerStepDescription
   },
   BoardClient,

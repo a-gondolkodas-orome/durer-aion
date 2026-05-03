@@ -3,7 +3,6 @@ import { range, cloneDeep, every, some, isNull } from 'lodash';
 import { strategyGameFactory } from '../../game-factory/strategy-game';
 import { aiBotStrategy } from './bot-strategy';
 import { isAllowedStep, allColors } from './helpers';
-import { gameList } from '../gameList';
 import { useTranslation } from '../../language/translate';
 
 const generateStartBoard = () => Array(8).fill(null);
@@ -164,12 +163,9 @@ const rule = {
   </>
 };
 
-const { name, title, credit } = gameList.CubeColoring;
 export const CubeColoring = strategyGameFactory({
   presentation: {
     rule,
-    title: title || name,
-    credit,
     getPlayerStepDescription: () => ({
       hu: 'Válassz színt, majd színezz meg egy csúcsot!',
       en: 'Choose a colour, then colour a vertex.'

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { range, random, cloneDeep } from 'lodash';
 import { strategyGameFactory } from '../../../game-factory/strategy-game';
 import { aiBotStrategy } from './bot-strategy';
-import { gameList } from '../../gameList';
 import { useLanguage } from '../../../language/language-context';
 
 const generateStartBoard = () => ([random(0, 9), random(0, 9), random(0, 9), random(4, 9)]);
@@ -168,12 +167,9 @@ const rule = {
   </>
 };
 
-const { name, title, credit } = gameList.FourPilesSpreadAhead;
 export const FourPilesSpreadAhead = strategyGameFactory({
   presentation: {
     rule,
-    title: title || name,
-    credit,
     getPlayerStepDescription: () => ({
       hu: 'Kattints egy korongra, hogy jelezd, hány korongot szeretnél elvenni a kupacból.',
       en: 'Click on a disc to indicate the number of discs you want to remove.'

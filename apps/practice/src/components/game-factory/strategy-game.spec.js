@@ -93,7 +93,6 @@ const MinimalBoardClient = ({ board, moves }) => (
 const minimalConfig = (moves, endOfTurnMove) => ({
   presentation: {
     rule: <></>,
-    title: 'Test',
     getPlayerStepDescription: () => ''
   },
   BoardClient: MinimalBoardClient,
@@ -116,7 +115,6 @@ const GameEndingBoardClient = ({ board, moves }) => (
 const gameEndingConfig = (overrides = {}) => ({
   presentation: {
     rule: <></>,
-    title: 'Test',
     getPlayerStepDescription: () => ''
   },
   BoardClient: GameEndingBoardClient,
@@ -149,7 +147,6 @@ const ctxAwareConfig = (overrides = {}) => {
   return {
     presentation: {
       rule: <></>,
-      title: 'Test',
       getPlayerStepDescription: () => ''
     },
     BoardClient: CtxAwareBoardClient,

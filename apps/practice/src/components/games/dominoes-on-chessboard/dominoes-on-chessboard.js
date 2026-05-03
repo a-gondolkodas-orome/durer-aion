@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { range, cloneDeep, isEqual, flatMap, sample, last, shuffle } from 'lodash';
 import { strategyGameFactory, dummyEvents } from '../../game-factory/strategy-game';
-import { gameList } from '../gameList';
 
 const BOARDSIZE = 6;
 const getId = ({ row, col }) => row * BOARDSIZE + col;
@@ -245,12 +244,9 @@ const rule = {
   </>
 };
 
-const { name, title, credit } = gameList.DominoesOnChessboard;
 export const DominoesOnChessboard = strategyGameFactory({
   presentation: {
     rule,
-    title: title || name,
-    credit,
     getPlayerStepDescription: () => ({
       hu: 'Kattints egy üres mezőre, majd egy szomszédjára, hogy lehelyezz egy dominót.',
       en: 'Click an empty square, then a neighbour of it, to place a domino.'

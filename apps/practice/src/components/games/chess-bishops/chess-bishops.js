@@ -4,7 +4,6 @@ import { strategyGameFactory } from '../../game-factory/strategy-game';
 import { ChessBishopSvg } from './chess-bishop-svg';
 import { aiBotStrategy } from './bot-strategy';
 import { generateStartBoard, getAllowedMoves, BISHOP, FORBIDDEN, markForbiddenFields } from './helpers';
-import { gameList } from '../gameList';
 
 const BoardClient = ({ board, ctx, moves }) => {
   const [hoveredField, setHoveredField] = useState(null);
@@ -113,12 +112,9 @@ const rule = {
   </>
 };
 
-const { name, title, credit } = gameList.ChessBishops;
 export const ChessBishops = strategyGameFactory({
   presentation: {
     rule,
-    title: title || name,
-    credit,
     getPlayerStepDescription: () => ({
       hu: 'Kattints egy mezőre, amit nem üt egyik futó sem.',
       en: 'Click on a square that is not attacked by any bishop.'

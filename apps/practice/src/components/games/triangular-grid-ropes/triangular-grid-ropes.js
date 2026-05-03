@@ -3,7 +3,6 @@ import { strategyGameFactory } from '../../game-factory/strategy-game';
 import { aiBotStrategy } from './bot-strategy';
 import { isAllowed, getAllowedSuperset, isGameEnd, vertices } from './helpers';
 import { cloneDeep } from 'lodash';
-import { gameList } from '../gameList';
 
 const BoardClient = ({ board, ctx, moves }) => {
   const [firstNode, setFirstNode] = useState(null);
@@ -129,12 +128,9 @@ const rule = {
   </>
 };
 
-const { name, title, credit } = gameList.TriangularGridRopes;
 export const TriangularGridRopes = strategyGameFactory({
   presentation: {
     rule,
-    title: title || name,
-    credit,
     getPlayerStepDescription: () => ({
       hu: 'Kattints két oszlopra, amik között kötelet szeretnél kifeszíteni.',
       en: 'Click two poles to connect them.'

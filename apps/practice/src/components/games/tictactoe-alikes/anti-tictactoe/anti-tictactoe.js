@@ -4,7 +4,6 @@ import { strategyGameFactory } from '../../../game-factory/strategy-game';
 import { generateEmptyTicTacToeBoard } from '../helpers';
 import { isGameEnd, hasFirstPlayerWon } from './helpers';
 import { aiBotStrategy } from './bot-strategy';
-import { gameList } from '../../gameList';
 
 const BoardClient = ({ board, ctx, moves }) => {
   const isMoveAllowed = (id) => {
@@ -73,12 +72,9 @@ const rule = {
   </>
 };
 
-const { name, title, credit } = gameList.AntiTicTacToe;
 export const AntiTicTacToe = strategyGameFactory({
   presentation: {
     rule,
-    title: title || name,
-    credit,
     getPlayerStepDescription: () => ({
       hu: 'Helyezz le egy korongot egy üres mezőre kattintással.',
       en: 'Click on an empty square to place a piece.'

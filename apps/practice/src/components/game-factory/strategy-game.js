@@ -31,7 +31,7 @@ export const strategyGameFactory = ({
   gameplay,
   variants
 }) => {
-  const { rule, title, credit, roleLabels, getPlayerStepDescription } = presentation;
+  const { rule, roleLabels, getPlayerStepDescription } = presentation;
   const { moves, endOfTurnMove } = gameplay;
   const { defaultVariantIndex, defaultVariant, resolvedVariants } = resolveVariants(variants);
 
@@ -55,8 +55,7 @@ export const strategyGameFactory = ({
 
     const isHumanVsHumanGame = mode === 'vsHuman';
 
-    const location = useLocation();
-    const gameId = location.pathname.split('/').pop();
+    const gameId = useLocation().pathname.split('/').pop();
     const { stats, recordResult, resetStats } = useGameStats(gameId, selectedVariantIndex);
 
     useEffect(() => {
@@ -180,7 +179,7 @@ export const strategyGameFactory = ({
 
     return (
     <main className="flex flex-col p-2 min-h-screen">
-      <GameHeader title={t(title)} />
+      <GameHeader />
       <div className="flex justify-center grow">
         <div className="max-w-[100ch] w-full">
           <GameRule ruleDescription={t(rule)} />
@@ -205,7 +204,7 @@ export const strategyGameFactory = ({
           </div>
         </div>
       </div>
-      <GameFooter credit={credit}/>
+      <GameFooter />
       <GameEndDialog
         isOpen={isGameEndDialogOpen}
         setIsOpen={setIsGameEndDialogOpen}

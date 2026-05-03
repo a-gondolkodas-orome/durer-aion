@@ -9,7 +9,6 @@ import {
   getUntakenCards,
   generateStartBoard
 } from "../helpers";
-import { gameList } from '../../gameList';
 
 const CARD_COUNT = 9;
 
@@ -93,12 +92,9 @@ const rule = {
   </>
 };
 
-const { name, title, credit } = gameList.ThievesMean9;
 export const ThievesMean9 = strategyGameFactory({
   presentation: {
     rule,
-    title: title || name,
-    credit,
     roleLabels: [
       { hu: 'Nyomozó', en: "Sheriff" },
       { hu: 'Tolvaj', en: "Thief" }

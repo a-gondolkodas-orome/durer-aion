@@ -5,7 +5,6 @@ import { aiBotStrategy } from './bot-strategy';
 import { RockSvg } from './symbols/rock-svg';
 import { PaperSvg } from './symbols/paper-svg';
 import { ScissorSvg } from './symbols/scissor-svg';
-import { gameList } from '../gameList';
 import { useTranslation } from '../../language/translate';
 
 const BoardClient = ({ board, ctx, moves }) => {
@@ -98,12 +97,9 @@ const rule = {
   </>
 };
 
-const { name, title, credit } = gameList.RockPaperScissor;
 export const RockPaperScissor = strategyGameFactory({
   presentation: {
     rule,
-    title: title || name,
-    credit,
     getPlayerStepDescription: () => ({
       hu: 'Távolíts el egy kártyát az ellenfél elől.',
       en: 'Remove a card from your opponent.'

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { strategyGameFactory } from '../../game-factory/strategy-game';
 import { range, sample, random } from 'lodash';
-import { gameList } from '../gameList';
 import { useTranslation } from '../../language/translate';
 
 const primeList = [
@@ -175,12 +174,9 @@ const rule = {
   </>
 };
 
-const { name, title, credit } = gameList.PrimeExponentials;
 export const PrimeExponentials = strategyGameFactory({
   presentation: {
     rule,
-    title: title || name,
-    credit,
     getPlayerStepDescription
   },
   BoardClient,

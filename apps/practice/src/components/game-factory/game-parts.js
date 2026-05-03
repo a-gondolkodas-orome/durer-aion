@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router';
+import { Link, useLocation } from 'react-router';
 import {
   Disclosure, DisclosureButton, DisclosurePanel,
   Dialog, DialogPanel, DialogTitle,
@@ -7,6 +7,7 @@ import {
 } from '@headlessui/react';
 import { useTranslation } from '../language/translate';
 import { LanguageSelector } from '../language/language-selector';
+import { gameList } from '../games/gameList';
 
 export const DEFAULT_PLAYER_NAMES = [
   { hu: '1. játékos', en: '1st player' },
@@ -95,8 +96,11 @@ export const GameSidebar = ({
   );
 };
 
-export const GameHeader = ({ title }) => {
+export const GameHeader = () => {
   const { t } = useTranslation();
+  const gameId = useLocation().pathname.split('/').pop();
+  const gameEntry = gameList[gameId];
+  const title = t(gameEntry?.title || gameEntry?.name);
   return (
   <>
     <header className="flex flex-wrap items-baseline">
@@ -125,8 +129,10 @@ export const GameHeader = ({ title }) => {
   </>);
 };
 
-export const GameFooter = ({ credit }) => {
+export const GameFooter = () => {
   const { t } = useTranslation();
+  const gameId = useLocation().pathname.split('/').pop();
+  const credit = gameList[gameId]?.credit;
   return (
     <footer className="text-right">
       { credit !== undefined && (

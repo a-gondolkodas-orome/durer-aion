@@ -121,7 +121,6 @@ const botStrategy = ({ board, moves }) => {
 export const PlusOneTwo = strategyGameFactory({
   presentation: {
     rule: <>0-ról +1/+2 20-ig</>,
-    title: '+1, +2',
     // a function returning a string, receives optional { board, ctx }
     getPlayerStepDescription: () => 'Válaszd ki, hogy hánnyal növelsz.'
   },

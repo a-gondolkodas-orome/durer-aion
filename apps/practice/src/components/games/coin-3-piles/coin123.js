@@ -4,7 +4,6 @@ import { strategyGameFactory } from '../../game-factory/strategy-game';
 import { aiBotStrategy  } from './bot-strategy';
 import { BoardClient } from './board-client';
 import { getPlayerStepDescription, isWinningState, moves } from './helpers';
-import { gameList } from '../gameList';
 
 const generateStartBoard = () => {
   if (random(0, 1)) {
@@ -40,12 +39,9 @@ const rule = {
   </>
 };
 
-const { name, title, credit } = gameList.Coin123;
 export const Coin123 = strategyGameFactory({
   presentation: {
     rule,
-    title: title || name,
-    credit,
     getPlayerStepDescription
   },
   BoardClient,

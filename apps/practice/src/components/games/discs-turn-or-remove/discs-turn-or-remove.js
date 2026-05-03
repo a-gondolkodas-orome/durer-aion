@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { strategyGameFactory } from "../../game-factory/strategy-game";
 import { range, isEqual, random, sample, difference, filter, cloneDeep } from "lodash";
-import { gameList } from "../gameList";
 import { useTranslation } from "../../language/translate";
 
 const generateStartBoard = (maxDiscs) => () => {
@@ -226,8 +225,6 @@ const rule = (maxDiscs) => ({
 export const SixDiscs = strategyGameFactory({
   presentation: {
     rule: rule(6),
-    title: gameList.SixDiscs.title || gameList.SixDiscs.name,
-    credit: gameList.SixDiscs.credit,
     getPlayerStepDescription
   },
   BoardClient: gameBoardFactory(6),
@@ -238,8 +235,6 @@ export const SixDiscs = strategyGameFactory({
 export const TenDiscs = strategyGameFactory({
   presentation: {
     rule: rule(10),
-    title: gameList.TenDiscs.title || gameList.TenDiscs.name,
-    credit: gameList.TenDiscs.credit,
     getPlayerStepDescription
   },
   BoardClient: gameBoardFactory(10),

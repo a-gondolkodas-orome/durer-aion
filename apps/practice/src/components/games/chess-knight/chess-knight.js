@@ -4,7 +4,6 @@ import { strategyGameFactory } from '../../game-factory/strategy-game';
 import { aiBotStrategy } from './bot-strategy';
 import { getAllowedMoves, generateStartBoard, markVisitedFields } from './helpers';
 import { ChessKnightSvg } from './chess-knight-svg';
-import { gameList } from '../gameList';
 
 const BoardClient = ({ board, ctx, moves }) => {
   const clickField = (field) => {
@@ -87,12 +86,9 @@ const rule = {
   </>
 };
 
-const { name, title, credit } = gameList.ChessKnight;
 export const ChessKnight = strategyGameFactory({
   presentation: {
     rule,
-    title: title || name,
-    credit,
     getPlayerStepDescription: () => ({
       hu: 'Lépj egy szabad mezőre a huszárral.',
       en: 'Move the knight to a free square.'

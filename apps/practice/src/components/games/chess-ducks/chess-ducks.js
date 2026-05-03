@@ -9,9 +9,7 @@ import {
   FORBIDDEN,
   moves
 } from './helpers';
-import { gameList } from '../gameList';
-
-const chessDucksGameFactory = ({ ROWS, COLS }, metadata) => {
+const chessDucksGameFactory = ({ ROWS, COLS }) => {
   const generateStartBoard = () => {
     return range(0, ROWS).map(() => range(0, COLS).map(() => null));
   };
@@ -93,12 +91,9 @@ const chessDucksGameFactory = ({ ROWS, COLS }, metadata) => {
     </>
   };
 
-  const { name, title, credit } = metadata;
   return strategyGameFactory({
     presentation: {
       rule,
-      title: title || name,
-      credit,
       getPlayerStepDescription: () => ({
         hu: 'Kattints egy mezőre, amit nem üt egyik kacsa sem.',
         en: 'Click on a square that is not attacked by any duck.'
@@ -110,11 +105,5 @@ const chessDucksGameFactory = ({ ROWS, COLS }, metadata) => {
   });
 };
 
-export const ChessDucksC = chessDucksGameFactory(
-  { ROWS: 4, COLS: 6 },
-  gameList.ChessDucksC
-);
-export const ChessDucksE = chessDucksGameFactory(
-  { ROWS: 4, COLS: 7 },
-  gameList.ChessDucksE
-);
+export const ChessDucksC = chessDucksGameFactory({ ROWS: 4, COLS: 6 });
+export const ChessDucksE = chessDucksGameFactory({ ROWS: 4, COLS: 7 });

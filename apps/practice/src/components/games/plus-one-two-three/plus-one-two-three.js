@@ -1,7 +1,6 @@
 import React from 'react';
 import { strategyGameFactory } from '../../game-factory/strategy-game';
 import { range, random } from 'lodash';
-import { gameList } from '../gameList';
 
 const target = 40;
 const maxStep = 3;
@@ -79,12 +78,9 @@ const rule = {
   </>
 };
 
-const { name, title, credit } = gameList.PlusOneTwoThree;
 export const PlusOneTwoThree = strategyGameFactory({
   presentation: {
     rule,
-    title: title || name,
-    credit,
     getPlayerStepDescription: () => ({
       hu: 'Válaszd ki, hogy melyik számra lépsz.',
       en: 'Choose which number to step to.'

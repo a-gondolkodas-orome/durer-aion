@@ -2,7 +2,6 @@ import React from 'react';
 import { strategyGameFactory } from '../../game-factory/strategy-game';
 import { range, random } from 'lodash';
 import { ChessBishopSvg } from '../chess-bishops/chess-bishop-svg';
-import { gameList } from '../gameList';
 
 const BoardClient = ({ board, ctx, moves }) => {
   const isMoveAllowed = (step) => {
@@ -105,12 +104,9 @@ const rule = {
   </>
 };
 
-const { name, title, credit } = gameList.TwelveSquares;
 export const TwelveSquares = strategyGameFactory({
   presentation: {
     rule,
-    title: title || name,
-    credit,
     getPlayerStepDescription: ({ ctx: { currentPlayer } }) => currentPlayer === 0
       ? {
         hu: 'Kattints a mezőre ahova lépni szeretnél a bal oldali bábuval.',

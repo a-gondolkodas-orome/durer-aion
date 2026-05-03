@@ -4,7 +4,6 @@ import { aiBotStrategy } from './bot-strategy';
 import { BoardClient } from './board-client';
 import { isGameEnd, getWinnerIndex } from './helpers';
 import { cloneDeep } from 'lodash';
-import { gameList } from '../../gameList';
 
 const generateStartBoard = () => {
   return {
@@ -102,12 +101,9 @@ const getPlayerStepDescription = ({ board, ctx }) => {
   };
 };
 
-const { name, title, credit } = gameList.SharkChase4;
 export const SharkChase4 = strategyGameFactory({
   presentation: {
     rule,
-    title: title || name,
-    credit,
     roleLabels: [
       { hu: 'Kutató', en: "Researcher" },
       { hu: 'Cápa', en: "Shark" }
