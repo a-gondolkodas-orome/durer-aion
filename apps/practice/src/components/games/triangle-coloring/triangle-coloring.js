@@ -117,6 +117,10 @@ const moves = {
 
 const getAllowedMoves = board => range(16).filter(i => board[i] === null);
 
+const randomBotStrategy = ({ board, moves }) => {
+  moves.colorTriangle(board, sample(getAllowedMoves(board)));
+};
+
 const aiBotStrategy = ({ board, moves }) => {
   const optimalMove = getOptimalAiMove(board);
   moves.colorTriangle(board, optimalMove);
@@ -172,5 +176,13 @@ export const TriangleColoring = strategyGameFactory({
   },
   BoardClient,
   gameplay: { moves },
-  variants: [{ botStrategy: aiBotStrategy, generateStartBoard: () => Array(16).fill(null) }]
+  variants: [
+    { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
+    {
+      botStrategy: aiBotStrategy,
+      generateStartBoard: () => Array(16).fill(null),
+      label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
+      isDefault: true
+    }
+  ]
 });
