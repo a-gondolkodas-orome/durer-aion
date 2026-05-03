@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { MyGameState } from './game';
 import { BoardProps } from 'boardgame.io/react';
 import { useRef} from 'react';
@@ -16,10 +15,16 @@ export function MyBoard({ G, ctx, moves }: BoardProps<MyGameState>, theme: any) 
 
   const onClick = () => {
     // read input value
-    const inputValueK = parseInt(inputK.current!.value);
-    const inputValueL = parseInt(inputL.current!.value);
-    inputK.current!.value = '';
-    inputL.current!.value = '';
+    let inputValueK = 0; 
+    if (inputK.current) {
+      inputValueK = parseInt(inputK.current.value);
+      inputK.current.value = '';
+    }
+    let inputValueL = 0;
+    if (inputL.current) {
+      inputValueL = parseInt(inputL.current.value);
+      inputL.current.value = '';
+    }
     moves.changeCoins(inputValueK, inputValueL);
   };
 

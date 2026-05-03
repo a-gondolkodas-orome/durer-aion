@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { MyGameState } from './game';
 import { BoardProps } from 'boardgame.io/react';
 import { useRef } from 'react';
@@ -10,8 +9,11 @@ export function MyBoard({ G, ctx, moves }: BoardProps<MyGameState>) {
 
   const onClick = () => {
     // read input value
-    const inputValue = parseInt(inputEl.current!.value);
-    inputEl.current!.value = '';
+    let inputValue = 0;
+    if (inputEl.current) {
+      inputValue = parseInt(inputEl.current.value);
+      inputEl.current.value = '';
+    }
     moves.increaseNumber(inputValue);
   };
 

@@ -331,8 +331,7 @@ export function configureTeamsRouter(
     if (staleInfo.isStale) {
         console.log(`Stale found: ${JSON.stringify(staleInfo)}`);
         await closeMatch(
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          (team[staleInfo.gameState!] as InProgressMatchStatus).matchID,
+          (team[staleInfo.gameState ?? 'relayMatch'] as InProgressMatchStatus).matchID,
           teams,
           ctx.db
         );

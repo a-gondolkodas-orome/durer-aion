@@ -16,50 +16,26 @@ export const mockTeamState: TeamModelDto = {
   },
 }
 
-// eslint-disable-next-line @typescript-eslint/no-extraneous-class
-export class MockTeamState {
-  public static teamState: TeamModelDto | null = null;
+let teamState: TeamModelDto | null = null;  
 
-  public static mockHome = () => {
-    this.teamState = {
-      ...mockTeamState,
-      pageState: "HOME",
-    };
-  };
+const setPageState = (pageState: 'DISCLAIMER'|'HOME'|'RELAY'|'STRATEGY') => {  
+  teamState = { ...mockTeamState, pageState };  
+};  
 
-  public static mockDisclaimer = () => {
-    this.teamState = {
-      ...mockTeamState,
-      pageState: "DISCLAIMER",
-    };
-  };
-
-  public static mockRelay = () => {
-    this.teamState = {
-      ...mockTeamState,
-      pageState: "RELAY",
-    };
-  };
-
-  public static mockStrategy = () => {
-    this.teamState = {
-      ...mockTeamState,
-      pageState: "STRATEGY",
-    };
-  };
-
-  public static mockHook = {
-    useTeamState: () => {
-      return MockTeamState.teamState;
-    },
-    useRefreshTeamState: jest.fn(),
-    useLogin: jest.fn(),
-    useLogout: jest.fn(),
-    useStartRelay: jest.fn(),
-    useStartStrategy: jest.fn(),
-    useToHome: jest.fn(),
-    LoadTeamState: () => {
-      return null;
-    },
-  };
-}
+export const MockTeamState = {  
+  get teamState() { return teamState; },  
+  mockHome: () => setPageState("HOME"),  
+  mockDisclaimer: () => setPageState("DISCLAIMER"),  
+  mockRelay: () => setPageState("RELAY"),  
+  mockStrategy: () => setPageState("STRATEGY"),  
+  mockHook: {  
+    useTeamState: () => teamState,  
+    useRefreshTeamState: jest.fn(),  
+    useLogin: jest.fn(),  
+    useLogout: jest.fn(),  
+    useStartRelay: jest.fn(),  
+    useStartStrategy: jest.fn(),  
+    useToHome: jest.fn(),  
+    LoadTeamState: () => null,  
+  },  
+};

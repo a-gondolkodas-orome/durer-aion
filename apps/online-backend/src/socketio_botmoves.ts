@@ -113,12 +113,12 @@ export class SocketIOButBotMoves extends SocketIO {
     super.init(app, games, origins);
 
     for (const game of games) {
-      if (game.name === undefined) {
+      if (!game.name) {
         console.log(`There was a game with no name. This is the game object: ${JSON.stringify(game)}.\n We skipped the gameobject, you should fix this!".`)
         continue
       }
       const nsp = app._io?.of(game.name);
-      const bot = game.name ? this.bots[game.name] : Object.values(this.bots)[0];
+      const bot = this.bots[game.name];
 
       /** This should be in sync with how socket data is communicated.
        * See boardgame.io/dist/src/server/transport/socketio.ts
