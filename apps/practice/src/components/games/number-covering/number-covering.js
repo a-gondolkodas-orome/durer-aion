@@ -3,6 +3,10 @@ import { strategyGameFactory } from '../../game-factory/strategy-game';
 import { range, sum, sample, cloneDeep } from 'lodash';
 import { useTranslation } from '../../language/translate';
 
+const COVERED = -1;
+
+const getRemaining = (board) => board.filter(i => i !== COVERED);
+
 const BoardClient = ({ board, ctx, moves }) => {
   const { t } = useTranslation();
 
@@ -17,7 +21,7 @@ const BoardClient = ({ board, ctx, moves }) => {
       <tbody>
         <tr>
         {range(board.length).map(i => (
-          board[i]!==-1
+          board[i]!== COVERED
           ? <td
               className='border-4 aspect-square text-center'
               key = {i}
@@ -38,9 +42,16 @@ const BoardClient = ({ board, ctx, moves }) => {
         </tr>
       </tbody>
     </table>
-    <p>{t({ hu: 'Megmaradt számok összege', en: 'Sum of remaining numbers' })}: {sum(board.filter(i => i > 0))}</p>
+    <p>
+      {t({ hu: 'Megmaradt számok összege', en: 'Sum of remaining numbers' })}
+      : {sum(getRemaining(board))}
+    </p>
     </section>
   );
+};
+
+const randomBotStrategy = ({ board, moves }) => {
+  moves.coverNumber(board, sample(getRemaining(board)));
 };
 
 const aiBotStrategy = ({ board, ctx, moves }) => {
@@ -49,11 +60,11 @@ const aiBotStrategy = ({ board, ctx, moves }) => {
 };
 
 const getOptimalAiMove = (board, chosenRoleIndex) => {
-  const notCovered = board.filter(i => i !== -1);
-  const evens = notCovered.filter(i => i%2 === 0);
-  const odds = notCovered.filter(i => i%2 === 1);
+  const remaining = getRemaining(board);
+  const evens = remaining.filter(i => i%2 === 0);
+  const odds = remaining.filter(i => i%2 === 1);
   if (evens.length === odds.length || evens.length === 0 || odds.length === 0) {
-    return sample(notCovered);
+    return sample(remaining);
   } else {
     if (chosenRoleIndex === 0){
       const candidates = evens.length > odds.length ? evens : odds;
@@ -94,10 +105,10 @@ const rule10 = {
 const moves = {
   coverNumber: (board, { events }, number) => {
     const nextBoard = cloneDeep(board);
-    nextBoard[number-1] = -1;
+    nextBoard[number-1] = COVERED;
     events.endTurn();
 
-    const remaining = nextBoard.filter(i => i>0);
+    const remaining = getRemaining(nextBoard);
     if (remaining.length === 2) {
       events.endGame({ winnerIndex: sum(remaining) % 2 });
     }
@@ -117,7 +128,11 @@ export const NumberCovering8 = strategyGameFactory({
   },
   BoardClient,
   gameplay: { moves },
-  variants: [{ botStrategy: aiBotStrategy, generateStartBoard: () => range(1, 9) }]
+  variants: [
+    { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
+    { botStrategy: aiBotStrategy, generateStartBoard: () => range(1, 9),
+      label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
+  ]
 });
 
 export const NumberCovering10 = strategyGameFactory({
@@ -127,5 +142,9 @@ export const NumberCovering10 = strategyGameFactory({
   },
   BoardClient,
   gameplay: { moves },
-  variants: [{ botStrategy: aiBotStrategy, generateStartBoard: () => range(1, 11) }]
+  variants: [
+    { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
+    { botStrategy: aiBotStrategy, generateStartBoard: () => range(1, 11),
+      label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
+  ]
 });
