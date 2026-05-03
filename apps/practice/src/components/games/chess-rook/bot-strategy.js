@@ -1,6 +1,11 @@
 'use strict';
 
-import { last, random } from 'lodash';
+import { last, random, sample } from 'lodash';
+import { getAllowedMoves } from './helpers';
+
+export const randomBotStrategy = ({ board, moves }) => {
+  moves.moveRook(board, sample(getAllowedMoves(board)));
+};
 
 export const aiBotStrategy = ({ board, moves }) => {
   const aiMove = getOptimalAiMove(board);

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { range, isEqual, some, cloneDeep } from 'lodash';
 import { strategyGameFactory } from '../../game-factory/strategy-game';
 import { ChessBishopSvg } from './chess-bishop-svg';
-import { aiBotStrategy } from './bot-strategy';
+import { aiBotStrategy, randomBotStrategy } from './bot-strategy';
 import { generateStartBoard, getAllowedMoves, BISHOP, FORBIDDEN, markForbiddenFields } from './helpers';
 
 const BoardClient = ({ board, ctx, moves }) => {
@@ -122,5 +122,8 @@ export const ChessBishops = strategyGameFactory({
   },
   BoardClient,
   gameplay: { moves },
-  variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
+  variants: [
+    { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
+    { botStrategy: aiBotStrategy, generateStartBoard, label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
+  ]
 });

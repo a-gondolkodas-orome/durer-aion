@@ -7,6 +7,10 @@ const HORIZONTAL = "h";
 const VERTICAL = "v";
 let axis = null;
 
+export const randomBotStrategy = ({ board, moves }) => {
+  moves.placeBishop(board, sample(getAllowedMoves(board)));
+};
+
 export const aiBotStrategy = ({ board, moves }) => {
   const aiMove = getOptimalAiMove(board);
   moves.placeBishop(board, aiMove);
