@@ -1,6 +1,10 @@
 import { sample, cloneDeep } from 'lodash';
 import { Thief, hasWinningTriple, getUntakenCards } from '../helpers';
 
+export const randomBotStrategy = ({ board, moves }) => {
+  moves.takeCard(board, sample(getUntakenCards(board, 9)));
+};
+
 export const aiBotStrategy = ({ board, moves, ctx }) => {
     const move = getMove(board, ctx.chosenRoleIndex);
     moves.takeCard(board, move);
