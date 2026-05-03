@@ -9,6 +9,10 @@ const [DUCK] = [1];
 const flipH = ([r, c]) => [ROWS - 1 - r, c];
 const flipV = ([r, c]) => [r, COLS - 1 - c];
 
+export const randomBotStrategy = ({ board, moves }) => {
+  moves.placeDuck(board, sample(getAllowedMoves(board)));
+};
+
 export const aiBotStrategy = ({ board, moves }) => {
   const aiMove = getOptimalAiMove(board);
   moves.placeDuck(board, aiMove);

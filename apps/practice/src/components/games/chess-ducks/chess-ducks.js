@@ -2,7 +2,7 @@ import React from 'react';
 import { strategyGameFactory } from '../../game-factory/strategy-game';
 import { some, range, isEqual } from 'lodash';
 import { DuckSvg } from './rubber-duck-svg';
-import { aiBotStrategy } from './bot-strategy';
+import { aiBotStrategy, randomBotStrategy } from './bot-strategy';
 import {
   getAllowedMoves,
   DUCK,
@@ -101,7 +101,10 @@ const chessDucksGameFactory = ({ ROWS, COLS }) => {
     },
     BoardClient,
     gameplay: { moves },
-    variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
+    variants: [
+      { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
+      { botStrategy: aiBotStrategy, generateStartBoard, label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
+    ]
   });
 };
 
