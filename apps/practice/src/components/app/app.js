@@ -47,8 +47,8 @@ import { SuperstitiousCounting } from '../games/superstitious-counting/superstit
 import { Take1OrHalve } from '../games/take-1-or-halve/take-1-or-halve';
 import { TakePowerOfTwo } from '../games/take-power-of-two/take-power-of-two';
 import { TenDigitNumber } from '../games/ten-digit-number/ten-digit-number';
-import { ThievesMean7 } from '../games/thieves-mean/thieves-mean-7/thieves-mean-7';
-import { ThievesMean9 } from '../games/thieves-mean/thieves-mean-9/thieves-mean-9';
+import { ThiefSheriffMean7 } from '../games/thief-sheriff-mean/thief-sheriff-mean-7/thief-sheriff-mean-7';
+import { ThiefSheriffMean9 } from '../games/thief-sheriff-mean/thief-sheriff-mean-9/thief-sheriff-mean-9';
 import { TicTacToe } from '../games/tictactoe-alikes/tictactoe/tictactoe';
 import { TicTacToeDoubleStart } from '../games/tictactoe-alikes/tictactoe-doublestart/tictactoe-doublestart';
 import { TriangleColoring } from '../games/triangle-coloring/triangle-coloring';
@@ -106,8 +106,8 @@ export const App = () => {
     { path: '/game/TakePowerOfTwo', element: <TakePowerOfTwo />},
     { path: '/game/TenDigitNumber', element: <TenDigitNumber /> },
     { path: '/game/TenDiscs', element: <TenDiscs />},
-    { path: '/game/ThievesMean', element: <ThievesMean7 />},
-    { path: '/game/ThievesMean9', element: <ThievesMean9 />},
+    { path: '/game/ThiefSheriffMean', element: <ThiefSheriffMean7 />},
+    { path: '/game/ThiefSheriffMean9', element: <ThiefSheriffMean9 />},
     { path: '/game/TicTacToe', element: <TicTacToe /> },
     { path: '/game/TicTacToeDoubleStart', element: <TicTacToeDoubleStart /> },
     { path: '/game/TriangleColoring', element: <TriangleColoring />},

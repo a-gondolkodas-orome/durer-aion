@@ -92,7 +92,7 @@ const rule = {
   </>
 };
 
-export const ThievesMean9 = strategyGameFactory({
+export const ThiefSheriffMean9 = strategyGameFactory({
   presentation: {
     rule,
     roleLabels: [
