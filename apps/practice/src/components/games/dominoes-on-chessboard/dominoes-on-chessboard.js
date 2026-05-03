@@ -4,39 +4,26 @@ import { strategyGameFactory, dummyEvents } from '../../game-factory/strategy-ga
 
 const BOARDSIZE = 6;
 const getId = ({ row, col }) => row * BOARDSIZE + col;
+const isCovered = (field, board) => flatMap(board).includes(getId(field));
 
 const BoardClient = ({ board, ctx, moves }) => {
   const [selectedField, setSelectedField] = useState(null);
   const [hoveredField, setHoveredField] = useState(null);
 
   const hasEmptyNeighbor = ({ row, col }) => {
-    if (col < (BOARDSIZE - 1) && !isCovered({ row, col: col + 1 })) return true;
-    if (col >= 1 && !isCovered({ row, col: col -1 })) return true;
-    if (row < (BOARDSIZE - 1) && !isCovered({ row: row + 1, col })) return true;
-    if (row >= 1 && !isCovered({ row: row - 1, col })) return true;
+    if (col < (BOARDSIZE - 1) && !isCovered({ row, col: col + 1 }, board)) return true;
+    if (col >= 1 && !isCovered({ row, col: col - 1 }, board)) return true;
+    if (row < (BOARDSIZE - 1) && !isCovered({ row: row + 1, col }, board)) return true;
+    if (row >= 1 && !isCovered({ row: row - 1, col }, board)) return true;
     return false;
   }
 
   const clickField = (field) => {
-    if (!ctx.isClientMoveAllowed) return;
-    if (isCovered(field)) return;
-    if (!hasEmptyNeighbor(field)) return;
-    if (selectedField === null) {
-      setSelectedField(field);
-      return;
-    }
-    if (isEqual(field, selectedField)) {
-      setSelectedField(null);
-      return;
-    }
-    if (!isNeighborOfSelected(field)) return;
+    if (selectedField === null) { setSelectedField(field); return; }
+    if (isEqual(field, selectedField)) { setSelectedField(null); return; }
     moves.placeDomino(board, [getId(selectedField), getId(field)]);
     setSelectedField(null);
   };
-
-  const isCovered = (field) => {
-    return flatMap(board).includes(getId(field));
-  }
 
   const isNeighborOfSelected = ({ row, col }) => {
     if (selectedField === null) return false;
@@ -47,12 +34,12 @@ const BoardClient = ({ board, ctx, moves }) => {
 
   const isPartOfPreview = (field) => {
     if (selectedField === null || hoveredField === null) return false;
-    if (!isNeighborOfSelected(hoveredField) || isCovered(hoveredField)) return false;
+    if (!isNeighborOfSelected(hoveredField) || isCovered(hoveredField, board)) return false;
     return isEqual(field, selectedField) || isEqual(field, hoveredField);
   };
 
   const getCellBgClass = (field) => {
-    if (isCovered(field)) return 'bg-slate-600 border-black';
+    if (isCovered(field, board)) return 'bg-slate-600 border-black';
     if (!ctx.isClientMoveAllowed) return '';
     if (isPartOfPreview(field)) return 'bg-blue-500';
     if (isEqual(selectedField, field)) return 'bg-blue-600';
@@ -62,19 +49,24 @@ const BoardClient = ({ board, ctx, moves }) => {
 
   const isClickAllowed = (field) => {
     if (!ctx.isClientMoveAllowed) return false;
-    if (isCovered(field)) return false;
+    if (isCovered(field, board)) return false;
     if (!hasEmptyNeighbor(field)) return false;
     if (selectedField !== null && isEqual(field, selectedField)) return true;
     if (selectedField !== null && !isNeighborOfSelected(field)) return false;
     return true;
   }
 
-  const getDominoBorders = (field) => {
-    if (!isCovered(field)) return '';
+  const getDominoNeighborCoords = (field) => {
     const domino = board.find(d => d.includes(getId(field)));
     const neighbor = domino[0] === getId(field) ? domino[1] : domino[0];
     const nCol = neighbor % BOARDSIZE;
-    const nRow = ((neighbor - nCol) / BOARDSIZE);
+    const nRow = (neighbor - nCol) / BOARDSIZE;
+    return { nRow, nCol };
+  };
+
+  const getDominoBorders = (field) => {
+    if (!isCovered(field, board)) return '';
+    const { nRow, nCol } = getDominoNeighborCoords(field);
     if (field.row === nRow) {
       if (field.col === nCol - 1) return 'rounded-l-md border-t-4 border-l-4 border-b-4';
       return 'rounded-r-md border-t-4 border-r-4 border-b-4'
@@ -87,11 +79,8 @@ const BoardClient = ({ board, ctx, moves }) => {
   }
 
   const getOuterBorders = field => {
-    if (!isCovered(field)) return 'border-4';
-    const domino = board.find(d => d.includes(getId(field)));
-    const neighbor = domino[0] === getId(field) ? domino[1] : domino[0];
-    const nCol = neighbor % BOARDSIZE;
-    const nRow = ((neighbor - nCol) / BOARDSIZE);
+    if (!isCovered(field, board)) return 'border-4';
+    const { nRow, nCol } = getDominoNeighborCoords(field);
     if (field.row === nRow) {
       if (field.col === nCol - 1) return 'border-t-4 border-l-4 border-b-4 border-r-4 border-r-yellow-400';
       return 'border-t-4 border-r-4 border-b-4 border-l-4 border-l-yellow-400'
@@ -128,7 +117,7 @@ const BoardClient = ({ board, ctx, moves }) => {
                   onFocus={() => setHoveredField({ row, col })}
                   onBlur={() => setHoveredField(null)}
                 >
-                  {isCovered({ row, col }) &&
+                  {isCovered({ row, col }, board) &&
                   <span
                     className={`
                       aspect-square rounded-full bg-yellow-400 inline-block
@@ -151,15 +140,12 @@ const getPossibleMoves = board => {
   const boardIndices = flatMap(
     range(0, BOARDSIZE), row => range(0, BOARDSIZE).map(col => ({ row, col }))
   );
-  const isCovered = (field) => {
-    return flatMap(board).includes(getId(field));
-  }
   boardIndices.forEach(({ row, col }) => {
-    if (isCovered({ row, col })) return;
-    if (col < (BOARDSIZE - 1) && !isCovered({ row, col: col + 1 })) {
+    if (isCovered({ row, col }, board)) return;
+    if (col < (BOARDSIZE - 1) && !isCovered({ row, col: col + 1 }, board)) {
       possibleMoves.push([getId({row, col }), getId({ row, col: col + 1 })])
     };
-    if (row < (BOARDSIZE - 1) && !isCovered({ row: row + 1, col })) {
+    if (row < (BOARDSIZE - 1) && !isCovered({ row: row + 1, col }, board)) {
       possibleMoves.push([getId({row, col }), getId({ row: row + 1, col })])
     };
     return;
