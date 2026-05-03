@@ -1,6 +1,15 @@
 'use strict';
 
-import { random } from 'lodash';
+import { random, sample } from 'lodash';
+
+export const randomBotStrategy = ({ board, moves }) => {
+  const pileId = sample([0, 1].filter(i => board[i] >= 2));
+  const pieceCount = random(1, board[pileId] - 1);
+  const { nextBoard } = moves.removePile(board, 1 - pileId);
+  setTimeout(() => {
+    moves.splitPile(nextBoard, { pileId, pieceCount });
+  }, 750);
+};
 
 export const aiBotStrategy = ({ board, moves }) => {
   const { pileId, pieceCount } = getAiStep(board);
@@ -25,9 +34,5 @@ const getAiStep = (board) => {
 const getOptimalDivision = (pieceCountInPile) => {
   if (pieceCountInPile === 2) return 1;
 
-  return generateRandomOddBetween(1, pieceCountInPile - 1);
-};
-
-const generateRandomOddBetween = (low, high) => {
-  return 1 + 2 * random(Math.ceil((low - 1) / 2), Math.floor((high - 1) / 2));
+  return 1 + 2 * random(0, Math.floor((pieceCountInPile - 2) / 2));
 };
