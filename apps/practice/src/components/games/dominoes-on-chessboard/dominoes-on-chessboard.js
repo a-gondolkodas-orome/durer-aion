@@ -166,6 +166,10 @@ const moves = {
   }
 }
 
+const randomBotStrategy = ({ board, moves }) => {
+  moves.placeDomino(board, sample(getPossibleMoves(board)));
+};
+
 // Note: Currently the AI may not win even from a winning position if the player
 // selected winning role but then did not follow winning strategy due to intractability.
 // We may improve AI with some heuristic and leveraging equivalent positions.
@@ -240,5 +244,11 @@ export const DominoesOnChessboard = strategyGameFactory({
   },
   BoardClient,
   gameplay: { moves },
-  variants: [{ botStrategy: aiBotStrategy, generateStartBoard: () => [] }]
+  variants: [
+    { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
+    {
+      botStrategy: aiBotStrategy, generateStartBoard: () => [],
+      label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true
+    }
+  ]
 });
