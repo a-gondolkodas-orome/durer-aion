@@ -1,13 +1,29 @@
 'use strict';
 
-import { random } from 'lodash';
+import { random, sample } from 'lodash';
 
 export const aiBotStrategy = ({ board, moves }) => {
-  const { removedPileId, pileId, pieceCount } = getAiStep(board);
+  const botStep = getAiStep(board);
+  executeBotStrategy(botStep, { board, moves });
+}
+
+export const randomBotStrategy = ({ board, moves }) => {
+  const botStep = getRandomStep(board);
+  executeBotStrategy(botStep, { board, moves });
+}
+
+const executeBotStrategy = ({ removedPileId, pileId, pieceCount }, { board, moves }) => {
   const { nextBoard } = moves.removePile(board, removedPileId);
   setTimeout(() => {
     moves.splitPile(nextBoard, { pileId, pieceCount });
-  }, 750)
+  }, 750);
+};
+
+const getRandomStep = (board) => {
+  const pileId = sample([0, 1, 2].filter(i => board[i] >= 2));
+  const removedPileId = sample([0, 1, 2].filter(i => i !== pileId));
+  const pieceCount = random(1, board[pileId] - 1);
+  return { removedPileId, pileId, pieceCount };
 };
 
 export const getAiStep = (board) => {

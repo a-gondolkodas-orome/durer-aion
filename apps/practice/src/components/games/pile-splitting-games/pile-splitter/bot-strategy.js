@@ -2,22 +2,26 @@
 
 import { random, sample } from 'lodash';
 
+export const aiBotStrategy = ({ board, moves }) => {
+  const botStep = getAiStep(board);
+  executeBotStrategy(botStep, { board, moves });
+}
+
 export const randomBotStrategy = ({ board, moves }) => {
-  const pileId = sample([0, 1].filter(i => board[i] >= 2));
-  const pieceCount = random(1, board[pileId] - 1);
+  const botStep = getRandomStep(board);
+  executeBotStrategy(botStep, { board, moves });
+}
+
+const executeBotStrategy = ({ pileId, pieceCount }, { board, moves }) => {
   const { nextBoard } = moves.removePile(board, 1 - pileId);
   setTimeout(() => {
     moves.splitPile(nextBoard, { pileId, pieceCount });
   }, 750);
 };
 
-export const aiBotStrategy = ({ board, moves }) => {
-  const { pileId, pieceCount } = getAiStep(board);
-  // 1 - pileId is the other pile. we split one and remove the other pile
-  const { nextBoard } = moves.removePile(board, 1 - pileId);
-  setTimeout(() => {
-    moves.splitPile(nextBoard, { pileId, pieceCount });
-  }, 750)
+const getRandomStep = (board) => {
+  const pileId = sample([0, 1].filter(i => board[i] >= 2));
+  return { pileId, pieceCount: random(1, board[pileId] - 1) };
 };
 
 const getAiStep = (board) => {

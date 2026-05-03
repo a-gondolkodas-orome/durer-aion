@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { range, isEqual, random, cloneDeep } from 'lodash';
 import { strategyGameFactory } from '../../../game-factory/strategy-game';
-import { aiBotStrategy } from './bot-strategy';
+import { aiBotStrategy, randomBotStrategy } from './bot-strategy';
 
 const generateStartBoard = () => {
   const x = random(2, 8) * 2 + 1;
@@ -181,5 +181,8 @@ export const PileSplitter3 = strategyGameFactory({
   },
   BoardClient,
   gameplay: { moves },
-  variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
+  variants: [
+    { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
+    { botStrategy: aiBotStrategy, generateStartBoard, label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
+  ]
 });
