@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { strategyGameFactory } from '../../game-factory/strategy-game';
-import { range, sample, random } from 'lodash';
+import { sample, random } from 'lodash';
 import { useTranslation } from '../../language/translate';
 
 const primeList = [
@@ -29,16 +29,13 @@ const allPrimePowers = (() => {
 
 const generateStartBoard = () => {
   if (random(0, 1)) {
-    return random(1, 166) * 6;
+    return random(3, 166) * 6;
   } else {
-    return random(1, 166) * 6 + random(1, 5);
+    return random(3, 166) * 6 + random(1, 5);
   }
 };
 
-const getAvailableExponents = (num, prime) => {
-  const maxExponent = Math.floor(Math.log(num) / Math.log(prime));
-  return range(0, maxExponent + 1);
-};
+const generateSmallStartBoard = () => random(12, 72);
 
 const PrimePowerButton = ({ entry, board, isClientMoveAllowed, chooseEntry, setHovered }) => {
   const { prime, exponent, value } = entry;
@@ -117,30 +114,28 @@ const BoardClient = ({ board, ctx, moves }) => {
   );
 };
 
+const randomBotStrategy = ({ board, moves }) => {
+  const validMoves = allPrimePowers.filter(e => e.value <= board);
+  const { prime, exponent } = sample(validMoves);
+  moves.subtractPrimeExponent(board, { prime, exponent });
+};
+
 const aiBotStrategy = ({ board, moves }) => {
   if (board === 1) {
     moves.subtractPrimeExponent(board, { prime: 2, exponent: 0 });
     return;
   }
 
-  const availablePrimes = primeList.filter(p => p <= board);
+  const validMoves = allPrimePowers.filter(({ value }) => value <= board);
 
   let chosenPrime;
   let chosenExponent;
 
   if (board % 6 === 0) {
-    chosenPrime = sample(availablePrimes);
-    chosenExponent = sample(getAvailableExponents(board, chosenPrime));
+    ({ prime: chosenPrime, exponent: chosenExponent } = sample(validMoves));
   } else {
-    let possibleMoves = [];
-    for (const p of availablePrimes) {
-      for (const e of getAvailableExponents(board, p)) {
-        if((board - p ** e) % 6 === 0) {
-          possibleMoves.push([p, e]);
-        }
-      }
-    }
-    [chosenPrime, chosenExponent] = sample(possibleMoves);
+    const possibleMoves = validMoves.filter(({ value }) => (board - value) % 6 === 0);
+    ({ prime: chosenPrime, exponent: chosenExponent } = sample(possibleMoves));
   }
   moves.subtractPrimeExponent(board, { prime: chosenPrime, exponent: chosenExponent });
   return;
@@ -181,5 +176,16 @@ export const PrimeExponentials = strategyGameFactory({
   },
   BoardClient,
   gameplay: { moves },
-  variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
+  variants: [
+    {
+      botStrategy: randomBotStrategy,
+      generateStartBoard: generateSmallStartBoard,
+      label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
+    {
+      botStrategy: aiBotStrategy,
+      generateStartBoard,
+      label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
+      isDefault: true
+    }
+  ]
 });
