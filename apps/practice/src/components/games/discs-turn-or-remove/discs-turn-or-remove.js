@@ -192,6 +192,15 @@ const aiBotStrategy = ({ board, moves }) => {
   }
 };
 
+const randomBotStrategy = ({ board, moves }) => {
+  const validMoves = [];
+  if (board[0] >= 1) validMoves.push(() => moves.removeDiscs(board, 1));
+  if (board[0] >= 2) validMoves.push(() => moves.removeDiscs(board, 2));
+  if (board[1] >= 1) validMoves.push(() => moves.turnDiscs(board, 1));
+  if (board[1] >= 2) validMoves.push(() => moves.turnDiscs(board, 2));
+  sample(validMoves)();
+};
+
 const getPlayerStepDescription = () => ({
   hu: 'Kattints a jobb szélső vagy az attól eggyel balra lévő kék korongra 1 vagy 2 kék korong ' +
     'elvételéhez, vagy tedd ugyanezt piros koronggal 1 vagy 2 piros korong kékké fordításához.',
@@ -229,7 +238,11 @@ export const SixDiscs = strategyGameFactory({
   },
   BoardClient: gameBoardFactory(6),
   gameplay: { moves },
-  variants: [{ botStrategy: aiBotStrategy, generateStartBoard: generateStartBoard(6) }]
+  variants: [
+    { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
+    { botStrategy: aiBotStrategy, generateStartBoard: generateStartBoard(6),
+      label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
+  ]
 });
 
 export const TenDiscs = strategyGameFactory({
@@ -239,5 +252,9 @@ export const TenDiscs = strategyGameFactory({
   },
   BoardClient: gameBoardFactory(10),
   gameplay: { moves },
-  variants: [{ botStrategy: aiBotStrategy, generateStartBoard: generateStartBoard(10) }]
+  variants: [
+    { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
+    { botStrategy: aiBotStrategy, generateStartBoard: generateStartBoard(10),
+      label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
+  ]
 });
