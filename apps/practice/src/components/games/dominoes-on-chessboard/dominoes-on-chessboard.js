@@ -56,40 +56,25 @@ const BoardClient = ({ board, ctx, moves }) => {
     return true;
   }
 
-  const getDominoNeighborCoords = (field) => {
+  const getDominoDirection = (field) => {
     const domino = board.find(d => d.includes(getId(field)));
     const neighbor = domino[0] === getId(field) ? domino[1] : domino[0];
     const nCol = neighbor % BOARDSIZE;
     const nRow = (neighbor - nCol) / BOARDSIZE;
-    return { nRow, nCol };
+    if (field.row === nRow) return field.col < nCol ? 'left' : 'right';
+    return field.row < nRow ? 'top' : 'bottom';
+  };
+
+  const DOMINO_BORDER_CLASSES = {
+    left:   'rounded-l-md border-t-4 border-b-4 border-l-4',
+    right:  'rounded-r-md border-t-4 border-b-4 border-r-4',
+    top:    'rounded-t-md border-t-4 border-l-4 border-r-4',
+    bottom: 'rounded-b-md border-b-4 border-l-4 border-r-4'
   };
 
   const getDominoBorders = (field) => {
     if (!isCovered(field, board)) return '';
-    const { nRow, nCol } = getDominoNeighborCoords(field);
-    if (field.row === nRow) {
-      if (field.col === nCol - 1) return 'rounded-l-md border-t-4 border-l-4 border-b-4';
-      return 'rounded-r-md border-t-4 border-r-4 border-b-4'
-    }
-    if (field.col === nCol) {
-      if (field.row === nRow - 1) return 'rounded-t-md border-r-4 border-l-4 border-t-4';
-      return 'rounded-b-md border-r-4 border-l-4 border-b-4';
-    }
-    return '';
-  }
-
-  const getOuterBorders = field => {
-    if (!isCovered(field, board)) return 'border-4';
-    const { nRow, nCol } = getDominoNeighborCoords(field);
-    if (field.row === nRow) {
-      if (field.col === nCol - 1) return 'border-t-4 border-l-4 border-b-4 border-r-4 border-r-yellow-400';
-      return 'border-t-4 border-r-4 border-b-4 border-l-4 border-l-yellow-400'
-    }
-    if (field.col === nCol) {
-      if (field.row === nRow - 1) return 'border-r-4 border-l-4 border-t-4 border-b-4 border-b-yellow-400';
-      return 'border-r-4 border-l-4 border-b-4 border-t-4 border-t-yellow-400';
-    }
-    return 'border-4';
+    return DOMINO_BORDER_CLASSES[getDominoDirection(field)];
   }
 
   return (
@@ -101,7 +86,7 @@ const BoardClient = ({ board, ctx, moves }) => {
             {range(BOARDSIZE).map(col => (
               <td
                 key={col}
-                className={getOuterBorders({ row, col })}
+                className="border-4"
               >
                 <button
                   className={`
@@ -117,13 +102,22 @@ const BoardClient = ({ board, ctx, moves }) => {
                   onFocus={() => setHoveredField({ row, col })}
                   onBlur={() => setHoveredField(null)}
                 >
-                  {isCovered({ row, col }, board) &&
-                  <span
-                    className={`
+                  {isCovered({ row, col }, board) && <>
+                    <span className={`
                       aspect-square rounded-full bg-yellow-400 inline-block
                       absolute z-20 left-[40%] right-[40%] bottom-[40%]
-                    `}
-                  ></span>}
+                    `} />
+                    {getDominoDirection({ row, col }) === 'left' && (
+                      <span className={
+                        'absolute right-0 top-0 bottom-0 w-1.5 bg-yellow-400 z-10 translate-x-full'
+                      } />
+                    )}
+                    {getDominoDirection({ row, col }) === 'top' && (
+                      <span className={
+                        'absolute bottom-0 left-0 right-0 h-1.5 bg-yellow-400 z-10 translate-y-full'
+                      } />
+                    )}
+                  </>}
                 </button>
               </td>
             ))}
