@@ -86,7 +86,7 @@ const BoardClient = ({ board, ctx, moves }) => {
     return '';
   }
 
-  const getOuterBoarders = field => {
+  const getOuterBorders = field => {
     if (!isCovered(field)) return 'border-4';
     const domino = board.find(d => d.includes(getId(field)));
     const neighbor = domino[0] === getId(field) ? domino[1] : domino[0];
@@ -112,7 +112,7 @@ const BoardClient = ({ board, ctx, moves }) => {
             {range(BOARDSIZE).map(col => (
               <td
                 key={col}
-                className={getOuterBoarders({ row, col })}
+                className={getOuterBorders({ row, col })}
               >
                 <button
                   className={`
