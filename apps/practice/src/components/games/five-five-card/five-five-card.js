@@ -1,7 +1,7 @@
 import React from 'react';
 import { range, cloneDeep, compact } from 'lodash';
 import { strategyGameFactory } from '../../game-factory/strategy-game';
-import { aiBotStrategy } from './bot-strategy';
+import { aiBotStrategy, randomBotStrategy } from './bot-strategy';
 import { useTranslation } from '../../language/translate';
 
 const BoardClient = ({ board, ctx, moves }) => {
@@ -109,5 +109,13 @@ export const FiveFiveCard = strategyGameFactory({
   },
   BoardClient,
   gameplay: { moves },
-  variants: [{ botStrategy: aiBotStrategy, generateStartBoard: () => [[1, 2, 3, 4, 5], [1, 2, 3, 4, 5]] }]
+  variants: [
+    { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
+    {
+      botStrategy: aiBotStrategy,
+      generateStartBoard: () => [[1, 2, 3, 4, 5], [1, 2, 3, 4, 5]],
+      label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
+      isDefault: true
+    }
+  ]
 });

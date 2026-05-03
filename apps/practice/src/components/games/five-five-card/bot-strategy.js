@@ -1,6 +1,12 @@
 'use strict';
 
-import { sample, compact } from 'lodash';
+import { sample, compact, range } from 'lodash';
+
+export const randomBotStrategy = ({ board, ctx, moves }) => {
+  const opponentIdx = ctx.chosenRoleIndex;
+  const validIds = range(1, 6).filter(id => board[opponentIdx][id - 1] !== null);
+  moves.removeCard(board, sample(validIds));
+};
 
 export const aiBotStrategy = ({ board, ctx, moves }) => {
   const idx = getOptimalAiMove(board, ctx.chosenRoleIndex);
@@ -19,16 +25,16 @@ const isWinningPosition = (i, j, chosenRoleIndex) => {
   }
 }
 
-export const getOptimalAiMove = (board, chosenRoleIndex) => {
+export const getOptimalAiMove = (board, opponentIndex) => {
   const firstPlayersPossibleMoves = compact(board[1]);
   const secondPlayersPossibleMoves = compact(board[0]);
   // as a first player still try to win if second player may not play optimally
-  if (chosenRoleIndex === 1) {
+  if (opponentIndex === 1) {
     let possibleWinningMoves = [];
     for (const i of firstPlayersPossibleMoves){
       let isIsolatedPoint = true;
       for (const j of secondPlayersPossibleMoves){
-        if (isWinningPosition(i, j, 1 - chosenRoleIndex)){
+        if (isWinningPosition(i, j, 1 - opponentIndex)){
           isIsolatedPoint = false;
         }
       }
@@ -46,14 +52,14 @@ export const getOptimalAiMove = (board, chosenRoleIndex) => {
 
   // as a second player proceed with placing at an empty place symmetrical to player's piece
 
-  if (chosenRoleIndex === 0) {
+  if (opponentIndex === 0) {
     let winningMoves = [];
     let badMoves = [];
     // calculate wrong moves
     for (const j of firstPlayersPossibleMoves){
       let winningPairs = [];
       for (const i of secondPlayersPossibleMoves){
-        if (isWinningPosition(j, i, chosenRoleIndex)){
+        if (isWinningPosition(j, i, opponentIndex)){
           winningPairs.push(i);
         }
       }
