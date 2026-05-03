@@ -3,11 +3,13 @@ import { strategyGameFactory } from '../../game-factory/strategy-game';
 import { range, random, sample } from 'lodash';
 import { ChessBishopSvg } from '../chess-bishops/chess-bishop-svg';
 
+const isValidStep = (board, step) =>
+  (step === 1 || step === 2) && step !== board.right - board.left;
+
 const BoardClient = ({ board, ctx, moves }) => {
   const isMoveAllowed = (step) => {
 	  if(!ctx.isClientMoveAllowed) return false;
-    if (step === board.right - board.left) return false;
-    return step === 1 || step === 2;
+    return isValidStep(board, step);
   };
 
   const makeStep = (step) => {
@@ -51,7 +53,7 @@ const BoardClient = ({ board, ctx, moves }) => {
             >{ i === board.left || i === board.right
               ? <span>
                 <svg className="inline-block w-full aspect-square">
-                  <use xlinkHref="#game-chess-bishop" />
+                  <use href="#game-chess-bishop" />
                 </svg>
               </span> : i }
             </button>
@@ -65,7 +67,7 @@ const BoardClient = ({ board, ctx, moves }) => {
 };
 
 const randomBotStrategy = ({ board, moves }) => {
-  const validSteps = [1, 2].filter(step => step !== board.right - board.left);
+  const validSteps = [1, 2].filter(step => isValidStep(board, step));
   moves.step(board, sample(validSteps));
 };
 
@@ -75,7 +77,7 @@ const optimalBotStrategy = ({ board, moves }) => {
 };
 
 const getOptimalAiStep = ({ left, right }) => {
-  let dst = right-left;
+  const dst = right-left;
   if(dst === 1) return 2;
   if(dst === 2) return 1;
   if(dst % 3 === 2) return random(1,2);
