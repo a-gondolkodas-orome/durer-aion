@@ -17,10 +17,10 @@ i18next
     defaultNS: 'translation',
     resources: {
       en: {
-        translation: enTranslation,
+        ...enTranslation,
       },
       hu: {
-        translation: huTranslation,
+        ...huTranslation,
       },
     },
     interpolation: {
