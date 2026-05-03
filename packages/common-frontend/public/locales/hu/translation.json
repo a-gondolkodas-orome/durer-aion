@@ -107,7 +107,8 @@
       "testGameWin": "Gratulálok, a próbajátékban nyertetek!",
       "botWins": "Sajnos a gép nyert.",
       "endOfGame": "A játék végetért.",
-      "play": "Innentől játssz a jobboldalon található táblán.",
+      "liveStarted": "Éles játék elindítva.",
+      "testStarted": "Próbajáték elindítva.",
       "results": "Eredmények",
       "actions": "Akciók"
     }

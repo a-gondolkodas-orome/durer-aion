@@ -252,7 +252,8 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
                         textTransform: 'none',
                         borderRadius: '10px',
                       }} variant='contained' color='primary' disabled>
-                      {t('guide.play')}
+                      {G.difficulty === "live" && t('guide.liveStarted')}
+                      {G.difficulty === "test" && t('guide.testStarted')}
                       </Button>
                     </Stack>
                     }

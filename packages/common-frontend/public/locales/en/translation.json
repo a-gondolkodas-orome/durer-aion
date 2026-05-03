@@ -110,7 +110,8 @@
       "testGameWin": "Congratulations, you won the test game!",
       "botWins": "Unfortunately the computer won.",
       "endOfGame": "The game has ended.",
-      "play": "Now play on the board to the right.",
+      "liveStarted": "Live game started.",
+      "testStarted": "Test game started.",
       "results": "Results",
       "actions": "Actions"
     }
