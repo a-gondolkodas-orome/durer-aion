@@ -1,6 +1,6 @@
 import React from 'react';
 import { strategyGameFactory } from '../../game-factory/strategy-game';
-import { range, random } from 'lodash';
+import { range, random, sample } from 'lodash';
 import { ChessBishopSvg } from '../chess-bishops/chess-bishop-svg';
 
 const BoardClient = ({ board, ctx, moves }) => {
@@ -64,6 +64,11 @@ const BoardClient = ({ board, ctx, moves }) => {
   );
 };
 
+const randomBotStrategy = ({ board, moves }) => {
+  const validSteps = [1, 2].filter(step => step !== board.right - board.left);
+  moves.step(board, sample(validSteps));
+};
+
 const optimalBotStrategy = ({ board, moves }) => {
   const step = getOptimalAiStep(board);
   moves.step(board, step);
@@ -120,9 +125,11 @@ export const TwelveSquares = strategyGameFactory({
   BoardClient,
   gameplay: { moves },
   variants: [
+    { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
     {
       botStrategy: optimalBotStrategy,
       generateStartBoard: () => ({ left: 1, right: 12 }),
+      label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
       isDefault: true
     }
   ]
