@@ -1,7 +1,6 @@
-import { INVALID_MOVE } from 'boardgame.io/core';
 import { GameType, GUESSER_PLAYER, PlayerIDType } from '../../../common/types';
 
-export interface MyGameState { }
+export type MyGameState = Record<string, never>;
 
 export type Position = [number, number];
 
@@ -11,14 +10,9 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type
 
   moves: {
     clickCell: ({ G, ctx, playerID, events }, s: string) => {
-      // if (false) { // TODO: more checks
-      //   return INVALID_MOVE;
-      // }
-      // if (playerID === GUESSER_PLAYER) {
-        
-      // } else {
-        
-      // }
+      void ctx;
+      void playerID;
+      void s;
       
       const winner = getWinner();
       if (winner !== null) {
@@ -39,6 +33,10 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type
   },
 
   possibleMoves: (G, ctx, playerID) => {
+    void G;
+    void ctx;
+    void playerID;
+    
     const moves = [1];
     
     return moves;

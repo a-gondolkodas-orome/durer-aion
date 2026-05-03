@@ -27,7 +27,7 @@ export interface MyGameState {
 
 const lengthOfCompetition = 60 * 60; // seconds
 
-export function RelayWrapper(sendRelayFunction = (...inputs: any[]) => {}): Game<MyGameState> {
+export function RelayWrapper(sendRelayFunction = (..._inputs: any[]) => {}): Game<MyGameState> {
   const GameRelay: Game<MyGameState> = {
     name: "relay",
     setup: () => {
@@ -51,13 +51,13 @@ export function RelayWrapper(sendRelayFunction = (...inputs: any[]) => {}): Game
     {
       startNewGame: {
         moves: {
-          startGame: ({ G, ctx, playerID, events }) => {
+          startGame: ({ G, _ctx, playerID, events }) => {
             if (playerID !== GUESSER_PLAYER || G.numberOfTry !== 0) {
               return INVALID_MOVE;
             }
             events.endTurn();
           },
-          firstProblem({ G, ctx, playerID, events }, problemText: string, nextProblemMaxPoints: number, url: string) {
+          firstProblem({ G, _ctx, playerID, events }, problemText: string, nextProblemMaxPoints: number, url: string) {
             if (playerID !== JUDGE_PLAYER) {
               // He is not the bot OR G.answer is null (and it is not the first question)
               return INVALID_MOVE;
@@ -70,7 +70,7 @@ export function RelayWrapper(sendRelayFunction = (...inputs: any[]) => {}): Game
         },
         turn: {
           order: TurnOrder.ONCE,
-          onMove: ({G, ctx, playerID, events }) => {
+          onMove: ({G, _ctx, playerID, events }) => {
             if(playerID === GUESSER_PLAYER) {
               const currentTime = new Date();
               if(currentTime.getTime() - new Date(G.end).getTime() > 1000*10){
@@ -103,7 +103,7 @@ export function RelayWrapper(sendRelayFunction = (...inputs: any[]) => {}): Game
               }
             }
           },
-          onEnd: ({G, ctx, playerID, events}) => {
+          onEnd: ({G, ctx, _playerID, events}) => {
             if (ctx.currentPlayer === JUDGE_PLAYER) {
               const currentTime = new Date();
               if (currentTime.getTime() - new Date(G.end).getTime() >= 0) {
@@ -113,13 +113,13 @@ export function RelayWrapper(sendRelayFunction = (...inputs: any[]) => {}): Game
             }
           }
         },
-        onEnd: ({G, ctx, playerID, events, random, log}) => {
+        onEnd: ({G, _ctx, _playerID, _events, _random, _log}) => {
           if (typeof localStorage !== "undefined") {
             localStorage.setItem("RelayPoints", G.points.toString());
           }
         },
         moves: {
-          newProblem({ G, ctx, playerID, events }, problemText: string, nextProblemMaxPoints: number, correctnessPreviousAnswer: boolean, url: string) {
+          newProblem({ G, _ctx, playerID, events }, problemText: string, nextProblemMaxPoints: number, correctnessPreviousAnswer: boolean, url: string) {
             if (playerID !== JUDGE_PLAYER || G.answer === null) {
               // He is not the bot OR G.answer is null (and it is not the first question)
               return INVALID_MOVE;
@@ -141,7 +141,7 @@ export function RelayWrapper(sendRelayFunction = (...inputs: any[]) => {}): Game
             G.numberOfTry = 1;
             events.endTurn();
           },
-          nextTry({ G, ctx, playerID, events }, maxPoints: number) {
+          nextTry({ G, _ctx, playerID, events }, maxPoints: number) {
             if (playerID !== JUDGE_PLAYER || G.answer === null) {
               return INVALID_MOVE;
             }
@@ -152,14 +152,14 @@ export function RelayWrapper(sendRelayFunction = (...inputs: any[]) => {}): Game
             G.currentProblemMaxPoints = maxPoints;
             events.endTurn();
           },
-          submitAnswer({ G, ctx, playerID, events }, answer: number) {
+          submitAnswer({ G, _ctx, playerID, events }, answer: number) {
             if (playerID !== GUESSER_PLAYER || !Number.isInteger(answer) || answer < 0 || answer > 9999) {
               return INVALID_MOVE;
             }
             G.answer = answer;
             events.endTurn();
           },
-          endGame({ G, ctx, playerID, events }, correctnessPreviousAnswer: boolean) {
+          endGame({ G, _ctx, playerID, events }, correctnessPreviousAnswer: boolean) {
             if (playerID !== JUDGE_PLAYER || G.answer === null) {
               return INVALID_MOVE;
             }
@@ -177,7 +177,7 @@ export function RelayWrapper(sendRelayFunction = (...inputs: any[]) => {}): Game
             }
               events.endGame();
           },
-          getTime({ G, ctx, playerID, events }) {
+          getTime({ G, _ctx, playerID, _events }) {
             if (playerID !== GUESSER_PLAYER) {
               return INVALID_MOVE;
             }
@@ -188,7 +188,7 @@ export function RelayWrapper(sendRelayFunction = (...inputs: any[]) => {}): Game
     },
 
     ai: {
-      enumerate: (G, ctx, playerID) => {
+      enumerate: (_G, _ctx, _playerID) => {
         return [];
       }
     }

@@ -38,6 +38,9 @@ export const MyGame: GameType<MyGameState> = {
   },
 
   startingPosition: ({G, ctx, playerID, random}) => {
+    void ctx;
+    void playerID;
+
     let rookPosition: Position = [0, 0];
     if(G.difficulty === "live"){
       if(G.numberOfTries === 1){
@@ -59,7 +62,7 @@ export const MyGame: GameType<MyGameState> = {
     return { rookPosition: rookPosition };
   },
 
-  possibleMoves: (G, ctx, playerID) => {
+  possibleMoves: (G, _ctx, _playerID) => {
     const moves = [];
     for (let i = G.rookPosition[0] + 1; i <= tableSize[0]; i++) {
       moves.push({ move: "clickCell", args: [[i, G.rookPosition[1]]] });

@@ -3,7 +3,7 @@ import { GameStateMixin } from '../../../common/types';
 import { MyGameState, Position } from './game';
 
 
-export function strategy(state: State<MyGameState & GameStateMixin>, botID: string): [Position | undefined, string] {
+export function strategy(state: State<MyGameState & GameStateMixin>, _botID: string): [Position | undefined, string] {
   if(state.G.difficulty === "live"){
     if(state.G.rookPosition[0] !== state.G.rookPosition[1]){
       // He is not on the the diagonal, we can step on a winning position

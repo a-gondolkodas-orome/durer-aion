@@ -1264,7 +1264,7 @@ const ATLOSVILLAK = [
   const JOKOZEPSOK=["B","E","H","J","K","L","M","N","O","Q","T","W"];
 export function strategy(
   state: State<MyGameState & GameStateMixin>,
-  botID: string
+  _botID: string
 ): [string | undefined, string] {
   if(state.G.difficulty === "live"){
     let rEddigiek:string[] = [];

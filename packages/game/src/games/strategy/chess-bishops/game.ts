@@ -11,7 +11,7 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type I was Game<My
   name: "chess-bishops",
   setup: () => ({ board: Array(64).fill(null) }),
   moves: {
-    clickCell: ({ G, ctx, playerID }, cellID: number) => {
+    clickCell: ({ G, ctx, _playerID }, cellID: number) => {
       if (G.board[cellID] !== null) {
         return INVALID_MOVE;
       }
@@ -30,7 +30,7 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type I was Game<My
       }
     },
   },
-  possibleMoves: (G, ctx, playerID) => {
+  possibleMoves: (G, _ctx, _playerID) => {
     const moves = [];
     for (let i = 0; i < 64; i++) {
       if (G.board[i] === null) {

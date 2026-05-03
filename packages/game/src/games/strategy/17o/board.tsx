@@ -6,7 +6,7 @@ import { Button } from '@mui/material';
 // import { IS_OFFLINE_MODE } from '../../client/utils/util';
 
 
-interface MyGameProps extends BoardProps<MyGameState> { }
+type MyGameProps = BoardProps<MyGameState>;
 
 export function MyBoard({ G, ctx, moves }: MyGameProps) {
   // TODO: use formik

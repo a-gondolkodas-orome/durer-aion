@@ -85,7 +85,7 @@ const megadottValaszlepesek = new Map<string,string>([
   ["97", "3"],
   ["98", "3"],
 ]);
-export function strategy(state: State<MyGameState & GameStateMixin>, botID: string): [number | undefined, string] {
+export function strategy(state: State<MyGameState & GameStateMixin>, _botID: string): [number | undefined, string] {
   if (state.G.difficulty === "live") {
     let rEddigiek:number[] = [];
     if(state.G.firstPlayer === GUESSER_PLAYER){

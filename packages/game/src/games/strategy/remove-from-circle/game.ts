@@ -26,7 +26,7 @@ export const MyGameWrapper = function (category: "C" | "D" | "E") {
     },
 
     moves: {
-      removePoint: ({G, ctx, playerID, events }, index: number) => {
+      removePoint: ({G, ctx, _playerID, events }, index: number) => {
         if( index<0 || index>=G.circle.length) {
           return INVALID_MOVE;
         }
@@ -94,7 +94,7 @@ export const MyGameWrapper = function (category: "C" | "D" | "E") {
       },
     },
     
-    possibleMoves: (G, ctx, playerID) => {
+    possibleMoves: (G, _ctx, _playerID) => {
       const moves = [];
       for (let i = 1; i<G.circle.length-1; i++) {
         if ((G.circle[i-1] || G.circle[i+1]) && G.circle[i]) {
@@ -108,7 +108,7 @@ export const MyGameWrapper = function (category: "C" | "D" | "E") {
     },
 
     turn: {
-      onMove: ({ G, ctx, playerID, events }) => {
+      onMove: ({ G, _ctx, playerID, events }) => {
         if (playerID === GUESSER_PLAYER) {
           const currentTime = new Date();
           if (currentTime.getTime() - new Date(G.end).getTime() > 1000 * 10) {
@@ -117,7 +117,7 @@ export const MyGameWrapper = function (category: "C" | "D" | "E") {
           }
         }
       },
-      onEnd: ({ G, ctx, playerID, events }) => {
+      onEnd: ({ G, _ctx, playerID, events }) => {
         if (playerID === JUDGE_PLAYER) {
           const currentTime = new Date();
           if (currentTime.getTime() - new Date(G.end).getTime() >= 0) {

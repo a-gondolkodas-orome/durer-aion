@@ -19,7 +19,7 @@ export function MyClient<T_SpecificGameState>(
 export function MyClientRelay(
   game: typeof GameRelay,
   board: any,
-  description: string
+  _description: string
 ) { // TODO: finish types
   return Client({
     game: game,

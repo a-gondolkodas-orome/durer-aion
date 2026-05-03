@@ -16,6 +16,8 @@ import * as Yup from 'yup';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
+const noop: () => {};
+
 export function TeamDetailDialog(props: {data: TeamModelDto, setConfirmDialog: Dispatch<ConfirmDialogInterface | null>}) {
   const resetRelay = useResetRelay();
   const resetStrategy = useResetStrategy();
@@ -277,7 +279,7 @@ function MatchStatusDataField(props: {matchId: string, isRelay: boolean}) {
         msRemaining={msRemaining ?? null}
         setMsRemaining={setMsRemaining}
         endTime={new Date(data.G.end)}
-        getServerTimer={()=>{}}
+        getServerTimer={noop}
         serverRemainingMs={new Date(data.G.end).getTime() - new Date().getTime()}
       /></Stack>
       { props.isRelay && <Stack>

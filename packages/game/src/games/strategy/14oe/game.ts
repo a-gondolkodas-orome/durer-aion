@@ -17,7 +17,7 @@ export const MyGame: GameType<MyGameState> = {
   }),
 
   moves: {
-    clickCell: ({ G, ctx, playerID, events }, n: number) => {
+    clickCell: ({ G, _ctx, playerID, events }, n: number) => {
       if (!G.remainingNumbers.includes(n)) {
         return INVALID_MOVE;
       }
@@ -44,7 +44,7 @@ export const MyGame: GameType<MyGameState> = {
     },
   },
 
-  possibleMoves: (G, ctx, playerID) => {
+  possibleMoves: (G, _ctx, _playerID) => {
     const moves = [];
     for (const i of G.remainingNumbers) {
       moves.push({ move: "clickCell", args: [i] });

@@ -19,8 +19,9 @@ const Form: React.FunctionComponent<FormProps> = (props: FormProps) => {
         <Formik initialValues={props.initialValues}
                 validationSchema={props.validationSchema}
                 onSubmit={(values, { setSubmitting, setTouched, resetForm }) => {
-                    props.onSubmit(values, setSubmitting);
-                    resetForm()
+                  void setTouched;
+                  props.onSubmit(values, setSubmitting);
+                  resetForm()
                 }}>
             <FormikForm>
                 {props.children}

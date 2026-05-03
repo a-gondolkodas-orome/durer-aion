@@ -44,7 +44,7 @@ export const MyGame: GameType<MyGameState> = {
   }),
 
   moves: {
-    clickCell: ({ G, ctx, playerID, events }, s: string) => {
+    clickCell: ({ G, _ctx, playerID, events }, s: string) => {
       if (!G.remainingLetters.includes(s)) {
         // TODO: more checks
         return INVALID_MOVE;
@@ -77,7 +77,7 @@ export const MyGame: GameType<MyGameState> = {
     },
   },
 
-  possibleMoves: (G, ctx, playerID) => {
+  possibleMoves: (G, _ctx, _playerID) => {
     const moves = [];
     for (const i of G.remainingLetters) {
       moves.push({ move: "clickCell", args: [i] });

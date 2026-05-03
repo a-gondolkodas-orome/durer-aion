@@ -239,7 +239,7 @@ export class MockClientRepository implements ClientRepository {
   addMinutes(_matchId: string, _minutes: number): Promise<string> {
     return Promise.resolve("OK");
   }
-  removeTeam(teamId: string): Promise<void> {
+  removeTeam(_teamId: string): Promise<void> {
     throw Error("NOT call this");
   }
 }

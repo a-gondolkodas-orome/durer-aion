@@ -11,6 +11,7 @@ function addRook(cellID : Position, G: any) {
 }
 
 export function MyBoard({ G, ctx, moves }: MyGameProps) {
+  void ctx;
   const tableMark = Array.from({ length: 8 }, () => Array.from({ length: 8 }, () => 0));
 
   return (

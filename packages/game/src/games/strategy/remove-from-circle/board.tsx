@@ -5,9 +5,10 @@ import { range } from "lodash";
 // import { IS_OFFLINE_MODE } from '../../client/utils/util';
 
 
-interface MyGameProps extends BoardProps<RemoveFromCircleGameState> { }
+type MyGameProps = BoardProps<RemoveFromCircleGameState>;
 
 export function MyBoard({ G, ctx, moves }: MyGameProps) {
+  void ctx;
 
   const onClick = (index: number) => {
     /* TODO refactor this sholud not be here at board

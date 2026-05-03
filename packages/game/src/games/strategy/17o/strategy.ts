@@ -8,7 +8,7 @@ import { GameStateMixin } from '../../../common/types';
 
 
 export function strategyWrapper(category: "C" | "D" | "E") {
-  return (state: State<MyGameState & GameStateMixin>, botID: string): [number | { pile: number } | undefined, string] => {
+  return (state: State<MyGameState & GameStateMixin>, _botID: string): [number | { pile: number } | undefined, string] => {
     if (state.ctx.phase === "startNewGame") {
       return [startingPosition({ G: state.G, ctx: state.ctx }, category), "setStartingPosition"];
     }
@@ -32,6 +32,8 @@ export function strategyWrapper(category: "C" | "D" | "E") {
 }
 
 function startingPosition({ G, ctx }: any, category: "C" | "D" | "E"): { pile: number } {
+  void ctx;
+  
   if (category === "C") {
     // C Category
     return { pile: 17 };

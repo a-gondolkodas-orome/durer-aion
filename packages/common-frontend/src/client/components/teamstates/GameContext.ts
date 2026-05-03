@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useContext } from "react";
+import { createContext, useContext } from "react";
 
 interface ClientProps {
   category?: 'C' | 'D' | 'E';

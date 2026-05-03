@@ -1,6 +1,5 @@
 import { INVALID_MOVE } from 'boardgame.io/core';
 import { GameType, GUESSER_PLAYER, JUDGE_PLAYER, PlayerIDType } from '../../../common/types';
-import { Ctx } from 'boardgame.io';
 
 export interface MyGameState {
   numbersOnTable: boolean[];
@@ -81,7 +80,8 @@ export const MyGameWrapper = function (category: "C" | "D") {
     possibleMoves: possibleMoves,
 
     turn: {
-      onMove: ({ G, ctx, playerID, events }) => {
+      onMove: ({ G, playerID, events }) => {
+
         if (playerID === GUESSER_PLAYER) {
           const currentTime = new Date();
           if (currentTime.getTime() - new Date(G.end).getTime() > 1000 * 10) {
@@ -91,6 +91,8 @@ export const MyGameWrapper = function (category: "C" | "D") {
         }
       },
       onEnd: ({ G, ctx, playerID, events }) => {
+        void ctx;
+
         if (playerID === JUDGE_PLAYER) {
           const currentTime = new Date();
           if (currentTime.getTime() - new Date(G.end).getTime() >= 0) {
