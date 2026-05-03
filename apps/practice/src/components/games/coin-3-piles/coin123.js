@@ -1,7 +1,7 @@
 import React from 'react';
 import { random, sum } from 'lodash';
 import { strategyGameFactory } from '../../game-factory/strategy-game';
-import { aiBotStrategy  } from './bot-strategy';
+import { aiBotStrategy, randomBotStrategy } from './bot-strategy';
 import { BoardClient } from './board-client';
 import { getPlayerStepDescription, isWinningState, moves } from './helpers';
 
@@ -46,5 +46,8 @@ export const Coin123 = strategyGameFactory({
   },
   BoardClient,
   gameplay: { moves },
-  variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
+  variants: [
+    { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
+    { botStrategy: aiBotStrategy, generateStartBoard, label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
+  ]
 });

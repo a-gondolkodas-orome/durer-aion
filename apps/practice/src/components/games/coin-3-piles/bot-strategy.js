@@ -1,4 +1,15 @@
-import { findIndex } from 'lodash';
+import { findIndex, sample, range } from 'lodash';
+
+export const randomBotStrategy = ({ board, moves }) => {
+  const nonEmptyPiles = [1, 2, 3].filter(i => board[i - 1] > 0);
+  const remove = sample(nonEmptyPiles);
+  const { nextBoard } = moves.removeCoin(board, remove);
+  if (remove === 1) return;
+  const addOptions = [null, ...range(1, remove)];
+  setTimeout(() => {
+    moves.addCoin(nextBoard, sample(addOptions));
+  }, 750);
+};
 
 export const aiBotStrategy = ({ board, moves }) => {
   const { remove, add } = botMoveParams({ board });
