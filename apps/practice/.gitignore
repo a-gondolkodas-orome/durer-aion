@@ -7,3 +7,4 @@ npm-debug.log*
 .vscode
 # rollup-plugin-visualizer output
 stats.html
+tmp_*
