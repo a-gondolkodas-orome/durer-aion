@@ -57,13 +57,10 @@ const gameBoardFactory = (maxDiscs) => {
     const nextBoardDescription = () => {
       if (hovered === null) return '';
       if (!ctx.isClientMoveAllowed) return '';
-      if (hovered[0] === 0) {
-        if (hovered[1] === board[0] - 1) return fmt(board[1], board[0] - 1);
-        return fmt(board[1], board[0] - 2);
-      }
-      if (hovered[1] === board[1] - 1) return fmt(board[1] - 1, board[0] + 1);
-      return fmt(board[1] - 2, board[0] + 2);
-    }
+      const count = board[hovered[0]] - hovered[1];
+      if (hovered[0] === 0) return fmt(board[1], board[0] - count);
+      return fmt(board[1] - count, board[0] + count);
+    };
 
 
     return (
