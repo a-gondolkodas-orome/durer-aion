@@ -1,6 +1,6 @@
 import React from 'react';
 import { strategyGameFactory } from '../../../game-factory/strategy-game';
-import { aiBotStrategy } from './bot-strategy';
+import { aiBotStrategy, randomBotStrategy } from './bot-strategy';
 import { BoardClient } from './board-client';
 import { isGameEnd, getWinnerIndex } from './helpers';
 import { cloneDeep } from 'lodash';
@@ -116,5 +116,8 @@ export const SharkChase5 = strategyGameFactory({
   },
   BoardClient,
   gameplay: { moves },
-  variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
+  variants: [
+    { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
+    { botStrategy: aiBotStrategy, generateStartBoard, label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
+  ]
 });

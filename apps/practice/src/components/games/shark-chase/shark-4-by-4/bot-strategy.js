@@ -2,6 +2,41 @@
 
 import { sample } from 'lodash';
 
+const getAdjacentCells = (pos) => {
+  const cells = [];
+  if (pos + 4 < 16) cells.push(pos + 4);
+  if (pos - 4 >= 0) cells.push(pos - 4);
+  if (pos + 1 < 16 && pos % 4 !== 3) cells.push(pos + 1);
+  if (pos - 1 >= 0 && pos % 4 !== 0) cells.push(pos - 1);
+  return cells;
+};
+
+export const randomBotStrategy = ({ board, ctx, moves }) => {
+  if (ctx.chosenRoleIndex === 0) {
+    const safeMoves = [...getAdjacentCells(board.shark).filter(c => board.submarines[c] === 0), board.shark];
+    const firstPos = sample(safeMoves);
+    const { nextBoard } = moves.moveShark(board, firstPos);
+    if (nextBoard.sharkMovesInTurn === 1) {
+      setTimeout(() => {
+        const safeCells = getAdjacentCells(nextBoard.shark).filter(c => nextBoard.submarines[c] === 0);
+        const secondMoves = [...safeCells, nextBoard.shark];
+        moves.moveShark(nextBoard, sample(secondMoves));
+      }, firstPos === board.shark ? 0 : 750);
+    }
+  } else {
+    const winningFrom = findSubmarineNextToShark(board);
+    if (winningFrom !== undefined) {
+      moves.moveSubmarine(board, { from: winningFrom, to: board.shark });
+      return;
+    }
+    const validMoves = [];
+    board.submarines.forEach((count, from) => {
+      if (count >= 1) getAdjacentCells(from).forEach(to => validMoves.push({ from, to }));
+    });
+    moves.moveSubmarine(board, sample(validMoves));
+  }
+};
+
 export const aiBotStrategy = ({ board, ctx, moves }) => {
   if (ctx.chosenRoleIndex === 0) {
     const finalPos = getNextSharkPositionByAI(board.submarines, board.shark);
