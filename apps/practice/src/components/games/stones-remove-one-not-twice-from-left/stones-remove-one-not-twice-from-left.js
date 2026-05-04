@@ -84,6 +84,10 @@ const isGameEnd = (board, ctx) => {
   return false;
 }
 
+const randomBotStrategy = ({ board, ctx, moves }) => {
+  moves.removeStone(board, getPileOfRandomAllowedMove(board, ctx));
+};
+
 const aiBotStrategy = ({ board, ctx, moves }) => {
   if (board.leftRestriction[ctx.currentPlayer]) {
     moves.removeStone(board, 1);
@@ -202,5 +206,8 @@ export const StonesRemoveOneNotTwiceFromLeft = strategyGameFactory({
   },
   BoardClient,
   gameplay: { moves },
-  variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
+  variants: [
+    { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
+    { botStrategy: aiBotStrategy, generateStartBoard, label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
+  ]
 });
