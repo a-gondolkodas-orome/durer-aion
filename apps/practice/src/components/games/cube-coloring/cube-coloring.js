@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { range, cloneDeep, every, some, isNull } from 'lodash';
 import { strategyGameFactory } from '../../game-factory/strategy-game';
-import { aiBotStrategy } from './bot-strategy';
+import { aiBotStrategy, randomBotStrategy } from './bot-strategy';
 import { isAllowedStep, allColors } from './helpers';
 import { useTranslation } from '../../language/translate';
 
@@ -173,5 +173,8 @@ export const CubeColoring = strategyGameFactory({
   },
   BoardClient,
   gameplay: { moves },
-  variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
+  variants: [
+    { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
+    { botStrategy: aiBotStrategy, generateStartBoard, label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
+  ]
 });

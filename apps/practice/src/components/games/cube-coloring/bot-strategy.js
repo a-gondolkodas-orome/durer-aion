@@ -3,6 +3,19 @@
 import { isNull, difference, range, shuffle, sample } from 'lodash';
 import { allColors, isAllowedStep, neighbours } from './helpers';
 
+export const randomBotStrategy = ({ board, moves }) => {
+  const validMoves = [];
+  for (const vertex of range(0, 8)) {
+    if (!isNull(board[vertex])) continue;
+    for (const color of allColors) {
+      if (isAllowedStep(board, vertex, color)) {
+        validMoves.push({ vertex, color });
+      }
+    }
+  }
+  moves.colorVertex(board, sample(validMoves));
+};
+
 export const aiBotStrategy = ({ board, ctx, moves }) => {
   const { vertex, color } = ctx.chosenRoleIndex === 0
     ? makeOptimalStepAsSecond(board)
