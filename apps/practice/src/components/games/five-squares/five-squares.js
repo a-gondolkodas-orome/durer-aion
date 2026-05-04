@@ -1,7 +1,7 @@
 import React from 'react';
 import { range, sum, isEqual, random, cloneDeep } from 'lodash';
 import { strategyGameFactory } from '../../game-factory/strategy-game';
-import { aiBotStrategy } from './bot-strategy';
+import { aiBotStrategy, randomBotStrategy } from './bot-strategy';
 
 const generateStartBoard = () => {
   const board = Array(5).fill(0);
@@ -88,5 +88,8 @@ export const FiveSquares = strategyGameFactory({
   },
   BoardClient,
   gameplay: { moves },
-  variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
+  variants: [
+    { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
+    { botStrategy: aiBotStrategy, generateStartBoard, label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
+  ]
 });

@@ -1,6 +1,10 @@
 'use strict';
 
-import { sum, random } from 'lodash';
+import { sum, random, sample, range } from 'lodash';
+
+export const randomBotStrategy = ({ board, moves }) => {
+  moves.addPiece(board, sample(range(0, 4)));
+};
 
 export const aiBotStrategy = ({ board, moves }) => {
   const id = getOptimalTileIndex(board);

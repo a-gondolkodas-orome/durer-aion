@@ -2,6 +2,17 @@
 
 import { sum, random, cloneDeep } from 'lodash';
 
+export const randomBotStrategy = ({ board, ctx, moves }) => {
+  if (ctx.chosenRoleIndex === 0) {
+    const { nextBoard } = moves.addPiece(board, random(4));
+    setTimeout(() => {
+      moves.addPiece(nextBoard, random(4));
+    }, 750);
+  } else {
+    moves.addPiece(board, random(4));
+  }
+};
+
 export const aiBotStrategy = ({ board, ctx, moves }) => {
   if (ctx.chosenRoleIndex === 0) {
     const tileIndices = getOptimalTileIndices(board);
