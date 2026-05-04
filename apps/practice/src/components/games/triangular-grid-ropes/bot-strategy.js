@@ -13,6 +13,10 @@ import {
 //  3 4 5
 // 6 7 8 9
 
+export const randomBotStrategy = ({ board, moves }) => {
+  moves.stretchRope(board, sample(getAllowedMoves(board)));
+};
+
 export const aiBotStrategy = ({ board, ctx, moves }) => {
   const move = getOptimalAiMove({ board, chosenRoleIndex: ctx.chosenRoleIndex });
   moves.stretchRope(board, move);
