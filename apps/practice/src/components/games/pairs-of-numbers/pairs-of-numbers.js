@@ -52,6 +52,14 @@ const moves = {
   }
 };
 
+const randomBotStrategy = ({ board, moves }) => {
+  if (random(0, 1) === 0) {
+    moves.add1(board);
+  } else {
+    moves.subtract(board);
+  }
+};
+
 const aiBotStrategy = ({ board, moves }) => {
   const [a, b] = board;
   if (a <= b) {
@@ -98,6 +106,12 @@ const rule = {
   </>
 };
 
+const generateTestStartBoard = () => {
+  const b = random(2, 5);
+  const a = b + random(1, b);
+  return [a, b];
+};
+
 const generateStartBoard = () => {
   if (random(0, 2) === 0) {
     const b = random(8, 15);
@@ -138,5 +152,9 @@ export const PairsOfNumbers = strategyGameFactory({
   },
   BoardClient,
   gameplay: { moves },
-  variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
+  variants: [
+    { botStrategy: randomBotStrategy, generateStartBoard: generateTestStartBoard,
+      label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
+    { botStrategy: aiBotStrategy, generateStartBoard, label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
+  ]
 });

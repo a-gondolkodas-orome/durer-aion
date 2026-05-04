@@ -183,6 +183,11 @@ const getPlayerStepDescription = () => ({
   en: 'Click the pile you want to remove a stone from.'
 });
 
+const generateTestStartBoard = () => ({
+  piles: sample([[3, 4], [4, 3], [3, 3], [4, 4]]),
+  leftRestriction: [false, false]
+});
+
 const generateStartBoard = () => {
   const piles = sample([
     [11, 8],
@@ -207,7 +212,16 @@ export const StonesRemoveOneNotTwiceFromLeft = strategyGameFactory({
   BoardClient,
   gameplay: { moves },
   variants: [
-    { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
-    { botStrategy: aiBotStrategy, generateStartBoard, label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
+    {
+      botStrategy: randomBotStrategy,
+      generateStartBoard: generateTestStartBoard,
+      label: { hu: 'Teszt 🤖', en: 'Test 🤖' }
+    },
+    {
+      botStrategy: aiBotStrategy,
+      generateStartBoard,
+      label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
+      isDefault: true
+    }
   ]
 });
