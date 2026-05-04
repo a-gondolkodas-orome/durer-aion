@@ -2,6 +2,10 @@
 
 import { random } from 'lodash';
 
+export const randomBotStrategy = ({ board, moves }) => {
+  moves.step(board, randomStep(board.restricted));
+};
+
 export const aiBotStrategy = ({ board, moves }) => {
   const step = getOptimalAiStep(board);
   moves.step(board, step);
