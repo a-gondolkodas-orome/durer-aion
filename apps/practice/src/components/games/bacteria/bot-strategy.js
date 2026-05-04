@@ -15,6 +15,34 @@ import {
   isOddEdge
 } from "./helpers";
 
+export const randomBotStrategy = ({ board, ctx, moves }) => {
+  const { bacteria } = board;
+  const bacteriaCoords = getBacteriaCoords(bacteria);
+
+  if (ctx.currentPlayer === 1) {
+    const [row, col] = sample(bacteriaCoords);
+    moves.defend(board, { row, col });
+    return;
+  }
+
+  const validMoves = [];
+  for (const [row, col] of bacteriaCoords) {
+    if (bacteria[row][col + 1] !== undefined) {
+      validMoves.push(() => moves.shiftRight(board, { row, col }));
+    }
+    if (col > 0) {
+      validMoves.push(() => moves.shiftLeft(board, { row, col }));
+    }
+    if (bacteria[row + 2] !== undefined) {
+      validMoves.push(() => moves.jump(board, { row, col }));
+    }
+    if (bacteria[row + 1] !== undefined) {
+      validMoves.push(() => moves.spread(board, { row, col }));
+    }
+  }
+  sample(validMoves)();
+};
+
 /* Currently only implemented for the case of adjacent goal fields */
 export const aiBotStrategy = ({ board, ctx, moves }) => {
   if (ctx.chosenRoleIndex === 0) {

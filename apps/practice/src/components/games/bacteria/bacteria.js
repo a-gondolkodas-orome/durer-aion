@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { range, random } from "lodash";
 import { strategyGameFactory } from "../../game-factory/strategy-game";
-import { aiBotStrategy } from "./bot-strategy";
+import { aiBotStrategy, randomBotStrategy } from "./bot-strategy";
 import {
   isJump,
   isSpread,
@@ -277,5 +277,8 @@ export const Bacteria = strategyGameFactory({
   },
   BoardClient,
   gameplay: { moves },
-  variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
+  variants: [
+    { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
+    { botStrategy: aiBotStrategy, generateStartBoard, label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
+  ]
 });
