@@ -1,12 +1,12 @@
+import { random, sample } from 'lodash';
 
 export const aiBotStrategy = ({ board, moves }) => {
   let bankIndex = 0;
   if (board.lastMove === null) {
-    bankIndex = Math.floor(Math.random() * board.circle.length);
+    bankIndex = random(board.circle.length - 1);
   } else {
-    let pMoves = optimalStrategy[board.circle.length - 7][convertToBinary(board.circle)];
-    let i = Math.floor(Math.random() * pMoves.length);
-    bankIndex = pMoves[i] + 1;
+    const pMoves = optimalStrategy[board.circle.length - 7][convertToBinary(board.circle)];
+    bankIndex = sample(pMoves) + 1;
   }
   moves.rob(board, bankIndex)
 }

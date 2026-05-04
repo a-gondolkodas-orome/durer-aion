@@ -88,6 +88,10 @@ const getAllowedBanks = board => {
   })
 }
 
+const randomBotStrategy = ({ board, moves }) => {
+  moves.rob(board, sample(getAllowedBanks(board)));
+};
+
 const rule = {
   hu: <>
     Bergengócia fővárosában legalább 7 és legfeljebb 10 bank található, melyek körben,
@@ -125,5 +129,8 @@ export const BankRobbers = strategyGameFactory({
   },
   BoardClient,
   gameplay: { moves },
-  variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
+  variants: [
+    { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
+    { botStrategy: aiBotStrategy, generateStartBoard, label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
+  ]
 });
