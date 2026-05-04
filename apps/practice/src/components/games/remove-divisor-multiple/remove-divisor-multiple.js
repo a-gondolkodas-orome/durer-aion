@@ -75,12 +75,18 @@ const moves = {
 };
 
 const isGameEnd = board => {
-  const possibleMoves = range(board.numbersOnTable.length)
-    .filter(n => isAllowed(board, n + 1));
+  const possibleMoves = range(1, board.numbersOnTable.length + 1)
+    .filter(n => isAllowed(board, n));
   return possibleMoves.length === 0;
 }
 
-const aiBotStrategy = ({ board, ctx, moves }) => {
+const randomBotStrategy = ({ board, moves }) => {
+  const possibleMoves = range(1, board.numbersOnTable.length + 1)
+    .filter(n => isAllowed(board, n));
+  moves.removeNumber(board, sample(possibleMoves));
+};
+
+const aiBotStrategy = ({ board, moves }) => {
   const numCount = board.numbersOnTable.length;
   const stateId = generateStateID(board);
   const optimalMoves = strategyDict[numCount]
@@ -89,9 +95,8 @@ const aiBotStrategy = ({ board, ctx, moves }) => {
   if (optimalMoves.length) {
     moves.removeNumber(board, sample(optimalMoves));
   } else {
-    const possibleMoves = range(numCount)
-      .filter(n => isAllowed(board, n + 1))
-      .map(x => x + 1);
+    const possibleMoves = range(1, numCount + 1)
+      .filter(n => isAllowed(board, n));
     moves.removeNumber(board, sample(possibleMoves));
   }
 };
@@ -144,5 +149,8 @@ export const RemoveDivisorMultiple = strategyGameFactory({
   },
   BoardClient,
   gameplay: { moves },
-  variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
+  variants: [
+    { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
+    { botStrategy: aiBotStrategy, generateStartBoard, label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
+  ]
 });
