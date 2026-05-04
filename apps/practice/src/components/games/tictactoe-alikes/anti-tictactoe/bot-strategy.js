@@ -1,16 +1,22 @@
 'use strict';
 
-import { isNull, range, sample, cloneDeep } from 'lodash';
+import { range, isNull, sample, cloneDeep } from 'lodash';
 import { hasWinningSubset } from '../helpers';
 import { roleColors, hasFirstPlayerWon, isGameEnd } from './helpers';
+
+export const randomBotStrategy = ({ board, moves }) => {
+  moves.placePiece(board, sample(emptyCells(board)));
+};
 
 export const aiBotStrategy = ({ board, ctx, moves }) => {
   const id = getOptimalAiPlacingPosition(board, ctx.chosenRoleIndex);
   moves.placePiece(board, id);
 };
 
+const emptyCells = board => range(0, 9).filter(i => isNull(board[i]));
+
 const getOptimalAiPlacingPosition = (board, chosenRoleIndex) => {
-  const allowedPlaces = range(0, 9).filter(i => isNull(board[i]));
+  const allowedPlaces = emptyCells(board);
 
   // start with middle place as a first step
   if (allowedPlaces.length === 9) return 4;
@@ -51,8 +57,7 @@ const isWinningState = (board, amIFirst) => {
   if (isGameEnd(board)) {
     return amIFirst === hasFirstPlayerWon(board);
   }
-  const allowedPlaces = range(0, 9).filter(i => isNull(board[i]));
-  const optimalPlaceForOther = allowedPlaces.find(i => {
+  const optimalPlaceForOther = emptyCells(board).find(i => {
     const boardCopy = cloneDeep(board);
     boardCopy[i] = roleColors[amIFirst ? 1 : 0];
     return isWinningState(boardCopy, !amIFirst);

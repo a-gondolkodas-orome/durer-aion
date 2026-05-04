@@ -3,6 +3,26 @@
 import { isNull, range, cloneDeep, sample } from 'lodash';
 import { pColor, aiColor, inPlacingPhase, isGameEnd } from './helpers';
 
+export const randomBotStrategy = ({ board, moves }) => {
+  const allowedPlaces = getAllowedPlaces(board, false);
+  if (inPlacingPhase(board)) {
+    const safePlaces = allowedPlaces.filter(i => !opponentCanWinNext(board, i));
+    moves.placePiece(board, sample(safePlaces.length > 0 ? safePlaces : allowedPlaces));
+  } else {
+    moves.whitenPiece(board, sample(allowedPlaces));
+  }
+};
+
+const opponentCanWinNext = (board, position) => {
+  const boardCopy = cloneDeep(board);
+  boardCopy[position] = aiColor;
+  return range(0, 9).filter(i => isNull(boardCopy[i])).some(i => {
+    const boardCopy2 = cloneDeep(boardCopy);
+    boardCopy2[i] = pColor;
+    return isGameEnd(boardCopy2);
+  });
+};
+
 export const aiBotStrategy = ({ board, moves }) => {
   if (inPlacingPhase(board)) {
     const id = getOptimalAiPlacingPosition(board);
