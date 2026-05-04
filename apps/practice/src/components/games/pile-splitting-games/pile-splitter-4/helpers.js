@@ -7,8 +7,19 @@ export const generateStartBoard = () => {
   return generateLosingStartBoard();
 };
 
-const generateWinningStartBoard = (remainingTrials = 50) => {
-  const board = [random(5, 12), random(5, 12), random(5, 12), random(5, 12)];
+export const generateTestStartBoard = () => {
+  if (random(0, 1)) return generateWinningStartBoard(5, 3, 6);
+  return generateLosingStartBoard(5, 3, 6);
+};
+
+
+const generateWinningStartBoard = (remainingTrials = 50, pileMin = 5, pileMax = 12) => {
+  const board = [
+    random(pileMin, pileMax),
+    random(pileMin, pileMax),
+    random(pileMin, pileMax),
+    random(pileMin, pileMax)
+  ];
   if (!isWinningState(board)) {
     if (remainingTrials > 0) {
       return generateWinningStartBoard(remainingTrials - 1);
@@ -24,8 +35,13 @@ const generateWinningStartBoard = (remainingTrials = 50) => {
   return modifiedBoard;
 };
 
-const generateLosingStartBoard = (remainingTrials = 50) => {
-  const board = [random(5, 12), random(5, 12), random(5, 12), random(5, 12)];
+const generateLosingStartBoard = (remainingTrials = 50, pileMin = 5, pileMax = 12) => {
+  const board = [
+    random(pileMin, pileMax),
+    random(pileMin, pileMax),
+    random(pileMin, pileMax),
+    random(pileMin, pileMax)
+  ];
   if (isWinningState(board)) {
     if (remainingTrials > 0) {
       return generateLosingStartBoard(remainingTrials - 1);

@@ -142,6 +142,16 @@ const generateStartBoard = () => {
   })
 }
 
+const generateTestStartBoard = () => {
+  const numCount = random(0, 2) === 0
+    ? sample([6])
+    : sample([7, 8, 9]);
+  return ({
+    numbersOnTable: Array(numCount).fill(true),
+    previousMove: null
+  })
+}
+
 export const RemoveDivisorMultiple = strategyGameFactory({
   presentation: {
     rule,
@@ -150,7 +160,16 @@ export const RemoveDivisorMultiple = strategyGameFactory({
   BoardClient,
   gameplay: { moves },
   variants: [
-    { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
-    { botStrategy: aiBotStrategy, generateStartBoard, label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
+    {
+      botStrategy: randomBotStrategy,
+      generateStartBoard: generateTestStartBoard,
+      label: { hu: 'Teszt 🤖', en: 'Test 🤖' }
+    },
+    {
+      botStrategy: aiBotStrategy,
+      generateStartBoard,
+      label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
+      isDefault: true
+    }
   ]
 });

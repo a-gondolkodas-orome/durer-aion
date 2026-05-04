@@ -66,6 +66,14 @@ const moves = {
   }
 };
 
+const randomBotStrategy = ({ board, moves }) => {
+  if (board % 2 === 0 && random(0, 1) === 0) {
+    moves.halve(board);
+  } else {
+    moves.take1(board);
+  }
+};
+
 const aiBotStrategy = ({ board, moves }) => {
   if (board !== 4 && board % 4 === 0) {
     moves.take1(board);
@@ -106,5 +114,10 @@ export const Take1OrHalve = strategyGameFactory({
   },
   BoardClient,
   gameplay: { moves },
-  variants: [{ botStrategy: aiBotStrategy, generateStartBoard: () => random(20, 27) }]
+  variants: [
+    { botStrategy: randomBotStrategy, generateStartBoard: () => random(5, 10),
+      label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
+    { botStrategy: aiBotStrategy, generateStartBoard: () => random(20, 27),
+      label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
+  ]
 });

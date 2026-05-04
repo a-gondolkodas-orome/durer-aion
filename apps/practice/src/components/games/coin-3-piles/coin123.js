@@ -5,6 +5,8 @@ import { aiBotStrategy, randomBotStrategy } from './bot-strategy';
 import { BoardClient } from './board-client';
 import { getPlayerStepDescription, isWinningState, moves } from './helpers';
 
+const generateTestStartBoard = () => [random(0, 2), random(0, 2), random(1, 3)];
+
 const generateStartBoard = () => {
   if (random(0, 1)) {
     return generateWinningStartBoard();
@@ -47,7 +49,8 @@ export const Coin123 = strategyGameFactory({
   BoardClient,
   gameplay: { moves },
   variants: [
-    { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
+    { botStrategy: randomBotStrategy, generateStartBoard: generateTestStartBoard,
+      label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
     { botStrategy: aiBotStrategy, generateStartBoard, label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
   ]
 });

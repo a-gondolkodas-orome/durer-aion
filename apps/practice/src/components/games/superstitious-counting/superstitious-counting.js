@@ -4,9 +4,17 @@ import { strategyGameFactory } from '../../game-factory/strategy-game';
 import { aiBotStrategy, randomBotStrategy } from './bot-strategy';
 import { useTranslation } from '../../language/translate';
 
+
 const generateStartBoard = () => {
   const losingPositions = range(29, 127, 14);
   const winningPositions = difference(range(26, 115), losingPositions);
+  const target = sample([sample(losingPositions), sample(winningPositions)]);
+  return { current: 0, target, restricted: null };
+};
+
+const generateTestStartBoard = () => {
+  const losingPositions = [29];
+  const winningPositions = difference(range(26, 33), losingPositions);
   const target = sample([sample(losingPositions), sample(winningPositions)]);
   return { current: 0, target, restricted: null };
 };
@@ -108,7 +116,8 @@ export const SuperstitiousCounting = strategyGameFactory({
   BoardClient,
   gameplay: { moves },
   variants: [
-    { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
+    { botStrategy: randomBotStrategy, generateStartBoard: generateTestStartBoard,
+      label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
     { botStrategy: aiBotStrategy, generateStartBoard, label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
   ]
 });

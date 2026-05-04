@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { range, isEqual, cloneDeep } from 'lodash';
 import { strategyGameFactory } from '../../../game-factory/strategy-game';
 import { aiBotStrategy, randomBotStrategy } from './bot-strategy';
-import { generateStartBoard } from './helpers';
+import { generateStartBoard, generateTestStartBoard } from './helpers';
 
 const BoardClient = ({ board, ctx, moves }) => {
   const [removedPileId, setRemovedPileId] = useState(null);
@@ -190,7 +190,11 @@ export const PileSplitter4 = strategyGameFactory({
   BoardClient,
   gameplay: { moves },
   variants: [
-    { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
+    {
+      botStrategy: randomBotStrategy,
+      generateStartBoard: generateTestStartBoard,
+      label: { hu: 'Teszt 🤖', en: 'Test 🤖' }
+    },
     { botStrategy: aiBotStrategy, generateStartBoard, label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
   ]
 });

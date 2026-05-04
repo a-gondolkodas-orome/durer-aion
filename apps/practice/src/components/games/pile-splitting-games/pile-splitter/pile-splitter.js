@@ -127,7 +127,11 @@ export const PileSplitter = strategyGameFactory({
   BoardClient,
   gameplay: { moves },
   variants: [
-    { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
+    {
+      botStrategy: randomBotStrategy,
+      label: { hu: 'Teszt 🤖', en: 'Test 🤖' },
+      generateStartBoard: () => ([random(2, 5), random(2, 5)])
+    },
     {
       botStrategy: aiBotStrategy,
       generateStartBoard: () => ([random(3, 10), random(3, 10)]),
