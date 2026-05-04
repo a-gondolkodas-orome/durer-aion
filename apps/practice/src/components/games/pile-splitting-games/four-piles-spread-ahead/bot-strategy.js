@@ -1,6 +1,16 @@
 'use strict';
 
-import { random } from 'lodash';
+import { random, sample, range } from 'lodash';
+
+export const randomBotStrategy = ({ board, moves }) => {
+  const validMoves = [];
+  for (const pileId of [1, 2, 3]) {
+    for (const pieceCount of range(1, Math.min(pileId, board[pileId]) + 1)) {
+      validMoves.push({ pileId, pieceCount });
+    }
+  }
+  return moves.spreadPieces(board, sample(validMoves));
+};
 
 export const aiBotStrategy = ({ board, moves }) => {
   let pileId, pieceId;

@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { range, random, cloneDeep } from 'lodash';
 import { strategyGameFactory } from '../../../game-factory/strategy-game';
-import { aiBotStrategy } from './bot-strategy';
+import { aiBotStrategy, randomBotStrategy } from './bot-strategy';
 import { useLanguage } from '../../../language/language-context';
 
 const generateStartBoard = () => ([random(0, 9), random(0, 9), random(0, 9), random(4, 9)]);
+const generateTestStartBoard = () => ([random(0, 6), random(0, 6), random(0, 6), random(4, 6)]);
 
 const BoardClient = ({ board, ctx, moves }) => {
   const { language } = useLanguage();
@@ -177,5 +178,9 @@ export const FourPilesSpreadAhead = strategyGameFactory({
   },
   BoardClient,
   gameplay: { moves },
-  variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
+  variants: [
+    { botStrategy: randomBotStrategy, generateStartBoard: generateTestStartBoard,
+      label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
+    { botStrategy: aiBotStrategy, generateStartBoard, label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
+  ]
 });
