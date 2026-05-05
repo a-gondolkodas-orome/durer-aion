@@ -130,7 +130,7 @@ export const getNextSharkPositionByAI = (submarines, shark) => {
 
   // 4 kozepso mezo
   for (let ind = 0; ind < 4; ind++) {
-    let i = [5,6,9,10][ind];
+    const i = [5,6,9,10][ind];
     if (componentSizes[i] === maxi && isReachableWithoutDeath(submarines, shark, i)) {
       possibleMoves.push(i);
     }
@@ -139,7 +139,7 @@ export const getNextSharkPositionByAI = (submarines, shark) => {
   // szelek de nem sarkok
   if (possibleMoves.length === 0) {
     for (let ind = 0; ind < 8; ind++) {
-      let i = [1,2,4,7,8,11,13,14][ind];
+      const i = [1,2,4,7,8,11,13,14][ind];
       if (componentSizes[i] == maxi && isReachableWithoutDeath(submarines, shark, i)) {
         possibleMoves.push(i);
       }
@@ -149,7 +149,7 @@ export const getNextSharkPositionByAI = (submarines, shark) => {
   // sarkok
   if (possibleMoves.length === 0) {
     for (let ind = 0; ind < 4; ind++) {
-      let i = [0,3,12,15][ind];
+      const i = [0,3,12,15][ind];
       if (componentSizes[i] == maxi && isReachableWithoutDeath(submarines, shark, i)) {
         possibleMoves.push(i);
       }

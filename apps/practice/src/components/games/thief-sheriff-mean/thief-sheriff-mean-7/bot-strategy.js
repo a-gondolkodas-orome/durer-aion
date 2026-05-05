@@ -13,7 +13,7 @@ export const aiBotStrategy = ({ board, moves, ctx }) => {
 }
 
 const getMove = (board) => {
-  let cards = Array(CARD_COUNT).fill(null);
+  const cards = Array(CARD_COUNT).fill(null);
   board.cards[Sheriff].forEach(card => {
     cards[card - 1] = Sheriff;
   });
@@ -27,7 +27,7 @@ const getMove = (board) => {
   const maxCount = Math.max(...meanCounts.map(([count]) => count));
   // return the card that participates in the most good sets of three cards
   // take only ones with max value
-  let maxIndices = meanCounts.filter(([count]) => count === maxCount)
+  const maxIndices = meanCounts.filter(([count]) => count === maxCount)
     .map(([_, idx]) => idx);
   return sample(maxIndices) + 1;
 }

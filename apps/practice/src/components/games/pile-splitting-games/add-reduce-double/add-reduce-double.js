@@ -141,9 +141,16 @@ export const AddReduceDouble = strategyGameFactory({
   BoardClient,
   gameplay: { moves },
   variants: [
-    { botStrategy: randomBotStrategy, generateStartBoard: () => ([random(2, 5), random(2, 5)]),
-      label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
-    { botStrategy: aiBotStrategy, generateStartBoard: () => ([random(3, 10), random(3, 10)]),
-      label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
+    {
+      botStrategy: randomBotStrategy,
+      generateStartBoard: () => ([random(2, 5), random(2, 5)]),
+      label: { hu: 'Teszt 🤖', en: 'Test 🤖' }
+    },
+    {
+      botStrategy: aiBotStrategy,
+      generateStartBoard: () => ([random(3, 10), random(3, 10)]),
+      label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
+      isDefault: true
+    }
   ]
 });

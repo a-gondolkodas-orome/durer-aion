@@ -7,11 +7,13 @@ import { cloneDeep } from 'lodash';
 
 const generateStartBoard = () => {
   return {
-    submarines: [	0, 0, 0, 1, 1,
-									0, 0, 0, 1, 1,
-									0, 0, 0, 0, 0,
-									0, 0, 0, 0, 0,
-									0, 0, 0, 0, 0],
+    submarines: [
+      [0, 0, 0, 1, 1],
+      [0, 0, 0, 1, 1],
+      [0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0]
+    ].flat(),
     shark: 20,
     turn: 1,
     sharkMovesInTurn: 0

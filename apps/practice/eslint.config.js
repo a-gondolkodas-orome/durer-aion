@@ -19,12 +19,22 @@ export default [
       'no-duplicate-imports': 'error',
       'no-multiple-empty-lines': ['error', { max: 2 }],
       'no-trailing-spaces': 'error',
-      'no-var': 'warn'
+      'no-var': 'warn',
+      'object-curly-newline': ['error', { 'consistent': true }],
+      'object-property-newline': ['error', { 'allowAllPropertiesOnSameLine': true }],
+      'array-bracket-newline': ['error', 'consistent'],
+      'array-element-newline': ['error', 'consistent'],
+      'react/jsx-key': ['error']
     }
   },
   {
     // SVG files contain inline path data that cannot be meaningfully reformatted
     files: ['src/**/*-svg.js'],
     rules: { 'max-len': 'off' }
+  },
+  {
+    // test files may contain nicely formatted arrays such as for tictactoe
+    files: ['src/**/*spec.js'],
+    rules: { 'array-element-newline': 'off' }
   }
 ];

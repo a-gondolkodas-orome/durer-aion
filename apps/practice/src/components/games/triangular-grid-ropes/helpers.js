@@ -44,11 +44,14 @@ export const getAllowedSuperset = (board, { from, to }) => {
   return { from, to };
 };
 
+
+/* eslint-disable array-element-newline */
 const oneLengthEdges = [
   '0-1', '1-3', '3-6', '2-4', '4-7', '5-8',
   '0-2', '2-5', '5-9', '1-4', '4-8', '3-7',
   '6-7', '7-8', '8-9', '3-4', '4-5', '1-2'
 ];
+/* eslint-enable array-element-newline */
 
 export const mirrorNodes = {
   'x': [0, 2, 1, 5, 4, 3, 9, 8, 7, 6],

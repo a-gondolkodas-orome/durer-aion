@@ -75,7 +75,6 @@ Before declaring the game done, verify each item:
 - [ ] Interactions disabled during the other player's turn (`ctx.isClientMoveAllowed`)
 - [ ] Mobile-friendly and keyboard-navigable
 - [ ] Player can undo within multi-move turns if applicable
-- [ ] No console errors/warnings (e.g. missing React keys)
 - [ ] AI appears to "think" in multi-move turns (uses `setTimeout`)
 
 ### 9. Offer a test bot variant (only if optimal AI was implemented)

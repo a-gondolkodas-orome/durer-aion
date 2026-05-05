@@ -20,9 +20,8 @@ export const aiBotStrategy = ({ board, moves }) => {
     pieceCount = generateRandomEvenBetween(2, board[pileId]);
 
   } else {
-    let third;
     pileId = (board[0]>board[1]) ? 0 : 1;
-    third = Math.floor((board[pileId]-board[1-pileId]+1)/3);
+    const third = Math.floor((board[pileId]-board[1-pileId]+1)/3);
     pieceCount = 2 * third;
   }
 

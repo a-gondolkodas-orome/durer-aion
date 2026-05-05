@@ -130,8 +130,12 @@ export const NumberCovering8 = strategyGameFactory({
   gameplay: { moves },
   variants: [
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
-    { botStrategy: aiBotStrategy, generateStartBoard: () => range(1, 9),
-      label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
+    {
+      botStrategy: aiBotStrategy,
+      generateStartBoard: () => range(1, 9),
+      label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
+      isDefault: true
+    }
   ]
 });
 
@@ -144,7 +148,11 @@ export const NumberCovering10 = strategyGameFactory({
   gameplay: { moves },
   variants: [
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
-    { botStrategy: aiBotStrategy, generateStartBoard: () => range(1, 11),
-      label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
+    {
+      botStrategy: aiBotStrategy,
+      generateStartBoard: () => range(1, 11),
+      label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
+      isDefault: true
+    }
   ]
 });

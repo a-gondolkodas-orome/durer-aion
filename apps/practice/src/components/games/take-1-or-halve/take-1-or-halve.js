@@ -115,9 +115,16 @@ export const Take1OrHalve = strategyGameFactory({
   BoardClient,
   gameplay: { moves },
   variants: [
-    { botStrategy: randomBotStrategy, generateStartBoard: () => random(5, 10),
-      label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
-    { botStrategy: aiBotStrategy, generateStartBoard: () => random(20, 27),
-      label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
+    {
+      botStrategy: randomBotStrategy,
+      generateStartBoard: () => random(5, 10),
+      label: { hu: 'Teszt 🤖', en: 'Test 🤖' }
+    },
+    {
+      botStrategy: aiBotStrategy,
+      generateStartBoard: () => random(20, 27),
+      label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
+      isDefault: true
+    }
   ]
 });

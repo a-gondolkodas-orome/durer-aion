@@ -164,7 +164,8 @@ const BoardClient = ({ board: { bacteria, goals }, ctx, moves }) => {
     const isDefenderTarget = !isPlayerAttacker && ctx.isClientMoveAllowed && bacteria[row][col] >= 1;
     return [
       "aspect-4/3 w-full border-2 rounded-sm flex items-center justify-center",
-      bg, border,
+      bg,
+      border,
       isForbidden({ row, col }) ? "opacity-50 cursor-not-allowed" : "",
       isDefenderTarget ? "enabled:hover:bg-red-100 enabled:hover:border-red-400" : ""
     ].join(" ");

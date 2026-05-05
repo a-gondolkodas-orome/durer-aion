@@ -147,7 +147,7 @@ export const getNextSharkPositionByAI = (submarines, shark) => {
 
 	// kozepso mezo
   {
-		let i = 12;
+		const i = 12;
     if (componentSizes[i] == maxi && isReachableWithoutDeath(submarines, shark, i)) {
       possibleMoves.push(i);
     }
@@ -156,7 +156,7 @@ export const getNextSharkPositionByAI = (submarines, shark) => {
   // nem sarkok a kozepso koron
   if (possibleMoves.length === 0) {
     for (let ind = 0; ind < 4; ind++) {
-      let i = [7,11,13,17][ind];
+      const i = [7,11,13,17][ind];
       if (componentSizes[i] == maxi && isReachableWithoutDeath(submarines, shark, i)) {
         possibleMoves.push(i);
       }
@@ -166,7 +166,7 @@ export const getNextSharkPositionByAI = (submarines, shark) => {
   // kozepso kor sarkai
   if (possibleMoves.length === 0) {
     for (let ind = 0; ind < 4; ind++) {
-      let i = [6,8,16,18][ind];
+      const i = [6,8,16,18][ind];
       if (componentSizes[i] == maxi && isReachableWithoutDeath(submarines, shark, i)) {
         possibleMoves.push(i);
       }
@@ -176,7 +176,7 @@ export const getNextSharkPositionByAI = (submarines, shark) => {
   // kulso kor kozeőpso mezoi
   if (possibleMoves.length === 0) {
     for (let ind = 0; ind < 4; ind++) {
-      let i = [2,10,14,22][ind];
+      const i = [2,10,14,22][ind];
       if (componentSizes[i] == maxi && isReachableWithoutDeath(submarines, shark, i)) {
         possibleMoves.push(i);
       }
@@ -186,7 +186,7 @@ export const getNextSharkPositionByAI = (submarines, shark) => {
   // kulso kor masodik es negyedik mezoi
   if (possibleMoves.length === 0) {
     for (let ind = 0; ind < 8; ind++) {
-      let i = [1,3,5,9,15,19,21,23][ind];
+      const i = [1,3,5,9,15,19,21,23][ind];
       if (componentSizes[i] == maxi && isReachableWithoutDeath(submarines, shark, i)) {
         possibleMoves.push(i);
       }
@@ -196,7 +196,7 @@ export const getNextSharkPositionByAI = (submarines, shark) => {
   // sarkok
   if (possibleMoves.length === 0) {
     for (let ind = 0; ind < 4; ind++) {
-      let i = [0,4,20,24][ind];
+      const i = [0,4,20,24][ind];
       if (componentSizes[i] == maxi && isReachableWithoutDeath(submarines, shark, i)) {
         possibleMoves.push(i);
       }

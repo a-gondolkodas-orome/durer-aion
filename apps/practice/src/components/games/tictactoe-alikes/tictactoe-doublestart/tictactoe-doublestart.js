@@ -103,7 +103,11 @@ export const TicTacToeDoubleStart = strategyGameFactory({
   gameplay: { moves },
   variants: [
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
-    { botStrategy: aiBotStrategy, generateStartBoard: generateEmptyTicTacToeBoard,
-      label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
+    {
+      botStrategy: aiBotStrategy,
+      generateStartBoard: generateEmptyTicTacToeBoard,
+      label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
+      isDefault: true
+    }
   ]
 });

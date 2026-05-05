@@ -241,8 +241,10 @@ export const DominoesOnChessboard = strategyGameFactory({
   variants: [
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
     {
-      botStrategy: aiBotStrategy, generateStartBoard: () => [],
-      label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true
+      botStrategy: aiBotStrategy,
+      generateStartBoard: () => [],
+      label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
+      isDefault: true
     }
   ]
 });

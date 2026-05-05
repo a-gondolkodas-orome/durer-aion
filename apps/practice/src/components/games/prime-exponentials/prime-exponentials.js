@@ -3,6 +3,7 @@ import { strategyGameFactory } from '../../game-factory/strategy-game';
 import { sample, random } from 'lodash';
 import { useTranslation } from '../../language/translate';
 
+/* eslint-disable array-element-newline */
 const primeList = [
   2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71,
   73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151,
@@ -16,6 +17,7 @@ const primeList = [
   821, 823, 827, 829, 839, 853, 857, 859, 863, 877, 881, 883, 887, 907, 911,
   919, 929, 937, 941, 947, 953, 967, 971, 977, 983, 991, 997
 ];
+/* eslint-enable array-element-newline */
 
 const allPrimePowers = (() => {
   const entries = [{ prime: 2, exponent: 0, value: 1 }];
@@ -180,7 +182,8 @@ export const PrimeExponentials = strategyGameFactory({
     {
       botStrategy: randomBotStrategy,
       generateStartBoard: generateSmallStartBoard,
-      label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
+      label: { hu: 'Teszt 🤖', en: 'Test 🤖' }
+    },
     {
       botStrategy: aiBotStrategy,
       generateStartBoard,

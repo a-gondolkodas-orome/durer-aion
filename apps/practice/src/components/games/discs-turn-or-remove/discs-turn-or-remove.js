@@ -139,8 +139,8 @@ const gameBoardFactory = (maxDiscs) => {
         </table>
         {t({
           hu: `${board[1]} piros és ${board[0]} kék korong`,
-          en: `${board[1]} red and ${board[0]} blue discs` }
-        )}
+          en: `${board[1]} red and ${board[0]} blue discs`
+        })}
         {nextBoardDescription()}
       </section>
     );
@@ -237,8 +237,12 @@ export const SixDiscs = strategyGameFactory({
   gameplay: { moves },
   variants: [
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
-    { botStrategy: aiBotStrategy, generateStartBoard: generateStartBoard(6),
-      label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
+    {
+      botStrategy: aiBotStrategy,
+      generateStartBoard: generateStartBoard(6),
+      label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
+      isDefault: true
+    }
   ]
 });
 
@@ -251,7 +255,11 @@ export const TenDiscs = strategyGameFactory({
   gameplay: { moves },
   variants: [
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
-    { botStrategy: aiBotStrategy, generateStartBoard: generateStartBoard(10),
-      label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
+    {
+      botStrategy: aiBotStrategy,
+      generateStartBoard: generateStartBoard(10),
+      label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
+      isDefault: true
+    }
   ]
 });

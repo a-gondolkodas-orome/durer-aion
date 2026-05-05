@@ -224,8 +224,6 @@ framework.
 - is the game usable only with keyboard (without a mouse)?
 - is it clear what the player should do next?
 - can the player undo their last interaction in turns with multiple moves?
-- check for console errors/warnings as well, i.e. missing keys on react
-  components
 - pretend the bot is thinking in turns with multiple moves (for one move it is
   handled by framework)
 

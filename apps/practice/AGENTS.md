@@ -92,7 +92,6 @@ strategyGameFactory({
 - Interactions disabled during the other player's turn (`ctx.isClientMoveAllowed`)
 - Mobile-friendly and keyboard-navigable
 - Player can undo within multi-move turns if applicable
-- No console errors/warnings (e.g. missing React keys)
 - AI appears to "think" in multi-move turns (use `setTimeout`)
 
 ## Internationalisation (i18n)

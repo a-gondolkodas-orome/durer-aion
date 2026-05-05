@@ -53,9 +53,12 @@ export const Overview = () => {
 const CategoryFilter = ({ selected, onChange }) => {
   const { t } = useTranslation();
   const categories = [
-    { k: 'A', v: 'A' }, { k: 'B', v: 'B' },
-    { k: 'C', v: 'C' }, { k: 'D', v: 'D' },
-    { k: 'E', v: 'E' }, { k: 'E+', v: 'E+' }
+    { k: 'A', v: 'A' },
+    { k: 'B', v: 'B' },
+    { k: 'C', v: 'C' },
+    { k: 'D', v: 'D' },
+    { k: 'E', v: 'E' },
+    { k: 'E+', v: 'E+' }
   ];
   return (
     <div className="flex flex-wrap items-center gap-1">

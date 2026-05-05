@@ -49,8 +49,11 @@ export const Coin123 = strategyGameFactory({
   BoardClient,
   gameplay: { moves },
   variants: [
-    { botStrategy: randomBotStrategy, generateStartBoard: generateTestStartBoard,
-      label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
+    {
+      botStrategy: randomBotStrategy,
+      generateStartBoard: generateTestStartBoard,
+      label: { hu: 'Teszt 🤖', en: 'Test 🤖' }
+    },
     { botStrategy: aiBotStrategy, generateStartBoard, label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
   ]
 });
