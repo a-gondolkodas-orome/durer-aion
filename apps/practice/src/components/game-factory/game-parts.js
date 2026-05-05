@@ -117,6 +117,7 @@ export const GameHeader = () => {
       <span className="basis-44 text-right hidden md:flex items-center justify-end gap-2">
         <a
           href="https://forms.gle/7DwugmXNrvKgkiiu8"
+          rel="noreferrer"
           target="_blank"
           className="px-2"
         >
@@ -154,6 +155,7 @@ export const GameFooter = () => {
       <a
         href="https://forms.gle/7DwugmXNrvKgkiiu8"
         target="_blank"
+        rel="noreferrer"
         className="px-2 md:hidden"
       >
         {t({ hu: 'Hibabejelentő', en: 'Bug report' })}

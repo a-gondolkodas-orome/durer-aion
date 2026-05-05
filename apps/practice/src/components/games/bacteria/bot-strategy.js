@@ -51,9 +51,9 @@ export const aiBotStrategy = ({ board, ctx, moves }) => {
   } else {
     const { attackChoice, attackRow, attackCol } = aiAttack(board);
     switch(attackChoice) {
-      case 'shiftRight': moves.shiftRight(board, { row: attackRow, col: attackCol });
-      case 'shiftLeft': moves.shiftLeft(board, { row: attackRow, col: attackCol });
-      case 'jump': moves.jump(board, { row: attackRow, col: attackCol });
+      case 'shiftRight': moves.shiftRight(board, { row: attackRow, col: attackCol }); break;
+      case 'shiftLeft': moves.shiftLeft(board, { row: attackRow, col: attackCol }); break;
+      case 'jump': moves.jump(board, { row: attackRow, col: attackCol }); break;
       case 'spread': moves.spread(board, { row: attackRow, col: attackCol });
     }
   }

@@ -92,6 +92,7 @@ const OverviewHeader = () => {
       <a
         href="https://forms.gle/7DwugmXNrvKgkiiu8"
         target="_blank"
+        rel="noreferrer"
         className="text-sm text-slate-500 hover:text-slate-700"
       >
         {t({ hu: 'Hibabejelentő', en: 'Bug report' })}
