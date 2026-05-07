@@ -21,7 +21,7 @@ export function ChooserItem(props: {
   const [mobileDescOpen, setMobileDescOpen] = useState(props.status.state !== "FINISHED");
   const isOffline = useClientRepo().version === "OFFLINE";
   const theme = useTheme();
-  const { t } = useTranslation(undefined, { keyPrefix: 'chooser' });
+  const { t } = useTranslation();
 
   return (
     <Stack sx={{
@@ -50,7 +50,7 @@ export function ChooserItem(props: {
           return !prev
         })
       }}>
-        <span>{props.type==='relay' ? t('name', { keyPrefix: 'relay' }) : t('name', { keyPrefix: 'strategy' })}  {!props.hideDesc && <ExpandMoreIcon sx={{
+        <span>{props.type==='relay' ? t('relay.name') : t('strategy.name')}  {!props.hideDesc && <ExpandMoreIcon sx={{
           fontSize: 33,
           marginBottom: "-9px",
           display: {
@@ -68,7 +68,7 @@ export function ChooserItem(props: {
             md: 0,
           }
         }}>
-          {t('filledAt')}: {formatTime((props.status as FinishedMatchStatus).startAt)} - {formatTime((props.status as FinishedMatchStatus).endAt)} {t('achievedPoint')}: {(props.status as FinishedMatchStatus).score}
+          {t('chooser.filledAt')}: {formatTime((props.status as FinishedMatchStatus).startAt)} - {formatTime((props.status as FinishedMatchStatus).endAt)} {t('chooser.achievedPoint')}: {(props.status as FinishedMatchStatus).score}
         </Stack>
       }
       {props.type === 'relay' &&
@@ -92,7 +92,7 @@ export function ChooserItem(props: {
             md: 0,
             xs: '10px'
           }}}>
-            {!props.hideDesc && t('relayDescription')}
+            {!props.hideDesc && t('chooser.relayDescription')}
           </Stack>
         </Stack>
       }        
@@ -139,7 +139,7 @@ export function ChooserItem(props: {
           startStrategy()
         }
       }} disabled={props.status.state !== "NOT STARTED"}>
-        {t('start')}
+        {t('chooser.start')}
       </Button>
       { !isOffline &&
       <Button sx={{
@@ -157,7 +157,7 @@ export function ChooserItem(props: {
           props.setState("S");
         }
       }} disabled={props.status.state === "NOT STARTED"}>
-        {t('result')}
+        {t('chooser.result')}
       </Button>
       }
     </Stack>

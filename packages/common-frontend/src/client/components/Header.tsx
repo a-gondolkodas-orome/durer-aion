@@ -7,7 +7,7 @@ import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 
 export function Header(props: { teamName: string | null }) {
-  const { t } = useTranslation(undefined, { keyPrefix: 'header' });
+  const { t } = useTranslation();
   const theme = useTheme();
   const logout = useLogout();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -39,7 +39,7 @@ export function Header(props: { teamName: string | null }) {
           fontWeight: 'bold',
           paddingTop: '20px',
           whiteSpace: 'nowrap',
-        }}>{t('title')}</Stack>
+        }}>{t('header.title')}</Stack>
         {
           <Stack sx={{
             flexDirection: 'row',
@@ -79,7 +79,7 @@ export function Header(props: { teamName: string | null }) {
                 "&:hover": {
                   opacity: '0.8',
                 }
-              }}>{t('logout')}</Stack>
+              }}>{t('header.logout')}</Stack>
             </>
             }
             <Stack sx={{
@@ -107,7 +107,7 @@ export function Header(props: { teamName: string | null }) {
             md: 'flex'
           },
           whiteSpace: 'nowrap',
-        }}>{t('subtitle')}</Stack>
+        }}>{t('header.subtitle')}</Stack>
         <Dialog
           open={mobileMenuOpen}
           onClose={()=>{
@@ -135,7 +135,7 @@ export function Header(props: { teamName: string | null }) {
               fontSize: 20,
               textTransform: 'capitalize'
             }}
-            >{t('logout')}</Button>
+            >{t('header.logout')}</Button>
         </Dialog>
       </Container>
     </Stack>

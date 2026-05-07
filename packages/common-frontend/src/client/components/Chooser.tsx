@@ -17,7 +17,7 @@ export function Chooser(props: {
     props.state.strategyMatch.state === "FINISHED";
   const isOffline = useClientRepo().version === "OFFLINE";
   const theme = useTheme();
-  const { t } = useTranslation(undefined, { keyPrefix: 'chooser'});
+  const { t } = useTranslation();
 
   return (
     <Stack
@@ -54,7 +54,7 @@ export function Chooser(props: {
               fontSize: "24px",
             }}
           >
-            {t('finish.title')}
+            {t('chooser.finish.title')}
           </p>
           <span>
             <Trans 
@@ -68,9 +68,9 @@ export function Chooser(props: {
               fontSize: "24px",
             }}
           >
-            {t('finish.final')}: <b>{finalPoints}</b>
+            {t('chooser.finish.final')}: <b>{finalPoints}</b>
           </p>
-          { isOffline && t('pointsNotSettled')}
+          { isOffline && t('chooser.pointsNotSettled')}
         </Stack>
       )}
       <Stack

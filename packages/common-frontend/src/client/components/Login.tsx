@@ -14,7 +14,7 @@ export function Login() {
   const theme = useTheme();
   const { enqueueSnackbar } = useSnackbar();
   const login = useLogin();
-  const { t } = useTranslation(undefined, { keyPrefix: 'login' });
+  const { t } = useTranslation();
 
   return (
     <Stack sx={{
@@ -46,8 +46,8 @@ export function Login() {
             md: "40px",
           }
         }}>
-          {t('greeting')}<br/>
-          {t('beforeTitle')}{t('title', { keyPrefix: 'header' })}{t('afterTitle')}
+          {t('login.greeting')}<br/>
+          {t('login.beforeTitle')}{t('header.title')}{t('login.afterTitle')}
         </Stack>
         <Stack sx={{
           marginTop: {
@@ -59,13 +59,13 @@ export function Login() {
             md: "30px",
           }
         }}>
-          {t('loginInstruction')}
+          {t('login.loginInstruction')}
         </Stack>
         <Stack>
           <Form style={{ position: "relative", zIndex: 2 }} initialValues={{ joinCode: '' }}
             onSubmit={(values) => {
               if(!values.joinCode) {
-                enqueueSnackbar(t('error.empty'), { variant: 'error' });
+                enqueueSnackbar(t('login.error.empty'), { variant: 'error' });
                 return;
               }
               login(values.joinCode).catch(err => {
@@ -120,7 +120,7 @@ export function Login() {
                 }
               }}
             >
-              {t('loginButton')}
+              {t('login.loginButton')}
             </Button>
           </Form>
         </Stack>
@@ -134,7 +134,7 @@ export function Login() {
           xs: "20px",
           md: "100px"
         }}}>
-        {t('fallback')}
+        {t('login.fallback')}
       </Stack>
     </Stack>
   )

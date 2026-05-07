@@ -9,7 +9,7 @@ export function Disclaimer(props: {teamName: string, category: string}) {
   const goHome = useToHome();
   const theme = useTheme();
   const isOffline = useClientRepo().version === "OFFLINE";
-  const { t } = useTranslation(undefined, { keyPrefix: 'disclaimer' });
+  const { t } = useTranslation();
 
   return (
     <Stack
@@ -76,7 +76,7 @@ export function Disclaimer(props: {teamName: string, category: string}) {
               }} />
           </div>
         </Stack>
-        {t('start')}
+        {t('disclaimer.start')}
       </Stack>
 
       <Stack
@@ -86,7 +86,7 @@ export function Disclaimer(props: {teamName: string, category: string}) {
           fontStyle: "italic",
         }}
       >
-        {t('progress')}
+        {t('disclaimer.progress')}
       </Stack>
 
       <Stack
@@ -98,7 +98,7 @@ export function Disclaimer(props: {teamName: string, category: string}) {
           }
         }}
       >
-        {t('progressDescription', {minpoints: 25, maxpoints: 52})}
+        {t('disclaimer.progressDescription', {minpoints: 25, maxpoints: 52})}
       </Stack>
 
       <Stack
@@ -108,7 +108,7 @@ export function Disclaimer(props: {teamName: string, category: string}) {
           fontStyle: "italic",
         }}
       >
-        {t('interface')}
+        {t('disclaimer.interface')}
       </Stack>
 
       <Stack
@@ -150,7 +150,7 @@ export function Disclaimer(props: {teamName: string, category: string}) {
           goHome();
         }}
       >
-        {t('continue')}
+        {t('disclaimer.continue')}
       </Button>
     </Stack>
   );

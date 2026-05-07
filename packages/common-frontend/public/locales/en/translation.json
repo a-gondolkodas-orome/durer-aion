@@ -5,7 +5,7 @@
       "hu": "Hungarian"
     },
     "disclaimer": {
-      "welcome": "Dear Team <i>{{tname}}</i>, we welcome you in the online round!",
+      "welcome": "Dear Team <i>{{tname}}</i>, welcome to the online round!",
       "category": "Your category: <b>{{category}}</b>",
       "start": "In the online round, teams must work on their own; they must not ask for help from other people until the competition ends (at 21:30). The use of artificial intelligence is also forbidden.",
       "progress": "Advancing to next rounds",

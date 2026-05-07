@@ -6,7 +6,7 @@ import { Suspense } from "react";
 const testId = "strategyRoot";
 
 export function Strategy(props: { state: TeamModelDto }) {
-  const { t } = useTranslation(undefined, {keyPrefix: 'strategy'});
+  const { t } = useTranslation();
   const StrategyClient = useGame().StrategyClient;
   switch (props.state.strategyMatch.state) {
     case "FINISHED":
@@ -24,6 +24,6 @@ export function Strategy(props: { state: TeamModelDto }) {
       );
     case "NOT STARTED":
     default:
-      return <div data-testId={testId}>{t('notSupported')}</div>;
+      return <div data-testId={testId}>{t('strategy.notSupported')}</div>;
   }
 }
