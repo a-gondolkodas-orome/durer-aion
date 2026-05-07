@@ -46,7 +46,8 @@
         "integer": "Egész számot kell írni",
         "type": "Számot kell írnod",
         "range": "A megoldás 0 és 9999 között van",
-        "badCategory": "ROSSZ KATEGÓRIA"
+        "badCategory": "ROSSZ KATEGÓRIA",
+        "empty": "Nem írtál semmilyen választ!"
       },
       "goodGuess": "A válasz helyes volt",
       "wrongGuess": "A válasz sajnos nem volt jó",

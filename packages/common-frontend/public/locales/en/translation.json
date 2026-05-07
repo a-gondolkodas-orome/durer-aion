@@ -47,7 +47,8 @@
         "integer": "You must give an integer",
         "type": "Answer must be a number",
         "range": "The solution is between 0 and 9999",
-        "badCategory": "WRONG CATEGORY"
+        "badCategory": "WRONG CATEGORY",
+        "empty": "You didn't give any answer!"
       },
       "goodGuess": "Your answer is correct",
       "wrongGuess": "Your guess is sadly wrong",
