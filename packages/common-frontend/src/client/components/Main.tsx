@@ -26,7 +26,7 @@ export function Main() {
   return (
     <Layout>
       <LoadTeamState />
-      <Header teamName={teamState?.teamName ?? null} />
+      <Header teamName={teamState?.teamName ?? null} admin={admin}/>
       <Container
         sx={{
           paddingLeft: {
@@ -47,7 +47,7 @@ export function Main() {
         data-testId="mainRoot"
       >
         {admin && <Admin teamId={window.location.pathname.split('/').at(2)}/>}
-        {!teamState && !admin && <Login />}
+        {!teamState && <Login />}
         {teamState && teamState.pageState === "DISCLAIMER" && (
           <Disclaimer teamName={teamState.teamName} category={teamState.category}/>
         )}

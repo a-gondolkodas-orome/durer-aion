@@ -8,7 +8,7 @@ import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from './Langswitcher';
 
-export function Header(props: { teamName: string | null }) {
+export function Header(props: { teamName: string | null, admin: boolean }) {
   const { t } = useTranslation(undefined, { keyPrefix: 'header' });
   const theme = useTheme();
   const logout = useLogout();
@@ -89,7 +89,7 @@ export function Header(props: { teamName: string | null }) {
               flex: 1
             }}>
             </Stack>
-            <IconButton
+            {props.admin && <IconButton
               onClick={() => {
                 setLanguageSwitcherOpen(!languageSwitcherOpen);
               }}
@@ -99,8 +99,8 @@ export function Header(props: { teamName: string | null }) {
               }}
             >
               <LanguageIcon />
-            </IconButton>
-            {languageSwitcherOpen &&
+            </IconButton>}
+            {props.admin && languageSwitcherOpen &&
             <LanguageSwitcher direction='row' style='dropdown' />
             }
           </Stack>
@@ -153,7 +153,7 @@ export function Header(props: { teamName: string | null }) {
               textTransform: 'capitalize'
             }}
             >{t('logout')}</Button>
-            <LanguageSwitcher />
+            {props.admin && <LanguageSwitcher />}
         </Dialog>
       </Container>
     </Stack>
