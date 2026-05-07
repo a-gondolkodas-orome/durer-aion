@@ -1,6 +1,7 @@
 import { Stack } from '@mui/system';
 import { useAddMinutes, useAll, useRemoveTeam } from '../hooks/user-hooks';
-import { Button, Dialog, Table, TableCell, TableRow } from '@mui/material';
+import { Button, Dialog, Table, TableCell, TableRow, IconButton } from '@mui/material';
+import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
 import { useEffect, useState } from 'react';
 import useSWR from 'swr';
 import { DataGrid } from '@mui/x-data-grid';
@@ -26,6 +27,7 @@ export function Admin(props: {teamId?: string}) {
   const [selectedRow, setSelectedRow] = useState<TeamModelDto | null>(null);
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogInterface | null>(null);
   const [teamFromPath, setTeamFromPath] = useState<TeamModelDto | null>(null);
+  const [adminPageOpen, setAdminPageOpen] = useState<boolean>(true);
 
   useEffect(()=>{
     if (props.teamId) {
@@ -78,11 +80,18 @@ export function Admin(props: {teamId?: string}) {
           {selectedRow && <TeamDetailDialog data={selectedRow} setConfirmDialog={setConfirmDialog}/>}
       </Dialog>
       <ConfirmDialog confirmDialog={confirmDialog}  setConfirmDialog={setConfirmDialog}/>
-      <Stack sx={{width: "100%", display:"flex", flexDirection: "row"}}>
-        <Stack sx={{fontSize:"32px", width: "100%", textAlign: "center"}}>Admin felület </Stack>
+      <Stack sx={{width: "100%", display:"flex", flexDirection: "row", alignItems: "center", justifyContent: "center"}}>
+        <IconButton
+          onClick={() => setAdminPageOpen(!adminPageOpen)}
+          size="large"
+          sx={{marginRight: "8px"}}
+        >
+          {adminPageOpen ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+        </IconButton>
+        <Stack sx={{fontSize:"32px", textAlign: "center"}}>Admin felület </Stack>
       </Stack>
-      {teamFromPath && <TeamDetailDialog data={teamFromPath} setConfirmDialog={setConfirmDialog}/>}
-      {!teamFromPath && <Stack sx={{
+      {adminPageOpen && teamFromPath && <TeamDetailDialog data={teamFromPath} setConfirmDialog={setConfirmDialog}/>}
+      {adminPageOpen && !teamFromPath && <Stack sx={{
         height: "635px",
       }}>
         {data && <DataGrid columns={[
@@ -187,7 +196,7 @@ export function Admin(props: {teamId?: string}) {
         }}
         />}
       </Stack>}
-      {!teamFromPath && data && <Stack sx={{padding: "10px"}}>
+      {adminPageOpen && !teamFromPath && data && <Stack sx={{padding: "10px"}}>
         idő hozzáadása minden aktív játékosnak:
         <Form
         initialValues={{ time: '' }}
@@ -249,7 +258,7 @@ export function Admin(props: {teamId?: string}) {
         )}/>
       </Form>
       </Stack>}
-      {!teamFromPath && data &&
+      {adminPageOpen && !teamFromPath && data &&
         <Button
           color="error"
           variant="contained"
@@ -276,7 +285,7 @@ export function Admin(props: {teamId?: string}) {
         >
           Összes csapat törlése
         </Button>}
-     {!teamFromPath && data && <Stats data={data}/>}
+     {adminPageOpen && !teamFromPath && data && <Stats data={data}/>}
     </Stack>
   )
 }
