@@ -8,7 +8,7 @@ export function Countdown(
     msRemaining: number | null,
     setMsRemaining: Dispatch<SetStateAction<number>>,
     endTime: Date,
-    getServerTimer: ()=>void,
+    getServerTimer: () => void,
     serverRemainingMs: number;
   }>
 ) {
