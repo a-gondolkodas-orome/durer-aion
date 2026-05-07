@@ -33,7 +33,10 @@ export const randomBotStrategy = ({ board, ctx, moves }) => {
     board.submarines.forEach((count, from) => {
       if (count >= 1) getAdjacentCells(from).forEach(to => validMoves.push({ from, to }));
     });
-    moves.moveSubmarine(board, sample(validMoves));
+    const approachingMoves = validMoves.filter(
+      ({ from, to }) => distanceFromShark(board.shark, to) < distanceFromShark(board.shark, from)
+    );
+    moves.moveSubmarine(board, sample(approachingMoves.length > 0 ? approachingMoves : validMoves));
   }
 };
 
