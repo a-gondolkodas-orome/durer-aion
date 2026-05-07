@@ -175,7 +175,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
               width: '250px',
               fontSize: '10px',
             }}>
-            ({t('warnings.timeNotReal')})
+            ({t('general.warning.timeNotReal')})
             </Stack>
           }
         </Stack>

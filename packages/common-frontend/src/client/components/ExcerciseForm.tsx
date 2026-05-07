@@ -33,10 +33,8 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
   useEffect(()=>{
     if(props.previousCorrectness!=null){
       if(props.previousCorrectness){
-        console.log(t('goodGuess'))
         enqueueSnackbar(t('goodGuess'), { variant: 'success' });
       } else {
-        console.log(t('wrongGuess'))
         enqueueSnackbar(t('wrongGuess'), { variant: 'error' });
       }
     }

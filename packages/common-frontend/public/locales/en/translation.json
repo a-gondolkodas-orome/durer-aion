@@ -26,7 +26,8 @@
       "filledAt": "Filled at",
       "achievedPoint": "Points achieved",
       "start": "Start",
-      "result": "Results"
+      "result": "Results",
+      "pointsNotSettled": "Your final points are only here for informational purposes, these will be reevaluated based on all the submissions we get."
     },
     "relay": {
       "endTable": {
@@ -61,7 +62,11 @@
       "task": "task",
       "point": "point",
       "remainingTime": "Remaining time",
-      "returnHome": "Back to main page"
+      "returnHome": "Back to main page",
+      "warning": {
+        "timeNotMatch": "Your computer's clock is not synchronized with the server's clock, the displayed remaining time is not perfect, reloading the page may solve the problem",
+        "timeNotReal": "The clock is for informational purposes only. You will see a different time on other devices and browsers, but we will still only consider answers received on time."
+      }
     },
     "header": {
       "logout": "logout",
@@ -74,7 +79,11 @@
       "afterTitle": ".",
       "loginInstruction": "To log in, check your emails and enter the code you find there here:",
       "fallback": "If you can't find the email, write to us at the verseny (at) durerinfo (dot) hu email address.",
-      "loginButton": "Log in"
+      "loginButton": "Log in",
+      "error": {
+        "empty": "You didn't give any code!",
+        "wrongid": "Incorrect log-in code."
+      }
     },
     "waitingRoom": {
       "soon": "The online round will start soon!",
@@ -119,14 +128,7 @@
     },
     "error": {
       "unexpected": "An unexpected error occurred",
-      "empty": "You have not specified any answer!",
-      "wrongid": "Incorrect log-in code.",
       "notFound": "This page was not found."
-    },
-    "warnings": {
-      "timeNotMatch": "Your computer's clock is not synchronized with the server's clock, the displayed remaining time is not perfect, reloading the page may solve the problem",
-      "timeNotReal": "The clock is for informational purposes only. You will see a different time on other devices and browsers, but we will still only consider answers received on time.",
-      "pointsNotSettled": "Your final points are only here for informational purposes, these will be reevaluated based on all the submissions we get."
     }
   }
 }

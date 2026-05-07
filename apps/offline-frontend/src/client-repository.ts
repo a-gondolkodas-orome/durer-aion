@@ -147,7 +147,7 @@ export class OfflineClientRepository implements ClientRepository {
       return Promise.resolve(joinCode);
     }
 
-    throw new Error(i18n.t('error.wrongid'));
+    throw new Error(i18n.t('login.error.wrongid'));
   }
 
 }

@@ -70,7 +70,7 @@ export function Chooser(props: {
           >
             {t('finish.final')}: <b>{finalPoints}</b>
           </p>
-          { isOffline && t('pointsNotSettled', { keyPrefix: 'warnings' })}
+          { isOffline && t('pointsNotSettled')}
         </Stack>
       )}
       <Stack

@@ -26,7 +26,8 @@
       "filledAt": "Kitöltve ekkor",
       "achievedPoint": "Elért pontszám",
       "start": "Kezdjük",
-      "result": "Eredmények"
+      "result": "Eredmények",
+      "pointsNotSettled": "A pontszámotok csak tájékoztató jellegű, a végleges pontszámotokat a beküldött válaszok alapján újraértékeljük."
     },
     "relay": {
       "endTable": {
@@ -60,7 +61,11 @@
       "remainingTime": "Hátralevő idő",
       "task": "feladat",
       "point": "pont",
-      "returnHome": "Vissza a főoldalra"
+      "returnHome": "Vissza a főoldalra",
+      "warning": {
+        "timeNotMatch": "A számítógép órája nincs szinkronban a szerver órájával, a jelzett hátralevő idő nem tökéletes, az oldal újra töltése megoldhatja a problémát",
+        "timeNotReal": "Az óra csak tájékoztató jellegű. Más eszközökön és böngészőkben más időt fogtok látni, de így is csak az időben beérkezett válaszokat fogjuk figyelembe venni."
+      }
     },
     "header": {
       "logout": "kilépés",
@@ -73,7 +78,11 @@
       "afterTitle": " online fordulójának felületén.",
       "loginInstruction": "Belépéshez nézd meg az emailjeidet, és üsd be az ott található kódot ide:",
       "fallback": "Ha nem találjátok az emailt, akkor írjatok nekünk a verseny [K] durerinfo [P] hu email címre.",
-      "loginButton": "Belépés"
+      "loginButton": "Belépés",
+      "error": { 
+        "empty": "Nem adtál meg kódot!",
+        "wrongid": "Rossz belépési kód!"
+      }
     },
     "waitingRoom": {
       "soon": "Az online forduló hamarosan kezdődik!",
@@ -116,14 +125,7 @@
     },
     "error": {
       "unexpected": "Váratlan hiba történt",
-      "empty": "Nem írtál semmi választ!",
-      "wrongid": "Rossz belépési kód!",
       "notFound": "Ez az oldal nem található"
-    },
-    "warnings": {
-      "timeNotMatch": "A számítógép órája nincs szinkronban a szerver órájával, a jelzett hátralevő idő nem tökéletes, az oldal újra töltése megoldhatja a problémát",
-      "timeNotReal": "Az óra csak tájékoztató jellegű. Más eszközökön és böngészőkben más időt fogtok látni, de így is csak az időben beérkezett válaszokat fogjuk figyelembe venni.",
-      "pointsNotSettled": "A pontszámotok csak tájékoztató jellegű, a végleges pontszámotokat a beküldött válaszok alapján újraértékeljük."
     }
   }
 }

@@ -96,7 +96,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
             fontSize: '10px',
             marginLeft: 'auto',
           }}>
-          {t('timeNotReal', { keyPrefix: 'warnings' })}
+          {t('warning.timeNotReal', { keyPrefix: 'general' })}
           </Stack>}
           <Stack sx={{
             marginTop: '10px',
