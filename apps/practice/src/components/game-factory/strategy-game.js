@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import {
-  GameSidebar, GameFooter, GameHeader, GameRule, GameEndDialog, DEFAULT_PLAYER_NAMES
-} from './game-parts';
+import { GameHeader, GameFooter, GameRule } from './game-parts/game-chrome';
+import { GameSidebar } from './game-parts/game-sidebar';
+import { GameEndDialog } from './game-parts/game-end-dialog';
+import { DEFAULT_PLAYER_NAMES } from './game-parts/game-controls';
 import { partial, mapValues, wrap, _ } from 'lodash';
 import { useTranslation } from '../language/translate';
 import { useLocation } from 'react-router';
@@ -52,6 +53,7 @@ export const strategyGameFactory = ({
     const [turnState, setTurnState] = useState(null);
     const [mode, setMode] = useState('vsComputer');
     const [playerNames, setPlayerNames] = useState(['', '']);
+    const [gameEndDisplayCtx, setGameEndDisplayCtx] = useState(null);
 
     const isHumanVsHumanGame = mode === 'vsHuman';
 
@@ -77,8 +79,14 @@ export const strategyGameFactory = ({
       return moveResult;
     };
 
-    const resetGameState = (generateBoard = activeGenerateStartBoard) => {
-      setBoard(generateBoard());
+    const resetGameState = ({ newMode = mode, generateBoard = activeGenerateStartBoard } = {}) => {
+      setMode(newMode);
+      let boardGenerator = generateBoard;
+      if (newMode === 'vsHuman' && !activeVariant.generateStartBoard) {
+        setSelectedVariantIndex(defaultVariantIndex);
+        boardGenerator = defaultVariant.generateStartBoard;
+      }
+      setBoard(boardGenerator());
       setPhase('roleSelection');
       setChosenRoleIndex(null);
       setCurrentPlayer(null);
@@ -86,22 +94,25 @@ export const strategyGameFactory = ({
       setWinnerIndex(null);
       setGameUuid(crypto.randomUUID());
       setTurnState(null);
-    };
-
-    const switchMode = (newMode) => {
-      setMode(newMode);
-      if (newMode === 'vsHuman' && !activeVariant.generateStartBoard) {
-        setSelectedVariantIndex(defaultVariantIndex);
-        resetGameState(defaultVariant.generateStartBoard);
-      } else {
-        resetGameState();
-      }
+      setGameEndDisplayCtx(null);
     };
 
     const setDifficulty = (index) => {
       setSelectedVariantIndex(index);
       const newVariant = resolvedVariants[index] ?? defaultVariant;
-      resetGameState(newVariant.generateStartBoard ?? defaultGenerateStartBoard);
+      resetGameState({ generateBoard: newVariant.generateStartBoard ?? defaultGenerateStartBoard });
+    };
+
+    const changeMode = (newMode) => {
+      setMode(newMode);
+      if (newMode === 'vsHuman' && !activeVariant.generateStartBoard) {
+        setSelectedVariantIndex(defaultVariantIndex);
+      }
+    };
+
+    const playerNameOf = (index) => {
+      if (index === null) return null;
+      return playerNames[index] || t(DEFAULT_PLAYER_NAMES[index]);
     };
 
     const endGame = ({ winnerIndex = null } = {}) => {
@@ -112,6 +123,14 @@ export const strategyGameFactory = ({
       if (!isHumanVsHumanGame) {
         recordResult(resolvedWinner === chosenRoleIndex ? 'win' : 'loss');
       }
+      setGameEndDisplayCtx({
+        phase: 'gameEnd',
+        isHumanVsHumanGame,
+        isRoleSelectorWinner: resolvedWinner === chosenRoleIndex,
+        winnerName: playerNameOf(resolvedWinner),
+        winnerIndex: resolvedWinner,
+        playerNames
+      });
     };
 
     const endTurn = () => {
@@ -122,11 +141,6 @@ export const strategyGameFactory = ({
       setPhase('play');
       setCurrentPlayer(0);
       setChosenRoleIndex(roleIndex);
-    };
-
-    const playerNameOf = (index) => {
-      if (index === null) return null;
-      return playerNames[index] || t(DEFAULT_PLAYER_NAMES[index]);
     };
 
     const isClientMoveAllowed = phase === 'play'
@@ -195,7 +209,14 @@ export const strategyGameFactory = ({
               roleLabels={roleLabels}
               stepDescription={t(getPlayerStepDescription({ board, ctx }))}
               ctx={ctx}
-              moves={{ startGame, resetGameState, switchMode, setPlayerNames, setDifficulty }}
+              gameEndDisplayCtx={gameEndDisplayCtx}
+              moves={{
+                startGame,
+                resetGameState,
+                switchMode: (newMode) => resetGameState({ newMode }),
+                setPlayerNames,
+                setDifficulty
+              }}
               variants={visibleVariants}
               selectedVariantIndex={selectedVariantIndex}
               stats={stats}
@@ -209,7 +230,12 @@ export const strategyGameFactory = ({
         isOpen={isGameEndDialogOpen}
         setIsOpen={setIsGameEndDialogOpen}
         resetGameState={resetGameState}
-        ctx={ctx}
+        ctx={gameEndDisplayCtx ?? ctx}
+        isHumanVsHumanGame={isHumanVsHumanGame}
+        onSwitchMode={changeMode}
+        variants={visibleVariants}
+        selectedVariantIndex={selectedVariantIndex}
+        onSelectVariant={setSelectedVariantIndex}
       />
     </main>
     );
