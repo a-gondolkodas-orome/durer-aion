@@ -90,202 +90,205 @@ export function Admin(props: {teamId?: string}) {
         </IconButton>
         <Stack sx={{fontSize:"32px", textAlign: "center"}}>Admin felület </Stack>
       </Stack>
-      {adminPageOpen && teamFromPath && <TeamDetailDialog data={teamFromPath} setConfirmDialog={setConfirmDialog}/>}
-      {adminPageOpen && !teamFromPath && <Stack sx={{
-        height: "635px",
-      }}>
-        {data && <DataGrid columns={[
-          {
-            field: 'id',
-            headerName: 'ID',
-            width: 75,
-            editable: false,
-          },
-          {
-            field: 'teamName',
-            headerName: 'Csapatnév',
-            width: 200,
-            editable: false,
-          },
-          {
-            field: 'category',
-            headerName: 'Kategória',
-            width: 100,
-            editable: false,
-          },
-          {
-            field: 'pageState',
-            headerName: 'Állapot',
-            width: 150,
-            editable: false,
-          },
-          {
-            field: 'other',
-            headerName: 'Egyéb',
-            width: 250,
-            editable: false,
-          },
-          {
-            field: 'relayMatchState',
-            headerName: 'Relay',
-            width: 120,
-            editable: false,
-          },
-          {
-            field: 'strategyMatchState',
-            headerName: 'Strategy',
-            width: 120,
-            editable: false,
-          },
-          {
-            field: 'view',
-            width: 170,
-            headerName: '',
-            renderCell: (renderData) => {
-              return (
-                <Button
-                  color='primary'
-                  variant='contained'
-                  onClick={() => {setSelectedRow(renderData.row as TeamModelDto)}}>
-                    Szerkesztés
-                </Button>
-              )
-            }
-          },
-          {
-            field: 'view_tab',
-            width: 170,
-            headerName: '',
-            renderCell: (renderData) => {
-              return (
-                <Button
-                  color='primary'
-                  variant='contained'
-                  onClick={()=>{
-                    window.open("/admin/"+renderData.row.teamId, '_blank', 'noopener,noreferrer')
-                  }}>
-                    + új tab
-                </Button>
-              )
-            }
-          }
-        ]}
-        rows={data.map((a)=>{
-          return {
-            id: a.teamId,
-            relayMatchState: a.relayMatch.state,
-            strategyMatchState: a.strategyMatch.state,
-             ...a,
-          };
-        })}
-        initialState={{
-          pagination: {
-            paginationModel: {
-              pageSize: 10,
+      {adminPageOpen && <>
+        {teamFromPath && <TeamDetailDialog data={teamFromPath} setConfirmDialog={setConfirmDialog}/>}
+        {!teamFromPath && <Stack sx={{
+          height: "635px",
+        }}>
+          {data && <DataGrid columns={[
+            {
+              field: 'id',
+              headerName: 'ID',
+              width: 75,
+              editable: false,
             },
-          },
-          columns: {
-            columnVisibilityModel: {
-              other: false,
+            {
+              field: 'teamName',
+              headerName: 'Csapatnév',
+              width: 200,
+              editable: false,
             },
-          },
-        }}
-        pageSizeOptions={[10, 25, 50]}
-        sx={{
-          height: "auto",
-        }}
-        />}
-      </Stack>}
-      {adminPageOpen && !teamFromPath && data && <Stack sx={{padding: "10px"}}>
-        idő hozzáadása minden aktív játékosnak:
-        <Form
-        initialValues={{ time: '' }}
-        validationSchema={Yup.object().shape({
-          time: Yup.number()
-            .integer('Egész számot kell írni')
-            .typeError('Számot kell írni')
-            .required('Nincs megadva érték')
-          })}
-        onSubmit={async (values) => { 
-          setConfirmDialog({
-            text: `Erősítsd meg, hogy minden aktuális csapatnak meg akarod növelni az idejét ${values.time} perccel`,
-            confirm: async () => {
-              try {
-                data?.forEach(async a=>{
-                  if(a.relayMatch.state === "IN PROGRESS") {
-                    await addMinutes(a.relayMatch.matchID, values.time);
-                  }
-                  if(a.strategyMatch.state === "IN PROGRESS") {
-                    await addMinutes(a.strategyMatch.matchID, values.time);
-                  }
-                })
-                enqueueSnackbar("Sikeres művelet", { variant: 'success' });
-              } catch (e: unknown) {
-                const message = e instanceof Error ? e.message : "Váratlan hiba történt";
-                enqueueSnackbar(message, { variant: 'error' });
+            {
+              field: 'category',
+              headerName: 'Kategória',
+              width: 100,
+              editable: false,
+            },
+            {
+              field: 'pageState',
+              headerName: 'Állapot',
+              width: 150,
+              editable: false,
+            },
+            {
+              field: 'other',
+              headerName: 'Egyéb',
+              width: 250,
+              editable: false,
+            },
+            {
+              field: 'relayMatchState',
+              headerName: 'Relay',
+              width: 120,
+              editable: false,
+            },
+            {
+              field: 'strategyMatchState',
+              headerName: 'Strategy',
+              width: 120,
+              editable: false,
+            },
+            {
+              field: 'view',
+              width: 170,
+              headerName: '',
+              renderCell: (renderData) => {
+                return (
+                  <Button
+                    color='primary'
+                    variant='contained'
+                    onClick={() => {setSelectedRow(renderData.row as TeamModelDto)}}>
+                      Szerkesztés
+                  </Button>
+                )
               }
             },
-          })
-        }}>
-        <Stack sx={{display: "flex", flexDirection: "row", margin: "15px"}}>
-        <Field
-          name="time"
-        >
-        {
-          ({field}: FieldProps<string | number>) => <input
-            {...field}
-            className="text-input"
-            placeholder="perc"
-            style={{
-              width: '200px',
-              borderWidth: '2px',
-              borderColor: theme.palette.primary.main,
-            }}
-          />
-        }</Field>
-        <Button sx={{
-          width: '150px',
-          alignSelf: 'center',
-          textTransform: 'none',
-        }} variant='contained' color='primary' type="submit">
-          hozzáadás
-        </Button>
-        </Stack>
-        <ErrorMessage name="time"/><ErrorMessage name="time" render={msg => (
-          <Stack sx={{ color: 'red', fontSize: '0.875rem' }}>
-            {msg}
-          </Stack>
-        )}/>
-      </Form>
-      </Stack>}
-      {adminPageOpen && !teamFromPath && data &&
-        <Button
-          color="error"
-          variant="contained"
-          sx={{ margin: '10px 0', maxWidth: 300 }}
-          onClick={() => {
+            {
+              field: 'view_tab',
+              width: 170,
+              headerName: '',
+              renderCell: (renderData) => {
+                return (
+                  <Button
+                    color='primary'
+                    variant='contained'
+                    onClick={()=>{
+                      window.open("/admin/"+renderData.row.teamId, '_blank', 'noopener,noreferrer')
+                    }}>
+                      + új tab
+                  </Button>
+                )
+              }
+            }
+          ]}
+          rows={data.map((a)=>{
+            return {
+              id: a.teamId,
+              relayMatchState: a.relayMatch.state,
+              strategyMatchState: a.strategyMatch.state,
+              ...a,
+            };
+          })}
+          initialState={{
+            pagination: {
+              paginationModel: {
+                pageSize: 10,
+              },
+            },
+            columns: {
+              columnVisibilityModel: {
+                other: false,
+              },
+            },
+          }}
+          pageSizeOptions={[10, 25, 50]}
+          sx={{
+            height: "auto",
+          }}
+          />}
+        </Stack>}
+        {!teamFromPath && data && <Stack sx={{padding: "10px"}}>
+          idő hozzáadása minden aktív játékosnak:
+          <Form
+          initialValues={{ time: '' }}
+          validationSchema={Yup.object().shape({
+            time: Yup.number()
+              .integer('Egész számot kell írni')
+              .typeError('Számot kell írni')
+              .required('Nincs megadva érték')
+            })}
+          onSubmit={async (values) => { 
             setConfirmDialog({
-              text: 'Biztosan törlöd az összes csapatot? Ez a művelet nem visszavonható!',
+              text: `Erősítsd meg, hogy minden aktuális csapatnak meg akarod növelni az idejét ${values.time} perccel`,
               confirm: async () => {
                 try {
-                  data.forEach(team => {
-                    removeTeam(team.teamId);
-                  });
-                  enqueueSnackbar('Összes csapat törölve', { variant: 'success' });
-                  // Refresh the list
-                  if (typeof window !== 'undefined') {
-                    getAll();
-                  }
-                } catch (e: any) {
-                  enqueueSnackbar(e?.message || 'Hiba történt', { variant: 'error' });
+                  data?.forEach(async a=>{
+                    if(a.relayMatch.state === "IN PROGRESS") {
+                      await addMinutes(a.relayMatch.matchID, values.time);
+                    }
+                    if(a.strategyMatch.state === "IN PROGRESS") {
+                      await addMinutes(a.strategyMatch.matchID, values.time);
+                    }
+                  })
+                  enqueueSnackbar("Sikeres művelet", { variant: 'success' });
+                } catch (e) {
+                  const message = e instanceof Error ? e.message : "Váratlan hiba történt";
+                  enqueueSnackbar(message, { variant: 'error' });
                 }
-              }
-            });
-          }}
-        >
-          Összes csapat törlése
-        </Button>}
-     {adminPageOpen && !teamFromPath && data && <Stats data={data}/>}
+              },
+            })
+          }}>
+          <Stack sx={{display: "flex", flexDirection: "row", margin: "15px"}}>
+          <Field
+            name="time"
+          >
+          {
+            ({field}: FieldProps<string | number>) => <input
+              {...field}
+              className="text-input"
+              placeholder="perc"
+              style={{
+                width: '200px',
+                borderWidth: '2px',
+                borderColor: theme.palette.primary.main,
+              }}
+            />
+          }</Field>
+          <Button sx={{
+            width: '150px',
+            alignSelf: 'center',
+            textTransform: 'none',
+          }} variant='contained' color='primary' type="submit">
+            hozzáadás
+          </Button>
+          </Stack>
+          <ErrorMessage name="time"/><ErrorMessage name="time" render={msg => (
+            <Stack sx={{ color: 'red', fontSize: '0.875rem' }}>
+              {msg}
+            </Stack>
+          )}/>
+        </Form>
+        </Stack>}
+        {!teamFromPath && data &&
+          <Button
+            color="error"
+            variant="contained"
+            sx={{ margin: '10px 0', maxWidth: 300 }}
+            onClick={() => {
+              setConfirmDialog({
+                text: 'Biztosan törlöd az összes csapatot? Ez a művelet nem visszavonható!',
+                confirm: async () => {
+                  try {
+                    data.forEach(team => {
+                      removeTeam(team.teamId);
+                    });
+                    enqueueSnackbar('Összes csapat törölve', { variant: 'success' });
+                    // Refresh the list
+                    if (typeof window !== 'undefined') {
+                      getAll();
+                    }
+                  } catch (e) {
+                    const message = e instanceof Error ? e.message : "Váratlan hiba történt";
+                    enqueueSnackbar(message, { variant: 'error' });
+                  }
+                }
+              });
+            }}
+          >
+            Összes csapat törlése
+          </Button>}
+      {!teamFromPath && data && <Stats data={data}/>}
+      </>}
     </Stack>
   )
 }

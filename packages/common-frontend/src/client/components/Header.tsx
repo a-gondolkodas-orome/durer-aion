@@ -89,23 +89,25 @@ export function Header(props: { teamName: string | null, admin: boolean }) {
               flex: 1
             }}>
             </Stack>
-            {props.admin && <IconButton
-              onClick={() => {
-                setLanguageSwitcherOpen(!languageSwitcherOpen);
-              }}
-              sx={{
-                color: theme.palette.primary.contrastText,
-                marginLeft: '10px'
-              }}
-            >
-              <LanguageIcon />
-            </IconButton>}
-            {props.admin && languageSwitcherOpen &&
-            <LanguageSwitcher direction='row' style='dropdown' />
-            }
+            {props.admin && <>
+              {<IconButton
+                onClick={() => {
+                  setLanguageSwitcherOpen(!languageSwitcherOpen);
+                }}
+                sx={{
+                  color: theme.palette.primary.contrastText,
+                  marginLeft: '10px'
+                }}
+              >
+                <LanguageIcon />
+              </IconButton>}
+              {languageSwitcherOpen &&
+              <LanguageSwitcher direction='row' style='dropdown' />
+              }
+              </>}
           </Stack>
         }
-        {props.teamName &&<Stack sx={{
+        {(props.teamName || props.admin) &&<Stack sx={{
           display: {
             xs: 'flex',
             md: 'none'
@@ -139,11 +141,14 @@ export function Header(props: { teamName: string | null, admin: boolean }) {
             }
           }}
         >
-           <Stack sx={{
-              fontSize: 30,
-              paddingTop: '10px',
-              paddingBottom: '20px',
-            }}>{props.teamName}</Stack>
+          <Stack sx={{
+            fontSize: 30,
+            paddingTop: '10px',
+            paddingBottom: '20px',
+            display: 'flex',
+            alignItems: 'center'
+          }}>{props.teamName ?? <LanguageIcon sx={{transform: 'scale(2)'}}/>}</Stack>
+          {props.teamName &&
             <Button onClick={()=>{
               setMobileMenuOpen(false);
               logout();
@@ -152,8 +157,8 @@ export function Header(props: { teamName: string | null, admin: boolean }) {
               fontSize: 20,
               textTransform: 'capitalize'
             }}
-            >{t('header.logout')}</Button>
-            {props.admin && <LanguageSwitcher />}
+            >{t('header.logout')}</Button>}
+          {props.admin && <LanguageSwitcher />}
         </Dialog>
       </Container>
     </Stack>

@@ -1,18 +1,24 @@
-import { useTheme } from '@mui/material/styles';
-import i18next from 'i18next';
-import { Select, MenuItem, Stack, Button } from '@mui/material';
-import LanguageIcon from '@mui/icons-material/Language';
-import { useTranslation } from 'react-i18next';
+import { alpha, SxProps, useTheme } from '@mui/material/styles';
 import i18n from 'i18next';
+import { Select, MenuItem, Stack, Button } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
-type langNames = Record<string, string>;
+type langNamesByCodes = Record<string, string>;
+type langFlagsByCodes = Record<string, string>;
 
-export function LanguageSwitcher(props: { direction?: string, style?: string }) {
+interface langButtonStyles {
+  opacity: number;
+  "&:hover"?: SxProps;
+}
+
+export function LanguageSwitcher(props: { direction?: ("column"|"row"), style?: ("simple"|"dropdown"|"simple-dropdown") }) {
   const theme = useTheme();
   const { t } = useTranslation();
   const gap = (props.style === 'simple') ? '0px' : '10px';
   const languagesArray = Object.keys(i18n.options.resources ?? {})
-  const allLanguages: langNames = {};
+  const allLanguages: langNamesByCodes = {};
+  const flagFileNames: langFlagsByCodes = {"en": "flag-united-kingdom_1f1ec-1f1e7.png", "hu": "flag-hungary_1f1ed-1f1fa.png"};
+  const languageFlag = (lang: string) => <img src={`https://em-content.zobj.net/source/catrinity/458/${flagFileNames[lang]}`} style={{ width: '24px', height: '24px' }}/> 
   languagesArray.forEach(l => {
     allLanguages[l] = t(`languages.${l}`);
     if (allLanguages[l] === `languages.${l}`) {
@@ -20,12 +26,12 @@ export function LanguageSwitcher(props: { direction?: string, style?: string }) 
     }
   });
 
-  if (props.style === 'dropdown') {
+  if (props.style?.includes('dropdown')) {
     return (
       <Select
-        value={i18next.language}
+        value={i18n.language}
         variant='standard'
-        onChange={(e) => i18next.changeLanguage(e.target.value)}
+        onChange={(e) => i18n.changeLanguage(e.target.value)}
         sx={{ 
           margin: '10px', 
           minWidth: '80px', 
@@ -42,7 +48,11 @@ export function LanguageSwitcher(props: { direction?: string, style?: string }) 
         }}
       >
         {Object.keys(allLanguages).map((lang) => (
-          <MenuItem key={lang} value={lang}>{allLanguages[lang]}</MenuItem>
+          <MenuItem key={lang} value={lang}>{
+            props.style?.includes("simple") 
+              ? lang.toUpperCase() 
+              : <Stack sx={{ display: 'flex', alignItems: 'center', gap: '8px', flexDirection: "row" }}>{languageFlag(lang)}{allLanguages[lang]}</Stack>
+          }</MenuItem>
         ))}
       </Select>
     );
@@ -51,17 +61,16 @@ export function LanguageSwitcher(props: { direction?: string, style?: string }) 
   return (
     <Stack sx={{ display: 'flex', gap: gap, margin: '10px', flexDirection: props.direction ?? 'column'}}>
       {Object.keys(allLanguages).map((lang) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const stylesObject: any = {opacity: 0.6};
-        if (i18next.language === lang) {
+        const stylesObject: langButtonStyles = {opacity: 0.6};
+        if (i18n.language === lang) {
           stylesObject.opacity = 1;
-          stylesObject["&:hover"] = {backgroundColor: "transparent", cursor: "unset"};
+          stylesObject["&:hover"] = {backgroundColor: "transparent", cursor: "unset", borderColor: alpha(theme.palette.primary.main, 0.5)};
         }
         return (
         <Button
           key={lang}
           variant={props.style === 'simple' ? 'text' : 'outlined'}
-          onClick={() => i18next.changeLanguage(lang)}
+          onClick={() => i18n.changeLanguage(lang)}
           sx={props.style === 'simple' ?
             {
               margin: '5px 0px',
@@ -76,7 +85,7 @@ export function LanguageSwitcher(props: { direction?: string, style?: string }) 
             : stylesObject
           }
         >
-          {props.style !== 'simple' && <LanguageIcon sx={{ paddingRight: '5px' }}/>}
+          {props.style !== 'simple' && languageFlag(lang)}
           {props.style === 'simple' ? lang : allLanguages[lang]}
         </Button>
       )}
