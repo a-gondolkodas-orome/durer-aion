@@ -9,11 +9,13 @@ import { Strategy } from "./teamstates/Strategy";
 import { Disclaimer } from "./Disclaimer";
 import { Chooser } from "./Chooser";
 import { Admin } from "./Admin";
+import i18next from "i18next";
 
-export function Main(props: { gitCommitHash: string }) {
+export function Main(props: { language: string, gitCommitHash: string }) {
   const teamState = useTeamState();
   const [frontendState, setFrontEndState] = useState<"R" | "S" | null>(null);
   const [admin, setAdmin] = useState<boolean>(false);
+  i18next.changeLanguage(props.language);
 
   useEffect(() => {
     if (window.location.pathname.includes('/admin')) {

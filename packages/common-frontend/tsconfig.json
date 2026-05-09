@@ -12,6 +12,7 @@
     "module": "ESNext",
     "target": "ES6",
     "moduleResolution": "node",
+    "resolveJsonModule": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "preserveWatchOutput": true,
