@@ -102,7 +102,7 @@ export function Header(props: { teamName: string | null, admin: boolean }) {
                 <LanguageIcon />
               </IconButton>}
               {languageSwitcherOpen &&
-              <LanguageSwitcher direction='row' style='dropdown' />
+              <LanguageSwitcher variant='dropdown' />
               }
               </>}
           </Stack>
