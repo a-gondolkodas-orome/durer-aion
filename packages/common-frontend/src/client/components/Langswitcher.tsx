@@ -7,15 +7,36 @@ interface Language {
   label: string;
 }
 
-const FLAG_BASE_URL = "https://em-content.zobj.net/source/catrinity/458/";
-const flagFileNames: Record<string, string> = {
-  en: "flag-united-kingdom_1f1ec-1f1e7.png",
-  hu: "flag-hungary_1f1ed-1f1fa.png",
+const Flags: Record<string, JSX.Element> = {
+  hu: (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" width="24" height="24">
+      <clipPath id="a">
+        <circle cx="30" cy="30" r="30" />
+      </clipPath>
+      <g clipPath="url(#a)">
+        <path fill="#ce2939" d="M0 0h60v20H0z" />
+        <path fill="#fff" d="M0 20h60v20H0z" />
+        <path fill="#477050" d="M0 40h60v20H0z" />
+      </g>
+    </svg>
+  ),
+  en: (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" width="24" height="24">
+      <clipPath id="a2">
+        <circle cx="30" cy="30" r="30" />
+      </clipPath>
+      <g clipPath="url(#a2)">
+        <path fill="#012169" d="M0 0h60v60H0z" />
+        <path stroke="#fff" strokeWidth="12" d="M0 0 60 60M60 0 0 60" />
+        <path stroke="#C8102E" strokeWidth="7" d="M0 0 60 60M60 0 0 60" />
+        <path stroke="#fff" strokeWidth="20" d="M30 0v60M0 30h60" />
+        <path stroke="#C8102E" strokeWidth="12" d="M30 0v60M0 30h60" />
+      </g>
+    </svg>
+  ),
 };
 
-const LanguageFlag = ({ code }: { code: string }) => (
-  <img src={`${FLAG_BASE_URL}${flagFileNames[code]}`} style={{ width: "24px", height: "24px" }} />
-);
+const LanguageFlag = ({ code }: { code: string }) => Flags[code] ?? null;
 
 const selectSx = (theme: Theme) => ({
   margin: "10px",
@@ -26,15 +47,6 @@ const selectSx = (theme: Theme) => ({
   "&:hover:before": {
     borderBottom: "2px solid " + theme.palette.primary.contrastText + " !important",
   },
-});
-
-const simpleButtonSx = (theme: Theme) => ({
-  margin: "5px 0px",
-  padding: "0px",
-  fontSize: 13,
-  color: theme.palette.primary.contrastText,
-  background: theme.palette.primary.main,
-  "&:hover": { textDecoration: "underline" },
 });
 
 const selectableButtonSx = { opacity: 0.6 };
@@ -93,7 +105,7 @@ function LanguageButtons({ compact, direction }: { compact: boolean; direction: 
     <Stack sx={{ display: "flex", gap, margin: "10px", flexDirection: direction }}>
       {languages.map(({ code, label }) => {
         const isActive = i18n.language === code;
-        const sx = compact ? simpleButtonSx(theme) : isActive ? selectedButtonSx(theme) : selectableButtonSx;
+        const sx = !compact && isActive ? selectedButtonSx(theme) : selectableButtonSx;
         return (
           <Button key={code} variant={compact ? "text" : "outlined"} onClick={() => i18n.changeLanguage(code)} sx={sx}>
             {!compact && <LanguageFlag code={code} />}
