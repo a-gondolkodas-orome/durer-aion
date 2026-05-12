@@ -102,7 +102,7 @@ export function Header(props: { teamName: string | null, admin: boolean }) {
                 <LanguageIcon />
               </IconButton>}
               {languageSwitcherOpen &&
-              <LanguageSwitcher variant='dropdown' />
+              <LanguageSwitcher variant='dropdown' id={1} />
               }
               </>}
           </Stack>
@@ -158,7 +158,7 @@ export function Header(props: { teamName: string | null, admin: boolean }) {
               textTransform: 'capitalize'
             }}
             >{t('header.logout')}</Button>}
-          {props.admin && <LanguageSwitcher />}
+          {props.admin && <LanguageSwitcher id={2} />}
         </Dialog>
       </Container>
     </Stack>
