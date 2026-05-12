@@ -49,8 +49,9 @@ const selectSx = (theme: Theme) => ({
   },
 });
 
-const selectableButtonSx = { opacity: 0.6 };
+const selectableButtonSx = { opacity: 0.6, gap: '8px' };
 const selectedButtonSx = (theme: Theme) => ({
+  gap: '8px',
   opacity: 1,
   "&:hover": {
     backgroundColor: "transparent",
