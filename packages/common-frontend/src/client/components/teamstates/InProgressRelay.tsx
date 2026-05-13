@@ -15,8 +15,6 @@ import { useTranslation } from 'react-i18next';
 
 type MyGameProps = BoardProps<MyGameState>;
 
-const noop = () => undefined;
-
 export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
   const [msRemaining, setMsRemaining] = useState(G.millisecondsRemaining);
   const [gameover, setGameover] = useState(ctx.gameover);
@@ -103,8 +101,8 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
             <b style={{marginRight: '5px'}}>{t('general.remainingTime')}:</b>
             <Countdown
               msRemaining={msRemaining ?? null}
-              setMsRemaining={noop}
-              getServerTimer={noop}
+              setMsRemaining={() => undefined}
+              getServerTimer={() => undefined}
               endTime={new Date(G.end)} 
               serverRemainingMs={G.millisecondsRemaining}/>
           </Stack>

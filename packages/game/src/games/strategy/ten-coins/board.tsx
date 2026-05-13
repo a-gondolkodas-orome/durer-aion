@@ -15,16 +15,13 @@ export function MyBoard({ G, ctx, moves }: BoardProps<MyGameState>, theme: any) 
 
   const onClick = () => {
     // read input value
-    let inputValueK = 0; 
-    if (inputK.current) {
-      inputValueK = parseInt(inputK.current.value);
-      inputK.current.value = '';
+    if (!inputK.current || !inputL.current) {
+      console.error('Empty input.')
+      return
     }
-    let inputValueL = 0;
-    if (inputL.current) {
-      inputValueL = parseInt(inputL.current.value);
-      inputL.current.value = '';
-    }
+    const inputValueK = parseInt(inputK.current.value);
+    inputK.current.value = '';
+    const inputValueL = parseInt(inputL.current.value);
     moves.changeCoins(inputValueK, inputValueL);
   };
 

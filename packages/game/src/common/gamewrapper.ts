@@ -50,7 +50,7 @@ function getTime({ G, _ctx, playerID, _events }: any) {
 }
 
 export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameState>, 
-                                                 sendStrategyFunction = (...inputs: any[]): void => {},
+                                                 sendStrategyFunction = (..._inputs: any[]): void => undefined,
                                                 ): Game<T_SpecificGameState & GameStateMixin> {
   const myGameWrapper: Game<T_SpecificGameState & GameStateMixin> = {
     setup: () => ({

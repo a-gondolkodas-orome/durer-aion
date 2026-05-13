@@ -11,11 +11,12 @@ export function MyBoard({ G, ctx, moves }: MyGameProps) {
 
   const onClick = () => {
     // read input value
-    let inputValue = 0;
-    if (inputEl.current) {
-      inputValue = parseInt(inputEl.current.value);
-      inputEl.current.value = '';
+    if (!inputEl.current) {
+      console.error('Empty input.')
+      return
     }
+    const inputValue = parseInt(inputEl.current.value);
+    inputEl.current.value = '';
     moves.clickCell(inputValue);
   };
 

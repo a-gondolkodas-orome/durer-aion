@@ -99,7 +99,7 @@ export class SocketIOButBotMoves extends SocketIO {
   constructor(
     anything: any,
     bots: Record<string, any>,
-    onFinishedMatch: (matchID: string) => Promise<void> = async () => {}
+    onFinishedMatch: (matchID: string) => Promise<void> = async () => undefined
   ) {
     super({ ...anything });
     this.bots = bots;

@@ -4,10 +4,11 @@ import './style.css';
 
 type MyGameProps = BoardProps<MyGameState>;
 
-export function MyBoard({ ..._unused }: MyGameProps) {
+export function MyBoard({ G }: MyGameProps) {
 
   return (
-    <div id="jatek">
+    <div id="jatek">ű
+      {G.points}
     </div>
   );
 }
