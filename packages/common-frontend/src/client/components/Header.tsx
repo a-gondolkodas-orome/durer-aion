@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { LanguageDropdown } from './Langswitcher';
 
 export function Header(props: { teamName: string | null, admin: boolean }) {
-  const { t } = useTranslation(undefined, { keyPrefix: 'header' });
+  const { t } = useTranslation();
   const theme = useTheme();
   const logout = useLogout();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
