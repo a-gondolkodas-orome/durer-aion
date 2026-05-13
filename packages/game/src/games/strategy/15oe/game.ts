@@ -9,11 +9,11 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type
   setup: () => ({ }),
 
   moves: {
-    clickCell: ({ G, ctx, playerID, events }, s: string) => {
-      void ctx;
-      void playerID;
-      void s;
-      
+    clickCell: ({ G, events }, s: string) => {
+      if (!s) {
+        console.error('No specified move.')
+      }
+
       const winner = getWinner();
       if (winner !== null) {
         G.winner = winner;
@@ -32,10 +32,7 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type
     }
   },
 
-  possibleMoves: (G, ctx, playerID) => {
-    void G;
-    void ctx;
-    void playerID;
+  possibleMoves: () => {
     
     const moves = [1];
     

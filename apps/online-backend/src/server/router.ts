@@ -331,7 +331,7 @@ export function configureTeamsRouter(
     if (staleInfo.isStale) {
         console.log(`Stale found: ${JSON.stringify(staleInfo)}`);
         await closeMatch(
-          (team[staleInfo.gameState ?? 'relayMatch'] as InProgressMatchStatus).matchID,
+          (team[staleInfo.gameState] as InProgressMatchStatus).matchID,
           teams,
           ctx.db
         );

@@ -90,8 +90,7 @@ export const MyGameWrapper = function (category: "C" | "D") {
           }
         }
       },
-      onEnd: ({ G, ctx, playerID, events }) => {
-        void ctx;
+      onEnd: ({ G, playerID, events }) => {
 
         if (playerID === JUDGE_PLAYER) {
           const currentTime = new Date();

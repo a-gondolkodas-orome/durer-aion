@@ -67,8 +67,7 @@ function winningStrategy(G: MyGameState): [number, string] {
     const pMoves = strategyDict[G.numbersOnTable.length][generateStateID(G.numbersOnTable, G.previousMove)];
     const i = Math.floor(Math.random()*pMoves.length);
     return [pMoves[i], "removeNumber"];
-  } catch (e) {
-    void e;
+  } catch {
     console.error("Winning strategy not found, using random strategy instead.");
     return randomStrategy(G);
   }

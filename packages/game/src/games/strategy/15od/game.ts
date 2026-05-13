@@ -10,12 +10,10 @@ export const MyGame: GameType<MyGameState> = {
   setup: () => ({ }),
 
   moves: {
-    clickCell: ({ G, ctx, playerID, events }, s: string) => {
-      void ctx;
-      void playerID;
-      void events;
-      void s;
-      
+    clickCell: ({ G, events }, s: string) => {
+      if (!s) {
+        console.error('No move specified!');
+      }
       const winner = getWinner();
       if (winner !== null) {
         G.winner = winner;
@@ -33,11 +31,7 @@ export const MyGame: GameType<MyGameState> = {
     },
   },
 
-  possibleMoves: (G, ctx, playerID) => {
-    void G;
-    void ctx;
-    void playerID;
-    
+  possibleMoves: () => {
     const moves = [1];
     
     return moves;

@@ -7,8 +7,7 @@ import { range } from "lodash";
 
 type MyGameProps = BoardProps<RemoveFromCircleGameState>;
 
-export function MyBoard({ G, ctx, moves }: MyGameProps) {
-  void ctx;
+export function MyBoard({ G, moves }: MyGameProps) {
 
   const onClick = (index: number) => {
     /* TODO refactor this sholud not be here at board

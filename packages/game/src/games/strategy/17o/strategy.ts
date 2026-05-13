@@ -31,8 +31,7 @@ export function strategyWrapper(category: "C" | "D" | "E") {
   }
 }
 
-function startingPosition({ G, ctx }: any, category: "C" | "D" | "E"): { pile: number } {
-  void ctx;
+function startingPosition({ G }: any, category: "C" | "D" | "E"): { pile: number } {
   
   if (category === "C") {
     // C Category

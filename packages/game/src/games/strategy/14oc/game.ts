@@ -37,10 +37,7 @@ export const MyGame: GameType<MyGameState> = {
     },
   },
 
-  startingPosition: ({G, ctx, playerID, random}) => {
-    void ctx;
-    void playerID;
-
+  startingPosition: ({G, random}) => {
     let rookPosition: Position = [0, 0];
     if(G.difficulty === "live"){
       if(G.numberOfTries === 1){

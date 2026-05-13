@@ -176,7 +176,7 @@ export async function checkStaleMatch(
   team: TeamModel
 ): Promise<
   | { isStale: false }
-  | { isStale: true; gameState?: "relayMatch" | "strategyMatch" }
+  | { isStale: true; gameState: "relayMatch" | "strategyMatch" }
 > {
   // Find if boardgame match is already timed out, but not registered
   const now = new Date(Date());
@@ -255,7 +255,7 @@ export async function getNewGame(
   const staleInfo = await checkStaleMatch(team);
   if (staleInfo.isStale) {
     await closeMatch(
-      (team[staleInfo.gameState ?? 'relayMatch'] as InProgressMatchStatus).matchID,
+      (team[staleInfo.gameState] as InProgressMatchStatus).matchID,
       teams,
       ctx.db
     );

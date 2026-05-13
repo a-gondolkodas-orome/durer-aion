@@ -3,8 +3,7 @@ import { BoardProps } from 'boardgame.io/react';
 
 type MyGameProps = BoardProps<MyGameState>;
 
-export function MyBoard({ G, ctx, moves }: MyGameProps) {
-  void ctx;
+export function MyBoard({ G, moves }: MyGameProps) {
   return (
     <div
       style={{

@@ -5,9 +5,9 @@ import './style.css';
 type MyGameProps = BoardProps<MyGameState>;
 
 export function MyBoard({ G, ctx, moves }: MyGameProps) {
-  void G;
-  void ctx;
-  void moves;
+  if (G || !ctx || !moves) {
+    console.error('Not specified game conditions.');
+  }
 
   return (
     <div id="jatek">

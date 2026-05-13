@@ -6,8 +6,7 @@ import { range } from "lodash";
 type MyGameProps = BoardProps<MyGameState>;
 
 
-export function MyBoard({ G, ctx, moves }: MyGameProps) {
-  void ctx;
+export function MyBoard({ G, moves }: MyGameProps) {
 
   const onClick = (index: number) => {
     moves.removeNumber(index)
