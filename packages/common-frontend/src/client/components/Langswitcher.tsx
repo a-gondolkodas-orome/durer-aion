@@ -65,7 +65,7 @@ const selectSx = (theme: Theme, color?: string) => ({
 function useLanguages(): Language[] {
   const { i18n } = useTranslation();
   return Object.keys(i18n.options.resources ?? {}).map((code) => (
-    { code, label: KnownLanguageNames[code] ?? code }
+    { code, label: KnownLanguageNames[code] ?? code.toUpperCase() }
   ));
 }
 
