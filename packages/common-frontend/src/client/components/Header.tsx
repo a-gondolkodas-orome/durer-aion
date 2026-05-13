@@ -1,4 +1,4 @@
-import { Container, Dialog, Stack, Button, IconButton } from '@mui/material';
+import { Container, Dialog, Stack, Button } from '@mui/material';
 import { useState } from 'react';
 import { useLogout } from '../hooks/user-hooks';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
@@ -6,14 +6,13 @@ import LanguageIcon from '@mui/icons-material/Language';
 import { useClientRepo } from '../api-repository-interface';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
-import { LanguageSwitcher } from './Langswitcher';
+import { LanguageDropdown } from './Langswitcher';
 
 export function Header(props: { teamName: string | null, admin: boolean }) {
   const { t } = useTranslation(undefined, { keyPrefix: 'header' });
   const theme = useTheme();
   const logout = useLogout();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [languageSwitcherOpen, setLanguageSwitcherOpen] = useState(false);
   const clientRepository = useClientRepo();
   return (
     <Stack sx={{
@@ -60,51 +59,38 @@ export function Header(props: { teamName: string | null, admin: boolean }) {
           }}>
             {props.teamName &&
               <>
-              <Stack sx={{
-                flex: 1
-              }}></Stack>
-              <Stack sx={{
-                fontSize: 25,
-                display: 'block',
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-              }}>{props.teamName}</Stack>
-              <Stack onClick={()=>{
-                logout();
-                if ( clientRepository.version === "OFFLINE") {
-                  window.location.reload();
-                }            
-              }} sx={{
-                fontSize: 20,
-                margin: '0px 15px',
-                cursor: 'pointer',
-                "&:hover": {
-                  opacity: '0.8',
-                }
-              }}>{t('header.logout')}</Stack>
-            </>
+                <Stack sx={{
+                  flex: 1
+                }}></Stack>
+                <Stack sx={{
+                  fontSize: 25,
+                  display: 'block',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}>{props.teamName}</Stack>
+                <Stack onClick={()=>{
+                  logout();
+                  if ( clientRepository.version === "OFFLINE") {
+                    window.location.reload();
+                  }            
+                }} sx={{
+                  fontSize: 20,
+                  margin: '0px 15px',
+                  cursor: 'pointer',
+                  "&:hover": {
+                    opacity: '0.8',
+                  }
+                }}>{t('header.logout')}</Stack>
+              </>
             }
             <Stack sx={{
               flex: 1
             }}>
             </Stack>
-            {props.admin && <>
-              {<IconButton
-                onClick={() => {
-                  setLanguageSwitcherOpen(!languageSwitcherOpen);
-                }}
-                sx={{
-                  color: theme.palette.primary.contrastText,
-                  marginLeft: '10px'
-                }}
-              >
-                <LanguageIcon />
-              </IconButton>}
-              {languageSwitcherOpen &&
-              <LanguageSwitcher variant='dropdown' id={1} />
-              }
-              </>}
+            {props.admin && 
+              <LanguageDropdown id={1} fontColor={theme.palette.primary.contrastText} />
+            }
           </Stack>
         }
         {(props.teamName || props.admin) &&<Stack sx={{
@@ -158,7 +144,7 @@ export function Header(props: { teamName: string | null, admin: boolean }) {
               textTransform: 'capitalize'
             }}
             >{t('header.logout')}</Button>}
-          {props.admin && <LanguageSwitcher id={2} />}
+          {props.admin && <LanguageDropdown id={2} showFlagForSelected={!props.teamName}/>}
         </Dialog>
       </Container>
     </Stack>

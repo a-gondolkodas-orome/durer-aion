@@ -1,11 +1,14 @@
-import { alpha, Theme, useTheme } from "@mui/material/styles";
-import { Select, MenuItem, Stack, Button } from "@mui/material";
+import { Theme, useTheme } from "@mui/material/styles";
+import { Select, MenuItem, Stack } from "@mui/material";
+import LanguageIcon from '@mui/icons-material/Language';
 import { useTranslation } from "react-i18next";
 
 interface Language {
-  code: string;
-  label: string;
+  code: string,
+  label: string
 }
+
+const KnownLanguageNames: Record<string, string> = {'en': 'English', 'hu': 'Magyar'}
 
 const Flags: Record<string, JSX.Element> = {
   hu: (
@@ -26,51 +29,47 @@ const Flags: Record<string, JSX.Element> = {
   ),
 };
 
-const LanguageFlag = ({ code, id }: { code: string, id?: number }) => {
-  id = id ?? 1;
+const LanguageFlag = ({ langcode, dropdownid }: { langcode: string, dropdownid?: number }) => {
+  dropdownid = dropdownid ?? 1;
   return (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" width="24" height="24">
-      <clipPath id={`c${id}`}>
+      <clipPath id={`clip-${dropdownid}`}>
         <circle cx="30" cy="30" r="30" />
       </clipPath>
-      <g clipPath={`url(#c${id})`}>
-        {Flags[code] ?? null}
+      <g clipPath={`url(#clip-${dropdownid})`}>
+        {Flags[langcode] ?? null}
       </g>
     </svg>
   );
 }
 
-const selectSx = (theme: Theme) => ({
+const selectSx = (theme: Theme, color?: string) => ({
   margin: "10px",
   minWidth: "80px",
-  color: theme.palette.primary.contrastText,
-  "& .MuiSvgIcon-root": { fill: theme.palette.primary.contrastText },
+  color: color ?? '#000',
+  border: theme.palette.primary.main + " 1px solid",
+  borderRadius: "3px",
+  "& .MuiInput-input": {
+    padding: "5px 8px",
+  },
+  "& .MuiSvgIcon-root": { fill: color ?? '#000' },
   "&::before": { borderBottom: "transparent" },
   "&:hover:before": {
-    borderBottom: "2px solid " + theme.palette.primary.contrastText + " !important",
+    borderBottom: "2px solid " + (color ?? theme.palette.primary.main) + " !important",
   },
-});
-
-const selectableButtonSx = { opacity: 0.6, gap: '8px' };
-const selectedButtonSx = (theme: Theme) => ({
-  gap: '8px',
-  opacity: 1,
-  "&:hover": {
-    backgroundColor: "transparent",
-    cursor: "unset",
-    borderColor: alpha(theme.palette.primary.main, 0.5),
+  "&::after": {
+    borderBottom: "2px solid " + (color ?? theme.palette.primary.main) + " !important",
   },
 });
 
 function useLanguages(): Language[] {
-  const { t, i18n } = useTranslation();
-  return Object.keys(i18n.options.resources ?? {}).map((code) => {
-    const label = t(`languages.${code}`);
-    return { code, label: label === `languages.${code}` ? code : label };
-  });
+  const { i18n } = useTranslation();
+  return Object.keys(i18n.options.resources ?? {}).map((code) => (
+    { code, label: KnownLanguageNames[code] ?? code }
+  ));
 }
 
-function LanguageDropdown({ compact, id }: { compact: boolean, id: number }) {
+export function LanguageDropdown({ id, fontColor, showFlagForSelected } : { id?: number, fontColor?: string, showFlagForSelected?: boolean }) {
   const theme = useTheme();
   const { i18n } = useTranslation();
   const languages = useLanguages();
@@ -79,56 +78,29 @@ function LanguageDropdown({ compact, id }: { compact: boolean, id: number }) {
     <Select
       value={i18n.language}
       variant="standard"
-      onChange={(e) => i18n.changeLanguage(e.target.value)}
-      sx={selectSx(theme)}
+      onChange={(e) => i18n.changeLanguage(e.target.value as string)}
+      sx={selectSx(theme, fontColor)}
+      {...(!showFlagForSelected && { 
+        renderValue: (value) => {
+          const lang = languages.find(({ code }) => code === value);
+          if (!lang) return null;
+          return (
+            <Stack sx={{ display: "flex", alignItems: "center", gap: "8px", flexDirection: "row" }}>
+              <LanguageIcon />
+              {lang.label}
+            </Stack>
+          );
+        }
+      })}
     >
       {languages.map(({ code, label }) => (
         <MenuItem key={code} value={code}>
-          {compact ? (
-            code.toUpperCase()
-          ) : (
-            <Stack sx={{ display: "flex", alignItems: "center", gap: "8px", flexDirection: "row" }}>
-              <LanguageFlag code={code} id={id} />
-              {label}
-            </Stack>
-          )}
+          <Stack sx={{ display: "flex", alignItems: "center", gap: "8px", flexDirection: "row" }}>
+            <LanguageFlag langcode={code} dropdownid={id} />
+            {label}
+          </Stack>
         </MenuItem>
       ))}
     </Select>
   );
-}
-
-function LanguageButtons({ compact, direction, id }: { compact: boolean; direction: "column" | "row", id: number }) {
-  const theme = useTheme();
-  const { i18n } = useTranslation();
-  const languages = useLanguages();
-  const gap = compact ? "0px" : "10px";
-
-  return (
-    <Stack sx={{ display: "flex", gap, margin: "10px", flexDirection: direction }}>
-      {languages.map(({ code, label }) => {
-        const isActive = i18n.language === code;
-        const sx = !compact && isActive ? selectedButtonSx(theme) : selectableButtonSx;
-        return (
-          <Button key={code} variant={compact ? "text" : "outlined"} onClick={() => i18n.changeLanguage(code)} sx={sx}>
-            {!compact && <LanguageFlag code={code} id={id} />}
-            {compact ? code : label}
-          </Button>
-        );
-      })}
-    </Stack>
-  );
-}
-
-export function LanguageSwitcher(props: {
-  id: number;
-  direction?: "column" | "row";
-  variant?: "dropdown" | "buttons";
-  compact?: boolean;
-}) {
-  const compact = props.compact ?? false;
-  if (props.variant === "dropdown") {
-    return <LanguageDropdown compact={compact} id={props.id} />;
-  }
-  return <LanguageButtons compact={compact} direction={props.direction ?? "column"} id={props.id} />;
 }
