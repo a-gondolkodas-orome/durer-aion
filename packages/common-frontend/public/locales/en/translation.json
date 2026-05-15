@@ -1,9 +1,5 @@
 {
   "translation": {
-    "languages": {
-      "en": "English",
-      "hu": "Hungarian"
-    },
     "disclaimer": {
       "welcome": "Dear Team <i>{{tname}}</i>, welcome to the online round!",
       "category": "Your category: <b>{{category}}</b>",
@@ -55,13 +51,14 @@
       "name": "Relay tasks",
       "guess": "Guess:",
       "send": "Submit",
-      "guessNum": "guess #{{guessnum}}:",
+      "guessNum": "Guess #{{guessnum}}:",
+      "task": "Task #{{num}} ({{maxpoints}})",
       "taskImage": "Image belonging to the current task (if it didn't load properly, try refreshing the page)"
     },
     "general": {
       "loading": "Loading game or task…",
-      "task": "task",
-      "point": "point",
+      "points_one": "1 points",
+      "points_other": "{{count}} points",
       "remainingTime": "Remaining time",
       "returnHome": "Back to main page",
       "warning": {
@@ -117,7 +114,7 @@
         "ifFirstPlayer": "Choose whether you want to be the first or second player.",
         "yourTurn": "Your turn now!",
         "waitingForServer": "Waiting for server...",
-        "realGameWin": "Congratulations, you won! Defeat the computer one more time!",
+        "realGameWin": "Congratulations, you won! Defeat the computer next time as well to achieve full victory!",
         "testGameWin": "Congratulations, you won the test game!",
         "botWins": "Unfortunately the computer won.",
         "endOfGame": "The game has ended.",

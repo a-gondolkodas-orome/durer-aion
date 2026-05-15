@@ -1,9 +1,5 @@
 {
   "translation": {
-    "languages": {
-      "en": "Angol",
-      "hu": "Magyar"
-    },
     "disclaimer": {
       "welcome": "Kedves <i>{{tname}}</i> csapat, üdvözlünk az online fordulón!",
       "category": "Kategóriátok: <b>{{category}}</b>",
@@ -55,13 +51,13 @@
       "guess": "Tipp:",
       "send": "Küldés",
       "guessNum": "{{guessnum}}. próba:",
+      "task": "{{num}}. feladat ({{maxpoints}})",
       "taskImage": "A feladathoz tartozó kép (ha nem töltött be, próbáld meg frissíteni az oldalt!)"
     },
     "general": {
       "loading": "Játék vagy feladat betöltése…",
+      "points": "{{count}} pont",
       "remainingTime": "Hátralevő idő",
-      "task": "feladat",
-      "point": "pont",
       "returnHome": "Vissza a főoldalra",
       "warning": {
         "timeNotMatch": "A számítógép órája nincs szinkronban a szerver órájával, a jelzett hátralevő idő nem tökéletes, az oldal újra töltése megoldhatja a problémát",
@@ -114,7 +110,7 @@
         "ifFirstPlayer": "Válaszd ki, hogy első vagy második játékos akarsz-e lenni.",
         "yourTurn": "Most Te jössz!",
         "waitingForServer": "Várakozás a szerverre...",
-        "realGameWin": "Gratulálok, nyertetek! Verjétek meg még egyszer a gépet!",
+        "realGameWin": "Gratulálok, nyertetek! Verjétek meg még következőleg is a gépet a teljes győzelemhez!",
         "testGameWin": "Gratulálok, a próbajátékban nyertetek!",
         "botWins": "Sajnos a gép nyert.",
         "endOfGame": "A játék végetért.",
