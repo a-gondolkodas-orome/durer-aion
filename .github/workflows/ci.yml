@@ -72,7 +72,7 @@ jobs:
       - name: Install Node.js dependencies
         run: npm ci
       - name: Run i18next validation
-        run: npm run i18n:check
+        run: npm run i18n:check -- -s hu  -l packages/common-frontend/public
 
   # tests:
   #   name: client tests
