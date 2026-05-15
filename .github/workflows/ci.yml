@@ -71,6 +71,8 @@ jobs:
           node-version: 22
       - name: Install Node.js dependencies
         run: npm ci
+      - name: Run i18next validation
+        run: npm run i18next:check
 
   # tests:
   #   name: client tests
