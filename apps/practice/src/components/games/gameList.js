@@ -379,5 +379,12 @@ export const gameList = {
     category: ["E"],
     name: { hu: "Kavicsgyűjtés egyesével", en: "Collecting stones 1 by 1" },
     credit: { developedBy: ["Turu Tamás"] }
+  },
+  NumberPyramid: {
+    year: { k: "XIX. (25/26)", v: "25/26" },
+    round: "döntő",
+    category: ["E+"],
+    name: { hu: "Számpiramis", en: "Number Pyramid" },
+    credit: { suggestedBy: ["Imolay András"] }
   }
 };

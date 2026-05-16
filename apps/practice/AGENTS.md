@@ -13,6 +13,7 @@ The goal is to eventually include all past Dürer competition games. Currently r
 - **Tailwind CSS 4** — styling
 - **Vitest** + **@testing-library/react** — unit and component tests
 - **ESLint** — linting
+- **lodash** — utility library; feel free to use lodash functions if it helps readability, it's already used extensively in the project
 
 No backend, no database, no auth. Deployed as a static build to GitHub Pages.
 
@@ -86,7 +87,7 @@ strategyGameFactory({
 ### New game checklist
 
 - Game works correctly in both `vsComputer` and `vsHuman` mode
-- Starting positions representative of the game's complexity
+- Starting positions representative of the game's complexity; each player wins with ~50% probability across random starting boards
 - Player cannot win with a non-winning strategy (i.e. AI is truly optimal)
 - Clear what the player should do next (`getPlayerStepDescription`)
 - Interactions disabled during the other player's turn (`ctx.isClientMoveAllowed`)

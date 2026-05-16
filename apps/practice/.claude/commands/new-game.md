@@ -69,7 +69,7 @@ npm run dev
 ### 8. Go through the checklist
 Before declaring the game done, verify each item:
 - [ ] Works correctly in both `vsComputer` and `vsHuman` mode
-- [ ] Starting positions are representative of the game's complexity
+- [ ] Starting positions are representative of the game's complexity; each player wins with ~50% probability across random starting boards
 - [ ] If optimal AI is implemented: player cannot win with a non-winning strategy
 - [ ] `getPlayerStepDescription` makes the next move clear
 - [ ] Interactions disabled during the other player's turn (`ctx.isClientMoveAllowed`)

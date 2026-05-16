@@ -27,6 +27,7 @@ import { FiveSquares } from '../games/five-squares/five-squares';
 import { FourPilesSpreadAhead } from '../games/pile-splitting-games/four-piles-spread-ahead/four-piles-spread-ahead';
 import { HunyadiAndTheJanissaries } from '../games/hunyadi-and-the-janissaries/hunyadi-and-the-janissaries';
 import { NumberCovering8, NumberCovering10 } from '../games/number-covering/number-covering';
+import { NumberPyramid } from '../games/number-pyramid/number-pyramid';
 import { PairsOfNumbers } from '../games/pairs-of-numbers/pairs-of-numbers';
 import { PileSplitter } from '../games/pile-splitting-games/pile-splitter/pile-splitter';
 import { PileSplitter3 } from '../games/pile-splitting-games/pile-splitter-3/pile-splitter-3';
@@ -86,6 +87,7 @@ export const App = () => {
     { path: '/game/HunyadiAndTheJanissaries', element: <HunyadiAndTheJanissaries /> },
     { path: '/game/NumberCovering10', element: <NumberCovering10 /> },
     { path: '/game/NumberCovering8', element: <NumberCovering8 /> },
+    { path: '/game/NumberPyramid', element: <NumberPyramid /> },
     { path: '/game/PairsOfNumbers', element: <PairsOfNumbers />},
     { path: '/game/PileSplitter', element: <PileSplitter /> },
     { path: '/game/PileSplitter3', element: <PileSplitter3 /> },

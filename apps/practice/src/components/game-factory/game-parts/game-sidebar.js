@@ -52,7 +52,7 @@ export const GameSidebar = ({
 
   return (
     <div className="p-2 flex flex-col grow shrink-0 basis-64 gap-3">
-      <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 flex flex-col gap-3">
+      <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 mb-8 flex flex-col gap-3">
         {displayCtx.isHumanVsHumanGame && ctx.phase !== 'roleSelection'
           ? <PlayerTurnPanel ctx={ctx} />
           : <p className="text-center font-bold text-lg">{t(getCtaText(displayCtx))}</p>
