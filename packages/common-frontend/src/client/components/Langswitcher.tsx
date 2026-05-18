@@ -3,33 +3,35 @@ import { Select, MenuItem, Stack } from "@mui/material";
 import LanguageIcon from '@mui/icons-material/Language';
 import { useTranslation } from "react-i18next";
 
-interface Language {
-  code: string,
-  label: string
-}
+const Languages = {
+  hu: {
+    label: 'Magyar',
+    flag: (
+      <>
+        <path fill="#ce2939" d="M0 0h60v20H0z" />
+        <path fill="#fff" d="M0 20h60v20H0z" />
+        <path fill="#477050" d="M0 40h60v20H0z" />
+      </>
+    ),
+  },
+  en: {
+    label: 'English',
+    flag: (
+      <>
+        <path fill="#012169" d="M0 0h60v60H0z" />
+        <path stroke="#fff" strokeWidth="12" d="M0 0 60 60M60 0 0 60" />
+        <path stroke="#C8102E" strokeWidth="7" d="M0 0 60 60M60 0 0 60" />
+        <path stroke="#fff" strokeWidth="20" d="M30 0v60M0 30h60" />
+        <path stroke="#C8102E" strokeWidth="12" d="M30 0v60M0 30h60" />
+      </>
+    ),
+  },
+} as const;
 
-const KnownLanguageNames: Record<string, string> = {'en': 'English', 'hu': 'Magyar'}
+type LanguageCode = keyof typeof Languages;
+const supportedCodes = Object.keys(Languages) as LanguageCode[];
 
-const Flags: Record<string, JSX.Element> = {
-  hu: (
-    <>
-      <path fill="#ce2939" d="M0 0h60v20H0z" />
-      <path fill="#fff" d="M0 20h60v20H0z" />
-      <path fill="#477050" d="M0 40h60v20H0z" />
-    </>
-  ),
-  en: (
-    <>
-      <path fill="#012169" d="M0 0h60v60H0z" />
-      <path stroke="#fff" strokeWidth="12" d="M0 0 60 60M60 0 0 60" />
-      <path stroke="#C8102E" strokeWidth="7" d="M0 0 60 60M60 0 0 60" />
-      <path stroke="#fff" strokeWidth="20" d="M30 0v60M0 30h60" />
-      <path stroke="#C8102E" strokeWidth="12" d="M30 0v60M0 30h60" />
-    </>
-  ),
-};
-
-const LanguageFlag = ({ langcode, dropdownid }: { langcode: string, dropdownid?: number }) => {
+const LanguageFlag = ({ langcode, dropdownid }: { langcode: LanguageCode, dropdownid?: number }) => {
   dropdownid = dropdownid ?? 1;
   return (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" width="24" height="24">
@@ -37,7 +39,7 @@ const LanguageFlag = ({ langcode, dropdownid }: { langcode: string, dropdownid?:
         <circle cx="30" cy="30" r="30" />
       </clipPath>
       <g clipPath={`url(#clip-${dropdownid})`}>
-        {Flags[langcode] ?? null}
+        {Languages[langcode].flag}
       </g>
     </svg>
   );
@@ -62,11 +64,12 @@ const selectSx = (theme: Theme, color?: string) => ({
   },
 });
 
-function useLanguages(): Language[] {
+function useLanguages() {
   const { i18n } = useTranslation();
-  return Object.keys(i18n.options.resources ?? {}).map((code) => (
-    { code, label: KnownLanguageNames[code] ?? code.toUpperCase() }
-  ));
+  const i18nCodes = Object.keys(i18n.options.resources ?? {});
+  return supportedCodes
+    .filter((code) => i18nCodes.includes(code))
+    .map((code) => ({ code, label: Languages[code].label }));
 }
 
 export function LanguageDropdown({ id, fontColor, showFlagForSelected } : { id?: number, fontColor?: string, showFlagForSelected?: boolean }) {
@@ -75,10 +78,10 @@ export function LanguageDropdown({ id, fontColor, showFlagForSelected } : { id?:
   const languages = useLanguages();
 
   return (
-    <Select
+    <Select<string>
       value={i18n.language}
       variant="standard"
-      onChange={(e) => i18n.changeLanguage(e.target.value as string)}
+      onChange={(e) => i18n.changeLanguage(e.target.value)}
       sx={selectSx(theme, fontColor)}
       {...(!showFlagForSelected && { 
         renderValue: (value) => {
