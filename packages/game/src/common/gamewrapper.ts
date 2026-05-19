@@ -2,15 +2,15 @@ import { Ctx, Game } from 'boardgame.io';
 import { INVALID_MOVE, TurnOrder } from 'boardgame.io/core';
 import { GameStateMixin, GameType, GUESSER_PLAYER, JUDGE_PLAYER } from './types';
 
-function chooseRole({ G, ctx, playerID }: any, firstPlayer: string):void { // TODO: type
+function chooseRole({ G, _ctx, _playerID }: any, firstPlayer: string):void { // TODO: type
   G.firstPlayer = firstPlayer;
 }
 
-function chooseNewGameType({ G, ctx, playerID, random, events }: any, difficulty: string) {
+function chooseNewGameType({ G, _ctx, playerID, _random, events }: any, difficulty: string) {
   if (playerID !== GUESSER_PLAYER) {
     return INVALID_MOVE;
   };
-  let newG = {
+  const newG = {
     ...G,
     difficulty: difficulty,
     firstPlayer: null,
@@ -23,7 +23,7 @@ function chooseNewGameType({ G, ctx, playerID, random, events }: any, difficulty
   }
 };
 
-function setStartingPosition({ G, ctx, playerID, random, events }: any, startingPosition: any) { // TODO: type
+function setStartingPosition({ G, _ctx, playerID, _random, events }: any, startingPosition: any) { // TODO: type
   if (playerID !== JUDGE_PLAYER) {
     return INVALID_MOVE;
   };
@@ -42,7 +42,7 @@ export function isMakeMovePayloadReadOnly(payload_type: string) {
 }
 
 
-function getTime({ G, ctx, playerID, events }: any) {
+function getTime({ G, _ctx, playerID, _events }: any) {
   if (playerID !== GUESSER_PLAYER) {
     return INVALID_MOVE;
   }
@@ -50,7 +50,7 @@ function getTime({ G, ctx, playerID, events }: any) {
 }
 
 export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameState>, 
-                                                 sendStrategyFunction = (...inputs: any[]): void => {},
+                                                 sendStrategyFunction = (..._inputs: any[]): void => undefined,
                                                 ): Game<T_SpecificGameState & GameStateMixin> {
   const myGameWrapper: Game<T_SpecificGameState & GameStateMixin> = {
     setup: () => ({
@@ -116,7 +116,7 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
             sendStrategyFunction({component: "strategy", phase: "step", G: G, ctx: ctx, log: log});
           },
         },
-        onEnd: ({G, ctx, playerID, events, random, log}) => {
+        onEnd: ({G, ctx, _playerID, _events, _random, _log}) => {
           if (typeof localStorage !== "undefined") {
             localStorage.setItem("StrategyPoints", G.points.toString());
           }

@@ -2,12 +2,13 @@ import { MyGameState } from './game';
 import { BoardProps } from 'boardgame.io/react';
 import './style.css';
 
-interface MyGameProps extends BoardProps<MyGameState> { };
+type MyGameProps = BoardProps<MyGameState>;
 
-export function MyBoard({ G, ctx, moves }: MyGameProps) {
+export function MyBoard({ G }: MyGameProps) {
 
   return (
-    <div id="jatek">
+    <div id="jatek">ű
+      {G.points}
     </div>
   );
 }

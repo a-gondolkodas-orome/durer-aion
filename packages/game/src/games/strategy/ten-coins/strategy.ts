@@ -1,7 +1,7 @@
 import { State } from 'boardgame.io';
 import { MyGameState } from './game';
 
-const strategyMap = new Map<string, undefined | Array<number>>([
+const strategyMap = new Map<string, undefined | number[]>([
   ["11000", [2,1]],
   ["10100", [3,1]],
   ["10010", [4,1]],
@@ -35,12 +35,12 @@ const strategyMap = new Map<string, undefined | Array<number>>([
 
 export function strategyWrapper(category: "C" | "D" | "E")
 {
-  return (state: State<MyGameState>, botID: string): [Array<number> | {coins: Array<number>} | undefined, string] => {
+  return (state: State<MyGameState>, _botID: string): [number[] | {coins: number[]} | undefined, string] => {
     if(state.ctx.phase === "startNewGame") {
       return [startingPosition({G: state.G, ctx: state.ctx}, category), "setStartingPosition"];
     }
     
-    let existingCoins = [false,false,false,false,false];
+    const existingCoins = [false,false,false,false,false];
     for(let i = 0; i < 10; i++){
       existingCoins[state.G.coins[i] - 1] = true;
     }
@@ -53,12 +53,12 @@ export function strategyWrapper(category: "C" | "D" | "E")
   }
 }
 
-function startingPosition({ G, ctx}: any, category: "C" | "D" | "E"): {coins: Array<number>} {
+function startingPosition({ G, _ctx}: any, category: "C" | "D" | "E"): {coins: number[]} {
   if (category === "C"){
     // C Category
     if (G.difficulty === "test") {
-      let numbers = [1,2,3,4];
-      let rndNumber = Math.floor(Math.random()*2);
+      const numbers = [1,2,3,4];
+      const rndNumber = Math.floor(Math.random()*2);
       for(let i = 0; i < rndNumber; i++){
         numbers.splice(Math.floor(Math.random()*numbers.length),1);
       }
@@ -77,11 +77,11 @@ function startingPosition({ G, ctx}: any, category: "C" | "D" | "E"): {coins: Ar
     } else {
       return {coins: getRandomNumbers([1,2,3], 7)};
     }
-  } else if (category === "D" || 'E') {
+  } else if (category === "D" || category === 'E') {
     // D,E Category
     if (G.difficulty === "test") {
-      let numbers = [1,2,3,4,5];
-      let rndNumber = Math.floor(Math.random()*3);
+      const numbers = [1,2,3,4,5];
+      const rndNumber = Math.floor(Math.random()*3);
       for(let i = 0; i < rndNumber; i++){
         numbers.splice(Math.floor(Math.random()*numbers.length),1);
       }
@@ -113,9 +113,9 @@ function startingPosition({ G, ctx}: any, category: "C" | "D" | "E"): {coins: Ar
 }
 
 function getRandomNumbers(set: number[], count: number): number[] {
-  let result = [];
+  const result = [];
   for (let i = 0; i < count; i++) {
-    let randomIndex = Math.floor(Math.random() * set.length);
+    const randomIndex = Math.floor(Math.random() * set.length);
     result.push(set[randomIndex]);
   }
   result.push(...set);

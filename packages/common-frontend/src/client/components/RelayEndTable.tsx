@@ -1,4 +1,3 @@
-import React from 'react';
 import { Button, Table, TableCell, TableRow } from '@mui/material';
 import { Stack } from '@mui/system';
 import { useRefreshTeamState, useToHome } from '../hooks/user-hooks';
@@ -72,7 +71,7 @@ export function RelayEndTable(props: {allPoints: number, task: {max: number, got
             </TableRow>
             <TableRow>
                 <TableCell>{t('relay.endTable.point')}</TableCell>
-                {props.task.slice(0, 10).map((data, idx)=>{
+                {props.task.slice(0, 10).map((data)=>{
                     let currStyle = { backgroundColor: '#fff' };
                     if(data.got !== null){
                       if(0 < data.max - data.got && data.max - data.got < 3) {
@@ -94,7 +93,7 @@ export function RelayEndTable(props: {allPoints: number, task: {max: number, got
             </TableRow>
             <TableRow>
                 <TableCell>{t('relay.endTable.point')}</TableCell>
-                {props.task.slice(10).map((data, idx)=>{
+                {props.task.slice(10).map((data, _idx)=>{
                     let currStyle = { backgroundColor: '#fff' };
                     if(data.got !== null){
                       if(0 < data.max - data.got && data.max - data.got < 3) {
@@ -199,7 +198,7 @@ export function RelayEndTableData(props: {allPoints: number, task: {max: number,
             </TableRow>
             <TableRow>
                 <TableCell>{t('relay.endTable.point')}</TableCell>
-                {props.task.slice(0, 10).map((data, idx)=>{
+                {props.task.slice(0, 10).map((data, _idx)=>{
                     let currStyle = { backgroundColor: '#fff' };
                     if(data.got !== null){
                       if(0 < data.max - data.got && data.max - data.got < 3) {
@@ -213,7 +212,7 @@ export function RelayEndTableData(props: {allPoints: number, task: {max: number,
                 </TableCell>})}
             </TableRow><TableRow>
                 <TableCell>Válaszok</TableCell>
-                {props.task.slice(0, 10).map((data, idx)=>{
+                {props.task.slice(0, 10).map((data, _idx)=>{
                 return <TableCell>
                     {data.answers.join(", ")}
                 </TableCell>})}
@@ -227,7 +226,7 @@ export function RelayEndTableData(props: {allPoints: number, task: {max: number,
             </TableRow>
             <TableRow>
                 <TableCell>{t('relay.endTable.point')}</TableCell>
-                {props.task.slice(10).map((data, idx)=>{
+                {props.task.slice(10).map((data, _idx)=>{
                     let currStyle = { backgroundColor: '#fff' };
                     if(data.got !== null){
                       if(0 < data.max - data.got && data.max - data.got < 3) {
@@ -241,7 +240,7 @@ export function RelayEndTableData(props: {allPoints: number, task: {max: number,
                 </TableCell>})}
             </TableRow><TableRow>
                 <TableCell>Válaszok</TableCell>
-                {props.task.slice(10).map((data, idx)=>{
+                {props.task.slice(10).map((data, _idx)=>{
                 return <TableCell>
                     {data.answers.join(", ")}
                 </TableCell>})}

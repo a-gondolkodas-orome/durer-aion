@@ -6,9 +6,7 @@ import { Button } from '@mui/material';
 
 import KeyboardDoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
 
-interface MyGameProps extends BoardProps<MyGameState> { }
-
-export function MyBoard({ G, ctx, moves }: MyGameProps, theme: any) {
+export function MyBoard({ G, ctx, moves }: BoardProps<MyGameState>, theme: any) {
   // TODO: use formik
   // create refs to store the text input elements
   const inputK = useRef<HTMLInputElement>(null);
@@ -17,10 +15,13 @@ export function MyBoard({ G, ctx, moves }: MyGameProps, theme: any) {
 
   const onClick = () => {
     // read input value
-    const inputValueK = parseInt(inputK.current!.value);
-    const inputValueL = parseInt(inputL.current!.value);
-    inputK.current!.value = '';
-    inputL.current!.value = '';
+    if (!inputK.current || !inputL.current) {
+      console.error('Empty input.')
+      return
+    }
+    const inputValueK = parseInt(inputK.current.value);
+    inputK.current.value = '';
+    const inputValueL = parseInt(inputL.current.value);
     moves.changeCoins(inputValueK, inputValueL);
   };
 

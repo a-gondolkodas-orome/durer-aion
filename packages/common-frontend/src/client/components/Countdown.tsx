@@ -8,7 +8,7 @@ export function Countdown(
     msRemaining: number | null,
     setMsRemaining: Dispatch<SetStateAction<number>>,
     endTime: Date,
-    getServerTimer: ()=>void,
+    getServerTimer: () => void,
     serverRemainingMs: number;
   }>
 ) {
@@ -45,7 +45,6 @@ export function Countdown(
           }
           handle = null;
       };
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [serverRemainingMs]);
 
     useEffect(() => {

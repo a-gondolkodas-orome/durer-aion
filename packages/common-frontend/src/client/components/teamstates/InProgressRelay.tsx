@@ -13,7 +13,8 @@ import { useTheme } from '@mui/material/styles';
 import { alpha } from "@mui/system/colorManipulator"
 import { useTranslation } from 'react-i18next';
 
-interface MyGameProps extends BoardProps<MyGameState> { };
+type MyGameProps = BoardProps<MyGameState>;
+
 export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
   const [msRemaining, setMsRemaining] = useState(G.millisecondsRemaining);
   const [gameover, setGameover] = useState(ctx.gameover);
@@ -34,7 +35,6 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
       }
     }
     setGameover(ctx.gameover)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ctx.gameover]);
   useEffect(() => {
     setMsRemaining(G.millisecondsRemaining);
@@ -59,7 +59,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
               xs: '100%',
               md: 'calc(100% - 64px)'
             },
-              backgroundColor: theme.palette.background.paper,
+            backgroundColor: theme.palette.background.paper,
           }
         }}
         open={
@@ -101,8 +101,8 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
             <b style={{marginRight: '5px'}}>{t('general.remainingTime')}:</b>
             <Countdown
               msRemaining={msRemaining ?? null}
-              setMsRemaining={()=>{}}
-              getServerTimer={()=>{}}
+              setMsRemaining={() => undefined}
+              getServerTimer={() => undefined}
               endTime={new Date(G.end)} 
               serverRemainingMs={G.millisecondsRemaining}/>
           </Stack>
@@ -148,9 +148,9 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
           <ExcerciseForm 
             previousTries={G.previousAnswers[G.currentProblem].map(it=>it.answer)} 
             previousCorrectness={!finished ? G.correctnessPreviousAnswer : null}
-            attempt={(G.currentProblem+1)*3+G.numberOfTry}
-            onSubmit={(input) => {
-              moves.submitAnswer(parseInt(input));
+            attempt={(G.currentProblem+1) * 3 + G.numberOfTry}
+            onSubmit={(input: number) => {
+              moves.submitAnswer(input);
               // TODO this should be done in repository
             }}
           />

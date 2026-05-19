@@ -9,7 +9,7 @@ import { useTheme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
 
 export function boardWrapper(board: any, description: any) { //<please> TODO: solve types with BoardProps<MyGameState>
-  return ({ G, ctx, moves, log }: any) => {
+  return ({ G, ctx, moves, _log }: any) => {
     const [msRemaining, setMsRemaining] = useState(G.millisecondsRemaining as number); // asked from the server
     const [gameover, setGameover] = useState(ctx.gameover);
     const toHome = useToHome();

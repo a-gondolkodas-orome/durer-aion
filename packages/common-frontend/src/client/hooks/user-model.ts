@@ -57,7 +57,7 @@ export class UserModel {
     return res;
   }
 
-  async adminMatchState(matchId: String): Promise<MatchStateDto | null> {
+  async adminMatchState(matchId: string): Promise<MatchStateDto | null> {
     const res = await this.repo.getMatchState(matchId);
 
     return res;
@@ -69,15 +69,15 @@ export class UserModel {
     return res;
   }
 
-  async resetRealy(teamId: String): Promise<TeamModelDto> {
+  async resetRealy(teamId: string): Promise<TeamModelDto> {
     return this.repo.resetRelay(teamId);
   }
 
-  async resetStrategy(teamId: String): Promise<TeamModelDto> {
+  async resetStrategy(teamId: string): Promise<TeamModelDto> {
     return this.repo.resetStrategy(teamId);
   }
 
-  async addMinutes(matchId: String, minutes: number): Promise<void> {
+  async addMinutes(matchId: string, minutes: number): Promise<void> {
     await this.repo.addMinutes(matchId, minutes);
   }
 

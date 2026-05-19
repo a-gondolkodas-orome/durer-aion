@@ -31,7 +31,7 @@ export const injectPlayer = async (
     credentials: string;
 }
 ) => {
-  let match = await fetch(db, matchId, { metadata: true });
+  const match = await fetch(db, matchId, { metadata: true });
   console.log(`Match is indeed empty, and thus in need for a bot!`);
   match.metadata.players[playerID].name = name;
   match.metadata.players[playerID].credentials = credentials;
@@ -174,7 +174,10 @@ export async function allowedToStart(
 
 export async function checkStaleMatch(
   team: TeamModel
-): Promise<{ isStale: boolean; gameState?: "relayMatch" | "strategyMatch" }> {
+): Promise<
+  | { isStale: false }
+  | { isStale: true; gameState: "relayMatch" | "strategyMatch" }
+> {
   // Find if boardgame match is already timed out, but not registered
   const now = new Date(Date());
   if (team.relayMatch.state === "IN PROGRESS") {
@@ -252,7 +255,7 @@ export async function getNewGame(
   const staleInfo = await checkStaleMatch(team);
   if (staleInfo.isStale) {
     await closeMatch(
-      (team[staleInfo.gameState!] as InProgressMatchStatus).matchID,
+      (team[staleInfo.gameState] as InProgressMatchStatus).matchID,
       teams,
       ctx.db
     );

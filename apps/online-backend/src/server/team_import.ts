@@ -13,15 +13,15 @@ function arraysEqual(a: string[], b: string[]) {
   // Please note that calling sort on an array will modify that array.
   // you might want to clone your array first.
 
-  for (var i = 0; i < a.length; ++i) {
+  for (let i = 0; i < a.length; ++i) {
     if (a[i] !== b[i]) return false;
   }
   return true;
 }
 
 function randomDigits(numDigits: number) {
-  var result = "";
-  for (var i = 0; i < numDigits; i++) { result += `${randomInt(0, 10)}`; }
+  let result = "";
+  for (let i = 0; i < numDigits; i++) { result += `${randomInt(0, 10)}`; }
   return result;
 }
 
@@ -64,19 +64,19 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
     rows.pop();
   }
   const table = rows.map(row => row.split('\t'));
-  const header = table.shift()!;
+  const header = table.shift() ?? [];
   const expected_header = ["Teamname", "Category", "Email", "Other", "ID", "Login Code", "Credentials"];
   if (!arraysEqual(header, expected_header)) {
     onwarn("WARNING: Header not exactly how we defined it. This is not always a problem.");
     onwarn(`Found: ${header.join(', ')}`);
     onwarn(`Expected: ${expected_header.join(', ')}`);
   }
-  var export_table: string[][] = [];
+  const export_table: string[][] = [];
 
   let successful = 0;
   let failed = 0; // not counting empty rows...
   await teams.connect();
-  for (var row of table) {
+  for (const row of table) {
     // Trim: Remove possible '\r' characters in windows CRLF
     const [teamname, category, email, other, ...extra_columns] = row.map(column => column.trim());
     let ok = true;

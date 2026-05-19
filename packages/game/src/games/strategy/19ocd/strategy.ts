@@ -1,11 +1,11 @@
 import { State } from 'boardgame.io';
 import { MyGameState } from './game';
 import { GameStateMixin } from '../../../common/types';
-import { strategyDict, StrategyDict } from './strategydict';
+import { strategyDict } from './strategydict';
 import { possibleMoves } from './game';
 
 export function strategyWrapper(category: "C" | "D") {
-  return (state: State<MyGameState & GameStateMixin>, botID: string): [number | MyGameState | undefined, string] => {
+  return (state: State<MyGameState & GameStateMixin>, _botID: string): [number | MyGameState | undefined, string] => {
     if (state.ctx.phase === "startNewGame") {
       return [startingPosition({ G: state.G, ctx: state.ctx }, category), "setStartingPosition"];
     }
@@ -18,7 +18,7 @@ export function strategyWrapper(category: "C" | "D") {
   }
 }
 
-function startingPosition({ G, ctx }: any, category: "C" | "D"): MyGameState | undefined {
+function startingPosition({ G, _ctx }: any, category: "C" | "D"): MyGameState | undefined {
   if (category === "C") {
     if (G.difficulty === "live") {
       if (G.winningStreak % 2 === 0) {
@@ -46,12 +46,12 @@ function startingPosition({ G, ctx }: any, category: "C" | "D"): MyGameState | u
 }
 
 function randomStrategy(G: MyGameState): [number, string] {
-  let pMoves =  possibleMoves(G);
-  let i = Math.floor(Math.random()*pMoves.length);
+  const pMoves =  possibleMoves(G);
+  const i = Math.floor(Math.random()*pMoves.length);
   return [pMoves[i].args[0], pMoves[i].move];
 }
 
-function generateStateID(numbersOnTable: Array<boolean>, previousMove: number): string {
+function generateStateID(numbersOnTable: boolean[], previousMove: number): string {
   let id = 0
   for (let i = 0; i < numbersOnTable.length; i++) {
     if (numbersOnTable[i]){
@@ -64,10 +64,10 @@ function generateStateID(numbersOnTable: Array<boolean>, previousMove: number): 
 
 function winningStrategy(G: MyGameState): [number, string] {
   try {
-    let pMoves = strategyDict[G.numbersOnTable.length][generateStateID(G.numbersOnTable, G.previousMove)];
-    let i = Math.floor(Math.random()*pMoves.length);
+    const pMoves = strategyDict[G.numbersOnTable.length][generateStateID(G.numbersOnTable, G.previousMove)];
+    const i = Math.floor(Math.random()*pMoves.length);
     return [pMoves[i], "removeNumber"];
-  } catch (e) {
+  } catch {
     console.error("Winning strategy not found, using random strategy instead.");
     return randomStrategy(G);
   }
