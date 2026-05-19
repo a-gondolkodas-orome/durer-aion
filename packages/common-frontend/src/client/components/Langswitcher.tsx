@@ -2,6 +2,7 @@ import { Theme, useTheme } from "@mui/material/styles";
 import { Select, MenuItem, Stack } from "@mui/material";
 import LanguageIcon from '@mui/icons-material/Language';
 import { useTranslation } from "react-i18next";
+import { useId } from "react"
 
 const Languages = {
   hu: {
@@ -31,8 +32,8 @@ const Languages = {
 type LanguageCode = keyof typeof Languages;
 const supportedCodes = Object.keys(Languages) as LanguageCode[];
 
-const LanguageFlag = ({ langcode, dropdownid }: { langcode: LanguageCode, dropdownid?: number }) => {
-  dropdownid = dropdownid ?? 1;
+const LanguageFlag = ({ langcode }: { langcode: LanguageCode }) => {
+  const dropdownid = useId();
   return (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" width="24" height="24">
       <clipPath id={`clip-${dropdownid}`}>
@@ -56,23 +57,24 @@ const selectSx = (theme: Theme, color?: string) => ({
   },
   "& .MuiSvgIcon-root": { fill: color ?? '#000' },
   "&::before": { borderBottom: "transparent" },
-  "&:hover:before": {
-    borderBottom: "2px solid " + (color ?? theme.palette.primary.main) + " !important",
+  "&&:hover:before": {
+    borderBottom: "2px solid " + (color ?? theme.palette.primary.main),
   },
-  "&::after": {
-    borderBottom: "2px solid " + (color ?? theme.palette.primary.main) + " !important",
+  "&&::after": {
+    borderBottom: "2px solid " + (color ?? theme.palette.primary.main),
   },
 });
 
 function useLanguages() {
   const { i18n } = useTranslation();
-  const i18nCodes = Object.keys(i18n.options.resources ?? {});
+  const i18nCodes = i18n.options.supportedLngs ? i18n.options.supportedLngs : Object.keys(i18n.options.resources ?? {});
+  if (!i18nCodes) return []
   return supportedCodes
     .filter((code) => i18nCodes.includes(code))
     .map((code) => ({ code, label: Languages[code].label }));
 }
 
-export function LanguageDropdown({ id, fontColor, showFlagForSelected } : { id?: number, fontColor?: string, showFlagForSelected?: boolean }) {
+export function LanguageDropdown({ fontColor } : { fontColor?: string }) {
   const theme = useTheme();
   const { i18n } = useTranslation();
   const languages = useLanguages();
@@ -83,23 +85,17 @@ export function LanguageDropdown({ id, fontColor, showFlagForSelected } : { id?:
       variant="standard"
       onChange={(e) => i18n.changeLanguage(e.target.value)}
       sx={selectSx(theme, fontColor)}
-      {...(!showFlagForSelected && { 
-        renderValue: (value) => {
-          const lang = languages.find(({ code }) => code === value);
-          if (!lang) return null;
-          return (
-            <Stack sx={{ display: "flex", alignItems: "center", gap: "8px", flexDirection: "row" }}>
-              <LanguageIcon />
-              {lang.label}
-            </Stack>
-          );
-        }
-      })}
+      renderValue={(value) => (
+        <Stack sx={{ display: "flex", alignItems: "center", gap: "8px", flexDirection: "row" }}>
+          <LanguageIcon />
+          {languages.find(({ code }) => code === value)?.label}
+        </Stack>
+      )}
     >
       {languages.map(({ code, label }) => (
         <MenuItem key={code} value={code}>
           <Stack sx={{ display: "flex", alignItems: "center", gap: "8px", flexDirection: "row" }}>
-            <LanguageFlag langcode={code} dropdownid={id} />
+            <LanguageFlag langcode={code} />
             {label}
           </Stack>
         </MenuItem>

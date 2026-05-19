@@ -2,7 +2,6 @@ import { Container, Dialog, Stack, Button } from '@mui/material';
 import { useState } from 'react';
 import { useLogout } from '../hooks/user-hooks';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
-import LanguageIcon from '@mui/icons-material/Language';
 import { useClientRepo } from '../api-repository-interface';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
@@ -89,7 +88,7 @@ export function Header(props: { teamName: string | null, admin: boolean }) {
             }}>
             </Stack>
             {props.admin && 
-              <LanguageDropdown id={1} fontColor={theme.palette.primary.contrastText} />
+              <LanguageDropdown fontColor={theme.palette.primary.contrastText} />
             }
           </Stack>
         }
@@ -127,24 +126,25 @@ export function Header(props: { teamName: string | null, admin: boolean }) {
             }
           }}
         >
-          <Stack sx={{
-            fontSize: 30,
-            paddingTop: '10px',
-            paddingBottom: '20px',
-            display: 'flex',
-            alignItems: 'center'
-          }}>{props.teamName ?? <LanguageIcon sx={{transform: 'scale(2)'}}/>}</Stack>
-          {props.teamName &&
-            <Button onClick={()=>{
-              setMobileMenuOpen(false);
-              logout();
-            }} variant='outlined'
-            sx={{
-              fontSize: 20,
-              textTransform: 'capitalize'
-            }}
-            >{t('header.logout')}</Button>}
-          {props.admin && <LanguageDropdown id={2} showFlagForSelected={!props.teamName}/>}
+          {props.teamName && <>
+              <Stack sx={{
+                fontSize: 30,
+                paddingTop: '10px',
+                paddingBottom: '20px',
+                display: 'flex',
+                alignItems: 'center'
+              }}>{props.teamName}</Stack>
+              <Button onClick={()=>{
+                setMobileMenuOpen(false);
+                logout();
+              }} variant='outlined'
+              sx={{
+                fontSize: 20,
+                textTransform: 'capitalize'
+              }}
+              >{t('header.logout')}</Button>
+            </>}
+          {props.admin && <LanguageDropdown />}
         </Dialog>
       </Container>
     </Stack>
