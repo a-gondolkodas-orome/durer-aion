@@ -57,7 +57,7 @@
     },
     "general": {
       "loading": "Loading game or task…",
-      "points_one": "1 points",
+      "points_one": "1 point",
       "points_other": "{{count}} points",
       "remainingTime": "Remaining time",
       "returnHome": "Back to main page",
