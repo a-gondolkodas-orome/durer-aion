@@ -60,7 +60,7 @@
     "dev:server": "turbo dev --filter=online-backend --filter=game --filter=schemas --filter=strategy",
     "dev:online": "turbo dev --filter=online-frontend --filter=game --filter=common-frontend",
     "dev:offline": "turbo dev --filter=offline-frontend --filter=game --filter=strategy --filter=common-frontend",
-    "i18n:check": "i18n-check -f i18next -s hu -l packages/common-frontend/public -u ./**/src -i disclaimer.interfaceDescription disclaimer.interfaceDescriptionOfflineMode"
+    "i18n:check": "i18n-check -f i18next -s hu -l packages/common-frontend/public -u ./**/src"
   },
   "eslintConfig": {
     "extends": [
