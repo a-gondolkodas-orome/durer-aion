@@ -1,6 +1,6 @@
 import React from "react";
 import { Stack } from "@mui/system";
-import { useTranslation } from "react-i18next";
+import { useTranslation, Trans } from "react-i18next";
 
 export interface ExcerciseTaskProps {
   task: string;
@@ -14,9 +14,10 @@ export const ExcerciseTask: React.FunctionComponent<ExcerciseTaskProps> = (props
 </latex-js>`;
   const { t } = useTranslation();
   return <Stack>
-    <Stack sx={{fontSize: '20px'}}>
-      {props.serial}. {t('general.task')} ({props.maxPoints} {t('general.point')}):
-    </Stack>
+    <Trans sx={{fontSize: '20px'}}
+      i18nKey='relay.task'
+      values={{ num: props.serial, maxpoints: t('general.points', { count: props.maxPoints})}}
+      />
     <div dangerouslySetInnerHTML={{ __html: completestring }} />
     {props.pictureUrl && <img src={props.pictureUrl} style={{maxWidth:'80%', display: 'flex', marginLeft:'auto', marginRight: 'auto', marginTop: "30px"}} alt={t('relay.taskImage')}/>}
   </Stack>
