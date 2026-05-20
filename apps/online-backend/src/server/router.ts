@@ -7,6 +7,7 @@ import { BOT_ID, TransportAPI } from '../socketio_botmoves';
 import { getFilterPlayerView } from "boardgame.io/internal";
 import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus, createGame, injectBot, injectPlayer } from './team_manage';
 import { import_teams_from_tsv } from './team_import';
+import { PlayerIDType } from 'game';
 
 /**
  * 
@@ -344,7 +345,7 @@ export function configureTeamsRouter(
   );
 
   /**
-   * Let a team strat a RELAY match.
+   * Let a team start a RELAY match.
    * 
    * @param {string} GUID - TeamId
    */
@@ -357,7 +358,7 @@ export function configureTeamsRouter(
 
     // about to start a game
     const body: LobbyAPI.CreatedMatch = await createGame(game, ctx);
-    await injectPlayer(ctx.db, body.matchID, { playerID: '0', name: GUID, credentials: team.credentials });
+    await injectPlayer(ctx.db, body.matchID, { playerID: PlayerIDType.GUESSER_PLAYER, name: GUID, credentials: team.credentials });
     await injectBot(ctx.db, body.matchID, BOT_ID);
 
     //created new game, updated team state accordingly
@@ -385,7 +386,7 @@ export function configureTeamsRouter(
     //about to start
 
     const body: LobbyAPI.CreatedMatch = await createGame(game, ctx);
-    await injectPlayer(ctx.db, body.matchID, { playerID: '0', name: GUID, credentials: team.credentials });
+    await injectPlayer(ctx.db, body.matchID, { playerID: PlayerIDType.GUESSER_PLAYER, name: GUID, credentials: team.credentials });
     await injectBot(ctx.db, body.matchID, BOT_ID);
 
     //created new game, updated team state accordingly

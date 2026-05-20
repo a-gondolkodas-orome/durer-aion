@@ -14,7 +14,7 @@ import { PostgresStore } from 'bgio-postgres';
 import { argv, env, exit } from 'process';
 import { SocketIOButBotMoves } from './socketio_botmoves';
 import { Server } from 'boardgame.io/server';
-import botWrapper from './botwrapper';
+import botWrapper, { ChangeReturnType as  MergedWrappedBots,  makeWrappedBot } from './botwrapper';
 import cors from '@koa/cors';
 import { configureTeamsRouter } from './server/router';
 import { TeamsRepository } from './server/db';
@@ -51,12 +51,12 @@ export function getAdminCredentials() {
 }
 
 const games = [
-  { ...GameRelay, name: relayNames.C },
-  { ...GameRelay, name: relayNames.D },
-  { ...GameRelay, name: relayNames.E },
-  { ...gameWrapper(strategyGameWrappers.C()), name: strategyNames.C },
-  { ...gameWrapper(strategyGameWrappers.D()), name: strategyNames.D },
-  { ...gameWrapper(strategyGameWrappers.E()), name: strategyNames.E },
+  { ...GameRelay, name: relayNames.C } as typeof GameRelay & {name:string},
+  { ...GameRelay, name: relayNames.D } as typeof GameRelay & {name:string},
+  { ...GameRelay, name: relayNames.E } as typeof GameRelay & {name:string},
+  { ...gameWrapper(strategyGameWrappers.C()), name: strategyNames.C } as ReturnType<typeof gameWrapper<typeof strategyGameWrappers.C>> & {name:string},
+  { ...gameWrapper(strategyGameWrappers.D()), name: strategyNames.D } as ReturnType<typeof gameWrapper<typeof strategyGameWrappers.D>> & {name:string},
+  { ...gameWrapper(strategyGameWrappers.E()), name: strategyNames.E } as ReturnType<typeof gameWrapper<typeof strategyGameWrappers.E>> & {name:string},
 ];
 
 
@@ -86,12 +86,15 @@ if (argv[2] === "import") {
   import_teams_from_tsv_locally(teams, filename).then(() => exit(0));
 } else {
   const botSetup = Object.fromEntries(
-    games.map((game, idx) =>
-      [game.name,
-      new (bot_factories[idx])({
-        enumerate: game.ai?.enumerate,
-        seed: game.seed,
-      })]
+    games.map((game, idx) => {
+      if (!game.ai) return []
+      return [game.name,
+      makeWrappedBot(
+        (bot_factories as MergedWrappedBots<typeof bot_factories>)[idx],
+        game.ai.enumerate,
+        game.seed,
+      )]
+    }
     ));
 
   const socketio = new SocketIOButBotMoves(

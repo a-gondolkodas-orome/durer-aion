@@ -267,8 +267,9 @@ export function Admin(props: {teamId?: string}) {
                   if (typeof window !== 'undefined') {
                     getAll();
                   }
-                } catch (e: any) {
-                  enqueueSnackbar(e?.message || 'Hiba történt', { variant: 'error' });
+                } catch (e: unknown) {
+                  const message = e instanceof Error ? e.message : "Váratlan hiba történt";
+                  enqueueSnackbar(message, { variant: 'error' });
                 }
               }
             });

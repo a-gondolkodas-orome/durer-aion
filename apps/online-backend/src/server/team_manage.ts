@@ -1,7 +1,7 @@
 import { createMatch } from "boardgame.io/internal";
 import { nanoid } from "nanoid";
 import { getBotCredentials, getGameStartAndEndTime, relayNames } from "./common";
-import { strategyNames } from "game";
+import { PlayerIDType, strategyNames } from "game";
 import { Game, LobbyAPI, Server, StorageAPI } from "boardgame.io";
 import { TeamsRepository } from "./db";
 import {
@@ -26,7 +26,7 @@ export const injectPlayer = async (
   name,
     credentials,
 }: {
-    playerID: any; //TODO: fix to correct type
+    playerID: PlayerIDType;
     name: string;
     credentials: string;
 }
@@ -49,7 +49,7 @@ export const injectPlayer = async (
 export const injectBot = async (
   db: StorageAPI.Async | StorageAPI.Sync,
   matchId: string,
-  bot_id: string
+  bot_id: PlayerIDType
 ) => {
   await injectPlayer(db, matchId, {
     playerID: bot_id,

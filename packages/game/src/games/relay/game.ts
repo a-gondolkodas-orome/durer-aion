@@ -3,6 +3,7 @@ import { INVALID_MOVE, TurnOrder } from "boardgame.io/core";
 // import { sendDataRelayEnd } from "../../common/sendData";
 import { GUESSER_PLAYER, JUDGE_PLAYER, otherPlayer, PlayerIDType } from "../../common/types";
 // import { IS_OFFLINE_MODE } from "../../client/utils/util";
+import { BotAction } from "boardgame.io/dist/types/src/ai/bot";
 
 interface Answer {
   answer: number;
@@ -188,7 +189,7 @@ export function RelayWrapper(sendRelayFunction = (..._inputs: any[]) => undefine
     },
 
     ai: {
-      enumerate: (_G, _ctx, _playerID) => {
+      enumerate: (_G: MyGameState, _ctx, _playerID): BotAction[] => {
         return [];
       }
     }

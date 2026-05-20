@@ -1,12 +1,13 @@
 import { Ctx, Game } from 'boardgame.io';
 import { INVALID_MOVE, TurnOrder } from 'boardgame.io/core';
 import { GameStateMixin, GameType, GUESSER_PLAYER, JUDGE_PLAYER } from './types';
+import { BotAction } from 'boardgame.io/dist/types/src/ai/bot';
 
-function chooseRole({ G, _ctx, _playerID }: any, firstPlayer: string):void { // TODO: type
+function chooseRole({ G, _ctx, _playerID }: any, firstPlayer: string): void { // TODO: solve type
   G.firstPlayer = firstPlayer;
 }
 
-function chooseNewGameType({ G, _ctx, playerID, _random, events }: any, difficulty: string) {
+function chooseNewGameType({ G, _ctx, playerID, _random, events }: any, difficulty: string) { // TODO: solve type
   if (playerID !== GUESSER_PLAYER) {
     return INVALID_MOVE;
   };
@@ -23,7 +24,7 @@ function chooseNewGameType({ G, _ctx, playerID, _random, events }: any, difficul
   }
 };
 
-function setStartingPosition({ G, _ctx, playerID, _random, events }: any, startingPosition: any) { // TODO: type
+function setStartingPosition({ G, _ctx, playerID, _random, events }: any, startingPosition: any) { // TODO: solve type
   if (playerID !== JUDGE_PLAYER) {
     return INVALID_MOVE;
   };
@@ -42,7 +43,7 @@ export function isMakeMovePayloadReadOnly(payload_type: string) {
 }
 
 
-function getTime({ G, _ctx, playerID, _events }: any) {
+function getTime({ G, _ctx, playerID, _events }: any) { // TODO: solve type
   if (playerID !== GUESSER_PLAYER) {
     return INVALID_MOVE;
   }
@@ -125,7 +126,7 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
       },
     },
     // conflict with boardgameio type, where id is string, instead of playerIDType
-    ai: { enumerate: game.possibleMoves as (G:T_SpecificGameState,ctx:Ctx,playerID:string)=>any[] }
+    ai: { enumerate: game.possibleMoves as (G:T_SpecificGameState,ctx:Ctx,playerID:string)=> BotAction[] }
   };
 
   return myGameWrapper;
