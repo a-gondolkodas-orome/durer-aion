@@ -121,13 +121,16 @@ export function Disclaimer(props: {teamName: string, category: string}) {
         }}
       >
         <div>
-          <Trans 
-          i18nKey={isOffline ? 'disclaimer.interfaceDescriptionOfflineMode' : 'disclaimer.interfaceDescription'}
-          components={{
-            b: <b />,
-            small: <small />,
-            br: <br />
-          }} />
+          <Trans
+            // t('disclaimer.interfaceDescriptionOfflineMode')
+            // t('disclaimer.interfaceDescription')
+            i18nKey={isOffline ? 'disclaimer.interfaceDescriptionOfflineMode' : 'disclaimer.interfaceDescription'}
+            components={{
+              b: <b />,
+              small: <small />,
+              br: <br />
+            }}
+          />
         </div>
       </Stack>
 

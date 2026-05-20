@@ -4,7 +4,8 @@ import { MatchStatus, FinishedMatchStatus } from '../dto/TeamStateDto';
 import { useStartRelay, useStartStrategy } from '../hooks/user-hooks';
 import { formatTime } from '../utils/DateFormatter';
 import { useState } from 'react';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { useClientRepo } from '../api-repository-interface';
 import { useTheme } from "@mui/material/styles";
 import { useTranslation, Trans } from 'react-i18next';
@@ -50,13 +51,19 @@ export function ChooserItem(props: {
           return !prev
         })
       }}>
-        <span>{props.type==='relay' ? t('relay.name') : t('strategy.name')}  {!props.hideDesc && <ExpandMoreIcon sx={{
+        <span>{props.type==='relay' ? t('relay.name') : t('strategy.name')}  {!props.hideDesc && (mobileDescOpen ? <KeyboardArrowUpIcon sx={{
           fontSize: 33,
           marginBottom: "-9px",
           display: {
             md: 'none',
           }
-        }}/>}</span>
+        }}/> : <KeyboardArrowDownIcon sx={{
+          fontSize: 33,
+          marginBottom: "-9px",
+          display: {
+            md: 'none',
+          }
+        }}/>)}</span>
       </Stack>
       {props.status.state === "FINISHED" &&
         <Stack sx={{

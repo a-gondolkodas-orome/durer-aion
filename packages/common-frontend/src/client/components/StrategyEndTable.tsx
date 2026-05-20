@@ -30,7 +30,7 @@ export function StrategyEndTable(props: {allPoints: number, numOfTries: number})
         fontSize: '18px',
         fontWeight: 'bold',
         textAlign: 'center'
-    }}>{t('relay.endTable.all')}</Stack>
+    }}>{t('strategy.endTable.all')}</Stack>
       <Stack sx={{
           marginTop: '25px',
           display: 'flex',

@@ -15,11 +15,11 @@ i18next
     defaultNS: 'translation',
     resources: {
       en: {
-        ...enTranslation,
+        translation: enTranslation,
       },
       hu: {
-        ...huTranslation,
-      },
+        translation: huTranslation,
+      }
     },
     interpolation: {
       escapeValue: false,

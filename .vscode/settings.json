@@ -16,4 +16,5 @@
   "i18n-ally.defaultNamespace": "translation",
   "i18n-ally.sourceLanguage": "hu",
   "i18n-ally.keystyle": "nested",
+  "i18n-ally.namespace": true
 }
