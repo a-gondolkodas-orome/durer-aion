@@ -3,6 +3,11 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { GameSidebar } from './game-sidebar';
 
+beforeAll(() => {
+  const { unmount } = render(<MemoryRouter><div /></MemoryRouter>);
+  unmount();
+});
+
 const defaultVariants = [{ botStrategy: () => {}, generateStartBoard: () => {}, originalIndex: 0, disabled: false }];
 
 const renderSidebar = (ctxOverrides = {}, movesOverrides = {}, variants = defaultVariants) => {

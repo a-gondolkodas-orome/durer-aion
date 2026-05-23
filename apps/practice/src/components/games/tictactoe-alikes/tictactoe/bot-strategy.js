@@ -1,6 +1,6 @@
 'use strict';
 
-import { isNull, range, cloneDeep, sample } from 'lodash';
+import { isNull, range, sample } from 'lodash';
 import { pColor, aiColor, inPlacingPhase, isGameEnd } from './helpers';
 
 export const randomBotStrategy = ({ board, moves }) => {
@@ -14,7 +14,7 @@ export const randomBotStrategy = ({ board, moves }) => {
 };
 
 const opponentCanWinNext = (board, position) => {
-  const boardCopy = cloneDeep(board);
+  const boardCopy = [...board];
   boardCopy[position] = aiColor;
   return range(0, 9).filter(i => isNull(boardCopy[i])).some(i => {
     const boardCopy2 = cloneDeep(boardCopy);
@@ -39,21 +39,21 @@ const getOptimalAiPlacingPosition = (board) => {
   if (allowedPlaces.length === 9) return(sample([0, 2, 4, 6, 8]));
 
   const instantWinningPlace = allowedPlaces.find((i) => {
-    const localBoard = cloneDeep(board);
+    const localBoard = [...board];
     localBoard[i] = aiColor;
     return isGameEnd(localBoard);
   });
   if (instantWinningPlace !== undefined) return instantWinningPlace;
 
   const instantDefendingPlace = allowedPlaces.find((i) => {
-    const localBoard = cloneDeep(board);
+    const localBoard = [...board];
     localBoard[i] = pColor;
     return isGameEnd(localBoard);
   });
   if (instantDefendingPlace !== undefined) return instantDefendingPlace;
 
   const optimalPlaces = allowedPlaces.filter(i => {
-    const boardCopy = cloneDeep(board);
+    const boardCopy = [...board];
     boardCopy[i] = aiColor;
     return isWinningState(boardCopy, false);
   });
@@ -67,7 +67,7 @@ const getOptimalAiFlippingPosition = (board) => {
   const allowedPlaces = getAllowedPlaces(board, false);
 
   const optimalPlaces = allowedPlaces.filter(i => {
-    const boardCopy = cloneDeep(board);
+    const boardCopy = [...board];
     boardCopy[i] = 'white';
     return isWinningState(boardCopy, false);
   });
@@ -79,9 +79,15 @@ const getOptimalAiFlippingPosition = (board) => {
   return sample(allowedPlaces);
 };
 
+const isWinningStateCache = new Map();
+
 // given board *after* your step, are you set up to win the game for sure?
 const isWinningState = (board, amIPlayer) => {
+  const key = board.join(',') + '|' + amIPlayer;
+  if (isWinningStateCache.has(key)) return isWinningStateCache.get(key);
+
   if (isGameEnd(board)) {
+    isWinningStateCache.set(key, true);
     return true;
   }
 
@@ -89,11 +95,13 @@ const isWinningState = (board, amIPlayer) => {
   const colorForOther = getNextColor(board, !amIPlayer);
 
   const optimalPlaceForOther = allowedPlacesForOther.find(i => {
-    const boardCopy = cloneDeep(board);
+    const boardCopy = [...board];
     boardCopy[i] = colorForOther;
     return isWinningState(boardCopy, !amIPlayer);
   });
-  return optimalPlaceForOther === undefined;
+  const result = optimalPlaceForOther === undefined;
+  isWinningStateCache.set(key, result);
+  return result;
 };
 
 const getAllowedPlaces = (board, amIPlayer) => {
