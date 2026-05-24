@@ -66,7 +66,7 @@ const moves = {
     if (nextBoard.numTurns >= 5) {
       nextBoard.cards[Thief].push(...getUntakenCards(nextBoard, CARD_COUNT));
       const winner = hasWinningTriple(nextBoard.cards[Thief]) ? Thief : Sheriff;
-      events.endGame({ winnerIndex: winner });
+      events.endGame(winner);
     }
     events.endTurn();
     return { nextBoard };

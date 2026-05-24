@@ -83,7 +83,7 @@ const moves = {
     const nextBoard = { current: numberAfterStep, target: board.target, restricted: 13 - step };
     events.endTurn();
     if (numberAfterStep >= board.target) {
-      events.endGame({ winnerIndex: 1 - ctx.currentPlayer })
+      events.endGame(1 - ctx.currentPlayer)
     }
     return { nextBoard };
   }

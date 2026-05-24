@@ -53,7 +53,7 @@ const moves = {
     }
     events.endTurn();
     if (number > target) {
-      events.endGame({ winnerIndex: 1 - ctx.currentPlayer })
+      events.endGame(1 - ctx.currentPlayer)
     }
     return { nextBoard: number }
   }

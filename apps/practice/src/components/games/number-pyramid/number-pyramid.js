@@ -17,7 +17,7 @@ export const moves = {
 
     events.setTurnState(null);
     if (combinedValue >= board.target) {
-      events.endGame({ winnerIndex: ctx.currentPlayer });
+      events.endGame(ctx.currentPlayer);
       return { nextBoard };
     }
     events.endTurn();

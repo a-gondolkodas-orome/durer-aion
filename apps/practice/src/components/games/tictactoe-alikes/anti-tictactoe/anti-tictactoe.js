@@ -53,7 +53,7 @@ const moves = {
     nextBoard[id] = ctx.currentPlayer === 0 ? 'red' : 'blue';
     events.endTurn();
     if (isGameEnd(nextBoard)) {
-      events.endGame({ winnerIndex: hasFirstPlayerWon(nextBoard) ? 0 : 1 });
+      events.endGame(hasFirstPlayerWon(nextBoard) ? 0 : 1);
     }
     return { nextBoard };
   }

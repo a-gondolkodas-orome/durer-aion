@@ -56,7 +56,7 @@ const moves = {
     if (!isDuringFirstMove(nextBoard)) {
       events.endTurn();
       if (isGameEnd(nextBoard)) {
-        events.endGame({ winnerIndex: hasFirstPlayerWon(nextBoard) ? 0 : 1 });
+        events.endGame(hasFirstPlayerWon(nextBoard) ? 0 : 1);
       }
     }
 

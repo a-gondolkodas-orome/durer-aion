@@ -42,7 +42,7 @@ const moves = {
     const nextBoard = { ...cloneDeep(board), thief: vertex, turnCount: board.turnCount + 1 };
     events.endTurn();
     if (isGameEnd(nextBoard)) {
-      events.endGame({ winnerIndex: hasFirstPlayerWon(nextBoard) ? 0 : 1 });
+      events.endGame(hasFirstPlayerWon(nextBoard) ? 0 : 1);
     }
     return { nextBoard };
   },
@@ -58,7 +58,7 @@ const moves = {
     nextBoard.firstPolicemanMoved = false;
     events.endTurn();
     if (isGameEnd(nextBoard)) {
-      events.endGame({ winnerIndex: hasFirstPlayerWon(nextBoard) ? 0 : 1 });
+      events.endGame(hasFirstPlayerWon(nextBoard) ? 0 : 1);
     }
     return { nextBoard };
   }

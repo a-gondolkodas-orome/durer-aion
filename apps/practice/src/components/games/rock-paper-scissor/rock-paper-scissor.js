@@ -75,7 +75,7 @@ const moves = {
     nextBoard[1 - ctx.currentPlayer][idx] = null;
     events.endTurn();
     if (isGameEnd(nextBoard)) {
-      events.endGame({ winnerIndex: getWinnerIndex(nextBoard) });
+      events.endGame(getWinnerIndex(nextBoard));
     }
     return { nextBoard };
   }

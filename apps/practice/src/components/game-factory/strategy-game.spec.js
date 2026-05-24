@@ -127,11 +127,11 @@ const gameEndingConfig = (overrides = {}) => ({
   gameplay: {
     moves: {
       endWin: (board, { ctx, events }) => {
-        events.endGame({ winnerIndex: ctx.currentPlayer });
+        events.endGame(ctx.currentPlayer);
         return { nextBoard: board };
       },
       endLose: (board, { ctx, events }) => {
-        events.endGame({ winnerIndex: 1 - ctx.currentPlayer });
+        events.endGame(1 - ctx.currentPlayer);
         return { nextBoard: board };
       }
     }

@@ -31,7 +31,7 @@ const moves = {
     nextBoard.kmUsedToday = 0;
     if (board.day === 4) {
       const allTowers = nextBoard.towers.every(t => t);
-      events.endGame({ winnerIndex: allTowers ? 0 : 1 });
+      events.endGame(allTowers ? 0 : 1);
       return { nextBoard };
     }
     events.endTurn();

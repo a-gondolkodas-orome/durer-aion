@@ -135,7 +135,7 @@ const moves = {
     events.endTurn();
     if (isGameEnd(nextBoard)) {
       const winnerIndex = every(nextBoard, v => !isNull(v)) ? 0 : 1;
-      events.endGame({ winnerIndex })
+      events.endGame(winnerIndex)
     }
     return { nextBoard };
   }

@@ -21,7 +21,7 @@ const moves = {
     nextBoard.submarines[to] += 1;
     events.endTurn();
     if (isGameEnd(nextBoard)) {
-      events.endGame({ winnerIndex: getWinnerIndex(nextBoard)})
+      events.endGame(getWinnerIndex(nextBoard))
     }
     return { nextBoard };
   },
@@ -43,7 +43,7 @@ const moves = {
     nextBoard.sharkMovesInTurn = 0;
     events.endTurn();
     if (isGameEnd(nextBoard)) {
-      events.endGame({ winnerIndex: getWinnerIndex(nextBoard)})
+      events.endGame(getWinnerIndex(nextBoard))
     }
     return { nextBoard };
   }

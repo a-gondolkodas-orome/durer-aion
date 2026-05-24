@@ -88,7 +88,7 @@ const moves = {
     const newSumMod9 = (board.sumMod9 + digit) % 9;
     const nextBoard = { digits: newDigits, sumMod9: newSumMod9 };
     if (newDigits.length === totalDigits) {
-      events.endGame({ winnerIndex: newSumMod9 === 0 ? 1 : 0 });
+      events.endGame(newSumMod9 === 0 ? 1 : 0);
     } else {
       events.endTurn();
     }

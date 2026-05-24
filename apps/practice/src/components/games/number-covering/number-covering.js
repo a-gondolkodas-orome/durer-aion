@@ -110,7 +110,7 @@ const moves = {
 
     const remaining = getRemaining(nextBoard);
     if (remaining.length === 2) {
-      events.endGame({ winnerIndex: sum(remaining) % 2 });
+      events.endGame(sum(remaining) % 2);
     }
     return { nextBoard };
   }

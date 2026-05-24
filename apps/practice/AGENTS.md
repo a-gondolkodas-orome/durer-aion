@@ -82,7 +82,7 @@ strategyGameFactory({
   remembered during a turn if needed, i.e. to expose it from BoardClient to
   getPlayerStepDescription
 
-**`events`**: `endTurn()`, `endGame({ winnerIndex? })`, `setTurnState(stage)`.
+**`events`**: `endTurn()`, `endGame(winnerIndex?)`, `setTurnState(stage)`.
 
 ### New game checklist
 

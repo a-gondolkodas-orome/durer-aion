@@ -9,7 +9,7 @@ describe('HunyadiAndTheJanissaries helpers', () => {
       let winnerIndexMock = null;
       const events = {
         endTurn: () => {},
-        endGame: ({ winnerIndex }) => { winnerIndexMock = winnerIndex; }
+        endGame: (winnerIndex) => { winnerIndexMock = winnerIndex; }
       }
       moves.killGroup([[], ['red', 'red']], { events }, 'red')
       expect(winnerIndexMock).toBe(1);
@@ -19,7 +19,7 @@ describe('HunyadiAndTheJanissaries helpers', () => {
       let winnerIndexMock = null;
       const events = {
         endTurn: () => {},
-        endGame: ({ winnerIndex }) => { winnerIndexMock = winnerIndex; }
+        endGame: (winnerIndex) => { winnerIndexMock = winnerIndex; }
       }
       const { nextBoard } = moves.killGroup(
         [[], ['red', 'blue'], ['blue']], { events }, 'red'
@@ -32,7 +32,7 @@ describe('HunyadiAndTheJanissaries helpers', () => {
       let winnerIndexMock = 'mock';
       const events = {
         endTurn: () => {},
-        endGame: ({ winnerIndex }) => { winnerIndexMock = winnerIndex; }
+        endGame: (winnerIndex) => { winnerIndexMock = winnerIndex; }
       }
       const board = [[], ['red'], ['blue', 'red'], [], ['blue', 'blue']];
       const { nextBoard } = moves.killGroup(board, { events }, 'red');

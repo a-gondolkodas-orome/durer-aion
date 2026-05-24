@@ -94,7 +94,7 @@ const moves = {
     const nextBoard = board + number;
     events.endTurn();
     if (nextBoard >= 20) {
-      events.endGame({ winnerIndex: 1 - ctx.currentPlayer })
+      events.endGame(1 - ctx.currentPlayer)
     }
     return { nextBoard }
   }

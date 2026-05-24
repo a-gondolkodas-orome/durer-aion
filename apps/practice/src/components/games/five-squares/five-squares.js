@@ -23,7 +23,7 @@ const moves = {
     events.endTurn();
     if (sum(nextBoard) === 10) {
       const winnerIndex = isEqual(cloneDeep(nextBoard).sort(), [0, 1, 2, 3, 4]) ? 1 : 0;
-      events.endGame({ winnerIndex });
+      events.endGame(winnerIndex);
     }
     return { nextBoard };
   },

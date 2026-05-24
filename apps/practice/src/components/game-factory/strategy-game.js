@@ -115,7 +115,7 @@ export const strategyGameFactory = ({
       return playerNames[index] || t(DEFAULT_PLAYER_NAMES[index]);
     };
 
-    const endGame = ({ winnerIndex = null } = {}) => {
+    const endGame = (winnerIndex = null) => {
       const resolvedWinner = winnerIndex === null ? currentPlayer : winnerIndex;
       setPhase('gameEnd');
       setWinnerIndex(resolvedWinner);

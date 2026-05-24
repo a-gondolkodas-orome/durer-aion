@@ -50,7 +50,7 @@ export const moves = {
     const isGameEnd = flatten(nextBoard).length === 0;
     if (isGameEnd) {
       events.endTurn();
-      events.endGame({ winnerIndex: 1 });
+      events.endGame(1);
       return { nextBoard, isGameEnd };
     }
     return { nextBoard, isGameEnd, autoEndOfTurn: true };
@@ -71,7 +71,7 @@ export const moves = {
     const nextBoard = [...tail(board), []];
     events.endTurn();
     if (nextBoard[0].length > 0) {
-      events.endGame({ winnerIndex: 0 });
+      events.endGame(0);
     }
     return { nextBoard };
   }
