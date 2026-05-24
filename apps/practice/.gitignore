@@ -8,3 +8,4 @@ npm-debug.log*
 # rollup-plugin-visualizer output
 stats.html
 tmp_*
+.claude/settings.local.json
