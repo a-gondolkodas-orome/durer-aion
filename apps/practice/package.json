@@ -15,31 +15,31 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@headlessui/react": "2.2.9",
-    "@tailwindcss/postcss": "4.2.2",
+    "@headlessui/react": "2.2.10",
+    "@tailwindcss/postcss": "4.3.0",
     "lodash": "4.18.1",
-    "postcss": "8.5.8",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
-    "react-router": "7.14.0",
-    "tailwindcss": "4.2.2"
+    "postcss": "8.5.15",
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
+    "react-router": "7.15.1",
+    "tailwindcss": "4.3.0"
   },
   "devDependencies": {
-    "@babel/preset-env": "7.29.2",
+    "@babel/preset-env": "7.29.5",
     "@babel/preset-react": "7.28.5",
     "@testing-library/react": "16.3.2",
     "@types/lodash": "4.17.24",
-    "@types/react": "19.2.14",
+    "@types/react": "19.2.15",
     "@types/react-dom": "19.2.3",
-    "@typescript-eslint/parser": "8.59.3",
+    "@typescript-eslint/parser": "8.59.4",
     "@vitejs/plugin-react": "5.1.4",
     "eslint": "9.39.2",
     "eslint-plugin-react": "7.37.5",
-    "jsdom": "29.0.1",
+    "jsdom": "29.1.1",
     "process": "0.11.10",
     "typescript": "6.0.3",
     "vite": "7.3.1",
-    "vitest": "4.1.2"
+    "vitest": "4.1.7"
   },
   "browserslist": "> 0.5%, last 2 versions, not dead",
   "postcss": {
