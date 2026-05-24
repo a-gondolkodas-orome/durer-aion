@@ -1,49 +1,54 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { range, random, cloneDeep } from 'lodash';
 import { strategyGameFactory } from '../../../game-factory/strategy-game';
+import type { BoardClientProps, Events } from '../../../game-factory/types';
 import { aiBotStrategy, randomBotStrategy } from './bot-strategy';
 import { useLanguage } from '../../../language/language-context';
 
-const generateStartBoard = () => ([random(0, 9), random(0, 9), random(0, 9), random(4, 9)]);
-const generateTestStartBoard = () => ([random(0, 6), random(0, 6), random(0, 6), random(4, 6)]);
+export type Board = number[];
+type Piece = { pileId: number; pieceId: number };
+type HoveredPiece = Piece | null;
 
-const BoardClient = ({ board, ctx, moves }) => {
+const generateStartBoard = (): Board => ([random(0, 9), random(0, 9), random(0, 9), random(4, 9)]);
+const generateTestStartBoard = (): Board => ([random(0, 6), random(0, 6), random(0, 6), random(4, 6)]);
+
+const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { language } = useLanguage();
-  const [hoveredPiece, setHoveredPiece] = useState(null);
+  const [hoveredPiece, setHoveredPiece] = useState<HoveredPiece>(null);
 
-  const nonExistent = ({ pileId, pieceId }) => {
+  const nonExistent = ({ pileId, pieceId }: Piece) => {
     return pieceId >= board[pileId];
   };
 
-  const isDisabled = ({ pileId, pieceId }) => {
+  const isDisabled = ({ pileId, pieceId }: Piece) => {
     if (!ctx.isClientMoveAllowed) return true;
     return pieceId>pileId-1 || (pieceId>board[pileId]-1);
   };
 
-  const hoverPiece = (piece) => {
+  const hoverPiece = (piece: HoveredPiece) => {
     if (piece === null) {
       setHoveredPiece(null);
       return;
     }
     if (isDisabled(piece)) return;
     setHoveredPiece(piece);
-  }
+  };
 
-  const clickPiece = ({ pileId, pieceId }) => {
+  const clickPiece = ({ pileId, pieceId }: Piece) => {
     if (isDisabled({ pileId, pieceId })) return;
 
     moves.spreadPieces(board, { pileId, pieceCount: pieceId + 1 });
     setHoveredPiece(null);
   };
 
-  const toBeRemoved = ({ pileId, pieceId }) => {
+  const toBeRemoved = ({ pileId, pieceId }: Piece) => {
     if (hoveredPiece === null) return false;
     if (pileId !== hoveredPiece.pileId) return false;
     if (pieceId > hoveredPiece.pieceId) return false;
     return true;
   };
 
-  const toAppear = ({ pileId, pieceId }) => {
+  const toAppear = ({ pileId, pieceId }: Piece) => {
     if (hoveredPiece === null) return false;
     return (
       (pileId<hoveredPiece.pileId) &&
@@ -69,12 +74,12 @@ const BoardClient = ({ board, ctx, moves }) => {
     return `${pileId+1}. ${pileName}: ${pieceCountInPile} `;
   };
 
-  const pieceVisibility = ({ pileId, pieceId }) => {
+  const pieceVisibility = ({ pileId, pieceId }: Piece) => {
     if (nonExistent({ pileId, pieceId }) && !toAppear({ pileId, pieceId })) return 'invisible inline-block';
     return 'inline-block';
   };
 
-  const pieceColor = ({ pileId, pieceId }) => {
+  const pieceColor = ({ pileId, pieceId }: Piece) => {
     if (toBeRemoved({ pileId, pieceId })) return 'bg-slate-600 opacity-75';
     if (toAppear({ pileId, pieceId })) return 'bg-blue-600 opacity-75';
     if (isDisabled({ pileId, pieceId })) return 'bg-blue-900 cursor-not-allowed';
@@ -134,7 +139,7 @@ const BoardClient = ({ board, ctx, moves }) => {
 };
 
 const moves = {
-  spreadPieces: (board, { events }, { pileId, pieceCount }) => {
+  spreadPieces: (board: Board, { events }: { events: Events }, { pileId, pieceCount }) => {
     if (pieceCount > pileId) console.error('invalid_move');
     const nextBoard = cloneDeep(board);
     nextBoard[pileId] = board[pileId] - pieceCount;
@@ -148,7 +153,7 @@ const moves = {
     }
     return { nextBoard };
   }
-}
+};
 
 const rule = {
   hu: <>

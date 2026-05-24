@@ -1,17 +1,22 @@
-import React, { useState } from 'react';
-import { range, isEqual, random, _, cloneDeep } from 'lodash';
+import { useState } from 'react';
+import { range, isEqual, random, cloneDeep } from 'lodash';
 import { strategyGameFactory } from '../../../game-factory/strategy-game';
+import type { BoardClientProps, Events } from '../../../game-factory/types';
 import { aiBotStrategy, randomBotStrategy } from './bot-strategy';
 
-const BoardClient = ({ board, ctx, moves }) => {
-  const [hoveredPiece, setHoveredPiece] = useState(null);
+export type Board = number[];
+type Piece = { pileId: number; pieceId: number };
+type HoveredPiece = Piece | null;
 
-  const isDisabled = ({ pileId, pieceId }) => {
+const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
+  const [hoveredPiece, setHoveredPiece] = useState<HoveredPiece>(null);
+
+  const isDisabled = ({ pileId, pieceId }: Piece) => {
     if (!ctx.isClientMoveAllowed) return true;
     return pieceId === board[pileId] - 1;
   };
 
-  const clickPiece = ({ pileId, pieceId }) => {
+  const clickPiece = ({ pileId, pieceId }: Piece) => {
     if (isDisabled({ pileId, pieceId })) return;
 
     const { nextBoard } = moves.removePile(board, 1 - pileId);
@@ -22,7 +27,7 @@ const BoardClient = ({ board, ctx, moves }) => {
     }, 750);
   };
 
-  const toBeLeft = ({ pileId, pieceId }) => {
+  const toBeLeft = ({ pileId, pieceId }: Piece) => {
     if (!ctx.isClientMoveAllowed) return false;
     if (hoveredPiece === null) return false;
     if (pileId !== hoveredPiece.pileId) return false;
@@ -31,7 +36,7 @@ const BoardClient = ({ board, ctx, moves }) => {
     return true;
   };
 
-  const toBeRemoved = ({ pileId }) => {
+  const toBeRemoved = (pileId) => {
     if (!ctx.isClientMoveAllowed) return false;
     if (hoveredPiece === null) return false;
     return hoveredPiece.pileId !== pileId;
@@ -68,7 +73,7 @@ const BoardClient = ({ board, ctx, moves }) => {
               disabled={isDisabled({ pileId, pieceId })}
               className={`
                 inline-block bg-blue-600 w-[20%] aspect-square rounded-full mx-0.5 mt-0.5
-                ${toBeRemoved({ pileId }) ? 'opacity-50 bg-slate-600' : ''}
+                ${toBeRemoved(pileId) ? 'opacity-50 bg-slate-600' : ''}
                 ${toBeLeft({ pileId, pieceId }) ? 'bg-blue-900' : ''}
               `}
               onClick={() => clickPiece({ pileId, pieceId })}
@@ -90,12 +95,12 @@ const getPlayerStepDescription = () => ({
 });
 
 const moves = {
-  removePile: (board, _, pileId) => {
+  removePile: (board: Board, _, pileId) => {
     const nextBoard = cloneDeep(board);
     nextBoard[pileId] = 0;
     return { nextBoard };
   },
-  splitPile: (board, { events }, { pileId, pieceCount }) => {
+  splitPile: (board: Board, { events }: { events: Events }, { pileId, pieceCount }) => {
     const nextBoard = [pieceCount, board[pileId] - pieceCount];
     events.endTurn();
     if (isEqual(nextBoard, [1, 1])) {
@@ -103,7 +108,7 @@ const moves = {
     }
     return { nextBoard };
   }
-}
+};
 
 const rule = {
   hu: <>

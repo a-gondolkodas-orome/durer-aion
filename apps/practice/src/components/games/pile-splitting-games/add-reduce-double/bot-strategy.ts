@@ -1,9 +1,9 @@
-'use strict';
-
 import { random, sample, range } from 'lodash';
+import type { StrategyArgs } from '../../../game-factory/types';
+import type { Board } from './add-reduce-double';
 
-export const randomBotStrategy = ({ board, moves }) => {
-  const validMoves = [];
+export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+  const validMoves: { pileId: number; pieceCount: number }[] = [];
   for (const pileId of [0, 1]) {
     for (const pieceCount of range(2, board[pileId] + 1, 2)) {
       validMoves.push({ pileId, pieceCount });
@@ -12,12 +12,12 @@ export const randomBotStrategy = ({ board, moves }) => {
   moves.moveHalvedPieces(board, sample(validMoves));
 };
 
-export const aiBotStrategy = ({ board, moves }) => {
+export const aiBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   let pileId, pieceCount;
   if (board[0]-board[1] === -1 || board[0]-board[1] === 0 || board[0]-board[1] === 1) {
     const ran = random(0,1);
     pileId=(board[ran]>1) ? ran : (1 - ran);
-    pieceCount = generateRandomEvenBetween(2, board[pileId]);
+    pieceCount = 2 * random(1, board[pileId] / 2);
 
   } else {
     pileId = (board[0]>board[1]) ? 0 : 1;
@@ -26,8 +26,4 @@ export const aiBotStrategy = ({ board, moves }) => {
   }
 
   moves.moveHalvedPieces(board, { pileId, pieceCount });
-};
-
-const generateRandomEvenBetween = (low, high) => {
-  return 2 * random(Math.ceil(low / 2), Math.floor(high / 2));
 };

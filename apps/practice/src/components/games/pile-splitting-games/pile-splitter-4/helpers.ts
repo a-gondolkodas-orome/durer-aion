@@ -1,19 +1,18 @@
-'use strict';
-
 import { range, random } from 'lodash';
+import type { Board } from './pile-splitter-4';
 
-export const generateStartBoard = () => {
+export const generateStartBoard = (): Board => {
   if (random(0, 1)) return generateWinningStartBoard();
   return generateLosingStartBoard();
 };
 
-export const generateTestStartBoard = () => {
+export const generateTestStartBoard = (): Board => {
   if (random(0, 1)) return generateWinningStartBoard(5, 3, 6);
   return generateLosingStartBoard(5, 3, 6);
 };
 
 
-const generateWinningStartBoard = (remainingTrials = 50, pileMin = 5, pileMax = 12) => {
+const generateWinningStartBoard = (remainingTrials = 50, pileMin = 5, pileMax = 12): Board => {
   const board = [
     random(pileMin, pileMax),
     random(pileMin, pileMax),
@@ -35,7 +34,7 @@ const generateWinningStartBoard = (remainingTrials = 50, pileMin = 5, pileMax = 
   return modifiedBoard;
 };
 
-const generateLosingStartBoard = (remainingTrials = 50, pileMin = 5, pileMax = 12) => {
+const generateLosingStartBoard = (remainingTrials = 50, pileMin = 5, pileMax = 12): Board => {
   const board = [
     random(pileMin, pileMax),
     random(pileMin, pileMax),
@@ -55,9 +54,9 @@ const generateLosingStartBoard = (remainingTrials = 50, pileMin = 5, pileMax = 1
   const modifiedBoard = board.map(x => x * 2);
   modifiedBoard[random(0, 3)] -= 1;
   return modifiedBoard;
-}
+};
 
-const isWinningState = board => {
+const isWinningState = (board: Board): boolean => {
   const oddPileIndices = range(0, 4).filter(i => board[i] % 2 === 1);
   const oddPileCount = oddPileIndices.length;
 
@@ -68,8 +67,7 @@ const isWinningState = board => {
     const modifiedBoard = [...board];
     modifiedBoard[oddPileIndices[0]] += 1;
     return isWinningState(modifiedBoard);
-  }
-  if (oddPileCount === 0) {
+  } else { // oddPileCount === 0
     return isWinningState(board.map(x => x / 2));
   }
-}
+};

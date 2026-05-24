@@ -1,26 +1,31 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { range, isEqual, random, cloneDeep } from 'lodash';
 import { strategyGameFactory } from '../../../game-factory/strategy-game';
+import type { BoardClientProps, Events } from '../../../game-factory/types';
 import { aiBotStrategy, randomBotStrategy } from './bot-strategy';
 
-const generateStartBoard = () => {
+export type Board = number[];
+type Piece = { pileId: number; pieceId: number };
+type HoveredPiece = Piece | null;
+
+const generateStartBoard = (): Board => {
   const x = random(2, 8) * 2 + 1;
   const y = random(3, Math.min(20, 33 - x));
   return [x, y, 37 - x - y];
 };
 
-const BoardClient = ({ board, ctx, moves }) => {
-  const [removedPileId, setRemovedPileId] = useState(null);
-  const [hoveredPiece, setHoveredPiece] = useState(null);
-  const [hoveredPileId, setHoveredPileId] = useState(null);
+const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
+  const [removedPileId, setRemovedPileId] = useState<number | null>(null);
+  const [hoveredPiece, setHoveredPiece] = useState<HoveredPiece>(null);
+  const [hoveredPileId, setHoveredPileId] = useState<number | null>(null);
 
-  const isDisabled = ({ pileId, pieceId }) => {
+  const isDisabled = ({ pileId, pieceId }: Piece) => {
     if (!ctx.isClientMoveAllowed) return true;
     if (removedPileId === null) return false;
     return pileId !== removedPileId && pieceId === board[pileId] - 1;
   };
 
-  const clickPiece = ({ pileId, pieceId }) => {
+  const clickPiece = ({ pileId, pieceId }: Piece) => {
     if (!ctx.isClientMoveAllowed) return;
 
     if (removedPileId === pileId) {
@@ -33,17 +38,17 @@ const BoardClient = ({ board, ctx, moves }) => {
     }
     if (pieceId === board[pileId] - 1) return;
 
-    const { nextBoard } = moves.removePile(board, removedPileId)
+    const { nextBoard } = moves.removePile(board, removedPileId);
 
     setTimeout(() => {
-      moves.splitPile(nextBoard, { pileId, pieceCount: pieceId + 1 })
+      moves.splitPile(nextBoard, { pileId, pieceCount: pieceId + 1 });
 
       setRemovedPileId(null);
       setHoveredPiece(null);
     }, 750);
   };
 
-  const toBeLeft = ({ pileId, pieceId }) => {
+  const toBeLeft = ({ pileId, pieceId }: Piece) => {
     if (hoveredPiece === null) return false;
     if (removedPileId === null) return false;
     if (removedPileId === pileId) return false;
@@ -53,7 +58,7 @@ const BoardClient = ({ board, ctx, moves }) => {
     return true;
   };
 
-  const isHoverPreviewedForRemoval = ({ pileId }) => {
+  const isHoverPreviewedForRemoval = ({ pileId }: { pileId: number }) => {
     if (!ctx.isClientMoveAllowed) return false;
     if (removedPileId !== null) return false;
     return hoveredPileId === pileId;
@@ -65,7 +70,7 @@ const BoardClient = ({ board, ctx, moves }) => {
     if (removedPileId === null) setRemovedPileId(pileId);
   };
 
-  const pieceColor = ({ pileId, pieceId }) => {
+  const pieceColor = ({ pileId, pieceId }: Piece) => {
     if (pileId === removedPileId) return 'bg-slate-600 opacity-75';
     if (isHoverPreviewedForRemoval({ pileId })) return 'bg-slate-600 opacity-50';
     if (toBeLeft({ pileId, pieceId })) return 'bg-blue-900';
@@ -130,14 +135,14 @@ const BoardClient = ({ board, ctx, moves }) => {
 };
 
 const moves = {
-  removePile: (board, _, pileId) => {
+  removePile: (board: Board, _, pileId: number) => {
     const nextBoard = cloneDeep(board);
     nextBoard[pileId] = 0;
     return { nextBoard };
   },
-  splitPile: (board, { events }, { pileId, pieceCount }) => {
+  splitPile: (board: Board, { events }: { events: Events }, { pileId, pieceCount }) => {
     const nextBoard = cloneDeep(board);
-    const removedPileId = [0, 1, 2].find(i => nextBoard[i] === 0)
+    const removedPileId = [0, 1, 2].find(i => nextBoard[i] === 0)!;
     if (removedPileId === undefined) console.error('invalid_move');
     if (removedPileId < pileId) {
       nextBoard[removedPileId] = pieceCount;

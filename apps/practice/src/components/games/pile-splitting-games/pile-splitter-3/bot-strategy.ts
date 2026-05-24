@@ -1,34 +1,39 @@
-'use strict';
-
 import { random, sample } from 'lodash';
+import type { StrategyArgs, GameMoves } from '../../../game-factory/types';
+import type { Board } from './pile-splitter-3';
 
-export const aiBotStrategy = ({ board, moves }) => {
+type BotStep = { removedPileId: number; pileId: number; pieceCount: number };
+
+export const aiBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   const botStep = getAiStep(board);
   executeBotStrategy(botStep, { board, moves });
-}
+};
 
-export const randomBotStrategy = ({ board, moves }) => {
+export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   const botStep = getRandomStep(board);
   executeBotStrategy(botStep, { board, moves });
-}
+};
 
-const executeBotStrategy = ({ removedPileId, pileId, pieceCount }, { board, moves }) => {
+const executeBotStrategy = (
+  { removedPileId, pileId, pieceCount }: BotStep,
+  { board, moves }: { board: Board; moves: GameMoves<Board> }
+) => {
   const { nextBoard } = moves.removePile(board, removedPileId);
   setTimeout(() => {
     moves.splitPile(nextBoard, { pileId, pieceCount });
   }, 750);
 };
 
-const getRandomStep = (board) => {
-  const pileId = sample([0, 1, 2].filter(i => board[i] >= 2));
-  const removedPileId = sample([0, 1, 2].filter(i => i !== pileId));
+const getRandomStep = (board: Board): BotStep => {
+  const pileId = sample([0, 1, 2].filter(i => board[i] >= 2))!;
+  const removedPileId = sample([0, 1, 2].filter(i => i !== pileId))!;
   const pieceCount = random(1, board[pileId] - 1);
   return { removedPileId, pileId, pieceCount };
 };
 
-export const getAiStep = (board) => {
+export const getAiStep = (board: Board): BotStep => {
   const start = random(0, 2);
-  let removedPileId, splitPileId;
+  let removedPileId: number, splitPileId: number;
 
   if (board[0] % 2 === 1 || board[1] % 2 === 1 || board[2] % 2 === 1) {
     if (board[start] % 2 === 0) {
@@ -61,23 +66,23 @@ export const getAiStep = (board) => {
       removedPileId,
       pileId: splitPileId,
       pieceCount: getOptimalDivision(board, splitPileId)
-    }
+    };
   } else if (board[0] === 2 && board[1] === 2 && board[2] === 2) {
     return {
       removedPileId: (start + 1) % 3,
       pileId: start,
       pieceCount: getOptimalDivision(board, start)
-    }
+    };
   } else {
-    //this is the case where all piles have even number of pieces
-    //should not occur in an optimal game with 37 pieces
-    //with this the enemy also has a strategy when the game starts with 36 pieces
+    // this is the case where all piles have even number of pieces
+    // should not occur in an optimal game with 37 pieces
+    // with this the enemy also has a strategy when the game starts with 36 pieces
     const aiStep = getAiStep(board.map((x) => x / 2));
     return { ...aiStep, pieceCount: aiStep.pieceCount * 2 };
   }
 };
 
-const getOptimalDivision = function (board, pileId) {
+const getOptimalDivision = (board: Board, pileId: number): number => {
   const sum = board[pileId];
 
   if (sum === 2) return 1;

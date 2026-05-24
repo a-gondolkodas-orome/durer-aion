@@ -1,44 +1,49 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { range, isEqual, random, cloneDeep } from 'lodash';
 import { strategyGameFactory } from '../../../game-factory/strategy-game';
+import type { BoardClientProps, Events } from '../../../game-factory/types';
 import { aiBotStrategy, randomBotStrategy } from './bot-strategy';
 
-const BoardClient = ({ board, ctx, moves }) => {
-  const [hoveredPiece, setHoveredPiece] = useState(null);
+export type Board = number[];
+type Piece = { pileId: number; pieceId: number };
+type HoveredPiece = Piece | null;
 
-  const nonExistent = ({ pileId, pieceId }) => {
+const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
+  const [hoveredPiece, setHoveredPiece] = useState<HoveredPiece>(null);
+
+  const nonExistent = ({ pileId, pieceId }: Piece) => {
     return pieceId >= board[pileId];
   };
 
-  const isDisabled = ({ pileId, pieceId }) => {
+  const isDisabled = ({ pileId, pieceId }: Piece) => {
     if (!ctx.isClientMoveAllowed) return true;
     return pieceId % 2 === 0 || (pieceId > board[pileId] - 1);
   };
 
-  const hoverPiece = (piece) => {
+  const hoverPiece = (piece: HoveredPiece) => {
     if (piece === null) {
       setHoveredPiece(null);
       return;
     }
     if (isDisabled(piece)) return;
     setHoveredPiece(piece);
-  }
+  };
 
-  const clickPiece = ({ pileId, pieceId }) => {
+  const clickPiece = ({ pileId, pieceId }: Piece) => {
     if (isDisabled({ pileId, pieceId })) return;
 
     moves.moveHalvedPieces(board, { pileId, pieceCount: pieceId + 1 });
     setHoveredPiece(null);
   };
 
-  const toBeRemoved = ({ pileId, pieceId }) => {
+  const toBeRemoved = ({ pileId, pieceId }: Piece) => {
     if (hoveredPiece === null) return false;
     if (pileId !== hoveredPiece.pileId) return false;
     if (pieceId > hoveredPiece.pieceId) return false;
     return true;
   };
 
-  const toAppear = ({ pileId, pieceId }) => {
+  const toAppear = ({ pileId, pieceId }: Piece) => {
     if (hoveredPiece === null) return false;
     if(pileId === hoveredPiece.pileId) return false;
     if(pieceId > board[pileId] + (hoveredPiece.pieceId + 1) / 2 - 1) return false;
@@ -103,7 +108,7 @@ const BoardClient = ({ board, ctx, moves }) => {
 };
 
 const moves = {
-  moveHalvedPieces: (board, { events }, { pileId, pieceCount }) => {
+  moveHalvedPieces: (board: Board, { events }: { events: Events }, { pileId, pieceCount }) => {
     if (pieceCount % 2 !== 0) console.error('invalid_move');
     const nextBoard = cloneDeep(board);
     nextBoard[pileId] -= pieceCount;
@@ -115,7 +120,7 @@ const moves = {
     }
     return { nextBoard };
   }
-}
+};
 
 const rule = {
   hu: <>
