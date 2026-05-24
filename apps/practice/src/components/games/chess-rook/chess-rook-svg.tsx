@@ -1,5 +1,3 @@
-import React from 'react';
-
 export const ChessRookSvg = () => {
   return (
     <svg style={{ display: 'none' }}>

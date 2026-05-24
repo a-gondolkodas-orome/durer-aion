@@ -1,9 +1,11 @@
-'use strict';
-
 import { range } from 'lodash';
 
-export const generateStartBoard = () => {
-  const board = range(0, 8).map(() => range(0, 8).map(() => null));
+export type CellValue = null | 'rook' | 'visited';
+export type Field = { row: number; col: number };
+export type Board = { chessBoard: CellValue[][]; rookPosition: Field };
+
+export const generateStartBoard = (): Board => {
+  const board = range(0, 8).map(() => range(0, 8).map((): CellValue => null));
   board[0][0] = 'rook';
   return {
     chessBoard: board,
@@ -11,10 +13,10 @@ export const generateStartBoard = () => {
   };
 };
 
-export const getAllowedMoves = (board) => {
+export const getAllowedMoves = (board: Board): Field[] => {
   const { row, col } = board.rookPosition;
 
-  const allowedMoves = [];
+  const allowedMoves: Field[] = [];
   let i = 1;
   while (row - i >= 0 && board.chessBoard[(row - i)][col] === null) {
     allowedMoves.push({ row: row - i, col });
@@ -38,7 +40,7 @@ export const getAllowedMoves = (board) => {
   return allowedMoves;
 };
 
-export const markVisitedFields = (board, rookPosition, nextRookPosition) => {
+export const markVisitedFields = (board: Board, rookPosition: Field, nextRookPosition: Field): void => {
   if (rookPosition.row === nextRookPosition.row) {
     range(rookPosition.col, nextRookPosition.col).forEach(col => {
       board.chessBoard[rookPosition.row][col] = 'visited';

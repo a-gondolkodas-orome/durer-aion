@@ -1,34 +1,37 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { range, isEqual, some, cloneDeep } from 'lodash';
 import { strategyGameFactory } from '../../game-factory/strategy-game';
+import type { BoardClientProps, Events } from '../../game-factory/types';
 import { ChessBishopSvg } from './chess-bishop-svg';
 import { aiBotStrategy, randomBotStrategy } from './bot-strategy';
-import { generateStartBoard, getAllowedMoves, BISHOP, FORBIDDEN, markForbiddenFields } from './helpers';
+import {
+  generateStartBoard, getAllowedMoves, BISHOP, FORBIDDEN, markForbiddenFields, type Board, type Field
+} from './helpers';
 
-const BoardClient = ({ board, ctx, moves }) => {
-  const [hoveredField, setHoveredField] = useState(null);
-  const clickField = (field) => {
+const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
+  const [hoveredField, setHoveredField] = useState<Field | null>(null);
+  const clickField = (field: Field) => {
     if (!isMoveAllowed(field)) return;
 
     moves.placeBishop(board, field);
   };
 
-  const isPotentialNextStep = (field) => {
+  const isPotentialNextStep = (field: Field) => {
     if (!isMoveAllowed(field)) return false;
     if (!hoveredField) return false;
     return isEqual(hoveredField, field);
   };
-  const isMoveAllowed = (targetField) => {
+  const isMoveAllowed = (targetField: Field) => {
     if (!ctx.isClientMoveAllowed) return false;
     return some(getAllowedMoves(board), field => isEqual(field, targetField));
   };
-  const isForbidden = ({ row, col }) => {
+  const isForbidden = ({ row, col }: Field) => {
     return board[row][col] === FORBIDDEN;
   };
-  const isBishop = ({ row, col }) => {
+  const isBishop = ({ row, col }: Field) => {
     return board[row][col] === BISHOP;
   };
-  const wouldBeForbidden = ({ row, col }) => {
+  const wouldBeForbidden = ({ row, col }: Field) => {
     if (!ctx.isClientMoveAllowed) return false;
     if (!hoveredField) return false;
     if (!isMoveAllowed(hoveredField)) return false;
@@ -87,7 +90,7 @@ const BoardClient = ({ board, ctx, moves }) => {
 };
 
 const moves = {
-  placeBishop: (board, { events }, { row, col }) => {
+  placeBishop: (board: Board, { events }: { events: Events }, { row, col }: Field) => {
     const nextBoard = cloneDeep(board);
     markForbiddenFields(nextBoard, { row, col });
     nextBoard[row][col] = BISHOP;
@@ -97,7 +100,7 @@ const moves = {
     }
     return { nextBoard };
   }
-}
+};
 
 const rule = {
   hu: <>

@@ -1,5 +1,5 @@
-import React from 'react';
 import { strategyGameFactory } from '../../game-factory/strategy-game';
+import type { BoardClientProps } from '../../game-factory/types';
 import { some, range, isEqual } from 'lodash';
 import { DuckSvg } from './rubber-duck-svg';
 import { aiBotStrategy, randomBotStrategy } from './bot-strategy';
@@ -7,29 +7,32 @@ import {
   getAllowedMoves,
   DUCK,
   FORBIDDEN,
-  moves
+  moves,
+  type Board,
+  type Field
 } from './helpers';
-const chessDucksGameFactory = ({ ROWS, COLS }) => {
-  const generateStartBoard = () => {
+
+const chessDucksGameFactory = ({ ROWS, COLS }: { ROWS: number; COLS: number }) => {
+  const generateStartBoard = (): Board => {
     return range(0, ROWS).map(() => range(0, COLS).map(() => null));
   };
 
-  const BoardClient = ({ board, ctx, moves }) => {
-    const clickField = (field) => {
+  const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
+    const clickField = (field: Field) => {
       if (!isMoveAllowed(field)) return;
 
       moves.placeDuck(board, field);
     };
 
-    const isMoveAllowed = (targetField) => {
+    const isMoveAllowed = (targetField: Field) => {
       if (!ctx.isClientMoveAllowed) return false;
       return some(getAllowedMoves(board), field => isEqual(field, targetField));
     };
 
-    const isForbidden = ({ row, col }) => {
+    const isForbidden = ({ row, col }: Field) => {
       return board[row][col] === FORBIDDEN;
     };
-    const isDuck = ({ row, col }) => {
+    const isDuck = ({ row, col }: Field) => {
       return board[row][col] === DUCK;
     };
 
@@ -74,7 +77,7 @@ const chessDucksGameFactory = ({ ROWS, COLS }) => {
   const toldalek = {
     '6': 'o',
     '7': 'e'
-  }
+  };
 
   const rule = {
     hu: <>

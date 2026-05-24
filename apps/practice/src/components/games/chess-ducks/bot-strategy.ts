@@ -1,24 +1,22 @@
-import { getBoardIndices, moves, getAllowedMoves } from "./helpers";
+import { getBoardIndices, moves, getAllowedMoves, type Board, type Field } from "./helpers";
 import { dummyEvents } from "../../game-factory/strategy-game";
+import type { StrategyArgs } from "../../game-factory/types";
 import { shuffle, sample } from "lodash";
 
 /* This strategy file is relevant for the 4x7 case */
 const [ROWS, COLS] = [4, 7];
 const [DUCK] = [1];
 
-const flipH = ([r, c]) => [ROWS - 1 - r, c];
-const flipV = ([r, c]) => [r, COLS - 1 - c];
-
-export const randomBotStrategy = ({ board, moves }) => {
+export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   moves.placeDuck(board, sample(getAllowedMoves(board)));
 };
 
-export const aiBotStrategy = ({ board, moves }) => {
+export const aiBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   const aiMove = getOptimalAiMove(board);
   moves.placeDuck(board, aiMove);
 };
 
-const getOptimalAiMove = (board) => {
+const getOptimalAiMove = (board: Board): Field => {
   const allowedMoves = getAllowedMoves(board);
   const boardIndices = getBoardIndices(board.length, board[0].length);
 
@@ -29,7 +27,7 @@ const getOptimalAiMove = (board) => {
 
   // live search is too slow and there is no optimal first step anyways
   if (duckCount === 0) {
-    return sample(allowedMoves);
+    return sample(allowedMoves)!;
   }
 
   // live search is too slow
@@ -58,15 +56,22 @@ const getOptimalAiMove = (board) => {
     }
   }
 
-  return sample(allowedMoves);
+  return sample(allowedMoves)!;
 };
 
-const getOptimalThirdStep = (board) => {
+type Coords = [number, number];
+
+const flipH = ([r, c]: Coords): Coords => [ROWS - 1 - r, c];
+const flipV = ([r, c]: Coords): Coords => [r, COLS - 1 - c];
+
+type TransformationType = 'original' | 'flipV' | 'rotate180' | 'flipH';
+
+const getOptimalThirdStep = (board: Board): Field | undefined => {
   const boardIndices = getBoardIndices(board.length, board[0].length);
   const ducks = boardIndices.filter(({ row, col }) => board[row][col] === DUCK);
   const [r1, c1, r2, c2] = [ducks[0]['row'], ducks[0]['col'], ducks[1]['row'], ducks[1]['col']];
 
-  const equivalentPositions = [
+  const equivalentPositions: { ducks: [Coords, Coords]; type: TransformationType }[] = [
     { 'ducks': [[r1, c1], [r2, c2]], type: 'original' }
   ];
 
@@ -90,22 +95,21 @@ const getOptimalThirdStep = (board) => {
 
   const pos = equivalentPositions.find(({ ducks: [[r1, c1], [r2, c2]] }) =>
     aiOptimalThirdSteps[`${r1};${c1} - ${r2};${c2}`] !== undefined
-  )
+  );
 
   if (pos !== undefined) {
     const ducks = pos['ducks'];
-    const optimalStep =  aiOptimalThirdSteps[`${ducks[0][0]};${ducks[0][1]} - ${ducks[1][0]};${ducks[1][1]}`]
+    const optimalStep = aiOptimalThirdSteps[`${ducks[0][0]};${ducks[0][1]} - ${ducks[1][0]};${ducks[1][1]}`];
     const transformedStep = invertTransformation(
       [optimalStep['row'], optimalStep['col']],
       pos['type']
     );
     return { row: transformedStep[0], col: transformedStep[1] };
-  } {
-    return undefined;
   }
+  return undefined;
 };
 
-const invertTransformation = (stepCoords, type) => {
+const invertTransformation = (stepCoords: Coords, type: TransformationType): Coords => {
   switch (type) {
     case 'original': return stepCoords;
     case 'flipV': return flipV(stepCoords);
@@ -115,7 +119,7 @@ const invertTransformation = (stepCoords, type) => {
 };
 
 // given board *after* your step, are you set up to win the game for sure?
-const isWinningState = (board, amIPlayer) => {
+const isWinningState = (board: Board, amIPlayer: boolean): boolean => {
   if (getAllowedMoves(board).length === 0) {
     return true;
   }
@@ -130,7 +134,7 @@ const isWinningState = (board, amIPlayer) => {
 };
 
 // see scripts/pre-generate-ai-moves/chess-ducks-optimal-2nd-moves.cjs
-const aiOptimalSecondSteps = {
+const aiOptimalSecondSteps: Record<string, Field> = {
   '0;0': { row: 0, col: 6 },
   '0;1': { row: 3, col: 1 },
   '0;2': { row: 3, col: 1 },
@@ -162,7 +166,7 @@ const aiOptimalSecondSteps = {
 };
 
 // see scripts/pre-generate-ai-moves/chess-ducks-optimal-3rd-moves.cjs
-const aiOptimalThirdSteps = {
+const aiOptimalThirdSteps: Record<string, Field> = {
   '0;0 - 0;2': { row: 1, col: 5 },
   '0;0 - 0;3': { row: 3, col: 2 },
   '0;0 - 0;4': { row: 3, col: 0 },

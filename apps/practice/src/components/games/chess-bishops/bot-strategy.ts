@@ -1,22 +1,22 @@
-'use strict';
-
 import { sample, cloneDeep, random, shuffle } from 'lodash';
-import { markForbiddenFields, getAllowedMoves, boardIndices, BISHOP } from './helpers';
+import type { StrategyArgs } from '../../game-factory/types';
+import { markForbiddenFields, getAllowedMoves, boardIndices, BISHOP, type Board, type Field } from './helpers';
 
-const HORIZONTAL = "h";
-const VERTICAL = "v";
-let axis = null;
+const HORIZONTAL = "h" as const;
+const VERTICAL = "v" as const;
+type Axis = typeof HORIZONTAL | typeof VERTICAL;
+let axis: Axis | null = null;
 
-export const randomBotStrategy = ({ board, moves }) => {
+export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   moves.placeBishop(board, sample(getAllowedMoves(board)));
 };
 
-export const aiBotStrategy = ({ board, moves }) => {
+export const aiBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   const aiMove = getOptimalAiMove(board);
   moves.placeBishop(board, aiMove);
 };
 
-export const getOptimalAiMove = (board) => {
+export const getOptimalAiMove = (board: Board): Field => {
   const allowedHMirrorMoves = boardIndices.filter(
     ({ row, col }) => board[row][col] === null && board[row][7 - col] === BISHOP
   );
@@ -59,16 +59,15 @@ export const getOptimalAiMove = (board) => {
       return isWinningState(boardCopy, false);
     });
 
-
     if (optimalPlace !== undefined) {
       return optimalPlace;
     }
   }
-  return sample(allowedMoves);
+  return sample(allowedMoves)!;
 };
 
 // given board *after* your step, are you set up to win the game for sure?
-const isWinningState = (board, amIPlayer) => {
+const isWinningState = (board: Board, amIPlayer: boolean): boolean => {
   if (getAllowedMoves(board).length === 0) {
     return true;
   }
@@ -84,14 +83,26 @@ const isWinningState = (board, amIPlayer) => {
   return optimalPlaceForOther === undefined;
 };
 
-const rotate90 = ([r, c]) => [c, 8 - 1 - r];
-const flip = ([r, c]) => [8 - 1 - r, c];
+type Coords = [number, number];
 
-const getOptimalThirdStep = (board) => {
+const rotate90 = ([r, c]: Coords): Coords => [c, 8 - 1 - r];
+const flip = ([r, c]: Coords): Coords => [8 - 1 - r, c];
+
+type TransformationType =
+  | 'original'
+  | 'rotate90'
+  | 'rotate180'
+  | 'rotate270'
+  | 'rotate270-hflip'
+  | 'rotate270-hflip-rotate90'
+  | 'rotate270-hflip-rotate180'
+  | 'rotate270-hflip-rotate270';
+
+const getOptimalThirdStep = (board: Board): Field | undefined => {
   const bishops = boardIndices.filter(({ row, col }) => board[row][col] === BISHOP);
   const [r1, c1, r2, c2] = [bishops[0]['row'], bishops[0]['col'], bishops[1]['row'], bishops[1]['col']];
 
-  const equivalentPositions = [
+  const equivalentPositions: { bishops: [Coords, Coords]; type: TransformationType }[] = [
     { 'bishops': [[r1, c1], [r2, c2]], type: 'original' }
   ];
 
@@ -139,22 +150,21 @@ const getOptimalThirdStep = (board) => {
 
   const pos = equivalentPositions.find(({ bishops: [[r1, c1], [r2, c2]] }) =>
     aiOptimalThirdSteps[`${r1};${c1} - ${r2};${c2}`] !== undefined
-  )
+  );
 
   if (pos !== undefined) {
     const bishops = pos['bishops'];
-    const optimalStep =  aiOptimalThirdSteps[`${bishops[0][0]};${bishops[0][1]} - ${bishops[1][0]};${bishops[1][1]}`]
+    const optimalStep = aiOptimalThirdSteps[`${bishops[0][0]};${bishops[0][1]} - ${bishops[1][0]};${bishops[1][1]}`];
     const transformedStep = invertTransformation(
       [optimalStep['row'], optimalStep['col']],
       pos['type']
     );
     return { row: transformedStep[0], col: transformedStep[1] };
-  } {
-    return undefined;
   }
+  return undefined;
 };
 
-const invertTransformation = (stepCoords, type) => {
+const invertTransformation = (stepCoords: Coords, type: TransformationType): Coords => {
   switch (type) {
     case 'original': return stepCoords;
     case 'rotate90': return rotate90(rotate90(rotate90(stepCoords)));
@@ -167,7 +177,7 @@ const invertTransformation = (stepCoords, type) => {
   }
 };
 
-const aiOptimalThirdSteps = {
+const aiOptimalThirdSteps: Record<string, Field> = {
   "0;0 - 0;1": {"row":3,"col":6},
   "0;0 - 0;2": {"row":3,"col":2},
   "0;0 - 0;3": {"row":4,"col":1},

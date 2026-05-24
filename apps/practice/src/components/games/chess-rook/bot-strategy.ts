@@ -1,31 +1,30 @@
-'use strict';
-
 import { last, random, sample } from 'lodash';
-import { getAllowedMoves } from './helpers';
+import type { StrategyArgs } from '../../game-factory/types';
+import { getAllowedMoves, type Board, type Field } from './helpers';
 
-export const randomBotStrategy = ({ board, moves }) => {
+export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   moves.moveRook(board, sample(getAllowedMoves(board)));
 };
 
-export const aiBotStrategy = ({ board, moves }) => {
+export const aiBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   const aiMove = getOptimalAiMove(board);
   moves.moveRook(board, aiMove);
 };
 
-export const getOptimalAiMove = (board) => {
+export const getOptimalAiMove = (board: Board): Field => {
   const { row, col } = board.rookPosition;
   const allMoves = getAllowedMoves(board);
   const allowedHorizontalMoves = allMoves.filter(m => m.row === row);
   const allowedVerticalMoves = allMoves.filter(m => m.col === col);
 
   if (allowedHorizontalMoves.length < allowedVerticalMoves.length) {
-    return last(allowedVerticalMoves);
+    return last(allowedVerticalMoves)!;
   } else if (allowedHorizontalMoves.length > allowedVerticalMoves.length) {
-    return last(allowedHorizontalMoves);
+    return last(allowedHorizontalMoves)!;
   }
   if (random(0, 1) === 1) {
-    return last(allowedHorizontalMoves);
+    return last(allowedHorizontalMoves)!;
   } else {
-    return last(allowedVerticalMoves);
+    return last(allowedVerticalMoves)!;
   }
 };

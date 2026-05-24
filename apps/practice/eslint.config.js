@@ -37,12 +37,12 @@ export default [
   },
   {
     // SVG files contain inline path data that cannot be meaningfully reformatted
-    files: ['src/**/*-svg.js'],
+    files: ['src/**/*-svg.{js,ts,tsx,jsx}'],
     rules: { 'max-len': 'off' }
   },
   {
     // test files may contain nicely formatted arrays such as for tictactoe
-    files: ['src/**/*spec.js'],
+    files: ['src/**/*spec.{js,ts}'],
     rules: { 'array-element-newline': 'off' }
   }
 ];

@@ -1,29 +1,29 @@
-import React from 'react';
 import { range, some, isEqual, cloneDeep } from 'lodash';
 import { strategyGameFactory } from '../../game-factory/strategy-game';
+import type { BoardClientProps, Events } from '../../game-factory/types';
 import { aiBotStrategy, randomBotStrategy } from './bot-strategy';
-import { getAllowedMoves, generateStartBoard, markVisitedFields } from './helpers';
-import { ChessKnightSvg } from './chess-knight-svg';
+import { getAllowedMoves, generateStartBoard, markVisitedFields, type Board, type Field } from './helpers';
+import { ChessRookSvg } from './chess-rook-svg';
 
-const BoardClient = ({ board, ctx, moves }) => {
-  const clickField = (field) => {
+const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
+  const clickField = (field: Field) => {
     if (!isMoveAllowed(field)) return;
 
-    moves.moveKnight(board, field);
+    moves.moveRook(board, field);
   };
-  const isMoveAllowed = (targetField) => {
+  const isMoveAllowed = (targetField: Field) => {
     if (!ctx.isClientMoveAllowed) return false;
     return some(getAllowedMoves(board), field => isEqual(field, targetField));
   };
 
   return (
   <section className="p-2 shrink-0 grow basis-2/3">
-    <ChessKnightSvg />
+    <ChessRookSvg />
     <table className="border-collapse w-full table-fixed">
       <tbody>
-        {range(4).map(row => (
+        {range(8).map(row => (
           <tr key={row}>
-            {range(4).map(col => (
+            {range(8).map(col => (
               <td
                 key={col}
                 onClick={() => clickField({ row, col })}
@@ -34,14 +34,14 @@ const BoardClient = ({ board, ctx, moves }) => {
                     {isMoveAllowed({ row, col }) && (
                       <span>
                         <svg className="w-full aspect-square opacity-25 inline-block">
-                          <use xlinkHref="#game-chess-knight" />
+                          <use xlinkHref="#game-chess-rook" />
                         </svg>
                       </span>
                     )}
-                    {board.chessBoard[row][col] === 'knight' && (
+                    {board.chessBoard[row][col] === 'rook' && (
                       <span>
                         <svg className="w-full aspect-square inline-block">
-                          <use xlinkHref="#game-chess-knight" />
+                          <use xlinkHref="#game-chess-rook" />
                         </svg>
                       </span>
                     )}
@@ -58,12 +58,12 @@ const BoardClient = ({ board, ctx, moves }) => {
 };
 
 const moves = {
-  moveKnight: (board, { events }, { row, col }) => {
+  moveRook: (board: Board, { events }: { events: Events }, { row, col }: Field) => {
     const nextBoard = cloneDeep(board);
-    markVisitedFields(nextBoard, nextBoard.knightPosition);
+    markVisitedFields(nextBoard, nextBoard.rookPosition, { row, col });
 
-    nextBoard.chessBoard[row][col] = 'knight';
-    nextBoard.knightPosition = { row, col };
+    nextBoard.chessBoard[row][col] = 'rook';
+    nextBoard.rookPosition = { row, col };
 
     events.endTurn();
     if (getAllowedMoves(nextBoard).length === 0) {
@@ -71,27 +71,30 @@ const moves = {
     }
     return { nextBoard };
   }
-}
+};
 
 const rule = {
   hu: <>
-    Egy 4 × 4-es tábla egyik mezőjén kezdetben egy huszár áll. Két játékos felváltva
-    lép a huszárral. Nem szabad olyan mezőre lépni, amelyen korábban már járt a huszár,
-    így a kezdőmezőre sem. Az veszít, aki nem tud lépni.
+    A játékosok felváltva lépnek egy bástyával, amely a sakktábla bal felső sarkából indul. A
+    bástya vízszintesen vagy függőlegesen bármennyit (legalább egyet) léphet, de egyszerre csak az
+    egyik irányba. Azokat a mezőket amikre a bástya lép, illetve a lépés közben áthalad, megjelöljük,
+    ezekre a mezőkre már nem léphetünk később (át sem haladhatunk felettük). Az a játékos veszít, aki
+    nem tud lépni.
   </>,
   en: <>
-    A knight is placed on one square of a 4 × 4 board. Two players take turns moving the knight.
-    The knight may not move to any square it has already visited, including the starting square.
-    The player who cannot move loses.
+    Players take turns moving a rook that starts in the top-left corner of a chessboard. The rook
+    may move any number of squares (at least one) horizontally or vertically, but only in one
+    direction per move. Every square the rook lands on or passes through is marked and can no longer
+    be entered or passed through later. The player who cannot move loses.
   </>
 };
 
-export const ChessKnight = strategyGameFactory({
+export const ChessRook = strategyGameFactory({
   presentation: {
     rule,
     getPlayerStepDescription: () => ({
-      hu: 'Lépj egy szabad mezőre a huszárral.',
-      en: 'Move the knight to a free square.'
+      hu: 'Kattints egy szabad mezőre a bástyával egy sorban vagy oszlopban.',
+      en: 'Click on a free square in the same row or column as the rook.'
     })
   },
   BoardClient,
