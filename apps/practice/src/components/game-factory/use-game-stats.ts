@@ -1,25 +1,27 @@
 import { useState, useEffect, useCallback } from 'react';
 
-const EMPTY_STATS = { win: 0, loss: 0 };
+export interface Stats { win: number; loss: number }
 
-const readStats = (key) => {
+const EMPTY_STATS: Stats = { win: 0, loss: 0 };
+
+const readStats = (key: string): Stats => {
   try {
-    return JSON.parse(localStorage.getItem(key)) ?? EMPTY_STATS;
+    return JSON.parse(localStorage.getItem(key)!) ?? EMPTY_STATS;
   } catch {
     return EMPTY_STATS;
   }
 };
 
-export const useGameStats = (gameId, variantIndex) => {
+export const useGameStats = (gameId: string, variantIndex: number) => {
   const storageKey = `stats_${gameId}_${variantIndex}`;
 
-  const [stats, setStats] = useState(() => readStats(storageKey));
+  const [stats, setStats] = useState<Stats>(() => readStats(storageKey));
 
   useEffect(() => {
     setStats(readStats(storageKey));
   }, [storageKey]);
 
-  const recordResult = useCallback((result) => {
+  const recordResult = useCallback((result: keyof Stats) => {
     setStats(prev => {
       const next = { ...prev, [result]: prev[result] + 1 };
       localStorage.setItem(storageKey, JSON.stringify(next));

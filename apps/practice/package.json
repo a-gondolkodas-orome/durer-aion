@@ -6,10 +6,11 @@
   "type": "module",
   "scripts": {
     "test:unit": "vitest run",
-    "test": "npm run lint && npm run test:unit",
+    "test": "npm run lint && npm run typecheck && npm run test:unit",
     "test:watch": "vitest",
-    "lint": "eslint \"src/**/*.js\" --no-fix",
-    "lint:fix": "eslint \"src/**/*.js\" --fix",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint \"src/**/*.{js,ts,tsx}\" --no-fix",
+    "lint:fix": "eslint \"src/**/*.{js,ts,tsx}\" --fix",
     "dev": "vite",
     "build": "vite build"
   },
@@ -27,11 +28,16 @@
     "@babel/preset-env": "7.29.2",
     "@babel/preset-react": "7.28.5",
     "@testing-library/react": "16.3.2",
+    "@types/lodash": "4.17.24",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "@typescript-eslint/parser": "8.59.3",
     "@vitejs/plugin-react": "5.1.4",
     "eslint": "9.39.2",
     "eslint-plugin-react": "7.37.5",
     "jsdom": "29.0.1",
     "process": "0.11.10",
+    "typescript": "6.0.3",
     "vite": "7.3.1",
     "vitest": "4.1.2"
   },
@@ -42,7 +48,7 @@
     }
   },
   "prettier": {
-    "trailingComma": "none"
-    , "printWidth": 120
+    "trailingComma": "none",
+    "printWidth": 120
   }
 }

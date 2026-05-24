@@ -1,13 +1,43 @@
-import React from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogPanel, DialogTitle, Description } from '@headlessui/react';
 import { useTranslation } from '../../language/translate';
 import { ModeSelector, DifficultySelector, getCtaText } from './game-controls';
+import type { Ctx, Variant, Mode } from '../types';
 
 export const GameEndDialog = ({
-  isOpen, setIsOpen, resetGameState, ctx,
-  isHumanVsHumanGame, onSwitchMode, variants, selectedVariantIndex, onSelectVariant
+  isOpen, setIsOpen, ctx,
+  selectedVariantIndex, getVariantsForMode, onNewGame
+}: {
+  isOpen: boolean
+  setIsOpen: (open: boolean) => void
+  ctx: Ctx
+  selectedVariantIndex: number
+  getVariantsForMode: (mode: Mode) => Variant[]
+  onNewGame: (mode: Mode, variantIndex: number) => void
 }) => {
   const { t } = useTranslation();
+  const [localMode, setLocalMode] = useState<Mode>(ctx.isHumanVsHumanGame ? 'vsHuman' : 'vsComputer');
+  const [localVariantIndex, setLocalVariantIndex] = useState(selectedVariantIndex);
+
+  useEffect(() => {
+    if (isOpen) {
+      setLocalMode(ctx.isHumanVsHumanGame ? 'vsHuman' : 'vsComputer');
+      setLocalVariantIndex(selectedVariantIndex);
+    }
+  }, [isOpen, ctx.isHumanVsHumanGame, selectedVariantIndex]);
+
+  const localVariants = getVariantsForMode(localMode);
+
+  const handleModeChange = (newMode: Mode) => {
+    const newVariants = getVariantsForMode(newMode);
+    setLocalMode(newMode);
+    const stillAvailable = newVariants.find(v => v.originalIndex === localVariantIndex && !v.disabled);
+    if (!stillAvailable) {
+      const firstEnabled = newVariants.find(v => !v.disabled);
+      setLocalVariantIndex(firstEnabled?.originalIndex ?? newVariants[0]?.originalIndex ?? 0);
+    }
+  };
+
   return (
     <Dialog
       open={isOpen}
@@ -32,20 +62,20 @@ export const GameEndDialog = ({
           </Description>
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 flex flex-col gap-3">
             <ModeSelector
-              isHumanVsHumanGame={isHumanVsHumanGame}
-              onSwitchMode={onSwitchMode}
+              isHumanVsHumanGame={localMode === 'vsHuman'}
+              onSwitchMode={handleModeChange}
               disabled={false}
             />
-            {variants.length > 1 && (
+            {localVariants.length > 1 && (
               <DifficultySelector
-                variants={variants}
-                selectedIndex={selectedVariantIndex}
-                onSelect={onSelectVariant}
+                variants={localVariants}
+                selectedIndex={localVariantIndex}
+                onSelect={setLocalVariantIndex}
                 disabled={false}
               />
             )}
             <button
-              onClick={() => resetGameState()}
+              onClick={() => onNewGame(localMode, localVariantIndex)}
               className="cta-button"
             >
               {t({ hu: 'Új játék', en: 'New game' })}

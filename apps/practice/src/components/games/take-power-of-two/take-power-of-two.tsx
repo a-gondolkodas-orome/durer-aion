@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { strategyGameFactory } from '../../game-factory/strategy-game';
+import type { Events, StrategyArgs, BoardClientProps } from '../../game-factory/types';
 import { range, random, reverse, sample } from 'lodash';
 import { useTranslation } from '../../language/translate';
 
@@ -10,6 +11,8 @@ const generateStartBoard = () => {
     return random(10, 99) * 3 + random(1, 2);
   }
 };
+
+type Board = number
 
 const ExponentCell = ({ e, choosePower, setHovered }) => {
   return <td
@@ -27,9 +30,7 @@ const ExponentCell = ({ e, choosePower, setHovered }) => {
   </td>
 }
 
-const ExponentsTable = ({
-  board, choosePower, hovered, setHovered
-}) => {
+const ExponentsTable = ({ board, choosePower, hovered, setHovered }) => {
   const { t } = useTranslation();
   const availableExponents = getAvailableExponents(board);
 
@@ -58,7 +59,6 @@ const ExponentsTable = ({
             key={e}
             e={e}
             choosePower={choosePower}
-            hovered={hovered}
             setHovered={setHovered}
           ></ExponentCell>
         )}
@@ -72,10 +72,10 @@ const ExponentsTable = ({
 }
 
 
-const BoardClient = ({ board, ctx, moves }) => {
+const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const [hoveredPower, setHoveredPower] = useState(null);
 
-  const choosePower = (e) => {
+  const choosePower = (e: number) => {
     moves.subtractPowerOfTwo(board, e);
     setHoveredPower(null);
   }
@@ -103,11 +103,11 @@ const generateTestStartBoard = () => {
   }
 };
 
-const randomBotStrategy = ({ board, moves }) => {
+const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   moves.subtractPowerOfTwo(board, sample(getAvailableExponents(board)));
 };
 
-const aiBotStrategy = ({ board, moves }) => {
+const aiBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   if (board === 1) {
     moves.subtractPowerOfTwo(board, 0);
     return;
@@ -121,7 +121,7 @@ const aiBotStrategy = ({ board, moves }) => {
   }
 }
 
-const getAvailableExponents = (num) => {
+const getAvailableExponents = (num: Board) => {
   const baseLog = Math.log(num) / Math.log(2);
   const maxExponent = Math.floor(baseLog);
   return range(0, maxExponent + 1);
@@ -133,7 +133,7 @@ const getPlayerStepDescription = () => ({
 });
 
 const moves = {
-  subtractPowerOfTwo: (board, { events }, exponent) => {
+  subtractPowerOfTwo: (board: Board, { events }: { events: Events }, exponent: number) => {
     const nextBoard = board - 2 ** exponent;
     events.endTurn();
     if (nextBoard === 0) {

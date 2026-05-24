@@ -1,10 +1,9 @@
-import React from 'react';
 import { Link, useRouteError } from 'react-router';
 
 export const ErrorPage = () => {
-  const error = useRouteError();
+  const error = useRouteError() as { status?: number } | null;
 
-  if (error && error.status === 404) {
+  if (error?.status === 404) {
     return <main className="p-2">
       <p>
         Sajnáljuk, a keresett oldal nem található. Az alábbi gombra kattintva válassz egy játékot.

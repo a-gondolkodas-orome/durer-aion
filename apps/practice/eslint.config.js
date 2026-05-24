@@ -1,16 +1,10 @@
 import react from 'eslint-plugin-react';
+import tsParser from '@typescript-eslint/parser';
 
 export default [
   {
-    files: ['src/**/*.js'],
+    files: ['src/**/*.{js,ts,tsx}'],
     plugins: { react },
-    languageOptions: {
-      parserOptions: {
-        ecmaFeatures: {
-          jsx: true
-        }
-      }
-    },
     rules: {
       'comma-dangle': ['error', 'never'],
       'curly': ['error', 'multi-line'],
@@ -25,6 +19,20 @@ export default [
       'array-bracket-newline': ['error', 'consistent'],
       'array-element-newline': ['error', 'consistent'],
       'react/jsx-key': ['error']
+    }
+  },
+  {
+    files: ['src/**/*.js'],
+    languageOptions: {
+      parserOptions: {
+        ecmaFeatures: { jsx: true }
+      }
+    }
+  },
+  {
+    files: ['src/**/*.{ts,tsx}'],
+    languageOptions: {
+      parser: tsParser
     }
   },
   {

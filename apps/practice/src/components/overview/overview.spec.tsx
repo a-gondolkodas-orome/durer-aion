@@ -1,10 +1,9 @@
-import React from 'react';
 import { render } from '@testing-library/react';
 import { Overview } from './overview';
-import { gameList } from '../games/gameList';
+import { gameList, type GameList } from '../games/gameList';
 import { HashRouter } from 'react-router';
 
-vi.mock('../games/gameList', () => ({
+vi.mock('../games/gameList', (): { gameList: GameList } => ({
   gameList: {
     GameA: { name: { hu: 'A játék' }, category: ['A'], year: { k: 'I. (07/08)', v: '07/08' }, round: 'döntő' },
     GameB: { name: { hu: 'B játék' }, category: ['B'], year: { k: 'II. (08/09)', v: '08/09' }, round: 'döntő' },

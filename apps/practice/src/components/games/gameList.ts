@@ -1,26 +1,21 @@
-/*
-Each element of gameList should look like the following:
+import { I18nString } from '../language/translate';
 
-```
-// key should match path in router (app.js)
-DominoesOnChessboard : {
-  year: { k: 'III. (09/10)', v: '09/10' },
-  round: 'döntő',
-  category: ['C'],
-  // name on card in overview list
-  name: 'Sakktáblára Dominók',
-  // optional, longer title to show on game page instead of name
-  title: 'Sakktáblára Dominók felváltva',
-  // Optional credit with optional suggestedBy and developedBy fields.
-  // If present, both should be array even if only one person.
-  credit: { suggestedBy: ['???'], developedBy: ['Czeller Ildikó'] }
+export type Category = 'A' | 'B' | 'C' | 'D' | 'E' | 'E+'
+export type Round = 'döntő' | 'online'
+export type GameList = Record<string, GameEntry>;
+
+export interface GameEntry {
+  year: { k: string; v: string }
+  round: Round
+  category: Category[]
+  name: I18nString // shown on the card in the overview list.
+  title?: I18nString // longer title shown on the game page instead of name
+  credit?: { suggestedBy?: string[]; developedBy?: string[] }
 }
-```
 
-When you add a new game, keep the order by year first, category second.
-*/
-
-export const gameList = {
+// Key must match the path registered in the router (app.js).
+// Keep entries ordered by year first, category second.
+export const gameList: GameList = {
   ChessBishops: {
     year: { k: "I. (07/08)", v: "07/08" },
     round: "döntő",

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { gameList } from '../games/gameList';
+import { useState } from 'react';
+import { gameList, GameEntry, Category } from '../games/gameList';
 import { every, orderBy } from 'lodash';
 import { Link } from 'react-router';
 import { useTranslation } from '../language/translate';
@@ -7,16 +7,16 @@ import { LanguageSelector } from '../language/language-selector';
 
 export const Overview = () => {
   const { t } = useTranslation();
-  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
 
-  const shouldShow = game => {
+  const shouldShow = (game: GameEntry) => {
     const noCategoryMatch = selectedCategories.length > 0
       && every(game.category, c => !selectedCategories.includes(c));
     if (noCategoryMatch) return false;
     return true;
   };
 
-  // order by category and then by year regardless of order in gameList.js
+  // order by category and then by year regardless of order in gameList.ts
   const gamesToShow = orderBy(
     Object.keys(gameList).filter(id => shouldShow(gameList[id]))
       .sort((a, b) =>
@@ -26,10 +26,10 @@ export const Overview = () => {
       ),
     a => gameList[a].year.v,
     'desc'
-  )
+  );
 
   return <main className="p-2">
-    <OverviewHeader></OverviewHeader>
+    <OverviewHeader />
     <div className="border-t border-slate-200 mt-2 pt-3 flex flex-wrap items-center gap-1 mb-2">
       <CategoryFilter selected={selectedCategories} onChange={setSelectedCategories} />
     </div>
@@ -37,20 +37,23 @@ export const Overview = () => {
       {t({ hu: '5-8. osztályosoknak (A-B kategória)', en: 'For grades 5–8 (A–B category)' })}
     </h2>
     <div className="flex flex-wrap justify-center">
-      {gamesToShow.filter(id => gameList[id].category[0] <= "B")
+      {gamesToShow.filter(id => gameList[id].category[0] <= 'B')
         .map(id => <Game key={id} gameId={id} gameProps={gameList[id]} />)}
     </div>
     <h2 className="font-bold my-4 text-center">
       {t({ hu: '9-12. osztályosoknak (C-D-E kategória)', en: 'For grades 9–12 (C–D–E category)' })}
     </h2>
     <div className="flex flex-wrap justify-center">
-      {gamesToShow.filter(id => gameList[id].category[0] > "B")
+      {gamesToShow.filter(id => gameList[id].category[0] > 'B')
         .map(id => <Game key={id} gameId={id} gameProps={gameList[id]} />)}
     </div>
   </main>;
 };
 
-const CategoryFilter = ({ selected, onChange }) => {
+const CategoryFilter = ({ selected, onChange }: {
+  selected: Category[]
+  onChange: (selected: Category[]) => void
+}) => {
   const { t } = useTranslation();
   const categories = [
     { k: 'A', v: 'A' },
@@ -59,7 +62,7 @@ const CategoryFilter = ({ selected, onChange }) => {
     { k: 'D', v: 'D' },
     { k: 'E', v: 'E' },
     { k: 'E+', v: 'E+' }
-  ];
+  ] as const;
   return (
     <div className="flex flex-wrap items-center gap-1">
       <span className="text-sm">{t({ hu: 'Szűrés kategóriákra:', en: 'Filter by category:' })}</span>
@@ -122,7 +125,7 @@ const OverviewHeader = () => {
   </div>;
 };
 
-const categoryColorClass = {
+const categoryColorClass: Record<Category, string> = {
   'A':  'bg-emerald-200 border-emerald-400 text-emerald-950',
   'B':  'bg-teal-300 border-teal-500 text-teal-950',
   'C':  'bg-blue-300 border-blue-400 text-blue-950',
@@ -134,14 +137,14 @@ const categoryColorClass = {
 const chipBase = 'rounded-full border px-2 py-0.5 text-xs whitespace-nowrap';
 const neutralChip = `${chipBase} border-slate-300 bg-white text-slate-800`;
 
-const Game = ({ gameId, gameProps }) => {
+const Game = ({ gameId, gameProps }: { gameId: string; gameProps: GameEntry }) => {
   const { t } = useTranslation();
 
   const round = gameProps.round === 'döntő'
     ? t({ hu: 'döntő', en: 'final' })
     : gameProps.round;
 
-  const categoryColor = categoryColorClass[gameProps.category[0]] ?? neutralChip;
+  const categoryColor = categoryColorClass[gameProps.category[0]];
 
   return <Link
     to={`/game/${gameId}`}

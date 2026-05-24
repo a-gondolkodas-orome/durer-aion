@@ -1,11 +1,18 @@
-import React from "react";
 import { range, random, sample, difference, cloneDeep } from "lodash";
 import { strategyGameFactory } from "../../game-factory/strategy-game";
+import type { Ctx, Events } from '../../game-factory/types';
 import { neighbours } from "./helpers";
 import { aiBotStrategy } from "./bot-strategy";
 import { BoardClient } from "./board-client";
 
-const generateStartBoardA = () => {
+export type Board = {
+  turnCount: number
+  policemen: number[]
+  thief: number
+  firstPolicemanMoved: boolean
+}
+
+const generateStartBoardA = (): Board => {
   const policeStartPosition = random(0, 7);
   const immediatePoliceWinPositions = [policeStartPosition, ...neighbours[policeStartPosition]];
   const thiefStartPosition = sample(difference(range(0, 8), immediatePoliceWinPositions));
@@ -17,7 +24,7 @@ const generateStartBoardA = () => {
   };
 };
 
-const generateStartBoardB = () => {
+const generateStartBoardB = (): Board => {
   const policeStartPosition = [random(0, 7), random(0, 7)];
   const immediatePoliceWinPositions = [
     ...policeStartPosition,
@@ -38,21 +45,22 @@ const generateStartBoardB = () => {
 };
 
 const moves = {
-  moveThief: (board, { events }, vertex) => {
-    const nextBoard = { ...cloneDeep(board), thief: vertex, turnCount: board.turnCount + 1 };
+  moveThief: (board: Board, { events }: { events: Events }, vertex: number) => {
+    const overrides: Partial<Board> = { thief: vertex, turnCount: board.turnCount + 1 };
+    const nextBoard = { ...cloneDeep(board), ...overrides };
     events.endTurn();
     if (isGameEnd(nextBoard)) {
       events.endGame(hasFirstPlayerWon(nextBoard) ? 0 : 1);
     }
     return { nextBoard };
   },
-  moveFirstPoliceman: (board, { events }, vertex) => {
+  moveFirstPoliceman: (board: Board, _, vertex: number) => {
     const nextBoard = cloneDeep(board);
     nextBoard.policemen[0] = vertex;
     nextBoard.firstPolicemanMoved = true;
     return { nextBoard };
   },
-  moveSecondPoliceman: (board, { events }, vertex) => {
+  moveSecondPoliceman: (board: Board, { events }: { events: Events }, vertex: number) => {
     const nextBoard = cloneDeep(board);
     nextBoard.policemen[1] = vertex;
     nextBoard.firstPolicemanMoved = false;
@@ -64,7 +72,7 @@ const moves = {
   }
 };
 
-const isGameEnd = (board) => {
+const isGameEnd = (board: Board) => {
   if (board.turnCount === 3) {
     return true;
   } else if (board.thief === board.policemen[0] || board.thief === board.policemen[1]) {
@@ -73,7 +81,7 @@ const isGameEnd = (board) => {
   return false;
 };
 
-const hasFirstPlayerWon = (board) => {
+const hasFirstPlayerWon = (board: Board) => {
   return board.turnCount < 4 && board.policemen.includes(board.thief);
 };
 
@@ -121,6 +129,22 @@ const ruleB = {
   </>
 }
 
+const getPlayerStepDescription = ({ board, ctx }: { board: Board; ctx: Ctx }) => {
+  if (ctx.currentPlayer === 0) {
+    return {
+      hu: `Kattints arra az útkereszteződésre, ahová a ` +
+        `${board.firstPolicemanMoved ? "zöld" : "kék"} rendőrrel lépni szeretnél.`,
+      en: `Click the intersection you want to move the ` +
+        `${board.firstPolicemanMoved ? "green" : "blue"} policeman to.`
+    };
+  } else {
+    return {
+      hu: "Kattints arra az útkereszteződésre, ahová a tolvajjal lépni szeretnél.",
+      en: "Click the intersection you want to move the thief to."
+    };
+  }
+}
+
 export const PolicemanthiefA = strategyGameFactory({
   presentation: {
     rule: ruleA,
@@ -128,21 +152,7 @@ export const PolicemanthiefA = strategyGameFactory({
       { hu: "Rendőrök", en: "Policemen" },
       { hu: "Tolvaj", en: "Thief" }
     ],
-    getPlayerStepDescription: ({ board, ctx }) => {
-      if (ctx.currentPlayer === 0) {
-        return {
-          hu: `Kattints arra az útkereszteződésre, ahová a ` +
-            `${board.firstPolicemanMoved ? "zöld" : "kék"} rendőrrel lépni szeretnél.`,
-          en: `Click the intersection you want to move the ` +
-            `${board.firstPolicemanMoved ? "green" : "blue"} policeman to.`
-        };
-      } else {
-        return {
-          hu: "Kattints arra az útkereszteződésre, ahová a tolvajjal lépni szeretnél.",
-          en: "Click the intersection you want to move the thief to."
-        };
-      }
-    }
+    getPlayerStepDescription
   },
   BoardClient,
   gameplay: { moves },
@@ -156,21 +166,7 @@ export const PolicemanthiefB = strategyGameFactory({
       { hu: "Rendőrök", en: "Policemen" },
       { hu: "Tolvaj", en: "Thief" }
     ],
-    getPlayerStepDescription: ({ board, ctx }) => {
-      if (ctx.currentPlayer === 0) {
-        return {
-          hu: `Kattints arra az útkereszteződésre, ahová a ` +
-            `${board.firstPolicemanMoved ? "zöld" : "kék"} rendőrrel lépni szeretnél.`,
-          en: `Click the intersection you want to move the ` +
-            `${board.firstPolicemanMoved ? "green" : "blue"} policeman to.`
-        };
-      } else {
-        return {
-          hu: "Kattints arra az útkereszteződésre, ahová a tolvajjal lépni szeretnél.",
-          en: "Click the intersection you want to move the thief to."
-        };
-      }
-    }
+    getPlayerStepDescription
   },
   BoardClient,
   gameplay: { moves },

@@ -1,4 +1,3 @@
-import React from 'react';
 import { useLanguage } from './language-context';
 
 export const LanguageSelector = () => {

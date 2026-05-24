@@ -1,19 +1,25 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router';
+import { Language } from './translate';
 
-const LanguageContext = createContext({ language: 'hu', setLanguage: () => {} });
+interface LanguageContextValue {
+  language: Language
+  setLanguage: (lang: Language) => void
+}
 
-export const LanguageProvider = ({ children }) => {
+const LanguageContext = createContext<LanguageContextValue>({ language: 'hu', setLanguage: () => {} });
+
+export const LanguageProvider = ({ children }: { children: React.ReactNode }) => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [language, setLanguageState] = useState(
-    () => searchParams.get('lang') ?? localStorage.getItem('lang') ?? 'hu'
+  const [language, setLanguageState] = useState<Language>(
+    () => (searchParams.get('lang') ?? localStorage.getItem('lang') ?? 'hu') as Language
   );
 
   // When the URL ?lang= param changes (e.g. direct link or back/forward),
   // sync it into state. Ignore navigations that drop the param entirely
   // (those happen on Link clicks and should keep the in-memory language).
   useEffect(() => {
-    const langFromUrl = searchParams.get('lang');
+    const langFromUrl = searchParams.get('lang') as Language | null;
     if (langFromUrl !== null && langFromUrl !== language) {
       setLanguageState(langFromUrl);
       if (langFromUrl === 'hu') localStorage.removeItem('lang');
@@ -21,7 +27,7 @@ export const LanguageProvider = ({ children }) => {
     }
   }, [searchParams]);
 
-  const setLanguage = (lang) => {
+  const setLanguage = (lang: Language) => {
     setLanguageState(lang);
     if (lang === 'hu') localStorage.removeItem('lang');
     else localStorage.setItem('lang', lang);

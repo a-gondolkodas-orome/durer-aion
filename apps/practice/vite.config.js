@@ -32,14 +32,15 @@ export default defineConfig(() => ({
     }
   },
   esbuild: {
-    include: /\.js$/,
+    include: /\.[jt]sx?$/,
     exclude: [],
-    loader: 'jsx'
+    loader: 'tsx'
   },
   optimizeDeps: {
     esbuildOptions: {
       loader: {
-        '.js': 'jsx'
+        '.js': 'tsx',
+        '.ts': 'tsx'
       }
     }
   },
