@@ -29,7 +29,7 @@ const getMove = (board: Board) => {
   // return the card that participates in the most good sets of three cards
   // take only ones with max value
   const maxIndices = meanCounts.filter(([count]) => count === maxCount)
-    .map(([_, idx]) => idx);
+    .map(([, idx]) => idx);
   return sample(maxIndices)! + 1;
 }
 

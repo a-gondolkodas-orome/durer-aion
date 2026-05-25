@@ -1,6 +1,6 @@
 import React from 'react';
 import { Label, Field, Input } from '@headlessui/react';
-import { useTranslation, I18nString } from '../../language/translate';
+import { useTranslation, type I18nString } from '../../language/translate';
 import {
   ModeSelector,
   DifficultySelector,
@@ -8,7 +8,7 @@ import {
 } from './game-controls';
 import type { Ctx, Mode, Variant } from '../types';
 
-import { Stats } from '../use-game-stats';
+import type { Stats } from '../use-game-stats';
 
 export interface SidebarMoves {
   switchMode: (mode: Mode) => void

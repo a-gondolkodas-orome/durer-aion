@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { gameList, GameEntry, Category } from '../games/gameList';
+import { gameList, type GameEntry, type Category } from '../games/gameList';
 import { every, orderBy } from 'lodash';
 import { Link } from 'react-router';
 import { useTranslation } from '../language/translate';

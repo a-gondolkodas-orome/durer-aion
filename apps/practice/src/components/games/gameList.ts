@@ -1,4 +1,4 @@
-import { I18nString } from '../language/translate';
+import type { I18nString } from '../language/translate';
 
 export type Category = 'A' | 'B' | 'C' | 'D' | 'E' | 'E+'
 export type Round = 'döntő' | 'online'

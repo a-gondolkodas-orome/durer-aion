@@ -1,6 +1,6 @@
 import { strategyGameFactory } from '../../../game-factory/strategy-game';
 import { range, cloneDeep } from 'lodash';
-import type { Events, BoardClientProps } from '../../../game-factory/types';
+import type { Events, BoardClientProps, Ctx } from '../../../game-factory/types';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import {
   hasWinningTriple,
@@ -57,10 +57,10 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 };
 
 const moves = {
-  takeCard: (board: Board, { ctx, events }: { ctx: any, events: Events }, idx) => {
+  takeCard: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, idx) => {
     const nextBoard = cloneDeep(board);
 
-    nextBoard.cards[ctx.currentPlayer].push(idx);
+    nextBoard.cards[ctx.currentPlayer!].push(idx);
     nextBoard.numTurns += 1;
 
     if (nextBoard.numTurns === 8) {

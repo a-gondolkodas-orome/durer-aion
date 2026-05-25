@@ -1,4 +1,4 @@
-import { useTranslation, I18nString } from '../../language/translate';
+import { useTranslation, type I18nString } from '../../language/translate';
 import type { Variant, Ctx, Mode } from '../types';
 
 export const ModeSelector = ({ isHumanVsHumanGame, onSwitchMode, disabled }: {

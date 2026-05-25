@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router';
-import { Language } from './translate';
+import type { Language } from './translate';
 
 interface LanguageContextValue {
   language: Language

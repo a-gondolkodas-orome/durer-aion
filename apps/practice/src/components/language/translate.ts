@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 import { useLanguage } from './language-context';
 
 export interface I18nString { hu: string; en?: string }

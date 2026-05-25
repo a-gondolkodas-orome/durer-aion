@@ -9,8 +9,8 @@
     "test": "npm run lint && npm run typecheck && npm run test:unit",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint \"src/**/*.{js,ts,tsx}\" --no-fix",
-    "lint:fix": "eslint \"src/**/*.{js,ts,tsx}\" --fix",
+    "lint": "eslint \"src/**/*.{js,jsx,ts,tsx}\" --no-fix",
+    "lint:fix": "eslint \"src/**/*.{js,jsx,ts,tsx}\" --fix",
     "dev": "vite",
     "build": "vite build"
   },
@@ -31,6 +31,7 @@
     "@types/lodash": "4.17.24",
     "@types/react": "19.2.15",
     "@types/react-dom": "19.2.3",
+    "@typescript-eslint/eslint-plugin": "8.59.4",
     "@typescript-eslint/parser": "8.59.4",
     "@vitejs/plugin-react": "6.0.2",
     "eslint": "9.39.2",
