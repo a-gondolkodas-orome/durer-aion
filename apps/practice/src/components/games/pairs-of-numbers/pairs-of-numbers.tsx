@@ -2,7 +2,6 @@ import { strategyGameFactory } from '../../game-factory/strategy-game';
 import type { Events, StrategyArgs, BoardClientProps } from '../../game-factory/types';
 import { random } from 'lodash';
 import { useTranslation } from '../../language/translate';
-import { CtaButton } from '../../utils/cta-button';
 
 type Board = number[]
 
@@ -15,24 +14,26 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       </p>
       <div className="flex flex-wrap">
         <span className="grow px-2">
-          <CtaButton
+          <button
+            className='cta-button'
             disabled={!ctx.isClientMoveAllowed}
             onClick={() => moves.add1(board)}
           >
             {t({ hu: 'Növelek', en: 'Increase' })} {ctx.isClientMoveAllowed && <>
               (→<code className="text-md">({board[0]},{board[1] + 1})</code>)
             </>}
-          </CtaButton>
+          </button>
         </span>
         <span className='grow px-2'>
-          <CtaButton
+          <button
+            className="cta-button"
             disabled={!ctx.isClientMoveAllowed}
             onClick={() => moves.subtract(board)}
           >
             {t({ hu: 'Kivonok', en: 'Subtract' })} {ctx.isClientMoveAllowed && <>
               (→<code className="text-md">({board[0] - board[1]},{board[1]})</code>)
             </>}
-          </CtaButton>
+          </button>
         </span>
       </div>
     </section>

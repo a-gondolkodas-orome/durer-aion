@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { CtaButton } from '../../utils/cta-button';
 import { range } from 'lodash';
 import { useTranslation } from '../../language/translate';
 import type { BoardClientProps } from '../../game-factory/types';
@@ -81,13 +80,13 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         <span className="font-semibold">
           {t({ hu: 'Visszarakás:', en: 'Place back:' })}
         </span>
-        <CtaButton
+        <button
           disabled={!isAddAllowed(1)}
-          className="w-auto"
+          className="cta-button w-auto"
           onClick={passAddition}
         >
           {t({ hu: 'Semmi', en: 'Nothing' })}
-        </CtaButton>
+        </button>
         {[1, 2].map(coinValue => (
           <button
             key={coinValue}
@@ -102,13 +101,13 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             onMouseLeave={() => setHoveredPile(null)}
           >{coinValue}</button>
         ))}
-        <CtaButton
+        <button
           disabled={!wasCoinAlreadyRemovedInTurn}
-          className="w-auto bg-rose-400 enabled:hover:bg-rose-500 text-sm ml-auto"
+          className="cta-button w-auto bg-rose-400 enabled:hover:bg-rose-500 text-sm ml-auto"
           onClick={undoCoinRemoval}
         >
           {t({ hu: '↶ Visszavonás', en: '↶ Undo' })}
-        </CtaButton>
+        </button>
       </div>
 
       <hr className="my-4" />
