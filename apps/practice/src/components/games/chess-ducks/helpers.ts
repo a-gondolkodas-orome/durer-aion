@@ -1,5 +1,5 @@
 import { flatMap, range, cloneDeep } from "lodash";
-import type { Events } from "../../game-factory/types";
+import type { Events } from "../../game-factory";
 
 export const DUCK = 1 as const;
 export const FORBIDDEN = 2 as const;

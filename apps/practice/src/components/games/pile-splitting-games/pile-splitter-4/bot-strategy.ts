@@ -1,5 +1,5 @@
 import { random, range, sample } from 'lodash';
-import type { StrategyArgs, GameMoves } from '../../../game-factory/types';
+import type { StrategyArgs, GameMoves } from '../../../game-factory';
 import type { Board } from './pile-splitter-4';
 
 type BotStep = { removedPileId: number; pileId: number; pieceCount: number };

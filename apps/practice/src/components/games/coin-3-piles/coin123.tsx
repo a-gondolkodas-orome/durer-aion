@@ -1,5 +1,5 @@
 import { random, sum } from 'lodash';
-import { strategyGameFactory } from '../../game-factory/strategy-game';
+import { strategyGameFactory } from '../../game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { BoardClient } from './board-client';
 import { getPlayerStepDescription, isWinningState, moves, type Board } from './helpers';

@@ -1,5 +1,5 @@
 import { useTranslation } from '../../language/translate';
-import type { BoardClientProps } from '../../game-factory/types';
+import type { BoardClientProps } from '../../game-factory';
 import type { Board } from './architect-and-bandits-b';
 
 const VERTEX_LABELS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];

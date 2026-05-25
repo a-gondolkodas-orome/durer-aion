@@ -1,5 +1,5 @@
 import { sample, sortBy, sum } from 'lodash';
-import type { StrategyArgs } from '../../game-factory/types';
+import type { StrategyArgs } from '../../game-factory';
 import type { Board } from './pile-union';
 
 type MoveAction = { type: 'remove'; i: number } | { type: 'merge'; i: number; j: number }

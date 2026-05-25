@@ -1,6 +1,5 @@
-import { strategyGameFactory } from '../../game-factory/strategy-game';
+import { strategyGameFactory, type Events, type BoardClientProps, type StrategyArgs } from '../../game-factory';
 import { range, cloneDeep, random, sample } from 'lodash';
-import type { Events, BoardClientProps, StrategyArgs } from '../../game-factory/types';
 import { smartBotStrategy } from './bot-strategy';
 
 export type Board = { circle: boolean[], lastMove: number | null, firstMove: number | null }

@@ -1,5 +1,5 @@
 import { distanceFromDangerousAttackZone, isDangerous, moves } from "./helpers";
-import type { Events } from '../../game-factory/types';
+import type { Events } from '../../game-factory';
 import { reverse } from 'lodash';
 
 describe('distanceFromDangerousAttackZone', () => {

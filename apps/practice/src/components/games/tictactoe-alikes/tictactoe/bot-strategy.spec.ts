@@ -1,7 +1,6 @@
 import { smartBotStrategy } from './bot-strategy';
 import type { Board } from './helpers';
-import type { GameMoves } from '../../../game-factory/types';
-import { makeCtx } from '../../../game-factory/ctx-factory';
+import { makeCtx, type GameMoves } from '../../../game-factory';
 
 const mockPlacePiece = (): GameMoves<Board> => ({
   placePiece: (board: Board, id: number) => { board[id] = 'new_piece'; return { nextBoard: board }; }

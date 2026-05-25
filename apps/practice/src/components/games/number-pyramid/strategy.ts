@@ -1,5 +1,5 @@
 import { orderBy, random, range, sample, sampleSize, shuffle, sum } from 'lodash';
-import type { StrategyArgs } from '../../game-factory/types';
+import type { StrategyArgs } from '../../game-factory';
 
 export type Slot = { value: number; state: 'active' | 'consumed' };
 export type Level = (Slot | null)[];

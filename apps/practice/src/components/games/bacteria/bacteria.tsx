@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { range, random } from "lodash";
-import { strategyGameFactory } from "../../game-factory/strategy-game";
-import type { BoardClientProps } from '../../game-factory/types';
+import { strategyGameFactory, type BoardClientProps } from "../../game-factory";
 import { smartBotStrategy, randomBotStrategy } from "./bot-strategy";
 import {
   isJump,

@@ -1,6 +1,6 @@
 import { isNull, difference, range, shuffle, sample } from 'lodash';
 import { allColors, isAllowedStep, neighbours, type Board } from './helpers';
-import type { StrategyArgs } from '../../game-factory/types';
+import type { StrategyArgs } from '../../game-factory';
 
 export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   const validMoves: { vertex: number, color: string }[] = [];

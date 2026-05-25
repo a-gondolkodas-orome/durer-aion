@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { range, isEqual, cloneDeep } from 'lodash';
-import { strategyGameFactory } from '../../../game-factory/strategy-game';
-import type { BoardClientProps, Events } from '../../../game-factory/types';
+import { strategyGameFactory, type BoardClientProps, type Events } from '../../../game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { generateStartBoard, generateTestStartBoard } from './helpers';
 

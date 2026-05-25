@@ -1,6 +1,5 @@
 import { cloneDeep, sumBy } from 'lodash';
-import { strategyGameFactory } from '../../game-factory/strategy-game';
-import type { Ctx, Events } from '../../game-factory/types';
+import { strategyGameFactory, type Ctx, type Events } from '../../game-factory';
 import {
   smartBotStrategy, generateStartBoard, randomBotStrategy, type Board
 } from './strategy';

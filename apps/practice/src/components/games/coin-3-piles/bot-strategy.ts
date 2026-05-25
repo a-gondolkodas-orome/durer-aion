@@ -1,5 +1,5 @@
 import { findIndex, sample, range } from 'lodash';
-import type { StrategyArgs } from '../../game-factory/types';
+import type { StrategyArgs } from '../../game-factory';
 import type { Board } from './helpers';
 
 export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {

@@ -2,7 +2,7 @@ import { Fragment } from "react";
 import { range } from "lodash";
 import { neighbours } from "./helpers";
 import type { Board } from "./policeman-thief";
-import type { BoardClientProps } from "../../game-factory/types";
+import type { BoardClientProps } from "../../game-factory";
 
 const cubeCoords = [
   { cx: "30%", cy: "30%" },

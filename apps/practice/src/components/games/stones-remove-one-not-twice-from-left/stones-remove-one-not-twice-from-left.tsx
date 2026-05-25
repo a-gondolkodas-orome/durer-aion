@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { strategyGameFactory } from '../../game-factory/strategy-game';
-import type { Ctx, Events, StrategyArgs, BoardClientProps } from '../../game-factory/types';
+import {
+  strategyGameFactory, type Ctx, type Events, type StrategyArgs, type BoardClientProps
+} from '../../game-factory';
 import { cloneDeep, isEqual, sample, random, range } from 'lodash';
 import { useTranslation } from '../../language/translate';
 

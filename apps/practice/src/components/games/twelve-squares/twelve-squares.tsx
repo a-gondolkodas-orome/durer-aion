@@ -1,5 +1,6 @@
-import { strategyGameFactory } from '../../game-factory/strategy-game';
-import type { Ctx, Events, StrategyArgs, BoardClientProps } from '../../game-factory/types';
+import {
+  strategyGameFactory, type Ctx, type Events, type StrategyArgs, type BoardClientProps
+} from '../../game-factory';
 import { range, random, sample } from 'lodash';
 import { ChessBishopSvg } from '../chess-bishops/chess-bishop-svg';
 

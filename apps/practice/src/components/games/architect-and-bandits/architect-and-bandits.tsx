@@ -1,6 +1,5 @@
 import { cloneDeep } from 'lodash';
-import { strategyGameFactory } from '../../game-factory/strategy-game';
-import type { Events } from '../../game-factory/types';
+import { strategyGameFactory, type Events } from '../../game-factory';
 import { BoardClient } from './board-client';
 
 export type Board = { architectPosition: number, towers: boolean[], day: number, kmUsedToday: number }

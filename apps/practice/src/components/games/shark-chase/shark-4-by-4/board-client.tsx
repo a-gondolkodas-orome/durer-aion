@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { range } from 'lodash';
-import type { BoardClientProps } from '../../../game-factory/types';
+import type { BoardClientProps } from '../../../game-factory';
 import { SharkSvg } from '../assets/shark-chase-shark-svg';
 import { SubmarineSvg } from '../assets/shark-chase-submarine-svg';
 import { useTranslation } from '../../../language/translate';

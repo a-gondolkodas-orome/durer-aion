@@ -1,6 +1,5 @@
 import { range, some, isEqual, cloneDeep } from 'lodash';
-import { strategyGameFactory } from '../../game-factory/strategy-game';
-import type { BoardClientProps, Events } from '../../game-factory/types';
+import { strategyGameFactory, type BoardClientProps, type Events } from '../../game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { getAllowedMoves, generateStartBoard, markVisitedFields, type Board, type Field } from './helpers';
 import { ChessKnightSvg } from './chess-knight-svg';

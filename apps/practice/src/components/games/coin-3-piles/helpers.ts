@@ -1,5 +1,5 @@
 import { cloneDeep, isEqual } from "lodash";
-import type { Events } from '../../game-factory/types';
+import type { Events } from '../../game-factory';
 
 export type Board = number[]
 

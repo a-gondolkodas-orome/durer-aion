@@ -1,6 +1,6 @@
 import { isNull, range, sample } from 'lodash';
 import { pColor, botColor, inPlacingPhase, isGameEnd, type Board } from './helpers';
-import type { StrategyArgs } from '../../../game-factory/types';
+import type { StrategyArgs } from '../../../game-factory';
 
 export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   const allowedPlaces = getAllowedPlaces(board, false);

@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { strategyGameFactory } from '../../game-factory/strategy-game';
-import type { BoardClientProps, Ctx } from '../../game-factory/types';
+import { strategyGameFactory, type BoardClientProps, type Ctx } from '../../game-factory';
 import { CastleSvg } from './assets/castle-svg';
 import { SoldierSvg } from './assets/soldier-svg';
 import { smartBotStrategy } from './bot-strategy';

@@ -1,7 +1,7 @@
 import { range, isNull, sample, sampleSize, cloneDeep } from 'lodash';
 import { hasWinningSubset } from '../helpers';
 import { isGameEnd, hasFirstPlayerWon, roleColors, type Board } from './helpers';
-import type { StrategyArgs } from '../../../game-factory/types';
+import type { StrategyArgs } from '../../../game-factory';
 
 const emptyCells = (board: Board) => range(0, 9).filter(i => isNull(board[i]));
 

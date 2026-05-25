@@ -1,6 +1,6 @@
 import { sample, cloneDeep } from 'lodash';
 import { Thief, hasWinningTriple, getUntakenCards, type Board } from '../helpers';
-import type { StrategyArgs } from '../../../game-factory/types';
+import type { StrategyArgs } from '../../../game-factory';
 
 export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   moves.takeCard(board, sample(getUntakenCards(board, 9)));

@@ -1,5 +1,6 @@
-import { strategyGameFactory, dummyEvents } from '../../game-factory/strategy-game';
-import type { Events, StrategyArgs, BoardClientProps } from '../../game-factory/types';
+import {
+  strategyGameFactory, dummyEvents, type Events, type StrategyArgs, type BoardClientProps
+} from '../../game-factory';
 import { range, cloneDeep, sample, shuffle } from 'lodash';
 
 const [ALLOWED, COLORED, FORBIDDEN] = [1 as const, 2 as const, 3 as const];

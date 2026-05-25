@@ -1,5 +1,4 @@
-import { strategyGameFactory } from '../../game-factory/strategy-game';
-import type { BoardClientProps } from '../../game-factory/types';
+import { strategyGameFactory, type BoardClientProps } from '../../game-factory';
 import { some, range, isEqual } from 'lodash';
 import { DuckSvg } from './rubber-duck-svg';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';

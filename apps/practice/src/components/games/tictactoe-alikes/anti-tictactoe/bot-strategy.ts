@@ -1,7 +1,7 @@
 import { range, isNull, sample, cloneDeep } from 'lodash';
 import { hasWinningSubset } from '../helpers';
 import { roleColors, hasFirstPlayerWon, isGameEnd, type Board } from './helpers';
-import type { StrategyArgs } from '../../../game-factory/types';
+import type { StrategyArgs } from '../../../game-factory';
 
 export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   moves.placePiece(board, sample(emptyCells(board)));

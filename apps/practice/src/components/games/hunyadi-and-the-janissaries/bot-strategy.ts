@@ -1,5 +1,5 @@
 import { random } from 'lodash';
-import type { StrategyArgs } from '../../game-factory/types';
+import type { StrategyArgs } from '../../game-factory';
 import { type Board, type SoldierColor, type Soldier } from './helpers';
 
 export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {

@@ -1,6 +1,5 @@
-import { strategyGameFactory } from '../../../game-factory/strategy-game';
+import { strategyGameFactory, type Events, type BoardClientProps, type Ctx } from '../../../game-factory';
 import { range, cloneDeep } from 'lodash';
-import type { Events, BoardClientProps, Ctx } from '../../../game-factory/types';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import {
   hasWinningTriple,

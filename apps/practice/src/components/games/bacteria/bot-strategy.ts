@@ -6,7 +6,7 @@ import {
   filter,
   sum
 } from "lodash";
-import type { StrategyArgs } from '../../game-factory/types';
+import type { StrategyArgs } from '../../game-factory';
 import {
   lastCol,
   isDangerous,

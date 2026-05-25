@@ -1,5 +1,5 @@
 import { cloneDeep, last } from "lodash";
-import type { Events } from '../../game-factory/types';
+import type { Events } from '../../game-factory';
 import type { Board } from "./bacteria"
 
 export const moves = {

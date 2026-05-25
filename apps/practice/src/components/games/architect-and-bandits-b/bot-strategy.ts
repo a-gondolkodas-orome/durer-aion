@@ -1,5 +1,5 @@
 import { maxBy, sample } from 'lodash';
-import type { StrategyArgs } from '../../game-factory/types';
+import type { StrategyArgs } from '../../game-factory';
 import type { Board } from './architect-and-bandits-b';
 
 // Vertices A(0)..J(9) clockwise. Each edge = 10 km, max 5 edges/day.

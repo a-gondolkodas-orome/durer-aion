@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { range } from 'lodash';
 import { useTranslation } from '../../language/translate';
-import type { BoardClientProps } from '../../game-factory/types';
+import type { BoardClientProps } from '../../game-factory';
 import type { Board } from './helpers';
 
 const getCoinBgColor = (coinValue) => {

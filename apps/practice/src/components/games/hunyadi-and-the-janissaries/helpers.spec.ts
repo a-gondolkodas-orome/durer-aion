@@ -1,5 +1,5 @@
 import { moves, generateStartBoard, type Board } from './helpers';
-import type { Events } from '../../game-factory/types';
+import type { Events } from '../../game-factory';
 import { uniq, flatten } from 'lodash';
 
 describe('HunyadiAndTheJanissaries helpers', () => {

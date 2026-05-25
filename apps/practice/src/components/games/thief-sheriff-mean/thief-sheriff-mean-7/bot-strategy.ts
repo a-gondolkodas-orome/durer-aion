@@ -1,6 +1,6 @@
 import { sample } from 'lodash';
 import { Sheriff, Thief, getUntakenCards, type Board } from '../helpers';
-import type { StrategyArgs } from '../../../game-factory/types';
+import type { StrategyArgs } from '../../../game-factory';
 
 const CARD_COUNT = 7;
 

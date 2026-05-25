@@ -1,5 +1,5 @@
 import { isP2WinningPosition, randomBotStrategy, smartBotStrategy, type Board, type Slot } from './strategy';
-import { makeCtx } from '../../game-factory/ctx-factory';
+import { makeCtx } from '../../game-factory';
 
 const active = (value: number): Slot => ({ value, state: 'active' });
 const consumed = (value: number): Slot => ({ value, state: 'consumed' });

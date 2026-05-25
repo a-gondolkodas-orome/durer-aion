@@ -1,6 +1,5 @@
 import { compact, cloneDeep } from 'lodash';
-import { strategyGameFactory } from '../../game-factory/strategy-game';
-import type { Ctx, Events, BoardClientProps } from '../../game-factory/types';
+import { strategyGameFactory, type Ctx, type Events, type BoardClientProps } from '../../game-factory';
 import { smartBotStrategy } from './bot-strategy';
 import { RockSvg } from './symbols/rock-svg';
 import { PaperSvg } from './symbols/paper-svg';
