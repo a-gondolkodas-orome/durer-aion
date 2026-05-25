@@ -11,7 +11,6 @@ import {
   isAllowedAttackClick,
   moves
 } from "./helpers";
-import { GameBoard } from '../../game-factory/game-parts/game-board';
 
 export type Board = { bacteria: number[][], goals: number[] }
 
@@ -191,7 +190,7 @@ const BoardClient = ({ board: { bacteria, goals }, ctx, moves }: BoardClientProp
   };
 
   return (
-    <GameBoard>
+    <section className="p-2 shrink-0 grow basis-2/3">
       <table
         className="w-[95%] table-fixed"
         style={{ transform: "scaleY(-1)" }}
@@ -218,7 +217,7 @@ const BoardClient = ({ board: { bacteria, goals }, ctx, moves }: BoardClientProp
           ))}
         </tbody>
       </table>
-    </GameBoard>
+    </section>
   );
 };
 

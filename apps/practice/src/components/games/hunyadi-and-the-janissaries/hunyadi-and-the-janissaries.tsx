@@ -7,7 +7,6 @@ import { SoldierSvg } from './assets/soldier-svg';
 import { smartBotStrategy } from './bot-strategy';
 import { generateStartBoard, moves, type Board, type SoldierColor } from './helpers';
 import { useTranslation } from '../../language/translate';
-import { GameBoard } from '../../game-factory/game-parts/game-board';
 
 type Piece = { rowIndex: number, pieceIndex: number }
 
@@ -39,7 +38,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   };
 
   return (
-    <GameBoard>
+    <section className="p-2 shrink-0 grow basis-2/3">
       <SoldierSvg />
       <CastleSvg />
       <svg className={`m-auto w-[40%] fill-slate-600 ${board[0].length > 0 ? 'opacity-50' : ''}`}>
@@ -102,7 +101,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           {t({ hu: 'Befejezem a kettéosztást', en: 'Finish the split' })}
         </CtaButton>
       )}
-    </GameBoard>
+    </section>
   );
 };
 

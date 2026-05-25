@@ -5,7 +5,6 @@ import type { Events, BoardClientProps } from '../../game-factory/types';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { isAllowedStep, allColors, generateStartBoard, type Board } from './helpers';
 import { useTranslation } from '../../language/translate';
-import { GameBoard } from '../../game-factory/game-parts/game-board';
 
 const cubeCoords = [
   { cx: '8%',  cy: '25%' },
@@ -53,7 +52,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   };
 
   return (
-  <GameBoard>
+  <section className="p-2 shrink-0 grow basis-2/3">
     <header>
       <button
         disabled={!ctx.isClientMoveAllowed}
@@ -119,7 +118,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         <circle cx={x} cy={y} r="4%" fill={color} className="pointer-events-none opacity-50 stroke-0" />
       )}
     </svg>
-  </GameBoard>
+  </section>
   );
 };
 

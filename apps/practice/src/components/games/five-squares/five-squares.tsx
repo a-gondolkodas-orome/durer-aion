@@ -4,7 +4,6 @@ import { strategyGameFactory } from '../../game-factory/strategy-game';
 import type { Ctx, Events, BoardClientProps } from '../../game-factory/types';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { useTranslation } from '../../language/translate';
-import { GameBoard } from '../../game-factory/game-parts/game-board';
 
 export type Board = number[]
 type TurnState = { firstPlacedSquareIndex: number } | null
@@ -53,7 +52,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const showDimmedDisc = ctx.isClientMoveAllowed && firstPlacedSquareIndex !== null;
 
   return (
-  <GameBoard>
+  <section className="p-2 shrink-0 grow basis-2/3">
     <div className="grid grid-cols-3 gap-0 border-t-4 border-l-4">
       {range(board.length).map(id =>
         <button
@@ -86,7 +85,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         </CtaButton>
       </div>
     )}
-  </GameBoard>
+  </section>
   );
 };
 

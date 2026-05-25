@@ -7,7 +7,6 @@ import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import {
   generateStartBoard, getAllowedMoves, BISHOP, FORBIDDEN, markForbiddenFields, type Board, type Field
 } from './helpers';
-import { GameBoard } from '../../game-factory/game-parts/game-board';
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const [hoveredField, setHoveredField] = useState<Field | null>(null);
@@ -42,7 +41,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   };
 
   return (
-  <GameBoard>
+  <section className="p-2 shrink-0 grow basis-2/3">
     <ChessBishopSvg />
     <table className="w-full border-collapse table-fixed">
       <tbody>
@@ -86,7 +85,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         ))}
       </tbody>
     </table>
-  </GameBoard>
+  </section>
   );
 };
 

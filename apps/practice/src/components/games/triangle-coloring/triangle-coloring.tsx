@@ -1,7 +1,6 @@
 import { strategyGameFactory, dummyEvents } from '../../game-factory/strategy-game';
 import type { Events, StrategyArgs, BoardClientProps } from '../../game-factory/types';
 import { range, cloneDeep, sample, shuffle } from 'lodash';
-import { GameBoard } from '../../game-factory/game-parts/game-board';
 
 const [ALLOWED, COLORED, FORBIDDEN] = [1 as const, 2 as const, 3 as const];
 type Board = (typeof ALLOWED | typeof COLORED | typeof FORBIDDEN)[]
@@ -77,7 +76,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   };
 
   return(
-    <GameBoard>
+    <section className="p-2 shrink-0 grow basis-2/3">
       <svg className="aspect-square" viewBox="0 0 100 100">
         {range(16).map(i => (
           <polygon
@@ -97,7 +96,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           ></polygon>
         ))}
       </svg>
-    </GameBoard>
+    </section>
   );
 };
 

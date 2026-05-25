@@ -3,7 +3,6 @@ import { range, cloneDeep, sample, random } from 'lodash';
 import { strategyDict } from './bot-strategy';
 import { useTranslation } from '../../language/translate';
 import type { Events, BoardClientProps, StrategyArgs } from '../../game-factory/types';
-import { GameBoard } from '../../game-factory/game-parts/game-board';
 
 type Board = { numbersOnTable: boolean[], previousMove: number | null }
 
@@ -31,7 +30,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   }
 
   return (
-    <GameBoard>
+    <section className="p-2 shrink-0 grow basis-2/3">
       <p className = "text-2xl">
         {t({
           hu: `A mostani játékban n=${board.numbersOnTable.length}`,
@@ -60,7 +59,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           </button>
         )}
       </div>
-    </GameBoard>
+    </section>
   )
 };
 

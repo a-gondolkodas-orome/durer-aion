@@ -3,7 +3,6 @@ import { strategyGameFactory } from '../../game-factory/strategy-game';
 import type { Ctx, Events, BoardClientProps } from '../../game-factory/types';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { useTranslation } from '../../language/translate';
-import { GameBoard } from '../../game-factory/game-parts/game-board';
 
 export type Board = { current: number, target: number, restricted: number | null }
 
@@ -39,7 +38,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   };
 
   return (
-  <GameBoard>
+  <section className="p-2 shrink-0 grow basis-2/3">
     <div className="flex flex-wrap mb-1">
       {fields.map(i =>
         <button
@@ -75,7 +74,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         })}
       </p>
     )}
-  </GameBoard>
+  </section>
   );
 };
 

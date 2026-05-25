@@ -10,7 +10,6 @@ import {
   generateStartBoard,
   type Board
 } from "../helpers";
-import { GameBoard } from '../../../game-factory/game-parts/game-board';
 
 const CARD_COUNT = 9;
 
@@ -32,7 +31,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   }
 
   return(
-    <GameBoard>
+    <section className="p-2 shrink-0 grow basis-2/3">
       <div>
         {range(1, CARD_COUNT + 1).map(num =>
         <button
@@ -53,7 +52,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           {num}
         </button>)}
       </div>
-    </GameBoard>
+    </section>
     );
 };
 

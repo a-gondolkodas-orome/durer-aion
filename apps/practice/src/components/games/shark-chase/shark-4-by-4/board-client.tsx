@@ -5,7 +5,6 @@ import { SharkSvg } from '../assets/shark-chase-shark-svg';
 import { SubmarineSvg } from '../assets/shark-chase-submarine-svg';
 import { useTranslation } from '../../../language/translate';
 import { type Board } from './shark-chase';
-import { GameBoard } from '../../../game-factory/game-parts/game-board';
 
 export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
@@ -60,7 +59,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   };
 
   return (
-  <GameBoard>
+  <section className="p-2 shrink-0 grow basis-2/3">
     <p className='font-bold text-lg'>{t({ hu: 'Hátralévő lépések száma', en: 'Remaining moves' })}: {12-board.turn}</p>
     <SubmarineSvg/>
     <SharkSvg/>
@@ -97,7 +96,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       </button>
       ))}
     </div>
-  </GameBoard>
+  </section>
   );
 };
 

@@ -3,7 +3,6 @@ import { range } from "lodash";
 import { neighbours } from "./helpers";
 import type { Board } from "./policeman-thief";
 import type { BoardClientProps } from "../../game-factory/types";
-import { GameBoard } from '../../game-factory/game-parts/game-board';
 
 const cubeCoords = [
   { cx: "30%", cy: "30%" },
@@ -69,7 +68,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   };
 
   return (
-    <GameBoard>
+    <section className="p-2 shrink-0 grow basis-2/3">
       <svg className="aspect-square stroke-black stroke-3">
         <pattern id="2policemen" patternUnits="userSpaceOnUse" patternTransform="rotate(45 0 0)" width="12" height="12">
           <rect x="0" y="0" fill="navy" stroke="navy" width="12" height="12"></rect>
@@ -128,6 +127,6 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           </Fragment>
         ))}
       </svg>
-    </GameBoard>
+    </section>
   );
 };

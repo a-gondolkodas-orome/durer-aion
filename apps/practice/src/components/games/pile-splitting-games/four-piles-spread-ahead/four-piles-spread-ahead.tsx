@@ -4,7 +4,6 @@ import { strategyGameFactory } from '../../../game-factory/strategy-game';
 import type { BoardClientProps, Events } from '../../../game-factory/types';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { useLanguage } from '../../../language/language-context';
-import { GameBoard } from '../../../game-factory/game-parts/game-board';
 
 export type Board = number[];
 type Piece = { pileId: number; pieceId: number };
@@ -102,7 +101,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   };
 
   return (
-  <GameBoard>
+  <section className="p-2 shrink-0 grow basis-2/3">
     {[0, 1, 2, 3].map(pileId => (
       <div
         key={pileId}
@@ -135,7 +134,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           ))}
       </div>
     ))}
-  </GameBoard>
+  </section>
   );
 };
 
