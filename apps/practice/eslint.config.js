@@ -1,11 +1,11 @@
-import react from 'eslint-plugin-react';
+import reactPlugin from '@eslint-react/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
 import tsPlugin from '@typescript-eslint/eslint-plugin';
 
 export default [
   {
     files: ['src/**/*.{js,ts,tsx}'],
-    plugins: { react },
+    plugins: { '@eslint-react': reactPlugin },
     rules: {
       'comma-dangle': ['error', 'never'],
       'curly': ['error', 'multi-line'],
@@ -19,7 +19,7 @@ export default [
       'object-property-newline': ['error', { 'allowAllPropertiesOnSameLine': true }],
       'array-bracket-newline': ['error', 'consistent'],
       'array-element-newline': ['error', 'consistent'],
-      'react/jsx-key': ['error']
+      '@eslint-react/no-missing-key': ['error']
     }
   },
   {
