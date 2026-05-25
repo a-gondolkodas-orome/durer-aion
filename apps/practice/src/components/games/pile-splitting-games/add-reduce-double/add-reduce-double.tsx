@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { range, isEqual, random, cloneDeep } from 'lodash';
 import { strategyGameFactory } from '../../../game-factory/strategy-game';
 import type { BoardClientProps, Events } from '../../../game-factory/types';
-import { aiBotStrategy, randomBotStrategy } from './bot-strategy';
+import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 
 export type Board = number[];
 type Piece = { pileId: number; pieceId: number };
@@ -152,7 +152,7 @@ export const AddReduceDouble = strategyGameFactory({
       label: { hu: 'Teszt 🤖', en: 'Test 🤖' }
     },
     {
-      botStrategy: aiBotStrategy,
+      botStrategy: smartBotStrategy,
       generateStartBoard: () => ([random(3, 10), random(3, 10)]),
       label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
       isDefault: true

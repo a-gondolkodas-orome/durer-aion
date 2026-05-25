@@ -86,7 +86,7 @@ If the optimal AI strategy was implemented in step 2, ask the user:
 
 1. Add a `randomBotStrategy` function — pick a random valid move, but if any move wins immediately (wins in 1 turn), pick one of those winning moves instead. Follow the pattern in `src/components/games/ten-digit-number/ten-digit-number.js`.
 
-2. Rename the existing optimal bot strategy to `aiBotStrategy` (or a similarly descriptive name).
+2. Rename the existing optimal bot strategy to `smartBotStrategy` (or a similarly descriptive name).
 
 3. Restructure `variants` to put the test bot first and the smart bot second (marked `isDefault: true`):
    ```javascript
@@ -96,7 +96,7 @@ If the optimal AI strategy was implemented in step 2, ask the user:
        label: { hu: 'Teszt 🤖', en: 'Test 🤖' }
      },
      {
-       botStrategy: aiBotStrategy,
+       botStrategy: smartBotStrategy,
        generateStartBoard: ...,
        label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
        isDefault: true

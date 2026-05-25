@@ -1,7 +1,7 @@
 import { range, cloneDeep, compact } from 'lodash';
 import { strategyGameFactory } from '../../game-factory/strategy-game';
 import type { Ctx, Events, BoardClientProps } from '../../game-factory/types';
-import { aiBotStrategy, randomBotStrategy } from './bot-strategy';
+import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { useTranslation } from '../../language/translate';
 
 export type Board = (number | null)[][]
@@ -114,7 +114,7 @@ export const FiveFiveCard = strategyGameFactory({
   variants: [
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
     {
-      botStrategy: aiBotStrategy,
+      botStrategy: smartBotStrategy,
       generateStartBoard: () => [[1, 2, 3, 4, 5], [1, 2, 3, 4, 5]],
       label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
       isDefault: true

@@ -1,7 +1,7 @@
 import { compact, cloneDeep } from 'lodash';
 import { strategyGameFactory } from '../../game-factory/strategy-game';
 import type { Ctx, Events, BoardClientProps } from '../../game-factory/types';
-import { aiBotStrategy } from './bot-strategy';
+import { smartBotStrategy } from './bot-strategy';
 import { RockSvg } from './symbols/rock-svg';
 import { PaperSvg } from './symbols/paper-svg';
 import { ScissorSvg } from './symbols/scissor-svg';
@@ -111,7 +111,7 @@ export const RockPaperScissor = strategyGameFactory({
   gameplay: { moves },
   variants: [
     {
-      botStrategy: aiBotStrategy,
+      botStrategy: smartBotStrategy,
       generateStartBoard: (): Board => [['rock', 'paper', 'scissor'], ['rock', 'paper', 'scissor']]
     }
   ]

@@ -125,7 +125,7 @@ const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   moves.subtractPrimeExponent(board, { prime, exponent });
 };
 
-const aiBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   if (board === 1) {
     moves.subtractPrimeExponent(board, { prime: 2, exponent: 0 });
     return;
@@ -188,7 +188,7 @@ export const PrimeExponentials = strategyGameFactory({
       label: { hu: 'Teszt 🤖', en: 'Test 🤖' }
     },
     {
-      botStrategy: aiBotStrategy,
+      botStrategy: smartBotStrategy,
       generateStartBoard,
       label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
       isDefault: true

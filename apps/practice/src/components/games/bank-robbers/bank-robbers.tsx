@@ -1,7 +1,7 @@
 import { strategyGameFactory } from '../../game-factory/strategy-game';
 import { range, cloneDeep, random, sample } from 'lodash';
 import type { Events, BoardClientProps, StrategyArgs } from '../../game-factory/types';
-import { aiBotStrategy } from './bot-strategy';
+import { smartBotStrategy } from './bot-strategy';
 
 export type Board = { circle: boolean[], lastMove: number | null, firstMove: number | null }
 
@@ -133,6 +133,6 @@ export const BankRobbers = strategyGameFactory({
   gameplay: { moves },
   variants: [
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
-    { botStrategy: aiBotStrategy, generateStartBoard, label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
+    { botStrategy: smartBotStrategy, generateStartBoard, label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
   ]
 });

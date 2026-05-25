@@ -6,7 +6,7 @@ export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   moves.addPiece(board, sample(range(0, 4)));
 };
 
-export const aiBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   const id = getOptimalTileIndex(board);
   moves.addPiece(board, id);
 }

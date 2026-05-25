@@ -1,12 +1,12 @@
-import { getOptimalAiMove } from './bot-strategy';
+import { getOptimalSmartBotMove } from './bot-strategy';
 import { generateStartBoard, markVisitedFields } from './helpers';
 import { isEqual, cloneDeep } from 'lodash';
 
 describe('chess rook', () => {
-  describe('getOptimalAiMove()', () => {
+  describe('getOptimalSmartBotMove()', () => {
     it('should move to end of row or column as a first step', () => {
       const board = generateStartBoard();
-      const rookPosition = getOptimalAiMove(board);
+      const rookPosition = getOptimalSmartBotMove(board);
       expect(
         isEqual(rookPosition, { row: 0, col: 7 }) ||
         isEqual(rookPosition, { row: 7, col: 0 })
@@ -21,7 +21,7 @@ describe('chess rook', () => {
       nextBoard.chessBoard[0][5] = 'rook';
       nextBoard.rookPosition = { row: 0, col: 5 };
 
-      const rookPosition = getOptimalAiMove(nextBoard);
+      const rookPosition = getOptimalSmartBotMove(nextBoard);
       expect(rookPosition).toEqual({ row: 7, col: 5 });
     });
   });

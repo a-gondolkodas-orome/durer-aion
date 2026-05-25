@@ -113,7 +113,7 @@ const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   moves.chooseDigit(board, sample(availableDigits));
 };
 
-const aiBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   const turnsLeft = totalDigits - board.digits.length;
   const currentPlayer = (totalDigits - turnsLeft) % 2;
 
@@ -172,7 +172,7 @@ export const TenDigitNumber = strategyGameFactory({
       label: { hu: 'Teszt 🤖', en: 'Test 🤖' }
     },
     {
-      botStrategy: aiBotStrategy,
+      botStrategy: smartBotStrategy,
       generateStartBoard: () => ({ digits: [], sumMod9: 0 }),
       label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
       isDefault: true

@@ -56,12 +56,12 @@ const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   moves.coverNumber(board, sample(getRemaining(board)));
 };
 
-const aiBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
-  const aiMove = getOptimalAiMove(board, ctx.chosenRoleIndex);
-  moves.coverNumber(board, aiMove);
+const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
+  const botMove = getOptimalSmartBotMove(board, ctx.chosenRoleIndex);
+  moves.coverNumber(board, botMove);
 };
 
-const getOptimalAiMove = (board: Board, chosenRoleIndex) => {
+const getOptimalSmartBotMove = (board: Board, chosenRoleIndex) => {
   const remaining = getRemaining(board);
   const evens = remaining.filter(i => i%2 === 0);
   const odds = remaining.filter(i => i%2 === 1);
@@ -133,7 +133,7 @@ export const NumberCovering8 = strategyGameFactory({
   variants: [
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
     {
-      botStrategy: aiBotStrategy,
+      botStrategy: smartBotStrategy,
       generateStartBoard: () => range(1, 9),
       label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
       isDefault: true
@@ -151,7 +151,7 @@ export const NumberCovering10 = strategyGameFactory({
   variants: [
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
     {
-      botStrategy: aiBotStrategy,
+      botStrategy: smartBotStrategy,
       generateStartBoard: () => range(1, 11),
       label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
       isDefault: true

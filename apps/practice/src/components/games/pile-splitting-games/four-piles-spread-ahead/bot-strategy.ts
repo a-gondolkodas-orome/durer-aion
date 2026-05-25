@@ -12,12 +12,12 @@ export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   return moves.spreadPieces(board, sample(validMoves));
 };
 
-export const aiBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  const { pileId, pieceId } = getAiStep(board);
+export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+  const { pileId, pieceId } = getSmartBotStep(board);
   return moves.spreadPieces(board, { pileId, pieceCount: pieceId + 1 });
 };
 
-const getAiStep = (board: Board): { pileId: number; pieceId: number } => {
+const getSmartBotStep = (board: Board): { pileId: number; pieceId: number } => {
   if ((board[1] % 2 === 0) && (board[3] % 5 === 3)) {
     return { pileId: 3, pieceId: random(0, 1) };
   } else if ((board[1] % 2 === 0) && (board[3] % 5 === 4)) {

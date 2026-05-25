@@ -11,12 +11,12 @@ export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   moves.placeDuck(board, sample(getAllowedMoves(board)));
 };
 
-export const aiBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  const aiMove = getOptimalAiMove(board);
-  moves.placeDuck(board, aiMove);
+export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+  const botMove = getOptimalSmartBotMove(board);
+  moves.placeDuck(board, botMove);
 };
 
-const getOptimalAiMove = (board: Board): Field => {
+const getOptimalSmartBotMove = (board: Board): Field => {
   const allowedMoves = getAllowedMoves(board);
   const boardIndices = getBoardIndices(board.length, board[0].length);
 
@@ -32,7 +32,7 @@ const getOptimalAiMove = (board: Board): Field => {
 
   // live search is too slow
   if (duckCount === 1 && colCount === 7) {
-    return aiOptimalSecondSteps[`${ducks[0].row};${ducks[0].col}`];
+    return smartBotOptimalSecondSteps[`${ducks[0].row};${ducks[0].col}`];
   }
 
   // use pre-calculated optimal 3rd moves as live calculation would be too slow
@@ -94,12 +94,12 @@ const getOptimalThirdStep = (board: Board): Field | undefined => {
   equivalentPositions.push({ 'ducks': [mb2, mb1], type: 'flipH' });
 
   const pos = equivalentPositions.find(({ ducks: [[r1, c1], [r2, c2]] }) =>
-    aiOptimalThirdSteps[`${r1};${c1} - ${r2};${c2}`] !== undefined
+    smartBotOptimalThirdSteps[`${r1};${c1} - ${r2};${c2}`] !== undefined
   );
 
   if (pos !== undefined) {
     const ducks = pos['ducks'];
-    const optimalStep = aiOptimalThirdSteps[`${ducks[0][0]};${ducks[0][1]} - ${ducks[1][0]};${ducks[1][1]}`];
+    const optimalStep = smartBotOptimalThirdSteps[`${ducks[0][0]};${ducks[0][1]} - ${ducks[1][0]};${ducks[1][1]}`];
     const transformedStep = invertTransformation(
       [optimalStep['row'], optimalStep['col']],
       pos['type']
@@ -134,7 +134,7 @@ const isWinningState = (board: Board, amIPlayer: boolean): boolean => {
 };
 
 // see scripts/pre-generate-ai-moves/chess-ducks-optimal-2nd-moves.cjs
-const aiOptimalSecondSteps: Record<string, Field> = {
+const smartBotOptimalSecondSteps: Record<string, Field> = {
   '0;0': { row: 0, col: 6 },
   '0;1': { row: 3, col: 1 },
   '0;2': { row: 3, col: 1 },
@@ -166,7 +166,7 @@ const aiOptimalSecondSteps: Record<string, Field> = {
 };
 
 // see scripts/pre-generate-ai-moves/chess-ducks-optimal-3rd-moves.cjs
-const aiOptimalThirdSteps: Record<string, Field> = {
+const smartBotOptimalThirdSteps: Record<string, Field> = {
   '0;0 - 0;2': { row: 1, col: 5 },
   '0;0 - 0;3': { row: 3, col: 2 },
   '0;0 - 0;4': { row: 3, col: 0 },

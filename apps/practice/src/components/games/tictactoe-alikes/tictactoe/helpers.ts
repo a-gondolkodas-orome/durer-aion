@@ -10,16 +10,16 @@ export const isGameEnd = (board: Board) => {
 };
 
 export const pColor = 'blue';
-export const aiColor = 'red';
+export const botColor = 'red';
 
 export const inPlacingPhase = (board: Board) => board.find(isNull) !== undefined;
 
 export const currentPlayerColor = (ctx) =>
   ctx.isHumanVsHumanGame
     ? (ctx.currentPlayer === 0 ? 'blue' : 'red')
-    : (ctx.currentPlayer === ctx.chosenRoleIndex ? pColor : aiColor);
+    : (ctx.currentPlayer === ctx.chosenRoleIndex ? pColor : botColor);
 
 export const otherPlayerColor = (ctx) =>
   ctx.isHumanVsHumanGame
     ? (ctx.currentPlayer === 0 ? 'red' : 'blue')
-    : (ctx.currentPlayer === ctx.chosenRoleIndex ? aiColor : pColor);
+    : (ctx.currentPlayer === ctx.chosenRoleIndex ? botColor : pColor);

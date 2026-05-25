@@ -4,8 +4,8 @@ import type { Board } from './pile-splitter';
 
 type BotStep = { pileId: number; pieceCount: number };
 
-export const aiBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  const botStep = getAiStep(board);
+export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+  const botStep = getSmartBotStep(board);
   executeBotStrategy(botStep, { board, moves });
 };
 
@@ -29,7 +29,7 @@ const getRandomStep = (board: Board): BotStep => {
   return { pileId, pieceCount: random(1, board[pileId] - 1) };
 };
 
-const getAiStep = (board: Board): BotStep => {
+const getSmartBotStep = (board: Board): BotStep => {
   const randomPileIndex = random(0, 1);
 
   const pileIndexToSplit = (board[randomPileIndex] % 2 === 0 || board[1 - randomPileIndex] === 1)

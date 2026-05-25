@@ -1,7 +1,7 @@
 import { botMoveParams } from './bot-strategy';
 
 describe('coin123 strategy', () => {
-  describe('aiBotStrategy (tested via botMoveParams)', () => {
+  describe('smartBotStrategy (tested via botMoveParams)', () => {
     it('should apply winning move if two piles are odd and one is even: v1', () => {
       const board = [3, 2, 5];
       expect(botMoveParams({ board })).toEqual({ remove: 3, add: 1 });

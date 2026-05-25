@@ -121,12 +121,12 @@ const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   moves.colorTriangle(board, sample(getAllowedMoves(board)));
 };
 
-const aiBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  const optimalMove = getOptimalAiMove(board);
+const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+  const optimalMove = getOptimalSmartBotMove(board);
   moves.colorTriangle(board, optimalMove);
 };
 
-const getOptimalAiMove = (board: Board) => {
+const getOptimalSmartBotMove = (board: Board) => {
   const allowedMoves = getAllowedMoves(board);
   const optimalPlace = shuffle(allowedMoves).find(i => {
     const { nextBoard } = moves.colorTriangle(board, { events: dummyEvents }, i);
@@ -179,7 +179,7 @@ export const TriangleColoring = strategyGameFactory({
   variants: [
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
     {
-      botStrategy: aiBotStrategy,
+      botStrategy: smartBotStrategy,
       generateStartBoard: () => Array(16).fill(ALLOWED),
       label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
       isDefault: true

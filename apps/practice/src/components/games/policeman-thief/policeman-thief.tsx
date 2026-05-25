@@ -2,7 +2,7 @@ import { range, random, sample, difference, cloneDeep } from "lodash";
 import { strategyGameFactory } from "../../game-factory/strategy-game";
 import type { Ctx, Events } from '../../game-factory/types';
 import { neighbours } from "./helpers";
-import { aiBotStrategy } from "./bot-strategy";
+import { smartBotStrategy } from "./bot-strategy";
 import { BoardClient } from "./board-client";
 
 export type Board = {
@@ -156,7 +156,7 @@ export const PolicemanthiefA = strategyGameFactory({
   },
   BoardClient,
   gameplay: { moves },
-  variants: [{ botStrategy: aiBotStrategy, generateStartBoard: generateStartBoardA }]
+  variants: [{ botStrategy: smartBotStrategy, generateStartBoard: generateStartBoardA }]
 });
 
 export const PolicemanthiefB = strategyGameFactory({
@@ -170,5 +170,5 @@ export const PolicemanthiefB = strategyGameFactory({
   },
   BoardClient,
   gameplay: { moves },
-  variants: [{ botStrategy: aiBotStrategy, generateStartBoard: generateStartBoardB }]
+  variants: [{ botStrategy: smartBotStrategy, generateStartBoard: generateStartBoardB }]
 });

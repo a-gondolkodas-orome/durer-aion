@@ -4,7 +4,7 @@ import type { Events } from '../../game-factory/types';
 import { BoardClient } from './board-client';
 
 export type Board = { architectPosition: number, towers: boolean[], day: number, kmUsedToday: number }
-import { aiBotStrategy } from './bot-strategy';
+import { smartBotStrategy } from './bot-strategy';
 
 // Vertices A(0)..J(9) clockwise, each edge 10 km, max 50 km/day
 
@@ -111,5 +111,5 @@ export const ArchitectAndBanditsB = strategyGameFactory({
   },
   BoardClient,
   gameplay: { moves, endOfTurnMove: 'startNextDay' },
-  variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
+  variants: [{ botStrategy: smartBotStrategy, generateStartBoard }]
 });

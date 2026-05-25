@@ -172,7 +172,7 @@ const moves = {
   }
 };
 
-const aiBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   const rem = board[0] % 3;
   if (rem === 0) {
     const randomNonEmptyPile = sample(filter([0, 1], (i) => board[i] > 0))!;
@@ -241,7 +241,7 @@ export const SixDiscs = strategyGameFactory({
   variants: [
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
     {
-      botStrategy: aiBotStrategy,
+      botStrategy: smartBotStrategy,
       generateStartBoard: generateStartBoard(6),
       label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
       isDefault: true
@@ -259,7 +259,7 @@ export const TenDiscs = strategyGameFactory({
   variants: [
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
     {
-      botStrategy: aiBotStrategy,
+      botStrategy: smartBotStrategy,
       generateStartBoard: generateStartBoard(10),
       label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
       isDefault: true

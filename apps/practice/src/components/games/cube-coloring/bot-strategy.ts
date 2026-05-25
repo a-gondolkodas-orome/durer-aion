@@ -15,7 +15,7 @@ export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   moves.colorVertex(board, sample(validMoves));
 };
 
-export const aiBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
   const { vertex, color } = ctx.chosenRoleIndex === 0
     ? makeOptimalStepAsSecond(board)!
     : makeOptimalStepAsFirst(board);

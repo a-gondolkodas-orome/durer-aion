@@ -1,4 +1,4 @@
-import { aiBotStrategy } from "./bot-strategy";
+import { smartBotStrategy } from "./bot-strategy";
 import type { Board } from './bank-robbers';
 import type { GameMoves } from '../../game-factory/types';
 import { makeCtx } from '../../game-factory/ctx-factory';
@@ -7,14 +7,14 @@ const mockRob = (): GameMoves<Board> => ({
   rob: (board: Board, bank: number) => { board.circle[bank] = false; return { nextBoard: board }; }
 });
 
-describe('aiBotStrategy', () => {
+describe('smartBotStrategy', () => {
   it('moves symmetrically for even number of banks', () => {
     const board: Board = {
       circle: [false, true, true, true, true, true, true, true],
       firstMove: 5,
       lastMove: 0
     }
-    aiBotStrategy({ board, ctx: makeCtx(), moves: mockRob() });
+    smartBotStrategy({ board, ctx: makeCtx(), moves: mockRob() });
     expect(board.circle[4]).toBe(false);
   });
 
@@ -24,7 +24,7 @@ describe('aiBotStrategy', () => {
       firstMove: 5,
       lastMove: 0
     }
-    aiBotStrategy({ board, ctx: makeCtx(), moves: mockRob() });
+    smartBotStrategy({ board, ctx: makeCtx(), moves: mockRob() });
     expect(board.circle[2] === false || board.circle[5] === false).toBe(true);
   });
 
@@ -34,7 +34,7 @@ describe('aiBotStrategy', () => {
       firstMove: 5,
       lastMove: 0
     }
-    aiBotStrategy({ board, ctx: makeCtx(), moves: mockRob() });
+    smartBotStrategy({ board, ctx: makeCtx(), moves: mockRob() });
     expect(board.circle[3] === false || board.circle[6] === false).toBe(true);
   });
 });

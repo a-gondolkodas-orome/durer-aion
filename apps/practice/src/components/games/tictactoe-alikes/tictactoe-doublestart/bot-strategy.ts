@@ -18,7 +18,7 @@ export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   }
 };
 
-export const aiBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
   if (emptyCells(board).length === 9) {
     // choose two neighboring corners randomly
     const firstStep = sample([[0, 2], [2, 8], [6, 8], [0, 6]])!;
@@ -27,20 +27,20 @@ export const aiBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
       moves.placePiece(nextBoard, firstStep[1]);
     }, 750)
   } else {
-    const position = getOptimalAiPlacingPosition(board, ctx.chosenRoleIndex);
+    const position = getOptimalBotPlacingPosition(board, ctx.chosenRoleIndex);
     moves.placePiece(board, position);
   }
 };
 
-const getOptimalAiPlacingPosition = (board: Board, chosenRoleIndex) => {
-  const aiColor = roleColors[1 - chosenRoleIndex];
+const getOptimalBotPlacingPosition = (board: Board, chosenRoleIndex) => {
+  const botColor = roleColors[1 - chosenRoleIndex];
   const opponentColor = roleColors[chosenRoleIndex];
 
   const allowedPlaces = emptyCells(board);
 
   const optimalPlaces = allowedPlaces.filter(i => {
     const boardCopy = cloneDeep(board);
-    boardCopy[i] = aiColor;
+    boardCopy[i] = botColor;
     return isWinningState(boardCopy, chosenRoleIndex === 1);
   });
 

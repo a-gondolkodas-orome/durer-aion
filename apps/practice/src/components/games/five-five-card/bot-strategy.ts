@@ -8,8 +8,8 @@ export const randomBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) =>
   moves.removeCard(board, sample(validIds));
 };
 
-export const aiBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
-  const idx = getOptimalAiMove(board, ctx.chosenRoleIndex);
+export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
+  const idx = getOptimalSmartBotMove(board, ctx.chosenRoleIndex);
   moves.removeCard(board, idx);
 };
 
@@ -24,7 +24,7 @@ const isWinningPosition = (i, j, chosenRoleIndex): boolean => {
   }
 }
 
-export const getOptimalAiMove = (board: Board, opponentIndex) => {
+export const getOptimalSmartBotMove = (board: Board, opponentIndex) => {
   const firstPlayersPossibleMoves = compact(board[1]);
   const secondPlayersPossibleMoves = compact(board[0]);
   // as a first player still try to win if second player may not play optimally

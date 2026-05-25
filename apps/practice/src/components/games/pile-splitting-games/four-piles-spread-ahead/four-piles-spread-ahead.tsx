@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { range, random, cloneDeep } from 'lodash';
 import { strategyGameFactory } from '../../../game-factory/strategy-game';
 import type { BoardClientProps, Events } from '../../../game-factory/types';
-import { aiBotStrategy, randomBotStrategy } from './bot-strategy';
+import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { useLanguage } from '../../../language/language-context';
 
 export type Board = number[];
@@ -189,6 +189,6 @@ export const FourPilesSpreadAhead = strategyGameFactory({
       generateStartBoard: generateTestStartBoard,
       label: { hu: 'Teszt 🤖', en: 'Test 🤖' }
     },
-    { botStrategy: aiBotStrategy, generateStartBoard, label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
+    { botStrategy: smartBotStrategy, generateStartBoard, label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
   ]
 });

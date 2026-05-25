@@ -171,7 +171,7 @@ const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
 // Note: Currently the AI may not win even from a winning position if the player
 // selected winning role but then did not follow winning strategy due to intractability.
 // We may improve AI with some heuristic and leveraging equivalent positions.
-const aiBotStrategy = ({ board, moves, ctx }: StrategyArgs<Board>) => {
+const smartBotStrategy = ({ board, moves, ctx }: StrategyArgs<Board>) => {
   const possibleMoves = getPossibleMoves(board);
   if (possibleMoves.length >= 20) {
     if (ctx.chosenRoleIndex === 1) {
@@ -184,12 +184,12 @@ const aiBotStrategy = ({ board, moves, ctx }: StrategyArgs<Board>) => {
       moves.placeDomino(board, mirrorImage);
     }
   } else {
-    const optimalMove = getOptimalAiMove(board);
+    const optimalMove = getOptimalSmartBotMove(board);
     moves.placeDomino(board, optimalMove);
   }
 }
 
-const getOptimalAiMove = (board: Board) => {
+const getOptimalSmartBotMove = (board: Board) => {
   const allowedMoves = getPossibleMoves(board);
   const optimalPlace = shuffle(allowedMoves).find(i => {
     const { nextBoard } = moves.placeDomino(board, { events: dummyEvents }, i);
@@ -246,7 +246,7 @@ export const DominoesOnChessboard = strategyGameFactory({
   variants: [
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
     {
-      botStrategy: aiBotStrategy,
+      botStrategy: smartBotStrategy,
       generateStartBoard: () => [],
       label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
       isDefault: true

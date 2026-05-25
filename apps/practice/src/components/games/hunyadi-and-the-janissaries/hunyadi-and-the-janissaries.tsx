@@ -3,7 +3,7 @@ import { strategyGameFactory } from '../../game-factory/strategy-game';
 import type { BoardClientProps, Ctx } from '../../game-factory/types';
 import { CastleSvg } from './assets/castle-svg';
 import { SoldierSvg } from './assets/soldier-svg';
-import { aiBotStrategy } from './bot-strategy';
+import { smartBotStrategy } from './bot-strategy';
 import { generateStartBoard, moves, type Board, type SoldierColor } from './helpers';
 import { useTranslation } from '../../language/translate';
 
@@ -146,5 +146,5 @@ export const HunyadiAndTheJanissaries = strategyGameFactory({
   },
   BoardClient,
   gameplay: { moves, endOfTurnMove: 'stepUp' },
-  variants: [{ botStrategy: aiBotStrategy, generateStartBoard }]
+  variants: [{ botStrategy: smartBotStrategy, generateStartBoard }]
 });

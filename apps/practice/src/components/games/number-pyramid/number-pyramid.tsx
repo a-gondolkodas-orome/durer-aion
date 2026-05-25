@@ -2,7 +2,7 @@ import { cloneDeep, sumBy } from 'lodash';
 import { strategyGameFactory } from '../../game-factory/strategy-game';
 import type { Ctx, Events } from '../../game-factory/types';
 import {
-  aiBotStrategy, generateStartBoard, randomBotStrategy, type Board
+  smartBotStrategy, generateStartBoard, randomBotStrategy, type Board
 } from './strategy';
 import { BoardClient, type TurnState } from './board-client';
 
@@ -74,7 +74,7 @@ export const NumberPyramid = strategyGameFactory({
       label: { hu: 'Teszt 🤖', en: 'Test 🤖' }
     },
     {
-      botStrategy: aiBotStrategy,
+      botStrategy: smartBotStrategy,
       generateStartBoard,
       label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
       isDefault: true

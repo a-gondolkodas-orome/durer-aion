@@ -6,12 +6,12 @@ export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   moves.step(board, randomStep(board.restricted));
 };
 
-export const aiBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  const step = getOptimalAiStep(board);
+export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+  const step = getOptimalBotStep(board);
   moves.step(board, step);
 };
 
-const getOptimalAiStep = ({ current, target, restricted }) => {
+const getOptimalBotStep = ({ current, target, restricted }) => {
   if ((target - current) % 14 === 0) { //any step wins
     return randomStep(restricted);
   }

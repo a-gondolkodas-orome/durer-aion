@@ -6,12 +6,12 @@ export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   moves.moveKnight(board, sample(getAllowedMoves(board)));
 };
 
-export const aiBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  const aiMove = getOptimalAiMove(board);
-  moves.moveKnight(board, aiMove);
+export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+  const botMove = getOptimalSmartBotMove(board);
+  moves.moveKnight(board, botMove);
 };
 
-export const getOptimalAiMove = (board: Board): Field => {
+export const getOptimalSmartBotMove = (board: Board): Field => {
   const allowedMoves = getAllowedMoves(board);
   if (allowedMoves.length === 1) {
     return allowedMoves[0];

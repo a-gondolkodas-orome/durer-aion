@@ -3,7 +3,7 @@ import { range, random } from 'lodash';
 import { strategyGameFactory } from '../../game-factory/strategy-game';
 import type { Events, BoardClientProps } from '../../game-factory/types';
 import { useTranslation } from '../../language/translate';
-import { aiBotStrategy, randomBotStrategy } from './bot-strategy';
+import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 
 export type Board = number[]
 export type MoveType = 'remove' | 'merge'
@@ -239,7 +239,7 @@ export const PileUnion = strategyGameFactory({
       label: { hu: 'Teszt 🤖', en: 'Test 🤖' }
     },
     {
-      botStrategy: aiBotStrategy,
+      botStrategy: smartBotStrategy,
       generateStartBoard: () => {
         const numPiles = random(2, 4);
         return Array.from({ length: numPiles }, () => random(2, 5));

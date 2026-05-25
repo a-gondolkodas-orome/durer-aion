@@ -11,12 +11,12 @@ export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   moves.placeBishop(board, sample(getAllowedMoves(board)));
 };
 
-export const aiBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  const aiMove = getOptimalAiMove(board);
-  moves.placeBishop(board, aiMove);
+export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+  const botMove = getOptimalSmartBotMove(board);
+  moves.placeBishop(board, botMove);
 };
 
-export const getOptimalAiMove = (board: Board): Field => {
+export const getOptimalSmartBotMove = (board: Board): Field => {
   const allowedHMirrorMoves = boardIndices.filter(
     ({ row, col }) => board[row][col] === null && board[row][7 - col] === BISHOP
   );
@@ -149,12 +149,14 @@ const getOptimalThirdStep = (board: Board): Field | undefined => {
   equivalentPositions.push({ bishops: [mb2, mb1], type: 'rotate270-hflip-rotate270' });
 
   const pos = equivalentPositions.find(({ bishops: [[r1, c1], [r2, c2]] }) =>
-    aiOptimalThirdSteps[`${r1};${c1} - ${r2};${c2}`] !== undefined
+    smartBotOptimalThirdSteps[`${r1};${c1} - ${r2};${c2}`] !== undefined
   );
 
   if (pos !== undefined) {
     const bishops = pos['bishops'];
-    const optimalStep = aiOptimalThirdSteps[`${bishops[0][0]};${bishops[0][1]} - ${bishops[1][0]};${bishops[1][1]}`];
+    const optimalStep = smartBotOptimalThirdSteps[
+      `${bishops[0][0]};${bishops[0][1]} - ${bishops[1][0]};${bishops[1][1]}`
+    ];
     const transformedStep = invertTransformation(
       [optimalStep['row'], optimalStep['col']],
       pos['type']
@@ -177,7 +179,7 @@ const invertTransformation = (stepCoords: Coords, type: TransformationType): Coo
   }
 };
 
-const aiOptimalThirdSteps: Record<string, Field> = {
+const smartBotOptimalThirdSteps: Record<string, Field> = {
   "0;0 - 0;1": {"row":3,"col":6},
   "0;0 - 0;2": {"row":3,"col":2},
   "0;0 - 0;3": {"row":4,"col":1},

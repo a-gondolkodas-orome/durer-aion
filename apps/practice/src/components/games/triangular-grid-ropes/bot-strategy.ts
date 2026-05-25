@@ -20,12 +20,12 @@ export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   moves.stretchRope(board, sample(getAllowedMoves(board)));
 };
 
-export const aiBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
-  const move = getOptimalAiMove({ board, chosenRoleIndex: ctx.chosenRoleIndex });
+export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
+  const move = getOptimalSmartBotMove({ board, chosenRoleIndex: ctx.chosenRoleIndex });
   moves.stretchRope(board, move);
 };
 
-const getOptimalAiMove = ({ board, chosenRoleIndex }: { board: Board, chosenRoleIndex: number | null }) => {
+const getOptimalSmartBotMove = ({ board, chosenRoleIndex }: { board: Board, chosenRoleIndex: number | null }) => {
   const allowedMoves = getAllowedMoves(board);
   if (chosenRoleIndex === 1) {
     if (board.length === 0) {

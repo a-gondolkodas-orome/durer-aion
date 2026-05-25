@@ -88,7 +88,7 @@ const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   moves.removeNumber(board, sample(possibleMoves));
 };
 
-const aiBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   const numCount = board.numbersOnTable.length;
   const stateId = generateStateID(board);
   const optimalMoves = strategyDict[numCount]
@@ -168,7 +168,7 @@ export const RemoveDivisorMultiple = strategyGameFactory({
       label: { hu: 'Teszt 🤖', en: 'Test 🤖' }
     },
     {
-      botStrategy: aiBotStrategy,
+      botStrategy: smartBotStrategy,
       generateStartBoard,
       label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
       isDefault: true

@@ -8,7 +8,7 @@ export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   moves.takeCard(board, [sample(getUntakenCards(board, CARD_COUNT))]);
 };
 
-export const aiBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
     const move = getMove(board);
     moves.takeCard(board, [move]);
 }

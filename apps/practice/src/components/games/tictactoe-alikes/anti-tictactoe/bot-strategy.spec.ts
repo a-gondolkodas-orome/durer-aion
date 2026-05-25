@@ -1,4 +1,4 @@
-import { aiBotStrategy } from "./bot-strategy";
+import { smartBotStrategy } from "./bot-strategy";
 import type { Board } from './helpers';
 import type { GameMoves } from '../../../game-factory/types';
 import { makeCtx } from '../../../game-factory/ctx-factory';
@@ -7,12 +7,12 @@ const mockPlacePiece = (): GameMoves<Board> => ({
   placePiece: (board: Board, id: number) => { board[id] = 'new_piece'; return { nextBoard: board }; }
 });
 
-describe('aiBotStrategy', () => {
+describe('smartBotStrategy', () => {
   it('should place to middle place as a starting move', () => {
     const board = Array(9).fill(null);
     const moves = mockPlacePiece();
 
-    aiBotStrategy({ board, moves, ctx: makeCtx({ chosenRoleIndex: 1 }) });
+    smartBotStrategy({ board, moves, ctx: makeCtx({ chosenRoleIndex: 1 }) });
 
     expect(board[4]).toEqual('new_piece');
   });
@@ -24,7 +24,7 @@ describe('aiBotStrategy', () => {
       null, 'red', null,
       null, null, null
     ]
-    aiBotStrategy({ board: board1, moves, ctx: makeCtx({ chosenRoleIndex: 1 }) })
+    smartBotStrategy({ board: board1, moves, ctx: makeCtx({ chosenRoleIndex: 1 }) })
     expect(board1[8]).toEqual('new_piece');
 
     const board2 = [
@@ -32,7 +32,7 @@ describe('aiBotStrategy', () => {
       null, 'red', 'blue',
       null, null, 'red'
     ]
-    aiBotStrategy({ board: board2, moves, ctx: makeCtx({ chosenRoleIndex: 1 }) })
+    smartBotStrategy({ board: board2, moves, ctx: makeCtx({ chosenRoleIndex: 1 }) })
 
     expect(board2[3]).toEqual('new_piece');
   });
@@ -44,7 +44,7 @@ describe('aiBotStrategy', () => {
       'red', null, 'red'
     ];
     const moves = mockPlacePiece();
-    aiBotStrategy({ board, moves, ctx: makeCtx({ chosenRoleIndex: 0 }) })
+    smartBotStrategy({ board, moves, ctx: makeCtx({ chosenRoleIndex: 0 }) })
     expect(board[1]).not.toEqual('new_piece');
   });
 });

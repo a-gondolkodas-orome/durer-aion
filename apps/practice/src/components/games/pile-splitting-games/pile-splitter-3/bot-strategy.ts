@@ -4,8 +4,8 @@ import type { Board } from './pile-splitter-3';
 
 type BotStep = { removedPileId: number; pileId: number; pieceCount: number };
 
-export const aiBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  const botStep = getAiStep(board);
+export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+  const botStep = getSmartBotStep(board);
   executeBotStrategy(botStep, { board, moves });
 };
 
@@ -31,7 +31,7 @@ const getRandomStep = (board: Board): BotStep => {
   return { removedPileId, pileId, pieceCount };
 };
 
-export const getAiStep = (board: Board): BotStep => {
+export const getSmartBotStep = (board: Board): BotStep => {
   const start = random(0, 2);
   let removedPileId: number, splitPileId: number;
 
@@ -77,8 +77,8 @@ export const getAiStep = (board: Board): BotStep => {
     // this is the case where all piles have even number of pieces
     // should not occur in an optimal game with 37 pieces
     // with this the enemy also has a strategy when the game starts with 36 pieces
-    const aiStep = getAiStep(board.map((x) => x / 2));
-    return { ...aiStep, pieceCount: aiStep.pieceCount * 2 };
+    const botStep = getSmartBotStep(board.map((x) => x / 2));
+    return { ...botStep, pieceCount: botStep.pieceCount * 2 };
   }
 };
 

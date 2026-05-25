@@ -1,4 +1,4 @@
-import { aiDefense, aiAttack } from "./bot-strategy";
+import { smartBotDefense, smartBotAttack } from "./bot-strategy";
 import { reverse, isEqual } from "lodash";
 
 describe('test ai strategy', () => {
@@ -10,7 +10,7 @@ describe('test ai strategy', () => {
         [0, 0, 1]
       ]);
       const board = { bacteria, goals: [1] };
-      expect(aiDefense(board)).toEqual({ defenseRow: 2, defenseCol: 0 })
+      expect(smartBotDefense(board)).toEqual({ defenseRow: 2, defenseCol: 0 })
     });
 
     it('removes a bacteria if it could reach goals with a jump', () => {
@@ -20,7 +20,7 @@ describe('test ai strategy', () => {
         [0, 0, 1]
       ]);
       const board = { bacteria, goals: [2] };
-      expect(aiDefense(board)).toEqual({ defenseRow: 0, defenseCol: 2 })
+      expect(smartBotDefense(board)).toEqual({ defenseRow: 0, defenseCol: 2 })
     });
 
     it('removes a closer dangerous bacteria', () => {
@@ -32,7 +32,7 @@ describe('test ai strategy', () => {
         [0, 0, 0, 0]
       ]);
       const board = { bacteria, goals: [2, 3, 4] };
-      expect(aiDefense(board)).toEqual({ defenseRow: 2, defenseCol: 4 })
+      expect(smartBotDefense(board)).toEqual({ defenseRow: 2, defenseCol: 4 })
     });
 
     it('removes a more dangerous bacteria even if no immediate threat', () => {
@@ -42,7 +42,7 @@ describe('test ai strategy', () => {
         [1, 0, 0, 1, 0]
       ]);
       const board = { bacteria, goals: [2] };
-      expect(aiDefense(board)).toEqual({ defenseRow: 0, defenseCol: 3 })
+      expect(smartBotDefense(board)).toEqual({ defenseRow: 0, defenseCol: 3 })
     });
 
     it('removes a bacteria if it could reach goals in several steps', () => {
@@ -54,7 +54,7 @@ describe('test ai strategy', () => {
         [0, 0, 0, 1, 0, 0, 0]
       ]);
       const board = { bacteria, goals: [2, 3, 4] };
-      expect(aiDefense(board)).toEqual({ defenseRow: 0, defenseCol: 3 })
+      expect(smartBotDefense(board)).toEqual({ defenseRow: 0, defenseCol: 3 })
     });
 
     it('removes a bacteria if multiple in a cell', () => {
@@ -64,7 +64,7 @@ describe('test ai strategy', () => {
         [0, 2, 0, 1, 0]
       ]);
       const board = { bacteria, goals: [2] };
-      expect(aiDefense(board)).toEqual({ defenseRow: 0, defenseCol: 1 })
+      expect(smartBotDefense(board)).toEqual({ defenseRow: 0, defenseCol: 1 })
     });
 
     it('removes a bacteria from a path with multiple bacteria', () => {
@@ -74,7 +74,7 @@ describe('test ai strategy', () => {
         [0, 0, 1, 0, 0]
       ]);
       const board = { bacteria, goals: [4] };
-      const d = aiDefense(board);
+      const d = smartBotDefense(board);
       expect(isEqual(d, { defenseRow: 1, defenseCol: 1 }) || isEqual(d, { defenseRow: 0, defenseCol: 2 })).toBe(true);
     });
 
@@ -85,7 +85,7 @@ describe('test ai strategy', () => {
         [0, 0, 1, 0, 0]
       ]);
       const board = { bacteria, goals: [0] };
-      const d = aiDefense(board);
+      const d = smartBotDefense(board);
       expect(isEqual(d, { defenseRow: 1, defenseCol: 2 }) || isEqual(d, { defenseRow: 0, defenseCol: 2 })).toBe(true);
     });
 
@@ -96,7 +96,7 @@ describe('test ai strategy', () => {
         [0, 0, 1, 0, 0]
       ]);
       const board = { bacteria, goals: [2] };
-      expect(aiDefense(board)).toEqual({ defenseRow: 0, defenseCol: 2 })
+      expect(smartBotDefense(board)).toEqual({ defenseRow: 0, defenseCol: 2 })
     });
 
     it('removes dangerous bacteria if multiples cannot spread', () => {
@@ -106,7 +106,7 @@ describe('test ai strategy', () => {
         [2, 0, 1, 0, 0]
       ]);
       const board = { bacteria, goals: [2] };
-      expect(aiDefense(board)).toEqual({ defenseRow: 0, defenseCol: 2 })
+      expect(smartBotDefense(board)).toEqual({ defenseRow: 0, defenseCol: 2 })
     });
   });
 
@@ -118,7 +118,7 @@ describe('test ai strategy', () => {
         [0, 0, 1]
       ]);
       const board = { bacteria, goals: [1] };
-      expect(aiAttack(board)).toEqual({ attackChoice: "shiftRight", attackRow: 2, attackCol: 0 })
+      expect(smartBotAttack(board)).toEqual({ attackChoice: "shiftRight", attackRow: 2, attackCol: 0 })
     });
 
     it('reaches goal with shiftLeft if it can', () => {
@@ -128,7 +128,7 @@ describe('test ai strategy', () => {
         [0, 0, 1]
       ]);
       const board = { bacteria, goals: [1] };
-      expect(aiAttack(board)).toEqual({ attackChoice: "shiftLeft", attackRow: 2, attackCol: 2 })
+      expect(smartBotAttack(board)).toEqual({ attackChoice: "shiftLeft", attackRow: 2, attackCol: 2 })
     });
 
     it('reaches goal with spread if it can', () => {
@@ -138,7 +138,7 @@ describe('test ai strategy', () => {
         [0, 0, 1]
       ]);
       const board = { bacteria, goals: [1] };
-      expect(aiAttack(board)).toEqual({ attackChoice: "spread", attackRow: 1, attackCol: 0 })
+      expect(smartBotAttack(board)).toEqual({ attackChoice: "spread", attackRow: 1, attackCol: 0 })
     });
 
     it('reaches goal with jump if it can', () => {
@@ -148,7 +148,7 @@ describe('test ai strategy', () => {
         [0, 0, 1]
       ]);
       const board = { bacteria, goals: [2] };
-      expect(aiAttack(board)).toEqual({ attackChoice: "jump", attackRow: 0, attackCol: 2 })
+      expect(smartBotAttack(board)).toEqual({ attackChoice: "jump", attackRow: 0, attackCol: 2 })
     });
 
     it('spreads a dangerous bacteria if it can', () => {
@@ -161,7 +161,7 @@ describe('test ai strategy', () => {
       ]);
       const board = { bacteria, goals: [2, 3, 4] };
 
-      expect(aiAttack(board)).toEqual({ attackChoice: "spread", attackRow: 0, attackCol: 3 })
+      expect(smartBotAttack(board)).toEqual({ attackChoice: "spread", attackRow: 0, attackCol: 3 })
     });
 
     it('makes a valid move from a losing position', () => {
@@ -171,7 +171,7 @@ describe('test ai strategy', () => {
         [0, 0, 1]
       ]);
       const board = { bacteria, goals: [1] }
-      const attack = aiAttack(board);
+      const attack = smartBotAttack(board);
 
       const variantA = {
         attackChoice: "jump",
@@ -202,7 +202,7 @@ describe('test ai strategy', () => {
         [0, 0, 0, 0, 1]
       ]);
       const board = { bacteria, goals: [3] };
-      const attack = aiAttack(board);
+      const attack = smartBotAttack(board);
       expect(attack).toEqual({
         attackChoice: "spread",
         attackRow: 1,
@@ -219,7 +219,7 @@ describe('test ai strategy', () => {
         [0, 0, 1, 0, 0]
       ]);
       const board = { bacteria, goals: [1, 2, 3] };
-      const { attackRow, attackCol } = aiAttack(board);
+      const { attackRow, attackCol } = smartBotAttack(board);
       expect([attackRow, attackCol]).toEqual([3, 1])
     });
   });

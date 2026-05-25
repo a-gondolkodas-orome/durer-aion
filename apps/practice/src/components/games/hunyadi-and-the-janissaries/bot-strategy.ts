@@ -2,7 +2,7 @@ import { random } from 'lodash';
 import type { StrategyArgs } from '../../game-factory/types';
 import { type Board, type SoldierColor, type Soldier } from './helpers';
 
-export const aiBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
   if (ctx.chosenRoleIndex === 0) {
     const optimalGroupToKill = getOptimalGroupToKill(board);
     moves.killGroup(board, optimalGroupToKill);

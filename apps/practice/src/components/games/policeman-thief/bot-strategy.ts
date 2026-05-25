@@ -3,7 +3,7 @@ import { neighbours } from "./helpers";
 import type { Board } from "./policeman-thief";
 import type { StrategyArgs, GameMoves } from "../../game-factory/types";
 
-export const aiBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
   if (ctx.chosenRoleIndex === 0) {
     moveThiefOptimally({ board, moves });
   } else {

@@ -45,12 +45,12 @@ export const randomBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) =>
 };
 
 /* Currently only implemented for the case of adjacent goal fields */
-export const aiBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
   if (ctx.chosenRoleIndex === 0) {
-    const { defenseRow, defenseCol } = aiDefense(board);
+    const { defenseRow, defenseCol } = smartBotDefense(board);
     moves.defend(board, { row: defenseRow, col: defenseCol });
   } else {
-    const { attackChoice, attackRow, attackCol } = aiAttack(board);
+    const { attackChoice, attackRow, attackCol } = smartBotAttack(board);
     switch(attackChoice) {
       case 'shiftRight': moves.shiftRight(board, { row: attackRow, col: attackCol }); break;
       case 'shiftLeft': moves.shiftLeft(board, { row: attackRow, col: attackCol }); break;
@@ -60,7 +60,7 @@ export const aiBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
   }
 };
 
-export const aiDefense = (board: Board) => {
+export const smartBotDefense = (board: Board) => {
   let defenseRow, defenseCol;
 
   const bacteriaCoords = getBacteriaCoords(board.bacteria);
@@ -100,7 +100,7 @@ export const aiDefense = (board: Board) => {
   return { defenseRow, defenseCol };
 };
 
-export const aiAttack = (board: Board) => {
+export const smartBotAttack = (board: Board) => {
   const { bacteria, goals } = board;
 
   const goalRowIdx = bacteria.length - 1;

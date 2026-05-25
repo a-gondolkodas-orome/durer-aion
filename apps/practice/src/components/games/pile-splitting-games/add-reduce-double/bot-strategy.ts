@@ -12,7 +12,7 @@ export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   moves.moveHalvedPieces(board, sample(validMoves));
 };
 
-export const aiBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   let pileId, pieceCount;
   if (board[0]-board[1] === -1 || board[0]-board[1] === 0 || board[0]-board[1] === 1) {
     const ran = random(0,1);

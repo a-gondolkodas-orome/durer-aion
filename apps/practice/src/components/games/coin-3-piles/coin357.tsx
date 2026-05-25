@@ -1,5 +1,5 @@
 import { strategyGameFactory } from '../../game-factory/strategy-game';
-import { aiBotStrategy, randomBotStrategy } from './bot-strategy';
+import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { BoardClient } from './board-client';
 import { getPlayerStepDescription, moves, type Board } from './helpers';
 
@@ -27,7 +27,7 @@ export const Coin357 = strategyGameFactory({
   variants: [
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
     {
-      botStrategy: aiBotStrategy,
+      botStrategy: smartBotStrategy,
       generateStartBoard: (): Board => ([3, 5, 7]),
       label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
       isDefault: true

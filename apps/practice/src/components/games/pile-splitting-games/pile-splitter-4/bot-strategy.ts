@@ -4,8 +4,8 @@ import type { Board } from './pile-splitter-4';
 
 type BotStep = { removedPileId: number; pileId: number; pieceCount: number };
 
-export const aiBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  const botStep = getAiStep(board);
+export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+  const botStep = getSmartBotStep(board);
   executeBotStrategy(botStep, { board, moves });
 };
 
@@ -31,7 +31,7 @@ const getRandomStep = (board: Board): BotStep => {
   return { removedPileId, pileId, pieceCount };
 };
 
-export const getAiStep = (board: Board): BotStep => {
+export const getSmartBotStep = (board: Board): BotStep => {
   const start = random(0, 3);
   let removedPileId = -1, splitPileId = -1;
 
@@ -67,11 +67,11 @@ export const getAiStep = (board: Board): BotStep => {
     } else {
       const modifiedBoard = [...board];
       modifiedBoard[oddPile] += 1;
-      const aiStep = getAiStep(modifiedBoard);
+      const botStep = getSmartBotStep(modifiedBoard);
       return {
-        removedPileId: aiStep.removedPileId,
-        pileId: aiStep.pileId,
-        pieceCount: aiStep.pieceCount - 1
+        removedPileId: botStep.removedPileId,
+        pileId: botStep.pileId,
+        pieceCount: botStep.pieceCount - 1
       };
     }
   }
@@ -81,8 +81,8 @@ export const getAiStep = (board: Board): BotStep => {
       removedPileId = (start + 1) % 4;
       splitPileId = start;
     } else {
-      const aiStep = getAiStep(board.map((x) => x / 2));
-      return { ...aiStep, pieceCount: aiStep.pieceCount * 2 };
+      const botStep = getSmartBotStep(board.map((x) => x / 2));
+      return { ...botStep, pieceCount: botStep.pieceCount * 2 };
     }
   }
 

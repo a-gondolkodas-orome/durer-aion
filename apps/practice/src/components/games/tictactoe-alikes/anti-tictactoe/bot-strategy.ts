@@ -7,14 +7,14 @@ export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   moves.placePiece(board, sample(emptyCells(board)));
 };
 
-export const aiBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
-  const id = getOptimalAiPlacingPosition(board, ctx.chosenRoleIndex);
+export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
+  const id = getOptimalBotPlacingPosition(board, ctx.chosenRoleIndex);
   moves.placePiece(board, id);
 };
 
 const emptyCells = (board: Board) => range(0, 9).filter(i => isNull(board[i]));
 
-const getOptimalAiPlacingPosition = (board: Board, chosenRoleIndex) => {
+const getOptimalBotPlacingPosition = (board: Board, chosenRoleIndex) => {
   const allowedPlaces = emptyCells(board);
 
   // start with middle place as a first step

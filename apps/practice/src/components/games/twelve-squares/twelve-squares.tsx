@@ -74,11 +74,11 @@ const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
 };
 
 const optimalBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  const step = getOptimalAiStep(board);
+  const step = getOptimalBotStep(board);
   moves.step(board, step);
 };
 
-const getOptimalAiStep = ({ left, right }) => {
+const getOptimalBotStep = ({ left, right }) => {
   const dst = right-left;
   if(dst === 1) return 2;
   if(dst === 2) return 1;

@@ -1,7 +1,7 @@
 import { strategyGameFactory } from '../../../game-factory/strategy-game';
 import { range, cloneDeep } from 'lodash';
 import type { Events, BoardClientProps } from '../../../game-factory/types';
-import { aiBotStrategy, randomBotStrategy } from './bot-strategy';
+import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import {
   hasWinningTriple,
   Sheriff,
@@ -106,6 +106,6 @@ export const ThiefSheriffMean9 = strategyGameFactory({
   gameplay: { moves },
   variants: [
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
-    { botStrategy: aiBotStrategy, generateStartBoard, label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
+    { botStrategy: smartBotStrategy, generateStartBoard, label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
   ]
 });

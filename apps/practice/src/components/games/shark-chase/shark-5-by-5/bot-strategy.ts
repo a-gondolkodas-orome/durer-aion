@@ -40,7 +40,7 @@ export const randomBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) =>
   }
 };
 
-export const aiBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
   if (ctx.chosenRoleIndex === 0) {
     const finalPos = getNextSharkPositionByAI(board.submarines, board.shark)!;
     const firstPos = getIntermediateSharkPosition(board.submarines, board.shark, finalPos);
@@ -51,12 +51,12 @@ export const aiBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
       }, firstPos === finalPos ? 0 : 750);
     }
   } else {
-    const { from, to } = getOptimalSubmarineMoveByAi(board)!;
+    const { from, to } = getOptimalSubmarineMoveByBot(board)!;
     moves.moveSubmarine(board, { from, to });
   }
 };
 
-const getOptimalSubmarineMoveByAi = (board: Board): { from: number; to: number } | undefined => {
+const getOptimalSubmarineMoveByBot = (board: Board): { from: number; to: number } | undefined => {
   const submarineNextToShark = findSubmarineNextToShark(board);
   if (submarineNextToShark !== undefined) {
     return { from: submarineNextToShark, to: board.shark }

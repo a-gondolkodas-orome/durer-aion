@@ -1,5 +1,5 @@
 import { isNull, range, sample } from 'lodash';
-import { pColor, aiColor, inPlacingPhase, isGameEnd, type Board } from './helpers';
+import { pColor, botColor, inPlacingPhase, isGameEnd, type Board } from './helpers';
 import type { StrategyArgs } from '../../../game-factory/types';
 
 export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
@@ -14,7 +14,7 @@ export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
 
 const opponentCanWinNext = (board: Board, position) => {
   const boardCopy = [...board];
-  boardCopy[position] = aiColor;
+  boardCopy[position] = botColor;
   return range(0, 9).filter(i => isNull(boardCopy[i])).some(i => {
     const boardCopy2 = [...boardCopy];
     boardCopy2[i] = pColor;
@@ -22,24 +22,24 @@ const opponentCanWinNext = (board: Board, position) => {
   });
 };
 
-export const aiBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   if (inPlacingPhase(board)) {
-    const id = getOptimalAiPlacingPosition(board);
+    const id = getOptimalBotPlacingPosition(board);
     moves.placePiece(board, id);
   } else {
-    const id = getOptimalAiFlippingPosition(board);
+    const id = getOptimalBotFlippingPosition(board);
     moves.whitenPiece(board, id);
   }
 };
 
-const getOptimalAiPlacingPosition = (board: Board) => {
+const getOptimalBotPlacingPosition = (board: Board) => {
   const allowedPlaces = getAllowedPlaces(board, false);
 
   if (allowedPlaces.length === 9) return(sample([0, 2, 4, 6, 8]));
 
   const instantWinningPlace = allowedPlaces.find((i) => {
     const localBoard = [...board];
-    localBoard[i] = aiColor;
+    localBoard[i] = botColor;
     return isGameEnd(localBoard);
   });
   if (instantWinningPlace !== undefined) return instantWinningPlace;
@@ -53,7 +53,7 @@ const getOptimalAiPlacingPosition = (board: Board) => {
 
   const optimalPlaces = allowedPlaces.filter(i => {
     const boardCopy = [...board];
-    boardCopy[i] = aiColor;
+    boardCopy[i] = botColor;
     return isWinningState(boardCopy, false);
   });
 
@@ -62,7 +62,7 @@ const getOptimalAiPlacingPosition = (board: Board) => {
   return sample(allowedPlaces);
 };
 
-const getOptimalAiFlippingPosition = (board: Board) => {
+const getOptimalBotFlippingPosition = (board: Board) => {
   const allowedPlaces = getAllowedPlaces(board, false);
 
   const optimalPlaces = allowedPlaces.filter(i => {
@@ -107,13 +107,13 @@ const getAllowedPlaces = (board: Board, amIPlayer) => {
   if (inPlacingPhase(board)) {
     return range(0, 9).filter(i => isNull(board[i]));
   }
-  const enemyColor = amIPlayer ? aiColor : pColor;
+  const enemyColor = amIPlayer ? botColor : pColor;
   return range(0, 9).filter(i => board[i] === enemyColor);
 };
 
 const getNextColor = (board: Board, amIPlayer) => {
   if (inPlacingPhase(board)) {
-    return amIPlayer ? pColor : aiColor;
+    return amIPlayer ? pColor : botColor;
   }
   return 'white';
 };

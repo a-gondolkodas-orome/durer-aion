@@ -1,7 +1,7 @@
 import { range, sample, difference } from 'lodash';
 import { strategyGameFactory } from '../../game-factory/strategy-game';
 import type { Ctx, Events, BoardClientProps } from '../../game-factory/types';
-import { aiBotStrategy, randomBotStrategy } from './bot-strategy';
+import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { useTranslation } from '../../language/translate';
 
 export type Board = { current: number, target: number, restricted: number | null }
@@ -122,6 +122,6 @@ export const SuperstitiousCounting = strategyGameFactory({
       generateStartBoard: generateTestStartBoard,
       label: { hu: 'Teszt 🤖', en: 'Test 🤖' }
     },
-    { botStrategy: aiBotStrategy, generateStartBoard, label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
+    { botStrategy: smartBotStrategy, generateStartBoard, label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
   ]
 });

@@ -107,7 +107,7 @@ const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   moves.subtractPowerOfTwo(board, sample(getAvailableExponents(board)));
 };
 
-const aiBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   if (board === 1) {
     moves.subtractPowerOfTwo(board, 0);
     return;
@@ -169,6 +169,6 @@ export const TakePowerOfTwo = strategyGameFactory({
       generateStartBoard: generateTestStartBoard,
       label: { hu: 'Teszt 🤖', en: 'Test 🤖' }
     },
-    { botStrategy: aiBotStrategy, generateStartBoard, label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
+    { botStrategy: smartBotStrategy, generateStartBoard, label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
   ]
 });

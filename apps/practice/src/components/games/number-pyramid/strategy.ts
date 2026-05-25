@@ -19,7 +19,7 @@ export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   moves.combineTwo(board, { levelIdx: li, indices: sampleSize(actives, 2) });
 };
 
-export const aiBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
   const win = findImmediateWin(board);
   if (win) { moves.combineTwo(board, win); return; }
 

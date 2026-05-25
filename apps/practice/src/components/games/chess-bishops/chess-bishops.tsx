@@ -3,7 +3,7 @@ import { range, isEqual, some, cloneDeep } from 'lodash';
 import { strategyGameFactory } from '../../game-factory/strategy-game';
 import type { BoardClientProps, Events } from '../../game-factory/types';
 import { ChessBishopSvg } from './chess-bishop-svg';
-import { aiBotStrategy, randomBotStrategy } from './bot-strategy';
+import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import {
   generateStartBoard, getAllowedMoves, BISHOP, FORBIDDEN, markForbiddenFields, type Board, type Field
 } from './helpers';
@@ -127,6 +127,6 @@ export const ChessBishops = strategyGameFactory({
   gameplay: { moves },
   variants: [
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
-    { botStrategy: aiBotStrategy, generateStartBoard, label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
+    { botStrategy: smartBotStrategy, generateStartBoard, label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
   ]
 });

@@ -1,7 +1,7 @@
 import { range, some, isEqual, cloneDeep } from 'lodash';
 import { strategyGameFactory } from '../../game-factory/strategy-game';
 import type { BoardClientProps, Events } from '../../game-factory/types';
-import { aiBotStrategy, randomBotStrategy } from './bot-strategy';
+import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { getAllowedMoves, generateStartBoard, markVisitedFields, type Board, type Field } from './helpers';
 import { ChessRookSvg } from './chess-rook-svg';
 
@@ -101,6 +101,6 @@ export const ChessRook = strategyGameFactory({
   gameplay: { moves },
   variants: [
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
-    { botStrategy: aiBotStrategy, generateStartBoard, label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
+    { botStrategy: smartBotStrategy, generateStartBoard, label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
   ]
 });

@@ -15,7 +15,7 @@ import type { Board } from './architect-and-bandits-b';
 //   Day 3: cover remaining missing, position for day 4
 //   Day 4: visit any towers destroyed on night 3 (always reachable ≤5 edges)
 
-export const aiBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
   if (ctx.currentPlayer === 0) {
     const path = getOptimalArchitectPath(board);
     executeArchitectPath(path, board, moves);

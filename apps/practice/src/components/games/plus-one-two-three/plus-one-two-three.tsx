@@ -61,7 +61,7 @@ const moves = {
   }
 };
 
-const aiBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   const nextBoard = board % (1 + maxStep) !== 0
     ? board + (1 + maxStep) - board % (1 + maxStep)
     : board + random(1, maxStep);
@@ -90,5 +90,5 @@ export const PlusOneTwoThree = strategyGameFactory({
   },
   BoardClient,
   gameplay: { moves },
-  variants: [{ botStrategy: aiBotStrategy, generateStartBoard: () => 0 }]
+  variants: [{ botStrategy: smartBotStrategy, generateStartBoard: () => 0 }]
 });

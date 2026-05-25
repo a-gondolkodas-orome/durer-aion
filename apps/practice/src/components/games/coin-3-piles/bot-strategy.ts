@@ -13,7 +13,7 @@ export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   }, 750);
 };
 
-export const aiBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   const { remove, add } = botMoveParams({ board });
   const { nextBoard } = moves.removeCoin(board, remove);
   if (add === undefined) return;

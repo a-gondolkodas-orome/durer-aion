@@ -32,7 +32,7 @@ const isLosing = (board: Board) => {
 P = Previous player wins (the player who just moved wins)
 N = Next player wins — the current player to move has a winning move available
 */
-export const aiBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   const T = sum(board) + board.length;
 
   if (T % 2 === 0) {

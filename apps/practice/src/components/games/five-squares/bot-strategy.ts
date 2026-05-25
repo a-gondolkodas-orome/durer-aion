@@ -13,7 +13,7 @@ export const randomBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) =>
   }
 };
 
-export const aiBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
   if (ctx.chosenRoleIndex === 0) {
     const tileIndices = getOptimalTileIndices(board)!;
     const { nextBoard } = moves.addPiece(board, tileIndices[0]);

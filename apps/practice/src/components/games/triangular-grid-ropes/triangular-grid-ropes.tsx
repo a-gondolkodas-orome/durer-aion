@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { strategyGameFactory } from '../../game-factory/strategy-game';
 import type { Events, BoardClientProps } from '../../game-factory/types';
-import { aiBotStrategy, randomBotStrategy } from './bot-strategy';
+import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { isAllowed, getAllowedSuperset, isGameEnd, vertices, type Board } from './helpers';
 import { cloneDeep } from 'lodash';
 
@@ -142,7 +142,7 @@ export const TriangularGridRopes = strategyGameFactory({
   variants: [
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
     {
-      botStrategy: aiBotStrategy,
+      botStrategy: smartBotStrategy,
       generateStartBoard: (): Board => [],
       label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
       isDefault: true

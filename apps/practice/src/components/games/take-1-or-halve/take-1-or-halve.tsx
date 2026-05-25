@@ -78,7 +78,7 @@ const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   }
 };
 
-const aiBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   if (board !== 4 && board % 4 === 0) {
     moves.take1(board);
   } else if (board === 6) {
@@ -125,7 +125,7 @@ export const Take1OrHalve = strategyGameFactory({
       label: { hu: 'Teszt 🤖', en: 'Test 🤖' }
     },
     {
-      botStrategy: aiBotStrategy,
+      botStrategy: smartBotStrategy,
       generateStartBoard: () => random(20, 27),
       label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
       isDefault: true

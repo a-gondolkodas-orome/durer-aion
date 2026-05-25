@@ -91,7 +91,7 @@ const randomBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
   moves.removeStone(board, getPileOfRandomAllowedMove(board, ctx));
 };
 
-const aiBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
+const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
   if (board.leftRestriction[ctx.currentPlayer!]) {
     moves.removeStone(board, 1);
     return;
@@ -221,7 +221,7 @@ export const StonesRemoveOneNotTwiceFromLeft = strategyGameFactory({
       label: { hu: 'Teszt 🤖', en: 'Test 🤖' }
     },
     {
-      botStrategy: aiBotStrategy,
+      botStrategy: smartBotStrategy,
       generateStartBoard,
       label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
       isDefault: true

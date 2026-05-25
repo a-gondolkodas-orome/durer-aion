@@ -1,7 +1,7 @@
 import { range, cloneDeep } from 'lodash';
 import { strategyGameFactory } from '../../../game-factory/strategy-game';
 import type { Events, BoardClientProps, Ctx } from '../../../game-factory/types';
-import { aiBotStrategy, randomBotStrategy } from './bot-strategy';
+import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { generateEmptyTicTacToeBoard } from '../helpers';
 import { isGameEnd, hasFirstPlayerWon, type Board } from './helpers';
 
@@ -104,7 +104,7 @@ export const TicTacToeDoubleStart = strategyGameFactory({
   variants: [
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
     {
-      botStrategy: aiBotStrategy,
+      botStrategy: smartBotStrategy,
       generateStartBoard: generateEmptyTicTacToeBoard,
       label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
       isDefault: true
