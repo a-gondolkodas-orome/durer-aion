@@ -31,19 +31,6 @@ export default defineConfig(() => ({
       }
     }
   },
-  esbuild: {
-    include: /\.[jt]sx?$/,
-    exclude: [],
-    loader: 'tsx'
-  },
-  optimizeDeps: {
-    esbuildOptions: {
-      loader: {
-        '.js': 'tsx',
-        '.ts': 'tsx'
-      }
-    }
-  },
   server: {
     host: true,
     port: 8012,
