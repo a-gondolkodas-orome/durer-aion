@@ -2,7 +2,7 @@ import { strategyGameFactory, dummyEvents } from '../../game-factory/strategy-ga
 import type { Events, StrategyArgs, BoardClientProps } from '../../game-factory/types';
 import { range, cloneDeep, sample, shuffle } from 'lodash';
 
-const [ALLOWED, COLORED, FORBIDDEN] = [1, 2, 3];
+const [ALLOWED, COLORED, FORBIDDEN] = [1 as const, 2 as const, 3 as const];
 type Board = (typeof ALLOWED | typeof COLORED | typeof FORBIDDEN)[]
 
 // triangles

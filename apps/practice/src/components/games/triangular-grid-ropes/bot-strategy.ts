@@ -9,7 +9,7 @@ import {
   type Board,
   type Edge
 } from './helpers';
-import type { PlayerIndex, StrategyArgs } from '../../game-factory/types';
+import type { StrategyArgs } from '../../game-factory/types';
 
 //    0
 //   1 2
@@ -25,7 +25,7 @@ export const aiBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
   moves.stretchRope(board, move);
 };
 
-const getOptimalAiMove = ({ board, chosenRoleIndex }: { board: Board, chosenRoleIndex: PlayerIndex | null }) => {
+const getOptimalAiMove = ({ board, chosenRoleIndex }: { board: Board, chosenRoleIndex: number | null }) => {
   const allowedMoves = getAllowedMoves(board);
   if (chosenRoleIndex === 1) {
     if (board.length === 0) {

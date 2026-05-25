@@ -148,8 +148,9 @@ const Game = ({ gameId, gameProps }: { gameId: string; gameProps: GameEntry }) =
 
   return <Link
     to={`/game/${gameId}`}
+    data-testid="game-card"
     className={
-      'rounded-lg shadow-sm border p-2 m-2 max-w-[32ch] w-full flex flex-col js-game-card ' +
+      'rounded-lg shadow-sm border p-2 m-2 max-w-[32ch] w-full flex flex-col ' +
       'cursor-pointer hover:shadow-md hover:border-blue-400 transition-shadow no-underline text-inherit'
     }
   >

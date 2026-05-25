@@ -13,7 +13,7 @@ export interface GameEntry {
   credit?: { suggestedBy?: string[]; developedBy?: string[] }
 }
 
-// Key must match the path registered in the router (app.js).
+// Key must match the path registered in the router (app.ts).
 // Keep entries ordered by year first, category second.
 export const gameList: GameList = {
   ChessBishops: {

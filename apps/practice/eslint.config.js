@@ -22,14 +22,6 @@ export default [
     }
   },
   {
-    files: ['src/**/*.js'],
-    languageOptions: {
-      parserOptions: {
-        ecmaFeatures: { jsx: true }
-      }
-    }
-  },
-  {
     files: ['src/**/*.{ts,tsx}'],
     languageOptions: {
       parser: tsParser

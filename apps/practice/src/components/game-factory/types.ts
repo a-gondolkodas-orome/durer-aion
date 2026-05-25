@@ -2,22 +2,21 @@ import type { I18nString } from '../language/translate';
 
 export type Phase = 'roleSelection' | 'play' | 'gameEnd'
 export type Mode = 'vsComputer' | 'vsHuman'
-export type PlayerIndex = number
 
 export interface Ctx {
   isHumanVsHumanGame: boolean
   resolvedPlayerNames: [string, string]
-  chosenRoleIndex: PlayerIndex | null
+  chosenRoleIndex: number | null
   phase: Phase
   turnState: unknown
-  currentPlayer: PlayerIndex | null
+  currentPlayer: number | null
   isClientMoveAllowed: boolean
-  winnerIndex: PlayerIndex | null
+  winnerIndex: number | null
 }
 
 export interface Events {
   endTurn: () => void
-  endGame: (winnerIndex?: PlayerIndex | null) => void
+  endGame: (winnerIndex?: number | null) => void
   setTurnState: (state: unknown) => void
 }
 
@@ -42,4 +41,3 @@ export interface VariantInput<TBoard> {
   generateStartBoard?: () => TBoard
   botStrategy?: (args: StrategyArgs<TBoard>) => void
 }
-

@@ -1,0 +1,113 @@
+import { range, cloneDeep } from 'lodash';
+import { strategyGameFactory } from '../../../game-factory/strategy-game';
+import type { Events, BoardClientProps, Ctx } from '../../../game-factory/types';
+import { aiBotStrategy, randomBotStrategy } from './bot-strategy';
+import { generateEmptyTicTacToeBoard } from '../helpers';
+import { isGameEnd, hasFirstPlayerWon, type Board } from './helpers';
+
+const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
+  const isMoveAllowed = (id) => {
+    if (!ctx.isClientMoveAllowed) return false;
+    return board[id] === null;
+  };
+  const clickField = (id) => {
+    if (!isMoveAllowed(id)) return;
+    moves.placePiece(board, id);
+  };
+  const pieceColor = (id) => {
+    const colorCode = board[id];
+    if (colorCode === 'red') return 'bg-red-600';
+    return 'bg-blue-600';
+  };
+
+  /*
+  Due to simulating borders with the background peeking through gaps, we need
+  to explicitly give bg-white to children.
+  */
+  return (
+    <section className="p-2 shrink-0 grow basis-2/3">
+    <div className="grid grid-cols-3  bg-slate-200 gap-1 p-1">
+      {range(9).map(id => (
+        <button
+        key={id}
+        disabled={!isMoveAllowed(id)}
+        onClick={() => clickField(id)}
+        className="aspect-square p-[25%] bg-white"
+        >
+          {board[id] && (
+            <span
+              className={`w-full aspect-square block rounded-full ${pieceColor(id)}`}
+            ></span>
+          )}
+      </button>
+      ))}
+    </div>
+  </section>
+  );
+};
+
+const isDuringFirstMove = (board: Board) => board.filter(c => c).length <= 1;
+
+const moves = {
+  placePiece: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, id) => {
+    const nextBoard = cloneDeep(board);
+    nextBoard[id] = ctx.currentPlayer === 0 ? 'red' : 'blue';
+
+    if (!isDuringFirstMove(nextBoard)) {
+      events.endTurn();
+      if (isGameEnd(nextBoard)) {
+        events.endGame(hasFirstPlayerWon(nextBoard) ? 0 : 1);
+      }
+    }
+
+    return { nextBoard };
+  }
+};
+
+const getPlayerStepDescription = ({ board }) => {
+  return isDuringFirstMove(board)
+    ? {
+      hu: 'Helyezz le két korongot egy-egy üres mezőre kattintással.',
+      en: 'Click two empty cells to place two pieces.'
+    }
+    : {
+      hu: 'Helyezz le egy korongot egy üres mezőre kattintással.',
+      en: 'Click an empty cell to place a piece.'
+    };
+};
+
+const rule = {
+  hu: <>
+    A 3 × 3-as duplánkezdő amőba játékban először a kezdő tesz le két piros korongot, majd
+    a második egy kék korongot és innentől felváltva egy-egy korongot tesznek le a saját színükből, amíg
+    be nem telik a tábla. A kezdő nyer, ha a játék végén van valahol három piros egy sorban, oszlopban
+    vagy átlóban, de sehol sincs három kék egy sorban, oszlopban vagy átlóban; egyébként a második
+    nyer.
+  </>,
+  en: <>
+    In double-starting tic-tac-toe, played on a 3 × 3 board, the first player begins
+    by placing two red disks on any two cells. Players then alternate turns,
+    each placing one disk on an empty cell — the first player using red disks
+    and the second using blue. The game ends when the board is full.
+    The first player wins if there are three red disks in a row, column, or diagonal,
+    but no three blue disks form such a line. Otherwise, the second player wins.
+  </>
+};
+
+export const TicTacToeDoubleStart = strategyGameFactory({
+  presentation: {
+    rule,
+    getPlayerStepDescription
+  },
+  BoardClient,
+  gameplay: { moves },
+  variants: [
+    { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
+    {
+      botStrategy: aiBotStrategy,
+      generateStartBoard: generateEmptyTicTacToeBoard,
+      label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
+      isDefault: true
+    }
+  ]
+});

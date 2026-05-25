@@ -7,7 +7,7 @@ import { useTranslation, TranslatableNode, I18nString } from '../language/transl
 import { useLocation } from 'react-router';
 import { useGameStats } from './use-game-stats';
 import type {
-  Phase, Mode, PlayerIndex, Ctx, Events, MoveResult, MoveFunction, GameMoves,
+  Phase, Mode, Ctx, Events, MoveResult, MoveFunction, GameMoves,
   BoardClientProps, Variant as DisplayVariant, VariantInput
 } from './types';
 import { resolveVariants } from './resolve-variants';
@@ -54,10 +54,10 @@ export const strategyGameFactory = <TBoard,>({
 
     const [board, setBoard] = useState<TBoard>(activeGenerateStartBoard());
     const [phase, setPhase] = useState<Phase>('roleSelection');
-    const [chosenRoleIndex, setChosenRoleIndex] = useState<PlayerIndex | null>(null);
-    const [currentPlayer, setCurrentPlayer] = useState<PlayerIndex | null>(null);
+    const [chosenRoleIndex, setChosenRoleIndex] = useState<number | null>(null);
+    const [currentPlayer, setCurrentPlayer] = useState<number | null>(null);
     const [isGameEndDialogOpen, setIsGameEndDialogOpen] = useState(false);
-    const [winnerIndex, setWinnerIndex] = useState<PlayerIndex | null>(null);
+    const [winnerIndex, setWinnerIndex] = useState<number | null>(null);
     const [gameUuid, setGameUuid] = useState(crypto.randomUUID());
     const [turnState, setTurnState] = useState<unknown>(null);
     const [mode, setMode] = useState<Mode>('vsComputer');
@@ -123,7 +123,7 @@ export const strategyGameFactory = <TBoard,>({
       playerNames[1] || t(DEFAULT_PLAYER_NAMES[1])
     ];
 
-    const endGame = (winnerIndex?: PlayerIndex | null) => {
+    const endGame = (winnerIndex?: number | null) => {
       const resolvedWinner = winnerIndex ?? currentPlayer;
       setPhase('gameEnd');
       setWinnerIndex(resolvedWinner);

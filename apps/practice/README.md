@@ -1,31 +1,36 @@
 # durer-jatekok
 
-Code for the online, client-side versions of past strategy games at the Dürer Math Competition.
+Code for the online, client-side versions of past strategy games at the Dürer
+Math Competition.
 
-The deployed version is here: https://a-gondolkodas-orome.github.io/durer-jatekok/.
+The deployed version is here:
+https://a-gondolkodas-orome.github.io/durer-jatekok/.
 
 # Development
 
-Feel free to commit directly to the default (master) branch. If in doubt, send a pull request instead.
+Feel free to commit directly to the default (master) branch. If in doubt, send a
+pull request instead.
 
-When you push to the default (master) branch, the tests are run, and if they are successful, the project is deployed to the live website within a few minutes.
+When you push to the default (master) branch, the tests are run, and if they are
+successful, the project is deployed to the live website within a few minutes.
 
 ## Adding a new game
 
-To keep track of who works on which game, use [this table](https://docs.google.com/spreadsheets/d/1-6u9PCtvf_gDHrs65x36pmDzFt4nZZx_IUuXrgS2aZk/edit#gid=0).
+To keep track of who works on which game, use [this
+table](https://docs.google.com/spreadsheets/d/1-6u9PCtvf_gDHrs65x36pmDzFt4nZZx_IUuXrgS2aZk/edit#gid=0).
 
 TL;DR;
 
 1. Create a react component for the game under `src/components/games`.
-2. Add the game component to the router in `src/components/app/app.js`.
-3. Add the game metadata to `src/components/games/gameList.js`.
+2. Add the game component to the router in `src/components/app/app.tsx`.
+3. Add the game metadata to `src/components/games/gameList.ts`.
 
 *For more information, see Section [How to Develop](#how-to-develop)*
 
 ## Project setup
 
-There is a (fairly minimal) devcontainer setup if you prefer that. Alternatively,
-here are the installation instructions:
+There is a (fairly minimal) devcontainer setup if you prefer that.
+Alternatively, here are the installation instructions:
 
 ### Installing locally 
 
@@ -55,7 +60,8 @@ npm run lint:fix
 
 ### Build for prod
 
-(some problems only appear in prod build, not while testing, for example using a variable without declaring it)
+(some problems only appear in prod build, not while testing, for example using a
+variable without declaring it)
 
 ```bash
 npm run build
@@ -73,11 +79,14 @@ Recommended VS Code extensions:
 
 # How to develop
 
-This project uses the React frontend "framework", the [official tutorial](https://react.dev/learn) is a good starting point.
+This project uses the React frontend "framework", the [official
+tutorial](https://react.dev/learn) is a good starting point.
 
-The common parts of all games (showing rules, alternating turns, buttons for choosing a role, restart game) are extracted
-to a `strategyGameFactory` which is highly recommended (but not a must). The below documentation is about creating a new game
-with this factory (so that you can focus on game logic and designing the board interactions.)
+The common parts of all games (showing rules, alternating turns, buttons for
+choosing a role, restart game) are extracted to a `strategyGameFactory` which is
+highly recommended (but not a must). The below documentation is about creating a
+new game with this factory (so that you can focus on game logic and designing
+the board interactions.)
 
 
 *It is recommended to copy and modify an existing, similar game.*
@@ -88,9 +97,11 @@ with this factory (so that you can focus on game logic and designing the board i
 
 <summary>The code</summary>
 
-```js
+```typescript
+type Board = number;
+
 const moves = {
-  addNumber: (board, { ctx, events }, number) => {
+  addNumber: (board: Board, { ctx, events }: { ctx: Ctx; events: Events }, number) => {
     const nextBoard = board + number;
     events.endTurn();
     if (nextBoard >= 20) {
@@ -100,7 +111,7 @@ const moves = {
   }
 };
 
-const BoardClient = ({ board, ctx, moves }) => {
+const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const clickNumber = (number) => {
     if (!ctx.isClientMoveAllowed) return;
     moves.addNumber(board, number);
@@ -112,16 +123,14 @@ const BoardClient = ({ board, ctx, moves }) => {
   </>
 };
 
-const botStrategy = ({ board, moves }) => {
+const botStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   const optimalStep = board % 3 === 0 ? 1 : (3 - board % 3)
   moves.addNumber(board, optimalStep);
 };
 
-// React component added to router in app.js
 export const PlusOneTwo = strategyGameFactory({
   presentation: {
     rule: <>0-ról +1/+2 20-ig</>,
-    // a function returning a string, receives optional { board, ctx }
     getPlayerStepDescription: () => 'Válaszd ki, hogy hánnyal növelsz.'
   },
   BoardClient,
@@ -233,10 +242,10 @@ The site supports Hungarian (default) and English. See `TicTacToe`
 for a complete example. English translations are added on a game-per-game bases,
 it is fine to add new games with Hungarian only.
 
-The `t()` helper from `translate.js` resolves a value to the active language.
+The `t()` helper from `translate.ts` resolves a value to the active language.
 The value can be a plain string if there are no translations available, or a
 `{hu, en }` object. For longer strings, consider extracting the english versions
-to `<game-name>-en.js` to keep the main files more compact.
+to `<game-name>-en.ts` to keep the main files more compact.
 
 Check the [Dürer Archive](https://durerinfo.hu/archivum/feladatsorok/) for
 existing translations.
