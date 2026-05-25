@@ -2,7 +2,7 @@ import type { I18nString } from '../language/translate';
 
 export type Phase = 'roleSelection' | 'play' | 'gameEnd'
 export type Mode = 'vsComputer' | 'vsHuman'
-export type PlayerIndex = 0 | 1
+export type PlayerIndex = number
 
 export interface Ctx {
   isHumanVsHumanGame: boolean

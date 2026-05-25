@@ -3,7 +3,7 @@ import { GameHeader, GameFooter, GameRule } from './game-parts/game-chrome';
 import { GameSidebar } from './game-parts/game-sidebar';
 import { GameEndDialog } from './game-parts/game-end-dialog';
 import { mapValues } from 'lodash';
-import { useTranslation, TranslatableNode, Translatable, I18nString } from '../language/translate';
+import { useTranslation, TranslatableNode, I18nString } from '../language/translate';
 import { useLocation } from 'react-router';
 import { useGameStats } from './use-game-stats';
 import type {
@@ -20,7 +20,7 @@ const DEFAULT_PLAYER_NAMES: I18nString[] = [
 export interface Presentation<TBoard> {
   rule: TranslatableNode
   roleLabels?: [I18nString, I18nString]
-  getPlayerStepDescription: (args: { board: TBoard; ctx: Ctx }) => Translatable
+  getPlayerStepDescription: (args: { board: TBoard; ctx: Ctx }) => TranslatableNode
 }
 
 export interface Gameplay<TBoard> {
@@ -134,13 +134,13 @@ export const strategyGameFactory = <TBoard,>({
     };
 
     const endTurn = () => {
-      setCurrentPlayer(p => (1 - p!) as PlayerIndex);
+      setCurrentPlayer(p => 1 - p!);
     };
 
     const startGame = (roleIndex: number | null = null) => {
       setPhase('play');
       setCurrentPlayer(0);
-      setChosenRoleIndex(roleIndex as PlayerIndex | null);
+      setChosenRoleIndex(roleIndex);
     };
 
     const isClientMoveAllowed = phase === 'play'
