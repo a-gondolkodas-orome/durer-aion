@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { CtaButton } from '../../utils/cta-button';
 import { strategyGameFactory } from '../../game-factory/strategy-game';
 import type { BoardClientProps, Ctx } from '../../game-factory/types';
 import { CastleSvg } from './assets/castle-svg';
@@ -94,13 +95,12 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         </div>
       ))}
       {isPlayerSultan && (
-        <button
-          className="cta-button"
+        <CtaButton
           disabled={!ctx.isClientMoveAllowed}
           onClick={() => moves.finalizeSeparation(board)}
         >
           {t({ hu: 'Befejezem a kettéosztást', en: 'Finish the split' })}
-        </button>
+        </CtaButton>
       )}
     </GameBoard>
   );

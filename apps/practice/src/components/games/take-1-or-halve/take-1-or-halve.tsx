@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { CtaButton } from '../../utils/cta-button';
 import { strategyGameFactory } from '../../game-factory/strategy-game';
 import type { Events, StrategyArgs, BoardClientProps } from '../../game-factory/types';
 import { random, range } from 'lodash';
@@ -35,22 +36,20 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       <CoinPile count={board} hoveredAction={hoveredAction} />
       <div className="flex flex-wrap">
         <span className="grow px-2">
-          <button
-            className='cta-button'
+          <CtaButton
             disabled={!ctx.isClientMoveAllowed}
             onClick={() => moves.take1(board)}
             onMouseEnter={() => setHoveredAction('take1')}
             onMouseLeave={() => setHoveredAction(null)}
-          >{t({ hu: 'Elveszek egyet', en: 'Take one' })}</button>
+          >{t({ hu: 'Elveszek egyet', en: 'Take one' })}</CtaButton>
         </span>
         <span className='grow px-2'>
-          <button
-            className="cta-button"
+          <CtaButton
             disabled={!ctx.isClientMoveAllowed || board % 2 === 1}
             onClick={() => moves.halve(board)}
             onMouseEnter={() => setHoveredAction('halve')}
             onMouseLeave={() => setHoveredAction(null)}
-          >{t({ hu: 'Elveszem a felét', en: 'Take half' })}</button>
+          >{t({ hu: 'Elveszem a felét', en: 'Take half' })}</CtaButton>
         </span>
       </div>
     </GameBoard>

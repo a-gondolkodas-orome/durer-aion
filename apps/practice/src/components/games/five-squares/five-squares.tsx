@@ -1,4 +1,5 @@
 import { range, sum, isEqual, random, cloneDeep } from 'lodash';
+import { CtaButton } from '../../utils/cta-button';
 import { strategyGameFactory } from '../../game-factory/strategy-game';
 import type { Ctx, Events, BoardClientProps } from '../../game-factory/types';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
@@ -77,12 +78,12 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     </div>
     {ctx.isClientMoveAllowed && firstPlacedSquareIndex !== null && (
       <div className="flex justify-end mt-2">
-        <button
-          className="cta-button w-auto bg-slate-400 enabled:hover:bg-slate-500 text-sm"
+        <CtaButton
+          className="w-auto bg-slate-400 enabled:hover:bg-slate-500 text-sm"
           onClick={() => moves.undoFirstDisc(board)}
         >
           {t({ hu: '↶ Visszavonás', en: '↶ Undo' })}
-        </button>
+        </CtaButton>
       </div>
     )}
   </GameBoard>

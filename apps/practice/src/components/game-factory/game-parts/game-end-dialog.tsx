@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Dialog, DialogPanel, DialogTitle, Description } from '@headlessui/react';
 import { useTranslation } from '../../language/translate';
 import { ModeSelector, DifficultySelector, getCtaText } from './game-controls';
+import { CtaButton } from '../../utils/cta-button';
 import type { Ctx, Variant, Mode } from '../types';
 
 export const GameEndDialog = ({
@@ -74,12 +75,11 @@ export const GameEndDialog = ({
                 disabled={false}
               />
             )}
-            <button
+            <CtaButton
               onClick={() => onNewGame(localMode, localVariantIndex)}
-              className="cta-button"
             >
               {t({ hu: 'Új játék', en: 'New game' })}
-            </button>
+            </CtaButton>
           </div>
         </DialogPanel>
       </div>
