@@ -2,6 +2,7 @@ import { sample } from 'lodash';
 import { strategyGameFactory } from '../../game-factory/strategy-game';
 import type { Events, StrategyArgs, BoardClientProps } from '../../game-factory/types';
 import { useTranslation } from '../../language/translate';
+import { GameBoard } from '../../game-factory/game-parts/game-board';
 
 type Board = { digits: number[], sumMod9: number }
 
@@ -47,7 +48,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   }
 
   return (
-    <section className="p-2 shrink-0 grow basis-2/3">
+    <GameBoard>
       <div className="flex gap-1 mb-2 flex-wrap">
         {slots.map((d, i) => (
           <div
@@ -80,7 +81,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           </div>
         </div>
       )}
-    </section>
+    </GameBoard>
   );
 };
 

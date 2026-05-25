@@ -1,6 +1,7 @@
 import { strategyGameFactory } from '../../game-factory/strategy-game';
 import type { Ctx, Events, StrategyArgs, BoardClientProps } from '../../game-factory/types';
 import { range, random } from 'lodash';
+import { GameBoard } from '../../game-factory/game-parts/game-board';
 
 type Board = number
 
@@ -20,7 +21,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   };
 
   return(
-    <section className="p-2 shrink-0 grow basis-2/3">
+    <GameBoard>
       <div className="flex flex-wrap mb-1">
       {range(target + maxStep + 1).map(i =>
         <button
@@ -39,7 +40,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       </button>
       )}
     </div>
-    </section>
+    </GameBoard>
   );
 };
 

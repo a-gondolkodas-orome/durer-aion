@@ -4,6 +4,7 @@ import type { BoardClientProps, Events } from '../../game-factory/types';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { getAllowedMoves, generateStartBoard, markVisitedFields, type Board, type Field } from './helpers';
 import { ChessRookSvg } from './chess-rook-svg';
+import { GameBoard } from '../../game-factory/game-parts/game-board';
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const clickField = (field: Field) => {
@@ -17,7 +18,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   };
 
   return (
-  <section className="p-2 shrink-0 grow basis-2/3">
+  <GameBoard>
     <ChessRookSvg />
     <table className="border-collapse w-full table-fixed">
       <tbody>
@@ -53,7 +54,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         ))}
       </tbody>
     </table>
-  </section>
+  </GameBoard>
   );
 };
 

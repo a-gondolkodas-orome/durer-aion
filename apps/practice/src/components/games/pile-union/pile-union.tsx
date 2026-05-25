@@ -4,6 +4,7 @@ import { strategyGameFactory } from '../../game-factory/strategy-game';
 import type { Events, BoardClientProps } from '../../game-factory/types';
 import { useTranslation } from '../../language/translate';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
+import { GameBoard } from '../../game-factory/game-parts/game-board';
 
 export type Board = number[]
 export type MoveType = 'remove' | 'merge'
@@ -31,7 +32,7 @@ const BoardClient = ({ board, ctx, events, moves }: BoardClientProps<Board>) => 
   };
 
   return (
-    <section className="p-2 shrink-0 grow basis-2/3">
+    <GameBoard>
       {board.length > 0 && (
         <MoveTypeSelector
           moveType={moveType}
@@ -54,7 +55,7 @@ const BoardClient = ({ board, ctx, events, moves }: BoardClientProps<Board>) => 
         ))}
       </div>
 
-    </section>
+    </GameBoard>
   );
 };
 

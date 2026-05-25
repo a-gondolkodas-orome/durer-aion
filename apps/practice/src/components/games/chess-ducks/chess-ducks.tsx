@@ -11,6 +11,7 @@ import {
   type Board,
   type Field
 } from './helpers';
+import { GameBoard } from '../../game-factory/game-parts/game-board';
 
 const chessDucksGameFactory = ({ ROWS, COLS }: { ROWS: number; COLS: number }) => {
   const generateStartBoard = (): Board => {
@@ -37,7 +38,7 @@ const chessDucksGameFactory = ({ ROWS, COLS }: { ROWS: number; COLS: number }) =
     };
 
     return(
-      <section className="p-2 shrink-0 grow basis-2/3">
+      <GameBoard>
         <DuckSvg />
         <table className="w-full border-collapse table-fixed">
         <tbody>
@@ -70,7 +71,7 @@ const chessDucksGameFactory = ({ ROWS, COLS }: { ROWS: number; COLS: number }) =
           ))}
         </tbody>
       </table>
-      </section>
+      </GameBoard>
     );
   };
 

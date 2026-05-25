@@ -2,6 +2,7 @@ import { range, sum, isEqual, cloneDeep } from 'lodash';
 import { strategyGameFactory } from '../../game-factory/strategy-game';
 import type { Events, BoardClientProps } from '../../game-factory/types';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
+import { GameBoard } from '../../game-factory/game-parts/game-board';
 
 export type Board = number[]
 
@@ -27,7 +28,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   };
 
   return (
-  <section className="p-2 shrink-0 grow basis-2/3">
+  <GameBoard>
     <div className="grid grid-cols-2 gap-0 border-2">
       {range(board.length).map(id =>
         <button
@@ -49,7 +50,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       </button>
       )}
     </div>
-  </section>
+  </GameBoard>
   );
 };
 

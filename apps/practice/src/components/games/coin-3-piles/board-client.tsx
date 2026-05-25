@@ -3,6 +3,7 @@ import { range } from 'lodash';
 import { useTranslation } from '../../language/translate';
 import type { BoardClientProps } from '../../game-factory/types';
 import type { Board } from './helpers';
+import { GameBoard } from '../../game-factory/game-parts/game-board';
 
 const getCoinBgColor = (coinValue) => {
   if (coinValue === 1) return 'bg-yellow-700';
@@ -74,7 +75,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   };
 
   return (
-    <section className="p-2 shrink-0 grow basis-2/3">
+    <GameBoard>
 
       <div className={`flex items-center gap-4 px-4 flex-wrap ${!wasCoinAlreadyRemovedInTurn ? 'opacity-40' : ''}`}>
         <span className="font-semibold">
@@ -157,6 +158,6 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         ))}
       </div>
 
-    </section>
+    </GameBoard>
   );
 };

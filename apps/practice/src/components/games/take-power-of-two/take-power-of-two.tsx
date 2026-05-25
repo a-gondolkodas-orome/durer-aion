@@ -3,6 +3,7 @@ import { strategyGameFactory } from '../../game-factory/strategy-game';
 import type { Events, StrategyArgs, BoardClientProps } from '../../game-factory/types';
 import { range, random, reverse, sample } from 'lodash';
 import { useTranslation } from '../../language/translate';
+import { GameBoard } from '../../game-factory/game-parts/game-board';
 
 const generateStartBoard = () => {
   if (random(0, 1)) {
@@ -81,7 +82,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   }
 
   return (
-    <section className='p-2 shrink-0 grow basis-2/3'>
+    <GameBoard>
       <p className='w-full text-8xl font-bold text-center'>{board}</p><br />
       {!ctx.isClientMoveAllowed
         ? ''
@@ -91,7 +92,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           hovered={hoveredPower}
           setHovered={setHoveredPower}
         ></ExponentsTable>}
-    </section>
+    </GameBoard>
   );
 }
 

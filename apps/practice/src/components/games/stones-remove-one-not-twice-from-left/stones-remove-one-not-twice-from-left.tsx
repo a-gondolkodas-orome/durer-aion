@@ -3,6 +3,7 @@ import { strategyGameFactory } from '../../game-factory/strategy-game';
 import type { Ctx, Events, StrategyArgs, BoardClientProps } from '../../game-factory/types';
 import { cloneDeep, isEqual, sample, random, range } from 'lodash';
 import { useTranslation } from '../../language/translate';
+import { GameBoard } from '../../game-factory/game-parts/game-board';
 
 type Board = { piles: [number, number], leftRestriction: [boolean, boolean] }
 
@@ -43,7 +44,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   }
 
   return (
-    <section className="p-2 shrink-0 grow basis-2/3">
+    <GameBoard>
       <div className="flex">
         {[0, 1].map(pileId => (
           <div key={pileId} className="grow px-2 flex flex-col">
@@ -60,7 +61,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           </div>
         ))}
       </div>
-    </section>
+    </GameBoard>
   );
 };
 

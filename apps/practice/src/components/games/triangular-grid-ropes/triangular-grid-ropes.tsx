@@ -4,6 +4,7 @@ import type { Events, BoardClientProps } from '../../game-factory/types';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { isAllowed, getAllowedSuperset, isGameEnd, vertices, type Board } from './helpers';
 import { cloneDeep } from 'lodash';
+import { GameBoard } from '../../game-factory/game-parts/game-board';
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const [firstNode, setFirstNode] = useState<number | null>(null);
@@ -32,7 +33,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const candidateToV = candidateEdge ? vertices[candidateEdge.to] : null;
 
   return (
-  <section className="p-2 shrink-0 grow basis-2/3">
+  <GameBoard>
   <svg className="aspect-square">
 
     {/* edges */}
@@ -91,7 +92,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       />
     ))}
   </svg>
-  </section>
+  </GameBoard>
   );
 };
 

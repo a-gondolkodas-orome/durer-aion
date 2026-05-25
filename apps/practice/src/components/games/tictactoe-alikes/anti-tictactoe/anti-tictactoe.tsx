@@ -4,6 +4,7 @@ import type { Events, BoardClientProps, Ctx } from '../../../game-factory/types'
 import { generateEmptyTicTacToeBoard } from '../helpers';
 import { isGameEnd, hasFirstPlayerWon, type Board } from './helpers';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
+import { GameBoard } from '../../../game-factory/game-parts/game-board';
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const isMoveAllowed = (id) => {
@@ -26,7 +27,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   to explicitly give bg-white to children.
   */
   return (
-  <section className="p-2 shrink-0 grow basis-2/3">
+  <GameBoard>
     <div className="grid grid-cols-3 bg-slate-200 gap-1 p-1">
       {range(9).map(id => (
         <button
@@ -43,7 +44,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       </button>
       ))}
     </div>
-  </section>
+  </GameBoard>
   );
 };
 
