@@ -116,7 +116,10 @@ const executeBanditStrategy = (board: Board, moves) => {
   const candidates = board.towers
     .map((t, i) => (t && i !== pos ? i : null))
     .filter(i => i !== null);
-  if (candidates.length === 0) return;
+  if (candidates.length === 0) {
+    moves.destroyTower(board, pos);
+    return;
+  };
 
   const missing = board.towers
     .map((t, i) => (!t && i !== pos ? i : null))
