@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { strategyGameFactory, type Events, type StrategyArgs, type BoardClientProps } from '../../game-factory';
+import {
+  strategyGameFactory, type Events, type StrategyArgs, type BoardClientProps, GameBoard
+} from '../../game-factory';
 import { random, range } from 'lodash';
 import { useTranslation } from '../../language/translate';
 
@@ -28,7 +30,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
   const [hoveredAction, setHoveredAction] = useState<HoveredAction>(null);
   return(
-    <section className="p-2 shrink-0 grow basis-2/3">
+    <GameBoard>
       <p className="text-xl font-semibold text-center text-stone-600">{board}</p>
       <CoinPile count={board} hoveredAction={hoveredAction} />
       <div className="flex flex-wrap">
@@ -51,7 +53,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           >{t({ hu: 'Elveszem a felét', en: 'Take half' })}</button>
         </span>
       </div>
-    </section>
+    </GameBoard>
   );
 };
 

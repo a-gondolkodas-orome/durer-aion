@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import {
-  strategyGameFactory, type Ctx, type Events, type StrategyArgs, type BoardClientProps
+  strategyGameFactory,
+  type Ctx, type Events, type StrategyArgs, type BoardClientProps,
+  GameBoard
 } from '../../game-factory';
 import { cloneDeep, isEqual, sample, random, range } from 'lodash';
 import { useTranslation } from '../../language/translate';
@@ -44,7 +46,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   }
 
   return (
-    <section className="p-2 shrink-0 grow basis-2/3">
+    <GameBoard>
       <div className="flex">
         {[0, 1].map(pileId => (
           <div key={pileId} className="grow px-2 flex flex-col">
@@ -61,7 +63,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           </div>
         ))}
       </div>
-    </section>
+    </GameBoard>
   );
 };
 

@@ -1,4 +1,6 @@
-import { strategyGameFactory, type Events, type BoardClientProps, type StrategyArgs } from '../../game-factory';
+import {
+  strategyGameFactory, type Events, type BoardClientProps, type StrategyArgs, GameBoard
+} from '../../game-factory';
 import { range, cloneDeep, random, sample } from 'lodash';
 import { smartBotStrategy } from './bot-strategy';
 
@@ -32,7 +34,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   }
 
   return(
-    <section className="p-2 shrink-0 grow basis-2/3">
+    <GameBoard>
       <svg width="100%" height="100%" viewBox='0 0 110 110'>
       {
         range(board.circle.length).map(index => (
@@ -61,7 +63,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       ></circle>
     ))}
     </svg>
-    </section>
+    </GameBoard>
   );
 };
 

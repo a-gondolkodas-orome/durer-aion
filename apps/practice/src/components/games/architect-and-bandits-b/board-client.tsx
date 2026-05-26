@@ -1,6 +1,6 @@
 import { useTranslation } from '../../language/translate';
-import type { BoardClientProps } from '../../game-factory';
 import type { Board } from './architect-and-bandits-b';
+import { GameBoard, type BoardClientProps } from '../../game-factory';
 
 const VERTEX_LABELS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
 
@@ -50,7 +50,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const canEndDay = ctx.isClientMoveAllowed && ctx.currentPlayer === 0;
 
   return (
-    <section className="p-2 shrink-0 grow basis-2/3 flex flex-col items-center">
+    <GameBoard className="flex flex-col items-center">
       <svg
         viewBox="0 -3 100 110"
         className="aspect-square w-full max-h-96"
@@ -139,6 +139,6 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           {t({ hu: 'Befejezem a napot', en: 'End Day' })}
         </button>
       )}
-    </section>
+    </GameBoard>
   );
 };

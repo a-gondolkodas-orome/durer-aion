@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { strategyGameFactory, type BoardClientProps, type Ctx } from '../../game-factory';
+import { strategyGameFactory, type BoardClientProps, type Ctx, GameBoard } from '../../game-factory';
 import { CastleSvg } from './assets/castle-svg';
 import { SoldierSvg } from './assets/soldier-svg';
 import { smartBotStrategy } from './bot-strategy';
@@ -36,7 +36,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   };
 
   return (
-    <section className="p-2 shrink-0 grow basis-2/3">
+    <GameBoard>
       <SoldierSvg />
       <CastleSvg />
       <svg className={`m-auto w-[40%] fill-slate-600 ${board[0].length > 0 ? 'opacity-50' : ''}`}>
@@ -100,7 +100,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           {t({ hu: 'Befejezem a kettéosztást', en: 'Finish the split' })}
         </button>
       )}
-    </section>
+    </GameBoard>
   );
 };
 

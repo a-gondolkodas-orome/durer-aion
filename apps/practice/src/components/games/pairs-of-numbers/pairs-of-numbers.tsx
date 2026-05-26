@@ -1,4 +1,6 @@
-import { strategyGameFactory, type Events, type StrategyArgs, type BoardClientProps } from '../../game-factory';
+import {
+  strategyGameFactory, type Events, type StrategyArgs, type BoardClientProps, GameBoard
+} from '../../game-factory';
 import { random } from 'lodash';
 import { useTranslation } from '../../language/translate';
 
@@ -7,7 +9,7 @@ type Board = number[]
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
   return(
-    <section className="p-2 shrink-0 grow basis-2/3">
+    <GameBoard>
       <p className='w-full text-8xl font-bold text-center'>
         <code>({board[0]},{board[1]})</code>
       </p>
@@ -35,7 +37,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           </button>
         </span>
       </div>
-    </section>
+    </GameBoard>
   );
 };
 

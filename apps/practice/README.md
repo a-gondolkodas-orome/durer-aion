@@ -117,10 +117,10 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     moves.addNumber(board, number);
   };
 
-  return <>
+  return <GameBoard>
     <button onClick={() => clickNumber(1)}>1</button>
     <button onClick={() => clickNumber(2)}>2</button>
-  </>
+  </GameBoard>
 };
 
 const botStrategy = ({ board, moves }: StrategyArgs<Board>) => {

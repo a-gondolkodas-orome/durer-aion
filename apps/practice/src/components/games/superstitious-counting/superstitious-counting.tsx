@@ -1,5 +1,5 @@
 import { range, sample, difference } from 'lodash';
-import { strategyGameFactory, type Ctx, type Events, type BoardClientProps } from '../../game-factory';
+import { strategyGameFactory, type Ctx, type Events, type BoardClientProps, GameBoard } from '../../game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { useTranslation } from '../../language/translate';
 
@@ -37,7 +37,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   };
 
   return (
-  <section className="p-2 shrink-0 grow basis-2/3">
+  <GameBoard>
     <div className="flex flex-wrap mb-1">
       {fields.map(i =>
         <button
@@ -73,7 +73,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         })}
       </p>
     )}
-  </section>
+  </GameBoard>
   );
 };
 

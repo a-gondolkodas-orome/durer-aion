@@ -1,5 +1,5 @@
 import { compact, cloneDeep } from 'lodash';
-import { strategyGameFactory, type Ctx, type Events, type BoardClientProps } from '../../game-factory';
+import { strategyGameFactory, type Ctx, type Events, type BoardClientProps, GameBoard } from '../../game-factory';
 import { smartBotStrategy } from './bot-strategy';
 import { RockSvg } from './symbols/rock-svg';
 import { PaperSvg } from './symbols/paper-svg';
@@ -22,7 +22,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   };
 
   return (
-  <section className="p-2 shrink-0 grow basis-2/3">
+  <GameBoard>
     <div className="grid grid-cols-3">
       <span className="text-gray-500 text-xl text-center">{t({ hu: 'Kezdő', en: 'First' })}</span>
       <span></span>
@@ -51,7 +51,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         ))
       ))}
     </div>
-  </section>
+  </GameBoard>
   );
 };
 

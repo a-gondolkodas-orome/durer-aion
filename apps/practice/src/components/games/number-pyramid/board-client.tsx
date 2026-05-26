@@ -1,7 +1,7 @@
 import { isEqual } from 'lodash';
-import type { BoardClientProps } from '../../game-factory';
 import { useTranslation } from '../../language/translate';
 import { hasActivePair, type Board } from './strategy';
+import { GameBoard, type BoardClientProps } from '../../game-factory';
 
 export type TurnState = { levelIdx: number; slotIdx: number } | null;
 
@@ -52,7 +52,7 @@ export const BoardClient = ({ board, ctx, events, moves }: BoardClientProps<Boar
   };
 
   return (
-    <section className="p-2 shrink-0 grow basis-2/3">
+    <GameBoard>
       <p className="text-center text-lg font-semibold mb-4">
         {t({ hu: 'Célszám (k)', en: 'Target (k)' })}:{' '}
         <span className="text-2xl font-bold text-blue-600">
@@ -89,6 +89,6 @@ export const BoardClient = ({ board, ctx, events, moves }: BoardClientProps<Boar
           );
         })}
       </div>
-    </section>
+    </GameBoard>
   );
 };

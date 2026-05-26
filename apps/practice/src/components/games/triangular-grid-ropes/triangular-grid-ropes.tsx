@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { strategyGameFactory, type Events, type BoardClientProps } from '../../game-factory';
+import { strategyGameFactory, type Events, type BoardClientProps, GameBoard } from '../../game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { isAllowed, getAllowedSuperset, isGameEnd, vertices, type Board } from './helpers';
 import { cloneDeep } from 'lodash';
@@ -31,7 +31,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const candidateToV = candidateEdge ? vertices[candidateEdge.to] : null;
 
   return (
-  <section className="p-2 shrink-0 grow basis-2/3">
+  <GameBoard>
   <svg className="aspect-square">
 
     {/* edges */}
@@ -90,7 +90,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       />
     ))}
   </svg>
-  </section>
+  </GameBoard>
   );
 };
 

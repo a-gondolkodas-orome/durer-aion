@@ -1,4 +1,4 @@
-import { strategyGameFactory, type BoardClientProps } from '../../game-factory';
+import { strategyGameFactory, type BoardClientProps, GameBoard } from '../../game-factory';
 import { some, range, isEqual } from 'lodash';
 import { DuckSvg } from './rubber-duck-svg';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
@@ -36,7 +36,7 @@ const chessDucksGameFactory = ({ ROWS, COLS }: { ROWS: number; COLS: number }) =
     };
 
     return(
-      <section className="p-2 shrink-0 grow basis-2/3">
+      <GameBoard>
         <DuckSvg />
         <table className="w-full border-collapse table-fixed">
         <tbody>
@@ -69,7 +69,7 @@ const chessDucksGameFactory = ({ ROWS, COLS }: { ROWS: number; COLS: number }) =
           ))}
         </tbody>
       </table>
-      </section>
+      </GameBoard>
     );
   };
 

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { range, cloneDeep, every, some, isNull } from 'lodash';
-import { strategyGameFactory, type Events, type BoardClientProps } from '../../game-factory';
+import { strategyGameFactory, type Events, type BoardClientProps, GameBoard } from '../../game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { isAllowedStep, allColors, generateStartBoard, type Board } from './helpers';
 import { useTranslation } from '../../language/translate';
@@ -51,7 +51,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   };
 
   return (
-  <section className="p-2 shrink-0 grow basis-2/3">
+  <GameBoard>
     <header>
       <button
         disabled={!ctx.isClientMoveAllowed}
@@ -117,7 +117,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         <circle cx={x} cy={y} r="4%" fill={color} className="pointer-events-none opacity-50 stroke-0" />
       )}
     </svg>
-  </section>
+  </GameBoard>
   );
 };
 

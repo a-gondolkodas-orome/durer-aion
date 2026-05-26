@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { range, random } from 'lodash';
-import { strategyGameFactory, type Events, type BoardClientProps } from '../../game-factory';
+import { strategyGameFactory, type Events, type BoardClientProps, GameBoard } from '../../game-factory';
 import { useTranslation } from '../../language/translate';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 
@@ -30,7 +30,7 @@ const BoardClient = ({ board, ctx, events, moves }: BoardClientProps<Board>) => 
   };
 
   return (
-    <section className="p-2 shrink-0 grow basis-2/3">
+    <GameBoard>
       {board.length > 0 && (
         <MoveTypeSelector
           moveType={moveType}
@@ -53,7 +53,7 @@ const BoardClient = ({ board, ctx, events, moves }: BoardClientProps<Board>) => 
         ))}
       </div>
 
-    </section>
+    </GameBoard>
   );
 };
 

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { range, random } from "lodash";
-import { strategyGameFactory, type BoardClientProps } from "../../game-factory";
+import { strategyGameFactory, type BoardClientProps, GameBoard } from "../../game-factory";
 import { smartBotStrategy, randomBotStrategy } from "./bot-strategy";
 import {
   isJump,
@@ -189,7 +189,7 @@ const BoardClient = ({ board: { bacteria, goals }, ctx, moves }: BoardClientProp
   };
 
   return (
-    <section className="p-2 shrink-0 grow basis-2/3">
+    <GameBoard>
       <table
         className="w-[95%] table-fixed"
         style={{ transform: "scaleY(-1)" }}
@@ -216,7 +216,7 @@ const BoardClient = ({ board: { bacteria, goals }, ctx, moves }: BoardClientProp
           ))}
         </tbody>
       </table>
-    </section>
+    </GameBoard>
   );
 };
 

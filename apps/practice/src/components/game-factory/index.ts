@@ -7,3 +7,4 @@ export type {
   Variant, VariantInput
 } from './types';
 export { makeCtx } from './ctx-factory';
+export { GameBoard } from './game-parts/game-board';

@@ -1,4 +1,6 @@
-import { strategyGameFactory, type Events, type BoardClientProps, type StrategyArgs } from '../../game-factory';
+import {
+  strategyGameFactory, type Events, type BoardClientProps, type StrategyArgs, GameBoard
+} from '../../game-factory';
 import { range, cloneDeep, sample, random } from 'lodash';
 import { strategyDict } from './bot-strategy';
 import { useTranslation } from '../../language/translate';
@@ -29,7 +31,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   }
 
   return (
-    <section className="p-2 shrink-0 grow basis-2/3">
+    <GameBoard>
       <p className = "text-2xl">
         {t({
           hu: `A mostani játékban n=${board.numbersOnTable.length}`,
@@ -58,7 +60,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           </button>
         )}
       </div>
-    </section>
+    </GameBoard>
   )
 };
 

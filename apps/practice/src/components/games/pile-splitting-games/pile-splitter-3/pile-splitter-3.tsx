@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { range, isEqual, random, cloneDeep } from 'lodash';
-import { strategyGameFactory, type BoardClientProps, type Events } from '../../../game-factory';
+import { strategyGameFactory, type BoardClientProps, type Events, GameBoard } from '../../../game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 
 export type Board = number[];
@@ -93,7 +93,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   };
 
   return (
-  <section className="p-2 shrink-0 grow basis-2/3">
+  <GameBoard>
     {[0, 1, 2].map(pileId => (
       <div
         key={pileId}
@@ -129,7 +129,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           ))}
       </div>
     ))}
-  </section>
+  </GameBoard>
   );
 };
 

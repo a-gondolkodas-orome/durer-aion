@@ -1,4 +1,4 @@
-import { strategyGameFactory, type Events, type BoardClientProps, type Ctx } from '../../../game-factory';
+import { strategyGameFactory, type Events, type BoardClientProps, type Ctx, GameBoard } from '../../../game-factory';
 import { range, cloneDeep } from 'lodash';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import {
@@ -30,7 +30,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   }
 
   return(
-    <section className="p-2 shrink-0 grow basis-2/3">
+    <GameBoard>
       <div>
         {range(1, CARD_COUNT + 1).map(num =>
         <button
@@ -51,7 +51,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           {num}
         </button>)}
       </div>
-    </section>
+    </GameBoard>
     );
 };
 

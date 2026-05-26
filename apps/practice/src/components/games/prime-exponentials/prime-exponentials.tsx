@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { strategyGameFactory, type Events, type StrategyArgs, type BoardClientProps } from '../../game-factory';
+import {
+  strategyGameFactory, type Events, type StrategyArgs, type BoardClientProps, GameBoard
+} from '../../game-factory';
 import { sample, random } from 'lodash';
 import { useTranslation } from '../../language/translate';
 
@@ -104,7 +106,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   };
 
   return (
-    <section className='p-2 shrink-0 grow basis-2/3'>
+    <GameBoard>
       <p className='w-full text-8xl font-bold text-center'>{board}</p><br />
       <HoverPreview hovered={hovered} board={board} />
       <PrimePowerGrid
@@ -114,7 +116,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         chooseEntry={chooseEntry}
         setHovered={setHovered}
       />
-    </section>
+    </GameBoard>
   );
 };
 

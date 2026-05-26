@@ -1,4 +1,6 @@
-import { strategyGameFactory, type Events, type StrategyArgs, type BoardClientProps } from '../../game-factory';
+import {
+  strategyGameFactory, type Events, type StrategyArgs, type BoardClientProps, GameBoard
+} from '../../game-factory';
 import { range, sum, sample, cloneDeep } from 'lodash';
 import { useTranslation } from '../../language/translate';
 
@@ -17,7 +19,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   };
 
   return(
-    <section className="p-2 shrink-0 grow basis-2/3">
+    <GameBoard>
     <table className="border-collapse table-fixed w-full">
       <tbody>
         <tr>
@@ -47,7 +49,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       {t({ hu: 'Megmaradt számok összege', en: 'Sum of remaining numbers' })}
       : {sum(getRemaining(board))}
     </p>
-    </section>
+    </GameBoard>
   );
 };
 

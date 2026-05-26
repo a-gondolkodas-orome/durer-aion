@@ -1,5 +1,5 @@
 import { range, cloneDeep } from 'lodash';
-import { strategyGameFactory, type Events, type BoardClientProps, type Ctx } from '../../../game-factory';
+import { strategyGameFactory, type Events, type BoardClientProps, type Ctx, GameBoard } from '../../../game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { generateEmptyTicTacToeBoard } from '../helpers';
 import { isGameEnd, hasFirstPlayerWon, type Board } from './helpers';
@@ -24,7 +24,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   to explicitly give bg-white to children.
   */
   return (
-    <section className="p-2 shrink-0 grow basis-2/3">
+    <GameBoard>
     <div className="grid grid-cols-3  bg-slate-200 gap-1 p-1">
       {range(9).map(id => (
         <button
@@ -41,7 +41,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       </button>
       ))}
     </div>
-  </section>
+  </GameBoard>
   );
 };
 

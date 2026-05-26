@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { strategyGameFactory, type Events, type StrategyArgs, type BoardClientProps } from "../../game-factory";
+import {
+  strategyGameFactory, type Events, type StrategyArgs, type BoardClientProps, GameBoard
+} from "../../game-factory";
 import { range, isEqual, random, sample, difference, filter, cloneDeep } from "lodash";
 import { useTranslation } from "../../language/translate";
 
@@ -66,7 +68,7 @@ const gameBoardFactory = (maxDiscs) => {
 
 
     return (
-      <section className="p-2 shrink-0 grow basis-2/3">
+      <GameBoard>
         <table className="table-fixed w-full">
           <tbody>
             <tr>
@@ -144,7 +146,7 @@ const gameBoardFactory = (maxDiscs) => {
           en: `${board[1]} red and ${board[0]} blue discs`
         })}
         {nextBoardDescription()}
-      </section>
+      </GameBoard>
     );
   };
 };

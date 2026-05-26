@@ -1,5 +1,7 @@
 import {
-  strategyGameFactory, type Ctx, type Events, type StrategyArgs, type BoardClientProps
+  strategyGameFactory,
+  type Ctx, type Events, type StrategyArgs, type BoardClientProps,
+  GameBoard
 } from '../../game-factory';
 import { range, random, sample } from 'lodash';
 import { ChessBishopSvg } from '../chess-bishops/chess-bishop-svg';
@@ -36,7 +38,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   };
 
   return (
-  <section className="p-2 shrink-0 grow basis-2/3">
+  <GameBoard>
     <ChessBishopSvg/>
     <table className="w-full table-fixed">
       <tbody>
@@ -65,7 +67,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       </tr>
       </tbody>
     </table>
-  </section>
+  </GameBoard>
   );
 };
 

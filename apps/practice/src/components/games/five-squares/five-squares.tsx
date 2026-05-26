@@ -1,5 +1,5 @@
 import { range, sum, isEqual, random, cloneDeep } from 'lodash';
-import { strategyGameFactory, type Ctx, type Events, type BoardClientProps } from '../../game-factory';
+import { strategyGameFactory, type Ctx, type Events, type BoardClientProps, GameBoard } from '../../game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { useTranslation } from '../../language/translate';
 
@@ -50,7 +50,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const showDimmedDisc = ctx.isClientMoveAllowed && firstPlacedSquareIndex !== null;
 
   return (
-  <section className="p-2 shrink-0 grow basis-2/3">
+  <GameBoard>
     <div className="grid grid-cols-3 gap-0 border-t-4 border-l-4">
       {range(board.length).map(id =>
         <button
@@ -83,7 +83,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         </button>
       </div>
     )}
-  </section>
+  </GameBoard>
   );
 };
 

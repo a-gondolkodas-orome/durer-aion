@@ -1,5 +1,5 @@
 import { range, some, isEqual, cloneDeep } from 'lodash';
-import { strategyGameFactory, type BoardClientProps, type Events } from '../../game-factory';
+import { strategyGameFactory, type BoardClientProps, type Events, GameBoard } from '../../game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { getAllowedMoves, generateStartBoard, markVisitedFields, type Board, type Field } from './helpers';
 import { ChessKnightSvg } from './chess-knight-svg';
@@ -16,7 +16,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   };
 
   return (
-  <section className="p-2 shrink-0 grow basis-2/3">
+  <GameBoard>
     <ChessKnightSvg />
     <table className="border-collapse w-full table-fixed">
       <tbody>
@@ -52,7 +52,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         ))}
       </tbody>
     </table>
-  </section>
+  </GameBoard>
   );
 };
 

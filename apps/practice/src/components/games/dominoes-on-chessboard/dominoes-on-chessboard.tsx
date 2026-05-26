@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { range, cloneDeep, isEqual, flatMap, sample, last, shuffle } from 'lodash';
 import {
-  strategyGameFactory, dummyEvents, type Events, type StrategyArgs, type BoardClientProps
+  strategyGameFactory, dummyEvents,
+  type Events, type StrategyArgs, type BoardClientProps,
+  GameBoard
 } from '../../game-factory';
 
 type Board = [number, number][]
@@ -84,7 +86,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   }
 
   return (
-  <section className="p-2 shrink-0 grow basis-2/3">
+  <GameBoard>
     <table className="w-full border-collapse table-fixed">
       <tbody>
         {range(BOARDSIZE).map(row => (
@@ -131,7 +133,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         ))}
       </tbody>
     </table>
-  </section>
+  </GameBoard>
   );
 };
 

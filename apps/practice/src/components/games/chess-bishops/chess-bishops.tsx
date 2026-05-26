@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { range, isEqual, some, cloneDeep } from 'lodash';
-import { strategyGameFactory, type BoardClientProps, type Events } from '../../game-factory';
+import { strategyGameFactory, type BoardClientProps, type Events, GameBoard } from '../../game-factory';
 import { ChessBishopSvg } from './chess-bishop-svg';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import {
@@ -40,7 +40,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   };
 
   return (
-  <section className="p-2 shrink-0 grow basis-2/3">
+  <GameBoard>
     <ChessBishopSvg />
     <table className="w-full border-collapse table-fixed">
       <tbody>
@@ -84,7 +84,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         ))}
       </tbody>
     </table>
-  </section>
+  </GameBoard>
   );
 };
 
