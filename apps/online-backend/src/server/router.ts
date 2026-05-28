@@ -345,9 +345,10 @@ export function configureTeamsRouter(
       };
     } catch (error: any) {
       ctx.status = 400;
+      const message = error ? `${error.name}: ${error.message}` : 'Failed to process uploaded files';
       ctx.body = {
         success: false,
-        error: `${error?.name ?? 'Error'}: ${error?.message}` || 'Failed to process uploaded files',
+        error: message
       };
     }
   });

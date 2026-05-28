@@ -9,10 +9,6 @@ import {
   strategyNames,
   RelayStrategy
 } from 'game';
-//import { 
-//  RelayStrategy,
-//  strategyWrapper as StrategyStrategyremovefromcirclee,
-//} from 'strategy';
 import { PostgresStore } from 'bgio-postgres';
 import { argv, env, exit } from 'process';
 import { SocketIOButBotMoves } from './socketio_botmoves';
@@ -52,6 +48,12 @@ export function getAdminCredentials() {
   return env.ADMIN_CREDENTIALS;
 }
 
+function checkS3Variables() {
+  requireEnv('PROBLEMS_S3_BUCKET_NAME');
+  requireEnv('PROBLEMS_S3_KEY_ID');
+  requireEnv('PROBLEMS_S3_SECRET_KEY');
+}
+
 const games = [
   { ...GameRelay, name: relayNames.C },
   { ...GameRelay, name: relayNames.D },
@@ -73,7 +75,7 @@ async function createBotFactories(problems: RelayProblemsRepository) {
 }
 
 async function main() {
-  let { db, teams, problems } = getDb();
+  const { db, teams, problems } = getDb();
 
   if (argv[2] === "sanity-check") {
     console.log("OK");
@@ -83,6 +85,7 @@ async function main() {
   getBotCredentials(); // give love if no creds are supplied
   getAdminCredentials(); // give love if no creds are supplied
   getGameStartAndEndTime(); // give love if no creds are supplied
+  checkS3Variables();
 
   // node: argv[0] vs server.ts: argv[1]
   if (argv[2] === "import") {
