@@ -72,7 +72,7 @@ export const strategyGameFactory = <TBoard,>({
       if (!isHumanVsHumanGame && phase === 'play' && currentPlayer === (1 - chosenRoleIndex!)) {
         doBotTurn();
       }
-    }, [currentPlayer]);
+    }, [currentPlayer, isHumanVsHumanGame, phase, chosenRoleIndex]); // doBotTurn excluded: recreates every render
 
     let wrappedGameMoves: GameMoves<TBoard> = {} as GameMoves<TBoard>;
 

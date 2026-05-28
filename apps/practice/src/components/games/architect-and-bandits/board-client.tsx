@@ -84,7 +84,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               onClick={() => handleVertexClick(i)}
               onKeyUp={(e) => { if (e.key === 'Enter') handleVertexClick(i); }}
               tabIndex={clickable ? 0 : undefined}
-              style={{ cursor: clickable ? 'pointer' : 'default' }}
+              className={clickable ? 'cursor-pointer' : 'cursor-default'}
               role={clickable ? 'button' : undefined}
               aria-label={clickable ? VERTEX_LABELS[i] : undefined}
             >
@@ -102,7 +102,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                   x={x} y={y + 2.2}
                   textAnchor="middle"
                   fontSize="5.5"
-                  style={{ userSelect: 'none', pointerEvents: 'none' }}
+                  className="select-none pointer-events-none"
                 >
                   🧍
                 </text>
@@ -115,7 +115,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                 fontSize="4"
                 fontWeight="bold"
                 fill="#111"
-                style={{ userSelect: 'none', pointerEvents: 'none' }}
+                className="select-none pointer-events-none"
               >
                 {VERTEX_LABELS[i]}
               </text>

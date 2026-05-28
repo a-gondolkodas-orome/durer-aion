@@ -127,7 +127,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           <span key={coinValue}>
             {range(board[coinValue - 1]).map(i => (
               <button
-                key={`${i}-${shouldShowCoinToBeAdded(coinValue)}`}
+                key={i}
                 disabled={!isRemovalAllowed(coinValue)}
                 className={`
                   w-[15%] aspect-square inline-block rounded-full mr-0.5 mt-2

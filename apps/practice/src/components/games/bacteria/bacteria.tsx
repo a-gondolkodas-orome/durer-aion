@@ -171,7 +171,7 @@ const BoardClient = ({ board: { bacteria, goals }, ctx, moves }: BoardClientProp
       border,
       isForbidden({ row, col }) ? "opacity-50 cursor-not-allowed" : "",
       isDefenderTarget ? "enabled:hover:bg-red-100 enabled:hover:border-red-400" : ""
-    ].join(" ");
+    ].filter(Boolean).join(" ");
   };
 
   const cellContent = ({ row, col }) => {
