@@ -66,7 +66,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
           await toHome();
           window.location.reload();
            }}>
-          {<RelayEndTable allPoints={G.points} msRemaining={msRemaining} task={
+          {<RelayEndTable allPoints={G.points} task={
            // TODO .maxpoints
            [3, 3, 4, 4, 4, 5, 5, 6, 6].map((it, idx)=>({
             max: it,

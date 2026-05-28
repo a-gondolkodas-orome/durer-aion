@@ -17,7 +17,7 @@ import botWrapper from './botwrapper';
 import cors from '@koa/cors';
 import { configureTeamsRouter } from './server/router';
 import { TeamsRepository, RelayProblemsRepository } from './server/db';
-import { getBotCredentials, getGameStartAndEndTime, relayNames } from './server/common';
+import { getBotCredentials, relayNames } from './server/common';
 import { import_teams_from_tsv_locally } from './server/team_import';
 
 import auth from 'koa-basic-auth';
@@ -84,7 +84,6 @@ async function main() {
 
   getBotCredentials(); // give love if no creds are supplied
   getAdminCredentials(); // give love if no creds are supplied
-  getGameStartAndEndTime(); // give love if no creds are supplied
   checkS3Variables();
 
   // node: argv[0] vs server.ts: argv[1]
@@ -93,14 +92,14 @@ async function main() {
     import_teams_from_tsv_locally(teams, filename).then(() => exit(0));
   } else {
     const bot_factories = await createBotFactories(problems);
-  const botSetup = Object.fromEntries(
-    games.map((game, idx) =>
-      [game.name,
-      new (bot_factories[idx])({
-        enumerate: game.ai?.enumerate,
-        seed: game.seed,
-      })]
-    ));
+    const botSetup = Object.fromEntries(
+      games.map((game, idx) =>
+        [game.name,
+        new (bot_factories[idx])({
+          enumerate: game.ai?.enumerate,
+          seed: game.seed,
+        })]
+      ));
 
   const socketio = new SocketIOButBotMoves(
     { https: undefined },
