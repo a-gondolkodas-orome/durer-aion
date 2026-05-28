@@ -54,7 +54,7 @@ export const GameEndDialog = ({
             <button
               onClick={() => setIsOpen(false)}
               aria-label={t({ hu: 'Bezárás', en: 'Close' })}
-              className="bg-slate-200 rounded-sm text-2xl px-1"
+              className="bg-slate-200 rounded-sm text-2xl px-1 hocus:bg-slate-300"
             >×</button>
           </header>
           <Description className="text-lg block text-justify mb-3">

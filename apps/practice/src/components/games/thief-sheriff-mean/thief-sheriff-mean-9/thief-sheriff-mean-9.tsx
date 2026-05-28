@@ -42,8 +42,8 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             border-2 shadow-md border-slate-800 rounded-xl text-4xl
             text-center font-bold
             ${ctx.currentPlayer === Thief
-              ? "enabled:hover:bg-red-400 enabled:focus:bg-red-400"
-              : "enabled:hover:bg-blue-400 enabled:focus:bg-blue-400"
+              ? "enabled:hocus:bg-red-400"
+              : "enabled:hocus:bg-blue-400"
             }
             ${getCardColor(num)}
           `}

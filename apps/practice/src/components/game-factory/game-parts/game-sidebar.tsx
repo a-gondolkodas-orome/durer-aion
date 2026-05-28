@@ -104,7 +104,7 @@ export const GameSidebar = ({
           />
         ) : (
           <details className="border border-slate-200 rounded-lg p-2 text-sm">
-            <summary className="cursor-pointer text-slate-500 hover:text-slate-700">
+            <summary className="cursor-pointer text-slate-500 hocus:text-slate-700">
               {modeSummaryLabel}{variantSummaryLabel}
             </summary>
             <div className="mt-2 flex flex-col gap-3">
@@ -121,7 +121,7 @@ export const GameSidebar = ({
 
         <button
           className={`rounded-lg py-1.5 px-4 w-full text-center border
-            border-slate-300 text-slate-600 hover:bg-slate-50 focus:bg-slate-50
+            border-slate-300 text-slate-600 hocus:bg-slate-50
             disabled:opacity-40 disabled:cursor-not-allowed`}
           disabled={!isNewGameAllowed}
           onClick={() => moves.resetGameState()}
@@ -177,8 +177,8 @@ const RoleSelector = ({ roleLabels, onRoleSelection, disabled }: {
         key={i}
         data-testid={`role-btn-${i}`}
         className="rounded-lg py-2 px-4 w-full text-center font-semibold
-          bg-blue-500 hover:bg-blue-600 focus:bg-blue-600 text-white
-          disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-blue-500 disabled:focus:bg-blue-500"
+          bg-blue-500 hocus:bg-blue-600 text-white
+          disabled:opacity-40 disabled:cursor-not-allowed disabled:hocus:bg-blue-500"
         disabled={disabled}
         onClick={() => onRoleSelection(i)}
       >
@@ -230,7 +230,7 @@ const PlayerNameSetup = ({ roleLabels, playerNames, placeholderNames, setPlayerN
     <button
       data-testid="start-hh-game"
       className="rounded-lg py-2 px-4 w-full text-center font-semibold
-        bg-blue-500 hover:bg-blue-600 focus:bg-blue-600 text-white"
+        bg-blue-500 hocus:bg-blue-600 text-white"
       onClick={onStart}
     >
       {t({ hu: 'Kezdhetjük!', en: "Let's go!" })}
@@ -286,7 +286,7 @@ const WinLossCounter = ({ stats, onReset }: { stats: Stats; onReset: () => void 
       <button
         onClick={onReset}
         aria-label={t({ hu: 'Számlálók nullázása', en: 'Reset counters' })}
-        className="text-xs hover:text-slate-700"
+        className="text-xs hocus:text-slate-700"
       >
         ↻
       </button>

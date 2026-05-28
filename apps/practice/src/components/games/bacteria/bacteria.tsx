@@ -170,7 +170,7 @@ const BoardClient = ({ board: { bacteria, goals }, ctx, moves }: BoardClientProp
       bg,
       border,
       isForbidden({ row, col }) ? "opacity-50 cursor-not-allowed" : "",
-      isDefenderTarget ? "enabled:hover:bg-red-100 enabled:hover:border-red-400" : ""
+      isDefenderTarget ? "enabled:hocus:bg-red-100 enabled:hocus:border-red-400" : ""
     ].filter(Boolean).join(" ");
   };
 

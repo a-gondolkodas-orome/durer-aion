@@ -76,7 +76,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     {ctx.isClientMoveAllowed && firstPlacedSquareIndex !== null && (
       <div className="flex justify-end mt-2">
         <button
-          className="cta-button w-auto bg-slate-400 enabled:hover:bg-slate-500 text-sm"
+          className="cta-button w-auto bg-slate-400 enabled:hocus:bg-slate-500 text-sm"
           onClick={() => moves.undoFirstDisc(board)}
         >
           {t({ hu: '↶ Visszavonás', en: '↶ Undo' })}

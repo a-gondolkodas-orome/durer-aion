@@ -73,7 +73,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                 key={d}
                 onClick={(e) => { moves.chooseDigit(board, d); e.currentTarget.blur(); }}
                 className="border-2 border-slate-300 rounded-xl text-2xl w-12 h-12 font-bold shadow-sm
-                  hover:bg-blue-100 hover:border-blue-300 focus:bg-blue-100 focus:border-blue-300 transition-colors"
+                  hocus:bg-blue-100 hocus:border-blue-300 transition-colors"
               >
                 {d}
               </button>

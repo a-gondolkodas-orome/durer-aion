@@ -12,7 +12,7 @@ export const ModeSelector = ({ isHumanVsHumanGame, onSwitchMode, disabled }: {
       ? `bg-blue-500 text-white font-semibold ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`
       : disabled
         ? 'opacity-40 cursor-not-allowed bg-slate-100 text-slate-600'
-        : 'bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer'}`;
+        : 'bg-slate-100 text-slate-600 hocus:bg-slate-200 cursor-pointer'}`;
   return (
     <fieldset>
       <legend className="text-xs text-slate-500 mb-1.5">
@@ -61,9 +61,9 @@ export const DifficultySelector = ({ variants, selectedIndex, onSelect, disabled
       ? `bg-blue-500 text-white font-semibold ${fieldsetDisabled ? 'cursor-not-allowed' : 'cursor-pointer'}`
       : variantDisabled || fieldsetDisabled
         ? 'opacity-40 cursor-not-allowed bg-slate-100 text-slate-600'
-        : 'bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer'}`;
+        : 'bg-slate-100 text-slate-600 hocus:bg-slate-200 cursor-pointer'}`;
   return (
-    <fieldset className="overflow-hidden">
+    <fieldset>
       <legend className="text-xs text-slate-500 mb-1.5">
         {t({ hu: 'Nehézség', en: 'Difficulty' })}
       </legend>

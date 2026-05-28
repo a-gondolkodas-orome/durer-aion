@@ -31,8 +31,8 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     if (i === board.right) return 'bg-purple-400';
     if (isMoveAllowed(potentialStep(i))) {
       return ctx.currentPlayer === 0
-        ? 'bg-green-200 hover:bg-green-400 focus:bg-green-400'
-        : 'bg-purple-200 hover:bg-purple-400 focus:bg-purple-400';
+        ? 'bg-green-200 hocus:bg-green-400'
+        : 'bg-purple-200 hocus:bg-purple-400';
     }
     return 'bg-slate-200';
   };

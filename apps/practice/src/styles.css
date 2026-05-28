@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant hocus (&:hover, &:focus);
+
 @layer base {
     *,  ::after,  ::before,  ::backdrop,  ::file-selector-button { 
         border-color: var(--color-gray-200, currentColor);
@@ -23,6 +25,6 @@
         @apply border-none rounded-lg block my-1 py-1.5 px-3 w-full;
         @apply text-center text-lg whitespace-normal font-semibold;
         @apply disabled:opacity-50 disabled:cursor-not-allowed;
-        @apply bg-blue-500 text-white enabled:hover:bg-blue-600 enabled:focus:bg-blue-600;
+        @apply bg-blue-500 text-white enabled:hocus:bg-blue-600;
     }
 }

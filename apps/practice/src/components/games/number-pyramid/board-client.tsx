@@ -20,7 +20,7 @@ const ActiveSlot = ({ value, isSelected, isDisabled, onClick }) => (
     className={`${chipBase} transition-colors ${
       isSelected ? 'bg-blue-600 border-blue-700 text-white'
         : isDisabled ? 'bg-slate-100 border-slate-300 text-slate-500 cursor-default'
-          : 'bg-white border-slate-400 hover:bg-blue-50 hover:border-blue-400 cursor-pointer'
+          : 'bg-white border-slate-400 hocus:bg-blue-50 hocus:border-blue-400 cursor-pointer'
     }`}
     onClick={onClick}
     disabled={isDisabled}

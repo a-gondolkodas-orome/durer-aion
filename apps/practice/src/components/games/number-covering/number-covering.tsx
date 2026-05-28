@@ -31,7 +31,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             >
               <button
                 disabled={!ctx.isClientMoveAllowed}
-                className='w-full enabled:hover:bg-gray-400 enabled:focus:bg-gray-400'
+                className='w-full enabled:hocus:bg-gray-400'
                 onClick={() => clickNumber(i+1)}
               >
                 {board[i]}

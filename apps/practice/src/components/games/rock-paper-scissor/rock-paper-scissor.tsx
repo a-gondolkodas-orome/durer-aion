@@ -41,7 +41,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                 p-2 m-2 aspect-4/5 border-4 rounded-xl shadow-md
                 disabled:cursor-not-allowed
                 enabled:border-emerald-400 enabled:border-dashed
-                enabled:hover:border-solid enabled:focus:border-solid
+                enabled:hocus:border-solid
               `}
             >
               { symbolIdx === 0 && (<RockSvg />) }

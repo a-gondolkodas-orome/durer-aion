@@ -72,7 +72,9 @@ const CategoryFilter = ({ selected, onChange }: {
             key={v}
             onClick={() => onChange(isSelected ? selected.filter(s => s !== v) : [...selected, v])}
             className={`rounded-lg px-2 py-0.5 border text-sm cursor-pointer
-              ${isSelected ? 'bg-blue-200 border-blue-400' : 'bg-white border-slate-300'}`}
+              ${isSelected
+                ? 'bg-blue-200 border-blue-400 hocus:bg-blue-300'
+                : 'bg-white border-slate-300 hocus:bg-slate-100'}`}
           >{k}</button>
         );
       })}
@@ -81,7 +83,8 @@ const CategoryFilter = ({ selected, onChange }: {
         disabled={selected.length === 0}
         aria-label={t({ hu: 'Szűrés törlése', en: 'Clear filters' })}
         className={`rounded-lg px-2 py-0.5 border border-slate-300 bg-white text-sm
-          text-gray-400 cursor-pointer disabled:opacity-0 disabled:cursor-default`}
+          text-gray-400 cursor-pointer hocus:bg-slate-100
+          disabled:opacity-0 disabled:cursor-default`}
       >×</button>
     </div>
   );
@@ -95,7 +98,7 @@ const OverviewHeader = () => {
         href="https://forms.gle/7DwugmXNrvKgkiiu8"
         target="_blank"
         rel="noreferrer"
-        className="text-sm text-slate-500 hover:text-slate-700"
+        className="text-sm text-slate-500 hocus:text-slate-700"
       >
         {t({ hu: 'Hibabejelentő', en: 'Bug report' })}
       </a>
@@ -150,7 +153,8 @@ const Game = ({ gameId, gameProps }: { gameId: string; gameProps: GameEntry }) =
     data-testid="game-card"
     className={`
       rounded-lg shadow-sm border p-2 m-2 max-w-[32ch] w-full flex flex-col
-      cursor-pointer hover:shadow-md hover:border-blue-400 transition-shadow
+      cursor-pointer hocus:shadow-md hocus:border-blue-400
+      focus-visible:shadow-md focus-visible:border-blue-400 transition-shadow
       no-underline text-inherit
     `}
   >

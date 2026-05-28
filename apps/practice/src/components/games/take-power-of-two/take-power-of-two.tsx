@@ -17,7 +17,7 @@ type Board = number
 
 const ExponentCell = ({ e, choosePower, setHovered }) => {
   return <td
-    className="border-4 hover:bg-gray-300"
+    className="border-4 hocus:bg-gray-300"
     key={e}>
     <button
       className={`w-full p-[5%] aspect-video`}

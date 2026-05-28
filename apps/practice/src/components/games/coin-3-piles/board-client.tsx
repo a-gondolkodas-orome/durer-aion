@@ -103,7 +103,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         ))}
         <button
           disabled={!wasCoinAlreadyRemovedInTurn}
-          className="cta-button w-auto bg-rose-400 enabled:hover:bg-rose-500 text-sm ml-auto"
+          className="cta-button w-auto bg-rose-400 enabled:hocus:bg-rose-500 text-sm ml-auto"
           onClick={undoCoinRemoval}
         >
           {t({ hu: '↶ Visszavonás', en: '↶ Undo' })}

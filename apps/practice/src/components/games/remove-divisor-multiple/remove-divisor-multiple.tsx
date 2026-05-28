@@ -53,7 +53,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               text-center font-bold
               ${board.numbersOnTable[num - 1] ? '' : 'opacity-50 border-gray-600 text-gray-600'}
               ${board.numbersOnTable[num - 1] ? (isMoveAllowed(num) ? 'border-green-600' : 'border-red-600') : ''}
-              enabled:hover:bg-green-600 enabled:focus:bg-green-600
+              enabled:hocus:bg-green-600
             `}
           >
             {num}
