@@ -18,10 +18,10 @@ type Board = number
 const ExponentCell = ({ e, choosePower, setHovered }) => {
   return <td
     className="border-4 hover:bg-gray-300"
-    key={e}
-    onClick={() => choosePower(e)}>
+    key={e}>
     <button
       className={`w-full p-[5%] aspect-video`}
+      onClick={() => choosePower(e)}
       onMouseOver={() => setHovered(e)}
       onMouseOut={() => setHovered(null)}
       onFocus={() => setHovered(e)}
@@ -83,7 +83,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 
   return (
     <GameBoard>
-      <p className='w-full text-8xl font-bold text-center'>{board}</p><br />
+      <p className='w-full text-8xl font-bold text-center mb-4'>{board}</p>
       {!ctx.isClientMoveAllowed
         ? ''
         : <ExponentsTable

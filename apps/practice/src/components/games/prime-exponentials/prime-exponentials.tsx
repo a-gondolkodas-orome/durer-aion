@@ -107,7 +107,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 
   return (
     <GameBoard>
-      <p className='w-full text-8xl font-bold text-center'>{board}</p><br />
+      <p className='w-full text-8xl font-bold text-center mb-4'>{board}</p>
       <HoverPreview hovered={hovered} board={board} />
       <PrimePowerGrid
         board={board}

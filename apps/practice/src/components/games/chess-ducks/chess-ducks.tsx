@@ -45,7 +45,6 @@ const chessDucksGameFactory = ({ ROWS, COLS }: { ROWS: number; COLS: number }) =
               {range(COLS).map(col => (
                 <td
                   key={col}
-                  onClick={() => clickField({ row, col })}
                   className={`
                     border-4
                     ${isForbidden({ row, col }) ? 'bg-slate-400 cursor-not-allowed' : ''}
@@ -54,13 +53,12 @@ const chessDucksGameFactory = ({ ROWS, COLS }: { ROWS: number; COLS: number }) =
                   <button
                     className="aspect-square w-full h-full p-[5%]"
                     disabled={!isMoveAllowed({ row, col })}
+                    onClick={() => clickField({ row, col })}
                   >
                     {isDuck({ row, col }) && (
-                      <span>
-                        <svg className="inline-block aspect-square">
-                          <use xlinkHref="#game-duck" />
-                        </svg>
-                      </span>
+                      <svg className="inline-block aspect-square">
+                        <use xlinkHref="#game-duck" />
+                      </svg>
                     )}
                   </button>
                 </td>

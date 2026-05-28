@@ -49,7 +49,6 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             {range(8).map(col => (
               <td
                 key={col}
-                onClick={() => clickField({ row, col })}
                 className={`
                   border-4 ${isForbidden({ row, col }) ? 'bg-slate-400 cursor-not-allowed' : ''}
                   ${wouldBeForbidden({ row, col }) ? 'bg-slate-200' : ''}
@@ -58,24 +57,21 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                 <button
                   className="aspect-square w-full p-[5%]"
                   disabled={!isMoveAllowed({ row, col })}
+                  onClick={() => clickField({ row, col })}
                   onMouseOver={() => setHoveredField({ row, col })}
                   onMouseOut={() => setHoveredField(null)}
                   onFocus={() => setHoveredField({ row, col })}
                   onBlur={() => setHoveredField(null)}
                 >
                   {isBishop({ row, col }) && (
-                    <span>
-                      <svg className="inline-block w-full aspect-square">
-                        <use xlinkHref="#game-chess-bishop" />
-                      </svg>
-                    </span>
+                    <svg className="inline-block w-full aspect-square">
+                      <use xlinkHref="#game-chess-bishop" />
+                    </svg>
                   )}
                   {isPotentialNextStep({ row, col }) && (
-                    <span>
-                      <svg className="inline-block w-full aspect-square opacity-50">
-                        <use xlinkHref="#game-chess-bishop" />
-                      </svg>
-                    </span>
+                    <svg className="inline-block w-full aspect-square opacity-50">
+                      <use xlinkHref="#game-chess-bishop" />
+                    </svg>
                   )}
                 </button>
               </td>
