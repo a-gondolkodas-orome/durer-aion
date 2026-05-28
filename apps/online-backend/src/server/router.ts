@@ -3,10 +3,11 @@ import * as Router from '@koa/router';
 import type { Game, LobbyAPI, Server, StorageAPI } from 'boardgame.io';
 import { TeamsRepository } from './db';
 import { InProgressMatchStatus } from 'schemas';
-import { BOT_ID, TransportAPI } from '../socketio_botmoves';
+import { TransportAPI } from '../socketio_botmoves';
 import { getFilterPlayerView } from "boardgame.io/internal";
 import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus, createGame, injectBot, injectPlayer } from './team_manage';
 import { import_teams_from_tsv } from './team_import';
+import { PlayerIDType } from 'game';
 
 /**
  * 
@@ -344,7 +345,7 @@ export function configureTeamsRouter(
   );
 
   /**
-   * Let a team strat a RELAY match.
+   * Let a team start a RELAY match.
    * 
    * @param {string} GUID - TeamId
    */
@@ -357,8 +358,8 @@ export function configureTeamsRouter(
 
     // about to start a game
     const body: LobbyAPI.CreatedMatch = await createGame(game, ctx);
-    await injectPlayer(ctx.db, body.matchID, { playerID: '0', name: GUID, credentials: team.credentials });
-    await injectBot(ctx.db, body.matchID, BOT_ID);
+    await injectPlayer(ctx.db, body.matchID, { playerID: PlayerIDType.GUESSER_PLAYER, name: GUID, credentials: team.credentials });
+    await injectBot(ctx.db, body.matchID);
 
     //created new game, updated team state accordingly
     const match = await startMatchStatus(body.matchID, ctx);
@@ -385,8 +386,8 @@ export function configureTeamsRouter(
     //about to start
 
     const body: LobbyAPI.CreatedMatch = await createGame(game, ctx);
-    await injectPlayer(ctx.db, body.matchID, { playerID: '0', name: GUID, credentials: team.credentials });
-    await injectBot(ctx.db, body.matchID, BOT_ID);
+    await injectPlayer(ctx.db, body.matchID, { playerID: PlayerIDType.GUESSER_PLAYER, name: GUID, credentials: team.credentials });
+    await injectBot(ctx.db, body.matchID);
 
     //created new game, updated team state accordingly
     team.update({
@@ -447,6 +448,6 @@ export function configureTeamsRouter(
     await next();
     //Figured out where match id is stored
     console.log(`Injecting bot in :${ctx.response.body.matchID}`);
-    await injectBot(ctx.db, ctx.response.body.matchID, BOT_ID);
+    await injectBot(ctx.db, ctx.response.body.matchID);
   });
 }
