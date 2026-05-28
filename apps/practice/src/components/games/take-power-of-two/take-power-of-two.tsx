@@ -3,7 +3,7 @@ import {
   strategyGameFactory, type Events, type StrategyArgs, type BoardClientProps, GameBoard
 } from '../../game-factory';
 import { range, random, reverse, sample } from 'lodash';
-import { useTranslation } from '../../language/translate';
+import { useTranslation } from '../../language';
 
 const generateStartBoard = () => {
   if (random(0, 1)) {

@@ -1,4 +1,4 @@
-import { useTranslation } from '../../language/translate';
+import { useTranslation } from '../../language';
 import type { Board } from './architect-and-bandits';
 import { GameBoard, type BoardClientProps } from '../../game-factory';
 

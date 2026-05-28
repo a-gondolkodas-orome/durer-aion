@@ -1,6 +1,6 @@
 import React from 'react';
 import { Label, Field, Input } from '@headlessui/react';
-import { useTranslation, type I18nString } from '../../language/translate';
+import { useTranslation, type I18nString } from '../../language';
 import {
   ModeSelector,
   DifficultySelector,

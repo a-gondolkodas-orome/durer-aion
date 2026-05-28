@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { range, random } from 'lodash';
 import { strategyGameFactory, type Events, type BoardClientProps, GameBoard } from '../../game-factory';
-import { useTranslation } from '../../language/translate';
+import { useTranslation } from '../../language';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 
 export type Board = number[]

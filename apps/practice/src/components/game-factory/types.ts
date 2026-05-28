@@ -1,4 +1,4 @@
-import type { I18nString } from '../language/translate';
+import type { I18nString } from '../language';
 
 export type Phase = 'roleSelection' | 'play' | 'gameEnd'
 export type Mode = 'vsComputer' | 'vsHuman'

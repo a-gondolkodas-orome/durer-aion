@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { range } from 'lodash';
-import { useTranslation } from '../../language/translate';
+import { useTranslation } from '../../language';
 import type { Board } from './helpers';
 import { GameBoard, type BoardClientProps } from '../../game-factory';
 

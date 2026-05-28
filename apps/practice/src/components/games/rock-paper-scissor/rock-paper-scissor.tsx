@@ -4,7 +4,7 @@ import { smartBotStrategy } from './bot-strategy';
 import { RockSvg } from './symbols/rock-svg';
 import { PaperSvg } from './symbols/paper-svg';
 import { ScissorSvg } from './symbols/scissor-svg';
-import { useTranslation } from '../../language/translate';
+import { useTranslation } from '../../language';
 
 export type Board = ('rock' | 'paper' | 'scissor' | null)[][]
 

@@ -1,8 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router';
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react';
-import { useTranslation } from '../../language/translate';
-import { LanguageSelector } from '../../language/language-selector';
+import { useTranslation, LanguageSelector } from '../../language';
 import { gameList } from '../../games/gameList';
 
 export const GameHeader = () => {

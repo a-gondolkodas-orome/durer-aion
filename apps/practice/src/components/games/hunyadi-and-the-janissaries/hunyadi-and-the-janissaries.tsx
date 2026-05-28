@@ -4,7 +4,7 @@ import { CastleSvg } from './assets/castle-svg';
 import { SoldierSvg } from './assets/soldier-svg';
 import { smartBotStrategy } from './bot-strategy';
 import { generateStartBoard, moves, type Board, type SoldierColor } from './helpers';
-import { useTranslation } from '../../language/translate';
+import { useTranslation } from '../../language';
 
 type Piece = { rowIndex: number, pieceIndex: number }
 

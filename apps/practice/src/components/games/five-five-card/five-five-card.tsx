@@ -1,7 +1,7 @@
 import { range, cloneDeep, compact } from 'lodash';
 import { strategyGameFactory, type Ctx, type Events, type BoardClientProps, GameBoard } from '../../game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
-import { useTranslation } from '../../language/translate';
+import { useTranslation } from '../../language';
 
 export type Board = (number | null)[][]
 

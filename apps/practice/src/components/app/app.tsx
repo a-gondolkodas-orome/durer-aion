@@ -1,8 +1,8 @@
-import React, { StrictMode } from 'react';
+import { StrictMode } from 'react';
 import { createHashRouter, RouterProvider, Outlet } from 'react-router';
 import { Overview } from '../overview/overview';
 import { ErrorPage } from '../error-page';
-import { LanguageProvider } from '../language/language-context';
+import { LanguageProvider } from '../language';
 
 /*
 Import all the games individually. Aim to keep abc ordering for easy navigation.

@@ -3,7 +3,7 @@ import {
   strategyGameFactory, type Events, type StrategyArgs, type BoardClientProps, GameBoard
 } from '../../game-factory';
 import { sample, random } from 'lodash';
-import { useTranslation } from '../../language/translate';
+import { useTranslation } from '../../language';
 
 type Board = number
 

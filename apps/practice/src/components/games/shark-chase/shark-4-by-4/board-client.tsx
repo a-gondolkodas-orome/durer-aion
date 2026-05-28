@@ -3,7 +3,7 @@ import { range } from 'lodash';
 
 import { SharkSvg } from '../assets/shark-chase-shark-svg';
 import { SubmarineSvg } from '../assets/shark-chase-submarine-svg';
-import { useTranslation } from '../../../language/translate';
+import { useTranslation } from '../../../language';
 import { type Board } from './shark-chase';
 import { GameBoard, type BoardClientProps } from '../../../game-factory';
 

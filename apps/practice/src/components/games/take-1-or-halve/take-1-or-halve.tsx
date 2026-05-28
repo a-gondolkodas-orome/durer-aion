@@ -3,7 +3,7 @@ import {
   strategyGameFactory, type Events, type StrategyArgs, type BoardClientProps, GameBoard
 } from '../../game-factory';
 import { random, range } from 'lodash';
-import { useTranslation } from '../../language/translate';
+import { useTranslation } from '../../language';
 
 type Board = number
 type HoveredAction = 'take1' | 'halve' | null

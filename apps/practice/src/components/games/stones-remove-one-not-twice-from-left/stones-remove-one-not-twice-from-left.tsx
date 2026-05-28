@@ -5,7 +5,7 @@ import {
   GameBoard
 } from '../../game-factory';
 import { cloneDeep, isEqual, sample, random, range } from 'lodash';
-import { useTranslation } from '../../language/translate';
+import { useTranslation } from '../../language';
 
 type Board = { piles: [number, number], leftRestriction: [boolean, boolean] }
 

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { range, random, cloneDeep } from 'lodash';
 import { strategyGameFactory, type BoardClientProps, type Events, GameBoard } from '../../../game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
-import { useLanguage } from '../../../language/language-context';
+import { useLanguage } from '../../../language';
 
 export type Board = number[];
 type Piece = { pileId: number; pieceId: number };

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Dialog, DialogPanel, DialogTitle, Description } from '@headlessui/react';
-import { useTranslation } from '../../language/translate';
+import { useTranslation } from '../../language';
 import { ModeSelector, DifficultySelector, getCtaText } from './game-controls';
 import type { Ctx, Variant, Mode } from '../types';
 

@@ -3,7 +3,7 @@ import { GameHeader, GameFooter, GameRule } from './game-parts/game-chrome';
 import { GameSidebar } from './game-parts/game-sidebar';
 import { GameEndDialog } from './game-parts/game-end-dialog';
 import { mapValues } from 'lodash';
-import { useTranslation, type TranslatableNode, type I18nString } from '../language/translate';
+import { useTranslation, type TranslatableNode, type I18nString } from '../language';
 import { useLocation } from 'react-router';
 import { useGameStats } from './use-game-stats';
 import type {
