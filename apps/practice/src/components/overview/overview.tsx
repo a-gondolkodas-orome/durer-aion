@@ -128,7 +128,7 @@ const OverviewHeader = () => {
 };
 
 const categoryColorClass: Record<Category, string> = {
-  'A':  'bg-emerald-200 border-emerald-400 text-emerald-950',
+  'A':  'bg-green-200 border-green-400 text-green-950',
   'B':  'bg-teal-300 border-teal-500 text-teal-950',
   'C':  'bg-blue-300 border-blue-400 text-blue-950',
   'D':  'bg-blue-400 border-blue-500 text-blue-950',

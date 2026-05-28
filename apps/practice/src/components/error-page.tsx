@@ -10,7 +10,7 @@ export const ErrorPage = () => {
       </p>
       <Link
         to = "/"
-        className="rounded-lg px-2 py-1 bg-blue-400 hocus:bg-blue-600 text-black"
+        className="rounded-lg px-2 py-1 bg-blue-500 hocus:bg-blue-600 text-white"
       >Vissza a főoldalra</Link>
     </main>;
   }

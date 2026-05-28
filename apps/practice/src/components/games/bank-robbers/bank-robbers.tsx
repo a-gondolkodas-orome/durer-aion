@@ -30,7 +30,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     if (index === board.lastMove) return "fill-red-800 stroke-red-600";
     if (board.circle[index] === false) return "fill-red-800";
     if (!isAllowedBank(index)) return "fill-gray-400";
-    return "fill-emerald-600";
+    return "fill-green-600";
   }
 
   return(

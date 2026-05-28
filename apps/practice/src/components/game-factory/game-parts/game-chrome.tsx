@@ -45,7 +45,7 @@ export const GameFooter = () => {
   return (
     <footer className="text-right">
       { credit !== undefined && (
-        <p className ="px-2 text-gray-800 font-light text-sm">
+        <p className ="px-2 text-slate-800 font-light text-sm">
           { (credit.suggestedBy || []).length
             ? t({
               hu: `A játékot javasolta: ${credit.suggestedBy!.join(', ')}.`,

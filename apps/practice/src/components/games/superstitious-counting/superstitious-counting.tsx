@@ -46,7 +46,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           onClick={() => makeStep(i - board.current)}
           className={`
             border-2 text-2xl min-w-[4ch] text-center p-1 my-1 font-bold
-            enabled:bg-emerald-200 enabled:hocus:bg-emerald-400
+            enabled:bg-green-200 enabled:hocus:bg-green-400
             ${i === board.target ? 'border-8 border-purple-600' : '' }
             ${board.restricted && i === board.current + board.restricted ? 'bg-red-200' : '' }
             ${i < board.current ? 'bg-slate-400' : ''}

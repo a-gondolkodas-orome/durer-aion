@@ -95,7 +95,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               w-10 aspect-square rounded-full font-bold text-white
               ${getCoinBgColor(coinValue)} shadow-md ${getCoinShadowColor(coinValue)}
               disabled:opacity-50 disabled:cursor-not-allowed
-              enabled:cursor-pointer enabled:hocus:ring-2 enabled:hocus:ring-rose-400
+              enabled:cursor-pointer enabled:hocus:ring-2 enabled:hocus:ring-red-400
             `}
             onClick={() => addToPile(coinValue)}
             onMouseEnter={() => setHoveredPile(coinValue)}
@@ -104,7 +104,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         ))}
         <button
           disabled={!wasCoinAlreadyRemovedInTurn}
-          className="cta-button w-auto bg-rose-400 enabled:hocus:bg-rose-500 text-sm ml-auto"
+          className="cta-button w-auto bg-red-400 enabled:hocus:bg-red-500 text-sm ml-auto"
           onClick={undoCoinRemoval}
         >
           {t({ hu: '↶ Visszavonás', en: '↶ Undo' })}
@@ -134,7 +134,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                   w-[15%] aspect-square inline-block rounded-full mr-0.5 mt-2
                   ${getCoinBgColor(coinValue)} shadow-md ${getCoinShadowColor(coinValue)}
                   disabled:cursor-not-allowed
-                  enabled:cursor-pointer enabled:hocus:ring-2 enabled:hocus:ring-rose-400
+                  enabled:cursor-pointer enabled:hocus:ring-2 enabled:hocus:ring-red-400
                   ${shouldShowCoinToBeRemoved(coinValue) && i === (board[coinValue - 1] - 1)
                     ? 'opacity-50' : ''}
                 `}

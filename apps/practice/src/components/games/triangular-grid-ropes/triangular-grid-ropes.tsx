@@ -62,7 +62,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         cx={vertex.cx} cy={vertex.cy} r="2%" fill="black"
         className={`
           ${vertex.id === firstNode
-            ? (ctx.currentPlayer === 0 ? "fill-blue-500" : "fill-emerald-800")
+            ? (ctx.currentPlayer === 0 ? "fill-blue-500" : "fill-green-800")
             : ''
           }
           ${

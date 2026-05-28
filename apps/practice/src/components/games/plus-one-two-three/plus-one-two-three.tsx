@@ -32,11 +32,11 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           onClick={() => clickNumber(i)}
           className={`
             border-2 text-2xl min-w-[4ch] text-center p-1 my-1 font-bold
-            enabled:bg-emerald-200 enabled:hocus:bg-emerald-400
+            enabled:bg-green-200 enabled:hocus:bg-green-400
             ${i === target ? 'border-8 border-black' : '' }
             ${i < board ? 'bg-slate-400' : ''}
             ${i === board ? 'bg-slate-200' : ''}
-            ${i > target ? 'text-slate-400 border-rose-600' : ''}
+            ${i > target ? 'text-slate-400 border-red-600' : ''}
           `}
         >{ i === board ? 'X' : i }
       </button>
