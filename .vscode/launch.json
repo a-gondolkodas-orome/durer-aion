@@ -10,6 +10,14 @@
         "sourceMapPathOverrides": {
             "webpack:///src/*": "${webRoot}/*"
         }
+        },
+        {
+          "type": "node",
+          "request": "attach",
+          "name": "Attach to Backend",
+          "port": 9229,
+          "restart": true,
+          "skipFiles": ["<node_internals>/**"]
         }
     ]
 }

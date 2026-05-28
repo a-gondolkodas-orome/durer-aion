@@ -1,12 +1,14 @@
-import { Container, Dialog, Stack } from '@mui/material';
-import React, { useState } from 'react';
+import { Container, Dialog, Stack, Button } from '@mui/material';
+import { useState } from 'react';
 import { useLogout } from '../hooks/user-hooks';
-import { dictionary } from '../text-constants';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import { useClientRepo } from '../api-repository-interface';
 import { useTheme } from '@mui/material/styles';
+import { useTranslation } from 'react-i18next';
+import { LanguageDropdown } from './Langswitcher';
 
-export function Header(props: { teamName: string | null }) {
+export function Header(props: { teamName: string | null, admin: boolean }) {
+  const { t } = useTranslation();
   const theme = useTheme();
   const logout = useLogout();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -38,8 +40,8 @@ export function Header(props: { teamName: string | null }) {
           fontWeight: 'bold',
           paddingTop: '20px',
           whiteSpace: 'nowrap',
-        }}>{dictionary.header.title}</Stack>
-        {props.teamName &&
+        }}>{t('header.title')}</Stack>
+        {
           <Stack sx={{
             flexDirection: 'row',
             display: {
@@ -54,35 +56,43 @@ export function Header(props: { teamName: string | null }) {
             paddingLeft: '10px',
             paddingRight: '10px',
           }}>
+            {props.teamName &&
+              <>
+                <Stack sx={{
+                  flex: 1
+                }}></Stack>
+                <Stack sx={{
+                  fontSize: 25,
+                  display: 'block',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}>{props.teamName}</Stack>
+                <Stack onClick={()=>{
+                  logout();
+                  if ( clientRepository.version === "OFFLINE") {
+                    window.location.reload();
+                  }            
+                }} sx={{
+                  fontSize: 20,
+                  margin: '0px 15px',
+                  cursor: 'pointer',
+                  "&:hover": {
+                    opacity: '0.8',
+                  }
+                }}>{t('header.logout')}</Stack>
+              </>
+            }
             <Stack sx={{
               flex: 1
-            }}></Stack>
-            <Stack sx={{
-              fontSize: 25,
-              display: 'block',
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            }}>{props.teamName}</Stack>
-            <Stack onClick={()=>{
-              logout();
-              if ( clientRepository.version === "OFFLINE") {
-                window.location.reload();
-              }            
-            }} sx={{
-              fontSize: 20,
-              marginLeft: '15px',
-              cursor: 'pointer',
-              "&:hover": {
-                opacity: '0.8',
-              }
-            }}>{dictionary.header.logout}</Stack>
-            <Stack sx={{
-              flex: 1
-            }}></Stack>
+            }}>
+            </Stack>
+            {props.admin && 
+              <LanguageDropdown fontColor={theme.palette.primary.contrastText} />
+            }
           </Stack>
         }
-        {props.teamName &&<Stack sx={{
+        {(props.teamName || props.admin) &&<Stack sx={{
           display: {
             xs: 'flex',
             md: 'none'
@@ -101,7 +111,7 @@ export function Header(props: { teamName: string | null }) {
             md: 'flex'
           },
           whiteSpace: 'nowrap',
-        }}>{dictionary.header.subtitle}</Stack>
+        }}>{t('header.subtitle')}</Stack>
         <Dialog
           open={mobileMenuOpen}
           onClose={()=>{
@@ -116,22 +126,25 @@ export function Header(props: { teamName: string | null }) {
             }
           }}
         >
-           <Stack sx={{
-              fontSize: 30,
-              paddingTop: '10px',
-              paddingBottom: '20px',
-            }}>{props.teamName}</Stack>
-            <Stack onClick={()=>{
-              setMobileMenuOpen(false);
-              logout();
-            }} sx={{
-              fontSize: 20,
-              marginLeft: '15px',
-              cursor: 'pointer',
-              "&:hover": {
-                opacity: '0.8',
-              }
-            }}>{dictionary.header.logout}</Stack>
+          {props.teamName && <>
+              <Stack sx={{
+                fontSize: 30,
+                paddingTop: '10px',
+                paddingBottom: '20px',
+                display: 'flex',
+                alignItems: 'center'
+              }}>{props.teamName}</Stack>
+              <Button onClick={()=>{
+                setMobileMenuOpen(false);
+                logout();
+              }} variant='outlined'
+              sx={{
+                fontSize: 20,
+                textTransform: 'capitalize'
+              }}
+              >{t('header.logout')}</Button>
+            </>}
+          {props.admin && <LanguageDropdown />}
         </Dialog>
       </Container>
     </Stack>

@@ -1,4 +1,12 @@
-const theme = ({
+import { ThemeOptions } from "@mui/material";
+
+declare module '@mui/material/styles' {
+    interface TypeBackground {
+        paperOpacity: number;
+    }
+}
+
+const themeConfig: ThemeOptions = ({
     palette: {
         secondary: {
             main: '#fff',
@@ -6,7 +14,8 @@ const theme = ({
         },
         background: {
             default: '#FFF8D7',
-            paper: '#FFFFFFE6'  // Opacity: 90%
+            paper: '#fff',
+            paperOpacity: 0.9,
         }
     },
     typography: {
@@ -27,4 +36,4 @@ const theme = ({
     },
 });
 
-export default theme;
+export default themeConfig;

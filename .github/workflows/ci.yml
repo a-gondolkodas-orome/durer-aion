@@ -9,25 +9,25 @@ on:
       - main
 
 jobs:
-  # lint:
-  #   name: linters
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Check out Git repository
-  #       uses: actions/checkout@v2
-  #     - name: Set up Node.js
-  #       uses: actions/setup-node@v1
-  #       with:
-  #         node-version: 16
-  #     - name: Install Node.js dependencies
-  #       run: npm ci
-  #     - name: Run linters
-  #       uses: wearerequired/lint-action@v2
-  #       with:
-  #         eslint: true
-  #         commit: "false"
-  #         eslint_extensions: "js,ts,jsx,tsx"
-  #         eslint_args: "--max-warnings=19" # TODO: change it to 0 after the big refactor
+  lint:
+    name: linters
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+      - name: Set up Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 24
+      - name: Install Node.js dependencies
+        run: npm ci
+      - name: Run linters
+        uses: wearerequired/lint-action@v2
+        with:
+          eslint: true
+          commit: "false"
+          eslint_extensions: "js,ts,jsx,tsx"
+          eslint_args: "--max-warnings=107" # TODO: change it to 0 after the big refactor
 
   # lint:
   #   name: lint
@@ -38,7 +38,7 @@ jobs:
   #     - name: Set up Node.js
   #       uses: actions/setup-node@v1
   #       with:
-  #         node-version: 22
+  #         node-version: 24
   #     - name: Install Node.js dependencies
   #       run: npm ci
   #     - name: Run lint
@@ -53,11 +53,26 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v1
         with:
-          node-version: 22
+          node-version: 24
       - name: Install Node.js dependencies
         run: npm ci
       - name: Run build
         run: npm run build
+
+  i18n:
+    name: i18n
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+      - name: Set up Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 22
+      - name: Install Node.js dependencies
+        run: npm ci
+      - name: Run i18next validation
+        run: npm run i18n:check
 
   # tests:
   #   name: client tests

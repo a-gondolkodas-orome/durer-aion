@@ -5,9 +5,9 @@ import { range } from "lodash";
 // import { IS_OFFLINE_MODE } from '../../client/utils/util';
 
 
-interface MyGameProps extends BoardProps<RemoveFromCircleGameState> { }
+type MyGameProps = BoardProps<RemoveFromCircleGameState>;
 
-export function MyBoard({ G, ctx, moves }: MyGameProps) {
+export function MyBoard({ G, moves }: MyGameProps) {
 
   const onClick = (index: number) => {
     /* TODO refactor this sholud not be here at board
@@ -18,7 +18,7 @@ export function MyBoard({ G, ctx, moves }: MyGameProps) {
   };
 
   const getAngle = (index: number) => {
-    let step = Math.PI*2/G.circle.length;
+    const step = Math.PI*2/G.circle.length;
     return index*step + (G.firstMove === -1 ? 0 : G.firstMove*step)
   };
 

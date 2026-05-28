@@ -9,11 +9,13 @@ import { Strategy } from "./teamstates/Strategy";
 import { Disclaimer } from "./Disclaimer";
 import { Chooser } from "./Chooser";
 import { Admin } from "./Admin";
+import i18next from "i18next";
 
-export function Main() {
+export function Main(props: { language: string, gitCommitHash: string }) {
   const teamState = useTeamState();
   const [frontendState, setFrontEndState] = useState<"R" | "S" | null>(null);
   const [admin, setAdmin] = useState<boolean>(false);
+  i18next.changeLanguage(props.language);
 
   useEffect(() => {
     if (window.location.pathname.includes('/admin')) {
@@ -26,7 +28,7 @@ export function Main() {
   return (
     <Layout>
       <LoadTeamState />
-      <Header teamName={teamState?.teamName ?? null} />
+      <Header teamName={teamState?.teamName ?? null} admin={admin}/>
       <Container
         sx={{
           paddingLeft: {
@@ -47,9 +49,9 @@ export function Main() {
         data-testId="mainRoot"
       >
         {admin && <Admin teamId={window.location.pathname.split('/').at(2)}/>}
-        {!teamState && !admin && <Login />}
+        {!teamState && <Login />}
         {teamState && teamState.pageState === "DISCLAIMER" && (
-          <Disclaimer />
+          <Disclaimer teamName={teamState.teamName} category={teamState.category}/>
         )}
         {teamState && teamState.pageState === "HOME" && frontendState === null && (
           <Chooser state={teamState} setState={setFrontEndState}/>
@@ -67,6 +69,14 @@ export function Main() {
           <Strategy state={teamState} />
         )}
       </Container>
+      <footer style={{
+        textAlign: "center",
+        color: "#777",
+        fontSize: '70%',
+        marginBottom: '8px'
+      }}>
+        <div>{props.gitCommitHash}</div>
+      </footer>
     </Layout>
   );
 }

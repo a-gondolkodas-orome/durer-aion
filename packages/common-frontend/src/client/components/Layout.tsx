@@ -5,8 +5,8 @@ import { CssBaseline, Stack } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import importedTheme from './theme';
 import { deepmerge } from '@mui/utils';
-export interface LayoutProps extends React.HTMLProps<any> {
-}
+
+export type LayoutProps = React.HTMLProps<any>;
 
 export const Layout: React.FunctionComponent<LayoutProps> = (props: LayoutProps) => {
     return <React.Fragment>
@@ -30,7 +30,7 @@ export const Layout: React.FunctionComponent<LayoutProps> = (props: LayoutProps)
                       overflow: "hidden",
                       height: 'calc(100% - 100px)'
                     }}>
-                    <SuperPicture picture={{webPUrl: "durerbackground.png", jpegOrPngUrl: "durerbackground.png", alt: "", title: ""}} style={{opacity:.3}}/>
+                    <SuperPicture picture={{webPUrl: "durerbackground.png", jpegOrPngUrl: "durerbackground.png", alt: "", title: ""}} style={{opacity:.3, height: '100%'}}/>
                   </Stack>
                   <div>
                     {props.children}

@@ -1,15 +1,16 @@
 import { ClientRepository, LOCAL_STORAGE_TEAMSTATE, TeamModelDto, MatchStateDto } from "common-frontend";
 import { teamData } from "./teamData";
 import { sendDataLogin, sendGameData } from "./sendData";
+import i18n from "i18next";
 
 export class OfflineClientRepository implements ClientRepository {
   
   version = "OFFLINE" as const;
   
-  startRelay(joinCode: string): Promise<string> {
+  startRelay(_joinCode: string): Promise<string> {
     const teamState = getTeamStateFromLocal();
     if (!(teamState.pageState === 'HOME' && teamState.relayMatch.state === 'NOT STARTED' && teamState.strategyMatch.state !== 'IN PROGRESS')) {
-      throw new Error('Váratlan hiba történt');
+      throw new Error(i18n.t('error.unexpected'));
     }
     const newState = {
       ...teamState,
@@ -28,10 +29,10 @@ export class OfflineClientRepository implements ClientRepository {
     return Promise.resolve("ok");
   }
 
-  startStrategy(joinCode: string): Promise<string> {
+  startStrategy(_joinCode: string): Promise<string> {
     const teamState = getTeamStateFromLocal();
     if (!(teamState.pageState === 'HOME' && teamState.strategyMatch.state === 'NOT STARTED' && teamState.relayMatch.state !== 'IN PROGRESS')) {
-      throw new Error('Váratlan hiba történt');
+      throw new Error(i18n.t('error.unexpected'));
     }
     const newState = {
       ...teamState,
@@ -51,7 +52,7 @@ export class OfflineClientRepository implements ClientRepository {
     return Promise.resolve("ok");
   }
 
-  toHome(joinCode: string): Promise<string> {
+  toHome(_joinCode: string): Promise<string> {
     const teamState = getTeamStateFromLocal();
     const newState = {...teamState, pageState: 'HOME'}
     if (teamState.relayMatch.state === "IN PROGRESS"){
@@ -76,7 +77,7 @@ export class OfflineClientRepository implements ClientRepository {
     return Promise.resolve("ok");
   }
 
-  getTeamState(joinCode: string): Promise<TeamModelDto> {
+  getTeamState(_joinCode: string): Promise<TeamModelDto> {
     const teamState = getTeamStateFromLocal();
     return Promise.resolve(teamState) as Promise<TeamModelDto>;
   }
@@ -85,30 +86,30 @@ export class OfflineClientRepository implements ClientRepository {
     return null;
   }
 
-  async resetRelay(teamId: String): Promise<TeamModelDto> {
+  async resetRelay(_teamId: string): Promise<TeamModelDto> {
     throw Error("NOT call this");
   }
 
-  async resetStrategy(teamId: String): Promise<TeamModelDto> {
+  async resetStrategy(_teamId: string): Promise<TeamModelDto> {
     throw Error("NOT call this");
   }
 
-  async addMinutes(matchId: String, minutes: number): Promise<String> {
+  async addMinutes(_matchId: string, _minutes: number): Promise<string> {
     return Promise.resolve("OK");
   }
 
-  async getMatchState(matchId: String): Promise<MatchStateDto> {
+  async getMatchState(_matchId: string): Promise<MatchStateDto> {
     throw Error("NOT call this");
   }
-  async getMatchLogs(matchId: String): Promise<MatchStateDto> {
+  async getMatchLogs(_matchId: string): Promise<MatchStateDto> {
     throw Error("NOT call this");
   }
-  async removeTeam(teamId: string): Promise<void> {
+  async removeTeam(_teamId: string): Promise<void> {
     throw Error("NOT call this");
   }
 
   joinWithCode(joinCode: string): Promise<string> {
-    // return the  if it is in the teamData.ts file
+    // return the joincode if it is in the teamData.ts file
 
     const i = teamData.findIndex(e => e.join_code === joinCode);
     let pageState = "DISCLAIMER"
@@ -146,7 +147,7 @@ export class OfflineClientRepository implements ClientRepository {
       return Promise.resolve(joinCode);
     }
 
-    throw new Error("Rossz belépési kód!");
+    throw new Error(i18n.t('login.error.wrongid'));
   }
 
 }
@@ -154,11 +155,11 @@ export class OfflineClientRepository implements ClientRepository {
 
 const getTeamStateFromLocal = (): TeamModelDto => {
   if (typeof localStorage === "undefined") {
-    throw new Error('Váratlan hiba történt');
+    throw new Error(i18n.t('error.unexpected'));
   }
   const teamstateString = localStorage.getItem(LOCAL_STORAGE_TEAMSTATE);
   if (teamstateString === null) {
-    throw new Error('Váratlan hiba történt');
+    throw new Error(i18n.t('error.unexpected'));
   }
   return JSON.parse(teamstateString);
 }

@@ -1,13 +1,14 @@
 import { Button } from '@mui/material';
-import { Stack } from '@mui/system';
+import { Stack, alpha } from '@mui/system';
 import { MatchStatus, FinishedMatchStatus } from '../dto/TeamStateDto';
 import { useStartRelay, useStartStrategy } from '../hooks/user-hooks';
 import { formatTime } from '../utils/DateFormatter';
-import { dictionary } from '../text-constants';
 import { useState } from 'react';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { useClientRepo } from '../api-repository-interface';
 import { useTheme } from "@mui/material/styles";
+import { useTranslation, Trans } from 'react-i18next';
 
 export function ChooserItem(props: {
   status: MatchStatus,
@@ -21,6 +22,7 @@ export function ChooserItem(props: {
   const [mobileDescOpen, setMobileDescOpen] = useState(props.status.state !== "FINISHED");
   const isOffline = useClientRepo().version === "OFFLINE";
   const theme = useTheme();
+  const { t } = useTranslation();
 
   return (
     <Stack sx={{
@@ -33,7 +35,7 @@ export function ChooserItem(props: {
         xs: "10px",
         md: "40px",
       },
-      backgroundColor: theme.palette.background.paper,
+      backgroundColor: alpha(theme.palette.background.paper, theme.palette.background.paperOpacity),
     }}>
       <Stack sx={{
         fontWeight: 'bold',
@@ -49,13 +51,19 @@ export function ChooserItem(props: {
           return !prev
         })
       }}>
-        <span>{props.type==='relay' ? dictionary.relay.name : dictionary.strategy.name}  {!props.hideDesc && <ExpandMoreIcon sx={{
+        <span>{props.type==='relay' ? t('relay.name') : t('strategy.name')}  {!props.hideDesc && (mobileDescOpen ? <KeyboardArrowUpIcon sx={{
           fontSize: 33,
           marginBottom: "-9px",
           display: {
             md: 'none',
           }
-        }}/>}</span>
+        }}/> : <KeyboardArrowDownIcon sx={{
+          fontSize: 33,
+          marginBottom: "-9px",
+          display: {
+            md: 'none',
+          }
+        }}/>)}</span>
       </Stack>
       {props.status.state === "FINISHED" &&
         <Stack sx={{
@@ -67,7 +75,7 @@ export function ChooserItem(props: {
             md: 0,
           }
         }}>
-          {dictionary.chooser.filledAt}: {formatTime((props.status as FinishedMatchStatus).startAt)} - {formatTime((props.status as FinishedMatchStatus).endAt)} {dictionary.chooser.achievedPoint}: {(props.status as FinishedMatchStatus).score}
+          {t('chooser.filledAt')}: {formatTime((props.status as FinishedMatchStatus).startAt)} - {formatTime((props.status as FinishedMatchStatus).endAt)} {t('chooser.achievedPoint')}: {(props.status as FinishedMatchStatus).score}
         </Stack>
       }
       {props.type === 'relay' &&
@@ -91,7 +99,7 @@ export function ChooserItem(props: {
             md: 0,
             xs: '10px'
           }}}>
-            {!props.hideDesc && dictionary.chooser.relayDescription}
+            {!props.hideDesc && t('chooser.relayDescription')}
           </Stack>
         </Stack>
       }        
@@ -112,7 +120,16 @@ export function ChooserItem(props: {
             marginBlockEnd: 0,
           },
         }}>
-          {!props.hideDesc && <span dangerouslySetInnerHTML={{ __html: dictionary.chooser.gameDescriptionHtml }}/>}
+          {!props.hideDesc && 
+          <Trans
+            i18nKey='chooser.gameDescriptionHtml'
+            components={{
+              b: <b />,
+              p: <p />,
+              ul: <ul />,
+              li: <li />
+            }}
+          />}
         </Stack>
       }
       <Button sx={{
@@ -129,7 +146,7 @@ export function ChooserItem(props: {
           startStrategy()
         }
       }} disabled={props.status.state !== "NOT STARTED"}>
-        {dictionary.chooser.start}
+        {t('chooser.start')}
       </Button>
       { !isOffline &&
       <Button sx={{
@@ -147,7 +164,7 @@ export function ChooserItem(props: {
           props.setState("S");
         }
       }} disabled={props.status.state === "NOT STARTED"}>
-        {dictionary.chooser.result}
+        {t('chooser.result')}
       </Button>
       }
     </Stack>

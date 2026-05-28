@@ -3,10 +3,10 @@ import { BoardProps } from 'boardgame.io/react';
 import { range } from "lodash";
 
 
-interface MyGameProps extends BoardProps<MyGameState> { }
+type MyGameProps = BoardProps<MyGameState>;
 
 
-export function MyBoard({ G, ctx, moves }: MyGameProps) {
+export function MyBoard({ G, moves }: MyGameProps) {
 
   const onClick = (index: number) => {
     moves.removeNumber(index)

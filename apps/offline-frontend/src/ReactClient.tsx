@@ -2,16 +2,15 @@ import { GameRelay, descriptionC, descriptionD, descriptionE, MyBoardWrapper, My
 import { RelayStrategy } from "strategy";
 import { InProgressRelay } from "common-frontend";
 import { ClientFactory, ClientFactoryRelay } from "./client_factory";
-import { getProblems } from "./relayProblemDownload";
 
 const GameC = MyGameWrappers.C();
 const GameD = MyGameWrappers.D();
 const GameE = MyGameWrappers.E();
 
-let description = <p className="text-justify"></p>
-export const { ClientWithBot: RelayClientWithBotC } = ClientFactoryRelay({...GameRelay, name: "relay_c"}, InProgressRelay, RelayStrategy(() => getProblems("C")), description);
-export const { ClientWithBot: RelayClientWithBotD } = ClientFactoryRelay({...GameRelay, name: "relay_d"}, InProgressRelay, RelayStrategy(() => getProblems("D")), description);
-export const { ClientWithBot: RelayClientWithBotE } = ClientFactoryRelay({...GameRelay, name: "relay_e"}, InProgressRelay, RelayStrategy(() => getProblems("E")), description);
+const description = <p className="text-justify"></p>
+export const { ClientWithBot: RelayClientWithBotC } = ClientFactoryRelay({...GameRelay, name: "relay_c"}, InProgressRelay, RelayStrategy("C"), description);
+export const { ClientWithBot: RelayClientWithBotD } = ClientFactoryRelay({...GameRelay, name: "relay_d"}, InProgressRelay, RelayStrategy("D"), description);
+export const { ClientWithBot: RelayClientWithBotE } = ClientFactoryRelay({...GameRelay, name: "relay_e"}, InProgressRelay, RelayStrategy("E"), description);
 export const { ClientWithBot: StrategyClientWithBotC } = ClientFactory({...GameC, name: strategyNames.C}, MyBoardWrapper("C"), StrategyWrappers.C(), descriptionC);
 export const { ClientWithBot: StrategyClientWithBotD } = ClientFactory({...GameD, name: strategyNames.D}, MyBoardWrapper("D"), StrategyWrappers.D(), descriptionD);
 export const { ClientWithBot: StrategyClientWithBotE } = ClientFactory({...GameE, name: strategyNames.E}, MyBoardWrapper("E"), StrategyWrappers.E(), descriptionE);

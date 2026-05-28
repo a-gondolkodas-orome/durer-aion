@@ -7,18 +7,21 @@ import { Dialog } from '@mui/material';
 import { useRefreshTeamState, useToHome } from '../../hooks/user-hooks';
 import { ExcerciseTask } from '../ExcerciseTask';
 import { ExcerciseForm } from '../ExcerciseForm';
-import { dictionary } from '../../text-constants';
 import { RelayEndTable } from '../RelayEndTable';
 import { useClientRepo } from '../../api-repository-interface';
 import { useTheme } from '@mui/material/styles';
+import { alpha } from "@mui/system/colorManipulator"
+import { useTranslation } from 'react-i18next';
 
-interface MyGameProps extends BoardProps<MyGameState> { };
+type MyGameProps = BoardProps<MyGameState>;
+
 export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
   const [msRemaining, setMsRemaining] = useState(G.millisecondsRemaining);
   const [gameover, setGameover] = useState(ctx.gameover);
   const refreshState = useRefreshTeamState();
   const toHome = useToHome();
   const theme = useTheme();
+  const { t } = useTranslation();
 
   useEffect(()=>{
     if (!ctx.gameover) {
@@ -32,7 +35,6 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
       }
     }
     setGameover(ctx.gameover)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ctx.gameover]);
   useEffect(() => {
     setMsRemaining(G.millisecondsRemaining);
@@ -57,6 +59,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
               xs: '100%',
               md: 'calc(100% - 64px)'
             },
+            backgroundColor: theme.palette.background.paper,
           }
         }}
         open={
@@ -95,11 +98,11 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
             paddingLeft: "30px",
             marginBottom: '20px'
           }}>
-            <b style={{marginRight: '5px'}}>{dictionary.relay.remainingTime}:</b>
+            <b style={{marginRight: '5px'}}>{t('general.remainingTime')}:</b>
             <Countdown
               msRemaining={msRemaining ?? null}
-              setMsRemaining={()=>{}}
-              getServerTimer={()=>{}}
+              setMsRemaining={() => undefined}
+              getServerTimer={() => undefined}
               endTime={new Date(G.end)} 
               serverRemainingMs={G.millisecondsRemaining}/>
           </Stack>
@@ -108,7 +111,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
             xs: '100%',
             md: "calc(100% - 380px)",
           },
-          backgroundColor: theme.palette.background.paper,
+          backgroundColor: alpha(theme.palette.background.paper, theme.palette.background.paperOpacity),
           borderRadius: {
             xs: 0,
             md: "25px",
@@ -138,16 +141,16 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
             md: "350px",
           },
           maxHeight: "min-content",
-          backgroundColor: theme.palette.background.paper,
+          backgroundColor: alpha(theme.palette.background.paper, theme.palette.background.paperOpacity),
           borderRadius: "25px",
           padding: '30px',
         }}>
           <ExcerciseForm 
             previousTries={G.previousAnswers[G.currentProblem].map(it=>it.answer)} 
             previousCorrectness={!finished ? G.correctnessPreviousAnswer : null}
-            attempt={(G.currentProblem+1)*3+G.numberOfTry}
-            onSubmit={(input) => {
-              moves.submitAnswer(parseInt(input));
+            attempt={(G.currentProblem+1) * 3 + G.numberOfTry}
+            onSubmit={(input: number) => {
+              moves.submitAnswer(input);
               // TODO this should be done in repository
             }}
           />
@@ -158,7 +161,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
             fontSize: 18,
             flexDirection: 'row',
           }}>
-            <b style={{marginRight: '5px'}}>{dictionary.relay.remainingTime}:</b>
+            <b style={{marginRight: '5px'}}>{t('general.remainingTime')}:</b>
             {!finished && <Countdown
               msRemaining={msRemaining ?? null}
               setMsRemaining={setMsRemaining}
@@ -172,7 +175,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
               width: '250px',
               fontSize: '10px',
             }}>
-            (Az óra csak tájékoztató jellegű. Más eszközökön és böngészőkben más időt fogtok látni, de így is csak az időben beérkezett válaszokat fogjuk figyelembe venni.)
+            ({t('general.warning.timeNotReal')})
             </Stack>
           }
         </Stack>

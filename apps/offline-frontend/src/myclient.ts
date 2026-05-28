@@ -7,6 +7,7 @@ import { RelayWrapper } from 'game';
 import { State } from 'boardgame.io';
 import botWrapper from './botwrapper';
 import { sendGameData } from './sendData';
+import { BGIO_LOCALSTORAGE_PREFIX } from 'common-frontend/src/client/utils/util';
 //import { Debug } from 'boardgame.io/debug';
 
 export function ClientWithBot<T_SpecificGameState,T_SpecificPosition>(
@@ -20,28 +21,32 @@ export function ClientWithBot<T_SpecificGameState,T_SpecificPosition>(
     board: boardWrapper(board, description),
     multiplayer: Local(
       {
-        bots: { '1': botWrapper(strategy) }
+        bots: { '1': botWrapper(strategy) },
+        persist: true,
+        storageKey: BGIO_LOCALSTORAGE_PREFIX + game.name,
       }
     ),
     numPlayers: 2,
     //debug: { impl: Debug },
-  })
+  });
 }
 
 export function ClientRelayWithBot(
   game: typeof GameRelay,
   board: any,
   strategy: any, //TODO: type (?)
-  description: string){ // TODO: types
+  _description: string){ // TODO: types
   return Client({
     game: RelayWrapper(sendGameData),
     board: board,
     multiplayer: Local(
       {
-        bots: { '1': botWrapper(strategy) }
+        bots: { '1': botWrapper(strategy) },
+        persist: true,
+        storageKey: BGIO_LOCALSTORAGE_PREFIX + game.name,
       }
     ),
     numPlayers: 2,
     //debug: { impl: Debug },
-  })
+  });
 }

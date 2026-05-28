@@ -136,7 +136,7 @@ export function configureTeamsRouter(
     await ctx.db.setState(matchID, new_state);
 
     //Reconstruct game name from metadata
-    let game = games.find(g => g.name === metadata.gameName);
+    const game = games.find(g => g.name === metadata.gameName);
     if (!game) {
       ctx.throw(404, `Match found, but game ${metadata.gameName} was not found.`);
       return
@@ -414,7 +414,6 @@ export function configureTeamsRouter(
     koaBody(),
     async (ctx) => {
       const GUID = ctx.params.GUID ?? ctx.throw(400);
-    console.log("team-data-access: ", GUID);
       let team =
         (await teams.getTeam({ teamId: GUID })) ??
         ctx.throw(404, `Team with {teamId:${GUID}} not found.`);
@@ -422,7 +421,7 @@ export function configureTeamsRouter(
     if (staleInfo.isStale) {
         console.log(`Stale found: ${JSON.stringify(staleInfo)}`);
         await closeMatch(
-          (team[staleInfo.gameState!] as InProgressMatchStatus).matchID,
+          (team[staleInfo.gameState] as InProgressMatchStatus).matchID,
           teams,
           ctx.db
         );

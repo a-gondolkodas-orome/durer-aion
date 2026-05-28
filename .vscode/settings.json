@@ -2,5 +2,19 @@
   "editor.detectIndentation": false,
   "editor.tabSize": 2,
   "editor.insertSpaces": true,
-  "editor.formatOnSave": false
+  "editor.formatOnSave": false,
+  "js/ts.tsdk.path": "node_modules/typescript/lib",
+  "js/ts.tsdk.promptToUseWorkspaceVersion": true,
+  "i18n-ally.localesPaths": [
+    "packages/common-frontend/public/locales"
+  ],
+  "i18n-ally.enabledFrameworks": [
+    "react",
+    "i18next",
+    "general"
+  ],
+  "i18n-ally.defaultNamespace": "translation",
+  "i18n-ally.sourceLanguage": "hu",
+  "i18n-ally.keystyle": "nested",
+  "i18n-ally.namespace": true
 }

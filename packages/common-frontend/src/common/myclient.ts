@@ -13,19 +13,19 @@ export function MyClient<T_SpecificGameState>(
     game: gameWrapper(game),
     board: boardWrapper(board, description),
     numPlayers: 2,
-  })
+  });
 }
 
 export function MyClientRelay(
   game: typeof GameRelay,
   board: any,
-  description: string
+  _description: string
 ) { // TODO: finish types
   return Client({
     game: game,
     board: board,
     numPlayers: 2,
-  },)
+  });
 }
 
 export function MyOnlineClient<T_SpecificGameState >(

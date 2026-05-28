@@ -12,7 +12,7 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<
   setup: () => ({ current: 0, target: 100, restricted: null }), // TODO: Random
 
   moves: {
-    increaseNumber: ({ G, ctx, playerID }, numberToAdd: number) => {
+    increaseNumber: ({ G, ctx, _playerID }, numberToAdd: number) => {
       if (!Array.from(Array(12).keys()).map(x => x + 1).includes(numberToAdd)
         || G.restricted === numberToAdd) {
         return INVALID_MOVE;
@@ -25,14 +25,14 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<
     }
   },
 
-  startingPosition: ({ G, ctx, playerID }) => ({
+  startingPosition: ({ G }) => ({
     current: 0,
     target: G.target + 100,
     restricted: null
   }),
 
-  possibleMoves: (G, ctx, playerID) => {
-    let moves = [];
+  possibleMoves: (G) => {
+    const moves = [];
     for (let i = 1; i <= 12; i++) {
       if (G.restricted === null || 13 - G.restricted !== i) {
         moves.push({ move: 'increaseNumber', args: [i] });

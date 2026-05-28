@@ -2,12 +2,12 @@ import React, { useEffect, useState } from "react";
 import * as Yup from 'yup';
 import { Button, Stack } from "@mui/material";
 import Form from "./form";
-import { ErrorMessage, Field } from "formik";
+import { ErrorMessage, Field, FieldProps } from "formik";
 import CloseIcon from '@mui/icons-material/Close';
 import { useSnackbar } from "notistack";
 import { useRefreshTeamState } from "../hooks/user-hooks";
-import { dictionary } from "../text-constants";
 import { useTheme } from "@mui/material/styles";
+import { useTranslation } from "react-i18next";
 
 function sanitizeValue(value: string) {
   const regex = /^([1-9]*[0-9]*)$/;
@@ -19,8 +19,8 @@ function sanitizeValue(value: string) {
 
 export interface MyProps {
   previousTries: number[];
-  previousCorrectness: Boolean | null;
-  onSubmit: (result: any) => void;
+  previousCorrectness: boolean | null;
+  onSubmit: (result: number) => void;
   attempt: number;
 }
 
@@ -29,14 +29,13 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
   const { enqueueSnackbar } = useSnackbar();
   const refreshState = useRefreshTeamState();
   const [sentAnswer, setSentAnswer] = useState<number>(0);
+  const { t } = useTranslation();
   useEffect(()=>{
     if(props.previousCorrectness!=null){
       if(props.previousCorrectness){
-        console.log('A válasz helyes volt')
-        enqueueSnackbar('A válasz helyes volt', { variant: 'success' });
+        enqueueSnackbar(t('relay.goodGuess'), { variant: 'success' });
       } else {
-        console.log('A válasz sajnos nem volt jó')
-        enqueueSnackbar('A válasz sajnos nem volt jó', { variant: 'error' });
+        enqueueSnackbar(t('relay.wrongGuess'), { variant: 'error' });
       }
     }
     setSentAnswer((p)=>{return p-1;});
@@ -48,7 +47,7 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
       fontStyle: 'italic',
       marginBottom: '5px',
     }}>
-      {dictionary.relay.guess}
+      {t('relay.guess')}
     </Stack>
     <Stack>
       <Form
@@ -57,24 +56,26 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
         initialValues={{ result: '' }}
         validationSchema={Yup.object().shape({
           result: Yup.number()
-            .integer('Egész számot kell írni')
-            .typeError('Számot kell írnod')
-            .min(0, 'A válasz 0 és 9999 között van')
-            .max(9999, 'A válasz 0 és 9999 között van')
-            .required('Nem írtál semmi választ!')
+            .integer(t('relay.error.integer'))
+            .typeError(t('relay.error.type'))
+            .min(0, t('relay.error.range'))
+            .max(9999, t('relay.error.range'))
+            .required(t('relay.error.empty'))
         })}
         onSubmit={(values) => {
           if (props.previousTries.includes(parseInt(values.result))) {
-            enqueueSnackbar('Ezt a választ már próbáltátok', { variant: 'error' });
+            enqueueSnackbar(t('relay.error.duplicate'), { variant: 'error' });
             return;
           }
-          try{
-            props.onSubmit(values.result)
+          try {
+            props.onSubmit(parseInt(values.result))
             refreshState()
-          } catch (e: any) {
+          } catch (e: unknown) {
             console.log(e)
-            enqueueSnackbar(e?.message || "Hiba történt", { variant: 'error' });
-            if (e?.message === "cannot make move after game end") {
+            const message = e instanceof Error ? e.message : "Váratlan hiba történt";
+            enqueueSnackbar(message, { variant: 'error' });
+            if (message === "cannot make move after game end") {
+              // TODO: this error should be handled better, currently it never happens
               refreshState();
             }
           }
@@ -87,7 +88,7 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
           ({
             field, 
             form: { handleChange },
-          }: any) => <input
+          }: FieldProps<number>) => <input
             autoFocus={sentAnswer>0}
             autoComplete="off"
             {...field}
@@ -117,7 +118,7 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
               alignItems: 'center',
               fontSize: 16,
             }}>
-              {idx + 1}. próba
+              {t('relay.guessNum', { guessnum: idx + 1 })}
               <Stack sx={{
                 fontSize: '18px',
                 marginLeft: '10px',
@@ -135,7 +136,7 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
           borderRadius: '10px',
           marginTop: '40px',
         }} variant='contained' color='primary' type="submit">
-          {dictionary.relay.send}
+          {t('relay.send')}
         </Button>
       </Form>
     </Stack>

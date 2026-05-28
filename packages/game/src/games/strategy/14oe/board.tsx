@@ -2,7 +2,7 @@ import { MyGameState } from './game';
 import { BoardProps } from 'boardgame.io/react';
 import { useRef } from 'react';
 
-interface MyGameProps extends BoardProps<MyGameState> { }
+type MyGameProps = BoardProps<MyGameState>;
 
 export function MyBoard({ G, ctx, moves }: MyGameProps) {
   // TODO: use formik
@@ -11,8 +11,12 @@ export function MyBoard({ G, ctx, moves }: MyGameProps) {
 
   const onClick = () => {
     // read input value
-    const inputValue = parseInt(inputEl.current!.value);
-    inputEl.current!.value = '';
+    if (!inputEl.current) {
+      console.error('Empty input.')
+      return
+    }
+    const inputValue = parseInt(inputEl.current.value);
+    inputEl.current.value = '';
     moves.clickCell(inputValue);
   };
 

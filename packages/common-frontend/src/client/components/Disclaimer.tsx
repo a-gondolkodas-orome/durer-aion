@@ -1,14 +1,15 @@
 import { Button } from "@mui/material";
-import { Stack } from "@mui/system";
-import { dictionary } from "../text-constants";
+import { Stack, alpha } from "@mui/system";
 import { useToHome } from "../hooks/user-hooks";
 import { useClientRepo } from "../api-repository-interface";
 import { useTheme } from "@mui/material/styles";
+import { useTranslation, Trans } from 'react-i18next';
 
-export function Disclaimer() {
+export function Disclaimer(props: {teamName: string, category: string}) {
   const goHome = useToHome();
   const theme = useTheme();
   const isOffline = useClientRepo().version === "OFFLINE";
+  const { t } = useTranslation();
 
   return (
     <Stack
@@ -30,7 +31,7 @@ export function Disclaimer() {
           xs: 0,
           md: "40px"
         },
-        backgroundColor: theme.palette.background.paper,
+        backgroundColor: alpha(theme.palette.background.paper, theme.palette.background.paperOpacity),
         borderRadius: {
           xs: 0,
           md: "30px",
@@ -44,7 +45,38 @@ export function Disclaimer() {
           marginBottom: "25px",
         }}
       >
-        {dictionary.disclaimer.start}
+        <Stack sx={{
+          fontSize: 24,
+          marginBottom: "2px",
+          flexDirection: "row",
+          alignSelf: "center",
+        }}>
+          <div style={{textAlign: "center"}}>
+            <Trans
+              i18nKey='disclaimer.welcome'
+              values={{ tname: props.teamName }}
+              components={{
+                i: <i style={{color: theme.palette.primary.main}} />
+              }} />
+          </div>
+        </Stack>
+        <Stack sx={{
+          fontStyle:"italic",
+          alignSelf: "center",
+          flexDirection: "row",
+          fontSize: 18,
+          marginBottom: "20px",
+        }}>
+          <div style={{textAlign: "center"}}>
+            <Trans
+              i18nKey='disclaimer.category'
+              values={{ category: props.category }}
+              components={{
+                b: <b style={{color: theme.palette.primary.main}} />
+              }} />
+          </div>
+        </Stack>
+        {t('disclaimer.start')}
       </Stack>
 
       <Stack
@@ -54,7 +86,7 @@ export function Disclaimer() {
           fontStyle: "italic",
         }}
       >
-        {dictionary.disclaimer.progress}
+        {t('disclaimer.progress')}
       </Stack>
 
       <Stack
@@ -66,7 +98,7 @@ export function Disclaimer() {
           }
         }}
       >
-        {dictionary.disclaimer.progressDescription}
+        {t('disclaimer.progressDescription', {minpoints: 25, maxpoints: 52})}
       </Stack>
 
       <Stack
@@ -76,7 +108,7 @@ export function Disclaimer() {
           fontStyle: "italic",
         }}
       >
-        {dictionary.disclaimer.interface}
+        {t('disclaimer.interface')}
       </Stack>
 
       <Stack
@@ -84,11 +116,22 @@ export function Disclaimer() {
           fontSize: 16,
           marginBottom: {
             xs: "15px",
-            md: "150px",
+            md: "75px",
           }
         }}
       >
-        <span dangerouslySetInnerHTML={{ __html: ( isOffline ? dictionary.disclaimer.interfaceDescriptionBHTML : dictionary.disclaimer.interfaceDescription) }}></span>
+        <div>
+          <Trans
+            // t('disclaimer.interfaceDescriptionOfflineMode')
+            // t('disclaimer.interfaceDescription')
+            i18nKey={isOffline ? 'disclaimer.interfaceDescriptionOfflineMode' : 'disclaimer.interfaceDescription'}
+            components={{
+              b: <b />,
+              small: <small />,
+              br: <br />
+            }}
+          />
+        </div>
       </Stack>
 
 
@@ -110,7 +153,7 @@ export function Disclaimer() {
           goHome();
         }}
       >
-        {dictionary.disclaimer.continue}
+        {t('disclaimer.continue')}
       </Button>
     </Stack>
   );

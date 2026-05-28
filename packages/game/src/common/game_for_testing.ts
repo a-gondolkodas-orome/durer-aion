@@ -2,7 +2,7 @@ import { Ctx } from "boardgame.io";
 import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
 import { GameStateMixin, GameType, GUESSER_PLAYER, JUDGE_PLAYER, SetupFunction, StartingPositionFunction } from "./types";
 
-type G = { data: string };
+interface G { data: string }
 
 export function createGameWithMoveWithoutStartingPosition(setup: SetupFunction<G>,
   move: ({ G, ctx, playerID, random }: { G: G, ctx: Ctx; playerID: string; random: RandomAPI; }, ...args: any[]) => GameStateMixin & G): GameType<G> {

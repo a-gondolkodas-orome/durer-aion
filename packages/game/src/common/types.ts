@@ -38,7 +38,7 @@ interface GameMixin<G> {
 }
 
 /// Base structure, passed through directly to boardgame.io.
-interface WrappableGame<G extends any = any, PluginAPIs extends Record<string, unknown> = Record<string, unknown>> {
+interface WrappableGame<G = unknown, PluginAPIs extends Record<string, unknown> = Record<string, unknown>> {
   name?: string;
   minPlayers?: number;
   maxPlayers?: number;

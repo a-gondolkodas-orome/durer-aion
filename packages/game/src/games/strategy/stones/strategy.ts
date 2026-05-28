@@ -3,7 +3,7 @@ import { MyGameState } from './game';
 import { GameStateMixin, GUESSER_PLAYER, JUDGE_PLAYER } from '../../../common';
 import { moveMap } from './moveMap';
 
-function startingPosition({ G, ctx}: any, category: "E"): MyGameState {
+function startingPosition({ G, _ctx}: any, _category: "E"): MyGameState {
   const initialPositions = [
     [[11, 8], [9, 9]],
     [[9, 8], [9, 7]],
@@ -15,8 +15,8 @@ function startingPosition({ G, ctx}: any, category: "E"): MyGameState {
 
   let left, right;
   if (G.difficulty === "live") {
-      let NoL = Math.min(G.numberOfLoss, initialPositions.length - 1);
-      let WS = G.winningStreak;
+      const NoL = Math.min(G.numberOfLoss, initialPositions.length - 1);
+      const WS = G.winningStreak;
       left = initialPositions[NoL][WS][0];
       right = initialPositions[NoL][WS][1];
   } else {
@@ -30,7 +30,7 @@ function startingPosition({ G, ctx}: any, category: "E"): MyGameState {
   };
 }
 
-function winningStrategy(category: "C" | "D" | "E", state: State<MyGameState & GameStateMixin>, botID: string): [boolean | undefined, string] {
+function winningStrategy(category: "C" | "D" | "E", state: State<MyGameState & GameStateMixin>, _botID: string): [boolean | undefined, string] {
     const G = state.G;
     if (G.stonesLeft === 9 && G.stonesRight === 9) {
       return [false, "takeStone"];

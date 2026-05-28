@@ -2,17 +2,19 @@ import { MyGameState } from './game';
 import { BoardProps } from 'boardgame.io/react';
 import { useRef } from 'react';
 
-interface MyGameProps extends BoardProps<MyGameState> { }
-
-export function MyBoard({ G, ctx, moves }: MyGameProps) {
+export function MyBoard({ G, ctx, moves }: BoardProps<MyGameState>) {
   // TODO: use formik
   // create a ref to store the text input element
   const inputEl = useRef<HTMLInputElement>(null);
 
   const onClick = () => {
     // read input value
-    const inputValue = parseInt(inputEl.current!.value);
-    inputEl.current!.value = '';
+    if (!inputEl.current) {
+      console.error('Empty input.')
+      return
+    }
+    const inputValue = parseInt(inputEl.current.value);
+    inputEl.current.value = '';
     moves.increaseNumber(inputValue);
   };
 

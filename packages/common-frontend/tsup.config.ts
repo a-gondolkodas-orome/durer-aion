@@ -15,6 +15,8 @@ export default defineConfig({
   format: ['esm', 'cjs'],
   dts: true,
   outDir: 'dist',
+  // Keep external dependencies as imports so browser ESM never hits runtime `require` shims.
+  skipNodeModulesBundle: true,
   splitting: false,
   clean: true,
 
