@@ -8,7 +8,7 @@ import {
   FinishedMatchStatus,
   InProgressMatchStatus,
 } from "schemas";
-import { fetch } from "../socketio_botmoves";
+import { BOT_ID, fetch } from "../socketio_botmoves";
 import { TeamModel } from "./model";
 
 /** Joins a player to a match where the bot's side is not connected.
@@ -48,11 +48,10 @@ export const injectPlayer = async (
  */
 export const injectBot = async (
   db: StorageAPI.Async | StorageAPI.Sync,
-  matchId: string,
-  bot_id: PlayerIDType
+  matchId: string
 ) => {
   await injectPlayer(db, matchId, {
-    playerID: bot_id,
+    playerID: BOT_ID,
     name: "Bot",
     credentials: getBotCredentials(),
   });
