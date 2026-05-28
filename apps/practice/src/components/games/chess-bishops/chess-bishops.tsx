@@ -50,12 +50,15 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               <td
                 key={col}
                 className={`
-                  border-4 ${isForbidden({ row, col }) ? 'bg-slate-400 cursor-not-allowed' : ''}
-                  ${wouldBeForbidden({ row, col }) ? 'bg-slate-200' : ''}
+                  border-4 ${isForbidden({ row, col }) ? 'bg-slate-400' : ''}
+                  ${wouldBeForbidden({ row, col }) ? 'bg-slate-300' : ''}
                 `}
               >
                 <button
-                  className="aspect-square w-full p-[5%]"
+                  className={`
+                    aspect-square w-full
+                    disabled:cursor-not-allowed enabled:cursor-pointer
+                  `}
                   disabled={!isMoveAllowed({ row, col })}
                   onClick={() => clickField({ row, col })}
                   onMouseOver={() => setHoveredField({ row, col })}
@@ -64,12 +67,12 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                   onBlur={() => setHoveredField(null)}
                 >
                   {isBishop({ row, col }) && (
-                    <svg className="inline-block w-full aspect-square">
+                    <svg className="inline-block aspect-square">
                       <use xlinkHref="#game-chess-bishop" />
                     </svg>
                   )}
                   {isPotentialNextStep({ row, col }) && (
-                    <svg className="inline-block w-full aspect-square opacity-50">
+                    <svg className="inline-block aspect-square opacity-50">
                       <use xlinkHref="#game-chess-bishop" />
                     </svg>
                   )}

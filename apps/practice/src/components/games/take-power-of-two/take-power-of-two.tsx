@@ -20,7 +20,7 @@ const ExponentCell = ({ e, choosePower, setHovered }) => {
     className="border-4 hocus:bg-gray-300"
     key={e}>
     <button
-      className={`w-full p-[5%] aspect-video`}
+      className={`w-full p-[5%] aspect-video cursor-pointer`}
       onClick={() => choosePower(e)}
       onMouseOver={() => setHovered(e)}
       onMouseOut={() => setHovered(null)}
