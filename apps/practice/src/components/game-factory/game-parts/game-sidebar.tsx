@@ -55,26 +55,6 @@ export const GameSidebar = ({
     ? ' · ' + t(selectedVariant?.label ?? defaultVariantLabel)
     : '';
 
-  function ModeDifficultySelectors() {
-    return (
-      <>
-        <ModeSelector
-          isHumanVsHumanGame={ctx.isHumanVsHumanGame}
-          onSwitchMode={moves.switchMode}
-          disabled={!isNewGameAllowed}
-        />
-        {variants.length > 1 && (
-          <DifficultySelector
-            variants={variants}
-            selectedIndex={selectedVariantIndex}
-            onSelect={moves.setDifficulty}
-            disabled={!isNewGameAllowed}
-          />
-        )}
-      </>
-    );
-  }
-
   return (
     <div className="p-2 flex flex-col grow shrink-0 basis-64 gap-3">
       <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 mb-8 flex flex-col gap-3">
@@ -114,13 +94,27 @@ export const GameSidebar = ({
       </div>
 
       <div className="mt-auto flex flex-col gap-3">
-        {ctx.phase !== 'play' ? <ModeDifficultySelectors /> : (
+        {ctx.phase !== 'play' ? (
+          <ModeDifficultySelectors
+            ctx={ctx}
+            moves={moves}
+            variants={variants}
+            selectedVariantIndex={selectedVariantIndex}
+            disabled={!isNewGameAllowed}
+          />
+        ) : (
           <details className="border border-slate-200 rounded-lg p-2 text-sm">
             <summary className="cursor-pointer text-slate-500 hover:text-slate-700">
               {modeSummaryLabel}{variantSummaryLabel}
             </summary>
             <div className="mt-2 flex flex-col gap-3">
-              <ModeDifficultySelectors />
+              <ModeDifficultySelectors
+                ctx={ctx}
+                moves={moves}
+                variants={variants}
+                selectedVariantIndex={selectedVariantIndex}
+                disabled={!isNewGameAllowed}
+              />
             </div>
           </details>
         )}
@@ -141,6 +135,32 @@ export const GameSidebar = ({
     </div>
   );
 };
+
+const ModeDifficultySelectors = ({
+  ctx, moves, variants, selectedVariantIndex, disabled
+}: {
+  ctx: Ctx
+  moves: SidebarMoves
+  variants: Variant[]
+  selectedVariantIndex: number
+  disabled: boolean
+}) => (
+  <>
+    <ModeSelector
+      isHumanVsHumanGame={ctx.isHumanVsHumanGame}
+      onSwitchMode={moves.switchMode}
+      disabled={disabled}
+    />
+    {variants.length > 1 && (
+      <DifficultySelector
+        variants={variants}
+        selectedIndex={selectedVariantIndex}
+        onSelect={moves.setDifficulty}
+        disabled={disabled}
+      />
+    )}
+  </>
+);
 
 const RoleSelector = ({ roleLabels, onRoleSelection, disabled }: {
   roleLabels?: [I18nString, I18nString]
