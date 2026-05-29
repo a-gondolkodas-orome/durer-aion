@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { render } from '@testing-library/react';
 import { Overview } from './overview';
 import { gameList, type GameList } from '../games/gameList';

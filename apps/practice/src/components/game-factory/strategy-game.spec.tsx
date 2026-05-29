@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { render, fireEvent, act } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { strategyGameFactory, type StrategyGameConfig, type Gameplay } from './strategy-game';
