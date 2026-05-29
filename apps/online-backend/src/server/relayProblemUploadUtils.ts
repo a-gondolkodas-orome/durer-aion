@@ -4,12 +4,20 @@ import { readFileSync } from 'fs';
 import { S3ClientConfig } from '@aws-sdk/client-s3';
 import { getS3Url } from 'strategy';
 
-function getUploadedFileName(file: any): string {
+interface UploadedFile {
+  originalFilename?: string | null;
+  name?: string | null;
+  filename?: string | null;
+  filepath?: string;
+  path?: string;
+}
+
+function getUploadedFileName(file: UploadedFile): string {
   const name = file?.originalFilename ?? file?.name ?? file?.filename;
   return typeof name === 'string' ? name : '';
 }
 
-function getUploadedFilePath(file: any): string {
+function getUploadedFilePath(file: UploadedFile): string {
   const filePath = file?.filepath ?? file?.path;
   if (typeof filePath !== 'string' || filePath.length === 0) {
     throw new Error('Uploaded file is missing a filepath.');
@@ -66,14 +74,14 @@ export async function uploadToS3(filePath: string, fileName: string, contentType
 }
 
 // Helper function to extract and validate uploaded files
-export function extractUploadedFiles(files: any): { tomlFile: any; imageFiles: any[] } {
+export function extractUploadedFiles(files: Record<string, UploadedFile | UploadedFile[]>): { tomlFile: UploadedFile; imageFiles: UploadedFile[] } {
   // Handle both single file and multiple files cases
-  let fileList: any[] = [];
+  let fileList: UploadedFile[] = [];
   if (files.file) {
     fileList = Array.isArray(files.file) ? files.file : [files.file];
   } else {
     // Handle case where files are uploaded with different field names
-    fileList = Object.values(files).flat();
+    fileList = (Object.values(files).flat() as UploadedFile[]);
   }
 
   if (fileList.length === 0) {
@@ -81,8 +89,8 @@ export function extractUploadedFiles(files: any): { tomlFile: any; imageFiles: a
   }
 
   // Separate TOML and image files
-  let tomlFile: any = null;
-  const imageFiles: any[] = [];
+  let tomlFile: UploadedFile | null = null;
+  const imageFiles: UploadedFile[] = [];
   const allowedImageExtensions = ['.png', '.jpg', '.jpeg', '.gif'];
 
   for (const file of fileList) {
@@ -115,7 +123,7 @@ export function extractUploadedFiles(files: any): { tomlFile: any; imageFiles: a
   return { tomlFile, imageFiles };
 }
 
-export async function uploadImagesS3(imageFiles: any[]): Promise<{ name: string; s3Url: string }[]> {
+export async function uploadImagesS3(imageFiles: UploadedFile[]): Promise<{ name: string; s3Url: string }[]> {
   const uploadedImages: { name: string; s3Url: string }[] = [];
   
   for (const imageFile of imageFiles) {
@@ -129,7 +137,7 @@ export async function uploadImagesS3(imageFiles: any[]): Promise<{ name: string;
   return uploadedImages;
 }
 
-export function getUploadedFileInfo(file: any): { name: string; filePath: string } {
+export function getUploadedFileInfo(file: UploadedFile): { name: string; filePath: string } {
   const name = getUploadedFileName(file);
   if (!name) {
     throw new Error('Invalid uploaded file: missing filename (expected originalFilename).');

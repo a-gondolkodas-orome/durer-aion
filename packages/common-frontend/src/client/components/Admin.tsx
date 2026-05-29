@@ -1,4 +1,5 @@
 import { Stack } from '@mui/system';
+import type { RelayProblem } from 'game';
 import { useAddMinutes, useAll, useRemoveTeam } from '../hooks/user-hooks';
 import { Button, Dialog, Table, TableCell, TableRow, IconButton } from '@mui/material';
 import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
@@ -371,9 +372,9 @@ function ProblemsUpload({ onUploadSuccess }: { onUploadSuccess: () => void }) {
           { variant: 'error', style: { whiteSpace: 'pre-line' } }
         );
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       enqueueSnackbar(
-        error?.message || 'Hálózati hiba történt', 
+        error instanceof Error ? error.message : 'Hálózati hiba történt',
         { variant: 'error' }
       );
     } finally {
@@ -448,7 +449,7 @@ function ProblemsUpload({ onUploadSuccess }: { onUploadSuccess: () => void }) {
 function ProblemsViewer({ refreshTrigger }: { refreshTrigger: number }) {
   const theme = useTheme();
   const [selectedCategory, setSelectedCategory] = useState<string>('C');
-  const [problems, setProblems] = useState<any[]>([]);
+  const [problems, setProblems] = useState<RelayProblem[]>([]);
   const [loading, setLoading] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
 

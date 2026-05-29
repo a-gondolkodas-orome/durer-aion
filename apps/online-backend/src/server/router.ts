@@ -344,9 +344,9 @@ export function configureTeamsRouter(
         },
         imageFiles: uploadedImages
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       ctx.status = 400;
-      const message = error ? `${error.name}: ${error.message}` : 'Failed to process uploaded files';
+      const message = error instanceof Error ? `${error.name}: ${error.message}` : 'Failed to process uploaded files';
       ctx.body = {
         success: false,
         error: message
@@ -376,14 +376,14 @@ export function configureTeamsRouter(
         count: probs.length,
         problems: probs
       };
-    } catch (error: any) {
-      const isValidationError = error.message.includes('Invalid category');
+    } catch (error: unknown) {
+      const isValidationError = error instanceof Error && error.message.includes('Invalid category');
       ctx.status = isValidationError ? 400 : 500;
       ctx.body = {
         success: false,
-        error: isValidationError 
-          ? error.message 
-          : `Failed to fetch problems: ${error?.message || 'Unknown error'}`
+        error: isValidationError
+          ? (error as Error).message
+          : `Failed to fetch problems: ${error instanceof Error ? error.message : 'Unknown error'}`
       };
     }
   });

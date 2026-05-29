@@ -1,11 +1,20 @@
-import { parse } from 'smol-toml';
+import { parse, TomlTable } from 'smol-toml';
 import type { RelayProblem } from 'game';
 
 export function getS3Url(fileName: string, S3BucketName: string): string {
   return `https://${S3BucketName}.s3.amazonaws.com/${fileName}`;
 }
 
-function formatProblemsWithAttachments(problems: any[], S3BucketName: string): RelayProblem[] {
+interface RawProblem {
+  category: string;
+  index: number;
+  problemText: string;
+  answer: number;
+  points: number;
+  attachment?: string;
+}
+
+function formatProblemsWithAttachments(problems: RawProblem[], S3BucketName: string): RelayProblem[] {
   return problems.map(problem => ({
     category: problem.category,
     index: problem.index,
@@ -17,11 +26,9 @@ function formatProblemsWithAttachments(problems: any[], S3BucketName: string): R
   }) as RelayProblem);
 }
 
-function validateProblem(problem: any, index: number, category: string, imgNames: string[]): void {
+function tomlToRawProblem(problem: TomlTable, index: number, category: string, imgNames: string[]): RawProblem {
   const errPrefix = `Problem at index ${index} in category ${category} `;
-  if (typeof problem !== 'object' || problem === null) {
-    throw new Error(errPrefix + `is not an object.`);
-  }
+
   const problemKeys = Object.keys(problem);
   if (!problemKeys.includes('problemText') || typeof problem.problemText !== 'string') {
     throw new Error(errPrefix + `is missing 'problemText' or it is not a string.`);
@@ -35,7 +42,7 @@ function validateProblem(problem: any, index: number, category: string, imgNames
   if (problemKeys.includes('attachment') && typeof problem['attachment'] !== 'string') {
     throw new Error(errPrefix + `field 'attachment' is not a string.`);
   }
-  if (problemKeys.includes('attachment') && !imgNames.includes(problem['attachment'])) {
+  if (problemKeys.includes('attachment') && (typeof problem['attachment'] !== 'string' || !imgNames.includes(problem['attachment']))) {
     throw new Error(errPrefix + `has a missing 'attachment': ${problem['attachment']}. Expected one of: ${imgNames.join(', ')}.`);
   }
   problemKeys.forEach(key => {
@@ -43,6 +50,14 @@ function validateProblem(problem: any, index: number, category: string, imgNames
       throw new Error(errPrefix + `has an unexpected key: ${key}. Expected keys are: problemText, answer, points, attachment.`);
     }
   });
+  return {
+    category,
+    index,
+    problemText: problem.problemText as string,
+    answer: problem.answer as number,
+    points: problem.points as number,
+    attachment: typeof problem['attachment'] === 'string' ? problem['attachment'] : undefined,
+  } as RawProblem;
 }
 
 export function parseProblemTOML(tomlString: string, imgNames: string[], S3BucketName: string): RelayProblem[] {
@@ -51,7 +66,7 @@ export function parseProblemTOML(tomlString: string, imgNames: string[], S3Bucke
   if (categories.length === 0) {
     throw new Error("Empty TOML.");
   }
-  let parsedProblems: any[] = [];
+  const parsedProblems: RawProblem[] = [];
 
   categories.forEach(category => {
     validateProblemCategory(category);
@@ -62,13 +77,8 @@ export function parseProblemTOML(tomlString: string, imgNames: string[], S3Bucke
     }
 
     problems.forEach((problem, index) => {
-      problem = {
-        ...problem as object,
-        category: category,
-        index: index,
-      }
-      validateProblem(problem, index, category, imgNames);
-      parsedProblems.push(problem);
+      const rawProblem = tomlToRawProblem(problem as TomlTable, index, category, imgNames);
+      parsedProblems.push(rawProblem);
     });
   });
   return formatProblemsWithAttachments(parsedProblems, S3BucketName);

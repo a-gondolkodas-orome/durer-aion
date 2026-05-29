@@ -15,7 +15,7 @@ export function strategy(getProblems: () => Promise<RelayProblem[]>){
   let problems: RelayProblem[] | null = null;
   getProblems().then(p => { problems = p; });
 
-  return (state: State<MyGameState>, botID: string): [any[] | undefined, string] => {
+  return (state: State<MyGameState>, _botID: string): [(string | number | boolean)[] | undefined, string] => {
     if (!problems) return [undefined, "getTime"];
     const problemIdx = state.G.currentProblem;
     if (state.G.numberOfTry === 0) {

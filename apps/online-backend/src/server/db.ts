@@ -114,7 +114,7 @@ export class RelayProblemsRepository {
 
   async addProblems(problems: RelayProblem[]) {
     const rows = problems.map(({ attachmentUrl: _url, ...rest }) => rest);
-    return await RelayProblemModel.bulkCreate(rows as any[]);
+    return await RelayProblemModel.bulkCreate(rows as Omit<RelayProblem, 'attachmentUrl'>[]);
   }
 
   async clearProblems() {
