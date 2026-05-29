@@ -82,9 +82,11 @@ const CategoryFilter = ({ selected, onChange }: {
         onClick={() => onChange([])}
         disabled={selected.length === 0}
         aria-label={t({ hu: 'Szűrés törlése', en: 'Clear filters' })}
-        className={`rounded-lg px-2 py-0.5 border border-slate-300 bg-white text-sm
-          text-gray-400 cursor-pointer hocus:bg-slate-100
-          disabled:opacity-0 disabled:cursor-default`}
+        className={`
+          rounded-lg px-2 py-0.5 border border-slate-300 bg-white text-sm
+          text-gray-400 hocus:bg-slate-100
+          disabled:opacity-0 disabled:cursor-default
+        `}
       >×</button>
     </div>
   );

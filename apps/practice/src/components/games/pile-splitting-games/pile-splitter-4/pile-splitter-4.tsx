@@ -126,7 +126,6 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               disabled={isDisabled({ pileId, pieceId })}
               className={`
                 inline-block w-[20%] aspect-square rounded-full mx-0.5 mt-0.5
-                disabled:cursor-not-allowed
                 ${pieceColor({ pileId, pieceId })}
               `}
               onClick={(e) => { e.stopPropagation(); clickPiece({ pileId, pieceId }); }}

@@ -72,7 +72,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           disabled={!isAllowed_choosePiece(id) && !isAllowed_movePiece(id)}
           className={`
             aspect-square p-[0%] border-2 relative flex justify-center items-center
-            disabled:cursor-default enabled:cursor-pointer
+            disabled:cursor-default
             ${possibleMoves.includes(id) && isCurrentPlayerShark && board.submarines[id] ? 'border-red-600' : ''}
           `}
         >

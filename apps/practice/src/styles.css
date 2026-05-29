@@ -18,13 +18,22 @@
     a {
         @apply text-blue-700 underline;
     }
+    [role="button"] {
+        cursor: pointer;
+    }
+    button:enabled {
+        cursor: pointer;
+    }
+    button:disabled {
+        cursor: not-allowed;
+    }
 }
 
 @layer components {
     .cta-button {
         @apply border-none rounded-lg block my-1 py-1.5 px-3 w-full;
         @apply text-center text-lg whitespace-normal font-semibold;
-        @apply disabled:opacity-50 disabled:cursor-not-allowed enabled:cursor-pointer;
+        @apply disabled:opacity-50;
         @apply bg-blue-500 text-white enabled:hocus:bg-blue-600;
     }
 }

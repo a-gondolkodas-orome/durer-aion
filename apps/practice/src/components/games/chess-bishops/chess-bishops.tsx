@@ -55,10 +55,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                 `}
               >
                 <button
-                  className={`
-                    aspect-square w-full
-                    disabled:cursor-not-allowed enabled:cursor-pointer
-                  `}
+                  className="aspect-square w-full"
                   disabled={!isMoveAllowed({ row, col })}
                   onClick={() => clickField({ row, col })}
                   onMouseOver={() => setHoveredField({ row, col })}

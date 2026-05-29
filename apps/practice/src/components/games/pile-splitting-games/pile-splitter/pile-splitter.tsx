@@ -72,7 +72,6 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               disabled={isDisabled({ pileId, pieceId })}
               className={`
                 inline-block bg-blue-600 w-[20%] aspect-square rounded-full mx-0.5 mt-0.5
-                disabled:cursor-not-allowed enabled:cursor-pointer
                 ${toBeRemoved(pileId) ? 'opacity-50 bg-slate-600' : ''}
                 ${toBeLeft({ pileId, pieceId }) ? 'bg-blue-900' : ''}
               `}

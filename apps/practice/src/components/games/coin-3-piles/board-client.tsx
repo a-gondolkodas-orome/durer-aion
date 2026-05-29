@@ -94,8 +94,8 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             className={`
               w-10 aspect-square rounded-full font-bold text-white
               ${getCoinBgColor(coinValue)} shadow-md ${getCoinShadowColor(coinValue)}
-              disabled:opacity-50 disabled:cursor-not-allowed
-              enabled:cursor-pointer enabled:hocus:ring-2 enabled:hocus:ring-red-400
+              disabled:opacity-50
+              enabled:hocus:ring-2 enabled:hocus:ring-red-400
             `}
             onClick={() => addToPile(coinValue)}
             onMouseEnter={() => setHoveredPile(coinValue)}
@@ -133,8 +133,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                 className={`
                   w-[15%] aspect-square inline-block rounded-full mr-0.5 mt-2
                   ${getCoinBgColor(coinValue)} shadow-md ${getCoinShadowColor(coinValue)}
-                  disabled:cursor-not-allowed
-                  enabled:cursor-pointer enabled:hocus:ring-2 enabled:hocus:ring-red-400
+                  enabled:hocus:ring-2 enabled:hocus:ring-red-400
                   ${shouldShowCoinToBeRemoved(coinValue) && i === (board[coinValue - 1] - 1)
                     ? 'opacity-50' : ''}
                 `}

@@ -43,8 +43,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           disabled={!isMoveAllowed(id)}
           onClick={() => clickField(id)}
           className={`
-            aspect-square p-[25%]
-            disabled:cursor-not-allowed enabled:cursor-pointer enabled:hocus:bg-slate-100
+            aspect-square p-[25%] enabled:hocus:bg-slate-100
             ${!gameIsInPlacingPhase && isMoveAllowed(id) ? 'bg-green-100' : 'bg-white'}
           `}
         >

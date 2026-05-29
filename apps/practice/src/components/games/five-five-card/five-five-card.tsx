@@ -39,7 +39,6 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               onClick={() => clickField(id)}
               className={`
                 p-2 m-2 aspect-3/2 text-3xl border-4 rounded-xl shadow-md
-                disabled:cursor-not-allowed
                 enabled:border-green-400 enabled:border-dashed
                 enabled:hocus:border-solid
               `}

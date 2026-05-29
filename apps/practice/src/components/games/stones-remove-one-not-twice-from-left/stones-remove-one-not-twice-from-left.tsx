@@ -14,7 +14,7 @@ const StonePile = ({ count, onClick, disabled, restricted }) => {
   return (
     <button
       className={`w-full flex-1 flex flex-wrap content-start justify-center gap-2 p-2
-        disabled:cursor-not-allowed ${restricted ? 'opacity-50' : ''}`}
+        ${restricted ? 'opacity-50' : ''}`}
       style={{ transform: 'scaleY(-1)' }}
       onClick={onClick}
       disabled={disabled}
