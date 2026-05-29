@@ -283,21 +283,20 @@ export function Admin(props: {teamId?: string}) {
                     enqueueSnackbar(message, { variant: 'error' });
                   }
                 }
-              }
-            });
-          }}
+              });
+            }}
         >
           Összes csapat törlése
         </Button>}
       
       {/* Problems Upload Section */}
       {!teamFromPath && <ProblemsUpload onUploadSuccess={() => setRefreshProblems(prev => prev + 1)} />}
-      </>}
-      
+
       {/* Problems Viewer Section */}
       {!teamFromPath && <ProblemsViewer refreshTrigger={refreshProblems} />}
-      
+
      {!teamFromPath && data && <Stats data={data}/>}
+    </>}
     </Stack>
   )
 }
