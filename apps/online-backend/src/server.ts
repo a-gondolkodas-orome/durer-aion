@@ -1,6 +1,4 @@
-// Load the .env file before anything else
-// separate file because the linter doesn't like dotenv.config() before other imports
-import "./dotenv_helper";
+import 'dotenv';
 import {
   GameRelay,
   MyGameWrappers as strategyGameWrappers,

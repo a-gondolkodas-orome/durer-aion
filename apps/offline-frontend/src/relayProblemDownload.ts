@@ -3,16 +3,20 @@ import { S3Client, S3ClientConfig, GetObjectCommand, ListObjectsV2Command, NoSuc
 import { parseProblemTOML } from "strategy";
 
 export function requireEnv(name: string): string {
-  const value = process.env[`REACT_APP_${name}`];
+  const value = (import.meta.env as Record<string, string | undefined>)[`VITE_${name}`];
   if (!value) {
-    throw new Error(`REACT_APP_${name} environment variable is required`);
+    throw new Error(`VITE_${name} environment variable is required`);
   }
   return value;
 }
 
 function getS3Config(): S3ClientConfig {
   return {
-    region: process.env.PROBLEMS_S3_REGION || 'eu-north-1',
+    region: import.meta.env.VITE_PROBLEMS_S3_REGION || 'eu-north-1',
+    credentials: {
+      accessKeyId: "",
+      secretAccessKey: "",
+    },
   }
 }
 
