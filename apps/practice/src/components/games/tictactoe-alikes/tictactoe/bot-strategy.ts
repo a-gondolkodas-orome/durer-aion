@@ -3,7 +3,7 @@ import { pColor, botColor, inPlacingPhase, isGameEnd, type Board } from './helpe
 import type { StrategyArgs } from '../../../game-factory';
 
 export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  const allowedPlaces = getAllowedPlaces(board, false);
+  const allowedPlaces = getAllowedPlaces({ board, amIBot: true });
   if (inPlacingPhase(board)) {
     const safePlaces = allowedPlaces.filter(i => !opponentCanWinNext(board, i));
     moves.placePiece(board, sample(safePlaces.length > 0 ? safePlaces : allowedPlaces));
@@ -33,7 +33,7 @@ export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
 };
 
 const getOptimalBotPlacingPosition = (board: Board) => {
-  const allowedPlaces = getAllowedPlaces(board, false);
+  const allowedPlaces = getAllowedPlaces({ board, amIBot: true });
 
   if (allowedPlaces.length === 9) return(sample([0, 2, 4, 6, 8]));
 
@@ -54,7 +54,7 @@ const getOptimalBotPlacingPosition = (board: Board) => {
   const optimalPlaces = allowedPlaces.filter(i => {
     const boardCopy = [...board];
     boardCopy[i] = botColor;
-    return isWinningState(boardCopy, false);
+    return isWinningState({ board: boardCopy, amIBot: true });
   });
 
   if (optimalPlaces.length > 0) return sample(optimalPlaces);
@@ -63,12 +63,12 @@ const getOptimalBotPlacingPosition = (board: Board) => {
 };
 
 const getOptimalBotFlippingPosition = (board: Board) => {
-  const allowedPlaces = getAllowedPlaces(board, false);
+  const allowedPlaces = getAllowedPlaces({ board, amIBot: true });
 
   const optimalPlaces = allowedPlaces.filter(i => {
     const boardCopy = [...board];
     boardCopy[i] = 'white';
-    return isWinningState(boardCopy, false);
+    return isWinningState({ board: boardCopy, amIBot: true });
   });
 
   // if you can win symmetrically, try to do so (only for beauty)
@@ -81,8 +81,8 @@ const getOptimalBotFlippingPosition = (board: Board) => {
 const isWinningStateCache = new Map();
 
 // given board *after* your step, are you set up to win the game for sure?
-const isWinningState = (board: Board, amIPlayer) => {
-  const key = board.join(',') + '|' + amIPlayer;
+const isWinningState = ({ board, amIBot }: { board: Board, amIBot: boolean }) => {
+  const key = board.join(',') + '|' + amIBot;
   if (isWinningStateCache.has(key)) return isWinningStateCache.get(key);
 
   if (isGameEnd(board)) {
@@ -90,30 +90,30 @@ const isWinningState = (board: Board, amIPlayer) => {
     return true;
   }
 
-  const allowedPlacesForOther = getAllowedPlaces(board, !amIPlayer);
-  const colorForOther = getNextColor(board, !amIPlayer);
+  const allowedPlacesForOther = getAllowedPlaces({ board, amIBot: !amIBot });
+  const colorForOther = getNextColor({ board, amIBot: !amIBot });
 
   const optimalPlaceForOther = allowedPlacesForOther.find(i => {
     const boardCopy = [...board];
     boardCopy[i] = colorForOther;
-    return isWinningState(boardCopy, !amIPlayer);
+    return isWinningState({ board: boardCopy, amIBot: !amIBot });
   });
   const result = optimalPlaceForOther === undefined;
   isWinningStateCache.set(key, result);
   return result;
 };
 
-const getAllowedPlaces = (board: Board, amIPlayer) => {
+const getAllowedPlaces = ({ board, amIBot }: { board: Board, amIBot: boolean }) => {
   if (inPlacingPhase(board)) {
     return range(0, 9).filter(i => isNull(board[i]));
   }
-  const enemyColor = amIPlayer ? botColor : pColor;
+  const enemyColor = amIBot ? pColor : botColor;
   return range(0, 9).filter(i => board[i] === enemyColor);
 };
 
-const getNextColor = (board: Board, amIPlayer) => {
+const getNextColor = ({ board, amIBot }: { board: Board, amIBot: boolean }) => {
   if (inPlacingPhase(board)) {
-    return amIPlayer ? pColor : botColor;
+    return amIBot ? botColor : pColor;
   }
   return 'white';
 };
