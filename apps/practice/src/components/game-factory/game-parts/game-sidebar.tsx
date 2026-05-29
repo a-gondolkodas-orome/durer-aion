@@ -121,7 +121,7 @@ export const GameSidebar = ({
 
         <button
           className={`rounded-lg py-1.5 px-4 w-full text-center border
-            border-slate-300 text-slate-600 hocus:bg-slate-50
+            border-slate-300 text-slate-600 enabled:hocus:bg-slate-50
             disabled:opacity-40`}
           disabled={!isNewGameAllowed}
           onClick={() => moves.resetGameState()}
@@ -177,8 +177,8 @@ const RoleSelector = ({ roleLabels, onRoleSelection, disabled }: {
         key={i}
         data-testid={`role-btn-${i}`}
         className="rounded-lg py-2 px-4 w-full text-center font-semibold
-          bg-blue-500 hocus:bg-blue-600 text-white
-          disabled:opacity-40 disabled:hocus:bg-blue-500"
+          bg-blue-500 enabled:hocus:bg-blue-600 text-white
+          disabled:opacity-40"
         disabled={disabled}
         onClick={() => onRoleSelection(i)}
       >

@@ -106,7 +106,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           disabled={!wasCoinAlreadyRemovedInTurn}
           className={`
             rounded-lg py-1 px-3 text-sm border border-slate-300 text-slate-600
-            hocus:bg-slate-100 disabled:opacity-50 ml-auto
+            enabled:hocus:bg-slate-100 disabled:opacity-50 ml-auto
           `}
           onClick={undoCoinRemoval}
         >

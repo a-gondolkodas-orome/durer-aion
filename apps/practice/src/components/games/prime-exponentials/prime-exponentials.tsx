@@ -51,7 +51,7 @@ const PrimePowerButton = ({ entry, board, isClientMoveAllowed, chooseEntry, setH
     <button
       className={`border rounded w-10 py-0.5 text-center leading-tight border-gray-300
         ${isAboveBoard ? 'opacity-25' : ''}
-        ${isActive ? 'hocus:bg-blue-100 hocus:border-blue-300 cursor-pointer' : ''}`}
+        ${isActive ? 'hocus:bg-blue-100 hocus:border-blue-300' : ''}`}
       onClick={() => isActive && chooseEntry(entry)}
       onMouseOver={() => isActive && setHovered(entry)}
       onMouseOut={() => setHovered(null)}
