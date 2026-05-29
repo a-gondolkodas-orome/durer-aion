@@ -73,16 +73,18 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       </button>
       )}
     </div>
-    {ctx.isClientMoveAllowed && firstPlacedSquareIndex !== null && (
-      <div className="flex justify-end mt-2">
-        <button
-          className="cta-button w-auto bg-slate-400 enabled:hocus:bg-slate-500 text-sm"
-          onClick={() => moves.undoFirstDisc(board)}
-        >
-          {t({ hu: '↶ Visszavonás', en: '↶ Undo' })}
-        </button>
-      </div>
-    )}
+    <div className="flex justify-end mt-2">
+      <button
+        className={`
+          rounded-lg py-1 px-3 text-sm border border-slate-300 text-slate-600
+          enabled:hocus:bg-slate-100 disabled:opacity-50
+        `}
+        onClick={() => moves.undoFirstDisc(board)}
+        disabled={!ctx.isClientMoveAllowed || firstPlacedSquareIndex === null}
+      >
+        {t({ hu: '↶ Visszavonás', en: '↶ Undo' })}
+      </button>
+    </div>
   </GameBoard>
   );
 };
