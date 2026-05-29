@@ -5,6 +5,8 @@ import { DeletedTeamModel, deletedTeamAttributes } from './deletedTeam';
 import { Sequelize, Op, WhereOptions } from 'sequelize';
 import { relayProblemAttributes, RelayProblemModel } from './relayProblemModel';
 import { RelayProblem } from 'game';
+import { getS3Url } from 'strategy';
+import { requireEnv } from './relayProblemUploadUtils';
 
 export class TeamsRepository {
   sequelize: Sequelize;
@@ -94,23 +96,28 @@ export class RelayProblemsRepository {
   }
 
   async getProblems(category: string): Promise<RelayProblem[]> {
-    const problems = await RelayProblemModel.findAll({
-      where: {
-        category: category
-      },
-      order: [['index', 'ASC']]
+    const rows = await RelayProblemModel.findAll({
+      where: { category },
+      order: [['index', 'ASC']],
     });
-    return problems.map(problem => problem.get({ plain: true }) as RelayProblem);
+    const bucket = requireEnv('PROBLEMS_S3_BUCKET_NAME');
+    return rows.map(row => {
+      const plain = row.get({ plain: true }) as Omit<RelayProblem, 'attachmentUrl'> & { attachmentFileName: string | null };
+      return {
+        ...plain,
+        attachmentUrl: plain.attachmentFileName
+          ? getS3Url(`images/${plain.attachmentFileName}`, bucket)
+          : null,
+      };
+    });
   }
 
   async addProblems(problems: RelayProblem[]) {
-    const promises = problems.map(problem => {
-      return RelayProblemModel.upsert(problem as any);
-    });
-    return await Promise.all(promises);
+    const rows = problems.map(({ attachmentUrl: _url, ...rest }) => rest);
+    return await RelayProblemModel.bulkCreate(rows as any[]);
   }
 
   async clearProblems() {
-    return await RelayProblemModel.truncate();
+    return await RelayProblemModel.destroy({ where: {} });
   }
 }

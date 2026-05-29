@@ -9,7 +9,7 @@ import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus, createGame, 
 import { import_teams_from_tsv } from './team_import';
 import { readFileSync } from 'fs';
 import { uploadToS3, extractUploadedFiles, uploadImagesS3, requireEnv, getUploadedFileInfo } from './relayProblemUploadUtils';
-import { validateProblemCategory, parseProblemTOML } from 'strategy/';
+import { validateProblemCategory, parseProblemTOML } from 'strategy';
 
 /**
  * 
@@ -327,11 +327,12 @@ export function configureTeamsRouter(
         requireEnv('PROBLEMS_S3_BUCKET_NAME')
       );
 
-      await problems.clearProblems();
       const addedProblems = await problems.addProblems(parsedProblems);
 
       const tomlS3Url = await uploadToS3(tomlInfo.filePath, "problems.toml", 'application/toml');
       const uploadedImages = await uploadImagesS3(imageFiles);
+
+      await problems.clearProblems();
 
       ctx.body = {
         success: true,

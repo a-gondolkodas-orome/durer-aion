@@ -61,7 +61,7 @@ async function getImageNames(bucket: string): Promise<string[]> {
   try {
     const response = await s3.send(command);
 
-    const files = (response.Contents || []).map(obj => obj.Key!);
+    const files = (response.Contents || []).map(obj => obj.Key!.split('/').pop()).filter(name => name) as string[];
 
     return files;
   } catch (err) {

@@ -75,16 +75,16 @@ async function createBotFactories(problems: RelayProblemsRepository) {
 }
 
 async function main() {
+  getBotCredentials(); // give love if no creds are supplied
+  getAdminCredentials(); // give love if no creds are supplied
+  checkS3Variables();
+
   const { db, teams, problems } = getDb();
 
   if (argv[2] === "sanity-check") {
     console.log("OK");
     exit(0);
   }
-
-  getBotCredentials(); // give love if no creds are supplied
-  getAdminCredentials(); // give love if no creds are supplied
-  checkS3Variables();
 
   // node: argv[0] vs server.ts: argv[1]
   if (argv[2] === "import") {
