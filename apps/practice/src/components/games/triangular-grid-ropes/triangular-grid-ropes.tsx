@@ -56,7 +56,17 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     )}
 
     {/* grid nodes */}
-    {vertices.map(vertex => (
+    {vertices.map(vertex => {
+      const isClickable = ctx.isClientMoveAllowed && (
+        firstNode === null ||
+        vertex.id === firstNode ||
+        isAllowed(board, { from: firstNode, to: vertex.id })
+      );
+      const isInvalidHover = firstNode !== null &&
+        vertex.id === hoveredNode &&
+        firstNode !== hoveredNode &&
+        !isCandidateAllowed;
+      return (
       <circle
         key={vertex.id}
         cx={vertex.cx} cy={vertex.cy} r="2%" fill="black"
@@ -65,30 +75,22 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             ? (ctx.currentPlayer === 0 ? "fill-blue-500" : "fill-green-800")
             : ''
           }
-          ${
-            (
-              firstNode !== null &&
-              vertex.id === hoveredNode &&
-              firstNode !== hoveredNode &&
-              !isCandidateAllowed
-            )
-            ? 'fill-red-400 cursor-not-allowed'
-            : ''
-          }
+          ${isInvalidHover ? 'fill-red-400 cursor-not-allowed' : ''}
         `}
         onClick={() => connectNode(vertex.id)}
         onKeyUp={(event) => {
           if (event.key === 'Enter') connectNode(vertex.id);
         }}
-        tabIndex={ctx.isClientMoveAllowed ? 0 : undefined}
-        role={ctx.isClientMoveAllowed ? 'button' : undefined}
-        aria-label={ctx.isClientMoveAllowed ? `Node ${vertex.id + 1}` : undefined}
+        tabIndex={isClickable ? 0 : undefined}
+        role={isClickable ? 'button' : undefined}
+        aria-label={isClickable ? `Node ${vertex.id + 1}` : undefined}
         onFocus={() => setHoveredNode(vertex.id)}
         onBlur={() => setHoveredNode(null)}
         onMouseOver={() => setHoveredNode(vertex.id)}
         onMouseOut={() => setHoveredNode(null)}
       />
-    ))}
+      );
+    })}
   </svg>
   </GameBoard>
   );

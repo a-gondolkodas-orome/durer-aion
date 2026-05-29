@@ -66,9 +66,10 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     return `${v0.cx},${v0.cy} ${v1.cx},${v1.cy} ${v2.cx},${v2.cy}`
   }
 
+  const isClickable = i => ctx.isClientMoveAllowed && board[i] === ALLOWED;
+
   const colorTriangle = i => {
-    if (!ctx.isClientMoveAllowed) return;
-    if (board[i] !== ALLOWED) return;
+    if (!isClickable(i)) return;
     moves.colorTriangle(board, i);
   }
 
@@ -93,9 +94,9 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             onKeyUp={(event) => {
               if (event.key === 'Enter') colorTriangle(i);
             }}
-            tabIndex={ctx.isClientMoveAllowed ? 0 : undefined}
-            role={ctx.isClientMoveAllowed ? 'button' : undefined}
-            aria-label={ctx.isClientMoveAllowed ? `Triangle ${i + 1}` : undefined}
+            tabIndex={isClickable(i) ? 0 : undefined}
+            role={isClickable(i) ? 'button' : undefined}
+            aria-label={isClickable(i) ? `Triangle ${i + 1}` : undefined}
           ></polygon>
         ))}
       </svg>
