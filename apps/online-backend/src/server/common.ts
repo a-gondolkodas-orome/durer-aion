@@ -7,18 +7,6 @@ export function getBotCredentials() {
   return env.BOT_CREDENTIALS;
 }
 
-export function getGameStartAndEndTime() {
-  if (!env.GAME_GLOBAL_START_T) {
-    throw new Error('No GAME_GLOBAL_START_T supplied! Do set it in the environment');
-  }
-  if (!env.GAME_GLOBAL_END_T) {
-    throw new Error('No GAME_GLOBAL_END_T supplied! Do set it in the environment');
-  }
-  return {
-    globalStartAt: new Date(env.GAME_GLOBAL_START_T),
-    globalEndAt: new Date(env.GAME_GLOBAL_END_T),
-  };
-}
 
 export const relayNames = {
   C: 'relay_c',

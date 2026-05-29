@@ -64,10 +64,10 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
         }}
         open={
           finished
-        } onClose={async () => { 
-          refreshState()
+        } onClose={async () => {
+          await refreshState();
           await toHome();
-          window.location.reload(); 
+          window.location.reload();
            }}>
           {<RelayEndTable allPoints={G.points} task={
            // TODO .maxpoints

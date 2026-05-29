@@ -8,7 +8,11 @@
     "ADMIN_CREDENTIALS",
     "DATABASE_URL",
     "GAME_GLOBAL_START_T",
-    "GAME_GLOBAL_END_T"
+    "GAME_GLOBAL_END_T",
+    "PROBLEMS_S3_REGION",
+    "PROBLEMS_S3_KEY_ID",
+    "PROBLEMS_S3_SECRET_KEY",
+    "PROBLEMS_S3_BUCKET_NAME"
   ],
   "tasks": {
     "start": {

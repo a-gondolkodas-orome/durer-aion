@@ -1,8 +1,12 @@
 import type { PostgresStore } from 'bgio-postgres';
 import { InProgressMatchStatus } from 'schemas';
-import { teamAttributes, TeamModel } from './model';
+import { teamAttributes, TeamModel } from './teamModel';
 import { DeletedTeamModel, deletedTeamAttributes } from './deletedTeam';
 import { Sequelize, Op, WhereOptions } from 'sequelize';
+import { relayProblemAttributes, RelayProblemModel } from './relayProblemModel';
+import { RelayProblem } from 'game';
+import { getS3Url } from 'game';
+import { requireEnv } from './relayProblemUploadUtils';
 
 export class TeamsRepository {
   sequelize: Sequelize;
@@ -73,5 +77,47 @@ export class TeamsRepository {
       deletedAt: new Date(),
     });
     return await TeamModel.destroy({ where: { teamId } });
+  }
+}
+
+export class RelayProblemsRepository {
+  sequelize: Sequelize;
+  
+  constructor(db: PostgresStore) {
+    this.sequelize = db.sequelize;
+    RelayProblemModel.init(relayProblemAttributes, {
+      sequelize: db.sequelize,
+      tableName: "RelayProblems",
+    });
+  }
+
+  async connect() {
+    await this.sequelize.sync();
+  }
+
+  async getProblems(category: string): Promise<RelayProblem[]> {
+    const rows = await RelayProblemModel.findAll({
+      where: { category },
+      order: [['index', 'ASC']],
+    });
+    const bucket = requireEnv('PROBLEMS_S3_BUCKET_NAME');
+    return rows.map(row => {
+      const plain = row.get({ plain: true }) as Omit<RelayProblem, 'attachmentUrl'> & { attachmentFileName: string | null };
+      return {
+        ...plain,
+        attachmentUrl: plain.attachmentFileName
+          ? getS3Url(`images/${plain.attachmentFileName}`, bucket)
+          : null,
+      };
+    });
+  }
+
+  async addProblems(problems: RelayProblem[]) {
+    const rows = problems.map(({ attachmentUrl: _url, ...rest }) => rest);
+    return await RelayProblemModel.bulkCreate(rows as Omit<RelayProblem, 'attachmentUrl'>[]);
+  }
+
+  async clearProblems() {
+    return await RelayProblemModel.destroy({ where: {} });
   }
 }
