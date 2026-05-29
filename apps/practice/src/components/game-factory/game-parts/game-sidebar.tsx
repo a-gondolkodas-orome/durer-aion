@@ -168,7 +168,7 @@ const RoleSelector = ({ roleLabels, onRoleSelection, disabled }: {
   disabled: boolean
 }) => {
   const { t } = useTranslation();
-  return <span className="basis-24 flex flex-col gap-2">
+  return <div className="basis-24 flex flex-col gap-2">
     {[
       { hu: 'Kezdő leszek', en: "I'll go first" },
       { hu: 'Második leszek', en: "I'll go second" }
@@ -185,7 +185,7 @@ const RoleSelector = ({ roleLabels, onRoleSelection, disabled }: {
         {t(roleLabels ? roleLabels[i] : defaultLabel)}
       </button>
     ))}
-  </span>;
+  </div>;
 };
 
 const PlayerNameSetup = ({ roleLabels, playerNames, placeholderNames, setPlayerNames, onStart }: {
@@ -197,7 +197,7 @@ const PlayerNameSetup = ({ roleLabels, playerNames, placeholderNames, setPlayerN
 }) => {
   const { t } = useTranslation();
   return (
-  <span className="flex flex-col gap-3">
+  <div className="flex flex-col gap-3">
     <p className="text-sm text-slate-500 italic">
       {t({ hu: 'Neveitek (nem kötelező):', en: 'Your names (optional):' })}
     </p>
@@ -235,7 +235,7 @@ const PlayerNameSetup = ({ roleLabels, playerNames, placeholderNames, setPlayerN
     >
       {t({ hu: 'Kezdhetjük!', en: "Let's go!" })}
     </button>
-  </span>
+  </div>
   );
 };
 

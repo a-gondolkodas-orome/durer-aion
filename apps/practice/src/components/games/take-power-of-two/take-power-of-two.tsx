@@ -16,11 +16,9 @@ const generateStartBoard = () => {
 type Board = number
 
 const ExponentCell = ({ e, choosePower, setHovered }) => {
-  return <td
-    className="border-4 hocus:bg-gray-300"
-    key={e}>
+  return <td className="border-4">
     <button
-      className={`w-full p-[5%] aspect-video cursor-pointer`}
+      className="w-full p-[5%] aspect-video hocus:bg-gray-300"
       onClick={() => choosePower(e)}
       onMouseOver={() => setHovered(e)}
       onMouseOut={() => setHovered(null)}
@@ -65,7 +63,7 @@ const ExponentsTable = ({ board, choosePower, hovered, setHovered }) => {
         )}
       </tr></tbody>
     </table>
-    {hovered === null ? <br></br> : <p>
+    {hovered === null ? <br /> : <p>
       {t({ hu: `Kivonandó 2-hatvány: 2^${hovered} = ${2**hovered}. Eredmény: ${board-2**hovered}.`,
         en: `Power to subtract: 2^${hovered} = ${2**hovered}. Result: ${board-2**hovered}.` })}
     </p>}

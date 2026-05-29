@@ -71,7 +71,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           onClick={() => clickField(id)}
           disabled={!isAllowed_choosePiece(id) && !isAllowed_movePiece(id)}
           className={`
-            aspect-square p-[0%] border-2 relative flex justify-center items-center
+            aspect-square border-2 relative flex justify-center items-center
             disabled:cursor-default
             ${possibleMoves.includes(id) && isCurrentPlayerShark && board.submarines[id] ? 'border-red-600' : ''}
           `}
@@ -115,50 +115,24 @@ const OptionalNextShark = () => {
   </svg>;
 };
 
-const OptionalNextSubmarine = ({ existingSubmarineCount }) => {
-  return <>
-    {(existingSubmarineCount === 1) && (
-      <svg className="aspect-square top-[10%] absolute z-40 opacity-50">
-        <use xlinkHref="#submarine" />
-      </svg>
-    )}
-    {(existingSubmarineCount !== 1) && (
-      <svg className="aspect-square top-0 absolute z-40 opacity-50">
-        <use xlinkHref="#submarine" />
-      </svg>
-    )}
-  </>;
+const OptionalNextSubmarine = ({ existingSubmarineCount }) => (
+  <svg className={`aspect-square absolute z-40 opacity-50 ${existingSubmarineCount === 1 ? 'top-[10%]' : 'top-0'}`}>
+    <use xlinkHref="#submarine" />
+  </svg>
+);
+
+const topsByCount: Record<number, string[]> = {
+  1: ['top-0'],
+  2: ['top-[-10%]', 'top-[10%]'],
+  3: ['top-[-10%]', 'top-0', 'top-[10%]']
 };
 
-const SubmarinesInCell = ({ count }) => {
-  return <>
-    {count === 1 && (
-      <svg className="aspect-square top-0 absolute z-20 opacity-80">
+const SubmarinesInCell = ({ count }) => (
+  <>
+    {(topsByCount[count] ?? []).map(pos => (
+      <svg key={pos} className={`aspect-square ${pos} absolute z-20 opacity-80`}>
         <use xlinkHref="#submarine" />
       </svg>
-    )}
-    {count === 2 && (
-      <>
-        <svg className="aspect-square top-[-10%] absolute z-20 opacity-80">
-          <use xlinkHref="#submarine" />
-        </svg>
-        <svg className="aspect-square top-[10%] absolute z-20 opacity-80">
-          <use xlinkHref="#submarine" />
-        </svg>
-      </>
-    )}
-    {count === 3 && (
-      <>
-        <svg className="aspect-square top-[-10%] absolute z-20 opacity-80">
-          <use xlinkHref="#submarine" />
-        </svg>
-        <svg className="aspect-square top-0 absolute z-20 opacity-80">
-          <use xlinkHref="#submarine" />
-        </svg>
-        <svg className="aspect-square top-[10%] absolute z-20 opacity-80">
-          <use xlinkHref="#submarine" />
-        </svg>
-      </>
-    )}
-  </>;
-};
+    ))}
+  </>
+);

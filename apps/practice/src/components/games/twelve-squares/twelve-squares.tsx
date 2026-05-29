@@ -13,7 +13,7 @@ const isValidStep = (board: Board, step) =>
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const isMoveAllowed = (step) => {
-	  if(!ctx.isClientMoveAllowed) return false;
+    if (!ctx.isClientMoveAllowed) return false;
     return isValidStep(board, step);
   };
 
@@ -56,11 +56,10 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               disabled={!isMoveAllowed(potentialStep(i))}
               onClick={() => makeStep(potentialStep(i))}
             >{ i === board.left || i === board.right
-              ? <span>
-                <svg className="inline-block w-full aspect-square">
+              ? <svg className="inline-block w-full aspect-square">
                   <use href="#game-chess-bishop" />
                 </svg>
-              </span> : i }
+              : i }
             </button>
           </td>
         )}

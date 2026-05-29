@@ -26,20 +26,20 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         {range(board.length).map(i => (
           board[i]!== COVERED
           ? <td
-              className='border-4 aspect-square text-center'
-              key = {i}
+              className="border-4 aspect-square text-center"
+              key={i}
             >
               <button
                 disabled={!ctx.isClientMoveAllowed}
-                className='w-full enabled:hocus:bg-gray-400'
+                className="w-full enabled:hocus:bg-gray-400"
                 onClick={() => clickNumber(i+1)}
               >
                 {board[i]}
               </button>
             </td>
           : <td
-              className='text-center border-4 bg-gray-600'
-              key = {i}
+              className="text-center border-4 bg-gray-600"
+              key={i}
             >X</td>
         ))}
         </tr>

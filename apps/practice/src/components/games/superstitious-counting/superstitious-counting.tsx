@@ -57,7 +57,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       </button>
       )}
     </div>
-    <span className = "text-xl">
+    <span className="text-xl">
       {t({
         hu: `m értéke: ${board.target}`,
         en: `Value of m: ${board.target}`

@@ -31,18 +31,14 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                 <div className="aspect-square p-[5%] w-full">
                   <button className="w-full aspect-square" disabled={!isMoveAllowed({ row, col })}>
                     {isMoveAllowed({ row, col }) && (
-                      <span>
-                        <svg className="w-full aspect-square opacity-25 inline-block">
-                          <use xlinkHref="#game-chess-knight" />
-                        </svg>
-                      </span>
+                      <svg className="w-full aspect-square opacity-25 inline-block">
+                        <use xlinkHref="#game-chess-knight" />
+                      </svg>
                     )}
                     {board.chessBoard[row][col] === 'knight' && (
-                      <span>
-                        <svg className="w-full aspect-square inline-block">
-                          <use xlinkHref="#game-chess-knight" />
-                        </svg>
-                      </span>
+                      <svg className="w-full aspect-square inline-block">
+                        <use xlinkHref="#game-chess-knight" />
+                      </svg>
                     )}
                   </button>
                 </div>

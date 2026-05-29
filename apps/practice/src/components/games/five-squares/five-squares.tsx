@@ -51,7 +51,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 
   return (
   <GameBoard>
-    <div className="grid grid-cols-3 gap-0 border-t-4 border-l-4">
+    <div className="grid grid-cols-3 border-t-4 border-l-4">
       {range(board.length).map(id =>
         <button
           key={id}

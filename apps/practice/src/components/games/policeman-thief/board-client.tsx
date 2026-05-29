@@ -1,4 +1,3 @@
-import { Fragment } from "react";
 import { range } from "lodash";
 import { neighbours } from "./helpers";
 import type { Board } from "./policeman-thief";
@@ -109,22 +108,21 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         <line x1="90%" y1="10%" x2="70%" y2="30%" />
 
         {range(8).map((vertex) => (
-          <Fragment key={vertex}>
-            <circle
-              cx={cubeCoords[vertex].cx}
-              cy={cubeCoords[vertex].cy}
-              r="4%"
-              fill={getColor(vertex)}
-              onClick={() => handleCircleClick(vertex)}
-              onKeyUp={(event) => {
-                if (event.key === 'Enter') handleCircleClick(vertex);
-              }}
-              tabIndex={isClickable(vertex) ? 0 : undefined}
-              role={isClickable(vertex) ? 'button' : undefined}
-              aria-label={isClickable(vertex) ? `Vertex ${vertex + 1}` : undefined}
-              className={isClickable(vertex) ? 'opacity-50' : ''}
-            />
-          </Fragment>
+          <circle
+            key={vertex}
+            cx={cubeCoords[vertex].cx}
+            cy={cubeCoords[vertex].cy}
+            r="4%"
+            fill={getColor(vertex)}
+            onClick={() => handleCircleClick(vertex)}
+            onKeyUp={(event) => {
+              if (event.key === 'Enter') handleCircleClick(vertex);
+            }}
+            tabIndex={isClickable(vertex) ? 0 : undefined}
+            role={isClickable(vertex) ? 'button' : undefined}
+            aria-label={isClickable(vertex) ? `Vertex ${vertex + 1}` : undefined}
+            className={isClickable(vertex) ? 'opacity-50' : ''}
+          />
         ))}
       </svg>
     </GameBoard>
