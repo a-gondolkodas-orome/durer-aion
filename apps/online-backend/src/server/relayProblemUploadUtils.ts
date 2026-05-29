@@ -2,7 +2,7 @@ import { extname } from 'path';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { readFileSync } from 'fs';
 import { S3ClientConfig } from '@aws-sdk/client-s3';
-import { getS3Url } from 'strategy';
+import { getS3Url } from 'game';
 
 interface UploadedFile {
   originalFilename?: string | null;

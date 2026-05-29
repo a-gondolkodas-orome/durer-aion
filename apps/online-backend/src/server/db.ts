@@ -5,7 +5,7 @@ import { DeletedTeamModel, deletedTeamAttributes } from './deletedTeam';
 import { Sequelize, Op, WhereOptions } from 'sequelize';
 import { relayProblemAttributes, RelayProblemModel } from './relayProblemModel';
 import { RelayProblem } from 'game';
-import { getS3Url } from 'strategy';
+import { getS3Url } from 'game';
 import { requireEnv } from './relayProblemUploadUtils';
 
 export class TeamsRepository {

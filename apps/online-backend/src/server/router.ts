@@ -9,7 +9,7 @@ import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus, createGame, 
 import { import_teams_from_tsv } from './team_import';
 import { readFileSync } from 'fs';
 import { uploadToS3, extractUploadedFiles, uploadImagesS3, requireEnv, getUploadedFileInfo } from './relayProblemUploadUtils';
-import { validateProblemCategory, parseProblemTOML } from 'strategy';
+import { validateProblemCategory, parseProblemTOML } from 'game';
 
 /**
  * 

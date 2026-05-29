@@ -1,5 +1,5 @@
 import { RelayProblem } from "game";
-import { parseProblemTOML } from "strategy";
+import { parseProblemTOML } from "game";
 
 export function requireEnv(name: string): string {
   const value = (import.meta.env as Record<string, string | undefined>)[`VITE_${name}`];

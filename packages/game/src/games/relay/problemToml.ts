@@ -1,5 +1,5 @@
 import { parse, TomlTable } from 'smol-toml';
-import type { RelayProblem } from 'game';
+import type { RelayProblem } from './strategy';
 
 export function getS3Url(fileName: string, S3BucketName: string): string {
   return `https://${S3BucketName}.s3.amazonaws.com/${fileName}`;
