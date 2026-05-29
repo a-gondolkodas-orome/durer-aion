@@ -11,10 +11,12 @@ export interface RelayProblem {
   attachmentFileName: string | null;
 }
 
-export async function strategy(getProblems: () => Promise<RelayProblem[]>){
-  const problems = await getProblems();
+export function strategy(getProblems: () => Promise<RelayProblem[]>){
+  let problems: RelayProblem[] | null = null;
+  getProblems().then(p => { problems = p; });
 
   return (state: State<MyGameState>, botID: string): [any[] | undefined, string] => {
+    if (!problems) return [undefined, "getTime"];
     const problemIdx = state.G.currentProblem;
     if (state.G.numberOfTry === 0) {
       const url = problems[problemIdx].attachmentUrl ?? "";

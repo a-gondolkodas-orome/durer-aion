@@ -1,5 +1,5 @@
 import { parse } from 'smol-toml';
-import { RelayProblem } from 'game';
+import type { RelayProblem } from 'game';
 
 export function getS3Url(fileName: string, S3BucketName: string): string {
   return `https://${S3BucketName}.s3.amazonaws.com/${fileName}`;

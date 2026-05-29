@@ -61,11 +61,11 @@ const games = [
   { ...gameWrapper(strategyGameWrappers.E()), name: strategyNames.E },
 ];
 
-async function createBotFactories(problems: RelayProblemsRepository) {
+function createBotFactories(problems: RelayProblemsRepository) {
   return [
-    botWrapper(await RelayStrategy(() => problems.getProblems("C"))),
-    botWrapper(await RelayStrategy(() => problems.getProblems("D"))),
-    botWrapper(await RelayStrategy(() => problems.getProblems("E"))),
+    botWrapper(RelayStrategy(() => problems.getProblems("C"))),
+    botWrapper(RelayStrategy(() => problems.getProblems("D"))),
+    botWrapper(RelayStrategy(() => problems.getProblems("E"))),
     botWrapper(StrategyStrategy.C()),
     botWrapper(StrategyStrategy.D()),
     botWrapper(StrategyStrategy.E()),
@@ -89,7 +89,7 @@ async function main() {
     const filename = argv[3];
     import_teams_from_tsv_locally(teams, filename).then(() => exit(0));
   } else {
-    const bot_factories = await createBotFactories(problems);
+    const bot_factories = createBotFactories(problems);
     const botSetup = Object.fromEntries(
       games.map((game, idx) =>
         [game.name,
