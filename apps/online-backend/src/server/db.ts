@@ -1,6 +1,6 @@
 import type { PostgresStore } from 'bgio-postgres';
 import { InProgressMatchStatus } from 'schemas';
-import { teamAttributes, TeamModel } from './model';
+import { teamAttributes, TeamModel } from './teamModel';
 import { DeletedTeamModel, deletedTeamAttributes } from './deletedTeam';
 import { Sequelize, Op, WhereOptions } from 'sequelize';
 import { relayProblemAttributes, RelayProblemModel } from './relayProblemModel';

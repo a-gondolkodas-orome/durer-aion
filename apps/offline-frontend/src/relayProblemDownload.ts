@@ -44,8 +44,10 @@ export async function getProblems(category: 'C' | 'D' | 'E'): Promise<RelayProbl
     const { text, imgNames } = JSON.parse(cached);
     problems = parseProblemTOML(text, imgNames, bucket);
   } else {
-    const text = await S3DownloadText("problems.toml");
-    const imgNames = await getImageNames();
+    const [text, imgNames] = await Promise.all([
+      S3DownloadText("problems.toml"),
+      getImageNames(),
+    ]);
     problems = parseProblemTOML(text, imgNames, bucket);
     localStorage.setItem("problemsData", JSON.stringify({ text, imgNames }));
   }

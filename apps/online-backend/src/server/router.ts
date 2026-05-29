@@ -327,12 +327,11 @@ export function configureTeamsRouter(
         requireEnv('PROBLEMS_S3_BUCKET_NAME')
       );
 
-      const addedProblems = await problems.addProblems(parsedProblems);
-
       const tomlS3Url = await uploadToS3(tomlInfo.filePath, "problems.toml", 'application/toml');
       const uploadedImages = await uploadImagesS3(imageFiles);
 
       await problems.clearProblems();
+      const addedProblems = await problems.addProblems(parsedProblems);
 
       ctx.body = {
         success: true,
@@ -377,13 +376,11 @@ export function configureTeamsRouter(
         problems: probs
       };
     } catch (error: unknown) {
-      const isValidationError = error instanceof Error && error.message.includes('Invalid category');
-      ctx.status = isValidationError ? 400 : 500;
+      ctx.status = 400;
       ctx.body = {
         success: false,
-        error: isValidationError
-          ? (error as Error).message
-          : `Failed to fetch problems: ${error instanceof Error ? error.message : 'Unknown error'}`
+        error: (error instanceof Error && error.message) 
+          ? error.message : `Failed to fetch problems: Unknown error`
       };
     }
   });

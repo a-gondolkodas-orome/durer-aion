@@ -126,13 +126,12 @@ export function extractUploadedFiles(files: Record<string, UploadedFile | Upload
 export async function uploadImagesS3(imageFiles: UploadedFile[]): Promise<{ name: string; s3Url: string }[]> {
   const uploadedImages: { name: string; s3Url: string }[] = [];
   
-  for (const imageFile of imageFiles) {
-    const name = getUploadedFileName(imageFile);
-    const filePath = getUploadedFilePath(imageFile);
+  await Promise.all(imageFiles.map(async (file) => {
+    const { name, filePath } = getUploadedFileInfo(file);
     const contentType = imageContentTypeFromFileName(name);
     const s3Url = await uploadToS3(filePath, 'images/' + name, contentType);
     uploadedImages.push({ name, s3Url });
-  }
+  }));
 
   return uploadedImages;
 }

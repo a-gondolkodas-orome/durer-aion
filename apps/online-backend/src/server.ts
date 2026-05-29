@@ -1,4 +1,4 @@
-import 'dotenv';
+import './dotenv_helper';
 import {
   GameRelay,
   MyGameWrappers as strategyGameWrappers,
@@ -89,6 +89,8 @@ async function main() {
     const filename = argv[3];
     import_teams_from_tsv_locally(teams, filename).then(() => exit(0));
   } else {
+    await problems.connect();
+
     const bot_factories = createBotFactories(problems);
     const botSetup = Object.fromEntries(
       games.map((game, idx) =>

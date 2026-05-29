@@ -9,7 +9,7 @@ import {
   InProgressMatchStatus,
 } from "schemas";
 import { fetch } from "../socketio_botmoves";
-import { TeamModel } from "./model";
+import { TeamModel } from "./teamModel";
 
 /** Joins a player to a match where the bot's side is not connected.
  * @param db: Database context
