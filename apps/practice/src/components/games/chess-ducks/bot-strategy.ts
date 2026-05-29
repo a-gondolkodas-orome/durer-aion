@@ -47,7 +47,7 @@ const getOptimalSmartBotMove = (board: Board): Field => {
     // from the optimal moves
     const optimalPlace = shuffle(allowedMoves).find(({ row, col }) => {
       const { nextBoard } = moves.placeDuck(board, { events: dummyEvents }, { row, col });
-      return isWinningState(nextBoard, false);
+      return isWinningState(nextBoard);
     });
 
     if (optimalPlace !== undefined) {
@@ -118,7 +118,7 @@ const invertTransformation = (stepCoords: Coords, type: TransformationType): Coo
 };
 
 // given board *after* your step, are you set up to win the game for sure?
-const isWinningState = (board: Board, amIPlayer: boolean): boolean => {
+const isWinningState = (board: Board): boolean => {
   if (getAllowedMoves(board).length === 0) {
     return true;
   }
@@ -127,7 +127,7 @@ const isWinningState = (board: Board, amIPlayer: boolean): boolean => {
 
   const optimalPlaceForOther = allowedPlacesForOther.find(({ row, col }) => {
     const { nextBoard } = moves.placeDuck(board, { events: dummyEvents }, { row, col });
-    return isWinningState(nextBoard, !amIPlayer);
+    return isWinningState(nextBoard);
   });
   return optimalPlaceForOther === undefined;
 };

@@ -56,7 +56,7 @@ export const getOptimalSmartBotMove = (board: Board): Field => {
       const boardCopy = cloneDeep(board);
       markForbiddenFields(boardCopy, { row, col });
       boardCopy[row][col] = BISHOP;
-      return isWinningState(boardCopy, false);
+      return isWinningState(boardCopy);
     });
 
     if (optimalPlace !== undefined) {
@@ -67,7 +67,7 @@ export const getOptimalSmartBotMove = (board: Board): Field => {
 };
 
 // given board *after* your step, are you set up to win the game for sure?
-const isWinningState = (board: Board, amIPlayer: boolean): boolean => {
+const isWinningState = (board: Board): boolean => {
   if (getAllowedMoves(board).length === 0) {
     return true;
   }
@@ -78,7 +78,7 @@ const isWinningState = (board: Board, amIPlayer: boolean): boolean => {
     const boardCopy = cloneDeep(board);
     markForbiddenFields(boardCopy, { row, col });
     boardCopy[row][col] = BISHOP;
-    return isWinningState(boardCopy, !amIPlayer);
+    return isWinningState(boardCopy);
   });
   return optimalPlaceForOther === undefined;
 };

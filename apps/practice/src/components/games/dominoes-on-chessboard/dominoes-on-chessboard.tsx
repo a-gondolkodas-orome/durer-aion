@@ -196,7 +196,7 @@ const getOptimalSmartBotMove = (board: Board) => {
   const allowedMoves = getPossibleMoves(board);
   const optimalPlace = shuffle(allowedMoves).find(i => {
     const { nextBoard } = moves.placeDomino(board, { events: dummyEvents }, i);
-    return isWinningState(nextBoard, false);
+    return isWinningState(nextBoard);
   });
 
   if (optimalPlace !== undefined) {
@@ -206,7 +206,7 @@ const getOptimalSmartBotMove = (board: Board) => {
 };
 
 // given board *after* your step, are you set up to win the game for sure?
-const isWinningState = (board: Board, amIPlayer) => {
+const isWinningState = (board: Board) => {
   const allowedPlacesForOther = getPossibleMoves(board);
   if (allowedPlacesForOther.length === 0) {
     return true;
@@ -214,7 +214,7 @@ const isWinningState = (board: Board, amIPlayer) => {
 
   const optimalPlaceForOther = allowedPlacesForOther.find(i => {
     const { nextBoard } = moves.placeDomino(board, { events: dummyEvents }, i);
-    return isWinningState(nextBoard, !amIPlayer);
+    return isWinningState(nextBoard);
   });
   return optimalPlaceForOther === undefined;
 };
