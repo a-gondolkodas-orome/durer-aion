@@ -82,16 +82,19 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         </span>
         <button
           disabled={!isAddAllowed(1)}
-          className="primary-button w-auto"
+          className="secondary-button w-auto"
           onClick={passAddition}
         >
-          {t({ hu: 'Semmi', en: 'Nothing' })}
+          {t({ hu: 'Semmi ∅', en: 'Nothing ∅' })}
         </button>
         {[1, 2].map(coinValue => (
           <button
             key={coinValue}
             disabled={!isAddAllowed(coinValue)}
-            className={`primary-button w-auto rounded-4xl ${getCoinBgColor(coinValue)}`}
+            className={`
+              primary-button w-auto rounded-4xl
+              ${getCoinBgColor(coinValue)} enabled:hocus:brightness-75
+            `}
             onClick={() => addToPile(coinValue)}
             onMouseEnter={() => setHoveredPile(coinValue)}
             onMouseLeave={() => setHoveredPile(null)}
