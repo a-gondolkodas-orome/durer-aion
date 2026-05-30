@@ -4,7 +4,7 @@
 
 @layer base {
     *,  ::after,  ::before,  ::backdrop,  ::file-selector-button { 
-        border-color: var(--color-gray-200, currentColor);
+        border-color: var(--color-slate-200, currentColor);
     }
     p, h1, h2, h3, h4, h5, h6 {
         overflow-wrap: break-word;

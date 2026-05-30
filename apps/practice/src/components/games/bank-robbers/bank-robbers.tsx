@@ -30,7 +30,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const getBankColor = index => {
     if (index === board.lastMove) return "fill-red-800 stroke-red-600";
     if (board.circle[index] === false) return "fill-red-800";
-    if (!isAllowedBank(index)) return "fill-gray-400";
+    if (!isAllowedBank(index)) return "fill-slate-400";
     return "fill-green-600";
   }
 
@@ -43,7 +43,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           return (
             <line
               key={index}
-              className="stroke-gray-600"
+              className="stroke-slate-600"
               x1={x} y1={y}
               x2={prev.x} y2={prev.y}
               strokeWidth={1.5}

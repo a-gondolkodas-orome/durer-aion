@@ -18,7 +18,7 @@ type Board = number
 const ExponentCell = ({ e, choosePower, setHovered }) => {
   return <td className="border-4">
     <button
-      className="w-full p-[5%] aspect-video hocus:bg-gray-300"
+      className="w-full p-[5%] aspect-video hocus:bg-slate-300"
       onClick={() => choosePower(e)}
       onMouseOver={() => setHovered(e)}
       onMouseOut={() => setHovered(null)}

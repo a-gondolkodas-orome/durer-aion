@@ -31,14 +31,14 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             >
               <button
                 disabled={!ctx.isClientMoveAllowed}
-                className="w-full enabled:hocus:bg-gray-400"
+                className="w-full enabled:hocus:bg-slate-400"
                 onClick={() => clickNumber(i+1)}
               >
                 {board[i]}
               </button>
             </td>
           : <td
-              className="text-center border-4 bg-gray-600"
+              className="text-center border-4 bg-slate-600"
               key={i}
             >X</td>
         ))}

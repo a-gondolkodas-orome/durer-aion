@@ -49,7 +49,7 @@ const PrimePowerButton = ({ entry, board, isClientMoveAllowed, chooseEntry, setH
   const isActive = !isAboveBoard && isClientMoveAllowed;
   return (
     <button
-      className={`border rounded w-10 py-0.5 text-center leading-tight border-gray-300
+      className={`border rounded w-10 py-0.5 text-center leading-tight border-slate-300
         ${isAboveBoard ? 'opacity-25' : ''}
         ${isActive ? 'hocus:bg-blue-100 hocus:border-blue-300' : ''}`}
       onClick={() => isActive && chooseEntry(entry)}
@@ -58,7 +58,7 @@ const PrimePowerButton = ({ entry, board, isClientMoveAllowed, chooseEntry, setH
       onFocus={() => isActive && setHovered(entry)}
       onBlur={() => setHovered(null)}
     >
-      <span className="block text-xs text-gray-500" aria-hidden={exponent <= 1}>
+      <span className="block text-xs text-slate-500" aria-hidden={exponent <= 1}>
         {exponent > 1 ? <>{prime}<sup>{exponent}</sup></> : <>&nbsp;</>}
       </span>
       <span className="block">{value}</span>

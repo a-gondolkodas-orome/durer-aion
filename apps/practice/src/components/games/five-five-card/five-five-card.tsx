@@ -20,11 +20,11 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   return (
   <GameBoard>
     <div className="grid grid-cols-3">
-      <span className="text-gray-500 text-xl text-center">
+      <span className="text-slate-500 text-xl text-center">
         {t({ hu: 'Kezdő', en: 'First' })}
       </span>
       <span></span>
-      <span className="text-gray-500 text-xl text-center">
+      <span className="text-slate-500 text-xl text-center">
         {t({ hu: 'Második', en: 'Second' })}
       </span>
     </div>
