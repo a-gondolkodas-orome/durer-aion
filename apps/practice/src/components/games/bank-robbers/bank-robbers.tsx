@@ -7,9 +7,10 @@ import { smartBotStrategy } from './bot-strategy';
 export type Board = { circle: boolean[], lastMove: number | null, firstMove: number | null }
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const getAngle = (index) => {
-    const step = Math.PI*2/board.circle.length;
-    return index*step + (board.firstMove === null ? 0 : board.firstMove*step);
+  const getCoords = (index) => {
+    const step = Math.PI * 2/board.circle.length;
+    const angle = index * step + (board.firstMove === null ? 0 : board.firstMove * step);
+    return { x: 55 + 50 * Math.cos(angle), y: 55 + 50 * Math.sin(angle) };
   };
 
   const isAllowedMove = index => {
@@ -33,36 +34,42 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     return "fill-green-600";
   }
 
-  return(
+  return (
     <GameBoard>
       <svg width="100%" height="100%" viewBox='0 0 110 110'>
-      {
-        range(board.circle.length).map(index => (
-          <line
-          key={`${index-1}-${index}`}
-          className="stroke-gray-600"
-          x1={55+50*Math.cos(getAngle(index))} y1={55+50*Math.sin(getAngle(index))}
-          x2={55+50*Math.cos(getAngle(index-1))} y2={55+50*Math.sin(getAngle(index-1))}
-          strokeWidth={1.5}
-          />
-        ))}
-    {range(board.circle.length).map(index => (
-      <circle
-        key={index}
-        cx={55+50*Math.cos(getAngle(index))} cy={55+50*Math.sin(getAngle(index))}
-        r="4%"
-        className={`${getBankColor(index)}`}
-        strokeWidth={index === board.lastMove ? "1%" : "0"}
-        onClick={() => clickBank(index)}
-        onKeyUp={(event) => {
-          if (event.key === 'Enter') clickBank(index);
-        }}
-        tabIndex={isAllowedMove(index) ? 0 : undefined}
-        role={isAllowedMove(index) ? 'button' : undefined}
-        aria-label={isAllowedMove(index) ? `Bank ${index + 1}` : undefined}
-      ></circle>
-    ))}
-    </svg>
+        {range(board.circle.length).map(index => {
+          const { x, y } = getCoords(index);
+          const prev = getCoords(index - 1);
+          return (
+            <line
+              key={index}
+              className="stroke-gray-600"
+              x1={x} y1={y}
+              x2={prev.x} y2={prev.y}
+              strokeWidth={1.5}
+            />
+          );
+        })}
+        {range(board.circle.length).map(index => {
+          const { x, y } = getCoords(index);
+          return (
+            <circle
+              key={index}
+              cx={x} cy={y}
+              r="4%"
+              className={`${getBankColor(index)}`}
+              strokeWidth={index === board.lastMove ? "1%" : "0"}
+              onClick={() => clickBank(index)}
+              onKeyUp={(event) => {
+                if (event.key === 'Enter') clickBank(index);
+              }}
+              tabIndex={isAllowedMove(index) ? 0 : undefined}
+              role={isAllowedMove(index) ? 'button' : undefined}
+              aria-label={isAllowedMove(index) ? `Bank ${index + 1}` : undefined}
+            />
+          );
+        })}
+      </svg>
     </GameBoard>
   );
 };
