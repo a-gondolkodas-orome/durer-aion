@@ -53,7 +53,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   return (
     <GameBoard className="flex flex-col items-center">
       <svg
-        viewBox="0 -3 100 110"
+        viewBox="0 0 100 100"
         className="aspect-square w-full max-h-96"
       >
         {/* Octagon edges */}
@@ -122,25 +122,25 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           );
         })}
 
-        {/* Day / km info inside SVG */}
-        {ctx.phase === 'play' &&
-          <text x="50" y="104" textAnchor="middle" fontSize="3.5" fill="#374151">
-            {ctx.currentPlayer === 0
-              ? t({
-                hu: `${board.day}. nap · ${board.kmUsedToday}/40 km`,
-                en: `Day ${board.day} · ${board.kmUsedToday}/40 km`
-              })
-              : t({ hu: `${board.day}. éjszaka`, en: `Night ${board.day}` })
-            }
-          </text>
-        }
       </svg>
+
+      {ctx.phase === 'play' && (
+        <p>
+          {ctx.currentPlayer === 0
+            ? t({
+              hu: `${board.day}. nap · ${board.kmUsedToday}/40 km`,
+              en: `Day ${board.day} · ${board.kmUsedToday}/40 km`
+            })
+            : t({ hu: `${board.day}. éjszaka`, en: `Night ${board.day}` })
+          }
+        </p>
+      )}
 
       {/* End Day button */}
       {canEndDay && (
         <button
           onClick={() => moves.endDay(board)}
-          className="mt-3 px-5 py-2 bg-blue-600 text-white rounded-lg hocus:bg-blue-700 font-medium"
+          className="cta-button w-auto"
         >
           {t({ hu: 'Befejezem a napot', en: 'End Day' })}
         </button>
