@@ -4,7 +4,8 @@ import { strategyGameFactory, type BoardClientProps, type Events, GameBoard } fr
 import { ChessBishopSvg } from './chess-bishop-svg';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import {
-  generateStartBoard, getAllowedMoves, BISHOP, FORBIDDEN, markForbiddenFields, type Board, type Field
+  generateStartBoard, getAllowedMoves, BISHOP, FORBIDDEN, markForbiddenFields,
+  type Board, type Field
 } from './helpers';
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {

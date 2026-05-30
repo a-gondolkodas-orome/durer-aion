@@ -39,34 +39,34 @@ const chessDucksGameFactory = ({ ROWS, COLS }: { ROWS: number; COLS: number }) =
       <GameBoard>
         <DuckSvg />
         <table className="w-full border-collapse table-fixed">
-        <tbody>
-          {range(ROWS).map(row => (
-            <tr key={row}>
-              {range(COLS).map(col => (
-                <td
-                  key={col}
-                  className={`
-                    border-4
-                    ${isForbidden({ row, col }) ? 'bg-slate-400 cursor-not-allowed' : ''}
-                  `}
-                >
-                  <button
-                    className="aspect-square w-full h-full p-[5%]"
-                    disabled={!isMoveAllowed({ row, col })}
-                    onClick={() => clickField({ row, col })}
+          <tbody>
+            {range(ROWS).map(row => (
+              <tr key={row}>
+                {range(COLS).map(col => (
+                  <td
+                    key={col}
+                    className={`
+                      border-4
+                      ${isForbidden({ row, col }) ? 'bg-slate-400' : ''}
+                    `}
                   >
-                    {isDuck({ row, col }) && (
-                      <svg className="inline-block aspect-square">
-                        <use xlinkHref="#game-duck" />
-                      </svg>
-                    )}
-                  </button>
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+                    <button
+                      className="aspect-square w-full h-full p-[5%]"
+                      disabled={!isMoveAllowed({ row, col })}
+                      onClick={() => clickField({ row, col })}
+                    >
+                      {isDuck({ row, col }) && (
+                        <svg className="inline-block aspect-square">
+                          <use xlinkHref="#game-duck" />
+                        </svg>
+                      )}
+                    </button>
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </GameBoard>
     );
   };
