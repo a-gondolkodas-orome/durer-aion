@@ -36,7 +36,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       <div className="flex flex-wrap">
         <span className="grow px-2">
           <button
-            className='cta-button'
+            className="primary-button"
             disabled={!ctx.isClientMoveAllowed}
             onClick={() => moves.take1(board)}
             onMouseEnter={() => setHoveredAction('take1')}
@@ -45,7 +45,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         </span>
         <span className='grow px-2'>
           <button
-            className="cta-button"
+            className="primary-button"
             disabled={!ctx.isClientMoveAllowed || board % 2 === 1}
             onClick={() => moves.halve(board)}
             onMouseEnter={() => setHoveredAction('halve')}

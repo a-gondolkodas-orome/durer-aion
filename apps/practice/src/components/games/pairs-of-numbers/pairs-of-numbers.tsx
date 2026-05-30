@@ -16,7 +16,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       <div className="flex flex-wrap">
         <span className="grow px-2">
           <button
-            className='cta-button'
+            className='primary-button'
             disabled={!ctx.isClientMoveAllowed}
             onClick={() => moves.add1(board)}
           >
@@ -27,7 +27,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         </span>
         <span className='grow px-2'>
           <button
-            className="cta-button"
+            className="primary-button"
             disabled={!ctx.isClientMoveAllowed}
             onClick={() => moves.subtract(board)}
           >

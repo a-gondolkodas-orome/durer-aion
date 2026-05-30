@@ -81,7 +81,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const pieceColor = ({ pileId, pieceId }: Piece) => {
     if (toBeRemoved({ pileId, pieceId })) return 'bg-slate-600 opacity-75';
     if (toAppear({ pileId, pieceId })) return 'bg-blue-600 opacity-75';
-    if (isDisabled({ pileId, pieceId })) return 'bg-blue-900 cursor-not-allowed';
+    if (isDisabled({ pileId, pieceId })) return 'bg-blue-900';
     return hoveredPiece ? 'bg-blue-900' : 'bg-blue-600';
   };
 

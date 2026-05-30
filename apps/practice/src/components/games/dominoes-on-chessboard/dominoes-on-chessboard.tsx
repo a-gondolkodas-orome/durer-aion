@@ -99,7 +99,6 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                 <button
                   className={`
                     aspect-square w-full p-[5%] relative
-                    ${!isClickAllowed({ row, col }) ? 'cursor-not-allowed' : ''}
                     ${getCellBgClass({ row, col })}
                     ${getDominoBorders({ row, col })}
                   `}

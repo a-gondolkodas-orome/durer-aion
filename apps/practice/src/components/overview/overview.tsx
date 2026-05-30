@@ -71,7 +71,7 @@ const CategoryFilter = ({ selected, onChange }: {
           <button
             key={v}
             onClick={() => onChange(isSelected ? selected.filter(s => s !== v) : [...selected, v])}
-            className={`rounded-lg px-2 py-0.5 border text-sm cursor-pointer
+            className={`rounded-lg px-2 py-0.5 border text-sm
               ${isSelected
                 ? 'bg-blue-200 border-blue-400 hocus:bg-blue-300'
                 : 'bg-white border-slate-300 hocus:bg-slate-100'}`}

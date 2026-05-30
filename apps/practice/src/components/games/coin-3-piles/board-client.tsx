@@ -82,7 +82,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         </span>
         <button
           disabled={!isAddAllowed(1)}
-          className="cta-button w-auto"
+          className="primary-button w-auto"
           onClick={passAddition}
         >
           {t({ hu: 'Semmi', en: 'Nothing' })}
@@ -91,12 +91,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           <button
             key={coinValue}
             disabled={!isAddAllowed(coinValue)}
-            className={`
-              w-10 aspect-square rounded-full font-bold text-white
-              ${getCoinBgColor(coinValue)} shadow-md ${getCoinShadowColor(coinValue)}
-              disabled:opacity-50
-              enabled:hocus:ring-2 enabled:hocus:ring-red-400
-            `}
+            className={`primary-button w-auto rounded-4xl ${getCoinBgColor(coinValue)}`}
             onClick={() => addToPile(coinValue)}
             onMouseEnter={() => setHoveredPile(coinValue)}
             onMouseLeave={() => setHoveredPile(null)}
@@ -104,10 +99,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         ))}
         <button
           disabled={!wasCoinAlreadyRemovedInTurn}
-          className={`
-            rounded-lg py-1 px-3 text-sm border border-slate-300 text-slate-600
-            enabled:hocus:bg-slate-100 disabled:opacity-50 ml-auto
-          `}
+          className="secondary-button w-auto ml-auto"
           onClick={undoCoinRemoval}
         >
           {t({ hu: '↶ Visszavonás', en: '↶ Undo' })}

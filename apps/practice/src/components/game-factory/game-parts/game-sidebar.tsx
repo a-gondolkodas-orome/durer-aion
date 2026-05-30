@@ -120,9 +120,7 @@ export const GameSidebar = ({
         )}
 
         <button
-          className={`rounded-lg py-1.5 px-4 w-full text-center border
-            border-slate-300 text-slate-600 enabled:hocus:bg-slate-50
-            disabled:opacity-40`}
+          className="secondary-button"
           disabled={!isNewGameAllowed}
           onClick={() => moves.resetGameState()}
         >

@@ -76,7 +76,7 @@ export const GameEndDialog = ({
             )}
             <button
               onClick={() => onNewGame(localMode, localVariantIndex)}
-              className="cta-button"
+              className="primary-button"
             >
               {t({ hu: 'Új játék', en: 'New game' })}
             </button>

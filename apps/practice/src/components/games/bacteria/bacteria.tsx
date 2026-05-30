@@ -169,7 +169,7 @@ const BoardClient = ({ board: { bacteria, goals }, ctx, moves }: BoardClientProp
       "aspect-4/3 w-full border-2 rounded-sm flex items-center justify-center",
       bg,
       border,
-      isForbidden({ row, col }) ? "opacity-50 cursor-not-allowed" : "",
+      isForbidden({ row, col }) ? "opacity-50" : "",
       isDefenderTarget ? "enabled:hocus:bg-red-100 enabled:hocus:border-red-400" : ""
     ].filter(Boolean).join(" ");
   };

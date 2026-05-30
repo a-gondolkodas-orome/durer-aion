@@ -75,10 +75,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     </div>
     <div className="flex justify-end mt-2">
       <button
-        className={`
-          rounded-lg py-1 px-3 text-sm border border-slate-300 text-slate-600
-          enabled:hocus:bg-slate-100 disabled:opacity-50
-        `}
+        className="secondary-button w-auto"
         onClick={() => moves.undoFirstDisc(board)}
         disabled={!ctx.isClientMoveAllowed || firstPlacedSquareIndex === null}
       >

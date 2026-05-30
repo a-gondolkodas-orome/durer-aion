@@ -93,7 +93,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       ))}
       {isPlayerSultan && (
         <button
-          className="cta-button"
+          className="primary-button mt-2"
           disabled={!ctx.isClientMoveAllowed}
           onClick={() => moves.finalizeSeparation(board)}
         >

@@ -25,7 +25,7 @@ const DisabledDisc = ({ bgColor }) => {
   return (
     <td className="text-center aspect-square">
       <button
-        className="aspect-square w-full p-[5%] cursor-not-allowed"
+        className="aspect-square w-full p-[5%]"
         disabled
       >
         <span

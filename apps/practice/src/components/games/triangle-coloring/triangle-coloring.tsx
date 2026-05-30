@@ -86,9 +86,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           <polygon
             key={i}
             points={getTrianglePoints(i)}
-            className={`
-              ${getColor(i)} ${board[i] === FORBIDDEN ? 'cursor-not-allowed' : ''}
-            `}
+            className={getColor(i)}
             stroke="black" strokeWidth="0.5"
             onClick={() => colorTriangle(i)}
             onKeyUp={(event) => {

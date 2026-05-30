@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-@custom-variant hocus (&:hover, &:focus);
+@custom-variant hocus (&:hover, &:focus-visible);
 
 @layer base {
     *,  ::after,  ::before,  ::backdrop,  ::file-selector-button { 
@@ -30,10 +30,14 @@
 }
 
 @layer components {
-    .cta-button {
-        @apply border-none rounded-lg block my-1 py-1.5 px-3 w-full;
-        @apply text-center text-lg whitespace-normal font-semibold;
-        @apply disabled:opacity-50;
-        @apply bg-blue-500 text-white enabled:hocus:bg-blue-600;
+    .primary-button {
+        @apply block w-full rounded-lg py-1.5 px-3;
+        @apply text-center text-lg font-semibold disabled:opacity-50;
+        @apply border-none bg-blue-500 text-white enabled:hocus:bg-blue-600;
+    }
+    .secondary-button {
+        @apply block w-full rounded-lg py-1.5 px-3;
+        @apply text-center text-lg disabled:opacity-50;
+        @apply border border-slate-300 text-slate-600 enabled:hocus:bg-slate-200;
     }
 }

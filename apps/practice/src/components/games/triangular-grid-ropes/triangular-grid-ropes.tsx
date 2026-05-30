@@ -75,7 +75,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             ? (ctx.currentPlayer === 0 ? "fill-blue-500" : "fill-green-800")
             : ''
           }
-          ${isInvalidHover ? 'fill-red-400 cursor-not-allowed' : ''}
+          ${isInvalidHover ? 'fill-red-400' : ''}
         `}
         onClick={() => connectNode(vertex.id)}
         onKeyUp={(event) => {

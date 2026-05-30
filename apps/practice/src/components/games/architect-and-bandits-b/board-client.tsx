@@ -135,7 +135,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       {canEndDay && (
         <button
           onClick={() => moves.endDay(board)}
-          className="cta-button w-auto"
+          className="primary-button w-auto mt-1"
         >
           {t({ hu: 'Befejezem a napot', en: 'End Day' })}
         </button>
