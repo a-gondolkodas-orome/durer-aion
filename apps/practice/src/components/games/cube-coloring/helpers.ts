@@ -1,14 +1,13 @@
-import { isNull, every } from 'lodash';
+import { every } from 'lodash';
 
-export type Board = (string | null)[]
+export type Board = string[]
 
-export const generateStartBoard = (): Board => Array(8).fill(null);
-
-export const allColors = ['#dc2626', '#eab308', '#2563eb'];
+export const generateStartBoard = (): Board => Array(8).fill('');
+export const isColored = (board: Board, i: number) => board[i] !== '';
 
 export const isAllowedStep = (board: Board, vertex, color) => {
-  if (!isNull(board[vertex])) return false;
-  return every(neighbours[vertex], i => isNull(board[i]) || board[i] !== color);
+  if (isColored(board, vertex)) return false;
+  return every(neighbours[vertex], i => (!isColored(board, i)) || board[i] !== color);
 };
 
 export const neighbours = {

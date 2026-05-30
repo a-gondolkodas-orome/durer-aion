@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { range, cloneDeep, every, some, isNull } from 'lodash';
+import { range, cloneDeep, every, some, map } from 'lodash';
 import { strategyGameFactory, type Events, type BoardClientProps, GameBoard } from '../../game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
-import { isAllowedStep, allColors, generateStartBoard, type Board } from './helpers';
+import { isAllowedStep, isColored, generateStartBoard, type Board } from './helpers';
 import { useTranslation } from '../../language';
 
 const cubeCoords = [
@@ -15,6 +15,24 @@ const cubeCoords = [
   { cx: '91%', cy: '74%' },
   { cx: '25%', cy: '74%' }
 ];
+
+export const nodeColors = {
+  'red': {
+    bg: 'bg-red-500 text-slate-600 enabled:hocus:bg-red-600',
+    name: { hu: 'Piros', en: 'Red' },
+    svg: 'var(--color-red-500)'
+  },
+  'blue': {
+    bg: 'bg-blue-500 enabled:hocus:bg-blue-600',
+    name: { hu: 'Kék', en: 'Blue' },
+    svg: 'var(--color-blue-500)'
+  },
+  'yellow': {
+    bg: 'bg-yellow-500 text-slate-800 enabled:hocus:bg-yellow-600',
+    name: { hu: 'Sárga', en: 'Yellow' },
+    svg: 'var(--color-yellow-500)'
+  }
+};
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
@@ -52,31 +70,17 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 
   return (
   <GameBoard>
-    <header>
-      <button
-        disabled={!ctx.isClientMoveAllowed}
-        className={`
-          w-[30%] mx-[1%] rounded-sm text-xl bg-red-600
-          ${!show || color !== '#dc2626' ? 'bg-opacity-50' : ''}
-        `}
-        onClick={() => pick('#dc2626')}
-      >{t({ hu: 'Piros', en: 'Red' })}</button>
-      <button
-        disabled={!ctx.isClientMoveAllowed}
-        className={`
-          w-[30%] mx-[1%] rounded-sm text-xl bg-yellow-600
-          ${!show || color !== '#eab308' ? 'bg-opacity-50' : ''}
-        `}
-        onClick={() => pick('#eab308')}
-      >{t({ hu: 'Sárga', en: 'Yellow' })}</button>
-      <button
-        disabled={!ctx.isClientMoveAllowed}
-        className={`
-          w-[30%] mx-[1%] rounded-sm text-xl bg-blue-600
-          ${!show || color !== '#2563eb' ? 'bg-opacity-50' : ''}
-        `}
-        onClick={() => pick('#2563eb')}
-      >{t({ hu: 'Kék', en: 'Blue' })}</button>
+    <header className="flex gap-2">
+      {map(nodeColors, ({ bg, name }, colorKey) =>
+        <button
+          key={colorKey}
+          disabled={!ctx.isClientMoveAllowed || (show && color !== colorKey)}
+          className={`primary-button ${bg}`}
+          onClick={() => pick(colorKey)}
+        >
+          {t(name)}
+        </button>
+      )}
     </header>
 
     <svg
@@ -107,14 +111,18 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           tabIndex={isMoveAllowed(nodeId) ? 0 : undefined}
           role={isMoveAllowed(nodeId) ? 'button' : undefined}
           aria-label={isMoveAllowed(nodeId) ? `Node ${nodeId + 1}` : undefined}
-          fill={board[nodeId] || (isMoveAllowed(nodeId) || !show ? 'white' : 'gray')}
+          fill={nodeColors[board[nodeId]]?.svg ?? (isMoveAllowed(nodeId) || !show ? 'white' : 'var(--color-slate-400)')}
         />
       ))}
 
       {/* <!-- cursor position with to-be-used color --> */}
       {x};{y}
       {show && (
-        <circle cx={x} cy={y} r="4%" fill={color} className="pointer-events-none opacity-50 stroke-0" />
+        <circle
+          cx={x} cy={y} r="4%"
+          fill={nodeColors[color].svg}
+          className="pointer-events-none opacity-50 stroke-0"
+        />
       )}
     </svg>
   </GameBoard>
@@ -123,7 +131,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 
 const isGameEnd = (board: Board) => {
   const canUseColor = color => some(range(0, 8), v => isAllowedStep(board, v, color));
-  return every(allColors, color => !canUseColor(color));
+  return every(Object.keys(nodeColors), color => !canUseColor(color));
 };
 
 const moves = {
@@ -132,7 +140,7 @@ const moves = {
     nextBoard[vertex] = color;
     events.endTurn();
     if (isGameEnd(nextBoard)) {
-      const winnerIndex = every(nextBoard, v => !isNull(v)) ? 0 : 1;
+      const winnerIndex = every(range(0, 8), v => isColored(nextBoard, v)) ? 0 : 1;
       events.endGame(winnerIndex)
     }
     return { nextBoard };
