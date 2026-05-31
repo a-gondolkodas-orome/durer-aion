@@ -31,7 +31,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const [hoveredAction, setHoveredAction] = useState<HoveredAction>(null);
   return(
     <GameBoard>
-      <p className="text-xl font-semibold text-center text-stone-600">{board}</p>
+      <p className="text-xl font-semibold text-center text-slate-600">{board}</p>
       <CoinPile count={board} hoveredAction={hoveredAction} />
       <div className="flex flex-wrap">
         <span className="grow px-2">

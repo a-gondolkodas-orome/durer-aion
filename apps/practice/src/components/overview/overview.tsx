@@ -29,7 +29,7 @@ export const Overview = () => {
 
   return <main className="p-2">
     <OverviewHeader />
-    <div className="border-t border-slate-200 mt-2 pt-3 flex flex-wrap items-center gap-1 mb-2">
+    <div className="border-t border-slate-300 mt-2 pt-3 flex flex-wrap items-center gap-1 mb-2">
       <CategoryFilter selected={selectedCategories} onChange={setSelectedCategories} />
     </div>
     <h2 className="font-bold my-4 text-center">
@@ -71,7 +71,7 @@ const CategoryFilter = ({ selected, onChange }: {
           <button
             key={v}
             onClick={() => onChange(isSelected ? selected.filter(s => s !== v) : [...selected, v])}
-            className={`rounded-lg px-2 py-0.5 border text-sm
+            className={`px-2 py-0.5 border text-sm
               ${isSelected
                 ? 'bg-blue-200 border-blue-400 hocus:bg-blue-300'
                 : 'bg-white border-slate-300 hocus:bg-slate-100'}`}
@@ -83,8 +83,8 @@ const CategoryFilter = ({ selected, onChange }: {
         disabled={selected.length === 0}
         aria-label={t({ hu: 'Szűrés törlése', en: 'Clear filters' })}
         className={`
-          rounded-lg px-2 py-0.5 border border-slate-300 bg-white text-sm
-          text-slate-400 enabled:hocus:bg-slate-100
+          px-2 py-0.5 border border-slate-300 bg-white text-sm
+          text-slate-500 enabled:hocus:bg-slate-100
           disabled:opacity-0 disabled:cursor-default
         `}
       >×</button>
@@ -100,7 +100,7 @@ const OverviewHeader = () => {
         href="https://forms.gle/7DwugmXNrvKgkiiu8"
         target="_blank"
         rel="noreferrer"
-        className="text-sm text-slate-500 hocus:text-slate-700"
+        className="text-sm text-slate-500 hocus:text-slate-600"
       >
         {t({ hu: 'Hibabejelentő', en: 'Bug report' })}
       </a>
@@ -139,7 +139,7 @@ const categoryColorClass: Record<Category, string> = {
 };
 
 const chipBase = 'rounded-full border px-2 py-0.5 text-xs whitespace-nowrap';
-const neutralChip = `${chipBase} border-slate-300 bg-white text-slate-800`;
+const neutralChip = `${chipBase} border-slate-300`;
 
 const Game = ({ gameId, gameProps }: { gameId: string; gameProps: GameEntry }) => {
   const { t } = useTranslation();
@@ -169,7 +169,7 @@ const Game = ({ gameId, gameProps }: { gameId: string; gameProps: GameEntry }) =
       <span className={`${chipBase} ${categoryColor}`}>{gameProps.category.join(', ')}</span>
       <span className={neutralChip}>{round}</span>
       <span className="grow"></span>
-      <span className="text-slate-400 text-sm" aria-hidden="true">→</span>
+      <span className="text-slate-500 text-sm" aria-hidden="true">→</span>
     </div>
   </Link>;
 };

@@ -120,7 +120,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           <span key={coinValue} className="flex items-center gap-1 text-sm font-semibold">
             <span className={`w-4 h-4 rounded-full ${getCoinBgColor(coinValue)}`} />
             {coinValue}
-            <span className="text-stone-500 font-normal">× {board[coinValue - 1]}</span>
+            <span className="text-slate-500 font-normal">× {board[coinValue - 1]}</span>
           </span>
         ))}
       </div>

@@ -8,17 +8,17 @@ export type TurnState = { levelIdx: number; slotIdx: number } | null;
 const chipBase = 'rounded-lg border-2 px-3 py-2 font-bold text-lg min-w-12 text-center';
 
 const PlaceholderSlot = () => (
-  <div className={`${chipBase} border-dashed border-slate-200 bg-slate-50 text-transparent select-none`}>0</div>
+  <div className={`${chipBase} border-dashed text-transparent select-none`}>0</div>
 );
 
 const ConsumedSlot = ({ value }) => (
-  <div className={`${chipBase} border-slate-200 bg-slate-50 text-slate-300 line-through`}>{value}</div>
+  <div className={`${chipBase} opacity-50 line-through`}>{value}</div>
 );
 
 const ActiveSlot = ({ value, isSelected, isDisabled, onClick }) => (
   <button
     className={`${chipBase} transition-colors ${
-      isSelected ? 'bg-blue-600 border-blue-700 text-white'
+      isSelected ? 'bg-blue-500 border-blue-600 text-white'
         : isDisabled ? 'bg-slate-100 border-slate-300 text-slate-500 cursor-default'
           : 'bg-white border-slate-400 hocus:bg-blue-50 hocus:border-blue-400'
     }`}
@@ -82,7 +82,7 @@ export const BoardClient = ({ board, ctx, events, moves }: BoardClientProps<Boar
                   );
                 })}
               </div>
-              <span className="text-xs text-slate-400">
+              <span className="text-xs text-slate-500">
                 {t({ hu: `${levelIdx + 1}. szint`, en: `Level ${levelIdx + 1}` })}
               </span>
             </div>

@@ -104,7 +104,7 @@ export const GameSidebar = ({
           />
         ) : (
           <details className="border border-slate-200 rounded-lg p-2 text-sm">
-            <summary className="cursor-pointer text-slate-500 hocus:text-slate-700">
+            <summary className="cursor-pointer text-slate-500 hocus:text-slate-600">
               {modeSummaryLabel}{variantSummaryLabel}
             </summary>
             <div className="mt-2 flex flex-col gap-3">
@@ -205,7 +205,7 @@ const PlayerNameSetup = ({ roleLabels, playerNames, placeholderNames, setPlayerN
       </Label>
       <Input
         name="name_of_first_player"
-        className="border border-slate-300 rounded-md text-slate-700 px-2 py-1 text-sm w-full
+        className="border border-slate-300 rounded-md text-slate-600 px-2 py-1 text-sm w-full
           focus:outline-none focus:ring-1 focus:ring-blue-400"
         placeholder={placeholderNames[0]}
         value={playerNames[0]}
@@ -218,7 +218,7 @@ const PlayerNameSetup = ({ roleLabels, playerNames, placeholderNames, setPlayerN
       </Label>
       <Input
         name="name_of_second_player"
-        className="border border-slate-300 rounded-md text-slate-700 px-2 py-1 text-sm w-full
+        className="border border-slate-300 rounded-md text-slate-600 px-2 py-1 text-sm w-full
           focus:outline-none focus:ring-1 focus:ring-blue-400"
         placeholder={placeholderNames[1]}
         value={playerNames[1]}
@@ -260,7 +260,7 @@ const PlayerTurnPanel = ({ ctx }: { ctx: Ctx }) => {
             className={`flex items-center gap-2 rounded-md px-3 py-2 border-l-4
               ${highlighted ? 'bg-blue-50 border-blue-400' : 'bg-white border-slate-200'}`}
           >
-            <span className={`flex-1 ${highlighted ? 'font-bold text-blue-700' : 'text-slate-400'}`}>
+            <span className={`flex-1 ${highlighted ? 'font-bold text-blue-700' : 'text-slate-500'}`}>
               {playerName(i)}
             </span>
             {isWinner && <span>🏆</span>}
@@ -284,7 +284,7 @@ const WinLossCounter = ({ stats, onReset }: { stats: Stats; onReset: () => void 
       <button
         onClick={onReset}
         aria-label={t({ hu: 'Számlálók nullázása', en: 'Reset counters' })}
-        className="text-xs hocus:text-slate-700"
+        className="text-xs hocus:text-slate-600"
       >
         ↻
       </button>

@@ -51,7 +51,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             ${board.restricted && i === board.current + board.restricted ? 'bg-red-200' : '' }
             ${i < board.current ? 'bg-slate-400' : ''}
             ${i === board.current ? 'bg-slate-200' : ''}
-            ${i > board.target ? 'text-slate-400 border-purple-600' : ''}
+            ${i > board.target ? 'text-slate-500 border-purple-600' : ''}
           `}
         >{ i === board.current ? 'X' : i }
       </button>

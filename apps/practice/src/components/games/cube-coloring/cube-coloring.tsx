@@ -18,7 +18,7 @@ const cubeCoords = [
 
 export const nodeColors = {
   'red': {
-    bg: 'bg-red-500 text-slate-600 enabled:hocus:bg-red-600',
+    bg: 'bg-red-500 text-black enabled:hocus:bg-red-600',
     name: { hu: 'Piros', en: 'Red' },
     svg: 'var(--color-red-500)'
   },
@@ -28,7 +28,7 @@ export const nodeColors = {
     svg: 'var(--color-blue-500)'
   },
   'yellow': {
-    bg: 'bg-yellow-500 text-slate-800 enabled:hocus:bg-yellow-600',
+    bg: 'bg-yellow-500 text-black enabled:hocus:bg-yellow-600',
     name: { hu: 'Sárga', en: 'Yellow' },
     svg: 'var(--color-yellow-500)'
   }

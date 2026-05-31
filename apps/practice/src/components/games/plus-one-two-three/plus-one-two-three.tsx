@@ -36,7 +36,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             ${i === target ? 'border-8 border-black' : '' }
             ${i < board ? 'bg-slate-400' : ''}
             ${i === board ? 'bg-slate-200' : ''}
-            ${i > target ? 'text-slate-400 border-red-600' : ''}
+            ${i > target ? 'text-slate-500 border-red-600' : ''}
           `}
         >{ i === board ? 'X' : i }
       </button>

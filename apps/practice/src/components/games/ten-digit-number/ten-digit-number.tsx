@@ -53,12 +53,15 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         {slots.map((d, i) => (
           <div
             key={i}
-            className={`border-2 w-10 h-12 flex items-center justify-center text-2xl font-bold
-              ${d !== null
-                ? 'border-slate-600'
-                : i === board.digits.length && ctx.phase === 'play'
-                  ? 'border-blue-400 bg-blue-50 text-blue-400'
-                  : 'bg-slate-100 border-slate-300 text-slate-300'}`}
+            className={`
+              border-2 w-10 h-12 flex items-center justify-center text-2xl font-bold
+              ${d === null
+                ? (
+                  i === board.digits.length && ctx.phase === 'play'
+                    ? 'border-blue-400 bg-blue-50 text-blue-400'
+                    : 'opacity-50 border-slate-600'
+                ) : 'border-slate-600'}
+            `}
           >
             {d !== null ? d : '?'}
           </div>
