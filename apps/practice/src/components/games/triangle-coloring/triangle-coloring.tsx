@@ -82,21 +82,29 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   return(
     <GameBoard>
       <svg className="aspect-square" viewBox="0 0 100 100">
-        {range(16).map(i => (
-          <polygon
-            key={i}
-            points={getTrianglePoints(i)}
-            className={getColor(i)}
-            stroke="black" strokeWidth="0.5"
-            onClick={() => colorTriangle(i)}
-            onKeyUp={(event) => {
-              if (event.key === 'Enter') colorTriangle(i);
-            }}
-            tabIndex={isClickable(i) ? 0 : undefined}
-            role={isClickable(i) ? 'button' : undefined}
-            aria-label={isClickable(i) ? `Triangle ${i + 1}` : undefined}
-          ></polygon>
-        ))}
+        <defs>
+          <clipPath id="big-triangle-clip">
+            <polygon points="50,12.5 16.5,73 83.5,73" />
+          </clipPath>
+        </defs>
+        <g clipPath="url(#big-triangle-clip)">
+          {range(16).map(i => (
+            <polygon
+              key={i}
+              points={getTrianglePoints(i)}
+              className={getColor(i)}
+              stroke="black" strokeWidth="0.5"
+              onClick={() => colorTriangle(i)}
+              onKeyUp={(event) => {
+                if (event.key === 'Enter') colorTriangle(i);
+              }}
+              tabIndex={isClickable(i) ? 0 : undefined}
+              role={isClickable(i) ? 'button' : undefined}
+              aria-label={isClickable(i) ? `Triangle ${i + 1}` : undefined}
+            ></polygon>
+          ))}
+        </g>
+        <polygon points="50,12.5 16.5,73 83.5,73" fill="none" stroke="black" strokeWidth="0.5" />
       </svg>
     </GameBoard>
   );
