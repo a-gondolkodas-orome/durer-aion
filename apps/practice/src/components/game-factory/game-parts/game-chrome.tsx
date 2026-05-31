@@ -38,6 +38,11 @@ export const GameHeader = () => {
   </>);
 };
 
+const toWesternOrder = (name: string) => {
+  const [family, ...given] = name.split(' ');
+  return [...given, family].join(' ');
+};
+
 export const GameFooter = () => {
   const { t } = useTranslation();
   const gameId = useLocation().pathname.split('/').pop();
@@ -49,13 +54,13 @@ export const GameFooter = () => {
           { (credit.suggestedBy || []).length
             ? t({
               hu: `A játékot javasolta: ${credit.suggestedBy!.join(', ')}.`,
-              en: `Suggested by: ${credit.suggestedBy!.join(', ')}.`
+              en: `Suggested by: ${credit.suggestedBy!.map(toWesternOrder).join(', ')}.`
             })
             : ''}
           { (credit.developedBy || []).length
             ? ' ' + t({
               hu: `A játékot programozta: ${credit.developedBy!.join(', ')}.`,
-              en: `Developed by: ${credit.developedBy!.join(', ')}.`
+              en: `Developed by: ${credit.developedBy!.map(toWesternOrder).join(', ')}.`
             })
             : ''}
         </p>
