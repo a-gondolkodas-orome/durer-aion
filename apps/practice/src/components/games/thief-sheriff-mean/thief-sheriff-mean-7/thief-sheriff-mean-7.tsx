@@ -38,9 +38,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           disabled={!isAllowedMove(num)}
           onClick={() => clickCard(num)}
           className={`
-            m-1 min-h-28 w-18
-            border-2 shadow-md border-slate-800 rounded-xl text-4xl
-            text-center font-bold
+            m-1 min-h-28 w-18 border-2 shadow-md border-slate-800 text-4xl font-bold
             ${ctx.currentPlayer === Thief
               ? "enabled:hocus:bg-red-400"
               : "enabled:hocus:bg-blue-400"

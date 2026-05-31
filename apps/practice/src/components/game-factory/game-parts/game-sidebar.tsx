@@ -174,9 +174,7 @@ const RoleSelector = ({ roleLabels, onRoleSelection, disabled }: {
       <button
         key={i}
         data-testid={`role-btn-${i}`}
-        className="rounded-lg py-2 px-4 w-full text-center font-semibold
-          bg-blue-500 enabled:hocus:bg-blue-600 text-white
-          disabled:opacity-40"
+        className="primary-button"
         disabled={disabled}
         onClick={() => onRoleSelection(i)}
       >
@@ -227,8 +225,7 @@ const PlayerNameSetup = ({ roleLabels, playerNames, placeholderNames, setPlayerN
     </Field>
     <button
       data-testid="start-hh-game"
-      className="rounded-lg py-2 px-4 w-full text-center font-semibold
-        bg-blue-500 hocus:bg-blue-600 text-white"
+      className="primary-button"
       onClick={onStart}
     >
       {t({ hu: 'Kezdhetjük!', en: "Let's go!" })}

@@ -16,9 +16,9 @@ const generateStartBoard = () => {
 type Board = number
 
 const ExponentCell = ({ e, choosePower, setHovered }) => {
-  return <td className="border-4">
+  return <td className="border-4 hocus:bg-slate-300">
     <button
-      className="w-full p-[5%] aspect-video hocus:bg-slate-300"
+      className="w-full p-[5%] aspect-video"
       onClick={() => choosePower(e)}
       onMouseOver={() => setHovered(e)}
       onMouseOut={() => setHovered(null)}

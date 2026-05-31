@@ -24,23 +24,18 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       <tbody>
         <tr>
         {range(board.length).map(i => (
-          board[i]!== COVERED
-          ? <td
-              className="border-4 aspect-square text-center"
-              key={i}
+          <td
+            className={`border-4 aspect-square ${ctx.isClientMoveAllowed ? 'hocus:bg-slate-300' : ''}`}
+            key={i}
+          >
+            <button
+              disabled={!ctx.isClientMoveAllowed || board[i] === COVERED}
+              className={`w-full rounded-none aspect-square select-none ${board[i] === COVERED && 'bg-slate-400'}`}
+              onClick={() => clickNumber(i+1)}
             >
-              <button
-                disabled={!ctx.isClientMoveAllowed}
-                className="w-full enabled:hocus:bg-slate-400"
-                onClick={() => clickNumber(i+1)}
-              >
-                {board[i]}
-              </button>
-            </td>
-          : <td
-              className="text-center border-4 bg-slate-600"
-              key={i}
-            >X</td>
+              {board[i] === COVERED ? 'X' : board[i]}
+            </button>
+          </td>
         ))}
         </tr>
       </tbody>

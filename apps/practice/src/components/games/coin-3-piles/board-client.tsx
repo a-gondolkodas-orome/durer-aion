@@ -94,7 +94,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                 key={coinValue}
                 disabled={!isAddAllowed(coinValue)}
                 className={`
-                  primary-button w-auto rounded-4xl
+                  primary-button w-auto rounded-2xl
                   ${getCoinBgColor(coinValue)} enabled:hocus:brightness-75
                 `}
                 onClick={() => addToPile(coinValue)}

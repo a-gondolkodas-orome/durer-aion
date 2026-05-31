@@ -54,7 +54,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           <div
             key={i}
             className={`
-              border-2 w-10 h-12 flex items-center justify-center text-2xl font-bold
+              border-2 w-10 h-12 rounded-sm flex items-center justify-center text-2xl font-bold
               ${d === null
                 ? (
                   i === board.digits.length && ctx.phase === 'play'
@@ -68,22 +68,21 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         ))}
       </div>
       {numberSummary && <p className="text-sm text-slate-500 mb-2">{numberSummary}</p>}
-      {ctx.isClientMoveAllowed && (
-        <div className="mt-6 pt-4 border-t border-slate-200">
-          <div className="flex gap-2 flex-wrap">
-            {availableDigits.map(d => (
-              <button
-                key={d}
-                onClick={(e) => { moves.chooseDigit(board, d); e.currentTarget.blur(); }}
-                className="border-2 border-slate-300 rounded-xl text-2xl w-12 h-12 font-bold shadow-sm
-                  hocus:bg-blue-100 hocus:border-blue-300 transition-colors"
-              >
-                {d}
-              </button>
-            ))}
-          </div>
+      <div className="mt-6 pt-4 border-t border-slate-200">
+        <div className="flex gap-2 flex-wrap">
+          {availableDigits.map(d => (
+            <button
+              key={d}
+              disabled={!ctx.isClientMoveAllowed}
+              onClick={(e) => { moves.chooseDigit(board, d); e.currentTarget.blur(); }}
+              className="border-2 border-slate-300 text-2xl w-12 h-12 font-bold
+                enabled:hocus:bg-blue-100 enabled:hocus:border-blue-300 disabled:opacity-50"
+            >
+              {d}
+            </button>
+          ))}
         </div>
-      )}
+      </div>
     </GameBoard>
   );
 };

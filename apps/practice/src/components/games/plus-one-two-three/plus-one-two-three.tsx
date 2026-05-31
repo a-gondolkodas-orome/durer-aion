@@ -24,14 +24,14 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 
   return(
     <GameBoard>
-      <div className="flex flex-wrap mb-1">
+      <div className="flex flex-wrap gap-1">
       {range(target + maxStep + 1).map(i =>
         <button
           key={i}
           disabled={!isMoveAllowed(i)}
           onClick={() => clickNumber(i)}
           className={`
-            border-2 text-2xl min-w-[4ch] text-center p-1 my-1 font-bold
+            border-2 rounded-sm text-2xl min-w-[4ch] p-1 my-1 font-bold
             enabled:bg-green-200 enabled:hocus:bg-green-400
             ${i === target ? 'border-8 border-black' : '' }
             ${i < board ? 'bg-slate-400' : ''}

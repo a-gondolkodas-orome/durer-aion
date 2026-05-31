@@ -47,12 +47,12 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           <td
             key={i}
             className={`
-              text-xl text-center p-0.5 font-bold aspect-square border-2 border-white
+              text-xl p-0.5 font-bold border-2 border-white
               ${cellBackground(i)}
             `}
           >
             <button
-              className="w-full aspect-square"
+              className="w-full aspect-square p-[5%]"
               disabled={!isMoveAllowed(potentialStep(i))}
               onClick={() => makeStep(potentialStep(i))}
             >{ i === board.left || i === board.right
