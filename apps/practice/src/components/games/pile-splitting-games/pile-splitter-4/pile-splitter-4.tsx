@@ -13,9 +13,12 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const [hoveredPiece, setHoveredPiece] = useState<HoveredPiece>(null);
   const [hoveredPileId, setHoveredPileId] = useState<number | null>(null);
 
+  const canRemovePile = (pileId: number) =>
+    board.some((size, i) => i !== pileId && size >= 2);
+
   const isDisabled = ({ pileId, pieceId }: Piece) => {
     if (!ctx.isClientMoveAllowed) return true;
-    if (removedPileId === null) return false;
+    if (removedPileId === null) return !canRemovePile(pileId);
     return pileId !== removedPileId && pieceId === board[pileId] - 1;
   };
 
@@ -59,13 +62,17 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const isHoverPreviewedForRemoval = (pileId) => {
     if (!ctx.isClientMoveAllowed) return false;
     if (removedPileId !== null) return false;
+    if (!canRemovePile(pileId)) return false;
     return hoveredPileId === pileId;
   };
 
   const clickPile = (pileId) => {
     if (!ctx.isClientMoveAllowed) return;
     if (removedPileId === pileId) { setRemovedPileId(null); return; }
-    if (removedPileId === null) setRemovedPileId(pileId);
+    if (removedPileId === null) {
+      if (!canRemovePile(pileId)) return;
+      setRemovedPileId(pileId);
+    }
   };
 
   const toBeLeft = ({ pileId, pieceId }: Piece) => {
@@ -95,7 +102,8 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       return pieceCountInPile ? `${pieceCountInPile} → 🗑️` : '🗑️';
     }
     if (removedPileId === null) {
-      return hoveredPileId === pileId ? `${pieceCountInPile} → 🗑️` : pieceCountInPile || '🗑️';
+      const showRemovePreview = hoveredPileId === pileId && canRemovePile(pileId);
+      return showRemovePreview ? `${pieceCountInPile} → 🗑️` : pieceCountInPile || '🗑️';
     }
     if (!hoveredPiece || hoveredPiece.pileId !== pileId) return pieceCountInPile || '🗑️';
     return `${pieceCountInPile} → ${hoveredPiece.pieceId + 1}, ${pieceCountInPile - hoveredPiece.pieceId - 1}`;
