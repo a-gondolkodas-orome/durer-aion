@@ -76,30 +76,34 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   return (
     <GameBoard>
 
-      <div className={`flex items-center gap-4 px-4 flex-wrap ${!wasCoinAlreadyRemovedInTurn ? 'opacity-40' : ''}`}>
-        <span className="font-semibold">
-          {t({ hu: 'Visszarakás:', en: 'Place back:' })}
-        </span>
-        <button
-          disabled={!isAddAllowed(1)}
-          className="secondary-button w-auto"
-          onClick={passAddition}
-        >
-          {t({ hu: 'Semmi ∅', en: 'Nothing ∅' })}
-        </button>
-        {[1, 2].map(coinValue => (
-          <button
-            key={coinValue}
-            disabled={!isAddAllowed(coinValue)}
-            className={`
-              primary-button w-auto rounded-4xl
-              ${getCoinBgColor(coinValue)} enabled:hocus:brightness-75
-            `}
-            onClick={() => addToPile(coinValue)}
-            onMouseEnter={() => setHoveredPile(coinValue)}
-            onMouseLeave={() => setHoveredPile(null)}
-          >{coinValue}</button>
-        ))}
+      <div className={`flex items-end gap-4 px-4 flex-wrap ${!wasCoinAlreadyRemovedInTurn ? 'opacity-40' : ''}`}>
+        <div className="flex flex-col gap-1">
+          <span className="font-semibold text-sm">
+            {t({ hu: 'Visszarakás:', en: 'Place back:' })}
+          </span>
+          <div className="flex gap-4">
+            <button
+              disabled={!isAddAllowed(1)}
+              className="secondary-button w-auto"
+              onClick={passAddition}
+            >
+              {t({ hu: 'Semmi ∅', en: 'Nothing ∅' })}
+            </button>
+            {[1, 2].map(coinValue => (
+              <button
+                key={coinValue}
+                disabled={!isAddAllowed(coinValue)}
+                className={`
+                  primary-button w-auto rounded-4xl
+                  ${getCoinBgColor(coinValue)} enabled:hocus:brightness-75
+                `}
+                onClick={() => addToPile(coinValue)}
+                onMouseEnter={() => setHoveredPile(coinValue)}
+                onMouseLeave={() => setHoveredPile(null)}
+              >{coinValue}</button>
+            ))}
+          </div>
+        </div>
         <button
           disabled={!wasCoinAlreadyRemovedInTurn}
           className="secondary-button w-auto ml-auto"
@@ -114,7 +118,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       <div className="flex justify-center gap-4 mb-2">
         {[1, 2, 3].map(coinValue => (
           <span key={coinValue} className="flex items-center gap-1 text-sm font-semibold">
-            <span className={`w-4 h-4 rounded-full inline-block ${getCoinBgColor(coinValue)}`} />
+            <span className={`w-4 h-4 rounded-full ${getCoinBgColor(coinValue)}`} />
             {coinValue}
             <span className="text-stone-500 font-normal">× {board[coinValue - 1]}</span>
           </span>
@@ -129,7 +133,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                 key={i}
                 disabled={!isRemovalAllowed(coinValue)}
                 className={`
-                  w-[15%] aspect-square inline-block rounded-full mr-0.5 mt-2
+                  w-[15%] aspect-square rounded-full mr-0.5 mt-2
                   ${getCoinBgColor(coinValue)} shadow-md ${getCoinShadowColor(coinValue)}
                   enabled:hocus:ring-2 enabled:hocus:ring-red-400
                   ${shouldShowCoinToBeRemoved(coinValue) && i === (board[coinValue - 1] - 1)
@@ -147,7 +151,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               <button
                 disabled
                 className={`
-                  w-[15%] aspect-square inline-block rounded-full mr-0.5 mt-2 opacity-50
+                  w-[15%] aspect-square rounded-full mr-0.5 mt-2 opacity-50
                   ${getCoinBgColor(coinValue)} shadow-md ${getCoinShadowColor(coinValue)}
                 `}
                 style={{ transform: 'scaleY(-1)' }}
