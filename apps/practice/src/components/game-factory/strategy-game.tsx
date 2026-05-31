@@ -61,7 +61,17 @@ export const strategyGameFactory = <TBoard,>({
     const [gameUuid, setGameUuid] = useState(crypto.randomUUID());
     const [turnState, setTurnState] = useState<unknown>(null);
     const [mode, setMode] = useState<Mode>('vsComputer');
-    const [playerNames, setPlayerNames] = useState(['', '']);
+    const [playerNames, setPlayerNames] = useState<[string, string]>(() => {
+      try {
+        const stored = localStorage.getItem('durer-player-names');
+        if (stored) return JSON.parse(stored) as [string, string];
+      } catch {}
+      return ['', ''];
+    });
+
+    useEffect(() => {
+      localStorage.setItem('durer-player-names', JSON.stringify(playerNames));
+    }, [playerNames]);
 
     const isHumanVsHumanGame = mode === 'vsHuman';
 

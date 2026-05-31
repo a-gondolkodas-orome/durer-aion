@@ -13,7 +13,7 @@ import type { Stats } from '../use-game-stats';
 export interface SidebarMoves {
   switchMode: (mode: Mode) => void
   startGame: (roleIndex?: number | null) => void
-  setPlayerNames: (names: string[]) => void
+  setPlayerNames: (names: [string, string]) => void
   setDifficulty: (index: number) => void
   resetGameState: () => void
 }
@@ -188,7 +188,7 @@ const PlayerNameSetup = ({ roleLabels, playerNames, placeholderNames, setPlayerN
   roleLabels?: [I18nString, I18nString]
   playerNames: string[]
   placeholderNames: [string, string]
-  setPlayerNames: (names: string[]) => void
+  setPlayerNames: (names: [string, string]) => void
   onStart: () => void
 }) => {
   const { t } = useTranslation();
