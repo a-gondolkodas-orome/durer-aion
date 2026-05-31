@@ -11,9 +11,11 @@
     }
     h1 {
         @apply text-2xl;
+        text-wrap: balance;
     }
     h2 {
         @apply text-xl;
+        text-wrap: balance;
     }
     a {
         @apply text-blue-700 underline;
