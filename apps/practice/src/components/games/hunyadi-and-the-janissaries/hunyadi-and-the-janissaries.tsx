@@ -47,7 +47,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             {board[0].map((group, pieceIndex) => (
               <svg
                 className={`
-                  w-[10%] aspect-square inline-block mx-1
+                  w-[10%] aspect-square mx-1
                   ${group === 'blue' ? 'fill-blue-600' : 'fill-red-600'}
                 `}
                 key={pieceIndex}
@@ -71,7 +71,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             <button
               key={pieceIndex}
               disabled={!ctx.isClientMoveAllowed}
-              className="aspect-square w-[10%] inline-block mx-1"
+              className="aspect-square w-[10%] mx-1"
               onClick={() => clickOnSoldier({ rowIndex, pieceIndex })}
               onFocus={() => setHoveredPiece({ rowIndex, pieceIndex })}
               onBlur={() => setHoveredPiece(null)}
@@ -80,7 +80,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             >
               <svg
                 className={`
-                  w-full aspect-square inline-block border-dashed border-black
+                  w-full aspect-square border-dashed border-black
                   ${showToBeKilled(group) ? 'outline-dashed opacity-50' : ''}
                   ${group === 'blue' ? 'fill-blue-600' : 'fill-red-600'}
                 `}
@@ -91,15 +91,16 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           ))}
         </div>
       ))}
-      {isPlayerSultan && (
-        <button
-          className="primary-button mt-2"
-          disabled={!ctx.isClientMoveAllowed}
-          onClick={() => moves.finalizeSeparation(board)}
-        >
-          {t({ hu: 'Befejezem a kettéosztást', en: 'Finish the split' })}
-        </button>
-      )}
+      <button
+        className={`
+          primary-button w-auto m-auto mt-2
+          ${!ctx.isClientMoveAllowed || !isPlayerSultan ? 'invisible' : ''}
+        `}
+        disabled={!ctx.isClientMoveAllowed || !isPlayerSultan}
+        onClick={() => moves.finalizeSeparation(board)}
+      >
+        {t({ hu: 'Befejezem a kettéosztást', en: 'Finish the split' })}
+      </button>
     </GameBoard>
   );
 };

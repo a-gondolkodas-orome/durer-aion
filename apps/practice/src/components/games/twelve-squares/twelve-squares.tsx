@@ -52,11 +52,11 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             `}
           >
             <button
-              className="w-full"
+              className="w-full aspect-square"
               disabled={!isMoveAllowed(potentialStep(i))}
               onClick={() => makeStep(potentialStep(i))}
             >{ i === board.left || i === board.right
-              ? <svg className="inline-block w-full aspect-square">
+              ? <svg className="w-full aspect-square">
                   <use href="#game-chess-bishop" />
                 </svg>
               : i }

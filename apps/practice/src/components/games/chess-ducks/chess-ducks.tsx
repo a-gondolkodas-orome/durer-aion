@@ -51,12 +51,12 @@ const chessDucksGameFactory = ({ ROWS, COLS }: { ROWS: number; COLS: number }) =
                     `}
                   >
                     <button
-                      className="aspect-square w-full h-full p-[5%]"
+                      className="w-full aspect-square p-[5%]"
                       disabled={!isMoveAllowed({ row, col })}
                       onClick={() => clickField({ row, col })}
                     >
                       {isDuck({ row, col }) && (
-                        <svg className="inline-block aspect-square">
+                        <svg className="w-full aspect-square">
                           <use xlinkHref="#game-duck" />
                         </svg>
                       )}

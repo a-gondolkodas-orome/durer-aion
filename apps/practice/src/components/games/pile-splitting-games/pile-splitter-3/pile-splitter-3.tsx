@@ -116,7 +116,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               key={pieceId}
               disabled={isDisabled({ pileId, pieceId })}
               className={`
-                inline-block w-[20%] aspect-square rounded-full mx-0.5 mt-0.5
+                w-[20%] aspect-square rounded-full mx-0.5 mt-0.5
                 ${pieceColor({ pileId, pieceId })}
               `}
               onClick={(e) => { e.stopPropagation(); clickPiece({ pileId, pieceId }); }}

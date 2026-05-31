@@ -25,23 +25,24 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             {range(4).map(col => (
               <td
                 key={col}
-                onClick={() => clickField({ row, col })}
                 className={`border-4 ${board.chessBoard[row][col] === 'visited' ? 'bg-slate-300' : ''}`}
               >
-                <div className="aspect-square p-[5%] w-full">
-                  <button className="w-full aspect-square" disabled={!isMoveAllowed({ row, col })}>
-                    {isMoveAllowed({ row, col }) && (
-                      <svg className="w-full aspect-square opacity-25 inline-block">
-                        <use xlinkHref="#game-chess-knight" />
-                      </svg>
-                    )}
-                    {board.chessBoard[row][col] === 'knight' && (
-                      <svg className="w-full aspect-square inline-block">
-                        <use xlinkHref="#game-chess-knight" />
-                      </svg>
-                    )}
-                  </button>
-                </div>
+                <button
+                  className="w-full aspect-square p-[5%]"
+                  disabled={!isMoveAllowed({ row, col })}
+                  onClick={() => clickField({ row, col })}
+                >
+                  {isMoveAllowed({ row, col }) && (
+                    <svg className="w-full aspect-square opacity-25">
+                      <use xlinkHref="#game-chess-knight" />
+                    </svg>
+                  )}
+                  {board.chessBoard[row][col] === 'knight' && (
+                    <svg className="w-full aspect-square">
+                      <use xlinkHref="#game-chess-knight" />
+                    </svg>
+                  )}
+                </button>
               </td>
             ))}
           </tr>

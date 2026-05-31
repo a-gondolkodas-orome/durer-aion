@@ -23,15 +23,11 @@ const generateStartBoard = (maxDiscs) => (): Board => {
 
 const DisabledDisc = ({ bgColor }) => {
   return (
-    <td className="text-center aspect-square">
+    <td className="aspect-square">
       <button
-        className="aspect-square w-full p-[5%]"
+        className={`w-[95%] aspect-square rounded-full ${bgColor}`}
         disabled
-      >
-        <span
-          className={`w-full aspect-square inline-block rounded-full ${bgColor}`}
-        ></span>
-      </button>
+      />
     </td>
   );
 };
@@ -77,28 +73,22 @@ const gameBoardFactory = (maxDiscs) => {
                   ? <DisabledDisc key={`red-disabled-${i}`} bgColor="bg-red-800"/>
                   : (
                     <td
-                      className="text-center aspect-square"
+                      className="aspect-square"
                       key={`red-${i}-${board[0]}-${board[1]}`}
                       onClick={() => select(1, i)}
                     >
                       <button
-                        className="aspect-square w-full p-[5%]"
+                        className={`w-[95%] aspect-square rounded-full ${
+                          ctx.isClientMoveAllowed && isSelected(1, i)
+                            ? "opacity-75 bg-blue-800"
+                            : "bg-red-800"
+                        }`}
                         disabled={!ctx.isClientMoveAllowed}
                         onMouseOver={() => setHovered([1, i])}
                         onMouseOut={() => setHovered(null)}
                         onFocus={() => setHovered([1, i])}
                         onBlur={() => setHovered(null)}
-                      >
-                        <span
-                          className={`
-                            w-full aspect-square inline-block rounded-full
-                            ${ctx.isClientMoveAllowed && isSelected(1, i)
-                              ? "opacity-75 bg-blue-800"
-                              : "bg-red-800"
-                            }
-                          `}
-                        ></span>
-                      </button>
+                      />
                     </td>
                   )
               )}
@@ -108,28 +98,22 @@ const gameBoardFactory = (maxDiscs) => {
                   ? <DisabledDisc key={`blue-disabled-${i}`} bgColor="bg-blue-800"/>
                   : (
                     <td
-                      className="text-center aspect-square"
+                      className="aspect-square"
                       key={`blue-${i}-${board[0]}-${board[1]}`}
                       onClick={() => select(0, i)}
                     >
                       <button
-                        className="aspect-square w-full p-[5%]"
+                        className={`w-[95%] aspect-square rounded-full ${
+                          ctx.isClientMoveAllowed && isSelected(0, i)
+                            ? "opacity-50 bg-slate-600"
+                            : "bg-blue-800"
+                        }`}
                         disabled={!ctx.isClientMoveAllowed}
                         onMouseOver={() => setHovered([0, i])}
                         onMouseOut={() => setHovered(null)}
                         onFocus={() => setHovered([0, i])}
                         onBlur={() => setHovered(null)}
-                      >
-                        <span
-                          className={`
-                            w-full aspect-square inline-block rounded-full
-                            ${ctx.isClientMoveAllowed && isSelected(0, i)
-                              ? "opacity-50 bg-slate-600"
-                              : "bg-blue-800"
-                            }
-                          `}
-                        ></span>
-                      </button>
+                      />
                     </td>
                   )
               )}

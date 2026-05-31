@@ -27,13 +27,13 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 
   return (
   <GameBoard>
-    <div className="grid grid-cols-2 border-2">
+    <div className="grid grid-cols-2 border-t-2 border-l-2">
       {range(board.length).map(id =>
         <button
           key={id}
           disabled={!ctx.isClientMoveAllowed}
           onClick={() => placePiece(id)}
-          className="aspect-square border-2 p-[4%]"
+          className="aspect-square border-r-2 border-b-2 p-[4%]"
         >
           {range(board[id]).map((i) =>
             <span

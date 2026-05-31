@@ -64,15 +64,16 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     <p className='font-bold text-lg'>{t({ hu: 'Hátralévő lépések száma', en: 'Remaining moves' })}: {16-board.turn}</p>
     <SubmarineSvg/>
     <SharkSvg/>
-    <div className="grid grid-cols-5 border-2">
+    <div className="grid grid-cols-5 border-t-2 border-l-2">
       {range(25).map(id => (
         <button
           key={id}
           onClick={() => clickField(id)}
           disabled={!isAllowed_choosePiece(id) && !isAllowed_movePiece(id)}
           className={`
-            aspect-square border-2 relative flex justify-center items-center
-            ${possibleMoves.includes(id) && isCurrentPlayerShark && board.submarines[id] ? 'border-red-600' : ''}
+            aspect-square border-r-2 border-b-2 relative flex justify-center items-center
+            ${possibleMoves.includes(id) && isCurrentPlayerShark && board.submarines[id]
+              ? 'ring-2 ring-inset ring-red-600' : ''}
           `}
         >
           {possibleMoves.includes(id) && isCurrentPlayerResearcher && (

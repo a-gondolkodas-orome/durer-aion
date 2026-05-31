@@ -56,7 +56,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                 `}
               >
                 <button
-                  className="aspect-square w-full"
+                  className="w-full aspect-square p-[5%]"
                   disabled={!isMoveAllowed({ row, col })}
                   onClick={() => clickField({ row, col })}
                   onMouseOver={() => setHoveredField({ row, col })}
@@ -65,12 +65,12 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                   onBlur={() => setHoveredField(null)}
                 >
                   {isBishop({ row, col }) && (
-                    <svg className="inline-block aspect-square">
+                    <svg className="w-full aspect-square">
                       <use xlinkHref="#game-chess-bishop" />
                     </svg>
                   )}
                   {isPotentialNextStep({ row, col }) && (
-                    <svg className="inline-block aspect-square opacity-50">
+                    <svg className="w-full aspect-square opacity-50">
                       <use xlinkHref="#game-chess-bishop" />
                     </svg>
                   )}
