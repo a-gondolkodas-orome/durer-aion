@@ -10,7 +10,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
   return(
     <GameBoard>
-      <p className='w-full text-8xl font-bold text-center'>
+      <p className='text-4xl font-bold text-center mb-2'>
         <code>({board[0]},{board[1]})</code>
       </p>
       <div className="flex flex-wrap">
@@ -21,7 +21,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             onClick={() => moves.add1(board)}
           >
             {t({ hu: 'Növelek', en: 'Increase' })} {ctx.isClientMoveAllowed && <>
-              (→<code className="text-md">({board[0]},{board[1] + 1})</code>)
+              (→<code>({board[0]},{board[1] + 1})</code>)
             </>}
           </button>
         </span>
@@ -32,7 +32,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             onClick={() => moves.subtract(board)}
           >
             {t({ hu: 'Kivonok', en: 'Subtract' })} {ctx.isClientMoveAllowed && <>
-              (→<code className="text-md">({board[0] - board[1]},{board[1]})</code>)
+              (→<code>({board[0] - board[1]},{board[1]})</code>)
             </>}
           </button>
         </span>

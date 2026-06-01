@@ -30,7 +30,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           >
             <button
               disabled={!ctx.isClientMoveAllowed || board[i] === COVERED}
-              className={`w-full aspect-square select-none ${board[i] === COVERED && 'bg-slate-400'}`}
+              className={`w-full text-2xl aspect-square select-none ${board[i] === COVERED && 'bg-slate-400'}`}
               onClick={() => clickNumber(i+1)}
             >
               {board[i] === COVERED ? 'X' : board[i]}
@@ -40,7 +40,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         </tr>
       </tbody>
     </table>
-    <p>
+    <p className="mt-2">
       {t({ hu: 'Megmaradt számok összege', en: 'Sum of remaining numbers' })}
       : {sum(getRemaining(board))}
     </p>

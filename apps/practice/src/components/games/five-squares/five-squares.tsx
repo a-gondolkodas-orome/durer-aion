@@ -73,15 +73,13 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       </button>
       )}
     </div>
-    <div className="flex justify-end mt-2">
-      <button
-        className="secondary-button w-auto"
-        onClick={() => moves.undoFirstDisc(board)}
-        disabled={!ctx.isClientMoveAllowed || firstPlacedSquareIndex === null}
-      >
-        {t({ hu: '↶ Visszavonás', en: '↶ Undo' })}
-      </button>
-    </div>
+    <button
+      className="secondary-button w-auto ml-auto mt-2"
+      onClick={() => moves.undoFirstDisc(board)}
+      disabled={!ctx.isClientMoveAllowed || firstPlacedSquareIndex === null}
+    >
+      {t({ hu: '↶ Visszavonás', en: '↶ Undo' })}
+    </button>
   </GameBoard>
   );
 };
