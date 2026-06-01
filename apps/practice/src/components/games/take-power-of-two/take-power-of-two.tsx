@@ -63,9 +63,11 @@ const ExponentsTable = ({ board, choosePower, hovered, setHovered }) => {
         )}
       </tr></tbody>
     </table>
-    {hovered === null ? <br /> : <p>
-      {t({ hu: `Kivonandó 2-hatvány: 2^${hovered} = ${2**hovered}. Eredmény: ${board-2**hovered}.`,
-        en: `Power to subtract: 2^${hovered} = ${2**hovered}. Result: ${board-2**hovered}.` })}
+    {hovered && <p className="mt-2">
+      {t({
+        hu: `Kivonandó 2-hatvány: 2^${hovered} = ${2**hovered}. Eredmény: ${board-2**hovered}.`,
+        en: `Power to subtract: 2^${hovered} = ${2**hovered}. Result: ${board-2**hovered}.`
+      })}
     </p>}
   </>;
 }

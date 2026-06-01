@@ -50,16 +50,16 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       <div className="flex">
         {[0, 1].map(pileId => (
           <div key={pileId} className="grow px-2 flex flex-col">
-            <p className="text-xl font-semibold text-center text-slate-600">{board.piles[pileId]}</p>
+            <h2 className="text-center">
+              {t(pileId === 0 ? { hu: 'Bal', en: 'Left' } : { hu: 'Jobb', en: 'Right' })}
+              {': ' + board.piles[pileId]}
+            </h2>
             <StonePile
               count={board.piles[pileId]}
               onClick={() => moves.removeStone(board, pileId)}
               disabled={!isMoveAllowed(pileId)}
               restricted={ctx.isClientMoveAllowed && !isMoveAllowed(pileId)}
             />
-            <p className="text-center font-semibold text-slate-600">
-              {t(pileId === 0 ? { hu: 'Bal', en: 'Left' } : { hu: 'Jobb', en: 'Right' })}
-            </p>
           </div>
         ))}
       </div>

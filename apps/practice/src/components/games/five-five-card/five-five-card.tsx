@@ -20,15 +20,14 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   return (
   <GameBoard>
     <div className="grid grid-cols-3">
-      <span className="text-slate-500 text-xl text-center">
+      <h2 className="text-center">
         {t({ hu: 'Kezdő', en: 'First' })}
-      </span>
+      </h2>
       <span></span>
-      <span className="text-slate-500 text-xl text-center">
+      <h2 className="text-center">
         {t({ hu: 'Második', en: 'Second' })}
-      </span>
-    </div>
-    <div className="grid grid-cols-3">
+      </h2>
+
       {range(5).map(id => (
         [0, null, 1].map(playerIdx => (
           playerIdx === null || board[playerIdx][id] === null
@@ -38,9 +37,9 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               disabled={playerIdx === ctx.currentPlayer || !isMoveAllowed(id)}
               onClick={() => clickField(id)}
               className={`
-                p-2 m-2 aspect-3/2 text-3xl border-4 rounded-lg shadow-md
-                enabled:border-green-400 enabled:border-dashed
-                enabled:hocus:border-solid
+                p-2 m-2 aspect-3/2 text-3xl border-4 border-blue-600 rounded-lg shadow-md
+                enabled:border-dashed
+                enabled:hocus:opacity-50 enabled:hocus:bg-slate-200 enabled:hocus:border-slate-400
               `}
             >
               {board[playerIdx][id]}

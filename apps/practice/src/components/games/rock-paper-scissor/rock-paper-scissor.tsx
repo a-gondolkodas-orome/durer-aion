@@ -24,11 +24,10 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   return (
   <GameBoard>
     <div className="grid grid-cols-3">
-      <span className="text-slate-500 text-xl text-center">{t({ hu: 'Kezdő', en: 'First' })}</span>
+      <h2 className="text-center">{t({ hu: 'Kezdő', en: 'First' })}</h2>
       <span></span>
-      <span className="text-slate-500 text-xl text-center">{t({ hu: 'Második', en: 'Second' })}</span>
-    </div>
-    <div className="grid grid-cols-3">
+      <h2 className="text-center">{t({ hu: 'Második', en: 'Second' })}</h2>
+
       {[0, 1, 2].map(symbolIdx => (
         [0, null, 1].map(playerIdx => (
           playerIdx === null || board[playerIdx][symbolIdx] === null
@@ -38,9 +37,9 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               disabled={playerIdx === ctx.currentPlayer || !isMoveAllowed(symbolIdx)}
               onClick={() => clickField(symbolIdx)}
               className={`
-                p-2 m-2 aspect-4/5 border-4 rounded-lg shadow-md
-                enabled:border-green-400 enabled:border-dashed
-                enabled:hocus:border-solid
+                p-2 m-2 aspect-4/5 border-4 rounded-lg shadow-md border-blue-600
+                enabled:border-dashed
+                enabled:hocus:opacity-50 enabled:hocus:bg-slate-200 enabled:hocus:border-slate-400
               `}
             >
               { symbolIdx === 0 && (<RockSvg />) }

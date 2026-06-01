@@ -49,7 +49,7 @@ const PrimePowerButton = ({ entry, board, isClientMoveAllowed, chooseEntry, setH
   const isActive = !isAboveBoard && isClientMoveAllowed;
   return (
     <button
-      className={`border rounded w-10 py-0.5 leading-tight border-slate-300
+      className={`border rounded w-10 py-0.5 leading-tight
         ${isAboveBoard ? 'opacity-25' : ''}
         ${isActive ? 'hocus:bg-blue-100 hocus:border-blue-300' : ''}`}
       onClick={() => isActive && chooseEntry(entry)}

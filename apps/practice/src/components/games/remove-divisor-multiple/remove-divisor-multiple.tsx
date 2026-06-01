@@ -32,15 +32,6 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 
   return (
     <GameBoard>
-      <p className="text-2xl">
-        {t({
-          hu: `A mostani játékban n=${board.numbersOnTable.length}`,
-          en: `In this game n=${board.numbersOnTable.length}`
-        })}
-      </p>
-      <p className="text-2xl">
-        {t({ hu: 'Az előző lépés', en: 'Previous move' })}: {board.previousMove === null ? "-" : board.previousMove}
-      </p>
       <div>
         {range(1, board.numbersOnTable.length + 1).map(num =>
           <button
@@ -49,15 +40,18 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             onClick={() => removeNumber(num)}
             className={`
               m-1 min-h-28 w-18 border-4 rounded-lg shadow-md text-4xl font-bold
-              ${board.numbersOnTable[num - 1] ? '' : 'opacity-50 border-slate-600 text-slate-600'}
-              ${board.numbersOnTable[num - 1] ? (isMoveAllowed(num) ? 'border-green-600' : 'border-red-600') : ''}
-              enabled:hocus:bg-green-600
-            `}
+              ${board.numbersOnTable[num - 1] ? '' : 'opacity-50 border-dashed'}
+              ${board.numbersOnTable[num - 1] ? (isMoveAllowed(num) ? 'border-blue-600' : 'border-red-600') : ''}
+              enabled:hocus:opacity-50 enabled:hocus:border-dashed
+              `}
           >
             {num}
           </button>
         )}
       </div>
+      <p className="text-2xl mt-2">
+        {t({ hu: 'Az előző lépés', en: 'Previous move' })}: {board.previousMove === null ? "-" : board.previousMove}
+      </p>
     </GameBoard>
   )
 };

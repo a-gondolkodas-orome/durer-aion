@@ -41,47 +41,44 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     const num = board.digits.reduce((acc, d) => acc * 10 + d, 0);
     const remainder = board.sumMod9;
     const quotient = (num - remainder) / 9;
+    const fmt = (n: number) => n.toLocaleString();
     const expr = remainder === 0
-      ? `${num} = ${quotient} · 9`
-      : `${num} = ${quotient} · 9 + ${remainder}`;
+      ? `${fmt(num)} = ${fmt(quotient)} · 9`
+      : `${fmt(num)} = ${fmt(quotient)} · 9 + ${remainder}`;
     numberSummary = t({ hu: `A szám: ${expr}`, en: `The number: ${expr}` });
   }
 
   return (
     <GameBoard>
       <div className="flex gap-1 mb-2 flex-wrap">
-        {slots.map((d, i) => (
-          <div
-            key={i}
-            className={`
-              border-2 w-10 h-12 rounded-sm flex items-center justify-center text-2xl font-bold
-              ${d === null
-                ? (
-                  i === board.digits.length && ctx.phase === 'play'
-                    ? 'border-blue-400 bg-blue-50 text-blue-400'
-                    : 'opacity-50 border-slate-600'
-                ) : 'border-slate-600'}
-            `}
-          >
-            {d !== null ? d : '?'}
-          </div>
-        ))}
+        {slots.map((d, i) => {
+          const isNextSlot = d === null && i === board.digits.length && ctx.phase === 'play';
+          const slotClass = isNextSlot
+            ? 'border-blue-400 bg-blue-50 text-blue-400'
+            : `border-slate-600 ${d === null ? 'opacity-50' : ''}`;
+          return (
+            <div
+              key={i}
+              className={`border-2 w-10 py-2 rounded-sm text-center text-2xl ${slotClass}`}
+            >
+              {d ?? '?'}
+            </div>
+          );
+        })}
       </div>
       {numberSummary && <p className="text-sm text-slate-500 mb-2">{numberSummary}</p>}
-      <div className="mt-6 pt-4 border-t border-slate-200">
-        <div className="flex gap-2 flex-wrap">
-          {availableDigits.map(d => (
-            <button
-              key={d}
-              disabled={!ctx.isClientMoveAllowed}
-              onClick={(e) => { moves.chooseDigit(board, d); e.currentTarget.blur(); }}
-              className="rounded-lg border-2 border-slate-300 text-2xl w-12 h-12 font-bold
-                enabled:hocus:bg-blue-100 enabled:hocus:border-blue-300 disabled:opacity-50"
-            >
-              {d}
-            </button>
-          ))}
-        </div>
+      <div className="mt-6 pt-4 border-t border-slate-200 flex gap-2 flex-wrap">
+        {availableDigits.map(d => (
+          <button
+            key={d}
+            disabled={!ctx.isClientMoveAllowed}
+            onClick={(e) => { moves.chooseDigit(board, d); e.currentTarget.blur(); }}
+            className="rounded-lg border-2 border-slate-300 text-2xl w-12 py-2 font-bold
+              enabled:hocus:bg-blue-100 enabled:hocus:border-blue-300 disabled:opacity-50"
+          >
+            {d}
+          </button>
+        ))}
       </div>
     </GameBoard>
   );
