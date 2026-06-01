@@ -98,7 +98,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               >
                 <button
                   className={`
-                    aspect-square w-full p-[5%] rounded-none relative
+                    aspect-square w-full p-[5%] relative
                     ${getCellBgClass({ row, col })}
                     ${getDominoBorders({ row, col })}
                   `}

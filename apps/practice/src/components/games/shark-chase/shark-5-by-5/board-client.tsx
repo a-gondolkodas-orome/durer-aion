@@ -71,7 +71,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           onClick={() => clickField(id)}
           disabled={!isAllowed_choosePiece(id) && !isAllowed_movePiece(id)}
           className={`
-            aspect-square rounded-none border-r-2 border-b-2 relative flex justify-center items-center
+            aspect-square border-r-2 border-b-2 relative flex justify-center items-center
             ${possibleMoves.includes(id) && isCurrentPlayerShark && board.submarines[id]
               ? 'ring-2 ring-inset ring-red-600' : ''}
           `}

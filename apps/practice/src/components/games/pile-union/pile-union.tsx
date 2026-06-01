@@ -130,7 +130,7 @@ const Pile = ({ size, disabled, isSelected, moveType, onClick }: {
       onFocus={() => setHovered(true)}
       onBlur={() => setHovered(false)}
       className={`
-        flex flex-col items-center gap-1 p-2 border-2 transition-colors
+        flex flex-col items-center gap-1 p-2 rounded-lg border-2 transition-colors
         ${isSelected ? 'border-blue-300 bg-blue-600/40' :
           isRemoveHovered ? 'border-slate-200 bg-slate-800/5' :
           isMergeHovered ? 'border-blue-300 bg-blue-600/20' :

@@ -48,7 +48,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             disabled={!isMoveAllowed(num) || !ctx.isClientMoveAllowed}
             onClick={() => removeNumber(num)}
             className={`
-              m-1 min-h-28 w-18 border-4 shadow-md text-4xl font-bold
+              m-1 min-h-28 w-18 border-4 rounded-lg shadow-md text-4xl font-bold
               ${board.numbersOnTable[num - 1] ? '' : 'opacity-50 border-slate-600 text-slate-600'}
               ${board.numbersOnTable[num - 1] ? (isMoveAllowed(num) ? 'border-green-600' : 'border-red-600') : ''}
               enabled:hocus:bg-green-600

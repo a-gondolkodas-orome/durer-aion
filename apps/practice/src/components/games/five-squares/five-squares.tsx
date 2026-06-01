@@ -57,7 +57,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           key={id}
           disabled={!ctx.isClientMoveAllowed}
           onClick={() => placePiece(id)}
-          className="aspect-square rounded-none border-r-4 border-b-4 p-[3%]"
+          className="aspect-square border-r-4 border-b-4 p-[3%]"
         >
           {range(board[id]).map((i) =>
             <span

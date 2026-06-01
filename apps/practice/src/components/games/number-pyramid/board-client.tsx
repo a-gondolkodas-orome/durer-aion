@@ -5,7 +5,7 @@ import { GameBoard, type BoardClientProps } from '../../game-factory';
 
 export type TurnState = { levelIdx: number; slotIdx: number } | null;
 
-const chipBase = 'border-2 px-3 py-2 font-bold text-lg min-w-12';
+const chipBase = 'rounded-lg border-2 px-3 py-2 font-bold text-lg min-w-12';
 
 const PlaceholderSlot = () => (
   <button disabled className={`${chipBase} border-dashed text-transparent select-none`}>0</button>

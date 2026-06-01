@@ -30,7 +30,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           >
             <button
               disabled={!ctx.isClientMoveAllowed || board[i] === COVERED}
-              className={`w-full rounded-none aspect-square select-none ${board[i] === COVERED && 'bg-slate-400'}`}
+              className={`w-full aspect-square select-none ${board[i] === COVERED && 'bg-slate-400'}`}
               onClick={() => clickNumber(i+1)}
             >
               {board[i] === COVERED ? 'X' : board[i]}
