@@ -120,7 +120,10 @@ export const App = () => {
 
   const router = createHashRouter([{
     element: <RootLayout />,
-    children: routes.map(route => ({ ...route, errorElement: <ErrorPage /> }))
+    children: [
+      ...routes.map(route => ({ ...route, errorElement: <ErrorPage /> })),
+      { path: '*', element: <ErrorPage /> }
+    ]
   }]);
 
 return <StrictMode>
