@@ -27,6 +27,7 @@ export const Coin357 = strategyGameFactory({
   variants: [
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
     {
+      // smart bot: verified as optimal
       botStrategy: smartBotStrategy,
       generateStartBoard: (): Board => ([3, 5, 7]),
       label: { hu: 'Okos 🤖', en: 'Smart 🤖' },

@@ -137,6 +137,7 @@ export const PileSplitter = strategyGameFactory({
       generateStartBoard: () => ([random(2, 5), random(2, 5)])
     },
     {
+      // smart bot: verified as optimal
       botStrategy: smartBotStrategy,
       generateStartBoard: () => ([random(3, 10), random(3, 10)]),
       label: { hu: 'Okos 🤖', en: 'Smart 🤖' },

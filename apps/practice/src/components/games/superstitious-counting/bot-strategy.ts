@@ -12,13 +12,13 @@ export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
 };
 
 const getOptimalBotStep = ({ current, target, restricted }) => {
-  if ((target - current) % 14 === 0) { //any step wins
+  if ((target - current) % 14 === 0) { // any step wins
     return randomStep(restricted);
   }
-  if ((target - current) % 14 === 1) { //any step looses
+  if ((target - current) % 14 === 1) { // any step looses
     return randomStep(restricted);
   }
-  //only one winning step
+  // only one winning step
   if ((target - current) % 14 - 1 === restricted) return randomStep(restricted);
   else return (target - current) % 14 - 1;
 };

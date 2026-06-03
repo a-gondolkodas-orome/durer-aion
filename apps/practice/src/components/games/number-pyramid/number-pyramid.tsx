@@ -1,7 +1,6 @@
-import { cloneDeep, sumBy } from 'lodash';
 import { strategyGameFactory, type Ctx, type Events } from '../../game-factory';
 import {
-  smartBotStrategy, generateStartBoard, randomBotStrategy, type Board
+  smartBotStrategy, generateStartBoard, randomBotStrategy, applyMoveToBoard, type Board
 } from './strategy';
 import { BoardClient, type TurnState } from './board-client';
 
@@ -11,14 +10,7 @@ export const moves = {
     { ctx, events }: { ctx: Ctx; events: Events },
     { levelIdx, indices }
   ) => {
-    const nextBoard = cloneDeep(board);
-
-    const slots = indices.map((idx) => nextBoard.levels[levelIdx][idx]!);
-    const combinedValue = sumBy(slots, 'value');
-    slots.forEach((slot) => { slot.state = 'consumed'; });
-
-    const emptyIdx = nextBoard.levels[levelIdx + 1].findIndex((s) => s === null);
-    nextBoard.levels[levelIdx + 1][emptyIdx] = { value: combinedValue, state: 'active' };
+    const { nextBoard, combinedValue } = applyMoveToBoard(board, levelIdx, indices);
 
     events.setTurnState(null);
     if (combinedValue >= board.target) {
@@ -73,10 +65,12 @@ export const NumberPyramid = strategyGameFactory({
       label: { hu: 'Teszt 🤖', en: 'Test 🤖' }
     },
     {
+      // smart bot: verified as optimal
       botStrategy: smartBotStrategy,
       generateStartBoard,
       label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
-      isDefault: true
+      isDefault: true,
+      notAlwaysOptimal: true
     }
   ]
 });

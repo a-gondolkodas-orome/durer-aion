@@ -1,6 +1,6 @@
-import { sample, compact, range } from 'lodash';
+import { sample, range } from 'lodash';
 import type { StrategyArgs } from '../../game-factory';
-import type { Board } from './five-five-card';
+import { type Board, getWinnerIndex } from './five-five-card';
 
 export const randomBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
   const opponentIdx = ctx.chosenRoleIndex!;
@@ -9,76 +9,43 @@ export const randomBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) =>
 };
 
 export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
-  const idx = getOptimalSmartBotMove(board, ctx.chosenRoleIndex);
-  moves.removeCard(board, idx);
+  const botPlayerIndex = ctx.currentPlayer!;
+  const opponentIdx = 1 - botPlayerIndex;
+
+  let bestScore = -Infinity;
+  let bestMoves: number[] = [];
+
+  for (let i = 0; i < 5; i++) {
+    if (board[opponentIdx][i] === null) continue;
+    const nextBoard = board.map(row => [...row]);
+    nextBoard[opponentIdx][i] = null;
+    const score = minimax(nextBoard, 1 - botPlayerIndex, botPlayerIndex);
+    if (score > bestScore) {
+      bestScore = score;
+      bestMoves = [i + 1];
+    } else if (score === bestScore) {
+      bestMoves.push(i + 1);
+    }
+  }
+
+  moves.removeCard(board, sample(bestMoves)!);
 };
 
-const isWinningPosition = (i, j, chosenRoleIndex): boolean => {
-  if (i === j){
-    return chosenRoleIndex === 1;
-  }
-  if ((i + j) % 2 === 0){
-    return i < j;
-  } else { // (i + j) % 2 === 1
-    return i > j;
-  }
-}
+const minimax = (board: Board, currentPlayer, botPlayerIndex): number => {
+  const winner = getWinnerIndex(board);
+  if (winner !== undefined) return winner === botPlayerIndex ? 1 : -1;
 
-export const getOptimalSmartBotMove = (board: Board, opponentIndex) => {
-  const firstPlayersPossibleMoves = compact(board[1]);
-  const secondPlayersPossibleMoves = compact(board[0]);
-  // as a first player still try to win if second player may not play optimally
-  if (opponentIndex === 1) {
-    let possibleWinningMoves: number[] = [];
-    for (const i of firstPlayersPossibleMoves){
-      let isIsolatedPoint = true;
-      for (const j of secondPlayersPossibleMoves){
-        if (isWinningPosition(i, j, 1 - opponentIndex)){
-          isIsolatedPoint = false;
-        }
-      }
-      if (!isIsolatedPoint){
-        possibleWinningMoves.push(i);
-      }
-    }
-    // if no winning move make a random move
-    if (possibleWinningMoves.length === 0){
-      return sample(firstPlayersPossibleMoves);
-    }
-    // make a possibly winning move
-    return sample(possibleWinningMoves)
+  const opponentIdx = 1 - currentPlayer;
+  const isMaximizing = currentPlayer === botPlayerIndex;
+  let best = isMaximizing ? -Infinity : Infinity;
+
+  for (let i = 0; i < 5; i++) {
+    if (board[opponentIdx][i] === null) continue;
+    const nextBoard = board.map(row => [...row]);
+    nextBoard[opponentIdx][i] = null;
+    const score = minimax(nextBoard, 1 - currentPlayer, botPlayerIndex);
+    best = isMaximizing ? Math.max(best, score) : Math.min(best, score);
   }
 
-  // as a second player proceed with placing at an empty place symmetrical to player's piece
-
-  if (opponentIndex === 0) {
-    let winningMoves: number[] = [];
-    let badMoves: number[] = [];
-    // calculate wrong moves
-    for (const j of firstPlayersPossibleMoves){
-      let winningPairs: number[] = [];
-      for (const i of secondPlayersPossibleMoves){
-        if (isWinningPosition(j, i, opponentIndex)){
-          winningPairs.push(i);
-        }
-      }
-      if (winningPairs.length > 0){
-        badMoves.push(sample(winningPairs)!);
-      }
-    }
-    for (const i of secondPlayersPossibleMoves){
-      let isGoodMove = true;
-      for (const j of badMoves){
-        if (i === j) isGoodMove = false;
-      }
-      if (isGoodMove === true) winningMoves.push(i);
-    }
-    // if no winning move make a random move (not possible)
-    if (winningMoves.length === 0){
-      console.log("Error in strategy...");
-      return sample(secondPlayersPossibleMoves);
-    }
-    // make a winning move
-    return sample(winningMoves);
-  }
+  return best;
 };

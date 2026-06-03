@@ -84,6 +84,17 @@ export const DifficultySelector = ({ variants, selectedIndex, onSelect, disabled
               disabled={v.disabled || fieldsetDisabled}
             />
             {t(v.label ?? { hu: `${v.originalIndex + 1}. szint`, en: `Level ${v.originalIndex + 1}` })}
+            {v.notAlwaysOptimal && (
+              <span
+                className="ml-1 opacity-70 text-xs"
+                title={t({
+                  hu: 'A gép nem minden esetben tud nyerő lépést találni.',
+                  en: 'The bot may not always find a winning move.'
+                })}
+              >
+                ⓘ
+              </span>
+            )}
           </label>
         ))}
       </div>

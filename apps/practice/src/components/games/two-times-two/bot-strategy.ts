@@ -1,4 +1,4 @@
-import { sum, random, sample, range } from 'lodash';
+import { sum, isEqual, sample, range } from 'lodash';
 import type { StrategyArgs } from '../../game-factory';
 import type { Board } from './two-times-two';
 
@@ -6,81 +6,31 @@ export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   moves.addPiece(board, sample(range(0, 4)));
 };
 
-export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  const id = getOptimalTileIndex(board);
-  moves.addPiece(board, id);
-}
+export const smartBotStrategy = ({ board, moves, ctx }: StrategyArgs<Board>) => {
+  const botPlayerIndex = ctx.currentPlayer!;
+  const scores = range(0, 4).map(i => {
+    const next = [...board] as Board;
+    next[i]++;
+    return minimax(next, 1 - botPlayerIndex, botPlayerIndex);
+  });
+  const best = Math.max(...scores);
+  const bestTiles = range(0, 4).filter(i => scores[i] === best);
+  moves.addPiece(board, sample(bestTiles));
+};
 
-const getOptimalTileIndex = (board: Board) => {
-  const pieces = sum(board);
-
-  if (pieces % 2 === 0) { //following the strategy
-    if (pieces === 0) return random(0, 3);
-    if (pieces === 2) { // 0,0,0,2 or 0,0,1,1
-      let stack = false;
-      for (let i = 0; i < 4; i++) {
-        if (board[i] === 2) stack = true;
-      }
-      if (stack) {
-        let i = 0;
-        while (board[i] !== 2) i++;
-        return i;
-      } else {
-        let ret = random(0, 3);
-        while (board[ret] === 1) ret = random(0, 3);
-        return ret;
-      }
-    }
-    if (pieces === 4) { // 0,0,0,4 or 0,0,1,3 or 0,1,1,2 or 1,1,1,1 (or 0,0,2,2)
-      let board2 = [...board];
-      board2.sort();
-      if (board2[3] >= 3) {
-        let i = 0;
-        while (board[i] < 3) i++;
-        return i;
-      } else if (board2[0] === 0) {
-        let i = 0;
-        while (board[i] !== 0 && i < 4) i++;
-        return i;
-      } else return random(0, 3);
-    }
-  } else { //trying to win if the player makes a mistake
-    if (pieces === 1) { // 0,0,0,1
-      return random(0, 3);
-    }
-    if (pieces === 3) { // 0,0,0,3 or 0,0,1,2 or 0,1,1,1
-      let stack = false;
-      for (let i = 0; i < 4; i++) {
-        if (board[i] === 3) stack = true;
-      }
-      if (stack) {
-        let ret = random(0, 3);
-        while (board[ret] !== 0) ret = random(0, 3);
-        return ret;
-      } else {
-        let ret = random(0, 3);
-        while (board[ret] !== 1) ret = random(0, 3);
-        return ret;
-      }
-    }
-    if (pieces === 5) { // 0,0,2,3 or 0,1,1,3 or 0,1,2,2 (or 0,0,0,5 or 0,0,1,4 or 1,1,1,2)
-      let board2 = [...board];
-      board2.sort();
-      if (board2[3] === 3) {
-        if (board2[2] === 2) { // 0,0,2,3
-          let ret = random(0, 3);
-          while (board[ret] !== 0) ret = random(0, 3);
-          return ret;
-        } else { // 0,1,1,3
-          let ret = random(0, 3);
-          while (board[ret] !== 1) ret = random(0, 3);
-          return ret;
-        }
-      } else if (board2[3] === 2 && board2[2] === 2) { // 0,1,2,2
-        let ret = random(0, 3);
-        while (board[ret] !== 2) ret = random(0, 3);
-        return ret;
-      } else return random(0, 3);
-    }
+// Return `+1` if the bot's player index won, `-1` otherwise.
+const minimax = (board: Board, currentPlayer: number, botPlayerIndex: number): number => {
+  if (sum(board) === 6) {
+    const winnerIndex = isEqual([...board].sort(), [0, 1, 2, 3]) ? 1 : 0;
+    return winnerIndex === botPlayerIndex ? 1 : -1;
   }
+  const isMaximizing = currentPlayer === botPlayerIndex;
+  let best = isMaximizing ? -Infinity : Infinity;
+  for (let i = 0; i < 4; i++) {
+    const next = [...board] as Board;
+    next[i]++;
+    const score = minimax(next, 1 - currentPlayer, botPlayerIndex);
+    best = isMaximizing ? Math.max(best, score) : Math.min(best, score);
+  }
+  return best;
 };

@@ -1,4 +1,4 @@
-import { range, cloneDeep, compact } from 'lodash';
+import { range, cloneDeep } from 'lodash';
 import { strategyGameFactory, type Ctx, type Events, type BoardClientProps, GameBoard } from '../../game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { useTranslation } from '../../language';
@@ -19,30 +19,29 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 
   return (
   <GameBoard>
-    <div className="grid grid-cols-3">
-      <h2 className="text-center">
+    <div className="grid grid-cols-4 gap-y-3">
+      <h2 className="text-center col-start-1">
         {t({ hu: 'Kezdő', en: 'First' })}
       </h2>
-      <span></span>
-      <h2 className="text-center">
+      <h2 className="text-center col-start-4">
         {t({ hu: 'Második', en: 'Second' })}
       </h2>
 
       {range(5).map(id => (
-        [0, null, 1].map(playerIdx => (
-          playerIdx === null || board[playerIdx][id] === null
-          ? <span className="aspect-3/2 m-2" key={`${playerIdx}-${id}`}></span>
-          : <button
-              key={`${playerIdx}-${id}`}
-              disabled={playerIdx === ctx.currentPlayer || !isMoveAllowed(id)}
-              onClick={() => clickField(id)}
-              className={`
-                p-2 m-2 aspect-3/2 text-3xl border-4 border-blue-600 rounded-lg shadow-md
-                enabled:border-dashed
-                enabled:hocus:opacity-50 enabled:hocus:bg-slate-200 enabled:hocus:border-slate-400
-              `}
-            >
-              {board[playerIdx][id]}
+        [0, 1].map(playerIdx => (
+          <button
+            key={`${playerIdx}-${id}`}
+            disabled={playerIdx === ctx.currentPlayer || !isMoveAllowed(id)}
+            onClick={() => clickField(id)}
+            className={`
+              ${playerIdx === 0 ? 'col-start-1' : 'col-start-4'}
+              aspect-3/2 text-2xl border-4 rounded-lg
+              enabled:border-green-400 enabled:border-dashed
+              enabled:hocus:border-solid
+              ${board[playerIdx][id] === null ? 'opacity-0' : ''}
+            `}
+          >
+            {board[playerIdx][id]}
           </button>
         ))
       ))}
@@ -52,13 +51,16 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 };
 
 const isGameEnd = (board: Board) => {
-  return compact(board[0]).length === 1 && compact(board[1]).length === 1;
+  return (
+    board[0].filter(v => v !== null).length === 1 &&
+    board[1].filter(v => v !== null).length === 1
+  );
 };
 
-const getWinnerIndex = (board: Board) => {
+export const getWinnerIndex = (board: Board) => {
   if (!isGameEnd(board)) return undefined;
-  const firstPlayerNumber = compact(board[0])[0]!;
-  const secondPlayerNumber = compact(board[1])[0]!
+  const firstPlayerNumber = board[0].find(v => v !== null)!;
+  const secondPlayerNumber = board[1].find(v => v !== null)!
 
   if (firstPlayerNumber === secondPlayerNumber) return 0;
   if ((firstPlayerNumber + secondPlayerNumber) % 2 === 0){
@@ -111,6 +113,7 @@ export const FiveFiveCard = strategyGameFactory({
   variants: [
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
     {
+      // smart bot: verified as optimal
       botStrategy: smartBotStrategy,
       generateStartBoard: () => [[1, 2, 3, 4, 5], [1, 2, 3, 4, 5]],
       label: { hu: 'Okos 🤖', en: 'Smart 🤖' },

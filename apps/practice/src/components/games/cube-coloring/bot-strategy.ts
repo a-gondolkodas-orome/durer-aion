@@ -40,7 +40,6 @@ const makeOptimalStepAsSecond = (board: Board) => {
     if (missingColors.length === 1) {
       for (const v of getEmptyNeighbours(board, vertex)) {
         if (isAllowedStep(board, v, missingColors[0])) {
-          board[v] = missingColors[0];
           return { vertex: v, color: missingColors[0] };
         }
       }
@@ -51,7 +50,6 @@ const makeOptimalStepAsSecond = (board: Board) => {
   const pairs = shuffle([[0, 6], [6, 0], [1, 7], [7, 1], [3, 5], [5, 3]]);
   for (const p of pairs) {
     if (isColored(board, p[0]) && isAllowedStep(board, p[1], board[p[0]])) {
-      board[p[1]] = board[p[0]];
       return { vertex: p[1], color: board[p[0]] };
     }
   }
@@ -62,7 +60,6 @@ const makeOptimalStepAsSecond = (board: Board) => {
     if (missingColors.length === 2) {
       for (const v of getEmptyNeighbours(board, vertex)) {
         if (isAllowedStep(board, v, missingColors[0])) {
-          board[v] = missingColors[0];
           return { vertex: v, color: missingColors[0] };
         }
       }
@@ -72,7 +69,6 @@ const makeOptimalStepAsSecond = (board: Board) => {
   for (const vertex of emptyVertices) {
     for (const color of shuffle(Object.keys(nodeColors))) {
       if (isAllowedStep(board, vertex, color)) {
-        board[vertex] = color;
         return { vertex, color };
       }
     }

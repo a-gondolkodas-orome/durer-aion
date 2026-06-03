@@ -1,62 +1,55 @@
 import { sample } from 'lodash';
-import { Sheriff, Thief, getUntakenCards, type Board } from '../helpers';
-import type { StrategyArgs } from '../../../game-factory';
+import { Sheriff, Thief, hasWinningTriple, getUntakenCards, type Board } from '../helpers';
+import { dummyEvents, makeCtx, type StrategyArgs } from '../../../game-factory';
+import { moves, CARD_COUNT } from './moves';
 
-const CARD_COUNT = 7;
+const TURN_PLAYER = [Sheriff, Thief, Sheriff, Thief, Sheriff];
 
-export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  moves.takeCard(board, [sample(getUntakenCards(board, CARD_COUNT))]);
+export const randomBotStrategy = ({ board, moves: gameMoves }: StrategyArgs<Board>) => {
+  gameMoves.takeCard(board, [sample(getUntakenCards(board, CARD_COUNT))]);
 };
 
-export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-    const move = getMove(board);
-    moves.takeCard(board, [move]);
-}
+export const smartBotStrategy = ({ board, moves: gameMoves, ctx }: StrategyArgs<Board>) => {
+  gameMoves.takeCard(board, [getBotCard(board, ctx.currentPlayer!)]);
+};
 
-const getMove = (board: Board) => {
-  const cards: (number | null)[] = Array(CARD_COUNT).fill(null);
-  board.cards[Sheriff].forEach(card => {
-    cards[card - 1] = Sheriff;
+export const getBotCard = (board: Board, botPlayerIndex: number): number => {
+  const memo = new Map<string, number>();
+  const untaken = getUntakenCards(board, CARD_COUNT);
+  const scores = untaken.map(card => {
+    const { nextBoard } = moves.takeCard(
+      board, { ctx: makeCtx({ currentPlayer: botPlayerIndex }), events: dummyEvents }, [card]
+    );
+    return minimax(nextBoard, botPlayerIndex, memo);
   });
-  board.cards[Thief].forEach(card => {
-    cards[card - 1] = Thief;
-  });
-  const meanCounts = getMeanCounts(cards)
-    .map((count, idx) => [count, idx])
-    .filter((_, idx) => cards[idx] === null);
-  // find max count that is not taken by sheriff or thief
-  const maxCount = Math.max(...meanCounts.map(([count]) => count));
-  // return the card that participates in the most good sets of three cards
-  // take only ones with max value
-  const maxIndices = meanCounts.filter(([count]) => count === maxCount)
-    .map(([, idx]) => idx);
-  return sample(maxIndices)! + 1;
-}
+  const best = Math.max(...scores);
+  return sample(untaken.filter((_, i) => scores[i] === best))!;
+};
 
-const findPossibleMeans = (cards) => {
-  // get all good sets of three cards
-  const means: number[][] = [];
-  for (let i = 0; i < (CARD_COUNT - 2); i++) {
-    for (let j = i + 1; j < (CARD_COUNT - 1); j++) {
-      for (let k = j + 1; k < CARD_COUNT; k++) {
-        if (cards[i] === Sheriff || cards[j] === Sheriff || cards[k] === Sheriff) {
-          continue;
-        }
-        if (i + k === 2 * j) {
-          means.push([i, j, k]);
-        }
-      }
-    }
+export const getBotScore = (board: Board, botPlayerIndex: number): number => {
+  return minimax(board, botPlayerIndex, new Map());
+};
+
+const minimax = (board: Board, botPlayerIndex: number, memo: Map<string, number>): number => {
+  if (board.cards[Sheriff].length + board.cards[Thief].length === CARD_COUNT) {
+    const winner = hasWinningTriple(board.cards[Thief]) ? Thief : Sheriff;
+    return winner === botPlayerIndex ? 1 : -1;
   }
-  return means;
-}
 
-const getMeanCounts = (cards) => {
-  const counts = Array(CARD_COUNT).fill(0);
-  findPossibleMeans(cards).forEach(mean => {
-    counts[mean[0]]++;
-    counts[mean[1]]++;
-    counts[mean[2]]++;
-  });
-  return counts;
-}
+  const key =
+    board.cards[Sheriff].slice().sort().join(',') + '|' +
+    board.cards[Thief].slice().sort().join(',');
+  if (memo.has(key)) return memo.get(key)!;
+
+  const currentPlayer = TURN_PLAYER[board.numTurns];
+  const isMaximizing = currentPlayer === botPlayerIndex;
+  let best = isMaximizing ? -Infinity : Infinity;
+  for (const card of getUntakenCards(board, CARD_COUNT)) {
+    const { nextBoard } = moves.takeCard(board, { ctx: makeCtx({ currentPlayer }), events: dummyEvents }, [card]);
+    const score = minimax(nextBoard, botPlayerIndex, memo);
+    best = isMaximizing ? Math.max(best, score) : Math.min(best, score);
+  }
+
+  memo.set(key, best);
+  return best;
+};

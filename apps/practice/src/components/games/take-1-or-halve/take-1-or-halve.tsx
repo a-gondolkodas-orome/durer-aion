@@ -126,6 +126,7 @@ export const Take1OrHalve = strategyGameFactory({
       label: { hu: 'Teszt 🤖', en: 'Test 🤖' }
     },
     {
+      // smart bot: verified as optimal
       botStrategy: smartBotStrategy,
       generateStartBoard: () => random(20, 27),
       label: { hu: 'Okos 🤖', en: 'Smart 🤖' },

@@ -41,8 +41,18 @@ export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => 
     }
   }
 
-  // TODO: is this optimal if bot does not have winning initial position but
-  // other player does not play according to winning strategy?
+  for (let li = 0; li < 3; li++) {
+    const actives = activeSlotIndices(board.levels[li]);
+    for (let i = 0; i < actives.length; i++) {
+      for (let j = i + 1; j < actives.length; j++) {
+        const { nextBoard } = applyMoveToBoard(board, li, [actives[i], actives[j]]);
+        if (!canWin(nextBoard)) {
+          moves.combineTwo(board, { levelIdx: li, indices: [actives[i], actives[j]] });
+          return;
+        }
+      }
+    }
+  }
   for (let li = 0; li < 3; li++) {
     if (tryLevel(li)) return;
   }
@@ -104,6 +114,33 @@ const findWinningPair = (level: Level, target: number) => {
 };
 
 export const hasActivePair = (level: Level): boolean => activeSlotIndices(level).length >= 2;
+
+export const applyMoveToBoard = (
+  board: Board, levelIdx: number, indices: number[]
+): { nextBoard: Board; combinedValue: number } => {
+  const newLevels = board.levels.map(level => [...level]);
+  const level = newLevels[levelIdx];
+  const combinedValue = indices.reduce((acc, i) => acc + (level[i] as Slot).value, 0);
+  indices.forEach(i => { level[i] = { ...(level[i] as Slot), state: 'consumed' }; });
+  const emptyIdx = newLevels[levelIdx + 1].indexOf(null);
+  newLevels[levelIdx + 1][emptyIdx] = { value: combinedValue, state: 'active' };
+  return { nextBoard: { ...board, levels: newLevels }, combinedValue };
+};
+
+const canWin = (board: Board): boolean => {
+  for (let li = 0; li < 3; li++) {
+    const actives = activeSlotIndices(board.levels[li]);
+    for (let i = 0; i < actives.length; i++) {
+      for (let j = i + 1; j < actives.length; j++) {
+        const total = board.levels[li][actives[i]]!.value + board.levels[li][actives[j]]!.value;
+        if (total >= board.target) return true;
+        const { nextBoard } = applyMoveToBoard(board, li, [actives[i], actives[j]]);
+        if (!canWin(nextBoard)) return true;
+      }
+    }
+  }
+  return false;
+};
 
 // Slot states: null = empty placeholder, { value, state:'active'|'consumed' }
 const activeSlotIndices = (level: Level): number[] =>

@@ -129,6 +129,7 @@ export const NumberCovering8 = strategyGameFactory({
   variants: [
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
     {
+      // smart bot: verified as optimal
       botStrategy: smartBotStrategy,
       generateStartBoard: () => range(1, 9),
       label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
@@ -147,6 +148,7 @@ export const NumberCovering10 = strategyGameFactory({
   variants: [
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
     {
+      // smart bot: verified as optimal
       botStrategy: smartBotStrategy,
       generateStartBoard: () => range(1, 11),
       label: { hu: 'Okos 🤖', en: 'Smart 🤖' },

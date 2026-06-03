@@ -108,6 +108,7 @@ export const RockPaperScissor = strategyGameFactory({
   gameplay: { moves },
   variants: [
     {
+      // smart bot: verified as optimal
       botStrategy: smartBotStrategy,
       generateStartBoard: (): Board => [['rock', 'paper', 'scissor'], ['rock', 'paper', 'scissor']]
     }

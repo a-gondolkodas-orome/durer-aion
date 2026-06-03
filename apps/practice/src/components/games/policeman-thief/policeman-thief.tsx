@@ -155,6 +155,7 @@ export const PolicemanthiefA = strategyGameFactory({
   },
   BoardClient,
   gameplay: { moves },
+  // smart bot: verified as optimal
   variants: [{ botStrategy: smartBotStrategy, generateStartBoard: generateStartBoardA }]
 });
 
@@ -169,5 +170,6 @@ export const PolicemanthiefB = strategyGameFactory({
   },
   BoardClient,
   gameplay: { moves },
+  // smart bot: verified as optimal
   variants: [{ botStrategy: smartBotStrategy, generateStartBoard: generateStartBoardB }]
 });

@@ -1,16 +1,14 @@
-import { strategyGameFactory, type Events, type BoardClientProps, type Ctx, GameBoard } from '../../../game-factory';
-import { range, cloneDeep } from 'lodash';
+import { strategyGameFactory, type BoardClientProps, GameBoard } from '../../../game-factory';
+import { range } from 'lodash';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import {
-  hasWinningTriple,
   Sheriff,
   Thief,
   getUntakenCards,
   generateStartBoard,
   type Board
 } from "../helpers";
-
-const CARD_COUNT = 7;
+import { moves, CARD_COUNT } from './moves';
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const isAllowedMove = index => {
@@ -53,23 +51,6 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     );
 };
 
-const moves = {
-  takeCard: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, indices) => {
-    const nextBoard = cloneDeep(board);
-
-    indices.forEach(idx => {
-      nextBoard.cards[ctx.currentPlayer!].push(idx)
-    });
-    nextBoard.numTurns += 1;
-    if (nextBoard.numTurns >= 5) {
-      nextBoard.cards[Thief].push(...getUntakenCards(nextBoard, CARD_COUNT));
-      const winner = hasWinningTriple(nextBoard.cards[Thief]) ? Thief : Sheriff;
-      events.endGame(winner);
-    }
-    events.endTurn();
-    return { nextBoard };
-  }
-}
 
 const rule = {
   hu: <>
@@ -112,6 +93,7 @@ export const ThiefSheriffMean7 = strategyGameFactory({
   gameplay: { moves },
   variants: [
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
+    // smart bot: verified as optimal
     { botStrategy: smartBotStrategy, generateStartBoard, label: { hu: 'Okos 🤖', en: 'Smart 🤖' }, isDefault: true }
   ]
 });

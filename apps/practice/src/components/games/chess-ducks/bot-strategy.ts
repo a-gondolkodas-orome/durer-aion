@@ -43,7 +43,7 @@ const getOptimalSmartBotMove = (board: Board): Field => {
   }
 
   if (duckCount >= 3 || colCount === 6) {
-    // sample + find has the same effect as filter + sample: find a random
+    // shuffle + find has the same effect as filter + sample: find a random
     // from the optimal moves
     const optimalPlace = shuffle(allowedMoves).find(({ row, col }) => {
       const { nextBoard } = moves.placeDuck(board, { events: dummyEvents }, { row, col });

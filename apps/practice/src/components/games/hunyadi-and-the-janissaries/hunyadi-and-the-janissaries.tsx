@@ -146,5 +146,6 @@ export const HunyadiAndTheJanissaries = strategyGameFactory({
   },
   BoardClient,
   gameplay: { moves, endOfTurnMove: 'stepUp' },
+  // smart bot: verified as optimal
   variants: [{ botStrategy: smartBotStrategy, generateStartBoard }]
 });

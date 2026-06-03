@@ -150,6 +150,7 @@ export const AddReduceDouble = strategyGameFactory({
       label: { hu: 'Teszt 🤖', en: 'Test 🤖' }
     },
     {
+      // smart bot: verified as optimal
       botStrategy: smartBotStrategy,
       generateStartBoard: () => ([random(3, 10), random(3, 10)]),
       label: { hu: 'Okos 🤖', en: 'Smart 🤖' },

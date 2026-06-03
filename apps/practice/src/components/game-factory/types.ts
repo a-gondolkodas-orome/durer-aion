@@ -33,6 +33,7 @@ export interface Variant {
   disabled?: boolean
   label?: I18nString
   botStrategy?: unknown
+  notAlwaysOptimal?: boolean
 }
 
 export interface VariantInput<TBoard> {
@@ -40,4 +41,5 @@ export interface VariantInput<TBoard> {
   isDefault?: boolean
   generateStartBoard?: () => TBoard
   botStrategy?: (args: StrategyArgs<TBoard>) => void
+  notAlwaysOptimal?: boolean
 }

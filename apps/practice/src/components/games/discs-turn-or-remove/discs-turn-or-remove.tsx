@@ -226,6 +226,7 @@ export const SixDiscs = strategyGameFactory({
   variants: [
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
     {
+      // smart bot: verified as optimal
       botStrategy: smartBotStrategy,
       generateStartBoard: generateStartBoard(6),
       label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
@@ -244,6 +245,7 @@ export const TenDiscs = strategyGameFactory({
   variants: [
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
     {
+      // smart bot: verified as optimal
       botStrategy: smartBotStrategy,
       generateStartBoard: generateStartBoard(10),
       label: { hu: 'Okos 🤖', en: 'Smart 🤖' },

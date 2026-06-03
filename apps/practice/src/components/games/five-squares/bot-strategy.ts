@@ -1,143 +1,84 @@
-import { sum, random, cloneDeep } from 'lodash';
+import { sum, isEqual, sample, range } from 'lodash';
 import type { StrategyArgs } from '../../game-factory';
 import type { Board } from './five-squares';
 
 export const randomBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
-  if (ctx.chosenRoleIndex === 0) {
-    const { nextBoard } = moves.addPiece(board, random(4));
+  if (ctx.currentPlayer === 1) {
+    const { nextBoard } = moves.addPiece(board, sample(range(5)));
     setTimeout(() => {
-      moves.addPiece(nextBoard, random(4));
+      moves.addPiece(nextBoard, sample(range(5)));
     }, 750);
   } else {
-    moves.addPiece(board, random(4));
+    moves.addPiece(board, sample(range(5)));
   }
 };
 
 export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
-  if (ctx.chosenRoleIndex === 0) {
-    const tileIndices = getOptimalTileIndices(board)!;
-    const { nextBoard } = moves.addPiece(board, tileIndices[0]);
+  const botPlayerIndex = ctx.currentPlayer!;
+  if (botPlayerIndex === 1) {
+    const pairs = bestPairs(board, botPlayerIndex);
+    const pair = sample(pairs)!;
+    const { nextBoard } = moves.addPiece(board, pair[0]);
     setTimeout(() => {
-      moves.addPiece(nextBoard, tileIndices[1]);
-    }, 750)
+      moves.addPiece(nextBoard, pair[1]);
+    }, 750);
   } else {
-    const tileIndex = getOptimalTileIndex(board);
-    moves.addPiece(board, tileIndex);
+    const scores = range(5).map(i => {
+      const next = [...board] as Board;
+      next[i]++;
+      return minimax(next, 1, botPlayerIndex);
+    });
+    const best = Math.max(...scores);
+    const bestTiles = range(5).filter(i => scores[i] === best);
+    moves.addPiece(board, sample(bestTiles));
   }
 };
 
-//following the strategy
-const getOptimalTileIndices = (board: Board) => {
-  const pieces = sum(board);
-  let board2 = cloneDeep(board);
-  board2.sort();
-
-  if(pieces === 2){ // 0,0,0,1,1 or 0,0,0,0,2
-    if(board2[4] === 2){
-      const i = findSquare(board,0);
-      return [i,i];
-    }
-    else{
-      return findSquares(board,1,1);
-    }
-  }
-  else if(pieces === 5){ // 0,0,1,2,2 or 0,0,0,2,3
-    if(random(1) === 0){ // make 0,0,1,3,3
-      if(board2[4] === 2){
-        return findSquares(board,2,2);
-      }
-      else{
-        return [findSquare(board,0),findSquare(board,2)];
-      }
-    }
-    else{ // make 0,0,2,2,3
-      if(board2[4] === 2){
-        return [findSquare(board,1),findSquare(board,2)];
-      }
-      else{
-        const i = findSquare(board,0);
-        return [i,i];
+const bestPairs = (board: Board, botPlayerIndex: number): [number, number][] => {
+  let best = -Infinity;
+  const result: [number, number][] = [];
+  for (let i = 0; i < 5; i++) {
+    for (let j = i; j < 5; j++) {
+      const next = [...board] as Board;
+      next[i]++;
+      next[j]++;
+      const score = minimax(next, 0, botPlayerIndex);
+      if (score > best) {
+        best = score;
+        result.length = 0;
+        result.push([i, j]);
+      } else if (score === best) {
+        result.push([i, j]);
       }
     }
   }
-  else if(pieces === 8){ // 0,1,2,2,3 or 0,1,1,3,3 or 0,0,2,3,3 or 0,0,2,2,4 or 0,0,1,3,4
-    if(board2[4] === 4){
-      if(board2[3] === 3){ // 0,0,1,3,4
-        const i = findSquare(board,0);
-        return [i,i];
-      }
-      else{ // 0,0,2,2,4
-        return [findSquare(board,0),findSquare(board,2)];
-      }
-    }
-    else if(board2[3] === 3){
-      if(board2[2] === 2){ // 0,0,2,3,3
-        return [findSquare(board,0),findSquare(board,3)];
-      }
-      else{ // 0,1,1,3,3
-        return [findSquare(board,1),findSquare(board,3)];
-      }
-    }
-    else{ // 0,1,2,2,3
-      const i = findSquare(board,2);
-      return [i,i];
-    }
-  }
-  else alert("illegal state");
+  return result;
 };
 
-//trying to win if the player makes a mistake
-const getOptimalTileIndex = (board: Board) => {
-  const pieces = sum(board);
-  let board2 = cloneDeep(board);
-  board2.sort();
-
-  if(pieces === 1){ // (0,0,0,0,1)
-    return random(4);
+const minimax = (board: Board, currentPlayer: number, botPlayerIndex: number): number => {
+  if (sum(board) === 10) {
+    const winnerIndex = isEqual([...board].sort(), [0, 1, 2, 3, 4]) ? 1 : 0;
+    return winnerIndex === botPlayerIndex ? 1 : -1;
   }
-  else if(pieces === 4){ // (0,1,1,1,1) or 0,0,1,1,2 or (0,0,0,2,2) or 0,0,0,1,3 or (0,0,0,0,4)
-    if(board2[4] === 3){
-      return findSquare(board,3);
+  const isMaximizing = currentPlayer === botPlayerIndex;
+  let best = isMaximizing ? -Infinity : Infinity;
+  if (currentPlayer === 0) {
+    for (let i = 0; i < 5; i++) {
+      const next = [...board] as Board;
+      next[i]++;
+      const score = minimax(next, 1, botPlayerIndex);
+      best = isMaximizing ? Math.max(best, score) : Math.min(best, score);
     }
-    else if(board2[4] === 2 && board2[3] === 1){
-      return findSquare(board,0);
-    }
-    else{
-      return random(4);
-    }
-  }
-  /*
-  (1,1,1,2,2) or 0,1,2,2,2 or (1,1,1,1,3) or 0,1,1,2,3 or (0,0,2,2,3)
-  or (0,0,1,3,3) or 0,1,1,1,4 or 0,0,1,2,4 or 0,0,0,3,4 or (0,0,1,1,5)
-  or (0,0,0,2,5) or (0,0,0,1,6) or (0,0,0,0,7)
-  */
-  else if(pieces === 7){
-    if(board2[4] === 4){
-      return findSquare(board,4);
-    }
-    else if(board2[0] === 0 && board2[1] !== 0){
-      return findSquare(board,0);
-    }
-    else{
-      return random(4);
+  } else {
+    for (let i = 0; i < 5; i++) {
+      for (let j = i; j < 5; j++) {
+        const next = [...board] as Board;
+        next[i]++;
+        next[j]++;
+        const score = minimax(next, 0, botPlayerIndex);
+        best = isMaximizing ? Math.max(best, score) : Math.min(best, score);
+      }
     }
   }
-  else alert("illegal state");
-};
-
-// finds a square with n pieces randomly
-const findSquare = (board: Board, n) => {
-  let ret = random(4);
-  while (board[ret] !== n) ret = random(4);
-  return ret;
-};
-
-// finds the squares with values n and k
-// n and k does not need to be different but there must be exactly 2 such squares
-const findSquares = (board: Board, n, k) => {
-  let i1 = 0;
-  while (board[i1] !== n || board[i1] !== k) i1++;
-  let i2 = i1+1;
-  while (board[i2] !== n || board[i2] !== k) i2++;
-  return [i1,i2];
+  return best;
 };
