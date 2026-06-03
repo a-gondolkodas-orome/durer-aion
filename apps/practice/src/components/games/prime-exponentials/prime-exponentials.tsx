@@ -83,11 +83,11 @@ const PrimePowerGrid = ({ board, visiblePowers, isClientMoveAllowed, chooseEntry
   );
 };
 
-const HoverPreview = ({ hovered, board }) => {
+const HoverPreview = ({ hovered, board, isClientMoveAllowed }) => {
   const { t } = useTranslation();
   return (
     <div className="min-h-6 mb-2">
-      {hovered !== null && <p>
+      {hovered !== null && hovered.value <= board && isClientMoveAllowed && <p>
         {t({ hu: 'Kivonandó prímhatvány:', en: 'Prime power to subtract:' })}{' '}
         <strong>{hovered.prime}<sup>{hovered.exponent}</sup> = {hovered.value}</strong>.{' '}
         {t({ hu: 'Eredmény:', en: 'Result:' })}{' '}
@@ -108,7 +108,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   return (
     <GameBoard>
       <p className='w-full text-8xl font-bold text-center mb-4'>{board}</p>
-      <HoverPreview hovered={hovered} board={board} />
+      <HoverPreview hovered={hovered} board={board} isClientMoveAllowed={ctx.isClientMoveAllowed} />
       <PrimePowerGrid
         board={board}
         visiblePowers={visiblePowers}
