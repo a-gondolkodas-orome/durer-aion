@@ -29,17 +29,17 @@ export const Overview = () => {
 
   return <main className="p-2">
     <OverviewHeader />
-    <div className="border-t border-slate-300 mt-2 pt-3 flex flex-wrap items-center gap-1 mb-2">
+    <div className="border-t mt-2 pt-3 flex flex-wrap items-center gap-1 mb-2">
       <CategoryFilter selected={selectedCategories} onChange={setSelectedCategories} />
     </div>
-    <h2 className="font-bold my-4 text-center">
+    <h2 className="my-4 text-center">
       {t({ hu: '5-8. osztályosoknak (A-B kategória)', en: 'For grades 5–8 (A–B category)' })}
     </h2>
     <div className="flex flex-wrap gap-4 justify-center">
       {gamesToShow.filter(id => gameList[id].category[0] <= 'B')
         .map(id => <Game key={id} gameId={id} gameProps={gameList[id]} />)}
     </div>
-    <h2 className="font-bold my-4 text-center">
+    <h2 className="my-4 text-center">
       {t({ hu: '9-12. osztályosoknak (C-D-E kategória)', en: 'For grades 9–12 (C–D–E category)' })}
     </h2>
     <div className="flex flex-wrap gap-4 justify-center">
@@ -91,22 +91,14 @@ const CategoryFilter = ({ selected, onChange }: {
 
 const OverviewHeader = () => {
   const { t } = useTranslation();
-  return <div className="pb-2">
-    <div className="flex justify-end items-center gap-2 mb-1">
-      <a
-        href="https://forms.gle/7DwugmXNrvKgkiiu8"
-        target="_blank"
-        rel="noreferrer"
-        className="text-sm text-slate-500 hocus:text-slate-600"
-      >
-        {t({ hu: 'Hibabejelentő', en: 'Bug report' })}
-      </a>
+  return <>
+    <header className="flex flex-wrap items-baseline pb-2">
+      <h1 className="grow text-blue-600 font-bold text-center">
+        {t({ hu: 'Dürer stratégiás játékok', en: 'Dürer Strategy Games' })}
+      </h1>
       <LanguageSelector />
-    </div>
-    <h1 className="text-blue-600 font-bold text-center text-2xl pb-2">
-      {t({ hu: 'Dürer stratégiás játékok', en: 'Dürer Strategy Games' })}
-    </h1>
-    <div className="max-w-[100ch] mx-auto">
+    </header>
+    <div className="max-w-[100ch] mx-auto pb-2">
       {t({
         hu: <>
           A <i>stratégiás játék</i> egy két szereplős játék,
@@ -123,7 +115,7 @@ const OverviewHeader = () => {
         </>
       })}
     </div>
-  </div>;
+  </>;
 };
 
 const categoryColorClass: Record<Category, string> = {
@@ -155,7 +147,7 @@ const Game = ({ gameId, gameProps }: { gameId: string; gameProps: GameEntry }) =
       no-underline text-inherit
     `}
   >
-    <h2 className="font-semibold mb-4 text-center">
+    <h2 className="mb-4 text-center">
       {t(gameProps.name)}
     </h2>
     <div className="grow"></div>

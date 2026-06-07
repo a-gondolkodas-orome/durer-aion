@@ -19,7 +19,7 @@ const ActiveSlot = ({ value, isSelected, isDisabled, onClick }) => (
   <button
     className={`${chipBase} transition-colors ${
       isSelected ? 'bg-blue-500 border-blue-600 text-white'
-        : isDisabled ? 'bg-slate-100 border-slate-300 text-slate-500'
+        : isDisabled ? 'bg-slate-100 text-slate-500'
           : 'bg-white border-slate-400 hocus:bg-blue-50 hocus:border-blue-400'
     }`}
     onClick={onClick}

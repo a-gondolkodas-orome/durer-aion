@@ -203,7 +203,7 @@ const PlayerNameSetup = ({ roleLabels, playerNames, placeholderNames, setPlayerN
       </Label>
       <Input
         name="name_of_first_player"
-        className="border border-slate-300 rounded-md text-slate-600 px-2 py-1 text-sm w-full
+        className="border rounded-md text-slate-600 px-2 py-1 text-sm w-full
           focus:outline-none focus:ring-1 focus:ring-blue-400"
         placeholder={placeholderNames[0]}
         value={playerNames[0]}
@@ -216,7 +216,7 @@ const PlayerNameSetup = ({ roleLabels, playerNames, placeholderNames, setPlayerN
       </Label>
       <Input
         name="name_of_second_player"
-        className="border border-slate-300 rounded-md text-slate-600 px-2 py-1 text-sm w-full
+        className="border rounded-md text-slate-600 px-2 py-1 text-sm w-full
           focus:outline-none focus:ring-1 focus:ring-blue-400"
         placeholder={placeholderNames[1]}
         value={playerNames[1]}

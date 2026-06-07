@@ -11,30 +11,30 @@ export const GameHeader = () => {
   const title = t(gameEntry?.title ?? gameEntry?.name ?? '');
   return (
   <>
-    <header className="flex flex-wrap items-baseline">
+    <header className="flex flex-wrap items-baseline border-b pb-2 mb-2">
       <Link
         to='/'
-        className="md:basis-44 text-sm text-blue-600 whitespace-nowrap"
-      >← <span className="hidden md:inline">{t({ hu: 'Vissza a listához', en: 'Back to list' })}</span></Link>
-      <h1 className="grow text-blue-600 font-bold pb-4 text-center">
+        className="md:basis-44 text-sm whitespace-nowrap"
+      >
+        ← <span className="hidden md:inline">{t({ hu: 'Vissza a listához', en: 'Back to list' })}</span>
+      </Link>
+      <h1 className="grow text-blue-600 text-center">
         {title}
       </h1>
       <span className="md:hidden ml-auto">
         <LanguageSelector />
       </span>
-      <span className="basis-44 text-right hidden md:flex items-center justify-end gap-2">
+      <span className="basis-44 ml-auto hidden md:flex items-center justify-end gap-2">
         <a
           href="https://forms.gle/7DwugmXNrvKgkiiu8"
           rel="noreferrer"
           target="_blank"
-          className="px-2"
         >
           {t({ hu: 'Hibabejelentő', en: 'Bug report' })}
         </a>
         <LanguageSelector />
       </span>
     </header>
-    <hr />
   </>);
 };
 
