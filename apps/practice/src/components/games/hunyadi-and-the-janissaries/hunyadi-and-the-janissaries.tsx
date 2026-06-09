@@ -65,7 +65,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             marginLeft: (6-rowIndex) + 'rem',
             marginRight: (6-rowIndex) + 'rem'
           }}
-          className="border-t-black border-t-2 p-0.5 text-center whitespace-nowrap"
+          className="border-t-slate-900 border-t-2 p-0.5 text-center whitespace-nowrap"
         >
           {board[rowIndex] && board[rowIndex].map((group, pieceIndex) => (
             <button
@@ -80,7 +80,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             >
               <svg
                 className={`
-                  w-full aspect-square border-dashed border-black
+                  w-full aspect-square border-dashed border-slate-900
                   ${showToBeKilled(group) ? 'outline-dashed opacity-50' : ''}
                   ${group === 'blue' ? 'fill-blue-600' : 'fill-red-600'}
                 `}

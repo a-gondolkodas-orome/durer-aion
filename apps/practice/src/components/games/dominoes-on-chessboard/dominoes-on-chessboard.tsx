@@ -63,7 +63,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   };
 
   const getCellBgClass = (field: Field) => {
-    if (isCovered(field, board)) return 'bg-slate-600 border-black';
+    if (isCovered(field, board)) return 'bg-slate-600 border-slate-900';
     if (!ctx.isClientMoveAllowed) return '';
     if (isPartOfPreview(field)) return 'bg-blue-500';
     if (isEqual(selectedField, field)) return 'bg-blue-600';

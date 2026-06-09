@@ -44,7 +44,7 @@ export const GameEndDialog = ({
       onClose={() => setIsOpen(false)}
       className="relative z-50"
     >
-      <div className="fixed inset-0 bg-black/50" aria-hidden="true"></div>
+      <div className="fixed inset-0 bg-slate-900/50" aria-hidden="true"></div>
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <DialogPanel className="rounded-sm bg-slate-50 max-w-sm w-full p-2">
           <header className="flex items-baseline mb-2">

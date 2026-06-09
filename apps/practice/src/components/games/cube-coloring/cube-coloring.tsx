@@ -18,7 +18,7 @@ const cubeCoords = [
 
 export const nodeColors = {
   'red': {
-    bg: 'bg-red-500 text-black enabled:hocus:bg-red-600',
+    bg: 'bg-red-500 text-inherit enabled:hocus:bg-red-600',
     name: { hu: 'Piros', en: 'Red' },
     svg: 'var(--color-red-500)'
   },
@@ -28,7 +28,7 @@ export const nodeColors = {
     svg: 'var(--color-blue-500)'
   },
   'yellow': {
-    bg: 'bg-yellow-500 text-black enabled:hocus:bg-yellow-600',
+    bg: 'bg-yellow-500 text-inherit enabled:hocus:bg-yellow-600',
     name: { hu: 'Sárga', en: 'Yellow' },
     svg: 'var(--color-yellow-500)'
   }
@@ -85,7 +85,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 
     <svg
       onMouseMove={(event) => drawPickedColor(event)}
-      className="aspect-square stroke-black stroke-3"
+      className="aspect-square stroke-slate-900 stroke-3"
     >
       {/* <!-- front and back face --> */}
       <rect x="8%" y="25%" width="66%" height="66%" className="fill-transparent" />

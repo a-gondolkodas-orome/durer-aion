@@ -33,7 +33,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           className={`
             border-2 rounded-sm text-2xl min-w-[4ch] p-1 my-1 font-bold
             enabled:bg-green-200 enabled:hocus:bg-green-400
-            ${i === target ? 'border-8 border-black' : '' }
+            ${i === target ? 'border-8 border-slate-900' : '' }
             ${i < board ? 'bg-slate-400' : ''}
             ${i === board ? 'bg-slate-200' : ''}
             ${i > target ? 'text-slate-500 border-red-600' : ''}
