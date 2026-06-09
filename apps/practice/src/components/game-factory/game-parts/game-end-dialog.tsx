@@ -46,7 +46,7 @@ export const GameEndDialog = ({
     >
       <div className="fixed inset-0 bg-black/50" aria-hidden="true"></div>
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel className="rounded-sm bg-white max-w-sm w-full p-2">
+        <DialogPanel className="rounded-sm bg-slate-50 max-w-sm w-full p-2">
           <header className="flex items-baseline mb-2">
             <DialogTitle className="grow block text-2xl text-center">
               {t({ hu: 'A játék véget ért', en: 'Game over' })}

@@ -30,13 +30,13 @@
 
 @layer components {
     .primary-button {
-        @apply block w-full py-1.5 px-3;
+        @apply block w-full py-1.5 px-2;
         @apply text-lg font-semibold rounded-lg disabled:opacity-50;
         @apply border-none bg-blue-500 text-white enabled:hocus:bg-blue-600;
     }
     .secondary-button {
-        @apply block w-full py-1.5 px-3;
+        @apply block w-full py-1.5 px-2;
         @apply text-lg rounded-lg disabled:opacity-50;
-        @apply border enabled:hocus:border-slate-300 enabled:hocus:bg-slate-100;
+        @apply border enabled:hocus:border-slate-300 bg-slate-50 enabled:hocus:bg-slate-100;
     }
 }

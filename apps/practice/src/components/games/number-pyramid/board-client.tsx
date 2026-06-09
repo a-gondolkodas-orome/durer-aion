@@ -5,22 +5,22 @@ import { GameBoard, type BoardClientProps } from '../../game-factory';
 
 export type TurnState = { levelIdx: number; slotIdx: number } | null;
 
-const chipBase = 'rounded-lg border-2 px-3 py-2 font-bold text-lg min-w-12';
+const chipBase = 'rounded-lg border-2 py-2 font-bold min-w-10';
 
 const PlaceholderSlot = () => (
   <button disabled className={`${chipBase} border-dashed text-transparent select-none`}>0</button>
 );
 
 const ConsumedSlot = ({ value }) => (
-  <button disabled className={`${chipBase} opacity-50 line-through`}>{value}</button>
+  <button disabled className={`${chipBase} opacity-40 line-through`}>{value}</button>
 );
 
 const ActiveSlot = ({ value, isSelected, isDisabled, onClick }) => (
   <button
-    className={`${chipBase} transition-colors ${
-      isSelected ? 'bg-blue-500 border-blue-600 text-white'
-        : isDisabled ? 'bg-slate-100 text-slate-500'
-          : 'bg-white border-slate-400 hocus:bg-blue-50 hocus:border-blue-400'
+    className={`${chipBase} ${
+      isSelected ? 'bg-blue-500 border-blue-400 text-white'
+        : isDisabled ? 'bg-slate-200 opacity-50'
+          : 'border-slate-400 hocus:bg-blue-50 hocus:border-blue-400'
     }`}
     onClick={onClick}
     disabled={isDisabled}

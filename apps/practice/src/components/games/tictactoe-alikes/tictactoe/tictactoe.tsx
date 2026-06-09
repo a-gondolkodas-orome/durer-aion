@@ -26,13 +26,13 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const pieceColor = (id) => {
     const colorCode = board[id];
     if (colorCode === 'red') return 'bg-red-600';
-    if (colorCode === 'white') return 'bg-white';
+    if (colorCode === 'white') return 'bg-slate-50';
     return 'bg-blue-600';
   };
 
   /*
   Due to simulating borders with the background peeking through gaps, we need
-  to explicitly give bg-white to children.
+  to explicitly give surface background to children.
   */
   return (
   <GameBoard>
@@ -44,7 +44,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           onClick={() => clickField(id)}
           className={`
             aspect-square p-[25%] enabled:hocus:bg-slate-100
-            ${!gameIsInPlacingPhase && isMoveAllowed(id) ? 'bg-green-100' : 'bg-white'}
+            ${!gameIsInPlacingPhase && isMoveAllowed(id) ? 'bg-green-100' : 'bg-slate-50'}
           `}
         >
           {board[id] && (
@@ -52,7 +52,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               className={`
                 w-full aspect-square block rounded-full
                 ${pieceColor(id)}
-                ${pieceColor(id) === 'bg-white' ? 'border-4 border-slate-600' : ''}
+                ${pieceColor(id) === 'bg-slate-50' ? 'border-4 border-slate-600' : ''}
               `}
             ></span>
           )}

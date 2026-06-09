@@ -21,7 +21,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 
   /*
   Due to simulating borders with the background peeking through gaps, we need
-  to explicitly give bg-white to children.
+  to explicitly give surface background to children.
   */
   return (
     <GameBoard>
@@ -31,7 +31,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         key={id}
         disabled={!isMoveAllowed(id)}
         onClick={() => clickField(id)}
-        className="aspect-square p-[25%] bg-white"
+        className="aspect-square p-[25%] bg-slate-50"
         >
           {board[id] && (
             <span

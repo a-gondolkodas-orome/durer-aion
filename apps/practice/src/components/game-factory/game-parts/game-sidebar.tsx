@@ -57,7 +57,7 @@ export const GameSidebar = ({
 
   return (
     <div className="p-2 flex flex-col grow shrink-0 basis-64 gap-3">
-      <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 mb-8 flex flex-col gap-3">
+      <div className="rounded-lg border bg-slate-50 p-3 mb-8 flex flex-col gap-3">
         {ctx.isHumanVsHumanGame && ctx.phase !== 'roleSelection'
           ? <PlayerTurnPanel ctx={ctx} />
           : <p className="text-center font-bold text-lg">{t(getCtaText(ctx))}</p>
@@ -246,7 +246,7 @@ const PlayerTurnPanel = ({ ctx }: { ctx: Ctx }) => {
   const isEnd = ctx.phase === 'gameEnd';
 
   return (
-    <div className="flex flex-col gap-1" aria-live="polite">
+    <div className="flex flex-col gap-2" aria-live="polite">
       {[0, 1].map(i => {
         const isActive = !isEnd && ctx.currentPlayer === i;
         const isWinner = isEnd && ctx.winnerIndex === i;
@@ -254,10 +254,10 @@ const PlayerTurnPanel = ({ ctx }: { ctx: Ctx }) => {
         return (
           <div
             key={i}
-            className={`flex items-center gap-2 rounded-md px-3 py-2 border-l-4
-              ${highlighted ? 'bg-blue-50 border-blue-400' : 'bg-white border-slate-200'}`}
+            className={`flex items-center gap-2 rounded-md px-3 py-2 border-l-4 drop-shadow-sm
+              ${highlighted ? 'bg-blue-50 border-blue-400' : 'bg-white'}`}
           >
-            <span className={`flex-1 ${highlighted ? 'font-bold text-blue-700' : 'text-slate-500'}`}>
+            <span className={`flex-1 ${highlighted ? 'font-bold text-blue-700' : ''}`}>
               {playerName(i)}
             </span>
             {isWinner && <span>🏆</span>}
