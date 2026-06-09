@@ -71,8 +71,8 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           onClick={() => clickField(id)}
           disabled={!isAllowed_choosePiece(id) && !isAllowed_movePiece(id)}
           className={`
-            aspect-square border-r-2 border-b-2 relative flex justify-center items-center
-            disabled:cursor-default
+            aspect-square border-r-2 border-b-2 p-2 relative flex justify-center items-center
+            disabled:cursor-default enabled:hocus:bg-blue-50
             ${possibleMoves.includes(id) && isCurrentPlayerShark && board.submarines[id]
               ? 'ring-2 ring-inset ring-red-600' : ''}
           `}
@@ -87,14 +87,14 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             <SubmarinesInCell count={board.submarines[id]} />
           )}
           {board.shark === id && (
-            <svg className="aspect-square top-0 absolute z-10 opacity-80">
+            <svg className="aspect-square top-0 absolute z-10">
               <use xlinkHref="#shark" />
             </svg>
           )}
           {board.shark === id && isCurrentPlayerShark && ctx.isClientMoveAllowed && (
-            <span
-              className="absolute z-50 w-[75%] text-black border-2 rounded-sm bg-white opacity-80"
-            >{t({ hu: 'Itt maradok', en: 'Stay here' })}</span>
+            <button
+              className="absolute bottom-1 z-50 w-[95%] secondary-button text-xs p-0.5"
+            >{t({ hu: 'Itt maradok', en: 'Stay here' })}</button>
           )}
       </button>
       ))}
