@@ -67,7 +67,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         })}
       </div>
       {numberSummary && <p className="text-sm text-slate-500 mb-2">{numberSummary}</p>}
-      <div className="mt-6 pt-4 border-t border-slate-200 flex gap-2 flex-wrap">
+      <div className="mt-6 pt-4 border-t flex gap-2 flex-wrap">
         {availableDigits.map(d => (
           <button
             key={d}

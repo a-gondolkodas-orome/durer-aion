@@ -103,7 +103,7 @@ export const GameSidebar = ({
             disabled={!isNewGameAllowed}
           />
         ) : (
-          <details className="border border-slate-200 rounded-lg p-2 text-sm">
+          <details className="border rounded-lg p-2 text-sm">
             <summary className="cursor-pointer text-slate-500 hocus:text-slate-600">
               {modeSummaryLabel}{variantSummaryLabel}
             </summary>

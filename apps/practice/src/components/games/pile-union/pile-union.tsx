@@ -133,7 +133,7 @@ const Pile = ({ size, disabled, isSelected, moveType, onClick }: {
       className={`
         flex flex-col items-center gap-1 p-2 rounded-lg border-2 transition-colors
         ${isSelected ? 'border-blue-300 bg-blue-600/40' :
-          isRemoveHovered ? 'border-slate-200 bg-slate-800/5' :
+          isRemoveHovered ?  'bg-slate-800/5' :
           isMergeHovered ? 'border-blue-300 bg-blue-600/20' :
           'border-transparent'}
         disabled:cursor-default

@@ -60,7 +60,7 @@ export const GameEndDialog = ({
           <Description className="text-lg block text-justify mb-3">
             {t(getCtaText(ctx))}
           </Description>
-          <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 flex flex-col gap-3">
+          <div className="rounded-lg border bg-slate-50 p-3 flex flex-col gap-3">
             <ModeSelector
               isHumanVsHumanGame={localMode === 'vsHuman'}
               onSwitchMode={handleModeChange}
