@@ -7,12 +7,7 @@ export const ModeSelector = ({ isHumanVsHumanGame, onSwitchMode, disabled }: {
   disabled: boolean
 }) => {
   const { t } = useTranslation();
-  const labelClass = (active: boolean) => `grow py-1 px-2 text-center
-    ${active
-      ? `bg-blue-500 text-white font-semibold ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`
-      : disabled
-        ? 'opacity-40 cursor-not-allowed bg-slate-100'
-        : 'bg-slate-100 text-slate-600 hocus:bg-slate-200 cursor-pointer'}`;
+
   return (
     <fieldset>
       <legend className="text-xs text-slate-600 mb-1.5">
@@ -20,7 +15,7 @@ export const ModeSelector = ({ isHumanVsHumanGame, onSwitchMode, disabled }: {
       </legend>
       <div className={`flex rounded-lg overflow-hidden border text-sm
         has-focus-visible:ring-2 has-focus-visible:ring-red-400 has-focus-visible:ring-offset-1`}>
-        <label className={labelClass(!isHumanVsHumanGame)}>
+        <label className={labelClass(!isHumanVsHumanGame, disabled)}>
           <input
             type="radio"
             name="mode"
@@ -32,7 +27,7 @@ export const ModeSelector = ({ isHumanVsHumanGame, onSwitchMode, disabled }: {
           />
           🤖 {t({ hu: 'Gép ellen', en: 'vs Computer' })}
         </label>
-        <label className={labelClass(isHumanVsHumanGame)}>
+        <label className={labelClass(isHumanVsHumanGame, disabled)}>
           <input
             type="radio"
             name="mode"
@@ -56,12 +51,7 @@ export const DifficultySelector = ({ variants, selectedIndex, onSelect, disabled
   disabled: boolean
 }) => {
   const { t } = useTranslation();
-  const labelClass = (active: boolean, variantDisabled = false) => `min-w-0 grow py-1 px-2 text-center
-    ${active && !variantDisabled
-      ? `bg-blue-500 text-white font-semibold ${fieldsetDisabled ? 'cursor-not-allowed' : 'cursor-pointer'}`
-      : variantDisabled || fieldsetDisabled
-        ? 'opacity-40 cursor-not-allowed bg-slate-100'
-        : 'bg-slate-100 text-slate-600 hocus:bg-slate-200 cursor-pointer'}`;
+
   return (
     <fieldset>
       <legend className="text-xs text-slate-600 mb-1.5">
@@ -72,7 +62,7 @@ export const DifficultySelector = ({ variants, selectedIndex, onSelect, disabled
         {variants.map(v => (
           <label
             key={v.originalIndex}
-            className={labelClass(v.originalIndex === selectedIndex, v.disabled)}
+            className={labelClass(v.originalIndex === selectedIndex, v.disabled || fieldsetDisabled)}
             title={v.disabled ? t({ hu: 'Nincs gépi stratégia megadva', en: 'No bot strategy defined' }) : undefined}
           >
             <input
@@ -101,6 +91,13 @@ export const DifficultySelector = ({ variants, selectedIndex, onSelect, disabled
     </fieldset>
   );
 };
+
+const labelClass = (active: boolean, disabled: boolean) => `
+  grow py-1 px-2 text-center
+  ${disabled ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}
+  ${active ? 'bg-blue-500 text-white font-semibold' : 'bg-slate-100'}
+  ${!active && !disabled ? 'hocus:bg-slate-200' : ''}
+`;
 
 export const getCtaText = ({
   phase,

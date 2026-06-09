@@ -65,11 +65,12 @@ const MoveTypeSelector = ({ moveType, isClientMoveAllowed, canMerge, onSelect }:
 }) => {
   const { t } = useTranslation();
 
-  const labelClass = (active: boolean, disabled: boolean) => `grow py-1 px-2 text-center ${
-    active ? 'bg-blue-500 text-white font-semibold cursor-pointer'
-    : disabled ? 'opacity-40 cursor-not-allowed bg-slate-100 text-slate-600'
-    : 'bg-slate-100 text-slate-600 hocus:bg-slate-200 cursor-pointer'
-  }`;
+  const labelClass = (active: boolean, disabled: boolean) => `
+    grow py-1 px-2 text-center
+    ${disabled ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}
+    ${active ? 'bg-blue-500 text-white font-semibold' : 'bg-slate-100'}
+    ${!active && !disabled ? 'hocus:bg-slate-200' : ''}
+  `;
 
   return (
     <fieldset
