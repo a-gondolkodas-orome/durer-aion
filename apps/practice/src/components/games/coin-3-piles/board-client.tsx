@@ -76,12 +76,16 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   return (
     <GameBoard>
 
-      <div className={`flex items-end gap-4 px-4 flex-wrap ${!wasCoinAlreadyRemovedInTurn ? 'opacity-40' : ''}`}>
+      <div
+        className={`
+          flex items-end gap-4 flex-wrap ${!wasCoinAlreadyRemovedInTurn ? 'opacity-40' : ''}
+        `}
+      >
         <div className="flex flex-col gap-1">
           <span className="font-semibold text-sm">
             {t({ hu: 'Visszarakás:', en: 'Place back:' })}
           </span>
-          <div className="flex gap-4">
+          <div className="flex gap-2">
             <button
               disabled={!isAddAllowed(1)}
               className="secondary-button w-auto"
@@ -94,7 +98,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                 key={coinValue}
                 disabled={!isAddAllowed(coinValue)}
                 className={`
-                  primary-button w-auto rounded-2xl
+                  primary-button w-auto min-w-[4ch] rounded-2xl
                   ${getCoinBgColor(coinValue)} enabled:hocus:brightness-75
                 `}
                 onClick={() => addToPile(coinValue)}
@@ -113,9 +117,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         </button>
       </div>
 
-      <hr className="my-4" />
-
-      <div className="flex justify-center gap-4 mb-2">
+      <div className="flex justify-center gap-4 my-2 border-t pt-2">
         {[1, 2, 3].map(coinValue => (
           <span key={coinValue} className="flex items-center gap-1 text-sm font-semibold">
             <span className={`w-4 h-4 rounded-full ${getCoinBgColor(coinValue)}`} />
