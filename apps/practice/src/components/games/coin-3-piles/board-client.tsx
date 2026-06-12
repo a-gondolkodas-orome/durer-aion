@@ -6,12 +6,12 @@ import { GameBoard, type BoardClientProps } from '../../game-factory';
 
 const getCoinBgColor = (coinValue) => {
   if (coinValue === 1) return 'bg-yellow-700';
-  if (coinValue === 2) return 'bg-slate-500';
+  if (coinValue === 2) return 'bg-stone-500';
   return 'bg-yellow-400';
 };
 const getCoinShadowColor = (coinValue) => {
   if (coinValue === 1) return 'shadow-yellow-700';
-  if (coinValue === 2) return 'shadow-slate-500';
+  if (coinValue === 2) return 'shadow-stone-500';
   return 'shadow-yellow-400';
 };
 
@@ -120,7 +120,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           <span key={coinValue} className="flex items-center gap-1 text-sm font-semibold">
             <span className={`w-4 h-4 rounded-full ${getCoinBgColor(coinValue)}`} />
             {coinValue}
-            <span className="text-slate-500 font-normal">× {board[coinValue - 1]}</span>
+            <span className="font-normal">× {board[coinValue - 1]}</span>
           </span>
         ))}
       </div>

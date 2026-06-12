@@ -71,9 +71,9 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               key={pieceId}
               disabled={isDisabled({ pileId, pieceId })}
               className={`
-                bg-blue-600 w-[20%] aspect-square rounded-full mx-0.5 mt-0.5
-                ${toBeRemoved(pileId) ? 'opacity-50 bg-slate-600' : ''}
-                ${toBeLeft({ pileId, pieceId }) ? 'bg-blue-900' : ''}
+                bg-blue-800 w-[20%] aspect-square rounded-full mx-0.5 mt-0.5
+                ${toBeRemoved(pileId) ? 'bg-slate-900/40' : ''}
+                ${toBeLeft({ pileId, pieceId }) ? 'bg-blue-800/75' : ''}
               `}
               onClick={() => clickPiece({ pileId, pieceId })}
               onFocus={() => setHoveredPiece({ pileId, pieceId })}

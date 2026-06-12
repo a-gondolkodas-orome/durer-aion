@@ -61,7 +61,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     const pileName = language === 'en' ? 'pile' : 'kupac';
 
     if (!ctx.isClientMoveAllowed || !hoveredPiece) {
-      return `${pileId+1}. ${pileName}: ${pieceCountInPile} `;
+      return `${pileId+1}. ${pileName}: ${pieceCountInPile}`;
     }
 
     if (pileId===hoveredPiece.pileId) {
@@ -79,10 +79,9 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   };
 
   const pieceColor = ({ pileId, pieceId }: Piece) => {
-    if (toBeRemoved({ pileId, pieceId })) return 'bg-slate-600 opacity-75';
-    if (toAppear({ pileId, pieceId })) return 'bg-blue-600 opacity-75';
-    if (isDisabled({ pileId, pieceId })) return 'bg-blue-900';
-    return hoveredPiece ? 'bg-blue-900' : 'bg-blue-600';
+    if (toBeRemoved({ pileId, pieceId })) return 'bg-slate-900/40';
+    if (toAppear({ pileId, pieceId })) return 'bg-blue-800/40';
+    return 'bg-blue-800';
   };
 
   const leftBorder = (pileId) => {

@@ -80,7 +80,7 @@ const gameBoardFactory = (maxDiscs) => {
                       <button
                         className={`w-[95%] aspect-square rounded-full ${
                           ctx.isClientMoveAllowed && isSelected(1, i)
-                            ? "opacity-75 bg-blue-800"
+                            ? "bg-blue-800/75"
                             : "bg-red-800"
                         }`}
                         disabled={!ctx.isClientMoveAllowed}
@@ -103,11 +103,10 @@ const gameBoardFactory = (maxDiscs) => {
                       onClick={() => select(0, i)}
                     >
                       <button
-                        className={`w-[95%] aspect-square rounded-full ${
-                          ctx.isClientMoveAllowed && isSelected(0, i)
-                            ? "opacity-50 bg-slate-600"
-                            : "bg-blue-800"
-                        }`}
+                        className={`
+                          w-[95%] aspect-square rounded-full bg-blue-800
+                          ${isSelected(0, i) ? "enabled:opacity-50" : ""}
+                        `}
                         disabled={!ctx.isClientMoveAllowed}
                         onMouseOver={() => setHovered([0, i])}
                         onMouseOut={() => setHovered(null)}

@@ -25,7 +25,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             {range(4).map(col => (
               <td
                 key={col}
-                className={`border-4 ${board.chessBoard[row][col] === 'visited' ? 'bg-slate-300' : ''}`}
+                className={`border-4 ${board.chessBoard[row][col] === 'visited' ? 'bg-slate-900/40' : ''}`}
               >
                 <button
                   className="w-full aspect-square p-[5%]"
@@ -33,7 +33,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                   onClick={() => clickField({ row, col })}
                 >
                   {isMoveAllowed({ row, col }) && (
-                    <svg className="w-full aspect-square opacity-25">
+                    <svg className="w-full aspect-square opacity-20">
                       <use xlinkHref="#game-chess-knight" />
                     </svg>
                   )}

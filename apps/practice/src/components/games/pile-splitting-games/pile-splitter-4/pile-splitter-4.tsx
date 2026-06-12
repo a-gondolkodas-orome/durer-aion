@@ -59,7 +59,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     );
   };
 
-  const isHoverPreviewedForRemoval = (pileId) => {
+  const isHoverPreviewedForRemoval = (pileId: number) => {
     if (!ctx.isClientMoveAllowed) return false;
     if (removedPileId !== null) return false;
     if (!canRemovePile(pileId)) return false;
@@ -86,10 +86,10 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   };
 
   const pieceColor = ({ pileId, pieceId }: Piece) => {
-    if (pileId === removedPileId) return 'bg-slate-600 opacity-75';
-    if (isHoverPreviewedForRemoval(pileId)) return 'bg-slate-600 opacity-50';
-    if (toBeLeft({ pileId, pieceId })) return 'bg-blue-900';
-    return 'bg-blue-600';
+    if (pileId === removedPileId) return 'bg-slate-900/40';
+    if (isHoverPreviewedForRemoval(pileId)) return 'bg-slate-900/20';
+    if (toBeLeft({ pileId, pieceId })) return 'bg-blue-800/75';
+    return 'bg-blue-800';
   };
 
   const currentChoiceDescription = (pileId) => {

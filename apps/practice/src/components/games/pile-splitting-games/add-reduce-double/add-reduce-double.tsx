@@ -83,14 +83,14 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               disabled={isDisabled({ pileId, pieceId })}
               className={`
                 w-[18%] aspect-square rounded-full mx-0.5 mt-0.5
-                ${toAppear({ pileId, pieceId }) && nonExistent({ pileId, pieceId }) ? 'bg-blue-600 opacity-50' : ''}
-                ${toBeRemoved({ pileId, pieceId }) ? 'bg-slate-600 opacity-50' : ''}
+                ${toAppear({ pileId, pieceId }) && nonExistent({ pileId, pieceId }) ? 'bg-blue-800/50' : ''}
+                ${toBeRemoved({ pileId, pieceId }) ? 'bg-slate-900/40' : ''}
                 ${
                   (nonExistent({ pileId, pieceId }) && !toAppear({ pileId, pieceId }))
                     ? 'invisible inline-block'
                     : 'inline-block'
                 }
-                ${!nonExistent({ pileId, pieceId }) && !toBeRemoved({ pileId, pieceId }) ? 'bg-blue-900' : ''}
+                ${!nonExistent({ pileId, pieceId }) && !toBeRemoved({ pileId, pieceId }) ? 'bg-blue-800' : ''}
               `}
               onClick={() => clickPiece({ pileId, pieceId })}
               onFocus={() => hoverPiece({ pileId, pieceId })}

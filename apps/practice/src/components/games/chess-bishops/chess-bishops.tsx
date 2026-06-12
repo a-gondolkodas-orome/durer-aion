@@ -51,8 +51,8 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               <td
                 key={col}
                 className={`
-                  border-4 ${isForbidden({ row, col }) ? 'bg-slate-400' : ''}
-                  ${wouldBeForbidden({ row, col }) ? 'bg-slate-300' : ''}
+                  border-4 ${isForbidden({ row, col }) ? 'bg-slate-900/40' : ''}
+                  ${wouldBeForbidden({ row, col }) ? 'bg-slate-900/20' : ''}
                 `}
               >
                 <button
