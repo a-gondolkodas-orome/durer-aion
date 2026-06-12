@@ -8,6 +8,14 @@
       data-goatcounter="https://agondolkodasorome.goatcounter.com/count"
       async src="//gc.zgo.at/count.js">
     </script>
+    <script>
+      window.addEventListener('touchstart', function() {
+        document.documentElement.classList.add('using-touch');
+      }, { passive: true });
+      window.addEventListener('mousemove', function() {
+        document.documentElement.classList.remove('using-touch');
+      }, { passive: true });
+    </script>
     <link rel="stylesheet" href="/src/styles.css">
     <link rel="icon" href="data:,">
   </head>
