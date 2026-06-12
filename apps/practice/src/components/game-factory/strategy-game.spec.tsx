@@ -62,7 +62,7 @@ describe('isClientMoveAllowed', () => {
     const { getByTestId } = renderGame(ctxAwareConfig());
     fireEvent.click(getByTestId('mode-vsHuman'));
     expect((getByTestId('move-btn') as HTMLButtonElement).disabled).toBe(true);
-    fireEvent.click(getByTestId('start-hh-game'));
+    fireEvent.click(getByTestId('start-hh-game-0'));
     expect((getByTestId('move-btn') as HTMLButtonElement).disabled).toBe(false);
     fireEvent.click(getByTestId('move-btn')); // endTurn → currentPlayer 1
     expect((getByTestId('move-btn') as HTMLButtonElement).disabled).toBe(false);
@@ -86,7 +86,7 @@ describe('Bot behavior by mode', () => {
     const botStrategy = vi.fn();
     const { getByTestId } = renderGame(ctxAwareConfig(botStrategy));
     fireEvent.click(getByTestId('mode-vsHuman'));
-    fireEvent.click(getByTestId('start-hh-game'));
+    fireEvent.click(getByTestId('start-hh-game-0'));
     fireEvent.click(getByTestId('move-btn')); // endTurn → currentPlayer 1
     act(() => { vi.advanceTimersByTime(1500); });
     expect(botStrategy).not.toHaveBeenCalled();
@@ -108,13 +108,13 @@ describe('switchMode', () => {
     fireEvent.click(getByTestId('role-btn-0'));
     expect((getByTestId('move-btn') as HTMLButtonElement).disabled).toBe(false);
     fireEvent.click(getByTestId('mode-vsHuman'));
-    expect(getByTestId('start-hh-game')).toBeTruthy();
+    expect(getByTestId('start-hh-game-0')).toBeTruthy();
   });
 
   it('resets to roleSelection when switching back to vsComputer', () => {
     const { getByTestId } = renderGame(ctxAwareConfig());
     fireEvent.click(getByTestId('mode-vsHuman'));
-    fireEvent.click(getByTestId('start-hh-game'));
+    fireEvent.click(getByTestId('start-hh-game-0'));
     fireEvent.click(getByTestId('move-btn'));
     fireEvent.click(getByTestId('mode-vsComputer'));
     expect(getByTestId('role-btn-0')).toBeTruthy();
@@ -207,7 +207,7 @@ describe('win/loss tracking', () => {
   it('does not record in localStorage in vsHuman mode', () => {
     const { getByTestId } = renderGame(gameEndingConfig());
     fireEvent.click(getByTestId('mode-vsHuman'));
-    fireEvent.click(getByTestId('start-hh-game'));
+    fireEvent.click(getByTestId('start-hh-game-0'));
     fireEvent.click(getByTestId('end-win-btn'));
     expect(localStorage.getItem('stats__0')).toBeNull();
   });

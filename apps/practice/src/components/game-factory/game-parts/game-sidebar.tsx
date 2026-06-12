@@ -1,5 +1,5 @@
 import React from 'react';
-import { Label, Field, Input } from '@headlessui/react';
+import { Input } from '@headlessui/react';
 import { useTranslation, type I18nString } from '../../language';
 import {
   ModeSelector,
@@ -58,8 +58,8 @@ export const GameSidebar = ({
   return (
     <div className="p-2 flex flex-col grow shrink-0 basis-64 gap-3">
       <div className="rounded-lg border bg-slate-50 p-2 sm:p-3 mb-2 sm:mb-8 flex flex-col gap-3">
-        {ctx.isHumanVsHumanGame && ctx.phase !== 'roleSelection'
-          ? <PlayerTurnPanel ctx={ctx} />
+        {ctx.isHumanVsHumanGame
+          ? ctx.phase !== 'roleSelection' && <PlayerTurnPanel ctx={ctx} />
           : <p className="text-center font-bold text-base sm:text-lg">{t(getCtaText(ctx))}</p>
         }
 
@@ -81,7 +81,6 @@ export const GameSidebar = ({
             ? <PlayerNameSetup
                 roleLabels={roleLabels}
                 playerNames={playerNames}
-                placeholderNames={ctx.resolvedPlayerNames}
                 setPlayerNames={moves.setPlayerNames}
                 onStart={moves.startGame}
               />
@@ -184,52 +183,46 @@ const RoleSelector = ({ roleLabels, onRoleSelection, disabled }: {
   </div>;
 };
 
-const PlayerNameSetup = ({ roleLabels, playerNames, placeholderNames, setPlayerNames, onStart }: {
+const PlayerNameSetup = ({ roleLabels, playerNames, setPlayerNames, onStart }: {
   roleLabels?: [I18nString, I18nString]
   playerNames: string[]
-  placeholderNames: [string, string]
   setPlayerNames: (names: [string, string]) => void
   onStart: () => void
 }) => {
   const { t } = useTranslation();
   return (
   <div className="flex flex-col gap-2 sm:gap-3">
-    <p className="hidden sm:block text-sm text-slate-500 italic">
-      {t({ hu: 'Neveitek (nem kötelező):', en: 'Your names (optional):' })}
-    </p>
-    <Field className="flex items-center gap-2">
-      <Label className="font-semibold shrink-0 w-16 text-right text-sm">
-        {t(roleLabels ? roleLabels[0] : { hu: 'Első', en: 'First' }) + ':'}
-      </Label>
-      <Input
-        name="name_of_first_player"
-        className="border rounded-md text-slate-600 px-2 py-1 text-sm w-full
-          focus:outline-none focus:ring-1 focus:ring-blue-400"
-        placeholder={placeholderNames[0]}
-        value={playerNames[0]}
-        onChange={e => setPlayerNames([e.target.value.trim(), playerNames[1]])}
-      />
-    </Field>
-    <Field className="flex items-center gap-2">
-      <Label className="font-semibold shrink-0 w-16 text-right text-sm">
-        {t(roleLabels ? roleLabels[1] : { hu: 'Második', en: 'Second' }) + ':'}
-      </Label>
-      <Input
-        name="name_of_second_player"
-        className="border rounded-md text-slate-600 px-2 py-1 text-sm w-full
-          focus:outline-none focus:ring-1 focus:ring-blue-400"
-        placeholder={placeholderNames[1]}
-        value={playerNames[1]}
-        onChange={e => setPlayerNames([playerNames[0], e.target.value.trim()])}
-      />
-    </Field>
-    <button
-      data-testid="start-hh-game"
-      className="primary-button"
-      onClick={onStart}
-    >
-      {t({ hu: 'Kezdhetjük!', en: "Let's go!" })}
-    </button>
+    {([0, 1] as const).map(i => (
+      <div key={i} className="flex items-center gap-2">
+        <Input
+          name={i === 0 ? 'name_of_first_player' : 'name_of_second_player'}
+          className="border rounded-md text-slate-600 px-2 py-1 text-sm w-full
+            focus:outline-none focus:ring-1 focus:ring-blue-400"
+          placeholder={t([
+            { hu: 'Neved (Nyuszika)', en: 'Your name (Pip)' },
+            { hu: 'Neved (Teknős)', en: 'Your name (Dot)' }
+          ][i])}
+          value={playerNames[i]}
+          onChange={e => {
+            const updated: [string, string] = [playerNames[0], playerNames[1]];
+            updated[i] = e.target.value.trim();
+            setPlayerNames(updated);
+          }}
+        />
+        <button
+          data-testid={`start-hh-game-${i}`}
+          className="shrink-0 px-2 py-1 text-sm font-semibold rounded-md
+            bg-blue-500 text-white enabled:hocus:bg-blue-600 disabled:opacity-50"
+          onClick={() => {
+            setPlayerNames([playerNames[i], playerNames[1 - i]]);
+            onStart();
+          }}
+        >
+          {t({ hu: 'Kezdek', en: 'I start' })}
+          {roleLabels && ` (${t(roleLabels[0])})`}
+        </button>
+      </div>
+    ))}
   </div>
   );
 };
