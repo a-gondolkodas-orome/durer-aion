@@ -20,30 +20,22 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 
   return(
     <GameBoard>
-    <table className="border-collapse table-fixed w-full">
-      <tbody>
-        <tr>
-        {range(board.length).map(i => (
-          <td
-            className={`border-4 aspect-square ${ctx.isClientMoveAllowed ? 'hocus:bg-slate-300' : ''}`}
-            key={i}
-          >
-            <button
-              disabled={!ctx.isClientMoveAllowed || board[i] === COVERED}
-              className={`w-full text-2xl aspect-square select-none ${board[i] === COVERED && 'bg-slate-400'}`}
-              onClick={() => clickNumber(i+1)}
-            >
-              {board[i] === COVERED ? 'X' : board[i]}
-            </button>
-          </td>
-        ))}
-        </tr>
-      </tbody>
-    </table>
-    <p className="mt-2">
-      {t({ hu: 'Megmaradt számok összege', en: 'Sum of remaining numbers' })}
-      : {sum(getRemaining(board))}
-    </p>
+      <div className="flex flex-wrap gap-1">
+      {range(board.length).map(i => (
+        <button
+          key={i}
+          disabled={!ctx.isClientMoveAllowed || board[i] === COVERED}
+          className={`secondary-button w-auto text-2xl min-w-[3ch]`}
+          onClick={() => clickNumber(i+1)}
+        >
+          {board[i] === COVERED ? 'X' : board[i]}
+        </button>
+      ))}
+      </div>
+      <p className="mt-2">
+        {t({ hu: 'Megmaradt számok összege', en: 'Sum of remaining numbers' })}
+        : {sum(getRemaining(board))}
+      </p>
     </GameBoard>
   );
 };
