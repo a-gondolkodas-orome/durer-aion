@@ -13,29 +13,25 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       <p className='text-4xl font-bold text-center mb-2'>
         <code>({board[0]},{board[1]})</code>
       </p>
-      <div className="flex flex-wrap">
-        <span className="grow px-2">
-          <button
-            className='primary-button'
-            disabled={!ctx.isClientMoveAllowed}
-            onClick={() => moves.add1(board)}
-          >
-            {t({ hu: 'Növelek', en: 'Increase' })} {ctx.isClientMoveAllowed && <>
-              (→<code>({board[0]},{board[1] + 1})</code>)
-            </>}
-          </button>
-        </span>
-        <span className='grow px-2'>
-          <button
-            className="primary-button"
-            disabled={!ctx.isClientMoveAllowed}
-            onClick={() => moves.subtract(board)}
-          >
-            {t({ hu: 'Kivonok', en: 'Subtract' })} {ctx.isClientMoveAllowed && <>
-              (→<code>({board[0] - board[1]},{board[1]})</code>)
-            </>}
-          </button>
-        </span>
+      <div className="flex flex-wrap gap-2">
+        <button
+          className="primary-button w-auto grow"
+          disabled={!ctx.isClientMoveAllowed}
+          onClick={() => moves.add1(board)}
+        >
+          {t({ hu: 'Növelek', en: 'Increase' })} {ctx.isClientMoveAllowed && <>
+            (→<code>({board[0]},{board[1] + 1})</code>)
+          </>}
+        </button>
+        <button
+          className="primary-button w-auto grow"
+          disabled={!ctx.isClientMoveAllowed}
+          onClick={() => moves.subtract(board)}
+        >
+          {t({ hu: 'Kivonok', en: 'Subtract' })} {ctx.isClientMoveAllowed && <>
+            (→<code>({board[0] - board[1]},{board[1]})</code>)
+          </>}
+        </button>
       </div>
     </GameBoard>
   );
