@@ -48,16 +48,16 @@ export const GameEndDialog = ({
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <DialogPanel className="rounded-sm bg-slate-50 max-w-sm w-full p-2">
           <header className="flex items-baseline mb-2">
-            <DialogTitle className="grow block text-2xl text-center">
+            <DialogTitle className="grow block text-xl sm:text-2xl text-center">
               {t({ hu: 'A játék véget ért', en: 'Game over' })}
             </DialogTitle>
             <button
               onClick={() => setIsOpen(false)}
               aria-label={t({ hu: 'Bezárás', en: 'Close' })}
-              className="bg-slate-200 rounded-sm text-2xl px-1 hocus:bg-slate-300"
+              className="bg-slate-200 rounded-sm text-xl sm:text-2xl px-1 hocus:bg-slate-300"
             >×</button>
           </header>
-          <Description className="text-lg block text-justify mb-3">
+          <Description className="text-base sm:text-lg block text-justify mb-2">
             {t(getCtaText(ctx))}
           </Description>
           <div className="rounded-lg border bg-slate-50 p-3 flex flex-col gap-3">

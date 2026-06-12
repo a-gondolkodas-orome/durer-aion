@@ -57,10 +57,10 @@ export const GameSidebar = ({
 
   return (
     <div className="p-2 flex flex-col grow shrink-0 basis-64 gap-3">
-      <div className="rounded-lg border bg-slate-50 p-3 mb-8 flex flex-col gap-3">
+      <div className="rounded-lg border bg-slate-50 p-2 sm:p-3 mb-2 sm:mb-8 flex flex-col gap-3">
         {ctx.isHumanVsHumanGame && ctx.phase !== 'roleSelection'
           ? <PlayerTurnPanel ctx={ctx} />
-          : <p className="text-center font-bold text-lg">{t(getCtaText(ctx))}</p>
+          : <p className="text-center font-bold text-base sm:text-lg">{t(getCtaText(ctx))}</p>
         }
 
         {ctx.phase === 'play' && (
@@ -166,7 +166,7 @@ const RoleSelector = ({ roleLabels, onRoleSelection, disabled }: {
   disabled: boolean
 }) => {
   const { t } = useTranslation();
-  return <div className="basis-24 flex flex-col gap-2">
+  return <div className="flex flex-row flex-wrap sm:flex-col gap-2">
     {[
       { hu: 'Kezdő leszek', en: "I'll go first" },
       { hu: 'Második leszek', en: "I'll go second" }
@@ -174,7 +174,7 @@ const RoleSelector = ({ roleLabels, onRoleSelection, disabled }: {
       <button
         key={i}
         data-testid={`role-btn-${i}`}
-        className="primary-button"
+        className="primary-button flex-1 min-w-24 sm:flex-none sm:min-w-0"
         disabled={disabled}
         onClick={() => onRoleSelection(i)}
       >
@@ -193,8 +193,8 @@ const PlayerNameSetup = ({ roleLabels, playerNames, placeholderNames, setPlayerN
 }) => {
   const { t } = useTranslation();
   return (
-  <div className="flex flex-col gap-3">
-    <p className="text-sm text-slate-500 italic">
+  <div className="flex flex-col gap-2 sm:gap-3">
+    <p className="hidden sm:block text-sm text-slate-500 italic">
       {t({ hu: 'Neveitek (nem kötelező):', en: 'Your names (optional):' })}
     </p>
     <Field className="flex items-center gap-2">
@@ -246,7 +246,7 @@ const PlayerTurnPanel = ({ ctx }: { ctx: Ctx }) => {
   const isEnd = ctx.phase === 'gameEnd';
 
   return (
-    <div className="flex flex-col gap-2" aria-live="polite">
+    <div className="flex flex-row flex-wrap sm:flex-col gap-2" aria-live="polite">
       {[0, 1].map(i => {
         const isActive = !isEnd && ctx.currentPlayer === i;
         const isWinner = isEnd && ctx.winnerIndex === i;
@@ -254,8 +254,11 @@ const PlayerTurnPanel = ({ ctx }: { ctx: Ctx }) => {
         return (
           <div
             key={i}
-            className={`flex items-center gap-2 rounded-md px-3 py-2 border-l-4 drop-shadow-sm
-              ${highlighted ? 'bg-blue-50 border-blue-400' : 'bg-white'}`}
+            className={`
+              flex-1 sm:flex-none flex items-center gap-2 rounded-md px-2 py-1 sm:px-3 sm:py-2
+              border-l-4 drop-shadow-sm
+              ${highlighted ? 'bg-blue-50 border-blue-400' : 'bg-white'}
+            `}
           >
             <span className={`flex-1 ${highlighted ? 'font-bold text-blue-700' : ''}`}>
               {playerName(i)}

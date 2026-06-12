@@ -15,11 +15,11 @@
         overflow-wrap: break-word;
     }
     h1 {
-        @apply text-2xl font-bold;
+        @apply text-xl sm:text-2xl font-bold;
         text-wrap: balance;
     }
     h2 {
-        @apply text-xl font-semibold;
+        @apply text-lg sm:text-xl font-semibold;
         text-wrap: balance;
     }
     a {
@@ -35,13 +35,13 @@
 
 @layer components {
     .primary-button {
-        @apply block w-full py-1.5 px-2;
-        @apply text-lg font-semibold rounded-lg disabled:opacity-50;
+        @apply block w-full py-1 sm:py-1.5 px-1.5 sm:px-2;
+        @apply text-base sm:text-lg font-semibold rounded-lg disabled:opacity-50;
         @apply border-none bg-blue-500 text-white enabled:hocus:bg-blue-600;
     }
     .secondary-button {
         @apply block w-full py-1.5 px-2;
-        @apply text-lg rounded-lg disabled:opacity-50;
+        @apply text-base sm:text-lg rounded-lg disabled:opacity-50;
         @apply border enabled:hocus:border-slate-300 bg-slate-50 enabled:hocus:bg-slate-100;
     }
 }

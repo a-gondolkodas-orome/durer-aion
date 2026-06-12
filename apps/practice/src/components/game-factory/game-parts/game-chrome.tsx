@@ -83,7 +83,9 @@ export const GameRule = ({ ruleDescription }: { ruleDescription: React.ReactNode
     <Disclosure defaultOpen>
       {({ open }) => (
         <div className="border-2 rounded-sm grow">
-          <DisclosureButton className="w-full bg-slate-200 text-xl flex justify-center">
+          <DisclosureButton
+            className="w-full bg-slate-200 text-lg sm:text-xl flex justify-center"
+          >
             <span className="grow">{t({ hu: 'Játékszabályok', en: 'Game rules' })}</span>
             <span
               className="text-right pr-4"
