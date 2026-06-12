@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @custom-variant hocus {
-  @media (hover: hover) {
+  @media (pointer: fine) {
     &:hover { @slot; }
   }
   &:focus-visible { @slot; }
