@@ -58,9 +58,17 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   };
 
   const drawPickedColor = (event) => {
-    setX(event.nativeEvent.offsetX);
-    setY(event.nativeEvent.offsetY);
+    const svg = event.currentTarget as SVGSVGElement;
+    setX(event.nativeEvent.offsetX / svg.clientWidth * 100);
+    setY(event.nativeEvent.offsetY / svg.clientHeight * 100);
   };
+
+  const isNearAllowedNode = show && range(8).some(nodeId => {
+    if (!isMoveAllowed(nodeId)) return false;
+    const cx = parseFloat(cubeCoords[nodeId].cx);
+    const cy = parseFloat(cubeCoords[nodeId].cy);
+    return Math.hypot(x - cx, y - cy) < 6;
+  });
 
   const setVertexColor = (vertex) => {
     if (!isMoveAllowed(vertex)) return;
@@ -115,11 +123,9 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         />
       ))}
 
-      {/* <!-- cursor position with to-be-used color --> */}
-      {x};{y}
-      {show && (
+      {isNearAllowedNode && (
         <circle
-          cx={x} cy={y} r="4%"
+          cx={x + '%'} cy={y + '%'} r="4%"
           fill={nodeColors[color].svg}
           className="pointer-events-none opacity-50 stroke-0"
         />
