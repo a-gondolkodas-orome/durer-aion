@@ -12,8 +12,8 @@
       window.addEventListener('touchstart', function() {
         document.documentElement.classList.add('using-touch');
       }, { passive: true });
-      window.addEventListener('mousemove', function() {
-        document.documentElement.classList.remove('using-touch');
+      window.addEventListener('pointermove', function(e) {
+        if (e.pointerType === 'mouse') document.documentElement.classList.remove('using-touch');
       }, { passive: true });
     </script>
     <link rel="stylesheet" href="/src/styles.css">
