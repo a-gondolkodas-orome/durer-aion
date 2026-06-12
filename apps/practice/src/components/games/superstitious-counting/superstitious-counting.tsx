@@ -38,33 +38,31 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 
   return (
   <GameBoard>
-    <div className="flex flex-wrap gap-1">
+    <div className="flex flex-wrap gap-2">
       {fields.map(i =>
         <button
           key={i}
           disabled={!isMoveAllowed(i - board.current)}
           onClick={() => makeStep(i - board.current)}
           className={`
-            border-2 rounded-sm text-2xl min-w-[4ch] p-1 my-1 font-bold
+            border-2 rounded-sm text-2xl min-w-[4ch] py-1 font-bold
             enabled:bg-green-200 enabled:hocus:bg-green-400
-            ${i === board.target ? 'border-8 border-purple-600' : '' }
             ${board.restricted && i === board.current + board.restricted ? 'bg-red-200' : '' }
-            ${i < board.current ? 'bg-slate-400' : ''}
-            ${i === board.current ? 'bg-slate-200' : ''}
-            ${i > board.target ? 'text-slate-500 border-purple-600' : ''}
+            ${i < board.current ? 'opacity-50' : ''}
+            ${i >= board.target ? 'opacity-50 border-purple-600' : ''}
           `}
         >{ i === board.current ? 'X' : i }
       </button>
       )}
     </div>
-    <span className="text-xl">
+    <p className="text-xl mt-2">
       {t({
         hu: `m értéke: ${board.target}`,
         en: `Value of m: ${board.target}`
       })}
-    </span>
+    </p>
     {ctx.isClientMoveAllowed && (
-      <p className="text-xl">
+      <p className="text-xl mt-2">
         {t({
           hu: `Előző lépés: ${board.restricted ? (13 - board.restricted) : '-'}. ` +
             `Tiltott: ${ board.restricted || '-' }.`,

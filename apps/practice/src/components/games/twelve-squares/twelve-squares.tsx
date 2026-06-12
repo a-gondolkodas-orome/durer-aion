@@ -31,8 +31,8 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     if (i === board.right) return 'bg-purple-400';
     if (isMoveAllowed(potentialStep(i))) {
       return ctx.currentPlayer === 0
-        ? 'bg-green-200 hocus:bg-green-400'
-        : 'bg-purple-200 hocus:bg-purple-400';
+        ? 'bg-green-200 enabled:hocus:bg-green-400'
+        : 'bg-purple-200 enabled:hocus:bg-purple-400';
     }
     return 'bg-slate-200';
   };
@@ -40,32 +40,24 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   return (
   <GameBoard>
     <ChessBishopSvg/>
-    <table className="w-full table-fixed">
-      <tbody>
-      <tr>
+    <div className="grid grid-cols-12 gap-1">
         {range(1,13).map(i =>
-          <td
+          <button
             key={i}
             className={`
-              text-xl p-0.5 font-bold border-2 border-white
+              w-full aspect-square text-xl font-bold rounded-sm drop-shadow-sm p-[10%]
               ${cellBackground(i)}
             `}
-          >
-            <button
-              className="w-full aspect-square p-[5%]"
-              disabled={!isMoveAllowed(potentialStep(i))}
-              onClick={() => makeStep(potentialStep(i))}
-            >{ i === board.left || i === board.right
-              ? <svg className="w-full aspect-square">
-                  <use href="#game-chess-bishop" />
-                </svg>
-              : i }
-            </button>
-          </td>
+            disabled={!isMoveAllowed(potentialStep(i))}
+            onClick={() => makeStep(potentialStep(i))}
+          >{ i === board.left || i === board.right
+            ? <svg className="w-full aspect-square">
+                <use href="#game-chess-bishop" />
+              </svg>
+            : i }
+          </button>
         )}
-      </tr>
-      </tbody>
-    </table>
+    </div>
   </GameBoard>
   );
 };

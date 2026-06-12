@@ -37,9 +37,9 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               disabled={playerIdx === ctx.currentPlayer || !isMoveAllowed(symbolIdx)}
               onClick={() => clickField(symbolIdx)}
               className={`
-                p-2 m-2 aspect-4/5 border-4 rounded-lg shadow-md border-blue-600
-                enabled:border-dashed
-                enabled:hocus:opacity-50 enabled:hocus:bg-slate-200 enabled:hocus:border-slate-400
+                p-2 m-2 aspect-4/5 bg-slate-50 drop-shadow-lg
+                enabled:border-2 enabled:border-dashed
+                enabled:hocus:opacity-50
               `}
             >
               { symbolIdx === 0 && (<RockSvg />) }
@@ -99,9 +99,9 @@ const rule = {
 export const RockPaperScissor = strategyGameFactory({
   presentation: {
     rule,
-    getPlayerStepDescription: () => ({
-      hu: 'Távolíts el egy kártyát az ellenfél elől.',
-      en: 'Remove a card from your opponent.'
+    getPlayerStepDescription: ({ ctx }) => ({
+      hu: `Távolíts el egy kártyát a másik (${ctx.currentPlayer === 0 ? 'Második' : 'Első'}) játékos elől.`,
+      en: `Remove a card from the other (${ctx.currentPlayer === 0 ? 'Second' : 'First'}) player.`
     })
   },
   BoardClient,

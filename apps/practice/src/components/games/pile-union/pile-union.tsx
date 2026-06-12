@@ -79,7 +79,7 @@ const MoveTypeSelector = ({ moveType, isClientMoveAllowed, canMerge, onSelect }:
     >
       <div
         className={`
-          flex rounded-lg overflow-hidden border text-sm
+          flex divide-x divide-slate-300 rounded-lg overflow-hidden border text-sm
           has-focus-visible:ring-2 has-focus-visible:ring-red-400 has-focus-visible:ring-offset-1
         `}>
         <label
@@ -93,7 +93,6 @@ const MoveTypeSelector = ({ moveType, isClientMoveAllowed, canMerge, onSelect }:
           />
           {t({ hu: 'Elveszek 1-et', en: 'Remove 1' })}
         </label>
-        <div className="w-px bg-slate-300" />
         <label
           className={labelClass(moveType === 'merge' && isClientMoveAllowed, !isClientMoveAllowed || !canMerge)}
         >

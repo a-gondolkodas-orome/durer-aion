@@ -42,17 +42,15 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           key={id}
           disabled={!isMoveAllowed(id)}
           onClick={() => clickField(id)}
-          className={`
-            aspect-square p-[25%] enabled:hocus:bg-slate-100
-            ${!gameIsInPlacingPhase && isMoveAllowed(id) ? 'bg-green-100' : 'bg-slate-50'}
-          `}
+          className="aspect-square p-[25%] bg-slate-50"
         >
           {board[id] && (
             <span
               className={`
                 w-full aspect-square block rounded-full
+                ${!gameIsInPlacingPhase && isMoveAllowed(id) ? 'hover:opacity-50' : ''}
                 ${pieceColor(id)}
-                ${pieceColor(id) === 'bg-slate-50' ? 'border-4 border-slate-600' : ''}
+                ${board[id] === 'white' ? 'border-4 border-slate-900' : ''}
               `}
             ></span>
           )}

@@ -15,55 +15,29 @@ const generateStartBoard = () => {
 
 type Board = number
 
-const ExponentCell = ({ e, choosePower, setHovered }) => {
-  return <td className="border-4 hocus:bg-slate-300">
-    <button
-      className="w-full p-[5%] aspect-video"
-      onClick={() => choosePower(e)}
-      onMouseOver={() => setHovered(e)}
-      onMouseOut={() => setHovered(null)}
-      onFocus={() => setHovered(e)}
-      onBlur={() => setHovered(null)}
-    >{2 ** e}
-    </button>
-  </td>
-}
-
-const ExponentsTable = ({ board, choosePower, hovered, setHovered }) => {
+const ExponentsTable = ({ disabled, board, choosePower, hovered, setHovered }) => {
   const { t } = useTranslation();
   const availableExponents = getAvailableExponents(board);
 
-  // https://tailwindcss.com/docs/content-configuration#dynamic-class-names
-  // if we dynamically generate, tailwind won't recognize them :(
-  const widthClassNames = [
-    "",
-    "w-[10%] min-w-[10%]",
-    "w-[20%] min-w-[20%]",
-    "w-[30%] min-w-[30%]",
-    "w-[40%] min-w-[40%]",
-    "w-[50%] min-w-[50%]",
-    "w-[60%] min-w-[60%]",
-    "w-[70%] min-w-[70%]",
-    "w-[80%] min-w-[80%]",
-    "w-[90%] min-w-[90%]",
-    "w-full min-w-full"
-  ][availableExponents.length]
+  if (availableExponents.length === 0) return <></>;
 
   return <>
     <p>{t({ hu: 'Lehetséges hatványok:', en: 'Available powers:' })}</p>
-    <table className={`border-collapse table-fixed ${widthClassNames}`}>
-      <tbody><tr>
-        {availableExponents.map(e =>
-          <ExponentCell
-            key={e}
-            e={e}
-            choosePower={choosePower}
-            setHovered={setHovered}
-          ></ExponentCell>
-        )}
-      </tr></tbody>
-    </table>
-    {hovered && <p className="mt-2">
+    <div className="flex flex-wrap gap-2">
+      {availableExponents.map(e =>
+        <button
+          key={e}
+          disabled={disabled}
+          className="secondary-button w-auto min-w-12"
+          onClick={() => choosePower(e)}
+          onMouseOver={() => setHovered(e)}
+          onMouseOut={() => setHovered(null)}
+          onFocus={() => setHovered(e)}
+          onBlur={() => setHovered(null)}
+        >{2 ** e}</button>
+      )}
+    </div>
+    {hovered !== null && !disabled && <p className="mt-2">
       {t({
         hu: `Kivonandó 2-hatvány: 2^${hovered} = ${2**hovered}. Eredmény: ${board-2**hovered}.`,
         en: `Power to subtract: 2^${hovered} = ${2**hovered}. Result: ${board-2**hovered}.`
@@ -84,14 +58,13 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   return (
     <GameBoard>
       <p className='w-full text-8xl font-bold text-center mb-4'>{board}</p>
-      {!ctx.isClientMoveAllowed
-        ? ''
-        : <ExponentsTable
-          board={board}
-          choosePower={choosePower}
-          hovered={hoveredPower}
-          setHovered={setHoveredPower}
-        ></ExponentsTable>}
+      <ExponentsTable
+        disabled={!ctx.isClientMoveAllowed}
+        board={board}
+        choosePower={choosePower}
+        hovered={hoveredPower}
+        setHovered={setHoveredPower}
+      />
     </GameBoard>
   );
 }
@@ -123,6 +96,7 @@ const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
 }
 
 const getAvailableExponents = (num: Board) => {
+  if (num === 0) return [];
   const baseLog = Math.log(num) / Math.log(2);
   const maxExponent = Math.floor(baseLog);
   return range(0, maxExponent + 1);
