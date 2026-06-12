@@ -32,17 +32,17 @@ export const Overview = () => {
     <div className="border-t mt-2 pt-3 flex flex-wrap items-center gap-1 mb-2">
       <CategoryFilter selected={selectedCategories} onChange={setSelectedCategories} />
     </div>
-    <h2 className="my-4 text-center">
+    <h2 className="my-4 text-center hidden sm:block">
       {t({ hu: '5-8. osztályosoknak (A-B kategória)', en: 'For grades 5–8 (A–B category)' })}
     </h2>
-    <div className="flex flex-wrap gap-4 justify-center">
+    <div className="flex flex-wrap gap-2 sm:gap-4 justify-center">
       {gamesToShow.filter(id => gameList[id].category[0] <= 'B')
         .map(id => <Game key={id} gameId={id} gameProps={gameList[id]} />)}
     </div>
-    <h2 className="my-4 text-center">
+    <h2 className="my-4 text-center hidden sm:block">
       {t({ hu: '9-12. osztályosoknak (C-D-E kategória)', en: 'For grades 9–12 (C–D–E category)' })}
     </h2>
-    <div className="flex flex-wrap gap-4 justify-center">
+    <div className="flex flex-wrap gap-2 sm:gap-4 justify-center">
       {gamesToShow.filter(id => gameList[id].category[0] > 'B')
         .map(id => <Game key={id} gameId={id} gameProps={gameList[id]} />)}
     </div>
@@ -142,12 +142,12 @@ const Game = ({ gameId, gameProps }: { gameId: string; gameProps: GameEntry }) =
     to={`/game/${gameId}`}
     data-testid="game-card"
     className={`
-      rounded-lg border p-2 max-w-[32ch] w-full flex flex-col
+      rounded-lg border p-1 sm:p-2 max-w-[20ch] sm:max-w-[32ch] w-full flex flex-col
       cursor-pointer hocus:bg-blue-50 hocus:border-blue-400
       no-underline text-inherit
     `}
   >
-    <h2 className="mb-4 text-center">
+    <h2 className="mb-2 sm:mb-4 text-base sm:text-xl text-center">
       {t(gameProps.name)}
     </h2>
     <div className="grow"></div>
