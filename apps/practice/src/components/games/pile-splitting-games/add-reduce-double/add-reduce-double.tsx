@@ -83,7 +83,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               key={pieceId}
               disabled={isDisabled({ pileId, pieceId })}
               className={`
-                w-[18%] aspect-square rounded-full mx-0.5 mt-0.5
+                w-[18%] aspect-square rounded-full mx-0.5 mt-0.5 align-top
                 ${toAppear({ pileId, pieceId }) && nonExistent({ pileId, pieceId }) ? 'bg-blue-800/50' : ''}
                 ${toBeRemoved({ pileId, pieceId }) ? 'bg-slate-900/40' : ''}
                 ${
@@ -99,7 +99,12 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               onPointerEnter={() => hoverPiece({ pileId, pieceId, moveCount: ctx.moveCount })}
               onPointerMove={() => hoverPiece({ pileId, pieceId, moveCount: ctx.moveCount })}
               onPointerLeave={() => hoverPiece(null)}
-            ></button>
+            >
+              {!isDisabled({ pileId, pieceId }) &&
+              <p className="text-sm" style={{ transform: 'scaleY(-1)' }}>
+                -{pieceId + 1};+{(pieceId + 1) / 2}
+              </p>}
+            </button>
           ))}
       </div>
     ))}

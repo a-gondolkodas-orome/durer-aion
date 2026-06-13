@@ -141,7 +141,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               key={pieceId}
               disabled={isDisabled({ pileId, pieceId })}
               className={`
-                w-[20%] aspect-square rounded-full mx-0.5 mt-0.5
+                w-[20%] aspect-square rounded-full mx-0.5 mt-0.5 align-top
                 ${pieceColor({ pileId, pieceId })}
               `}
               onClick={(e) => { e.stopPropagation(); clickPiece({ pileId, pieceId }); }}
@@ -150,7 +150,12 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               onPointerEnter={() => setHoveredPiece({ pileId, pieceId, moveCount: ctx.moveCount })}
               onPointerMove={() => setHoveredPiece({ pileId, pieceId, moveCount: ctx.moveCount })}
               onPointerLeave={() => setHoveredPiece(null)}
-            ></button>
+            >
+              {!isDisabled({ pileId, pieceId }) && removedPileId !== null && removedPileId !== pileId &&
+              <p className="text-sm" style={{ transform: 'scaleY(-1)' }}>
+                {pieceId + 1};{board[pileId] - pieceId - 1}
+              </p>}
+            </button>
           ))}
       </div>
     ))}

@@ -120,7 +120,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               key={pieceId}
               disabled={isDisabled({ pileId, pieceId })}
               className={[
-                'w-[18%] aspect-square rounded-full mx-0.5 mt-0.5',
+                'w-[18%] aspect-square rounded-full mx-0.5 mt-0.5 align-top',
                 pieceVisibility({ pileId, pieceId }),
                 pieceColor({ pileId, pieceId })
               ].join(' ')}
@@ -130,7 +130,12 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               onPointerEnter={() => hoverPiece({ pileId, pieceId, moveCount: ctx.moveCount })}
               onPointerMove={() => hoverPiece({ pileId, pieceId, moveCount: ctx.moveCount })}
               onPointerLeave={() => hoverPiece(null)}
-            ></button>
+            >
+              {!isDisabled({ pileId, pieceId }) &&
+              <p className="text-sm" style={{ transform: 'scaleY(-1)' }}>
+                {pieceId + 1}
+              </p>}
+            </button>
           ))}
       </div>
     ))}

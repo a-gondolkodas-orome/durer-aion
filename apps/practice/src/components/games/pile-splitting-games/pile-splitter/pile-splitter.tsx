@@ -75,7 +75,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               key={pieceId}
               disabled={isDisabled({ pileId, pieceId })}
               className={`
-                bg-blue-800 w-[20%] aspect-square rounded-full mx-0.5 mt-0.5
+                bg-blue-800 w-[20%] aspect-square rounded-full mx-0.5 mt-0.5 align-top
                 ${toBeRemoved(pileId) ? 'bg-slate-900/40' : ''}
                 ${toBeLeft({ pileId, pieceId }) ? 'bg-blue-800/75' : ''}
               `}
@@ -85,7 +85,12 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               onPointerEnter={() => setHoveredPiece({ pileId, pieceId, moveCount: ctx.moveCount })}
               onPointerMove={() => setHoveredPiece({ pileId, pieceId, moveCount: ctx.moveCount })}
               onPointerLeave={() => setHoveredPiece(null)}
-            ></button>
+            >
+              {!isDisabled({ pileId, pieceId }) &&
+              <p className="text-sm" style={{ transform: 'scaleY(-1)' }}>
+                {pieceId + 1};{board[pileId] - pieceId - 1}
+              </p>}
+            </button>
           ))}
       </div>
     ))}
