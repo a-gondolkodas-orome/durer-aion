@@ -119,7 +119,10 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           tabIndex={isMoveAllowed(nodeId) ? 0 : undefined}
           role={isMoveAllowed(nodeId) ? 'button' : undefined}
           aria-label={isMoveAllowed(nodeId) ? `Node ${nodeId + 1}` : undefined}
-          fill={nodeColors[board[nodeId]]?.svg ?? (isMoveAllowed(nodeId) || !show ? 'white' : 'var(--color-slate-400)')}
+          fill={
+            nodeColors[board[nodeId]]?.svg
+            ?? (isMoveAllowed(nodeId) || !show ? 'var(--color-slate-50)' : 'var(--color-slate-400)')
+          }
         />
       ))}
 

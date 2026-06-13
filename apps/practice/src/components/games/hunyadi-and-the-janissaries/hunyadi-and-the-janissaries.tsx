@@ -40,7 +40,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     <GameBoard>
       <SoldierSvg />
       <CastleSvg />
-      <svg className={`m-auto w-[40%] fill-slate-600 ${board[0].length > 0 ? 'opacity-50' : ''}`}>
+      <svg className={`m-auto w-[40%] fill-stone-600 ${board[0].length > 0 ? 'opacity-50' : ''}`}>
         <use xlinkHref="#game-castle" />
       </svg>
       <div className="relative">
@@ -49,7 +49,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               <svg
                 className={`
                   w-[10%] aspect-square mx-1
-                  ${group === 'blue' ? 'fill-blue-600' : 'fill-red-600'}
+                  ${group === 'blue' ? 'fill-blue-800' : 'fill-red-800'}
                 `}
                 key={pieceIndex}
               >
@@ -66,7 +66,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             marginLeft: (6-rowIndex) + 'rem',
             marginRight: (6-rowIndex) + 'rem'
           }}
-          className="border-t-slate-900 border-t-2 p-0.5 text-center whitespace-nowrap"
+          className="border-t-stone-600 border-t-2 p-0.5 text-center whitespace-nowrap"
         >
           {board[rowIndex] && board[rowIndex].map((group, pieceIndex) => (
             <button
@@ -84,7 +84,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                 className={`
                   w-full aspect-square border-dashed border-slate-900
                   ${showToBeKilled(group) ? 'outline-dashed opacity-50' : ''}
-                  ${group === 'blue' ? 'fill-blue-600' : 'fill-red-600'}
+                  ${group === 'blue' ? 'fill-blue-800' : 'fill-red-800'}
                 `}
               >
                 <use xlinkHref="#game-soldier-icon" />

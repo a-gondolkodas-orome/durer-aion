@@ -16,8 +16,8 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   };
   const pieceColor = (id) => {
     const colorCode = board[id];
-    if (colorCode === 'red') return 'bg-red-600';
-    return 'bg-blue-600';
+    if (colorCode === 'red') return 'bg-red-800';
+    return 'bg-blue-800';
   };
 
   /*

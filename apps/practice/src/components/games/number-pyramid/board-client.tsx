@@ -82,7 +82,7 @@ export const BoardClient = ({ board, ctx, events, moves }: BoardClientProps<Boar
                   );
                 })}
               </div>
-              <span className="text-xs text-slate-500">
+              <span className="text-xs">
                 {t({ hu: `${levelIdx + 1}. szint`, en: `Level ${levelIdx + 1}` })}
               </span>
             </div>

@@ -39,7 +39,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             <span
               key={i}
               className={`
-                m-[3%] aspect-square inline-block bg-blue-600 rounded-full
+                m-[3%] aspect-square inline-block bg-blue-800 rounded-full
                 ${board[id] <= 4 ? 'w-[40%]' : 'w-[25%]'}
               `}
             >

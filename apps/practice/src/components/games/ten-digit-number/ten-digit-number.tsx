@@ -66,7 +66,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           );
         })}
       </div>
-      {numberSummary && <p className="text-sm text-slate-500 mb-2">{numberSummary}</p>}
+      {numberSummary && <p className="text-sm mb-2">{numberSummary}</p>}
       <div className="mt-6 pt-4 border-t flex gap-2 flex-wrap">
         {availableDigits.map(d => (
           <button
@@ -156,8 +156,8 @@ export const TenDigitNumber = strategyGameFactory({
   presentation: {
     rule,
     roleLabels: [
-      { hu: 'Jenő (1.)', en: 'Alice (1st)' },
-      { hu: 'Béla (2.)', en: 'Bob (2nd)' }
+      { hu: 'Jenő', en: 'Alice' },
+      { hu: 'Béla', en: 'Bob' }
     ],
     getPlayerStepDescription: () => ({
       hu: 'Válassz egy számjegyet 1 és 6 között.',

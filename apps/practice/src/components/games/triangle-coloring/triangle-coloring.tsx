@@ -74,8 +74,8 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   }
 
   const getColor = i => {
-    if (board[i] === COLORED) return 'fill-blue-600';
-    if (board[i] === FORBIDDEN) return 'fill-slate-400';
+    if (board[i] === COLORED) return 'fill-blue-800';
+    if (board[i] === FORBIDDEN) return 'fill-slate-900/40';
     return 'fill-transparent';
   };
 

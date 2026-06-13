@@ -22,8 +22,8 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   }
 
   const getCardColor = num => {
-    if (board.cards[Thief].includes(num)) return 'bg-red-600';
-    if (board.cards[Sheriff].includes(num)) return 'bg-blue-600';
+    if (board.cards[Thief].includes(num)) return 'bg-red-800';
+    if (board.cards[Sheriff].includes(num)) return 'bg-blue-800 text-white';
     return 'bg-slate-50';
   }
 
@@ -38,8 +38,8 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           className={`
             m-1 min-h-28 w-18 border-2 rounded-lg shadow-md border-slate-900 text-4xl font-bold
             ${ctx.currentPlayer === Thief
-              ? "enabled:hocus:bg-red-400"
-              : "enabled:hocus:bg-blue-400"
+              ? "enabled:hocus:bg-red-800/75"
+              : "enabled:hocus:bg-blue-800/75 enabled:hocus:text-white"
             }
             ${getCardColor(num)}
           `}

@@ -44,25 +44,25 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       if (ctx.currentPlayer === 1) {
         if (board.policemen[0] === vertex) return "url(#thief-and-first-policeman)";
         if (board.policemen[1] === vertex) return "url(#thief-and-second-policeman)";
-        return "red";
+        return "var(--color-red-500)";
       }
       if (ctx.currentPlayer === 0) {
         if (board.firstPolicemanMoved) {
           if (board.thief === vertex) return "url(#thief-and-second-policeman)";
           if (board.policemen[0] === vertex) return "url(#2policemen)";
-          return "forestgreen";
+          return "var(--color-green-600)";
         }
         if (board.thief === vertex) return "url(#thief-and-first-policeman)";
         if (board.policemen[1] === vertex) return "url(#2policemen)";
-        return "navy";
+        return "var(--color-blue-800)";
       }
     }
     if (board.thief === vertex && board.policemen[0] === vertex) return "url(#thief-and-first-policeman)";
     if (board.thief === vertex && board.policemen[1] === vertex) return "url(#thief-and-second-policeman)";
-    if (board.thief === vertex) return "red";
+    if (board.thief === vertex) return "var(--color-red-500)";
     if (board.policemen[0] === vertex && board.policemen[1] === vertex) return "url(#2policemen)";
-    if (board.policemen[0] === vertex) return "navy";
-    if (board.policemen[1] === vertex) return "forestgreen";
+    if (board.policemen[0] === vertex) return "var(--color-blue-800)";
+    if (board.policemen[1] === vertex) return "var(--color-green-600)";
     return "white";
   };
 
@@ -70,22 +70,22 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     <GameBoard>
       <svg className="aspect-square stroke-slate-900 stroke-3">
         <pattern id="2policemen" patternUnits="userSpaceOnUse" patternTransform="rotate(45 0 0)" width="12" height="12">
-          <rect x="0" y="0" fill="navy" stroke="navy" width="12" height="12"></rect>
-          <line x1="0" y1="0" x2="0" y2="12" style={{ stroke: "forestgreen", strokeWidth: "12" }} />
+          <rect x="0" y="0" fill="var(--color-blue-800)" stroke="var(--color-blue-800)" width="12" height="12"></rect>
+          <line x1="0" y1="0" x2="0" y2="12" style={{ stroke: "var(--color-green-600)", strokeWidth: "12" }} />
         </pattern>
         <pattern
           id="thief-and-first-policeman"
           patternUnits="userSpaceOnUse" patternTransform="rotate(45 0 0)" width="12" height="12"
         >
-          <rect x="0" y="0" fill="red" stroke="red" width="12" height="12"></rect>
-          <line x1="0" y1="0" x2="0" y2="12" style={{ stroke: "navy", strokeWidth: "12" }} />
+          <rect x="0" y="0" fill="var(--color-red-500)" stroke="var(--color-red-500)" width="12" height="12"></rect>
+          <line x1="0" y1="0" x2="0" y2="12" style={{ stroke: "var(--color-blue-800)", strokeWidth: "12" }} />
         </pattern>
         <pattern
           id="thief-and-second-policeman"
           patternUnits="userSpaceOnUse" patternTransform="rotate(45 0 0)" width="12" height="12"
         >
-          <rect x="0" y="0" fill="red" stroke="red" width="12" height="12"></rect>
-          <line x1="0" y1="0" x2="0" y2="12" style={{ stroke: "forestgreen", strokeWidth: "12" }} />
+          <rect x="0" y="0" fill="var(--color-red-500)" stroke="var(--color-red-500)" width="12" height="12"></rect>
+          <line x1="0" y1="0" x2="0" y2="12" style={{ stroke: "var(--color-green-600)", strokeWidth: "12" }} />
         </pattern>
         <rect
           x="30%"
