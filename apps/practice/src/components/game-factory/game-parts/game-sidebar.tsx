@@ -212,7 +212,7 @@ const PlayerNameSetup = ({ roleLabels, playerNames, setPlayerNames, onStart }: {
         <button
           data-testid={`start-hh-game-${i}`}
           className="shrink-0 px-2 py-1 text-sm font-semibold rounded-md
-            bg-blue-500 text-white enabled:hocus:bg-blue-600 disabled:opacity-50"
+            bg-blue-500 text-white hocus:bg-blue-600"
           onClick={() => {
             setPlayerNames([playerNames[i], playerNames[1 - i]]);
             onStart();
