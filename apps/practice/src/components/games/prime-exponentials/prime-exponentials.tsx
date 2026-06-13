@@ -49,12 +49,16 @@ const PrimePowerButton = ({ entry, board, isClientMoveAllowed, chooseEntry, setH
   const isActive = !isAboveBoard && isClientMoveAllowed;
   return (
     <button
-      className={`border rounded w-10 py-0.5 leading-tight
+      disabled={!isActive}
+      className={`
+        border rounded w-10 py-0.5 leading-tight
         ${isAboveBoard ? 'opacity-25' : ''}
-        ${isActive ? 'hocus:bg-blue-100 hocus:border-blue-300' : ''}`}
+        enabled:hocus:bg-blue-100 enabled:hocus:border-blue-300
+      `}
       onClick={() => isActive && chooseEntry(entry)}
-      onMouseOver={() => isActive && setHovered(entry)}
-      onMouseOut={() => setHovered(null)}
+      onPointerEnter={() => isActive && setHovered(entry)}
+      onPointerMove={() => isActive && setHovered(entry)}
+      onPointerLeave={() => setHovered(null)}
       onFocus={() => isActive && setHovered(entry)}
       onBlur={() => setHovered(null)}
     >
@@ -98,23 +102,28 @@ const HoverPreview = ({ hovered, board, isClientMoveAllowed }) => {
 };
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const [hovered, setHovered] = useState(null);
+  const [hovered, setHovered] = useState<{ entry: typeof allPrimePowers[0]; moveCount: number } | null>(null);
+  const validHovered = hovered?.moveCount === ctx.moveCount ? hovered.entry : null;
   const [visiblePowers] = useState(() => allPrimePowers.filter(e => e.value <= board));
 
   const chooseEntry = ({ prime, exponent }) => {
     moves.subtractPrimeExponent(board, { prime, exponent });
   };
 
+  type PrimePower = typeof allPrimePowers[0];
+  const setHoveredEntry = (entry: PrimePower | null) =>
+    setHovered(entry ? { entry, moveCount: ctx.moveCount } : null);
+
   return (
     <GameBoard>
       <p className='w-full text-8xl font-bold text-center mb-4'>{board}</p>
-      <HoverPreview hovered={hovered} board={board} isClientMoveAllowed={ctx.isClientMoveAllowed} />
+      <HoverPreview hovered={validHovered} board={board} isClientMoveAllowed={ctx.isClientMoveAllowed} />
       <PrimePowerGrid
         board={board}
         visiblePowers={visiblePowers}
         isClientMoveAllowed={ctx.isClientMoveAllowed}
         chooseEntry={chooseEntry}
-        setHovered={setHovered}
+        setHovered={setHoveredEntry}
       />
     </GameBoard>
   );

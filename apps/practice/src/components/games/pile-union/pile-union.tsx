@@ -49,6 +49,7 @@ const BoardClient = ({ board, ctx, events, moves }: BoardClientProps<Board>) => 
             isSelected={moveType === 'merge' && turnState?.firstSelectedPile === pileIndex}
             moveType={moveType}
             onClick={() => handlePileClick(pileIndex)}
+            moveCount={ctx.moveCount}
           />
         ))}
       </div>
@@ -110,25 +111,28 @@ const MoveTypeSelector = ({ moveType, isClientMoveAllowed, canMerge, onSelect }:
   );
 };
 
-const Pile = ({ size, disabled, isSelected, moveType, onClick }: {
+const Pile = ({ size, disabled, isSelected, moveType, onClick, moveCount }: {
   size: number
   disabled: boolean
   isSelected: boolean
   moveType: MoveType
   onClick: () => void
+  moveCount: number
 }) => {
-  const [hovered, setHovered] = useState(false);
-  const isRemoveHovered = moveType === 'remove' && hovered;
-  const isMergeHovered = moveType === 'merge' && hovered;
+  const [hovered, setHovered] = useState<number | null>(null);
+  const validHovered = hovered === moveCount;
+  const isRemoveHovered = moveType === 'remove' && validHovered;
+  const isMergeHovered = moveType === 'merge' && validHovered;
 
   return (
     <button
       disabled={disabled}
       onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      onFocus={() => setHovered(true)}
-      onBlur={() => setHovered(false)}
+      onPointerEnter={() => setHovered(moveCount)}
+      onPointerMove={() => setHovered(moveCount)}
+      onPointerLeave={() => setHovered(null)}
+      onFocus={() => setHovered(moveCount)}
+      onBlur={() => setHovered(null)}
       className={`
         flex flex-col items-center gap-1 p-2 rounded-lg border-2 transition-colors
         ${isSelected ? 'border-blue-300 bg-blue-600/40' :

@@ -35,7 +35,8 @@ const DisabledDisc = ({ bgColor }) => {
 const gameBoardFactory = (maxDiscs) => {
   return ({ board, ctx, moves }: BoardClientProps<Board>) => {
     const { t } = useTranslation();
-    const [hovered, setHovered] = useState<[number, number] | null>(null);
+    const [hovered, setHovered] = useState<{ value: [number, number]; moveCount: number } | null>(null);
+    const validHovered = hovered?.moveCount === ctx.moveCount ? hovered.value : null;
 
     const select = (pile, i) => {
       if (!ctx.isClientMoveAllowed) return;
@@ -47,7 +48,7 @@ const gameBoardFactory = (maxDiscs) => {
       setHovered(null);
     };
 
-    const isSelected = (pile, i) => isEqual(hovered, [pile, i]) || isEqual(hovered, [pile, i - 1]);
+    const isSelected = (pile, i) => isEqual(validHovered, [pile, i]) || isEqual(validHovered, [pile, i - 1]);
 
     const fmt = (red, blue) => t({
       hu: ` --> ${red} piros és ${blue} kék korong`,
@@ -55,10 +56,10 @@ const gameBoardFactory = (maxDiscs) => {
     });
 
     const nextBoardDescription = () => {
-      if (hovered === null) return '';
+      if (validHovered === null) return '';
       if (!ctx.isClientMoveAllowed) return '';
-      const count = board[hovered[0]] - hovered[1];
-      if (hovered[0] === 0) return fmt(board[1], board[0] - count);
+      const count = board[validHovered[0]] - validHovered[1];
+      if (validHovered[0] === 0) return fmt(board[1], board[0] - count);
       return fmt(board[1] - count, board[0] + count);
     };
 
@@ -84,9 +85,10 @@ const gameBoardFactory = (maxDiscs) => {
                             : "bg-red-800"
                         }`}
                         disabled={!ctx.isClientMoveAllowed}
-                        onMouseOver={() => setHovered([1, i])}
-                        onMouseOut={() => setHovered(null)}
-                        onFocus={() => setHovered([1, i])}
+                        onPointerEnter={() => setHovered({ value: [1, i], moveCount: ctx.moveCount })}
+                        onPointerMove={() => setHovered({ value: [1, i], moveCount: ctx.moveCount })}
+                        onPointerLeave={() => setHovered(null)}
+                        onFocus={() => setHovered({ value: [1, i], moveCount: ctx.moveCount })}
                         onBlur={() => setHovered(null)}
                       />
                     </td>
@@ -108,9 +110,10 @@ const gameBoardFactory = (maxDiscs) => {
                           ${isSelected(0, i) ? "enabled:opacity-50" : ""}
                         `}
                         disabled={!ctx.isClientMoveAllowed}
-                        onMouseOver={() => setHovered([0, i])}
-                        onMouseOut={() => setHovered(null)}
-                        onFocus={() => setHovered([0, i])}
+                        onPointerEnter={() => setHovered({ value: [0, i], moveCount: ctx.moveCount })}
+                        onPointerMove={() => setHovered({ value: [0, i], moveCount: ctx.moveCount })}
+                        onPointerLeave={() => setHovered(null)}
+                        onFocus={() => setHovered({ value: [0, i], moveCount: ctx.moveCount })}
                         onBlur={() => setHovered(null)}
                       />
                     </td>

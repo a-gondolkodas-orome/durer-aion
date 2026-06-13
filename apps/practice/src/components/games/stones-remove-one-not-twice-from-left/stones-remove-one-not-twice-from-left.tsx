@@ -9,8 +9,9 @@ import { useTranslation } from '../../language';
 
 type Board = { piles: [number, number], leftRestriction: [boolean, boolean] }
 
-const StonePile = ({ count, onClick, disabled, restricted }) => {
-  const [hovered, setHovered] = useState(false);
+const StonePile = ({ count, onClick, disabled, restricted, moveCount }) => {
+  const [hovered, setHovered] = useState<number | null>(null);
+  const validHovered = hovered === moveCount;
   return (
     <button
       className={`w-full flex-1 flex flex-wrap content-start justify-center gap-2 p-2
@@ -18,16 +19,17 @@ const StonePile = ({ count, onClick, disabled, restricted }) => {
       style={{ transform: 'scaleY(-1)' }}
       onClick={onClick}
       disabled={disabled}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      onFocus={() => setHovered(true)}
-      onBlur={() => setHovered(false)}
+      onPointerEnter={() => setHovered(moveCount)}
+      onPointerMove={() => setHovered(moveCount)}
+      onPointerLeave={() => setHovered(null)}
+      onFocus={() => setHovered(moveCount)}
+      onBlur={() => setHovered(null)}
     >
       {range(count).map(i => (
         <div
           key={i}
           className={`w-[20%] aspect-square rounded-full bg-stone-500 shadow-md shadow-stone-700
-            transition-opacity ${hovered && !disabled && i === count - 1 ? 'opacity-30' : ''}`}
+            transition-opacity ${validHovered && !disabled && i === count - 1 ? 'opacity-30' : ''}`}
           style={{ transform: 'scaleY(-1)' }}
         />
       ))}
@@ -59,6 +61,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               onClick={() => moves.removeStone(board, pileId)}
               disabled={!isMoveAllowed(pileId)}
               restricted={ctx.isClientMoveAllowed && !isMoveAllowed(pileId)}
+              moveCount={ctx.moveCount}
             />
           </div>
         ))}

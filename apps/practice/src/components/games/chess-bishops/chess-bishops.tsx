@@ -9,7 +9,8 @@ import {
 } from './helpers';
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const [hoveredField, setHoveredField] = useState<Field | null>(null);
+  const [hoveredField, setHoveredField] = useState<{ field: Field; moveCount: number } | null>(null);
+  const validHoveredField = hoveredField?.moveCount === ctx.moveCount ? hoveredField.field : null;
   const clickField = (field: Field) => {
     if (!isMoveAllowed(field)) return;
 
@@ -18,8 +19,8 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 
   const isPotentialNextStep = (field: Field) => {
     if (!isMoveAllowed(field)) return false;
-    if (!hoveredField) return false;
-    return isEqual(hoveredField, field);
+    if (!validHoveredField) return false;
+    return isEqual(validHoveredField, field);
   };
   const isMoveAllowed = (targetField: Field) => {
     if (!ctx.isClientMoveAllowed) return false;
@@ -33,11 +34,11 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   };
   const wouldBeForbidden = ({ row, col }: Field) => {
     if (!ctx.isClientMoveAllowed) return false;
-    if (!hoveredField) return false;
-    if (!isMoveAllowed(hoveredField)) return false;
+    if (!validHoveredField) return false;
+    if (!isMoveAllowed(validHoveredField)) return false;
     if (!isMoveAllowed({ row, col })) return false;
     if (isPotentialNextStep({ row, col })) return false;
-    return Math.abs(row - hoveredField.row) === Math.abs(col - hoveredField.col);
+    return Math.abs(row - validHoveredField.row) === Math.abs(col - validHoveredField.col);
   };
 
   return (
@@ -59,9 +60,10 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                   className="w-full aspect-square p-[5%]"
                   disabled={!isMoveAllowed({ row, col })}
                   onClick={() => clickField({ row, col })}
-                  onMouseOver={() => setHoveredField({ row, col })}
-                  onMouseOut={() => setHoveredField(null)}
-                  onFocus={() => setHoveredField({ row, col })}
+                  onPointerEnter={() => setHoveredField({ field: { row, col }, moveCount: ctx.moveCount })}
+                  onPointerMove={() => setHoveredField({ field: { row, col }, moveCount: ctx.moveCount })}
+                  onPointerLeave={() => setHoveredField(null)}
+                  onFocus={() => setHoveredField({ field: { row, col }, moveCount: ctx.moveCount })}
                   onBlur={() => setHoveredField(null)}
                 >
                   {isBishop({ row, col }) && (

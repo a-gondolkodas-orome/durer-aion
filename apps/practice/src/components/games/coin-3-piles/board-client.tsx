@@ -18,7 +18,8 @@ const getCoinShadowColor = (coinValue) => {
 export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
   const [valueOfRemovedCoin, setValueOfRemovedCoin] = useState<number | null>(null);
-  const [hoveredPile, setHoveredPile] = useState<number | null>(null);
+  const [hoveredPile, setHoveredPile] = useState<{ value: number; moveCount: number } | null>(null);
+  const validHoveredPile = hoveredPile?.moveCount === ctx.moveCount ? hoveredPile.value : null;
 
   const wasCoinAlreadyRemovedInTurn = valueOfRemovedCoin !== null;
 
@@ -65,12 +66,12 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const shouldShowCoinToBeRemoved = (coinValue) => {
     if (!ctx.isClientMoveAllowed) return false;
     if (wasCoinAlreadyRemovedInTurn) return false;
-    return coinValue === hoveredPile && board[coinValue - 1] !== 0;
+    return coinValue === validHoveredPile && board[coinValue - 1] !== 0;
   };
 
   const shouldShowCoinToBeAdded = (coinValue) => {
     if (!wasCoinAlreadyRemovedInTurn) return false;
-    return valueOfRemovedCoin! > coinValue && coinValue === hoveredPile;
+    return valueOfRemovedCoin! > coinValue && coinValue === validHoveredPile;
   };
 
   return (
@@ -102,8 +103,9 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                   ${getCoinBgColor(coinValue)} enabled:hocus:brightness-75
                 `}
                 onClick={() => addToPile(coinValue)}
-                onMouseEnter={() => setHoveredPile(coinValue)}
-                onMouseLeave={() => setHoveredPile(null)}
+                onPointerEnter={() => setHoveredPile({ value: coinValue, moveCount: ctx.moveCount })}
+                onPointerMove={() => setHoveredPile({ value: coinValue, moveCount: ctx.moveCount })}
+                onPointerLeave={() => setHoveredPile(null)}
               >{coinValue}</button>
             ))}
           </div>
@@ -143,9 +145,16 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                 `}
                 style={{ transform: 'scaleY(-1)' }}
                 onClick={() => removeFromPile(coinValue)}
-                onMouseOver={() => { if (!wasCoinAlreadyRemovedInTurn) setHoveredPile(coinValue); }}
-                onMouseOut={() => setHoveredPile(null)}
-                onFocus={() => { if (!wasCoinAlreadyRemovedInTurn) setHoveredPile(coinValue); }}
+                onPointerEnter={() => {
+                  if (!wasCoinAlreadyRemovedInTurn) setHoveredPile({ value: coinValue, moveCount: ctx.moveCount });
+                }}
+                onPointerMove={() => {
+                  if (!wasCoinAlreadyRemovedInTurn) setHoveredPile({ value: coinValue, moveCount: ctx.moveCount });
+                }}
+                onPointerLeave={() => setHoveredPile(null)}
+                onFocus={() => {
+                  if (!wasCoinAlreadyRemovedInTurn) setHoveredPile({ value: coinValue, moveCount: ctx.moveCount });
+                }}
                 onBlur={() => setHoveredPile(null)}
               >{coinValue}</button>
             ))}

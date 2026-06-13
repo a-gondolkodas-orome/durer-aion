@@ -30,8 +30,9 @@ const ExponentsTable = ({ disabled, board, choosePower, hovered, setHovered }) =
           disabled={disabled}
           className="secondary-button w-auto min-w-12"
           onClick={() => choosePower(e)}
-          onMouseOver={() => setHovered(e)}
-          onMouseOut={() => setHovered(null)}
+          onPointerEnter={() => setHovered(e)}
+          onPointerMove={() => setHovered(e)}
+          onPointerLeave={() => setHovered(null)}
           onFocus={() => setHovered(e)}
           onBlur={() => setHovered(null)}
         >{2 ** e}</button>
@@ -48,7 +49,8 @@ const ExponentsTable = ({ disabled, board, choosePower, hovered, setHovered }) =
 
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const [hoveredPower, setHoveredPower] = useState(null);
+  const [hoveredPower, setHoveredPower] = useState<{ value: number; moveCount: number } | null>(null);
+  const validHoveredPower = hoveredPower?.moveCount === ctx.moveCount ? hoveredPower.value : null;
 
   const choosePower = (e: number) => {
     moves.subtractPowerOfTwo(board, e);
@@ -62,8 +64,8 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         disabled={!ctx.isClientMoveAllowed}
         board={board}
         choosePower={choosePower}
-        hovered={hoveredPower}
-        setHovered={setHoveredPower}
+        hovered={validHoveredPower}
+        setHovered={(e: number | null) => setHoveredPower(e !== null ? { value: e, moveCount: ctx.moveCount } : null)}
       />
     </GameBoard>
   );

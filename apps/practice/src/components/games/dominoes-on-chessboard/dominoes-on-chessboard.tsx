@@ -32,7 +32,8 @@ const DOMINO_BORDER_CLASSES = {
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const [selectedField, setSelectedField] = useState<Field | null>(null);
-  const [hoveredField, setHoveredField] = useState<Field | null>(null);
+  const [hoveredField, setHoveredField] = useState<{ field: Field; moveCount: number } | null>(null);
+  const validHoveredField = hoveredField?.moveCount === ctx.moveCount ? hoveredField.field : null;
 
   const hasEmptyNeighbor = ({ row, col }) => {
     if (col < (BOARDSIZE - 1) && !isCovered({ row, col: col + 1 }, board)) return true;
@@ -57,9 +58,9 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   }
 
   const isPartOfPreview = (field: Field) => {
-    if (selectedField === null || hoveredField === null) return false;
-    if (!isNeighborOfSelected(hoveredField) || isCovered(hoveredField, board)) return false;
-    return isEqual(field, selectedField) || isEqual(field, hoveredField);
+    if (selectedField === null || validHoveredField === null) return false;
+    if (!isNeighborOfSelected(validHoveredField) || isCovered(validHoveredField, board)) return false;
+    return isEqual(field, selectedField) || isEqual(field, validHoveredField);
   };
 
   const getCellBgClass = (field: Field) => {
@@ -103,9 +104,10 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                   `}
                   disabled={!isClickAllowed({ row, col })}
                   onClick={() => clickField({ row, col })}
-                  onMouseOver={() => setHoveredField({ row, col })}
-                  onMouseOut={() => setHoveredField(null)}
-                  onFocus={() => setHoveredField({ row, col })}
+                  onPointerEnter={() => setHoveredField({ field: { row, col }, moveCount: ctx.moveCount })}
+                  onPointerMove={() => setHoveredField({ field: { row, col }, moveCount: ctx.moveCount })}
+                  onPointerLeave={() => setHoveredField(null)}
+                  onFocus={() => setHoveredField({ field: { row, col }, moveCount: ctx.moveCount })}
                   onBlur={() => setHoveredField(null)}
                 >
                   {isCovered({ row, col }, board) && <>

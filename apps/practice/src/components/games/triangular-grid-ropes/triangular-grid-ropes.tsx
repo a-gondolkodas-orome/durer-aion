@@ -6,7 +6,8 @@ import { cloneDeep } from 'lodash';
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const [firstNode, setFirstNode] = useState<number | null>(null);
-  const [hoveredNode, setHoveredNode] = useState<number | null>(null);
+  const [hoveredNode, setHoveredNode] = useState<{ value: number; moveCount: number } | null>(null);
+  const validHoveredNode = hoveredNode?.moveCount === ctx.moveCount ? hoveredNode.value : null;
 
   const connectNode = node => {
     if (!ctx.isClientMoveAllowed) return;
@@ -22,11 +23,11 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   };
 
   const isCandidateAllowed = (
-    firstNode !== null && hoveredNode !== null &&
-    isAllowed(board, { from: firstNode, to: hoveredNode })
+    firstNode !== null && validHoveredNode !== null &&
+    isAllowed(board, { from: firstNode, to: validHoveredNode })
   );
 
-  const candidateEdge = getAllowedSuperset(board, { from: firstNode, to: hoveredNode });
+  const candidateEdge = getAllowedSuperset(board, { from: firstNode, to: validHoveredNode });
   const candidateFromV = candidateEdge ? vertices[candidateEdge.from] : null;
   const candidateToV = candidateEdge ? vertices[candidateEdge.to] : null;
 
@@ -46,7 +47,8 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     ))}
 
     {/* candidate next edge */}
-    {firstNode !== null && hoveredNode !== null && firstNode !== hoveredNode && candidateFromV && candidateToV && (
+    {firstNode !== null && validHoveredNode !== null &&
+      firstNode !== validHoveredNode && candidateFromV && candidateToV && (
       <line
       x1={candidateFromV.cx} y1={candidateFromV.cy}
       x2={candidateToV.cx} y2={candidateToV.cy}
@@ -63,8 +65,8 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         isAllowed(board, { from: firstNode, to: vertex.id })
       );
       const isInvalidHover = firstNode !== null &&
-        vertex.id === hoveredNode &&
-        firstNode !== hoveredNode &&
+        vertex.id === validHoveredNode &&
+        firstNode !== validHoveredNode &&
         !isCandidateAllowed;
       return (
       <circle
@@ -84,10 +86,11 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         tabIndex={isClickable ? 0 : undefined}
         role={isClickable ? 'button' : undefined}
         aria-label={isClickable ? `Node ${vertex.id + 1}` : undefined}
-        onFocus={() => setHoveredNode(vertex.id)}
+        onFocus={() => setHoveredNode({ value: vertex.id, moveCount: ctx.moveCount })}
         onBlur={() => setHoveredNode(null)}
-        onMouseOver={() => setHoveredNode(vertex.id)}
-        onMouseOut={() => setHoveredNode(null)}
+        onPointerEnter={() => setHoveredNode({ value: vertex.id, moveCount: ctx.moveCount })}
+        onPointerMove={() => setHoveredNode({ value: vertex.id, moveCount: ctx.moveCount })}
+        onPointerLeave={() => setHoveredNode(null)}
       />
       );
     })}

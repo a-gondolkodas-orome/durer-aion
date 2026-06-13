@@ -5,7 +5,7 @@ import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 
 export type Board = number[];
 type Piece = { pileId: number; pieceId: number };
-type HoveredPiece = Piece | null;
+type HoveredPiece = (Piece & { moveCount: number }) | null;
 
 const generateStartBoard = (): Board => {
   const x = random(2, 8) * 2 + 1;
@@ -16,7 +16,12 @@ const generateStartBoard = (): Board => {
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const [removedPileId, setRemovedPileId] = useState<number | null>(null);
   const [hoveredPiece, setHoveredPiece] = useState<HoveredPiece>(null);
-  const [hoveredPileId, setHoveredPileId] = useState<number | null>(null);
+  const validHoveredPiece = (
+    hoveredPiece?.moveCount === ctx.moveCount
+    && hoveredPiece?.pieceId < board[hoveredPiece?.pileId] - 1
+  ) ? hoveredPiece : null;
+  const [hoveredPileId, setHoveredPileId] = useState<{ pileId: number; moveCount: number } | null>(null);
+  const validHoveredPileId = hoveredPileId?.moveCount === ctx.moveCount ? hoveredPileId.pileId : null;
 
   const canRemovePile = (pileId: number) =>
     board.some((size, i) => i !== pileId && size >= 2);
@@ -51,12 +56,12 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   };
 
   const toBeLeft = ({ pileId, pieceId }: Piece) => {
-    if (hoveredPiece === null) return false;
+    if (validHoveredPiece === null) return false;
     if (removedPileId === null) return false;
     if (removedPileId === pileId) return false;
-    if (pileId !== hoveredPiece.pileId) return false;
-    if (hoveredPiece.pieceId === board[pileId] - 1) return false;
-    if (pieceId > hoveredPiece.pieceId) return false;
+    if (pileId !== validHoveredPiece.pileId) return false;
+    if (validHoveredPiece.pieceId === board[pileId] - 1) return false;
+    if (pieceId > validHoveredPiece.pieceId) return false;
     return true;
   };
 
@@ -64,7 +69,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     if (!ctx.isClientMoveAllowed) return false;
     if (removedPileId !== null) return false;
     if (!canRemovePile(pileId)) return false;
-    return hoveredPileId === pileId;
+    return validHoveredPileId === pileId;
   };
 
   const clickPile = (pileId) => {
@@ -93,11 +98,13 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       return pieceCountInPile ? `${pieceCountInPile} → 🗑️` : '🗑️';
     }
     if (removedPileId === null) {
-      const showRemovePreview = hoveredPileId === pileId && canRemovePile(pileId);
+      const showRemovePreview = validHoveredPileId === pileId && canRemovePile(pileId);
       return showRemovePreview ? `${pieceCountInPile} → 🗑️` : pieceCountInPile || '🗑️';
     }
-    if (!hoveredPiece || hoveredPiece.pileId !== pileId) return pieceCountInPile || '🗑️';
-    return `${pieceCountInPile} → ${hoveredPiece.pieceId + 1}, ${pieceCountInPile - hoveredPiece.pieceId - 1}`;
+    if (!validHoveredPiece || validHoveredPiece.pileId !== pileId) return pieceCountInPile || '🗑️';
+    return `
+      ${pieceCountInPile} → ${validHoveredPiece.pieceId + 1}, ${pieceCountInPile - validHoveredPiece.pieceId - 1}
+    `;
   };
 
   return (
@@ -113,8 +120,9 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         `}
         style={{ transform: 'scaleY(-1)' }}
         onClick={() => clickPile(pileId)}
-        onMouseEnter={() => setHoveredPileId(pileId)}
-        onMouseLeave={() => setHoveredPileId(null)}
+        onPointerEnter={() => setHoveredPileId({ pileId, moveCount: ctx.moveCount })}
+        onPointerMove={() => setHoveredPileId({ pileId, moveCount: ctx.moveCount })}
+        onPointerLeave={() => setHoveredPileId(null)}
       >
         <p className="text-xl" style={{ transform: 'scaleY(-1)' }}>
           {currentChoiceDescription(pileId)}
@@ -128,10 +136,11 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                 ${pieceColor({ pileId, pieceId })}
               `}
               onClick={(e) => { e.stopPropagation(); clickPiece({ pileId, pieceId }); }}
-              onFocus={() => setHoveredPiece({ pileId, pieceId })}
+              onFocus={() => setHoveredPiece({ pileId, pieceId, moveCount: ctx.moveCount })}
               onBlur={() => setHoveredPiece(null)}
-              onMouseOver={() => setHoveredPiece({ pileId, pieceId })}
-              onMouseOut={() => setHoveredPiece(null)}
+              onPointerEnter={() => setHoveredPiece({ pileId, pieceId, moveCount: ctx.moveCount })}
+              onPointerMove={() => setHoveredPiece({ pileId, pieceId, moveCount: ctx.moveCount })}
+              onPointerLeave={() => setHoveredPiece(null)}
             ></button>
           ))}
       </div>
