@@ -12,6 +12,7 @@ export interface Ctx {
   currentPlayer: number | null
   isClientMoveAllowed: boolean
   winnerIndex: number | null
+  moveCount: number
 }
 
 export interface Events {

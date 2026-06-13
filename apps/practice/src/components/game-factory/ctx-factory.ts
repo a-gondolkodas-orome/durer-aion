@@ -9,5 +9,6 @@ export const makeCtx = (overrides: Partial<Ctx> = {}): Ctx => ({
   winnerIndex: null,
   chosenRoleIndex: null,
   turnState: null,
+  moveCount: 0,
   ...overrides
 });

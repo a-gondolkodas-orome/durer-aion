@@ -59,6 +59,7 @@ export const strategyGameFactory = <TBoard,>({
     const [isGameEndDialogOpen, setIsGameEndDialogOpen] = useState(false);
     const [winnerIndex, setWinnerIndex] = useState<number | null>(null);
     const [gameUuid, setGameUuid] = useState(crypto.randomUUID());
+    const [moveCount, setMoveCount] = useState(0);
     const [turnState, setTurnState] = useState<unknown>(null);
     const [mode, setMode] = useState<Mode>('vsComputer');
     const [playerNames, setPlayerNames] = useState<[string, string]>(() => {
@@ -89,6 +90,7 @@ export const strategyGameFactory = <TBoard,>({
     const moveWrapper = (doMove: () => MoveResult<TBoard>): MoveResult<TBoard> => {
       const moveResult = doMove();
       setBoard(moveResult.nextBoard);
+      setMoveCount(c => c + 1);
       if (endOfTurnMove && moveResult.autoEndOfTurn) {
         setTimeout(() => {
           wrappedGameMoves[endOfTurnMove]!(moveResult.nextBoard);
@@ -114,6 +116,7 @@ export const strategyGameFactory = <TBoard,>({
       setIsGameEndDialogOpen(false);
       setWinnerIndex(null);
       setGameUuid(crypto.randomUUID());
+      setMoveCount(0);
       setTurnState(null);
     };
 
@@ -164,7 +167,8 @@ export const strategyGameFactory = <TBoard,>({
       turnState,
       currentPlayer,
       isClientMoveAllowed,
-      winnerIndex
+      winnerIndex,
+      moveCount
     };
 
     const events: Events = {
