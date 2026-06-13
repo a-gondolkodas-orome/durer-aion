@@ -1,6 +1,9 @@
 @import "tailwindcss";
 
-@custom-variant hocus (&:hover, &:focus-visible);
+@custom-variant hocus {
+  html:not(.using-touch) &:hover { @slot; }
+  &:focus-visible { @slot; }
+}
 
 @layer base {
     *,  ::after,  ::before,  ::backdrop,  ::file-selector-button { 
