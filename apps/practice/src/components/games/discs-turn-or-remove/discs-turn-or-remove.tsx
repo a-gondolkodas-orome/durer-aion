@@ -42,6 +42,17 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 
   const isSelected = (pile, i) => isEqual(validHovered, [pile, i]) || isEqual(validHovered, [pile, i - 1]);
 
+  const hoverProps = (pile: number, i: number) => {
+    const setPieceAsHovered = () => setHovered({ value: [pile, i], moveCount: ctx.moveCount });
+    return {
+      onPointerEnter: setPieceAsHovered,
+      onPointerMove: setPieceAsHovered,
+      onPointerLeave: () => setHovered(null),
+      onFocus: setPieceAsHovered,
+      onBlur: () => setHovered(null)
+    };
+  };
+
   const fmt = (red, blue) => t({
     hu: ` → ${red} piros és ${blue} kék korong`,
     en: ` → ${red} red and ${blue} blue discs`
@@ -72,11 +83,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                 }`}
                 disabled={!ctx.isClientMoveAllowed}
                 onClick={() => select(1, i)}
-                onPointerEnter={() => setHovered({ value: [1, i], moveCount: ctx.moveCount })}
-                onPointerMove={() => setHovered({ value: [1, i], moveCount: ctx.moveCount })}
-                onPointerLeave={() => setHovered(null)}
-                onFocus={() => setHovered({ value: [1, i], moveCount: ctx.moveCount })}
-                onBlur={() => setHovered(null)}
+                {...hoverProps(1, i)}
               />
             )
         )}
@@ -90,11 +97,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                 className={`size-12 rounded-full bg-blue-800 ${isSelected(0, i) ? "enabled:opacity-50" : ""}`}
                 disabled={!ctx.isClientMoveAllowed}
                 onClick={() => select(0, i)}
-                onPointerEnter={() => setHovered({ value: [0, i], moveCount: ctx.moveCount })}
-                onPointerMove={() => setHovered({ value: [0, i], moveCount: ctx.moveCount })}
-                onPointerLeave={() => setHovered(null)}
-                onFocus={() => setHovered({ value: [0, i], moveCount: ctx.moveCount })}
-                onBlur={() => setHovered(null)}
+                {...hoverProps(0, i)}
               />
             )
         )}
