@@ -21,120 +21,91 @@ const generateStartBoard = (maxDiscs) => (): Board => {
   }
 };
 
-const DisabledDisc = ({ bgColor }) => {
-  return (
-    <td className="aspect-square">
-      <button
-        className={`w-[95%] aspect-square rounded-full ${bgColor}`}
-        disabled
-      />
-    </td>
-  );
-};
+const DisabledDisc = ({ bgColor }) => (
+  <button className={`size-12 rounded-full ${bgColor}`} disabled />
+);
 
-const gameBoardFactory = (maxDiscs) => {
-  return ({ board, ctx, moves }: BoardClientProps<Board>) => {
-    const { t } = useTranslation();
-    const [hovered, setHovered] = useState<{ value: [number, number]; moveCount: number } | null>(null);
-    const validHovered = hovered?.moveCount === ctx.moveCount ? hovered.value : null;
+const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
+  const { t } = useTranslation();
+  const [hovered, setHovered] = useState<{ value: [number, number]; moveCount: number } | null>(null);
+  const validHovered = hovered?.moveCount === ctx.moveCount ? hovered.value : null;
 
-    const select = (pile, i) => {
-      if (!ctx.isClientMoveAllowed) return;
-      if (pile === 0) {
-        moves.removeDiscs(board, board[0] - i);
-      } else {
-        moves.turnDiscs(board, board[1] - i);
-      }
-      setHovered(null);
-    };
-
-    const isSelected = (pile, i) => isEqual(validHovered, [pile, i]) || isEqual(validHovered, [pile, i - 1]);
-
-    const fmt = (red, blue) => t({
-      hu: ` --> ${red} piros és ${blue} kék korong`,
-      en: ` --> ${red} red and ${blue} blue discs`
-    });
-
-    const nextBoardDescription = () => {
-      if (validHovered === null) return '';
-      if (!ctx.isClientMoveAllowed) return '';
-      const count = board[validHovered[0]] - validHovered[1];
-      if (validHovered[0] === 0) return fmt(board[1], board[0] - count);
-      return fmt(board[1] - count, board[0] + count);
-    };
-
-
-    return (
-      <GameBoard>
-        <table className="table-fixed w-full">
-          <tbody>
-            <tr>
-              {range(board[1]).map((i) =>
-                board[1] > i + 2
-                  ? <DisabledDisc key={`red-disabled-${i}`} bgColor="bg-red-800"/>
-                  : (
-                    <td
-                      className="aspect-square"
-                      key={`red-${i}-${board[0]}-${board[1]}`}
-                      onClick={() => select(1, i)}
-                    >
-                      <button
-                        className={`w-[95%] aspect-square rounded-full ${
-                          ctx.isClientMoveAllowed && isSelected(1, i)
-                            ? "bg-blue-800/75"
-                            : "bg-red-800"
-                        }`}
-                        disabled={!ctx.isClientMoveAllowed}
-                        onPointerEnter={() => setHovered({ value: [1, i], moveCount: ctx.moveCount })}
-                        onPointerMove={() => setHovered({ value: [1, i], moveCount: ctx.moveCount })}
-                        onPointerLeave={() => setHovered(null)}
-                        onFocus={() => setHovered({ value: [1, i], moveCount: ctx.moveCount })}
-                        onBlur={() => setHovered(null)}
-                      />
-                    </td>
-                  )
-              )}
-
-              {range(board[0]).map((i) =>
-                board[0] > i + 2
-                  ? <DisabledDisc key={`blue-disabled-${i}`} bgColor="bg-blue-800"/>
-                  : (
-                    <td
-                      className="aspect-square"
-                      key={`blue-${i}-${board[0]}-${board[1]}`}
-                      onClick={() => select(0, i)}
-                    >
-                      <button
-                        className={`
-                          w-[95%] aspect-square rounded-full bg-blue-800
-                          ${isSelected(0, i) ? "enabled:opacity-50" : ""}
-                        `}
-                        disabled={!ctx.isClientMoveAllowed}
-                        onPointerEnter={() => setHovered({ value: [0, i], moveCount: ctx.moveCount })}
-                        onPointerMove={() => setHovered({ value: [0, i], moveCount: ctx.moveCount })}
-                        onPointerLeave={() => setHovered(null)}
-                        onFocus={() => setHovered({ value: [0, i], moveCount: ctx.moveCount })}
-                        onBlur={() => setHovered(null)}
-                      />
-                    </td>
-                  )
-              )}
-
-              {/* dummy cells to ensure stable piece width */}
-              {range(maxDiscs - board[0] - board[1]).map((i) => (
-                <td key={`dummy-${i}`}></td>
-              ))}
-            </tr>
-          </tbody>
-        </table>
-        {t({
-          hu: `${board[1]} piros és ${board[0]} kék korong`,
-          en: `${board[1]} red and ${board[0]} blue discs`
-        })}
-        {nextBoardDescription()}
-      </GameBoard>
-    );
+  const select = (pile, i) => {
+    if (!ctx.isClientMoveAllowed) return;
+    if (pile === 0) {
+      moves.removeDiscs(board, board[0] - i);
+    } else {
+      moves.turnDiscs(board, board[1] - i);
+    }
+    setHovered(null);
   };
+
+  const isSelected = (pile, i) => isEqual(validHovered, [pile, i]) || isEqual(validHovered, [pile, i - 1]);
+
+  const fmt = (red, blue) => t({
+    hu: ` → ${red} piros és ${blue} kék korong`,
+    en: ` → ${red} red and ${blue} blue discs`
+  });
+
+  const nextBoardDescription = () => {
+    if (validHovered === null) return '';
+    if (!ctx.isClientMoveAllowed) return '';
+    const count = board[validHovered[0]] - validHovered[1];
+    if (validHovered[0] === 0) return fmt(board[1], board[0] - count);
+    return fmt(board[1] - count, board[0] + count);
+  };
+
+
+  return (
+    <GameBoard>
+      <div className="flex flex-wrap gap-1">
+        {range(board[1]).map((i) =>
+          board[1] > i + 2
+            ? <DisabledDisc key={`red-disabled-${i}`} bgColor="bg-red-800"/>
+            : (
+              <button
+                key={`red-${i}-${board[0]}-${board[1]}`}
+                className={`size-12 rounded-full ${
+                  ctx.isClientMoveAllowed && isSelected(1, i)
+                    ? "bg-blue-800/75"
+                    : "bg-red-800"
+                }`}
+                disabled={!ctx.isClientMoveAllowed}
+                onClick={() => select(1, i)}
+                onPointerEnter={() => setHovered({ value: [1, i], moveCount: ctx.moveCount })}
+                onPointerMove={() => setHovered({ value: [1, i], moveCount: ctx.moveCount })}
+                onPointerLeave={() => setHovered(null)}
+                onFocus={() => setHovered({ value: [1, i], moveCount: ctx.moveCount })}
+                onBlur={() => setHovered(null)}
+              />
+            )
+        )}
+
+        {range(board[0]).map((i) =>
+          board[0] > i + 2
+            ? <DisabledDisc key={`blue-disabled-${i}`} bgColor="bg-blue-800"/>
+            : (
+              <button
+                key={`blue-${i}-${board[0]}-${board[1]}`}
+                className={`size-12 rounded-full bg-blue-800 ${isSelected(0, i) ? "enabled:opacity-50" : ""}`}
+                disabled={!ctx.isClientMoveAllowed}
+                onClick={() => select(0, i)}
+                onPointerEnter={() => setHovered({ value: [0, i], moveCount: ctx.moveCount })}
+                onPointerMove={() => setHovered({ value: [0, i], moveCount: ctx.moveCount })}
+                onPointerLeave={() => setHovered(null)}
+                onFocus={() => setHovered({ value: [0, i], moveCount: ctx.moveCount })}
+                onBlur={() => setHovered(null)}
+              />
+            )
+        )}
+      </div>
+      {t({
+        hu: `${board[1]} piros és ${board[0]} kék korong`,
+        en: `${board[1]} red and ${board[0]} blue discs`
+      })}
+      {nextBoardDescription()}
+    </GameBoard>
+  );
 };
 
 const moves = {
@@ -223,7 +194,7 @@ export const SixDiscs = strategyGameFactory({
     rule: rule(6),
     getPlayerStepDescription
   },
-  BoardClient: gameBoardFactory(6),
+  BoardClient,
   gameplay: { moves },
   variants: [
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
@@ -242,7 +213,7 @@ export const TenDiscs = strategyGameFactory({
     rule: rule(10),
     getPlayerStepDescription
   },
-  BoardClient: gameBoardFactory(10),
+  BoardClient,
   gameplay: { moves },
   variants: [
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
