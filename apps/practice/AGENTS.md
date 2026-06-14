@@ -119,6 +119,10 @@ Always pass the current `board` as first arg when chaining moves within a turn.
 - Mobile-friendly and keyboard-navigable
 - AI appears to "think" in multi-move turns (use `setTimeout`)
 
+## Dark mode
+
+The site supports dark mode. Use `dark:` Tailwind variants for dark-mode-specific overrides. For card/panel backgrounds, prefer `bg-surface-elevated` (a custom token) over raw color classes — it adapts automatically to both light and dark themes.
+
 ## Internationalisation (i18n)
 
 See [README.md § Internationalisation
