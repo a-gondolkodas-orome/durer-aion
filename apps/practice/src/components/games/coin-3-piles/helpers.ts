@@ -4,7 +4,7 @@ import type { Events } from '../../game-factory';
 export type Board = number[]
 
 export const getPlayerStepDescription = ({ ctx: { turnState } }) => {
-  if (turnState === 'placeBack') {
+  if (turnState !== null) {
     return {
       hu: 'Válassz a visszarakási lehetőségek közül.',
       en: 'Choose an option in the place back bar.'
@@ -32,14 +32,8 @@ export const moves = {
         events.endGame();
       }
     } else {
-      events.setTurnState('placeBack');
+      events.setTurnState({ removedCoinValue: value });
     }
-    return { nextBoard };
-  },
-  undoRemoveCoin: (board: Board, { events }: { events: Events }, value) => {
-    const nextBoard = cloneDeep(board);
-    nextBoard[value - 1] += 1;
-    events.setTurnState(null);
     return { nextBoard };
   },
   addCoin: (board: Board, { events }: { events: Events }, value) => {

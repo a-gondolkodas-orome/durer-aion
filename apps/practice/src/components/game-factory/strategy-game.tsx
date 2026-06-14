@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { GameHeader, GameFooter, GameRule } from './game-parts/game-chrome';
 import { GameSidebar } from './game-parts/game-sidebar';
 import { GameEndDialog } from './game-parts/game-end-dialog';
-import { mapValues } from 'lodash';
+import { mapValues, cloneDeep } from 'lodash';
 import { useTranslation, type TranslatableNode, type I18nString } from '../language';
 import { useLocation } from 'react-router';
 import { useGameStats } from './use-game-stats';
@@ -62,6 +62,10 @@ export const strategyGameFactory = <TBoard,>({
     const [moveCount, setMoveCount] = useState(0);
     const [turnState, setTurnState] = useState<unknown>(null);
     const [mode, setMode] = useState<Mode>('vsComputer');
+    type UndoSnapshot = { board: TBoard; currentPlayer: number };
+    const [undoSnapshot, setUndoSnapshot] = useState<UndoSnapshot | null>(null);
+    const currentTurnHasMovesRef = useRef(false);
+    const botTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const [playerNames, setPlayerNames] = useState<[string, string]>(() => {
       try {
         const stored = localStorage.getItem('durer-player-names');
@@ -88,11 +92,16 @@ export const strategyGameFactory = <TBoard,>({
     let wrappedGameMoves: GameMoves<TBoard> = {} as GameMoves<TBoard>;
 
     const moveWrapper = (doMove: () => MoveResult<TBoard>): MoveResult<TBoard> => {
+      if (!currentTurnHasMovesRef.current) {
+        setUndoSnapshot({ board: cloneDeep(board), currentPlayer: currentPlayer! });
+        currentTurnHasMovesRef.current = true;
+      }
       const moveResult = doMove();
       setBoard(moveResult.nextBoard);
       setMoveCount(c => c + 1);
       if (endOfTurnMove && moveResult.autoEndOfTurn) {
-        setTimeout(() => {
+        botTimeoutRef.current = setTimeout(() => {
+          botTimeoutRef.current = null;
           wrappedGameMoves[endOfTurnMove]!(moveResult.nextBoard);
         }, 750);
       }
@@ -118,6 +127,8 @@ export const strategyGameFactory = <TBoard,>({
       setGameUuid(crypto.randomUUID());
       setMoveCount(0);
       setTurnState(null);
+      setUndoSnapshot(null);
+      currentTurnHasMovesRef.current = false;
     };
 
     const setDifficulty = (index: number) => {
@@ -146,7 +157,25 @@ export const strategyGameFactory = <TBoard,>({
       }
     };
 
+    const canUndo = phase === 'play'
+      && undoSnapshot !== null
+      && (isHumanVsHumanGame || undoSnapshot.currentPlayer === chosenRoleIndex);
+
+    const undo = () => {
+      if (!canUndo) return;
+      if (botTimeoutRef.current !== null) {
+        clearTimeout(botTimeoutRef.current);
+        botTimeoutRef.current = null;
+      }
+      setBoard(undoSnapshot!.board);
+      setCurrentPlayer(undoSnapshot!.currentPlayer);
+      setTurnState(null);
+      setUndoSnapshot(null);
+      currentTurnHasMovesRef.current = false;
+    };
+
     const endTurn = () => {
+      currentTurnHasMovesRef.current = false;
       setCurrentPlayer(p => 1 - p!);
     };
 
@@ -186,7 +215,8 @@ export const strategyGameFactory = <TBoard,>({
       const { botStrategy } = activeVariant;
       if (!botStrategy) throw new Error('strategyGameFactory: no botStrategy available for vsComputer mode');
       const time = Math.floor(Math.random() * 500 + 1000);
-      setTimeout(() => {
+      botTimeoutRef.current = setTimeout(() => {
+        botTimeoutRef.current = null;
         botStrategy({ board, ctx, moves: wrappedGameMoves });
       }, time);
     };
@@ -217,7 +247,9 @@ export const strategyGameFactory = <TBoard,>({
                 resetGameState,
                 switchMode: (newMode) => resetGameState({ newMode }),
                 setPlayerNames,
-                setDifficulty
+                setDifficulty,
+                undo,
+                canUndo
               }}
               variants={visibleVariants}
               selectedVariantIndex={selectedVariantIndex}

@@ -17,7 +17,7 @@ const getCoinShadowColor = (coinValue) => {
 
 export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
-  const [valueOfRemovedCoin, setValueOfRemovedCoin] = useState<number | null>(null);
+  const valueOfRemovedCoin = (ctx.turnState as { removedCoinValue: number } | null)?.removedCoinValue ?? null;
   const [hoveredPile, setHoveredPile] = useState<{ value: number; moveCount: number } | null>(null);
   const validHoveredPile = hoveredPile?.moveCount === ctx.moveCount ? hoveredPile.value : null;
 
@@ -35,30 +35,19 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     return coinValue < valueOfRemovedCoin!;
   };
 
-  const undoCoinRemoval = () => {
-    moves.undoRemoveCoin(board, valueOfRemovedCoin);
-    setValueOfRemovedCoin(null);
-  };
-
   const removeFromPile = coinValue => {
     if (!isRemovalAllowed(coinValue)) return;
-    if (coinValue !== 1) {
-      setValueOfRemovedCoin(coinValue);
-    } else {
-      setHoveredPile(null);
-    }
+    if (coinValue === 1) setHoveredPile(null);
     moves.removeCoin(board, coinValue);
   };
 
   const addToPile = coinValue => {
     if (!isAddAllowed(coinValue)) return;
-    setValueOfRemovedCoin(null);
     setHoveredPile(null);
     moves.addCoin(board, coinValue);
   };
 
   const passAddition = () => {
-    setValueOfRemovedCoin(null);
     setHoveredPile(null);
     moves.addCoin(board, null);
   };
@@ -110,13 +99,6 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             ))}
           </div>
         </div>
-        <button
-          disabled={!wasCoinAlreadyRemovedInTurn}
-          className="secondary-button w-auto ml-auto"
-          onClick={undoCoinRemoval}
-        >
-          {t({ hu: '↶ Visszavonás', en: '↶ Undo' })}
-        </button>
       </div>
 
       <div className="flex justify-center gap-4 my-2 border-t pt-2">

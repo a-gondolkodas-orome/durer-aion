@@ -1,7 +1,6 @@
 import { range, sum, isEqual, random, cloneDeep } from 'lodash';
 import { strategyGameFactory, type Ctx, type Events, type BoardClientProps, GameBoard } from '../../game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
-import { useTranslation } from '../../language';
 
 export type Board = number[]
 type TurnState = { firstPlacedSquareIndex: number } | null
@@ -28,18 +27,10 @@ const moves = {
       events.endGame(winnerIndex);
     }
     return { nextBoard };
-  },
-  undoFirstDisc: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }) => {
-    const nextBoard = cloneDeep(board);
-    nextBoard[(ctx.turnState as TurnState)!.firstPlacedSquareIndex] -= 1;
-    events.setTurnState(null);
-    return { nextBoard };
   }
 }
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const { t } = useTranslation();
-
   const placePiece = (id: number) => {
     if (!ctx.isClientMoveAllowed) return;
     moves.addPiece(board, id);
@@ -73,13 +64,6 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       </button>
       )}
     </div>
-    <button
-      className="secondary-button w-auto ml-auto mt-2"
-      onClick={() => moves.undoFirstDisc(board)}
-      disabled={!ctx.isClientMoveAllowed || firstPlacedSquareIndex === null}
-    >
-      {t({ hu: '↶ Visszavonás', en: '↶ Undo' })}
-    </button>
   </GameBoard>
   );
 };

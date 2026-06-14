@@ -1,4 +1,4 @@
-import { random, flatten, cloneDeep, sum, remove, tail } from 'lodash';
+import { random, flatten, cloneDeep, sum, tail } from 'lodash';
 import type { Events } from '../../game-factory';
 
 export type SoldierColor = 'blue' | 'red';
@@ -48,7 +48,7 @@ export const generateStartBoard = (): Board => {
 
 export const moves = {
   killGroup: (board: Board, { events }: { events: Events }, group: SoldierColor) => {
-    const nextBoard = board.map(row => remove(row, soldier => soldier !== group));
+    const nextBoard = board.map(row => row.filter(soldier => soldier !== group));
 
     const isGameEnd = flatten(nextBoard).length === 0;
     if (isGameEnd) {

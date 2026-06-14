@@ -164,6 +164,133 @@ describe('strategyGameFactory endOfTurnMove', () => {
   });
 });
 
+describe('undo', () => {
+  describe('vsHuman', () => {
+    it('undo button is disabled before any move', () => {
+      const { getByTestId } = renderGame(ctxAwareConfig());
+      fireEvent.click(getByTestId('mode-vsHuman'));
+      fireEvent.click(getByTestId('start-hh-game-0'));
+      expect((getByTestId('undo-btn') as HTMLButtonElement).disabled).toBe(true);
+    });
+
+    it('undo button is enabled after a move', () => {
+      const { getByTestId } = renderGame(ctxAwareConfig());
+      fireEvent.click(getByTestId('mode-vsHuman'));
+      fireEvent.click(getByTestId('start-hh-game-0'));
+      fireEvent.click(getByTestId('move-btn'));
+      expect((getByTestId('undo-btn') as HTMLButtonElement).disabled).toBe(false);
+    });
+
+    it('clicking undo restores the previous board and player', () => {
+      const gameplay: Gameplay<Board> = {
+        moves: {
+          mainMove: (board: Board, { events }: { events: Events }) => {
+            events.endTurn();
+            return { nextBoard: [...board, 'moved'] };
+          }
+        }
+      };
+      const { getByTestId } = renderGame(makeConfig({ BoardClient: CtxAwareBoardClient, gameplay }));
+      fireEvent.click(getByTestId('mode-vsHuman'));
+      fireEvent.click(getByTestId('start-hh-game-0'));
+      fireEvent.click(getByTestId('move-btn')); // player 0 moves → player 1's turn
+      expect((getByTestId('move-btn') as HTMLButtonElement).disabled).toBe(false); // player 1 can move
+      fireEvent.click(getByTestId('undo-btn')); // undo → back to player 0's turn
+      expect((getByTestId('move-btn') as HTMLButtonElement).disabled).toBe(false); // player 0 can move
+      expect((getByTestId('undo-btn') as HTMLButtonElement).disabled).toBe(true);  // snapshot cleared
+    });
+
+    it('undo is disabled after use (snapshot cleared)', () => {
+      const { getByTestId } = renderGame(ctxAwareConfig());
+      fireEvent.click(getByTestId('mode-vsHuman'));
+      fireEvent.click(getByTestId('start-hh-game-0'));
+      fireEvent.click(getByTestId('move-btn'));
+      fireEvent.click(getByTestId('undo-btn'));
+      expect((getByTestId('undo-btn') as HTMLButtonElement).disabled).toBe(true);
+    });
+
+    it('a new move after undo re-enables undo', () => {
+      const { getByTestId } = renderGame(ctxAwareConfig());
+      fireEvent.click(getByTestId('mode-vsHuman'));
+      fireEvent.click(getByTestId('start-hh-game-0'));
+      fireEvent.click(getByTestId('move-btn'));
+      fireEvent.click(getByTestId('undo-btn'));
+      fireEvent.click(getByTestId('move-btn')); // make a new move
+      expect((getByTestId('undo-btn') as HTMLButtonElement).disabled).toBe(false);
+    });
+
+    it('resetGameState clears the undo snapshot', () => {
+      const { getByTestId } = renderGame(ctxAwareConfig());
+      fireEvent.click(getByTestId('mode-vsHuman'));
+      fireEvent.click(getByTestId('start-hh-game-0'));
+      fireEvent.click(getByTestId('move-btn')); // creates snapshot
+      fireEvent.click(getByTestId('new-game-btn')); // reset
+      fireEvent.click(getByTestId('start-hh-game-0'));
+      expect((getByTestId('undo-btn') as HTMLButtonElement).disabled).toBe(true);
+    });
+
+    it('undo is enabled mid-turn (after first move but before endTurn)', () => {
+      const gameplay: Gameplay<Board> = {
+        moves: {
+          mainMove: (board: Board, { events }: { events: Events }) => {
+            events.setTurnState('step2');
+            return { nextBoard: board };
+          }
+        }
+      };
+      const { getByTestId } = renderGame(makeConfig({ BoardClient: CtxAwareBoardClient, gameplay }));
+      fireEvent.click(getByTestId('mode-vsHuman'));
+      fireEvent.click(getByTestId('start-hh-game-0'));
+      fireEvent.click(getByTestId('move-btn')); // sets turnState = 'step2', no endTurn
+      expect((getByTestId('undo-btn') as HTMLButtonElement).disabled).toBe(false);
+    });
+  });
+
+  describe('vsComputer', () => {
+    beforeAll(() => { vi.useFakeTimers(); });
+    afterAll(() => { vi.useRealTimers(); });
+    afterEach(() => { vi.clearAllTimers(); });
+
+    it('undo enabled immediately after human move (before bot fires)', () => {
+      const botStrategy = vi.fn();
+      const { getByTestId } = renderGame(ctxAwareConfig(botStrategy));
+      fireEvent.click(getByTestId('role-btn-0'));
+      fireEvent.click(getByTestId('move-btn')); // human moves
+      expect((getByTestId('undo-btn') as HTMLButtonElement).disabled).toBe(false);
+    });
+
+    it('clicking undo before bot fires cancels bot and restores human turn', () => {
+      const botStrategy = vi.fn();
+      const { getByTestId } = renderGame(ctxAwareConfig(botStrategy));
+      fireEvent.click(getByTestId('role-btn-0'));
+      fireEvent.click(getByTestId('move-btn')); // human moves → bot thinking
+      fireEvent.click(getByTestId('undo-btn'));  // undo before bot fires
+      act(() => { vi.advanceTimersByTime(1500); }); // bot timeout should be canceled
+      expect(botStrategy).not.toHaveBeenCalled();
+      expect((getByTestId('move-btn') as HTMLButtonElement).disabled).toBe(false); // human's turn
+    });
+
+    it('undo disabled after bot completes its move', () => {
+      const botStrategy = vi.fn().mockImplementation((args: any) => { args.moves.mainMove(args.board); });
+      const { getByTestId } = renderGame(ctxAwareConfig(botStrategy));
+      fireEvent.click(getByTestId('role-btn-0'));
+      fireEvent.click(getByTestId('move-btn')); // human moves
+      act(() => { vi.advanceTimersByTime(1500); }); // bot fires and calls mainMove
+      expect((getByTestId('undo-btn') as HTMLButtonElement).disabled).toBe(true);
+    });
+
+    it('undo does not re-trigger bot after restoring human turn', () => {
+      const botStrategy = vi.fn();
+      const { getByTestId } = renderGame(ctxAwareConfig(botStrategy));
+      fireEvent.click(getByTestId('role-btn-0'));
+      fireEvent.click(getByTestId('move-btn')); // human moves → bot thinking
+      fireEvent.click(getByTestId('undo-btn'));  // undo
+      act(() => { vi.advanceTimersByTime(1500); }); // advance timers
+      expect(botStrategy).not.toHaveBeenCalled(); // bot never fired
+    });
+  });
+});
+
 const gameEndingConfig = () => makeConfig({
   BoardClient: ({ board, moves }: BoardClientProps<Board>) => (
     <>

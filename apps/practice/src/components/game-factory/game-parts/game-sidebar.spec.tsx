@@ -16,7 +16,9 @@ const defaultMoves: SidebarMoves = {
   startGame: vi.fn(),
   setPlayerNames: vi.fn(),
   setDifficulty: vi.fn(),
-  resetGameState: vi.fn()
+  resetGameState: vi.fn(),
+  undo: vi.fn(),
+  canUndo: false
 };
 
 const renderSidebar = (ctxOverrides: Partial<Ctx> = {}) => {
