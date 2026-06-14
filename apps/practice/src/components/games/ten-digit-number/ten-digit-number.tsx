@@ -54,7 +54,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         {slots.map((d, i) => {
           const isNextSlot = d === null && i === board.digits.length && ctx.phase === 'play';
           const slotClass = isNextSlot
-            ? 'border-blue-400 bg-blue-50 text-blue-400'
+            ? 'border-blue-400 bg-blue-50 dark:bg-blue-900 text-blue-400 dark:text-blue-300'
             : `border-slate-600 ${d === null ? 'opacity-50' : ''}`;
           return (
             <div
@@ -74,7 +74,8 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             disabled={!ctx.isClientMoveAllowed}
             onClick={(e) => { moves.chooseDigit(board, d); e.currentTarget.blur(); }}
             className="rounded-lg border-2 text-2xl w-12 py-2 font-bold
-              enabled:hocus:bg-blue-100 enabled:hocus:border-blue-300 disabled:opacity-50"
+              enabled:hocus:bg-blue-100 dark:enabled:hocus:bg-blue-900
+              enabled:hocus:border-blue-300 disabled:opacity-50"
           >
             {d}
           </button>

@@ -93,7 +93,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 
     <svg
       onMouseMove={(event) => drawPickedColor(event)}
-      className="aspect-square stroke-slate-900 stroke-3"
+      className="aspect-square stroke-slate-900 dark:stroke-slate-300 stroke-3"
     >
       {/* <!-- front and back face --> */}
       <rect x="8%" y="25%" width="66%" height="66%" className="fill-transparent" />
@@ -119,10 +119,12 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           tabIndex={isMoveAllowed(nodeId) ? 0 : undefined}
           role={isMoveAllowed(nodeId) ? 'button' : undefined}
           aria-label={isMoveAllowed(nodeId) ? `Node ${nodeId + 1}` : undefined}
-          fill={
-            nodeColors[board[nodeId]]?.svg
-            ?? (isMoveAllowed(nodeId) || !show ? 'var(--color-slate-50)' : 'var(--color-slate-400)')
-          }
+          fill={nodeColors[board[nodeId]]?.svg}
+          className={!nodeColors[board[nodeId]]
+            ? (isMoveAllowed(nodeId) || !show
+              ? 'fill-slate-50 dark:fill-slate-300'
+              : 'fill-slate-400 dark:fill-slate-600')
+            : undefined}
         />
       ))}
 

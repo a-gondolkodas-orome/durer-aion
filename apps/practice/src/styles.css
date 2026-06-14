@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@variant dark (&:where(.dark, .dark *));
 
 @custom-variant hocus {
   html:not(.using-touch) &:hover { @slot; }
@@ -6,8 +7,18 @@
 }
 
 @layer base {
-    *,  ::after,  ::before,  ::backdrop,  ::file-selector-button { 
+    html {
+        @apply bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100;
+    }
+    *,  ::after,  ::before,  ::backdrop,  ::file-selector-button {
         border-color: var(--color-slate-200, currentColor);
+    }
+    :where(.dark) *,
+    :where(.dark) ::after,
+    :where(.dark) ::before,
+    :where(.dark) ::backdrop,
+    :where(.dark) ::file-selector-button {
+        border-color: var(--color-slate-700, currentColor);
     }
     p, h1, h2, h3, h4, h5, h6 {
         overflow-wrap: break-word;
@@ -21,13 +32,19 @@
         text-wrap: balance;
     }
     a {
-        @apply text-blue-700 underline;
+        @apply text-blue-700 dark:text-blue-400 underline;
     }
     [role="button"] {
         cursor: pointer;
     }
     button {
         @apply text-center enabled:cursor-pointer disabled:cursor-not-allowed;
+    }
+}
+
+@layer utilities {
+    .bg-surface-elevated {
+        @apply bg-slate-50 dark:bg-slate-800;
     }
 }
 
@@ -40,6 +57,7 @@
     .secondary-button {
         @apply block w-full py-1.5 px-2;
         @apply text-base sm:text-lg rounded-lg disabled:opacity-50;
-        @apply border enabled:hocus:border-slate-300 bg-slate-50 enabled:hocus:bg-slate-100;
+        @apply border enabled:hocus:border-slate-300 bg-slate-50 dark:bg-slate-800 enabled:hocus:bg-slate-100;
+        @apply dark:enabled:hocus:bg-slate-700 dark:enabled:hocus:border-slate-600;
     }
 }

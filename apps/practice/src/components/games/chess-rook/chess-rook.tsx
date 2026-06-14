@@ -25,7 +25,9 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             {range(8).map(col => (
               <td
                 key={col}
-                className={`border-4 ${board.chessBoard[row][col] === 'visited' ? 'bg-slate-900/40' : ''}`}
+                className={`border-4 ${
+                  board.chessBoard[row][col] === 'visited' ? 'bg-slate-900/40 dark:bg-white/20' : ''
+                }`}
               >
                 <button
                   className="w-full aspect-square p-[5%]"

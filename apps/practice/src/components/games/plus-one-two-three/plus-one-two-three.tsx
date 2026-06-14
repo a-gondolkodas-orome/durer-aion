@@ -32,8 +32,8 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           onClick={() => clickNumber(i)}
           className={`
             border-2 rounded-sm text-2xl min-w-[4ch] p-1 my-1 font-bold
-            enabled:bg-green-200 enabled:hocus:bg-green-400
-            ${i === target ? 'border-slate-900 border-dashed' : '' }
+            enabled:bg-green-200 dark:enabled:bg-green-700 enabled:hocus:bg-green-400 dark:enabled:hocus:bg-green-600
+            ${i === target ? 'border-slate-900 dark:border-slate-400 border-dashed' : '' }
             ${i < board ? 'opacity-50' : ''}
             ${i > target ? 'opacity-50 border-red-600' : ''}
           `}

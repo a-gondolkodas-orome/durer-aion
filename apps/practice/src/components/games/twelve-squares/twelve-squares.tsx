@@ -31,10 +31,10 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     if (i === board.right) return 'bg-purple-400';
     if (isMoveAllowed(potentialStep(i))) {
       return ctx.currentPlayer === 0
-        ? 'bg-green-200 enabled:hocus:bg-green-400'
-        : 'bg-purple-200 enabled:hocus:bg-purple-400';
+        ? 'bg-green-200 dark:bg-green-700 enabled:hocus:bg-green-400 dark:enabled:hocus:bg-green-600'
+        : 'bg-purple-200 dark:bg-purple-700 enabled:hocus:bg-purple-400 dark:enabled:hocus:bg-purple-600';
     }
-    return 'bg-slate-200';
+    return 'bg-slate-200 dark:bg-slate-700';
   };
 
   return (

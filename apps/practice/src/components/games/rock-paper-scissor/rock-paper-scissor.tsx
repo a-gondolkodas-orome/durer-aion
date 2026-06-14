@@ -37,7 +37,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               disabled={playerIdx === ctx.currentPlayer || !isMoveAllowed(symbolIdx)}
               onClick={() => clickField(symbolIdx)}
               className={`
-                p-2 m-2 aspect-4/5 bg-slate-50 drop-shadow-lg
+                p-2 m-2 aspect-4/5 bg-surface-elevated rounded-lg drop-shadow-lg
                 enabled:border-2 enabled:border-dashed
                 enabled:hocus:opacity-50
               `}

@@ -75,7 +75,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 
   const getColor = i => {
     if (board[i] === COLORED) return 'fill-blue-800';
-    if (board[i] === FORBIDDEN) return 'fill-slate-900/40';
+    if (board[i] === FORBIDDEN) return 'fill-slate-900/40 dark:fill-white/20';
     return 'fill-transparent';
   };
 
@@ -92,8 +92,8 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             <polygon
               key={i}
               points={getTrianglePoints(i)}
-              className={getColor(i)}
-              stroke="black" strokeWidth="0.5"
+              className={`${getColor(i)} stroke-slate-900 dark:stroke-slate-400`}
+              strokeWidth="0.5"
               onClick={() => colorTriangle(i)}
               onKeyUp={(event) => {
                 if (event.key === 'Enter') colorTriangle(i);
@@ -104,7 +104,10 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             ></polygon>
           ))}
         </g>
-        <polygon points="50,12.5 16.5,73 83.5,73" fill="none" stroke="black" strokeWidth="0.5" />
+        <polygon
+          points="50,12.5 16.5,73 83.5,73"
+          fill="none" className="stroke-slate-900 dark:stroke-slate-400" strokeWidth="0.5"
+        />
       </svg>
     </GameBoard>
   );

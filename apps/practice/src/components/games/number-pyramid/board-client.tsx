@@ -19,8 +19,8 @@ const ActiveSlot = ({ value, isSelected, isDisabled, onClick }) => (
   <button
     className={`${chipBase} ${
       isSelected ? 'bg-blue-500 border-blue-400 text-white'
-        : isDisabled ? 'bg-slate-200 opacity-50'
-          : 'hocus:bg-blue-50 hocus:border-blue-400'
+        : isDisabled ? 'bg-slate-200 dark:bg-slate-700 opacity-50'
+          : 'hocus:bg-blue-50 dark:hocus:bg-blue-900 hocus:border-blue-400'
     }`}
     onClick={onClick}
     disabled={isDisabled}
@@ -55,7 +55,7 @@ export const BoardClient = ({ board, ctx, events, moves }: BoardClientProps<Boar
     <GameBoard>
       <p className="text-center text-lg font-semibold mb-4">
         {t({ hu: 'Célszám (k)', en: 'Target (k)' })}:{' '}
-        <span className="text-2xl font-bold text-blue-600">
+        <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
           {board.target}
         </span>
       </p>

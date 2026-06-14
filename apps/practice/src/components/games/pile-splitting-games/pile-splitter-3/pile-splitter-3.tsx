@@ -82,8 +82,8 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   };
 
   const pieceColor = ({ pileId, pieceId }: Piece) => {
-    if (pileId === removedPileId) return 'bg-slate-900/40';
-    if (isHoverPreviewedForRemoval(pileId)) return 'bg-slate-900/20';
+    if (pileId === removedPileId) return 'bg-slate-900/40 dark:bg-white/20';
+    if (isHoverPreviewedForRemoval(pileId)) return 'bg-slate-900/20 dark:bg-white/10';
     if (toBeLeft({ pileId, pieceId })) return 'bg-blue-800/75';
     return 'bg-blue-800';
   };

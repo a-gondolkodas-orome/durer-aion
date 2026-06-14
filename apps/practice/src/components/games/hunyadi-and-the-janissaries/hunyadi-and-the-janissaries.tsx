@@ -82,7 +82,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             >
               <svg
                 className={`
-                  w-full aspect-square border-dashed border-slate-900
+                  w-full aspect-square border-dashed border-slate-900 dark:border-slate-400
                   ${showToBeKilled(group) ? 'outline-dashed opacity-50' : ''}
                   ${group === 'blue' ? 'fill-blue-800' : 'fill-red-800'}
                 `}

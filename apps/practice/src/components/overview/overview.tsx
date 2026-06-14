@@ -3,6 +3,7 @@ import { gameList, type GameEntry, type Category } from '../games/gameList';
 import { every, orderBy } from 'lodash';
 import { Link } from 'react-router';
 import { useTranslation, LanguageSelector } from '../language';
+import { ThemeSwitcher } from '../theme';
 
 export const Overview = () => {
   const { t } = useTranslation();
@@ -46,6 +47,10 @@ export const Overview = () => {
       {gamesToShow.filter(id => gameList[id].category[0] > 'B')
         .map(id => <Game key={id} gameId={id} gameProps={gameList[id]} />)}
     </div>
+    <footer className="md:hidden flex justify-end items-center gap-3 mt-4 px-2">
+      <ThemeSwitcher />
+      <LanguageSelector />
+    </footer>
   </main>;
 };
 
@@ -70,10 +75,10 @@ const CategoryFilter = ({ selected, onChange }: {
           key={v}
           onClick={() => onChange(selected.includes(v) ? selected.filter(s => s !== v) : [...selected, v])}
           className={`
-            px-2 rounded-sm drop-shadow-md 
+            px-2 rounded-sm drop-shadow-md
             ${selected.includes(v)
-              ? 'bg-blue-200 hocus:bg-slate-200'
-              : 'bg-slate-50 hocus:bg-blue-200'}`}
+              ? 'bg-blue-200 dark:bg-blue-800 hocus:bg-slate-200 dark:hocus:bg-slate-700'
+              : 'bg-surface-elevated hocus:bg-blue-200 dark:hocus:bg-blue-800'}`}
         >{k}</button>
       )}
       <button
@@ -81,7 +86,7 @@ const CategoryFilter = ({ selected, onChange }: {
         disabled={selected.length === 0}
         aria-label={t({ hu: 'Szűrés törlése', en: 'Clear filters' })}
         className={`
-          px-2 rounded-sm drop-shadow-md enabled:hocus:bg-slate-200
+          px-2 rounded-sm drop-shadow-md enabled:hocus:bg-slate-200 dark:enabled:hocus:bg-slate-700
           disabled:invisible disabled:cursor-default
         `}
       >×</button>
@@ -93,10 +98,13 @@ const OverviewHeader = () => {
   const { t } = useTranslation();
   return <>
     <header className="flex flex-wrap items-baseline pb-2">
-      <h1 className="grow text-blue-600 font-bold text-center">
+      <h1 className="grow text-blue-600 dark:text-blue-400 font-bold text-center">
         {t({ hu: 'Dürer stratégiás játékok', en: 'Dürer Strategy Games' })}
       </h1>
-      <LanguageSelector />
+      <span className="hidden md:flex items-center gap-2">
+        <ThemeSwitcher />
+        <LanguageSelector />
+      </span>
     </header>
     <div className="max-w-[100ch] mx-auto pb-2">
       {t({
@@ -119,10 +127,10 @@ const OverviewHeader = () => {
 };
 
 const categoryColorClass: Record<Category, string> = {
-  'A':  'bg-green-200',
-  'B':  'bg-teal-300',
-  'C':  'bg-blue-300',
-  'D':  'bg-blue-400',
+  'A':  'bg-green-200 dark:bg-green-700',
+  'B':  'bg-teal-300 dark:bg-teal-700',
+  'C':  'bg-blue-300 dark:bg-blue-700',
+  'D':  'bg-blue-400 dark:bg-blue-600',
   'E':  'bg-blue-600 text-white',
   'E+': 'bg-blue-800 text-white'
 };
@@ -143,7 +151,7 @@ const Game = ({ gameId, gameProps }: { gameId: string; gameProps: GameEntry }) =
     data-testid="game-card"
     className={`
       rounded-lg border p-1 sm:p-2 max-w-[20ch] sm:max-w-[32ch] w-full flex flex-col
-      cursor-pointer hocus:bg-blue-50 hocus:border-blue-400
+      cursor-pointer hocus:bg-blue-50 dark:hocus:bg-blue-950 hocus:border-blue-400
       no-underline text-inherit
     `}
   >
@@ -152,8 +160,8 @@ const Game = ({ gameId, gameProps }: { gameId: string; gameProps: GameEntry }) =
     </h2>
     <div className="grow"></div>
     <div className="flex flex-wrap items-baseline gap-1 text-xs">
-      <span className={`${chipBase} bg-slate-50`} title={gameProps.year.k}>{gameProps.year.v}</span>
-      <span className={`${chipBase} bg-slate-50`}>{round}</span>
+      <span className={`${chipBase} bg-surface-elevated`} title={gameProps.year.k}>{gameProps.year.v}</span>
+      <span className={`${chipBase} bg-surface-elevated`}>{round}</span>
       <span className={`${chipBase} ${categoryColor}`}>{gameProps.category.join(', ')}</span>
       <span className="ml-auto" aria-hidden="true">→</span>
     </div>

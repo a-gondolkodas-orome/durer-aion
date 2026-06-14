@@ -57,7 +57,7 @@ export const GameSidebar = ({
 
   return (
     <div className="p-2 flex flex-col grow shrink-0 basis-64 gap-3">
-      <div className="rounded-lg border bg-slate-50 p-2 sm:p-3 mb-2 sm:mb-8 flex flex-col gap-3">
+      <div className="rounded-lg border bg-slate-100 dark:bg-slate-800 p-2 sm:p-3 mb-2 sm:mb-8 flex flex-col gap-3">
         {ctx.isHumanVsHumanGame
           ? ctx.phase !== 'roleSelection' && <PlayerTurnPanel ctx={ctx} />
           : <p className="text-center font-bold text-base sm:text-lg">{t(getCtaText(ctx))}</p>
@@ -103,7 +103,8 @@ export const GameSidebar = ({
           />
         ) : (
           <details className="border rounded-lg p-2 text-sm">
-            <summary className="cursor-pointer text-slate-500 hocus:text-slate-600">
+            <summary className="cursor-pointer text-slate-500 hocus:text-slate-600
+              dark:text-slate-400 dark:hocus:text-slate-300">
               {modeSummaryLabel}{variantSummaryLabel}
             </summary>
             <div className="mt-2 flex flex-col gap-3">
@@ -196,8 +197,9 @@ const PlayerNameSetup = ({ roleLabels, playerNames, setPlayerNames, onStart }: {
       <div key={i} className="flex items-center gap-2">
         <Input
           name={i === 0 ? 'name_of_first_player' : 'name_of_second_player'}
-          className="border rounded-md text-slate-600 px-2 py-1 text-sm w-full
-            focus:outline-none focus:ring-1 focus:ring-blue-400"
+          className="border rounded-md text-slate-600 dark:text-slate-200
+           bg-surface-elevated
+            px-2 py-1 text-sm w-full focus:outline-none focus:ring-1 focus:ring-blue-400"
           placeholder={t([
             { hu: 'Neved (Nyuszika)', en: 'Your name (Pip)' },
             { hu: 'Neved (Teknős)', en: 'Your name (Dot)' }
@@ -250,10 +252,12 @@ const PlayerTurnPanel = ({ ctx }: { ctx: Ctx }) => {
             className={`
               flex-1 sm:flex-none flex items-center gap-2 rounded-md px-2 py-1 sm:px-3 sm:py-2
               border-l-4 drop-shadow-sm
-              ${highlighted ? 'bg-blue-50 border-blue-400' : 'bg-white'}
+              ${highlighted
+                ? 'bg-blue-50 dark:bg-blue-950 border-blue-400 dark:border-blue-700'
+                : 'bg-surface-elevated'}
             `}
           >
-            <span className={`flex-1 ${highlighted ? 'font-bold text-blue-700' : ''}`}>
+            <span className={`flex-1 ${highlighted ? 'font-bold text-blue-700 dark:text-blue-300' : ''}`}>
               {playerName(i)}
             </span>
             {isWinner && <span>🏆</span>}
@@ -267,7 +271,7 @@ const PlayerTurnPanel = ({ ctx }: { ctx: Ctx }) => {
 const WinLossCounter = ({ stats, onReset }: { stats: Stats; onReset: () => void }) => {
   const { t } = useTranslation();
   return (
-    <div className="flex items-center justify-between text-sm text-slate-500">
+    <div className="flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
       <span title={t({
         hu: `Megnyert játékok: ${stats.win}, Elvesztett játékok: ${stats.loss}`,
         en: `Wins: ${stats.win}, Losses: ${stats.loss}`
@@ -277,7 +281,7 @@ const WinLossCounter = ({ stats, onReset }: { stats: Stats; onReset: () => void 
       <button
         onClick={onReset}
         aria-label={t({ hu: 'Számlálók nullázása', en: 'Reset counters' })}
-        className="text-xs hocus:text-slate-600"
+        className="text-xs hocus:text-slate-600 dark:hocus:text-slate-300"
       >
         ↻
       </button>

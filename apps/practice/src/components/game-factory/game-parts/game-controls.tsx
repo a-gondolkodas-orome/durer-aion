@@ -10,7 +10,7 @@ export const ModeSelector = ({ isHumanVsHumanGame, onSwitchMode, disabled }: {
 
   return (
     <fieldset>
-      <legend className="text-xs text-slate-600 mb-1.5">
+      <legend className="text-xs text-slate-600 dark:text-slate-400 mb-1.5">
         {t({ hu: 'Játékmód', en: 'Game mode' })}
       </legend>
       <div className={`flex divide-x divide-slate-300 rounded-lg overflow-hidden border text-sm
@@ -54,7 +54,7 @@ export const DifficultySelector = ({ variants, selectedIndex, onSelect, disabled
 
   return (
     <fieldset>
-      <legend className="text-xs text-slate-600 mb-1.5">
+      <legend className="text-xs text-slate-600 dark:text-slate-400 mb-1.5">
         {t({ hu: 'Nehézség', en: 'Difficulty' })}
       </legend>
       <div className={`flex divide-x divide-slate-300 rounded-lg overflow-hidden border text-sm
@@ -95,8 +95,8 @@ export const DifficultySelector = ({ variants, selectedIndex, onSelect, disabled
 const labelClass = (active: boolean, disabled: boolean) => `
   grow py-1 px-2 text-center
   ${disabled ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}
-  ${active ? 'bg-blue-500 text-white font-semibold' : 'bg-slate-100'}
-  ${!active && !disabled ? 'hocus:bg-slate-200' : ''}
+  ${active ? 'bg-blue-500 text-white font-semibold' : 'bg-slate-100 dark:bg-slate-700'}
+  ${!active && !disabled ? 'hocus:bg-slate-200 dark:hocus:bg-slate-600' : ''}
 `;
 
 export const getCtaText = ({

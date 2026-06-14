@@ -76,7 +76,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               disabled={isDisabled({ pileId, pieceId })}
               className={`
                 bg-blue-800 w-[20%] aspect-square rounded-full mx-0.5 mt-0.5 align-top
-                ${toBeRemoved(pileId) ? 'bg-slate-900/40' : ''}
+                ${toBeRemoved(pileId) ? 'bg-slate-900/40 dark:bg-white/20' : ''}
                 ${toBeLeft({ pileId, pieceId }) ? 'bg-blue-800/75' : ''}
               `}
               onClick={() => clickPiece({ pileId, pieceId })}

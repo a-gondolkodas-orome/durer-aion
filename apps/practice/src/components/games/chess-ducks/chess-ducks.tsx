@@ -47,7 +47,7 @@ const chessDucksGameFactory = ({ ROWS, COLS }: { ROWS: number; COLS: number }) =
                     key={col}
                     className={`
                       border-4
-                      ${isForbidden({ row, col }) ? 'bg-slate-900/40' : ''}
+                      ${isForbidden({ row, col }) ? 'bg-slate-900/40 dark:bg-white/20' : ''}
                     `}
                   >
                     <button

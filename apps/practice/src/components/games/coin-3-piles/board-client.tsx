@@ -137,7 +137,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                 key={i}
                 disabled={!isRemovalAllowed(coinValue)}
                 className={`
-                  w-[15%] aspect-square rounded-full mr-0.5 mt-2
+                  w-[15%] aspect-square rounded-full mr-0.5 mt-2 text-slate-800
                   ${getCoinBgColor(coinValue)} shadow-md ${getCoinShadowColor(coinValue)}
                   enabled:hocus:ring-2 enabled:hocus:ring-red-400
                   ${shouldShowCoinToBeRemoved(coinValue) && i === (board[coinValue - 1] - 1)
@@ -162,7 +162,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               <button
                 disabled
                 className={`
-                  w-[15%] aspect-square rounded-full mr-0.5 mt-2 opacity-50
+                  w-[15%] aspect-square rounded-full mr-0.5 mt-2 opacity-50 text-slate-800
                   ${getCoinBgColor(coinValue)} shadow-md ${getCoinShadowColor(coinValue)}
                 `}
                 style={{ transform: 'scaleY(-1)' }}

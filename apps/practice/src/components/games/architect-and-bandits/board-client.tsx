@@ -27,11 +27,11 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   // Hide towers during role selection (before the game actually begins)
   const gameStarted = ctx.isHumanVsHumanGame || ctx.chosenRoleIndex !== null;
 
-  const isAdjacentToArchitect = (v) =>
+  const isAdjacentToArchitect = (v: number) =>
     (v - board.architectPosition + 8) % 8 === 1 ||
     (board.architectPosition - v + 8) % 8 === 1;
 
-  const isClickable = (v) => {
+  const isClickable = (v: number) => {
     if (!ctx.isClientMoveAllowed) return false;
     if (ctx.currentPlayer === 0) {
       return board.kmUsedToday < 40 && isAdjacentToArchitect(v);
@@ -39,7 +39,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     return board.towers[v];
   };
 
-  const handleVertexClick = (v) => {
+  const handleVertexClick = (v: number) => {
     if (!isClickable(v)) return;
     if (ctx.currentPlayer === 0) {
       moves.moveArchitect(board, v);
@@ -65,7 +65,8 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               key={i}
               x1={from.x} y1={from.y}
               x2={to.x} y2={to.y}
-              stroke="#888" strokeWidth="0.6"
+              className="stroke-stone-700 dark:stroke-stone-200"
+              strokeWidth="0.6"
             />
           );
         })}
@@ -90,9 +91,11 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               {/* Vertex base square — + thick border when tower present */}
               <rect
                 x={x - 4.5} y={y - 4.5} width={9} height={9}
-                fill={hasTower ? '#c2b280' : '#f3f4f6'}
-                stroke={hasTower ? '#374151' : '#6b7280'}
-                strokeWidth={hasTower ? 1.2 : 0.5}
+                strokeWidth={hasTower ? 1.2 : 0.4}
+                className={hasTower
+                  ? 'fill-stone-400 dark:fill-stone-300 stroke-stone-600 dark:stroke-stone-700'
+                  : 'fill-slate-100 dark:fill-slate-800 stroke-stone-200 dark:stroke-stone-700'
+                }
               />
 
               {/* Architect marker: person emoji */}
@@ -113,7 +116,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                 textAnchor="middle"
                 fontSize="4"
                 fontWeight="bold"
-                fill="#111"
+                fill="currentColor"
                 className="select-none pointer-events-none"
               >
                 {VERTEX_LABELS[i]}

@@ -3,6 +3,7 @@ import { createHashRouter, RouterProvider, Outlet } from 'react-router';
 import { Overview } from '../overview/overview';
 import { ErrorPage } from '../error-page';
 import { LanguageProvider } from '../language';
+import { ThemeProvider } from '../theme';
 
 /*
 Import all the games individually. Aim to keep abc ordering for easy navigation.
@@ -58,9 +59,11 @@ import { TwelveSquares } from '../games/twelve-squares/twelve-squares';
 import { TwoTimesTwo } from '../games/two-times-two/two-times-two';
 
 const RootLayout = () => (
-  <LanguageProvider>
-    <Outlet />
-  </LanguageProvider>
+  <ThemeProvider>
+    <LanguageProvider>
+      <Outlet />
+    </LanguageProvider>
+  </ThemeProvider>
 );
 
 export const App = () => {

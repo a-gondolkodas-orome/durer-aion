@@ -75,13 +75,12 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       return (
       <circle
         key={vertex.id}
-        cx={vertex.cx} cy={vertex.cy} r="2%" fill="black"
+        cx={vertex.cx} cy={vertex.cy} r="2%"
         className={`
           ${vertex.id === firstNode
             ? (ctx.currentPlayer === 0 ? "fill-blue-500" : "fill-green-500")
-            : ''
+            : isInvalidHover ? 'fill-red-500' : 'fill-slate-900 dark:fill-slate-300'
           }
-          ${isInvalidHover ? 'fill-red-500' : ''}
         `}
         onClick={() => connectNode(vertex.id)}
         onKeyUp={(event) => {

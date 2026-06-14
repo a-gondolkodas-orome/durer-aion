@@ -26,7 +26,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const pieceColor = (id) => {
     const colorCode = board[id];
     if (colorCode === 'red') return 'bg-red-800';
-    if (colorCode === 'white') return 'bg-slate-50';
+    if (colorCode === 'white') return 'bg-slate-50 dark:bg-slate-600';
     return 'bg-blue-800';
   };
 
@@ -36,13 +36,13 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   */
   return (
   <GameBoard>
-    <div className="grid grid-cols-3 bg-slate-200 gap-1 p-1">
+    <div className="grid grid-cols-3 bg-slate-200 dark:bg-slate-600 gap-1 p-1">
       {range(9).map(id => (
         <button
           key={id}
           disabled={!isMoveAllowed(id)}
           onClick={() => clickField(id)}
-          className="aspect-square p-[25%] bg-slate-50"
+          className="aspect-square p-[25%] bg-surface-elevated"
         >
           {board[id] && (
             <span
@@ -50,7 +50,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                 w-full aspect-square block rounded-full
                 ${!gameIsInPlacingPhase && isMoveAllowed(id) ? 'hover:opacity-50' : ''}
                 ${pieceColor(id)}
-                ${board[id] === 'white' ? 'border-4 border-slate-900' : ''}
+                ${board[id] === 'white' ? 'border-4 border-slate-900 dark:border-slate-300' : ''}
               `}
             ></span>
           )}

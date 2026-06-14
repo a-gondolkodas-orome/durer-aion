@@ -3,7 +3,7 @@ export const ChessRookSvg = () => {
     <svg style={{ display: 'none' }}>
       <symbol id="game-chess-rook" viewBox="0 0 504 504">
         <g id="layer1" transform="translate(-523.71 -225.65)">
-          <path id="path2406" style={{ fill: '#000000' }}
+          <path id="path2406" style={{ fill: 'currentColor' }}
             d="m90 422.5v-18.5h12.5 12.5v-21.35-21.36l21-22.36 21-22.36v-74.56-74.56l-24.44-18.47-24.45-18.48-0.05-33.75-0.06-33.75h28.5 28.5v15 15h26 26v-15-15h35 35v15 15h26 26v-15-15h28.5 28.5l-0.05 33.75-0.05 33.75-24.45 18.5-24.45 18.5v74.7 74.69l20.97 22.31 20.97 22.3 0.03 21.25 0.03 21.25h12.5 12.5v18.5 18.5h-162-162v-18.5z"
             transform="translate(523.71 225.65)" />
           <path id="path2392" style={{ fill: '#ffffff' }}

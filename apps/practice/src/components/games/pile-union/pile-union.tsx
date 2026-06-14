@@ -69,8 +69,8 @@ const MoveTypeSelector = ({ moveType, isClientMoveAllowed, canMerge, onSelect }:
   const labelClass = (active: boolean, disabled: boolean) => `
     grow py-1 px-2 text-center
     ${disabled ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}
-    ${active ? 'bg-blue-500 text-white font-semibold' : 'bg-slate-100'}
-    ${!active && !disabled ? 'hocus:bg-slate-200' : ''}
+    ${active ? 'bg-blue-500 text-white font-semibold' : 'bg-slate-100 dark:bg-slate-700'}
+    ${!active && !disabled ? 'hocus:bg-slate-200 dark:hocus:bg-slate-600' : ''}
   `;
 
   return (
@@ -136,7 +136,7 @@ const Pile = ({ size, disabled, isSelected, moveType, onClick, moveCount }: {
       className={`
         flex flex-col items-center gap-1 p-2 rounded-lg border-2 transition-colors
         ${isSelected ? 'border-blue-300 bg-blue-600/40' :
-          isRemoveHovered ?  'bg-slate-900/5' :
+          isRemoveHovered ?  'bg-slate-900/5 dark:bg-white/5' :
           isMergeHovered ? 'border-blue-300 bg-blue-600/20' :
           'border-transparent'}
         disabled:cursor-default

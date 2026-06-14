@@ -72,7 +72,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           disabled={!isAllowed_choosePiece(id) && !isAllowed_movePiece(id)}
           className={`
             aspect-square border-r-2 border-b-2 p-2 relative flex justify-center items-center
-            disabled:cursor-default enabled:hocus:bg-blue-50
+            disabled:cursor-default enabled:hocus:bg-blue-50 dark:enabled:hocus:bg-blue-950
             ${possibleMoves.includes(id) && isCurrentPlayerShark && board.submarines[id]
               ? 'ring-2 ring-inset ring-red-600' : ''}
           `}

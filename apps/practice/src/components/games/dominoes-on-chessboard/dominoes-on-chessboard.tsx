@@ -64,11 +64,11 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   };
 
   const getCellBgClass = (field: Field) => {
-    if (isCovered(field, board)) return 'bg-slate-600 border-slate-900';
-    if (!ctx.isClientMoveAllowed) return '';
+    if (isCovered(field, board)) return 'bg-slate-600 border-slate-900 dark:border-slate-400';
+    if (!ctx.isClientMoveAllowed) return 'bg-surface-elevated';
     if (isPartOfPreview(field) || isEqual(selectedField, field)) return 'bg-blue-400';
-    if (isNeighborOfSelected(field)) return 'bg-blue-100';
-    return '';
+    if (isNeighborOfSelected(field)) return 'bg-blue-100 dark:bg-blue-900';
+    return 'bg-surface-elevated';
   };
 
   const isClickAllowed = (field: Field) => {
@@ -94,7 +94,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             {range(BOARDSIZE).map(col => (
               <td
                 key={col}
-                className="border-4"
+                className="border-4 dark:border-slate-600"
               >
                 <button
                   className={`
