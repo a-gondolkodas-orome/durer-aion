@@ -117,7 +117,6 @@ Always pass the current `board` as first arg when chaining moves within a turn.
 - Clear what the player should do next (`getPlayerStepDescription`)
 - Interactions disabled during the other player's turn (`ctx.isClientMoveAllowed`)
 - Mobile-friendly and keyboard-navigable
-- Player can undo within multi-move turns if applicable
 - AI appears to "think" in multi-move turns (use `setTimeout`)
 
 ## Internationalisation (i18n)

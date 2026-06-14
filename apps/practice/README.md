@@ -232,7 +232,6 @@ framework.
 - is the game (mostly) mobile-friendly?
 - is the game usable only with keyboard (without a mouse)?
 - is it clear what the player should do next?
-- can the player undo their last interaction in turns with multiple moves?
 - pretend the bot is thinking in turns with multiple moves (for one move it is
   handled by framework)
 
