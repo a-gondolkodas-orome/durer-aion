@@ -22,7 +22,7 @@ export const DuckSvg = () => {
         <circle cx="135" cy="72" r="4" fill="#333"/>
 
         {/*<!-- Duck legs -->*/}
-        <g stroke="#333" strokeWidth="3" fill="none">
+        <g stroke="currentColor" strokeWidth="3" fill="none">
           {/*<!-- Left leg -->*/}
           <line x1="90" y1="165" x2="90" y2="175"/>
           <path d="M 85 175 L 90 175 L 95 175 M 85 178 L 90 175 L 95 178" strokeWidth="2"/>
