@@ -12,18 +12,20 @@ export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   moves.moveHalvedPieces(board, sample(validMoves));
 };
 
-export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  let pileId, pieceCount;
+export const getSmartBotStep = (board: Board): { pileId: number; pieceCount: number } => {
+  let pileId: number, pieceCount: number;
   if (board[0]-board[1] === -1 || board[0]-board[1] === 0 || board[0]-board[1] === 1) {
     const ran = random(0,1);
     pileId=(board[ran]>1) ? ran : (1 - ran);
     pieceCount = 2 * random(1, board[pileId] / 2);
-
   } else {
     pileId = (board[0]>board[1]) ? 0 : 1;
     const third = Math.floor((board[pileId]-board[1-pileId]+1)/3);
     pieceCount = 2 * third;
   }
+  return { pileId, pieceCount };
+};
 
-  moves.moveHalvedPieces(board, { pileId, pieceCount });
+export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+  moves.moveHalvedPieces(board, getSmartBotStep(board));
 };

@@ -34,7 +34,7 @@ const executeArchitectPath = (path, board, moves) => {
   setTimeout(() => executeArchitectPath(rest, nextBoard, moves), 600);
 };
 
-const getOptimalArchitectPath = (board: Board) => {
+export const getOptimalArchitectPath = (board: Board) => {
   const pos = board.architectPosition;
   const towers = board.towers;
   const day = board.day;
@@ -134,7 +134,7 @@ const executeBanditStrategy = (board: Board, moves) => {
 
 // Minimum moves to visit all targets from pos on an 8-cycle.
 // Tries all k+1 arc splits: j targets covered going CW, the rest going CCW.
-const minPathToVisitAll = (pos, targets) => {
+export const minPathToVisitAll = (pos, targets) => {
   if (targets.length === 0) return 0;
   const cwDists = targets.map((v) => (v - pos + 8) % 8).sort((a, b) => a - b);
   const k = cwDists.length;

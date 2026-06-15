@@ -17,7 +17,7 @@ export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   return moves.spreadPieces(board, { pileId, pieceCount: pieceId + 1 });
 };
 
-const getSmartBotStep = (board: Board): { pileId: number; pieceId: number } => {
+export const getSmartBotStep = (board: Board): { pileId: number; pieceId: number } => {
   if ((board[1] % 2 === 0) && (board[3] % 5 === 3)) {
     return { pileId: 3, pieceId: random(0, 1) };
   } else if ((board[1] % 2 === 0) && (board[3] % 5 === 4)) {

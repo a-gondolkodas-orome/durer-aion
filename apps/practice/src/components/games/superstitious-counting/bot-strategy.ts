@@ -11,7 +11,7 @@ export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   moves.step(board, step);
 };
 
-const getOptimalBotStep = ({ current, target, restricted }) => {
+export const getOptimalBotStep = ({ current, target, restricted }) => {
   if ((target - current) % 14 === 0) { // any step wins
     return randomStep(restricted);
   }
