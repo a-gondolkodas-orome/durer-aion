@@ -4,12 +4,9 @@ Code for the online, client-side versions of past strategy games at the Dürer
 Math Competition.
 
 The deployed version is here:
-https://a-gondolkodas-orome.github.io/durer-jatekok/.
+jatek.durerinfo.hu/ .
 
 # Development
-
-Feel free to commit directly to the default (master) branch. If in doubt, send a
-pull request instead.
 
 When you push to the default (master) branch, the tests are run, and if they are
 successful, the project is deployed to the live website within a few minutes.
@@ -83,10 +80,7 @@ This project uses the React frontend "framework", the [official
 tutorial](https://react.dev/learn) is a good starting point.
 
 The common parts of all games (showing rules, alternating turns, buttons for
-choosing a role, restart game) are extracted to a `strategyGameFactory` which is
-highly recommended (but not a must). The below documentation is about creating a
-new game with this factory (so that you can focus on game logic and designing
-the board interactions.)
+choosing a role, restart game) are extracted to a `strategyGameFactory`.
 
 
 *It is recommended to copy and modify an existing, similar game.*
@@ -148,8 +142,7 @@ export const PlusOneTwo = strategyGameFactory({
 ### board object
 
 Concept: `board` holds the state necessary to know the game state, specific to
-each game, that the next player needs to know. It can be also convenient to
-store temporary state during a turn with multiple moves. Common state, managed
+each game, that the next player needs to know. Common state, managed
 by the framework is stored in `ctx` (such as `currentPlayer`).
 
 See `generateStartBoard()` inside each variant.
