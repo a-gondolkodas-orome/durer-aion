@@ -4,7 +4,7 @@ Code for the online, client-side versions of past strategy games at the Dürer
 Math Competition.
 
 The deployed version is here:
-jatek.durerinfo.hu/ .
+https://jatek.durerinfo.hu/ .
 
 # Development
 
