@@ -3,14 +3,20 @@ on:
   push:
     branches: [master]
 
+concurrency:
+  group: deploy
+  cancel-in-progress: true
+
 jobs:
   test:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write
     container:
       image: node:24.11.1
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: test and build
         run: |
           npm ci
