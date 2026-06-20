@@ -41,7 +41,8 @@ export const gameList: GameList = {
     year: { k: "III. (09/10)", v: "09/10" },
     round: "döntő",
     category: ["C"],
-    name: { hu: "Sakktáblára dominók", en: "Dominoes on a chessboard" },
+    name: { hu: "Sakktáblára dominók", en: "Cram (Dominoes)" },
+    title: { hu: "Sakktáblára dominók", en: "Cram (Dominoes on a chessboard)" },
     credit: { developedBy: ["Czeller Ildikó"] }
   },
   PlusOneTwoThree: {
