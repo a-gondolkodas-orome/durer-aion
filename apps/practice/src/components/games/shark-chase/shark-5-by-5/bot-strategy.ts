@@ -1,6 +1,7 @@
 import { sample } from 'lodash';
 import type { StrategyArgs } from '../../../game-factory';
 import { type Board } from './shark-chase';
+import sharkExceptionMoves from './shark-exception-moves.json';
 
 const getAdjacentCells = (pos: number): number[] => {
   const cells: number[] = [];
@@ -42,7 +43,7 @@ export const randomBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) =>
 
 export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
   if (ctx.chosenRoleIndex === 0) {
-    const finalPos = getNextSharkPositionByAI(board.submarines, board.shark)!;
+    const finalPos = getNextSharkPositionByAI(board)!;
     const firstPos = getIntermediateSharkPosition(board.submarines, board.shark, finalPos);
     const { nextBoard } = moves.moveShark(board, firstPos);
     if (finalPos !== board.shark) {
@@ -134,89 +135,120 @@ const distanceFromShark = (shark: number, id: number): number => {
   );
 }
 
-export const getNextSharkPositionByAI = (submarines: number[], shark: number): number | undefined => {
-  const componentSizes = getComponentSizes(submarines)
+// Greedy fallback used only when no move guarantees survival (game is already lost):
+// picks the reachable cell with the largest "safe" connected component (cells not
+// adjacent to any submarine), preferring central cells, then progressively further out.
+const selectByLocationPreference = (submarines: number[], pool: number[]): number => {
+  const componentSizes = getComponentSizes(submarines);
 
-  // 2 lepessel elerheto mezo aminek legnagyobb az osszefuggosegi komponense
   let maxi = 1;
+  for (const i of pool) {
+    if (maxi < componentSizes[i]) maxi = componentSizes[i];
+  }
+
+  const matching = (group: number[]) => pool.filter(i => group.includes(i) && componentSizes[i] === maxi);
+
+  const groups = [[12], [7, 11, 13, 17], [6, 8, 16, 18], [2, 10, 14, 22], [1, 3, 5, 9, 15, 19, 21, 23], [0, 4, 20, 24]];
+  let possibleMoves: number[] = [];
+  for (const group of groups) {
+    possibleMoves = matching(group);
+    if (possibleMoves.length > 0) break;
+  }
+
+  return sample(possibleMoves.length > 0 ? possibleMoves : pool)!;
+}
+
+// Is the shark guaranteed to survive to day 15 if it moves to `to` on its current
+// turn, assuming the researchers then play optimally against it from here on?
+const isMoveWinning = (submarines: number[], to: number, turn: number, memo: Map<string, boolean>): boolean => {
+  const nextTurn = turn + 1;
+  if (nextTurn > 15) return true;
+  return canSharkSurviveSubmarineTurn(submarines, to, nextTurn, memo);
+}
+
+const stateKey = (submarines: number[], shark: number, turn: number, phase: 'sub' | 'shark'): string =>
+  `${submarines.join(',')}|${shark}|${turn}|${phase}`;
+
+// Researchers move next (one submarine, one adjacent step); can they force a capture
+// from here, however the shark plays afterwards?
+const canSharkSurviveSubmarineTurn = (
+  submarines: number[], shark: number, turn: number, memo: Map<string, boolean>
+): boolean => {
+  const key = stateKey(submarines, shark, turn, 'sub');
+  const cached = memo.get(key);
+  if (cached !== undefined) return cached;
+
+  let sharkSurvives = true;
+  outer: for (let from = 0; from < 25; from++) {
+    if (submarines[from] === 0) continue;
+    for (const to of getAdjacentCells(from)) {
+      const nextSubmarines = submarines.slice();
+      nextSubmarines[from] -= 1;
+      nextSubmarines[to] += 1;
+      const sharkSurvivesHere =
+        nextSubmarines[shark] < 1 && canSharkSurviveSharkTurn(nextSubmarines, shark, turn, memo);
+      if (!sharkSurvivesHere) {
+        sharkSurvives = false;
+        break outer;
+      }
+    }
+  }
+  memo.set(key, sharkSurvives);
+  return sharkSurvives;
+}
+
+// Shark moves next; does it have at least one move (of up to 2 steps) keeping it safe?
+const canSharkSurviveSharkTurn = (
+  submarines: number[], shark: number, turn: number, memo: Map<string, boolean>
+): boolean => {
+  const key = stateKey(submarines, shark, turn, 'shark');
+  const cached = memo.get(key);
+  if (cached !== undefined) return cached;
+
+  let sharkSurvives = false;
+  for (let to = 0; to < 25; to++) {
+    if (isReachableWithoutDeath(submarines, shark, to) && isMoveWinning(submarines, to, turn, memo)) {
+      sharkSurvives = true;
+      break;
+    }
+  }
+  memo.set(key, sharkSurvives);
+  return sharkSurvives;
+}
+
+// The exact search below is fast once few turns remain, but can take a few seconds
+// on the first several turns since the reachable state space is still large. In the
+// huge majority of early-game states the cheap heuristic already picks a winning move
+// on its own, so up to PRECOMPUTE_MAX_TURN we only consult a small precomputed table of
+// the rare exceptions (states where the heuristic would pick a losing move), stored in
+// shark-exception-moves.json, and use the heuristic directly everywhere else - skipping
+// the expensive search entirely for early turns. Regenerate via
+// scripts/pre-generate-ai-moves/shark-chase-5/shark-chase-5-exceptions.cjs if the game
+// rules or heuristic ever change.
+const PRECOMPUTE_MAX_TURN = 8;
+
+const exceptionKey = (submarines: number[], shark: number, turn: number): string =>
+  `${submarines.join(',')}|${shark}|${turn}`;
+
+
+export const getNextSharkPositionByAI = (board: Board): number | undefined => {
+  const { submarines, shark, turn } = board;
+  const reachable: number[] = [];
   for (let i = 0; i < 25; i++) {
     if (isReachableWithoutDeath(submarines, shark, i)) {
-      if(maxi < componentSizes[i]) {
-        maxi = componentSizes[i];
-      }
+      reachable.push(i);
     }
   }
 
-  const possibleMoves: number[] = [];
-
-	// kozepso mezo
-  {
-		const i = 12;
-    if (componentSizes[i] == maxi && isReachableWithoutDeath(submarines, shark, i)) {
-      possibleMoves.push(i);
-    }
-	}
-
-  // nem sarkok a kozepso koron
-  if (possibleMoves.length === 0) {
-    for (let ind = 0; ind < 4; ind++) {
-      const i = [7,11,13,17][ind];
-      if (componentSizes[i] == maxi && isReachableWithoutDeath(submarines, shark, i)) {
-        possibleMoves.push(i);
-      }
-    }
+  if (turn <= PRECOMPUTE_MAX_TURN) {
+    const exception = sharkExceptionMoves[exceptionKey(submarines, shark, turn)];
+    return exception !== undefined ? exception : selectByLocationPreference(submarines, reachable);
   }
 
-  // kozepso kor sarkai
-  if (possibleMoves.length === 0) {
-    for (let ind = 0; ind < 4; ind++) {
-      const i = [6,8,16,18][ind];
-      if (componentSizes[i] == maxi && isReachableWithoutDeath(submarines, shark, i)) {
-        possibleMoves.push(i);
-      }
-    }
-  }
+  const memo = new Map<string, boolean>();
+  const winningMoves = reachable.filter(to => isMoveWinning(submarines, to, turn, memo));
 
-  // kulso kor kozeőpso mezoi
-  if (possibleMoves.length === 0) {
-    for (let ind = 0; ind < 4; ind++) {
-      const i = [2,10,14,22][ind];
-      if (componentSizes[i] == maxi && isReachableWithoutDeath(submarines, shark, i)) {
-        possibleMoves.push(i);
-      }
-		}
-	}
-
-  // kulso kor masodik es negyedik mezoi
-  if (possibleMoves.length === 0) {
-    for (let ind = 0; ind < 8; ind++) {
-      const i = [1,3,5,9,15,19,21,23][ind];
-      if (componentSizes[i] == maxi && isReachableWithoutDeath(submarines, shark, i)) {
-        possibleMoves.push(i);
-      }
-    }
-  }
-
-  // sarkok
-  if (possibleMoves.length === 0) {
-    for (let ind = 0; ind < 4; ind++) {
-      const i = [0,4,20,24][ind];
-      if (componentSizes[i] == maxi && isReachableWithoutDeath(submarines, shark, i)) {
-        possibleMoves.push(i);
-      }
-    }
-  }
-
-  // ha nincs mas lehetoseg, legalabb ne lepjunk azonnal tengeralattjarora
-  if (possibleMoves.length === 0) {
-    for (let i = 0; i <25; i++) {
-      if (isReachableWithoutDeath(submarines, shark, i)) {
-        possibleMoves.push(i);
-      }
-    }
-  }
-
-  return sample(possibleMoves);
+  return selectByLocationPreference(submarines, winningMoves.length > 0 ? winningMoves : reachable);
 }
 
 const isReachableWithoutDeath = (submarines: number[], shark: number, id: number): boolean => {
