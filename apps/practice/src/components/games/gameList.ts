@@ -52,6 +52,12 @@ export const gameList: GameList = {
     name: { hu: "+1, +2, +3", en: "+1, +2, +3" },
     credit: { developedBy: ["Hajós Balázs"] }
   },
+  DigitSubtraction: {
+    year: { k: "V. (11/12)", v: "11/12" },
+    round: "döntő",
+    category: ["B"],
+    name: { hu: "Számjegy kivonás", en: "Digit Subtraction" }
+  },
   TenDigitNumber: {
     year: { k: "V. (11/12)", v: "11/12" },
     round: "döntő",

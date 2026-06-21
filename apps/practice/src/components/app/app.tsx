@@ -22,6 +22,7 @@ import { ChessRook } from '../games/chess-rook/chess-rook';
 import { Coin123 } from '../games/coin-3-piles/coin123';
 import { Coin357 } from '../games/coin-3-piles/coin357';
 import { CubeColoring } from '../games/cube-coloring/cube-coloring';
+import { DigitSubtraction } from '../games/digit-subtraction/digit-subtraction';
 import { DominoesOnChessboard } from '../games/dominoes-on-chessboard/dominoes-on-chessboard';
 import { FiveFiveCard } from '../games/five-five-card/five-five-card';
 import { FiveSquares } from '../games/five-squares/five-squares';
@@ -86,6 +87,7 @@ export const App = () => {
     { path: '/game/Coin123', element: <Coin123 /> },
     { path: '/game/Coin357', element: <Coin357 /> },
     { path: '/game/CubeColoring', element: <CubeColoring /> },
+    { path: '/game/DigitSubtraction', element: <DigitSubtraction /> },
     { path: '/game/DominoesOnChessboard', element: <DominoesOnChessboard />},
     { path: '/game/FiveFiveCard', element: <FiveFiveCard /> },
     { path: '/game/FiveSquares', element: <FiveSquares /> },
