@@ -369,6 +369,12 @@ export const gameList: GameList = {
     name: { hu: "Mágikus láda", en: "Magic Box" },
     credit: { developedBy: ["Czeller Ildikó"] }
   },
+  MagicBoxB: {
+    year: { k: "XIX. (25/26)", v: "25/26" },
+    round: "döntő",
+    category: ["B"],
+    name: { hu: "Mágikus láda (B)", en: "Magic Box (B)" }
+  },
   RemoveDivisorMultiple: {
     year: { k: "XIX. (25/26)", v: "25/26" },
     round: "online",
