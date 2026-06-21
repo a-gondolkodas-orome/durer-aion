@@ -1,15 +1,16 @@
 import { useState } from 'react';
-import { range, cloneDeep, isEqual, flatMap, sample, last, shuffle } from 'lodash';
+import { range, cloneDeep, isEqual, flatMap } from 'lodash';
 import {
-  strategyGameFactory, dummyEvents,
-  type Events, type StrategyArgs, type BoardClientProps,
+  strategyGameFactory,
+  type Events, type BoardClientProps,
   GameBoard
 } from '../../game-factory';
+import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 
-type Board = [number, number][]
+export type Board = [number, number][]
 type Field = { row: number, col: number }
 
-const BOARDSIZE = 6;
+export const BOARDSIZE = 6;
 const getId = ({ row, col }: Field) => row * BOARDSIZE + col;
 const isCovered = (field: Field, board: Board) => flatMap(board).includes(getId(field));
 
@@ -137,7 +138,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const getPossibleMoves = (board: Board) => {
+export const getPossibleMoves = (board: Board) => {
   const possibleMoves: [number, number][] = [];
   const boardIndices = flatMap(
     range(0, BOARDSIZE), row => range(0, BOARDSIZE).map(col => ({ row, col }))
@@ -166,58 +167,6 @@ const moves = {
     return { nextBoard };
   }
 }
-
-const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  moves.placeDomino(board, sample(getPossibleMoves(board)));
-};
-
-// Note: Currently the AI may not win even from a winning position if the player
-// selected winning role but then did not follow winning strategy due to intractability.
-// We may improve AI with some heuristic and leveraging equivalent positions.
-const smartBotStrategy = ({ board, moves, ctx }: StrategyArgs<Board>) => {
-  const possibleMoves = getPossibleMoves(board);
-  if (possibleMoves.length >= 20) {
-    if (ctx.chosenRoleIndex === 1) {
-      const randomDomino = sample(getPossibleMoves(board));
-      moves.placeDomino(board, randomDomino);
-    } else {
-      const lastDomino = last(board)!;
-      const N = BOARDSIZE * BOARDSIZE - 1;
-      const mirrorImage = [N - lastDomino[0], N - lastDomino[1]];
-      moves.placeDomino(board, mirrorImage);
-    }
-  } else {
-    const optimalMove = getOptimalSmartBotMove(board);
-    moves.placeDomino(board, optimalMove);
-  }
-}
-
-const getOptimalSmartBotMove = (board: Board) => {
-  const allowedMoves = getPossibleMoves(board);
-  const optimalPlace = shuffle(allowedMoves).find(i => {
-    const { nextBoard } = moves.placeDomino(board, { events: dummyEvents }, i);
-    return isWinningState(nextBoard);
-  });
-
-  if (optimalPlace !== undefined) {
-    return optimalPlace;
-  }
-  return sample(allowedMoves);
-};
-
-// given board *after* your step, are you set up to win the game for sure?
-const isWinningState = (board: Board) => {
-  const allowedPlacesForOther = getPossibleMoves(board);
-  if (allowedPlacesForOther.length === 0) {
-    return true;
-  }
-
-  const optimalPlaceForOther = allowedPlacesForOther.find(i => {
-    const { nextBoard } = moves.placeDomino(board, { events: dummyEvents }, i);
-    return isWinningState(nextBoard);
-  });
-  return optimalPlaceForOther === undefined;
-};
 
 const toldalek = {
   '4': 'e',
