@@ -197,6 +197,11 @@ const canSharkSurviveSharkTurn = (
   return sharkSurvives;
 }
 
+// Shared across calls: isMoveWinning/canSharkSurviveSubmarineTurn/canSharkSurviveSharkTurn
+// are pure functions of (submarines, shark, turn), so results from earlier moves/tests
+// remain valid and are worth keeping.
+const sharkSurvivalMemo = new Map<string, boolean>();
+
 export const getNextSharkPositionByAI = (board: Board): number | undefined => {
   const { submarines, shark, turn } = board;
   const reachable: number[] = [];
@@ -206,8 +211,7 @@ export const getNextSharkPositionByAI = (board: Board): number | undefined => {
     }
   }
 
-  const memo = new Map<string, boolean>();
-  const winningMoves = reachable.filter(to => isMoveWinning(submarines, to, turn, memo));
+  const winningMoves = reachable.filter(to => isMoveWinning(submarines, to, turn, sharkSurvivalMemo));
 
   return selectByLocationPreference(submarines, winningMoves.length > 0 ? winningMoves : reachable);
 }

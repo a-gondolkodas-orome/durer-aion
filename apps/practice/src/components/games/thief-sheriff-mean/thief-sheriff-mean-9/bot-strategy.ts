@@ -11,21 +11,25 @@ export const smartBotStrategy = ({ board, moves: gameMoves, ctx }: StrategyArgs<
   gameMoves.takeCard(board, getBotCard(board, ctx.currentPlayer!));
 };
 
+// Shared across calls: minimax's score depends only on (cards, botPlayerIndex), so
+// results from earlier moves/tests remain valid and are worth keeping. botPlayerIndex
+// is part of the key since the same card state scores differently per perspective.
+const minimaxMemo = new Map<string, number>();
+
 export const getBotCard = (board: Board, botPlayerIndex: number): number => {
-  const memo = new Map<string, number>();
   const untaken = getUntakenCards(board, CARD_COUNT);
   const scores = untaken.map(card => {
     const { nextBoard } = moves.takeCard(
       board, { ctx: makeCtx({ currentPlayer: botPlayerIndex }), events: dummyEvents }, card
     );
-    return minimax(nextBoard, botPlayerIndex, memo);
+    return minimax(nextBoard, botPlayerIndex, minimaxMemo);
   });
   const best = Math.max(...scores);
   return sample(untaken.filter((_, i) => scores[i] === best))!;
 };
 
 export const getBotScore = (board: Board, botPlayerIndex: number): number => {
-  return minimax(board, botPlayerIndex, new Map());
+  return minimax(board, botPlayerIndex, minimaxMemo);
 };
 
 const minimax = (board: Board, botPlayerIndex: number, memo: Map<string, number>): number => {
@@ -37,7 +41,7 @@ const minimax = (board: Board, botPlayerIndex: number, memo: Map<string, number>
 
   const key =
     board.cards[Sheriff].slice().sort().join(',') + '|' +
-    board.cards[Thief].slice().sort().join(',');
+    board.cards[Thief].slice().sort().join(',') + '|' + botPlayerIndex;
   if (memo.has(key)) return memo.get(key)!;
 
   const currentPlayer = board.numTurns % 2 === 0 ? Sheriff : Thief;

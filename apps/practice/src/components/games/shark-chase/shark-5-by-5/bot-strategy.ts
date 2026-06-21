@@ -230,6 +230,11 @@ const PRECOMPUTE_MAX_TURN = 8;
 const exceptionKey = (submarines: number[], shark: number, turn: number): string =>
   `${submarines.join(',')}|${shark}|${turn}`;
 
+// Shared across calls: isMoveWinning/canSharkSurviveSubmarineTurn/canSharkSurviveSharkTurn
+// are pure functions of (submarines, shark, turn), so results from earlier moves/tests
+// remain valid and are worth keeping.
+const sharkSurvivalMemo = new Map<string, boolean>();
+
 
 export const getNextSharkPositionByAI = (board: Board): number | undefined => {
   const { submarines, shark, turn } = board;
@@ -245,8 +250,7 @@ export const getNextSharkPositionByAI = (board: Board): number | undefined => {
     return exception !== undefined ? exception : selectByLocationPreference(submarines, reachable);
   }
 
-  const memo = new Map<string, boolean>();
-  const winningMoves = reachable.filter(to => isMoveWinning(submarines, to, turn, memo));
+  const winningMoves = reachable.filter(to => isMoveWinning(submarines, to, turn, sharkSurvivalMemo));
 
   return selectByLocationPreference(submarines, winningMoves.length > 0 ? winningMoves : reachable);
 }
