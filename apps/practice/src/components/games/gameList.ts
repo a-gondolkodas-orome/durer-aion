@@ -65,6 +65,12 @@ export const gameList: GameList = {
     name: { hu: "Tizenkét mező", en: "Twelve squares" },
     credit: { developedBy: ["Melján Dávid"] }
   },
+  PrimelyToZero: {
+    year: { k: "VI. (12/13)", v: "12/13" },
+    round: "döntő",
+    category: ["B"],
+    name: { hu: "Prímesen nullára", en: "Primely to Zero" }
+  },
   HunyadiAndTheJanissaries: {
     year: { k: "VI. (12/13)", v: "12/13" },
     round: "döntő",
