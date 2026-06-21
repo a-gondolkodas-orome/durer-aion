@@ -7,20 +7,19 @@ import {
 } from '../../game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 
-export type Board = [number, number][]
-type Field = { row: number, col: number }
+export type Field = { row: number, col: number }
+export type Domino = [Field, Field]
+export type Board = Domino[]
 
 export const BOARDSIZE = 6;
-const getId = ({ row, col }: Field) => row * BOARDSIZE + col;
-const isCovered = (field: Field, board: Board) => flatMap(board).includes(getId(field));
+export const ALL_FIELDS: Field[] = flatMap(range(BOARDSIZE), row => range(BOARDSIZE).map(col => ({ row, col })));
+const isCovered = (field: Field, board: Board) => flatMap(board).some(c => isEqual(c, field));
 
 const getDominoDirection = (field: Field, board: Board) => {
-  const domino = board.find(d => d.includes(getId(field)))!;
-  const neighbor = domino[0] === getId(field) ? domino[1] : domino[0];
-  const nCol = neighbor % BOARDSIZE;
-  const nRow = (neighbor - nCol) / BOARDSIZE;
-  if (field.row === nRow) return field.col < nCol ? 'left' : 'right';
-  return field.row < nRow ? 'top' : 'bottom';
+  const domino = board.find(d => d.some(c => isEqual(c, field)))!;
+  const neighbor = isEqual(domino[0], field) ? domino[1] : domino[0];
+  if (field.row === neighbor.row) return field.col < neighbor.col ? 'left' : 'right';
+  return field.row < neighbor.row ? 'top' : 'bottom';
 };
 
 // Each direction: all 4 borders except the opposite side, rounded on its own side.
@@ -36,26 +35,24 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const [hoveredField, setHoveredField] = useState<{ field: Field; moveCount: number } | null>(null);
   const validHoveredField = hoveredField?.moveCount === ctx.moveCount ? hoveredField.field : null;
 
-  const hasEmptyNeighbor = ({ row, col }) => {
-    if (col < (BOARDSIZE - 1) && !isCovered({ row, col: col + 1 }, board)) return true;
-    if (col >= 1 && !isCovered({ row, col: col - 1 }, board)) return true;
-    if (row < (BOARDSIZE - 1) && !isCovered({ row: row + 1, col }, board)) return true;
-    if (row >= 1 && !isCovered({ row: row - 1, col }, board)) return true;
-    return false;
-  }
+  const hasEmptyNeighbor = ({ row, col }: Field) => {
+    return [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dRow, dCol]) => {
+      const neighbor = { row: row + dRow, col: col + dCol };
+      if (neighbor.row < 0 || neighbor.row >= BOARDSIZE || neighbor.col < 0 || neighbor.col >= BOARDSIZE) return false;
+      return !isCovered(neighbor, board);
+    });
+  };
 
   const clickField = (field: Field) => {
     if (selectedField === null) { setSelectedField(field); return; }
     if (isEqual(field, selectedField)) { setSelectedField(null); return; }
-    moves.placeDomino(board, [getId(selectedField), getId(field)]);
+    moves.placeDomino(board, [selectedField, field]);
     setSelectedField(null);
   };
 
   const isNeighborOfSelected = ({ row, col }) => {
     if (selectedField === null) return false;
-    if (row === selectedField.row && Math.abs(col - selectedField.col) === 1) return true;
-    if (col === selectedField.col && Math.abs(row - selectedField.row) === 1) return true;
-    return false;
+    return Math.abs(row - selectedField.row) + Math.abs(col - selectedField.col) === 1;
   }
 
   const isPartOfPreview = (field: Field) => {
@@ -92,7 +89,9 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       <tbody>
         {range(BOARDSIZE).map(row => (
           <tr key={row}>
-            {range(BOARDSIZE).map(col => (
+            {range(BOARDSIZE).map(col => {
+              const field: Field = { row, col };
+              return (
               <td
                 key={col}
                 className="border-4 dark:border-slate-600"
@@ -100,28 +99,28 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                 <button
                   className={`
                     aspect-square w-full p-[5%] relative
-                    ${getCellBgClass({ row, col })}
-                    ${getDominoBorders({ row, col })}
+                    ${getCellBgClass(field)}
+                    ${getDominoBorders(field)}
                   `}
-                  disabled={!isClickAllowed({ row, col })}
-                  onClick={() => clickField({ row, col })}
-                  onPointerEnter={() => setHoveredField({ field: { row, col }, moveCount: ctx.moveCount })}
-                  onPointerMove={() => setHoveredField({ field: { row, col }, moveCount: ctx.moveCount })}
+                  disabled={!isClickAllowed(field)}
+                  onClick={() => clickField(field)}
+                  onPointerEnter={() => setHoveredField({ field, moveCount: ctx.moveCount })}
+                  onPointerMove={() => setHoveredField({ field, moveCount: ctx.moveCount })}
                   onPointerLeave={() => setHoveredField(null)}
-                  onFocus={() => setHoveredField({ field: { row, col }, moveCount: ctx.moveCount })}
+                  onFocus={() => setHoveredField({ field, moveCount: ctx.moveCount })}
                   onBlur={() => setHoveredField(null)}
                 >
-                  {isCovered({ row, col }, board) && <>
+                  {isCovered(field, board) && <>
                     <span className={`
                       aspect-square rounded-full bg-yellow-400 inline-block
                       absolute z-20 left-[40%] right-[40%] bottom-[40%]
                     `} />
-                    {getDominoDirection({ row, col }, board) === 'left' && (
+                    {getDominoDirection(field, board) === 'left' && (
                       <span className={
                         'absolute right-0 top-0 bottom-0 w-1.5 bg-yellow-400 z-10 translate-x-full'
                       } />
                     )}
-                    {getDominoDirection({ row, col }, board) === 'top' && (
+                    {getDominoDirection(field, board) === 'top' && (
                       <span className={
                         'absolute bottom-0 left-0 right-0 h-1.5 bg-yellow-400 z-10 translate-y-full'
                       } />
@@ -129,7 +128,8 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                   </>}
                 </button>
               </td>
-            ))}
+              );
+            })}
           </tr>
         ))}
       </tbody>
@@ -139,17 +139,14 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 };
 
 export const getPossibleMoves = (board: Board) => {
-  const possibleMoves: [number, number][] = [];
-  const boardIndices = flatMap(
-    range(0, BOARDSIZE), row => range(0, BOARDSIZE).map(col => ({ row, col }))
-  );
-  boardIndices.forEach(({ row, col }) => {
+  const possibleMoves: Board = [];
+  ALL_FIELDS.forEach(({ row, col }) => {
     if (isCovered({ row, col }, board)) return;
     if (col < (BOARDSIZE - 1) && !isCovered({ row, col: col + 1 }, board)) {
-      possibleMoves.push([getId({row, col }), getId({ row, col: col + 1 })])
+      possibleMoves.push([{ row, col }, { row, col: col + 1 }])
     };
     if (row < (BOARDSIZE - 1) && !isCovered({ row: row + 1, col }, board)) {
-      possibleMoves.push([getId({row, col }), getId({ row: row + 1, col })])
+      possibleMoves.push([{ row, col }, { row: row + 1, col }])
     };
   });
 
@@ -157,7 +154,7 @@ export const getPossibleMoves = (board: Board) => {
 }
 
 const moves = {
-  placeDomino: (board: Board, { events }: { events: Events }, domino) => {
+  placeDomino: (board: Board, { events }: { events: Events }, domino: Domino) => {
     const nextBoard = cloneDeep(board);
     nextBoard.push(domino);
     events.endTurn();

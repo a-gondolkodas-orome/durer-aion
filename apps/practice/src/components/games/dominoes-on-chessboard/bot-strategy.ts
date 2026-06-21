@@ -1,10 +1,12 @@
 import { sample, last } from 'lodash';
 import type { StrategyArgs } from '../../game-factory';
-import { type Board, BOARDSIZE, getPossibleMoves } from './dominoes-on-chessboard';
+import { type Board, type Domino, type Field, ALL_FIELDS, BOARDSIZE, getPossibleMoves } from './dominoes-on-chessboard';
 
 export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   moves.placeDomino(board, sample(getPossibleMoves(board)));
 };
+
+const mirror = ({ row, col }: Field): Field => ({ row: BOARDSIZE - 1 - row, col: BOARDSIZE - 1 - col });
 
 export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
   if (ctx.chosenRoleIndex === 0) {
@@ -13,8 +15,7 @@ export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => 
     // there's never a reason to search - it always wins regardless of how well the
     // first player plays.
     const lastDomino = last(board)!;
-    const N = BOARDSIZE * BOARDSIZE - 1;
-    moves.placeDomino(board, [N - lastDomino[0], N - lastDomino[1]]);
+    moves.placeDomino(board, [mirror(lastDomino[0]), mirror(lastDomino[1])]);
     return;
   }
 
@@ -49,36 +50,28 @@ export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => 
 // a handful of dominoes have been placed).
 const MAX_EXACTLY_SOLVABLE_REGION_SIZE = 16;
 
-type Cell = [number, number];
+const cellKey = ({ row, col }: Field) => `${row},${col}`;
 
-const idToCell = (id: number): Cell => [Math.floor(id / BOARDSIZE), id % BOARDSIZE];
-const cellToId = ([row, col]: Cell): number => row * BOARDSIZE + col;
-const cellKey = ([row, col]: Cell) => `${row},${col}`;
-
-const getEmptyCells = (board: Board): Cell[] => {
-  const covered = new Set(board.flat());
-  const empty: Cell[] = [];
-  for (let id = 0; id < BOARDSIZE * BOARDSIZE; id++) {
-    if (!covered.has(id)) empty.push(idToCell(id));
-  }
-  return empty;
+const getEmptyCells = (board: Board): Field[] => {
+  const covered = new Set(board.flat().map(cellKey));
+  return ALL_FIELDS.filter(field => !covered.has(cellKey(field)));
 };
 
-const getConnectedComponents = (cells: Cell[]): Cell[][] => {
+const getConnectedComponents = (cells: Field[]): Field[][] => {
   const present = new Set(cells.map(cellKey));
   const seen = new Set<string>();
-  const components: Cell[][] = [];
+  const components: Field[][] = [];
 
   for (const cell of cells) {
     if (seen.has(cellKey(cell))) continue;
-    const component: Cell[] = [];
+    const component: Field[] = [];
     const stack = [cell];
     seen.add(cellKey(cell));
     while (stack.length > 0) {
-      const [row, col] = stack.pop()!;
-      component.push([row, col]);
+      const { row, col } = stack.pop()!;
+      component.push({ row, col });
       for (const [dRow, dCol] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
-        const neighbor: Cell = [row + dRow, col + dCol];
+        const neighbor: Field = { row: row + dRow, col: col + dCol };
         const key = cellKey(neighbor);
         if (present.has(key) && !seen.has(key)) {
           seen.add(key);
@@ -93,28 +86,28 @@ const getConnectedComponents = (cells: Cell[]): Cell[][] => {
 
 // Normalizes a region to a translation- and symmetry-independent string, so that two
 // regions with the same shape (up to the square's 8 symmetries) share one memo entry.
-const SQUARE_SYMMETRIES: ((cell: Cell) => Cell)[] = [
-  ([row, col]) => [row, col],
-  ([row, col]) => [row, -col],
-  ([row, col]) => [-row, col],
-  ([row, col]) => [-row, -col],
-  ([row, col]) => [col, row],
-  ([row, col]) => [col, -row],
-  ([row, col]) => [-col, row],
-  ([row, col]) => [-col, -row]
+const SQUARE_SYMMETRIES: ((cell: Field) => Field)[] = [
+  ({ row, col }) => ({ row, col }),
+  ({ row, col }) => ({ row, col: -col }),
+  ({ row, col }) => ({ row: -row, col }),
+  ({ row, col }) => ({ row: -row, col: -col }),
+  ({ row, col }) => ({ row: col, col: row }),
+  ({ row, col }) => ({ row: col, col: -row }),
+  ({ row, col }) => ({ row: -col, col: row }),
+  ({ row, col }) => ({ row: -col, col: -row })
 ];
 
-const normalize = (cells: Cell[]): Cell[] => {
-  const minRow = Math.min(...cells.map(([row]) => row));
-  const minCol = Math.min(...cells.map(([, col]) => col));
+const normalize = (cells: Field[]): Field[] => {
+  const minRow = Math.min(...cells.map(({ row }) => row));
+  const minCol = Math.min(...cells.map(({ col }) => col));
   return cells
-    .map(([row, col]): Cell => [row - minRow, col - minCol])
-    .sort(([r1, c1], [r2, c2]) => r1 - r2 || c1 - c2);
+    .map(({ row, col }): Field => ({ row: row - minRow, col: col - minCol }))
+    .sort((a, b) => a.row - b.row || a.col - b.col);
 };
 
-const serialize = (cells: Cell[]) => cells.map(cellKey).join(';');
+const serialize = (cells: Field[]) => cells.map(cellKey).join(';');
 
-const canonicalRegionKey = (cells: Cell[]): string =>
+const canonicalRegionKey = (cells: Field[]): string =>
   SQUARE_SYMMETRIES
     .map(symmetry => serialize(normalize(cells.map(symmetry))))
     .sort()[0];
@@ -122,24 +115,24 @@ const canonicalRegionKey = (cells: Cell[]): string =>
 // Does this region map onto itself under 180° rotation about its own center, with no
 // cell mapped to itself? If so its Grundy value is 0, by the standard mirroring
 // argument, with no need to search it.
-const isCenterSymmetricWithNoFixedCell = (cells: Cell[]): boolean => {
+const isCenterSymmetricWithNoFixedCell = (cells: Field[]): boolean => {
   const present = new Set(cells.map(cellKey));
-  const minRow = Math.min(...cells.map(([row]) => row));
-  const maxRow = Math.max(...cells.map(([row]) => row));
-  const minCol = Math.min(...cells.map(([, col]) => col));
-  const maxCol = Math.max(...cells.map(([, col]) => col));
+  const minRow = Math.min(...cells.map(({ row }) => row));
+  const maxRow = Math.max(...cells.map(({ row }) => row));
+  const minCol = Math.min(...cells.map(({ col }) => col));
+  const maxCol = Math.max(...cells.map(({ col }) => col));
   const doubledCenterRow = minRow + maxRow;
   const doubledCenterCol = minCol + maxCol;
 
-  return cells.every(([row, col]) => {
+  return cells.every(({ row, col }) => {
     if (row * 2 === doubledCenterRow && col * 2 === doubledCenterCol) return false;
-    return present.has(cellKey([doubledCenterRow - row, doubledCenterCol - col]));
+    return present.has(cellKey({ row: doubledCenterRow - row, col: doubledCenterCol - col }));
   });
 };
 
 const grundyMemo = new Map<string, number>();
 
-const grundyOfRegion = (cells: Cell[]): number => {
+const grundyOfRegion = (cells: Field[]): number => {
   if (cells.length < 2) return 0;
   const key = canonicalRegionKey(cells);
   const cached = grundyMemo.get(key);
@@ -147,12 +140,16 @@ const grundyOfRegion = (cells: Cell[]): number => {
 
   const present = new Set(cells.map(cellKey));
   const reachableValues = new Set<number>();
-  for (const [row, col] of cells) {
+  for (const { row, col } of cells) {
     for (const [dRow, dCol] of [[1, 0], [0, 1]]) {
-      const neighbor: Cell = [row + dRow, col + dCol];
+      const neighbor: Field = { row: row + dRow, col: col + dCol };
       if (!present.has(cellKey(neighbor))) continue;
+      // Manual field comparison, not lodash isEqual: this filter runs inside the
+      // exponential region search (see profiling notes above), and isEqual measured
+      // ~190x slower than direct property comparison - enough to blow past the
+      // MAX_EXACTLY_SOLVABLE_REGION_SIZE timing budget.
       const remaining = cells.filter(
-        ([r, c]) => !(r === row && c === col) && !(r === neighbor[0] && c === neighbor[1])
+        c => !(c.row === row && c.col === col) && !(c.row === neighbor.row && c.col === neighbor.col)
       );
       let xor = 0;
       for (const component of getConnectedComponents(remaining)) xor ^= grundyOfRegion(component);
@@ -168,7 +165,7 @@ const grundyOfRegion = (cells: Cell[]): number => {
 
 // Returns the region's Grundy value if it's cheap enough to know for sure, else
 // undefined - signaling that the overall position can't be safely evaluated.
-const getKnownGrundy = (cells: Cell[]): number | undefined => {
+const getKnownGrundy = (cells: Field[]): number | undefined => {
   if (cells.length <= MAX_EXACTLY_SOLVABLE_REGION_SIZE) return grundyOfRegion(cells);
   return isCenterSymmetricWithNoFixedCell(cells) ? 0 : undefined;
 };
@@ -177,7 +174,7 @@ const getKnownGrundy = (cells: Cell[]): number | undefined => {
 // is actually winning. Returns undefined if the position is unwinnable against perfect
 // play, or too large/irregular to evaluate safely (the caller should fall back to its
 // existing heuristic in that case, rather than risk an incorrect "exact" move).
-export const getExactWinningMove = (board: Board): [number, number] | undefined => {
+export const getExactWinningMove = (board: Board): Domino | undefined => {
   const components = getConnectedComponents(getEmptyCells(board));
   const grundyValues = components.map(getKnownGrundy);
   if (grundyValues.some(value => value === undefined)) return undefined;
@@ -196,17 +193,17 @@ export const getExactWinningMove = (board: Board): [number, number] | undefined 
     const otherComponentsXor = totalXor ^ grundyValues[i]!;
     const present = new Set(component.map(cellKey));
 
-    for (const [row, col] of component) {
+    for (const { row, col } of component) {
       for (const [dRow, dCol] of [[1, 0], [0, 1]]) {
-        const neighbor: Cell = [row + dRow, col + dCol];
+        const neighbor: Field = { row: row + dRow, col: col + dCol };
         if (!present.has(cellKey(neighbor))) continue;
         const remaining = component.filter(
-          ([r, c]) => !(r === row && c === col) && !(r === neighbor[0] && c === neighbor[1])
+          c => !(c.row === row && c.col === col) && !(c.row === neighbor.row && c.col === neighbor.col)
         );
         let resultingXor = 0;
         for (const piece of getConnectedComponents(remaining)) resultingXor ^= grundyOfRegion(piece);
         if ((otherComponentsXor ^ resultingXor) === 0) {
-          return [cellToId([row, col]), cellToId(neighbor)];
+          return [{ row, col }, neighbor];
         }
       }
     }
