@@ -362,6 +362,13 @@ export const gameList: GameList = {
     name: { hu: "Számpár módosítás", en: "Pairs of numbers" },
     credit: { developedBy: ["Czeller Ildikó"] }
   },
+  MagicBox: {
+    year: { k: "XIX. (25/26)", v: "25/26" },
+    round: "döntő",
+    category: ["A"],
+    name: { hu: "Mágikus láda", en: "Magic Box" },
+    credit: { developedBy: ["Czeller Ildikó"] }
+  },
   RemoveDivisorMultiple: {
     year: { k: "XIX. (25/26)", v: "25/26" },
     round: "online",
