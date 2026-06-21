@@ -207,12 +207,12 @@ const PlayerNameSetup = ({ roleLabels, playerNames, setPlayerNames, onStart }: {
   return (
   <div className="flex flex-col gap-2 sm:gap-3">
     {([0, 1] as const).map(i => (
-      <div key={i} className="flex items-center gap-2">
+      <div key={i} className="flex items-center gap-2 flex-wrap">
         <Input
           name={i === 0 ? 'name_of_first_player' : 'name_of_second_player'}
           className="border rounded-md text-slate-600 dark:text-slate-200
            bg-surface-elevated
-            px-2 py-1 text-sm w-full focus:outline-none focus:ring-1 focus:ring-blue-400"
+            px-2 py-1 text-sm flex-1 min-w-20 focus:outline-none focus:ring-1 focus:ring-blue-400"
           placeholder={t([
             { hu: 'Neved (Nyuszika)', en: 'Your name (Pip)' },
             { hu: 'Neved (Teknős)', en: 'Your name (Dot)' }
