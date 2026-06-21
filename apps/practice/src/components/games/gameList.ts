@@ -111,8 +111,7 @@ export const gameList: GameList = {
     year: { k: "VIII. (14/15)", v: "14/15" },
     round: "döntő",
     category: ["C"],
-    name: { hu: "Kupac egyesítés", en: "Pile union" },
-    credit: { developedBy: ["Czeller Ildikó"] }
+    name: { hu: "Kupac egyesítés", en: "Pile union" }
   },
   Policemanthief: {
     year: { k: "IX. (15/16)", v: "15/16" },
@@ -127,8 +126,7 @@ export const gameList: GameList = {
     round: "döntő",
     category: ["B"],
     name: { hu: "Rendőrök, tolvaj (B)", en: "Policemen and thief (B)" },
-    title: { hu: "Rendőrök, tolvaj (B kategória)", en: "Policemen and thief (category B)" },
-    credit: { developedBy: ["Czeller Ildikó"] }
+    title: { hu: "Rendőrök, tolvaj (B kategória)", en: "Policemen and thief (category B)" }
   },
   SixDiscs: {
     year: { k: "X. (16/17)", v: "16/17" },
@@ -286,16 +284,14 @@ export const gameList: GameList = {
     round: "döntő",
     category: ["A"],
     name: { hu: "Építész és banditák (A)", en: "Architect and Bandits (A)" },
-    title: { hu: "Építész és banditák (8 torony)", en: "Architect and Bandits (8 towers)" },
-    credit: { developedBy: ["Czeller Ildikó"] }
+    title: { hu: "Építész és banditák (8 torony)", en: "Architect and Bandits (8 towers)" }
   },
   ArchitectAndBanditsB: {
     year: { k: "XVII. (23/24)", v: "23/24" },
     round: "döntő",
     category: ["B"],
     name: { hu: "Építész és banditák (B)", en: "Architect and Bandits (B)" },
-    title: { hu: "Építész és banditák (10 torony)", en: "Architect and Bandits (10 towers)" },
-    credit: { developedBy: ["Czeller Ildikó"] }
+    title: { hu: "Építész és banditák (10 torony)", en: "Architect and Bandits (10 towers)" }
   },
   SharkChase4: {
     year: { k: "XVII. (23/24)", v: "23/24" },
@@ -359,8 +355,7 @@ export const gameList: GameList = {
     year: { k: "XVIII. (24/25)", v: "24/25" },
     round: "döntő",
     category: ["E", "E+"],
-    name: { hu: "Számpár módosítás", en: "Pairs of numbers" },
-    credit: { developedBy: ["Czeller Ildikó"] }
+    name: { hu: "Számpár módosítás", en: "Pairs of numbers" }
   },
   MagicBox: {
     year: { k: "XIX. (25/26)", v: "25/26" },
