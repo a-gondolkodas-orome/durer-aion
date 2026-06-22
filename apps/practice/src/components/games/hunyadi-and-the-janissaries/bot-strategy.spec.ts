@@ -1,5 +1,4 @@
 import { getOptimalGroupToKill, getOptimalSoldierGroups } from './bot-strategy';
-import { isEqual } from 'lodash';
 import { moves, type Board } from './helpers';
 
 describe('HunyadiAndTheJanissaries strategy', () => {
@@ -20,7 +19,7 @@ describe('HunyadiAndTheJanissaries strategy', () => {
       const board = [[], ['blue', 'blue']] as Board;
       const soldiers = getOptimalSoldierGroups(board);
       const { nextBoard } = moves.setGroupOfSoldiers(board, {}, soldiers);
-      expect(isEqual(nextBoard, [[], ['red', 'blue']]) || isEqual(nextBoard, [[], ['blue', 'red']]));
+      expect([[[], ['red', 'blue']], [[], ['blue', 'red']]]).toContainEqual(nextBoard);
     });
 
     it('should balance soldiers with smaller weight for later rows - v1', () => {
@@ -33,10 +32,10 @@ describe('HunyadiAndTheJanissaries strategy', () => {
       ] as Board;
       const soldiers = getOptimalSoldierGroups(board);
       const { nextBoard } = moves.setGroupOfSoldiers(board, {}, soldiers);
-      expect(
-        isEqual(nextBoard, [[], ['blue'], ['red'], [], ['red', 'red', 'red', 'red']]) ||
-        isEqual(nextBoard, [[], ['red'], ['blue'], [], ['blue', 'blue', 'blue', 'blue']])
-      ).toBe(true);
+      expect([
+        [[], ['blue'], ['red'], [], ['red', 'red', 'red', 'red']],
+        [[], ['red'], ['blue'], [], ['blue', 'blue', 'blue', 'blue']]
+      ]).toContainEqual(nextBoard);
     });
 
     it('should balance soldiers with smaller weight for later rows - v2', () => {
@@ -49,10 +48,10 @@ describe('HunyadiAndTheJanissaries strategy', () => {
       ] as Board;
       const soldiers = getOptimalSoldierGroups(board);
       const { nextBoard } = moves.setGroupOfSoldiers(board, {}, soldiers);
-      expect(
-        isEqual(nextBoard, [[], ['blue'], ['red', 'red', 'blue'], ['red'], ['red', 'red']]) ||
-        isEqual(nextBoard, [[], ['red'], ['blue', 'blue', 'red'], ['blue'], ['blue', 'blue']])
-      ).toBe(true);
+      expect([
+        [[], ['blue'], ['red', 'red', 'blue'], ['red'], ['red', 'red']],
+        [[], ['red'], ['blue', 'blue', 'red'], ['blue'], ['blue', 'blue']]
+      ]).toContainEqual(nextBoard);
     });
   });
 });

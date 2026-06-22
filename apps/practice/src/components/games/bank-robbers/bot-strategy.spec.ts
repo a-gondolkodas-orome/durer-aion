@@ -24,7 +24,7 @@ describe('smartBotStrategy', () => {
       lastMove: 0
     }
     smartBotStrategy({ board, ctx: makeCtx(), moves: mockRob() });
-    expect(board.circle[2] === false || board.circle[5] === false).toBe(true);
+    expect([board.circle[2], board.circle[5]]).toContain(false);
   });
 
   it('robs bank with 2 gap as second for 9 banks', () => {
@@ -34,6 +34,6 @@ describe('smartBotStrategy', () => {
       lastMove: 0
     }
     smartBotStrategy({ board, ctx: makeCtx(), moves: mockRob() });
-    expect(board.circle[3] === false || board.circle[6] === false).toBe(true);
+    expect([board.circle[3], board.circle[6]]).toContain(false);
   });
 });

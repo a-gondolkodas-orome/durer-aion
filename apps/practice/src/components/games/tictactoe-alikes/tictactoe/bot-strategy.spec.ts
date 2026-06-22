@@ -147,7 +147,7 @@ describe('smartBotStrategy', () => {
 
         smartBotStrategy({ board: board1, ctx: makeCtx(), moves });
 
-        expect(board1[3] === 'white' || board1[5] === 'white').toBe(true);
+        expect([board1[3], board1[5]]).toContain('white');
 
         const board2 = [
           'red', 'blue', 'blue',
@@ -155,7 +155,7 @@ describe('smartBotStrategy', () => {
           'red', 'blue', 'blue'
         ]
         smartBotStrategy({ board: board2, ctx: makeCtx(), moves });
-        expect(board2[7] === 'white' || board2[1] === 'white').toBe(true);
+        expect([board2[7], board2[1]]).toContain('white');
       });
 
       it('should color 8 to white as 3rd if no instant win (and similarly in rotated scenarios)', () => {
@@ -235,7 +235,7 @@ describe('smartBotStrategy', () => {
         ]
         const moves = mockWhitenPiece();
         smartBotStrategy({ board, ctx: makeCtx(), moves })
-        expect(board[2] === 'white' || board[6] === 'white').toBe(true);
+        expect([board[2], board[6]]).toContain('white');
       });
 
       it('should color 3 to white (and similarly in rotated scenarios)', () => {
