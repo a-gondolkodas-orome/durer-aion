@@ -98,8 +98,8 @@ const rule = {
     Károly and Dezső wish to count up to <code>m</code> and play the following game in the
     meantime: they start from 0 and the two players can add a positive number less than 13 to the
     previous number, taking turns. However because of their superstition, if one of them added <code>x</code>,
-    then the other one in the next step cannot add <code>13-x</code>. Whoever reaches
-    (or surpasses) <code>m</code> first, loses.
+    then the other one in the next step cannot add <code>13-x</code>. The first player to reach
+    or exceed <code>m</code> loses.
   </>
 };
 

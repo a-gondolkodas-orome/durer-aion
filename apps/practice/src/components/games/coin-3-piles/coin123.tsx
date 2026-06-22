@@ -34,8 +34,8 @@ const rule = {
     a kupacból.
   </>,
   en: <>
-    There are some coins in the heap, of value 1, 2, or 3 pengő. In a move, the player
-    may take a coin from the heap and replace a coin of smaller value, or not replace anything.
+    There are some coins in a heap, of value 1, 2, or 3 pengő. In a move, the player
+    may take a coin from the heap and put back a coin of smaller value in its place, or nothing.
     The winner is the one who takes the last coin from the heap.
   </>
 };

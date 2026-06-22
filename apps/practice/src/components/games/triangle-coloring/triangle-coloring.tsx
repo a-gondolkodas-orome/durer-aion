@@ -169,7 +169,7 @@ const isWinningState = (board: Board) => {
 const rule = {
   hu: <>
     Két játékos felváltva satíroz be az ábrán egy-egy kis háromszöget.
-    Nem szabad olyan háromszöget satírozni, amivel oldalszomszédos
+    Nem szabad olyan háromszöget satírozni, amelynek valamelyik oldalszomszédja
     már be van satírozva. Az veszít, aki nem tud satírozni.
   </>,
   en: <>

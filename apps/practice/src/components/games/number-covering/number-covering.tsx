@@ -81,7 +81,7 @@ const rule8 = {
 
 const rule10 = {
   hu: <>
-    Egy táblázatban 1-től 10-ig szerepelnek a számok. Két játékos felválva takar le egy-egy
+    Egy táblázatban 1-től 10-ig szerepelnek a számok. Két játékos felváltva takar le egy-egy
     számot addig, amíg csak két szám marad. Ha a megmaradt két szám összege páros, akkor a kezdő
     nyer, ha pedig páratlan, akkor a második.
   </>,

@@ -26,7 +26,7 @@ const rule = {
   en: <>
     Cupid and Amor pass the time with the following game: among 6 people they
     alternately make two of them fall in love with each other. The winner is whoever
-    first creates a love triangle from their own loves. In that case the love is
+    first creates a love triangle from the pairs they created. In that case the love is
     mutual; a love triangle consists of three people, any two of whom are in love
     with each other.
   </>

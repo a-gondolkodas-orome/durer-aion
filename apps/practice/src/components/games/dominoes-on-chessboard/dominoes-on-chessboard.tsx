@@ -174,7 +174,7 @@ const toldalek = {
 const rule = {
   hu: <>
     Két játékos felváltva tesz egy-egy dominót egy {BOARDSIZE} × {BOARDSIZE}-{toldalek[BOARDSIZE]}s
-    sakktáblára úgy, hogy két élszomszédos üres mezőt fedjen le. Az veszít aki nem tud tenni.
+    sakktáblára úgy, hogy két élszomszédos üres mezőt fedjen le. Az veszít, aki nem tud tenni.
   </>,
   en: <>
     Two players take turns placing a domino on a {BOARDSIZE} × {BOARDSIZE} chessboard so that it

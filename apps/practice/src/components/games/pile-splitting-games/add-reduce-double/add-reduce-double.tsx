@@ -134,9 +134,9 @@ const rule = {
     Az veszít, aki nem tud lépni.
   </>,
   en: <>
-    We have two piles of pucks. In each step, the player in turn adds at least one puck
-    to one of the piles and takes away two times as many pucks from the other pile. The one who
-    cannot make a new step, loses.
+    We have two piles of pieces. In each step, the current player adds at least one piece
+    to one of the piles and takes away two times as many pieces from the other pile. The player who
+    cannot move loses.
   </>
 };
 

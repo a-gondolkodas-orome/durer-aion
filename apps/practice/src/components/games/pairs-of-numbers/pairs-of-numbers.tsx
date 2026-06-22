@@ -96,7 +96,7 @@ const rule = {
   </>,
   en: <>
     Initially, an ordered pair of positive integers <code>(n,&nbsp;k)</code> is written on a sheet of paper.
-    Two players are playing a game, taking turns alternately. In each turn, if the pair
+    Two players take turns. In each turn, if the pair
     <code>(a,&nbsp;b)</code> is on the sheet and is not crossed out, then the player
     must cross out <code>(a,&nbsp;b)</code> and instead write
     <code className="whitespace-nowrap">(a, b + 1)</code> or

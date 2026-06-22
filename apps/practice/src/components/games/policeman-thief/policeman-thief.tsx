@@ -114,7 +114,7 @@ const ruleB = {
     esetleg ugyanarra a mezőre is kerülhet. Egy körben előbb a rendőrök (a kék majd a zöld) mennek át
     egy-egy szomszédos útkereszteződésbe egy út mentén (szét is válhatnak), majd a
     tolvaj is hasonlóan lép. Minden körben kötelező mindenkinek helyet változtatnia.
-    A rendőrök nyernek, ha a rabló bármikor azonos kereszteződésben van egy rend-
+    A rendőrök nyernek, ha a tolvaj bármikor azonos kereszteződésben van egy rend-
     őrrel. A tolvaj nyer, ha a harmadik kör végéig nem kapták el.
   </>,
   en: <>

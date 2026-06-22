@@ -169,12 +169,12 @@ const rule = {
     ha van olyan csúcs ami nem lett kiszínezve.
   </>,
   en: <>
-    Given is the skeleton of a cuboid in which one of the solid
-    diagonals is drawn. Within a move the upcoming player colours one of
+    The skeleton of a cuboid is given, in which one of the solid
+    diagonals is drawn. On each turn the current player colours one of
     the yet uncoloured vertices with one of three colours (meaning that he
-    puts a red, yellow or blue disc on top of the vertex) in a way that no
-    adjacent vertices can have the same colour. The game ends when the
-    next player cannot make a move any longer. The player who started
+    puts a red, yellow or blue disc on top of the vertex) so that no two
+    adjacent vertices have the same colour. The game ends when the
+    next player can no longer move. The player who started
     wins if all the vertices have been coloured, whereas the second player
     wins if there remain uncoloured vertices.
   </>

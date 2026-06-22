@@ -11,9 +11,9 @@ const rule = {
     a kupacból.
   </>,
  en: <>
-  There are 3 of the 1 pengő, 5 of the 2 pengő, and 7 of the 3 pengő coin in a heap.
-  In a move, the player takes a coin from the heap and replaces a coin of smaller value,
-  or does not replace anything. The winner is the one who takes the last coin from the heap.
+  There are three 1-pengő, five 2-pengő, and seven 3-pengő coins in a heap.
+  In a move, the player takes a coin from the heap and puts back a coin of smaller value in its place,
+  or nothing. The winner is the one who takes the last coin from the heap.
  </>
 };
 

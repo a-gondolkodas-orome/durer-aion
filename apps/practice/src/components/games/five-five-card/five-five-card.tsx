@@ -86,7 +86,7 @@ const rule = {
   hu: <>
     Mindkét játékos előtt 5-5 kártyalap van az 1-5 egész számokkal megszámozva.
     A játékosok felváltva elvesznek egy-egy lapot az ellenfelük elől, egészen addig, amíg
-    már csak egy-egy lap marad marad előttük. Ha a két megmaradt
+    már csak egy-egy lap marad előttük. Ha a két megmaradt
     szám összege páratlan, akkor az nyer, aki előtt a nagyobbik van; ha páros az összeg, akkor
     pedig az, aki előtt a kisebbik (ha ugyanaz a szám marad meg a két játékos előtt, akkor az nyer,
     aki kezdte a játékot).

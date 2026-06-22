@@ -126,12 +126,12 @@ const rule = {
     szabályoknak megfelelően több kötelet kifeszíteni.
   </>,
   en: <>
-    In an Indian reservatory there are 10 totem poles arranged according to the left
-    figure. Silent Stream and Red Fire used to play the following game: In turns they stretch ropes
-    between two-two poles in such a way that every stretched rope is parallel to a side of the big
-    triangle and no rope can go along a pole that is already touched by another rope. Furthermoe,
-    if instead of a rope one can stretch out a straight line extension of the rope, then one should
-    stretch out this extension. The one who cannot stretch out more ropes according to the rules
+    In an Indian reservation there are 10 totem poles arranged according to the left
+    figure. Silent Stream and Red Fire play the following game: In turns they stretch ropes
+    between pairs of poles in such a way that every stretched rope is parallel to a side of the big
+    triangle and no rope can go along a pole that is already touched by another rope. Furthermore,
+    if a rope&apos;s straight-line extension could be stretched instead under the above conditions,
+    that extension must be stretched. The one who cannot stretch out more ropes according to the rules
     loses.
   </>
 };
