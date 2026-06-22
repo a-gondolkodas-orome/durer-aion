@@ -43,7 +43,7 @@ Read the chosen reference file in full before writing anything.
 
 ### 4. Create the game file
 Create `src/components/games/<game-name>/<game-name>.js`. Follow the `strategyGameFactory` API from `AGENTS.md`. Key rules:
-- If the user supplied the rule text, use it verbatim in `rule.hu`. Never silently rephrase, correct, or abbreviate it — propose any wording change explicitly and wait for approval before applying it.
+- If the user supplied the rule text, use it verbatim in `rule.hu` by default. Don't silently rephrase, correct, or abbreviate it. **Exception:** when the original wording doesn't fit the online implementation — e.g. it refers to the competition organizers/judges instead of the opponent/computer, or to physical artifacts (paper, pencil, cards on a table) that don't exist in the browser version — it's fine to reword it slightly to fit. In that case, explicitly highlight every change you made to the user (e.g. show before/after) so they can review it. For any other wording change, propose it and wait for approval before applying.
 - `board` holds only game-specific state; common state is in `ctx`
 - Every move returns `{ nextBoard }`; pass the current board when chaining moves within a turn
 - Guard all player interactions with `ctx.isClientMoveAllowed`
