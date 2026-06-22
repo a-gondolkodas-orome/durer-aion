@@ -273,6 +273,10 @@ export const strategyGameFactory = <TBoard,>({
   };
 };
 
+// No-op `events` for production code paths that call a move purely to compute
+// `nextBoard` (e.g. bot lookahead) and don't care about side effects. For tests
+// that need to assert handlers were called, use `makeEvents` from `test-utils`
+// (spies) instead — it can't be used here as it depends on vitest.
 export const dummyEvents: Events = {
   endTurn: () => {},
   endGame: () => {},
