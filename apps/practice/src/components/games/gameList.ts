@@ -37,6 +37,12 @@ export const gameList: GameList = {
     name: { hu: "Prímhatványok kivonása", en: "Subtract a prime power" },
     credit: { developedBy: ["Hajós Balázs"] }
   },
+  AmorAndCupido: {
+    year: { k: "II. (08/09)", v: "08/09" },
+    round: "döntő",
+    category: ["B"],
+    name: { hu: "Ámor és Kupidó", en: "Cupid and Amor" }
+  },
   DominoesOnChessboard: {
     year: { k: "III. (09/10)", v: "09/10" },
     round: "döntő",

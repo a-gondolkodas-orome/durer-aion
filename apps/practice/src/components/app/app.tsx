@@ -10,6 +10,7 @@ Import all the games individually. Aim to keep abc ordering for easy navigation.
 */
 
 import { AddReduceDouble } from '../games/pile-splitting-games/add-reduce-double/add-reduce-double';
+import { AmorAndCupido } from '../games/amor-and-cupido/amor-and-cupido';
 import { AntiTicTacToe } from '../games/tictactoe-alikes/anti-tictactoe/anti-tictactoe';
 import { ArchitectAndBandits } from '../games/architect-and-bandits/architect-and-bandits';
 import { ArchitectAndBanditsB } from '../games/architect-and-bandits-b/architect-and-bandits-b';
@@ -74,6 +75,7 @@ export const App = () => {
   const routes = [
     { path: '/', element: <Overview /> },
     { path: '/game/AddReduceDouble', element: <AddReduceDouble /> },
+    { path: '/game/AmorAndCupido', element: <AmorAndCupido /> },
     { path: '/game/AntiTicTacToe', element: <AntiTicTacToe /> },
     { path: '/game/ArchitectAndBandits', element: <ArchitectAndBandits /> },
     { path: '/game/ArchitectAndBanditsB', element: <ArchitectAndBanditsB /> },

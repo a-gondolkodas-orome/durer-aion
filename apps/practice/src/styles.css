@@ -46,6 +46,9 @@
     .bg-surface-elevated {
         @apply bg-slate-50 dark:bg-slate-800;
     }
+    .fill-surface-elevated {
+        @apply fill-slate-50 dark:fill-slate-800;
+    }
 }
 
 @layer components {
