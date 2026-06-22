@@ -1,4 +1,5 @@
 import { isEqual } from 'lodash';
+import { makeCtx } from '../../game-factory';
 import { getExactWinningMove, smartBotStrategy } from './bot-strategy';
 import { ALL_FIELDS, BOARDSIZE, type Board, type Domino, type Field } from './dominoes-on-chessboard';
 
@@ -65,20 +66,11 @@ describe('getExactWinningMove', () => {
 });
 
 describe('smartBotStrategy', () => {
-  const makeCtx = (chosenRoleIndex: number) => ({
-    chosenRoleIndex,
-    currentPlayer: 0,
-    isClientMoveAllowed: true,
-    isHumanVsHumanGame: false,
-    moveCount: 0,
-    turnState: null
-  });
-
   it('always mirrors through the board center when playing second, regardless of position', () => {
     const board: Board = [[{ row: 0, col: 0 }, { row: 0, col: 1 }]];
     let placed: Domino | undefined;
     const moves = { placeDomino: (_board: Board, domino: Domino) => { placed = domino; } };
-    smartBotStrategy({ board, ctx: makeCtx(0) as never, moves: moves as never });
+    smartBotStrategy({ board, ctx: makeCtx({ chosenRoleIndex: 0 }), moves: moves as never });
     expect(new Set(placed!.map(fieldKey))).toEqual(new Set([
       fieldKey({ row: BOARDSIZE - 1, col: BOARDSIZE - 1 }),
       fieldKey({ row: BOARDSIZE - 1, col: BOARDSIZE - 2 })
@@ -93,7 +85,7 @@ describe('smartBotStrategy', () => {
     const board = coverEverythingExcept([...isolatedDomino, ...square2x2]);
     let placed: Domino | undefined;
     const moves = { placeDomino: (_board: Board, domino: Domino) => { placed = domino; } };
-    smartBotStrategy({ board, ctx: makeCtx(1) as never, moves: moves as never });
+    smartBotStrategy({ board, ctx: makeCtx({ chosenRoleIndex: 1 }), moves: moves as never });
 
     expect(placed).toBeDefined();
     const covered = new Set(board.flat().map(fieldKey));
