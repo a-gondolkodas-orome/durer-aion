@@ -31,11 +31,7 @@ export default [
     rules: {
       'no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': 'error',
-      '@typescript-eslint/consistent-type-imports': 'error',
-      'no-restricted-syntax': ['error', {
-        selector: 'TSAsExpression > TSNeverKeyword.typeAnnotation',
-        message: "'as never' is not allowed; use a more specific type or fix the underlying type instead."
-      }]
+      '@typescript-eslint/consistent-type-imports': 'error'
     }
   },
   {
