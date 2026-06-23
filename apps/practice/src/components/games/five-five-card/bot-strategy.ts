@@ -31,6 +31,7 @@ export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => 
   moves.removeCard(board, sample(bestMoves)!);
 };
 
+// Return `+1` if the bot's player index won, `-1` otherwise.
 const minimax = (board: Board, currentPlayer, botPlayerIndex): number => {
   const winner = getWinnerIndex(board);
   if (winner !== undefined) return winner === botPlayerIndex ? 1 : -1;

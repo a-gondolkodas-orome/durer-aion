@@ -2,7 +2,7 @@ import { random, sum } from 'lodash';
 import { strategyGameFactory } from '../../game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { BoardClient } from './board-client';
-import { getPlayerStepDescription, isWinningState, moves, type Board } from './helpers';
+import { getPlayerStepDescription, canWin, moves, type Board } from './helpers';
 
 const generateTestStartBoard = (): Board => [random(0, 2), random(0, 2), random(1, 3)];
 
@@ -16,13 +16,13 @@ const generateStartBoard = (): Board => {
 
 const generateWinningStartBoard = (): Board => {
   const board = [random(0, 5), random(0, 7), random(1, 8)];
-  if (!isWinningState({ board }) && sum(board) >= 4) return board;
+  if (!canWin(board) && sum(board) >= 4) return board;
   return generateWinningStartBoard();
 }
 
 const generateLosingStartBoard = (): Board => {
   const board = [random(0, 5), random(0, 7), random(1, 8)];
-  if (isWinningState({ board }) && sum(board) >= 4) return board;
+  if (canWin(board) && sum(board) >= 4) return board;
   return generateLosingStartBoard();
 }
 

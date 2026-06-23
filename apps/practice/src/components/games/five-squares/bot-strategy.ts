@@ -55,6 +55,7 @@ const bestPairs = (board: Board, botPlayerIndex: number): [number, number][] => 
   return result;
 };
 
+// Return `+1` if the bot's player index won, `-1` otherwise.
 const minimax = (board: Board, currentPlayer: number, botPlayerIndex: number): number => {
   if (sum(board) === 10) {
     const winnerIndex = isEqual([...board].sort(), [0, 1, 2, 3, 4]) ? 1 : 0;

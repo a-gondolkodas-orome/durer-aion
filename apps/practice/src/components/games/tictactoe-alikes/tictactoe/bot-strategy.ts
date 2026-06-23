@@ -54,7 +54,7 @@ const getOptimalBotPlacingPosition = (board: Board) => {
   const optimalPlaces = allowedPlaces.filter(i => {
     const boardCopy = [...board];
     boardCopy[i] = botColor;
-    return isWinningState({ board: boardCopy, amIBot: true });
+    return isWinningState(boardCopy, true);
   });
 
   if (optimalPlaces.length > 0) return sample(optimalPlaces);
@@ -68,7 +68,7 @@ const getOptimalBotFlippingPosition = (board: Board) => {
   const optimalPlaces = allowedPlaces.filter(i => {
     const boardCopy = [...board];
     boardCopy[i] = 'white';
-    return isWinningState({ board: boardCopy, amIBot: true });
+    return isWinningState(boardCopy, true);
   });
 
   // if you can win symmetrically, try to do so (only for beauty)
@@ -81,7 +81,7 @@ const getOptimalBotFlippingPosition = (board: Board) => {
 const isWinningStateCache = new Map();
 
 // given board *after* your step, are you set up to win the game for sure?
-const isWinningState = ({ board, amIBot }: { board: Board, amIBot: boolean }) => {
+const isWinningState = (board: Board, amIBot: boolean) => {
   const key = board.join(',') + '|' + amIBot;
   if (isWinningStateCache.has(key)) return isWinningStateCache.get(key);
 
@@ -96,7 +96,7 @@ const isWinningState = ({ board, amIBot }: { board: Board, amIBot: boolean }) =>
   const optimalPlaceForOther = allowedPlacesForOther.find(i => {
     const boardCopy = [...board];
     boardCopy[i] = colorForOther;
-    return isWinningState({ board: boardCopy, amIBot: !amIBot });
+    return isWinningState(boardCopy, !amIBot);
   });
   const result = optimalPlaceForOther === undefined;
   isWinningStateCache.set(key, result);

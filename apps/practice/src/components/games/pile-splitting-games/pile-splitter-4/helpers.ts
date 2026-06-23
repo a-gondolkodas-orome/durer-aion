@@ -19,7 +19,7 @@ const generateWinningStartBoard = (remainingTrials = 50, pileMin = 5, pileMax = 
     random(pileMin, pileMax),
     random(pileMin, pileMax)
   ];
-  if (!isWinningState(board)) {
+  if (!canWin(board)) {
     if (remainingTrials > 0) {
       return generateWinningStartBoard(remainingTrials - 1);
     }
@@ -41,7 +41,7 @@ const generateLosingStartBoard = (remainingTrials = 50, pileMin = 5, pileMax = 1
     random(pileMin, pileMax),
     random(pileMin, pileMax)
   ];
-  if (isWinningState(board)) {
+  if (canWin(board)) {
     if (remainingTrials > 0) {
       return generateLosingStartBoard(remainingTrials - 1);
     }
@@ -56,7 +56,8 @@ const generateLosingStartBoard = (remainingTrials = 50, pileMin = 5, pileMax = 1
   return modifiedBoard;
 };
 
-const isWinningState = (board: Board): boolean => {
+// Can the player to move force a win? Recursive parity normalisation.
+const canWin = (board: Board): boolean => {
   const oddPileIndices = range(0, 4).filter(i => board[i] % 2 === 1);
   const oddPileCount = oddPileIndices.length;
 
@@ -66,8 +67,8 @@ const isWinningState = (board: Board): boolean => {
   if (oddPileCount === 1) {
     const modifiedBoard = [...board];
     modifiedBoard[oddPileIndices[0]] += 1;
-    return isWinningState(modifiedBoard);
+    return canWin(modifiedBoard);
   } else { // oddPileCount === 0
-    return isWinningState(board.map(x => x / 2));
+    return canWin(board.map(x => x / 2));
   }
 };

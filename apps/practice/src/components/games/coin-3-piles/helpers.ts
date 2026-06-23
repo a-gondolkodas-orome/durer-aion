@@ -16,7 +16,8 @@ export const getPlayerStepDescription = ({ ctx: { turnState } }) => {
   };
 };
 
-export const isWinningState = ({ board }: { board: Board }) => {
+// Can the player to move force a win? Closed-form parity predicate.
+export const canWin = (board: Board) => {
   const oddPiles = [0, 1, 2].filter(i => board[i] % 2 === 1);
 
   return (oddPiles.length === 3 || oddPiles.length === 0);
