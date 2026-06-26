@@ -1,5 +1,5 @@
 import { smartBotDefense, smartBotAttack } from "./bot-strategy";
-import { reverse, isEqual } from "lodash";
+import { reverse } from "lodash";
 
 describe('test ai strategy', () => {
   describe('defense', () => {
@@ -61,8 +61,12 @@ describe('test ai strategy', () => {
       const bacteria = reverse([
         [0, 0, 0, 0, 0],
           [0, 0, 0, 0],
-        [0, 2, 0, 1, 0]
+        [0, 2, 1, 0, 0]
       ]);
+      // (0,1) holds two bacteria (a "multiple" path); (0,2) sits in the
+      // dangerous zone. The multiple-cell path must win, so a regression that
+      // counts cells instead of bacteria (treating the 2 as a single bacterium)
+      // would fall back to the dangerous (0,2) and fail.
       const board = { bacteria, goals: [2] };
       expect(smartBotDefense(board)).toEqual({ defenseRow: 0, defenseCol: 1 })
     });
@@ -75,7 +79,7 @@ describe('test ai strategy', () => {
       ]);
       const board = { bacteria, goals: [4] };
       const d = smartBotDefense(board);
-      expect(isEqual(d, { defenseRow: 1, defenseCol: 1 }) || isEqual(d, { defenseRow: 0, defenseCol: 2 })).toBe(true);
+      expect([{ defenseRow: 1, defenseCol: 1 }, { defenseRow: 0, defenseCol: 2 }]).toContainEqual(d);
     });
 
     it('removes a bacteria from a path with multiple bacteria: right side', () => {
@@ -86,7 +90,7 @@ describe('test ai strategy', () => {
       ]);
       const board = { bacteria, goals: [0] };
       const d = smartBotDefense(board);
-      expect(isEqual(d, { defenseRow: 1, defenseCol: 2 }) || isEqual(d, { defenseRow: 0, defenseCol: 2 })).toBe(true);
+      expect([{ defenseRow: 1, defenseCol: 2 }, { defenseRow: 0, defenseCol: 2 }]).toContainEqual(d);
     });
 
     it('removes a dangerous bacteria if no multiple', () => {
@@ -188,11 +192,7 @@ describe('test ai strategy', () => {
         attackRow: 0,
         attackCol: 2
       };
-      expect(
-        isEqual(attack, variantA) ||
-        isEqual(attack, variantB) ||
-        isEqual(attack, variantC)
-      ).toBe(true);
+      expect([variantA, variantB, variantC]).toContainEqual(attack);
     });
 
     it('attack with multiple bacteria if no dangerous one', () => {

@@ -19,19 +19,31 @@ describe('add-reduce-double getSmartBotStep', () => {
 
   describe('balanced piles (diff <= 1): constrained random', () => {
     it('always picks the only movable pile when the other has size 1', () => {
-      // [1, 2]: both balanced (diff=-1); board[ran=0]=1 not >1, so pileId forced to 1
+      // [1, 2]: both balanced (diff=-1); the size-1 pile is never movable regardless
+      // of the internal random draw, so pileId must always be 1.
       // pieceCount = 2*random(1, 2/2)=2*random(1,1)=2
-      expect(getSmartBotStep([1, 2])).toEqual({ pileId: 1, pieceCount: 2 });
+      for (let i = 0; i < 50; i++) {
+        expect(getSmartBotStep([1, 2])).toEqual({ pileId: 1, pieceCount: 2 });
+      }
     });
 
     it('always picks the only movable pile when the other has size 1 (swapped)', () => {
-      expect(getSmartBotStep([2, 1])).toEqual({ pileId: 0, pieceCount: 2 });
+      for (let i = 0; i < 50; i++) {
+        expect(getSmartBotStep([2, 1])).toEqual({ pileId: 0, pieceCount: 2 });
+      }
     });
 
     it('returns a valid even pieceCount from either pile when both are large', () => {
-      const { pileId, pieceCount } = getSmartBotStep([4, 4]);
-      expect([0, 1]).toContain(pileId);
-      expect([2, 4]).toContain(pieceCount);
+      // pieceCount = 2*random(1, 4/2) so it must always stay in {2,4} and both piles
+      // must actually be chosen over many draws; loop to exercise every random outcome.
+      const seenPiles = new Set<number>();
+      for (let i = 0; i < 100; i++) {
+        const { pileId, pieceCount } = getSmartBotStep([4, 4]);
+        expect([0, 1]).toContain(pileId);
+        expect([2, 4]).toContain(pieceCount);
+        seenPiles.add(pileId);
+      }
+      expect(seenPiles).toEqual(new Set([0, 1]));
     });
   });
 });

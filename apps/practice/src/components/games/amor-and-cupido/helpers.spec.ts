@@ -13,8 +13,11 @@ describe('helpers geometry', () => {
     const board = generateStartBoard();
     expect(getAllowedMoves(board)).toHaveLength(15);
     board[edgeIndex[0][1]] = 0;
-    expect(getAllowedMoves(board)).toHaveLength(14);
+    board[edgeIndex[0][2]] = 1;
+    // Edges owned by either player must be excluded, not just one colour.
+    expect(getAllowedMoves(board)).toHaveLength(13);
     expect(getAllowedMoves(board)).not.toContain(edgeIndex[0][1]);
+    expect(getAllowedMoves(board)).not.toContain(edgeIndex[0][2]);
   });
 });
 
@@ -40,11 +43,15 @@ describe('completesTriangle', () => {
 describe('findWinningTriangle', () => {
   it('returns the three edges of a completed triangle', () => {
     const board = generateStartBoard();
+    // Use a non-first triangle {3,4,5} and add a stray player-0 edge that lies in
+    // earlier triangles, so a `some`-instead-of-`every` regression would return the
+    // wrong (earlier) triangle rather than the actually completed one.
     board[edgeIndex[0][1]] = 0;
-    board[edgeIndex[0][2]] = 0;
-    board[edgeIndex[1][2]] = 0;
+    board[edgeIndex[3][4]] = 0;
+    board[edgeIndex[3][5]] = 0;
+    board[edgeIndex[4][5]] = 0;
     expect(findWinningTriangle(board, 0)?.sort((a, b) => a - b)).toEqual(
-      [edgeIndex[0][1], edgeIndex[0][2], edgeIndex[1][2]].sort((a, b) => a - b)
+      [edgeIndex[3][4], edgeIndex[3][5], edgeIndex[4][5]].sort((a, b) => a - b)
     );
     expect(findWinningTriangle(board, 1)).toBeNull();
   });

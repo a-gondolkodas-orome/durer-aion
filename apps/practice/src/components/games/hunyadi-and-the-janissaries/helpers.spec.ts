@@ -1,46 +1,31 @@
 import { moves, generateStartBoard, type Board } from './helpers';
-import type { Events } from '../../game-factory';
 import { uniq, flatten } from 'lodash';
+import { makeEvents } from '../../../test-utils';
 
 describe('HunyadiAndTheJanissaries helpers', () => {
   describe('moves', () => {
     it('should claim victory for Hunyadi if all soldiers are killed', () => {
-      let winnerIndexMock;
-      const events: Events = {
-        endTurn: () => {},
-        endGame: (winnerIndex) => { winnerIndexMock = winnerIndex },
-        setTurnState: () => {}
-      }
+      const events = makeEvents();
       moves.killGroup([[], ['red', 'red']] as Board, { events }, 'red')
-      expect(winnerIndexMock).toBe(1);
+      expect(events.endGame).toHaveBeenCalledWith(1);
     });
 
     it('should claim loss for Hunyadi if a soldier reaches the castle', () => {
-      let winnerIndexMock;
-      const events: Events = {
-        endTurn: () => {},
-        endGame: (winnerIndex) => { winnerIndexMock = winnerIndex; },
-        setTurnState: () => {}
-      }
+      const events = makeEvents();
       const { nextBoard } = moves.killGroup(
         [[], ['red', 'blue'], ['blue']] as Board, { events }, 'red'
       );
       moves.stepUp(nextBoard, { events });
-      expect(winnerIndexMock).toBe(0);
+      expect(events.endGame).toHaveBeenCalledWith(0);
     });
 
     it('should report game as still in progress and advance remaining soldiers otherwise', () => {
-      let endGameCalled = false;
-      const events: Events = {
-        endTurn: () => {},
-        endGame: () => { endGameCalled = true; },
-        setTurnState: () => {}
-      }
+      const events = makeEvents();
       const board = [[], ['red'], ['blue', 'red'], [], ['blue', 'blue']] as Board;
       const { nextBoard } = moves.killGroup(board, { events }, 'red');
       const state = moves.stepUp(nextBoard, { events });
       expect(state.nextBoard).toEqual([[], ['blue'], [], ['blue', 'blue'], []])
-      expect(endGameCalled).toBe(false);
+      expect(events.endGame).not.toHaveBeenCalled();
     });
   });
 

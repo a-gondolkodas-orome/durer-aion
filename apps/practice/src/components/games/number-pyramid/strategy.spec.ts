@@ -91,10 +91,16 @@ describe('randomBotStrategy', () => {
 
 describe('smartBotStrategy', () => {
   it('takes an immediate winning move when available', () => {
+    // P1-winning board (extremes=23, inner=9, k=15). Level 1 holds a non-winning
+    // active pair (5+4=9 < 15) which the winning-strategy prefers over level 0;
+    // findImmediateWin must override and take the level-0 win (10+9 >= 15).
     const board = makeBoard([10, 9, 3, 2, 2, 2, 2, 2], 15);
+    board.levels[1][0] = active(5);
+    board.levels[1][1] = active(4);
     const { moves: mockMoves, captured } = makeMoveCapture();
     smartBotStrategy({ board, ctx: makeCtx({ currentPlayer: 0 }), moves: mockMoves });
     expect(captured).toHaveLength(1);
+    expect(captured[0].levelIdx).toBe(0);
     const vals = captured[0].indices.map((i) => board.levels[0][i]!.value);
     expect(vals[0] + vals[1]).toBeGreaterThanOrEqual(15);
   });
@@ -110,9 +116,11 @@ describe('smartBotStrategy', () => {
   });
 
   it('P1 in a winning position prefers level 1 over level 0', () => {
+    // level-1 pair 5+4=9 < k=23, so this is NOT an immediate win: the choice of
+    // level 1 must come from the strategy's level priority, not findImmediateWin
     const board = makeBoard([8, 7, 6, 5, 4, 4, 3, 3], 23);
-    board.levels[1][0] = active(15);
-    board.levels[1][1] = active(12);
+    board.levels[1][0] = active(5);
+    board.levels[1][1] = active(4);
     const { moves: mockMoves, captured } = makeMoveCapture();
     smartBotStrategy({ board, ctx: makeCtx({ currentPlayer: 0 }), moves: mockMoves });
     expect(captured[0].levelIdx).toBe(1);
@@ -138,14 +146,18 @@ describe('smartBotStrategy', () => {
   });
 
   it('immediate win on a higher level takes priority over strategy', () => {
-    // P1-winning board, but level 1 already has a winning pair
+    // P1-winning board: level 1 has a non-winning active pair (5+4 < 23) that the
+    // winning-strategy would pick first, but level 2 has an immediate win (12+12 >= 23).
+    // findImmediateWin must override the level-priority strategy and choose level 2.
     const board = makeBoard([8, 7, 6, 5, 4, 4, 3, 3], 23);
-    board.levels[1][0] = active(15);
-    board.levels[1][1] = active(10);
+    board.levels[1][0] = active(5);
+    board.levels[1][1] = active(4);
+    board.levels[2][0] = active(12);
+    board.levels[2][1] = active(12);
     const { moves: mockMoves, captured } = makeMoveCapture();
     smartBotStrategy({ board, ctx: makeCtx({ currentPlayer: 0 }), moves: mockMoves });
-    expect(captured[0].levelIdx).toBe(1);
-    const vals = captured[0].indices.map((i) => board.levels[1][i]!.value);
+    expect(captured[0].levelIdx).toBe(2);
+    const vals = captured[0].indices.map((i) => board.levels[2][i]!.value);
     expect(vals[0] + vals[1]).toBeGreaterThanOrEqual(23);
   });
 

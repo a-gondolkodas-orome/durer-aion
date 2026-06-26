@@ -1,5 +1,5 @@
 import { isEqual } from 'lodash';
-import { makeCtx } from '../../game-factory';
+import { makeCtx, type GameMoves } from '../../game-factory';
 import { getExactWinningMove, smartBotStrategy } from './bot-strategy';
 import { ALL_FIELDS, BOARDSIZE, type Board, type Domino, type Field } from './dominoes-on-chessboard';
 
@@ -57,6 +57,23 @@ describe('getExactWinningMove', () => {
     expect(isWinningForMover(afterMove, memo)).toBe(false);
   });
 
+  it('picks a winning move on a single region where only some moves win (2x3 block)', () => {
+    // In a 2x3 region the three vertical dominoes win and the four horizontal ones
+    // lose, so a defined-but-wrong move would pass toBeDefined yet fail the oracle.
+    const region: Field[] = [];
+    for (let r = 0; r < 2; r++) for (let c = 0; c < 3; c++) region.push({ row: r, col: c });
+    const board = coverEverythingExcept(region);
+
+    const move = getExactWinningMove(board);
+    expect(move).toBeDefined();
+
+    const covered = new Set(board.flat().map(fieldKey));
+    const emptyCells = ALL_FIELDS.filter(c => !covered.has(fieldKey(c)));
+    const afterMove = emptyCells.filter(c => !isEqual(c, move![0]) && !isEqual(c, move![1]));
+    const memo = new Map<string, boolean>();
+    expect(isWinningForMover(afterMove, memo)).toBe(false);
+  });
+
   it('returns undefined when no move can force a win (two equal isolated dominoes)', () => {
     const board = coverEverythingExcept([
       { row: 0, col: 0 }, { row: 0, col: 1 }, { row: 0, col: 3 }, { row: 0, col: 4 }
@@ -69,8 +86,10 @@ describe('smartBotStrategy', () => {
   it('always mirrors through the board center when playing second, regardless of position', () => {
     const board: Board = [[{ row: 0, col: 0 }, { row: 0, col: 1 }]];
     let placed: Domino | undefined;
-    const moves = { placeDomino: (_board: Board, domino: Domino) => { placed = domino; } };
-    smartBotStrategy({ board, ctx: makeCtx({ chosenRoleIndex: 0 }), moves: moves as never });
+    const moves: GameMoves<Board> = {
+      placeDomino: (board: Board, domino: Domino) => { placed = domino; return { nextBoard: board }; }
+    };
+    smartBotStrategy({ board, ctx: makeCtx({ chosenRoleIndex: 0 }), moves });
     expect(new Set(placed!.map(fieldKey))).toEqual(new Set([
       fieldKey({ row: BOARDSIZE - 1, col: BOARDSIZE - 1 }),
       fieldKey({ row: BOARDSIZE - 1, col: BOARDSIZE - 2 })
@@ -84,8 +103,10 @@ describe('smartBotStrategy', () => {
     ];
     const board = coverEverythingExcept([...isolatedDomino, ...square2x2]);
     let placed: Domino | undefined;
-    const moves = { placeDomino: (_board: Board, domino: Domino) => { placed = domino; } };
-    smartBotStrategy({ board, ctx: makeCtx({ chosenRoleIndex: 1 }), moves: moves as never });
+    const moves: GameMoves<Board> = {
+      placeDomino: (board: Board, domino: Domino) => { placed = domino; return { nextBoard: board }; }
+    };
+    smartBotStrategy({ board, ctx: makeCtx({ chosenRoleIndex: 1 }), moves });
 
     expect(placed).toBeDefined();
     const covered = new Set(board.flat().map(fieldKey));

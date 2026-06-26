@@ -2,8 +2,9 @@ import { isGameEnd, hasFirstPlayerWon } from "./helpers";
 
 describe('isGameEnd, hasFirstPlayerWon', () => {
   it('should end the game if there are 3 pieces in a row for the second player', () => {
+    // only blue (2nd player) has a winning row; board not yet full
     const board = [
-      'red', 'red', 'red',
+      'red', 'red', null,
       'blue', 'blue', 'blue',
       'red', null, null
     ];

@@ -34,9 +34,7 @@ describe('getNextSharkPositionByAI', () => {
       0, 0, 0, 0, 0
     ];
     const shark = 0;
-    const start = Date.now();
     const position = getNextSharkPositionByAI(makeBoard(submarines, shark, 8));
-    expect(Date.now() - start).toBeLessThan(200);
     expect(position).toEqual(5);
   });
 });

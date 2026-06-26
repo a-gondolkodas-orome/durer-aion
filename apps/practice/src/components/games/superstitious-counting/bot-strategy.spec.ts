@@ -2,19 +2,31 @@ import { getOptimalBotStep } from './bot-strategy';
 
 describe('superstitious-counting getOptimalBotStep', () => {
   it('returns any valid step when remainder is 0 (any step wins)', () => {
-    // (20 - 6) % 14 === 0
-    const step = getOptimalBotStep({ current: 6, target: 20, restricted: 3 });
-    expect(step).toBeGreaterThanOrEqual(1);
-    expect(step).toBeLessThanOrEqual(12);
-    expect(step).not.toBe(3);
+    // (20 - 6) % 14 === 0. Loop to exercise the random draw: every result must stay
+    // within 1..12, never equal the restricted value, and the full allowed set must
+    // eventually appear (catches off-by-one range bugs and a broken restricted filter).
+    const seen = new Set<number>();
+    for (let i = 0; i < 300; i++) {
+      const step = getOptimalBotStep({ current: 6, target: 20, restricted: 3 });
+      expect(step).toBeGreaterThanOrEqual(1);
+      expect(step).toBeLessThanOrEqual(12);
+      expect(step).not.toBe(3);
+      seen.add(step);
+    }
+    expect(seen).toEqual(new Set([1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12]));
   });
 
   it('returns any valid step when remainder is 1 (any step loses)', () => {
     // (15 - 0) % 14 === 1
-    const step = getOptimalBotStep({ current: 0, target: 15, restricted: 5 });
-    expect(step).toBeGreaterThanOrEqual(1);
-    expect(step).toBeLessThanOrEqual(12);
-    expect(step).not.toBe(5);
+    const seen = new Set<number>();
+    for (let i = 0; i < 300; i++) {
+      const step = getOptimalBotStep({ current: 0, target: 15, restricted: 5 });
+      expect(step).toBeGreaterThanOrEqual(1);
+      expect(step).toBeLessThanOrEqual(12);
+      expect(step).not.toBe(5);
+      seen.add(step);
+    }
+    expect(seen).toEqual(new Set([1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12]));
   });
 
   it('returns the unique winning step when it is not restricted', () => {

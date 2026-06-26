@@ -33,7 +33,7 @@ describe('placeStoneAt', () => {
   it('should set the given cell to true without mutating the input', () => {
     const stones = Array(9).fill(false);
     const next = placeStoneAt(stones, 4);
-    expect(next[4]).toBe(true);
+    expect(next).toEqual([false, false, false, false, true, false, false, false, false]);
     expect(stones[4]).toBe(false);
   });
 });

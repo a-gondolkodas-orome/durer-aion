@@ -182,6 +182,13 @@ describe('undo', () => {
     });
 
     it('clicking undo restores the previous board and player', () => {
+      const BoardWithDisplay = ({ board, ctx, moves }: BoardClientProps<Board>) => (
+        <button
+          data-testid="move-btn"
+          disabled={!ctx.isClientMoveAllowed}
+          onClick={() => moves.mainMove(board)}
+        >{board.join(',')}</button>
+      );
       const gameplay: Gameplay<Board> = {
         moves: {
           mainMove: (board: Board, { events }: { events: Events }) => {
@@ -190,12 +197,15 @@ describe('undo', () => {
           }
         }
       };
-      const { getByTestId } = renderGame(makeConfig({ BoardClient: CtxAwareBoardClient, gameplay }));
+      const { getByTestId } = renderGame(makeConfig({ BoardClient: BoardWithDisplay, gameplay }));
       fireEvent.click(getByTestId('mode-vsHuman'));
       fireEvent.click(getByTestId('start-hh-game-0'));
+      expect(getByTestId('move-btn').textContent).toBe('initial'); // start board
       fireEvent.click(getByTestId('move-btn')); // player 0 moves → player 1's turn
+      expect(getByTestId('move-btn').textContent).toBe('initial,moved'); // board advanced
       expect((getByTestId('move-btn') as HTMLButtonElement).disabled).toBe(false); // player 1 can move
       fireEvent.click(getByTestId('undo-btn')); // undo → back to player 0's turn
+      expect(getByTestId('move-btn').textContent).toBe('initial'); // board restored
       expect((getByTestId('move-btn') as HTMLButtonElement).disabled).toBe(false); // player 0 can move
       expect((getByTestId('undo-btn') as HTMLButtonElement).disabled).toBe(true);  // snapshot cleared
     });

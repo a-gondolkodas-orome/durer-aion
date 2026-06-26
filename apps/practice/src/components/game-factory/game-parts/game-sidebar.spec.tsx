@@ -57,11 +57,13 @@ describe('GameSidebar', () => {
     expect(container.querySelector('.animate-spin')).not.toBeNull();
   });
 
-  it('does not show spinner in vsHuman play', () => {
+  it('does not show spinner in vsHuman play even when client move is not allowed', () => {
+    // the spinner must never appear in vsHuman mode, regardless of isClientMoveAllowed;
+    // only the !isHumanVsHumanGame guard prevents it here
     const { container } = renderSidebar({
       isHumanVsHumanGame: true,
       phase: 'play',
-      isClientMoveAllowed: true
+      isClientMoveAllowed: false
     });
     expect(container.querySelector('.animate-spin')).toBeNull();
   });

@@ -9,13 +9,19 @@ describe('getSmartBotStep', () => {
   it('odd, odd, odd, even case: split the even pile into odd-odd', () => {
     const botStep = getSmartBotStep([3, 5, 4, 7]);
     expect(botStep.pileId).toEqual(2);
-    expect(botStep.pieceCount === 1 || botStep.pieceCount === 3);
+    expect([1, 3]).toContainEqual(botStep.pieceCount);
+    // must remove a different pile, never the pile being split
+    expect(botStep.removedPileId).not.toEqual(botStep.pileId);
+    expect([0, 1, 2, 3]).toContain(botStep.removedPileId);
   });
 
   it('odd, odd, even, even case: remove one even, split the other into odd-odd', () => {
     const botStep = getSmartBotStep([4, 4, 3, 5]);
-    expect(botStep.pileId === 0 || botStep.pileId === 1);
-    expect(botStep.pieceCount === 1 || botStep.pieceCount === 3)
+    expect([0, 1]).toContainEqual(botStep.pileId);
+    expect([1, 3]).toContainEqual(botStep.pieceCount);
+    // remove the other even pile (0 or 1), never the pile being split
+    expect([0, 1]).toContainEqual(botStep.removedPileId);
+    expect(botStep.removedPileId).not.toEqual(botStep.pileId);
   });
 
   it('even, even, even, even case: follow strategy for halfed piles recursively', () => {

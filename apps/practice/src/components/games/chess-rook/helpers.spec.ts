@@ -27,12 +27,16 @@ describe('getAllowedMoves', () => {
     markVisitedFields(board, { row: 0, col: 0 }, { row: 0, col: 3 });
     board.chessBoard[0][3] = 'rook';
     board.rookPosition = { row: 0, col: 3 };
+    // a visited square directly below the rook blocks the vertical path past it
+    board.chessBoard[4][3] = 'visited';
 
     const moves = getAllowedMoves(board);
     expect(moves).not.toContainEqual({ row: 0, col: 0 });
     expect(moves).not.toContainEqual({ row: 0, col: 2 });
     expect(moves).toContainEqual({ row: 0, col: 4 });
     expect(moves).toContainEqual({ row: 3, col: 3 });
+    expect(moves).not.toContainEqual({ row: 4, col: 3 });
+    expect(moves).not.toContainEqual({ row: 5, col: 3 });
   });
 
   it('should return no moves when all paths are blocked', () => {
