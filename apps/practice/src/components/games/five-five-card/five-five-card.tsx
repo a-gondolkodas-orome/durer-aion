@@ -85,7 +85,7 @@ const moves = {
 const rule = {
   hu: <>
     Mindkét játékos előtt 5-5 kártyalap van az 1-5 egész számokkal megszámozva.
-    A játékosok felváltva elvesznek egy-egy lapot az ellenfelük elől, egészen addig, amíg
+    A játékosok felváltva elvesznek egy-egy lapot a másik játékos elől, egészen addig, amíg
     már csak egy-egy lap marad előttük. Ha a két megmaradt
     szám összege páratlan, akkor az nyer, aki előtt a nagyobbik van; ha páros az összeg, akkor
     pedig az, aki előtt a kisebbik (ha ugyanaz a szám marad meg a két játékos előtt, akkor az nyer,
@@ -93,7 +93,7 @@ const rule = {
   </>,
   en: <>
     Each player has 5 cards in front of them numbered 1 to 5. The players take turns removing one
-    card from their opponent's row until only one card remains in front of each player. If the sum
+    card from the other player's row until only one card remains in front of each player. If the sum
     of the two remaining numbers is odd, the player with the larger number wins; if the sum is even,
     the player with the smaller number wins (if both players have the same number left, the first
     player wins).
@@ -104,8 +104,8 @@ export const FiveFiveCard = strategyGameFactory({
   presentation: {
     rule,
     getPlayerStepDescription: () => ({
-      hu: 'Vegyél el egy kártyát az ellenfél elől.',
-      en: 'Remove a card from your opponent.'
+      hu: 'Vegyél el egy kártyát a másik játékos elől.',
+      en: 'Remove a card from the other player.'
     })
   },
   BoardClient,

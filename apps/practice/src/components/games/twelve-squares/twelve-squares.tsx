@@ -97,13 +97,13 @@ const rule = {
   hu: <>
     Van 12 mező egymás mellett. A két szélsőbe lerakunk egy-egy bábut. Ezután a játékosok
     felváltva lépnek egyet vagy kettőt a saját bábujukkal a másik irányába. A másik bábujára rálépni nem
-    szabad. Az nyer, aki átugorja az ellenfél bábuját.
+    szabad. Az nyer, aki átugorja a másik játékos bábuját.
   </>,
   en: <>
     A 1 × 12 board is given with one piece placed on each end.
     Players take turns moving their piece toward the other, advancing one or two squares at a time.
-    A player may not move to a square already occupied by the opponent's piece.
-    The player who jumps over their opponent's piece wins.
+    A player may not move to a square already occupied by the other player's piece.
+    The player who jumps over the other player's piece wins.
   </>
 };
 

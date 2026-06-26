@@ -55,8 +55,8 @@ export const MagicBoxB = strategyGameFactory({
     getPlayerStepDescription: ({ board }) => {
       if (board.pendingLine === null) {
         return {
-          hu: 'Jelölj ki egy sort vagy oszlopot, ahova az ellenfélnek a következő követ kell raknia.',
-          en: 'Designate a row or column where your opponent must place their next stone.'
+          hu: 'Jelölj ki egy sort vagy oszlopot, ahova a másik játékosnak a következő követ kell raknia.',
+          en: 'Designate a row or column where the other player must place their next stone.'
         };
       }
       return {

@@ -48,6 +48,7 @@ Create `src/components/games/<game-name>/<game-name>.js`. Follow the `strategyGa
 - Every move returns `{ nextBoard }`; pass the current board when chaining moves within a turn
 - Guard all player interactions with `ctx.isClientMoveAllowed`
 - `getPlayerStepDescription` should make it obvious what the current player should do
+- For user-facing text referring to the other participant, prefer "other player" / "másik játékos" over "opponent" / "ellenfél" — the latter reads as too harsh, especially in Hungarian
 - If the bot needs multiple moves in one turn, wrap subsequent moves in `setTimeout` to simulate thinking
 - Pull `name`, `title`, `credit` from `gameList` rather than hardcoding them
 

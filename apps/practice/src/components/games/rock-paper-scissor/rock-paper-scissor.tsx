@@ -83,14 +83,14 @@ const moves = {
 const rule = {
   hu: <>
     A játék kezdetekor mindkét játékos elé leteszünk három kártyát: az egyik követ, a
-    másik papírt, a harmadik ollót ábrázol. Ezután a játékosok felváltva elvesznek egy-egy kártyát az
-    ellenfelük elől, egészen addig, amíg már csak egy-egy kártya marad. Ekkor a megmaradt kártyákat
+    másik papírt, a harmadik ollót ábrázol. Ezután a játékosok felváltva elvesznek egy-egy kártyát a
+    másik játékos elől, egészen addig, amíg már csak egy-egy kártya marad. Ekkor a megmaradt kártyákat
     ütköztetik a „kő-papír-olló" játék szabályai szerint, így eldöntve, hogy ki a győztes; ha mindkét
     kártyán ugyanaz van, akkor a Kezdő nyert.
   </>,
   en: <>
     At the start each player has three cards in front of them: one showing rock, one paper, one
-    scissors. Players take turns removing a card from their opponent until only one card remains
+    scissors. Players take turns removing a card from the other player until only one card remains
     for each player. The remaining cards are then compared by rock-paper-scissors rules to determine
     the winner; if both cards show the same symbol, the first player wins.
   </>

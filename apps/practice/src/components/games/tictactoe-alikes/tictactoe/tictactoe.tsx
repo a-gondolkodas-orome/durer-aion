@@ -100,14 +100,14 @@ const rule = {
     szabályai szerint, tehát felváltva tesznek le korongokat, és ha egy sorban, oszlopban vagy átlóban
     összegyűlik három azonos színű korong, az adott játékos nyer. Ha az első 9 korong lehelyezése
     után döntetlen az állás (azaz egyik játékos sem nyert), akkor tovább folytatják a játékot, a soron
-    következő játékos az ellenfél egy már lehelyezett korongját fehérre színezheti. Ezek után az nyer,
+    következő játékos a másik játékos egy már lehelyezett korongját fehérre színezheti. Ezek után az nyer,
     aki először hoz létre három fehér korongot egy sorban, oszlopban vagy átlóban.
   </>,
   en: <>
     Two players play a game of ordinary tic-tac-toe on a 3 × 3 board with red and
     blue disks. That is, if there are three disks of the same colour in a row, column or diagonal,
     then the person placing that colour wins. In case no one wins after the placement of the first
-    9 disks, the next player colours one of the opponent&apos;s already placed disks white. Now
+    9 disks, the next player colours one of the other player&apos;s already placed disks white. Now
     whoever first creates three white disks in a row, column or diagonal, wins.
   </>
 };
