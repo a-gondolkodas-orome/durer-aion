@@ -24,18 +24,7 @@ interface TestItem {
   category: Category
 }
 
-export default function SelectProblem() {
-  const [age, setAge] = useState('');
-  const { enqueueSnackbar } = useSnackbar();
-  const login = useLogin();
-  const theme = useTheme();
-  const { t } = useTranslation();
-
-  const handleChange = (event: SelectChangeEvent) => {
-    setAge(event.target.value as string);
-  };
-
-  const availableTests: TestListElement[] = [
+export const availableRelayTests: TestListElement[] = [
     {final: [Category.B, Category.C, Category.D]},
     {final: [Category.B, Category.C, Category.D]},
     {final: [Category.B, Category.C, Category.D]},
@@ -48,9 +37,21 @@ export default function SelectProblem() {
     {local: [Category.A, Category.B], final: [Category.A, Category.B, Category.C, Category.Cp, Category.D, Category.Dp]},
     {local: [Category.A, Category.B], final: [Category.A, Category.B, Category.C, Category.Cp, Category.D, Category.Dp]},
     {local: [Category.A, Category.B], final: [Category.A, Category.B, Category.C, Category.D, Category.E, Category.Ep]},
-  ];
+]
+
+export default function SelectProblem() {
+  const [age, setAge] = useState('');
+  const { enqueueSnackbar } = useSnackbar();
+  const login = useLogin();
+  const theme = useTheme();
+  const { t } = useTranslation();
+
+  const handleChange = (event: SelectChangeEvent) => {
+    setAge(event.target.value as string);
+  };
+
   const allTests: TestItem[] = [];
-  availableTests.forEach((testsForAYear, yearidx) => {
+  availableRelayTests.forEach((testsForAYear, yearidx) => {
     if (testsForAYear.local) {
       allTests.push(...testsForAYear.local.map(test => ({ year: yearidx, finalround: false, category: test })));
     }
