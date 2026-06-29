@@ -1,0 +1,42 @@
+{
+  "ts-node": {
+    "compilerOptions": {
+        "module": "CommonJS"
+    }
+  },
+  "compilerOptions": {
+    "allowJs": false,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "module": "esnext",
+    "moduleResolution": "node",
+    "noEmit": true,
+    "noFallthroughCasesInSwitch": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "ESNext",
+    "types": ["vite/client"],
+    "paths": {
+      "game": ["../../packages/game"],
+      "strategy": ["../../packages/strategy"],
+      "schemas": ["../../packages/schemas"],
+      "common-frontend": ["../../packages/common-frontend"]
+    }
+  },
+  "include": [
+    "src",
+    "../../packages/*/src",
+    "../../packages/*/index.d.ts", 
+    "../../packages/*/index.ts"
+  ],
+  "exclude": [
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/__tests__/**"
+  ]
+}

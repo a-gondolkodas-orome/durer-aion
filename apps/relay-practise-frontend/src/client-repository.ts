@@ -1,0 +1,169 @@
+import { ClientRepository, LOCAL_STORAGE_TEAMSTATE, TeamModelDto, MatchStateDto } from "common-frontend";
+import { teamData } from "./teamData";
+import { sendDataLogin, sendGameData } from "./sendData";
+import i18n from "i18next";
+
+export class OfflineClientRepository implements ClientRepository {
+  
+  version = "OFFLINE" as const;
+  
+  startRelay(_joinCode: string): Promise<string> {
+    const teamState = getTeamStateFromLocal();
+    if (!(teamState.pageState === 'HOME' && teamState.relayMatch.state === 'NOT STARTED' && teamState.strategyMatch.state !== 'IN PROGRESS')) {
+      throw new Error(i18n.t('error.unexpected'));
+    }
+    const newState = {
+      ...teamState,
+      pageState: 'RELAY',
+      relayMatch: {
+        state: 'IN PROGRESS',
+        startAt: new Date(),
+        endAt: addMin(new Date(), 60),
+        matchID: "",
+      },
+    }
+    sendGameData({component: "relay", phase: "start"});
+    localStorage.setItem(LOCAL_STORAGE_TEAMSTATE,
+      JSON.stringify(newState)
+    );
+    return Promise.resolve("ok");
+  }
+
+  startStrategy(_joinCode: string): Promise<string> {
+    const teamState = getTeamStateFromLocal();
+    if (!(teamState.pageState === 'HOME' && teamState.strategyMatch.state === 'NOT STARTED' && teamState.relayMatch.state !== 'IN PROGRESS')) {
+      throw new Error(i18n.t('error.unexpected'));
+    }
+    const newState = {
+      ...teamState,
+      pageState: 'STRATEGY',
+      strategyMatch: {
+        state: 'IN PROGRESS',
+        startAt: new Date(),
+        endAt: addMin(new Date(), 30),
+        matchID: "",
+      },
+    }
+    
+  sendGameData({component: "strategy", phase: "start"});
+    localStorage.setItem(LOCAL_STORAGE_TEAMSTATE,
+      JSON.stringify(newState)
+    );
+    return Promise.resolve("ok");
+  }
+
+  toHome(_joinCode: string): Promise<string> {
+    const teamState = getTeamStateFromLocal();
+    const newState = {...teamState, pageState: 'HOME'}
+    if (teamState.relayMatch.state === "IN PROGRESS"){
+      const score = Number(localStorage.getItem("RelayPoints"))
+      sendGameData({component: "relay", phase: "end", G: {points: score}})
+      newState.relayMatch = {
+        ...teamState.relayMatch,
+        state: "FINISHED",
+        endAt: new Date(),
+        score: score,
+      }
+    }
+    if (teamState.strategyMatch.state === "IN PROGRESS"){
+      newState.strategyMatch = {
+        ...teamState.strategyMatch,
+        state: "FINISHED",
+        endAt: new Date(),
+        score: Number(localStorage.getItem("StrategyPoints")),
+      }
+    }
+    localStorage.setItem(LOCAL_STORAGE_TEAMSTATE, JSON.stringify(newState));
+    return Promise.resolve("ok");
+  }
+
+  getTeamState(_joinCode: string): Promise<TeamModelDto> {
+    const teamState = getTeamStateFromLocal();
+    return Promise.resolve(teamState) as Promise<TeamModelDto>;
+  }
+
+  async getAll(): Promise<any> {
+    return null;
+  }
+
+  async resetRelay(_teamId: string): Promise<TeamModelDto> {
+    throw Error("NOT call this");
+  }
+
+  async resetStrategy(_teamId: string): Promise<TeamModelDto> {
+    throw Error("NOT call this");
+  }
+
+  async addMinutes(_matchId: string, _minutes: number): Promise<string> {
+    return Promise.resolve("OK");
+  }
+
+  async getMatchState(_matchId: string): Promise<MatchStateDto> {
+    throw Error("NOT call this");
+  }
+  async getMatchLogs(_matchId: string): Promise<MatchStateDto> {
+    throw Error("NOT call this");
+  }
+  async removeTeam(_teamId: string): Promise<void> {
+    throw Error("NOT call this");
+  }
+
+  joinWithCode(joinCode: string): Promise<string> {
+    // return the joincode if it is in the teamData.ts file
+
+    const i = teamData.findIndex(e => e.join_code === joinCode);
+    let pageState = "DISCLAIMER"
+    if (typeof localStorage !== "undefined") {
+      const teamStateString = localStorage.getItem(LOCAL_STORAGE_TEAMSTATE);
+      if (teamStateString !== null){
+        const teamState = JSON.parse(teamStateString);
+        pageState = teamState.pageState;
+      }
+    }
+
+    if (i > -1) {
+      const i = teamData.findIndex(e => e.join_code === joinCode);
+      const currentTeamData = teamData[i];
+      const teamState = {
+        teamId: "1",
+        joinCode: joinCode,
+        teamName: currentTeamData.teamname,
+        category: currentTeamData.category,
+        credentials: "credentials",
+        email: "asd@asd.asd",
+        pageState: pageState,
+        relayMatch: {
+          state: 'NOT STARTED',
+        },
+        strategyMatch: {
+          state: 'NOT STARTED',
+        },
+      }
+
+      sendDataLogin(teamState as TeamModelDto); // TODO: remove as TeamModelDto
+      localStorage.setItem(LOCAL_STORAGE_TEAMSTATE,
+        JSON.stringify(teamState)
+      );
+      return Promise.resolve(joinCode);
+    }
+
+    throw new Error(i18n.t('login.error.wrongid'));
+  }
+
+}
+
+
+const getTeamStateFromLocal = (): TeamModelDto => {
+  if (typeof localStorage === "undefined") {
+    throw new Error(i18n.t('error.unexpected'));
+  }
+  const teamstateString = localStorage.getItem(LOCAL_STORAGE_TEAMSTATE);
+  if (teamstateString === null) {
+    throw new Error(i18n.t('error.unexpected'));
+  }
+  return JSON.parse(teamstateString);
+}
+
+const addMin = (from: Date, t: number): Date => {
+  return new Date(from.setMinutes(from.getMinutes()+t));
+}

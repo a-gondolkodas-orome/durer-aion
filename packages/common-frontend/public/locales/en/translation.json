@@ -43,19 +43,30 @@
     "logout": "logout",
     "logoutofthiswholething": "",
     "subtitle": "Online round",
-    "title": "XIX. Dürer Competition"
+    "title": "XIX. Dürer Competition",
+    "titlePlain": "Dürer Competition",
+    "relayPractise": "Practising relays"
   },
   "login": {
     "afterTitle": ".",
     "beforeTitle": "Welcome to the online round interface of the ",
     "error": {
       "empty": "You didn't give any code!",
-      "wrongid": "Incorrect log-in code."
+      "wrongid": "Incorrect log-in code.",
+      "noRound": "No round selected!"
     },
     "fallback": "If you can't find the email, write to us at the verseny (at) durerinfo (dot) hu email address.",
     "greeting": "Dear Competitor!",
     "loginButton": "Log in",
-    "loginInstruction": "To log in, check your emails and enter the code you find there here:"
+    "loginInstruction": "To log in, check your emails and enter the code you find there here:",
+    "relayPractise": "Practise relay tasks",
+    "relayPractiseDescription": "You can try out yourselves with relay-type tasks from former competitions. Choose the desired set of tasks (by year & category), for which you'll have 90 minutes to complete.",
+    "competitionType": {
+      "local": "Local round #{{num}}, {{category}}",
+      "final": "Final round #{{num}}, {{category}}"
+    },
+    "proceedButton": "Proceed",
+    "roundSelector": "Round:"
   },
   "relay": {
     "endTable": {

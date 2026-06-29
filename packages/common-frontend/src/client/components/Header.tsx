@@ -7,7 +7,7 @@ import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { LanguageDropdown } from './Langswitcher';
 
-export function Header(props: { teamName: string | null, admin: boolean }) {
+export function Header(props: { teamName: string | null, admin: boolean, titles?: string[] }) {
   const { t } = useTranslation();
   const theme = useTheme();
   const logout = useLogout();
@@ -40,7 +40,7 @@ export function Header(props: { teamName: string | null, admin: boolean }) {
           fontWeight: 'bold',
           paddingTop: '20px',
           whiteSpace: 'nowrap',
-        }}>{t('header.title')}</Stack>
+        }}>{(props.titles) ? t(props.titles[0]) : t('header.title')}</Stack>
         {
           <Stack sx={{
             flexDirection: 'row',
@@ -111,7 +111,7 @@ export function Header(props: { teamName: string | null, admin: boolean }) {
             md: 'flex'
           },
           whiteSpace: 'nowrap',
-        }}>{t('header.subtitle')}</Stack>
+        }}>{(props.titles) ? t(props.titles[1]) : t('header.subtitle')}</Stack>
         <Dialog
           open={mobileMenuOpen}
           onClose={()=>{
