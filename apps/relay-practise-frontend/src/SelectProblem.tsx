@@ -11,7 +11,7 @@ import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 
 enum Category {
-  A = 'A', B = 'B', C = 'C', D = 'D', E = 'E', Cp = 'Cp', Dp = 'Dp', Ep = 'Ep'
+  A = 'A', B = 'B', C = 'C', D = 'D', E = 'E', Cp = 'C+', Dp = 'D+', Ep = 'E+'
 }
 
 interface TestListElement {
