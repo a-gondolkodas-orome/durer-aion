@@ -71,8 +71,9 @@ export default function SelectProblem() {
           label="Forduló"
           onChange={handleChange}
         >
-          {allTests.map(testItem => 
+          {allTests.map((testItem, idx) => 
             <MenuItem
+              key={idx}
               value={`${testItem.year + 1}_${testItem.finalround ? 'D' : 'H'}_${testItem.category}`}>
                 {testItem.finalround 
                   ? t('login.competitionType.final', {num: testItem.year + 1, category: testItem.category})

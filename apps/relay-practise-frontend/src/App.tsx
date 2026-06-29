@@ -55,7 +55,7 @@ function App() {
                 paddingBottom: "50px",
                 maxWidth: "1200px",
               }}
-              data-testId="mainRoot"
+              data-testid="mainRoot"
             >
               {!teamState && <LoginToRelay />}
               {teamState && <Relay state={teamState}/>}

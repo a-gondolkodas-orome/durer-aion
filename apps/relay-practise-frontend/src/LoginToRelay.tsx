@@ -14,7 +14,7 @@ export function LoginToRelay() {
       width: '100%',
       alignItems: 'start',
       justifyContent: 'center',
-    }} data-testId="loginRoot">
+    }} data-testid="loginRoot">
       <Stack sx={{
         width: '100%',
         maxWidth: 680,
