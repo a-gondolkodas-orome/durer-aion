@@ -13,11 +13,13 @@ export interface RelayProblem {
 
 export function strategy(getProblems: () => Promise<RelayProblem[]>){
   let problems: RelayProblem[] | null = null;
-  getProblems().then(p => { problems = p; });
 
-  return (state: State<MyGameState>, _botID: string): [(string | number | boolean)[] | undefined, string] => {
-    if (!problems) return [undefined, "getTime"];
+  return async (state: State<MyGameState>, _botID: string): Promise<[(string | number | boolean)[] | undefined, string]> => {
     const problemIdx = state.G.currentProblem;
+    // Reload the problems from the database at the start of every game
+    if (state.G.numberOfTry === 0 || !problems) {
+      problems = await getProblems();
+    }
     if (state.G.numberOfTry === 0) {
       const url = problems[problemIdx].attachmentUrl ?? "";
       return [[problems[problemIdx].problemText,3,url], "firstProblem"];
