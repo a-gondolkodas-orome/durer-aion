@@ -1,12 +1,15 @@
 import koaBody from 'koa-body';
 import * as Router from '@koa/router';
 import type { Game, LobbyAPI, Server, StorageAPI } from 'boardgame.io';
-import { TeamsRepository } from './db';
+import { TeamsRepository, RelayProblemsRepository } from './db';
 import { InProgressMatchStatus } from 'schemas';
 import { BOT_ID, TransportAPI } from '../socketio_botmoves';
 import { getFilterPlayerView } from "boardgame.io/internal";
 import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus, createGame, injectBot, injectPlayer } from './team_manage';
 import { import_teams_from_tsv } from './team_import';
+import { readFileSync } from 'fs';
+import { uploadToS3, extractUploadedFiles, uploadImagesS3, requireEnv, getUploadedFileInfo } from './relayProblemUploadUtils';
+import { validateProblemCategory, parseProblemTOML } from 'game';
 
 /**
  * 
@@ -14,11 +17,13 @@ import { import_teams_from_tsv } from './team_import';
  * 
  * @param router - Koa Router
  * @param teams - List of teams, provided as a TeamsRepository
+ * @param problems - Relay problems repository for managing problems data
  * @param games - List of possible games for teams
  */
 export function configureTeamsRouter(
   router: Router<any, Server.AppCtx>,
   teams: TeamsRepository,
+  problems: RelayProblemsRepository,
   games: Game<any, Record<string, unknown>, any>[]
 ) {
   /**
@@ -296,6 +301,89 @@ export function configureTeamsRouter(
 
     ctx.body = import_results;  
   })
+
+  /**
+   * Upload problems from TOML file and images
+   * 
+   * @param {File} tomlFile - TOML file containing problem definitions
+   * @param {File[]} imageFiles - Image files (.png, .jpg, .jpeg, .gif)
+   * @returns {Object} - Upload results with success/failure counts
+   */
+  router.put("/game/admin/problems/upload", koaBody({ multipart: true }), async (ctx) => {
+    const files = ctx.request.files;
+    if (!files) {
+      ctx.throw(400, 'No files uploaded!');
+      return;
+    }
+
+    try {
+      const { tomlFile, imageFiles } = extractUploadedFiles(files);
+      const tomlInfo = getUploadedFileInfo(tomlFile);
+      const imageInfos = imageFiles.map(getUploadedFileInfo);
+
+      const parsedProblems = parseProblemTOML(
+        readFileSync(tomlInfo.filePath, 'utf-8'),
+        imageInfos.map(info => info.name),
+        requireEnv('PROBLEMS_S3_BUCKET_NAME')
+      );
+
+      const tomlS3Url = await uploadToS3(tomlInfo.filePath, "problems.toml", 'application/toml');
+      const uploadedImages = await uploadImagesS3(imageFiles);
+
+      await problems.clearProblems();
+      const addedProblems = await problems.addProblems(parsedProblems);
+
+      ctx.body = {
+        success: true,
+        message: 'Problems uploaded successfully',
+        problemsAdded: addedProblems.length,
+        tomlFile: {
+          name: tomlInfo.name,
+          s3Url: tomlS3Url
+        },
+        imageFiles: uploadedImages
+      };
+    } catch (error: unknown) {
+      ctx.status = 400;
+      const message = error instanceof Error ? `${error.name}: ${error.message}` : 'Failed to process uploaded files';
+      ctx.body = {
+        success: false,
+        error: message
+      };
+    }
+  });
+
+  /**
+   * Get problems by category with their associated S3 attachments
+   * 
+   * @param {string} category - Problem category (C, D, or E)
+   * @returns {Object} - Problems list with attachment URLs
+   */
+  router.get("/game/admin/problems/get/:category", koaBody(), async (ctx) => {
+    const category = ctx.params.category;
+    
+    try {
+      // Validate category parameter
+      validateProblemCategory(category);
+
+      // Fetch problems from repository
+      const probs = await problems.getProblems(category);
+      
+      ctx.body = {
+        success: true,
+        category: category,
+        count: probs.length,
+        problems: probs
+      };
+    } catch (error: unknown) {
+      ctx.status = 400;
+      ctx.body = {
+        success: false,
+        error: (error instanceof Error && error.message) 
+          ? error.message : `Failed to fetch problems: Unknown error`
+      };
+    }
+  });
 
   /**
    * Get team ID based on login token

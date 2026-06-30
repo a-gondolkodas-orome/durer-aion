@@ -1,8 +1,9 @@
 import { Stack } from '@mui/system';
+import type { RelayProblem } from 'game';
 import { useAddMinutes, useAll, useRemoveTeam } from '../hooks/user-hooks';
 import { Button, Dialog, Table, TableCell, TableRow, IconButton } from '@mui/material';
 import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import useSWR from 'swr';
 import { DataGrid } from '@mui/x-data-grid';
 import { TeamModelDto } from '../dto/TeamStateDto';
@@ -28,6 +29,7 @@ export function Admin(props: {teamId?: string}) {
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogInterface | null>(null);
   const [teamFromPath, setTeamFromPath] = useState<TeamModelDto | null>(null);
   const [adminPageOpen, setAdminPageOpen] = useState<boolean>(true);
+  const [refreshProblems, setRefreshProblems] = useState(0);
 
   useEffect(()=>{
     if (props.teamId) {
@@ -284,13 +286,292 @@ export function Admin(props: {teamId?: string}) {
                 }
               });
             }}
-          >
-            Összes csapat törlése
-          </Button>}
-      {!teamFromPath && data && <Stats data={data}/>}
-      </>}
+        >
+          Összes csapat törlése
+        </Button>}
+      
+      {/* Problems Upload Section */}
+      {!teamFromPath && <ProblemsUpload onUploadSuccess={() => setRefreshProblems(prev => prev + 1)} />}
+
+      {/* Problems Viewer Section */}
+      {!teamFromPath && <ProblemsViewer refreshTrigger={refreshProblems} />}
+
+     {!teamFromPath && data && <Stats data={data}/>}
+    </>}
     </Stack>
   )
+}
+
+function ProblemsUpload({ onUploadSuccess }: { onUploadSuccess: () => void }) {
+  const theme = useTheme();
+  const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const { enqueueSnackbar } = useSnackbar();
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSelectedFiles(event.target.files);
+  };
+
+  const handleUpload = async () => {
+    if (!selectedFiles || selectedFiles.length === 0) {
+      enqueueSnackbar("Válassz ki fájlokat a feltöltéshez", { variant: 'warning' });
+      return;
+    }
+
+    // Validate files: one TOML and multiple image files
+    const tomlFiles = Array.from(selectedFiles).filter(file => 
+      file.name.toLowerCase().endsWith('.toml')
+    );
+    const imageFiles = Array.from(selectedFiles).filter(file => 
+      /\.(png|jpg|jpeg|gif)$/i.test(file.name)
+    );
+
+    if (tomlFiles.length !== 1) {
+      enqueueSnackbar("Pontosan egy TOML fájlt kell kiválasztani", { variant: 'error' });
+      return;
+    }
+
+    if (imageFiles.length === 0) {
+      enqueueSnackbar("Legalább egy képfájlt (.png, .jpg, .jpeg, .gif) ki kell választani", { variant: 'warning' });
+    }
+
+    setUploading(true);
+
+    try {
+      const formData = new FormData();
+      
+      // Add all files to FormData
+      Array.from(selectedFiles).forEach(file => {
+        formData.append('file', file);
+      });
+
+      const response = await fetch('/game/admin/problems/upload', {
+        method: 'PUT',
+        body: formData,
+        credentials: 'include', // Include authentication credentials
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        enqueueSnackbar(
+          `Sikeres feltöltés! ${result.problemsAdded} feladat hozzáadva.`, 
+          { variant: 'success' }
+        );
+        // Clear selection
+        setSelectedFiles(null);
+        const fileInput = document.getElementById('problems-file-input') as HTMLInputElement;
+        if (fileInput) fileInput.value = '';
+        // Trigger refresh of problems viewer
+        onUploadSuccess();
+      } else {
+        enqueueSnackbar(
+          result.error || 'Hiba történt a feltöltés során', 
+          // style: { whiteSpace: 'pre-line' } so that the 
+          // toml errors are properly formatted in multiple lines
+          { variant: 'error', style: { whiteSpace: 'pre-line' } }
+        );
+      }
+    } catch (error: unknown) {
+      enqueueSnackbar(
+        error instanceof Error ? error.message : 'Hálózati hiba történt',
+        { variant: 'error' }
+      );
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <Stack sx={{ padding: "10px", borderTop: "1px solid #ccc", marginTop: "20px" }}>
+      <h3>Feladatok feltöltése</h3>
+      <p>Válassz ki egy TOML fájlt a feladatokkal és a hozzájuk tartozó képfájlokat:</p>
+      
+      <Stack sx={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "10px", margin: "15px 0" }}>
+        <input
+          id="problems-file-input"
+          type="file"
+          multiple
+          accept=".toml,.png,.jpg,.jpeg,.gif"
+          onChange={handleFileChange}
+          style={{
+            padding: "8px",
+            borderWidth: "2px",
+            borderColor: theme.palette.primary.main,
+            borderStyle: "solid",
+            borderRadius: "4px",
+            minWidth: "300px"
+          }}
+        />
+        
+        <Button
+          sx={{
+            width: '150px',
+            textTransform: 'none',
+          }}
+          variant='contained'
+          color='primary'
+          onClick={handleUpload}
+          disabled={uploading || !selectedFiles}
+        >
+          {uploading ? 'Feltöltés...' : 'Feltöltés'}
+        </Button>
+      </Stack>
+
+      {selectedFiles && selectedFiles.length > 0 && (
+        <Stack sx={{ marginTop: "10px" }}>
+          <strong>Kiválasztott fájlok:</strong>
+          <ul style={{ margin: "5px 0", paddingLeft: "20px" }}>
+            {Array.from(selectedFiles).map((file, index) => (
+              <li key={index} style={{ 
+                color: file.name.toLowerCase().endsWith('.toml') ? 'blue' : 
+                       /\.(png|jpg|jpeg|gif)$/i.test(file.name) ? 'green' : 'red'
+              }}>
+                {file.name} ({(file.size / 1024).toFixed(1)} KB)
+              </li>
+            ))}
+          </ul>
+        </Stack>
+      )}
+
+      <Stack sx={{ fontSize: "14px", color: "#666", marginTop: "10px" }}>
+        <strong>Útmutató:</strong>
+        <ul style={{ margin: "5px 0", paddingLeft: "20px" }}>
+          <li>Válassz ki pontosan <strong>egy TOML fájlt</strong> a feladatokkal</li>
+          <li>Válaszd ki az összes <strong>képfájlt</strong> (.png, .jpg, .jpeg, .gif), amelyekre a TOML fájl hivatkozik</li>
+          <li>A TOML fájlban az attachment mezőkben csak a fájlneveket add meg (útvonal nélkül)</li>
+        </ul>
+      </Stack>
+    </Stack>
+  );
+}
+
+function ProblemsViewer({ refreshTrigger }: { refreshTrigger: number }) {
+  const theme = useTheme();
+  const [selectedCategory, setSelectedCategory] = useState<string>('C');
+  const [problems, setProblems] = useState<RelayProblem[]>([]);
+  const [loading, setLoading] = useState(false);
+  const { enqueueSnackbar } = useSnackbar();
+
+  const categories = ['C', 'D', 'E'];
+
+  const fetchProblems = useCallback(async (category: string) => {
+    setLoading(true);
+    try {
+      const response = await fetch(`/game/admin/problems/get/${category}`, {
+        credentials: 'include',
+      });
+      
+      const result = await response.json();
+      
+      if (response.ok && result.success) {
+        setProblems(result.problems || []);
+      } else {
+        enqueueSnackbar(
+          result.error || 'Hiba történt a feladatok betöltése során',
+          { variant: 'error' }
+        );
+        setProblems([]);
+      }
+    } catch (error: any) {
+      enqueueSnackbar(
+        error?.message || 'Hálózati hiba történt',
+        { variant: 'error' }
+      );
+      setProblems([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [enqueueSnackbar]);
+
+  useEffect(() => {
+    fetchProblems(selectedCategory);
+  }, [selectedCategory, fetchProblems]);
+
+  // Refresh when refreshTrigger changes (after upload)
+  useEffect(() => {
+    if (refreshTrigger > 0) {
+      fetchProblems(selectedCategory);
+    }
+  }, [refreshTrigger, selectedCategory, fetchProblems]);
+
+  return (
+    <Stack sx={{ padding: "10px", borderTop: "1px solid #ccc", marginTop: "20px" }}>
+      <h3>Feladatok megtekintése</h3>
+      
+      <Stack sx={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "10px", margin: "15px 0" }}>
+        <strong>Kategória:</strong>
+        {categories.map(category => (
+          <Button
+            key={category}
+            variant={selectedCategory === category ? 'contained' : 'outlined'}
+            color='primary'
+            onClick={() => setSelectedCategory(category)}
+            sx={{ textTransform: 'none' }}
+          >
+            {category}
+          </Button>
+        ))}
+        <Button
+          variant='outlined'
+          color='secondary'
+          onClick={() => fetchProblems(selectedCategory)}
+          disabled={loading}
+          sx={{ textTransform: 'none' }}
+        >
+          Frissítés
+        </Button>
+      </Stack>
+
+      {loading && <p>Betöltés...</p>}
+      
+      {!loading && problems.length === 0 && (
+        <p style={{ color: '#666' }}>Nincsenek feladatok ebben a kategóriában.</p>
+      )}
+      
+      {!loading && problems.length > 0 && (
+        <Stack sx={{ marginTop: "10px" }}>
+          <strong>{selectedCategory} kategória - {problems.length} feladat:</strong>
+          
+          <Table sx={{ marginTop: "10px", border: "1px solid #ccc" }}>
+            <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
+              <TableCell><strong>Index</strong></TableCell>
+              <TableCell><strong>Feladat szövege</strong></TableCell>
+              <TableCell><strong>Válasz</strong></TableCell>
+              <TableCell><strong>Pontszám</strong></TableCell>
+              <TableCell><strong>Melléklet</strong></TableCell>
+            </TableRow>
+            {problems
+              .sort((a, b) => a.index - b.index)
+              .map((problem, idx) => (
+                <TableRow key={idx} sx={{ borderBottom: "1px solid #ddd" }}>
+                  <TableCell>{problem.index}</TableCell>
+                  <TableCell sx={{ maxWidth: "300px", wordWrap: "break-word" }}>
+                    {problem.problemText}
+                  </TableCell>
+                  <TableCell>{problem.answer}</TableCell>
+                  <TableCell>{problem.points}</TableCell>
+                  <TableCell>
+                    {problem.attachmentUrl ? (
+                      <a 
+                        href={problem.attachmentUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        style={{ color: theme.palette.primary.main }}
+                      >
+                        {problem.attachmentFileName}
+                      </a>
+                    ) : (
+                      <span style={{ color: '#666' }}>Nincs</span>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+          </Table>
+        </Stack>
+      )}
+    </Stack>
+  );
 }
 
 function Stats(props: {data: TeamModelDto[]}) {

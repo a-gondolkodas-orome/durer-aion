@@ -1,5 +1,5 @@
 import { DataTypes, ModelAttributes } from "sequelize";
-import { TeamModel, teamAttributes } from "./model";
+import { TeamModel, teamAttributes } from "./teamModel";
 
 export class DeletedTeamModel extends TeamModel {
   public deletedAt!: Date;

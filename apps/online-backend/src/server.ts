@@ -1,15 +1,12 @@
-import { 
+import './dotenv_helper';
+import {
   GameRelay,
   MyGameWrappers as strategyGameWrappers,
   StrategyWrappers as StrategyStrategy,
   gameWrapper,
   strategyNames,
+  RelayStrategy
 } from 'game';
-import { RelayStrategy } from 'strategy';
-//import { 
-//  RelayStrategy,
-//  strategyWrapper as StrategyStrategyremovefromcirclee,
-//} from 'strategy';
 import { PostgresStore } from 'bgio-postgres';
 import { argv, env, exit } from 'process';
 import { SocketIOButBotMoves } from './socketio_botmoves';
@@ -17,8 +14,8 @@ import { Server } from 'boardgame.io/server';
 import botWrapper from './botwrapper';
 import cors from '@koa/cors';
 import { configureTeamsRouter } from './server/router';
-import { TeamsRepository } from './server/db';
-import { getBotCredentials, getGameStartAndEndTime, relayNames } from './server/common';
+import { TeamsRepository, RelayProblemsRepository } from './server/db';
+import { getBotCredentials, relayNames } from './server/common';
 import { import_teams_from_tsv_locally } from './server/team_import';
 
 import auth from 'koa-basic-auth';
@@ -26,9 +23,7 @@ import mount from 'koa-mount';
 import { closeMatch } from './server/team_manage';
 
 import * as Sentry from '@sentry/node';
-import dotenv from 'dotenv';
-
-dotenv.config(); // Loads .env file into process.env
+import { requireEnv } from "./server/relayProblemUploadUtils";
 
 function getDb() {
   if (env.DATABASE_URL) {
@@ -37,6 +32,7 @@ function getDb() {
     return {
       db,
       teams: new TeamsRepository(db),
+      problems: new RelayProblemsRepository(db),
     }
   } else {
     throw new Error('Failed to load DB data. Only postgres is supported!');
@@ -50,6 +46,12 @@ export function getAdminCredentials() {
   return env.ADMIN_CREDENTIALS;
 }
 
+function checkS3Variables() {
+  requireEnv('PROBLEMS_S3_BUCKET_NAME');
+  requireEnv('PROBLEMS_S3_KEY_ID');
+  requireEnv('PROBLEMS_S3_SECRET_KEY');
+}
+
 const games = [
   { ...GameRelay, name: relayNames.C },
   { ...GameRelay, name: relayNames.D },
@@ -59,40 +61,45 @@ const games = [
   { ...gameWrapper(strategyGameWrappers.E()), name: strategyNames.E },
 ];
 
-
-const bot_factories = [
-  botWrapper(RelayStrategy("C")),
-  botWrapper(RelayStrategy("D")),
-  botWrapper(RelayStrategy("E")),
-  botWrapper(StrategyStrategy.C()),
-  botWrapper(StrategyStrategy.D()),
-  botWrapper(StrategyStrategy.E()),
-];
-
-if (argv[2] === "sanity-check") {
-  console.log("OK");
-  exit(0);
+function createBotFactories(problems: RelayProblemsRepository) {
+  return [
+    botWrapper(RelayStrategy(() => problems.getProblems("C"))),
+    botWrapper(RelayStrategy(() => problems.getProblems("D"))),
+    botWrapper(RelayStrategy(() => problems.getProblems("E"))),
+    botWrapper(StrategyStrategy.C()),
+    botWrapper(StrategyStrategy.D()),
+    botWrapper(StrategyStrategy.E()),
+  ];
 }
 
-getBotCredentials(); // give love if no creds are supplied
-getAdminCredentials(); // give love if no creds are supplied
-getGameStartAndEndTime(); // give love if no creds are supplied
+async function main() {
+  getBotCredentials(); // give love if no creds are supplied
+  getAdminCredentials(); // give love if no creds are supplied
+  checkS3Variables();
 
-const { db, teams } = getDb();
+  const { db, teams, problems } = getDb();
 
-// node: argv[0] vs server.ts: argv[1]
-if (argv[2] === "import") {
-  const filename = argv[3];
-  import_teams_from_tsv_locally(teams, filename).then(() => exit(0));
-} else {
-  const botSetup = Object.fromEntries(
-    games.map((game, idx) =>
-      [game.name,
-      new (bot_factories[idx])({
-        enumerate: game.ai?.enumerate,
-        seed: game.seed,
-      })]
-    ));
+  if (argv[2] === "sanity-check") {
+    console.log("OK");
+    exit(0);
+  }
+
+  // node: argv[0] vs server.ts: argv[1]
+  if (argv[2] === "import") {
+    const filename = argv[3];
+    import_teams_from_tsv_locally(teams, filename).then(() => exit(0));
+  } else {
+    await problems.connect();
+
+    const bot_factories = createBotFactories(problems);
+    const botSetup = Object.fromEntries(
+      games.map((game, idx) =>
+        [game.name,
+        new (bot_factories[idx])({
+          enumerate: game.ai?.enumerate,
+          seed: game.seed,
+        })]
+      ));
 
   const socketio = new SocketIOButBotMoves(
     { https: undefined },
@@ -122,7 +129,7 @@ if (argv[2] === "import") {
 
   //TODO regex mount protection for Boardgame.io endpoints
 
-  configureTeamsRouter(server.router, teams, games);
+  configureTeamsRouter(server.router, teams, problems, games);
 
   Sentry.init({ dsn: "https://1f4c47a1692b4936951908e2669a1e99@sentry.durerinfo.hu/4" });
 
@@ -136,4 +143,7 @@ if (argv[2] === "import") {
   });
 
   server.run(PORT);
+  }
 }
+
+main().catch(console.error);
