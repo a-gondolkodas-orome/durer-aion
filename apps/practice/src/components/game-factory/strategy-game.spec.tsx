@@ -363,3 +363,42 @@ describe('win/loss tracking', () => {
     expect(stats).toEqual({ win: 1, loss: 1 });
   });
 });
+
+describe('umami game-finished event', () => {
+  let track: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    localStorage.clear();
+    track = vi.fn();
+    window.umami = { track: track as NonNullable<Window['umami']>['track'] };
+  });
+
+  afterEach(() => { delete window.umami; });
+
+  const lastEvent = () => track.mock.calls.at(-1)!;
+
+  it('fires with result "win" when the chosen player wins vs computer', () => {
+    const { getByTestId } = renderGame(gameEndingConfig());
+    fireEvent.click(getByTestId('role-btn-0'));
+    fireEvent.click(getByTestId('end-win-btn'));
+    expect(lastEvent()[0]).toBe('game-finished');
+    expect(lastEvent()[1]).toMatchObject({ mode: 'vsComputer', result: 'win' });
+  });
+
+  it('fires with result "loss" when the opponent wins vs computer', () => {
+    const { getByTestId } = renderGame(gameEndingConfig());
+    fireEvent.click(getByTestId('role-btn-0'));
+    fireEvent.click(getByTestId('end-lose-btn'));
+    expect(lastEvent()[1]).toMatchObject({ mode: 'vsComputer', result: 'loss' });
+  });
+
+  it('fires without a result in vsHuman mode', () => {
+    const { getByTestId } = renderGame(gameEndingConfig());
+    fireEvent.click(getByTestId('mode-vsHuman'));
+    fireEvent.click(getByTestId('start-hh-game-0'));
+    fireEvent.click(getByTestId('end-win-btn'));
+    expect(lastEvent()[0]).toBe('game-finished');
+    expect(lastEvent()[1]).toMatchObject({ mode: 'vsHuman' });
+    expect(lastEvent()[1]).not.toHaveProperty('result');
+  });
+});

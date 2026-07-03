@@ -6,6 +6,7 @@ import { mapValues, cloneDeep } from 'lodash';
 import { useTranslation, type TranslatableNode, type I18nString } from '../language';
 import { useLocation } from 'react-router';
 import { useGameStats } from './use-game-stats';
+import { trackEvent } from '../app/umami';
 import type {
   Phase, Mode, Ctx, Events, MoveResult, MoveFunction, GameMoves,
   BoardClientProps, Variant as DisplayVariant, VariantInput
@@ -155,6 +156,12 @@ export const strategyGameFactory = <TBoard,>({
       if (!isHumanVsHumanGame) {
         recordResult(resolvedWinner === chosenRoleIndex ? 'win' : 'loss');
       }
+      trackEvent('game-finished', {
+        game: gameId,
+        mode,
+        variant: selectedVariantIndex,
+        ...(isHumanVsHumanGame ? {} : { result: resolvedWinner === chosenRoleIndex ? 'win' : 'loss' })
+      });
     };
 
     const canUndo = phase === 'play'

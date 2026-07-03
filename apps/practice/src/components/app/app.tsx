@@ -4,6 +4,7 @@ import { Overview } from '../overview/overview';
 import { ErrorPage } from '../error-page';
 import { LanguageProvider } from '../language';
 import { ThemeProvider } from '../theme';
+import { usePageviewTracking } from './use-pageview-tracking';
 
 /*
 Import all the games individually. Aim to keep abc ordering for easy navigation.
@@ -65,13 +66,17 @@ import { TriangularGridRopes } from '../games/triangular-grid-ropes/triangular-g
 import { TwelveSquares } from '../games/twelve-squares/twelve-squares';
 import { TwoTimesTwo } from '../games/two-times-two/two-times-two';
 
-const RootLayout = () => (
-  <ThemeProvider>
-    <LanguageProvider>
-      <Outlet />
-    </LanguageProvider>
-  </ThemeProvider>
-);
+const RootLayout = () => {
+  usePageviewTracking();
+
+  return (
+    <ThemeProvider>
+      <LanguageProvider>
+        <Outlet />
+      </LanguageProvider>
+    </ThemeProvider>
+  );
+};
 
 export const App = () => {
   const routes = [

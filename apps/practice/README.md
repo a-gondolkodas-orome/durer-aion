@@ -261,8 +261,7 @@ ahead](https://github.com/a-gondolkodas-orome/durer-jatekok/pull/213/changes/198
 - [optional] vitest for unit testing
 - github actions for CI/CD.
 - github pages as hosting
-- [goatcounter](https://agondolkodasorome.goatcounter.com/) as usage tracker
-  (Ildi has access)
+- [self-hosted umami](https://umami.durerinfo.hu) as usage tracker
 
 </details>
 
