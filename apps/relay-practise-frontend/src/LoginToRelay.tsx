@@ -1,5 +1,5 @@
 import { Stack } from '@mui/system';
-import SelectProblem from './SelectProblem';
+import SelectRelayRound from './SelectRound';
 import { useTranslation } from 'react-i18next';
 import { useTheme, alpha } from '@mui/material';
 
@@ -42,7 +42,7 @@ export function LoginToRelay() {
           <p>{t('login.relayPractiseDescription')}</p>
         </Stack>
         <Stack sx={{ mt: 4 }}>
-          <SelectProblem />
+          <SelectRelayRound />
         </Stack>
       </Stack>
     </Stack>

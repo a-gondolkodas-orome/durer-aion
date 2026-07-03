@@ -64,7 +64,15 @@
       "final": "{{num}}. döntő {{category}}"
     },
     "proceedButton": "Tovább",
-    "roundSelector": "Forduló:"
+    "roundSelector": "Forduló:",
+    "yearSelector": "Verseny sorszáma:",
+    "roundTypeSelector": "Forduló típusa:",
+    "categorySelector": "Kategória:",
+    "yearOption": "{{num}}.",
+    "roundType": {
+      "local": "Helyi",
+      "final": "Döntő"
+    }
   },
   "relay": {
     "endTable": {

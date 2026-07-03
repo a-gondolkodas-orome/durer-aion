@@ -66,7 +66,15 @@
       "final": "Final round #{{num}}, {{category}}"
     },
     "proceedButton": "Proceed",
-    "roundSelector": "Round:"
+    "roundSelector": "Round:",
+    "yearSelector": "Competition number:",
+    "roundTypeSelector": "Round type:",
+    "categorySelector": "Category:",
+    "yearOption": "#{{num}}",
+    "roundType": {
+      "local": "Local",
+      "final": "Final"
+    }
   },
   "relay": {
     "endTable": {
