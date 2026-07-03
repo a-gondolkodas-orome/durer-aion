@@ -19,12 +19,13 @@ export enum Category {
 interface TestListElement {
   local?: Category[],
   final?: Category[],
+  online?: Category[]
 }
-type RoundType = 'local' | 'final';
+type RoundType = 'local' | 'final' | 'online';
 
 // Join code (= teamName) of a test, e.g. "12_D_C+": year, final(D)/local(H) round, category
 export const relayTestCode = (yearIdx: number, round: RoundType, category: Category | string) =>
-  `${yearIdx + 1}_${round === 'final' ? 'D' : 'H'}_${category}`;
+  `${yearIdx + 1}_${round === 'final' ? 'D' : (round === 'online' ? 'O' : 'H')}_${category}`;
 
 export const availableRelayTests: TestListElement[] = [
     {final: [Category.B, Category.C, Category.D]},
@@ -44,7 +45,8 @@ export const availableRelayTests: TestListElement[] = [
     {},
     {},
     {},
-    {final: [Category.C, Category.D, Category.E]},
+    {},
+    {online: [Category.C, Category.D, Category.E]},
 ]
 
 export default function SelectRelayRound() {
@@ -65,7 +67,7 @@ export default function SelectRelayRound() {
     testHasCategory(availableRelayTests[yearIdx], roundType, cat)
       && hasProblemSet(relayTestCode(yearIdx, roundType, cat));
 
-  const roundTypes: RoundType[] = ['local', 'final'];
+  const roundTypes: RoundType[] = ['local', 'final', 'online'];
 
   const availableCategories: Category[] = Object.values(Category).filter(cat =>
     availableRelayTests.some((_test, idx) =>
