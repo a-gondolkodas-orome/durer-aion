@@ -97,6 +97,12 @@ export const gameList: GameList = {
     name: { hu: "Kő-papír-olló", en: "Rock-paper-scissors" },
     credit: { developedBy: ["Máté Lőrinc"] }
   },
+  FiveConnectedFields: {
+    year: { k: "XVI. (22/23)", v: "22/23" },
+    round: "döntő",
+    category: ["A"],
+    name: { hu: "Öt összekötött mező", en: "Five connected fields" }
+  },
   FiveFiveCard: {
     year: { k: "VII. (13/14)", v: "13/14" },
     round: "döntő",

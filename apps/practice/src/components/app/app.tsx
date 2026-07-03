@@ -25,6 +25,7 @@ import { Coin357 } from '../games/coin-3-piles/coin357';
 import { CubeColoring } from '../games/cube-coloring/cube-coloring';
 import { DigitSubtraction } from '../games/digit-subtraction/digit-subtraction';
 import { DominoesOnChessboard } from '../games/dominoes-on-chessboard/dominoes-on-chessboard';
+import { FiveConnectedFields } from '../games/five-connected-fields/five-connected-fields';
 import { FiveFiveCard } from '../games/five-five-card/five-five-card';
 import { FiveSquares } from '../games/five-squares/five-squares';
 import { FourPilesSpreadAhead } from '../games/pile-splitting-games/four-piles-spread-ahead/four-piles-spread-ahead';
@@ -91,6 +92,7 @@ export const App = () => {
     { path: '/game/CubeColoring', element: <CubeColoring /> },
     { path: '/game/DigitSubtraction', element: <DigitSubtraction /> },
     { path: '/game/DominoesOnChessboard', element: <DominoesOnChessboard />},
+    { path: '/game/FiveConnectedFields', element: <FiveConnectedFields /> },
     { path: '/game/FiveFiveCard', element: <FiveFiveCard /> },
     { path: '/game/FiveSquares', element: <FiveSquares /> },
     { path: '/game/FourPilesSpreadAhead', element: <FourPilesSpreadAhead /> },
