@@ -65,7 +65,6 @@
       "online": "{{num}}. internetes {{category}}"
     },
     "proceedButton": "Tovább",
-    "roundSelector": "Forduló:",
     "yearSelector": "Verseny sorszáma:",
     "roundTypeSelector": "Forduló típusa:",
     "categorySelector": "Kategória:",

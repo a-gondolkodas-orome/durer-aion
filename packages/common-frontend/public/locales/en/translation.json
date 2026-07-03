@@ -67,7 +67,6 @@
       "online": "Online round #{{num}}, {{category}}"
     },
     "proceedButton": "Proceed",
-    "roundSelector": "Round:",
     "yearSelector": "Competition number:",
     "roundTypeSelector": "Round type:",
     "categorySelector": "Category:",

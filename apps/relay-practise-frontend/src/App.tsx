@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import './App.css';
 import i18next from "i18next";
 import { useTranslation } from 'react-i18next';
-import { GameProvider, ClientRepoProvider, Header, Layout, Login, Relay, useTeamState, LoadTeamState } from 'common-frontend';
+import { GameProvider, ClientRepoProvider, Header, Layout, Relay, useTeamState, LoadTeamState } from 'common-frontend';
 import { OfflineClientRepository } from './client-repository';
 import { ThemeProvider } from '@mui/material/styles';
 import { Container } from "@mui/material";
@@ -32,9 +32,11 @@ function App() {
   const testTitle = (code: string) => {
     const [num, round, category] = code.split('_');
     const roundType = round === 'D' ? 'final' : round === 'O' ? 'online' : 'local';
+    // t('login.competitionType.local'), t('login.competitionType.final'), t('login.competitionType.online');
     return t(`login.competitionType.${roundType}`, { num, category });
   };
 
+  // t('header.titlePlain'), t('header.relayPractise');
   const titles = ['header.titlePlain', 'header.relayPractise'];
   if (teamState?.teamName) {
     titles.push(testTitle(teamState.teamName));

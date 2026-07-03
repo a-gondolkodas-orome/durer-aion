@@ -105,6 +105,7 @@ export default function SelectRelayRound() {
     setYear(event.target.value);
   };
 
+  // t('login.roundType.local'), t('login.roundType.final'), t('login.roundType.online');
   const categoryLabel = t('login.categorySelector');
   const roundLabel = t('login.roundTypeSelector');
   const yearLabel = t('login.yearSelector');
