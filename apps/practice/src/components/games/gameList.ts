@@ -55,6 +55,13 @@ export const gameList: GameList = {
     icon: "small-graph",
     name: { hu: "Ámor és Kupidó", en: "Cupid and Amor" }
   },
+  WaningStones: {
+    year: { k: "II. (08/09)", v: "08/09" },
+    round: "döntő",
+    category: ["C"],
+    icon: "piles",
+    name: { hu: "Apadó kupac", en: "Waning Stones" }
+  },
   DominoesOnChessboard: {
     year: { k: "III. (09/10)", v: "09/10" },
     round: "döntő",
