@@ -1,4 +1,4 @@
-import { availableRelayTests, Category } from "./SelectRound"
+import { availableRelayTests, Category, relayTestCode } from "./SelectRound"
 
 interface TestItem {
   year: number,
@@ -21,7 +21,7 @@ export const teamData: {
   category: string,
   join_code: string
 }[] = allTests.map(test => {
-  const teamname = `${test.year + 1}_${test.finalround ? 'D' : 'H'}_${test.category}`
+  const teamname = relayTestCode(test.year, test.finalround ? 'final' : 'local', test.category)
   return {
     teamname: teamname,
     category: test.category.toString(),

@@ -89,6 +89,7 @@
       "duplicate": "Ezt a választ már próbáltátok",
       "empty": "Nem írtál semmilyen választ!",
       "integer": "Egész számot kell írni",
+      "missingTest": "Ennek a feladatsornak ({{test}}) a feladatai még nem érhetőek el.",
       "range": "A megoldás 0 és 9999 között van",
       "type": "Számot kell írnod"
     },

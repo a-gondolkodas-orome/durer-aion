@@ -112,18 +112,12 @@ export class OfflineClientRepository implements ClientRepository {
     // return the joincode if it is in the teamData.ts file
 
     const i = teamData.findIndex(e => e.join_code === joinCode);
-    let pageState = "DISCLAIMER"
-    if (typeof localStorage !== "undefined") {
-      const teamStateString = localStorage.getItem(LOCAL_STORAGE_TEAMSTATE);
-      if (teamStateString !== null){
-        const teamState = JSON.parse(teamStateString);
-        pageState = teamState.pageState;
-      }
-    }
 
     if (i > -1) {
-      const i = teamData.findIndex(e => e.join_code === joinCode);
       const currentTeamData = teamData[i];
+      // There is no disclaimer/home page in this app: logging in to a test
+      // always starts from HOME so that startRelay() can run right away.
+      const pageState = "HOME";
       const teamState = {
         teamId: "1",
         joinCode: joinCode,

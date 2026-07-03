@@ -10,6 +10,7 @@ import { useLogin } from 'common-frontend';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { useStartRelay } from 'common-frontend';
+import { hasProblemSet } from './problems';
 
 export enum Category {
   A = 'A', B = 'B', C = 'C', D = 'D', E = 'E', Cp = 'C+', Dp = 'D+', Ep = 'E+'
@@ -17,9 +18,13 @@ export enum Category {
 
 interface TestListElement {
   local?: Category[],
-  final: Category[],
+  final?: Category[],
 }
 type RoundType = 'local' | 'final';
+
+// Join code (= teamName) of a test, e.g. "12_D_C+": year, final(D)/local(H) round, category
+export const relayTestCode = (yearIdx: number, round: RoundType, category: Category | string) =>
+  `${yearIdx + 1}_${round === 'final' ? 'D' : 'H'}_${category}`;
 
 export const availableRelayTests: TestListElement[] = [
     {final: [Category.B, Category.C, Category.D]},
@@ -34,6 +39,12 @@ export const availableRelayTests: TestListElement[] = [
     {local: [Category.A, Category.B], final: [Category.A, Category.B, Category.C, Category.Cp, Category.D, Category.Dp]},
     {local: [Category.A, Category.B], final: [Category.A, Category.B, Category.C, Category.Cp, Category.D, Category.Dp]},
     {local: [Category.A, Category.B], final: [Category.A, Category.B, Category.C, Category.D, Category.E, Category.Ep]},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {final: [Category.C, Category.D, Category.E]},
 ]
 
 export default function SelectRelayRound() {
@@ -49,24 +60,31 @@ export default function SelectRelayRound() {
   const testHasCategory = (test: TestListElement, round: RoundType, cat: Category) =>
     (round === 'local' ? test.local : test.final)?.includes(cat) ?? false;
 
+  // A test can only be offered if its problem set is already bundled with the app
+  const testIsPlayable = (yearIdx: number, roundType: RoundType, cat: Category) =>
+    testHasCategory(availableRelayTests[yearIdx], roundType, cat)
+      && hasProblemSet(relayTestCode(yearIdx, roundType, cat));
+
+  const roundTypes: RoundType[] = ['local', 'final'];
+
   const availableCategories: Category[] = Object.values(Category).filter(cat =>
-    availableRelayTests.some(test =>
-      testHasCategory(test, 'local', cat) || testHasCategory(test, 'final', cat)
+    availableRelayTests.some((_test, idx) =>
+      roundTypes.some(roundType => testIsPlayable(idx, roundType, cat))
     )
   );
 
   const availableRounds: RoundType[] =
     category === ''
       ? []
-      : (['local', 'final'] as RoundType[]).filter(roundType =>
-          availableRelayTests.some(test => testHasCategory(test, roundType, category as Category))
+      : roundTypes.filter(roundType =>
+          availableRelayTests.some((_test, idx) => testIsPlayable(idx, roundType, category as Category))
         );
 
   const availableYears: number[] =
     category === '' || round === ''
       ? []
-      : availableRelayTests.reduce<number[]>((years, test, idx) => {
-          if (testHasCategory(test, round as RoundType, category as Category)) years.push(idx);
+      : availableRelayTests.reduce<number[]>((years, _test, idx) => {
+          if (testIsPlayable(idx, round as RoundType, category as Category)) years.push(idx);
           return years;
         }, []);
 
@@ -92,16 +110,18 @@ export default function SelectRelayRound() {
   // Fit width to absolutely positioned input label
   const minWidthForLabel = (label: string) => `calc(${label.length}ch + 3em)`;
 
-  const handleProceed = () => {
+  const handleProceed = async () => {
     if (year === '' || round === '' || category === '') {
       enqueueSnackbar(t('login.error.noRound'), { variant: 'error' });
       return;
     }
-    const code = `${Number(year) + 1}_${round === 'final' ? 'D' : 'H'}_${category}`;
-    login(code).catch(err => {
-      enqueueSnackbar(err?.message, { variant: 'error' });
-    });
-    startRelay();
+    const code = relayTestCode(Number(year), round as RoundType, category);
+    try {
+      await login(code);
+      await startRelay();
+    } catch (err) {
+      enqueueSnackbar((err as Error)?.message, { variant: 'error' });
+    }
   };
 
   return (

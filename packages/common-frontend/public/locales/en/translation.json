@@ -92,6 +92,7 @@
       "duplicate": "You've already tried this guess",
       "empty": "You didn't give any answer!",
       "integer": "You must give an integer",
+      "missingTest": "The problems of this test ({{test}}) are not available yet.",
       "range": "The solution is between 0 and 9999",
       "type": "Answer must be a number"
     },

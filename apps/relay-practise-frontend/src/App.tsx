@@ -19,7 +19,6 @@ const theme = {
 
 function App() {
   const RelayClient = React.lazy(() => import('./ReactClient').then(module => ({ default: module.RelayClient })));
-  const StrategyClient = React.lazy(() => import('./ReactClient').then(module => ({ default: module.StrategyClient })));
   const teamState = useTeamState();
 
   useEffect(() => {
@@ -27,10 +26,9 @@ function App() {
   }, [])
 
   return (
-    <GameProvider 
+    <GameProvider
       value={{
         RelayClient: RelayClient,
-        StrategyClient: StrategyClient,
     }}>
       <ThemeProvider theme={theme}>
         <ClientRepoProvider 
