@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import './App.css';
 import i18next from "i18next";
+import { useTranslation } from 'react-i18next';
 import { GameProvider, ClientRepoProvider, Header, Layout, Login, Relay, useTeamState, LoadTeamState } from 'common-frontend';
 import { OfflineClientRepository } from './client-repository';
 import { ThemeProvider } from '@mui/material/styles';
@@ -20,10 +21,24 @@ const theme = {
 function App() {
   const RelayClient = React.lazy(() => import('./ReactClient').then(module => ({ default: module.RelayClient })));
   const teamState = useTeamState();
+  const { t } = useTranslation();
 
   useEffect(() => {
     i18next.changeLanguage(import.meta.env.VITE_LANGUAGE);
   }, [])
+
+  // The teamName is the join code of the selected test (`<num>_<H|D|O>_<category>`),
+  // shown in the header as a translated round name instead of the raw code
+  const testTitle = (code: string) => {
+    const [num, round, category] = code.split('_');
+    const roundType = round === 'D' ? 'final' : round === 'O' ? 'online' : 'local';
+    return t(`login.competitionType.${roundType}`, { num, category });
+  };
+
+  const titles = ['header.titlePlain', 'header.relayPractise'];
+  if (teamState?.teamName) {
+    titles.push(testTitle(teamState.teamName));
+  }
 
   return (
     <GameProvider
@@ -35,7 +50,7 @@ function App() {
           value={new OfflineClientRepository()}>
           <Layout>
             <LoadTeamState />
-            <Header teamName={teamState?.teamName ?? null} admin={true} titles={['header.titlePlain', 'header.relayPractise']}/>
+            <Header teamName={teamState?.teamName ?? null} admin={true} titles={titles}/>
             <Container
               sx={{
                 paddingLeft: {

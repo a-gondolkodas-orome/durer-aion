@@ -21,17 +21,14 @@ export function RelayClient({ teamName }: {
   const [missing, setMissing] = useState(false);
 
   useEffect(() => {
-    let cancelled = false;
     setProblems(null);
     setMissing(false);
     if (!teamName) {
       setMissing(true);
       return;
     }
-    loadProblemSet(teamName)
-      .then(problemSet => { if (!cancelled) setProblems(problemSet); })
-      .catch(() => { if (!cancelled) setMissing(true); });
-    return () => { cancelled = true; };
+    setProblems(loadProblemSet(teamName));
+    return;
   }, [teamName]);
 
   const ClientWithBot = useMemo(() => {

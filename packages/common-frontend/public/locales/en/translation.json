@@ -63,7 +63,8 @@
     "relayPractiseDescription": "You can try out yourselves with relay-type tasks from former competitions. Choose the desired set of tasks (by year & category), for which you'll have 90 minutes to complete.",
     "competitionType": {
       "local": "Local round #{{num}}, {{category}}",
-      "final": "Final round #{{num}}, {{category}}"
+      "final": "Final round #{{num}}, {{category}}",
+      "online": "Online round #{{num}}, {{category}}"
     },
     "proceedButton": "Proceed",
     "roundSelector": "Round:",

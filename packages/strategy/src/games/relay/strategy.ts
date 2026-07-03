@@ -6,6 +6,8 @@ export interface Problem {
   answer: number;
   points: number;
   url?: string;
+  help1?: string;
+  help2?: string;
 }
 
 interface RelayProblems {

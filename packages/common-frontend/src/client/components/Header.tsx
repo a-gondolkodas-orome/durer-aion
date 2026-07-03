@@ -7,6 +7,8 @@ import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { LanguageDropdown } from './Langswitcher';
 
+// titles[0] and titles[1] are translation keys for the two side titles;
+// titles[2] is an optional, already-translated text shown instead of the team name
 export function Header(props: { teamName: string | null, admin: boolean, titles?: string[] }) {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -67,7 +69,7 @@ export function Header(props: { teamName: string | null, admin: boolean, titles?
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
-                }}>{props.teamName}</Stack>
+                }}>{props.titles?.[2] ?? props.teamName}</Stack>
                 <Stack onClick={()=>{
                   logout();
                   if ( clientRepository.version === "OFFLINE") {
@@ -133,7 +135,7 @@ export function Header(props: { teamName: string | null, admin: boolean, titles?
                 paddingBottom: '20px',
                 display: 'flex',
                 alignItems: 'center'
-              }}>{props.teamName}</Stack>
+              }}>{props.titles?.[2] ?? props.teamName}</Stack>
               <Button onClick={()=>{
                 setMobileMenuOpen(false);
                 logout();
