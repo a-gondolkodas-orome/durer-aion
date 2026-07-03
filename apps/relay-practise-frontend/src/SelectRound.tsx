@@ -21,7 +21,7 @@ interface TestListElement {
   final?: Category[],
   online?: Category[]
 }
-type RoundType = 'local' | 'final' | 'online';
+export type RoundType = 'local' | 'final' | 'online';
 
 // Join code (= teamName) of a test, e.g. "12_D_C+": year, final(D)/local(H) round, category
 export const relayTestCode = (yearIdx: number, round: RoundType, category: Category | string) =>
@@ -60,7 +60,7 @@ export default function SelectRelayRound() {
   const startRelay = useStartRelay();
 
   const testHasCategory = (test: TestListElement, round: RoundType, cat: Category) =>
-    (round === 'local' ? test.local : test.final)?.includes(cat) ?? false;
+    test[round]?.includes(cat) ?? false;
 
   // A test can only be offered if its problem set is already bundled with the app
   const testIsPlayable = (yearIdx: number, roundType: RoundType, cat: Category) =>

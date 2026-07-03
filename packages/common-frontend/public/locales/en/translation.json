@@ -73,7 +73,8 @@
     "yearOption": "#{{num}}",
     "roundType": {
       "local": "Local",
-      "final": "Final"
+      "final": "Final",
+      "online": "Online"
     }
   },
   "relay": {

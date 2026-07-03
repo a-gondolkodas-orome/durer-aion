@@ -71,7 +71,8 @@
     "yearOption": "{{num}}.",
     "roundType": {
       "local": "Helyi",
-      "final": "Döntő"
+      "final": "Döntő",
+      "online": "Internetes"
     }
   },
   "relay": {

@@ -74,7 +74,7 @@ export function RelayEndTable(props: {allPoints: number, task: {max: number, got
                 {props.task.slice(0, 10).map((data)=>{
                     let currStyle = { backgroundColor: '#fff' };
                     if(data.got !== null){
-                      if(0 < data.max - data.got && data.max - data.got < 3) {
+                      if(data.max - data.got < 3) {
                         currStyle = { backgroundColor: pointColours[data.max - data.got] }
                       } else {
                         currStyle = { backgroundColor: pointColours[3] }
@@ -96,7 +96,7 @@ export function RelayEndTable(props: {allPoints: number, task: {max: number, got
                 {props.task.slice(10).map((data, _idx)=>{
                     let currStyle = { backgroundColor: '#fff' };
                     if(data.got !== null){
-                      if(0 < data.max - data.got && data.max - data.got < 3) {
+                      if(data.max - data.got < 3) {
                         currStyle = { backgroundColor: pointColours[data.max - data.got] }
                       } else {
                         currStyle = { backgroundColor: pointColours[3] }
@@ -201,7 +201,7 @@ export function RelayEndTableData(props: {allPoints: number, task: {max: number,
                 {props.task.slice(0, 10).map((data, _idx)=>{
                     let currStyle = { backgroundColor: '#fff' };
                     if(data.got !== null){
-                      if(0 < data.max - data.got && data.max - data.got < 3) {
+                      if(data.max - data.got < 3) {
                         currStyle = { backgroundColor: pointColours[data.max - data.got] }
                       } else {
                         currStyle = { backgroundColor: pointColours[3] }
@@ -229,7 +229,7 @@ export function RelayEndTableData(props: {allPoints: number, task: {max: number,
                 {props.task.slice(10).map((data, _idx)=>{
                     let currStyle = { backgroundColor: '#fff' };
                     if(data.got !== null){
-                      if(0 < data.max - data.got && data.max - data.got < 3) {
+                      if(data.max - data.got < 3) {
                         currStyle = { backgroundColor: pointColours[data.max - data.got] }
                       } else {
                         currStyle = { backgroundColor: pointColours[3] }
