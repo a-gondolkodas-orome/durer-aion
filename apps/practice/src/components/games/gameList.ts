@@ -64,6 +64,13 @@ export const gameList: GameList = {
     title: { hu: "Sakktáblára dominók", en: "Cram (Dominoes on a chessboard)" },
     credit: { developedBy: ["Czeller Ildikó"] }
   },
+  IncrementOrDouble: {
+    year: { k: "IV. (10/11)", v: "10/11" },
+    round: "döntő",
+    category: ["B"],
+    icon: "number",
+    name: { hu: "x+1, 2x 100-ig", en: "x+1, 2x up to 100" }
+  },
   PlusOneTwoThree: {
     year: { k: "V. (11/12)", v: "11/12" },
     round: "döntő",

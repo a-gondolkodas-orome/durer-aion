@@ -32,6 +32,7 @@ import { FiveSquares } from '../games/five-squares/five-squares';
 import { FourConnectedFields } from '../games/four-connected-fields/four-connected-fields';
 import { FourPilesSpreadAhead } from '../games/pile-splitting-games/four-piles-spread-ahead/four-piles-spread-ahead';
 import { HunyadiAndTheJanissaries } from '../games/hunyadi-and-the-janissaries/hunyadi-and-the-janissaries';
+import { IncrementOrDouble } from '../games/increment-or-double/increment-or-double';
 import { MagicBox } from '../games/magic-box/magic-box';
 import { MagicBoxB } from '../games/magic-box-b/magic-box-b';
 import { NumberCovering8, NumberCovering10 } from '../games/number-covering/number-covering';
@@ -104,6 +105,7 @@ export const App = () => {
     { path: '/game/FourConnectedFields', element: <FourConnectedFields /> },
     { path: '/game/FourPilesSpreadAhead', element: <FourPilesSpreadAhead /> },
     { path: '/game/HunyadiAndTheJanissaries', element: <HunyadiAndTheJanissaries /> },
+    { path: '/game/IncrementOrDouble', element: <IncrementOrDouble /> },
     { path: '/game/MagicBox', element: <MagicBox /> },
     { path: '/game/MagicBoxB', element: <MagicBoxB /> },
     { path: '/game/NumberCovering10', element: <NumberCovering10 /> },
