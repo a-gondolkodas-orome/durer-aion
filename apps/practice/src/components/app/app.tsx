@@ -28,6 +28,7 @@ import { DominoesOnChessboard } from '../games/dominoes-on-chessboard/dominoes-o
 import { FiveConnectedFields } from '../games/five-connected-fields/five-connected-fields';
 import { FiveFiveCard } from '../games/five-five-card/five-five-card';
 import { FiveSquares } from '../games/five-squares/five-squares';
+import { FourConnectedFields } from '../games/four-connected-fields/four-connected-fields';
 import { FourPilesSpreadAhead } from '../games/pile-splitting-games/four-piles-spread-ahead/four-piles-spread-ahead';
 import { HunyadiAndTheJanissaries } from '../games/hunyadi-and-the-janissaries/hunyadi-and-the-janissaries';
 import { MagicBox } from '../games/magic-box/magic-box';
@@ -95,6 +96,7 @@ export const App = () => {
     { path: '/game/FiveConnectedFields', element: <FiveConnectedFields /> },
     { path: '/game/FiveFiveCard', element: <FiveFiveCard /> },
     { path: '/game/FiveSquares', element: <FiveSquares /> },
+    { path: '/game/FourConnectedFields', element: <FourConnectedFields /> },
     { path: '/game/FourPilesSpreadAhead', element: <FourPilesSpreadAhead /> },
     { path: '/game/HunyadiAndTheJanissaries', element: <HunyadiAndTheJanissaries /> },
     { path: '/game/MagicBox', element: <MagicBox /> },

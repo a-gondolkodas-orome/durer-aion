@@ -1,0 +1,66 @@
+import { strategyGameFactory, type Ctx, type Events } from "../../game-factory";
+import { type Board, hasAnyMove } from "./helpers";
+import { randomBotStrategy, smartBotStrategy } from "./bot-strategy";
+import { BoardClient } from "./board-client";
+
+export type { Board };
+
+const moves = {
+  placeCoin: (board: Board, { ctx, events }: { ctx: Ctx; events: Events }, node: number) => {
+    const nextBoard = board.slice();
+    nextBoard[node] += 1;
+    events.endTurn();
+    // The player who places the last coin wins: the game ends when no field is
+    // empty and no line has equal endpoints, i.e. when the mover just made all
+    // further moves impossible.
+    if (!hasAnyMove(nextBoard)) {
+      events.endGame(ctx.currentPlayer);
+    }
+    return { nextBoard };
+  }
+};
+
+const rule = {
+  hu: <>
+    Az ábrán négy mező látható, melyeket vonalak kötnek össze. Kezdetben mind a
+    négy mező üres. Egy lépésben a soron lévő játékos vagy választ egy üres mezőt,
+    és rak rá egy korongot, vagy kiválaszt egy vonalat, melynek a két végpontján
+    ugyanannyi korong van, és az egyik végpontjára rak még egy korongot. A játék
+    akkor ér véget, ha nincs üres mező és nincs olyan vonal, aminek a két végén
+    ugyanannyi korong van. Az a játékos nyer, aki az utolsó korongot lerakta.
+  </>,
+  en: <>
+    The diagram shows four fields joined by lines. Every field starts empty. On a
+    turn the current player either picks an empty field and places a coin on it,
+    or picks a line whose two endpoints hold the same number of coins and places
+    one more coin on one of those endpoints. The game ends when no field is empty
+    and no line has an equal number of coins at both ends. The player who placed
+    the last coin wins.
+  </>
+};
+
+export const FourConnectedFields = strategyGameFactory({
+  presentation: {
+    rule,
+    getPlayerStepDescription: () => ({
+      hu: "Kattints egy üres mezőre, vagy egy olyanra, amelynek van azonos számú koronggal " +
+        "rendelkező szomszédja, és tegyél rá egy korongot.",
+      en: "Click an empty field, or a field with a neighbour holding the same number of coins, to place a coin on it."
+    })
+  },
+  BoardClient,
+  gameplay: { moves },
+  variants: [
+    {
+      botStrategy: randomBotStrategy,
+      label: { hu: "Teszt 🤖", en: "Test 🤖" }
+    },
+    {
+      // smart bot: verified as optimal
+      botStrategy: smartBotStrategy,
+      generateStartBoard: (): Board => [0, 0, 0, 0],
+      label: { hu: "Okos 🤖", en: "Smart 🤖" },
+      isDefault: true
+    }
+  ]
+});

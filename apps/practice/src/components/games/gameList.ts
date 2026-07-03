@@ -103,6 +103,12 @@ export const gameList: GameList = {
     category: ["A"],
     name: { hu: "Öt összekötött mező", en: "Five connected fields" }
   },
+  FourConnectedFields: {
+    year: { k: "XVI. (22/23)", v: "22/23" },
+    round: "döntő",
+    category: ["B"],
+    name: { hu: "Négy összekötött mező", en: "Four connected fields" }
+  },
   FiveFiveCard: {
     year: { k: "VII. (13/14)", v: "13/14" },
     round: "döntő",
