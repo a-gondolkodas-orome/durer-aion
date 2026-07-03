@@ -82,6 +82,7 @@
     "endTable": {
       "all": "Total points",
       "back": "Back to competition",
+      "selectOtherRound": "Select other round",
       "point": "Points",
       "reminder": "Don't forget to play with the strategy game too if you haven't done yet!",
       "task": "Task",

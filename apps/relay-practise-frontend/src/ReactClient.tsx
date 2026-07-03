@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { ComponentProps, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { GameRelay } from "game";
 import { relayStrategy, Problem } from "strategy";
@@ -37,9 +37,16 @@ export function RelayClient({ teamName }: {
     }
     // The game name ends up in the localStorage key, so every test keeps its own saved match
     const gameName = `relay_${teamName.replace(/\+/g, 'p').toLowerCase()}`;
+    // The board gets the problem set's max points (so the end table shows all
+    // of its tasks) and a button leading back to the round selector
+    const Board = (props: ComponentProps<typeof InProgressRelay>) =>
+      <InProgressRelay {...props}
+        maxPointsList={problems.map(problem => problem.points)}
+        selectRoundOnEnd
+      />;
     return ClientFactoryRelay(
       { ...GameRelay, name: gameName },
-      InProgressRelay,
+      Board,
       relayStrategy(problems),
       description,
     ).ClientWithBot;

@@ -80,6 +80,7 @@
     "endTable": {
       "all": "Összpontszám",
       "back": "Vissza a versenyhez",
+      "selectOtherRound": "Fordulóválasztás",
       "point": "Pontszám",
       "reminder": "Ne feledkezzetek meg a stratégiás játékról, ha azzal még nem játszottatok!",
       "task": "Feladat",
