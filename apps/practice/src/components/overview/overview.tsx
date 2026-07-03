@@ -1,31 +1,35 @@
 import { useState } from 'react';
-import { gameList, type GameEntry, type Category } from '../games/gameList';
-import { every, orderBy } from 'lodash';
-import { Link } from 'react-router';
-import { useTranslation, LanguageSelector } from '../language';
+import { gameList, type Category } from '../games/gameList';
+import { useTranslation, LanguageSelector, type I18nNode } from '../language';
 import { ThemeSwitcher } from '../theme';
+import { FeaturedStrip } from './featured-strip';
+import { CategorySection } from './category-section';
+import {
+  sectionOrder,
+  defaultOpenSections,
+  getFeaturedGames,
+  groupBySection,
+  filterByCategories,
+  orderByCategoryThenYear,
+  type SectionKey
+} from './selection';
+
+const sectionTitles: Record<SectionKey, I18nNode> = {
+  AB:  { hu: '5-8. osztályosoknak (A-B kategória)', en: 'For grades 5–8 (A–B category)' },
+  CDE: { hu: '9-12. osztályosoknak (C-D-E kategória)', en: 'For grades 9–12 (C-D-E category)' }
+};
 
 export const Overview = () => {
-  const { t } = useTranslation();
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
+  const isFiltering = selectedCategories.length > 0;
 
-  const shouldShow = (game: GameEntry) => {
-    const noCategoryMatch = selectedCategories.length > 0
-      && every(game.category, c => !selectedCategories.includes(c));
-    if (noCategoryMatch) return false;
-    return true;
-  };
+  const allIds = Object.keys(gameList);
+  const visibleIds = filterByCategories(allIds, selectedCategories, gameList);
+  const groups = groupBySection(visibleIds, gameList);
 
-  // order by category and then by year regardless of order in gameList.ts
-  const gamesToShow = orderBy(
-    Object.keys(gameList).filter(id => shouldShow(gameList[id]))
-      .sort((a, b) =>
-        gameList[a].category[0] > gameList[b].category[0]
-        ? 1
-        : (gameList[a].category[0] < gameList[b].category[0] ? -1 : 0)
-      ),
-    a => gameList[a].year.v,
-    'desc'
+  const featuredIds = orderByCategoryThenYear(
+    filterByCategories(getFeaturedGames(gameList), selectedCategories, gameList),
+    gameList
   );
 
   return <main className="p-2">
@@ -33,20 +37,20 @@ export const Overview = () => {
     <div className="border-t mt-2 pt-3 flex flex-wrap items-center gap-1 mb-2">
       <CategoryFilter selected={selectedCategories} onChange={setSelectedCategories} />
     </div>
-    <h2 className="my-4 text-center hidden sm:block">
-      {t({ hu: '5-8. osztályosoknak (A-B kategória)', en: 'For grades 5–8 (A–B category)' })}
-    </h2>
-    <div className="flex flex-wrap gap-2 sm:gap-4 justify-center">
-      {gamesToShow.filter(id => gameList[id].category[0] <= 'B')
-        .map(id => <Game key={id} gameId={id} gameProps={gameList[id]} />)}
-    </div>
-    <h2 className="my-4 text-center hidden sm:block">
-      {t({ hu: '9-12. osztályosoknak (C-D-E kategória)', en: 'For grades 9–12 (C–D–E category)' })}
-    </h2>
-    <div className="flex flex-wrap gap-2 sm:gap-4 justify-center">
-      {gamesToShow.filter(id => gameList[id].category[0] > 'B')
-        .map(id => <Game key={id} gameId={id} gameProps={gameList[id]} />)}
-    </div>
+
+    <FeaturedStrip gameIds={featuredIds} />
+
+    {sectionOrder.map(section => (
+      <CategorySection
+        key={section}
+        title={sectionTitles[section]}
+        gameIds={orderByCategoryThenYear(groups[section], gameList)}
+        defaultOpen={defaultOpenSections.includes(section)}
+        forceOpen={isFiltering}
+        storageKey={section}
+      />
+    ))}
+
     <footer className="md:hidden flex justify-end items-center gap-3 mt-4 px-2">
       <ThemeSwitcher />
       <LanguageSelector />
@@ -124,46 +128,4 @@ const OverviewHeader = () => {
       })}
     </div>
   </>;
-};
-
-const categoryColorClass: Record<Category, string> = {
-  'A':  'bg-green-200 dark:bg-green-700',
-  'B':  'bg-teal-300 dark:bg-teal-700',
-  'C':  'bg-blue-300 dark:bg-blue-700',
-  'D':  'bg-blue-400 dark:bg-blue-600',
-  'E':  'bg-blue-600 text-white',
-  'E+': 'bg-blue-800 text-white'
-};
-
-const chipBase = 'rounded-full drop-shadow-sm px-2 py-0.5 whitespace-nowrap';
-
-const Game = ({ gameId, gameProps }: { gameId: string; gameProps: GameEntry }) => {
-  const { t } = useTranslation();
-
-  const round = gameProps.round === 'döntő'
-    ? t({ hu: 'döntő', en: 'final' })
-    : gameProps.round;
-
-  const categoryColor = categoryColorClass[gameProps.category[0]];
-
-  return <Link
-    to={`/game/${gameId}`}
-    data-testid="game-card"
-    className={`
-      rounded-lg border p-1 sm:p-2 max-w-[20ch] sm:max-w-[32ch] w-full flex flex-col
-      cursor-pointer hocus:bg-blue-50 dark:hocus:bg-blue-950 hocus:border-blue-400
-      no-underline text-inherit
-    `}
-  >
-    <h2 className="mb-2 sm:mb-4 text-base sm:text-xl text-center">
-      {t(gameProps.name)}
-    </h2>
-    <div className="grow"></div>
-    <div className="flex flex-wrap items-baseline gap-1 text-xs">
-      <span className={`${chipBase} bg-surface-elevated`} title={gameProps.year.k}>{gameProps.year.v}</span>
-      <span className={`${chipBase} bg-surface-elevated`}>{round}</span>
-      <span className={`${chipBase} ${categoryColor}`}>{gameProps.category.join(', ')}</span>
-      <span className="ml-auto" aria-hidden="true">→</span>
-    </div>
-  </Link>;
 };

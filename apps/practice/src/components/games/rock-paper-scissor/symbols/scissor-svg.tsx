@@ -1,6 +1,9 @@
-export const ScissorSvg = () => {
+import type { SVGProps } from 'react';
+
+export const ScissorSvg = (props: SVGProps<SVGSVGElement>) => {
   return <svg
     viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+    {...props}
   >
     <path
       d="M16.4013 20.5L6 2M22 19C22 20.6569 20.6569 22 19 22C17.3431 22 16 20.6569 16 19C16 17.3431 17.3431 16 19 16C20.6569 16 22 17.3431 22 19Z"
