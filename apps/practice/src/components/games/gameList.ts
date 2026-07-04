@@ -438,7 +438,7 @@ export const gameList: GameList = {
     category: ["A"],
     icon: "cards",
     name: { hu: "Tolvajnál átlag (1-7)", en: "Thief's mean (1–7)" },
-    credit: { developedBy: ["Turu Tamás"] }
+    credit: { developedBy: ["Turu Tamás"], suggestedBy: ["Győrffi Ádám György"] }
   },
   ThiefSheriffMean9: {
     year: { k: "XVIII. (24/25)", v: "24/25" },
@@ -446,7 +446,7 @@ export const gameList: GameList = {
     category: ["B"],
     icon: "cards",
     name: { hu: "Tolvajnál átlag (1-9)", en: "Thief's mean (1–9)" },
-    credit: { developedBy: ["Czeller Ildikó", "Turu Tamás"] }
+    credit: { developedBy: ["Czeller Ildikó", "Turu Tamás"], suggestedBy: ["Győrffi Ádám György"] }
   },
   ChessKnight: {
     year: { k: "XVIII. (24/25)", v: "24/25" },
