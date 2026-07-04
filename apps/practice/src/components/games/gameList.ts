@@ -71,6 +71,13 @@ export const gameList: GameList = {
     title: { hu: "Sakktáblára dominók", en: "Cram (Dominoes on a chessboard)" },
     credit: { developedBy: ["Czeller Ildikó"] }
   },
+  PolynomialBuilding: {
+    year: { k: "III. (09/10)", v: "09/10" },
+    round: "döntő",
+    category: ["C"],
+    icon: "number",
+    name: { hu: "Polinomépítés", en: "Building a polynomial" }
+  },
   IncrementOrDouble: {
     year: { k: "IV. (10/11)", v: "10/11" },
     round: "döntő",
