@@ -17,7 +17,9 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 
   const isDisabled = ({ pileId, pieceId }: Piece) => {
     if (!ctx.isClientMoveAllowed) return true;
-    return pieceId % 2 === 0 || (pieceId > board[pileId] - 1);
+    // Clicking piece `pieceId` removes it and everything above it (from the top),
+    // i.e. `board[pileId] - pieceId` pieces, which must be even and at least 2.
+    return (board[pileId] - pieceId) % 2 !== 0 || pieceId > board[pileId] - 2;
   };
 
   const hoverPiece = (piece: HoveredPiece) => {
@@ -32,21 +34,24 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const clickPiece = ({ pileId, pieceId }: Piece) => {
     if (isDisabled({ pileId, pieceId })) return;
 
-    moves.moveHalvedPieces(board, { pileId, pieceCount: pieceId + 1 });
+    moves.moveHalvedPieces(board, { pileId, pieceCount: board[pileId] - pieceId });
     setHoveredPiece(null);
   };
+
+  // The pieces removed by clicking the hovered piece: it and everything above it.
+  const removedCount = () => (validHoveredPiece ? board[validHoveredPiece.pileId] - validHoveredPiece.pieceId : 0);
 
   const toBeRemoved = ({ pileId, pieceId }: Piece) => {
     if (validHoveredPiece === null) return false;
     if (pileId !== validHoveredPiece.pileId) return false;
-    if (pieceId > validHoveredPiece.pieceId) return false;
+    if (pieceId < validHoveredPiece.pieceId) return false;
     return true;
   };
 
   const toAppear = ({ pileId, pieceId }: Piece) => {
     if (validHoveredPiece === null) return false;
     if(pileId === validHoveredPiece.pileId) return false;
-    if(pieceId > board[pileId] + (validHoveredPiece.pieceId + 1) / 2 - 1) return false;
+    if(pieceId > board[pileId] + removedCount() / 2 - 1) return false;
     return true;
   };
 
@@ -57,10 +62,10 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     if (!validHoveredPiece) return pieceCountInPile;
 
     if (validHoveredPiece.pileId !== pileId) {
-      return `${pieceCountInPile} → ${pieceCountInPile + (validHoveredPiece.pieceId+1)/2 }`;
+      return `${pieceCountInPile} → ${pieceCountInPile + removedCount() / 2 }`;
     }
 
-    return `${pieceCountInPile} → ${pieceCountInPile - validHoveredPiece.pieceId - 1}`;
+    return `${pieceCountInPile} → ${pieceCountInPile - removedCount()}`;
   };
 
   return (
@@ -102,7 +107,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             >
               {!isDisabled({ pileId, pieceId }) &&
               <p className="text-sm" style={{ transform: 'scaleY(-1)' }}>
-                -{pieceId + 1};+{(pieceId + 1) / 2}
+                -{board[pileId] - pieceId};+{(board[pileId] - pieceId) / 2}
               </p>}
             </button>
           ))}
