@@ -66,6 +66,7 @@ import { SuperstitiousCounting } from '../games/superstitious-counting/superstit
 import { Take1OrHalve } from '../games/take-1-or-halve/take-1-or-halve';
 import { TakePowerOfTwo } from '../games/take-power-of-two/take-power-of-two';
 import { TenCoins } from '../games/ten-coins/ten-coins';
+import { TenCoinsD } from '../games/ten-coins-d/ten-coins-d';
 import { TenDigitNumber } from '../games/ten-digit-number/ten-digit-number';
 import { ThiefSheriffMean7 } from '../games/thief-sheriff-mean/thief-sheriff-mean-7/thief-sheriff-mean-7';
 import { ThiefSheriffMean9 } from '../games/thief-sheriff-mean/thief-sheriff-mean-9/thief-sheriff-mean-9';
@@ -151,6 +152,7 @@ export const App = () => {
     { path: '/game/Take1OrHalve', element: <Take1OrHalve /> },
     { path: '/game/TakePowerOfTwo', element: <TakePowerOfTwo />},
     { path: '/game/TenCoins', element: <TenCoins /> },
+    { path: '/game/TenCoinsD', element: <TenCoinsD /> },
     { path: '/game/TenDigitNumber', element: <TenDigitNumber /> },
     { path: '/game/TenDiscs', element: <TenDiscs />},
     { path: '/game/ThiefSheriffMean', element: <ThiefSheriffMean7 />},
