@@ -129,6 +129,13 @@ export const gameList: GameList = {
     icon: "number",
     name: { hu: "Prímesen nullára", en: "Primely to Zero" }
   },
+  DoublingReduction: {
+    year: { k: "VI. (12/13)", v: "12/13" },
+    round: "döntő",
+    category: ["C"],
+    icon: "piles",
+    name: { hu: "Duplázva csökkentés", en: "Doubling reduction" }
+  },
   HunyadiAndTheJanissaries: {
     year: { k: "VI. (12/13)", v: "12/13" },
     round: "döntő",
