@@ -549,6 +549,13 @@ export const gameList: GameList = {
     icon: "piles",
     name: { hu: "Két kupacból elvétel", en: "Take from two piles" }
   },
+  SixFieldsCircle: {
+    year: { k: "XIX. (25/26)", v: "25/26" },
+    round: "döntő",
+    category: ["D", "E"],
+    icon: "small-graph",
+    name: { hu: "6 mező körben", en: "Six fields on a circle" }
+  },
   RemoveDivisorMultiple: {
     year: { k: "XIX. (25/26)", v: "25/26" },
     round: "online",

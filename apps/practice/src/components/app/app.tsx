@@ -58,6 +58,7 @@ import { RookToCorner } from '../games/rook-to-corner/rook-to-corner';
 import { SharkChase4 } from '../games/shark-chase/shark-4-by-4/shark-chase';
 import { SharkChase5 } from '../games/shark-chase/shark-5-by-5/shark-chase';
 import { SixDiscs, TenDiscs } from '../games/discs-turn-or-remove/discs-turn-or-remove';
+import { SixFieldsCircle } from '../games/six-fields-circle/six-fields-circle';
 import {
   StonesRemoveOneNotTwiceFromLeft
 } from '../games/stones-remove-one-not-twice-from-left/stones-remove-one-not-twice-from-left';
@@ -143,6 +144,7 @@ export const App = () => {
     { path: '/game/SharkChase4', element: <SharkChase4 />},
     { path: '/game/SharkChase5', element: <SharkChase5 />},
     { path: '/game/SixDiscs', element: <SixDiscs />},
+    { path: '/game/SixFieldsCircle', element: <SixFieldsCircle />},
     { path: '/game/StonesRemoveOneNotTwiceFromLeft', element: <StonesRemoveOneNotTwiceFromLeft />},
     { path: '/game/SuperstitiousCounting', element: <SuperstitiousCounting /> },
     { path: '/game/Take1OrHalve', element: <Take1OrHalve /> },
