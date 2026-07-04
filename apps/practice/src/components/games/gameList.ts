@@ -273,6 +273,13 @@ export const gameList: GameList = {
     name: { hu: "Számok lefedése 1-től 10-ig", en: "Covering numbers 1 to 10" },
     credit: { developedBy: ["Hajós Balázs"] }
   },
+  RemoveRowOrColumn: {
+    year: { k: "XI. (17/18)", v: "17/18" },
+    round: "döntő",
+    category: ["C"],
+    icon: "board",
+    name: { hu: "Sor vagy oszlop levétele", en: "Remove a row or column" }
+  },
   TicTacToeDoubleStart: {
     year: { k: "XII. (18/19)", v: "18/19" },
     round: "döntő",

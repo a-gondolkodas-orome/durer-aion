@@ -19,7 +19,7 @@ const makeBoard = (level0Values, target, opts: { sortedInitial? } = {}): Board =
 };
 
 const makeMoveCapture = () => {
-  const captured = [] as any[];
+  const captured: { levelIdx: number; indices: number[] }[] = [];
   return {
     moves: {
       combineTwo: (board: Board, arg) => {

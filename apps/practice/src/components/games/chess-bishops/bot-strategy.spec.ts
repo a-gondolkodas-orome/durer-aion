@@ -1,4 +1,3 @@
-import { vi } from 'vitest';
 import lodash from 'lodash';
 import { getOptimalSmartBotMove } from './bot-strategy';
 import { generateStartBoard, BISHOP, markForbiddenFields } from './helpers'

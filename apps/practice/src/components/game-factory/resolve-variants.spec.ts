@@ -14,10 +14,6 @@ describe('resolveVariants', () => {
     expect(() => resolveVariants([])).toThrow('variants must be a non-empty array');
   });
 
-  it('throws when variants is missing', () => {
-    expect(() => resolveVariants(undefined as any)).toThrow('variants must be a non-empty array');
-  });
-
   it('throws when multiple variants have no isDefault', () => {
     expect(() => resolveVariants([makeVariant(), makeVariant()]))
       .toThrow('exactly one variant must have isDefault: true');

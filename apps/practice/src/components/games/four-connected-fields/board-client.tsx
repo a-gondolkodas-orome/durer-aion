@@ -60,7 +60,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               r="11%"
               className={
                 isClickable(node)
-                  ? "fill-slate-50 dark:fill-slate-500 hocus:fill-sky-200 dark:hocus:fill-sky-600"
+                  ? "fill-slate-50 dark:fill-slate-500 hocus:fill-blue-200 dark:hocus:fill-blue-600"
                   : "fill-slate-300 dark:fill-slate-800"
               }
             />

@@ -119,9 +119,31 @@ Always pass the current `board` as first arg when chaining moves within a turn.
 - Mobile-friendly and keyboard-navigable
 - AI appears to "think" in multi-move turns (use `setTimeout`)
 
+### Bot / variant conventions
+
+These are deliberate design choices — treat them as expected, don't "fix" them:
+
+- **Test bots carry no `notAlwaysOptimal` flag.** Being easy to beat is the whole
+  point of a "Test" bot. The `notAlwaysOptimal` flag (which renders the ⓘ marker
+  in `game-controls.tsx`) is only for a *smart/optimal* bot that in a few
+  positions may fail to punish a mistake.
+- **The "Teszt / Test" variant name is intentional** — it means "test your
+  understanding of the rules before a real game", matching competition usage. Do
+  not rename it to "Easy".
+- **A role that always wins regardless of the start board is acceptable** and does
+  not violate the ~50/50 win-probability guideline above.
+
 ## Dark mode
 
 The site supports dark mode. Use `dark:` Tailwind variants for dark-mode-specific overrides. For card/panel backgrounds, prefer `bg-surface-elevated` (a custom token) over raw color classes — it adapts automatically to both light and dark themes.
+
+## Styling / colours
+
+Keep styling simple and consistent. Use plain Tailwind colour names — `blue`,
+`red`, `green`, `slate` — rather than the fancy variants (`sky`, `rose`,
+`emerald`, etc.). Only reach for a less common colour when there is a real
+reason, such as matching an existing element. Don't introduce colour variety
+for its own sake.
 
 ## Internationalisation (i18n)
 

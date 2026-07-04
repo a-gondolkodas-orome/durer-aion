@@ -1,4 +1,3 @@
-import { vi } from 'vitest';
 import type { Events } from './components/game-factory';
 
 // Mock `events` for testing move functions. Each handler is a spy, so tests can

@@ -8,8 +8,8 @@ const VERTEX_COORDS = Array.from({ length: 6 }, (_, i) => {
 });
 
 const ownerStroke = (owner: number | null): string => {
-  if (owner === 0) return 'stroke-rose-500';
-  if (owner === 1) return 'stroke-sky-500';
+  if (owner === 0) return 'stroke-red-500';
+  if (owner === 1) return 'stroke-blue-500';
   return 'stroke-stone-300 dark:stroke-stone-600';
 };
 
@@ -25,7 +25,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const winningEdges =
     ctx.winnerIndex !== null ? findWinningTriangle(board, ctx.winnerIndex) : null;
 
-  const hoverStroke = ctx.currentPlayer === 0 ? 'hover:stroke-rose-500/50' : 'hover:stroke-sky-500/50';
+  const hoverStroke = ctx.currentPlayer === 0 ? 'hover:stroke-red-500/50' : 'hover:stroke-blue-500/50';
 
   return (
     <GameBoard>

@@ -50,6 +50,7 @@ import { PolynomialBuilding } from '../games/polynomial-building/polynomial-buil
 import { PrimeExponentials } from '../games/prime-exponentials/prime-exponentials';
 import { PrimelyToZero } from '../games/primely-to-zero/primely-to-zero';
 import { RemoveDivisorMultiple } from '../games/remove-divisor-multiple/remove-divisor-multiple';
+import { RemoveRowOrColumn } from '../games/remove-row-or-column/remove-row-or-column';
 import { RockPaperScissor } from '../games/rock-paper-scissor/rock-paper-scissor';
 import { SharkChase4 } from '../games/shark-chase/shark-4-by-4/shark-chase';
 import { SharkChase5 } from '../games/shark-chase/shark-5-by-5/shark-chase';
@@ -130,6 +131,7 @@ export const App = () => {
     { path: '/game/PrimeExponentials', element: <PrimeExponentials />},
     { path: '/game/PrimelyToZero', element: <PrimelyToZero />},
     { path: '/game/RemoveDivisorMultiple', element: <RemoveDivisorMultiple />},
+    { path: '/game/RemoveRowOrColumn', element: <RemoveRowOrColumn />},
     { path: '/game/rockPaperScissor', element: <RockPaperScissor /> },
     { path: '/game/SharkChase4', element: <SharkChase4 />},
     { path: '/game/SharkChase5', element: <SharkChase5 />},
