@@ -420,6 +420,13 @@ export const gameList: GameList = {
     name: { hu: "Latin-négyzet kitöltés", en: "Filling a Latin square" },
     credit: { suggestedBy: ["Nagy Kartal"] }
   },
+  TenCoins: {
+    year: { k: "XVI. (22/23)", v: "22/23" },
+    round: "online",
+    category: ["C"],
+    icon: "coins",
+    name: { hu: "10 érme", en: "10 coins" }
+  },
   AddReduceDouble: {
     year: { k: "XVI. (22/23)", v: "22/23" },
     round: "döntő",
