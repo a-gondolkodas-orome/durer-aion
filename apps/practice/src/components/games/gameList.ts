@@ -297,6 +297,13 @@ export const gameList: GameList = {
     name: { hu: "3x3-as antiamőba", en: "3×3 anti-tic-tac-toe" },
     credit: { developedBy: ["Czeller Ildikó"] }
   },
+  Dominoes4x4: {
+    year: { k: "XII. (18/19)", v: "18/19" },
+    round: "döntő",
+    category: ["C", "D"],
+    icon: "dominoes",
+    name: { hu: "Álló és fekvő dominók", en: "Standing and lying dominoes" }
+  },
   TwoTimesTwo: {
     year: { k: "XIII.(19/20)", v: "19/20" },
     round: "döntő",
