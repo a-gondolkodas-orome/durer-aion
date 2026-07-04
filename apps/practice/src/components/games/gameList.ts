@@ -405,6 +405,14 @@ export const gameList: GameList = {
     title: { hu: "Békés kacsák a 4 × 7-es sakktáblán", en: "Peaceful ducks on the 4 × 7 board" },
     credit: { developedBy: ["Jánosik Áron"] }
   },
+  LatinSquareFilling: {
+    year: { k: "XVI. (22/23)", v: "22/23" },
+    round: "döntő",
+    category: ["C"],
+    icon: "board",
+    name: { hu: "Latin-négyzet kitöltés", en: "Filling a Latin square" },
+    credit: { suggestedBy: ["Nagy Kartal"] }
+  },
   AddReduceDouble: {
     year: { k: "XVI. (22/23)", v: "22/23" },
     round: "döntő",
