@@ -10,6 +10,15 @@
     html {
         @apply bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100;
     }
+    /* Engraving/detail lines of the rook piece (see shared/rook-svg.tsx). White
+       against the dark piece body in light mode; dark against the light body in
+       dark mode. Driven by a custom property so it inherits into <use>. */
+    :root {
+        --rook-groove: var(--color-white);
+    }
+    :root.dark {
+        --rook-groove: var(--color-slate-800);
+    }
     *,  ::after,  ::before,  ::backdrop,  ::file-selector-button {
         border-color: var(--color-slate-200, currentColor);
     }

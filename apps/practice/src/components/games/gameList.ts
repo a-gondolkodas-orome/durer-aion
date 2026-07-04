@@ -345,6 +345,13 @@ export const gameList: GameList = {
     name: { hu: "Kupac kettéosztó 4 kupaccal", en: "Pile splitting (4 piles)" },
     credit: { developedBy: ["Soós Máté"] }
   },
+  RookToCorner: {
+    year: { k: "XIV. (20/21)", v: "20/21" },
+    round: "online",
+    category: ["C"],
+    icon: "chess",
+    name: { hu: "Bástya a sarokba", en: "Rook to the corner" }
+  },
   TriangularGridRopes: {
     year: { k: "XIV. (20/21)", v: "20/21" },
     round: "döntő",

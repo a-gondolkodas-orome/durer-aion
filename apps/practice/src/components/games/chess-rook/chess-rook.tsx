@@ -2,7 +2,7 @@ import { range, some, isEqual, cloneDeep } from 'lodash';
 import { strategyGameFactory, type BoardClientProps, type Events, GameBoard } from '../../game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { getAllowedMoves, generateStartBoard, markVisitedFields, type Board, type Field } from './helpers';
-import { ChessRookSvg } from './chess-rook-svg';
+import { RookSvg } from '../shared/rook-svg';
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const clickField = (field: Field) => {
@@ -17,7 +17,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 
   return (
   <GameBoard>
-    <ChessRookSvg />
+    <RookSvg id="game-chess-rook" />
     <table className="border-collapse w-full table-fixed">
       <tbody>
         {range(8).map(row => (

@@ -54,6 +54,7 @@ import { PrimelyToZero } from '../games/primely-to-zero/primely-to-zero';
 import { RemoveDivisorMultiple } from '../games/remove-divisor-multiple/remove-divisor-multiple';
 import { RemoveRowOrColumn } from '../games/remove-row-or-column/remove-row-or-column';
 import { RockPaperScissor } from '../games/rock-paper-scissor/rock-paper-scissor';
+import { RookToCorner } from '../games/rook-to-corner/rook-to-corner';
 import { SharkChase4 } from '../games/shark-chase/shark-4-by-4/shark-chase';
 import { SharkChase5 } from '../games/shark-chase/shark-5-by-5/shark-chase';
 import { SixDiscs, TenDiscs } from '../games/discs-turn-or-remove/discs-turn-or-remove';
@@ -138,6 +139,7 @@ export const App = () => {
     { path: '/game/RemoveDivisorMultiple', element: <RemoveDivisorMultiple />},
     { path: '/game/RemoveRowOrColumn', element: <RemoveRowOrColumn />},
     { path: '/game/rockPaperScissor', element: <RockPaperScissor /> },
+    { path: '/game/RookToCorner', element: <RookToCorner /> },
     { path: '/game/SharkChase4', element: <SharkChase4 />},
     { path: '/game/SharkChase5', element: <SharkChase5 />},
     { path: '/game/SixDiscs', element: <SixDiscs />},
