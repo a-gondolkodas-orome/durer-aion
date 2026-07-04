@@ -45,6 +45,7 @@ import { PileSplitter4 } from '../games/pile-splitting-games/pile-splitter-4/pil
 import { PileUnion } from '../games/pile-union/pile-union';
 import { PlusOneTwoThree } from '../games/plus-one-two-three/plus-one-two-three';
 import { PolicemanthiefA, PolicemanthiefB } from '../games/policeman-thief/policeman-thief';
+import { PolicemanthiefC } from '../games/policeman-thief-c/policeman-thief-c';
 import { PolynomialBuilding } from '../games/polynomial-building/polynomial-building';
 import { PrimeExponentials } from '../games/prime-exponentials/prime-exponentials';
 import { PrimelyToZero } from '../games/primely-to-zero/primely-to-zero';
@@ -124,6 +125,7 @@ export const App = () => {
     { path: '/game/PlusOneTwoThree', element: <PlusOneTwoThree />},
     { path: '/game/Policemanthief', element: <PolicemanthiefA />},
     { path: '/game/PolicemanthiefB', element: <PolicemanthiefB />},
+    { path: '/game/PolicemanthiefC', element: <PolicemanthiefC />},
     { path: '/game/PolynomialBuilding', element: <PolynomialBuilding /> },
     { path: '/game/PrimeExponentials', element: <PrimeExponentials />},
     { path: '/game/PrimelyToZero', element: <PrimelyToZero />},
