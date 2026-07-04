@@ -535,6 +535,13 @@ export const gameList: GameList = {
     name: { hu: "Mágikus láda (B)", en: "Magic Box (B)" },
     title: { hu: "Mágikus láda (kijelöléssel)", en: "Magic Box (with designation)" }
   },
+  TwoOfThreeTakeaway: {
+    year: { k: "XIX. (25/26)", v: "25/26" },
+    round: "döntő",
+    category: ["C"],
+    icon: "piles",
+    name: { hu: "Két kupacból elvétel", en: "Take from two piles" }
+  },
   RemoveDivisorMultiple: {
     year: { k: "XIX. (25/26)", v: "25/26" },
     round: "online",

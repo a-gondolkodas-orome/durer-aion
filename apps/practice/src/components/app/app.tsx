@@ -72,6 +72,7 @@ import { TicTacToeDoubleStart } from '../games/tictactoe-alikes/tictactoe-double
 import { TriangleColoring } from '../games/triangle-coloring/triangle-coloring';
 import { TriangularGridRopes } from '../games/triangular-grid-ropes/triangular-grid-ropes';
 import { TwelveSquares } from '../games/twelve-squares/twelve-squares';
+import { TwoOfThreeTakeaway } from '../games/two-of-three-takeaway/two-of-three-takeaway';
 import { TwoTimesTwo } from '../games/two-times-two/two-times-two';
 import { WaningStones } from '../games/waning-stones/waning-stones';
 
@@ -154,6 +155,7 @@ export const App = () => {
     { path: '/game/TriangleColoring', element: <TriangleColoring />},
     { path: '/game/TriangularGridRopes', element: <TriangularGridRopes /> },
     { path: '/game/TwelveSquares', element: <TwelveSquares />},
+    { path: '/game/TwoOfThreeTakeaway', element: <TwoOfThreeTakeaway /> },
     { path: '/game/TwoTimesTwo', element: <TwoTimesTwo /> },
     { path: '/game/WaningStones', element: <WaningStones /> }
   ];
