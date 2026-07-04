@@ -8,7 +8,7 @@ https://jatek.durerinfo.hu/ .
 
 # Development
 
-When you push to the default (master) branch, the tests are run, and if they are
+When you push to the default (main) branch, the tests are run, and if they are
 successful, the project is deployed to the live website within a few minutes.
 
 ## Adding a new game
