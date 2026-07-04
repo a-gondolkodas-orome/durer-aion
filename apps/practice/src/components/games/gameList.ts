@@ -100,6 +100,13 @@ export const gameList: GameList = {
     icon: "number",
     name: { hu: "Számjegy kivonás", en: "Digit Subtraction" }
   },
+  ThreePilesRebuild: {
+    year: { k: "V. (11/12)", v: "11/12" },
+    round: "döntő",
+    category: ["C"],
+    icon: "piles",
+    name: { hu: "Három kupac", en: "Three piles" }
+  },
   TenDigitNumber: {
     year: { k: "V. (11/12)", v: "11/12" },
     round: "döntő",

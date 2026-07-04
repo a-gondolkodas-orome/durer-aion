@@ -61,6 +61,7 @@ import { TakePowerOfTwo } from '../games/take-power-of-two/take-power-of-two';
 import { TenDigitNumber } from '../games/ten-digit-number/ten-digit-number';
 import { ThiefSheriffMean7 } from '../games/thief-sheriff-mean/thief-sheriff-mean-7/thief-sheriff-mean-7';
 import { ThiefSheriffMean9 } from '../games/thief-sheriff-mean/thief-sheriff-mean-9/thief-sheriff-mean-9';
+import { ThreePilesRebuild } from '../games/three-piles-rebuild/three-piles-rebuild';
 import { TicTacToe } from '../games/tictactoe-alikes/tictactoe/tictactoe';
 import { TicTacToeDoubleStart } from '../games/tictactoe-alikes/tictactoe-doublestart/tictactoe-doublestart';
 import { TriangleColoring } from '../games/triangle-coloring/triangle-coloring';
@@ -137,6 +138,7 @@ export const App = () => {
     { path: '/game/TenDiscs', element: <TenDiscs />},
     { path: '/game/ThiefSheriffMean', element: <ThiefSheriffMean7 />},
     { path: '/game/ThiefSheriffMean9', element: <ThiefSheriffMean9 />},
+    { path: '/game/ThreePilesRebuild', element: <ThreePilesRebuild /> },
     { path: '/game/TicTacToe', element: <TicTacToe /> },
     { path: '/game/TicTacToeDoubleStart', element: <TicTacToeDoubleStart /> },
     { path: '/game/TriangleColoring', element: <TriangleColoring />},
