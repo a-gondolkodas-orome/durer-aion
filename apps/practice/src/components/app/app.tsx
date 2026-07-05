@@ -40,6 +40,7 @@ import { LatinSquareFilling } from '../games/latin-square-filling/latin-square-f
 import { MagicBox } from '../games/magic-box/magic-box';
 import { MagicBoxB } from '../games/magic-box-b/magic-box-b';
 import { MatchstickPiles } from '../games/matchstick-piles/matchstick-piles';
+import { ModifiedMill } from '../games/modified-mill/modified-mill';
 import { NumberCovering8, NumberCovering10 } from '../games/number-covering/number-covering';
 import { NumberPyramid } from '../games/number-pyramid/number-pyramid';
 import { PairsOfNumbers } from '../games/pairs-of-numbers/pairs-of-numbers';
@@ -128,6 +129,7 @@ export const App = () => {
     { path: '/game/MagicBox', element: <MagicBox /> },
     { path: '/game/MagicBoxB', element: <MagicBoxB /> },
     { path: '/game/MatchstickPiles', element: <MatchstickPiles /> },
+    { path: '/game/ModifiedMill', element: <ModifiedMill /> },
     { path: '/game/NumberCovering10', element: <NumberCovering10 /> },
     { path: '/game/NumberCovering8', element: <NumberCovering8 /> },
     { path: '/game/NumberPyramid', element: <NumberPyramid /> },
