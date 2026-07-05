@@ -362,6 +362,13 @@ export const gameList: GameList = {
     icon: "dominoes",
     name: { hu: "Álló és fekvő dominók", en: "Standing and lying dominoes" }
   },
+  TakeAndPoint: {
+    year: { k: "XII. (18/19)", v: "18/19" },
+    round: "döntő",
+    category: ["E", "E+"],
+    icon: "piles",
+    name: { hu: "Vegyél és mutass", en: "Take and point" }
+  },
   TwoTimesTwo: {
     year: { k: "XIII.(19/20)", v: "19/20" },
     round: "döntő",

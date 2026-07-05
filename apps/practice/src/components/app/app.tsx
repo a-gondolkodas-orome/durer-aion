@@ -69,6 +69,7 @@ import {
 } from '../games/stones-remove-one-not-twice-from-left/stones-remove-one-not-twice-from-left';
 import { SuperstitiousCounting } from '../games/single-number-increase/superstitious-counting/superstitious-counting';
 import { Take1OrHalve } from '../games/single-pile-removal/take-1-or-halve/take-1-or-halve';
+import { TakeAndPoint } from '../games/take-and-point/take-and-point';
 import { TakePowerOfTwo } from '../games/single-pile-removal/take-power-of-two/take-power-of-two';
 import { TenCoins } from '../games/ten-coins/ten-coins-c/ten-coins-c';
 import { TenCoinsD } from '../games/ten-coins/ten-coins-d/ten-coins-d';
@@ -161,6 +162,7 @@ export const App = () => {
     { path: '/game/StonesRemoveOneNotTwiceFromLeft', element: <StonesRemoveOneNotTwiceFromLeft />},
     { path: '/game/SuperstitiousCounting', element: <SuperstitiousCounting /> },
     { path: '/game/Take1OrHalve', element: <Take1OrHalve /> },
+    { path: '/game/TakeAndPoint', element: <TakeAndPoint /> },
     { path: '/game/TakePowerOfTwo', element: <TakePowerOfTwo />},
     { path: '/game/TenCoins', element: <TenCoins /> },
     { path: '/game/TenCoinsD', element: <TenCoinsD /> },
