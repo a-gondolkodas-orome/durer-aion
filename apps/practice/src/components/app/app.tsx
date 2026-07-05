@@ -67,6 +67,7 @@ import { SixFieldsCircle } from '../games/six-fields-circle/six-fields-circle';
 import {
   StonesRemoveOneNotTwiceFromLeft
 } from '../games/stones-remove-one-not-twice-from-left/stones-remove-one-not-twice-from-left';
+import { SumFifteen } from '../games/sum-fifteen/sum-fifteen';
 import { SuperstitiousCounting } from '../games/single-number-increase/superstitious-counting/superstitious-counting';
 import { Take1OrHalve } from '../games/single-pile-removal/take-1-or-halve/take-1-or-halve';
 import { TakeAndPoint } from '../games/take-and-point/take-and-point';
@@ -160,6 +161,7 @@ export const App = () => {
     { path: '/game/SixDiscs', element: <SixDiscs />},
     { path: '/game/SixFieldsCircle', element: <SixFieldsCircle />},
     { path: '/game/StonesRemoveOneNotTwiceFromLeft', element: <StonesRemoveOneNotTwiceFromLeft />},
+    { path: '/game/SumFifteen', element: <SumFifteen /> },
     { path: '/game/SuperstitiousCounting', element: <SuperstitiousCounting /> },
     { path: '/game/Take1OrHalve', element: <Take1OrHalve /> },
     { path: '/game/TakeAndPoint', element: <TakeAndPoint /> },

@@ -432,6 +432,13 @@ export const gameList: GameList = {
     icon: "board",
     name: { hu: "Módosított malom", en: "Modified mill" }
   },
+  SumFifteen: {
+    year: { k: "XIV. (20/21)", v: "20/21" },
+    round: "online",
+    category: ["E"],
+    icon: "number",
+    name: { hu: "Összeg 15", en: "Sum 15" }
+  },
   Coin357: {
     year: { k: "XV. (21/22)", v: "21/22" },
     round: "döntő",
