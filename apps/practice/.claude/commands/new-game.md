@@ -52,8 +52,12 @@ Create `src/components/games/<game-name>/<game-name>.js`. Follow the `strategyGa
 - If the bot needs multiple moves in one turn, wrap subsequent moves in `setTimeout` to simulate thinking
 - Pull `name`, `title`, `credit` from `gameList` rather than hardcoding them
 
-### 5. Register the route in `src/components/app/app.js`
-Add the import and a route entry. Keep both lists in alphabetical order.
+### 5. Re-export the component from `src/components/games/index.ts`
+Add one `export { YourGame } from './path/...'` line to the barrel, keyed by the
+game's `gameList` key (alias if the export name differs, e.g.
+`export { FooA as Foo } from '...'`), keeping alphabetical order. The route is the
+key, and the router in `src/components/app/app.js` derives it from `gameList`
+automatically — no edit is needed there.
 
 ### 6. Add metadata to `src/components/games/gameList.js`
 Using the metadata collected in Step 1, add the entry in alphabetical order by key. Use `title` only if a longer display name is needed on the game page beyond the short name.

@@ -18,9 +18,11 @@ table](https://docs.google.com/spreadsheets/d/1-6u9PCtvf_gDHrs65x36pmDzFt4nZZx_I
 
 TL;DR;
 
-1. Create a react component for the game under `src/components/games`.
-2. Add the game component to the router in `src/components/app/app.tsx`.
-3. Add the game metadata to `src/components/games/gameList.ts`.
+1. Add the game metadata to `src/components/games/gameList.ts`.
+2. Create a react component for the game under `src/components/games`.
+3. Re-export the game component from the barrel in
+   `src/components/games/index.ts`, keyed by the game's `gameList` key. The router
+   in `src/components/app/app.tsx` picks it up automatically — no edit needed there.
 
 *For more information, see Section [How to Develop](#how-to-develop)*
 

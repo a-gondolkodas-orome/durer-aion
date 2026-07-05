@@ -37,7 +37,10 @@ export interface GameEntry {
   icon: IconKey // thematic card icon, also drives the overview's "filter by type".
 }
 
-// Key must match the path registered in the router (app.ts).
+// The key IS the game's URL slug (`/game/<key>`) and must have a matching
+// re-export in `index.ts`. The router (`app.tsx`) derives every route by looping
+// over this list. Renaming a component never affects a route — only the alias in
+// `index.ts` changes — so keys are stable identifiers; don't rename them lightly.
 // Keep entries ordered by year first, category second.
 export const gameList: GameList = {
   ChessBishops: {
