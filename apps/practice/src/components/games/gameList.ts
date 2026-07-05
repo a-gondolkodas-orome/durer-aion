@@ -206,6 +206,13 @@ export const gameList: GameList = {
     icon: "piles",
     name: { hu: "Kupac egyesítés", en: "Pile union" }
   },
+  MatchstickPiles: {
+    year: { k: "VIII. (14/15)", v: "14/15" },
+    round: "döntő",
+    category: ["D"],
+    icon: "piles",
+    name: { hu: "Gyufakupacok", en: "Matchstick piles" }
+  },
   Policemanthief: {
     year: { k: "IX. (15/16)", v: "15/16" },
     round: "döntő",
