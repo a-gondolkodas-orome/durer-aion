@@ -1,5 +1,6 @@
 import type { FC, SVGProps } from 'react';
 import type { IconKey } from '../games/gameList';
+import type { I18nString } from '../language';
 import { ScissorSvg } from '../games/rock-paper-scissor/symbols/scissor-svg';
 
 // Small, self-contained, monochrome icons for the overview cards. Everything is
@@ -132,14 +133,6 @@ const ScissorIcon: FC<IconProps> = (p) => (
   <ScissorSvg className="w-full h-full" aria-hidden focusable="false" {...p} />
 );
 
-// Neutral placeholder for games without a dedicated icon.
-export const FallbackIcon: FC<IconProps> = (p) => (
-  <svg {...svgProps(p)}>
-    <circle cx="12" cy="12" r="8.5" />
-    <circle cx="12" cy="12" r="2" fill="currentColor" stroke="none" />
-  </svg>
-);
-
 export const gameIcons: Record<IconKey, FC<IconProps>> = {
   chess: ChessIcon,
   board: BoardIcon,
@@ -156,7 +149,26 @@ export const gameIcons: Record<IconKey, FC<IconProps>> = {
   scissor: ScissorIcon
 };
 
-export const GameIcon = ({ iconKey, ...rest }: { iconKey?: IconKey } & IconProps) => {
-  const Icon = (iconKey && gameIcons[iconKey]) ?? FallbackIcon;
+export const GameIcon = ({ iconKey, ...rest }: { iconKey: IconKey } & IconProps) => {
+  const Icon = gameIcons[iconKey];
   return <Icon {...rest} />;
+};
+
+// Human-readable names for the icon types, used as the accessible label and
+// tooltip for the overview's "filter by type" buttons (which show only the
+// glyph).
+export const iconLabels: Record<IconKey, I18nString> = {
+  chess: { hu: 'Sakk', en: 'Chess' },
+  board: { hu: 'Tábla', en: 'Board' },
+  coloring: { hu: 'Színezés', en: 'Coloring' },
+  coins: { hu: 'Érmék', en: 'Coins' },
+  number: { hu: 'Számok', en: 'Numbers' },
+  'small-graph': { hu: 'Gráf', en: 'Graph' },
+  piles: { hu: 'Kupacok', en: 'Piles' },
+  cards: { hu: 'Kártyák', en: 'Cards' },
+  pursuit: { hu: 'Üldözés', en: 'Pursuit' },
+  pyramid: { hu: 'Piramis', en: 'Pyramid' },
+  dominoes: { hu: 'Dominó', en: 'Dominoes' },
+  house: { hu: 'Ház', en: 'House' },
+  scissor: { hu: 'Kő-papír-olló', en: 'Rock-paper-scissors' }
 };

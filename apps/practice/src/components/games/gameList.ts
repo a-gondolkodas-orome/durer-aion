@@ -4,11 +4,27 @@ export type Category = 'A' | 'B' | 'C' | 'D' | 'E' | 'E+'
 export type Round = 'döntő' | 'online'
 export type GameList = Record<string, GameEntry>;
 
-// Keys into the overview icon registry (game-icons.tsx). A game without an
-// `icon` falls back to a neutral placeholder.
-export type IconKey =
-  | 'chess' | 'board' | 'coloring' | 'coins' | 'number' | 'small-graph'
-  | 'piles' | 'cards' | 'pursuit' | 'pyramid' | 'dominoes' | 'house' | 'scissor'
+// Canonical list of icon keys into the overview icon registry
+// (game-icons.tsx). Single source of truth: `IconKey` is derived from it, and
+// the registry and the overview's "filter by type" row iterate it, so the set
+// of valid keys and their order live in exactly one place.
+export const iconKeys = [
+  'chess',
+  'board',
+  'coloring',
+  'coins',
+  'number',
+  'small-graph',
+  'piles',
+  'cards',
+  'pursuit',
+  'pyramid',
+  'dominoes',
+  'house',
+  'scissor'
+] as const;
+
+export type IconKey = typeof iconKeys[number];
 
 export interface GameEntry {
   year: { k: string; v: string }
@@ -18,7 +34,7 @@ export interface GameEntry {
   title?: I18nString // longer title shown on the game page instead of name
   credit?: { suggestedBy?: string[]; developedBy?: string[] }
   featured?: boolean // include in the "Featured games" strip. Absent/false = not featured.
-  icon?: IconKey // thematic card icon; absent = fallback icon.
+  icon: IconKey // thematic card icon, also drives the overview's "filter by type".
 }
 
 // Key must match the path registered in the router (app.ts).

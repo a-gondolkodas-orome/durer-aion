@@ -1,5 +1,5 @@
 import { every, orderBy } from 'lodash';
-import type { Category, GameList } from '../games/gameList';
+import { iconKeys, type Category, type GameList, type IconKey } from '../games/gameList';
 
 // The overview groups games into two broad brackets rather than one section per
 // category. Age categories are soft (an A-category student may well enjoy a B
@@ -43,6 +43,25 @@ export const filterByCategories = (
   return ids.filter(id =>
     !every(list[id].category, c => !selected.includes(c))
   );
+};
+
+// The distinct icons actually used by the catalog, in canonical `iconKeys`
+// order. Only these are offered as "filter by type" options, so the filter row
+// never shows a type with no games behind it.
+export const getUsedIcons = (list: GameList): IconKey[] => {
+  const used = new Set(Object.values(list).map(entry => entry.icon));
+  return iconKeys.filter(key => used.has(key));
+};
+
+// Keep only games whose icon is one of the selected types. An empty selection
+// matches everything (mirrors `filterByCategories`).
+export const filterByIcons = (
+  ids: string[],
+  selected: IconKey[],
+  list: GameList
+): string[] => {
+  if (selected.length === 0) return ids;
+  return ids.filter(id => selected.includes(list[id].icon));
 };
 
 // Ids ordered the way cards should appear: by category (A → E+), then by year

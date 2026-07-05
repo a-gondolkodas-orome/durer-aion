@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 import { render, screen, within, fireEvent } from '@testing-library/react';
 import { Overview } from './overview';
-import type { GameList } from '../games/gameList';
+import type { GameList, IconKey } from '../games/gameList';
 import { HashRouter } from 'react-router';
 
-vi.mock('../games/gameList', (): { gameList: GameList } => ({
+vi.mock('../games/gameList', async (importOriginal): Promise<{ gameList: GameList; iconKeys: readonly IconKey[] }> => ({
+  iconKeys: (await importOriginal<{ iconKeys: readonly IconKey[] }>()).iconKeys,
   gameList: {
     GameA1: {
       name: { hu: 'A egy' },
@@ -14,10 +15,10 @@ vi.mock('../games/gameList', (): { gameList: GameList } => ({
       featured: true,
       icon: 'chess'
     },
-    GameA2: { name: { hu: 'A kettő' }, category: ['A'], year: { k: '', v: '12/13' }, round: 'döntő' },
-    GameB1: { name: { hu: 'B egy' }, category: ['B'], year: { k: '', v: '13/14' }, round: 'döntő' },
-    GameC1: { name: { hu: 'C egy' }, category: ['C'], year: { k: '', v: '14/15' }, round: 'online' },
-    GameCD: { name: { hu: 'CD' }, category: ['C', 'D'], year: { k: '', v: '15/16' }, round: 'döntő' }
+    GameA2: { name: { hu: 'A kettő' }, category: ['A'], year: { k: '', v: '12/13' }, round: 'döntő', icon: 'number' },
+    GameB1: { name: { hu: 'B egy' }, category: ['B'], year: { k: '', v: '13/14' }, round: 'döntő', icon: 'number' },
+    GameC1: { name: { hu: 'C egy' }, category: ['C'], year: { k: '', v: '14/15' }, round: 'online', icon: 'coins' },
+    GameCD: { name: { hu: 'CD' }, category: ['C', 'D'], year: { k: '', v: '15/16' }, round: 'döntő', icon: 'piles' }
   }
 }));
 
@@ -57,6 +58,7 @@ describe('Overview', () => {
 
   it('filtering force-opens matching sections and hides the rest (and the strip)', () => {
     renderOverview();
+    fireEvent.click(screen.getByRole('button', { name: 'Szűrők' }));
     fireEvent.click(screen.getByRole('button', { name: 'C' }));
     // C–E+ section force-opened with its matching cards
     expect(screen.getByText('C egy')).toBeTruthy();
@@ -89,7 +91,56 @@ describe('Overview', () => {
     expect(screen.queryByText('A egy')).toBeNull();
   });
 
-  it('renders a fallback icon for a game without an icon', () => {
+  it('keeps the filter panel hidden until the funnel toggle is clicked', () => {
+    renderOverview();
+    // neither the category nor the type toggles are rendered yet...
+    expect(screen.queryByRole('button', { name: 'C' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Érmék' })).toBeNull();
+    // ...until the header funnel opens the panel, which reveals both rows at once
+    fireEvent.click(screen.getByRole('button', { name: 'Szűrők' }));
+    expect(screen.getByRole('button', { name: 'C' })).toBeTruthy();
+    // only icons actually in use are offered (coins, piles) — chess is used too
+    expect(screen.getByRole('button', { name: 'Érmék' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Kupacok' })).toBeTruthy();
+  });
+
+  it('narrows the catalog by icon type', () => {
+    renderOverview();
+    fireEvent.click(screen.getByRole('button', { name: 'Szűrők' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Kupacok' })); // piles → only GameCD
+    expect(screen.getByText('CD')).toBeTruthy();
+    expect(screen.queryByText('C egy')).toBeNull();
+    expect(screen.queryByText('A kettő')).toBeNull();
+    // GameA1 (featured, chess) doesn't match piles → strip hidden
+    expect(screen.queryByTestId('featured-strip')).toBeNull();
+  });
+
+  it('combines category and icon filters with AND', () => {
+    renderOverview();
+    fireEvent.click(screen.getByRole('button', { name: 'Szűrők' }));
+    fireEvent.click(screen.getByRole('button', { name: 'C' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Érmék' })); // coins
+    // GameC1 is C + coins → matches; GameCD is C + piles → excluded by icon
+    expect(screen.getByText('C egy')).toBeTruthy();
+    expect(screen.queryByText('CD')).toBeNull();
+  });
+
+  it('keeps filters applied and shows the count after collapsing the panel', () => {
+    renderOverview();
+    const funnel = screen.getByRole('button', { name: 'Szűrők' });
+    fireEvent.click(funnel);
+    fireEvent.click(screen.getByRole('button', { name: 'C' }));
+    // collapse the panel again — the toggles disappear...
+    fireEvent.click(funnel);
+    expect(screen.queryByRole('button', { name: 'C' })).toBeNull();
+    // ...but the filter stays applied (C–E+ cards still shown, A–B still hidden)
+    // and the funnel surfaces the active count
+    expect(screen.getByText('C egy')).toBeTruthy();
+    expect(screen.queryByText('A kettő')).toBeNull();
+    expect(within(funnel).getByText('1')).toBeTruthy();
+  });
+
+  it('renders the game icon on each card', () => {
     renderOverview();
     fireEvent.click(screen.getByRole('button', { name: /A-B kategória/ }));
     const card = screen.getByText('A kettő').closest('a');
