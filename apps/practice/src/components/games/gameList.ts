@@ -78,6 +78,13 @@ export const gameList: GameList = {
     icon: "piles",
     name: { hu: "Apadó kupac", en: "Waning Stones" }
   },
+  ThreeMore: {
+    year: { k: "II. (08/09)", v: "08/09" },
+    round: "döntő",
+    category: ["D"],
+    icon: "piles",
+    name: { hu: "Hárommal többet", en: "Three More" }
+  },
   DominoesOnChessboard: {
     year: { k: "III. (09/10)", v: "09/10" },
     round: "döntő",

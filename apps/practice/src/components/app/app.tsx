@@ -73,6 +73,7 @@ import { TenCoinsD } from '../games/ten-coins-d/ten-coins-d';
 import { TenDigitNumber } from '../games/ten-digit-number/ten-digit-number';
 import { ThiefSheriffMean7 } from '../games/thief-sheriff-mean/thief-sheriff-mean-7/thief-sheriff-mean-7';
 import { ThiefSheriffMean9 } from '../games/thief-sheriff-mean/thief-sheriff-mean-9/thief-sheriff-mean-9';
+import { ThreeMore } from '../games/three-more/three-more';
 import { ThreePilesRebuild } from '../games/three-piles-rebuild/three-piles-rebuild';
 import { TicTacToe } from '../games/tictactoe-alikes/tictactoe/tictactoe';
 import { TicTacToeDoubleStart } from '../games/tictactoe-alikes/tictactoe-doublestart/tictactoe-doublestart';
@@ -163,6 +164,7 @@ export const App = () => {
     { path: '/game/TenDiscs', element: <TenDiscs />},
     { path: '/game/ThiefSheriffMean', element: <ThiefSheriffMean7 />},
     { path: '/game/ThiefSheriffMean9', element: <ThiefSheriffMean9 />},
+    { path: '/game/ThreeMore', element: <ThreeMore /> },
     { path: '/game/ThreePilesRebuild', element: <ThreePilesRebuild /> },
     { path: '/game/TicTacToe', element: <TicTacToe /> },
     { path: '/game/TicTacToeDoubleStart', element: <TicTacToeDoubleStart /> },
