@@ -322,7 +322,21 @@ export const gameList: GameList = {
     round: "döntő",
     category: ["C"],
     icon: "board",
-    name: { hu: "Sor vagy oszlop levétele", en: "Remove a row or column" }
+    name: { hu: "Sor vagy oszlop levétele (C)", en: "Remove a row or column (C)" }
+  },
+  RemoveRowOrColumnE: {
+    year: { k: "XI. (17/18)", v: "17/18" },
+    round: "döntő",
+    category: ["E"],
+    icon: "board",
+    name: {
+      hu: "Sor vagy oszlop levétele (E)",
+      en: "Remove a row or column (E)"
+    },
+    title: {
+      hu: "Sor vagy oszlop levétele – több téglalap",
+      en: "Remove a row or column – multiple rectangles"
+    }
   },
   TicTacToeDoubleStart: {
     year: { k: "XII. (18/19)", v: "18/19" },

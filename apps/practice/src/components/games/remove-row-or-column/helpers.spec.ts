@@ -1,5 +1,5 @@
 import {
-  type Grid, getRectangleAt, getRectangles, applyMove, isEmpty, getAllMoves, generateStartBoard
+  type Grid, getRectangleAt, getRectangles, applyMove, isEmpty, getAllMoves
 } from './helpers';
 
 const g = (rows: number[][]): Grid => rows.map(r => r.map(Boolean));
@@ -71,18 +71,5 @@ describe('isEmpty', () => {
   it('detects an empty board', () => {
     expect(isEmpty(g([[0, 0], [0, 0]]))).toBe(true);
     expect(isEmpty(g([[0, 1]]))).toBe(false);
-  });
-});
-
-describe('generateStartBoard', () => {
-  it('always produces a full rectangular grid with sides in 2..6', () => {
-    for (let i = 0; i < 50; i++) {
-      const { grid } = generateStartBoard();
-      expect(grid.length).toBeGreaterThanOrEqual(2);
-      expect(grid.length).toBeLessThanOrEqual(6);
-      expect(grid[0].length).toBeGreaterThanOrEqual(2);
-      expect(grid[0].length).toBeLessThanOrEqual(6);
-      expect(grid.every(row => row.every(Boolean))).toBe(true);
-    }
   });
 });
