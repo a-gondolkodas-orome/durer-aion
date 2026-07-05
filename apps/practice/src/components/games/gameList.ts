@@ -425,6 +425,13 @@ export const gameList: GameList = {
     name: { hu: "10 totemoszlop", en: "10 totem poles" },
     credit: { developedBy: ["Czeller Ildikó"] }
   },
+  TriangularGridRopes15: {
+    year: { k: "XIV. (20/21)", v: "20/21" },
+    round: "döntő",
+    category: ["E", "E+"],
+    icon: "small-graph",
+    name: { hu: "15 totemoszlop", en: "15 totem poles" }
+  },
   ModifiedMill: {
     year: { k: "XIV. (20/21)", v: "20/21" },
     round: "online",

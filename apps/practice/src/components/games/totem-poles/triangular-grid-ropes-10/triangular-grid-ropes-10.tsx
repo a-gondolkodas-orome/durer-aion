@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { strategyGameFactory, type Events, type BoardClientProps, GameBoard } from '../../game-factory';
+import { strategyGameFactory, type Events, type BoardClientProps, GameBoard } from '../../../game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { isAllowed, getAllowedSuperset, isGameEnd, vertices, type Board } from './helpers';
 import { cloneDeep } from 'lodash';

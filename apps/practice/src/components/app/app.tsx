@@ -82,7 +82,8 @@ import { ThreePilesRebuild } from '../games/three-piles-rebuild/three-piles-rebu
 import { TicTacToe } from '../games/tictactoe-alikes/tictactoe/tictactoe';
 import { TicTacToeDoubleStart } from '../games/tictactoe-alikes/tictactoe-doublestart/tictactoe-doublestart';
 import { TriangleColoring } from '../games/triangle-coloring/triangle-coloring';
-import { TriangularGridRopes } from '../games/triangular-grid-ropes/triangular-grid-ropes';
+import { TriangularGridRopes } from '../games/totem-poles/triangular-grid-ropes-10/triangular-grid-ropes-10';
+import { TriangularGridRopes15 } from '../games/totem-poles/triangular-grid-ropes-15/triangular-grid-ropes-15';
 import { TwelveSquares } from '../games/twelve-squares/twelve-squares';
 import { TwoOfThreeTakeaway } from '../games/two-of-three-takeaway/two-of-three-takeaway';
 import { TwoTimesTwo } from '../games/distinct-squares/two-times-two/two-times-two';
@@ -178,6 +179,7 @@ export const App = () => {
     { path: '/game/TicTacToeDoubleStart', element: <TicTacToeDoubleStart /> },
     { path: '/game/TriangleColoring', element: <TriangleColoring />},
     { path: '/game/TriangularGridRopes', element: <TriangularGridRopes /> },
+    { path: '/game/TriangularGridRopes15', element: <TriangularGridRopes15 /> },
     { path: '/game/TwelveSquares', element: <TwelveSquares />},
     { path: '/game/TwoOfThreeTakeaway', element: <TwoOfThreeTakeaway /> },
     { path: '/game/TwoTimesTwo', element: <TwoTimesTwo /> },

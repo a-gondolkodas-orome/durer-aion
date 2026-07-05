@@ -9,7 +9,7 @@ import {
   type Board,
   type Edge
 } from './helpers';
-import type { StrategyArgs } from '../../game-factory';
+import type { StrategyArgs } from '../../../game-factory';
 
 //    0
 //   1 2
