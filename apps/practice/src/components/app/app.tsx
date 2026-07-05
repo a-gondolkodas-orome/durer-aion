@@ -33,6 +33,7 @@ import { FiveFiveCard } from '../games/five-five-card/five-five-card';
 import { FiveSquares } from '../games/five-squares/five-squares';
 import { FourConnectedFields } from '../games/four-connected-fields/four-connected-fields';
 import { FourPilesSpreadAhead } from '../games/pile-splitting-games/four-piles-spread-ahead/four-piles-spread-ahead';
+import { FourPilesTwoGrabs } from '../games/four-piles-two-grabs/four-piles-two-grabs';
 import { HunyadiAndTheJanissaries } from '../games/hunyadi-and-the-janissaries/hunyadi-and-the-janissaries';
 import { IncrementOrDouble } from '../games/increment-or-double/increment-or-double';
 import { LatinSquareFilling } from '../games/latin-square-filling/latin-square-filling';
@@ -120,6 +121,7 @@ export const App = () => {
     { path: '/game/FiveSquares', element: <FiveSquares /> },
     { path: '/game/FourConnectedFields', element: <FourConnectedFields /> },
     { path: '/game/FourPilesSpreadAhead', element: <FourPilesSpreadAhead /> },
+    { path: '/game/FourPilesTwoGrabs', element: <FourPilesTwoGrabs /> },
     { path: '/game/HunyadiAndTheJanissaries', element: <HunyadiAndTheJanissaries /> },
     { path: '/game/IncrementOrDouble', element: <IncrementOrDouble /> },
     { path: '/game/LatinSquareFilling', element: <LatinSquareFilling /> },

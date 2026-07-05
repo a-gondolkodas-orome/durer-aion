@@ -182,6 +182,13 @@ export const gameList: GameList = {
     name: { hu: "Háromszög színezés", en: "Triangle colouring" },
     credit: { developedBy: ["Czeller Ildikó"] }
   },
+  FourPilesTwoGrabs: {
+    year: { k: "VII. (13/14)", v: "13/14" },
+    round: "döntő",
+    category: ["D"],
+    icon: "piles",
+    name: { hu: "Négy kupac, két marok", en: "Four piles, two grabs" }
+  },
   PileSplitter: {
     year: { k: "VIII. (14/15)", v: "14/15" },
     round: "döntő",
