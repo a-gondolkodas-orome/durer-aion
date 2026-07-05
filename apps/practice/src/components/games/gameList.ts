@@ -101,6 +101,13 @@ export const gameList: GameList = {
     icon: "number",
     name: { hu: "Polinomépítés", en: "Building a polynomial" }
   },
+  ChocolateBreaking: {
+    year: { k: "III. (09/10)", v: "09/10" },
+    round: "döntő",
+    category: ["D"],
+    icon: "board",
+    name: { hu: "Csoki törögetés", en: "Breaking chocolate" }
+  },
   IncrementOrDouble: {
     year: { k: "IV. (10/11)", v: "10/11" },
     round: "döntő",

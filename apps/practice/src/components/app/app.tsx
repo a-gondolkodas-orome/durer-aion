@@ -21,6 +21,7 @@ import { ChessBishops } from '../games/chess-bishops/chess-bishops';
 import { ChessDucksC, ChessDucksE } from '../games/chess-ducks/chess-ducks';
 import { ChessKnight } from '../games/chess-knight/chess-knight';
 import { ChessRook } from '../games/chess-rook/chess-rook';
+import { ChocolateBreaking } from '../games/chocolate-breaking/chocolate-breaking';
 import { Coin123 } from '../games/coin-3-piles/coin123';
 import { Coin357 } from '../games/coin-3-piles/coin357';
 import { CubeColoring } from '../games/cube-coloring/cube-coloring';
@@ -111,6 +112,7 @@ export const App = () => {
     { path: '/game/ChessDucksE', element: <ChessDucksE />},
     { path: '/game/ChessKnight', element: <ChessKnight />},
     { path: '/game/ChessRook', element: <ChessRook /> },
+    { path: '/game/ChocolateBreaking', element: <ChocolateBreaking /> },
     { path: '/game/Coin123', element: <Coin123 /> },
     { path: '/game/Coin357', element: <Coin357 /> },
     { path: '/game/CubeColoring', element: <CubeColoring /> },
