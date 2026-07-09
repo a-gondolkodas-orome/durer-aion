@@ -596,6 +596,14 @@ export const gameList: GameList = {
       developedBy: ["Szemerédi Levente"]
     }
   },
+  MatchesOnEdges: {
+    year: { k: "XVII. (23/24)", v: "23/24" },
+    round: "döntő",
+    category: ["E+"],
+    icon: "board",
+    name: { hu: "Gyufák az éleken", en: "Matches on edges" },
+    credit: { suggestedBy: ["Németh Márton"] }
+  },
   ThiefSheriffMean: {
     year: { k: "XVIII. (24/25)", v: "24/25" },
     round: "döntő",

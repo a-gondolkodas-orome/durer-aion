@@ -17,7 +17,7 @@
       }
     }
   },
-  "postCreateCommand": "npm ci",
+  "postCreateCommand": "npm ci && npx playwright install --with-deps chromium",
   "forwardPorts": [8012],
   "portsAttributes": {
     "8012": {

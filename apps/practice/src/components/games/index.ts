@@ -41,6 +41,7 @@ export { IncrementOrDouble } from './single-number-increase/increment-or-double/
 export { LatinSquareFilling } from './latin-square-filling/latin-square-filling';
 export { MagicBox } from './magic-box/magic-box-a/magic-box-a';
 export { MagicBoxB } from './magic-box/magic-box-b/magic-box-b';
+export { MatchesOnEdges } from './matches-on-edges/matches-on-edges';
 export { MatchstickPiles } from './matchstick-piles/matchstick-piles';
 export { ModifiedMill } from './modified-mill/modified-mill';
 export { NumberCovering8, NumberCovering10 } from './number-covering/number-covering';
