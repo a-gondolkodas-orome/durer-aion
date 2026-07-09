@@ -63,7 +63,7 @@ export const strategyGameFactory = <TBoard,>({
     const [moveCount, setMoveCount] = useState(0);
     const [turnState, setTurnState] = useState<unknown>(null);
     const [mode, setMode] = useState<Mode>('vsComputer');
-    type UndoSnapshot = { board: TBoard; currentPlayer: number };
+    type UndoSnapshot = { board: TBoard; currentPlayer: number; moveCount: number };
     const [undoSnapshot, setUndoSnapshot] = useState<UndoSnapshot | null>(null);
     const currentTurnHasMovesRef = useRef(false);
     const botTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -94,7 +94,7 @@ export const strategyGameFactory = <TBoard,>({
 
     const moveWrapper = (doMove: () => MoveResult<TBoard>): MoveResult<TBoard> => {
       if (!currentTurnHasMovesRef.current) {
-        setUndoSnapshot({ board: cloneDeep(board), currentPlayer: currentPlayer! });
+        setUndoSnapshot({ board: cloneDeep(board), currentPlayer: currentPlayer!, moveCount });
         currentTurnHasMovesRef.current = true;
       }
       const moveResult = doMove();
@@ -176,6 +176,7 @@ export const strategyGameFactory = <TBoard,>({
       }
       setBoard(undoSnapshot!.board);
       setCurrentPlayer(undoSnapshot!.currentPlayer);
+      setMoveCount(undoSnapshot!.moveCount);
       setTurnState(null);
       setUndoSnapshot(null);
       currentTurnHasMovesRef.current = false;

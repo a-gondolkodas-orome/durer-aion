@@ -501,6 +501,14 @@ export const gameList: GameList = {
     title: { hu: "Békés kacsák a 4 × 7-es sakktáblán", en: "Peaceful ducks on the 4 × 7 board" },
     credit: { developedBy: ["Jánosik Áron"] }
   },
+  RecolouringDiscs: {
+    year: { k: "XV. (21/22)", v: "21/22" },
+    round: "döntő",
+    category: ["E"],
+    icon: "board",
+    name: { hu: "Átszínező korongok", en: "Recolouring discs" },
+    credit: { suggestedBy: ["Váli Benedek"] }
+  },
   LatinSquareFilling: {
     year: { k: "XVI. (22/23)", v: "22/23" },
     round: "döntő",

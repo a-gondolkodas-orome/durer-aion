@@ -210,6 +210,54 @@ describe('undo', () => {
       expect((getByTestId('undo-btn') as HTMLButtonElement).disabled).toBe(true);  // snapshot cleared
     });
 
+    it('clicking undo restores moveCount', () => {
+      const BoardWithCount = ({ board, ctx, moves }: BoardClientProps<Board>) => (
+        <button
+          data-testid="move-btn"
+          disabled={!ctx.isClientMoveAllowed}
+          onClick={() => moves.mainMove(board)}
+        >count:{ctx.moveCount}</button>
+      );
+      const { getByTestId } = renderGame(makeConfig({ BoardClient: BoardWithCount }));
+      fireEvent.click(getByTestId('mode-vsHuman'));
+      fireEvent.click(getByTestId('start-hh-game-0'));
+      expect(getByTestId('move-btn').textContent).toBe('count:0');
+      fireEvent.click(getByTestId('move-btn')); // moveCount → 1
+      expect(getByTestId('move-btn').textContent).toBe('count:1');
+      fireEvent.click(getByTestId('undo-btn')); // undo → moveCount back to 0
+      expect(getByTestId('move-btn').textContent).toBe('count:0');
+    });
+
+    it('undo restores moveCount to the start of a multi-move turn', () => {
+      // A turn with two moves before endTurn: undo must roll moveCount back by both.
+      const gameplay: Gameplay<Board> = {
+        moves: {
+          mainMove: (board: Board, { events }: { events: Events }) => {
+            events.setTurnState('step2');
+            return { nextBoard: board };
+          },
+          secondMove: (board: Board, { events }: { events: Events }) => {
+            events.endTurn();
+            return { nextBoard: board };
+          }
+        }
+      };
+      const BoardWithCount = ({ board, ctx, moves }: BoardClientProps<Board>) => (
+        <>
+          <button data-testid="move-btn" onClick={() => moves.mainMove(board)}>count:{ctx.moveCount}</button>
+          <button data-testid="second-btn" onClick={() => moves.secondMove(board)}>second</button>
+        </>
+      );
+      const { getByTestId } = renderGame(makeConfig({ BoardClient: BoardWithCount, gameplay }));
+      fireEvent.click(getByTestId('mode-vsHuman'));
+      fireEvent.click(getByTestId('start-hh-game-0'));
+      fireEvent.click(getByTestId('move-btn')); // moveCount → 1, snapshot taken at 0
+      fireEvent.click(getByTestId('second-btn')); // moveCount → 2, same turn
+      expect(getByTestId('move-btn').textContent).toBe('count:2');
+      fireEvent.click(getByTestId('undo-btn')); // undo whole turn → moveCount back to 0
+      expect(getByTestId('move-btn').textContent).toBe('count:0');
+    });
+
     it('undo is disabled after use (snapshot cleared)', () => {
       const { getByTestId } = renderGame(ctxAwareConfig());
       fireEvent.click(getByTestId('mode-vsHuman'));

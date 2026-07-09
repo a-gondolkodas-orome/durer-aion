@@ -58,6 +58,7 @@ export { PolicemanthiefC } from './policeman-thief/policeman-thief-c/policeman-t
 export { PolynomialBuilding } from './polynomial-building/polynomial-building';
 export { PrimeExponentials } from './single-pile-removal/prime-exponentials/prime-exponentials';
 export { PrimelyToZero } from './single-pile-removal/primely-to-zero/primely-to-zero';
+export { RecolouringDiscs } from './recolouring-discs/recolouring-discs';
 export { RemoveDivisorMultiple } from './remove-divisor-multiple/remove-divisor-multiple';
 export { RemoveRowOrColumn } from './remove-row-or-column/single/remove-row-or-column';
 export { RemoveRowOrColumnE } from './remove-row-or-column/multiple/remove-row-or-column-e';
