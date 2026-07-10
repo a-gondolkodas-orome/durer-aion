@@ -17,6 +17,7 @@ export { AntiTicTacToe } from './tictactoe-alikes/anti-tictactoe/anti-tictactoe'
 export { ArchitectAndBandits } from './architect-and-bandits/architect-and-bandits-a/architect-and-bandits-a';
 export { ArchitectAndBanditsB } from './architect-and-bandits/architect-and-bandits-b/architect-and-bandits-b';
 export { Bacteria } from './bacteria/bacteria';
+export { BacteriaScatteredGoals } from './bacteria-scattered-goals/bacteria-scattered-goals';
 export { BankRobbers } from './bank-robbers/bank-robbers';
 export { ChessBishops } from './chess-bishops/chess-bishops';
 export { ChessDucksC, ChessDucksE } from './chess-ducks/chess-ducks';

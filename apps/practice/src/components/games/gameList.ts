@@ -304,6 +304,13 @@ export const gameList: GameList = {
     name: { hu: "Baktériumok terjedése", en: "Spreading of bacteria" },
     credit: { developedBy: ["Tárkányi Damján"] }
   },
+  BacteriaScatteredGoals: {
+    year: { k: "X. (16/17)", v: "16/17" },
+    round: "döntő",
+    category: ["E", "E+"],
+    icon: "pursuit",
+    name: { hu: "Baktériumok terjedése (E)", en: "Spreading of bacteria (E)" }
+  },
   NumberCovering8: {
     year: { k: "XI. (17/18)", v: "17/18" },
     round: "döntő",
