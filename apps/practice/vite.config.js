@@ -42,6 +42,11 @@ export default defineConfig(() => ({
     globals: true,
     environment: 'node',
     clearMocks: true,
-    restoreMocks: true
+    restoreMocks: true,
+    // Reuse one context per worker instead of a fresh one per file (~40% faster).
+    // These are pure-logic and cleanly-torn-down component tests, so no cross-file
+    // state leaks. The strict per-file-isolated behaviour is still a `vitest run
+    // --isolate` away if a leak is ever suspected.
+    isolate: false
   }
 }));

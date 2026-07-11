@@ -26,18 +26,23 @@ describe('recolouring-discs solver', () => {
     }
   });
 
+  // Solving n = 7..12 is the heaviest work in the fast suite (~1s cold, more
+  // under parallel CPU contention), so give it a generous timeout to stay clear
+  // of the default 5s limit.
   it('first player wins iff 4 does not divide n, for n = 7..12', () => {
     for (let n = 7; n <= 12; n++) {
       const expected = n % 4 === 0 ? BLUE : RED;
       expect(solveForN(n).winnerAt(startCells(n), RED)).toBe(expected);
     }
-  });
+  }, 20000);
 
   it('resolves the shipped board sizes', () => {
     expect(solveForN(7).winnerAt(startCells(7), RED)).toBe(RED); // 7 mod 4 = 3 -> first player
     expect(solveForN(8).winnerAt(startCells(8), RED)).toBe(BLUE); // 4 | 8 -> second player
   });
 
+  // Covers the same n = 7..12 solves as above (memoised, so usually instant),
+  // but keep the generous timeout in case this runs first under contention.
   it('the board-size pools match their advertised winning role', () => {
     for (const n of FIRST_PLAYER_WIN_SIZES) {
       expect(solveForN(n).winnerAt(startCells(n), RED)).toBe(RED);
@@ -45,7 +50,7 @@ describe('recolouring-discs solver', () => {
     for (const n of SECOND_PLAYER_WIN_SIZES) {
       expect(solveForN(n).winnerAt(startCells(n), RED)).toBe(BLUE);
     }
-  });
+  }, 20000);
 
   it('forces a win well within the 200-ply cap for the shipped sizes', () => {
     for (const n of [7, 8]) {
