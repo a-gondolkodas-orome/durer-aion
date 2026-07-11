@@ -1,10 +1,5 @@
 # Dürer Games — Project Context
 
-> **NEVER commit or attempt to push.** Leave all changes in the working tree for
-> the maintainer to review, stage, and commit themselves. Do not run `git commit`
-> or `git push` (or open PRs) under any circumstances, even if asked to "finish
-> up" or "wrap up" — surface the diff instead.
-
 ## What this project is
 
 A public, static site (no server, hosted on GitHub Pages) featuring interactive
