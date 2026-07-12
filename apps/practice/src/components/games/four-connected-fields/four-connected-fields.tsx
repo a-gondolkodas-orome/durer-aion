@@ -53,13 +53,13 @@ export const FourConnectedFields = strategyGameFactory({
   variants: [
     {
       botStrategy: randomBotStrategy,
-      label: { hu: "Teszt 🤖", en: "Test 🤖" }
+      label: { hu: "Teszt", en: "Test" }
     },
     {
       // smart bot: verified as optimal
       botStrategy: smartBotStrategy,
       generateStartBoard: (): Board => [0, 0, 0, 0],
-      label: { hu: "Okos 🤖", en: "Smart 🤖" },
+      label: { hu: "Teljes", en: "Full" },
       isDefault: true
     }
   ]

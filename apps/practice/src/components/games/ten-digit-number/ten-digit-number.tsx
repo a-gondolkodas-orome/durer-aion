@@ -170,13 +170,13 @@ export const TenDigitNumber = strategyGameFactory({
   variants: [
     {
       botStrategy: randomBotStrategy,
-      label: { hu: 'Teszt 🤖', en: 'Test 🤖' }
+      label: { hu: 'Teszt', en: 'Test' }
     },
     {
       // smart bot: verified as optimal
       botStrategy: smartBotStrategy,
       generateStartBoard: () => ({ digits: [], sumMod9: 0 }),
-      label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
+      label: { hu: 'Teljes', en: 'Full' },
       isDefault: true
     }
   ]

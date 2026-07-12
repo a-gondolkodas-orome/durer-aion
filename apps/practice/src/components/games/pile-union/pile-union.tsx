@@ -239,7 +239,7 @@ export const PileUnion = strategyGameFactory({
   variants: [
     {
       botStrategy: randomBotStrategy,
-      label: { hu: 'Teszt 🤖', en: 'Test 🤖' }
+      label: { hu: 'Teszt', en: 'Test' }
     },
     {
       // smart bot: verified as optimal
@@ -248,7 +248,7 @@ export const PileUnion = strategyGameFactory({
         const numPiles = random(2, 4);
         return Array.from({ length: numPiles }, () => random(2, 5));
       },
-      label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
+      label: { hu: 'Teljes', en: 'Full' },
       isDefault: true
     }
   ]

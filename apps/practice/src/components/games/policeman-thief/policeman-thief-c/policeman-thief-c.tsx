@@ -152,13 +152,13 @@ export const PolicemanthiefC = strategyGameFactory({
       // Random bot: plays a random legal move, but grabs an immediate catch/escape
       // when one is available. Lets a human thief realistically win.
       botStrategy: randomBotStrategy,
-      label: { hu: 'Teszt 🤖', en: 'Test 🤖' }
+      label: { hu: 'Teszt', en: 'Test' }
     },
     {
       // Smart bot: provably optimal (full minimax on the fixed graph).
       botStrategy: smartBotStrategy,
       generateStartBoard,
-      label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
+      label: { hu: 'Teljes', en: 'Full' },
       isDefault: true
     }
   ]

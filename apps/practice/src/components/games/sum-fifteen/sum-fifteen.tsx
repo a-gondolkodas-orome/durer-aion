@@ -137,13 +137,13 @@ export const SumFifteen = strategyGameFactory({
   variants: [
     {
       botStrategy: randomBotStrategy,
-      label: { hu: 'Teszt 🤖', en: 'Test 🤖' }
+      label: { hu: 'Teszt', en: 'Test' }
     },
     {
       // smart bot: full optimal search (see winnerOptimal in helpers.ts)
       botStrategy: smartBotStrategy,
       generateStartBoard,
-      label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
+      label: { hu: 'Teljes', en: 'Full' },
       isDefault: true
     }
   ]

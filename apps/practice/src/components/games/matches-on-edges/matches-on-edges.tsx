@@ -62,13 +62,13 @@ export const MatchesOnEdges = strategyGameFactory({
     {
       botStrategy: randomBotStrategy,
       generateStartBoard,
-      label: { hu: 'Teszt 🤖', en: 'Test 🤖' }
+      label: { hu: 'Teszt', en: 'Test' }
     },
     // smart bot: verified as optimal (see bot-strategy.spec.ts)
     {
       botStrategy: smartBotStrategy,
       generateStartBoard,
-      label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
+      label: { hu: 'Teljes', en: 'Full' },
       isDefault: true
     }
   ]

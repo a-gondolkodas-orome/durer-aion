@@ -53,7 +53,7 @@ export const ModifiedMill = strategyGameFactory({
   variants: [
     {
       botStrategy: randomBotStrategy,
-      label: { hu: 'Teszt 🤖', en: 'Test 🤖' }
+      label: { hu: 'Teszt', en: 'Test' }
     },
     {
       // First player follows the exhaustively verified winning strategy; as the
@@ -61,7 +61,7 @@ export const ModifiedMill = strategyGameFactory({
       // punish a mistake — hence notAlwaysOptimal.
       botStrategy: smartBotStrategy,
       generateStartBoard: generateEmptyBoard,
-      label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
+      label: { hu: 'Teljes', en: 'Full' },
       isDefault: true,
       notAlwaysOptimal: true
     }

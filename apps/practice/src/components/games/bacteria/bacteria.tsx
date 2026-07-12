@@ -282,12 +282,12 @@ export const Bacteria = strategyGameFactory({
   BoardClient,
   gameplay: { moves },
   variants: [
-    { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
+    { botStrategy: randomBotStrategy, label: { hu: 'Teszt', en: 'Test' } },
     // verified as optimal
     {
       botStrategy: smartBotStrategy,
       generateStartBoard,
-      label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
+      label: { hu: 'Teljes', en: 'Full' },
       isDefault: true
     }
   ]

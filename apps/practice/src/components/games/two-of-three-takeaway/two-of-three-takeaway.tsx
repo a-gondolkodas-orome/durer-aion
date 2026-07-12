@@ -151,13 +151,13 @@ export const TwoOfThreeTakeaway = strategyGameFactory({
     {
       botStrategy: randomBotStrategy,
       generateStartBoard,
-      label: { hu: 'Teszt 🤖', en: 'Test 🤖' }
+      label: { hu: 'Teszt', en: 'Test' }
     },
     // smart bot: verified as optimal (see helpers.spec.ts exhaustive minimax check)
     {
       botStrategy: smartBotStrategy,
       generateStartBoard,
-      label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
+      label: { hu: 'Teljes', en: 'Full' },
       isDefault: true
     }
   ]

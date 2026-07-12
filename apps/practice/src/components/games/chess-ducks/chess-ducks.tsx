@@ -102,12 +102,12 @@ const chessDucksGameFactory = ({ ROWS, COLS }: { ROWS: number; COLS: number }) =
     BoardClient,
     gameplay: { moves },
     variants: [
-      { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
+      { botStrategy: randomBotStrategy, label: { hu: 'Teszt', en: 'Test' } },
       {
         // smart bot: verified as optimal
         botStrategy: smartBotStrategy,
         generateStartBoard,
-        label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
+        label: { hu: 'Teljes', en: 'Full' },
         isDefault: true
       }
     ]

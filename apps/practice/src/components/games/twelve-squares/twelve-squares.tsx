@@ -123,12 +123,12 @@ export const TwelveSquares = strategyGameFactory({
   BoardClient,
   gameplay: { moves },
   variants: [
-    { botStrategy: randomBotStrategy, label: { hu: 'Teszt 🤖', en: 'Test 🤖' } },
+    { botStrategy: randomBotStrategy, label: { hu: 'Teszt', en: 'Test' } },
     {
       // smart bot: verified as optimal
       botStrategy: optimalBotStrategy,
       generateStartBoard: () => ({ left: 1, right: 12 }),
-      label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
+      label: { hu: 'Teljes', en: 'Full' },
       isDefault: true
     }
   ]

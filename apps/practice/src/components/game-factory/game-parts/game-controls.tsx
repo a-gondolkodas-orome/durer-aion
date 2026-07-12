@@ -55,7 +55,7 @@ export const DifficultySelector = ({ variants, selectedIndex, onSelect, disabled
   return (
     <fieldset>
       <legend className="text-xs text-slate-600 dark:text-slate-400 mb-1.5">
-        {t({ hu: 'Nehézség', en: 'Difficulty' })}
+        {t({ hu: 'Változat', en: 'Variant' })}
       </legend>
       <div className={`flex divide-x divide-slate-300 rounded-lg overflow-hidden border text-sm
         has-focus-visible:ring-2 has-focus-visible:ring-red-400 has-focus-visible:ring-offset-1`}>

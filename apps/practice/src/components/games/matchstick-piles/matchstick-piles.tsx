@@ -244,13 +244,13 @@ export const MatchstickPiles = strategyGameFactory({
     {
       botStrategy: randomBotStrategy,
       generateStartBoard: () => range(random(2, 3)).map(() => random(2, 5)),
-      label: { hu: 'Teszt 🤖', en: 'Test 🤖' }
+      label: { hu: 'Teszt', en: 'Test' }
     },
     {
       // smart bot: verified as optimal (Grundy/XOR characterisation)
       botStrategy: smartBotStrategy,
       generateStartBoard,
-      label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
+      label: { hu: 'Teljes', en: 'Full' },
       isDefault: true
     }
   ]
