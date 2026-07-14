@@ -1,6 +1,6 @@
 import { cloneDeep, last } from "lodash";
 import type { Events } from '../../game-factory';
-import type { Board } from "./bacteria"
+import type { Board } from "./danger"
 
 export const moves = {
   defend: (board: Board, { events }: { events: Events }, { row, col }) => {

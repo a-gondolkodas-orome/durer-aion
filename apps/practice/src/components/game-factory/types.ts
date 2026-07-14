@@ -1,4 +1,4 @@
-import type { I18nString } from '../language';
+import type { I18nString, TranslatableNode } from '../language';
 
 export type Phase = 'roleSelection' | 'play' | 'gameEnd'
 export type Mode = 'vsComputer' | 'vsHuman'
@@ -43,4 +43,8 @@ export interface VariantInput<TBoard> {
   generateStartBoard?: () => TBoard
   botStrategy?: (args: StrategyArgs<TBoard>) => void
   notAlwaysOptimal?: boolean
+  // Optional per-variant rule text. Falls back to `presentation.rule` when
+  // omitted — used when sibling games are merged into one game whose variants
+  // differ only in their rule wording (e.g. board size / coin values).
+  rule?: TranslatableNode
 }

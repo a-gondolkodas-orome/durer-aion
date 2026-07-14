@@ -17,15 +17,13 @@ export { AntiTicTacToe } from './tictactoe-alikes/anti-tictactoe/anti-tictactoe'
 export { ArchitectAndBandits } from './architect-and-bandits/architect-and-bandits-a/architect-and-bandits-a';
 export { ArchitectAndBanditsB } from './architect-and-bandits/architect-and-bandits-b/architect-and-bandits-b';
 export { Bacteria } from './bacteria/bacteria';
-export { BacteriaScatteredGoals } from './bacteria-scattered-goals/bacteria-scattered-goals';
 export { BankRobbers } from './bank-robbers/bank-robbers';
 export { ChessBishops } from './chess-bishops/chess-bishops';
-export { ChessDucksC, ChessDucksE } from './chess-ducks/chess-ducks';
+export { ChessDucks } from './chess-ducks/chess-ducks';
 export { ChessKnight } from './chess-knight/chess-knight';
 export { ChessRook } from './chess-rook/chess-rook';
 export { ChocolateBreaking } from './chocolate-breaking/chocolate-breaking';
-export { Coin123 } from './coin-3-piles/coin123';
-export { Coin357 } from './coin-3-piles/coin357';
+export { CoinsIn3Piles } from './coins-in-3-piles/coins-in-3-piles';
 export { CubeColoring } from './cube-coloring/cube-coloring';
 export { DigitSubtraction } from './digit-subtraction/digit-subtraction';
 export { Dominoes4x4 } from './dominoes-4x4/dominoes-4x4';
@@ -45,7 +43,7 @@ export { MagicBoxB } from './magic-box/magic-box-b/magic-box-b';
 export { MatchesOnEdges } from './matches-on-edges/matches-on-edges';
 export { MatchstickPiles } from './matchstick-piles/matchstick-piles';
 export { ModifiedMill } from './modified-mill/modified-mill';
-export { NumberCovering8, NumberCovering10 } from './number-covering/number-covering';
+export { NumberCovering } from './number-covering/number-covering';
 export { NumberPyramid } from './number-pyramid/number-pyramid';
 export { PairsOfNumbers } from './pairs-of-numbers/pairs-of-numbers';
 export { PileSplitter } from './pile-splitting-games/pile-splitter/pile-splitter';
@@ -53,22 +51,19 @@ export { PileSplitter3 } from './pile-splitting-games/pile-splitter-3/pile-split
 export { PileSplitter4 } from './pile-splitting-games/pile-splitter-4/pile-splitter-4';
 export { PileUnion } from './pile-union/pile-union';
 export { PlusOneTwoThree } from './single-number-increase/plus-one-two-three/plus-one-two-three';
-export {
-  PolicemanthiefA as Policemanthief, PolicemanthiefB
-} from './policeman-thief/policeman-thief-ab/policeman-thief-ab';
+export { Policemanthief } from './policeman-thief/policeman-thief-ab/policeman-thief-ab';
 export { PolicemanthiefC } from './policeman-thief/policeman-thief-c/policeman-thief-c';
 export { PolynomialBuilding } from './polynomial-building/polynomial-building';
 export { PrimeExponentials } from './single-pile-removal/prime-exponentials/prime-exponentials';
 export { PrimelyToZero } from './single-pile-removal/primely-to-zero/primely-to-zero';
 export { RecolouringDiscs } from './recolouring-discs/recolouring-discs';
 export { RemoveDivisorMultiple } from './remove-divisor-multiple/remove-divisor-multiple';
-export { RemoveRowOrColumn } from './remove-row-or-column/single/remove-row-or-column';
-export { RemoveRowOrColumnE } from './remove-row-or-column/multiple/remove-row-or-column-e';
+export { RemoveRowOrColumn } from './remove-row-or-column/remove-row-or-column';
 export { RockPaperScissor } from './rock-paper-scissor/rock-paper-scissor';
 export { RookToCorner } from './rook-to-corner/rook-to-corner';
 export { SharkChase4 } from './shark-chase/shark-4-by-4/shark-chase';
 export { SharkChase5 } from './shark-chase/shark-5-by-5/shark-chase';
-export { SixDiscs, TenDiscs } from './discs-turn-or-remove/discs-turn-or-remove';
+export { DiscsFlipOrRemove } from './discs-flip-or-remove/discs-flip-or-remove';
 export { SixFieldsCircle } from './six-fields-circle/six-fields-circle';
 export {
   StonesRemoveOneNotTwiceFromLeft
@@ -78,8 +73,7 @@ export { SuperstitiousCounting } from './single-number-increase/superstitious-co
 export { Take1OrHalve } from './single-pile-removal/take-1-or-halve/take-1-or-halve';
 export { TakeAndPoint } from './take-and-point/take-and-point';
 export { TakePowerOfTwo } from './single-pile-removal/take-power-of-two/take-power-of-two';
-export { TenCoins } from './ten-coins/ten-coins-c/ten-coins-c';
-export { TenCoinsD } from './ten-coins/ten-coins-d/ten-coins-d';
+export { TenCoins } from './ten-coins/ten-coins';
 export { TenDigitNumber } from './ten-digit-number/ten-digit-number';
 export { ThiefSheriffMean7 as ThiefSheriffMean } from './thief-sheriff-mean/thief-sheriff-mean-7/thief-sheriff-mean-7';
 export { ThiefSheriffMean9 } from './thief-sheriff-mean/thief-sheriff-mean-9/thief-sheriff-mean-9';

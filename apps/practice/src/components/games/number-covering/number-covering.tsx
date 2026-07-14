@@ -6,7 +6,7 @@ import { useTranslation } from '../../language';
 
 type Board = number[]
 
-const COVERED = -1 as const;
+export const COVERED = -1 as const;
 
 const getRemaining = (board: Board) => board.filter(i => i !== COVERED);
 
@@ -44,7 +44,7 @@ const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   moves.coverNumber(board, sample(getRemaining(board)));
 };
 
-const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
   const botMove = getOptimalSmartBotMove(board, ctx.chosenRoleIndex);
   moves.coverNumber(board, botMove);
 };
@@ -92,7 +92,7 @@ const rule10 = {
   </>
 };
 
-const moves = {
+export const moves = {
   coverNumber: (board: Board, { events }: { events: Events }, number) => {
     const nextBoard = cloneDeep(board);
     nextBoard[number-1] = COVERED;
@@ -111,40 +111,48 @@ const getPlayerStepDescription = () => ({
   en: 'Click a number to cover it.'
 });
 
-export const NumberCovering8 = strategyGameFactory({
+const genericRule = {
+  hu: <>
+    Egy táblázatban 1-től kezdődően néhány szám szerepel. Két játékos felváltva takar le egy-egy
+    számot addig, amíg csak két szám marad. Ha a megmaradt két szám összege páros, akkor a kezdő
+    nyer, ha pedig páratlan, akkor a második.
+  </>,
+  en: <>
+    A table contains the numbers starting from 1. Two players take turns covering one number at a time
+    until only two numbers remain. If the sum of the two remaining numbers is even, the first
+    player wins; if it is odd, the second player wins.
+  </>
+};
+
+// Test variant covers both sub-games: numbers 1–8 or 1–10.
+const generateTestStartBoard = (): Board => sample([() => range(1, 9), () => range(1, 11)])!();
+
+export const NumberCovering = strategyGameFactory({
   presentation: {
-    rule: rule8,
+    rule: genericRule,
     getPlayerStepDescription
   },
   BoardClient,
   gameplay: { moves },
   variants: [
-    { botStrategy: randomBotStrategy, label: { hu: 'Teszt', en: 'Test' } },
     {
-      // smart bot: verified as optimal
+      botStrategy: randomBotStrategy,
+      generateStartBoard: generateTestStartBoard,
+      label: { hu: 'Teszt', en: 'Test' }
+    },
+    // smart bot: verified as optimal
+    {
       botStrategy: smartBotStrategy,
       generateStartBoard: () => range(1, 9),
-      label: { hu: 'Teljes', en: 'Full' },
+      rule: rule8,
+      label: { hu: '8 szám', en: '8 numbers' },
       isDefault: true
-    }
-  ]
-});
-
-export const NumberCovering10 = strategyGameFactory({
-  presentation: {
-    rule: rule10,
-    getPlayerStepDescription
-  },
-  BoardClient,
-  gameplay: { moves },
-  variants: [
-    { botStrategy: randomBotStrategy, label: { hu: 'Teszt', en: 'Test' } },
+    },
     {
-      // smart bot: verified as optimal
       botStrategy: smartBotStrategy,
       generateStartBoard: () => range(1, 11),
-      label: { hu: 'Teljes', en: 'Full' },
-      isDefault: true
+      rule: rule10,
+      label: { hu: '10 szám', en: '10 numbers' }
     }
   ]
 });

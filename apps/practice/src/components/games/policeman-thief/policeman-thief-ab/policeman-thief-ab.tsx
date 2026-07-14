@@ -144,32 +144,35 @@ const getPlayerStepDescription = ({ board, ctx }: { board: Board; ctx: Ctx }) =>
   }
 }
 
-export const PolicemanthiefA = strategyGameFactory({
+const roleLabels: [{ hu: string; en: string }, { hu: string; en: string }] = [
+  { hu: "Rendőrök", en: "Policemen" },
+  { hu: "Tolvaj", en: "Thief" }
+];
+
+// A and B are the same game; they differ only in the start position (in A the two
+// policemen always start on the same intersection, in B they may start apart) and
+// the corresponding rule wording. Exposed as two variants of one game.
+export const Policemanthief = strategyGameFactory({
   presentation: {
     rule: ruleA,
-    roleLabels: [
-      { hu: "Rendőrök", en: "Policemen" },
-      { hu: "Tolvaj", en: "Thief" }
-    ],
+    roleLabels,
     getPlayerStepDescription
   },
   BoardClient,
   gameplay: { moves },
-  // smart bot: verified as optimal
-  variants: [{ botStrategy: smartBotStrategy, generateStartBoard: generateStartBoardA }]
-});
-
-export const PolicemanthiefB = strategyGameFactory({
-  presentation: {
-    rule: ruleB,
-    roleLabels: [
-      { hu: "Rendőrök", en: "Policemen" },
-      { hu: "Tolvaj", en: "Thief" }
-    ],
-    getPlayerStepDescription
-  },
-  BoardClient,
-  gameplay: { moves },
-  // smart bot: verified as optimal
-  variants: [{ botStrategy: smartBotStrategy, generateStartBoard: generateStartBoardB }]
+  variants: [
+    // smart bot: verified as optimal
+    {
+      botStrategy: smartBotStrategy,
+      generateStartBoard: generateStartBoardA,
+      label: { hu: 'Együtt (A)', en: 'Together (A)' },
+      isDefault: true
+    },
+    {
+      botStrategy: smartBotStrategy,
+      generateStartBoard: generateStartBoardB,
+      rule: ruleB,
+      label: { hu: 'Külön (B)', en: 'Apart (B)' }
+    }
+  ]
 });

@@ -236,7 +236,7 @@ export const strategyGameFactory = <TBoard,>({
       <GameHeader />
       <div className="flex justify-center grow">
         <div className="max-w-[100ch] w-full">
-          <GameRule ruleDescription={t(rule)} />
+          <GameRule ruleDescription={t(activeVariant.rule ?? rule)} />
           <div className="flex flex-wrap">
             <BoardClient
               key={gameUuid}

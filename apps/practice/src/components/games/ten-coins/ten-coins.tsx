@@ -3,17 +3,19 @@ import {
   strategyGameFactory,
   type Events, type StrategyArgs, type BoardClientProps,
   GameBoard
-} from '../../../game-factory';
-import { useTranslation } from '../../../language';
+} from '../../game-factory';
+import { useTranslation } from '../../language';
 
-// The board is the multiset of coin values (each in 1..4). Only which distinct
-// values are present matters for the game logic; the counts are pure flavour.
+// The board is the multiset of coin values. Only which distinct values are
+// present matters for the game logic; the counts are pure flavour. The two
+// variants differ only in the range of allowed values (1..4 for category C,
+// 1..5 for the harder category D) — encoded purely in the start board, so the
+// solver, moves and board rendering are all shared and board-driven.
 type Board = number[]
 
 const totalCoins = 10;
-const values = [1, 2, 3, 4];
 
-// --- Exact solver over the (at most 15) non-empty subsets of {1,2,3,4} ---------
+// --- Exact solver over the non-empty subsets of the present values ------------
 // A move picks a present value K and turns *all* K-coins into some L < K, so the
 // set of distinct values goes from S to (S \ {K}) ∪ {L}. You win when only one
 // distinct value remains after your move.
@@ -49,14 +51,14 @@ const playerToMoveWins = (set: number[]): boolean => {
   return (winMemo[key] = wins);
 };
 
-// The single losing position is {1,2,3}: every move from it hands the opponent a
-// two-value board, which they win instantly. Everything else is won by driving
-// the position to {1,2,3} (or merging to a single value when two remain).
+// Losing positions (second player to move wins): {1,2,3} for values 1..4; and
+// {1,2,3}, {1,4,5}, {2,3,4,5}, {1,2,3,4,5} for values 1..5. Everything else is a
+// first-player win, driven towards one of these (or merged to a single value).
 
 const BoardClient = ({ board, ctx, events, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
   const selectedValue = ctx.turnState as number | null;
-  const presentValues = values.filter(v => board.includes(v));
+  const presentValues = distinctValues(board);
 
   // Value-1 coins can't be selected: there is no smaller value to change them to.
   const isSelectable = (v: number) => v > 1;
@@ -142,7 +144,8 @@ const coinColors: Record<number, string> = {
   1: 'bg-slate-200 border-slate-500 text-slate-800 dark:bg-slate-600 dark:border-slate-300 dark:text-slate-100',
   2: 'bg-blue-200 border-blue-600 text-blue-900 dark:bg-blue-800 dark:border-blue-300 dark:text-blue-100',
   3: 'bg-green-200 border-green-600 text-green-900 dark:bg-green-800 dark:border-green-300 dark:text-green-100',
-  4: 'bg-red-200 border-red-600 text-red-900 dark:bg-red-800 dark:border-red-300 dark:text-red-100'
+  4: 'bg-red-200 border-red-600 text-red-900 dark:bg-red-800 dark:border-red-300 dark:text-red-100',
+  5: 'bg-yellow-200 border-yellow-600 text-yellow-900 dark:bg-yellow-800 dark:border-yellow-300 dark:text-yellow-100'
 };
 
 const Coin = ({ value }: { value: number }) => (
@@ -153,7 +156,7 @@ const Coin = ({ value }: { value: number }) => (
   </div>
 );
 
-const moves = {
+export const moves = {
   convert: (board: Board, { events }: { events: Events }, k, l) => {
     const nextBoard = board.map(v => (v === k ? l : v)).sort((a, b) => a - b);
     if (uniq(nextBoard).length === 1) {
@@ -165,10 +168,10 @@ const moves = {
   }
 };
 
-// Smart bot: play the winning move when one exists (drive towards {1,2,3}, or
-// merge to a single value). In a losing position, make the reply that leaves the
-// opponent with the most ways to blunder.
-const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+// Smart bot: play the winning move when one exists (drive towards a losing
+// position, or merge to a single value). In a losing position, make the reply
+// that leaves the opponent with the most ways to blunder.
+export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   const candidateMoves = movesFromSet(distinctValues(board));
 
   const winningMoves = candidateMoves.filter(isWinningMove);
@@ -204,15 +207,41 @@ const randomCounts = (total: number, parts: number): number[] => {
   return counts;
 };
 
-// Mix of starts: ~half are {1,2,3} (second player wins), ~half are a first-player
-// win, so choosing the right role genuinely matters.
-const generateStartBoard = (): Board => {
-  const set = random(0, 1) === 0
-    ? [1, 2, 3]
-    : sample([[1, 2, 4], [1, 3, 4], [2, 3, 4], [1, 2, 3, 4]])!;
+const boardFromSet = (set: number[]): Board => {
   const counts = randomCounts(totalCoins, set.length);
   return set.flatMap((v, i) => Array(counts[i]).fill(v));
 };
+
+// Category C (values 1..4). Mix of starts: ~half are {1,2,3} (second player wins),
+// ~half are a first-player win, so choosing the right role genuinely matters.
+const generateStartBoardC = (): Board => boardFromSet(
+  random(0, 1) === 0
+    ? [1, 2, 3]
+    : sample([[1, 2, 4], [1, 3, 4], [2, 3, 4], [1, 2, 3, 4]])!
+);
+
+// Category D (values 1..5). Same idea over the larger set of losing/winning sets.
+const losingSetsD = [[1, 2, 3], [1, 4, 5], [2, 3, 4, 5], [1, 2, 3, 4, 5]];
+const winningSetsD = [
+  [1, 2, 4],
+[1, 3, 4],
+[2, 3, 4],
+[1, 2, 5],
+[1, 3, 5],
+[2, 3, 5],
+  [2, 4, 5],
+[3, 4, 5],
+[1, 2, 3, 4],
+[1, 2, 3, 5],
+[1, 2, 4, 5],
+[1, 3, 4, 5]
+];
+const generateStartBoardD = (): Board => boardFromSet(
+  random(0, 1) === 0 ? sample(losingSetsD)! : sample(winningSetsD)!
+);
+
+// Test variant covers both sub-games: a values-1..4 or a values-1..5 start.
+const generateTestStartBoard = (): Board => sample([generateStartBoardC, generateStartBoardD])!();
 
 const getPlayerStepDescription = ({ ctx }) => {
   if (ctx.turnState !== null) {
@@ -227,9 +256,9 @@ const getPlayerStepDescription = ({ ctx }) => {
   };
 };
 
-const rule = {
+const ruleFor = (maxValue: number) => ({
   hu: <>
-    Kezdetben van 10 érme az asztalon, melyek értékei 1 és 4 közé eső egészek lehetnek.
+    Kezdetben van 10 érme az asztalon, melyek értékei 1 és {maxValue} közé eső egészek lehetnek.
     A két játékos felváltva lép. A soron lévő játékos kiválaszt egy K értéket, amire igaz,
     hogy van az asztalon K értékű érme, és az összes K értékű érmét átváltoztatja valamilyen
     kisebb L értékűre (mindet ugyanarra az L értékre, ahol az L érték 1 és K−1 közötti).
@@ -237,7 +266,26 @@ const rule = {
     Te döntheted el, hogy a kezdő vagy a második játékos bőrébe szeretnél-e bújni.
   </>,
   en: <>
-    There are 10 coins on the table to start, each with an integer value between 1 and 4.
+    There are 10 coins on the table to start, each with an integer value between 1 and {maxValue}.
+    The two players move alternately. On their turn the current player chooses a value K such
+    that at least one coin of value K is on the table, and turns all coins of value K into some
+    smaller value L (all to the same L, where L is between 1 and K−1). Whoever makes all coins
+    equal in value after their move wins. Knowing the starting position, you may decide whether
+    to play as the first or the second player.
+  </>
+});
+
+const genericRule = {
+  hu: <>
+    Kezdetben van 10 érme az asztalon, melyek értékei kis pozitív egészek (1-től 4-ig vagy 5-ig).
+    A két játékos felváltva lép. A soron lévő játékos kiválaszt egy K értéket, amire igaz,
+    hogy van az asztalon K értékű érme, és az összes K értékű érmét átváltoztatja valamilyen
+    kisebb L értékűre (mindet ugyanarra az L értékre, ahol az L érték 1 és K−1 közötti).
+    Az nyer, akinek a lépése után minden érme azonos értékű lesz. A kezdőállás ismeretében
+    Te döntheted el, hogy a kezdő vagy a második játékos bőrébe szeretnél-e bújni.
+  </>,
+  en: <>
+    There are 10 coins on the table to start, each a small positive integer (1 to 4, or 1 to 5).
     The two players move alternately. On their turn the current player chooses a value K such
     that at least one coin of value K is on the table, and turns all coins of value K into some
     smaller value L (all to the same L, where L is between 1 and K−1). Whoever makes all coins
@@ -248,7 +296,7 @@ const rule = {
 
 export const TenCoins = strategyGameFactory({
   presentation: {
-    rule,
+    rule: genericRule,
     getPlayerStepDescription
   },
   BoardClient,
@@ -256,14 +304,22 @@ export const TenCoins = strategyGameFactory({
   variants: [
     {
       botStrategy: randomBotStrategy,
+      generateStartBoard: generateTestStartBoard,
       label: { hu: 'Teszt', en: 'Test' }
     },
+    // smart bot: verified as optimal
     {
-      // smart bot: verified as optimal
       botStrategy: smartBotStrategy,
-      generateStartBoard,
-      label: { hu: 'Teljes', en: 'Full' },
+      generateStartBoard: generateStartBoardC,
+      rule: ruleFor(4),
+      label: { hu: '4 érték', en: '4 values' },
       isDefault: true
+    },
+    {
+      botStrategy: smartBotStrategy,
+      generateStartBoard: generateStartBoardD,
+      rule: ruleFor(5),
+      label: { hu: '5 érték', en: '5 values' }
     }
   ]
 });

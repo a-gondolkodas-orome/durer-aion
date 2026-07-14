@@ -85,6 +85,15 @@ export const computeSinks = (board: Board, lettered: boolean[][]): boolean[][] =
 // The game value: the attacker wins iff the bacteria CANNOT be routed to
 // distinct free cells via vertex-disjoint upward paths avoiding lettered
 // cells. deficiency = (#bacteria) - (max routable) >= 1  <=>  attacker wins.
+//
+// Each cell has vertex capacity 1 (the cellIn->cellOut edge below), enforcing
+// the vertex-disjoint requirement. A consequence is that a cell holding 2+
+// bacteria can route only one of them onward, so on such "stacked" positions
+// deficiency may over-estimate the attacker. This does not affect real play:
+// every start board (both variants) places one bacterium per distinct column,
+// and the bot's full-game simulations remain optimal (see bot-strategy.spec).
+// A capacity of (bacteria on cell) would change the theory and is deliberately
+// avoided.
 export const deficiency = (
   board: Board,
   lettered = computeLettered(board),

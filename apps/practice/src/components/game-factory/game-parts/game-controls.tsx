@@ -93,7 +93,7 @@ export const DifficultySelector = ({ variants, selectedIndex, onSelect, disabled
 };
 
 const labelClass = (active: boolean, disabled: boolean) => `
-  grow py-1 px-2 text-center
+  grow flex items-center justify-center py-1 px-2 text-center
   ${disabled ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}
   ${active ? 'bg-blue-500 text-white font-semibold' : 'bg-slate-100 dark:bg-slate-700'}
   ${!active && !disabled ? 'hocus:bg-slate-200 dark:hocus:bg-slate-600' : ''}

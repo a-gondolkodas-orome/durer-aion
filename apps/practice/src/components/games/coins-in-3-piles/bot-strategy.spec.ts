@@ -1,6 +1,6 @@
 import { botMoveParams } from './bot-strategy';
 
-describe('coin123 strategy', () => {
+describe('coins-in-3-piles strategy', () => {
   describe('smartBotStrategy (tested via botMoveParams)', () => {
     it('should apply winning move if two piles are odd and one is even: v1', () => {
       const board = [3, 2, 5];
