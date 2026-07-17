@@ -1,5 +1,6 @@
 import { range } from "lodash";
-import { type Board, computeLettered, deficiency } from "./danger";
+import { computeLettered, deficiency } from "./danger";
+import type { Board } from "./helpers";
 
 const emptyBoard = (rows: number, wide: number): number[][] =>
   range(rows).map(r => Array(r % 2 === 0 ? wide : wide - 1).fill(0));

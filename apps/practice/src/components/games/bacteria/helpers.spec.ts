@@ -1,4 +1,4 @@
-import { distanceFromDangerousAttackZone, isDangerous, moves } from "./helpers";
+import { distanceFromDangerousAttackZone, isDangerous, moves, applyAttackMove, type MoveType } from "./helpers";
 import { reverse } from 'lodash';
 import { makeEvents } from '../../../test-utils';
 
@@ -74,5 +74,33 @@ describe('moves', () => {
     const events = makeEvents();
     moves.defend(board, { events }, { row: 2, col: 0 });
     expect(events.endGame).toHaveBeenCalled();
+  });
+
+  // The real game (moves) and the bot's look-ahead (applyAttackMove) must apply
+  // identical mechanics; locking them together prevents silent divergence.
+  it('each attacker move matches the shared applyAttackMove', () => {
+    // (2,1) can shiftLeft, shiftRight, jump (to 4,1) and spread (to 3,0 / 3,1).
+    const makeBoard = () => ({
+      bacteria: [
+        [0, 0, 0],
+          [0, 0],
+        [0, 1, 0],
+          [0, 0],
+        [0, 0, 0]
+      ],
+      goals: [1]
+    });
+    const types: MoveType[] = ['shiftRight', 'shiftLeft', 'jump', 'spread'];
+    for (const type of types) {
+      const { nextBoard, reachedGoal } = applyAttackMove(makeBoard(), { type, row: 2, col: 1 });
+      const events = makeEvents();
+      const viaMoves = moves[type](makeBoard(), { events }, { row: 2, col: 1 });
+      expect(viaMoves.nextBoard.bacteria).toEqual(nextBoard.bacteria);
+      if (reachedGoal) {
+        expect(events.endGame).toHaveBeenCalled();
+      } else {
+        expect(events.endGame).not.toHaveBeenCalled();
+      }
+    }
   });
 })

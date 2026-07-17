@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { range, cloneDeep, every, some, map } from 'lodash';
 import { strategyGameFactory, type Events, type BoardClientProps, GameBoard } from '../../game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
-import { isAllowedStep, isColored, generateStartBoard, type Board } from './helpers';
+import { isAllowedStep, isColored, generateStartBoard, edges, type Board } from './helpers';
 import { useTranslation } from '../../language';
 
+// Screen position of each node; the drawn skeleton (see `edges` in helpers)
+// connects these by node id.
 const cubeCoords = [
   { cx: '8%',  cy: '25%' },
   { cx: '74%', cy: '25%' },
@@ -95,17 +97,13 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       onMouseMove={(event) => drawPickedColor(event)}
       className="aspect-square stroke-slate-900 dark:stroke-slate-300 stroke-3"
     >
-      {/* <!-- front and back face --> */}
-      <rect x="8%" y="25%" width="66%" height="66%" className="fill-transparent" />
-      <rect x="25%" y="8%" width="66%" height="66%" className="fill-transparent" />
-
-      {/* <!-- 4 edges connecting front and back face --> */}
-      <line x1="8%" y1="25%" x2="25%" y2="8%"/>
-      <line x1="74%" y1="25%" x2="91%" y2="8%"/>
-      <line x1="74%" y1="91%" x2="91%" y2="74%"/>
-      <line x1="8%" y1="91%" x2="25%" y2="74%"/>
-      {/* <!-- main diagonal --> */}
-      <line x1="74%" y1="91%" x2="25%" y2="8%"/>
+      {edges.map(([from, to]) => (
+        <line
+          key={`${from}-${to}`}
+          x1={cubeCoords[from].cx} y1={cubeCoords[from].cy}
+          x2={cubeCoords[to].cx} y2={cubeCoords[to].cy}
+        />
+      ))}
 
       {/* <!-- 8 nodes --> */}
       {range(8).map(nodeId => (

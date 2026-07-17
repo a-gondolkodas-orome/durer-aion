@@ -1,52 +1,24 @@
 import { cloneDeep, sample, maxBy } from "lodash";
 import type { StrategyArgs } from '../../game-factory';
+import { computeLettered, computeSinks, deficiency } from "./danger";
 import {
   type Board,
-  computeLettered,
-  computeSinks,
-  deficiency,
+  type AttackMove,
+  applyAttackMove,
   bacteriaCoords,
   totalBacteria,
   inBoard,
   spreadChildren,
   isGoalCell,
   topRowIdx
-} from "./danger";
-
-type MoveType = 'shiftRight' | 'shiftLeft' | 'jump' | 'spread';
-type AttackMove = { type: MoveType; row: number; col: number };
+} from "./helpers";
 
 export type { AttackMove };
 
-// Pure simulation of an attacker move, mirroring the semantics in helpers.ts.
+// Pure look-ahead over the shared attacker-move mechanics (see applyAttackMove).
 export const simulate = (board: Board, move: AttackMove): { board: Board; reachedGoal: boolean } => {
-  const next = cloneDeep(board);
-  const { type, row, col } = move;
-  let reached: [number, number][] = [];
-
-  if (type === 'shiftRight') {
-    const count = next.bacteria[row][col];
-    next.bacteria[row][col] = 0;
-    next.bacteria[row][col + 1] += count;
-    reached = [[row, col + 1]];
-  } else if (type === 'shiftLeft') {
-    const count = next.bacteria[row][col];
-    next.bacteria[row][col] = 0;
-    next.bacteria[row][col - 1] += count;
-    reached = [[row, col - 1]];
-  } else if (type === 'jump') {
-    next.bacteria[row][col] -= 1;
-    next.bacteria[row + 2][col] += 1;
-    reached = [[row + 2, col]];
-  } else {
-    const count = next.bacteria[row][col];
-    next.bacteria[row][col] = 0;
-    reached = spreadChildren(board, row, col);
-    for (const [r, c] of reached) next.bacteria[r][c] += count;
-  }
-
-  const reachedGoal = reached.some(([r, c]) => isGoalCell(board, r, c));
-  return { board: next, reachedGoal };
+  const { nextBoard, reachedGoal } = applyAttackMove(board, move);
+  return { board: nextBoard, reachedGoal };
 };
 
 export const legalAttackMoves = (board: Board): AttackMove[] => {

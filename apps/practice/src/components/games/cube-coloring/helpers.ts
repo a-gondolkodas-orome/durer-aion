@@ -10,13 +10,32 @@ export const isAllowedStep = (board: Board, vertex, color) => {
   return every(neighbours[vertex], i => (!isColored(board, i)) || board[i] !== color);
 };
 
-export const neighbours = {
-  0: [1, 3, 4],
-  1: [0, 2, 5],
-  2: [1, 3, 4, 6],
-  3: [0, 2, 7],
-  4: [0, 2, 5, 7],
-  5: [1, 4, 6],
-  6: [2, 5, 7],
-  7: [3, 4, 6]
-};
+// Nodes 0-3 are the front face, nodes 4-7 the back face; node i on the front
+// connects to node i+4 on the back. Each edge is a pair of node ids; this is
+// the single source of truth for both the drawn skeleton and the adjacency used
+// by the colouring rules.
+export const edges: [number, number][] = [
+  // front face
+  [0, 1],
+  [1, 2],
+  [2, 3],
+  [3, 0],
+  // back face
+  [4, 5],
+  [5, 6],
+  [6, 7],
+  [7, 4],
+  // 4 edges connecting front and back face
+  [0, 4],
+  [1, 5],
+  [2, 6],
+  [3, 7],
+  // main diagonal
+  [2, 4]
+];
+
+export const neighbours: Record<number, number[]> = edges.reduce((acc, [a, b]) => {
+  (acc[a] ||= []).push(b);
+  (acc[b] ||= []).push(a);
+  return acc;
+}, {} as Record<number, number[]>);

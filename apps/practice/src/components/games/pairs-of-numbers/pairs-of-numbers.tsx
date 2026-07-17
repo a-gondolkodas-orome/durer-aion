@@ -158,6 +158,11 @@ export const PairsOfNumbers = strategyGameFactory({
       label: { hu: 'Teszt', en: 'Test' }
     },
     // smart bot: verified as optimal
-    { botStrategy: smartBotStrategy, generateStartBoard, label: { hu: 'Teljes', en: 'Full' }, isDefault: true }
+    {
+      botStrategy: smartBotStrategy,
+      generateStartBoard,
+      label: { hu: 'Teljes', en: 'Full' },
+      isDefault: true
+    }
   ]
 });

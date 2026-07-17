@@ -8,9 +8,9 @@ import {
   isShiftRight,
   isShiftLeft,
   isAllowedAttackClick,
-  moves
+  moves,
+  type Board
 } from "./helpers";
-import type { Board } from "./danger";
 import {
   generateAdjacentStartBoard,
   generateScatteredStartBoard,

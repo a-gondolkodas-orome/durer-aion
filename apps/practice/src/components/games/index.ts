@@ -3,6 +3,11 @@ Barrel re-exporting every game's page component under its `gameList` key. The
 router (`app.tsx`) loops over `gameList` and looks each key up in this module's
 namespace, so a game's route is its key and nothing else.
 
+This is the component-wiring half of the pair; game metadata lives in the sibling
+`gameList.ts`, kept separate so metadata-only consumers (the overview homepage,
+game chrome) don't pull the whole game-component graph into their bundle. This
+barrel is imported in exactly one runtime place — the router.
+
 Each game is listed here exactly once. Where a component's export name differs
 from the key, alias it on re-export (`export { PolicemanthiefA as Policemanthief }`).
 That indirection is the point: renaming or moving a component only touches its

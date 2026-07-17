@@ -1,5 +1,6 @@
 import { reverse } from "lodash";
-import { type Board, deficiency, removeOne } from "./danger";
+import { deficiency } from "./danger";
+import { type Board, removeOne } from "./helpers";
 import { attackerMove, defenderMove, legalAttackMoves } from "./bot-strategy";
 
 // Readable behavioural checks that live ALONGSIDE bot-strategy.spec.ts (the

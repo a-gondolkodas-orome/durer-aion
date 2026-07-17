@@ -1,3 +1,16 @@
+/*
+Game registry — METADATA ONLY. One entry per game (year, round, category, name,
+icon, credit, `featured`). Deliberately free of React and of any game-component
+import: this is the widely-imported half of the pair — the overview homepage
+(cards, filters, icons, featured strip) and game chrome read it for display.
+Its sibling `index.ts` holds the component wiring (the actual page components).
+
+The two files are kept apart on purpose. Merging them would drag the whole
+game-component graph into every metadata consumer's bundle. This file is imported
+~a dozen places; `index.ts` is imported in exactly one runtime place — the router.
+`app.tsx` pairs them: it loops these keys and looks each up in the `index.ts`
+namespace. `game-list-integrity.spec.ts` guards that the two stay 1-to-1 in sync.
+*/
 import type { I18nString } from '../language';
 
 export type Category = 'A' | 'B' | 'C' | 'D' | 'E' | 'E+'

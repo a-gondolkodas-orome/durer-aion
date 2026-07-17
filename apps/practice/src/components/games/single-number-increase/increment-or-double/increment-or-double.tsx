@@ -1,7 +1,7 @@
 import {
   strategyGameFactory, type Ctx, type Events, type StrategyArgs, type BoardClientProps, GameBoard
 } from '../../../game-factory';
-import { random } from 'lodash';
+import { sample } from 'lodash';
 
 // `board` is the last number said. 0 means nothing has been said yet, so the
 // starting player must open with 1 (their only legal move from 0).
@@ -37,7 +37,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const say = (board: Board, next: number, { ctx, events }: { ctx: Ctx, events: Events }) => {
+const say = (next: number, { ctx, events }: { ctx: Ctx, events: Events }) => {
   events.endTurn();
   if (isLosing(next)) {
     events.endGame(1 - ctx.currentPlayer!);
@@ -46,8 +46,8 @@ const say = (board: Board, next: number, { ctx, events }: { ctx: Ctx, events: Ev
 };
 
 const moves = {
-  increment: (board: Board, meta: { ctx: Ctx, events: Events }) => say(board, board + 1, meta),
-  double: (board: Board, meta: { ctx: Ctx, events: Events }) => say(board, board * 2, meta)
+  increment: (board: Board, meta: { ctx: Ctx, events: Events }) => say(board + 1, meta),
+  double: (board: Board, meta: { ctx: Ctx, events: Events }) => say(board * 2, meta)
 };
 
 // The mover wins exactly when the last number said is even, so the only winning
@@ -56,7 +56,7 @@ const moves = {
 // even, winning number, so play randomly to maximise the chance the human errs.
 export const getBotNextNumber = (board: Board): number => {
   if (board % 2 === 0) return board + 1;
-  return random(0, 1) === 0 ? board + 1 : board * 2;
+  return sample([board + 1, board * 2])!;
 };
 
 const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {

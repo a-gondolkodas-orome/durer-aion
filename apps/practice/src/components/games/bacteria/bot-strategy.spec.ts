@@ -1,10 +1,10 @@
 import { cloneDeep, range } from "lodash";
+import { deficiency } from "./danger";
 import {
   type Board,
-  deficiency,
   bacteriaCoords,
   totalBacteria
-} from "./danger";
+} from "./helpers";
 import {
   simulate,
   legalAttackMoves,
