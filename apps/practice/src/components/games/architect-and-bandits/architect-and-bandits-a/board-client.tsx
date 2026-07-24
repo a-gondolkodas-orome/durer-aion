@@ -1,6 +1,6 @@
-import { useTranslation } from '../../../language';
+import { useTranslation } from '../../../../language';
 import type { Board } from './architect-and-bandits-a';
-import { GameBoard, type BoardClientProps } from '../../../game-factory';
+import { GameBoard, type BoardClientProps } from '../../../strategy-game-factory';
 
 const VERTEX_LABELS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 

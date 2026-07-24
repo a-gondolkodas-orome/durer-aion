@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { useTranslation } from '../../language';
-import { GameBoard, type BoardClientProps } from '../../game-factory';
+import { useTranslation } from '../../../language';
+import { GameBoard, type BoardClientProps } from '../../strategy-game-factory';
 import { type Board, type Cell, colorOf, moveTargets, placeTargets } from './helpers';
 
 // Translucent version of each disc colour, used for the recolour pulse ring.

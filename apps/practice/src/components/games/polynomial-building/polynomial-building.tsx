@@ -1,4 +1,4 @@
-import { strategyGameFactory, type Events } from '../../game-factory';
+import { strategyGameFactory, type Events } from '../../strategy-game-factory';
 import { type Board, type Coef, COEFS, hasThreeIntegerRoots } from './helpers';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { BoardClient } from './board-client';

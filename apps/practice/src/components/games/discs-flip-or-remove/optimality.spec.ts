@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { mapValues } from 'lodash';
-import { dummyEvents, makeCtx, type GameMoves } from '../../game-factory';
+import { dummyEvents, makeCtx, type GameMoves } from '../../strategy-game-factory';
 import { moves as gameMoves, smartBotStrategy } from './discs-flip-or-remove';
 
 // Exhaustive optimality check for both variants (max 6 and max 10 discs).

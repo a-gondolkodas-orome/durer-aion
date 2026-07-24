@@ -1,4 +1,4 @@
-import { makeCtx, type GameMoves, type StrategyArgs } from '../../game-factory';
+import { makeCtx, type GameMoves, type StrategyArgs } from '../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { type Board, type Coef, hasThreeIntegerRoots, canComplete } from './helpers';
 

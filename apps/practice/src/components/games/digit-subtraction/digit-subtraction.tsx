@@ -3,7 +3,7 @@ import {
   strategyGameFactory,
   type Ctx, type Events, type StrategyArgs, type BoardClientProps,
   GameBoard
-} from '../../game-factory';
+} from '../../strategy-game-factory';
 
 type Board = number
 

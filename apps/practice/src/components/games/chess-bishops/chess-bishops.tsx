@@ -1,7 +1,7 @@
 import { range, isEqual, some, cloneDeep } from 'lodash';
 import {
   strategyGameFactory, type BoardClientProps, type Events, GameBoard, useHoverPreview
-} from '../../game-factory';
+} from '../../strategy-game-factory';
 import { ChessBishopSvg } from './chess-bishop-svg';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import {

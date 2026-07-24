@@ -1,5 +1,5 @@
 import { random } from 'lodash';
-import type { StrategyArgs } from '../../../game-factory';
+import type { StrategyArgs } from '../../../strategy-game-factory';
 import type { Board } from './superstitious-counting';
 
 export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {

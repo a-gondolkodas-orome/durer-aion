@@ -1,4 +1,4 @@
-import type { VariantInput } from './types';
+import type { VariantInput } from '../types';
 
 export const resolveVariants = <TBoard,>(variants: VariantInput<TBoard>[]) => {
   if (!variants || variants.length === 0) {

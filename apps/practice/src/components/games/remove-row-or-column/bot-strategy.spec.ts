@@ -1,4 +1,4 @@
-import { makeCtx, type GameMoves } from '../../game-factory';
+import { makeCtx, type GameMoves } from '../../strategy-game-factory';
 import { type Board, type Grid, type Move, applyMove, isEmpty, getAllMoves } from './helpers';
 import { grundy, boardGrundy, smartBotStrategy, randomBotStrategy } from './bot-strategy';
 

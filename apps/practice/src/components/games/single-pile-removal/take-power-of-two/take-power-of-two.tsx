@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import {
   strategyGameFactory, type Events, type StrategyArgs, type BoardClientProps, GameBoard
-} from '../../../game-factory';
+} from '../../../strategy-game-factory';
 import { range, random, reverse, sample } from 'lodash';
-import { useTranslation } from '../../../language';
+import { useTranslation } from '../../../../language';
 
 const generateStartBoard = () => {
   if (random(0, 1)) {

@@ -1,5 +1,5 @@
 import { sample, cloneDeep, random, shuffle } from 'lodash';
-import type { StrategyArgs } from '../../game-factory';
+import type { StrategyArgs } from '../../strategy-game-factory';
 import { markForbiddenFields, getAllowedMoves, boardIndices, BISHOP, type Board, type Field } from './helpers';
 
 const HORIZONTAL = "h" as const;

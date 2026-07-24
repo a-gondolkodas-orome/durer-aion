@@ -1,5 +1,5 @@
 import { sample, shuffle } from 'lodash';
-import type { StrategyArgs } from '../../game-factory';
+import type { StrategyArgs } from '../../strategy-game-factory';
 import {
   type Board,
   applyRemoval,

@@ -2,7 +2,7 @@ import {
   strategyGameFactory, dummyEvents,
   type Events, type StrategyArgs, type BoardClientProps,
   GameBoard
-} from '../../game-factory';
+} from '../../strategy-game-factory';
 import { range, cloneDeep, sample, shuffle } from 'lodash';
 
 const [ALLOWED, COLORED, FORBIDDEN] = [1 as const, 2 as const, 3 as const];

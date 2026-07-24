@@ -2,7 +2,7 @@ import {
   strategyGameFactory,
   type Ctx, type Events, type StrategyArgs, type BoardClientProps,
   GameBoard
-} from '../../game-factory';
+} from '../../strategy-game-factory';
 import { range, random, sample } from 'lodash';
 import { ChessBishopSvg } from '../chess-bishops/chess-bishop-svg';
 

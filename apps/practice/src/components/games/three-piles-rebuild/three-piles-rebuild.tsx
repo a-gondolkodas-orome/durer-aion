@@ -6,8 +6,8 @@ import {
   type StrategyArgs,
   type GameMoves,
   GameBoard
-} from '../../game-factory';
-import { useTranslation } from '../../language';
+} from '../../strategy-game-factory';
+import { useTranslation } from '../../../language';
 import {
   type Board,
   canSplit,

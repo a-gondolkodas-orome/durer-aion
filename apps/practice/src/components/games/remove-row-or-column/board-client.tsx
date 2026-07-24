@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { range } from 'lodash';
 import {
   type BoardClientProps, type Events, type Ctx, GameBoard
-} from '../../game-factory';
-import { useTranslation } from '../../language';
+} from '../../strategy-game-factory';
+import { useTranslation } from '../../../language';
 import {
   type Board, type Orientation, type Move,
   getRectangleAt, applyMove, isEmpty

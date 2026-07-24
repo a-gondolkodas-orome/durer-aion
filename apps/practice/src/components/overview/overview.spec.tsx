@@ -1,11 +1,13 @@
 // @vitest-environment jsdom
 import { render, screen, within, fireEvent } from '@testing-library/react';
 import { Overview } from './overview';
-import type { GameList, IconKey } from '../games/gameList';
+import type { Category, GameList, IconKey } from '../games/gameList';
 import { HashRouter } from 'react-router';
 
-vi.mock('../games/gameList', async (importOriginal): Promise<{ gameList: GameList; iconKeys: readonly IconKey[] }> => ({
-  iconKeys: (await importOriginal<{ iconKeys: readonly IconKey[] }>()).iconKeys,
+type CanonicalConstants = { iconKeys: readonly IconKey[]; categories: readonly Category[] };
+
+vi.mock('../games/gameList', async (importOriginal): Promise<CanonicalConstants & { gameList: GameList }> => ({
+  ...(await importOriginal<CanonicalConstants>()),
   gameList: {
     GameA1: {
       name: { hu: 'A egy' },

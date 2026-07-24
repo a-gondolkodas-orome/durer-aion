@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { range, cloneDeep, every, some, map } from 'lodash';
-import { strategyGameFactory, type Events, type BoardClientProps, GameBoard } from '../../game-factory';
+import { strategyGameFactory, type Events, type BoardClientProps, GameBoard } from '../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { isAllowedStep, isColored, generateStartBoard, edges, type Board } from './helpers';
-import { useTranslation } from '../../language';
+import { useTranslation } from '../../../language';
 
 // Screen position of each node; the drawn skeleton (see `edges` in helpers)
 // connects these by node id.

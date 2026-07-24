@@ -1,13 +1,5 @@
-import {
-  getFeaturedGames,
-  sectionKeyOf,
-  groupBySection,
-  getUsedIcons,
-  filterByCategories,
-  filterByIcons,
-  orderByCategoryThenYear
-} from './selection';
-import type { GameList } from '../games/gameList';
+import { getFeaturedGames, sectionKeyOf, groupBySection, orderByCategoryThenYear } from './sections';
+import type { GameList } from '../../games/gameList';
 
 const list: GameList = {
   EasyA: {
@@ -50,41 +42,6 @@ describe('groupBySection', () => {
     expect(groups.AB).toEqual(['EasyA', 'EasyB']);
     // multi-category games (['C','D'], ['E','E+']) both land in the single CDE bracket
     expect(groups.CDE).toEqual(['MidCD', 'HardE']);
-  });
-});
-
-describe('filterByCategories', () => {
-  const ids = Object.keys(list);
-
-  it('returns everything for an empty selection', () => {
-    expect(filterByCategories(ids, [], list)).toEqual(ids);
-  });
-
-  it('matches games sharing any selected category', () => {
-    // D is a secondary category of MidCD, so MidCD matches
-    expect(filterByCategories(ids, ['D'], list)).toEqual(['MidCD']);
-    expect(filterByCategories(ids, ['A', 'E+'], list)).toEqual(['EasyA', 'HardE']);
-  });
-});
-
-describe('getUsedIcons', () => {
-  it('returns the distinct icons in canonical order, ignoring unused keys', () => {
-    // used icons: chess, coins (twice), number — canonical order is chess, coins, number
-    expect(getUsedIcons(list)).toEqual(['chess', 'coins', 'number']);
-  });
-});
-
-describe('filterByIcons', () => {
-  const ids = Object.keys(list);
-
-  it('returns everything for an empty selection', () => {
-    expect(filterByIcons(ids, [], list)).toEqual(ids);
-  });
-
-  it('keeps only games whose icon is selected', () => {
-    expect(filterByIcons(ids, ['coins'], list)).toEqual(['EasyB', 'MidCD']);
-    expect(filterByIcons(ids, ['chess', 'coins'], list)).toEqual(['EasyA', 'EasyB', 'MidCD']);
-    expect(filterByIcons(ids, ['chess'], list)).toEqual(['EasyA']);
   });
 });
 

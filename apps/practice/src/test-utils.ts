@@ -1,4 +1,4 @@
-import type { Events } from './components/game-factory';
+import type { Events } from './components/strategy-game-factory';
 
 // Mock `events` for testing move functions. Each handler is a spy, so tests can
 // assert e.g. `expect(events.endGame).toHaveBeenCalledWith(1)`. For production

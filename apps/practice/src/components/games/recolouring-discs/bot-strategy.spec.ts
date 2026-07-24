@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { makeCtx, type GameMoves, type StrategyArgs } from '../../game-factory';
+import { makeCtx, type GameMoves, type StrategyArgs } from '../../strategy-game-factory';
 import {
   type Board,
   type Cell,

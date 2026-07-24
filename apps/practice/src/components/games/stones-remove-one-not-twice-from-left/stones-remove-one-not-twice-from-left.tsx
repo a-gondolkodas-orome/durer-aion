@@ -3,9 +3,9 @@ import {
   strategyGameFactory,
   type Ctx, type Events, type StrategyArgs, type BoardClientProps,
   GameBoard
-} from '../../game-factory';
+} from '../../strategy-game-factory';
 import { cloneDeep, isEqual, sample, random, range } from 'lodash';
-import { useTranslation } from '../../language';
+import { useTranslation } from '../../../language';
 
 type Board = { piles: [number, number], leftRestriction: [boolean, boolean] }
 

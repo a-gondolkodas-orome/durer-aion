@@ -1,7 +1,7 @@
 import { difference, range, shuffle, sample } from 'lodash';
 import { isAllowedStep, isColored, neighbours, type Board } from './helpers';
 import { nodeColors } from './cube-coloring';
-import type { StrategyArgs } from '../../game-factory';
+import type { StrategyArgs } from '../../strategy-game-factory';
 
 export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   const validMoves: { vertex: number, color: string }[] = [];

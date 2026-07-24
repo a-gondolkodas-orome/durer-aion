@@ -1,6 +1,6 @@
 import {
   strategyGameFactory, type Ctx, type Events, type StrategyArgs, type BoardClientProps, GameBoard
-} from '../../../game-factory';
+} from '../../../strategy-game-factory';
 import { sample } from 'lodash';
 
 // `board` is the last number said. 0 means nothing has been said yet, so the

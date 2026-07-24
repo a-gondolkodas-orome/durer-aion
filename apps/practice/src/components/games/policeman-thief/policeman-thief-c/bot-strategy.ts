@@ -1,7 +1,7 @@
 import { sample, random, range } from "lodash";
 import { neighbours, VERTEX_COUNT, dist, minDistToSet } from "./helpers";
 import type { Board } from "./policeman-thief-c";
-import type { StrategyArgs, GameMoves } from "../../../game-factory";
+import type { StrategyArgs, GameMoves } from "../../../strategy-game-factory";
 
 // ---------------------------------------------------------------------------
 // Minimax core (exhaustive; the graph and rules are fixed so the memo below is

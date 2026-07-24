@@ -3,8 +3,8 @@ import {
   strategyGameFactory,
   type Events, type StrategyArgs, type BoardClientProps,
   GameBoard
-} from '../../game-factory';
-import { useTranslation } from '../../language';
+} from '../../strategy-game-factory';
+import { useTranslation } from '../../../language';
 
 // The board is the multiset of coin values. Only which distinct values are
 // present matters for the game logic; the counts are pure flavour. The two

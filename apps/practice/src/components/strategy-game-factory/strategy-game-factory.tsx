@@ -1,17 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { GameHeader, GameFooter, GameRule } from './game-parts/game-chrome';
-import { GameSidebar } from './game-parts/game-sidebar';
+import { GameHeader } from './game-parts/game-header';
+import { GameFooter } from './game-parts/game-footer';
+import { GameRule } from './game-parts/game-rule';
+import { GameSidebar } from './game-parts/game-sidebar/game-sidebar';
 import { GameEndDialog } from './game-parts/game-end-dialog';
 import { mapValues, cloneDeep } from 'lodash';
-import { useTranslation, type TranslatableNode, type I18nString } from '../language';
+import { useTranslation, type TranslatableNode, type I18nString } from '../../language';
 import { useLocation } from 'react-router';
-import { useGameStats } from './use-game-stats';
-import { trackEvent } from '../app/umami';
+import { useGameStats } from './hooks/use-game-stats';
+import { trackEvent } from '../../tracking';
 import type {
   Phase, Mode, Ctx, Events, MoveResult, MoveFunction, GameMoves,
   BoardClientProps, Variant as DisplayVariant, VariantInput
 } from './types';
-import { resolveVariants } from './resolve-variants';
+import { resolveVariants } from './helpers/resolve-variants';
 
 const DEFAULT_PLAYER_NAMES: I18nString[] = [
   { hu: '1. játékos', en: '1st player' },

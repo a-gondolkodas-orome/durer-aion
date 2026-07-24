@@ -4,7 +4,7 @@ import {
   strategyGameFactory,
   type Events, type StrategyArgs, type GameMoves, type BoardClientProps,
   GameBoard
-} from '../../game-factory';
+} from '../../strategy-game-factory';
 
 // A board is the list of pile sizes; every pile has at least one match.
 export type Board = number[];

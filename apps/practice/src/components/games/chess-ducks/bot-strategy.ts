@@ -1,5 +1,5 @@
 import { getBoardIndices, moves, getAllowedMoves, type Board, type Field } from "./helpers";
-import { dummyEvents, type StrategyArgs } from "../../game-factory";
+import { dummyEvents, type StrategyArgs } from "../../strategy-game-factory";
 import { shuffle, sample } from "lodash";
 
 /* This strategy file is relevant for the 4x7 case */

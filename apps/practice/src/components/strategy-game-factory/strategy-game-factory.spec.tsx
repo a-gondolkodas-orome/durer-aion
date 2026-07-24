@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { render, fireEvent, act } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
-import { strategyGameFactory, type StrategyGameConfig, type Gameplay } from './strategy-game';
+import { strategyGameFactory, type StrategyGameConfig, type Gameplay } from './strategy-game-factory';
 import type { BoardClientProps, Ctx, Events, GameMoves } from './types';
 
 type Board = string[];

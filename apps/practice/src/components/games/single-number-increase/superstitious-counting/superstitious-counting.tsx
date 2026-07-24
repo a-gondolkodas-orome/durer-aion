@@ -1,7 +1,9 @@
 import { range, sample, difference } from 'lodash';
-import { strategyGameFactory, type Ctx, type Events, type BoardClientProps, GameBoard } from '../../../game-factory';
+import {
+  strategyGameFactory, type Ctx, type Events, type BoardClientProps, GameBoard
+} from '../../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
-import { useTranslation } from '../../../language';
+import { useTranslation } from '../../../../language';
 
 export type Board = { current: number, target: number, restricted: number | null }
 

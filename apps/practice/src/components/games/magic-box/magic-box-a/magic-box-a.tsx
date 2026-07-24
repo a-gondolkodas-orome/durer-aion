@@ -1,5 +1,7 @@
 import { range } from 'lodash';
-import { strategyGameFactory, type Events, type BoardClientProps, type Ctx, GameBoard } from '../../../game-factory';
+import {
+  strategyGameFactory, type Events, type BoardClientProps, type Ctx, GameBoard
+} from '../../../strategy-game-factory';
 import { generateEmptyBoard, isGameEnd, placeStone, type Board } from './helpers';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 

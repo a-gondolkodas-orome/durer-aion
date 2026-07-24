@@ -1,5 +1,7 @@
 import { range, cloneDeep } from 'lodash';
-import { strategyGameFactory, type Events, type BoardClientProps, type Ctx, GameBoard } from '../../../game-factory';
+import {
+  strategyGameFactory, type Events, type BoardClientProps, type Ctx, GameBoard
+} from '../../../strategy-game-factory';
 import { generateEmptyTicTacToeBoard } from '../helpers';
 import { isGameEnd, hasFirstPlayerWon, type Board } from './helpers';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';

@@ -1,5 +1,5 @@
 import { cloneDeep, last } from "lodash";
-import type { Events } from '../../game-factory';
+import type { Events } from '../../strategy-game-factory';
 
 export type Board = { bacteria: number[][], goals: number[] };
 

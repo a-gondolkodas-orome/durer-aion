@@ -31,7 +31,7 @@ registered in `gameList.ts`.
 **Shared infrastructure:**
 - `game-parts/` — common UI elements (rules section, role chooser, restart
   button, etc.)
-- `strategy-game.tsx` — game flow engine via `strategyGameFactory`: handles
+- `strategy-game-factory.tsx` — game flow engine via `strategyGameFactory`: handles
   turn-taking, end-of-game detection, restart/clean state. Defines a
   well-specified API that every game must implement.
 
@@ -46,7 +46,7 @@ Traffic is expected to remain low — no scalability concerns.
 
 ## Testing
 
-Any logic change (not just styling) to `strategy-game.tsx` or the overview page
+Any logic change (not just styling) to `strategy-game-factory.tsx` or the overview page
 must be covered by new unit tests. Prefer adding tests before or alongside the
 change, not as an afterthought.
 
@@ -65,7 +65,7 @@ non-trivial.
 
 Follow the steps in [README.md § Adding a new
 game](README.md#adding-a-new-game). Use `strategyGameFactory` (see
-`strategy-game.tsx`) — copy a similar existing game as a starting point.
+`strategy-game-factory.tsx`) — copy a similar existing game as a starting point.
 
 ### strategyGameFactory API
 

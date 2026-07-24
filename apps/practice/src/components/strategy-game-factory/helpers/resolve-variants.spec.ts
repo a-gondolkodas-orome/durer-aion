@@ -1,5 +1,5 @@
 import { resolveVariants } from './resolve-variants';
-import type { VariantInput } from './types';
+import type { VariantInput } from '../types';
 
 type Board = string[];
 

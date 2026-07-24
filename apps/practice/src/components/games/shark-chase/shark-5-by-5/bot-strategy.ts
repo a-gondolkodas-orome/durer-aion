@@ -1,5 +1,5 @@
 import { sample } from 'lodash';
-import type { StrategyArgs } from '../../../game-factory';
+import type { StrategyArgs } from '../../../strategy-game-factory';
 import { type Board } from './shark-chase';
 import sharkExceptionMoves from './shark-exception-moves.json';
 

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
   strategyGameFactory, type Events, type BoardClientProps, GameBoard, useHoverPreview
-} from '../../../game-factory';
+} from '../../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { isAllowed, getAllowedSuperset, isGameEnd, vertices, type Board } from './helpers';
 import { cloneDeep } from 'lodash';

@@ -1,7 +1,7 @@
 import { isEqual } from 'lodash';
-import { useTranslation } from '../../language';
+import { useTranslation } from '../../../language';
 import { hasActivePair, type Board } from './strategy';
-import { GameBoard, type BoardClientProps } from '../../game-factory';
+import { GameBoard, type BoardClientProps } from '../../strategy-game-factory';
 
 export type TurnState = { levelIdx: number; slotIdx: number } | null;
 

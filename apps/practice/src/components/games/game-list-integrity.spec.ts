@@ -1,5 +1,5 @@
-import { gameList } from '../games/gameList';
-import * as gameComponents from '../games';
+import { gameList } from './gameList';
+import * as gameComponents from './index';
 
 const components = gameComponents as Record<string, unknown>;
 

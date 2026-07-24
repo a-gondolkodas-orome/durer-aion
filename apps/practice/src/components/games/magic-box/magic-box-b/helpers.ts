@@ -1,4 +1,4 @@
-import type { I18nString } from '../../../language';
+import type { I18nString } from '../../../../language';
 
 export type Board = { stones: boolean[]; pendingLine: number | null }
 

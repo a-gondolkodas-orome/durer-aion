@@ -2,8 +2,8 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { GameSidebar, type SidebarMoves } from './game-sidebar';
-import type { Ctx } from '../types';
-import { makeCtx } from '../ctx-factory';
+import type { Ctx } from '../../types';
+import { makeCtx } from '../../helpers/make-ctx';
 
 beforeAll(() => {
   const { unmount } = renderSidebar();

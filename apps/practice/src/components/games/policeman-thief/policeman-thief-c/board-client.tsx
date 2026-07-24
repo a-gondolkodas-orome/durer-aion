@@ -1,8 +1,8 @@
 import { range } from "lodash";
 import { neighbours, coords, edges, VERTEX_COUNT } from "./helpers";
 import type { Board } from "./policeman-thief-c";
-import { GameBoard, type BoardClientProps } from "../../../game-factory";
-import { useTranslation } from "../../../language";
+import { GameBoard, type BoardClientProps } from "../../../strategy-game-factory";
+import { useTranslation } from "../../../../language";
 
 const COP_COLORS = ['var(--color-blue-800)', 'var(--color-green-600)', 'var(--color-amber-500)'];
 const THIEF_COLOR = 'var(--color-red-500)';

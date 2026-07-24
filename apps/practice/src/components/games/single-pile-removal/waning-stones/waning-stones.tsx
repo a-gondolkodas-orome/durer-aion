@@ -1,8 +1,8 @@
 import {
   strategyGameFactory, type Events, type StrategyArgs, type BoardClientProps, GameBoard, useHoverPreview
-} from '../../../game-factory';
+} from '../../../strategy-game-factory';
 import { range, random, sample, minBy } from 'lodash';
-import { useTranslation } from '../../../language';
+import { useTranslation } from '../../../../language';
 
 // `stones` is the number of pebbles left in the pile. `maxTake` is the most a
 // player may take this turn: on the opening move it is ⌊stones/2⌋ (baked into the

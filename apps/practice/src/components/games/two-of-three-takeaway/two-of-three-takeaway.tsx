@@ -4,8 +4,8 @@ import {
   strategyGameFactory,
   type Ctx, type Events, type StrategyArgs, type BoardClientProps,
   GameBoard
-} from '../../game-factory';
-import { useTranslation } from '../../language';
+} from '../../strategy-game-factory';
+import { useTranslation } from '../../../language';
 import {
   type Board,
   applyMove,

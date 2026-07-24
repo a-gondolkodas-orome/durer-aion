@@ -1,5 +1,5 @@
 import { sample, maxBy } from 'lodash';
-import type { StrategyArgs } from '../../game-factory';
+import type { StrategyArgs } from '../../strategy-game-factory';
 import { SYMMETRIES } from './board-data';
 import {
   type Board, CELL_COUNT, boardMasks, emptyCells, completesLine, linesThrough

@@ -1,9 +1,9 @@
 import {
   strategyGameFactory, type Events, type BoardClientProps, type StrategyArgs, GameBoard
-} from '../../game-factory';
+} from '../../strategy-game-factory';
 import { range, cloneDeep, sample, random } from 'lodash';
 import { strategyDict } from './bot-strategy';
-import { useTranslation } from '../../language';
+import { useTranslation } from '../../../language';
 
 type Board = { numbersOnTable: boolean[], previousMove: number | null }
 

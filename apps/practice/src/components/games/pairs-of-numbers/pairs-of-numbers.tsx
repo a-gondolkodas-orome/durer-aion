@@ -1,8 +1,8 @@
 import {
   strategyGameFactory, type Events, type StrategyArgs, type BoardClientProps, GameBoard
-} from '../../game-factory';
+} from '../../strategy-game-factory';
 import { random } from 'lodash';
-import { useTranslation } from '../../language';
+import { useTranslation } from '../../../language';
 
 type Board = number[]
 

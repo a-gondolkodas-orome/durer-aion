@@ -1,7 +1,7 @@
 import { random } from "lodash";
 import { neighbours } from "./helpers";
 import type { Board } from "./policeman-thief-ab";
-import type { StrategyArgs, GameMoves } from "../../../game-factory";
+import type { StrategyArgs, GameMoves } from "../../../strategy-game-factory";
 
 export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
   if (ctx.chosenRoleIndex === 0) {

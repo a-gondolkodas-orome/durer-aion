@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { type BoardClientProps, GameBoard } from '../../game-factory';
-import { useTranslation } from '../../language';
+import { type BoardClientProps, GameBoard } from '../../strategy-game-factory';
+import { useTranslation } from '../../../language';
 import { type Board, type Coef, COEFS, integerRoots } from './helpers';
 
 // Any integer is allowed; the digit cap only keeps arithmetic exact (< 2^53).

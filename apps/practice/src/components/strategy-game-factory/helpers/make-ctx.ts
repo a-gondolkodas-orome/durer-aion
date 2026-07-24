@@ -1,4 +1,4 @@
-import type { Ctx } from './types';
+import type { Ctx } from '../types';
 
 export const makeCtx = (overrides: Partial<Ctx> = {}): Ctx => ({
   phase: 'roleSelection',

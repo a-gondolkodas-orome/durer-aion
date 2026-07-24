@@ -6,8 +6,8 @@ import {
   type Events,
   type StrategyArgs,
   GameBoard
-} from '../../game-factory';
-import { useTranslation } from '../../language';
+} from '../../strategy-game-factory';
+import { useTranslation } from '../../../language';
 import {
   type Board,
   generateStartBoard,

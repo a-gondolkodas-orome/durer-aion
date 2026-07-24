@@ -1,5 +1,5 @@
 import { random, flatten, cloneDeep, sum, tail } from 'lodash';
-import type { Events } from '../../game-factory';
+import type { Events } from '../../strategy-game-factory';
 
 export type SoldierColor = 'blue' | 'red';
 export type Board = SoldierColor[][];

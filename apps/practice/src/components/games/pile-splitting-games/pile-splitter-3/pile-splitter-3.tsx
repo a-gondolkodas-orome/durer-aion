@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { range, isEqual, random, cloneDeep } from 'lodash';
 import {
   strategyGameFactory, type BoardClientProps, type Events, GameBoard, useHoverPreview
-} from '../../../game-factory';
+} from '../../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 
 export type Board = number[];

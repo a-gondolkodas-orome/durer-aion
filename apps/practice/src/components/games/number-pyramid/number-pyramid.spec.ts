@@ -1,6 +1,6 @@
 import { moves } from './number-pyramid';
 import type { Board, Slot } from './strategy';
-import { makeCtx } from '../../game-factory';
+import { makeCtx } from '../../strategy-game-factory';
 import { makeEvents } from '../../../test-utils';
 
 const active = (value: number): Slot => ({ value, state: 'active' });

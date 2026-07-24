@@ -1,6 +1,6 @@
 import { cloneDeep } from 'lodash';
 import { Sheriff, Thief, hasWinningTriple, getUntakenCards, type Board } from '../helpers';
-import type { Ctx, Events } from '../../../game-factory';
+import type { Ctx, Events } from '../../../strategy-game-factory';
 
 export const CARD_COUNT = 9;
 

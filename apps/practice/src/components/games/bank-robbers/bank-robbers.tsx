@@ -1,6 +1,6 @@
 import {
   strategyGameFactory, type Events, type BoardClientProps, type StrategyArgs, GameBoard
-} from '../../game-factory';
+} from '../../strategy-game-factory';
 import { range, cloneDeep, random, sample } from 'lodash';
 import { smartBotStrategy } from './bot-strategy';
 

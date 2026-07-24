@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import {
   strategyGameFactory, type Events, type StrategyArgs, type BoardClientProps, GameBoard
-} from '../../../game-factory';
+} from '../../../strategy-game-factory';
 import { random, range } from 'lodash';
-import { useTranslation } from '../../../language';
+import { useTranslation } from '../../../../language';
 
 type Board = number
 type HoveredAction = 'take1' | 'halve' | null

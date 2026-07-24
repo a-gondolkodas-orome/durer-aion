@@ -1,5 +1,5 @@
 import { sample, random } from 'lodash';
-import type { StrategyArgs } from '../../game-factory';
+import type { StrategyArgs } from '../../strategy-game-factory';
 import {
   type Board, type Grid, getRectangles, getAllMoves, applyMove, isEmpty
 } from './helpers';

@@ -1,7 +1,7 @@
 import {
   strategyGameFactory, type Events, type Ctx, type StrategyArgs, type BoardClientProps, GameBoard
-} from '../../game-factory';
-import { useTranslation } from '../../language';
+} from '../../strategy-game-factory';
+import { useTranslation } from '../../../language';
 import {
   allNumbers, generateStartBoard, numbersOwnedBy, currentPlayerFromOwner,
   hasSum15, findWinningTriple, chooseSmartMove, chooseTestMove, type Board

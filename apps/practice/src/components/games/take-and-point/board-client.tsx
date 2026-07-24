@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { range } from 'lodash';
-import { useTranslation } from '../../language';
-import { GameBoard, type BoardClientProps } from '../../game-factory';
+import { useTranslation } from '../../../language';
+import { GameBoard, type BoardClientProps } from '../../strategy-game-factory';
 import { type Board, nonEmptyIndices } from './helpers';
 
 const Chips = ({ count, removeCount = 0 }: { count: number; removeCount?: number }) => (

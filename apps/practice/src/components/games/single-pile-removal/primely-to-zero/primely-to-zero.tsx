@@ -2,7 +2,7 @@ import {
   strategyGameFactory,
   type Ctx, type Events, type StrategyArgs, type BoardClientProps,
   GameBoard
-} from '../../../game-factory';
+} from '../../../strategy-game-factory';
 import { range, sample } from 'lodash';
 
 type Board = number

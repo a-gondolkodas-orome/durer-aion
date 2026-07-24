@@ -1,6 +1,6 @@
 import { range } from 'lodash';
-import { useTranslation } from '../../../language';
-import { GameBoard, type BoardClientProps } from '../../../game-factory';
+import { useTranslation } from '../../../../language';
+import { GameBoard, type BoardClientProps } from '../../../strategy-game-factory';
 import { LINES, LINE_LABELS, type Board } from './helpers';
 
 const BOX_SIZE = 'w-64 sm:w-72';

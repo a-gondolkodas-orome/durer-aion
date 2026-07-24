@@ -1,6 +1,6 @@
 import { sample } from 'lodash';
 import { Sheriff, Thief, hasWinningTriple, getUntakenCards, type Board } from '../helpers';
-import { dummyEvents, makeCtx, type StrategyArgs } from '../../../game-factory';
+import { dummyEvents, makeCtx, type StrategyArgs } from '../../../strategy-game-factory';
 import { moves, CARD_COUNT } from './moves';
 
 export const randomBotStrategy = ({ board, moves: gameMoves }: StrategyArgs<Board>) => {

@@ -1,5 +1,5 @@
 import { random, sample } from 'lodash';
-import type { StrategyArgs } from '../../game-factory';
+import type { StrategyArgs } from '../../strategy-game-factory';
 import {
   type Board, type Coef, COEFS, rootTriplesWithProduct, completionValue, canComplete
 } from './helpers';

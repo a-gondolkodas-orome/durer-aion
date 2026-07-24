@@ -1,5 +1,7 @@
 import { range, sum, isEqual, random, cloneDeep } from 'lodash';
-import { strategyGameFactory, type Ctx, type Events, type BoardClientProps, GameBoard } from '../../../game-factory';
+import {
+  strategyGameFactory, type Ctx, type Events, type BoardClientProps, GameBoard
+} from '../../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 
 export type Board = number[]

@@ -1,5 +1,5 @@
 import { sample } from "lodash";
-import { type StrategyArgs } from "../../game-factory";
+import { type StrategyArgs } from "../../strategy-game-factory";
 import { type Board, legalNodes } from "./helpers";
 
 // Every move raises the total coin count by exactly 1, so the game is a

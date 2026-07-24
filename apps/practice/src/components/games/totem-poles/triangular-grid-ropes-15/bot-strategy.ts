@@ -1,7 +1,7 @@
 import { sample } from 'lodash';
 import { getAllowedMoves, type Board } from './helpers';
 import { findWinningMove } from './solver';
-import type { StrategyArgs } from '../../../game-factory';
+import type { StrategyArgs } from '../../../strategy-game-factory';
 
 //         0
 //        1 2

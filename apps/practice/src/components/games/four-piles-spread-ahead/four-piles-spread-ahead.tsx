@@ -1,9 +1,9 @@
 import { range, random, cloneDeep } from 'lodash';
 import {
   strategyGameFactory, type BoardClientProps, type Events, GameBoard, useHoverPreview
-} from '../../game-factory';
+} from '../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
-import { useLanguage } from '../../language';
+import { useLanguage } from '../../../language';
 
 export type Board = number[];
 type Piece = { pileId: number; pieceId: number };

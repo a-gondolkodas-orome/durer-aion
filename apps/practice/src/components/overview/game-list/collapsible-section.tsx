@@ -1,5 +1,5 @@
 import { useId, useState, type ReactNode } from 'react';
-import { useTranslation, type I18nNode } from '../language';
+import { useTranslation, type I18nNode } from '../../../language';
 
 // Persist each section's open/closed state for the tab session, so it survives
 // navigating to a game page and back (which unmounts the overview). sessionStorage

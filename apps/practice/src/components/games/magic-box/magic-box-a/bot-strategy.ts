@@ -1,6 +1,6 @@
 import { range, sample } from 'lodash';
 import { isGameEnd, placeStone, type Board } from './helpers';
-import type { StrategyArgs } from '../../../game-factory';
+import type { StrategyArgs } from '../../../strategy-game-factory';
 
 export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   moves.placeStone(board, sample(emptyCells(board)));

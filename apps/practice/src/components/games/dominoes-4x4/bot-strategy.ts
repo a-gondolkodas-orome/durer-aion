@@ -1,5 +1,5 @@
 import { sample } from 'lodash';
-import type { StrategyArgs } from '../../game-factory';
+import type { StrategyArgs } from '../../strategy-game-factory';
 import { type Board, type Domino, BOARDSIZE } from './dominoes-4x4';
 
 // This game is Domineering on a 4x4 board: player 0 (Árgyélus) only ever places

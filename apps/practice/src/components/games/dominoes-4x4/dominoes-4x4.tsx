@@ -4,7 +4,7 @@ import {
   strategyGameFactory,
   type Events, type Ctx, type BoardClientProps,
   GameBoard, useHoverPreview
-} from '../../game-factory';
+} from '../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 
 export type Field = { row: number, col: number }
