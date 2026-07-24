@@ -1,6 +1,7 @@
-import { useState } from 'react';
 import { range, isEqual, some, cloneDeep } from 'lodash';
-import { strategyGameFactory, type BoardClientProps, type Events, GameBoard } from '../../game-factory';
+import {
+  strategyGameFactory, type BoardClientProps, type Events, GameBoard, useHoverPreview
+} from '../../game-factory';
 import { ChessBishopSvg } from './chess-bishop-svg';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import {
@@ -9,8 +10,7 @@ import {
 } from './helpers';
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const [hoveredField, setHoveredField] = useState<{ field: Field; moveCount: number } | null>(null);
-  const validHoveredField = hoveredField?.moveCount === ctx.moveCount ? hoveredField.field : null;
+  const { value: validHoveredField, hoverProps } = useHoverPreview<Field>(ctx.moveCount);
   const clickField = (field: Field) => {
     if (!isMoveAllowed(field)) return;
 
@@ -60,11 +60,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                   className="w-full aspect-square p-[5%]"
                   disabled={!isMoveAllowed({ row, col })}
                   onClick={() => clickField({ row, col })}
-                  onPointerEnter={() => setHoveredField({ field: { row, col }, moveCount: ctx.moveCount })}
-                  onPointerMove={() => setHoveredField({ field: { row, col }, moveCount: ctx.moveCount })}
-                  onPointerLeave={() => setHoveredField(null)}
-                  onFocus={() => setHoveredField({ field: { row, col }, moveCount: ctx.moveCount })}
-                  onBlur={() => setHoveredField(null)}
+                  {...hoverProps({ row, col })}
                 >
                   {isBishop({ row, col }) && (
                     <svg className="w-full aspect-square">

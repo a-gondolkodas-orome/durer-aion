@@ -1,12 +1,14 @@
-import { compact, cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash';
 import { strategyGameFactory, type Ctx, type Events, type BoardClientProps, GameBoard } from '../../game-factory';
 import { smartBotStrategy } from './bot-strategy';
 import { RockSvg } from './symbols/rock-svg';
 import { PaperSvg } from './symbols/paper-svg';
-import { ScissorSvg } from './symbols/scissor-svg';
+import { ScissorSvg } from '../shared/scissor-svg';
 import { useTranslation } from '../../language';
 
 export type Board = ('rock' | 'paper' | 'scissor' | null)[][]
+
+const symbolSvgs = [RockSvg, PaperSvg, ScissorSvg];
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
@@ -24,37 +26,36 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   return (
   <GameBoard>
     <div className="grid grid-cols-3">
-      <h2 className="text-center">{t({ hu: 'Kezdő', en: 'First' })}</h2>
-      <span></span>
-      <h2 className="text-center">{t({ hu: 'Második', en: 'Second' })}</h2>
+      <h2 className="text-center col-start-1">{t({ hu: 'Kezdő', en: 'First' })}</h2>
+      <h2 className="text-center col-start-3">{t({ hu: 'Második', en: 'Second' })}</h2>
 
-      {[0, 1, 2].map(symbolIdx => (
-        [0, null, 1].map(playerIdx => (
-          playerIdx === null || board[playerIdx][symbolIdx] === null
-          ? <span className="aspect-4/5 m-2" key={`${playerIdx}-${symbolIdx}`}></span>
-          : <button
-              key={`${playerIdx}-${symbolIdx}`}
-              disabled={playerIdx === ctx.currentPlayer || !isMoveAllowed(symbolIdx)}
-              onClick={() => clickField(symbolIdx)}
-              className={`
-                p-2 m-2 aspect-4/5 bg-surface-elevated rounded-lg drop-shadow-lg
-                enabled:border-2 enabled:border-dashed
-                enabled:hocus:opacity-50
-              `}
-            >
-              { symbolIdx === 0 && (<RockSvg />) }
-              { symbolIdx === 1 && (<PaperSvg />) }
-              { symbolIdx === 2 && (<ScissorSvg />) }
-            </button>
-        ))
-      ))}
+      {[0, 1, 2].map(symbolIdx => {
+        const SymbolSvg = symbolSvgs[symbolIdx];
+        return [0, 1].map(playerIdx => (
+          <button
+            key={`${playerIdx}-${symbolIdx}`}
+            disabled={playerIdx === ctx.currentPlayer || !isMoveAllowed(symbolIdx)}
+            onClick={() => clickField(symbolIdx)}
+            className={`
+              ${playerIdx === 0 ? 'col-start-1' : 'col-start-3'}
+              p-2 m-2 aspect-4/5 bg-surface-elevated rounded-lg drop-shadow-lg
+              enabled:border-2 enabled:border-dashed
+              enabled:hocus:opacity-50
+              ${board[playerIdx][symbolIdx] === null ? 'opacity-0' : ''}
+            `}
+          >
+            <SymbolSvg />
+          </button>
+        ));
+      })}
     </div>
   </GameBoard>
   );
 };
 
 const isGameEnd = (board: Board) => {
-  return compact(board[0]).length === 1 && compact(board[1]).length === 1;
+  const remaining = (row: Board[number]) => row.filter(symbol => symbol !== null).length;
+  return remaining(board[0]) === 1 && remaining(board[1]) === 1;
 };
 
 const getWinnerIndex = (board: Board) => {

@@ -1,6 +1,5 @@
-import { useState } from 'react';
 import {
-  strategyGameFactory, type Events, type StrategyArgs, type BoardClientProps, GameBoard
+  strategyGameFactory, type Events, type StrategyArgs, type BoardClientProps, GameBoard, useHoverPreview
 } from '../../../game-factory';
 import { range, random, sample, minBy } from 'lodash';
 import { useTranslation } from '../../../language';
@@ -59,8 +58,8 @@ export const chooseSmartTake = (board: Board): number => {
 const StonePile = ({ board, disabled, onTake, moveCount }: {
   board: Board; disabled: boolean; onTake: (count: number) => void; moveCount: number
 }) => {
-  const [hovered, setHovered] = useState<{ count: number; moveCount: number } | null>(null);
-  const previewCount = hovered?.moveCount === moveCount ? hovered.count : 0;
+  const { value, hoverProps } = useHoverPreview<number>(moveCount);
+  const previewCount = value ?? 0;
   const c = cap(board);
 
   return (
@@ -82,11 +81,7 @@ const StonePile = ({ board, disabled, onTake, moveCount }: {
             key={i}
             disabled={disabled || !takeable}
             onClick={() => onTake(takeCount)}
-            onPointerEnter={() => canSelect && setHovered({ count: takeCount, moveCount })}
-            onPointerMove={() => canSelect && setHovered({ count: takeCount, moveCount })}
-            onPointerLeave={() => setHovered(null)}
-            onFocus={() => canSelect && setHovered({ count: takeCount, moveCount })}
-            onBlur={() => setHovered(null)}
+            {...(canSelect ? hoverProps(takeCount) : {})}
             aria-label={`${takeCount}`}
             className={`w-[11%] sm:w-[8%] aspect-square rounded-full bg-stone-500 shadow-md shadow-stone-700
               flex items-center justify-center text-white font-semibold text-xs sm:text-sm

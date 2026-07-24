@@ -1,20 +1,19 @@
-import { useState } from 'react';
 import { range, random, cloneDeep } from 'lodash';
-import { strategyGameFactory, type BoardClientProps, type Events, GameBoard } from '../../game-factory';
+import {
+  strategyGameFactory, type BoardClientProps, type Events, GameBoard, useHoverPreview
+} from '../../game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { useLanguage } from '../../language';
 
 export type Board = number[];
 type Piece = { pileId: number; pieceId: number };
-type HoveredPiece = (Piece & { moveCount: number }) | null;
 
 const generateStartBoard = (): Board => ([random(0, 9), random(0, 9), random(0, 9), random(4, 9)]);
 const generateTestStartBoard = (): Board => ([random(0, 6), random(0, 6), random(0, 6), random(4, 6)]);
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { language } = useLanguage();
-  const [hoveredPiece, setHoveredPiece] = useState<HoveredPiece>(null);
-  const validHoveredPiece = hoveredPiece?.moveCount === ctx.moveCount ? hoveredPiece : null;
+  const { value: validHoveredPiece, hoverProps } = useHoverPreview<Piece>(ctx.moveCount);
 
   const nonExistent = ({ pileId, pieceId }: Piece) => {
     return pieceId >= board[pileId];
@@ -27,20 +26,10 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     return pieceId < board[pileId] - pileId || pieceId > board[pileId] - 1;
   };
 
-  const hoverPiece = (piece: HoveredPiece) => {
-    if (piece === null) {
-      setHoveredPiece(null);
-      return;
-    }
-    if (isDisabled(piece)) return;
-    setHoveredPiece(piece);
-  };
-
   const clickPiece = ({ pileId, pieceId }: Piece) => {
     if (isDisabled({ pileId, pieceId })) return;
 
     moves.spreadPieces(board, { pileId, pieceCount: board[pileId] - pieceId });
-    setHoveredPiece(null);
   };
 
   // The pieces removed by clicking the hovered piece: it and everything above it.
@@ -130,11 +119,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                 pieceColor({ pileId, pieceId })
               ].join(' ')}
               onClick={() => clickPiece({ pileId, pieceId })}
-              onFocus={() => hoverPiece({ pileId, pieceId, moveCount: ctx.moveCount })}
-              onBlur={() => hoverPiece(null)}
-              onPointerEnter={() => hoverPiece({ pileId, pieceId, moveCount: ctx.moveCount })}
-              onPointerMove={() => hoverPiece({ pileId, pieceId, moveCount: ctx.moveCount })}
-              onPointerLeave={() => hoverPiece(null)}
+              {...(isDisabled({ pileId, pieceId }) ? {} : hoverProps({ pileId, pieceId }))}
             >
               {!isDisabled({ pileId, pieceId }) &&
               <p className="text-sm" style={{ transform: 'scaleY(-1)' }}>

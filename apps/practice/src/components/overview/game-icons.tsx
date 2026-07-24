@@ -1,7 +1,7 @@
 import type { FC, SVGProps } from 'react';
 import type { IconKey } from '../games/gameList';
 import type { I18nString } from '../language';
-import { ScissorSvg } from '../games/rock-paper-scissor/symbols/scissor-svg';
+import { ScissorSvg } from '../games/shared/scissor-svg';
 
 // Small, self-contained, monochrome icons for the overview cards. Everything is
 // drawn with `currentColor` so each icon tints with the category-accent badge it
@@ -127,8 +127,8 @@ const HouseIcon: FC<IconProps> = (p) => (
   </svg>
 );
 
-// Reuses the in-game scissor artwork; it already draws with `currentColor` and
-// has no global ids, so it composes safely on the overview cards.
+// Reuses the shared scissor artwork (games/shared, also used in-game); it already
+// draws with `currentColor` and has no global ids, so it composes safely here.
 const ScissorIcon: FC<IconProps> = (p) => (
   <ScissorSvg className="w-full h-full" aria-hidden focusable="false" {...p} />
 );

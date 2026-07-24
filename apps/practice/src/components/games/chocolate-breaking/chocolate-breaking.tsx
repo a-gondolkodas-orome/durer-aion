@@ -86,7 +86,6 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 
   const onBreak = (move: Move) => {
     if (!ctx.isClientMoveAllowed) return;
-    setHovered(null);
     moves.breakPiece(board, move);
   };
 

@@ -1,8 +1,7 @@
-import { useState } from 'react';
 import { range } from 'lodash';
 import { useTranslation } from '../../language';
 import type { Board } from './helpers';
-import { GameBoard, type BoardClientProps } from '../../game-factory';
+import { GameBoard, type BoardClientProps, useHoverPreview } from '../../game-factory';
 
 const getCoinBgColor = (coinValue) => {
   if (coinValue === 1) return 'bg-yellow-700';
@@ -18,8 +17,7 @@ const getCoinShadowColor = (coinValue) => {
 export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
   const valueOfRemovedCoin = (ctx.turnState as { removedCoinValue: number } | null)?.removedCoinValue ?? null;
-  const [hoveredPile, setHoveredPile] = useState<{ value: number; moveCount: number } | null>(null);
-  const validHoveredPile = hoveredPile?.moveCount === ctx.moveCount ? hoveredPile.value : null;
+  const { value: validHoveredPile, hoverProps } = useHoverPreview<number>(ctx.moveCount);
 
   const wasCoinAlreadyRemovedInTurn = valueOfRemovedCoin !== null;
 
@@ -37,18 +35,15 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 
   const removeFromPile = coinValue => {
     if (!isRemovalAllowed(coinValue)) return;
-    if (coinValue === 1) setHoveredPile(null);
     moves.removeCoin(board, coinValue);
   };
 
   const addToPile = coinValue => {
     if (!isAddAllowed(coinValue)) return;
-    setHoveredPile(null);
     moves.addCoin(board, coinValue);
   };
 
   const passAddition = () => {
-    setHoveredPile(null);
     moves.addCoin(board, null);
   };
 
@@ -92,9 +87,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                   ${getCoinBgColor(coinValue)} enabled:hocus:brightness-75
                 `}
                 onClick={() => addToPile(coinValue)}
-                onPointerEnter={() => setHoveredPile({ value: coinValue, moveCount: ctx.moveCount })}
-                onPointerMove={() => setHoveredPile({ value: coinValue, moveCount: ctx.moveCount })}
-                onPointerLeave={() => setHoveredPile(null)}
+                {...(isAddAllowed(coinValue) ? hoverProps(coinValue) : {})}
               >{coinValue}</button>
             ))}
           </div>
@@ -127,17 +120,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                 `}
                 style={{ transform: 'scaleY(-1)' }}
                 onClick={() => removeFromPile(coinValue)}
-                onPointerEnter={() => {
-                  if (!wasCoinAlreadyRemovedInTurn) setHoveredPile({ value: coinValue, moveCount: ctx.moveCount });
-                }}
-                onPointerMove={() => {
-                  if (!wasCoinAlreadyRemovedInTurn) setHoveredPile({ value: coinValue, moveCount: ctx.moveCount });
-                }}
-                onPointerLeave={() => setHoveredPile(null)}
-                onFocus={() => {
-                  if (!wasCoinAlreadyRemovedInTurn) setHoveredPile({ value: coinValue, moveCount: ctx.moveCount });
-                }}
-                onBlur={() => setHoveredPile(null)}
+                {...(isRemovalAllowed(coinValue) ? hoverProps(coinValue) : {})}
               >{coinValue}</button>
             ))}
             {shouldShowCoinToBeAdded(coinValue) && (

@@ -3,7 +3,7 @@ import { range, cloneDeep, isEqual, flatMap } from 'lodash';
 import {
   strategyGameFactory,
   type Events, type BoardClientProps,
-  GameBoard
+  GameBoard, useHoverPreview
 } from '../../game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 
@@ -32,8 +32,7 @@ const DOMINO_BORDER_CLASSES = {
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const [selectedField, setSelectedField] = useState<Field | null>(null);
-  const [hoveredField, setHoveredField] = useState<{ field: Field; moveCount: number } | null>(null);
-  const validHoveredField = hoveredField?.moveCount === ctx.moveCount ? hoveredField.field : null;
+  const { value: validHoveredField, hoverProps } = useHoverPreview<Field>(ctx.moveCount);
 
   const hasEmptyNeighbor = ({ row, col }: Field) => {
     return [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dRow, dCol]) => {
@@ -104,11 +103,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                   `}
                   disabled={!isClickAllowed(field)}
                   onClick={() => clickField(field)}
-                  onPointerEnter={() => setHoveredField({ field, moveCount: ctx.moveCount })}
-                  onPointerMove={() => setHoveredField({ field, moveCount: ctx.moveCount })}
-                  onPointerLeave={() => setHoveredField(null)}
-                  onFocus={() => setHoveredField({ field, moveCount: ctx.moveCount })}
-                  onBlur={() => setHoveredField(null)}
+                  {...hoverProps(field)}
                 >
                   {isCovered(field, board) && <>
                     <span className={`

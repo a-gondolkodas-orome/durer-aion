@@ -1,18 +1,14 @@
-import { useState } from 'react';
 import { range, isEqual, random, cloneDeep } from 'lodash';
-import { strategyGameFactory, type BoardClientProps, type Events, GameBoard } from '../../../game-factory';
+import {
+  strategyGameFactory, type BoardClientProps, type Events, GameBoard, useHoverPreview
+} from '../../../game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 
 export type Board = number[];
 type Piece = { pileId: number; pieceId: number };
-type HoveredPiece = { pileId: number; pieceId: number; moveCount: number } | null;
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const [hoveredPiece, setHoveredPiece] = useState<HoveredPiece>(null);
-  const validHoveredPiece = (
-    hoveredPiece?.moveCount === ctx.moveCount
-    && hoveredPiece?.pieceId < board[hoveredPiece?.pileId] - 1
-  ) ? hoveredPiece : null;
+  const { value: validHoveredPiece, hoverProps } = useHoverPreview<Piece>(ctx.moveCount);
 
   const isDisabled = ({ pileId, pieceId }: Piece) => {
     if (!ctx.isClientMoveAllowed) return true;
@@ -80,11 +76,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                 ${toBeLeft({ pileId, pieceId }) ? 'bg-blue-800/75' : ''}
               `}
               onClick={() => clickPiece({ pileId, pieceId })}
-              onFocus={() => setHoveredPiece({ pileId, pieceId, moveCount: ctx.moveCount })}
-              onBlur={() => setHoveredPiece(null)}
-              onPointerEnter={() => setHoveredPiece({ pileId, pieceId, moveCount: ctx.moveCount })}
-              onPointerMove={() => setHoveredPiece({ pileId, pieceId, moveCount: ctx.moveCount })}
-              onPointerLeave={() => setHoveredPiece(null)}
+              {...(isDisabled({ pileId, pieceId }) ? {} : hoverProps({ pileId, pieceId }))}
             >
               {!isDisabled({ pileId, pieceId }) &&
               <p className="text-sm" style={{ transform: 'scaleY(-1)' }}>

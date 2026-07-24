@@ -8,3 +8,4 @@ export type {
 } from './types';
 export { makeCtx } from './ctx-factory';
 export { GameBoard } from './game-parts/game-board';
+export { useHoverPreview } from './use-hover-preview';

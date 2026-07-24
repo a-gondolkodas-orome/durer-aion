@@ -1,13 +1,12 @@
-import { useState } from "react";
 import {
-  strategyGameFactory, type Events, type StrategyArgs, type BoardClientProps, GameBoard
+  strategyGameFactory, type Events, type StrategyArgs, type BoardClientProps, GameBoard, useHoverPreview
 } from "../../game-factory";
 import { range, isEqual, random, sample, difference, filter, cloneDeep } from "lodash";
 import { useTranslation } from "../../language";
 
 type Board = [number, number]
 
-const generateStartBoard = (maxDiscs) => (): Board => {
+const generateStartBoard = (maxDiscs: number) => (): Board => {
   const discCount = random(Math.floor(maxDiscs/2), maxDiscs);
   if (random(0, 1)) {
     const blueCount = sample(range(0, discCount + 1, 3))!;
@@ -27,8 +26,7 @@ const DisabledDisc = ({ bgColor }) => (
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
-  const [hovered, setHovered] = useState<{ value: [number, number]; moveCount: number } | null>(null);
-  const validHovered = hovered?.moveCount === ctx.moveCount ? hovered.value : null;
+  const { value: validHovered, hoverProps } = useHoverPreview<[number, number]>(ctx.moveCount);
 
   const select = (pile, i) => {
     if (!ctx.isClientMoveAllowed) return;
@@ -37,21 +35,9 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     } else {
       moves.turnDiscs(board, board[1] - i);
     }
-    setHovered(null);
   };
 
   const isSelected = (pile, i) => isEqual(validHovered, [pile, i]) || isEqual(validHovered, [pile, i - 1]);
-
-  const hoverProps = (pile: number, i: number) => {
-    const setPieceAsHovered = () => setHovered({ value: [pile, i], moveCount: ctx.moveCount });
-    return {
-      onPointerEnter: setPieceAsHovered,
-      onPointerMove: setPieceAsHovered,
-      onPointerLeave: () => setHovered(null),
-      onFocus: setPieceAsHovered,
-      onBlur: () => setHovered(null)
-    };
-  };
 
   const fmt = (red, blue) => t({
     hu: ` → ${red} piros és ${blue} kék korong`,
@@ -83,7 +69,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                 }`}
                 disabled={!ctx.isClientMoveAllowed}
                 onClick={() => select(1, i)}
-                {...hoverProps(1, i)}
+                {...hoverProps([1, i])}
               />
             )
         )}
@@ -97,7 +83,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                 className={`size-12 rounded-full bg-blue-800 ${isSelected(0, i) ? "enabled:opacity-50" : ""}`}
                 disabled={!ctx.isClientMoveAllowed}
                 onClick={() => select(0, i)}
-                {...hoverProps(0, i)}
+                {...hoverProps([0, i])}
               />
             )
         )}

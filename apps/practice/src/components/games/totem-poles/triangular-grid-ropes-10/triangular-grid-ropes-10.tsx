@@ -1,13 +1,14 @@
 import { useState } from 'react';
-import { strategyGameFactory, type Events, type BoardClientProps, GameBoard } from '../../../game-factory';
+import {
+  strategyGameFactory, type Events, type BoardClientProps, GameBoard, useHoverPreview
+} from '../../../game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { isAllowed, getAllowedSuperset, isGameEnd, vertices, type Board } from './helpers';
 import { cloneDeep } from 'lodash';
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const [firstNode, setFirstNode] = useState<number | null>(null);
-  const [hoveredNode, setHoveredNode] = useState<{ value: number; moveCount: number } | null>(null);
-  const validHoveredNode = hoveredNode?.moveCount === ctx.moveCount ? hoveredNode.value : null;
+  const { value: validHoveredNode, hoverProps } = useHoverPreview<number>(ctx.moveCount);
 
   const connectNode = node => {
     if (!ctx.isClientMoveAllowed) return;
@@ -89,11 +90,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         tabIndex={isClickable ? 0 : undefined}
         role={isClickable ? 'button' : undefined}
         aria-label={isClickable ? `Node ${vertex.id + 1}` : undefined}
-        onFocus={() => setHoveredNode({ value: vertex.id, moveCount: ctx.moveCount })}
-        onBlur={() => setHoveredNode(null)}
-        onPointerEnter={() => setHoveredNode({ value: vertex.id, moveCount: ctx.moveCount })}
-        onPointerMove={() => setHoveredNode({ value: vertex.id, moveCount: ctx.moveCount })}
-        onPointerLeave={() => setHoveredNode(null)}
+        {...hoverProps(vertex.id)}
       />
       );
     })}
