@@ -1,6 +1,7 @@
 import { smartBotStrategy } from "./bot-strategy";
 import type { Board } from './bank-robbers';
-import { makeCtx, type GameMoves } from '../../strategy-game-factory';
+import { type GameMoves } from '../../strategy-game-factory';
+import { makeCtx } from '../../../test-utils';
 
 const mockRob = (): GameMoves<Board> => ({
   rob: (board: Board, bank: number) => { board.circle[bank] = false; return { nextBoard: board }; }

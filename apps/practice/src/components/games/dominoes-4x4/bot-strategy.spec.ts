@@ -1,4 +1,5 @@
-import { makeCtx, type GameMoves } from '../../strategy-game-factory';
+import { type GameMoves } from '../../strategy-game-factory';
+import { makeCtx } from '../../../test-utils';
 import { smartBotStrategy, randomBotStrategy, isWinningForPlayerToMove } from './bot-strategy';
 import { getPossibleMoves, type Board, type Domino, type Field } from './dominoes-4x4';
 

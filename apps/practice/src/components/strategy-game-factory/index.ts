@@ -6,6 +6,5 @@ export type {
   StrategyArgs, BoardClientProps,
   Variant, VariantInput
 } from './types';
-export { makeCtx } from './helpers/make-ctx';
 export { GameBoard } from './game-parts/game-board';
 export { useHoverPreview } from './hooks/use-hover-preview';

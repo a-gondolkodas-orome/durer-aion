@@ -1,5 +1,5 @@
 import { edgeIndex, generateStartBoard, type Board } from './helpers';
-import { makeCtx } from '../../strategy-game-factory';
+import { makeCtx } from '../../../test-utils';
 import { getBotScore, smartBotStrategy } from './bot-strategy';
 
 describe('optimal solver (negamax)', () => {

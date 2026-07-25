@@ -1,7 +1,7 @@
 import { sample } from 'lodash';
 import { Sheriff, Thief, hasWinningTriple, getUntakenCards, type Board } from '../helpers';
-import { dummyEvents, makeCtx, type StrategyArgs } from '../../../strategy-game-factory';
-import { moves, CARD_COUNT } from './moves';
+import { type StrategyArgs } from '../../../strategy-game-factory';
+import { applyTakeCard, CARD_COUNT } from './moves';
 
 const TURN_PLAYER = [Sheriff, Thief, Sheriff, Thief, Sheriff];
 
@@ -17,9 +17,7 @@ export const getBotCard = (board: Board, botPlayerIndex: number): number => {
   const memo = new Map<string, number>();
   const untaken = getUntakenCards(board, CARD_COUNT);
   const scores = untaken.map(card => {
-    const { nextBoard } = moves.takeCard(
-      board, { ctx: makeCtx({ currentPlayer: botPlayerIndex }), events: dummyEvents }, [card]
-    );
+    const nextBoard = applyTakeCard(board, botPlayerIndex, [card]);
     return minimax(nextBoard, botPlayerIndex, memo);
   });
   const best = Math.max(...scores);
@@ -45,7 +43,7 @@ const minimax = (board: Board, botPlayerIndex: number, memo: Map<string, number>
   const isMaximizing = currentPlayer === botPlayerIndex;
   let best = isMaximizing ? -Infinity : Infinity;
   for (const card of getUntakenCards(board, CARD_COUNT)) {
-    const { nextBoard } = moves.takeCard(board, { ctx: makeCtx({ currentPlayer }), events: dummyEvents }, [card]);
+    const nextBoard = applyTakeCard(board, currentPlayer, [card]);
     const score = minimax(nextBoard, botPlayerIndex, memo);
     best = isMaximizing ? Math.max(best, score) : Math.min(best, score);
   }
