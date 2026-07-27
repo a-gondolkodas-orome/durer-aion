@@ -1,22 +1,13 @@
-import {
-  strategyGameFactory, type Events, type StrategyArgs, type BoardClientProps, GameBoard, useHoverPreview
-} from '../../../strategy-game-factory';
+import { strategyGameFactory, type Events, type StrategyArgs } from '../../../strategy-game-factory';
 import { range, random, sample, minBy } from 'lodash';
-import { useTranslation } from '../../../../language';
+import { type Board, cap, BoardClient, getPlayerStepDescription } from '../pebble-pile';
 
-// `stones` is the number of pebbles left in the pile. `maxTake` is the most a
-// player may take this turn: on the opening move it is 4 (baked into the start
-// board); after every move it becomes the amount the other player just took,
-// plus three.
-type Board = { stones: number; maxTake: number }
+export { cap };
 
 // You may take up to three more than the other player's last take.
 const INCREMENT = 3;
 // The opening move is capped at four pebbles.
 const OPENING_MAX = 4;
-
-// The most a player may legally take this turn.
-export const cap = (board: Board): number => Math.min(board.maxTake, board.stones);
 
 // Memoised minimax: is the position (n stones, max-take m) a win for the mover?
 // The winning positions have a period-11 structure (from the opening the second
@@ -26,12 +17,12 @@ export const cap = (board: Board): number => Math.min(board.maxTake, board.stone
 const winMemo = new Map<string, boolean>();
 export const moverWins = (stones: number, maxTake: number): boolean => {
   if (stones === 0) return false;
-  const c = Math.min(maxTake, stones);
-  const key = `${stones},${c}`;
+  const maxTakeable = Math.min(maxTake, stones);
+  const key = `${stones},${maxTakeable}`;
   const cached = winMemo.get(key);
   if (cached !== undefined) return cached;
   let result = false;
-  for (let k = 1; k <= c; k++) {
+  for (let k = 1; k <= maxTakeable; k++) {
     // After taking k the other player faces `stones - k` with a cap of k + 3.
     if (!moverWins(stones - k, k + INCREMENT)) { result = true; break; }
   }
@@ -47,81 +38,21 @@ export const isWinningTake = (stones: number, k: number): boolean =>
 // The count the optimal bot takes from `board`.
 export const chooseSmartTake = (board: Board): number => {
   const { stones } = board;
-  const c = cap(board);
+  const maxTakeable = cap(board);
 
   // Winning position: play the smallest take that secures the win.
-  const winning = range(1, c + 1).find(k => isWinningTake(stones, k));
+  const winning = range(1, maxTakeable + 1).find(k => isWinningTake(stones, k));
   if (winning !== undefined) return winning;
 
   // Losing position: every legal take hands the other player a win, so play the
   // "trap" that leaves them the fewest winning replies, breaking ties toward the
   // smaller take (range is ascending and minBy keeps the first minimum) to drag
   // the game out and give the human more chances to err.
-  return minBy(range(1, c + 1), k => {
+  return minBy(range(1, maxTakeable + 1), k => {
     const rem = stones - k;
     const oppCap = Math.min(k + INCREMENT, rem);
     return range(1, oppCap + 1).filter(j => isWinningTake(rem, j)).length;
   })!;
-};
-
-const StonePile = ({ board, disabled, onTake, moveCount }: {
-  board: Board; disabled: boolean; onTake: (count: number) => void; moveCount: number
-}) => {
-  const { value, hoverProps } = useHoverPreview<number>(moveCount);
-  const previewCount = value ?? 0;
-  const c = cap(board);
-
-  return (
-    // rotate(180deg) makes the pile fill from the bottom (incomplete row on top)
-    // while keeping left-to-right reading order, so pebble "1" is the top-left of
-    // the pile and the count grows down and to the right. Each pebble re-rotates
-    // 180° so its number stays upright. Pebbles are taken from the top, so DOM
-    // index i corresponds to taking stones - i.
-    <div className="flex flex-wrap justify-center gap-1.5 p-2" style={{ transform: 'rotate(180deg)' }}>
-      {range(board.stones).map(i => {
-        const takeCount = board.stones - i; // clicking a pebble takes it and everything above
-        const takeable = takeCount <= c;
-        // Only selectable pebbles drive the hover preview. Don't rely on the
-        // `disabled` attribute to suppress this — some browsers (e.g. Safari)
-        // still fire pointer events on disabled buttons.
-        const canSelect = !disabled && takeable;
-        return (
-          <button
-            key={i}
-            disabled={disabled || !takeable}
-            onClick={() => onTake(takeCount)}
-            {...(canSelect ? hoverProps(takeCount) : {})}
-            aria-label={`${takeCount}`}
-            className={`w-[11%] sm:w-[8%] aspect-square rounded-full bg-stone-500 shadow-md shadow-stone-700
-              flex items-center justify-center text-white font-semibold text-xs sm:text-sm
-              transition-opacity
-              ${canSelect && takeCount <= previewCount ? 'opacity-30' : ''}`}
-            style={{ transform: 'rotate(180deg)' }}
-          >
-            {/* Active pebbles show how many would be removed by clicking them. */}
-            {canSelect && <span>{takeCount}</span>}
-          </button>
-        );
-      })}
-    </div>
-  );
-};
-
-const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const { t } = useTranslation();
-  return (
-    <GameBoard>
-      <p className="text-center text-2xl font-bold mb-2">
-        {t({ hu: 'Kavicsok', en: 'Pebbles' })}: {board.stones}
-      </p>
-      <StonePile
-        board={board}
-        disabled={!ctx.isClientMoveAllowed}
-        onTake={count => moves.take(board, count)}
-        moveCount={ctx.moveCount}
-      />
-    </GameBoard>
-  );
 };
 
 const moves = {
@@ -164,11 +95,6 @@ const rule = {
     than the other player took last time. Whoever takes the last pebble(s) wins.
   </>
 };
-
-const getPlayerStepDescription = ({ board }: { board: Board }) => ({
-  hu: `Kattints egy kavicsra: legfeljebb ${cap(board)} kavicsot vehetsz el.`,
-  en: `Click a pebble: you may take at most ${cap(board)} pebble(s).`
-});
 
 export const ThreeMore = strategyGameFactory({
   presentation: {
