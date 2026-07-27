@@ -1,17 +1,14 @@
-import { useState } from 'react';
 import {
   strategyGameFactory,
   type Ctx, type Events, type StrategyArgs, type BoardClientProps,
-  GameBoard
+  GameBoard, useHoverPreview
 } from '../../strategy-game-factory';
 import { cloneDeep, isEqual, sample, random, range } from 'lodash';
 import { useTranslation } from '../../../language';
 
 type Board = { piles: [number, number], leftRestriction: [boolean, boolean] }
 
-const StonePile = ({ count, onClick, disabled, restricted, moveCount }) => {
-  const [hovered, setHovered] = useState<number | null>(null);
-  const validHovered = hovered === moveCount;
+const StonePile = ({ count, onClick, disabled, restricted, hovered, hoverProps }) => {
   return (
     <button
       className={`w-full flex-1 flex flex-wrap content-start justify-center gap-2 p-2
@@ -19,17 +16,13 @@ const StonePile = ({ count, onClick, disabled, restricted, moveCount }) => {
       style={{ transform: 'scaleY(-1)' }}
       onClick={onClick}
       disabled={disabled}
-      onPointerEnter={() => setHovered(moveCount)}
-      onPointerMove={() => setHovered(moveCount)}
-      onPointerLeave={() => setHovered(null)}
-      onFocus={() => setHovered(moveCount)}
-      onBlur={() => setHovered(null)}
+      {...hoverProps}
     >
       {range(count).map(i => (
         <div
           key={i}
           className={`w-[20%] aspect-square rounded-full bg-stone-500 shadow-md shadow-stone-700
-            transition-opacity ${validHovered && !disabled && i === count - 1 ? 'opacity-30' : ''}`}
+            transition-opacity ${hovered && i === count - 1 ? 'opacity-30' : ''}`}
           style={{ transform: 'scaleY(-1)' }}
         />
       ))}
@@ -39,6 +32,7 @@ const StonePile = ({ count, onClick, disabled, restricted, moveCount }) => {
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
+  const { value: hoveredPile, hoverProps } = useHoverPreview<number>(ctx.moveCount);
 
   const isMoveAllowed = pileId => {
     if (!ctx.isClientMoveAllowed) return false;
@@ -61,7 +55,8 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               onClick={() => moves.removeStone(board, pileId)}
               disabled={!isMoveAllowed(pileId)}
               restricted={ctx.isClientMoveAllowed && !isMoveAllowed(pileId)}
-              moveCount={ctx.moveCount}
+              hovered={hoveredPile === pileId}
+              hoverProps={isMoveAllowed(pileId) ? hoverProps(pileId) : {}}
             />
           </div>
         ))}

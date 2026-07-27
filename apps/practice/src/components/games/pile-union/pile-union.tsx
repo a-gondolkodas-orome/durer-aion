@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, type ComponentProps } from 'react';
 import { range, random } from 'lodash';
-import { strategyGameFactory, type Events, type BoardClientProps, GameBoard } from '../../strategy-game-factory';
+import {
+  strategyGameFactory, type Events, type BoardClientProps, GameBoard, useHoverPreview
+} from '../../strategy-game-factory';
 import { useTranslation } from '../../../language';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 
@@ -10,6 +12,7 @@ type TurnState = { firstSelectedPile: number } | null
 
 const BoardClient = ({ board, ctx, events, moves }: BoardClientProps<Board>) => {
   const [moveType, setMoveType] = useState<MoveType>('remove');
+  const { value: hoveredPile, hoverProps } = useHoverPreview<number>(ctx.moveCount);
   const turnState = ctx.turnState as TurnState;
 
   const handlePileClick = (pileIndex) => {
@@ -49,7 +52,8 @@ const BoardClient = ({ board, ctx, events, moves }: BoardClientProps<Board>) => 
             isSelected={moveType === 'merge' && turnState?.firstSelectedPile === pileIndex}
             moveType={moveType}
             onClick={() => handlePileClick(pileIndex)}
-            moveCount={ctx.moveCount}
+            hovered={hoveredPile === pileIndex}
+            hoverProps={ctx.isClientMoveAllowed ? hoverProps(pileIndex) : {}}
           />
         ))}
       </div>
@@ -111,28 +115,23 @@ const MoveTypeSelector = ({ moveType, isClientMoveAllowed, canMerge, onSelect }:
   );
 };
 
-const Pile = ({ size, disabled, isSelected, moveType, onClick, moveCount }: {
+const Pile = ({ size, disabled, isSelected, moveType, onClick, hovered, hoverProps }: {
   size: number
   disabled: boolean
   isSelected: boolean
   moveType: MoveType
   onClick: () => void
-  moveCount: number
+  hovered: boolean
+  hoverProps: ComponentProps<'button'>
 }) => {
-  const [hovered, setHovered] = useState<number | null>(null);
-  const validHovered = hovered === moveCount;
-  const isRemoveHovered = moveType === 'remove' && validHovered;
-  const isMergeHovered = moveType === 'merge' && validHovered;
+  const isRemoveHovered = moveType === 'remove' && hovered;
+  const isMergeHovered = moveType === 'merge' && hovered;
 
   return (
     <button
       disabled={disabled}
       onClick={onClick}
-      onPointerEnter={() => setHovered(moveCount)}
-      onPointerMove={() => setHovered(moveCount)}
-      onPointerLeave={() => setHovered(null)}
-      onFocus={() => setHovered(moveCount)}
-      onBlur={() => setHovered(null)}
+      {...hoverProps}
       className={`
         flex flex-col items-center gap-1 p-2 rounded-lg border-2 transition-colors
         ${isSelected ? 'border-blue-300 bg-blue-600/40' :
