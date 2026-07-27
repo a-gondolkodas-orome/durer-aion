@@ -28,13 +28,63 @@ TL;DR;
 
 ## Project setup
 
-There is a (fairly minimal) devcontainer setup if you prefer that.
-Alternatively, here are the installation instructions:
+Two ways to get started:
 
-### Installing locally 
+- **Locally**: install the Node.js version in `.nvmrc` globally (or run `nvm use`
+  in the project directory), then run `npm ci`.
+- **Devcontainer**: there is a (fairly minimal) setup, written for local Docker.
+  It bakes Playwright's Chromium into the image and pins Node, so container
+  creation only has to run `npm ci`. It also ships the GitHub CLI and keeps `gh`
+  and Claude Code logins in named volumes across rebuilds.
 
-- install Node.js on your computer globally (or use nvm)
-- in the project directory terminal run `npm ci`
+<details>
+<summary>Devcontainer details</summary>
+
+It is written for local Docker — GitHub Codespaces supports only a restricted
+set of devcontainer properties and may ignore the `mounts` block, in which case
+none of the persistence described below happens.
+
+It bakes a Chromium build for Playwright into the image at build time, so
+container creation only has to run `npm ci`. If you bump `playwright` in
+`package.json`, also bump `PLAYWRIGHT_VERSION` in `.devcontainer/Dockerfile` and
+rebuild the container — otherwise Playwright will look for a browser revision
+that is not in the image.
+
+Node is pinned the same way. The image tag only fixes the major version, so the
+exact one comes from the node devcontainer feature in `.devcontainer/devcontainer.json`
+and must match the three other places it is written down: `.nvmrc`, `engines.node`
+in `package.json`, and the container image in both `.github/workflows/*.yml`. Bump
+them together and rebuild, or the container quietly runs a different Node than CI does.
+
+`npm run test` fails on either mismatch, so you will not find out the hard way.
+
+The container also has npm's update notifier switched off
+(`NPM_CONFIG_UPDATE_NOTIFIER`). The npm that matters here is the one bundled with
+the pinned Node; upgrading it separately would only diverge from CI.
+
+The GitHub CLI (`gh`) is included too. It does not pick up your SSH key or VS Code's
+git credential helper, so run `gh auth login` once inside the container; the login is
+kept in a named Docker volume and survives rebuilds. A fine-grained token limited to
+this repository is enough for the usual PR and CI commands.
+
+Claude Code's config directory (`~/.claude`) is a named volume as well, so its login and
+settings — default permission mode, theme, notifications — survive rebuilds. `CLAUDE_CONFIG_DIR`
+is set to that same default path only so that `~/.claude.json`, which normally sits next to the
+directory, is stored inside the volume too.
+
+Both volumes get their `node` ownership from the image the first time Docker creates them.
+That means a volume created under an older version of this setup stays root-owned, and
+**rebuilding does not repair it** — `gh auth login` keeps failing. If you hit that, remove the
+volumes and rebuild:
+
+```bash
+docker volume rm durer-gh-config durer-claude-home
+```
+
+Volume names are per Docker host, so every clone, worktree and branch checkout on one
+machine shares the same login state.
+
+</details>
 
 ## Useful npm commands
 <details>

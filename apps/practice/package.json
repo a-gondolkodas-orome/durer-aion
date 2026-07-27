@@ -4,9 +4,13 @@
   "private": true,
   "license": "CC-BY-NC-SA-4.0",
   "type": "module",
+  "engines": {
+    "node": ">=24.11.1 <25"
+  },
   "scripts": {
     "test:unit": "vitest run",
-    "test": "npm run lint && npm run typecheck && npm run test:unit",
+    "test": "npm run check:versions && npm run lint && npm run typecheck && npm run test:unit",
+    "check:versions": "node scripts/check-versions.mjs",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"src/**/*.{js,jsx,ts,tsx}\" --no-fix",

@@ -1,6 +1,21 @@
 {
   "name": "React Dev Container",
-  "image": "mcr.microsoft.com/devcontainers/javascript-node:24",
+  "build": { "dockerfile": "Dockerfile" },
+  "features": {
+    // Keep in sync with .nvmrc, package.json engines and .github/workflows/*.yml —
+    // `npm run check:versions` fails on a mismatch. Listed first so the features that
+    // install global npm packages run against this Node.
+    "ghcr.io/devcontainers/features/node:1": { "version": "24.11.1" },
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/anthropics/devcontainer-features/claude-code:1": {}
+  },
+  "mounts": [
+    "source=durer-gh-config,target=/home/node/.config/gh,type=volume",
+    "source=durer-claude-home,target=/home/node/.claude,type=volume"
+  ],
+  "containerEnv": {
+    "CLAUDE_CONFIG_DIR": "/home/node/.claude"
+  },
   "customizations": {
     "vscode": {
       "extensions": [
@@ -11,13 +26,14 @@
       ],
       "settings": {
         "editor.tabSize": 2,
+        "tailwindCSS.experimental.configFile": "src/styles.css",
         "javascript.updateImportsOnFileMove.enabled": "always",
         "files.insertFinalNewline": true,
         "files.trimFinalNewlines": true
       }
     }
   },
-  "postCreateCommand": "npm ci && npx playwright install --with-deps chromium",
+  "postCreateCommand": "npm ci",
   "forwardPorts": [8012],
   "portsAttributes": {
     "8012": {
