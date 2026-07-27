@@ -1,6 +1,5 @@
-import { useState } from 'react';
 import {
-  strategyGameFactory, type Events, type StrategyArgs, type BoardClientProps, GameBoard
+  strategyGameFactory, type Events, type StrategyArgs, type BoardClientProps, GameBoard, useHoverPreview
 } from '../../../strategy-game-factory';
 import { random, range } from 'lodash';
 import { useTranslation } from '../../../../language';
@@ -28,7 +27,9 @@ const CoinPile = ({ count, hoveredAction }: { count: number, hoveredAction: Hove
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
-  const [hoveredAction, setHoveredAction] = useState<HoveredAction>(null);
+  const { value: hoveredAction, hoverProps } = useHoverPreview<'take1' | 'halve'>(ctx.moveCount);
+  const canTake1 = ctx.isClientMoveAllowed;
+  const canHalve = ctx.isClientMoveAllowed && board % 2 === 0;
   return(
     <GameBoard>
       <h2 className="text-center">{board}</h2>
@@ -36,17 +37,15 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       <div className="flex flex-wrap gap-2">
         <button
           className="primary-button w-auto grow"
-          disabled={!ctx.isClientMoveAllowed}
+          disabled={!canTake1}
           onClick={() => moves.take1(board)}
-          onMouseEnter={() => setHoveredAction('take1')}
-          onMouseLeave={() => setHoveredAction(null)}
+          {...(canTake1 ? hoverProps('take1') : {})}
         >{t({ hu: 'Elveszek egyet', en: 'Take one' })}</button>
         <button
           className="primary-button w-auto grow"
-          disabled={!ctx.isClientMoveAllowed || board % 2 === 1}
+          disabled={!canHalve}
           onClick={() => moves.halve(board)}
-          onMouseEnter={() => setHoveredAction('halve')}
-          onMouseLeave={() => setHoveredAction(null)}
+          {...(canHalve ? hoverProps('halve') : {})}
         >{t({ hu: 'Elveszem a felét', en: 'Take half' })}</button>
       </div>
     </GameBoard>

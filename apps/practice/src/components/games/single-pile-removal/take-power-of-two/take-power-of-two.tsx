@@ -1,6 +1,5 @@
-import { useState } from 'react';
 import {
-  strategyGameFactory, type Events, type StrategyArgs, type BoardClientProps, GameBoard
+  strategyGameFactory, type Events, type StrategyArgs, type BoardClientProps, GameBoard, useHoverPreview
 } from '../../../strategy-game-factory';
 import { range, random, reverse, sample } from 'lodash';
 import { useTranslation } from '../../../../language';
@@ -15,7 +14,7 @@ const generateStartBoard = () => {
 
 type Board = number
 
-const ExponentsTable = ({ disabled, board, choosePower, hovered, setHovered }) => {
+const ExponentsTable = ({ disabled, board, choosePower, hovered, hoverProps }) => {
   const { t } = useTranslation();
   const availableExponents = getAvailableExponents(board);
 
@@ -30,11 +29,7 @@ const ExponentsTable = ({ disabled, board, choosePower, hovered, setHovered }) =
           disabled={disabled}
           className="secondary-button w-auto min-w-12"
           onClick={() => choosePower(e)}
-          onPointerEnter={() => setHovered(e)}
-          onPointerMove={() => setHovered(e)}
-          onPointerLeave={() => setHovered(null)}
-          onFocus={() => setHovered(e)}
-          onBlur={() => setHovered(null)}
+          {...(disabled ? {} : hoverProps(e))}
         >{2 ** e}</button>
       )}
     </div>
@@ -49,13 +44,7 @@ const ExponentsTable = ({ disabled, board, choosePower, hovered, setHovered }) =
 
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const [hoveredPower, setHoveredPower] = useState<{ value: number; moveCount: number } | null>(null);
-  const validHoveredPower = hoveredPower?.moveCount === ctx.moveCount ? hoveredPower.value : null;
-
-  const choosePower = (e: number) => {
-    moves.subtractPowerOfTwo(board, e);
-    setHoveredPower(null);
-  }
+  const { value: hoveredPower, hoverProps } = useHoverPreview<number>(ctx.moveCount);
 
   return (
     <GameBoard>
@@ -63,9 +52,9 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       <ExponentsTable
         disabled={!ctx.isClientMoveAllowed}
         board={board}
-        choosePower={choosePower}
-        hovered={validHoveredPower}
-        setHovered={(e: number | null) => setHoveredPower(e !== null ? { value: e, moveCount: ctx.moveCount } : null)}
+        choosePower={(e: number) => moves.subtractPowerOfTwo(board, e)}
+        hovered={hoveredPower}
+        hoverProps={hoverProps}
       />
     </GameBoard>
   );

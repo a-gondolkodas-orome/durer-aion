@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import {
-  strategyGameFactory, type Events, type StrategyArgs, type BoardClientProps, GameBoard
+  strategyGameFactory, type Events, type StrategyArgs, type BoardClientProps, GameBoard, useHoverPreview
 } from '../../../strategy-game-factory';
 import { sample, random } from 'lodash';
 import { useTranslation } from '../../../../language';
@@ -43,7 +43,7 @@ const generateStartBoard = () => {
 
 const generateSmallStartBoard = () => random(12, 72);
 
-const PrimePowerButton = ({ entry, board, isClientMoveAllowed, chooseEntry, setHovered }) => {
+const PrimePowerButton = ({ entry, board, isClientMoveAllowed, chooseEntry, hoverProps }) => {
   const { prime, exponent, value } = entry;
   const isAboveBoard = value > board;
   const isActive = !isAboveBoard && isClientMoveAllowed;
@@ -56,11 +56,7 @@ const PrimePowerButton = ({ entry, board, isClientMoveAllowed, chooseEntry, setH
         enabled:hocus:bg-blue-100 dark:enabled:hocus:bg-blue-900 enabled:hocus:border-blue-300
       `}
       onClick={() => isActive && chooseEntry(entry)}
-      onPointerEnter={() => isActive && setHovered(entry)}
-      onPointerMove={() => isActive && setHovered(entry)}
-      onPointerLeave={() => setHovered(null)}
-      onFocus={() => isActive && setHovered(entry)}
-      onBlur={() => setHovered(null)}
+      {...(isActive ? hoverProps(entry) : {})}
     >
       <span className="block text-xs text-slate-500" aria-hidden={exponent <= 1}>
         {exponent > 1 ? <>{prime}<sup>{exponent}</sup></> : <>&nbsp;</>}
@@ -70,7 +66,7 @@ const PrimePowerButton = ({ entry, board, isClientMoveAllowed, chooseEntry, setH
   );
 };
 
-const PrimePowerGrid = ({ board, visiblePowers, isClientMoveAllowed, chooseEntry, setHovered }) => {
+const PrimePowerGrid = ({ board, visiblePowers, isClientMoveAllowed, chooseEntry, hoverProps }) => {
   return (
     <div className="flex flex-wrap gap-1 items-end">
       {visiblePowers.map(entry => (
@@ -80,7 +76,7 @@ const PrimePowerGrid = ({ board, visiblePowers, isClientMoveAllowed, chooseEntry
           board={board}
           isClientMoveAllowed={isClientMoveAllowed}
           chooseEntry={chooseEntry}
-          setHovered={setHovered}
+          hoverProps={hoverProps}
         />
       ))}
     </div>
@@ -102,28 +98,23 @@ const HoverPreview = ({ hovered, board, isClientMoveAllowed }) => {
 };
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const [hovered, setHovered] = useState<{ entry: typeof allPrimePowers[0]; moveCount: number } | null>(null);
-  const validHovered = hovered?.moveCount === ctx.moveCount ? hovered.entry : null;
+  const { value: hovered, hoverProps } = useHoverPreview<typeof allPrimePowers[0]>(ctx.moveCount);
   const [visiblePowers] = useState(() => allPrimePowers.filter(e => e.value <= board));
 
   const chooseEntry = ({ prime, exponent }) => {
     moves.subtractPrimeExponent(board, { prime, exponent });
   };
 
-  type PrimePower = typeof allPrimePowers[0];
-  const setHoveredEntry = (entry: PrimePower | null) =>
-    setHovered(entry ? { entry, moveCount: ctx.moveCount } : null);
-
   return (
     <GameBoard>
       <p className='w-full text-8xl font-bold text-center mb-4'>{board}</p>
-      <HoverPreview hovered={validHovered} board={board} isClientMoveAllowed={ctx.isClientMoveAllowed} />
+      <HoverPreview hovered={hovered} board={board} isClientMoveAllowed={ctx.isClientMoveAllowed} />
       <PrimePowerGrid
         board={board}
         visiblePowers={visiblePowers}
         isClientMoveAllowed={ctx.isClientMoveAllowed}
         chooseEntry={chooseEntry}
-        setHovered={setHoveredEntry}
+        hoverProps={hoverProps}
       />
     </GameBoard>
   );
