@@ -38,4 +38,22 @@ describe('useHoverPreview', () => {
     act(() => result.current.hoverProps('b').onPointerEnter());
     expect(result.current.value).toBe('b');
   });
+
+  it('exposes imperative set/clear with the same moveCount stamp', () => {
+    const { result, rerender } = renderHook(
+      ({ moveCount }) => useHoverPreview<string>(moveCount),
+      { initialProps: { moveCount: 1 } }
+    );
+
+    act(() => result.current.set('tap'));
+    expect(result.current.value).toBe('tap');
+
+    act(() => result.current.clear());
+    expect(result.current.value).toBeNull();
+
+    // an imperatively set value is also invalidated by the next move
+    act(() => result.current.set('tap'));
+    rerender({ moveCount: 2 });
+    expect(result.current.value).toBeNull();
+  });
 });

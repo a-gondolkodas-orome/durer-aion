@@ -1,7 +1,6 @@
-import { useState } from 'react';
 import { range } from 'lodash';
 import {
-  type BoardClientProps, type Events, type Ctx, GameBoard
+  type BoardClientProps, type Events, type Ctx, GameBoard, useHoverPreview
 } from '../../strategy-game-factory';
 import { useTranslation } from '../../../language';
 import {
@@ -15,18 +14,19 @@ export const BoardClient = ({ board, ctx, events, moves }: BoardClientProps<Boar
   const { t } = useTranslation();
   const { grid } = board;
   const selected = ctx.turnState as Selected;
-  const [hoverOrientation, setHoverOrientation] = useState<Orientation | null>(null);
+  const { value: hoverOrientation, hoverProps, clear: clearHover } = useHoverPreview<Orientation>(ctx.moveCount);
   const rect = selected ? getRectangleAt(grid, selected.r, selected.c) : null;
 
   const clickDisc = (r: number, c: number) => {
     if (!ctx.isClientMoveAllowed) return;
-    setHoverOrientation(null);
+    // Picking another disc keeps moveCount unchanged, so drop the hover
+    // preview explicitly — it belonged to the previous selection.
+    clearHover();
     events.setTurnState(selected && selected.r === r && selected.c === c ? null : { r, c });
   };
 
   const removeLine = (orientation: Orientation) => {
     if (!ctx.isClientMoveAllowed || !selected) return;
-    setHoverOrientation(null);
     moves.removeLine(board, { ...selected, orientation });
   };
 
@@ -98,10 +98,7 @@ export const BoardClient = ({ board, ctx, events, moves }: BoardClientProps<Boar
               key={orientation}
               className="primary-button w-auto grow"
               onClick={() => removeLine(orientation)}
-              onPointerEnter={() => setHoverOrientation(orientation)}
-              onPointerLeave={() => setHoverOrientation(null)}
-              onFocus={() => setHoverOrientation(orientation)}
-              onBlur={() => setHoverOrientation(null)}
+              {...hoverProps(orientation)}
             >
               {t(label)} ({count})
             </button>

@@ -1,7 +1,6 @@
-import { useState } from 'react';
 import { range } from 'lodash';
 import {
-  strategyGameFactory, type BoardClientProps, type Ctx, type Events, GameBoard
+  strategyGameFactory, type BoardClientProps, type Ctx, type Events, GameBoard, useHoverPreview
 } from '../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import {
@@ -12,22 +11,19 @@ import {
 const CELL = 30; // px per chocolate cell
 const CUT = 18; // px hit area of a cut line
 
-type HoveredCut = (Move & { moveCount: number }) | null;
-
-const PieceView = ({ piece, ctx, hovered, setHovered, onActivate }: {
+const PieceView = ({ piece, ctx, hovered, setHovered, clearHovered, onActivate }: {
   piece: Piece;
   ctx: Ctx;
-  hovered: HoveredCut;
-  setHovered: (h: HoveredCut) => void;
+  hovered: Move | null;
+  setHovered: (h: Move) => void;
+  clearHovered: () => void;
   onActivate: (move: Move) => void;
 }) => {
   const { w, h } = piece;
   const breaks = safeBreaks(piece);
 
-  const hoveredHere = ctx.isClientMoveAllowed
-    && hovered?.moveCount === ctx.moveCount
-    && hovered?.id === piece.id
-    ? breaks.find(br => br.dir === hovered!.dir && br.pos === hovered!.pos)
+  const hoveredHere = ctx.isClientMoveAllowed && hovered?.id === piece.id
+    ? breaks.find(br => br.dir === hovered.dir && br.pos === hovered.pos)
     : undefined;
 
   const label = hoveredHere
@@ -66,10 +62,10 @@ const PieceView = ({ piece, ctx, hovered, setHovered, onActivate }: {
               style={style}
               aria-label={`${w}×${h} → ${br.a.w}×${br.a.h} + ${br.b.w}×${br.b.h}`}
               onClick={() => onActivate(cut)}
-              onFocus={() => setHovered({ ...cut, moveCount: ctx.moveCount })}
-              onBlur={() => setHovered(null)}
-              onPointerEnter={e => { if (e.pointerType === 'mouse') setHovered({ ...cut, moveCount: ctx.moveCount }); }}
-              onPointerLeave={e => { if (e.pointerType === 'mouse') setHovered(null); }}
+              onFocus={() => setHovered(cut)}
+              onBlur={clearHovered}
+              onPointerEnter={e => { if (e.pointerType === 'mouse') setHovered(cut); }}
+              onPointerLeave={e => { if (e.pointerType === 'mouse') clearHovered(); }}
             >
               <span className={`transition-colors ${line}`} />
             </button>
@@ -84,7 +80,7 @@ const PieceView = ({ piece, ctx, hovered, setHovered, onActivate }: {
 };
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const [hovered, setHovered] = useState<HoveredCut>(null);
+  const { value: hovered, set: setHovered, clear: clearHovered } = useHoverPreview<Move>(ctx.moveCount);
 
   const onBreak = (move: Move) => {
     if (!ctx.isClientMoveAllowed) return;
@@ -96,10 +92,10 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   // first tap highlights (showing the preview) and the second tap confirms.
   const onActivate = (move: Move) => {
     if (!ctx.isClientMoveAllowed) return;
-    const isSelected = hovered?.moveCount === ctx.moveCount
-      && hovered?.id === move.id && hovered?.dir === move.dir && hovered?.pos === move.pos;
+    const isSelected = hovered?.id === move.id
+      && hovered?.dir === move.dir && hovered?.pos === move.pos;
     if (isSelected) onBreak(move);
-    else setHovered({ ...move, moveCount: ctx.moveCount });
+    else setHovered(move);
   };
 
   return (
@@ -112,6 +108,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             ctx={ctx}
             hovered={hovered}
             setHovered={setHovered}
+            clearHovered={clearHovered}
             onActivate={onActivate}
           />
         ))}

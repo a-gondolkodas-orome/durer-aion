@@ -17,23 +17,27 @@ import { useState } from 'react';
  * that shouldn't drive a preview (e.g. a currently disabled one). It is safe on
  * a container with focusable children too: React's onFocus/onBlur bubble, so a
  * child's focus previews the container — matching pointer hover.
+ *
+ * `set`/`clear` are the imperative escape hatch for flows `hoverProps` can't
+ * express — e.g. a touch two-tap flow where the first tap (onClick) sets the
+ * preview, or handlers that filter by `pointerType`. Values set this way get
+ * the same moveCount stamp, so they are invalidated by the next move too.
  */
 export function useHoverPreview<T>(moveCount: number) {
   const [hovered, setHovered] = useState<{ value: T; moveCount: number } | null>(null);
 
   const value = hovered?.moveCount === moveCount ? hovered.value : null;
 
-  const hoverProps = (v: T) => {
-    const set = () => setHovered({ value: v, moveCount });
-    const clear = () => setHovered(null);
-    return {
-      onPointerEnter: set,
-      onPointerMove: set,
-      onPointerLeave: clear,
-      onFocus: set,
-      onBlur: clear
-    };
-  };
+  const set = (v: T) => setHovered({ value: v, moveCount });
+  const clear = () => setHovered(null);
 
-  return { value, hoverProps };
+  const hoverProps = (v: T) => ({
+    onPointerEnter: () => set(v),
+    onPointerMove: () => set(v),
+    onPointerLeave: clear,
+    onFocus: () => set(v),
+    onBlur: clear
+  });
+
+  return { value, hoverProps, set, clear };
 }
