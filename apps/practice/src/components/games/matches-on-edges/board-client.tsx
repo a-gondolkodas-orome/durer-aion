@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { range } from 'lodash';
 import { useTranslation } from '../../../language';
-import { GameBoard, type BoardClientProps } from '../../strategy-game-factory';
+import { GameBoard, type BoardClientProps, useHoverPreview } from '../../strategy-game-factory';
 import { type Board, boundaryEdgesToPlace, currentWindowSize, legalMoves } from './helpers';
 
 const Matchstick = ({ ghost = false }: { ghost?: boolean }) => (
@@ -33,12 +33,12 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const validStarts = new Set(legalMoves(board).map(m => m.a));
 
   const [selectedStart, setSelectedStart] = useState<number | null>(null);
-  const [hoverStart, setHoverStart] = useState<number | null>(null);
+  const { value: hoverStart, hoverProps } = useHoverPreview<number>(ctx.moveCount);
 
-  // Drop the in-progress selection whenever the board advances (own or bot move).
+  // Drop the in-progress selection whenever the board advances (own or bot
+  // move). The hover preview needs no reset: its moveCount stamp expires.
   useEffect(() => {
     setSelectedStart(null);
-    setHoverStart(null);
   }, [ctx.moveCount]);
 
   const canInteract = ctx.isClientMoveAllowed;
@@ -76,10 +76,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               key={`cell-${i}`}
               disabled={!selectable}
               onClick={() => selectStart(i)}
-              onMouseEnter={() => selectable && setHoverStart(i)}
-              onMouseLeave={() => setHoverStart(null)}
-              onFocus={() => selectable && setHoverStart(i)}
-              onBlur={() => setHoverStart(null)}
+              {...(selectable ? hoverProps(i) : {})}
               aria-pressed={selectedStart === i}
               aria-label={t({
                 hu: `${i + 1}. mező${selectable ? `, ${k} hosszú résztábla kezdete` : ''}`,

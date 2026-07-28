@@ -1,18 +1,17 @@
-import { Fragment, useState } from 'react';
+import { Fragment } from 'react';
 import { range, sample, random } from 'lodash';
 import {
   strategyGameFactory,
   type Events, type StrategyArgs, type GameMoves, type BoardClientProps,
-  GameBoard
+  GameBoard, useHoverPreview
 } from '../../strategy-game-factory';
 
 // A board is the list of pile sizes; every pile has at least one match.
 export type Board = number[];
 
 type Hover =
-  | { pileId: number; kind: 'remove'; moveCount: number }
-  | { pileId: number; kind: 'split'; splitAfter: number; moveCount: number }
-  | null;
+  | { pileId: number; kind: 'remove' }
+  | { pileId: number; kind: 'split'; splitAfter: number };
 
 const Matchstick = ({ removed }: { removed: boolean }) => (
   <span className="relative block w-2 h-9">
@@ -28,9 +27,7 @@ const Matchstick = ({ removed }: { removed: boolean }) => (
 );
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const [hover, setHover] = useState<Hover>(null);
-  const activeHover =
-    ctx.isClientMoveAllowed && hover?.moveCount === ctx.moveCount ? hover : null;
+  const { value: activeHover, hoverProps } = useHoverPreview<Hover>(ctx.moveCount);
 
   const clickRemove = (pileId: number) => {
     if (!ctx.isClientMoveAllowed) return;
@@ -41,12 +38,6 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     if (!ctx.isClientMoveAllowed) return;
     moves.splitPile(board, pileId, splitAfter + 1);
   };
-
-  const hoverSplit = (pileId: number, splitAfter: number) =>
-    setHover({ pileId, kind: 'split', splitAfter, moveCount: ctx.moveCount });
-  const hoverRemove = (pileId: number) =>
-    setHover({ pileId, kind: 'remove', moveCount: ctx.moveCount });
-  const clearHover = () => setHover(null);
 
   const pileDescription = (pileId: number, size: number) => {
     if (!activeHover || activeHover.pileId !== pileId) return `${size}`;
@@ -89,10 +80,9 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                       disabled={!ctx.isClientMoveAllowed}
                       className="self-stretch w-4 flex items-center justify-center group"
                       onClick={() => clickSplit(pileId, matchId - 1)}
-                      onFocus={() => hoverSplit(pileId, matchId - 1)}
-                      onBlur={clearHover}
-                      onPointerEnter={() => hoverSplit(pileId, matchId - 1)}
-                      onPointerLeave={clearHover}
+                      {...(ctx.isClientMoveAllowed
+                        ? hoverProps({ pileId, kind: 'split', splitAfter: matchId - 1 })
+                        : {})}
                     >
                       <span className={`
                         w-0.5 h-9 rounded-full transition-colors
@@ -112,10 +102,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                       enabled:focus:bg-slate-200 dark:enabled:focus:bg-slate-700
                     `}
                     onClick={() => clickRemove(pileId)}
-                    onFocus={() => hoverRemove(pileId)}
-                    onBlur={clearHover}
-                    onPointerEnter={() => hoverRemove(pileId)}
-                    onPointerLeave={clearHover}
+                    {...(ctx.isClientMoveAllowed ? hoverProps({ pileId, kind: 'remove' }) : {})}
                   >
                     <Matchstick removed={isMatchRemoved(pileId, matchId, size)} />
                   </button>
