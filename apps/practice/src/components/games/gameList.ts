@@ -134,6 +134,13 @@ export const gameList: GameList = {
     icon: "number",
     name: { hu: "x+1, 2x 100-ig", en: "x+1, 2x up to 100" }
   },
+  TriangleCircleGame: {
+    year: { k: "IV. (10/11)", v: "10/11" },
+    round: "döntő",
+    category: ["C", "D"],
+    icon: "coloring",
+    name: { hu: "Vonal és kör", en: "Line and circle" }
+  },
   PlusOneTwoThree: {
     year: { k: "V. (11/12)", v: "11/12" },
     round: "döntő",

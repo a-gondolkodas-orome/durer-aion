@@ -86,6 +86,7 @@ export { ThreeMore } from './single-pile-removal/three-more/three-more';
 export { ThreePilesRebuild } from './three-piles-rebuild/three-piles-rebuild';
 export { TicTacToe } from './tictactoe-alikes/tictactoe/tictactoe';
 export { TicTacToeDoubleStart } from './tictactoe-alikes/tictactoe-doublestart/tictactoe-doublestart';
+export { TriangleCircleGame } from './triangle-circle-game/triangle-circle-game';
 export { TriangleColoring } from './triangle-coloring/triangle-coloring';
 export { TriangularGridRopes } from './totem-poles/triangular-grid-ropes-10/triangular-grid-ropes-10';
 export { TriangularGridRopes15 } from './totem-poles/triangular-grid-ropes-15/triangular-grid-ropes-15';
