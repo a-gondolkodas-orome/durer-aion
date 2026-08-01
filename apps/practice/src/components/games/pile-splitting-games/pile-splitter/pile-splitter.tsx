@@ -1,8 +1,9 @@
-import { range, isEqual, random, cloneDeep } from 'lodash';
+import { range, isEqual, random } from 'lodash';
 import {
   strategyGameFactory, type BoardClientProps, type Events, GameBoard, useHoverPreview
 } from '../../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
+import { isRemovalAllowed, isSplitAllowed, withPileRemoved } from '../helpers';
 
 export type Board = number[];
 type Piece = { pileId: number; pieceId: number };
@@ -10,14 +11,13 @@ type Piece = { pileId: number; pieceId: number };
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { value: validHoveredPiece, hoverProps } = useHoverPreview<Piece>(ctx.moveCount);
 
-  const isDisabled = ({ pileId, pieceId }: Piece) => {
-    if (!ctx.isClientMoveAllowed) return true;
-    return pieceId === board[pileId] - 1;
-  };
+  // One click performs the whole turn, so a piece is clickable only if both
+  // halves are legal: discarding the other pile, then splitting this one here.
+  const isDisabled = ({ pileId, pieceId }: Piece) =>
+    !moves.removePile.isAllowed!(board, 1 - pileId)
+      || !isSplitAllowed(withPileRemoved(board, 1 - pileId), pileId, pieceId + 1);
 
   const clickPiece = ({ pileId, pieceId }: Piece) => {
-    if (isDisabled({ pileId, pieceId })) return;
-
     const { nextBoard } = moves.removePile(board, 1 - pileId);
 
     setTimeout(() => {
@@ -96,18 +96,21 @@ const getPlayerStepDescription = () => ({
 });
 
 const moves = {
-  removePile: (board: Board, _, pileId) => {
-    const nextBoard = cloneDeep(board);
-    nextBoard[pileId] = 0;
-    return { nextBoard };
+  removePile: {
+    validate: (board: Board, _, pileId: number) => isRemovalAllowed(board, pileId),
+    apply: (board: Board, _, pileId) => ({ nextBoard: withPileRemoved(board, pileId) })
   },
-  splitPile: (board: Board, { events }: { events: Events }, { pileId, pieceCount }) => {
-    const nextBoard = [pieceCount, board[pileId] - pieceCount];
-    events.endTurn();
-    if (isEqual(nextBoard, [1, 1])) {
-      events.endGame();
+  splitPile: {
+    validate: (board: Board, _, { pileId, pieceCount }: { pileId: number; pieceCount: number }) =>
+      isSplitAllowed(board, pileId, pieceCount),
+    apply: (board: Board, { events }: { events: Events }, { pileId, pieceCount }) => {
+      const nextBoard = [pieceCount, board[pileId] - pieceCount];
+      events.endTurn();
+      if (isEqual(nextBoard, [1, 1])) {
+        events.endGame();
+      }
+      return { nextBoard };
     }
-    return { nextBoard };
   }
 };
 

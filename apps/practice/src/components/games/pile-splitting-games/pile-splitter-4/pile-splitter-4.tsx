@@ -4,6 +4,7 @@ import {
   strategyGameFactory, type BoardClientProps, type Events, GameBoard, useHoverPreview
 } from '../../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
+import { emptiedPileId, isRemovalAllowed, isSplitAllowed, withPileRemoved } from '../helpers';
 import { generateStartBoard, generateTestStartBoard } from './helpers';
 
 export type Board = number[];
@@ -14,20 +15,22 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { value: validHoveredPiece, hoverProps } = useHoverPreview<Piece>(ctx.moveCount);
   const { value: validHoveredPileId, hoverProps: pileHoverProps } = useHoverPreview<number>(ctx.moveCount);
 
-  const canRemovePile = (pileId: number) =>
-    board.some((size, i) => i !== pileId && size >= 2);
-
   const canSelectPile = (pileId: number) =>
-    ctx.isClientMoveAllowed && removedPileId === null && canRemovePile(pileId);
+    removedPileId === null && moves.removePile.isAllowed!(board, pileId);
 
   const isDisabled = ({ pileId, pieceId }: Piece) => {
     if (!ctx.isClientMoveAllowed) return true;
-    if (removedPileId === null) return !canRemovePile(pileId);
-    return pileId !== removedPileId && pieceId === board[pileId] - 1;
+    // the first click picks the pile to discard, the second where to split
+    if (removedPileId === null) return !canSelectPile(pileId);
+    // clicking the picked pile again deselects it
+    if (pileId === removedPileId) return false;
+    return !isSplitAllowed(withPileRemoved(board, removedPileId), pileId, pieceId + 1);
   };
 
+  // The click handlers keep their guards: a rejected click must leave the local
+  // pile selection alone, which the engine's silent gating cannot do for us.
   const clickPiece = ({ pileId, pieceId }: Piece) => {
-    if (!ctx.isClientMoveAllowed) return;
+    if (isDisabled({ pileId, pieceId })) return;
 
     if (removedPileId === pileId) {
       setRemovedPileId(null);
@@ -37,7 +40,6 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       setRemovedPileId(pileId);
       return;
     }
-    if (pieceId === board[pileId] - 1) return;
 
     const { nextBoard } = moves.removePile(board, removedPileId);
 
@@ -148,27 +150,30 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 };
 
 const moves = {
-  removePile: (board: Board, _, pileId: number) => {
-    const nextBoard = cloneDeep(board);
-    nextBoard[pileId] = 0;
-    return { nextBoard };
+  removePile: {
+    validate: (board: Board, _, pileId: number) => isRemovalAllowed(board, pileId),
+    apply: (board: Board, _, pileId: number) => ({ nextBoard: withPileRemoved(board, pileId) })
   },
-  splitPile: (board: Board, { events }: { events: Events }, { pileId, pieceCount }) => {
-    const nextBoard = cloneDeep(board);
-    const removedPileId = [0, 1, 2, 3].find(i => nextBoard[i] === 0)!;
-    if (removedPileId === undefined) console.error('invalid_move');
-    if (removedPileId < pileId) {
-      nextBoard[removedPileId] = pieceCount;
-      nextBoard[pileId] = nextBoard[pileId] - pieceCount;
-    } else {
-      nextBoard[removedPileId] = nextBoard[pileId] - pieceCount;
-      nextBoard[pileId] = pieceCount;
+  splitPile: {
+    validate: (board: Board, _, { pileId, pieceCount }: { pileId: number; pieceCount: number }) =>
+      isSplitAllowed(board, pileId, pieceCount),
+    apply: (board: Board, { events }: { events: Events }, { pileId, pieceCount }) => {
+      const nextBoard = cloneDeep(board);
+      // the slot emptied earlier this turn takes the other half of the split
+      const removedPileId = emptiedPileId(nextBoard)!;
+      if (removedPileId < pileId) {
+        nextBoard[removedPileId] = pieceCount;
+        nextBoard[pileId] = nextBoard[pileId] - pieceCount;
+      } else {
+        nextBoard[removedPileId] = nextBoard[pileId] - pieceCount;
+        nextBoard[pileId] = pieceCount;
+      }
+      events.endTurn();
+      if (isEqual(nextBoard, [1, 1, 1, 1])) {
+        events.endGame();
+      }
+      return { nextBoard };
     }
-    events.endTurn();
-    if (isEqual(nextBoard, [1, 1, 1, 1])) {
-      events.endGame();
-    }
-    return { nextBoard };
   }
 };
 
