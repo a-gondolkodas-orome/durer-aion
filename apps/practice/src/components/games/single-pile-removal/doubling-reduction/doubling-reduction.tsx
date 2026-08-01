@@ -1,6 +1,6 @@
 import { strategyGameFactory, type Events, type StrategyArgs } from '../../../strategy-game-factory';
 import { range, random, sample, minBy } from 'lodash';
-import { type Board, cap, BoardClient, getPlayerStepDescription } from '../pebble-pile';
+import { type Board, cap, validateTake, BoardClient, getPlayerStepDescription } from '../pebble-pile';
 
 export { cap };
 
@@ -47,12 +47,15 @@ export const chooseSmartTake = (board: Board): number => {
 };
 
 const moves = {
-  take: (board: Board, { events }: { events: Events }, count: number) => {
-    // Next player may take strictly less than twice this take, i.e. up to 2·count − 1.
-    const nextBoard: Board = { stones: board.stones - count, maxTake: 2 * count - 1 };
-    events.endTurn();
-    if (nextBoard.stones === 0) events.endGame(); // mover took the last stone(s) → wins
-    return { nextBoard };
+  take: {
+    validate: validateTake,
+    apply: (board: Board, { events }: { events: Events }, count: number) => {
+      // Next player may take strictly less than twice this take, i.e. up to 2·count − 1.
+      const nextBoard: Board = { stones: board.stones - count, maxTake: 2 * count - 1 };
+      events.endTurn();
+      if (nextBoard.stones === 0) events.endGame(); // mover took the last stone(s) → wins
+      return { nextBoard };
+    }
   }
 };
 

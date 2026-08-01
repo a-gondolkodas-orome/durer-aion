@@ -12,8 +12,14 @@ export type Board = { stones: number; maxTake: number }
 // The most a player may legally take this turn.
 export const cap = (board: Board): number => Math.min(board.maxTake, board.stones);
 
-const StonePile = ({ board, disabled, onTake, moveCount }: {
-  board: Board; disabled: boolean; onTake: (count: number) => void; moveCount: number
+// A take is legal when it removes a whole number of pebbles, at least one and at
+// most this turn's cap. The three games differ only in how the *next* cap is
+// derived, so they share this one validator.
+export const validateTake = (board: Board, _, count: number): boolean =>
+  Number.isInteger(count) && count >= 1 && count <= cap(board);
+
+const StonePile = ({ board, isTakeAllowed, onTake, moveCount }: {
+  board: Board; isTakeAllowed: (count: number) => boolean; onTake: (count: number) => void; moveCount: number
 }) => {
   const { value, hoverProps } = useHoverPreview<number>(moveCount);
   const previewCount = value ?? 0;
@@ -30,7 +36,7 @@ const StonePile = ({ board, disabled, onTake, moveCount }: {
         // Only selectable pebbles drive the hover preview. Don't rely on the
         // `disabled` attribute to suppress this — some browsers (e.g. Safari)
         // still fire pointer events on disabled buttons.
-        const canSelect = !disabled && (takeCount <= cap(board));
+        const canSelect = isTakeAllowed(takeCount);
         return (
           <button
             key={i}
@@ -61,7 +67,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       </p>
       <StonePile
         board={board}
-        disabled={!ctx.isClientMoveAllowed}
+        isTakeAllowed={count => moves.take.isAllowed!(board, count)}
         onTake={count => moves.take(board, count)}
         moveCount={ctx.moveCount}
       />
