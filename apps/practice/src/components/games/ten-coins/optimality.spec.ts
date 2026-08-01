@@ -40,8 +40,9 @@ const driveBot = (set: Vals): Vals => {
   const board = [...set];
   let captured = board;
   const ctx = makeCtx();
-  const wrapped = mapValues(gameMoves, fn => (b: number[], ...args: unknown[]) => {
-    const res = (fn as (...a: unknown[]) => { nextBoard: number[] })(b, { ctx, events: dummyEvents }, ...args);
+  // Long-form moves ({ validate, apply }) expose their effect as `apply`.
+  const wrapped = mapValues(gameMoves, ({ apply }) => (b: number[], ...args: unknown[]) => {
+    const res = (apply as (...a: unknown[]) => { nextBoard: number[] })(b, { ctx, events: dummyEvents }, ...args);
     captured = res.nextBoard;
     return res;
   }) as unknown as GameMoves<number[]>;

@@ -30,16 +30,20 @@ const StonePile = ({ count, onClick, disabled, restricted, hovered, hoverProps }
   );
 };
 
+// The pile must have a stone left, and the left pile is closed to a player who
+// took from it on their previous turn. The restriction is recorded per player,
+// so this is one of the games where whose move it is genuinely decides what is
+// legal — not merely whose turn it is.
+export const isRemovalAllowed = (board: Board, player: number, pileId: number): boolean =>
+  (pileId === 0 || pileId === 1)
+    && board.piles[pileId] > 0
+    && !(pileId === 0 && board.leftRestriction[player]);
+
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
   const { value: hoveredPile, hoverProps } = useHoverPreview<number>(ctx.moveCount);
 
-  const isMoveAllowed = pileId => {
-    if (!ctx.isClientMoveAllowed) return false;
-    if (board.piles[pileId] === 0) return false;
-    if (pileId === 0 && board.leftRestriction[ctx.currentPlayer!]) return false;
-    return true;
-  }
+  const isMoveAllowed = pileId => moves.removeStone.isAllowed!(board, pileId);
 
   return (
     <GameBoard>
@@ -66,15 +70,19 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 };
 
 const moves = {
-  removeStone: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, pileId) => {
-    const nextBoard = cloneDeep(board);
-    nextBoard.piles[pileId] = board.piles[pileId] - 1;
-    nextBoard.leftRestriction[ctx.currentPlayer!] = (pileId === 0);
-    events.endTurn();
-    if (isGameEnd(nextBoard, ctx)) {
-      events.endGame();
+  removeStone: {
+    validate: (board: Board, { ctx }: { ctx: Ctx }, pileId) =>
+      isRemovalAllowed(board, ctx.currentPlayer!, pileId),
+    apply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, pileId) => {
+      const nextBoard = cloneDeep(board);
+      nextBoard.piles[pileId] = board.piles[pileId] - 1;
+      nextBoard.leftRestriction[ctx.currentPlayer!] = (pileId === 0);
+      events.endTurn();
+      if (isGameEnd(nextBoard, ctx)) {
+        events.endGame();
+      }
+      return { nextBoard };
     }
-    return { nextBoard };
   }
 };
 

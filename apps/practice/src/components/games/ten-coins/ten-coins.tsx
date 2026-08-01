@@ -60,16 +60,14 @@ const BoardClient = ({ board, ctx, events, moves }: BoardClientProps<Board>) => 
   const selectedValue = ctx.turnState as number | null;
   const presentValues = distinctValues(board);
 
-  // Value-1 coins can't be selected: there is no smaller value to change them to.
-  const isSelectable = (v: number) => v > 1;
-
+  // Asking about L = 1 asks whether these coins can be changed at all: it is the
+  // most generous target, so value-1 coins fall out as unselectable.
   const selectValue = (v: number) => {
-    if (!ctx.isClientMoveAllowed || !isSelectable(v)) return;
+    if (!moves.convert.isAllowed!(board, v, 1)) return;
     events.setTurnState(selectedValue === v ? null : v);
   };
 
   const chooseTarget = (l: number) => {
-    if (!ctx.isClientMoveAllowed || selectedValue === null) return;
     moves.convert(board, selectedValue, l);
     events.setTurnState(null);
   };
@@ -83,7 +81,7 @@ const BoardClient = ({ board, ctx, events, moves }: BoardClientProps<Board>) => 
           return (
             <button
               key={v}
-              disabled={!ctx.isClientMoveAllowed || !isSelectable(v)}
+              disabled={!moves.convert.isAllowed!(board, v, 1)}
               onClick={() => selectValue(v)}
               aria-pressed={isSelected}
               aria-label={t({
@@ -125,7 +123,7 @@ const BoardClient = ({ board, ctx, events, moves }: BoardClientProps<Board>) => 
           {range(1, selectedValue).map(l => (
             <button
               key={l}
-              disabled={!ctx.isClientMoveAllowed}
+              disabled={!moves.convert.isAllowed!(board, selectedValue, l)}
               onClick={() => chooseTarget(l)}
               aria-label={t({ hu: `${l} értékű érme`, en: `value ${l} coin` })}
               className="rounded-full transition-transform enabled:hocus:scale-110
@@ -156,15 +154,24 @@ const Coin = ({ value }: { value: number }) => (
   </div>
 );
 
+// A move needs a value K that is actually on the table, and a strictly smaller
+// positive L to turn those coins into. Both players draw on the same table, so
+// whose turn it is does not enter into legality.
+export const isConversionAllowed = (board: Board, k: number, l: number): boolean =>
+  Number.isInteger(k) && Number.isInteger(l) && l >= 1 && l < k && board.includes(k);
+
 export const moves = {
-  convert: (board: Board, { events }: { events: Events }, k, l) => {
-    const nextBoard = board.map(v => (v === k ? l : v)).sort((a, b) => a - b);
-    if (uniq(nextBoard).length === 1) {
-      events.endGame(); // whoever equalises the coins wins → current player
-    } else {
-      events.endTurn();
+  convert: {
+    validate: (board: Board, _, k, l) => isConversionAllowed(board, k, l),
+    apply: (board: Board, { events }: { events: Events }, k, l) => {
+      const nextBoard = board.map(v => (v === k ? l : v)).sort((a, b) => a - b);
+      if (uniq(nextBoard).length === 1) {
+        events.endGame(); // whoever equalises the coins wins → current player
+      } else {
+        events.endTurn();
+      }
+      return { nextBoard };
     }
-    return { nextBoard };
   }
 };
 

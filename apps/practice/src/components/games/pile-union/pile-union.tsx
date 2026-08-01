@@ -15,6 +15,9 @@ const BoardClient = ({ board, ctx, events, moves }: BoardClientProps<Board>) => 
   const { value: hoveredPile, hoverProps } = useHoverPreview<number>(ctx.moveCount);
   const turnState = ctx.turnState as TurnState;
 
+  // The merge branch is a two-click sequence held in turn state, so this one
+  // keeps its guard: without it a click during the bot's turn would still move
+  // the selection around.
   const handlePileClick = (pileIndex) => {
     if (!ctx.isClientMoveAllowed) return;
     if (moveType === 'remove') {
@@ -174,25 +177,41 @@ const Matchstick = ({ dimmed }: { dimmed: boolean }) => (
   </div>
 );
 
+// Empty piles never survive a move (removeOne drops a pile it empties), so any
+// pile still on the table has a match to take.
+export const isPile = (board: Board, pileIndex: number): boolean =>
+  Number.isInteger(pileIndex) && pileIndex >= 0 && pileIndex < board.length;
+
+// Merging needs two piles, and they have to be different ones.
+export const isMergeAllowed = (board: Board, piles: number[]): boolean =>
+  Array.isArray(piles) && piles.length === 2
+    && isPile(board, piles[0]) && isPile(board, piles[1]) && piles[0] !== piles[1];
+
 const moves = {
-  removeOne: (board: Board, { events }: { events: Events }, pileIndex) => {
-    const newSize = board[pileIndex] - 1;
-    const nextBoard = [
-      ...board.slice(0, pileIndex),
-      ...(newSize > 0 ? [newSize] : []),
-      ...board.slice(pileIndex + 1)
-    ];
-    events.endTurn();
-    if (nextBoard.length === 0) events.endGame();
-    return { nextBoard };
+  removeOne: {
+    validate: (board: Board, _, pileIndex) => isPile(board, pileIndex),
+    apply: (board: Board, { events }: { events: Events }, pileIndex) => {
+      const newSize = board[pileIndex] - 1;
+      const nextBoard = [
+        ...board.slice(0, pileIndex),
+        ...(newSize > 0 ? [newSize] : []),
+        ...board.slice(pileIndex + 1)
+      ];
+      events.endTurn();
+      if (nextBoard.length === 0) events.endGame();
+      return { nextBoard };
+    }
   },
-  mergePiles: (board: Board, { events }: { events: Events }, [pileIndex1, pileIndex2]) => {
-    const [firstIdx, secondIdx] = [pileIndex1, pileIndex2].sort((a, b) => a - b);
-    const merged = board[firstIdx] + board[secondIdx];
-    const nextBoard = board.filter((_, i) => i !== firstIdx && i !== secondIdx);
-    nextBoard.splice(firstIdx, 0, merged);
-    events.endTurn();
-    return { nextBoard };
+  mergePiles: {
+    validate: (board: Board, _, piles: number[]) => isMergeAllowed(board, piles),
+    apply: (board: Board, { events }: { events: Events }, [pileIndex1, pileIndex2]) => {
+      const [firstIdx, secondIdx] = [pileIndex1, pileIndex2].sort((a, b) => a - b);
+      const merged = board[firstIdx] + board[secondIdx];
+      const nextBoard = board.filter((_, i) => i !== firstIdx && i !== secondIdx);
+      nextBoard.splice(firstIdx, 0, merged);
+      events.endTurn();
+      return { nextBoard };
+    }
   }
 };
 
