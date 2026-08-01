@@ -1,6 +1,6 @@
 import { useTranslation } from '../../../../language';
-import type { Board } from './architect-and-bandits-a';
 import { GameBoard, type BoardClientProps } from '../../../strategy-game-factory';
+import { type Board, ARCHITECT } from '../helpers';
 
 const VERTEX_LABELS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 
@@ -27,28 +27,19 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   // Hide towers during role selection (before the game actually begins)
   const gameStarted = ctx.isHumanVsHumanGame || ctx.chosenRoleIndex !== null;
 
-  const isAdjacentToArchitect = (v: number) =>
-    (v - board.architectPosition + 8) % 8 === 1 ||
-    (board.architectPosition - v + 8) % 8 === 1;
-
-  const isClickable = (v: number) => {
-    if (!ctx.isClientMoveAllowed) return false;
-    if (ctx.currentPlayer === 0) {
-      return board.kmUsedToday < 40 && isAdjacentToArchitect(v);
-    }
-    return board.towers[v];
-  };
+  const isClickable = (v: number) => (ctx.currentPlayer === ARCHITECT
+    ? moves.moveArchitect.isAllowed!(board, v)
+    : moves.destroyTower.isAllowed!(board, v));
 
   const handleVertexClick = (v: number) => {
-    if (!isClickable(v)) return;
-    if (ctx.currentPlayer === 0) {
+    if (ctx.currentPlayer === ARCHITECT) {
       moves.moveArchitect(board, v);
     } else {
       moves.destroyTower(board, v);
     }
   };
 
-  const canEndDay = ctx.isClientMoveAllowed && ctx.currentPlayer === 0;
+  const canEndDay = moves.endDay.isAllowed!(board);
 
   return (
     <GameBoard className="flex flex-col items-center">
@@ -129,7 +120,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 
       {ctx.phase === 'play' && (
         <p>
-          {ctx.currentPlayer === 0
+          {ctx.currentPlayer === ARCHITECT
             ? t({
               hu: `${board.day}. nap · ${board.kmUsedToday}/40 km`,
               en: `Day ${board.day} · ${board.kmUsedToday}/40 km`

@@ -1,5 +1,5 @@
 import { minPathToVisitAll, getOptimalArchitectPath } from './bot-strategy';
-import type { Board } from './architect-and-bandits-a';
+import type { Board } from '../helpers';
 
 const makeBoard = (architectPosition: number, towers: boolean[], day: number): Board => ({
   architectPosition, towers, day, kmUsedToday: 0

@@ -1,6 +1,6 @@
 import { maxBy } from 'lodash';
 import type { StrategyArgs } from '../../../strategy-game-factory';
-import type { Board } from './architect-and-bandits-a';
+import type { Board } from '../helpers';
 
 // Vertices A(0)..H(7) clockwise. Each edge = 10 km, max 4 edges/day.
 // Architect wins by visiting all 8 vertices over 4 days despite 3 nightly destructions.
