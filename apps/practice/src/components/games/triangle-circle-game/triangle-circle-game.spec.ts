@@ -6,7 +6,7 @@ import { makeEvents } from '../../../test-utils';
 describe('moves.shadeEdge', () => {
   it('shades the edge and passes the turn', () => {
     const events = makeEvents();
-    const { nextBoard } = moves.shadeEdge(generateStartBoard(), { events }, 0);
+    const { nextBoard } = moves.shadeEdge.apply(generateStartBoard(), { events }, 0);
     expect(nextBoard.edges[0]).toBe(true);
     expect(events.endTurn).toHaveBeenCalled();
     expect(events.endGame).not.toHaveBeenCalled();
@@ -16,7 +16,7 @@ describe('moves.shadeEdge', () => {
     const [e0, e1, e2] = TRIANGLES[0].edgeIds;
     const board = applyShade(applyShade(generateStartBoard(), e0), e1);
     const events = makeEvents();
-    moves.shadeEdge(board, { events }, e2);
+    moves.shadeEdge.apply(board, { events }, e2);
     expect(events.endGame).toHaveBeenCalledWith(LINE);
     expect(events.endTurn).not.toHaveBeenCalled();
   });
@@ -25,7 +25,7 @@ describe('moves.shadeEdge', () => {
     const [e0, e1, e2] = TRIANGLES[0].edgeIds;
     const board = applyCircle(applyShade(applyShade(generateStartBoard(), e0), e1), 0);
     const events = makeEvents();
-    moves.shadeEdge(board, { events }, e2);
+    moves.shadeEdge.apply(board, { events }, e2);
     expect(events.endTurn).toHaveBeenCalled();
     expect(events.endGame).not.toHaveBeenCalled();
   });
@@ -34,7 +34,7 @@ describe('moves.shadeEdge', () => {
 describe('moves.placeCircle', () => {
   it('places the circle and passes the turn', () => {
     const events = makeEvents();
-    const { nextBoard } = moves.placeCircle(generateStartBoard(), { events }, 7);
+    const { nextBoard } = moves.placeCircle.apply(generateStartBoard(), { events }, 7);
     expect(nextBoard.circles[7]).toBe(true);
     expect(events.endTurn).toHaveBeenCalled();
     expect(events.endGame).not.toHaveBeenCalled();
@@ -44,7 +44,7 @@ describe('moves.placeCircle', () => {
     const circles = new Array(TRIANGLE_COUNT).fill(true);
     circles[12] = false;
     const events = makeEvents();
-    moves.placeCircle({ edges: generateStartBoard().edges, circles }, { events }, 12);
+    moves.placeCircle.apply({ edges: generateStartBoard().edges, circles }, { events }, 12);
     expect(events.endGame).toHaveBeenCalledWith(CIRCLE);
     expect(events.endTurn).not.toHaveBeenCalled();
   });

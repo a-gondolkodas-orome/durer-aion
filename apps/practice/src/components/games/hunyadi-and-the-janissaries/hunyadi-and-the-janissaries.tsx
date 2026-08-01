@@ -4,7 +4,7 @@ import {
 import { CastleSvg } from './assets/castle-svg';
 import { SoldierSvg } from './assets/soldier-svg';
 import { smartBotStrategy } from './bot-strategy';
-import { generateStartBoard, moves, type Board, type SoldierColor } from './helpers';
+import { generateStartBoard, moves, SULTAN, type Board, type SoldierColor } from './helpers';
 import { useTranslation } from '../../../language';
 
 type Piece = { rowIndex: number, pieceIndex: number }
@@ -13,7 +13,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
   const { value: validHoveredPiece, hoverProps } = useHoverPreview<Piece>(ctx.moveCount);
 
-  const isPlayerSultan = ctx.currentPlayer === 0;
+  const isPlayerSultan = ctx.currentPlayer === SULTAN;
   const groupOfHoveredPiece = validHoveredPiece
     ? board[validHoveredPiece.rowIndex][validHoveredPiece.pieceIndex]
     : null;
@@ -24,14 +24,14 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     return group === groupOfHoveredPiece;
   };
 
+  // The same click means different things to the two roles: the sultan flips
+  // the clicked soldier's colour, Hunyadi wipes out everyone sharing it. The
+  // engine ignores whichever move is not the caller's to make, so no guard.
   const clickOnSoldier = ({ rowIndex, pieceIndex }: Piece) => {
-    if (!ctx.isClientMoveAllowed) return;
-
+    const group = board[rowIndex][pieceIndex];
     if (isPlayerSultan) {
-      const group = board[rowIndex][pieceIndex] === 'red' ? 'blue' : 'red';
-      moves.setGroupOfSoldiers(board, [{ rowIndex, pieceIndex, group }]);
+      moves.setGroupOfSoldiers(board, [{ rowIndex, pieceIndex, group: group === 'red' ? 'blue' : 'red' }]);
     } else {
-      const group = board[rowIndex][pieceIndex];
       moves.killGroup(board, group);
     }
   };
@@ -71,7 +71,9 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           {board[rowIndex] && board[rowIndex].map((group, pieceIndex) => (
             <button
               key={pieceIndex}
-              disabled={!ctx.isClientMoveAllowed}
+              disabled={!(isPlayerSultan
+                ? moves.setGroupOfSoldiers.isAllowed!(board, [{ rowIndex, pieceIndex, group }])
+                : moves.killGroup.isAllowed!(board, group))}
               className="aspect-square w-[10%] mx-1"
               onClick={() => clickOnSoldier({ rowIndex, pieceIndex })}
               {...hoverProps({ rowIndex, pieceIndex })}
@@ -92,9 +94,9 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       <button
         className={`
           primary-button w-auto m-auto mt-2
-          ${!ctx.isClientMoveAllowed || !isPlayerSultan ? 'invisible' : ''}
+          ${moves.finalizeSeparation.isAllowed!(board) ? '' : 'invisible'}
         `}
-        disabled={!ctx.isClientMoveAllowed || !isPlayerSultan}
+        disabled={!moves.finalizeSeparation.isAllowed!(board)}
         onClick={() => moves.finalizeSeparation(board)}
       >
         {t({ hu: 'Befejezem a kettéosztást', en: 'Finish the split' })}
@@ -104,7 +106,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 };
 
 const getPlayerStepDescription = ({ ctx }: { ctx: Ctx }) => {
-  return ctx.currentPlayer === 0
+  return ctx.currentPlayer === SULTAN
     ? {
       hu: 'Kattints a katonákra és válaszd két részre a seregedet.',
       en: 'Click soldiers to split your army in two.'

@@ -2,7 +2,7 @@ import { EDGES, TRIANGLES } from './geometry';
 import {
   type Board,
   generateStartBoard, shadedCount,
-  isLineWin, isCircleWin, isWinningShade,
+  isLineWin, isCircleWin, isWinningShade, isShadeAllowed, isCirclePlacementAllowed,
   liveThreats, preThreatEdges, freeEdges, freeTriangles,
   applyShade, applyCircle
 } from './helpers';
@@ -93,5 +93,27 @@ describe('threat vocabulary', () => {
     expect(liveThreats(applyShade(board, edge)).length).toBeGreaterThanOrEqual(2);
     // Circling one partner defuses it.
     expect(preThreatEdges(applyCircle(board, t1))).not.toContain(edge);
+  });
+
+  it('allows shading a free edge and refuses an already shaded or non-existent one', () => {
+    const board = applyShade(generateStartBoard(), 3);
+    expect(isShadeAllowed(board, 4)).toBe(true);
+    expect(isShadeAllowed(board, 3)).toBe(false);
+    expect(isShadeAllowed(board, -1)).toBe(false);
+    expect(isShadeAllowed(board, EDGES.length)).toBe(false);
+  });
+
+  it('allows circling a free triangle and refuses an already circled or non-existent one', () => {
+    const board = applyCircle(generateStartBoard(), 2);
+    expect(isCirclePlacementAllowed(board, 1)).toBe(true);
+    expect(isCirclePlacementAllowed(board, 2)).toBe(false);
+    expect(isCirclePlacementAllowed(board, -1)).toBe(false);
+    expect(isCirclePlacementAllowed(board, TRIANGLES.length)).toBe(false);
+  });
+
+  it('agrees with the free-edge and free-triangle listings', () => {
+    const board = applyCircle(applyShade(generateStartBoard(), 3), 2);
+    expect(freeEdges(board).every(e => isShadeAllowed(board, e))).toBe(true);
+    expect(freeTriangles(board).every(t => isCirclePlacementAllowed(board, t))).toBe(true);
   });
 });

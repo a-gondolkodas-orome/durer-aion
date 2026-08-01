@@ -1,33 +1,44 @@
-import { strategyGameFactory, type Events } from '../../strategy-game-factory';
+import { strategyGameFactory, type Ctx, type Events } from '../../strategy-game-factory';
 import { BoardClient } from './board-client';
 import {
   type Board, LINE, CIRCLE,
-  applyShade, applyCircle, generateStartBoard, isLineWin, isCircleWin
+  applyShade, applyCircle, generateStartBoard, isLineWin, isCircleWin,
+  isShadeAllowed, isCirclePlacementAllowed
 } from './helpers';
 import { smartBotStrategy, randomBotStrategy } from './strategy/bot-strategy';
 
+// Each move belongs to exactly one role, so both validators check who is on
+// turn: shading is not a thing the circle player can do at all.
 export const moves = {
   // Line player shades one edge; they win at once if it completes an un-circled
   // triangle, otherwise the turn passes.
-  shadeEdge: (board: Board, { events }: { events: Events }, edgeId: number) => {
-    const nextBoard = applyShade(board, edgeId);
-    if (isLineWin(nextBoard)) {
-      events.endGame(LINE);
-    } else {
-      events.endTurn();
+  shadeEdge: {
+    validate: (board: Board, { ctx }: { ctx: Ctx }, edgeId: number) =>
+      ctx.currentPlayer === LINE && isShadeAllowed(board, edgeId),
+    apply: (board: Board, { events }: { events: Events }, edgeId: number) => {
+      const nextBoard = applyShade(board, edgeId);
+      if (isLineWin(nextBoard)) {
+        events.endGame(LINE);
+      } else {
+        events.endTurn();
+      }
+      return { nextBoard };
     }
-    return { nextBoard };
   },
   // Circle player drops a circle into one triangle; they win once every triangle
   // is circled, otherwise the turn passes.
-  placeCircle: (board: Board, { events }: { events: Events }, triangleId: number) => {
-    const nextBoard = applyCircle(board, triangleId);
-    if (isCircleWin(nextBoard)) {
-      events.endGame(CIRCLE);
-    } else {
-      events.endTurn();
+  placeCircle: {
+    validate: (board: Board, { ctx }: { ctx: Ctx }, triangleId: number) =>
+      ctx.currentPlayer === CIRCLE && isCirclePlacementAllowed(board, triangleId),
+    apply: (board: Board, { events }: { events: Events }, triangleId: number) => {
+      const nextBoard = applyCircle(board, triangleId);
+      if (isCircleWin(nextBoard)) {
+        events.endGame(CIRCLE);
+      } else {
+        events.endTurn();
+      }
+      return { nextBoard };
     }
-    return { nextBoard };
   }
 };
 

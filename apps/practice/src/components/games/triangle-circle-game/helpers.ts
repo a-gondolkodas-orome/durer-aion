@@ -42,6 +42,17 @@ export const freeTriangles = (board: Board): number[] => {
   return result;
 };
 
+// The two players never compete for the same resource: the line player only
+// shades edges, the circle player only fills triangles. Each may use anything
+// their opponent has not — and they cannot — touched, so "still free" is the
+// whole of legality on both sides.
+export const isShadeAllowed = (board: Board, edgeId: number): boolean =>
+  Number.isInteger(edgeId) && edgeId >= 0 && edgeId < EDGE_COUNT && !board.edges[edgeId];
+
+export const isCirclePlacementAllowed = (board: Board, triangleId: number): boolean =>
+  Number.isInteger(triangleId) && triangleId >= 0 && triangleId < TRIANGLE_COUNT
+    && !board.circles[triangleId];
+
 export const applyShade = (board: Board, edgeId: number): Board => {
   const edges = board.edges.slice();
   edges[edgeId] = true;

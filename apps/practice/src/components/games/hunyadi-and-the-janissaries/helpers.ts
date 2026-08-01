@@ -46,28 +46,54 @@ export const generateStartBoard = (): Board => {
   return [[], ...board];
 };
 
-export const moves = {
-  killGroup: (board: Board, { events }: { events: Events }, group: SoldierColor) => {
-    const nextBoard = board.map(row => row.filter(soldier => soldier !== group));
+export const [SULTAN, HUNYADI] = [0, 1];
 
-    const isGameEnd = flatten(nextBoard).length === 0;
-    if (isGameEnd) {
+// Hunyadi destroys one of the two colours. Wiping out a colour nobody was
+// assigned to is allowed by the rules (it simply achieves nothing), so the
+// colour being present on the staircase is not part of legality.
+export const isColor = (group: string): group is SoldierColor => group === 'blue' || group === 'red';
+
+// A soldier reference points at an actual soldier on the staircase, and the
+// group it is assigned to is one of the two colours the sultan splits into.
+export const isSoldierAssignmentAllowed = (board: Board, soldiers: Soldier[]): boolean =>
+  Array.isArray(soldiers) && soldiers.every(
+    ({ rowIndex, pieceIndex, group }) =>
+      isColor(group) && board[rowIndex]?.[pieceIndex] !== undefined
+  );
+
+export const moves = {
+  killGroup: {
+    validate: (board: Board, { ctx }, group: SoldierColor) =>
+      ctx.currentPlayer === HUNYADI && isColor(group),
+    apply: (board: Board, { events }: { events: Events }, group: SoldierColor) => {
+      const nextBoard = board.map(row => row.filter(soldier => soldier !== group));
+
+      const isGameEnd = flatten(nextBoard).length === 0;
+      if (isGameEnd) {
+        events.endTurn();
+        events.endGame(1);
+        return { nextBoard, isGameEnd };
+      }
+      return { nextBoard, isGameEnd, autoEndOfTurn: true };
+    }
+  },
+  finalizeSeparation: {
+    validate: (board: Board, { ctx }) => ctx.currentPlayer === SULTAN,
+    apply: (board: Board, { events }: { events: Events }) => {
       events.endTurn();
-      events.endGame(1);
-      return { nextBoard, isGameEnd };
+      return { nextBoard: board };
     }
-    return { nextBoard, isGameEnd, autoEndOfTurn: true };
   },
-  finalizeSeparation: (board: Board, { events }: { events: Events }) => {
-    events.endTurn();
-    return { nextBoard: board };
-  },
-  setGroupOfSoldiers: (board: Board, _, soldiers: Soldier[]) => {
-    const nextBoard = cloneDeep(board);
-    for (const soldier of soldiers) {
-      nextBoard[soldier.rowIndex][soldier.pieceIndex] = soldier.group;
+  setGroupOfSoldiers: {
+    validate: (board: Board, { ctx }, soldiers: Soldier[]) =>
+      ctx.currentPlayer === SULTAN && isSoldierAssignmentAllowed(board, soldiers),
+    apply: (board: Board, _, soldiers: Soldier[]) => {
+      const nextBoard = cloneDeep(board);
+      for (const soldier of soldiers) {
+        nextBoard[soldier.rowIndex][soldier.pieceIndex] = soldier.group;
+      }
+      return { nextBoard };
     }
-    return { nextBoard };
   },
   // endOfTurn move automatically initiated by game engine
   stepUp: (board: Board, { events }: { events: Events }) => {

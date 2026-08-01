@@ -1,9 +1,9 @@
 import { random } from 'lodash';
 import type { StrategyArgs } from '../../strategy-game-factory';
-import { type Board, type SoldierColor, type Soldier } from './helpers';
+import { SULTAN, type Board, type SoldierColor, type Soldier } from './helpers';
 
 export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
-  if (ctx.chosenRoleIndex === 0) {
+  if (ctx.chosenRoleIndex === SULTAN) {
     const optimalGroupToKill = getOptimalGroupToKill(board);
     moves.killGroup(board, optimalGroupToKill);
   } else {
