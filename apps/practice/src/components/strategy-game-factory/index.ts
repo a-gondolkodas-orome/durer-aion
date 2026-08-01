@@ -1,8 +1,8 @@
 export { strategyGameFactory, dummyEvents } from './strategy-game-factory';
-export type { Presentation, Gameplay, StrategyGameConfig } from './strategy-game-factory';
+export type { Presentation, StrategyGameConfig } from './strategy-game-factory';
 export type {
   Phase, Mode, Ctx, Events,
-  MoveResult, MoveFunction, GameMoves,
+  MoveResult, MoveFunction, MoveDefinition, Gameplay, GameMoves,
   StrategyArgs, BoardClientProps,
   Variant, VariantInput
 } from './types';

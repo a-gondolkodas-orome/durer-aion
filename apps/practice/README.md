@@ -158,14 +158,11 @@ const moves = {
 };
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const clickNumber = (number) => {
-    if (!ctx.isClientMoveAllowed) return;
-    moves.addNumber(board, number);
-  };
-
+  // no handler guard needed: the framework ignores dispatches that are not
+  // allowed; `disabled` is for the player's benefit
   return <GameBoard>
-    <button onClick={() => clickNumber(1)}>1</button>
-    <button onClick={() => clickNumber(2)}>2</button>
+    <button disabled={!ctx.isClientMoveAllowed} onClick={() => moves.addNumber(board, 1)}>1</button>
+    <button disabled={!ctx.isClientMoveAllowed} onClick={() => moves.addNumber(board, 2)}>2</button>
   </GameBoard>
 };
 
@@ -205,18 +202,67 @@ Conceptually a `move` is a unit that captures a change in the board initiated by
 a player. Moves help ensure that the game is played according to rules by all
 players.
 
-Technically a move is a function whose first param is board, second param is `{
-ctx, events }` and may receive any number of additional params. The second param
-is provided by the framework, additional params will be provided by the client
-based on player interaction or by the bot strategy. Each move must return an
-object with `nextBoard`.
+Technically the apply function of a move takes board as first param, `{
+ctx, events }` as second param and may receive any number of additional params.
+The second param is provided by the framework, additional params will be
+provided by the client based on player interaction or by the bot strategy. Each
+move must return an object with `nextBoard`.
 
 A move may result in ending the turn of the current player or ending the game or
 allow further moves within the same turn.
 
 You must always pass `board` as a first param to all moves (meaning you must
 pass the updated board to subsequent moves in case of multiple moves within a
-turn).
+turn). This threading is not incidental: the framework holds game state in
+React render state, which a bot's `setTimeout` closures see only as a stale
+snapshot — see [AGENTS.md § Known limitation: React state staleness in
+multi-move turns](AGENTS.md#known-limitation-react-state-staleness-in-multi-move-turns)
+for the root cause and how `ctx.turnState` is handled.
+
+In `gameplay.moves`, each entry is either the apply function itself (shorthand)
+or a long-form object `{ apply, validate? }`:
+
+```ts
+moves: {
+  removeCoin: {
+    validate: (board, { ctx }, value) => board[value - 1] > 0,
+    apply: (board, { events }, value) => { /* ... */ return { nextBoard }; }
+  }
+}
+```
+
+`apply` does **not** validate its arguments — it applies them blindly; legality
+lives in `validate`, right next to it.
+
+### validate (optional, per move)
+
+`validate` is a pure predicate `(board, { ctx }, ...args) => boolean` colocated
+with `apply` — the single source of truth for move legality. The framework
+rejects dispatches that fail it, and exposes it on the wrapped move as
+`moves.<name>.isAllowed(board, ...args)` (turn ownership AND `validate`, `ctx`
+bound) for the `BoardClient`'s `disabled` state. Full contract in
+[AGENTS.md](AGENTS.md#strategygamefactory-api).
+
+<details>
+<summary>Details</summary>
+
+- Enforcement: the `moves` object the `BoardClient` receives silently ignores
+  any dispatch that fails `isAllowed` — click handlers need no
+  `if (!allowed) return` guards (keep one only when the handler couples local
+  UI state to a successful move, see `cube-coloring`). Bot and auto
+  end-of-turn dispatches failing `validate` throw in development, and warn +
+  record an `illegal-move` analytics event + no-op in production.
+- A shorthand move (plain function) has no argument validation — fully opt-in.
+- Keep the "whose turn is it" check out of `validate` — `isAllowed` folds
+  `ctx.isClientMoveAllowed` in for you.
+- `isAllowed` is not for bots: during the bot's turn `isClientMoveAllowed` is
+  false by design, so bots enumerate legal moves via the raw `validate`/helpers.
+- `validate` is React-free, so a future authoritative/competition server could
+  run the exact same predicate.
+- Worked examples: `coins-in-3-piles` (two-phase turn), `cube-coloring` (reuses
+  its `isAllowedStep` helper).
+
+</details>
 
 ### BoardClient React component
 

@@ -80,7 +80,7 @@ strategyGameFactory({
   },
   BoardClient,                 // React component receiving { board, ctx, events, moves }
   gameplay: {
-    moves,                     // object of move functions: (board, { ctx, events }, ...args) => { nextBoard }
+    moves,                     // { [name]: apply | { apply, validate? } } — see below
     endOfTurnMove?,            // optional move name auto-executed after moves with autoEndOfTurn: true
   },
   variants,                    // see below
@@ -94,8 +94,43 @@ omitted on a variant, the default variant's `botStrategy` is used as fallback.
 If multiple variants are provided, exactly one must be `isDefault: true`. A
 single-entry array needs no `isDefault` flag.
 
-**`moves`** — each move is `(board, { ctx, events }, ...args) => { nextBoard }`.
-Always pass the current `board` as first arg when chaining moves within a turn.
+**`moves`** — each move is either a plain apply function
+`(board, { ctx, events }, ...args) => { nextBoard }` (shorthand), or a long-form
+object `{ apply, validate? }` colocating it with a legality predicate. Always
+pass the current `board` as first arg when chaining moves within a turn. `apply`
+trusts its arguments and applies them blindly; legality is enforced by
+`validate` (below) and/or the `BoardClient`'s `disabled` gating.
+
+**`validate`** (optional, per move) — a pure, side-effect-free legality predicate
+`(board, { ctx }, ...args) => boolean` sitting right next to its `apply`. When
+present, the engine rejects any dispatch whose args fail it (in dev it throws
+loudly to surface the bug; in prod it warns, fires an `illegal-move` analytics
+event, and no-ops so a stray call cannot corrupt the board). The function
+shorthand means "always legal", so this is fully opt-in and games that predate
+it keep working unchanged. The validator is the **single source of truth** for
+legality: it drives the engine's enforcement, and — being React-free — a
+possible future server-side authoritative check can reuse the same predicate.
+Do **not** put the "whose turn is it" check (`ctx.isClientMoveAllowed`) inside
+`validate`; the engine folds that in for the client (below). The engine hands
+out two wrappings of the same moves: the `moves` object the `BoardClient`
+receives **silently ignores** any dispatch that fails `isAllowed` (so a stray
+click — even on a button a browser failed to disable — is a harmless no-op),
+while bot and auto `endOfTurnMove` dispatches are checked against `validate`
+alone and fail loudly (dev: throw; prod: warn + `illegal-move` analytics event
++ no-op), since there an illegal move is a bug. See `coins-in-3-piles`
+(two-phase turn) and `cube-coloring` (reuses the existing `isAllowedStep`
+helper) for examples.
+
+**`moves.<name>.isAllowed(board, ...args)`** — exposed on every move of the
+`BoardClient`'s wrapped `moves` object: `ctx.isClientMoveAllowed` (turn
+ownership) AND the move's `validate` (when defined), with `ctx` already bound.
+Drive button `disabled` state with it. Because the engine applies the same
+check to every client dispatch, click handlers need no `if (!allowed) return`
+guards — keep one only when the handler couples local UI state to a successful
+move (see `cube-coloring`'s colour-selection reset). Not for bots: their
+`moves` copy carries no `isAllowed` (during the bot's turn
+`isClientMoveAllowed` is false by design), so bots enumerate legal moves via
+the raw `validate`/helpers instead.
 
 **`ctx`** fields available in moves and `BoardClient`:
 - `currentPlayer`: 0/1 — use this for game logic in both modes
@@ -108,12 +143,52 @@ Always pass the current `board` as first arg when chaining moves within a turn.
 
 **`events`**: `endTurn()`, `endGame(winnerIndex?)`, `setTurnState(stage)`.
 
+### Known limitation: React state staleness in multi-move turns
+
+The engine keeps authoritative game state (`board`, `turnState`,
+`currentPlayer`) in React render state, but bots and chained dispatches run in
+`setTimeout` closures that captured a snapshot from an earlier render. Anything
+they need that is newer than their snapshot must reach them some other way.
+Two workarounds exist for two symptoms of this one root cause:
+
+- **`board`** — threaded explicitly by convention: every move returns
+  `nextBoard`, and a multi-move bot must pass the intermediate `nextBoard` to
+  its next calculation/dispatch instead of its (stale) `board` argument. Fails
+  loudly when violated (visibly wrong moves).
+- **`ctx.turnState`** — shadowed engine-side: move validation reads `ctx`
+  through a ref that is re-synced every render *and* patched synchronously by
+  `events.setTurnState`, because a chained dispatch (e.g. a bot's 0-delay
+  `setTimeout`) can fire before React re-renders. See `ctxRef` in
+  `strategy-game-factory.tsx` and the two-phase bot regression tests.
+
+The asymmetry matters when reviewing new games: a validator that depends on
+some *other* mid-turn-changing `ctx` field (e.g. `moveCount`) would need the
+same ref treatment — there is no general mechanism, only per-field shadows.
+
+There is no fully robust fix within the current shape. The known-robust
+architecture is a boardgame.io-style imperative game-state store outside React
+(React subscribing via `useSyncExternalStore`): moves would read/write current
+state synchronously, `board` threading and the ctx ref would both become
+unnecessary by construction. That refactor converges with the possible future
+server-side authoritative check (a server needs the React-free state machine
+anyway), so if that check is ever built, do both together rather than bolting
+on more per-field shadows. Until then, the current conventions are a deliberate
+simplicity trade-off — don't "fix" them piecemeal.
+
+Note "boardgame.io-style" means the architecture only. **Do not propose
+adopting boardgame.io itself**: it is a good library but effectively
+unmaintained (no meaningful releases for years, and its React client pins
+React versions well behind the one used here). Borrow its ideas — the
+long-form move shape already does — and build the rest in-repo.
+
 ### New game checklist
 
 - Game works correctly in both `vsComputer` and `vsHuman` mode
 - Starting positions representative of the game's complexity; each player wins
   with ~50% probability across random starting boards
 - Player cannot win with a non-winning strategy (i.e. AI is truly optimal)
+- Moves with non-trivial legality define `validate` (single source of truth for
+  the engine, the `BoardClient`'s `disabled` state and the bot)
 - Clear what the player should do next (`getPlayerStepDescription`)
 - Interactions disabled during the other player's turn (`ctx.isClientMoveAllowed`)
 - Mobile-friendly and keyboard-navigable

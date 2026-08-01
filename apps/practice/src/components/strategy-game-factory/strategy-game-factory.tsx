@@ -10,7 +10,7 @@ import { useLocation } from 'react-router';
 import { useGameStats } from './hooks/use-game-stats';
 import { trackEvent } from '../../tracking';
 import type {
-  Phase, Mode, Ctx, Events, MoveResult, MoveFunction, GameMoves,
+  Phase, Mode, Ctx, Events, MoveResult, Gameplay, GameMoves,
   BoardClientProps, Variant as DisplayVariant, VariantInput
 } from './types';
 import { resolveVariants } from './helpers/resolve-variants';
@@ -24,11 +24,6 @@ export interface Presentation<TBoard> {
   rule: TranslatableNode
   roleLabels?: [I18nString, I18nString]
   getPlayerStepDescription: (args: { board: TBoard; ctx: Ctx }) => TranslatableNode
-}
-
-export interface Gameplay<TBoard> {
-  moves: Record<string, MoveFunction<TBoard>>
-  endOfTurnMove?: string
 }
 
 export type StrategyGameConfig<TBoard> = {
@@ -47,6 +42,9 @@ export const strategyGameFactory = <TBoard,>({
   const { rule, roleLabels, getPlayerStepDescription } = presentation;
   const { moves, endOfTurnMove } = gameplay;
   const { defaultVariantIndex, defaultVariant, resolvedVariants } = resolveVariants(variants);
+  // Normalize the shorthand (plain function = apply with no validator) so the
+  // rest of the engine deals with a single long-form shape.
+  const normalizedMoves = mapValues(moves, (m) => typeof m === 'function' ? { apply: m } : m);
 
   return () => {
     const { t } = useTranslation();
@@ -94,7 +92,31 @@ export const strategyGameFactory = <TBoard,>({
 
     let wrappedGameMoves: GameMoves<TBoard> = {} as GameMoves<TBoard>;
 
-    const moveWrapper = (doMove: () => MoveResult<TBoard>): MoveResult<TBoard> => {
+    // An illegal move should never happen through the UI (buttons are disabled)
+    // or a correct bot, so reaching here means a bug or tampering. In dev we
+    // throw loudly to surface the bug; in prod we fail safe: warn, record it,
+    // and no-op so a stray call can't corrupt the board or white-screen a player.
+    const reportIllegalMove = (name: string, moveBoard: TBoard, args: unknown[]) => {
+      const message = `strategyGameFactory: illegal move ${name}(${JSON.stringify(args)}) `
+        + `rejected on board ${JSON.stringify(moveBoard)}`;
+      if (import.meta.env.DEV) {
+        throw new Error(message);
+      }
+      console.warn(message);
+      trackEvent('illegal-move', { game: gameId, move: name });
+    };
+
+    const moveWrapper = (
+      name: string,
+      moveBoard: TBoard,
+      args: unknown[],
+      doMove: () => MoveResult<TBoard>
+    ): MoveResult<TBoard> => {
+      const validator = normalizedMoves[name]!.validate;
+      if (validator && !validator(moveBoard, { ctx: ctxRef.current }, ...args)) {
+        reportIllegalMove(name, moveBoard, args);
+        return { nextBoard: moveBoard };
+      }
       if (!currentTurnHasMovesRef.current) {
         setUndoSnapshot({ board: cloneDeep(board), currentPlayer: currentPlayer!, moveCount });
         currentTurnHasMovesRef.current = true;
@@ -210,16 +232,48 @@ export const strategyGameFactory = <TBoard,>({
       moveCount
     };
 
+    // Bots chain the moves of a multi-move turn through setTimeout on the
+    // wrappers captured when their turn started, so by the time the second
+    // move dispatches, the render-scoped `ctx` those wrappers close over is
+    // stale (e.g. `turnState` still null). Validators must judge the move
+    // against the *current* game state, so they read `ctx` through this ref.
+    const ctxRef = useRef(ctx);
+    ctxRef.current = ctx;
+
     const events: Events = {
       endTurn,
       endGame,
-      setTurnState
+      // Also patch turnState onto ctxRef synchronously: a chained dispatch can
+      // validate before React re-renders (e.g. a bot's 0-delay setTimeout),
+      // when the render-synced ref would still hold the previous turnState.
+      setTurnState: (state) => {
+        setTurnState(state);
+        ctxRef.current = { ...ctxRef.current, turnState: state };
+      }
     };
 
-    wrappedGameMoves = mapValues(
-      moves,
-      (f) => (board: TBoard, ...args: unknown[]) => moveWrapper(() => f(board, { ctx, events }, ...args))
-    ) as GameMoves<TBoard>;
+    wrappedGameMoves = mapValues(normalizedMoves, ({ apply }, name) => {
+      const wrapped: GameMoves<TBoard>[string] = (board: TBoard, ...args: unknown[]) =>
+        moveWrapper(name, board, args, () => apply(board, { ctx, events }, ...args));
+      return wrapped;
+    });
+
+    // What the BoardClient receives: the same moves, but a dispatch is silently
+    // ignored unless `isAllowed` holds — turn ownership (ctx.isClientMoveAllowed)
+    // AND the move's validator. This engine-side gate replaces per-handler
+    // `if (!allowed) return` guards, and also covers browsers that fire pointer
+    // events on disabled buttons. Bots and the auto `endOfTurnMove` dispatch use
+    // `wrappedGameMoves` instead: there an illegal move is a bug, and the
+    // validator fails loudly (see `reportIllegalMove`).
+    const clientGameMoves: GameMoves<TBoard> = mapValues(normalizedMoves, ({ validate }, name) => {
+      const isAllowed = (board: TBoard, ...args: unknown[]) =>
+        ctxRef.current.isClientMoveAllowed
+          && (!validate || validate(board, { ctx: ctxRef.current }, ...args));
+      const clientWrapped: GameMoves<TBoard>[string] = (board: TBoard, ...args: unknown[]) =>
+        isAllowed(board, ...args) ? wrappedGameMoves[name]!(board, ...args) : { nextBoard: board };
+      clientWrapped.isAllowed = isAllowed;
+      return clientWrapped;
+    });
 
     const doBotTurn = () => {
       const { botStrategy } = activeVariant;
@@ -245,7 +299,7 @@ export const strategyGameFactory = <TBoard,>({
               board={board}
               ctx={ctx}
               events={events}
-              moves={wrappedGameMoves}
+              moves={clientGameMoves}
             />
             <GameSidebar
               roleLabels={roleLabels}

@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 import { render, fireEvent, act } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
-import { strategyGameFactory, type StrategyGameConfig, type Gameplay } from './strategy-game-factory';
-import type { BoardClientProps, Ctx, Events, GameMoves } from './types';
+import { strategyGameFactory, type StrategyGameConfig } from './strategy-game-factory';
+import type { BoardClientProps, Ctx, Events, Gameplay, GameMoves, StrategyArgs } from './types';
 
 type Board = string[];
 
@@ -40,7 +40,7 @@ const makeConfig = ({
 }: {
   BoardClient?: StrategyGameConfig<Board>['BoardClient']
   gameplay?: Gameplay<Board>
-  botStrategy?: () => void
+  botStrategy?: (args: StrategyArgs<Board>) => void
 } = {}): StrategyGameConfig<Board> => ({
   presentation: { rule: <></>, getPlayerStepDescription: () => '' },
   BoardClient,
@@ -137,6 +137,7 @@ describe('strategyGameFactory endOfTurnMove', () => {
     };
 
     const { getByTestId } = renderGame(minimalConfig({ moves, endOfTurnMove: 'autoMove' }));
+    fireEvent.click(getByTestId('role-btn-0'));
     fireEvent.click(getByTestId('move-btn'));
 
     expect(autoMove).not.toHaveBeenCalled();
@@ -157,6 +158,7 @@ describe('strategyGameFactory endOfTurnMove', () => {
     };
 
     const { getByTestId } = renderGame(minimalConfig({ moves, endOfTurnMove: 'autoMove' }));
+    fireEvent.click(getByTestId('role-btn-0'));
     fireEvent.click(getByTestId('move-btn'));
     act(() => { vi.advanceTimersByTime(750); });
 
@@ -500,5 +502,182 @@ describe('umami game-finished event', () => {
     expect(lastEvent()[0]).toBe('game-finished');
     expect(lastEvent()[1]).toMatchObject({ mode: 'vsHuman' });
     expect(lastEvent()[1]).not.toHaveProperty('result');
+  });
+});
+
+describe('move validate enforcement', () => {
+  const guardedConfig = (botStrategy: () => void = () => {}) => makeConfig({
+    BoardClient: ({ board, moves }: BoardClientProps<Board>) => (
+      <>
+        <button data-testid="legal-btn" onClick={() => moves.guarded(board, 'ok')}>legal</button>
+        <button data-testid="illegal-btn" onClick={() => moves.guarded(board, 'bad')}>illegal</button>
+        <button data-testid="hand-over-btn" onClick={() => moves.handOver(board)}>hand over</button>
+        <span data-testid="board">{board.join(',')}</span>
+        <span data-testid="can-ok">{String(moves.guarded.isAllowed!(board, 'ok'))}</span>
+        <span data-testid="can-bad">{String(moves.guarded.isAllowed!(board, 'bad'))}</span>
+      </>
+    ),
+    gameplay: {
+      moves: {
+        guarded: {
+          apply: (board: Board, _meta: { events: Events }, arg: string) => ({ nextBoard: [...board, arg] }),
+          validate: (_board: Board, _meta: { ctx: Ctx }, arg: string) => arg === 'ok'
+        },
+        handOver: (board: Board, { events }: { events: Events }) => {
+          events.endTurn();
+          return { nextBoard: board };
+        }
+      }
+    },
+    botStrategy
+  });
+
+  it('applies a client dispatch whose args pass its validator', () => {
+    const { getByTestId } = renderGame(guardedConfig());
+    fireEvent.click(getByTestId('role-btn-0'));
+    fireEvent.click(getByTestId('legal-btn'));
+    expect(getByTestId('board').textContent).toBe('initial,ok');
+  });
+
+  it('silently ignores a client dispatch whose args fail the validator', () => {
+    const { getByTestId } = renderGame(guardedConfig());
+    fireEvent.click(getByTestId('role-btn-0'));
+    fireEvent.click(getByTestId('illegal-btn')); // must not throw
+    expect(getByTestId('board').textContent).toBe('initial');
+  });
+
+  it('silently ignores a client dispatch when it is not the client turn', () => {
+    const { getByTestId } = renderGame(guardedConfig());
+    fireEvent.click(getByTestId('role-btn-0'));
+    fireEvent.click(getByTestId('hand-over-btn')); // endTurn → bot's turn
+    fireEvent.click(getByTestId('legal-btn')); // legal args, wrong turn
+    expect(getByTestId('board').textContent).toBe('initial');
+  });
+
+  it('silently ignores a client dispatch before the game starts', () => {
+    const { getByTestId } = renderGame(guardedConfig());
+    fireEvent.click(getByTestId('legal-btn'));
+    expect(getByTestId('board').textContent).toBe('initial');
+  });
+
+  it('throws a loud error in dev when a bot dispatches a move that fails its validator', () => {
+    vi.useFakeTimers();
+    try {
+      const botStrategy = vi.fn().mockImplementation((args: any) => { args.moves.guarded(args.board, 'bad'); });
+      const { getByTestId } = renderGame(guardedConfig(botStrategy));
+      fireEvent.click(getByTestId('role-btn-0'));
+      fireEvent.click(getByTestId('hand-over-btn')); // → bot's turn
+      expect(() => act(() => { vi.advanceTimersByTime(1500); })).toThrow(/illegal move/);
+      expect(getByTestId('board').textContent).toBe('initial'); // threw before touching the board
+    } finally {
+      vi.clearAllTimers();
+      vi.useRealTimers();
+    }
+  });
+
+  it('exposes isAllowed on the wrapped move: turn ownership AND the validator, ctx bound', () => {
+    const { getByTestId } = renderGame(guardedConfig());
+    // outside the play phase nothing is dispatchable, even with legal args
+    expect(getByTestId('can-ok').textContent).toBe('false');
+    fireEvent.click(getByTestId('role-btn-0'));
+    expect(getByTestId('can-ok').textContent).toBe('true');
+    expect(getByTestId('can-bad').textContent).toBe('false');
+  });
+
+  it('runs a plain-function (shorthand) move unchanged — no validator', () => {
+    // defaultGameplay uses the function shorthand, so mainMove applies + endTurn as before
+    const { getByTestId } = renderGame(ctxAwareConfig());
+    fireEvent.click(getByTestId('role-btn-0'));
+    fireEvent.click(getByTestId('move-btn'));
+    expect((getByTestId('move-btn') as HTMLButtonElement).disabled).toBe(true); // bot's turn now
+  });
+
+  // Mirrors the coins-in-3-piles bots: a two-phase turn chained via setTimeout
+  // on the move wrappers captured when the bot's turn started. The phase-2
+  // validator reads ctx.turnState, which phase 1 just set — the engine must
+  // judge it against the current game state, not the render the wrappers came
+  // from. The 0-delay variant (smartBotStrategy's "place back nothing" branch)
+  // is the harshest case: phase 2 dispatches before React re-renders at all.
+  const twoPhaseBotConfig = (chainDelayMs: number) => makeConfig({
+    BoardClient: ({ board }: BoardClientProps<Board>) => (
+      <span data-testid="board">{board.join(',')}</span>
+    ),
+    gameplay: {
+      moves: {
+        phase1: {
+          validate: (_board: Board, { ctx }: { ctx: Ctx }) => ctx.turnState === null,
+          apply: (board: Board, { events }: { events: Events }) => {
+            events.setTurnState({ removedCoinValue: 3 });
+            return { nextBoard: [...board, 'p1'] };
+          }
+        },
+        phase2: {
+          validate: (_board: Board, { ctx }: { ctx: Ctx }) => ctx.turnState !== null,
+          apply: (board: Board, { events }: { events: Events }) => {
+            events.endTurn();
+            events.setTurnState(null);
+            return { nextBoard: [...board, 'p2'] };
+          }
+        }
+      }
+    },
+    botStrategy: ({ board, moves }) => {
+      const { nextBoard } = moves.phase1(board);
+      setTimeout(() => { moves.phase2(nextBoard); }, chainDelayMs);
+    }
+  });
+
+  const playTwoPhaseBotTurn = (chainDelayMs: number) => {
+    vi.useFakeTimers();
+    try {
+      const { getByTestId } = renderGame(twoPhaseBotConfig(chainDelayMs));
+      fireEvent.click(getByTestId('role-btn-1')); // human is 2nd player → bot moves first
+      act(() => { vi.advanceTimersByTime(1500); }); // bot "thinking" delay → phase1
+      act(() => { vi.advanceTimersByTime(750); }); // the chained phase2 — must not be rejected
+      return getByTestId('board').textContent;
+    } finally {
+      vi.clearAllTimers();
+      vi.useRealTimers();
+    }
+  };
+
+  it('validates a bot-chained second move against current turnState, not a stale render', () => {
+    expect(playTwoPhaseBotTurn(750)).toBe('initial,p1,p2');
+  });
+
+  it('validates a 0-delay chained second move dispatched before React re-renders', () => {
+    expect(playTwoPhaseBotTurn(0)).toBe('initial,p1,p2');
+  });
+
+  describe('in production (import.meta.env.DEV = false)', () => {
+    beforeEach(() => { vi.stubEnv('DEV', false); vi.useFakeTimers(); });
+    afterEach(() => { vi.clearAllTimers(); vi.useRealTimers(); vi.unstubAllEnvs(); });
+
+    const illegalBotStrategy = () =>
+      vi.fn().mockImplementation((args: any) => { args.moves.guarded(args.board, 'bad'); });
+
+    it('does not throw and leaves the board unchanged on an illegal bot move', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const { getByTestId } = renderGame(guardedConfig(illegalBotStrategy()));
+      fireEvent.click(getByTestId('role-btn-0'));
+      fireEvent.click(getByTestId('hand-over-btn')); // → bot's turn
+      act(() => { vi.advanceTimersByTime(1500); }); // bot dispatches 'bad' — must not throw
+      expect(getByTestId('board').textContent).toBe('initial'); // no-op, not corrupted
+      expect(warn).toHaveBeenCalled();
+      warn.mockRestore();
+    });
+
+    it('reports an illegal-move umami event', () => {
+      vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const track = vi.fn();
+      window.umami = { track: track as NonNullable<Window['umami']>['track'] };
+      const { getByTestId } = renderGame(guardedConfig(illegalBotStrategy()));
+      fireEvent.click(getByTestId('role-btn-0'));
+      fireEvent.click(getByTestId('hand-over-btn'));
+      act(() => { vi.advanceTimersByTime(1500); });
+      expect(track).toHaveBeenCalledWith('illegal-move', expect.objectContaining({ move: 'guarded' }));
+      delete window.umami;
+      vi.restoreAllMocks();
+    });
   });
 });

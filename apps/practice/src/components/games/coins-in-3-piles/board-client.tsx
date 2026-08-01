@@ -21,31 +21,10 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 
   const wasCoinAlreadyRemovedInTurn = valueOfRemovedCoin !== null;
 
-  const isRemovalAllowed = coinValue => {
-    if (!ctx.isClientMoveAllowed) return false;
-    if (wasCoinAlreadyRemovedInTurn) return false;
-    return board[coinValue - 1] !== 0;
-  };
+  const isRemovalAllowed = coinValue => moves.removeCoin.isAllowed!(board, coinValue);
+  const isAddAllowed = coinValue => moves.addCoin.isAllowed!(board, coinValue);
+  const isPassAllowed = () => moves.passAddition.isAllowed!(board);
 
-  const isAddAllowed = coinValue => {
-    if (!ctx.isClientMoveAllowed) return false;
-    if (!wasCoinAlreadyRemovedInTurn) return false;
-    return coinValue < valueOfRemovedCoin!;
-  };
-
-  const removeFromPile = coinValue => {
-    if (!isRemovalAllowed(coinValue)) return;
-    moves.removeCoin(board, coinValue);
-  };
-
-  const addToPile = coinValue => {
-    if (!isAddAllowed(coinValue)) return;
-    moves.addCoin(board, coinValue);
-  };
-
-  const passAddition = () => {
-    moves.addCoin(board, null);
-  };
 
   const shouldShowCoinToBeRemoved = (coinValue) => {
     if (!ctx.isClientMoveAllowed) return false;
@@ -72,9 +51,9 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           </span>
           <div className="flex gap-2">
             <button
-              disabled={!isAddAllowed(1)}
+              disabled={!isPassAllowed()}
               className="secondary-button w-auto"
-              onClick={passAddition}
+              onClick={() => moves.passAddition(board)}
             >
               {t({ hu: 'Semmi ∅', en: 'Nothing ∅' })}
             </button>
@@ -86,7 +65,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                   primary-button w-auto min-w-[4ch] rounded-2xl
                   ${getCoinBgColor(coinValue)} enabled:hocus:brightness-75
                 `}
-                onClick={() => addToPile(coinValue)}
+                onClick={() => moves.addCoin(board, coinValue)}
                 {...(isAddAllowed(coinValue) ? hoverProps(coinValue) : {})}
               >{coinValue}</button>
             ))}
@@ -119,7 +98,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                     ? 'opacity-50' : ''}
                 `}
                 style={{ transform: 'scaleY(-1)' }}
-                onClick={() => removeFromPile(coinValue)}
+                onClick={() => moves.removeCoin(board, coinValue)}
                 {...(isRemovalAllowed(coinValue) ? hoverProps(coinValue) : {})}
               >{coinValue}</button>
             ))}

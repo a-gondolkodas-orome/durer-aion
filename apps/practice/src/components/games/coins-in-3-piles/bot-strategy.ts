@@ -8,8 +8,13 @@ export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   const { nextBoard } = moves.removeCoin(board, remove);
   if (remove === 1) return;
   const addOptions = [null, ...range(1, remove)];
+  const add = sample(addOptions);
   setTimeout(() => {
-    moves.addCoin(nextBoard, sample(addOptions));
+    if (add === null) {
+      moves.passAddition(nextBoard);
+    } else {
+      moves.addCoin(nextBoard, add);
+    }
   }, 750);
 };
 
@@ -19,7 +24,7 @@ export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   if (add === undefined) return;
   if (add === null) {
     setTimeout(() => {
-      moves.addCoin(nextBoard, null);
+      moves.passAddition(nextBoard);
     }, 0);
   } else {
     setTimeout(() => {

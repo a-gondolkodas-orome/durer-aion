@@ -1,5 +1,5 @@
 import { cloneDeep, isEqual } from "lodash";
-import type { Events } from '../../strategy-game-factory';
+import type { Ctx, Events } from '../../strategy-game-factory';
 
 export type Board = number[]
 
@@ -24,29 +24,47 @@ export const canWin = (board: Board) => {
 }
 
 export const moves = {
-  removeCoin: (board: Board, { events }: { events: Events }, value) => {
-    const nextBoard = cloneDeep(board);
-    nextBoard[value - 1] -= 1;
-    if (value === 1) {
-      events.endTurn();
-      if (isEqual(nextBoard, [0, 0, 0])) {
-        events.endGame();
+  removeCoin: {
+    validate: (board: Board, { ctx }: { ctx: Ctx }, value: number) =>
+      ctx.turnState === null && value >= 1 && value <= 3 && board[value - 1] > 0,
+    apply: (board: Board, { events }: { events: Events }, value) => {
+      const nextBoard = cloneDeep(board);
+      nextBoard[value - 1] -= 1;
+      if (value === 1) {
+        events.endTurn();
+        if (isEqual(nextBoard, [0, 0, 0])) {
+          events.endGame();
+        }
+      } else {
+        events.setTurnState({ removedCoinValue: value });
       }
-    } else {
-      events.setTurnState({ removedCoinValue: value });
+      return { nextBoard };
     }
-    return { nextBoard };
   },
-  addCoin: (board: Board, { events }: { events: Events }, value) => {
-    const nextBoard = cloneDeep(board);
-    if (value !== null) {
+  addCoin: {
+    validate: (board: Board, { ctx }: { ctx: Ctx }, value: number) => {
+      const removed = (ctx.turnState as { removedCoinValue: number } | null)?.removedCoinValue;
+      return removed != null && value >= 1 && value < removed;
+    },
+    apply: (board: Board, { events }: { events: Events }, value) => {
+      const nextBoard = cloneDeep(board);
       nextBoard[value - 1] += 1;
+      return finishPlaceBack(nextBoard, events);
     }
-    events.endTurn();
-    events.setTurnState(null);
-    if (isEqual(nextBoard, [0, 0, 0])) {
-      events.endGame();
-    }
-    return { nextBoard };
+  },
+  passAddition: {
+    validate: (board: Board, { ctx }: { ctx: Ctx }) => ctx.turnState !== null,
+    apply: (board: Board, { events }: { events: Events }) => finishPlaceBack(board, events)
   }
+}
+
+// Shared second half of the place-back phase: whether a coin was added or the
+// player passed, the turn ends the same way.
+function finishPlaceBack(nextBoard: Board, events: Events) {
+  events.endTurn();
+  events.setTurnState(null);
+  if (isEqual(nextBoard, [0, 0, 0])) {
+    events.endGame();
+  }
+  return { nextBoard };
 }

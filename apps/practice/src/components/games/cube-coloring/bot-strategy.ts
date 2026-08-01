@@ -1,13 +1,12 @@
 import { difference, range, shuffle, sample } from 'lodash';
-import { isAllowedStep, isColored, neighbours, type Board } from './helpers';
-import { nodeColors } from './cube-coloring';
+import { isAllowedStep, isColored, neighbours, colors, type Board } from './helpers';
 import type { StrategyArgs } from '../../strategy-game-factory';
 
 export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   const validMoves: { vertex: number, color: string }[] = [];
   for (const vertex of range(0, 8)) {
     if (isColored(board, vertex)) continue;
-    for (const color of Object.keys(nodeColors)) {
+    for (const color of colors) {
       if (isAllowedStep(board, vertex, color)) {
         validMoves.push({ vertex, color });
       }
@@ -27,8 +26,8 @@ const makeOptimalStepAsFirst = (board: Board) => {
   const mainDiagonal = shuffle([2, 4]);
   const otherVertices = shuffle([0, 1, 3, 5, 6, 7]);
   const vertexToColor = [...mainDiagonal, ...otherVertices].find(v => !isColored(board, v));
-  const colors = Object.keys(nodeColors).filter(c => isAllowedStep(board, vertexToColor, c));
-  return { vertex: vertexToColor, color: sample(colors) };
+  const allowedColors = colors.filter(c => isAllowedStep(board, vertexToColor, c));
+  return { vertex: vertexToColor, color: sample(allowedColors) };
 };
 
 const makeOptimalStepAsSecond = (board: Board) => {
@@ -67,7 +66,7 @@ const makeOptimalStepAsSecond = (board: Board) => {
   }
   // every vertex is either banned or has no colored neighbor
   for (const vertex of emptyVertices) {
-    for (const color of shuffle(Object.keys(nodeColors))) {
+    for (const color of shuffle(colors)) {
       if (isAllowedStep(board, vertex, color)) {
         return { vertex, color };
       }
@@ -79,7 +78,7 @@ const makeOptimalStepAsSecond = (board: Board) => {
 
 const getMissingColors = (board: Board, vertex) => {
   const nbColors = neighbours[vertex].map(v => board[v]);
-  return difference(Object.keys(nodeColors), nbColors);
+  return difference(colors, nbColors);
 };
 
 const getEmptyNeighbours = (board: Board, vertex) => {
