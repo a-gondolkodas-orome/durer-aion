@@ -3,6 +3,7 @@ import {
   strategyGameFactory, type Ctx, type Events, type BoardClientProps, GameBoard
 } from '../../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
+import { isPlacementAllowed } from '../helpers';
 
 export type Board = number[]
 type TurnState = { firstPlacedSquareIndex: number } | null
@@ -15,29 +16,27 @@ const generateStartBoard = (): Board => {
 };
 
 const moves = {
-  addPiece: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, pileId: number) => {
-    const nextBoard = cloneDeep(board);
-    nextBoard[pileId] += 1;
-    if (ctx.currentPlayer === 1 && [3, 6, 9].includes(sum(nextBoard))) {
-      events.setTurnState({ firstPlacedSquareIndex: pileId });
+  addPiece: {
+    validate: (board: Board, _, pileId: number) => isPlacementAllowed(board, pileId),
+    apply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, pileId: number) => {
+      const nextBoard = cloneDeep(board);
+      nextBoard[pileId] += 1;
+      if (ctx.currentPlayer === 1 && [3, 6, 9].includes(sum(nextBoard))) {
+        events.setTurnState({ firstPlacedSquareIndex: pileId });
+        return { nextBoard };
+      }
+      events.setTurnState(null);
+      events.endTurn();
+      if (sum(nextBoard) === 10) {
+        const winnerIndex = isEqual(cloneDeep(nextBoard).sort(), [0, 1, 2, 3, 4]) ? 1 : 0;
+        events.endGame(winnerIndex);
+      }
       return { nextBoard };
     }
-    events.setTurnState(null);
-    events.endTurn();
-    if (sum(nextBoard) === 10) {
-      const winnerIndex = isEqual(cloneDeep(nextBoard).sort(), [0, 1, 2, 3, 4]) ? 1 : 0;
-      events.endGame(winnerIndex);
-    }
-    return { nextBoard };
   }
 }
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const placePiece = (id: number) => {
-    if (!ctx.isClientMoveAllowed) return;
-    moves.addPiece(board, id);
-  };
-
   const turnState = ctx.turnState as TurnState;
   const firstPlacedSquareIndex = turnState?.firstPlacedSquareIndex ?? null;
   const showDimmedDisc = ctx.isClientMoveAllowed && firstPlacedSquareIndex !== null;
@@ -48,8 +47,8 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       {range(board.length).map(id =>
         <button
           key={id}
-          disabled={!ctx.isClientMoveAllowed}
-          onClick={() => placePiece(id)}
+          disabled={!moves.addPiece.isAllowed!(board, id)}
+          onClick={() => moves.addPiece(board, id)}
           className="aspect-square border-r-4 border-b-4 p-[3%]"
         >
           {range(board[id]).map((i) =>

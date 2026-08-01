@@ -1,38 +1,36 @@
 import { range, sum, isEqual, cloneDeep } from 'lodash';
 import { strategyGameFactory, type Events, type BoardClientProps, GameBoard } from '../../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
+import { isPlacementAllowed } from '../helpers';
 
 export type Board = number[]
 
 const generateStartBoard = (): Board => [0, 0, 0, 0];
 
 const moves = {
-  addPiece: (board: Board, { events }: { events: Events }, pileId) => {
-    const nextBoard = cloneDeep(board);
-    nextBoard[pileId] += 1;
-    events.endTurn();
-    if (sum(nextBoard) === 6) {
-      const winnerIndex = isEqual(cloneDeep(nextBoard).sort(), [0, 1, 2, 3]) ? 1 : 0;
-      events.endGame(winnerIndex);
+  addPiece: {
+    validate: (board: Board, _, pileId) => isPlacementAllowed(board, pileId),
+    apply: (board: Board, { events }: { events: Events }, pileId) => {
+      const nextBoard = cloneDeep(board);
+      nextBoard[pileId] += 1;
+      events.endTurn();
+      if (sum(nextBoard) === 6) {
+        const winnerIndex = isEqual(cloneDeep(nextBoard).sort(), [0, 1, 2, 3]) ? 1 : 0;
+        events.endGame(winnerIndex);
+      }
+      return { nextBoard };
     }
-    return { nextBoard };
   }
 }
 
-const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const placePiece = id => {
-    if (!ctx.isClientMoveAllowed) return;
-    moves.addPiece(board, id);
-  };
-
-  return (
+const BoardClient = ({ board, moves }: BoardClientProps<Board>) => (
   <GameBoard>
     <div className="grid grid-cols-2 border-t-2 border-l-2">
       {range(board.length).map(id =>
         <button
           key={id}
-          disabled={!ctx.isClientMoveAllowed}
-          onClick={() => placePiece(id)}
+          disabled={!moves.addPiece.isAllowed!(board, id)}
+          onClick={() => moves.addPiece(board, id)}
           className="aspect-square border-r-2 border-b-2 p-[4%]"
         >
           {range(board[id]).map((i) =>
@@ -49,8 +47,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       )}
     </div>
   </GameBoard>
-  );
-};
+);
 
 const getPlayerStepDescription = () => ({
   hu: 'Kattints arra a mezőre, ahova korongot szeretnél lerakni.',
