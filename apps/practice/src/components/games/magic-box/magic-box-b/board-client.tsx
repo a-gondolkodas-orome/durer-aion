@@ -5,25 +5,10 @@ import { LINES, LINE_LABELS, type Board } from './helpers';
 
 const BOX_SIZE = 'w-64 sm:w-72';
 
-export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
+export const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
   const { stones, pendingLine } = board;
-  const canDesignate = ctx.isClientMoveAllowed && pendingLine === null;
 
-  const isCellClickable = (id) => {
-    if (!ctx.isClientMoveAllowed || pendingLine === null) return false;
-    return LINES[pendingLine].includes(id) && !stones[id];
-  };
-
-  const clickCell = (id) => {
-    if (!isCellClickable(id)) return;
-    moves.placeStone(board, id);
-  };
-
-  const designateLine = (lineIndex) => {
-    if (!canDesignate) return;
-    moves.designateLine(board, lineIndex);
-  };
 
   const isCellHighlighted = (id) => pendingLine !== null && LINES[pendingLine].includes(id);
 
@@ -40,8 +25,8 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             {range(9).map(id => (
               <button
                 key={id}
-                disabled={!isCellClickable(id)}
-                onClick={() => clickCell(id)}
+                disabled={!moves.placeStone.isAllowed!(board, id)}
+                onClick={() => moves.placeStone(board, id)}
                 className={`p-[20%] ${
                   isCellHighlighted(id) ? 'bg-amber-200 dark:bg-amber-700' : 'bg-surface-elevated'
                 }`}
@@ -57,8 +42,8 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             {range(3).map(row => (
               <button
                 key={row}
-                disabled={!canDesignate}
-                onClick={() => designateLine(row)}
+                disabled={!moves.designateLine.isAllowed!(board, row)}
+                onClick={() => moves.designateLine(board, row)}
                 title={t(LINE_LABELS[row])}
                 aria-label={t(LINE_LABELS[row])}
                 className={`${selectorButtonClass} w-10`}
@@ -73,8 +58,8 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           {range(3).map(col => (
             <button
               key={col}
-              disabled={!canDesignate}
-              onClick={() => designateLine(3 + col)}
+              disabled={!moves.designateLine.isAllowed!(board, 3 + col)}
+              onClick={() => moves.designateLine(board, 3 + col)}
               title={t(LINE_LABELS[3 + col])}
               aria-label={t(LINE_LABELS[3 + col])}
               className={`${selectorButtonClass} h-10`}

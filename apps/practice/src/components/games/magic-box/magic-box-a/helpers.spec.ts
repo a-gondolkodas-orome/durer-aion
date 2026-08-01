@@ -1,4 +1,4 @@
-import { hasFullLine, generateEmptyBoard } from './helpers';
+import { hasFullLine, generateEmptyBoard, isPlacementAllowed } from './helpers';
 
 describe('hasFullLine', () => {
   it('should be false for an empty board', () => {
@@ -40,5 +40,26 @@ describe('hasFullLine', () => {
       true, true, false
     ];
     expect(hasFullLine(board)).toBe(true);
+  });
+});
+
+describe('isPlacementAllowed', () => {
+  it('allows any empty compartment', () => {
+    const board = generateEmptyBoard();
+    expect([0, 4, 8].every(id => isPlacementAllowed(board, id))).toBe(true);
+  });
+
+  it('rejects a compartment that already holds a stone', () => {
+    const board = generateEmptyBoard();
+    board[4] = true;
+    expect(isPlacementAllowed(board, 4)).toBe(false);
+    expect(isPlacementAllowed(board, 3)).toBe(true);
+  });
+
+  it('rejects a compartment outside the box', () => {
+    const board = generateEmptyBoard();
+    expect(isPlacementAllowed(board, 9)).toBe(false);
+    expect(isPlacementAllowed(board, -1)).toBe(false);
+    expect(isPlacementAllowed(board, 1.5)).toBe(false);
   });
 });

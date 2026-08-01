@@ -1,4 +1,6 @@
-import { isLineFull, emptyCellsInLine, placeStoneAt } from './helpers';
+import {
+  isLineFull, emptyCellsInLine, placeStoneAt, isPlacementAllowed, isDesignationAllowed, type Board
+} from './helpers';
 
 describe('isLineFull', () => {
   it('should be false when a row is not fully occupied', () => {
@@ -35,5 +37,51 @@ describe('placeStoneAt', () => {
     const next = placeStoneAt(stones, 4);
     expect(next).toEqual([false, false, false, false, true, false, false, false, false]);
     expect(stones[4]).toBe(false);
+  });
+});
+
+// Row 1 is line 0 (cells 0,1,2); column 1 is line 3 (cells 0,3,6).
+const boardAwaitingStoneInRow1 = (): Board => ({ stones: Array(9).fill(false), pendingLine: 0 });
+const boardAwaitingDesignation = (): Board => ({ stones: Array(9).fill(false), pendingLine: null });
+
+describe('isPlacementAllowed', () => {
+  it('allows an empty cell of the designated line', () => {
+    const board = boardAwaitingStoneInRow1();
+    expect([0, 1, 2].every(id => isPlacementAllowed(board, id))).toBe(true);
+  });
+
+  it('rejects a cell outside the designated line', () => {
+    expect(isPlacementAllowed(boardAwaitingStoneInRow1(), 3)).toBe(false);
+  });
+
+  it('rejects a cell of the designated line that is already taken', () => {
+    const board = boardAwaitingStoneInRow1();
+    board.stones[1] = true;
+    expect(isPlacementAllowed(board, 1)).toBe(false);
+  });
+
+  it('rejects placing while no line has been designated', () => {
+    expect(isPlacementAllowed(boardAwaitingDesignation(), 0)).toBe(false);
+  });
+
+  it('rejects a cell outside the box', () => {
+    expect(isPlacementAllowed(boardAwaitingStoneInRow1(), 9)).toBe(false);
+  });
+});
+
+describe('isDesignationAllowed', () => {
+  it('allows any of the six lines once the stone has been placed', () => {
+    const board = boardAwaitingDesignation();
+    expect([0, 1, 2, 3, 4, 5].every(line => isDesignationAllowed(board, line))).toBe(true);
+  });
+
+  it('rejects designating while a line is still awaiting its stone', () => {
+    expect(isDesignationAllowed(boardAwaitingStoneInRow1(), 2)).toBe(false);
+  });
+
+  it('rejects a line index that does not exist', () => {
+    const board = boardAwaitingDesignation();
+    expect(isDesignationAllowed(board, 6)).toBe(false);
+    expect(isDesignationAllowed(board, -1)).toBe(false);
   });
 });

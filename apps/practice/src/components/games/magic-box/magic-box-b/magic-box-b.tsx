@@ -1,22 +1,30 @@
 import { strategyGameFactory, type Events, type Ctx } from '../../../strategy-game-factory';
 import { BoardClient } from './board-client';
-import { generateEmptyBoard, isLineFull, placeStoneAt, type Board } from './helpers';
+import {
+  generateEmptyBoard, isDesignationAllowed, isLineFull, isPlacementAllowed, placeStoneAt, type Board
+} from './helpers';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 
 const moves = {
-  placeStone: (board: Board, _, cellId) => {
-    const nextBoard: Board = { stones: placeStoneAt(board.stones, cellId), pendingLine: null };
-    return { nextBoard };
+  placeStone: {
+    validate: (board: Board, _, cellId: number) => isPlacementAllowed(board, cellId),
+    apply: (board: Board, _, cellId) => {
+      const nextBoard: Board = { stones: placeStoneAt(board.stones, cellId), pendingLine: null };
+      return { nextBoard };
+    }
   },
 
-  designateLine: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, lineIndex) => {
-    const nextBoard: Board = { stones: board.stones, pendingLine: lineIndex };
-    if (isLineFull(nextBoard.stones, lineIndex)) {
-      events.endGame(ctx.currentPlayer === 0 ? 0 : 1);
-    } else {
-      events.endTurn();
+  designateLine: {
+    validate: (board: Board, _, lineIndex: number) => isDesignationAllowed(board, lineIndex),
+    apply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, lineIndex) => {
+      const nextBoard: Board = { stones: board.stones, pendingLine: lineIndex };
+      if (isLineFull(nextBoard.stones, lineIndex)) {
+        events.endGame(ctx.currentPlayer === 0 ? 0 : 1);
+      } else {
+        events.endTurn();
+      }
+      return { nextBoard };
     }
-    return { nextBoard };
   }
 };
 

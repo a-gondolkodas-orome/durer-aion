@@ -35,3 +35,18 @@ export const emptyCellsInLine = (stones: boolean[], lineIndex: number) => LINES[
 
 export const placeStoneAt = (stones: boolean[], cellId: number): boolean[] =>
   [...stones.slice(0, cellId), true, ...stones.slice(cellId + 1)];
+
+// The two halves of a turn alternate through `pendingLine`, which the board
+// itself carries — a designated line is waiting for a stone, and only once that
+// stone is placed may the next line be designated. So neither half needs turn
+// state to know whether it is its moment.
+export const isPlacementAllowed = (board: Board, cellId: number): boolean =>
+  board.pendingLine !== null
+    && LINES[board.pendingLine].includes(cellId)
+    && !board.stones[cellId];
+
+export const isDesignationAllowed = (board: Board, lineIndex: number): boolean =>
+  board.pendingLine === null
+    && Number.isInteger(lineIndex)
+    && lineIndex >= 0
+    && lineIndex < LINES.length;

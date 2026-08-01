@@ -2,28 +2,17 @@ import { range } from 'lodash';
 import {
   strategyGameFactory, type Events, type BoardClientProps, type Ctx, GameBoard
 } from '../../../strategy-game-factory';
-import { generateEmptyBoard, isGameEnd, placeStone, type Board } from './helpers';
+import { generateEmptyBoard, isGameEnd, isPlacementAllowed, placeStone, type Board } from './helpers';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 
-const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const isMoveAllowed = (id) => {
-    if (!ctx.isClientMoveAllowed) return false;
-    return !board[id];
-  };
-  const clickField = (id) => {
-    if (!isMoveAllowed(id)) return;
-
-    moves.placeStone(board, id);
-  };
-
-  return (
+const BoardClient = ({ board, moves }: BoardClientProps<Board>) => (
   <GameBoard>
     <div className="grid grid-cols-3 bg-slate-200 dark:bg-slate-600 gap-1 p-1">
       {range(9).map(id => (
         <button
           key={id}
-          disabled={!isMoveAllowed(id)}
-          onClick={() => clickField(id)}
+          disabled={!moves.placeStone.isAllowed!(board, id)}
+          onClick={() => moves.placeStone(board, id)}
           className="aspect-square p-[25%] bg-surface-elevated"
         >
           {board[id] && (
@@ -33,17 +22,19 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       ))}
     </div>
   </GameBoard>
-  );
-};
+);
 
 const moves = {
-  placeStone: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, id) => {
-    const nextBoard = placeStone(board, id);
-    events.endTurn();
-    if (isGameEnd(nextBoard)) {
-      events.endGame(ctx.currentPlayer === 0 ? 1 : 0);
+  placeStone: {
+    validate: (board: Board, _, id: number) => isPlacementAllowed(board, id),
+    apply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, id) => {
+      const nextBoard = placeStone(board, id);
+      events.endTurn();
+      if (isGameEnd(nextBoard)) {
+        events.endGame(ctx.currentPlayer === 0 ? 1 : 0);
+      }
+      return { nextBoard };
     }
-    return { nextBoard };
   }
 }
 
