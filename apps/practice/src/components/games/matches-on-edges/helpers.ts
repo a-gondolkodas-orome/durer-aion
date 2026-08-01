@@ -63,6 +63,14 @@ export const legalMoves = (board: Board): Move[] => {
   return moves;
 };
 
+// Is [a, b] one of the windows the player to move may play? The size is forced
+// (always the largest legal one), and the window must sit strictly inside a
+// single match-free block — so this is not a bounds check but the game's whole
+// move rule. Matching against the generated list keeps the two definitions from
+// drifting; there are only O(n) legal moves.
+export const isWindowAllowed = (board: Board, a: number, b: number): boolean =>
+  legalMoves(board).some(m => m.a === a && m.b === b);
+
 // The bounding edges of window [a, b] that are still free and would receive a
 // match. Used both to apply a move and to preview it in the UI.
 export const boundaryEdgesToPlace = (board: Board, a: number, b: number): number[] => {

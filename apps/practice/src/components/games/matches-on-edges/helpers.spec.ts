@@ -5,6 +5,7 @@ import {
   blockMultiset,
   currentWindowSize,
   emptyBoard,
+  isWindowAllowed,
   legalMoves,
   moverWins,
   secondPlayerWins
@@ -127,5 +128,37 @@ describe('move mechanics', () => {
     const after = applyMove(board, 0, 0);
     expect(blockMultiset(after)).toEqual([]);
     expect(currentWindowSize(after)).toBeNull();
+  });
+});
+
+describe('isWindowAllowed', () => {
+  it('accepts exactly the windows the generator lists', () => {
+    const board = emptyBoard(10);
+    const listed = new Set(legalMoves(board).map(m => `${m.a},${m.b}`));
+    for (let a = 0; a < board.n; a++) {
+      for (let b = a; b < board.n; b++) {
+        expect(isWindowAllowed(board, a, b)).toBe(listed.has(`${a},${b}`));
+      }
+    }
+  });
+
+  it('refuses a window of the wrong size — the largest legal size is forced', () => {
+    const board = emptyBoard(10); // largest allowed window here is 8
+    expect(currentWindowSize(board)).toBe(8);
+    expect(isWindowAllowed(board, 0, 7)).toBe(true);
+    expect(isWindowAllowed(board, 0, 0)).toBe(false); // k = 1 is legal in general, but not largest
+    expect(isWindowAllowed(board, 0, 3)).toBe(false); // k = 4 likewise
+  });
+
+  it('refuses a window that runs off the board', () => {
+    const board = emptyBoard(10);
+    expect(isWindowAllowed(board, 3, 10)).toBe(false);
+    expect(isWindowAllowed(board, -1, 6)).toBe(false);
+  });
+
+  it('refuses every window once the game is over', () => {
+    const board = { n: 3, edges: [true, true] };
+    expect(currentWindowSize(board)).toBe(null);
+    expect(isWindowAllowed(board, 0, 0)).toBe(false);
   });
 });

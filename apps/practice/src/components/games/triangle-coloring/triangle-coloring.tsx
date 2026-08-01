@@ -59,19 +59,16 @@ const triangles = [
   { id: 15, v: [9, 13, 14], neighbors: [14] }
 ];
 
-const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
+const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   const getTrianglePoints = i => {
     const v = triangles[i].v;
     const [v0, v1, v2] = [vertices[v[0]], vertices[v[1]], vertices[v[2]]];
     return `${v0.cx},${v0.cy} ${v1.cx},${v1.cy} ${v2.cx},${v2.cy}`
   }
 
-  const isClickable = i => ctx.isClientMoveAllowed && board[i] === ALLOWED;
+  const isClickable = i => moves.colorTriangle.isAllowed!(board, i);
 
-  const colorTriangle = i => {
-    if (!isClickable(i)) return;
-    moves.colorTriangle(board, i);
-  }
+  const colorTriangle = i => moves.colorTriangle(board, i);
 
   const getColor = i => {
     if (board[i] === COLORED) return 'fill-blue-800';
@@ -113,18 +110,27 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
+// A triangle may be coloured while it is still ALLOWED — neither coloured
+// already nor forbidden by a neighbour someone coloured earlier. Both players
+// colour from the same board, so whose turn it is does not enter into legality.
+export const isColoringAllowed = (board: Board, id: number): boolean =>
+  Number.isInteger(id) && id >= 0 && id < triangles.length && board[id] === ALLOWED;
+
 const moves = {
-  colorTriangle: (board: Board, { events }: { events: Events }, id: number) => {
-    const nextBoard = cloneDeep(board);
-    nextBoard[id] = COLORED;
-    triangles[id].neighbors.forEach(n => {
-      nextBoard[n] = FORBIDDEN;
-    });
-    events.endTurn();
-    if (getAllowedMoves(nextBoard).length === 0) {
-      events.endGame();
+  colorTriangle: {
+    validate: (board: Board, _, id: number) => isColoringAllowed(board, id),
+    apply: (board: Board, { events }: { events: Events }, id: number) => {
+      const nextBoard = cloneDeep(board);
+      nextBoard[id] = COLORED;
+      triangles[id].neighbors.forEach(n => {
+        nextBoard[n] = FORBIDDEN;
+      });
+      events.endTurn();
+      if (getAllowedMoves(nextBoard).length === 0) {
+        events.endGame();
+      }
+      return { nextBoard };
     }
-    return { nextBoard };
   }
 };
 
@@ -142,7 +148,7 @@ const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
 const getOptimalSmartBotMove = (board: Board) => {
   const allowedMoves = getAllowedMoves(board);
   const optimalPlace = shuffle(allowedMoves).find(i => {
-    const { nextBoard } = moves.colorTriangle(board, { events: dummyEvents }, i);
+    const { nextBoard } = moves.colorTriangle.apply(board, { events: dummyEvents }, i);
     return isWinningState(nextBoard);
   });
 
@@ -160,7 +166,7 @@ const isWinningState = (board: Board) => {
   }
 
   const optimalPlaceForOther = allowedPlacesForOther.find(i => {
-    const { nextBoard } = moves.colorTriangle(board, { events: dummyEvents }, i);
+    const { nextBoard } = moves.colorTriangle.apply(board, { events: dummyEvents }, i);
     return isWinningState(nextBoard);
   });
   return optimalPlaceForOther === undefined;

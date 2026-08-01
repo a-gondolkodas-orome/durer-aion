@@ -1,20 +1,25 @@
 import { strategyGameFactory, type Ctx, type Events } from '../../strategy-game-factory';
 import { BoardClient } from './board-client';
-import { type Board, applyMove, currentWindowSize, generateStartBoard, isTerminal } from './helpers';
+import {
+  type Board, applyMove, currentWindowSize, generateStartBoard, isTerminal, isWindowAllowed
+} from './helpers';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 
 const moves = {
   // Place the length-k subtable [a, b]: matches go on its free bounding edges.
   // If that leaves the other player with no legal move, they lose; otherwise the
   // turn passes.
-  placeWindow: (board: Board, { ctx, events }: { ctx: Ctx; events: Events }, a: number, b: number) => {
-    const nextBoard = applyMove(board, a, b);
-    if (isTerminal(nextBoard)) {
-      events.endGame(ctx.currentPlayer!);
-    } else {
-      events.endTurn();
+  placeWindow: {
+    validate: (board: Board, _, a: number, b: number) => isWindowAllowed(board, a, b),
+    apply: (board: Board, { ctx, events }: { ctx: Ctx; events: Events }, a: number, b: number) => {
+      const nextBoard = applyMove(board, a, b);
+      if (isTerminal(nextBoard)) {
+        events.endGame(ctx.currentPlayer!);
+      } else {
+        events.endTurn();
+      }
+      return { nextBoard };
     }
-    return { nextBoard };
   }
 };
 

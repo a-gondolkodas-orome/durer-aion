@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { range } from 'lodash';
 import { useTranslation } from '../../../language';
 import { GameBoard, type BoardClientProps, useHoverPreview } from '../../strategy-game-factory';
-import { type Board, boundaryEdgesToPlace, currentWindowSize, legalMoves } from './helpers';
+import { type Board, boundaryEdgesToPlace, currentWindowSize } from './helpers';
 
 const Matchstick = ({ ghost = false }: { ghost?: boolean }) => (
   <div
@@ -30,7 +30,10 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
   const { n, edges } = board;
   const k = currentWindowSize(board);
-  const validStarts = new Set(legalMoves(board).map(m => m.a));
+  // A cell is a valid start exactly when the window it would open is a legal
+  // move — asked of the move itself rather than of the generator directly.
+  const isValidStart = (a: number) =>
+    k !== null && moves.placeWindow.isAllowed!(board, a, a + k - 1);
 
   const [selectedStart, setSelectedStart] = useState<number | null>(null);
   const { value: hoverStart, hoverProps } = useHoverPreview<number>(ctx.moveCount);
@@ -54,12 +57,12 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 
   const selectStart = (a: number) => {
-    if (!canInteract || !validStarts.has(a)) return;
+    if (!isValidStart(a)) return;
     setSelectedStart(prev => (prev === a ? null : a));
   };
 
   const submit = () => {
-    if (!canInteract || selectedStart === null || k === null) return;
+    if (selectedStart === null || k === null) return;
     moves.placeWindow(board, selectedStart, selectedStart + k - 1);
   };
 
@@ -70,7 +73,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     <GameBoard className="min-w-0">
       <div className="flex items-center justify-center w-full">
         {range(n).flatMap(i => {
-          const selectable = canInteract && validStarts.has(i);
+          const selectable = isValidStart(i);
           const cell = (
             <button
               key={`cell-${i}`}

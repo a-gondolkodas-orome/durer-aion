@@ -12,7 +12,7 @@ import {
   type Board,
   generateStartBoard,
   isFull,
-  legalDigits,
+  isLegalPlacement,
   legalMoves,
   getSmartBotStep,
   getRandomBotStep
@@ -32,12 +32,13 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     setSelectedCell(prev => (prev === cell ? null : cell));
   };
 
-  const placeDigit = (digit: number) => {
-    if (!ctx.isClientMoveAllowed || selectedCell === null) return;
-    moves.placeDigit(board, selectedCell, digit);
-  };
+  const placeDigit = (digit: number) => moves.placeDigit(board, selectedCell, digit);
 
-  const allowed = selectedCell === null ? [] : legalDigits(board, selectedCell);
+  // Which digits the selected cell will accept — asked of the move itself, so
+  // the keypad and the engine cannot disagree.
+  const allowed = [1, 2, 3].filter(
+    digit => selectedCell !== null && moves.placeDigit.isAllowed!(board, selectedCell, digit)
+  );
 
   return (
     <GameBoard>
@@ -109,18 +110,21 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 };
 
 const moves = {
-  placeDigit: (board: Board, { events }: { ctx: Ctx; events: Events }, cell: number, digit: number) => {
-    const nextBoard = board.map((v, i) => (i === cell ? digit : v));
-    events.endTurn();
-    // The next player now faces nextBoard: a full grid means the first player
-    // won; an empty grid with no legal move means that player is stuck and the
-    // second player won.
-    if (isFull(nextBoard)) {
-      events.endGame(0);
-    } else if (legalMoves(nextBoard).length === 0) {
-      events.endGame(1);
+  placeDigit: {
+    validate: (board: Board, _, cell: number, digit: number) => isLegalPlacement(board, cell, digit),
+    apply: (board: Board, { events }: { ctx: Ctx; events: Events }, cell: number, digit: number) => {
+      const nextBoard = board.map((v, i) => (i === cell ? digit : v));
+      events.endTurn();
+      // The next player now faces nextBoard: a full grid means the first player
+      // won; an empty grid with no legal move means that player is stuck and the
+      // second player won.
+      if (isFull(nextBoard)) {
+        events.endGame(0);
+      } else if (legalMoves(nextBoard).length === 0) {
+        events.endGame(1);
+      }
+      return { nextBoard };
     }
-    return { nextBoard };
   }
 };
 

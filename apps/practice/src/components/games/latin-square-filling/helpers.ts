@@ -14,6 +14,8 @@ export const isFull = (board: Board): boolean => board.every(v => v !== 0);
 // Writing `digit` into empty `cell` is legal iff that digit is not already
 // present in the cell's row or column (no row/column may hold two equal digits).
 export const isLegalPlacement = (board: Board, cell: number, digit: number): boolean => {
+  if (!Number.isInteger(cell) || cell < 0 || cell >= 9) return false;
+  if (![1, 2, 3].includes(digit)) return false;
   if (board[cell] !== 0) return false;
   const r = rowOf(cell), c = colOf(cell);
   for (let k = 0; k < 3; k++) {
