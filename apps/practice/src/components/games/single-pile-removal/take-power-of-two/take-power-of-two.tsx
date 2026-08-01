@@ -14,7 +14,7 @@ const generateStartBoard = () => {
 
 type Board = number
 
-const ExponentsTable = ({ disabled, board, choosePower, hovered, hoverProps }) => {
+const ExponentsTable = ({ isPowerAllowed, board, choosePower, hovered, hoverProps }) => {
   const { t } = useTranslation();
   const availableExponents = getAvailableExponents(board);
 
@@ -26,14 +26,14 @@ const ExponentsTable = ({ disabled, board, choosePower, hovered, hoverProps }) =
       {availableExponents.map(e =>
         <button
           key={e}
-          disabled={disabled}
+          disabled={!isPowerAllowed(e)}
           className="secondary-button w-auto min-w-12"
           onClick={() => choosePower(e)}
-          {...(disabled ? {} : hoverProps(e))}
+          {...(isPowerAllowed(e) ? hoverProps(e) : {})}
         >{2 ** e}</button>
       )}
     </div>
-    {hovered !== null && !disabled && <p className="mt-2">
+    {hovered !== null && isPowerAllowed(hovered) && <p className="mt-2">
       {t({
         hu: `Kivonandó 2-hatvány: 2^${hovered} = ${2**hovered}. Eredmény: ${board-2**hovered}.`,
         en: `Power to subtract: 2^${hovered} = ${2**hovered}. Result: ${board-2**hovered}.`
@@ -50,7 +50,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     <GameBoard>
       <p className='w-full text-8xl font-bold text-center mb-4'>{board}</p>
       <ExponentsTable
-        disabled={!ctx.isClientMoveAllowed}
+        isPowerAllowed={(e: number) => moves.subtractPowerOfTwo.isAllowed!(board, e)}
         board={board}
         choosePower={(e: number) => moves.subtractPowerOfTwo(board, e)}
         hovered={hoveredPower}
@@ -99,13 +99,18 @@ const getPlayerStepDescription = () => ({
 });
 
 const moves = {
-  subtractPowerOfTwo: (board: Board, { events }: { events: Events }, exponent: number) => {
-    const nextBoard = board - 2 ** exponent;
-    events.endTurn();
-    if (nextBoard === 0) {
-      events.endGame();
+  subtractPowerOfTwo: {
+    // A power of 2 may be subtracted only if it does not exceed the number —
+    // exactly the exponents the board already offers.
+    validate: (board: Board, _, exponent: number) => getAvailableExponents(board).includes(exponent),
+    apply: (board: Board, { events }: { events: Events }, exponent: number) => {
+      const nextBoard = board - 2 ** exponent;
+      events.endTurn();
+      if (nextBoard === 0) {
+        events.endGame();
+      }
+      return { nextBoard };
     }
-    return { nextBoard };
   }
 }
 

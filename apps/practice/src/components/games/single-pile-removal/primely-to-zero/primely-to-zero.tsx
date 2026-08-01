@@ -14,25 +14,20 @@ const validSteps = new Set([1, 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 4
 
 const isValidStep = (d: number): boolean => validSteps.has(d);
 
-const isMoveValid = (board: Board, target: number): boolean => {
+export const isMoveValid = (board: Board, target: number): boolean => {
   if (target < 0 || target >= board) return false;
   return isValidStep(board - target);
 };
 
-const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const clickTarget = (target: number) => {
-    if (!ctx.isClientMoveAllowed || !isMoveValid(board, target)) return;
-    moves.moveTo(board, target);
-  };
-
+const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   return (
     <GameBoard>
       <div className="flex flex-wrap gap-2">
         {range(maxStart + 1).map(i =>
           <button
             key={i}
-            disabled={!ctx.isClientMoveAllowed || !isMoveValid(board, i)}
-            onClick={() => clickTarget(i)}
+            disabled={!moves.moveTo.isAllowed!(board, i)}
+            onClick={() => moves.moveTo(board, i)}
             className={`
               border-2 rounded-sm text-2xl min-w-[4ch] p-1 my-1 font-bold
               enabled:bg-green-200 dark:enabled:bg-green-700 enabled:hocus:bg-green-400 dark:enabled:hocus:bg-green-600
@@ -49,13 +44,16 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 };
 
 const moves = {
-  moveTo: (_board: Board, { ctx, events }: { ctx: Ctx, events: Events }, target: number) => {
-    const winner = ctx.currentPlayer!;
-    events.endTurn();
-    if (target === 0) {
-      events.endGame(winner);
+  moveTo: {
+    validate: (board: Board, _, target: number) => isMoveValid(board, target),
+    apply: (_board: Board, { ctx, events }: { ctx: Ctx, events: Events }, target: number) => {
+      const winner = ctx.currentPlayer!;
+      events.endTurn();
+      if (target === 0) {
+        events.endGame(winner);
+      }
+      return { nextBoard: target };
     }
-    return { nextBoard: target };
   }
 };
 

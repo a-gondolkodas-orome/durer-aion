@@ -33,6 +33,12 @@ const allPrimePowers = (() => {
   return entries.sort((a, b) => a.value - b.value);
 })();
 
+// Only a genuine prime power that fits within the number may be subtracted, so
+// legality is membership in the enumeration above rather than an arithmetic
+// check, which would also accept a composite base.
+export const isSubtractionAllowed = (board: Board, { prime, exponent }: { prime: number; exponent: number }) =>
+  allPrimePowers.some(e => e.prime === prime && e.exponent === exponent && e.value <= board);
+
 const generateStartBoard = () => {
   if (random(0, 1)) {
     return random(3, 166) * 6;
@@ -43,10 +49,10 @@ const generateStartBoard = () => {
 
 const generateSmallStartBoard = () => random(12, 72);
 
-const PrimePowerButton = ({ entry, board, isClientMoveAllowed, chooseEntry, hoverProps }) => {
+const PrimePowerButton = ({ entry, board, isEntryAllowed, chooseEntry, hoverProps }) => {
   const { prime, exponent, value } = entry;
   const isAboveBoard = value > board;
-  const isActive = !isAboveBoard && isClientMoveAllowed;
+  const isActive = isEntryAllowed(entry);
   return (
     <button
       disabled={!isActive}
@@ -55,7 +61,7 @@ const PrimePowerButton = ({ entry, board, isClientMoveAllowed, chooseEntry, hove
         ${isAboveBoard ? 'opacity-25' : ''}
         enabled:hocus:bg-blue-100 dark:enabled:hocus:bg-blue-900 enabled:hocus:border-blue-300
       `}
-      onClick={() => isActive && chooseEntry(entry)}
+      onClick={() => chooseEntry(entry)}
       {...(isActive ? hoverProps(entry) : {})}
     >
       <span className="block text-xs text-slate-500" aria-hidden={exponent <= 1}>
@@ -66,7 +72,7 @@ const PrimePowerButton = ({ entry, board, isClientMoveAllowed, chooseEntry, hove
   );
 };
 
-const PrimePowerGrid = ({ board, visiblePowers, isClientMoveAllowed, chooseEntry, hoverProps }) => {
+const PrimePowerGrid = ({ board, visiblePowers, isEntryAllowed, chooseEntry, hoverProps }) => {
   return (
     <div className="flex flex-wrap gap-1 items-end">
       {visiblePowers.map(entry => (
@@ -74,7 +80,7 @@ const PrimePowerGrid = ({ board, visiblePowers, isClientMoveAllowed, chooseEntry
           key={`${entry.prime}-${entry.exponent}`}
           entry={entry}
           board={board}
-          isClientMoveAllowed={isClientMoveAllowed}
+          isEntryAllowed={isEntryAllowed}
           chooseEntry={chooseEntry}
           hoverProps={hoverProps}
         />
@@ -83,11 +89,11 @@ const PrimePowerGrid = ({ board, visiblePowers, isClientMoveAllowed, chooseEntry
   );
 };
 
-const HoverPreview = ({ hovered, board, isClientMoveAllowed }) => {
+const HoverPreview = ({ hovered, board, isEntryAllowed }) => {
   const { t } = useTranslation();
   return (
     <div className="min-h-6 mb-2">
-      {hovered !== null && hovered.value <= board && isClientMoveAllowed && <p>
+      {hovered !== null && isEntryAllowed(hovered) && <p>
         {t({ hu: 'Kivonandó prímhatvány:', en: 'Prime power to subtract:' })}{' '}
         <strong>{hovered.prime}<sup>{hovered.exponent}</sup> = {hovered.value}</strong>.{' '}
         {t({ hu: 'Eredmény:', en: 'Result:' })}{' '}
@@ -100,6 +106,8 @@ const HoverPreview = ({ hovered, board, isClientMoveAllowed }) => {
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { value: hovered, hoverProps } = useHoverPreview<typeof allPrimePowers[0]>(ctx.moveCount);
   const [visiblePowers] = useState(() => allPrimePowers.filter(e => e.value <= board));
+  const isEntryAllowed = (entry: typeof allPrimePowers[0]) =>
+    moves.subtractPrimeExponent.isAllowed!(board, entry);
 
   const chooseEntry = ({ prime, exponent }) => {
     moves.subtractPrimeExponent(board, { prime, exponent });
@@ -108,11 +116,11 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   return (
     <GameBoard>
       <p className='w-full text-8xl font-bold text-center mb-4'>{board}</p>
-      <HoverPreview hovered={hovered} board={board} isClientMoveAllowed={ctx.isClientMoveAllowed} />
+      <HoverPreview hovered={hovered} board={board} isEntryAllowed={isEntryAllowed} />
       <PrimePowerGrid
         board={board}
         visiblePowers={visiblePowers}
-        isClientMoveAllowed={ctx.isClientMoveAllowed}
+        isEntryAllowed={isEntryAllowed}
         chooseEntry={chooseEntry}
         hoverProps={hoverProps}
       />
@@ -153,13 +161,17 @@ const getPlayerStepDescription = () => ({
 });
 
 const moves = {
-  subtractPrimeExponent: (board: Board, { events }: { events: Events }, { prime, exponent }) => {
-    const nextBoard = board - prime ** exponent;
-    events.endTurn();
-    if (nextBoard === 0) {
-      events.endGame();
+  subtractPrimeExponent: {
+    validate: (board: Board, _, entry: { prime: number; exponent: number }) =>
+      isSubtractionAllowed(board, entry),
+    apply: (board: Board, { events }: { events: Events }, { prime, exponent }) => {
+      const nextBoard = board - prime ** exponent;
+      events.endTurn();
+      if (nextBoard === 0) {
+        events.endGame();
+      }
+      return { nextBoard };
     }
-    return { nextBoard };
   }
 };
 
