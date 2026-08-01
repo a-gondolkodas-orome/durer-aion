@@ -48,6 +48,15 @@ export const getRectangles = (grid: Grid): Rect[] => {
   return rects;
 };
 
+// A move names a disc and an orientation; the rectangle it belongs to, and
+// hence the line removed, follow from the grid. Every disc's row and column are
+// removable, so "there is a disc at (r, c)" is the whole of legality — but it
+// matters, since applyMove reads the rectangle around that disc and there is
+// none around an empty cell.
+export const isRemovalAllowed = (grid: Grid, move: Move): boolean =>
+  !!move && (move.orientation === 'row' || move.orientation === 'col')
+    && grid[move.r]?.[move.c] === true;
+
 // Remove every disc in the chosen row / column of the rectangle containing (r, c).
 export const applyMove = (grid: Grid, { r, c, orientation }: Move): Grid => {
   const rect = getRectangleAt(grid, r, c)!;

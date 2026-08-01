@@ -1,5 +1,6 @@
 import {
-  type Grid, getRectangleAt, getRectangles, applyMove, isEmpty, getAllMoves
+  type Grid, type Move,
+  getRectangleAt, getRectangles, applyMove, isEmpty, getAllMoves, isRemovalAllowed
 } from './helpers';
 
 const g = (rows: number[][]): Grid => rows.map(r => r.map(Boolean));
@@ -71,5 +72,42 @@ describe('isEmpty', () => {
   it('detects an empty board', () => {
     expect(isEmpty(g([[0, 0], [0, 0]]))).toBe(true);
     expect(isEmpty(g([[0, 1]]))).toBe(false);
+  });
+});
+
+describe('isRemovalAllowed', () => {
+  const grid = g([
+    [1, 1, 0],
+    [1, 1, 0],
+    [0, 0, 1]
+  ]);
+
+  it('accepts either orientation on any cell holding a disc', () => {
+    expect(isRemovalAllowed(grid, { r: 0, c: 0, orientation: 'row' })).toBe(true);
+    expect(isRemovalAllowed(grid, { r: 0, c: 0, orientation: 'col' })).toBe(true);
+    expect(isRemovalAllowed(grid, { r: 2, c: 2, orientation: 'row' })).toBe(true);
+  });
+
+  it('refuses an empty cell — there is no rectangle around one to remove a line from', () => {
+    expect(isRemovalAllowed(grid, { r: 0, c: 2, orientation: 'row' })).toBe(false);
+    expect(isRemovalAllowed(grid, { r: 2, c: 0, orientation: 'col' })).toBe(false);
+  });
+
+  it('refuses a cell off the grid', () => {
+    expect(isRemovalAllowed(grid, { r: -1, c: 0, orientation: 'row' })).toBe(false);
+    expect(isRemovalAllowed(grid, { r: 0, c: 9, orientation: 'row' })).toBe(false);
+    expect(isRemovalAllowed(grid, { r: 9, c: 0, orientation: 'row' })).toBe(false);
+  });
+
+  // The board client builds the move by spreading the selected disc into
+  // `{ ...selected, orientation }`, so with nothing selected it has no r/c at
+  // all. That is what makes the selection itself part of legality — the client
+  // needs no null-check of its own.
+  it('refuses a move with no disc named at all', () => {
+    expect(isRemovalAllowed(grid, { orientation: 'row' } as Move)).toBe(false);
+  });
+
+  it('accepts every move the generator lists', () => {
+    expect(getAllMoves(grid).every(m => isRemovalAllowed(grid, m))).toBe(true);
   });
 });

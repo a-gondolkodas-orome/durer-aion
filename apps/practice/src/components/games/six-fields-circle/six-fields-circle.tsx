@@ -1,20 +1,25 @@
 import { strategyGameFactory, type Ctx, type Events } from "../../strategy-game-factory";
-import { type Board, type Move, hasLegalMove, generateStartBoard } from "./helpers";
+import {
+  type Board, type Move, hasLegalMove, generateStartBoard, isRemovalAllowed
+} from "./helpers";
 import { smartBotStrategy, randomBotStrategy } from "./bot-strategy";
 import { BoardClient } from "./board-client";
 
 export type { Board };
 
 const moves = {
-  removeFromTwo: (board: Board, { ctx, events }: { ctx: Ctx; events: Events }, [i, j]: Move) => {
-    const nextBoard = board.slice();
-    nextBoard[i] -= 1;
-    nextBoard[j] -= 1;
-    events.endTurn();
-    // If no move remains, the next player cannot move and loses, so the player
-    // who just moved (the current player) wins.
-    if (!hasLegalMove(nextBoard)) events.endGame(ctx.currentPlayer);
-    return { nextBoard };
+  removeFromTwo: {
+    validate: (board: Board, _, move: Move) => isRemovalAllowed(board, move),
+    apply: (board: Board, { ctx, events }: { ctx: Ctx; events: Events }, [i, j]: Move) => {
+      const nextBoard = board.slice();
+      nextBoard[i] -= 1;
+      nextBoard[j] -= 1;
+      events.endTurn();
+      // If no move remains, the next player cannot move and loses, so the player
+      // who just moved (the current player) wins.
+      if (!hasLegalMove(nextBoard)) events.endGame(ctx.currentPlayer);
+      return { nextBoard };
+    }
   }
 };
 

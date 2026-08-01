@@ -5,7 +5,7 @@ import {
 import { useTranslation } from '../../../language';
 import {
   type Board, type Orientation, type Move,
-  getRectangleAt, applyMove, isEmpty
+  getRectangleAt, applyMove, isEmpty, isRemovalAllowed
 } from './helpers';
 
 type Selected = { r: number; c: number } | null
@@ -23,11 +23,6 @@ export const BoardClient = ({ board, ctx, events, moves }: BoardClientProps<Boar
     // preview explicitly — it belonged to the previous selection.
     clearHover();
     events.setTurnState(selected && selected.r === r && selected.c === c ? null : { r, c });
-  };
-
-  const removeLine = (orientation: Orientation) => {
-    if (!ctx.isClientMoveAllowed || !selected) return;
-    moves.removeLine(board, { ...selected, orientation });
   };
 
   const discClass = (r: number, c: number) => {
@@ -97,7 +92,7 @@ export const BoardClient = ({ board, ctx, events, moves }: BoardClientProps<Boar
             <button
               key={orientation}
               className="primary-button w-auto grow"
-              onClick={() => removeLine(orientation)}
+              onClick={() => moves.removeLine(board, { ...selected, orientation })}
               {...hoverProps(orientation)}
             >
               {t(label)} ({count})
@@ -110,16 +105,19 @@ export const BoardClient = ({ board, ctx, events, moves }: BoardClientProps<Boar
 };
 
 export const moves = {
-  removeLine: (board: Board, { events }: { events: Events }, move: Move) => {
-    const nextBoard = { grid: applyMove(board.grid, move) };
-    events.setTurnState(null);
-    events.endTurn();
-    // Whoever removes the last disc wins; endGame() defaults the winner to the
-    // player who just moved (currentPlayer at move time).
-    if (isEmpty(nextBoard.grid)) {
-      events.endGame();
+  removeLine: {
+    validate: (board: Board, _, move: Move) => isRemovalAllowed(board.grid, move),
+    apply: (board: Board, { events }: { events: Events }, move: Move) => {
+      const nextBoard = { grid: applyMove(board.grid, move) };
+      events.setTurnState(null);
+      events.endTurn();
+      // Whoever removes the last disc wins; endGame() defaults the winner to the
+      // player who just moved (currentPlayer at move time).
+      if (isEmpty(nextBoard.grid)) {
+        events.endGame();
+      }
+      return { nextBoard };
     }
-    return { nextBoard };
   }
 };
 

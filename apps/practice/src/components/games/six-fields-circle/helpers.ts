@@ -15,6 +15,17 @@ export const OPPOSITE_PAIRS: Move[] = [[0, 3], [1, 4], [2, 5]];
 
 export const isOpposite = (i: number, j: number) => Math.abs(i - j) === 3;
 
+const isField = (i: number) => Number.isInteger(i) && i >= 0 && i < FIELD_COUNT;
+
+// Two distinct, non-empty fields that are not opposite each other. The order of
+// the pair is irrelevant — the board client hands it over in click order.
+export const isRemovalAllowed = (board: Board, move: Move): boolean => {
+  if (!Array.isArray(move) || move.length !== 2) return false;
+  const [i, j] = move;
+  return isField(i) && isField(j) && i !== j && !isOpposite(i, j)
+    && board[i] > 0 && board[j] > 0;
+};
+
 export const getLegalMoves = (board: Board): Move[] => {
   const moves: Move[] = [];
   for (let i = 0; i < FIELD_COUNT; i++) {

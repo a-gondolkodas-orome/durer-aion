@@ -1,6 +1,6 @@
 import { range } from "lodash";
 import { GameBoard, type BoardClientProps, type Events } from "../../strategy-game-factory";
-import { type Board, FIELD_COUNT, OPPOSITE_PAIRS, isOpposite } from "./helpers";
+import { type Board, FIELD_COUNT, OPPOSITE_PAIRS } from "./helpers";
 
 type TurnState = { first: number } | null
 
@@ -21,9 +21,9 @@ export const BoardClient = ({ board, ctx, events, moves }: BoardClientProps<Boar
   const isClickable = (node: number) => {
     if (!ctx.isClientMoveAllowed) return false;
     if (first === null) return board[node] > 0;
-    // A field is selected: allow clicking it again to deselect, or any other
-    // non-empty, non-opposite field to complete the move.
-    return node === first || (board[node] > 0 && !isOpposite(first, node));
+    // A field is selected: allow clicking it again to deselect, or any field
+    // that would complete a legal move.
+    return node === first || moves.removeFromTwo.isAllowed!(board, [first, node]);
   };
 
   const handleClick = (node: number) => {
