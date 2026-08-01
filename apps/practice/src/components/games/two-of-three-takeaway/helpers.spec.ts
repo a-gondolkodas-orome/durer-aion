@@ -2,6 +2,7 @@ import {
   type Board,
   applyMove,
   canMove,
+  isTakeAllowed,
   isTerminal,
   getLegalMoves,
   isWinningInOneMove,
@@ -137,5 +138,30 @@ describe('two-of-three-takeaway helpers', () => {
       for (let i = 0; i < 500; i++) results.add(isWinningBoard(generateStartBoard()));
       expect(results).toEqual(new Set([true, false]));
     });
+  });
+});
+
+describe('isTakeAllowed', () => {
+  const board: Board = [3, 1, 0];
+
+  it('accepts two distinct non-empty piles, in either order', () => {
+    expect(isTakeAllowed(board, 0, 1)).toBe(true);
+    expect(isTakeAllowed(board, 1, 0)).toBe(true);
+  });
+
+  it('refuses an empty pile, the same pile twice, and indices off the board', () => {
+    expect(isTakeAllowed(board, 0, 2)).toBe(false); // pile 2 is empty
+    expect(isTakeAllowed(board, 0, 0)).toBe(false);
+    expect(isTakeAllowed(board, 0, 3)).toBe(false);
+    expect(isTakeAllowed(board, -1, 0)).toBe(false);
+  });
+
+  it('accepts every move the generator lists, and nothing else', () => {
+    const listed = new Set(getLegalMoves(board).map(([i, j]) => `${i},${j}`));
+    for (let i = 0; i < 3; i++) {
+      for (let j = i + 1; j < 3; j++) {
+        expect(isTakeAllowed(board, i, j)).toBe(listed.has(`${i},${j}`));
+      }
+    }
   });
 });

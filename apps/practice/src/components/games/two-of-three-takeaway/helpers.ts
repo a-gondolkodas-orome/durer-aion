@@ -17,6 +17,12 @@ export const isTerminal = (board: Board): boolean => !canMove(board);
 export const applyMove = (board: Board, [i, j]: Move): Board =>
   board.map((v, idx) => (idx === i || idx === j ? v - 1 : v));
 
+export const isPile = (i: number): boolean => Number.isInteger(i) && i >= 0 && i < 3;
+
+// A move takes one chip from each of two *distinct* non-empty piles.
+export const isTakeAllowed = (board: Board, i: number, j: number): boolean =>
+  isPile(i) && isPile(j) && i !== j && board[i] > 0 && board[j] > 0;
+
 export const getLegalMoves = (board: Board): Move[] => {
   const nonEmpty = board.map((v, i) => i).filter(i => board[i] > 0);
   const moves: Move[] = [];

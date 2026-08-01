@@ -13,7 +13,14 @@ const digitsOf = (n: number): number[] =>
 const uniqueNonZeroDigits = (n: number): number[] =>
   [...new Set(digitsOf(n))];
 
-const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
+// Only a non-zero digit that actually appears in the current number may be
+// subtracted. Both players draw from the same number, so whose turn it is does
+// not enter into legality.
+export const isSubtractableDigit = (board: Board, digit: number): boolean =>
+  Number.isInteger(digit) && digit >= 1 && digit <= 9
+    && String(board).includes(String(digit));
+
+const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   const digits = String(board).split('').map(Number);
 
   return (
@@ -22,7 +29,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         {digits.map((d, i) => (
           <button
             key={i}
-            disabled={!ctx.isClientMoveAllowed || d === 0}
+            disabled={!moves.subtractDigit.isAllowed!(board, d)}
             onClick={() => moves.subtractDigit(board, d)}
             className="secondary-button border-2 text-3xl sm:text-5xl w-12 sm:w-16 py-2 sm:py-3 font-bold"
           >
@@ -35,14 +42,17 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 };
 
 const moves = {
-  subtractDigit: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, digit: number) => {
-    const nextBoard = board - digit;
-    if (nextBoard === 0) {
-      events.endGame(ctx.currentPlayer!);
-    } else {
-      events.endTurn();
+  subtractDigit: {
+    validate: (board: Board, _, digit: number) => isSubtractableDigit(board, digit),
+    apply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, digit: number) => {
+      const nextBoard = board - digit;
+      if (nextBoard === 0) {
+        events.endGame(ctx.currentPlayer!);
+      } else {
+        events.endTurn();
+      }
+      return { nextBoard };
     }
-    return { nextBoard };
   }
 };
 

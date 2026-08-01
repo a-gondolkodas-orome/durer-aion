@@ -4,7 +4,7 @@ import {
 import { useTranslation } from '../../../language';
 import {
   allNumbers, generateStartBoard, numbersOwnedBy, currentPlayerFromOwner,
-  hasSum15, findWinningTriple, chooseSmartMove, chooseTestMove, type Board
+  hasSum15, findWinningTriple, chooseSmartMove, chooseTestMove, isChoiceAllowed, type Board
 } from './helpers';
 
 const ownedLabel = (owner: Board['owner'], player: 0 | 1): string => {
@@ -19,11 +19,6 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const winningTriple = ctx.phase === 'gameEnd' && ctx.winnerIndex !== null
     ? (findWinningTriple(numbersOwnedBy(owner, ctx.winnerIndex as 0 | 1)) ?? [])
     : [];
-
-  const clickNumber = (n: number) => {
-    if (!ctx.isClientMoveAllowed || owner[n - 1] !== null) return;
-    moves.chooseNumber(board, n);
-  };
 
   const ownerLabel = (player: 0 | 1) => {
     const colorClass = player === 0
@@ -63,8 +58,8 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         {allNumbers.map(n => (
           <button
             key={n}
-            disabled={!ctx.isClientMoveAllowed || owner[n - 1] !== null}
-            onClick={(e) => { clickNumber(n); e.currentTarget.blur(); }}
+            disabled={!moves.chooseNumber.isAllowed!(board, n)}
+            onClick={(e) => { moves.chooseNumber(board, n); e.currentTarget.blur(); }}
             className={numberClass(n)}
           >
             {n}
@@ -82,21 +77,24 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 };
 
 const moves = {
-  chooseNumber: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, n: number) => {
-    const player = ctx.currentPlayer as 0 | 1;
-    const owner = board.owner.slice() as Board['owner'];
-    owner[n - 1] = player;
-    const nextBoard = { owner };
+  chooseNumber: {
+    validate: (board: Board, _, n: number) => isChoiceAllowed(board.owner, n),
+    apply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, n: number) => {
+      const player = ctx.currentPlayer as 0 | 1;
+      const owner = board.owner.slice() as Board['owner'];
+      owner[n - 1] = player;
+      const nextBoard = { owner };
 
-    if (hasSum15(numbersOwnedBy(owner, player))) {
-      events.endGame(player);
-    } else if (owner.every(o => o !== null)) {
-      // All nine numbers claimed, nobody reached a triple summing to 15.
-      events.endGame(1);
-    } else {
-      events.endTurn();
+      if (hasSum15(numbersOwnedBy(owner, player))) {
+        events.endGame(player);
+      } else if (owner.every(o => o !== null)) {
+        // All nine numbers claimed, nobody reached a triple summing to 15.
+        events.endGame(1);
+      } else {
+        events.endTurn();
+      }
+      return { nextBoard };
     }
-    return { nextBoard };
   }
 };
 

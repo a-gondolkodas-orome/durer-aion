@@ -9,6 +9,7 @@ import { useTranslation } from '../../../language';
 import {
   type Board,
   applyMove,
+  isTakeAllowed,
   isTerminal,
   getSmartBotMove,
   getRandomBotMove,
@@ -102,15 +103,18 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 };
 
 const moves = {
-  takeChips: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, i: number, j: number) => {
-    const nextBoard = applyMove(board, [i, j]);
-    if (isTerminal(nextBoard)) {
-      // The opponent cannot move, so the player who just moved wins.
-      events.endGame(ctx.currentPlayer!);
-    } else {
-      events.endTurn();
+  takeChips: {
+    validate: (board: Board, _, i: number, j: number) => isTakeAllowed(board, i, j),
+    apply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, i: number, j: number) => {
+      const nextBoard = applyMove(board, [i, j]);
+      if (isTerminal(nextBoard)) {
+        // The opponent cannot move, so the player who just moved wins.
+        events.endGame(ctx.currentPlayer!);
+      } else {
+        events.endTurn();
+      }
+      return { nextBoard };
     }
-    return { nextBoard };
   }
 };
 

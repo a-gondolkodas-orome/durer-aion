@@ -7,11 +7,17 @@ import { useTranslation } from '../../../language';
 
 type Board = { numbersOnTable: boolean[], previousMove: number | null }
 
-const isAllowed = (board: Board, n) => {
+// The number must still be on the table, and — from the second move on — be a
+// divisor or a multiple of the number the other player just removed. The
+// on-the-table check used to be skipped for the opening move, where every
+// number is still there anyway; hoisting it above the previousMove branch
+// changes nothing for a real opening move but keeps a bogus argument out.
+export const isAllowed = (board: Board, n) => {
+  if (!Number.isInteger(n) || n < 1 || n > board.numbersOnTable.length) return false;
+  if (board.numbersOnTable[n - 1] === false) return false;
   if (board.previousMove === null) {
     return true;
   }
-  if (board.numbersOnTable[n - 1] === false) return false;
   if (board.previousMove > n && board.previousMove % n === 0) {
     return true;
   } else if (board.previousMove < n && n % board.previousMove === 0) {
@@ -20,15 +26,14 @@ const isAllowed = (board: Board, n) => {
   return false;
 }
 
-const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
+const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
-  const isMoveAllowed = n => isAllowed(board, n);
+  // Two different questions: `isLegal` marks the numbers that could be removed
+  // from this position — shown in blue whoever is on turn — while `isAllowed`
+  // additionally requires that it is this client's move, and gates the buttons.
+  const isLegal = n => isAllowed(board, n);
 
-  const removeNumber = n => {
-    if (!ctx.isClientMoveAllowed) return;
-    if (!isMoveAllowed(n)) return;
-    moves.removeNumber(board, n);
-  }
+  const removeNumber = n => moves.removeNumber(board, n);
 
   return (
     <GameBoard>
@@ -36,12 +41,12 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         {range(1, board.numbersOnTable.length + 1).map(num =>
           <button
             key={num}
-            disabled={!isMoveAllowed(num) || !ctx.isClientMoveAllowed}
+            disabled={!moves.removeNumber.isAllowed!(board, num)}
             onClick={() => removeNumber(num)}
             className={`
               m-1 min-h-28 w-18 border-4 rounded-lg shadow-md text-4xl font-bold
               ${board.numbersOnTable[num - 1] ? '' : 'opacity-50 border-dashed'}
-              ${board.numbersOnTable[num - 1] ? (isMoveAllowed(num) ? 'border-blue-600' : 'border-red-600') : ''}
+              ${board.numbersOnTable[num - 1] ? (isLegal(num) ? 'border-blue-600' : 'border-red-600') : ''}
               enabled:hocus:opacity-50 enabled:hocus:border-dashed
               `}
           >
@@ -57,15 +62,18 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 };
 
 const moves = {
-  removeNumber: (board: Board, { events }: { events: Events }, n) => {
-    const nextBoard = cloneDeep(board);
-    nextBoard.numbersOnTable[n - 1] = false;
-    nextBoard.previousMove = n;
-    events.endTurn();
-    if (isGameEnd(nextBoard)) {
-      events.endGame();
+  removeNumber: {
+    validate: (board: Board, _, n) => isAllowed(board, n),
+    apply: (board: Board, { events }: { events: Events }, n) => {
+      const nextBoard = cloneDeep(board);
+      nextBoard.numbersOnTable[n - 1] = false;
+      nextBoard.previousMove = n;
+      events.endTurn();
+      if (isGameEnd(nextBoard)) {
+        events.endGame();
+      }
+      return { nextBoard };
     }
-    return { nextBoard };
   }
 };
 

@@ -1,7 +1,7 @@
 import { range } from 'lodash';
 import {
   hasSum15, findWinningTriple, winnerOptimal, chooseSmartMove,
-  numbersOwnedBy, freeNumbers, currentPlayerFromOwner, generateStartBoard,
+  numbersOwnedBy, freeNumbers, currentPlayerFromOwner, generateStartBoard, isChoiceAllowed,
   type Owner
 } from './helpers';
 
@@ -86,5 +86,30 @@ describe('chooseSmartMove', () => {
     const owner: Owner = [0, 1, 0, null, null, 1, null, null, null];
     expect(currentPlayerFromOwner(owner)).toBe(0);
     expect(chooseSmartMove(owner, 0)).toBe(7);
+  });
+});
+
+describe('isChoiceAllowed', () => {
+  const owner: Owner = [0, null, 1, null, null, null, null, null, null];
+
+  it('accepts a number nobody has claimed', () => {
+    expect(isChoiceAllowed(owner, 2)).toBe(true);
+    expect(isChoiceAllowed(owner, 9)).toBe(true);
+  });
+
+  it('refuses a number either player already owns', () => {
+    expect(isChoiceAllowed(owner, 1)).toBe(false);
+    expect(isChoiceAllowed(owner, 3)).toBe(false);
+  });
+
+  it('refuses anything outside 1..9', () => {
+    expect(isChoiceAllowed(owner, 0)).toBe(false);
+    expect(isChoiceAllowed(owner, 10)).toBe(false);
+    expect(isChoiceAllowed(owner, 2.5)).toBe(false);
+  });
+
+  it('accepts exactly the free numbers', () => {
+    const free = new Set(freeNumbers(owner));
+    for (let n = 1; n <= 9; n++) expect(isChoiceAllowed(owner, n)).toBe(free.has(n));
   });
 });
