@@ -77,3 +77,15 @@ export const dist: number[][] = (() => {
 
 export const minDistToSet = (vertex: number, set: number[]): number =>
   Math.min(...set.map((c) => dist[vertex][c]));
+
+export const isVertex = (vertex: number): boolean =>
+  Number.isInteger(vertex) && vertex >= 0 && vertex < VERTEX_COUNT;
+
+// Once the chase is on, everyone moves along a single edge, so every move
+// reduces to "is the target adjacent to where the piece stands".
+export const isNeighbour = (from: number, to: number): boolean =>
+  isVertex(from) && isVertex(to) && neighbours[from].includes(to);
+
+// Player 0 chases, player 1 runs. Both indices appear in move legality, in the
+// winner handed to endGame and in the board client, so they get names.
+export const [POLICE, THIEF] = [0, 1];

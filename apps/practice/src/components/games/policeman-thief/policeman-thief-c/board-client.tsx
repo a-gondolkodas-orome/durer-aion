@@ -1,5 +1,5 @@
 import { range } from "lodash";
-import { neighbours, coords, edges, VERTEX_COUNT } from "./helpers";
+import { coords, edges, POLICE, VERTEX_COUNT } from "./helpers";
 import type { Board } from "./policeman-thief-c";
 import { GameBoard, type BoardClientProps } from "../../../strategy-game-factory";
 import { useTranslation } from "../../../../language";
@@ -15,27 +15,23 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
   const { phase } = board;
 
-  const isClickable = (vertex: number) => {
-    if (!ctx.isClientMoveAllowed) return false;
-    if (phase === 'placingCops') return true; // police may occupy any vertex (even a shared one)
-    if (phase === 'placingThief') return !board.policemen.includes(vertex);
-    if (ctx.currentPlayer === 0) return neighbours[board.policemen[board.copCursor]].includes(vertex);
-    return neighbours[board.thief!].includes(vertex);
+  // Exactly one move is on offer at any moment; it decides both what a click
+  // does and which vertices are highlighted.
+  const activeMove = () => {
+    if (phase === 'placingCops') return moves.placeCop;
+    if (phase === 'placingThief') return moves.placeThief;
+    return ctx.currentPlayer === POLICE ? moves.moveCop : moves.moveThief;
   };
 
-  const handleClick = (vertex: number) => {
-    if (!isClickable(vertex)) return;
-    if (phase === 'placingCops') moves.placeCop(board, vertex);
-    else if (phase === 'placingThief') moves.placeThief(board, vertex);
-    else if (ctx.currentPlayer === 0) moves.moveCop(board, vertex);
-    else moves.moveThief(board, vertex);
-  };
+  const isClickable = (vertex: number) => activeMove().isAllowed!(board, vertex);
+
+  const handleClick = (vertex: number) => activeMove()(board, vertex);
 
   // Collect the pieces standing on each vertex so shared vertices can be shown
   // as a small cluster rather than overlapping discs.
   const piecesByVertex: Piece[][] = range(VERTEX_COUNT).map(() => []);
   board.policemen.forEach((vertex, i) => {
-    const isActive = phase === 'chasing' && ctx.currentPlayer === 0
+    const isActive = phase === 'chasing' && ctx.currentPlayer === POLICE
       && ctx.isClientMoveAllowed && i === board.copCursor;
     piecesByVertex[vertex].push({ color: COP_COLORS[i], isThief: false, isActive });
   });

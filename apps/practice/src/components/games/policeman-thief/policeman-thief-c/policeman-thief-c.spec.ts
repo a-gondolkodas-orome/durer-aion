@@ -1,6 +1,7 @@
 import { moves, generateStartBoard, pickCopCount, type Board } from './policeman-thief-c';
+import { POLICE, THIEF, VERTEX_COUNT } from './helpers';
 import { range } from 'lodash';
-import { makeEvents } from '../../../../test-utils';
+import { makeEvents, makeCtx } from '../../../../test-utils';
 
 const meta = () => ({ events: makeEvents() });
 
@@ -42,7 +43,7 @@ describe('pickCopCount', () => {
 describe('moves.placeCop', () => {
   it('adds a policeman without ending the turn until all are placed', () => {
     const { events } = meta();
-    const { nextBoard } = moves.placeCop(generateStartBoard(), { events }, 7);
+    const { nextBoard } = moves.placeCop.apply(generateStartBoard(), { events }, 7);
     expect(nextBoard.policemen).toEqual([7]);
     expect(nextBoard.phase).toBe('placingCops');
     expect(events.endTurn).not.toHaveBeenCalled();
@@ -53,7 +54,7 @@ describe('moves.placeCop', () => {
     // pin copCount so placing the second cop reliably completes placement
     // (generateStartBoard randomises it to 2 or 3)
     const board = { ...generateStartBoard(), copCount: 2, policemen: [7] };
-    const { nextBoard } = moves.placeCop(board, { events }, 3);
+    const { nextBoard } = moves.placeCop.apply(board, { events }, 3);
     expect(nextBoard.policemen).toEqual([7, 3]);
     expect(nextBoard.phase).toBe('placingThief');
     expect(events.endTurn).toHaveBeenCalledTimes(1);
@@ -64,7 +65,7 @@ describe('moves.placeThief', () => {
   it('places the thief, enters the chasing phase and ends the turn', () => {
     const { events } = meta();
     const board: Board = { ...generateStartBoard(), policemen: [10, 11], phase: 'placingThief' };
-    const { nextBoard } = moves.placeThief(board, { events }, 2);
+    const { nextBoard } = moves.placeThief.apply(board, { events }, 2);
     expect(nextBoard.thief).toBe(2);
     expect(nextBoard.phase).toBe('chasing');
     expect(nextBoard.copCursor).toBe(0);
@@ -75,7 +76,7 @@ describe('moves.placeThief', () => {
 describe('moves.moveCop', () => {
   it('advances the cursor and keeps the turn until every policeman has moved', () => {
     const { events } = meta();
-    const { nextBoard } = moves.moveCop(chasingBoard(), { events }, 12);
+    const { nextBoard } = moves.moveCop.apply(chasingBoard(), { events }, 12);
     expect(nextBoard.policemen).toEqual([12, 11]);
     expect(nextBoard.copCursor).toBe(1);
     expect(events.endTurn).not.toHaveBeenCalled();
@@ -84,7 +85,7 @@ describe('moves.moveCop', () => {
 
   it('ends the turn after the last policeman moves', () => {
     const { events } = meta();
-    const { nextBoard } = moves.moveCop(chasingBoard({ copCursor: 1 }), { events }, 13);
+    const { nextBoard } = moves.moveCop.apply(chasingBoard({ copCursor: 1 }), { events }, 13);
     expect(nextBoard.policemen).toEqual([10, 13]);
     expect(nextBoard.copCursor).toBe(0);
     expect(events.endTurn).toHaveBeenCalledTimes(1);
@@ -93,7 +94,7 @@ describe('moves.moveCop', () => {
   it('ends the game for the police when a policeman steps onto the thief', () => {
     const { events } = meta();
     // thief on vertex 0; blue cop at 10 is adjacent to 0
-    moves.moveCop(chasingBoard({ thief: 0 }), { events }, 0);
+    moves.moveCop.apply(chasingBoard({ thief: 0 }), { events }, 0);
     expect(events.endGame).toHaveBeenCalledWith(0);
     expect(events.endTurn).not.toHaveBeenCalled();
   });
@@ -102,7 +103,7 @@ describe('moves.moveCop', () => {
 describe('moves.moveThief', () => {
   it('records a move and ends the turn when the thief stays free', () => {
     const { events } = meta();
-    const { nextBoard } = moves.moveThief(chasingBoard({ thief: 0 }), { events }, 5);
+    const { nextBoard } = moves.moveThief.apply(chasingBoard({ thief: 0 }), { events }, 5);
     expect(nextBoard.thief).toBe(5);
     expect(nextBoard.thiefMoveCount).toBe(1);
     expect(events.endTurn).toHaveBeenCalledTimes(1);
@@ -113,7 +114,7 @@ describe('moves.moveThief', () => {
     const { events } = meta();
     // thief at 9 (adjacent to 0 and 4); a cop sits on 9's neighbour... use direct overlap
     const board = chasingBoard({ thief: 0, policemen: [5, 11] });
-    moves.moveThief(board, { events }, 5);
+    moves.moveThief.apply(board, { events }, 5);
     expect(events.endGame).toHaveBeenCalledWith(0);
     expect(events.endTurn).not.toHaveBeenCalled();
   });
@@ -121,8 +122,56 @@ describe('moves.moveThief', () => {
   it('ends the game for the thief after a safe third move', () => {
     const { events } = meta();
     const board = chasingBoard({ thief: 0, thiefMoveCount: 2, policemen: [12, 13] });
-    moves.moveThief(board, { events }, 5);
+    moves.moveThief.apply(board, { events }, 5);
     expect(events.endGame).toHaveBeenCalledWith(1);
     expect(events.endTurn).not.toHaveBeenCalled();
+  });
+});
+
+describe('move legality', () => {
+  const asPolice = { ctx: makeCtx({ currentPlayer: POLICE }) };
+  const asThief = { ctx: makeCtx({ currentPlayer: THIEF }) };
+
+  it('accepts a policeman on any vertex during the placement phase', () => {
+    const board = generateStartBoard();
+    expect(moves.placeCop.validate(board, asPolice, 0)).toBe(true);
+    expect(moves.placeCop.validate(board, asPolice, VERTEX_COUNT - 1)).toBe(true);
+    expect(moves.placeCop.validate(board, asPolice, VERTEX_COUNT)).toBe(false);
+    expect(moves.placeCop.validate(board, asPolice, -1)).toBe(false);
+  });
+
+  it('refuses to place further policemen once the phase has moved on', () => {
+    const board = { ...generateStartBoard(), phase: 'placingThief' as const, policemen: [0, 1] };
+    expect(moves.placeCop.validate(board, asPolice, 5)).toBe(false);
+  });
+
+  it('keeps the thief off a vertex a policeman already occupies', () => {
+    const board = { ...generateStartBoard(), phase: 'placingThief' as const, policemen: [0, 7] };
+    expect(moves.placeThief.validate(board, asThief, 3)).toBe(true);
+    expect(moves.placeThief.validate(board, asThief, 0)).toBe(false);
+    expect(moves.placeThief.validate(board, asThief, 7)).toBe(false);
+  });
+
+  it('moves the policeman the cursor points at, along one edge', () => {
+    const board = chasingBoard({ policemen: [10, 11], copCursor: 0 });
+    expect(moves.moveCop.validate(board, asPolice, 0)).toBe(true); // 10 ~ 0
+    expect(moves.moveCop.validate(board, asPolice, 1)).toBe(false); // 1 is 11's neighbour
+    expect(moves.moveCop.validate(board, asPolice, 10)).toBe(false); // must move
+
+    const second = chasingBoard({ policemen: [10, 11], copCursor: 1 });
+    expect(moves.moveCop.validate(second, asPolice, 1)).toBe(true); // 11 ~ 1
+    expect(moves.moveCop.validate(second, asPolice, 0)).toBe(false);
+  });
+
+  it('never lets one side make the other side\'s move', () => {
+    const board = chasingBoard({ policemen: [10, 11], thief: 0 });
+    expect(moves.moveCop.validate(board, asThief, 0)).toBe(false);
+    expect(moves.moveThief.validate(board, asPolice, 5)).toBe(false);
+  });
+
+  it('refuses a chase move before the chase has started', () => {
+    const board = generateStartBoard();
+    expect(moves.moveCop.validate(board, asPolice, 0)).toBe(false);
+    expect(moves.moveThief.validate(board, asThief, 0)).toBe(false);
   });
 });

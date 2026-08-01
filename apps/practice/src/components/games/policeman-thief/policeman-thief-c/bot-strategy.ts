@@ -1,5 +1,5 @@
 import { sample, random, range } from "lodash";
-import { neighbours, VERTEX_COUNT, dist, minDistToSet } from "./helpers";
+import { neighbours, VERTEX_COUNT, dist, minDistToSet, THIEF } from "./helpers";
 import type { Board } from "./policeman-thief-c";
 import type { StrategyArgs, GameMoves } from "../../../strategy-game-factory";
 
@@ -170,7 +170,7 @@ const moveThiefOptimally = ({ board, moves }: { board: Board; moves: GameMoves<B
 };
 
 export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
-  const botIsCops = ctx.chosenRoleIndex === 1;
+  const botIsCops = ctx.chosenRoleIndex === THIEF;
   if (botIsCops) {
     if (board.phase === 'placingCops') placeCopsOptimally({ board, moves });
     else moveCopsOptimally({ board, moves });
@@ -221,7 +221,7 @@ const moveThiefRandom = ({ board, moves }: { board: Board; moves: GameMoves<Boar
 };
 
 export const randomBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
-  const botIsCops = ctx.chosenRoleIndex === 1;
+  const botIsCops = ctx.chosenRoleIndex === THIEF;
   if (botIsCops) {
     if (board.phase === 'placingCops') placeCopsRandom({ board, moves });
     else moveCopsRandom({ board, moves });

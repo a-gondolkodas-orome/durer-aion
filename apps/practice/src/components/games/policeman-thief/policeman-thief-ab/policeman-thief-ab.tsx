@@ -1,6 +1,6 @@
 import { range, random, sample, difference, cloneDeep } from "lodash";
 import { strategyGameFactory, type Ctx, type Events } from "../../../strategy-game-factory";
-import { neighbours } from "./helpers";
+import { neighbours, isNeighbour, POLICE, THIEF } from "./helpers";
 import { smartBotStrategy } from "./bot-strategy";
 import { BoardClient } from "./board-client";
 
@@ -43,31 +43,49 @@ const generateStartBoardB = (): Board => {
   };
 };
 
-const moves = {
-  moveThief: (board: Board, { events }: { events: Events }, vertex: number) => {
-    const overrides: Partial<Board> = { thief: vertex, turnCount: board.turnCount + 1 };
-    const nextBoard = { ...cloneDeep(board), ...overrides };
-    events.endTurn();
-    if (isGameEnd(nextBoard)) {
-      events.endGame(hasFirstPlayerWon(nextBoard) ? 0 : 1);
+// A police round is two half-moves — blue then green — and `firstPolicemanMoved`
+// records which half is due, so no turn state is needed. The thief's move
+// belongs to the other player entirely, hence the currentPlayer checks: they
+// say *which* piece may move, not merely whose turn it is.
+export const moves = {
+  moveThief: {
+    validate: (board: Board, { ctx }: { ctx: Ctx }, vertex: number) =>
+      ctx.currentPlayer === THIEF && isNeighbour(board.thief, vertex),
+    apply: (board: Board, { events }: { events: Events }, vertex: number) => {
+      const overrides: Partial<Board> = { thief: vertex, turnCount: board.turnCount + 1 };
+      const nextBoard = { ...cloneDeep(board), ...overrides };
+      events.endTurn();
+      if (isGameEnd(nextBoard)) {
+        events.endGame(hasFirstPlayerWon(nextBoard) ? POLICE : THIEF);
+      }
+      return { nextBoard };
     }
-    return { nextBoard };
   },
-  moveFirstPoliceman: (board: Board, _, vertex: number) => {
-    const nextBoard = cloneDeep(board);
-    nextBoard.policemen[0] = vertex;
-    nextBoard.firstPolicemanMoved = true;
-    return { nextBoard };
-  },
-  moveSecondPoliceman: (board: Board, { events }: { events: Events }, vertex: number) => {
-    const nextBoard = cloneDeep(board);
-    nextBoard.policemen[1] = vertex;
-    nextBoard.firstPolicemanMoved = false;
-    events.endTurn();
-    if (isGameEnd(nextBoard)) {
-      events.endGame(hasFirstPlayerWon(nextBoard) ? 0 : 1);
+  moveFirstPoliceman: {
+    validate: (board: Board, { ctx }: { ctx: Ctx }, vertex: number) =>
+      ctx.currentPlayer === POLICE && !board.firstPolicemanMoved
+        && isNeighbour(board.policemen[0], vertex),
+    apply: (board: Board, _, vertex: number) => {
+      const nextBoard = cloneDeep(board);
+      nextBoard.policemen[0] = vertex;
+      nextBoard.firstPolicemanMoved = true;
+      return { nextBoard };
     }
-    return { nextBoard };
+  },
+  moveSecondPoliceman: {
+    validate: (board: Board, { ctx }: { ctx: Ctx }, vertex: number) =>
+      ctx.currentPlayer === POLICE && board.firstPolicemanMoved
+        && isNeighbour(board.policemen[1], vertex),
+    apply: (board: Board, { events }: { events: Events }, vertex: number) => {
+      const nextBoard = cloneDeep(board);
+      nextBoard.policemen[1] = vertex;
+      nextBoard.firstPolicemanMoved = false;
+      events.endTurn();
+      if (isGameEnd(nextBoard)) {
+        events.endGame(hasFirstPlayerWon(nextBoard) ? POLICE : THIEF);
+      }
+      return { nextBoard };
+    }
   }
 };
 
@@ -129,7 +147,7 @@ const ruleB = {
 }
 
 const getPlayerStepDescription = ({ board, ctx }: { board: Board; ctx: Ctx }) => {
-  if (ctx.currentPlayer === 0) {
+  if (ctx.currentPlayer === POLICE) {
     return {
       hu: `Kattints arra az útkereszteződésre, ahová a ` +
         `${board.firstPolicemanMoved ? "zöld" : "kék"} rendőrrel lépni szeretnél.`,
