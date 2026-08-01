@@ -31,8 +31,9 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
   const [inputs, setInputs] = useState<Record<Coef, string>>({ a: '', b: '', c: '' });
 
+  // The text has to parse before there is a value to judge; from there on the
+  // move's own validator decides, and the engine ignores a dispatch it rejects.
   const submit = (coef: Coef) => {
-    if (!ctx.isClientMoveAllowed || board[coef] !== null) return;
     const raw = inputs[coef];
     if (!isValidValue(raw)) return;
     moves.setCoefficient(board, coef, parseInt(raw, 10));
@@ -79,7 +80,8 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                 placeholder={t({ hu: 'egész szám', en: 'integer' })}
               />
               <button
-                disabled={!ctx.isClientMoveAllowed || !isValidValue(inputs[coef])}
+                disabled={!isValidValue(inputs[coef])
+                  || !moves.setCoefficient.isAllowed!(board, coef, parseInt(inputs[coef], 10))}
                 onClick={() => submit(coef)}
                 className="rounded-md border-2 px-3 py-1.5 font-bold
                   enabled:hocus:bg-blue-100 dark:enabled:hocus:bg-blue-900

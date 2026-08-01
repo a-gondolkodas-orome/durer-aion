@@ -1,4 +1,7 @@
-import { divisors, integerRoots, hasThreeIntegerRoots, completionValue } from './helpers';
+import {
+  divisors, integerRoots, hasThreeIntegerRoots, completionValue, isCoefficientChoiceAllowed,
+  type Board, type Coef
+} from './helpers';
 
 const sorted = (xs: number[] | null) => (xs === null ? null : [...xs].sort((a, b) => a - b));
 
@@ -66,5 +69,33 @@ describe('completionValue', () => {
     const v = completionValue({ a: null, b: 5000, c: 0 });
     expect(v).toBe(-5001);
     expect(hasThreeIntegerRoots(-5001, 5000, 0)).toBe(true);
+  });
+});
+
+describe('isCoefficientChoiceAllowed', () => {
+  const empty: Board = { a: null, b: null, c: null };
+
+  it('accepts any integer for a coefficient nobody has fixed', () => {
+    expect(isCoefficientChoiceAllowed(empty, 'a', 0)).toBe(true);
+    expect(isCoefficientChoiceAllowed(empty, 'b', -7)).toBe(true);
+    expect(isCoefficientChoiceAllowed(empty, 'c', 1000000)).toBe(true);
+  });
+
+  it('refuses a coefficient that is already set', () => {
+    const board: Board = { a: 2, b: null, c: null };
+    expect(isCoefficientChoiceAllowed(board, 'a', 5)).toBe(false);
+    expect(isCoefficientChoiceAllowed(board, 'b', 5)).toBe(true);
+  });
+
+  it('refuses a value that is not an exact integer', () => {
+    expect(isCoefficientChoiceAllowed(empty, 'a', 1.5)).toBe(false);
+    expect(isCoefficientChoiceAllowed(empty, 'a', NaN)).toBe(false);
+    expect(isCoefficientChoiceAllowed(empty, 'a', Infinity)).toBe(false);
+    // Beyond 2^53 the root arithmetic would stop being exact.
+    expect(isCoefficientChoiceAllowed(empty, 'a', 2 ** 53)).toBe(false);
+  });
+
+  it('refuses a name that is not one of the three coefficients', () => {
+    expect(isCoefficientChoiceAllowed(empty, 'd' as Coef, 1)).toBe(false);
   });
 });

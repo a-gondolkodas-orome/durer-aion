@@ -3,6 +3,13 @@ export type Board = { a: number | null; b: number | null; c: number | null }
 
 export const COEFS: Coef[] = ['a', 'b', 'c'];
 
+// Any integer may be chosen for any coefficient nobody has fixed yet — the two
+// players pick from the same three slots, so whose turn it is does not enter
+// into legality. The safe-integer bound is what keeps the root arithmetic
+// exact; the board client caps the input at 12 digits for the same reason.
+export const isCoefficientChoiceAllowed = (board: Board, coef: Coef, value: number): boolean =>
+  COEFS.includes(coef) && board[coef] === null && Number.isSafeInteger(value);
+
 // All integer divisors (positive and negative) of a nonzero integer.
 export const divisors = (n: number): number[] => {
   const m = Math.abs(n);

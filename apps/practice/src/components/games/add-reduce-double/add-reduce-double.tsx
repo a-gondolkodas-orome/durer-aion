@@ -14,18 +14,11 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     return pieceId >= board[pileId];
   };
 
-  const isDisabled = ({ pileId, pieceId }: Piece) => {
-    if (!ctx.isClientMoveAllowed) return true;
-    // Clicking piece `pieceId` removes it and everything above it (from the top),
-    // i.e. `board[pileId] - pieceId` pieces, which must be even and at least 2.
-    return (board[pileId] - pieceId) % 2 !== 0 || pieceId > board[pileId] - 2;
-  };
-
-  const clickPiece = ({ pileId, pieceId }: Piece) => {
-    if (isDisabled({ pileId, pieceId })) return;
-
-    moves.moveHalvedPieces(board, { pileId, pieceCount: board[pileId] - pieceId });
-  };
+  // Clicking piece `pieceId` removes it and everything above it (from the top),
+  // i.e. `board[pileId] - pieceId` pieces — so the piece is clickable exactly
+  // when that is a legal transfer.
+  const isDisabled = ({ pileId, pieceId }: Piece) =>
+    !moves.moveHalvedPieces.isAllowed!(board, { pileId, pieceCount: board[pileId] - pieceId });
 
   // The pieces removed by clicking the hovered piece: it and everything above it.
   const removedCount = () => (validHoveredPiece ? board[validHoveredPiece.pileId] - validHoveredPiece.pieceId : 0);
@@ -87,7 +80,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                 }
                 ${!nonExistent({ pileId, pieceId }) && !toBeRemoved({ pileId, pieceId }) ? 'bg-blue-800' : ''}
               `}
-              onClick={() => clickPiece({ pileId, pieceId })}
+              onClick={() => moves.moveHalvedPieces(board, { pileId, pieceCount: board[pileId] - pieceId })}
               {...(isDisabled({ pileId, pieceId }) ? {} : hoverProps({ pileId, pieceId }))}
             >
               {!isDisabled({ pileId, pieceId }) &&
@@ -102,18 +95,30 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
+// An even number of pieces, at least two, and no more than the pile holds —
+// half of them then go to the other pile. Both players draw on the same two
+// piles, so whose turn it is does not enter into legality.
+export const isTransferAllowed = (board: Board, { pileId, pieceCount }): boolean =>
+  (pileId === 0 || pileId === 1)
+    && Number.isInteger(pieceCount)
+    && pieceCount >= 2
+    && pieceCount % 2 === 0
+    && pieceCount <= board[pileId];
+
 const moves = {
-  moveHalvedPieces: (board: Board, { events }: { events: Events }, { pileId, pieceCount }) => {
-    if (pieceCount % 2 !== 0) console.error('invalid_move');
-    const nextBoard = cloneDeep(board);
-    nextBoard[pileId] -= pieceCount;
-    nextBoard[1 - pileId] += pieceCount / 2;
-    events.endTurn();
-    const isGameEnd = isEqual(nextBoard, [1, 1]) || isEqual(nextBoard, [0, 1]) || isEqual(nextBoard, [1, 0]);
-    if (isGameEnd) {
-      events.endGame();
+  moveHalvedPieces: {
+    validate: (board: Board, _, piece) => isTransferAllowed(board, piece),
+    apply: (board: Board, { events }: { events: Events }, { pileId, pieceCount }) => {
+      const nextBoard = cloneDeep(board);
+      nextBoard[pileId] -= pieceCount;
+      nextBoard[1 - pileId] += pieceCount / 2;
+      events.endTurn();
+      const isGameEnd = isEqual(nextBoard, [1, 1]) || isEqual(nextBoard, [0, 1]) || isEqual(nextBoard, [1, 0]);
+      if (isGameEnd) {
+        events.endGame();
+      }
+      return { nextBoard };
     }
-    return { nextBoard };
   }
 };
 

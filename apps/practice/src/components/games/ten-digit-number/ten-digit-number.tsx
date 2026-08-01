@@ -30,6 +30,12 @@ const winnerFromState = (() => {
   return (sumMod9, turnsLeft) => memo[`${sumMod9},${turnsLeft}`];
 })();
 
+// Only one of the six offered digits may be appended, and only while the number
+// is still short of its ten digits. Both players draw from the same six, so
+// whose turn it is does not enter into legality.
+export const isDigitChoiceAllowed = (board: Board, digit: number): boolean =>
+  board.digits.length < totalDigits && availableDigits.includes(digit);
+
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
   const slots = Array.from({ length: totalDigits }, (_, i) =>
@@ -71,7 +77,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         {availableDigits.map(d => (
           <button
             key={d}
-            disabled={!ctx.isClientMoveAllowed}
+            disabled={!moves.chooseDigit.isAllowed!(board, d)}
             onClick={(e) => { moves.chooseDigit(board, d); e.currentTarget.blur(); }}
             className="rounded-lg border-2 text-2xl w-12 py-2 font-bold
               enabled:hocus:bg-blue-100 dark:enabled:hocus:bg-blue-900
@@ -86,16 +92,19 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 };
 
 const moves = {
-  chooseDigit: (board: Board, { events }: { events: Events }, digit) => {
-    const newDigits = [...board.digits, digit];
-    const newSumMod9 = (board.sumMod9 + digit) % 9;
-    const nextBoard = { digits: newDigits, sumMod9: newSumMod9 };
-    if (newDigits.length === totalDigits) {
-      events.endGame(newSumMod9 === 0 ? 1 : 0);
-    } else {
-      events.endTurn();
+  chooseDigit: {
+    validate: (board: Board, _, digit) => isDigitChoiceAllowed(board, digit),
+    apply: (board: Board, { events }: { events: Events }, digit) => {
+      const newDigits = [...board.digits, digit];
+      const newSumMod9 = (board.sumMod9 + digit) % 9;
+      const nextBoard = { digits: newDigits, sumMod9: newSumMod9 };
+      if (newDigits.length === totalDigits) {
+        events.endGame(newSumMod9 === 0 ? 1 : 0);
+      } else {
+        events.endTurn();
+      }
+      return { nextBoard };
     }
-    return { nextBoard };
   }
 };
 

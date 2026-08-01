@@ -1,19 +1,25 @@
 import { strategyGameFactory, type Events } from '../../strategy-game-factory';
-import { type Board, type Coef, COEFS, hasThreeIntegerRoots } from './helpers';
+import {
+  type Board, type Coef, COEFS, hasThreeIntegerRoots, isCoefficientChoiceAllowed
+} from './helpers';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { BoardClient } from './board-client';
 
 const moves = {
-  setCoefficient: (board: Board, { events }: { events: Events }, coef: Coef, value: number) => {
-    const nextBoard = { ...board, [coef]: value };
-    const filled = nextBoard.a !== null && nextBoard.b !== null && nextBoard.c !== null;
-    if (filled) {
-      // A (player 0) wins iff all three roots are integers; otherwise B (player 1).
-      events.endGame(hasThreeIntegerRoots(nextBoard.a!, nextBoard.b!, nextBoard.c!) ? 0 : 1);
-    } else {
-      events.endTurn();
+  setCoefficient: {
+    validate: (board: Board, _, coef: Coef, value: number) =>
+      isCoefficientChoiceAllowed(board, coef, value),
+    apply: (board: Board, { events }: { events: Events }, coef: Coef, value: number) => {
+      const nextBoard = { ...board, [coef]: value };
+      const filled = nextBoard.a !== null && nextBoard.b !== null && nextBoard.c !== null;
+      if (filled) {
+        // A (player 0) wins iff all three roots are integers; otherwise B (player 1).
+        events.endGame(hasThreeIntegerRoots(nextBoard.a!, nextBoard.b!, nextBoard.c!) ? 0 : 1);
+      } else {
+        events.endTurn();
+      }
+      return { nextBoard };
     }
-    return { nextBoard };
   }
 };
 
