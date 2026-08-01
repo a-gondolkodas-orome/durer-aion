@@ -19,18 +19,10 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     return pieceId >= board[pileId];
   };
 
-  const isDisabled = ({ pileId, pieceId }: Piece) => {
-    if (!ctx.isClientMoveAllowed) return true;
-    // Clicking piece `pieceId` removes it and everything above it (from the top),
-    // i.e. `board[pileId] - pieceId` pieces; that count must be between 1 and pileId.
-    return pieceId < board[pileId] - pileId || pieceId > board[pileId] - 1;
-  };
-
-  const clickPiece = ({ pileId, pieceId }: Piece) => {
-    if (isDisabled({ pileId, pieceId })) return;
-
-    moves.spreadPieces(board, { pileId, pieceCount: board[pileId] - pieceId });
-  };
+  // Clicking piece `pieceId` removes it and everything above it (from the top),
+  // i.e. `board[pileId] - pieceId` pieces.
+  const isDisabled = ({ pileId, pieceId }: Piece) =>
+    !moves.spreadPieces.isAllowed!(board, { pileId, pieceCount: board[pileId] - pieceId });
 
   // The pieces removed by clicking the hovered piece: it and everything above it.
   const removedCount = () => (validHoveredPiece ? board[validHoveredPiece.pileId] - validHoveredPiece.pieceId : 0);
@@ -118,7 +110,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                 pieceVisibility({ pileId, pieceId }),
                 pieceColor({ pileId, pieceId })
               ].join(' ')}
-              onClick={() => clickPiece({ pileId, pieceId })}
+              onClick={() => moves.spreadPieces(board, { pileId, pieceCount: board[pileId] - pieceId })}
               {...(isDisabled({ pileId, pieceId }) ? {} : hoverProps({ pileId, pieceId }))}
             >
               {!isDisabled({ pileId, pieceId }) &&
@@ -133,20 +125,33 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
+// A move takes `pieceCount` pieces off pile `pileId` and puts one on each of the
+// `pieceCount` piles immediately in front of it, so it can never reach past the
+// first pile — hence the cap at `pileId`.
+export const isSpreadAllowed = (board: Board, pileId: number, pieceCount: number): boolean =>
+  Number.isInteger(pileId) && pileId >= 0 && pileId < board.length
+    && Number.isInteger(pieceCount)
+    && pieceCount >= 1
+    && pieceCount <= pileId
+    && pieceCount <= board[pileId];
+
 const moves = {
-  spreadPieces: (board: Board, { events }: { events: Events }, { pileId, pieceCount }) => {
-    if (pieceCount > pileId) console.error('invalid_move');
-    const nextBoard = cloneDeep(board);
-    nextBoard[pileId] = board[pileId] - pieceCount;
-    for (let i = pileId - pieceCount; i < pileId; i++) {
-      nextBoard[i] = board[i] + 1;
+  spreadPieces: {
+    validate: (board: Board, _, { pileId, pieceCount }: { pileId: number; pieceCount: number }) =>
+      isSpreadAllowed(board, pileId, pieceCount),
+    apply: (board: Board, { events }: { events: Events }, { pileId, pieceCount }) => {
+      const nextBoard = cloneDeep(board);
+      nextBoard[pileId] = board[pileId] - pieceCount;
+      for (let i = pileId - pieceCount; i < pileId; i++) {
+        nextBoard[i] = board[i] + 1;
+      }
+      const isGameEnd = nextBoard[1]===0 && nextBoard[2]===0 && nextBoard[3]===0;
+      events.endTurn();
+      if (isGameEnd) {
+        events.endGame();
+      }
+      return { nextBoard };
     }
-    const isGameEnd = nextBoard[1]===0 && nextBoard[2]===0 && nextBoard[3]===0;
-    events.endTurn();
-    if (isGameEnd) {
-      events.endGame();
-    }
-    return { nextBoard };
   }
 };
 

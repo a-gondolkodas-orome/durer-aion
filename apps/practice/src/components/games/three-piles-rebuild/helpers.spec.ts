@@ -1,5 +1,8 @@
 import { range } from 'lodash';
 import {
+  isKeepAllowed,
+  isSplitAllowed,
+  keptPileId,
   isWinningNumber,
   isLosingNumber,
   isWinningBoard,
@@ -151,6 +154,63 @@ describe('three-piles-rebuild helpers', () => {
       for (let i = 0; i < 100; i++) {
         expect(isTerminal(generateTestStartBoard())).toBe(false);
       }
+    });
+  });
+
+  describe('keptPileId', () => {
+    it('is undefined at the start of a turn, when all three piles stand', () => {
+      expect(keptPileId([7, 8, 9])).toBe(undefined);
+    });
+
+    it('is the surviving pile once the other two are discarded', () => {
+      expect(keptPileId([0, 8, 0])).toBe(1);
+    });
+  });
+
+  describe('isKeepAllowed', () => {
+    it('allows keeping a pile that can still be split', () => {
+      expect(isKeepAllowed([7, 8, 9], 1)).toBe(true);
+    });
+
+    it('rejects keeping a pile too small to split into three', () => {
+      expect(isKeepAllowed([7, 2, 9], 1)).toBe(false);
+    });
+
+    it('rejects a second keep in the same turn', () => {
+      expect(keptPileId([0, 8, 0])).toBe(1);
+      expect(isKeepAllowed([0, 8, 0], 1)).toBe(false);
+    });
+
+    it('rejects a pile id outside the board', () => {
+      expect(isKeepAllowed([7, 8, 9], 3)).toBe(false);
+      expect(isKeepAllowed([7, 8, 9], -1)).toBe(false);
+    });
+  });
+
+  describe('isSplitAllowed', () => {
+    it('allows three non-empty parts summing to the kept pile', () => {
+      expect(isSplitAllowed([0, 8, 0], [1, 1, 6])).toBe(true);
+      expect(isSplitAllowed([0, 8, 0], [3, 3, 2])).toBe(true);
+    });
+
+    it('rejects parts that do not use up the kept pile', () => {
+      expect(isSplitAllowed([0, 8, 0], [1, 1, 5])).toBe(false);
+      expect(isSplitAllowed([0, 8, 0], [1, 1, 7])).toBe(false);
+    });
+
+    it('rejects an empty or negative part', () => {
+      expect(isSplitAllowed([0, 8, 0], [0, 2, 6])).toBe(false);
+      expect(isSplitAllowed([0, 8, 0], [-1, 3, 6])).toBe(false);
+    });
+
+    it('rejects anything that is not three whole parts', () => {
+      expect(isSplitAllowed([0, 8, 0], [4, 4])).toBe(false);
+      expect(isSplitAllowed([0, 8, 0], [1, 1, 3, 3])).toBe(false);
+      expect(isSplitAllowed([0, 8, 0], [1.5, 1.5, 5])).toBe(false);
+    });
+
+    it('rejects splitting before a pile has been kept this turn', () => {
+      expect(isSplitAllowed([7, 8, 9], [1, 1, 6])).toBe(false);
     });
   });
 });

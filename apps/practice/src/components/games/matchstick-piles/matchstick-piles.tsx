@@ -29,15 +29,8 @@ const Matchstick = ({ removed }: { removed: boolean }) => (
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { value: activeHover, hoverProps } = useHoverPreview<Hover>(ctx.moveCount);
 
-  const clickRemove = (pileId: number) => {
-    if (!ctx.isClientMoveAllowed) return;
-    moves.removeMatch(board, pileId);
-  };
-
-  const clickSplit = (pileId: number, splitAfter: number) => {
-    if (!ctx.isClientMoveAllowed) return;
-    moves.splitPile(board, pileId, splitAfter + 1);
-  };
+  const canSplit = (pileId: number, splitAfter: number) =>
+    moves.splitPile.isAllowed!(board, pileId, splitAfter + 1);
 
   const pileDescription = (pileId: number, size: number) => {
     if (!activeHover || activeHover.pileId !== pileId) return `${size}`;
@@ -77,10 +70,10 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                     <button
                       type="button"
                       aria-label="split pile here"
-                      disabled={!ctx.isClientMoveAllowed}
+                      disabled={!canSplit(pileId, matchId - 1)}
                       className="self-stretch w-4 flex items-center justify-center group"
-                      onClick={() => clickSplit(pileId, matchId - 1)}
-                      {...(ctx.isClientMoveAllowed
+                      onClick={() => moves.splitPile(board, pileId, matchId)}
+                      {...(canSplit(pileId, matchId - 1)
                         ? hoverProps({ pileId, kind: 'split', splitAfter: matchId - 1 })
                         : {})}
                     >
@@ -95,14 +88,14 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                   <button
                     type="button"
                     aria-label="remove a match from this pile"
-                    disabled={!ctx.isClientMoveAllowed}
+                    disabled={!moves.removeMatch.isAllowed!(board, pileId)}
                     className={`
                       p-1 rounded-sm
                       enabled:hover:bg-slate-200 dark:enabled:hover:bg-slate-700
                       enabled:focus:bg-slate-200 dark:enabled:focus:bg-slate-700
                     `}
-                    onClick={() => clickRemove(pileId)}
-                    {...(ctx.isClientMoveAllowed ? hoverProps({ pileId, kind: 'remove' }) : {})}
+                    onClick={() => moves.removeMatch(board, pileId)}
+                    {...(moves.removeMatch.isAllowed!(board, pileId) ? hoverProps({ pileId, kind: 'remove' }) : {})}
                   >
                     <Matchstick removed={isMatchRemoved(pileId, matchId, size)} />
                   </button>
@@ -116,24 +109,45 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
+const isPileId = (board: Board, pileId: number): boolean =>
+  Number.isInteger(pileId) && pileId >= 0 && pileId < board.length;
+
+// Empty piles are dropped from the board, so every pile has a match to give up.
+export const isRemovalAllowed = (board: Board, pileId: number): boolean =>
+  isPileId(board, pileId) && board[pileId] >= 1;
+
+// A split has to leave both halves non-empty.
+export const isSplitAllowed = (board: Board, pileId: number, firstPart: number): boolean =>
+  isPileId(board, pileId)
+    && Number.isInteger(firstPart)
+    && firstPart >= 1
+    && firstPart <= board[pileId] - 1;
+
 const moves = {
-  removeMatch: (board: Board, { events }: { events: Events }, pileId: number) => {
-    const nextBoard = board
-      .map((n, i) => (i === pileId ? n - 1 : n))
-      .filter(n => n > 0);
-    events.endTurn();
-    // The player who takes the last match leaves the other player unable to
-    // move, and therefore wins.
-    if (nextBoard.length === 0) events.endGame();
-    return { nextBoard };
+  removeMatch: {
+    validate: (board: Board, _, pileId: number) => isRemovalAllowed(board, pileId),
+    apply: (board: Board, { events }: { events: Events }, pileId: number) => {
+      const nextBoard = board
+        .map((n, i) => (i === pileId ? n - 1 : n))
+        .filter(n => n > 0);
+      events.endTurn();
+      // The player who takes the last match leaves the other player unable to
+      // move, and therefore wins.
+      if (nextBoard.length === 0) events.endGame();
+      return { nextBoard };
+    }
   },
-  splitPile: (board: Board, _meta: { events: Events }, pileId: number, firstPart: number) => {
-    const size = board[pileId];
-    const nextBoard = board.flatMap((n, i) =>
-      i === pileId ? [firstPart, size - firstPart] : [n]
-    );
-    _meta.events.endTurn();
-    return { nextBoard };
+  splitPile: {
+    validate: (board: Board, _, pileId: number, firstPart: number) =>
+      isSplitAllowed(board, pileId, firstPart),
+    apply: (board: Board, { events }: { events: Events }, pileId: number, firstPart: number) => {
+      const size = board[pileId];
+      const nextBoard = board.flatMap((n, i) =>
+        i === pileId ? [firstPart, size - firstPart] : [n]
+      );
+      events.endTurn();
+      return { nextBoard };
+    }
   }
 };
 

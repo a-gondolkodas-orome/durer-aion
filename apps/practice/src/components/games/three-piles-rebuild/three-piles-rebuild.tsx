@@ -11,7 +11,10 @@ import { useTranslation } from '../../../language';
 import {
   type Board,
   canSplit,
+  isKeepAllowed,
+  isSplitAllowed,
   isTerminal,
+  withOtherPilesDiscarded,
   getSmartBotStep,
   getRandomBotStep,
   generateStartBoard,
@@ -41,8 +44,10 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const isMidMove = board.filter(v => v === 0).length === 2;
   const activeKeepId = keepId ?? (isMidMove ? board.findIndex(v => v > 0) : null);
 
+  // A rejected click must leave the local selection alone, so this keeps a guard
+  // rather than relying on the engine silently ignoring the dispatch.
   const clickPile = (pileId: number) => {
-    if (!ctx.isClientMoveAllowed || isMidMove || !canSplit(board[pileId])) return;
+    if (!moves.keepPile.isAllowed!(board, pileId)) return;
     setInputs({ p1: '', p2: '' });
     setKeepId(prev => (prev === pileId ? null : pileId));
   };
@@ -51,7 +56,10 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const p1 = parsePart(inputs.p1);
   const p2 = parsePart(inputs.p2);
   const p3 = p1 !== null && p2 !== null ? n - p1 - p2 : null;
-  const splitValid = p1 !== null && p2 !== null && p3 !== null && p3 >= 1;
+  // The rebuild is judged against the board the keep would leave behind, since
+  // both halves of the turn are submitted by this one button.
+  const splitValid = keepId !== null && p1 !== null && p2 !== null && p3 !== null
+    && isSplitAllowed(withOtherPilesDiscarded(board, keepId), [p1, p2, p3]);
 
   const submit = () => {
     if (!ctx.isClientMoveAllowed || keepId === null || !splitValid) return;
@@ -81,7 +89,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           return (
             <button
               key={pileId}
-              disabled={!ctx.isClientMoveAllowed || isMidMove || !canSplit(board[pileId])}
+              disabled={!moves.keepPile.isAllowed!(board, pileId)}
               onClick={() => clickPile(pileId)}
               className={`
                 flex-1 max-w-32 rounded-lg border-2 p-3 sm:p-4 flex flex-col items-center gap-1
@@ -165,17 +173,21 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 
 const moves = {
   // Step 1 of a turn: keep one pile, discard the other two (shown as 0).
-  keepPile: (board: Board, _: unknown, keepId: number) => {
-    const nextBoard = board.map((v, i) => (i === keepId ? v : 0));
-    return { nextBoard };
+  keepPile: {
+    validate: (board: Board, _, keepId: number) => isKeepAllowed(board, keepId),
+    apply: (board: Board, _, keepId: number) =>
+      ({ nextBoard: withOtherPilesDiscarded(board, keepId) })
   },
   // Step 2: rebuild three new piles from the kept pile's pebbles.
-  splitPile: (_board: Board, { events }: { events: Events }, parts: number[]) => {
-    const nextBoard = [...parts];
-    events.endTurn();
-    // The opponent now faces nextBoard; if they cannot split any pile they lose.
-    if (isTerminal(nextBoard)) events.endGame();
-    return { nextBoard };
+  splitPile: {
+    validate: (board: Board, _, parts: number[]) => isSplitAllowed(board, parts),
+    apply: (_board: Board, { events }: { events: Events }, parts: number[]) => {
+      const nextBoard = [...parts];
+      events.endTurn();
+      // The opponent now faces nextBoard; if they cannot split any pile they lose.
+      if (isTerminal(nextBoard)) events.endGame();
+      return { nextBoard };
+    }
   }
 };
 

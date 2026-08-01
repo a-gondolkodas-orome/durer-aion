@@ -10,6 +10,7 @@ import {
   type Board,
   type Move,
   applyMove,
+  isMoveLegal,
   isTerminal,
   getSmartBotMove,
   getRandomBotMove,
@@ -97,16 +98,11 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   }, [ctx.moveCount]);
 
   const activeCount = removals.filter(r => r > 0).length;
-  const readyToMove = activeCount === 2;
+  const readyToMove = moves.takeStones.isAllowed!(board, removals);
 
   const adjust = (i: number, delta: number) => {
     if (!ctx.isClientMoveAllowed) return;
     setRemovals(prev => prev.map((r, idx) => (idx === i ? r + delta : r)));
-  };
-
-  const submit = () => {
-    if (!ctx.isClientMoveAllowed || !readyToMove) return;
-    moves.takeStones(board, removals);
   };
 
   return (
@@ -129,7 +125,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         <div className="mt-4 flex flex-col items-center gap-2">
           <button
             disabled={!readyToMove}
-            onClick={submit}
+            onClick={() => moves.takeStones(board, removals)}
             className="primary-button w-auto"
           >
             {t({ hu: 'Elveszem a kavicsokat', en: 'Remove the stones' })}
@@ -141,15 +137,18 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 };
 
 const moves = {
-  takeStones: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, move: Move) => {
-    const nextBoard = applyMove(board, move);
-    if (isTerminal(nextBoard)) {
-      // The opponent cannot move, so the player who just moved wins.
-      events.endGame(ctx.currentPlayer!);
-    } else {
-      events.endTurn();
+  takeStones: {
+    validate: (board: Board, _, move: Move) => isMoveLegal(board, move),
+    apply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, move: Move) => {
+      const nextBoard = applyMove(board, move);
+      if (isTerminal(nextBoard)) {
+        // The opponent cannot move, so the player who just moved wins.
+        events.endGame(ctx.currentPlayer!);
+      } else {
+        events.endTurn();
+      }
+      return { nextBoard };
     }
-    return { nextBoard };
   }
 };
 

@@ -9,6 +9,34 @@ export const canSplit = (n: number): boolean => n >= 3;
 // A player facing a triple loses exactly when no pile can be split any more.
 export const isTerminal = (board: Board): boolean => !board.some(canSplit);
 
+// Between the two halves of a turn the two discarded piles are 0, so the board
+// itself records whether a turn is half-done; no turn state is needed. Every
+// pile of a finished turn holds at least one pebble, so a 0 can only be a
+// discarded pile.
+export const keptPileId = (board: Board): number | undefined =>
+  board.filter(v => v === 0).length === 2 ? board.findIndex(v => v > 0) : undefined;
+
+// The board `keepPile` leaves behind. The board client needs it too: it must
+// judge the rebuild half of the turn before the keep has been dispatched.
+export const withOtherPilesDiscarded = (board: Board, keepId: number): Board =>
+  board.map((v, i) => (i === keepId ? v : 0));
+
+// A pile can be kept only at the start of a turn, and only if it can be split.
+export const isKeepAllowed = (board: Board, keepId: number): boolean =>
+  Number.isInteger(keepId) && keepId >= 0 && keepId < board.length
+    && keptPileId(board) === undefined
+    && canSplit(board[keepId]);
+
+// The rebuild has to use up the kept pile exactly, in three non-empty parts.
+export const isSplitAllowed = (board: Board, parts: number[]): boolean => {
+  const keptId = keptPileId(board);
+  if (keptId === undefined) return false;
+  return Array.isArray(parts)
+    && parts.length === 3
+    && parts.every(part => Number.isInteger(part) && part >= 1)
+    && parts.reduce((a, b) => a + b, 0) === board[keptId];
+};
+
 // Winning ("N") numbers are n >= 3 with n % 6 in {0,3,4,5}; the losing ("P")
 // numbers are exactly n % 6 in {1,2} (1,2,7,8,13,14,...). See helpers.spec.ts /
 // the written proof: a number is winning iff it can be split into three losing

@@ -1,6 +1,7 @@
 import {
   type Board,
   applyMove,
+  isMoveLegal,
   canMove,
   isTerminal,
   getLegalMoves,
@@ -133,6 +134,36 @@ describe('four-piles-two-grabs helpers', () => {
       const results = new Set<boolean>();
       for (let i = 0; i < 500; i++) results.add(isWinningBoard(generateStartBoard()));
       expect(results).toEqual(new Set([true, false]));
+    });
+  });
+
+  describe('isMoveLegal', () => {
+    const board: Board = [3, 4, 0, 5];
+
+    it('allows taking from exactly two non-empty piles', () => {
+      expect(isMoveLegal(board, [1, 2, 0, 0])).toBe(true);
+      expect(isMoveLegal(board, [3, 0, 0, 5])).toBe(true);
+    });
+
+    it('rejects taking from fewer or more than two piles', () => {
+      expect(isMoveLegal(board, [1, 0, 0, 0])).toBe(false);
+      expect(isMoveLegal(board, [0, 0, 0, 0])).toBe(false);
+      expect(isMoveLegal(board, [1, 1, 0, 1])).toBe(false);
+    });
+
+    it('rejects taking more than a pile holds', () => {
+      expect(isMoveLegal(board, [4, 1, 0, 0])).toBe(false);
+    });
+
+    it('rejects taking from an empty pile', () => {
+      expect(isMoveLegal(board, [1, 0, 1, 0])).toBe(false);
+    });
+
+    it('rejects a malformed move', () => {
+      expect(isMoveLegal(board, [1, 2])).toBe(false);
+      expect(isMoveLegal(board, [1.5, 2, 0, 0])).toBe(false);
+      expect(isMoveLegal(board, [-1, 2, 0, 0])).toBe(false);
+      expect(isMoveLegal(board, undefined as unknown as number[])).toBe(false);
     });
   });
 });
