@@ -18,9 +18,11 @@ export const neighbours: Record<number, number[]> = {
 
 // A field can receive a coin in two ways: it is empty (place a coin on any empty
 // field), or it is joined by a line to a field holding the same number of coins
-// (add a coin to one end of an equal-valued line).
+// (add a coin to one end of an equal-valued line). Anything that is not a field
+// of the graph is rejected rather than looked up.
 export const isNodePlayable = (board: Board, node: number): boolean =>
-  board[node] === 0 || neighbours[node].some((other) => board[other] === board[node]);
+  neighbours[node] !== undefined
+    && (board[node] === 0 || neighbours[node].some((other) => board[other] === board[node]));
 
 export const legalNodes = (board: Board): number[] =>
   range(4).filter((node) => isNodePlayable(board, node));

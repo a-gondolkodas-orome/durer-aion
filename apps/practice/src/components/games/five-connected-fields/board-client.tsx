@@ -1,6 +1,6 @@
 import { range } from "lodash";
 import { GameBoard, type BoardClientProps } from "../../strategy-game-factory";
-import { type Board, side1, side2, isNodePlayable } from "./helpers";
+import { type Board, side1, side2 } from "./helpers";
 
 // A deliberately non-obvious drawing of the K(2,3) graph: the two hub fields
 // (side 1) sit at the diagonal corners, the three side-2 fields at top-right,
@@ -16,14 +16,8 @@ const coords: Record<number, { cx: string; cy: string }> = {
 
 const edges = side1.flatMap((a) => side2.map((b) => [a, b] as const));
 
-export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const isClickable = (node: number) =>
-    ctx.isClientMoveAllowed && isNodePlayable(board, node);
-
-  const handleClick = (node: number) => {
-    if (!isClickable(node)) return;
-    moves.placeCoin(board, node);
-  };
+export const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
+  const isClickable = (node: number) => moves.placeCoin.isAllowed!(board, node);
 
   return (
     <GameBoard>
@@ -41,9 +35,9 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         {range(5).map((node) => (
           <g
             key={node}
-            onClick={() => handleClick(node)}
+            onClick={() => moves.placeCoin(board, node)}
             onKeyUp={(event) => {
-              if (event.key === "Enter") handleClick(node);
+              if (event.key === "Enter") moves.placeCoin(board, node);
             }}
             tabIndex={isClickable(node) ? 0 : undefined}
             role={isClickable(node) ? "button" : undefined}
