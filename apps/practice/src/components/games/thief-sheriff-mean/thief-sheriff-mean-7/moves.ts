@@ -1,5 +1,5 @@
 import { cloneDeep } from 'lodash';
-import { Sheriff, Thief, hasWinningTriple, getUntakenCards, type Board } from '../helpers';
+import { Sheriff, Thief, hasWinningTriple, getUntakenCards, isCardAvailable, type Board } from '../helpers';
 import type { Ctx, Events } from '../../../strategy-game-factory';
 
 export const CARD_COUNT = 7;
@@ -17,13 +17,19 @@ export const applyTakeCard = (board: Board, player: number, indices: number[]): 
 };
 
 export const moves = {
-  takeCard: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, indices: number[]): { nextBoard: Board } => {
-    const nextBoard = applyTakeCard(board, ctx.currentPlayer!, indices);
-    if (nextBoard.numTurns >= 5) {
-      const winner = hasWinningTriple(nextBoard.cards[Thief]) ? Thief : Sheriff;
-      events.endGame(winner);
+  takeCard: {
+    // A step takes a single card; the sweep of whatever is left at the end of
+    // the game happens inside `applyTakeCard`, not as a move argument.
+    validate: (board: Board, _, indices: number[]) =>
+      Array.isArray(indices) && indices.length === 1 && isCardAvailable(board, CARD_COUNT, indices[0]),
+    apply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, indices: number[]): { nextBoard: Board } => {
+      const nextBoard = applyTakeCard(board, ctx.currentPlayer!, indices);
+      if (nextBoard.numTurns >= 5) {
+        const winner = hasWinningTriple(nextBoard.cards[Thief]) ? Thief : Sheriff;
+        events.endGame(winner);
+      }
+      events.endTurn();
+      return { nextBoard };
     }
-    events.endTurn();
-    return { nextBoard };
   }
 };

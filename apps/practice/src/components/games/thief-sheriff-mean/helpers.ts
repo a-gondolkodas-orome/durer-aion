@@ -30,6 +30,11 @@ export const getUntakenCards = (board: Board, total: number) => {
   );
 }
 
+// Each step of either variant takes one card off the table, and only a card
+// neither player is holding yet.
+export const isCardAvailable = (board: Board, total: number, index: number): boolean =>
+  getUntakenCards(board, total).includes(index);
+
 export const generateStartBoard = (): Board => {
   return {
     cards: [[], []],
