@@ -33,15 +33,24 @@ export const markForbiddenFields = (board: Board, { row, col }: Field): void => 
   }
 };
 
+// A duck goes on a field that is still free — neither holding a duck nor
+// attacked by one. Both players place on the same board, so whose turn it is
+// does not enter into legality.
+export const isPlacementAllowed = (board: Board, field: Field): boolean =>
+  !!field && board[field.row]?.[field.col] === null;
+
 export const moves = {
-  placeDuck: (board: Board, { events }: { events: Events }, { row, col }: Field) => {
-    const nextBoard = cloneDeep(board);
-    nextBoard[row][col] = DUCK;
-    markForbiddenFields(nextBoard, { row, col });
-    events.endTurn();
-    if (getAllowedMoves(nextBoard).length === 0) {
-      events.endGame();
+  placeDuck: {
+    validate: (board: Board, _, field: Field) => isPlacementAllowed(board, field),
+    apply: (board: Board, { events }: { events: Events }, { row, col }: Field) => {
+      const nextBoard = cloneDeep(board);
+      nextBoard[row][col] = DUCK;
+      markForbiddenFields(nextBoard, { row, col });
+      events.endTurn();
+      if (getAllowedMoves(nextBoard).length === 0) {
+        events.endGame();
+      }
+      return { nextBoard };
     }
-    return { nextBoard };
   }
 };

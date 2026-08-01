@@ -1,9 +1,8 @@
 import { strategyGameFactory, type BoardClientProps, GameBoard } from '../../strategy-game-factory';
-import { some, range, isEqual, sample } from 'lodash';
+import { range, sample } from 'lodash';
 import { DuckSvg } from './rubber-duck-svg';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import {
-  getAllowedMoves,
   DUCK,
   FORBIDDEN,
   moves,
@@ -16,18 +15,7 @@ const generateStartBoard = (ROWS: number, COLS: number) => (): Board => {
 };
 
 // Board-driven: reads its dimensions from the board, so it renders any size.
-const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const clickField = (field: Field) => {
-    if (!isMoveAllowed(field)) return;
-
-    moves.placeDuck(board, field);
-  };
-
-  const isMoveAllowed = (targetField: Field) => {
-    if (!ctx.isClientMoveAllowed) return false;
-    return some(getAllowedMoves(board), field => isEqual(field, targetField));
-  };
-
+const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   const isForbidden = ({ row, col }: Field) => {
     return board[row][col] === FORBIDDEN;
   };
@@ -52,8 +40,8 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                 >
                   <button
                     className="w-full aspect-square p-[5%]"
-                    disabled={!isMoveAllowed({ row, col })}
-                    onClick={() => clickField({ row, col })}
+                    disabled={!moves.placeDuck.isAllowed!(board, { row, col })}
+                    onClick={() => moves.placeDuck(board, { row, col })}
                   >
                     {isDuck({ row, col }) && (
                       <svg className="w-full aspect-square">

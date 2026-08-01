@@ -6,26 +6,19 @@ import { smartBotStrategy } from './bot-strategy';
 
 export type Board = { circle: boolean[], lastMove: number | null, firstMove: number | null }
 
-const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
+const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   const getCoords = (index) => {
     const step = Math.PI * 2/board.circle.length;
     const angle = index * step + (board.firstMove === null ? 0 : board.firstMove * step);
     return { x: 55 + 50 * Math.cos(angle), y: 55 + 50 * Math.sin(angle) };
   };
 
-  const isAllowedMove = index => {
-    if (!ctx.isClientMoveAllowed) return false;
-    return isAllowedBank(index);
-  }
+  // Two different questions: `isAllowedBank` marks the banks that could be
+  // robbed from this position — shown in green whoever is on turn — while
+  // `isAllowedMove` additionally requires that it is this client's move.
+  const isAllowedMove = index => moves.rob.isAllowed!(board, index);
 
-  const isAllowedBank = index => {
-    return getAllowedBanks(board).includes(index);
-  }
-
-  const clickBank = (index) => {
-    if (!isAllowedMove(index)) return;
-    moves.rob(board, index);
-  }
+  const isAllowedBank = index => isRobbable(board, index);
 
   const getBankColor = index => {
     if (index === board.lastMove) return "fill-red-800 stroke-red-600";
@@ -59,9 +52,9 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               r="4%"
               className={`${getBankColor(index)}`}
               strokeWidth={index === board.lastMove ? "1%" : "0"}
-              onClick={() => clickBank(index)}
+              onClick={() => moves.rob(board, index)}
               onKeyUp={(event) => {
-                if (event.key === 'Enter') clickBank(index);
+                if (event.key === 'Enter') moves.rob(board, index);
               }}
               tabIndex={isAllowedMove(index) ? 0 : undefined}
               role={isAllowedMove(index) ? 'button' : undefined}
@@ -75,22 +68,32 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 };
 
 const moves = {
-  rob: (board: Board, { events }: { events: Events }, index) => {
-    const nextBoard = cloneDeep(board);
-    // so that ai strategy can be simpler: first move is always the same
-    const transformedMove = board.firstMove === null ? 0 : index;
-    if (board.firstMove === null) {
-      nextBoard.firstMove = index;
+  rob: {
+    validate: (board: Board, _, index) => isRobbable(board, index),
+    apply: (board: Board, { events }: { events: Events }, index) => {
+      const nextBoard = cloneDeep(board);
+      // so that ai strategy can be simpler: first move is always the same
+      const transformedMove = board.firstMove === null ? 0 : index;
+      if (board.firstMove === null) {
+        nextBoard.firstMove = index;
+      }
+      nextBoard.lastMove = transformedMove;
+      nextBoard.circle[transformedMove] = false;
+      events.endTurn();
+      if (getAllowedBanks(nextBoard).length === 0) {
+        events.endGame();
+      }
+      return { nextBoard };
     }
-    nextBoard.lastMove = transformedMove;
-    nextBoard.circle[transformedMove] = false;
-    events.endTurn();
-    if (getAllowedBanks(nextBoard).length === 0) {
-      events.endGame();
-    }
-    return { nextBoard };
   }
 }
+
+// A bank may be robbed while it still stands and at least one of its two
+// neighbours does too — a bank whose neighbours are both gone has police lying
+// in wait. Both gangs rob from the same circle, so whose turn it is does not
+// enter into legality.
+export const isRobbable = (board: Board, index: number): boolean =>
+  getAllowedBanks(board).includes(index);
 
 const getAllowedBanks = (board: Board) => {
   return range(board.circle.length).filter(i => {

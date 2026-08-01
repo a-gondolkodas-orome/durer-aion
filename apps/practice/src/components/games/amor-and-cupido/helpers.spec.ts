@@ -1,6 +1,6 @@
 import {
   EDGES, TRIANGLES, edgeIndex, getAllowedMoves, completesTriangle, findWinningTriangle,
-  generateStartBoard
+  generateStartBoard, isClaimAllowed
 } from './helpers';
 
 describe('helpers geometry', () => {
@@ -54,5 +54,36 @@ describe('findWinningTriangle', () => {
       [edgeIndex[3][4], edgeIndex[3][5], edgeIndex[4][5]].sort((a, b) => a - b)
     );
     expect(findWinningTriangle(board, 1)).toBeNull();
+  });
+});
+
+describe('isClaimAllowed', () => {
+  it('accepts a pair nobody has claimed', () => {
+    expect(isClaimAllowed(generateStartBoard(), 0)).toBe(true);
+    expect(isClaimAllowed(generateStartBoard(), 14)).toBe(true);
+  });
+
+  it('refuses a pair either player already owns', () => {
+    const board = generateStartBoard();
+    board[3] = 0;
+    board[7] = 1;
+    expect(isClaimAllowed(board, 3)).toBe(false);
+    expect(isClaimAllowed(board, 7)).toBe(false);
+  });
+
+  it('refuses a pair that does not exist', () => {
+    expect(isClaimAllowed(generateStartBoard(), -1)).toBe(false);
+    expect(isClaimAllowed(generateStartBoard(), 15)).toBe(false);
+    expect(isClaimAllowed(generateStartBoard(), 1.5)).toBe(false);
+  });
+
+  it('accepts exactly the edges the generator lists', () => {
+    const board = generateStartBoard();
+    board[2] = 0;
+    board[5] = 1;
+    const listed = new Set(getAllowedMoves(board));
+    for (let e = 0; e < EDGES.length; e++) {
+      expect(isClaimAllowed(board, e)).toBe(listed.has(e));
+    }
   });
 });

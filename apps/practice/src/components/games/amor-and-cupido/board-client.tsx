@@ -14,13 +14,7 @@ const ownerStroke = (owner: number | null): string => {
 };
 
 export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const isMoveAllowed = (edge: number) =>
-    ctx.isClientMoveAllowed && board[edge] === null;
-
-  const clickEdge = (edge: number) => {
-    if (!isMoveAllowed(edge)) return;
-    moves.claimEdge(board, edge);
-  };
+  const isMoveAllowed = (edge: number) => moves.claimEdge.isAllowed!(board, edge);
 
   const winningEdges =
     ctx.winnerIndex !== null ? findWinningTriangle(board, ctx.winnerIndex) : null;
@@ -50,8 +44,8 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                 }`}
                 strokeWidth={4}
                 strokeLinecap="round"
-                onClick={() => clickEdge(edge)}
-                onKeyUp={event => { if (event.key === 'Enter') clickEdge(edge); }}
+                onClick={() => moves.claimEdge(board, edge)}
+                onKeyUp={event => { if (event.key === 'Enter') moves.claimEdge(board, edge); }}
                 tabIndex={isMoveAllowed(edge) ? 0 : undefined}
                 role={isMoveAllowed(edge) ? 'button' : undefined}
                 aria-label={
