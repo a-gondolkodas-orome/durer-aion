@@ -11,8 +11,7 @@ const target = 99;
 
 const isLosing = (n: number) => n > target;
 
-const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const canMove = ctx.isClientMoveAllowed;
+const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   const incResult = board + 1;
   const dblResult = board * 2;
 
@@ -30,8 +29,8 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     <GameBoard>
       <h2 className="text-center text-5xl font-bold my-4">{board}</h2>
       <div className="flex flex-wrap gap-2">
-        {actionButton('x+1', incResult, () => moves.increment(board), !canMove)}
-        {actionButton('2x', dblResult, () => moves.double(board), !canMove || board === 0)}
+        {actionButton('x+1', incResult, () => moves.increment(board), !moves.increment.isAllowed!(board))}
+        {actionButton('2x', dblResult, () => moves.double(board), !moves.double.isAllowed!(board))}
       </div>
     </GameBoard>
   );
@@ -47,7 +46,11 @@ const say = (next: number, { ctx, events }: { ctx: Ctx, events: Events }) => {
 
 const moves = {
   increment: (board: Board, meta: { ctx: Ctx, events: Events }) => say(board + 1, meta),
-  double: (board: Board, meta: { ctx: Ctx, events: Events }) => say(board * 2, meta)
+  double: {
+    // Doubling nothing says nothing, so the opening move can only be x+1 = 1.
+    validate: (board: Board) => board >= 1,
+    apply: (board: Board, meta: { ctx: Ctx, events: Events }) => say(board * 2, meta)
+  }
 };
 
 // The mover wins exactly when the last number said is even, so the only winning

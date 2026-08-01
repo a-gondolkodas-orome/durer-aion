@@ -10,17 +10,8 @@ type Board = number
 const target = 40;
 const maxStep = 3;
 
-const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
+const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
 
-  const isMoveAllowed = number => {
-    if (!ctx.isClientMoveAllowed) return false;
-    return isIncreaseValid({ board, number });
-  }
-
-  const clickNumber = (number) => {
-    if (!isMoveAllowed(number)) return;
-    moves.increaseTo(board, number);
-  };
 
   return(
     <GameBoard>
@@ -28,8 +19,8 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       {range(target + maxStep + 1).map(i =>
         <button
           key={i}
-          disabled={!isMoveAllowed(i)}
-          onClick={() => clickNumber(i)}
+          disabled={!moves.increaseTo.isAllowed!(board, i)}
+          onClick={() => moves.increaseTo(board, i)}
           className={`
             border-2 rounded-sm text-2xl min-w-[4ch] p-1 my-1 font-bold
             enabled:bg-green-200 dark:enabled:bg-green-700 enabled:hocus:bg-green-400 dark:enabled:hocus:bg-green-600
@@ -45,21 +36,20 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const isIncreaseValid = ({ board, number }) => {
-  if (number <= board) return false;
-  return (number - board) <= maxStep;
-}
+// A step advances to a strictly larger whole number, by at most maxStep.
+export const isIncreaseValid = ({ board, number }: { board: Board; number: number }): boolean =>
+  Number.isInteger(number) && number > board && (number - board) <= maxStep;
 
 const moves = {
-  increaseTo: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, number) => {
-    if (!isIncreaseValid({ board, number })) {
-      console.error('invalid_move');
+  increaseTo: {
+    validate: (board: Board, _, number: number) => isIncreaseValid({ board, number }),
+    apply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, number) => {
+      events.endTurn();
+      if (number > target) {
+        events.endGame(1 - ctx.currentPlayer!)
+      }
+      return { nextBoard: number }
     }
-    events.endTurn();
-    if (number > target) {
-      events.endGame(1 - ctx.currentPlayer!)
-    }
-    return { nextBoard: number }
   }
 };
 

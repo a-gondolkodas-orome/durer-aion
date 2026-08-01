@@ -7,6 +7,11 @@ import { useTranslation } from '../../../../language';
 
 export type Board = { current: number, target: number, restricted: number | null }
 
+// A step adds a positive whole number below 13, and superstition forbids the one
+// that would complete 13 together with the previous player's step.
+export const isStepAllowed = (board: Board, step: number): boolean =>
+  Number.isInteger(step) && step > 0 && step < 13 && step !== board.restricted;
+
 const generateStartBoard = (): Board => {
   const losingPositions = range(29, 127, 14);
   const winningPositions = difference(range(26, 115), losingPositions);
@@ -25,18 +30,6 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
   const fields = range(board.target + 14);
 
-  const isMoveAllowed = (step) => {
-    if (!ctx.isClientMoveAllowed) return false;
-    if(step === board.restricted || step <= 0 || step >= 13) {
-      return false;
-    }
-    return true;
-  };
-
-  const makeStep = (step) => {
-    if (!isMoveAllowed(step)) return;
-    moves.step(board, step);
-  };
 
   return (
   <GameBoard>
@@ -44,8 +37,8 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       {fields.map(i =>
         <button
           key={i}
-          disabled={!isMoveAllowed(i - board.current)}
-          onClick={() => makeStep(i - board.current)}
+          disabled={!moves.step.isAllowed!(board, i - board.current)}
+          onClick={() => moves.step(board, i - board.current)}
           className={`
             border-2 rounded-sm text-2xl min-w-[4ch] py-1 font-bold
             enabled:bg-green-200 dark:enabled:bg-green-700 enabled:hocus:bg-green-400 dark:enabled:hocus:bg-green-600
@@ -78,14 +71,17 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 };
 
 const moves = {
-  step: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, step) => {
-    const numberAfterStep = board.current + step;
-    const nextBoard = { current: numberAfterStep, target: board.target, restricted: 13 - step };
-    events.endTurn();
-    if (numberAfterStep >= board.target) {
-      events.endGame(1 - ctx.currentPlayer!)
+  step: {
+    validate: (board: Board, _, step: number) => isStepAllowed(board, step),
+    apply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, step) => {
+      const numberAfterStep = board.current + step;
+      const nextBoard = { current: numberAfterStep, target: board.target, restricted: 13 - step };
+      events.endTurn();
+      if (numberAfterStep >= board.target) {
+        events.endGame(1 - ctx.currentPlayer!)
+      }
+      return { nextBoard };
     }
-    return { nextBoard };
   }
 };
 
