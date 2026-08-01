@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
+import { range } from 'lodash';
 import { useTranslation } from '../../../language';
 import { GameBoard, type BoardClientProps } from '../../strategy-game-factory';
-import { type Board, type Cell, colorOf, moveTargets, placeTargets } from './helpers';
+import { type Board, type Cell, colorOf } from './helpers';
 
 // Translucent version of each disc colour, used for the recolour pulse ring.
 const pulseColor: Record<'red' | 'blue', string> = {
@@ -63,22 +64,28 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     });
   }, [ctx.moveCount, cells]);
 
-  const targets = selectedFrom !== null ? moveTargets(cells, selectedFrom) : [];
-  const placeable = canInteract && myColor !== null ? placeTargets(cells, myColor) : [];
+  // Every "may I?" question the board asks goes through the moves' own
+  // validators, so the highlighting and the engine agree by construction.
+  const isTarget = (to: number) =>
+    selectedFrom !== null && moves.moveDisc.isAllowed!(board, selectedFrom, to);
+  const isPlaceable = (at: number) => moves.placeDisc.isAllowed!(board, at);
+  // A disc is worth picking up only if it has somewhere to go; being of the
+  // player's own colour is already implied by `moveDisc`'s validator.
+  const isMovable = (from: number) => range(cells.length).some(to => moves.moveDisc.isAllowed!(board, from, to));
 
   const clickCell = (i: number) => {
     if (!canInteract || myColor === null) return;
     if (selectedFrom !== null) {
-      if (targets.includes(i)) {
+      if (isTarget(i)) {
         moves.moveDisc(board, selectedFrom, i);
         return;
       }
       if (i === selectedFrom) return setSelectedFrom(null);
     }
     if (cells[i] === myColor) {
-      return setSelectedFrom(moveTargets(cells, i).length > 0 ? i : null);
+      return setSelectedFrom(isMovable(i) ? i : null);
     }
-    if (cells[i] === null && placeable.includes(i)) {
+    if (isPlaceable(i)) {
       moves.placeDisc(board, i);
       return;
     }
@@ -87,10 +94,10 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 
   const cellState = (i: number): 'selected' | 'target' | 'placeable' | 'movable' | 'plain' => {
     if (i === selectedFrom) return 'selected';
-    if (selectedFrom !== null && targets.includes(i)) return 'target';
-    if (selectedFrom === null && canInteract) {
-      if (cells[i] === myColor && moveTargets(cells, i).length > 0) return 'movable';
-      if (cells[i] === null && placeable.includes(i)) return 'placeable';
+    if (isTarget(i)) return 'target';
+    if (selectedFrom === null) {
+      if (isMovable(i)) return 'movable';
+      if (isPlaceable(i)) return 'placeable';
     }
     return 'plain';
   };

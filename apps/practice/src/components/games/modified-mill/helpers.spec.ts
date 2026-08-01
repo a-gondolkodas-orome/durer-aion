@@ -1,6 +1,6 @@
 import {
   generateEmptyBoard, playerColor, playerHasLine, isBoardFull, boardMasks,
-  completesLine, hasLine, CELL_COUNT
+  completesLine, hasLine, isPlacementAllowed, CELL_COUNT
 } from './helpers';
 import { LINES, SYMMETRIES } from './board-data';
 import { canonicalize } from './bot-strategy';
@@ -57,6 +57,22 @@ describe('modified mill helpers', () => {
     expect(isBoardFull(board)).toBe(false);
     board.fill('red');
     expect(isBoardFull(board)).toBe(true);
+  });
+
+  it('allows placing on an empty cell but not on an occupied one', () => {
+    const board = generateEmptyBoard();
+    board[7] = 'red';
+    board[8] = 'blue';
+    expect(isPlacementAllowed(board, 0)).toBe(true);
+    expect(isPlacementAllowed(board, 7)).toBe(false);
+    expect(isPlacementAllowed(board, 8)).toBe(false);
+  });
+
+  it('rejects cells outside the board', () => {
+    const board = generateEmptyBoard();
+    expect(isPlacementAllowed(board, -1)).toBe(false);
+    expect(isPlacementAllowed(board, CELL_COUNT)).toBe(false);
+    expect(isPlacementAllowed(board, 1.5)).toBe(false);
   });
 
   it('canonicalize gives every symmetric image of a position the same key', () => {

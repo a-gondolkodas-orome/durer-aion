@@ -6,6 +6,8 @@ import {
   applyMove,
   countColor,
   generateStartBoard,
+  isDiscMoveAllowed,
+  isPlacementAllowed,
   majorityWinner,
   targetCounts
 } from './helpers';
@@ -31,11 +33,22 @@ const finalize = (
   return { nextBoard };
 };
 
+// Which discs a player may touch depends on their colour, so both validators
+// read `ctx.currentPlayer`. Passing is always available, so it needs no
+// validator.
 const moves = {
-  moveDisc: (board: Board, meta: { ctx: Ctx; events: Events }, from: number, to: number) =>
-    finalize(applyMove(board.cells, meta.ctx.currentPlayer!, { type: 'move', from, to }), meta),
-  placeDisc: (board: Board, meta: { ctx: Ctx; events: Events }, at: number) =>
-    finalize(applyMove(board.cells, meta.ctx.currentPlayer!, { type: 'place', to: at }), meta),
+  moveDisc: {
+    validate: (board: Board, { ctx }: { ctx: Ctx }, from: number, to: number) =>
+      isDiscMoveAllowed(board.cells, ctx.currentPlayer!, from, to),
+    apply: (board: Board, meta: { ctx: Ctx; events: Events }, from: number, to: number) =>
+      finalize(applyMove(board.cells, meta.ctx.currentPlayer!, { type: 'move', from, to }), meta)
+  },
+  placeDisc: {
+    validate: (board: Board, { ctx }: { ctx: Ctx }, at: number) =>
+      isPlacementAllowed(board.cells, ctx.currentPlayer!, at),
+    apply: (board: Board, meta: { ctx: Ctx; events: Events }, at: number) =>
+      finalize(applyMove(board.cells, meta.ctx.currentPlayer!, { type: 'place', to: at }), meta)
+  },
   pass: (board: Board, meta: { ctx: Ctx; events: Events }) =>
     finalize([...board.cells], meta)
 };

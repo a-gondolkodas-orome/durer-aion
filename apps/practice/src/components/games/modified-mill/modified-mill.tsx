@@ -1,6 +1,6 @@
 import { strategyGameFactory, type Ctx, type Events } from '../../strategy-game-factory';
 import {
-  type Board, generateEmptyBoard, playerColor, playerHasLine, isBoardFull
+  type Board, generateEmptyBoard, playerColor, playerHasLine, isBoardFull, isPlacementAllowed
 } from './helpers';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { BoardClient } from './board-client';
@@ -8,18 +8,21 @@ import { BoardClient } from './board-client';
 export type { Board };
 
 const moves = {
-  placePiece: (board: Board, { ctx, events }: { ctx: Ctx; events: Events }, node: number) => {
-    const nextBoard = board.slice();
-    nextBoard[node] = playerColor(ctx.currentPlayer!);
-    events.endTurn();
-    if (playerHasLine(nextBoard, ctx.currentPlayer!)) {
-      // Three of your discs adjacent in a line: the player who placed them wins.
-      events.endGame(ctx.currentPlayer);
-    } else if (isBoardFull(nextBoard)) {
-      // Board full with no line: the second player wins.
-      events.endGame(1);
+  placePiece: {
+    validate: (board: Board, _, node: number) => isPlacementAllowed(board, node),
+    apply: (board: Board, { ctx, events }: { ctx: Ctx; events: Events }, node: number) => {
+      const nextBoard = board.slice();
+      nextBoard[node] = playerColor(ctx.currentPlayer!);
+      events.endTurn();
+      if (playerHasLine(nextBoard, ctx.currentPlayer!)) {
+        // Three of your discs adjacent in a line: the player who placed them wins.
+        events.endGame(ctx.currentPlayer);
+      } else if (isBoardFull(nextBoard)) {
+        // Board full with no line: the second player wins.
+        events.endGame(1);
+      }
+      return { nextBoard };
     }
-    return { nextBoard };
   }
 };
 

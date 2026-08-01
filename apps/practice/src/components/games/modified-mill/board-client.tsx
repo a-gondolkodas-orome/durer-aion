@@ -11,8 +11,8 @@ const pos = COORDS.map(([x, y]) => ({ cx: px(x), cy: px(y) }));
 // adjacency belongs to exactly one line, so this renders the whole board.
 const segments = LINES.flatMap(([a, b, c]) => [[a, b], [b, c]] as const);
 
-export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const isClickable = (node: number) => ctx.isClientMoveAllowed && board[node] === null;
+export const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
+  const isClickable = (node: number) => moves.placePiece.isAllowed!(board, node);
 
   const handleClick = (node: number) => {
     if (!isClickable(node)) return;

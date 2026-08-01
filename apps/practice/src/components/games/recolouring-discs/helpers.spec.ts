@@ -5,6 +5,8 @@ import {
   BLUE,
   applyMove,
   encode,
+  isDiscMoveAllowed,
+  isPlacementAllowed,
   legalMoves,
   majorityWinner,
   moveTargets,
@@ -42,6 +44,40 @@ describe('recolouring-discs helpers', () => {
 
   it('always offers a pass move', () => {
     expect(legalMoves(startCells(7), RED).some(m => m.type === 'pass')).toBe(true);
+  });
+
+  it('only lets a player move a disc of their own colour', () => {
+    const board = cells('R...B.');
+    expect(isDiscMoveAllowed(board, RED, 0, 1)).toBe(true);
+    expect(isDiscMoveAllowed(board, BLUE, 0, 1)).toBe(false); // red's disc
+    expect(isDiscMoveAllowed(board, RED, 2, 3)).toBe(false); // no disc at all
+  });
+
+  it('rejects moves further than two fields, off the board or onto an occupied cell', () => {
+    const board = cells('RB..B.');
+    expect(isDiscMoveAllowed(board, RED, 0, 2)).toBe(true); // jump over the blue on 1
+    expect(isDiscMoveAllowed(board, RED, 0, 1)).toBe(false); // occupied
+    expect(isDiscMoveAllowed(board, RED, 0, 3)).toBe(false); // three fields away
+    expect(isDiscMoveAllowed(board, RED, 0, -1)).toBe(false);
+    expect(isDiscMoveAllowed(board, RED, -1, 0)).toBe(false);
+  });
+
+  it('only lets a player place next to one of their own discs', () => {
+    const board = cells('R...B.');
+    expect(isPlacementAllowed(board, RED, 1)).toBe(true);
+    expect(isPlacementAllowed(board, RED, 3)).toBe(false); // next to blue only
+    expect(isPlacementAllowed(board, BLUE, 3)).toBe(true);
+    expect(isPlacementAllowed(board, BLUE, 4)).toBe(false); // occupied by blue itself
+  });
+
+  it('agrees with the move generator on every legal move', () => {
+    const board = cells('R.B.R.B.');
+    for (const player of [RED, BLUE]) {
+      for (const move of legalMoves(board, player)) {
+        if (move.type === 'move') expect(isDiscMoveAllowed(board, player, move.from, move.to)).toBe(true);
+        if (move.type === 'place') expect(isPlacementAllowed(board, player, move.to)).toBe(true);
+      }
+    }
   });
 
   it('applies the asymmetric majority thresholds', () => {

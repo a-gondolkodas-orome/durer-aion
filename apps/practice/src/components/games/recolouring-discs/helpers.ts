@@ -68,6 +68,15 @@ export const placeTargets = (cells: Cell[], color: 'red' | 'blue'): number[] =>
         (j + 1 < cells.length && cells[j + 1] === color))
   );
 
+// A player may only pick up a disc of their own colour, and only drop it on a
+// cell `moveTargets` offers (empty, 1–2 away).
+export const isDiscMoveAllowed = (cells: Cell[], player: number, from: number, to: number): boolean =>
+  cells[from] === colorOf(player) && moveTargets(cells, from).includes(to);
+
+// A new disc may only go on an empty cell next to one of the player's own discs.
+export const isPlacementAllowed = (cells: Cell[], player: number, at: number): boolean =>
+  placeTargets(cells, colorOf(player)).includes(at);
+
 export const legalMoves = (cells: Cell[], player: number): Move[] => {
   const color = colorOf(player);
   const result: Move[] = [{ type: 'pass' }];
