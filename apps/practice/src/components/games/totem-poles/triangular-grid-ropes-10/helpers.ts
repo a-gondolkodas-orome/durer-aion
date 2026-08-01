@@ -22,7 +22,14 @@ export const vertices = [
 export type Edge = { from: number, to: number }
 export type Board = Edge[]
 
-export const isAllowed = (board: Board, { from, to }: Edge) => {
+// Takes a half-built edge as well as a complete one: the board client asks about
+// a pair whose ends may not both be picked yet, and the engine hands over
+// whatever a move was dispatched with. Either way, an edge missing an end is
+// simply not an allowed rope.
+export const isAllowed = (board: Board, edge?: { from: number | null, to: number | null } | null) => {
+  const from = edge?.from ?? null;
+  const to = edge?.to ?? null;
+  if (from === null || to === null) return false;
   if (!isParallel({ from, to })) return false;
   if (isPartOfExistingRope(board, { from, to })) return false;
   const middlePoints = getMiddlePoints({ from, to });
