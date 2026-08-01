@@ -2,29 +2,24 @@ import { range, cloneDeep } from 'lodash';
 import {
   strategyGameFactory, type Events, type BoardClientProps, type Ctx, GameBoard
 } from '../../../strategy-game-factory';
-import { generateEmptyTicTacToeBoard } from '../helpers';
+import { generateEmptyTicTacToeBoard, validatePlacement } from '../helpers';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
-import { inPlacingPhase, isGameEnd, currentPlayerColor, otherPlayerColor, type Board } from './helpers';
+import {
+  inPlacingPhase, isGameEnd, currentPlayerColor, otherPlayerColor, isWhiteningAllowed, type Board
+} from './helpers';
 
-const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
+const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   const gameIsInPlacingPhase = inPlacingPhase(board);
   const clickField = (id) => {
-    if (!isMoveAllowed(id)) return;
-
     if (gameIsInPlacingPhase) {
       moves.placePiece(board, id);
     } else {
       moves.whitenPiece(board, id);
     }
   };
-  const isMoveAllowed = (id) => {
-    if (!ctx.isClientMoveAllowed) return false;
-    if (gameIsInPlacingPhase) {
-      return board[id] === null;
-    } else {
-      return board[id] === otherPlayerColor(ctx);
-    }
-  };
+  const isMoveAllowed = (id) => gameIsInPlacingPhase
+    ? moves.placePiece.isAllowed!(board, id)
+    : moves.whitenPiece.isAllowed!(board, id);
   const pieceColor = (id) => {
     const colorCode = board[id];
     if (colorCode === 'red') return 'bg-red-800';
@@ -64,23 +59,29 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 };
 
 const moves = {
-  placePiece: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, id) => {
-    const nextBoard = cloneDeep(board);
-    nextBoard[id] = currentPlayerColor(ctx);
-    events.endTurn();
-    if (isGameEnd(nextBoard)) {
-      events.endGame();
+  placePiece: {
+    validate: validatePlacement,
+    apply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, id) => {
+      const nextBoard = cloneDeep(board);
+      nextBoard[id] = currentPlayerColor(ctx);
+      events.endTurn();
+      if (isGameEnd(nextBoard)) {
+        events.endGame();
+      }
+      return { nextBoard };
     }
-    return { nextBoard };
   },
-  whitenPiece: (board: Board, { events }: { events: Events }, id) => {
-    const nextBoard = cloneDeep(board);
-    nextBoard[id] = 'white';
-    events.endTurn();
-    if (isGameEnd(nextBoard)) {
-      events.endGame();
+  whitenPiece: {
+    validate: (board: Board, { ctx }: { ctx: Ctx }, id: number) => isWhiteningAllowed(board, ctx, id),
+    apply: (board: Board, { events }: { events: Events }, id) => {
+      const nextBoard = cloneDeep(board);
+      nextBoard[id] = 'white';
+      events.endTurn();
+      if (isGameEnd(nextBoard)) {
+        events.endGame();
+      }
+      return { nextBoard };
     }
-    return { nextBoard };
   }
 }
 

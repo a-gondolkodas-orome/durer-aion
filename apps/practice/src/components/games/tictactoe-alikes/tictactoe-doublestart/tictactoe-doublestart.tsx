@@ -3,18 +3,10 @@ import {
   strategyGameFactory, type Events, type BoardClientProps, type Ctx, GameBoard
 } from '../../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
-import { generateEmptyTicTacToeBoard } from '../helpers';
+import { generateEmptyTicTacToeBoard, validatePlacement } from '../helpers';
 import { isGameEnd, hasFirstPlayerWon, type Board } from './helpers';
 
-const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const isMoveAllowed = (id) => {
-    if (!ctx.isClientMoveAllowed) return false;
-    return board[id] === null;
-  };
-  const clickField = (id) => {
-    if (!isMoveAllowed(id)) return;
-    moves.placePiece(board, id);
-  };
+const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   const pieceColor = (id) => {
     const colorCode = board[id];
     if (colorCode === 'red') return 'bg-red-800';
@@ -31,8 +23,8 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       {range(9).map(id => (
         <button
         key={id}
-        disabled={!isMoveAllowed(id)}
-        onClick={() => clickField(id)}
+        disabled={!moves.placePiece.isAllowed!(board, id)}
+        onClick={() => moves.placePiece(board, id)}
         className="aspect-square p-[25%] bg-surface-elevated"
         >
           {board[id] && (
@@ -50,18 +42,21 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 const isDuringFirstMove = (board: Board) => board.filter(c => c).length <= 1;
 
 const moves = {
-  placePiece: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, id) => {
-    const nextBoard = cloneDeep(board);
-    nextBoard[id] = ctx.currentPlayer === 0 ? 'red' : 'blue';
+  placePiece: {
+    validate: validatePlacement,
+    apply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, id) => {
+      const nextBoard = cloneDeep(board);
+      nextBoard[id] = ctx.currentPlayer === 0 ? 'red' : 'blue';
 
-    if (!isDuringFirstMove(nextBoard)) {
-      events.endTurn();
-      if (isGameEnd(nextBoard)) {
-        events.endGame(hasFirstPlayerWon(nextBoard) ? 0 : 1);
+      if (!isDuringFirstMove(nextBoard)) {
+        events.endTurn();
+        if (isGameEnd(nextBoard)) {
+          events.endGame(hasFirstPlayerWon(nextBoard) ? 0 : 1);
+        }
       }
-    }
 
-    return { nextBoard };
+      return { nextBoard };
+    }
   }
 };
 
