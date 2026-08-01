@@ -9,15 +9,6 @@ export type Board = (number | null)[][]
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
-  const isMoveAllowed = (id: number) => {
-    if (!ctx.isClientMoveAllowed) return false;
-    return board[1 - ctx.currentPlayer!][id] !== null;
-  };
-  const clickField = (id: number) => {
-    if (!isMoveAllowed(id)) return;
-
-    moves.removeCard(board, id + 1);
-  };
 
   return (
   <GameBoard>
@@ -33,8 +24,8 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         [0, 1].map(playerIdx => (
           <button
             key={`${playerIdx}-${id}`}
-            disabled={playerIdx === ctx.currentPlayer || !isMoveAllowed(id)}
-            onClick={() => clickField(id)}
+            disabled={playerIdx === ctx.currentPlayer || !moves.removeCard.isAllowed!(board, id + 1)}
+            onClick={() => moves.removeCard(board, id + 1)}
             className={`
               ${playerIdx === 0 ? 'col-start-1' : 'col-start-4'}
               aspect-3/2 text-2xl border-4 rounded-lg
@@ -72,15 +63,24 @@ export const getWinnerIndex = (board: Board) => {
   }
 }
 
+// Cards are addressed by their 1-based position in the other player's hand, and
+// only a card still lying there may be taken.
+export const isRemovalAllowed = (board: Board, opponent: number, id: number): boolean =>
+  Number.isInteger(id) && id >= 1 && id <= board[opponent].length && board[opponent][id - 1] !== null;
+
 const moves = {
-  removeCard: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, id: number) => {
-    const nextBoard = cloneDeep(board);
-    nextBoard[1 - ctx.currentPlayer!][id - 1] = null;
-    events.endTurn();
-    if (isGameEnd(nextBoard)) {
-      events.endGame(getWinnerIndex(nextBoard));
+  removeCard: {
+    validate: (board: Board, { ctx }: { ctx: Ctx }, id: number) =>
+      isRemovalAllowed(board, 1 - ctx.currentPlayer!, id),
+    apply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, id: number) => {
+      const nextBoard = cloneDeep(board);
+      nextBoard[1 - ctx.currentPlayer!][id - 1] = null;
+      events.endTurn();
+      if (isGameEnd(nextBoard)) {
+        events.endGame(getWinnerIndex(nextBoard));
+      }
+      return { nextBoard };
     }
-    return { nextBoard };
   }
 }
 

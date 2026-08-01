@@ -10,13 +10,14 @@ export const COVERED = -1 as const;
 
 const getRemaining = (board: Board) => board.filter(i => i !== COVERED);
 
-const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
+// Numbers are addressed by their value, which is also their 1-based position;
+// only one that is still showing may be covered.
+export const isCoveringAllowed = (board: Board, number: number): boolean =>
+  Number.isInteger(number) && number >= 1 && number <= board.length && board[number - 1] !== COVERED;
+
+const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
 
-  const clickNumber = (number) => {
-    if (!ctx.isClientMoveAllowed) return;
-    moves.coverNumber(board, number);
-  };
 
   return(
     <GameBoard>
@@ -24,9 +25,9 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       {range(board.length).map(i => (
         <button
           key={i}
-          disabled={!ctx.isClientMoveAllowed || board[i] === COVERED}
+          disabled={!moves.coverNumber.isAllowed!(board, i + 1)}
           className={`secondary-button w-auto text-2xl min-w-[3ch]`}
-          onClick={() => clickNumber(i+1)}
+          onClick={() => moves.coverNumber(board, i + 1)}
         >
           {board[i] === COVERED ? 'X' : board[i]}
         </button>
@@ -95,16 +96,19 @@ const genericRule = {
 };
 
 export const moves = {
-  coverNumber: (board: Board, { events }: { events: Events }, number) => {
-    const nextBoard = cloneDeep(board);
-    nextBoard[number-1] = COVERED;
-    events.endTurn();
+  coverNumber: {
+    validate: (board: Board, _, number: number) => isCoveringAllowed(board, number),
+    apply: (board: Board, { events }: { events: Events }, number) => {
+      const nextBoard = cloneDeep(board);
+      nextBoard[number-1] = COVERED;
+      events.endTurn();
 
-    const remaining = getRemaining(nextBoard);
-    if (remaining.length === 2) {
-      events.endGame(sum(remaining) % 2);
+      const remaining = getRemaining(nextBoard);
+      if (remaining.length === 2) {
+        events.endGame(sum(remaining) % 2);
+      }
+      return { nextBoard };
     }
-    return { nextBoard };
   }
 }
 
