@@ -1,5 +1,5 @@
 import { moves } from './number-pyramid';
-import type { Board, Slot } from './strategy';
+import { isCombineAllowed, applyMoveToBoard, type Board, type Slot } from './strategy';
 import { makeCtx, makeEvents } from '../../../test-utils';
 
 const active = (value: number): Slot => ({ value, state: 'active' });
@@ -19,7 +19,7 @@ describe('moves.combineTwo', () => {
   it('places combined value on next level', () => {
     const board = makeBoard([5, 4, 3, 2, 2, 2, 2, 2], 50);
     const events = makeEvents();
-    const { nextBoard } = moves.combineTwo(
+    const { nextBoard } = moves.combineTwo.apply(
       board, { ctx: makeCtx({ currentPlayer: 0 }), events }, { levelIdx: 0, indices: [0, 1] }
     );
     const level1Active = nextBoard.levels[1].find((s) => s?.state === 'active');
@@ -29,7 +29,7 @@ describe('moves.combineTwo', () => {
   it('marks both combined slots as consumed', () => {
     const board = makeBoard([5, 4, 3, 2, 2, 2, 2, 2], 50);
     const events = makeEvents();
-    const { nextBoard } = moves.combineTwo(
+    const { nextBoard } = moves.combineTwo.apply(
       board, { ctx: makeCtx({ currentPlayer: 0 }), events }, { levelIdx: 0, indices: [0, 1] }
     );
     expect(nextBoard.levels[0][0]!.state).toBe('consumed');
@@ -39,7 +39,7 @@ describe('moves.combineTwo', () => {
   it('calls endTurn when combined value is below k', () => {
     const board = makeBoard([5, 4, 3, 2, 2, 2, 2, 2], 50);
     const events = makeEvents();
-    moves.combineTwo(board, { ctx: makeCtx({ currentPlayer: 0 }), events }, { levelIdx: 0, indices: [0, 1] });
+    moves.combineTwo.apply(board, { ctx: makeCtx({ currentPlayer: 0 }), events }, { levelIdx: 0, indices: [0, 1] });
     expect(events.endTurn).toHaveBeenCalledTimes(1);
     expect(events.endGame).not.toHaveBeenCalled();
   });
@@ -48,7 +48,7 @@ describe('moves.combineTwo', () => {
     // combined value 10+9=19 exactly equals k, so the "at least k" win must trigger
     const board = makeBoard([10, 9, 3, 2, 2, 2, 2, 2], 19);
     const events = makeEvents();
-    moves.combineTwo(board, { ctx: makeCtx({ currentPlayer: 1 }), events }, { levelIdx: 0, indices: [0, 1] });
+    moves.combineTwo.apply(board, { ctx: makeCtx({ currentPlayer: 1 }), events }, { levelIdx: 0, indices: [0, 1] });
     expect(events.endGame).toHaveBeenCalledWith(1);
     expect(events.endTurn).not.toHaveBeenCalled();
   });
@@ -56,7 +56,40 @@ describe('moves.combineTwo', () => {
   it('does not mutate the original board', () => {
     const board = makeBoard([5, 4, 3, 2, 2, 2, 2, 2], 50);
     const events = makeEvents();
-    moves.combineTwo(board, { ctx: makeCtx({ currentPlayer: 0 }), events }, { levelIdx: 0, indices: [0, 1] });
+    moves.combineTwo.apply(board, { ctx: makeCtx({ currentPlayer: 0 }), events }, { levelIdx: 0, indices: [0, 1] });
     expect(board.levels[0][0]!.state).toBe('active');
+  });
+});
+
+describe('isCombineAllowed', () => {
+  const board = makeBoard([5, 4, 3, 2, 2, 2, 2, 2], 50);
+
+  it('accepts two distinct active slots on a level that has one above it', () => {
+    expect(isCombineAllowed(board, { levelIdx: 0, indices: [0, 1] })).toBe(true);
+    expect(isCombineAllowed(board, { levelIdx: 0, indices: [7, 3] })).toBe(true);
+  });
+
+  it('refuses the same slot twice, or anything that is not a pair', () => {
+    expect(isCombineAllowed(board, { levelIdx: 0, indices: [2, 2] })).toBe(false);
+    expect(isCombineAllowed(board, { levelIdx: 0, indices: [0] })).toBe(false);
+    expect(isCombineAllowed(board, { levelIdx: 0, indices: [0, 1, 2] })).toBe(false);
+  });
+
+  it('refuses a slot that is empty or already consumed', () => {
+    // Level 1 is still empty; combining two of its slots is not a move.
+    expect(isCombineAllowed(board, { levelIdx: 1, indices: [0, 1] })).toBe(false);
+    const { nextBoard } = applyMoveToBoard(board, 0, [0, 1]);
+    expect(isCombineAllowed(nextBoard, { levelIdx: 0, indices: [0, 2] })).toBe(false);
+    expect(isCombineAllowed(nextBoard, { levelIdx: 0, indices: [2, 3] })).toBe(true);
+  });
+
+  it('refuses the top level — there is nowhere to write the sum', () => {
+    expect(isCombineAllowed(board, { levelIdx: 3, indices: [0, 1] })).toBe(false);
+    expect(isCombineAllowed(board, { levelIdx: 4, indices: [0, 1] })).toBe(false);
+    expect(isCombineAllowed(board, { levelIdx: -1, indices: [0, 1] })).toBe(false);
+  });
+
+  it('refuses a slot index off the level', () => {
+    expect(isCombineAllowed(board, { levelIdx: 0, indices: [0, 8] })).toBe(false);
   });
 });

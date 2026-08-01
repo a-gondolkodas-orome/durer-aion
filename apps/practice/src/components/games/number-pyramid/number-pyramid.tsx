@@ -1,24 +1,28 @@
 import { strategyGameFactory, type Ctx, type Events } from '../../strategy-game-factory';
 import {
-  smartBotStrategy, generateStartBoard, randomBotStrategy, applyMoveToBoard, type Board
+  smartBotStrategy, generateStartBoard, randomBotStrategy, applyMoveToBoard,
+  isCombineAllowed, type Board
 } from './strategy';
 import { BoardClient, type TurnState } from './board-client';
 
 export const moves = {
-  combineTwo: (
-    board: Board,
-    { ctx, events }: { ctx: Ctx; events: Events },
-    { levelIdx, indices }
-  ) => {
-    const { nextBoard, combinedValue } = applyMoveToBoard(board, levelIdx, indices);
+  combineTwo: {
+    validate: (board: Board, _, move) => isCombineAllowed(board, move),
+    apply: (
+      board: Board,
+      { ctx, events }: { ctx: Ctx; events: Events },
+      { levelIdx, indices }
+    ) => {
+      const { nextBoard, combinedValue } = applyMoveToBoard(board, levelIdx, indices);
 
-    events.setTurnState(null);
-    if (combinedValue >= board.target) {
-      events.endGame(ctx.currentPlayer);
+      events.setTurnState(null);
+      if (combinedValue >= board.target) {
+        events.endGame(ctx.currentPlayer);
+        return { nextBoard };
+      }
+      events.endTurn();
       return { nextBoard };
     }
-    events.endTurn();
-    return { nextBoard };
   }
 };
 

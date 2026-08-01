@@ -28,14 +28,14 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
   const { value: validHovered, hoverProps } = useHoverPreview<[number, number]>(ctx.moveCount);
 
-  const select = (pile, i) => {
-    if (!ctx.isClientMoveAllowed) return;
-    if (pile === 0) {
-      moves.removeDiscs(board, board[0] - i);
-    } else {
-      moves.turnDiscs(board, board[1] - i);
-    }
-  };
+  // Clicking the i-th disc of a pile takes everything above it, i.e.
+  // board[pile] - i discs. The blue pile is removed from, the red one flipped.
+  const moveForPile = (pile: number) => (pile === 0 ? moves.removeDiscs : moves.turnDiscs);
+
+  const isSelectable = (pile: number, i: number) =>
+    moveForPile(pile).isAllowed!(board, board[pile] - i);
+
+  const select = (pile, i) => moveForPile(pile)(board, board[pile] - i);
 
   const isSelected = (pile, i) => isEqual(validHovered, [pile, i]) || isEqual(validHovered, [pile, i - 1]);
 
@@ -67,7 +67,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                     ? "bg-blue-800/75"
                     : "bg-red-800"
                 }`}
-                disabled={!ctx.isClientMoveAllowed}
+                disabled={!isSelectable(1, i)}
                 onClick={() => select(1, i)}
                 {...hoverProps([1, i])}
               />
@@ -81,7 +81,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               <button
                 key={`blue-${i}-${board[0]}-${board[1]}`}
                 className={`size-12 rounded-full bg-blue-800 ${isSelected(0, i) ? "enabled:opacity-50" : ""}`}
-                disabled={!ctx.isClientMoveAllowed}
+                disabled={!isSelectable(0, i)}
                 onClick={() => select(0, i)}
                 {...hoverProps([0, i])}
               />
@@ -97,25 +97,41 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
+// board[0] is the blue pile, board[1] the red one. Either move takes one or two
+// discs from its own pile — no more, and never from an emptier pile than that.
+// Both players draw on the same two piles, so whose turn it is does not enter
+// into legality.
+export const isRemovalAllowed = (board: Board, count: number): boolean =>
+  (count === 1 || count === 2) && count <= board[0];
+
+export const isFlipAllowed = (board: Board, count: number): boolean =>
+  (count === 1 || count === 2) && count <= board[1];
+
 export const moves = {
-  removeDiscs: (board: Board, { events }: { events: Events }, count) => {
-    const nextBoard = cloneDeep(board);
-    nextBoard[0] -= count;
-    events.endTurn();
-    if (isEqual(nextBoard, [0, 0])) {
-      events.endGame();
+  removeDiscs: {
+    validate: (board: Board, _, count) => isRemovalAllowed(board, count),
+    apply: (board: Board, { events }: { events: Events }, count) => {
+      const nextBoard = cloneDeep(board);
+      nextBoard[0] -= count;
+      events.endTurn();
+      if (isEqual(nextBoard, [0, 0])) {
+        events.endGame();
+      }
+      return { nextBoard };
     }
-    return { nextBoard };
   },
-  turnDiscs: (board: Board, { events }: { events: Events }, count) => {
-    const nextBoard = cloneDeep(board);
-    nextBoard[1] -= count;
-    nextBoard[0] += count;
-    events.endTurn();
-    if (isEqual(nextBoard, [0, 0])) {
-      events.endGame();
+  turnDiscs: {
+    validate: (board: Board, _, count) => isFlipAllowed(board, count),
+    apply: (board: Board, { events }: { events: Events }, count) => {
+      const nextBoard = cloneDeep(board);
+      nextBoard[1] -= count;
+      nextBoard[0] += count;
+      events.endTurn();
+      if (isEqual(nextBoard, [0, 0])) {
+        events.endGame();
+      }
+      return { nextBoard };
     }
-    return { nextBoard };
   }
 };
 

@@ -64,6 +64,17 @@ export const totalGrundy = (pieces: Piece[]): number =>
 export const allMoves = (pieces: Piece[]): Move[] =>
   pieces.flatMap(p => safeBreaks(p).map(br => ({ id: p.id, dir: br.dir, pos: br.pos })));
 
+// A break names a piece still on the table and one of that piece's safe cuts —
+// a break that would snap off a 1×1 is not a move, it is the loss condition.
+// Both players break from the same table, so whose turn it is does not enter
+// into legality.
+export const isBreakAllowed = (board: Board, move: Move): boolean => {
+  if (!move) return false;
+  const piece = board.pieces.find(p => p.id === move.id);
+  if (piece === undefined) return false;
+  return safeBreaks(piece).some(br => br.dir === move.dir && br.pos === move.pos);
+};
+
 export const applyBreak = (board: Board, { id, dir, pos }: Move): Board => {
   const idx = board.pieces.findIndex(p => p.id === id);
   const p = board.pieces[idx];

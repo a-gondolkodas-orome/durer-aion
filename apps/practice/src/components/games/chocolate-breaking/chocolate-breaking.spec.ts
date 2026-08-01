@@ -1,5 +1,5 @@
 import {
-  grundy, totalGrundy, hasSafeBreak, applyBreak, isFlexible,
+  grundy, totalGrundy, hasSafeBreak, applyBreak, isFlexible, isBreakAllowed, allMoves,
   generateStartBoard, type Board, type Move
 } from './helpers';
 import { getSmartBotMove, getRandomBotMove } from './bot-strategy';
@@ -82,5 +82,43 @@ describe('chocolate breaking', () => {
         expect(hasSafeBreak(board.pieces)).toBe(true);
       }
     });
+  });
+});
+
+describe('isBreakAllowed', () => {
+  it('accepts a safe cut on a piece that is on the table', () => {
+    expect(isBreakAllowed(single(3, 3), { id: 0, dir: 'v', pos: 1 })).toBe(true);
+    expect(isBreakAllowed(single(3, 3), { id: 0, dir: 'h', pos: 2 })).toBe(true);
+  });
+
+  it('refuses a cut that would snap off a 1x1 — that is the loss, not a move', () => {
+    // A 1x3 strip has no safe cut at all: either half would be a 1x1.
+    expect(isBreakAllowed(single(1, 3), { id: 0, dir: 'h', pos: 1 })).toBe(false);
+    expect(isBreakAllowed(single(1, 3), { id: 0, dir: 'h', pos: 2 })).toBe(false);
+    // A 1x4 strip may only be cut down the middle.
+    expect(isBreakAllowed(single(1, 4), { id: 0, dir: 'h', pos: 2 })).toBe(true);
+    expect(isBreakAllowed(single(1, 4), { id: 0, dir: 'h', pos: 1 })).toBe(false);
+  });
+
+  it('refuses a cut outside the piece, or along its edge', () => {
+    expect(isBreakAllowed(single(3, 3), { id: 0, dir: 'v', pos: 0 })).toBe(false);
+    expect(isBreakAllowed(single(3, 3), { id: 0, dir: 'v', pos: 3 })).toBe(false);
+  });
+
+  it('refuses a piece that is not on the table', () => {
+    expect(isBreakAllowed(single(3, 3), { id: 7, dir: 'v', pos: 1 })).toBe(false);
+  });
+
+  it('accepts exactly the cuts the generator lists', () => {
+    const board: Board = { pieces: [{ id: 0, w: 3, h: 4 }, { id: 1, w: 2, h: 2 }], nextId: 2 };
+    const listed = new Set(allMoves(board.pieces).map(m => `${m.id}${m.dir}${m.pos}`));
+    for (const piece of board.pieces) {
+      for (const dir of ['v', 'h'] as const) {
+        for (let pos = 0; pos <= 5; pos++) {
+          const move: Move = { id: piece.id, dir, pos };
+          expect(isBreakAllowed(board, move)).toBe(listed.has(`${piece.id}${dir}${pos}`));
+        }
+      }
+    }
   });
 });

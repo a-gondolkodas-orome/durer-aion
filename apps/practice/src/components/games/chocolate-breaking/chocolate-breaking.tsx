@@ -5,7 +5,7 @@ import {
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import {
   generateStartBoard, generateTestStartBoard, safeBreaks, hasSafeBreak,
-  applyBreak, type Board, type Piece, type Move
+  applyBreak, isBreakAllowed, type Board, type Piece, type Move
 } from './helpers';
 
 const CELL = 30; // px per chocolate cell
@@ -82,19 +82,16 @@ const PieceView = ({ piece, ctx, hovered, setHovered, clearHovered, onActivate }
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { value: hovered, set: setHovered, clear: clearHovered } = useHoverPreview<Move>(ctx.moveCount);
 
-  const onBreak = (move: Move) => {
-    if (!ctx.isClientMoveAllowed) return;
-    moves.breakPiece(board, move);
-  };
-
   // A cut is broken once it is the highlighted one: on desktop hover/focus
   // highlights it so a single click/Enter breaks straight away; on touch the
   // first tap highlights (showing the preview) and the second tap confirms.
+  // The guard stays: the first tap only moves local highlight state, which the
+  // engine's move check does not cover.
   const onActivate = (move: Move) => {
     if (!ctx.isClientMoveAllowed) return;
     const isSelected = hovered?.id === move.id
       && hovered?.dir === move.dir && hovered?.pos === move.pos;
-    if (isSelected) onBreak(move);
+    if (isSelected) moves.breakPiece(board, move);
     else setHovered(move);
   };
 
@@ -118,13 +115,16 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 };
 
 const moves = {
-  breakPiece: (board: Board, { events }: { events: Events }, move: Move) => {
-    const nextBoard = applyBreak(board, move);
-    events.endTurn();
-    if (!hasSafeBreak(nextBoard.pieces)) {
-      events.endGame();
+  breakPiece: {
+    validate: (board: Board, _, move: Move) => isBreakAllowed(board, move),
+    apply: (board: Board, { events }: { events: Events }, move: Move) => {
+      const nextBoard = applyBreak(board, move);
+      events.endTurn();
+      if (!hasSafeBreak(nextBoard.pieces)) {
+        events.endGame();
+      }
+      return { nextBoard };
     }
-    return { nextBoard };
   }
 };
 

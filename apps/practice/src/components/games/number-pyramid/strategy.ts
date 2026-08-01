@@ -145,3 +145,16 @@ const canWin = (board: Board): boolean => {
 // Slot states: null = empty placeholder, { value, state:'active'|'consumed' }
 const activeSlotIndices = (level: Level): number[] =>
   level.flatMap((s, i) => (s?.state === 'active' ? [i] : []));
+
+// A move erases two distinct numbers that are still active on one level and
+// writes their sum one level up — so the level must have a level above it.
+// Both players combine on the same pyramid, so whose turn it is does not enter
+// into legality.
+export const isCombineAllowed = (board: Board, move: { levelIdx: number; indices: number[] }): boolean => {
+  if (!move) return false;
+  const { levelIdx, indices } = move;
+  if (!Number.isInteger(levelIdx) || levelIdx < 0 || levelIdx >= board.levels.length - 1) return false;
+  if (!Array.isArray(indices) || indices.length !== 2 || indices[0] === indices[1]) return false;
+  const actives = activeSlotIndices(board.levels[levelIdx]);
+  return indices.every(i => actives.includes(i));
+};
