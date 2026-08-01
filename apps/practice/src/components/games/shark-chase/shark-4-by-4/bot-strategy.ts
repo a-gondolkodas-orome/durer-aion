@@ -1,6 +1,6 @@
 import { sample } from 'lodash';
 import type { StrategyArgs } from '../../../strategy-game-factory';
-import { type Board } from './shark-chase';
+import type { Board } from '../helpers';
 
 const getAdjacentCells = (pos: number): number[] => {
   const cells: number[] = [];

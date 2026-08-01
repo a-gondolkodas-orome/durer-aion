@@ -3,13 +3,9 @@ import { strategyGameFactory, type Ctx, type Events } from '../../../strategy-ga
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { BoardClient } from './board-client';
 import { isGameEnd, getWinnerIndex } from './helpers';
-
-export type Board = {
-  submarines: number[];
-  shark: number;
-  turn: number;
-  sharkMovesInTurn: number;
-};
+import {
+  type Board, RESEARCHERS, SHARK, isSharkMoveAllowed, isSubmarineMoveAllowed
+} from '../helpers';
 
 const generateStartBoard = (): Board => {
   return {
@@ -21,37 +17,45 @@ const generateStartBoard = (): Board => {
 };
 
 const moves = {
-  moveSubmarine: (board: Board, { events }: { events: Events }, { from, to }: { from: number; to: number }) => {
-    const nextBoard = cloneDeep(board);
-    nextBoard.submarines[from] -= 1;
-    nextBoard.submarines[to] += 1;
-    events.endTurn();
-    if (isGameEnd(nextBoard)) {
-      events.endGame(getWinnerIndex(nextBoard))
-    }
-    return { nextBoard };
-  },
-  moveShark: (board: Board, { events }: { events: Events }, to: number) => {
-    const nextBoard = cloneDeep(board);
-    nextBoard.shark = to;
-
-    const isAnotherSharkMoveAllowed = (
-      board.submarines[to] === 0 &&
-        to !== board.shark &&
-        board.sharkMovesInTurn === 0
-    );
-    if (isAnotherSharkMoveAllowed) {
-      nextBoard.sharkMovesInTurn = 1;
+  moveSubmarine: {
+    validate: (board: Board, { ctx }: { ctx: Ctx }, move: { from: number; to: number }) =>
+      ctx.currentPlayer === RESEARCHERS && !!move && isSubmarineMoveAllowed(board, move.from, move.to),
+    apply: (board: Board, { events }: { events: Events }, { from, to }: { from: number; to: number }) => {
+      const nextBoard = cloneDeep(board);
+      nextBoard.submarines[from] -= 1;
+      nextBoard.submarines[to] += 1;
+      events.endTurn();
+      if (isGameEnd(nextBoard)) {
+        events.endGame(getWinnerIndex(nextBoard))
+      }
       return { nextBoard };
     }
+  },
+  moveShark: {
+    validate: (board: Board, { ctx }: { ctx: Ctx }, to: number) =>
+      ctx.currentPlayer === SHARK && isSharkMoveAllowed(board, to),
+    apply: (board: Board, { events }: { events: Events }, to: number) => {
+      const nextBoard = cloneDeep(board);
+      nextBoard.shark = to;
 
-    nextBoard.turn += 1;
-    nextBoard.sharkMovesInTurn = 0;
-    events.endTurn();
-    if (isGameEnd(nextBoard)) {
-      events.endGame(getWinnerIndex(nextBoard))
+      const isAnotherSharkMoveAllowed = (
+        board.submarines[to] === 0 &&
+          to !== board.shark &&
+          board.sharkMovesInTurn === 0
+      );
+      if (isAnotherSharkMoveAllowed) {
+        nextBoard.sharkMovesInTurn = 1;
+        return { nextBoard };
+      }
+
+      nextBoard.turn += 1;
+      nextBoard.sharkMovesInTurn = 0;
+      events.endTurn();
+      if (isGameEnd(nextBoard)) {
+        events.endGame(getWinnerIndex(nextBoard))
+      }
+      return { nextBoard };
     }
-    return { nextBoard };
   }
 }
 

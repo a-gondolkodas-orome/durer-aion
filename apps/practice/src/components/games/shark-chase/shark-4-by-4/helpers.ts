@@ -1,4 +1,4 @@
-import type { Board } from './shark-chase';
+import type { Board } from '../helpers';
 
 export const isGameEnd = (board: Board): boolean =>
   board.submarines[board.shark] >= 1 || board.turn > 11;

@@ -1,5 +1,5 @@
 import { getNextSharkPositionByAI } from './bot-strategy';
-import type { Board } from './shark-chase';
+import type { Board } from '../helpers';
 
 const makeBoard = (submarines: number[], shark: number, turn: number): Board => ({
   submarines, shark, turn, sharkMovesInTurn: 0
