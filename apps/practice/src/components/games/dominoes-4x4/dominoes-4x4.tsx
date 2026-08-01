@@ -30,6 +30,14 @@ export const getPossibleMoves = (board: Board, player: number): Board => {
   return possibleMoves;
 };
 
+// A domino is legal when it covers two uncovered fields along the current
+// player's own axis, which is what `getPossibleMoves` enumerates for them. The
+// player picks the two fields in either order, so the pair is matched unordered.
+export const isDominoAllowed = (board: Board, player: number, domino: Domino): boolean =>
+  Array.isArray(domino) && domino.length === 2
+    && getPossibleMoves(board, player)
+      .some(m => isEqual(m, domino) || isEqual(m, [domino[1], domino[0]]));
+
 const getDominoDirection = (field: Field, board: Board) => {
   const domino = board.find(d => d.some(c => isEqual(c, field)))!;
   const neighbor = isEqual(domino[0], field) ? domino[1] : domino[0];
@@ -53,14 +61,9 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   // horizontal for Félix (player 1).
   const step = ctx.currentPlayer === 0 ? { dRow: 1, dCol: 0 } : { dRow: 0, dCol: 1 };
 
-  const isValidPartner = ({ row, col }: Field) => {
-    if (selectedField === null) return false;
-    const dRow = Math.abs(row - selectedField.row);
-    const dCol = Math.abs(col - selectedField.col);
-    if (dRow + dCol !== 1) return false;
-    const alongPlayerAxis = ctx.currentPlayer === 0 ? dRow === 1 : dCol === 1;
-    return alongPlayerAxis && !isCovered({ row, col }, board);
-  };
+  // The field would complete a legal domino with the one already selected.
+  const isValidPartner = (field: Field) =>
+    selectedField !== null && moves.placeDomino.isAllowed!(board, [selectedField, field]);
 
   const hasPlaceablePartner = ({ row, col }: Field) => {
     return [[step.dRow, step.dCol], [-step.dRow, -step.dCol]].some(([dRow, dCol]) => {
@@ -70,7 +73,10 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     });
   };
 
+  // A rejected click must leave the local selection alone, so this keeps a guard
+  // rather than relying on the engine silently ignoring the dispatch.
   const clickField = (field: Field) => {
+    if (!isClickAllowed(field)) return;
     if (selectedField === null) { setSelectedField(field); return; }
     if (isEqual(field, selectedField)) { setSelectedField(null); return; }
     moves.placeDomino(board, [selectedField, field]);
@@ -104,7 +110,9 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const isClickAllowed = (field: Field) => {
     if (!ctx.isClientMoveAllowed) return false;
     if (isCovered(field, board)) return false;
+    // clicking the selected field again deselects it
     if (selectedField !== null && isEqual(field, selectedField)) return true;
+    // the second click has to complete a domino the engine would accept
     if (selectedField !== null) return isValidPartner(field);
     return hasPlaceablePartner(field);
   };
@@ -153,17 +161,21 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 };
 
 const moves = {
-  placeDomino: (board: Board, { ctx, events }: { ctx: Ctx; events: Events }, domino: Domino) => {
-    const nextBoard = cloneDeep(board);
-    nextBoard.push(domino);
-    const nextPlayer = 1 - ctx.currentPlayer!;
-    events.endTurn();
-    // Normal play: if the next player has no legal placement, they lose and the player
-    // who just moved wins (endGame with no argument credits the mover).
-    if (getPossibleMoves(nextBoard, nextPlayer).length === 0) {
-      events.endGame();
+  placeDomino: {
+    validate: (board: Board, { ctx }: { ctx: Ctx }, domino: Domino) =>
+      isDominoAllowed(board, ctx.currentPlayer!, domino),
+    apply: (board: Board, { ctx, events }: { ctx: Ctx; events: Events }, domino: Domino) => {
+      const nextBoard = cloneDeep(board);
+      nextBoard.push(domino);
+      const nextPlayer = 1 - ctx.currentPlayer!;
+      events.endTurn();
+      // Normal play: if the next player has no legal placement, they lose and the player
+      // who just moved wins (endGame with no argument credits the mover).
+      if (getPossibleMoves(nextBoard, nextPlayer).length === 0) {
+        events.endGame();
+      }
+      return { nextBoard };
     }
-    return { nextBoard };
   }
 };
 

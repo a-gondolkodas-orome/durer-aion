@@ -42,21 +42,23 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     });
   };
 
+  // A rejected click must leave the local selection alone, so this keeps a guard
+  // rather than relying on the engine silently ignoring the dispatch.
   const clickField = (field: Field) => {
+    if (!isClickAllowed(field)) return;
     if (selectedField === null) { setSelectedField(field); return; }
     if (isEqual(field, selectedField)) { setSelectedField(null); return; }
     moves.placeDomino(board, [selectedField, field]);
     setSelectedField(null);
   };
 
-  const isNeighborOfSelected = ({ row, col }) => {
-    if (selectedField === null) return false;
-    return Math.abs(row - selectedField.row) + Math.abs(col - selectedField.col) === 1;
-  }
+  // The field would complete a legal domino with the one already selected.
+  const isValidPartner = (field: Field) =>
+    selectedField !== null && moves.placeDomino.isAllowed!(board, [selectedField, field]);
 
   const isPartOfPreview = (field: Field) => {
     if (selectedField === null || validHoveredField === null) return false;
-    if (!isNeighborOfSelected(validHoveredField) || isCovered(validHoveredField, board)) return false;
+    if (!isValidPartner(validHoveredField)) return false;
     return isEqual(field, selectedField) || isEqual(field, validHoveredField);
   };
 
@@ -64,7 +66,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     if (isCovered(field, board)) return 'bg-slate-600 border-slate-900 dark:border-slate-400';
     if (!ctx.isClientMoveAllowed) return 'bg-surface-elevated';
     if (isPartOfPreview(field) || isEqual(selectedField, field)) return 'bg-blue-400';
-    if (isNeighborOfSelected(field)) return 'bg-blue-100 dark:bg-blue-900';
+    if (isValidPartner(field)) return 'bg-blue-100 dark:bg-blue-900';
     return 'bg-surface-elevated';
   };
 
@@ -72,8 +74,10 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     if (!ctx.isClientMoveAllowed) return false;
     if (isCovered(field, board)) return false;
     if (!hasEmptyNeighbor(field)) return false;
+    // clicking the selected field again deselects it
     if (selectedField !== null && isEqual(field, selectedField)) return true;
-    if (selectedField !== null && !isNeighborOfSelected(field)) return false;
+    // the second click has to complete a domino the engine would accept
+    if (selectedField !== null) return isValidPartner(field);
     return true;
   }
 
@@ -148,15 +152,25 @@ export const getPossibleMoves = (board: Board) => {
   return possibleMoves;
 }
 
+// A domino is legal when it covers two uncovered neighbouring fields, which is
+// what `getPossibleMoves` enumerates. The player picks the two fields in either
+// order, so the pair is matched unordered.
+export const isDominoAllowed = (board: Board, domino: Domino): boolean =>
+  Array.isArray(domino) && domino.length === 2
+    && getPossibleMoves(board).some(m => isEqual(m, domino) || isEqual(m, [domino[1], domino[0]]));
+
 const moves = {
-  placeDomino: (board: Board, { events }: { events: Events }, domino: Domino) => {
-    const nextBoard = cloneDeep(board);
-    nextBoard.push(domino);
-    events.endTurn();
-    if (getPossibleMoves(nextBoard).length === 0) {
-      events.endGame();
+  placeDomino: {
+    validate: (board: Board, _, domino: Domino) => isDominoAllowed(board, domino),
+    apply: (board: Board, { events }: { events: Events }, domino: Domino) => {
+      const nextBoard = cloneDeep(board);
+      nextBoard.push(domino);
+      events.endTurn();
+      if (getPossibleMoves(nextBoard).length === 0) {
+        events.endGame();
+      }
+      return { nextBoard };
     }
-    return { nextBoard };
   }
 }
 
