@@ -4,16 +4,8 @@ import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { getAllowedMoves, generateStartBoard, markVisitedFields, type Board, type Field } from './helpers';
 import { ChessKnightSvg } from './chess-knight-svg';
 
-const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const clickField = (field: Field) => {
-    if (!isMoveAllowed(field)) return;
-
-    moves.moveKnight(board, field);
-  };
-  const isMoveAllowed = (targetField: Field) => {
-    if (!ctx.isClientMoveAllowed) return false;
-    return some(getAllowedMoves(board), field => isEqual(field, targetField));
-  };
+const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
+  const isMoveAllowed = (targetField: Field) => moves.moveKnight.isAllowed!(board, targetField);
 
   return (
   <GameBoard>
@@ -32,7 +24,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                 <button
                   className="w-full aspect-square p-[5%]"
                   disabled={!isMoveAllowed({ row, col })}
-                  onClick={() => clickField({ row, col })}
+                  onClick={() => moves.moveKnight(board, { row, col })}
                 >
                   {isMoveAllowed({ row, col }) && (
                     <svg className="w-full aspect-square opacity-20">
@@ -56,18 +48,22 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 };
 
 const moves = {
-  moveKnight: (board: Board, { events }: { events: Events }, { row, col }: Field) => {
-    const nextBoard = cloneDeep(board);
-    markVisitedFields(nextBoard, nextBoard.knightPosition);
+  moveKnight: {
+    validate: (board: Board, _, target: Field) =>
+      some(getAllowedMoves(board), field => isEqual(field, target)),
+    apply: (board: Board, { events }: { events: Events }, { row, col }: Field) => {
+      const nextBoard = cloneDeep(board);
+      markVisitedFields(nextBoard, nextBoard.knightPosition);
 
-    nextBoard.chessBoard[row][col] = 'knight';
-    nextBoard.knightPosition = { row, col };
+      nextBoard.chessBoard[row][col] = 'knight';
+      nextBoard.knightPosition = { row, col };
 
-    events.endTurn();
-    if (getAllowedMoves(nextBoard).length === 0) {
-      events.endGame();
+      events.endTurn();
+      if (getAllowedMoves(nextBoard).length === 0) {
+        events.endGame();
+      }
+      return { nextBoard };
     }
-    return { nextBoard };
   }
 };
 

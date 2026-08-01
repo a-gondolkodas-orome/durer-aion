@@ -1,4 +1,4 @@
-import { range, isEqual, some, cloneDeep } from 'lodash';
+import { range, some, isEqual, cloneDeep } from 'lodash';
 import {
   strategyGameFactory, type BoardClientProps, type Events, GameBoard, useHoverPreview
 } from '../../strategy-game-factory';
@@ -11,21 +11,13 @@ import {
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { value: validHoveredField, hoverProps } = useHoverPreview<Field>(ctx.moveCount);
-  const clickField = (field: Field) => {
-    if (!isMoveAllowed(field)) return;
-
-    moves.placeBishop(board, field);
-  };
 
   const isPotentialNextStep = (field: Field) => {
     if (!isMoveAllowed(field)) return false;
     if (!validHoveredField) return false;
     return isEqual(validHoveredField, field);
   };
-  const isMoveAllowed = (targetField: Field) => {
-    if (!ctx.isClientMoveAllowed) return false;
-    return some(getAllowedMoves(board), field => isEqual(field, targetField));
-  };
+  const isMoveAllowed = (targetField: Field) => moves.placeBishop.isAllowed!(board, targetField);
   const isForbidden = ({ row, col }: Field) => {
     return board[row][col] === FORBIDDEN;
   };
@@ -59,7 +51,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                 <button
                   className="w-full aspect-square p-[5%]"
                   disabled={!isMoveAllowed({ row, col })}
-                  onClick={() => clickField({ row, col })}
+                  onClick={() => moves.placeBishop(board, { row, col })}
                   {...hoverProps({ row, col })}
                 >
                   {isBishop({ row, col }) && (
@@ -84,15 +76,19 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 };
 
 const moves = {
-  placeBishop: (board: Board, { events }: { events: Events }, { row, col }: Field) => {
-    const nextBoard = cloneDeep(board);
-    markForbiddenFields(nextBoard, { row, col });
-    nextBoard[row][col] = BISHOP;
-    events.endTurn();
-    if (getAllowedMoves(nextBoard).length === 0) {
-      events.endGame();
+  placeBishop: {
+    validate: (board: Board, _, target: Field) =>
+      some(getAllowedMoves(board), field => isEqual(field, target)),
+    apply: (board: Board, { events }: { events: Events }, { row, col }: Field) => {
+      const nextBoard = cloneDeep(board);
+      markForbiddenFields(nextBoard, { row, col });
+      nextBoard[row][col] = BISHOP;
+      events.endTurn();
+      if (getAllowedMoves(nextBoard).length === 0) {
+        events.endGame();
+      }
+      return { nextBoard };
     }
-    return { nextBoard };
   }
 };
 

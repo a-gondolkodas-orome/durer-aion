@@ -4,16 +4,8 @@ import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { getAllowedMoves, generateStartBoard, isTarget, boardSize, type Board, type Field } from './helpers';
 import { RookSvg } from '../shared/rook-svg';
 
-const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const clickField = (field: Field) => {
-    if (!isMoveAllowed(field)) return;
-
-    moves.moveRook(board, field);
-  };
-  const isMoveAllowed = (targetField: Field) => {
-    if (!ctx.isClientMoveAllowed) return false;
-    return some(getAllowedMoves(board), field => isEqual(field, targetField));
-  };
+const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
+  const isMoveAllowed = (targetField: Field) => moves.moveRook.isAllowed!(board, targetField);
 
   return (
   <GameBoard>
@@ -30,7 +22,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                   <button
                     className="w-full aspect-square p-[5%]"
                     disabled={!isMoveAllowed({ row, col })}
-                    onClick={() => clickField({ row, col })}
+                    onClick={() => moves.moveRook(board, { row, col })}
                   >
                     {isGoal && !hasRook && (
                       <span className="flex items-center justify-center w-full aspect-square text-3xl sm:text-4xl">
@@ -60,16 +52,20 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 };
 
 const moves = {
-  moveRook: (board: Board, { events }: { events: Events }, { row, col }: Field) => {
-    const nextBoard = cloneDeep(board);
-    nextBoard.rookPosition = { row, col };
+  moveRook: {
+    validate: (board: Board, _, target: Field) =>
+      some(getAllowedMoves(board), field => isEqual(field, target)),
+    apply: (board: Board, { events }: { events: Events }, { row, col }: Field) => {
+      const nextBoard = cloneDeep(board);
+      nextBoard.rookPosition = { row, col };
 
-    if (isTarget({ row, col })) {
-      events.endGame();
-    } else {
-      events.endTurn();
+      if (isTarget({ row, col })) {
+        events.endGame();
+      } else {
+        events.endTurn();
+      }
+      return { nextBoard };
     }
-    return { nextBoard };
   }
 };
 
