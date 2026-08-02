@@ -165,45 +165,39 @@ express both in their return value); `setTurnState` also remains current for
 `BoardClient` components that keep mid-turn UI state in `ctx.turnState`
 (several games call it from UI code — that usage does not migrate).
 
-### Known limitation: React state staleness in multi-move turns
+### Game state architecture: synchronous store outside React
 
-The engine keeps authoritative game state (`board`, `turnState`,
-`currentPlayer`) in React render state, but bots and chained dispatches run in
-`setTimeout` closures that captured a snapshot from an earlier render. Anything
-they need that is newer than their snapshot must reach them some other way.
-Two workarounds exist for two symptoms of this one root cause:
+Authoritative game state (`board`, `phase`, `currentPlayer`, `turnState`,
+`moveCount`, …) lives in a small synchronous store outside React
+(`strategy-game-factory/engine/store.ts`); the factory component subscribes via
+`useSyncExternalStore` and renders snapshots of it. Every dispatch — from the
+`BoardClient`, a bot, or the auto `endOfTurnMove` — is validated and applied by
+a framework-free reducer (`engine/reducer.ts`, handling both move contracts)
+against `store.getState()`, so bots and chained `setTimeout` dispatches can
+never observe a stale render snapshot. Validators may depend on **any** `ctx`
+field (`turnState`, `moveCount`, …); `ctx` is always derived fresh from the
+store (`engine/build-ctx.ts`). This boardgame.io-style architecture replaced
+the earlier per-field workarounds (a render-synced `ctxRef` shadow) that made
+staleness a reviewable hazard.
 
-- **`board`** — threaded explicitly by convention: every move returns
-  `nextBoard`, and a multi-move bot must pass the intermediate `nextBoard` to
-  its next calculation/dispatch instead of its (stale) `board` argument. Fails
-  loudly when violated (visibly wrong moves).
-- **`ctx.turnState`** — shadowed engine-side: move validation reads `ctx`
-  through a ref that is re-synced every render *and* patched synchronously by
-  `events.setTurnState` (the engine routes an outcome-returning `apply`'s returned
-  `nextTurnState` through the same setter), because a chained dispatch (e.g. a
-  bot's 0-delay `setTimeout`) can fire before React re-renders. See `ctxRef` in
-  `strategy-game-factory.tsx` and the two-phase bot regression tests (legacy
-  and v2 variants).
+Two conventions to keep in mind:
 
-The asymmetry matters when reviewing new games: a validator that depends on
-some *other* mid-turn-changing `ctx` field (e.g. `moveCount`) would need the
-same ref treatment — there is no general mechanism, only per-field shadows.
-
-There is no fully robust fix within the current shape. The known-robust
-architecture is a boardgame.io-style imperative game-state store outside React
-(React subscribing via `useSyncExternalStore`): moves would read/write current
-state synchronously, `board` threading and the ctx ref would both become
-unnecessary by construction. That refactor converges with the possible future
-server-side authoritative check (a server needs the React-free state machine
-anyway), so if that check is ever built, do both together rather than bolting
-on more per-field shadows. Until then, the current conventions are a deliberate
-simplicity trade-off — don't "fix" them piecemeal.
+- **`board` threading stays the public API shape**: always pass the latest
+  `nextBoard` when chaining moves within a turn. The store board is
+  authoritative regardless — in dev the engine **throws** on a mismatch
+  ("stale board passed to move …", converting a chaining bug into a loud,
+  located error), in prod the store board silently wins.
+- The `engine/` modules are React-free by design — they are the seed of the
+  headless engine a future server-authoritative competition mode needs (see
+  `docs/real-competitions-plan.md` and issue #313). Don't import React (or
+  anything React-flavoured) there.
 
 Note "boardgame.io-style" means the architecture only. **Do not propose
 adopting boardgame.io itself**: it is a good library but effectively
 unmaintained (no meaningful releases for years, and its React client pins
 React versions well behind the one used here). Borrow its ideas — the
-long-form move shape already does — and build the rest in-repo.
+long-form move shape and the external store already do — and build the rest
+in-repo.
 
 ### New game checklist
 

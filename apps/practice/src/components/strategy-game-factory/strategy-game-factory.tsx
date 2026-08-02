@@ -1,19 +1,22 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useSyncExternalStore } from 'react';
 import { GameHeader } from './game-parts/game-header';
 import { GameFooter } from './game-parts/game-footer';
 import { GameRule } from './game-parts/game-rule';
 import { GameSidebar } from './game-parts/game-sidebar/game-sidebar';
 import { GameEndDialog } from './game-parts/game-end-dialog';
-import { mapValues, cloneDeep } from 'lodash';
+import { mapValues, isEqual } from 'lodash';
 import { useTranslation, type TranslatableNode, type I18nString } from '../../language';
 import { useLocation } from 'react-router';
 import { useGameStats } from './hooks/use-game-stats';
 import { trackEvent } from '../../tracking';
 import type {
-  Phase, Mode, Ctx, Events, MoveOutcome, NormalizedMove, Gameplay, GameMoves,
+  Mode, Ctx, Events, MoveOutcome, NormalizedMove, Gameplay, GameMoves,
   BoardClientProps, Variant as DisplayVariant, VariantInput
 } from './types';
 import { resolveVariants } from './helpers/resolve-variants';
+import { createGameStore, createInitialCoreState } from './engine/store';
+import { buildCtx } from './engine/build-ctx';
+import { reduceMove } from './engine/reducer';
 
 const DEFAULT_PLAYER_NAMES: I18nString[] = [
   { hu: '1. játékos', en: '1st player' },
@@ -63,19 +66,15 @@ export const strategyGameFactory = <TBoard,>({
     const defaultGenerateStartBoard = defaultVariant.generateStartBoard!;
     const activeGenerateStartBoard = activeVariant.generateStartBoard ?? defaultGenerateStartBoard;
 
-    const [board, setBoard] = useState<TBoard>(activeGenerateStartBoard());
-    const [phase, setPhase] = useState<Phase>('roleSelection');
-    const [chosenRoleIndex, setChosenRoleIndex] = useState<number | null>(null);
-    const [currentPlayer, setCurrentPlayer] = useState<number | null>(null);
+    // Authoritative game state lives in a synchronous store outside React (see
+    // engine/store.ts); React renders a snapshot of it. Bots and chained
+    // dispatches always read the store, so they can never see stale state.
+    const [store] = useState(() => createGameStore(createInitialCoreState(activeGenerateStartBoard())));
+    const state = useSyncExternalStore(store.subscribe, store.getState);
+    const { board, phase, mode, currentPlayer, chosenRoleIndex, undoSnapshot } = state;
+
     const [isGameEndDialogOpen, setIsGameEndDialogOpen] = useState(false);
-    const [winnerIndex, setWinnerIndex] = useState<number | null>(null);
     const [gameUuid, setGameUuid] = useState(crypto.randomUUID());
-    const [moveCount, setMoveCount] = useState(0);
-    const [turnState, setTurnState] = useState<unknown>(null);
-    const [mode, setMode] = useState<Mode>('vsComputer');
-    type UndoSnapshot = { board: TBoard; currentPlayer: number; moveCount: number };
-    const [undoSnapshot, setUndoSnapshot] = useState<UndoSnapshot | null>(null);
-    const currentTurnHasMovesRef = useRef(false);
     const botTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const [playerNames, setPlayerNames] = useState<[string, string]>(() => {
       try {
@@ -100,6 +99,11 @@ export const strategyGameFactory = <TBoard,>({
       }
     }, [currentPlayer, isHumanVsHumanGame, phase, chosenRoleIndex]); // doBotTurn excluded: recreates every render
 
+    const resolvedPlayerNames: [string, string] = [
+      playerNames[0] || t(DEFAULT_PLAYER_NAMES[0]),
+      playerNames[1] || t(DEFAULT_PLAYER_NAMES[1])
+    ];
+
     let wrappedGameMoves: GameMoves<TBoard> = {} as GameMoves<TBoard>;
 
     // An illegal move should never happen through the UI (buttons are disabled)
@@ -116,52 +120,49 @@ export const strategyGameFactory = <TBoard,>({
       trackEvent('illegal-move', { game: gameId, move: name });
     };
 
-    const moveWrapper = (
-      name: string,
-      moveBoard: TBoard,
-      args: unknown[],
-      doMove: () => MoveOutcome<TBoard>
-    ): MoveOutcome<TBoard> => {
-      const { validate, apply } = normalizedMoves[name]!;
-      if (validate && !validate(moveBoard, { ctx: ctxRef.current }, ...args)) {
+    // Game-end side effects (the state transition itself already happened in
+    // the reducer / store): dialog, win/loss stats, analytics.
+    const handleGameEnd = (resolvedWinner: number | null) => {
+      const s = store.getState();
+      setIsGameEndDialogOpen(true);
+      if (s.mode !== 'vsHuman') {
+        recordResult(resolvedWinner === s.chosenRoleIndex ? 'win' : 'loss');
+      }
+      trackEvent('game-finished', {
+        game: gameId,
+        mode: s.mode,
+        variant: selectedVariantIndex,
+        ...(s.mode === 'vsHuman' ? {} : { result: resolvedWinner === s.chosenRoleIndex ? 'win' : 'loss' })
+      });
+    };
+
+    const dispatchMove = (name: string, moveBoard: TBoard, args: unknown[]): MoveOutcome<TBoard> => {
+      // The store board is authoritative; the board argument remains for API
+      // compatibility. A mismatch means a chaining bug — a bot or BoardClient
+      // passed a stale board to the second move of a turn — so fail loudly in
+      // dev; in prod the store board silently wins.
+      if (import.meta.env.DEV && !isEqual(moveBoard, store.getState().board)) {
+        throw new Error(`strategyGameFactory: stale board passed to move ${name} — `
+          + 'pass the latest nextBoard when chaining moves within a turn');
+      }
+      const transition = reduceMove(
+        store.getState(), normalizedMoves[name]!, name, args, resolvedPlayerNames
+      );
+      if (transition.illegal) {
         reportIllegalMove(name, moveBoard, args);
-        return { nextBoard: moveBoard };
+        return transition.result;
       }
-      if (!currentTurnHasMovesRef.current) {
-        setUndoSnapshot({ board: cloneDeep(board), currentPlayer: currentPlayer!, moveCount });
-        currentTurnHasMovesRef.current = true;
+      store.setState(transition.state);
+      if (transition.gameJustEnded) {
+        handleGameEnd(transition.gameJustEnded.winnerIndex);
       }
-      const moveResult = doMove();
-      setBoard(moveResult.nextBoard);
-      setMoveCount(c => c + 1);
-      // The returned outcome is interpreted only for outcome-returning `apply`
-      // moves: a legacy move causes turn/game transitions through `events`
-      // instead, and any extra fields it happens to return must stay inert.
-      if (apply) {
-        // Through `events.setTurnState` so ctxRef is patched synchronously — a
-        // chained dispatch can validate before React re-renders.
-        if (moveResult.nextTurnState !== undefined) {
-          events.setTurnState(moveResult.nextTurnState);
-        }
-        if (moveResult.gameEnd) {
-          if (import.meta.env.DEV && (moveResult.isTurnEnd || moveResult.autoEndOfTurn)) {
-            throw new Error(`strategyGameFactory: move ${name} returned gameEnd `
-              + 'together with isTurnEnd/autoEndOfTurn');
-          }
-          endGame(moveResult.gameEnd.winnerIndex);
-          return moveResult;
-        }
-        if (moveResult.isTurnEnd) {
-          endTurn();
-        }
-      }
-      if (endOfTurnMove && moveResult.autoEndOfTurn) {
+      if (endOfTurnMove && transition.autoEndOfTurn) {
         botTimeoutRef.current = setTimeout(() => {
           botTimeoutRef.current = null;
-          wrappedGameMoves[endOfTurnMove]!(moveResult.nextBoard);
+          wrappedGameMoves[endOfTurnMove]!(transition.result.nextBoard);
         }, 750);
       }
-      return moveResult;
+      return transition.result;
     };
 
     const resetGameState = ({ newMode = mode, newVariantIndex = selectedVariantIndex } = {}) => {
@@ -173,18 +174,9 @@ export const strategyGameFactory = <TBoard,>({
         boardGenerator = defaultGenerateStartBoard;
       }
       setSelectedVariantIndex(finalVariantIndex);
-      setMode(newMode);
-      setBoard(boardGenerator());
-      setPhase('roleSelection');
-      setChosenRoleIndex(null);
-      setCurrentPlayer(null);
+      store.setState(createInitialCoreState(boardGenerator(), newMode));
       setIsGameEndDialogOpen(false);
-      setWinnerIndex(null);
       setGameUuid(crypto.randomUUID());
-      setMoveCount(0);
-      setTurnState(null);
-      setUndoSnapshot(null);
-      currentTurnHasMovesRef.current = false;
     };
 
     const setDifficulty = (index: number) => {
@@ -198,27 +190,6 @@ export const strategyGameFactory = <TBoard,>({
         .filter(v => !humanVsHuman || !!v.generateStartBoard);
     };
 
-    const resolvedPlayerNames: [string, string] = [
-      playerNames[0] || t(DEFAULT_PLAYER_NAMES[0]),
-      playerNames[1] || t(DEFAULT_PLAYER_NAMES[1])
-    ];
-
-    const endGame = (winnerIndex?: number | null) => {
-      const resolvedWinner = winnerIndex ?? currentPlayer;
-      setPhase('gameEnd');
-      setWinnerIndex(resolvedWinner);
-      setIsGameEndDialogOpen(true);
-      if (!isHumanVsHumanGame) {
-        recordResult(resolvedWinner === chosenRoleIndex ? 'win' : 'loss');
-      }
-      trackEvent('game-finished', {
-        game: gameId,
-        mode,
-        variant: selectedVariantIndex,
-        ...(isHumanVsHumanGame ? {} : { result: resolvedWinner === chosenRoleIndex ? 'win' : 'loss' })
-      });
-    };
-
     const canUndo = phase === 'play'
       && undoSnapshot !== null
       && (isHumanVsHumanGame || undoSnapshot.currentPlayer === chosenRoleIndex);
@@ -229,81 +200,66 @@ export const strategyGameFactory = <TBoard,>({
         clearTimeout(botTimeoutRef.current);
         botTimeoutRef.current = null;
       }
-      setBoard(undoSnapshot!.board);
-      setCurrentPlayer(undoSnapshot!.currentPlayer);
-      setMoveCount(undoSnapshot!.moveCount);
-      setTurnState(null);
-      setUndoSnapshot(null);
-      currentTurnHasMovesRef.current = false;
-    };
-
-    const endTurn = () => {
-      currentTurnHasMovesRef.current = false;
-      setCurrentPlayer(p => 1 - p!);
+      store.setState({
+        board: undoSnapshot!.board,
+        currentPlayer: undoSnapshot!.currentPlayer,
+        moveCount: undoSnapshot!.moveCount,
+        turnState: null,
+        undoSnapshot: null,
+        currentTurnHasMoves: false
+      });
     };
 
     const startGame = (roleIndex: number | null = null) => {
-      setPhase('play');
-      setCurrentPlayer(0);
-      setChosenRoleIndex(roleIndex);
+      store.setState({ phase: 'play', currentPlayer: 0, chosenRoleIndex: roleIndex });
     };
 
-    const isClientMoveAllowed = phase === 'play'
-      && (isHumanVsHumanGame || currentPlayer === chosenRoleIndex);
+    const ctx: Ctx = buildCtx(state, resolvedPlayerNames);
 
-    const ctx: Ctx = {
-      isHumanVsHumanGame,
-      resolvedPlayerNames,
-      chosenRoleIndex,
-      phase,
-      turnState,
-      currentPlayer,
-      isClientMoveAllowed,
-      winnerIndex,
-      moveCount
-    };
-
-    // Bots chain the moves of a multi-move turn through setTimeout on the
-    // wrappers captured when their turn started, so by the time the second
-    // move dispatches, the render-scoped `ctx` those wrappers close over is
-    // stale (e.g. `turnState` still null). Validators must judge the move
-    // against the *current* game state, so they read `ctx` through this ref.
-    const ctxRef = useRef(ctx);
-    ctxRef.current = ctx;
-
+    // For the BoardClient (setTurnState is current usage; endTurn/endGame only
+    // remain for legacy compatibility). Moves never see this object: legacy
+    // `apply` moves get the reducer's events, outcome-returning moves get none.
     const events: Events = {
-      endTurn,
-      endGame,
-      // Also patch turnState onto ctxRef synchronously: a chained dispatch can
-      // validate before React re-renders (e.g. a bot's 0-delay setTimeout),
-      // when the render-synced ref would still hold the previous turnState.
-      setTurnState: (state) => {
-        setTurnState(state);
-        ctxRef.current = { ...ctxRef.current, turnState: state };
+      endTurn: () => {
+        store.setState({
+          currentTurnHasMoves: false,
+          currentPlayer: 1 - store.getState().currentPlayer!
+        });
+      },
+      endGame: (winnerIndex?: number | null) => {
+        const resolvedWinner = winnerIndex ?? store.getState().currentPlayer;
+        store.setState({ phase: 'gameEnd', winnerIndex: resolvedWinner });
+        handleGameEnd(resolvedWinner);
+      },
+      setTurnState: (turnState) => {
+        store.setState({ turnState });
       }
     };
 
-    wrappedGameMoves = mapValues(normalizedMoves, ({ legacyApply, apply }, name) => {
-      const wrapped: GameMoves<TBoard>[string] = (board: TBoard, ...args: unknown[]) =>
-        moveWrapper(name, board, args, () => apply
-          ? apply(board, { ctx }, ...args)
-          : legacyApply!(board, { ctx, events }, ...args));
+    wrappedGameMoves = mapValues(normalizedMoves, (_def, name) => {
+      const wrapped: GameMoves<TBoard>[string] = (moveBoard: TBoard, ...args: unknown[]) =>
+        dispatchMove(name, moveBoard, args);
       return wrapped;
     });
 
     // What the BoardClient receives: the same moves, but a dispatch is silently
     // ignored unless `isAllowed` holds — turn ownership (ctx.isClientMoveAllowed)
-    // AND the move's validator. This engine-side gate replaces per-handler
-    // `if (!allowed) return` guards, and also covers browsers that fire pointer
-    // events on disabled buttons. Bots and the auto `endOfTurnMove` dispatch use
-    // `wrappedGameMoves` instead: there an illegal move is a bug, and the
-    // validator fails loudly (see `reportIllegalMove`).
+    // AND the move's validator, both judged against the current store state.
+    // This engine-side gate replaces per-handler `if (!allowed) return` guards,
+    // and also covers browsers that fire pointer events on disabled buttons.
+    // Bots and the auto `endOfTurnMove` dispatch use `wrappedGameMoves` instead:
+    // there an illegal move is a bug, and the validator fails loudly (see
+    // `reportIllegalMove`).
     const clientGameMoves: GameMoves<TBoard> = mapValues(normalizedMoves, ({ validate }, name) => {
-      const isAllowed = (board: TBoard, ...args: unknown[]) =>
-        ctxRef.current.isClientMoveAllowed
-          && (!validate || validate(board, { ctx: ctxRef.current }, ...args));
-      const clientWrapped: GameMoves<TBoard>[string] = (board: TBoard, ...args: unknown[]) =>
-        isAllowed(board, ...args) ? wrappedGameMoves[name]!(board, ...args) : { nextBoard: board };
+      const isAllowed = (moveBoard: TBoard, ...args: unknown[]) => {
+        const liveCtx = buildCtx(store.getState(), resolvedPlayerNames);
+        return liveCtx.isClientMoveAllowed
+          && (!validate || validate(moveBoard, { ctx: liveCtx }, ...args));
+      };
+      const clientWrapped: GameMoves<TBoard>[string] = (moveBoard: TBoard, ...args: unknown[]) =>
+        isAllowed(moveBoard, ...args)
+          ? wrappedGameMoves[name]!(moveBoard, ...args)
+          : { nextBoard: moveBoard };
       clientWrapped.isAllowed = isAllowed;
       return clientWrapped;
     });
@@ -314,7 +270,9 @@ export const strategyGameFactory = <TBoard,>({
       const time = Math.floor(Math.random() * 500 + 1000);
       botTimeoutRef.current = setTimeout(() => {
         botTimeoutRef.current = null;
-        botStrategy({ board, ctx, moves: wrappedGameMoves });
+        // read fresh state: the render this closure came from may be long gone
+        const s = store.getState();
+        botStrategy({ board: s.board, ctx: buildCtx(s, resolvedPlayerNames), moves: wrappedGameMoves });
       }, time);
     };
 

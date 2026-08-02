@@ -928,9 +928,9 @@ describe('outcome-returning moves (apply)', () => {
     });
   });
 
-  // The v2 twin of the legacy two-phase regression tests: nextTurnState must be
-  // patched onto ctxRef synchronously while processing the outcome, or a bot's
-  // 0-delay chained dispatch would be validated against a stale turnState.
+  // The v2 twin of the legacy two-phase regression tests: the returned
+  // nextTurnState must land in the authoritative store synchronously, or a
+  // bot's 0-delay chained dispatch would be validated against a stale turnState.
   const twoPhaseV2BotConfig = (chainDelayMs: number) => makeConfig({
     BoardClient: ({ board }: BoardClientProps<Board>) => (
       <span data-testid="board">{board.join(',')}</span>
@@ -975,6 +975,69 @@ describe('outcome-returning moves (apply)', () => {
 
   it('validates a 0-delay chained second move dispatched before React re-renders', () => {
     expect(playTwoPhaseV2BotTurn(0)).toBe('initial,p1,p2');
+  });
+
+  // These two tests pin what the external store fixed: validators and chained
+  // dispatches read the authoritative store, not a render snapshot. A validator
+  // depending on a mid-turn-changing ctx field OTHER than turnState (here
+  // moveCount) was impossible under the old per-field ctxRef shadow.
+  describe('the external store fixes render-snapshot staleness', () => {
+    it('a 0-delay chained dispatch validates against current ctx.moveCount', () => {
+      vi.useFakeTimers();
+      try {
+        const config = makeConfig({
+          BoardClient: ({ board }: BoardClientProps<Board>) => (
+            <span data-testid="board">{board.join(',')}</span>
+          ),
+          gameplay: {
+            moves: {
+              phase1: { apply: (board: Board) => ({ nextBoard: [...board, 'p1'] }) },
+              phase2: {
+                validate: (_board: Board, { ctx }: { ctx: Ctx }) => ctx.moveCount === 1,
+                apply: (board: Board) => ({ nextBoard: [...board, 'p2'], isTurnEnd: true })
+              }
+            }
+          },
+          botStrategy: ({ board, moves }) => {
+            const { nextBoard } = moves.phase1(board);
+            setTimeout(() => { moves.phase2(nextBoard); }, 0);
+          }
+        });
+        const { getByTestId } = renderGame(config);
+        fireEvent.click(getByTestId('role-btn-1')); // bot moves first
+        act(() => { vi.advanceTimersByTime(1500); }); // phase1
+        act(() => { vi.advanceTimersByTime(0); }); // chained phase2, before any re-render
+        expect(getByTestId('board').textContent).toBe('initial,p1,p2');
+      } finally {
+        vi.clearAllTimers();
+        vi.useRealTimers();
+      }
+    });
+
+    it('throws in dev when a chained dispatch passes a stale board', () => {
+      vi.useFakeTimers();
+      try {
+        const config = makeConfig({
+          gameplay: {
+            moves: {
+              step: { apply: (board: Board) => ({ nextBoard: [...board, 'x'] }) }
+            }
+          },
+          botStrategy: ({ board, moves }) => {
+            moves.step(board);
+            // BUG under test: passes the original board instead of nextBoard
+            setTimeout(() => { moves.step(board); }, 0);
+          }
+        });
+        const { getByTestId } = renderGame(config);
+        fireEvent.click(getByTestId('role-btn-1')); // bot moves first
+        expect(() => act(() => { vi.advanceTimersByTime(1500); }))
+          .toThrow(/stale board passed to move step/);
+      } finally {
+        vi.clearAllTimers();
+        vi.useRealTimers();
+      }
+    });
   });
 
   describe('validate on outcome-returning moves', () => {

@@ -231,11 +231,15 @@ imperatively; existing games are migrated one by one, new games should use
 
 You must always pass `board` as a first param to all moves (meaning you must
 pass the updated board to subsequent moves in case of multiple moves within a
-turn). This threading is not incidental: the framework holds game state in
-React render state, which a bot's `setTimeout` closures see only as a stale
-snapshot — see [AGENTS.md § Known limitation: React state staleness in
-multi-move turns](AGENTS.md#known-limitation-react-state-staleness-in-multi-move-turns)
-for the root cause and how `ctx.turnState` is handled.
+turn). The framework's own state lives in a synchronous store outside React
+and is authoritative, so the engine no longer *needs* the argument for
+correctness — it stays because a move is a pure function of its inputs, usable
+outside a live game (bot look-ahead and specs call moves directly on
+hypothetical boards), and because the explicit threading lets the engine catch
+chaining bugs: passing a stale board to a chained move throws in development
+("stale board passed to move …") instead of corrupting the game — see
+[AGENTS.md § Game state architecture: synchronous store outside
+React](AGENTS.md#game-state-architecture-synchronous-store-outside-react).
 
 In `gameplay.moves`, each entry is either a legacy move function itself
 (shorthand) or a long-form object `{ apply, validate? }` (preferred) /
