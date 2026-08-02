@@ -1,6 +1,7 @@
 import { range, some, isEqual, cloneDeep } from 'lodash';
 import {
-  strategyGameFactory, type BoardClientProps, type Events, GameBoard, useHoverPreview
+  strategyGameFactory, type BoardClientProps, type Ctx, type MoveOutcome,
+  GameBoard, useHoverPreview
 } from '../../strategy-game-factory';
 import { ChessBishopSvg } from './chess-bishop-svg';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
@@ -79,15 +80,14 @@ const moves = {
   placeBishop: {
     validate: (board: Board, _, target: Field) =>
       some(getAllowedMoves(board), field => isEqual(field, target)),
-    legacyApply: (board: Board, { events }: { events: Events }, { row, col }: Field) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, { row, col }: Field): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       markForbiddenFields(nextBoard, { row, col });
       nextBoard[row][col] = BISHOP;
-      events.endTurn();
       if (getAllowedMoves(nextBoard).length === 0) {
-        events.endGame();
+        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   }
 };

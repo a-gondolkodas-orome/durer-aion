@@ -1,5 +1,7 @@
 import { range, some, isEqual, cloneDeep } from 'lodash';
-import { strategyGameFactory, type BoardClientProps, type Events, GameBoard } from '../../strategy-game-factory';
+import {
+  strategyGameFactory, type BoardClientProps, type Ctx, type MoveOutcome, GameBoard
+} from '../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { getAllowedMoves, generateStartBoard, isTarget, boardSize, type Board, type Field } from './helpers';
 import { RookSvg } from '../shared/rook-svg';
@@ -55,16 +57,14 @@ const moves = {
   moveRook: {
     validate: (board: Board, _, target: Field) =>
       some(getAllowedMoves(board), field => isEqual(field, target)),
-    legacyApply: (board: Board, { events }: { events: Events }, { row, col }: Field) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, { row, col }: Field): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard.rookPosition = { row, col };
 
       if (isTarget({ row, col })) {
-        events.endGame();
-      } else {
-        events.endTurn();
+        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   }
 };

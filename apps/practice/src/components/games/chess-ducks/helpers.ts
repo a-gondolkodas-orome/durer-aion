@@ -1,5 +1,5 @@
 import { flatMap, range, cloneDeep } from "lodash";
-import type { Events } from "../../strategy-game-factory";
+import type { Ctx, MoveOutcome } from "../../strategy-game-factory";
 
 export const DUCK = 1 as const;
 export const FORBIDDEN = 2 as const;
@@ -39,18 +39,25 @@ export const markForbiddenFields = (board: Board, { row, col }: Field): void => 
 export const isPlacementAllowed = (board: Board, field: Field): boolean =>
   !!field && board[field.row]?.[field.col] === null;
 
+// The board transform a placement performs, with no turn or game consequences.
+// Shared by the move and by the bot's lookahead search, which wants the next
+// board and nothing else.
+export const withDuckPlaced = (board: Board, { row, col }: Field): Board => {
+  const nextBoard = cloneDeep(board);
+  nextBoard[row][col] = DUCK;
+  markForbiddenFields(nextBoard, { row, col });
+  return nextBoard;
+};
+
 export const moves = {
   placeDuck: {
     validate: (board: Board, _, field: Field) => isPlacementAllowed(board, field),
-    legacyApply: (board: Board, { events }: { events: Events }, { row, col }: Field) => {
-      const nextBoard = cloneDeep(board);
-      nextBoard[row][col] = DUCK;
-      markForbiddenFields(nextBoard, { row, col });
-      events.endTurn();
+    apply: (board: Board, { ctx }: { ctx: Ctx }, field: Field): MoveOutcome<Board> => {
+      const nextBoard = withDuckPlaced(board, field);
       if (getAllowedMoves(nextBoard).length === 0) {
-        events.endGame();
+        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   }
 };

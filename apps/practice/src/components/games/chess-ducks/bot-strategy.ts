@@ -1,5 +1,5 @@
-import { getBoardIndices, moves, getAllowedMoves, type Board, type Field } from "./helpers";
-import { dummyEvents, type StrategyArgs } from "../../strategy-game-factory";
+import { getBoardIndices, withDuckPlaced, getAllowedMoves, type Board, type Field } from "./helpers";
+import { type StrategyArgs } from "../../strategy-game-factory";
 import { shuffle, sample } from "lodash";
 
 /* This strategy file is relevant for the 4x7 case */
@@ -46,8 +46,7 @@ const getOptimalSmartBotMove = (board: Board): Field => {
     // shuffle + find has the same effect as filter + sample: find a random
     // from the optimal moves
     const optimalPlace = shuffle(allowedMoves).find(({ row, col }) => {
-      const { nextBoard } = moves.placeDuck.legacyApply(board, { events: dummyEvents }, { row, col });
-      return isWinningState(nextBoard);
+      return isWinningState(withDuckPlaced(board, { row, col }));
     });
 
     if (optimalPlace !== undefined) {
@@ -126,8 +125,7 @@ const isWinningState = (board: Board): boolean => {
   const allowedPlacesForOther = getAllowedMoves(board);
 
   const optimalPlaceForOther = allowedPlacesForOther.find(({ row, col }) => {
-    const { nextBoard } = moves.placeDuck.legacyApply(board, { events: dummyEvents }, { row, col });
-    return isWinningState(nextBoard);
+    return isWinningState(withDuckPlaced(board, { row, col }));
   });
   return optimalPlaceForOther === undefined;
 };

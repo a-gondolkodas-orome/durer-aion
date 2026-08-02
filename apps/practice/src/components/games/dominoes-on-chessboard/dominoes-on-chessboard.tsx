@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { range, cloneDeep, isEqual, flatMap } from 'lodash';
 import {
   strategyGameFactory,
-  type Events, type BoardClientProps,
+  type Ctx, type MoveOutcome, type BoardClientProps,
   GameBoard, useHoverPreview
 } from '../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
@@ -162,14 +162,13 @@ export const isDominoAllowed = (board: Board, domino: Domino): boolean =>
 const moves = {
   placeDomino: {
     validate: (board: Board, _, domino: Domino) => isDominoAllowed(board, domino),
-    legacyApply: (board: Board, { events }: { events: Events }, domino: Domino) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, domino: Domino): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard.push(domino);
-      events.endTurn();
       if (getPossibleMoves(nextBoard).length === 0) {
-        events.endGame();
+        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   }
 }

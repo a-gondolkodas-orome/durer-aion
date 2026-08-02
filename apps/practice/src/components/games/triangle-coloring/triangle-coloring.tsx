@@ -1,6 +1,6 @@
 import {
-  strategyGameFactory, dummyEvents,
-  type Events, type StrategyArgs, type BoardClientProps,
+  strategyGameFactory,
+  type Ctx, type MoveOutcome, type StrategyArgs, type BoardClientProps,
   GameBoard
 } from '../../strategy-game-factory';
 import { range, cloneDeep, sample, shuffle } from 'lodash';
@@ -116,20 +116,27 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
 export const isColoringAllowed = (board: Board, id: number): boolean =>
   Number.isInteger(id) && id >= 0 && id < triangles.length && board[id] === ALLOWED;
 
+// The board transform a colouring performs, with no turn or game consequences.
+// Shared by the move and by the lookahead search below, which wants the next
+// board and nothing else.
+const withTriangleColored = (board: Board, id: number): Board => {
+  const nextBoard = cloneDeep(board);
+  nextBoard[id] = COLORED;
+  triangles[id].neighbors.forEach(n => {
+    nextBoard[n] = FORBIDDEN;
+  });
+  return nextBoard;
+};
+
 const moves = {
   colorTriangle: {
     validate: (board: Board, _, id: number) => isColoringAllowed(board, id),
-    legacyApply: (board: Board, { events }: { events: Events }, id: number) => {
-      const nextBoard = cloneDeep(board);
-      nextBoard[id] = COLORED;
-      triangles[id].neighbors.forEach(n => {
-        nextBoard[n] = FORBIDDEN;
-      });
-      events.endTurn();
+    apply: (board: Board, { ctx }: { ctx: Ctx }, id: number): MoveOutcome<Board> => {
+      const nextBoard = withTriangleColored(board, id);
       if (getAllowedMoves(nextBoard).length === 0) {
-        events.endGame();
+        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   }
 };
@@ -147,10 +154,9 @@ const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
 
 const getOptimalSmartBotMove = (board: Board) => {
   const allowedMoves = getAllowedMoves(board);
-  const optimalPlace = shuffle(allowedMoves).find(i => {
-    const { nextBoard } = moves.colorTriangle.legacyApply(board, { events: dummyEvents }, i);
-    return isWinningState(nextBoard);
-  });
+  const optimalPlace = shuffle(allowedMoves).find(
+    i => isWinningState(withTriangleColored(board, i))
+  );
 
   if (optimalPlace !== undefined) {
     return optimalPlace;
@@ -165,10 +171,9 @@ const isWinningState = (board: Board) => {
     return true;
   }
 
-  const optimalPlaceForOther = allowedPlacesForOther.find(i => {
-    const { nextBoard } = moves.colorTriangle.legacyApply(board, { events: dummyEvents }, i);
-    return isWinningState(nextBoard);
-  });
+  const optimalPlaceForOther = allowedPlacesForOther.find(
+    i => isWinningState(withTriangleColored(board, i))
+  );
   return optimalPlaceForOther === undefined;
 };
 

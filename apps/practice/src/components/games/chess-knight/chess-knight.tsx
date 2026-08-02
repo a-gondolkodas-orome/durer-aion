@@ -1,5 +1,7 @@
 import { range, some, isEqual, cloneDeep } from 'lodash';
-import { strategyGameFactory, type BoardClientProps, type Events, GameBoard } from '../../strategy-game-factory';
+import {
+  strategyGameFactory, type BoardClientProps, type Ctx, type MoveOutcome, GameBoard
+} from '../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { getAllowedMoves, generateStartBoard, markVisitedFields, type Board, type Field } from './helpers';
 import { ChessKnightSvg } from './chess-knight-svg';
@@ -51,18 +53,17 @@ const moves = {
   moveKnight: {
     validate: (board: Board, _, target: Field) =>
       some(getAllowedMoves(board), field => isEqual(field, target)),
-    legacyApply: (board: Board, { events }: { events: Events }, { row, col }: Field) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, { row, col }: Field): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       markVisitedFields(nextBoard, nextBoard.knightPosition);
 
       nextBoard.chessBoard[row][col] = 'knight';
       nextBoard.knightPosition = { row, col };
 
-      events.endTurn();
       if (getAllowedMoves(nextBoard).length === 0) {
-        events.endGame();
+        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   }
 };

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { range, cloneDeep, isEqual, flatMap } from 'lodash';
 import {
   strategyGameFactory,
-  type Events, type Ctx, type BoardClientProps,
+  type MoveOutcome, type Ctx, type BoardClientProps,
   GameBoard, useHoverPreview
 } from '../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
@@ -164,17 +164,14 @@ const moves = {
   placeDomino: {
     validate: (board: Board, { ctx }: { ctx: Ctx }, domino: Domino) =>
       isDominoAllowed(board, ctx.currentPlayer!, domino),
-    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx; events: Events }, domino: Domino) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, domino: Domino): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard.push(domino);
       const nextPlayer = 1 - ctx.currentPlayer!;
-      events.endTurn();
-      // Normal play: if the next player has no legal placement, they lose and the player
-      // who just moved wins (endGame with no argument credits the mover).
       if (getPossibleMoves(nextBoard, nextPlayer).length === 0) {
-        events.endGame();
+        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   }
 };
