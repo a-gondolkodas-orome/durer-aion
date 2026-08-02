@@ -80,7 +80,6 @@ const moves = {
       const nextBoard = ctx.currentPlayer === 0
         ? { left: board.left + step, right: board.right }
         : { left: board.left, right: board.right - step };
-      // Jumping past the other piece wins for the player who just moved.
       if (nextBoard.right < nextBoard.left) {
         return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }

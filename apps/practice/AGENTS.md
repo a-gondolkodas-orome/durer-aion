@@ -247,6 +247,29 @@ See [README.md § Internationalisation
 (i18n)](README.md#internationalisation-i18n). Use the `t()` helper from
 `translate.js`.
 
+## Comments
+
+Only write a comment when it explains something that is **not self-evident from
+the code itself** — a rule of the game the condition alone doesn't imply, why an
+apparently redundant branch exists, a non-obvious invariant, the reasoning behind
+a strategy. A comment that restates the line under it is noise; delete it.
+
+```ts
+// noise — the code already says exactly this
+// The player who takes the last match wins.
+if (nextBoard.length === 0) {
+  return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
+}
+
+// worth keeping — the return value alone doesn't say why there is no game-end branch
+// A split never empties the board, so it can only ever end the turn.
+return { nextBoard, isTurnEnd: true };
+```
+
+This applies with particular force to moves on the outcome-returning `apply`
+contract: `gameEnd: { winnerIndex }` already names the winner, so prose
+narrating who won earns nothing.
+
 ## Maintenance philosophy
 
 This is a volunteer side-project with limited time. Prefer simple, consistent,
