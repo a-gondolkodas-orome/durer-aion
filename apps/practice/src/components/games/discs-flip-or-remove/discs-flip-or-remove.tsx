@@ -1,5 +1,6 @@
 import {
-  strategyGameFactory, type Events, type StrategyArgs, type BoardClientProps, GameBoard, useHoverPreview
+  strategyGameFactory, type Ctx, type MoveOutcome, type StrategyArgs, type BoardClientProps,
+  GameBoard, useHoverPreview
 } from "../../strategy-game-factory";
 import { range, isEqual, random, sample, difference, filter, cloneDeep } from "lodash";
 import { useTranslation } from "../../../language";
@@ -110,27 +111,25 @@ export const isFlipAllowed = (board: Board, count: number): boolean =>
 export const moves = {
   removeDiscs: {
     validate: (board: Board, _, count) => isRemovalAllowed(board, count),
-    legacyApply: (board: Board, { events }: { events: Events }, count) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, count): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard[0] -= count;
-      events.endTurn();
       if (isEqual(nextBoard, [0, 0])) {
-        events.endGame();
+        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   },
   turnDiscs: {
     validate: (board: Board, _, count) => isFlipAllowed(board, count),
-    legacyApply: (board: Board, { events }: { events: Events }, count) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, count): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard[1] -= count;
       nextBoard[0] += count;
-      events.endTurn();
       if (isEqual(nextBoard, [0, 0])) {
-        events.endGame();
+        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   }
 };

@@ -1,7 +1,7 @@
 import { uniq, sample, random, range } from 'lodash';
 import {
   strategyGameFactory,
-  type Events, type StrategyArgs, type BoardClientProps,
+  type Ctx, type MoveOutcome, type StrategyArgs, type BoardClientProps,
   GameBoard
 } from '../../strategy-game-factory';
 import { useTranslation } from '../../../language';
@@ -163,14 +163,12 @@ export const isConversionAllowed = (board: Board, k: number, l: number): boolean
 export const moves = {
   convert: {
     validate: (board: Board, _, k, l) => isConversionAllowed(board, k, l),
-    legacyApply: (board: Board, { events }: { events: Events }, k, l) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, k, l): MoveOutcome<Board> => {
       const nextBoard = board.map(v => (v === k ? l : v)).sort((a, b) => a - b);
       if (uniq(nextBoard).length === 1) {
-        events.endGame(); // whoever equalises the coins wins → current player
-      } else {
-        events.endTurn();
+        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   }
 };

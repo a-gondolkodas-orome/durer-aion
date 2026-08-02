@@ -1,6 +1,6 @@
 import { cloneDeep } from 'lodash';
 import {
-  strategyGameFactory, type Ctx, type Events, type BoardClientProps, GameBoard
+  strategyGameFactory, type Ctx, type MoveOutcome, type BoardClientProps, GameBoard
 } from '../../strategy-game-factory';
 import { smartBotStrategy } from './bot-strategy';
 import { RockSvg } from './symbols/rock-svg';
@@ -65,18 +65,19 @@ const getWinnerIndex = (board: Board) => {
 export const isRemovalAllowed = (board: Board, opponent: number, idx: number): boolean =>
   Number.isInteger(idx) && idx >= 0 && idx < board[opponent].length && board[opponent][idx] !== null;
 
-const moves = {
+export const moves = {
   removeSymbol: {
     validate: (board: Board, { ctx }: { ctx: Ctx }, idx: number) =>
       isRemovalAllowed(board, 1 - ctx.currentPlayer!, idx),
-    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, idx: number) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, idx: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard[1 - ctx.currentPlayer!][idx] = null;
-      events.endTurn();
-      if (isGameEnd(nextBoard)) {
-        events.endGame(getWinnerIndex(nextBoard));
+      // getWinnerIndex is undefined exactly while the game is still running.
+      const winnerIndex = getWinnerIndex(nextBoard);
+      if (winnerIndex !== undefined) {
+        return { nextBoard, gameEnd: { winnerIndex } };
       }
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   }
 }

@@ -3,7 +3,7 @@ import {
   strategyGameFactory,
   type BoardClientProps,
   type Ctx,
-  type Events,
+  type MoveOutcome,
   type StrategyArgs,
   GameBoard
 } from '../../strategy-game-factory';
@@ -109,21 +109,19 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const moves = {
+export const moves = {
   placeDigit: {
     validate: (board: Board, _, cell: number, digit: number) => isLegalPlacement(board, cell, digit),
-    legacyApply: (board: Board, { events }: { ctx: Ctx; events: Events }, cell: number, digit: number) => {
+    apply: (board: Board, _, cell: number, digit: number): MoveOutcome<Board> => {
       const nextBoard = board.map((v, i) => (i === cell ? digit : v));
-      events.endTurn();
-      // The next player now faces nextBoard: a full grid means the first player
-      // won; an empty grid with no legal move means that player is stuck and the
-      // second player won.
       if (isFull(nextBoard)) {
-        events.endGame(0);
-      } else if (legalMoves(nextBoard).length === 0) {
-        events.endGame(1);
+        return { nextBoard, gameEnd: { winnerIndex: 0 } };
       }
-      return { nextBoard };
+      // An empty cell remains but the next player has no legal digit for it.
+      if (legalMoves(nextBoard).length === 0) {
+        return { nextBoard, gameEnd: { winnerIndex: 1 } };
+      }
+      return { nextBoard, isTurnEnd: true };
     }
   }
 };

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import {
-  strategyGameFactory, type Events, type BoardClientProps, GameBoard, useHoverPreview
+  strategyGameFactory, type Ctx, type MoveOutcome, type BoardClientProps, GameBoard, useHoverPreview
 } from '../../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import {
@@ -100,19 +100,18 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const moves = {
+export const moves = {
   stretchRope: {
     validate: (board: Board, _, edge: Edge) => isAllowed(board, edge),
-    legacyApply: (board: Board, { events }: { events: Events }, { from, to }) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, { from, to }): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       // A rope is stretched as far as it legally reaches, not just between the
       // two nodes that were clicked.
       nextBoard.push(getAllowedSuperset(board, { from, to })!);
-      events.endTurn();
       if (isGameEnd(nextBoard)) {
-        events.endGame();
+        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   }
 }
