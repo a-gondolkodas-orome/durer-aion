@@ -1,4 +1,4 @@
-import { strategyGameFactory, type Ctx, type Events } from '../../strategy-game-factory';
+import { strategyGameFactory, type Ctx, type MoveOutcome } from '../../strategy-game-factory';
 import { BoardClient } from './board-client';
 import {
   type Board, applyMove, currentWindowSize, generateStartBoard, isTerminal, isWindowAllowed
@@ -11,14 +11,14 @@ const moves = {
   // turn passes.
   placeWindow: {
     validate: (board: Board, _, a: number, b: number) => isWindowAllowed(board, a, b),
-    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx; events: Events }, a: number, b: number) => {
+    apply: (
+      board: Board, { ctx }: { ctx: Ctx }, a: number, b: number
+    ): MoveOutcome<Board> => {
       const nextBoard = applyMove(board, a, b);
       if (isTerminal(nextBoard)) {
-        events.endGame(ctx.currentPlayer!);
-      } else {
-        events.endTurn();
+        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   }
 };

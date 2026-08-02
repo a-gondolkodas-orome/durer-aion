@@ -1,6 +1,6 @@
 import { range } from 'lodash';
 import {
-  strategyGameFactory, type BoardClientProps, type Ctx, type Events, GameBoard, useHoverPreview
+  strategyGameFactory, type BoardClientProps, type Ctx, type MoveOutcome, GameBoard, useHoverPreview
 } from '../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import {
@@ -117,13 +117,12 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 const moves = {
   breakPiece: {
     validate: (board: Board, _, move: Move) => isBreakAllowed(board, move),
-    legacyApply: (board: Board, { events }: { events: Events }, move: Move) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, move: Move): MoveOutcome<Board> => {
       const nextBoard = applyBreak(board, move);
-      events.endTurn();
       if (!hasSafeBreak(nextBoard.pieces)) {
-        events.endGame();
+        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   }
 };

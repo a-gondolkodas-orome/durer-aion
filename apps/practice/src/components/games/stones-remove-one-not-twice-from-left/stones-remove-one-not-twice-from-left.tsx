@@ -1,6 +1,6 @@
 import {
   strategyGameFactory,
-  type Ctx, type Events, type StrategyArgs, type BoardClientProps,
+  type Ctx, type MoveOutcome, type StrategyArgs, type BoardClientProps,
   GameBoard, useHoverPreview
 } from '../../strategy-game-factory';
 import { cloneDeep, isEqual, sample, random, range } from 'lodash';
@@ -73,15 +73,14 @@ const moves = {
   removeStone: {
     validate: (board: Board, { ctx }: { ctx: Ctx }, pileId) =>
       isRemovalAllowed(board, ctx.currentPlayer!, pileId),
-    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, pileId) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, pileId): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard.piles[pileId] = board.piles[pileId] - 1;
       nextBoard.leftRestriction[ctx.currentPlayer!] = (pileId === 0);
-      events.endTurn();
       if (isGameEnd(nextBoard, ctx)) {
-        events.endGame();
+        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   }
 };

@@ -1,5 +1,5 @@
 import {
-  strategyGameFactory, type Events, type BoardClientProps, type StrategyArgs, GameBoard
+  strategyGameFactory, type Ctx, type MoveOutcome, type BoardClientProps, type StrategyArgs, GameBoard
 } from '../../strategy-game-factory';
 import { range, cloneDeep, sample, random } from 'lodash';
 import { strategyDict } from './bot-strategy';
@@ -64,15 +64,14 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
 const moves = {
   removeNumber: {
     validate: (board: Board, _, n) => isAllowed(board, n),
-    legacyApply: (board: Board, { events }: { events: Events }, n) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, n): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard.numbersOnTable[n - 1] = false;
       nextBoard.previousMove = n;
-      events.endTurn();
       if (isGameEnd(nextBoard)) {
-        events.endGame();
+        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   }
 };

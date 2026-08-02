@@ -1,4 +1,4 @@
-import { strategyGameFactory, type Ctx, type Events } from "../../strategy-game-factory";
+import { strategyGameFactory, type Ctx, type MoveOutcome } from "../../strategy-game-factory";
 import {
   type Board, type Move, hasLegalMove, generateStartBoard, isRemovalAllowed
 } from "./helpers";
@@ -10,15 +10,14 @@ export type { Board };
 const moves = {
   removeFromTwo: {
     validate: (board: Board, _, move: Move) => isRemovalAllowed(board, move),
-    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx; events: Events }, [i, j]: Move) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, [i, j]: Move): MoveOutcome<Board> => {
       const nextBoard = board.slice();
       nextBoard[i] -= 1;
       nextBoard[j] -= 1;
-      events.endTurn();
-      // If no move remains, the next player cannot move and loses, so the player
-      // who just moved (the current player) wins.
-      if (!hasLegalMove(nextBoard)) events.endGame(ctx.currentPlayer);
-      return { nextBoard };
+      if (!hasLegalMove(nextBoard)) {
+        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
+      }
+      return { nextBoard, isTurnEnd: true };
     }
   }
 };

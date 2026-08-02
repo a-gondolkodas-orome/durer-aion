@@ -1,5 +1,5 @@
 import {
-  strategyGameFactory, type Events, type BoardClientProps, type StrategyArgs, GameBoard
+  strategyGameFactory, type Ctx, type MoveOutcome, type BoardClientProps, type StrategyArgs, GameBoard
 } from '../../strategy-game-factory';
 import { range, cloneDeep, random, sample } from 'lodash';
 import { smartBotStrategy } from './bot-strategy';
@@ -70,7 +70,7 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
 const moves = {
   rob: {
     validate: (board: Board, _, index) => isRobbable(board, index),
-    legacyApply: (board: Board, { events }: { events: Events }, index) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, index): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       // so that ai strategy can be simpler: first move is always the same
       const transformedMove = board.firstMove === null ? 0 : index;
@@ -79,11 +79,10 @@ const moves = {
       }
       nextBoard.lastMove = transformedMove;
       nextBoard.circle[transformedMove] = false;
-      events.endTurn();
       if (getAllowedBanks(nextBoard).length === 0) {
-        events.endGame();
+        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   }
 }

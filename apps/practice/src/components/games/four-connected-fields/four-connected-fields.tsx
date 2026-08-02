@@ -1,4 +1,4 @@
-import { strategyGameFactory, type Ctx, type Events } from "../../strategy-game-factory";
+import { strategyGameFactory, type Ctx, type MoveOutcome } from "../../strategy-game-factory";
 import { type Board, hasAnyMove, isNodePlayable } from "./helpers";
 import { randomBotStrategy, smartBotStrategy } from "./bot-strategy";
 import { BoardClient } from "./board-client";
@@ -8,17 +8,15 @@ export type { Board };
 const moves = {
   placeCoin: {
     validate: (board: Board, _, node: number) => isNodePlayable(board, node),
-    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx; events: Events }, node: number) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, node: number): MoveOutcome<Board> => {
       const nextBoard = board.slice();
       nextBoard[node] += 1;
-      events.endTurn();
-      // The player who places the last coin wins: the game ends when no field is
-      // empty and no line has equal endpoints, i.e. when the mover just made all
-      // further moves impossible.
+      // No move remains once every field is occupied and no line has equal
+      // endpoints.
       if (!hasAnyMove(nextBoard)) {
-        events.endGame(ctx.currentPlayer);
+        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   }
 };

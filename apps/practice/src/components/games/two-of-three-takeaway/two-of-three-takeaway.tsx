@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { range } from 'lodash';
 import {
   strategyGameFactory,
-  type Ctx, type Events, type StrategyArgs, type BoardClientProps,
+  type Ctx, type MoveOutcome, type StrategyArgs, type BoardClientProps,
   GameBoard
 } from '../../strategy-game-factory';
 import { useTranslation } from '../../../language';
@@ -105,15 +105,14 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 const moves = {
   takeChips: {
     validate: (board: Board, _, i: number, j: number) => isTakeAllowed(board, i, j),
-    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, i: number, j: number) => {
+    apply: (
+      board: Board, { ctx }: { ctx: Ctx }, i: number, j: number
+    ): MoveOutcome<Board> => {
       const nextBoard = applyMove(board, [i, j]);
       if (isTerminal(nextBoard)) {
-        // The opponent cannot move, so the player who just moved wins.
-        events.endGame(ctx.currentPlayer!);
-      } else {
-        events.endTurn();
+        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   }
 };
