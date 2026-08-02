@@ -61,7 +61,7 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   )
 };
 
-const moves = {
+export const moves = {
   removeNumber: {
     validate: (board: Board, _, n) => isAllowed(board, n),
     apply: (board: Board, { ctx }: { ctx: Ctx }, n): MoveOutcome<Board> => {

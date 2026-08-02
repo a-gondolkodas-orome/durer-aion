@@ -114,7 +114,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const moves = {
+export const moves = {
   breakPiece: {
     validate: (board: Board, _, move: Move) => isBreakAllowed(board, move),
     apply: (board: Board, { ctx }: { ctx: Ctx }, move: Move): MoveOutcome<Board> => {

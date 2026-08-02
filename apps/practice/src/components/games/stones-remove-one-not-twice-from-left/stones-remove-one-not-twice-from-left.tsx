@@ -69,7 +69,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const moves = {
+export const moves = {
   removeStone: {
     validate: (board: Board, { ctx }: { ctx: Ctx }, pileId) =>
       isRemovalAllowed(board, ctx.currentPlayer!, pileId),

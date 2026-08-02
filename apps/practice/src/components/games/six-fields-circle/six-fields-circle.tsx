@@ -7,7 +7,7 @@ import { BoardClient } from "./board-client";
 
 export type { Board };
 
-const moves = {
+export const moves = {
   removeFromTwo: {
     validate: (board: Board, _, move: Move) => isRemovalAllowed(board, move),
     apply: (board: Board, { ctx }: { ctx: Ctx }, [i, j]: Move): MoveOutcome<Board> => {

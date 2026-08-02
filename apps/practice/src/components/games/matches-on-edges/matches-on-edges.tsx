@@ -5,7 +5,7 @@ import {
 } from './helpers';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 
-const moves = {
+export const moves = {
   // Place the length-k subtable [a, b]: matches go on its free bounding edges.
   // If that leaves the other player with no legal move, they lose; otherwise the
   // turn passes.

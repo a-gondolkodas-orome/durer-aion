@@ -67,7 +67,7 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const moves = {
+export const moves = {
   rob: {
     validate: (board: Board, _, index) => isRobbable(board, index),
     apply: (board: Board, { ctx }: { ctx: Ctx }, index): MoveOutcome<Board> => {

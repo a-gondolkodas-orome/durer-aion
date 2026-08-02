@@ -102,7 +102,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const moves = {
+export const moves = {
   takeChips: {
     validate: (board: Board, _, i: number, j: number) => isTakeAllowed(board, i, j),
     apply: (
