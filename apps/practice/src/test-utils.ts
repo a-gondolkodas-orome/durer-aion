@@ -1,14 +1,4 @@
-import type { Ctx, Events } from './components/strategy-game-factory';
-
-// Mock `events` for testing move functions. Each handler is a spy, so tests can
-// assert e.g. `expect(events.endGame).toHaveBeenCalledWith(1)`. For production
-// code that needs no-op events (e.g. bot lookahead), use `dummyEvents` instead.
-export const makeEvents = (overrides: Partial<Events> = {}): Events => ({
-  endTurn: vi.fn(),
-  endGame: vi.fn(),
-  setTurnState: vi.fn(),
-  ...overrides
-});
+import type { Ctx } from './components/strategy-game-factory';
 
 // Mock `ctx` for testing move functions and bot strategies.
 export const makeCtx = (overrides: Partial<Ctx> = {}): Ctx => ({

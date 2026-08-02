@@ -208,9 +208,8 @@ meta object as second param and may receive any number of additional params
 (provided by the client based on player interaction or by the bot strategy).
 
 A move may result in ending the turn of the current player or ending the game or
-allow further moves within the same turn. In the preferred, outcome-returning
-form (`apply`) the move expresses all of this as data in its return value
-(a `MoveOutcome`):
+allow further moves within the same turn. The move expresses all of this as data
+in its return value (a `MoveOutcome`):
 
 - `nextBoard` (required): the board after the move
 - `isTurnEnd`: `true` passes the turn; omitted = further moves follow within
@@ -224,10 +223,7 @@ form (`apply`) the move expresses all of this as data in its return value
 
 `apply` receives `{ ctx }` and no `events` — it is a pure function, which
 is what lets the same move logic run on a possible future authoritative
-competition server. The legacy form (`legacyApply`) instead receives
-`{ ctx, events }` and calls `events.endTurn()` / `events.endGame(winnerIndex?)`
-imperatively; existing games are migrated one by one, new games should use
-`apply`.
+competition server.
 
 You must always pass `board` as a first param to all moves (meaning you must
 pass the updated board to subsequent moves in case of multiple moves within a
@@ -242,8 +238,7 @@ chaining bugs: passing a stale board to a chained move throws in development
 React](AGENTS.md#game-state-architecture-synchronous-store-outside-react).
 
 In `gameplay.moves`, each entry is an object pairing an optional `validate`
-with exactly one apply function: `{ apply, validate? }` (preferred) or
-`{ legacyApply, validate? }` (legacy):
+with the move's `apply`:
 
 ```ts
 moves: {
@@ -254,8 +249,8 @@ moves: {
 }
 ```
 
-Neither `apply` nor `legacyApply` validates its arguments — they apply them
-blindly; legality lives in `validate`, right next to them.
+`apply` does not validate its arguments — it applies them blindly; legality
+lives in `validate`, right next to it.
 
 ### validate (optional, per move)
 
@@ -328,14 +323,12 @@ framework.
   remembered during a turn, i.e. to expose it from BoardClient to
   getPlayerStepDescription
 
-`events` is an object that will contain the following (extendable):
-- `endTurn`: a function (legacy `legacyApply` moves only — outcome-returning moves
-  return `isTurnEnd: true` instead)
-- `endGame`: a function with optional winnerIndex specified, if not, last player
-  to move is the winner (legacy `legacyApply` moves only — outcome-returning moves
-  return `gameEnd: { winnerIndex }` with an explicit winner instead)
-- `setTurnState`: a function to set `turnState` — still current for
-  `BoardClient` components that keep mid-turn UI state in `ctx.turnState`
+`events` holds a single function, for `BoardClient` components that keep
+mid-turn UI state in `ctx.turnState`:
+- `setTurnState`: a function to set `turnState`
+
+Moves never receive `events`: they return `isTurnEnd`, `gameEnd` and
+`nextTurnState` instead.
 </details>
 
 ## Things to look out for

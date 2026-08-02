@@ -10,7 +10,7 @@ import { useLocation } from 'react-router';
 import { useGameStats } from './hooks/use-game-stats';
 import { trackEvent } from '../../tracking';
 import type {
-  Mode, Ctx, Events, MoveOutcome, EngineMove, Gameplay, GameMoves,
+  Mode, Ctx, Events, MoveOutcome, Gameplay, GameMoves,
   BoardClientProps, Variant as DisplayVariant, VariantInput
 } from './types';
 import { resolveVariants } from './helpers/resolve-variants';
@@ -45,16 +45,6 @@ export const strategyGameFactory = <TBoard,>({
   const { rule, roleLabels, getPlayerStepDescription } = presentation;
   const { moves, endOfTurnMove } = gameplay;
   const { defaultVariantIndex, defaultVariant, resolvedVariants } = resolveVariants(variants);
-  const moveDefinitions: Record<string, EngineMove<TBoard>> = moves;
-  Object.entries(moveDefinitions).forEach(([name, def]) => {
-    if (!!def.legacyApply === !!def.apply) {
-      const message = `strategyGameFactory: move ${name} must define exactly one of apply/legacyApply`;
-      if (import.meta.env.DEV) {
-        throw new Error(message);
-      }
-      console.warn(message);
-    }
-  });
 
   return () => {
     const { t } = useTranslation();
@@ -119,7 +109,7 @@ export const strategyGameFactory = <TBoard,>({
 
     // Game-end side effects (the state transition itself already happened in
     // the reducer / store): dialog, win/loss stats, analytics.
-    const handleGameEnd = (resolvedWinner: number | null) => {
+    const handleGameEnd = (resolvedWinner: number) => {
       const s = store.getState();
       setIsGameEndDialogOpen(true);
       if (s.mode !== 'vsHuman') {
@@ -143,7 +133,7 @@ export const strategyGameFactory = <TBoard,>({
           + 'pass the latest nextBoard when chaining moves within a turn');
       }
       const transition = reduceMove(
-        store.getState(), moveDefinitions[name]!, name, args, resolvedPlayerNames
+        store.getState(), moves[name]!, name, args, resolvedPlayerNames
       );
       if (transition.illegal) {
         reportIllegalMove(name, moveBoard, args);
@@ -213,27 +203,15 @@ export const strategyGameFactory = <TBoard,>({
 
     const ctx: Ctx = buildCtx(state, resolvedPlayerNames);
 
-    // For the BoardClient (setTurnState is current usage; endTurn/endGame only
-    // remain for legacy compatibility). Moves never see this object: legacy
-    // `apply` moves get the reducer's events, outcome-returning moves get none.
+    // For the BoardClient's mid-turn UI state. Moves never see this object;
+    // they return `nextTurnState` instead.
     const events: Events = {
-      endTurn: () => {
-        store.setState({
-          currentTurnHasMoves: false,
-          currentPlayer: 1 - store.getState().currentPlayer!
-        });
-      },
-      endGame: (winnerIndex?: number | null) => {
-        const resolvedWinner = winnerIndex ?? store.getState().currentPlayer;
-        store.setState({ phase: 'gameEnd', winnerIndex: resolvedWinner });
-        handleGameEnd(resolvedWinner);
-      },
       setTurnState: (turnState) => {
         store.setState({ turnState });
       }
     };
 
-    wrappedGameMoves = mapValues(moveDefinitions, (_def, name) => {
+    wrappedGameMoves = mapValues(moves, (_def, name) => {
       const wrapped: GameMoves<TBoard>[string] = (moveBoard: TBoard, ...args: unknown[]) =>
         dispatchMove(name, moveBoard, args);
       return wrapped;
@@ -247,7 +225,7 @@ export const strategyGameFactory = <TBoard,>({
     // Bots and the auto `endOfTurnMove` dispatch use `wrappedGameMoves` instead:
     // there an illegal move is a bug, and the validator fails loudly (see
     // `reportIllegalMove`).
-    const clientGameMoves: GameMoves<TBoard> = mapValues(moveDefinitions, ({ validate }, name) => {
+    const clientGameMoves: GameMoves<TBoard> = mapValues(moves, ({ validate }, name) => {
       const isAllowed = (moveBoard: TBoard, ...args: unknown[]) => {
         const liveCtx = buildCtx(store.getState(), resolvedPlayerNames);
         return liveCtx.isClientMoveAllowed
@@ -323,14 +301,4 @@ export const strategyGameFactory = <TBoard,>({
     </main>
     );
   };
-};
-
-// No-op `events` for production code paths that call a move purely to compute
-// `nextBoard` (e.g. bot lookahead) and don't care about side effects. For tests
-// that need to assert handlers were called, use `makeEvents` from `test-utils`
-// (spies) instead — it can't be used here as it depends on vitest.
-export const dummyEvents: Events = {
-  endTurn: () => {},
-  endGame: () => {},
-  setTurnState: () => {}
 };

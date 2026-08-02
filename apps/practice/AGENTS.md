@@ -80,7 +80,7 @@ strategyGameFactory({
   },
   BoardClient,                 // React component receiving { board, ctx, events, moves }
   gameplay: {
-    moves,                     // { [name]: { apply, validate? } | legacyFn | { legacyApply, validate? } } — see below
+    moves,                     // { [name]: { apply, validate? } } — see below
     endOfTurnMove?,            // optional move name auto-executed after moves with autoEndOfTurn: true
   },
   variants,                    // see below
@@ -94,34 +94,26 @@ omitted on a variant, the default variant's `botStrategy` is used as fallback.
 If multiple variants are provided, exactly one must be `isDefault: true`. A
 single-entry array needs no `isDefault` flag.
 
-**`moves`** — every move is an object pairing an optional `validate` with
-exactly one apply function. The two apply contracts are mixable within one game:
-
-- **`{ apply, validate? }` (preferred, use for new games)** — an
-  outcome-returning move `(board, { ctx }, ...args) => MoveOutcome`. It gets no
-  `events`; everything it causes is data in the returned `MoveOutcome`:
-  `{ nextBoard, isTurnEnd?, nextTurnState?, gameEnd?, autoEndOfTurn? }`.
-  `isTurnEnd: true` passes the turn (omitted = further moves follow in the same
-  turn); `gameEnd: { winnerIndex }` ends the game with an always-explicit winner
-  (`ctx.currentPlayer!` when the mover wins) and never flips `currentPlayer` —
-  `isTurnEnd`/`autoEndOfTurn` alongside it are a dev-mode error;
-  `nextTurnState` sets `ctx.turnState` (`null` clears, omitted keeps);
-  `autoEndOfTurn: true` schedules `endOfTurnMove`. Being `events`-free makes the
-  move a pure reducer — the piece a future authoritative competition server
-  and the planned external state store both need (see issue #313).
-- **`{ legacyApply, validate? }` (legacy)** — `legacyApply` has the signature
-  `(board, { ctx, events }, ...args) => { nextBoard }` and calls
-  `events.endTurn()` / `events.endGame(winnerIndex?)` imperatively
-  (bare `endGame()` credits the mover). Existing games migrate to the
-  outcome-returning `apply` one by one; don't add new legacy moves.
+**`moves`** — every move is `{ apply, validate? }`: an optional legality
+predicate paired with an outcome-returning
+`(board, { ctx }, ...args) => MoveOutcome`. A move gets no `events` —
+everything it causes is data in the returned `MoveOutcome`:
+`{ nextBoard, isTurnEnd?, nextTurnState?, gameEnd?, autoEndOfTurn? }`.
+`isTurnEnd: true` passes the turn (omitted = further moves follow in the same
+turn); `gameEnd: { winnerIndex }` ends the game with an always-explicit winner
+(`ctx.currentPlayer!` when the mover wins) and never flips `currentPlayer` —
+`isTurnEnd`/`autoEndOfTurn` alongside it are a dev-mode error;
+`nextTurnState` sets `ctx.turnState` (`null` clears, omitted keeps);
+`autoEndOfTurn: true` schedules `endOfTurnMove`. Being `events`-free makes a
+move a pure reducer, which is what lets the same function run in a future
+authoritative competition server (see issue #313).
 
 Always pass the current `board` as first arg when chaining moves within a turn.
-Neither form validates its arguments — they apply them blindly; legality is
+`apply` does not validate its arguments — it applies them blindly; legality is
 enforced by `validate` (below) and/or the `BoardClient`'s `disabled` gating.
 
 **`validate`** (optional, per move) — a pure, side-effect-free legality predicate
-`(board, { ctx }, ...args) => boolean` sitting right next to its
-`apply`/`legacyApply`. When
+`(board, { ctx }, ...args) => boolean` sitting right next to its `apply`. When
 present, the engine rejects any dispatch whose args fail it (in dev it throws
 loudly to surface the bug; in prod it warns, fires an `illegal-move` analytics
 event, and no-ops so a stray call cannot corrupt the board). Omitting it means
@@ -160,11 +152,9 @@ the raw `validate`/helpers instead.
   remembered during a turn if needed, i.e. to expose it from BoardClient to
   getPlayerStepDescription
 
-**`events`**: `endTurn()`, `endGame(winnerIndex?)`, `setTurnState(stage)`.
-`endTurn`/`endGame` are for legacy moves only (outcome-returning moves
-express both in their return value); `setTurnState` also remains current for
-`BoardClient` components that keep mid-turn UI state in `ctx.turnState`
-(several games call it from UI code — that usage does not migrate).
+**`events`**: `setTurnState(stage)`, and nothing else — it exists for
+`BoardClient` components that keep mid-turn UI state in `ctx.turnState`.
+Moves never receive it; they return `nextTurnState` instead.
 
 ### Game state architecture: synchronous store outside React
 
@@ -173,7 +163,7 @@ Authoritative game state (`board`, `phase`, `currentPlayer`, `turnState`,
 (`strategy-game-factory/engine/store.ts`); the factory component subscribes via
 `useSyncExternalStore` and renders snapshots of it. Every dispatch — from the
 `BoardClient`, a bot, or the auto `endOfTurnMove` — is validated and applied by
-a framework-free reducer (`engine/reducer.ts`, handling both move contracts)
+a framework-free reducer (`engine/reducer.ts`)
 against `store.getState()`, so bots and chained `setTimeout` dispatches can
 never observe a stale render snapshot. Validators may depend on **any** `ctx`
 field (`turnState`, `moveCount`, …); `ctx` is always derived fresh from the
@@ -206,7 +196,7 @@ in-repo.
 - Starting positions representative of the game's complexity; each player wins
   with ~50% probability across random starting boards
 - Player cannot win with a non-winning strategy (i.e. AI is truly optimal)
-- Moves use the outcome-returning `apply` form (no `events` in moves; see
+- Moves return their consequences rather than causing them (see
   `five-connected-fields`, `coins-in-3-piles`, `hunyadi-and-the-janissaries`)
 - Moves with non-trivial legality define `validate` (single source of truth for
   the engine, the `BoardClient`'s `disabled` state and the bot)

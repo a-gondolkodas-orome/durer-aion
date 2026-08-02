@@ -15,15 +15,15 @@ export interface Ctx {
   moveCount: number
 }
 
+// Mid-turn UI state a BoardClient needs to remember (which pile is selected,
+// which slot is being edited). Moves never see this: they express turn state
+// through `nextTurnState` in their returned MoveOutcome.
 export interface Events {
-  endTurn: () => void
-  endGame: (winnerIndex?: number | null) => void
   setTurnState: (state: unknown) => void
 }
 
-// Everything a move can cause, expressed as data. Returned by outcome-returning
-// (`apply`) moves and interpreted by the engine; legacy (`legacyApply`) moves
-// return only `nextBoard`/`autoEndOfTurn` and cause the rest through `events`.
+// Everything a move can cause, expressed as data: the engine interprets what
+// the move returns, so a move never reaches out and changes anything itself.
 export type MoveOutcome<TBoard> = {
   nextBoard: TBoard
   // Turn passes to the other player. Omitted/false = turn continues (mid-turn
@@ -38,40 +38,21 @@ export type MoveOutcome<TBoard> = {
   // present (contradiction; throws in dev).
   autoEndOfTurn?: boolean
 }
-export type MoveResult<TBoard> = Pick<MoveOutcome<TBoard>, 'nextBoard' | 'autoEndOfTurn'>
-export type MoveFunction<TBoard> = (
-  board: TBoard, meta: { ctx: Ctx; events: Events }, ...args: any[]
-) => MoveResult<TBoard>
-// Outcome-returning apply: no `events` param, so purity is enforced by the
-// type system — everything the move causes is in the returned MoveOutcome.
+// A move is a pure reducer: board in, outcome out. It gets no `events`, so
+// purity is enforced by the type system rather than by convention — which is
+// what lets the same function run in a future authoritative server.
 export type PureMoveFunction<TBoard> = (
   board: TBoard, meta: { ctx: Ctx }, ...args: any[]
 ) => MoveOutcome<TBoard>
 // Pure, side-effect-free legality predicate for a single move, colocated with
-// its `apply`/`legacyApply` in the long-form move definition. Because it depends only on
-// `board` + `ctx` (no React, no `events`), the same function drives the UI
-// (button `disabled`), the engine (illegal-move enforcement) and, in the
-// future, an authoritative server-side check.
+// its `apply`. Because it depends only on `board` + `ctx` (no React), the same
+// function drives the UI (button `disabled`), the engine (illegal-move
+// enforcement) and, in the future, an authoritative server-side check.
 type MoveValidator<TBoard> = (
   board: TBoard, meta: { ctx: Ctx }, ...args: any[]
 ) => boolean
-// Every move is an object pairing an optional legality validator with exactly
-// one apply function: either a legacy `legacyApply` or — the preferred contract
-// for new games — an outcome-returning `apply` that gets no `events` and
-// instead returns turn/game consequences as data. The distinct key is the
-// contract marker: the engine interprets the returned MoveOutcome only for
-// `apply` moves, and a migrated move that still touches `events` fails to
-// compile.
-export type MoveDefinition<TBoard> =
-  | { legacyApply: MoveFunction<TBoard>; validate?: MoveValidator<TBoard> }
-  | { apply: PureMoveFunction<TBoard>; validate?: MoveValidator<TBoard> }
-// Engine-internal move shape (not re-exported from the barrel): the union above
-// collapsed to one object with both apply keys optional, which is what the
-// reducer's truthiness branch reads. Exactly one of them is present — enforced
-// at factory time, since plain JS callers can bypass MoveDefinition.
-export type EngineMove<TBoard> = {
-  legacyApply?: MoveFunction<TBoard>
-  apply?: PureMoveFunction<TBoard>
+export type MoveDefinition<TBoard> = {
+  apply: PureMoveFunction<TBoard>
   validate?: MoveValidator<TBoard>
 }
 export interface Gameplay<TBoard> {
