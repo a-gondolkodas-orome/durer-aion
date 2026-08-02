@@ -105,7 +105,7 @@ export const isTransferAllowed = (board: Board, { pileId, pieceCount }): boolean
     && pieceCount % 2 === 0
     && pieceCount <= board[pileId];
 
-const moves = {
+export const moves = {
   moveHalvedPieces: {
     validate: (board: Board, _, piece) => isTransferAllowed(board, piece),
     apply: (board: Board, { ctx }: { ctx: Ctx }, { pileId, pieceCount }): MoveOutcome<Board> => {

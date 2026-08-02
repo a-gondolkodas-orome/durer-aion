@@ -91,7 +91,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const moves = {
+export const moves = {
   chooseDigit: {
     validate: (board: Board, _, digit) => isDigitChoiceAllowed(board, digit),
     apply: (board: Board, _, digit): MoveOutcome<Board> => {

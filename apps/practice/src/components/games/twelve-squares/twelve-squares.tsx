@@ -73,7 +73,7 @@ const getOptimalBotStep = ({ left, right }) => {
   return (dst+1) % 3;
 };
 
-const moves = {
+export const moves = {
   step: {
     validate: (board: Board, _, step) => isValidStep(board, step),
     apply: (board: Board, { ctx }: { ctx: Ctx }, step): MoveOutcome<Board> => {

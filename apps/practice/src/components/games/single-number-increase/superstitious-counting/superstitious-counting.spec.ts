@@ -1,4 +1,5 @@
-import { isStepAllowed, type Board } from './superstitious-counting';
+import { moves, isStepAllowed, type Board } from './superstitious-counting';
+import { makeCtx } from '../../../../test-utils';
 
 const boardWith = (restricted: number | null): Board => ({ current: 10, target: 50, restricted });
 
@@ -28,5 +29,27 @@ describe('isStepAllowed', () => {
 
   it('rejects a non-integer step', () => {
     expect(isStepAllowed(boardWith(null), 2.5)).toBe(false);
+  });
+});
+
+// The player who reaches the target *loses*, so every ending credits the
+// mover's opponent — the opposite of most games in the repo.
+const asPlayer = (currentPlayer: number) => ({ ctx: makeCtx({ currentPlayer }) });
+
+describe('superstitious-counting end of game', () => {
+  it.each([0, 1])('ends against the mover (player %i) on reaching the target', player => {
+    const outcome = moves.step.apply(
+      { current: 95, target: 100, restricted: null }, asPlayer(player), 5
+    );
+    expect(outcome.gameEnd).toEqual({ winnerIndex: 1 - player });
+    expect(outcome.isTurnEnd).toBeUndefined();
+  });
+
+  it('passes the turn while short of the target', () => {
+    const outcome = moves.step.apply(
+      { current: 50, target: 100, restricted: null }, asPlayer(0), 5
+    );
+    expect(outcome.gameEnd).toBeUndefined();
+    expect(outcome.isTurnEnd).toBe(true);
   });
 });

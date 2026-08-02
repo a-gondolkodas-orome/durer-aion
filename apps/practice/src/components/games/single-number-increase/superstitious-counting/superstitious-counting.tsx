@@ -70,7 +70,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const moves = {
+export const moves = {
   step: {
     validate: (board: Board, _, step: number) => isStepAllowed(board, step),
     apply: (board: Board, { ctx }: { ctx: Ctx }, step): MoveOutcome<Board> => {

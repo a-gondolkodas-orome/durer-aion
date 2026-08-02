@@ -40,7 +40,7 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
 export const isIncreaseValid = ({ board, number }: { board: Board; number: number }): boolean =>
   Number.isInteger(number) && number > board && (number - board) <= maxStep;
 
-const moves = {
+export const moves = {
   increaseTo: {
     validate: (board: Board, _, number: number) => isIncreaseValid({ board, number }),
     apply: (board: Board, { ctx }: { ctx: Ctx }, number): MoveOutcome<Board> => {

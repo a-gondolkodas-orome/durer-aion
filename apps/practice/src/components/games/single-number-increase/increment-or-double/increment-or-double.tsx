@@ -43,7 +43,7 @@ const say = (next: number, ctx: Ctx): MoveOutcome<Board> => {
   return { nextBoard: next, isTurnEnd: true };
 };
 
-const moves = {
+export const moves = {
   increment: { apply: (board: Board, { ctx }: { ctx: Ctx }) => say(board + 1, ctx) },
   double: {
     // Doubling nothing says nothing, so the opening move can only be x+1 = 1.

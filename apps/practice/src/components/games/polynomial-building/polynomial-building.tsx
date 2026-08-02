@@ -5,7 +5,7 @@ import {
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { BoardClient } from './board-client';
 
-const moves = {
+export const moves = {
   setCoefficient: {
     validate: (board: Board, _, coef: Coef, value: number) =>
       isCoefficientChoiceAllowed(board, coef, value),
