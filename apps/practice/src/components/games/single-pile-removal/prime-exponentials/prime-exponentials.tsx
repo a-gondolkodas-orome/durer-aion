@@ -108,7 +108,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { value: hovered, hoverProps } = useHoverPreview<typeof allPrimePowers[0]>(ctx.moveCount);
   const [visiblePowers] = useState(() => allPrimePowers.filter(e => e.value <= board));
   const isEntryAllowed = (entry: typeof allPrimePowers[0]) =>
-    moves.subtractPrimeExponent.isAllowed!(board, entry);
+    moves.subtractPrimeExponent.isAllowed(board, entry);
 
   const chooseEntry = ({ prime, exponent }) => {
     moves.subtractPrimeExponent(board, { prime, exponent });

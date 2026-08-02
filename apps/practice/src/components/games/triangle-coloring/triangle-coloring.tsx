@@ -66,7 +66,7 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
     return `${v0.cx},${v0.cy} ${v1.cx},${v1.cy} ${v2.cx},${v2.cy}`
   }
 
-  const isClickable = i => moves.colorTriangle.isAllowed!(board, i);
+  const isClickable = i => moves.colorTriangle.isAllowed(board, i);
 
   const colorTriangle = i => moves.colorTriangle(board, i);
 

@@ -7,7 +7,7 @@ import { getAllowedMoves, generateStartBoard, isTarget, boardSize, type Board, t
 import { RookSvg } from '../shared/rook-svg';
 
 const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
-  const isMoveAllowed = (targetField: Field) => moves.moveRook.isAllowed!(board, targetField);
+  const isMoveAllowed = (targetField: Field) => moves.moveRook.isAllowed(board, targetField);
 
   return (
   <GameBoard>

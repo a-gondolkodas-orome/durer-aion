@@ -29,7 +29,7 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
         {digits.map((d, i) => (
           <button
             key={i}
-            disabled={!moves.subtractDigit.isAllowed!(board, d)}
+            disabled={!moves.subtractDigit.isAllowed(board, d)}
             onClick={() => moves.subtractDigit(board, d)}
             className="secondary-button border-2 text-3xl sm:text-5xl w-12 sm:w-16 py-2 sm:py-3 font-bold"
           >

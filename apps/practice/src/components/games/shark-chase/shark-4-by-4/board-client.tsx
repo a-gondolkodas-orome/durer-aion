@@ -21,8 +21,8 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   };
 
   const isAllowed_movePiece = (id: number): boolean => (isCurrentPlayerShark
-    ? moves.moveShark.isAllowed!(board, id)
-    : chosenPiece !== null && moves.moveSubmarine.isAllowed!(board, { from: chosenPiece, to: id }));
+    ? moves.moveShark.isAllowed(board, id)
+    : chosenPiece !== null && moves.moveSubmarine.isAllowed(board, { from: chosenPiece, to: id }));
 
   const possibleMoves = range(board.submarines.length).filter(isAllowed_movePiece);
 

@@ -33,7 +33,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   // A cell is a valid start exactly when the window it would open is a legal
   // move — asked of the move itself rather than of the generator directly.
   const isValidStart = (a: number) =>
-    k !== null && moves.placeWindow.isAllowed!(board, a, a + k - 1);
+    k !== null && moves.placeWindow.isAllowed(board, a, a + k - 1);
 
   const [selectedStart, setSelectedStart] = useState<number | null>(null);
   const { value: hoverStart, hoverProps } = useHoverPreview<number>(ctx.moveCount);

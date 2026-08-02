@@ -78,7 +78,7 @@ strategyGameFactory({
     roleLabels?,               // optional: [{ hu, en }, { hu, en }] — defaults to "1st/2nd player"
     getPlayerStepDescription,  // ({ board, ctx }) => { hu, en } — shown as turn instruction
   },
-  BoardClient,                 // React component receiving { board, ctx, events, moves }
+  BoardClient,                 // React component receiving { board, ctx, moves, setTurnState }
   gameplay: {
     moves,                     // { [name]: { apply, validate? } } — see below
     endOfTurnMove?,            // optional move name auto-executed after moves with autoEndOfTurn: true
@@ -96,17 +96,18 @@ single-entry array needs no `isDefault` flag.
 
 **`moves`** — every move is `{ apply, validate? }`: an optional legality
 predicate paired with an outcome-returning
-`(board, { ctx }, ...args) => MoveOutcome`. A move gets no `events` —
-everything it causes is data in the returned `MoveOutcome`:
+`(board, { ctx }, ...args) => MoveOutcome`. A move is handed nothing it could
+cause an effect through — everything it causes is data in the returned
+`MoveOutcome`:
 `{ nextBoard, isTurnEnd?, nextTurnState?, gameEnd?, autoEndOfTurn? }`.
 `isTurnEnd: true` passes the turn (omitted = further moves follow in the same
 turn); `gameEnd: { winnerIndex }` ends the game with an always-explicit winner
 (`ctx.currentPlayer!` when the mover wins) and never flips `currentPlayer` —
 `isTurnEnd`/`autoEndOfTurn` alongside it are a dev-mode error;
 `nextTurnState` sets `ctx.turnState` (`null` clears, omitted keeps);
-`autoEndOfTurn: true` schedules `endOfTurnMove`. Being `events`-free makes a
-move a pure reducer, which is what lets the same function run in a future
-authoritative competition server (see issue #313).
+`autoEndOfTurn: true` schedules `endOfTurnMove`. Causing nothing directly is
+what makes a move a pure reducer, and what lets the same function run in a
+future authoritative competition server (see issue #313).
 
 Always pass the current `board` as first arg when chaining moves within a turn.
 `apply` does not validate its arguments — it applies them blindly; legality is
@@ -141,7 +142,11 @@ guards — keep one only when the handler couples local UI state to a successful
 move (see `cube-coloring`'s colour-selection reset). Not for bots: their
 `moves` copy carries no `isAllowed` (during the bot's turn
 `isClientMoveAllowed` is false by design), so bots enumerate legal moves via
-the raw `validate`/helpers instead.
+the raw `validate`/helpers instead. The two wrappings have two types:
+`ClientGameMoves` (what `BoardClientProps.moves` is — `isAllowed` guaranteed,
+so no `!` at the call site) and the wider `GameMoves` (what `StrategyArgs.moves`
+is — dispatch only). `ClientGameMoves` is assignable to `GameMoves`, so a
+helper shared between a `BoardClient` and a bot takes `GameMoves`.
 
 **`ctx`** fields available in moves and `BoardClient`:
 - `currentPlayer`: 0/1 — use this for game logic in both modes
@@ -152,9 +157,11 @@ the raw `validate`/helpers instead.
   remembered during a turn if needed, i.e. to expose it from BoardClient to
   getPlayerStepDescription
 
-**`events`**: `setTurnState(stage)`, and nothing else — it exists for
-`BoardClient` components that keep mid-turn UI state in `ctx.turnState`.
-Moves never receive it; they return `nextTurnState` instead.
+**`setTurnState(stage)`** — a `BoardClient`-only prop, for components that keep
+mid-turn UI state in `ctx.turnState`. It is the one path that writes engine
+state without going through a move, deliberately: a selection is not a move, so
+it must not bump `moveCount` or take an undo snapshot. Moves never get it; they
+return `nextTurnState` instead.
 
 ### Game state architecture: synchronous store outside React
 

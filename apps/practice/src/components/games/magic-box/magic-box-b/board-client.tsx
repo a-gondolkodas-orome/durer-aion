@@ -25,7 +25,7 @@ export const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
             {range(9).map(id => (
               <button
                 key={id}
-                disabled={!moves.placeStone.isAllowed!(board, id)}
+                disabled={!moves.placeStone.isAllowed(board, id)}
                 onClick={() => moves.placeStone(board, id)}
                 className={`p-[20%] ${
                   isCellHighlighted(id) ? 'bg-amber-200 dark:bg-amber-700' : 'bg-surface-elevated'
@@ -42,7 +42,7 @@ export const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
             {range(3).map(row => (
               <button
                 key={row}
-                disabled={!moves.designateLine.isAllowed!(board, row)}
+                disabled={!moves.designateLine.isAllowed(board, row)}
                 onClick={() => moves.designateLine(board, row)}
                 title={t(LINE_LABELS[row])}
                 aria-label={t(LINE_LABELS[row])}
@@ -58,7 +58,7 @@ export const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
           {range(3).map(col => (
             <button
               key={col}
-              disabled={!moves.designateLine.isAllowed!(board, 3 + col)}
+              disabled={!moves.designateLine.isAllowed(board, 3 + col)}
               onClick={() => moves.designateLine(board, 3 + col)}
               title={t(LINE_LABELS[3 + col])}
               aria-label={t(LINE_LABELS[3 + col])}

@@ -48,7 +48,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   // A rejected click must leave the local selection alone, so this keeps a guard
   // rather than relying on the engine silently ignoring the dispatch.
   const clickPile = (pileId: number) => {
-    if (!moves.keepPile.isAllowed!(board, pileId)) return;
+    if (!moves.keepPile.isAllowed(board, pileId)) return;
     setInputs({ p1: '', p2: '' });
     setKeepId(prev => (prev === pileId ? null : pileId));
   };
@@ -90,7 +90,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           return (
             <button
               key={pileId}
-              disabled={!moves.keepPile.isAllowed!(board, pileId)}
+              disabled={!moves.keepPile.isAllowed(board, pileId)}
               onClick={() => clickPile(pileId)}
               className={`
                 flex-1 max-w-32 rounded-lg border-2 p-3 sm:p-4 flex flex-col items-center gap-1

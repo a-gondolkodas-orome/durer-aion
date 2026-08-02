@@ -67,11 +67,11 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   // Every "may I?" question the board asks goes through the moves' own
   // validators, so the highlighting and the engine agree by construction.
   const isTarget = (to: number) =>
-    selectedFrom !== null && moves.moveDisc.isAllowed!(board, selectedFrom, to);
-  const isPlaceable = (at: number) => moves.placeDisc.isAllowed!(board, at);
+    selectedFrom !== null && moves.moveDisc.isAllowed(board, selectedFrom, to);
+  const isPlaceable = (at: number) => moves.placeDisc.isAllowed(board, at);
   // A disc is worth picking up only if it has somewhere to go; being of the
   // player's own colour is already implied by `moveDisc`'s validator.
-  const isMovable = (from: number) => range(cells.length).some(to => moves.moveDisc.isAllowed!(board, from, to));
+  const isMovable = (from: number) => range(cells.length).some(to => moves.moveDisc.isAllowed(board, from, to));
 
   const clickCell = (i: number) => {
     if (!canInteract || myColor === null) return;

@@ -46,9 +46,12 @@ a **new backend service** powers competition mode only.
 | Match state, clock, streak, retries, scoring, results | **Server** | Authoritative and tamper-proof |
 
 The existing `strategyGameFactory` API is already close to what's needed: moves
-are near-pure (`(board, { ctx, events }, ...args) => { nextBoard }`) and bot
-strategies are `(board) => nextBoard`. These can run headless in Node with
-modest refactoring.
+are pure reducers (`(board, { ctx }, ...args) => MoveOutcome`) paired with pure
+`validate` predicates, and the interpreter that runs them
+(`strategy-game-factory/engine/`) is deliberately React-free, so move legality
+and win detection already run headless in Node. Bot strategies
+(`({ board, ctx, moves }) => void`) dispatch moves instead of returning them,
+which is the part that still needs work.
 
 ## The four server-authoritative signals
 
@@ -124,6 +127,11 @@ Node**. Do it for a **pilot game first**, not the whole catalog. The smart bot
 strategy is split into a **server-only** module that the client build never
 imports. Needs test coverage.
 
+Partly done already: the move interpreter, the game store and the `ctx`
+derivation live in `strategy-game-factory/engine/`, which imports no React. What
+remains is per game — most game files still keep their moves in the same `.tsx`
+as their JSX rule text — plus the server-only split of the smart bot.
+
 ### Phase 2 — Stand up the backend
 
 Choose host + storage (a small Node service or serverless functions;
@@ -171,9 +179,10 @@ Why this is attractive:
 
 - **No new backend to design or operate.** The four server-authoritative signals
   (start board, move validation, smart bot, clock) already have a home.
-- **`strategyGameFactory` is a natural fit.** Its moves are near-pure and its bot
-  strategies are `(board) => nextBoard`; that maps onto a `boardgame.io`-style
-  engine slot more directly than onto a bespoke service.
+- **`strategyGameFactory` is a natural fit.** Its moves are pure reducers
+  returning a `MoveOutcome`, and its interpreter is already framework-free; that
+  maps onto a `boardgame.io`-style engine slot more directly than onto a bespoke
+  service.
 - **Division of labour matches reality.** This repo stays a lightweight,
   no-backend practice site (its original purpose); competition concerns live
   where competition infrastructure already exists.

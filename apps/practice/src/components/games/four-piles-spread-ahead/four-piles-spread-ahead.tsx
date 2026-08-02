@@ -22,7 +22,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   // Clicking piece `pieceId` removes it and everything above it (from the top),
   // i.e. `board[pileId] - pieceId` pieces.
   const isDisabled = ({ pileId, pieceId }: Piece) =>
-    !moves.spreadPieces.isAllowed!(board, { pileId, pieceCount: board[pileId] - pieceId });
+    !moves.spreadPieces.isAllowed(board, { pileId, pieceCount: board[pileId] - pieceId });
 
   // The pieces removed by clicking the hovered piece: it and everything above it.
   const removedCount = () => (validHoveredPiece ? board[validHoveredPiece.pileId] - validHoveredPiece.pieceId : 0);

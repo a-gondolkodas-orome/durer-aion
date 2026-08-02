@@ -29,7 +29,7 @@ const ActiveSlot = ({ value, isSelected, isDisabled, onClick }) => (
   </button>
 );
 
-export const BoardClient = ({ board, ctx, events, moves }: BoardClientProps<Board>) => {
+export const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
   const turnState = ctx.turnState as TurnState;
 
@@ -40,11 +40,11 @@ export const BoardClient = ({ board, ctx, events, moves }: BoardClientProps<Boar
 
     if (turnState === null) {
       if (!hasActivePair(board.levels[levelIdx])) return;
-      events.setTurnState({ levelIdx, slotIdx });
+      setTurnState({ levelIdx, slotIdx });
       return;
     }
     if (isEqual(turnState, { levelIdx, slotIdx })) {
-      events.setTurnState(null);
+      setTurnState(null);
       return;
     }
 

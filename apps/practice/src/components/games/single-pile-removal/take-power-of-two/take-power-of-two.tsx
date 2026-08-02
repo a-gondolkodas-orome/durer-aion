@@ -51,7 +51,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     <GameBoard>
       <p className='w-full text-8xl font-bold text-center mb-4'>{board}</p>
       <ExponentsTable
-        isPowerAllowed={(e: number) => moves.subtractPowerOfTwo.isAllowed!(board, e)}
+        isPowerAllowed={(e: number) => moves.subtractPowerOfTwo.isAllowed(board, e)}
         board={board}
         choosePower={(e: number) => moves.subtractPowerOfTwo(board, e)}
         hovered={hoveredPower}

@@ -81,7 +81,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               />
               <button
                 disabled={!isValidValue(inputs[coef])
-                  || !moves.setCoefficient.isAllowed!(board, coef, parseInt(inputs[coef], 10))}
+                  || !moves.setCoefficient.isAllowed(board, coef, parseInt(inputs[coef], 10))}
                 onClick={() => submit(coef)}
                 className="rounded-md border-2 px-3 py-1.5 font-bold
                   enabled:hocus:bg-blue-100 dark:enabled:hocus:bg-blue-900

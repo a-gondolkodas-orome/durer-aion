@@ -27,8 +27,8 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const gameStarted = ctx.isHumanVsHumanGame || ctx.chosenRoleIndex !== null;
 
   const isClickable = (v) => (ctx.currentPlayer === ARCHITECT
-    ? moves.moveArchitect.isAllowed!(board, v)
-    : moves.destroyTower.isAllowed!(board, v));
+    ? moves.moveArchitect.isAllowed(board, v)
+    : moves.destroyTower.isAllowed(board, v));
 
   const handleVertexClick = (v) => {
     if (ctx.currentPlayer === ARCHITECT) {
@@ -38,7 +38,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     }
   };
 
-  const canEndDay = moves.endDay.isAllowed!(board);
+  const canEndDay = moves.endDay.isAllowed(board);
 
   return (
     <GameBoard className="flex flex-col items-center">

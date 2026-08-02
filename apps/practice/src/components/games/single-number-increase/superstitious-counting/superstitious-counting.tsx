@@ -37,7 +37,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       {fields.map(i =>
         <button
           key={i}
-          disabled={!moves.step.isAllowed!(board, i - board.current)}
+          disabled={!moves.step.isAllowed(board, i - board.current)}
           onClick={() => moves.step(board, i - board.current)}
           className={`
             border-2 rounded-sm text-2xl min-w-[4ch] py-1 font-bold

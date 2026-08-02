@@ -43,7 +43,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
   const { value: hoveredPile, hoverProps } = useHoverPreview<number>(ctx.moveCount);
 
-  const isMoveAllowed = pileId => moves.removeStone.isAllowed!(board, pileId);
+  const isMoveAllowed = pileId => moves.removeStone.isAllowed(board, pileId);
 
   return (
     <GameBoard>

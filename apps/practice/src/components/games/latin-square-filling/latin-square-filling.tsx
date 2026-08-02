@@ -37,7 +37,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   // Which digits the selected cell will accept — asked of the move itself, so
   // the keypad and the engine cannot disagree.
   const allowed = [1, 2, 3].filter(
-    digit => selectedCell !== null && moves.placeDigit.isAllowed!(board, selectedCell, digit)
+    digit => selectedCell !== null && moves.placeDigit.isAllowed(board, selectedCell, digit)
   );
 
   return (

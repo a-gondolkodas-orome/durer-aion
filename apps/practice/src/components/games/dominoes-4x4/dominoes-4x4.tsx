@@ -63,7 +63,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 
   // The field would complete a legal domino with the one already selected.
   const isValidPartner = (field: Field) =>
-    selectedField !== null && moves.placeDomino.isAllowed!(board, [selectedField, field]);
+    selectedField !== null && moves.placeDomino.isAllowed(board, [selectedField, field]);
 
   const hasPlaceablePartner = ({ row, col }: Field) => {
     return [[step.dRow, step.dCol], [-step.dRow, -step.dCol]].some(([dRow, dCol]) => {

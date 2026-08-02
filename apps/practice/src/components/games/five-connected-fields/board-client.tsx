@@ -17,7 +17,7 @@ const coords: Record<number, { cx: string; cy: string }> = {
 const edges = side1.flatMap((a) => side2.map((b) => [a, b] as const));
 
 export const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
-  const isClickable = (node: number) => moves.placeCoin.isAllowed!(board, node);
+  const isClickable = (node: number) => moves.placeCoin.isAllowed(board, node);
 
   return (
     <GameBoard>

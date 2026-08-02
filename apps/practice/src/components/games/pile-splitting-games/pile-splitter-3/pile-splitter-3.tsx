@@ -21,7 +21,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { value: validHoveredPileId, hoverProps: pileHoverProps } = useHoverPreview<number>(ctx.moveCount);
 
   const canSelectPile = (pileId: number) =>
-    removedPileId === null && moves.removePile.isAllowed!(board, pileId);
+    removedPileId === null && moves.removePile.isAllowed(board, pileId);
 
   const isDisabled = ({ pileId, pieceId }: Piece) => {
     if (!ctx.isClientMoveAllowed) return true;

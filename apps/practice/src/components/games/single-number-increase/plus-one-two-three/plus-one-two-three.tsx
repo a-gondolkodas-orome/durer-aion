@@ -19,7 +19,7 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
       {range(target + maxStep + 1).map(i =>
         <button
           key={i}
-          disabled={!moves.increaseTo.isAllowed!(board, i)}
+          disabled={!moves.increaseTo.isAllowed(board, i)}
           onClick={() => moves.increaseTo(board, i)}
           className={`
             border-2 rounded-sm text-2xl min-w-[4ch] p-1 my-1 font-bold

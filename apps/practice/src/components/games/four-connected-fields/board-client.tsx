@@ -21,7 +21,7 @@ const edges = [
 ];
 
 export const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
-  const isClickable = (node: number) => moves.placeCoin.isAllowed!(board, node);
+  const isClickable = (node: number) => moves.placeCoin.isAllowed(board, node);
 
   return (
     <GameBoard>

@@ -58,7 +58,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         {allNumbers.map(n => (
           <button
             key={n}
-            disabled={!moves.chooseNumber.isAllowed!(board, n)}
+            disabled={!moves.chooseNumber.isAllowed(board, n)}
             onClick={(e) => { moves.chooseNumber(board, n); e.currentTarget.blur(); }}
             className={numberClass(n)}
           >

@@ -18,7 +18,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   // i.e. `board[pileId] - pieceId` pieces — so the piece is clickable exactly
   // when that is a legal transfer.
   const isDisabled = ({ pileId, pieceId }: Piece) =>
-    !moves.moveHalvedPieces.isAllowed!(board, { pileId, pieceCount: board[pileId] - pieceId });
+    !moves.moveHalvedPieces.isAllowed(board, { pileId, pieceCount: board[pileId] - pieceId });
 
   // The pieces removed by clicking the hovered piece: it and everything above it.
   const removedCount = () => (validHoveredPiece ? board[validHoveredPiece.pileId] - validHoveredPiece.pieceId : 0);

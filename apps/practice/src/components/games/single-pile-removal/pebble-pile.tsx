@@ -67,7 +67,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       </p>
       <StonePile
         board={board}
-        isTakeAllowed={count => moves.take.isAllowed!(board, count)}
+        isTakeAllowed={count => moves.take.isAllowed(board, count)}
         onTake={count => moves.take(board, count)}
         moveCount={ctx.moveCount}
       />

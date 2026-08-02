@@ -25,7 +25,7 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
       {range(board.length).map(i => (
         <button
           key={i}
-          disabled={!moves.coverNumber.isAllowed!(board, i + 1)}
+          disabled={!moves.coverNumber.isAllowed(board, i + 1)}
           className={`secondary-button w-auto text-2xl min-w-[3ch]`}
           onClick={() => moves.coverNumber(board, i + 1)}
         >

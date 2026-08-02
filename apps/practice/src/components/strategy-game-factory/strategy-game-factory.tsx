@@ -10,7 +10,7 @@ import { useLocation } from 'react-router';
 import { useGameStats } from './hooks/use-game-stats';
 import { trackEvent } from '../../tracking';
 import type {
-  Mode, Ctx, Events, MoveOutcome, Gameplay, GameMoves,
+  Mode, Ctx, MoveOutcome, Gameplay, GameMoves, ClientGameMoves,
   BoardClientProps, Variant as DisplayVariant, VariantInput
 } from './types';
 import { resolveVariants } from './helpers/resolve-variants';
@@ -203,12 +203,10 @@ export const strategyGameFactory = <TBoard,>({
 
     const ctx: Ctx = buildCtx(state, resolvedPlayerNames);
 
-    // For the BoardClient's mid-turn UI state. Moves never see this object;
-    // they return `nextTurnState` instead.
-    const events: Events = {
-      setTurnState: (turnState) => {
-        store.setState({ turnState });
-      }
+    // For the BoardClient's mid-turn UI state. Moves never get this; they
+    // return `nextTurnState` instead.
+    const setTurnState = (turnState: unknown) => {
+      store.setState({ turnState });
     };
 
     wrappedGameMoves = mapValues(moves, (_def, name) => {
@@ -225,17 +223,19 @@ export const strategyGameFactory = <TBoard,>({
     // Bots and the auto `endOfTurnMove` dispatch use `wrappedGameMoves` instead:
     // there an illegal move is a bug, and the validator fails loudly (see
     // `reportIllegalMove`).
-    const clientGameMoves: GameMoves<TBoard> = mapValues(moves, ({ validate }, name) => {
+    const clientGameMoves: ClientGameMoves<TBoard> = mapValues(moves, ({ validate }, name) => {
       const isAllowed = (moveBoard: TBoard, ...args: unknown[]) => {
         const liveCtx = buildCtx(store.getState(), resolvedPlayerNames);
         return liveCtx.isClientMoveAllowed
           && (!validate || validate(moveBoard, { ctx: liveCtx }, ...args));
       };
-      const clientWrapped: GameMoves<TBoard>[string] = (moveBoard: TBoard, ...args: unknown[]) =>
-        isAllowed(moveBoard, ...args)
-          ? wrappedGameMoves[name]!(moveBoard, ...args)
-          : { nextBoard: moveBoard };
-      clientWrapped.isAllowed = isAllowed;
+      const clientWrapped: ClientGameMoves<TBoard>[string] = Object.assign(
+        (moveBoard: TBoard, ...args: unknown[]) =>
+          isAllowed(moveBoard, ...args)
+            ? wrappedGameMoves[name]!(moveBoard, ...args)
+            : { nextBoard: moveBoard },
+        { isAllowed }
+      );
       return clientWrapped;
     });
 
@@ -264,7 +264,7 @@ export const strategyGameFactory = <TBoard,>({
               key={gameUuid}
               board={board}
               ctx={ctx}
-              events={events}
+              setTurnState={setTurnState}
               moves={clientGameMoves}
             />
             <GameSidebar

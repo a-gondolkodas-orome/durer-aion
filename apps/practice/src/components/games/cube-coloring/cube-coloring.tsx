@@ -45,7 +45,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const [x, setX] = useState(0);
   const [y, setY] = useState(0);
 
-  const isColoringAllowed = (vertex) => moves.colorVertex.isAllowed!(board, { vertex, color });
+  const isColoringAllowed = (vertex) => moves.colorVertex.isAllowed(board, { vertex, color });
 
   const pick = (pickedColor) => {
     if (!ctx.isClientMoveAllowed) return;

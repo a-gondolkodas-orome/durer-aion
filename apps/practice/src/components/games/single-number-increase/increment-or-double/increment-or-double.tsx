@@ -29,8 +29,8 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
     <GameBoard>
       <h2 className="text-center text-5xl font-bold my-4">{board}</h2>
       <div className="flex flex-wrap gap-2">
-        {actionButton('x+1', incResult, () => moves.increment(board), !moves.increment.isAllowed!(board))}
-        {actionButton('2x', dblResult, () => moves.double(board), !moves.double.isAllowed!(board))}
+        {actionButton('x+1', incResult, () => moves.increment(board), !moves.increment.isAllowed(board))}
+        {actionButton('2x', dblResult, () => moves.double(board), !moves.double.isAllowed(board))}
       </div>
     </GameBoard>
   );

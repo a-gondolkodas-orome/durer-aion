@@ -34,7 +34,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const moveForPile = (pile: number) => (pile === 0 ? moves.removeDiscs : moves.turnDiscs);
 
   const isSelectable = (pile: number, i: number) =>
-    moveForPile(pile).isAllowed!(board, board[pile] - i);
+    moveForPile(pile).isAllowed(board, board[pile] - i);
 
   const select = (pile, i) => moveForPile(pile)(board, board[pile] - i);
 

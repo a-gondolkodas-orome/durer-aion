@@ -41,7 +41,7 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
         {range(1, board.numbersOnTable.length + 1).map(num =>
           <button
             key={num}
-            disabled={!moves.removeNumber.isAllowed!(board, num)}
+            disabled={!moves.removeNumber.isAllowed(board, num)}
             onClick={() => removeNumber(num)}
             className={`
               m-1 min-h-28 w-18 border-4 rounded-lg shadow-md text-4xl font-bold

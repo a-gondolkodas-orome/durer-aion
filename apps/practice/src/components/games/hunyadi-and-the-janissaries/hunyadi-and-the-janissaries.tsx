@@ -72,8 +72,8 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             <button
               key={pieceIndex}
               disabled={!(isPlayerSultan
-                ? moves.setGroupOfSoldiers.isAllowed!(board, [{ rowIndex, pieceIndex, group }])
-                : moves.killGroup.isAllowed!(board, group))}
+                ? moves.setGroupOfSoldiers.isAllowed(board, [{ rowIndex, pieceIndex, group }])
+                : moves.killGroup.isAllowed(board, group))}
               className="aspect-square w-[10%] mx-1"
               onClick={() => clickOnSoldier({ rowIndex, pieceIndex })}
               {...hoverProps({ rowIndex, pieceIndex })}
@@ -94,9 +94,9 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       <button
         className={`
           primary-button w-auto m-auto mt-2
-          ${moves.finalizeSeparation.isAllowed!(board) ? '' : 'invisible'}
+          ${moves.finalizeSeparation.isAllowed(board) ? '' : 'invisible'}
         `}
-        disabled={!moves.finalizeSeparation.isAllowed!(board)}
+        disabled={!moves.finalizeSeparation.isAllowed(board)}
         onClick={() => moves.finalizeSeparation(board)}
       >
         {t({ hu: 'Befejezem a kettéosztást', en: 'Finish the split' })}

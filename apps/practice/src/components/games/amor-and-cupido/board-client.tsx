@@ -14,7 +14,7 @@ const ownerStroke = (owner: number | null): string => {
 };
 
 export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const isMoveAllowed = (edge: number) => moves.claimEdge.isAllowed!(board, edge);
+  const isMoveAllowed = (edge: number) => moves.claimEdge.isAllowed(board, edge);
 
   const winningEdges =
     ctx.winnerIndex !== null ? findWinningTriangle(board, ctx.winnerIndex) : null;

@@ -24,7 +24,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         [0, 1].map(playerIdx => (
           <button
             key={`${playerIdx}-${id}`}
-            disabled={playerIdx === ctx.currentPlayer || !moves.removeCard.isAllowed!(board, id + 1)}
+            disabled={playerIdx === ctx.currentPlayer || !moves.removeCard.isAllowed(board, id + 1)}
             onClick={() => moves.removeCard(board, id + 1)}
             className={`
               ${playerIdx === 0 ? 'col-start-1' : 'col-start-4'}

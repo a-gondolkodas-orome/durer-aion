@@ -14,7 +14,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   // One click performs the whole turn, so a piece is clickable only if both
   // halves are legal: discarding the other pile, then splitting this one here.
   const isDisabled = ({ pileId, pieceId }: Piece) =>
-    !moves.removePile.isAllowed!(board, 1 - pileId)
+    !moves.removePile.isAllowed(board, 1 - pileId)
       || !isSplitAllowed(withPileRemoved(board, 1 - pileId), pileId, pieceId + 1);
 
   const clickPiece = ({ pileId, pieceId }: Piece) => {

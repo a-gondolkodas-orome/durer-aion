@@ -23,7 +23,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     return ctx.currentPlayer === POLICE ? moves.moveCop : moves.moveThief;
   };
 
-  const isClickable = (vertex: number) => activeMove().isAllowed!(board, vertex);
+  const isClickable = (vertex: number) => activeMove().isAllowed(board, vertex);
 
   const handleClick = (vertex: number) => activeMove()(board, vertex);
 

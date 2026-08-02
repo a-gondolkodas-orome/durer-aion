@@ -16,7 +16,7 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   // Two different questions: `isAllowedBank` marks the banks that could be
   // robbed from this position — shown in green whoever is on turn — while
   // `isAllowedMove` additionally requires that it is this client's move.
-  const isAllowedMove = index => moves.rob.isAllowed!(board, index);
+  const isAllowedMove = index => moves.rob.isAllowed(board, index);
 
   const isAllowedBank = index => isRobbable(board, index);
 

@@ -63,7 +63,7 @@ const BoardClient = ({ board: { bacteria, goals }, ctx, moves }: BoardClientProp
     if (bacteria[row][col] === undefined) return false;
     const name = attackMoveName({ attackRow, attackCol, row, col });
     return name !== null
-      && moves[name].isAllowed!({ bacteria, goals }, { row: attackRow, col: attackCol });
+      && moves[name].isAllowed({ bacteria, goals }, { row: attackRow, col: attackCol });
   };
 
   const isGoal = ({ row, col }) => row === (bacteria.length - 1) && goals.includes(col);

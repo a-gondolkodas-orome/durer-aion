@@ -54,7 +54,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 
   // The field would complete a legal domino with the one already selected.
   const isValidPartner = (field: Field) =>
-    selectedField !== null && moves.placeDomino.isAllowed!(board, [selectedField, field]);
+    selectedField !== null && moves.placeDomino.isAllowed(board, [selectedField, field]);
 
   const isPartOfPreview = (field: Field) => {
     if (selectedField === null || validHoveredField === null) return false;

@@ -40,7 +40,7 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
                 >
                   <button
                     className="w-full aspect-square p-[5%]"
-                    disabled={!moves.placeDuck.isAllowed!(board, { row, col })}
+                    disabled={!moves.placeDuck.isAllowed(board, { row, col })}
                     onClick={() => moves.placeDuck(board, { row, col })}
                   >
                     {isDuck({ row, col }) && (

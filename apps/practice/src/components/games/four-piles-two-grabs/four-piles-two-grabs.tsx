@@ -98,7 +98,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   }, [ctx.moveCount]);
 
   const activeCount = removals.filter(r => r > 0).length;
-  const readyToMove = moves.takeStones.isAllowed!(board, removals);
+  const readyToMove = moves.takeStones.isAllowed(board, removals);
 
   const adjust = (i: number, delta: number) => {
     if (!ctx.isClientMoveAllowed) return;

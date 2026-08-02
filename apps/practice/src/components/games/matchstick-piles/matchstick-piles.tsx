@@ -30,7 +30,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { value: activeHover, hoverProps } = useHoverPreview<Hover>(ctx.moveCount);
 
   const canSplit = (pileId: number, splitAfter: number) =>
-    moves.splitPile.isAllowed!(board, pileId, splitAfter + 1);
+    moves.splitPile.isAllowed(board, pileId, splitAfter + 1);
 
   const pileDescription = (pileId: number, size: number) => {
     if (!activeHover || activeHover.pileId !== pileId) return `${size}`;
@@ -88,14 +88,14 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                   <button
                     type="button"
                     aria-label="remove a match from this pile"
-                    disabled={!moves.removeMatch.isAllowed!(board, pileId)}
+                    disabled={!moves.removeMatch.isAllowed(board, pileId)}
                     className={`
                       p-1 rounded-sm
                       enabled:hover:bg-slate-200 dark:enabled:hover:bg-slate-700
                       enabled:focus:bg-slate-200 dark:enabled:focus:bg-slate-700
                     `}
                     onClick={() => moves.removeMatch(board, pileId)}
-                    {...(moves.removeMatch.isAllowed!(board, pileId) ? hoverProps({ pileId, kind: 'remove' }) : {})}
+                    {...(moves.removeMatch.isAllowed(board, pileId) ? hoverProps({ pileId, kind: 'remove' }) : {})}
                   >
                     <Matchstick removed={isMatchRemoved(pileId, matchId, size)} />
                   </button>

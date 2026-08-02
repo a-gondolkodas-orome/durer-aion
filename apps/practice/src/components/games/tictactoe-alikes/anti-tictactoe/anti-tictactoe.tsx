@@ -23,7 +23,7 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
       {range(9).map(id => (
         <button
           key={id}
-          disabled={!moves.placePiece.isAllowed!(board, id)}
+          disabled={!moves.placePiece.isAllowed(board, id)}
           onClick={() => moves.placePiece(board, id)}
           className="aspect-square p-[25%] bg-surface-elevated"
         >

@@ -21,13 +21,13 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     } else if (node === firstNode) {
       setFirstNode(null);
     } else {
-      if (!moves.stretchRope.isAllowed!(board, { from: firstNode, to: node })) return;
+      if (!moves.stretchRope.isAllowed(board, { from: firstNode, to: node })) return;
       moves.stretchRope(board, { from: firstNode, to: node });
       setFirstNode(null);
     }
   };
 
-  const isCandidateAllowed = moves.stretchRope.isAllowed!(board, { from: firstNode, to: validHoveredNode });
+  const isCandidateAllowed = moves.stretchRope.isAllowed(board, { from: firstNode, to: validHoveredNode });
 
   const candidateEdge = getAllowedSuperset(board, { from: firstNode, to: validHoveredNode });
   const candidateFromV = candidateEdge ? vertices[candidateEdge.from] : null;
@@ -68,7 +68,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       const isClickable = ctx.isClientMoveAllowed && (
         firstNode === null ||
         vertex.id === firstNode ||
-        moves.stretchRope.isAllowed!(board, { from: firstNode, to: vertex.id })
+        moves.stretchRope.isAllowed(board, { from: firstNode, to: vertex.id })
       );
       const isInvalidHover = firstNode !== null &&
         vertex.id === validHoveredNode &&

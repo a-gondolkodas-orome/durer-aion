@@ -12,7 +12,7 @@ const pos = COORDS.map(([x, y]) => ({ cx: px(x), cy: px(y) }));
 const segments = LINES.flatMap(([a, b, c]) => [[a, b], [b, c]] as const);
 
 export const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
-  const isClickable = (node: number) => moves.placePiece.isAllowed!(board, node);
+  const isClickable = (node: number) => moves.placePiece.isAllowed(board, node);
 
   const handleClick = (node: number) => {
     if (!isClickable(node)) return;

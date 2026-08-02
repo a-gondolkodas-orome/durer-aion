@@ -24,7 +24,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 
   const handleCircleClick = (vertex: number) => activeMove()(board, vertex);
 
-  const isClickable = (vertex: number) => activeMove().isAllowed!(board, vertex);
+  const isClickable = (vertex: number) => activeMove().isAllowed(board, vertex);
 
   const getColor = (vertex: number) => {
     if (isClickable(vertex)) {

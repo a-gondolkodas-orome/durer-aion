@@ -18,8 +18,8 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
     }
   };
   const isMoveAllowed = (id) => gameIsInPlacingPhase
-    ? moves.placePiece.isAllowed!(board, id)
-    : moves.whitenPiece.isAllowed!(board, id);
+    ? moves.placePiece.isAllowed(board, id)
+    : moves.whitenPiece.isAllowed(board, id);
   const pieceColor = (id) => {
     const colorCode = board[id];
     if (colorCode === 'red') return 'bg-red-800';

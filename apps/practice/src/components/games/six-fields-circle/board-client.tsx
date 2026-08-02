@@ -1,5 +1,5 @@
 import { range } from "lodash";
-import { GameBoard, type BoardClientProps, type Events } from "../../strategy-game-factory";
+import { GameBoard, type BoardClientProps } from "../../strategy-game-factory";
 import { type Board, FIELD_COUNT, OPPOSITE_PAIRS } from "./helpers";
 
 type TurnState = { first: number } | null
@@ -13,8 +13,7 @@ const coords: { cx: number; cy: number }[] = range(FIELD_COUNT).map((i) => {
   };
 });
 
-export const BoardClient = ({ board, ctx, events, moves }: BoardClientProps<Board>) => {
-  const setTurnState = events.setTurnState as Events["setTurnState"];
+export const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProps<Board>) => {
   const turnState = ctx.turnState as TurnState;
   const first = turnState?.first ?? null;
 
@@ -23,7 +22,7 @@ export const BoardClient = ({ board, ctx, events, moves }: BoardClientProps<Boar
     if (first === null) return board[node] > 0;
     // A field is selected: allow clicking it again to deselect, or any field
     // that would complete a legal move.
-    return node === first || moves.removeFromTwo.isAllowed!(board, [first, node]);
+    return node === first || moves.removeFromTwo.isAllowed(board, [first, node]);
   };
 
   const handleClick = (node: number) => {

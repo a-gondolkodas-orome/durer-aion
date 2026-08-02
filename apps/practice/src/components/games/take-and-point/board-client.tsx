@@ -66,7 +66,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 
   const canInteract = ctx.isClientMoveAllowed;
   const pointCount = requiredPointCount(piles);
-  const pointingReady = moves.pointPiles.isAllowed!(board, selectedForPoint);
+  const pointingReady = moves.pointPiles.isAllowed(board, selectedForPoint);
 
   const togglePoint = (i: number) => {
     if (!canInteract || stage !== 'point' || piles[i] === 0) return;
@@ -89,7 +89,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   };
 
   const removalReady = removal !== null
-    && moves.takeStones.isAllowed!(board, removal.index, removal.amount);
+    && moves.takeStones.isAllowed(board, removal.index, removal.amount);
 
   const submitRemoval = () => {
     if (!removal) return;
@@ -146,7 +146,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                     label={t({ hu: `+1 a(z) ${i + 1}. kupacból`, en: `+1 from pile ${i + 1}` })}
                     // One more stone must itself be a legal take; the second
                     // clause is local UI state (only one pile per turn).
-                    disabled={!moves.takeStones.isAllowed!(board, i, removeCount + 1)
+                    disabled={!moves.takeStones.isAllowed(board, i, removeCount + 1)
                       || (removal !== null && removal.index !== i)}
                     onClick={() => adjustRemoval(i, 1)}
                   >+</Stepper>

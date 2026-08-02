@@ -18,7 +18,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     if (!validHoveredField) return false;
     return isEqual(validHoveredField, field);
   };
-  const isMoveAllowed = (targetField: Field) => moves.placeBishop.isAllowed!(board, targetField);
+  const isMoveAllowed = (targetField: Field) => moves.placeBishop.isAllowed(board, targetField);
   const isForbidden = ({ row, col }: Field) => {
     return board[row][col] === FORBIDDEN;
   };

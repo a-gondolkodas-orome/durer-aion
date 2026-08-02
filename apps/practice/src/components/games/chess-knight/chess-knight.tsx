@@ -7,7 +7,7 @@ import { getAllowedMoves, generateStartBoard, markVisitedFields, type Board, typ
 import { ChessKnightSvg } from './chess-knight-svg';
 
 const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
-  const isMoveAllowed = (targetField: Field) => moves.moveKnight.isAllowed!(board, targetField);
+  const isMoveAllowed = (targetField: Field) => moves.moveKnight.isAllowed(board, targetField);
 
   return (
   <GameBoard>

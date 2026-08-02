@@ -26,7 +26,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     setHoveredEdge(null);
   }, [ctx.moveCount]);
 
-  const triangleClickable = (t: number) => moves.placeCircle.isAllowed!(board, t);
+  const triangleClickable = (t: number) => moves.placeCircle.isAllowed(board, t);
 
   const triangleClass = (t: number) => {
     if (board.circles[t]) return 'fill-slate-900/5 dark:fill-white/5';
@@ -124,7 +124,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         {/* Invisible wide hit targets for edges — only on the line player's turn,
             where the move's own validator is what makes the list non-empty. */}
         <g>
-          {EDGES.filter(edge => moves.shadeEdge.isAllowed!(board, edge.id)).map(edge => (
+          {EDGES.filter(edge => moves.shadeEdge.isAllowed(board, edge.id)).map(edge => (
             <line
               key={`hit-${edge.id}`}
               x1={edge.x1} y1={edge.y1} x2={edge.x2} y2={edge.y2}

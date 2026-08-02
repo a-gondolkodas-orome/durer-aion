@@ -22,7 +22,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const cellBackground = (i) => {
     if (i === board.left) return 'bg-green-400';
     if (i === board.right) return 'bg-purple-400';
-    if (moves.step.isAllowed!(board, potentialStep(i))) {
+    if (moves.step.isAllowed(board, potentialStep(i))) {
       return ctx.currentPlayer === 0
         ? 'bg-green-200 dark:bg-green-700 enabled:hocus:bg-green-400 dark:enabled:hocus:bg-green-600'
         : 'bg-purple-200 dark:bg-purple-700 enabled:hocus:bg-purple-400 dark:enabled:hocus:bg-purple-600';
@@ -41,7 +41,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               w-full aspect-square text-xl font-bold rounded-sm drop-shadow-sm p-[10%]
               ${cellBackground(i)}
             `}
-            disabled={!moves.step.isAllowed!(board, potentialStep(i))}
+            disabled={!moves.step.isAllowed(board, potentialStep(i))}
             onClick={() => moves.step(board, potentialStep(i))}
           >{ i === board.left || i === board.right
             ? <svg className="w-full aspect-square">

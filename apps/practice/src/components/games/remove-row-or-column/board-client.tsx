@@ -10,7 +10,7 @@ import {
 
 type Selected = { r: number; c: number } | null
 
-export const BoardClient = ({ board, ctx, events, moves }: BoardClientProps<Board>) => {
+export const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
   const { grid } = board;
   const selected = ctx.turnState as Selected;
@@ -22,7 +22,7 @@ export const BoardClient = ({ board, ctx, events, moves }: BoardClientProps<Boar
     // Picking another disc keeps moveCount unchanged, so drop the hover
     // preview explicitly — it belonged to the previous selection.
     clearHover();
-    events.setTurnState(selected && selected.r === r && selected.c === c ? null : { r, c });
+    setTurnState(selected && selected.r === r && selected.c === c ? null : { r, c });
   };
 
   const discClass = (r: number, c: number) => {

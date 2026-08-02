@@ -30,7 +30,7 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => (
       {range(board.length).map(id =>
         <button
           key={id}
-          disabled={!moves.addPiece.isAllowed!(board, id)}
+          disabled={!moves.addPiece.isAllowed(board, id)}
           onClick={() => moves.addPiece(board, id)}
           className="aspect-square border-r-2 border-b-2 p-[4%]"
         >

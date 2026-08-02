@@ -35,17 +35,18 @@ Note: written solutions typically only describe what to do from a winning positi
 
 ### 3. Pick a reference game to copy
 Choose the simplest existing game that resembles the new one structurally:
-- Number/token games with simple state: `src/components/games/plus-one-two-three/plus-one-two-three.js`
+- Number/token games with simple state: `src/components/games/single-number-increase/plus-one-two-three/plus-one-two-three.tsx`
 - Games with variants (multiple starting configs): look in `src/components/games/pile-splitting-games/`
 - Grid/board games: `src/components/games/chess-rook/` or `src/components/games/shark-chase/`
 
 Read the chosen reference file in full before writing anything.
 
 ### 4. Create the game file
-Create `src/components/games/<game-name>/<game-name>.js`. Follow the `strategyGameFactory` API from `AGENTS.md`. Key rules:
+Create `src/components/games/<game-name>/<game-name>.tsx`. Follow the `strategyGameFactory` API from `AGENTS.md`. Key rules:
 - If the user supplied the rule text, use it verbatim in `rule.hu` by default. Don't silently rephrase, correct, or abbreviate it. **Exception:** when the original wording doesn't fit the online implementation — e.g. it refers to the competition organizers/judges instead of the opponent/computer, or to physical artifacts (paper, pencil, cards on a table) that don't exist in the browser version — it's fine to reword it slightly to fit. In that case, explicitly highlight every change you made to the user (e.g. show before/after) so they can review it. For any other wording change, propose it and wait for approval before applying.
 - `board` holds only game-specific state; common state is in `ctx`
-- Every move returns `{ nextBoard }`; pass the current board when chaining moves within a turn
+- Every move is `{ apply, validate? }`. `apply` is a pure reducer returning a `MoveOutcome` (`{ nextBoard, isTurnEnd?, gameEnd?, nextTurnState?, autoEndOfTurn? }`) — it never reaches out and changes anything itself. Pass the current board when chaining moves within a turn
+- Give a move with non-trivial legality a `validate` predicate, and drive the `BoardClient`'s `disabled` state with `moves.<name>.isAllowed(board, ...args)` rather than a hand-rolled duplicate check
 - Guard all player interactions with `ctx.isClientMoveAllowed`
 - `getPlayerStepDescription` should make it obvious what the current player should do
 - For user-facing text referring to the other participant, prefer "other player" / "másik játékos" over "opponent" / "ellenfél" — the latter reads as too harsh, especially in Hungarian
@@ -56,10 +57,10 @@ Create `src/components/games/<game-name>/<game-name>.js`. Follow the `strategyGa
 Add one `export { YourGame } from './path/...'` line to the barrel, keyed by the
 game's `gameList` key (alias if the export name differs, e.g.
 `export { FooA as Foo } from '...'`), keeping alphabetical order. The route is the
-key, and the router in `src/components/app/app.js` derives it from `gameList`
+key, and the router in `src/components/app/app.tsx` derives it from `gameList`
 automatically — no edit is needed there.
 
-### 6. Add metadata to `src/components/games/gameList.js`
+### 6. Add metadata to `src/components/games/gameList.ts`
 Using the metadata collected in Step 1, add the entry in alphabetical order by key. Use `title` only if a longer display name is needed on the game page beyond the short name.
 
 ### 7. Run tests and verify
@@ -76,6 +77,8 @@ Before declaring the game done, verify each item:
 - [ ] Works correctly in both `vsComputer` and `vsHuman` mode
 - [ ] Starting positions are representative of the game's complexity; each player wins with ~50% probability across random starting boards
 - [ ] If optimal AI is implemented: player cannot win with a non-winning strategy
+- [ ] Moves return their consequences in the `MoveOutcome` rather than causing them
+- [ ] Moves with non-trivial legality define `validate`, and the `BoardClient` gates on `isAllowed`
 - [ ] `getPlayerStepDescription` makes the next move clear
 - [ ] Interactions disabled during the other player's turn (`ctx.isClientMoveAllowed`)
 - [ ] Mobile-friendly and keyboard-navigable
@@ -89,12 +92,12 @@ If the optimal AI strategy was implemented in step 2, ask the user:
 
 **If yes**, update the game file:
 
-1. Add a `randomBotStrategy` function — pick a random valid move, but if any move wins immediately (wins in 1 turn), pick one of those winning moves instead. Follow the pattern in `src/components/games/ten-digit-number/ten-digit-number.js`.
+1. Add a `randomBotStrategy` function — pick a random valid move, but if any move wins immediately (wins in 1 turn), pick one of those winning moves instead. Follow the pattern in `src/components/games/ten-digit-number/ten-digit-number.tsx`.
 
 2. Rename the existing optimal bot strategy to `smartBotStrategy` (or a similarly descriptive name).
 
 3. Restructure `variants` to put the test bot first and the smart bot second (marked `isDefault: true`):
-   ```javascript
+   ```typescript
    variants: [
      {
        botStrategy: randomBotStrategy,

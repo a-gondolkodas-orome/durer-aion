@@ -10,7 +10,7 @@ export type Board = number[]
 export type MoveType = 'remove' | 'merge'
 type TurnState = { firstSelectedPile: number } | null
 
-const BoardClient = ({ board, ctx, events, moves }: BoardClientProps<Board>) => {
+const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProps<Board>) => {
   const [moveType, setMoveType] = useState<MoveType>('remove');
   const { value: hoveredPile, hoverProps } = useHoverPreview<number>(ctx.moveCount);
   const turnState = ctx.turnState as TurnState;
@@ -24,12 +24,12 @@ const BoardClient = ({ board, ctx, events, moves }: BoardClientProps<Board>) => 
       moves.removeOne(board, pileIndex);
     } else {
       if (turnState === null) {
-        events.setTurnState({ firstSelectedPile: pileIndex });
+        setTurnState({ firstSelectedPile: pileIndex });
       } else if (turnState.firstSelectedPile === pileIndex) {
-        events.setTurnState(null);
+        setTurnState(null);
       } else {
         moves.mergePiles(board, [turnState.firstSelectedPile, pileIndex]);
-        events.setTurnState(null);
+        setTurnState(null);
         setMoveType('remove');
       }
     }
@@ -42,7 +42,7 @@ const BoardClient = ({ board, ctx, events, moves }: BoardClientProps<Board>) => 
           moveType={moveType}
           isClientMoveAllowed={ctx.isClientMoveAllowed}
           canMerge={board.length >= 2}
-          onSelect={(type) => { setMoveType(type); events.setTurnState(null); }}
+          onSelect={(type) => { setMoveType(type); setTurnState(null); }}
         />
       )}
 
