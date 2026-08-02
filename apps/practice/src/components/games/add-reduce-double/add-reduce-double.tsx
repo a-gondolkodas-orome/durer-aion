@@ -1,6 +1,6 @@
 import { range, isEqual, random, cloneDeep } from 'lodash';
 import {
-  strategyGameFactory, type BoardClientProps, type Events, GameBoard, useHoverPreview
+  strategyGameFactory, type BoardClientProps, type Ctx, type MoveOutcome, GameBoard, useHoverPreview
 } from '../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 
@@ -108,16 +108,15 @@ export const isTransferAllowed = (board: Board, { pileId, pieceCount }): boolean
 const moves = {
   moveHalvedPieces: {
     validate: (board: Board, _, piece) => isTransferAllowed(board, piece),
-    legacyApply: (board: Board, { events }: { events: Events }, { pileId, pieceCount }) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, { pileId, pieceCount }): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard[pileId] -= pieceCount;
       nextBoard[1 - pileId] += pieceCount / 2;
-      events.endTurn();
       const isGameEnd = isEqual(nextBoard, [1, 1]) || isEqual(nextBoard, [0, 1]) || isEqual(nextBoard, [1, 0]);
       if (isGameEnd) {
-        events.endGame();
+        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   }
 };

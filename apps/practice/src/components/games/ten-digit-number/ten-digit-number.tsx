@@ -1,6 +1,6 @@
 import { sample } from 'lodash';
 import {
-  strategyGameFactory, type Events, type StrategyArgs, type BoardClientProps, GameBoard
+  strategyGameFactory, type MoveOutcome, type StrategyArgs, type BoardClientProps, GameBoard
 } from '../../strategy-game-factory';
 import { useTranslation } from '../../../language';
 
@@ -94,16 +94,14 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 const moves = {
   chooseDigit: {
     validate: (board: Board, _, digit) => isDigitChoiceAllowed(board, digit),
-    legacyApply: (board: Board, { events }: { events: Events }, digit) => {
+    apply: (board: Board, _, digit): MoveOutcome<Board> => {
       const newDigits = [...board.digits, digit];
       const newSumMod9 = (board.sumMod9 + digit) % 9;
       const nextBoard = { digits: newDigits, sumMod9: newSumMod9 };
       if (newDigits.length === totalDigits) {
-        events.endGame(newSumMod9 === 0 ? 1 : 0);
-      } else {
-        events.endTurn();
+        return { nextBoard, gameEnd: { winnerIndex: newSumMod9 === 0 ? 1 : 0 } };
       }
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   }
 };

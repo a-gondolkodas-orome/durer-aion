@@ -1,5 +1,5 @@
 import {
-  strategyGameFactory, type Ctx, type Events, type StrategyArgs, type BoardClientProps, GameBoard
+  strategyGameFactory, type Ctx, type MoveOutcome, type StrategyArgs, type BoardClientProps, GameBoard
 } from '../../../strategy-game-factory';
 import { sample } from 'lodash';
 
@@ -36,22 +36,19 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const say = (next: number, { ctx, events }: { ctx: Ctx, events: Events }) => {
-  events.endTurn();
+const say = (next: number, ctx: Ctx): MoveOutcome<Board> => {
   if (isLosing(next)) {
-    events.endGame(1 - ctx.currentPlayer!);
+    return { nextBoard: next, gameEnd: { winnerIndex: 1 - ctx.currentPlayer! } };
   }
-  return { nextBoard: next };
+  return { nextBoard: next, isTurnEnd: true };
 };
 
 const moves = {
-  increment: {
-    legacyApply: (board: Board, meta: { ctx: Ctx, events: Events }) => say(board + 1, meta)
-  },
+  increment: { apply: (board: Board, { ctx }: { ctx: Ctx }) => say(board + 1, ctx) },
   double: {
     // Doubling nothing says nothing, so the opening move can only be x+1 = 1.
     validate: (board: Board) => board >= 1,
-    legacyApply: (board: Board, meta: { ctx: Ctx, events: Events }) => say(board * 2, meta)
+    apply: (board: Board, { ctx }: { ctx: Ctx }) => say(board * 2, ctx)
   }
 };
 

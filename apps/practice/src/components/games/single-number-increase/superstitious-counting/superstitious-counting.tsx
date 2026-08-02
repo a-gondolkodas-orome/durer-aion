@@ -1,6 +1,6 @@
 import { range, sample, difference } from 'lodash';
 import {
-  strategyGameFactory, type Ctx, type Events, type BoardClientProps, GameBoard
+  strategyGameFactory, type Ctx, type MoveOutcome, type BoardClientProps, GameBoard
 } from '../../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { useTranslation } from '../../../../language';
@@ -73,14 +73,13 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 const moves = {
   step: {
     validate: (board: Board, _, step: number) => isStepAllowed(board, step),
-    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, step) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, step): MoveOutcome<Board> => {
       const numberAfterStep = board.current + step;
       const nextBoard = { current: numberAfterStep, target: board.target, restricted: 13 - step };
-      events.endTurn();
       if (numberAfterStep >= board.target) {
-        events.endGame(1 - ctx.currentPlayer!)
+        return { nextBoard, gameEnd: { winnerIndex: 1 - ctx.currentPlayer! } };
       }
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   }
 };

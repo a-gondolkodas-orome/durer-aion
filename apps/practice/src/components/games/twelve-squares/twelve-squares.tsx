@@ -1,6 +1,6 @@
 import {
   strategyGameFactory,
-  type Ctx, type Events, type StrategyArgs, type BoardClientProps,
+  type Ctx, type MoveOutcome, type StrategyArgs, type BoardClientProps,
   GameBoard
 } from '../../strategy-game-factory';
 import { range, random, sample } from 'lodash';
@@ -76,15 +76,15 @@ const getOptimalBotStep = ({ left, right }) => {
 const moves = {
   step: {
     validate: (board: Board, _, step) => isValidStep(board, step),
-    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, step) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, step): MoveOutcome<Board> => {
       const nextBoard = ctx.currentPlayer === 0
         ? { left: board.left + step, right: board.right }
         : { left: board.left, right: board.right - step };
-      events.endTurn();
+      // Jumping past the other piece wins for the player who just moved.
       if (nextBoard.right < nextBoard.left) {
-        events.endGame();
+        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   }
 };

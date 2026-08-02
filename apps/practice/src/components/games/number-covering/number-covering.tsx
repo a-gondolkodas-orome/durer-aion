@@ -1,5 +1,5 @@
 import {
-  strategyGameFactory, type Events, type StrategyArgs, type BoardClientProps, GameBoard
+  strategyGameFactory, type MoveOutcome, type StrategyArgs, type BoardClientProps, GameBoard
 } from '../../strategy-game-factory';
 import { range, sum, sample, cloneDeep } from 'lodash';
 import { useTranslation } from '../../../language';
@@ -98,16 +98,15 @@ const genericRule = {
 export const moves = {
   coverNumber: {
     validate: (board: Board, _, number: number) => isCoveringAllowed(board, number),
-    legacyApply: (board: Board, { events }: { events: Events }, number) => {
+    apply: (board: Board, _, number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard[number-1] = COVERED;
-      events.endTurn();
 
       const remaining = getRemaining(nextBoard);
       if (remaining.length === 2) {
-        events.endGame(sum(remaining) % 2);
+        return { nextBoard, gameEnd: { winnerIndex: sum(remaining) % 2 } };
       }
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   }
 }

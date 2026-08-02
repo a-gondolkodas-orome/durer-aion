@@ -1,6 +1,6 @@
 import {
   strategyGameFactory,
-  type Ctx, type Events, type StrategyArgs, type BoardClientProps,
+  type Ctx, type MoveOutcome, type StrategyArgs, type BoardClientProps,
   GameBoard
 } from '../../../strategy-game-factory';
 import { range, random } from 'lodash';
@@ -43,12 +43,11 @@ export const isIncreaseValid = ({ board, number }: { board: Board; number: numbe
 const moves = {
   increaseTo: {
     validate: (board: Board, _, number: number) => isIncreaseValid({ board, number }),
-    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, number) => {
-      events.endTurn();
+    apply: (board: Board, { ctx }: { ctx: Ctx }, number): MoveOutcome<Board> => {
       if (number > target) {
-        events.endGame(1 - ctx.currentPlayer!)
+        return { nextBoard: number, gameEnd: { winnerIndex: 1 - ctx.currentPlayer! } };
       }
-      return { nextBoard: number }
+      return { nextBoard: number, isTurnEnd: true };
     }
   }
 };
