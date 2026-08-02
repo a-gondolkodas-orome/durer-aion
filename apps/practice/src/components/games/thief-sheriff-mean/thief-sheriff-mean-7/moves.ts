@@ -22,7 +22,9 @@ export const moves = {
     // the game happens inside `applyTakeCard`, not as a move argument.
     validate: (board: Board, _, indices: number[]) =>
       Array.isArray(indices) && indices.length === 1 && isCardAvailable(board, CARD_COUNT, indices[0]),
-    apply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, indices: number[]): { nextBoard: Board } => {
+    legacyApply: (
+      board: Board, { ctx, events }: { ctx: Ctx, events: Events }, indices: number[]
+    ): { nextBoard: Board } => {
       const nextBoard = applyTakeCard(board, ctx.currentPlayer!, indices);
       if (nextBoard.numTurns >= 5) {
         const winner = hasWinningTriple(nextBoard.cards[Thief]) ? Thief : Sheriff;

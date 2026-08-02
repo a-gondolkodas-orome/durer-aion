@@ -40,7 +40,7 @@ export const moves = {
   placeCop: {
     validate: (board: Board, _, vertex: number) =>
       board.phase === 'placingCops' && isVertex(vertex),
-    apply: (board: Board, { events }: { events: Events }, vertex: number) => {
+    legacyApply: (board: Board, { events }: { events: Events }, vertex: number) => {
       const nextBoard = cloneDeep(board);
       nextBoard.policemen.push(vertex);
       if (nextBoard.policemen.length === nextBoard.copCount) {
@@ -54,7 +54,7 @@ export const moves = {
   placeThief: {
     validate: (board: Board, _, vertex: number) =>
       board.phase === 'placingThief' && isVertex(vertex) && !board.policemen.includes(vertex),
-    apply: (board: Board, { events }: { events: Events }, vertex: number) => {
+    legacyApply: (board: Board, { events }: { events: Events }, vertex: number) => {
       const nextBoard = cloneDeep(board);
       nextBoard.thief = vertex;
       nextBoard.phase = 'chasing';
@@ -69,7 +69,7 @@ export const moves = {
     validate: (board: Board, { ctx }: { ctx: Ctx }, vertex: number) =>
       board.phase === 'chasing' && ctx.currentPlayer === POLICE
         && isNeighbour(board.policemen[board.copCursor], vertex),
-    apply: (board: Board, { events }: { events: Events }, vertex: number) => {
+    legacyApply: (board: Board, { events }: { events: Events }, vertex: number) => {
       const nextBoard = cloneDeep(board);
       nextBoard.policemen[nextBoard.copCursor] = vertex;
       nextBoard.copCursor += 1;
@@ -90,7 +90,7 @@ export const moves = {
     validate: (board: Board, { ctx }: { ctx: Ctx }, vertex: number) =>
       board.phase === 'chasing' && ctx.currentPlayer === THIEF
         && isNeighbour(board.thief!, vertex),
-    apply: (board: Board, { events }: { events: Events }, vertex: number) => {
+    legacyApply: (board: Board, { events }: { events: Events }, vertex: number) => {
       const nextBoard = cloneDeep(board);
       nextBoard.thief = vertex;
       nextBoard.thiefMoveCount += 1;

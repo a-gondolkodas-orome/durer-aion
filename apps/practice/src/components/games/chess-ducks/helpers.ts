@@ -42,7 +42,7 @@ export const isPlacementAllowed = (board: Board, field: Field): boolean =>
 export const moves = {
   placeDuck: {
     validate: (board: Board, _, field: Field) => isPlacementAllowed(board, field),
-    apply: (board: Board, { events }: { events: Events }, { row, col }: Field) => {
+    legacyApply: (board: Board, { events }: { events: Events }, { row, col }: Field) => {
       const nextBoard = cloneDeep(board);
       nextBoard[row][col] = DUCK;
       markForbiddenFields(nextBoard, { row, col });

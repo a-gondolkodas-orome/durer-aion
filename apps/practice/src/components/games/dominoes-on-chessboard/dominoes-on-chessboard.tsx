@@ -162,7 +162,7 @@ export const isDominoAllowed = (board: Board, domino: Domino): boolean =>
 const moves = {
   placeDomino: {
     validate: (board: Board, _, domino: Domino) => isDominoAllowed(board, domino),
-    apply: (board: Board, { events }: { events: Events }, domino: Domino) => {
+    legacyApply: (board: Board, { events }: { events: Events }, domino: Domino) => {
       const nextBoard = cloneDeep(board);
       nextBoard.push(domino);
       events.endTurn();

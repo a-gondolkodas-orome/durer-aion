@@ -72,7 +72,7 @@ const moves = {
   removeCard: {
     validate: (board: Board, { ctx }: { ctx: Ctx }, id: number) =>
       isRemovalAllowed(board, 1 - ctx.currentPlayer!, id),
-    apply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, id: number) => {
+    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, id: number) => {
       const nextBoard = cloneDeep(board);
       nextBoard[1 - ctx.currentPlayer!][id - 1] = null;
       events.endTurn();

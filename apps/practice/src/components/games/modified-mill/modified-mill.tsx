@@ -10,7 +10,7 @@ export type { Board };
 const moves = {
   placePiece: {
     validate: (board: Board, _, node: number) => isPlacementAllowed(board, node),
-    apply: (board: Board, { ctx, events }: { ctx: Ctx; events: Events }, node: number) => {
+    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx; events: Events }, node: number) => {
       const nextBoard = board.slice();
       nextBoard[node] = playerColor(ctx.currentPlayer!);
       events.endTurn();

@@ -26,18 +26,21 @@ export type MoveFunction<TBoard> = (
   board: TBoard, meta: { ctx: Ctx; events: Events }, ...args: any[]
 ) => MoveResult<TBoard>
 // Pure, side-effect-free legality predicate for a single move, colocated with
-// its `apply` in the long-form move definition. Because it depends only on
+// its `legacyApply` in the long-form move definition. Because it depends only on
 // `board` + `ctx` (no React, no `events`), the same function drives the UI
 // (button `disabled`), the engine (illegal-move enforcement) and, in the
 // future, an authoritative server-side check.
 type MoveValidator<TBoard> = (
   board: TBoard, meta: { ctx: Ctx }, ...args: any[]
 ) => boolean
-// A move is either a plain apply function (shorthand — always accepted by the
+// A move is either a plain move function (shorthand — always accepted by the
 // engine) or a long-form object pairing it with an optional legality validator.
+// The key is named `legacyApply` because this events-based contract is on its
+// way out: an outcome-returning replacement lands next, and every remaining
+// `legacyApply` is one game still to migrate.
 export type MoveDefinition<TBoard> =
   | MoveFunction<TBoard>
-  | { apply: MoveFunction<TBoard>; validate?: MoveValidator<TBoard> }
+  | { legacyApply: MoveFunction<TBoard>; validate?: MoveValidator<TBoard> }
 export interface Gameplay<TBoard> {
   moves: Record<string, MoveDefinition<TBoard>>
   // move name auto-executed (after a delay) following moves returning autoEndOfTurn: true

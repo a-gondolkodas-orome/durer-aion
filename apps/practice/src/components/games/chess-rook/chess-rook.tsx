@@ -51,7 +51,7 @@ const moves = {
   moveRook: {
     validate: (board: Board, _, target: Field) =>
       some(getAllowedMoves(board), field => isEqual(field, target)),
-    apply: (board: Board, { events }: { events: Events }, { row, col }: Field) => {
+    legacyApply: (board: Board, { events }: { events: Events }, { row, col }: Field) => {
       const nextBoard = cloneDeep(board);
       markVisitedFields(nextBoard, nextBoard.rookPosition, { row, col });
 

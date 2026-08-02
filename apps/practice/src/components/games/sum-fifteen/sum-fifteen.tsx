@@ -79,7 +79,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 const moves = {
   chooseNumber: {
     validate: (board: Board, _, n: number) => isChoiceAllowed(board.owner, n),
-    apply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, n: number) => {
+    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, n: number) => {
       const player = ctx.currentPlayer as 0 | 1;
       const owner = board.owner.slice() as Board['owner'];
       owner[n - 1] = player;

@@ -107,7 +107,7 @@ export const BoardClient = ({ board, ctx, events, moves }: BoardClientProps<Boar
 export const moves = {
   removeLine: {
     validate: (board: Board, _, move: Move) => isRemovalAllowed(board.grid, move),
-    apply: (board: Board, { events }: { events: Events }, move: Move) => {
+    legacyApply: (board: Board, { events }: { events: Events }, move: Move) => {
       const nextBoard = { grid: applyMove(board.grid, move) };
       events.setTurnState(null);
       events.endTurn();

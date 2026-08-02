@@ -49,7 +49,7 @@ const moves = {
   double: {
     // Doubling nothing says nothing, so the opening move can only be x+1 = 1.
     validate: (board: Board) => board >= 1,
-    apply: (board: Board, meta: { ctx: Ctx, events: Events }) => say(board * 2, meta)
+    legacyApply: (board: Board, meta: { ctx: Ctx, events: Events }) => say(board * 2, meta)
   }
 };
 

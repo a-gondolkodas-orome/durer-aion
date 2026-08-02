@@ -108,7 +108,7 @@ export const isTransferAllowed = (board: Board, { pileId, pieceCount }): boolean
 const moves = {
   moveHalvedPieces: {
     validate: (board: Board, _, piece) => isTransferAllowed(board, piece),
-    apply: (board: Board, { events }: { events: Events }, { pileId, pieceCount }) => {
+    legacyApply: (board: Board, { events }: { events: Events }, { pileId, pieceCount }) => {
       const nextBoard = cloneDeep(board);
       nextBoard[pileId] -= pieceCount;
       nextBoard[1 - pileId] += pieceCount / 2;

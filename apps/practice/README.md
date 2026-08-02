@@ -202,7 +202,7 @@ Conceptually a `move` is a unit that captures a change in the board initiated by
 a player. Moves help ensure that the game is played according to rules by all
 players.
 
-Technically the apply function of a move takes board as first param, `{
+Technically the `legacyApply` function of a move takes board as first param, `{
 ctx, events }` as second param and may receive any number of additional params.
 The second param is provided by the framework, additional params will be
 provided by the client based on player interaction or by the bot strategy. Each
@@ -219,8 +219,8 @@ snapshot — see [AGENTS.md § Known limitation: React state staleness in
 multi-move turns](AGENTS.md#known-limitation-react-state-staleness-in-multi-move-turns)
 for the root cause and how `ctx.turnState` is handled.
 
-In `gameplay.moves`, each entry is either the apply function itself (shorthand)
-or a long-form object `{ apply, validate? }`:
+In `gameplay.moves`, each entry is either the move function itself (shorthand)
+or a long-form object `{ legacyApply, validate? }`:
 
 ```ts
 moves: {
@@ -231,13 +231,13 @@ moves: {
 }
 ```
 
-`apply` does **not** validate its arguments — it applies them blindly; legality
+`legacyApply` does **not** validate its arguments — it applies them blindly; legality
 lives in `validate`, right next to it.
 
 ### validate (optional, per move)
 
 `validate` is a pure predicate `(board, { ctx }, ...args) => boolean` colocated
-with `apply` — the single source of truth for move legality. The framework
+with `legacyApply` — the single source of truth for move legality. The framework
 rejects dispatches that fail it, and exposes it on the wrapped move as
 `moves.<name>.isAllowed(board, ...args)` (turn ownership AND `validate`, `ctx`
 bound) for the `BoardClient`'s `disabled` state. Full contract in

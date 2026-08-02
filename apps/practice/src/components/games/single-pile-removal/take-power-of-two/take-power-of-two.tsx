@@ -103,7 +103,7 @@ const moves = {
     // A power of 2 may be subtracted only if it does not exceed the number —
     // exactly the exponents the board already offers.
     validate: (board: Board, _, exponent: number) => getAvailableExponents(board).includes(exponent),
-    apply: (board: Board, { events }: { events: Events }, exponent: number) => {
+    legacyApply: (board: Board, { events }: { events: Events }, exponent: number) => {
       const nextBoard = board - 2 ** exponent;
       events.endTurn();
       if (nextBoard === 0) {

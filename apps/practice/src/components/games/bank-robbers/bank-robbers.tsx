@@ -70,7 +70,7 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
 const moves = {
   rob: {
     validate: (board: Board, _, index) => isRobbable(board, index),
-    apply: (board: Board, { events }: { events: Events }, index) => {
+    legacyApply: (board: Board, { events }: { events: Events }, index) => {
       const nextBoard = cloneDeep(board);
       // so that ai strategy can be simpler: first move is always the same
       const transformedMove = board.firstMove === null ? 0 : index;

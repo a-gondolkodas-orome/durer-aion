@@ -112,7 +112,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 const moves = {
   placeDigit: {
     validate: (board: Board, _, cell: number, digit: number) => isLegalPlacement(board, cell, digit),
-    apply: (board: Board, { events }: { ctx: Ctx; events: Events }, cell: number, digit: number) => {
+    legacyApply: (board: Board, { events }: { ctx: Ctx; events: Events }, cell: number, digit: number) => {
       const nextBoard = board.map((v, i) => (i === cell ? digit : v));
       events.endTurn();
       // The next player now faces nextBoard: a full grid means the first player

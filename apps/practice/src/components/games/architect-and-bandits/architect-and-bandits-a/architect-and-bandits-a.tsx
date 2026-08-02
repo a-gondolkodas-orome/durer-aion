@@ -30,7 +30,7 @@ const moves = {
   moveArchitect: {
     validate: (board: Board, { ctx }: { ctx: Ctx }, targetVertex: number) =>
       ctx.currentPlayer === ARCHITECT && isArchitectStepAllowed(board, targetVertex, KM_PER_DAY),
-    apply: (board: Board, _, targetVertex) => {
+    legacyApply: (board: Board, _, targetVertex) => {
       const nextBoard = cloneDeep(board);
       nextBoard.architectPosition = targetVertex;
       nextBoard.towers[targetVertex] = true;
@@ -41,7 +41,7 @@ const moves = {
 
   endDay: {
     validate: (_board: Board, { ctx }: { ctx: Ctx }) => ctx.currentPlayer === ARCHITECT,
-    apply: (board: Board, { events }: { events: Events }) => {
+    legacyApply: (board: Board, { events }: { events: Events }) => {
       const nextBoard = cloneDeep(board);
       nextBoard.kmUsedToday = 0;
       if (board.day === 4) {
@@ -56,7 +56,7 @@ const moves = {
   destroyTower: {
     validate: (board: Board, { ctx }: { ctx: Ctx }, vertex: number) =>
       ctx.currentPlayer === BANDITS && isDestructionAllowed(board, vertex),
-    apply: (board: Board, _, vertex) => {
+    legacyApply: (board: Board, _, vertex) => {
       const nextBoard = cloneDeep(board);
       nextBoard.towers[vertex] = false;
       return { nextBoard, autoEndOfTurn: true };

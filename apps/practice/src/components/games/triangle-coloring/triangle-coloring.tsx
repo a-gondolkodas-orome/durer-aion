@@ -119,7 +119,7 @@ export const isColoringAllowed = (board: Board, id: number): boolean =>
 const moves = {
   colorTriangle: {
     validate: (board: Board, _, id: number) => isColoringAllowed(board, id),
-    apply: (board: Board, { events }: { events: Events }, id: number) => {
+    legacyApply: (board: Board, { events }: { events: Events }, id: number) => {
       const nextBoard = cloneDeep(board);
       nextBoard[id] = COLORED;
       triangles[id].neighbors.forEach(n => {
@@ -148,7 +148,7 @@ const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
 const getOptimalSmartBotMove = (board: Board) => {
   const allowedMoves = getAllowedMoves(board);
   const optimalPlace = shuffle(allowedMoves).find(i => {
-    const { nextBoard } = moves.colorTriangle.apply(board, { events: dummyEvents }, i);
+    const { nextBoard } = moves.colorTriangle.legacyApply(board, { events: dummyEvents }, i);
     return isWinningState(nextBoard);
   });
 
@@ -166,7 +166,7 @@ const isWinningState = (board: Board) => {
   }
 
   const optimalPlaceForOther = allowedPlacesForOther.find(i => {
-    const { nextBoard } = moves.colorTriangle.apply(board, { events: dummyEvents }, i);
+    const { nextBoard } = moves.colorTriangle.legacyApply(board, { events: dummyEvents }, i);
     return isWinningState(nextBoard);
   });
   return optimalPlaceForOther === undefined;

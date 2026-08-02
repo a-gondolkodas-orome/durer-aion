@@ -42,9 +42,9 @@ export const strategyGameFactory = <TBoard,>({
   const { rule, roleLabels, getPlayerStepDescription } = presentation;
   const { moves, endOfTurnMove } = gameplay;
   const { defaultVariantIndex, defaultVariant, resolvedVariants } = resolveVariants(variants);
-  // Normalize the shorthand (plain function = apply with no validator) so the
+  // Normalize the shorthand (plain function = legacyApply with no validator) so the
   // rest of the engine deals with a single long-form shape.
-  const normalizedMoves = mapValues(moves, (m) => typeof m === 'function' ? { apply: m } : m);
+  const normalizedMoves = mapValues(moves, (m) => typeof m === 'function' ? { legacyApply: m } : m);
 
   return () => {
     const { t } = useTranslation();
@@ -252,9 +252,9 @@ export const strategyGameFactory = <TBoard,>({
       }
     };
 
-    wrappedGameMoves = mapValues(normalizedMoves, ({ apply }, name) => {
+    wrappedGameMoves = mapValues(normalizedMoves, ({ legacyApply }, name) => {
       const wrapped: GameMoves<TBoard>[string] = (board: TBoard, ...args: unknown[]) =>
-        moveWrapper(name, board, args, () => apply(board, { ctx, events }, ...args));
+        moveWrapper(name, board, args, () => legacyApply(board, { ctx, events }, ...args));
       return wrapped;
     });
 

@@ -44,7 +44,7 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
 const moves = {
   subtractDigit: {
     validate: (board: Board, _, digit: number) => isSubtractableDigit(board, digit),
-    apply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, digit: number) => {
+    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, digit: number) => {
       const nextBoard = board - digit;
       if (nextBoard === 0) {
         events.endGame(ctx.currentPlayer!);

@@ -117,7 +117,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 const moves = {
   breakPiece: {
     validate: (board: Board, _, move: Move) => isBreakAllowed(board, move),
-    apply: (board: Board, { events }: { events: Events }, move: Move) => {
+    legacyApply: (board: Board, { events }: { events: Events }, move: Move) => {
       const nextBoard = applyBreak(board, move);
       events.endTurn();
       if (!hasSafeBreak(nextBoard.pieces)) {

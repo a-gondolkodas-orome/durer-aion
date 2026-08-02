@@ -10,7 +10,7 @@ const generateStartBoard = (): Board => [0, 0, 0, 0];
 const moves = {
   addPiece: {
     validate: (board: Board, _, pileId) => isPlacementAllowed(board, pileId),
-    apply: (board: Board, { events }: { events: Events }, pileId) => {
+    legacyApply: (board: Board, { events }: { events: Events }, pileId) => {
       const nextBoard = cloneDeep(board);
       nextBoard[pileId] += 1;
       events.endTurn();

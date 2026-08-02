@@ -69,7 +69,7 @@ const moves = {
   removeSymbol: {
     validate: (board: Board, { ctx }: { ctx: Ctx }, idx: number) =>
       isRemovalAllowed(board, 1 - ctx.currentPlayer!, idx),
-    apply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, idx: number) => {
+    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, idx: number) => {
       const nextBoard = cloneDeep(board);
       nextBoard[1 - ctx.currentPlayer!][idx] = null;
       events.endTurn();

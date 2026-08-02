@@ -73,7 +73,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 const moves = {
   step: {
     validate: (board: Board, _, step: number) => isStepAllowed(board, step),
-    apply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, step) => {
+    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, step) => {
       const numberAfterStep = board.current + step;
       const nextBoard = { current: numberAfterStep, target: board.target, restricted: 13 - step };
       events.endTurn();

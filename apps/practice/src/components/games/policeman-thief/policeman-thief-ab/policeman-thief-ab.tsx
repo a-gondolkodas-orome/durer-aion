@@ -51,7 +51,7 @@ export const moves = {
   moveThief: {
     validate: (board: Board, { ctx }: { ctx: Ctx }, vertex: number) =>
       ctx.currentPlayer === THIEF && isNeighbour(board.thief, vertex),
-    apply: (board: Board, { events }: { events: Events }, vertex: number) => {
+    legacyApply: (board: Board, { events }: { events: Events }, vertex: number) => {
       const overrides: Partial<Board> = { thief: vertex, turnCount: board.turnCount + 1 };
       const nextBoard = { ...cloneDeep(board), ...overrides };
       events.endTurn();
@@ -65,7 +65,7 @@ export const moves = {
     validate: (board: Board, { ctx }: { ctx: Ctx }, vertex: number) =>
       ctx.currentPlayer === POLICE && !board.firstPolicemanMoved
         && isNeighbour(board.policemen[0], vertex),
-    apply: (board: Board, _, vertex: number) => {
+    legacyApply: (board: Board, _, vertex: number) => {
       const nextBoard = cloneDeep(board);
       nextBoard.policemen[0] = vertex;
       nextBoard.firstPolicemanMoved = true;
@@ -76,7 +76,7 @@ export const moves = {
     validate: (board: Board, { ctx }: { ctx: Ctx }, vertex: number) =>
       ctx.currentPlayer === POLICE && board.firstPolicemanMoved
         && isNeighbour(board.policemen[1], vertex),
-    apply: (board: Board, { events }: { events: Events }, vertex: number) => {
+    legacyApply: (board: Board, { events }: { events: Events }, vertex: number) => {
       const nextBoard = cloneDeep(board);
       nextBoard.policemen[1] = vertex;
       nextBoard.firstPolicemanMoved = false;

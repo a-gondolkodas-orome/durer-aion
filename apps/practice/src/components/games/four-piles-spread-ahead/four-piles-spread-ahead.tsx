@@ -139,7 +139,7 @@ const moves = {
   spreadPieces: {
     validate: (board: Board, _, { pileId, pieceCount }: { pileId: number; pieceCount: number }) =>
       isSpreadAllowed(board, pileId, pieceCount),
-    apply: (board: Board, { events }: { events: Events }, { pileId, pieceCount }) => {
+    legacyApply: (board: Board, { events }: { events: Events }, { pileId, pieceCount }) => {
       const nextBoard = cloneDeep(board);
       nextBoard[pileId] = board[pileId] - pieceCount;
       for (let i = pileId - pieceCount; i < pileId; i++) {

@@ -152,12 +152,12 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 const moves = {
   removePile: {
     validate: (board: Board, _, pileId: number) => isRemovalAllowed(board, pileId),
-    apply: (board: Board, _, pileId: number) => ({ nextBoard: withPileRemoved(board, pileId) })
+    legacyApply: (board: Board, _, pileId: number) => ({ nextBoard: withPileRemoved(board, pileId) })
   },
   splitPile: {
     validate: (board: Board, _, { pileId, pieceCount }: { pileId: number; pieceCount: number }) =>
       isSplitAllowed(board, pileId, pieceCount),
-    apply: (board: Board, { events }: { events: Events }, { pileId, pieceCount }) => {
+    legacyApply: (board: Board, { events }: { events: Events }, { pileId, pieceCount }) => {
       const nextBoard = cloneDeep(board);
       // the slot emptied earlier this turn takes the other half of the split
       const removedPileId = emptiedPileId(nextBoard)!;

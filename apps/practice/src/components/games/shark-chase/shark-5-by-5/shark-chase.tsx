@@ -26,7 +26,7 @@ const moves = {
   moveSubmarine: {
     validate: (board: Board, { ctx }: { ctx: Ctx }, move: { from: number; to: number }) =>
       ctx.currentPlayer === RESEARCHERS && !!move && isSubmarineMoveAllowed(board, move.from, move.to),
-    apply: (board: Board, { events }: { events: Events }, { from, to }: { from: number; to: number }) => {
+    legacyApply: (board: Board, { events }: { events: Events }, { from, to }: { from: number; to: number }) => {
       const nextBoard = cloneDeep(board);
       nextBoard.submarines[from] -= 1;
       nextBoard.submarines[to] += 1;
@@ -40,7 +40,7 @@ const moves = {
   moveShark: {
     validate: (board: Board, { ctx }: { ctx: Ctx }, to: number) =>
       ctx.currentPlayer === SHARK && isSharkMoveAllowed(board, to),
-    apply: (board: Board, { events }: { events: Events }, to: number) => {
+    legacyApply: (board: Board, { events }: { events: Events }, to: number) => {
       const nextBoard = cloneDeep(board);
       nextBoard.shark = to;
 

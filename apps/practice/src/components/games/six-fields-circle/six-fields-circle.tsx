@@ -10,7 +10,7 @@ export type { Board };
 const moves = {
   removeFromTwo: {
     validate: (board: Board, _, move: Move) => isRemovalAllowed(board, move),
-    apply: (board: Board, { ctx, events }: { ctx: Ctx; events: Events }, [i, j]: Move) => {
+    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx; events: Events }, [i, j]: Move) => {
       const nextBoard = board.slice();
       nextBoard[i] -= 1;
       nextBoard[j] -= 1;

@@ -76,7 +76,7 @@ const getOptimalBotStep = ({ left, right }) => {
 const moves = {
   step: {
     validate: (board: Board, _, step) => isValidStep(board, step),
-    apply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, step) => {
+    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, step) => {
       const nextBoard = ctx.currentPlayer === 0
         ? { left: board.left + step, right: board.right }
         : { left: board.left, right: board.right - step };

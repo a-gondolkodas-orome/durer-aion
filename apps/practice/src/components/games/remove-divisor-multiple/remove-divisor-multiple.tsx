@@ -64,7 +64,7 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
 const moves = {
   removeNumber: {
     validate: (board: Board, _, n) => isAllowed(board, n),
-    apply: (board: Board, { events }: { events: Events }, n) => {
+    legacyApply: (board: Board, { events }: { events: Events }, n) => {
       const nextBoard = cloneDeep(board);
       nextBoard.numbersOnTable[n - 1] = false;
       nextBoard.previousMove = n;

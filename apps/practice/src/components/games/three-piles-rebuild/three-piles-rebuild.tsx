@@ -175,13 +175,13 @@ const moves = {
   // Step 1 of a turn: keep one pile, discard the other two (shown as 0).
   keepPile: {
     validate: (board: Board, _, keepId: number) => isKeepAllowed(board, keepId),
-    apply: (board: Board, _, keepId: number) =>
+    legacyApply: (board: Board, _, keepId: number) =>
       ({ nextBoard: withOtherPilesDiscarded(board, keepId) })
   },
   // Step 2: rebuild three new piles from the kept pile's pebbles.
   splitPile: {
     validate: (board: Board, _, parts: number[]) => isSplitAllowed(board, parts),
-    apply: (_board: Board, { events }: { events: Events }, parts: number[]) => {
+    legacyApply: (_board: Board, { events }: { events: Events }, parts: number[]) => {
       const nextBoard = [...parts];
       events.endTurn();
       // The opponent now faces nextBoard; if they cannot split any pile they lose.

@@ -98,12 +98,12 @@ const getPlayerStepDescription = () => ({
 const moves = {
   removePile: {
     validate: (board: Board, _, pileId: number) => isRemovalAllowed(board, pileId),
-    apply: (board: Board, _, pileId) => ({ nextBoard: withPileRemoved(board, pileId) })
+    legacyApply: (board: Board, _, pileId) => ({ nextBoard: withPileRemoved(board, pileId) })
   },
   splitPile: {
     validate: (board: Board, _, { pileId, pieceCount }: { pileId: number; pieceCount: number }) =>
       isSplitAllowed(board, pileId, pieceCount),
-    apply: (board: Board, { events }: { events: Events }, { pileId, pieceCount }) => {
+    legacyApply: (board: Board, { events }: { events: Events }, { pileId, pieceCount }) => {
       const nextBoard = [pieceCount, board[pileId] - pieceCount];
       events.endTurn();
       if (isEqual(nextBoard, [1, 1])) {

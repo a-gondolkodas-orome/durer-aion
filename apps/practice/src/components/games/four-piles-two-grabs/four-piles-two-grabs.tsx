@@ -139,7 +139,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 const moves = {
   takeStones: {
     validate: (board: Board, _, move: Move) => isMoveLegal(board, move),
-    apply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, move: Move) => {
+    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, move: Move) => {
       const nextBoard = applyMove(board, move);
       if (isTerminal(nextBoard)) {
         // The opponent cannot move, so the player who just moved wins.

@@ -17,7 +17,7 @@ export const applyTakeCard = (board: Board, player: number, idx: number): Board 
 export const moves = {
   takeCard: {
     validate: (board: Board, _, idx: number) => isCardAvailable(board, CARD_COUNT, idx),
-    apply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, idx: number): { nextBoard: Board } => {
+    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, idx: number): { nextBoard: Board } => {
       const nextBoard = applyTakeCard(board, ctx.currentPlayer!, idx);
       if (nextBoard.numTurns === 8) {
         const winner = hasWinningTriple(nextBoard.cards[Thief]) ? Thief : Sheriff;

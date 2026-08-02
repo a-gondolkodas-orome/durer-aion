@@ -80,7 +80,7 @@ strategyGameFactory({
   },
   BoardClient,                 // React component receiving { board, ctx, events, moves }
   gameplay: {
-    moves,                     // { [name]: apply | { apply, validate? } } — see below
+    moves,                     // { [name]: moveFn | { legacyApply, validate? } } — see below
     endOfTurnMove?,            // optional move name auto-executed after moves with autoEndOfTurn: true
   },
   variants,                    // see below
@@ -94,15 +94,15 @@ omitted on a variant, the default variant's `botStrategy` is used as fallback.
 If multiple variants are provided, exactly one must be `isDefault: true`. A
 single-entry array needs no `isDefault` flag.
 
-**`moves`** — each move is either a plain apply function
+**`moves`** — each move is either a plain move function
 `(board, { ctx, events }, ...args) => { nextBoard }` (shorthand), or a long-form
-object `{ apply, validate? }` colocating it with a legality predicate. Always
-pass the current `board` as first arg when chaining moves within a turn. `apply`
+object `{ legacyApply, validate? }` colocating it with a legality predicate. Always
+pass the current `board` as first arg when chaining moves within a turn. `legacyApply`
 trusts its arguments and applies them blindly; legality is enforced by
 `validate` (below) and/or the `BoardClient`'s `disabled` gating.
 
 **`validate`** (optional, per move) — a pure, side-effect-free legality predicate
-`(board, { ctx }, ...args) => boolean` sitting right next to its `apply`. When
+`(board, { ctx }, ...args) => boolean` sitting right next to its `legacyApply`. When
 present, the engine rejects any dispatch whose args fail it (in dev it throws
 loudly to surface the bug; in prod it warns, fires an `illegal-move` analytics
 event, and no-ops so a stray call cannot corrupt the board). The function

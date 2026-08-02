@@ -46,7 +46,7 @@ const getOptimalSmartBotMove = (board: Board): Field => {
     // shuffle + find has the same effect as filter + sample: find a random
     // from the optimal moves
     const optimalPlace = shuffle(allowedMoves).find(({ row, col }) => {
-      const { nextBoard } = moves.placeDuck.apply(board, { events: dummyEvents }, { row, col });
+      const { nextBoard } = moves.placeDuck.legacyApply(board, { events: dummyEvents }, { row, col });
       return isWinningState(nextBoard);
     });
 
@@ -126,7 +126,7 @@ const isWinningState = (board: Board): boolean => {
   const allowedPlacesForOther = getAllowedMoves(board);
 
   const optimalPlaceForOther = allowedPlacesForOther.find(({ row, col }) => {
-    const { nextBoard } = moves.placeDuck.apply(board, { events: dummyEvents }, { row, col });
+    const { nextBoard } = moves.placeDuck.legacyApply(board, { events: dummyEvents }, { row, col });
     return isWinningState(nextBoard);
   });
   return optimalPlaceForOther === undefined;

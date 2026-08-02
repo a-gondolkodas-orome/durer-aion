@@ -126,7 +126,7 @@ export const isSplitAllowed = (board: Board, pileId: number, firstPart: number):
 const moves = {
   removeMatch: {
     validate: (board: Board, _, pileId: number) => isRemovalAllowed(board, pileId),
-    apply: (board: Board, { events }: { events: Events }, pileId: number) => {
+    legacyApply: (board: Board, { events }: { events: Events }, pileId: number) => {
       const nextBoard = board
         .map((n, i) => (i === pileId ? n - 1 : n))
         .filter(n => n > 0);
@@ -140,7 +140,7 @@ const moves = {
   splitPile: {
     validate: (board: Board, _, pileId: number, firstPart: number) =>
       isSplitAllowed(board, pileId, firstPart),
-    apply: (board: Board, { events }: { events: Events }, pileId: number, firstPart: number) => {
+    legacyApply: (board: Board, { events }: { events: Events }, pileId: number, firstPart: number) => {
       const size = board[pileId];
       const nextBoard = board.flatMap((n, i) =>
         i === pileId ? [firstPart, size - firstPart] : [n]

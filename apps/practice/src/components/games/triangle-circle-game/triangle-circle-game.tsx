@@ -15,7 +15,7 @@ export const moves = {
   shadeEdge: {
     validate: (board: Board, { ctx }: { ctx: Ctx }, edgeId: number) =>
       ctx.currentPlayer === LINE && isShadeAllowed(board, edgeId),
-    apply: (board: Board, { events }: { events: Events }, edgeId: number) => {
+    legacyApply: (board: Board, { events }: { events: Events }, edgeId: number) => {
       const nextBoard = applyShade(board, edgeId);
       if (isLineWin(nextBoard)) {
         events.endGame(LINE);
@@ -30,7 +30,7 @@ export const moves = {
   placeCircle: {
     validate: (board: Board, { ctx }: { ctx: Ctx }, triangleId: number) =>
       ctx.currentPlayer === CIRCLE && isCirclePlacementAllowed(board, triangleId),
-    apply: (board: Board, { events }: { events: Events }, triangleId: number) => {
+    legacyApply: (board: Board, { events }: { events: Events }, triangleId: number) => {
       const nextBoard = applyCircle(board, triangleId);
       if (isCircleWin(nextBoard)) {
         events.endGame(CIRCLE);

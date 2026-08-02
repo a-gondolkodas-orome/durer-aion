@@ -520,7 +520,7 @@ describe('move validate enforcement', () => {
     gameplay: {
       moves: {
         guarded: {
-          apply: (board: Board, _meta: { events: Events }, arg: string) => ({ nextBoard: [...board, arg] }),
+          legacyApply: (board: Board, _meta: { events: Events }, arg: string) => ({ nextBoard: [...board, arg] }),
           validate: (_board: Board, _meta: { ctx: Ctx }, arg: string) => arg === 'ok'
         },
         handOver: (board: Board, { events }: { events: Events }) => {
@@ -606,14 +606,14 @@ describe('move validate enforcement', () => {
       moves: {
         phase1: {
           validate: (_board: Board, { ctx }: { ctx: Ctx }) => ctx.turnState === null,
-          apply: (board: Board, { events }: { events: Events }) => {
+          legacyApply: (board: Board, { events }: { events: Events }) => {
             events.setTurnState({ removedCoinValue: 3 });
             return { nextBoard: [...board, 'p1'] };
           }
         },
         phase2: {
           validate: (_board: Board, { ctx }: { ctx: Ctx }) => ctx.turnState !== null,
-          apply: (board: Board, { events }: { events: Events }) => {
+          legacyApply: (board: Board, { events }: { events: Events }) => {
             events.endTurn();
             events.setTurnState(null);
             return { nextBoard: [...board, 'p2'] };

@@ -27,7 +27,7 @@ export const moves = {
   removeCoin: {
     validate: (board: Board, { ctx }: { ctx: Ctx }, value: number) =>
       ctx.turnState === null && value >= 1 && value <= 3 && board[value - 1] > 0,
-    apply: (board: Board, { events }: { events: Events }, value) => {
+    legacyApply: (board: Board, { events }: { events: Events }, value) => {
       const nextBoard = cloneDeep(board);
       nextBoard[value - 1] -= 1;
       if (value === 1) {
@@ -46,7 +46,7 @@ export const moves = {
       const removed = (ctx.turnState as { removedCoinValue: number } | null)?.removedCoinValue;
       return removed != null && value >= 1 && value < removed;
     },
-    apply: (board: Board, { events }: { events: Events }, value) => {
+    legacyApply: (board: Board, { events }: { events: Events }, value) => {
       const nextBoard = cloneDeep(board);
       nextBoard[value - 1] += 1;
       return finishPlaceBack(nextBoard, events);
@@ -54,7 +54,7 @@ export const moves = {
   },
   passAddition: {
     validate: (board: Board, { ctx }: { ctx: Ctx }) => ctx.turnState !== null,
-    apply: (board: Board, { events }: { events: Events }) => finishPlaceBack(board, events)
+    legacyApply: (board: Board, { events }: { events: Events }) => finishPlaceBack(board, events)
   }
 }
 

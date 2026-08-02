@@ -73,7 +73,7 @@ const moves = {
   removeStone: {
     validate: (board: Board, { ctx }: { ctx: Ctx }, pileId) =>
       isRemovalAllowed(board, ctx.currentPlayer!, pileId),
-    apply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, pileId) => {
+    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, pileId) => {
       const nextBoard = cloneDeep(board);
       nextBoard.piles[pileId] = board.piles[pileId] - 1;
       nextBoard.leftRestriction[ctx.currentPlayer!] = (pileId === 0);

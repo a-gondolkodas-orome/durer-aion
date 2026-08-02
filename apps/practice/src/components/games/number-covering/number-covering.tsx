@@ -98,7 +98,7 @@ const genericRule = {
 export const moves = {
   coverNumber: {
     validate: (board: Board, _, number: number) => isCoveringAllowed(board, number),
-    apply: (board: Board, { events }: { events: Events }, number) => {
+    legacyApply: (board: Board, { events }: { events: Events }, number) => {
       const nextBoard = cloneDeep(board);
       nextBoard[number-1] = COVERED;
       events.endTurn();

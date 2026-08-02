@@ -43,7 +43,7 @@ export const isIncreaseValid = ({ board, number }: { board: Board; number: numbe
 const moves = {
   increaseTo: {
     validate: (board: Board, _, number: number) => isIncreaseValid({ board, number }),
-    apply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, number) => {
+    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, number) => {
       events.endTurn();
       if (number > target) {
         events.endGame(1 - ctx.currentPlayer!)

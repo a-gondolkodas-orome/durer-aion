@@ -44,7 +44,7 @@ const isDuringFirstMove = (board: Board) => board.filter(c => c).length <= 1;
 const moves = {
   placePiece: {
     validate: validatePlacement,
-    apply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, id) => {
+    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, id) => {
       const nextBoard = cloneDeep(board);
       nextBoard[id] = ctx.currentPlayer === 0 ? 'red' : 'blue';
 

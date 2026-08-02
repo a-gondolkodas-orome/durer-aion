@@ -65,7 +65,7 @@ export const moves = {
   killGroup: {
     validate: (board: Board, { ctx }, group: SoldierColor) =>
       ctx.currentPlayer === HUNYADI && isColor(group),
-    apply: (board: Board, { events }: { events: Events }, group: SoldierColor) => {
+    legacyApply: (board: Board, { events }: { events: Events }, group: SoldierColor) => {
       const nextBoard = board.map(row => row.filter(soldier => soldier !== group));
 
       const isGameEnd = flatten(nextBoard).length === 0;
@@ -79,7 +79,7 @@ export const moves = {
   },
   finalizeSeparation: {
     validate: (board: Board, { ctx }) => ctx.currentPlayer === SULTAN,
-    apply: (board: Board, { events }: { events: Events }) => {
+    legacyApply: (board: Board, { events }: { events: Events }) => {
       events.endTurn();
       return { nextBoard: board };
     }
@@ -87,7 +87,7 @@ export const moves = {
   setGroupOfSoldiers: {
     validate: (board: Board, { ctx }, soldiers: Soldier[]) =>
       ctx.currentPlayer === SULTAN && isSoldierAssignmentAllowed(board, soldiers),
-    apply: (board: Board, _, soldiers: Soldier[]) => {
+    legacyApply: (board: Board, _, soldiers: Soldier[]) => {
       const nextBoard = cloneDeep(board);
       for (const soldier of soldiers) {
         nextBoard[soldier.rowIndex][soldier.pieceIndex] = soldier.group;

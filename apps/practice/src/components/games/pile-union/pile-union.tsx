@@ -190,7 +190,7 @@ export const isMergeAllowed = (board: Board, piles: number[]): boolean =>
 const moves = {
   removeOne: {
     validate: (board: Board, _, pileIndex) => isPile(board, pileIndex),
-    apply: (board: Board, { events }: { events: Events }, pileIndex) => {
+    legacyApply: (board: Board, { events }: { events: Events }, pileIndex) => {
       const newSize = board[pileIndex] - 1;
       const nextBoard = [
         ...board.slice(0, pileIndex),
@@ -204,7 +204,7 @@ const moves = {
   },
   mergePiles: {
     validate: (board: Board, _, piles: number[]) => isMergeAllowed(board, piles),
-    apply: (board: Board, { events }: { events: Events }, [pileIndex1, pileIndex2]) => {
+    legacyApply: (board: Board, { events }: { events: Events }, [pileIndex1, pileIndex2]) => {
       const [firstIdx, secondIdx] = [pileIndex1, pileIndex2].sort((a, b) => a - b);
       const merged = board[firstIdx] + board[secondIdx];
       const nextBoard = board.filter((_, i) => i !== firstIdx && i !== secondIdx);

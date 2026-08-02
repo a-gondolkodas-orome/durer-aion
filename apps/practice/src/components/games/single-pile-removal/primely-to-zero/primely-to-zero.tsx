@@ -46,7 +46,7 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
 const moves = {
   moveTo: {
     validate: (board: Board, _, target: number) => isMoveValid(board, target),
-    apply: (_board: Board, { ctx, events }: { ctx: Ctx, events: Events }, target: number) => {
+    legacyApply: (_board: Board, { ctx, events }: { ctx: Ctx, events: Events }, target: number) => {
       const winner = ctx.currentPlayer!;
       events.endTurn();
       if (target === 0) {

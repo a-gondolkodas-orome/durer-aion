@@ -8,7 +8,7 @@ import { BoardClient, type TurnState } from './board-client';
 export const moves = {
   combineTwo: {
     validate: (board: Board, _, move) => isCombineAllowed(board, move),
-    apply: (
+    legacyApply: (
       board: Board,
       { ctx, events }: { ctx: Ctx; events: Events },
       { levelIdx, indices }

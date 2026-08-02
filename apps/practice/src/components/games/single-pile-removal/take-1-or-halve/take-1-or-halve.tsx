@@ -63,7 +63,7 @@ const moves = {
   halve: {
     // Half may only be taken when the pile is even; taking one is always legal.
     validate: (board: Board) => board >= 2 && board % 2 === 0,
-    apply: (board: Board, { events }: { events: Events }) => {
+    legacyApply: (board: Board, { events }: { events: Events }) => {
       events.endTurn();
       return { nextBoard: board / 2 };
     }

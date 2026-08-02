@@ -164,7 +164,7 @@ const moves = {
   placeDomino: {
     validate: (board: Board, { ctx }: { ctx: Ctx }, domino: Domino) =>
       isDominoAllowed(board, ctx.currentPlayer!, domino),
-    apply: (board: Board, { ctx, events }: { ctx: Ctx; events: Events }, domino: Domino) => {
+    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx; events: Events }, domino: Domino) => {
       const nextBoard = cloneDeep(board);
       nextBoard.push(domino);
       const nextPlayer = 1 - ctx.currentPlayer!;

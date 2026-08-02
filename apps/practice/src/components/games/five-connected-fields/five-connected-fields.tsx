@@ -8,7 +8,7 @@ export type { Board };
 const moves = {
   placeCoin: {
     validate: (board: Board, _, node: number) => isNodePlayable(board, node),
-    apply: (board: Board, { ctx, events }: { ctx: Ctx; events: Events }, node: number) => {
+    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx; events: Events }, node: number) => {
       const nextBoard = board.slice();
       nextBoard[node] += 1;
       events.endTurn();

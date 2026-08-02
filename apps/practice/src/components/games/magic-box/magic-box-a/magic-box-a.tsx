@@ -27,7 +27,7 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => (
 const moves = {
   placeStone: {
     validate: (board: Board, _, id: number) => isPlacementAllowed(board, id),
-    apply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, id) => {
+    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, id) => {
       const nextBoard = placeStone(board, id);
       events.endTurn();
       if (isGameEnd(nextBoard)) {

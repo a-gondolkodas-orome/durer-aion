@@ -58,7 +58,7 @@ export const chooseSmartTake = (board: Board): number => {
 const moves = {
   take: {
     validate: validateTake,
-    apply: (board: Board, { events }: { events: Events }, count: number) => {
+    legacyApply: (board: Board, { events }: { events: Events }, count: number) => {
       const nextBoard: Board = { stones: board.stones - count, maxTake: count + INCREMENT };
       events.endTurn();
       if (nextBoard.stones === 0) events.endGame(); // mover took the last stone(s) → wins

@@ -94,7 +94,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 const moves = {
   chooseDigit: {
     validate: (board: Board, _, digit) => isDigitChoiceAllowed(board, digit),
-    apply: (board: Board, { events }: { events: Events }, digit) => {
+    legacyApply: (board: Board, { events }: { events: Events }, digit) => {
       const newDigits = [...board.digits, digit];
       const newSumMod9 = (board.sumMod9 + digit) % 9;
       const nextBoard = { digits: newDigits, sumMod9: newSumMod9 };

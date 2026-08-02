@@ -164,7 +164,7 @@ const moves = {
   subtractPrimeExponent: {
     validate: (board: Board, _, entry: { prime: number; exponent: number }) =>
       isSubtractionAllowed(board, entry),
-    apply: (board: Board, { events }: { events: Events }, { prime, exponent }) => {
+    legacyApply: (board: Board, { events }: { events: Events }, { prime, exponent }) => {
       const nextBoard = board - prime ** exponent;
       events.endTurn();
       if (nextBoard === 0) {

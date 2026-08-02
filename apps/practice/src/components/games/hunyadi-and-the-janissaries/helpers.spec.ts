@@ -8,13 +8,13 @@ describe('HunyadiAndTheJanissaries helpers', () => {
   describe('moves', () => {
     it('should claim victory for Hunyadi if all soldiers are killed', () => {
       const events = makeEvents();
-      moves.killGroup.apply([[], ['red', 'red']] as Board, { events }, 'red')
+      moves.killGroup.legacyApply([[], ['red', 'red']] as Board, { events }, 'red')
       expect(events.endGame).toHaveBeenCalledWith(1);
     });
 
     it('should claim loss for Hunyadi if a soldier reaches the castle', () => {
       const events = makeEvents();
-      const { nextBoard } = moves.killGroup.apply(
+      const { nextBoard } = moves.killGroup.legacyApply(
         [[], ['red', 'blue'], ['blue']] as Board, { events }, 'red'
       );
       moves.stepUp(nextBoard, { events });
@@ -24,7 +24,7 @@ describe('HunyadiAndTheJanissaries helpers', () => {
     it('should report game as still in progress and advance remaining soldiers otherwise', () => {
       const events = makeEvents();
       const board = [[], ['red'], ['blue', 'red'], [], ['blue', 'blue']] as Board;
-      const { nextBoard } = moves.killGroup.apply(board, { events }, 'red');
+      const { nextBoard } = moves.killGroup.legacyApply(board, { events }, 'red');
       const state = moves.stepUp(nextBoard, { events });
       expect(state.nextBoard).toEqual([[], ['blue'], [], ['blue', 'blue'], []])
       expect(events.endGame).not.toHaveBeenCalled();

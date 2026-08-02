@@ -49,7 +49,7 @@ export const chooseSmartTake = (board: Board): number => {
 const moves = {
   take: {
     validate: validateTake,
-    apply: (board: Board, { events }: { events: Events }, count: number) => {
+    legacyApply: (board: Board, { events }: { events: Events }, count: number) => {
       // Next player may take strictly less than twice this take, i.e. up to 2·count − 1.
       const nextBoard: Board = { stones: board.stones - count, maxTake: 2 * count - 1 };
       events.endTurn();

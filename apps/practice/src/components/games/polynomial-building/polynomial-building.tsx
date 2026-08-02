@@ -9,7 +9,7 @@ const moves = {
   setCoefficient: {
     validate: (board: Board, _, coef: Coef, value: number) =>
       isCoefficientChoiceAllowed(board, coef, value),
-    apply: (board: Board, { events }: { events: Events }, coef: Coef, value: number) => {
+    legacyApply: (board: Board, { events }: { events: Events }, coef: Coef, value: number) => {
       const nextBoard = { ...board, [coef]: value };
       const filled = nextBoard.a !== null && nextBoard.b !== null && nextBoard.c !== null;
       if (filled) {

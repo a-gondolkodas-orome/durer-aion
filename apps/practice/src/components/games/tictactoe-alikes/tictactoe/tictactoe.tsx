@@ -61,7 +61,7 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
 const moves = {
   placePiece: {
     validate: validatePlacement,
-    apply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, id) => {
+    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, id) => {
       const nextBoard = cloneDeep(board);
       nextBoard[id] = currentPlayerColor(ctx);
       events.endTurn();
@@ -73,7 +73,7 @@ const moves = {
   },
   whitenPiece: {
     validate: (board: Board, { ctx }: { ctx: Ctx }, id: number) => isWhiteningAllowed(board, ctx, id),
-    apply: (board: Board, { events }: { events: Events }, id) => {
+    legacyApply: (board: Board, { events }: { events: Events }, id) => {
       const nextBoard = cloneDeep(board);
       nextBoard[id] = 'white';
       events.endTurn();

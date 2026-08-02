@@ -140,7 +140,7 @@ const moves = {
   colorVertex: {
     validate: (board: Board, _, { vertex, color }: { vertex: number; color: string | null }) =>
       isAllowedStep(board, vertex, color),
-    apply: (board: Board, { events }: { events: Events }, { vertex, color }) => {
+    legacyApply: (board: Board, { events }: { events: Events }, { vertex, color }) => {
       const nextBoard = cloneDeep(board);
       nextBoard[vertex] = color;
       events.endTurn();

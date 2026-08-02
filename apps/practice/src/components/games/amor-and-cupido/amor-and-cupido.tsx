@@ -6,7 +6,7 @@ import { BoardClient } from './board-client';
 const moves = {
   claimEdge: {
     validate: (board: Board, _, edge: number) => isClaimAllowed(board, edge),
-    apply: (board: Board, { ctx, events }: { ctx: Ctx; events: Events }, edge: number) => {
+    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx; events: Events }, edge: number) => {
       const nextBoard = board.slice();
       nextBoard[edge] = ctx.currentPlayer;
       if (completesTriangle(board, ctx.currentPlayer!, edge)) {

@@ -103,7 +103,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 const moves = {
   stretchRope: {
     validate: (board: Board, _, edge: Edge) => isAllowed(board, edge),
-    apply: (board: Board, { events }: { events: Events }, { from, to }) => {
+    legacyApply: (board: Board, { events }: { events: Events }, { from, to }) => {
       const nextBoard = cloneDeep(board);
       // A rope is stretched as far as it legally reaches, not just between the
       // two nodes that were clicked.

@@ -18,7 +18,7 @@ const generateStartBoard = (): Board => {
 const moves = {
   addPiece: {
     validate: (board: Board, _, pileId: number) => isPlacementAllowed(board, pileId),
-    apply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, pileId: number) => {
+    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, pileId: number) => {
       const nextBoard = cloneDeep(board);
       nextBoard[pileId] += 1;
       if (ctx.currentPlayer === 1 && [3, 6, 9].includes(sum(nextBoard))) {

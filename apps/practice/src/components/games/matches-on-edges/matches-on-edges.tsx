@@ -11,7 +11,7 @@ const moves = {
   // turn passes.
   placeWindow: {
     validate: (board: Board, _, a: number, b: number) => isWindowAllowed(board, a, b),
-    apply: (board: Board, { ctx, events }: { ctx: Ctx; events: Events }, a: number, b: number) => {
+    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx; events: Events }, a: number, b: number) => {
       const nextBoard = applyMove(board, a, b);
       if (isTerminal(nextBoard)) {
         events.endGame(ctx.currentPlayer!);

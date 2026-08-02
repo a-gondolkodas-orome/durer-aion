@@ -40,13 +40,13 @@ const moves = {
   moveDisc: {
     validate: (board: Board, { ctx }: { ctx: Ctx }, from: number, to: number) =>
       isDiscMoveAllowed(board.cells, ctx.currentPlayer!, from, to),
-    apply: (board: Board, meta: { ctx: Ctx; events: Events }, from: number, to: number) =>
+    legacyApply: (board: Board, meta: { ctx: Ctx; events: Events }, from: number, to: number) =>
       finalize(applyMove(board.cells, meta.ctx.currentPlayer!, { type: 'move', from, to }), meta)
   },
   placeDisc: {
     validate: (board: Board, { ctx }: { ctx: Ctx }, at: number) =>
       isPlacementAllowed(board.cells, ctx.currentPlayer!, at),
-    apply: (board: Board, meta: { ctx: Ctx; events: Events }, at: number) =>
+    legacyApply: (board: Board, meta: { ctx: Ctx; events: Events }, at: number) =>
       finalize(applyMove(board.cells, meta.ctx.currentPlayer!, { type: 'place', to: at }), meta)
   },
   pass: (board: Board, meta: { ctx: Ctx; events: Events }) =>

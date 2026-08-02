@@ -8,7 +8,7 @@ import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 const moves = {
   placeStone: {
     validate: (board: Board, _, cellId: number) => isPlacementAllowed(board, cellId),
-    apply: (board: Board, _, cellId) => {
+    legacyApply: (board: Board, _, cellId) => {
       const nextBoard: Board = { stones: placeStoneAt(board.stones, cellId), pendingLine: null };
       return { nextBoard };
     }
@@ -16,7 +16,7 @@ const moves = {
 
   designateLine: {
     validate: (board: Board, _, lineIndex: number) => isDesignationAllowed(board, lineIndex),
-    apply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, lineIndex) => {
+    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, lineIndex) => {
       const nextBoard: Board = { stones: board.stones, pendingLine: lineIndex };
       if (isLineFull(nextBoard.stones, lineIndex)) {
         events.endGame(ctx.currentPlayer === 0 ? 0 : 1);
