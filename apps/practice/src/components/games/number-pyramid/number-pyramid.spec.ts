@@ -1,6 +1,6 @@
 import { moves } from './number-pyramid';
 import { isCombineAllowed, applyMoveToBoard, type Board, type Slot } from './strategy';
-import { makeCtx, makeEvents } from '../../../test-utils';
+import { makeCtx } from '../../../test-utils';
 
 const active = (value: number): Slot => ({ value, state: 'active' });
 
@@ -16,53 +16,48 @@ const makeBoard = (level0Values: number[], target: number): Board => ({
 });
 
 describe('moves.combineTwo', () => {
+  const combine = (board: Board, currentPlayer: number) => moves.combineTwo.apply(
+    board, { ctx: makeCtx({ currentPlayer }) }, { levelIdx: 0, indices: [0, 1] }
+  );
+
   it('places combined value on next level', () => {
     const board = makeBoard([5, 4, 3, 2, 2, 2, 2, 2], 50);
-    const events = makeEvents();
-    const { nextBoard } = moves.combineTwo.legacyApply(
-      board, { ctx: makeCtx({ currentPlayer: 0 }), events }, { levelIdx: 0, indices: [0, 1] }
-    );
+    const { nextBoard } = combine(board, 0);
     const level1Active = nextBoard.levels[1].find((s) => s?.state === 'active');
     expect(level1Active!.value).toBe(9);
   });
 
   it('marks both combined slots as consumed', () => {
     const board = makeBoard([5, 4, 3, 2, 2, 2, 2, 2], 50);
-    const events = makeEvents();
-    const { nextBoard } = moves.combineTwo.legacyApply(
-      board, { ctx: makeCtx({ currentPlayer: 0 }), events }, { levelIdx: 0, indices: [0, 1] }
-    );
+    const { nextBoard } = combine(board, 0);
     expect(nextBoard.levels[0][0]!.state).toBe('consumed');
     expect(nextBoard.levels[0][1]!.state).toBe('consumed');
   });
 
-  it('calls endTurn when combined value is below k', () => {
+  it('ends the turn when combined value is below k', () => {
     const board = makeBoard([5, 4, 3, 2, 2, 2, 2, 2], 50);
-    const events = makeEvents();
-    moves.combineTwo.legacyApply(
-      board, { ctx: makeCtx({ currentPlayer: 0 }), events }, { levelIdx: 0, indices: [0, 1] }
-    );
-    expect(events.endTurn).toHaveBeenCalledTimes(1);
-    expect(events.endGame).not.toHaveBeenCalled();
+    const outcome = combine(board, 0);
+    expect(outcome.isTurnEnd).toBe(true);
+    expect(outcome.gameEnd).toBeUndefined();
   });
 
-  it('calls endGame with current player when combined value reaches k', () => {
+  it('ends the game for the current player when combined value reaches k', () => {
     // combined value 10+9=19 exactly equals k, so the "at least k" win must trigger
     const board = makeBoard([10, 9, 3, 2, 2, 2, 2, 2], 19);
-    const events = makeEvents();
-    moves.combineTwo.legacyApply(
-      board, { ctx: makeCtx({ currentPlayer: 1 }), events }, { levelIdx: 0, indices: [0, 1] }
-    );
-    expect(events.endGame).toHaveBeenCalledWith(1);
-    expect(events.endTurn).not.toHaveBeenCalled();
+    const outcome = combine(board, 1);
+    expect(outcome.gameEnd).toEqual({ winnerIndex: 1 });
+    expect(outcome.isTurnEnd).toBeUndefined();
+  });
+
+  it('always clears the turn state', () => {
+    const board = makeBoard([5, 4, 3, 2, 2, 2, 2, 2], 50);
+    expect(combine(board, 0).nextTurnState).toBeNull();
+    expect(combine(makeBoard([10, 9, 3, 2, 2, 2, 2, 2], 19), 1).nextTurnState).toBeNull();
   });
 
   it('does not mutate the original board', () => {
     const board = makeBoard([5, 4, 3, 2, 2, 2, 2, 2], 50);
-    const events = makeEvents();
-    moves.combineTwo.legacyApply(
-      board, { ctx: makeCtx({ currentPlayer: 0 }), events }, { levelIdx: 0, indices: [0, 1] }
-    );
+    combine(board, 0);
     expect(board.levels[0][0]!.state).toBe('active');
   });
 });

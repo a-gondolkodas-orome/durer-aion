@@ -1,6 +1,6 @@
 import { range, sum, isEqual, random, cloneDeep } from 'lodash';
 import {
-  strategyGameFactory, type Ctx, type Events, type BoardClientProps, GameBoard
+  strategyGameFactory, type Ctx, type MoveOutcome, type BoardClientProps, GameBoard
 } from '../../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { isPlacementAllowed } from '../helpers';
@@ -15,23 +15,23 @@ const generateStartBoard = (): Board => {
   return board;
 };
 
-const moves = {
+export const moves = {
   addPiece: {
     validate: (board: Board, _, pileId: number) => isPlacementAllowed(board, pileId),
-    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, pileId: number) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, pileId: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard[pileId] += 1;
+      // The second player places two squares at a time, so on the first half of
+      // such a turn the turn stays open and the placement is remembered for the
+      // BoardClient to dim.
       if (ctx.currentPlayer === 1 && [3, 6, 9].includes(sum(nextBoard))) {
-        events.setTurnState({ firstPlacedSquareIndex: pileId });
-        return { nextBoard };
+        return { nextBoard, nextTurnState: { firstPlacedSquareIndex: pileId } };
       }
-      events.setTurnState(null);
-      events.endTurn();
       if (sum(nextBoard) === 10) {
         const winnerIndex = isEqual(cloneDeep(nextBoard).sort(), [0, 1, 2, 3, 4]) ? 1 : 0;
-        events.endGame(winnerIndex);
+        return { nextBoard, nextTurnState: null, gameEnd: { winnerIndex } };
       }
-      return { nextBoard };
+      return { nextBoard, nextTurnState: null, isTurnEnd: true };
     }
   }
 }

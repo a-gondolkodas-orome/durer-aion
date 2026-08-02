@@ -1,4 +1,4 @@
-import { strategyGameFactory, type Ctx, type Events } from '../../strategy-game-factory';
+import { strategyGameFactory, type Ctx, type MoveOutcome } from '../../strategy-game-factory';
 import {
   smartBotStrategy, generateStartBoard, randomBotStrategy, applyMoveToBoard,
   isCombineAllowed, type Board
@@ -8,20 +8,19 @@ import { BoardClient, type TurnState } from './board-client';
 export const moves = {
   combineTwo: {
     validate: (board: Board, _, move) => isCombineAllowed(board, move),
-    legacyApply: (
+    apply: (
       board: Board,
-      { ctx, events }: { ctx: Ctx; events: Events },
+      { ctx }: { ctx: Ctx },
       { levelIdx, indices }
-    ) => {
+    ): MoveOutcome<Board> => {
       const { nextBoard, combinedValue } = applyMoveToBoard(board, levelIdx, indices);
 
-      events.setTurnState(null);
+      // nextTurnState clears the half-made selection the BoardClient parked in
+      // ctx.turnState while the player was picking the second slot.
       if (combinedValue >= board.target) {
-        events.endGame(ctx.currentPlayer);
-        return { nextBoard };
+        return { nextBoard, nextTurnState: null, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }
-      events.endTurn();
-      return { nextBoard };
+      return { nextBoard, nextTurnState: null, isTurnEnd: true };
     }
   }
 };

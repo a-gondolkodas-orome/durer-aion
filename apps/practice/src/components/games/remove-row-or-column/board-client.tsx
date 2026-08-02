@@ -1,6 +1,6 @@
 import { range } from 'lodash';
 import {
-  type BoardClientProps, type Events, type Ctx, GameBoard, useHoverPreview
+  type BoardClientProps, type MoveOutcome, type Ctx, GameBoard, useHoverPreview
 } from '../../strategy-game-factory';
 import { useTranslation } from '../../../language';
 import {
@@ -107,16 +107,14 @@ export const BoardClient = ({ board, ctx, events, moves }: BoardClientProps<Boar
 export const moves = {
   removeLine: {
     validate: (board: Board, _, move: Move) => isRemovalAllowed(board.grid, move),
-    legacyApply: (board: Board, { events }: { events: Events }, move: Move) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, move: Move): MoveOutcome<Board> => {
       const nextBoard = { grid: applyMove(board.grid, move) };
-      events.setTurnState(null);
-      events.endTurn();
-      // Whoever removes the last disc wins; endGame() defaults the winner to the
-      // player who just moved (currentPlayer at move time).
+      // nextTurnState clears the disc the BoardClient parked in ctx.turnState
+      // while the player was choosing between its row and its column.
       if (isEmpty(nextBoard.grid)) {
-        events.endGame();
+        return { nextBoard, nextTurnState: null, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }
-      return { nextBoard };
+      return { nextBoard, nextTurnState: null, isTurnEnd: true };
     }
   }
 };
