@@ -1,6 +1,6 @@
 import { range, random, cloneDeep } from 'lodash';
 import {
-  strategyGameFactory, type BoardClientProps, type Events, GameBoard, useHoverPreview
+  strategyGameFactory, type BoardClientProps, type Ctx, type MoveOutcome, GameBoard, useHoverPreview
 } from '../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { useLanguage } from '../../../language';
@@ -139,18 +139,17 @@ const moves = {
   spreadPieces: {
     validate: (board: Board, _, { pileId, pieceCount }: { pileId: number; pieceCount: number }) =>
       isSpreadAllowed(board, pileId, pieceCount),
-    legacyApply: (board: Board, { events }: { events: Events }, { pileId, pieceCount }) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, { pileId, pieceCount }): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard[pileId] = board[pileId] - pieceCount;
       for (let i = pileId - pieceCount; i < pileId; i++) {
         nextBoard[i] = board[i] + 1;
       }
       const isGameEnd = nextBoard[1]===0 && nextBoard[2]===0 && nextBoard[3]===0;
-      events.endTurn();
       if (isGameEnd) {
-        events.endGame();
+        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   }
 };

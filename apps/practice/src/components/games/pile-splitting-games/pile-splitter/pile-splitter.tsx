@@ -1,6 +1,6 @@
 import { range, isEqual, random } from 'lodash';
 import {
-  strategyGameFactory, type BoardClientProps, type Events, GameBoard, useHoverPreview
+  strategyGameFactory, type BoardClientProps, type Ctx, type MoveOutcome, GameBoard, useHoverPreview
 } from '../../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { isRemovalAllowed, isSplitAllowed, withPileRemoved } from '../helpers';
@@ -98,18 +98,21 @@ const getPlayerStepDescription = () => ({
 const moves = {
   removePile: {
     validate: (board: Board, _, pileId: number) => isRemovalAllowed(board, pileId),
-    legacyApply: (board: Board, _, pileId) => ({ nextBoard: withPileRemoved(board, pileId) })
+    // First half of the turn: discard a pile, then split the other — the turn
+    // stays open in between.
+    apply: (board: Board, _, pileId): MoveOutcome<Board> =>
+      ({ nextBoard: withPileRemoved(board, pileId) })
   },
   splitPile: {
     validate: (board: Board, _, { pileId, pieceCount }: { pileId: number; pieceCount: number }) =>
       isSplitAllowed(board, pileId, pieceCount),
-    legacyApply: (board: Board, { events }: { events: Events }, { pileId, pieceCount }) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, { pileId, pieceCount }): MoveOutcome<Board> => {
       const nextBoard = [pieceCount, board[pileId] - pieceCount];
-      events.endTurn();
+      // Two single-piece piles cannot be split, so the opponent is stuck.
       if (isEqual(nextBoard, [1, 1])) {
-        events.endGame();
+        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   }
 };

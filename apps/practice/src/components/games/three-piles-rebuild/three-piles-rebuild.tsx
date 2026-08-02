@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import {
   strategyGameFactory,
   type BoardClientProps,
-  type Events,
+  type Ctx,
+  type MoveOutcome,
   type StrategyArgs,
   type GameMoves,
   GameBoard
@@ -175,18 +176,20 @@ const moves = {
   // Step 1 of a turn: keep one pile, discard the other two (shown as 0).
   keepPile: {
     validate: (board: Board, _, keepId: number) => isKeepAllowed(board, keepId),
-    legacyApply: (board: Board, _, keepId: number) =>
+    // First half of the turn: keep one pile, then rebuild from it — the turn
+    // stays open in between.
+    apply: (board: Board, _, keepId: number): MoveOutcome<Board> =>
       ({ nextBoard: withOtherPilesDiscarded(board, keepId) })
   },
   // Step 2: rebuild three new piles from the kept pile's pebbles.
   splitPile: {
     validate: (board: Board, _, parts: number[]) => isSplitAllowed(board, parts),
-    legacyApply: (_board: Board, { events }: { events: Events }, parts: number[]) => {
+    apply: (_board: Board, { ctx }: { ctx: Ctx }, parts: number[]): MoveOutcome<Board> => {
       const nextBoard = [...parts];
-      events.endTurn();
-      // The opponent now faces nextBoard; if they cannot split any pile they lose.
-      if (isTerminal(nextBoard)) events.endGame();
-      return { nextBoard };
+      if (isTerminal(nextBoard)) {
+        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
+      }
+      return { nextBoard, isTurnEnd: true };
     }
   }
 };

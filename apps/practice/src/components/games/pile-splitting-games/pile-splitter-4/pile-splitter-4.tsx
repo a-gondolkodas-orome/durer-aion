@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { range, isEqual, cloneDeep } from 'lodash';
 import {
-  strategyGameFactory, type BoardClientProps, type Events, GameBoard, useHoverPreview
+  strategyGameFactory, type BoardClientProps, type Ctx, type MoveOutcome, GameBoard, useHoverPreview
 } from '../../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { emptiedPileId, isRemovalAllowed, isSplitAllowed, withPileRemoved } from '../helpers';
@@ -152,12 +152,15 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 const moves = {
   removePile: {
     validate: (board: Board, _, pileId: number) => isRemovalAllowed(board, pileId),
-    legacyApply: (board: Board, _, pileId: number) => ({ nextBoard: withPileRemoved(board, pileId) })
+    // First half of the turn: empty a pile, then split another into it — the
+    // turn stays open in between.
+    apply: (board: Board, _, pileId: number): MoveOutcome<Board> =>
+      ({ nextBoard: withPileRemoved(board, pileId) })
   },
   splitPile: {
     validate: (board: Board, _, { pileId, pieceCount }: { pileId: number; pieceCount: number }) =>
       isSplitAllowed(board, pileId, pieceCount),
-    legacyApply: (board: Board, { events }: { events: Events }, { pileId, pieceCount }) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, { pileId, pieceCount }): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       // the slot emptied earlier this turn takes the other half of the split
       const removedPileId = emptiedPileId(nextBoard)!;
@@ -168,11 +171,11 @@ const moves = {
         nextBoard[removedPileId] = nextBoard[pileId] - pieceCount;
         nextBoard[pileId] = pieceCount;
       }
-      events.endTurn();
+      // All piles down to a single piece: the opponent cannot split anything.
       if (isEqual(nextBoard, [1, 1, 1, 1])) {
-        events.endGame();
+        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   }
 };

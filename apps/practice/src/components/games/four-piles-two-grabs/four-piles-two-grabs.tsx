@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { range } from 'lodash';
 import {
   strategyGameFactory,
-  type Ctx, type Events, type StrategyArgs, type BoardClientProps,
+  type Ctx, type MoveOutcome, type StrategyArgs, type BoardClientProps,
   GameBoard
 } from '../../strategy-game-factory';
 import { useTranslation } from '../../../language';
@@ -139,15 +139,12 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 const moves = {
   takeStones: {
     validate: (board: Board, _, move: Move) => isMoveLegal(board, move),
-    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, move: Move) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, move: Move): MoveOutcome<Board> => {
       const nextBoard = applyMove(board, move);
       if (isTerminal(nextBoard)) {
-        // The opponent cannot move, so the player who just moved wins.
-        events.endGame(ctx.currentPlayer!);
-      } else {
-        events.endTurn();
+        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   }
 };

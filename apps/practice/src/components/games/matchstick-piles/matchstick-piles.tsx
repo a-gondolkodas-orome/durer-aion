@@ -2,7 +2,7 @@ import { Fragment } from 'react';
 import { range, sample, random } from 'lodash';
 import {
   strategyGameFactory,
-  type Events, type StrategyArgs, type GameMoves, type BoardClientProps,
+  type Ctx, type MoveOutcome, type StrategyArgs, type GameMoves, type BoardClientProps,
   GameBoard, useHoverPreview
 } from '../../strategy-game-factory';
 
@@ -126,27 +126,26 @@ export const isSplitAllowed = (board: Board, pileId: number, firstPart: number):
 const moves = {
   removeMatch: {
     validate: (board: Board, _, pileId: number) => isRemovalAllowed(board, pileId),
-    legacyApply: (board: Board, { events }: { events: Events }, pileId: number) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, pileId: number): MoveOutcome<Board> => {
       const nextBoard = board
         .map((n, i) => (i === pileId ? n - 1 : n))
         .filter(n => n > 0);
-      events.endTurn();
-      // The player who takes the last match leaves the other player unable to
-      // move, and therefore wins.
-      if (nextBoard.length === 0) events.endGame();
-      return { nextBoard };
+      if (nextBoard.length === 0) {
+        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
+      }
+      return { nextBoard, isTurnEnd: true };
     }
   },
   splitPile: {
     validate: (board: Board, _, pileId: number, firstPart: number) =>
       isSplitAllowed(board, pileId, firstPart),
-    legacyApply: (board: Board, { events }: { events: Events }, pileId: number, firstPart: number) => {
+    apply: (board: Board, _, pileId: number, firstPart: number): MoveOutcome<Board> => {
       const size = board[pileId];
       const nextBoard = board.flatMap((n, i) =>
         i === pileId ? [firstPart, size - firstPart] : [n]
       );
-      events.endTurn();
-      return { nextBoard };
+      // A split never empties the board, so it can only ever end the turn.
+      return { nextBoard, isTurnEnd: true };
     }
   }
 };
