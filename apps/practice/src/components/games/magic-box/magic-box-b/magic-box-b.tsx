@@ -5,7 +5,7 @@ import {
 } from './helpers';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 
-const moves = {
+export const moves = {
   placeStone: {
     validate: (board: Board, _, cellId: number) => isPlacementAllowed(board, cellId),
     // First half of the turn: place a stone, then designate a line — the turn

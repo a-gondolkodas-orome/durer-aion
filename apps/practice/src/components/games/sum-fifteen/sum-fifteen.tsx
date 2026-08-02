@@ -76,7 +76,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const moves = {
+export const moves = {
   chooseNumber: {
     validate: (board: Board, _, n: number) => isChoiceAllowed(board.owner, n),
     apply: (board: Board, { ctx }: { ctx: Ctx }, n: number): MoveOutcome<Board> => {

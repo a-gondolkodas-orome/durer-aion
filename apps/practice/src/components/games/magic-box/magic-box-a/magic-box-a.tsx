@@ -24,7 +24,7 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => (
   </GameBoard>
 );
 
-const moves = {
+export const moves = {
   placeStone: {
     validate: (board: Board, _, id: number) => isPlacementAllowed(board, id),
     apply: (board: Board, { ctx }: { ctx: Ctx }, id): MoveOutcome<Board> => {

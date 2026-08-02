@@ -7,7 +7,7 @@ import { BoardClient } from './board-client';
 
 export type { Board };
 
-const moves = {
+export const moves = {
   placePiece: {
     validate: (board: Board, _, node: number) => isPlacementAllowed(board, node),
     apply: (board: Board, { ctx }: { ctx: Ctx }, node: number): MoveOutcome<Board> => {

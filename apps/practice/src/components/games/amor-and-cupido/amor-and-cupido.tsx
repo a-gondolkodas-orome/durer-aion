@@ -3,7 +3,7 @@ import { type Board, completesTriangle, generateStartBoard, isClaimAllowed } fro
 import { smartBotStrategy } from './bot-strategy';
 import { BoardClient } from './board-client';
 
-const moves = {
+export const moves = {
   claimEdge: {
     validate: (board: Board, _, edge: number) => isClaimAllowed(board, edge),
     apply: (board: Board, { ctx }: { ctx: Ctx }, edge: number): MoveOutcome<Board> => {
