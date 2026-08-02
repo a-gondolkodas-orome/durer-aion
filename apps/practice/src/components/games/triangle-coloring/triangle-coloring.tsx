@@ -128,7 +128,7 @@ const withTriangleColored = (board: Board, id: number): Board => {
   return nextBoard;
 };
 
-const moves = {
+export const moves = {
   colorTriangle: {
     validate: (board: Board, _, id: number) => isColoringAllowed(board, id),
     apply: (board: Board, { ctx }: { ctx: Ctx }, id: number): MoveOutcome<Board> => {

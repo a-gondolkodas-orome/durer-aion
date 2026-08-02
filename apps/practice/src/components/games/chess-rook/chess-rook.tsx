@@ -49,7 +49,7 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const moves = {
+export const moves = {
   moveRook: {
     validate: (board: Board, _, target: Field) =>
       some(getAllowedMoves(board), field => isEqual(field, target)),

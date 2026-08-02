@@ -76,7 +76,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const moves = {
+export const moves = {
   placeBishop: {
     validate: (board: Board, _, target: Field) =>
       some(getAllowedMoves(board), field => isEqual(field, target)),

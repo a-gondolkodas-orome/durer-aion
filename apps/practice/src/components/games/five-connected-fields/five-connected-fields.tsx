@@ -5,7 +5,7 @@ import { BoardClient } from "./board-client";
 
 export type { Board };
 
-const moves = {
+export const moves = {
   placeCoin: {
     validate: (board: Board, _, node: number) => isNodePlayable(board, node),
     apply: (board: Board, { ctx }: { ctx: Ctx }, node: number) => {

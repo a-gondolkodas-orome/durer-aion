@@ -160,7 +160,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const moves = {
+export const moves = {
   placeDomino: {
     validate: (board: Board, { ctx }: { ctx: Ctx }, domino: Domino) =>
       isDominoAllowed(board, ctx.currentPlayer!, domino),

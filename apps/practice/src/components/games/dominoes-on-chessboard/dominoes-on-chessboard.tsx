@@ -159,7 +159,7 @@ export const isDominoAllowed = (board: Board, domino: Domino): boolean =>
   Array.isArray(domino) && domino.length === 2
     && getPossibleMoves(board).some(m => isEqual(m, domino) || isEqual(m, [domino[1], domino[0]]));
 
-const moves = {
+export const moves = {
   placeDomino: {
     validate: (board: Board, _, domino: Domino) => isDominoAllowed(board, domino),
     apply: (board: Board, { ctx }: { ctx: Ctx }, domino: Domino): MoveOutcome<Board> => {
