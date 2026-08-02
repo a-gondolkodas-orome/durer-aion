@@ -1,25 +1,35 @@
 import { strategyGameFactory, type Ctx, type Events } from '../../strategy-game-factory';
 import { BoardClient } from './board-client';
-import { type Board, applyRemoval, generateStartBoard, isTerminal, nonEmptyIndices } from './helpers';
+import {
+  type Board, applyRemoval, generateStartBoard, isTerminal, nonEmptyIndices,
+  isPointingAllowed, isRemovalAllowed
+} from './helpers';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 
 const moves = {
   // Take `amount` stones from a pointed pile. The turn does NOT end here: the
   // same player then points at piles for the other player (see `pointPiles`).
-  takeStones: (board: Board, { ctx, events }: { ctx: Ctx; events: Events }, index: number, amount: number) => {
-    const nextBoard: Board = { piles: applyRemoval(board.piles, index, amount), pointed: null };
-    if (isTerminal(nextBoard)) {
-      // Whoever takes the last stone wins.
-      events.endGame(ctx.currentPlayer!);
+  takeStones: {
+    validate: (board: Board, _, index: number, amount: number) =>
+      isRemovalAllowed(board, index, amount),
+    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx; events: Events }, index: number, amount: number) => {
+      const nextBoard: Board = { piles: applyRemoval(board.piles, index, amount), pointed: null };
+      if (isTerminal(nextBoard)) {
+        // Whoever takes the last stone wins.
+        events.endGame(ctx.currentPlayer!);
+      }
+      return { nextBoard };
     }
-    return { nextBoard };
   },
 
   // Point at the piles the other player will choose from, then hand over the turn.
-  pointPiles: (board: Board, { events }: { ctx: Ctx; events: Events }, indices: number[]) => {
-    const nextBoard: Board = { piles: board.piles, pointed: indices };
-    events.endTurn();
-    return { nextBoard };
+  pointPiles: {
+    validate: (board: Board, _, indices: number[]) => isPointingAllowed(board, indices),
+    legacyApply: (board: Board, { events }: { ctx: Ctx; events: Events }, indices: number[]) => {
+      const nextBoard: Board = { piles: board.piles, pointed: indices };
+      events.endTurn();
+      return { nextBoard };
+    }
   }
 };
 

@@ -7,8 +7,9 @@ import {
   isSpread,
   isShiftRight,
   isShiftLeft,
-  isAllowedAttackClick,
+  hasBacterium,
   moves,
+  ATTACKER,
   type Board
 } from "./helpers";
 import {
@@ -43,11 +44,26 @@ const BoardClient = ({ board: { bacteria, goals }, ctx, moves }: BoardClientProp
 
   const boardWidth = bacteria[0].length;
 
-  const isPlayerAttacker = ctx.currentPlayer === 0;
+  const isPlayerAttacker = ctx.currentPlayer === ATTACKER;
 
+  // Which of the four attacks the second click means is decided by where it
+  // lands relative to the first.
+  const attackMoveName = (attack) => {
+    if (isJump(attack)) return 'jump';
+    if (isSpread(attack)) return 'spread';
+    if (isShiftRight(attack)) return 'shiftRight';
+    if (isShiftLeft(attack)) return 'shiftLeft';
+    return null;
+  };
+
+  // A second click is a real attack when the target exists on the board, its
+  // position spells out one of the four attacks, and that attack's own
+  // validator accepts the selected source cell.
   const isAllowedAttack = ({ row, col }) => {
     if (bacteria[row][col] === undefined) return false;
-    return isAllowedAttackClick({ attackRow, attackCol, row, col });
+    const name = attackMoveName({ attackRow, attackCol, row, col });
+    return name !== null
+      && moves[name].isAllowed!({ bacteria, goals }, { row: attackRow, col: attackCol });
   };
 
   const isGoal = ({ row, col }) => row === (bacteria.length - 1) && goals.includes(col);
@@ -73,19 +89,8 @@ const BoardClient = ({ board: { bacteria, goals }, ctx, moves }: BoardClientProp
       return;
     }
 
-    const attack = { attackRow, attackCol, row, col };
-    if (isJump(attack)) {
-      moves.jump({ bacteria, goals }, { row: attackRow, col: attackCol });
-    }
-    if (isSpread(attack)) {
-      moves.spread({ bacteria, goals }, { row: attackRow, col: attackCol });
-    }
-    if (isShiftRight(attack)) {
-      moves.shiftRight({ bacteria, goals }, { row: attackRow, col: attackCol });
-    }
-    if (isShiftLeft(attack)) {
-      moves.shiftLeft({ bacteria, goals }, { row: attackRow, col: attackCol });
-    }
+    const name = attackMoveName({ attackRow, attackCol, row, col });
+    if (name) moves[name]({ bacteria, goals }, { row: attackRow, col: attackCol });
 
     setAttackRow(null);
     setAttackCol(null);
@@ -96,7 +101,7 @@ const BoardClient = ({ board: { bacteria, goals }, ctx, moves }: BoardClientProp
   const isForbidden = ({ row, col }) => {
     if (attackRow !== null && row === attackRow && col === attackCol) return false;
     if (attackRow !== null && !isAllowedAttack({ row, col })) return true;
-    if (attackRow === null && bacteria[row][col] < 1) return true;
+    if (attackRow === null && !hasBacterium({ bacteria, goals }, { row, col })) return true;
     return false;
   };
 
@@ -180,7 +185,7 @@ const BoardClient = ({ board: { bacteria, goals }, ctx, moves }: BoardClientProp
 };
 
 const getPlayerStepDescription = ({ ctx }) => {
-  if (ctx.currentPlayer === 0) {
+  if (ctx.currentPlayer === ATTACKER) {
     return {
       hu: "Kattints egy mezőre, amin van baktérium és hajtsd végre " +
         "a három lehetséges támadás egyikét egy további szabályos kattintással.",

@@ -1,4 +1,4 @@
-import { random, range, shuffle } from 'lodash';
+import { random, range, shuffle, uniq } from 'lodash';
 
 // piles: sizes of the piles; a value of 0 means that pile is empty (kept in the
 // array so pile indices stay stable across a game). pointed: indices of the
@@ -25,6 +25,28 @@ export const removerWins = (piles: number[]): boolean => countMinPiles(piles) % 
 
 export const applyRemoval = (piles: number[], index: number, amount: number): number[] =>
   piles.map((p, i) => (i === index ? p - amount : p));
+
+// How many piles the pointing player must indicate: two, or just the one when
+// a single non-empty pile is left.
+export const requiredPointCount = (piles: number[]): number =>
+  nonEmptyIndices(piles).length === 1 ? 1 : 2;
+
+// The two halves of a turn are told apart by the board alone: `pointed` is null
+// until someone has pointed, and `takeStones` clears it again. Pointing means
+// naming exactly the required number of distinct non-empty piles.
+export const isPointingAllowed = (board: Board, indices: number[]): boolean =>
+  board.pointed === null
+    && Array.isArray(indices)
+    && indices.length === requiredPointCount(board.piles)
+    && uniq(indices).length === indices.length
+    && indices.every(i => board.piles[i] > 0);
+
+// Taking means removing between one stone and the whole pile from one of the
+// piles the other player pointed at.
+export const isRemovalAllowed = (board: Board, index: number, amount: number): boolean =>
+  board.pointed !== null
+    && board.pointed.includes(index)
+    && Number.isInteger(amount) && amount >= 1 && amount <= board.piles[index];
 
 // Random start position. Every extra pile is strictly larger than the smallest
 // pile size, so the number of minimal piles (which decides who wins) is `mCount`

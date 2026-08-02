@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { range } from 'lodash';
 import { useTranslation } from '../../../language';
 import { GameBoard, type BoardClientProps } from '../../strategy-game-factory';
-import { type Board, nonEmptyIndices } from './helpers';
+import { type Board, requiredPointCount } from './helpers';
 
 const Chips = ({ count, removeCount = 0 }: { count: number; removeCount?: number }) => (
   // rotate(180deg) makes the heap fill from the bottom up, leaving the
@@ -65,21 +65,18 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   }, [ctx.moveCount]);
 
   const canInteract = ctx.isClientMoveAllowed;
-  const requiredPointCount = nonEmptyIndices(piles).length === 1 ? 1 : 2;
+  const pointCount = requiredPointCount(piles);
+  const pointingReady = moves.pointPiles.isAllowed!(board, selectedForPoint);
 
   const togglePoint = (i: number) => {
     if (!canInteract || stage !== 'point' || piles[i] === 0) return;
     setSelectedForPoint(prev => {
       if (prev.includes(i)) return prev.filter(x => x !== i);
-      if (prev.length >= requiredPointCount) return prev;
+      if (prev.length >= pointCount) return prev;
       return [...prev, i];
     });
   };
 
-  const submitPoint = () => {
-    if (!canInteract || selectedForPoint.length !== requiredPointCount) return;
-    moves.pointPiles(board, selectedForPoint);
-  };
 
   const adjustRemoval = (i: number, delta: number) => {
     if (!canInteract || stage !== 'remove') return;
@@ -91,8 +88,11 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     });
   };
 
+  const removalReady = removal !== null
+    && moves.takeStones.isAllowed!(board, removal.index, removal.amount);
+
   const submitRemoval = () => {
-    if (!canInteract || !removal) return;
+    if (!removal) return;
     moves.takeStones(board, removal.index, removal.amount);
   };
 
@@ -144,7 +144,9 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                   >−</Stepper>
                   <Stepper
                     label={t({ hu: `+1 a(z) ${i + 1}. kupacból`, en: `+1 from pile ${i + 1}` })}
-                    disabled={!canInteract || removeCount >= count
+                    // One more stone must itself be a legal take; the second
+                    // clause is local UI state (only one pile per turn).
+                    disabled={!moves.takeStones.isAllowed!(board, i, removeCount + 1)
                       || (removal !== null && removal.index !== i)}
                     onClick={() => adjustRemoval(i, 1)}
                   >+</Stepper>
@@ -157,18 +159,18 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 
       {canInteract && stage === 'point' && (
         <button
-          disabled={selectedForPoint.length !== requiredPointCount}
-          onClick={submitPoint}
+          disabled={!pointingReady}
+          onClick={() => moves.pointPiles(board, selectedForPoint)}
           className="primary-button w-auto mt-4 mx-auto"
         >
-          {requiredPointCount === 1
+          {pointCount === 1
             ? t({ hu: 'Rámutatok az utolsó kupacra', en: 'Point at the last pile' })
             : t({ hu: 'Rámutatok e két kupacra', en: 'Point at these two piles' })}
         </button>
       )}
       {canInteract && stage === 'remove' && (
         <button
-          disabled={!removal}
+          disabled={!removalReady}
           onClick={submitRemoval}
           className="primary-button w-auto mt-4 mx-auto"
         >

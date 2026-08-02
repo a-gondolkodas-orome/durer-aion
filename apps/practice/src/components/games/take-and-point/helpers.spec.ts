@@ -6,8 +6,12 @@ import {
   isTerminal,
   minPileSize,
   nonEmptyIndices,
-  removerWins
+  removerWins,
+  requiredPointCount,
+  isPointingAllowed,
+  isRemovalAllowed
 } from './helpers';
+import { choosePointing, chooseRemoval } from './bot-strategy';
 
 // Brute-force ground truth: does the player who is about to be pointed at (and
 // then takes) win the rest of the game with optimal play from both sides?
@@ -98,5 +102,49 @@ describe('helpers', () => {
     // Roughly 50/50 between the two roles.
     expect(odd / samples).toBeGreaterThan(0.3);
     expect(odd / samples).toBeLessThan(0.7);
+  });
+});
+
+describe('legality', () => {
+  it('requires two piles while more than one is non-empty, one when a single pile is left', () => {
+    expect(requiredPointCount([3, 2, 1])).toBe(2);
+    expect(requiredPointCount([0, 4, 0])).toBe(1);
+  });
+
+  it('accepts pointing at the required number of distinct non-empty piles', () => {
+    const board = { piles: [3, 2, 0], pointed: null };
+    expect(isPointingAllowed(board, [0, 1])).toBe(true);
+    expect(isPointingAllowed(board, [0])).toBe(false); // too few
+    expect(isPointingAllowed(board, [0, 1, 2])).toBe(false); // too many
+    expect(isPointingAllowed(board, [0, 0])).toBe(false); // same pile twice
+    expect(isPointingAllowed(board, [0, 2])).toBe(false); // pile 2 is empty
+    expect(isPointingAllowed(board, [0, 9])).toBe(false); // no such pile
+  });
+
+  it('refuses pointing once someone has already pointed this turn', () => {
+    expect(isPointingAllowed({ piles: [3, 2, 0], pointed: [0, 1] }, [0, 1])).toBe(false);
+  });
+
+  it('accepts taking between one stone and the whole of a pointed pile', () => {
+    const board = { piles: [3, 2, 4], pointed: [0, 1] };
+    expect(isRemovalAllowed(board, 0, 1)).toBe(true);
+    expect(isRemovalAllowed(board, 0, 3)).toBe(true);
+    expect(isRemovalAllowed(board, 0, 4)).toBe(false); // more than the pile holds
+    expect(isRemovalAllowed(board, 0, 0)).toBe(false);
+    expect(isRemovalAllowed(board, 0, 1.5)).toBe(false);
+    expect(isRemovalAllowed(board, 2, 1)).toBe(false); // pile 2 was not pointed at
+  });
+
+  it('refuses taking before anyone has pointed', () => {
+    expect(isRemovalAllowed({ piles: [3, 2, 4], pointed: null }, 0, 1)).toBe(false);
+  });
+
+  it('accepts everything the bot chooses', () => {
+    const board = { piles: [2, 3, 3, 1], pointed: null };
+    const pointed = choosePointing(board);
+    expect(isPointingAllowed(board, pointed)).toBe(true);
+    const afterPointing = { piles: board.piles, pointed };
+    const { index, amount } = chooseRemoval(afterPointing);
+    expect(isRemovalAllowed(afterPointing, index, amount)).toBe(true);
   });
 });

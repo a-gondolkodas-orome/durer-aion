@@ -78,26 +78,51 @@ export const applyAttackMove = (board: Board, { type, row, col }: AttackMove) =>
   return { nextBoard, reached, reachedGoal };
 };
 
-const attackerMove = (type: MoveType) =>
-  (board: Board, { events }: { events: Events }, { row, col }) => {
+export const [ATTACKER, DEFENDER] = [0, 1];
+
+// Every move of either player starts from a cell that holds at least one
+// bacterium.
+export const hasBacterium = (board: Board, { row, col }): boolean =>
+  inBoard(board, row, col) && board.bacteria[row][col] >= 1;
+
+// An attack additionally needs somewhere to go: the sideways step, the two-row
+// jump and at least one of the division's two children must land on the board.
+// Without this a spread from the top row would simply delete the bacteria.
+export const isAttackAllowed = (board: Board, { type, row, col }: AttackMove): boolean => {
+  if (!hasBacterium(board, { row, col })) return false;
+  if (type === 'shiftRight') return inBoard(board, row, col + 1);
+  if (type === 'shiftLeft') return inBoard(board, row, col - 1);
+  if (type === 'jump') return inBoard(board, row + 2, col);
+  return spreadChildren(board, row, col).length >= 1;
+};
+
+const attackerMove = (type: MoveType) => ({
+  validate: (board: Board, { ctx }, { row, col }) =>
+    ctx.currentPlayer === ATTACKER && isAttackAllowed(board, { type, row, col }),
+  legacyApply: (board: Board, { events }: { events: Events }, { row, col }) => {
     const { nextBoard, reachedGoal } = applyAttackMove(board, { type, row, col });
     events.endTurn();
     if (reachedGoal) events.endGame();
     return { nextBoard };
-  };
+  }
+});
 
 export const moves = {
-  defend: (board: Board, { events }: { events: Events }, { row, col }) => {
-    const nextBoard = cloneDeep(board);
+  defend: {
+    validate: (board: Board, { ctx }, cell) =>
+      ctx.currentPlayer === DEFENDER && hasBacterium(board, cell),
+    legacyApply: (board: Board, { events }: { events: Events }, { row, col }) => {
+      const nextBoard = cloneDeep(board);
 
-    nextBoard.bacteria[row][col] -= 1;
-    events.endTurn();
+      nextBoard.bacteria[row][col] -= 1;
+      events.endTurn();
 
-    if (areAllBacteriaRemoved(nextBoard.bacteria)) {
-      events.endGame();
+      if (areAllBacteriaRemoved(nextBoard.bacteria)) {
+        events.endGame();
+      }
+
+      return { nextBoard };
     }
-
-    return { nextBoard };
   },
   shiftRight: attackerMove('shiftRight'),
   shiftLeft: attackerMove('shiftLeft'),
@@ -122,12 +147,6 @@ export const isSpread = ({ attackRow, attackCol, row, col }) => {
 
 export const isJump = ({ attackRow, attackCol, row, col }) => {
   return row === attackRow + 2 && col === attackCol;
-};
-
-export const isAllowedAttackClick = (attack) => {
-  return (
-    isShiftRight(attack) || isShiftLeft(attack) || isSpread(attack) || isJump(attack)
-  );
 };
 
 const areAllBacteriaRemoved = (bacteria) => {

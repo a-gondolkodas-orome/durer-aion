@@ -8,9 +8,12 @@ import {
   bacteriaCoords,
   totalBacteria,
   inBoard,
+  isAttackAllowed,
   spreadChildren,
   isGoalCell,
-  topRowIdx
+  topRowIdx,
+  ATTACKER,
+  DEFENDER
 } from "./helpers";
 
 export type { AttackMove };
@@ -21,16 +24,16 @@ export const simulate = (board: Board, move: AttackMove): { board: Board; reache
   return { board: nextBoard, reachedGoal };
 };
 
-export const legalAttackMoves = (board: Board): AttackMove[] => {
-  const moves: AttackMove[] = [];
-  for (const [row, col] of bacteriaCoords(board)) {
-    if (inBoard(board, row, col + 1)) moves.push({ type: 'shiftRight', row, col });
-    if (inBoard(board, row, col - 1)) moves.push({ type: 'shiftLeft', row, col });
-    if (inBoard(board, row + 2, col)) moves.push({ type: 'jump', row, col });
-    if (spreadChildren(board, row, col).length >= 1) moves.push({ type: 'spread', row, col });
-  }
-  return moves;
-};
+const ATTACK_TYPES = ['shiftRight', 'shiftLeft', 'jump', 'spread'] as const;
+
+// The bot enumerates its options with the very predicate the engine validates
+// dispatches against, so the two can never disagree.
+export const legalAttackMoves = (board: Board): AttackMove[] =>
+  bacteriaCoords(board).flatMap(([row, col]) =>
+    ATTACK_TYPES
+      .map(type => ({ type, row, col }))
+      .filter(move => isAttackAllowed(board, move))
+  );
 
 // A move is winning-preserving when, after every possible defender removal,
 // the attacker is still winning (or has already reached a goal).
@@ -118,7 +121,7 @@ export const defenderMove = (board: Board): { row: number; col: number } => {
 };
 
 export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
-  if (ctx.chosenRoleIndex === 0) {
+  if (ctx.chosenRoleIndex === ATTACKER) {
     const { row, col } = defenderMove(board);
     moves.defend(board, { row, col });
   } else {
@@ -131,7 +134,7 @@ export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => 
 export const randomBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
   const coords = bacteriaCoords(board);
 
-  if (ctx.currentPlayer === 1) {
+  if (ctx.currentPlayer === DEFENDER) {
     const [row, col] = sample(coords)!;
     moves.defend(board, { row, col });
     return;
