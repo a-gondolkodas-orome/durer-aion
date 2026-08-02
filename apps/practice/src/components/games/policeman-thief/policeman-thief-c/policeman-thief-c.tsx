@@ -1,5 +1,5 @@
 import { cloneDeep, random } from "lodash";
-import { strategyGameFactory, type Ctx, type Events } from "../../../strategy-game-factory";
+import { strategyGameFactory, type Ctx, type MoveOutcome } from "../../../strategy-game-factory";
 import { smartBotStrategy, randomBotStrategy } from "./bot-strategy";
 import { isNeighbour, isVertex, POLICE, THIEF } from "./helpers";
 import { BoardClient } from "./board-client";
@@ -40,12 +40,13 @@ export const moves = {
   placeCop: {
     validate: (board: Board, _, vertex: number) =>
       board.phase === 'placingCops' && isVertex(vertex),
-    legacyApply: (board: Board, { events }: { events: Events }, vertex: number) => {
+    apply: (board: Board, _, vertex: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard.policemen.push(vertex);
+      // Every policeman is placed within one turn; the turn ends with the last.
       if (nextBoard.policemen.length === nextBoard.copCount) {
         nextBoard.phase = 'placingThief';
-        events.endTurn();
+        return { nextBoard, isTurnEnd: true };
       }
       return { nextBoard };
     }
@@ -54,13 +55,12 @@ export const moves = {
   placeThief: {
     validate: (board: Board, _, vertex: number) =>
       board.phase === 'placingThief' && isVertex(vertex) && !board.policemen.includes(vertex),
-    legacyApply: (board: Board, { events }: { events: Events }, vertex: number) => {
+    apply: (board: Board, _, vertex: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard.thief = vertex;
       nextBoard.phase = 'chasing';
       nextBoard.copCursor = 0;
-      events.endTurn();
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   },
   // Chasing: move the current policeman along one edge. Catching the thief
@@ -69,17 +69,17 @@ export const moves = {
     validate: (board: Board, { ctx }: { ctx: Ctx }, vertex: number) =>
       board.phase === 'chasing' && ctx.currentPlayer === POLICE
         && isNeighbour(board.policemen[board.copCursor], vertex),
-    legacyApply: (board: Board, { events }: { events: Events }, vertex: number) => {
+    apply: (board: Board, _, vertex: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard.policemen[nextBoard.copCursor] = vertex;
       nextBoard.copCursor += 1;
       if (vertex === nextBoard.thief) {
-        events.endGame(POLICE);
-        return { nextBoard };
+        return { nextBoard, gameEnd: { winnerIndex: POLICE } };
       }
+      // Each policeman moves in turn; the turn ends once the cursor wraps.
       if (nextBoard.copCursor === nextBoard.copCount) {
         nextBoard.copCursor = 0;
-        events.endTurn();
+        return { nextBoard, isTurnEnd: true };
       }
       return { nextBoard };
     }
@@ -90,20 +90,17 @@ export const moves = {
     validate: (board: Board, { ctx }: { ctx: Ctx }, vertex: number) =>
       board.phase === 'chasing' && ctx.currentPlayer === THIEF
         && isNeighbour(board.thief!, vertex),
-    legacyApply: (board: Board, { events }: { events: Events }, vertex: number) => {
+    apply: (board: Board, _, vertex: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard.thief = vertex;
       nextBoard.thiefMoveCount += 1;
       if (nextBoard.policemen.includes(vertex)) {
-        events.endGame(POLICE);
-        return { nextBoard };
+        return { nextBoard, gameEnd: { winnerIndex: POLICE } };
       }
       if (nextBoard.thiefMoveCount === 3) {
-        events.endGame(THIEF);
-        return { nextBoard };
+        return { nextBoard, gameEnd: { winnerIndex: THIEF } };
       }
-      events.endTurn();
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   }
 };

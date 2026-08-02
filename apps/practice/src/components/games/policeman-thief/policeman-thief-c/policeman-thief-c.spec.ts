@@ -1,9 +1,9 @@
 import { moves, generateStartBoard, pickCopCount, type Board } from './policeman-thief-c';
 import { POLICE, THIEF, VERTEX_COUNT } from './helpers';
 import { range } from 'lodash';
-import { makeEvents, makeCtx } from '../../../../test-utils';
+import { makeCtx } from '../../../../test-utils';
 
-const meta = () => ({ events: makeEvents() });
+const meta = { ctx: makeCtx() };
 
 const chasingBoard = (overrides: Partial<Board> = {}): Board => ({
   copCount: 2,
@@ -42,89 +42,79 @@ describe('pickCopCount', () => {
 
 describe('moves.placeCop', () => {
   it('adds a policeman without ending the turn until all are placed', () => {
-    const { events } = meta();
-    const { nextBoard } = moves.placeCop.legacyApply(generateStartBoard(), { events }, 7);
-    expect(nextBoard.policemen).toEqual([7]);
-    expect(nextBoard.phase).toBe('placingCops');
-    expect(events.endTurn).not.toHaveBeenCalled();
+    const outcome = moves.placeCop.apply(generateStartBoard(), meta, 7);
+    expect(outcome.nextBoard.policemen).toEqual([7]);
+    expect(outcome.nextBoard.phase).toBe('placingCops');
+    expect(outcome.isTurnEnd).toBeUndefined();
   });
 
   it('ends the turn and moves to thief placement once all police are placed', () => {
-    const { events } = meta();
     // pin copCount so placing the second cop reliably completes placement
     // (generateStartBoard randomises it to 2 or 3)
     const board = { ...generateStartBoard(), copCount: 2, policemen: [7] };
-    const { nextBoard } = moves.placeCop.legacyApply(board, { events }, 3);
-    expect(nextBoard.policemen).toEqual([7, 3]);
-    expect(nextBoard.phase).toBe('placingThief');
-    expect(events.endTurn).toHaveBeenCalledTimes(1);
+    const outcome = moves.placeCop.apply(board, meta, 3);
+    expect(outcome.nextBoard.policemen).toEqual([7, 3]);
+    expect(outcome.nextBoard.phase).toBe('placingThief');
+    expect(outcome.isTurnEnd).toBe(true);
   });
 });
 
 describe('moves.placeThief', () => {
   it('places the thief, enters the chasing phase and ends the turn', () => {
-    const { events } = meta();
     const board: Board = { ...generateStartBoard(), policemen: [10, 11], phase: 'placingThief' };
-    const { nextBoard } = moves.placeThief.legacyApply(board, { events }, 2);
-    expect(nextBoard.thief).toBe(2);
-    expect(nextBoard.phase).toBe('chasing');
-    expect(nextBoard.copCursor).toBe(0);
-    expect(events.endTurn).toHaveBeenCalledTimes(1);
+    const outcome = moves.placeThief.apply(board, meta, 2);
+    expect(outcome.nextBoard.thief).toBe(2);
+    expect(outcome.nextBoard.phase).toBe('chasing');
+    expect(outcome.nextBoard.copCursor).toBe(0);
+    expect(outcome.isTurnEnd).toBe(true);
   });
 });
 
 describe('moves.moveCop', () => {
   it('advances the cursor and keeps the turn until every policeman has moved', () => {
-    const { events } = meta();
-    const { nextBoard } = moves.moveCop.legacyApply(chasingBoard(), { events }, 12);
-    expect(nextBoard.policemen).toEqual([12, 11]);
-    expect(nextBoard.copCursor).toBe(1);
-    expect(events.endTurn).not.toHaveBeenCalled();
-    expect(events.endGame).not.toHaveBeenCalled();
+    const outcome = moves.moveCop.apply(chasingBoard(), meta, 12);
+    expect(outcome.nextBoard.policemen).toEqual([12, 11]);
+    expect(outcome.nextBoard.copCursor).toBe(1);
+    expect(outcome.isTurnEnd).toBeUndefined();
+    expect(outcome.gameEnd).toBeUndefined();
   });
 
   it('ends the turn after the last policeman moves', () => {
-    const { events } = meta();
-    const { nextBoard } = moves.moveCop.legacyApply(chasingBoard({ copCursor: 1 }), { events }, 13);
-    expect(nextBoard.policemen).toEqual([10, 13]);
-    expect(nextBoard.copCursor).toBe(0);
-    expect(events.endTurn).toHaveBeenCalledTimes(1);
+    const outcome = moves.moveCop.apply(chasingBoard({ copCursor: 1 }), meta, 13);
+    expect(outcome.nextBoard.policemen).toEqual([10, 13]);
+    expect(outcome.nextBoard.copCursor).toBe(0);
+    expect(outcome.isTurnEnd).toBe(true);
   });
 
   it('ends the game for the police when a policeman steps onto the thief', () => {
-    const { events } = meta();
     // thief on vertex 0; blue cop at 10 is adjacent to 0
-    moves.moveCop.legacyApply(chasingBoard({ thief: 0 }), { events }, 0);
-    expect(events.endGame).toHaveBeenCalledWith(0);
-    expect(events.endTurn).not.toHaveBeenCalled();
+    const outcome = moves.moveCop.apply(chasingBoard({ thief: 0 }), meta, 0);
+    expect(outcome.gameEnd).toEqual({ winnerIndex: POLICE });
+    expect(outcome.isTurnEnd).toBeUndefined();
   });
 });
 
 describe('moves.moveThief', () => {
   it('records a move and ends the turn when the thief stays free', () => {
-    const { events } = meta();
-    const { nextBoard } = moves.moveThief.legacyApply(chasingBoard({ thief: 0 }), { events }, 5);
-    expect(nextBoard.thief).toBe(5);
-    expect(nextBoard.thiefMoveCount).toBe(1);
-    expect(events.endTurn).toHaveBeenCalledTimes(1);
-    expect(events.endGame).not.toHaveBeenCalled();
+    const outcome = moves.moveThief.apply(chasingBoard({ thief: 0 }), meta, 5);
+    expect(outcome.nextBoard.thief).toBe(5);
+    expect(outcome.nextBoard.thiefMoveCount).toBe(1);
+    expect(outcome.isTurnEnd).toBe(true);
+    expect(outcome.gameEnd).toBeUndefined();
   });
 
   it('ends the game for the police when the thief steps onto a policeman', () => {
-    const { events } = meta();
-    // thief at 9 (adjacent to 0 and 4); a cop sits on 9's neighbour... use direct overlap
     const board = chasingBoard({ thief: 0, policemen: [5, 11] });
-    moves.moveThief.legacyApply(board, { events }, 5);
-    expect(events.endGame).toHaveBeenCalledWith(0);
-    expect(events.endTurn).not.toHaveBeenCalled();
+    const outcome = moves.moveThief.apply(board, meta, 5);
+    expect(outcome.gameEnd).toEqual({ winnerIndex: POLICE });
+    expect(outcome.isTurnEnd).toBeUndefined();
   });
 
   it('ends the game for the thief after a safe third move', () => {
-    const { events } = meta();
     const board = chasingBoard({ thief: 0, thiefMoveCount: 2, policemen: [12, 13] });
-    moves.moveThief.legacyApply(board, { events }, 5);
-    expect(events.endGame).toHaveBeenCalledWith(1);
-    expect(events.endTurn).not.toHaveBeenCalled();
+    const outcome = moves.moveThief.apply(board, meta, 5);
+    expect(outcome.gameEnd).toEqual({ winnerIndex: THIEF });
+    expect(outcome.isTurnEnd).toBeUndefined();
   });
 });
 

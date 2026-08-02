@@ -1,5 +1,5 @@
 import { cloneDeep } from 'lodash';
-import { strategyGameFactory, type Ctx, type Events } from '../../../strategy-game-factory';
+import { strategyGameFactory, type Ctx, type MoveOutcome } from '../../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { BoardClient } from './board-client';
 import { isGameEnd, getWinnerIndex } from './helpers';
@@ -16,25 +16,26 @@ const generateStartBoard = (): Board => {
   };
 };
 
-const moves = {
+export const moves = {
   moveSubmarine: {
     validate: (board: Board, { ctx }: { ctx: Ctx }, move: { from: number; to: number }) =>
       ctx.currentPlayer === RESEARCHERS && !!move && isSubmarineMoveAllowed(board, move.from, move.to),
-    legacyApply: (board: Board, { events }: { events: Events }, { from, to }: { from: number; to: number }) => {
+    apply: (
+      board: Board, _, { from, to }: { from: number; to: number }
+    ): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard.submarines[from] -= 1;
       nextBoard.submarines[to] += 1;
-      events.endTurn();
       if (isGameEnd(nextBoard)) {
-        events.endGame(getWinnerIndex(nextBoard))
+        return { nextBoard, gameEnd: { winnerIndex: getWinnerIndex(nextBoard) } };
       }
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   },
   moveShark: {
     validate: (board: Board, { ctx }: { ctx: Ctx }, to: number) =>
       ctx.currentPlayer === SHARK && isSharkMoveAllowed(board, to),
-    legacyApply: (board: Board, { events }: { events: Events }, to: number) => {
+    apply: (board: Board, _, to: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard.shark = to;
 
@@ -43,6 +44,7 @@ const moves = {
           to !== board.shark &&
           board.sharkMovesInTurn === 0
       );
+      // A free first step earns a second one, so the turn stays open.
       if (isAnotherSharkMoveAllowed) {
         nextBoard.sharkMovesInTurn = 1;
         return { nextBoard };
@@ -50,11 +52,10 @@ const moves = {
 
       nextBoard.turn += 1;
       nextBoard.sharkMovesInTurn = 0;
-      events.endTurn();
       if (isGameEnd(nextBoard)) {
-        events.endGame(getWinnerIndex(nextBoard))
+        return { nextBoard, gameEnd: { winnerIndex: getWinnerIndex(nextBoard) } };
       }
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   }
 }

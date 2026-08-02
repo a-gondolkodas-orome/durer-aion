@@ -1,6 +1,6 @@
 import { cloneDeep } from 'lodash';
 import { Sheriff, Thief, hasWinningTriple, getUntakenCards, isCardAvailable, type Board } from '../helpers';
-import type { Ctx, Events } from '../../../strategy-game-factory';
+import type { Ctx, MoveOutcome } from '../../../strategy-game-factory';
 
 export const CARD_COUNT = 7;
 
@@ -22,16 +22,15 @@ export const moves = {
     // the game happens inside `applyTakeCard`, not as a move argument.
     validate: (board: Board, _, indices: number[]) =>
       Array.isArray(indices) && indices.length === 1 && isCardAvailable(board, CARD_COUNT, indices[0]),
-    legacyApply: (
-      board: Board, { ctx, events }: { ctx: Ctx, events: Events }, indices: number[]
-    ): { nextBoard: Board } => {
+    apply: (
+      board: Board, { ctx }: { ctx: Ctx }, indices: number[]
+    ): MoveOutcome<Board> => {
       const nextBoard = applyTakeCard(board, ctx.currentPlayer!, indices);
       if (nextBoard.numTurns >= 5) {
         const winner = hasWinningTriple(nextBoard.cards[Thief]) ? Thief : Sheriff;
-        events.endGame(winner);
+        return { nextBoard, gameEnd: { winnerIndex: winner } };
       }
-      events.endTurn();
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   }
 };
