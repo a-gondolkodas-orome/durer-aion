@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import {
-  strategyGameFactory, type Events, type StrategyArgs, type BoardClientProps, GameBoard, useHoverPreview
+  strategyGameFactory, type Ctx, type MoveOutcome, type StrategyArgs, type BoardClientProps,
+  GameBoard, useHoverPreview
 } from '../../../strategy-game-factory';
 import { sample, random } from 'lodash';
 import { useTranslation } from '../../../../language';
@@ -164,13 +165,12 @@ const moves = {
   subtractPrimeExponent: {
     validate: (board: Board, _, entry: { prime: number; exponent: number }) =>
       isSubtractionAllowed(board, entry),
-    legacyApply: (board: Board, { events }: { events: Events }, { prime, exponent }) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, { prime, exponent }): MoveOutcome<Board> => {
       const nextBoard = board - prime ** exponent;
-      events.endTurn();
       if (nextBoard === 0) {
-        events.endGame();
+        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   }
 };

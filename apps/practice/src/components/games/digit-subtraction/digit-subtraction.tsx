@@ -1,7 +1,7 @@
 import { sample } from 'lodash';
 import {
   strategyGameFactory,
-  type Ctx, type Events, type StrategyArgs, type BoardClientProps,
+  type Ctx, type MoveOutcome, type StrategyArgs, type BoardClientProps,
   GameBoard
 } from '../../strategy-game-factory';
 
@@ -44,14 +44,12 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
 const moves = {
   subtractDigit: {
     validate: (board: Board, _, digit: number) => isSubtractableDigit(board, digit),
-    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, digit: number) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, digit: number): MoveOutcome<Board> => {
       const nextBoard = board - digit;
       if (nextBoard === 0) {
-        events.endGame(ctx.currentPlayer!);
-      } else {
-        events.endTurn();
+        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   }
 };

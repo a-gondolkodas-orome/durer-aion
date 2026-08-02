@@ -1,6 +1,6 @@
 import {
   strategyGameFactory,
-  type Ctx, type Events, type StrategyArgs, type BoardClientProps,
+  type Ctx, type MoveOutcome, type StrategyArgs, type BoardClientProps,
   GameBoard
 } from '../../../strategy-game-factory';
 import { range, sample } from 'lodash';
@@ -46,13 +46,11 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
 const moves = {
   moveTo: {
     validate: (board: Board, _, target: number) => isMoveValid(board, target),
-    legacyApply: (_board: Board, { ctx, events }: { ctx: Ctx, events: Events }, target: number) => {
-      const winner = ctx.currentPlayer!;
-      events.endTurn();
+    apply: (_board: Board, { ctx }: { ctx: Ctx }, target: number): MoveOutcome<Board> => {
       if (target === 0) {
-        events.endGame(winner);
+        return { nextBoard: target, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }
-      return { nextBoard: target };
+      return { nextBoard: target, isTurnEnd: true };
     }
   }
 };

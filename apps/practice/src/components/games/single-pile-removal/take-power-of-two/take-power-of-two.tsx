@@ -1,5 +1,6 @@
 import {
-  strategyGameFactory, type Events, type StrategyArgs, type BoardClientProps, GameBoard, useHoverPreview
+  strategyGameFactory, type Ctx, type MoveOutcome, type StrategyArgs, type BoardClientProps,
+  GameBoard, useHoverPreview
 } from '../../../strategy-game-factory';
 import { range, random, reverse, sample } from 'lodash';
 import { useTranslation } from '../../../../language';
@@ -103,13 +104,12 @@ const moves = {
     // A power of 2 may be subtracted only if it does not exceed the number —
     // exactly the exponents the board already offers.
     validate: (board: Board, _, exponent: number) => getAvailableExponents(board).includes(exponent),
-    legacyApply: (board: Board, { events }: { events: Events }, exponent: number) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, exponent: number): MoveOutcome<Board> => {
       const nextBoard = board - 2 ** exponent;
-      events.endTurn();
       if (nextBoard === 0) {
-        events.endGame();
+        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   }
 }

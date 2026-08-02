@@ -1,4 +1,6 @@
-import { strategyGameFactory, type Events, type StrategyArgs } from '../../../strategy-game-factory';
+import {
+  strategyGameFactory, type Ctx, type MoveOutcome, type StrategyArgs
+} from '../../../strategy-game-factory';
 import { range, random, sample, minBy } from 'lodash';
 import { type Board, cap, validateTake, BoardClient, getPlayerStepDescription } from '../pebble-pile';
 
@@ -35,11 +37,10 @@ export const chooseSmartTake = (board: Board): number => {
 const moves = {
   take: {
     validate: validateTake,
-    legacyApply: (board: Board, { events }: { events: Events }, count: number) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, count: number): MoveOutcome<Board> => {
       const nextBoard: Board = { stones: board.stones - count, maxTake: count };
-      events.endTurn();
-      if (nextBoard.stones === 0) events.endGame(); // mover took the last stone(s) → wins
-      return { nextBoard };
+      if (nextBoard.stones === 0) return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
+      return { nextBoard, isTurnEnd: true };
     }
   }
 };

@@ -1,5 +1,6 @@
 import {
-  strategyGameFactory, type Events, type StrategyArgs, type BoardClientProps, GameBoard, useHoverPreview
+  strategyGameFactory, type Ctx, type MoveOutcome, type StrategyArgs, type BoardClientProps,
+  GameBoard, useHoverPreview
 } from '../../../strategy-game-factory';
 import { random, range } from 'lodash';
 import { useTranslation } from '../../../../language';
@@ -54,21 +55,18 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 
 const moves = {
   take1: {
-    legacyApply: (board: Board, { events }: { events: Events }) => {
-      events.endTurn();
+    apply: (board: Board, { ctx }: { ctx: Ctx }): MoveOutcome<Board> => {
+      const nextBoard = board - 1;
       if (board === 1) {
-        events.endGame();
+        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }
-      return { nextBoard: board - 1 }
+      return { nextBoard, isTurnEnd: true };
     }
   },
   halve: {
     // Half may only be taken when the pile is even; taking one is always legal.
     validate: (board: Board) => board >= 2 && board % 2 === 0,
-    legacyApply: (board: Board, { events }: { events: Events }) => {
-      events.endTurn();
-      return { nextBoard: board / 2 };
-    }
+    apply: (board: Board): MoveOutcome<Board> => ({ nextBoard: board / 2, isTurnEnd: true })
   }
 };
 
