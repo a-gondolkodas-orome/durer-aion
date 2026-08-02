@@ -1,6 +1,6 @@
 import { range, cloneDeep } from 'lodash';
 import {
-  strategyGameFactory, type Events, type BoardClientProps, type Ctx, GameBoard
+  strategyGameFactory, type MoveOutcome, type BoardClientProps, type Ctx, GameBoard
 } from '../../../strategy-game-factory';
 import { generateEmptyTicTacToeBoard, validatePlacement } from '../helpers';
 import { isGameEnd, hasFirstPlayerWon, type Board } from './helpers';
@@ -42,14 +42,13 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
 const moves = {
   placePiece: {
     validate: validatePlacement,
-    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, id) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, id): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard[id] = ctx.currentPlayer === 0 ? 'red' : 'blue';
-      events.endTurn();
       if (isGameEnd(nextBoard)) {
-        events.endGame(hasFirstPlayerWon(nextBoard) ? 0 : 1);
+        return { nextBoard, gameEnd: { winnerIndex: hasFirstPlayerWon(nextBoard) ? 0 : 1 } };
       }
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   }
 }

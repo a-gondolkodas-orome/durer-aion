@@ -1,5 +1,5 @@
 import {
-  strategyGameFactory, type Events, type Ctx, type StrategyArgs, type BoardClientProps, GameBoard
+  strategyGameFactory, type MoveOutcome, type Ctx, type StrategyArgs, type BoardClientProps, GameBoard
 } from '../../strategy-game-factory';
 import { useTranslation } from '../../../language';
 import {
@@ -79,21 +79,20 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 const moves = {
   chooseNumber: {
     validate: (board: Board, _, n: number) => isChoiceAllowed(board.owner, n),
-    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, n: number) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, n: number): MoveOutcome<Board> => {
       const player = ctx.currentPlayer as 0 | 1;
       const owner = board.owner.slice() as Board['owner'];
       owner[n - 1] = player;
       const nextBoard = { owner };
 
       if (hasSum15(numbersOwnedBy(owner, player))) {
-        events.endGame(player);
-      } else if (owner.every(o => o !== null)) {
-        // All nine numbers claimed, nobody reached a triple summing to 15.
-        events.endGame(1);
-      } else {
-        events.endTurn();
+        return { nextBoard, gameEnd: { winnerIndex: player } };
       }
-      return { nextBoard };
+      if (owner.every(o => o !== null)) {
+        // All nine numbers claimed, nobody reached a triple summing to 15.
+        return { nextBoard, gameEnd: { winnerIndex: 1 } };
+      }
+      return { nextBoard, isTurnEnd: true };
     }
   }
 };

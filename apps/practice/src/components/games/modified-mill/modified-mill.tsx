@@ -1,4 +1,4 @@
-import { strategyGameFactory, type Ctx, type Events } from '../../strategy-game-factory';
+import { strategyGameFactory, type Ctx, type MoveOutcome } from '../../strategy-game-factory';
 import {
   type Board, generateEmptyBoard, playerColor, playerHasLine, isBoardFull, isPlacementAllowed
 } from './helpers';
@@ -10,18 +10,16 @@ export type { Board };
 const moves = {
   placePiece: {
     validate: (board: Board, _, node: number) => isPlacementAllowed(board, node),
-    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx; events: Events }, node: number) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, node: number): MoveOutcome<Board> => {
       const nextBoard = board.slice();
       nextBoard[node] = playerColor(ctx.currentPlayer!);
-      events.endTurn();
       if (playerHasLine(nextBoard, ctx.currentPlayer!)) {
-        // Three of your discs adjacent in a line: the player who placed them wins.
-        events.endGame(ctx.currentPlayer);
-      } else if (isBoardFull(nextBoard)) {
-        // Board full with no line: the second player wins.
-        events.endGame(1);
+        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }
-      return { nextBoard };
+      if (isBoardFull(nextBoard)) {
+        return { nextBoard, gameEnd: { winnerIndex: 1 } };
+      }
+      return { nextBoard, isTurnEnd: true };
     }
   }
 };

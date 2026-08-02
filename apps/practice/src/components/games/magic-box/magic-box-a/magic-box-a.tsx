@@ -1,6 +1,6 @@
 import { range } from 'lodash';
 import {
-  strategyGameFactory, type Events, type BoardClientProps, type Ctx, GameBoard
+  strategyGameFactory, type MoveOutcome, type BoardClientProps, type Ctx, GameBoard
 } from '../../../strategy-game-factory';
 import { generateEmptyBoard, isGameEnd, isPlacementAllowed, placeStone, type Board } from './helpers';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
@@ -27,13 +27,13 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => (
 const moves = {
   placeStone: {
     validate: (board: Board, _, id: number) => isPlacementAllowed(board, id),
-    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, id) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, id): MoveOutcome<Board> => {
       const nextBoard = placeStone(board, id);
-      events.endTurn();
+      // The box breaks under the stone just placed, so the mover loses.
       if (isGameEnd(nextBoard)) {
-        events.endGame(ctx.currentPlayer === 0 ? 1 : 0);
+        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer === 0 ? 1 : 0 } };
       }
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   }
 }

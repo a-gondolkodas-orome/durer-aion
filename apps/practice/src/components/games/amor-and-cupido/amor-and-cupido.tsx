@@ -1,4 +1,4 @@
-import { strategyGameFactory, type Ctx, type Events } from '../../strategy-game-factory';
+import { strategyGameFactory, type Ctx, type MoveOutcome } from '../../strategy-game-factory';
 import { type Board, completesTriangle, generateStartBoard, isClaimAllowed } from './helpers';
 import { smartBotStrategy } from './bot-strategy';
 import { BoardClient } from './board-client';
@@ -6,15 +6,13 @@ import { BoardClient } from './board-client';
 const moves = {
   claimEdge: {
     validate: (board: Board, _, edge: number) => isClaimAllowed(board, edge),
-    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx; events: Events }, edge: number) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, edge: number): MoveOutcome<Board> => {
       const nextBoard = board.slice();
       nextBoard[edge] = ctx.currentPlayer;
       if (completesTriangle(board, ctx.currentPlayer!, edge)) {
-        events.endGame(ctx.currentPlayer);
-      } else {
-        events.endTurn();
+        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   }
 };

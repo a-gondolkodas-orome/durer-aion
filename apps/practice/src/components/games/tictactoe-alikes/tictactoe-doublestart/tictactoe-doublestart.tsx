@@ -1,6 +1,6 @@
 import { range, cloneDeep } from 'lodash';
 import {
-  strategyGameFactory, type Events, type BoardClientProps, type Ctx, GameBoard
+  strategyGameFactory, type MoveOutcome, type BoardClientProps, type Ctx, GameBoard
 } from '../../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { generateEmptyTicTacToeBoard, validatePlacement } from '../helpers';
@@ -44,18 +44,19 @@ const isDuringFirstMove = (board: Board) => board.filter(c => c).length <= 1;
 const moves = {
   placePiece: {
     validate: validatePlacement,
-    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, id) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, id): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard[id] = ctx.currentPlayer === 0 ? 'red' : 'blue';
 
-      if (!isDuringFirstMove(nextBoard)) {
-        events.endTurn();
-        if (isGameEnd(nextBoard)) {
-          events.endGame(hasFirstPlayerWon(nextBoard) ? 0 : 1);
-        }
+      // The opening turn places two pieces, so the first of them leaves the
+      // turn open: no isTurnEnd, and no game-end check either.
+      if (isDuringFirstMove(nextBoard)) {
+        return { nextBoard };
       }
-
-      return { nextBoard };
+      if (isGameEnd(nextBoard)) {
+        return { nextBoard, gameEnd: { winnerIndex: hasFirstPlayerWon(nextBoard) ? 0 : 1 } };
+      }
+      return { nextBoard, isTurnEnd: true };
     }
   }
 };

@@ -1,6 +1,6 @@
 import { range, cloneDeep } from 'lodash';
 import {
-  strategyGameFactory, type Events, type BoardClientProps, type Ctx, GameBoard
+  strategyGameFactory, type MoveOutcome, type BoardClientProps, type Ctx, GameBoard
 } from '../../../strategy-game-factory';
 import { generateEmptyTicTacToeBoard, validatePlacement } from '../helpers';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
@@ -61,26 +61,24 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
 const moves = {
   placePiece: {
     validate: validatePlacement,
-    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, id) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, id): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard[id] = currentPlayerColor(ctx);
-      events.endTurn();
       if (isGameEnd(nextBoard)) {
-        events.endGame();
+        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   },
   whitenPiece: {
     validate: (board: Board, { ctx }: { ctx: Ctx }, id: number) => isWhiteningAllowed(board, ctx, id),
-    legacyApply: (board: Board, { events }: { events: Events }, id) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, id): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard[id] = 'white';
-      events.endTurn();
       if (isGameEnd(nextBoard)) {
-        events.endGame();
+        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   }
 }

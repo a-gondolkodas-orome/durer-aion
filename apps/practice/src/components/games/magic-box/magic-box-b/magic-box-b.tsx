@@ -1,4 +1,4 @@
-import { strategyGameFactory, type Events, type Ctx } from '../../../strategy-game-factory';
+import { strategyGameFactory, type MoveOutcome, type Ctx } from '../../../strategy-game-factory';
 import { BoardClient } from './board-client';
 import {
   generateEmptyBoard, isDesignationAllowed, isLineFull, isPlacementAllowed, placeStoneAt, type Board
@@ -8,7 +8,9 @@ import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 const moves = {
   placeStone: {
     validate: (board: Board, _, cellId: number) => isPlacementAllowed(board, cellId),
-    legacyApply: (board: Board, _, cellId) => {
+    // First half of the turn: place a stone, then designate a line — the turn
+    // stays open in between.
+    apply: (board: Board, _, cellId): MoveOutcome<Board> => {
       const nextBoard: Board = { stones: placeStoneAt(board.stones, cellId), pendingLine: null };
       return { nextBoard };
     }
@@ -16,14 +18,13 @@ const moves = {
 
   designateLine: {
     validate: (board: Board, _, lineIndex: number) => isDesignationAllowed(board, lineIndex),
-    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx, events: Events }, lineIndex) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, lineIndex): MoveOutcome<Board> => {
       const nextBoard: Board = { stones: board.stones, pendingLine: lineIndex };
+      // A full designated line leaves the other player nowhere to place.
       if (isLineFull(nextBoard.stones, lineIndex)) {
-        events.endGame(ctx.currentPlayer === 0 ? 0 : 1);
-      } else {
-        events.endTurn();
+        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   }
 };
