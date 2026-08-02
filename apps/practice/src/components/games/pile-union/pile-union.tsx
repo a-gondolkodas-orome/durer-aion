@@ -187,7 +187,7 @@ export const isMergeAllowed = (board: Board, piles: number[]): boolean =>
   Array.isArray(piles) && piles.length === 2
     && isPile(board, piles[0]) && isPile(board, piles[1]) && piles[0] !== piles[1];
 
-const moves = {
+export const moves = {
   removeOne: {
     validate: (board: Board, _, pileIndex) => isPile(board, pileIndex),
     apply: (board: Board, { ctx }: { ctx: Ctx }, pileIndex): MoveOutcome<Board> => {

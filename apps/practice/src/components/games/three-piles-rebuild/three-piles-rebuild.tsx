@@ -172,7 +172,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const moves = {
+export const moves = {
   // Step 1 of a turn: keep one pile, discard the other two (shown as 0).
   keepPile: {
     validate: (board: Board, _, keepId: number) => isKeepAllowed(board, keepId),

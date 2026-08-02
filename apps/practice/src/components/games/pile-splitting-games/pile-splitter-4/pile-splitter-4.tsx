@@ -149,7 +149,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const moves = {
+export const moves = {
   removePile: {
     validate: (board: Board, _, pileId: number) => isRemovalAllowed(board, pileId),
     // First half of the turn: empty a pile, then split another into it — the

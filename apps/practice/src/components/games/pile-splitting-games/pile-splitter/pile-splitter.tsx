@@ -95,7 +95,7 @@ const getPlayerStepDescription = () => ({
   en: 'Click the piece where you want to split the pile.'
 });
 
-const moves = {
+export const moves = {
   removePile: {
     validate: (board: Board, _, pileId: number) => isRemovalAllowed(board, pileId),
     // First half of the turn: discard a pile, then split the other — the turn

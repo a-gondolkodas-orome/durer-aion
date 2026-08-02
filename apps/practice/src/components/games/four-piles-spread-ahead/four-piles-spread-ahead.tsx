@@ -135,7 +135,7 @@ export const isSpreadAllowed = (board: Board, pileId: number, pieceCount: number
     && pieceCount <= pileId
     && pieceCount <= board[pileId];
 
-const moves = {
+export const moves = {
   spreadPieces: {
     validate: (board: Board, _, { pileId, pieceCount }: { pileId: number; pieceCount: number }) =>
       isSpreadAllowed(board, pileId, pieceCount),

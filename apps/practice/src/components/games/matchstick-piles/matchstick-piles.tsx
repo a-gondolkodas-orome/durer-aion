@@ -123,7 +123,7 @@ export const isSplitAllowed = (board: Board, pileId: number, firstPart: number):
     && firstPart >= 1
     && firstPart <= board[pileId] - 1;
 
-const moves = {
+export const moves = {
   removeMatch: {
     validate: (board: Board, _, pileId: number) => isRemovalAllowed(board, pileId),
     apply: (board: Board, { ctx }: { ctx: Ctx }, pileId: number): MoveOutcome<Board> => {
