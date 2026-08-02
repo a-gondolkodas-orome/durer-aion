@@ -43,7 +43,7 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const moves = {
+export const moves = {
   moveTo: {
     validate: (board: Board, _, target: number) => isMoveValid(board, target),
     apply: (_board: Board, { ctx }: { ctx: Ctx }, target: number): MoveOutcome<Board> => {

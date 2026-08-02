@@ -48,7 +48,7 @@ export const chooseSmartTake = (board: Board): number => {
   })!;
 };
 
-const moves = {
+export const moves = {
   take: {
     validate: validateTake,
     apply: (board: Board, { ctx }: { ctx: Ctx }, count: number): MoveOutcome<Board> => {

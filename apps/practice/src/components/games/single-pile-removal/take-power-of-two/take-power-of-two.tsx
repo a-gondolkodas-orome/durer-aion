@@ -99,7 +99,7 @@ const getPlayerStepDescription = () => ({
   en: 'Choose a power of 2 to subtract.'
 });
 
-const moves = {
+export const moves = {
   subtractPowerOfTwo: {
     // A power of 2 may be subtracted only if it does not exceed the number —
     // exactly the exponents the board already offers.

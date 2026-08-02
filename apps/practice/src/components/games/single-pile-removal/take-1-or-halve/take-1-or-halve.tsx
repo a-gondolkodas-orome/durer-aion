@@ -53,7 +53,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const moves = {
+export const moves = {
   take1: {
     apply: (board: Board, { ctx }: { ctx: Ctx }): MoveOutcome<Board> => {
       const nextBoard = board - 1;

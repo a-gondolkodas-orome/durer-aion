@@ -1,4 +1,5 @@
-import { isMoveValid } from './primely-to-zero';
+import { moves, isMoveValid } from './primely-to-zero';
+import { makeCtx } from '../../../../test-utils';
 
 describe('isMoveValid', () => {
   it('allows a target reached by subtracting 1, 2 or a prime', () => {
@@ -26,5 +27,21 @@ describe('isMoveValid', () => {
   it('rejects a negative or non-integer target', () => {
     expect(isMoveValid(50, -1)).toBe(false);
     expect(isMoveValid(50, 47.5)).toBe(false);
+  });
+});
+
+const asPlayer = (currentPlayer: number) => ({ ctx: makeCtx({ currentPlayer }) });
+
+describe('primely-to-zero end of game', () => {
+  it.each([0, 1])('ends the game for the mover (player %i) when the pile is cleared', player => {
+    const outcome = moves.moveTo.apply(5, asPlayer(player), 0);
+    expect(outcome.gameEnd).toEqual({ winnerIndex: player });
+    expect(outcome.isTurnEnd).toBeUndefined();
+  });
+
+  it('passes the turn while stones remain', () => {
+    const outcome = moves.moveTo.apply(9, asPlayer(0), 4);
+    expect(outcome.gameEnd).toBeUndefined();
+    expect(outcome.isTurnEnd).toBe(true);
   });
 });

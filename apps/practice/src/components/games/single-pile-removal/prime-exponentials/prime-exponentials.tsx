@@ -161,7 +161,7 @@ const getPlayerStepDescription = () => ({
   en: 'Choose a prime power to subtract.'
 });
 
-const moves = {
+export const moves = {
   subtractPrimeExponent: {
     validate: (board: Board, _, entry: { prime: number; exponent: number }) =>
       isSubtractionAllowed(board, entry),

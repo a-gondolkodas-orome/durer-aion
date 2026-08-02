@@ -1,4 +1,5 @@
-import { isSubtractionAllowed } from './prime-exponentials';
+import { moves, isSubtractionAllowed } from './prime-exponentials';
+import { makeCtx } from '../../../../test-utils';
 
 describe('isSubtractionAllowed', () => {
   it('allows a prime power no larger than the number', () => {
@@ -28,5 +29,21 @@ describe('isSubtractionAllowed', () => {
   it('rejects a negative or non-integer exponent', () => {
     expect(isSubtractionAllowed(100, { prime: 7, exponent: -1 })).toBe(false);
     expect(isSubtractionAllowed(100, { prime: 7, exponent: 1.5 })).toBe(false);
+  });
+});
+
+const asPlayer = (currentPlayer: number) => ({ ctx: makeCtx({ currentPlayer }) });
+
+describe('prime-exponentials end of game', () => {
+  it.each([0, 1])('ends the game for the mover (player %i) when the pile is cleared', player => {
+    const outcome = moves.subtractPrimeExponent.apply(8, asPlayer(player), { prime: 2, exponent: 3 });
+    expect(outcome.gameEnd).toEqual({ winnerIndex: player });
+    expect(outcome.isTurnEnd).toBeUndefined();
+  });
+
+  it('passes the turn while stones remain', () => {
+    const outcome = moves.subtractPrimeExponent.apply(20, asPlayer(0), { prime: 2, exponent: 3 });
+    expect(outcome.gameEnd).toBeUndefined();
+    expect(outcome.isTurnEnd).toBe(true);
   });
 });

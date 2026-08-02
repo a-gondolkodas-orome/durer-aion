@@ -41,7 +41,7 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const moves = {
+export const moves = {
   subtractDigit: {
     validate: (board: Board, _, digit: number) => isSubtractableDigit(board, digit),
     apply: (board: Board, { ctx }: { ctx: Ctx }, digit: number): MoveOutcome<Board> => {
