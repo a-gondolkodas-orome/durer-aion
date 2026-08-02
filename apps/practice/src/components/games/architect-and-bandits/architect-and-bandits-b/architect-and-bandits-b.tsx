@@ -1,5 +1,5 @@
 import { cloneDeep } from 'lodash';
-import { strategyGameFactory, type Ctx, type Events } from '../../../strategy-game-factory';
+import { strategyGameFactory, type Ctx, type MoveOutcome } from '../../../strategy-game-factory';
 import {
   type Board, ARCHITECT, BANDITS, isArchitectStepAllowed, isDestructionAllowed
 } from '../helpers';
@@ -22,11 +22,13 @@ const generateStartBoard = (): Board => {
 // The architect may walk this far along the wall each day.
 export const KM_PER_DAY = 50;
 
-const moves = {
+export const moves = {
   moveArchitect: {
     validate: (board: Board, { ctx }: { ctx: Ctx }, targetVertex: number) =>
       ctx.currentPlayer === ARCHITECT && isArchitectStepAllowed(board, targetVertex, KM_PER_DAY),
-    legacyApply: (board: Board, _, targetVertex) => {
+    // The architect keeps walking within the day, so the turn stays open until
+    // `endDay`.
+    apply: (board: Board, _, targetVertex): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard.architectPosition = targetVertex;
       nextBoard.towers[targetVertex] = true;
@@ -37,23 +39,21 @@ const moves = {
 
   endDay: {
     validate: (_board: Board, { ctx }: { ctx: Ctx }) => ctx.currentPlayer === ARCHITECT,
-    legacyApply: (board: Board, { events }: { events: Events }) => {
+    apply: (board: Board): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard.kmUsedToday = 0;
       if (board.day === 4) {
         const allTowers = nextBoard.towers.every(t => t);
-        events.endGame(allTowers ? 0 : 1);
-        return { nextBoard };
+        return { nextBoard, gameEnd: { winnerIndex: allTowers ? ARCHITECT : BANDITS } };
       }
-      events.endTurn();
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   },
 
   destroyTower: {
     validate: (board: Board, { ctx }: { ctx: Ctx }, vertex: number) =>
       ctx.currentPlayer === BANDITS && isDestructionAllowed(board, vertex),
-    legacyApply: (board: Board, _, vertex) => {
+    apply: (board: Board, _, vertex): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard.towers[vertex] = false;
       return { nextBoard, autoEndOfTurn: true };
@@ -61,13 +61,12 @@ const moves = {
   },
 
   startNextDay: {
-    legacyApply: (board: Board, { events }: { events: Events }) => {
+    apply: (board: Board): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard.day += 1;
       nextBoard.kmUsedToday = 0;
       nextBoard.towers[nextBoard.architectPosition] = true;
-      events.endTurn();
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   }
 };

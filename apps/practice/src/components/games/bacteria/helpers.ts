@@ -1,5 +1,5 @@
 import { cloneDeep, last } from "lodash";
-import type { Events } from '../../strategy-game-factory';
+import type { Ctx, MoveOutcome } from '../../strategy-game-factory';
 
 export type Board = { bacteria: number[][], goals: number[] };
 
@@ -99,11 +99,10 @@ export const isAttackAllowed = (board: Board, { type, row, col }: AttackMove): b
 const attackerMove = (type: MoveType) => ({
   validate: (board: Board, { ctx }, { row, col }) =>
     ctx.currentPlayer === ATTACKER && isAttackAllowed(board, { type, row, col }),
-  legacyApply: (board: Board, { events }: { events: Events }, { row, col }) => {
+  apply: (board: Board, { ctx }: { ctx: Ctx }, { row, col }): MoveOutcome<Board> => {
     const { nextBoard, reachedGoal } = applyAttackMove(board, { type, row, col });
-    events.endTurn();
-    if (reachedGoal) events.endGame();
-    return { nextBoard };
+    if (reachedGoal) return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
+    return { nextBoard, isTurnEnd: true };
   }
 });
 
@@ -111,17 +110,14 @@ export const moves = {
   defend: {
     validate: (board: Board, { ctx }, cell) =>
       ctx.currentPlayer === DEFENDER && hasBacterium(board, cell),
-    legacyApply: (board: Board, { events }: { events: Events }, { row, col }) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, { row, col }): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
-
       nextBoard.bacteria[row][col] -= 1;
-      events.endTurn();
 
       if (areAllBacteriaRemoved(nextBoard.bacteria)) {
-        events.endGame();
+        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }
-
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   },
   shiftRight: attackerMove('shiftRight'),

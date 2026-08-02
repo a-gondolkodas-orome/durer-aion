@@ -1,10 +1,10 @@
 import {
   distanceFromDangerousAttackZone, isDangerous, moves, applyAttackMove,
-  hasBacterium, isAttackAllowed, type MoveType
+  hasBacterium, isAttackAllowed, ATTACKER, DEFENDER, type MoveType
 } from "./helpers";
 import { legalAttackMoves } from "./bot-strategy";
 import { reverse } from 'lodash';
-import { makeEvents } from '../../../test-utils';
+import { makeCtx } from '../../../test-utils';
 
 describe('distanceFromDangerousAttackZone', () => {
   it('returns 0 for winning attack position', () => {
@@ -55,6 +55,9 @@ describe('isDangerous', () => {
 });
 
 describe('moves', () => {
+  const meta = { ctx: makeCtx({ currentPlayer: DEFENDER }) };
+  const attackerMeta = { ctx: makeCtx({ currentPlayer: ATTACKER }) };
+
   it('defend move only removes one bacteria', () => {
     const bacteria = reverse([
       [2, 0, 0],
@@ -62,10 +65,9 @@ describe('moves', () => {
       [0, 0, 0]
     ]);
     const board = { bacteria, goals: [1] };
-    const events = makeEvents();
-    const { nextBoard } = moves.defend.legacyApply(board, { events }, { row: 2, col: 0 });
-    expect(nextBoard.bacteria[2][0]).toEqual(1);
-    expect(events.endGame).not.toHaveBeenCalled();
+    const outcome = moves.defend.apply(board, meta, { row: 2, col: 0 });
+    expect(outcome.nextBoard.bacteria[2][0]).toEqual(1);
+    expect(outcome.gameEnd).toBeUndefined();
   });
 
   it('defend move ends game if no more bacteria', () => {
@@ -75,9 +77,8 @@ describe('moves', () => {
       [0, 0, 0]
     ]);
     const board = { bacteria, goals: [1] };
-    const events = makeEvents();
-    moves.defend.legacyApply(board, { events }, { row: 2, col: 0 });
-    expect(events.endGame).toHaveBeenCalled();
+    const outcome = moves.defend.apply(board, meta, { row: 2, col: 0 });
+    expect(outcome.gameEnd).toEqual({ winnerIndex: DEFENDER });
   });
 
   // The real game (moves) and the bot's look-ahead (applyAttackMove) must apply
@@ -97,13 +98,12 @@ describe('moves', () => {
     const types: MoveType[] = ['shiftRight', 'shiftLeft', 'jump', 'spread'];
     for (const type of types) {
       const { nextBoard, reachedGoal } = applyAttackMove(makeBoard(), { type, row: 2, col: 1 });
-      const events = makeEvents();
-      const viaMoves = moves[type].legacyApply(makeBoard(), { events }, { row: 2, col: 1 });
+      const viaMoves = moves[type].apply(makeBoard(), attackerMeta, { row: 2, col: 1 });
       expect(viaMoves.nextBoard.bacteria).toEqual(nextBoard.bacteria);
       if (reachedGoal) {
-        expect(events.endGame).toHaveBeenCalled();
+        expect(viaMoves.gameEnd).toEqual({ winnerIndex: ATTACKER });
       } else {
-        expect(events.endGame).not.toHaveBeenCalled();
+        expect(viaMoves.gameEnd).toBeUndefined();
       }
     }
   });

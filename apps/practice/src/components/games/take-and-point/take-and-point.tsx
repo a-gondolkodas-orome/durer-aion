@@ -1,4 +1,4 @@
-import { strategyGameFactory, type Ctx, type Events } from '../../strategy-game-factory';
+import { strategyGameFactory, type Ctx, type MoveOutcome } from '../../strategy-game-factory';
 import { BoardClient } from './board-client';
 import {
   type Board, applyRemoval, generateStartBoard, isTerminal, nonEmptyIndices,
@@ -6,17 +6,18 @@ import {
 } from './helpers';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 
-const moves = {
+export const moves = {
   // Take `amount` stones from a pointed pile. The turn does NOT end here: the
   // same player then points at piles for the other player (see `pointPiles`).
   takeStones: {
     validate: (board: Board, _, index: number, amount: number) =>
       isRemovalAllowed(board, index, amount),
-    legacyApply: (board: Board, { ctx, events }: { ctx: Ctx; events: Events }, index: number, amount: number) => {
+    apply: (
+      board: Board, { ctx }: { ctx: Ctx }, index: number, amount: number
+    ): MoveOutcome<Board> => {
       const nextBoard: Board = { piles: applyRemoval(board.piles, index, amount), pointed: null };
       if (isTerminal(nextBoard)) {
-        // Whoever takes the last stone wins.
-        events.endGame(ctx.currentPlayer!);
+        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }
       return { nextBoard };
     }
@@ -25,11 +26,8 @@ const moves = {
   // Point at the piles the other player will choose from, then hand over the turn.
   pointPiles: {
     validate: (board: Board, _, indices: number[]) => isPointingAllowed(board, indices),
-    legacyApply: (board: Board, { events }: { ctx: Ctx; events: Events }, indices: number[]) => {
-      const nextBoard: Board = { piles: board.piles, pointed: indices };
-      events.endTurn();
-      return { nextBoard };
-    }
+    apply: (board: Board, _, indices: number[]): MoveOutcome<Board> =>
+      ({ nextBoard: { piles: board.piles, pointed: indices }, isTurnEnd: true })
   }
 };
 

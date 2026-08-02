@@ -1,5 +1,5 @@
 import {
-  strategyGameFactory, type Events, type StrategyArgs, type BoardClientProps, GameBoard
+  strategyGameFactory, type Ctx, type MoveOutcome, type StrategyArgs, type BoardClientProps, GameBoard
 } from '../../strategy-game-factory';
 import { random } from 'lodash';
 import { useTranslation } from '../../../language';
@@ -37,20 +37,18 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const moves = {
+export const moves = {
   add1: {
-    legacyApply: (board: Board, { events }: { events: Events }) => {
-      events.endTurn();
-      return { nextBoard: [board[0], board[1] + 1] }
-    }
+    apply: (board: Board): MoveOutcome<Board> =>
+      ({ nextBoard: [board[0], board[1] + 1], isTurnEnd: true })
   },
   subtract: {
-    legacyApply: (board: Board, { events }: { events: Events }) => {
-      events.endTurn();
+    apply: (board: Board, { ctx }: { ctx: Ctx }): MoveOutcome<Board> => {
+      const nextBoard = [board[0] - board[1], board[1]];
       if (board[0] - board[1] <= 0) {
-        events.endGame();
+        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }
-      return { nextBoard: [board[0] - board[1], board[1]] };
+      return { nextBoard, isTurnEnd: true };
     }
   }
 };

@@ -1,4 +1,4 @@
-import { strategyGameFactory, type Ctx, type Events } from '../../strategy-game-factory';
+import { strategyGameFactory, type Ctx, type MoveOutcome } from '../../strategy-game-factory';
 import { BoardClient } from './board-client';
 import {
   type Board, LINE, CIRCLE,
@@ -15,14 +15,12 @@ export const moves = {
   shadeEdge: {
     validate: (board: Board, { ctx }: { ctx: Ctx }, edgeId: number) =>
       ctx.currentPlayer === LINE && isShadeAllowed(board, edgeId),
-    legacyApply: (board: Board, { events }: { events: Events }, edgeId: number) => {
+    apply: (board: Board, _, edgeId: number): MoveOutcome<Board> => {
       const nextBoard = applyShade(board, edgeId);
       if (isLineWin(nextBoard)) {
-        events.endGame(LINE);
-      } else {
-        events.endTurn();
+        return { nextBoard, gameEnd: { winnerIndex: LINE } };
       }
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   },
   // Circle player drops a circle into one triangle; they win once every triangle
@@ -30,14 +28,12 @@ export const moves = {
   placeCircle: {
     validate: (board: Board, { ctx }: { ctx: Ctx }, triangleId: number) =>
       ctx.currentPlayer === CIRCLE && isCirclePlacementAllowed(board, triangleId),
-    legacyApply: (board: Board, { events }: { events: Events }, triangleId: number) => {
+    apply: (board: Board, _, triangleId: number): MoveOutcome<Board> => {
       const nextBoard = applyCircle(board, triangleId);
       if (isCircleWin(nextBoard)) {
-        events.endGame(CIRCLE);
-      } else {
-        events.endTurn();
+        return { nextBoard, gameEnd: { winnerIndex: CIRCLE } };
       }
-      return { nextBoard };
+      return { nextBoard, isTurnEnd: true };
     }
   }
 };

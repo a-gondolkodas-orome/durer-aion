@@ -1,4 +1,4 @@
-import { strategyGameFactory, type Ctx, type Events } from '../../strategy-game-factory';
+import { strategyGameFactory, type Ctx, type MoveOutcome } from '../../strategy-game-factory';
 import { BoardClient } from './board-client';
 import {
   type Board,
@@ -17,41 +17,38 @@ const PLY_CAP = 200;
 
 // Apply a resulting position: end the game if someone reached their majority or
 // the 200-ply cap is hit (blue wins on the cap), otherwise pass the turn.
-const finalize = (
-  nextCells: Board['cells'],
-  { ctx, events }: { ctx: Ctx; events: Events }
-): { nextBoard: Board } => {
+const finalize = (nextCells: Board['cells'], ctx: Ctx): MoveOutcome<Board> => {
   const nextBoard: Board = { cells: nextCells };
   const winner = majorityWinner(nextCells);
   if (winner !== null) {
-    events.endGame(winner);
-  } else if (ctx.moveCount + 1 >= PLY_CAP) {
-    events.endGame(1); // blue wins if neither side reaches their majority in time
-  } else {
-    events.endTurn();
+    return { nextBoard, gameEnd: { winnerIndex: winner } };
   }
-  return { nextBoard };
+  if (ctx.moveCount + 1 >= PLY_CAP) {
+    // blue wins if neither side reaches their majority in time
+    return { nextBoard, gameEnd: { winnerIndex: 1 } };
+  }
+  return { nextBoard, isTurnEnd: true };
 };
 
 // Which discs a player may touch depends on their colour, so both validators
 // read `ctx.currentPlayer`. Passing is always available, so it needs no
 // validator.
-const moves = {
+export const moves = {
   moveDisc: {
     validate: (board: Board, { ctx }: { ctx: Ctx }, from: number, to: number) =>
       isDiscMoveAllowed(board.cells, ctx.currentPlayer!, from, to),
-    legacyApply: (board: Board, meta: { ctx: Ctx; events: Events }, from: number, to: number) =>
-      finalize(applyMove(board.cells, meta.ctx.currentPlayer!, { type: 'move', from, to }), meta)
+    apply: (board: Board, { ctx }: { ctx: Ctx }, from: number, to: number) =>
+      finalize(applyMove(board.cells, ctx.currentPlayer!, { type: 'move', from, to }), ctx)
   },
   placeDisc: {
     validate: (board: Board, { ctx }: { ctx: Ctx }, at: number) =>
       isPlacementAllowed(board.cells, ctx.currentPlayer!, at),
-    legacyApply: (board: Board, meta: { ctx: Ctx; events: Events }, at: number) =>
-      finalize(applyMove(board.cells, meta.ctx.currentPlayer!, { type: 'place', to: at }), meta)
+    apply: (board: Board, { ctx }: { ctx: Ctx }, at: number) =>
+      finalize(applyMove(board.cells, ctx.currentPlayer!, { type: 'place', to: at }), ctx)
   },
   pass: {
-    legacyApply: (board: Board, meta: { ctx: Ctx; events: Events }) =>
-      finalize([...board.cells], meta)
+    apply: (board: Board, { ctx }: { ctx: Ctx }) =>
+      finalize([...board.cells], ctx)
   }
 };
 
