@@ -241,8 +241,8 @@ chaining bugs: passing a stale board to a chained move throws in development
 [AGENTS.md § Game state architecture: synchronous store outside
 React](AGENTS.md#game-state-architecture-synchronous-store-outside-react).
 
-In `gameplay.moves`, each entry is either a legacy move function itself
-(shorthand) or a long-form object `{ apply, validate? }` (preferred) /
+In `gameplay.moves`, each entry is an object pairing an optional `validate`
+with exactly one apply function: `{ apply, validate? }` (preferred) or
 `{ legacyApply, validate? }` (legacy):
 
 ```ts
@@ -275,7 +275,8 @@ bound) for the `BoardClient`'s `disabled` state. Full contract in
   UI state to a successful move, see `cube-coloring`). Bot and auto
   end-of-turn dispatches failing `validate` throw in development, and warn +
   record an `illegal-move` analytics event + no-op in production.
-- A shorthand move (plain function) has no argument validation — fully opt-in.
+- `validate` is optional: a move without one is always accepted, so this is
+  fully opt-in and moves with trivial legality simply omit it.
 - Keep the "whose turn is it" check out of `validate` — `isAllowed` folds
   `ctx.isClientMoveAllowed` in for you.
 - `isAllowed` is not for bots: during the bot's turn `isClientMoveAllowed` is
@@ -328,10 +329,10 @@ framework.
   getPlayerStepDescription
 
 `events` is an object that will contain the following (extendable):
-- `endTurn`: a function (legacy `legacyApply`/shorthand moves only — outcome-returning moves
+- `endTurn`: a function (legacy `legacyApply` moves only — outcome-returning moves
   return `isTurnEnd: true` instead)
 - `endGame`: a function with optional winnerIndex specified, if not, last player
-  to move is the winner (legacy `legacyApply`/shorthand moves only — outcome-returning moves
+  to move is the winner (legacy `legacyApply` moves only — outcome-returning moves
   return `gameEnd: { winnerIndex }` with an explicit winner instead)
 - `setTurnState`: a function to set `turnState` — still current for
   `BoardClient` components that keep mid-turn UI state in `ctx.turnState`

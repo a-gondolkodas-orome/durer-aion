@@ -45,7 +45,9 @@ const say = (next: number, { ctx, events }: { ctx: Ctx, events: Events }) => {
 };
 
 const moves = {
-  increment: (board: Board, meta: { ctx: Ctx, events: Events }) => say(board + 1, meta),
+  increment: {
+    legacyApply: (board: Board, meta: { ctx: Ctx, events: Events }) => say(board + 1, meta)
+  },
   double: {
     // Doubling nothing says nothing, so the opening move can only be x+1 = 1.
     validate: (board: Board) => board >= 1,

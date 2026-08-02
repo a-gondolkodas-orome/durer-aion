@@ -62,13 +62,15 @@ const moves = {
       return { nextBoard, autoEndOfTurn: true };
     }
   },
-  startNextDay: (board: Board, { events }: { events: Events }) => {
-    const nextBoard = cloneDeep(board);
-    nextBoard.day += 1;
-    nextBoard.kmUsedToday = 0;
-    nextBoard.towers[nextBoard.architectPosition] = true;
-    events.endTurn();
-    return { nextBoard };
+  startNextDay: {
+    legacyApply: (board: Board, { events }: { events: Events }) => {
+      const nextBoard = cloneDeep(board);
+      nextBoard.day += 1;
+      nextBoard.kmUsedToday = 0;
+      nextBoard.towers[nextBoard.architectPosition] = true;
+      events.endTurn();
+      return { nextBoard };
+    }
   }
 };
 

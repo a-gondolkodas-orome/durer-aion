@@ -3,7 +3,7 @@ import { render, fireEvent, act } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { strategyGameFactory, type StrategyGameConfig } from './strategy-game-factory';
 import type {
-  BoardClientProps, Ctx, Events, Gameplay, GameMoves, MoveDefinition, StrategyArgs
+  BoardClientProps, Ctx, Events, Gameplay, MoveDefinition, StrategyArgs
 } from './types';
 
 type Board = string[];
@@ -28,9 +28,11 @@ const CtxAwareBoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => 
 
 const defaultGameplay: Gameplay<Board> = {
   moves: {
-    mainMove: (board: Board, { events }: { events: Events }) => {
-      events.endTurn();
-      return { nextBoard: board };
+    mainMove: {
+      legacyApply: (board: Board, { events }: { events: Events }) => {
+        events.endTurn();
+        return { nextBoard: board };
+      }
     }
   }
 };
@@ -130,12 +132,14 @@ describe('strategyGameFactory endOfTurnMove', () => {
 
   it('calls endOfTurnMove after 750ms when a move returns autoEndOfTurn: true', () => {
     const autoMove = vi.fn((board: Board) => ({ nextBoard: board }));
-    const moves: GameMoves<Board> = {
-      mainMove: (board, { events }: { events: Events }) => {
-        events.endTurn();
-        return { nextBoard: board, autoEndOfTurn: true };
+    const moves: Gameplay<Board>['moves'] = {
+      mainMove: {
+        legacyApply: (board, { events }: { events: Events }) => {
+          events.endTurn();
+          return { nextBoard: board, autoEndOfTurn: true };
+        }
       },
-      autoMove
+      autoMove: { legacyApply: autoMove }
     };
 
     const { getByTestId } = renderGame(minimalConfig({ moves, endOfTurnMove: 'autoMove' }));
@@ -151,12 +155,14 @@ describe('strategyGameFactory endOfTurnMove', () => {
 
   it('does not call endOfTurnMove when a move does not return autoEndOfTurn', () => {
     const autoMove = vi.fn((board: Board) => ({ nextBoard: board }));
-    const moves: GameMoves<Board> = {
-      mainMove: (board, { events }: { events: Events }) => {
-        events.endTurn();
-        return { nextBoard: board };
+    const moves: Gameplay<Board>['moves'] = {
+      mainMove: {
+        legacyApply: (board, { events }: { events: Events }) => {
+          events.endTurn();
+          return { nextBoard: board };
+        }
       },
-      autoMove
+      autoMove: { legacyApply: autoMove }
     };
 
     const { getByTestId } = renderGame(minimalConfig({ moves, endOfTurnMove: 'autoMove' }));
@@ -195,9 +201,11 @@ describe('undo', () => {
       );
       const gameplay: Gameplay<Board> = {
         moves: {
-          mainMove: (board: Board, { events }: { events: Events }) => {
-            events.endTurn();
-            return { nextBoard: [...board, 'moved'] };
+          mainMove: {
+            legacyApply: (board: Board, { events }: { events: Events }) => {
+              events.endTurn();
+              return { nextBoard: [...board, 'moved'] };
+            }
           }
         }
       };
@@ -236,13 +244,17 @@ describe('undo', () => {
       // A turn with two moves before endTurn: undo must roll moveCount back by both.
       const gameplay: Gameplay<Board> = {
         moves: {
-          mainMove: (board: Board, { events }: { events: Events }) => {
-            events.setTurnState('step2');
-            return { nextBoard: board };
+          mainMove: {
+            legacyApply: (board: Board, { events }: { events: Events }) => {
+              events.setTurnState('step2');
+              return { nextBoard: board };
+            }
           },
-          secondMove: (board: Board, { events }: { events: Events }) => {
-            events.endTurn();
-            return { nextBoard: board };
+          secondMove: {
+            legacyApply: (board: Board, { events }: { events: Events }) => {
+              events.endTurn();
+              return { nextBoard: board };
+            }
           }
         }
       };
@@ -294,9 +306,11 @@ describe('undo', () => {
     it('undo is enabled mid-turn (after first move but before endTurn)', () => {
       const gameplay: Gameplay<Board> = {
         moves: {
-          mainMove: (board: Board, { events }: { events: Events }) => {
-            events.setTurnState('step2');
-            return { nextBoard: board };
+          mainMove: {
+            legacyApply: (board: Board, { events }: { events: Events }) => {
+              events.setTurnState('step2');
+              return { nextBoard: board };
+            }
           }
         }
       };
@@ -362,13 +376,17 @@ const gameEndingConfig = () => makeConfig({
   ),
   gameplay: {
     moves: {
-      endWin: (board: Board, { ctx, events }: { ctx: Ctx; events: Events }) => {
-        events.endGame(ctx.currentPlayer);
-        return { nextBoard: board };
+      endWin: {
+        legacyApply: (board: Board, { ctx, events }: { ctx: Ctx; events: Events }) => {
+          events.endGame(ctx.currentPlayer);
+          return { nextBoard: board };
+        }
       },
-      endLose: (board: Board, { ctx, events }: { ctx: Ctx; events: Events }) => {
-        events.endGame(ctx.currentPlayer === 0 ? 1 : 0);
-        return { nextBoard: board };
+      endLose: {
+        legacyApply: (board: Board, { ctx, events }: { ctx: Ctx; events: Events }) => {
+          events.endGame(ctx.currentPlayer === 0 ? 1 : 0);
+          return { nextBoard: board };
+        }
       }
     }
   }
@@ -525,9 +543,11 @@ describe('move validate enforcement', () => {
           legacyApply: (board: Board, _meta: { events: Events }, arg: string) => ({ nextBoard: [...board, arg] }),
           validate: (_board: Board, _meta: { ctx: Ctx }, arg: string) => arg === 'ok'
         },
-        handOver: (board: Board, { events }: { events: Events }) => {
-          events.endTurn();
-          return { nextBoard: board };
+        handOver: {
+          legacyApply: (board: Board, { events }: { events: Events }) => {
+            events.endTurn();
+            return { nextBoard: board };
+          }
         }
       }
     },
@@ -586,8 +606,8 @@ describe('move validate enforcement', () => {
     expect(getByTestId('can-bad').textContent).toBe('false');
   });
 
-  it('runs a plain-function (shorthand) move unchanged — no validator', () => {
-    // defaultGameplay uses the function shorthand, so mainMove applies + endTurn as before
+  it('dispatches a move with no validator unconditionally', () => {
+    // defaultGameplay's mainMove is legacyApply-only, so every dispatch applies
     const { getByTestId } = renderGame(ctxAwareConfig());
     fireEvent.click(getByTestId('role-btn-0'));
     fireEvent.click(getByTestId('move-btn'));
@@ -810,9 +830,11 @@ describe('outcome-returning moves (apply)', () => {
   it('legacy and outcome-returning moves coexist within one game', () => {
     const gameplay: Gameplay<Board> = {
       moves: {
-        legacyMove: (board: Board, { events }: { events: Events }) => {
-          events.endTurn();
-          return { nextBoard: [...board, 'legacy'] };
+        legacyMove: {
+          legacyApply: (board: Board, { events }: { events: Events }) => {
+            events.endTurn();
+            return { nextBoard: [...board, 'legacy'] };
+          }
         },
         v2Move: { apply: (board: Board) => ({ nextBoard: [...board, 'v2'], isTurnEnd: true }) }
       }
@@ -837,13 +859,15 @@ describe('outcome-returning moves (apply)', () => {
     // old isGameEnd did) — the engine must not interpret them as v2 outcomes.
     const gameplay: Gameplay<Board> = {
       moves: {
-        mainMove: (board: Board) => {
-          // a non-fresh object dodges the excess-property check, like real
-          // legacy code returning ad-hoc extra fields did
-          const strayOutcome = {
-            nextBoard: [...board, 'x'], isTurnEnd: true, gameEnd: { winnerIndex: 0 }
-          };
-          return strayOutcome;
+        mainMove: {
+          legacyApply: (board: Board) => {
+            // a non-fresh object dodges the excess-property check, like real
+            // legacy code returning ad-hoc extra fields did
+            const strayOutcome = {
+              nextBoard: [...board, 'x'], isTurnEnd: true, gameEnd: { winnerIndex: 0 }
+            };
+            return strayOutcome;
+          }
         }
       }
     };

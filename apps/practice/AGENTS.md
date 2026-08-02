@@ -94,7 +94,8 @@ omitted on a variant, the default variant's `botStrategy` is used as fallback.
 If multiple variants are provided, exactly one must be `isDefault: true`. A
 single-entry array needs no `isDefault` flag.
 
-**`moves`** — each move is one of three shapes, all mixable within one game:
+**`moves`** — every move is an object pairing an optional `validate` with
+exactly one apply function. The two apply contracts are mixable within one game:
 
 - **`{ apply, validate? }` (preferred, use for new games)** — an
   outcome-returning move `(board, { ctx }, ...args) => MoveOutcome`. It gets no
@@ -108,9 +109,9 @@ single-entry array needs no `isDefault` flag.
   `autoEndOfTurn: true` schedules `endOfTurnMove`. Being `events`-free makes the
   move a pure reducer — the piece a future authoritative competition server
   and the planned external state store both need (see issue #313).
-- **legacy plain move function** `(board, { ctx, events }, ...args) =>
-  { nextBoard }` (shorthand), or **legacy `{ legacyApply, validate? }`** — the
-  move calls `events.endTurn()` / `events.endGame(winnerIndex?)` imperatively
+- **`{ legacyApply, validate? }` (legacy)** — `legacyApply` has the signature
+  `(board, { ctx, events }, ...args) => { nextBoard }` and calls
+  `events.endTurn()` / `events.endGame(winnerIndex?)` imperatively
   (bare `endGame()` credits the mover). Existing games migrate to the
   outcome-returning `apply` one by one; don't add new legacy moves.
 
@@ -123,9 +124,9 @@ enforced by `validate` (below) and/or the `BoardClient`'s `disabled` gating.
 `apply`/`legacyApply`. When
 present, the engine rejects any dispatch whose args fail it (in dev it throws
 loudly to surface the bug; in prod it warns, fires an `illegal-move` analytics
-event, and no-ops so a stray call cannot corrupt the board). The function
-shorthand means "always legal", so this is fully opt-in and games that predate
-it keep working unchanged. The validator is the **single source of truth** for
+event, and no-ops so a stray call cannot corrupt the board). Omitting it means
+"always legal", so this is fully opt-in and moves whose legality is trivial
+simply leave it out. The validator is the **single source of truth** for
 legality: it drives the engine's enforcement, and — being React-free — a
 possible future server-side authoritative check can reuse the same predicate.
 Do **not** put the "whose turn is it" check (`ctx.isClientMoveAllowed`) inside

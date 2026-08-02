@@ -53,12 +53,14 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 };
 
 const moves = {
-  take1: (board: Board, { events }: { events: Events }) => {
-    events.endTurn();
-    if (board === 1) {
-      events.endGame();
+  take1: {
+    legacyApply: (board: Board, { events }: { events: Events }) => {
+      events.endTurn();
+      if (board === 1) {
+        events.endGame();
+      }
+      return { nextBoard: board - 1 }
     }
-    return { nextBoard: board - 1 }
   },
   halve: {
     // Half may only be taken when the pile is even; taking one is always legal.

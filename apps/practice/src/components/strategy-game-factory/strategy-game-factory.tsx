@@ -10,7 +10,7 @@ import { useLocation } from 'react-router';
 import { useGameStats } from './hooks/use-game-stats';
 import { trackEvent } from '../../tracking';
 import type {
-  Mode, Ctx, Events, MoveOutcome, NormalizedMove, Gameplay, GameMoves,
+  Mode, Ctx, Events, MoveOutcome, EngineMove, Gameplay, GameMoves,
   BoardClientProps, Variant as DisplayVariant, VariantInput
 } from './types';
 import { resolveVariants } from './helpers/resolve-variants';
@@ -45,11 +45,8 @@ export const strategyGameFactory = <TBoard,>({
   const { rule, roleLabels, getPlayerStepDescription } = presentation;
   const { moves, endOfTurnMove } = gameplay;
   const { defaultVariantIndex, defaultVariant, resolvedVariants } = resolveVariants(variants);
-  // Normalize the shorthand (plain function = legacy move with no validator)
-  // so the rest of the engine deals with a single long-form shape.
-  const normalizedMoves: Record<string, NormalizedMove<TBoard>> =
-    mapValues(moves, (m) => typeof m === 'function' ? { legacyApply: m } : m);
-  Object.entries(normalizedMoves).forEach(([name, def]) => {
+  const moveDefinitions: Record<string, EngineMove<TBoard>> = moves;
+  Object.entries(moveDefinitions).forEach(([name, def]) => {
     if (!!def.legacyApply === !!def.apply) {
       const message = `strategyGameFactory: move ${name} must define exactly one of apply/legacyApply`;
       if (import.meta.env.DEV) {
@@ -146,7 +143,7 @@ export const strategyGameFactory = <TBoard,>({
           + 'pass the latest nextBoard when chaining moves within a turn');
       }
       const transition = reduceMove(
-        store.getState(), normalizedMoves[name]!, name, args, resolvedPlayerNames
+        store.getState(), moveDefinitions[name]!, name, args, resolvedPlayerNames
       );
       if (transition.illegal) {
         reportIllegalMove(name, moveBoard, args);
@@ -236,7 +233,7 @@ export const strategyGameFactory = <TBoard,>({
       }
     };
 
-    wrappedGameMoves = mapValues(normalizedMoves, (_def, name) => {
+    wrappedGameMoves = mapValues(moveDefinitions, (_def, name) => {
       const wrapped: GameMoves<TBoard>[string] = (moveBoard: TBoard, ...args: unknown[]) =>
         dispatchMove(name, moveBoard, args);
       return wrapped;
@@ -250,7 +247,7 @@ export const strategyGameFactory = <TBoard,>({
     // Bots and the auto `endOfTurnMove` dispatch use `wrappedGameMoves` instead:
     // there an illegal move is a bug, and the validator fails loudly (see
     // `reportIllegalMove`).
-    const clientGameMoves: GameMoves<TBoard> = mapValues(normalizedMoves, ({ validate }, name) => {
+    const clientGameMoves: GameMoves<TBoard> = mapValues(moveDefinitions, ({ validate }, name) => {
       const isAllowed = (moveBoard: TBoard, ...args: unknown[]) => {
         const liveCtx = buildCtx(store.getState(), resolvedPlayerNames);
         return liveCtx.isClientMoveAllowed

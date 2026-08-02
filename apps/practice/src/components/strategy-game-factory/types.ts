@@ -55,21 +55,21 @@ export type PureMoveFunction<TBoard> = (
 type MoveValidator<TBoard> = (
   board: TBoard, meta: { ctx: Ctx }, ...args: any[]
 ) => boolean
-// A move is either a legacy plain function (shorthand — always accepted by the
-// engine), a long-form `legacyApply` object pairing it with an optional
-// legality validator, or — the preferred contract for new games — an
-// outcome-returning `apply` that gets no `events` and instead returns
-// turn/game consequences as data. The distinct key is the contract marker: the
-// engine interprets the returned MoveOutcome only for `apply` moves, and a
-// migrated move that still touches `events` fails to compile.
+// Every move is an object pairing an optional legality validator with exactly
+// one apply function: either a legacy `legacyApply` or — the preferred contract
+// for new games — an outcome-returning `apply` that gets no `events` and
+// instead returns turn/game consequences as data. The distinct key is the
+// contract marker: the engine interprets the returned MoveOutcome only for
+// `apply` moves, and a migrated move that still touches `events` fails to
+// compile.
 export type MoveDefinition<TBoard> =
-  | MoveFunction<TBoard>
   | { legacyApply: MoveFunction<TBoard>; validate?: MoveValidator<TBoard> }
   | { apply: PureMoveFunction<TBoard>; validate?: MoveValidator<TBoard> }
-// Engine-internal normalized move shape (not re-exported from the barrel):
-// the shorthand folded into long form, carrying exactly one of
-// apply/legacyApply (enforced at factory time).
-export type NormalizedMove<TBoard> = {
+// Engine-internal move shape (not re-exported from the barrel): the union above
+// collapsed to one object with both apply keys optional, which is what the
+// reducer's truthiness branch reads. Exactly one of them is present — enforced
+// at factory time, since plain JS callers can bypass MoveDefinition.
+export type EngineMove<TBoard> = {
   legacyApply?: MoveFunction<TBoard>
   apply?: PureMoveFunction<TBoard>
   validate?: MoveValidator<TBoard>

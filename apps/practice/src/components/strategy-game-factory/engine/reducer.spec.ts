@@ -1,6 +1,6 @@
 import { reduceMove } from './reducer';
 import { createInitialCoreState, type CoreState } from './store';
-import type { Events, NormalizedMove } from '../types';
+import type { Events, EngineMove } from '../types';
 
 type Board = string[];
 
@@ -14,7 +14,7 @@ const playState = (overrides: Partial<CoreState<Board>> = {}): CoreState<Board> 
   ...overrides
 });
 
-const reduce = (state: CoreState<Board>, def: NormalizedMove<Board>, ...args: unknown[]) =>
+const reduce = (state: CoreState<Board>, def: EngineMove<Board>, ...args: unknown[]) =>
   reduceMove(state, def, 'testMove', args, NAMES);
 
 describe('reduceMove — legacy (events-based) contract equivalence', () => {
@@ -22,7 +22,7 @@ describe('reduceMove — legacy (events-based) contract equivalence', () => {
     // The one real trap of moving from async React setState to a synchronous
     // reducer: ~40 legacy games call endTurn() first, then a bare endGame(),
     // which must still resolve to the player at move start.
-    const def: NormalizedMove<Board> = {
+    const def: EngineMove<Board> = {
       legacyApply: (board, { events }: { events: Events }) => {
         events.endTurn();
         events.endGame();
@@ -36,7 +36,7 @@ describe('reduceMove — legacy (events-based) contract equivalence', () => {
   });
 
   it('endGame(winner) followed by endTurn() keeps the winner intact (thief-sheriff shape)', () => {
-    const def: NormalizedMove<Board> = {
+    const def: EngineMove<Board> = {
       legacyApply: (board, { events }: { events: Events }) => {
         events.endGame(1);
         events.endTurn();
@@ -50,7 +50,7 @@ describe('reduceMove — legacy (events-based) contract equivalence', () => {
   });
 
   it('endTurn() flips the player and closes the turn', () => {
-    const def: NormalizedMove<Board> = {
+    const def: EngineMove<Board> = {
       legacyApply: (board, { events }: { events: Events }) => {
         events.endTurn();
         return { nextBoard: [...board, 'x'] };
@@ -64,7 +64,7 @@ describe('reduceMove — legacy (events-based) contract equivalence', () => {
   });
 
   it('setTurnState writes turnState', () => {
-    const def: NormalizedMove<Board> = {
+    const def: EngineMove<Board> = {
       legacyApply: (board, { events }: { events: Events }) => {
         events.setTurnState('stage2');
         return { nextBoard: board };
@@ -74,7 +74,7 @@ describe('reduceMove — legacy (events-based) contract equivalence', () => {
   });
 
   it('legacy autoEndOfTurn passes through', () => {
-    const def: NormalizedMove<Board> = {
+    const def: EngineMove<Board> = {
       legacyApply: (board) => ({ nextBoard: board, autoEndOfTurn: true })
     };
     expect(reduce(playState(), def).autoEndOfTurn).toBe(true);
@@ -83,7 +83,7 @@ describe('reduceMove — legacy (events-based) contract equivalence', () => {
 
 describe('reduceMove — outcome-returning (apply) contract', () => {
   it('isTurnEnd flips the player and closes the turn', () => {
-    const def: NormalizedMove<Board> = {
+    const def: EngineMove<Board> = {
       apply: (board) => ({ nextBoard: board, isTurnEnd: true })
     };
     const transition = reduce(playState(), def);
@@ -92,7 +92,7 @@ describe('reduceMove — outcome-returning (apply) contract', () => {
   });
 
   it('gameEnd sets phase and winner without flipping the player', () => {
-    const def: NormalizedMove<Board> = {
+    const def: EngineMove<Board> = {
       apply: (board) => ({ nextBoard: board, gameEnd: { winnerIndex: 1 } })
     };
     const transition = reduce(playState(), def);
@@ -103,9 +103,9 @@ describe('reduceMove — outcome-returning (apply) contract', () => {
   });
 
   it('nextTurnState sets, undefined keeps, null clears turnState', () => {
-    const set: NormalizedMove<Board> = { apply: (b) => ({ nextBoard: b, nextTurnState: 's' }) };
-    const keep: NormalizedMove<Board> = { apply: (b) => ({ nextBoard: b }) };
-    const clear: NormalizedMove<Board> = { apply: (b) => ({ nextBoard: b, nextTurnState: null }) };
+    const set: EngineMove<Board> = { apply: (b) => ({ nextBoard: b, nextTurnState: 's' }) };
+    const keep: EngineMove<Board> = { apply: (b) => ({ nextBoard: b }) };
+    const clear: EngineMove<Board> = { apply: (b) => ({ nextBoard: b, nextTurnState: null }) };
     const afterSet = reduce(playState(), set).state;
     expect(afterSet.turnState).toBe('s');
     const afterKeep = reduce(afterSet, keep).state;
@@ -114,7 +114,7 @@ describe('reduceMove — outcome-returning (apply) contract', () => {
   });
 
   it('throws in dev when gameEnd is combined with isTurnEnd or autoEndOfTurn', () => {
-    const def: NormalizedMove<Board> = {
+    const def: EngineMove<Board> = {
       apply: (board) => ({ nextBoard: board, isTurnEnd: true, gameEnd: { winnerIndex: 0 } })
     };
     expect(() => reduce(playState(), def)).toThrow(/gameEnd together with/);
@@ -125,7 +125,7 @@ describe('reduceMove — outcome-returning (apply) contract', () => {
     // no endOfTurnMove may be scheduled afterwards
     vi.stubEnv('DEV', false);
     try {
-      const def: NormalizedMove<Board> = {
+      const def: EngineMove<Board> = {
         apply: (board) => ({ nextBoard: board, autoEndOfTurn: true, gameEnd: { winnerIndex: 0 } })
       };
       const transition = reduce(playState(), def);
@@ -139,7 +139,7 @@ describe('reduceMove — outcome-returning (apply) contract', () => {
 
 describe('reduceMove — shared mechanics', () => {
   it('a failing validator returns the state unchanged (same reference) and flags illegal', () => {
-    const def: NormalizedMove<Board> = {
+    const def: EngineMove<Board> = {
       validate: () => false,
       apply: (board) => ({ nextBoard: [...board, 'x'] })
     };
@@ -151,7 +151,7 @@ describe('reduceMove — shared mechanics', () => {
   });
 
   it('takes the undo snapshot on the first move of a turn only', () => {
-    const midMove: NormalizedMove<Board> = {
+    const midMove: EngineMove<Board> = {
       apply: (board) => ({ nextBoard: [...board, 'x'] })
     };
     const first = reduce(playState(), midMove);
@@ -164,7 +164,7 @@ describe('reduceMove — shared mechanics', () => {
   });
 
   it('the validator sees current turnState and moveCount through ctx', () => {
-    const def: NormalizedMove<Board> = {
+    const def: EngineMove<Board> = {
       validate: (_board, { ctx }) => ctx.turnState === 'armed' && ctx.moveCount === 3,
       apply: (board) => ({ nextBoard: board, isTurnEnd: true })
     };

@@ -38,16 +38,20 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 };
 
 const moves = {
-  add1: (board: Board, { events }: { events: Events }) => {
-    events.endTurn();
-    return { nextBoard: [board[0], board[1] + 1] }
-  },
-  subtract: (board: Board, { events }: { events: Events }) => {
-    events.endTurn();
-    if (board[0] - board[1] <= 0) {
-      events.endGame();
+  add1: {
+    legacyApply: (board: Board, { events }: { events: Events }) => {
+      events.endTurn();
+      return { nextBoard: [board[0], board[1] + 1] }
     }
-    return { nextBoard: [board[0] - board[1], board[1]] };
+  },
+  subtract: {
+    legacyApply: (board: Board, { events }: { events: Events }) => {
+      events.endTurn();
+      if (board[0] - board[1] <= 0) {
+        events.endGame();
+      }
+      return { nextBoard: [board[0] - board[1], board[1]] };
+    }
   }
 };
 

@@ -49,8 +49,10 @@ const moves = {
     legacyApply: (board: Board, meta: { ctx: Ctx; events: Events }, at: number) =>
       finalize(applyMove(board.cells, meta.ctx.currentPlayer!, { type: 'place', to: at }), meta)
   },
-  pass: (board: Board, meta: { ctx: Ctx; events: Events }) =>
-    finalize([...board.cells], meta)
+  pass: {
+    legacyApply: (board: Board, meta: { ctx: Ctx; events: Events }) =>
+      finalize([...board.cells], meta)
+  }
 };
 
 const rule = {

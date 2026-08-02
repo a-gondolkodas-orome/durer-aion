@@ -1,5 +1,5 @@
 import { cloneDeep } from 'lodash';
-import type { MoveOutcome, NormalizedMove } from '../types';
+import type { MoveOutcome, EngineMove } from '../types';
 import { buildCtx } from './build-ctx';
 import type { CoreState } from './store';
 
@@ -20,7 +20,7 @@ export type MoveTransition<TBoard> = {
 // what to do with the returned transition (store write, dialog, timers).
 export const reduceMove = <TBoard>(
   state: CoreState<TBoard>,
-  def: NormalizedMove<TBoard>,
+  def: EngineMove<TBoard>,
   name: string,
   args: unknown[],
   resolvedPlayerNames: [string, string]
