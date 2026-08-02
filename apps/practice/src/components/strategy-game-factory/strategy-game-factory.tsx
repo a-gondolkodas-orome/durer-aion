@@ -10,7 +10,7 @@ import { useLocation } from 'react-router';
 import { useGameStats } from './hooks/use-game-stats';
 import { trackEvent } from '../../tracking';
 import type {
-  Phase, Mode, Ctx, Events, MoveResult, Gameplay, GameMoves,
+  Phase, Mode, Ctx, Events, MoveOutcome, NormalizedMove, Gameplay, GameMoves,
   BoardClientProps, Variant as DisplayVariant, VariantInput
 } from './types';
 import { resolveVariants } from './helpers/resolve-variants';
@@ -42,9 +42,19 @@ export const strategyGameFactory = <TBoard,>({
   const { rule, roleLabels, getPlayerStepDescription } = presentation;
   const { moves, endOfTurnMove } = gameplay;
   const { defaultVariantIndex, defaultVariant, resolvedVariants } = resolveVariants(variants);
-  // Normalize the shorthand (plain function = legacyApply with no validator) so the
-  // rest of the engine deals with a single long-form shape.
-  const normalizedMoves = mapValues(moves, (m) => typeof m === 'function' ? { legacyApply: m } : m);
+  // Normalize the shorthand (plain function = legacy move with no validator)
+  // so the rest of the engine deals with a single long-form shape.
+  const normalizedMoves: Record<string, NormalizedMove<TBoard>> =
+    mapValues(moves, (m) => typeof m === 'function' ? { legacyApply: m } : m);
+  Object.entries(normalizedMoves).forEach(([name, def]) => {
+    if (!!def.legacyApply === !!def.apply) {
+      const message = `strategyGameFactory: move ${name} must define exactly one of apply/legacyApply`;
+      if (import.meta.env.DEV) {
+        throw new Error(message);
+      }
+      console.warn(message);
+    }
+  });
 
   return () => {
     const { t } = useTranslation();
@@ -110,10 +120,10 @@ export const strategyGameFactory = <TBoard,>({
       name: string,
       moveBoard: TBoard,
       args: unknown[],
-      doMove: () => MoveResult<TBoard>
-    ): MoveResult<TBoard> => {
-      const validator = normalizedMoves[name]!.validate;
-      if (validator && !validator(moveBoard, { ctx: ctxRef.current }, ...args)) {
+      doMove: () => MoveOutcome<TBoard>
+    ): MoveOutcome<TBoard> => {
+      const { validate, apply } = normalizedMoves[name]!;
+      if (validate && !validate(moveBoard, { ctx: ctxRef.current }, ...args)) {
         reportIllegalMove(name, moveBoard, args);
         return { nextBoard: moveBoard };
       }
@@ -124,6 +134,27 @@ export const strategyGameFactory = <TBoard,>({
       const moveResult = doMove();
       setBoard(moveResult.nextBoard);
       setMoveCount(c => c + 1);
+      // The returned outcome is interpreted only for outcome-returning `apply`
+      // moves: a legacy move causes turn/game transitions through `events`
+      // instead, and any extra fields it happens to return must stay inert.
+      if (apply) {
+        // Through `events.setTurnState` so ctxRef is patched synchronously — a
+        // chained dispatch can validate before React re-renders.
+        if (moveResult.nextTurnState !== undefined) {
+          events.setTurnState(moveResult.nextTurnState);
+        }
+        if (moveResult.gameEnd) {
+          if (import.meta.env.DEV && (moveResult.isTurnEnd || moveResult.autoEndOfTurn)) {
+            throw new Error(`strategyGameFactory: move ${name} returned gameEnd `
+              + 'together with isTurnEnd/autoEndOfTurn');
+          }
+          endGame(moveResult.gameEnd.winnerIndex);
+          return moveResult;
+        }
+        if (moveResult.isTurnEnd) {
+          endTurn();
+        }
+      }
       if (endOfTurnMove && moveResult.autoEndOfTurn) {
         botTimeoutRef.current = setTimeout(() => {
           botTimeoutRef.current = null;
@@ -252,9 +283,11 @@ export const strategyGameFactory = <TBoard,>({
       }
     };
 
-    wrappedGameMoves = mapValues(normalizedMoves, ({ legacyApply }, name) => {
+    wrappedGameMoves = mapValues(normalizedMoves, ({ legacyApply, apply }, name) => {
       const wrapped: GameMoves<TBoard>[string] = (board: TBoard, ...args: unknown[]) =>
-        moveWrapper(name, board, args, () => legacyApply(board, { ctx, events }, ...args));
+        moveWrapper(name, board, args, () => apply
+          ? apply(board, { ctx }, ...args)
+          : legacyApply!(board, { ctx, events }, ...args));
       return wrapped;
     });
 

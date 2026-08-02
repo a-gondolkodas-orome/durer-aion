@@ -80,7 +80,7 @@ strategyGameFactory({
   },
   BoardClient,                 // React component receiving { board, ctx, events, moves }
   gameplay: {
-    moves,                     // { [name]: moveFn | { legacyApply, validate? } } — see below
+    moves,                     // { [name]: { apply, validate? } | legacyFn | { legacyApply, validate? } } — see below
     endOfTurnMove?,            // optional move name auto-executed after moves with autoEndOfTurn: true
   },
   variants,                    // see below
@@ -94,15 +94,33 @@ omitted on a variant, the default variant's `botStrategy` is used as fallback.
 If multiple variants are provided, exactly one must be `isDefault: true`. A
 single-entry array needs no `isDefault` flag.
 
-**`moves`** — each move is either a plain move function
-`(board, { ctx, events }, ...args) => { nextBoard }` (shorthand), or a long-form
-object `{ legacyApply, validate? }` colocating it with a legality predicate. Always
-pass the current `board` as first arg when chaining moves within a turn. `legacyApply`
-trusts its arguments and applies them blindly; legality is enforced by
-`validate` (below) and/or the `BoardClient`'s `disabled` gating.
+**`moves`** — each move is one of three shapes, all mixable within one game:
+
+- **`{ apply, validate? }` (preferred, use for new games)** — an
+  outcome-returning move `(board, { ctx }, ...args) => MoveOutcome`. It gets no
+  `events`; everything it causes is data in the returned `MoveOutcome`:
+  `{ nextBoard, isTurnEnd?, nextTurnState?, gameEnd?, autoEndOfTurn? }`.
+  `isTurnEnd: true` passes the turn (omitted = further moves follow in the same
+  turn); `gameEnd: { winnerIndex }` ends the game with an always-explicit winner
+  (`ctx.currentPlayer!` when the mover wins) and never flips `currentPlayer` —
+  `isTurnEnd`/`autoEndOfTurn` alongside it are a dev-mode error;
+  `nextTurnState` sets `ctx.turnState` (`null` clears, omitted keeps);
+  `autoEndOfTurn: true` schedules `endOfTurnMove`. Being `events`-free makes the
+  move a pure reducer — the piece a future authoritative competition server
+  and the planned external state store both need (see issue #313).
+- **legacy plain move function** `(board, { ctx, events }, ...args) =>
+  { nextBoard }` (shorthand), or **legacy `{ legacyApply, validate? }`** — the
+  move calls `events.endTurn()` / `events.endGame(winnerIndex?)` imperatively
+  (bare `endGame()` credits the mover). Existing games migrate to the
+  outcome-returning `apply` one by one; don't add new legacy moves.
+
+Always pass the current `board` as first arg when chaining moves within a turn.
+Neither form validates its arguments — they apply them blindly; legality is
+enforced by `validate` (below) and/or the `BoardClient`'s `disabled` gating.
 
 **`validate`** (optional, per move) — a pure, side-effect-free legality predicate
-`(board, { ctx }, ...args) => boolean` sitting right next to its `legacyApply`. When
+`(board, { ctx }, ...args) => boolean` sitting right next to its
+`apply`/`legacyApply`. When
 present, the engine rejects any dispatch whose args fail it (in dev it throws
 loudly to surface the bug; in prod it warns, fires an `illegal-move` analytics
 event, and no-ops so a stray call cannot corrupt the board). The function
@@ -142,6 +160,10 @@ the raw `validate`/helpers instead.
   getPlayerStepDescription
 
 **`events`**: `endTurn()`, `endGame(winnerIndex?)`, `setTurnState(stage)`.
+`endTurn`/`endGame` are for legacy moves only (outcome-returning moves
+express both in their return value); `setTurnState` also remains current for
+`BoardClient` components that keep mid-turn UI state in `ctx.turnState`
+(several games call it from UI code — that usage does not migrate).
 
 ### Known limitation: React state staleness in multi-move turns
 
@@ -157,9 +179,11 @@ Two workarounds exist for two symptoms of this one root cause:
   loudly when violated (visibly wrong moves).
 - **`ctx.turnState`** — shadowed engine-side: move validation reads `ctx`
   through a ref that is re-synced every render *and* patched synchronously by
-  `events.setTurnState`, because a chained dispatch (e.g. a bot's 0-delay
-  `setTimeout`) can fire before React re-renders. See `ctxRef` in
-  `strategy-game-factory.tsx` and the two-phase bot regression tests.
+  `events.setTurnState` (the engine routes an outcome-returning `apply`'s returned
+  `nextTurnState` through the same setter), because a chained dispatch (e.g. a
+  bot's 0-delay `setTimeout`) can fire before React re-renders. See `ctxRef` in
+  `strategy-game-factory.tsx` and the two-phase bot regression tests (legacy
+  and v2 variants).
 
 The asymmetry matters when reviewing new games: a validator that depends on
 some *other* mid-turn-changing `ctx` field (e.g. `moveCount`) would need the
@@ -187,6 +211,8 @@ long-form move shape already does — and build the rest in-repo.
 - Starting positions representative of the game's complexity; each player wins
   with ~50% probability across random starting boards
 - Player cannot win with a non-winning strategy (i.e. AI is truly optimal)
+- Moves use the outcome-returning `apply` form (no `events` in moves; see
+  `five-connected-fields`, `coins-in-3-piles`, `hunyadi-and-the-janissaries`)
 - Moves with non-trivial legality define `validate` (single source of truth for
   the engine, the `BoardClient`'s `disabled` state and the bot)
 - Clear what the player should do next (`getPlayerStepDescription`)

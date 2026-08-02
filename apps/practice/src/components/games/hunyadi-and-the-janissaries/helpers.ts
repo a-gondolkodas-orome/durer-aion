@@ -1,5 +1,4 @@
 import { random, flatten, cloneDeep, sum, tail } from 'lodash';
-import type { Events } from '../../strategy-game-factory';
 
 export type SoldierColor = 'blue' | 'red';
 export type Board = SoldierColor[][];
@@ -65,29 +64,23 @@ export const moves = {
   killGroup: {
     validate: (board: Board, { ctx }, group: SoldierColor) =>
       ctx.currentPlayer === HUNYADI && isColor(group),
-    legacyApply: (board: Board, { events }: { events: Events }, group: SoldierColor) => {
+    apply: (board: Board, _, group: SoldierColor) => {
       const nextBoard = board.map(row => row.filter(soldier => soldier !== group));
 
-      const isGameEnd = flatten(nextBoard).length === 0;
-      if (isGameEnd) {
-        events.endTurn();
-        events.endGame(1);
-        return { nextBoard, isGameEnd };
+      if (flatten(nextBoard).length === 0) {
+        return { nextBoard, gameEnd: { winnerIndex: HUNYADI } };
       }
-      return { nextBoard, isGameEnd, autoEndOfTurn: true };
+      return { nextBoard, autoEndOfTurn: true };
     }
   },
   finalizeSeparation: {
     validate: (board: Board, { ctx }) => ctx.currentPlayer === SULTAN,
-    legacyApply: (board: Board, { events }: { events: Events }) => {
-      events.endTurn();
-      return { nextBoard: board };
-    }
+    apply: (board: Board) => ({ nextBoard: board, isTurnEnd: true })
   },
   setGroupOfSoldiers: {
     validate: (board: Board, { ctx }, soldiers: Soldier[]) =>
       ctx.currentPlayer === SULTAN && isSoldierAssignmentAllowed(board, soldiers),
-    legacyApply: (board: Board, _, soldiers: Soldier[]) => {
+    apply: (board: Board, _, soldiers: Soldier[]) => {
       const nextBoard = cloneDeep(board);
       for (const soldier of soldiers) {
         nextBoard[soldier.rowIndex][soldier.pieceIndex] = soldier.group;
@@ -96,12 +89,13 @@ export const moves = {
     }
   },
   // endOfTurn move automatically initiated by game engine
-  stepUp: (board: Board, { events }: { events: Events }) => {
-    const nextBoard = [...tail(board), []];
-    events.endTurn();
-    if (nextBoard[0].length > 0) {
-      events.endGame(0);
+  stepUp: {
+    apply: (board: Board) => {
+      const nextBoard = [...tail(board), []];
+      if (nextBoard[0].length > 0) {
+        return { nextBoard, gameEnd: { winnerIndex: SULTAN } };
+      }
+      return { nextBoard, isTurnEnd: true };
     }
-    return { nextBoard };
   }
 };

@@ -1,5 +1,5 @@
 import { cloneDeep, isEqual } from "lodash";
-import type { Ctx, Events } from '../../strategy-game-factory';
+import type { Ctx, MoveOutcome } from '../../strategy-game-factory';
 
 export type Board = number[]
 
@@ -27,18 +27,16 @@ export const moves = {
   removeCoin: {
     validate: (board: Board, { ctx }: { ctx: Ctx }, value: number) =>
       ctx.turnState === null && value >= 1 && value <= 3 && board[value - 1] > 0,
-    legacyApply: (board: Board, { events }: { events: Events }, value) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, value): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard[value - 1] -= 1;
       if (value === 1) {
-        events.endTurn();
         if (isEqual(nextBoard, [0, 0, 0])) {
-          events.endGame();
+          return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
         }
-      } else {
-        events.setTurnState({ removedCoinValue: value });
+        return { nextBoard, isTurnEnd: true };
       }
-      return { nextBoard };
+      return { nextBoard, nextTurnState: { removedCoinValue: value } };
     }
   },
   addCoin: {
@@ -46,25 +44,23 @@ export const moves = {
       const removed = (ctx.turnState as { removedCoinValue: number } | null)?.removedCoinValue;
       return removed != null && value >= 1 && value < removed;
     },
-    legacyApply: (board: Board, { events }: { events: Events }, value) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, value) => {
       const nextBoard = cloneDeep(board);
       nextBoard[value - 1] += 1;
-      return finishPlaceBack(nextBoard, events);
+      return finishPlaceBack(nextBoard, ctx);
     }
   },
   passAddition: {
     validate: (board: Board, { ctx }: { ctx: Ctx }) => ctx.turnState !== null,
-    legacyApply: (board: Board, { events }: { events: Events }) => finishPlaceBack(board, events)
+    apply: (board: Board, { ctx }: { ctx: Ctx }) => finishPlaceBack(board, ctx)
   }
 }
 
 // Shared second half of the place-back phase: whether a coin was added or the
 // player passed, the turn ends the same way.
-function finishPlaceBack(nextBoard: Board, events: Events) {
-  events.endTurn();
-  events.setTurnState(null);
+function finishPlaceBack(nextBoard: Board, ctx: Ctx): MoveOutcome<Board> {
   if (isEqual(nextBoard, [0, 0, 0])) {
-    events.endGame();
+    return { nextBoard, nextTurnState: null, gameEnd: { winnerIndex: ctx.currentPlayer! } };
   }
-  return { nextBoard };
+  return { nextBoard, nextTurnState: null, isTurnEnd: true };
 }

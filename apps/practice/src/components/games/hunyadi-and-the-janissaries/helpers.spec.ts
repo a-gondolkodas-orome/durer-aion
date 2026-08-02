@@ -1,33 +1,34 @@
 import {
-  moves, generateStartBoard, isColor, isSoldierAssignmentAllowed, type Board
+  moves, generateStartBoard, isColor, isSoldierAssignmentAllowed, HUNYADI, SULTAN, type Board
 } from './helpers';
 import { uniq, flatten } from 'lodash';
-import { makeEvents } from '../../../test-utils';
+import { makeCtx } from '../../../test-utils';
 
 describe('HunyadiAndTheJanissaries helpers', () => {
   describe('moves', () => {
+    const meta = { ctx: makeCtx() };
+
     it('should claim victory for Hunyadi if all soldiers are killed', () => {
-      const events = makeEvents();
-      moves.killGroup.legacyApply([[], ['red', 'red']] as Board, { events }, 'red')
-      expect(events.endGame).toHaveBeenCalledWith(1);
+      const { gameEnd } = moves.killGroup.apply([[], ['red', 'red']] as Board, meta, 'red');
+      expect(gameEnd).toEqual({ winnerIndex: HUNYADI });
     });
 
     it('should claim loss for Hunyadi if a soldier reaches the castle', () => {
-      const events = makeEvents();
-      const { nextBoard } = moves.killGroup.legacyApply(
-        [[], ['red', 'blue'], ['blue']] as Board, { events }, 'red'
+      const { nextBoard, autoEndOfTurn } = moves.killGroup.apply(
+        [[], ['red', 'blue'], ['blue']] as Board, meta, 'red'
       );
-      moves.stepUp(nextBoard, { events });
-      expect(events.endGame).toHaveBeenCalledWith(0);
+      expect(autoEndOfTurn).toBe(true);
+      const { gameEnd } = moves.stepUp.apply(nextBoard);
+      expect(gameEnd).toEqual({ winnerIndex: SULTAN });
     });
 
     it('should report game as still in progress and advance remaining soldiers otherwise', () => {
-      const events = makeEvents();
       const board = [[], ['red'], ['blue', 'red'], [], ['blue', 'blue']] as Board;
-      const { nextBoard } = moves.killGroup.legacyApply(board, { events }, 'red');
-      const state = moves.stepUp(nextBoard, { events });
-      expect(state.nextBoard).toEqual([[], ['blue'], [], ['blue', 'blue'], []])
-      expect(events.endGame).not.toHaveBeenCalled();
+      const { nextBoard } = moves.killGroup.apply(board, meta, 'red');
+      const outcome = moves.stepUp.apply(nextBoard);
+      expect(outcome.nextBoard).toEqual([[], ['blue'], [], ['blue', 'blue'], []])
+      expect(outcome.gameEnd).toBeUndefined();
+      expect(outcome.isTurnEnd).toBe(true);
     });
   });
 

@@ -57,3 +57,37 @@ describe('coins-in-3-piles move validators', () => {
     });
   });
 });
+
+describe('coins-in-3-piles move outcomes', () => {
+  const ctx = makeCtx({ currentPlayer: 0 });
+
+  it('removing a 1-coin ends the turn without a place-back phase', () => {
+    expect(moves.removeCoin.apply([2, 5, 7], { ctx }, 1))
+      .toEqual({ nextBoard: [1, 5, 7], isTurnEnd: true });
+  });
+
+  it('removing the last coin as a 1-coin ends the game, the mover winning', () => {
+    expect(moves.removeCoin.apply([1, 0, 0], { ctx }, 1))
+      .toEqual({ nextBoard: [0, 0, 0], gameEnd: { winnerIndex: 0 } });
+  });
+
+  it('removing a 2- or 3-coin starts the place-back phase instead of ending the turn', () => {
+    expect(moves.removeCoin.apply([3, 5, 7], { ctx }, 3))
+      .toEqual({ nextBoard: [3, 5, 6], nextTurnState: { removedCoinValue: 3 } });
+  });
+
+  it('placing back a coin ends the turn and clears the place-back state', () => {
+    expect(moves.addCoin.apply([3, 5, 6], { ctx }, 2))
+      .toEqual({ nextBoard: [3, 6, 6], nextTurnState: null, isTurnEnd: true });
+  });
+
+  it('passing on the empty board ends the game, the mover winning', () => {
+    expect(moves.passAddition.apply([0, 0, 0], { ctx }))
+      .toEqual({ nextBoard: [0, 0, 0], nextTurnState: null, gameEnd: { winnerIndex: 0 } });
+  });
+
+  it('passing on a non-empty board just ends the turn', () => {
+    expect(moves.passAddition.apply([3, 5, 6], { ctx }))
+      .toEqual({ nextBoard: [3, 5, 6], nextTurnState: null, isTurnEnd: true });
+  });
+});

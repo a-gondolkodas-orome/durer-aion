@@ -147,13 +147,14 @@ choosing a role, restart game) are extracted to a `strategyGameFactory`.
 type Board = number;
 
 const moves = {
-  addNumber: (board: Board, { ctx, events }: { ctx: Ctx; events: Events }, number) => {
-    const nextBoard = board + number;
-    events.endTurn();
-    if (nextBoard >= 20) {
-      events.endGame(1 - ctx.currentPlayer)
+  addNumber: {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, number) => {
+      const nextBoard = board + number;
+      if (nextBoard >= 20) {
+        return { nextBoard, gameEnd: { winnerIndex: 1 - ctx.currentPlayer! } };
+      }
+      return { nextBoard, isTurnEnd: true };
     }
-    return { nextBoard }
   }
 };
 
@@ -202,14 +203,31 @@ Conceptually a `move` is a unit that captures a change in the board initiated by
 a player. Moves help ensure that the game is played according to rules by all
 players.
 
-Technically the `legacyApply` function of a move takes board as first param, `{
-ctx, events }` as second param and may receive any number of additional params.
-The second param is provided by the framework, additional params will be
-provided by the client based on player interaction or by the bot strategy. Each
-move must return an object with `nextBoard`.
+Technically a move function takes board as first param, a framework-provided
+meta object as second param and may receive any number of additional params
+(provided by the client based on player interaction or by the bot strategy).
 
 A move may result in ending the turn of the current player or ending the game or
-allow further moves within the same turn.
+allow further moves within the same turn. In the preferred, outcome-returning
+form (`apply`) the move expresses all of this as data in its return value
+(a `MoveOutcome`):
+
+- `nextBoard` (required): the board after the move
+- `isTurnEnd`: `true` passes the turn; omitted = further moves follow within
+  the same turn. Ignored when `gameEnd` is present.
+- `gameEnd: { winnerIndex }`: the game is over, with an always explicit winner
+  (`ctx.currentPlayer!` when the mover wins)
+- `nextTurnState`: new `ctx.turnState` value (`null` clears it; omitted =
+  unchanged)
+- `autoEndOfTurn`: `true` asks the framework to auto-dispatch
+  `gameplay.endOfTurnMove` after a short delay
+
+`apply` receives `{ ctx }` and no `events` — it is a pure function, which
+is what lets the same move logic run on a possible future authoritative
+competition server. The legacy form (`legacyApply`) instead receives
+`{ ctx, events }` and calls `events.endTurn()` / `events.endGame(winnerIndex?)`
+imperatively; existing games are migrated one by one, new games should use
+`apply`.
 
 You must always pass `board` as a first param to all moves (meaning you must
 pass the updated board to subsequent moves in case of multiple moves within a
@@ -219,25 +237,26 @@ snapshot — see [AGENTS.md § Known limitation: React state staleness in
 multi-move turns](AGENTS.md#known-limitation-react-state-staleness-in-multi-move-turns)
 for the root cause and how `ctx.turnState` is handled.
 
-In `gameplay.moves`, each entry is either the move function itself (shorthand)
-or a long-form object `{ legacyApply, validate? }`:
+In `gameplay.moves`, each entry is either a legacy move function itself
+(shorthand) or a long-form object `{ apply, validate? }` (preferred) /
+`{ legacyApply, validate? }` (legacy):
 
 ```ts
 moves: {
   removeCoin: {
     validate: (board, { ctx }, value) => board[value - 1] > 0,
-    apply: (board, { events }, value) => { /* ... */ return { nextBoard }; }
+    apply: (board, { ctx }, value) => { /* ... */ return { nextBoard, isTurnEnd: true }; }
   }
 }
 ```
 
-`legacyApply` does **not** validate its arguments — it applies them blindly; legality
-lives in `validate`, right next to it.
+Neither `apply` nor `legacyApply` validates its arguments — they apply them
+blindly; legality lives in `validate`, right next to them.
 
 ### validate (optional, per move)
 
 `validate` is a pure predicate `(board, { ctx }, ...args) => boolean` colocated
-with `legacyApply` — the single source of truth for move legality. The framework
+with `apply` — the single source of truth for move legality. The framework
 rejects dispatches that fail it, and exposes it on the wrapped move as
 `moves.<name>.isAllowed(board, ...args)` (turn ownership AND `validate`, `ctx`
 bound) for the `BoardClient`'s `disabled` state. Full contract in
@@ -304,11 +323,14 @@ framework.
   remembered during a turn, i.e. to expose it from BoardClient to
   getPlayerStepDescription
 
-`events` is and objects that will contain the following (extendable):
-- `endTurn`: a function
+`events` is an object that will contain the following (extendable):
+- `endTurn`: a function (legacy `legacyApply`/shorthand moves only — outcome-returning moves
+  return `isTurnEnd: true` instead)
 - `endGame`: a function with optional winnerIndex specified, if not, last player
-  to move is the winner
-- `setTurnState`: a function to set `turnState`
+  to move is the winner (legacy `legacyApply`/shorthand moves only — outcome-returning moves
+  return `gameEnd: { winnerIndex }` with an explicit winner instead)
+- `setTurnState`: a function to set `turnState` — still current for
+  `BoardClient` components that keep mid-turn UI state in `ctx.turnState`
 </details>
 
 ## Things to look out for

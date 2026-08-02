@@ -2,7 +2,9 @@
 import { render, fireEvent, act } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { strategyGameFactory, type StrategyGameConfig } from './strategy-game-factory';
-import type { BoardClientProps, Ctx, Events, Gameplay, GameMoves, StrategyArgs } from './types';
+import type {
+  BoardClientProps, Ctx, Events, Gameplay, GameMoves, MoveDefinition, StrategyArgs
+} from './types';
 
 type Board = string[];
 
@@ -678,6 +680,350 @@ describe('move validate enforcement', () => {
       expect(track).toHaveBeenCalledWith('illegal-move', expect.objectContaining({ move: 'guarded' }));
       delete window.umami;
       vi.restoreAllMocks();
+    });
+  });
+});
+
+describe('outcome-returning moves (apply)', () => {
+  const v2Config = () => makeConfig({
+    BoardClient: ({ board, ctx, moves }: BoardClientProps<Board>) => (
+      <>
+        <button
+          data-testid="pass-btn"
+          disabled={!ctx.isClientMoveAllowed}
+          onClick={() => moves.passTurn(board)}
+        >pass</button>
+        <button data-testid="mid-btn" onClick={() => moves.midMove(board)}>mid</button>
+        <button data-testid="win-btn" onClick={() => moves.winNow(board)}>win</button>
+        <button data-testid="lose-btn" onClick={() => moves.loseNow(board)}>lose</button>
+        <span data-testid="board">{board.join(',')}</span>
+        <span data-testid="player">{String(ctx.currentPlayer)}</span>
+        <span data-testid="phase">{ctx.phase}</span>
+      </>
+    ),
+    gameplay: {
+      moves: {
+        passTurn: {
+          apply: (board: Board) => ({ nextBoard: [...board, 'pass'], isTurnEnd: true })
+        },
+        midMove: {
+          apply: (board: Board) => ({ nextBoard: [...board, 'mid'] })
+        },
+        winNow: {
+          apply: (board: Board, { ctx }: { ctx: Ctx }) =>
+            ({ nextBoard: board, gameEnd: { winnerIndex: ctx.currentPlayer! } })
+        },
+        loseNow: {
+          apply: (board: Board, { ctx }: { ctx: Ctx }) =>
+            ({ nextBoard: board, gameEnd: { winnerIndex: 1 - ctx.currentPlayer! } })
+        }
+      }
+    }
+  });
+
+  it('isTurnEnd: true passes the turn', () => {
+    const { getByTestId } = renderGame(v2Config());
+    fireEvent.click(getByTestId('role-btn-0'));
+    fireEvent.click(getByTestId('pass-btn'));
+    expect(getByTestId('board').textContent).toBe('initial,pass');
+    expect(getByTestId('player').textContent).toBe('1');
+    expect((getByTestId('pass-btn') as HTMLButtonElement).disabled).toBe(true); // bot's turn
+  });
+
+  it('a result with no outcome fields keeps the turn (mid-turn move)', () => {
+    const { getByTestId } = renderGame(v2Config());
+    fireEvent.click(getByTestId('role-btn-0'));
+    fireEvent.click(getByTestId('mid-btn'));
+    expect(getByTestId('board').textContent).toBe('initial,mid');
+    expect(getByTestId('player').textContent).toBe('0');
+    expect((getByTestId('pass-btn') as HTMLButtonElement).disabled).toBe(false); // still my turn
+  });
+
+  it('gameEnd ends the game with the explicit winner and does not flip currentPlayer', () => {
+    localStorage.clear();
+    const track = vi.fn();
+    window.umami = { track: track as NonNullable<Window['umami']>['track'] };
+    const { getByTestId } = renderGame(v2Config());
+    fireEvent.click(getByTestId('role-btn-0'));
+    fireEvent.click(getByTestId('win-btn'));
+    expect(getByTestId('phase').textContent).toBe('gameEnd');
+    // The v2 contract never flips the player at game end (legacy games often
+    // called endTurn before endGame; nothing user-visible read the flip).
+    expect(getByTestId('player').textContent).toBe('0');
+    expect(JSON.parse(localStorage.getItem('stats__0')!)).toEqual({ win: 1, loss: 0 });
+    expect(track).toHaveBeenCalledWith('game-finished', expect.objectContaining({ result: 'win' }));
+    delete window.umami;
+  });
+
+  it('gameEnd records a loss when the opponent is the explicit winner', () => {
+    localStorage.clear();
+    const { getByTestId } = renderGame(v2Config());
+    fireEvent.click(getByTestId('role-btn-0'));
+    fireEvent.click(getByTestId('lose-btn'));
+    expect(JSON.parse(localStorage.getItem('stats__0')!)).toEqual({ win: 0, loss: 1 });
+  });
+
+  it('throws at factory time when a move defines both legacyApply and apply, or neither', () => {
+    // deliberately malformed configs, cast past the compile-time guard
+    const asMove = (def: object) => def as MoveDefinition<Board>;
+    const both = asMove({
+      legacyApply: (board: Board) => ({ nextBoard: board }),
+      apply: (board: Board) => ({ nextBoard: board })
+    });
+    expect(() => strategyGameFactory(minimalConfig({ moves: { broken: both } })))
+      .toThrow(/exactly one of apply\/legacyApply/);
+    expect(() => strategyGameFactory(minimalConfig({ moves: { broken: asMove({}) } })))
+      .toThrow(/exactly one of apply\/legacyApply/);
+  });
+
+  it('throws in dev when a move returns gameEnd together with isTurnEnd', () => {
+    vi.useFakeTimers();
+    try {
+      const config = makeConfig({
+        gameplay: {
+          moves: {
+            contradiction: {
+              apply: (board: Board) =>
+                ({ nextBoard: board, isTurnEnd: true, gameEnd: { winnerIndex: 0 } })
+            },
+            handOver: { apply: (board: Board) => ({ nextBoard: board, isTurnEnd: true }) }
+          }
+        },
+        BoardClient: ({ board, moves }: BoardClientProps<Board>) => (
+          <button data-testid="hand-over-btn" onClick={() => moves.handOver(board)}>go</button>
+        ),
+        botStrategy: (({ board, moves }: StrategyArgs<Board>) => {
+          moves.contradiction(board);
+        }) as () => void
+      });
+      const { getByTestId } = renderGame(config);
+      fireEvent.click(getByTestId('role-btn-0'));
+      fireEvent.click(getByTestId('hand-over-btn')); // → bot's turn
+      expect(() => act(() => { vi.advanceTimersByTime(1500); }))
+        .toThrow(/gameEnd together with isTurnEnd\/autoEndOfTurn/);
+    } finally {
+      vi.clearAllTimers();
+      vi.useRealTimers();
+    }
+  });
+
+  it('legacy and outcome-returning moves coexist within one game', () => {
+    const gameplay: Gameplay<Board> = {
+      moves: {
+        legacyMove: (board: Board, { events }: { events: Events }) => {
+          events.endTurn();
+          return { nextBoard: [...board, 'legacy'] };
+        },
+        v2Move: { apply: (board: Board) => ({ nextBoard: [...board, 'v2'], isTurnEnd: true }) }
+      }
+    };
+    const BoardClient = ({ board, moves }: BoardClientProps<Board>) => (
+      <>
+        <button data-testid="legacy-btn" onClick={() => moves.legacyMove(board)}>legacy</button>
+        <button data-testid="v2-btn" onClick={() => moves.v2Move(board)}>v2</button>
+        <span data-testid="board">{board.join(',')}</span>
+      </>
+    );
+    const { getByTestId } = renderGame(makeConfig({ BoardClient, gameplay }));
+    fireEvent.click(getByTestId('mode-vsHuman'));
+    fireEvent.click(getByTestId('start-hh-game-0'));
+    fireEvent.click(getByTestId('v2-btn')); // player 0, v2 contract
+    fireEvent.click(getByTestId('legacy-btn')); // player 1, legacy contract
+    expect(getByTestId('board').textContent).toBe('initial,v2,legacy');
+  });
+
+  it('extra outcome-shaped fields returned by a legacy move stay inert', () => {
+    // A legacy (events-based) game may return stray extra fields (hunyadi's
+    // old isGameEnd did) — the engine must not interpret them as v2 outcomes.
+    const gameplay: Gameplay<Board> = {
+      moves: {
+        mainMove: (board: Board) => {
+          // a non-fresh object dodges the excess-property check, like real
+          // legacy code returning ad-hoc extra fields did
+          const strayOutcome = {
+            nextBoard: [...board, 'x'], isTurnEnd: true, gameEnd: { winnerIndex: 0 }
+          };
+          return strayOutcome;
+        }
+      }
+    };
+    const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => (
+      <>
+        <button data-testid="move-btn" onClick={() => moves.mainMove(board)}>move</button>
+        <span data-testid="player">{String(ctx.currentPlayer)}</span>
+        <span data-testid="phase">{ctx.phase}</span>
+      </>
+    );
+    const { getByTestId } = renderGame(makeConfig({ BoardClient, gameplay }));
+    fireEvent.click(getByTestId('role-btn-0'));
+    fireEvent.click(getByTestId('move-btn'));
+    expect(getByTestId('phase').textContent).toBe('play'); // gameEnd field ignored
+    expect(getByTestId('player').textContent).toBe('0'); // isTurnEnd field ignored
+  });
+
+  it('autoEndOfTurn schedules an outcome-returning endOfTurnMove after 750ms', () => {
+    vi.useFakeTimers();
+    try {
+      const autoMove = vi.fn((board: Board) => ({ nextBoard: board, isTurnEnd: true }));
+      const gameplay: Gameplay<Board> = {
+        moves: {
+          mainMove: { apply: (board: Board) => ({ nextBoard: board, autoEndOfTurn: true }) },
+          autoMove: { apply: autoMove }
+        },
+        endOfTurnMove: 'autoMove'
+      };
+      const { getByTestId } = renderGame(makeConfig({ BoardClient: CtxAwareBoardClient, gameplay }));
+      fireEvent.click(getByTestId('role-btn-0'));
+      fireEvent.click(getByTestId('move-btn'));
+      expect(autoMove).not.toHaveBeenCalled();
+      act(() => { vi.advanceTimersByTime(750); });
+      expect(autoMove).toHaveBeenCalledOnce();
+      expect((getByTestId('move-btn') as HTMLButtonElement).disabled).toBe(true); // its isTurnEnd applied
+    } finally {
+      vi.clearAllTimers();
+      vi.useRealTimers();
+    }
+  });
+
+  describe('nextTurnState', () => {
+    const turnStateConfig = () => makeConfig({
+      BoardClient: ({ board, ctx, moves }: BoardClientProps<Board>) => (
+        <>
+          <button data-testid="set-btn" onClick={() => moves.setTs(board)}>set</button>
+          <button data-testid="keep-btn" onClick={() => moves.keepTs(board)}>keep</button>
+          <button data-testid="clear-btn" onClick={() => moves.clearTs(board)}>clear</button>
+          <span data-testid="board">{board.join(',')}</span>
+          <span data-testid="ts">{JSON.stringify(ctx.turnState)}</span>
+        </>
+      ),
+      gameplay: {
+        moves: {
+          setTs: { apply: (board: Board) => ({ nextBoard: [...board, 's'], nextTurnState: 'stage2' }) },
+          keepTs: { apply: (board: Board) => ({ nextBoard: [...board, 'k'] }) },
+          clearTs: { apply: (board: Board) => ({ nextBoard: [...board, 'c'], nextTurnState: null }) }
+        }
+      }
+    });
+
+    it('sets, preserves (undefined) and clears (null) turnState', () => {
+      const { getByTestId } = renderGame(turnStateConfig());
+      fireEvent.click(getByTestId('role-btn-0'));
+      expect(getByTestId('ts').textContent).toBe('null');
+      fireEvent.click(getByTestId('set-btn'));
+      expect(getByTestId('ts').textContent).toBe('"stage2"');
+      fireEvent.click(getByTestId('keep-btn')); // omitted nextTurnState → unchanged
+      expect(getByTestId('ts').textContent).toBe('"stage2"');
+      fireEvent.click(getByTestId('clear-btn')); // null → cleared
+      expect(getByTestId('ts').textContent).toBe('null');
+    });
+
+    it('undo mid-turn restores the board and clears turnState', () => {
+      const { getByTestId } = renderGame(turnStateConfig());
+      fireEvent.click(getByTestId('mode-vsHuman'));
+      fireEvent.click(getByTestId('start-hh-game-0'));
+      fireEvent.click(getByTestId('set-btn')); // mid-turn, turnState = 'stage2'
+      fireEvent.click(getByTestId('undo-btn'));
+      expect(getByTestId('board').textContent).toBe('initial');
+      expect(getByTestId('ts').textContent).toBe('null');
+    });
+  });
+
+  // The v2 twin of the legacy two-phase regression tests: nextTurnState must be
+  // patched onto ctxRef synchronously while processing the outcome, or a bot's
+  // 0-delay chained dispatch would be validated against a stale turnState.
+  const twoPhaseV2BotConfig = (chainDelayMs: number) => makeConfig({
+    BoardClient: ({ board }: BoardClientProps<Board>) => (
+      <span data-testid="board">{board.join(',')}</span>
+    ),
+    gameplay: {
+      moves: {
+        phase1: {
+          validate: (_board: Board, { ctx }: { ctx: Ctx }) => ctx.turnState === null,
+          apply: (board: Board) =>
+            ({ nextBoard: [...board, 'p1'], nextTurnState: { removedCoinValue: 3 } })
+        },
+        phase2: {
+          validate: (_board: Board, { ctx }: { ctx: Ctx }) => ctx.turnState !== null,
+          apply: (board: Board) =>
+            ({ nextBoard: [...board, 'p2'], isTurnEnd: true, nextTurnState: null })
+        }
+      }
+    },
+    botStrategy: ({ board, moves }) => {
+      const { nextBoard } = moves.phase1(board);
+      setTimeout(() => { moves.phase2(nextBoard); }, chainDelayMs);
+    }
+  });
+
+  const playTwoPhaseV2BotTurn = (chainDelayMs: number) => {
+    vi.useFakeTimers();
+    try {
+      const { getByTestId } = renderGame(twoPhaseV2BotConfig(chainDelayMs));
+      fireEvent.click(getByTestId('role-btn-1')); // human is 2nd player → bot moves first
+      act(() => { vi.advanceTimersByTime(1500); }); // bot "thinking" delay → phase1
+      act(() => { vi.advanceTimersByTime(750); }); // the chained phase2 — must not be rejected
+      return getByTestId('board').textContent;
+    } finally {
+      vi.clearAllTimers();
+      vi.useRealTimers();
+    }
+  };
+
+  it('validates a bot-chained second move against the returned nextTurnState', () => {
+    expect(playTwoPhaseV2BotTurn(750)).toBe('initial,p1,p2');
+  });
+
+  it('validates a 0-delay chained second move dispatched before React re-renders', () => {
+    expect(playTwoPhaseV2BotTurn(0)).toBe('initial,p1,p2');
+  });
+
+  describe('validate on outcome-returning moves', () => {
+    const guardedV2Config = (botStrategy: () => void = () => {}) => makeConfig({
+      BoardClient: ({ board, moves }: BoardClientProps<Board>) => (
+        <>
+          <button data-testid="legal-btn" onClick={() => moves.guarded(board, 'ok')}>legal</button>
+          <button data-testid="illegal-btn" onClick={() => moves.guarded(board, 'bad')}>illegal</button>
+          <button data-testid="hand-over-btn" onClick={() => moves.handOver(board)}>hand over</button>
+          <span data-testid="board">{board.join(',')}</span>
+        </>
+      ),
+      gameplay: {
+        moves: {
+          guarded: {
+            validate: (_board: Board, _meta: { ctx: Ctx }, arg: string) => arg === 'ok',
+            apply: (board: Board, _meta: { ctx: Ctx }, arg: string) =>
+              ({ nextBoard: [...board, arg] })
+          },
+          handOver: { apply: (board: Board) => ({ nextBoard: board, isTurnEnd: true }) }
+        }
+      },
+      botStrategy
+    });
+
+    it('silently ignores an illegal client dispatch', () => {
+      const { getByTestId } = renderGame(guardedV2Config());
+      fireEvent.click(getByTestId('role-btn-0'));
+      fireEvent.click(getByTestId('illegal-btn')); // must not throw
+      expect(getByTestId('board').textContent).toBe('initial');
+      fireEvent.click(getByTestId('legal-btn'));
+      expect(getByTestId('board').textContent).toBe('initial,ok');
+    });
+
+    it('throws loudly in dev on an illegal bot dispatch', () => {
+      vi.useFakeTimers();
+      try {
+        const botStrategy = vi.fn().mockImplementation((args: any) => {
+          args.moves.guarded(args.board, 'bad');
+        });
+        const { getByTestId } = renderGame(guardedV2Config(botStrategy));
+        fireEvent.click(getByTestId('role-btn-0'));
+        fireEvent.click(getByTestId('hand-over-btn')); // → bot's turn
+        expect(() => act(() => { vi.advanceTimersByTime(1500); })).toThrow(/illegal move/);
+        expect(getByTestId('board').textContent).toBe('initial');
+      } finally {
+        vi.clearAllTimers();
+        vi.useRealTimers();
+      }
     });
   });
 });

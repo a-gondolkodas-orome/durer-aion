@@ -21,26 +21,59 @@ export interface Events {
   setTurnState: (state: unknown) => void
 }
 
-export type MoveResult<TBoard> = { nextBoard: TBoard; autoEndOfTurn?: boolean }
+// Everything a move can cause, expressed as data. Returned by outcome-returning
+// (`apply`) moves and interpreted by the engine; legacy (`legacyApply`) moves
+// return only `nextBoard`/`autoEndOfTurn` and cause the rest through `events`.
+export type MoveOutcome<TBoard> = {
+  nextBoard: TBoard
+  // Turn passes to the other player. Omitted/false = turn continues (mid-turn
+  // move of a multi-phase turn). Ignored when `gameEnd` is present.
+  isTurnEnd?: boolean
+  // undefined = turnState unchanged; null = cleared; anything else = new value.
+  nextTurnState?: unknown
+  // Terminal: the game is over. The winner is always explicit — there is no
+  // "omitted = mover wins" shorthand in this contract.
+  gameEnd?: { winnerIndex: number }
+  // Schedule gameplay.endOfTurnMove after a delay. Ignored when `gameEnd` is
+  // present (contradiction; throws in dev).
+  autoEndOfTurn?: boolean
+}
+export type MoveResult<TBoard> = Pick<MoveOutcome<TBoard>, 'nextBoard' | 'autoEndOfTurn'>
 export type MoveFunction<TBoard> = (
   board: TBoard, meta: { ctx: Ctx; events: Events }, ...args: any[]
 ) => MoveResult<TBoard>
+// Outcome-returning apply: no `events` param, so purity is enforced by the
+// type system — everything the move causes is in the returned MoveOutcome.
+export type PureMoveFunction<TBoard> = (
+  board: TBoard, meta: { ctx: Ctx }, ...args: any[]
+) => MoveOutcome<TBoard>
 // Pure, side-effect-free legality predicate for a single move, colocated with
-// its `legacyApply` in the long-form move definition. Because it depends only on
+// its `apply`/`legacyApply` in the long-form move definition. Because it depends only on
 // `board` + `ctx` (no React, no `events`), the same function drives the UI
 // (button `disabled`), the engine (illegal-move enforcement) and, in the
 // future, an authoritative server-side check.
 type MoveValidator<TBoard> = (
   board: TBoard, meta: { ctx: Ctx }, ...args: any[]
 ) => boolean
-// A move is either a plain move function (shorthand — always accepted by the
-// engine) or a long-form object pairing it with an optional legality validator.
-// The key is named `legacyApply` because this events-based contract is on its
-// way out: an outcome-returning replacement lands next, and every remaining
-// `legacyApply` is one game still to migrate.
+// A move is either a legacy plain function (shorthand — always accepted by the
+// engine), a long-form `legacyApply` object pairing it with an optional
+// legality validator, or — the preferred contract for new games — an
+// outcome-returning `apply` that gets no `events` and instead returns
+// turn/game consequences as data. The distinct key is the contract marker: the
+// engine interprets the returned MoveOutcome only for `apply` moves, and a
+// migrated move that still touches `events` fails to compile.
 export type MoveDefinition<TBoard> =
   | MoveFunction<TBoard>
   | { legacyApply: MoveFunction<TBoard>; validate?: MoveValidator<TBoard> }
+  | { apply: PureMoveFunction<TBoard>; validate?: MoveValidator<TBoard> }
+// Engine-internal normalized move shape (not re-exported from the barrel):
+// the shorthand folded into long form, carrying exactly one of
+// apply/legacyApply (enforced at factory time).
+export type NormalizedMove<TBoard> = {
+  legacyApply?: MoveFunction<TBoard>
+  apply?: PureMoveFunction<TBoard>
+  validate?: MoveValidator<TBoard>
+}
 export interface Gameplay<TBoard> {
   moves: Record<string, MoveDefinition<TBoard>>
   // move name auto-executed (after a delay) following moves returning autoEndOfTurn: true
@@ -56,7 +89,7 @@ export interface Gameplay<TBoard> {
 // use the raw `validate`/helpers to enumerate legal moves.
 export type GameMoves<TBoard> = Record<
   string,
-  ((board: TBoard, ...args: any[]) => MoveResult<TBoard>)
+  ((board: TBoard, ...args: any[]) => MoveOutcome<TBoard>)
     & { isAllowed?: (board: TBoard, ...args: any[]) => boolean }
 >
 export type StrategyArgs<TBoard> = { board: TBoard; ctx: Ctx; moves: GameMoves<TBoard> }
