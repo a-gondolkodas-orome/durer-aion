@@ -1,9 +1,6 @@
-import { moves, type Board } from './five-five-card';
+import { isRemovalAllowed, moves, type Board } from './five-five-card';
 import { makeCtx } from '../../../test-utils';
 
-// Each player starts with cards 1..5 and takes from the other until one each is
-// left. The player holding the larger card wins on an odd sum, the smaller on
-// an even sum, and the starter wins a tie.
 const asPlayer = (currentPlayer: number) => ({ ctx: makeCtx({ currentPlayer }) });
 
 // A hand holding exactly the listed values, at their 1-based positions.
@@ -12,6 +9,28 @@ const hand = (values: number[]): (number | null)[] =>
 
 const board = (first: number[], second: number[]): Board => [hand(first), hand(second)];
 
+describe('isRemovalAllowed', () => {
+  // Cards are addressed by their 1-based position in the other player's hand.
+  const table = board([1, 2, 4, 5], [1, 2, 3, 4, 5]);
+
+  it("allows taking a card the other player still holds", () => {
+    expect([1, 2, 3, 4, 5].every(id => isRemovalAllowed(table, 1, id))).toBe(true);
+  });
+
+  it('rejects a card the other player has already lost', () => {
+    expect(isRemovalAllowed(table, 0, 3)).toBe(false);
+    expect(isRemovalAllowed(table, 0, 2)).toBe(true);
+  });
+
+  it('rejects a position outside the hand, including the 0 of 0-based indexing', () => {
+    expect(isRemovalAllowed(table, 1, 0)).toBe(false);
+    expect(isRemovalAllowed(table, 1, 6)).toBe(false);
+  });
+});
+
+// Each player starts with cards 1..5 and takes from the other until one each is
+// left. The player holding the larger card wins on an odd sum, the smaller on
+// an even sum, and the starter wins a tie.
 describe('end of game', () => {
   it('ends once both players are down to one card, odd sum going to the larger', () => {
     // player 0 takes the 5 from player 1, leaving 3 against 4: sum 7, larger wins

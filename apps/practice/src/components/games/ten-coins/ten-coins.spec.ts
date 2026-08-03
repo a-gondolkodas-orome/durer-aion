@@ -2,7 +2,38 @@ import { describe, it, expect } from 'vitest';
 import { mapValues, uniq, range } from 'lodash';
 import { type GameMoves } from '../../strategy-game-factory';
 import { makeCtx } from '../../../test-utils';
-import { moves as gameMoves, smartBotStrategy } from './ten-coins';
+import { isConversionAllowed, moves as gameMoves, smartBotStrategy } from './ten-coins';
+
+describe('isConversionAllowed', () => {
+  // Four 3s and six 1s: the values 1 and 3 are on the table, 2 and 4 are not.
+  const board = [1, 1, 1, 1, 1, 1, 3, 3, 3, 3];
+
+  it('accepts a value on the table turned into any smaller one', () => {
+    expect(isConversionAllowed(board, 3, 1)).toBe(true);
+    expect(isConversionAllowed(board, 3, 2)).toBe(true);
+  });
+
+  it('refuses a value that is not on the table', () => {
+    expect(isConversionAllowed(board, 2, 1)).toBe(false);
+    expect(isConversionAllowed(board, 4, 1)).toBe(false);
+  });
+
+  it('refuses a target that is not strictly smaller', () => {
+    expect(isConversionAllowed(board, 3, 3)).toBe(false);
+    expect(isConversionAllowed(board, 3, 4)).toBe(false);
+  });
+
+  it('refuses value-1 coins, which have no smaller value to become', () => {
+    expect(isConversionAllowed(board, 1, 1)).toBe(false);
+    expect(isConversionAllowed(board, 1, 0)).toBe(false);
+  });
+
+  it('refuses non-integer or non-positive arguments', () => {
+    expect(isConversionAllowed(board, 3, 0)).toBe(false);
+    expect(isConversionAllowed(board, 3, -1)).toBe(false);
+    expect(isConversionAllowed(board, 3, 1.5)).toBe(false);
+  });
+});
 
 // Exhaustive optimality check for both variants (coin values 1..4 and 1..5).
 // Only the SET of distinct present values matters for the game, so we represent

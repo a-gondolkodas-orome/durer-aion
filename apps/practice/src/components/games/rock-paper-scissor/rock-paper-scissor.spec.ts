@@ -1,9 +1,6 @@
-import { moves, type Board } from './rock-paper-scissor';
+import { isRemovalAllowed, moves, type Board } from './rock-paper-scissor';
 import { makeCtx } from '../../../test-utils';
 
-// Both players start with rock, paper and scissors and take cards from each
-// other until one each is left; the survivors then play a normal round, with
-// ties going to the starting player.
 const asPlayer = (currentPlayer: number) => ({ ctx: makeCtx({ currentPlayer }) });
 
 const ROCK = 0, PAPER = 1, SCISSOR = 2;
@@ -13,6 +10,27 @@ const hand = (kept: number[]): Board[number] =>
 
 const board = (first: number[], second: number[]): Board => [hand(first), hand(second)];
 
+describe('isRemovalAllowed', () => {
+  const table = board([ROCK, SCISSOR], [ROCK, PAPER, SCISSOR]);
+
+  it("allows taking a symbol the other player still holds", () => {
+    expect([0, 1, 2].every(idx => isRemovalAllowed(table, 1, idx))).toBe(true);
+  });
+
+  it('rejects a symbol the other player has already lost', () => {
+    expect(isRemovalAllowed(table, 0, PAPER)).toBe(false);
+    expect(isRemovalAllowed(table, 0, ROCK)).toBe(true);
+  });
+
+  it('rejects a symbol that does not exist', () => {
+    expect(isRemovalAllowed(table, 1, 3)).toBe(false);
+    expect(isRemovalAllowed(table, 1, -1)).toBe(false);
+  });
+});
+
+// Both players start with rock, paper and scissors and take cards from each
+// other until one each is left; the survivors then play a normal round, with
+// ties going to the starting player.
 describe('end of game', () => {
   it('ends once both players are down to one card, and the beating card wins', () => {
     // player 1 takes player 0's scissors, leaving rock against scissors

@@ -2,8 +2,6 @@ import { moves, type Board } from './policeman-thief-ab';
 import { POLICE, THIEF } from './helpers';
 import { makeCtx } from '../../../../test-utils';
 
-// The police win by landing on the thief within three thief moves; surviving
-// the third move wins it for the thief.
 const asPlayer = (currentPlayer: number) => ({ ctx: makeCtx({ currentPlayer }) });
 
 const board = (overrides: Partial<Board> = {}): Board => ({
@@ -14,6 +12,43 @@ const board = (overrides: Partial<Board> = {}): Board => ({
   ...overrides
 });
 
+describe('move legality', () => {
+  // Blue policeman on 0, green on 3, thief on 6.
+  const chase = (overrides: Partial<Board> = {}) =>
+    board({ policemen: [0, 3], thief: 6, ...overrides });
+
+  it('lets the thief step to an adjacent intersection only', () => {
+    expect(moves.moveThief.validate(chase(), asPlayer(THIEF), 2)).toBe(true); // 6 ~ 2
+    expect(moves.moveThief.validate(chase(), asPlayer(THIEF), 1)).toBe(false);
+    expect(moves.moveThief.validate(chase(), asPlayer(THIEF), 6)).toBe(false); // must move
+  });
+
+  it('does not let the police move the thief, nor the thief the police', () => {
+    expect(moves.moveThief.validate(chase(), asPlayer(POLICE), 2)).toBe(false);
+    expect(moves.moveFirstPoliceman.validate(chase(), asPlayer(THIEF), 1)).toBe(false);
+  });
+
+  it('offers the blue policeman first and the green one only afterwards', () => {
+    const beforeSplit = chase();
+    expect(moves.moveFirstPoliceman.validate(beforeSplit, asPlayer(POLICE), 1)).toBe(true); // 0 ~ 1
+    expect(moves.moveSecondPoliceman.validate(beforeSplit, asPlayer(POLICE), 1)).toBe(false);
+
+    const afterFirst = chase({ firstPolicemanMoved: true });
+    expect(moves.moveFirstPoliceman.validate(afterFirst, asPlayer(POLICE), 1)).toBe(false);
+    expect(moves.moveSecondPoliceman.validate(afterFirst, asPlayer(POLICE), 1)).toBe(true); // 3 ~ 1
+  });
+
+  it('keeps each policeman to its own neighbours', () => {
+    // Vertex 4 is adjacent to the blue policeman on 0, but not to the green on 3.
+    expect(moves.moveFirstPoliceman.validate(chase(), asPlayer(POLICE), 4)).toBe(true);
+    expect(moves.moveSecondPoliceman.validate(
+      chase({ firstPolicemanMoved: true }), asPlayer(POLICE), 4
+    )).toBe(false);
+  });
+});
+
+// The police win by landing on the thief within three thief moves; surviving
+// the third move wins it for the thief.
 describe('end of game', () => {
   it('gives the game to the police when the thief walks into one', () => {
     // vertices 3 and 1 are neighbours on the cube graph; a policeman waits on 1
