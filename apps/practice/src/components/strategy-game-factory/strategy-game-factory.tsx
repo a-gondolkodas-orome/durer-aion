@@ -42,17 +42,27 @@ export type StrategyGameConfig<TBoard> = {
   variants: VariantInput<TBoard>[]
 }
 
+// The game component carries the headless half of its own configuration. It is
+// what `runMatch` needs to play the game with no browser, so the catalog-wide
+// conformance spec can reach every registered game without a second registry to
+// keep in step — and it is the shape a competition server would load a game by
+// (docs/real-competitions-plan.md).
+export type StrategyGame<TBoard> = React.FC & {
+  gameplay: Gameplay<TBoard>
+  variants: VariantInput<TBoard>[]
+}
+
 export const strategyGameFactory = <TBoard,>({
   presentation,
   BoardClient,
   gameplay,
   variants
-}: StrategyGameConfig<TBoard>) => {
+}: StrategyGameConfig<TBoard>): StrategyGame<TBoard> => {
   const { rule, roleLabels, getPlayerStepDescription } = presentation;
   const { moves, endOfTurnMove } = gameplay;
   const { defaultVariantIndex, defaultVariant, resolvedVariants } = resolveVariants(variants);
 
-  return () => {
+  const Game = () => {
     const { t } = useTranslation();
     const [selectedVariantIndex, setSelectedVariantIndex] = useState(defaultVariantIndex);
     const activeVariant = resolvedVariants[selectedVariantIndex] ?? defaultVariant;
@@ -361,4 +371,8 @@ export const strategyGameFactory = <TBoard,>({
     </main>
     );
   };
+
+  Game.gameplay = gameplay;
+  Game.variants = resolvedVariants;
+  return Game;
 };

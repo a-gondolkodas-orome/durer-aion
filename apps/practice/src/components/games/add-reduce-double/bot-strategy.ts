@@ -19,7 +19,9 @@ export const getSmartBotStep = (board: Board): { pileId: number; pieceCount: num
   if (board[0]-board[1] === -1 || board[0]-board[1] === 0 || board[0]-board[1] === 1) {
     const ran = random(0,1);
     pileId=(board[ran]>1) ? ran : (1 - ran);
-    pieceCount = 2 * random(1, board[pileId] / 2);
+    // `random` returns a float if either bound is one, and an odd pile halves
+    // to a float — which would name an illegal fractional transfer.
+    pieceCount = 2 * random(1, Math.floor(board[pileId] / 2));
   } else {
     pileId = (board[0]>board[1]) ? 0 : 1;
     const third = Math.floor((board[pileId]-board[1-pileId]+1)/3);

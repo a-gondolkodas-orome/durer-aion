@@ -1,5 +1,5 @@
 export { strategyGameFactory } from './strategy-game-factory';
-export type { Presentation, StrategyGameConfig } from './strategy-game-factory';
+export type { Presentation, StrategyGame, StrategyGameConfig } from './strategy-game-factory';
 export type {
   Phase, Mode, Ctx,
   MoveOutcome, MoveFunction, MoveDefinition, Gameplay, GameMoves, ClientGameMoves,

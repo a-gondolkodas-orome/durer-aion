@@ -16,9 +16,12 @@ const getAdjacentCells = (pos: number): number[] => {
 
 // The shark's turn is a route of up to two steps, named as a whole: the halfway
 // cell is only chosen to reach the target safely, so the two are one decision.
+// Standing still is the one single-step turn — any real first step leaves the
+// turn open for a second, so a route that stops after `via` would strand the
+// bot mid-turn. Returning to `from` is a two-step route like any other.
 const asSharkRoute = (from: number, via: number, to: number): BotMove<Moves>[] =>
-  to === from
-    ? [{ move: 'moveShark', args: [via] }]
+  via === from
+    ? [{ move: 'moveShark', args: [from] }]
     : [{ move: 'moveShark', args: [via] }, { move: 'moveShark', args: [to] }];
 
 export const randomBotStrategy: Bot = ({ board, ctx }) => {

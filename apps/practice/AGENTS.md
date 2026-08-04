@@ -9,8 +9,9 @@ can play against the computer (choosing a role) or against another human in the
 same browser. The computer plays optimally, so the visitor can only win by also
 playing optimally.
 
-The goal is to eventually include all past Dürer competition games. Currently
-roughly half are implemented.
+The goal is to include all past Dürer competition games. Most are implemented
+(76 in `gameList.ts`); what remains is a tail of stragglers plus each new
+competition's games as they are held.
 
 ## Tech stack
 
@@ -99,6 +100,16 @@ hand-rolled game loop. That is what turns "the AI is truly optimal" into a test:
 the smart bot must win as the mover from a winning start board, and as the
 replier from a losing one (see `coins-in-3-piles`, `remove-row-or-column`).
 
+Every registered game is already swept once by
+`games/plays-to-an-end.spec.ts`, which plays each variant headlessly and asserts
+only that a match completes and names a winner — `runMatch` throws on an unknown
+move, a move the game's own `validate` rejects, a move named after the turn
+ended, and a game that never ends, so a new game gets that much conformance for
+free. It is a test of the *game*, not of the bot's judgement, and it is kept
+cheap on purpose: variants whose bot searches are listed out of it by name
+(their own bot spec covers them), and the rest play as many random start boards
+as a small per-variant time budget allows.
+
 Size the sweep to what the strategy costs. Sweeping every start board is right
 for a cheap strategy over a small state space (`coins-in-3-piles`: 124 boards,
 ~50 ms) and wrong for one that searches (`totem-poles`: ~3 s for a handful of
@@ -109,8 +120,8 @@ the parity invariant, the win/loss predicate.
 ## Planned future directions
 
 ### Primary (ongoing)
-- **Add remaining Dürer competition games** — the main ongoing effort; goal is
-  to cover all past competition games
+- **Add Dürer competition games** — the games of each new competition, plus the
+  tail of older ones still missing
 - **Refactoring and style improvements** — keep the codebase clean, consistent,
   and easy to maintain
 
