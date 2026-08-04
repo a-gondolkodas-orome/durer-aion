@@ -145,7 +145,10 @@ describe('strategyGameFactory endOfTurnMove', () => {
   afterAll(() => { vi.useRealTimers(); });
   afterEach(() => { vi.clearAllTimers(); });
 
-  it('calls endOfTurnMove after 750ms when a move returns autoEndOfTurn: true', () => {
+  it('calls endOfTurnMove after the step delay when a move returns autoEndOfTurn: true', () => {
+    // the beat is spread over 750-1250ms so the bot does not answer like a
+    // metronome; pinning Math.random makes it exactly the low end
+    vi.spyOn(Math, 'random').mockReturnValue(0);
     const autoMove = vi.fn((board: Board) => ({ nextBoard: board }));
     const moves: Gameplay<Board>['moves'] = {
       mainMove: {
@@ -155,7 +158,10 @@ describe('strategyGameFactory endOfTurnMove', () => {
     };
 
     const { getByTestId } = renderGame(minimalConfig({ moves, endOfTurnMove: 'autoMove' }));
-    fireEvent.click(getByTestId('role-btn-0'));
+    // human-vs-human: mainMove passes the turn, and the bot's own pause is the
+    // same beat, so this keeps the schedule under test to the endOfTurnMove
+    fireEvent.click(getByTestId('mode-vsHuman'));
+    fireEvent.click(getByTestId('start-hh-game-0'));
     fireEvent.click(getByTestId('move-btn'));
 
     expect(autoMove).not.toHaveBeenCalled();
@@ -844,9 +850,10 @@ describe('outcome-returning moves (apply)', () => {
     }
   });
 
-  it('autoEndOfTurn schedules an outcome-returning endOfTurnMove after 750ms', () => {
+  it('autoEndOfTurn schedules an outcome-returning endOfTurnMove after the step delay', () => {
     vi.useFakeTimers();
     try {
+      vi.spyOn(Math, 'random').mockReturnValue(0); // pin the spread beat to 750ms
       const autoMove = vi.fn((board: Board) => ({ nextBoard: board, isTurnEnd: true }));
       const gameplay: Gameplay<Board> = {
         moves: {

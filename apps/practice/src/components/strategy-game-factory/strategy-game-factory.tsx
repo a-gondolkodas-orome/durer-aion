@@ -18,11 +18,7 @@ import { createGameStore, createInitialCoreState } from './engine/store';
 import { buildCtx } from './engine/build-ctx';
 import { asBotMoves, isBotTurnUnfinished, unknownMoveMessage } from './engine/bot-turn';
 import { reduceMove } from './engine/reducer';
-
-// Pause between the moves of a bot's multi-phase turn, and before the auto
-// endOfTurnMove: long enough to follow what the bot did, short enough not to
-// stall the game.
-const BOT_STEP_DELAY = 750;
+import { stepDelay } from './engine/timing';
 
 const DEFAULT_PLAYER_NAMES: I18nString[] = [
   { hu: '1. játékos', en: '1st player' },
@@ -169,7 +165,7 @@ export const strategyGameFactory = <TBoard,>({
         botTimeoutRef.current = setTimeout(() => {
           botTimeoutRef.current = null;
           wrappedGameMoves[endOfTurnMove]!(transition.result.nextBoard);
-        }, BOT_STEP_DELAY);
+        }, stepDelay());
       }
       return transition.result;
     };
@@ -309,7 +305,7 @@ export const strategyGameFactory = <TBoard,>({
         // A pending auto endOfTurnMove occupies the same timeout slot and
         // already owns the rest of the turn, so only carry on without one.
         if (botTimeoutRef.current === null) {
-          runBotTurn(rest, BOT_STEP_DELAY);
+          runBotTurn(rest, stepDelay());
         }
       }, delay);
     };
@@ -318,7 +314,7 @@ export const strategyGameFactory = <TBoard,>({
       if (!activeVariant.botStrategy) {
         throw new Error('strategyGameFactory: no botStrategy available for vsComputer mode');
       }
-      runBotTurn([], Math.floor(Math.random() * 500 + 1000));
+      runBotTurn([], stepDelay());
     };
 
     const visibleVariants = getVariantsForMode(mode);

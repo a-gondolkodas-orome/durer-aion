@@ -226,7 +226,8 @@ whole turn at once is the right shape when the turn is one decision made of
 several moves (`pile-splitter`: discard a pile, split another; `magic-box`:
 place a stone, designate a line); naming one move and being asked again with
 the updated `board`/`ctx` is equally fine (`take-and-point`). The engine
-(`engine/bot-turn.ts`) plays the named moves out — with `BOT_STEP_DELAY`
+(`engine/bot-turn.ts`) plays the named moves out — with `STEP_DELAY`
+(`engine/timing.ts`)
 between them in the browser so the bot appears to think, immediately in a
 headless match — and asks the strategy again while the turn is still its own.
 Naming a move after the turn ended is a bug (dev: throw); naming moves the
@@ -274,6 +275,27 @@ mid-turn UI state in `ctx.turnState`. It is the one path that writes engine
 state without going through a move, deliberately: a selection is not a move, so
 it must not bump `moveCount` or take an undo snapshot. Moves never get it; they
 return `nextTurnState` instead.
+
+**`useDeferredMove(ctx.moveCount)`** — for a `BoardClient` whose single click
+submits a whole turn made of two moves (`pile-splitter`, `three-piles-rebuild`).
+Dispatch the first move, then hand the second to the returned function: it plays
+a `STEP_DELAY` later, so the board reads as two actions rather than one jump —
+the same beat the engine gives a bot's multi-move turn.
+
+Do not schedule that beat with a bare `setTimeout`. The callback closes over the
+board the first move produced, so a restart, a variant switch or an undo inside
+the window fires the move at a position that is gone — in dev that throws
+"stale board passed to move". The hook cancels on all of those (they rewind
+`moveCount`) and on unmount.
+
+```tsx
+const deferMove = useDeferredMove(ctx.moveCount);
+
+const clickPiece = ({ pileId, pieceId }: Piece) => {
+  const { nextBoard } = moves.removePile(board, 1 - pileId);
+  deferMove(() => moves.splitPile(nextBoard, { pileId, pieceCount: pieceId + 1 }));
+};
+```
 
 ### Game state architecture: synchronous store outside React
 

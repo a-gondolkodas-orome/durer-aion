@@ -3,7 +3,8 @@ import {
   strategyGameFactory,
   type BoardClientProps,
   GameBoard,
-  useHoverPreview
+  useHoverPreview,
+  useDeferredMove
 } from '../../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { isSplitAllowed, withPileRemoved } from '../gameplay';
@@ -11,6 +12,7 @@ import { moves, type Board, type Piece } from './gameplay';
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { value: validHoveredPiece, hoverProps } = useHoverPreview<Piece>(ctx.moveCount);
+  const deferMove = useDeferredMove(ctx.moveCount);
 
   // One click performs the whole turn, so a piece is clickable only if both
   // halves are legal: discarding the other pile, then splitting this one here.
@@ -21,9 +23,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const clickPiece = ({ pileId, pieceId }: Piece) => {
     const { nextBoard } = moves.removePile(board, 1 - pileId);
 
-    setTimeout(() => {
-      moves.splitPile(nextBoard, { pileId, pieceCount: pieceId + 1 });
-    }, 750);
+    deferMove(() => moves.splitPile(nextBoard, { pileId, pieceCount: pieceId + 1 }));
   };
 
   const toBeLeft = ({ pileId, pieceId }: Piece) => {

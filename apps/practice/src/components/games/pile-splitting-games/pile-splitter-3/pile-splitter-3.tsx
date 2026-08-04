@@ -4,7 +4,8 @@ import {
   strategyGameFactory,
   type BoardClientProps,
   GameBoard,
-  useHoverPreview
+  useHoverPreview,
+  useDeferredMove
 } from '../../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { isSplitAllowed, withPileRemoved } from '../gameplay';
@@ -13,6 +14,7 @@ import { generateStartBoard, moves, type Board, type Piece } from './gameplay';
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const [removedPileId, setRemovedPileId] = useState<number | null>(null);
   const { value: validHoveredPiece, hoverProps } = useHoverPreview<Piece>(ctx.moveCount);
+  const deferMove = useDeferredMove(ctx.moveCount);
   const { value: validHoveredPileId, hoverProps: pileHoverProps } = useHoverPreview<number>(ctx.moveCount);
 
   const canSelectPile = (pileId: number) =>
@@ -43,11 +45,10 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 
     const { nextBoard } = moves.removePile(board, removedPileId);
 
-    setTimeout(() => {
+    deferMove(() => {
       moves.splitPile(nextBoard, { pileId, pieceCount: pieceId + 1 });
-
       setRemovedPileId(null);
-    }, 750);
+    });
   };
 
   const toBeLeft = ({ pileId, pieceId }: Piece) => {

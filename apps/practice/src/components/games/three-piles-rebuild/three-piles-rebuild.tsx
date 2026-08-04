@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
-import { strategyGameFactory, type BoardClientProps, GameBoard } from '../../strategy-game-factory';
+import {
+  strategyGameFactory, type BoardClientProps, GameBoard, useDeferredMove
+} from '../../strategy-game-factory';
 import { useTranslation } from '../../../language';
 import {
   canSplit,
@@ -21,6 +23,7 @@ const parsePart = (raw: string): number | null => {
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
+  const deferMove = useDeferredMove(ctx.moveCount);
   const [keepId, setKeepId] = useState<number | null>(null);
   const [inputs, setInputs] = useState<{ p1: string; p2: string }>({ p1: '', p2: '' });
 
@@ -60,7 +63,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     const { nextBoard } = moves.keepPile(board, keepId);
     setKeepId(null);
     setInputs({ p1: '', p2: '' });
-    setTimeout(() => moves.splitPile(nextBoard, parts), 750);
+    deferMove(() => moves.splitPile(nextBoard, parts));
   };
 
   const caption = (pileId: number): string => {
