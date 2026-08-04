@@ -4,7 +4,7 @@ import tsPlugin from '@typescript-eslint/eslint-plugin';
 
 export default [
   {
-    files: ['src/**/*.{js,ts,tsx}'],
+    files: ['src/**/*.{ts,tsx}'],
     plugins: { '@eslint-react': reactPlugin },
     rules: {
       'comma-dangle': ['error', 'never'],
@@ -41,7 +41,7 @@ export default [
   {
     // A game's gameplay.ts is its framework-free half — the module a future
     // server-authoritative competition mode validates moves with, so it has to
-    // run in plain Node. See docs/real-competitions-plan.md.
+    // run in plain Node. See issue #313.
     files: ['src/components/games/**/gameplay.ts', 'src/components/strategy-game-factory/engine/**/*.ts'],
     plugins: { '@typescript-eslint': tsPlugin },
     languageOptions: { parser: tsParser },
@@ -63,12 +63,12 @@ export default [
   },
   {
     // SVG files contain inline path data that cannot be meaningfully reformatted
-    files: ['src/**/*-svg.{js,ts,tsx,jsx}'],
+    files: ['src/**/*-svg.{ts,tsx}'],
     rules: { 'max-len': 'off' }
   },
   {
     // test files may contain nicely formatted arrays such as for tictactoe
-    files: ['src/**/*spec.{js,ts}'],
+    files: ['src/**/*spec.{ts,tsx}'],
     rules: { 'array-element-newline': 'off' }
   }
 ];

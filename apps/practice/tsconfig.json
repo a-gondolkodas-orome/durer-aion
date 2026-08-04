@@ -7,8 +7,6 @@
     "strict": true,
     "noImplicitAny": false,
     "noEmit": true,
-    "allowJs": true,
-    "checkJs": false,
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "types": ["vitest/globals", "vite/client"]

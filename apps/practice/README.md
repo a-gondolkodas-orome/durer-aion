@@ -19,7 +19,11 @@ table](https://docs.google.com/spreadsheets/d/1-6u9PCtvf_gDHrs65x36pmDzFt4nZZx_I
 TL;DR;
 
 1. Add the game metadata to `src/components/games/gameList.ts`.
-2. Create a react component for the game under `src/components/games`.
+2. Create a folder for the game under `src/components/games` with the standard
+   files: a React-free `gameplay.ts` (the `Board` type, start boards and
+   `moves`), `bot-strategy.ts`, the game component `<game>.tsx` (plus
+   `board-client.tsx` once the JSX outgrows the game file), and a
+   `gameplay.spec.ts` — see [Where it lives](#where-it-lives).
 3. Re-export the game component from the barrel in
    `src/components/games/index.ts`, keyed by the game's `gameList` key. The router
    in `src/components/app/app.tsx` picks it up automatically — no edit needed there.
@@ -144,12 +148,15 @@ choosing a role, restart game) are extracted to a `strategyGameFactory`.
 <summary>The code</summary>
 
 ```tsx
-type Board = number;
+// gameplay.ts — the React-free rules half of the game
+export type Board = number;
 
-const moves = {
+export const moves = {
   addNumber: {
-    apply: (board: Board, { ctx }: { ctx: Ctx }, number) => {
-      const nextBoard = board + number;
+    // annotate every move argument: an unannotated one types as `any` and
+    // silently disables the bot's argument type-checking
+    apply: (board: Board, { ctx }: { ctx: Ctx }, amount: number) => {
+      const nextBoard = board + amount;
       if (nextBoard >= 20) {
         return { nextBoard, gameEnd: { winnerIndex: 1 - ctx.currentPlayer! } };
       }
@@ -158,6 +165,15 @@ const moves = {
   }
 };
 
+export type Moves = typeof moves;
+
+// bot-strategy.ts — `Moves` pins the move names and argument types
+const botStrategy: BotStrategy<Board, Moves> = ({ board }) => {
+  const optimalStep = board % 3 === 0 ? 1 : (3 - board % 3)
+  return { move: 'addNumber', args: [optimalStep] };
+};
+
+// <game>.tsx — the React side: BoardClient and the factory call
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   // no handler guard needed: the framework ignores dispatches that are not
   // allowed; `disabled` is for the player's benefit
@@ -165,11 +181,6 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     <button disabled={!ctx.isClientMoveAllowed} onClick={() => moves.addNumber(board, 1)}>1</button>
     <button disabled={!ctx.isClientMoveAllowed} onClick={() => moves.addNumber(board, 2)}>2</button>
   </GameBoard>
-};
-
-const botStrategy: BotStrategy<Board> = ({ board }) => {
-  const optimalStep = board % 3 === 0 ? 1 : (3 - board % 3)
-  return { move: 'addNumber', args: [optimalStep] };
 };
 
 export const PlusOneTwo = strategyGameFactory({
@@ -236,7 +247,7 @@ and never imports React — ESLint enforces that. The rest (`bot-strategy.ts`,
 `board-client.tsx`, `<game>.tsx` with the rule text and the factory call) sits
 on the React side. The split exists because a future server-authoritative
 competition mode has to validate moves in plain Node with the very same module
-(see [docs/real-competitions-plan.md](docs/real-competitions-plan.md)); it also
+(a future server-authoritative competition mode, see issue #313); it also
 lets specs and the bot's move pinning import the rules without dragging in JSX.
 Details in [AGENTS.md § Files in a game folder](AGENTS.md#architecture).
 
@@ -270,19 +281,13 @@ it is fine to add new games with Hungarian only.
 
 The `t()` helper from `translate.ts` resolves a value to the active language.
 The value can be a plain string if there are no translations available, or a
-`{hu, en }` object. For longer strings, consider extracting the english versions
-to `<game-name>-en.ts` to keep the main files more compact.
+`{ hu, en }` object.
 
 Check the [Dürer Archive](https://durerinfo.hu/archivum/feladatsorok/) for
 existing translations.
 
-Example internationalization of existing games:
-[Pairs of
-numbers](https://github.com/a-gondolkodas-orome/durer-jatekok/pull/213/changes/b574233c4e0c3e7d8c9dde3a2388a47133f93e10),
-[4 piles: spread
-ahead](https://github.com/a-gondolkodas-orome/durer-jatekok/pull/213/changes/1981715efa316e7bf1608c7b441dc0898ea6ed2f),
-[Add N, take
-2N](https://github.com/a-gondolkodas-orome/durer-jatekok/pull/213/changes/16158b67ece84ff68f25afbe9365f6650c7273d3)
+For an example of internationalizing an existing game, see
+[PR #213](https://github.com/a-gondolkodas-orome/durer-jatekok/pull/213).
 
 ## Technologies used
 
@@ -291,8 +296,8 @@ ahead](https://github.com/a-gondolkodas-orome/durer-jatekok/pull/213/changes/198
 - Node.js for the development server and building the application
 - React frontend framework ([official tutorial](https://react.dev/learn) is a
   good starting point)
-- [optional] Tailwindcss for styling with utility classes
-- [optional] vitest for unit testing
+- Tailwindcss for styling with utility classes
+- vitest for unit testing (runs in CI; every game is swept by a conformance test)
 - github actions for CI/CD.
 - github pages as hosting
 - [self-hosted umami](https://umami.durerinfo.hu) as usage tracker

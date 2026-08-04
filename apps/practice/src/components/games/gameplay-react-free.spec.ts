@@ -1,6 +1,6 @@
 // Every game's gameplay.ts has to run in plain Node: it is the module a
 // server-authoritative competition mode would validate moves with (see
-// docs/real-competitions-plan.md). ESLint bans `react` and the factory barrel by
+// issue #313). ESLint bans `react` and the factory barrel by
 // specifier, but it cannot tell that a specifier like './pebble-pile' resolves
 // to a .tsx — that is what this walk is for, and it follows the .ts files it
 // finds so an indirect pull is caught too.

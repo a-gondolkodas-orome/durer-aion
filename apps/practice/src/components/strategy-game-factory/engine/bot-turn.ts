@@ -9,7 +9,7 @@ import type { CoreState } from './store';
 // Pacing is therefore the caller's concern, never the strategy's: a bot that
 // scheduled its own follow-up move with setTimeout could not run outside a
 // browser, which is exactly what an authoritative server would have to do
-// (docs/real-competitions-plan.md).
+// (issue #313).
 export const asBotMoves = (named: BotMove | BotMove[]): BotMove[] =>
   Array.isArray(named) ? named : [named];
 

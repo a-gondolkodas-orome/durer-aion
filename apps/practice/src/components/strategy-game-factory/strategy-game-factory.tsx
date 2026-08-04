@@ -46,7 +46,7 @@ export type StrategyGameConfig<TBoard> = {
 // what `runMatch` needs to play the game with no browser, so the catalog-wide
 // conformance spec can reach every registered game without a second registry to
 // keep in step — and it is the shape a competition server would load a game by
-// (docs/real-competitions-plan.md).
+// (issue #313).
 export type StrategyGame<TBoard> = React.FC & {
   gameplay: Gameplay<TBoard>
   variants: VariantInput<TBoard>[]

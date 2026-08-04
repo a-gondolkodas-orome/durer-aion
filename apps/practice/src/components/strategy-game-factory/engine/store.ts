@@ -6,7 +6,7 @@ import type { Mode, Phase } from '../types';
 // the old board-threading convention and the ctxRef per-field shadow.
 // This module is framework-free (no React import): together with reducer.ts
 // and build-ctx.ts it is the seed of the headless engine a future
-// server-authoritative competition mode needs (docs/real-competitions-plan.md).
+// server-authoritative competition mode needs (issue #313).
 export type CoreState<TBoard> = {
   board: TBoard
   phase: Phase

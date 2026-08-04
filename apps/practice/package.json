@@ -13,8 +13,8 @@
     "check:versions": "node scripts/check-versions.mjs",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint \"src/**/*.{js,jsx,ts,tsx}\" --no-fix",
-    "lint:fix": "eslint \"src/**/*.{js,jsx,ts,tsx}\" --fix",
+    "lint": "eslint \"src/**/*.{ts,tsx}\" --no-fix",
+    "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
     "dev": "vite",
     "build": "vite build"
   },
