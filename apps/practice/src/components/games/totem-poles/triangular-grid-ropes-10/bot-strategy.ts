@@ -23,20 +23,16 @@ export const randomBotStrategy: Bot = ({ board }) =>
   ({ move: 'stretchRope', args: [sample(getAllowedMoves(board))] });
 
 export const smartBotStrategy: Bot = ({ board, ctx }) => {
-  const move = getOptimalSmartBotMove({ board, chosenRoleIndex: ctx.chosenRoleIndex });
-  return { move: 'stretchRope', args: [move] };
-};
-
-const getOptimalSmartBotMove = ({ board, chosenRoleIndex }: { board: Board, chosenRoleIndex: number | null }) => {
   const allowedMoves = getAllowedMoves(board);
-  if (chosenRoleIndex === 1) {
+  if (ctx.chosenRoleIndex === 1) {
     if (board.length === 0) {
-      return sample([{ from: 3, to: 5 }, { from: 1, to: 8 }, { from: 2, to: 7 }]);
+      const opening = sample([{ from: 3, to: 5 }, { from: 1, to: 8 }, { from: 2, to: 7 }]);
+      return { move: 'stretchRope', args: [opening] };
     } else {
       const symDir = edgeDirection(board[0]!)!;
       const lastMove = last(board)!;
       if (edgeDirection(lastMove) === symDir) {
-        return allowedMoves.find(e => edgeDirection(e) === symDir);
+        return { move: 'stretchRope', args: [allowedMoves.find(e => edgeDirection(e) === symDir)] };
       } else {
         const mirrorOfLastMove: Edge = {
           from: mirrorNodes[symDir][lastMove.from],
@@ -44,9 +40,9 @@ const getOptimalSmartBotMove = ({ board, chosenRoleIndex }: { board: Board, chos
         };
         if (!isAllowed(board, mirrorOfLastMove)) {
           console.error('Unexpected state, falling back');
-          return sample(allowedMoves);
+          return { move: 'stretchRope', args: [sample(allowedMoves)] };
         }
-        return mirrorOfLastMove;
+        return { move: 'stretchRope', args: [mirrorOfLastMove] };
       }
     }
   }
@@ -57,7 +53,7 @@ const getOptimalSmartBotMove = ({ board, chosenRoleIndex }: { board: Board, chos
   });
 
   if (nonTrivialMoves.length === 0) {
-    return sample(allowedMoves);
+    return { move: 'stretchRope', args: [sample(allowedMoves)] };
   }
 
   if (trivialMoves.length % 2 === 0) {
@@ -69,7 +65,7 @@ const getOptimalSmartBotMove = ({ board, chosenRoleIndex }: { board: Board, chos
     });
 
     if (optimalMove !== undefined) {
-      return optimalMove;
+      return { move: 'stretchRope', args: [optimalMove] };
     }
   } else {
     const simBoard = [...board, ...tail(trivialMoves)];
@@ -80,11 +76,11 @@ const getOptimalSmartBotMove = ({ board, chosenRoleIndex }: { board: Board, chos
     });
 
     if (optimalMove !== undefined) {
-      return optimalMove;
+      return { move: 'stretchRope', args: [optimalMove] };
     }
   }
 
-  return sample(allowedMoves);
+  return { move: 'stretchRope', args: [sample(allowedMoves)] };
 };
 
 // given board *after* your step, are you set up to win the game for sure?

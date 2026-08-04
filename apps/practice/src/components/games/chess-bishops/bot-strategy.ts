@@ -14,11 +14,6 @@ export const randomBotStrategy: Bot = ({ board }) =>
   ({ move: 'placeBishop', args: [sample(getAllowedMoves(board))] });
 
 export const smartBotStrategy: Bot = ({ board }) => {
-  const botMove = getOptimalSmartBotMove(board);
-  return { move: 'placeBishop', args: [botMove] };
-};
-
-export const getOptimalSmartBotMove = (board: Board): Field => {
   const allowedHMirrorMoves = boardIndices.filter(
     ({ row, col }) => board[row][col] === null && board[row][7 - col] === BISHOP
   );
@@ -34,10 +29,10 @@ export const getOptimalSmartBotMove = (board: Board): Field => {
   }
   if (bishopCount < 4) {
     if (axis === HORIZONTAL && allowedHMirrorMoves.length === 1) {
-      return allowedHMirrorMoves[0];
+      return { move: 'placeBishop', args: [allowedHMirrorMoves[0]] };
     }
     if (axis === VERTICAL && allowedVMirrorMoves.length === 1) {
-      return allowedVMirrorMoves[0];
+      return { move: 'placeBishop', args: [allowedVMirrorMoves[0]] };
     }
   }
 
@@ -47,7 +42,7 @@ export const getOptimalSmartBotMove = (board: Board): Field => {
   if (bishopCount == 2) {
     const optimalPlace = getOptimalThirdStep(board);
     if (optimalPlace !== undefined) {
-      return optimalPlace;
+      return { move: 'placeBishop', args: [optimalPlace] };
     }
   }
   // try to win from bad position if player does not play optimally
@@ -62,10 +57,10 @@ export const getOptimalSmartBotMove = (board: Board): Field => {
     });
 
     if (optimalPlace !== undefined) {
-      return optimalPlace;
+      return { move: 'placeBishop', args: [optimalPlace] };
     }
   }
-  return sample(allowedMoves)!;
+  return { move: 'placeBishop', args: [sample(allowedMoves)!] };
 };
 
 // given board *after* your step, are you set up to win the game for sure?

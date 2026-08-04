@@ -8,11 +8,6 @@ type Bot = BotStrategy<Board, keyof typeof moves>
 export const randomBotStrategy: Bot = ({ board }) =>
   ({ move: 'placeStone', args: [sample(emptyCells(board))] });
 
-export const smartBotStrategy: Bot = ({ board, ctx }) => {
-  const id = getOptimalPlacingPosition(board, ctx.chosenRoleIndex);
-  return { move: 'placeStone', args: [id] };
-};
-
 const emptyCells = (board: Board) => range(0, 9).filter(i => !board[i]);
 
 const winnerCache = new Map<string, number>();
@@ -33,7 +28,8 @@ const winner = (board: Board, toMove: number): number => {
   return result;
 };
 
-export const getOptimalPlacingPosition = (board: Board, chosenRoleIndex) => {
+export const smartBotStrategy: Bot = ({ board, ctx }) => {
+  const chosenRoleIndex = ctx.chosenRoleIndex!;
   const allowedPlaces = emptyCells(board);
 
   const winningPlaces = allowedPlaces.filter(i => {
@@ -41,11 +37,13 @@ export const getOptimalPlacingPosition = (board: Board, chosenRoleIndex) => {
     const outcome = isGameEnd(nextBoard) ? 1 - chosenRoleIndex : winner(nextBoard, 1 - chosenRoleIndex);
     return outcome === chosenRoleIndex;
   });
-  if (winningPlaces.length > 0) return sample(winningPlaces);
+  if (winningPlaces.length > 0) return { move: 'placeStone', args: [sample(winningPlaces)] };
 
   // no winning move exists; at least avoid losing immediately if possible
   const notInstantLosingPlaces = allowedPlaces.filter(i => !isGameEnd(placeStone(board, i)));
-  if (notInstantLosingPlaces.length > 0) return sample(notInstantLosingPlaces);
+  if (notInstantLosingPlaces.length > 0) {
+    return { move: 'placeStone', args: [sample(notInstantLosingPlaces)] };
+  }
 
-  return sample(allowedPlaces);
+  return { move: 'placeStone', args: [sample(allowedPlaces)] };
 };

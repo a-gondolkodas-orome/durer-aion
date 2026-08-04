@@ -149,20 +149,12 @@ const randomBotStrategy: Bot = ({ board }) =>
   ({ move: 'colorTriangle', args: [sample(getAllowedMoves(board))] });
 
 const smartBotStrategy: Bot = ({ board }) => {
-  const optimalMove = getOptimalSmartBotMove(board);
-  return { move: 'colorTriangle', args: [optimalMove] };
-};
-
-const getOptimalSmartBotMove = (board: Board) => {
   const allowedMoves = getAllowedMoves(board);
   const optimalPlace = shuffle(allowedMoves).find(
     i => isWinningState(withTriangleColored(board, i))
   );
 
-  if (optimalPlace !== undefined) {
-    return optimalPlace;
-  }
-  return sample(allowedMoves);
+  return { move: 'colorTriangle', args: [optimalPlace ?? sample(allowedMoves)] };
 };
 
 // given board *after* your step, are you set up to win the game for sure?

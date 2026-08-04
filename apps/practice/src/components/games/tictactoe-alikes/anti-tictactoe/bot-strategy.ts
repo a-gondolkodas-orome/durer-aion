@@ -10,17 +10,11 @@ export const randomBotStrategy: Bot = ({ board }) =>
   ({ move: 'placePiece', args: [sample(emptyCells(board))] });
 
 export const smartBotStrategy: Bot = ({ board, ctx }) => {
-  const id = getOptimalBotPlacingPosition(board, ctx.chosenRoleIndex);
-  return { move: 'placePiece', args: [id] };
-};
-
-const emptyCells = (board: Board) => range(0, 9).filter(i => isNull(board[i]));
-
-const getOptimalBotPlacingPosition = (board: Board, chosenRoleIndex) => {
+  const chosenRoleIndex = ctx.chosenRoleIndex!;
   const allowedPlaces = emptyCells(board);
 
   // start with middle place as a first step
-  if (allowedPlaces.length === 9) return 4;
+  if (allowedPlaces.length === 9) return { move: 'placePiece', args: [4] };
 
   // as a first player, proceed with placing at an empty place symmetrical to player's piece
   if (chosenRoleIndex === 1) {
@@ -29,7 +23,7 @@ const getOptimalBotPlacingPosition = (board: Board, chosenRoleIndex) => {
     for (const p of pairs) {
       // first is occupied, second is not from given pair
       if (!isNull(board[p[0]]) && isNull(board[p[1]])) {
-        return p[1];
+        return { move: 'placePiece', args: [p[1]] };
       }
     }
   }
@@ -43,15 +37,19 @@ const getOptimalBotPlacingPosition = (board: Board, chosenRoleIndex) => {
     return isWinningState(boardCopy, chosenRoleIndex === 1);
   });
 
-  if (optimalPlaces.length > 0) return sample(optimalPlaces);
+  if (optimalPlaces.length > 0) return { move: 'placePiece', args: [sample(optimalPlaces)] };
 
   // even if we are gonna lose, try to prolong it
   const aiPieces = range(0, 9).filter(i => board[i] === botColor);
   const notInstantLosingPlaces = allowedPlaces.filter(i => !hasWinningSubset([...aiPieces, i]));
-  if (notInstantLosingPlaces.length > 0) return sample(notInstantLosingPlaces);
+  if (notInstantLosingPlaces.length > 0) {
+    return { move: 'placePiece', args: [sample(notInstantLosingPlaces)] };
+  }
 
-  return sample(allowedPlaces);
+  return { move: 'placePiece', args: [sample(allowedPlaces)] };
 };
+
+const emptyCells = (board: Board) => range(0, 9).filter(i => isNull(board[i]));
 
 // given board *after* your step, are you set up to win the game for sure?
 const isWinningState = (board: Board, amIFirst) => {

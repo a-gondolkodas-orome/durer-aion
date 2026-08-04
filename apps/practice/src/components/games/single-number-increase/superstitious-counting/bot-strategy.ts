@@ -7,21 +7,18 @@ type Bot = BotStrategy<Board, keyof typeof moves>
 export const randomBotStrategy: Bot = ({ board }) =>
   ({ move: 'step', args: [randomStep(board.restricted)] });
 
-export const smartBotStrategy: Bot = ({ board }) => {
-  const step = getOptimalBotStep(board);
-  return { move: 'step', args: [step] };
-};
-
-export const getOptimalBotStep = ({ current, target, restricted }) => {
+export const smartBotStrategy: Bot = ({ board: { current, target, restricted } }) => {
   if ((target - current) % 14 === 0) { // any step wins
-    return randomStep(restricted);
+    return { move: 'step', args: [randomStep(restricted)] };
   }
   if ((target - current) % 14 === 1) { // any step looses
-    return randomStep(restricted);
+    return { move: 'step', args: [randomStep(restricted)] };
   }
   // only one winning step
-  if ((target - current) % 14 - 1 === restricted) return randomStep(restricted);
-  else return (target - current) % 14 - 1;
+  if ((target - current) % 14 - 1 === restricted) {
+    return { move: 'step', args: [randomStep(restricted)] };
+  }
+  return { move: 'step', args: [(target - current) % 14 - 1] };
 };
 
 const randomStep = (restricted) => {

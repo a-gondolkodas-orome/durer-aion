@@ -12,11 +12,6 @@ export const randomBotStrategy: Bot = ({ board }) =>
   ({ move: 'placeDuck', args: [sample(getAllowedMoves(board))] });
 
 export const smartBotStrategy: Bot = ({ board }) => {
-  const botMove = getOptimalSmartBotMove(board);
-  return { move: 'placeDuck', args: [botMove] };
-};
-
-const getOptimalSmartBotMove = (board: Board): Field => {
   const allowedMoves = getAllowedMoves(board);
   const boardIndices = getBoardIndices(board.length, board[0].length);
 
@@ -27,19 +22,22 @@ const getOptimalSmartBotMove = (board: Board): Field => {
 
   // live search is too slow and there is no optimal first step anyways
   if (duckCount === 0) {
-    return sample(allowedMoves)!;
+    return { move: 'placeDuck', args: [sample(allowedMoves)!] };
   }
 
   // live search is too slow
   if (duckCount === 1 && colCount === 7) {
-    return smartBotOptimalSecondSteps[`${ducks[0].row};${ducks[0].col}`];
+    return {
+      move: 'placeDuck',
+      args: [smartBotOptimalSecondSteps[`${ducks[0].row};${ducks[0].col}`]]
+    };
   }
 
   // use pre-calculated optimal 3rd moves as live calculation would be too slow
   if (duckCount == 2 && colCount === 7) {
     const optimalPlace = getOptimalThirdStep(board);
     if (optimalPlace !== undefined) {
-      return optimalPlace;
+      return { move: 'placeDuck', args: [optimalPlace] };
     }
   }
 
@@ -51,11 +49,11 @@ const getOptimalSmartBotMove = (board: Board): Field => {
     });
 
     if (optimalPlace !== undefined) {
-      return optimalPlace;
+      return { move: 'placeDuck', args: [optimalPlace] };
     }
   }
 
-  return sample(allowedMoves)!;
+  return { move: 'placeDuck', args: [sample(allowedMoves)!] };
 };
 
 type Coords = [number, number];

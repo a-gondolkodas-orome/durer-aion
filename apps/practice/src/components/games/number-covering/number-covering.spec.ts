@@ -1,7 +1,10 @@
-import { isCoveringAllowed, getOptimalSmartBotMove, moves, COVERED } from './number-covering';
-import { makeCtx } from '../../../test-utils';
+import { isCoveringAllowed, smartBotStrategy, moves, COVERED, type Board } from './number-covering';
+import { botNextMoveArgs, makeCtx } from '../../../test-utils';
 
 const meta = { ctx: makeCtx() };
+
+const smartBotCover = (board: Board, currentPlayer: number): number =>
+  botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx({ currentPlayer }) }))[0];
 
 describe('isCoveringAllowed', () => {
   const board = [1, 2, COVERED, 4, 5];
@@ -29,22 +32,22 @@ describe('smart bot', () => {
 
   it('as first player covers from the smaller parity class', () => {
     // odds are the minority -> covers an odd
-    expect([1, 3, 5]).toContain(getOptimalSmartBotMove({ board: fourEvensThreeOdds, currentPlayer: 0 }));
+    expect([1, 3, 5]).toContain(smartBotCover(fourEvensThreeOdds, 0));
     // evens are the minority -> covers an even
-    expect([2, 4]).toContain(getOptimalSmartBotMove({ board: twoEvensFourOdds, currentPlayer: 0 }));
+    expect([2, 4]).toContain(smartBotCover(twoEvensFourOdds, 0));
   });
 
   it('as second player covers from the larger parity class', () => {
     // evens are the majority -> covers an even
-    expect([2, 4, 6, 8]).toContain(getOptimalSmartBotMove({ board: fourEvensThreeOdds, currentPlayer: 1 }));
+    expect([2, 4, 6, 8]).toContain(smartBotCover(fourEvensThreeOdds, 1));
     // odds are the majority -> covers an odd
-    expect([1, 3, 5, 7]).toContain(getOptimalSmartBotMove({ board: twoEvensFourOdds, currentPlayer: 1 }));
+    expect([1, 3, 5, 7]).toContain(smartBotCover(twoEvensFourOdds, 1));
   });
 
   it('plays a legal move when the parities are balanced', () => {
     const numbers = [1, 2, 3, 4, 5, 6, 7, 8]; // 4 evens, 4 odds
-    expect(numbers).toContain(getOptimalSmartBotMove({ board: numbers, currentPlayer: 0 }));
-    expect(numbers).toContain(getOptimalSmartBotMove({ board: numbers, currentPlayer: 1 }));
+    expect(numbers).toContain(smartBotCover(numbers, 0));
+    expect(numbers).toContain(smartBotCover(numbers, 1));
   });
 });
 

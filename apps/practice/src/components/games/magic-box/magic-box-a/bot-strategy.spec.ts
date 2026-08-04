@@ -1,14 +1,18 @@
-import { getOptimalPlacingPosition } from './bot-strategy';
-import { generateEmptyBoard, isGameEnd, placeStone } from './helpers';
+import { smartBotStrategy } from './bot-strategy';
+import { generateEmptyBoard, isGameEnd, placeStone, type Board } from './helpers';
+import { botNextMoveArgs, makeCtx } from '../../../../test-utils';
 
-describe('getOptimalPlacingPosition', () => {
+const smartBotPlacement = (board: Board, chosenRoleIndex: number): number =>
+  botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx({ chosenRoleIndex }) }))[0];
+
+describe('smartBotStrategy', () => {
   it('should not place a stone that immediately completes a line if a safe move exists', () => {
     const board = [
       true, true, false,
       false, false, false,
       false, false, false
     ];
-    expect(getOptimalPlacingPosition(board, 0)).not.toBe(2);
+    expect(smartBotPlacement(board, 0)).not.toBe(2);
   });
 
   it('should pick the only remaining move that does not complete a line, regardless of role', () => {
@@ -18,8 +22,8 @@ describe('getOptimalPlacingPosition', () => {
       true, false, false
     ];
     // empty cells are 2, 3, 7, 8; placing at 2, 3 or 7 each completes a line, only 8 is safe
-    expect(getOptimalPlacingPosition(board, 0)).toBe(8);
-    expect(getOptimalPlacingPosition(board, 1)).toBe(8);
+    expect(smartBotPlacement(board, 0)).toBe(8);
+    expect(smartBotPlacement(board, 1)).toBe(8);
   });
 
   it('should fall back to one of the remaining cells when every move completes a line', () => {
@@ -28,7 +32,7 @@ describe('getOptimalPlacingPosition', () => {
       true, false, true,
       true, true, false
     ];
-    expect([0, 4, 8]).toContain(getOptimalPlacingPosition(board, 0));
+    expect([0, 4, 8]).toContain(smartBotPlacement(board, 0));
   });
 
   it('should let the second player always force a win with optimal play from an empty board', () => {
@@ -36,7 +40,7 @@ describe('getOptimalPlacingPosition', () => {
       let board = placeStone(generateEmptyBoard(), firstMove);
       let mover = 1;
       while (!isGameEnd(board)) {
-        const id = getOptimalPlacingPosition(board, mover) as number;
+        const id = smartBotPlacement(board, mover);
         board = placeStone(board, id);
         mover = 1 - mover;
       }

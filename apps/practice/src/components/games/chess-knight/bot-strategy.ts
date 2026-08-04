@@ -9,28 +9,24 @@ export const randomBotStrategy: Bot = ({ board }) =>
   ({ move: 'moveKnight', args: [sample(getAllowedMoves(board))] });
 
 export const smartBotStrategy: Bot = ({ board }) => {
-  const botMove = getOptimalSmartBotMove(board);
-  return { move: 'moveKnight', args: [botMove] };
-};
-
-export const getOptimalSmartBotMove = (board: Board): Field => {
   const allowedMoves = getAllowedMoves(board);
+
   if (allowedMoves.length === 1) {
-    return allowedMoves[0];
+    return { move: 'moveKnight', args: [allowedMoves[0]] };
   }
   if (isCenter(board.knightPosition)) {
     const cornerMove = allowedMoves.find(move => isCorner(move));
     if (cornerMove !== undefined) {
-      return cornerMove;
+      return { move: 'moveKnight', args: [cornerMove] };
     }
   }
   if (isEdgeMiddle(board.knightPosition)) {
     const moveOnEdgeCircle = allowedMoves.find(move => isEdgeMiddle(move));
     if (moveOnEdgeCircle !== undefined) {
-      return moveOnEdgeCircle;
+      return { move: 'moveKnight', args: [moveOnEdgeCircle] };
     }
   }
-  return sample(allowedMoves)!;
+  return { move: 'moveKnight', args: [sample(allowedMoves)!] };
 };
 
 const isCenter = ({ row, col }: Field): boolean => {

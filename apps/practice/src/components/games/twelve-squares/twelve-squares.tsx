@@ -62,17 +62,12 @@ const randomBotStrategy: Bot = ({ board }) => {
   return { move: 'step', args: [sample(validSteps)] };
 };
 
-const optimalBotStrategy: Bot = ({ board }) => {
-  const step = getOptimalBotStep(board);
-  return { move: 'step', args: [step] };
-};
-
-const getOptimalBotStep = ({ left, right }) => {
+const optimalBotStrategy: Bot = ({ board: { left, right } }) => {
   const dst = right-left;
-  if(dst === 1) return 2;
-  if(dst === 2) return 1;
-  if(dst % 3 === 2) return random(1,2);
-  return (dst+1) % 3;
+  if(dst === 1) return { move: 'step', args: [2] };
+  if(dst === 2) return { move: 'step', args: [1] };
+  if(dst % 3 === 2) return { move: 'step', args: [random(1,2)] };
+  return { move: 'step', args: [(dst+1) % 3] };
 };
 
 export const moves = {

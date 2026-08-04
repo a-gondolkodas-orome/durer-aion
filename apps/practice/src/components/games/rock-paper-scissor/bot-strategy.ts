@@ -5,16 +5,12 @@ import type { Board, moves } from './rock-paper-scissor';
 type Bot = BotStrategy<Board, keyof typeof moves>
 
 export const smartBotStrategy: Bot = ({ board, ctx }) => {
-  const idx = getOptimalSmartBotMove(board, ctx.currentPlayer!);
-  return { move: 'removeSymbol', args: [idx] };
-};
-
-export const getOptimalSmartBotMove = (board: Board, currentPlayer: number): number => {
+  const currentPlayer = ctx.currentPlayer!;
   // start with a random place as a first step
   if (currentPlayer === 0) {
     const allowedPlaces = [0, 1, 2].filter(i => board[1][i] !== null);
     if (allowedPlaces.length === 3) {
-      return random(0, 2);
+      return { move: 'removeSymbol', args: [random(0, 2)] };
     }
   }
 
@@ -27,7 +23,7 @@ export const getOptimalSmartBotMove = (board: Board, currentPlayer: number): num
 
       // first is occupied, second is not from given pair
       if (board[0][p[0]] === null && board[1][p[1]] !== null) {
-        return p[1];
+        return { move: 'removeSymbol', args: [p[1]] };
       }
     }
   }
@@ -40,7 +36,7 @@ export const getOptimalSmartBotMove = (board: Board, currentPlayer: number): num
     for (const p of pairs) {
       // first is not occupied, second is occupied from given pair
       if (board[0][p[0]] !== null && board[1][p[1]] === null) {
-        return p[0];
+        return { move: 'removeSymbol', args: [p[0]] };
       }
     }
   }

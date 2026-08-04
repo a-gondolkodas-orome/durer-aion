@@ -1,9 +1,13 @@
 import lodash from 'lodash';
-import { getOptimalSmartBotMove } from './bot-strategy';
-import { generateStartBoard, BISHOP, markForbiddenFields } from './helpers'
+import { smartBotStrategy } from './bot-strategy';
+import { generateStartBoard, BISHOP, markForbiddenFields, type Board, type Field } from './helpers'
+import { botNextMoveArgs, makeCtx } from '../../../test-utils';
+
+const smartBotPlacement = (board: Board): Field =>
+  botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx() }))[0];
 
 describe('test bishop strategy', () => {
-  describe('getOptimalSmartBotMove()', () => {
+  describe('smartBotStrategy', () => {
     afterEach(() => {
       vi.restoreAllMocks();
     });
@@ -14,7 +18,7 @@ describe('test bishop strategy', () => {
       const board = generateStartBoard();
       markForbiddenFields(board, { row: 1, col: 5 });
       board[1][5] = BISHOP;
-      const res = getOptimalSmartBotMove(board);
+      const res = smartBotPlacement(board);
       expect(res).toEqual({ row: 1, col: 2 });
     });
 
@@ -24,7 +28,7 @@ describe('test bishop strategy', () => {
       const board = generateStartBoard();
       markForbiddenFields(board, { row: 1, col: 5 });
       board[1][5] = BISHOP;
-      const res = getOptimalSmartBotMove(board);
+      const res = smartBotPlacement(board);
       expect(res).toEqual({ row: 6, col: 5 });
     });
 
@@ -32,12 +36,12 @@ describe('test bishop strategy', () => {
       const board = generateStartBoard();
       markForbiddenFields(board, { row: 1, col: 5 });
       board[1][5] = BISHOP;
-      const move2 = getOptimalSmartBotMove(board);
+      const move2 = smartBotPlacement(board);
       markForbiddenFields(board, move2);
       board[move2.row][move2.col] = BISHOP;
       markForbiddenFields(board, { row: 6, col: 4 });
       board[6][4] = BISHOP;
-      const move4 = getOptimalSmartBotMove(board);
+      const move4 = smartBotPlacement(board);
       expect([
         [{ row: 1, col: 2 }, { row: 6, col: 3 }],
         [{ row: 6, col: 5 }, { row: 1, col: 4 }]

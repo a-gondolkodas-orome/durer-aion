@@ -4,7 +4,7 @@ import {
 import { range, sum, sample, cloneDeep } from 'lodash';
 import { useTranslation } from '../../../language';
 
-type Board = number[]
+export type Board = number[]
 
 export const COVERED = -1 as const;
 
@@ -47,26 +47,19 @@ const randomBotStrategy: Bot = ({ board }) =>
   ({ move: 'coverNumber', args: [sample(getRemaining(board))] });
 
 export const smartBotStrategy: Bot = ({ board, ctx }) => {
-  const botMove = getOptimalSmartBotMove({ board, currentPlayer: ctx.currentPlayer });
-  return { move: 'coverNumber', args: [botMove] };
-};
-
-export const getOptimalSmartBotMove = (
-  { board, currentPlayer }: { board: Board, currentPlayer: number | null }
-) => {
   const remaining = getRemaining(board);
   const evens = remaining.filter(i => i%2 === 0);
   const odds = remaining.filter(i => i%2 === 1);
   if (evens.length === odds.length || evens.length === 0 || odds.length === 0) {
-    return sample(remaining);
-  } else if (currentPlayer === 0) {
+    return { move: 'coverNumber', args: [sample(remaining)] };
+  } else if (ctx.currentPlayer === 0) {
     // first player wants same-parity survivors -> remove from the smaller class
     const candidates = evens.length < odds.length ? evens : odds;
-    return sample(candidates);
+    return { move: 'coverNumber', args: [sample(candidates)] };
   } else {
     // second player wants a mixed pair -> remove from the larger class
     const candidates = evens.length > odds.length ? evens : odds;
-    return sample(candidates);
+    return { move: 'coverNumber', args: [sample(candidates)] };
   }
 };
 

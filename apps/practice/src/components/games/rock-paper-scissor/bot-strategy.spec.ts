@@ -1,33 +1,38 @@
-import { getOptimalSmartBotMove } from "./bot-strategy";
+import { smartBotStrategy } from "./bot-strategy";
+import { botNextMoveArgs, makeCtx } from '../../../test-utils';
+import type { Board } from './rock-paper-scissor';
 
-describe('getOptimalSmartBotMove', () => {
+const smartBotRemoval = (board: Board, currentPlayer: number): number =>
+  botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx({ currentPlayer }) }))[0];
+
+describe('smartBotStrategy', () => {
   it('as a second player remove useless piece in first step', () => {
     expect(
-      getOptimalSmartBotMove([['rock', 'paper', 'scissor'], ['rock', null, 'scissor']], 1)
+      smartBotRemoval([['rock', 'paper', 'scissor'], ['rock', null, 'scissor']], 1)
     ).toEqual(0);
     expect(
-      getOptimalSmartBotMove([['rock', 'paper', 'scissor'], ['rock', 'paper', null]], 1)
+      smartBotRemoval([['rock', 'paper', 'scissor'], ['rock', 'paper', null]], 1)
     ).toEqual(1);
     expect(
-      getOptimalSmartBotMove([['rock', 'paper', 'scissor'], [null, 'paper', 'scissor']], 1)
+      smartBotRemoval([['rock', 'paper', 'scissor'], [null, 'paper', 'scissor']], 1)
     ).toEqual(2);
   });
 
   it('as a second player remove useless piece in second step', () => {
     expect(
-      getOptimalSmartBotMove([[null, 'paper', 'scissor'], [null, null, 'scissor']], 1)
+      smartBotRemoval([[null, 'paper', 'scissor'], [null, null, 'scissor']], 1)
     ).toEqual(2);
   });
 
   it('as a first player remove a piece that you cannot beat if possible', () => {
     expect(
-      getOptimalSmartBotMove([['rock', null, 'scissor'], ['rock', null, 'scissor']], 0)
+      smartBotRemoval([['rock', null, 'scissor'], ['rock', null, 'scissor']], 0)
     ).toEqual(0);
   });
 
   it('as a first player remove a piece that can still beat you if possible', () => {
     expect(
-      getOptimalSmartBotMove([['rock', 'paper', null], ['rock', null, 'scissor']], 0)
+      smartBotRemoval([['rock', 'paper', null], ['rock', null, 'scissor']], 0)
     ).toEqual(2);
   });
 });
