@@ -1,4 +1,4 @@
-import { isValidStep, moves } from './twelve-squares';
+import { isValidStep, moves } from './gameplay';
 import { makeCtx } from '../../../test-utils';
 
 const asPlayer = (currentPlayer: number) => ({ ctx: makeCtx({ currentPlayer }) });

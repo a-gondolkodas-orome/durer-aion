@@ -132,9 +132,13 @@ imports. Needs test coverage.
 Partly done already: the move interpreter, the game store, the `ctx` derivation
 and the headless match runner live in `strategy-game-factory/engine/`, which
 imports no React, and every bot is a pure `({ board, ctx }) => BotMove[]`
-function that the runner can drive with no browser. What remains is per game —
-most game files still keep their moves in the same `.tsx` as their JSX rule text
-— plus the server-only split of the smart bot.
+function that the runner can drive with no browser. Per game, the target layout
+is a React-free `gameplay.ts` holding the board type, the start boards and the
+moves, kept framework-free by ESLint (`AGENTS.md § Files in a game folder`); a
+pilot batch is converted and the rest follow mechanically. What then remains is
+the server-only split of the smart bot — and the rule that a competition game's
+start boards must not be derived from the winning characterisation, since that
+predicate would otherwise ship to the client alongside them.
 
 ### Phase 2 — Stand up the backend
 

@@ -1,13 +1,11 @@
 import { useState } from 'react';
-import { range, cloneDeep, every, some, map } from 'lodash';
-import {
-  strategyGameFactory, type MoveOutcome, type BoardClientProps, GameBoard
-} from '../../strategy-game-factory';
+import { range, map } from 'lodash';
+import { strategyGameFactory, type BoardClientProps, GameBoard } from '../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
-import { isAllowedStep, isColored, generateStartBoard, edges, colors, type Board } from './helpers';
+import { generateStartBoard, edges, moves, type Board } from './gameplay';
 import { useTranslation } from '../../../language';
 
-// Screen position of each node; the drawn skeleton (see `edges` in helpers)
+// Screen position of each node; the drawn skeleton (see `edges` in gameplay)
 // connects these by node id.
 const cubeCoords = [
   { cx: '8%',  cy: '25%' },
@@ -132,31 +130,6 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   </GameBoard>
   );
 };
-
-const isGameEnd = (board: Board) => {
-  const canUseColor = color => some(range(0, 8), v => isAllowedStep(board, v, color));
-  return every(colors, color => !canUseColor(color));
-};
-
-export const moves = {
-  colorVertex: {
-    validate: (board: Board, _, { vertex, color }: { vertex: number; color: string | null }) =>
-      isAllowedStep(board, vertex, color),
-    apply: (board: Board, _, { vertex, color }): MoveOutcome<Board> => {
-      const nextBoard = cloneDeep(board);
-      nextBoard[vertex] = color;
-      if (isGameEnd(nextBoard)) {
-        // The first player wants every vertex coloured; the second wants the
-        // colouring to get stuck before that.
-        const winnerIndex = every(range(0, 8), v => isColored(nextBoard, v)) ? 0 : 1;
-        return { nextBoard, gameEnd: { winnerIndex } };
-      }
-      return { nextBoard, isTurnEnd: true };
-    }
-  }
-}
-
-export type Moves = typeof moves;
 
 const rule = {
   hu: <>

@@ -42,6 +42,36 @@ rules, permissible moves, initial state, etc.). Strategy is implemented however
 is simplest: on-the-fly calculation/logic when feasible, or precomputed optimal
 moves stored in a JSON file when performance requires it.
 
+**Files in a game folder:**
+
+| File | Holds | React? |
+|---|---|---|
+| `gameplay.ts` | `Board` type, `generateStartBoard`, `moves`, `Moves`, and the legality / win-detection helpers they use | **never** |
+| `bot-strategy.ts` | `smartBotStrategy`, `randomBotStrategy` and the search or characterisation behind them | never in practice |
+| `board-client.tsx` | `BoardClient` (split out once the JSX outgrows the game file) | yes |
+| `<game>.tsx` | `rule`, `getPlayerStepDescription`, `variants`, the `strategyGameFactory` call | yes |
+
+`gameplay.ts` is the **framework-free half of a game**: the same module a
+server-authoritative competition mode would validate moves with, so it has to
+run in plain Node (see `docs/real-competitions-plan.md` and issue #313). ESLint
+enforces that — a `react` import, or a value import from the
+`strategy-game-factory` barrel, is an error there; types from the barrel are
+fine, since `import type` is erased. A game whose gameplay is a handful of lines
+still gets the file: uniform layout is what makes the catalog skimmable, and it
+is what a spec and the bot's move pinning import without dragging in JSX.
+
+Two rules keep the boundary meaningful rather than nominal:
+
+- **Presentation does not live in `gameplay.ts`.** Step descriptions, labels and
+  rule text belong to the game file even when they happen to contain no JSX.
+- **A predicate that exists only to characterise the winning strategy belongs
+  with the bot**, not in `gameplay.ts` — competition mode ships the bot
+  server-side precisely so it cannot be read out of the bundle. A handful of
+  older games derive their random start boards from such a predicate
+  (`coins-in-3-piles`'s `isLostForMover`), which keeps it in `gameplay.ts`; that
+  is accepted for practice games, where the strategy is readable anyway. A
+  **competition** game must not do it — curate its start boards instead.
+
 Traffic is expected to remain low — no scalability concerns.
 
 ## Testing
@@ -176,11 +206,11 @@ throw). A game pins both by exporting its moves as a type, next to the moves
 themselves:
 
 ```ts
-// helpers.ts, under the moves object
+// gameplay.ts, under the moves object
 export type Moves = typeof moves;
 
 // bot-strategy.ts
-import type { Board, Moves } from './helpers';
+import type { Board, Moves } from './gameplay';
 
 type Bot = BotStrategy<Board, Moves>
 
@@ -241,7 +271,8 @@ Two conventions to keep in mind:
 - The `engine/` modules are React-free by design — they are the seed of the
   headless engine a future server-authoritative competition mode needs (see
   `docs/real-competitions-plan.md` and issue #313). Don't import React (or
-  anything React-flavoured) there.
+  anything React-flavoured) there; ESLint enforces it, as it does for each
+  game's `gameplay.ts`.
 
 Note "boardgame.io-style" means the architecture only. **Do not propose
 adopting boardgame.io itself**: it is a good library but effectively
@@ -256,6 +287,7 @@ in-repo.
 - Starting positions representative of the game's complexity; each player wins
   with ~50% probability across random starting boards
 - Player cannot win with a non-winning strategy (i.e. AI is truly optimal)
+- Board type, start boards and moves live in a React-free `gameplay.ts`
 - Moves return their consequences rather than causing them (see
   `five-connected-fields`, `coins-in-3-piles`, `hunyadi-and-the-janissaries`)
 - Moves with non-trivial legality define `validate` (single source of truth for

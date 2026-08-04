@@ -1,7 +1,7 @@
 import {
   type Board, type Grid, type Move,
   getRectangleAt, getRectangles, applyMove, isEmpty, getAllMoves, isRemovalAllowed, moves
-} from './helpers';
+} from './gameplay';
 import { makeCtx } from '../../../test-utils';
 
 const g = (rows: number[][]): Grid => rows.map(r => r.map(Boolean));

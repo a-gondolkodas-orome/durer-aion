@@ -41,12 +41,11 @@ Choose the simplest existing game that resembles the new one structurally:
 
 Read the chosen reference file in full before writing anything.
 
-### 4. Create the game file
-Create `src/components/games/<game-name>/<game-name>.tsx`. The contract you are implementing — `moves`/`apply`/`validate`, `isAllowed`, the bot contract, `ctx`, `setTurnState` — is specified in [AGENTS.md § strategyGameFactory API](../../AGENTS.md#strategygamefactory-api); read it rather than guessing from the reference game alone. Authoring decisions on top of it:
+### 4. Create the game files
+Create `src/components/games/<game-name>/gameplay.ts` (board type, start boards, moves) and `<game-name>.tsx` (rule text, step description, variants, factory call). Which file holds what — and why `gameplay.ts` must stay React-free — is in [AGENTS.md § Files in a game folder](../../AGENTS.md#architecture); the contract you are implementing — `moves`/`apply`/`validate`, `isAllowed`, the bot contract, `ctx`, `setTurnState` — is in [AGENTS.md § strategyGameFactory API](../../AGENTS.md#strategygamefactory-api). Read both rather than guessing from the reference game alone. Authoring decisions on top of them:
 - If the user supplied the rule text, use it verbatim in `rule.hu` by default. Don't silently rephrase, correct, or abbreviate it. **Exception:** when the original wording doesn't fit the online implementation — e.g. it refers to the competition organizers/judges instead of the opponent/computer, or to physical artifacts (paper, pencil, cards on a table) that don't exist in the browser version — it's fine to reword it slightly to fit. In that case, explicitly highlight every change you made to the user (e.g. show before/after) so they can review it. For any other wording change, propose it and wait for approval before applying.
 - For user-facing text referring to the other participant, prefer "other player" / "másik játékos" over "opponent" / "ellenfél" — the latter reads as too harsh, especially in Hungarian
 - `getPlayerStepDescription` should make it obvious what the current player should do — it is the game's instruction line, not a status label
-- Keep the game's `moves` (and the `Board` type) in a React-free `helpers.ts` when the game is more than trivial: it is what lets a spec and the bot's move pinning import them without pulling in JSX
 - Pull `name`, `title`, `credit` from `gameList` rather than hardcoding them
 
 ### 5. Re-export the component from `src/components/games/index.ts`

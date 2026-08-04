@@ -1,5 +1,5 @@
 import { getBotCard, getBotScore } from './bot-strategy';
-import { Sheriff, Thief, generateStartBoard, type Board } from '../helpers';
+import { Sheriff, Thief, generateStartBoard, type Board } from '../gameplay';
 
 describe('thief-sheriff-mean-9 smart bot', () => {
   describe('as Sheriff', () => {

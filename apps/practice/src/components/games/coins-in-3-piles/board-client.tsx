@@ -1,6 +1,6 @@
 import { range } from 'lodash';
 import { useTranslation } from '../../../language';
-import type { Board } from './helpers';
+import type { Board } from './gameplay';
 import { GameBoard, type BoardClientProps, useHoverPreview } from '../../strategy-game-factory';
 
 const getCoinBgColor = (coinValue) => {

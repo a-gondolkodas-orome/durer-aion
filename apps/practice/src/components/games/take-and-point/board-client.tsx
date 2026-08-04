@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { range } from 'lodash';
 import { useTranslation } from '../../../language';
 import { GameBoard, type BoardClientProps } from '../../strategy-game-factory';
-import { type Board, requiredPointCount } from './helpers';
+import { type Board, requiredPointCount } from './gameplay';
 
 const Chips = ({ count, removeCount = 0 }: { count: number; removeCount?: number }) => (
   // rotate(180deg) makes the heap fill from the bottom up, leaving the

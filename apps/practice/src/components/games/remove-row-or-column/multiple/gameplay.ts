@@ -1,5 +1,5 @@
 import { range, random, sample } from 'lodash';
-import type { Board, Grid } from '../helpers';
+import type { Board, Grid } from '../gameplay';
 
 interface Dims { h: number; w: number }
 
@@ -20,7 +20,7 @@ const isLosingForMover = (dims: Dims[]): boolean => {
 // Lay the rectangles out left to right, all aligned to the top, separated by a
 // single blank column. The blank column keeps neighbouring rectangles isolated
 // (no two discs of different rectangles touch, even diagonally), so the flood
-// fill in ../helpers recovers each as its own rectangle.
+// fill in ../gameplay recovers each as its own rectangle.
 const layout = (dims: Dims[]): Grid => {
   const height = Math.max(...dims.map(d => d.h));
   const width = dims.reduce((sum, d) => sum + d.w, 0) + (dims.length - 1);

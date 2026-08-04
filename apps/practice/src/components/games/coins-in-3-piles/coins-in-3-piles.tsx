@@ -1,34 +1,22 @@
-import { random, sample, sum } from 'lodash';
 import { strategyGameFactory } from '../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { BoardClient } from './board-client';
-import { getPlayerStepDescription, isLostForMover, moves, type Board } from './helpers';
+import {
+  generateArbitraryStartBoard, generateFixedStartBoard, generateTestStartBoard, moves
+} from './gameplay';
 
-const generateWinningStartBoard = (): Board => {
-  const board = [random(0, 5), random(0, 7), random(1, 8)];
-  if (!isLostForMover(board) && sum(board) >= 4) return board;
-  return generateWinningStartBoard();
+const getPlayerStepDescription = ({ ctx: { turnState } }) => {
+  if (turnState !== null) {
+    return {
+      hu: 'Válassz a visszarakási lehetőségek közül.',
+      en: 'Choose an option in the place back bar.'
+    };
+  }
+  return {
+    hu: 'Kattints egy érmére, hogy elvegyél egyet.',
+    en: 'Click a coin to remove it.'
+  };
 };
-
-const generateLosingStartBoard = (): Board => {
-  const board = [random(0, 5), random(0, 7), random(1, 8)];
-  if (isLostForMover(board) && sum(board) >= 4) return board;
-  return generateLosingStartBoard();
-};
-
-// "Arbitrary" sub-game: a balanced (~50/50) heap of 1/2/3-pengő coins.
-const generateArbitraryStartBoard = (): Board =>
-  random(0, 1) ? generateWinningStartBoard() : generateLosingStartBoard();
-
-// "Fixed" sub-game (the original "Change 15 coins"): 3×1, 5×2, 7×3.
-const generateFixedStartBoard = (): Board => [3, 5, 7];
-
-// Test variant covers both sub-games: a small arbitrary heap, or the fixed 3-5-7 setup.
-const generateTestStartBoard = (): Board =>
-  sample([
-    (): Board => [random(0, 2), random(0, 2), random(1, 3)],
-    generateFixedStartBoard
-  ])!();
 
 const rule = {
   hu: <>

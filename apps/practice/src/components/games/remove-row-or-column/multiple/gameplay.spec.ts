@@ -1,6 +1,6 @@
-import { getRectangles } from '../helpers';
+import { getRectangles } from '../gameplay';
 import { boardGrundy } from '../bot-strategy';
-import { generateStartBoard } from './helpers';
+import { generateStartBoard } from './gameplay';
 
 describe('generateStartBoard', () => {
   it('places several isolated rectangles', () => {

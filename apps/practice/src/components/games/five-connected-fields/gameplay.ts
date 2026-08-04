@@ -1,4 +1,5 @@
 import { range } from "lodash";
+import type { Ctx } from "../../strategy-game-factory";
 
 // The board is the K(2,3) bipartite graph of 5 fields, holding coin counts.
 // Indices 0=A, 1=B are the two "hub" fields (side 1, each adjacent to all of
@@ -29,3 +30,23 @@ export const legalNodes = (board: Board): number[] =>
 
 export const hasAnyMove = (board: Board): boolean =>
   legalNodes(board).length > 0;
+
+export const generateStartBoard = (): Board => [0, 0, 0, 0, 0];
+
+export const moves = {
+  placeCoin: {
+    validate: (board: Board, _, node: number) => isNodePlayable(board, node),
+    apply: (board: Board, { ctx }: { ctx: Ctx }, node: number) => {
+      const nextBoard = board.slice();
+      nextBoard[node] += 1;
+      // The player who places the last coin wins: the game ends when no line has
+      // equal endpoints, i.e. when the mover just made all further moves impossible.
+      if (!hasAnyMove(nextBoard)) {
+        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
+      }
+      return { nextBoard, isTurnEnd: true };
+    }
+  }
+};
+
+export type Moves = typeof moves;

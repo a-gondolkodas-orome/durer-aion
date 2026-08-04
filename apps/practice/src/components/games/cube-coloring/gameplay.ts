@@ -1,4 +1,5 @@
-import { every } from 'lodash';
+import { cloneDeep, every, range, some } from 'lodash';
+import type { MoveOutcome } from '../../strategy-game-factory';
 
 export type Board = string[]
 
@@ -43,3 +44,28 @@ export const neighbours: Record<number, number[]> = edges.reduce((acc, [a, b]) =
   (acc[b] ||= []).push(a);
   return acc;
 }, {} as Record<number, number[]>);
+
+const isGameEnd = (board: Board) => {
+  const canUseColor = color => some(range(0, 8), v => isAllowedStep(board, v, color));
+  return every(colors, color => !canUseColor(color));
+};
+
+export const moves = {
+  colorVertex: {
+    validate: (board: Board, _, { vertex, color }: { vertex: number; color: string | null }) =>
+      isAllowedStep(board, vertex, color),
+    apply: (board: Board, _, { vertex, color }): MoveOutcome<Board> => {
+      const nextBoard = cloneDeep(board);
+      nextBoard[vertex] = color;
+      if (isGameEnd(nextBoard)) {
+        // The first player wants every vertex coloured; the second wants the
+        // colouring to get stuck before that.
+        const winnerIndex = every(range(0, 8), v => isColored(nextBoard, v)) ? 0 : 1;
+        return { nextBoard, gameEnd: { winnerIndex } };
+      }
+      return { nextBoard, isTurnEnd: true };
+    }
+  }
+}
+
+export type Moves = typeof moves;

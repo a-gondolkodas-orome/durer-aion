@@ -3,7 +3,7 @@ import {
   type BoardClientProps, type Ctx, GameBoard, useHoverPreview
 } from '../../strategy-game-factory';
 import { useTranslation } from '../../../language';
-import { type Board, type Orientation, getRectangleAt } from './helpers';
+import { type Board, type Orientation, getRectangleAt } from './gameplay';
 
 type Selected = { r: number; c: number } | null
 

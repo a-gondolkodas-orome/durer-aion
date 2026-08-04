@@ -1,6 +1,6 @@
 import { range } from "lodash";
 import { GameBoard, type BoardClientProps } from "../../strategy-game-factory";
-import { type Board, side1, side2 } from "./helpers";
+import { type Board, side1, side2 } from "./gameplay";
 
 // A deliberately non-obvious drawing of the K(2,3) graph: the two hub fields
 // (side 1) sit at the diagonal corners, the three side-2 fields at top-right,

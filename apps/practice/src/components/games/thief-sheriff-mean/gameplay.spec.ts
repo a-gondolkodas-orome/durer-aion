@@ -1,4 +1,4 @@
-import { isCardAvailable, type Board } from './helpers';
+import { isCardAvailable, type Board } from './gameplay';
 
 // cards[Sheriff] first, then cards[Thief].
 const board: Board = { cards: [[2, 5], [3]], numTurns: 0 };

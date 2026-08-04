@@ -1,37 +1,7 @@
-import { strategyGameFactory, type Ctx, type MoveOutcome } from '../../strategy-game-factory';
+import { strategyGameFactory } from '../../strategy-game-factory';
 import { BoardClient } from './board-client';
-import {
-  type Board, applyRemoval, generateStartBoard, isTerminal, nonEmptyIndices,
-  isPointingAllowed, isRemovalAllowed
-} from './helpers';
+import { generateStartBoard, moves, nonEmptyIndices } from './gameplay';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
-
-export const moves = {
-  // Take `amount` stones from a pointed pile. The turn does NOT end here: the
-  // same player then points at piles for the other player (see `pointPiles`).
-  takeStones: {
-    validate: (board: Board, _, index: number, amount: number) =>
-      isRemovalAllowed(board, index, amount),
-    apply: (
-      board: Board, { ctx }: { ctx: Ctx }, index: number, amount: number
-    ): MoveOutcome<Board> => {
-      const nextBoard: Board = { piles: applyRemoval(board.piles, index, amount), pointed: null };
-      if (isTerminal(nextBoard)) {
-        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
-      }
-      return { nextBoard };
-    }
-  },
-
-  // Point at the piles the other player will choose from, then hand over the turn.
-  pointPiles: {
-    validate: (board: Board, _, indices: number[]) => isPointingAllowed(board, indices),
-    apply: (board: Board, _, indices: number[]): MoveOutcome<Board> =>
-      ({ nextBoard: { piles: board.piles, pointed: indices }, isTurnEnd: true })
-  }
-};
-
-export type Moves = typeof moves;
 
 const rule = {
   hu: <>

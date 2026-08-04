@@ -1,18 +1,9 @@
 import {
-  strategyGameFactory,
-  type Ctx, type MoveOutcome, type BotStrategy, type BoardClientProps,
-  GameBoard
+  strategyGameFactory, type BotStrategy, type BoardClientProps, GameBoard
 } from '../../strategy-game-factory';
 import { range, random, sample } from 'lodash';
 import { ChessBishopSvg } from '../chess-bishops/chess-bishop-svg';
-
-type Board = { left: number, right: number }
-
-// A piece advances one or two squares; landing exactly on the other piece is
-// the one thing forbidden. Both players step by the same rule, so whose turn it
-// is does not enter into legality — only which piece the step then moves.
-export const isValidStep = (board: Board, step) =>
-  (step === 1 || step === 2) && step !== board.right - board.left;
+import { generateStartBoard, isValidStep, moves, type Board, type Moves } from './gameplay';
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const potentialStep = i => {
@@ -70,23 +61,6 @@ const optimalBotStrategy: Bot = ({ board: { left, right } }) => {
   return { move: 'step', args: [(dst+1) % 3] };
 };
 
-export const moves = {
-  step: {
-    validate: (board: Board, _, step) => isValidStep(board, step),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, step): MoveOutcome<Board> => {
-      const nextBoard = ctx.currentPlayer === 0
-        ? { left: board.left + step, right: board.right }
-        : { left: board.left, right: board.right - step };
-      if (nextBoard.right < nextBoard.left) {
-        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
-      }
-      return { nextBoard, isTurnEnd: true };
-    }
-  }
-};
-
-export type Moves = typeof moves;
-
 const rule = {
   hu: <>
     Van 12 mező egymás mellett. A két szélsőbe lerakunk egy-egy bábut. Ezután a játékosok
@@ -121,7 +95,7 @@ export const TwelveSquares = strategyGameFactory({
     {
       // smart bot: verified as optimal
       botStrategy: optimalBotStrategy,
-      generateStartBoard: () => ({ left: 1, right: 12 }),
+      generateStartBoard,
       label: { hu: 'Teljes', en: 'Full' },
       isDefault: true
     }

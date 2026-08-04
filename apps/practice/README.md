@@ -228,6 +228,18 @@ values.
 
 Each variant also supplies `generateStartBoard()`.
 
+### Where it lives
+
+A game folder splits along one line: `gameplay.ts` holds the `Board` type, the
+start boards, the `moves` and the legality and win-detection helpers they use,
+and never imports React — ESLint enforces that. The rest (`bot-strategy.ts`,
+`board-client.tsx`, `<game>.tsx` with the rule text and the factory call) sits
+on the React side. The split exists because a future server-authoritative
+competition mode has to validate moves in plain Node with the very same module
+(see [docs/real-competitions-plan.md](docs/real-competitions-plan.md)); it also
+lets specs and the bot's move pinning import the rules without dragging in JSX.
+Details in [AGENTS.md § Files in a game folder](AGENTS.md#architecture).
+
 ### board and ctx
 
 `board` holds only what is specific to this game. Everything common is managed

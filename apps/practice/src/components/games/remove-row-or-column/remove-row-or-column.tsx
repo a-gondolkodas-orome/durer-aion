@@ -2,9 +2,9 @@ import { sample } from 'lodash';
 import { strategyGameFactory } from '../../strategy-game-factory';
 import { BoardClient, getPlayerStepDescription } from './board-client';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
-import { moves } from './helpers';
-import { generateStartBoard as generateSingleBoard } from './single/helpers';
-import { generateStartBoard as generateMultipleBoard } from './multiple/helpers';
+import { moves } from './gameplay';
+import { generateStartBoard as generateSingleBoard } from './single/gameplay';
+import { generateStartBoard as generateMultipleBoard } from './multiple/gameplay';
 
 const rule = {
   hu: <>

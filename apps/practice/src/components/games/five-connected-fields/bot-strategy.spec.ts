@@ -1,5 +1,5 @@
 import { isWinningForMover, getBotMove } from "./bot-strategy";
-import { hasAnyMove, isNodePlayable, legalNodes, type Board } from "./helpers";
+import { hasAnyMove, isNodePlayable, legalNodes, type Board } from "./gameplay";
 
 const addCoin = (board: Board, node: number): Board => {
   const next = board.slice();

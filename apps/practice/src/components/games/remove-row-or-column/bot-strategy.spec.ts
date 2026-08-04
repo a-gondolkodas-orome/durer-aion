@@ -1,7 +1,7 @@
 import { runMatch, type MatchResult } from '../../strategy-game-factory';
 import {
   type Board, type Grid, applyMove, isEmpty, getAllMoves, moves
-} from './helpers';
+} from './gameplay';
 import { grundy, boardGrundy, smartBotStrategy, randomBotStrategy } from './bot-strategy';
 
 const full = (rows: number, cols: number): Grid =>

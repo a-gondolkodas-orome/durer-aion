@@ -1,5 +1,5 @@
-import { moves } from './moves';
-import { Sheriff, Thief, hasWinningTriple, type Board } from '../helpers';
+import { moves } from './gameplay';
+import { Sheriff, Thief, hasWinningTriple, type Board } from '../gameplay';
 import { makeCtx } from '../../../../test-utils';
 
 // The thief wins by holding three cards in arithmetic progression; the sheriff

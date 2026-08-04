@@ -7,9 +7,9 @@ import {
   isTerminal,
   minPileSize,
   nonEmptyIndices,
-  removerWins
-} from './helpers';
-import type { Moves } from './take-and-point';
+  removerWins,
+  type Moves
+} from './gameplay';
 
 type Bot = BotStrategy<Board, Moves>
 

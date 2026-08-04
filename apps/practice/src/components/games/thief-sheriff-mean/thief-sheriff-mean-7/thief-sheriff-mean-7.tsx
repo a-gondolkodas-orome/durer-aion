@@ -6,8 +6,8 @@ import {
   Thief,
   generateStartBoard,
   type Board
-} from "../helpers";
-import { moves, CARD_COUNT } from './moves';
+} from "../gameplay";
+import { moves, CARD_COUNT } from './gameplay';
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const getCardColor = num => {

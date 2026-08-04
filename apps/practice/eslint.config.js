@@ -39,6 +39,29 @@ export default [
     }
   },
   {
+    // A game's gameplay.ts is its framework-free half — the module a future
+    // server-authoritative competition mode validates moves with, so it has to
+    // run in plain Node. See docs/real-competitions-plan.md.
+    files: ['src/components/games/**/gameplay.ts', 'src/components/strategy-game-factory/engine/**/*.ts'],
+    plugins: { '@typescript-eslint': tsPlugin },
+    languageOptions: { parser: tsParser },
+    rules: {
+      '@typescript-eslint/no-restricted-imports': ['error', {
+        patterns: [
+          {
+            group: ['react', 'react/*', 'react-*', '*.tsx', '**/*.tsx'],
+            message: 'Must stay framework-free; move anything React-flavoured into the game .tsx.'
+          },
+          {
+            group: ['**/strategy-game-factory', '**/strategy-game-factory/index'],
+            allowTypeImports: true,
+            message: 'Only types may come from the strategy-game-factory barrel — it pulls in React.'
+          }
+        ]
+      }]
+    }
+  },
+  {
     // SVG files contain inline path data that cannot be meaningfully reformatted
     files: ['src/**/*-svg.{js,ts,tsx,jsx}'],
     rules: { 'max-len': 'off' }

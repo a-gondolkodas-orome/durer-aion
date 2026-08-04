@@ -1,4 +1,4 @@
-import { generateStartBoard } from './helpers';
+import { generateStartBoard } from './gameplay';
 
 describe('generateStartBoard', () => {
   it('always produces a full rectangular grid with sides in 2..6', () => {

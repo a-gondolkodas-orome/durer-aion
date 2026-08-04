@@ -1,5 +1,5 @@
 import { range, random, sample } from 'lodash';
-import type { Board, Grid } from '../helpers';
+import type { Board, Grid } from '../gameplay';
 
 const makeFullGrid = (rows: number, cols: number): Grid =>
   range(rows).map(() => range(cols).map(() => true));

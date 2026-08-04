@@ -1,4 +1,4 @@
-import { moves, type Board } from './helpers';
+import { moves, type Board } from './gameplay';
 import { makeCtx } from '../../../test-utils';
 
 describe('coins-in-3-piles move validators', () => {

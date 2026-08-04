@@ -1,27 +1,7 @@
-import { strategyGameFactory, type Ctx } from "../../strategy-game-factory";
-import { type Board, hasAnyMove, isNodePlayable } from "./helpers";
+import { strategyGameFactory } from "../../strategy-game-factory";
+import { generateStartBoard, moves } from "./gameplay";
 import { smartBotStrategy } from "./bot-strategy";
 import { BoardClient } from "./board-client";
-
-export type { Board };
-
-export const moves = {
-  placeCoin: {
-    validate: (board: Board, _, node: number) => isNodePlayable(board, node),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, node: number) => {
-      const nextBoard = board.slice();
-      nextBoard[node] += 1;
-      // The player who places the last coin wins: the game ends when no line has
-      // equal endpoints, i.e. when the mover just made all further moves impossible.
-      if (!hasAnyMove(nextBoard)) {
-        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
-      }
-      return { nextBoard, isTurnEnd: true };
-    }
-  }
-};
-
-export type Moves = typeof moves;
 
 const rule = {
   hu: <>
@@ -51,5 +31,5 @@ export const FiveConnectedFields = strategyGameFactory({
   BoardClient,
   gameplay: { moves },
   // smart bot: verified as optimal
-  variants: [{ botStrategy: smartBotStrategy, generateStartBoard: (): Board => [0, 0, 0, 0, 0] }]
+  variants: [{ botStrategy: smartBotStrategy, generateStartBoard }]
 });

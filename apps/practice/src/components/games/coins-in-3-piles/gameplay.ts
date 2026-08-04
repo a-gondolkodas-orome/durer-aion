@@ -1,20 +1,7 @@
-import { cloneDeep, isEqual } from "lodash";
+import { cloneDeep, isEqual, random, sample, sum } from 'lodash';
 import type { Ctx, MoveOutcome } from '../../strategy-game-factory';
 
 export type Board = number[]
-
-export const getPlayerStepDescription = ({ ctx: { turnState } }) => {
-  if (turnState !== null) {
-    return {
-      hu: 'Válassz a visszarakási lehetőségek közül.',
-      en: 'Choose an option in the place back bar.'
-    };
-  }
-  return {
-    hu: 'Kattints egy érmére, hogy elvegyél egyet.',
-    en: 'Click a coin to remove it.'
-  };
-};
 
 // Is the player to move lost against optimal play? Closed-form parity
 // predicate: a turn changes the parity of one pile, or of two when a coin is
@@ -26,6 +13,32 @@ export const isLostForMover = (board: Board) => {
 
   return (oddPiles.length === 3 || oddPiles.length === 0);
 }
+
+const generateWinningStartBoard = (): Board => {
+  const board = [random(0, 5), random(0, 7), random(1, 8)];
+  if (!isLostForMover(board) && sum(board) >= 4) return board;
+  return generateWinningStartBoard();
+};
+
+const generateLosingStartBoard = (): Board => {
+  const board = [random(0, 5), random(0, 7), random(1, 8)];
+  if (isLostForMover(board) && sum(board) >= 4) return board;
+  return generateLosingStartBoard();
+};
+
+// "Arbitrary" sub-game: a balanced (~50/50) heap of 1/2/3-pengő coins.
+export const generateArbitraryStartBoard = (): Board =>
+  random(0, 1) ? generateWinningStartBoard() : generateLosingStartBoard();
+
+// "Fixed" sub-game (the original "Change 15 coins"): 3×1, 5×2, 7×3.
+export const generateFixedStartBoard = (): Board => [3, 5, 7];
+
+// Test variant covers both sub-games: a small arbitrary heap, or the fixed 3-5-7 setup.
+export const generateTestStartBoard = (): Board =>
+  sample([
+    (): Board => [random(0, 2), random(0, 2), random(1, 3)],
+    generateFixedStartBoard
+  ])!();
 
 export const moves = {
   removeCoin: {

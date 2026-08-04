@@ -1,7 +1,7 @@
 import { sample } from 'lodash';
-import { Sheriff, Thief, hasWinningTriple, getUntakenCards, type Board } from '../helpers';
+import { Sheriff, Thief, hasWinningTriple, getUntakenCards, type Board } from '../gameplay';
 import { type BotStrategy } from '../../../strategy-game-factory';
-import { applyTakeCard, CARD_COUNT, type Moves } from './moves';
+import { applyTakeCard, CARD_COUNT, type Moves } from './gameplay';
 
 type Bot = BotStrategy<Board, Moves>
 
