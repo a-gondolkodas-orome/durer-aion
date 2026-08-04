@@ -52,6 +52,8 @@ export const moves = {
   }
 };
 
+export type Moves = typeof moves;
+
 const rule = {
   hu: <>
     Egy sorban <i>n</i> mező van (itt legfeljebb 12); kezdetben a bal szélső mezőben egy piros, a jobb szélső

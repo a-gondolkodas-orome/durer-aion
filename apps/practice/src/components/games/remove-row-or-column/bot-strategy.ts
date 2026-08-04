@@ -1,10 +1,10 @@
 import { sample, random } from 'lodash';
 import type { BotStrategy } from '../../strategy-game-factory';
 import {
-  type Board, type Grid, type moves, getRectangles, getAllMoves, applyMove, isEmpty
+  type Board, type Grid, type Moves, getRectangles, getAllMoves, applyMove, isEmpty
 } from './helpers';
 
-type Bot = BotStrategy<Board, keyof typeof moves>
+type Bot = BotStrategy<Board, Moves>
 
 // Sprague–Grundy value of a single a×b rectangle. A move removes a full row
 // (splitting a×b into (i-1)×b and (a-i)×b) or a full column (a×(j-1) and

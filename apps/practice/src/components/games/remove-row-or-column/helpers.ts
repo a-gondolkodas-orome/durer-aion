@@ -88,6 +88,8 @@ export const moves = {
   }
 };
 
+export type Moves = typeof moves;
+
 // Every legal move: for each rectangle, one move per row and one per column.
 export const getAllMoves = (grid: Grid): Move[] => {
   const moves: Move[] = [];

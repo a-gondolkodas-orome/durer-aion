@@ -73,8 +73,22 @@ export type ClientGameMoves<TBoard> = Record<
     & { isAllowed: (board: TBoard, ...args: any[]) => boolean }
 >
 export type StrategyArgs<TBoard> = { board: TBoard; ctx: Ctx }
-// A move a bot wants played, named rather than dispatched.
-export type BotMove<TMoveName extends string = string> = { move: TMoveName; args?: unknown[] }
+// A game's `moves` object seen as a type — what a game exports as `Moves` so
+// its bots can name moves out of it.
+export type AnyMoves = Record<string, MoveDefinition<any>>
+// What a move takes beyond the board and the meta object: exactly the tail a
+// bot has to supply as `args`.
+type MoveArgs<TApply> =
+  TApply extends (board: any, meta: any, ...args: infer TArgs) => any ? TArgs : never
+// A move a bot wants played, named rather than dispatched. Parameterised by the
+// game's `Moves` it pins both halves: naming a move the game does not have, or
+// passing it the wrong arguments, is a typecheck error at the bot. Given only a
+// union of names (or nothing) it still pins the name, leaving `args` unchecked.
+export type BotMove<TMoves extends string | AnyMoves = string> =
+  TMoves extends string ? { move: TMoves; args?: unknown[] }
+  : TMoves extends AnyMoves
+    ? { [K in keyof TMoves]: { move: K; args?: MoveArgs<TMoves[K]['apply']> } }[keyof TMoves]
+    : never
 // A bot is a pure function of the position: it names the move it wants, or the
 // whole sequence when the turn is planned as one decision, and the engine plays
 // them out — paced in the browser so the bot appears to think, immediately in a
@@ -83,8 +97,8 @@ export type BotMove<TMoveName extends string = string> = { move: TMoveName; args
 // board to thread, so the same function can run on an authoritative server.
 // If the turn is still the bot's once its moves are played, it is asked again
 // (see engine/bot-turn.ts), so naming one move at a time is equally fine.
-export type BotStrategy<TBoard, TMoveName extends string = string> =
-  (args: StrategyArgs<TBoard>) => BotMove<TMoveName> | BotMove<TMoveName>[]
+export type BotStrategy<TBoard, TMoves extends string | AnyMoves = string> =
+  (args: StrategyArgs<TBoard>) => BotMove<TMoves> | BotMove<TMoves>[]
 export type BoardClientProps<TBoard> = Omit<StrategyArgs<TBoard>, 'moves'> & {
   moves: ClientGameMoves<TBoard>
   // Writes the mid-turn UI state a BoardClient needs to remember (which pile is

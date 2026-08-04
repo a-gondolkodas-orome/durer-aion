@@ -170,22 +170,33 @@ headless match — and asks the strategy again while the turn is still its own.
 Naming a move after the turn ended is a bug (dev: throw); naming moves the
 game-winning move made moot is fine (they are dropped).
 
-`BotMove.move` is a string, so a mistyped name would only surface when the bot
-plays it (dev: throw, naming the move names the game does have). Every game
-therefore pins the union to its own moves, which turns a typo into a typecheck
-error — follow suit in a new game:
+Left unpinned, `BotMove` is `{ move: string, args?: unknown[] }`, so neither a
+mistyped name nor wrong arguments surface until the bot plays the move (dev:
+throw). A game pins both by exporting its moves as a type, next to the moves
+themselves:
 
 ```ts
-import type { Board, moves } from './helpers';
+// helpers.ts, under the moves object
+export type Moves = typeof moves;
 
-type Bot = BotStrategy<Board, keyof typeof moves>
+// bot-strategy.ts
+import type { Board, Moves } from './helpers';
+
+type Bot = BotStrategy<Board, Moves>
 
 export const smartBotStrategy: Bot = ({ board }) => ({ move: 'removeLine', args: [choice] });
 ```
 
-Give the union its own `type MoveName = keyof typeof moves` alias only where
-something else names it too — a helper that builds a turn's moves returns
-`BotMove<MoveName>[]` (see `coins-in-3-piles`'s `asTurn`).
+`BotStrategy<Board, Moves>` derives the move names **and** each move's argument
+list from `apply`, so a typo, a wrong arity and a wrong argument type are all
+typecheck errors at the bot that made them. A helper that builds a turn's moves
+takes the same parameter: `BotMove<Moves>[]` (see `coins-in-3-piles`'s
+`asTurn`).
+
+The argument half is only as precise as `apply`'s signature — an unannotated
+parameter there types as `any` and silently checks nothing, so annotate them.
+`BotStrategy<Board>` (or a bare name union) still works and pins nothing beyond
+the name; a game that has not been converted yet keeps compiling.
 
 **`ctx`** fields available in moves and `BoardClient`:
 - `currentPlayer`: 0/1 — use this for game logic in both modes

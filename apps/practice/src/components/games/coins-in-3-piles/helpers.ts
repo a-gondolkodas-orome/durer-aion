@@ -31,7 +31,7 @@ export const moves = {
   removeCoin: {
     validate: (board: Board, { ctx }: { ctx: Ctx }, value: number) =>
       ctx.turnState === null && value >= 1 && value <= 3 && board[value - 1] > 0,
-    apply: (board: Board, { ctx }: { ctx: Ctx }, value): MoveOutcome<Board> => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, value: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard[value - 1] -= 1;
       if (value === 1) {
@@ -48,7 +48,7 @@ export const moves = {
       const removed = (ctx.turnState as { removedCoinValue: number } | null)?.removedCoinValue;
       return removed != null && value >= 1 && value < removed;
     },
-    apply: (board: Board, { ctx }: { ctx: Ctx }, value) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, value: number) => {
       const nextBoard = cloneDeep(board);
       nextBoard[value - 1] += 1;
       return finishPlaceBack(nextBoard, ctx);
@@ -59,6 +59,8 @@ export const moves = {
     apply: (board: Board, { ctx }: { ctx: Ctx }) => finishPlaceBack(board, ctx)
   }
 }
+
+export type Moves = typeof moves
 
 // Shared second half of the place-back phase: whether a coin was added or the
 // player passed, the turn ends the same way.

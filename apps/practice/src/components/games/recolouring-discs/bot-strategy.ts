@@ -11,10 +11,9 @@ import {
   majorityWinner
 } from './helpers';
 import { solveForN } from './solver';
-import type { moves } from './recolouring-discs';
+import type { Moves } from './recolouring-discs';
 
-type MoveName = keyof typeof moves
-type Bot = BotStrategy<Board, MoveName>
+type Bot = BotStrategy<Board, Moves>
 
 interface Option {
   move: Move;
@@ -24,7 +23,7 @@ interface Option {
 const optionsFor = (cells: Cell[], player: number): Option[] =>
   legalMoves(cells, player).map(move => ({ move, cells: applyMove(cells, player, move) }));
 
-const asBotMove = (move: Move): BotMove<MoveName> => {
+const asBotMove = (move: Move): BotMove<Moves> => {
   if (move.type === 'move') return { move: 'moveDisc', args: [move.from, move.to] };
   if (move.type === 'place') return { move: 'placeDisc', args: [move.to] };
   return { move: 'pass' };
