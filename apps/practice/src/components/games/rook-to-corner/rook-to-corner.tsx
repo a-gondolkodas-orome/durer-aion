@@ -69,6 +69,8 @@ export const moves = {
   }
 };
 
+export type Moves = typeof moves;
+
 const rule = {
   hu: <>
     Egy 8 × 8-as tábla egyik mezőjére elhelyezünk egy bástyát. A két játékos felváltva léphet a

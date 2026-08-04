@@ -4,9 +4,9 @@ import { SYMMETRIES } from './board-data';
 import {
   type Board, CELL_COUNT, boardMasks, emptyCells, completesLine, linesThrough
 } from './helpers';
-import type { moves } from './modified-mill';
+import type { Moves } from './modified-mill';
 
-type Bot = BotStrategy<Board, keyof typeof moves>
+type Bot = BotStrategy<Board, Moves>
 import strategyTable from './strategy.json';
 
 const STRATEGY: Record<string, number> = strategyTable;

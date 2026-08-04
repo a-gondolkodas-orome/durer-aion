@@ -2,15 +2,14 @@ import { range, isNull, sample, sampleSize, cloneDeep } from 'lodash';
 import { hasWinningSubset } from '../helpers';
 import { isGameEnd, hasFirstPlayerWon, roleColors, type Board } from './helpers';
 import type { BotMove, BotStrategy } from '../../../strategy-game-factory';
-import type { moves } from './tictactoe-doublestart';
+import type { Moves } from './tictactoe-doublestart';
 
-type MoveName = keyof typeof moves
-type Bot = BotStrategy<Board, MoveName>
+type Bot = BotStrategy<Board, Moves>
 
 const emptyCells = (board: Board) => range(0, 9).filter(i => isNull(board[i]));
 
 // The opening turn places two pieces, named together as one decision.
-const placements = (...cells: (number | undefined)[]): BotMove<MoveName>[] =>
+const placements = (...cells: (number | undefined)[]): BotMove<Moves>[] =>
   cells.map(cell => ({ move: 'placePiece', args: [cell] }));
 
 export const randomBotStrategy: Bot = ({ board }) => {

@@ -23,6 +23,8 @@ export const moves = {
   }
 };
 
+export type Moves = typeof moves;
+
 const rule = {
   hu: <>
     Egy 1 × n-es tábla szomszédos mezőit n − 1 elválasztó él határolja el egymástól, melyeken kezdetben

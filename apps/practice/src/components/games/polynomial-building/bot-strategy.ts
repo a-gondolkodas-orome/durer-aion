@@ -3,9 +3,9 @@ import type { BotStrategy } from '../../strategy-game-factory';
 import {
   type Board, type Coef, COEFS, rootTriplesWithProduct, completionValue, canComplete
 } from './helpers';
-import type { moves } from './polynomial-building';
+import type { Moves } from './polynomial-building';
 
-type Bot = BotStrategy<Board, keyof typeof moves>
+type Bot = BotStrategy<Board, Moves>
 
 // Weak bot: plays a random legal move, but completes to a win on the last move
 // when it can (only the first player, who always makes the final move, can win in 1).

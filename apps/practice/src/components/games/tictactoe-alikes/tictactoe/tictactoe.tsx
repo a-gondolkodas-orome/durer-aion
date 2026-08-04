@@ -83,6 +83,8 @@ export const moves = {
   }
 }
 
+export type Moves = typeof moves;
+
 const getPlayerStepDescription = ({ board, ctx }) => {
   return inPlacingPhase(board)
     ? {

@@ -1,10 +1,9 @@
 import { sample } from 'lodash';
 import type { BotMove, BotStrategy } from '../../../strategy-game-factory';
 import type { Board } from '../helpers';
-import type { moves } from './shark-chase';
+import type { Moves } from './shark-chase';
 
-type MoveName = keyof typeof moves
-type Bot = BotStrategy<Board, MoveName>
+type Bot = BotStrategy<Board, Moves>
 
 const getAdjacentCells = (pos: number): number[] => {
   const cells: number[] = [];
@@ -17,7 +16,7 @@ const getAdjacentCells = (pos: number): number[] => {
 
 // The shark's turn is a route of up to two steps, named as a whole: the halfway
 // cell is only chosen to reach the target safely, so the two are one decision.
-const asSharkRoute = (from: number, via: number, to: number): BotMove<MoveName>[] =>
+const asSharkRoute = (from: number, via: number, to: number): BotMove<Moves>[] =>
   to === from
     ? [{ move: 'moveShark', args: [via] }]
     : [{ move: 'moveShark', args: [via] }, { move: 'moveShark', args: [to] }];

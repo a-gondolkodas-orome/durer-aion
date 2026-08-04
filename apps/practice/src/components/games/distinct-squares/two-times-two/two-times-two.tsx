@@ -24,6 +24,8 @@ export const moves = {
   }
 }
 
+export type Moves = typeof moves;
+
 const BoardClient = ({ board, moves }: BoardClientProps<Board>) => (
   <GameBoard>
     <div className="grid grid-cols-2 border-t-2 border-l-2">

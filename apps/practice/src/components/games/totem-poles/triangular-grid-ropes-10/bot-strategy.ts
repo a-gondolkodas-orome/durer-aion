@@ -10,9 +10,9 @@ import {
   type Edge
 } from './helpers';
 import type { BotStrategy } from '../../../strategy-game-factory';
-import type { moves } from './triangular-grid-ropes-10';
+import type { Moves } from './triangular-grid-ropes-10';
 
-type Bot = BotStrategy<Board, keyof typeof moves>
+type Bot = BotStrategy<Board, Moves>
 
 //    0
 //   1 2
@@ -20,19 +20,21 @@ type Bot = BotStrategy<Board, keyof typeof moves>
 // 6 7 8 9
 
 export const randomBotStrategy: Bot = ({ board }) =>
-  ({ move: 'stretchRope', args: [sample(getAllowedMoves(board))] });
+  ({ move: 'stretchRope', args: [sample(getAllowedMoves(board))!] });
 
 export const smartBotStrategy: Bot = ({ board, ctx }) => {
   const allowedMoves = getAllowedMoves(board);
   if (ctx.chosenRoleIndex === 1) {
     if (board.length === 0) {
-      const opening = sample([{ from: 3, to: 5 }, { from: 1, to: 8 }, { from: 2, to: 7 }]);
+      const opening = sample([{ from: 3, to: 5 }, { from: 1, to: 8 }, { from: 2, to: 7 }])!;
       return { move: 'stretchRope', args: [opening] };
     } else {
       const symDir = edgeDirection(board[0]!)!;
       const lastMove = last(board)!;
       if (edgeDirection(lastMove) === symDir) {
-        return { move: 'stretchRope', args: [allowedMoves.find(e => edgeDirection(e) === symDir)] };
+        // The mirroring strategy keeps the position symmetric, so an edge in
+        // the symmetry direction is still free whenever the opponent just took one.
+        return { move: 'stretchRope', args: [allowedMoves.find(e => edgeDirection(e) === symDir)!] };
       } else {
         const mirrorOfLastMove: Edge = {
           from: mirrorNodes[symDir][lastMove.from],
@@ -40,7 +42,7 @@ export const smartBotStrategy: Bot = ({ board, ctx }) => {
         };
         if (!isAllowed(board, mirrorOfLastMove)) {
           console.error('Unexpected state, falling back');
-          return { move: 'stretchRope', args: [sample(allowedMoves)] };
+          return { move: 'stretchRope', args: [sample(allowedMoves)!] };
         }
         return { move: 'stretchRope', args: [mirrorOfLastMove] };
       }
@@ -53,7 +55,7 @@ export const smartBotStrategy: Bot = ({ board, ctx }) => {
   });
 
   if (nonTrivialMoves.length === 0) {
-    return { move: 'stretchRope', args: [sample(allowedMoves)] };
+    return { move: 'stretchRope', args: [sample(allowedMoves)!] };
   }
 
   if (trivialMoves.length % 2 === 0) {
@@ -80,7 +82,7 @@ export const smartBotStrategy: Bot = ({ board, ctx }) => {
     }
   }
 
-  return { move: 'stretchRope', args: [sample(allowedMoves)] };
+  return { move: 'stretchRope', args: [sample(allowedMoves)!] };
 };
 
 // given board *after* your step, are you set up to win the game for sure?

@@ -156,6 +156,8 @@ export const moves = {
   }
 }
 
+export type Moves = typeof moves;
+
 const rule = {
   hu: <>
     Adott egy téglatest rácsa, aminek be van húzva az egyik testátlója.

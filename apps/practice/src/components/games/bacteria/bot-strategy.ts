@@ -14,10 +14,10 @@ import {
   topRowIdx,
   ATTACKER,
   DEFENDER,
-  type moves
+  type Moves
 } from "./helpers";
 
-type Bot = BotStrategy<Board, keyof typeof moves>
+type Bot = BotStrategy<Board, Moves>
 
 export type { AttackMove };
 

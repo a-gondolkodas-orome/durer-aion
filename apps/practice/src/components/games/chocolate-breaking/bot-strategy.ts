@@ -1,9 +1,9 @@
 import { sample } from 'lodash';
 import type { BotStrategy } from '../../strategy-game-factory';
 import { allMoves, applyBreak, totalGrundy, hasSafeBreak, type Board, type Move } from './helpers';
-import type { moves } from './chocolate-breaking';
+import type { Moves } from './chocolate-breaking';
 
-type Bot = BotStrategy<Board, keyof typeof moves>
+type Bot = BotStrategy<Board, Moves>
 
 const winningMoves = (board: Board): Move[] =>
   allMoves(board.pieces).filter(m => totalGrundy(applyBreak(board, m).pieces) === 0);

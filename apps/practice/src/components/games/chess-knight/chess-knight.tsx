@@ -68,6 +68,8 @@ export const moves = {
   }
 };
 
+export type Moves = typeof moves;
+
 const rule = {
   hu: <>
     Egy 4 × 4-es tábla egyik mezőjén kezdetben egy huszár áll. Két játékos felváltva

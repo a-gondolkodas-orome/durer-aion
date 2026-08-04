@@ -116,6 +116,8 @@ export const moves = {
   }
 }
 
+export type Moves = typeof moves;
+
 const rule = {
   hu: <>
     Egy indiánrezervátumban 10 totemoszlopot állítottak fel az ábrán látható háromszögrács szerint.

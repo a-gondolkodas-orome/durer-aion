@@ -85,6 +85,8 @@ export const moves = {
   }
 }
 
+export type Moves = typeof moves;
+
 const rule = {
   hu: <>
     Mindkét játékos előtt 5-5 kártyalap van az 1-5 egész számokkal megszámozva.

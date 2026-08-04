@@ -17,6 +17,8 @@ export const moves = {
   }
 };
 
+export type Moves = typeof moves;
+
 const rule = {
   hu: <>
     Cupido és Ámor a következő játékkal ütik el az időt: 6 ember közül felváltva

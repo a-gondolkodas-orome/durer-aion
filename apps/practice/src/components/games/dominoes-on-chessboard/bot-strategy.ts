@@ -1,13 +1,13 @@
 import { sample, last } from 'lodash';
 import type { BotStrategy } from '../../strategy-game-factory';
 import {
-  type Board, type Domino, type Field, type moves, ALL_FIELDS, BOARDSIZE, getPossibleMoves
+  type Board, type Domino, type Field, type Moves, ALL_FIELDS, BOARDSIZE, getPossibleMoves
 } from './dominoes-on-chessboard';
 
-type Bot = BotStrategy<Board, keyof typeof moves>
+type Bot = BotStrategy<Board, Moves>
 
 export const randomBotStrategy: Bot = ({ board }) =>
-  ({ move: 'placeDomino', args: [sample(getPossibleMoves(board))] });
+  ({ move: 'placeDomino', args: [sample(getPossibleMoves(board))!] });
 
 const mirror = ({ row, col }: Field): Field => ({ row: BOARDSIZE - 1 - row, col: BOARDSIZE - 1 - col });
 
@@ -26,7 +26,7 @@ export const smartBotStrategy: Bot = ({ board, ctx }) => {
   // position can be solved, to capitalize on any mistakes the opponent makes; fall
   // back to a random move otherwise.
   const exactMove = getExactWinningMove(board);
-  return { move: 'placeDomino', args: [exactMove ?? sample(getPossibleMoves(board))] };
+  return { move: 'placeDomino', args: [exactMove ?? sample(getPossibleMoves(board))!] };
 };
 
 // This game (Cram) is impartial - either player may place a domino in either

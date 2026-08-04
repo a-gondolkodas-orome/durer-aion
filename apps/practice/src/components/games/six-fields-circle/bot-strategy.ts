@@ -4,9 +4,9 @@ import {
   type Board, type Move, OPPOSITE_PAIRS, getLegalMoves, hasLegalMove, pairSum,
   sampleNonEmptyField
 } from "./helpers";
-import type { moves } from './six-fields-circle';
+import type { Moves } from './six-fields-circle';
 
-type Bot = BotStrategy<Board, keyof typeof moves>
+type Bot = BotStrategy<Board, Moves>
 
 // Optimal move: keep all three opposite-pair sums even, which hands the
 // opponent a losing position. When the mover is already in a losing position

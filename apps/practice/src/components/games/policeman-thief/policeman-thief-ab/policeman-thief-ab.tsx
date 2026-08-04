@@ -94,6 +94,8 @@ export const moves = {
   }
 };
 
+export type Moves = typeof moves;
+
 const isGameEnd = (board: Board) => {
   if (board.turnCount === 3) {
     return true;

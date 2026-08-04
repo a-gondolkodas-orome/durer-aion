@@ -84,6 +84,8 @@ export const moves = {
   }
 };
 
+export type Moves = typeof moves;
+
 const rule = {
   hu: <>
     Károly és Dezső <code>m</code>-ig szeretnének elszámolni, és közben a következő játékot játsszák:

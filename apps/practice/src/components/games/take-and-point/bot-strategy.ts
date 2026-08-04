@@ -9,10 +9,9 @@ import {
   nonEmptyIndices,
   removerWins
 } from './helpers';
-import type { moves } from './take-and-point';
+import type { Moves } from './take-and-point';
 
-type MoveName = keyof typeof moves
-type Bot = BotStrategy<Board, MoveName>
+type Bot = BotStrategy<Board, Moves>
 
 type Removal = { index: number; amount: number };
 
@@ -106,9 +105,9 @@ export const chooseRemoval = (board: Board): Removal => {
 // A turn takes stones and then points at the piles the opponent may take from,
 // both named at once — except on the opening turn, which only points, and when
 // the take empties the board and wins the game there and then.
-const asTurn = (board: Board, { index, amount }: Removal, point: (board: Board) => number[]): BotMove<MoveName>[] => {
+const asTurn = (board: Board, { index, amount }: Removal, point: (board: Board) => number[]): BotMove<Moves>[] => {
   const nextBoard: Board = { piles: applyRemoval(board.piles, index, amount), pointed: null };
-  const removal: BotMove<MoveName> = { move: 'takeStones', args: [index, amount] };
+  const removal: BotMove<Moves> = { move: 'takeStones', args: [index, amount] };
   if (isTerminal(nextBoard)) return [removal];
   return [removal, { move: 'pointPiles', args: [point(nextBoard)] }];
 };

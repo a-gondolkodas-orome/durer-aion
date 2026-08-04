@@ -8,9 +8,9 @@ import {
 import { OPENING_EDGES, isLineTurnWon, marchEdges, winningPairHeatEdges } from './forced-win';
 import { makeMoveEvaluator } from './search';
 import type { BotStrategy } from '../../../strategy-game-factory';
-import type { moves } from '../triangle-circle-game';
+import type { Moves } from '../triangle-circle-game';
 
-type Bot = BotStrategy<Board, keyof typeof moves>
+type Bot = BotStrategy<Board, Moves>
 
 // Smart bot.
 //

@@ -53,6 +53,8 @@ export const moves = {
   }
 }
 
+export type Moves = typeof moves;
+
 const rule = {
   hu: <>
     A 3×3-as antiamőba játékban a kezdő piros, a második kék korongokat rak le. Felváltva

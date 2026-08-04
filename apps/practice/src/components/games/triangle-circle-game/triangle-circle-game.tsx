@@ -38,6 +38,8 @@ export const moves = {
   }
 };
 
+export type Moves = typeof moves;
+
 const rule = {
   hu: <>
     Ebben a játékban ketten játszanak, a vonal-, illetve a körjátékos. A vonaljátékos a táblán minden

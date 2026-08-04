@@ -129,7 +129,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-type Bot = BotStrategy<Board, keyof typeof moves>
+type Bot = BotStrategy<Board, Moves>
 
 const randomBotStrategy: Bot = ({ board }) => {
   const validMoves = allPrimePowers.filter(e => e.value <= board);
@@ -174,6 +174,8 @@ export const moves = {
     }
   }
 };
+
+export type Moves = typeof moves;
 
 const rule = {
   hu: <>

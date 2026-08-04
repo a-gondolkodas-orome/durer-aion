@@ -1,15 +1,15 @@
-import { getBoardIndices, withDuckPlaced, getAllowedMoves, type Board, type Field, type moves } from "./helpers";
+import { getBoardIndices, withDuckPlaced, getAllowedMoves, type Board, type Field, type Moves } from "./helpers";
 import { type BotStrategy } from "../../strategy-game-factory";
 import { shuffle, sample } from "lodash";
 
-type Bot = BotStrategy<Board, keyof typeof moves>
+type Bot = BotStrategy<Board, Moves>
 
 /* This strategy file is relevant for the 4x7 case */
 const [ROWS, COLS] = [4, 7];
 const [DUCK] = [1];
 
 export const randomBotStrategy: Bot = ({ board }) =>
-  ({ move: 'placeDuck', args: [sample(getAllowedMoves(board))] });
+  ({ move: 'placeDuck', args: [sample(getAllowedMoves(board))!] });
 
 export const smartBotStrategy: Bot = ({ board }) => {
   const allowedMoves = getAllowedMoves(board);

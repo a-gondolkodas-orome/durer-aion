@@ -9,9 +9,9 @@ import {
   legalMoves,
   moverWins
 } from './helpers';
-import type { moves } from './matches-on-edges';
+import type { Moves } from './matches-on-edges';
 
-type Bot = BotStrategy<Board, keyof typeof moves>
+type Bot = BotStrategy<Board, Moves>
 
 // A move is winning if it leaves the other player (who moves next) in a losing
 // position.

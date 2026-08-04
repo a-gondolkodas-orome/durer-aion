@@ -76,18 +76,20 @@ export const moves = {
   }
 };
 
+export type Moves = typeof moves;
+
 const isGameEnd = (board: Board) => {
   const possibleMoves = range(1, board.numbersOnTable.length + 1)
     .filter(n => isAllowed(board, n));
   return possibleMoves.length === 0;
 }
 
-type Bot = BotStrategy<Board, keyof typeof moves>
+type Bot = BotStrategy<Board, Moves>
 
 const randomBotStrategy: Bot = ({ board }) => {
   const possibleMoves = range(1, board.numbersOnTable.length + 1)
     .filter(n => isAllowed(board, n));
-  return { move: 'removeNumber', args: [sample(possibleMoves)] };
+  return { move: 'removeNumber', args: [sample(possibleMoves)!] };
 };
 
 const smartBotStrategy: Bot = ({ board }) => {
@@ -97,11 +99,11 @@ const smartBotStrategy: Bot = ({ board }) => {
     ? strategyDict[numCount][stateId]
     : [];
   if (optimalMoves.length) {
-    return { move: 'removeNumber', args: [sample(optimalMoves)] };
+    return { move: 'removeNumber', args: [sample(optimalMoves)!] };
   } else {
     const possibleMoves = range(1, numCount + 1)
       .filter(n => isAllowed(board, n));
-    return { move: 'removeNumber', args: [sample(possibleMoves)] };
+    return { move: 'removeNumber', args: [sample(possibleMoves)!] };
   }
 };
 

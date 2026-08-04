@@ -1,9 +1,9 @@
 import { sample } from "lodash";
 import { type BotStrategy } from "../../strategy-game-factory";
 import { type Board, legalNodes, hasAnyMove } from "./helpers";
-import type { moves } from './four-connected-fields';
+import type { Moves } from './four-connected-fields';
 
-type Bot = BotStrategy<Board, keyof typeof moves>
+type Bot = BotStrategy<Board, Moves>
 
 // Every move raises the total coin count by exactly 1, so the game is a strictly
 // monotonic DAG: it always terminates and can be solved exactly by a memoized

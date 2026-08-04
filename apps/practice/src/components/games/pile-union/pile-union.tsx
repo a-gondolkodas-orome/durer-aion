@@ -217,6 +217,8 @@ export const moves = {
   }
 };
 
+export type Moves = typeof moves;
+
 const getPlayerStepDescription = ({ board, ctx }) => {
   if (ctx.turnState !== null) {
     return {

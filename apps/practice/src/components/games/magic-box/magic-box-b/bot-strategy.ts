@@ -1,14 +1,13 @@
 import { range, sample } from 'lodash';
 import { isLineFull, emptyCellsInLine, placeStoneAt, LINES, type Board } from './helpers';
 import type { BotMove, BotStrategy } from '../../../strategy-game-factory';
-import type { moves } from './magic-box-b';
+import type { Moves } from './magic-box-b';
 
-type MoveName = keyof typeof moves
-type Bot = BotStrategy<Board, MoveName>
+type Bot = BotStrategy<Board, Moves>
 
 // A turn is one decision — where to place, then which line to hand over — so it
 // is named as a whole. The opening turn has no pending line to place into.
-const asTurn = (pendingLine: number | null, cell: number | undefined, line: number): BotMove<MoveName>[] =>
+const asTurn = (pendingLine: number | null, cell: number | undefined, line: number): BotMove<Moves>[] =>
   pendingLine === null
     ? [{ move: 'designateLine', args: [line] }]
     : [{ move: 'placeStone', args: [cell] }, { move: 'designateLine', args: [line] }];

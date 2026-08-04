@@ -1,13 +1,13 @@
 import { sample, range } from 'lodash';
 import type { BotStrategy } from '../../strategy-game-factory';
-import { type Board, getWinnerIndex, type moves } from './five-five-card';
+import { type Board, getWinnerIndex, type Moves } from './five-five-card';
 
-type Bot = BotStrategy<Board, keyof typeof moves>
+type Bot = BotStrategy<Board, Moves>
 
 export const randomBotStrategy: Bot = ({ board, ctx }) => {
   const opponentIdx = ctx.chosenRoleIndex!;
   const validIds = range(1, 6).filter(id => board[opponentIdx][id - 1] !== null);
-  return { move: 'removeCard', args: [sample(validIds)] };
+  return { move: 'removeCard', args: [sample(validIds)!] };
 };
 
 export const smartBotStrategy: Bot = ({ board, ctx }) => {

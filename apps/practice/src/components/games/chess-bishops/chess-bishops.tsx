@@ -92,6 +92,8 @@ export const moves = {
   }
 };
 
+export type Moves = typeof moves;
+
 const rule = {
   hu: <>
     Két játékos felváltva tesz le a sakktáblára futókat. Egy új futót mindig

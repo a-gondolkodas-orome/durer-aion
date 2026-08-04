@@ -149,7 +149,9 @@ export const moves = {
   }
 };
 
-type Bot = BotStrategy<Board, keyof typeof moves>
+export type Moves = typeof moves;
+
+type Bot = BotStrategy<Board, Moves>
 
 const smartBotStrategy: Bot = ({ board }) =>
   ({ move: 'takeStones', args: [getSmartBotMove(board)] });

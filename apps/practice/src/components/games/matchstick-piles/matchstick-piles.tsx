@@ -150,6 +150,8 @@ export const moves = {
   }
 };
 
+export type Moves = typeof moves;
+
 // --- Optimal strategy -------------------------------------------------------
 // Impartial game: the Grundy value of a single pile of size n is
 //   g(0)=0, g(1)=1, g(2)=2, and for n>=3: 2 if n is even, 0 if n is odd.
@@ -188,13 +190,12 @@ const applyMove = (board: Board, move: Move): Board => {
   );
 };
 
-const asBotMove = (move: Move): BotMove<MoveName> =>
+const asBotMove = (move: Move): BotMove<Moves> =>
   move.type === 'remove'
     ? { move: 'removeMatch', args: [move.pileId] }
     : { move: 'splitPile', args: [move.pileId, move.firstPart] };
 
-type MoveName = keyof typeof moves
-type Bot = BotStrategy<Board, MoveName>
+type Bot = BotStrategy<Board, Moves>
 
 const smartBotStrategy: Bot = ({ board }) => {
   const candidates = legalMoves(board);

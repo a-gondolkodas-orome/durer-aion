@@ -1,13 +1,12 @@
 import { sum, isEqual, sample, range } from 'lodash';
 import type { BotMove, BotStrategy } from '../../../strategy-game-factory';
-import type { Board, moves } from './five-squares';
+import type { Board, Moves } from './five-squares';
 
-type MoveName = keyof typeof moves
-type Bot = BotStrategy<Board, MoveName>
+type Bot = BotStrategy<Board, Moves>
 
 // The second player places two squares per turn, chosen together (see
 // bestPairs), so the turn is named as a whole.
-const asTurn = (squares: number[]): BotMove<MoveName>[] =>
+const asTurn = (squares: number[]): BotMove<Moves>[] =>
   squares.map(square => ({ move: 'addPiece', args: [square] }));
 
 const randomSquare = () => sample(range(5))!;

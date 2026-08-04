@@ -54,7 +54,9 @@ export const moves = {
   }
 };
 
-type Bot = BotStrategy<Board, keyof typeof moves>
+export type Moves = typeof moves;
+
+type Bot = BotStrategy<Board, Moves>
 
 const randomBotStrategy: Bot = ({ board }) => {
   const digits = uniqueNonZeroDigits(board);

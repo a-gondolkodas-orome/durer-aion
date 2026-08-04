@@ -68,6 +68,8 @@ export const moves = {
   }
 };
 
+export type Moves = typeof moves;
+
 const rule = {
   hu: <>
     A játékosok felváltva lépnek egy bástyával, amely a sakktábla bal felső sarkából indul. A

@@ -106,7 +106,9 @@ export const moves = {
   }
 };
 
-type Bot = BotStrategy<Board, keyof typeof moves>
+export type Moves = typeof moves;
+
+type Bot = BotStrategy<Board, Moves>
 
 const randomBotStrategy: Bot = ({ board }) => {
   const turnsLeft = totalDigits - board.digits.length;
@@ -118,11 +120,11 @@ const randomBotStrategy: Bot = ({ board }) => {
     );
     return {
       move: 'chooseDigit',
-      args: [sample(winningDigits.length > 0 ? winningDigits : availableDigits)]
+      args: [sample(winningDigits.length > 0 ? winningDigits : availableDigits)!]
     };
   }
 
-  return { move: 'chooseDigit', args: [sample(availableDigits)] };
+  return { move: 'chooseDigit', args: [sample(availableDigits)!] };
 };
 
 const smartBotStrategy: Bot = ({ board }) => {
@@ -133,7 +135,7 @@ const smartBotStrategy: Bot = ({ board }) => {
     d => winnerFromState((board.sumMod9 + d) % 9, turnsLeft - 1) === currentPlayer
   );
   if (winningDigits.length > 0) {
-    return { move: 'chooseDigit', args: [sample(winningDigits)] };
+    return { move: 'chooseDigit', args: [sample(winningDigits)!] };
   }
 
   // Losing position: minimise opponent's winning replies, pick randomly among equally bad moves.
@@ -147,7 +149,7 @@ const smartBotStrategy: Bot = ({ board }) => {
   const counts = availableDigits.map(opponentWinCount);
   const minCount = Math.min(...counts);
   const leastBadDigits = availableDigits.filter((_, i) => counts[i] === minCount);
-  return { move: 'chooseDigit', args: [sample(leastBadDigits)] };
+  return { move: 'chooseDigit', args: [sample(leastBadDigits)!] };
 };
 
 const rule = {

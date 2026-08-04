@@ -1,10 +1,9 @@
 import { sample, random, range } from "lodash";
 import { neighbours, VERTEX_COUNT, dist, minDistToSet, THIEF } from "./helpers";
-import type { Board, moves } from "./policeman-thief-c";
+import type { Board, Moves } from "./policeman-thief-c";
 import type { BotMove, BotStrategy } from "../../../strategy-game-factory";
 
-type MoveName = keyof typeof moves
-type Bot = BotStrategy<Board, MoveName>
+type Bot = BotStrategy<Board, Moves>
 
 // ---------------------------------------------------------------------------
 // Minimax core (exhaustive; the graph and rules are fixed so the memo below is
@@ -122,13 +121,15 @@ const chooseCopPlacement = (copCount: number): number[] => {
 // Every policeman is placed (or stepped) in the same turn, from a plan made for
 // the position the turn starts in, so a turn is named as a whole. A step onto
 // the thief ends the game there and then, leaving the rest of the plan moot.
-const asCopMoves = (move: MoveName, target: number[]): BotMove<MoveName>[] =>
-  target.map(vertex => ({ move, args: [vertex] }));
+const asCopMoves = (move: 'placeCop' | 'moveCop', target: number[]): BotMove<Moves>[] =>
+  target.map(vertex => move === 'placeCop'
+    ? { move: 'placeCop', args: [vertex] }
+    : { move: 'moveCop', args: [vertex] });
 
-const placeCopsOptimally = (board: Board): BotMove<MoveName>[] =>
+const placeCopsOptimally = (board: Board): BotMove<Moves>[] =>
   asCopMoves('placeCop', chooseCopPlacement(board.copCount));
 
-const placeThiefOptimally = (board: Board): BotMove<MoveName> => {
+const placeThiefOptimally = (board: Board): BotMove<Moves> => {
   const cops = board.policemen;
   const candidates = range(VERTEX_COUNT).filter((v) => !cops.includes(v));
   const surviving = candidates.filter((v) => thiefSurvives(cops, v, 3));
@@ -147,10 +148,10 @@ export const chooseCopMove = (cops: number[], thief: number, movesLeft: number):
   return sample(argExtreme(pool, totalDistToThief, false))!;
 };
 
-const moveCopsOptimally = (board: Board): BotMove<MoveName>[] =>
+const moveCopsOptimally = (board: Board): BotMove<Moves>[] =>
   asCopMoves('moveCop', chooseCopMove(board.policemen, board.thief!, 3 - board.thiefMoveCount));
 
-const moveThiefOptimally = (board: Board): BotMove<MoveName> => {
+const moveThiefOptimally = (board: Board): BotMove<Moves> => {
   const { policemen: cops, thief } = board;
   const movesLeft = 3 - board.thiefMoveCount;
   const safe = neighbours[thief!].filter((t) => !cops.includes(t));
@@ -174,10 +175,10 @@ export const smartBotStrategy: Bot = ({ board, ctx }) => {
 // human thief realistically win, unlike the optimal bot.
 // ---------------------------------------------------------------------------
 
-const placeCopsRandom = (board: Board): BotMove<MoveName>[] =>
+const placeCopsRandom = (board: Board): BotMove<Moves>[] =>
   asCopMoves('placeCop', range(board.copCount).map(() => random(0, VERTEX_COUNT - 1)));
 
-const moveCopsRandom = (board: Board): BotMove<MoveName>[] => {
+const moveCopsRandom = (board: Board): BotMove<Moves>[] => {
   const thief = board.thief!;
   return asCopMoves('moveCop', board.policemen.map((c) => {
     const nbs = neighbours[c];
@@ -185,12 +186,12 @@ const moveCopsRandom = (board: Board): BotMove<MoveName>[] => {
   }));
 };
 
-const placeThiefRandom = (board: Board): BotMove<MoveName> => {
+const placeThiefRandom = (board: Board): BotMove<Moves> => {
   const candidates = range(VERTEX_COUNT).filter((v) => !board.policemen.includes(v));
   return { move: 'placeThief', args: [sample(candidates)!] };
 };
 
-const moveThiefRandom = (board: Board): BotMove<MoveName> => {
+const moveThiefRandom = (board: Board): BotMove<Moves> => {
   const safe = neighbours[board.thief!].filter((t) => !board.policemen.includes(t));
   return { move: 'moveThief', args: [sample(safe.length ? safe : neighbours[board.thief!])!] };
 };

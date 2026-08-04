@@ -126,6 +126,8 @@ export const moves = {
   spread: attackerMove('spread')
 };
 
+export type Moves = typeof moves;
+
 export const isShiftRight = ({ attackRow, attackCol, row, col }) => {
   return attackRow === row && (col === (attackCol + 1));
 };

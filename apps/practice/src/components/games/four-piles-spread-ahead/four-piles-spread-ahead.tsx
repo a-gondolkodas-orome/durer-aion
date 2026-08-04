@@ -154,6 +154,8 @@ export const moves = {
   }
 };
 
+export type Moves = typeof moves;
+
 const rule = {
   hu: <>
     Adott négy, korongokból álló kupac, melyek 1-től 4-ig vannak számozva. Egy lépésben a

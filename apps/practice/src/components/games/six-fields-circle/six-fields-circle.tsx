@@ -22,6 +22,8 @@ export const moves = {
   }
 };
 
+export type Moves = typeof moves;
+
 const getPlayerStepDescription = ({ ctx }: { ctx: Ctx }) => {
   if ((ctx.turnState as { first: number } | null) !== null) {
     return {

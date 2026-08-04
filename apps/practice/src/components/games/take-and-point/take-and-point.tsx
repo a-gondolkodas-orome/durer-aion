@@ -31,6 +31,8 @@ export const moves = {
   }
 };
 
+export type Moves = typeof moves;
+
 const rule = {
   hu: <>
     A játék elején néhány kupacban kavicsok vannak. Egy játékos körében az alábbi két dolog történik

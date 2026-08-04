@@ -180,6 +180,8 @@ export const moves = {
   }
 };
 
+export type Moves = typeof moves;
+
 const getPlayerStepDescription = () => ({
   hu: 'Először kattints az eltávolítandó kupacra, majd arra a korongra, ahol ketté akarod vágni a kupacot.',
   en: 'First click the pile you wish to remove, then the disk where you want to split.'

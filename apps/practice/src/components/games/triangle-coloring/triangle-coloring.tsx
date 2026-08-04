@@ -141,12 +141,14 @@ export const moves = {
   }
 };
 
+export type Moves = typeof moves;
+
 const getAllowedMoves = (board: Board) => range(16).filter(i => board[i] === ALLOWED);
 
-type Bot = BotStrategy<Board, keyof typeof moves>
+type Bot = BotStrategy<Board, Moves>
 
 const randomBotStrategy: Bot = ({ board }) =>
-  ({ move: 'colorTriangle', args: [sample(getAllowedMoves(board))] });
+  ({ move: 'colorTriangle', args: [sample(getAllowedMoves(board))!] });
 
 const smartBotStrategy: Bot = ({ board }) => {
   const allowedMoves = getAllowedMoves(board);
@@ -154,7 +156,7 @@ const smartBotStrategy: Bot = ({ board }) => {
     i => isWinningState(withTriangleColored(board, i))
   );
 
-  return { move: 'colorTriangle', args: [optimalPlace ?? sample(allowedMoves)] };
+  return { move: 'colorTriangle', args: [optimalPlace ?? sample(allowedMoves)!] };
 };
 
 // given board *after* your step, are you set up to win the game for sure?

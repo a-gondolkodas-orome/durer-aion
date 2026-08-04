@@ -105,6 +105,8 @@ export const moves = {
   }
 };
 
+export type Moves = typeof moves;
+
 const rule = {
   hu: <>
     A gráfon egy tolvaj menekül néhány rendőr elől. Előbb a rendőrök foglalják el

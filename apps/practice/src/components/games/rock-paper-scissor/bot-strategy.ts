@@ -1,8 +1,8 @@
 import { random } from 'lodash';
 import type { BotStrategy } from '../../strategy-game-factory';
-import type { Board, moves } from './rock-paper-scissor';
+import type { Board, Moves } from './rock-paper-scissor';
 
-type Bot = BotStrategy<Board, keyof typeof moves>
+type Bot = BotStrategy<Board, Moves>
 
 export const smartBotStrategy: Bot = ({ board, ctx }) => {
   const currentPlayer = ctx.currentPlayer!;

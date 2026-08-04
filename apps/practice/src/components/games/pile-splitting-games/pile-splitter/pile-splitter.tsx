@@ -117,6 +117,8 @@ export const moves = {
   }
 };
 
+export type Moves = typeof moves;
+
 const rule = {
   hu: <>
     A pályán mindig két kupac korong található.

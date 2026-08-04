@@ -24,6 +24,8 @@ export const moves = {
   }
 };
 
+export type Moves = typeof moves;
+
 const rule = {
   hu: <>
     Adott az ábrán látható módosított malom pálya. A két játékos felváltva helyez le piros

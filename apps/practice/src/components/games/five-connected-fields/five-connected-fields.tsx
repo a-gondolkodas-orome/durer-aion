@@ -21,6 +21,8 @@ export const moves = {
   }
 };
 
+export type Moves = typeof moves;
+
 const rule = {
   hu: <>
     Az ábrán öt mező látható, melyeket vonalak kötnek össze. Kezdetben mind az öt

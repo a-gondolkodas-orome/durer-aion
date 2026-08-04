@@ -1,13 +1,12 @@
 import { random, sample } from 'lodash';
 import type { BotMove, BotStrategy } from '../../../strategy-game-factory';
-import type { Board, moves } from './pile-splitter';
+import type { Board, Moves } from './pile-splitter';
 
-type MoveName = keyof typeof moves
-type Bot = BotStrategy<Board, MoveName>
+type Bot = BotStrategy<Board, Moves>
 
 // A turn is one decision expressed as two moves: which pile to keep, and where
 // to cut it.
-const asTurn = (pileId: number, pieceCount: number): BotMove<MoveName>[] => [
+const asTurn = (pileId: number, pieceCount: number): BotMove<Moves>[] => [
   { move: 'removePile', args: [1 - pileId] },
   { move: 'splitPile', args: [{ pileId, pieceCount }] }
 ];

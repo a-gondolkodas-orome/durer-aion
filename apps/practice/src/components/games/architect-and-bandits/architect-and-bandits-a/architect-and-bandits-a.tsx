@@ -73,6 +73,8 @@ export const moves = {
   }
 };
 
+export type Moves = typeof moves;
+
 const rule = {
   hu: <>
     Óxisz városa egy szabályos nyolcszög alakú fallal van körülvéve, melynek szomszédos csúcsai 10 km-re

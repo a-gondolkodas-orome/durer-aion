@@ -1,17 +1,17 @@
 import { isNull, range, sample } from 'lodash';
 import { pColor, botColor, inPlacingPhase, isGameEnd, type Board } from './helpers';
 import type { BotStrategy } from '../../../strategy-game-factory';
-import type { moves } from './tictactoe';
+import type { Moves } from './tictactoe';
 
-type Bot = BotStrategy<Board, keyof typeof moves>
+type Bot = BotStrategy<Board, Moves>
 
 export const randomBotStrategy: Bot = ({ board }) => {
   const allowedPlaces = getAllowedPlaces({ board, amIBot: true });
   if (inPlacingPhase(board)) {
     const safePlaces = allowedPlaces.filter(i => !opponentCanWinNext(board, i));
-    return { move: 'placePiece', args: [sample(safePlaces.length > 0 ? safePlaces : allowedPlaces)] };
+    return { move: 'placePiece', args: [sample(safePlaces.length > 0 ? safePlaces : allowedPlaces)!] };
   } else {
-    return { move: 'whitenPiece', args: [sample(allowedPlaces)] };
+    return { move: 'whitenPiece', args: [sample(allowedPlaces)!] };
   }
 };
 

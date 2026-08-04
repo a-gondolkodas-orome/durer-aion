@@ -173,6 +173,8 @@ export const moves = {
   }
 }
 
+export type Moves = typeof moves;
+
 const toldalek = {
   '4': 'e',
   '6': 'o',

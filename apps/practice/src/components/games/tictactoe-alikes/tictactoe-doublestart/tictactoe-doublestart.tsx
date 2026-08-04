@@ -61,6 +61,8 @@ export const moves = {
   }
 };
 
+export type Moves = typeof moves;
+
 const getPlayerStepDescription = ({ board }) => {
   return isDuringFirstMove(board)
     ? {

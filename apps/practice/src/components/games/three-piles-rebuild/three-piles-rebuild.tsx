@@ -194,15 +194,16 @@ export const moves = {
   }
 };
 
+export type Moves = typeof moves;
+
 // "Keep, then split" is one decision, so the turn is named as a whole (mirrors
 // the pile-splitting games).
-const asTurn = ({ keepId, parts }: { keepId: number; parts: number[] }): BotMove<MoveName>[] => [
+const asTurn = ({ keepId, parts }: { keepId: number; parts: number[] }): BotMove<Moves>[] => [
   { move: 'keepPile', args: [keepId] },
   { move: 'splitPile', args: [parts] }
 ];
 
-type MoveName = keyof typeof moves
-type Bot = BotStrategy<Board, MoveName>
+type Bot = BotStrategy<Board, Moves>
 
 const smartBotStrategy: Bot = ({ board }) => asTurn(getSmartBotStep(board));
 

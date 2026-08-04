@@ -53,7 +53,9 @@ export const moves = {
   }
 };
 
-type Bot = BotStrategy<Board, keyof typeof moves>
+export type Moves = typeof moves;
+
+type Bot = BotStrategy<Board, Moves>
 
 const randomBotStrategy: Bot = () =>
   random(0, 1) === 0 ? { move: 'add1' } : { move: 'subtract' };

@@ -36,6 +36,8 @@ export const moves = {
   }
 }
 
+export type Moves = typeof moves;
+
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const turnState = ctx.turnState as TurnState;
   const firstPlacedSquareIndex = turnState?.firstPlacedSquareIndex ?? null;

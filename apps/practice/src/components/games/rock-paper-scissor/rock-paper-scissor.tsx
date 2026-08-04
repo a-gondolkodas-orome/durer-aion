@@ -82,6 +82,8 @@ export const moves = {
   }
 }
 
+export type Moves = typeof moves;
+
 const rule = {
   hu: <>
     A játék kezdetekor mindkét játékos elé leteszünk három kártyát: az egyik követ, a

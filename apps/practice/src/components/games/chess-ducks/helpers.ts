@@ -61,3 +61,6 @@ export const moves = {
     }
   }
 };
+
+export type Moves = typeof moves;
+

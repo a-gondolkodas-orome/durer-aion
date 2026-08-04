@@ -134,8 +134,9 @@ export const moves = {
   }
 };
 
-type MoveName = keyof typeof moves
-type Bot = BotStrategy<Board, MoveName>
+export type Moves = typeof moves;
+
+type Bot = BotStrategy<Board, Moves>
 
 export const smartBotStrategy: Bot = ({ board }) => {
   const rem = board[0] % 3;
@@ -158,7 +159,7 @@ export const smartBotStrategy: Bot = ({ board }) => {
 };
 
 const randomBotStrategy: Bot = ({ board }) => {
-  const validMoves: BotMove<MoveName>[] = [];
+  const validMoves: BotMove<Moves>[] = [];
   if (board[0] >= 1) validMoves.push({ move: 'removeDiscs', args: [1] });
   if (board[0] >= 2) validMoves.push({ move: 'removeDiscs', args: [2] });
   if (board[1] >= 1) validMoves.push({ move: 'turnDiscs', args: [1] });

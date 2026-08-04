@@ -1,12 +1,12 @@
 import { range, sample } from 'lodash';
 import { isGameEnd, placeStone, type Board } from './helpers';
 import type { BotStrategy } from '../../../strategy-game-factory';
-import type { moves } from './magic-box-a';
+import type { Moves } from './magic-box-a';
 
-type Bot = BotStrategy<Board, keyof typeof moves>
+type Bot = BotStrategy<Board, Moves>
 
 export const randomBotStrategy: Bot = ({ board }) =>
-  ({ move: 'placeStone', args: [sample(emptyCells(board))] });
+  ({ move: 'placeStone', args: [sample(emptyCells(board))!] });
 
 const emptyCells = (board: Board) => range(0, 9).filter(i => !board[i]);
 
@@ -37,13 +37,13 @@ export const smartBotStrategy: Bot = ({ board, ctx }) => {
     const outcome = isGameEnd(nextBoard) ? 1 - chosenRoleIndex : winner(nextBoard, 1 - chosenRoleIndex);
     return outcome === chosenRoleIndex;
   });
-  if (winningPlaces.length > 0) return { move: 'placeStone', args: [sample(winningPlaces)] };
+  if (winningPlaces.length > 0) return { move: 'placeStone', args: [sample(winningPlaces)!] };
 
   // no winning move exists; at least avoid losing immediately if possible
   const notInstantLosingPlaces = allowedPlaces.filter(i => !isGameEnd(placeStone(board, i)));
   if (notInstantLosingPlaces.length > 0) {
-    return { move: 'placeStone', args: [sample(notInstantLosingPlaces)] };
+    return { move: 'placeStone', args: [sample(notInstantLosingPlaces)!] };
   }
 
-  return { move: 'placeStone', args: [sample(allowedPlaces)] };
+  return { move: 'placeStone', args: [sample(allowedPlaces)!] };
 };

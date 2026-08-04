@@ -3,9 +3,9 @@ import type { BotStrategy } from '../../strategy-game-factory';
 import {
   type Board, getAllowedMoves, completesTriangle, canonicalKey
 } from './helpers';
-import type { moves } from './amor-and-cupido';
+import type { Moves } from './amor-and-cupido';
 
-type Bot = BotStrategy<Board, keyof typeof moves>
+type Bot = BotStrategy<Board, Moves>
 
 // Game value of a position, memoised by canonical (isomorphism-reduced) key.
 // Shared across calls/tests: the value depends only on the position and who is

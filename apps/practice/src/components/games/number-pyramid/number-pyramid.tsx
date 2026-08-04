@@ -25,6 +25,8 @@ export const moves = {
   }
 };
 
+export type Moves = typeof moves;
+
 const rule = {
   hu: <>
     A játék kezdetén adott nyolc pozitív egész szám az első szinten, és egy <code>k</code> pozitív

@@ -1,9 +1,9 @@
 import { sample } from 'lodash';
 import type { BotStrategy } from '../../strategy-game-factory';
 import { getAllowedMoves, isTarget, type Board } from './helpers';
-import type { moves } from './rook-to-corner';
+import type { Moves } from './rook-to-corner';
 
-type Bot = BotStrategy<Board, keyof typeof moves>
+type Bot = BotStrategy<Board, Moves>
 
 // Random play, but grab an immediate win (moving onto the bottom-right square)
 // whenever one is available.

@@ -52,6 +52,8 @@ export const moves = {
   }
 };
 
+export type Moves = typeof moves;
+
 // The mover wins exactly when the last number said is even, so the only winning
 // move is always x+1 (which hands the opponent an odd number). From 0 this plays
 // the forced opening 1. From an odd (losing) board both moves hand the opponent an
@@ -61,7 +63,7 @@ export const getBotNextNumber = (board: Board): number => {
   return sample([board + 1, board * 2])!;
 };
 
-type Bot = BotStrategy<Board, keyof typeof moves>
+type Bot = BotStrategy<Board, Moves>
 
 const smartBotStrategy: Bot = ({ board }) => {
   const next = getBotNextNumber(board);

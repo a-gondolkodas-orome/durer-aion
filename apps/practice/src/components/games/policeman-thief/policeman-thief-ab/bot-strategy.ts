@@ -1,17 +1,16 @@
 import { random } from "lodash";
 import { neighbours, POLICE } from "./helpers";
-import type { Board, moves } from "./policeman-thief-ab";
+import type { Board, Moves } from "./policeman-thief-ab";
 import type { BotMove, BotStrategy } from "../../../strategy-game-factory";
 
-type MoveName = keyof typeof moves
-type Bot = BotStrategy<Board, MoveName>
+type Bot = BotStrategy<Board, Moves>
 
 export const smartBotStrategy: Bot = ({ board, ctx }) =>
   ctx.chosenRoleIndex === POLICE ? thiefMove(board) : policemenMoves(board);
 
 // Both policemen step in the same turn, planned together from the position they
 // start in, so the turn is named as a whole.
-const policemenMoves = (board: Board): BotMove<MoveName>[] => {
+const policemenMoves = (board: Board): BotMove<Moves>[] => {
   //policeman0 Step
   let index0 = board.policemen[0];
   // where it would catch the thief outright, which overrides any later choice
@@ -65,7 +64,7 @@ const policemenMoves = (board: Board): BotMove<MoveName>[] => {
   ];
 };
 
-const thiefMove = (board: Board): BotMove<MoveName> => {
+const thiefMove = (board: Board): BotMove<Moves> => {
   let index = board.thief;
   for (let i = 0; i < 3; i++) {
     if (

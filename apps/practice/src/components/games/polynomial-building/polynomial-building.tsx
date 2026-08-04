@@ -22,6 +22,8 @@ export const moves = {
   }
 };
 
+export type Moves = typeof moves;
+
 const rule = {
   hu: <>
     Legyen <code className="whitespace-nowrap">P(x) = x³ + ax² + bx + c</code> egy polinom.

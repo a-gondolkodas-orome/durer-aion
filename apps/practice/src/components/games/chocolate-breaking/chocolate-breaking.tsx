@@ -127,6 +127,8 @@ export const moves = {
   }
 };
 
+export type Moves = typeof moves;
+
 const rule = {
   hu: <>
     Két játékos felváltva tör egy tábla csokit a rácsvonalai mentén. Kezdetben egy téglalap alakú

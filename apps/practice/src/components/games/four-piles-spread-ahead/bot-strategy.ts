@@ -1,8 +1,8 @@
 import { random, sample, range } from 'lodash';
 import type { BotStrategy } from '../../strategy-game-factory';
-import type { Board, moves } from './four-piles-spread-ahead';
+import type { Board, Moves } from './four-piles-spread-ahead';
 
-type Bot = BotStrategy<Board, keyof typeof moves>
+type Bot = BotStrategy<Board, Moves>
 
 export const randomBotStrategy: Bot = ({ board }) => {
   const validMoves: { pileId: number; pieceCount: number }[] = [];
@@ -11,7 +11,7 @@ export const randomBotStrategy: Bot = ({ board }) => {
       validMoves.push({ pileId, pieceCount });
     }
   }
-  return { move: 'spreadPieces', args: [sample(validMoves)] };
+  return { move: 'spreadPieces', args: [sample(validMoves)!] };
 };
 
 export const smartBotStrategy: Bot = ({ board }) => {

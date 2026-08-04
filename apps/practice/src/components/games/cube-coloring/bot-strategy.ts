@@ -1,9 +1,9 @@
 import { difference, range, shuffle, sample } from 'lodash';
 import { isAllowedStep, isColored, neighbours, colors, type Board } from './helpers';
 import type { BotStrategy } from '../../strategy-game-factory';
-import type { moves } from './cube-coloring';
+import type { Moves } from './cube-coloring';
 
-type Bot = BotStrategy<Board, keyof typeof moves>
+type Bot = BotStrategy<Board, Moves>
 
 export const randomBotStrategy: Bot = ({ board }) => {
   const validMoves: { vertex: number, color: string }[] = [];
@@ -15,7 +15,7 @@ export const randomBotStrategy: Bot = ({ board }) => {
       }
     }
   }
-  return { move: 'colorVertex', args: [sample(validMoves)] };
+  return { move: 'colorVertex', args: [sample(validMoves)!] };
 };
 
 export const smartBotStrategy: Bot = ({ board, ctx }) => {

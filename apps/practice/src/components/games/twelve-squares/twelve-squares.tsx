@@ -55,11 +55,11 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-type Bot = BotStrategy<Board, keyof typeof moves>
+type Bot = BotStrategy<Board, Moves>
 
 const randomBotStrategy: Bot = ({ board }) => {
   const validSteps = [1, 2].filter(step => isValidStep(board, step));
-  return { move: 'step', args: [sample(validSteps)] };
+  return { move: 'step', args: [sample(validSteps)!] };
 };
 
 const optimalBotStrategy: Bot = ({ board: { left, right } }) => {
@@ -84,6 +84,8 @@ export const moves = {
     }
   }
 };
+
+export type Moves = typeof moves;
 
 const rule = {
   hu: <>

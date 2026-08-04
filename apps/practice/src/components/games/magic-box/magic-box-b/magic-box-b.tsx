@@ -29,6 +29,8 @@ export const moves = {
   }
 };
 
+export type Moves = typeof moves;
+
 const rule = {
   hu: <>
     A mágikus ládában kilenc rekesz van 3×3-as elrendezésben. Két játékos felváltva pakol köveket a

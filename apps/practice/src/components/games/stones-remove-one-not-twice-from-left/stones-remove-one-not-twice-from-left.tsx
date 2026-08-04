@@ -85,6 +85,8 @@ export const moves = {
   }
 };
 
+export type Moves = typeof moves;
+
 const isGameEnd = (board, ctx) => {
   if (isEqual(board.piles, [0, 0])) {
     return true;
@@ -95,7 +97,7 @@ const isGameEnd = (board, ctx) => {
   return false;
 }
 
-type Bot = BotStrategy<Board, keyof typeof moves>
+type Bot = BotStrategy<Board, Moves>
 
 const randomBotStrategy: Bot = ({ board, ctx }) =>
   ({ move: 'removeStone', args: [getPileOfRandomAllowedMove(board, ctx)] });

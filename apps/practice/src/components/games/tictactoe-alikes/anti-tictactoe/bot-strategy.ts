@@ -2,12 +2,12 @@ import { range, isNull, sample, cloneDeep } from 'lodash';
 import { hasWinningSubset } from '../helpers';
 import { roleColors, hasFirstPlayerWon, isGameEnd, type Board } from './helpers';
 import type { BotStrategy } from '../../../strategy-game-factory';
-import type { moves } from './anti-tictactoe';
+import type { Moves } from './anti-tictactoe';
 
-type Bot = BotStrategy<Board, keyof typeof moves>
+type Bot = BotStrategy<Board, Moves>
 
 export const randomBotStrategy: Bot = ({ board }) =>
-  ({ move: 'placePiece', args: [sample(emptyCells(board))] });
+  ({ move: 'placePiece', args: [sample(emptyCells(board))!] });
 
 export const smartBotStrategy: Bot = ({ board, ctx }) => {
   const chosenRoleIndex = ctx.chosenRoleIndex!;
@@ -37,16 +37,16 @@ export const smartBotStrategy: Bot = ({ board, ctx }) => {
     return isWinningState(boardCopy, chosenRoleIndex === 1);
   });
 
-  if (optimalPlaces.length > 0) return { move: 'placePiece', args: [sample(optimalPlaces)] };
+  if (optimalPlaces.length > 0) return { move: 'placePiece', args: [sample(optimalPlaces)!] };
 
   // even if we are gonna lose, try to prolong it
   const aiPieces = range(0, 9).filter(i => board[i] === botColor);
   const notInstantLosingPlaces = allowedPlaces.filter(i => !hasWinningSubset([...aiPieces, i]));
   if (notInstantLosingPlaces.length > 0) {
-    return { move: 'placePiece', args: [sample(notInstantLosingPlaces)] };
+    return { move: 'placePiece', args: [sample(notInstantLosingPlaces)!] };
   }
 
-  return { move: 'placePiece', args: [sample(allowedPlaces)] };
+  return { move: 'placePiece', args: [sample(allowedPlaces)!] };
 };
 
 const emptyCells = (board: Board) => range(0, 9).filter(i => isNull(board[i]));

@@ -176,6 +176,8 @@ export const moves = {
   }
 };
 
+export type Moves = typeof moves;
+
 const rule = {
   hu: <>
     Árgyélus és Félix felváltva pakolnak 1 × 2-es dominókat egy 4 × 4-es táblára. Árgyélus mindig

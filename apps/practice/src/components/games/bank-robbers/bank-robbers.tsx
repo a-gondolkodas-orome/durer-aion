@@ -87,6 +87,8 @@ export const moves = {
   }
 }
 
+export type Moves = typeof moves;
+
 // A bank may be robbed while it still stands and at least one of its two
 // neighbours does too — a bank whose neighbours are both gone has police lying
 // in wait. Both gangs rob from the same circle, so whose turn it is does not
@@ -100,7 +102,7 @@ const getAllowedBanks = (board: Board) => {
   })
 }
 
-type Bot = BotStrategy<Board, keyof typeof moves>
+type Bot = BotStrategy<Board, Moves>
 
 const randomBotStrategy: Bot = ({ board }) =>
   ({ move: 'rob', args: [sample(getAllowedBanks(board))!] });
