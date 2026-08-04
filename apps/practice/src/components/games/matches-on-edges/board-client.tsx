@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { range } from 'lodash';
 import { useTranslation } from '../../../language';
 import { GameBoard, type BoardClientProps, useHoverPreview } from '../../strategy-game-factory';
-import { type Board, boundaryEdgesToPlace, currentWindowSize } from './helpers';
+import { type Board, boundaryEdgesToPlace, currentWindowSize } from './gameplay';
 
 const Matchstick = ({ ghost = false }: { ghost?: boolean }) => (
   <div

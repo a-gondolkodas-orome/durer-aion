@@ -1,5 +1,5 @@
 import { sample } from 'lodash';
-import { getAllowedMoves, getAllowedSuperset, type Board, type Edge } from './helpers';
+import { getAllowedMoves, getAllowedSuperset, type Board, type Edge } from './gameplay';
 import { findWinningMove } from './solver';
 import { smartBotStrategy } from './bot-strategy';
 import { botNextMoveArgs, makeCtx } from '../../../../test-utils';

@@ -1,7 +1,7 @@
 import { maxBy, sample } from 'lodash';
 import type { BotMove, BotStrategy } from '../../../strategy-game-factory';
-import type { Board } from '../helpers';
-import type { Moves } from './architect-and-bandits-b';
+import type { Board } from '../gameplay';
+import type { Moves } from './gameplay';
 
 type Bot = BotStrategy<Board, Moves>
 

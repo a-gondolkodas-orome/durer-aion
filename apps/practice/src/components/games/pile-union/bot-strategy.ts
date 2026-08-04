@@ -1,6 +1,6 @@
 import { sample, sortBy, sum } from 'lodash';
 import type { BotStrategy } from '../../strategy-game-factory';
-import type { Board, Moves } from './pile-union';
+import type { Board, Moves } from './gameplay';
 
 type Bot = BotStrategy<Board, Moves>
 

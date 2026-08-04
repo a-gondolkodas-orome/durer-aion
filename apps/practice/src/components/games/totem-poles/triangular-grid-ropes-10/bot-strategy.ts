@@ -1,16 +1,16 @@
 import { last, isEqual, sample, shuffle, cloneDeep, tail } from 'lodash';
 import {
+  edgeDirection,
   getAllowedMoves,
   getTrivialMoves,
-  edgeDirection,
   isAllowed,
-  mirrorNodes,
   isGameEnd,
+  mirrorNodes,
   type Board,
-  type Edge
-} from './helpers';
+  type Edge,
+  type Moves
+} from './gameplay';
 import type { BotStrategy } from '../../../strategy-game-factory';
-import type { Moves } from './triangular-grid-ropes-10';
 
 type Bot = BotStrategy<Board, Moves>
 

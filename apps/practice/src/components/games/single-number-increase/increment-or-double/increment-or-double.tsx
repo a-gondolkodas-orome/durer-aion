@@ -1,15 +1,11 @@
 import {
-  strategyGameFactory, type Ctx, type MoveOutcome, type BotStrategy, type BoardClientProps, GameBoard
+  strategyGameFactory,
+  type BotStrategy,
+  type BoardClientProps,
+  GameBoard
 } from '../../../strategy-game-factory';
 import { sample } from 'lodash';
-
-// `board` is the last number said. 0 means nothing has been said yet, so the
-// starting player must open with 1 (their only legal move from 0).
-type Board = number
-
-const target = 99;
-
-const isLosing = (n: number) => n > target;
+import { isLosing, moves, target, type Board, type Moves } from './gameplay';
 
 const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   const incResult = board + 1;
@@ -35,24 +31,6 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
     </GameBoard>
   );
 };
-
-const say = (next: number, ctx: Ctx): MoveOutcome<Board> => {
-  if (isLosing(next)) {
-    return { nextBoard: next, gameEnd: { winnerIndex: 1 - ctx.currentPlayer! } };
-  }
-  return { nextBoard: next, isTurnEnd: true };
-};
-
-export const moves = {
-  increment: { apply: (board: Board, { ctx }: { ctx: Ctx }) => say(board + 1, ctx) },
-  double: {
-    // Doubling nothing says nothing, so the opening move can only be x+1 = 1.
-    validate: (board: Board) => board >= 1,
-    apply: (board: Board, { ctx }: { ctx: Ctx }) => say(board * 2, ctx)
-  }
-};
-
-export type Moves = typeof moves;
 
 // The mover wins exactly when the last number said is even, so the only winning
 // move is always x+1 (which hands the opponent an odd number). From 0 this plays

@@ -1,7 +1,7 @@
 import { range } from 'lodash';
 import { GameBoard, type BoardClientProps } from '../../strategy-game-factory';
 import { COORDS, LINES } from './board-data';
-import { type Board } from './helpers';
+import { type Board } from './gameplay';
 
 // Map the 0..6 grid coordinates onto a 0..100 viewBox with a margin.
 const px = (v: number) => 8 + (v / 6) * 84;

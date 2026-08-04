@@ -1,6 +1,5 @@
 import { sample, random, range } from "lodash";
-import { neighbours, VERTEX_COUNT, dist, minDistToSet, THIEF } from "./helpers";
-import type { Board, Moves } from "./policeman-thief-c";
+import { THIEF, VERTEX_COUNT, dist, minDistToSet, neighbours, type Board, type Moves } from './gameplay';
 import type { BotMove, BotStrategy } from "../../../strategy-game-factory";
 
 type Bot = BotStrategy<Board, Moves>

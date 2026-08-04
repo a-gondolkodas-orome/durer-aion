@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from '../../../language';
 import { GameBoard, type BoardClientProps } from '../../strategy-game-factory';
 import { BOARD_OUTLINE, EDGES, TRIANGLES, type Edge } from './geometry';
-import { type Board } from './helpers';
+import { type Board } from './gameplay';
 
 // Two very different interactions share one board: on the line player's turn the
 // edges are clickable, on the circle player's turn the triangles are. Only the

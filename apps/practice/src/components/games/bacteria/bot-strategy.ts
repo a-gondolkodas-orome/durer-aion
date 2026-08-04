@@ -15,7 +15,7 @@ import {
   ATTACKER,
   DEFENDER,
   type Moves
-} from "./helpers";
+} from "./gameplay";
 
 type Bot = BotStrategy<Board, Moves>
 

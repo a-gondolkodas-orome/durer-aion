@@ -1,24 +1,12 @@
 import { sample } from 'lodash';
-import {
-  strategyGameFactory,
-  type Ctx, type MoveOutcome, type BotStrategy, type BoardClientProps,
-  GameBoard
-} from '../../strategy-game-factory';
-
-type Board = number
+import { strategyGameFactory, type BotStrategy, type BoardClientProps, GameBoard } from '../../strategy-game-factory';
+import { generateStartBoard, moves, type Board, type Moves } from './gameplay';
 
 const digitsOf = (n: number): number[] =>
   String(n).split('').map(Number).filter(d => d !== 0);
 
 const uniqueNonZeroDigits = (n: number): number[] =>
   [...new Set(digitsOf(n))];
-
-// Only a non-zero digit that actually appears in the current number may be
-// subtracted. Both players draw from the same number, so whose turn it is does
-// not enter into legality.
-export const isSubtractableDigit = (board: Board, digit: number): boolean =>
-  Number.isInteger(digit) && digit >= 1 && digit <= 9
-    && String(board).includes(String(digit));
 
 const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   const digits = String(board).split('').map(Number);
@@ -41,21 +29,6 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   );
 };
 
-export const moves = {
-  subtractDigit: {
-    validate: (board: Board, _, digit: number) => isSubtractableDigit(board, digit),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, digit: number): MoveOutcome<Board> => {
-      const nextBoard = board - digit;
-      if (nextBoard === 0) {
-        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
-      }
-      return { nextBoard, isTurnEnd: true };
-    }
-  }
-};
-
-export type Moves = typeof moves;
-
 type Bot = BotStrategy<Board, Moves>
 
 const randomBotStrategy: Bot = ({ board }) => {
@@ -69,18 +42,6 @@ const smartBotStrategy: Bot = ({ board }) => {
     return { move: 'subtractDigit', args: [board % 10] };
   } else {
     return { move: 'subtractDigit', args: [sample(uniqueNonZeroDigits(board))!] };
-  }
-};
-
-const generateStartBoard = (): Board => {
-  if (Math.random() < 0.3) {
-    // multiple of 10 → P2 wins (losing position for P1)
-    return (Math.floor(Math.random() * 10) + 2) * 10;
-  } else {
-    // non-multiple of 10 → P1 wins
-    let n: number;
-    do { n = Math.floor(Math.random() * 180) + 21; } while (n % 10 === 0);
-    return n;
   }
 };
 

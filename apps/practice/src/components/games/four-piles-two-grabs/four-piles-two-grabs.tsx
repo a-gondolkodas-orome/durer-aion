@@ -1,21 +1,16 @@
 import { useEffect, useState } from 'react';
 import { range } from 'lodash';
-import {
-  strategyGameFactory,
-  type Ctx, type MoveOutcome, type BotStrategy, type BoardClientProps,
-  GameBoard
-} from '../../strategy-game-factory';
+import { strategyGameFactory, type BotStrategy, type BoardClientProps, GameBoard } from '../../strategy-game-factory';
 import { useTranslation } from '../../../language';
 import {
+  generateStartBoard,
+  getRandomBotMove,
+  getSmartBotMove,
+  moves,
   type Board,
   type Move,
-  applyMove,
-  isMoveLegal,
-  isTerminal,
-  getSmartBotMove,
-  getRandomBotMove,
-  generateStartBoard
-} from './helpers';
+  type Moves
+} from './gameplay';
 
 const Stepper = ({ label, disabled, onClick }: {
   label: string; disabled: boolean; onClick: () => void;
@@ -135,21 +130,6 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     </GameBoard>
   );
 };
-
-export const moves = {
-  takeStones: {
-    validate: (board: Board, _, move: Move) => isMoveLegal(board, move),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, move: Move): MoveOutcome<Board> => {
-      const nextBoard = applyMove(board, move);
-      if (isTerminal(nextBoard)) {
-        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
-      }
-      return { nextBoard, isTurnEnd: true };
-    }
-  }
-};
-
-export type Moves = typeof moves;
 
 type Bot = BotStrategy<Board, Moves>
 

@@ -1,30 +1,9 @@
-import { strategyGameFactory, type Ctx, type MoveOutcome } from '../../strategy-game-factory';
-import {
-  type Board, generateEmptyBoard, playerColor, playerHasLine, isBoardFull, isPlacementAllowed
-} from './helpers';
+import { strategyGameFactory } from '../../strategy-game-factory';
+import { generateEmptyBoard, moves, type Board } from './gameplay';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { BoardClient } from './board-client';
 
 export type { Board };
-
-export const moves = {
-  placePiece: {
-    validate: (board: Board, _, node: number) => isPlacementAllowed(board, node),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, node: number): MoveOutcome<Board> => {
-      const nextBoard = board.slice();
-      nextBoard[node] = playerColor(ctx.currentPlayer!);
-      if (playerHasLine(nextBoard, ctx.currentPlayer!)) {
-        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
-      }
-      if (isBoardFull(nextBoard)) {
-        return { nextBoard, gameEnd: { winnerIndex: 1 } };
-      }
-      return { nextBoard, isTurnEnd: true };
-    }
-  }
-};
-
-export type Moves = typeof moves;
 
 const rule = {
   hu: <>

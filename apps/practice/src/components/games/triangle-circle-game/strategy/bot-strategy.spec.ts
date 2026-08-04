@@ -3,7 +3,7 @@ import {
   LINE, CIRCLE,
   generateStartBoard, applyShade, applyCircle,
   isLineWin, isCircleWin, isWinningShade, liveThreats, preThreatEdges
-} from '../helpers';
+} from '../gameplay';
 import { smartBotStrategy, randomBotStrategy, makeSmartBotStrategy } from './bot-strategy';
 import { playBotTurn } from './spec-helpers';
 

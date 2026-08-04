@@ -1,9 +1,4 @@
-import { moves, lowestPow2, cap, isWinningTake, chooseSmartTake } from './waning-stones';
-import { makeCtx } from '../../../../test-utils';
-
-type Board = { stones: number; maxTake: number };
-
-const MAX = 32;
+import { lowestPow2, cap, isWinningTake, chooseSmartTake } from './waning-stones';
 
 // Independent brute-force minimax: the mover with `stones` left and a cap of
 // `maxTake` wins iff some legal take either clears the pile or leaves the
@@ -25,6 +20,10 @@ const solve = (() => {
   };
   return wins;
 })();
+
+const MAX = 32;
+
+type Board = { stones: number; maxTake: number };
 
 describe('waning-stones analysis', () => {
   it('mover loses exactly when the cap is below the lowest power of 2 dividing the pile', () => {
@@ -85,21 +84,5 @@ describe('waning-stones chooseSmartTake', () => {
     for (const board of winningBoards) {
       expect(smartWins(board)).toBe(true);
     }
-  });
-});
-
-const asPlayer = (currentPlayer: number) => ({ ctx: makeCtx({ currentPlayer }) });
-
-describe('waning-stones end of game', () => {
-  it.each([0, 1])('ends the game for the mover (player %i) when the pile is cleared', player => {
-    const outcome = moves.take.apply({ stones: 3, maxTake: 3 }, asPlayer(player), 3);
-    expect(outcome.gameEnd).toEqual({ winnerIndex: player });
-    expect(outcome.isTurnEnd).toBeUndefined();
-  });
-
-  it('passes the turn while stones remain', () => {
-    const outcome = moves.take.apply({ stones: 9, maxTake: 4 }, asPlayer(0), 3);
-    expect(outcome.gameEnd).toBeUndefined();
-    expect(outcome.isTurnEnd).toBe(true);
   });
 });

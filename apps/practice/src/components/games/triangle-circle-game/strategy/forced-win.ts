@@ -1,5 +1,5 @@
 import { EDGES, TRIANGLE_COUNT, edgeOrbit } from '../geometry';
-import { type Board, applyShade, applyCircle, shadedCount } from '../helpers';
+import { type Board, applyShade, applyCircle, shadedCount } from '../gameplay';
 
 // The line player's proven forced win on the side-6 board, built on two facts.
 //

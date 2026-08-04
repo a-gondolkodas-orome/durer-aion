@@ -1,6 +1,6 @@
 import { range } from 'lodash';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
-import { getAllowedMoves, isTarget, boardSize, type Field } from './helpers';
+import { getAllowedMoves, isTarget, boardSize, type Field } from './gameplay';
 import { botNextMoveArgs, makeCtx } from '../../../test-utils';
 
 const isAllowed = (from: Field, to: Field) =>

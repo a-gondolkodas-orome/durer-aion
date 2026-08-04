@@ -1,6 +1,6 @@
 import { botNextMoveArgs, makeCtx } from '../../../test-utils';
 import { smartBotStrategy, randomBotStrategy, isWinningForPlayerToMove } from './bot-strategy';
-import { getPossibleMoves, type Board, type Domino, type Field } from './dominoes-4x4';
+import { getPossibleMoves, type Board, type Domino, type Field } from './gameplay';
 
 const fieldKey = ({ row, col }: Field) => `${row},${col}`;
 

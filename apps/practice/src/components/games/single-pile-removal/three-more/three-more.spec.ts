@@ -1,10 +1,4 @@
-import { moves, cap, moverWins, isWinningTake, chooseSmartTake } from './three-more';
-import { makeCtx } from '../../../../test-utils';
-
-type Board = { stones: number; maxTake: number };
-
-const MAX = 80;
-const INCREMENT = 3;
+import { cap, moverWins, isWinningTake, chooseSmartTake } from './three-more';
 
 // Independent brute-force minimax: the mover with `stones` left and a cap of
 // `maxTake` wins iff some legal take either clears the pile or leaves the other
@@ -26,6 +20,11 @@ const solve = (() => {
   };
   return wins;
 })();
+
+const MAX = 80;
+const INCREMENT = 3;
+
+type Board = { stones: number; maxTake: number };
 
 describe('three-more analysis', () => {
   it('moverWins agrees with an independent brute-force solver', () => {
@@ -96,21 +95,5 @@ describe('three-more chooseSmartTake', () => {
     for (const board of winningBoards) {
       expect(smartWins(board)).toBe(true);
     }
-  });
-});
-
-const asPlayer = (currentPlayer: number) => ({ ctx: makeCtx({ currentPlayer }) });
-
-describe('three-more end of game', () => {
-  it.each([0, 1])('ends the game for the mover (player %i) when the pile is cleared', player => {
-    const outcome = moves.take.apply({ stones: 3, maxTake: 4 }, asPlayer(player), 3);
-    expect(outcome.gameEnd).toEqual({ winnerIndex: player });
-    expect(outcome.isTurnEnd).toBeUndefined();
-  });
-
-  it('passes the turn while stones remain', () => {
-    const outcome = moves.take.apply({ stones: 9, maxTake: 4 }, asPlayer(0), 3);
-    expect(outcome.gameEnd).toBeUndefined();
-    expect(outcome.isTurnEnd).toBe(true);
   });
 });

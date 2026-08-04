@@ -1,5 +1,5 @@
 import { range, sample } from "lodash";
-import type { Board } from "./helpers";
+import type { Board } from "./gameplay";
 
 // Curated start boards for the bacteria game. This is the single source of
 // truth: bacteria.tsx samples these for the actual variants, and

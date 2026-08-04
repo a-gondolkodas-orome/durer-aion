@@ -1,19 +1,7 @@
-import {
-  strategyGameFactory, type MoveOutcome, type BotStrategy, type BoardClientProps, GameBoard
-} from '../../strategy-game-factory';
-import { range, sum, sample, cloneDeep } from 'lodash';
+import { strategyGameFactory, type BotStrategy, type BoardClientProps, GameBoard } from '../../strategy-game-factory';
+import { range, sum, sample } from 'lodash';
 import { useTranslation } from '../../../language';
-
-export type Board = number[]
-
-export const COVERED = -1 as const;
-
-const getRemaining = (board: Board) => board.filter(i => i !== COVERED);
-
-// Numbers are addressed by their value, which is also their 1-based position;
-// only one that is still showing may be covered.
-export const isCoveringAllowed = (board: Board, number: number): boolean =>
-  Number.isInteger(number) && number >= 1 && number <= board.length && board[number - 1] !== COVERED;
+import { generateTestStartBoard, getRemaining, moves, type Board, COVERED, type Moves } from './gameplay';
 
 const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
@@ -89,31 +77,10 @@ const genericRule = {
   </>
 };
 
-export const moves = {
-  coverNumber: {
-    validate: (board: Board, _, number: number) => isCoveringAllowed(board, number),
-    apply: (board: Board, _, number): MoveOutcome<Board> => {
-      const nextBoard = cloneDeep(board);
-      nextBoard[number-1] = COVERED;
-
-      const remaining = getRemaining(nextBoard);
-      if (remaining.length === 2) {
-        return { nextBoard, gameEnd: { winnerIndex: sum(remaining) % 2 } };
-      }
-      return { nextBoard, isTurnEnd: true };
-    }
-  }
-}
-
-export type Moves = typeof moves;
-
 const getPlayerStepDescription = () => ({
   hu: 'Kattints egy számra, hogy lefedd.',
   en: 'Click a number to cover it.'
 });
-
-// Test variant covers both sub-games: numbers 1–8 or 1–10.
-const generateTestStartBoard = (): Board => range(1, sample([9, 11])!);
 
 export const NumberCovering = strategyGameFactory({
   presentation: {

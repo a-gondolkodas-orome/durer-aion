@@ -1,6 +1,6 @@
 import { random } from 'lodash';
 import type { BotStrategy } from '../../strategy-game-factory';
-import type { Board, Moves } from './rock-paper-scissor';
+import type { Board, Moves } from './gameplay';
 
 type Bot = BotStrategy<Board, Moves>
 

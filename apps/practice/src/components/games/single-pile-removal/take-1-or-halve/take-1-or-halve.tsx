@@ -1,12 +1,13 @@
 import {
-  strategyGameFactory, type Ctx, type MoveOutcome, type BotStrategy, type BoardClientProps,
-  GameBoard, useHoverPreview
+  strategyGameFactory,
+  type BotStrategy,
+  type BoardClientProps,
+  GameBoard,
+  useHoverPreview
 } from '../../../strategy-game-factory';
 import { random, range } from 'lodash';
 import { useTranslation } from '../../../../language';
-
-type Board = number
-type HoveredAction = 'take1' | 'halve' | null
+import { moves, type Board, type HoveredAction, type Moves } from './gameplay';
 
 const CoinPile = ({ count, hoveredAction }: { count: number, hoveredAction: HoveredAction }) => (
   <div className="flex flex-wrap justify-center gap-2 p-4" style={{ transform: 'scaleY(-1)' }}>
@@ -52,25 +53,6 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     </GameBoard>
   );
 };
-
-export const moves = {
-  take1: {
-    apply: (board: Board, { ctx }: { ctx: Ctx }): MoveOutcome<Board> => {
-      const nextBoard = board - 1;
-      if (board === 1) {
-        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
-      }
-      return { nextBoard, isTurnEnd: true };
-    }
-  },
-  halve: {
-    // Half may only be taken when the pile is even; taking one is always legal.
-    validate: (board: Board) => board >= 2 && board % 2 === 0,
-    apply: (board: Board): MoveOutcome<Board> => ({ nextBoard: board / 2, isTurnEnd: true })
-  }
-};
-
-export type Moves = typeof moves;
 
 type Bot = BotStrategy<Board, Moves>
 

@@ -11,7 +11,7 @@ import {
   moves,
   ATTACKER,
   type Board
-} from "./helpers";
+} from "./gameplay";
 import {
   generateAdjacentStartBoard,
   generateScatteredStartBoard,

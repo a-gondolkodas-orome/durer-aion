@@ -1,28 +1,9 @@
-import { isCoveringAllowed, smartBotStrategy, moves, COVERED, type Board } from './number-covering';
+import { smartBotStrategy } from './number-covering';
+import { COVERED, type Board } from './gameplay';
 import { botNextMoveArgs, makeCtx } from '../../../test-utils';
-
-const meta = { ctx: makeCtx() };
 
 const smartBotCover = (board: Board, currentPlayer: number): number =>
   botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx({ currentPlayer }) }))[0];
-
-describe('isCoveringAllowed', () => {
-  const board = [1, 2, COVERED, 4, 5];
-
-  it('allows covering a number still showing', () => {
-    expect([1, 2, 4, 5].every(number => isCoveringAllowed(board, number))).toBe(true);
-  });
-
-  it('rejects a number already covered', () => {
-    expect(isCoveringAllowed(board, 3)).toBe(false);
-  });
-
-  it('rejects a number not on the table', () => {
-    expect(isCoveringAllowed(board, 6)).toBe(false);
-    expect(isCoveringAllowed(board, 0)).toBe(false);
-    expect(isCoveringAllowed(board, 2.5)).toBe(false);
-  });
-});
 
 describe('smart bot', () => {
   // 1..8 with 7 covered -> 4 evens (2,4,6,8) and 3 odds (1,3,5) remain.
@@ -48,29 +29,5 @@ describe('smart bot', () => {
     const numbers = [1, 2, 3, 4, 5, 6, 7, 8]; // 4 evens, 4 odds
     expect(numbers).toContain(smartBotCover(numbers, 0));
     expect(numbers).toContain(smartBotCover(numbers, 1));
-  });
-});
-
-// The game runs until two numbers are left, and the *parity of their sum*
-// decides it: even hands it to the first player, odd to the second. Nothing
-// about whose turn it was matters, which is what these tests pin.
-describe('end of game', () => {
-  it('gives an even remaining sum to the first player', () => {
-    // covering 2 leaves 1 and 3
-    const outcome = moves.coverNumber.apply([1, 2, 3], meta, 2);
-    expect(outcome.gameEnd).toEqual({ winnerIndex: 0 });
-    expect(outcome.isTurnEnd).toBeUndefined();
-  });
-
-  it('gives an odd remaining sum to the second player', () => {
-    // covering 1 leaves 2 and 3
-    const outcome = moves.coverNumber.apply([1, 2, 3], meta, 1);
-    expect(outcome.gameEnd).toEqual({ winnerIndex: 1 });
-  });
-
-  it('passes the turn while more than two numbers show', () => {
-    const outcome = moves.coverNumber.apply([1, 2, 3, 4], meta, 4);
-    expect(outcome.gameEnd).toBeUndefined();
-    expect(outcome.isTurnEnd).toBe(true);
   });
 });

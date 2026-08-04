@@ -1,8 +1,6 @@
 import { range } from 'lodash';
-import {
-  strategyGameFactory, type MoveOutcome, type BoardClientProps, type Ctx, GameBoard
-} from '../../../strategy-game-factory';
-import { generateEmptyBoard, isGameEnd, isPlacementAllowed, placeStone, type Board } from './helpers';
+import { strategyGameFactory, type BoardClientProps, GameBoard } from '../../../strategy-game-factory';
+import { generateEmptyBoard, moves, type Board } from './gameplay';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 
 const BoardClient = ({ board, moves }: BoardClientProps<Board>) => (
@@ -23,22 +21,6 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => (
     </div>
   </GameBoard>
 );
-
-export const moves = {
-  placeStone: {
-    validate: (board: Board, _, id: number) => isPlacementAllowed(board, id),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, id): MoveOutcome<Board> => {
-      const nextBoard = placeStone(board, id);
-      // The box breaks under the stone just placed, so the mover loses.
-      if (isGameEnd(nextBoard)) {
-        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer === 0 ? 1 : 0 } };
-      }
-      return { nextBoard, isTurnEnd: true };
-    }
-  }
-}
-
-export type Moves = typeof moves;
 
 const rule = {
   hu: <>

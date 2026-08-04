@@ -1,30 +1,7 @@
-import { range, sum, isEqual, cloneDeep } from 'lodash';
-import {
-  strategyGameFactory, type MoveOutcome, type BoardClientProps, GameBoard
-} from '../../../strategy-game-factory';
+import { range } from 'lodash';
+import { strategyGameFactory, type BoardClientProps, GameBoard } from '../../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
-import { isPlacementAllowed } from '../helpers';
-
-export type Board = number[]
-
-const generateStartBoard = (): Board => [0, 0, 0, 0];
-
-export const moves = {
-  addPiece: {
-    validate: (board: Board, _, pileId) => isPlacementAllowed(board, pileId),
-    apply: (board: Board, _, pileId): MoveOutcome<Board> => {
-      const nextBoard = cloneDeep(board);
-      nextBoard[pileId] += 1;
-      if (sum(nextBoard) === 6) {
-        const winnerIndex = isEqual(cloneDeep(nextBoard).sort(), [0, 1, 2, 3]) ? 1 : 0;
-        return { nextBoard, gameEnd: { winnerIndex } };
-      }
-      return { nextBoard, isTurnEnd: true };
-    }
-  }
-}
-
-export type Moves = typeof moves;
+import { generateStartBoard, moves, type Board } from './gameplay';
 
 const BoardClient = ({ board, moves }: BoardClientProps<Board>) => (
   <GameBoard>

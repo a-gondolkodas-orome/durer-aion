@@ -1,10 +1,7 @@
 import { sample, maxBy } from 'lodash';
 import type { BotStrategy } from '../../strategy-game-factory';
 import { SYMMETRIES } from './board-data';
-import {
-  type Board, CELL_COUNT, boardMasks, emptyCells, completesLine, linesThrough
-} from './helpers';
-import type { Moves } from './modified-mill';
+import { CELL_COUNT, boardMasks, completesLine, emptyCells, linesThrough, type Board, type Moves } from './gameplay';
 
 type Bot = BotStrategy<Board, Moves>
 import strategyTable from './strategy.json';

@@ -1,7 +1,16 @@
 import { range } from 'lodash';
-import { useTranslation } from '../../../../language';
+import { useTranslation, type I18nString } from '../../../../language';
 import { GameBoard, type BoardClientProps } from '../../../strategy-game-factory';
-import { LINES, LINE_LABELS, type Board } from './helpers';
+import { LINES, type Board } from './gameplay';
+
+const LINE_LABELS: I18nString[] = [
+  { hu: '1. sor', en: 'Row 1' },
+  { hu: '2. sor', en: 'Row 2' },
+  { hu: '3. sor', en: 'Row 3' },
+  { hu: '1. oszlop', en: 'Column 1' },
+  { hu: '2. oszlop', en: 'Column 2' },
+  { hu: '3. oszlop', en: 'Column 3' }
+];
 
 const BOX_SIZE = 'w-64 sm:w-72';
 

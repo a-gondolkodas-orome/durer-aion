@@ -8,7 +8,7 @@ import {
   moves,
   type Board,
   type Field
-} from './helpers';
+} from './gameplay';
 
 const generateStartBoard = (ROWS: number, COLS: number) => (): Board => {
   return range(0, ROWS).map(() => range(0, COLS).map(() => null));

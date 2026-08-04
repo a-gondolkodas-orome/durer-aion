@@ -1,8 +1,7 @@
 import { sample } from 'lodash';
-import { getAllowedMoves, type Board } from './helpers';
+import { getAllowedMoves, type Board, type Moves } from './gameplay';
 import { findWinningMove } from './solver';
 import type { BotStrategy } from '../../../strategy-game-factory';
-import type { Moves } from './triangular-grid-ropes-15';
 
 type Bot = BotStrategy<Board, Moves>
 

@@ -1,5 +1,5 @@
 import { smartBotStrategy } from './bot-strategy';
-import { generateEmptyBoard, isGameEnd, placeStone, type Board } from './helpers';
+import { generateEmptyBoard, isGameEnd, placeStone, type Board } from './gameplay';
 import { botNextMoveArgs, makeCtx } from '../../../../test-utils';
 
 const smartBotPlacement = (board: Board, chosenRoleIndex: number): number =>

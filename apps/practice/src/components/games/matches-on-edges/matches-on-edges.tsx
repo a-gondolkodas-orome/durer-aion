@@ -1,29 +1,7 @@
-import { strategyGameFactory, type Ctx, type MoveOutcome } from '../../strategy-game-factory';
+import { strategyGameFactory } from '../../strategy-game-factory';
 import { BoardClient } from './board-client';
-import {
-  type Board, applyMove, currentWindowSize, generateStartBoard, isTerminal, isWindowAllowed
-} from './helpers';
+import { currentWindowSize, generateStartBoard, moves } from './gameplay';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
-
-export const moves = {
-  // Place the length-k subtable [a, b]: matches go on its free bounding edges.
-  // If that leaves the other player with no legal move, they lose; otherwise the
-  // turn passes.
-  placeWindow: {
-    validate: (board: Board, _, a: number, b: number) => isWindowAllowed(board, a, b),
-    apply: (
-      board: Board, { ctx }: { ctx: Ctx }, a: number, b: number
-    ): MoveOutcome<Board> => {
-      const nextBoard = applyMove(board, a, b);
-      if (isTerminal(nextBoard)) {
-        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
-      }
-      return { nextBoard, isTurnEnd: true };
-    }
-  }
-};
-
-export type Moves = typeof moves;
 
 const rule = {
   hu: <>

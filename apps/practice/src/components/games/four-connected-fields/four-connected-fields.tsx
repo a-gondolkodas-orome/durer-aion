@@ -1,27 +1,9 @@
-import { strategyGameFactory, type Ctx, type MoveOutcome } from "../../strategy-game-factory";
-import { type Board, hasAnyMove, isNodePlayable } from "./helpers";
-import { randomBotStrategy, smartBotStrategy } from "./bot-strategy";
-import { BoardClient } from "./board-client";
+import { strategyGameFactory } from '../../strategy-game-factory';
+import { moves, type Board } from './gameplay';
+import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
+import { BoardClient } from './board-client';
 
 export type { Board };
-
-export const moves = {
-  placeCoin: {
-    validate: (board: Board, _, node: number) => isNodePlayable(board, node),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, node: number): MoveOutcome<Board> => {
-      const nextBoard = board.slice();
-      nextBoard[node] += 1;
-      // No move remains once every field is occupied and no line has equal
-      // endpoints.
-      if (!hasAnyMove(nextBoard)) {
-        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
-      }
-      return { nextBoard, isTurnEnd: true };
-    }
-  }
-};
-
-export type Moves = typeof moves;
 
 const rule = {
   hu: <>

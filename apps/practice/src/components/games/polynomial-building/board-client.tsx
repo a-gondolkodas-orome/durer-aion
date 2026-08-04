@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { type BoardClientProps, GameBoard } from '../../strategy-game-factory';
 import { useTranslation } from '../../../language';
-import { type Board, type Coef, COEFS, integerRoots } from './helpers';
+import { type Board, type Coef, COEFS, integerRoots } from './gameplay';
 
 // Any integer is allowed; the digit cap only keeps arithmetic exact (< 2^53).
 const isValidValue = (raw: string): boolean => /^-?\d{1,12}$/.test(raw.trim());

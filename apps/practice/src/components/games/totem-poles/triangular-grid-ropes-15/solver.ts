@@ -1,4 +1,4 @@
-import { vertices, type Board, type Edge } from './helpers';
+import { vertices, type Board, type Edge } from './gameplay';
 
 // Fast optimal-move solver for the 15-pole board.
 //

@@ -1,14 +1,8 @@
-import { range, some, isEqual, cloneDeep } from 'lodash';
-import {
-  strategyGameFactory, type BoardClientProps, type Ctx, type MoveOutcome,
-  GameBoard, useHoverPreview
-} from '../../strategy-game-factory';
+import { range, isEqual } from 'lodash';
+import { strategyGameFactory, type BoardClientProps, GameBoard, useHoverPreview } from '../../strategy-game-factory';
 import { ChessBishopSvg } from './chess-bishop-svg';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
-import {
-  generateStartBoard, getAllowedMoves, BISHOP, FORBIDDEN, markForbiddenFields,
-  type Board, type Field
-} from './helpers';
+import { BISHOP, FORBIDDEN, generateStartBoard, moves, type Board, type Field } from './gameplay';
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { value: validHoveredField, hoverProps } = useHoverPreview<Field>(ctx.moveCount);
@@ -75,24 +69,6 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   </GameBoard>
   );
 };
-
-export const moves = {
-  placeBishop: {
-    validate: (board: Board, _, target: Field) =>
-      some(getAllowedMoves(board), field => isEqual(field, target)),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, { row, col }: Field): MoveOutcome<Board> => {
-      const nextBoard = cloneDeep(board);
-      markForbiddenFields(nextBoard, { row, col });
-      nextBoard[row][col] = BISHOP;
-      if (getAllowedMoves(nextBoard).length === 0) {
-        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
-      }
-      return { nextBoard, isTurnEnd: true };
-    }
-  }
-};
-
-export type Moves = typeof moves;
 
 const rule = {
   hu: <>

@@ -1,5 +1,5 @@
 import { smartBotStrategy } from "./bot-strategy";
-import type { Board } from './bank-robbers';
+import type { Board } from './gameplay';
 import { botNextMoveArgs, makeCtx } from '../../../test-utils';
 
 const robbedBank = (board: Board): number => botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx() }))[0];

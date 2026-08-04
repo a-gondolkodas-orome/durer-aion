@@ -4,6 +4,8 @@ import { chooseRemoval, choosePointing } from './bot-strategy';
 import {
   applyRemoval,
   countMinPiles,
+  isPointingAllowed,
+  isRemovalAllowed,
   minPileSize,
   nonEmptyIndices,
   removerWins
@@ -188,5 +190,16 @@ describe('smart bot wins every game it should, against a perfect adversary', () 
         expect(playGame([...piles], botSide)).toBe(botSide);
       }
     }
+  });
+});
+
+describe('legality of the bot\'s own moves', () => {
+  it('only chooses moves the rules allow', () => {
+    const board = { piles: [2, 3, 3, 1], pointed: null };
+    const pointed = choosePointing(board);
+    expect(isPointingAllowed(board, pointed)).toBe(true);
+    const afterPointing = { piles: board.piles, pointed };
+    const { index, amount } = chooseRemoval(afterPointing);
+    expect(isRemovalAllowed(afterPointing, index, amount)).toBe(true);
   });
 });

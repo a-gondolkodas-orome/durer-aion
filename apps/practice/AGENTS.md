@@ -51,6 +51,16 @@ moves stored in a JSON file when performance requires it.
 | `board-client.tsx` | `BoardClient` (split out once the JSX outgrows the game file) | yes |
 | `<game>.tsx` | `rule`, `getPlayerStepDescription`, `variants`, the `strategyGameFactory` call | yes |
 
+**The spec layout mirrors the file layout**: a spec is named after the module
+whose behaviour it asserts — `gameplay.spec.ts` for the rules,
+`bot-strategy.spec.ts` for the strategy, `<game>.spec.ts` for what the game file
+itself holds, plus a topical name (`solver.spec.ts`, `geometry.spec.ts`) where
+one part of the strategy is worth testing on its own. So a game whose bot lives
+in its `.tsx` tests that bot from `<game>.spec.ts`, and "the bot only ever
+produces legal moves" belongs with the bot even though it reads a rule to check
+it. What must not happen is moves being tested from anywhere but
+`gameplay.spec.ts`.
+
 `gameplay.ts` is the **framework-free half of a game**: the same module a
 server-authoritative competition mode would validate moves with, so it has to
 run in plain Node (see `docs/real-competitions-plan.md` and issue #313). ESLint

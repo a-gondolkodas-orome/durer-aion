@@ -1,9 +1,14 @@
 import { random, sample } from 'lodash';
 import type { BotStrategy } from '../../strategy-game-factory';
 import {
-  type Board, type Coef, COEFS, rootTriplesWithProduct, completionValue, canComplete
-} from './helpers';
-import type { Moves } from './polynomial-building';
+  COEFS,
+  canComplete,
+  completionValue,
+  rootTriplesWithProduct,
+  type Board,
+  type Coef,
+  type Moves
+} from './gameplay';
 
 type Bot = BotStrategy<Board, Moves>
 

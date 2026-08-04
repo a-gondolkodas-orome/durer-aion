@@ -1,9 +1,7 @@
-import { range, some, isEqual, cloneDeep } from 'lodash';
-import {
-  strategyGameFactory, type BoardClientProps, type Ctx, type MoveOutcome, GameBoard
-} from '../../strategy-game-factory';
+import { range } from 'lodash';
+import { strategyGameFactory, type BoardClientProps, GameBoard } from '../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
-import { getAllowedMoves, generateStartBoard, markVisitedFields, type Board, type Field } from './helpers';
+import { generateStartBoard, moves, type Board, type Field } from './gameplay';
 import { ChessKnightSvg } from './chess-knight-svg';
 
 const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
@@ -48,27 +46,6 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   </GameBoard>
   );
 };
-
-export const moves = {
-  moveKnight: {
-    validate: (board: Board, _, target: Field) =>
-      some(getAllowedMoves(board), field => isEqual(field, target)),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, { row, col }: Field): MoveOutcome<Board> => {
-      const nextBoard = cloneDeep(board);
-      markVisitedFields(nextBoard, nextBoard.knightPosition);
-
-      nextBoard.chessBoard[row][col] = 'knight';
-      nextBoard.knightPosition = { row, col };
-
-      if (getAllowedMoves(nextBoard).length === 0) {
-        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
-      }
-      return { nextBoard, isTurnEnd: true };
-    }
-  }
-};
-
-export type Moves = typeof moves;
 
 const rule = {
   hu: <>

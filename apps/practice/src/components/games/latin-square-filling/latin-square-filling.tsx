@@ -3,20 +3,11 @@ import {
   strategyGameFactory,
   type BoardClientProps,
   type Ctx,
-  type MoveOutcome,
   type BotStrategy,
   GameBoard
 } from '../../strategy-game-factory';
 import { useTranslation } from '../../../language';
-import {
-  type Board,
-  generateStartBoard,
-  isFull,
-  isLegalPlacement,
-  legalMoves,
-  getSmartBotStep,
-  getRandomBotStep
-} from './helpers';
+import { generateStartBoard, getRandomBotStep, getSmartBotStep, moves, type Board, type Moves } from './gameplay';
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
@@ -108,25 +99,6 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     </GameBoard>
   );
 };
-
-export const moves = {
-  placeDigit: {
-    validate: (board: Board, _, cell: number, digit: number) => isLegalPlacement(board, cell, digit),
-    apply: (board: Board, _, cell: number, digit: number): MoveOutcome<Board> => {
-      const nextBoard = board.map((v, i) => (i === cell ? digit : v));
-      if (isFull(nextBoard)) {
-        return { nextBoard, gameEnd: { winnerIndex: 0 } };
-      }
-      // An empty cell remains but the next player has no legal digit for it.
-      if (legalMoves(nextBoard).length === 0) {
-        return { nextBoard, gameEnd: { winnerIndex: 1 } };
-      }
-      return { nextBoard, isTurnEnd: true };
-    }
-  }
-};
-
-export type Moves = typeof moves;
 
 type Bot = BotStrategy<Board, Moves>
 

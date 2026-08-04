@@ -14,7 +14,6 @@ import {
   isRemovalAllowed,
   type Board
 } from './gameplay';
-import { choosePointing, chooseRemoval } from './bot-strategy';
 
 // Brute-force ground truth: does the player who is about to be pointed at (and
 // then takes) win the rest of the game with optimal play from both sides?
@@ -140,15 +139,6 @@ describe('legality', () => {
 
   it('refuses taking before anyone has pointed', () => {
     expect(isRemovalAllowed({ piles: [3, 2, 4], pointed: null }, 0, 1)).toBe(false);
-  });
-
-  it('accepts everything the bot chooses', () => {
-    const board = { piles: [2, 3, 3, 1], pointed: null };
-    const pointed = choosePointing(board);
-    expect(isPointingAllowed(board, pointed)).toBe(true);
-    const afterPointing = { piles: board.piles, pointed };
-    const { index, amount } = chooseRemoval(afterPointing);
-    expect(isRemovalAllowed(afterPointing, index, amount)).toBe(true);
   });
 });
 

@@ -1,5 +1,12 @@
-import { firstPlayerMove, heuristicMove } from './bot-strategy';
-import { emptyCells, hasLine, CELL_COUNT } from './helpers';
+import { canonicalize, firstPlayerMove, heuristicMove } from './bot-strategy';
+import { boardMasks, emptyCells, generateEmptyBoard, hasLine, CELL_COUNT } from './gameplay';
+import { LINES, SYMMETRIES } from './board-data';
+
+const applyPerm = (mask: number, perm: number[]): number => {
+  let result = 0;
+  for (let i = 0; i < CELL_COUNT; i++) if (mask & (1 << i)) result |= 1 << perm[i];
+  return result;
+};
 
 describe('modified mill bot strategy', () => {
   it('the first-player table wins against every possible second-player line', () => {
@@ -73,5 +80,21 @@ describe('modified mill bot strategy', () => {
     const red = (1 << line[0]) | (1 << line[1]);
     const blue = 1 << 12; // an unrelated blue disc, no blue win available
     expect(heuristicMove(blue, red)).toBe(line[2]);
+  });
+});
+
+describe('canonicalisation', () => {
+  it('canonicalize gives every symmetric image of a position the same key', () => {
+    const board = generateEmptyBoard();
+    board[LINES[0][0]] = 'red';
+    board[LINES[3][1]] = 'blue';
+    board[LINES[7][2]] = 'red';
+    const { red, blue } = boardMasks(board);
+    const base = canonicalize(red, blue).key;
+
+    // Applying any of the 8 board symmetries must not change the canonical key.
+    for (const perm of SYMMETRIES) {
+      expect(canonicalize(applyPerm(red, perm), applyPerm(blue, perm)).key).toBe(base);
+    }
   });
 });

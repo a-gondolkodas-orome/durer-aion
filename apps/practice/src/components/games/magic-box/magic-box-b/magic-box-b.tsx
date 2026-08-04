@@ -1,35 +1,7 @@
-import { strategyGameFactory, type MoveOutcome, type Ctx } from '../../../strategy-game-factory';
+import { strategyGameFactory } from '../../../strategy-game-factory';
 import { BoardClient } from './board-client';
-import {
-  generateEmptyBoard, isDesignationAllowed, isLineFull, isPlacementAllowed, placeStoneAt, type Board
-} from './helpers';
+import { generateEmptyBoard, moves } from './gameplay';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
-
-export const moves = {
-  placeStone: {
-    validate: (board: Board, _, cellId: number) => isPlacementAllowed(board, cellId),
-    // First half of the turn: place a stone, then designate a line — the turn
-    // stays open in between.
-    apply: (board: Board, _, cellId): MoveOutcome<Board> => {
-      const nextBoard: Board = { stones: placeStoneAt(board.stones, cellId), pendingLine: null };
-      return { nextBoard };
-    }
-  },
-
-  designateLine: {
-    validate: (board: Board, _, lineIndex: number) => isDesignationAllowed(board, lineIndex),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, lineIndex): MoveOutcome<Board> => {
-      const nextBoard: Board = { stones: board.stones, pendingLine: lineIndex };
-      // A full designated line leaves the other player nowhere to place.
-      if (isLineFull(nextBoard.stones, lineIndex)) {
-        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
-      }
-      return { nextBoard, isTurnEnd: true };
-    }
-  }
-};
-
-export type Moves = typeof moves;
 
 const rule = {
   hu: <>

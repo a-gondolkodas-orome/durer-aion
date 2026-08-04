@@ -11,7 +11,7 @@ import {
   moverWins,
   blockMultiset,
   secondPlayerWins
-} from './helpers';
+} from './gameplay';
 
 // Run a bot strategy on `board` and read back the move it named.
 const runBot = (

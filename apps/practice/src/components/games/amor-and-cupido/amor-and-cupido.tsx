@@ -1,23 +1,7 @@
-import { strategyGameFactory, type Ctx, type MoveOutcome } from '../../strategy-game-factory';
-import { type Board, completesTriangle, generateStartBoard, isClaimAllowed } from './helpers';
+import { strategyGameFactory } from '../../strategy-game-factory';
+import { generateStartBoard, moves } from './gameplay';
 import { smartBotStrategy } from './bot-strategy';
 import { BoardClient } from './board-client';
-
-export const moves = {
-  claimEdge: {
-    validate: (board: Board, _, edge: number) => isClaimAllowed(board, edge),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, edge: number): MoveOutcome<Board> => {
-      const nextBoard = board.slice();
-      nextBoard[edge] = ctx.currentPlayer;
-      if (completesTriangle(board, ctx.currentPlayer!, edge)) {
-        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
-      }
-      return { nextBoard, isTurnEnd: true };
-    }
-  }
-};
-
-export type Moves = typeof moves;
 
 const rule = {
   hu: <>

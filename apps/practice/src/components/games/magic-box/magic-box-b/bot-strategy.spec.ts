@@ -1,5 +1,5 @@
 import { getOptimalAction } from './bot-strategy';
-import { generateEmptyBoard, isLineFull, placeStoneAt, LINES } from './helpers';
+import { generateEmptyBoard, isLineFull, placeStoneAt, LINES } from './gameplay';
 
 describe('getOptimalAction', () => {
   it('should designate the just-completed line for an instant win when only one cell remains', () => {

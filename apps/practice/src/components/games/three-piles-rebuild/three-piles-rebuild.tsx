@@ -2,25 +2,23 @@ import { useEffect, useState } from 'react';
 import {
   strategyGameFactory,
   type BoardClientProps,
-  type Ctx,
-  type MoveOutcome,
   type BotStrategy,
   type BotMove,
   GameBoard
 } from '../../strategy-game-factory';
 import { useTranslation } from '../../../language';
 import {
-  type Board,
   canSplit,
-  isKeepAllowed,
-  isSplitAllowed,
-  isTerminal,
-  withOtherPilesDiscarded,
-  getSmartBotStep,
-  getRandomBotStep,
   generateStartBoard,
-  generateTestStartBoard
-} from './helpers';
+  generateTestStartBoard,
+  getRandomBotStep,
+  getSmartBotStep,
+  isSplitAllowed,
+  moves,
+  withOtherPilesDiscarded,
+  type Board,
+  type Moves
+} from './gameplay';
 
 // A part is valid if it is a positive integer (the cap keeps arithmetic exact).
 const parsePart = (raw: string): number | null => {
@@ -171,30 +169,6 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     </GameBoard>
   );
 };
-
-export const moves = {
-  // Step 1 of a turn: keep one pile, discard the other two (shown as 0).
-  keepPile: {
-    validate: (board: Board, _, keepId: number) => isKeepAllowed(board, keepId),
-    // First half of the turn: keep one pile, then rebuild from it — the turn
-    // stays open in between.
-    apply: (board: Board, _, keepId: number): MoveOutcome<Board> =>
-      ({ nextBoard: withOtherPilesDiscarded(board, keepId) })
-  },
-  // Step 2: rebuild three new piles from the kept pile's pebbles.
-  splitPile: {
-    validate: (board: Board, _, parts: number[]) => isSplitAllowed(board, parts),
-    apply: (_board: Board, { ctx }: { ctx: Ctx }, parts: number[]): MoveOutcome<Board> => {
-      const nextBoard = [...parts];
-      if (isTerminal(nextBoard)) {
-        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
-      }
-      return { nextBoard, isTurnEnd: true };
-    }
-  }
-};
-
-export type Moves = typeof moves;
 
 // "Keep, then split" is one decision, so the turn is named as a whole (mirrors
 // the pile-splitting games).

@@ -2,7 +2,7 @@ import { getSmartMove, getRandomMove } from "./bot-strategy";
 import {
   type Board, getLegalMoves, hasLegalMove, isOpposite, isWinningForMover,
   generateStartBoard, OPPOSITE_PAIRS, pairSum
-} from "./helpers";
+} from "./gameplay";
 
 const applyMove = (board: Board, [i, j]: [number, number]): Board => {
   const next = board.slice();

@@ -1,8 +1,8 @@
-import {
-  strategyGameFactory, type Ctx, type MoveOutcome, type BotStrategy
-} from '../../../strategy-game-factory';
-import { range, random, sample, minBy } from 'lodash';
-import { type Board, cap, validateTake, BoardClient, getPlayerStepDescription } from '../pebble-pile';
+import { strategyGameFactory, type BotStrategy } from '../../../strategy-game-factory';
+import { range, random, minBy } from 'lodash';
+import { BoardClient, getPlayerStepDescription } from '../pebble-pile';
+import { type Board, cap } from '../gameplay';
+import { generateStartBoard, generateTestStartBoard, moves, type Moves } from './gameplay';
 
 export { cap };
 
@@ -34,19 +34,6 @@ export const chooseSmartTake = (board: Board): number => {
   })!;
 };
 
-export const moves = {
-  take: {
-    validate: validateTake,
-    apply: (board: Board, { ctx }: { ctx: Ctx }, count: number): MoveOutcome<Board> => {
-      const nextBoard: Board = { stones: board.stones - count, maxTake: count };
-      if (nextBoard.stones === 0) return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
-      return { nextBoard, isTurnEnd: true };
-    }
-  }
-};
-
-export type Moves = typeof moves;
-
 type Bot = BotStrategy<Board, Moves>
 
 const smartBotStrategy: Bot = ({ board }) =>
@@ -60,19 +47,6 @@ const randomBotStrategy: Bot = ({ board }) => {
   }
   return { move: 'take', args: [random(1, cap(board))] };
 };
-
-const startBoard = (stones: number): Board => ({ stones, maxTake: Math.floor(stones / 2) });
-
-// Balanced starts: a power of 2 is a second-player win, everything else a
-// first-player win, so picking a power of 2 ~half the time makes each role win
-// with ~50% probability.
-const generateStartBoard = (): Board => startBoard(
-  random(0, 1)
-    ? sample([8, 16, 32, 64])!
-    : sample(range(8, 66).filter(n => (n & (n - 1)) !== 0))!
-);
-
-const generateTestStartBoard = (): Board => startBoard(sample([6, 8, 9, 10, 12])!);
 
 const rule = {
   hu: <>

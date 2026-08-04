@@ -1,20 +1,8 @@
 import { useEffect, useState } from 'react';
 import { range } from 'lodash';
-import {
-  strategyGameFactory,
-  type Ctx, type MoveOutcome, type BotStrategy, type BoardClientProps,
-  GameBoard
-} from '../../strategy-game-factory';
+import { strategyGameFactory, type BotStrategy, type BoardClientProps, GameBoard } from '../../strategy-game-factory';
 import { useTranslation } from '../../../language';
-import {
-  type Board,
-  applyMove,
-  isTakeAllowed,
-  isTerminal,
-  getSmartBotMove,
-  getRandomBotMove,
-  generateStartBoard
-} from './helpers';
+import { generateStartBoard, getRandomBotMove, getSmartBotMove, moves, type Board, type Moves } from './gameplay';
 
 const Pile = ({ count, index, selected, selectable, onClick }: {
   count: number; index: number; selected: boolean; selectable: boolean; onClick: () => void;
@@ -101,23 +89,6 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     </GameBoard>
   );
 };
-
-export const moves = {
-  takeChips: {
-    validate: (board: Board, _, i: number, j: number) => isTakeAllowed(board, i, j),
-    apply: (
-      board: Board, { ctx }: { ctx: Ctx }, i: number, j: number
-    ): MoveOutcome<Board> => {
-      const nextBoard = applyMove(board, [i, j]);
-      if (isTerminal(nextBoard)) {
-        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
-      }
-      return { nextBoard, isTurnEnd: true };
-    }
-  }
-};
-
-export type Moves = typeof moves;
 
 type Bot = BotStrategy<Board, Moves>
 

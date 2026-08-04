@@ -1,19 +1,20 @@
 import {
-  strategyGameFactory, type Ctx, type MoveOutcome, type BotStrategy, type BoardClientProps,
-  GameBoard, useHoverPreview
+  strategyGameFactory,
+  type BotStrategy,
+  type BoardClientProps,
+  GameBoard,
+  useHoverPreview
 } from '../../../strategy-game-factory';
-import { range, random, reverse, sample } from 'lodash';
+import { reverse, sample } from 'lodash';
 import { useTranslation } from '../../../../language';
-
-const generateStartBoard = () => {
-  if (random(0, 1)) {
-    return random(10, 99) * 3;
-  } else {
-    return random(10, 99) * 3 + random(1, 2);
-  }
-};
-
-type Board = number
+import {
+  generateStartBoard,
+  generateTestStartBoard,
+  getAvailableExponents,
+  moves,
+  type Board,
+  type Moves
+} from './gameplay';
 
 const ExponentsTable = ({ isPowerAllowed, board, choosePower, hovered, hoverProps }) => {
   const { t } = useTranslation();
@@ -43,7 +44,6 @@ const ExponentsTable = ({ isPowerAllowed, board, choosePower, hovered, hoverProp
   </>;
 }
 
-
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { value: hoveredPower, hoverProps } = useHoverPreview<number>(ctx.moveCount);
 
@@ -60,14 +60,6 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     </GameBoard>
   );
 }
-
-const generateTestStartBoard = () => {
-  if (random(0, 1)) {
-    return random(1, 9) * 3;
-  } else {
-    return random(1, 9) * 3 + random(1, 2);
-  }
-};
 
 type Bot = BotStrategy<Board, Moves>
 
@@ -90,34 +82,10 @@ const smartBotStrategy: Bot = ({ board }) => {
   }
 }
 
-const getAvailableExponents = (num: Board) => {
-  if (num === 0) return [];
-  const baseLog = Math.log(num) / Math.log(2);
-  const maxExponent = Math.floor(baseLog);
-  return range(0, maxExponent + 1);
-}
-
 const getPlayerStepDescription = () => ({
   hu: 'Válaszd ki a 2 hatványát amit ki szeretnél vonni.',
   en: 'Choose a power of 2 to subtract.'
 });
-
-export const moves = {
-  subtractPowerOfTwo: {
-    // A power of 2 may be subtracted only if it does not exceed the number —
-    // exactly the exponents the board already offers.
-    validate: (board: Board, _, exponent: number) => getAvailableExponents(board).includes(exponent),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, exponent: number): MoveOutcome<Board> => {
-      const nextBoard = board - 2 ** exponent;
-      if (nextBoard === 0) {
-        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
-      }
-      return { nextBoard, isTurnEnd: true };
-    }
-  }
-}
-
-export type Moves = typeof moves;
 
 const rule = {
   hu: <>

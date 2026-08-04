@@ -1,7 +1,6 @@
 import { range, sample } from 'lodash';
-import { isGameEnd, placeStone, type Board } from './helpers';
+import { isGameEnd, placeStone, type Board, type Moves } from './gameplay';
 import type { BotStrategy } from '../../../strategy-game-factory';
-import type { Moves } from './magic-box-a';
 
 type Bot = BotStrategy<Board, Moves>
 

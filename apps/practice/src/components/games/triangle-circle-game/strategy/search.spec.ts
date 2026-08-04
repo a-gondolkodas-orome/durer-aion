@@ -2,7 +2,7 @@ import { EDGES, TRIANGLES, TRIANGLE_COUNT } from '../geometry';
 import {
   type Board, LINE, CIRCLE,
   generateStartBoard, applyShade
-} from '../helpers';
+} from '../gameplay';
 import { evaluatePosition } from './search';
 
 const otherEdge = (t: number, notEdge: number) => TRIANGLES[t].edgeIds.find(e => e !== notEdge)!;

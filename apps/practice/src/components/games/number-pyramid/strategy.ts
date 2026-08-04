@@ -1,6 +1,6 @@
 import { orderBy, random, range, sample, sampleSize, shuffle, sum } from 'lodash';
 import type { BotMove, BotStrategy } from '../../strategy-game-factory';
-import type { Moves } from './number-pyramid';
+import type { Moves } from './gameplay';
 
 type Bot = BotStrategy<Board, Moves>
 

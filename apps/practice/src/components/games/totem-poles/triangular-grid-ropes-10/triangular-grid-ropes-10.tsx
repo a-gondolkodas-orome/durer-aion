@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import {
-  strategyGameFactory, type Ctx, type MoveOutcome, type BoardClientProps, GameBoard, useHoverPreview
+  strategyGameFactory,
+  type BoardClientProps,
+  GameBoard,
+  useHoverPreview
 } from '../../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
-import {
-  isAllowed, getAllowedSuperset, isGameEnd, vertices, type Board, type Edge
-} from './helpers';
-import { cloneDeep } from 'lodash';
+import { getAllowedSuperset, moves, vertices, type Board } from './gameplay';
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const [firstNode, setFirstNode] = useState<number | null>(null);
@@ -99,24 +99,6 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   </GameBoard>
   );
 };
-
-export const moves = {
-  stretchRope: {
-    validate: (board: Board, _, edge: Edge) => isAllowed(board, edge),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, { from, to }): MoveOutcome<Board> => {
-      const nextBoard = cloneDeep(board);
-      // A rope is stretched as far as it legally reaches, not just between the
-      // two nodes that were clicked.
-      nextBoard.push(getAllowedSuperset(board, { from, to })!);
-      if (isGameEnd(nextBoard)) {
-        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
-      }
-      return { nextBoard, isTurnEnd: true };
-    }
-  }
-}
-
-export type Moves = typeof moves;
 
 const rule = {
   hu: <>

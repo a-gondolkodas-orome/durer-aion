@@ -1,17 +1,17 @@
 import { sample } from 'lodash';
 import type { BotMove, BotStrategy } from '../../strategy-game-factory';
 import {
-  type Board,
-  type Cell,
-  type Move,
   applyMove,
   colorOf,
   countColor,
   legalMoves,
-  majorityWinner
-} from './helpers';
+  majorityWinner,
+  type Board,
+  type Cell,
+  type Move,
+  type Moves
+} from './gameplay';
 import { solveForN } from './solver';
-import type { Moves } from './recolouring-discs';
 
 type Bot = BotStrategy<Board, Moves>
 

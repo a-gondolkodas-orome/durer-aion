@@ -1,6 +1,5 @@
 import { range } from "lodash";
-import type { Board } from "./policeman-thief-ab";
-import { POLICE, THIEF } from "./helpers";
+import { POLICE, THIEF, type Board } from './gameplay';
 import { GameBoard, type BoardClientProps } from "../../../strategy-game-factory";
 
 const cubeCoords = [

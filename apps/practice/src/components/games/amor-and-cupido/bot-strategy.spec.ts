@@ -1,4 +1,4 @@
-import { edgeIndex, generateStartBoard } from './helpers';
+import { edgeIndex, generateStartBoard } from './gameplay';
 import { makeCtx } from '../../../test-utils';
 import { getBotScore, smartBotStrategy } from './bot-strategy';
 

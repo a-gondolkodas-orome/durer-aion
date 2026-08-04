@@ -1,25 +1,14 @@
 import {
-  strategyGameFactory, type Ctx, type MoveOutcome, type BotMove, type BotStrategy, type BoardClientProps,
-  GameBoard, useHoverPreview
-} from "../../strategy-game-factory";
-import { range, isEqual, random, sample, difference, filter, cloneDeep } from "lodash";
-import { useTranslation } from "../../../language";
-
-type Board = [number, number]
-
-const generateStartBoard = (maxDiscs: number) => (): Board => {
-  const discCount = random(Math.floor(maxDiscs/2), maxDiscs);
-  if (random(0, 1)) {
-    const blueCount = sample(range(0, discCount + 1, 3))!;
-    return [blueCount, discCount - blueCount];
-  } else {
-    const nextDivisibleBy3 = 3 * (Math.floor(maxDiscs/3) + 1);
-    const blueCount = sample(
-      difference(range(0, discCount + 1), range(0, nextDivisibleBy3, 3))
-    )!;
-    return [blueCount, discCount - blueCount];
-  }
-};
+  strategyGameFactory,
+  type BotMove,
+  type BotStrategy,
+  type BoardClientProps,
+  GameBoard,
+  useHoverPreview
+} from '../../strategy-game-factory';
+import { range, isEqual, random, sample, filter } from 'lodash';
+import { useTranslation } from '../../../language';
+import { generateStartBoard, generateTestStartBoard, moves, type Board, type Moves } from './gameplay';
 
 const DisabledDisc = ({ bgColor }) => (
   <button className={`size-12 rounded-full ${bgColor}`} disabled />
@@ -97,44 +86,6 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     </GameBoard>
   );
 };
-
-// board[0] is the blue pile, board[1] the red one. Either move takes one or two
-// discs from its own pile — no more, and never from an emptier pile than that.
-// Both players draw on the same two piles, so whose turn it is does not enter
-// into legality.
-export const isRemovalAllowed = (board: Board, count: number): boolean =>
-  (count === 1 || count === 2) && count <= board[0];
-
-export const isFlipAllowed = (board: Board, count: number): boolean =>
-  (count === 1 || count === 2) && count <= board[1];
-
-export const moves = {
-  removeDiscs: {
-    validate: (board: Board, _, count) => isRemovalAllowed(board, count),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, count): MoveOutcome<Board> => {
-      const nextBoard = cloneDeep(board);
-      nextBoard[0] -= count;
-      if (isEqual(nextBoard, [0, 0])) {
-        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
-      }
-      return { nextBoard, isTurnEnd: true };
-    }
-  },
-  turnDiscs: {
-    validate: (board: Board, _, count) => isFlipAllowed(board, count),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, count): MoveOutcome<Board> => {
-      const nextBoard = cloneDeep(board);
-      nextBoard[1] -= count;
-      nextBoard[0] += count;
-      if (isEqual(nextBoard, [0, 0])) {
-        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
-      }
-      return { nextBoard, isTurnEnd: true };
-    }
-  }
-};
-
-export type Moves = typeof moves;
 
 type Bot = BotStrategy<Board, Moves>
 
@@ -219,9 +170,6 @@ const genericRule = {
     The player who cannot move loses.
   </>
 };
-
-// Test variant covers both sub-games: a 6-disc or a 10-disc start position.
-const generateTestStartBoard = (): Board => sample([generateStartBoard(6), generateStartBoard(10)])!();
 
 export const DiscsFlipOrRemove = strategyGameFactory({
   presentation: {

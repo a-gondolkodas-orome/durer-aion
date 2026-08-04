@@ -1,7 +1,14 @@
 import { sample, cloneDeep, random, shuffle } from 'lodash';
 import type { BotStrategy } from '../../strategy-game-factory';
-import { markForbiddenFields, getAllowedMoves, boardIndices, BISHOP, type Board, type Field } from './helpers';
-import type { Moves } from './chess-bishops';
+import {
+  BISHOP,
+  boardIndices,
+  getAllowedMoves,
+  markForbiddenFields,
+  type Board,
+  type Field,
+  type Moves
+} from './gameplay';
 
 type Bot = BotStrategy<Board, Moves>
 

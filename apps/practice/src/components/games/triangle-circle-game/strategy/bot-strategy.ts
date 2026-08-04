@@ -1,14 +1,21 @@
 import { sample } from 'lodash';
 import { EDGES } from '../geometry';
 import {
-  type Board, LINE,
-  applyShade, applyCircle, freeEdges, freeTriangles, shadedCount,
-  liveThreats, preThreatEdges, isWinningShade
-} from '../helpers';
+  LINE,
+  applyCircle,
+  applyShade,
+  freeEdges,
+  freeTriangles,
+  isWinningShade,
+  liveThreats,
+  preThreatEdges,
+  shadedCount,
+  type Board,
+  type Moves
+} from '../gameplay';
 import { OPENING_EDGES, isLineTurnWon, marchEdges, winningPairHeatEdges } from './forced-win';
 import { makeMoveEvaluator } from './search';
 import type { BotStrategy } from '../../../strategy-game-factory';
-import type { Moves } from '../triangle-circle-game';
 
 type Bot = BotStrategy<Board, Moves>
 

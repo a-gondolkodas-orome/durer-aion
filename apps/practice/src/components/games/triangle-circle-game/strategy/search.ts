@@ -1,5 +1,5 @@
 import { EDGES, TRIANGLES, TRIANGLE_COUNT, EDGE_COUNT } from '../geometry';
-import { type Board, LINE, CIRCLE } from '../helpers';
+import { type Board, LINE, CIRCLE } from '../gameplay';
 
 // Bounded-depth minimax over the threat-reduced game — the runtime, tractable
 // form of the exact solver (which is only feasible for tiny boards, where it

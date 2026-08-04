@@ -1,14 +1,14 @@
 import { useState } from 'react';
-import { range, isEqual, cloneDeep } from 'lodash';
+import { range } from 'lodash';
 import {
-  strategyGameFactory, type BoardClientProps, type Ctx, type MoveOutcome, GameBoard, useHoverPreview
+  strategyGameFactory,
+  type BoardClientProps,
+  GameBoard,
+  useHoverPreview
 } from '../../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
-import { emptiedPileId, isRemovalAllowed, isSplitAllowed, withPileRemoved } from '../helpers';
-import { generateStartBoard, generateTestStartBoard } from './helpers';
-
-export type Board = number[];
-type Piece = { pileId: number; pieceId: number };
+import { isSplitAllowed, withPileRemoved } from '../gameplay';
+import { generateStartBoard, generateTestStartBoard, moves, type Board, type Piece } from './gameplay';
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const [removedPileId, setRemovedPileId] = useState<number | null>(null);
@@ -148,39 +148,6 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   </GameBoard>
   );
 };
-
-export const moves = {
-  removePile: {
-    validate: (board: Board, _, pileId: number) => isRemovalAllowed(board, pileId),
-    // First half of the turn: empty a pile, then split another into it — the
-    // turn stays open in between.
-    apply: (board: Board, _, pileId: number): MoveOutcome<Board> =>
-      ({ nextBoard: withPileRemoved(board, pileId) })
-  },
-  splitPile: {
-    validate: (board: Board, _, { pileId, pieceCount }: { pileId: number; pieceCount: number }) =>
-      isSplitAllowed(board, pileId, pieceCount),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, { pileId, pieceCount }): MoveOutcome<Board> => {
-      const nextBoard = cloneDeep(board);
-      // the slot emptied earlier this turn takes the other half of the split
-      const removedPileId = emptiedPileId(nextBoard)!;
-      if (removedPileId < pileId) {
-        nextBoard[removedPileId] = pieceCount;
-        nextBoard[pileId] = nextBoard[pileId] - pieceCount;
-      } else {
-        nextBoard[removedPileId] = nextBoard[pileId] - pieceCount;
-        nextBoard[pileId] = pieceCount;
-      }
-      // All piles down to a single piece: the opponent cannot split anything.
-      if (isEqual(nextBoard, [1, 1, 1, 1])) {
-        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
-      }
-      return { nextBoard, isTurnEnd: true };
-    }
-  }
-};
-
-export type Moves = typeof moves;
 
 const getPlayerStepDescription = () => ({
   hu: 'Először kattints az eltávolítandó kupacra, majd arra a korongra, ahol ketté akarod vágni a kupacot.',

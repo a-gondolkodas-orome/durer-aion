@@ -3,7 +3,7 @@ import {
   type Board, LINE,
   generateStartBoard, applyShade, applyCircle,
   isLineWin, isCircleWin, liveThreats, freeTriangles
-} from '../helpers';
+} from '../gameplay';
 import { OPENING_EDGE, OPENING_EDGES, isLineTurnWon, marchEdges, winningPairHeatEdges } from './forced-win';
 import { makeSmartBotStrategy } from './bot-strategy';
 import { playBotTurn } from './spec-helpers';

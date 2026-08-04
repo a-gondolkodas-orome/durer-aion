@@ -1,6 +1,5 @@
 import { range } from "lodash";
-import { coords, edges, POLICE, VERTEX_COUNT } from "./helpers";
-import type { Board } from "./policeman-thief-c";
+import { POLICE, VERTEX_COUNT, coords, edges, type Board } from './gameplay';
 import { GameBoard, type BoardClientProps } from "../../../strategy-game-factory";
 import { useTranslation } from "../../../../language";
 

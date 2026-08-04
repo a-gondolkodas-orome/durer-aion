@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { range } from 'lodash';
 import { useTranslation } from '../../../language';
 import { GameBoard, type BoardClientProps } from '../../strategy-game-factory';
-import { type Board, type Cell, colorOf } from './helpers';
+import { type Board, type Cell, colorOf } from './gameplay';
 
 // Translucent version of each disc colour, used for the recolour pulse ring.
 const pulseColor: Record<'red' | 'blue', string> = {

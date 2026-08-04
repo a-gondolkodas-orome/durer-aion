@@ -22,7 +22,7 @@ import {
   legalMoves,
   majorityWinner,
   startCells
-} from './helpers';
+} from './gameplay';
 
 // A node is a position plus whose turn it is: "<encoded cells>:<player>".
 type NodeKey = string;

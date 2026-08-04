@@ -1,28 +1,7 @@
-import { strategyGameFactory, type MoveOutcome } from '../../strategy-game-factory';
-import {
-  type Board, type Coef, COEFS, hasThreeIntegerRoots, isCoefficientChoiceAllowed
-} from './helpers';
+import { strategyGameFactory } from '../../strategy-game-factory';
+import { COEFS, moves, type Board } from './gameplay';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { BoardClient } from './board-client';
-
-export const moves = {
-  setCoefficient: {
-    validate: (board: Board, _, coef: Coef, value: number) =>
-      isCoefficientChoiceAllowed(board, coef, value),
-    apply: (board: Board, _, coef: Coef, value: number): MoveOutcome<Board> => {
-      const nextBoard = { ...board, [coef]: value };
-      const filled = nextBoard.a !== null && nextBoard.b !== null && nextBoard.c !== null;
-      if (filled) {
-        // A (player 0) wins iff all three roots are integers; otherwise B (player 1).
-        const winnerIndex = hasThreeIntegerRoots(nextBoard.a!, nextBoard.b!, nextBoard.c!) ? 0 : 1;
-        return { nextBoard, gameEnd: { winnerIndex } };
-      }
-      return { nextBoard, isTurnEnd: true };
-    }
-  }
-};
-
-export type Moves = typeof moves;
 
 const rule = {
   hu: <>

@@ -1,12 +1,5 @@
-import { isAllowedStep, generateStartBoard, moves, neighbours, colors, type Board } from './gameplay';
+import { isAllowedStep, generateStartBoard, moves, neighbours, type Board } from './gameplay';
 import { makeCtx } from '../../../test-utils';
-import { nodeColors } from './cube-coloring';
-
-describe('cube-coloring palette', () => {
-  it('logic-side colors stay in sync with the styling palette nodeColors', () => {
-    expect(Object.keys(nodeColors)).toEqual(colors);
-  });
-});
 
 describe('cube-coloring isAllowedStep', () => {
   const empty = (): Board => generateStartBoard();

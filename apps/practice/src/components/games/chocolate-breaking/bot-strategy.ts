@@ -1,7 +1,6 @@
 import { sample } from 'lodash';
 import type { BotStrategy } from '../../strategy-game-factory';
-import { allMoves, applyBreak, totalGrundy, hasSafeBreak, type Board, type Move } from './helpers';
-import type { Moves } from './chocolate-breaking';
+import { allMoves, applyBreak, hasSafeBreak, totalGrundy, type Board, type Move, type Moves } from './gameplay';
 
 type Bot = BotStrategy<Board, Moves>
 

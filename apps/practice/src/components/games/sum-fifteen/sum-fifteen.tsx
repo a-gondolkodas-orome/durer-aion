@@ -1,11 +1,17 @@
-import {
-  strategyGameFactory, type MoveOutcome, type Ctx, type BotStrategy, type BoardClientProps, GameBoard
-} from '../../strategy-game-factory';
+import { strategyGameFactory, type BotStrategy, type BoardClientProps, GameBoard } from '../../strategy-game-factory';
 import { useTranslation } from '../../../language';
 import {
-  allNumbers, generateStartBoard, numbersOwnedBy, currentPlayerFromOwner,
-  hasSum15, findWinningTriple, chooseSmartMove, chooseTestMove, isChoiceAllowed, type Board
-} from './helpers';
+  allNumbers,
+  chooseSmartMove,
+  chooseTestMove,
+  currentPlayerFromOwner,
+  findWinningTriple,
+  generateStartBoard,
+  moves,
+  numbersOwnedBy,
+  type Board,
+  type Moves
+} from './gameplay';
 
 const ownedLabel = (owner: Board['owner'], player: 0 | 1): string => {
   const nums = numbersOwnedBy(owner, player);
@@ -75,29 +81,6 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     </GameBoard>
   );
 };
-
-export const moves = {
-  chooseNumber: {
-    validate: (board: Board, _, n: number) => isChoiceAllowed(board.owner, n),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, n: number): MoveOutcome<Board> => {
-      const player = ctx.currentPlayer as 0 | 1;
-      const owner = board.owner.slice() as Board['owner'];
-      owner[n - 1] = player;
-      const nextBoard = { owner };
-
-      if (hasSum15(numbersOwnedBy(owner, player))) {
-        return { nextBoard, gameEnd: { winnerIndex: player } };
-      }
-      if (owner.every(o => o !== null)) {
-        // All nine numbers claimed, nobody reached a triple summing to 15.
-        return { nextBoard, gameEnd: { winnerIndex: 1 } };
-      }
-      return { nextBoard, isTurnEnd: true };
-    }
-  }
-};
-
-export type Moves = typeof moves;
 
 type Bot = BotStrategy<Board, Moves>
 

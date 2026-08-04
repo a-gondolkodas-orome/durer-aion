@@ -1,13 +1,7 @@
 import { sample } from 'lodash';
-import {
-  strategyGameFactory, type MoveOutcome, type BotStrategy, type BoardClientProps, GameBoard
-} from '../../strategy-game-factory';
+import { strategyGameFactory, type BotStrategy, type BoardClientProps, GameBoard } from '../../strategy-game-factory';
 import { useTranslation } from '../../../language';
-
-type Board = { digits: number[], sumMod9: number }
-
-const totalDigits = 10;
-const availableDigits = [1, 2, 3, 4, 5, 6];
+import { availableDigits, moves, totalDigits, type Board, type Moves } from './gameplay';
 
 // Precompute winner(sumMod9, turnsLeft): 0 = Jenő wins, 1 = Béla wins, with optimal play.
 // Jenő is player 0 (first mover), Béla is player 1.
@@ -29,12 +23,6 @@ const winnerFromState = (() => {
   for (let t = 0; t <= totalDigits; t++) for (let s = 0; s < 9; s++) compute(s, t);
   return (sumMod9, turnsLeft) => memo[`${sumMod9},${turnsLeft}`];
 })();
-
-// Only one of the six offered digits may be appended, and only while the number
-// is still short of its ten digits. Both players draw from the same six, so
-// whose turn it is does not enter into legality.
-export const isDigitChoiceAllowed = (board: Board, digit: number): boolean =>
-  board.digits.length < totalDigits && availableDigits.includes(digit);
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
@@ -90,23 +78,6 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     </GameBoard>
   );
 };
-
-export const moves = {
-  chooseDigit: {
-    validate: (board: Board, _, digit) => isDigitChoiceAllowed(board, digit),
-    apply: (board: Board, _, digit): MoveOutcome<Board> => {
-      const newDigits = [...board.digits, digit];
-      const newSumMod9 = (board.sumMod9 + digit) % 9;
-      const nextBoard = { digits: newDigits, sumMod9: newSumMod9 };
-      if (newDigits.length === totalDigits) {
-        return { nextBoard, gameEnd: { winnerIndex: newSumMod9 === 0 ? 1 : 0 } };
-      }
-      return { nextBoard, isTurnEnd: true };
-    }
-  }
-};
-
-export type Moves = typeof moves;
 
 type Bot = BotStrategy<Board, Moves>
 

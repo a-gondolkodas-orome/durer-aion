@@ -1,12 +1,13 @@
-import { range, isEqual, random } from 'lodash';
+import { range, random } from 'lodash';
 import {
-  strategyGameFactory, type BoardClientProps, type Ctx, type MoveOutcome, GameBoard, useHoverPreview
+  strategyGameFactory,
+  type BoardClientProps,
+  GameBoard,
+  useHoverPreview
 } from '../../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
-import { isRemovalAllowed, isSplitAllowed, withPileRemoved } from '../helpers';
-
-export type Board = number[];
-type Piece = { pileId: number; pieceId: number };
+import { isSplitAllowed, withPileRemoved } from '../gameplay';
+import { moves, type Board, type Piece } from './gameplay';
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { value: validHoveredPiece, hoverProps } = useHoverPreview<Piece>(ctx.moveCount);
@@ -94,30 +95,6 @@ const getPlayerStepDescription = () => ({
   hu: 'Kattints a korongra, ahol ketté akarod vágni a kupacot.',
   en: 'Click the piece where you want to split the pile.'
 });
-
-export const moves = {
-  removePile: {
-    validate: (board: Board, _, pileId: number) => isRemovalAllowed(board, pileId),
-    // First half of the turn: discard a pile, then split the other — the turn
-    // stays open in between.
-    apply: (board: Board, _, pileId): MoveOutcome<Board> =>
-      ({ nextBoard: withPileRemoved(board, pileId) })
-  },
-  splitPile: {
-    validate: (board: Board, _, { pileId, pieceCount }: { pileId: number; pieceCount: number }) =>
-      isSplitAllowed(board, pileId, pieceCount),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, { pileId, pieceCount }): MoveOutcome<Board> => {
-      const nextBoard = [pieceCount, board[pileId] - pieceCount];
-      // Two single-piece piles cannot be split, so the opponent is stuck.
-      if (isEqual(nextBoard, [1, 1])) {
-        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
-      }
-      return { nextBoard, isTurnEnd: true };
-    }
-  }
-};
-
-export type Moves = typeof moves;
 
 const rule = {
   hu: <>

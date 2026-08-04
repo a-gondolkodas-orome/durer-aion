@@ -1,6 +1,6 @@
 import { smartBotStrategy } from "./bot-strategy";
 import { botNextMoveArgs, makeCtx } from '../../../test-utils';
-import type { Board } from './rock-paper-scissor';
+import type { Board } from './gameplay';
 
 const smartBotRemoval = (board: Board, currentPlayer: number): number =>
   botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx({ currentPlayer }) }))[0];

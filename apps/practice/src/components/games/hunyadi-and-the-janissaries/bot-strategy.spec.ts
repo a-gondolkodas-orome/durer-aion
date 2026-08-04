@@ -1,5 +1,5 @@
 import { getOptimalGroupToKill, getOptimalSoldierGroups } from './bot-strategy';
-import { moves, type Board } from './helpers';
+import { moves, type Board } from './gameplay';
 
 describe('HunyadiAndTheJanissaries strategy', () => {
   describe('getOptimalGroupToKill', () => {

@@ -1,14 +1,11 @@
 import {
   strategyGameFactory,
-  type Ctx, type MoveOutcome, type BotStrategy, type BoardClientProps,
+  type BotStrategy,
+  type BoardClientProps,
   GameBoard
 } from '../../../strategy-game-factory';
 import { range, random } from 'lodash';
-
-type Board = number
-
-const target = 40;
-const maxStep = 3;
+import { maxStep, moves, target, type Board, type Moves } from './gameplay';
 
 const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
 
@@ -35,24 +32,6 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
     </GameBoard>
   );
 };
-
-// A step advances to a strictly larger whole number, by at most maxStep.
-export const isIncreaseValid = ({ board, number }: { board: Board; number: number }): boolean =>
-  Number.isInteger(number) && number > board && (number - board) <= maxStep;
-
-export const moves = {
-  increaseTo: {
-    validate: (board: Board, _, number: number) => isIncreaseValid({ board, number }),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, number): MoveOutcome<Board> => {
-      if (number > target) {
-        return { nextBoard: number, gameEnd: { winnerIndex: 1 - ctx.currentPlayer! } };
-      }
-      return { nextBoard: number, isTurnEnd: true };
-    }
-  }
-};
-
-export type Moves = typeof moves;
 
 type Bot = BotStrategy<Board, Moves>
 

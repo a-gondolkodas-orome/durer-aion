@@ -1,28 +1,9 @@
-import { strategyGameFactory, type Ctx, type MoveOutcome } from "../../strategy-game-factory";
-import {
-  type Board, type Move, hasLegalMove, generateStartBoard, isRemovalAllowed
-} from "./helpers";
-import { smartBotStrategy, randomBotStrategy } from "./bot-strategy";
-import { BoardClient } from "./board-client";
+import { strategyGameFactory, type Ctx } from '../../strategy-game-factory';
+import { generateStartBoard, moves, type Board } from './gameplay';
+import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
+import { BoardClient } from './board-client';
 
 export type { Board };
-
-export const moves = {
-  removeFromTwo: {
-    validate: (board: Board, _, move: Move) => isRemovalAllowed(board, move),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, [i, j]: Move): MoveOutcome<Board> => {
-      const nextBoard = board.slice();
-      nextBoard[i] -= 1;
-      nextBoard[j] -= 1;
-      if (!hasLegalMove(nextBoard)) {
-        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
-      }
-      return { nextBoard, isTurnEnd: true };
-    }
-  }
-};
-
-export type Moves = typeof moves;
 
 const getPlayerStepDescription = ({ ctx }: { ctx: Ctx }) => {
   if ((ctx.turnState as { first: number } | null) !== null) {

@@ -11,7 +11,7 @@ import {
   legalMoves,
   majorityWinner,
   startCells
-} from './helpers';
+} from './gameplay';
 import { solveForN } from './solver';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 

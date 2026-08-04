@@ -1,42 +1,7 @@
-import { range, sum, isEqual, random, cloneDeep } from 'lodash';
-import {
-  strategyGameFactory, type Ctx, type MoveOutcome, type BoardClientProps, GameBoard
-} from '../../../strategy-game-factory';
+import { range } from 'lodash';
+import { strategyGameFactory, type BoardClientProps, GameBoard } from '../../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
-import { isPlacementAllowed } from '../helpers';
-
-export type Board = number[]
-type TurnState = { firstPlacedSquareIndex: number } | null
-
-const generateStartBoard = (): Board => {
-  const board = Array(5).fill(0);
-  const x = random(4);
-  board[x] += 1;
-  return board;
-};
-
-export const moves = {
-  addPiece: {
-    validate: (board: Board, _, pileId: number) => isPlacementAllowed(board, pileId),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, pileId: number): MoveOutcome<Board> => {
-      const nextBoard = cloneDeep(board);
-      nextBoard[pileId] += 1;
-      // The second player places two squares at a time, so on the first half of
-      // such a turn the turn stays open and the placement is remembered for the
-      // BoardClient to dim.
-      if (ctx.currentPlayer === 1 && [3, 6, 9].includes(sum(nextBoard))) {
-        return { nextBoard, nextTurnState: { firstPlacedSquareIndex: pileId } };
-      }
-      if (sum(nextBoard) === 10) {
-        const winnerIndex = isEqual(cloneDeep(nextBoard).sort(), [0, 1, 2, 3, 4]) ? 1 : 0;
-        return { nextBoard, nextTurnState: null, gameEnd: { winnerIndex } };
-      }
-      return { nextBoard, nextTurnState: null, isTurnEnd: true };
-    }
-  }
-}
-
-export type Moves = typeof moves;
+import { generateStartBoard, moves, type Board, type TurnState } from './gameplay';
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const turnState = ctx.turnState as TurnState;

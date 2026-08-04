@@ -1,5 +1,5 @@
 import { thiefSurvives, copMoveWins, winningPlacements, chooseCopMove } from './bot-strategy';
-import { neighbours, VERTEX_COUNT } from './helpers';
+import { neighbours, VERTEX_COUNT } from './gameplay';
 
 // ---------------------------------------------------------------------------
 // Independent, from-scratch reference solver (no memoisation, no shared code

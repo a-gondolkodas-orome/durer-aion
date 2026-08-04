@@ -1,4 +1,4 @@
-import { type Board, topRowIdx, wideWidth, rowWidth, spreadChildren, inBoard } from "./helpers";
+import { type Board, topRowIdx, wideWidth, rowWidth, spreadChildren, inBoard } from "./gameplay";
 
 // "Lettered" (dangerous) cells ---------------------------------------------
 // A cell is lettered if a single bacterium placed there (after the defender's

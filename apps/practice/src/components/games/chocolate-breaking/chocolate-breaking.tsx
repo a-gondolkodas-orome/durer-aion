@@ -1,12 +1,21 @@
 import { range } from 'lodash';
 import {
-  strategyGameFactory, type BoardClientProps, type Ctx, type MoveOutcome, GameBoard, useHoverPreview
+  strategyGameFactory,
+  type BoardClientProps,
+  type Ctx,
+  GameBoard,
+  useHoverPreview
 } from '../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import {
-  generateStartBoard, generateTestStartBoard, safeBreaks, hasSafeBreak,
-  applyBreak, isBreakAllowed, type Board, type Piece, type Move
-} from './helpers';
+  generateStartBoard,
+  generateTestStartBoard,
+  moves,
+  safeBreaks,
+  type Board,
+  type Move,
+  type Piece
+} from './gameplay';
 
 const CELL = 30; // px per chocolate cell
 const CUT = 18; // px hit area of a cut line
@@ -113,21 +122,6 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     </GameBoard>
   );
 };
-
-export const moves = {
-  breakPiece: {
-    validate: (board: Board, _, move: Move) => isBreakAllowed(board, move),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, move: Move): MoveOutcome<Board> => {
-      const nextBoard = applyBreak(board, move);
-      if (!hasSafeBreak(nextBoard.pieces)) {
-        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
-      }
-      return { nextBoard, isTurnEnd: true };
-    }
-  }
-};
-
-export type Moves = typeof moves;
 
 const rule = {
   hu: <>

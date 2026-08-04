@@ -1,9 +1,7 @@
-import { range, cloneDeep } from 'lodash';
-import {
-  strategyGameFactory, type MoveOutcome, type BoardClientProps, type Ctx, GameBoard
-} from '../../../strategy-game-factory';
-import { generateEmptyTicTacToeBoard, validatePlacement } from '../helpers';
-import { isGameEnd, hasFirstPlayerWon, type Board } from './helpers';
+import { range } from 'lodash';
+import { strategyGameFactory, type BoardClientProps, GameBoard } from '../../../strategy-game-factory';
+import { generateEmptyTicTacToeBoard } from '../gameplay';
+import { moves, type Board } from './gameplay';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 
 const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
@@ -38,22 +36,6 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   </GameBoard>
   );
 };
-
-export const moves = {
-  placePiece: {
-    validate: validatePlacement,
-    apply: (board: Board, { ctx }: { ctx: Ctx }, id): MoveOutcome<Board> => {
-      const nextBoard = cloneDeep(board);
-      nextBoard[id] = ctx.currentPlayer === 0 ? 'red' : 'blue';
-      if (isGameEnd(nextBoard)) {
-        return { nextBoard, gameEnd: { winnerIndex: hasFirstPlayerWon(nextBoard) ? 0 : 1 } };
-      }
-      return { nextBoard, isTurnEnd: true };
-    }
-  }
-}
-
-export type Moves = typeof moves;
 
 const rule = {
   hu: <>

@@ -1,10 +1,7 @@
-import {
-  strategyGameFactory, type Ctx, type MoveOutcome, type BotStrategy, type BoardClientProps, GameBoard
-} from '../../strategy-game-factory';
+import { strategyGameFactory, type BotStrategy, type BoardClientProps, GameBoard } from '../../strategy-game-factory';
 import { random } from 'lodash';
 import { useTranslation } from '../../../language';
-
-type Board = number[]
+import { generateStartBoard, generateTestStartBoard, moves, type Board, type Moves } from './gameplay';
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
@@ -36,24 +33,6 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     </GameBoard>
   );
 };
-
-export const moves = {
-  add1: {
-    apply: (board: Board): MoveOutcome<Board> =>
-      ({ nextBoard: [board[0], board[1] + 1], isTurnEnd: true })
-  },
-  subtract: {
-    apply: (board: Board, { ctx }: { ctx: Ctx }): MoveOutcome<Board> => {
-      const nextBoard = [board[0] - board[1], board[1]];
-      if (board[0] - board[1] <= 0) {
-        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
-      }
-      return { nextBoard, isTurnEnd: true };
-    }
-  }
-};
-
-export type Moves = typeof moves;
 
 type Bot = BotStrategy<Board, Moves>
 
@@ -100,42 +79,6 @@ const rule = {
     The winner is the first player to write a pair in which at least one of the numbers is not positive.
   </>
 };
-
-const generateTestStartBoard = () => {
-  const b = random(2, 5);
-  const a = b + random(1, b);
-  return [a, b];
-};
-
-const generateStartBoard = () => {
-  if (random(0, 2) === 0) {
-    const b = random(8, 15);
-    const a = b + random(1, b);
-    return [a, b];
-  }
-  if (random(0, 1) === 0) {
-    const r = random(0, 2);
-    if (r === 0) {
-      const b = random(5, 9) * 2 + 1;
-      const a = b * 2 + random(0, 5) * 2;
-      return [a, b];
-    } else if (r === 1) {
-      const b = random(5, 9) * 2 + 1;
-      const a = b * 2 + random(0, 5) * 2 + 1;
-      return [a, b];
-    } else if (r === 2) {
-      const b = random(5, 9) * 2;
-      const a = b * 2 + random(0, 5) * 2;
-      return [a, b];
-    }
-  } else {
-    const b = random(5, 9) * 2;
-    const a = b * (2 + random(0, 3)) + random(0, Math.floor((b - 1)/2)) * 2 + 1;
-    return [a, b];
-  }
-
-  return [random(15, 25), random(10, 15)];
-}
 
 export const PairsOfNumbers = strategyGameFactory({
   presentation: {

@@ -1,4 +1,4 @@
-import { type Board, applyShade, applyCircle } from '../helpers';
+import { type Board, applyShade, applyCircle } from '../gameplay';
 import { botNextMove, makeCtx } from '../../../../test-utils';
 import type { BotStrategy } from '../../../strategy-game-factory';
 

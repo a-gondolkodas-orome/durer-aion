@@ -1,11 +1,6 @@
 import { cloneDeep, range, reverse } from "lodash";
 import { deficiency } from "./danger";
-import {
-  type Board,
-  bacteriaCoords,
-  removeOne,
-  totalBacteria
-} from "./helpers";
+import { bacteriaCoords, isAttackAllowed, removeOne, totalBacteria, type Board } from './gameplay';
 import {
   simulate,
   legalAttackMoves,
@@ -348,5 +343,13 @@ describe("bacteria bot behaviour", () => {
       expect(deficiency(board)).toBe(0);
       expect(legalAttackMoves(board)).toContainEqual(attackerMove(board));
     });
+  });
+});
+
+describe('legal move enumeration', () => {
+  it('only enumerates attacks the rules allow', () => {
+    const busy = { bacteria: [[1, 2, 1], [3, 0], [0, 1, 0]], goals: [1] };
+    expect(legalAttackMoves(busy).length).toBeGreaterThan(0);
+    expect(legalAttackMoves(busy).every(m => isAttackAllowed(busy, m))).toBe(true);
   });
 });

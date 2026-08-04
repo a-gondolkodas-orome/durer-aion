@@ -1,44 +1,7 @@
-import { strategyGameFactory, type Ctx, type MoveOutcome } from '../../strategy-game-factory';
+import { strategyGameFactory } from '../../strategy-game-factory';
 import { BoardClient } from './board-client';
-import {
-  type Board, LINE, CIRCLE,
-  applyShade, applyCircle, generateStartBoard, isLineWin, isCircleWin,
-  isShadeAllowed, isCirclePlacementAllowed
-} from './helpers';
+import { LINE, generateStartBoard, moves } from './gameplay';
 import { smartBotStrategy, randomBotStrategy } from './strategy/bot-strategy';
-
-// Each move belongs to exactly one role, so both validators check who is on
-// turn: shading is not a thing the circle player can do at all.
-export const moves = {
-  // Line player shades one edge; they win at once if it completes an un-circled
-  // triangle, otherwise the turn passes.
-  shadeEdge: {
-    validate: (board: Board, { ctx }: { ctx: Ctx }, edgeId: number) =>
-      ctx.currentPlayer === LINE && isShadeAllowed(board, edgeId),
-    apply: (board: Board, _, edgeId: number): MoveOutcome<Board> => {
-      const nextBoard = applyShade(board, edgeId);
-      if (isLineWin(nextBoard)) {
-        return { nextBoard, gameEnd: { winnerIndex: LINE } };
-      }
-      return { nextBoard, isTurnEnd: true };
-    }
-  },
-  // Circle player drops a circle into one triangle; they win once every triangle
-  // is circled, otherwise the turn passes.
-  placeCircle: {
-    validate: (board: Board, { ctx }: { ctx: Ctx }, triangleId: number) =>
-      ctx.currentPlayer === CIRCLE && isCirclePlacementAllowed(board, triangleId),
-    apply: (board: Board, _, triangleId: number): MoveOutcome<Board> => {
-      const nextBoard = applyCircle(board, triangleId);
-      if (isCircleWin(nextBoard)) {
-        return { nextBoard, gameEnd: { winnerIndex: CIRCLE } };
-      }
-      return { nextBoard, isTurnEnd: true };
-    }
-  }
-};
-
-export type Moves = typeof moves;
 
 const rule = {
   hu: <>

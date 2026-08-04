@@ -1,4 +1,4 @@
-import { getBoardIndices, withDuckPlaced, getAllowedMoves, type Board, type Field, type Moves } from "./helpers";
+import { getBoardIndices, withDuckPlaced, getAllowedMoves, type Board, type Field, type Moves } from "./gameplay";
 import { type BotStrategy } from "../../strategy-game-factory";
 import { shuffle, sample } from "lodash";
 
