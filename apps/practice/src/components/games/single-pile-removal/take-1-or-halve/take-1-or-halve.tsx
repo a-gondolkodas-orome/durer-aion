@@ -70,7 +70,9 @@ export const moves = {
   }
 };
 
-const randomBotStrategy: BotStrategy<Board> = ({ board }) => {
+type Bot = BotStrategy<Board, keyof typeof moves>
+
+const randomBotStrategy: Bot = ({ board }) => {
   if (board % 2 === 0 && random(0, 1) === 0) {
     return { move: 'halve' };
   } else {
@@ -78,7 +80,7 @@ const randomBotStrategy: BotStrategy<Board> = ({ board }) => {
   }
 };
 
-const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
+const smartBotStrategy: Bot = ({ board }) => {
   if (board !== 4 && board % 4 === 0) {
     return { move: 'take1' };
   } else if (board === 6) {

@@ -134,7 +134,10 @@ export const moves = {
   }
 };
 
-export const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
+type MoveName = keyof typeof moves
+type Bot = BotStrategy<Board, MoveName>
+
+export const smartBotStrategy: Bot = ({ board }) => {
   const rem = board[0] % 3;
   if (rem === 0) {
     const randomNonEmptyPile = sample(filter([0, 1], (i) => board[i] > 0))!;
@@ -154,8 +157,8 @@ export const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
   }
 };
 
-const randomBotStrategy: BotStrategy<Board> = ({ board }) => {
-  const validMoves: BotMove[] = [];
+const randomBotStrategy: Bot = ({ board }) => {
+  const validMoves: BotMove<MoveName>[] = [];
   if (board[0] >= 1) validMoves.push({ move: 'removeDiscs', args: [1] });
   if (board[0] >= 2) validMoves.push({ move: 'removeDiscs', args: [2] });
   if (board[1] >= 1) validMoves.push({ move: 'turnDiscs', args: [1] });

@@ -1,14 +1,16 @@
 import { sample } from 'lodash';
 import { Sheriff, Thief, hasWinningTriple, getUntakenCards, type Board } from '../helpers';
 import { type BotStrategy } from '../../../strategy-game-factory';
-import { applyTakeCard, CARD_COUNT } from './moves';
+import { applyTakeCard, CARD_COUNT, type moves } from './moves';
+
+type Bot = BotStrategy<Board, keyof typeof moves>
 
 const TURN_PLAYER = [Sheriff, Thief, Sheriff, Thief, Sheriff];
 
-export const randomBotStrategy: BotStrategy<Board> = ({ board }) =>
+export const randomBotStrategy: Bot = ({ board }) =>
   ({ move: 'takeCard', args: [[sample(getUntakenCards(board, CARD_COUNT))]] });
 
-export const smartBotStrategy: BotStrategy<Board> = ({ board, ctx }) =>
+export const smartBotStrategy: Bot = ({ board, ctx }) =>
   ({ move: 'takeCard', args: [[getBotCard(board, ctx.currentPlayer!)]] });
 
 export const getBotCard = (board: Board, botPlayerIndex: number): number => {

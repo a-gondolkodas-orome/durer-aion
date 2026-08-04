@@ -54,13 +54,15 @@ export const moves = {
   }
 };
 
-const randomBotStrategy: BotStrategy<Board> = ({ board }) => {
+type Bot = BotStrategy<Board, keyof typeof moves>
+
+const randomBotStrategy: Bot = ({ board }) => {
   const digits = uniqueNonZeroDigits(board);
   const winningDigits = digits.filter(d => board - d === 0);
   return { move: 'subtractDigit', args: [sample(winningDigits.length > 0 ? winningDigits : digits)!] };
 };
 
-const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
+const smartBotStrategy: Bot = ({ board }) => {
   if (board % 10 !== 0) {
     return { move: 'subtractDigit', args: [board % 10] };
   } else {

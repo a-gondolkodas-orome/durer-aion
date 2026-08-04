@@ -1,6 +1,10 @@
 import { sample } from 'lodash';
 import type { BotMove, BotStrategy } from '../../../strategy-game-factory';
 import type { Board } from '../helpers';
+import type { moves } from './shark-chase';
+
+type MoveName = keyof typeof moves
+type Bot = BotStrategy<Board, MoveName>
 
 const getAdjacentCells = (pos: number): number[] => {
   const cells: number[] = [];
@@ -13,12 +17,12 @@ const getAdjacentCells = (pos: number): number[] => {
 
 // The shark's turn is a route of up to two steps, named as a whole: the halfway
 // cell is only chosen to reach the target safely, so the two are one decision.
-const asSharkRoute = (from: number, via: number, to: number): BotMove[] =>
+const asSharkRoute = (from: number, via: number, to: number): BotMove<MoveName>[] =>
   to === from
     ? [{ move: 'moveShark', args: [via] }]
     : [{ move: 'moveShark', args: [via] }, { move: 'moveShark', args: [to] }];
 
-export const randomBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
+export const randomBotStrategy: Bot = ({ board, ctx }) => {
   if (ctx.chosenRoleIndex === 0) {
     const safeMoves = [...getAdjacentCells(board.shark).filter(c => board.submarines[c] === 0), board.shark];
     const firstPos = sample(safeMoves)!;
@@ -45,7 +49,7 @@ export const randomBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
   }
 };
 
-export const smartBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
+export const smartBotStrategy: Bot = ({ board, ctx }) => {
   if (ctx.chosenRoleIndex === 0) {
     const finalPos = getNextSharkPositionByAI(board)!;
     const firstPos = getIntermediateSharkPosition(board.submarines, board.shark, finalPos);

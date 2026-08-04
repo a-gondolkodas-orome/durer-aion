@@ -1,13 +1,17 @@
 import { sample, last } from 'lodash';
 import type { BotStrategy } from '../../strategy-game-factory';
-import { type Board, type Domino, type Field, ALL_FIELDS, BOARDSIZE, getPossibleMoves } from './dominoes-on-chessboard';
+import {
+  type Board, type Domino, type Field, type moves, ALL_FIELDS, BOARDSIZE, getPossibleMoves
+} from './dominoes-on-chessboard';
 
-export const randomBotStrategy: BotStrategy<Board> = ({ board }) =>
+type Bot = BotStrategy<Board, keyof typeof moves>
+
+export const randomBotStrategy: Bot = ({ board }) =>
   ({ move: 'placeDomino', args: [sample(getPossibleMoves(board))] });
 
 const mirror = ({ row, col }: Field): Field => ({ row: BOARDSIZE - 1 - row, col: BOARDSIZE - 1 - col });
 
-export const smartBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
+export const smartBotStrategy: Bot = ({ board, ctx }) => {
   if (ctx.chosenRoleIndex === 0) {
     // Bot plays second: mirroring the opponent's last move through the board's center
     // is unconditionally optimal on this even-sized board (no cell maps to itself), so

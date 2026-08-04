@@ -97,12 +97,14 @@ export const moves = {
   }
 };
 
-const smartBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
+type Bot = BotStrategy<Board, keyof typeof moves>
+
+const smartBotStrategy: Bot = ({ board, ctx }) => {
   const player = (ctx.currentPlayer ?? currentPlayerFromOwner(board.owner)) as 0 | 1;
   return { move: 'chooseNumber', args: [chooseSmartMove(board.owner, player)] };
 };
 
-const randomBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
+const randomBotStrategy: Bot = ({ board, ctx }) => {
   const player = (ctx.currentPlayer ?? currentPlayerFromOwner(board.owner)) as 0 | 1;
   return { move: 'chooseNumber', args: [chooseTestMove(board.owner, player)] };
 };

@@ -129,13 +129,15 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const randomBotStrategy: BotStrategy<Board> = ({ board }) => {
+type Bot = BotStrategy<Board, keyof typeof moves>
+
+const randomBotStrategy: Bot = ({ board }) => {
   const validMoves = allPrimePowers.filter(e => e.value <= board);
   const { prime, exponent } = sample(validMoves)!;
   return { move: 'subtractPrimeExponent', args: [{ prime, exponent }] };
 };
 
-const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
+const smartBotStrategy: Bot = ({ board }) => {
   if (board === 1) {
     return { move: 'subtractPrimeExponent', args: [{ prime: 2, exponent: 0 }] };
   }

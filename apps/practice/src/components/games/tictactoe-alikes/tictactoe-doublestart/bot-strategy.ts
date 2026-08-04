@@ -2,21 +2,25 @@ import { range, isNull, sample, sampleSize, cloneDeep } from 'lodash';
 import { hasWinningSubset } from '../helpers';
 import { isGameEnd, hasFirstPlayerWon, roleColors, type Board } from './helpers';
 import type { BotMove, BotStrategy } from '../../../strategy-game-factory';
+import type { moves } from './tictactoe-doublestart';
+
+type MoveName = keyof typeof moves
+type Bot = BotStrategy<Board, MoveName>
 
 const emptyCells = (board: Board) => range(0, 9).filter(i => isNull(board[i]));
 
 // The opening turn places two pieces, named together as one decision.
-const placements = (...cells: (number | undefined)[]): BotMove[] =>
+const placements = (...cells: (number | undefined)[]): BotMove<MoveName>[] =>
   cells.map(cell => ({ move: 'placePiece', args: [cell] }));
 
-export const randomBotStrategy: BotStrategy<Board> = ({ board }) => {
+export const randomBotStrategy: Bot = ({ board }) => {
   const allowedPlaces = emptyCells(board);
   if (allowedPlaces.length < 9) return placements(sample(allowedPlaces));
   const [first, second] = sampleSize(allowedPlaces, 2);
   return placements(first, second);
 };
 
-export const smartBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
+export const smartBotStrategy: Bot = ({ board, ctx }) => {
   if (emptyCells(board).length === 9) {
     // two neighbouring corners, chosen randomly
     const opening = sample([[0, 2], [2, 8], [6, 8], [0, 6]])!;

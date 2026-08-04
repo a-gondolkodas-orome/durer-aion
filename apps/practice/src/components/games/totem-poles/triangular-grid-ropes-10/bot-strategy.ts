@@ -10,16 +10,19 @@ import {
   type Edge
 } from './helpers';
 import type { BotStrategy } from '../../../strategy-game-factory';
+import type { moves } from './triangular-grid-ropes-10';
+
+type Bot = BotStrategy<Board, keyof typeof moves>
 
 //    0
 //   1 2
 //  3 4 5
 // 6 7 8 9
 
-export const randomBotStrategy: BotStrategy<Board> = ({ board }) =>
+export const randomBotStrategy: Bot = ({ board }) =>
   ({ move: 'stretchRope', args: [sample(getAllowedMoves(board))] });
 
-export const smartBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
+export const smartBotStrategy: Bot = ({ board, ctx }) => {
   const move = getOptimalSmartBotMove({ board, chosenRoleIndex: ctx.chosenRoleIndex });
   return { move: 'stretchRope', args: [move] };
 };

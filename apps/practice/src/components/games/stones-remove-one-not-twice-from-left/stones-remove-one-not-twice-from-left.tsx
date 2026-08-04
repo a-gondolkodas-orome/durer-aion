@@ -95,10 +95,12 @@ const isGameEnd = (board, ctx) => {
   return false;
 }
 
-const randomBotStrategy: BotStrategy<Board> = ({ board, ctx }) =>
+type Bot = BotStrategy<Board, keyof typeof moves>
+
+const randomBotStrategy: Bot = ({ board, ctx }) =>
   ({ move: 'removeStone', args: [getPileOfRandomAllowedMove(board, ctx)] });
 
-const smartBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
+const smartBotStrategy: Bot = ({ board, ctx }) => {
   if (board.leftRestriction[ctx.currentPlayer!]) {
     return { move: 'removeStone', args: [1] };
   }

@@ -4,8 +4,7 @@ import {
   type Board, type Grid, type moves, getRectangles, getAllMoves, applyMove, isEmpty
 } from './helpers';
 
-// Naming the game's own move names makes a typo in a bot a typecheck error.
-type Bot = BotStrategy<Board, keyof typeof moves>;
+type Bot = BotStrategy<Board, keyof typeof moves>
 
 // Sprague–Grundy value of a single a×b rectangle. A move removes a full row
 // (splitting a×b into (i-1)×b and (a-i)×b) or a full column (a×(j-1) and

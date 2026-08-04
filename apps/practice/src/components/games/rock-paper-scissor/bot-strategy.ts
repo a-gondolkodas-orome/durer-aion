@@ -1,8 +1,10 @@
 import { random } from 'lodash';
 import type { BotStrategy } from '../../strategy-game-factory';
-import type { Board } from './rock-paper-scissor';
+import type { Board, moves } from './rock-paper-scissor';
 
-export const smartBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
+type Bot = BotStrategy<Board, keyof typeof moves>
+
+export const smartBotStrategy: Bot = ({ board, ctx }) => {
   const idx = getOptimalSmartBotMove(board, ctx.currentPlayer!);
   return { move: 'removeSymbol', args: [idx] };
 };

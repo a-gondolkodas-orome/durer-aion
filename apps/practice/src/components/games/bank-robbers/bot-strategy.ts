@@ -1,8 +1,10 @@
 import { random, sample } from 'lodash';
 import type { BotStrategy } from '../../strategy-game-factory';
-import type { Board } from './bank-robbers';
+import type { Board, moves } from './bank-robbers';
 
-export const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
+type Bot = BotStrategy<Board, keyof typeof moves>
+
+export const smartBotStrategy: Bot = ({ board }) => {
   let bankIndex = 0;
   if (board.lastMove === null) {
     bankIndex = random(board.circle.length - 1);

@@ -69,10 +69,12 @@ const generateTestStartBoard = () => {
   }
 };
 
-const randomBotStrategy: BotStrategy<Board> = ({ board }) =>
+type Bot = BotStrategy<Board, keyof typeof moves>
+
+const randomBotStrategy: Bot = ({ board }) =>
   ({ move: 'subtractPowerOfTwo', args: [sample(getAvailableExponents(board))] });
 
-const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
+const smartBotStrategy: Bot = ({ board }) => {
   if (board === 1) {
     return { move: 'subtractPowerOfTwo', args: [0] };
   }

@@ -188,12 +188,15 @@ const applyMove = (board: Board, move: Move): Board => {
   );
 };
 
-const asBotMove = (move: Move): BotMove =>
+const asBotMove = (move: Move): BotMove<MoveName> =>
   move.type === 'remove'
     ? { move: 'removeMatch', args: [move.pileId] }
     : { move: 'splitPile', args: [move.pileId, move.firstPart] };
 
-const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
+type MoveName = keyof typeof moves
+type Bot = BotStrategy<Board, MoveName>
+
+const smartBotStrategy: Bot = ({ board }) => {
   const candidates = legalMoves(board);
   const winningMove = candidates.find(move => xorSum(applyMove(board, move)) === 0);
   // In a losing position no move wins against optimal play, so play a random
@@ -201,7 +204,7 @@ const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
   return asBotMove(winningMove ?? sample(candidates)!);
 };
 
-const randomBotStrategy: BotStrategy<Board> = ({ board }) => {
+const randomBotStrategy: Bot = ({ board }) => {
   const candidates = legalMoves(board);
   // Grab an immediately winning move (one that empties the board) if there is
   // one; otherwise just play a random legal move.

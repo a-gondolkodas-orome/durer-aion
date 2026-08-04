@@ -61,7 +61,9 @@ export const getBotNextNumber = (board: Board): number => {
   return sample([board + 1, board * 2])!;
 };
 
-const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
+type Bot = BotStrategy<Board, keyof typeof moves>
+
+const smartBotStrategy: Bot = ({ board }) => {
   const next = getBotNextNumber(board);
   if (next === board * 2) {
     return { move: 'double' };

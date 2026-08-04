@@ -1,6 +1,10 @@
 import { maxBy } from 'lodash';
 import type { BotMove, BotStrategy } from '../../../strategy-game-factory';
 import type { Board } from '../helpers';
+import type { moves } from './architect-and-bandits-a';
+
+type MoveName = keyof typeof moves
+type Bot = BotStrategy<Board, MoveName>
 
 // Vertices A(0)..H(7) clockwise. Each edge = 10 km, max 4 edges/day.
 // Architect wins by visiting all 8 vertices over 4 days despite 3 nightly destructions.
@@ -15,7 +19,7 @@ import type { Board } from '../helpers';
 //   Day 3: rebuild remaining missing towers from night 2, position for day 4
 //   Day 4: visit any towers destroyed on night 3 (always reachable ≤ 4 edges)
 
-export const smartBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
+export const smartBotStrategy: Bot = ({ board, ctx }) => {
   if (ctx.currentPlayer === 0) {
     return asArchitectDay(getOptimalArchitectPath(board));
   }
@@ -24,8 +28,8 @@ export const smartBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
 
 // The architect's whole day is planned as one route (see the strategy above),
 // so its steps are named together, with the day closed at the end of them.
-const asArchitectDay = (path: number[]): BotMove[] => [
-  ...path.map(vertex => ({ move: 'moveArchitect', args: [vertex] })),
+const asArchitectDay = (path: number[]): BotMove<MoveName>[] => [
+  ...path.map((vertex): BotMove<MoveName> => ({ move: 'moveArchitect', args: [vertex] })),
   { move: 'endDay' }
 ];
 
@@ -106,7 +110,7 @@ export const getOptimalArchitectPath = (board: Board) => {
 // Bandit heuristic: pick the tower that maximises the
 // minimum path the architect needs to cover all missing+newly-destroyed vertices.
 // Destroying the architect's current position is excluded: startNextDay rebuilds it for free.
-const banditMove = (board: Board): BotMove => {
+const banditMove = (board: Board): BotMove<MoveName> => {
   const pos = board.architectPosition;
   const candidates = board.towers
     .map((t, i) => (t && i !== pos ? i : null))

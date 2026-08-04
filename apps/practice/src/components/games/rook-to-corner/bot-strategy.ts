@@ -1,8 +1,11 @@
 import { sample } from 'lodash';
 import type { BotStrategy } from '../../strategy-game-factory';
 import { getAllowedMoves, isTarget, type Board, type Field } from './helpers';
+import type { moves } from './rook-to-corner';
 
-export const randomBotStrategy: BotStrategy<Board> = ({ board }) =>
+type Bot = BotStrategy<Board, keyof typeof moves>
+
+export const randomBotStrategy: Bot = ({ board }) =>
   ({ move: 'moveRook', args: [getRandomBotMove(board)] });
 
 // Random play, but grab an immediate win (moving onto the bottom-right square)
@@ -13,7 +16,7 @@ export const getRandomBotMove = (board: Board): Field => {
   return winningMove ?? sample(allowedMoves)!;
 };
 
-export const smartBotStrategy: BotStrategy<Board> = ({ board }) =>
+export const smartBotStrategy: Bot = ({ board }) =>
   ({ move: 'moveRook', args: [getOptimalSmartBotMove(board)] });
 
 // The game is 2-heap Nim: the distances to the right and bottom edges are the

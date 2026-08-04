@@ -1,11 +1,13 @@
 import { random } from 'lodash';
 import type { BotStrategy } from '../../../strategy-game-factory';
-import type { Board } from './superstitious-counting';
+import type { Board, moves } from './superstitious-counting';
 
-export const randomBotStrategy: BotStrategy<Board> = ({ board }) =>
+type Bot = BotStrategy<Board, keyof typeof moves>
+
+export const randomBotStrategy: Bot = ({ board }) =>
   ({ move: 'step', args: [randomStep(board.restricted)] });
 
-export const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
+export const smartBotStrategy: Bot = ({ board }) => {
   const step = getOptimalBotStep(board);
   return { move: 'step', args: [step] };
 };

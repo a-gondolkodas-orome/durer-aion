@@ -11,6 +11,10 @@ import {
   majorityWinner
 } from './helpers';
 import { solveForN } from './solver';
+import type { moves } from './recolouring-discs';
+
+type MoveName = keyof typeof moves
+type Bot = BotStrategy<Board, MoveName>
 
 interface Option {
   move: Move;
@@ -20,7 +24,7 @@ interface Option {
 const optionsFor = (cells: Cell[], player: number): Option[] =>
   legalMoves(cells, player).map(move => ({ move, cells: applyMove(cells, player, move) }));
 
-const asBotMove = (move: Move): BotMove => {
+const asBotMove = (move: Move): BotMove<MoveName> => {
   if (move.type === 'move') return { move: 'moveDisc', args: [move.from, move.to] };
   if (move.type === 'place') return { move: 'placeDisc', args: [move.to] };
   return { move: 'pass' };
@@ -37,7 +41,7 @@ const opponentInstantWins = (cells: Cell[], opponent: number): number =>
 // Optimal bot. Verified in bot-strategy.spec.ts: from the winning role it never
 // loses; its moves keep the position in its own attractor and strictly reduce
 // the rank, so it always reaches its majority (well within the 200-ply cap).
-export const smartBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
+export const smartBotStrategy: Bot = ({ board, ctx }) => {
   const cells = board.cells;
   const n = cells.length;
   const me = ctx.currentPlayer!;
@@ -85,7 +89,7 @@ export const smartBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
 };
 
 // Test bot: plays at random, but takes an immediate win when one is available.
-export const randomBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
+export const randomBotStrategy: Bot = ({ board, ctx }) => {
   const cells = board.cells;
   const me = ctx.currentPlayer!;
   const options = optionsFor(cells, me);

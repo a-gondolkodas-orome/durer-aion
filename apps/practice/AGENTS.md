@@ -170,20 +170,22 @@ headless match — and asks the strategy again while the turn is still its own.
 Naming a move after the turn ended is a bug (dev: throw); naming moves the
 game-winning move made moot is fine (they are dropped).
 
-`BotMove.move` is a plain string by default, so a mistyped name only surfaces
-when the bot plays it (dev: throw, naming the move names the game does have).
-Have the compiler catch it instead by pinning the union to the game's own moves
-— worth it wherever the game exports them:
+`BotMove.move` is a string, so a mistyped name would only surface when the bot
+plays it (dev: throw, naming the move names the game does have). Every game
+therefore pins the union to its own moves, which turns a typo into a typecheck
+error — follow suit in a new game:
 
 ```ts
 import type { Board, moves } from './helpers';
-type Bot = BotStrategy<Board, keyof typeof moves>;
+
+type Bot = BotStrategy<Board, keyof typeof moves>
 
 export const smartBotStrategy: Bot = ({ board }) => ({ move: 'removeLine', args: [choice] });
 ```
 
-See `remove-row-or-column` and `coins-in-3-piles` (whose `asTurn` helper returns
-`BotMove<MoveName>[]`).
+Give the union its own `type MoveName = keyof typeof moves` alias only where
+something else names it too — a helper that builds a turn's moves returns
+`BotMove<MoveName>[]` (see `coins-in-3-piles`'s `asTurn`).
 
 **`ctx`** fields available in moves and `BoardClient`:
 - `currentPlayer`: 0/1 — use this for game logic in both modes

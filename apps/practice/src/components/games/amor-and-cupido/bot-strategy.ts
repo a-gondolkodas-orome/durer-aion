@@ -3,6 +3,9 @@ import type { BotStrategy } from '../../strategy-game-factory';
 import {
   type Board, getAllowedMoves, completesTriangle, canonicalKey
 } from './helpers';
+import type { moves } from './amor-and-cupido';
+
+type Bot = BotStrategy<Board, keyof typeof moves>
 
 // Game value of a position, memoised by canonical (isomorphism-reduced) key.
 // Shared across calls/tests: the value depends only on the position and who is
@@ -39,7 +42,7 @@ const negamax = (board: Board, toMove: number): number => {
 
 export const getBotScore = (board: Board, toMove: number): number => negamax(board, toMove);
 
-export const smartBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
+export const smartBotStrategy: Bot = ({ board, ctx }) => {
   const me = ctx.currentPlayer!;
   const empties = getAllowedMoves(board);
 

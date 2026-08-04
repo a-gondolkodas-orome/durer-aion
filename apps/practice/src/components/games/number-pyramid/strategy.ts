@@ -1,5 +1,9 @@
 import { orderBy, random, range, sample, sampleSize, shuffle, sum } from 'lodash';
 import type { BotMove, BotStrategy } from '../../strategy-game-factory';
+import type { moves } from './number-pyramid';
+
+type MoveName = keyof typeof moves
+type Bot = BotStrategy<Board, MoveName>
 
 export type Slot = { value: number; state: 'active' | 'consumed' };
 export type Level = (Slot | null)[];
@@ -9,7 +13,7 @@ export type Board = {
   sortedInitial: number[];
 };
 
-export const randomBotStrategy: BotStrategy<Board> = ({ board }) => {
+export const randomBotStrategy: Bot = ({ board }) => {
   const win = findImmediateWin(board);
   if (win) return { move: 'combineTwo', args: [win] };
 
@@ -19,13 +23,13 @@ export const randomBotStrategy: BotStrategy<Board> = ({ board }) => {
   return { move: 'combineTwo', args: [{ levelIdx: li, indices: sampleSize(actives, 2) }] };
 };
 
-export const smartBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
+export const smartBotStrategy: Bot = ({ board, ctx }) => {
   const win = findImmediateWin(board);
   if (win) return { move: 'combineTwo', args: [win] };
 
   const botIsWinner = isP2WinningPosition(board) === (ctx.currentPlayer === 1);
 
-  const tryLevel = (levelIdx, order: 'asc' | 'desc' = 'desc'): BotMove | null => {
+  const tryLevel = (levelIdx, order: 'asc' | 'desc' = 'desc'): BotMove<MoveName> | null => {
     if (!hasActivePair(board.levels[levelIdx])) return null;
     const level = board.levels[levelIdx];
     const indices = orderBy(activeSlotIndices(level), (i) => level[i]!.value, order).slice(0, 2);

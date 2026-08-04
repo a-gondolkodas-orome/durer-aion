@@ -1,16 +1,19 @@
 import { sample, cloneDeep, random, shuffle } from 'lodash';
 import type { BotStrategy } from '../../strategy-game-factory';
 import { markForbiddenFields, getAllowedMoves, boardIndices, BISHOP, type Board, type Field } from './helpers';
+import type { moves } from './chess-bishops';
+
+type Bot = BotStrategy<Board, keyof typeof moves>
 
 const HORIZONTAL = "h" as const;
 const VERTICAL = "v" as const;
 type Axis = typeof HORIZONTAL | typeof VERTICAL;
 let axis: Axis | null = null;
 
-export const randomBotStrategy: BotStrategy<Board> = ({ board }) =>
+export const randomBotStrategy: Bot = ({ board }) =>
   ({ move: 'placeBishop', args: [sample(getAllowedMoves(board))] });
 
-export const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
+export const smartBotStrategy: Bot = ({ board }) => {
   const botMove = getOptimalSmartBotMove(board);
   return { move: 'placeBishop', args: [botMove] };
 };

@@ -9,6 +9,9 @@ import {
   legalMoves,
   moverWins
 } from './helpers';
+import type { moves } from './matches-on-edges';
+
+type Bot = BotStrategy<Board, keyof typeof moves>
 
 // A move is winning if it leaves the other player (who moves next) in a losing
 // position.
@@ -26,7 +29,7 @@ const opponentWinningReplies = (board: Board, move: Move, memo: Map<string, bool
 // Optimal bot: verified against the official characterisation (see
 // bot-strategy.spec.ts). Plays a winning move when one exists, otherwise sets
 // the hardest possible trap.
-export const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
+export const smartBotStrategy: Bot = ({ board }) => {
   const memo = new Map<string, boolean>();
   const legal = legalMoves(board);
   const winning = winningMoves(board, legal, memo);
@@ -44,7 +47,7 @@ export const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
 
 // Test bot: plays at random, but takes an immediately winning move (one that
 // leaves the other player unable to move) when one is available.
-export const randomBotStrategy: BotStrategy<Board> = ({ board }) => {
+export const randomBotStrategy: Bot = ({ board }) => {
   const legal = legalMoves(board);
   const immediateWin = legal.find(m => isTerminal(applyMove(board, m.a, m.b)));
   const chosen = immediateWin ?? sample(legal)!;

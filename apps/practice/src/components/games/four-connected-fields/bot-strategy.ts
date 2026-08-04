@@ -1,6 +1,9 @@
 import { sample } from "lodash";
 import { type BotStrategy } from "../../strategy-game-factory";
 import { type Board, legalNodes, hasAnyMove } from "./helpers";
+import type { moves } from './four-connected-fields';
+
+type Bot = BotStrategy<Board, keyof typeof moves>
 
 // Every move raises the total coin count by exactly 1, so the game is a strictly
 // monotonic DAG: it always terminates and can be solved exactly by a memoized
@@ -36,7 +39,7 @@ const winningInOneMove = (board: Board): number[] =>
 
 // Test bot: plays a random legal move, but grabs an immediate one-move win if one
 // is available.
-export const randomBotStrategy: BotStrategy<Board> = ({ board }) => {
+export const randomBotStrategy: Bot = ({ board }) => {
   const instantWins = winningInOneMove(board);
   const node = instantWins.length > 0 ? sample(instantWins)! : sample(legalNodes(board))!;
   return { move: 'placeCoin', args: [node] };
@@ -56,5 +59,5 @@ export const getBotMove = (board: Board): number => {
   return sample(nodes.filter((node) => trapCount(node) === fewestReplies))!;
 };
 
-export const smartBotStrategy: BotStrategy<Board> = ({ board }) =>
+export const smartBotStrategy: Bot = ({ board }) =>
   ({ move: 'placeCoin', args: [getBotMove(board)] });

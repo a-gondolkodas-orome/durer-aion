@@ -196,14 +196,17 @@ export const moves = {
 
 // "Keep, then split" is one decision, so the turn is named as a whole (mirrors
 // the pile-splitting games).
-const asTurn = ({ keepId, parts }: { keepId: number; parts: number[] }): BotMove[] => [
+const asTurn = ({ keepId, parts }: { keepId: number; parts: number[] }): BotMove<MoveName>[] => [
   { move: 'keepPile', args: [keepId] },
   { move: 'splitPile', args: [parts] }
 ];
 
-const smartBotStrategy: BotStrategy<Board> = ({ board }) => asTurn(getSmartBotStep(board));
+type MoveName = keyof typeof moves
+type Bot = BotStrategy<Board, MoveName>
 
-const randomBotStrategy: BotStrategy<Board> = ({ board }) => asTurn(getRandomBotStep(board));
+const smartBotStrategy: Bot = ({ board }) => asTurn(getSmartBotStep(board));
+
+const randomBotStrategy: Bot = ({ board }) => asTurn(getRandomBotStep(board));
 
 const getPlayerStepDescription = () => ({
   hu: 'Válaszd ki, melyik kupacot tartod meg (a másik kettőt eldobod), majd oszd három új kupacra.',

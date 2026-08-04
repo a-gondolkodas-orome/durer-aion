@@ -1,12 +1,14 @@
 import { sample } from 'lodash';
 import { Sheriff, Thief, hasWinningTriple, getUntakenCards, type Board } from '../helpers';
 import { type BotStrategy } from '../../../strategy-game-factory';
-import { applyTakeCard, CARD_COUNT } from './moves';
+import { applyTakeCard, CARD_COUNT, type moves } from './moves';
 
-export const randomBotStrategy: BotStrategy<Board> = ({ board }) =>
+type Bot = BotStrategy<Board, keyof typeof moves>
+
+export const randomBotStrategy: Bot = ({ board }) =>
   ({ move: 'takeCard', args: [sample(getUntakenCards(board, CARD_COUNT))] });
 
-export const smartBotStrategy: BotStrategy<Board> = ({ board, ctx }) =>
+export const smartBotStrategy: Bot = ({ board, ctx }) =>
   ({ move: 'takeCard', args: [getBotCard(board, ctx.currentPlayer!)] });
 
 // Shared across calls: minimax's score depends only on (cards, botPlayerIndex), so

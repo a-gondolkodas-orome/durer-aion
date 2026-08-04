@@ -1,11 +1,14 @@
 import { range, sample } from 'lodash';
 import { isGameEnd, placeStone, type Board } from './helpers';
 import type { BotStrategy } from '../../../strategy-game-factory';
+import type { moves } from './magic-box-a';
 
-export const randomBotStrategy: BotStrategy<Board> = ({ board }) =>
+type Bot = BotStrategy<Board, keyof typeof moves>
+
+export const randomBotStrategy: Bot = ({ board }) =>
   ({ move: 'placeStone', args: [sample(emptyCells(board))] });
 
-export const smartBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
+export const smartBotStrategy: Bot = ({ board, ctx }) => {
   const id = getOptimalPlacingPosition(board, ctx.chosenRoleIndex);
   return { move: 'placeStone', args: [id] };
 };

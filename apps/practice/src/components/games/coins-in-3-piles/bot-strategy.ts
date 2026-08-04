@@ -2,7 +2,6 @@ import { findIndex, sample, range } from 'lodash';
 import type { BotMove, BotStrategy } from '../../strategy-game-factory';
 import type { Board, moves } from './helpers';
 
-// Naming the game's own move names makes a typo in a bot a typecheck error.
 type MoveName = keyof typeof moves
 type Bot = BotStrategy<Board, MoveName>
 

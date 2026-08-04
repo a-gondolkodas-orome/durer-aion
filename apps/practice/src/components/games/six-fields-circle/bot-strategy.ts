@@ -4,6 +4,9 @@ import {
   type Board, type Move, OPPOSITE_PAIRS, getLegalMoves, hasLegalMove, pairSum,
   sampleNonEmptyField
 } from "./helpers";
+import type { moves } from './six-fields-circle';
+
+type Bot = BotStrategy<Board, keyof typeof moves>
 
 // Optimal move: keep all three opposite-pair sums even, which hands the
 // opponent a losing position. When the mover is already in a losing position
@@ -37,8 +40,8 @@ export const getRandomMove = (board: Board): Move => {
   return sample(winningMoves.length > 0 ? winningMoves : legalMoves)!;
 };
 
-export const smartBotStrategy: BotStrategy<Board> = ({ board }) =>
+export const smartBotStrategy: Bot = ({ board }) =>
   ({ move: 'removeFromTwo', args: [getSmartMove(board)] });
 
-export const randomBotStrategy: BotStrategy<Board> = ({ board }) =>
+export const randomBotStrategy: Bot = ({ board }) =>
   ({ move: 'removeFromTwo', args: [getRandomMove(board)] });

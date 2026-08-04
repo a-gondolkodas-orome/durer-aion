@@ -9,6 +9,10 @@ import {
   nonEmptyIndices,
   removerWins
 } from './helpers';
+import type { moves } from './take-and-point';
+
+type MoveName = keyof typeof moves
+type Bot = BotStrategy<Board, MoveName>
 
 type Removal = { index: number; amount: number };
 
@@ -102,14 +106,14 @@ export const chooseRemoval = (board: Board): Removal => {
 // A turn takes stones and then points at the piles the opponent may take from,
 // both named at once — except on the opening turn, which only points, and when
 // the take empties the board and wins the game there and then.
-const asTurn = (board: Board, { index, amount }: Removal, point: (board: Board) => number[]): BotMove[] => {
+const asTurn = (board: Board, { index, amount }: Removal, point: (board: Board) => number[]): BotMove<MoveName>[] => {
   const nextBoard: Board = { piles: applyRemoval(board.piles, index, amount), pointed: null };
-  const removal = { move: 'takeStones', args: [index, amount] };
+  const removal: BotMove<MoveName> = { move: 'takeStones', args: [index, amount] };
   if (isTerminal(nextBoard)) return [removal];
   return [removal, { move: 'pointPiles', args: [point(nextBoard)] }];
 };
 
-export const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
+export const smartBotStrategy: Bot = ({ board }) => {
   if (board.pointed === null) return { move: 'pointPiles', args: [choosePointing(board)] };
   return asTurn(board, chooseRemoval(board), choosePointing);
 };
@@ -130,7 +134,7 @@ const randomPointing = (board: Board): number[] => {
   return shuffle(nonEmpty).slice(0, 2);
 };
 
-export const randomBotStrategy: BotStrategy<Board> = ({ board }) => {
+export const randomBotStrategy: Bot = ({ board }) => {
   if (board.pointed === null) return { move: 'pointPiles', args: [randomPointing(board)] };
   return asTurn(board, randomRemoval(board), randomPointing);
 };

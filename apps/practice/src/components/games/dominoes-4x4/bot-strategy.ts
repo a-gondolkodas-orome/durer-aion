@@ -1,6 +1,8 @@
 import { sample } from 'lodash';
 import type { BotStrategy } from '../../strategy-game-factory';
-import { type Board, type Domino, BOARDSIZE } from './dominoes-4x4';
+import { type Board, type Domino, BOARDSIZE, type moves } from './dominoes-4x4';
+
+type Bot = BotStrategy<Board, keyof typeof moves>
 
 // This game is Domineering on a 4x4 board: player 0 (Árgyélus) only ever places
 // vertical dominoes, player 1 (Félix) only horizontal ones. It is a partizan game
@@ -65,7 +67,7 @@ const canWin = (mask: number, player: number): boolean => {
 export const isWinningForPlayerToMove = (board: Board, player: number): boolean =>
   canWin(boardToMask(board), player);
 
-export const smartBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
+export const smartBotStrategy: Bot = ({ board, ctx }) => {
   const player = ctx.currentPlayer!;
   const mask = boardToMask(board);
   const candidates = movesForPlayer(mask, player);
@@ -94,7 +96,7 @@ export const smartBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
 
 // Test bot: plays randomly, but grabs an immediate win (a move after which the other
 // player has no legal placement) whenever one is available.
-export const randomBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
+export const randomBotStrategy: Bot = ({ board, ctx }) => {
   const player = ctx.currentPlayer!;
   const mask = boardToMask(board);
   const candidates = movesForPlayer(mask, player);

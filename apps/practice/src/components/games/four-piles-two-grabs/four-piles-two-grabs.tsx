@@ -149,10 +149,12 @@ export const moves = {
   }
 };
 
-const smartBotStrategy: BotStrategy<Board> = ({ board }) =>
+type Bot = BotStrategy<Board, keyof typeof moves>
+
+const smartBotStrategy: Bot = ({ board }) =>
   ({ move: 'takeStones', args: [getSmartBotMove(board)] });
 
-const randomBotStrategy: BotStrategy<Board> = ({ board }) =>
+const randomBotStrategy: Bot = ({ board }) =>
   ({ move: 'takeStones', args: [getRandomBotMove(board)] });
 
 const rule = {

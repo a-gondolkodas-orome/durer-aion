@@ -3,10 +3,13 @@ import type { BotStrategy } from '../../strategy-game-factory';
 import {
   type Board, type Coef, COEFS, rootTriplesWithProduct, completionValue, canComplete
 } from './helpers';
+import type { moves } from './polynomial-building';
+
+type Bot = BotStrategy<Board, keyof typeof moves>
 
 // Weak bot: plays a random legal move, but completes to a win on the last move
 // when it can (only the first player, who always makes the final move, can win in 1).
-export const randomBotStrategy: BotStrategy<Board> = ({ board }) => {
+export const randomBotStrategy: Bot = ({ board }) => {
   const empties = COEFS.filter(k => board[k] === null);
   const coef = sample(empties)!;
   if (empties.length === 1) {
@@ -58,7 +61,7 @@ const blockingMove = (board: Board): [Coef, number] | null => {
 // 3 empty → first player's move 1, 2 empty → second player's move 2,
 // 1 empty → first player's move 3. The first player has the last move and always
 // wins with correct play.
-export const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
+export const smartBotStrategy: Bot = ({ board }) => {
   const empties = COEFS.filter(k => board[k] === null);
 
   // First player, move 1: pick randomly between the two winning first moves —

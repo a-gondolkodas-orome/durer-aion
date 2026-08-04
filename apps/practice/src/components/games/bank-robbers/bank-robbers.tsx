@@ -100,7 +100,9 @@ const getAllowedBanks = (board: Board) => {
   })
 }
 
-const randomBotStrategy: BotStrategy<Board> = ({ board }) =>
+type Bot = BotStrategy<Board, keyof typeof moves>
+
+const randomBotStrategy: Bot = ({ board }) =>
   ({ move: 'rob', args: [sample(getAllowedBanks(board))!] });
 
 const rule = {

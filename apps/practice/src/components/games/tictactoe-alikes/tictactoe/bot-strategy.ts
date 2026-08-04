@@ -1,8 +1,11 @@
 import { isNull, range, sample } from 'lodash';
 import { pColor, botColor, inPlacingPhase, isGameEnd, type Board } from './helpers';
 import type { BotStrategy } from '../../../strategy-game-factory';
+import type { moves } from './tictactoe';
 
-export const randomBotStrategy: BotStrategy<Board> = ({ board }) => {
+type Bot = BotStrategy<Board, keyof typeof moves>
+
+export const randomBotStrategy: Bot = ({ board }) => {
   const allowedPlaces = getAllowedPlaces({ board, amIBot: true });
   if (inPlacingPhase(board)) {
     const safePlaces = allowedPlaces.filter(i => !opponentCanWinNext(board, i));
@@ -22,7 +25,7 @@ const opponentCanWinNext = (board: Board, position) => {
   });
 };
 
-export const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
+export const smartBotStrategy: Bot = ({ board }) => {
   if (inPlacingPhase(board)) {
     const id = getOptimalBotPlacingPosition(board);
     return { move: 'placePiece', args: [id] };

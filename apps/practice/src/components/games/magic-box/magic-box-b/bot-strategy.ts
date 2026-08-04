@@ -1,15 +1,19 @@
 import { range, sample } from 'lodash';
 import { isLineFull, emptyCellsInLine, placeStoneAt, LINES, type Board } from './helpers';
 import type { BotMove, BotStrategy } from '../../../strategy-game-factory';
+import type { moves } from './magic-box-b';
+
+type MoveName = keyof typeof moves
+type Bot = BotStrategy<Board, MoveName>
 
 // A turn is one decision — where to place, then which line to hand over — so it
 // is named as a whole. The opening turn has no pending line to place into.
-const asTurn = (pendingLine: number | null, cell: number | undefined, line: number): BotMove[] =>
+const asTurn = (pendingLine: number | null, cell: number | undefined, line: number): BotMove<MoveName>[] =>
   pendingLine === null
     ? [{ move: 'designateLine', args: [line] }]
     : [{ move: 'placeStone', args: [cell] }, { move: 'designateLine', args: [line] }];
 
-export const randomBotStrategy: BotStrategy<Board> = ({ board }) => {
+export const randomBotStrategy: Bot = ({ board }) => {
   const { stones, pendingLine } = board;
   return asTurn(
     pendingLine,
@@ -18,7 +22,7 @@ export const randomBotStrategy: BotStrategy<Board> = ({ board }) => {
   );
 };
 
-export const smartBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
+export const smartBotStrategy: Bot = ({ board, ctx }) => {
   const { cell, line } = getOptimalAction(board, ctx.chosenRoleIndex);
   return asTurn(board.pendingLine, cell, line);
 };

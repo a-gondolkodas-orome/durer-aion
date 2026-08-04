@@ -176,7 +176,9 @@ export const moves = {
 // Smart bot: play the winning move when one exists (drive towards a losing
 // position, or merge to a single value). In a losing position, make the reply
 // that leaves the opponent with the most ways to blunder.
-export const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
+type Bot = BotStrategy<Board, keyof typeof moves>
+
+export const smartBotStrategy: Bot = ({ board }) => {
   const candidateMoves = movesFromSet(distinctValues(board));
 
   const winningMoves = candidateMoves.filter(isWinningMove);
@@ -197,7 +199,7 @@ export const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
 };
 
 // Test bot: play a random legal move, but grab an immediate win when available.
-const randomBotStrategy: BotStrategy<Board> = ({ board }) => {
+const randomBotStrategy: Bot = ({ board }) => {
   const candidateMoves = movesFromSet(distinctValues(board));
   const winningNow = candidateMoves.filter(m => m.resultSet.length === 1);
   const move = sample(winningNow.length > 0 ? winningNow : candidateMoves)!;
