@@ -1,3 +1,6 @@
+import { isAllowed, type Board, type Moves } from './gameplay';
+import { range, sample } from 'lodash';
+import type { BotStrategy } from '../../strategy-game-factory';
 // generated with scripts/pre-generate-ai-moves/remove-divisor-multiple.py
 export const strategyDict = {
   "6": {
@@ -15990,3 +15993,36 @@ export const strategyDict = {
     "-1_32767": [11, 13]
   }
 };
+
+type Bot = BotStrategy<Board, Moves>
+
+export const randomBotStrategy: Bot = ({ board }) => {
+  const possibleMoves = range(1, board.numbersOnTable.length + 1)
+    .filter(n => isAllowed(board, n));
+  return { move: 'removeNumber', args: [sample(possibleMoves)!] };
+};
+
+export const smartBotStrategy: Bot = ({ board }) => {
+  const numCount = board.numbersOnTable.length;
+  const stateId = generateStateID(board);
+  const optimalMoves = strategyDict[numCount]
+    ? strategyDict[numCount][stateId]
+    : [];
+  if (optimalMoves.length) {
+    return { move: 'removeNumber', args: [sample(optimalMoves)!] };
+  } else {
+    const possibleMoves = range(1, numCount + 1)
+      .filter(n => isAllowed(board, n));
+    return { move: 'removeNumber', args: [sample(possibleMoves)!] };
+  }
+};
+
+const generateStateID = (board: Board) => {
+  let id = 0;
+  for (let i = 0; i < board.numbersOnTable.length; i++) {
+    if (board.numbersOnTable[i]){
+      id += 2**(i)
+    }
+  }
+  return (board.previousMove === null ? '-1' : board.previousMove) + "_" +id;
+}

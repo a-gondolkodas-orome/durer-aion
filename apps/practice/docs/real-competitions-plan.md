@@ -1,7 +1,15 @@
 # Supporting Real Competitions — High-Level Plan
 
-Status: **draft / planning** — not yet scheduled. This document captures the
-target design and a phased path to get there. Nothing here is built yet.
+Status: **partly superseded.** The fork this document ends on — build a
+competition backend here, or contribute the engine to the existing `durer-aion`
+monorepo — has since been decided in favour of **reuse**: the current effort is
+replacing `boardgame.io` in `a-gondolkodas-orome/durer-aion` with
+`strategyGameFactory`. Phases 2–5 below describe the backend this repo will now
+*not* build; read them as the requirements that repo has to meet, not as work
+scheduled here. Phase 1 (a headless engine) still applies and is largely done —
+every game's rules live in a React-free `gameplay.ts` and every bot in its own
+`bot-strategy.ts`, both enforced. The rest of the document is kept for the
+requirements it captures: what a competition needs, and why.
 
 ## Goal
 
@@ -132,13 +140,18 @@ imports. Needs test coverage.
 Partly done already: the move interpreter, the game store, the `ctx` derivation
 and the headless match runner live in `strategy-game-factory/engine/`, which
 imports no React, and every bot is a pure `({ board, ctx }) => BotMove[]`
-function that the runner can drive with no browser. Per game, the target layout
-is a React-free `gameplay.ts` holding the board type, the start boards and the
-moves, kept framework-free by ESLint (`AGENTS.md § Files in a game folder`); a
-pilot batch is converted and the rest follow mechanically. What then remains is
-the server-only split of the smart bot — and the rule that a competition game's
-start boards must not be derived from the winning characterisation, since that
-predicate would otherwise ship to the client alongside them.
+function that the runner can drive with no browser. Per game, the rules now live
+in a React-free `gameplay.ts` (board type, start boards, moves), kept
+framework-free by ESLint and by a spec that follows each module's imports
+looking for a `.tsx`; the strategy lives in its own `bot-strategy.ts`, so the
+two can be shipped to different places. `games/plays-to-an-end.spec.ts` plays
+every registered game headlessly, which is the match loop below minus the clock
+and the HTTP.
+
+What remains is keeping the smart bot out of whatever bundle the competitor
+loads — a build-level guarantee, not a file-layout one — and the rule that a
+competition game's start boards must not be derived from the winning
+characterisation, since that predicate would otherwise ship alongside them.
 
 ### Phase 2 — Stand up the backend
 

@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { range } from 'lodash';
-import { strategyGameFactory, type BotStrategy, type BoardClientProps, GameBoard } from '../../strategy-game-factory';
+import { strategyGameFactory, type BoardClientProps, GameBoard } from '../../strategy-game-factory';
 import { useTranslation } from '../../../language';
-import { generateStartBoard, getRandomBotMove, getSmartBotMove, moves, type Board, type Moves } from './gameplay';
+import { generateStartBoard, moves, type Board } from './gameplay';
+import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
 
 const Pile = ({ count, index, selected, selectable, onClick }: {
   count: number; index: number; selected: boolean; selectable: boolean; onClick: () => void;
@@ -88,18 +89,6 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       )}
     </GameBoard>
   );
-};
-
-type Bot = BotStrategy<Board, Moves>
-
-const smartBotStrategy: Bot = ({ board }) => {
-  const [i, j] = getSmartBotMove(board);
-  return { move: 'takeChips', args: [i, j] };
-};
-
-const randomBotStrategy: Bot = ({ board }) => {
-  const [i, j] = getRandomBotMove(board);
-  return { move: 'takeChips', args: [i, j] };
 };
 
 const rule = {

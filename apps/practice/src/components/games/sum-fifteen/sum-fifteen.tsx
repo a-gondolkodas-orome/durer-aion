@@ -1,17 +1,7 @@
-import { strategyGameFactory, type BotStrategy, type BoardClientProps, GameBoard } from '../../strategy-game-factory';
+import { strategyGameFactory, type BoardClientProps, GameBoard } from '../../strategy-game-factory';
 import { useTranslation } from '../../../language';
-import {
-  allNumbers,
-  chooseSmartMove,
-  chooseTestMove,
-  currentPlayerFromOwner,
-  findWinningTriple,
-  generateStartBoard,
-  moves,
-  numbersOwnedBy,
-  type Board,
-  type Moves
-} from './gameplay';
+import { allNumbers, findWinningTriple, generateStartBoard, moves, numbersOwnedBy, type Board } from './gameplay';
+import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
 
 const ownedLabel = (owner: Board['owner'], player: 0 | 1): string => {
   const nums = numbersOwnedBy(owner, player);
@@ -80,18 +70,6 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       }
     </GameBoard>
   );
-};
-
-type Bot = BotStrategy<Board, Moves>
-
-const smartBotStrategy: Bot = ({ board, ctx }) => {
-  const player = (ctx.currentPlayer ?? currentPlayerFromOwner(board.owner)) as 0 | 1;
-  return { move: 'chooseNumber', args: [chooseSmartMove(board.owner, player)] };
-};
-
-const randomBotStrategy: Bot = ({ board, ctx }) => {
-  const player = (ctx.currentPlayer ?? currentPlayerFromOwner(board.owner)) as 0 | 1;
-  return { move: 'chooseNumber', args: [chooseTestMove(board.owner, player)] };
 };
 
 const rule = {

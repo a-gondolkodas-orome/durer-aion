@@ -1,11 +1,7 @@
-import {
-  strategyGameFactory,
-  type BotStrategy,
-  type BoardClientProps,
-  GameBoard
-} from '../../../strategy-game-factory';
-import { range, sample } from 'lodash';
-import { generateStartBoard, isValidStep, maxStart, moves, validSteps, type Board, type Moves } from './gameplay';
+import { strategyGameFactory, type BoardClientProps, GameBoard } from '../../../strategy-game-factory';
+import { range } from 'lodash';
+import { generateStartBoard, maxStart, moves, type Board } from './gameplay';
+import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
 
 const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   return (
@@ -29,28 +25,6 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
       </div>
     </GameBoard>
   );
-};
-
-type Bot = BotStrategy<Board, Moves>
-
-const randomBotStrategy: Bot = ({ board }) => {
-  const step = isValidStep(board) ? board : sample([...validSteps].filter(s => s < board))!;
-  return { move: 'moveTo', args: [board - step] };
-};
-
-const smartBotStrategy: Bot = ({ board }) => {
-  const remainder = board % 4;
-  let step: number;
-  if (remainder !== 0) {
-    // all valid steps ≡ remainder (mod 4) land on a multiple of 4
-    const winningSteps = [...validSteps].filter(s => s <= board && (board - s) % 4 === 0);
-    step = sample(winningSteps)!;
-  } else {
-    // losing position: pick any valid step
-    const steps = [...validSteps].filter(s => s <= board);
-    step = sample(steps)!;
-  }
-  return { move: 'moveTo', args: [board - step] };
 };
 
 const rule = {

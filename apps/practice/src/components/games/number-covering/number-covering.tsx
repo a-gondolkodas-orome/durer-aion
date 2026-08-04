@@ -1,7 +1,8 @@
-import { strategyGameFactory, type BotStrategy, type BoardClientProps, GameBoard } from '../../strategy-game-factory';
-import { range, sum, sample } from 'lodash';
+import { strategyGameFactory, type BoardClientProps, GameBoard } from '../../strategy-game-factory';
+import { range, sum } from 'lodash';
 import { useTranslation } from '../../../language';
-import { generateTestStartBoard, getRemaining, moves, type Board, COVERED, type Moves } from './gameplay';
+import { generateTestStartBoard, getRemaining, moves, type Board, COVERED } from './gameplay';
+import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
 
 const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
@@ -27,28 +28,6 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
       </p>
     </GameBoard>
   );
-};
-
-type Bot = BotStrategy<Board, Moves>
-
-const randomBotStrategy: Bot = ({ board }) =>
-  ({ move: 'coverNumber', args: [sample(getRemaining(board))!] });
-
-export const smartBotStrategy: Bot = ({ board, ctx }) => {
-  const remaining = getRemaining(board);
-  const evens = remaining.filter(i => i%2 === 0);
-  const odds = remaining.filter(i => i%2 === 1);
-  if (evens.length === odds.length || evens.length === 0 || odds.length === 0) {
-    return { move: 'coverNumber', args: [sample(remaining)!] };
-  } else if (ctx.currentPlayer === 0) {
-    // first player wants same-parity survivors -> remove from the smaller class
-    const candidates = evens.length < odds.length ? evens : odds;
-    return { move: 'coverNumber', args: [sample(candidates)!] };
-  } else {
-    // second player wants a mixed pair -> remove from the larger class
-    const candidates = evens.length > odds.length ? evens : odds;
-    return { move: 'coverNumber', args: [sample(candidates)!] };
-  }
 };
 
 const makeRule = (maxNumber: number) => ({

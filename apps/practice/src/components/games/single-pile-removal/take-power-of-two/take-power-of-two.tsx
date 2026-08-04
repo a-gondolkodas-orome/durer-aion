@@ -1,20 +1,12 @@
 import {
   strategyGameFactory,
-  type BotStrategy,
   type BoardClientProps,
   GameBoard,
   useHoverPreview
 } from '../../../strategy-game-factory';
-import { reverse, sample } from 'lodash';
 import { useTranslation } from '../../../../language';
-import {
-  generateStartBoard,
-  generateTestStartBoard,
-  getAvailableExponents,
-  moves,
-  type Board,
-  type Moves
-} from './gameplay';
+import { generateStartBoard, generateTestStartBoard, getAvailableExponents, moves, type Board } from './gameplay';
+import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
 
 const ExponentsTable = ({ isPowerAllowed, board, choosePower, hovered, hoverProps }) => {
   const { t } = useTranslation();
@@ -59,27 +51,6 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       />
     </GameBoard>
   );
-}
-
-type Bot = BotStrategy<Board, Moves>
-
-const randomBotStrategy: Bot = ({ board }) =>
-  ({ move: 'subtractPowerOfTwo', args: [sample(getAvailableExponents(board))!] });
-
-const smartBotStrategy: Bot = ({ board }) => {
-  if (board === 1) {
-    return { move: 'subtractPowerOfTwo', args: [0] };
-  }
-  const availableExponents = getAvailableExponents(board);
-  if (board % 3 === 0) {
-    return { move: 'subtractPowerOfTwo', args: [sample(availableExponents)!] };
-  } else {
-    // board % 3 is 1 or 2 here, and 2**e alternates 1, 2, 1, 2 (mod 3), so
-    // e = 0 or e = 1 always lands on a multiple of 3 — both are available
-    // whenever board >= 2, which the board === 1 branch above guarantees.
-    const optimalMove = reverse(availableExponents).find(e => (board - 2 ** e) % 3 === 0)!;
-    return { move: 'subtractPowerOfTwo', args: [optimalMove] };
-  }
 }
 
 const getPlayerStepDescription = () => ({

@@ -1,6 +1,6 @@
 import { random, sample } from 'lodash';
 import type { BotStrategy } from '../../strategy-game-factory';
-import type { Board, Moves } from './gameplay';
+import { getAllowedBanks, type Board, type Moves } from './gameplay';
 
 type Bot = BotStrategy<Board, Moves>
 
@@ -994,3 +994,6 @@ const optimalStrategy = [
     [4]
   ]
 ];
+
+export const randomBotStrategy: Bot = ({ board }) =>
+  ({ move: 'rob', args: [sample(getAllowedBanks(board))!] });

@@ -1,11 +1,7 @@
-import {
-  strategyGameFactory,
-  type BotStrategy,
-  type BoardClientProps,
-  GameBoard
-} from '../../../strategy-game-factory';
-import { range, random } from 'lodash';
-import { maxStep, moves, target, type Board, type Moves } from './gameplay';
+import { strategyGameFactory, type BoardClientProps, GameBoard } from '../../../strategy-game-factory';
+import { range } from 'lodash';
+import { maxStep, moves, target, type Board } from './gameplay';
+import { smartBotStrategy } from './bot-strategy';
 
 const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
 
@@ -31,15 +27,6 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
     </div>
     </GameBoard>
   );
-};
-
-type Bot = BotStrategy<Board, Moves>
-
-const smartBotStrategy: Bot = ({ board }) => {
-  const nextBoard = board % (1 + maxStep) !== 0
-    ? board + (1 + maxStep) - board % (1 + maxStep)
-    : board + random(1, maxStep);
-  return { move: 'increaseTo', args: [nextBoard] };
 };
 
 const rule = {

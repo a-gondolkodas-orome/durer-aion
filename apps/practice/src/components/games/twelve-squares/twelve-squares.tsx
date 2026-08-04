@@ -1,9 +1,8 @@
-import {
-  strategyGameFactory, type BotStrategy, type BoardClientProps, GameBoard
-} from '../../strategy-game-factory';
-import { range, random, sample } from 'lodash';
+import { strategyGameFactory, type BoardClientProps, GameBoard } from '../../strategy-game-factory';
+import { range } from 'lodash';
 import { ChessBishopSvg } from '../chess-bishops/chess-bishop-svg';
-import { generateStartBoard, isValidStep, moves, type Board, type Moves } from './gameplay';
+import { generateStartBoard, moves, type Board } from './gameplay';
+import { optimalBotStrategy, randomBotStrategy } from './bot-strategy';
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const potentialStep = i => {
@@ -44,21 +43,6 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     </div>
   </GameBoard>
   );
-};
-
-type Bot = BotStrategy<Board, Moves>
-
-const randomBotStrategy: Bot = ({ board }) => {
-  const validSteps = [1, 2].filter(step => isValidStep(board, step));
-  return { move: 'step', args: [sample(validSteps)!] };
-};
-
-const optimalBotStrategy: Bot = ({ board: { left, right } }) => {
-  const dst = right-left;
-  if(dst === 1) return { move: 'step', args: [2] };
-  if(dst === 2) return { move: 'step', args: [1] };
-  if(dst % 3 === 2) return { move: 'step', args: [random(1,2)] };
-  return { move: 'step', args: [(dst+1) % 3] };
 };
 
 const rule = {

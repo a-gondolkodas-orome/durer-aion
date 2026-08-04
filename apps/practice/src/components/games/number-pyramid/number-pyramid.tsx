@@ -1,7 +1,7 @@
 import { strategyGameFactory, type Ctx } from '../../strategy-game-factory';
-import { smartBotStrategy, generateStartBoard, randomBotStrategy } from './strategy';
+import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
+import { generateStartBoard, moves } from './gameplay';
 import { BoardClient, type TurnState } from './board-client';
-import { moves } from './gameplay';
 
 const rule = {
   hu: <>

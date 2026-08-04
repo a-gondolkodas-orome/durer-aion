@@ -1,12 +1,6 @@
-import { sample } from 'lodash';
-import { strategyGameFactory, type BotStrategy, type BoardClientProps, GameBoard } from '../../strategy-game-factory';
-import { generateStartBoard, moves, type Board, type Moves } from './gameplay';
-
-const digitsOf = (n: number): number[] =>
-  String(n).split('').map(Number).filter(d => d !== 0);
-
-const uniqueNonZeroDigits = (n: number): number[] =>
-  [...new Set(digitsOf(n))];
+import { strategyGameFactory, type BoardClientProps, GameBoard } from '../../strategy-game-factory';
+import { generateStartBoard, moves, type Board } from './gameplay';
+import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
 
 const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   const digits = String(board).split('').map(Number);
@@ -27,22 +21,6 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
       </div>
     </GameBoard>
   );
-};
-
-type Bot = BotStrategy<Board, Moves>
-
-const randomBotStrategy: Bot = ({ board }) => {
-  const digits = uniqueNonZeroDigits(board);
-  const winningDigits = digits.filter(d => board - d === 0);
-  return { move: 'subtractDigit', args: [sample(winningDigits.length > 0 ? winningDigits : digits)!] };
-};
-
-const smartBotStrategy: Bot = ({ board }) => {
-  if (board % 10 !== 0) {
-    return { move: 'subtractDigit', args: [board % 10] };
-  } else {
-    return { move: 'subtractDigit', args: [sample(uniqueNonZeroDigits(board))!] };
-  }
 };
 
 const rule = {

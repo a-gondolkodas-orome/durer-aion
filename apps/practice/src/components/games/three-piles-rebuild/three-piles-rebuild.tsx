@@ -1,24 +1,16 @@
 import { useEffect, useState } from 'react';
-import {
-  strategyGameFactory,
-  type BoardClientProps,
-  type BotStrategy,
-  type BotMove,
-  GameBoard
-} from '../../strategy-game-factory';
+import { strategyGameFactory, type BoardClientProps, GameBoard } from '../../strategy-game-factory';
 import { useTranslation } from '../../../language';
 import {
   canSplit,
   generateStartBoard,
   generateTestStartBoard,
-  getRandomBotStep,
-  getSmartBotStep,
   isSplitAllowed,
   moves,
   withOtherPilesDiscarded,
-  type Board,
-  type Moves
+  type Board
 } from './gameplay';
+import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
 
 // A part is valid if it is a positive integer (the cap keeps arithmetic exact).
 const parsePart = (raw: string): number | null => {
@@ -172,17 +164,6 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 
 // "Keep, then split" is one decision, so the turn is named as a whole (mirrors
 // the pile-splitting games).
-const asTurn = ({ keepId, parts }: { keepId: number; parts: number[] }): BotMove<Moves>[] => [
-  { move: 'keepPile', args: [keepId] },
-  { move: 'splitPile', args: [parts] }
-];
-
-type Bot = BotStrategy<Board, Moves>
-
-const smartBotStrategy: Bot = ({ board }) => asTurn(getSmartBotStep(board));
-
-const randomBotStrategy: Bot = ({ board }) => asTurn(getRandomBotStep(board));
-
 const getPlayerStepDescription = () => ({
   hu: 'Válaszd ki, melyik kupacot tartod meg (a másik kettőt eldobod), majd oszd három új kupacra.',
   en: 'Choose which pile to keep (the other two are discarded), then split it into three new piles.'

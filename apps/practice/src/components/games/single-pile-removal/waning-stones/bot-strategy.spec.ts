@@ -1,4 +1,5 @@
-import { lowestPow2, cap, isWinningTake, chooseSmartTake } from './waning-stones';
+import { cap } from '../gameplay';
+import { lowestPow2, isWinningTake, chooseSmartTake } from './bot-strategy';
 
 // Independent brute-force minimax: the mover with `stones` left and a cap of
 // `maxTake` wins iff some legal take either clears the pile or leaves the

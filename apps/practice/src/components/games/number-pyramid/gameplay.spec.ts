@@ -1,5 +1,4 @@
-import { moves } from './gameplay';
-import { isCombineAllowed, applyMoveToBoard, type Board, type Slot } from './strategy';
+import { applyMoveToBoard, isCombineAllowed, moves, type Board, type Slot } from './gameplay';
 import { makeCtx } from '../../../test-utils';
 
 const active = (value: number): Slot => ({ value, state: 'active' });

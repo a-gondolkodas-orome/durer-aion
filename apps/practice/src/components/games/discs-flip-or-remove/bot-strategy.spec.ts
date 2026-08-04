@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { playBotMove } from '../../../test-utils';
-import { smartBotStrategy } from './discs-flip-or-remove';
+import { smartBotStrategy } from './bot-strategy';
 import { moves as gameMoves } from './gameplay';
 
 // board[0] = blue discs, board[1] = red discs.

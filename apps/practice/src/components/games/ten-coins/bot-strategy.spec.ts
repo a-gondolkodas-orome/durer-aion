@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { uniq, range } from 'lodash';
 import { playBotMove } from '../../../test-utils';
-import { smartBotStrategy } from './ten-coins';
+import { smartBotStrategy } from './bot-strategy';
 import { moves as gameMoves } from './gameplay';
 
 type Vals = number[];

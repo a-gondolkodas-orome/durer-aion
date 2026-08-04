@@ -1,16 +1,9 @@
 import { useEffect, useState } from 'react';
 import { range } from 'lodash';
-import { strategyGameFactory, type BotStrategy, type BoardClientProps, GameBoard } from '../../strategy-game-factory';
+import { strategyGameFactory, type BoardClientProps, GameBoard } from '../../strategy-game-factory';
 import { useTranslation } from '../../../language';
-import {
-  generateStartBoard,
-  getRandomBotMove,
-  getSmartBotMove,
-  moves,
-  type Board,
-  type Move,
-  type Moves
-} from './gameplay';
+import { generateStartBoard, moves, type Board, type Move } from './gameplay';
+import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
 
 const Stepper = ({ label, disabled, onClick }: {
   label: string; disabled: boolean; onClick: () => void;
@@ -130,14 +123,6 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     </GameBoard>
   );
 };
-
-type Bot = BotStrategy<Board, Moves>
-
-const smartBotStrategy: Bot = ({ board }) =>
-  ({ move: 'takeStones', args: [getSmartBotMove(board)] });
-
-const randomBotStrategy: Bot = ({ board }) =>
-  ({ move: 'takeStones', args: [getRandomBotMove(board)] });
 
 const rule = {
   hu: <>

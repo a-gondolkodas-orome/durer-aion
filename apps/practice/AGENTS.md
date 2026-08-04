@@ -56,11 +56,12 @@ moves stored in a JSON file when performance requires it.
 whose behaviour it asserts — `gameplay.spec.ts` for the rules,
 `bot-strategy.spec.ts` for the strategy, `<game>.spec.ts` for what the game file
 itself holds, plus a topical name (`solver.spec.ts`, `geometry.spec.ts`) where
-one part of the strategy is worth testing on its own. So a game whose bot lives
-in its `.tsx` tests that bot from `<game>.spec.ts`, and "the bot only ever
-produces legal moves" belongs with the bot even though it reads a rule to check
-it. What must not happen is moves being tested from anywhere but
-`gameplay.spec.ts`.
+one part of the strategy is worth testing on its own. What the module *is*
+decides, not what the test reads along the way: "the bot only ever produces
+legal moves" belongs with the bot even though it checks a rule, and a start
+board asserted to be winnable belongs with the rules even though the Grundy
+value proving it comes from the bot. What must not happen is moves being tested
+from anywhere but `gameplay.spec.ts`.
 
 `gameplay.ts` is the **framework-free half of a game**: the same module a
 server-authoritative competition mode would validate moves with, so it has to
@@ -120,6 +121,17 @@ the parity invariant, the win/loss predicate.
 ## Planned future directions
 
 ### Primary (ongoing)
+- **Replace `boardgame.io` in `durer-aion` with this engine** — the current main
+  effort. `a-gondolkodas-orome/durer-aion` already runs real competitions
+  (server-authoritative match state, team identity, timers, results); the plan
+  is for `strategyGameFactory` to take over its game-engine slot rather than
+  build a competition backend here. See
+  [docs/real-competitions-plan.md](docs/real-competitions-plan.md) — that
+  document's "build here vs. reuse `durer-aion`" fork is decided in favour of
+  reuse, so the phases describing a new backend in this repo no longer apply.
+  What does apply is the engine work they share: a game's rules and its bot
+  each importable with no React, which is why `gameplay.ts` and
+  `bot-strategy.ts` are separate files.
 - **Add Dürer competition games** — the games of each new competition, plus the
   tail of older ones still missing
 - **Refactoring and style improvements** — keep the codebase clean, consistent,

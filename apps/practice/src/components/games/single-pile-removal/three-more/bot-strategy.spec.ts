@@ -1,4 +1,5 @@
-import { cap, moverWins, isWinningTake, chooseSmartTake } from './three-more';
+import { cap } from '../gameplay';
+import { moverWins, isWinningTake, chooseSmartTake } from './bot-strategy';
 
 // Independent brute-force minimax: the mover with `stones` left and a cap of
 // `maxTake` wins iff some legal take either clears the pile or leaves the other

@@ -1,4 +1,4 @@
-import { smartBotStrategy } from './number-covering';
+import { smartBotStrategy } from './bot-strategy';
 import { COVERED, type Board } from './gameplay';
 import { botNextMoveArgs, makeCtx } from '../../../test-utils';
 

@@ -1,13 +1,13 @@
 import {
   strategyGameFactory,
-  type BotStrategy,
   type BoardClientProps,
   GameBoard,
   useHoverPreview
 } from '../../../strategy-game-factory';
 import { random, range } from 'lodash';
 import { useTranslation } from '../../../../language';
-import { moves, type Board, type HoveredAction, type Moves } from './gameplay';
+import { moves, type Board, type HoveredAction } from './gameplay';
+import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
 
 const CoinPile = ({ count, hoveredAction }: { count: number, hoveredAction: HoveredAction }) => (
   <div className="flex flex-wrap justify-center gap-2 p-4" style={{ transform: 'scaleY(-1)' }}>
@@ -52,28 +52,6 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       </div>
     </GameBoard>
   );
-};
-
-type Bot = BotStrategy<Board, Moves>
-
-const randomBotStrategy: Bot = ({ board }) => {
-  if (board % 2 === 0 && random(0, 1) === 0) {
-    return { move: 'halve' };
-  } else {
-    return { move: 'take1' };
-  }
-};
-
-const smartBotStrategy: Bot = ({ board }) => {
-  if (board !== 4 && board % 4 === 0) {
-    return { move: 'take1' };
-  } else if (board === 6) {
-    return { move: 'take1' };
-  } else if (board % 2 === 0) {
-    return { move: 'halve' };
-  } else {
-    return { move: 'take1' };
-  }
 };
 
 const rule = {

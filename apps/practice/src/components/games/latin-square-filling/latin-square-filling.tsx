@@ -1,13 +1,8 @@
 import { useEffect, useState } from 'react';
-import {
-  strategyGameFactory,
-  type BoardClientProps,
-  type Ctx,
-  type BotStrategy,
-  GameBoard
-} from '../../strategy-game-factory';
+import { strategyGameFactory, type BoardClientProps, type Ctx, GameBoard } from '../../strategy-game-factory';
 import { useTranslation } from '../../../language';
-import { generateStartBoard, getRandomBotStep, getSmartBotStep, moves, type Board, type Moves } from './gameplay';
+import { generateStartBoard, moves, type Board } from './gameplay';
+import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
@@ -98,18 +93,6 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       )}
     </GameBoard>
   );
-};
-
-type Bot = BotStrategy<Board, Moves>
-
-const smartBotStrategy: Bot = ({ board }) => {
-  const { cell, digit } = getSmartBotStep(board);
-  return { move: 'placeDigit', args: [cell, digit] };
-};
-
-const randomBotStrategy: Bot = ({ board }) => {
-  const { cell, digit } = getRandomBotStep(board);
-  return { move: 'placeDigit', args: [cell, digit] };
 };
 
 const getPlayerStepDescription = ({ ctx }: { board: Board; ctx: Ctx }) => {

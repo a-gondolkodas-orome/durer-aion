@@ -1,7 +1,7 @@
-import { strategyGameFactory, type BoardClientProps, type BotStrategy, GameBoard } from '../../strategy-game-factory';
-import { range, sample } from 'lodash';
-import { smartBotStrategy } from './bot-strategy';
-import { generateStartBoard, getAllowedBanks, isRobbable, moves, type Board, type Moves } from './gameplay';
+import { strategyGameFactory, type BoardClientProps, GameBoard } from '../../strategy-game-factory';
+import { range } from 'lodash';
+import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
+import { generateStartBoard, isRobbable, moves, type Board } from './gameplay';
 
 const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   const getCoords = (index) => {
@@ -63,11 +63,6 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
     </GameBoard>
   );
 };
-
-type Bot = BotStrategy<Board, Moves>
-
-const randomBotStrategy: Bot = ({ board }) =>
-  ({ move: 'rob', args: [sample(getAllowedBanks(board))!] });
 
 const rule = {
   hu: <>
