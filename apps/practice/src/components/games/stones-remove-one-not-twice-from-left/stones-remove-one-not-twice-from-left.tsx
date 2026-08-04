@@ -1,6 +1,6 @@
 import {
   strategyGameFactory,
-  type Ctx, type MoveOutcome, type StrategyArgs, type BoardClientProps,
+  type Ctx, type MoveOutcome, type BotStrategy, type BoardClientProps,
   GameBoard, useHoverPreview
 } from '../../strategy-game-factory';
 import { cloneDeep, isEqual, sample, random, range } from 'lodash';
@@ -95,20 +95,18 @@ const isGameEnd = (board, ctx) => {
   return false;
 }
 
-const randomBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
-  moves.removeStone(board, getPileOfRandomAllowedMove(board, ctx));
-};
+const randomBotStrategy: BotStrategy<Board> = ({ board, ctx }) =>
+  ({ move: 'removeStone', args: [getPileOfRandomAllowedMove(board, ctx)] });
 
-const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
+const smartBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
   if (board.leftRestriction[ctx.currentPlayer!]) {
-    moves.removeStone(board, 1);
-    return;
+    return { move: 'removeStone', args: [1] };
   }
   const optimalMove = getOptimalMove(board, ctx);
   const botMove = optimalMove !== undefined
     ? optimalMove
     : getPileOfRandomAllowedMove(board, ctx);
-  moves.removeStone(board, botMove);
+  return { move: 'removeStone', args: [botMove] };
 };
 
 // return undefined if there is no winning move

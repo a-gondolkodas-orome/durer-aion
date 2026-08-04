@@ -9,20 +9,19 @@ import {
   type Board,
   type Edge
 } from './helpers';
-import type { StrategyArgs } from '../../../strategy-game-factory';
+import type { BotStrategy } from '../../../strategy-game-factory';
 
 //    0
 //   1 2
 //  3 4 5
 // 6 7 8 9
 
-export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  moves.stretchRope(board, sample(getAllowedMoves(board)));
-};
+export const randomBotStrategy: BotStrategy<Board> = ({ board }) =>
+  ({ move: 'stretchRope', args: [sample(getAllowedMoves(board))] });
 
-export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
   const move = getOptimalSmartBotMove({ board, chosenRoleIndex: ctx.chosenRoleIndex });
-  moves.stretchRope(board, move);
+  return { move: 'stretchRope', args: [move] };
 };
 
 const getOptimalSmartBotMove = ({ board, chosenRoleIndex }: { board: Board, chosenRoleIndex: number | null }) => {

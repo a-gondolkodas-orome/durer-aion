@@ -1,11 +1,5 @@
 import { smartBotStrategy } from './bot-strategy';
-import type { Board } from './helpers';
-import { type GameMoves } from '../../../strategy-game-factory';
-import { makeCtx } from '../../../../test-utils';
-
-const mockPlacePiece = (color: string): GameMoves<Board> => ({
-  placePiece: (board: Board, id: number) => { board[id] = color; return { nextBoard: board }; }
-});
+import { botNextMoveArgs, makeCtx } from '../../../../test-utils';
 
 describe('Double starter TicTacToe strategy', () => {
   describe('AI is the first to move', () => {
@@ -15,9 +9,8 @@ describe('Double starter TicTacToe strategy', () => {
         null, null, null,
         null, null, null
       ];
-      const moves = mockPlacePiece('red');
-      smartBotStrategy({ board, ctx: makeCtx({ chosenRoleIndex: 1 }), moves });
-      expect(board[4]).toEqual('red');
+      const played = botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx({ chosenRoleIndex: 1 }) }));
+      expect(played).toContain(4);
     });
 
     it('should place to finish a winning diagonal if possible', () => {
@@ -26,9 +19,8 @@ describe('Double starter TicTacToe strategy', () => {
         null, 'red', null,
         null, null, 'blue'
       ];
-      const moves = mockPlacePiece('red');
-      smartBotStrategy({ board, ctx: makeCtx({ chosenRoleIndex: 1 }), moves });
-      expect(board[6]).toEqual('red');
+      const played = botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx({ chosenRoleIndex: 1 }) }));
+      expect(played).toContain(6);
     });
 
     it('should place to defend against 3 pieces in a row from other player', () => {
@@ -37,9 +29,8 @@ describe('Double starter TicTacToe strategy', () => {
         null, null, null,
         null, 'blue', 'blue'
       ];
-      const moves = mockPlacePiece('red');
-      smartBotStrategy({ board, ctx: makeCtx({ chosenRoleIndex: 1 }), moves });
-      expect(board[6]).toEqual('red');
+      const played = botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx({ chosenRoleIndex: 1 }) }));
+      expect(played).toContain(6);
     });
   });
 
@@ -50,9 +41,8 @@ describe('Double starter TicTacToe strategy', () => {
         null, null, 'red',
         null, 'blue', 'blue'
       ];
-      const moves = mockPlacePiece('blue');
-      smartBotStrategy({ board, ctx: makeCtx({ chosenRoleIndex: 0 }), moves });
-      expect(board[6]).toEqual('blue');
+      const played = botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx({ chosenRoleIndex: 0 }) }));
+      expect(played).toContain(6);
     });
 
     it('should try to create a blue row', () => {
@@ -61,9 +51,8 @@ describe('Double starter TicTacToe strategy', () => {
         null, 'red', null,
         null, null, null
       ];
-      const moves = mockPlacePiece('blue');
-      smartBotStrategy({ board, ctx: makeCtx({ chosenRoleIndex: 0 }), moves });
-      expect(board[8]).toEqual('blue');
+      const played = botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx({ chosenRoleIndex: 0 }) }));
+      expect(played).toContain(8);
     });
   });
 });

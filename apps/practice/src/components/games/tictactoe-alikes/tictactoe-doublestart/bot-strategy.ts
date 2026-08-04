@@ -1,35 +1,28 @@
 import { range, isNull, sample, sampleSize, cloneDeep } from 'lodash';
 import { hasWinningSubset } from '../helpers';
 import { isGameEnd, hasFirstPlayerWon, roleColors, type Board } from './helpers';
-import type { StrategyArgs } from '../../../strategy-game-factory';
+import type { BotMove, BotStrategy } from '../../../strategy-game-factory';
 
 const emptyCells = (board: Board) => range(0, 9).filter(i => isNull(board[i]));
 
-export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+// The opening turn places two pieces, named together as one decision.
+const placements = (...cells: (number | undefined)[]): BotMove[] =>
+  cells.map(cell => ({ move: 'placePiece', args: [cell] }));
+
+export const randomBotStrategy: BotStrategy<Board> = ({ board }) => {
   const allowedPlaces = emptyCells(board);
-  if (allowedPlaces.length === 9) {
-    const [first, second] = sampleSize(allowedPlaces, 2);
-    const { nextBoard } = moves.placePiece(board, first);
-    setTimeout(() => {
-      moves.placePiece(nextBoard, second);
-    }, 750);
-  } else {
-    moves.placePiece(board, sample(allowedPlaces));
-  }
+  if (allowedPlaces.length < 9) return placements(sample(allowedPlaces));
+  const [first, second] = sampleSize(allowedPlaces, 2);
+  return placements(first, second);
 };
 
-export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
   if (emptyCells(board).length === 9) {
-    // choose two neighboring corners randomly
-    const firstStep = sample([[0, 2], [2, 8], [6, 8], [0, 6]])!;
-    const { nextBoard } = moves.placePiece(board, firstStep[0]);
-    setTimeout(() => {
-      moves.placePiece(nextBoard, firstStep[1]);
-    }, 750)
-  } else {
-    const position = getOptimalBotPlacingPosition(board, ctx.chosenRoleIndex);
-    moves.placePiece(board, position);
+    // two neighbouring corners, chosen randomly
+    const opening = sample([[0, 2], [2, 8], [6, 8], [0, 6]])!;
+    return placements(opening[0], opening[1]);
   }
+  return placements(getOptimalBotPlacingPosition(board, ctx.chosenRoleIndex));
 };
 
 const getOptimalBotPlacingPosition = (board: Board, chosenRoleIndex) => {

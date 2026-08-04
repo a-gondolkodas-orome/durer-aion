@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import {
-  strategyGameFactory, type Ctx, type MoveOutcome, type StrategyArgs, type BoardClientProps,
+  strategyGameFactory, type Ctx, type MoveOutcome, type BotStrategy, type BoardClientProps,
   GameBoard, useHoverPreview
 } from '../../../strategy-game-factory';
 import { sample, random } from 'lodash';
@@ -129,16 +129,15 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+const randomBotStrategy: BotStrategy<Board> = ({ board }) => {
   const validMoves = allPrimePowers.filter(e => e.value <= board);
   const { prime, exponent } = sample(validMoves)!;
-  moves.subtractPrimeExponent(board, { prime, exponent });
+  return { move: 'subtractPrimeExponent', args: [{ prime, exponent }] };
 };
 
-const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
   if (board === 1) {
-    moves.subtractPrimeExponent(board, { prime: 2, exponent: 0 });
-    return;
+    return { move: 'subtractPrimeExponent', args: [{ prime: 2, exponent: 0 }] };
   }
 
   const validMoves = allPrimePowers.filter(({ value }) => value <= board);
@@ -152,8 +151,7 @@ const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
     const possibleMoves = validMoves.filter(({ value }) => (board - value) % 6 === 0);
     ({ prime: chosenPrime, exponent: chosenExponent } = sample(possibleMoves)!);
   }
-  moves.subtractPrimeExponent(board, { prime: chosenPrime, exponent: chosenExponent });
-  return;
+  return { move: 'subtractPrimeExponent', args: [{ prime: chosenPrime, exponent: chosenExponent }] };
 };
 
 const getPlayerStepDescription = () => ({

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { range } from 'lodash';
 import {
   strategyGameFactory,
-  type Ctx, type MoveOutcome, type StrategyArgs, type BoardClientProps,
+  type Ctx, type MoveOutcome, type BotStrategy, type BoardClientProps,
   GameBoard
 } from '../../strategy-game-factory';
 import { useTranslation } from '../../../language';
@@ -117,14 +117,14 @@ export const moves = {
   }
 };
 
-const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
   const [i, j] = getSmartBotMove(board);
-  moves.takeChips(board, i, j);
+  return { move: 'takeChips', args: [i, j] };
 };
 
-const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+const randomBotStrategy: BotStrategy<Board> = ({ board }) => {
   const [i, j] = getRandomBotMove(board);
-  moves.takeChips(board, i, j);
+  return { move: 'takeChips', args: [i, j] };
 };
 
 const rule = {

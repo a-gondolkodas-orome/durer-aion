@@ -1,5 +1,5 @@
 import {
-  strategyGameFactory, type Ctx, type MoveOutcome, type StrategyArgs, type BoardClientProps,
+  strategyGameFactory, type Ctx, type MoveOutcome, type BotMove, type BotStrategy, type BoardClientProps,
   GameBoard, useHoverPreview
 } from "../../strategy-game-factory";
 import { range, isEqual, random, sample, difference, filter, cloneDeep } from "lodash";
@@ -134,33 +134,33 @@ export const moves = {
   }
 };
 
-export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
   const rem = board[0] % 3;
   if (rem === 0) {
     const randomNonEmptyPile = sample(filter([0, 1], (i) => board[i] > 0))!;
     const amount = board[randomNonEmptyPile] > 1 ? sample([1, 2])! : 1;
     if (randomNonEmptyPile === 0) {
-      moves.removeDiscs(board, amount);
+      return { move: 'removeDiscs', args: [amount] };
     } else {
-      moves.turnDiscs(board, amount);
+      return { move: 'turnDiscs', args: [amount] };
     }
   } else {
     const amount = 3 - rem;
     if (board[1] >= amount && random(0, 1) === 1) {
-      moves.turnDiscs(board, amount);
+      return { move: 'turnDiscs', args: [amount] };
     } else {
-      moves.removeDiscs(board, rem);
+      return { move: 'removeDiscs', args: [rem] };
     }
   }
 };
 
-const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  const validMoves: Array<() => void> = [];
-  if (board[0] >= 1) validMoves.push(() => moves.removeDiscs(board, 1));
-  if (board[0] >= 2) validMoves.push(() => moves.removeDiscs(board, 2));
-  if (board[1] >= 1) validMoves.push(() => moves.turnDiscs(board, 1));
-  if (board[1] >= 2) validMoves.push(() => moves.turnDiscs(board, 2));
-  sample(validMoves)!();
+const randomBotStrategy: BotStrategy<Board> = ({ board }) => {
+  const validMoves: BotMove[] = [];
+  if (board[0] >= 1) validMoves.push({ move: 'removeDiscs', args: [1] });
+  if (board[0] >= 2) validMoves.push({ move: 'removeDiscs', args: [2] });
+  if (board[1] >= 1) validMoves.push({ move: 'turnDiscs', args: [1] });
+  if (board[1] >= 2) validMoves.push({ move: 'turnDiscs', args: [2] });
+  return sample(validMoves)!;
 };
 
 const getPlayerStepDescription = () => ({

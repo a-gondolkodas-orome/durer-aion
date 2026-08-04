@@ -1,8 +1,8 @@
 import { difference, range, shuffle, sample } from 'lodash';
 import { isAllowedStep, isColored, neighbours, colors, type Board } from './helpers';
-import type { StrategyArgs } from '../../strategy-game-factory';
+import type { BotStrategy } from '../../strategy-game-factory';
 
-export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+export const randomBotStrategy: BotStrategy<Board> = ({ board }) => {
   const validMoves: { vertex: number, color: string }[] = [];
   for (const vertex of range(0, 8)) {
     if (isColored(board, vertex)) continue;
@@ -12,14 +12,14 @@ export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
       }
     }
   }
-  moves.colorVertex(board, sample(validMoves));
+  return { move: 'colorVertex', args: [sample(validMoves)] };
 };
 
-export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
   const { vertex, color } = ctx.chosenRoleIndex === 0
     ? makeOptimalStepAsSecond(board)!
     : makeOptimalStepAsFirst(board);
-  moves.colorVertex(board, { vertex, color });
+  return { move: 'colorVertex', args: [{ vertex, color }] };
 };
 
 const makeOptimalStepAsFirst = (board: Board) => {

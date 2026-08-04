@@ -1,14 +1,14 @@
 import { sample, range } from 'lodash';
-import type { StrategyArgs } from '../../strategy-game-factory';
+import type { BotStrategy } from '../../strategy-game-factory';
 import { type Board, getWinnerIndex } from './five-five-card';
 
-export const randomBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
+export const randomBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
   const opponentIdx = ctx.chosenRoleIndex!;
   const validIds = range(1, 6).filter(id => board[opponentIdx][id - 1] !== null);
-  moves.removeCard(board, sample(validIds));
+  return { move: 'removeCard', args: [sample(validIds)] };
 };
 
-export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
   const botPlayerIndex = ctx.currentPlayer!;
   const opponentIdx = 1 - botPlayerIndex;
 
@@ -28,7 +28,7 @@ export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => 
     }
   }
 
-  moves.removeCard(board, sample(bestMoves)!);
+  return { move: 'removeCard', args: [sample(bestMoves)!] };
 };
 
 // Return `+1` if the bot's player index won, `-1` otherwise.

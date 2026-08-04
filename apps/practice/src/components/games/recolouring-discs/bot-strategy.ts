@@ -1,5 +1,5 @@
 import { sample } from 'lodash';
-import type { StrategyArgs } from '../../strategy-game-factory';
+import type { BotMove, BotStrategy } from '../../strategy-game-factory';
 import {
   type Board,
   type Cell,
@@ -20,10 +20,10 @@ interface Option {
 const optionsFor = (cells: Cell[], player: number): Option[] =>
   legalMoves(cells, player).map(move => ({ move, cells: applyMove(cells, player, move) }));
 
-const perform = (moves: StrategyArgs<Board>['moves'], board: Board, move: Move): void => {
-  if (move.type === 'move') moves.moveDisc(board, move.from, move.to);
-  else if (move.type === 'place') moves.placeDisc(board, move.to);
-  else moves.pass(board);
+const asBotMove = (move: Move): BotMove => {
+  if (move.type === 'move') return { move: 'moveDisc', args: [move.from, move.to] };
+  if (move.type === 'place') return { move: 'placeDisc', args: [move.to] };
+  return { move: 'pass' };
 };
 
 const infinityToLarge = (r: number): number => (r === Infinity ? Number.MAX_SAFE_INTEGER : r);
@@ -37,7 +37,7 @@ const opponentInstantWins = (cells: Cell[], opponent: number): number =>
 // Optimal bot. Verified in bot-strategy.spec.ts: from the winning role it never
 // loses; its moves keep the position in its own attractor and strictly reduce
 // the rank, so it always reaches its majority (well within the 200-ply cap).
-export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>): void => {
+export const smartBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
   const cells = board.cells;
   const n = cells.length;
   const me = ctx.currentPlayer!;
@@ -49,8 +49,7 @@ export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>): vo
   // Grab an outright win whenever one is available.
   const immediate = options.filter(o => majorityWinner(o.cells) === me);
   if (immediate.length) {
-    perform(moves, board, immediate[0].move);
-    return;
+    return asBotMove(immediate[0].move);
   }
 
   if (solved.winnerAt(cells, me) === me) {
@@ -66,11 +65,9 @@ export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>): vo
       // of progress while staying safe.
       const byCount = pool.map(o => ({ o, count: countColor(o.cells, myColor) }));
       const max = Math.max(...byCount.map(s => s.count));
-      perform(moves, board, sample(byCount.filter(s => s.count === max))!.o.move);
-      return;
+      return asBotMove(sample(byCount.filter(s => s.count === max))!.o.move);
     }
-    perform(moves, board, sample(scored.filter(s => s.rank === best))!.o.move);
-    return;
+    return asBotMove(sample(scored.filter(s => s.rank === best))!.o.move);
   }
 
   // Losing: make the opponent work. Prefer the child that maximises the
@@ -84,15 +81,15 @@ export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>): vo
   const maxDelay = Math.max(...scored.map(s => s.delay));
   const delayed = scored.filter(s => s.delay === maxDelay);
   const minTrap = Math.min(...delayed.map(s => s.trap));
-  perform(moves, board, sample(delayed.filter(s => s.trap === minTrap))!.o.move);
+  return asBotMove(sample(delayed.filter(s => s.trap === minTrap))!.o.move);
 };
 
 // Test bot: plays at random, but takes an immediate win when one is available.
-export const randomBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>): void => {
+export const randomBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
   const cells = board.cells;
   const me = ctx.currentPlayer!;
   const options = optionsFor(cells, me);
   const immediate = options.filter(o => majorityWinner(o.cells) === me);
   const pool = immediate.length ? immediate : options;
-  perform(moves, board, sample(pool)!.move);
+  return asBotMove(sample(pool)!.move);
 };

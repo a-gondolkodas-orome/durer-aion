@@ -1,15 +1,15 @@
 import { random, sample, range } from 'lodash';
-import type { StrategyArgs } from '../../strategy-game-factory';
+import type { BotStrategy } from '../../strategy-game-factory';
 import type { Board } from './add-reduce-double';
 
-export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+export const randomBotStrategy: BotStrategy<Board> = ({ board }) => {
   const validMoves: { pileId: number; pieceCount: number }[] = [];
   for (const pileId of [0, 1]) {
     for (const pieceCount of range(2, board[pileId] + 1, 2)) {
       validMoves.push({ pileId, pieceCount });
     }
   }
-  moves.moveHalvedPieces(board, sample(validMoves));
+  return { move: 'moveHalvedPieces', args: [sample(validMoves)] };
 };
 
 export const getSmartBotStep = (board: Board): { pileId: number; pieceCount: number } => {
@@ -26,6 +26,5 @@ export const getSmartBotStep = (board: Board): { pileId: number; pieceCount: num
   return { pileId, pieceCount };
 };
 
-export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  moves.moveHalvedPieces(board, getSmartBotStep(board));
-};
+export const smartBotStrategy: BotStrategy<Board> = ({ board }) =>
+  ({ move: 'moveHalvedPieces', args: [getSmartBotStep(board)] });

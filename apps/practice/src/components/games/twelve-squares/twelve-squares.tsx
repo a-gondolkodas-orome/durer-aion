@@ -1,6 +1,6 @@
 import {
   strategyGameFactory,
-  type Ctx, type MoveOutcome, type StrategyArgs, type BoardClientProps,
+  type Ctx, type MoveOutcome, type BotStrategy, type BoardClientProps,
   GameBoard
 } from '../../strategy-game-factory';
 import { range, random, sample } from 'lodash';
@@ -55,14 +55,14 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+const randomBotStrategy: BotStrategy<Board> = ({ board }) => {
   const validSteps = [1, 2].filter(step => isValidStep(board, step));
-  moves.step(board, sample(validSteps));
+  return { move: 'step', args: [sample(validSteps)] };
 };
 
-const optimalBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+const optimalBotStrategy: BotStrategy<Board> = ({ board }) => {
   const step = getOptimalBotStep(board);
-  moves.step(board, step);
+  return { move: 'step', args: [step] };
 };
 
 const getOptimalBotStep = ({ left, right }) => {

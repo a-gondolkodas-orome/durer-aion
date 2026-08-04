@@ -1,5 +1,5 @@
 import { sample, shuffle } from 'lodash';
-import type { StrategyArgs } from '../../strategy-game-factory';
+import type { BotMove, BotStrategy } from '../../strategy-game-factory';
 import {
   type Board,
   applyRemoval,
@@ -99,16 +99,19 @@ export const chooseRemoval = (board: Board): Removal => {
   return sample(scored.filter(s => s.score === best))!.o;
 };
 
-export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  if (board.pointed !== null) {
-    const { index, amount } = chooseRemoval(board);
-    const { nextBoard } = moves.takeStones(board, index, amount);
-    if (!isTerminal(nextBoard)) {
-      setTimeout(() => moves.pointPiles(nextBoard, choosePointing(nextBoard)), 700);
-    }
-  } else {
-    moves.pointPiles(board, choosePointing(board));
-  }
+// A turn takes stones and then points at the piles the opponent may take from,
+// both named at once — except on the opening turn, which only points, and when
+// the take empties the board and wins the game there and then.
+const asTurn = (board: Board, { index, amount }: Removal, point: (board: Board) => number[]): BotMove[] => {
+  const nextBoard: Board = { piles: applyRemoval(board.piles, index, amount), pointed: null };
+  const removal = { move: 'takeStones', args: [index, amount] };
+  if (isTerminal(nextBoard)) return [removal];
+  return [removal, { move: 'pointPiles', args: [point(nextBoard)] }];
+};
+
+export const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
+  if (board.pointed === null) return { move: 'pointPiles', args: [choosePointing(board)] };
+  return asTurn(board, chooseRemoval(board), choosePointing);
 };
 
 // Test bot: takes/points at random, but grabs the last stone when it can.
@@ -127,14 +130,7 @@ const randomPointing = (board: Board): number[] => {
   return shuffle(nonEmpty).slice(0, 2);
 };
 
-export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  if (board.pointed !== null) {
-    const { index, amount } = randomRemoval(board);
-    const { nextBoard } = moves.takeStones(board, index, amount);
-    if (!isTerminal(nextBoard)) {
-      setTimeout(() => moves.pointPiles(nextBoard, randomPointing(nextBoard)), 700);
-    }
-  } else {
-    moves.pointPiles(board, randomPointing(board));
-  }
+export const randomBotStrategy: BotStrategy<Board> = ({ board }) => {
+  if (board.pointed === null) return { move: 'pointPiles', args: [randomPointing(board)] };
+  return asTurn(board, randomRemoval(board), randomPointing);
 };

@@ -47,11 +47,13 @@ a **new backend service** powers competition mode only.
 
 The existing `strategyGameFactory` API is already close to what's needed: moves
 are pure reducers (`(board, { ctx }, ...args) => MoveOutcome`) paired with pure
-`validate` predicates, and the interpreter that runs them
-(`strategy-game-factory/engine/`) is deliberately React-free, so move legality
-and win detection already run headless in Node. Bot strategies
-(`({ board, ctx, moves }) => void`) dispatch moves instead of returning them,
-which is the part that still needs work.
+`validate` predicates, bot strategies are pure functions of the position
+(`({ board, ctx }) => BotMove | BotMove[]`) that name their moves rather than
+playing them, and the interpreter that runs all of it
+(`strategy-game-factory/engine/`) is deliberately React-free. Move legality, win
+detection and the bots therefore already run headless in Node —
+`engine/run-match.ts` plays a whole game that way, which is the match loop below
+minus the clock and the HTTP.
 
 ## The four server-authoritative signals
 
@@ -127,10 +129,12 @@ Node**. Do it for a **pilot game first**, not the whole catalog. The smart bot
 strategy is split into a **server-only** module that the client build never
 imports. Needs test coverage.
 
-Partly done already: the move interpreter, the game store and the `ctx`
-derivation live in `strategy-game-factory/engine/`, which imports no React. What
-remains is per game — most game files still keep their moves in the same `.tsx`
-as their JSX rule text — plus the server-only split of the smart bot.
+Partly done already: the move interpreter, the game store, the `ctx` derivation
+and the headless match runner live in `strategy-game-factory/engine/`, which
+imports no React, and every bot is a pure `({ board, ctx }) => BotMove[]`
+function that the runner can drive with no browser. What remains is per game —
+most game files still keep their moves in the same `.tsx` as their JSX rule text
+— plus the server-only split of the smart bot.
 
 ### Phase 2 — Stand up the backend
 

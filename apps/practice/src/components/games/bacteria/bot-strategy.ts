@@ -1,5 +1,5 @@
 import { cloneDeep, sample, maxBy } from "lodash";
-import type { StrategyArgs } from '../../strategy-game-factory';
+import type { BotStrategy } from '../../strategy-game-factory';
 import { computeLettered, computeSinks, deficiency } from "./danger";
 import {
   type Board,
@@ -120,28 +120,27 @@ export const defenderMove = (board: Board): { row: number; col: number } => {
   return { row, col };
 };
 
-export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
   if (ctx.chosenRoleIndex === ATTACKER) {
     const { row, col } = defenderMove(board);
-    moves.defend(board, { row, col });
+    return { move: 'defend', args: [{ row, col }] };
   } else {
     const move = attackerMove(board);
-    moves[move.type](board, { row: move.row, col: move.col });
+    return { move: move.type, args: [{ row: move.row, col: move.col }] };
   }
 };
 
 // Test bot: plays randomly, but takes an immediate winning move when offered.
-export const randomBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
+export const randomBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
   const coords = bacteriaCoords(board);
 
   if (ctx.currentPlayer === DEFENDER) {
     const [row, col] = sample(coords)!;
-    moves.defend(board, { row, col });
-    return;
+    return { move: 'defend', args: [{ row, col }] };
   }
 
   const options = legalAttackMoves(board);
   const winningNow = options.find(m => simulate(board, m).reachedGoal);
   const move = winningNow ?? sample(options)!;
-  moves[move.type](board, { row: move.row, col: move.col });
+  return { move: move.type, args: [{ row: move.row, col: move.col }] };
 };

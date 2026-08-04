@@ -1,14 +1,13 @@
 import { random } from 'lodash';
-import type { StrategyArgs } from '../../../strategy-game-factory';
+import type { BotStrategy } from '../../../strategy-game-factory';
 import type { Board } from './superstitious-counting';
 
-export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  moves.step(board, randomStep(board.restricted));
-};
+export const randomBotStrategy: BotStrategy<Board> = ({ board }) =>
+  ({ move: 'step', args: [randomStep(board.restricted)] });
 
-export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
   const step = getOptimalBotStep(board);
-  moves.step(board, step);
+  return { move: 'step', args: [step] };
 };
 
 export const getOptimalBotStep = ({ current, target, restricted }) => {

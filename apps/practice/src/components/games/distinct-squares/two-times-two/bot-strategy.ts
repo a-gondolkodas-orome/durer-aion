@@ -1,12 +1,11 @@
 import { sum, isEqual, sample, range } from 'lodash';
-import type { StrategyArgs } from '../../../strategy-game-factory';
+import type { BotStrategy } from '../../../strategy-game-factory';
 import type { Board } from './two-times-two';
 
-export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  moves.addPiece(board, sample(range(0, 4)));
-};
+export const randomBotStrategy: BotStrategy<Board> = () =>
+  ({ move: 'addPiece', args: [sample(range(0, 4))] });
 
-export const smartBotStrategy = ({ board, moves, ctx }: StrategyArgs<Board>) => {
+export const smartBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
   const botPlayerIndex = ctx.currentPlayer!;
   const scores = range(0, 4).map(i => {
     const next = [...board] as Board;
@@ -15,7 +14,7 @@ export const smartBotStrategy = ({ board, moves, ctx }: StrategyArgs<Board>) => 
   });
   const best = Math.max(...scores);
   const bestTiles = range(0, 4).filter(i => scores[i] === best);
-  moves.addPiece(board, sample(bestTiles));
+  return { move: 'addPiece', args: [sample(bestTiles)] };
 };
 
 // Return `+1` if the bot's player index won, `-1` otherwise.

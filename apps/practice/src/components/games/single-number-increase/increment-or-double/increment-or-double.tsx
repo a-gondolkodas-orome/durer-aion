@@ -1,5 +1,5 @@
 import {
-  strategyGameFactory, type Ctx, type MoveOutcome, type StrategyArgs, type BoardClientProps, GameBoard
+  strategyGameFactory, type Ctx, type MoveOutcome, type BotStrategy, type BoardClientProps, GameBoard
 } from '../../../strategy-game-factory';
 import { sample } from 'lodash';
 
@@ -61,12 +61,12 @@ export const getBotNextNumber = (board: Board): number => {
   return sample([board + 1, board * 2])!;
 };
 
-const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
   const next = getBotNextNumber(board);
   if (next === board * 2) {
-    moves.double(board);
+    return { move: 'double' };
   } else {
-    moves.increment(board);
+    return { move: 'increment' };
   }
 };
 

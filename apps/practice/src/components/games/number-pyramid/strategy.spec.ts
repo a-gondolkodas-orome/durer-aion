@@ -1,5 +1,5 @@
 import { isP2WinningPosition, randomBotStrategy, smartBotStrategy, type Board, type Slot } from './strategy';
-import { makeCtx } from '../../../test-utils';
+import { botNextMoveArgs, makeCtx } from '../../../test-utils';
 
 const active = (value: number): Slot => ({ value, state: 'active' });
 const consumed = (value: number): Slot => ({ value, state: 'consumed' });
@@ -15,19 +15,6 @@ const makeBoard = (level0Values, target, opts: { sortedInitial? } = {}): Board =
     ],
     target,
     sortedInitial: sorted
-  };
-};
-
-const makeMoveCapture = () => {
-  const captured: { levelIdx: number; indices: number[] }[] = [];
-  return {
-    moves: {
-      combineTwo: (board: Board, arg) => {
-        captured.push(arg);
-        return { nextBoard: board };
-      }
-    },
-    captured
   };
 };
 
@@ -54,8 +41,7 @@ describe('isP2WinningPosition', () => {
 describe('randomBotStrategy', () => {
   it('takes winning pair on level 0 when available', () => {
     const board = makeBoard([10, 9, 3, 2, 2, 2, 2, 2], 15);
-    const { moves: mockMoves, captured } = makeMoveCapture();
-    randomBotStrategy({ board, ctx: makeCtx(), moves: mockMoves });
+    const captured = botNextMoveArgs(randomBotStrategy({ board, ctx: makeCtx() }));
     expect(captured[0].levelIdx).toBe(0);
     const vals = captured[0].indices.map((i) => board.levels[0][i]!.value);
     expect(vals[0] + vals[1]).toBeGreaterThanOrEqual(15);
@@ -65,8 +51,7 @@ describe('randomBotStrategy', () => {
     const board = makeBoard([3, 3, 3, 3, 3, 3, 3, 3], 100);
     board.levels[1][0] = active(60);
     board.levels[1][1] = active(50);
-    const { moves: mockMoves, captured } = makeMoveCapture();
-    randomBotStrategy({ board, ctx: makeCtx(), moves: mockMoves });
+    const captured = botNextMoveArgs(randomBotStrategy({ board, ctx: makeCtx() }));
     expect(captured[0].levelIdx).toBe(1);
   });
 
@@ -74,16 +59,14 @@ describe('randomBotStrategy', () => {
     // 10 is consumed, so 9+3=12 < 15: no win available, bot picks any pair
     const board = makeBoard([10, 9, 3, 2, 2, 2, 2, 2], 15);
     board.levels[0][0] = consumed(10);
-    const { moves: mockMoves, captured } = makeMoveCapture();
-    randomBotStrategy({ board, ctx: makeCtx(), moves: mockMoves });
+    const captured = botNextMoveArgs(randomBotStrategy({ board, ctx: makeCtx() }));
     const vals = captured[0].indices.map((i) => board.levels[0][i]!.value);
     expect(vals[0] + vals[1]).toBeLessThan(15);
   });
 
   it('makes a valid move when no winning pair exists', () => {
     const board = makeBoard([5, 4, 3, 2, 2, 2, 2, 2], 20);
-    const { moves: mockMoves, captured } = makeMoveCapture();
-    randomBotStrategy({ board, ctx: makeCtx(), moves: mockMoves });
+    const captured = botNextMoveArgs(randomBotStrategy({ board, ctx: makeCtx() }));
     expect(captured).toHaveLength(1);
     expect(captured[0].indices).toHaveLength(2);
   });
@@ -97,8 +80,7 @@ describe('smartBotStrategy', () => {
     const board = makeBoard([10, 9, 3, 2, 2, 2, 2, 2], 15);
     board.levels[1][0] = active(5);
     board.levels[1][1] = active(4);
-    const { moves: mockMoves, captured } = makeMoveCapture();
-    smartBotStrategy({ board, ctx: makeCtx({ currentPlayer: 0 }), moves: mockMoves });
+    const captured = botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx({ currentPlayer: 0 }) }));
     expect(captured).toHaveLength(1);
     expect(captured[0].levelIdx).toBe(0);
     const vals = captured[0].indices.map((i) => board.levels[0][i]!.value);
@@ -108,8 +90,7 @@ describe('smartBotStrategy', () => {
   it('P1 in a winning position combines largest pair from level 0', () => {
     // [8,7,6,5,4,4,3,3]: extremes=21, inner=19, k=23 → P1 wins (inner < k)
     const board = makeBoard([8, 7, 6, 5, 4, 4, 3, 3], 23);
-    const { moves: mockMoves, captured } = makeMoveCapture();
-    smartBotStrategy({ board, ctx: makeCtx({ currentPlayer: 0 }), moves: mockMoves });
+    const captured = botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx({ currentPlayer: 0 }) }));
     expect(captured).toHaveLength(1);
     const vals = captured[0].indices.map((i) => board.levels[0][i]!.value);
     expect(Math.max(...vals)).toBe(8);
@@ -121,16 +102,14 @@ describe('smartBotStrategy', () => {
     const board = makeBoard([8, 7, 6, 5, 4, 4, 3, 3], 23);
     board.levels[1][0] = active(5);
     board.levels[1][1] = active(4);
-    const { moves: mockMoves, captured } = makeMoveCapture();
-    smartBotStrategy({ board, ctx: makeCtx({ currentPlayer: 0 }), moves: mockMoves });
+    const captured = botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx({ currentPlayer: 0 }) }));
     expect(captured[0].levelIdx).toBe(1);
   });
 
   it('P2 in a winning position combines smallest pair from level 0', () => {
     // [9,8,7,6,5,4,2,2]: extremes=21, inner=22, k=22 → P2 wins
     const board = makeBoard([9, 8, 7, 6, 5, 4, 2, 2], 22);
-    const { moves: mockMoves, captured } = makeMoveCapture();
-    smartBotStrategy({ board, ctx: makeCtx({ currentPlayer: 1 }), moves: mockMoves });
+    const captured = botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx({ currentPlayer: 1 }) }));
     expect(captured).toHaveLength(1);
     const vals = captured[0].indices.map((i) => board.levels[0][i]!.value);
     expect(Math.max(...vals)).toBe(2);
@@ -140,8 +119,7 @@ describe('smartBotStrategy', () => {
     const board = makeBoard([9, 8, 7, 6, 5, 4, 2, 2], 22);
     board.levels[1][0] = active(11);
     board.levels[1][1] = active(10);
-    const { moves: mockMoves, captured } = makeMoveCapture();
-    smartBotStrategy({ board, ctx: makeCtx({ currentPlayer: 1 }), moves: mockMoves });
+    const captured = botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx({ currentPlayer: 1 }) }));
     expect(captured[0].levelIdx).toBe(1);
   });
 
@@ -154,8 +132,7 @@ describe('smartBotStrategy', () => {
     board.levels[1][1] = active(4);
     board.levels[2][0] = active(12);
     board.levels[2][1] = active(12);
-    const { moves: mockMoves, captured } = makeMoveCapture();
-    smartBotStrategy({ board, ctx: makeCtx({ currentPlayer: 0 }), moves: mockMoves });
+    const captured = botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx({ currentPlayer: 0 }) }));
     expect(captured[0].levelIdx).toBe(2);
     const vals = captured[0].indices.map((i) => board.levels[2][i]!.value);
     expect(vals[0] + vals[1]).toBeGreaterThanOrEqual(23);
@@ -164,8 +141,7 @@ describe('smartBotStrategy', () => {
   it('losing bot falls back to lowest available level', () => {
     // P2-winning board, but current player is P1 (losing) → fallback loop picks level 0
     const board = makeBoard([9, 8, 7, 6, 5, 4, 2, 2], 22);
-    const { moves: mockMoves, captured } = makeMoveCapture();
-    smartBotStrategy({ board, ctx: makeCtx({ currentPlayer: 0 }), moves: mockMoves });
+    const captured = botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx({ currentPlayer: 0 }) }));
     expect(captured[0].levelIdx).toBe(0);
   });
 });

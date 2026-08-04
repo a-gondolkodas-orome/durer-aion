@@ -1,5 +1,5 @@
 import { sample } from 'lodash';
-import type { StrategyArgs } from '../../../strategy-game-factory';
+import type { BotMove, BotStrategy } from '../../../strategy-game-factory';
 import type { Board } from '../helpers';
 
 const getAdjacentCells = (pos: number): number[] => {
@@ -11,23 +11,25 @@ const getAdjacentCells = (pos: number): number[] => {
   return cells;
 };
 
-export const randomBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
+// The shark's turn is a route of up to two steps, named as a whole: the halfway
+// cell is only chosen to reach the target safely, so the two are one decision.
+const asSharkRoute = (from: number, via: number, to: number): BotMove[] =>
+  to === from
+    ? [{ move: 'moveShark', args: [via] }]
+    : [{ move: 'moveShark', args: [via] }, { move: 'moveShark', args: [to] }];
+
+export const randomBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
   if (ctx.chosenRoleIndex === 0) {
     const safeMoves = [...getAdjacentCells(board.shark).filter(c => board.submarines[c] === 0), board.shark];
     const firstPos = sample(safeMoves)!;
-    const { nextBoard } = moves.moveShark(board, firstPos);
-    if (nextBoard.sharkMovesInTurn === 1) {
-      setTimeout(() => {
-        const safeCells = getAdjacentCells(nextBoard.shark).filter(c => nextBoard.submarines[c] === 0);
-        const secondMoves = [...safeCells, nextBoard.shark];
-        moves.moveShark(nextBoard, sample(secondMoves)!);
-      }, firstPos === board.shark ? 0 : 750);
-    }
+    // Staying put is the whole turn; a real first step earns a second one.
+    if (firstPos === board.shark) return { move: 'moveShark', args: [firstPos] };
+    const safeCells = getAdjacentCells(firstPos).filter(c => board.submarines[c] === 0);
+    return asSharkRoute(board.shark, firstPos, sample([...safeCells, firstPos])!);
   } else {
     const winningFrom = findSubmarineNextToShark(board);
     if (winningFrom !== undefined) {
-      moves.moveSubmarine(board, { from: winningFrom, to: board.shark });
-      return;
+      return { move: 'moveSubmarine', args: [{ from: winningFrom, to: board.shark }] };
     }
     const validMoves: { from: number; to: number }[] = [];
     board.submarines.forEach((count, from) => {
@@ -36,23 +38,21 @@ export const randomBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) =>
     const approachingMoves = validMoves.filter(
       ({ from, to }) => distanceFromShark(board.shark, to) < distanceFromShark(board.shark, from)
     );
-    moves.moveSubmarine(board, sample(approachingMoves.length > 0 ? approachingMoves : validMoves)!);
+    return {
+      move: 'moveSubmarine',
+      args: [sample(approachingMoves.length > 0 ? approachingMoves : validMoves)!]
+    };
   }
 };
 
-export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
   if (ctx.chosenRoleIndex === 0) {
     const finalPos = getNextSharkPositionByAI(board)!;
     const firstPos = getIntermediateSharkPosition(board.submarines, board.shark, finalPos);
-    const { nextBoard } = moves.moveShark(board, firstPos);
-    if (finalPos !== board.shark) {
-      setTimeout(() => {
-        moves.moveShark(nextBoard, finalPos);
-      }, firstPos === finalPos ? 0 : 750);
-    }
+    return asSharkRoute(board.shark, firstPos, finalPos);
   } else {
     const { from, to } = getOptimalSubmarineMoveByBot(board)!;
-    moves.moveSubmarine(board, { from, to });
+    return { move: 'moveSubmarine', args: [{ from, to }] };
   }
 };
 

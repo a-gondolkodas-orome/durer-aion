@@ -1,15 +1,14 @@
 import { range, isNull, sample, cloneDeep } from 'lodash';
 import { hasWinningSubset } from '../helpers';
 import { roleColors, hasFirstPlayerWon, isGameEnd, type Board } from './helpers';
-import type { StrategyArgs } from '../../../strategy-game-factory';
+import type { BotStrategy } from '../../../strategy-game-factory';
 
-export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  moves.placePiece(board, sample(emptyCells(board)));
-};
+export const randomBotStrategy: BotStrategy<Board> = ({ board }) =>
+  ({ move: 'placePiece', args: [sample(emptyCells(board))] });
 
-export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
   const id = getOptimalBotPlacingPosition(board, ctx.chosenRoleIndex);
-  moves.placePiece(board, id);
+  return { move: 'placePiece', args: [id] };
 };
 
 const emptyCells = (board: Board) => range(0, 9).filter(i => isNull(board[i]));

@@ -1,5 +1,5 @@
 import { sample } from 'lodash';
-import type { StrategyArgs } from '../../strategy-game-factory';
+import type { BotStrategy } from '../../strategy-game-factory';
 import {
   type Board, getAllowedMoves, completesTriangle, canonicalKey
 } from './helpers';
@@ -39,15 +39,14 @@ const negamax = (board: Board, toMove: number): number => {
 
 export const getBotScore = (board: Board, toMove: number): number => negamax(board, toMove);
 
-export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
   const me = ctx.currentPlayer!;
   const empties = getAllowedMoves(board);
 
   // 1. Take an immediate winning move if one exists.
   const winningNow = empties.filter(e => completesTriangle(board, me, e));
   if (winningNow.length > 0) {
-    moves.claimEdge(board, sample(winningNow)!);
-    return;
+    return { move: 'claimEdge', args: [sample(winningNow)!] };
   }
 
   // 2. Forced-win moves: after playing them, the opponent is in a losing
@@ -58,8 +57,7 @@ export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => 
     return negamax(next, 1 - me) === -1;
   });
   if (forcedWin.length > 0) {
-    moves.claimEdge(board, sample(forcedWin)!);
-    return;
+    return { move: 'claimEdge', args: [sample(forcedWin)!] };
   }
 
   // 3. Losing position: the opponent can force a win with perfect play, so the
@@ -91,5 +89,5 @@ export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => 
   const scores = candidates.map(opponentWinningReplies);
   const fewest = Math.min(...scores);
   const bestMoves = candidates.filter((_, i) => scores[i] === fewest);
-  moves.claimEdge(board, sample(bestMoves)!);
+  return { move: 'claimEdge', args: [sample(bestMoves)!] };
 };

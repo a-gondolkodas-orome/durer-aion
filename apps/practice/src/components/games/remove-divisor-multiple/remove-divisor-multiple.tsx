@@ -1,5 +1,5 @@
 import {
-  strategyGameFactory, type Ctx, type MoveOutcome, type BoardClientProps, type StrategyArgs, GameBoard
+  strategyGameFactory, type Ctx, type MoveOutcome, type BoardClientProps, type BotStrategy, GameBoard
 } from '../../strategy-game-factory';
 import { range, cloneDeep, sample, random } from 'lodash';
 import { strategyDict } from './bot-strategy';
@@ -82,24 +82,24 @@ const isGameEnd = (board: Board) => {
   return possibleMoves.length === 0;
 }
 
-const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+const randomBotStrategy: BotStrategy<Board> = ({ board }) => {
   const possibleMoves = range(1, board.numbersOnTable.length + 1)
     .filter(n => isAllowed(board, n));
-  moves.removeNumber(board, sample(possibleMoves));
+  return { move: 'removeNumber', args: [sample(possibleMoves)] };
 };
 
-const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
   const numCount = board.numbersOnTable.length;
   const stateId = generateStateID(board);
   const optimalMoves = strategyDict[numCount]
     ? strategyDict[numCount][stateId]
     : [];
   if (optimalMoves.length) {
-    moves.removeNumber(board, sample(optimalMoves));
+    return { move: 'removeNumber', args: [sample(optimalMoves)] };
   } else {
     const possibleMoves = range(1, numCount + 1)
       .filter(n => isAllowed(board, n));
-    moves.removeNumber(board, sample(possibleMoves));
+    return { move: 'removeNumber', args: [sample(possibleMoves)] };
   }
 };
 

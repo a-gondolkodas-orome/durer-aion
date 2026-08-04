@@ -4,8 +4,8 @@ import {
   type BoardClientProps,
   type Ctx,
   type MoveOutcome,
-  type StrategyArgs,
-  type GameMoves,
+  type BotStrategy,
+  type BotMove,
   GameBoard
 } from '../../strategy-game-factory';
 import { useTranslation } from '../../../language';
@@ -194,23 +194,16 @@ export const moves = {
   }
 };
 
-// Both steps run with a 750 ms beat between them so the "keep, then split" turn
-// is visible (mirrors the pile-splitting games).
-const executeBotTurn = (
-  { keepId, parts }: { keepId: number; parts: number[] },
-  { board, moves }: { board: Board; moves: GameMoves<Board> }
-) => {
-  const { nextBoard } = moves.keepPile(board, keepId);
-  setTimeout(() => moves.splitPile(nextBoard, parts), 750);
-};
+// "Keep, then split" is one decision, so the turn is named as a whole (mirrors
+// the pile-splitting games).
+const asTurn = ({ keepId, parts }: { keepId: number; parts: number[] }): BotMove[] => [
+  { move: 'keepPile', args: [keepId] },
+  { move: 'splitPile', args: [parts] }
+];
 
-const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  executeBotTurn(getSmartBotStep(board), { board, moves });
-};
+const smartBotStrategy: BotStrategy<Board> = ({ board }) => asTurn(getSmartBotStep(board));
 
-const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  executeBotTurn(getRandomBotStep(board), { board, moves });
-};
+const randomBotStrategy: BotStrategy<Board> = ({ board }) => asTurn(getRandomBotStep(board));
 
 const getPlayerStepDescription = () => ({
   hu: 'Válaszd ki, melyik kupacot tartod meg (a másik kettőt eldobod), majd oszd három új kupacra.',

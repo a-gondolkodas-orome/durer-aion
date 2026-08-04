@@ -1,5 +1,5 @@
 import { sample } from 'lodash';
-import type { StrategyArgs } from '../../strategy-game-factory';
+import type { BotStrategy } from '../../strategy-game-factory';
 import {
   type Board,
   type Move,
@@ -26,7 +26,7 @@ const opponentWinningReplies = (board: Board, move: Move, memo: Map<string, bool
 // Optimal bot: verified against the official characterisation (see
 // bot-strategy.spec.ts). Plays a winning move when one exists, otherwise sets
 // the hardest possible trap.
-export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
   const memo = new Map<string, boolean>();
   const legal = legalMoves(board);
   const winning = winningMoves(board, legal, memo);
@@ -39,14 +39,14 @@ export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
     const fewest = Math.min(...scored.map(s => s.replies));
     chosen = sample(scored.filter(s => s.replies === fewest))!.m;
   }
-  moves.placeWindow(board, chosen.a, chosen.b);
+  return { move: 'placeWindow', args: [chosen.a, chosen.b] };
 };
 
 // Test bot: plays at random, but takes an immediately winning move (one that
 // leaves the other player unable to move) when one is available.
-export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+export const randomBotStrategy: BotStrategy<Board> = ({ board }) => {
   const legal = legalMoves(board);
   const immediateWin = legal.find(m => isTerminal(applyMove(board, m.a, m.b)));
   const chosen = immediateWin ?? sample(legal)!;
-  moves.placeWindow(board, chosen.a, chosen.b);
+  return { move: 'placeWindow', args: [chosen.a, chosen.b] };
 };

@@ -1,4 +1,4 @@
-import { edgeIndex, generateStartBoard, type Board } from './helpers';
+import { edgeIndex, generateStartBoard } from './helpers';
 import { makeCtx } from '../../../test-utils';
 import { getBotScore, smartBotStrategy } from './bot-strategy';
 
@@ -19,12 +19,7 @@ describe('smartBotStrategy', () => {
     // is to move and is losing, but must claim edge 1-2 to avoid losing now.
     board[edgeIndex[0][1]] = 0;
     board[edgeIndex[0][2]] = 0;
-    let played: number | null = null;
-    smartBotStrategy({
-      board,
-      ctx: makeCtx({ currentPlayer: 1 }),
-      moves: { claimEdge: (b: Board, edge: number) => { played = edge; return { nextBoard: b }; } }
-    });
-    expect(played).toBe(edgeIndex[1][2]);
+    expect(smartBotStrategy({ board, ctx: makeCtx({ currentPlayer: 1 }) }))
+      .toEqual({ move: 'claimEdge', args: [edgeIndex[1][2]] });
   });
 });

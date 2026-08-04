@@ -1,6 +1,6 @@
 import {
   strategyGameFactory,
-  type Ctx, type MoveOutcome, type StrategyArgs, type BoardClientProps,
+  type Ctx, type MoveOutcome, type BotStrategy, type BoardClientProps,
   GameBoard
 } from '../../../strategy-game-factory';
 import { range, random } from 'lodash';
@@ -52,11 +52,11 @@ export const moves = {
   }
 };
 
-const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
   const nextBoard = board % (1 + maxStep) !== 0
     ? board + (1 + maxStep) - board % (1 + maxStep)
     : board + random(1, maxStep);
-  moves.increaseTo(board, nextBoard);
+  return { move: 'increaseTo', args: [nextBoard] };
 };
 
 const rule = {

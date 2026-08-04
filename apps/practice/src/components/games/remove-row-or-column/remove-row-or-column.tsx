@@ -1,7 +1,8 @@
 import { sample } from 'lodash';
 import { strategyGameFactory } from '../../strategy-game-factory';
-import { BoardClient, moves, getPlayerStepDescription } from './board-client';
+import { BoardClient, getPlayerStepDescription } from './board-client';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
+import { moves } from './helpers';
 import { generateStartBoard as generateSingleBoard } from './single/helpers';
 import { generateStartBoard as generateMultipleBoard } from './multiple/helpers';
 

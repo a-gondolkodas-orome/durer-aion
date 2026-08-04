@@ -4,7 +4,7 @@ import {
   type BoardClientProps,
   type Ctx,
   type MoveOutcome,
-  type StrategyArgs,
+  type BotStrategy,
   GameBoard
 } from '../../strategy-game-factory';
 import { useTranslation } from '../../../language';
@@ -126,14 +126,14 @@ export const moves = {
   }
 };
 
-const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
   const { cell, digit } = getSmartBotStep(board);
-  moves.placeDigit(board, cell, digit);
+  return { move: 'placeDigit', args: [cell, digit] };
 };
 
-const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+const randomBotStrategy: BotStrategy<Board> = ({ board }) => {
   const { cell, digit } = getRandomBotStep(board);
-  moves.placeDigit(board, cell, digit);
+  return { move: 'placeDigit', args: [cell, digit] };
 };
 
 const getPlayerStepDescription = ({ ctx }: { board: Board; ctx: Ctx }) => {

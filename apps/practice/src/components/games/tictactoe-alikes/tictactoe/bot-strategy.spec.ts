@@ -1,15 +1,5 @@
 import { smartBotStrategy } from './bot-strategy';
-import type { Board } from './helpers';
-import { type GameMoves } from '../../../strategy-game-factory';
-import { makeCtx } from '../../../../test-utils';
-
-const mockPlacePiece = (): GameMoves<Board> => ({
-  placePiece: (board: Board, id: number) => { board[id] = 'new_piece'; return { nextBoard: board }; }
-});
-
-const mockWhitenPiece = (): GameMoves<Board> => ({
-  whitenPiece: (board: Board, id: number) => { board[id] = 'white'; return { nextBoard: board }; }
-});
+import { botNextMoveArgs, makeCtx } from '../../../../test-utils';
 
 describe('smartBotStrategy', () => {
   describe('new piece placing phase', () => {
@@ -19,11 +9,9 @@ describe('smartBotStrategy', () => {
         null, null, null,
         'blue', 'blue', null
       ];
-      const moves = mockPlacePiece();
+      const played = botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx() }));
 
-      smartBotStrategy({ board, ctx: makeCtx(), moves });
-
-      expect(board[2]).toEqual('new_piece');
+      expect(played).toContain(2);
     });
 
     it('should win the game in 1 move if possible for 0th place as well', () => {
@@ -32,11 +20,9 @@ describe('smartBotStrategy', () => {
         null, null, null,
         'blue', 'blue', null
       ];
-      const moves = mockPlacePiece();
+      const played = botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx() }));
 
-      smartBotStrategy({ board, ctx: makeCtx(), moves });
-
-      expect(board[0]).toEqual('new_piece');
+      expect(played).toContain(0);
     });
 
     it('should identify a diagonal winning position', () => {
@@ -45,11 +31,9 @@ describe('smartBotStrategy', () => {
         null, 'red', null,
         null, null, 'blue'
       ];
-      const moves = mockPlacePiece();
+      const played = botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx() }));
 
-      smartBotStrategy({ board, ctx: makeCtx(), moves });
-
-      expect(board[6]).toEqual('new_piece');
+      expect(played).toContain(6);
     });
 
     it('should place to player winning place', () => {
@@ -58,11 +42,9 @@ describe('smartBotStrategy', () => {
         'blue', null, null,
         null, 'red', null
       ];
-      const moves = mockPlacePiece();
+      const played = botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx() }));
 
-      smartBotStrategy({ board, ctx: makeCtx(), moves });
-
-      expect(board[6]).toEqual('new_piece');
+      expect(played).toContain(6);
     });
 
     it('should place to middle place if still empty', () => {
@@ -71,11 +53,9 @@ describe('smartBotStrategy', () => {
         null, null, null,
         null, null, null
       ];
-      const moves = mockPlacePiece();
+      const played = botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx() }));
 
-      smartBotStrategy({ board, ctx: makeCtx(), moves });
-
-      expect(board[4]).toEqual('new_piece');
+      expect(played).toContain(4);
     });
 
     it('should place to corner if middle is not empty', () => {
@@ -84,14 +64,9 @@ describe('smartBotStrategy', () => {
         null, 'blue', null,
         null, null, null
       ];
-      const moves = mockPlacePiece();
+      const played = botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx() }));
 
-      smartBotStrategy({ board, ctx: makeCtx(), moves });
-
-      expect(
-        board[0] === 'new_piece' || board[2] === 'new_piece' ||
-        board[6] === 'new_piece' || board[8] === 'new_piece'
-      ).toBe(true);
+      expect([0, 2, 6, 8]).toContain(played[0]);
     });
 
     it('should place to defending corner if 1 diagonal is occupied', () => {
@@ -100,13 +75,9 @@ describe('smartBotStrategy', () => {
         null, 'blue', null,
         null, null, 'blue'
       ];
-      const moves = mockPlacePiece();
+      const played = botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx() }));
 
-      smartBotStrategy({ board, ctx: makeCtx(), moves });
-
-      expect(
-        board[2] === 'new_piece' || board[6] === 'new_piece'
-      ).toBe(true);
+      expect([2, 6]).toContain(played[0]);
     });
   });
 
@@ -117,11 +88,9 @@ describe('smartBotStrategy', () => {
         'red', 'blue', 'blue',
         'blue', 'red', 'blue'
       ];
-      const moves = mockWhitenPiece();
+      const played = botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx() }));
 
-      smartBotStrategy({ board, ctx: makeCtx(), moves });
-
-      expect(board[4]).toEqual('white');
+      expect(played).toContain(4);
     });
 
     it('should win the game in one move is possible', () => {
@@ -130,11 +99,9 @@ describe('smartBotStrategy', () => {
         'white', 'white', 'blue',
         'blue', 'red', 'blue'
       ];
-      const moves = mockWhitenPiece();
+      const played = botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx() }));
 
-      smartBotStrategy({ board, ctx: makeCtx(), moves });
-
-      expect(board[5]).toEqual('white');
+      expect(played).toContain(5);
     });
 
     describe('r b r, b r b, b r b scenario', () => {
@@ -144,86 +111,83 @@ describe('smartBotStrategy', () => {
           'blue', 'red', 'blue',
           'blue', 'red', 'blue'
         ]
-        const moves = mockWhitenPiece();
+        const played1 = botNextMoveArgs(smartBotStrategy({ board: board1, ctx: makeCtx() }));
 
-        smartBotStrategy({ board: board1, ctx: makeCtx(), moves });
-
-        expect([board1[3], board1[5]]).toContain('white');
+        expect([3, 5]).toContain(played1[0]);
 
         const board2 = [
           'red', 'blue', 'blue',
           'blue', 'red', 'red',
           'red', 'blue', 'blue'
         ]
-        smartBotStrategy({ board: board2, ctx: makeCtx(), moves });
-        expect([board2[7], board2[1]]).toContain('white');
+        const played2 = botNextMoveArgs(smartBotStrategy({ board: board2, ctx: makeCtx() }));
+        expect([7, 1]).toContain(played2[0]);
       });
 
       it('should color 8 to white as 3rd if no instant win (and similarly in rotated scenarios)', () => {
-        const moves = mockWhitenPiece();
         const board1 = [
           'red', 'blue', 'white',
           'white', 'red', 'blue',
           'blue', 'red', 'blue'
         ]
-        smartBotStrategy({ board: board1, ctx: makeCtx(), moves });
-        expect(board1[8]).toEqual('white');
+        const played1 = botNextMoveArgs(smartBotStrategy({ board: board1, ctx: makeCtx() }));
+        expect(played1).toContain(8);
 
         const board2 = [
           'red', 'blue', 'red',
           'white', 'red', 'blue',
           'blue', 'white', 'blue'
         ]
-        smartBotStrategy({ board: board2, ctx: makeCtx(), moves });
-        expect(board2[8]).toEqual('white');
+        const played2 = botNextMoveArgs(smartBotStrategy({ board: board2, ctx: makeCtx() }));
+        expect(played2).toContain(8);
 
         const board3 = [
           'blue', 'white', 'red',
           'white', 'red', 'blue',
           'blue', 'blue', 'red'
         ]
-        smartBotStrategy({ board: board3, ctx: makeCtx(), moves })
-        expect(board3[6]).toEqual('white');
+        const played3 = botNextMoveArgs(smartBotStrategy({ board: board3, ctx: makeCtx() }));
+        expect(played3).toContain(6);
 
         const board4 = [
           'blue', 'white', 'red',
           'red', 'red', 'blue',
           'blue', 'blue', 'white'
         ]
-        smartBotStrategy({ board: board4, ctx: makeCtx(), moves })
-        expect(board4[6]).toEqual('white');
+        const played4 = botNextMoveArgs(smartBotStrategy({ board: board4, ctx: makeCtx() }));
+        expect(played4).toContain(6);
 
         const board5 = [
           'blue', 'white', 'blue',
           'blue', 'red', 'white',
           'red', 'blue', 'red'
         ]
-        smartBotStrategy({ board: board5, ctx: makeCtx(), moves })
-        expect(board5[0]).toEqual('white');
+        const played5 = botNextMoveArgs(smartBotStrategy({ board: board5, ctx: makeCtx() }));
+        expect(played5).toContain(0);
 
         const board6 = [
           'blue', 'red', 'blue',
           'blue', 'red', 'white',
           'white', 'blue', 'red'
         ]
-        smartBotStrategy({ board: board6, ctx: makeCtx(), moves })
-        expect(board6[0]).toEqual('white');
+        const played6 = botNextMoveArgs(smartBotStrategy({ board: board6, ctx: makeCtx() }));
+        expect(played6).toContain(0);
 
         const board7 = [
           'red', 'blue', 'blue',
           'blue', 'red', 'white',
           'red', 'white', 'blue'
         ]
-        smartBotStrategy({ board: board7, ctx: makeCtx(), moves })
-        expect(board7[2]).toEqual('white');
+        const played7 = botNextMoveArgs(smartBotStrategy({ board: board7, ctx: makeCtx() }));
+        expect(played7).toContain(2);
 
         const board8 = [
           'white', 'blue', 'blue',
           'blue', 'red', 'red',
           'red', 'white', 'blue'
         ]
-        smartBotStrategy({ board: board8, ctx: makeCtx(), moves })
-        expect(board8[2]).toEqual('white');
+        const played8 = botNextMoveArgs(smartBotStrategy({ board: board8, ctx: makeCtx() }));
+        expect(played8).toContain(2);
       });
     });
 
@@ -234,44 +198,42 @@ describe('smartBotStrategy', () => {
           'blue', 'red', 'red',
           'blue', 'red', 'blue'
         ]
-        const moves = mockWhitenPiece();
-        smartBotStrategy({ board, ctx: makeCtx(), moves })
-        expect([board[2], board[6]]).toContain('white');
+        const played = botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx() }));
+        expect([2, 6]).toContain(played[0]);
       });
 
       it('should color 3 to white (and similarly in rotated scenarios)', () => {
-        const moves = mockWhitenPiece();
         const board1 = [
           'red', 'blue', 'white',
           'blue', 'red', 'red',
           'blue', 'white', 'blue'
         ]
-        smartBotStrategy({ board: board1, ctx: makeCtx(), moves });
-        expect(board1[3]).toEqual('white');
+        const played1 = botNextMoveArgs(smartBotStrategy({ board: board1, ctx: makeCtx() }));
+        expect(played1).toContain(3);
 
         const board2 = [
           'blue', 'blue', 'red',
           'white', 'red', 'blue',
           'blue', 'red', 'white'
         ]
-        smartBotStrategy({ board: board2, ctx: makeCtx(), moves });
-        expect(board2[1]).toEqual('white');
+        const played2 = botNextMoveArgs(smartBotStrategy({ board: board2, ctx: makeCtx() }));
+        expect(played2).toContain(1);
 
         const board3 = [
           'blue', 'white', 'blue',
           'red', 'red', 'blue',
           'white', 'blue', 'red'
         ]
-        smartBotStrategy({ board: board3, ctx: makeCtx(), moves });
-        expect(board3[5]).toEqual('white');
+        const played3 = botNextMoveArgs(smartBotStrategy({ board: board3, ctx: makeCtx() }));
+        expect(played3).toContain(5);
 
         const board4 = [
           'white', 'red', 'blue',
           'blue', 'red', 'white',
           'red', 'blue', 'blue'
         ]
-        smartBotStrategy({ board: board4, ctx: makeCtx(), moves });
-        expect(board4[7]).toEqual('white');
+        const played4 = botNextMoveArgs(smartBotStrategy({ board: board4, ctx: makeCtx() }));
+        expect(played4).toContain(7);
       });
     });
   });

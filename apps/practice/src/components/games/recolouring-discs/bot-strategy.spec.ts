@@ -1,9 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { type GameMoves, type StrategyArgs } from '../../strategy-game-factory';
-import { makeCtx } from '../../../test-utils';
+import { type BotStrategy } from '../../strategy-game-factory';
+import { botNextMove, makeCtx } from '../../../test-utils';
 import {
   type Board,
   type Cell,
+  type Move,
   RED,
   BLUE,
   applyMove,
@@ -14,31 +15,21 @@ import {
 import { solveForN } from './solver';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 
-type Strategy = (args: StrategyArgs<Board>) => void;
-
 // Run one strategy for `player` on `cells` and return the resulting cells.
-const decide = (strategy: Strategy, cells: Cell[], player: number): Cell[] => {
-  const board: Board = { cells };
-  let result: Cell[] = cells;
-  const capture = (next: Cell[]) => {
-    result = next;
-    return { nextBoard: { cells: next } };
-  };
-  const moves: GameMoves<Board> = {
-    moveDisc: (b: Board, from: number, to: number) =>
-      capture(applyMove(b.cells, player, { type: 'move', from, to })),
-    placeDisc: (b: Board, at: number) => capture(applyMove(b.cells, player, { type: 'place', to: at })),
-    pass: (b: Board) => capture([...b.cells])
-  };
+const decide = (strategy: BotStrategy<Board>, cells: Cell[], player: number): Cell[] => {
   const ctx = makeCtx({ currentPlayer: player, isClientMoveAllowed: true, phase: 'play' });
-  strategy({ board, ctx, moves });
-  return result;
+  const { move, args = [] } = botNextMove(strategy({ board: { cells }, ctx }));
+  if (move === 'pass') return [...cells];
+  const asMove: Move = move === 'moveDisc'
+    ? { type: 'move', from: args[0] as number, to: args[1] as number }
+    : { type: 'place', to: args[0] as number };
+  return applyMove(cells, player, asMove);
 };
 
 // Play a full game; returns { winner, plies }.
 const playGame = (
   n: number,
-  strategies: [Strategy, Strategy]
+  strategies: [BotStrategy<Board>, BotStrategy<Board>]
 ): { winner: number; plies: number } => {
   let cells = startCells(n);
   let player = RED;
@@ -55,7 +46,7 @@ describe('recolouring-discs bot', () => {
   it('never loses (and wins via majority, not the cap) from the winning role vs a random opponent', () => {
     for (const n of [7, 8]) {
       const winningRole = solveForN(n).winnerAt(startCells(n), RED);
-      const strategies: [Strategy, Strategy] = winningRole === RED
+      const strategies: [BotStrategy<Board>, BotStrategy<Board>] = winningRole === RED
         ? [smartBotStrategy, randomBotStrategy]
         : [randomBotStrategy, smartBotStrategy];
       for (let game = 0; game < 40; game++) {

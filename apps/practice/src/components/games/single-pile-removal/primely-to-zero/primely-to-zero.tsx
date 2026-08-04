@@ -1,6 +1,6 @@
 import {
   strategyGameFactory,
-  type Ctx, type MoveOutcome, type StrategyArgs, type BoardClientProps,
+  type Ctx, type MoveOutcome, type BotStrategy, type BoardClientProps,
   GameBoard
 } from '../../../strategy-game-factory';
 import { range, sample } from 'lodash';
@@ -55,12 +55,12 @@ export const moves = {
   }
 };
 
-const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+const randomBotStrategy: BotStrategy<Board> = ({ board }) => {
   const step = isValidStep(board) ? board : sample([...validSteps].filter(s => s < board))!;
-  moves.moveTo(board, board - step);
+  return { move: 'moveTo', args: [board - step] };
 };
 
-const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
   const remainder = board % 4;
   let step: number;
   if (remainder !== 0) {
@@ -72,7 +72,7 @@ const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
     const steps = [...validSteps].filter(s => s <= board);
     step = sample(steps)!;
   }
-  moves.moveTo(board, board - step);
+  return { move: 'moveTo', args: [board - step] };
 };
 
 const generateStartBoard = (): Board => {

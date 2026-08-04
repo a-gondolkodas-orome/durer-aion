@@ -1,5 +1,5 @@
 import { maxBy, sample } from 'lodash';
-import type { StrategyArgs } from '../../../strategy-game-factory';
+import type { BotMove, BotStrategy } from '../../../strategy-game-factory';
 import type { Board } from '../helpers';
 
 // Vertices A(0)..J(9) clockwise. Each edge = 10 km, max 5 edges/day.
@@ -15,24 +15,19 @@ import type { Board } from '../helpers';
 //   Day 3: cover remaining missing, position for day 4
 //   Day 4: visit any towers destroyed on night 3 (always reachable ≤5 edges)
 
-export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
   if (ctx.currentPlayer === 0) {
-    const path = getOptimalArchitectPath(board);
-    executeArchitectPath(path, board, moves);
-  } else {
-    executeBanditStrategy(board, moves);
+    return asArchitectDay(getOptimalArchitectPath(board));
   }
+  return banditMove(board);
 };
 
-const executeArchitectPath = (path, board, moves) => {
-  if (path.length === 0) {
-    moves.endDay(board);
-    return;
-  }
-  const [next, ...rest] = path;
-  const { nextBoard } = moves.moveArchitect(board, next);
-  setTimeout(() => executeArchitectPath(rest, nextBoard, moves), 600);
-};
+// The architect's whole day is planned as one route (see the strategy above),
+// so its steps are named together, with the day closed at the end of them.
+const asArchitectDay = (path: number[]): BotMove[] => [
+  ...path.map(vertex => ({ move: 'moveArchitect', args: [vertex] })),
+  { move: 'endDay' }
+];
 
 export const getOptimalArchitectPath = (board: Board) => {
   const pos = board.architectPosition;
@@ -113,19 +108,17 @@ export const getOptimalArchitectPath = (board: Board) => {
 // Bandit heuristic: day 1 random; later days pick the tower that maximises the
 // minimum path the architect needs to cover all missing+newly-destroyed vertices.
 // Destroying the architect's current position is excluded: startNextDay rebuilds it for free.
-const executeBanditStrategy = (board: Board, moves) => {
+const banditMove = (board: Board): BotMove => {
   const pos = board.architectPosition;
   const candidates = board.towers
     .map((t, i) => (t && i !== pos ? i : null))
     .filter((i) => i !== null);
   if (candidates.length === 0) {
-    moves.destroyTower(board, pos);
-    return;
-  };
+    return { move: 'destroyTower', args: [pos] };
+  }
 
   if (board.day === 1) {
-    moves.destroyTower(board, sample(candidates)!);
-    return;
+    return { move: 'destroyTower', args: [sample(candidates)!] };
   }
 
   const missing = board.towers
@@ -136,7 +129,7 @@ const executeBanditStrategy = (board: Board, moves) => {
     candidates.map(v => ({ v, len: minPathToVisitAll(pos, [...missing, v]) })),
     'len'
   )!;
-  moves.destroyTower(board, best.v);
+  return { move: 'destroyTower', args: [best.v] };
 };
 
 // Minimum moves to visit all targets from pos on a 10-cycle.

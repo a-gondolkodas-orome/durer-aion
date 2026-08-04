@@ -1,26 +1,26 @@
 import { range, sample } from 'lodash';
 import { isLineFull, emptyCellsInLine, placeStoneAt, LINES, type Board } from './helpers';
-import type { StrategyArgs } from '../../../strategy-game-factory';
+import type { BotMove, BotStrategy } from '../../../strategy-game-factory';
 
-export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+// A turn is one decision — where to place, then which line to hand over — so it
+// is named as a whole. The opening turn has no pending line to place into.
+const asTurn = (pendingLine: number | null, cell: number | undefined, line: number): BotMove[] =>
+  pendingLine === null
+    ? [{ move: 'designateLine', args: [line] }]
+    : [{ move: 'placeStone', args: [cell] }, { move: 'designateLine', args: [line] }];
+
+export const randomBotStrategy: BotStrategy<Board> = ({ board }) => {
   const { stones, pendingLine } = board;
-  if (pendingLine !== null) {
-    const cell = sample(emptyCellsInLine(stones, pendingLine));
-    const { nextBoard } = moves.placeStone(board, cell);
-    setTimeout(() => moves.designateLine(nextBoard, sample(range(LINES.length))), 700);
-  } else {
-    moves.designateLine(board, sample(range(LINES.length)));
-  }
+  return asTurn(
+    pendingLine,
+    pendingLine === null ? undefined : sample(emptyCellsInLine(stones, pendingLine)),
+    sample(range(LINES.length))!
+  );
 };
 
-export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
   const { cell, line } = getOptimalAction(board, ctx.chosenRoleIndex);
-  if (board.pendingLine !== null) {
-    const { nextBoard } = moves.placeStone(board, cell);
-    setTimeout(() => moves.designateLine(nextBoard, line), 700);
-  } else {
-    moves.designateLine(board, line);
-  }
+  return asTurn(board.pendingLine, cell, line);
 };
 
 const winnerCache = new Map<string, number>();

@@ -1,22 +1,20 @@
 import { sample, last } from 'lodash';
-import type { StrategyArgs } from '../../strategy-game-factory';
+import type { BotStrategy } from '../../strategy-game-factory';
 import { type Board, type Domino, type Field, ALL_FIELDS, BOARDSIZE, getPossibleMoves } from './dominoes-on-chessboard';
 
-export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  moves.placeDomino(board, sample(getPossibleMoves(board)));
-};
+export const randomBotStrategy: BotStrategy<Board> = ({ board }) =>
+  ({ move: 'placeDomino', args: [sample(getPossibleMoves(board))] });
 
 const mirror = ({ row, col }: Field): Field => ({ row: BOARDSIZE - 1 - row, col: BOARDSIZE - 1 - col });
 
-export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
   if (ctx.chosenRoleIndex === 0) {
     // Bot plays second: mirroring the opponent's last move through the board's center
     // is unconditionally optimal on this even-sized board (no cell maps to itself), so
     // there's never a reason to search - it always wins regardless of how well the
     // first player plays.
     const lastDomino = last(board)!;
-    moves.placeDomino(board, [mirror(lastDomino[0]), mirror(lastDomino[1])]);
-    return;
+    return { move: 'placeDomino', args: [[mirror(lastDomino[0]), mirror(lastDomino[1])]] };
   }
 
   // Bot plays first: no unconditional winning strategy exists (this board is a proven
@@ -24,7 +22,7 @@ export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => 
   // position can be solved, to capitalize on any mistakes the opponent makes; fall
   // back to a random move otherwise.
   const exactMove = getExactWinningMove(board);
-  moves.placeDomino(board, exactMove ?? sample(getPossibleMoves(board)));
+  return { move: 'placeDomino', args: [exactMove ?? sample(getPossibleMoves(board))] };
 };
 
 // This game (Cram) is impartial - either player may place a domino in either

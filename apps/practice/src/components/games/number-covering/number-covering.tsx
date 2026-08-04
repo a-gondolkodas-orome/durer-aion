@@ -1,5 +1,5 @@
 import {
-  strategyGameFactory, type MoveOutcome, type StrategyArgs, type BoardClientProps, GameBoard
+  strategyGameFactory, type MoveOutcome, type BotStrategy, type BoardClientProps, GameBoard
 } from '../../strategy-game-factory';
 import { range, sum, sample, cloneDeep } from 'lodash';
 import { useTranslation } from '../../../language';
@@ -41,13 +41,12 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  moves.coverNumber(board, sample(getRemaining(board)));
-};
+const randomBotStrategy: BotStrategy<Board> = ({ board }) =>
+  ({ move: 'coverNumber', args: [sample(getRemaining(board))] });
 
-export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
   const botMove = getOptimalSmartBotMove({ board, currentPlayer: ctx.currentPlayer });
-  moves.coverNumber(board, botMove);
+  return { move: 'coverNumber', args: [botMove] };
 };
 
 export const getOptimalSmartBotMove = (

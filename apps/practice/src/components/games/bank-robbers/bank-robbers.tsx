@@ -1,5 +1,5 @@
 import {
-  strategyGameFactory, type Ctx, type MoveOutcome, type BoardClientProps, type StrategyArgs, GameBoard
+  strategyGameFactory, type Ctx, type MoveOutcome, type BoardClientProps, type BotStrategy, GameBoard
 } from '../../strategy-game-factory';
 import { range, cloneDeep, random, sample } from 'lodash';
 import { smartBotStrategy } from './bot-strategy';
@@ -100,9 +100,8 @@ const getAllowedBanks = (board: Board) => {
   })
 }
 
-const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  moves.rob(board, sample(getAllowedBanks(board))!);
-};
+const randomBotStrategy: BotStrategy<Board> = ({ board }) =>
+  ({ move: 'rob', args: [sample(getAllowedBanks(board))!] });
 
 const rule = {
   hu: <>

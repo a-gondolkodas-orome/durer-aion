@@ -1,5 +1,5 @@
 import { sample } from "lodash";
-import { type StrategyArgs } from "../../strategy-game-factory";
+import { type BotStrategy } from "../../strategy-game-factory";
 import { type Board, legalNodes } from "./helpers";
 
 // Every move raises the total coin count by exactly 1, so the game is a
@@ -43,6 +43,5 @@ export const getBotMove = (board: Board): number => {
   return sample(nodes.filter((node) => trapCount(node) === fewestReplies))!;
 };
 
-export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  moves.placeCoin(board, getBotMove(board));
-};
+export const smartBotStrategy: BotStrategy<Board> = ({ board }) =>
+  ({ move: 'placeCoin', args: [getBotMove(board)] });

@@ -1,5 +1,5 @@
 import { sample, sortBy, sum } from 'lodash';
-import type { StrategyArgs } from '../../strategy-game-factory';
+import type { BotStrategy } from '../../strategy-game-factory';
 import type { Board } from './pile-union';
 
 type MoveAction = { type: 'remove'; i: number } | { type: 'merge'; i: number; j: number }
@@ -32,28 +32,26 @@ const isLosing = (board: Board) => {
 P = Previous player wins (the player who just moved wins)
 N = Next player wins — the current player to move has a winning move available
 */
-export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
   const T = sum(board) + board.length;
 
   if (T % 2 === 0) {
     // N position: simple deterministic strategy — always move to T odd with all piles ≥ 2
     if (board.length === 1) {
       // Single pile: just remove from it
-      moves.removeOne(board, 0);
-      return;
+      return { move: 'removeOne', args: [0] };
     }
     const size1Idx = board.findIndex(x => x === 1);
     if (size1Idx !== -1) {
       // Merge the size-1 pile away so all piles stay ≥ 2
-      moves.mergePiles(board, [size1Idx, size1Idx === 0 ? 1 : 0]);
-      return;
+      return { move: 'mergePiles', args: [[size1Idx, size1Idx === 0 ? 1 : 0]] };
     }
     // All piles ≥ 2: remove from any pile of size ≥ 3, or merge if all are size 2
     const bigPileIdx = board.findIndex(x => x >= 3);
     if (bigPileIdx !== -1) {
-      moves.removeOne(board, bigPileIdx);
+      return { move: 'removeOne', args: [bigPileIdx] };
     } else {
-      moves.mergePiles(board, [0, 1]);
+      return { move: 'mergePiles', args: [[0, 1]] };
     }
   } else {
     // P position: use memo to capitalise on opponent mistakes, otherwise random
@@ -75,14 +73,14 @@ export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
     }
     const chosen = sample(winningMoves.length > 0 ? winningMoves : allMoves)!;
     if (chosen.type === 'remove') {
-      moves.removeOne(board, chosen.i);
+      return { move: 'removeOne', args: [chosen.i] };
     } else {
-      moves.mergePiles(board, [chosen.i, chosen.j]);
+      return { move: 'mergePiles', args: [[chosen.i, chosen.j]] };
     }
   }
 };
 
-export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+export const randomBotStrategy: BotStrategy<Board> = ({ board }) => {
   const winIn1: MoveAction[] = [];
   board.forEach((_, i) => {
     const next = board.filter((_, idx) => idx !== i);
@@ -98,8 +96,8 @@ export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
 
   const chosen = sample(winIn1.length > 0 ? winIn1 : allMoves)!;
   if (chosen.type === 'remove') {
-    moves.removeOne(board, chosen.i);
+    return { move: 'removeOne', args: [chosen.i] };
   } else {
-    moves.mergePiles(board, [chosen.i, chosen.j]);
+    return { move: 'mergePiles', args: [[chosen.i, chosen.j]] };
   }
 };

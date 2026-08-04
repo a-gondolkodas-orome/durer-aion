@@ -1,5 +1,5 @@
 import { sample } from 'lodash';
-import type { StrategyArgs } from '../../strategy-game-factory';
+import type { BotStrategy } from '../../strategy-game-factory';
 import { allMoves, applyBreak, totalGrundy, hasSafeBreak, type Board, type Move } from './helpers';
 
 const winningMoves = (board: Board): Move[] =>
@@ -28,10 +28,8 @@ export const getRandomBotMove = (board: Board): Move => {
   return sample(immediateWins.length > 0 ? immediateWins : moves)!;
 };
 
-export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  moves.breakPiece(board, getSmartBotMove(board));
-};
+export const smartBotStrategy: BotStrategy<Board> = ({ board }) =>
+  ({ move: 'breakPiece', args: [getSmartBotMove(board)] });
 
-export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  moves.breakPiece(board, getRandomBotMove(board));
-};
+export const randomBotStrategy: BotStrategy<Board> = ({ board }) =>
+  ({ move: 'breakPiece', args: [getRandomBotMove(board)] });

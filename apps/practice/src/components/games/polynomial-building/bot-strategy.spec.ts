@@ -1,23 +1,12 @@
-import { type GameMoves, type StrategyArgs } from '../../strategy-game-factory';
-import { makeCtx } from '../../../test-utils';
+import { type BotStrategy } from '../../strategy-game-factory';
+import { botNextMoveArgs, makeCtx } from '../../../test-utils';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { type Board, type Coef, hasThreeIntegerRoots, canComplete } from './helpers';
 
-type Strategy = (args: StrategyArgs<Board>) => void;
-
-// Run a bot on a board and capture the single move it makes.
-const runWith = (strategy: Strategy) => (board: Board): { coef: Coef; value: number } => {
-  let played: { coef: Coef; value: number } | null = null;
-  const moves: GameMoves<Board> = {
-    setCoefficient: (b: Board, ...args: unknown[]) => {
-      const [coef, value] = args as [Coef, number];
-      played = { coef, value };
-      return { nextBoard: { ...b, [coef]: value } };
-    }
-  };
-  strategy({ board, ctx: makeCtx({ phase: 'play', currentPlayer: 0 }), moves });
-  if (!played) throw new Error('bot made no move');
-  return played;
+// Run a bot on a board and read back the single move it names.
+const runWith = (strategy: BotStrategy<Board>) => (board: Board): { coef: Coef; value: number } => {
+  const [coef, value] = botNextMoveArgs(strategy({ board, ctx: makeCtx({ phase: 'play', currentPlayer: 0 }) }));
+  return { coef, value };
 };
 
 const runBot = runWith(smartBotStrategy);

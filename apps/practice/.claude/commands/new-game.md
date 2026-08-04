@@ -42,15 +42,11 @@ Choose the simplest existing game that resembles the new one structurally:
 Read the chosen reference file in full before writing anything.
 
 ### 4. Create the game file
-Create `src/components/games/<game-name>/<game-name>.tsx`. Follow the `strategyGameFactory` API from `AGENTS.md`. Key rules:
+Create `src/components/games/<game-name>/<game-name>.tsx`. The contract you are implementing — `moves`/`apply`/`validate`, `isAllowed`, the bot contract, `ctx`, `setTurnState` — is specified in [AGENTS.md § strategyGameFactory API](../../AGENTS.md#strategygamefactory-api); read it rather than guessing from the reference game alone. Authoring decisions on top of it:
 - If the user supplied the rule text, use it verbatim in `rule.hu` by default. Don't silently rephrase, correct, or abbreviate it. **Exception:** when the original wording doesn't fit the online implementation — e.g. it refers to the competition organizers/judges instead of the opponent/computer, or to physical artifacts (paper, pencil, cards on a table) that don't exist in the browser version — it's fine to reword it slightly to fit. In that case, explicitly highlight every change you made to the user (e.g. show before/after) so they can review it. For any other wording change, propose it and wait for approval before applying.
-- `board` holds only game-specific state; common state is in `ctx`
-- Every move is `{ apply, validate? }`. `apply` is a pure reducer returning a `MoveOutcome` (`{ nextBoard, isTurnEnd?, gameEnd?, nextTurnState?, autoEndOfTurn? }`) — it never reaches out and changes anything itself. Pass the current board when chaining moves within a turn
-- Give a move with non-trivial legality a `validate` predicate, and drive the `BoardClient`'s `disabled` state with `moves.<name>.isAllowed(board, ...args)` rather than a hand-rolled duplicate check
-- Guard all player interactions with `ctx.isClientMoveAllowed`
-- `getPlayerStepDescription` should make it obvious what the current player should do
 - For user-facing text referring to the other participant, prefer "other player" / "másik játékos" over "opponent" / "ellenfél" — the latter reads as too harsh, especially in Hungarian
-- If the bot needs multiple moves in one turn, wrap subsequent moves in `setTimeout` to simulate thinking
+- `getPlayerStepDescription` should make it obvious what the current player should do — it is the game's instruction line, not a status label
+- Keep the game's `moves` (and the `Board` type) in a React-free `helpers.ts` when the game is more than trivial: it is what lets a spec and the bot's move-name pinning import them without pulling in JSX
 - Pull `name`, `title`, `credit` from `gameList` rather than hardcoding them
 
 ### 5. Re-export the component from `src/components/games/index.ts`
@@ -64,6 +60,29 @@ automatically — no edit is needed there.
 Using the metadata collected in Step 1, add the entry in alphabetical order by key. Use `title` only if a longer display name is needed on the game page beyond the short name.
 
 ### 7. Run tests and verify
+If the optimal AI was implemented, write a spec that plays it rather than one
+that eyeballs a single decision. `runMatch` (from `strategy-game-factory`) plays
+a whole game headless through the real moves, validators and win detection:
+
+```typescript
+const { winnerIndex } = runMatch({
+  gameplay: { moves },
+  strategies: [smartBotStrategy, randomBotStrategy],
+  startBoard
+});
+```
+
+Assert what the checklist asks for: the smart bot wins as the mover from a
+board the mover can win, and as the replier from one it cannot (every move
+loses there, so any opponent must lose). A spec for a single decision needs no
+mock either — read it with `botNextMoveArgs` from `test-utils`.
+
+**How many boards to sweep depends on what the strategy costs** — exhaustive
+where it is cheap, a few representative boards where it searches, with the
+exhaustive argument moved into unit tests of the characterisation itself. See
+[AGENTS.md § Testing](../../AGENTS.md#testing) for the reasoning and the
+measured numbers.
+
 ```bash
 npm run test
 ```
@@ -73,17 +92,14 @@ npm run dev
 ```
 
 ### 8. Go through the checklist
-Before declaring the game done, verify each item:
-- [ ] Works correctly in both `vsComputer` and `vsHuman` mode
-- [ ] Starting positions are representative of the game's complexity; each player wins with ~50% probability across random starting boards
-- [ ] If optimal AI is implemented: player cannot win with a non-winning strategy
-- [ ] Moves return their consequences in the `MoveOutcome` rather than causing them
-- [ ] Moves with non-trivial legality define `validate`, and the `BoardClient` gates on `isAllowed`
-- [ ] `getPlayerStepDescription` makes the next move clear
-- [ ] Interactions disabled during the other player's turn (`ctx.isClientMoveAllowed`)
-- [ ] Mobile-friendly and keyboard-navigable
-- [ ] Player can undo within multi-move turns if applicable
-- [ ] AI appears to "think" in multi-move turns (uses `setTimeout`)
+Before declaring the game done, walk [AGENTS.md § New game
+checklist](../../AGENTS.md#new-game-checklist) and verify each item against the
+running game, not against your intent to have satisfied it. Two of them are
+worth naming here because they are the ones that quietly go unchecked:
+
+- the optimality claim must be backed by the `runMatch` spec from step 7, not by
+  eyeballing a few of the bot's moves
+- the game must be played through in **both** `vsComputer` and `vsHuman` mode
 
 ### 9. Offer a test bot variant (only if optimal AI was implemented)
 If the optimal AI strategy was implemented in step 2, ask the user:

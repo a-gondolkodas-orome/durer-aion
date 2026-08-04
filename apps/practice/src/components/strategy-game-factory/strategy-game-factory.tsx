@@ -10,13 +10,19 @@ import { useLocation } from 'react-router';
 import { useGameStats } from './hooks/use-game-stats';
 import { trackEvent } from '../../tracking';
 import type {
-  Mode, Ctx, MoveOutcome, Gameplay, GameMoves, ClientGameMoves,
+  Mode, Ctx, MoveOutcome, Gameplay, GameMoves, ClientGameMoves, BotStrategy, BotMove,
   BoardClientProps, Variant as DisplayVariant, VariantInput
 } from './types';
 import { resolveVariants } from './helpers/resolve-variants';
 import { createGameStore, createInitialCoreState } from './engine/store';
 import { buildCtx } from './engine/build-ctx';
+import { asBotMoves, isBotTurnUnfinished, unknownMoveMessage } from './engine/bot-turn';
 import { reduceMove } from './engine/reducer';
+
+// Pause between the moves of a bot's multi-phase turn, and before the auto
+// endOfTurnMove: long enough to follow what the bot did, short enough not to
+// stall the game.
+const BOT_STEP_DELAY = 750;
 
 const DEFAULT_PLAYER_NAMES: I18nString[] = [
   { hu: '1. játékos', en: '1st player' },
@@ -74,6 +80,12 @@ export const strategyGameFactory = <TBoard,>({
     useEffect(() => {
       localStorage.setItem('durer-player-names', JSON.stringify(playerNames));
     }, [playerNames]);
+
+    // A bot step (or auto endOfTurnMove) scheduled when the player navigates
+    // away would otherwise still fire, moving in a game nobody is watching.
+    useEffect(() => () => {
+      if (botTimeoutRef.current !== null) clearTimeout(botTimeoutRef.current);
+    }, []);
 
     const isHumanVsHumanGame = mode === 'vsHuman';
 
@@ -147,7 +159,7 @@ export const strategyGameFactory = <TBoard,>({
         botTimeoutRef.current = setTimeout(() => {
           botTimeoutRef.current = null;
           wrappedGameMoves[endOfTurnMove]!(transition.result.nextBoard);
-        }, 750);
+        }, BOT_STEP_DELAY);
       }
       return transition.result;
     };
@@ -239,16 +251,64 @@ export const strategyGameFactory = <TBoard,>({
       return clientWrapped;
     });
 
-    const doBotTurn = () => {
+    // Asks the bot what it wants to play. Reads the store rather than the
+    // render this closure came from, which may be long gone by now.
+    const askBot = (botStrategy: BotStrategy<TBoard>): BotMove[] => {
+      const state = store.getState();
+      const named = asBotMoves(botStrategy({
+        board: state.board, ctx: buildCtx(state, resolvedPlayerNames)
+      }));
+      // Naming nothing leaves the turn with the bot forever, so it is a bug in
+      // the strategy — loud in dev, and in prod a stalled bot beats a crash.
+      if (!named.length) {
+        const message = 'strategyGameFactory: botStrategy named no move to play';
+        if (import.meta.env.DEV) throw new Error(message);
+        console.warn(message);
+      }
+      return named;
+    };
+
+    // Plays the bot's named moves one at a time. The pause before each is what
+    // makes the bot look like it is thinking; keeping it here rather than
+    // inside the strategy is what lets the same strategy run headless
+    // (engine/run-match.ts).
+    const runBotTurn = (queue: BotMove[], delay: number) => {
       const { botStrategy } = activeVariant;
-      if (!botStrategy) throw new Error('strategyGameFactory: no botStrategy available for vsComputer mode');
-      const time = Math.floor(Math.random() * 500 + 1000);
       botTimeoutRef.current = setTimeout(() => {
         botTimeoutRef.current = null;
-        // read fresh state: the render this closure came from may be long gone
-        const s = store.getState();
-        botStrategy({ board: s.board, ctx: buildCtx(s, resolvedPlayerNames), moves: wrappedGameMoves });
-      }, time);
+        const playerBefore = store.getState().currentPlayer!;
+        const named = queue.length ? queue : askBot(botStrategy!);
+        if (!named.length) return;
+        const [{ move, args = [] }, ...rest] = named;
+        if (!moves[move]) {
+          if (import.meta.env.DEV) throw new Error(unknownMoveMessage(move, moves));
+          console.warn(unknownMoveMessage(move, moves));
+          return;
+        }
+        // The board comes from the store, so a bot has no board to pass and
+        // therefore no way to pass a stale one.
+        wrappedGameMoves[move]!(store.getState().board, ...args);
+        if (!isBotTurnUnfinished(store.getState(), playerBefore)) {
+          // A turn planned as a whole may win partway through — the rest of the
+          // plan is then moot rather than wrong.
+          if (import.meta.env.DEV && rest.length && store.getState().phase !== 'gameEnd') {
+            throw new Error(`strategyGameFactory: botStrategy named moves after ${move} ended its turn`);
+          }
+          return;
+        }
+        // A pending auto endOfTurnMove occupies the same timeout slot and
+        // already owns the rest of the turn, so only carry on without one.
+        if (botTimeoutRef.current === null) {
+          runBotTurn(rest, BOT_STEP_DELAY);
+        }
+      }, delay);
+    };
+
+    const doBotTurn = () => {
+      if (!activeVariant.botStrategy) {
+        throw new Error('strategyGameFactory: no botStrategy available for vsComputer mode');
+      }
+      runBotTurn([], Math.floor(Math.random() * 500 + 1000));
     };
 
     const visibleVariants = getVariantsForMode(mode);

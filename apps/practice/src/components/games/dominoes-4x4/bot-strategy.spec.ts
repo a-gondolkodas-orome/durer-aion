@@ -1,18 +1,11 @@
-import { type GameMoves } from '../../strategy-game-factory';
-import { makeCtx } from '../../../test-utils';
+import { botNextMoveArgs, makeCtx } from '../../../test-utils';
 import { smartBotStrategy, randomBotStrategy, isWinningForPlayerToMove } from './bot-strategy';
 import { getPossibleMoves, type Board, type Domino, type Field } from './dominoes-4x4';
 
 const fieldKey = ({ row, col }: Field) => `${row},${col}`;
 
-const captureMove = (board: Board, player: number, strategy: typeof smartBotStrategy): Domino => {
-  let placed: Domino | undefined;
-  const moves: GameMoves<Board> = {
-    placeDomino: (_board: Board, domino: Domino) => { placed = domino; return { nextBoard: _board }; }
-  };
-  strategy({ board, ctx: makeCtx({ currentPlayer: player }), moves });
-  return placed!;
-};
+const captureMove = (board: Board, player: number, strategy: typeof smartBotStrategy): Domino =>
+  botNextMoveArgs(strategy({ board, ctx: makeCtx({ currentPlayer: player }) }))[0] as Domino;
 
 describe('isWinningForPlayerToMove', () => {
   it('the empty 4x4 board is a win for Árgyélus (the vertical player to move)', () => {

@@ -1,20 +1,20 @@
 import { random, sample, range } from 'lodash';
-import type { StrategyArgs } from '../../strategy-game-factory';
+import type { BotStrategy } from '../../strategy-game-factory';
 import type { Board } from './four-piles-spread-ahead';
 
-export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+export const randomBotStrategy: BotStrategy<Board> = ({ board }) => {
   const validMoves: { pileId: number; pieceCount: number }[] = [];
   for (const pileId of [1, 2, 3]) {
     for (const pieceCount of range(1, Math.min(pileId, board[pileId]) + 1)) {
       validMoves.push({ pileId, pieceCount });
     }
   }
-  return moves.spreadPieces(board, sample(validMoves));
+  return { move: 'spreadPieces', args: [sample(validMoves)] };
 };
 
-export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
   const { pileId, pieceId } = getSmartBotStep(board);
-  return moves.spreadPieces(board, { pileId, pieceCount: pieceId + 1 });
+  return { move: 'spreadPieces', args: [{ pileId, pieceCount: pieceId + 1 }] };
 };
 
 export const getSmartBotStep = (board: Board): { pileId: number; pieceId: number } => {

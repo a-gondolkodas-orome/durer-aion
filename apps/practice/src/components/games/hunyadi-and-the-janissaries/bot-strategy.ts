@@ -1,15 +1,17 @@
 import { random } from 'lodash';
-import type { StrategyArgs } from '../../strategy-game-factory';
+import type { BotStrategy } from '../../strategy-game-factory';
 import { SULTAN, type Board, type SoldierColor, type Soldier } from './helpers';
 
-export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
   if (ctx.chosenRoleIndex === SULTAN) {
     const optimalGroupToKill = getOptimalGroupToKill(board);
-    moves.killGroup(board, optimalGroupToKill);
+    return { move: 'killGroup', args: [optimalGroupToKill] };
   } else {
-    const soldiers = getOptimalSoldierGroups(board);
-    const { nextBoard } = moves.setGroupOfSoldiers(board, soldiers);
-    moves.finalizeSeparation(nextBoard);
+    // Separating the soldiers and closing the separation is one decision.
+    return [
+      { move: 'setGroupOfSoldiers', args: [getOptimalSoldierGroups(board)] },
+      { move: 'finalizeSeparation' }
+    ];
   }
 };
 

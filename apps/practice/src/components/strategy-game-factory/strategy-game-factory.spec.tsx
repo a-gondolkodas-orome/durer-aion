@@ -2,7 +2,7 @@
 import { render, fireEvent, act } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { strategyGameFactory, type StrategyGameConfig } from './strategy-game-factory';
-import type { BoardClientProps, Ctx, Gameplay, StrategyArgs } from './types';
+import type { BoardClientProps, BotMove, BotStrategy, Ctx, Gameplay, StrategyArgs } from './types';
 
 type Board = string[];
 
@@ -35,11 +35,11 @@ const defaultGameplay: Gameplay<Board> = {
 const makeConfig = ({
   BoardClient = MinimalBoardClient,
   gameplay = defaultGameplay,
-  botStrategy = () => {}
+  botStrategy = (() => []) as BotStrategy<Board>
 }: {
   BoardClient?: StrategyGameConfig<Board>['BoardClient']
   gameplay?: Gameplay<Board>
-  botStrategy?: (args: StrategyArgs<Board>) => void
+  botStrategy?: BotStrategy<Board>
 } = {}): StrategyGameConfig<Board> => ({
   presentation: { rule: <></>, getPlayerStepDescription: () => '' },
   BoardClient,
@@ -48,7 +48,7 @@ const makeConfig = ({
 });
 
 const minimalConfig = (gameplay: Gameplay<Board>) => makeConfig({ gameplay });
-const ctxAwareConfig = (botStrategy: () => void = () => {}) =>
+const ctxAwareConfig = (botStrategy: BotStrategy<Board> = () => []) =>
   makeConfig({ BoardClient: CtxAwareBoardClient, botStrategy });
 
 const renderGame = (config: StrategyGameConfig<Board>) => {
@@ -82,7 +82,7 @@ describe('Bot behavior by mode', () => {
   afterEach(() => { vi.clearAllTimers(); });
 
   it('does not call botStrategy in vsHuman mode', () => {
-    const botStrategy = vi.fn();
+    const botStrategy = vi.fn((): BotMove[] => []);
     const { getByTestId } = renderGame(ctxAwareConfig(botStrategy));
     fireEvent.click(getByTestId('mode-vsHuman'));
     fireEvent.click(getByTestId('start-hh-game-0'));
@@ -91,8 +91,28 @@ describe('Bot behavior by mode', () => {
     expect(botStrategy).not.toHaveBeenCalled();
   });
 
+  // A scheduled bot step must not outlive the game: the player may navigate
+  // away mid-turn, and a stray timer would move in a store nobody is rendering.
+  it('drops a scheduled bot turn when the game unmounts', () => {
+    const botStrategy = vi.fn((): BotMove => ({ move: 'mainMove' }));
+    const { getByTestId, unmount } = renderGame(ctxAwareConfig(botStrategy));
+    fireEvent.click(getByTestId('role-btn-0'));
+    fireEvent.click(getByTestId('move-btn')); // endTurn → bot's turn scheduled
+    unmount();
+    act(() => { vi.advanceTimersByTime(10_000); });
+    expect(botStrategy).not.toHaveBeenCalled();
+  });
+
+  it('throws in dev when the bot names a move the game does not have', () => {
+    const { getByTestId } = renderGame(ctxAwareConfig(() => ({ move: 'mianMove' })));
+    fireEvent.click(getByTestId('role-btn-0'));
+    fireEvent.click(getByTestId('move-btn')); // endTurn → bot's turn
+    expect(() => act(() => { vi.advanceTimersByTime(1500); }))
+      .toThrow(/named unknown move 'mianMove' \(this game has: mainMove\)/);
+  });
+
   it('calls botStrategy when it becomes the computer turn', () => {
-    const botStrategy = vi.fn();
+    const botStrategy = vi.fn((): BotMove => ({ move: 'mainMove' }));
     const { getByTestId } = renderGame(ctxAwareConfig(botStrategy));
     fireEvent.click(getByTestId('role-btn-0'));
     fireEvent.click(getByTestId('move-btn')); // endTurn → bot's turn
@@ -160,6 +180,31 @@ describe('strategyGameFactory endOfTurnMove', () => {
     act(() => { vi.advanceTimersByTime(750); });
 
     expect(autoMove).not.toHaveBeenCalled();
+  });
+
+  // A bot move returning autoEndOfTurn leaves the turn unfinished, which is
+  // also the condition for calling the bot again — but the scheduled
+  // endOfTurnMove already owns the rest of the turn, so the bot must not move.
+  it('does not call the bot again while its auto endOfTurnMove is pending', () => {
+    const botStrategy = vi.fn((): BotMove => ({ move: 'mainMove' }));
+    const moves: Gameplay<Board>['moves'] = {
+      mainMove: { apply: (board: Board) => ({ nextBoard: [...board, 'main'], autoEndOfTurn: true }) },
+      autoMove: { apply: (board: Board) => ({ nextBoard: [...board, 'auto'], isTurnEnd: true }) }
+    };
+
+    const { getByTestId } = renderGame(makeConfig({
+      BoardClient: ({ board }: BoardClientProps<Board>) => (
+        <span data-testid="board">{board.join(',')}</span>
+      ),
+      gameplay: { moves, endOfTurnMove: 'autoMove' },
+      botStrategy
+    }));
+    fireEvent.click(getByTestId('role-btn-1')); // human is 2nd player → bot moves first
+    act(() => { vi.advanceTimersByTime(1500); }); // thinking delay → mainMove
+    act(() => { vi.advanceTimersByTime(10_000); }); // endOfTurnMove, and no bot step
+
+    expect(botStrategy).toHaveBeenCalledOnce();
+    expect(getByTestId('board').textContent).toBe('initial,main,auto');
   });
 });
 
@@ -305,7 +350,7 @@ describe('undo', () => {
     afterEach(() => { vi.clearAllTimers(); });
 
     it('undo enabled immediately after human move (before bot fires)', () => {
-      const botStrategy = vi.fn();
+      const botStrategy = vi.fn((): BotMove[] => []);
       const { getByTestId } = renderGame(ctxAwareConfig(botStrategy));
       fireEvent.click(getByTestId('role-btn-0'));
       fireEvent.click(getByTestId('move-btn')); // human moves
@@ -313,7 +358,7 @@ describe('undo', () => {
     });
 
     it('clicking undo before bot fires cancels bot and restores human turn', () => {
-      const botStrategy = vi.fn();
+      const botStrategy = vi.fn((): BotMove[] => []);
       const { getByTestId } = renderGame(ctxAwareConfig(botStrategy));
       fireEvent.click(getByTestId('role-btn-0'));
       fireEvent.click(getByTestId('move-btn')); // human moves → bot thinking
@@ -324,7 +369,7 @@ describe('undo', () => {
     });
 
     it('undo disabled after bot completes its move', () => {
-      const botStrategy = vi.fn().mockImplementation((args: any) => { args.moves.mainMove(args.board); });
+      const botStrategy = vi.fn(() => ({ move: 'mainMove' }));
       const { getByTestId } = renderGame(ctxAwareConfig(botStrategy));
       fireEvent.click(getByTestId('role-btn-0'));
       fireEvent.click(getByTestId('move-btn')); // human moves
@@ -333,7 +378,7 @@ describe('undo', () => {
     });
 
     it('undo does not re-trigger bot after restoring human turn', () => {
-      const botStrategy = vi.fn();
+      const botStrategy = vi.fn((): BotMove[] => []);
       const { getByTestId } = renderGame(ctxAwareConfig(botStrategy));
       fireEvent.click(getByTestId('role-btn-0'));
       fireEvent.click(getByTestId('move-btn')); // human moves → bot thinking
@@ -417,7 +462,7 @@ describe('per-variant rule', () => {
       gameplay: defaultGameplay,
       variants: [
         {
-          botStrategy: () => {},
+          botStrategy: () => [],
           generateStartBoard: (): Board => ['a'],
           rule: { hu: 'RULE_ONE', en: 'RULE_ONE' },
           isDefault: true
@@ -445,12 +490,12 @@ describe('per-variant rule', () => {
       gameplay: defaultGameplay,
       variants: [
         {
-          botStrategy: () => {},
+          botStrategy: () => [],
           generateStartBoard: (): Board => ['a'],
           isDefault: true
         },
         {
-          botStrategy: () => {},
+          botStrategy: () => [],
           generateStartBoard: (): Board => ['b'],
           rule: { hu: 'RULE_TWO', en: 'RULE_TWO' }
         }
@@ -501,7 +546,7 @@ describe('umami game-finished event', () => {
 });
 
 describe('move validate enforcement', () => {
-  const guardedConfig = (botStrategy: () => void = () => {}) => makeConfig({
+  const guardedConfig = (botStrategy: BotStrategy<Board> = () => []) => makeConfig({
     BoardClient: ({ board, moves }: BoardClientProps<Board>) => (
       <>
         <button data-testid="legal-btn" onClick={() => moves.guarded(board, 'ok')}>legal</button>
@@ -557,7 +602,7 @@ describe('move validate enforcement', () => {
   it('throws a loud error in dev when a bot dispatches a move that fails its validator', () => {
     vi.useFakeTimers();
     try {
-      const botStrategy = vi.fn().mockImplementation((args: any) => { args.moves.guarded(args.board, 'bad'); });
+      const botStrategy = vi.fn(() => ({ move: 'guarded', args: ['bad'] }));
       const { getByTestId } = renderGame(guardedConfig(botStrategy));
       fireEvent.click(getByTestId('role-btn-0'));
       fireEvent.click(getByTestId('hand-over-btn')); // → bot's turn
@@ -578,18 +623,22 @@ describe('move validate enforcement', () => {
     expect(getByTestId('can-bad').textContent).toBe('false');
   });
 
-  // The bot's wrapping deliberately omits isAllowed (it would be false all
-  // through the bot's turn), which is what lets ClientGameMoves type it as
-  // required and BoardClients call it without a non-null assertion.
-  it('does not expose isAllowed on the moves a bot receives', () => {
+  // A bot names moves rather than dispatching them, so it is handed no move
+  // wrappers at all — and therefore no isAllowed, which would be false all
+  // through its own turn anyway.
+  it('hands a bot the position only, not the move wrappers', () => {
     vi.useFakeTimers();
     try {
-      const botStrategy = vi.fn();
+      const seen: StrategyArgs<Board>[] = [];
+      const botStrategy: BotStrategy<Board> = (args) => {
+        seen.push(args);
+        return { move: 'guarded', args: ['ok'] };
+      };
       const { getByTestId } = renderGame(guardedConfig(botStrategy));
       fireEvent.click(getByTestId('role-btn-0'));
       fireEvent.click(getByTestId('hand-over-btn')); // → bot's turn
       act(() => { vi.advanceTimersByTime(1500); });
-      expect(botStrategy.mock.calls[0]![0].moves.guarded.isAllowed).toBeUndefined();
+      expect(Object.keys(seen[0]!)).toEqual(['board', 'ctx']);
     } finally {
       vi.clearAllTimers();
       vi.useRealTimers();
@@ -604,14 +653,12 @@ describe('move validate enforcement', () => {
     expect((getByTestId('move-btn') as HTMLButtonElement).disabled).toBe(true); // bot's turn now
   });
 
-  // Mirrors the coins-in-3-piles bots: a two-phase turn chained via setTimeout
-  // on the move wrappers captured when the bot's turn started. The phase-2
-  // validator reads ctx.turnState, which phase 1's returned nextTurnState just
-  // set — that has to reach the authoritative store synchronously, or the
-  // engine would judge phase 2 against the render the wrappers came from. The
-  // 0-delay variant (smartBotStrategy's "place back nothing" branch) is the
-  // harshest case: phase 2 dispatches before React re-renders at all.
-  const twoPhaseBotConfig = (chainDelayMs: number) => makeConfig({
+  // Mirrors the coins-in-3-piles bots: a two-phase turn, one move per bot call,
+  // the engine calling the bot again because phase 1 did not end the turn. The
+  // phase-2 validator reads ctx.turnState, which phase 1's returned
+  // nextTurnState just set — so the second call has to be judged against the
+  // authoritative store rather than the render the first call came from.
+  const twoPhaseBotConfig = () => makeConfig({
     BoardClient: ({ board }: BoardClientProps<Board>) => (
       <span data-testid="board">{board.join(',')}</span>
     ),
@@ -631,19 +678,16 @@ describe('move validate enforcement', () => {
         }
       }
     },
-    botStrategy: ({ board, moves }) => {
-      const { nextBoard } = moves.phase1(board);
-      setTimeout(() => { moves.phase2(nextBoard); }, chainDelayMs);
-    }
+    botStrategy: ({ ctx }) => ctx.turnState === null ? { move: 'phase1' } : { move: 'phase2' }
   });
 
-  const playTwoPhaseBotTurn = (chainDelayMs: number) => {
+  const playTwoPhaseBotTurn = (extraMs = 0) => {
     vi.useFakeTimers();
     try {
-      const { getByTestId } = renderGame(twoPhaseBotConfig(chainDelayMs));
+      const { getByTestId } = renderGame(twoPhaseBotConfig());
       fireEvent.click(getByTestId('role-btn-1')); // human is 2nd player → bot moves first
       act(() => { vi.advanceTimersByTime(1500); }); // bot "thinking" delay → phase1
-      act(() => { vi.advanceTimersByTime(750); }); // the chained phase2 — must not be rejected
+      act(() => { vi.advanceTimersByTime(750 + extraMs) }); // called again → phase2
       return getByTestId('board').textContent;
     } finally {
       vi.clearAllTimers();
@@ -651,12 +695,12 @@ describe('move validate enforcement', () => {
     }
   };
 
-  it('validates a bot-chained second move against the returned nextTurnState', () => {
-    expect(playTwoPhaseBotTurn(750)).toBe('initial,p1,p2');
+  it('calls the bot again for a move that did not end its turn', () => {
+    expect(playTwoPhaseBotTurn()).toBe('initial,p1,p2');
   });
 
-  it('validates a 0-delay chained second move dispatched before React re-renders', () => {
-    expect(playTwoPhaseBotTurn(0)).toBe('initial,p1,p2');
+  it('stops calling the bot once its move ended the turn', () => {
+    expect(playTwoPhaseBotTurn(10_000)).toBe('initial,p1,p2');
   });
 
   describe('in production (import.meta.env.DEV = false)', () => {
@@ -664,7 +708,7 @@ describe('move validate enforcement', () => {
     afterEach(() => { vi.clearAllTimers(); vi.useRealTimers(); vi.unstubAllEnvs(); });
 
     const illegalBotStrategy = () =>
-      vi.fn().mockImplementation((args: any) => { args.moves.guarded(args.board, 'bad'); });
+      vi.fn((): BotMove => ({ move: 'guarded', args: ['bad'] }));
 
     it('does not throw and leaves the board unchanged on an illegal bot move', () => {
       const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
@@ -787,9 +831,7 @@ describe('outcome-returning moves (apply)', () => {
         BoardClient: ({ board, moves }: BoardClientProps<Board>) => (
           <button data-testid="hand-over-btn" onClick={() => moves.handOver(board)}>go</button>
         ),
-        botStrategy: (({ board, moves }: StrategyArgs<Board>) => {
-          moves.contradiction(board);
-        }) as () => void
+        botStrategy: () => ({ move: 'contradiction' })
       });
       const { getByTestId } = renderGame(config);
       fireEvent.click(getByTestId('role-btn-0'));
@@ -897,7 +939,7 @@ describe('outcome-returning moves (apply)', () => {
   // depending on a mid-turn-changing ctx field OTHER than turnState (here
   // moveCount) was impossible under the old per-field ctxRef shadow.
   describe('the external store fixes render-snapshot staleness', () => {
-    it('a 0-delay chained dispatch validates against current ctx.moveCount', () => {
+    it('validates the second move of a bot turn against current ctx.moveCount', () => {
       vi.useFakeTimers();
       try {
         const config = makeConfig({
@@ -913,15 +955,12 @@ describe('outcome-returning moves (apply)', () => {
               }
             }
           },
-          botStrategy: ({ board, moves }) => {
-            const { nextBoard } = moves.phase1(board);
-            setTimeout(() => { moves.phase2(nextBoard); }, 0);
-          }
+          botStrategy: () => [{ move: 'phase1' }, { move: 'phase2' }]
         });
         const { getByTestId } = renderGame(config);
         fireEvent.click(getByTestId('role-btn-1')); // bot moves first
         act(() => { vi.advanceTimersByTime(1500); }); // phase1
-        act(() => { vi.advanceTimersByTime(0); }); // chained phase2, before any re-render
+        act(() => { vi.advanceTimersByTime(750); }); // phase2, before any re-render
         expect(getByTestId('board').textContent).toBe('initial,p1,p2');
       } finally {
         vi.clearAllTimers();
@@ -929,34 +968,40 @@ describe('outcome-returning moves (apply)', () => {
       }
     });
 
-    it('throws in dev when a chained dispatch passes a stale board', () => {
-      vi.useFakeTimers();
-      try {
-        const config = makeConfig({
-          gameplay: {
-            moves: {
-              step: { apply: (board: Board) => ({ nextBoard: [...board, 'x'] }) }
-            }
-          },
-          botStrategy: ({ board, moves }) => {
-            moves.step(board);
-            // BUG under test: passes the original board instead of nextBoard
-            setTimeout(() => { moves.step(board); }, 0);
+    // Only a BoardClient threads boards into moves — a bot names moves and the
+    // engine supplies the board — so this is where a stale board can still come
+    // from, and it stays a loud dev error.
+    it('throws in dev when a BoardClient chains a move onto a stale board', () => {
+      let thrown: Error | null = null;
+      const config = makeConfig({
+        gameplay: {
+          moves: {
+            step: { apply: (board: Board) => ({ nextBoard: [...board, 'x'] }) }
           }
-        });
-        const { getByTestId } = renderGame(config);
-        fireEvent.click(getByTestId('role-btn-1')); // bot moves first
-        expect(() => act(() => { vi.advanceTimersByTime(1500); }))
-          .toThrow(/stale board passed to move step/);
-      } finally {
-        vi.clearAllTimers();
-        vi.useRealTimers();
-      }
+        },
+        BoardClient: ({ board, moves }: BoardClientProps<Board>) => (
+          <button
+            data-testid="chain-btn"
+            onClick={() => {
+              try {
+                moves.step(board);
+                moves.step(board); // BUG under test: the original board, not nextBoard
+              } catch (error) {
+                thrown = error as Error;
+              }
+            }}
+          >chain</button>
+        )
+      });
+      const { getByTestId } = renderGame(config);
+      fireEvent.click(getByTestId('role-btn-0'));
+      fireEvent.click(getByTestId('chain-btn'));
+      expect(thrown!.message).toMatch(/stale board passed to move step/);
     });
   });
 
   describe('validate on outcome-returning moves', () => {
-    const guardedV2Config = (botStrategy: () => void = () => {}) => makeConfig({
+    const guardedV2Config = (botStrategy: BotStrategy<Board> = () => []) => makeConfig({
       BoardClient: ({ board, moves }: BoardClientProps<Board>) => (
         <>
           <button data-testid="legal-btn" onClick={() => moves.guarded(board, 'ok')}>legal</button>
@@ -990,9 +1035,7 @@ describe('outcome-returning moves (apply)', () => {
     it('throws loudly in dev on an illegal bot dispatch', () => {
       vi.useFakeTimers();
       try {
-        const botStrategy = vi.fn().mockImplementation((args: any) => {
-          args.moves.guarded(args.board, 'bad');
-        });
+        const botStrategy = vi.fn((): BotMove => ({ move: 'guarded', args: ['bad'] }));
         const { getByTestId } = renderGame(guardedV2Config(botStrategy));
         fireEvent.click(getByTestId('role-btn-0'));
         fireEvent.click(getByTestId('hand-over-btn')); // → bot's turn

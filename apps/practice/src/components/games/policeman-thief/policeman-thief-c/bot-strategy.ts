@@ -1,7 +1,7 @@
 import { sample, random, range } from "lodash";
 import { neighbours, VERTEX_COUNT, dist, minDistToSet, THIEF } from "./helpers";
 import type { Board } from "./policeman-thief-c";
-import type { StrategyArgs, GameMoves } from "../../../strategy-game-factory";
+import type { BotMove, BotStrategy } from "../../../strategy-game-factory";
 
 // ---------------------------------------------------------------------------
 // Minimax core (exhaustive; the graph and rules are fixed so the memo below is
@@ -116,26 +116,23 @@ const chooseCopPlacement = (copCount: number): number[] => {
   return range(VERTEX_COUNT).sort((a, b) => totalCentrality(a) - totalCentrality(b)).slice(0, copCount);
 };
 
-const placeCopsOptimally = ({ board, moves }: { board: Board; moves: GameMoves<Board> }) => {
-  const target = chooseCopPlacement(board.copCount);
-  const placeNext = (i: number, current: Board) => {
-    if (i >= target.length) return;
-    const { nextBoard } = moves.placeCop(current, target[i]);
-    if (i + 1 < target.length) {
-      setTimeout(() => placeNext(i + 1, nextBoard), 600);
-    }
-  };
-  placeNext(0, board);
-};
+// Every policeman is placed (or stepped) in the same turn, from a plan made for
+// the position the turn starts in, so a turn is named as a whole. A step onto
+// the thief ends the game there and then, leaving the rest of the plan moot.
+const asCopMoves = (move: string, target: number[]): BotMove[] =>
+  target.map(vertex => ({ move, args: [vertex] }));
 
-const placeThiefOptimally = ({ board, moves }: { board: Board; moves: GameMoves<Board> }) => {
+const placeCopsOptimally = (board: Board): BotMove[] =>
+  asCopMoves('placeCop', chooseCopPlacement(board.copCount));
+
+const placeThiefOptimally = (board: Board): BotMove => {
   const cops = board.policemen;
   const candidates = range(VERTEX_COUNT).filter((v) => !cops.includes(v));
   const surviving = candidates.filter((v) => thiefSurvives(cops, v, 3));
   const pool = surviving.length ? surviving : candidates;
   // Safest start: farthest from the nearest policeman (delays capture when doomed).
   const best = argExtreme(pool, (v) => minDistToSet(v, cops), true);
-  moves.placeThief(board, sample(best)!);
+  return { move: 'placeThief', args: [sample(best)!] };
 };
 
 export const chooseCopMove = (cops: number[], thief: number, movesLeft: number): number[] => {
@@ -147,18 +144,10 @@ export const chooseCopMove = (cops: number[], thief: number, movesLeft: number):
   return sample(argExtreme(pool, totalDistToThief, false))!;
 };
 
-const moveCopsOptimally = ({ board, moves }: { board: Board; moves: GameMoves<Board> }) => {
-  const movesLeft = 3 - board.thiefMoveCount;
-  const target = chooseCopMove(board.policemen, board.thief!, movesLeft);
-  const step = (i: number, current: Board) => {
-    const { nextBoard } = moves.moveCop(current, target[i]);
-    if (target[i] === board.thief) return; // caught -> game over, don't move the rest
-    if (i + 1 < target.length) setTimeout(() => step(i + 1, nextBoard), 700);
-  };
-  step(0, board);
-};
+const moveCopsOptimally = (board: Board): BotMove[] =>
+  asCopMoves('moveCop', chooseCopMove(board.policemen, board.thief!, 3 - board.thiefMoveCount));
 
-const moveThiefOptimally = ({ board, moves }: { board: Board; moves: GameMoves<Board> }) => {
+const moveThiefOptimally = (board: Board): BotMove => {
   const { policemen: cops, thief } = board;
   const movesLeft = 3 - board.thiefMoveCount;
   const safe = neighbours[thief!].filter((t) => !cops.includes(t));
@@ -166,18 +155,14 @@ const moveThiefOptimally = ({ board, moves }: { board: Board; moves: GameMoves<B
   const pool = surviving.length ? surviving : (safe.length ? safe : neighbours[thief!]);
   // Evade toward the vertex farthest from the nearest policeman.
   const best = argExtreme(pool, (t) => minDistToSet(t, cops), true);
-  moves.moveThief(board, sample(best)!);
+  return { move: 'moveThief', args: [sample(best)!] };
 };
 
-export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
-  const botIsCops = ctx.chosenRoleIndex === THIEF;
-  if (botIsCops) {
-    if (board.phase === 'placingCops') placeCopsOptimally({ board, moves });
-    else moveCopsOptimally({ board, moves });
-  } else {
-    if (board.phase === 'placingThief') placeThiefOptimally({ board, moves });
-    else moveThiefOptimally({ board, moves });
+export const smartBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
+  if (ctx.chosenRoleIndex === THIEF) {
+    return board.phase === 'placingCops' ? placeCopsOptimally(board) : moveCopsOptimally(board);
   }
+  return board.phase === 'placingThief' ? placeThiefOptimally(board) : moveThiefOptimally(board);
 };
 
 // ---------------------------------------------------------------------------
@@ -186,47 +171,30 @@ export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => 
 // human thief realistically win, unlike the optimal bot.
 // ---------------------------------------------------------------------------
 
-const placeCopsRandom = ({ board, moves }: { board: Board; moves: GameMoves<Board> }) => {
-  const target = range(board.copCount).map(() => random(0, VERTEX_COUNT - 1));
-  const placeNext = (i: number, current: Board) => {
-    if (i >= target.length) return;
-    const { nextBoard } = moves.placeCop(current, target[i]);
-    if (i + 1 < target.length) setTimeout(() => placeNext(i + 1, nextBoard), 500);
-  };
-  placeNext(0, board);
-};
+const placeCopsRandom = (board: Board): BotMove[] =>
+  asCopMoves('placeCop', range(board.copCount).map(() => random(0, VERTEX_COUNT - 1)));
 
-const moveCopsRandom = ({ board, moves }: { board: Board; moves: GameMoves<Board> }) => {
+const moveCopsRandom = (board: Board): BotMove[] => {
   const thief = board.thief!;
-  const target = board.policemen.map((c) => {
+  return asCopMoves('moveCop', board.policemen.map((c) => {
     const nbs = neighbours[c];
     return nbs.includes(thief) ? thief : sample(nbs)!; // grab a catch if adjacent
-  });
-  const step = (i: number, current: Board) => {
-    const { nextBoard } = moves.moveCop(current, target[i]);
-    if (target[i] === board.thief) return;
-    if (i + 1 < target.length) setTimeout(() => step(i + 1, nextBoard), 600);
-  };
-  step(0, board);
+  }));
 };
 
-const placeThiefRandom = ({ board, moves }: { board: Board; moves: GameMoves<Board> }) => {
+const placeThiefRandom = (board: Board): BotMove => {
   const candidates = range(VERTEX_COUNT).filter((v) => !board.policemen.includes(v));
-  moves.placeThief(board, sample(candidates)!);
+  return { move: 'placeThief', args: [sample(candidates)!] };
 };
 
-const moveThiefRandom = ({ board, moves }: { board: Board; moves: GameMoves<Board> }) => {
+const moveThiefRandom = (board: Board): BotMove => {
   const safe = neighbours[board.thief!].filter((t) => !board.policemen.includes(t));
-  moves.moveThief(board, sample(safe.length ? safe : neighbours[board.thief!])!);
+  return { move: 'moveThief', args: [sample(safe.length ? safe : neighbours[board.thief!])!] };
 };
 
-export const randomBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
-  const botIsCops = ctx.chosenRoleIndex === THIEF;
-  if (botIsCops) {
-    if (board.phase === 'placingCops') placeCopsRandom({ board, moves });
-    else moveCopsRandom({ board, moves });
-  } else {
-    if (board.phase === 'placingThief') placeThiefRandom({ board, moves });
-    else moveThiefRandom({ board, moves });
+export const randomBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
+  if (ctx.chosenRoleIndex === THIEF) {
+    return board.phase === 'placingCops' ? placeCopsRandom(board) : moveCopsRandom(board);
   }
+  return board.phase === 'placingThief' ? placeThiefRandom(board) : moveThiefRandom(board);
 };

@@ -1,5 +1,5 @@
 import {
-  strategyGameFactory, type MoveOutcome, type Ctx, type StrategyArgs, type BoardClientProps, GameBoard
+  strategyGameFactory, type MoveOutcome, type Ctx, type BotStrategy, type BoardClientProps, GameBoard
 } from '../../strategy-game-factory';
 import { useTranslation } from '../../../language';
 import {
@@ -97,14 +97,14 @@ export const moves = {
   }
 };
 
-const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
+const smartBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
   const player = (ctx.currentPlayer ?? currentPlayerFromOwner(board.owner)) as 0 | 1;
-  moves.chooseNumber(board, chooseSmartMove(board.owner, player));
+  return { move: 'chooseNumber', args: [chooseSmartMove(board.owner, player)] };
 };
 
-const randomBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
+const randomBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
   const player = (ctx.currentPlayer ?? currentPlayerFromOwner(board.owner)) as 0 | 1;
-  moves.chooseNumber(board, chooseTestMove(board.owner, player));
+  return { move: 'chooseNumber', args: [chooseTestMove(board.owner, player)] };
 };
 
 const rule = {

@@ -1,6 +1,6 @@
 import {
   strategyGameFactory,
-  type Ctx, type MoveOutcome, type StrategyArgs, type BoardClientProps,
+  type Ctx, type MoveOutcome, type BotStrategy, type BoardClientProps,
   GameBoard
 } from '../../strategy-game-factory';
 import { range, cloneDeep, sample, shuffle } from 'lodash';
@@ -143,13 +143,12 @@ export const moves = {
 
 const getAllowedMoves = (board: Board) => range(16).filter(i => board[i] === ALLOWED);
 
-const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  moves.colorTriangle(board, sample(getAllowedMoves(board)));
-};
+const randomBotStrategy: BotStrategy<Board> = ({ board }) =>
+  ({ move: 'colorTriangle', args: [sample(getAllowedMoves(board))] });
 
-const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
   const optimalMove = getOptimalSmartBotMove(board);
-  moves.colorTriangle(board, optimalMove);
+  return { move: 'colorTriangle', args: [optimalMove] };
 };
 
 const getOptimalSmartBotMove = (board: Board) => {

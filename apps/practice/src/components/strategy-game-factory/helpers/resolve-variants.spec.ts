@@ -5,7 +5,7 @@ type Board = string[];
 
 const makeVariant = (overrides: VariantInput<Board> = {}) => ({
   generateStartBoard: (): Board => [],
-  botStrategy: () => {},
+  botStrategy: () => [],
   ...overrides
 });
 
@@ -25,7 +25,7 @@ describe('resolveVariants', () => {
   });
 
   it('throws when the default variant has no generateStartBoard', () => {
-    expect(() => resolveVariants([{ botStrategy: () => {} }]))
+    expect(() => resolveVariants([{ botStrategy: () => [] }]))
       .toThrow('the default variant must define generateStartBoard');
   });
 
@@ -44,7 +44,7 @@ describe('resolveVariants', () => {
   });
 
   it('fills missing botStrategy from the default variant', () => {
-    const defaultBot = () => {};
+    const defaultBot = () => [];
     const variants = [
       makeVariant({ isDefault: true, botStrategy: defaultBot }),
       makeVariant({ botStrategy: undefined })
@@ -54,7 +54,7 @@ describe('resolveVariants', () => {
   });
 
   it('falls back to first available botStrategy when default has none', () => {
-    const otherBot = () => {};
+    const otherBot = () => [];
     const variants = [
       makeVariant({ isDefault: true, botStrategy: undefined }),
       makeVariant({ botStrategy: otherBot })
@@ -65,8 +65,8 @@ describe('resolveVariants', () => {
   });
 
   it('keeps own botStrategy when defined', () => {
-    const ownBot = () => {};
-    const defaultBot = () => {};
+    const ownBot = () => [];
+    const defaultBot = () => [];
     const variants = [
       makeVariant({ isDefault: true, botStrategy: defaultBot }),
       makeVariant({ botStrategy: ownBot })

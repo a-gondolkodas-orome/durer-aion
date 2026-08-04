@@ -167,9 +167,9 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   </GameBoard>
 };
 
-const botStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+const botStrategy: BotStrategy<Board> = ({ board }) => {
   const optimalStep = board % 3 === 0 ? 1 : (3 - board % 3)
-  moves.addNumber(board, optimalStep);
+  return { move: 'addNumber', args: [optimalStep] };
 };
 
 export const PlusOneTwo = strategyGameFactory({
@@ -184,171 +184,71 @@ export const PlusOneTwo = strategyGameFactory({
 ```
 </details>
 
-## Must have for a new game
+## Anatomy of a game
 
-<details>
-<summary>The details</summary>
+A game hands `strategyGameFactory` four things. What follows is the shape of
+each; every field, edge case and enforcement rule lives in
+[AGENTS.md § strategyGameFactory API](AGENTS.md#strategygamefactory-api).
 
-### board object
-
-Concept: `board` holds the state necessary to know the game state, specific to
-each game, that the next player needs to know. Common state, managed
-by the framework is stored in `ctx` (such as `currentPlayer`).
-
-See `generateStartBoard()` inside each variant.
-
-### possible game moves
-
-Conceptually a `move` is a unit that captures a change in the board initiated by
-a player. Moves help ensure that the game is played according to rules by all
-players.
-
-Technically a move function takes board as first param, a framework-provided
-meta object as second param and may receive any number of additional params
-(provided by the client based on player interaction or by the bot strategy).
-
-A move may result in ending the turn of the current player or ending the game or
-allow further moves within the same turn. The move expresses all of this as data
-in its return value (a `MoveOutcome`):
-
-- `nextBoard` (required): the board after the move
-- `isTurnEnd`: `true` passes the turn; omitted = further moves follow within
-  the same turn. Ignored when `gameEnd` is present.
-- `gameEnd: { winnerIndex }`: the game is over, with an always explicit winner
-  (`ctx.currentPlayer!` when the mover wins)
-- `nextTurnState`: new `ctx.turnState` value (`null` clears it; omitted =
-  unchanged)
-- `autoEndOfTurn`: `true` asks the framework to auto-dispatch
-  `gameplay.endOfTurnMove` after a short delay
-
-`apply` receives `{ ctx }` and nothing it could cause an effect through — it is
-a pure function, which is what lets the same move logic run on a possible future
-authoritative competition server.
-
-You must always pass `board` as a first param to all moves (meaning you must
-pass the updated board to subsequent moves in case of multiple moves within a
-turn). The framework's own state lives in a synchronous store outside React
-and is authoritative, so the engine no longer *needs* the argument for
-correctness — it stays because a move is a pure function of its inputs, usable
-outside a live game (bot look-ahead and specs call moves directly on
-hypothetical boards), and because the explicit threading lets the engine catch
-chaining bugs: passing a stale board to a chained move throws in development
-("stale board passed to move …") instead of corrupting the game — see
-[AGENTS.md § Game state architecture: synchronous store outside
-React](AGENTS.md#game-state-architecture-synchronous-store-outside-react).
-
-In `gameplay.moves`, each entry is an object pairing an optional `validate`
-with the move's `apply`:
+**`gameplay.moves`** — a move is one player-initiated change to the board, and
+the unit that keeps the game played by its rules. Each is `{ apply, validate? }`:
 
 ```ts
 moves: {
   removeCoin: {
     validate: (board, { ctx }, value) => board[value - 1] > 0,
-    apply: (board, { ctx }, value) => { /* ... */ return { nextBoard, isTurnEnd: true }; }
+    apply: (board, { ctx }, value) => ({ nextBoard, isTurnEnd: true })
   }
 }
 ```
 
-`apply` does not validate its arguments — it applies them blindly; legality
-lives in `validate`, right next to it.
+`apply` is a pure reducer that *returns* everything it causes — the next board,
+and whether the turn passed (`isTurnEnd`), the game ended
+(`gameEnd: { winnerIndex }`) or the mid-turn state changed (`nextTurnState`) —
+rather than causing it. It applies its arguments blindly; legality lives in the
+optional `validate` next to it, which is the single source of truth: the engine
+enforces it, and the `BoardClient` reads it back as
+`moves.<name>.isAllowed(board, ...args)` to drive `disabled`.
 
-### validate (optional, per move)
+**`BoardClient`** — the React component that draws the board and dispatches
+moves, given `board`, `ctx`, `moves` and `setTurnState`. State that only matters
+within a turn (a hover, a pending selection) belongs in the component, not in
+`board`.
 
-`validate` is a pure predicate `(board, { ctx }, ...args) => boolean` colocated
-with `apply` — the single source of truth for move legality. The framework
-rejects dispatches that fail it, and exposes it on the wrapped move as
-`moves.<name>.isAllowed(board, ...args)` (turn ownership AND `validate`, `ctx`
-bound) for the `BoardClient`'s `disabled` state. Full contract in
-[AGENTS.md](AGENTS.md#strategygamefactory-api).
+**`variants[].botStrategy`** — a pure function of the position that *names* the
+move it wants, `({ board, ctx }) => ({ move, args })`, or an array of those when
+a turn is one decision made of several moves. The engine plays them out and
+paces them, so a bot never calls a move, never threads a board and never uses
+`setTimeout`. Being a pure function, its decision can be read straight off the
+return value in a spec, and `runMatch` can play two strategies against each
+other through the real engine — see [AGENTS.md § Testing](AGENTS.md#testing).
 
-<details>
-<summary>Details</summary>
+**`presentation`** — the rule text and `getPlayerStepDescription`, both i18n
+values.
 
-- Enforcement: the `moves` object the `BoardClient` receives silently ignores
-  any dispatch that fails `isAllowed` — click handlers need no
-  `if (!allowed) return` guards (keep one only when the handler couples local
-  UI state to a successful move, see `cube-coloring`). Bot and auto
-  end-of-turn dispatches failing `validate` throw in development, and warn +
-  record an `illegal-move` analytics event + no-op in production.
-- `validate` is optional: a move without one is always accepted, so this is
-  fully opt-in and moves with trivial legality simply omit it.
-- Keep the "whose turn is it" check out of `validate` — `isAllowed` folds
-  `ctx.isClientMoveAllowed` in for you.
-- `isAllowed` is not for bots: during the bot's turn `isClientMoveAllowed` is
-  false by design, so bots enumerate legal moves via the raw `validate`/helpers.
-  That split is in the types too: `BoardClientProps.moves` is
-  `ClientGameMoves` (`isAllowed` guaranteed), `StrategyArgs.moves` is the wider
-  `GameMoves` (dispatch only).
-- `validate` is React-free, so a future authoritative/competition server could
-  run the exact same predicate.
-- Worked examples: `coins-in-3-piles` (two-phase turn), `cube-coloring` (reuses
-  its `isAllowedStep` helper).
+Each variant also supplies `generateStartBoard()`.
 
-</details>
+### board and ctx
 
-### BoardClient React component
+`board` holds only what is specific to this game. Everything common is managed
+by the framework in `ctx`: `currentPlayer`, `isClientMoveAllowed` (guard every
+player interaction with it), `isHumanVsHumanGame`, `chosenRoleIndex`, and
+`turnState` for multi-stage turns. Never modify either in place.
 
-`BoardClient`: a React component which renders the board and calls appropriate
-move functions triggered by user interaction.
+Always pass the current `board` as a move's first argument, including to
+subsequent moves within the same turn. The framework's own state is
+authoritative — it lives in a synchronous store outside React — so the argument
+is not what makes the engine correct. It stays because a move is then a pure
+function of its inputs, callable on hypothetical boards by bot look-ahead and
+by specs, and because the explicit threading lets the engine catch chaining
+bugs: a stale board throws in development instead of corrupting the game. See
+[AGENTS.md § Game state architecture](AGENTS.md#game-state-architecture-synchronous-store-outside-react).
 
-Props passed by framework:
+## Before opening a PR
 
-- `board` (result of last move),
-- `ctx`, (i.e. to know whose turn it is)
-- `moves` and
-- `setTurnState`
-
-Additional state variables may be created within the `BoardClient` component
-that is relevant only during a turn, not between turns, such as reacting to
-hover events.
-
-### Bot strategy
-
-Given `board` and `ctx` what move(s) should the bot make?
-
-To emulate thinking time for bot in case of multiple moves within a turn,
-subsequent moves must be wrapped in setTimeout, this is not (yet) handled by the
-framework.
-
-## state provided and handled by "framework" (strategyGameFactory)
-
-`board` is updated after every move
-
-`ctx` is an object and will contain the following (extendable):
-- `isHumanVsHumanGame`: boolean (true when two humans play; false when the user
-  plays agains the computer)
-- `isClientMoveAllowed`: boolean, use it to disable interactions while the other
-  player's (or computer's) turn is in progress
-- `currentPlayer`: 0/1 (whose turn it is — use this for game logic in both modes)
-- `chosenRoleIndex`: null/0/1 (the role the human chose; only meaningful in
-  `vsComputer` mode)
-- `turnState`: use for multi-stage turns or other state that needs to be
-  remembered during a turn, i.e. to expose it from BoardClient to
-  getPlayerStepDescription
-
-`setTurnState` is a `BoardClient`-only prop, for components that keep mid-turn
-UI state in `ctx.turnState`. It is the one path that writes engine state without
-going through a move, and deliberately so: a selection is not a move, so it must
-not bump `moveCount` or take an undo snapshot.
-
-Moves never receive it: they return `isTurnEnd`, `gameEnd` and `nextTurnState`
-instead.
-</details>
-
-## Things to look out for
-
-- do not allow the player interacting with the game while the other player's
-  (or computer's) turn is in progress, use `ctx.isClientMoveAllowed`
-- are the starting positions representative of the game complexity?
-- can the player win with a not-winning strategy?
-- never modify react state (e.g. the board) in place
-- the game should work both in `vsComputer` and `vsHuman` mode
-- is it easy to guess the winning strategy from watching the bot play?
-- is the game (mostly) mobile-friendly?
-- is the game usable only with keyboard (without a mouse)?
-- is it clear what the player should do next?
-- pretend the bot is thinking in turns with multiple moves (for one move it is
-  handled by framework)
+Walk the [new game checklist](AGENTS.md#new-game-checklist) — both game modes,
+balanced starting positions, an AI the player cannot beat with a losing
+strategy, keyboard and mobile usability.
 
 ## Internationalisation (i18n)
 

@@ -72,7 +72,19 @@ export type ClientGameMoves<TBoard> = Record<
   ((board: TBoard, ...args: any[]) => MoveOutcome<TBoard>)
     & { isAllowed: (board: TBoard, ...args: any[]) => boolean }
 >
-export type StrategyArgs<TBoard> = { board: TBoard; ctx: Ctx; moves: GameMoves<TBoard> }
+export type StrategyArgs<TBoard> = { board: TBoard; ctx: Ctx }
+// A move a bot wants played, named rather than dispatched.
+export type BotMove<TMoveName extends string = string> = { move: TMoveName; args?: unknown[] }
+// A bot is a pure function of the position: it names the move it wants, or the
+// whole sequence when the turn is planned as one decision, and the engine plays
+// them out — paced in the browser so the bot appears to think, immediately in a
+// headless match (engine/run-match.ts). Naming moves rather than dispatching
+// them is what keeps a strategy free of timers, of the move wrappers and of any
+// board to thread, so the same function can run on an authoritative server.
+// If the turn is still the bot's once its moves are played, it is asked again
+// (see engine/bot-turn.ts), so naming one move at a time is equally fine.
+export type BotStrategy<TBoard, TMoveName extends string = string> =
+  (args: StrategyArgs<TBoard>) => BotMove<TMoveName> | BotMove<TMoveName>[]
 export type BoardClientProps<TBoard> = Omit<StrategyArgs<TBoard>, 'moves'> & {
   moves: ClientGameMoves<TBoard>
   // Writes the mid-turn UI state a BoardClient needs to remember (which pile is
@@ -95,7 +107,7 @@ export interface VariantInput<TBoard> {
   label?: I18nString
   isDefault?: boolean
   generateStartBoard?: () => TBoard
-  botStrategy?: (args: StrategyArgs<TBoard>) => void
+  botStrategy?: BotStrategy<TBoard>
   notAlwaysOptimal?: boolean
   // Optional per-variant rule text. Falls back to `presentation.rule` when
   // omitted — used when sibling games are merged into one game whose variants

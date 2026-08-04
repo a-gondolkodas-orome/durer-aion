@@ -1,5 +1,5 @@
 import {
-  strategyGameFactory, type Ctx, type MoveOutcome, type StrategyArgs
+  strategyGameFactory, type Ctx, type MoveOutcome, type BotStrategy
 } from '../../../strategy-game-factory';
 import { range, random, sample, minBy } from 'lodash';
 import { type Board, cap, validateTake, BoardClient, getPlayerStepDescription } from '../pebble-pile';
@@ -68,9 +68,8 @@ export const moves = {
   }
 };
 
-const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  moves.take(board, chooseSmartTake(board));
-};
+const smartBotStrategy: BotStrategy<Board> = ({ board }) =>
+  ({ move: 'take', args: [chooseSmartTake(board)] });
 
 const startBoard = (stones: number): Board => ({ stones, maxTake: OPENING_MAX });
 

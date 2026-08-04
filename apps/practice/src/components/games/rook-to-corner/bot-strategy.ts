@@ -1,10 +1,9 @@
 import { sample } from 'lodash';
-import type { StrategyArgs } from '../../strategy-game-factory';
+import type { BotStrategy } from '../../strategy-game-factory';
 import { getAllowedMoves, isTarget, type Board, type Field } from './helpers';
 
-export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  moves.moveRook(board, getRandomBotMove(board));
-};
+export const randomBotStrategy: BotStrategy<Board> = ({ board }) =>
+  ({ move: 'moveRook', args: [getRandomBotMove(board)] });
 
 // Random play, but grab an immediate win (moving onto the bottom-right square)
 // whenever one is available.
@@ -14,9 +13,8 @@ export const getRandomBotMove = (board: Board): Field => {
   return winningMove ?? sample(allowedMoves)!;
 };
 
-export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  moves.moveRook(board, getOptimalSmartBotMove(board));
-};
+export const smartBotStrategy: BotStrategy<Board> = ({ board }) =>
+  ({ move: 'moveRook', args: [getOptimalSmartBotMove(board)] });
 
 // The game is 2-heap Nim: the distances to the right and bottom edges are the
 // two heaps, and each move shrinks exactly one of them. The losing

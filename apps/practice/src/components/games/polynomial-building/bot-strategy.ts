@@ -1,19 +1,18 @@
 import { random, sample } from 'lodash';
-import type { StrategyArgs } from '../../strategy-game-factory';
+import type { BotStrategy } from '../../strategy-game-factory';
 import {
   type Board, type Coef, COEFS, rootTriplesWithProduct, completionValue, canComplete
 } from './helpers';
 
 // Weak bot: plays a random legal move, but completes to a win on the last move
 // when it can (only the first player, who always makes the final move, can win in 1).
-export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+export const randomBotStrategy: BotStrategy<Board> = ({ board }) => {
   const empties = COEFS.filter(k => board[k] === null);
   const coef = sample(empties)!;
   if (empties.length === 1) {
-    moves.setCoefficient(board, coef, completionValue(board) ?? random(-9, 9));
-    return;
+    return { move: 'setCoefficient', args: [coef, completionValue(board) ?? random(-9, 9)] };
   }
-  moves.setCoefficient(board, coef, random(-9, 9));
+  return { move: 'setCoefficient', args: [coef, random(-9, 9)] };
 };
 
 // Nonzero, moderate values used as a "trap" when the second player is already
@@ -59,21 +58,19 @@ const blockingMove = (board: Board): [Coef, number] | null => {
 // 3 empty → first player's move 1, 2 empty → second player's move 2,
 // 1 empty → first player's move 3. The first player has the last move and always
 // wins with correct play.
-export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
   const empties = COEFS.filter(k => board[k] === null);
 
   // First player, move 1: pick randomly between the two winning first moves —
   // c = 0 (forces root 0) and b = -1 (forces the pair {1, -1}).
   if (empties.length === 3) {
     const [coef, value] = sample([['c', 0], ['b', -1]] as [Coef, number][])!;
-    moves.setCoefficient(board, coef, value);
-    return;
+    return { move: 'setCoefficient', args: [coef, value] };
   }
 
   // First player, move 3: complete to three integer roots if possible.
   if (empties.length === 1) {
-    moves.setCoefficient(board, empties[0], completionValue(board) ?? 0);
-    return;
+    return { move: 'setCoefficient', args: [empties[0], completionValue(board) ?? 0] };
   }
 
   // Second player, move 2.
@@ -81,13 +78,12 @@ export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   if (!isWinningFirstMove(setCoef, board)) {
     const block = blockingMove(board);
     if (block) {
-      moves.setCoefficient(board, block[0], block[1]);
-      return;
+      return { move: 'setCoefficient', args: [block[0], block[1]] };
     }
   }
 
   // The first player is winning (or, defensively, no block found): play a
   // losing-but-tricky move.
   const trapCoef: Coef = empties.includes('b') ? 'b' : empties[0];
-  moves.setCoefficient(board, trapCoef, sample(TRAP_VALUES)!);
+  return { move: 'setCoefficient', args: [trapCoef, sample(TRAP_VALUES)!] };
 };

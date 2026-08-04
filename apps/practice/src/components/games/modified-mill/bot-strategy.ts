@@ -1,5 +1,5 @@
 import { sample, maxBy } from 'lodash';
-import type { StrategyArgs } from '../../strategy-game-factory';
+import type { BotStrategy } from '../../strategy-game-factory';
 import { SYMMETRIES } from './board-data';
 import {
   type Board, CELL_COUNT, boardMasks, emptyCells, completesLine, linesThrough
@@ -92,21 +92,21 @@ const countBits = (mask: number): number => {
   return count;
 };
 
-export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
   const { red, blue } = boardMasks(board);
   const node = ctx.currentPlayer === 0
     ? firstPlayerMove(red, blue)
     : heuristicMove(blue, red);
-  moves.placePiece(board, node);
+  return { move: 'placePiece', args: [node] };
 };
 
 // Test bot: plays a random empty cell, but grabs an immediate line-completing
 // win when one is available.
-export const randomBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
+export const randomBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
   const { red, blue } = boardMasks(board);
   const myMask = ctx.currentPlayer === 0 ? red : blue;
   const empties = emptyCells(red, blue);
   const wins = empties.filter((node) => completesLine(myMask, node));
   const node = wins.length > 0 ? sample(wins)! : sample(empties)!;
-  moves.placePiece(board, node);
+  return { move: 'placePiece', args: [node] };
 };

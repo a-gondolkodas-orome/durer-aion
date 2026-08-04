@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { mapValues, uniq, range } from 'lodash';
-import { type GameMoves } from '../../strategy-game-factory';
-import { makeCtx } from '../../../test-utils';
+import { uniq, range } from 'lodash';
+import { playBotMove } from '../../../test-utils';
 import { isConversionAllowed, moves as gameMoves, smartBotStrategy } from './ten-coins';
 
 describe('isConversionAllowed', () => {
@@ -67,18 +66,8 @@ const moverWins = (set: Vals): boolean => {
 
 const isWinningMove = (result: Vals) => result.length === 1 || !moverWins(result);
 
-const driveBot = (set: Vals): Vals => {
-  const board = [...set];
-  let captured = board;
-  const ctx = makeCtx();
-  const wrapped = mapValues(gameMoves, ({ apply }) => (b: number[], ...args: unknown[]) => {
-    const res = (apply as (...a: unknown[]) => { nextBoard: number[] })(b, { ctx }, ...args);
-    captured = res.nextBoard;
-    return res;
-  }) as unknown as GameMoves<number[]>;
-  smartBotStrategy({ board, ctx, moves: wrapped });
-  return uniq(captured).sort((a, b) => a - b);
-};
+const driveBot = (set: Vals): Vals =>
+  uniq(playBotMove(smartBotStrategy, gameMoves, [...set])).sort((a, b) => a - b);
 
 const botCandidates = (set: Vals): Vals[] => {
   const seen = new Map<string, Vals>();

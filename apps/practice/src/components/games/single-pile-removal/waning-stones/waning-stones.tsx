@@ -1,5 +1,5 @@
 import {
-  strategyGameFactory, type Ctx, type MoveOutcome, type StrategyArgs
+  strategyGameFactory, type Ctx, type MoveOutcome, type BotStrategy
 } from '../../../strategy-game-factory';
 import { range, random, sample, minBy } from 'lodash';
 import { type Board, cap, validateTake, BoardClient, getPlayerStepDescription } from '../pebble-pile';
@@ -45,18 +45,16 @@ export const moves = {
   }
 };
 
-const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  moves.take(board, chooseSmartTake(board));
-};
+const smartBotStrategy: BotStrategy<Board> = ({ board }) =>
+  ({ move: 'take', args: [chooseSmartTake(board)] });
 
 // Test bot: takes the whole pile if that wins immediately, otherwise a random
 // legal amount.
-const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+const randomBotStrategy: BotStrategy<Board> = ({ board }) => {
   if (board.stones <= board.maxTake) {
-    moves.take(board, board.stones);
-    return;
+    return { move: 'take', args: [board.stones] };
   }
-  moves.take(board, random(1, cap(board)));
+  return { move: 'take', args: [random(1, cap(board))] };
 };
 
 const startBoard = (stones: number): Board => ({ stones, maxTake: Math.floor(stones / 2) });

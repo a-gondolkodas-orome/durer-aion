@@ -1,8 +1,11 @@
 import { sample, random } from 'lodash';
-import type { StrategyArgs } from '../../strategy-game-factory';
+import type { BotStrategy } from '../../strategy-game-factory';
 import {
-  type Board, type Grid, getRectangles, getAllMoves, applyMove, isEmpty
+  type Board, type Grid, type moves, getRectangles, getAllMoves, applyMove, isEmpty
 } from './helpers';
+
+// Naming the game's own move names makes a typo in a bot a typecheck error.
+type Bot = BotStrategy<Board, keyof typeof moves>;
 
 // Sprague–Grundy value of a single a×b rectangle. A move removes a full row
 // (splitting a×b into (i-1)×b and (a-i)×b) or a full column (a×(j-1) and
@@ -40,7 +43,7 @@ const CONCEDE_ODDS = 4;
 // opponent a win, so — unless we concede — play for a mistake: keep the game
 // going (no instant win for the opponent, e.g. never collapse to a lone 1×n
 // line) and leave them as few winning replies as possible.
-export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy: Bot = ({ board }) => {
   const { grid } = board;
   const allMoves = getAllMoves(grid);
   const winning = allMoves.filter(m => boardGrundy(applyMove(grid, m)) === 0);
@@ -69,13 +72,13 @@ export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
       choice = sample(keepAlive.filter(s => s.winningReplies === fewest))!.m;
     }
   }
-  moves.removeLine(board, choice);
+  return { move: 'removeLine', args: [choice] };
 };
 
 // Test bot: random legal move, but grabs an immediate win (last disc) if offered.
-export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+export const randomBotStrategy: Bot = ({ board }) => {
   const { grid } = board;
   const allMoves = getAllMoves(grid);
   const winningNow = allMoves.filter(m => isEmpty(applyMove(grid, m)));
-  moves.removeLine(board, sample(winningNow.length ? winningNow : allMoves)!);
+  return { move: 'removeLine', args: [sample(winningNow.length ? winningNow : allMoves)!] };
 };

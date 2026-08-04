@@ -16,8 +16,12 @@ export const getPlayerStepDescription = ({ ctx: { turnState } }) => {
   };
 };
 
-// Can the player to move force a win? Closed-form parity predicate.
-export const canWin = (board: Board) => {
+// Is the player to move lost against optimal play? Closed-form parity
+// predicate: a turn changes the parity of one pile, or of two when a coin is
+// placed back, so from an all-even (or all-odd) board every turn hands the
+// opponent one or two odd piles — the winning positions — and never the other
+// way round.
+export const isLostForMover = (board: Board) => {
   const oddPiles = [0, 1, 2].filter(i => board[i] % 2 === 1);
 
   return (oddPiles.length === 3 || oddPiles.length === 0);

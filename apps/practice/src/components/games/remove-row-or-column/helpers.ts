@@ -1,3 +1,5 @@
+import type { Ctx, MoveOutcome } from '../../strategy-game-factory';
+
 export type Grid = boolean[][]
 export type Board = { grid: Grid }
 export type Orientation = 'row' | 'col'
@@ -70,6 +72,21 @@ export const applyMove = (grid: Grid, { r, c, orientation }: Move): Grid => {
 };
 
 export const isEmpty = (grid: Grid): boolean => grid.every(row => row.every(cell => !cell));
+
+export const moves = {
+  removeLine: {
+    validate: (board: Board, _: { ctx: Ctx }, move: Move) => isRemovalAllowed(board.grid, move),
+    apply: (board: Board, { ctx }: { ctx: Ctx }, move: Move): MoveOutcome<Board> => {
+      const nextBoard = { grid: applyMove(board.grid, move) };
+      // nextTurnState clears the disc the BoardClient parked in ctx.turnState
+      // while the player was choosing between its row and its column.
+      if (isEmpty(nextBoard.grid)) {
+        return { nextBoard, nextTurnState: null, gameEnd: { winnerIndex: ctx.currentPlayer! } };
+      }
+      return { nextBoard, nextTurnState: null, isTurnEnd: true };
+    }
+  }
+};
 
 // Every legal move: for each rectangle, one move per row and one per column.
 export const getAllMoves = (grid: Grid): Move[] => {

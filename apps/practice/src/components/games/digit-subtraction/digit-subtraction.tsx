@@ -1,7 +1,7 @@
 import { sample } from 'lodash';
 import {
   strategyGameFactory,
-  type Ctx, type MoveOutcome, type StrategyArgs, type BoardClientProps,
+  type Ctx, type MoveOutcome, type BotStrategy, type BoardClientProps,
   GameBoard
 } from '../../strategy-game-factory';
 
@@ -54,17 +54,17 @@ export const moves = {
   }
 };
 
-const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+const randomBotStrategy: BotStrategy<Board> = ({ board }) => {
   const digits = uniqueNonZeroDigits(board);
   const winningDigits = digits.filter(d => board - d === 0);
-  moves.subtractDigit(board, sample(winningDigits.length > 0 ? winningDigits : digits)!);
+  return { move: 'subtractDigit', args: [sample(winningDigits.length > 0 ? winningDigits : digits)!] };
 };
 
-const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
   if (board % 10 !== 0) {
-    moves.subtractDigit(board, board % 10);
+    return { move: 'subtractDigit', args: [board % 10] };
   } else {
-    moves.subtractDigit(board, sample(uniqueNonZeroDigits(board))!);
+    return { move: 'subtractDigit', args: [sample(uniqueNonZeroDigits(board))!] };
   }
 };
 

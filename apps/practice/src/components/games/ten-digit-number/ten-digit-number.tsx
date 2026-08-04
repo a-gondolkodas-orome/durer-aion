@@ -1,6 +1,6 @@
 import { sample } from 'lodash';
 import {
-  strategyGameFactory, type MoveOutcome, type StrategyArgs, type BoardClientProps, GameBoard
+  strategyGameFactory, type MoveOutcome, type BotStrategy, type BoardClientProps, GameBoard
 } from '../../strategy-game-factory';
 import { useTranslation } from '../../../language';
 
@@ -106,7 +106,7 @@ export const moves = {
   }
 };
 
-const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+const randomBotStrategy: BotStrategy<Board> = ({ board }) => {
   const turnsLeft = totalDigits - board.digits.length;
   const currentPlayer = (totalDigits - turnsLeft) % 2;
 
@@ -114,14 +114,16 @@ const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
     const winningDigits = availableDigits.filter(
       d => winnerFromState((board.sumMod9 + d) % 9, 0) === currentPlayer
     );
-    moves.chooseDigit(board, sample(winningDigits.length > 0 ? winningDigits : availableDigits));
-    return;
+    return {
+      move: 'chooseDigit',
+      args: [sample(winningDigits.length > 0 ? winningDigits : availableDigits)]
+    };
   }
 
-  moves.chooseDigit(board, sample(availableDigits));
+  return { move: 'chooseDigit', args: [sample(availableDigits)] };
 };
 
-const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
   const turnsLeft = totalDigits - board.digits.length;
   const currentPlayer = (totalDigits - turnsLeft) % 2;
 
@@ -129,8 +131,7 @@ const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
     d => winnerFromState((board.sumMod9 + d) % 9, turnsLeft - 1) === currentPlayer
   );
   if (winningDigits.length > 0) {
-    moves.chooseDigit(board, sample(winningDigits));
-    return;
+    return { move: 'chooseDigit', args: [sample(winningDigits)] };
   }
 
   // Losing position: minimise opponent's winning replies, pick randomly among equally bad moves.
@@ -144,7 +145,7 @@ const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   const counts = availableDigits.map(opponentWinCount);
   const minCount = Math.min(...counts);
   const leastBadDigits = availableDigits.filter((_, i) => counts[i] === minCount);
-  moves.chooseDigit(board, sample(leastBadDigits));
+  return { move: 'chooseDigit', args: [sample(leastBadDigits)] };
 };
 
 const rule = {

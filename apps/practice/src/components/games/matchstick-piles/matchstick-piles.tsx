@@ -2,7 +2,7 @@ import { Fragment } from 'react';
 import { range, sample, random } from 'lodash';
 import {
   strategyGameFactory,
-  type Ctx, type MoveOutcome, type StrategyArgs, type GameMoves, type BoardClientProps,
+  type Ctx, type MoveOutcome, type BotStrategy, type BotMove, type BoardClientProps,
   GameBoard, useHoverPreview
 } from '../../strategy-game-factory';
 
@@ -188,30 +188,25 @@ const applyMove = (board: Board, move: Move): Board => {
   );
 };
 
-const executeMove = (board: Board, moves: GameMoves<Board>, move: Move) => {
-  if (move.type === 'remove') {
-    moves.removeMatch(board, move.pileId);
-  } else {
-    moves.splitPile(board, move.pileId, move.firstPart);
-  }
-};
+const asBotMove = (move: Move): BotMove =>
+  move.type === 'remove'
+    ? { move: 'removeMatch', args: [move.pileId] }
+    : { move: 'splitPile', args: [move.pileId, move.firstPart] };
 
-const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
   const candidates = legalMoves(board);
   const winningMove = candidates.find(move => xorSum(applyMove(board, move)) === 0);
   // In a losing position no move wins against optimal play, so play a random
   // legal move and hope the opponent slips.
-  const move = winningMove ?? sample(candidates)!;
-  executeMove(board, moves, move);
+  return asBotMove(winningMove ?? sample(candidates)!);
 };
 
-const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+const randomBotStrategy: BotStrategy<Board> = ({ board }) => {
   const candidates = legalMoves(board);
   // Grab an immediately winning move (one that empties the board) if there is
   // one; otherwise just play a random legal move.
   const winningNow = candidates.find(move => applyMove(board, move).length === 0);
-  const move = winningNow ?? sample(candidates)!;
-  executeMove(board, moves, move);
+  return asBotMove(winningNow ?? sample(candidates)!);
 };
 
 const generateStartBoard = (): Board => range(random(2, 3)).map(() => random(2, 6));

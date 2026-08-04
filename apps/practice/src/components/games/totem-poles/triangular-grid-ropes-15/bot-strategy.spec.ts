@@ -2,7 +2,7 @@ import { sample } from 'lodash';
 import { getAllowedMoves, getAllowedSuperset, type Board, type Edge } from './helpers';
 import { findWinningMove } from './solver';
 import { smartBotStrategy } from './bot-strategy';
-import { makeCtx } from '../../../../test-utils';
+import { botNextMoveArgs, makeCtx } from '../../../../test-utils';
 
 // Play a full game. Player 0 is the opponent, player 1 is the smart bot (the
 // second player, who has the winning strategy). Returns the index of the player
@@ -65,12 +65,7 @@ describe('findWinningMove', () => {
 
 describe('smartBotStrategy', () => {
   it('plays a legal opening move when it is the first player', () => {
-    let played: Edge | null = null;
-    smartBotStrategy({
-      board: [],
-      ctx: makeCtx({ currentPlayer: 0 }),
-      moves: { stretchRope: (_b: Board, move: Edge) => { played = move; return { nextBoard: [] }; } }
-    });
-    expect(played).not.toBeNull();
+    const [played] = botNextMoveArgs(smartBotStrategy({ board: [], ctx: makeCtx({ currentPlayer: 0 }) }));
+    expect(played).toBeDefined();
   });
 });

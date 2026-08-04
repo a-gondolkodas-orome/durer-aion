@@ -1,5 +1,5 @@
 import { orderBy, random, range, sample, sampleSize, shuffle, sum } from 'lodash';
-import type { StrategyArgs } from '../../strategy-game-factory';
+import type { BotMove, BotStrategy } from '../../strategy-game-factory';
 
 export type Slot = { value: number; state: 'active' | 'consumed' };
 export type Level = (Slot | null)[];
@@ -9,36 +9,34 @@ export type Board = {
   sortedInitial: number[];
 };
 
-export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+export const randomBotStrategy: BotStrategy<Board> = ({ board }) => {
   const win = findImmediateWin(board);
-  if (win) { moves.combineTwo(board, win); return; }
+  if (win) return { move: 'combineTwo', args: [win] };
 
   const available = range(3).filter((li) => hasActivePair(board.levels[li]));
   const li = sample(available)!;
   const actives = activeSlotIndices(board.levels[li]);
-  moves.combineTwo(board, { levelIdx: li, indices: sampleSize(actives, 2) });
+  return { move: 'combineTwo', args: [{ levelIdx: li, indices: sampleSize(actives, 2) }] };
 };
 
-export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
   const win = findImmediateWin(board);
-  if (win) { moves.combineTwo(board, win); return; }
+  if (win) return { move: 'combineTwo', args: [win] };
 
   const botIsWinner = isP2WinningPosition(board) === (ctx.currentPlayer === 1);
 
-  const tryLevel = (levelIdx, order: 'asc' | 'desc' = 'desc') => {
-    if (!hasActivePair(board.levels[levelIdx])) return false;
+  const tryLevel = (levelIdx, order: 'asc' | 'desc' = 'desc'): BotMove | null => {
+    if (!hasActivePair(board.levels[levelIdx])) return null;
     const level = board.levels[levelIdx];
     const indices = orderBy(activeSlotIndices(level), (i) => level[i]!.value, order).slice(0, 2);
-    moves.combineTwo(board, { levelIdx, indices });
-    return true;
+    return { move: 'combineTwo', args: [{ levelIdx, indices }] };
   };
 
   if (botIsWinner) {
-    if (ctx.currentPlayer === 0) {
-      if (tryLevel(1) || tryLevel(0) || tryLevel(2)) return;
-    } else {
-      if (tryLevel(1) || tryLevel(0, 'asc')) return;
-    }
+    const preferred = ctx.currentPlayer === 0
+      ? tryLevel(1) ?? tryLevel(0) ?? tryLevel(2)
+      : tryLevel(1) ?? tryLevel(0, 'asc');
+    if (preferred) return preferred;
   }
 
   for (let li = 0; li < 3; li++) {
@@ -47,15 +45,12 @@ export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => 
       for (let j = i + 1; j < actives.length; j++) {
         const { nextBoard } = applyMoveToBoard(board, li, [actives[i], actives[j]]);
         if (!canWin(nextBoard)) {
-          moves.combineTwo(board, { levelIdx: li, indices: [actives[i], actives[j]] });
-          return;
+          return { move: 'combineTwo', args: [{ levelIdx: li, indices: [actives[i], actives[j]] }] };
         }
       }
     }
   }
-  for (let li = 0; li < 3; li++) {
-    if (tryLevel(li)) return;
-  }
+  return range(3).map(li => tryLevel(li)).find(move => move !== null)!;
 };
 
 export const isP2WinningPosition = ({ sortedInitial, target }: Board): boolean => {

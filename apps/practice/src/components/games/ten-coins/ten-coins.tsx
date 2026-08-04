@@ -1,7 +1,7 @@
 import { uniq, sample, random, range } from 'lodash';
 import {
   strategyGameFactory,
-  type Ctx, type MoveOutcome, type StrategyArgs, type BoardClientProps,
+  type Ctx, type MoveOutcome, type BotStrategy, type BoardClientProps,
   GameBoard
 } from '../../strategy-game-factory';
 import { useTranslation } from '../../../language';
@@ -176,14 +176,13 @@ export const moves = {
 // Smart bot: play the winning move when one exists (drive towards a losing
 // position, or merge to a single value). In a losing position, make the reply
 // that leaves the opponent with the most ways to blunder.
-export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
   const candidateMoves = movesFromSet(distinctValues(board));
 
   const winningMoves = candidateMoves.filter(isWinningMove);
   if (winningMoves.length > 0) {
     const move = sample(winningMoves)!;
-    moves.convert(board, move.k, move.l);
-    return;
+    return { move: 'convert', args: [move.k, move.l] };
   }
 
   const blunderRoom = (move: Move) => {
@@ -194,15 +193,15 @@ export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
   const maxRoom = Math.max(...rooms);
   const bestMoves = candidateMoves.filter((_, i) => rooms[i] === maxRoom);
   const move = sample(bestMoves)!;
-  moves.convert(board, move.k, move.l);
+  return { move: 'convert', args: [move.k, move.l] };
 };
 
 // Test bot: play a random legal move, but grab an immediate win when available.
-const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+const randomBotStrategy: BotStrategy<Board> = ({ board }) => {
   const candidateMoves = movesFromSet(distinctValues(board));
   const winningNow = candidateMoves.filter(m => m.resultSet.length === 1);
   const move = sample(winningNow.length > 0 ? winningNow : candidateMoves)!;
-  moves.convert(board, move.k, move.l);
+  return { move: 'convert', args: [move.k, move.l] };
 };
 
 // Distribute `total` coins among `parts` values, each value getting at least one.

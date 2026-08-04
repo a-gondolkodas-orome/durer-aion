@@ -7,7 +7,7 @@ import {
 } from '../helpers';
 import { OPENING_EDGES, isLineTurnWon, marchEdges, winningPairHeatEdges } from './forced-win';
 import { makeMoveEvaluator } from './search';
-import type { Ctx, GameMoves } from '../../../strategy-game-factory';
+import type { BotStrategy } from '../../../strategy-game-factory';
 
 // Smart bot.
 //
@@ -26,7 +26,6 @@ import type { Ctx, GameMoves } from '../../../strategy-game-factory';
 // the bounded search to dodge deeper tactics — a human playing line only beats
 // it by executing a genuine winning plan.
 
-type Moves = GameMoves<Board>;
 type SearchOpts = { depth: number; budget: number };
 
 // Per-move limits for the bounded search used in fallback positions. Modest so
@@ -35,12 +34,12 @@ const SEARCH: SearchOpts = { depth: 12, budget: 45_000 };
 
 // Build a bot with a given search budget. Exposed so tests can dial the
 // fallback search down; the shipped bot uses SEARCH.
-export const makeSmartBotStrategy = (searchOpts: SearchOpts = SEARCH) =>
-  ({ board, ctx, moves }: { board: Board; ctx: Ctx; moves: Moves }) => {
+export const makeSmartBotStrategy = (searchOpts: SearchOpts = SEARCH): BotStrategy<Board> =>
+  ({ board, ctx }) => {
     if (ctx.currentPlayer === LINE) {
-      moves.shadeEdge(board, chooseLineMove(board, searchOpts));
+      return { move: 'shadeEdge', args: [chooseLineMove(board, searchOpts)] };
     } else {
-      moves.placeCircle(board, chooseCircleMove(board, searchOpts));
+      return { move: 'placeCircle', args: [chooseCircleMove(board, searchOpts)] };
     }
   };
 
@@ -49,13 +48,11 @@ export const smartBotStrategy = makeSmartBotStrategy(SEARCH);
 // Easy "test" bot: plays at random for whichever side it holds, except that it
 // grabs an immediate (one-move) win when one exists. Good for getting a feel
 // for the rules before a real game.
-export const randomBotStrategy = (
-  { board, ctx, moves }: { board: Board; ctx: Ctx; moves: Moves }
-) => {
+export const randomBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
   if (ctx.currentPlayer === LINE) {
-    moves.shadeEdge(board, randomLineMove(board));
+    return { move: 'shadeEdge', args: [randomLineMove(board)] };
   } else {
-    moves.placeCircle(board, randomCircleMove(board));
+    return { move: 'placeCircle', args: [randomCircleMove(board)] };
   }
 };
 

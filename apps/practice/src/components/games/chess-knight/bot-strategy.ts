@@ -1,14 +1,13 @@
 import { sample } from 'lodash';
-import type { StrategyArgs } from '../../strategy-game-factory';
+import type { BotStrategy } from '../../strategy-game-factory';
 import { getAllowedMoves, type Board, type Field } from './helpers';
 
-export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  moves.moveKnight(board, sample(getAllowedMoves(board)));
-};
+export const randomBotStrategy: BotStrategy<Board> = ({ board }) =>
+  ({ move: 'moveKnight', args: [sample(getAllowedMoves(board))] });
 
-export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
   const botMove = getOptimalSmartBotMove(board);
-  moves.moveKnight(board, botMove);
+  return { move: 'moveKnight', args: [botMove] };
 };
 
 export const getOptimalSmartBotMove = (board: Board): Field => {

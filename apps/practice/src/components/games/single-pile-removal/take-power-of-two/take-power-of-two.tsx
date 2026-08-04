@@ -1,5 +1,5 @@
 import {
-  strategyGameFactory, type Ctx, type MoveOutcome, type StrategyArgs, type BoardClientProps,
+  strategyGameFactory, type Ctx, type MoveOutcome, type BotStrategy, type BoardClientProps,
   GameBoard, useHoverPreview
 } from '../../../strategy-game-factory';
 import { range, random, reverse, sample } from 'lodash';
@@ -69,21 +69,19 @@ const generateTestStartBoard = () => {
   }
 };
 
-const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  moves.subtractPowerOfTwo(board, sample(getAvailableExponents(board)));
-};
+const randomBotStrategy: BotStrategy<Board> = ({ board }) =>
+  ({ move: 'subtractPowerOfTwo', args: [sample(getAvailableExponents(board))] });
 
-const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
   if (board === 1) {
-    moves.subtractPowerOfTwo(board, 0);
-    return;
+    return { move: 'subtractPowerOfTwo', args: [0] };
   }
   const availableExponents = getAvailableExponents(board);
   if (board % 3 === 0) {
-    moves.subtractPowerOfTwo(board, sample(availableExponents));
+    return { move: 'subtractPowerOfTwo', args: [sample(availableExponents)] };
   } else {
     const optimalMove = reverse(availableExponents).find(e => (board - 2 ** e) % 3 === 0);
-    moves.subtractPowerOfTwo(board, optimalMove);
+    return { move: 'subtractPowerOfTwo', args: [optimalMove] };
   }
 }
 

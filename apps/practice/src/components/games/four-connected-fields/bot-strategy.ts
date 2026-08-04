@@ -1,5 +1,5 @@
 import { sample } from "lodash";
-import { type StrategyArgs } from "../../strategy-game-factory";
+import { type BotStrategy } from "../../strategy-game-factory";
 import { type Board, legalNodes, hasAnyMove } from "./helpers";
 
 // Every move raises the total coin count by exactly 1, so the game is a strictly
@@ -36,10 +36,10 @@ const winningInOneMove = (board: Board): number[] =>
 
 // Test bot: plays a random legal move, but grabs an immediate one-move win if one
 // is available.
-export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+export const randomBotStrategy: BotStrategy<Board> = ({ board }) => {
   const instantWins = winningInOneMove(board);
   const node = instantWins.length > 0 ? sample(instantWins)! : sample(legalNodes(board))!;
-  moves.placeCoin(board, node);
+  return { move: 'placeCoin', args: [node] };
 };
 
 // From a winning position, play any move that keeps the win. From a losing
@@ -56,6 +56,5 @@ export const getBotMove = (board: Board): number => {
   return sample(nodes.filter((node) => trapCount(node) === fewestReplies))!;
 };
 
-export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  moves.placeCoin(board, getBotMove(board));
-};
+export const smartBotStrategy: BotStrategy<Board> = ({ board }) =>
+  ({ move: 'placeCoin', args: [getBotMove(board)] });

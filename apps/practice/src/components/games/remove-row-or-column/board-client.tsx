@@ -1,12 +1,9 @@
 import { range } from 'lodash';
 import {
-  type BoardClientProps, type MoveOutcome, type Ctx, GameBoard, useHoverPreview
+  type BoardClientProps, type Ctx, GameBoard, useHoverPreview
 } from '../../strategy-game-factory';
 import { useTranslation } from '../../../language';
-import {
-  type Board, type Orientation, type Move,
-  getRectangleAt, applyMove, isEmpty, isRemovalAllowed
-} from './helpers';
+import { type Board, type Orientation, getRectangleAt } from './helpers';
 
 type Selected = { r: number; c: number } | null
 
@@ -102,21 +99,6 @@ export const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProp
       )}
     </GameBoard>
   );
-};
-
-export const moves = {
-  removeLine: {
-    validate: (board: Board, _, move: Move) => isRemovalAllowed(board.grid, move),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, move: Move): MoveOutcome<Board> => {
-      const nextBoard = { grid: applyMove(board.grid, move) };
-      // nextTurnState clears the disc the BoardClient parked in ctx.turnState
-      // while the player was choosing between its row and its column.
-      if (isEmpty(nextBoard.grid)) {
-        return { nextBoard, nextTurnState: null, gameEnd: { winnerIndex: ctx.currentPlayer! } };
-      }
-      return { nextBoard, nextTurnState: null, isTurnEnd: true };
-    }
-  }
 };
 
 export const getPlayerStepDescription = ({ ctx }: { board: Board; ctx: Ctx }) => {

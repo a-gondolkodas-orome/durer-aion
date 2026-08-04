@@ -1,5 +1,5 @@
 import { sample } from 'lodash';
-import type { StrategyArgs } from '../../strategy-game-factory';
+import type { BotStrategy } from '../../strategy-game-factory';
 import { type Board, type Domino, BOARDSIZE } from './dominoes-4x4';
 
 // This game is Domineering on a 4x4 board: player 0 (Árgyélus) only ever places
@@ -65,15 +65,14 @@ const canWin = (mask: number, player: number): boolean => {
 export const isWinningForPlayerToMove = (board: Board, player: number): boolean =>
   canWin(boardToMask(board), player);
 
-export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
   const player = ctx.currentPlayer!;
   const mask = boardToMask(board);
   const candidates = movesForPlayer(mask, player);
 
   const winningMoves = candidates.filter(move => !canWin(move.mask, 1 - player));
   if (winningMoves.length > 0) {
-    moves.placeDomino(board, sample(winningMoves)!.domino);
-    return;
+    return { move: 'placeDomino', args: [sample(winningMoves)!.domino] };
   }
 
   // Losing position (every move loses against perfect play): play the move that leaves
@@ -90,12 +89,12 @@ export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => 
       bestMoves.push(move);
     }
   }
-  moves.placeDomino(board, sample(bestMoves)!.domino);
+  return { move: 'placeDomino', args: [sample(bestMoves)!.domino] };
 };
 
 // Test bot: plays randomly, but grabs an immediate win (a move after which the other
 // player has no legal placement) whenever one is available.
-export const randomBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
+export const randomBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
   const player = ctx.currentPlayer!;
   const mask = boardToMask(board);
   const candidates = movesForPlayer(mask, player);
@@ -104,5 +103,5 @@ export const randomBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) =>
     move => movesForPlayer(move.mask, 1 - player).length === 0
   );
   const chosen = sample(immediateWins.length > 0 ? immediateWins : candidates)!;
-  moves.placeDomino(board, chosen.domino);
+  return { move: 'placeDomino', args: [chosen.domino] };
 };

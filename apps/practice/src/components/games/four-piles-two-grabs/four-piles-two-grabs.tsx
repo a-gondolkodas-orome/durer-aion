@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { range } from 'lodash';
 import {
   strategyGameFactory,
-  type Ctx, type MoveOutcome, type StrategyArgs, type BoardClientProps,
+  type Ctx, type MoveOutcome, type BotStrategy, type BoardClientProps,
   GameBoard
 } from '../../strategy-game-factory';
 import { useTranslation } from '../../../language';
@@ -149,13 +149,11 @@ export const moves = {
   }
 };
 
-const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  moves.takeStones(board, getSmartBotMove(board));
-};
+const smartBotStrategy: BotStrategy<Board> = ({ board }) =>
+  ({ move: 'takeStones', args: [getSmartBotMove(board)] });
 
-const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  moves.takeStones(board, getRandomBotMove(board));
-};
+const randomBotStrategy: BotStrategy<Board> = ({ board }) =>
+  ({ move: 'takeStones', args: [getRandomBotMove(board)] });
 
 const rule = {
   hu: <>

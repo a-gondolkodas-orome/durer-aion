@@ -1,5 +1,5 @@
 import {
-  strategyGameFactory, type Ctx, type MoveOutcome, type StrategyArgs, type BoardClientProps,
+  strategyGameFactory, type Ctx, type MoveOutcome, type BotStrategy, type BoardClientProps,
   GameBoard, useHoverPreview
 } from '../../../strategy-game-factory';
 import { random, range } from 'lodash';
@@ -70,23 +70,23 @@ export const moves = {
   }
 };
 
-const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+const randomBotStrategy: BotStrategy<Board> = ({ board }) => {
   if (board % 2 === 0 && random(0, 1) === 0) {
-    moves.halve(board);
+    return { move: 'halve' };
   } else {
-    moves.take1(board);
+    return { move: 'take1' };
   }
 };
 
-const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
   if (board !== 4 && board % 4 === 0) {
-    moves.take1(board);
+    return { move: 'take1' };
   } else if (board === 6) {
-    moves.take1(board);
+    return { move: 'take1' };
   } else if (board % 2 === 0) {
-    moves.halve(board);
+    return { move: 'halve' };
   } else {
-    moves.take1(board);
+    return { move: 'take1' };
   }
 };
 

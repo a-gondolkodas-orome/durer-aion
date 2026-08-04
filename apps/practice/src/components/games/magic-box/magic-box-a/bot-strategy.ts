@@ -1,14 +1,13 @@
 import { range, sample } from 'lodash';
 import { isGameEnd, placeStone, type Board } from './helpers';
-import type { StrategyArgs } from '../../../strategy-game-factory';
+import type { BotStrategy } from '../../../strategy-game-factory';
 
-export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  moves.placeStone(board, sample(emptyCells(board)));
-};
+export const randomBotStrategy: BotStrategy<Board> = ({ board }) =>
+  ({ move: 'placeStone', args: [sample(emptyCells(board))] });
 
-export const smartBotStrategy = ({ board, ctx, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy: BotStrategy<Board> = ({ board, ctx }) => {
   const id = getOptimalPlacingPosition(board, ctx.chosenRoleIndex);
-  moves.placeStone(board, id);
+  return { move: 'placeStone', args: [id] };
 };
 
 const emptyCells = (board: Board) => range(0, 9).filter(i => !board[i]);

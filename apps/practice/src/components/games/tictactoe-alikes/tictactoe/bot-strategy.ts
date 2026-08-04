@@ -1,14 +1,14 @@
 import { isNull, range, sample } from 'lodash';
 import { pColor, botColor, inPlacingPhase, isGameEnd, type Board } from './helpers';
-import type { StrategyArgs } from '../../../strategy-game-factory';
+import type { BotStrategy } from '../../../strategy-game-factory';
 
-export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+export const randomBotStrategy: BotStrategy<Board> = ({ board }) => {
   const allowedPlaces = getAllowedPlaces({ board, amIBot: true });
   if (inPlacingPhase(board)) {
     const safePlaces = allowedPlaces.filter(i => !opponentCanWinNext(board, i));
-    moves.placePiece(board, sample(safePlaces.length > 0 ? safePlaces : allowedPlaces));
+    return { move: 'placePiece', args: [sample(safePlaces.length > 0 ? safePlaces : allowedPlaces)] };
   } else {
-    moves.whitenPiece(board, sample(allowedPlaces));
+    return { move: 'whitenPiece', args: [sample(allowedPlaces)] };
   }
 };
 
@@ -22,13 +22,13 @@ const opponentCanWinNext = (board: Board, position) => {
   });
 };
 
-export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
   if (inPlacingPhase(board)) {
     const id = getOptimalBotPlacingPosition(board);
-    moves.placePiece(board, id);
+    return { move: 'placePiece', args: [id] };
   } else {
     const id = getOptimalBotFlippingPosition(board);
-    moves.whitenPiece(board, id);
+    return { move: 'whitenPiece', args: [id] };
   }
 };
 

@@ -1,5 +1,5 @@
 import { sample } from "lodash";
-import type { StrategyArgs } from "../../strategy-game-factory";
+import type { BotStrategy } from "../../strategy-game-factory";
 import {
   type Board, type Move, OPPOSITE_PAIRS, getLegalMoves, hasLegalMove, pairSum,
   sampleNonEmptyField
@@ -37,10 +37,8 @@ export const getRandomMove = (board: Board): Move => {
   return sample(winningMoves.length > 0 ? winningMoves : legalMoves)!;
 };
 
-export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  moves.removeFromTwo(board, getSmartMove(board));
-};
+export const smartBotStrategy: BotStrategy<Board> = ({ board }) =>
+  ({ move: 'removeFromTwo', args: [getSmartMove(board)] });
 
-export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  moves.removeFromTwo(board, getRandomMove(board));
-};
+export const randomBotStrategy: BotStrategy<Board> = ({ board }) =>
+  ({ move: 'removeFromTwo', args: [getRandomMove(board)] });

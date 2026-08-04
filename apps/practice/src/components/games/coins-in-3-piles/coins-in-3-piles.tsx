@@ -2,17 +2,17 @@ import { random, sample, sum } from 'lodash';
 import { strategyGameFactory } from '../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { BoardClient } from './board-client';
-import { getPlayerStepDescription, canWin, moves, type Board } from './helpers';
+import { getPlayerStepDescription, isLostForMover, moves, type Board } from './helpers';
 
 const generateWinningStartBoard = (): Board => {
   const board = [random(0, 5), random(0, 7), random(1, 8)];
-  if (!canWin(board) && sum(board) >= 4) return board;
+  if (!isLostForMover(board) && sum(board) >= 4) return board;
   return generateWinningStartBoard();
 };
 
 const generateLosingStartBoard = (): Board => {
   const board = [random(0, 5), random(0, 7), random(1, 8)];
-  if (canWin(board) && sum(board) >= 4) return board;
+  if (isLostForMover(board) && sum(board) >= 4) return board;
   return generateLosingStartBoard();
 };
 

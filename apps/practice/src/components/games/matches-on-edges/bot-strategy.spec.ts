@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { sample } from 'lodash';
+import { botNextMoveArgs, makeCtx } from '../../../test-utils';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import {
   type Board,
@@ -12,21 +13,13 @@ import {
   secondPlayerWins
 } from './helpers';
 
-// Run a bot strategy on `board` and return the move it chose, via a mock `moves`
-// object that mirrors the wrapped-move signature (board, ...args).
+// Run a bot strategy on `board` and read back the move it named.
 const runBot = (
   strategy: typeof smartBotStrategy,
   board: Board
 ): { a: number; b: number } => {
-  let chosen: { a: number; b: number } | null = null;
-  const moves = {
-    placeWindow: (b: Board, a: number, bb: number) => {
-      chosen = { a, b: bb };
-      return { nextBoard: applyMove(b, a, bb) };
-    }
-  };
-  strategy({ board, ctx: {} as any, moves: moves as any });
-  return chosen!;
+  const [a, b] = botNextMoveArgs(strategy({ board, ctx: makeCtx() }));
+  return { a, b };
 };
 
 // Perfect adversary: pick a move leaving the opponent losing if possible.

@@ -1,8 +1,8 @@
 import { random, sample } from 'lodash';
-import type { StrategyArgs } from '../../strategy-game-factory';
+import type { BotStrategy } from '../../strategy-game-factory';
 import type { Board } from './bank-robbers';
 
-export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+export const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
   let bankIndex = 0;
   if (board.lastMove === null) {
     bankIndex = random(board.circle.length - 1);
@@ -10,7 +10,7 @@ export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
     const pMoves = optimalStrategy[board.circle.length - 7][convertToBinary(board.circle)];
     bankIndex = sample(pMoves)! + 1;
   }
-  moves.rob(board, bankIndex)
+  return { move: 'rob', args: [bankIndex] };
 }
 
 function convertToBinary(L) {

@@ -1,28 +1,19 @@
 import { random, sample } from 'lodash';
-import type { StrategyArgs, GameMoves } from '../../../strategy-game-factory';
+import type { BotMove, BotStrategy } from '../../../strategy-game-factory';
 import type { Board } from './pile-splitter-3';
 
 type BotStep = { removedPileId: number; pileId: number; pieceCount: number };
 
-export const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  const botStep = getSmartBotStep(board);
-  executeBotStrategy(botStep, { board, moves });
-};
+export const smartBotStrategy: BotStrategy<Board> = ({ board }) => asTurn(getSmartBotStep(board));
 
-export const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  const botStep = getRandomStep(board);
-  executeBotStrategy(botStep, { board, moves });
-};
+export const randomBotStrategy: BotStrategy<Board> = ({ board }) => asTurn(getRandomStep(board));
 
-const executeBotStrategy = (
-  { removedPileId, pileId, pieceCount }: BotStep,
-  { board, moves }: { board: Board; moves: GameMoves<Board> }
-) => {
-  const { nextBoard } = moves.removePile(board, removedPileId);
-  setTimeout(() => {
-    moves.splitPile(nextBoard, { pileId, pieceCount });
-  }, 750);
-};
+// A turn is one decision expressed as two moves: which pile to discard, and
+// where to cut one of those left.
+const asTurn = ({ removedPileId, pileId, pieceCount }: BotStep): BotMove[] => [
+  { move: 'removePile', args: [removedPileId] },
+  { move: 'splitPile', args: [{ pileId, pieceCount }] }
+];
 
 const getRandomStep = (board: Board): BotStep => {
   const pileId = sample([0, 1, 2].filter(i => board[i] >= 2))!;

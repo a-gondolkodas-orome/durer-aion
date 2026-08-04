@@ -3,8 +3,10 @@ export type { Presentation, StrategyGameConfig } from './strategy-game-factory';
 export type {
   Phase, Mode, Ctx,
   MoveOutcome, MoveFunction, MoveDefinition, Gameplay, GameMoves, ClientGameMoves,
-  StrategyArgs, BoardClientProps,
+  StrategyArgs, BotStrategy, BotMove, BoardClientProps,
   Variant, VariantInput
 } from './types';
+export { runMatch } from './engine/run-match';
+export type { MatchMove, MatchResult } from './engine/run-match';
 export { GameBoard } from './game-parts/game-board';
 export { useHoverPreview } from './hooks/use-hover-preview';

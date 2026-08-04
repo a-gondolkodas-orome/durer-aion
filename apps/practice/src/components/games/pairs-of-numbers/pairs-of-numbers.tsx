@@ -1,5 +1,5 @@
 import {
-  strategyGameFactory, type Ctx, type MoveOutcome, type StrategyArgs, type BoardClientProps, GameBoard
+  strategyGameFactory, type Ctx, type MoveOutcome, type BotStrategy, type BoardClientProps, GameBoard
 } from '../../strategy-game-factory';
 import { random } from 'lodash';
 import { useTranslation } from '../../../language';
@@ -53,39 +53,29 @@ export const moves = {
   }
 };
 
-const randomBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
-  if (random(0, 1) === 0) {
-    moves.add1(board);
-  } else {
-    moves.subtract(board);
-  }
-};
+const randomBotStrategy: BotStrategy<Board> = () =>
+  random(0, 1) === 0 ? { move: 'add1' } : { move: 'subtract' };
 
-const smartBotStrategy = ({ board, moves }: StrategyArgs<Board>) => {
+const smartBotStrategy: BotStrategy<Board> = ({ board }) => {
   const [a, b] = board;
   if (a <= b) {
-    moves.subtract(board);
-    return;
+    return { move: 'subtract' };
   }
   if (a <= 2 * b) {
-    moves.add1(board);
-    return;
+    return { move: 'add1' };
   }
 
   if (a % 2 === 0 && b % 2 === 0) {
-    moves.add1(board);
-    return;
+    return { move: 'add1' };
   }
   if (a % 2 === 1 && b % 2 === 1) {
-    moves.subtract(board);
-    return;
+    return { move: 'subtract' };
   }
   if (a % 2 === 1 && b % 2 === 0) {
-    moves.subtract(board);
-    return;
+    return { move: 'subtract' };
   }
 
-  moves.add1(board);
+  return { move: 'add1' };
 };
 
 const rule = {

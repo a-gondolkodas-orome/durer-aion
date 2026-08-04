@@ -1,11 +1,8 @@
 import { smartBotStrategy } from "./bot-strategy";
 import type { Board } from './bank-robbers';
-import { type GameMoves } from '../../strategy-game-factory';
-import { makeCtx } from '../../../test-utils';
+import { botNextMoveArgs, makeCtx } from '../../../test-utils';
 
-const mockRob = (): GameMoves<Board> => ({
-  rob: (board: Board, bank: number) => { board.circle[bank] = false; return { nextBoard: board }; }
-});
+const robbedBank = (board: Board): number => botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx() }))[0];
 
 describe('smartBotStrategy', () => {
   it('moves symmetrically for even number of banks', () => {
@@ -14,8 +11,7 @@ describe('smartBotStrategy', () => {
       firstMove: 5,
       lastMove: 0
     }
-    smartBotStrategy({ board, ctx: makeCtx(), moves: mockRob() });
-    expect(board.circle[4]).toBe(false);
+    expect(robbedBank(board)).toBe(4);
   });
 
   it('robs bank with 1 gap as second for 7 banks', () => {
@@ -24,8 +20,7 @@ describe('smartBotStrategy', () => {
       firstMove: 5,
       lastMove: 0
     }
-    smartBotStrategy({ board, ctx: makeCtx(), moves: mockRob() });
-    expect([board.circle[2], board.circle[5]]).toContain(false);
+    expect([2, 5]).toContain(robbedBank(board));
   });
 
   it('robs bank with 2 gap as second for 9 banks', () => {
@@ -34,7 +29,6 @@ describe('smartBotStrategy', () => {
       firstMove: 5,
       lastMove: 0
     }
-    smartBotStrategy({ board, ctx: makeCtx(), moves: mockRob() });
-    expect([board.circle[3], board.circle[6]]).toContain(false);
+    expect([3, 6]).toContain(robbedBank(board));
   });
 });
