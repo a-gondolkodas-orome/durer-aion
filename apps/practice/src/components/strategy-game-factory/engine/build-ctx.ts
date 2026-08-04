@@ -21,7 +21,10 @@ export const buildCtx = <TBoard>(
   phase: state.phase,
   turnState: state.turnState,
   currentPlayer: state.currentPlayer,
+  // The null check is not redundant with the seat comparison below: with no
+  // role chosen both seats are null and would match, opening the board up.
   isClientMoveAllowed: state.phase === 'play'
+    && state.currentPlayer !== null
     && (state.mode === 'vsHuman' || state.currentPlayer === state.chosenRoleIndex),
   winnerIndex: state.winnerIndex,
   moveCount: state.moveCount
