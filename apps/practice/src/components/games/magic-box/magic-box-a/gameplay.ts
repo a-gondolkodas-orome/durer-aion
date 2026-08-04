@@ -32,7 +32,7 @@ export const isGameEnd = hasFullLine;
 export const moves = {
   placeStone: {
     validate: (board: Board, _, id: number) => isPlacementAllowed(board, id),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, id): MoveOutcome<Board> => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, id: number): MoveOutcome<Board> => {
       const nextBoard = placeStone(board, id);
       // The box breaks under the stone just placed, so the mover loses.
       if (isGameEnd(nextBoard)) {

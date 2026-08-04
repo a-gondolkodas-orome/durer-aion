@@ -9,7 +9,7 @@ type Bot = BotStrategy<Board, Moves>
 const asTurn = (pendingLine: number | null, cell: number | undefined, line: number): BotMove<Moves>[] =>
   pendingLine === null
     ? [{ move: 'designateLine', args: [line] }]
-    : [{ move: 'placeStone', args: [cell] }, { move: 'designateLine', args: [line] }];
+    : [{ move: 'placeStone', args: [cell!] }, { move: 'designateLine', args: [line] }];
 
 export const randomBotStrategy: Bot = ({ board }) => {
   const { stones, pendingLine } = board;

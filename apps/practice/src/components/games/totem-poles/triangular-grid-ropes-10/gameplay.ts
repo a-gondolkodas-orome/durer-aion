@@ -43,11 +43,11 @@ export const isGameEnd = (board: Board) => {
   return allowedMoves.length === 0;
 };
 
-export const getAllowedSuperset = (board: Board, { from, to }) => {
+export const getAllowedSuperset = (board: Board, { from, to }: { from: number | null; to: number | null }) => {
   if (from == null || to == null || from === to) return null;
   if (!isAllowed(board, { from, to })) return { from, to };
   const edgeSupsersets = superSets[`${from}-${to}`] || superSets[`${to}-${from}`] || [];
-  const allowedSupersets = edgeSupsersets.filter(e => isAllowed(board, { from: e[0], to: e[1] }));
+  const allowedSupersets = edgeSupsersets.filter((e: number[]) => isAllowed(board, { from: e[0], to: e[1] }));
   if (allowedSupersets.length > 0) {
     const e = last(allowedSupersets)!;
     return { from: e[0], to: e[1] };
@@ -167,7 +167,7 @@ export const getTrivialMoves = (board: Board) => {
 export const moves = {
   stretchRope: {
     validate: (board: Board, _, edge: Edge) => isAllowed(board, edge),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, { from, to }): MoveOutcome<Board> => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, { from, to }: Edge): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       // A rope is stretched as far as it legally reaches, not just between the
       // two nodes that were clicked.

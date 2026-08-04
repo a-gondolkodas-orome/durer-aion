@@ -16,8 +16,8 @@ export const isMergeAllowed = (board: Board, piles: number[]): boolean =>
 
 export const moves = {
   removeOne: {
-    validate: (board: Board, _, pileIndex) => isPile(board, pileIndex),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, pileIndex): MoveOutcome<Board> => {
+    validate: (board: Board, _, pileIndex: number) => isPile(board, pileIndex),
+    apply: (board: Board, { ctx }: { ctx: Ctx }, pileIndex: number): MoveOutcome<Board> => {
       const newSize = board[pileIndex] - 1;
       const nextBoard = [
         ...board.slice(0, pileIndex),
@@ -33,7 +33,7 @@ export const moves = {
   },
   mergePiles: {
     validate: (board: Board, _, piles: number[]) => isMergeAllowed(board, piles),
-    apply: (board: Board, _, [pileIndex1, pileIndex2]): MoveOutcome<Board> => {
+    apply: (board: Board, _, [pileIndex1, pileIndex2]: number[]): MoveOutcome<Board> => {
       const [firstIdx, secondIdx] = [pileIndex1, pileIndex2].sort((a, b) => a - b);
       const merged = board[firstIdx] + board[secondIdx];
       const nextBoard = board.filter((_, i) => i !== firstIdx && i !== secondIdx);

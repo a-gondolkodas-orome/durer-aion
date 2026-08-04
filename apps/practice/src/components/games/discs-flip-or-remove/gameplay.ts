@@ -29,8 +29,8 @@ export const isFlipAllowed = (board: Board, count: number): boolean =>
 
 export const moves = {
   removeDiscs: {
-    validate: (board: Board, _, count) => isRemovalAllowed(board, count),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, count): MoveOutcome<Board> => {
+    validate: (board: Board, _, count: number) => isRemovalAllowed(board, count),
+    apply: (board: Board, { ctx }: { ctx: Ctx }, count: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard[0] -= count;
       if (isEqual(nextBoard, [0, 0])) {
@@ -40,8 +40,8 @@ export const moves = {
     }
   },
   turnDiscs: {
-    validate: (board: Board, _, count) => isFlipAllowed(board, count),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, count): MoveOutcome<Board> => {
+    validate: (board: Board, _, count: number) => isFlipAllowed(board, count),
+    apply: (board: Board, { ctx }: { ctx: Ctx }, count: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard[1] -= count;
       nextBoard[0] += count;

@@ -14,9 +14,9 @@ export const isRemovalAllowed = (board: Board, player: number, pileId: number): 
 
 export const moves = {
   removeStone: {
-    validate: (board: Board, { ctx }: { ctx: Ctx }, pileId) =>
+    validate: (board: Board, { ctx }: { ctx: Ctx }, pileId: number) =>
       isRemovalAllowed(board, ctx.currentPlayer!, pileId),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, pileId): MoveOutcome<Board> => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, pileId: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard.piles[pileId] = board.piles[pileId] - 1;
       nextBoard.leftRestriction[ctx.currentPlayer!] = (pileId === 0);
@@ -30,11 +30,11 @@ export const moves = {
 
 export type Moves = typeof moves;
 
-const isGameEnd = (board, ctx) => {
+const isGameEnd = (board: Board, ctx: Ctx) => {
   if (isEqual(board.piles, [0, 0])) {
     return true;
   }
-  if (board.piles[1] === 0 && board.leftRestriction[1 - ctx.currentPlayer]) {
+  if (board.piles[1] === 0 && board.leftRestriction[1 - ctx.currentPlayer!]) {
     return true;
   }
   return false;

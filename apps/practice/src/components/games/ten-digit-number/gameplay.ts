@@ -13,8 +13,8 @@ export const isDigitChoiceAllowed = (board: Board, digit: number): boolean =>
 
 export const moves = {
   chooseDigit: {
-    validate: (board: Board, _, digit) => isDigitChoiceAllowed(board, digit),
-    apply: (board: Board, _, digit): MoveOutcome<Board> => {
+    validate: (board: Board, _, digit: number) => isDigitChoiceAllowed(board, digit),
+    apply: (board: Board, _, digit: number): MoveOutcome<Board> => {
       const newDigits = [...board.digits, digit];
       const newSumMod9 = (board.sumMod9 + digit) % 9;
       const nextBoard = { digits: newDigits, sumMod9: newSumMod9 };

@@ -16,7 +16,7 @@ export const generateEmptyTicTacToeBoard = () => Array(9).fill(null);
 export const validatePlacement = (board: Board, _, id: number): boolean =>
   Number.isInteger(id) && id >= 0 && id < board.length && board[id] === null;
 
-export const hasWinningSubset = (indices) => {
+export const hasWinningSubset = (indices: number[]) => {
   const winningIndexSets = [
     [0, 1, 2],
     [3, 4, 5],
@@ -27,6 +27,6 @@ export const hasWinningSubset = (indices) => {
     [0, 4, 8],
     [2, 4, 6]
   ];
-  const isSubsetOfIndices = s => difference(s, indices).length === 0;
+  const isSubsetOfIndices = (s: number[]) => difference(s, indices).length === 0;
   return some(winningIndexSets, isSubsetOfIndices);
 };

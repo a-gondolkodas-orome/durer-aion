@@ -10,13 +10,17 @@ export const moves = {
     validate: (board: Board, _, pileId: number) => isRemovalAllowed(board, pileId),
     // First half of the turn: discard a pile, then split the other — the turn
     // stays open in between.
-    apply: (board: Board, _, pileId): MoveOutcome<Board> =>
+    apply: (board: Board, _, pileId: number): MoveOutcome<Board> =>
       ({ nextBoard: withPileRemoved(board, pileId) })
   },
   splitPile: {
     validate: (board: Board, _, { pileId, pieceCount }: { pileId: number; pieceCount: number }) =>
       isSplitAllowed(board, pileId, pieceCount),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, { pileId, pieceCount }): MoveOutcome<Board> => {
+    apply: (
+      board: Board,
+      { ctx }: { ctx: Ctx },
+      { pileId, pieceCount }: { pileId: number; pieceCount: number }
+    ): MoveOutcome<Board> => {
       const nextBoard = [pieceCount, board[pileId] - pieceCount];
       // Two single-piece piles cannot be split, so the opponent is stuck.
       if (isEqual(nextBoard, [1, 1])) {

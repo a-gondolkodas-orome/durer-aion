@@ -9,8 +9,8 @@ export const isColored = (board: Board, i: number) => board[i] !== '';
 // The logic-side palette; `nodeColors` in cube-coloring.tsx adds the styling.
 export const colors = ['red', 'blue', 'yellow'];
 
-export const isAllowedStep = (board: Board, vertex, color) => {
-  if (!colors.includes(color)) return false;
+export const isAllowedStep = (board: Board, vertex: number, color: string | null) => {
+  if (!color || !colors.includes(color)) return false;
   if (isColored(board, vertex)) return false;
   return every(neighbours[vertex], i => (!isColored(board, i)) || board[i] !== color);
 };
@@ -46,7 +46,7 @@ export const neighbours: Record<number, number[]> = edges.reduce((acc, [a, b]) =
 }, {} as Record<number, number[]>);
 
 const isGameEnd = (board: Board) => {
-  const canUseColor = color => some(range(0, 8), v => isAllowedStep(board, v, color));
+  const canUseColor = (color: string) => some(range(0, 8), v => isAllowedStep(board, v, color));
   return every(colors, color => !canUseColor(color));
 };
 
@@ -54,7 +54,7 @@ export const moves = {
   colorVertex: {
     validate: (board: Board, _, { vertex, color }: { vertex: number; color: string | null }) =>
       isAllowedStep(board, vertex, color),
-    apply: (board: Board, _, { vertex, color }): MoveOutcome<Board> => {
+    apply: (board: Board, _, { vertex, color }: { vertex: number; color: string }): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard[vertex] = color;
       if (isGameEnd(nextBoard)) {

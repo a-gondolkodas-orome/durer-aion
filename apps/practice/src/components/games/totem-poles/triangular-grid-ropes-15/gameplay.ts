@@ -179,7 +179,7 @@ export const isGameEnd = (board: Board) => {
 export const moves = {
   stretchRope: {
     validate: (board: Board, _, edge: Edge) => isAllowed(board, edge),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, { from, to }): MoveOutcome<Board> => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, { from, to }: Edge): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       // A rope is stretched as far as it legally reaches, not just between the
       // two nodes that were clicked.

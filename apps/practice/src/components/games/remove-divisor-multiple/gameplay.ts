@@ -8,7 +8,7 @@ export type Board = { numbersOnTable: boolean[], previousMove: number | null }
 // on-the-table check used to be skipped for the opening move, where every
 // number is still there anyway; hoisting it above the previousMove branch
 // changes nothing for a real opening move but keeps a bogus argument out.
-export const isAllowed = (board: Board, n) => {
+export const isAllowed = (board: Board, n: number) => {
   if (!Number.isInteger(n) || n < 1 || n > board.numbersOnTable.length) return false;
   if (board.numbersOnTable[n - 1] === false) return false;
   if (board.previousMove === null) {
@@ -24,8 +24,8 @@ export const isAllowed = (board: Board, n) => {
 
 export const moves = {
   removeNumber: {
-    validate: (board: Board, _, n) => isAllowed(board, n),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, n): MoveOutcome<Board> => {
+    validate: (board: Board, _, n: number) => isAllowed(board, n),
+    apply: (board: Board, { ctx }: { ctx: Ctx }, n: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard.numbersOnTable[n - 1] = false;
       nextBoard.previousMove = n;

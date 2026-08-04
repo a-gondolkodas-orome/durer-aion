@@ -12,7 +12,7 @@ export const isIncreaseValid = ({ board, number }: { board: Board; number: numbe
 export const moves = {
   increaseTo: {
     validate: (board: Board, _, number: number) => isIncreaseValid({ board, number }),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, number): MoveOutcome<Board> => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, number: number): MoveOutcome<Board> => {
       if (number > target) {
         return { nextBoard: number, gameEnd: { winnerIndex: 1 - ctx.currentPlayer! } };
       }

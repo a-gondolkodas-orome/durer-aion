@@ -15,7 +15,7 @@ export const isCoveringAllowed = (board: Board, number: number): boolean =>
 export const moves = {
   coverNumber: {
     validate: (board: Board, _, number: number) => isCoveringAllowed(board, number),
-    apply: (board: Board, _, number): MoveOutcome<Board> => {
+    apply: (board: Board, _, number: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard[number-1] = COVERED;
 

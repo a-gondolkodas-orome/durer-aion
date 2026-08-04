@@ -25,7 +25,7 @@ export const generateTestStartBoard = (): Board => {
 export const moves = {
   step: {
     validate: (board: Board, _, step: number) => isStepAllowed(board, step),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, step): MoveOutcome<Board> => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, step: number): MoveOutcome<Board> => {
       const numberAfterStep = board.current + step;
       const nextBoard = { current: numberAfterStep, target: board.target, restricted: 13 - step };
       if (numberAfterStep >= board.target) {

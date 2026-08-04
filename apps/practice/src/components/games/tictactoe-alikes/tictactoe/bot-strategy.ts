@@ -37,7 +37,7 @@ export const smartBotStrategy: Bot = ({ board }) => {
 const getOptimalBotPlacingPosition = (board: Board) => {
   const allowedPlaces = getAllowedPlaces({ board, amIBot: true });
 
-  if (allowedPlaces.length === 9) return(sample([0, 2, 4, 6, 8]));
+  if (allowedPlaces.length === 9) return sample([0, 2, 4, 6, 8])!;
 
   const instantWinningPlace = allowedPlaces.find((i) => {
     const localBoard = [...board];
@@ -59,9 +59,9 @@ const getOptimalBotPlacingPosition = (board: Board) => {
     return isWinningState(boardCopy, true);
   });
 
-  if (optimalPlaces.length > 0) return sample(optimalPlaces);
+  if (optimalPlaces.length > 0) return sample(optimalPlaces)!;
 
-  return sample(allowedPlaces);
+  return sample(allowedPlaces)!;
 };
 
 const getOptimalBotFlippingPosition = (board: Board) => {
@@ -75,9 +75,9 @@ const getOptimalBotFlippingPosition = (board: Board) => {
 
   // if you can win symmetrically, try to do so (only for beauty)
   if (optimalPlaces.find(i => i === 4) !== undefined) return 4;
-  if (optimalPlaces.length > 0) return sample(optimalPlaces);
+  if (optimalPlaces.length > 0) return sample(optimalPlaces)!;
 
-  return sample(allowedPlaces);
+  return sample(allowedPlaces)!;
 };
 
 const isWinningStateCache = new Map();

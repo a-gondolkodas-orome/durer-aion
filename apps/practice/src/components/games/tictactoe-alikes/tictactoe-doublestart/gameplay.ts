@@ -15,7 +15,7 @@ export const hasFirstPlayerWon = (board: Board) => {
 export const isGameEnd = (board: Board) =>
   board.filter(c => c).length === 9 || hasWinningSubsetForPlayer(board, 1);
 
-const hasWinningSubsetForPlayer = (board: Board, roleIndex) =>
+const hasWinningSubsetForPlayer = (board: Board, roleIndex: number) =>
   hasWinningSubset(range(0, 9).filter(i => board[i] === roleColors[roleIndex]));
 
 export const isDuringFirstMove = (board: Board) => board.filter(c => c).length <= 1;
@@ -23,7 +23,7 @@ export const isDuringFirstMove = (board: Board) => board.filter(c => c).length <
 export const moves = {
   placePiece: {
     validate: validatePlacement,
-    apply: (board: Board, { ctx }: { ctx: Ctx }, id): MoveOutcome<Board> => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, id: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard[id] = ctx.currentPlayer === 0 ? 'red' : 'blue';
 

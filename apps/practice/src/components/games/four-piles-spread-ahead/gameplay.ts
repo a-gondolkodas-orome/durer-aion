@@ -21,7 +21,11 @@ export const moves = {
   spreadPieces: {
     validate: (board: Board, _, { pileId, pieceCount }: { pileId: number; pieceCount: number }) =>
       isSpreadAllowed(board, pileId, pieceCount),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, { pileId, pieceCount }): MoveOutcome<Board> => {
+    apply: (
+      board: Board,
+      { ctx }: { ctx: Ctx },
+      { pileId, pieceCount }: { pileId: number; pieceCount: number }
+    ): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard[pileId] = board[pileId] - pieceCount;
       for (let i = pileId - pieceCount; i < pileId; i++) {

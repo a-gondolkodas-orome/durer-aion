@@ -26,7 +26,7 @@ export const moves = {
       ctx.currentPlayer === ARCHITECT && isArchitectStepAllowed(board, targetVertex, KM_PER_DAY),
     // The architect keeps walking within the day, so the turn stays open until
     // `endDay`.
-    apply: (board: Board, _, targetVertex): MoveOutcome<Board> => {
+    apply: (board: Board, _, targetVertex: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard.architectPosition = targetVertex;
       nextBoard.towers[targetVertex] = true;
@@ -50,7 +50,7 @@ export const moves = {
   destroyTower: {
     validate: (board: Board, { ctx }: { ctx: Ctx }, vertex: number) =>
       ctx.currentPlayer === BANDITS && isDestructionAllowed(board, vertex),
-    apply: (board: Board, _, vertex): MoveOutcome<Board> => {
+    apply: (board: Board, _, vertex: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard.towers[vertex] = false;
       return { nextBoard, autoEndOfTurn: true };

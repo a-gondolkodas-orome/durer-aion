@@ -27,9 +27,9 @@ export const smartBotStrategy: Bot = ({ board, ctx }) => {
 const makeOptimalStepAsFirst = (board: Board) => {
   const mainDiagonal = shuffle([2, 4]);
   const otherVertices = shuffle([0, 1, 3, 5, 6, 7]);
-  const vertexToColor = [...mainDiagonal, ...otherVertices].find(v => !isColored(board, v));
+  const vertexToColor = [...mainDiagonal, ...otherVertices].find(v => !isColored(board, v))!;
   const allowedColors = colors.filter(c => isAllowedStep(board, vertexToColor, c));
-  return { vertex: vertexToColor, color: sample(allowedColors) };
+  return { vertex: vertexToColor, color: sample(allowedColors)! };
 };
 
 const makeOptimalStepAsSecond = (board: Board) => {

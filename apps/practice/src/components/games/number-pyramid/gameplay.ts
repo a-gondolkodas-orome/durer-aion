@@ -41,11 +41,11 @@ export const generateStartBoard = (tries = 0): Board => {
 
 export const moves = {
   combineTwo: {
-    validate: (board: Board, _, move) => isCombineAllowed(board, move),
+    validate: (board: Board, _, move: { levelIdx: number; indices: number[] }) => isCombineAllowed(board, move),
     apply: (
       board: Board,
       { ctx }: { ctx: Ctx },
-      { levelIdx, indices }
+      { levelIdx, indices }: { levelIdx: number; indices: number[] }
     ): MoveOutcome<Board> => {
       const { nextBoard, combinedValue } = applyMoveToBoard(board, levelIdx, indices);
 

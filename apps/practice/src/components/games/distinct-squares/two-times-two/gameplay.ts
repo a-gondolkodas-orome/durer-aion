@@ -8,8 +8,8 @@ export const generateStartBoard = (): Board => [0, 0, 0, 0];
 
 export const moves = {
   addPiece: {
-    validate: (board: Board, _, pileId) => isPlacementAllowed(board, pileId),
-    apply: (board: Board, _, pileId): MoveOutcome<Board> => {
+    validate: (board: Board, _, pileId: number) => isPlacementAllowed(board, pileId),
+    apply: (board: Board, _, pileId: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard[pileId] += 1;
       if (sum(nextBoard) === 6) {

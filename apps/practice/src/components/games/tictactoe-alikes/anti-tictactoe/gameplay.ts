@@ -24,7 +24,7 @@ export const hasFirstPlayerWon = (board: Board) => {
 export const moves = {
   placePiece: {
     validate: validatePlacement,
-    apply: (board: Board, { ctx }: { ctx: Ctx }, id): MoveOutcome<Board> => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, id: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard[id] = ctx.currentPlayer === 0 ? 'red' : 'blue';
       if (isGameEnd(nextBoard)) {

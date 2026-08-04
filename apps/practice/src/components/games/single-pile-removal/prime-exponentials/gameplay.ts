@@ -49,7 +49,11 @@ export const moves = {
   subtractPrimeExponent: {
     validate: (board: Board, _, entry: { prime: number; exponent: number }) =>
       isSubtractionAllowed(board, entry),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, { prime, exponent }): MoveOutcome<Board> => {
+    apply: (
+      board: Board,
+      { ctx }: { ctx: Ctx },
+      { prime, exponent }: { prime: number; exponent: number }
+    ): MoveOutcome<Board> => {
       const nextBoard = board - prime ** exponent;
       if (nextBoard === 0) {
         return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };

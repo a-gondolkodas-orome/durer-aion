@@ -5,8 +5,8 @@ export type Board = { circle: boolean[], lastMove: number | null, firstMove: num
 
 export const moves = {
   rob: {
-    validate: (board: Board, _, index) => isRobbable(board, index),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, index): MoveOutcome<Board> => {
+    validate: (board: Board, _, index: number) => isRobbable(board, index),
+    apply: (board: Board, { ctx }: { ctx: Ctx }, index: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       // so that ai strategy can be simpler: first move is always the same
       const transformedMove = board.firstMove === null ? 0 : index;

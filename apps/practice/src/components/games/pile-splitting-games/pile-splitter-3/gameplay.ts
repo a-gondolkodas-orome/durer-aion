@@ -22,7 +22,11 @@ export const moves = {
   splitPile: {
     validate: (board: Board, _, { pileId, pieceCount }: { pileId: number; pieceCount: number }) =>
       isSplitAllowed(board, pileId, pieceCount),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, { pileId, pieceCount }): MoveOutcome<Board> => {
+    apply: (
+      board: Board,
+      { ctx }: { ctx: Ctx },
+      { pileId, pieceCount }: { pileId: number; pieceCount: number }
+    ): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       // the slot emptied earlier this turn takes the other half of the split
       const removedPileId = emptiedPileId(nextBoard)!;

@@ -18,8 +18,8 @@ export const isConversionAllowed = (board: Board, k: number, l: number): boolean
 
 export const moves = {
   convert: {
-    validate: (board: Board, _, k, l) => isConversionAllowed(board, k, l),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, k, l): MoveOutcome<Board> => {
+    validate: (board: Board, _, k: number, l: number) => isConversionAllowed(board, k, l),
+    apply: (board: Board, { ctx }: { ctx: Ctx }, k: number, l: number): MoveOutcome<Board> => {
       const nextBoard = board.map(v => (v === k ? l : v)).sort((a, b) => a - b);
       if (uniq(nextBoard).length === 1) {
         return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };

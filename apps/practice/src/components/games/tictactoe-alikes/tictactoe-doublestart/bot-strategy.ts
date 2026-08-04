@@ -8,12 +8,12 @@ type Bot = BotStrategy<Board, Moves>
 const emptyCells = (board: Board) => range(0, 9).filter(i => isNull(board[i]));
 
 // The opening turn places two pieces, named together as one decision.
-const placements = (...cells: (number | undefined)[]): BotMove<Moves>[] =>
+const placements = (...cells: number[]): BotMove<Moves>[] =>
   cells.map(cell => ({ move: 'placePiece', args: [cell] }));
 
 export const randomBotStrategy: Bot = ({ board }) => {
   const allowedPlaces = emptyCells(board);
-  if (allowedPlaces.length < 9) return placements(sample(allowedPlaces));
+  if (allowedPlaces.length < 9) return placements(sample(allowedPlaces)!);
   const [first, second] = sampleSize(allowedPlaces, 2);
   return placements(first, second);
 };
@@ -24,7 +24,7 @@ export const smartBotStrategy: Bot = ({ board, ctx }) => {
     const opening = sample([[0, 2], [2, 8], [6, 8], [0, 6]])!;
     return placements(opening[0], opening[1]);
   }
-  return placements(getOptimalBotPlacingPosition(board, ctx.chosenRoleIndex));
+  return placements(getOptimalBotPlacingPosition(board, ctx.chosenRoleIndex)!);
 };
 
 const getOptimalBotPlacingPosition = (board: Board, chosenRoleIndex) => {

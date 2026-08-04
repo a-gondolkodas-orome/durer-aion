@@ -47,7 +47,7 @@ export const moves = {
     validate: (board: Board, _, cellId: number) => isPlacementAllowed(board, cellId),
     // First half of the turn: place a stone, then designate a line — the turn
     // stays open in between.
-    apply: (board: Board, _, cellId): MoveOutcome<Board> => {
+    apply: (board: Board, _, cellId: number): MoveOutcome<Board> => {
       const nextBoard: Board = { stones: placeStoneAt(board.stones, cellId), pendingLine: null };
       return { nextBoard };
     }
@@ -55,7 +55,7 @@ export const moves = {
 
   designateLine: {
     validate: (board: Board, _, lineIndex: number) => isDesignationAllowed(board, lineIndex),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, lineIndex): MoveOutcome<Board> => {
+    apply: (board: Board, { ctx }: { ctx: Ctx }, lineIndex: number): MoveOutcome<Board> => {
       const nextBoard: Board = { stones: board.stones, pendingLine: lineIndex };
       // A full designated line leaves the other player nowhere to place.
       if (isLineFull(nextBoard.stones, lineIndex)) {
