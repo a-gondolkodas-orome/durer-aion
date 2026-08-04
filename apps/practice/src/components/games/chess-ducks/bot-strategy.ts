@@ -130,7 +130,7 @@ const isWinningState = (board: Board): boolean => {
 };
 
 // see scripts/pre-generate-ai-moves/chess-ducks-optimal-2nd-moves.cjs
-const smartBotOptimalSecondSteps: Record<string, Field> = {
+export const smartBotOptimalSecondSteps: Record<string, Field> = {
   '0;0': { row: 0, col: 6 },
   '0;1': { row: 3, col: 1 },
   '0;2': { row: 3, col: 1 },
@@ -162,7 +162,7 @@ const smartBotOptimalSecondSteps: Record<string, Field> = {
 };
 
 // see scripts/pre-generate-ai-moves/chess-ducks-optimal-3rd-moves.cjs
-const smartBotOptimalThirdSteps: Record<string, Field> = {
+export const smartBotOptimalThirdSteps: Record<string, Field> = {
   '0;0 - 0;2': { row: 1, col: 5 },
   '0;0 - 0;3': { row: 3, col: 2 },
   '0;0 - 0;4': { row: 3, col: 0 },
