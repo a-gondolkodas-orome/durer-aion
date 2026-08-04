@@ -54,7 +54,10 @@ export const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProp
                         en: `disc row ${r + 1} column ${c + 1}`
                       })}
                       className="size-9 sm:size-11 flex items-center justify-center"
-                      disabled={!ctx.isClientMoveAllowed || !grid[r][c]}
+                      // every disc's row and its column are removable, so either
+                      // orientation answers "can a move start here"; which one it is
+                      // gets chosen on the next click
+                      disabled={!moves.removeLine.isAllowed(board, { r, c, orientation: 'row' })}
                       onClick={() => clickDisc(r, c)}
                     >
                       {grid[r][c] && (

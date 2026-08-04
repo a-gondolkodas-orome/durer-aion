@@ -36,7 +36,9 @@ const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProps<Board
         <MoveTypeSelector
           moveType={moveType}
           isClientMoveAllowed={ctx.isClientMoveAllowed}
-          canMerge={board.length >= 2}
+          // any two distinct piles may merge, so the first pair answers whether
+          // merging is on offer at all
+          canMerge={moves.mergePiles.isAllowed(board, [0, 1])}
           onSelect={(type) => { setMoveType(type); setTurnState(null); }}
         />
       )}

@@ -53,8 +53,12 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     setFirstSelected(null);
   }, [ctx.moveCount]);
 
+  // A pile can start a move when some other pile can partner it — the pair is
+  // what the validator judges, so ask it rather than restate "not empty".
+  const canTakeFrom = (i: number) => board.some((_, j) => moves.takeChips.isAllowed(board, i, j));
+
   const clickPile = (i: number) => {
-    if (!ctx.isClientMoveAllowed || board[i] === 0) return;
+    if (!canTakeFrom(i)) return;
     if (firstSelected === null) {
       setFirstSelected(i);
       return;
@@ -75,7 +79,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             count={count}
             index={i}
             selected={firstSelected === i}
-            selectable={ctx.isClientMoveAllowed && count > 0}
+            selectable={canTakeFrom(i)}
             onClick={() => clickPile(i)}
           />
         ))}
