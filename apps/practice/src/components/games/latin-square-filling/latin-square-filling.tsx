@@ -1,17 +1,14 @@
-import { useEffect, useState } from 'react';
-import { strategyGameFactory, type BoardClientProps, type Ctx, GameBoard } from '../../strategy-game-factory';
+import {
+  strategyGameFactory, useMoveScopedState, type BoardClientProps, type Ctx, GameBoard
+} from '../../strategy-game-factory';
 import { useTranslation } from '../../../language';
 import { generateStartBoard, moves, type Board } from './gameplay';
 import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
-  const [selectedCell, setSelectedCell] = useState<number | null>(null);
-
-  // Clear the pending selection whenever the board advances (own or bot move).
-  useEffect(() => {
-    setSelectedCell(null);
-  }, [ctx.moveCount]);
+  // Move-scoped: the pending selection is gone once the board advances.
+  const [selectedCell, setSelectedCell] = useMoveScopedState<number | null>(ctx.moveCount, null);
 
   const clickCell = (cell: number) => {
     if (!ctx.isClientMoveAllowed || board[cell] !== 0) return;

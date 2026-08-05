@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
 import { range } from 'lodash';
-import { strategyGameFactory, type BoardClientProps, GameBoard } from '../../strategy-game-factory';
+import {
+  strategyGameFactory, useMoveScopedState, type BoardClientProps, GameBoard
+} from '../../strategy-game-factory';
 import { useTranslation } from '../../../language';
 import { generateStartBoard, moves, type Board, type Move } from './gameplay';
 import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
@@ -74,16 +75,14 @@ const Pile = ({ count, index, removeCount, canAdd, disabled, onInc, onDec }: {
   );
 };
 
+// module scope: useMoveScopedState hands this back on every render where the
+// stamp is stale, so it has to be one stable reference
 const emptyRemovals: Move = [0, 0, 0, 0];
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
-  const [removals, setRemovals] = useState<Move>(emptyRemovals);
-
-  // Reset the in-progress selection whenever the board advances (own or bot move).
-  useEffect(() => {
-    setRemovals(emptyRemovals);
-  }, [ctx.moveCount]);
+  // Move-scoped: the in-progress removals are gone once the board advances.
+  const [removals, setRemovals] = useMoveScopedState<Move>(ctx.moveCount, emptyRemovals);
 
   const activeCount = removals.filter(r => r > 0).length;
   const readyToMove = moves.takeStones.isAllowed(board, removals);

@@ -283,6 +283,29 @@ state without going through a move, deliberately: a selection is not a move, so
 it must not bump `moveCount` or take an undo snapshot. Moves never get it; they
 return `nextTurnState` instead.
 
+**`useMoveScopedState(ctx.moveCount, initial)`** — for a `BoardClient`'s own
+mid-turn UI state: a half-made selection, a pending set of removals. The value
+is stamped with the `moveCount` at which it was set and exposed only while that
+stamp holds, so any move discards it during the next render.
+
+Do not clear such state with `useEffect(() => setX(initial), [ctx.moveCount])`.
+That repairs it one render too late — the browser paints a frame with the old
+selection over the advanced board — and it is a reset every component has to
+remember rather than a property of the state itself.
+
+```tsx
+const [selectedCell, setSelectedCell] = useMoveScopedState<number | null>(ctx.moveCount, null);
+```
+
+Two things to get right: `initial` is handed back on every stale render, so a
+non-primitive must be one stable reference (hoist it to module scope, never
+`[]` inline); and mid-turn state the *engine* has to see — anything
+`getPlayerStepDescription` reads — belongs in `ctx.turnState` instead, since
+this hook is local to the component.
+
+`useHoverPreview(ctx.moveCount)` is this hook plus pointer/focus plumbing, so
+board previews get the same invalidation for free.
+
 **`useDeferredMove(ctx.moveCount)`** — for a `BoardClient` whose single click
 submits a whole turn made of two moves (`pile-splitter`, `three-piles-rebuild`).
 Dispatch the first move, then hand the second to the returned function: it plays

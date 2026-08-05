@@ -1,14 +1,13 @@
-import { useState } from 'react';
+import { useMoveScopedState } from './use-move-scoped-state';
 
 /**
  * Move-scoped hover state for board previews.
  *
- * A hover is stamped with the `moveCount` at which it was set, and the derived
- * `value` is exposed only while that stamp still matches the current
- * `moveCount`. Any move bumps `moveCount`, so a stale hover is invalidated on
- * the very next render — no effect and no explicit reset call. This is what
- * stops a preview from "sticking" after a move on touch devices, where no
- * `pointerleave` fires (the original reason the `moveCount` guard was added).
+ * The hover is `useMoveScopedState` (which owns the moveCount stamping) plus
+ * the pointer/focus plumbing: any move invalidates the preview on the very
+ * next render, which is what stops one from "sticking" after a move on touch
+ * devices, where no `pointerleave` fires (the original reason the `moveCount`
+ * guard was added).
  *
  * Pass `ctx.moveCount` from a BoardClient, or a `moveCount` prop when the hover
  * lives inside a repeated child component.
@@ -24,12 +23,9 @@ import { useState } from 'react';
  * the same moveCount stamp, so they are invalidated by the next move too.
  */
 export function useHoverPreview<T>(moveCount: number) {
-  const [hovered, setHovered] = useState<{ value: T; moveCount: number } | null>(null);
+  const [value, setHovered, clear] = useMoveScopedState<T | null>(moveCount, null);
 
-  const value = hovered?.moveCount === moveCount ? hovered.value : null;
-
-  const set = (v: T) => setHovered({ value: v, moveCount });
-  const clear = () => setHovered(null);
+  const set = (v: T) => setHovered(v);
 
   const hoverProps = (v: T) => ({
     onPointerEnter: () => set(v),
