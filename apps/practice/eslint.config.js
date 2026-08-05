@@ -1,8 +1,18 @@
 import reactPlugin from '@eslint-react/eslint-plugin';
+import reactHooks from 'eslint-plugin-react-hooks';
 import tsParser from '@typescript-eslint/parser';
 import tsPlugin from '@typescript-eslint/eslint-plugin';
 
 export default [
+  {
+    files: ['src/**/*.{ts,tsx}'],
+    plugins: { 'react-hooks': reactHooks },
+    rules: {
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'error',
+      'react-hooks/set-state-in-effect': 'error'
+    }
+  },
   {
     files: ['src/**/*.{ts,tsx}'],
     plugins: { '@eslint-react': reactPlugin },
@@ -44,7 +54,6 @@ export default [
     // run in plain Node. See issue #313.
     files: ['src/components/games/**/gameplay.ts', 'src/components/strategy-game-factory/engine/**/*.ts'],
     plugins: { '@typescript-eslint': tsPlugin },
-    languageOptions: { parser: tsParser },
     rules: {
       '@typescript-eslint/no-restricted-imports': ['error', {
         patterns: [

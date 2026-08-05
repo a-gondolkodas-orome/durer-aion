@@ -102,7 +102,10 @@ export const strategyGameFactory = <TBoard,>({
       if (!isHumanVsHumanGame && phase === 'play' && currentPlayer === (1 - chosenRoleIndex!)) {
         doBotTurn();
       }
-    }, [currentPlayer, isHumanVsHumanGame, phase, chosenRoleIndex]); // doBotTurn excluded: recreates every render
+      // doBotTurn is recreated every render, so listing it would restart the
+      // bot on every render rather than on a turn change.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentPlayer, isHumanVsHumanGame, phase, chosenRoleIndex]);
 
     const resolvedPlayerNames: [string, string] = [
       playerNames[0] || t(DEFAULT_PLAYER_NAMES[0]),

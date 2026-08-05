@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 
 export interface Stats { win: number; loss: number }
 
@@ -15,23 +15,25 @@ const readStats = (key: string): Stats => {
 export const useGameStats = (gameId: string, variantIndex: number) => {
   const storageKey = `stats_${gameId}_${variantIndex}`;
 
-  const [stats, setStats] = useState<Stats>(() => readStats(storageKey));
-
-  useEffect(() => {
-    setStats(readStats(storageKey));
-  }, [storageKey]);
+  // Stamped with the key it was read for, the same shape as
+  // useMoveScopedState: switching variant reads the new key during render, so
+  // the previous variant's counts are never shown for a frame. An effect
+  // re-reading on `storageKey` would repair it one render too late.
+  const [stored, setStored] = useState(() => ({ key: storageKey, stats: readStats(storageKey) }));
+  const stats = stored.key === storageKey ? stored.stats : readStats(storageKey);
 
   const recordResult = useCallback((result: keyof Stats) => {
-    setStats(prev => {
-      const next = { ...prev, [result]: prev[result] + 1 };
+    setStored(stale => {
+      const current = stale.key === storageKey ? stale.stats : readStats(storageKey);
+      const next = { ...current, [result]: current[result] + 1 };
       localStorage.setItem(storageKey, JSON.stringify(next));
-      return next;
+      return { key: storageKey, stats: next };
     });
   }, [storageKey]);
 
   const resetStats = useCallback(() => {
     localStorage.removeItem(storageKey);
-    setStats(EMPTY_STATS);
+    setStored({ key: storageKey, stats: EMPTY_STATS });
   }, [storageKey]);
 
   return { stats, recordResult, resetStats };
