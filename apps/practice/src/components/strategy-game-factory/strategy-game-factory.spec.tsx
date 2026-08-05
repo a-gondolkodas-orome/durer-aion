@@ -690,6 +690,7 @@ describe('move validate enforcement', () => {
   const playTwoPhaseBotTurn = (extraMs = 0) => {
     vi.useFakeTimers();
     try {
+      vi.spyOn(Math, 'random').mockReturnValue(0); // pin the spread beat to 750ms
       const { getByTestId } = renderGame(twoPhaseBotConfig());
       fireEvent.click(getByTestId('role-btn-1')); // human is 2nd player → bot moves first
       act(() => { vi.advanceTimersByTime(1500); }); // bot "thinking" delay → phase1
@@ -949,6 +950,7 @@ describe('outcome-returning moves (apply)', () => {
     it('validates the second move of a bot turn against current ctx.moveCount', () => {
       vi.useFakeTimers();
       try {
+        vi.spyOn(Math, 'random').mockReturnValue(0); // pin the spread beat to 750ms
         const config = makeConfig({
           BoardClient: ({ board }: BoardClientProps<Board>) => (
             <span data-testid="board">{board.join(',')}</span>

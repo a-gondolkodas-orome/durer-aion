@@ -14,11 +14,13 @@ the legacy move contract, zero React imports in `gameplay.ts` or the engine,
 the themes below, ordered by priority. Each item is sized as a small PR per
 [AGENTS.md § Pull request size](../AGENTS.md#pull-request-size).
 
-Items marked ✅ were fixed on the branch that introduced this document.
+Items marked ✅ have since been fixed; the PR that did it is named inline.
+Where acting on an item showed the review had got it wrong, the correction is
+recorded rather than quietly dropped.
 
 ---
 
-## 1. Docs out of sync with the refactor ✅ (done)
+## 1. Docs out of sync with the refactor ✅ (#398)
 
 - ✅ AGENTS.md placed the factory and `game-parts/` inside
   `src/components/games/`; they live in the sibling
@@ -34,7 +36,7 @@ Items marked ✅ were fixed on the branch that introduced this document.
   the references it anchored (AGENTS.md, README, engine comments) now pointing
   at issue #313.
 
-## 2. Migration leftovers in the toolchain ✅ (done)
+## 2. Migration leftovers in the toolchain ✅ (#398)
 
 `src/` has zero `.js`/`.jsx` files, but the toolchain still catered for them:
 `index.html` loading `/src/main.js`, `allowJs`/`checkJs` in tsconfig, `{js,jsx}`
@@ -44,7 +46,7 @@ Tailwind-v3 `tailwind.config.js`. All removed. (The commented-out
 gitignore entry are *not* leftovers: they document an occasionally-used,
 uncommitted bundle-analysis tool and stay.)
 
-## 3. Type-safety: the pinning is silently hollow for ~40% of moves
+## 3. Type-safety: the pinning is silently hollow for ~40% of moves ✅ (#402)
 
 `tsconfig.json` sets `"noImplicitAny": false` next to `"strict": true`. So an
 unannotated `apply`/`validate` parameter types as `any` — and
@@ -56,16 +58,16 @@ least one untyped move argument (e.g.
 `cube-coloring/gameplay.ts` `{ vertex, color }`,
 `totem-poles/*/gameplay.ts` `{ from, to }`), plus 11 `validate` declarations.
 
-**Plan:** a mechanical sweep annotating the ~49 untyped parameters. No
-behaviour change; typecheck is the review. Whether to then flip
-`"noImplicitAny": true` repo-wide is a separate, open decision — outside move
-signatures the flag may be more noise than value (utils, specs), and annotated
-moves plus review may be enough. Decide after the sweep, when the remaining
-fallout is visible.
+**Done in #402**: the untyped parameters are annotated, so
+`BotStrategy<Board, Moves>` now checks arguments as well as names everywhere.
+
+Whether to then flip `"noImplicitAny": true` repo-wide remains a separate,
+open decision — outside move signatures the flag may be more noise than value
+(utils, specs), and annotated moves plus review may be enough.
 
 ## 4. Test gaps in core logic
 
-### 4a. Bots with zero coverage of any kind (highest value)
+### 4a. Bots with zero coverage of any kind (highest value) ✅ (#403, #404)
 
 `games/plays-to-an-end.spec.ts` excludes slow variants by name, with a comment
 saying what is lost is "coverage that bot's own spec has". For four excluded
@@ -77,10 +79,20 @@ variants that is not true — they have **no bot spec either**:
 | `FiveSquares[1]` | `distinct-squares/five-squares/` | real minimax |
 | `TriangularGridRopes[1]` | `totem-poles/triangular-grid-ropes-10/` | search |
 
-**Plan:** one PR per game adding a `bot-strategy.spec.ts` on the
-`runMatch`-based pattern (`coins-in-3-piles`, `remove-row-or-column`): smart
-bot wins as mover from a winning board and as replier from a losing one.
-Until then, at least correct the sweep's comment.
+**Done** — chess-ducks in #403, five-squares and ropes-10 in #404, on the
+`runMatch`-based pattern (`coins-in-3-piles`, `remove-row-or-column`). Two
+things the work taught, both worth keeping:
+
+- The winners had to be established empirically before anything could be
+  asserted: chess-ducks 4×6 and 4×7 are second-player wins, five-squares is a
+  second-player win from every start square, ropes-10 is a mover win via
+  axis-opening plus mirroring.
+- **chess-ducks' opening books stay unverified**, and the spec says so. One
+  `isWinningState` search from a 3-duck board costs ~4.3 s, so checking the
+  tables against a fresh search is unaffordable — which is exactly why those
+  variants are in `SLOW_VARIANTS` to begin with. The spec asserts the book is
+  self-consistent and that its moves are legal and win real matches; it cannot
+  catch a book that is optimal-looking but wrong.
 
 ### 4b. Other bots with real search but no spec
 
@@ -89,15 +101,20 @@ Until then, at least correct the sweep's comment.
 ~22 spec-less bots are ≤30-line closed forms — acceptable to leave, the sweep
 covers their conformance.
 
-### 4c. Untested shared modules
+### 4c. Untested shared modules — mostly ✅ (#405)
 
-| Module | Why it matters |
-|---|---|
-| `src/test-utils.ts` | 98 specs depend on it; a bug here silently weakens all of them. `botNextMoveArgs` returns `any[]` — worth typing while at it |
-| `src/language/translate.ts` | `t()` used site-wide; the `?? texts.hu` fallback and null guard are a 10-line spec |
-| `strategy-game-factory/hooks/use-game-stats.ts` | corrupt-localStorage fallback and `resetStats` are untested branches |
-| `strategy-game-factory/engine/bot-turn.ts`, `engine/build-ctx.ts` | the only engine modules without a direct spec; `build-ctx` is the single source of `ctx` for every validator |
-| `game-parts/common/game-controls.tsx` | the `notAlwaysOptimal` ⓘ marker logic |
+| Module | Why it matters | Status |
+|---|---|---|
+| `src/language/translate.ts` | `t()` used site-wide; the `?? texts.hu` fallback and null guard are a 10-line spec | ✅ #405 |
+| `strategy-game-factory/hooks/use-game-stats.ts` | corrupt-localStorage fallback and `resetStats` are untested branches | ✅ #405 |
+| `strategy-game-factory/engine/bot-turn.ts`, `engine/build-ctx.ts` | the only engine modules without a direct spec; `build-ctx` is the single source of `ctx` for every validator | ✅ #405 |
+| `src/test-utils.ts` | 98 specs depend on it | declined — a helper this thin is exercised by its 98 callers |
+| `game-parts/common/game-controls.tsx` | the `notAlwaysOptimal` ⓘ marker logic | open |
+
+Writing the `build-ctx` spec turned up a real gap rather than just documenting
+the module: `isClientMoveAllowed` compared `currentPlayer === chosenRoleIndex`
+with both unset, so `null === null` made a move allowed before either seat was
+taken. #405 added the `currentPlayer !== null` guard.
 
 ### 4d. Thin specs
 
@@ -107,16 +124,27 @@ rules specs relative to module size.
 
 ## 5. Engine duplication and readability
 
-- **The bot turn loop exists twice**: `strategy-game-factory.tsx`
-  (`runBotTurn`, with `BOT_STEP_DELAY` pacing) and `engine/run-match.ts`
-  (immediate), with divergent error strings; auto-`endOfTurnMove` scheduling
-  is likewise duplicated. Only three helpers are shared via `engine/bot-turn.ts`.
-  Extracting one shared turn-runner parameterised by a scheduler would make the
-  headless path *provably* the browser path — which is the property the
-  competition effort (issue #313) relies on.
-- `engine/run-match.ts` rewrites `ctx.chosenRoleIndex` every turn; in the
-  browser it is fixed for the whole game. A bot consulting it behaves
-  differently headless. Decide the semantics and align.
+- ~~**The bot turn loop exists twice**~~ — **the review was wrong here**, and
+  the correction is the useful part. `strategy-game-factory.tsx`
+  (`runBotTurn`, paced) and `engine/run-match.ts` (immediate) read differently
+  but had **not** drifted: the "named moves after the turn ended" rule decides
+  the same thing in both. The only observable duplication was one bug producing
+  two different error strings. What differs between them is deliberate —
+  pacing, state access, illegal-move policy (prod warns, headless throws),
+  `endOfTurnMove` scheduling, cancellation, one bot vs two, `maxMoves` — and a
+  turn-runner parameterised over all of it needs a callback bag costing more
+  than it saves. A first attempt at the extraction removed ~6 duplicated lines
+  per host and added 27, and was dropped for that reason.
+
+  What *was* missing is a check that the two stay agreed, which is the property
+  issue #313 actually relies on. #408 adds
+  `engine/bot-turn-agreement.spec.tsx`: the same turn played through both
+  hosts, moves compared — named whole, named one at a time, and won partway
+  with moves left over.
+- ~~`engine/run-match.ts` rewrites `ctx.chosenRoleIndex` every turn~~ — also a
+  false alarm, settled while writing #404. The rewrite is *correct*: it is what
+  lets a bot infer which seat it is holding, and ropes-10's bot (the one that
+  consults it) gets the right answer in both seats. No change needed.
 - `strategy-game-factory.tsx` (378 L) mixes store wiring, illegal-move
   reporting, analytics, player names, timeout management, variant/mode reset,
   bot pacing and layout. Notable hazards: `let wrappedGameMoves = {} as …`
@@ -147,16 +175,20 @@ rules specs relative to module size.
 - **7 copies of `asTurn`**, **7 declarations of `type Field = { row, col }`**
   (4 with a byte-identical validator idiom) — obvious `games/shared/`
   extractions.
-- **6 BoardClients hand-derive legality** instead of `moves.X.isAllowed`
-  (`remove-row-or-column`, `two-of-three-takeaway`, `chocolate-breaking`,
-  `number-pyramid`, `pile-union`, `pairs-of-numbers`) — splits the single
-  source of truth the validate layer just established.
+- ~~**6 BoardClients hand-derive legality**~~ — **3**, not 6 ✅ (#407). The
+  count was overstated: of the six named, `remove-row-or-column`,
+  `two-of-three-takeaway` and `chocolate-breaking` restate their validator, and
+  those now call `moves.X.isAllowed`. The other three gate on something the
+  validator does not cover, so they stay as they are.
 - **4 BoardClients pace a two-move human turn with a raw
-  `setTimeout(…, 750)`** (`three-piles-rebuild`, `pile-splitter`,
-  `pile-splitter-3`, `pile-splitter-4`); none clears the timer, so a restart
-  inside the window dispatches against a dead board. One shared hook (or
-  engine support mirroring `BOT_STEP_DELAY`) fixes the leak and the
-  duplication.
+  `setTimeout(…, 750)`** ✅ (#406) — `three-piles-rebuild`, `pile-splitter`,
+  `pile-splitter-3`, `pile-splitter-4`; none cleared the timer. The leak was
+  real and reproduced in a browser: undoing 150 ms after a click threw
+  `stale board passed to move splitPile`. Restart was quieter only by luck.
+  All four now use `useDeferredMove(ctx.moveCount)`, which cancels on restart,
+  variant switch, undo and unmount. The same PR replaced the `BOT_STEP_DELAY`
+  constant with `stepDelay()`, so a human's second move and a bot's next move
+  share one beat.
 - **Precomputed tables stored two ways**: JSON (`modified-mill`,
   `shark-5-by-5`) vs inline TS (`remove-divisor-multiple/bot-strategy.ts`,
   16,028 lines; `bank-robbers`, 999). Converge on JSON.
@@ -185,27 +217,41 @@ rules specs relative to module size.
 - `package.json`: `postcss` sits in `dependencies` (build-only); `playwright`
   is a devDependency no code uses — it exists to bake Chromium into the
   devcontainer, worth a comment where it's declared.
-- CI: `pr_test.yml` has no `concurrency` group (stacked runs on busy PRs) and
-  no npm cache; the two workflows duplicate their build block verbatim.
+- CI: ~~`pr_test.yml` has no `concurrency` group (stacked runs on busy PRs) and
+  no npm cache~~ ✅ (#401); the two workflows still duplicate their build block
+  verbatim.
 - No path alias for `test-utils` — 97 specs import `../../../test-utils`.
 - 7 `console.*` calls in shipped game code (`triangular-grid-ropes-10`,
   `stones-remove-one-not-twice-from-left`, `cube-coloring`) as "unexpected
   state" fallbacks — arguably should throw in dev like the engine does.
-- No SessionStart hook for web/agent sessions: a fresh clone cannot run
-  tests until `npm ci`; a hook would remove that friction.
+- ~~No SessionStart hook for web/agent sessions~~ ✅ (#399): `npm ci` now runs
+  at session start, guarded by `CLAUDE_CODE_REMOTE` so local sessions are
+  unaffected.
 
 ---
 
 ## Suggested order
 
-| # | Item | Size |
+| # | Item | Status |
 |---|---|---|
-| 1 | ✅ Docs sync (§1) + toolchain leftovers (§2) | done on this branch |
-| 2 | Annotate untyped move args (§3); CI concurrency + cache and a SessionStart hook (§7) | mechanical PRs, in flight |
-| 3 | Bot specs for the four zero-coverage variants (§4a) | 3 small PRs |
-| 4 | Specs for `test-utils`, `translate`, `use-game-stats`, `bot-turn`, `build-ctx` (§4c) | 1–2 small PRs |
-| 5 | Unify the bot turn loop; settle `chosenRoleIndex` semantics (§5) | 1 design PR |
-| 6 | `games/shared/`: win/loss solver, mex, `Field`, `asTurn`; migrate by family (§6) | design PR + sweeps |
-| 7 | Route the 6 hand-gated BoardClients through `isAllowed`; fix the 4 `setTimeout` pacers (§6) | 2 small PRs |
-| 8 | react-hooks lint, quotes rule (§7) | small PRs |
-| 9 | Factory component/spec split, `turnState` generic, table-storage convergence, naming sweeps | opportunistic |
+| 1 | Docs sync (§1) + toolchain leftovers (§2) | ✅ #398 |
+| 2 | Annotate untyped move args (§3) | ✅ #402 |
+| 3 | SessionStart hook, CI concurrency + cache (§7) | ✅ #399, #401 |
+| 4 | Bot specs for the four zero-coverage variants (§4a) | ✅ #403, #404 |
+| 5 | Specs for `translate`, `use-game-stats`, `bot-turn`, `build-ctx` (§4c) | ✅ #405 |
+| 6 | Hand-gated BoardClients through `isAllowed`; the `setTimeout` pacers (§6) | ✅ #407, #406 |
+| 7 | Bot turn loop and `chosenRoleIndex` (§5) | ✅ #408 — both premises were false; landed as an agreement test |
+| 8 | `games/shared/`: win/loss solver, mex, `Field`, `asTurn`; migrate by family (§6) | deferred — worth more evidence before committing to an abstraction |
+| 9 | react-hooks lint, quotes rule (§7) | open, small PRs |
+| 10 | Factory component/spec split, `turnState` generic, table-storage convergence, naming sweeps | opportunistic |
+
+Remaining open items worth a line: `game-controls.tsx`'s ⓘ marker (§4c), the
+bots with real search but no spec (§4b), thin rules specs (§4d), and everything
+in §5 below the first two bullets — the 378-line factory component, the
+`turnState` generic, the 1050-line factory spec.
+
+**On the review's own accuracy**: of the items acted on, three claims did not
+survive contact — the bot turn loops had not drifted (§5), `chosenRoleIndex`
+was not divergent (§5), and the hand-gated BoardClient count was 3 rather than
+6 (§6). Worth weighing when reading the items nobody has picked up yet,
+particularly §6's duplication counts, which were gathered the same way.

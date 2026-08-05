@@ -225,13 +225,20 @@ playing it: no move wrappers, no board to thread, no `setTimeout`. Naming a
 whole turn at once is the right shape when the turn is one decision made of
 several moves (`pile-splitter`: discard a pile, split another; `magic-box`:
 place a stone, designate a line); naming one move and being asked again with
-the updated `board`/`ctx` is equally fine (`take-and-point`). The engine
-(`engine/bot-turn.ts`) plays the named moves out — with `STEP_DELAY`
-(`engine/timing.ts`)
-between them in the browser so the bot appears to think, immediately in a
-headless match — and asks the strategy again while the turn is still its own.
-Naming a move after the turn ended is a bug (dev: throw); naming moves the
-game-winning move made moot is fine (they are dropped).
+the updated `board`/`ctx` is equally fine (`take-and-point`). The engine plays
+the named moves out — with `stepDelay()` (`engine/timing.ts`) between them in
+the browser so the bot appears to think, immediately in a headless match — and
+asks the strategy again while the turn is still its own. Naming a move after the
+turn ended is a bug (dev: throw); naming moves the game-winning move made moot
+is fine (they are dropped).
+
+Two hosts play a named turn out: the browser shell in
+`strategy-game-factory.tsx` and the headless runner in `engine/run-match.ts`.
+They differ deliberately in pacing and in how loudly they complain — a bad
+strategy must not crash the site in production, while headless it should throw
+— but *which* moves land has to be identical.
+`engine/bot-turn-agreement.spec.tsx` plays the same turn through both and
+compares, so the two cannot drift apart on what counts as a bug.
 
 Left unpinned, `BotMove` is `{ move: string, args?: unknown[] }`, so neither a
 mistyped name nor wrong arguments surface until the bot plays the move (dev:
