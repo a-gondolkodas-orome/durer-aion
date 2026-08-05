@@ -219,7 +219,10 @@ export const PileUnion = strategyGameFactory({
       label: { hu: 'Teszt', en: 'Test' }
     },
     {
-      // smart bot: verified as optimal
+      // smart bot: verified as optimal — so no notAlwaysOptimal flag. Since the
+      // fix in #413 that is also checked mechanically: bot-strategy.spec.ts
+      // plays every board up to four piles of six and asserts the bot's move
+      // leaves the opponent a lost one.
       botStrategy: smartBotStrategy,
       generateStartBoard: () => {
         const numPiles = random(2, 4);

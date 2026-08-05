@@ -1,5 +1,5 @@
-import { sample, sortBy, sum } from 'lodash';
-import type { BotStrategy } from '../../strategy-game-factory';
+import { sample, sortBy } from 'lodash';
+import type { BotMove, BotStrategy } from '../../strategy-game-factory';
 import type { Board, Moves } from './gameplay';
 
 type Bot = BotStrategy<Board, Moves>
@@ -30,56 +30,43 @@ const isLosing = (board: Board) => {
   return !hasWinningMove;
 };
 
-/*
-P = Previous player wins (the player who just moved wins)
-N = Next player wins — the current player to move has a winning move available
-*/
-export const smartBotStrategy: Bot = ({ board }) => {
-  const T = sum(board) + board.length;
-
-  if (T % 2 === 0) {
-    // N position: simple deterministic strategy — always move to T odd with all piles ≥ 2
-    if (board.length === 1) {
-      // Single pile: just remove from it
-      return { move: 'removeOne', args: [0] };
-    }
-    const size1Idx = board.findIndex(x => x === 1);
-    if (size1Idx !== -1) {
-      // Merge the size-1 pile away so all piles stay ≥ 2
-      return { move: 'mergePiles', args: [[size1Idx, size1Idx === 0 ? 1 : 0]] };
-    }
-    // All piles ≥ 2: remove from any pile of size ≥ 3, or merge if all are size 2
-    const bigPileIdx = board.findIndex(x => x >= 3);
-    if (bigPileIdx !== -1) {
-      return { move: 'removeOne', args: [bigPileIdx] };
-    } else {
-      return { move: 'mergePiles', args: [[0, 1]] };
-    }
-  } else {
-    // P position: use memo to capitalise on opponent mistakes, otherwise random
-    const winningMoves: MoveAction[] = [];
-    const allMoves: MoveAction[] = [];
-    board.forEach((_, i) => {
-      allMoves.push({ type: 'remove', i });
-      const next = board.filter((_, idx) => idx !== i);
-      if (board[i] > 1) next.push(board[i] - 1);
-      if (isLosing(next)) winningMoves.push({ type: 'remove', i });
-    });
-    for (let i = 0; i < board.length; i++) {
-      for (let j = i + 1; j < board.length; j++) {
-        allMoves.push({ type: 'merge', i, j });
-        const next = board.filter((_, idx) => idx !== i && idx !== j);
-        next.push(board[i] + board[j]);
-        if (isLosing(next)) winningMoves.push({ type: 'merge', i, j });
-      }
-    }
-    const chosen = sample(winningMoves.length > 0 ? winningMoves : allMoves)!;
-    if (chosen.type === 'remove') {
-      return { move: 'removeOne', args: [chosen.i] };
-    } else {
-      return { move: 'mergePiles', args: [[chosen.i, chosen.j]] };
-    }
+// Every legal move from a board, in the order the game numbers its piles.
+const allMoves = (board: Board): MoveAction[] => {
+  const result: MoveAction[] = [];
+  board.forEach((_, i) => result.push({ type: 'remove', i }));
+  for (let i = 0; i < board.length; i++) {
+    for (let j = i + 1; j < board.length; j++) result.push({ type: 'merge', i, j });
   }
+  return result;
+};
+
+const boardAfter = (board: Board, move: MoveAction): Board => {
+  if (move.type === 'remove') {
+    const next = board.filter((_, idx) => idx !== move.i);
+    if (board[move.i]! > 1) next.push(board[move.i]! - 1);
+    return next;
+  }
+  const next = board.filter((_, idx) => idx !== move.i && idx !== move.j);
+  next.push(board[move.i]! + board[move.j]!);
+  return next;
+};
+
+const asBotMove = (move: MoveAction): BotMove<Moves> =>
+  move.type === 'remove'
+    ? { move: 'removeOne', args: [move.i] }
+    : { move: 'mergePiles', args: [[move.i, move.j]] };
+
+// A move is winning exactly when it hands the opponent a position they lose,
+// which `isLosing` answers outright. An earlier version instead picked by the
+// parity of sum + pileCount; that is a good rule of thumb but not a theorem —
+// it disagrees with the search on boards like [1,2] and [1,1,1], and it lost
+// outright from [1,1,1,x] for odd x, all of them reachable from a real start
+// board (four piles of two, reduced).
+export const smartBotStrategy: Bot = ({ board }) => {
+  const candidates = allMoves(board);
+  const winning = candidates.filter(move => isLosing(boardAfter(board, move)));
+  // Nothing wins against optimal play here, so play on and hope for a slip.
+  return asBotMove(sample(winning.length > 0 ? winning : candidates)!);
 };
 
 export const randomBotStrategy: Bot = ({ board }) => {

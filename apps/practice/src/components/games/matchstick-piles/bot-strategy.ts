@@ -8,12 +8,12 @@ import { type Board, type Moves } from './gameplay';
 // The value of a position is the XOR of its piles; the player to move wins iff
 // that XOR is non-zero. A winning move is any move leaving the opponent an
 // all-zero XOR position.
-const grundy = (n: number): number => {
+export const grundy = (n: number): number => {
   if (n <= 2) return n;
   return n % 2 === 0 ? 2 : 0;
 };
 
-const xorSum = (board: Board): number => board.reduce((acc, n) => acc ^ grundy(n), 0);
+export const xorSum = (board: Board): number => board.reduce((acc, n) => acc ^ grundy(n), 0);
 
 export type Move =
   | { type: 'remove'; pileId: number }
