@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
 import { range } from 'lodash';
 import { useTranslation } from '../../../language';
-import { GameBoard, type BoardClientProps, useHoverPreview } from '../../strategy-game-factory';
+import {
+  GameBoard, type BoardClientProps, useHoverPreview, useMoveScopedState
+} from '../../strategy-game-factory';
 import { type Board, boundaryEdgesToPlace, currentWindowSize } from './gameplay';
 
 const Matchstick = ({ ghost = false }: { ghost?: boolean }) => (
@@ -35,14 +36,10 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const isValidStart = (a: number) =>
     k !== null && moves.placeWindow.isAllowed(board, a, a + k - 1);
 
-  const [selectedStart, setSelectedStart] = useState<number | null>(null);
+  // Both are move-scoped: the selection and the hover preview expire together
+  // when the board advances (own or bot move).
+  const [selectedStart, setSelectedStart] = useMoveScopedState<number | null>(ctx.moveCount, null);
   const { value: hoverStart, hoverProps } = useHoverPreview<number>(ctx.moveCount);
-
-  // Drop the in-progress selection whenever the board advances (own or bot
-  // move). The hover preview needs no reset: its moveCount stamp expires.
-  useEffect(() => {
-    setSelectedStart(null);
-  }, [ctx.moveCount]);
 
   const canInteract = ctx.isClientMoveAllowed;
   const previewStart = canInteract ? (hoverStart ?? selectedStart) : null;

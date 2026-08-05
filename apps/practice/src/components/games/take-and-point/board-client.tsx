@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react';
 import { range } from 'lodash';
 import { useTranslation } from '../../../language';
-import { GameBoard, type BoardClientProps } from '../../strategy-game-factory';
+import { GameBoard, type BoardClientProps, useMoveScopedState } from '../../strategy-game-factory';
 import { type Board, requiredPointCount } from './gameplay';
 
 const Chips = ({ count, removeCount = 0 }: { count: number; removeCount?: number }) => (
@@ -50,19 +49,21 @@ const pileClass = (highlighted: boolean, pointed: boolean, empty: boolean) => `
   ${empty ? 'opacity-40' : ''}
 `;
 
+type Removal = { index: number; amount: number } | null
+
+// module scope: useMoveScopedState hands this back on every render where the
+// stamp is stale, so it has to be one stable reference
+const nonePointed: number[] = [];
+
 export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
   const { piles, pointed } = board;
   const stage: 'point' | 'remove' = pointed === null ? 'point' : 'remove';
 
-  const [selectedForPoint, setSelectedForPoint] = useState<number[]>([]);
-  const [removal, setRemoval] = useState<{ index: number; amount: number } | null>(null);
-
-  // Reset the in-progress selection whenever the board advances (own or bot move).
-  useEffect(() => {
-    setSelectedForPoint([]);
-    setRemoval(null);
-  }, [ctx.moveCount]);
+  // Move-scoped: both halves of the in-progress selection expire when the board
+  // advances (own or bot move).
+  const [selectedForPoint, setSelectedForPoint] = useMoveScopedState<number[]>(ctx.moveCount, nonePointed);
+  const [removal, setRemoval] = useMoveScopedState<Removal>(ctx.moveCount, null);
 
   const canInteract = ctx.isClientMoveAllowed;
   const pointCount = requiredPointCount(piles);

@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { range } from 'lodash';
 import { useTranslation } from '../../../language';
-import { GameBoard, type BoardClientProps } from '../../strategy-game-factory';
+import { GameBoard, type BoardClientProps, useMoveScopedState } from '../../strategy-game-factory';
 import { type Board, type Cell, colorOf } from './gameplay';
 
 // Translucent version of each disc colour, used for the recolour pulse ring.
@@ -37,10 +37,8 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const myColor = ctx.currentPlayer === null ? null : colorOf(ctx.currentPlayer);
   const canInteract = ctx.isClientMoveAllowed && myColor !== null;
 
-  const [selectedFrom, setSelectedFrom] = useState<number | null>(null);
-
-  // Drop any in-progress selection whenever the board advances.
-  useEffect(() => setSelectedFrom(null), [ctx.moveCount]);
+  // Move-scoped: any in-progress selection expires when the board advances.
+  const [selectedFrom, setSelectedFrom] = useMoveScopedState<number | null>(ctx.moveCount, null);
 
   // Pulse discs that were just recoloured (a cell that held a disc and now holds
   // the opposite colour) so the flip is easy to spot. We diff against the

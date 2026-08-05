@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react';
 import { useTranslation } from '../../../language';
-import { GameBoard, type BoardClientProps } from '../../strategy-game-factory';
+import { GameBoard, type BoardClientProps, useHoverPreview } from '../../strategy-game-factory';
 import { BOARD_OUTLINE, EDGES, TRIANGLES, type Edge } from './geometry';
 import { type Board } from './gameplay';
 
@@ -20,11 +19,8 @@ const insetEdge = (edge: Edge) => ({
 
 export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
-  const [hoveredEdge, setHoveredEdge] = useState<number | null>(null);
-
-  useEffect(() => {
-    setHoveredEdge(null);
-  }, [ctx.moveCount]);
+  // The preview is move-scoped, so shading an edge clears it without a reset.
+  const { value: hoveredEdge, hoverProps } = useHoverPreview<number>(ctx.moveCount);
 
   const triangleClickable = (t: number) => moves.placeCircle.isAllowed(board, t);
 
@@ -133,10 +129,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               strokeLinecap="round"
               className="cursor-pointer outline-none"
               onClick={() => moves.shadeEdge(board, edge.id)}
-              onMouseEnter={() => setHoveredEdge(edge.id)}
-              onMouseLeave={() => setHoveredEdge(null)}
-              onFocus={() => setHoveredEdge(edge.id)}
-              onBlur={() => setHoveredEdge(null)}
+              {...hoverProps(edge.id)}
               onKeyUp={event => { if (event.key === 'Enter') moves.shadeEdge(board, edge.id); }}
               tabIndex={0}
               role="button"

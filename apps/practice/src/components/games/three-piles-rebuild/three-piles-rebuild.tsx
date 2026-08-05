@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react';
 import {
-  strategyGameFactory, type BoardClientProps, GameBoard, useDeferredMove
+  strategyGameFactory, type BoardClientProps, GameBoard, useDeferredMove, useMoveScopedState
 } from '../../strategy-game-factory';
 import { useTranslation } from '../../../language';
 import {
@@ -21,17 +20,19 @@ const parsePart = (raw: string): number | null => {
   return value >= 1 ? value : null;
 };
 
+type Inputs = { p1: string; p2: string }
+
+// module scope: useMoveScopedState hands this back on every render where the
+// stamp is stale, so it has to be one stable reference
+const emptyInputs: Inputs = { p1: '', p2: '' };
+
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
   const deferMove = useDeferredMove(ctx.moveCount);
-  const [keepId, setKeepId] = useState<number | null>(null);
-  const [inputs, setInputs] = useState<{ p1: string; p2: string }>({ p1: '', p2: '' });
-
-  // Reset the in-progress selection whenever the board advances (own or bot move).
-  useEffect(() => {
-    setKeepId(null);
-    setInputs({ p1: '', p2: '' });
-  }, [ctx.moveCount]);
+  // Move-scoped: the kept pile and the typed parts expire when the board
+  // advances (own or bot move).
+  const [keepId, setKeepId] = useMoveScopedState<number | null>(ctx.moveCount, null);
+  const [inputs, setInputs] = useMoveScopedState<Inputs>(ctx.moveCount, emptyInputs);
 
   // Between keepPile and splitPile the two discarded piles are 0 — the board is
   // frozen mid-move (own animation beat or the bot's first step).
@@ -42,7 +43,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   // rather than relying on the engine silently ignoring the dispatch.
   const clickPile = (pileId: number) => {
     if (!moves.keepPile.isAllowed(board, pileId)) return;
-    setInputs({ p1: '', p2: '' });
+    setInputs(emptyInputs);
     setKeepId(prev => (prev === pileId ? null : pileId));
   };
 
@@ -62,7 +63,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     // split it into the three new piles.
     const { nextBoard } = moves.keepPile(board, keepId);
     setKeepId(null);
-    setInputs({ p1: '', p2: '' });
+    setInputs(emptyInputs);
     deferMove(() => moves.splitPile(nextBoard, parts));
   };
 

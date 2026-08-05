@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
 import { range } from 'lodash';
-import { strategyGameFactory, type BoardClientProps, GameBoard } from '../../strategy-game-factory';
+import {
+  strategyGameFactory, useMoveScopedState, type BoardClientProps, GameBoard
+} from '../../strategy-game-factory';
 import { useTranslation } from '../../../language';
 import { generateStartBoard, moves, type Board } from './gameplay';
 import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
@@ -46,12 +47,8 @@ const Pile = ({ count, index, selected, selectable, onClick }: {
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
-  const [firstSelected, setFirstSelected] = useState<number | null>(null);
-
-  // Reset the in-progress selection whenever the board advances (own or bot move).
-  useEffect(() => {
-    setFirstSelected(null);
-  }, [ctx.moveCount]);
+  // Move-scoped: the in-progress selection expires when the board advances.
+  const [firstSelected, setFirstSelected] = useMoveScopedState<number | null>(ctx.moveCount, null);
 
   // A pile can start a move when some other pile can partner it — the pair is
   // what the validator judges, so ask it rather than restate "not empty".
