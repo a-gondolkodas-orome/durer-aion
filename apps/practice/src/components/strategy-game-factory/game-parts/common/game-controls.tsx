@@ -1,5 +1,13 @@
+import { useId } from 'react';
 import { useTranslation } from '../../../../language';
 import type { Variant, Mode } from '../../types';
+
+// Radios sharing a `name` form one native group, and the browser keeps exactly
+// one of them checked. The sidebar and the game-end dialog each render these
+// selectors into the same document, so a fixed name made the two instances one
+// group: clicking the dialog's choice unchecked the sidebar's, and React —
+// whose own state had not changed there — left it that way. useId gives each
+// instance its own group.
 
 export const ModeSelector = ({ isHumanVsHumanGame, onSwitchMode, disabled }: {
   isHumanVsHumanGame: boolean
@@ -7,6 +15,7 @@ export const ModeSelector = ({ isHumanVsHumanGame, onSwitchMode, disabled }: {
   disabled: boolean
 }) => {
   const { t } = useTranslation();
+  const groupName = useId();
 
   return (
     <fieldset>
@@ -18,7 +27,7 @@ export const ModeSelector = ({ isHumanVsHumanGame, onSwitchMode, disabled }: {
         <label className={labelClass(!isHumanVsHumanGame, disabled)}>
           <input
             type="radio"
-            name="mode"
+            name={groupName}
             className="sr-only"
             data-testid="mode-vsComputer"
             checked={!isHumanVsHumanGame}
@@ -30,7 +39,7 @@ export const ModeSelector = ({ isHumanVsHumanGame, onSwitchMode, disabled }: {
         <label className={labelClass(isHumanVsHumanGame, disabled)}>
           <input
             type="radio"
-            name="mode"
+            name={groupName}
             className="sr-only"
             data-testid="mode-vsHuman"
             checked={isHumanVsHumanGame}
@@ -51,6 +60,7 @@ export const DifficultySelector = ({ variants, selectedIndex, onSelect, disabled
   disabled: boolean
 }) => {
   const { t } = useTranslation();
+  const groupName = useId();
 
   return (
     <fieldset>
@@ -67,7 +77,7 @@ export const DifficultySelector = ({ variants, selectedIndex, onSelect, disabled
           >
             <input
               type="radio"
-              name="difficulty"
+              name={groupName}
               className="sr-only"
               checked={v.originalIndex === selectedIndex}
               onChange={() => onSelect(v.originalIndex)}

@@ -482,8 +482,11 @@ describe('per-variant rule', () => {
     expect(getByText('RULE_ONE')).toBeTruthy();
     expect(queryByText('RULE_TWO')).toBeNull();
 
-    const radios = container.querySelectorAll('input[name="difficulty"]');
-    fireEvent.click(radios[1]);
+    // the variant radios' group name is a useId, so select them by the
+    // fieldset they live in rather than by a fixed name
+    const variantFieldset = container.querySelectorAll('fieldset')[1]!;
+    const radios = variantFieldset.querySelectorAll('input[type="radio"]');
+    fireEvent.click(radios[1]!);
 
     expect(getByText('RULE_TWO')).toBeTruthy();
     expect(queryByText('RULE_ONE')).toBeNull();
