@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { isConversionAllowed } from './gameplay';
+import { isConversionAllowed, moves, type Board } from './gameplay';
+import { makeCtx } from '../../../test-utils';
 
 describe('isConversionAllowed', () => {
   // Four 3s and six 1s: the values 1 and 3 are on the table, 2 and 4 are not.
@@ -32,9 +33,28 @@ describe('isConversionAllowed', () => {
   });
 });
 
-// Exhaustive optimality check for both variants (coin values 1..4 and 1..5).
-// Only the SET of distinct present values matters for the game, so we represent
-// a position by that set. A move replaces all coins of value K with some L < K.
-// You win when only one distinct value remains after your move.
-// We verify against an independent minimax that on every winning position the
-// bot makes a winning move.
+// A conversion turns *every* coin of the chosen value into the same smaller
+// one, and the player whose move leaves all ten coins equal wins.
+const asPlayer = (currentPlayer: number) => ({ ctx: makeCtx({ currentPlayer }) });
+
+describe('end of game', () => {
+  it('converts every coin of the chosen value at once', () => {
+    const board: Board = [1, 1, 3, 3, 3, 4];
+    expect(moves.convert.apply(board, asPlayer(0), 3, 2).nextBoard).toEqual([1, 1, 2, 2, 2, 4]);
+  });
+
+  it.each([0, 1])('ends for the mover (player %i) when every coin ends up equal', player => {
+    const board: Board = [1, 1, 1, 3, 3];
+    const outcome = moves.convert.apply(board, asPlayer(player), 3, 1);
+    expect(outcome.nextBoard).toEqual([1, 1, 1, 1, 1]);
+    expect(outcome.gameEnd).toEqual({ winnerIndex: player });
+    expect(outcome.isTurnEnd).toBeUndefined();
+  });
+
+  it('passes the turn while two values are still on the table', () => {
+    const outcome = moves.convert.apply([1, 1, 3, 3, 4], asPlayer(0), 4, 2);
+    expect(outcome.nextBoard).toEqual([1, 1, 2, 3, 3]);
+    expect(outcome.gameEnd).toBeUndefined();
+    expect(outcome.isTurnEnd).toBe(true);
+  });
+});

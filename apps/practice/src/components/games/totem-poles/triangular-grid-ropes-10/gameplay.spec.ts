@@ -40,6 +40,12 @@ describe('isAllowed', () => {
     expect(isAllowed(board, { from: 1, to: 2 })).toBe(true);
   });
 
+  it('rejects a rope from a pole to itself', () => {
+    // A vertex shares all three coordinates with itself and spans no middle
+    // point, so nothing else in `isAllowed` rules this out.
+    expect(isAllowed(emptyBoard, { from: 3, to: 3 })).toBe(false);
+  });
+
   // The board client asks about the rope the player is halfway through picking,
   // so it hands over an edge with an end still unchosen.
   it('rejects an edge that is missing an end', () => {

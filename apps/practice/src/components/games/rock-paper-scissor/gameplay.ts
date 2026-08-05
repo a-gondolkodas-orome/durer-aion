@@ -8,15 +8,18 @@ const isGameEnd = (board: Board) => {
   return remaining(board[0]) === 1 && remaining(board[1]) === 1;
 };
 
+// A card's index is its symbol: 0 = rock, 1 = paper, 2 = scissor. Each symbol
+// beats the one two places along, so rock beats scissor, paper beats rock and
+// scissor beats paper.
+const beats = (a: number, b: number) => b === (a + 2) % 3;
+
 const getWinnerIndex = (board: Board) => {
   if (!isGameEnd(board)) return undefined;
-  const pairs = [[0, 2], [1, 0], [2, 1]];
-  for (const p of pairs) {
-    if (board[0][p[0]] !== null && board[1][p[1]]) {
-      return 0;
-    }
-  }
-  return 1;
+  const first = board[0].findIndex(symbol => symbol !== null);
+  const second = board[1].findIndex(symbol => symbol !== null);
+  // Two cards showing the same symbol go to the starting player, so the second
+  // player only takes the round by beating them outright.
+  return beats(second, first) ? 1 : 0;
 };
 
 // Only a symbol the other player still holds may be taken away.

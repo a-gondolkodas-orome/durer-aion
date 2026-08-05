@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { isFlipAllowed, isRemovalAllowed } from './gameplay';
+import { isFlipAllowed, isRemovalAllowed, moves } from './gameplay';
+import { makeCtx } from '../../../test-utils';
 
 describe('isRemovalAllowed', () => {
   it('accepts taking one or two blue discs', () => {
@@ -38,8 +39,37 @@ describe('isFlipAllowed', () => {
   });
 });
 
-// Exhaustive optimality check for both variants (max 6 and max 10 discs).
-// Moves: remove 1-2 blue, or flip 1-2 red into blue.
-// A player who cannot move (board [0,0]) loses. We verify against an
-// independent minimax over the whole reachable state space that the bot,
-// whenever the mover can win, always moves to a losing-for-opponent position.
+// A move takes discs off the blue pile or moves them across from the red one,
+// so the board empties only through a removal; the player left with [0, 0]
+// cannot move and loses.
+describe('move outcomes', () => {
+  const asPlayer = (currentPlayer: number) => ({ ctx: makeCtx({ currentPlayer }) });
+
+  it('takes the discs off the table when the blue pile is drawn from', () => {
+    expect(moves.removeDiscs.apply([3, 4], asPlayer(0), 2).nextBoard).toEqual([1, 4]);
+  });
+
+  it('moves flipped discs from red to blue rather than discarding them', () => {
+    expect(moves.turnDiscs.apply([3, 4], asPlayer(0), 2).nextBoard).toEqual([5, 2]);
+  });
+
+  it.each([0, 1])('ends for the mover (player %i) on clearing the table', player => {
+    const outcome = moves.removeDiscs.apply([2, 0], asPlayer(player), 2);
+    expect(outcome.nextBoard).toEqual([0, 0]);
+    expect(outcome.gameEnd).toEqual({ winnerIndex: player });
+    expect(outcome.isTurnEnd).toBeUndefined();
+  });
+
+  it('passes the turn while any disc is left', () => {
+    const outcome = moves.removeDiscs.apply([2, 1], asPlayer(0), 2);
+    expect(outcome.gameEnd).toBeUndefined();
+    expect(outcome.isTurnEnd).toBe(true);
+  });
+
+  it('never ends the game on a flip — it always leaves a blue disc behind', () => {
+    const outcome = moves.turnDiscs.apply([0, 1], asPlayer(0), 1);
+    expect(outcome.nextBoard).toEqual([1, 0]);
+    expect(outcome.gameEnd).toBeUndefined();
+    expect(outcome.isTurnEnd).toBe(true);
+  });
+});

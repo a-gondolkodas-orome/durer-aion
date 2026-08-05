@@ -35,8 +35,9 @@ describe('isDigitChoiceAllowed', () => {
 // it is divisible by 9. Neither the mover nor the turn order enters into it.
 describe('end of game', () => {
   it('gives the tenth digit to Bob when the sum lands on a multiple of 9', () => {
-    // nine 1s sum to 9; adding a 9 keeps the total ≡ 0 (mod 9)
-    const outcome = moves.chooseDigit.apply(board(Array(9).fill(1)), meta, 9);
+    // eight 1s and a 4 sum to 12; a final 6 makes 18, a multiple of 9. Every
+    // digit here is one of the six the players may actually choose.
+    const outcome = moves.chooseDigit.apply(board([...Array(8).fill(1), 4]), meta, 6);
     expect(outcome.nextBoard.digits).toHaveLength(10);
     expect(outcome.nextBoard.sumMod9).toBe(0);
     expect(outcome.gameEnd).toEqual({ winnerIndex: 1 });

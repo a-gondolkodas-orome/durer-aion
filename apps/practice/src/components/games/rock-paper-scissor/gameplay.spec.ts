@@ -45,6 +45,18 @@ describe('end of game', () => {
     expect(outcome.gameEnd).toEqual({ winnerIndex: 1 });
   });
 
+  it.each([
+    ['rock', ROCK],
+    ['paper', PAPER],
+    ['scissor', SCISSOR]
+  ])('gives two %s cards to the starting player', (_name, symbol) => {
+    // player 1 takes player 0's spare card, leaving the same symbol on both sides
+    const spare = (symbol + 1) % 3;
+    const outcome = moves.removeSymbol.apply(board([symbol, spare], [symbol]), asPlayer(1), spare);
+    expect(outcome.gameEnd).toEqual({ winnerIndex: 0 });
+    expect(outcome.isTurnEnd).toBeUndefined();
+  });
+
   it('passes the turn while either player holds more than one card', () => {
     const outcome = moves.removeSymbol.apply(board([ROCK, PAPER, SCISSOR], [ROCK, PAPER]), asPlayer(0), PAPER);
     expect(outcome.gameEnd).toBeUndefined();

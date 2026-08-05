@@ -3,6 +3,12 @@ import { playBotMove } from '../../../test-utils';
 import { smartBotStrategy } from './bot-strategy';
 import { moves as gameMoves } from './gameplay';
 
+// Exhaustive optimality check for both variants (max 6 and max 10 discs).
+// Moves: remove 1-2 blue, or flip 1-2 red into blue.
+// A player who cannot move (board [0,0]) loses. We verify against an
+// independent minimax over the whole reachable state space that the bot,
+// whenever the mover can win, always moves to a losing-for-opponent position.
+
 // board[0] = blue discs, board[1] = red discs.
 type Board = [number, number];
 

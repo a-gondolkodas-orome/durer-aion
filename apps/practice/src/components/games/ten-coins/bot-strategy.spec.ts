@@ -4,6 +4,13 @@ import { playBotMove } from '../../../test-utils';
 import { smartBotStrategy } from './bot-strategy';
 import { moves as gameMoves } from './gameplay';
 
+// Exhaustive optimality check for both variants (coin values 1..4 and 1..5).
+// Only the SET of distinct present values matters for the game, so we represent
+// a position by that set. A move replaces all coins of value K with some L < K.
+// You win when only one distinct value remains after your move.
+// We verify against an independent minimax that on every winning position the
+// bot makes a winning move.
+
 type Vals = number[];
 
 const movesFromSet = (set: Vals): Vals[] => {

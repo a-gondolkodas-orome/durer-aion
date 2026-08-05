@@ -31,6 +31,9 @@ export const isAllowed = (board: Board, edge?: { from: number | null, to: number
   const from = edge?.from ?? null;
   const to = edge?.to ?? null;
   if (from === null || to === null) return false;
+  // A rope needs two distinct poles: from === to would pass the checks below
+  // (a vertex shares every coordinate with itself, and spans no middle point).
+  if (from === to) return false;
   if (!isParallel({ from, to })) return false;
   if (isPartOfExistingRope(board, { from, to })) return false;
   const middlePoints = getMiddlePoints({ from, to });
