@@ -111,6 +111,8 @@ Simple formatting errors such as trailing spaces can be automatically fixed with
 npm run lint:fix
 ```
 
+`npx stryker run` mutation-tests the engine on demand — not part of `npm run test` or CI, never fails a build, scope it with `--mutate "path/to/file.ts:120-160"`.
+
 ### Build for prod
 
 (some problems only appear in prod build, not while testing, for example using a

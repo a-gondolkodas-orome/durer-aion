@@ -7,5 +7,8 @@ npm-debug.log*
 .vscode
 # rollup-plugin-visualizer output
 stats.html
+# Stryker mutation testing: sandbox and generated report
+.stryker-tmp
+/reports
 tmp_*
 .claude/settings.local.json

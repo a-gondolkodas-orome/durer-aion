@@ -8,7 +8,7 @@
 import { render, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { strategyGameFactory, type StrategyGameConfig } from './strategy-game-factory';
-import type { BoardClientProps, BotStrategy, Gameplay } from './types';
+import type { BoardClientProps, BotStrategy, Gameplay, VariantInput } from './types';
 
 export type Board = string[];
 
@@ -35,16 +35,18 @@ export const defaultGameplay: Gameplay<Board> = {
 export const makeConfig = ({
   BoardClient = MinimalBoardClient,
   gameplay = defaultGameplay,
-  botStrategy = (() => []) as BotStrategy<Board>
+  botStrategy = (() => []) as BotStrategy<Board>,
+  variants
 }: {
   BoardClient?: StrategyGameConfig<Board>['BoardClient']
   gameplay?: Gameplay<Board>
   botStrategy?: BotStrategy<Board>
+  variants?: VariantInput<Board>[]
 } = {}): StrategyGameConfig<Board> => ({
   presentation: { rule: <></>, getPlayerStepDescription: () => '' },
   BoardClient,
   gameplay,
-  variants: [{ botStrategy, generateStartBoard: (): Board => ['initial'] }]
+  variants: variants ?? [{ botStrategy, generateStartBoard: (): Board => ['initial'] }]
 });
 
 export const minimalConfig = (gameplay: Gameplay<Board>) => makeConfig({ gameplay });
