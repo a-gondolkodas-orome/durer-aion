@@ -1,5 +1,5 @@
 import type { Ctx, MoveOutcome } from '../../strategy-game-factory';
-import { range } from "lodash";
+import { range } from 'lodash';
 
 // The board is a 4-field graph holding coin counts: K4 minus one edge. Indices
 // 0=A, 1=B are the two "hub" fields (degree 3, adjacent to each other and to both

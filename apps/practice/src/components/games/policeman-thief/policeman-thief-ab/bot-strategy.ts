@@ -1,6 +1,6 @@
-import { random } from "lodash";
+import { random } from 'lodash';
 import { POLICE, neighbours, type Board, type Moves } from './gameplay';
-import type { BotMove, BotStrategy } from "../../../strategy-game-factory";
+import type { BotMove, BotStrategy } from '../../../strategy-game-factory';
 
 type Bot = BotStrategy<Board, Moves>
 

@@ -13,7 +13,7 @@ const board = (first: number[], second: number[]): Board => [hand(first), hand(s
 describe('isRemovalAllowed', () => {
   const table = board([ROCK, SCISSOR], [ROCK, PAPER, SCISSOR]);
 
-  it("allows taking a symbol the other player still holds", () => {
+  it('allows taking a symbol the other player still holds', () => {
     expect([0, 1, 2].every(idx => isRemovalAllowed(table, 1, idx))).toBe(true);
   });
 

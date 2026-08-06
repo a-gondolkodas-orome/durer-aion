@@ -27,7 +27,7 @@ const getOptimalMove = (board, ctx) => {
     if (!board.leftRestriction[otherPlayer]) {
       return undefined;
     } else if (board.leftRestriction[ctx.currentPlayer]) {
-      console.error("Unexpected internal state, please report.")
+      console.error('Unexpected internal state, please report.')
       return undefined;
     } else {
       /*
@@ -63,7 +63,7 @@ const getOptimalMove = (board, ctx) => {
       if (!board.leftRestriction[ctx.currentPlayer]) {
         return 0;
       } else {
-        console.error("Unexpected internal state, please report.")
+        console.error('Unexpected internal state, please report.')
         return undefined;
       }
     } else {

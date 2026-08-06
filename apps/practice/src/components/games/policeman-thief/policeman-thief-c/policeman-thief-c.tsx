@@ -38,7 +38,7 @@ const getPlayerStepDescription = ({ board, ctx }: { board: Board; ctx: Ctx }) =>
   }
   if (board.phase === 'placingThief') {
     return {
-      hu: "Válaszd ki a tolvaj kiinduló csúcsát (nem lehet rendőrös csúcs).",
+      hu: 'Válaszd ki a tolvaj kiinduló csúcsát (nem lehet rendőrös csúcs).',
       en: "Choose the thief's starting vertex (it cannot be a vertex with a policeman)."
     };
   }
@@ -60,8 +60,8 @@ export const PolicemanthiefC = strategyGameFactory({
   presentation: {
     rule,
     roleLabels: [
-      { hu: "Rendőrök", en: "Policemen" },
-      { hu: "Tolvaj", en: "Thief" }
+      { hu: 'Rendőrök', en: 'Policemen' },
+      { hu: 'Tolvaj', en: 'Thief' }
     ],
     getPlayerStepDescription
   },

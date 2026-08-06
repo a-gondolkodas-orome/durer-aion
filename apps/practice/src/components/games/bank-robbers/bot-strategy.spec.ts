@@ -1,4 +1,4 @@
-import { smartBotStrategy } from "./bot-strategy";
+import { smartBotStrategy } from './bot-strategy';
 import type { Board } from './gameplay';
 import { botNextMoveArgs, makeCtx } from '../../../test-utils';
 

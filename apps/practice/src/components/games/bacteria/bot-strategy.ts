@@ -1,6 +1,6 @@
-import { cloneDeep, sample, maxBy } from "lodash";
+import { cloneDeep, sample, maxBy } from 'lodash';
 import type { BotStrategy } from '../../strategy-game-factory';
-import { computeLettered, computeSinks, deficiency } from "./danger";
+import { computeLettered, computeSinks, deficiency } from './danger';
 import {
   type Board,
   type AttackMove,
@@ -15,7 +15,7 @@ import {
   ATTACKER,
   DEFENDER,
   type Moves
-} from "./gameplay";
+} from './gameplay';
 
 type Bot = BotStrategy<Board, Moves>
 

@@ -1,24 +1,24 @@
-import { cloneDeep, range, reverse } from "lodash";
-import { deficiency } from "./danger";
+import { cloneDeep, range, reverse } from 'lodash';
+import { deficiency } from './danger';
 import { bacteriaCoords, isAttackAllowed, removeOne, totalBacteria, type Board } from './gameplay';
 import {
   simulate,
   legalAttackMoves,
   attackerMove,
   defenderMove
-} from "./bot-strategy";
-import { scatteredStartBoards, adjacentStartBoards } from "./start-boards";
+} from './bot-strategy';
+import { scatteredStartBoards, adjacentStartBoards } from './start-boards';
 
 // --- Independent brute-force game solver (small boards only) ---------------
 // attacker moves first; returns true iff the attacker can force a win.
 const buildSolver = () => {
   const resolved = new Map<string, boolean>();
   const key = (turn: string, board: Board) =>
-    turn + "g" + board.goals.join(",") + ";" + board.bacteria.map(r => r.join("")).join("|");
+    turn + 'g' + board.goals.join(',') + ';' + board.bacteria.map(r => r.join('')).join('|');
 
   const attackerWins = (board: Board, visiting: Set<string>): boolean => {
     if (totalBacteria(board) === 0) return false;
-    const k = key("a", board);
+    const k = key('a', board);
     if (resolved.has(k)) return resolved.get(k)!;
     if (visiting.has(k)) return false; // cycle: no finite forced win on this line
     visiting.add(k);
@@ -35,7 +35,7 @@ const buildSolver = () => {
   const defenderCannotSave = (board: Board, visiting: Set<string>): boolean => {
     const coords = bacteriaCoords(board);
     if (coords.length === 0) return false;
-    const k = key("d", board);
+    const k = key('d', board);
     if (resolved.has(k)) return resolved.get(k)!;
     if (visiting.has(k)) return false;
     visiting.add(k);
@@ -59,7 +59,7 @@ const buildSolver = () => {
 const emptyBoard = (rows: number, wide: number): number[][] =>
   range(rows).map(r => Array(r % 2 === 0 ? wide : wide - 1).fill(0));
 
-describe("deficiency equals the true game value (brute force)", () => {
+describe('deficiency equals the true game value (brute force)', () => {
   const solver = buildSolver();
 
   const cases: { rows: number; wide: number; maxBacteria: number }[] = [
@@ -69,7 +69,7 @@ describe("deficiency equals the true game value (brute force)", () => {
     { rows: 7, wide: 3, maxBacteria: 1 }
   ];
 
-  it("matches on all small boards", () => {
+  it('matches on all small boards', () => {
     let checked = 0;
     for (const { rows, wide, maxBacteria } of cases) {
       const goalOptions = range(1, 1 << wide); // every non-empty goal subset
@@ -120,39 +120,39 @@ const adversarialDefense = (board: Board): Board => {
   return best ?? board;
 };
 
-const playAttackerBotVsDefender = (start: Board, maxPlies = 400): "attacker" | "defender" => {
+const playAttackerBotVsDefender = (start: Board, maxPlies = 400): 'attacker' | 'defender' => {
   let board = cloneDeep(start);
   for (let ply = 0; ply < maxPlies; ply++) {
     const move = attackerMove(board);
     const { board: next, reachedGoal } = simulate(board, move);
     board = next;
-    if (reachedGoal) return "attacker";
-    if (totalBacteria(board) === 0) return "defender";
+    if (reachedGoal) return 'attacker';
+    if (totalBacteria(board) === 0) return 'defender';
     board = adversarialDefense(board);
-    if (totalBacteria(board) === 0) return "defender";
+    if (totalBacteria(board) === 0) return 'defender';
   }
-  return "defender"; // attacker failed to force a win in time
+  return 'defender'; // attacker failed to force a win in time
 };
 
-describe("smart bot plays the 9x17 game optimally", () => {
+describe('smart bot plays the 9x17 game optimally', () => {
   // The real scattered-variant start boards (generateScatteredStartBoard).
   const boards = scatteredStartBoards();
 
-  it("has a mix of attacker- and defender-winning start boards", () => {
+  it('has a mix of attacker- and defender-winning start boards', () => {
     const values = boards.map(board => deficiency(board) >= 1);
     expect(values.some(Boolean)).toBe(true);   // some attacker wins
     expect(values.some(v => !v)).toBe(true);    // some defender wins
   });
 
-  it("attacker bot wins from every attacker-winning start against an optimal defender", () => {
+  it('attacker bot wins from every attacker-winning start against an optimal defender', () => {
     for (const board of boards) {
       if (deficiency(board) >= 1) {
-        expect(playAttackerBotVsDefender(board), `goals ${board.goals}`).toBe("attacker");
+        expect(playAttackerBotVsDefender(board), `goals ${board.goals}`).toBe('attacker');
       }
     }
   });
 
-  it("defender bot never loses from a defender-winning start against a spreading attacker", () => {
+  it('defender bot never loses from a defender-winning start against a spreading attacker', () => {
     for (const start of boards) {
       if (deficiency(start) !== 0) continue;
       let board = cloneDeep(start);
@@ -185,24 +185,24 @@ describe("smart bot plays the 9x17 game optimally", () => {
 // real start boards of the adjacent variant (generateAdjacentStartBoard), which
 // seed bacteria on rows 0-2, to confirm the shared board-driven bot is also
 // optimal at width 11.
-describe("smart bot plays the 9x11 adjacent-goals game optimally", () => {
+describe('smart bot plays the 9x11 adjacent-goals game optimally', () => {
   const boards = adjacentStartBoards();
 
-  it("has a mix of attacker- and defender-winning start boards", () => {
+  it('has a mix of attacker- and defender-winning start boards', () => {
     const values = boards.map(board => deficiency(board) >= 1);
     expect(values.some(Boolean)).toBe(true);
     expect(values.some(v => !v)).toBe(true);
   });
 
-  it("attacker bot wins from every attacker-winning start against an optimal defender", () => {
+  it('attacker bot wins from every attacker-winning start against an optimal defender', () => {
     for (const board of boards) {
       if (deficiency(board) >= 1) {
-        expect(playAttackerBotVsDefender(board), `goals ${board.goals}`).toBe("attacker");
+        expect(playAttackerBotVsDefender(board), `goals ${board.goals}`).toBe('attacker');
       }
     }
   });
 
-  it("defender bot never loses from a defender-winning start against a spreading attacker", () => {
+  it('defender bot never loses from a defender-winning start against a spreading attacker', () => {
     for (const start of boards) {
       if (deficiency(start) !== 0) continue;
       let board = cloneDeep(start);
@@ -240,9 +240,9 @@ describe("smart bot plays the 9x11 adjacent-goals game optimally", () => {
 // Boards use lodash `reverse` so the literal reads top-row-first while the
 // engine indexes rows from the bottom (row 0 = start row, last row = goals).
 // A position is defender-winning exactly when deficiency === 0.
-describe("bacteria bot behaviour", () => {
-  describe("defenderMove", () => {
-    it("removes the only bacterium that keeps the position safe when winning", () => {
+describe('bacteria bot behaviour', () => {
+  describe('defenderMove', () => {
+    it('removes the only bacterium that keeps the position safe when winning', () => {
       // deficiency 0: the defender is winning and has exactly one safe removal —
       // the advanced threat on the top row. Taking anything else would let the
       // attacker through, so this choice is forced.
@@ -263,7 +263,7 @@ describe("bacteria bot behaviour", () => {
       expect(deficiency(removeOne(board, move.row, move.col))).toBe(0);
     });
 
-    it("accepts any safe removal when several keep the position winning", () => {
+    it('accepts any safe removal when several keep the position winning', () => {
       // deficiency 0 with more than one safe removal: the defender samples among
       // them, so we assert the *property* (the chosen removal stays winning)
       // rather than a single hard-coded cell — pinning one would be over-specified.
@@ -282,7 +282,7 @@ describe("bacteria bot behaviour", () => {
       }
     });
 
-    it("removes the advanced threat that restores a safe position", () => {
+    it('removes the advanced threat that restores a safe position', () => {
       // The board is momentarily unsafe (deficiency 1), but removing the
       // bacterium already up on the goal row brings it back to safe — and that
       // is the single removal the defender must find. Taking the far bacterium
@@ -298,8 +298,8 @@ describe("bacteria bot behaviour", () => {
     });
   });
 
-  describe("attackerMove", () => {
-    it("spreads to advance a dangerous bacterium when winning", () => {
+  describe('attackerMove', () => {
+    it('spreads to advance a dangerous bacterium when winning', () => {
       // deficiency 2: the attacker is winning and grows its dangerous bacterium
       // upward with a spread rather than a lateral shift.
       const board: Board = {
@@ -313,10 +313,10 @@ describe("bacteria bot behaviour", () => {
         goals: [2, 3, 4]
       };
       expect(deficiency(board)).toBeGreaterThanOrEqual(1);
-      expect(attackerMove(board)).toEqual({ type: "spread", row: 0, col: 3 });
+      expect(attackerMove(board)).toEqual({ type: 'spread', row: 0, col: 3 });
     });
 
-    it("attacks the closest dangerous bacterium", () => {
+    it('attacks the closest dangerous bacterium', () => {
       // Among several threats the attacker advances the one already highest up
       // the board (row 3), not a lower one.
       const board: Board = {
@@ -333,7 +333,7 @@ describe("bacteria bot behaviour", () => {
       expect([move.row, move.col]).toEqual([3, 1]);
     });
 
-    it("still returns a legal move from a losing position", () => {
+    it('still returns a legal move from a losing position', () => {
       // deficiency 0: the attacker has already lost, but must never crash or
       // return an illegal move — it plays on with some legal move.
       const board: Board = {

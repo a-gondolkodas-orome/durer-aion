@@ -8,7 +8,7 @@ describe('isCardAvailable', () => {
     expect([1, 4, 6, 7].every(index => isCardAvailable(board, 7, index))).toBe(true);
   });
 
-  it("rejects a card either player already holds", () => {
+  it('rejects a card either player already holds', () => {
     expect(isCardAvailable(board, 7, 2)).toBe(false); // sheriff's
     expect(isCardAvailable(board, 7, 3)).toBe(false); // thief's
   });

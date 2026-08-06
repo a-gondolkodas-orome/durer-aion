@@ -51,21 +51,21 @@ const getPlayerStepDescription = ({ board, ctx }: { board: Board; ctx: Ctx }) =>
   if (ctx.currentPlayer === POLICE) {
     return {
       hu: `Kattints arra az útkereszteződésre, ahová a ` +
-        `${board.firstPolicemanMoved ? "zöld" : "kék"} rendőrrel lépni szeretnél.`,
+        `${board.firstPolicemanMoved ? 'zöld' : 'kék'} rendőrrel lépni szeretnél.`,
       en: `Click the intersection you want to move the ` +
-        `${board.firstPolicemanMoved ? "green" : "blue"} policeman to.`
+        `${board.firstPolicemanMoved ? 'green' : 'blue'} policeman to.`
     };
   } else {
     return {
-      hu: "Kattints arra az útkereszteződésre, ahová a tolvajjal lépni szeretnél.",
-      en: "Click the intersection you want to move the thief to."
+      hu: 'Kattints arra az útkereszteződésre, ahová a tolvajjal lépni szeretnél.',
+      en: 'Click the intersection you want to move the thief to.'
     };
   }
 }
 
 const roleLabels: [{ hu: string; en: string }, { hu: string; en: string }] = [
-  { hu: "Rendőrök", en: "Policemen" },
-  { hu: "Tolvaj", en: "Thief" }
+  { hu: 'Rendőrök', en: 'Policemen' },
+  { hu: 'Tolvaj', en: 'Thief' }
 ];
 
 // A and B are the same game; they differ only in the start position (in A the two

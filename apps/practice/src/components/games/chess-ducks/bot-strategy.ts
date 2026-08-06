@@ -1,6 +1,6 @@
-import { getBoardIndices, withDuckPlaced, getAllowedMoves, type Board, type Field, type Moves } from "./gameplay";
-import { type BotStrategy } from "../../strategy-game-factory";
-import { shuffle, sample } from "lodash";
+import { getBoardIndices, withDuckPlaced, getAllowedMoves, type Board, type Field, type Moves } from './gameplay';
+import { type BotStrategy } from '../../strategy-game-factory';
+import { shuffle, sample } from 'lodash';
 
 type Bot = BotStrategy<Board, Moves>
 

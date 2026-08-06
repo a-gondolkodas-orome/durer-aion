@@ -1,6 +1,6 @@
-import { range } from "lodash";
-import { GameBoard, type BoardClientProps } from "../../strategy-game-factory";
-import { type Board, FIELD_COUNT, OPPOSITE_PAIRS } from "./gameplay";
+import { range } from 'lodash';
+import { GameBoard, type BoardClientProps } from '../../strategy-game-factory';
+import { type Board, FIELD_COUNT, OPPOSITE_PAIRS } from './gameplay';
 
 type TurnState = { first: number } | null
 
@@ -38,12 +38,12 @@ export const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProp
   };
 
   const nodeFill = (node: number) => {
-    if (node === first) return "fill-blue-500";
+    if (node === first) return 'fill-blue-500';
     if (isClickable(node)) {
-      return "fill-slate-50 dark:fill-slate-600 hocus:fill-blue-200 dark:hocus:fill-blue-500";
+      return 'fill-slate-50 dark:fill-slate-600 hocus:fill-blue-200 dark:hocus:fill-blue-500';
     }
 
-    return "fill-slate-200 dark:fill-slate-800";
+    return 'fill-slate-200 dark:fill-slate-800';
   };
 
   return (
@@ -74,18 +74,18 @@ export const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProp
             <g
               key={node}
               onClick={() => handleClick(node)}
-              onKeyUp={(event) => { if (event.key === "Enter") handleClick(node); }}
+              onKeyUp={(event) => { if (event.key === 'Enter') handleClick(node); }}
               tabIndex={clickable ? 0 : undefined}
-              role={clickable ? "button" : undefined}
+              role={clickable ? 'button' : undefined}
               aria-label={clickable ? `Field ${node + 1}, ${board[node]} discs` : undefined}
-              className={clickable ? "cursor-pointer" : ""}
+              className={clickable ? 'cursor-pointer' : ''}
             >
               <circle
                 cx={`${coords[node].cx}%`} cy={`${coords[node].cy}%`} r="11%"
                 strokeWidth="2"
                 className={`
                   ${nodeFill(node)}
-                  ${node === first ? "stroke-blue-700" : "stroke-slate-400 dark:stroke-slate-500"}
+                  ${node === first ? 'stroke-blue-700' : 'stroke-slate-400 dark:stroke-slate-500'}
                 `}
               />
               <text
@@ -93,7 +93,7 @@ export const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProp
                 textAnchor="middle" dominantBaseline="central" stroke="none"
                 className={`
                   text-3xl font-bold select-none pointer-events-none
-                  ${node === first ? "fill-white" : "fill-slate-900 dark:fill-slate-100"}
+                  ${node === first ? 'fill-white' : 'fill-slate-900 dark:fill-slate-100'}
                 `}
               >
                 {board[node]}

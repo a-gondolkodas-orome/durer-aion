@@ -1,6 +1,6 @@
-import { range } from "lodash";
-import { GameBoard, type BoardClientProps } from "../../strategy-game-factory";
-import { type Board, hubs, others } from "./gameplay";
+import { range } from 'lodash';
+import { GameBoard, type BoardClientProps } from '../../strategy-game-factory';
+import { type Board, hubs, others } from './gameplay';
 
 // Drawing of the graph (K4 minus the C-D edge) as a rhomboid: the two hub fields
 // sit at left and right (joined by the horizontal diagonal, and each joined to
@@ -9,10 +9,10 @@ import { type Board, hubs, others } from "./gameplay";
 // are the A-C, A-D, B-C, B-D lines; the missing C-D edge is the undrawn vertical
 // diagonal, matching the competition figure.
 const coords: Record<number, { cx: string; cy: string }> = {
-  0: { cx: "14%", cy: "50%" }, // A (hub, left)
-  1: { cx: "86%", cy: "50%" }, // B (hub, right)
-  2: { cx: "50%", cy: "25%" }, // C (top)
-  3: { cx: "50%", cy: "75%" }  // D (bottom)
+  0: { cx: '14%', cy: '50%' }, // A (hub, left)
+  1: { cx: '86%', cy: '50%' }, // B (hub, right)
+  2: { cx: '50%', cy: '25%' }, // C (top)
+  3: { cx: '50%', cy: '75%' }  // D (bottom)
 };
 
 const edges = [
@@ -41,12 +41,12 @@ export const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
             key={node}
             onClick={() => moves.placeCoin(board, node)}
             onKeyUp={(event) => {
-              if (event.key === "Enter") moves.placeCoin(board, node);
+              if (event.key === 'Enter') moves.placeCoin(board, node);
             }}
             tabIndex={isClickable(node) ? 0 : undefined}
-            role={isClickable(node) ? "button" : undefined}
+            role={isClickable(node) ? 'button' : undefined}
             aria-label={isClickable(node) ? `Field ${node + 1}, ${board[node]} coins` : undefined}
-            className={isClickable(node) ? "cursor-pointer" : ""}
+            className={isClickable(node) ? 'cursor-pointer' : ''}
           >
             <circle
               cx={coords[node].cx}
@@ -54,8 +54,8 @@ export const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
               r="11%"
               className={
                 isClickable(node)
-                  ? "fill-slate-50 dark:fill-slate-500 hocus:fill-blue-200 dark:hocus:fill-blue-600"
-                  : "fill-slate-300 dark:fill-slate-800"
+                  ? 'fill-slate-50 dark:fill-slate-500 hocus:fill-blue-200 dark:hocus:fill-blue-600'
+                  : 'fill-slate-300 dark:fill-slate-800'
               }
             />
             <text

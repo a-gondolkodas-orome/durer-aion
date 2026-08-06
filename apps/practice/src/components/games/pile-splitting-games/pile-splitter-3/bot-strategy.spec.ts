@@ -1,4 +1,4 @@
-import { getSmartBotStep } from "./bot-strategy";
+import { getSmartBotStep } from './bot-strategy';
 
 // getSmartBotStep picks an internal random `start` in 0..2, so each assertion must
 // hold for every possible start: loop enough times to exercise all branches.

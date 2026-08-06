@@ -1,5 +1,5 @@
-import { sample } from "lodash";
-import { type BotStrategy } from "../../strategy-game-factory";
+import { sample } from 'lodash';
+import { type BotStrategy } from '../../strategy-game-factory';
 import { hasAnyMove, legalNodes, type Board, type Moves } from './gameplay';
 
 type Bot = BotStrategy<Board, Moves>
@@ -18,7 +18,7 @@ const addCoin = (board: Board, node: number): Board => {
 const memo = new Map<string, boolean>();
 
 export const isWinningForMover = (board: Board): boolean => {
-  const key = board.join(",");
+  const key = board.join(',');
   const cached = memo.get(key);
   if (cached !== undefined) return cached;
 

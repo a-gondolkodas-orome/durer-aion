@@ -1,6 +1,6 @@
-import { sample, random, range } from "lodash";
+import { sample, random, range } from 'lodash';
 import { THIEF, VERTEX_COUNT, dist, minDistToSet, neighbours, type Board, type Moves } from './gameplay';
-import type { BotMove, BotStrategy } from "../../../strategy-game-factory";
+import type { BotMove, BotStrategy } from '../../../strategy-game-factory';
 
 type Bot = BotStrategy<Board, Moves>
 

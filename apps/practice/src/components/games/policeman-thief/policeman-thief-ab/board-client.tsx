@@ -1,16 +1,16 @@
-import { range } from "lodash";
+import { range } from 'lodash';
 import { POLICE, THIEF, type Board } from './gameplay';
-import { GameBoard, type BoardClientProps } from "../../../strategy-game-factory";
+import { GameBoard, type BoardClientProps } from '../../../strategy-game-factory';
 
 const cubeCoords = [
-  { cx: "30%", cy: "30%" },
-  { cx: "30%", cy: "70%" },
-  { cx: "70%", cy: "30%" },
-  { cx: "70%", cy: "70%" },
-  { cx: "10%", cy: "10%" },
-  { cx: "10%", cy: "90%" },
-  { cx: "90%", cy: "10%" },
-  { cx: "90%", cy: "90%" }
+  { cx: '30%', cy: '30%' },
+  { cx: '30%', cy: '70%' },
+  { cx: '70%', cy: '30%' },
+  { cx: '70%', cy: '70%' },
+  { cx: '10%', cy: '10%' },
+  { cx: '10%', cy: '90%' },
+  { cx: '90%', cy: '10%' },
+  { cx: '90%', cy: '90%' }
 ];
 
 export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
@@ -28,28 +28,28 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const getColor = (vertex: number) => {
     if (isClickable(vertex)) {
       if (ctx.currentPlayer === THIEF) {
-        if (board.policemen[0] === vertex) return "url(#thief-and-first-policeman)";
-        if (board.policemen[1] === vertex) return "url(#thief-and-second-policeman)";
-        return "var(--color-red-500)";
+        if (board.policemen[0] === vertex) return 'url(#thief-and-first-policeman)';
+        if (board.policemen[1] === vertex) return 'url(#thief-and-second-policeman)';
+        return 'var(--color-red-500)';
       }
       if (ctx.currentPlayer === POLICE) {
         if (board.firstPolicemanMoved) {
-          if (board.thief === vertex) return "url(#thief-and-second-policeman)";
-          if (board.policemen[0] === vertex) return "url(#2policemen)";
-          return "var(--color-green-600)";
+          if (board.thief === vertex) return 'url(#thief-and-second-policeman)';
+          if (board.policemen[0] === vertex) return 'url(#2policemen)';
+          return 'var(--color-green-600)';
         }
-        if (board.thief === vertex) return "url(#thief-and-first-policeman)";
-        if (board.policemen[1] === vertex) return "url(#2policemen)";
-        return "var(--color-blue-800)";
+        if (board.thief === vertex) return 'url(#thief-and-first-policeman)';
+        if (board.policemen[1] === vertex) return 'url(#2policemen)';
+        return 'var(--color-blue-800)';
       }
     }
-    if (board.thief === vertex && board.policemen[0] === vertex) return "url(#thief-and-first-policeman)";
-    if (board.thief === vertex && board.policemen[1] === vertex) return "url(#thief-and-second-policeman)";
-    if (board.thief === vertex) return "var(--color-red-500)";
-    if (board.policemen[0] === vertex && board.policemen[1] === vertex) return "url(#2policemen)";
-    if (board.policemen[0] === vertex) return "var(--color-blue-800)";
-    if (board.policemen[1] === vertex) return "var(--color-green-600)";
-    return "white";
+    if (board.thief === vertex && board.policemen[0] === vertex) return 'url(#thief-and-first-policeman)';
+    if (board.thief === vertex && board.policemen[1] === vertex) return 'url(#thief-and-second-policeman)';
+    if (board.thief === vertex) return 'var(--color-red-500)';
+    if (board.policemen[0] === vertex && board.policemen[1] === vertex) return 'url(#2policemen)';
+    if (board.policemen[0] === vertex) return 'var(--color-blue-800)';
+    if (board.policemen[1] === vertex) return 'var(--color-green-600)';
+    return 'white';
   };
 
   return (
@@ -57,21 +57,21 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       <svg className="aspect-square stroke-slate-900 dark:stroke-slate-300 stroke-3">
         <pattern id="2policemen" patternUnits="userSpaceOnUse" patternTransform="rotate(45 0 0)" width="12" height="12">
           <rect x="0" y="0" fill="var(--color-blue-800)" stroke="var(--color-blue-800)" width="12" height="12"></rect>
-          <line x1="0" y1="0" x2="0" y2="12" style={{ stroke: "var(--color-green-600)", strokeWidth: "12" }} />
+          <line x1="0" y1="0" x2="0" y2="12" style={{ stroke: 'var(--color-green-600)', strokeWidth: '12' }} />
         </pattern>
         <pattern
           id="thief-and-first-policeman"
           patternUnits="userSpaceOnUse" patternTransform="rotate(45 0 0)" width="12" height="12"
         >
           <rect x="0" y="0" fill="var(--color-red-500)" stroke="var(--color-red-500)" width="12" height="12"></rect>
-          <line x1="0" y1="0" x2="0" y2="12" style={{ stroke: "var(--color-blue-800)", strokeWidth: "12" }} />
+          <line x1="0" y1="0" x2="0" y2="12" style={{ stroke: 'var(--color-blue-800)', strokeWidth: '12' }} />
         </pattern>
         <pattern
           id="thief-and-second-policeman"
           patternUnits="userSpaceOnUse" patternTransform="rotate(45 0 0)" width="12" height="12"
         >
           <rect x="0" y="0" fill="var(--color-red-500)" stroke="var(--color-red-500)" width="12" height="12"></rect>
-          <line x1="0" y1="0" x2="0" y2="12" style={{ stroke: "var(--color-green-600)", strokeWidth: "12" }} />
+          <line x1="0" y1="0" x2="0" y2="12" style={{ stroke: 'var(--color-green-600)', strokeWidth: '12' }} />
         </pattern>
         <rect
           x="30%"

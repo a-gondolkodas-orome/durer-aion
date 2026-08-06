@@ -27,6 +27,7 @@ export default [
       'no-var': 'warn',
       'object-curly-newline': ['error', { 'consistent': true }],
       'object-property-newline': ['error', { 'allowAllPropertiesOnSameLine': true }],
+      'quotes': ['error', 'single', { avoidEscape: true, allowTemplateLiterals: true }],
       'array-bracket-newline': ['error', 'consistent'],
       'array-element-newline': ['error', 'consistent'],
       '@eslint-react/no-missing-key': ['error']

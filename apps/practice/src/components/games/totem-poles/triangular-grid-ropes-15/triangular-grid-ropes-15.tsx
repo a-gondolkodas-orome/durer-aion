@@ -56,7 +56,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       x2={candidateToV.cx} y2={candidateToV.cy}
       stroke={
         isCandidateAllowed
-        ? (ctx.currentPlayer === 0 ? "var(--color-blue-500)" : "var(--color-green-500)")
+        ? (ctx.currentPlayer === 0 ? 'var(--color-blue-500)' : 'var(--color-green-500)')
         : 'var(--color-red-500)'
       }
       strokeWidth="2" strokeDasharray="4"
@@ -80,7 +80,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         cx={vertex.cx} cy={vertex.cy} r="2%"
         className={`
           ${vertex.id === firstNode
-            ? (ctx.currentPlayer === 0 ? "fill-blue-500" : "fill-green-500")
+            ? (ctx.currentPlayer === 0 ? 'fill-blue-500' : 'fill-green-500')
             : isInvalidHover ? 'fill-red-500' : 'fill-slate-900 dark:fill-slate-300'
           }
         `}

@@ -1,7 +1,7 @@
-import { range } from "lodash";
+import { range } from 'lodash';
 import { POLICE, VERTEX_COUNT, coords, edges, type Board } from './gameplay';
-import { GameBoard, type BoardClientProps } from "../../../strategy-game-factory";
-import { useTranslation } from "../../../../language";
+import { GameBoard, type BoardClientProps } from '../../../strategy-game-factory';
+import { useTranslation } from '../../../../language';
 
 const COP_COLORS = ['var(--color-blue-800)', 'var(--color-green-600)', 'var(--color-amber-500)'];
 const THIEF_COLOR = 'var(--color-red-500)';

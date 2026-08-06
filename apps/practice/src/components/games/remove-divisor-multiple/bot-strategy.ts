@@ -2,6 +2,7 @@ import { isAllowed, type Board, type Moves } from './gameplay';
 import { range, sample } from 'lodash';
 import type { BotStrategy } from '../../strategy-game-factory';
 // generated with scripts/pre-generate-ai-moves/remove-divisor-multiple.py
+/* eslint-disable quotes -- pasted verbatim from the generator's JSON output */
 export const strategyDict = {
   "6": {
     "6_28": [3],
@@ -15993,6 +15994,7 @@ export const strategyDict = {
     "-1_32767": [11, 13]
   }
 };
+/* eslint-enable quotes */
 
 type Bot = BotStrategy<Board, Moves>
 
@@ -16024,5 +16026,5 @@ const generateStateID = (board: Board) => {
       id += 2**(i)
     }
   }
-  return (board.previousMove === null ? '-1' : board.previousMove) + "_" +id;
+  return (board.previousMove === null ? '-1' : board.previousMove) + '_' +id;
 }

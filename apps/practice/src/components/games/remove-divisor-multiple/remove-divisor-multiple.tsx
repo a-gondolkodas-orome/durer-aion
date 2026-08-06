@@ -33,7 +33,7 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
         )}
       </div>
       <p className="text-2xl mt-2">
-        {t({ hu: 'Az előző lépés', en: 'Previous move' })}: {board.previousMove === null ? "-" : board.previousMove}
+        {t({ hu: 'Az előző lépés', en: 'Previous move' })}: {board.previousMove === null ? '-' : board.previousMove}
       </p>
     </GameBoard>
   )

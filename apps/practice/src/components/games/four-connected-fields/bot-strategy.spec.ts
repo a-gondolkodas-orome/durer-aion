@@ -1,5 +1,5 @@
-import { isWinningForMover, getBotMove } from "./bot-strategy";
-import { hasAnyMove, isNodePlayable, legalNodes, type Board } from "./gameplay";
+import { isWinningForMover, getBotMove } from './bot-strategy';
+import { hasAnyMove, isNodePlayable, legalNodes, type Board } from './gameplay';
 
 const addCoin = (board: Board, node: number): Board => {
   const next = board.slice();
@@ -7,36 +7,36 @@ const addCoin = (board: Board, node: number): Board => {
   return next;
 };
 
-describe("four connected fields strategy", () => {
-  it("empty board is a loss for the first player (second player wins)", () => {
+describe('four connected fields strategy', () => {
+  it('empty board is a loss for the first player (second player wins)', () => {
     // Per the official solution, the second player has the winning strategy.
     expect(isWinningForMover([0, 0, 0, 0])).toBe(false);
   });
 
-  it("after any opening, the second player (to move) is in a winning position", () => {
+  it('after any opening, the second player (to move) is in a winning position', () => {
     // Every child of the empty board must be winning for the mover, since the
     // empty board is losing for the mover.
     expect(isWinningForMover([1, 0, 0, 0])).toBe(true); // opening on a hub (A)
     expect(isWinningForMover([0, 0, 1, 0])).toBe(true); // opening on a degree-2 field (C)
   });
 
-  it("an empty field is always playable, even with no equal-count neighbour", () => {
+  it('an empty field is always playable, even with no equal-count neighbour', () => {
     // This is the extra rule vs. five connected fields: placing on any empty field.
     // C (index 2) is empty; its neighbours A=1, B=2 are non-zero and unequal to 0.
     expect(isNodePlayable([1, 2, 0, 3], 2)).toBe(true);
   });
 
-  it("a non-empty field is playable exactly when a neighbour holds the same count", () => {
+  it('a non-empty field is playable exactly when a neighbour holds the same count', () => {
     expect(isNodePlayable([1, 2, 1, 3], 2)).toBe(true); // C(1) equals A(1)
     expect(isNodePlayable([2, 3, 1, 4], 2)).toBe(false); // C(1) has no equal neighbour
   });
 
-  it("detects a terminal position (no empty field, no line with equal endpoints)", () => {
+  it('detects a terminal position (no empty field, no line with equal endpoints)', () => {
     // Case 3 from the solution: A=2, B=3, C=1, D=1. No field empty; no edge equal.
     expect(hasAnyMove([2, 3, 1, 1])).toBe(false);
   });
 
-  it("bot always makes a legal move from the opening position", () => {
+  it('bot always makes a legal move from the opening position', () => {
     const board: Board = [0, 0, 0, 0];
     const move = getBotMove(board);
     expect(isNodePlayable(board, move)).toBe(true);
@@ -54,7 +54,7 @@ describe("four connected fields strategy", () => {
     const seen = new Set<string>();
     const losing: Board[] = [];
     const walk = (board: Board) => {
-      const key = board.join(",");
+      const key = board.join(',');
       if (seen.has(key)) return;
       seen.add(key);
       if (!hasAnyMove(board)) return;
@@ -77,7 +77,7 @@ describe("four connected fields strategy", () => {
     expect(sawRealChoice).toBe(true);
   });
 
-  it("optimal second player wins against every possible first-player line", () => {
+  it('optimal second player wins against every possible first-player line', () => {
     // Exhaustive proof of optimality: player 1 (the bot, second to move) plays
     // getBotMove, player 0 tries every legal reply. The second player must place
     // the last coin on every line.

@@ -1,4 +1,4 @@
-import { getSmartBotStep } from "./bot-strategy";
+import { getSmartBotStep } from './bot-strategy';
 
 describe('getSmartBotStep', () => {
   it('odd, odd, odd, odd case: split a non-1 pile', () => {

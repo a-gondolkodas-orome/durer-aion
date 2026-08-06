@@ -18,21 +18,21 @@ import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
 
 // x, y, z: 3 "axis" showing parallel lines to triangle sides
 const vertices = [
-  { id: 0, x: 0, y: 4, z: 4, cx: "50", cy: "12.5" },
-  { id: 1, x: 1, y: 3, z: 4, cx: "41.625", cy: "27.5" },
-  { id: 2, x: 1, y: 4, z: 3, cx: "58.375", cy: "27.5" },
-  { id: 3, x: 2, y: 2, z: 4, cx: "33.25", cy: "42.5" },
-  { id: 4, x: 2, y: 3, z: 3, cx: "50", cy: "42.5" },
-  { id: 5, x: 2, y: 4, z: 2, cx: "66.75", cy: "42.5" },
-  { id: 6, x: 3, y: 1, z: 4, cx: "25", cy: "57.5" },
-  { id: 7, x: 3, y: 2, z: 3, cx: "41.625", cy: "57.5" },
-  { id: 8, x: 3, y: 3, z: 2, cx: "58.375", cy: "57.5" },
-  { id: 9, x: 3, y: 4, z: 1, cx: "75", cy: "57.5" },
-  { id: 10, x: 4, y: 0, z: 4, cx: "16.5", cy: "73" },
-  { id: 11, x: 4, y: 1, z: 3, cx: "33.25", cy: "73" },
-  { id: 12, x: 4, y: 2, z: 2, cx: "50", cy: "73" },
-  { id: 13, x: 4, y: 3, z: 1, cx: "66.75", cy: "73" },
-  { id: 14, x: 4, y: 4, z: 0, cx: "83.5", cy: "73" }
+  { id: 0, x: 0, y: 4, z: 4, cx: '50', cy: '12.5' },
+  { id: 1, x: 1, y: 3, z: 4, cx: '41.625', cy: '27.5' },
+  { id: 2, x: 1, y: 4, z: 3, cx: '58.375', cy: '27.5' },
+  { id: 3, x: 2, y: 2, z: 4, cx: '33.25', cy: '42.5' },
+  { id: 4, x: 2, y: 3, z: 3, cx: '50', cy: '42.5' },
+  { id: 5, x: 2, y: 4, z: 2, cx: '66.75', cy: '42.5' },
+  { id: 6, x: 3, y: 1, z: 4, cx: '25', cy: '57.5' },
+  { id: 7, x: 3, y: 2, z: 3, cx: '41.625', cy: '57.5' },
+  { id: 8, x: 3, y: 3, z: 2, cx: '58.375', cy: '57.5' },
+  { id: 9, x: 3, y: 4, z: 1, cx: '75', cy: '57.5' },
+  { id: 10, x: 4, y: 0, z: 4, cx: '16.5', cy: '73' },
+  { id: 11, x: 4, y: 1, z: 3, cx: '33.25', cy: '73' },
+  { id: 12, x: 4, y: 2, z: 2, cx: '50', cy: '73' },
+  { id: 13, x: 4, y: 3, z: 1, cx: '66.75', cy: '73' },
+  { id: 14, x: 4, y: 4, z: 0, cx: '83.5', cy: '73' }
 ];
 
 const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {

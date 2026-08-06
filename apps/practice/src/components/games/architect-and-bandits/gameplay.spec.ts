@@ -35,7 +35,7 @@ describe('isArchitectStepAllowed', () => {
       expect(stepAllowed(octagon({ architectPosition: 3 }), 3)).toBe(false);
     });
 
-    it("allows the fourth edge of the day but not a fifth", () => {
+    it('allows the fourth edge of the day but not a fifth', () => {
       expect(stepAllowed(octagon({ kmUsedToday: 30 }), 1)).toBe(true);
       expect(stepAllowed(octagon({ kmUsedToday: 40 }), 1)).toBe(false);
     });

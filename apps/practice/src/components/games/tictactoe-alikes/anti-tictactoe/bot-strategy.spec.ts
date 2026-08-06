@@ -1,4 +1,4 @@
-import { smartBotStrategy } from "./bot-strategy";
+import { smartBotStrategy } from './bot-strategy';
 import { botNextMoveArgs, makeCtx } from '../../../../test-utils';
 
 describe('smartBotStrategy', () => {

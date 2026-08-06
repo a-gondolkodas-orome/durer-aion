@@ -1,7 +1,7 @@
 import {
   distanceFromDangerousAttackZone, isDangerous, moves, applyAttackMove,
   hasBacterium, isAttackAllowed, ATTACKER, DEFENDER, type MoveType
-} from "./gameplay";
+} from './gameplay';
 import { reverse } from 'lodash';
 import { makeCtx } from '../../../test-utils';
 

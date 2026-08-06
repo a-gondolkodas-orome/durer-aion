@@ -1,7 +1,7 @@
-import { strategyGameFactory } from "../../strategy-game-factory";
-import { generateStartBoard, moves } from "./gameplay";
-import { smartBotStrategy } from "./bot-strategy";
-import { BoardClient } from "./board-client";
+import { strategyGameFactory } from '../../strategy-game-factory';
+import { generateStartBoard, moves } from './gameplay';
+import { smartBotStrategy } from './bot-strategy';
+import { BoardClient } from './board-client';
 
 const rule = {
   hu: <>
@@ -24,8 +24,8 @@ export const FiveConnectedFields = strategyGameFactory({
   presentation: {
     rule,
     getPlayerStepDescription: () => ({
-      hu: "Kattints egy mezőre, amelynek van azonos számú koronggal rendelkező szomszédja, és tegyél rá egy korongot.",
-      en: "Click a field that has a neighbour with the same number of coins to place a coin on it."
+      hu: 'Kattints egy mezőre, amelynek van azonos számú koronggal rendelkező szomszédja, és tegyél rá egy korongot.',
+      en: 'Click a field that has a neighbour with the same number of coins to place a coin on it.'
     })
   },
   BoardClient,

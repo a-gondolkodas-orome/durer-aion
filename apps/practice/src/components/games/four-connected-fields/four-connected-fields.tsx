@@ -28,9 +28,9 @@ export const FourConnectedFields = strategyGameFactory({
   presentation: {
     rule,
     getPlayerStepDescription: () => ({
-      hu: "Kattints egy üres mezőre, vagy egy olyanra, amelynek van azonos számú koronggal " +
-        "rendelkező szomszédja, és tegyél rá egy korongot.",
-      en: "Click an empty field, or a field with a neighbour holding the same number of coins, to place a coin on it."
+      hu: 'Kattints egy üres mezőre, vagy egy olyanra, amelynek van azonos számú koronggal ' +
+        'rendelkező szomszédja, és tegyél rá egy korongot.',
+      en: 'Click an empty field, or a field with a neighbour holding the same number of coins, to place a coin on it.'
     })
   },
   BoardClient,
@@ -38,13 +38,13 @@ export const FourConnectedFields = strategyGameFactory({
   variants: [
     {
       botStrategy: randomBotStrategy,
-      label: { hu: "Teszt", en: "Test" }
+      label: { hu: 'Teszt', en: 'Test' }
     },
     {
       // smart bot: verified as optimal
       botStrategy: smartBotStrategy,
       generateStartBoard: (): Board => [0, 0, 0, 0],
-      label: { hu: "Teljes", en: "Full" },
+      label: { hu: 'Teljes', en: 'Full' },
       isDefault: true
     }
   ]

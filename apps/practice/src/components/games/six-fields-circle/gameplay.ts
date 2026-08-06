@@ -1,5 +1,5 @@
 import type { Ctx, MoveOutcome } from '../../strategy-game-factory';
-import { random, sample } from "lodash";
+import { random, sample } from 'lodash';
 
 // Six fields sit on a circle, indices 0..5 clockwise. Each field holds some
 // discs. A move picks two non-empty fields that are NOT opposite each other

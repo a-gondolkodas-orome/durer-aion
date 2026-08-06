@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { range } from "lodash";
-import { strategyGameFactory, type BoardClientProps, GameBoard } from "../../strategy-game-factory";
-import { smartBotStrategy, randomBotStrategy } from "./bot-strategy";
+import { useState } from 'react';
+import { range } from 'lodash';
+import { strategyGameFactory, type BoardClientProps, GameBoard } from '../../strategy-game-factory';
+import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import {
   isJump,
   isSpread,
@@ -11,19 +11,19 @@ import {
   moves,
   ATTACKER,
   type Board
-} from "./gameplay";
+} from './gameplay';
 import {
   generateAdjacentStartBoard,
   generateScatteredStartBoard,
   generateTestStartBoard
-} from "./start-boards";
+} from './start-boards';
 
 const BacteriaDisplay = ({ count, onGoal, dimmed = false }) => {
   if (count === 0) return null;
   const dotColor = dimmed
-    ? "bg-transparent border-2 border-green-500"
-    : onGoal ? "bg-green-300" : "bg-green-600";
-  const sizeClass = count === 1 ? "w-[45%]" : count <= 4 ? "w-[35%]" : "w-[25%]";
+    ? 'bg-transparent border-2 border-green-500'
+    : onGoal ? 'bg-green-300' : 'bg-green-600';
+  const sizeClass = count === 1 ? 'w-[45%]' : count <= 4 ? 'w-[35%]' : 'w-[25%]';
   return (
     <div className="flex flex-wrap justify-center items-center gap-[4%] p-[8%] w-full h-full">
       {range(count).map(i => (
@@ -96,7 +96,7 @@ const BoardClient = ({ board: { bacteria, goals }, ctx, moves }: BoardClientProp
     setAttackCol(null);
   };
 
-  const rowShift = row => row % 2 === 0 ? "0px" : `${100 / (2 * boardWidth)}%`;
+  const rowShift = row => row % 2 === 0 ? '0px' : `${100 / (2 * boardWidth)}%`;
 
   const isForbidden = ({ row, col }) => {
     if (attackRow !== null && row === attackRow && col === attackCol) return false;
@@ -114,28 +114,28 @@ const BoardClient = ({ board: { bacteria, goals }, ctx, moves }: BoardClientProp
   );
 
   const cellClassName = ({ row, col }) => {
-    if (isEdgeCell({ row, col })) return "aspect-4/3 w-full";
+    if (isEdgeCell({ row, col })) return 'aspect-4/3 w-full';
     const isSelected = row === attackRow && col === attackCol;
     const isValidTarget = attackRow !== null && isAllowedAttack({ row, col });
     const goal = isGoal({ row, col });
     let bg, border;
     if (isSelected) {
-      bg = "bg-yellow-200"; border = "border-yellow-500";
+      bg = 'bg-yellow-200'; border = 'border-yellow-500';
     } else if (isValidTarget) {
-      bg = "bg-amber-300"; border = "border-amber-500";
+      bg = 'bg-amber-300'; border = 'border-amber-500';
     } else if (goal) {
-      bg = "bg-blue-700"; border = "border-blue-900";
+      bg = 'bg-blue-700'; border = 'border-blue-900';
     } else {
-      bg = "bg-amber-100"; border = "border-stone-400";
+      bg = 'bg-amber-100'; border = 'border-stone-400';
     }
     const isDefenderTarget = !isPlayerAttacker && ctx.isClientMoveAllowed && bacteria[row][col] >= 1;
     return [
-      "aspect-4/3 w-full border-2 rounded-sm flex items-center justify-center",
+      'aspect-4/3 w-full border-2 rounded-sm flex items-center justify-center',
       bg,
       border,
-      isForbidden({ row, col }) ? "opacity-50" : "",
-      isDefenderTarget ? "enabled:hocus:bg-red-100 enabled:hocus:border-red-400" : ""
-    ].filter(Boolean).join(" ");
+      isForbidden({ row, col }) ? 'opacity-50' : '',
+      isDefenderTarget ? 'enabled:hocus:bg-red-100 enabled:hocus:border-red-400' : ''
+    ].filter(Boolean).join(' ');
   };
 
   const cellContent = ({ row, col }) => {
@@ -156,7 +156,7 @@ const BoardClient = ({ board: { bacteria, goals }, ctx, moves }: BoardClientProp
     <GameBoard>
       <table
         className="w-[95%] table-fixed"
-        style={{ transform: "scaleY(-1)" }}
+        style={{ transform: 'scaleY(-1)' }}
       >
         <tbody>
           {range(bacteria.length).map((row) => (
@@ -170,7 +170,7 @@ const BoardClient = ({ board: { bacteria, goals }, ctx, moves }: BoardClientProp
                     disabled={isDisabled({ row, col })}
                     onClick={() => clickField({ row, col })}
                     className={cellClassName({ row, col })}
-                    style={{ transform: "scaleY(-1)" }}
+                    style={{ transform: 'scaleY(-1)' }}
                   >
                     {cellContent({ row, col })}
                   </button>
@@ -187,14 +187,14 @@ const BoardClient = ({ board: { bacteria, goals }, ctx, moves }: BoardClientProp
 const getPlayerStepDescription = ({ ctx }) => {
   if (ctx.currentPlayer === ATTACKER) {
     return {
-      hu: "Kattints egy mezőre, amin van baktérium és hajtsd végre " +
-        "a három lehetséges támadás egyikét egy további szabályos kattintással.",
-      en: "Click on a square with bacteria and perform one of the three possible attacks with a second valid click."
+      hu: 'Kattints egy mezőre, amin van baktérium és hajtsd végre ' +
+        'a három lehetséges támadás egyikét egy további szabályos kattintással.',
+      en: 'Click on a square with bacteria and perform one of the three possible attacks with a second valid click.'
     };
   } else {
     return {
-      hu: "Kattints egy mezőre, amin van baktérium, hogy eltávolíts egy bakériumot onnan.",
-      en: "Click on a square with bacteria to remove one bacterium from it."
+      hu: 'Kattints egy mezőre, amin van baktérium, hogy eltávolíts egy bakériumot onnan.',
+      en: 'Click on a square with bacteria to remove one bacterium from it.'
     };
   }
 };
@@ -240,8 +240,8 @@ const adjacentRule = ruleBody({ hu: 'megjelölt (szomszédos)', en: '— which a
 const scatteredRule = ruleBody({ hu: 'megjelölt (nem feltétlenül szomszédos)', en: '— not necessarily adjacent —' });
 
 const roleLabels: [{ hu: string; en: string }, { hu: string; en: string }] = [
-  { hu: "Támadó", en: "Attacker" },
-  { hu: "Védekező", en: "Defender" }
+  { hu: 'Támadó', en: 'Attacker' },
+  { hu: 'Védekező', en: 'Defender' }
 ];
 
 export const Bacteria = strategyGameFactory({

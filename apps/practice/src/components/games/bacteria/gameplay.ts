@@ -1,4 +1,4 @@
-import { cloneDeep, last } from "lodash";
+import { cloneDeep, last } from 'lodash';
 import type { Ctx, MoveOutcome } from '../../strategy-game-factory';
 
 export type Board = { bacteria: number[][], goals: number[] };
@@ -175,20 +175,20 @@ export const distanceFromDangerousAttackZone = (board: Board, { row, col }: Cell
   const rightEdge = finalRight - Math.ceil((goalRowIdx - row)/2);
   if (board.goals[0] === 0) {
     if (col === 0 && row === (goalRowIdx - 2)) {
-      return { dist: 0, dir: "center" };
+      return { dist: 0, dir: 'center' };
     }
   }
   if (last(board.goals) === boardWidth - 1) {
     if (col === (boardWidth - 1) && row === (goalRowIdx - 2)) {
-      return { dist: 0, dir: "center" };
+      return { dist: 0, dir: 'center' };
     }
   }
   if (col >= leftEdge && col <= rightEdge) {
-    return { dist: 0, dir: "center" };
+    return { dist: 0, dir: 'center' };
   } else if (col < leftEdge) {
-    return { dist: leftEdge - col, dir: "left" };
+    return { dist: leftEdge - col, dir: 'left' };
   } else {
-    return { dist: col - rightEdge, dir: "right" };
+    return { dist: col - rightEdge, dir: 'right' };
   };
 };
 

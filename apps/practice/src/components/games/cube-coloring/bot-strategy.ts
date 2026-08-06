@@ -75,7 +75,7 @@ const makeOptimalStepAsSecond = (board: Board) => {
     }
   }
   // if all vertices are banned we should have a game end
-  console.error("This state should not happen");
+  console.error('This state should not happen');
 };
 
 const getMissingColors = (board: Board, vertex) => {

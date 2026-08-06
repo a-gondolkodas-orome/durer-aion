@@ -26,6 +26,7 @@
       ],
       "settings": {
         "editor.tabSize": 2,
+        "editor.codeActionsOnSave": { "source.fixAll.eslint": "explicit" },
         "tailwindCSS.experimental.configFile": "src/styles.css",
         "javascript.updateImportsOnFileMove.enabled": "always",
         "files.insertFinalNewline": true,

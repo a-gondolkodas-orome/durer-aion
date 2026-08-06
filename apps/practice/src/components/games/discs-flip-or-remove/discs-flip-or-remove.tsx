@@ -48,8 +48,8 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                 key={`red-${i}-${board[0]}-${board[1]}`}
                 className={`size-12 rounded-full ${
                   ctx.isClientMoveAllowed && isSelected(1, i)
-                    ? "bg-blue-800/75"
-                    : "bg-red-800"
+                    ? 'bg-blue-800/75'
+                    : 'bg-red-800'
                 }`}
                 disabled={!isSelectable(1, i)}
                 onClick={() => select(1, i)}
@@ -64,7 +64,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             : (
               <button
                 key={`blue-${i}-${board[0]}-${board[1]}`}
-                className={`size-12 rounded-full bg-blue-800 ${isSelected(0, i) ? "enabled:opacity-50" : ""}`}
+                className={`size-12 rounded-full bg-blue-800 ${isSelected(0, i) ? 'enabled:opacity-50' : ''}`}
                 disabled={!isSelectable(0, i)}
                 onClick={() => select(0, i)}
                 {...hoverProps([0, i])}

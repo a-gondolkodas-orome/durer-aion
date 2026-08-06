@@ -6,7 +6,7 @@ import {
   Thief,
   generateStartBoard,
   type Board
-} from "../gameplay";
+} from '../gameplay';
 import { moves, CARD_COUNT } from './gameplay';
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
@@ -27,8 +27,8 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           className={`
             m-1 min-h-28 w-18 border-2 rounded-lg shadow-md border-slate-900 dark:border-slate-400 text-4xl font-bold
             ${ctx.currentPlayer === Thief
-              ? "enabled:hocus:bg-red-800/75"
-              : "enabled:hocus:bg-blue-800/75 enabled:hocus:text-white"
+              ? 'enabled:hocus:bg-red-800/75'
+              : 'enabled:hocus:bg-blue-800/75 enabled:hocus:text-white'
             }
             ${getCardColor(num)}
           `}
@@ -62,8 +62,8 @@ export const ThiefSheriffMean9 = strategyGameFactory({
   presentation: {
     rule,
     roleLabels: [
-      { hu: 'Nyomozó', en: "Sheriff" },
-      { hu: 'Tolvaj', en: "Thief" }
+      { hu: 'Nyomozó', en: 'Sheriff' },
+      { hu: 'Tolvaj', en: 'Thief' }
     ],
     getPlayerStepDescription: () => ({ hu: 'Válassz egy kártyát.', en: 'Pick a card.' })
   },

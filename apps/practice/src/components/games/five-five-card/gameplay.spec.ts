@@ -13,7 +13,7 @@ describe('isRemovalAllowed', () => {
   // Cards are addressed by their 1-based position in the other player's hand.
   const table = board([1, 2, 4, 5], [1, 2, 3, 4, 5]);
 
-  it("allows taking a card the other player still holds", () => {
+  it('allows taking a card the other player still holds', () => {
     expect([1, 2, 3, 4, 5].every(id => isRemovalAllowed(table, 1, id))).toBe(true);
   });
 

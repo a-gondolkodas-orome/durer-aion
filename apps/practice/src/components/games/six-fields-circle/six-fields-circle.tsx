@@ -8,15 +8,15 @@ export type { Board };
 const getPlayerStepDescription = ({ ctx }: { ctx: Ctx }) => {
   if ((ctx.turnState as { first: number } | null) !== null) {
     return {
-      hu: "Kattints egy másik, nem üres és a kijelölttel nem szemközti mezőre a második korong " +
-        "elvételéhez, vagy a kijelölt mezőre a kijelölés visszavonásához.",
-      en: "Click another non-empty field that is not opposite the selected one to take the second " +
-        "disc, or click the selected field to undo the selection."
+      hu: 'Kattints egy másik, nem üres és a kijelölttel nem szemközti mezőre a második korong ' +
+        'elvételéhez, vagy a kijelölt mezőre a kijelölés visszavonásához.',
+      en: 'Click another non-empty field that is not opposite the selected one to take the second ' +
+        'disc, or click the selected field to undo the selection.'
     };
   }
   return {
-    hu: "Válassz ki egy nem üres mezőt, amelyről korongot szeretnél elvenni.",
-    en: "Pick a non-empty field to take a disc from."
+    hu: 'Válassz ki egy nem üres mezőt, amelyről korongot szeretnél elvenni.',
+    en: 'Pick a non-empty field to take a disc from.'
   };
 };
 
@@ -45,13 +45,13 @@ export const SixFieldsCircle = strategyGameFactory({
   variants: [
     {
       botStrategy: randomBotStrategy,
-      label: { hu: "Teszt", en: "Test" }
+      label: { hu: 'Teszt', en: 'Test' }
     },
     {
       // smart bot: verified as optimal (keeps every opposite-pair sum even)
       botStrategy: smartBotStrategy,
       generateStartBoard,
-      label: { hu: "Teljes", en: "Full" },
+      label: { hu: 'Teljes', en: 'Full' },
       isDefault: true
     }
   ]
