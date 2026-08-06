@@ -77,7 +77,6 @@ export const TwelveSquares = strategyGameFactory({
   variants: [
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt', en: 'Test' } },
     {
-      // smart bot: verified as optimal
       botStrategy: optimalBotStrategy,
       generateStartBoard,
       label: { hu: 'Teljes', en: 'Full' },

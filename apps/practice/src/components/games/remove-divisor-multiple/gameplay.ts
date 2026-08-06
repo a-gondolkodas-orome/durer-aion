@@ -5,9 +5,9 @@ export type Board = { numbersOnTable: boolean[], previousMove: number | null }
 
 // The number must still be on the table, and — from the second move on — be a
 // divisor or a multiple of the number the other player just removed. The
-// on-the-table check used to be skipped for the opening move, where every
-// number is still there anyway; hoisting it above the previousMove branch
-// changes nothing for a real opening move but keeps a bogus argument out.
+// on-the-table check sits above the previousMove branch so that a bogus
+// argument is rejected on the opening move too, where every number is still
+// there and the check would otherwise be vacuous.
 export const isAllowed = (board: Board, n: number) => {
   if (!Number.isInteger(n) || n < 1 || n > board.numbersOnTable.length) return false;
   if (board.numbersOnTable[n - 1] === false) return false;

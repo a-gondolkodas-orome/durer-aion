@@ -80,7 +80,6 @@ export const Policemanthief = strategyGameFactory({
   BoardClient,
   gameplay: { moves },
   variants: [
-    // smart bot: verified as optimal
     {
       botStrategy: smartBotStrategy,
       generateStartBoard: generateStartBoardA,

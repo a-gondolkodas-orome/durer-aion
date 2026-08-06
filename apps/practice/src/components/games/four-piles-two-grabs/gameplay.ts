@@ -15,7 +15,6 @@ export const canMove = (board: Board): boolean =>
 
 export const isTerminal = (board: Board): boolean => !canMove(board);
 
-// Remove the chosen amount from each pile.
 export const applyMove = (board: Board, move: Move): Board =>
   board.map((v, i) => v - move[i]);
 

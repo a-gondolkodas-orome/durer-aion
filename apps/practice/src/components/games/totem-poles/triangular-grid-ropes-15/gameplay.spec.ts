@@ -28,7 +28,7 @@ describe('15 totem poles geometry', () => {
   });
 
   it('auto-extends a rope to its maximal collinear segment', () => {
-    // 6-7 lies on the bottom row 10..14? no: 6-9 is a row; 6-7 extends to 6-9
+    // 6-7 sits on the row 6..9, so the rope stretches to the whole of it
     expect(getAllowedSuperset([], { from: 6, to: 7 })).toEqual({ from: 6, to: 9 });
   });
 

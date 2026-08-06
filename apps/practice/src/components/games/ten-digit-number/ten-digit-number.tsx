@@ -91,7 +91,6 @@ export const TenDigitNumber = strategyGameFactory({
       label: { hu: 'Teszt', en: 'Test' }
     },
     {
-      // smart bot: verified as optimal
       botStrategy: smartBotStrategy,
       generateStartBoard: () => ({ digits: [], sumMod9: 0 }),
       label: { hu: 'Teljes', en: 'Full' },

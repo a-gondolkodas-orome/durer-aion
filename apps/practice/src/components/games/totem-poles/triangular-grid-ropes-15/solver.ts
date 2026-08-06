@@ -153,7 +153,7 @@ const toRopeIndices = (board: Board): number[] => {
 
 // Returns a move that wins from `board` for the player to move, or null if the
 // position is lost (every move leaves the opponent winning). Deterministic: it
-// returns the verified winning move, matching generate-strategy.mjs.
+// returns the verified winning move, matching verify-optimality.mjs.
 export const findWinningMove = (board: Board): Edge | null => {
   const ris = toRopeIndices(board);
   const moves = allowedMoveIndices(ris).slice().sort((a, b) => (ropes[a].str < ropes[b].str ? -1 : 1));

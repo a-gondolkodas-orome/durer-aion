@@ -49,7 +49,6 @@ export const MatchesOnEdges = strategyGameFactory({
       generateStartBoard,
       label: { hu: 'Teszt', en: 'Test' }
     },
-    // smart bot: verified as optimal (see bot-strategy.spec.ts)
     {
       botStrategy: smartBotStrategy,
       generateStartBoard,

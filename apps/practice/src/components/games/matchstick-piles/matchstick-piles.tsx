@@ -135,7 +135,6 @@ export const MatchstickPiles = strategyGameFactory({
       label: { hu: 'Teszt', en: 'Test' }
     },
     {
-      // smart bot: verified as optimal (Grundy/XOR characterisation)
       botStrategy: smartBotStrategy,
       generateStartBoard,
       label: { hu: 'Teljes', en: 'Full' },

@@ -119,7 +119,6 @@ export const PrimeExponentials = strategyGameFactory({
       label: { hu: 'Teszt', en: 'Test' }
     },
     {
-      // smart bot: verified as optimal
       botStrategy: smartBotStrategy,
       generateStartBoard,
       label: { hu: 'Teljes', en: 'Full' },

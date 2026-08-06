@@ -80,7 +80,6 @@ export const SuperstitiousCounting = strategyGameFactory({
       generateStartBoard: generateTestStartBoard,
       label: { hu: 'Teszt', en: 'Test' }
     },
-    // smart bot: verified as optimal
     { botStrategy: smartBotStrategy, generateStartBoard, label: { hu: 'Teljes', en: 'Full' }, isDefault: true }
   ]
 });

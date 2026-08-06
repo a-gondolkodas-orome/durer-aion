@@ -54,7 +54,7 @@ export const smartBotStrategy: Bot = ({ board }) => {
   }
   // try to win from bad position if player does not play optimally
   if (bishopCount >= 4) {
-    // sample + find has the same effect as filter + sample: find a random
+    // shuffle + find has the same effect as filter + sample: find a random
     // from the optimal moves
     const optimalPlace = shuffle(allowedMoves).find(({ row, col }) => {
       const boardCopy = cloneDeep(board);

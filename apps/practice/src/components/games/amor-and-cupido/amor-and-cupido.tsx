@@ -29,7 +29,6 @@ export const AmorAndCupido = strategyGameFactory({
   },
   BoardClient,
   gameplay: { moves },
-  // Smart bot: verified as optimal.
   variants: [{
     botStrategy: smartBotStrategy,
     generateStartBoard

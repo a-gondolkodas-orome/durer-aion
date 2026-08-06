@@ -116,7 +116,6 @@ export const ChessDucks = strategyGameFactory({
       generateStartBoard: generateTestStartBoard,
       label: { hu: 'Teszt', en: 'Test' }
     },
-    // smart bot: verified as optimal
     {
       botStrategy: smartBotStrategy,
       generateStartBoard: generateStartBoard(4, 6),

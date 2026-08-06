@@ -258,7 +258,6 @@ export const Bacteria = strategyGameFactory({
       generateStartBoard: generateTestStartBoard,
       label: { hu: 'Teszt', en: 'Test' }
     },
-    // smart bot: verified as optimal (danger.ts solver; handles any goal layout)
     {
       botStrategy: smartBotStrategy,
       generateStartBoard: generateAdjacentStartBoard,

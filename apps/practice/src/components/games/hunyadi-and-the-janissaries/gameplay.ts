@@ -10,7 +10,8 @@ export const generateStartBoard = (): Board => {
   // and not single-step game
   const rowCount = 5;
   let board: SoldierColor[][] = [];
-  // for debugging purposes
+  // Complexity score: a soldier counts for more the closer to the castle it
+  // starts. The threshold below rejects boards that would be over too quickly.
   let totalScore = 0;
   for (let i = 0; i < (rowCount - 1); i++) {
     const row: SoldierColor[] = [];

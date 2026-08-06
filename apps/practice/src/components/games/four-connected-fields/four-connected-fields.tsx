@@ -41,7 +41,6 @@ export const FourConnectedFields = strategyGameFactory({
       label: { hu: 'Teszt', en: 'Test' }
     },
     {
-      // smart bot: verified as optimal
       botStrategy: smartBotStrategy,
       generateStartBoard: (): Board => [0, 0, 0, 0],
       label: { hu: 'Teljes', en: 'Full' },

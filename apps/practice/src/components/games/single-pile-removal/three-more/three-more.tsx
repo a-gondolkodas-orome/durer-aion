@@ -25,6 +25,5 @@ export const ThreeMore = strategyGameFactory({
   },
   BoardClient,
   gameplay: { moves },
-  // smart bot: verified as optimal
   variants: [{ botStrategy: smartBotStrategy, generateStartBoard }]
 });

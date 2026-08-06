@@ -147,7 +147,6 @@ export const DiscsFlipOrRemove = strategyGameFactory({
       generateStartBoard: generateTestStartBoard,
       label: { hu: 'Teszt', en: 'Test' }
     },
-    // smart bot: verified as optimal
     {
       botStrategy: smartBotStrategy,
       generateStartBoard: generateStartBoard(6),

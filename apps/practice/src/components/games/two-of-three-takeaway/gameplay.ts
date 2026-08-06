@@ -14,7 +14,6 @@ export const canMove = (board: Board): boolean =>
 
 export const isTerminal = (board: Board): boolean => !canMove(board);
 
-// Take one chip from each of the two chosen piles.
 export const applyMove = (board: Board, [i, j]: Move): Board =>
   board.map((v, idx) => (idx === i || idx === j ? v - 1 : v));
 

@@ -121,7 +121,6 @@ export const TwoOfThreeTakeaway = strategyGameFactory({
       generateStartBoard,
       label: { hu: 'Teszt', en: 'Test' }
     },
-    // smart bot: verified as optimal (see bot-strategy.spec.ts exhaustive minimax check)
     {
       botStrategy: smartBotStrategy,
       generateStartBoard,

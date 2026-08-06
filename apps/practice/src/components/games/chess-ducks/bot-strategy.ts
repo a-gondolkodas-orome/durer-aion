@@ -4,7 +4,8 @@ import { shuffle, sample } from 'lodash';
 
 type Bot = BotStrategy<Board, Moves>
 
-/* This strategy file is relevant for the 4x7 case */
+/* The pre-generated opening books below are for the 4x7 board; the 4x6 one is
+searched live (see the colCount checks in smartBotStrategy). */
 const [ROWS, COLS] = [4, 7];
 const [DUCK] = [1];
 

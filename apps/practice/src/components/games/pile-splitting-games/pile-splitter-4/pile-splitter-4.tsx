@@ -94,10 +94,10 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const currentChoiceDescription = (pileId) => {
     const pieceCountInPile = board[pileId];
 
-    // pieceCountInPile can be 0 in intermediateBoard during AI turn
+    // A pile is 0 between the bot's `removePile` and its `splitPile`.
     if (!ctx.isClientMoveAllowed) return pieceCountInPile || '🗑️';
     if (pileId === removedPileId) {
-      // pieceCountInPile can be 0 in intermediateBoard
+      // and likewise between the player's own two moves
       return pieceCountInPile ? `${pieceCountInPile} → 🗑️` : '🗑️';
     }
     if (removedPileId === null) {
@@ -182,7 +182,6 @@ export const PileSplitter4 = strategyGameFactory({
       generateStartBoard: generateTestStartBoard,
       label: { hu: 'Teszt', en: 'Test' }
     },
-    // smart bot: verified as optimal
     { botStrategy: smartBotStrategy, generateStartBoard, label: { hu: 'Teljes', en: 'Full' }, isDefault: true }
   ]
 });

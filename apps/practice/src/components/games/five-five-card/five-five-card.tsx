@@ -71,7 +71,6 @@ export const FiveFiveCard = strategyGameFactory({
   variants: [
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt', en: 'Test' } },
     {
-      // smart bot: verified as optimal
       botStrategy: smartBotStrategy,
       generateStartBoard: () => [[1, 2, 3, 4, 5], [1, 2, 3, 4, 5]],
       label: { hu: 'Teljes', en: 'Full' },

@@ -75,7 +75,6 @@ export const PolicemanthiefC = strategyGameFactory({
       label: { hu: 'Teszt', en: 'Test' }
     },
     {
-      // Smart bot: provably optimal (full minimax on the fixed graph).
       botStrategy: smartBotStrategy,
       generateStartBoard,
       label: { hu: 'Teljes', en: 'Full' },

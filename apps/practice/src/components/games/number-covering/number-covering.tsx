@@ -74,7 +74,6 @@ export const NumberCovering = strategyGameFactory({
       generateStartBoard: generateTestStartBoard,
       label: { hu: 'Teszt', en: 'Test' }
     },
-    // smart bot: verified as optimal
     {
       botStrategy: smartBotStrategy,
       generateStartBoard: () => range(1, 9),

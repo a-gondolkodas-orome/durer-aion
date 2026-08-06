@@ -48,7 +48,6 @@ export const SixFieldsCircle = strategyGameFactory({
       label: { hu: 'Teszt', en: 'Test' }
     },
     {
-      // smart bot: verified as optimal (keeps every opposite-pair sum even)
       botStrategy: smartBotStrategy,
       generateStartBoard,
       label: { hu: 'Teljes', en: 'Full' },

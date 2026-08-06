@@ -5,7 +5,7 @@ import { useTranslation, type I18nString } from '../../../language';
 import { GameIcon, iconLabels } from '../game-icons';
 
 // Keep only games matching at least one of the selected categories. An empty
-// selection matches everything. Mirrors the previous `shouldShow` semantics.
+// selection matches everything.
 export const filterByCategories = (
   ids: string[],
   selected: Category[],

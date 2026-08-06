@@ -53,7 +53,6 @@ export const MagicBoxB = strategyGameFactory({
   variants: [
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt', en: 'Test' } },
     {
-      // smart bot: verified as optimal
       botStrategy: smartBotStrategy,
       generateStartBoard: generateEmptyBoard,
       label: { hu: 'Teljes', en: 'Full' },

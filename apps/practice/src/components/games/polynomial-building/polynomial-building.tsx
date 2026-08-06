@@ -51,7 +51,6 @@ export const PolynomialBuilding = strategyGameFactory({
       label: { hu: 'Teszt', en: 'Test' }
     },
     {
-      // smart bot: verified as optimal
       botStrategy: smartBotStrategy,
       generateStartBoard: (): Board => ({ a: null, b: null, c: null }),
       label: { hu: 'Teljes', en: 'Full' },

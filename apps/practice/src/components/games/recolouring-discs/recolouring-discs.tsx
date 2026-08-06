@@ -63,7 +63,6 @@ export const RecolouringDiscs = strategyGameFactory({
       botStrategy: randomBotStrategy,
       label: { hu: 'Teszt', en: 'Test' }
     },
-    // smart bot: verified optimal in solver.spec.ts / bot-strategy.spec.ts
     {
       botStrategy: smartBotStrategy,
       generateStartBoard,

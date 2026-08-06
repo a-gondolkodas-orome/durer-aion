@@ -49,7 +49,6 @@ export const MagicBox = strategyGameFactory({
   variants: [
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt', en: 'Test' } },
     {
-      // smart bot: verified as optimal, second player always wins
       botStrategy: smartBotStrategy,
       generateStartBoard: generateEmptyBoard,
       label: { hu: 'Teljes', en: 'Full' },

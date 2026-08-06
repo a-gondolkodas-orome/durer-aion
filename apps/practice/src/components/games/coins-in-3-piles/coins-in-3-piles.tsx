@@ -59,7 +59,6 @@ export const CoinsIn3Piles = strategyGameFactory({
       generateStartBoard: generateTestStartBoard,
       label: { hu: 'Teszt', en: 'Test' }
     },
-    // smart bot: verified as optimal
     {
       botStrategy: smartBotStrategy,
       generateStartBoard: generateFixedStartBoard,

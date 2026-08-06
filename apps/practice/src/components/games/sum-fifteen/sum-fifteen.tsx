@@ -102,7 +102,6 @@ export const SumFifteen = strategyGameFactory({
       label: { hu: 'Teszt', en: 'Test' }
     },
     {
-      // smart bot: full optimal search (see winnerOptimal in bot-strategy.ts)
       botStrategy: smartBotStrategy,
       generateStartBoard,
       label: { hu: 'Teljes', en: 'Full' },

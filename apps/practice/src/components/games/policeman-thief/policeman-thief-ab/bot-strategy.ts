@@ -10,7 +10,6 @@ export const smartBotStrategy: Bot = ({ board, ctx }) =>
 // Both policemen step in the same turn, planned together from the position they
 // start in, so the turn is named as a whole.
 const policemenMoves = (board: Board): BotMove<Moves>[] => {
-  //policeman0 Step
   let index0 = board.policemen[0];
   // where it would catch the thief outright, which overrides any later choice
   let catchIndex0: number | null = null;
@@ -30,7 +29,6 @@ const policemenMoves = (board: Board): BotMove<Moves>[] => {
     index0 = neighbours[board.policemen[0]][random(0, 2)];
   }
 
-  //policeman1 Step
   let index1 = board.policemen[1];
   let catchIndex1: number | null = null;
   for (let i = 0; i < 3; i++) {

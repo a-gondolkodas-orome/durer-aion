@@ -74,7 +74,6 @@ export const RemoveRowOrColumn = strategyGameFactory({
       generateStartBoard: generateTestStartBoard,
       label: { hu: 'Teszt', en: 'Test' }
     },
-    // smart bot: optimal (Sprague–Grundy; moves to a zero position when winning)
     {
       botStrategy: smartBotStrategy,
       generateStartBoard: generateSingleBoard,
