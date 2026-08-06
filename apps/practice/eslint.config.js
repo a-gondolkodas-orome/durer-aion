@@ -52,8 +52,13 @@ export default [
   {
     // A game's gameplay.ts is its framework-free half — the module a future
     // server-authoritative competition mode validates moves with, so it has to
-    // run in plain Node. See issue #313.
-    files: ['src/components/games/**/gameplay.ts', 'src/components/strategy-game-factory/engine/**/*.ts'],
+    // run in plain Node. See issue #313. The .ts half of games/shared/ is
+    // engine-shaped for the same reason; its *-svg.tsx siblings are not matched.
+    files: [
+      'src/components/games/**/gameplay.ts',
+      'src/components/games/shared/**/*.ts',
+      'src/components/strategy-game-factory/engine/**/*.ts'
+    ],
     plugins: { '@typescript-eslint': tsPlugin },
     rules: {
       '@typescript-eslint/no-restricted-imports': ['error', {

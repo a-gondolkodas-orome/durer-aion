@@ -162,19 +162,56 @@ rules specs relative to module size.
 
 ## 6. Cross-game duplication and drift
 
-- **18 bots hand-roll a memoized win/loss minimax** (`amor-and-cupido`,
-  `dominoes-4x4`, `magic-box-a/b`, `shark-chase-*`, `tictactoe`, …), each with
-  its own `Map` + board-stringifier. A shared
-  `solveWinLoss({ key, isTerminal, legalMoves, apply })` in `games/shared/`
-  would collapse them and standardise the memo-key idiom.
-- **4 Grundy/mex implementations** (`remove-row-or-column`,
-  `chocolate-breaking`, `dominoes-on-chessboard`, `matchstick-piles`) — a
-  shared `mex()` + memo helper. Note `chocolate-breaking` keeps its Grundy
-  code in `gameplay.ts`, which AGENTS.md assigns to the bot side; the sibling
-  `remove-row-or-column` has it in `bot-strategy.ts`. Align while extracting.
-- **7 copies of `asTurn`**, **7 declarations of `type Field = { row, col }`**
-  (4 with a byte-identical validator idiom) — obvious `games/shared/`
-  extractions.
+- ~~**18 bots hand-roll a memoized win/loss minimax**~~ — **~10 do**, and the
+  other 7 are different searches ✅ (narrow extraction). The count conflated
+  "has a `Map`" with "is the same algorithm": `thief-sheriff-mean-7/-9` score
+  ±1 from a fixed perspective, `policeman-thief-c` searches survival with a
+  move horizon and simultaneous moves, both `shark-chase` bots memoize on turn
+  parity across two mutually recursive functions, `triangle-circle-game` is
+  heuristic-ordered and depth-limited, `dominoes-on-chessboard` computes Grundy
+  over connected regions, `ten-digit-number` memoizes `(sumMod9, turnsLeft)`
+  and `single-pile-removal/three-more` memoizes `(stones, maxTake)` — not a
+  board at all. Covering those in one helper needs a perspective parameter, a
+  score domain, a horizon and a canonicaliser: an options bag, not an
+  abstraction. What *was* extracted is the plain normal-play search, in
+  `games/shared/win-loss-solver.ts`, taking exactly `{ key, legalMoves, apply }`
+  — no terminal predicate (`legalMoves` returning `[]` is the terminal test)
+  and no losing-position policy (see below). Three bots adopted it:
+  `five-connected-fields` and `four-connected-fields`, whose `bot-strategy.ts`
+  were byte-identical to each other while their games differ, and `pile-union`,
+  whose search re-implemented inline the enumeration its own
+  `allMoves`/`boardAfter` already expressed. `ten-coins`, `three-more`,
+  `magic-box-a/b` and `dominoes-4x4` also fit and can follow one PR at a time.
+- **The losing-position fallback is deliberately not shared.** Six bots decide
+  what to play once nothing wins, and "leave the opponent the fewest winning
+  replies" is not the universal answer — one *trivial* winning reply can be a
+  worse thing to hand over than two non-obvious ones. `remove-row-or-column`
+  encodes exactly that (it avoids replies that let the opponent take the last
+  disc, and concedes outright 1 time in 4); `pile-union` just plays randomly.
+  That judgement belongs to each game, so the solver answers only which moves
+  win.
+- ~~**4 Grundy/mex implementations**~~ — **3** (`remove-row-or-column`,
+  `chocolate-breaking`, `dominoes-on-chessboard`); `matchstick-piles` has a
+  closed-form Grundy (`n <= 2 ? n : n % 2 ? 0 : 2`) with no mex and no memo.
+  The extractable surface is the two-line `while (reachable.has(mex)) mex++`,
+  and the three recursions around it have different shapes — not worth a
+  module. The layering sub-finding stands and is still open:
+  `chocolate-breaking` keeps its Grundy code in `gameplay.ts`, which AGENTS.md
+  assigns to the bot side, while its structural twin `remove-row-or-column`
+  keeps it in `bot-strategy.ts`. Worth its own small PR.
+- ~~**7 copies of `asTurn`**, **7 declarations of `type Field = { row, col }`**~~
+  — **neither is a duplication.** There are 8 `asTurn` declarations
+  (`coins-in-3-piles`, `distinct-squares/five-squares`, `three-piles-rebuild`,
+  all three pile-splitters, `take-and-point`, `magic-box-b`) and all 8 have a
+  different signature and a different body; what they share is a name and the
+  already-exported `BotMove<Moves>[]` return type. It is a naming convention,
+  and a good one. The single true duplicate pair is
+  `pile-splitter-3` ≡ `pile-splitter-4`, already siblings inside
+  `pile-splitting-games/` and hoistable there without any `games/shared/`.
+  `Field` is a one-line type alias in seven unrelated games; sharing it would
+  assert that `chess-bishops`' field is `dominoes-4x4`'s field for no payoff.
+  The four byte-identical `some(getAllowedMoves(board), isEqual)` validators
+  are real but are four lines total.
 - ~~**6 BoardClients hand-derive legality**~~ — **3**, not 6 ✅ (#407). The
   count was overstated: of the six named, `remove-row-or-column`,
   `two-of-three-takeaway` and `chocolate-breaking` restate their validator, and
@@ -192,9 +229,18 @@ rules specs relative to module size.
 - **Precomputed tables stored two ways**: JSON (`modified-mill`,
   `shark-5-by-5`) vs inline TS (`remove-divisor-multiple/bot-strategy.ts`,
   16,028 lines; `bank-robbers`, 999). Converge on JSON.
-- **Drifted near-twins**: `five-connected-fields` vs `four-connected-fields`
-  (~90% identical, but only one gained `randomBotStrategy`); the two
-  `shark-chase` bots.
+- **Near-twin games duplicated wholesale** — measured by `diff`, this is the
+  biggest remaining duplication in the games, and it needs no new abstraction:
+  the repo already hoists shared code to a family folder (eight parent folders
+  carry a shared `gameplay.ts`). `shark-chase/shark-4-by-4` vs `-5-by-5`
+  BoardClients differ in 7 of 124 lines (`grid-cols-4`→`5`, two board-size
+  constants, one style row); `tictactoe-alikes/anti-tictactoe` vs
+  `tictactoe-doublestart` in 50 of 73 lines of the whole `.tsx`; also
+  `architect-and-bandits-a`/`-b` and `thief-sheriff-mean-7`/`-9`.
+  `five-connected-fields` vs `four-connected-fields` was the same story in
+  `bot-strategy.ts` — byte-identical apart from comment wrapping, with only one
+  of them gaining `randomBotStrategy` — and is resolved above: both now call the
+  shared solver, so there is no longer a copy to drift.
 - **Naming**: `optimalBotStrategy` (`twelve-squares`) vs everyone's
   `smartBotStrategy`; `isGameEnd` (8 games) vs `isTerminal` (6) vs
   `isWinningBoard` (3); 8 folders with double-quoted imports (no `quotes`
@@ -241,7 +287,7 @@ rules specs relative to module size.
 | 5 | Specs for `translate`, `use-game-stats`, `bot-turn`, `build-ctx` (§4c) | ✅ #405 |
 | 6 | Hand-gated BoardClients through `isAllowed`; the `setTimeout` pacers (§6) | ✅ #407, #406 |
 | 7 | Bot turn loop and `chosenRoleIndex` (§5) | ✅ #408 — both premises were false; landed as an agreement test |
-| 8 | `games/shared/`: win/loss solver, mex, `Field`, `asTurn`; migrate by family (§6) | deferred — worth more evidence before committing to an abstraction |
+| 8 | `games/shared/`: win/loss solver, mex, `Field`, `asTurn`; migrate by family (§6) | ✅ solver only, 3 games — `mex`, `Field` and `asTurn` rejected on the evidence (§6) |
 | 9 | react-hooks lint, quotes rule (§7) | open, small PRs |
 | 10 | Factory component/spec split, `turnState` generic, table-storage convergence, naming sweeps | opportunistic |
 
@@ -250,8 +296,12 @@ bots with real search but no spec (§4b), thin rules specs (§4d), and everythin
 in §5 below the first two bullets — the 378-line factory component, the
 `turnState` generic, the 1050-line factory spec.
 
-**On the review's own accuracy**: of the items acted on, three claims did not
+**On the review's own accuracy**: of the items acted on, six claims did not
 survive contact — the bot turn loops had not drifted (§5), `chosenRoleIndex`
-was not divergent (§5), and the hand-gated BoardClient count was 3 rather than
-6 (§6). Worth weighing when reading the items nobody has picked up yet,
-particularly §6's duplication counts, which were gathered the same way.
+was not divergent (§5), the hand-gated BoardClient count was 3 rather than 6
+(§6), and, on row 8, the "18 minimaxes" were ~10 plus 7 unlike searches, the
+4 mex implementations were 3, and `asTurn`/`Field` turned out not to be
+duplication at all (§6). The pattern is consistent: counting *occurrences of a
+name or an idiom* overstates how much code is actually shared. Read the
+remaining unactioned items with that discount applied — grep counts in this
+document are a starting point for reading the code, not a finding.

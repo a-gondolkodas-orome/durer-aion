@@ -1,35 +1,26 @@
 import { sample } from 'lodash';
 import { type BotStrategy } from '../../strategy-game-factory';
+import { createWinLossSolver } from '../shared/win-loss-solver';
 import { type Board, type Moves, legalNodes } from './gameplay';
 
 type Bot = BotStrategy<Board, Moves>
 
-// Every move raises the total coin count by exactly 1, so the game is a
-// strictly monotonic DAG: it always terminates and can be solved exactly by a
-// memoized minimax. A position is winning for the player to move iff some legal
-// move leads to a position that is losing for the opponent. A player with no
-// legal move loses (the player who placed the last coin wins).
 const addCoin = (board: Board, node: number): Board => {
   const next = board.slice();
   next[node] += 1;
   return next;
 };
 
-const memo = new Map<string, boolean>();
+// Every move raises the total coin count by exactly 1, so the game is a strictly
+// monotonic DAG — the solver's precondition — and the player who places the last
+// coin wins, which is the normal play the solver assumes.
+const { isWinningForMover, winningMoves } = createWinLossSolver<Board, number>({
+  key: (board) => board.join(','),
+  legalMoves: legalNodes,
+  apply: addCoin
+});
 
-export const isWinningForMover = (board: Board): boolean => {
-  const key = board.join(',');
-  const cached = memo.get(key);
-  if (cached !== undefined) return cached;
-
-  const nodes = legalNodes(board);
-  const result = nodes.some((node) => !isWinningForMover(addCoin(board, node)));
-  memo.set(key, result);
-  return result;
-};
-
-const winningMoves = (board: Board): number[] =>
-  legalNodes(board).filter((node) => !isWinningForMover(addCoin(board, node)));
+export { isWinningForMover };
 
 // From a winning position, play any move that keeps the win. From a losing
 // position (opponent playing optimally would win), play the move that leaves the
