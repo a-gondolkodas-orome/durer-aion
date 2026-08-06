@@ -1,5 +1,5 @@
-import { totalGrundy, hasSafeBreak, applyBreak, type Board, type Move } from './gameplay';
-import { getSmartBotMove, getRandomBotMove } from './bot-strategy';
+import { hasSafeBreak, applyBreak, type Board, type Move } from './gameplay';
+import { getSmartBotMove, getRandomBotMove, totalGrundy } from './bot-strategy';
 
 const single = (w: number, h: number): Board => ({ pieces: [{ id: 0, w, h }], nextId: 1 });
 

@@ -1,8 +1,17 @@
 import { sample } from 'lodash';
 import type { BotStrategy } from '../../strategy-game-factory';
-import { allMoves, applyBreak, hasSafeBreak, totalGrundy, type Board, type Move, type Moves } from './gameplay';
+import {
+  allMoves, applyBreak, grundy, hasSafeBreak, type Board, type Move, type Moves, type Piece
+} from './gameplay';
 
 type Bot = BotStrategy<Board, Moves>
+
+// The board is a disjunctive sum of independent pieces, so it is losing for the
+// player to move exactly when the XOR of the piece values is 0. Nothing on the
+// rules side needs this — only the strategy does, which is why it lives here
+// and `grundy` itself does not.
+export const totalGrundy = (pieces: Piece[]): number =>
+  pieces.reduce((acc, p) => acc ^ grundy(p.w, p.h), 0);
 
 const winningMoves = (board: Board): Move[] =>
   allMoves(board.pieces).filter(m => totalGrundy(applyBreak(board, m).pieces) === 0);

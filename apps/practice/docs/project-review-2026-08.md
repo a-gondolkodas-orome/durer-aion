@@ -195,10 +195,22 @@ rules specs relative to module size.
   closed-form Grundy (`n <= 2 ? n : n % 2 ? 0 : 2`) with no mex and no memo.
   The extractable surface is the two-line `while (reachable.has(mex)) mex++`,
   and the three recursions around it have different shapes — not worth a
-  module. The layering sub-finding stands and is still open:
-  `chocolate-breaking` keeps its Grundy code in `gameplay.ts`, which AGENTS.md
-  assigns to the bot side, while its structural twin `remove-row-or-column`
-  keeps it in `bot-strategy.ts`. Worth its own small PR.
+  module. ~~The layering sub-finding stands~~ — **it does not, beyond one
+  line** ✅. AGENTS.md's rule is about a predicate that exists *only* to
+  characterise the winning strategy, and it carves out start-board generators
+  by name (`coins-in-3-piles`'s `isLostForMover`, accepted for practice games).
+  `chocolate-breaking`'s `generateStartBoard` rejection-samples on
+  `grundy(w, h)` to balance who wins, so `grundy` is load-bearing for the rules
+  half and belongs where it is; its values are irregular
+  (`grundy(5, 10) === 2`), so unlike the other games there is no closed form to
+  use instead. The claimed clean twin does not hold either:
+  `remove-row-or-column/multiple/gameplay.ts` keeps its own `isLosingForMover`
+  — the same characterisation, in closed form — in `gameplay.ts` too; its mex
+  recursion sits in `bot-strategy.ts` only because that closed form exists.
+  Six games are in this position, not one: also `six-fields-circle`,
+  `four-piles-two-grabs` and `three-piles-rebuild`. What did move is
+  `totalGrundy`, the XOR fold over `grundy` — no consumer inside `gameplay.ts`,
+  so it is the one part that exists only for the strategy.
 - ~~**7 copies of `asTurn`**, **7 declarations of `type Field = { row, col }`**~~
   — **neither is a duplication.** There are 8 `asTurn` declarations
   (`coins-in-3-piles`, `distinct-squares/five-squares`, `three-piles-rebuild`,
