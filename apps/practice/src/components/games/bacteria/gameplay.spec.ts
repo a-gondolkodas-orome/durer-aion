@@ -1,5 +1,5 @@
 import {
-  distanceFromDangerousAttackZone, isDangerous, moves, applyAttackMove,
+  distanceFromDangerousAttackZone, isDangerous, moves, applyAttackMove, totalBacteria,
   hasBacterium, isAttackAllowed, ATTACKER, DEFENDER, type MoveType
 } from './gameplay';
 import { reverse } from 'lodash';
@@ -107,6 +107,56 @@ describe('moves', () => {
     }
   });
 })
+
+// The rule moves and divides a whole cell at once: a shift takes *all* the
+// bacteria of the cell one step sideways, and a division sends a copy of *every*
+// bacterium on it to each of the two cells ahead — doubling the stack. Every
+// other test here uses a single bacterium, where "all of them" and "one of them"
+// are indistinguishable.
+describe('a whole cell moves at once', () => {
+  const withStack = (count: number) => ({
+    bacteria: [
+      [0, count, 0],
+        [0, 0],
+      [0, 0, 0]
+    ],
+    goals: [1]
+  });
+
+  it('shifts every bacterium of the cell, not just one', () => {
+    const { nextBoard } = applyAttackMove(withStack(4), { type: 'shiftRight', row: 0, col: 1 });
+    expect(nextBoard.bacteria[0]).toEqual([0, 0, 4]);
+  });
+
+  it('gives each of the division targets a copy of the whole stack', () => {
+    // From the wide row 0 the two cells ahead are (1,0) and (1,1), so a stack of
+    // three becomes three in each — six bacteria from three.
+    const { nextBoard } = applyAttackMove(withStack(3), { type: 'spread', row: 0, col: 1 });
+    expect(nextBoard.bacteria[0]).toEqual([0, 0, 0]);
+    expect(nextBoard.bacteria[1]).toEqual([3, 3]);
+    expect(totalBacteria(nextBoard)).toBe(6);
+  });
+
+  it('adds the stack to whatever the target cell already holds', () => {
+    const board = {
+      bacteria: [
+        [0, 2, 0],
+          [5, 0],
+        [0, 0, 0]
+      ],
+      goals: [1]
+    };
+    const { nextBoard } = applyAttackMove(board, { type: 'spread', row: 0, col: 1 });
+    expect(nextBoard.bacteria[1]).toEqual([7, 2]);
+  });
+
+  it('moves a single bacterium on a jump, however tall the stack', () => {
+    const { nextBoard } = applyAttackMove(withStack(4), { type: 'jump', row: 0, col: 1 });
+    expect(nextBoard.bacteria[0]).toEqual([0, 3, 0]);
+    expect(nextBoard.bacteria[2]).toEqual([0, 1, 0]);
+    expect(totalBacteria(nextBoard)).toBe(4);
+  });
+});
 
 describe('legality', () => {
   // Three rows: wide (3), narrow (2), wide (3). A single bacterium sits in the
