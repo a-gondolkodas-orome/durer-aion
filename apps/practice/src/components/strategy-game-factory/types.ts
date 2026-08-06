@@ -75,7 +75,7 @@ export type ClientGameMoves<TBoard> = Record<
 export type StrategyArgs<TBoard> = { board: TBoard; ctx: Ctx }
 // A game's `moves` object seen as a type — what a game exports as `Moves` so
 // its bots can name moves out of it.
-export type AnyMoves = Record<string, MoveDefinition<any>>
+type AnyMoves = Record<string, MoveDefinition<any>>
 // What a move takes beyond the board and the meta object: exactly the tail a
 // bot has to supply as `args`.
 type MoveArgs<TApply> =

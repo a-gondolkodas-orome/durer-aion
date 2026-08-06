@@ -15,7 +15,7 @@ export const botColor = 'red';
 
 export const inPlacingPhase = (board: Board) => board.find(isNull) !== undefined;
 
-export const currentPlayerColor = (ctx: Ctx) =>
+const currentPlayerColor = (ctx: Ctx) =>
   ctx.isHumanVsHumanGame
     ? (ctx.currentPlayer === 0 ? 'blue' : 'red')
     : (ctx.currentPlayer === ctx.chosenRoleIndex ? pColor : botColor);

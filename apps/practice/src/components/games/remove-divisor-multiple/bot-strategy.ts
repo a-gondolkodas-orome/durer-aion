@@ -3,7 +3,7 @@ import { range, sample } from 'lodash';
 import type { BotStrategy } from '../../strategy-game-factory';
 // generated with scripts/pre-generate-ai-moves/remove-divisor-multiple.py
 /* eslint-disable quotes -- pasted verbatim from the generator's JSON output */
-export const strategyDict = {
+const strategyDict = {
   "6": {
     "6_28": [3],
     "2_60": [4],

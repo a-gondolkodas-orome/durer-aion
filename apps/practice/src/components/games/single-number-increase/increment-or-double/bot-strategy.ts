@@ -6,7 +6,7 @@ import { type Board, type Moves } from './gameplay';
 // move is always x+1 (which hands the opponent an odd number). From 0 this plays
 // the forced opening 1. From an odd (losing) board both moves hand the opponent an
 // even, winning number, so play randomly to maximise the chance the human errs.
-export const getBotNextNumber = (board: Board): number => {
+const getBotNextNumber = (board: Board): number => {
   if (board % 2 === 0) return board + 1;
   return sample([board + 1, board * 2])!;
 };

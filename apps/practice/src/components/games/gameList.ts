@@ -17,7 +17,7 @@ import type { I18nString } from '../../language';
 export const categories = ['A', 'B', 'C', 'D', 'E', 'E+'] as const;
 export type Category = typeof categories[number];
 
-export type Round = 'döntő' | 'online'
+type Round = 'döntő' | 'online'
 export type GameList = Record<string, GameEntry>;
 
 // Canonical list of icon keys into the overview icon registry

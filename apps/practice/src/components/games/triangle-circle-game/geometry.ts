@@ -8,7 +8,7 @@
 // draw each shape) is derived once, here, from that lattice — nothing is
 // hand-transcribed, so the counts can't silently drift.
 
-export const GRID_SIZE = 6;
+const GRID_SIZE = 6;
 export const TRIANGLE_COUNT = 36;
 export const EDGE_COUNT = 63;
 

@@ -3,7 +3,7 @@ import type { MoveOutcome, MoveDefinition } from '../types';
 import { buildCtx } from './build-ctx';
 import type { CoreState } from './store';
 
-export type MoveTransition<TBoard> = {
+type MoveTransition<TBoard> = {
   state: CoreState<TBoard>
   // validate rejected the dispatch; state is unchanged (same reference)
   illegal?: boolean

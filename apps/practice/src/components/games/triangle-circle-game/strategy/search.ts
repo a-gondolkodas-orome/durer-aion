@@ -18,7 +18,7 @@ import { type Board, LINE, CIRCLE } from '../gameplay';
 // line win; a lone threat forces the circle player's reply) to see far along
 // forced lines cheaply.
 
-export type Outcome = 'lineWins' | 'lineLoses' | 'unknown';
+type Outcome = 'lineWins' | 'lineLoses' | 'unknown';
 
 // Precomputed bit machinery. Edges (up to 63) and triangles (36) live in BigInt
 // masks so a whole position is two integers.
@@ -181,7 +181,7 @@ export const evaluatePosition = (
 // Evaluate the position that results from a single move, reusing one budget/memo
 // across many candidate moves (so earlier, better-ordered candidates get the
 // most search and later ones benefit from the shared memo).
-export interface MoveEvaluator {
+interface MoveEvaluator {
   evalAfterShade: (board: Board, edgeId: number) => Outcome;
   evalAfterCircle: (board: Board, triangleId: number) => Outcome;
 }

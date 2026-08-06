@@ -3,7 +3,7 @@ import type { Ctx, MoveOutcome } from '../../strategy-game-factory';
 
 export type Board = number[];
 export type Piece = { pileId: number; pieceId: number };
-export type Transfer = { pileId: number; pieceCount: number };
+type Transfer = { pileId: number; pieceCount: number };
 
 // An even number of pieces, at least two, and no more than the pile holds —
 // half of them then go to the other pile. Both players draw on the same two

@@ -4,7 +4,7 @@ import type { Ctx, MoveOutcome } from '../../strategy-game-factory';
 export type Board = { bacteria: number[][], goals: number[] };
 export type Cell = { row: number; col: number };
 // A cell paired with the attacking cell it is being judged against.
-export type AttackZone = Cell & { attackRow: number; attackCol: number };
+type AttackZone = Cell & { attackRow: number; attackCol: number };
 
 // Board geometry ------------------------------------------------------------
 // Rows are indexed from the bottom (row 0 = start row, last row = goal row).

@@ -36,7 +36,7 @@ export const createInitialCoreState = <TBoard>(
   currentTurnHasMoves: false
 });
 
-export type GameStore<TBoard> = {
+type GameStore<TBoard> = {
   getState: () => CoreState<TBoard>
   setState: (patch: Partial<CoreState<TBoard>>) => void
   subscribe: (listener: () => void) => () => void

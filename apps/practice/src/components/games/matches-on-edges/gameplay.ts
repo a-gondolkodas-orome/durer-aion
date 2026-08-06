@@ -32,7 +32,7 @@ export const blocks = (board: Board): { start: number; length: number }[] => {
 // Largest allowed window size (1, or a multiple of 4) that fits *strictly*
 // inside a block of length `maxBlockLength`. Returns null when no block can host
 // any window, i.e. the game is over.
-export const allowedWindowSize = (maxBlockLength: number): number | null => {
+const allowedWindowSize = (maxBlockLength: number): number | null => {
   if (maxBlockLength < 2) return null;
   let k = 1;
   for (let c = 4; c < maxBlockLength; c += 4) k = c;

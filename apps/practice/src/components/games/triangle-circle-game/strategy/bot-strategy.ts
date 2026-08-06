@@ -170,12 +170,12 @@ const chooseCircleMove = (board: Board, searchOpts: SearchOpts): number => {
   return undecided.length > 0 ? undecided[0] : ordered[0].t;
 };
 
-// Random moves for the test bot / property tests. The line side still takes an
+// Random moves for the test bot. The line side still takes an
 // immediate win (a triangle at two shaded sides) when one is on the board; the
 // circle side's only one-move win is filling the last triangle, which a random
 // pick makes anyway.
-export const randomLineMove = (board: Board): number => {
+const randomLineMove = (board: Board): number => {
   const winning = freeEdges(board).filter(e => isWinningShade(board, e));
   return sample(winning.length > 0 ? winning : freeEdges(board))!;
 };
-export const randomCircleMove = (board: Board): number => sample(freeTriangles(board))!;
+const randomCircleMove = (board: Board): number => sample(freeTriangles(board))!;
