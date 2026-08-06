@@ -122,7 +122,6 @@ export const startCells = (n: number): Cell[] => {
 // doubles per cell, so larger boards are not exactly solvable.
 export const FIRST_PLAYER_WIN_SIZES = [7, 9, 10, 11];
 export const SECOND_PLAYER_WIN_SIZES = [8, 12];
-export const BOARD_SIZES = [...FIRST_PLAYER_WIN_SIZES, ...SECOND_PLAYER_WIN_SIZES];
 
 export const generateStartBoard = (): Board => {
   const pool = sample([FIRST_PLAYER_WIN_SIZES, SECOND_PLAYER_WIN_SIZES])!;
