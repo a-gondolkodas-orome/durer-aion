@@ -39,3 +39,8 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
+        with:
+          # A healthy deployment here reports success in well under a minute (28s for
+          # the last good one). The action's 10 minute default only ever delays the
+          # report when Pages' own queue is stalled, so fail fast instead.
+          timeout: 180000
