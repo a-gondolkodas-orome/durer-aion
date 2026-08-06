@@ -8,10 +8,6 @@ permissions:
   pages: write
   id-token: write
 
-concurrency:
-  group: pages
-  cancel-in-progress: false
-
 jobs:
   build:
     runs-on: ubuntu-24.04
@@ -20,25 +16,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
-      - name: Install dependencies
-        id: install
-        run: npm ci
-      # Same step-per-check split as pr_test.yml — see the comment there.
-      - name: Check tool versions
-        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
-        run: npm run check:versions
-      - name: Lint
-        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
-        run: npm run lint
-      - name: Typecheck
-        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
-        run: npm run typecheck
-      - name: Unit tests
-        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
-        run: npm run test:unit
-      - name: Build
-        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
-        run: npm run build
+      - name: test and build
+        run: |
+          npm ci
+          npm run test
+          npm run build
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
@@ -46,6 +28,9 @@ jobs:
 
   deploy:
     needs: build
+    concurrency:
+      group: pages
+      cancel-in-progress: false
     runs-on: ubuntu-24.04
     environment:
       name: github-pages
