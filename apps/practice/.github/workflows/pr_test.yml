@@ -22,8 +22,24 @@ jobs:
           path: ~/.npm
           key: npm-${{ hashFiles('package-lock.json') }}
           restore-keys: npm-
-      - name: test and build
-        run: |
-          npm ci
-          npm run test
-          npm run build
+      - name: Install dependencies
+        id: install
+        run: npm ci
+      # Each check runs even after an earlier one failed, so a red build names every
+      # problem at once: a contributor whose only mistake is formatting can see that
+      # the game logic itself passed, without reading the logs.
+      - name: Check tool versions
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: npm run check:versions
+      - name: Lint
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: npm run lint
+      - name: Typecheck
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: npm run typecheck
+      - name: Unit tests
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: npm run test:unit
+      - name: Build
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: npm run build
