@@ -43,15 +43,26 @@ const Harness = ({ isHumanVsHumanGame = false }: { isHumanVsHumanGame?: boolean 
   );
 };
 
+// Headless UI's `Dialog` keeps working after the synchronous render — it
+// portals the panel and wraps it in a `Transition`. A test that reads the
+// controls straight off `render` can therefore finish before that work lands,
+// and React reports the late state update as one escaping `act(...)`. Awaiting
+// a control keeps the settling inside `act`.
+const openDialog = async (props: { isHumanVsHumanGame?: boolean } = {}) => {
+  const view = render(<Harness {...props} />);
+  await view.findByTestId('mode-vsComputer');
+  return view;
+};
+
 describe('GameEndDialog', () => {
-  it('seeds the draft mode from the game that just ended', () => {
-    const { getByTestId } = render(<Harness isHumanVsHumanGame />);
+  it('seeds the draft mode from the game that just ended', async () => {
+    const { getByTestId } = await openDialog({ isHumanVsHumanGame: true });
 
     expect((getByTestId('mode-vsHuman') as HTMLInputElement).checked).toBe(true);
   });
 
-  it('lets the player draft a different mode', () => {
-    const { getByTestId } = render(<Harness />);
+  it('lets the player draft a different mode', async () => {
+    const { getByTestId } = await openDialog();
 
     fireEvent.click(getByTestId('mode-vsHuman'));
 
@@ -61,7 +72,7 @@ describe('GameEndDialog', () => {
   // The behaviour the removed effect existed for: a draft the player walked
   // away from must not come back the next time the dialog opens.
   it('discards an abandoned draft when reopened', async () => {
-    const { getByTestId, queryByTestId, getByText, findByTestId } = render(<Harness />);
+    const { getByTestId, queryByTestId, getByText, findByTestId } = await openDialog();
 
     fireEvent.click(getByTestId('mode-vsHuman'));
     expect((getByTestId('mode-vsHuman') as HTMLInputElement).checked).toBe(true);
