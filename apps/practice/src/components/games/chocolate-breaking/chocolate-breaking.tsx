@@ -153,7 +153,7 @@ export const ChocolateBreaking = strategyGameFactory({
       label: { hu: 'Teszt', en: 'Test' }
     },
     {
-      // smart bot: optimal via Sprague–Grundy values (see helpers.ts / bot-strategy.ts)
+      // smart bot: optimal via Sprague–Grundy values (see bot-strategy.ts)
       botStrategy: smartBotStrategy,
       generateStartBoard,
       label: { hu: 'Teljes', en: 'Full' },

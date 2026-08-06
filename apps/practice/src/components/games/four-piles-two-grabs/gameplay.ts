@@ -1,5 +1,5 @@
 import type { Ctx, MoveOutcome } from '../../strategy-game-factory';
-import { random, sample, sortBy } from 'lodash';
+import { random, sortBy } from 'lodash';
 
 // Stones in each of the four piles.
 export type Board = number[]; // length 4
@@ -55,7 +55,7 @@ export const isWinningInOneMove = (board: Board, move: Move): boolean =>
   isTerminal(applyMove(board, move));
 
 // The player to move LOSES exactly when the three smallest piles are equal.
-// (Verified against exhaustive minimax in helpers.spec.) Terminal positions –
+// (Verified against exhaustive minimax in bot-strategy.spec.ts.) Terminal positions –
 // at most one non-empty pile – have three zero piles, so they satisfy this too.
 const threeSmallestEqual = (board: Board): boolean => {
   const s = sortBy(board);
@@ -63,28 +63,6 @@ const threeSmallestEqual = (board: Board): boolean => {
 };
 
 export const isWinningBoard = (board: Board): boolean => !threeSmallestEqual(board);
-
-export const getSmartBotMove = (board: Board): Move => {
-  // Winning moves leave the opponent with three equal smallest piles (a losing
-  // position). Immediate wins (leaving the opponent unable to move) are a
-  // special case, so prefer them to end the game promptly.
-  const winning = getLegalMoves(board).filter(m => threeSmallestEqual(applyMove(board, m)));
-  const immediate = winning.filter(m => isWinningInOneMove(board, m));
-  if (immediate.length > 0) return sample(immediate)!;
-  if (winning.length > 0) return sample(winning)!;
-  // Losing position (three smallest already equal): every move hands the
-  // opponent a winning position, so we cannot win against optimal play. Play
-  // any legal move and hope the opponent slips up.
-  return sample(getLegalMoves(board))!;
-};
-
-// Test bot: play a random legal move, but grab an immediate one-move win when
-// one is available.
-export const getRandomBotMove = (board: Board): Move => {
-  const moves = getLegalMoves(board);
-  const winningNow = moves.filter(m => isWinningInOneMove(board, m));
-  return sample(winningNow.length > 0 ? winningNow : moves)!;
-};
 
 // --- Starting positions -----------------------------------------------------
 

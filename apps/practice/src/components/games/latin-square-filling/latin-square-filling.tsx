@@ -136,7 +136,7 @@ export const LatinSquareFilling = strategyGameFactory({
       generateStartBoard,
       label: { hu: 'Teszt', en: 'Test' }
     },
-    // smart bot: exhaustive minimax, verified optimal (see helpers.spec.ts)
+    // smart bot: exhaustive minimax, verified optimal (see bot-strategy.spec.ts)
     {
       botStrategy: smartBotStrategy,
       generateStartBoard,
