@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { makeCtx } from '../../../test-utils';
+import { makeCtx, moveValidator } from '../../../test-utils';
 import {
   applyRemoval,
   countMinPiles,
@@ -10,10 +10,11 @@ import {
   nonEmptyIndices,
   removerWins,
   requiredPointCount,
-  isPointingAllowed,
   isRemovalAllowed,
   type Board
 } from './gameplay';
+
+const isPointingAllowed = moveValidator(moves.pointPiles);
 
 // Brute-force ground truth: does the player who is about to be pointed at (and
 // then takes) win the rest of the game with optimal play from both sides?

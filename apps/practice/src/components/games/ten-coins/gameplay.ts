@@ -13,7 +13,7 @@ const totalCoins = 10;
 // A move needs a value K that is actually on the table, and a strictly smaller
 // positive L to turn those coins into. Both players draw on the same table, so
 // whose turn it is does not enter into legality.
-export const isConversionAllowed = (board: Board, k: number, l: number): boolean =>
+const isConversionAllowed = (board: Board, k: number, l: number): boolean =>
   Number.isInteger(k) && Number.isInteger(l) && l >= 1 && l < k && board.includes(k);
 
 export const moves = {

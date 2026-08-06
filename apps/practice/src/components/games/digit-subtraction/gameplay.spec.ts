@@ -1,5 +1,7 @@
-import { isSubtractableDigit, moves } from './gameplay';
-import { makeCtx } from '../../../test-utils';
+import { moves } from './gameplay';
+import { makeCtx, moveValidator } from '../../../test-utils';
+
+const isSubtractableDigit = moveValidator(moves.subtractDigit);
 
 const asPlayer = (currentPlayer: number) => ({ ctx: makeCtx({ currentPlayer }) });
 

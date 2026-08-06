@@ -5,7 +5,7 @@ export type Board = { current: number, target: number, restricted: number | null
 
 // A step adds a positive whole number below 13, and superstition forbids the one
 // that would complete 13 together with the previous player's step.
-export const isStepAllowed = (board: Board, step: number): boolean =>
+const isStepAllowed = (board: Board, step: number): boolean =>
   Number.isInteger(step) && step > 0 && step < 13 && step !== board.restricted;
 
 export const generateStartBoard = (): Board => {

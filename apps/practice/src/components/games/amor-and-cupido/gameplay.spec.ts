@@ -6,10 +6,11 @@ import {
   findWinningTriangle,
   generateStartBoard,
   getAllowedMoves,
-  isClaimAllowed,
   moves
 } from './gameplay';
-import { makeCtx } from '../../../test-utils';
+import { makeCtx, moveValidator } from '../../../test-utils';
+
+const isClaimAllowed = moveValidator(moves.claimEdge);
 
 describe('helpers geometry', () => {
   it('has 15 edges and 20 triangles', () => {

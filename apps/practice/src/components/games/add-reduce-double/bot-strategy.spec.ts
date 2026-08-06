@@ -1,6 +1,9 @@
 import { range, uniq } from 'lodash';
 import { getSmartBotStep } from './bot-strategy';
-import { isTransferAllowed, type Board } from './gameplay';
+import { moves, type Board } from './gameplay';
+import { moveValidator } from '../../../test-utils';
+
+const isTransferAllowed = moveValidator(moves.moveHalvedPieces);
 
 describe('add-reduce-double getSmartBotStep', () => {
   describe('unbalanced piles (diff > 1): deterministic', () => {

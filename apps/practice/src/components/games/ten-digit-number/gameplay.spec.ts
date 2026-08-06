@@ -1,5 +1,7 @@
-import { isDigitChoiceAllowed, moves } from './gameplay';
-import { makeCtx } from '../../../test-utils';
+import { moves } from './gameplay';
+import { makeCtx, moveValidator } from '../../../test-utils';
+
+const isDigitChoiceAllowed = moveValidator(moves.chooseDigit);
 
 const meta = { ctx: makeCtx() };
 

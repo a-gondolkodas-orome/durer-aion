@@ -1,5 +1,8 @@
-import { moves, isIncreaseValid } from './gameplay';
+import { moves, type Board } from './gameplay';
 import { makeCtx } from '../../../../test-utils';
+
+const isIncreaseValid = ({ board, number }: { board: Board; number: number }) =>
+  moves.increaseTo.validate(board, { ctx: makeCtx() }, number);
 
 describe('isIncreaseValid', () => {
   it('allows advancing by 1, 2 or 3', () => {

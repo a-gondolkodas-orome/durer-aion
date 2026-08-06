@@ -7,10 +7,8 @@ import {
   freeEdges,
   freeTriangles,
   generateStartBoard,
-  isCirclePlacementAllowed,
   isCircleWin,
   isLineWin,
-  isShadeAllowed,
   isWinningShade,
   liveThreats,
   moves,
@@ -18,7 +16,10 @@ import {
   shadedCount,
   type Board
 } from './gameplay';
-import { makeCtx } from '../../../test-utils';
+import { makeCtx, moveValidator } from '../../../test-utils';
+
+const isShadeAllowed = moveValidator(moves.shadeEdge, makeCtx({ currentPlayer: LINE }));
+const isCirclePlacementAllowed = moveValidator(moves.placeCircle, makeCtx({ currentPlayer: CIRCLE }));
 
 // Shade the three edges of a triangle on a fresh board.
 const boardWithFullTriangle = (t: number): Board => {

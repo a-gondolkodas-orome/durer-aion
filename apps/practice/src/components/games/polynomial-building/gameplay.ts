@@ -8,7 +8,7 @@ export const COEFS: Coef[] = ['a', 'b', 'c'];
 // players pick from the same three slots, so whose turn it is does not enter
 // into legality. The safe-integer bound is what keeps the root arithmetic
 // exact; the board client caps the input at 12 digits for the same reason.
-export const isCoefficientChoiceAllowed = (board: Board, coef: Coef, value: number): boolean =>
+const isCoefficientChoiceAllowed = (board: Board, coef: Coef, value: number): boolean =>
   COEFS.includes(coef) && board[coef] === null && Number.isSafeInteger(value);
 
 // All integer divisors (positive and negative) of a nonzero integer.

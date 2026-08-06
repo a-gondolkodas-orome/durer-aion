@@ -1,5 +1,7 @@
-import { isCoveringAllowed, moves, COVERED } from './gameplay';
-import { makeCtx } from '../../../test-utils';
+import { moves, COVERED } from './gameplay';
+import { makeCtx, moveValidator } from '../../../test-utils';
+
+const isCoveringAllowed = moveValidator(moves.coverNumber);
 
 const meta = { ctx: makeCtx() };
 

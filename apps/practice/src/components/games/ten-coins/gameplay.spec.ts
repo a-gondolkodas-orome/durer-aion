@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { isConversionAllowed, moves, type Board } from './gameplay';
-import { makeCtx } from '../../../test-utils';
+import { moves, type Board } from './gameplay';
+import { makeCtx, moveValidator } from '../../../test-utils';
+
+const isConversionAllowed = moveValidator(moves.convert);
 
 describe('isConversionAllowed', () => {
   // Four 3s and six 1s: the values 1 and 3 are on the table, 2 and 4 are not.

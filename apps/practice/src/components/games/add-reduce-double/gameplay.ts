@@ -8,7 +8,7 @@ export type Transfer = { pileId: number; pieceCount: number };
 // An even number of pieces, at least two, and no more than the pile holds —
 // half of them then go to the other pile. Both players draw on the same two
 // piles, so whose turn it is does not enter into legality.
-export const isTransferAllowed = (board: Board, { pileId, pieceCount }: Transfer): boolean =>
+const isTransferAllowed = (board: Board, { pileId, pieceCount }: Transfer): boolean =>
   (pileId === 0 || pileId === 1)
     && Number.isInteger(pieceCount)
     && pieceCount >= 2

@@ -1,5 +1,6 @@
 import { makeCtx } from '../../../../test-utils';
-import { inPlacingPhase, isWhiteningAllowed, moves, type Board } from './gameplay';
+import type { Ctx } from '../../../strategy-game-factory';
+import { inPlacingPhase, moves, type Board } from './gameplay';
 
 // vsHuman keeps the colours independent of role choice: player 0 is blue, so the
 // other player's colour is red.
@@ -24,6 +25,9 @@ describe('helpers', () => {
   });
 
   describe('isWhiteningAllowed', () => {
+    const isWhiteningAllowed = (board: Board, ctx: Ctx, id: number) =>
+      moves.whitenPiece.validate(board, { ctx }, id);
+
     it('rejects any whitening while empty cells remain', () => {
       const partialBoard: Board = [...fullBoard.slice(0, 8), null];
       expect(isWhiteningAllowed(partialBoard, ctxForFirstPlayer, 1)).toBe(false);

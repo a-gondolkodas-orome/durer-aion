@@ -24,7 +24,7 @@ export const generateStartBoard = (maxDiscs: number) => (): Board => {
 export const isRemovalAllowed = (board: Board, count: number): boolean =>
   (count === 1 || count === 2) && count <= board[0];
 
-export const isFlipAllowed = (board: Board, count: number): boolean =>
+const isFlipAllowed = (board: Board, count: number): boolean =>
   (count === 1 || count === 2) && count <= board[1];
 
 export const moves = {

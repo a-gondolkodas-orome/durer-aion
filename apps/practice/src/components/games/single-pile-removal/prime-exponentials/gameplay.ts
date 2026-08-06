@@ -32,7 +32,7 @@ export const allPrimePowers = (() => {
 // Only a genuine prime power that fits within the number may be subtracted, so
 // legality is membership in the enumeration above rather than an arithmetic
 // check, which would also accept a composite base.
-export const isSubtractionAllowed = (board: Board, { prime, exponent }: { prime: number; exponent: number }) =>
+const isSubtractionAllowed = (board: Board, { prime, exponent }: { prime: number; exponent: number }) =>
   allPrimePowers.some(e => e.prime === prime && e.exponent === exponent && e.value <= board);
 
 export const generateStartBoard = () => {

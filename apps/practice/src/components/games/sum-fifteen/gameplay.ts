@@ -17,7 +17,7 @@ export const freeNumbers = (owner: Owner): number[] =>
 
 // A player may claim any of 1..9 that nobody has claimed yet. Both players draw
 // from the same nine numbers, so whose turn it is does not enter into legality.
-export const isChoiceAllowed = (owner: Owner, n: number): boolean =>
+const isChoiceAllowed = (owner: Owner, n: number): boolean =>
   Number.isInteger(n) && n >= 1 && n <= allNumbers.length && owner[n - 1] === null;
 
 // The first player owns numbers on even move counts, so the player to move is

@@ -1,5 +1,7 @@
-import { moves, isMoveValid } from './gameplay';
-import { makeCtx } from '../../../../test-utils';
+import { moves } from './gameplay';
+import { makeCtx, moveValidator } from '../../../../test-utils';
+
+const isMoveValid = moveValidator(moves.moveTo);
 
 describe('isMoveValid', () => {
   it('allows a target reached by subtracting 1, 2 or a prime', () => {

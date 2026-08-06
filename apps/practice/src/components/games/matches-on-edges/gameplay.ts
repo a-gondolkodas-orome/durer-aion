@@ -69,7 +69,7 @@ export const legalMoves = (board: Board): Move[] => {
 // single match-free block — so this is not a bounds check but the game's whole
 // move rule. Matching against the generated list keeps the two definitions from
 // drifting; there are only O(n) legal moves.
-export const isWindowAllowed = (board: Board, a: number, b: number): boolean =>
+const isWindowAllowed = (board: Board, a: number, b: number): boolean =>
   legalMoves(board).some(m => m.a === a && m.b === b);
 
 // The bounding edges of window [a, b] that are still free and would receive a

@@ -7,13 +7,16 @@ import {
   applyMove,
   generateStartBoard,
   isFull,
-  isLegalPlacement,
   isTerminal,
   legalMoves,
+  moves,
   playerToMove,
   type Board,
   type Move
 } from './gameplay';
+import { moveValidator } from '../../../test-utils';
+
+const isLegalPlacement = moveValidator(moves.placeDigit);
 
 describe('latin-square-filling bot', () => {
 // Play a full game between two step functions, returning the winner index.

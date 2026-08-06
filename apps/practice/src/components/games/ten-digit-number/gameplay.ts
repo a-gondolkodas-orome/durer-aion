@@ -8,7 +8,7 @@ export const availableDigits = [1, 2, 3, 4, 5, 6];
 // Only one of the six offered digits may be appended, and only while the number
 // is still short of its ten digits. Both players draw from the same six, so
 // whose turn it is does not enter into legality.
-export const isDigitChoiceAllowed = (board: Board, digit: number): boolean =>
+const isDigitChoiceAllowed = (board: Board, digit: number): boolean =>
   board.digits.length < totalDigits && availableDigits.includes(digit);
 
 export const moves = {

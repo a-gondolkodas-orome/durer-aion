@@ -12,7 +12,7 @@ export const validSteps = new Set(
 
 export const isValidStep = (d: number): boolean => validSteps.has(d);
 
-export const isMoveValid = (board: Board, target: number): boolean => {
+const isMoveValid = (board: Board, target: number): boolean => {
   if (target < 0 || target >= board) return false;
   return isValidStep(board - target);
 };

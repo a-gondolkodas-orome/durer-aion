@@ -3,12 +3,13 @@ import {
   divisors,
   hasThreeIntegerRoots,
   integerRoots,
-  isCoefficientChoiceAllowed,
   moves,
   type Board,
   type Coef
 } from './gameplay';
-import { makeCtx } from '../../../test-utils';
+import { makeCtx, moveValidator } from '../../../test-utils';
+
+const isCoefficientChoiceAllowed = moveValidator(moves.setCoefficient);
 
 const sorted = (xs: number[] | null) => (xs === null ? null : [...xs].sort((a, b) => a - b));
 

@@ -43,7 +43,7 @@ export const getAllowedMoves = (board: Board): number[] =>
 
 // A pair may be claimed while nobody owns it. Both players claim from the same
 // 15 edges, so whose turn it is does not enter into legality.
-export const isClaimAllowed = (board: Board, edge: number): boolean =>
+const isClaimAllowed = (board: Board, edge: number): boolean =>
   Number.isInteger(edge) && edge >= 0 && edge < EDGES.length && board[edge] === null;
 
 // Would claiming `edge` for `player` complete a triangle entirely in their

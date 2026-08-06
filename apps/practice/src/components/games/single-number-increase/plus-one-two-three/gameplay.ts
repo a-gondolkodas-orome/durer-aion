@@ -6,7 +6,7 @@ export const target = 40;
 export const maxStep = 3;
 
 // A step advances to a strictly larger whole number, by at most maxStep.
-export const isIncreaseValid = ({ board, number }: { board: Board; number: number }): boolean =>
+const isIncreaseValid = ({ board, number }: { board: Board; number: number }): boolean =>
   Number.isInteger(number) && number > board && (number - board) <= maxStep;
 
 export const moves = {

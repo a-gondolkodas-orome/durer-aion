@@ -30,7 +30,7 @@ export const otherPlayerColor = (ctx: Ctx) =>
 // phase check is what stops a player from whitening mid-placement; for placing,
 // "the cell is empty" already implies the placing phase, so that move needs no
 // phase check of its own.
-export const isWhiteningAllowed = (board: Board, ctx: Ctx, id: number) =>
+const isWhiteningAllowed = (board: Board, ctx: Ctx, id: number) =>
   !inPlacingPhase(board) && board[id] === otherPlayerColor(ctx);
 
 export const moves = {

@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { isFlipAllowed, isRemovalAllowed, moves } from './gameplay';
-import { makeCtx } from '../../../test-utils';
+import { isRemovalAllowed, moves } from './gameplay';
+import { makeCtx, moveValidator } from '../../../test-utils';
+
+const isFlipAllowed = moveValidator(moves.turnDiscs);
 
 describe('isRemovalAllowed', () => {
   it('accepts taking one or two blue discs', () => {

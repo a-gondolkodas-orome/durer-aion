@@ -36,7 +36,7 @@ export const isPlacementAllowed = (board: Board, cellId: number): boolean =>
     && LINES[board.pendingLine].includes(cellId)
     && !board.stones[cellId];
 
-export const isDesignationAllowed = (board: Board, lineIndex: number): boolean =>
+const isDesignationAllowed = (board: Board, lineIndex: number): boolean =>
   board.pendingLine === null
     && Number.isInteger(lineIndex)
     && lineIndex >= 0

@@ -1,5 +1,7 @@
-import { isPile, isMergeAllowed, moves } from './gameplay';
-import { makeCtx } from '../../../test-utils';
+import { isPile, moves } from './gameplay';
+import { makeCtx, moveValidator } from '../../../test-utils';
+
+const isMergeAllowed = moveValidator(moves.mergePiles);
 
 const asPlayer = (currentPlayer: number) => ({ ctx: makeCtx({ currentPlayer }) });
 

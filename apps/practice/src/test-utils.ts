@@ -15,6 +15,15 @@ export const makeCtx = (overrides: Partial<Ctx> = {}): Ctx => ({
   ...overrides
 });
 
+// Reads a move's legality the way the engine does — through the move itself —
+// so a spec asserting a rule also pins that the rule is still wired to the move
+// it governs. A bare predicate imported from `gameplay.ts` keeps passing after
+// its `validate:` line is dropped; this does not.
+export const moveValidator = <TBoard, TArgs extends unknown[]>(
+  move: { validate?: (board: TBoard, meta: { ctx: Ctx }, ...args: TArgs) => boolean },
+  ctx: Ctx = makeCtx()
+) => (board: TBoard, ...args: TArgs): boolean => move.validate!(board, { ctx }, ...args);
+
 // A bot names its moves rather than playing them, so a spec reads its decision
 // straight off the return value. A strategy that named a whole turn returns
 // several; the one it would play next is the first.

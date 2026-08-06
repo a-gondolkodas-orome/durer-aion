@@ -1,8 +1,11 @@
 import {
-  moves, generateStartBoard, isColor, isSoldierAssignmentAllowed, HUNYADI, SULTAN, type Board
+  moves, generateStartBoard, HUNYADI, SULTAN, type Board, type SoldierColor
 } from './gameplay';
 import { uniq, flatten } from 'lodash';
-import { makeCtx } from '../../../test-utils';
+import { makeCtx, moveValidator } from '../../../test-utils';
+
+const isKillAllowed = moveValidator(moves.killGroup, makeCtx({ currentPlayer: HUNYADI }));
+const isSoldierAssignmentAllowed = moveValidator(moves.setGroupOfSoldiers, makeCtx({ currentPlayer: SULTAN }));
 
 describe('HunyadiAndTheJanissaries helpers', () => {
   describe('moves', () => {
@@ -36,10 +39,10 @@ describe('HunyadiAndTheJanissaries helpers', () => {
     const board = [[], ['red'], ['blue', 'red']] as Board;
 
     it('only accepts the two group colours', () => {
-      expect(isColor('red')).toBe(true);
-      expect(isColor('blue')).toBe(true);
-      expect(isColor('green')).toBe(false);
-      expect(isColor('')).toBe(false);
+      expect(isKillAllowed(board, 'red')).toBe(true);
+      expect(isKillAllowed(board, 'blue')).toBe(true);
+      expect(isKillAllowed(board, 'green' as SoldierColor)).toBe(false);
+      expect(isKillAllowed(board, '' as SoldierColor)).toBe(false);
     });
 
     it('accepts an assignment of soldiers that are actually on the staircase', () => {

@@ -69,7 +69,7 @@ export const allMoves = (pieces: Piece[]): Move[] =>
 // a break that would snap off a 1×1 is not a move, it is the loss condition.
 // Both players break from the same table, so whose turn it is does not enter
 // into legality.
-export const isBreakAllowed = (board: Board, move: Move): boolean => {
+const isBreakAllowed = (board: Board, move: Move): boolean => {
   if (!move) return false;
   const piece = board.pieces.find(p => p.id === move.id);
   if (piece === undefined) return false;

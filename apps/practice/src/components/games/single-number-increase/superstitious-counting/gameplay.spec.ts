@@ -1,5 +1,7 @@
-import { moves, isStepAllowed, type Board } from './gameplay';
-import { makeCtx } from '../../../../test-utils';
+import { moves, type Board } from './gameplay';
+import { makeCtx, moveValidator } from '../../../../test-utils';
+
+const isStepAllowed = moveValidator(moves.step);
 
 const boardWith = (restricted: number | null): Board => ({ current: 10, target: 50, restricted });
 

@@ -1,5 +1,7 @@
-import { isTransferAllowed, moves } from './gameplay';
-import { makeCtx } from '../../../test-utils';
+import { moves } from './gameplay';
+import { makeCtx, moveValidator } from '../../../test-utils';
+
+const isTransferAllowed = moveValidator(moves.moveHalvedPieces);
 
 const asPlayer = (currentPlayer: number) => ({ ctx: makeCtx({ currentPlayer }) });
 

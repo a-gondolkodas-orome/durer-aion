@@ -1,5 +1,7 @@
-import { applyMoveToBoard, isCombineAllowed, moves, type Board, type Slot } from './gameplay';
-import { makeCtx } from '../../../test-utils';
+import { applyMoveToBoard, moves, type Board, type Slot } from './gameplay';
+import { makeCtx, moveValidator } from '../../../test-utils';
+
+const isCombineAllowed = moveValidator(moves.combineTwo);
 
 const active = (value: number): Slot => ({ value, state: 'active' });
 

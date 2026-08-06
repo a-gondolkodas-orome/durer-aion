@@ -10,7 +10,7 @@ export const isPile = (board: Board, pileIndex: number): boolean =>
   Number.isInteger(pileIndex) && pileIndex >= 0 && pileIndex < board.length;
 
 // Merging needs two piles, and they have to be different ones.
-export const isMergeAllowed = (board: Board, piles: number[]): boolean =>
+const isMergeAllowed = (board: Board, piles: number[]): boolean =>
   Array.isArray(piles) && piles.length === 2
     && isPile(board, piles[0]) && isPile(board, piles[1]) && piles[0] !== piles[1];
 

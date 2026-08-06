@@ -4,12 +4,15 @@ import { chooseRemoval, choosePointing } from './bot-strategy';
 import {
   applyRemoval,
   countMinPiles,
-  isPointingAllowed,
   isRemovalAllowed,
   minPileSize,
+  moves,
   nonEmptyIndices,
   removerWins
 } from './gameplay';
+import { moveValidator } from '../../../test-utils';
+
+const isPointingAllowed = moveValidator(moves.pointPiles);
 
 // ---- brute-force oracle (independent of the bot) ----
 const cache = new Map<string, boolean>();

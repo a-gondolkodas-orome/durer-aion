@@ -3,14 +3,15 @@ import {
   canMove,
   generateStartBoard,
   getLegalMoves,
-  isMoveLegal,
   isTerminal,
   isWinningBoard,
   isWinningInOneMove,
   moves,
   type Board
 } from './gameplay';
-import { makeCtx } from '../../../test-utils';
+import { makeCtx, moveValidator } from '../../../test-utils';
+
+const isMoveLegal = moveValidator(moves.takeStones);
 
 describe('four-piles-two-grabs gameplay', () => {
   describe('move mechanics', () => {

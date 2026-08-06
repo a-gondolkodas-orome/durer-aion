@@ -2,7 +2,6 @@ import {
   findWinningTriple,
   freeNumbers,
   hasSum15,
-  isChoiceAllowed,
   moves,
   numbersOwnedBy,
   type Board,
@@ -36,6 +35,9 @@ describe('findWinningTriple', () => {
 });
 
 describe('isChoiceAllowed', () => {
+  const isChoiceAllowed = (owner: Owner, n: number) =>
+    moves.chooseNumber.validate({ owner }, { ctx: makeCtx() }, n);
+
   const owner: Owner = [0, null, 1, null, null, null, null, null, null];
 
   it('accepts a number nobody has claimed', () => {

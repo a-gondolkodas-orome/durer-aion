@@ -35,7 +35,7 @@ export const requiredPointCount = (piles: number[]): number =>
 // The two halves of a turn are told apart by the board alone: `pointed` is null
 // until someone has pointed, and `takeStones` clears it again. Pointing means
 // naming exactly the required number of distinct non-empty piles.
-export const isPointingAllowed = (board: Board, indices: number[]): boolean =>
+const isPointingAllowed = (board: Board, indices: number[]): boolean =>
   board.pointed === null
     && Array.isArray(indices)
     && indices.length === requiredPointCount(board.piles)

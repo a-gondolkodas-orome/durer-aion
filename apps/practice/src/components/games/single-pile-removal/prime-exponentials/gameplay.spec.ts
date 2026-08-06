@@ -1,5 +1,7 @@
-import { moves, isSubtractionAllowed } from './gameplay';
-import { makeCtx } from '../../../../test-utils';
+import { moves } from './gameplay';
+import { makeCtx, moveValidator } from '../../../../test-utils';
+
+const isSubtractionAllowed = moveValidator(moves.subtractPrimeExponent);
 
 describe('isSubtractionAllowed', () => {
   it('allows a prime power no larger than the number', () => {

@@ -21,7 +21,7 @@ export const applyMove = (board: Board, move: Move): Board =>
 // A move takes from exactly two piles, at least one stone and at most the whole
 // pile from each. Checked directly rather than as membership in getLegalMoves,
 // which enumerates a quadratic number of moves.
-export const isMoveLegal = (board: Board, move: Move): boolean =>
+const isMoveLegal = (board: Board, move: Move): boolean =>
   Array.isArray(move)
     && move.length === board.length
     && move.every((removed, i) => Number.isInteger(removed) && removed >= 0 && removed <= board[i])

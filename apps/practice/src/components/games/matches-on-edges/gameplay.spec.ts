@@ -5,14 +5,15 @@ import {
   currentWindowSize,
   emptyBoard,
   isTerminal,
-  isWindowAllowed,
   legalMoves,
   moverWins,
   moves,
   secondPlayerWins,
   type Board
 } from './gameplay';
-import { makeCtx } from '../../../test-utils';
+import { makeCtx, moveValidator } from '../../../test-utils';
+
+const isWindowAllowed = moveValidator(moves.placeWindow);
 
 // ---------------------------------------------------------------------------
 // Independent oracle: enumerate legal moves straight from the raw rules (no

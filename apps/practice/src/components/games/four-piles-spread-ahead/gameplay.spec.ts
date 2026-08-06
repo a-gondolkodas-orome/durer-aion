@@ -1,4 +1,4 @@
-import { isSpreadAllowed, moves, type Board } from './gameplay';
+import { moves, type Board } from './gameplay';
 import { makeCtx } from '../../../test-utils';
 
 const asPlayer = (currentPlayer: number) => ({ ctx: makeCtx({ currentPlayer }) });
@@ -7,6 +7,9 @@ const spread = (board: number[], pileId: number, pieceCount: number, player = 0)
   moves.spreadPieces.apply(board, asPlayer(player), { pileId, pieceCount });
 
 describe('isSpreadAllowed', () => {
+  const isSpreadAllowed = (board: Board, pileId: number, pieceCount: number) =>
+    moves.spreadPieces.validate(board, { ctx: makeCtx() }, { pileId, pieceCount });
+
   const board: Board = [2, 3, 4, 5];
 
   it('allows spreading onto every pile in front of the chosen one', () => {

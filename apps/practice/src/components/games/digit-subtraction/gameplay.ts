@@ -5,7 +5,7 @@ export type Board = number
 // Only a non-zero digit that actually appears in the current number may be
 // subtracted. Both players draw from the same number, so whose turn it is does
 // not enter into legality.
-export const isSubtractableDigit = (board: Board, digit: number): boolean =>
+const isSubtractableDigit = (board: Board, digit: number): boolean =>
   Number.isInteger(digit) && digit >= 1 && digit <= 9
     && String(board).includes(String(digit));
 

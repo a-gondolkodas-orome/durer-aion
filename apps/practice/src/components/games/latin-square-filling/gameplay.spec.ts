@@ -2,7 +2,6 @@ import {
   applyMove,
   generateStartBoard,
   isFull,
-  isLegalPlacement,
   isTerminal,
   legalDigits,
   legalMoves,
@@ -10,7 +9,9 @@ import {
   playerToMove,
   type Board
 } from './gameplay';
-import { makeCtx } from '../../../test-utils';
+import { makeCtx, moveValidator } from '../../../test-utils';
+
+const isLegalPlacement = moveValidator(moves.placeDigit);
 
 describe('latin-square-filling gameplay', () => {
   describe('legality', () => {

@@ -3,13 +3,14 @@ import {
   generateStartBoard,
   grundy,
   hasSafeBreak,
-  isBreakAllowed,
   isFlexible,
   moves,
   type Board,
   type Move
 } from './gameplay';
-import { makeCtx } from '../../../test-utils';
+import { makeCtx, moveValidator } from '../../../test-utils';
+
+const isBreakAllowed = moveValidator(moves.breakPiece);
 
 const single = (w: number, h: number): Board => ({ pieces: [{ id: 0, w, h }], nextId: 1 });
 

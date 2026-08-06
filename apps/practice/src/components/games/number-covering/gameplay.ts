@@ -9,7 +9,7 @@ export const getRemaining = (board: Board) => board.filter(i => i !== COVERED);
 
 // Numbers are addressed by their value, which is also their 1-based position;
 // only one that is still showing may be covered.
-export const isCoveringAllowed = (board: Board, number: number): boolean =>
+const isCoveringAllowed = (board: Board, number: number): boolean =>
   Number.isInteger(number) && number >= 1 && number <= board.length && board[number - 1] !== COVERED;
 
 export const moves = {

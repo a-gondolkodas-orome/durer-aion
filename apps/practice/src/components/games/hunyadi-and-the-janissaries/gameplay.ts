@@ -51,11 +51,11 @@ export const [SULTAN, HUNYADI] = [0, 1];
 // Hunyadi destroys one of the two colours. Wiping out a colour nobody was
 // assigned to is allowed by the rules (it simply achieves nothing), so the
 // colour being present on the staircase is not part of legality.
-export const isColor = (group: string): group is SoldierColor => group === 'blue' || group === 'red';
+const isColor = (group: string): group is SoldierColor => group === 'blue' || group === 'red';
 
 // A soldier reference points at an actual soldier on the staircase, and the
 // group it is assigned to is one of the two colours the sultan splits into.
-export const isSoldierAssignmentAllowed = (board: Board, soldiers: Soldier[]): boolean =>
+const isSoldierAssignmentAllowed = (board: Board, soldiers: Soldier[]): boolean =>
   Array.isArray(soldiers) && soldiers.every(
     ({ rowIndex, pieceIndex, group }) =>
       isColor(group) && board[rowIndex]?.[pieceIndex] !== undefined

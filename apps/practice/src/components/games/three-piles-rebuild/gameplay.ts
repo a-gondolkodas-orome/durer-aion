@@ -23,7 +23,7 @@ export const withOtherPilesDiscarded = (board: Board, keepId: number): Board =>
   board.map((v, i) => (i === keepId ? v : 0));
 
 // A pile can be kept only at the start of a turn, and only if it can be split.
-export const isKeepAllowed = (board: Board, keepId: number): boolean =>
+const isKeepAllowed = (board: Board, keepId: number): boolean =>
   Number.isInteger(keepId) && keepId >= 0 && keepId < board.length
     && keptPileId(board) === undefined
     && canSplit(board[keepId]);

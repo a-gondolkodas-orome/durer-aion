@@ -1,14 +1,15 @@
 import {
   LINES,
   emptyCellsInLine,
-  isDesignationAllowed,
   isLineFull,
   isPlacementAllowed,
   moves,
   placeStoneAt,
   type Board
 } from './gameplay';
-import { makeCtx } from '../../../../test-utils';
+import { makeCtx, moveValidator } from '../../../../test-utils';
+
+const isDesignationAllowed = moveValidator(moves.designateLine);
 
 describe('isLineFull', () => {
   it('should be false when a row is not fully occupied', () => {
