@@ -96,10 +96,25 @@ things the work taught, both worth keeping:
 
 ### 4b. Other bots with real search but no spec
 
-`pile-union` (105 L), `ten-digit-number` (68 L), `matchstick-piles` (64 L),
-`five-five-card` (54 L), `distinct-squares/two-times-two` (37 L). The other
-~22 spec-less bots are ≤30-line closed forms — acceptable to leave, the sweep
-covers their conformance.
+~~`pile-union` (105 L), `ten-digit-number` (68 L), `matchstick-piles` (64 L),
+`five-five-card` (54 L), `distinct-squares/two-times-two` (37 L).~~ **All five
+have a `bot-strategy.spec.ts` now**; the list above was stale, and hand-counting
+is why it stayed stale. `npm run coverage:unswept` (§7) produces the current one
+mechanically — 16 of the 76 bots have no spec of their own, and cross-referenced
+against line count the ones with real logic behind them are:
+
+| Bot | L | Unswept line coverage |
+|---|---|---|
+| `cube-coloring` | 88 | 13% |
+| `policeman-thief/policeman-thief-ab` | 83 | 8% |
+| `stones-remove-one-not-twice-from-left` | 83 | 10% |
+| `chess-knight` | 44 | 24% |
+| `pile-splitting-games/pile-splitter` | 39 | 39% |
+| `remove-divisor-multiple` | 16,030 | 20% (a table, not logic) |
+
+The other ten are ≤30-line closed forms — acceptable to leave, the sweep covers
+their conformance. The residual percentages are module-level code the game's
+rules spec pulls in, not tested behaviour; the ordering is the signal.
 
 ### 4c. Untested shared modules — mostly ✅ (#405)
 
@@ -109,7 +124,7 @@ covers their conformance.
 | `strategy-game-factory/hooks/use-game-stats.ts` | corrupt-localStorage fallback and `resetStats` are untested branches | ✅ #405 |
 | `strategy-game-factory/engine/bot-turn.ts`, `engine/build-ctx.ts` | the only engine modules without a direct spec; `build-ctx` is the single source of `ctx` for every validator | ✅ #405 |
 | `src/test-utils.ts` | 98 specs depend on it | declined — a helper this thin is exercised by its 98 callers |
-| `game-parts/common/game-controls.tsx` | the `notAlwaysOptimal` ⓘ marker logic | open |
+| `game-parts/common/game-controls.tsx` | the `notAlwaysOptimal` ⓘ marker logic | ✅ `game-controls.spec.tsx` |
 
 Writing the `build-ctx` spec turned up a real gap rather than just documenting
 the module: `isClientMoveAllowed` compared `currentPlayer === chosenRoleIndex`
@@ -121,6 +136,29 @@ taken. #405 added the `currentPlayer !== null` guard.
 `chess-knight/gameplay.spec.ts` (1 `it` / 58-line module),
 `chess-bishops` (2/54), `pile-splitter-4` (3/111) are the thinnest
 rules specs relative to module size.
+
+### 4e. The app shell, which no spec loaded at all ✅
+
+Found by the coverage tooling of §7 on its first run, and missed by all three
+review sweeps — which read the games, so nobody looked at what wraps them. No
+spec rendered `ThemeProvider`, `LanguageProvider` or `ErrorPage`, and this is
+not inert code:
+
+| Module | L | What was untested |
+|---|---|---|
+| `theme/theme-context.tsx` | 50 | `localStorage` read, the `dark` class, and a `matchMedia('(prefers-color-scheme: dark)')` subscription with a cleanup |
+| `language/language-context.tsx` | 62 | `?lang=` reconciled against `localStorage` in an effect with two eslint rules disabled on it |
+| `theme/theme-switcher.tsx`, `language/language-selector.tsx` | 46 | the only call sites of either setter |
+| `error-page/error-page.tsx` | 20 | both branches of `useRouteError()` |
+
+A detail that confirms nobody had ever rendered them: **jsdom ships no
+`window.matchMedia`**, so rendering `ThemeProvider` at its default `system`
+theme throws unless a spec stubs it — which is what
+`theme-context.spec.tsx` now does. All four modules are at 100% lines.
+
+`app.tsx` (0%) and `main.tsx` (excluded from the report) stay uncovered on
+purpose: route wiring and an entry point, where a spec would mostly assert that
+React Router works.
 
 ## 5. Engine duplication and readability
 
@@ -309,8 +347,28 @@ rules specs relative to module size.
   is `warn` with no `--max-warnings 0` so it can never fail.
 - Nothing outside `src/` is linted or typechecked (`vite.config.js`,
   `eslint.config.js`, `scripts/`).
-- No coverage tooling (`@vitest/coverage-v8` + a `coverage` script would make
-  §4 measurable), no dependabot/renovate despite exact-pinned deps.
+- ~~No coverage tooling (`@vitest/coverage-v8` + a `coverage` script would make
+  §4 measurable)~~ — the tooling is in ✅, but **the reason given was wrong**,
+  and that is the part worth keeping. Coverage cannot measure §4: 40,667 of the
+  43,417 non-spec source lines (94%) are under `games/`, and
+  `plays-to-an-end.spec.ts` and `renders.spec.tsx` execute almost all of them
+  while asserting only that a match ends and a board renders. The first report
+  came out at **87.7% statements** with §4b's bots sitting in the 90s — a naive
+  `coverage` script makes §4 look *solved*. A threshold would have been worse
+  than useless: it is passed by registering another game. §4a had already
+  recorded the same lesson in a different form (chess-ducks' opening books are
+  executed by their spec and still unverified), and the repo's actual answer to
+  "is this tested" is `npx stryker run`.
+
+  What the tool is good for is the opposite question — code **no spec loads** —
+  and there it earned its place immediately; see §4e. Two details make that
+  work: `coverage.include` must name `src/**` explicitly, or Vitest reports only
+  files a test imported and the never-loaded modules are missing rather than at
+  0%; and `coverage:unswept` runs the suite without the two sweeps, which is the
+  one number here that carries information (§4b).
+
+  Same posture as stryker, deliberately: a script, no CI step, no thresholds.
+- No dependabot/renovate despite exact-pinned deps.
 - `package.json`: `postcss` sits in `dependencies` (build-only); `playwright`
   is a devDependency no code uses — it exists to bake Chromium into the
   devcontainer, worth a comment where it's declared.
@@ -348,18 +406,29 @@ rules specs relative to module size.
 | 8 | `games/shared/`: win/loss solver, mex, `Field`, `asTurn`; migrate by family (§6) | ✅ solver only, 3 games — `mex`, `Field` and `asTurn` rejected on the evidence (§6) |
 | 9 | react-hooks lint, quotes rule (§7) | open, small PRs |
 | 10 | Factory component/spec split, `turnState` generic, table-storage convergence, naming sweeps | opportunistic |
+| 11 | Coverage tooling (§7) + specs for what it found (§4e) | ✅ — premise false, kept for a different reason |
 
-Remaining open items worth a line: `game-controls.tsx`'s ⓘ marker (§4c), the
-bots with real search but no spec (§4b), thin rules specs (§4d), and everything
-in §5 below the first two bullets — the 378-line factory component, the
-`turnState` generic, the 1050-line factory spec.
+Remaining open items worth a line: the bots with real search but no spec (§4b,
+list now regenerable), thin rules specs (§4d), and everything in §5 below the
+first two bullets — the 378-line factory component, the `turnState` generic,
+the 1050-line factory spec.
 
-**On the review's own accuracy**: of the items acted on, six claims did not
+**On the review's own accuracy**: of the items acted on, seven claims did not
 survive contact — the bot turn loops had not drifted (§5), `chosenRoleIndex`
 was not divergent (§5), the hand-gated BoardClient count was 3 rather than 6
-(§6), and, on row 8, the "18 minimaxes" were ~10 plus 7 unlike searches, the
+(§6), on row 8 the "18 minimaxes" were ~10 plus 7 unlike searches, the
 4 mex implementations were 3, and `asTurn`/`Field` turned out not to be
-duplication at all (§6). The pattern is consistent: counting *occurrences of a
-name or an idiom* overstates how much code is actually shared. Read the
-remaining unactioned items with that discount applied — grep counts in this
-document are a starting point for reading the code, not a finding.
+duplication at all (§6), and coverage tooling does not make §4 measurable (§7).
+The pattern is consistent: counting *occurrences of a name or an idiom*
+overstates how much code is actually shared. Read the remaining unactioned
+items with that discount applied — grep counts in this document are a starting
+point for reading the code, not a finding.
+
+Row 11 adds a second pattern, and it cuts the other way: **the review looked
+where the code is, not where the tests are not.** §4 catalogued test gaps by
+reading the games, and an entire untested app shell sat outside that gaze until
+a tool that reads nothing found it in one run (§4e). The lesson is not "trust
+coverage" — its headline number is meaningless here — but that a finding
+nobody's attention was pointed at needs a mechanical instrument to surface, and
+choosing the instrument for *that* job is different from choosing one to score
+the job already done.

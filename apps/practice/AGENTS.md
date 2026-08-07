@@ -124,6 +124,19 @@ playouts). For those, play a few representative boards and leave the exhaustive
 argument to cheap unit tests of the characterisation itself — the Grundy value,
 the parity invariant, the win/loss predicate.
 
+**Coverage is on demand and has no threshold** (`npm run coverage`), and should
+stay that way. Those two sweeps execute ~94% of the source — that is how much of
+this repo is `games/` — while asserting only that a match ends and a board
+renders, so the global percentage reads high whatever the tests are worth, and a
+CI gate on it would be satisfied by registering another game. What the report is
+good for is the question grep cannot answer: which modules **no spec loads at
+all**. That is why `coverage.include` in `vite.config.js` names every file under
+`src/` rather than letting Vitest report only what a test imported. Run
+`npm run coverage:unswept` for the other half — with the sweeps excluded, what
+drops to near zero is the game logic nothing but a sweep touches. Neither one is
+a measure of whether the bots are right; that is what a bot's own spec, and
+`npx stryker run` for the engine, are for.
+
 ## Planned future directions
 
 ### Primary (ongoing)

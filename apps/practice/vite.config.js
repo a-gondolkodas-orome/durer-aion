@@ -49,6 +49,28 @@ export default defineConfig(() => ({
     // teardown must be provided explicitly. The strict per-file-isolated behaviour
     // is still a `vitest run --isolate` away if a leak is ever suspected.
     isolate: false,
-    setupFiles: ['./src/test-setup.ts']
+    setupFiles: ['./src/test-setup.ts'],
+    // On demand only (`npm run coverage`), never in `npm test` or CI, and with no
+    // thresholds — same posture as stryker, and for a sharper reason: the two
+    // sweeps (plays-to-an-end, renders) execute nearly every line under games/
+    // while asserting almost nothing, so the global percentage is not a measure of
+    // anything. What the report is good for is the opposite question — code no
+    // spec loads at all — which is why `include` is spelled out below.
+    coverage: {
+      provider: 'v8',
+      // Without this, only files a test imported are reported, and a module no
+      // spec touches is missing from the report rather than showing up at 0%.
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: [
+        'src/**/*.spec.{ts,tsx}',
+        'src/test-utils.ts',
+        'src/test-setup.ts',
+        'src/**/spec-helpers.tsx',
+        'src/main.tsx'
+      ],
+      reporter: ['text', 'html'],
+      // /reports is already gitignored, for stryker's html report
+      reportsDirectory: 'reports/coverage'
+    }
   }
 }));

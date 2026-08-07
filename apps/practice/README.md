@@ -113,6 +113,20 @@ npm run lint:fix
 
 `npx stryker run` mutation-tests the engine on demand — not part of `npm run test` or CI, never fails a build, scope it with `--mutate "path/to/file.ts:120-160"`.
 
+```bash
+npm run coverage         # line coverage, on demand
+npm run coverage:unswept # the same, without the two all-games sweeps
+```
+
+Also on demand, also never part of `npm run test` or CI, and with no threshold
+to pass. The plain report is for finding code **no spec loads at all** — it
+lists every file under `src/`, not only the ones a test imported. The global
+percentage is not a target: `plays-to-an-end.spec.ts` and `renders.spec.tsx`
+execute nearly every line under `games/` while asserting almost nothing, so it
+reads high whatever the state of the tests. `coverage:unswept` drops those two,
+and what falls to near zero there is the game logic those sweeps are the only
+thing touching.
+
 ### Build for prod
 
 (some problems only appear in prod build, not while testing, for example using a
