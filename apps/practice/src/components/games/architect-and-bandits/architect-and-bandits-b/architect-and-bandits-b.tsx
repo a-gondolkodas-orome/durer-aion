@@ -1,8 +1,10 @@
 import { strategyGameFactory } from '../../../strategy-game-factory';
 import { ARCHITECT } from '../gameplay';
-import { BoardClient } from './board-client';
+import { makeBoardClient } from '../board-client';
 import { smartBotStrategy } from './bot-strategy';
-import { generateStartBoard, moves } from './gameplay';
+import { generateStartBoard, moves, KM_PER_DAY } from './gameplay';
+
+const BoardClient = makeBoardClient(KM_PER_DAY);
 
 // Vertices A(0)..J(9) clockwise, each edge 10 km, max 50 km/day
 

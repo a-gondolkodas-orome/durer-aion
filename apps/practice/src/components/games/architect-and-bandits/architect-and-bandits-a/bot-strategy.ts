@@ -1,9 +1,13 @@
 import { maxBy } from 'lodash';
 import type { BotMove, BotStrategy } from '../../../strategy-game-factory';
 import type { Board } from '../gameplay';
-import type { Moves } from './gameplay';
+import { VERTEX_COUNT, type Moves } from './gameplay';
+import { makeCyclePaths } from '../cycle-paths';
 
 type Bot = BotStrategy<Board, Moves>
+
+export const { minPathToVisitAll } = makeCyclePaths(VERTEX_COUNT);
+const { shortestPathTo, clockwisePath, counterclockwisePath } = makeCyclePaths(VERTEX_COUNT);
 
 // Vertices A(0)..H(7) clockwise. Each edge = 10 km, max 4 edges/day.
 // Architect wins by visiting all 8 vertices over 4 days despite 3 nightly destructions.
@@ -128,41 +132,3 @@ const banditMove = (board: Board): BotMove<Moves> => {
   )!;
   return { move: 'destroyTower', args: [best.v] };
 };
-
-// Minimum moves to visit all targets from pos on an 8-cycle.
-// Tries all k+1 arc splits: j targets covered going CW, the rest going CCW.
-export const minPathToVisitAll = (pos, targets) => {
-  if (targets.length === 0) return 0;
-  const cwDists = targets.map((v) => (v - pos + 8) % 8).sort((a, b) => a - b);
-  const k = cwDists.length;
-  let best = Infinity;
-  for (let j = 0; j <= k; j++) {
-    const cwReach = j > 0 ? cwDists[j - 1] : 0;
-    const ccwReach = j < k ? 8 - cwDists[j] : 0;
-    const cost = cwReach === 0 ? ccwReach
-      : ccwReach === 0 ? cwReach
-        : Math.min(2 * cwReach + ccwReach, cwReach + 2 * ccwReach);
-    best = Math.min(best, cost);
-  }
-  return best;
-};
-
-const directedPath = (from, to, step) => {
-  const path: number[] = [];
-  let cur = from;
-  while (cur !== to) {
-    cur = (cur + step + 8) % 8;
-    path.push(cur);
-  }
-  return path;
-};
-
-const shortestPathTo = (from, to) => {
-  if (from === to) return [];
-  const step = (to - from + 8) % 8 <= (from - to + 8) % 8 ? 1 : -1;
-  return directedPath(from, to, step);
-};
-
-const clockwisePath = (from, to) => directedPath(from, to, 1);
-
-const counterclockwisePath = (from, to) => directedPath(from, to, -1);

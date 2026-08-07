@@ -1,41 +1,8 @@
-import { range } from 'lodash';
-import { strategyGameFactory, type BoardClientProps, GameBoard } from '../../../strategy-game-factory';
+import { strategyGameFactory } from '../../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { generateEmptyTicTacToeBoard } from '../gameplay';
-import { isDuringFirstMove, moves, type Board } from './gameplay';
-
-const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
-  const pieceColor = (id) => {
-    const colorCode = board[id];
-    if (colorCode === 'red') return 'bg-red-800';
-    return 'bg-blue-800';
-  };
-
-  /*
-  Due to simulating borders with the background peeking through gaps, we need
-  to explicitly give surface background to children.
-  */
-  return (
-    <GameBoard>
-    <div className="grid grid-cols-3 bg-slate-200 dark:bg-slate-600 gap-1 p-1">
-      {range(9).map(id => (
-        <button
-        key={id}
-        disabled={!moves.placePiece.isAllowed(board, id)}
-        onClick={() => moves.placePiece(board, id)}
-        className="aspect-square p-[25%] bg-surface-elevated"
-        >
-          {board[id] && (
-            <span
-              className={`w-full aspect-square block rounded-full ${pieceColor(id)}`}
-            ></span>
-          )}
-      </button>
-      ))}
-    </div>
-  </GameBoard>
-  );
-};
+import { BoardClient } from '../board-client';
+import { isDuringFirstMove, moves } from './gameplay';
 
 const getPlayerStepDescription = ({ board }) => {
   return isDuringFirstMove(board)

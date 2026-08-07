@@ -2,8 +2,11 @@ import type { Ctx, MoveOutcome } from '../../../strategy-game-factory';
 import { cloneDeep } from 'lodash';
 import { RESEARCHERS, SHARK, isSharkMoveAllowed, isSubmarineMoveAllowed, type Board } from '../gameplay';
 
+// The shark wins by surviving to the end of day 15.
+export const MAX_TURN = 15;
+
 export const isGameEnd = (board: Board): boolean =>
-  board.submarines[board.shark] >= 1 || board.turn > 15;
+  board.submarines[board.shark] >= 1 || board.turn > MAX_TURN;
 
 export const getWinnerIndex = (board: Board): number =>
   board.submarines[board.shark] >= 1 ? 0 : 1;

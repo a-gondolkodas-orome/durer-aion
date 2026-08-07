@@ -1,8 +1,10 @@
 import { strategyGameFactory, type Ctx } from '../../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
-import { BoardClient } from './board-client';
+import { makeBoardClient } from '../board-client';
 import { type Board } from '../gameplay';
-import { generateStartBoard, moves } from './gameplay';
+import { generateStartBoard, moves, MAX_TURN } from './gameplay';
+
+const BoardClient = makeBoardClient(MAX_TURN);
 
 const rule = {
   hu: <>

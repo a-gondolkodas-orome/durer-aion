@@ -1,9 +1,14 @@
 import { maxBy, sample } from 'lodash';
 import type { BotMove, BotStrategy } from '../../../strategy-game-factory';
 import type { Board } from '../gameplay';
-import type { Moves } from './gameplay';
+import { VERTEX_COUNT, type Moves } from './gameplay';
+import { makeCyclePaths } from '../cycle-paths';
 
 type Bot = BotStrategy<Board, Moves>
+
+export const { minPathToVisitAll } = makeCyclePaths(VERTEX_COUNT);
+const { shortestPathTo, clockwisePath, counterclockwisePath, cycleDistance } =
+  makeCyclePaths(VERTEX_COUNT);
 
 // Vertices A(0)..J(9) clockwise. Each edge = 10 km, max 5 edges/day.
 // Architect wins by visiting all 10 vertices over 4 days despite 3 nightly destructions.
@@ -97,7 +102,7 @@ export const getOptimalArchitectPath = (board: Board) => {
     if (missing.length === 1) return shortestPathTo(pos, missing[0]);
 
     // 2 missing: one far vertex (5 steps away, from B/C+G/H/I/J case), one from night 3.
-    const farV = missing.find(v => decDist(pos, v) === 5) ?? missing[0];
+    const farV = missing.find(v => cycleDistance(pos, v) === 5) ?? missing[0];
     const nearV = missing.find(v => v !== farV);
 
     const pathCW = clockwisePath(pos, farV);
@@ -134,43 +139,3 @@ const banditMove = (board: Board): BotMove<Moves> => {
   )!;
   return { move: 'destroyTower', args: [best.v] };
 };
-
-// Minimum moves to visit all targets from pos on a 10-cycle.
-// Tries all k+1 arc splits: j targets covered going CW, the rest going CCW.
-export const minPathToVisitAll = (pos, targets) => {
-  if (targets.length === 0) return 0;
-  const cwDists = targets.map(v => (v - pos + 10) % 10).sort((a, b) => a - b);
-  const k = cwDists.length;
-  let best = Infinity;
-  for (let j = 0; j <= k; j++) {
-    const cwReach = j > 0 ? cwDists[j - 1] : 0;
-    const ccwReach = j < k ? 10 - cwDists[j] : 0;
-    const cost = cwReach === 0 ? ccwReach
-      : ccwReach === 0 ? cwReach
-        : Math.min(2 * cwReach + ccwReach, cwReach + 2 * ccwReach);
-    best = Math.min(best, cost);
-  }
-  return best;
-};
-
-const decDist = (a, b) => Math.min((b - a + 10) % 10, (a - b + 10) % 10);
-
-const directedPath = (from, to, step) => {
-  const path: number[] = [];
-  let cur = from;
-  while (cur !== to) {
-    cur = (cur + step + 10) % 10;
-    path.push(cur);
-  }
-  return path;
-};
-
-const shortestPathTo = (from, to) => {
-  if (from === to) return [];
-  const step = (to - from + 10) % 10 <= (from - to + 10) % 10 ? 1 : -1;
-  return directedPath(from, to, step);
-};
-
-const clockwisePath = (from, to) => directedPath(from, to, 1);
-
-const counterclockwisePath = (from, to) => directedPath(from, to, -1);

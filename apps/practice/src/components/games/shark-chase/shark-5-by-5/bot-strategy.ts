@@ -1,19 +1,17 @@
 import { sample } from 'lodash';
 import type { BotMove, BotStrategy } from '../../../strategy-game-factory';
 import type { Board } from '../gameplay';
+import { makeGeometry } from '../bot-geometry';
 import type { Moves } from './gameplay';
 
 type Bot = BotStrategy<Board, Moves>
+
+const {
+  getAdjacentCells, findSubmarineNextToShark, distanceFromShark,
+  isReachableWithoutDeath, getIntermediateSharkPosition, getComponentSizes
+} = makeGeometry(5);
 import sharkExceptionMoves from './shark-exception-moves.json';
 
-const getAdjacentCells = (pos: number): number[] => {
-  const cells: number[] = [];
-  if (pos + 5 < 25) cells.push(pos + 5);
-  if (pos - 5 >= 0) cells.push(pos - 5);
-  if (pos + 1 < 25 && pos % 5 !== 4) cells.push(pos + 1);
-  if (pos - 1 >= 0 && pos % 5 !== 0) cells.push(pos - 1);
-  return cells;
-};
 
 // The shark's turn is a route of up to two steps, named as a whole: the halfway
 // cell is only chosen to reach the target safely, so the two are one decision.
@@ -126,20 +124,6 @@ const getOptimalSubmarineMoveByBot = (board: Board): { from: number; to: number 
   return undefined;
 };
 
-const findSubmarineNextToShark = (board: Board): number | undefined => {
-  if (board.shark+5 < 25 && board.submarines[board.shark+5] >= 1) return board.shark+5;
-  if (board.shark-5 >= 0 && board.submarines[board.shark-5] >= 1) return board.shark-5;
-  if (board.shark+1 < 25 && board.shark%5 !== 4 && board.submarines[board.shark+1] >= 1) return board.shark+1;
-  if (board.shark-1 >= 0 && board.shark%5 !== 0 && board.submarines[board.shark-1] >= 1) return board.shark-1;
-  return undefined;
-};
-
-const distanceFromShark = (shark: number, id: number): number => {
-  return (
-    Math.abs((shark % 5) - (id % 5)) +
-    Math.abs(Math.floor(shark / 5) - Math.floor(id / 5))
-  );
-}
 
 // Greedy fallback used only when no move guarantees survival (game is already lost):
 // picks the reachable cell with the largest "safe" connected component (cells not
@@ -261,103 +245,4 @@ export const getNextSharkPositionByAI = (board: Board): number | undefined => {
   return selectByLocationPreference(submarines, winningMoves.length > 0 ? winningMoves : reachable);
 }
 
-const isReachableWithoutDeath = (submarines: number[], shark: number, id: number): boolean => {
-  if (distanceFromShark(shark, id) > 2) return false;
-  if (submarines[id] >= 1) return false;
-  if (distanceFromShark(shark, id) === 2) {
-    if (id === shark - 2 && submarines[shark - 1] >= 1) return false;	// bal
-    if (id === shark + 2 && submarines[shark + 1] >= 1) return false;	// jobb
-    if (id === shark + 10 && submarines[shark + 5] >= 1) return false;// lent
-    if (id === shark - 10 && submarines[shark - 5] >= 1) return false;// fent
-    if (id === shark - 6 && (submarines[shark - 5] >= 1 && submarines[shark - 1] >= 1)) return false; // bal fent
-    if (id === shark + 4 && (submarines[shark + 5] >= 1 && submarines[shark - 1] >= 1)) return false; // bal lent
-    if (id === shark + 6 && (submarines[shark + 5] >= 1 && submarines[shark + 1] >= 1)) return false; // jobb lent
-    if (id === shark - 4 && (submarines[shark - 5] >= 1 && submarines[shark + 1] >= 1)) return false; // jobb fent
-  }
-  return true;
-}
 
-const getIntermediateSharkPosition = (submarines: number[], shark: number, id: number): number => {
-  if (id === shark - 2) return shark - 1;
-  if (id === shark + 2) return shark + 1;
-  if (id === shark + 10) return shark + 5;
-  if (id === shark - 10) return shark - 5;
-  if (id === shark - 6 && submarines[shark - 5] >= 1) return shark - 1;
-  if (id === shark + 4 && submarines[shark + 5] >= 1) return shark - 1;
-  if (id === shark + 6 && submarines[shark + 5] >= 1) return shark + 1;
-  if (id === shark - 4 && submarines[shark - 5] >= 1) return shark + 1;
-  if (id === shark - 6 && submarines[shark - 1] >= 1) return shark - 5;
-  if (id === shark + 4 && submarines[shark - 1] >= 1) return shark + 5;
-  if (id === shark + 6 && submarines[shark + 1] >= 1) return shark + 5;
-  if (id === shark - 4 && submarines[shark + 1] >= 1) return shark - 5;
-  if (id === shark - 6) return shark - 5;
-  if (id === shark + 4) return shark + 5;
-  if (id === shark + 6) return shark + 5;
-  if (id === shark - 4) return shark - 5;
-  return id;
-}
-
-// osszefuggosegi komponensek a tengeralattjarokkal nem kozvetlen szomszedos mezokbol
-const getComponentSizes = (submarines: number[]): number[] => {
-  const isNextToSubmarine = (id: number): boolean => {
-    if (id+5 < 25 && submarines[id+5] >= 1) return true;
-    if (id-5 >= 0 && submarines[id-5] >= 1) return true;
-    if (id+1 < 25 && id%5 !== 4 && submarines[id+1] >= 1) return true;
-    if (id-1 >= 0 && id%5 !== 0 && submarines[id-1] >= 1) return true;
-    if (submarines[id] >= 1) return true;
-    return false;
-  }
-
-  const visited = Array(25).fill(false);
-  const visited2 = Array(25).fill(false);
-  const componentSizes = Array(25).fill(0);
-  const queue: number[] = [];
-  let first: number;
-
-  for (let i = 0; i<25; i++)
-  {
-    if (!visited[i] && !isNextToSubmarine(i))
-    {
-      queue.push(i);
-      visited[i] = true;
-      let counter = 0;
-      while(queue.length > 0)
-      {
-        counter++;
-        first = queue.shift()!;
-        if (first+5 < 25 && !isNextToSubmarine(first+5) && visited[first+5] == false) {
-          queue.push(first+5); visited[first+5]=true
-        }
-        if (first-5 >= 0 && !isNextToSubmarine(first-5) && visited[first-5] == false) {
-          queue.push(first-5); visited[first-5]=true
-        }
-        if (first+1 < 25 && first%5 !== 4 && !isNextToSubmarine(first+1) && visited[first+1] == false) {
-          queue.push(first+1); visited[first+1]=true
-        }
-        if (first-1 >= 0 && first%5 !== 0 && !isNextToSubmarine(first-1) && visited[first-1] == false) {
-          queue.push(first-1); visited[first-1]=true
-        }
-      }
-      queue.push(i);
-      visited2[i] = true;
-      while(queue.length > 0)
-      {
-        first = queue.shift()!;
-        componentSizes[first] = counter;
-        if (first+5 < 25 && !isNextToSubmarine(first+5) && visited2[first+5] == false) {
-          queue.push(first+5); visited2[first+5] = true;
-        }
-        if (first-5 >= 0 && !isNextToSubmarine(first-5) && visited2[first-5] == false) {
-          queue.push(first-5); visited2[first-5] = true;
-        }
-        if (first+1 < 25 && first%5 !== 4 && !isNextToSubmarine(first+1) && visited2[first+1] == false) {
-          queue.push(first+1); visited2[first+1] = true;
-        }
-        if (first-1 >= 0 && first%5 !== 0 && !isNextToSubmarine(first-1) && visited2[first-1] == false) {
-          queue.push(first-1); visited2[first-1] = true;
-        }
-      }
-    }
-  }
-  return componentSizes;
-}

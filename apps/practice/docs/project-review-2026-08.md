@@ -241,18 +241,38 @@ rules specs relative to module size.
 - **Precomputed tables stored two ways**: JSON (`modified-mill`,
   `shark-5-by-5`) vs inline TS (`remove-divisor-multiple/bot-strategy.ts`,
   16,028 lines; `bank-robbers`, 999). Converge on JSON.
-- **Near-twin games duplicated wholesale** — measured by `diff`, this is the
-  biggest remaining duplication in the games, and it needs no new abstraction:
-  the repo already hoists shared code to a family folder (eight parent folders
-  carry a shared `gameplay.ts`). `shark-chase/shark-4-by-4` vs `-5-by-5`
-  BoardClients differ in 7 of 124 lines (`grid-cols-4`→`5`, two board-size
-  constants, one style row); `tictactoe-alikes/anti-tictactoe` vs
-  `tictactoe-doublestart` in 50 of 73 lines of the whole `.tsx`; also
-  `architect-and-bandits-a`/`-b` and `thief-sheriff-mean-7`/`-9`.
+- ~~**Near-twin games duplicated wholesale**~~ ✅ — measured by `diff`, this was
+  the biggest remaining duplication in the games, and it needed no new
+  abstraction: the repo already hoists shared code to a family folder, and all
+  four pairs were already sitting in one. Every game keeps its own route,
+  `gameList.ts` entry and credits — merging a pair into one game with two
+  variants would have deleted a route and forced two different problem-setter
+  credits together, so only the code moved.
+  - `architect-and-bandits-a`/`-b`: `makeMoves(kmPerDay)` +
+    `makeStartBoard(vertexCount)` in the parent, a shared `board-client.tsx`,
+    and `cycle-paths.ts` for the five path helpers both bots wrote out with 8
+    swapped for 10. Each opening book stays per-variant, as does `-b`'s bandit
+    playing randomly on day 1.
+  - `shark-chase`: shared `board-client.tsx` (was 7 lines different in 124) and
+    `bot-geometry.ts` for adjacency, distance, two-step reachability and the
+    safe-component sizes. Each `gameplay.ts` now names `MAX_TURN` rather than
+    spelling 11/15 and 12/16 into two files. The opening book, the preference
+    rings and 5×5's JSON table stay per-variant.
+  - `thief-sheriff-mean`: shared `board-client.tsx`, after unifying `-7`'s
+    `takeCard` from `indices: number[]` to the scalar `-9` already took.
+  - `tictactoe-alikes`: shared `board-client.tsx` for `anti-tictactoe` and
+    `tictactoe-doublestart`; `tictactoe` keeps its own, since its second phase,
+    third colour and hover affordance would need more props than the copy costs.
+
   `five-connected-fields` vs `four-connected-fields` was the same story in
   `bot-strategy.ts` — byte-identical apart from comment wrapping, with only one
   of them gaining `randomBotStrategy` — and is resolved above: both now call the
   shared solver, so there is no longer a copy to drift.
+
+  What the batch also surfaced: `plays-to-an-end.spec.ts` plays every variant
+  headlessly and so never renders a `BoardClient`, which is exactly where a bad
+  hoist would hide. `games/renders.spec.ts` is the other half — all 76 games
+  mount and put something clickable on the page, in under five seconds.
 - **Naming**: `optimalBotStrategy` (`twelve-squares`) vs everyone's
   `smartBotStrategy`; `isGameEnd` (8 games) vs `isTerminal` (6) vs
   `isWinningBoard` (3); 8 folders with double-quoted imports (no `quotes`

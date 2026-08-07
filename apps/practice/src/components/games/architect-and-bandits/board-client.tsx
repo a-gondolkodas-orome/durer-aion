@@ -1,28 +1,26 @@
-import { useTranslation } from '../../../../language';
-import { GameBoard, type BoardClientProps } from '../../../strategy-game-factory';
-import { type Board, ARCHITECT } from '../gameplay';
+import { useTranslation } from '../../../language';
+import { GameBoard, type BoardClientProps } from '../../strategy-game-factory';
+import { type Board, ARCHITECT } from './gameplay';
 
-const VERTEX_LABELS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+const VERTEX_LABELS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
 
-// Regular octagon: A at top, clockwise. Center (50,50), radius 38.
-const VERTEX_COORDS = Array.from({ length: 8 }, (_, i) => {
-  const angle = (-90 + i * 45) * (Math.PI / 180);
-  return {
-    x: 50 + 38 * Math.cos(angle),
-    y: 50 + 38 * Math.sin(angle)
-  };
-});
+// A at the top, clockwise, on a circle of radius `radius` about (50, 50).
+const ringCoords = (vertexCount: number, radius: number) =>
+  Array.from({ length: vertexCount }, (_, i) => {
+    const angle = (-90 + i * (360 / vertexCount)) * (Math.PI / 180);
+    return {
+      x: 50 + radius * Math.cos(angle),
+      y: 50 + radius * Math.sin(angle)
+    };
+  });
 
-// Outward offset for labels
-const LABEL_COORDS = Array.from({ length: 8 }, (_, i) => {
-  const angle = (-90 + i * 45) * (Math.PI / 180);
-  return {
-    x: 50 + 47 * Math.cos(angle),
-    y: 50 + 47 * Math.sin(angle)
-  };
-});
-
-export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
+// The wall's shape follows from how many towers it has, which the board
+// carries; the day's walking allowance does not, so it comes in here.
+export const makeBoardClient = (kmPerDay: number) =>
+  ({ board, ctx, moves }: BoardClientProps<Board>) => {
+  const vertexCount = board.towers.length;
+  const VERTEX_COORDS = ringCoords(vertexCount, 38);
+  const LABEL_COORDS = ringCoords(vertexCount, 47);
   const { t } = useTranslation();
   // Hide towers during role selection (before the game actually begins)
   const gameStarted = ctx.isHumanVsHumanGame || ctx.chosenRoleIndex !== null;
@@ -47,10 +45,10 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         viewBox="0 0 100 100"
         className="aspect-square w-full max-h-96"
       >
-        {/* Octagon edges */}
-        {Array.from({ length: 8 }, (_, i) => {
+        {/* Wall edges */}
+        {Array.from({ length: vertexCount }, (_, i) => {
           const from = VERTEX_COORDS[i];
-          const to = VERTEX_COORDS[(i + 1) % 8];
+          const to = VERTEX_COORDS[(i + 1) % vertexCount];
           return (
             <line
               key={i}
@@ -63,7 +61,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         })}
 
         {/* Vertices */}
-        {Array.from({ length: 8 }, (_, i) => {
+        {Array.from({ length: vertexCount }, (_, i) => {
           const { x, y } = VERTEX_COORDS[i];
           const label = LABEL_COORDS[i];
           const hasTower = gameStarted && board.towers[i];
@@ -122,8 +120,8 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         <p>
           {ctx.currentPlayer === ARCHITECT
             ? t({
-              hu: `${board.day}. nap · ${board.kmUsedToday}/40 km`,
-              en: `Day ${board.day} · ${board.kmUsedToday}/40 km`
+              hu: `${board.day}. nap · ${board.kmUsedToday}/${kmPerDay} km`,
+              en: `Day ${board.day} · ${board.kmUsedToday}/${kmPerDay} km`
             })
             : t({ hu: `${board.day}. éjszaka`, en: `Night ${board.day}` })
           }
@@ -141,4 +139,4 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       )}
     </GameBoard>
   );
-};
+  };

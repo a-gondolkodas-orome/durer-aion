@@ -1,45 +1,10 @@
-import { strategyGameFactory, type BoardClientProps, GameBoard } from '../../../strategy-game-factory';
-import { range } from 'lodash';
+import { strategyGameFactory } from '../../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
-import {
-  Sheriff,
-  Thief,
-  generateStartBoard,
-  type Board
-} from '../gameplay';
+import { generateStartBoard } from '../gameplay';
+import { makeBoardClient } from '../board-client';
 import { moves, CARD_COUNT } from './gameplay';
 
-const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const getCardColor = num => {
-    if (board.cards[Thief].includes(num)) return 'bg-red-800';
-    if (board.cards[Sheriff].includes(num)) return 'bg-blue-800 text-white';
-    return 'bg-surface-elevated';
-  }
-
-  return(
-    <GameBoard>
-      <div>
-        {range(1, CARD_COUNT + 1).map(num =>
-        <button
-          key={num}
-          disabled={!moves.takeCard.isAllowed(board, [num])}
-          onClick={() => moves.takeCard(board, [num])}
-          className={`
-            m-1 min-h-28 w-18 border-2 rounded-lg shadow-md border-slate-900 dark:border-slate-400 text-4xl font-bold
-            ${ctx.currentPlayer === Thief
-              ? 'enabled:hocus:bg-red-800/75'
-              : 'enabled:hocus:bg-blue-800/75 enabled:hocus:text-white'
-            }
-            ${getCardColor(num)}
-          `}
-        >
-          {num}
-        </button>)}
-      </div>
-    </GameBoard>
-    );
-};
-
+const BoardClient = makeBoardClient(CARD_COUNT);
 
 const rule = {
   hu: <>

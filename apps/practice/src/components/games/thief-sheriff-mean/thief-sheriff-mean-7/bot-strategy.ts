@@ -8,16 +8,16 @@ type Bot = BotStrategy<Board, Moves>
 const TURN_PLAYER = [Sheriff, Thief, Sheriff, Thief, Sheriff];
 
 export const randomBotStrategy: Bot = ({ board }) =>
-  ({ move: 'takeCard', args: [[sample(getUntakenCards(board, CARD_COUNT))!]] });
+  ({ move: 'takeCard', args: [sample(getUntakenCards(board, CARD_COUNT))!] });
 
 export const smartBotStrategy: Bot = ({ board, ctx }) =>
-  ({ move: 'takeCard', args: [[getBotCard(board, ctx.currentPlayer!)]] });
+  ({ move: 'takeCard', args: [getBotCard(board, ctx.currentPlayer!)] });
 
 export const getBotCard = (board: Board, botPlayerIndex: number): number => {
   const memo = new Map<string, number>();
   const untaken = getUntakenCards(board, CARD_COUNT);
   const scores = untaken.map(card => {
-    const nextBoard = applyTakeCard(board, botPlayerIndex, [card]);
+    const nextBoard = applyTakeCard(board, botPlayerIndex, card);
     return minimax(nextBoard, botPlayerIndex, memo);
   });
   const best = Math.max(...scores);
@@ -43,7 +43,7 @@ const minimax = (board: Board, botPlayerIndex: number, memo: Map<string, number>
   const isMaximizing = currentPlayer === botPlayerIndex;
   let best = isMaximizing ? -Infinity : Infinity;
   for (const card of getUntakenCards(board, CARD_COUNT)) {
-    const nextBoard = applyTakeCard(board, currentPlayer, [card]);
+    const nextBoard = applyTakeCard(board, currentPlayer, card);
     const score = minimax(nextBoard, botPlayerIndex, memo);
     best = isMaximizing ? Math.max(best, score) : Math.min(best, score);
   }
