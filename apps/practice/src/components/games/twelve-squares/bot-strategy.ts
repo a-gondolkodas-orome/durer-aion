@@ -1,11 +1,11 @@
 import type { BotStrategy } from 'strategy-game-factory';
 import { random, sample } from 'lodash';
-import { isValidStep, type Board, type Moves } from './gameplay';
+import { moves, type Board, type Moves } from './gameplay';
 
 type Bot = BotStrategy<Board, Moves>
 
-export const randomBotStrategy: Bot = ({ board }) => {
-  const validSteps = [1, 2].filter(step => isValidStep(board, step));
+export const randomBotStrategy: Bot = ({ board, ctx }) => {
+  const validSteps = [1, 2].filter(step => moves.step.validate(board, { ctx }, step));
   return { move: 'step', args: [sample(validSteps)!] };
 };
 

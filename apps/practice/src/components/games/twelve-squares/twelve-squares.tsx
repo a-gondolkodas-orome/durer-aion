@@ -5,11 +5,11 @@ import { generateStartBoard, moves, type Board } from './gameplay';
 import { optimalBotStrategy, randomBotStrategy } from './bot-strategy';
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const potentialStep = i => {
+  const potentialStep = (i: number) => {
     return ctx.currentPlayer === 0 ? i - board.left : board.right - i;
   }
 
-  const cellBackground = (i) => {
+  const cellBackground = (i: number) => {
     if (i === board.left) return 'bg-green-400';
     if (i === board.right) return 'bg-purple-400';
     if (moves.step.isAllowed(board, potentialStep(i))) {
