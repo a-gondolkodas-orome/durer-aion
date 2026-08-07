@@ -43,7 +43,11 @@ Each game folder implements the optimal strategy (computer AI) and game-specific
 UI independently, conforming to the `strategyGameFactory` API (role labels,
 rules, permissible moves, initial state, etc.). Strategy is implemented however
 is simplest: on-the-fly calculation/logic when feasible, or precomputed optimal
-moves stored in a JSON file when performance requires it.
+moves stored in a JSON file when performance requires it. **A committed table
+needs its generator committed too**, in `scripts/pre-generate-ai-moves/` — a
+table nobody can rebuild is one nobody can audit or fix when the game changes.
+Write it so re-running it reproduces the committed file byte for byte, and so it
+verifies the table before writing (see `modified-mill-strategy.cjs`).
 
 **Files in a game folder:**
 
@@ -371,6 +375,9 @@ in-repo.
 - Starting positions representative of the game's complexity; each player wins
   with ~50% probability across random starting boards
 - Player cannot win with a non-winning strategy (i.e. AI is truly optimal)
+- Any precomputed move table ships with its generator in
+  `scripts/pre-generate-ai-moves/`, and re-running it reproduces the committed
+  file
 - Board type, start boards and moves live in a React-free `gameplay.ts`
 - Moves return their consequences rather than causing them (see
   `five-connected-fields`, `coins-in-3-piles`, `hunyadi-and-the-janissaries`)
