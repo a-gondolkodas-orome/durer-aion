@@ -1,0 +1,52 @@
+name: dependency-report
+on:
+  schedule:
+    # 06:00 UTC on the 1st of the month. GitHub disables a scheduled workflow after 60 days
+    # without repository activity, which at this repo's cadence should never come up — but it
+    # is the explanation for a month that passes silently.
+    - cron: '0 6 1 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  report:
+    runs-on: ubuntu-24.04
+    # No `container: node:24.11.1` and no setup-node, unlike the other two workflows. This job only
+    # reads version strings and fetches URLs, so the pinned toolchain buys it nothing — and pinning
+    # Node here would add a sixth place that scripts/check-versions.mjs does not know to look at.
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Collect outdated versions
+        id: report
+        # stdout goes to the run summary, so every run is readable in the Actions tab whatever
+        # happens to the issue below. The script never exits non-zero: an unreachable registry is
+        # reported as a row, not as a failed build.
+        run: node scripts/dependency-report.mjs --out dependency-report.md >> "$GITHUB_STEP_SUMMARY"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Reconcile the report issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BEHIND: ${{ steps.report.outputs.behind }}
+          TITLE: Dependency update report
+        run: |
+          # Matched on the title rather than the OPS label, so a label edited off by hand cannot
+          # cause a duplicate issue. --limit outruns gh's default page of 30.
+          number=$(gh issue list --state open --limit 100 --json number,title \
+            --jq "map(select(.title == \"$TITLE\")) | first | .number // empty")
+
+          if [ "$BEHIND" = 'true' ] && [ -n "$number" ]; then
+            # Edit rather than comment. Editing a body sends no notification, so a month where
+            # something is still behind stays silent — the one notification worth having is the
+            # issue appearing in the first place.
+            gh issue edit "$number" --body-file dependency-report.md
+          elif [ "$BEHIND" = 'true' ]; then
+            gh issue create --title "$TITLE" --label OPS --body-file dependency-report.md
+          elif [ -n "$number" ]; then
+            # Closed silently: the maintainer just merged the upgrades that made it current.
+            gh issue close "$number" --reason completed
+          fi

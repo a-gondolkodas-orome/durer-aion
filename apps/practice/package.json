@@ -11,6 +11,7 @@
     "test:unit": "vitest run",
     "test": "npm run check:versions && npm run lint && npm run typecheck && npm run test:unit",
     "check:versions": "node scripts/check-versions.mjs",
+    "report:outdated": "node scripts/dependency-report.mjs",
     "test:watch": "vitest",
     "coverage": "vitest run --coverage",
     "coverage:unswept": "vitest run --coverage --exclude \"**/plays-to-an-end.spec.ts\" --exclude \"**/renders.spec.tsx\"",

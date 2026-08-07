@@ -7,6 +7,8 @@ npm-debug.log*
 .vscode
 # rollup-plugin-visualizer output
 stats.html
+# `npm run report:outdated -- --out dependency-report.md` output
+dependency-report.md
 # Stryker mutation testing: sandbox and generated report
 .stryker-tmp
 /reports
