@@ -1,6 +1,7 @@
 import type { BotStrategy } from '../../strategy-game-factory';
 import { random } from 'lodash';
 import { type Board, type Moves } from './gameplay';
+import { reportUnexpectedState } from '../shared/unexpected-state';
 
 type Bot = BotStrategy<Board, Moves>
 
@@ -18,6 +19,14 @@ export const smartBotStrategy: Bot = ({ board, ctx }) => {
   return { move: 'removeStone', args: [botMove] };
 };
 
+// smartBotStrategy answers a left-restricted mover before ever consulting the
+// search, and the one recursive call below hands the restriction to the mover
+// only in an odd-odd position, which neither branch guarded by this message
+// can reach. So a restricted mover here means the caller or the recursion is
+// wrong, not that the game produced the position.
+const restrictedMoverMessage =
+  'stones-remove-one-not-twice-from-left: the mover is left-restricted in getOptimalMove';
+
 // return undefined if there is no winning move
 const getOptimalMove = (board, ctx) => {
   const otherPlayer = 1 - ctx.currentPlayer;
@@ -27,7 +36,7 @@ const getOptimalMove = (board, ctx) => {
     if (!board.leftRestriction[otherPlayer]) {
       return undefined;
     } else if (board.leftRestriction[ctx.currentPlayer]) {
-      console.error('Unexpected internal state, please report.')
+      reportUnexpectedState(restrictedMoverMessage);
       return undefined;
     } else {
       /*
@@ -63,7 +72,7 @@ const getOptimalMove = (board, ctx) => {
       if (!board.leftRestriction[ctx.currentPlayer]) {
         return 0;
       } else {
-        console.error('Unexpected internal state, please report.')
+        reportUnexpectedState(restrictedMoverMessage);
         return undefined;
       }
     } else {

@@ -299,9 +299,16 @@ rules specs relative to module size.
   no npm cache~~ ✅ (#401); the two workflows still duplicate their build block
   verbatim.
 - No path alias for `test-utils` — 97 specs import `../../../test-utils`.
-- 7 `console.*` calls in shipped game code (`triangular-grid-ropes-10`,
+- ~~7 `console.*` calls in shipped game code (`triangular-grid-ropes-10`,
   `stones-remove-one-not-twice-from-left`, `cube-coloring`) as "unexpected
-  state" fallbacks — arguably should throw in dev like the engine does.
+  state" fallbacks — arguably should throw in dev like the engine does.~~ ✅
+  Four of the seven were the game fallbacks (the other three are the engine's
+  own, which already throw in dev); they now go through
+  `games/shared/unexpected-state.ts`, which makes the engine's trade — throw in
+  dev, warn in prod and let the caller take its fallback. `cube-coloring`'s had
+  no fallback to take: it returned `undefined` into a `!`, so in prod it
+  crashed on the next line rather than degrading; the bot now names no move,
+  which the engine already handles.
 - ~~No SessionStart hook for web/agent sessions~~ ✅ (#399): `npm ci` now runs
   at session start, guarded by `CLAUDE_CODE_REMOTE` so local sessions are
   unaffected.

@@ -1,6 +1,7 @@
 import { difference, range, shuffle, sample } from 'lodash';
 import { isAllowedStep, isColored, neighbours, colors, type Board, type Moves } from './gameplay';
 import type { BotStrategy } from '../../strategy-game-factory';
+import { reportUnexpectedState } from '../shared/unexpected-state';
 
 type Bot = BotStrategy<Board, Moves>
 
@@ -18,10 +19,14 @@ export const randomBotStrategy: Bot = ({ board }) => {
 };
 
 export const smartBotStrategy: Bot = ({ board, ctx }) => {
-  const { vertex, color } = ctx.chosenRoleIndex === 0
-    ? makeOptimalStepAsSecond(board)!
+  const step = ctx.chosenRoleIndex === 0
+    ? makeOptimalStepAsSecond(board)
     : makeOptimalStepAsFirst(board);
-  return { move: 'colorVertex', args: [{ vertex, color }] };
+  // Only reachable after the unexpected state below: with no colourable vertex
+  // left there is no move to name, and naming none stalls the bot rather than
+  // crashing on an undefined step.
+  if (!step) return [];
+  return { move: 'colorVertex', args: [step] };
 };
 
 const makeOptimalStepAsFirst = (board: Board) => {
@@ -75,7 +80,8 @@ const makeOptimalStepAsSecond = (board: Board) => {
     }
   }
   // if all vertices are banned we should have a game end
-  console.error('This state should not happen');
+  reportUnexpectedState('cube-coloring: no colourable vertex left but the game has not ended');
+  return undefined;
 };
 
 const getMissingColors = (board: Board, vertex) => {

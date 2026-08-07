@@ -11,6 +11,7 @@ import {
   type Moves
 } from './gameplay';
 import type { BotStrategy } from '../../../strategy-game-factory';
+import { reportUnexpectedState } from '../../shared/unexpected-state';
 
 type Bot = BotStrategy<Board, Moves>
 
@@ -41,7 +42,12 @@ export const smartBotStrategy: Bot = ({ board, ctx }) => {
           to: mirrorNodes[symDir][lastMove.to]
         };
         if (!isAllowed(board, mirrorOfLastMove)) {
-          console.error('Unexpected state, falling back');
+          // The position is symmetric before the opponent moves, so the mirror
+          // of their move is free by construction — a taken one means the
+          // mirroring bookkeeping is wrong, not that the game reached it.
+          reportUnexpectedState(
+            `triangular-grid-ropes-10: mirror of ${JSON.stringify(lastMove)} already taken`
+          );
           return { move: 'stretchRope', args: [sample(allowedMoves)!] };
         }
         return { move: 'stretchRope', args: [mirrorOfLastMove] };
