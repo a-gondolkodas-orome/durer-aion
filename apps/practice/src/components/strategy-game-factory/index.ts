@@ -6,6 +6,7 @@ export type {
   StrategyArgs, BotStrategy, BotMove, BoardClientProps,
   Variant, VariantInput
 } from './types';
+export { resolveVariants } from './helpers/resolve-variants';
 export { runMatch } from './engine/run-match';
 export type { MatchMove, MatchResult } from './engine/run-match';
 export { GameBoard } from './game-parts/game-board';

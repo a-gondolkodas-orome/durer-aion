@@ -1,5 +1,8 @@
 import * as games from './index';
-import { runMatch, type StrategyGame } from '../strategy-game-factory';
+import {
+  resolveVariants, runMatch,
+  type BotStrategy, type Gameplay, type StrategyGame
+} from '../strategy-game-factory';
 
 // Plays every registered game headlessly, through the real moves, the real
 // validators and the real reducer. `runMatch` throws on everything this is
@@ -41,11 +44,25 @@ const SLOW_VARIANTS = new Set([
 const MAX_MATCHES = 8;
 const MATCH_BUDGET_MS = 15;
 
-type Case = { name: string; Game: StrategyGame<unknown>; variantIndex: number };
+type Case = {
+  name: string
+  gameplay: Gameplay<unknown>
+  generateStartBoard: () => unknown
+  botStrategy: BotStrategy<unknown>
+};
 
+// Resolved exactly as the factory resolves them, so a variant that inherits its
+// bot or its start boards from the default one is swept the way it is played.
 const allCases: Case[] = Object.entries(games as Record<string, StrategyGame<unknown>>)
-  .flatMap(([name, Game]) =>
-    Game.variants.map((_, variantIndex) => ({ name: `${name}[${variantIndex}]`, Game, variantIndex })));
+  .flatMap(([name, Game]) => {
+    const { defaultVariant, resolvedVariants } = resolveVariants(Game.variants);
+    return resolvedVariants.map((variant, variantIndex) => ({
+      name: `${name}[${variantIndex}]`,
+      gameplay: Game.gameplay,
+      generateStartBoard: variant.generateStartBoard ?? defaultVariant.generateStartBoard!,
+      botStrategy: variant.botStrategy!
+    }));
+  });
 
 const cases = allCases.filter(({ name }) => !SLOW_VARIANTS.has(name));
 
@@ -62,12 +79,7 @@ describe('every game plays to a decided end', () => {
     expect(dropped).toEqual(['AmorAndCupido', 'TriangularGridRopes15']);
   });
 
-  it.each(cases)('$name', ({ Game, variantIndex }) => {
-    const variant = Game.variants[variantIndex]!;
-    const defaultVariant = Game.variants[Math.max(Game.variants.findIndex(v => v.isDefault), 0)]!;
-    const generateStartBoard = variant.generateStartBoard ?? defaultVariant.generateStartBoard!;
-    const botStrategy = variant.botStrategy!;
-
+  it.each(cases)('$name', ({ gameplay, generateStartBoard, botStrategy }) => {
     // Start boards are random, so one match samples one line of play. Keep
     // playing fresh boards until the cheap games have had a handful or the
     // budget runs out — which spends the time where matches are cheap instead
@@ -75,7 +87,7 @@ describe('every game plays to a decided end', () => {
     const deadline = performance.now() + MATCH_BUDGET_MS;
     for (let match = 0; match < MAX_MATCHES; match++) {
       const { winnerIndex } = runMatch({
-        gameplay: Game.gameplay,
+        gameplay,
         strategies: [botStrategy, botStrategy],
         startBoard: generateStartBoard()
       });
