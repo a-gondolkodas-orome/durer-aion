@@ -377,9 +377,17 @@ React Router works.
   one monthly issue naming what is behind (npm packages, actions and Node), and
   closes it when nothing is. Security urgency stays with Dependabot alerts,
   which need no config file.
-- `package.json`: `postcss` sits in `dependencies` (build-only); `playwright`
+- ~~`package.json`: `postcss` sits in `dependencies` (build-only); `playwright`
   is a devDependency no code uses — it exists to bake Chromium into the
-  devcontainer, worth a comment where it's declared.
+  devcontainer, worth a comment where it's declared.~~ ✅ — but `postcss` was
+  **removed**, not moved: `vite` and `@tailwindcss/postcss` both depend on it,
+  so the declaration bought nothing that the lockfile did not already. A `"//"`
+  key covers `playwright`. Note the section was not a slip: 20db5d79 (2022)
+  deliberately moved the build deps into `dependencies`, back when the build ran
+  off a prod-only install. Both workflows run a plain `npm ci` now, so that
+  rationale is dead and `tailwindcss` / `@tailwindcss/postcss` moved to
+  `devDependencies` too. `dependencies` is now exactly the five packages `src/`
+  imports.
 - CI: ~~`pr_test.yml` has no `concurrency` group (stacked runs on busy PRs) and
   no npm cache~~ ✅ (#401); the two workflows still duplicate their build block
   verbatim.
