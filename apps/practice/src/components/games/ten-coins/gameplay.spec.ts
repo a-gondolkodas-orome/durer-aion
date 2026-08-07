@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { moves, type Board, type TurnState } from './gameplay';
-import { makeCtx, moveValidator } from '../../../test-utils';
+import { makeCtx, moveValidator } from 'test-utils';
 
 const isConversionAllowed = moveValidator(moves.convert);
 

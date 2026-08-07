@@ -11,7 +11,7 @@ import {
   secondPlayerWins,
   type Board
 } from './gameplay';
-import { makeCtx, moveValidator } from '../../../test-utils';
+import { makeCtx, moveValidator } from 'test-utils';
 
 const isWindowAllowed = moveValidator(moves.placeWindow);
 

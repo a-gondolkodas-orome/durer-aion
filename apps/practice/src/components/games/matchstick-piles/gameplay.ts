@@ -1,5 +1,5 @@
 import { range, random } from 'lodash';
-import type { Ctx, MoveOutcome } from '../../strategy-game-factory';
+import type { Ctx, MoveOutcome } from 'strategy-game-factory';
 
 // A board is the list of pile sizes; every pile has at least one match.
 export type Board = number[];

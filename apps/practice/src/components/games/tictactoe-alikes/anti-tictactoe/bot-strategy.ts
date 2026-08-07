@@ -1,7 +1,7 @@
 import { range, isNull, sample, cloneDeep } from 'lodash';
 import { hasWinningSubset } from '../gameplay';
 import { hasFirstPlayerWon, isGameEnd, roleColors, type Board, type Moves } from './gameplay';
-import type { BotStrategy } from '../../../strategy-game-factory';
+import type { BotStrategy } from 'strategy-game-factory';
 
 type Bot = BotStrategy<Board, Moves>
 

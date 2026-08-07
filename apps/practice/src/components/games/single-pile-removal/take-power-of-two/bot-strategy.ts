@@ -1,4 +1,4 @@
-import type { BotStrategy } from '../../../strategy-game-factory';
+import type { BotStrategy } from 'strategy-game-factory';
 import { reverse, sample } from 'lodash';
 import { getAvailableExponents, type Board, type Moves } from './gameplay';
 

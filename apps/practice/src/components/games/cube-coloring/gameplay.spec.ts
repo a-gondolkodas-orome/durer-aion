@@ -1,5 +1,5 @@
 import { isAllowedStep, generateStartBoard, moves, neighbours, type Board } from './gameplay';
-import { makeCtx } from '../../../test-utils';
+import { makeCtx } from 'test-utils';
 
 describe('cube-coloring isAllowedStep', () => {
   const empty = (): Board => generateStartBoard();

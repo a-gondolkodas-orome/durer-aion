@@ -1,5 +1,5 @@
 import { cloneDeep, sample, maxBy } from 'lodash';
-import type { BotStrategy } from '../../strategy-game-factory';
+import type { BotStrategy } from 'strategy-game-factory';
 import { computeLettered, computeSinks, deficiency } from './danger';
 import {
   type Board,

@@ -1,5 +1,5 @@
 import { sample, random } from 'lodash';
-import type { BotStrategy } from '../../strategy-game-factory';
+import type { BotStrategy } from 'strategy-game-factory';
 import {
   type Board, type Grid, type Moves, getRectangles, getAllMoves, applyMove, isEmpty
 } from './gameplay';

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { playBotMove } from '../../../test-utils';
+import { playBotMove } from 'test-utils';
 import { smartBotStrategy } from './bot-strategy';
 import { moves as gameMoves } from './gameplay';
 

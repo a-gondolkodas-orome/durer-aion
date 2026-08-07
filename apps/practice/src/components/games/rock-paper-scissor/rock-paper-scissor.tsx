@@ -1,9 +1,9 @@
-import { strategyGameFactory, type BoardClientProps, GameBoard } from '../../strategy-game-factory';
+import { strategyGameFactory, type BoardClientProps, GameBoard } from 'strategy-game-factory';
 import { smartBotStrategy } from './bot-strategy';
 import { RockSvg } from './symbols/rock-svg';
 import { PaperSvg } from './symbols/paper-svg';
 import { ScissorSvg } from '../shared/scissor-svg';
-import { useTranslation } from '../../../language';
+import { useTranslation } from 'language';
 import { moves, type Board } from './gameplay';
 
 const symbolSvgs = [RockSvg, PaperSvg, ScissorSvg];

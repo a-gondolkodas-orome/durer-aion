@@ -8,7 +8,7 @@ import {
   moves,
   type Board
 } from './gameplay';
-import { makeCtx } from '../../../test-utils';
+import { makeCtx } from 'test-utils';
 
 describe('two-of-three-takeaway gameplay', () => {
   describe('move mechanics', () => {

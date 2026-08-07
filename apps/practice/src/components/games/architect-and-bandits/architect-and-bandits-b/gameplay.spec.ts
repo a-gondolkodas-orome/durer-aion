@@ -1,6 +1,6 @@
 import { generateStartBoard, moves } from './gameplay';
 import { ARCHITECT, BANDITS, KM_PER_EDGE, type Board } from '../gameplay';
-import { makeCtx } from '../../../../test-utils';
+import { makeCtx } from 'test-utils';
 
 // After the fourth day the architect wins exactly when every vertex carries a
 // tower.

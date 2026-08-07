@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { makeCtx, moveValidator } from '../../../test-utils';
+import { makeCtx, moveValidator } from 'test-utils';
 import {
   applyRemoval,
   countMinPiles,

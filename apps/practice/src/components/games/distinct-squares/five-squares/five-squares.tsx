@@ -1,7 +1,7 @@
 import { range } from 'lodash';
 import {
   strategyGameFactory, type BoardClientProps, type StrategyArgs, GameBoard
-} from '../../../strategy-game-factory';
+} from 'strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { generateStartBoard, moves, type Board, type TurnState } from './gameplay';
 

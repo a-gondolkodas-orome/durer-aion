@@ -1,5 +1,5 @@
 import { moves, type TurnState } from './gameplay';
-import { makeCtx } from '../../../../test-utils';
+import { makeCtx } from 'test-utils';
 
 // The game always ends on the tenth square; the second player wins only if the
 // five counts are all distinct by then.

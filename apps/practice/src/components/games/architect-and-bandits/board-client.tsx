@@ -1,5 +1,5 @@
-import { useTranslation } from '../../../language';
-import { GameBoard, type BoardClientProps } from '../../strategy-game-factory';
+import { useTranslation } from 'language';
+import { GameBoard, type BoardClientProps } from 'strategy-game-factory';
 import { type Board, ARCHITECT } from './gameplay';
 
 const VERTEX_LABELS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];

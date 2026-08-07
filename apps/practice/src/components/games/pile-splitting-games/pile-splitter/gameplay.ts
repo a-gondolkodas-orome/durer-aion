@@ -1,5 +1,5 @@
 import { isEqual } from 'lodash';
-import type { Ctx, MoveOutcome } from '../../../strategy-game-factory';
+import type { Ctx, MoveOutcome } from 'strategy-game-factory';
 import { isRemovalAllowed, isSplitAllowed, withPileRemoved } from '../gameplay';
 
 export type Board = number[];

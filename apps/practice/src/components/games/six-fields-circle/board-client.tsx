@@ -1,5 +1,5 @@
 import { range } from 'lodash';
-import { GameBoard, type BoardClientProps } from '../../strategy-game-factory';
+import { GameBoard, type BoardClientProps } from 'strategy-game-factory';
 import { type Board, type TurnState, FIELD_COUNT, OPPOSITE_PAIRS } from './gameplay';
 
 // Six fields evenly spaced on a circle, index 0 at the top going clockwise.

@@ -1,5 +1,5 @@
 import { sample } from 'lodash';
-import type { BotStrategy } from '../../strategy-game-factory';
+import type { BotStrategy } from 'strategy-game-factory';
 import { availableDigits, totalDigits, type Board, type Moves } from './gameplay';
 
 // Precompute winner(sumMod9, turnsLeft): 0 = Jenő wins, 1 = Béla wins, with optimal play.

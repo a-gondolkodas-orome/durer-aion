@@ -2,7 +2,7 @@ import {
   moves, generateStartBoard, HUNYADI, SULTAN, type Board, type SoldierColor
 } from './gameplay';
 import { uniq, flatten } from 'lodash';
-import { makeCtx, moveValidator } from '../../../test-utils';
+import { makeCtx, moveValidator } from 'test-utils';
 
 const isKillAllowed = moveValidator(moves.killGroup, makeCtx({ currentPlayer: HUNYADI }));
 const isSoldierAssignmentAllowed = moveValidator(moves.setGroupOfSoldiers, makeCtx({ currentPlayer: SULTAN }));

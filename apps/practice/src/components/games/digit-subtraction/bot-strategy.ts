@@ -1,5 +1,5 @@
 import { sample } from 'lodash';
-import type { BotStrategy } from '../../strategy-game-factory';
+import type { BotStrategy } from 'strategy-game-factory';
 import { type Board, type Moves } from './gameplay';
 
 const digitsOf = (n: number): number[] =>

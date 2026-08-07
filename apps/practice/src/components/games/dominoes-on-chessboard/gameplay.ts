@@ -1,5 +1,5 @@
 import { range, cloneDeep, isEqual, flatMap } from 'lodash';
-import type { Ctx, MoveOutcome } from '../../strategy-game-factory';
+import type { Ctx, MoveOutcome } from 'strategy-game-factory';
 
 export type Field = { row: number, col: number }
 export type Domino = [Field, Field]

@@ -1,5 +1,5 @@
-import { makeCtx } from '../../../../test-utils';
-import type { Ctx } from '../../../strategy-game-factory';
+import { makeCtx } from 'test-utils';
+import type { Ctx } from 'strategy-game-factory';
 import { inPlacingPhase, moves, type Board } from './gameplay';
 
 // vsHuman keeps the colours independent of role choice: player 0 is blue, so the

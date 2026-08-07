@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from '../../strategy-game-factory';
+import type { Ctx, MoveOutcome } from 'strategy-game-factory';
 import { random } from 'lodash';
 
 // Chips in each of the three piles. The total is always even (it starts even

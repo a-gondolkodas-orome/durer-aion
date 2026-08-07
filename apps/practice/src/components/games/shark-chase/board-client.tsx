@@ -3,9 +3,9 @@ import { range } from 'lodash';
 
 import { SharkSvg } from './assets/shark-chase-shark-svg';
 import { SubmarineSvg } from './assets/shark-chase-submarine-svg';
-import { useTranslation } from '../../../language';
+import { useTranslation } from 'language';
 import { type Board, RESEARCHERS, SHARK, sideLength } from './gameplay';
-import { GameBoard, type BoardClientProps } from '../../strategy-game-factory';
+import { GameBoard, type BoardClientProps } from 'strategy-game-factory';
 
 // Tailwind scans for whole class names, so the grid width cannot be built by
 // interpolation even though the side length is on the board.

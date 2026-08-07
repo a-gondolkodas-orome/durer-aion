@@ -9,7 +9,7 @@ import {
   keptPileId,
   moves
 } from './gameplay';
-import { makeCtx, moveValidator } from '../../../test-utils';
+import { makeCtx, moveValidator } from 'test-utils';
 
 const isKeepAllowed = moveValidator(moves.keepPile);
 

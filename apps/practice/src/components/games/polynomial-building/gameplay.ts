@@ -1,4 +1,4 @@
-import type { MoveOutcome } from '../../strategy-game-factory';
+import type { MoveOutcome } from 'strategy-game-factory';
 export type Coef = 'a' | 'b' | 'c'
 export type Board = { a: number | null; b: number | null; c: number | null }
 

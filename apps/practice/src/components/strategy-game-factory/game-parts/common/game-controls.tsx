@@ -1,5 +1,5 @@
 import { useId } from 'react';
-import { useTranslation } from '../../../../language';
+import { useTranslation } from 'language';
 import type { Variant, Mode } from '../../types';
 
 // Radios sharing a `name` form one native group, and the browser keeps exactly

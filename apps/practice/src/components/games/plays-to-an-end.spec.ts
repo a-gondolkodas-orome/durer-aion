@@ -2,7 +2,7 @@ import * as games from './index';
 import {
   resolveVariants, runMatch,
   type BotStrategy, type Gameplay, type StrategyGame
-} from '../strategy-game-factory';
+} from 'strategy-game-factory';
 
 // Plays every registered game headlessly, through the real moves, the real
 // validators and the real reducer. `runMatch` throws on everything this is

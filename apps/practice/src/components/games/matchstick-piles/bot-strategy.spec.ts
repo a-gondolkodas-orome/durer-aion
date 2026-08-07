@@ -1,4 +1,4 @@
-import { runMatch, type MatchResult } from '../../strategy-game-factory';
+import { runMatch, type MatchResult } from 'strategy-game-factory';
 import { type Board, moves, generateStartBoard } from './gameplay';
 import { grundy, xorSum, smartBotStrategy, randomBotStrategy } from './bot-strategy';
 

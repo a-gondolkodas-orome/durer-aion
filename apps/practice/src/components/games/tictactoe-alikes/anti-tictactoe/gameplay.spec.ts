@@ -1,5 +1,5 @@
 import { hasFirstPlayerWon, isGameEnd, moves } from './gameplay';
-import { makeCtx } from '../../../../test-utils';
+import { makeCtx } from 'test-utils';
 
 describe('isGameEnd', () => {
   it('should end game if there are 3 in a row', () => {

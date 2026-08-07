@@ -1,5 +1,5 @@
 import { generateEmptyBoard, hasFullLine, isPlacementAllowed, moves } from './gameplay';
-import { makeCtx } from '../../../../test-utils';
+import { makeCtx } from 'test-utils';
 
 describe('hasFullLine', () => {
   it('should be false for an empty board', () => {

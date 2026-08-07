@@ -1,5 +1,5 @@
-import { strategyGameFactory, type BoardClientProps, GameBoard } from '../../strategy-game-factory';
-import { useTranslation } from '../../../language';
+import { strategyGameFactory, type BoardClientProps, GameBoard } from 'strategy-game-factory';
+import { useTranslation } from 'language';
 import { allNumbers, findWinningTriple, generateStartBoard, moves, numbersOwnedBy, type Board } from './gameplay';
 import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
 

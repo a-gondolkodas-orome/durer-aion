@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { sample } from 'lodash';
-import { botNextMoveArgs, makeCtx } from '../../../test-utils';
+import { botNextMoveArgs, makeCtx } from 'test-utils';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import {
   type Board,

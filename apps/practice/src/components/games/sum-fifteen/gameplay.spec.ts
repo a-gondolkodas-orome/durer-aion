@@ -7,7 +7,7 @@ import {
   type Board,
   type Owner
 } from './gameplay';
-import { makeCtx } from '../../../test-utils';
+import { makeCtx } from 'test-utils';
 
 describe('hasSum15', () => {
   it('detects a triple summing to 15', () => {

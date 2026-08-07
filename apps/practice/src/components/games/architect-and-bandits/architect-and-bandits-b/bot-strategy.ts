@@ -1,5 +1,5 @@
 import { maxBy, sample } from 'lodash';
-import type { BotMove, BotStrategy } from '../../../strategy-game-factory';
+import type { BotMove, BotStrategy } from 'strategy-game-factory';
 import type { Board } from '../gameplay';
 import { VERTEX_COUNT, type Moves } from './gameplay';
 import { makeCyclePaths } from '../cycle-paths';

@@ -1,5 +1,5 @@
 import { moves } from './gameplay';
-import { makeCtx } from '../../../../test-utils';
+import { makeCtx } from 'test-utils';
 
 // A turn is two moves: empty one pile, then split another into it. The game
 // ends once every pile is down to a single piece, since a pile of one cannot

@@ -1,5 +1,5 @@
 import { cloneDeep, isEqual, range, some } from 'lodash';
-import type { Ctx, MoveOutcome } from '../../strategy-game-factory';
+import type { Ctx, MoveOutcome } from 'strategy-game-factory';
 
 export type CellValue = null | 'rook' | 'visited';
 export type Field = { row: number; col: number };

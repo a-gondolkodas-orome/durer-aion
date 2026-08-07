@@ -14,7 +14,7 @@ import {
   type Board,
   type Move
 } from './gameplay';
-import { moveValidator } from '../../../test-utils';
+import { moveValidator } from 'test-utils';
 
 const isLegalPlacement = moveValidator(moves.placeDigit);
 

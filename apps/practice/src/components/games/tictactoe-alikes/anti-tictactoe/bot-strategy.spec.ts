@@ -1,5 +1,5 @@
 import { smartBotStrategy } from './bot-strategy';
-import { botNextMoveArgs, makeCtx } from '../../../../test-utils';
+import { botNextMoveArgs, makeCtx } from 'test-utils';
 
 describe('smartBotStrategy', () => {
   it('should place to middle place as a starting move', () => {

@@ -1,5 +1,5 @@
 import { cloneDeep } from 'lodash';
-import type { Ctx, MoveOutcome } from '../../strategy-game-factory';
+import type { Ctx, MoveOutcome } from 'strategy-game-factory';
 
 // Both variants play the same game on a regular polygon, differing only in how
 // many vertices the wall has and how far the architect may walk in a day.

@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from '../../../strategy-game-factory';
+import type { Ctx, MoveOutcome } from 'strategy-game-factory';
 import { range, random } from 'lodash';
 
 export const generateStartBoard = () => {

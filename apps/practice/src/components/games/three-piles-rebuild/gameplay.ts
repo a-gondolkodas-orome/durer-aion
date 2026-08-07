@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from '../../strategy-game-factory';
+import type { Ctx, MoveOutcome } from 'strategy-game-factory';
 import { random, range, sample } from 'lodash';
 
 export type Board = number[]; // always length 3

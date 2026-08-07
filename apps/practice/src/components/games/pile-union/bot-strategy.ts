@@ -1,5 +1,5 @@
 import { sample, sortBy } from 'lodash';
-import type { BotMove, BotStrategy } from '../../strategy-game-factory';
+import type { BotMove, BotStrategy } from 'strategy-game-factory';
 import { createWinLossSolver } from '../shared/win-loss-solver';
 import type { Board, Moves } from './gameplay';
 

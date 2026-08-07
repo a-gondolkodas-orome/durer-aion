@@ -1,8 +1,8 @@
 import { range } from 'lodash';
 import {
   strategyGameFactory, useMoveScopedState, type BoardClientProps, GameBoard
-} from '../../strategy-game-factory';
-import { useTranslation } from '../../../language';
+} from 'strategy-game-factory';
+import { useTranslation } from 'language';
 import { generateStartBoard, moves, type Board, type Move } from './gameplay';
 import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
 

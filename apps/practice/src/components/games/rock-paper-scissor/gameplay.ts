@@ -1,5 +1,5 @@
 import { cloneDeep } from 'lodash';
-import type { Ctx, MoveOutcome } from '../../strategy-game-factory';
+import type { Ctx, MoveOutcome } from 'strategy-game-factory';
 
 export type Board = ('rock' | 'paper' | 'scissor' | null)[][]
 

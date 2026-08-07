@@ -1,5 +1,5 @@
 import { flatMap, range, cloneDeep } from 'lodash';
-import type { Ctx, MoveOutcome } from '../../strategy-game-factory';
+import type { Ctx, MoveOutcome } from 'strategy-game-factory';
 
 export const DUCK = 1 as const;
 export const FORBIDDEN = 2 as const;

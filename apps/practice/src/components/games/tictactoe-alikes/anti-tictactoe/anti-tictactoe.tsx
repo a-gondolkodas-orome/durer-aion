@@ -1,4 +1,4 @@
-import { strategyGameFactory } from '../../../strategy-game-factory';
+import { strategyGameFactory } from 'strategy-game-factory';
 import { generateEmptyTicTacToeBoard } from '../gameplay';
 import { BoardClient } from '../board-client';
 import { moves } from './gameplay';

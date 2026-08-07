@@ -1,5 +1,5 @@
 import { range } from 'lodash';
-import { strategyGameFactory, type BoardClientProps, GameBoard } from '../../../strategy-game-factory';
+import { strategyGameFactory, type BoardClientProps, GameBoard } from 'strategy-game-factory';
 import { generateEmptyTicTacToeBoard } from '../gameplay';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { inPlacingPhase, moves, otherPlayerColor, type Board } from './gameplay';

@@ -1,6 +1,6 @@
 import type { FC, SVGProps } from 'react';
 import type { IconKey } from '../games/gameList';
-import type { I18nString } from '../../language';
+import type { I18nString } from 'language';
 import { ScissorSvg } from '../games/shared/scissor-svg';
 
 // Small, self-contained, monochrome icons for the overview cards. Everything is

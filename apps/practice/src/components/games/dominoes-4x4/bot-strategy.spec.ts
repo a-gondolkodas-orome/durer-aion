@@ -1,4 +1,4 @@
-import { botNextMoveArgs, makeCtx } from '../../../test-utils';
+import { botNextMoveArgs, makeCtx } from 'test-utils';
 import { smartBotStrategy, randomBotStrategy, isWinningForPlayerToMove } from './bot-strategy';
 import { getPossibleMoves, type Board, type Domino, type Field } from './gameplay';
 

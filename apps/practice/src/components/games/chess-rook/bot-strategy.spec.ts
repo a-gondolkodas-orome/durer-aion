@@ -1,6 +1,6 @@
 import { smartBotStrategy } from './bot-strategy';
 import { generateStartBoard, markVisitedFields, type Board, type Field } from './gameplay';
-import { botNextMoveArgs, makeCtx } from '../../../test-utils';
+import { botNextMoveArgs, makeCtx } from 'test-utils';
 import { isEqual, cloneDeep } from 'lodash';
 
 const smartBotTarget = (board: Board): Field =>

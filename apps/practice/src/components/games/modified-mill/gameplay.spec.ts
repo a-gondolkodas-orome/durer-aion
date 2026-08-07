@@ -11,7 +11,7 @@ import {
   playerHasLine
 } from './gameplay';
 import { LINES } from './board-data';
-import { makeCtx } from '../../../test-utils';
+import { makeCtx } from 'test-utils';
 
 describe('modified mill helpers', () => {
   it('has a 24-cell board and 16 winning lines of three cells each', () => {

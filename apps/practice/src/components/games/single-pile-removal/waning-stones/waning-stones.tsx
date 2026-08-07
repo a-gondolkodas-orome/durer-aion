@@ -1,4 +1,4 @@
-import { strategyGameFactory } from '../../../strategy-game-factory';
+import { strategyGameFactory } from 'strategy-game-factory';
 import { BoardClient, getPlayerStepDescription } from '../pebble-pile';
 import {  } from '../gameplay';
 import { generateStartBoard, generateTestStartBoard, moves } from './gameplay';

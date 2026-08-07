@@ -1,5 +1,5 @@
 import { range } from 'lodash';
-import type { Ctx } from '../../strategy-game-factory';
+import type { Ctx } from 'strategy-game-factory';
 
 // The board is the K(2,3) bipartite graph of 5 fields, holding coin counts.
 // Indices 0=A, 1=B are the two "hub" fields (side 1, each adjacent to all of

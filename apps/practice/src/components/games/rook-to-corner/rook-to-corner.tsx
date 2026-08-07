@@ -1,5 +1,5 @@
 import { range, isEqual } from 'lodash';
-import { strategyGameFactory, type BoardClientProps, GameBoard } from '../../strategy-game-factory';
+import { strategyGameFactory, type BoardClientProps, GameBoard } from 'strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { boardSize, generateStartBoard, isTarget, moves, type Board, type Field } from './gameplay';
 import { RookSvg } from '../shared/rook-svg';

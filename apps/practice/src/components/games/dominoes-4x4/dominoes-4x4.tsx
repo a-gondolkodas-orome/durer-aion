@@ -6,7 +6,7 @@ import {
   type BoardClientProps,
   GameBoard,
   useHoverPreview
-} from '../../strategy-game-factory';
+} from 'strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { isCovered, moves, BOARDSIZE, type Board, type Domino, type Field } from './gameplay';
 

@@ -1,4 +1,4 @@
-import type { BotStrategy } from '../../strategy-game-factory';
+import type { BotStrategy } from 'strategy-game-factory';
 import { sample, shuffle } from 'lodash';
 import { getAllowedMoves, withTriangleColored, type Board, type Moves } from './gameplay';
 

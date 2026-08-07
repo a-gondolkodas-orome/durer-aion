@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from '../../strategy-game-factory';
+import type { Ctx, MoveOutcome } from 'strategy-game-factory';
 import { range, cloneDeep, sample, random } from 'lodash';
 
 export type Board = { numbersOnTable: boolean[], previousMove: number | null }

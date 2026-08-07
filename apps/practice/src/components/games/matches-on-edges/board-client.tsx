@@ -1,8 +1,8 @@
 import { range } from 'lodash';
-import { useTranslation } from '../../../language';
+import { useTranslation } from 'language';
 import {
   GameBoard, type BoardClientProps, useHoverPreview, useMoveScopedState
-} from '../../strategy-game-factory';
+} from 'strategy-game-factory';
 import { type Board, boundaryEdgesToPlace, currentWindowSize } from './gameplay';
 
 const Matchstick = ({ ghost = false }: { ghost?: boolean }) => (

@@ -1,11 +1,11 @@
 import {
   strategyGameFactory, type BoardClientProps, type Ctx, GameBoard, useHoverPreview
-} from '../../strategy-game-factory';
+} from 'strategy-game-factory';
 import { CastleSvg } from './assets/castle-svg';
 import { SoldierSvg } from './assets/soldier-svg';
 import { smartBotStrategy } from './bot-strategy';
 import { generateStartBoard, moves, SULTAN, type Board, type SoldierColor } from './gameplay';
-import { useTranslation } from '../../../language';
+import { useTranslation } from 'language';
 
 type Piece = { rowIndex: number, pieceIndex: number }
 

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { isRemovalAllowed, moves } from './gameplay';
-import { makeCtx, moveValidator } from '../../../test-utils';
+import { makeCtx, moveValidator } from 'test-utils';
 
 const isFlipAllowed = moveValidator(moves.turnDiscs);
 

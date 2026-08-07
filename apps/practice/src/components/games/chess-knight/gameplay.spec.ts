@@ -1,6 +1,6 @@
 import { range } from 'lodash';
 import { generateStartBoard, getAllowedMoves, moves, type Board, type CellValue } from './gameplay';
-import { makeCtx } from '../../../test-utils';
+import { makeCtx } from 'test-utils';
 
 // A 4x4 board with the knight at `knightPosition` and `visited` already toured.
 const boardWith = (knightPosition: { row: number; col: number }, visited: number[][] = []): Board => {

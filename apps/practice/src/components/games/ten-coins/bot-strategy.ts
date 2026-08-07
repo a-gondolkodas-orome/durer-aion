@@ -1,5 +1,5 @@
 import { uniq, sample } from 'lodash';
-import type { BotStrategy } from '../../strategy-game-factory';
+import type { BotStrategy } from 'strategy-game-factory';
 import { type Board, type Moves } from './gameplay';
 
 type Move = { k: number, l: number, resultSet: number[] }

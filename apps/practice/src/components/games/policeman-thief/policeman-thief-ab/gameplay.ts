@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from '../../../strategy-game-factory';
+import type { Ctx, MoveOutcome } from 'strategy-game-factory';
 import { range, random, sample, difference, cloneDeep } from 'lodash';
 export const neighbours = {
   0: [1, 2, 4],

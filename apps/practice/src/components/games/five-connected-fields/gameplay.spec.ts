@@ -1,5 +1,5 @@
 import { hasAnyMove, isNodePlayable, legalNodes, moves, type Board } from './gameplay';
-import { makeCtx } from '../../../test-utils';
+import { makeCtx } from 'test-utils';
 
 // K(2,3): 0=A and 1=B are the hubs, each joined to 2=C, 3=D and 4=E. Neither
 // hub is joined to the other, and C, D, E are not joined to each other.

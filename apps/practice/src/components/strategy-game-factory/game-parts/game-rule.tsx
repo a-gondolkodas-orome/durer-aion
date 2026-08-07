@@ -1,6 +1,6 @@
 import React from 'react';
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react';
-import { useTranslation } from '../../../language';
+import { useTranslation } from 'language';
 
 export const GameRule = ({ ruleDescription }: { ruleDescription: React.ReactNode }) => {
   const { t } = useTranslation();

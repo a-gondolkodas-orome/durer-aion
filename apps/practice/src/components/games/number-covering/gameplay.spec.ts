@@ -1,5 +1,5 @@
 import { moves, COVERED } from './gameplay';
-import { makeCtx, moveValidator } from '../../../test-utils';
+import { makeCtx, moveValidator } from 'test-utils';
 
 const isCoveringAllowed = moveValidator(moves.coverNumber);
 

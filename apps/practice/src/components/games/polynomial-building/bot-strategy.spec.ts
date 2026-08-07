@@ -1,5 +1,5 @@
-import { type BotStrategy } from '../../strategy-game-factory';
-import { botNextMoveArgs, makeCtx } from '../../../test-utils';
+import { type BotStrategy } from 'strategy-game-factory';
+import { botNextMoveArgs, makeCtx } from 'test-utils';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { type Board, type Coef, hasThreeIntegerRoots, canComplete } from './gameplay';
 

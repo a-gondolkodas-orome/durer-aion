@@ -1,4 +1,4 @@
-import { strategyGameFactory, type BoardClientProps, GameBoard } from '../../strategy-game-factory';
+import { strategyGameFactory, type BoardClientProps, GameBoard } from 'strategy-game-factory';
 import { range } from 'lodash';
 import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
 import { generateStartBoard, isRobbable, moves, type Board } from './gameplay';

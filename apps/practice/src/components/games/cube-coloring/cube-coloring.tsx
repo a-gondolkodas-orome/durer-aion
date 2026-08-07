@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { range, map } from 'lodash';
-import { strategyGameFactory, type BoardClientProps, GameBoard } from '../../strategy-game-factory';
+import { strategyGameFactory, type BoardClientProps, GameBoard } from 'strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { generateStartBoard, edges, moves, type Board } from './gameplay';
-import { useTranslation } from '../../../language';
+import { useTranslation } from 'language';
 
 // Screen position of each node; the drawn skeleton (see `edges` in gameplay)
 // connects these by node id.

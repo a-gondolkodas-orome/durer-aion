@@ -1,4 +1,4 @@
-import { strategyGameFactory, type BoardClientProps, GameBoard } from '../../strategy-game-factory';
+import { strategyGameFactory, type BoardClientProps, GameBoard } from 'strategy-game-factory';
 import { range } from 'lodash';
 import { ChessBishopSvg } from '../chess-bishops/chess-bishop-svg';
 import { generateStartBoard, moves, type Board } from './gameplay';

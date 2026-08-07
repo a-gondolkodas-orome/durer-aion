@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from '../../strategy-game-factory';
+import type { Ctx, MoveOutcome } from 'strategy-game-factory';
 import { random, sample } from 'lodash';
 
 // Six fields sit on a circle, indices 0..5 clockwise. Each field holds some

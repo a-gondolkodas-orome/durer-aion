@@ -15,7 +15,7 @@ import {
 } from '../gameplay';
 import { OPENING_EDGES, isLineTurnWon, marchEdges, winningPairHeatEdges } from './forced-win';
 import { makeMoveEvaluator } from './search';
-import type { BotStrategy } from '../../../strategy-game-factory';
+import type { BotStrategy } from 'strategy-game-factory';
 
 type Bot = BotStrategy<Board, Moves>
 

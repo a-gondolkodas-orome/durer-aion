@@ -3,7 +3,7 @@ import {
   hasBacterium, isAttackAllowed, ATTACKER, DEFENDER, type MoveType
 } from './gameplay';
 import { reverse } from 'lodash';
-import { makeCtx } from '../../../test-utils';
+import { makeCtx } from 'test-utils';
 
 describe('moves', () => {
   const meta = { ctx: makeCtx({ currentPlayer: DEFENDER }) };

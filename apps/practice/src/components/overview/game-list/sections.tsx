@@ -1,6 +1,6 @@
 import { orderBy } from 'lodash';
 import { gameList, type Category, type GameList } from '../../games/gameList';
-import type { I18nNode } from '../../../language';
+import type { I18nNode } from 'language';
 import { CollapsibleSection } from './collapsible-section';
 import { GameCard } from './game-card';
 

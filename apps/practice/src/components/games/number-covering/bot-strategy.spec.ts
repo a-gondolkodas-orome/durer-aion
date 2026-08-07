@@ -1,6 +1,6 @@
 import { smartBotStrategy } from './bot-strategy';
 import { COVERED, type Board } from './gameplay';
-import { botNextMoveArgs, makeCtx } from '../../../test-utils';
+import { botNextMoveArgs, makeCtx } from 'test-utils';
 
 const smartBotCover = (board: Board, currentPlayer: number): number =>
   botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx({ currentPlayer }) }))[0];

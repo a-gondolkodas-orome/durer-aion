@@ -1,6 +1,6 @@
 import { range, sample } from 'lodash';
 import { isGameEnd, placeStone, type Board, type Moves } from './gameplay';
-import type { BotStrategy } from '../../../strategy-game-factory';
+import type { BotStrategy } from 'strategy-game-factory';
 
 type Bot = BotStrategy<Board, Moves>
 

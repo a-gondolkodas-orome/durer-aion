@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from '../../../strategy-game-factory';
+import type { Ctx, MoveOutcome } from 'strategy-game-factory';
 import { every, range, last, uniqWith, isEqual, cloneDeep } from 'lodash';
 
 // 15 totem poles: same game as `triangular-grid-ropes` (10 poles) but on a

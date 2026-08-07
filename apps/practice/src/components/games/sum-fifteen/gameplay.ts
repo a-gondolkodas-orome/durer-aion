@@ -1,4 +1,4 @@
-import type { MoveOutcome, Ctx } from '../../strategy-game-factory';
+import type { MoveOutcome, Ctx } from 'strategy-game-factory';
 
 // owner[i] holds who owns the number (i + 1): 0 = first player, 1 = second
 // player, null = still available.

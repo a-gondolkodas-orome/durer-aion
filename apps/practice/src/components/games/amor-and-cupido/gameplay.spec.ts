@@ -8,7 +8,7 @@ import {
   getAllowedMoves,
   moves
 } from './gameplay';
-import { makeCtx, moveValidator } from '../../../test-utils';
+import { makeCtx, moveValidator } from 'test-utils';
 
 const isClaimAllowed = moveValidator(moves.claimEdge);
 

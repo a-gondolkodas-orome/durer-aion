@@ -1,5 +1,5 @@
 import { emptiedPileId, isRemovalAllowed, isSplitAllowed, withPileRemoved } from '../gameplay';
-import type { Ctx, MoveOutcome } from '../../../strategy-game-factory';
+import type { Ctx, MoveOutcome } from 'strategy-game-factory';
 import { range, random, isEqual, cloneDeep } from 'lodash';
 
 export const generateStartBoard = (): Board => {

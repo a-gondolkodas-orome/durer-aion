@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from '../../../strategy-game-factory';
+import type { Ctx, MoveOutcome } from 'strategy-game-factory';
 import { cloneDeep, random } from 'lodash';
 // Modified Petersen graph: the standard Petersen graph (outer 5-cycle, inner
 // pentagram, 5 spokes) with each of the 5 outer edges subdivided by an extra

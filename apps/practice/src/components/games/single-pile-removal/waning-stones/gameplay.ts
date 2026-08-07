@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from '../../../strategy-game-factory';
+import type { Ctx, MoveOutcome } from 'strategy-game-factory';
 import { range, random, sample } from 'lodash';
 import { type Board, validateTake } from '../gameplay';
 

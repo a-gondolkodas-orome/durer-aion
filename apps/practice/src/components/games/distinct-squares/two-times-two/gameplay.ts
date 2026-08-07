@@ -1,5 +1,5 @@
 import { sum, isEqual, cloneDeep } from 'lodash';
-import type { MoveOutcome } from '../../../strategy-game-factory';
+import type { MoveOutcome } from 'strategy-game-factory';
 import { isPlacementAllowed } from '../gameplay';
 
 export type Board = number[]

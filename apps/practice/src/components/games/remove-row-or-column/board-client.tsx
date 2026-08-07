@@ -1,8 +1,8 @@
 import { range } from 'lodash';
 import {
   type BoardClientProps, type StrategyArgs, GameBoard, useHoverPreview
-} from '../../strategy-game-factory';
-import { useTranslation } from '../../../language';
+} from 'strategy-game-factory';
+import { useTranslation } from 'language';
 import { type Board, type Orientation, type TurnState, getRectangleAt } from './gameplay';
 
 export const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProps<Board, TurnState>) => {

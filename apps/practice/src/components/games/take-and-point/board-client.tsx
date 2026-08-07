@@ -1,6 +1,6 @@
 import { range } from 'lodash';
-import { useTranslation } from '../../../language';
-import { GameBoard, type BoardClientProps, useMoveScopedState } from '../../strategy-game-factory';
+import { useTranslation } from 'language';
+import { GameBoard, type BoardClientProps, useMoveScopedState } from 'strategy-game-factory';
 import { type Board, requiredPointCount } from './gameplay';
 
 const Chips = ({ count, removeCount = 0 }: { count: number; removeCount?: number }) => (

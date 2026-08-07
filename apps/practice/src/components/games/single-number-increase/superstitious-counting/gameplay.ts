@@ -1,5 +1,5 @@
 import { range, sample, difference } from 'lodash';
-import type { Ctx, MoveOutcome } from '../../../strategy-game-factory';
+import type { Ctx, MoveOutcome } from 'strategy-game-factory';
 
 export type Board = { current: number, target: number, restricted: number | null }
 

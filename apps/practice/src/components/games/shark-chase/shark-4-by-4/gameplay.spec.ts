@@ -1,6 +1,6 @@
 import { isGameEnd, moves } from './gameplay';
 import { RESEARCHERS, SHARK, type Board } from '../gameplay';
-import { makeCtx } from '../../../../test-utils';
+import { makeCtx } from 'test-utils';
 
 // The researchers win by moving a submarine onto the shark (or steering the
 // shark into one); the shark wins by surviving the turn limit.

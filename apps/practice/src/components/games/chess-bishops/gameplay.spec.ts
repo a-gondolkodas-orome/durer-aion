@@ -1,5 +1,5 @@
 import { FORBIDDEN, generateStartBoard, getAllowedMoves, markForbiddenFields, moves } from './gameplay';
-import { makeCtx } from '../../../test-utils';
+import { makeCtx } from 'test-utils';
 
 describe('markForbiddenFields', () => {
   it('should mark forbidden fields', () => {

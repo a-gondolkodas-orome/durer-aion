@@ -1,5 +1,5 @@
 import { POLICE, THIEF, VERTEX_COUNT, isNeighbour, isVertex, moves, neighbours, type Board } from './gameplay';
-import { makeCtx } from '../../../../test-utils';
+import { makeCtx } from 'test-utils';
 
 describe('graph predicates', () => {
   it('accepts only the eight intersections', () => {

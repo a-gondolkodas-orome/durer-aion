@@ -5,7 +5,7 @@ import {
   GameBoard,
   useHoverPreview,
   useDeferredMove
-} from '../../../strategy-game-factory';
+} from 'strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { isSplitAllowed, withPileRemoved } from '../gameplay';
 import { moves, type Board, type Piece } from './gameplay';

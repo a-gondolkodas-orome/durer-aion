@@ -1,5 +1,5 @@
 import { range } from 'lodash';
-import { type BoardClientProps, GameBoard } from '../../strategy-game-factory';
+import { type BoardClientProps, GameBoard } from 'strategy-game-factory';
 import { type Board } from './gameplay';
 
 // Shared by anti-tictactoe and tictactoe-doublestart, whose boards are the same

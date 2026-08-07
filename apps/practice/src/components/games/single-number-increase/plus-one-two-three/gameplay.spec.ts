@@ -1,5 +1,5 @@
 import { moves, type Board } from './gameplay';
-import { makeCtx } from '../../../../test-utils';
+import { makeCtx } from 'test-utils';
 
 const isIncreaseValid = ({ board, number }: { board: Board; number: number }) =>
   moves.increaseTo.validate(board, { ctx: makeCtx() }, number);

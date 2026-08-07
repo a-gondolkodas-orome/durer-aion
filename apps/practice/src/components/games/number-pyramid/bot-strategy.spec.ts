@@ -1,6 +1,6 @@
 import { isP2WinningPosition, randomBotStrategy, smartBotStrategy } from './bot-strategy';
 import type { Board, Slot } from './gameplay';
-import { botNextMoveArgs, makeCtx } from '../../../test-utils';
+import { botNextMoveArgs, makeCtx } from 'test-utils';
 
 const active = (value: number): Slot => ({ value, state: 'active' });
 const consumed = (value: number): Slot => ({ value, state: 'consumed' });

@@ -1,10 +1,10 @@
 import { isEqual } from 'lodash';
-import { runMatch, type MatchResult } from '../../../strategy-game-factory';
+import { runMatch, type MatchResult } from 'strategy-game-factory';
 import {
   getAllowedMoves, isAllowed, edgeDirection, mirrorNodes, moves, type Board, type Edge
 } from './gameplay';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
-import { botNextMoveArgs, makeCtx } from '../../../../test-utils';
+import { botNextMoveArgs, makeCtx } from 'test-utils';
 
 // Play a real game through the engine: the same moves, validator and win
 // detection the site runs on.

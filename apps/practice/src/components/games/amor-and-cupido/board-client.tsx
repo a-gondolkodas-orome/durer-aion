@@ -1,4 +1,4 @@
-import { GameBoard, type BoardClientProps } from '../../strategy-game-factory';
+import { GameBoard, type BoardClientProps } from 'strategy-game-factory';
 import { type Board, EDGES, findWinningTriangle } from './gameplay';
 
 // Hexagon coordinates (viewBox 0 0 100 100), first vertex at the top.

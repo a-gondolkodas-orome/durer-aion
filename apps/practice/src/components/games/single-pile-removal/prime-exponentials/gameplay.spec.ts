@@ -1,5 +1,5 @@
 import { moves } from './gameplay';
-import { makeCtx, moveValidator } from '../../../../test-utils';
+import { makeCtx, moveValidator } from 'test-utils';
 
 const isSubtractionAllowed = moveValidator(moves.subtractPrimeExponent);
 

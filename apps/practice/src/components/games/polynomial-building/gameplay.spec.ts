@@ -7,7 +7,7 @@ import {
   type Board,
   type Coef
 } from './gameplay';
-import { makeCtx, moveValidator } from '../../../test-utils';
+import { makeCtx, moveValidator } from 'test-utils';
 
 const isCoefficientChoiceAllowed = moveValidator(moves.setCoefficient);
 

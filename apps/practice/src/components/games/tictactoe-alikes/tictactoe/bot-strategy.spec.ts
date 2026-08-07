@@ -1,5 +1,5 @@
 import { smartBotStrategy } from './bot-strategy';
-import { botNextMoveArgs, makeCtx } from '../../../../test-utils';
+import { botNextMoveArgs, makeCtx } from 'test-utils';
 
 describe('smartBotStrategy', () => {
   describe('new piece placing phase', () => {

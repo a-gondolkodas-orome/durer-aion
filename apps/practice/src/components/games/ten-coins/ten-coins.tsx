@@ -1,8 +1,8 @@
 import { range } from 'lodash';
 import {
   strategyGameFactory, type BoardClientProps, type StrategyArgs, GameBoard
-} from '../../strategy-game-factory';
-import { useTranslation } from '../../../language';
+} from 'strategy-game-factory';
+import { useTranslation } from 'language';
 import {
   generateStartBoardC, generateStartBoardD, generateTestStartBoard, moves,
   type Board, type TurnState

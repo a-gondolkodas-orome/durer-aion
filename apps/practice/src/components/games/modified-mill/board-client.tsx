@@ -1,5 +1,5 @@
 import { range } from 'lodash';
-import { GameBoard, type BoardClientProps } from '../../strategy-game-factory';
+import { GameBoard, type BoardClientProps } from 'strategy-game-factory';
 import { COORDS, LINES } from './board-data';
 import { type Board } from './gameplay';
 

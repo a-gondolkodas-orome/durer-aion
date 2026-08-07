@@ -1,8 +1,8 @@
 import { range, uniq } from 'lodash';
-import { runMatch, type MatchResult } from '../../../strategy-game-factory';
+import { runMatch, type MatchResult } from 'strategy-game-factory';
 import { moves, generateStartBoard, type Board } from './gameplay';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
-import { makeCtx } from '../../../../test-utils';
+import { makeCtx } from 'test-utils';
 
 const startBoardOn = (square: number): Board => {
   const board = Array(5).fill(0);

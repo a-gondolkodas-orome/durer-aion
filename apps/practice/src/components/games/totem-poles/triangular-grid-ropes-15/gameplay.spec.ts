@@ -7,7 +7,7 @@ import {
   moves,
   vertices
 } from './gameplay';
-import { makeCtx } from '../../../../test-utils';
+import { makeCtx } from 'test-utils';
 
 describe('15 totem poles geometry', () => {
   it('has 15 poles arranged in 5 rows', () => {

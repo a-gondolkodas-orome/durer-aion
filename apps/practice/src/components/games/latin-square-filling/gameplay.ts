@@ -1,4 +1,4 @@
-import type { MoveOutcome } from '../../strategy-game-factory';
+import type { MoveOutcome } from 'strategy-game-factory';
 
 // A 3x3 grid, row-major. 0 = empty, 1 | 2 | 3 = a written digit.
 export type Board = number[]; // always length 9

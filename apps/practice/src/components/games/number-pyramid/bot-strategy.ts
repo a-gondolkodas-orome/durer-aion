@@ -1,5 +1,5 @@
 import { orderBy, range, sample, sampleSize } from 'lodash';
-import type { BotMove, BotStrategy } from '../../strategy-game-factory';
+import type { BotMove, BotStrategy } from 'strategy-game-factory';
 import {
   activeSlotIndices, applyMoveToBoard, hasActivePair, type Board, type Level, type Moves
 } from './gameplay';

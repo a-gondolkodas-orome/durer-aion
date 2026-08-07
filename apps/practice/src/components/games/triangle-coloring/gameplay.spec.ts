@@ -1,6 +1,6 @@
 import { range } from 'lodash';
 import { moves, isColoringAllowed } from './gameplay';
-import { makeCtx } from '../../../test-utils';
+import { makeCtx } from 'test-utils';
 
 const asPlayer = (currentPlayer: number) => ({ ctx: makeCtx({ currentPlayer }) });
 

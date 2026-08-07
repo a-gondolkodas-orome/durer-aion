@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from '../../strategy-game-factory';
+import type { Ctx, MoveOutcome } from 'strategy-game-factory';
 import { range, cloneDeep, random, sample } from 'lodash';
 
 export type Board = { circle: boolean[], lastMove: number | null, firstMove: number | null }

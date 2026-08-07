@@ -1,5 +1,5 @@
 import { cloneDeep, every, range, some } from 'lodash';
-import type { MoveOutcome } from '../../strategy-game-factory';
+import type { MoveOutcome } from 'strategy-game-factory';
 
 export type Board = string[]
 

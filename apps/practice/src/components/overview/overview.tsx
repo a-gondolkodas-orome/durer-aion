@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { gameList, type Category, type IconKey } from '../games/gameList';
-import { useTranslation, LanguageSelector, type I18nNode } from '../../language';
+import { useTranslation, LanguageSelector, type I18nNode } from 'language';
 import { ThemeSwitcher } from '../../theme';
 import {
   FilterToggle, CategoryFilter, IconFilter, filterByCategories, filterByIcons

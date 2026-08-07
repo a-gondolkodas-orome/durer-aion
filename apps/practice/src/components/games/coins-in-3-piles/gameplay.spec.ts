@@ -1,5 +1,5 @@
 import { moves, type Board, type TurnState } from './gameplay';
-import { makeCtx } from '../../../test-utils';
+import { makeCtx } from 'test-utils';
 
 describe('coins-in-3-piles move validators', () => {
   const isRemovalAllowed = (board: Board, turnState: TurnState | null, value: number) =>

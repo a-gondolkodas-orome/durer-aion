@@ -1,5 +1,5 @@
 import { moves } from './gameplay';
-import { makeCtx } from '../../../../test-utils';
+import { makeCtx } from 'test-utils';
 
 // The player who passes 99 *loses*, so every ending credits the mover's
 // opponent — the opposite of most games in the repo.

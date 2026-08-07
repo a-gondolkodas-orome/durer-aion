@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from '../../strategy-game-factory';
+import type { Ctx, MoveOutcome } from 'strategy-game-factory';
 import { EDGES, TRIANGLES, TRIANGLE_COUNT, EDGE_COUNT } from './geometry';
 
 // Board state. `edges[e]` is true once the line player has shaded edge e;

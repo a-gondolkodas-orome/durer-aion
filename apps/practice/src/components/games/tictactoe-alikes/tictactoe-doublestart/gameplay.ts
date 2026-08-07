@@ -1,4 +1,4 @@
-import type { MoveOutcome, Ctx } from '../../../strategy-game-factory';
+import type { MoveOutcome, Ctx } from 'strategy-game-factory';
 import { range, cloneDeep } from 'lodash';
 import { hasWinningSubset, type Board, validatePlacement } from '../gameplay';
 

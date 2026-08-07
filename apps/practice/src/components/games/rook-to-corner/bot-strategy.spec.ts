@@ -1,7 +1,7 @@
 import { range } from 'lodash';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { getAllowedMoves, isTarget, boardSize, type Field } from './gameplay';
-import { botNextMoveArgs, makeCtx } from '../../../test-utils';
+import { botNextMoveArgs, makeCtx } from 'test-utils';
 
 const isAllowed = (from: Field, to: Field) =>
   getAllowedMoves({ rookPosition: from }).some(m => m.row === to.row && m.col === to.col);

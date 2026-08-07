@@ -11,7 +11,7 @@ game-component graph into every metadata consumer's bundle. This file is importe
 `app.tsx` pairs them: it loops these keys and looks each up in the `index.ts`
 namespace. `gameList.spec.ts` guards that the two stay 1-to-1 in sync.
 */
-import type { I18nString } from '../../language';
+import type { I18nString } from 'language';
 
 // Canonical list of competition categories in increasing difficulty order.
 export const categories = ['A', 'B', 'C', 'D', 'E', 'E+'] as const;

@@ -4,7 +4,7 @@ import {
   type BoardClientProps,
   GameBoard,
   useHoverPreview
-} from '../../../strategy-game-factory';
+} from 'strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { getAllowedSuperset, moves, vertices, type Board } from './gameplay';
 

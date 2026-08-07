@@ -1,6 +1,6 @@
 import { Link } from 'react-router';
 import type { GameEntry, Category } from '../../games/gameList';
-import { useTranslation } from '../../../language';
+import { useTranslation } from 'language';
 import { GameIcon } from '../game-icons';
 
 const chipBase = 'rounded-full drop-shadow-sm px-2 py-0.5 whitespace-nowrap bg-surface-elevated';

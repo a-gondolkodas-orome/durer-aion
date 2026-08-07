@@ -37,6 +37,8 @@ sibling of `games/`):
   turn-taking, end-of-game detection, restart/clean state. Defines a
   well-specified API that every game must implement. Games import everything
   through the `strategy-game-factory` barrel (`index.ts`) — no deep imports.
+  `strategy-game-factory` is a path alias, so no `../../` either; it is anchored
+  to the barrel, which is what makes the no-deep-imports rule self-enforcing.
 
 **Per-game responsibility:**
 Each game folder implements the optimal strategy (computer AI) and game-specific
@@ -100,7 +102,8 @@ change, not as an afterthought.
 
 Game-specific logic is also worth testing when the winning strategy is
 non-trivial. Because bots name their moves, a spec can read a decision straight
-off the return value (`botNextMoveArgs` in `test-utils`), and `runMatch`
+off the return value (`botNextMoveArgs` in `test-utils`, imported by specs as
+`from 'test-utils'` — an alias, so no `../../../`), and `runMatch`
 (`strategy-game-factory/engine/run-match.ts`) plays two strategies against each
 other through the real moves and the real reducer — no fake `moves` object, no
 hand-rolled game loop. That is what turns "the AI is truly optimal" into a test:

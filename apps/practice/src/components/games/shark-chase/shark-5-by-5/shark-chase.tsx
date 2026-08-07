@@ -1,4 +1,4 @@
-import { strategyGameFactory, type Ctx } from '../../../strategy-game-factory';
+import { strategyGameFactory, type Ctx } from 'strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { makeBoardClient } from '../board-client';
 import { type Board } from '../gameplay';

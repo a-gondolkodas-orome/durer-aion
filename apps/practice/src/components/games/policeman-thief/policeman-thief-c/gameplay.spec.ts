@@ -11,7 +11,7 @@ import {
   type Board
 } from './gameplay';
 import { range } from 'lodash';
-import { makeCtx } from '../../../../test-utils';
+import { makeCtx } from 'test-utils';
 
 describe('modified Petersen graph', () => {
   it('has 15 vertices and 20 edges', () => {

@@ -1,4 +1,4 @@
-import type { MoveOutcome, Ctx } from '../../../strategy-game-factory';
+import type { MoveOutcome, Ctx } from 'strategy-game-factory';
 export type Board = boolean[]
 
 /*

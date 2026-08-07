@@ -1,4 +1,4 @@
-import { strategyGameFactory } from '../../../strategy-game-factory';
+import { strategyGameFactory } from 'strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { generateStartBoard } from '../gameplay';
 import { makeBoardClient } from '../board-client';

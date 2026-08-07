@@ -1,7 +1,7 @@
 import {
   strategyGameFactory, type BoardClientProps, GameBoard, useDeferredMove, useMoveScopedState
-} from '../../strategy-game-factory';
-import { useTranslation } from '../../../language';
+} from 'strategy-game-factory';
+import { useTranslation } from 'language';
 import {
   canSplit,
   generateStartBoard,

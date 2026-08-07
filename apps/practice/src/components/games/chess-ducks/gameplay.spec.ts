@@ -2,7 +2,7 @@ import { range } from 'lodash';
 import {
   DUCK, FORBIDDEN, moves, isPlacementAllowed, getAllowedMoves, withDuckPlaced, type Board
 } from './gameplay';
-import { makeCtx } from '../../../test-utils';
+import { makeCtx } from 'test-utils';
 
 const asPlayer = (currentPlayer: number) => ({ ctx: makeCtx({ currentPlayer }) });
 

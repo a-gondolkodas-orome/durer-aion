@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from '../../strategy-game-factory';
+import type { Ctx, MoveOutcome } from 'strategy-game-factory';
 import { range, cloneDeep } from 'lodash';
 
 export const [ALLOWED, COLORED, FORBIDDEN] = [1 as const, 2 as const, 3 as const];

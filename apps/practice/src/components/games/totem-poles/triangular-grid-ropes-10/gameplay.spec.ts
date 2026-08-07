@@ -1,5 +1,5 @@
 import { isAllowed, moves, type Board } from './gameplay';
-import { makeCtx } from '../../../../test-utils';
+import { makeCtx } from 'test-utils';
 
 //    0
 //   1 2

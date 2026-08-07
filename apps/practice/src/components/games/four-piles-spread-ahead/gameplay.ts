@@ -1,5 +1,5 @@
 import { random, cloneDeep } from 'lodash';
-import type { Ctx, MoveOutcome } from '../../strategy-game-factory';
+import type { Ctx, MoveOutcome } from 'strategy-game-factory';
 
 export type Board = number[];
 export type Piece = { pileId: number; pieceId: number };

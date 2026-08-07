@@ -10,7 +10,7 @@ import {
   nonEmptyIndices,
   removerWins
 } from './gameplay';
-import { moveValidator } from '../../../test-utils';
+import { moveValidator } from 'test-utils';
 
 const isPointingAllowed = moveValidator(moves.pointPiles);
 

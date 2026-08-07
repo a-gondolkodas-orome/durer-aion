@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from '../../strategy-game-factory';
+import type { Ctx, MoveOutcome } from 'strategy-game-factory';
 import { random, sample } from 'lodash';
 
 // Board: a 1 x n strip of cells (indices 0..n-1). Between cell i and cell i+1

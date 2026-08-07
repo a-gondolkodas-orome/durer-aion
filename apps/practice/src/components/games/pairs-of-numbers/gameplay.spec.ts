@@ -1,5 +1,5 @@
 import { moves } from './gameplay';
-import { makeCtx } from '../../../test-utils';
+import { makeCtx } from 'test-utils';
 
 // Whoever first writes a pair that is not all-positive wins, which happens
 // exactly when `subtract` drives a - b to zero or below.

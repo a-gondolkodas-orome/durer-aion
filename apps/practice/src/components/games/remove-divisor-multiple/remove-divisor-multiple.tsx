@@ -1,6 +1,6 @@
-import { strategyGameFactory, type BoardClientProps, GameBoard } from '../../strategy-game-factory';
+import { strategyGameFactory, type BoardClientProps, GameBoard } from 'strategy-game-factory';
 import { range } from 'lodash';
-import { useTranslation } from '../../../language';
+import { useTranslation } from 'language';
 import { generateStartBoard, generateTestStartBoard, isAllowed, moves, type Board } from './gameplay';
 import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
 

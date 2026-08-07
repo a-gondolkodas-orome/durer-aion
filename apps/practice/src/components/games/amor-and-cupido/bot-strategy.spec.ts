@@ -1,5 +1,5 @@
 import { edgeIndex, generateStartBoard } from './gameplay';
-import { makeCtx } from '../../../test-utils';
+import { makeCtx } from 'test-utils';
 import { getBotScore, smartBotStrategy } from './bot-strategy';
 
 describe('optimal solver (negamax)', () => {

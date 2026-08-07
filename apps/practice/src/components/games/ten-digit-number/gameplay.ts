@@ -1,4 +1,4 @@
-import type { MoveOutcome } from '../../strategy-game-factory';
+import type { MoveOutcome } from 'strategy-game-factory';
 
 export type Board = { digits: number[], sumMod9: number }
 

@@ -10,7 +10,7 @@ import {
   type Edge,
   type Moves
 } from './gameplay';
-import type { BotStrategy } from '../../../strategy-game-factory';
+import type { BotStrategy } from 'strategy-game-factory';
 import { reportUnexpectedState } from '../../shared/unexpected-state';
 
 type Bot = BotStrategy<Board, Moves>

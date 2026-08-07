@@ -5,7 +5,7 @@ import {
   type Ctx,
   GameBoard,
   useHoverPreview
-} from '../../strategy-game-factory';
+} from 'strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import {
   generateStartBoard,

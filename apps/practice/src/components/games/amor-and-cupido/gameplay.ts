@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from '../../strategy-game-factory';
+import type { Ctx, MoveOutcome } from 'strategy-game-factory';
 // Triangle achievement game on the complete graph K6 (6 people, 15 possible
 // pairs/edges). Each edge is owned by player 0, player 1, or nobody (null).
 // A player wins by owning all three edges of one of the 20 triangles.

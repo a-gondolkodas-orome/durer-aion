@@ -1,7 +1,7 @@
 import { isEqual } from 'lodash';
-import { useTranslation } from '../../../language';
+import { useTranslation } from 'language';
 import { hasActivePair, type Board, type TurnState } from './gameplay';
-import { GameBoard, type BoardClientProps } from '../../strategy-game-factory';
+import { GameBoard, type BoardClientProps } from 'strategy-game-factory';
 
 const chipBase = 'rounded-lg border-2 py-2 font-bold min-w-10';
 

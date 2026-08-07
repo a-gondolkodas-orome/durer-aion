@@ -1,7 +1,7 @@
 import lodash from 'lodash';
 import { smartBotStrategy } from './bot-strategy';
 import { generateStartBoard, BISHOP, markForbiddenFields, type Board, type Field } from './gameplay'
-import { botNextMoveArgs, makeCtx } from '../../../test-utils';
+import { botNextMoveArgs, makeCtx } from 'test-utils';
 
 const smartBotPlacement = (board: Board): Field =>
   botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx() }))[0];

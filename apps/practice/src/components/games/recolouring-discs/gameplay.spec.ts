@@ -14,7 +14,7 @@ import {
   type Board,
   type Cell
 } from './gameplay';
-import { makeCtx } from '../../../test-utils';
+import { makeCtx } from 'test-utils';
 
 const isDiscMoveAllowed = (cells: Cell[], player: number, from: number, to: number) =>
   moves.moveDisc.validate({ cells }, { ctx: makeCtx({ currentPlayer: player }) }, from, to);

@@ -1,5 +1,5 @@
 import { applyMoveToBoard, moves, type Board, type Slot } from './gameplay';
-import { makeCtx, moveValidator } from '../../../test-utils';
+import { makeCtx, moveValidator } from 'test-utils';
 
 const isCombineAllowed = moveValidator(moves.combineTwo);
 

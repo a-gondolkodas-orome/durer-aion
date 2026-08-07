@@ -1,5 +1,5 @@
 import { random, range, shuffle, uniq } from 'lodash';
-import type { Ctx, MoveOutcome } from '../../strategy-game-factory';
+import type { Ctx, MoveOutcome } from 'strategy-game-factory';
 
 // piles: sizes of the piles; a value of 0 means that pile is empty (kept in the
 // array so pile indices stay stable across a game). pointed: indices of the

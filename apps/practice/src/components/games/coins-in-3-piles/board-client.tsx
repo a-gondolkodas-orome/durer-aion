@@ -1,7 +1,7 @@
 import { range } from 'lodash';
-import { useTranslation } from '../../../language';
+import { useTranslation } from 'language';
 import type { Board, TurnState } from './gameplay';
-import { GameBoard, type BoardClientProps, useHoverPreview } from '../../strategy-game-factory';
+import { GameBoard, type BoardClientProps, useHoverPreview } from 'strategy-game-factory';
 
 const getCoinBgColor = (coinValue) => {
   if (coinValue === 1) return 'bg-yellow-700';

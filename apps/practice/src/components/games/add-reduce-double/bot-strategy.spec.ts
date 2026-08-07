@@ -1,7 +1,7 @@
 import { range, uniq } from 'lodash';
 import { getSmartBotStep } from './bot-strategy';
 import { moves, type Board } from './gameplay';
-import { moveValidator } from '../../../test-utils';
+import { moveValidator } from 'test-utils';
 
 const isTransferAllowed = moveValidator(moves.moveHalvedPieces);
 

@@ -1,5 +1,5 @@
 import { sortBy, sum } from 'lodash';
-import { runMatch, type MatchResult } from '../../strategy-game-factory';
+import { runMatch, type MatchResult } from 'strategy-game-factory';
 import { type Board, moves } from './gameplay';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 

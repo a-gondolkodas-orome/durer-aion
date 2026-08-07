@@ -1,5 +1,5 @@
 import { sample, shuffle } from 'lodash';
-import type { BotMove, BotStrategy } from '../../strategy-game-factory';
+import type { BotMove, BotStrategy } from 'strategy-game-factory';
 import {
   type Board,
   applyRemoval,

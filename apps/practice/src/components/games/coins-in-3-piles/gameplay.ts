@@ -1,5 +1,5 @@
 import { cloneDeep, isEqual, random, sample, sum } from 'lodash';
-import type { Ctx, MoveOutcome } from '../../strategy-game-factory';
+import type { Ctx, MoveOutcome } from 'strategy-game-factory';
 
 export type Board = number[]
 // The coin taken in the first half of the turn, while the player decides what

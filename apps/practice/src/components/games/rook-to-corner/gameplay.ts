@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from '../../strategy-game-factory';
+import type { Ctx, MoveOutcome } from 'strategy-game-factory';
 import { random, some, isEqual, cloneDeep } from 'lodash';
 
 export type Field = { row: number; col: number };

@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from '../../strategy-game-factory';
+import type { Ctx, MoveOutcome } from 'strategy-game-factory';
 import { flatMap, range, some, isEqual, cloneDeep } from 'lodash';
 
 export const BISHOP = 1 as const;

@@ -1,5 +1,5 @@
 import { sample } from 'lodash';
-import type { BotMove, BotStrategy } from '../../strategy-game-factory';
+import type { BotMove, BotStrategy } from 'strategy-game-factory';
 import { type Board, type Moves } from './gameplay';
 
 // --- Optimal strategy -------------------------------------------------------

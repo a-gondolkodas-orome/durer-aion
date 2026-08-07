@@ -2,8 +2,8 @@ import { useState, type ComponentProps } from 'react';
 import { range, random } from 'lodash';
 import {
   strategyGameFactory, type BoardClientProps, type StrategyArgs, GameBoard, useHoverPreview
-} from '../../strategy-game-factory';
-import { useTranslation } from '../../../language';
+} from 'strategy-game-factory';
+import { useTranslation } from 'language';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { moves, type Board, type MoveType, type TurnState } from './gameplay';
 

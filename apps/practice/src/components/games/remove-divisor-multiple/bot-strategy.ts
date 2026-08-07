@@ -1,6 +1,6 @@
 import { isAllowed, type Board, type Moves } from './gameplay';
 import { range, sample } from 'lodash';
-import type { BotStrategy } from '../../strategy-game-factory';
+import type { BotStrategy } from 'strategy-game-factory';
 // generated with scripts/pre-generate-ai-moves/remove-divisor-multiple.py
 /* eslint-disable quotes -- pasted verbatim from the generator's JSON output */
 const strategyDict = {

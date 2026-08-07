@@ -1,7 +1,7 @@
 import { type ReactNode } from 'react';
 import { every } from 'lodash';
 import { gameList, categories, iconKeys, type Category, type GameList, type IconKey } from '../../games/gameList';
-import { useTranslation, type I18nString } from '../../../language';
+import { useTranslation, type I18nString } from 'language';
 import { GameIcon, iconLabels } from '../game-icons';
 
 // Keep only games matching at least one of the selected categories. An empty

@@ -1,5 +1,5 @@
 import { generateStartBoard, getAllowedMoves, markVisitedFields, moves } from './gameplay';
-import { makeCtx } from '../../../test-utils';
+import { makeCtx } from 'test-utils';
 
 describe('markVisitedFields', () => {
   it('should mark visited fields', () => {

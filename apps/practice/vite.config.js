@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 // import { visualizer } from 'rollup-plugin-visualizer';
@@ -7,6 +8,28 @@ export default defineConfig(() => ({
     react()
     // visualizer({ open: true })
   ],
+  resolve: {
+    // Games and their specs sit two to four folders deep under src/, so without
+    // these every one of them reaches a shared module through a wall of `../` —
+    // a depth that shifts whenever a game grows a variant subfolder.
+    // Mirrored in tsconfig.json's `paths` — keep the two in sync.
+    // The patterns are anchored: `strategy-game-factory/engine/…` deliberately
+    // does not resolve, since games import through the barrel only.
+    alias: [
+      {
+        find: /^test-utils$/,
+        replacement: fileURLToPath(new URL('./src/test-utils.ts', import.meta.url))
+      },
+      {
+        find: /^strategy-game-factory$/,
+        replacement: fileURLToPath(new URL('./src/components/strategy-game-factory/index.ts', import.meta.url))
+      },
+      {
+        find: /^language$/,
+        replacement: fileURLToPath(new URL('./src/language/index.ts', import.meta.url))
+      }
+    ]
+  },
   base: '/',
   build: {
     rollupOptions: {

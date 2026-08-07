@@ -1,5 +1,5 @@
 import { moves } from './gameplay';
-import { makeCtx } from '../../../../test-utils';
+import { makeCtx } from 'test-utils';
 
 // The game always ends on the sixth square; the second player wins only if the
 // four counts are all distinct by then.

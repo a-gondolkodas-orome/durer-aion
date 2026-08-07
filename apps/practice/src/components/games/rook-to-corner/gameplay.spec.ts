@@ -1,6 +1,6 @@
 import { range } from 'lodash';
 import { boardSize, generateStartBoard, getAllowedMoves, isTarget, moves, target } from './gameplay';
-import { makeCtx } from '../../../test-utils';
+import { makeCtx } from 'test-utils';
 
 describe('rook to corner', () => {
   describe('getAllowedMoves()', () => {

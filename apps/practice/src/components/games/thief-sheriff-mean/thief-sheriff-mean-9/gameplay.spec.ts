@@ -1,6 +1,6 @@
 import { moves } from './gameplay';
 import { Sheriff, Thief, hasWinningTriple, type Board } from '../gameplay';
-import { makeCtx } from '../../../../test-utils';
+import { makeCtx } from 'test-utils';
 
 // The thief wins by holding three cards in arithmetic progression; the sheriff
 // wins by preventing that until the cards run out.

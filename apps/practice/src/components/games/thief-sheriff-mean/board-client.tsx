@@ -1,5 +1,5 @@
 import { range } from 'lodash';
-import { type BoardClientProps, GameBoard } from '../../strategy-game-factory';
+import { type BoardClientProps, GameBoard } from 'strategy-game-factory';
 import { Sheriff, Thief, type Board } from './gameplay';
 
 // Both variants deal the same row of numbered cards and take one per click; the

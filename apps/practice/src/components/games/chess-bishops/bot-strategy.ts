@@ -1,5 +1,5 @@
 import { sample, cloneDeep, random, shuffle } from 'lodash';
-import type { BotStrategy } from '../../strategy-game-factory';
+import type { BotStrategy } from 'strategy-game-factory';
 import {
   BISHOP,
   boardIndices,

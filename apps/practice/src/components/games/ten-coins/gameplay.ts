@@ -1,5 +1,5 @@
 import { uniq, sample, random } from 'lodash';
-import type { Ctx, MoveOutcome } from '../../strategy-game-factory';
+import type { Ctx, MoveOutcome } from 'strategy-game-factory';
 
 // The board is the multiset of coin values. Only which distinct values are
 // present matters for the game logic; the counts are pure flavour. The two

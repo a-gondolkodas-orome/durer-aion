@@ -1,5 +1,5 @@
 import { range } from 'lodash';
-import { GameBoard, type BoardClientProps } from '../../strategy-game-factory';
+import { GameBoard, type BoardClientProps } from 'strategy-game-factory';
 import { type Board, hubs, others } from './gameplay';
 
 // Drawing of the graph (K4 minus the C-D edge) as a rhomboid: the two hub fields

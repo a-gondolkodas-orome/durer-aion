@@ -1,4 +1,4 @@
-import type { BotMove, BotStrategy } from '../../strategy-game-factory';
+import type { BotMove, BotStrategy } from 'strategy-game-factory';
 import { random, sample, filter } from 'lodash';
 import { type Board, type Moves } from './gameplay';
 

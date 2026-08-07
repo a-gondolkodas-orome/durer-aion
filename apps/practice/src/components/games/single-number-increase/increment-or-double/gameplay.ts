@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from '../../../strategy-game-factory';
+import type { Ctx, MoveOutcome } from 'strategy-game-factory';
 
 // `board` is the last number said. 0 means nothing has been said yet, so the
 // starting player must open with 1 (their only legal move from 0).

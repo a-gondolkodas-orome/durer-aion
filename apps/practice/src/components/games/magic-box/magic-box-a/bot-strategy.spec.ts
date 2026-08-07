@@ -1,6 +1,6 @@
 import { smartBotStrategy } from './bot-strategy';
 import { generateEmptyBoard, isGameEnd, placeStone, type Board } from './gameplay';
-import { botNextMoveArgs, makeCtx } from '../../../../test-utils';
+import { botNextMoveArgs, makeCtx } from 'test-utils';
 
 const smartBotPlacement = (board: Board, chosenRoleIndex: number): number =>
   botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx({ chosenRoleIndex }) }))[0];

@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router';
-import { useTranslation, LanguageSelector } from '../../../language';
+import { useTranslation, LanguageSelector } from 'language';
 import { ThemeSwitcher } from '../../../theme';
 import { gameList } from '../../games/gameList';
 

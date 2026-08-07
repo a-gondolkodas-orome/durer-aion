@@ -16,7 +16,7 @@ import {
   shadedCount,
   type Board
 } from './gameplay';
-import { makeCtx, moveValidator } from '../../../test-utils';
+import { makeCtx, moveValidator } from 'test-utils';
 
 const isShadeAllowed = moveValidator(moves.shadeEdge, makeCtx({ currentPlayer: LINE }));
 const isCirclePlacementAllowed = moveValidator(moves.placeCircle, makeCtx({ currentPlayer: CIRCLE }));

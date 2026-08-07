@@ -1,4 +1,4 @@
-import type { MoveOutcome } from '../../strategy-game-factory';
+import type { MoveOutcome } from 'strategy-game-factory';
 import { range, sum, sample, cloneDeep } from 'lodash';
 
 export type Board = number[]

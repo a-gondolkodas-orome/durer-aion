@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from '../../strategy-game-factory';
+import type { Ctx, MoveOutcome } from 'strategy-game-factory';
 // Recolouring discs — core game logic.
 //
 // A row of `n` fields. Field 0 starts with a red disc, field n-1 with a blue
