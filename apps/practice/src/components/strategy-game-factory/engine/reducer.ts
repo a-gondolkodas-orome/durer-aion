@@ -3,8 +3,8 @@ import type { MoveOutcome, MoveDefinition } from '../types';
 import { buildCtx } from './build-ctx';
 import type { CoreState } from './store';
 
-type MoveTransition<TBoard> = {
-  state: CoreState<TBoard>
+type MoveTransition<TBoard, TTurnState> = {
+  state: CoreState<TBoard, TTurnState>
   // validate rejected the dispatch; state is unchanged (same reference)
   illegal?: boolean
   // the shell should schedule gameplay.endOfTurnMove
@@ -12,24 +12,24 @@ type MoveTransition<TBoard> = {
   // the shell should run its game-end side effects (dialog, stats, analytics)
   gameJustEnded?: { winnerIndex: number }
   // what the dispatcher (bot / BoardClient) receives back
-  result: MoveOutcome<TBoard>
+  result: MoveOutcome<TBoard, TTurnState>
 }
 
 // Framework-free move interpreter: validate + apply + fold the consequences
 // into the next CoreState. Pure — the React shell decides what to do with the
 // returned transition (store write, dialog, timers).
-export const reduceMove = <TBoard>(
-  state: CoreState<TBoard>,
-  def: MoveDefinition<TBoard>,
+export const reduceMove = <TBoard, TTurnState>(
+  state: CoreState<TBoard, TTurnState>,
+  def: MoveDefinition<TBoard, TTurnState>,
   name: string,
   args: unknown[],
   resolvedPlayerNames: [string, string]
-): MoveTransition<TBoard> => {
+): MoveTransition<TBoard, TTurnState> => {
   const ctx = buildCtx(state, resolvedPlayerNames);
   if (def.validate && !def.validate(state.board, { ctx }, ...args)) {
     return { state, illegal: true, result: { nextBoard: state.board } };
   }
-  const next: CoreState<TBoard> = { ...state };
+  const next: CoreState<TBoard, TTurnState> = { ...state };
   if (!state.currentTurnHasMoves) {
     next.undoSnapshot = {
       board: cloneDeep(state.board),
@@ -39,7 +39,7 @@ export const reduceMove = <TBoard>(
     next.currentTurnHasMoves = true;
   }
   let gameJustEnded: { winnerIndex: number } | undefined;
-  const result: MoveOutcome<TBoard> = def.apply(state.board, { ctx }, ...args);
+  const result: MoveOutcome<TBoard, TTurnState> = def.apply(state.board, { ctx }, ...args);
   if (result.nextTurnState !== undefined) {
     next.turnState = result.nextTurnState;
   }

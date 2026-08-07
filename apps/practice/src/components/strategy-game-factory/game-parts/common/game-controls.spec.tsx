@@ -11,8 +11,8 @@ import type { Variant } from '../../types';
 // highlight comes from the label's own class, so this is invisible on screen.)
 
 const variants: Variant[] = [
-  { originalIndex: 0, label: { hu: 'Könnyű', en: 'Easy' }, disabled: false } as Variant,
-  { originalIndex: 1, label: { hu: 'Nehéz', en: 'Hard' }, disabled: false } as Variant
+  { originalIndex: 0, label: { hu: 'Könnyű', en: 'Easy' }, disabled: false, hasBotStrategy: true },
+  { originalIndex: 1, label: { hu: 'Nehéz', en: 'Hard' }, disabled: false, hasBotStrategy: true }
 ];
 
 describe('ModeSelector', () => {
@@ -71,7 +71,7 @@ describe('DifficultySelector', () => {
   it('marks a variant whose bot is not always optimal', () => {
     const withMarker: Variant[] = [
       variants[0]!,
-      { ...variants[1]!, notAlwaysOptimal: true } as Variant
+      { ...variants[1]!, notAlwaysOptimal: true }
     ];
     const { getAllByTitle } = render(
       <DifficultySelector variants={withMarker} selectedIndex={0} onSelect={() => {}} disabled={false} />

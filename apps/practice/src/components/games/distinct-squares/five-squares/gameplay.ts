@@ -3,7 +3,9 @@ import type { Ctx, MoveOutcome } from '../../../strategy-game-factory';
 import { isPlacementAllowed } from '../gameplay';
 
 export type Board = number[]
-export type TurnState = { firstPlacedSquareIndex: number } | null
+// Where the second player put the first of their two pieces, so the
+// BoardClient can dim it for the rest of the turn.
+export type TurnState = { firstPlacedSquareIndex: number }
 
 export const generateStartBoard = (): Board => {
   const board = Array(5).fill(0);
@@ -14,8 +16,10 @@ export const generateStartBoard = (): Board => {
 
 export const moves = {
   addPiece: {
-    validate: (board: Board, _, pileId: number) => isPlacementAllowed(board, pileId),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, pileId: number): MoveOutcome<Board> => {
+    validate: (board: Board, _: { ctx: Ctx<TurnState> }, pileId: number) => isPlacementAllowed(board, pileId),
+    apply: (
+      board: Board, { ctx }: { ctx: Ctx<TurnState> }, pileId: number
+    ): MoveOutcome<Board, TurnState> => {
       const nextBoard = cloneDeep(board);
       nextBoard[pileId] += 1;
       // The second player places two squares at a time, so on the first half of

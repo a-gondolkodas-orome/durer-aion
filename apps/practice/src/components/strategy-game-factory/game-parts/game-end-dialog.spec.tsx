@@ -22,8 +22,8 @@ const ctxWith = (isHumanVsHumanGame: boolean): Ctx => ({
 });
 
 const variants: Variant[] = [
-  { originalIndex: 0, label: { hu: 'Könnyű', en: 'Easy' }, disabled: false } as Variant,
-  { originalIndex: 1, label: { hu: 'Nehéz', en: 'Hard' }, disabled: false } as Variant
+  { originalIndex: 0, label: { hu: 'Könnyű', en: 'Easy' }, disabled: false, hasBotStrategy: true },
+  { originalIndex: 1, label: { hu: 'Nehéz', en: 'Hard' }, disabled: false, hasBotStrategy: true }
 ];
 
 const Harness = ({ isHumanVsHumanGame = false }: { isHumanVsHumanGame?: boolean }) => {

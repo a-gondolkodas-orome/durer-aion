@@ -2,7 +2,8 @@ import type { Ctx, MoveOutcome } from '../../strategy-game-factory';
 
 export type Board = number[]
 export type MoveType = 'remove' | 'merge'
-export type TurnState = { firstSelectedPile: number } | null
+// The pile clicked first, while the player picks the one to merge it with.
+export type TurnState = { firstSelectedPile: number }
 
 // Empty piles never survive a move (removeOne drops a pile it empties), so any
 // pile still on the table has a match to take.
@@ -16,8 +17,10 @@ const isMergeAllowed = (board: Board, piles: number[]): boolean =>
 
 export const moves = {
   removeOne: {
-    validate: (board: Board, _, pileIndex: number) => isPile(board, pileIndex),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, pileIndex: number): MoveOutcome<Board> => {
+    validate: (board: Board, _: { ctx: Ctx<TurnState> }, pileIndex: number) => isPile(board, pileIndex),
+    apply: (
+      board: Board, { ctx }: { ctx: Ctx<TurnState> }, pileIndex: number
+    ): MoveOutcome<Board, TurnState> => {
       const newSize = board[pileIndex] - 1;
       const nextBoard = [
         ...board.slice(0, pileIndex),
@@ -32,8 +35,10 @@ export const moves = {
     }
   },
   mergePiles: {
-    validate: (board: Board, _, piles: number[]) => isMergeAllowed(board, piles),
-    apply: (board: Board, _, [pileIndex1, pileIndex2]: number[]): MoveOutcome<Board> => {
+    validate: (board: Board, _: { ctx: Ctx<TurnState> }, piles: number[]) => isMergeAllowed(board, piles),
+    apply: (
+      board: Board, _: { ctx: Ctx<TurnState> }, [pileIndex1, pileIndex2]: number[]
+    ): MoveOutcome<Board, TurnState> => {
       const [firstIdx, secondIdx] = [pileIndex1, pileIndex2].sort((a, b) => a - b);
       const merged = board[firstIdx] + board[secondIdx];
       const nextBoard = board.filter((_, i) => i !== firstIdx && i !== secondIdx);

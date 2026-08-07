@@ -2,6 +2,9 @@ import { cloneDeep, isEqual, random, sample, sum } from 'lodash';
 import type { Ctx, MoveOutcome } from '../../strategy-game-factory';
 
 export type Board = number[]
+// The coin taken in the first half of the turn, while the player decides what
+// (if anything) to place back.
+export type TurnState = { removedCoinValue: number }
 
 // Is the player to move lost against optimal play? Closed-form parity
 // predicate: a turn changes the parity of one pile, or of two when a coin is
@@ -42,9 +45,9 @@ export const generateTestStartBoard = (): Board =>
 
 export const moves = {
   removeCoin: {
-    validate: (board: Board, { ctx }: { ctx: Ctx }, value: number) =>
+    validate: (board: Board, { ctx }: { ctx: Ctx<TurnState> }, value: number) =>
       ctx.turnState === null && value >= 1 && value <= 3 && board[value - 1] > 0,
-    apply: (board: Board, { ctx }: { ctx: Ctx }, value: number): MoveOutcome<Board> => {
+    apply: (board: Board, { ctx }: { ctx: Ctx<TurnState> }, value: number): MoveOutcome<Board, TurnState> => {
       const nextBoard = cloneDeep(board);
       nextBoard[value - 1] -= 1;
       if (value === 1) {
@@ -57,19 +60,19 @@ export const moves = {
     }
   },
   addCoin: {
-    validate: (board: Board, { ctx }: { ctx: Ctx }, value: number) => {
-      const removed = (ctx.turnState as { removedCoinValue: number } | null)?.removedCoinValue;
+    validate: (board: Board, { ctx }: { ctx: Ctx<TurnState> }, value: number) => {
+      const removed = ctx.turnState?.removedCoinValue;
       return removed != null && value >= 1 && value < removed;
     },
-    apply: (board: Board, { ctx }: { ctx: Ctx }, value: number) => {
+    apply: (board: Board, { ctx }: { ctx: Ctx<TurnState> }, value: number) => {
       const nextBoard = cloneDeep(board);
       nextBoard[value - 1] += 1;
       return finishPlaceBack(nextBoard, ctx);
     }
   },
   passAddition: {
-    validate: (board: Board, { ctx }: { ctx: Ctx }) => ctx.turnState !== null,
-    apply: (board: Board, { ctx }: { ctx: Ctx }) => finishPlaceBack(board, ctx)
+    validate: (board: Board, { ctx }: { ctx: Ctx<TurnState> }) => ctx.turnState !== null,
+    apply: (board: Board, { ctx }: { ctx: Ctx<TurnState> }) => finishPlaceBack(board, ctx)
   }
 }
 
@@ -77,7 +80,7 @@ export type Moves = typeof moves
 
 // Shared second half of the place-back phase: whether a coin was added or the
 // player passed, the turn ends the same way.
-function finishPlaceBack(nextBoard: Board, ctx: Ctx): MoveOutcome<Board> {
+function finishPlaceBack(nextBoard: Board, ctx: Ctx<TurnState>): MoveOutcome<Board, TurnState> {
   if (isEqual(nextBoard, [0, 0, 0])) {
     return { nextBoard, nextTurnState: null, gameEnd: { winnerIndex: ctx.currentPlayer! } };
   }

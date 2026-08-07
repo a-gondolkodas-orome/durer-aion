@@ -8,6 +8,8 @@ export type Board = {
   target: number;
   sortedInitial: number[];
 };
+// The first of the two slots a turn combines, while the player picks the second.
+export type TurnState = { levelIdx: number; slotIdx: number };
 
 export const generateStartBoard = (tries = 0): Board => {
   if (tries >= 100) throw new Error('generateStartBoard: too many retries');
@@ -41,12 +43,16 @@ export const generateStartBoard = (tries = 0): Board => {
 
 export const moves = {
   combineTwo: {
-    validate: (board: Board, _, move: { levelIdx: number; indices: number[] }) => isCombineAllowed(board, move),
+    validate: (
+      board: Board,
+      _: { ctx: Ctx<TurnState> },
+      move: { levelIdx: number; indices: number[] }
+    ) => isCombineAllowed(board, move),
     apply: (
       board: Board,
-      { ctx }: { ctx: Ctx },
+      { ctx }: { ctx: Ctx<TurnState> },
       { levelIdx, indices }: { levelIdx: number; indices: number[] }
-    ): MoveOutcome<Board> => {
+    ): MoveOutcome<Board, TurnState> => {
       const { nextBoard, combinedValue } = applyMoveToBoard(board, levelIdx, indices);
 
       // nextTurnState clears the half-made selection the BoardClient parked in

@@ -143,6 +143,22 @@ describe('variant availability by mode', () => {
     expect(variantRadio(view, 'Beta').disabled).toBe(true);
   });
 
+  // The variant radio is not the only thing a missing bot turns off: with nobody
+  // to play the other side there is no role to choose either.
+  it('blocks role selection in vsComputer mode when the game defines no bot', () => {
+    const view = renderGame(botlessVariants());
+
+    expect((view.getByTestId('role-btn-0') as HTMLButtonElement).disabled).toBe(true);
+    expect((view.getByTestId('role-btn-1') as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it('offers both roles when the selected variant does have a bot', () => {
+    const view = renderGame(mixedVariants());
+
+    expect((view.getByTestId('role-btn-0') as HTMLButtonElement).disabled).toBe(false);
+    expect((view.getByTestId('role-btn-1') as HTMLButtonElement).disabled).toBe(false);
+  });
+
   it('enables those same variants in vsHuman mode, which needs no bot', () => {
     const view = renderGame(botlessVariants());
     fireEvent.click(view.getByTestId('mode-vsHuman'));

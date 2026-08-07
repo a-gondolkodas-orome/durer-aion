@@ -42,7 +42,8 @@ export const GameSidebar = ({
 }: GameSidebarProps) => {
   const { t } = useTranslation();
   const isNewGameAllowed = ctx.phase !== 'play' || ctx.isClientMoveAllowed;
-  const activeVariantHasBotStrategy = !!variants.find(v => v.originalIndex === selectedVariantIndex)?.botStrategy;
+  const activeVariantHasBotStrategy =
+    !!variants.find(v => v.originalIndex === selectedVariantIndex)?.hasBotStrategy;
 
   const selectedVariant = variants.find(v => v.originalIndex === selectedVariantIndex);
   const modeSummaryLabel = t(ctx.isHumanVsHumanGame

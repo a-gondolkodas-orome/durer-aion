@@ -1,7 +1,12 @@
 import { range } from 'lodash';
-import { strategyGameFactory, type BoardClientProps, GameBoard } from '../../strategy-game-factory';
+import {
+  strategyGameFactory, type BoardClientProps, type StrategyArgs, GameBoard
+} from '../../strategy-game-factory';
 import { useTranslation } from '../../../language';
-import { generateStartBoardC, generateStartBoardD, generateTestStartBoard, moves, type Board } from './gameplay';
+import {
+  generateStartBoardC, generateStartBoardD, generateTestStartBoard, moves,
+  type Board, type TurnState
+} from './gameplay';
 import { distinctValues, randomBotStrategy, smartBotStrategy } from './bot-strategy';
 
 // --- Exact solver over the non-empty subsets of the present values ------------
@@ -13,9 +18,9 @@ import { distinctValues, randomBotStrategy, smartBotStrategy } from './bot-strat
 // {1,2,3}, {1,4,5}, {2,3,4,5}, {1,2,3,4,5} for values 1..5. Everything else is a
 // first-player win, driven towards one of these (or merged to a single value).
 
-const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProps<Board>) => {
+const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProps<Board, TurnState>) => {
   const { t } = useTranslation();
-  const selectedValue = ctx.turnState as number | null;
+  const selectedValue = ctx.turnState;
   const presentValues = distinctValues(board);
 
   // Asking about L = 1 asks whether these coins can be changed at all: it is the
@@ -112,7 +117,7 @@ const Coin = ({ value }: { value: number }) => (
   </div>
 );
 
-const getPlayerStepDescription = ({ ctx }) => {
+const getPlayerStepDescription = ({ ctx }: StrategyArgs<Board, TurnState>) => {
   if (ctx.turnState !== null) {
     return {
       hu: `Válaszd ki, mi legyen a(z) ${ctx.turnState} értékű érmék új (kisebb) értéke.`,

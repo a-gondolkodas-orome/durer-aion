@@ -7,6 +7,8 @@ import type { Ctx, MoveOutcome } from '../../strategy-game-factory';
 // 1..5 for the harder category D) — encoded purely in the start board, so the
 // solver, moves and board rendering are all shared and board-driven.
 export type Board = number[]
+// The coin value the player selected, while choosing what to change it to.
+export type TurnState = number
 
 const totalCoins = 10;
 
@@ -18,8 +20,11 @@ const isConversionAllowed = (board: Board, k: number, l: number): boolean =>
 
 export const moves = {
   convert: {
-    validate: (board: Board, _, k: number, l: number) => isConversionAllowed(board, k, l),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, k: number, l: number): MoveOutcome<Board> => {
+    validate: (board: Board, _: { ctx: Ctx<TurnState> }, k: number, l: number) =>
+      isConversionAllowed(board, k, l),
+    apply: (
+      board: Board, { ctx }: { ctx: Ctx<TurnState> }, k: number, l: number
+    ): MoveOutcome<Board, TurnState> => {
       const nextBoard = board.map(v => (v === k ? l : v)).sort((a, b) => a - b);
       if (uniq(nextBoard).length === 1) {
         return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };

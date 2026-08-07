@@ -1,9 +1,9 @@
-import { isPile, moves } from './gameplay';
+import { isPile, moves, type TurnState } from './gameplay';
 import { makeCtx, moveValidator } from '../../../test-utils';
 
 const isMergeAllowed = moveValidator(moves.mergePiles);
 
-const asPlayer = (currentPlayer: number) => ({ ctx: makeCtx({ currentPlayer }) });
+const asPlayer = (currentPlayer: number) => ({ ctx: makeCtx<TurnState>({ currentPlayer }) });
 
 describe('isPile', () => {
   const board = [3, 2, 5];

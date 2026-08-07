@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { moves, type Board } from './gameplay';
+import { moves, type Board, type TurnState } from './gameplay';
 import { makeCtx, moveValidator } from '../../../test-utils';
 
 const isConversionAllowed = moveValidator(moves.convert);
@@ -37,7 +37,7 @@ describe('isConversionAllowed', () => {
 
 // A conversion turns *every* coin of the chosen value into the same smaller
 // one, and the player whose move leaves all ten coins equal wins.
-const asPlayer = (currentPlayer: number) => ({ ctx: makeCtx({ currentPlayer }) });
+const asPlayer = (currentPlayer: number) => ({ ctx: makeCtx<TurnState>({ currentPlayer }) });
 
 describe('end of game', () => {
   it('converts every coin of the chosen value at once', () => {

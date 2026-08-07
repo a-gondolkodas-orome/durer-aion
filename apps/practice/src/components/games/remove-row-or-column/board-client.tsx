@@ -1,16 +1,14 @@
 import { range } from 'lodash';
 import {
-  type BoardClientProps, type Ctx, GameBoard, useHoverPreview
+  type BoardClientProps, type StrategyArgs, GameBoard, useHoverPreview
 } from '../../strategy-game-factory';
 import { useTranslation } from '../../../language';
-import { type Board, type Orientation, getRectangleAt } from './gameplay';
+import { type Board, type Orientation, type TurnState, getRectangleAt } from './gameplay';
 
-type Selected = { r: number; c: number } | null
-
-export const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProps<Board>) => {
+export const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProps<Board, TurnState>) => {
   const { t } = useTranslation();
   const { grid } = board;
-  const selected = ctx.turnState as Selected;
+  const selected = ctx.turnState;
   const { value: hoverOrientation, hoverProps, clear: clearHover } = useHoverPreview<Orientation>(ctx.moveCount);
   const rect = selected ? getRectangleAt(grid, selected.r, selected.c) : null;
 
@@ -104,7 +102,7 @@ export const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProp
   );
 };
 
-export const getPlayerStepDescription = ({ ctx }: { board: Board; ctx: Ctx }) => {
+export const getPlayerStepDescription = ({ ctx }: StrategyArgs<Board, TurnState>) => {
   return ctx.turnState
     ? {
       hu: 'Vedd le a kijelölt korong sorát vagy oszlopát a gombokkal, vagy válassz másik korongot.',

@@ -7,13 +7,13 @@ import type { Mode, Phase } from '../types';
 // This module is framework-free (no React import): together with reducer.ts
 // and build-ctx.ts it is the seed of the headless engine a future
 // server-authoritative competition mode needs (issue #313).
-export type CoreState<TBoard> = {
+export type CoreState<TBoard, TTurnState = unknown> = {
   board: TBoard
   phase: Phase
   mode: Mode
   currentPlayer: number | null
   chosenRoleIndex: number | null
-  turnState: unknown
+  turnState: TTurnState | null
   moveCount: number
   winnerIndex: number | null
   undoSnapshot: { board: TBoard; currentPlayer: number; moveCount: number } | null
@@ -21,9 +21,9 @@ export type CoreState<TBoard> = {
   currentTurnHasMoves: boolean
 }
 
-export const createInitialCoreState = <TBoard>(
+export const createInitialCoreState = <TBoard, TTurnState = unknown>(
   board: TBoard, mode: Mode = 'vsComputer'
-): CoreState<TBoard> => ({
+): CoreState<TBoard, TTurnState> => ({
   board,
   phase: 'roleSelection',
   mode,
@@ -36,16 +36,18 @@ export const createInitialCoreState = <TBoard>(
   currentTurnHasMoves: false
 });
 
-type GameStore<TBoard> = {
-  getState: () => CoreState<TBoard>
-  setState: (patch: Partial<CoreState<TBoard>>) => void
+type GameStore<TBoard, TTurnState = unknown> = {
+  getState: () => CoreState<TBoard, TTurnState>
+  setState: (patch: Partial<CoreState<TBoard, TTurnState>>) => void
   subscribe: (listener: () => void) => () => void
 }
 
 // Minimal hand-rolled store: getState returns the same object between writes
 // (a requirement of useSyncExternalStore), setState merges a partial patch and
 // notifies subscribers synchronously.
-export const createGameStore = <TBoard>(initial: CoreState<TBoard>): GameStore<TBoard> => {
+export const createGameStore = <TBoard, TTurnState = unknown>(
+  initial: CoreState<TBoard, TTurnState>
+): GameStore<TBoard, TTurnState> => {
   let state = initial;
   const listeners = new Set<() => void>();
   return {

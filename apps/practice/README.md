@@ -260,6 +260,12 @@ by the framework in `ctx`: `currentPlayer`, `isClientMoveAllowed` (guard every
 player interaction with it), `isHumanVsHumanGame`, `chosenRoleIndex`, and
 `turnState` for multi-stage turns. Never modify either in place.
 
+A multi-stage game pins what its `turnState` holds — `export type TurnState` in
+`gameplay.ts`, `BoardClientProps<Board, TurnState>` on the component — and the
+factory infers the rest of the config from there, so nothing has to cast it
+back. See [AGENTS.md § Pinning the turn
+state](AGENTS.md#strategygamefactory-api).
+
 Always pass the current `board` as a move's first argument, including to
 subsequent moves within the same turn. The framework's own state is
 authoritative — it lives in a synchronous store outside React — so the argument

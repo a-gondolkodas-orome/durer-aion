@@ -1,11 +1,12 @@
-import { strategyGameFactory } from '../../strategy-game-factory';
+import { strategyGameFactory, type StrategyArgs } from '../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { BoardClient } from './board-client';
 import {
-  generateArbitraryStartBoard, generateFixedStartBoard, generateTestStartBoard, moves
+  generateArbitraryStartBoard, generateFixedStartBoard, generateTestStartBoard, moves,
+  type Board, type TurnState
 } from './gameplay';
 
-const getPlayerStepDescription = ({ ctx: { turnState } }) => {
+const getPlayerStepDescription = ({ ctx: { turnState } }: StrategyArgs<Board, TurnState>) => {
   if (turnState !== null) {
     return {
       hu: 'Válassz a visszarakási lehetőségek közül.',

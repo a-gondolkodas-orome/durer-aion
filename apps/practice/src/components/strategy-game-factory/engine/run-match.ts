@@ -33,20 +33,20 @@ const PLAYER_NAMES: [string, string] = ['0', '1'];
 // Everything that goes wrong throws: unlike the shell, which must keep a live
 // game playable, a headless match only ever runs in tests and CI, where a
 // silent no-op would hide the bug it exists to catch.
-export const runMatch = <TBoard>({
+export const runMatch = <TBoard, TTurnState = unknown>({
   gameplay: { moves, endOfTurnMove },
   strategies,
   startBoard,
   maxMoves = 500
 }: {
-  gameplay: Gameplay<TBoard>
+  gameplay: Gameplay<TBoard, TTurnState>
   // strategies[i] plays as player i
   strategies: [BotStrategy<TBoard>, BotStrategy<TBoard>]
   startBoard: TBoard
   maxMoves?: number
 }): MatchResult<TBoard> => {
-  let state: CoreState<TBoard> = {
-    ...createInitialCoreState(startBoard),
+  let state: CoreState<TBoard, TTurnState> = {
+    ...createInitialCoreState<TBoard, TTurnState>(startBoard),
     phase: 'play',
     currentPlayer: 0
   };

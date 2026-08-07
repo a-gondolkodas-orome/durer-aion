@@ -8,6 +8,8 @@ import { random, sample } from 'lodash';
 // forbidden. The player who cannot move loses.
 export type Board = number[]
 export type Move = [number, number]
+// The field clicked first, while the player picks the second one of the pair.
+export type TurnState = { first: number }
 
 export const FIELD_COUNT = 6;
 
@@ -78,8 +80,8 @@ export const sampleNonEmptyField = (board: Board, [a, b]: Move): number => {
 
 export const moves = {
   removeFromTwo: {
-    validate: (board: Board, _, move: Move) => isRemovalAllowed(board, move),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, [i, j]: Move): MoveOutcome<Board> => {
+    validate: (board: Board, _: { ctx: Ctx<TurnState> }, move: Move) => isRemovalAllowed(board, move),
+    apply: (board: Board, { ctx }: { ctx: Ctx<TurnState> }, [i, j]: Move): MoveOutcome<Board, TurnState> => {
       const nextBoard = board.slice();
       nextBoard[i] -= 1;
       nextBoard[j] -= 1;

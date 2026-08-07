@@ -1,8 +1,6 @@
 import { range } from 'lodash';
 import { GameBoard, type BoardClientProps } from '../../strategy-game-factory';
-import { type Board, FIELD_COUNT, OPPOSITE_PAIRS } from './gameplay';
-
-type TurnState = { first: number } | null
+import { type Board, type TurnState, FIELD_COUNT, OPPOSITE_PAIRS } from './gameplay';
 
 // Six fields evenly spaced on a circle, index 0 at the top going clockwise.
 const coords: { cx: number; cy: number }[] = range(FIELD_COUNT).map((i) => {
@@ -13,9 +11,8 @@ const coords: { cx: number; cy: number }[] = range(FIELD_COUNT).map((i) => {
   };
 });
 
-export const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProps<Board>) => {
-  const turnState = ctx.turnState as TurnState;
-  const first = turnState?.first ?? null;
+export const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProps<Board, TurnState>) => {
+  const first = ctx.turnState?.first ?? null;
 
   const isClickable = (node: number) => {
     if (!ctx.isClientMoveAllowed) return false;

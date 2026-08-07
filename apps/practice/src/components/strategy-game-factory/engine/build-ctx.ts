@@ -12,9 +12,9 @@ import type { CoreState } from './store';
 // `isHumanVsHumanGame`), and `undoSnapshot`/`currentTurnHasMoves` — engine
 // bookkeeping that would silently become public API, and that an authoritative
 // server must never ship to a client.
-export const buildCtx = <TBoard>(
-  state: CoreState<TBoard>, resolvedPlayerNames: [string, string]
-): Ctx => ({
+export const buildCtx = <TBoard, TTurnState>(
+  state: CoreState<TBoard, TTurnState>, resolvedPlayerNames: [string, string]
+): Ctx<TTurnState> => ({
   isHumanVsHumanGame: state.mode === 'vsHuman',
   resolvedPlayerNames,
   chosenRoleIndex: state.chosenRoleIndex,

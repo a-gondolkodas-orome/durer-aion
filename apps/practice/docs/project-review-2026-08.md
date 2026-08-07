@@ -152,9 +152,28 @@ rules specs relative to module size.
   render snapshot contrary to the file's own read-the-store doctrine; the
   single `botTimeoutRef` slot shared by bot pacing and `endOfTurnMove`
   (a load-bearing implicit invariant).
-- `types.ts`: `Variant.botStrategy?: unknown` forces `botStrategy!` at the
+- ~~`types.ts`: `Variant.botStrategy?: unknown` forces `botStrategy!` at the
   call site; `Ctx.turnState: unknown` pushes a cast into every multi-stage
-  `BoardClient` — worth a generic parameter.
+  `BoardClient` — worth a generic parameter.~~ ✅ Both done, differently.
+
+  `Ctx` (and with it `MoveOutcome`, `MoveDefinition`, `Gameplay`,
+  `StrategyArgs`, `BoardClientProps`, `CoreState`, the factory) took a
+  `TTurnState = unknown` parameter, naming the *payload* only — the engine adds
+  the `| null` every turn starts and ends in, so a game cannot forget it and
+  `createInitialCoreState` needs no cast. A game pins it by annotating its
+  `BoardClient`, and the factory infers the rest of the config from there; all
+  7 multi-stage games are converted and no longer cast, the other 69 compile
+  untouched. `BotStrategy` is deliberately left unparameterised: a bot is asked
+  again with a fresh `ctx` for each move it still owes, so it never reads its
+  own half-made selection back.
+
+  `Variant.botStrategy` was the display type holding a strategy it never calls,
+  opaque because the display knows no `TBoard`. It is now `hasBotStrategy:
+  boolean`, and `getVariantsForMode` builds the projection field by field
+  instead of spreading the whole variant. The `botStrategy!` at the call site
+  was optionality, not opacity: `runBotTurn` now takes the strategy as a
+  parameter, and `doBotTurn` — which already threw on a missing one — narrows
+  it once.
 - `strategy-game-factory.spec.tsx` is 1050 lines / 16 `describe`s — split by
   concern (undo, validate enforcement, outcome moves, staleness, …).
 - `plays-to-an-end.spec.ts` re-implements the default-variant logic instead of

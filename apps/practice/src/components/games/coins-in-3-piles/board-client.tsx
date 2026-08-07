@@ -1,6 +1,6 @@
 import { range } from 'lodash';
 import { useTranslation } from '../../../language';
-import type { Board } from './gameplay';
+import type { Board, TurnState } from './gameplay';
 import { GameBoard, type BoardClientProps, useHoverPreview } from '../../strategy-game-factory';
 
 const getCoinBgColor = (coinValue) => {
@@ -14,9 +14,9 @@ const getCoinShadowColor = (coinValue) => {
   return 'shadow-yellow-400';
 };
 
-export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
+export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board, TurnState>) => {
   const { t } = useTranslation();
-  const valueOfRemovedCoin = (ctx.turnState as { removedCoinValue: number } | null)?.removedCoinValue ?? null;
+  const valueOfRemovedCoin = ctx.turnState?.removedCoinValue ?? null;
   const { value: validHoveredPile, hoverProps } = useHoverPreview<number>(ctx.moveCount);
 
   const wasCoinAlreadyRemovedInTurn = valueOfRemovedCoin !== null;

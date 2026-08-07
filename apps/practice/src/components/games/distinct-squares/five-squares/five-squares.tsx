@@ -1,11 +1,12 @@
 import { range } from 'lodash';
-import { strategyGameFactory, type BoardClientProps, GameBoard } from '../../../strategy-game-factory';
+import {
+  strategyGameFactory, type BoardClientProps, type StrategyArgs, GameBoard
+} from '../../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { generateStartBoard, moves, type Board, type TurnState } from './gameplay';
 
-const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const turnState = ctx.turnState as TurnState;
-  const firstPlacedSquareIndex = turnState?.firstPlacedSquareIndex ?? null;
+const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board, TurnState>) => {
+  const firstPlacedSquareIndex = ctx.turnState?.firstPlacedSquareIndex ?? null;
   const showDimmedDisc = ctx.isClientMoveAllowed && firstPlacedSquareIndex !== null;
 
   return (
@@ -36,7 +37,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const getPlayerStepDescription = ({ ctx }) => {
+const getPlayerStepDescription = ({ ctx }: StrategyArgs<Board, TurnState>) => {
   if (ctx.currentPlayer === 1 && ctx.turnState === null) {
     return {
       hu: 'Kattints arra a mezőre, ahova az első korongot szeretnéd rakni. (1/2)',

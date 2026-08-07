@@ -1,7 +1,7 @@
-import { strategyGameFactory, type Ctx } from '../../strategy-game-factory';
+import { strategyGameFactory, type StrategyArgs } from '../../strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
-import { generateStartBoard, moves } from './gameplay';
-import { BoardClient, type TurnState } from './board-client';
+import { generateStartBoard, moves, type Board, type TurnState } from './gameplay';
+import { BoardClient } from './board-client';
 
 const rule = {
   hu: <>
@@ -18,8 +18,7 @@ const rule = {
   </>
 };
 
-const getPlayerStepDescription = ({ ctx }: { ctx: Ctx }) => {
-  const turnState = ctx.turnState as TurnState;
+const getPlayerStepDescription = ({ ctx: { turnState } }: StrategyArgs<Board, TurnState>) => {
   if (turnState) {
     const level = turnState.levelIdx + 1;
     return {

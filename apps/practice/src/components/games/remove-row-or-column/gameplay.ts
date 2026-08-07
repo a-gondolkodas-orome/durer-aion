@@ -3,6 +3,8 @@ import type { Ctx, MoveOutcome } from '../../strategy-game-factory';
 export type Grid = boolean[][]
 export type Board = { grid: Grid }
 export type Orientation = 'row' | 'col'
+// The disc the player picked first, while choosing between its row and its column.
+export type TurnState = { r: number; c: number }
 interface Rect { minR: number; maxR: number; minC: number; maxC: number }
 export interface Move { r: number; c: number; orientation: Orientation }
 
@@ -75,8 +77,8 @@ export const isEmpty = (grid: Grid): boolean => grid.every(row => row.every(cell
 
 export const moves = {
   removeLine: {
-    validate: (board: Board, _: { ctx: Ctx }, move: Move) => isRemovalAllowed(board.grid, move),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, move: Move): MoveOutcome<Board> => {
+    validate: (board: Board, _: { ctx: Ctx<TurnState> }, move: Move) => isRemovalAllowed(board.grid, move),
+    apply: (board: Board, { ctx }: { ctx: Ctx<TurnState> }, move: Move): MoveOutcome<Board, TurnState> => {
       const nextBoard = { grid: applyMove(board.grid, move) };
       // nextTurnState clears the disc the BoardClient parked in ctx.turnState
       // while the player was choosing between its row and its column.

@@ -1,14 +1,16 @@
 import { useState, type ComponentProps } from 'react';
 import { range, random } from 'lodash';
-import { strategyGameFactory, type BoardClientProps, GameBoard, useHoverPreview } from '../../strategy-game-factory';
+import {
+  strategyGameFactory, type BoardClientProps, type StrategyArgs, GameBoard, useHoverPreview
+} from '../../strategy-game-factory';
 import { useTranslation } from '../../../language';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { moves, type Board, type MoveType, type TurnState } from './gameplay';
 
-const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProps<Board>) => {
+const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProps<Board, TurnState>) => {
   const [moveType, setMoveType] = useState<MoveType>('remove');
   const { value: hoveredPile, hoverProps } = useHoverPreview<number>(ctx.moveCount);
-  const turnState = ctx.turnState as TurnState;
+  const { turnState } = ctx;
 
   // The merge branch is a two-click sequence held in turn state, so this one
   // keeps its guard: without it a click during the bot's turn would still move
@@ -174,7 +176,7 @@ const Matchstick = ({ dimmed }: { dimmed: boolean }) => (
   </div>
 );
 
-const getPlayerStepDescription = ({ board, ctx }) => {
+const getPlayerStepDescription = ({ board, ctx }: StrategyArgs<Board, TurnState>) => {
   if (ctx.turnState !== null) {
     return {
       hu: 'Kattints egy másik kupacra az egyesítéshez, vagy ugyanerre a kupacra a kijelölés visszavonásához.',

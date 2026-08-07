@@ -1,12 +1,12 @@
-import { strategyGameFactory, type Ctx } from '../../strategy-game-factory';
-import { generateStartBoard, moves, type Board } from './gameplay';
+import { strategyGameFactory, type StrategyArgs } from '../../strategy-game-factory';
+import { generateStartBoard, moves, type Board, type TurnState } from './gameplay';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { BoardClient } from './board-client';
 
 export type { Board };
 
-const getPlayerStepDescription = ({ ctx }: { ctx: Ctx }) => {
-  if ((ctx.turnState as { first: number } | null) !== null) {
+const getPlayerStepDescription = ({ ctx }: StrategyArgs<Board, TurnState>) => {
+  if (ctx.turnState !== null) {
     return {
       hu: 'Kattints egy másik, nem üres és a kijelölttel nem szemközti mezőre a második korong ' +
         'elvételéhez, vagy a kijelölt mezőre a kijelölés visszavonásához.',

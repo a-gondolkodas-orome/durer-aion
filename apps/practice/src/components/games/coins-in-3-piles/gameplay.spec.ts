@@ -1,13 +1,12 @@
-import { moves, type Board } from './gameplay';
+import { moves, type Board, type TurnState } from './gameplay';
 import { makeCtx } from '../../../test-utils';
 
 describe('coins-in-3-piles move validators', () => {
-  type TurnState = { removedCoinValue: number } | null;
-  const isRemovalAllowed = (board: Board, turnState: TurnState, value: number) =>
+  const isRemovalAllowed = (board: Board, turnState: TurnState | null, value: number) =>
     moves.removeCoin.validate(board, { ctx: makeCtx({ turnState }) }, value);
-  const isAddAllowed = (board: Board, turnState: TurnState, value: number) =>
+  const isAddAllowed = (board: Board, turnState: TurnState | null, value: number) =>
     moves.addCoin.validate(board, { ctx: makeCtx({ turnState }) }, value);
-  const isPassAllowed = (board: Board, turnState: TurnState) =>
+  const isPassAllowed = (board: Board, turnState: TurnState | null) =>
     moves.passAddition.validate(board, { ctx: makeCtx({ turnState }) });
 
   describe('removeCoin', () => {
@@ -59,7 +58,7 @@ describe('coins-in-3-piles move validators', () => {
 });
 
 describe('coins-in-3-piles move outcomes', () => {
-  const ctx = makeCtx({ currentPlayer: 0 });
+  const ctx = makeCtx<TurnState>({ currentPlayer: 0 });
 
   it('removing a 1-coin ends the turn without a place-back phase', () => {
     expect(moves.removeCoin.apply([2, 5, 7], { ctx }, 1))

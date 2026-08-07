@@ -30,7 +30,7 @@ const renderSidebar = (ctxOverrides: Partial<Ctx> = {}) => {
         ctx={ctx}
         playerNames={[]}
         moves={defaultMoves}
-        variants={[{ botStrategy: () => {}, originalIndex: 0, disabled: false }]}
+        variants={[{ hasBotStrategy: true, originalIndex: 0, disabled: false }]}
         selectedVariantIndex={0}
       />
     </MemoryRouter>

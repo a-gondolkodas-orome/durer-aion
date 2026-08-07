@@ -1,4 +1,6 @@
-import { getLegalMoves, hasLegalMove, isOpposite, isRemovalAllowed, moves, type Board } from './gameplay';
+import {
+  getLegalMoves, hasLegalMove, isOpposite, isRemovalAllowed, moves, type Board, type TurnState
+} from './gameplay';
 import { makeCtx } from '../../../test-utils';
 
 describe('isRemovalAllowed', () => {
@@ -53,7 +55,7 @@ describe('isRemovalAllowed', () => {
 
 // A move needs two non-empty fields that are not opposite each other, so two
 // survivors facing each other across the circle is a dead position.
-const asPlayer = (currentPlayer: number) => ({ ctx: makeCtx({ currentPlayer }) });
+const asPlayer = (currentPlayer: number) => ({ ctx: makeCtx<TurnState>({ currentPlayer }) });
 
 describe('end of game', () => {
   it.each([0, 1])('ends for the mover (player %i) when only opposite fields remain', p => {

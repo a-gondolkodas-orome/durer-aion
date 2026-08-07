@@ -11,7 +11,7 @@ import { useGameStats } from './hooks/use-game-stats';
 import { trackEvent } from '../../tracking';
 import type {
   Mode, Ctx, MoveOutcome, Gameplay, GameMoves, ClientGameMoves, BotStrategy, BotMove,
-  BoardClientProps, Variant as DisplayVariant, VariantInput
+  BoardClientProps, StrategyArgs, Variant as DisplayVariant, VariantInput
 } from './types';
 import { resolveVariants } from './helpers/resolve-variants';
 import { createGameStore, createInitialCoreState } from './engine/store';
@@ -25,16 +25,16 @@ const DEFAULT_PLAYER_NAMES: I18nString[] = [
   { hu: '2. játékos', en: '2nd player' }
 ];
 
-export interface Presentation<TBoard> {
+export interface Presentation<TBoard, TTurnState = unknown> {
   rule: TranslatableNode
   roleLabels?: [I18nString, I18nString]
-  getPlayerStepDescription: (args: { board: TBoard; ctx: Ctx }) => TranslatableNode
+  getPlayerStepDescription: (args: StrategyArgs<TBoard, TTurnState>) => TranslatableNode
 }
 
-export type StrategyGameConfig<TBoard> = {
-  presentation: Presentation<TBoard>
-  BoardClient: React.ComponentType<BoardClientProps<TBoard>>
-  gameplay: Gameplay<TBoard>
+export type StrategyGameConfig<TBoard, TTurnState = unknown> = {
+  presentation: Presentation<TBoard, TTurnState>
+  BoardClient: React.ComponentType<BoardClientProps<TBoard, TTurnState>>
+  gameplay: Gameplay<TBoard, TTurnState>
   variants: VariantInput<TBoard>[]
 }
 
@@ -43,17 +43,17 @@ export type StrategyGameConfig<TBoard> = {
 // conformance spec can reach every registered game without a second registry to
 // keep in step — and it is the shape a competition server would load a game by
 // (issue #313).
-export type StrategyGame<TBoard> = React.FC & {
-  gameplay: Gameplay<TBoard>
+export type StrategyGame<TBoard, TTurnState = unknown> = React.FC & {
+  gameplay: Gameplay<TBoard, TTurnState>
   variants: VariantInput<TBoard>[]
 }
 
-export const strategyGameFactory = <TBoard,>({
+export const strategyGameFactory = <TBoard, TTurnState = unknown>({
   presentation,
   BoardClient,
   gameplay,
   variants
-}: StrategyGameConfig<TBoard>): StrategyGame<TBoard> => {
+}: StrategyGameConfig<TBoard, TTurnState>): StrategyGame<TBoard, TTurnState> => {
   const { rule, roleLabels, getPlayerStepDescription } = presentation;
   const { moves, endOfTurnMove } = gameplay;
   const { defaultVariantIndex, defaultVariant, resolvedVariants } = resolveVariants(variants);
@@ -68,7 +68,9 @@ export const strategyGameFactory = <TBoard,>({
     // Authoritative game state lives in a synchronous store outside React (see
     // engine/store.ts); React renders a snapshot of it. Bots and chained
     // dispatches always read the store, so they can never see stale state.
-    const [store] = useState(() => createGameStore(createInitialCoreState(activeGenerateStartBoard())));
+    const [store] = useState(
+      () => createGameStore(createInitialCoreState<TBoard, TTurnState>(activeGenerateStartBoard()))
+    );
     const state = useSyncExternalStore(store.subscribe, store.getState);
     const { board, phase, mode, currentPlayer, chosenRoleIndex, undoSnapshot } = state;
 
@@ -112,7 +114,7 @@ export const strategyGameFactory = <TBoard,>({
       playerNames[1] || t(DEFAULT_PLAYER_NAMES[1])
     ];
 
-    let wrappedGameMoves: GameMoves<TBoard> = {} as GameMoves<TBoard>;
+    let wrappedGameMoves: GameMoves<TBoard, TTurnState> = {} as GameMoves<TBoard, TTurnState>;
 
     // An illegal move should never happen through the UI (buttons are disabled)
     // or a correct bot, so reaching here means a bug or tampering. In dev we
@@ -144,7 +146,9 @@ export const strategyGameFactory = <TBoard,>({
       });
     };
 
-    const dispatchMove = (name: string, moveBoard: TBoard, args: unknown[]): MoveOutcome<TBoard> => {
+    const dispatchMove = (
+      name: string, moveBoard: TBoard, args: unknown[]
+    ): MoveOutcome<TBoard, TTurnState> => {
       // The store board is authoritative; the board argument remains for API
       // compatibility. A mismatch means a chaining bug — a bot or BoardClient
       // passed a stale board to the second move of a turn — so fail loudly in
@@ -194,8 +198,15 @@ export const strategyGameFactory = <TBoard,>({
     const getVariantsForMode = (m: Mode): DisplayVariant[] => {
       const humanVsHuman = m === 'vsHuman';
       return resolvedVariants
-        .map((v, i) => ({ ...v, originalIndex: i, disabled: !humanVsHuman && !v.botStrategy }))
-        .filter(v => !humanVsHuman || !!v.generateStartBoard);
+        .map((variant, originalIndex) => ({ variant, originalIndex }))
+        .filter(({ variant }) => !humanVsHuman || !!variant.generateStartBoard)
+        .map(({ variant, originalIndex }) => ({
+          originalIndex,
+          label: variant.label,
+          notAlwaysOptimal: variant.notAlwaysOptimal,
+          hasBotStrategy: !!variant.botStrategy,
+          disabled: !humanVsHuman && !variant.botStrategy
+        }));
     };
 
     const canUndo = phase === 'play'
@@ -222,16 +233,16 @@ export const strategyGameFactory = <TBoard,>({
       store.setState({ phase: 'play', currentPlayer: 0, chosenRoleIndex: roleIndex });
     };
 
-    const ctx: Ctx = buildCtx(state, resolvedPlayerNames);
+    const ctx: Ctx<TTurnState> = buildCtx(state, resolvedPlayerNames);
 
     // For the BoardClient's mid-turn UI state. Moves never get this; they
     // return `nextTurnState` instead.
-    const setTurnState = (turnState: unknown) => {
+    const setTurnState = (turnState: TTurnState | null) => {
       store.setState({ turnState });
     };
 
     wrappedGameMoves = mapValues(moves, (_def, name) => {
-      const wrapped: GameMoves<TBoard>[string] = (moveBoard: TBoard, ...args: unknown[]) =>
+      const wrapped: GameMoves<TBoard, TTurnState>[string] = (moveBoard: TBoard, ...args: unknown[]) =>
         dispatchMove(name, moveBoard, args);
       return wrapped;
     });
@@ -244,13 +255,13 @@ export const strategyGameFactory = <TBoard,>({
     // Bots and the auto `endOfTurnMove` dispatch use `wrappedGameMoves` instead:
     // there an illegal move is a bug, and the validator fails loudly (see
     // `reportIllegalMove`).
-    const clientGameMoves: ClientGameMoves<TBoard> = mapValues(moves, ({ validate }, name) => {
+    const clientGameMoves: ClientGameMoves<TBoard, TTurnState> = mapValues(moves, ({ validate }, name) => {
       const isAllowed = (moveBoard: TBoard, ...args: unknown[]) => {
         const liveCtx = buildCtx(store.getState(), resolvedPlayerNames);
         return liveCtx.isClientMoveAllowed
           && (!validate || validate(moveBoard, { ctx: liveCtx }, ...args));
       };
-      const clientWrapped: ClientGameMoves<TBoard>[string] = Object.assign(
+      const clientWrapped: ClientGameMoves<TBoard, TTurnState>[string] = Object.assign(
         (moveBoard: TBoard, ...args: unknown[]) =>
           isAllowed(moveBoard, ...args)
             ? wrappedGameMoves[name]!(moveBoard, ...args)
@@ -281,12 +292,11 @@ export const strategyGameFactory = <TBoard,>({
     // makes the bot look like it is thinking; keeping it here rather than
     // inside the strategy is what lets the same strategy run headless
     // (engine/run-match.ts).
-    const runBotTurn = (queue: BotMove[], delay: number) => {
-      const { botStrategy } = activeVariant;
+    const runBotTurn = (queue: BotMove[], delay: number, botStrategy: BotStrategy<TBoard>) => {
       botTimeoutRef.current = setTimeout(() => {
         botTimeoutRef.current = null;
         const playerBefore = store.getState().currentPlayer!;
-        const named = queue.length ? queue : askBot(botStrategy!);
+        const named = queue.length ? queue : askBot(botStrategy);
         if (!named.length) return;
         const [{ move, args = [] }, ...rest] = named;
         if (!moves[move]) {
@@ -308,16 +318,17 @@ export const strategyGameFactory = <TBoard,>({
         // A pending auto endOfTurnMove occupies the same timeout slot and
         // already owns the rest of the turn, so only carry on without one.
         if (botTimeoutRef.current === null) {
-          runBotTurn(rest, stepDelay());
+          runBotTurn(rest, stepDelay(), botStrategy);
         }
       }, delay);
     };
 
     const doBotTurn = () => {
-      if (!activeVariant.botStrategy) {
+      const { botStrategy } = activeVariant;
+      if (!botStrategy) {
         throw new Error('strategyGameFactory: no botStrategy available for vsComputer mode');
       }
-      runBotTurn([], stepDelay());
+      runBotTurn([], stepDelay(), botStrategy);
     };
 
     const visibleVariants = getVariantsForMode(mode);

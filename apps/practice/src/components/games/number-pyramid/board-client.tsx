@@ -1,9 +1,7 @@
 import { isEqual } from 'lodash';
 import { useTranslation } from '../../../language';
-import { hasActivePair, type Board } from './gameplay';
+import { hasActivePair, type Board, type TurnState } from './gameplay';
 import { GameBoard, type BoardClientProps } from '../../strategy-game-factory';
-
-export type TurnState = { levelIdx: number; slotIdx: number } | null;
 
 const chipBase = 'rounded-lg border-2 py-2 font-bold min-w-10';
 
@@ -29,9 +27,9 @@ const ActiveSlot = ({ value, isSelected, isDisabled, onClick }) => (
   </button>
 );
 
-export const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProps<Board>) => {
+export const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProps<Board, TurnState>) => {
   const { t } = useTranslation();
-  const turnState = ctx.turnState as TurnState;
+  const { turnState } = ctx;
 
   const handleClick = ({ levelIdx, slotIdx }) => {
     if (!ctx.isClientMoveAllowed) return;
