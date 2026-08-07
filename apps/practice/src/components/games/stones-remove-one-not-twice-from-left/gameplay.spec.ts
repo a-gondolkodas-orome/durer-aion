@@ -1,10 +1,16 @@
-import { isRemovalAllowed, moves } from './gameplay';
+import { times, uniqWith, isEqual } from 'lodash';
+import {
+  type Board, boardAfterRemoval, generateStartBoard, generateTestStartBoard, hasNoLegalMove,
+  isRemovalAllowed, moves, openPiles
+} from './gameplay';
+import { isWinningForMover } from './bot-strategy';
 import { makeCtx } from 'test-utils';
 
 const asPlayer = (currentPlayer: number) => ({ ctx: makeCtx({ currentPlayer }) });
 
-const board = (piles: [number, number], leftRestriction: [boolean, boolean] = [false, false]) =>
-  ({ piles, leftRestriction });
+const board = (
+  piles: [number, number], leftRestriction: [boolean, boolean] = [false, false]
+): Board => ({ piles, leftRestriction });
 
 describe('isRemovalAllowed', () => {
   it('accepts either pile when nobody is restricted', () => {
@@ -42,6 +48,60 @@ describe('isRemovalAllowed', () => {
   });
 });
 
+describe('openPiles', () => {
+  it('lists both piles when nobody is restricted', () => {
+    expect(openPiles(board([3, 4]), 0)).toEqual([0, 1]);
+  });
+
+  it('drops an empty pile and a pile closed off to the mover', () => {
+    expect(openPiles(board([0, 4]), 0)).toEqual([1]);
+    expect(openPiles(board([3, 4], [true, false]), 0)).toEqual([1]);
+    expect(openPiles(board([3, 0]), 0)).toEqual([0]);
+  });
+});
+
+describe('hasNoLegalMove', () => {
+  it('is false while either pile is open', () => {
+    expect(hasNoLegalMove(board([1, 0]), 0)).toBe(false);
+    expect(hasNoLegalMove(board([0, 1]), 0)).toBe(false);
+    expect(hasNoLegalMove(board([0, 1], [true, false]), 0)).toBe(false);
+  });
+
+  it('is true with nothing left to take', () => {
+    expect(hasNoLegalMove(board([0, 0]), 0)).toBe(true);
+  });
+
+  it('is true when the right pile is empty and the left one is closed off', () => {
+    const b = board([4, 0], [true, false]);
+    expect(hasNoLegalMove(b, 0)).toBe(true);
+    // the other player took from the right last turn, so the left pile is open to them
+    expect(hasNoLegalMove(b, 1)).toBe(false);
+  });
+});
+
+describe('boardAfterRemoval', () => {
+  it("takes the stone and arms the mover's own left restriction", () => {
+    expect(boardAfterRemoval(board([3, 4]), 1, 0))
+      .toEqual(board([2, 4], [false, true]));
+  });
+
+  it("clears the mover's left restriction when they take from the right", () => {
+    expect(boardAfterRemoval(board([3, 4], [false, true]), 1, 1))
+      .toEqual(board([3, 3], [false, false]));
+  });
+
+  it("leaves the other player's restriction alone", () => {
+    expect(boardAfterRemoval(board([3, 4], [true, false]), 1, 0))
+      .toEqual(board([2, 4], [true, true]));
+  });
+
+  it('does not modify the board it is given', () => {
+    const before = board([3, 4]);
+    boardAfterRemoval(before, 0, 0);
+    expect(before).toEqual(board([3, 4]));
+  });
+});
+
 // The game ends when both piles are empty, or when the right pile is empty and
 // the player about to move may not take from the left one (they took from it
 // last time).
@@ -71,5 +131,34 @@ describe('end of game', () => {
     const outcome = moves.removeStone.apply(board([2, 2]), asPlayer(1), 0);
     expect(outcome.nextBoard.leftRestriction).toEqual([false, true]);
     expect(outcome.isTurnEnd).toBe(true);
+  });
+});
+
+// Sampling until the whole list has come up also pins that every board in it is
+// reachable — a board never generated could not be judged below.
+const allStartBoards = (generate: () => Board): Board[] =>
+  uniqWith(times(400, generate), isEqual);
+
+describe.each([
+  ['generateStartBoard', generateStartBoard, 7],
+  ['generateTestStartBoard', generateTestStartBoard, 4]
+] as const)('%s', (_name, generate, expectedCount) => {
+  const boards = allStartBoards(generate);
+
+  it('offers the whole list', () => {
+    expect(boards).toHaveLength(expectedCount);
+  });
+
+  it('starts everyone unrestricted, with both piles stocked', () => {
+    for (const startBoard of boards) {
+      expect(startBoard.leftRestriction).toEqual([false, false]);
+      expect(Math.min(...startBoard.piles)).toBeGreaterThan(0);
+    }
+  });
+
+  it('gives either player a real chance of holding the winning side', () => {
+    const winnable = boards.filter(startBoard => isWinningForMover(startBoard, 0)).length;
+    expect(winnable / boards.length).toBeGreaterThan(0.3);
+    expect(winnable / boards.length).toBeLessThan(0.7);
   });
 });

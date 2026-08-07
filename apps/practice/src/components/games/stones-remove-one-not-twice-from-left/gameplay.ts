@@ -1,5 +1,5 @@
 import type { Ctx, MoveOutcome } from 'strategy-game-factory';
-import { cloneDeep, isEqual, sample } from 'lodash';
+import { sample } from 'lodash';
 
 export type Board = { piles: [number, number], leftRestriction: [boolean, boolean] }
 
@@ -12,15 +12,37 @@ export const isRemovalAllowed = (board: Board, player: number, pileId: number): 
     && board.piles[pileId] > 0
     && !(pileId === 0 && board.leftRestriction[player]);
 
+// The piles a player may still take from.
+export const openPiles = (board: Board, player: number): number[] =>
+  board.piles.flatMap((_, pileId) => isRemovalAllowed(board, player, pileId) ? [pileId] : []);
+
+// "The player who cannot move loses" spelled out: both piles are shut to them,
+// which happens when the right one is empty and the left one is either empty
+// too or closed off because they took from it last turn. This is the game's
+// only terminal condition, which is what lets the bot's search treat "no legal
+// move" as a plain loss rather than a special case.
+export const hasNoLegalMove = (board: Board, player: number): boolean =>
+  openPiles(board, player).length === 0;
+
+// The rule half of `removeStone`, without the outcome the engine reads: taking
+// a stone also arms (or clears) the mover's own left-pile restriction. Shared
+// with the bot's look-ahead, so a searched position is built by the very
+// function that builds a played one.
+export const boardAfterRemoval = (board: Board, player: number, pileId: number): Board => {
+  const piles = [...board.piles] as [number, number];
+  piles[pileId] -= 1;
+  const leftRestriction = [...board.leftRestriction] as [boolean, boolean];
+  leftRestriction[player] = (pileId === 0);
+  return { piles, leftRestriction };
+};
+
 export const moves = {
   removeStone: {
     validate: (board: Board, { ctx }: { ctx: Ctx }, pileId: number) =>
       isRemovalAllowed(board, ctx.currentPlayer!, pileId),
     apply: (board: Board, { ctx }: { ctx: Ctx }, pileId: number): MoveOutcome<Board> => {
-      const nextBoard = cloneDeep(board);
-      nextBoard.piles[pileId] = board.piles[pileId] - 1;
-      nextBoard.leftRestriction[ctx.currentPlayer!] = (pileId === 0);
-      if (isGameEnd(nextBoard, ctx)) {
+      const nextBoard = boardAfterRemoval(board, ctx.currentPlayer!, pileId);
+      if (hasNoLegalMove(nextBoard, 1 - ctx.currentPlayer!)) {
         return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }
       return { nextBoard, isTurnEnd: true };
@@ -30,18 +52,8 @@ export const moves = {
 
 export type Moves = typeof moves;
 
-const isGameEnd = (board: Board, ctx: Ctx) => {
-  if (isEqual(board.piles, [0, 0])) {
-    return true;
-  }
-  if (board.piles[1] === 0 && board.leftRestriction[1 - ctx.currentPlayer!]) {
-    return true;
-  }
-  return false;
-}
-
 export const generateTestStartBoard = (): Board => ({
-  piles: sample([[3, 4], [4, 3], [3, 3], [4, 4]]),
+  piles: sample([[3, 4], [4, 3], [3, 3], [4, 4]]) as [number, number],
   leftRestriction: [false, false]
 });
 
