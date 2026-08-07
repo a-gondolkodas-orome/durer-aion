@@ -3,6 +3,7 @@ import { Input } from '@headlessui/react';
 import { useTranslation, type I18nString } from 'language';
 import { ModeSelector, DifficultySelector } from '../common/game-controls';
 import { getCtaText } from '../common/cta-text';
+import { DEFAULT_PLAYER_NAMES, havePlayerNameCollision } from '../common/player-names';
 import type { Ctx, Mode, Variant } from '../../types';
 
 import type { Stats } from '../../hooks/use-game-stats';
@@ -202,6 +203,8 @@ const PlayerNameSetup = ({ roleLabels, playerNames, setPlayerNames, onStart }: {
   onStart: () => void
 }) => {
   const { t } = useTranslation();
+  const hasCollision = havePlayerNameCollision(playerNames, t);
+  const hasEmptyName = !playerNames[0] || !playerNames[1];
   return (
   <div className="flex flex-col gap-2 sm:gap-3">
     {([0, 1] as const).map(i => (
@@ -216,6 +219,7 @@ const PlayerNameSetup = ({ roleLabels, playerNames, setPlayerNames, onStart }: {
             { hu: 'Neved (Teknős)', en: 'Your name (Dot)' }
           ][i])}
           value={playerNames[i]}
+          aria-invalid={hasCollision}
           onChange={e => {
             const updated: [string, string] = [playerNames[0], playerNames[1]];
             updated[i] = e.target.value.trim();
@@ -225,7 +229,8 @@ const PlayerNameSetup = ({ roleLabels, playerNames, setPlayerNames, onStart }: {
         <button
           data-testid={`start-hh-game-${i}`}
           className="shrink-0 px-2 py-1 text-sm font-semibold rounded-md
-            bg-blue-500 text-white hocus:bg-blue-600"
+            bg-blue-500 text-white enabled:hocus:bg-blue-600 disabled:opacity-50"
+          disabled={hasCollision}
           onClick={() => {
             setPlayerNames([playerNames[i], playerNames[1 - i]]);
             onStart();
@@ -236,6 +241,20 @@ const PlayerNameSetup = ({ roleLabels, playerNames, setPlayerNames, onStart }: {
         </button>
       </div>
     ))}
+    {hasCollision && (
+      <p role="alert" className="text-sm text-red-500">
+        {t({
+          hu: 'A két játékos neve nem lehet azonos.',
+          en: 'The two players must have different names.'
+        })}
+        {hasEmptyName && ' ' + t({
+          hu: `Az üresen hagyott mező helyére „${t(DEFAULT_PLAYER_NAMES[0])}", `
+            + `illetve „${t(DEFAULT_PLAYER_NAMES[1])}" kerül.`,
+          en: `An empty field is filled in as "${t(DEFAULT_PLAYER_NAMES[0])}" `
+            + `or "${t(DEFAULT_PLAYER_NAMES[1])}".`
+        })}
+      </p>
+    )}
   </div>
   );
 };

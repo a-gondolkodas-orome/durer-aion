@@ -19,11 +19,7 @@ import { buildCtx } from './engine/build-ctx';
 import { asBotMoves, isBotTurnUnfinished, unknownMoveMessage } from './engine/bot-turn';
 import { reduceMove } from './engine/reducer';
 import { stepDelay } from './engine/timing';
-
-const DEFAULT_PLAYER_NAMES: I18nString[] = [
-  { hu: '1. játékos', en: '1st player' },
-  { hu: '2. játékos', en: '2nd player' }
-];
+import { resolvePlayerNames } from './game-parts/common/player-names';
 
 export interface Presentation<TBoard, TTurnState = unknown> {
   rule: TranslatableNode
@@ -109,10 +105,7 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentPlayer, isHumanVsHumanGame, phase, chosenRoleIndex]);
 
-    const resolvedPlayerNames: [string, string] = [
-      playerNames[0] || t(DEFAULT_PLAYER_NAMES[0]),
-      playerNames[1] || t(DEFAULT_PLAYER_NAMES[1])
-    ];
+    const resolvedPlayerNames = resolvePlayerNames(playerNames, t);
 
     let wrappedGameMoves: GameMoves<TBoard, TTurnState> = {} as GameMoves<TBoard, TTurnState>;
 

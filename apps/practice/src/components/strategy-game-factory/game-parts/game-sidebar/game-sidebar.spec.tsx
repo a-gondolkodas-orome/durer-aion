@@ -21,14 +21,14 @@ const defaultMoves: SidebarMoves = {
   canUndo: false
 };
 
-const renderSidebar = (ctxOverrides: Partial<Ctx> = {}) => {
+const renderSidebar = (ctxOverrides: Partial<Ctx> = {}, playerNames: string[] = ['', '']) => {
   const ctx = makeCtx({ currentPlayer: 0, ...ctxOverrides });
   return render(
     <MemoryRouter>
       <GameSidebar
         stepDescription=""
         ctx={ctx}
-        playerNames={[]}
+        playerNames={playerNames}
         moves={defaultMoves}
         variants={[{ hasBotStrategy: true, originalIndex: 0, disabled: false }]}
         selectedVariantIndex={0}
@@ -41,6 +41,31 @@ describe('GameSidebar', () => {
   it('shows name inputs in vsHuman roleSelection', () => {
     renderSidebar({ isHumanVsHumanGame: true, phase: 'roleSelection' });
     expect(screen.getAllByRole('textbox')).toHaveLength(2);
+  });
+
+  describe('colliding player names', () => {
+    const nameSetup = (playerNames: string[]) =>
+      renderSidebar({ isHumanVsHumanGame: true, phase: 'roleSelection' }, playerNames);
+    const startButtons = () => [0, 1].map(i => screen.getByTestId(`start-hh-game-${i}`));
+
+    it('lets the game start with two different names', () => {
+      nameSetup(['Alice', 'Bob']);
+      expect(startButtons().every(button => (button as HTMLButtonElement).disabled)).toBe(false);
+      expect(screen.queryByRole('alert')).toBeNull();
+    });
+
+    it('blocks both starts when the same name is typed twice', () => {
+      nameSetup(['Alice', 'Alice']);
+      expect(startButtons().every(button => (button as HTMLButtonElement).disabled)).toBe(true);
+      expect(screen.getByRole('alert').textContent).toContain('nem lehet azonos');
+    });
+
+    it('blocks the start when a name matches the default of the empty field', () => {
+      nameSetup(['', '1. játékos']);
+      expect(startButtons().every(button => (button as HTMLButtonElement).disabled)).toBe(true);
+      // the empty field is the confusing part, so the message spells out what fills it in
+      expect(screen.getByRole('alert').textContent).toContain('Az üresen hagyott mező');
+    });
   });
 
   it('does not show name inputs in vsComputer roleSelection', () => {
