@@ -215,7 +215,8 @@ export const PlusOneTwo = strategyGameFactory({
 
 A game hands `strategyGameFactory` four things. What follows is the shape of
 each; every field, edge case and enforcement rule lives in
-[AGENTS.md § strategyGameFactory API](AGENTS.md#strategygamefactory-api).
+[src/components/CLAUDE.md § strategyGameFactory
+API](src/components/CLAUDE.md#strategygamefactory-api).
 
 **`gameplay.moves`** — a move is one player-initiated change to the board, and
 the unit that keeps the game played by its rules. Each is `{ apply, validate? }`:
@@ -277,8 +278,8 @@ player interaction with it), `isHumanVsHumanGame`, `chosenRoleIndex`, and
 A multi-stage game pins what its `turnState` holds — `export type TurnState` in
 `gameplay.ts`, `BoardClientProps<Board, TurnState>` on the component — and the
 factory infers the rest of the config from there, so nothing has to cast it
-back. See [AGENTS.md § Pinning the turn
-state](AGENTS.md#strategygamefactory-api).
+back. See [src/components/CLAUDE.md § Pinning the turn
+state](src/components/CLAUDE.md#strategygamefactory-api).
 
 Always pass the current `board` as a move's first argument, including to
 subsequent moves within the same turn. The framework's own state is
@@ -287,11 +288,13 @@ is not what makes the engine correct. It stays because a move is then a pure
 function of its inputs, callable on hypothetical boards by bot look-ahead and
 by specs, and because the explicit threading lets the engine catch chaining
 bugs: a stale board throws in development instead of corrupting the game. See
-[AGENTS.md § Game state architecture](AGENTS.md#game-state-architecture-synchronous-store-outside-react).
+[src/components/CLAUDE.md § Game state
+architecture](src/components/CLAUDE.md#game-state-architecture-synchronous-store-outside-react).
 
 ## Before opening a PR
 
-Walk the [new game checklist](AGENTS.md#new-game-checklist) — both game modes,
+Walk the [new game
+checklist](src/components/CLAUDE.md#new-game-checklist) — both game modes,
 balanced starting positions, an AI the player cannot beat with a losing
 strategy, keyboard and mobile usability.
 
