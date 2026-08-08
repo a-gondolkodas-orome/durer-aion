@@ -91,7 +91,7 @@ export const hasBacterium = (board: Board, { row, col }: Cell): boolean =>
 // An attack additionally needs somewhere to go: the sideways step, the two-row
 // jump and at least one of the division's two children must land on the board.
 // Without this a spread from the top row would simply delete the bacteria.
-export const isAttackAllowed = (board: Board, { type, row, col }: AttackMove): boolean => {
+const isAttackAllowed = (board: Board, { type, row, col }: AttackMove): boolean => {
   if (!hasBacterium(board, { row, col })) return false;
   if (type === 'shiftRight') return inBoard(board, row, col + 1);
   if (type === 'shiftLeft') return inBoard(board, row, col - 1);

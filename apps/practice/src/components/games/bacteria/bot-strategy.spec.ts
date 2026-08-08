@@ -1,6 +1,6 @@
 import { cloneDeep, range, reverse } from 'lodash';
 import { deficiency } from './danger';
-import { bacteriaCoords, isAttackAllowed, removeOne, totalBacteria, type Board } from './gameplay';
+import { ATTACKER, bacteriaCoords, removeOne, totalBacteria, type Board } from './gameplay';
 import {
   simulate,
   legalAttackMoves,
@@ -8,6 +8,11 @@ import {
   defenderMove
 } from './bot-strategy';
 import { scatteredStartBoards, adjacentStartBoards } from './start-boards';
+import { makeCtx } from 'test-utils';
+
+// The bot reads legality off its own moves, and every attack move asks who is
+// on turn, so the enumeration needs the attacker's ctx.
+const asAttacker = makeCtx({ currentPlayer: ATTACKER });
 
 // --- Independent brute-force game solver (small boards only) ---------------
 // attacker moves first; returns true iff the attacker can force a win.
@@ -23,7 +28,7 @@ const buildSolver = () => {
     if (visiting.has(k)) return false; // cycle: no finite forced win on this line
     visiting.add(k);
     let win = false;
-    for (const move of legalAttackMoves(board)) {
+    for (const move of legalAttackMoves(board, asAttacker)) {
       const { board: next, reachedGoal } = simulate(board, move);
       if (reachedGoal || defenderCannotSave(next, visiting)) { win = true; break; }
     }
@@ -123,7 +128,7 @@ const adversarialDefense = (board: Board): Board => {
 const playAttackerBotVsDefender = (start: Board, maxPlies = 400): 'attacker' | 'defender' => {
   let board = cloneDeep(start);
   for (let ply = 0; ply < maxPlies; ply++) {
-    const move = attackerMove(board);
+    const move = attackerMove(board, asAttacker);
     const { board: next, reachedGoal } = simulate(board, move);
     board = next;
     if (reachedGoal) return 'attacker';
@@ -158,7 +163,7 @@ describe('smart bot plays the 9x17 game optimally', () => {
       let board = cloneDeep(start);
       for (let ply = 0; ply < 400; ply++) {
         // greedy attacker: play the move that climbs highest
-        const moves = legalAttackMoves(board);
+        const moves = legalAttackMoves(board, asAttacker);
         let chosen = moves[0];
         let bestRow = -1;
         for (const m of moves) {
@@ -207,7 +212,7 @@ describe('smart bot plays the 9x11 adjacent-goals game optimally', () => {
       if (deficiency(start) !== 0) continue;
       let board = cloneDeep(start);
       for (let ply = 0; ply < 400; ply++) {
-        const moves = legalAttackMoves(board);
+        const moves = legalAttackMoves(board, asAttacker);
         let chosen = moves[0];
         let bestRow = -1;
         for (const m of moves) {
@@ -313,7 +318,7 @@ describe('bacteria bot behaviour', () => {
         goals: [2, 3, 4]
       };
       expect(deficiency(board)).toBeGreaterThanOrEqual(1);
-      expect(attackerMove(board)).toEqual({ type: 'spread', row: 0, col: 3 });
+      expect(attackerMove(board, asAttacker)).toEqual({ type: 'spread', row: 0, col: 3 });
     });
 
     it('attacks the closest dangerous bacterium', () => {
@@ -329,7 +334,7 @@ describe('bacteria bot behaviour', () => {
         ]),
         goals: [1, 2, 3]
       };
-      const move = attackerMove(board);
+      const move = attackerMove(board, asAttacker);
       expect([move.row, move.col]).toEqual([3, 1]);
     });
 
@@ -341,15 +346,16 @@ describe('bacteria bot behaviour', () => {
         goals: [1]
       };
       expect(deficiency(board)).toBe(0);
-      expect(legalAttackMoves(board)).toContainEqual(attackerMove(board));
+      expect(legalAttackMoves(board, asAttacker)).toContainEqual(attackerMove(board, asAttacker));
     });
   });
 });
 
 describe('legal move enumeration', () => {
-  it('only enumerates attacks the rules allow', () => {
+  it('starts every attack from a cell that holds a bacterium', () => {
     const busy = { bacteria: [[1, 2, 1], [3, 0], [0, 1, 0]], goals: [1] };
-    expect(legalAttackMoves(busy).length).toBeGreaterThan(0);
-    expect(legalAttackMoves(busy).every(m => isAttackAllowed(busy, m))).toBe(true);
+    const options = legalAttackMoves(busy, asAttacker);
+    expect(options.length).toBeGreaterThan(0);
+    expect(options.every(({ row, col }) => busy.bacteria[row][col] >= 1)).toBe(true);
   });
 });

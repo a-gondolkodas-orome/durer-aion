@@ -1,5 +1,5 @@
 import { cloneDeep, sample, maxBy } from 'lodash';
-import type { BotStrategy } from 'strategy-game-factory';
+import type { BotStrategy, Ctx } from 'strategy-game-factory';
 import { computeLettered, computeSinks, deficiency } from './danger';
 import {
   type Board,
@@ -8,7 +8,7 @@ import {
   bacteriaCoords,
   totalBacteria,
   inBoard,
-  isAttackAllowed,
+  moves,
   spreadChildren,
   isGoalCell,
   topRowIdx,
@@ -29,13 +29,14 @@ export const simulate = (board: Board, move: AttackMove): { board: Board; reache
 
 const ATTACK_TYPES = ['shiftRight', 'shiftLeft', 'jump', 'spread'] as const;
 
-// The bot enumerates its options with the very predicate the engine validates
-// dispatches against, so the two can never disagree.
-export const legalAttackMoves = (board: Board): AttackMove[] =>
+// The bot enumerates its options through the very moves it will name, so what
+// it offers and what the engine accepts cannot disagree. Each attack type is a
+// move of its own, so the type picks the validator.
+export const legalAttackMoves = (board: Board, ctx: Ctx): AttackMove[] =>
   bacteriaCoords(board).flatMap(([row, col]) =>
     ATTACK_TYPES
       .map(type => ({ type, row, col }))
-      .filter(move => isAttackAllowed(board, move))
+      .filter(({ type }) => moves[type].validate(board, { ctx }, { row, col }))
   );
 
 // A move is winning-preserving when, after every possible defender removal,
@@ -73,7 +74,7 @@ const progressScore = (board: Board, move: AttackMove, lettered: boolean[][]): n
   return letteredCount * 100000 + maxRow * 1000 + sumRows;
 };
 
-export const attackerMove = (board: Board): AttackMove => {
+export const attackerMove = (board: Board, ctx: Ctx): AttackMove => {
   const lettered = computeLettered(board);
   const sinks = computeSinks(board, lettered);
   const top = topRowIdx(board);
@@ -93,9 +94,9 @@ export const attackerMove = (board: Board): AttackMove => {
   }
 
   // Phase B: maneuver a bacterium up into the lettered region.
-  const moves = legalAttackMoves(board);
-  const winning = moves.filter(m => keepsWinning(board, m, lettered, sinks));
-  const pool = winning.length ? winning : moves;
+  const options = legalAttackMoves(board, ctx);
+  const winning = options.filter(m => keepsWinning(board, m, lettered, sinks));
+  const pool = winning.length ? winning : options;
   return maxBy(pool, m => progressScore(board, m, lettered))!;
 };
 
@@ -128,7 +129,7 @@ export const smartBotStrategy: Bot = ({ board, ctx }) => {
     const { row, col } = defenderMove(board);
     return { move: 'defend', args: [{ row, col }] };
   } else {
-    const move = attackerMove(board);
+    const move = attackerMove(board, ctx);
     return { move: move.type, args: [{ row: move.row, col: move.col }] };
   }
 };
@@ -142,7 +143,7 @@ export const randomBotStrategy: Bot = ({ board, ctx }) => {
     return { move: 'defend', args: [{ row, col }] };
   }
 
-  const options = legalAttackMoves(board);
+  const options = legalAttackMoves(board, ctx);
   const winningNow = options.find(m => simulate(board, m).reachedGoal);
   const move = winningNow ?? sample(options)!;
   return { move: move.type, args: [{ row: move.row, col: move.col }] };
