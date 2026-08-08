@@ -79,7 +79,7 @@ export const moves = {
       if (isGameEnd(nextBoard)) {
         return {
           nextBoard,
-          gameEnd: { winnerIndex: hasFirstPlayerWon(nextBoard) ? POLICE : THIEF }
+          gameEnd: { winnerIndex: isCaught(nextBoard) ? POLICE : THIEF }
         };
       }
       return { nextBoard, isTurnEnd: true };
@@ -108,7 +108,7 @@ export const moves = {
       if (isGameEnd(nextBoard)) {
         return {
           nextBoard,
-          gameEnd: { winnerIndex: hasFirstPlayerWon(nextBoard) ? POLICE : THIEF }
+          gameEnd: { winnerIndex: isCaught(nextBoard) ? POLICE : THIEF }
         };
       }
       return { nextBoard, isTurnEnd: true };
@@ -118,15 +118,12 @@ export const moves = {
 
 export type Moves = typeof moves;
 
-const isGameEnd = (board: Board) => {
-  if (board.turnCount === 3) {
-    return true;
-  } else if (board.thief === board.policemen[0] || board.thief === board.policemen[1]) {
-    return true;
-  }
-  return false;
-};
+// The thief escapes by surviving this many moves; the police win by sharing an
+// intersection with them before that.
+export const THIEF_MOVE_LIMIT = 3;
 
-const hasFirstPlayerWon = (board: Board) => {
-  return board.turnCount < 4 && board.policemen.includes(board.thief);
-};
+export const isCaught = ({ policemen, thief }: Pick<Board, 'policemen' | 'thief'>): boolean =>
+  policemen.includes(thief);
+
+const isGameEnd = (board: Board) =>
+  isCaught(board) || board.turnCount === THIEF_MOVE_LIMIT;
