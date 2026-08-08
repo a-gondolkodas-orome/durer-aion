@@ -24,7 +24,7 @@ export const isTakeAllowed = (board: Board, i: number, j: number): boolean =>
   isPile(i) && isPile(j) && i !== j && board[i] > 0 && board[j] > 0;
 
 export const getLegalMoves = (board: Board): Move[] => {
-  const nonEmpty = board.map((v, i) => i).filter(i => board[i] > 0);
+  const nonEmpty = board.map((_, i) => i).filter(i => board[i] > 0);
   const moves: Move[] = [];
   for (let a = 0; a < nonEmpty.length; a++) {
     for (let b = a + 1; b < nonEmpty.length; b++) {

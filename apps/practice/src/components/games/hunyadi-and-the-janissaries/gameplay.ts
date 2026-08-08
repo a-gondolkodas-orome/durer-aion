@@ -63,7 +63,7 @@ const isSoldierAssignmentAllowed = (board: Board, soldiers: Soldier[]): boolean 
 
 export const moves = {
   killGroup: {
-    validate: (board: Board, { ctx }, group: SoldierColor) =>
+    validate: (_board: Board, { ctx }, group: SoldierColor) =>
       ctx.currentPlayer === HUNYADI && isColor(group),
     apply: (board: Board, _, group: SoldierColor) => {
       const nextBoard = board.map(row => row.filter(soldier => soldier !== group));
@@ -75,7 +75,7 @@ export const moves = {
     }
   },
   finalizeSeparation: {
-    validate: (board: Board, { ctx }) => ctx.currentPlayer === SULTAN,
+    validate: (_board: Board, { ctx }) => ctx.currentPlayer === SULTAN,
     apply: (board: Board) => ({ nextBoard: board, isTurnEnd: true })
   },
   setGroupOfSoldiers: {

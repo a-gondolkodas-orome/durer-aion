@@ -30,7 +30,7 @@ const isMoveLegal = (board: Board, move: Move): boolean =>
 // Every legal move: pick two non-empty piles, remove between 1 and the whole
 // pile from each. Amounts removed from the two piles are independent.
 export const getLegalMoves = (board: Board): Move[] => {
-  const nonEmpty = board.map((v, i) => i).filter(i => board[i] > 0);
+  const nonEmpty = board.map((_, i) => i).filter(i => board[i] > 0);
   const moves: Move[] = [];
   for (let a = 0; a < nonEmpty.length; a++) {
     for (let b = a + 1; b < nonEmpty.length; b++) {

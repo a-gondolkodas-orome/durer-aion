@@ -77,6 +77,12 @@ alone and fail loudly (dev: throw; prod: warn + `illegal-move` analytics event
 (two-phase turn) and `cube-coloring` (reuses the existing `isAllowedStep`
 helper) for examples.
 
+Both halves take `(board, { ctx }, ...args)`, and the meta slot sits *before* the
+game-specific args, so it has to be written even when the move ignores it. Write
+it `_` then — `validate: (board: Board, _, cell: number) => …` — and `_board`
+when it is the board that goes unread instead. This is the repo-wide rule for
+unused parameters (AGENTS.md § Unused parameters); ESLint enforces it.
+
 **`moves.<name>.isAllowed(board, ...args)`** — exposed on every move of the
 `BoardClient`'s wrapped `moves` object: `ctx.isClientMoveAllowed` (turn
 ownership) AND the move's `validate` (when defined), with `ctx` already bound.

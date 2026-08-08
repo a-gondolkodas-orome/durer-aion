@@ -208,6 +208,24 @@ This applies with particular force to moves on the outcome-returning `apply`
 contract: `gameEnd: { winnerIndex }` already names the winner, so prose
 narrating who won earns nothing.
 
+## Unused parameters
+
+A parameter that has to be written but is never read starts with `_`: the `meta`
+slot of a move whose `validate` only asks about the board, the value slot of an
+`(_, i) => …` callback. A bare `_` is fine when it is the only unused parameter
+in the signature; give it a name (`_board`, `_meta`) when a second one would
+collide with it, or when the name is worth reading.
+
+ESLint enforces this (`no-unused-vars` with `args: 'all'`), so an unused
+parameter left under its real name is an error rather than a silent
+inconsistency.
+
+The rule is about parameters you are *forced* to write. One that is merely
+unwanted should be dropped instead — trailing parameters can simply be left off
+(`apply: (board: Board) => …`), and an unwanted key is left out of the
+destructuring, which is why bots and `getPlayerStepDescription` write
+`({ board })` rather than underscoring `ctx`.
+
 ## Pull request size
 
 Reviewer time is the scarcest resource here, so plan the split **before**

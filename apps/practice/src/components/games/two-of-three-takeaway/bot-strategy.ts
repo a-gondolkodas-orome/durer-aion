@@ -10,7 +10,7 @@ export const isWinningInOneMove = (board: Board, move: Move): boolean =>
   isTerminal(applyMove(board, move));
 
 const oddPiles = (board: Board): number[] =>
-  board.map((v, i) => i).filter(i => board[i] % 2 === 1);
+  board.map((_, i) => i).filter(i => board[i] % 2 === 1);
 
 // Because the total is even, the number of odd piles is even: either 0 (all
 // piles even — type (a)) or 2 (two odd, one even — type (b)). The player to

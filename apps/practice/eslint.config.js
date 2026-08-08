@@ -41,7 +41,16 @@ export default [
     },
     rules: {
       'no-unused-vars': 'off',
-      '@typescript-eslint/no-unused-vars': 'error',
+      // A parameter whose slot is fixed by a contract has to be written even
+      // when unused — a move's `meta` sits before its game-specific args. `^_`
+      // is how such a parameter says it is ignored on purpose; `args: 'all'`
+      // is what stops an ordinary name from going unnoticed in that slot.
+      '@typescript-eslint/no-unused-vars': ['error', {
+        args: 'all',
+        argsIgnorePattern: '^_',
+        caughtErrors: 'all',
+        caughtErrorsIgnorePattern: '^_'
+      }],
       '@typescript-eslint/consistent-type-imports': 'error',
       'no-restricted-syntax': ['error', {
         selector: 'TSAsExpression > TSNeverKeyword.typeAnnotation',

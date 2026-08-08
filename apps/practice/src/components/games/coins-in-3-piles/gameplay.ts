@@ -60,7 +60,7 @@ export const moves = {
     }
   },
   addCoin: {
-    validate: (board: Board, { ctx }: { ctx: Ctx<TurnState> }, value: number) => {
+    validate: (_board: Board, { ctx }: { ctx: Ctx<TurnState> }, value: number) => {
       const removed = ctx.turnState?.removedCoinValue;
       return removed != null && value >= 1 && value < removed;
     },
@@ -71,7 +71,7 @@ export const moves = {
     }
   },
   passAddition: {
-    validate: (board: Board, { ctx }: { ctx: Ctx<TurnState> }) => ctx.turnState !== null,
+    validate: (_board: Board, { ctx }: { ctx: Ctx<TurnState> }) => ctx.turnState !== null,
     apply: (board: Board, { ctx }: { ctx: Ctx<TurnState> }) => finishPlaceBack(board, ctx)
   }
 }
