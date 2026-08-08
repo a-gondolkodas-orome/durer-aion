@@ -9,7 +9,7 @@ ENV NPM_CONFIG_UPDATE_NOTIFIER=false
 
 # Must stay in sync with the "playwright" version in package.json — a mismatch means
 # node_modules/playwright looks for a browser revision that isn't in the image.
-ARG PLAYWRIGHT_VERSION=1.62.0
+ARG PLAYWRIGHT_VERSION=1.62.1
 
 # Shared location so the browsers installed here as root are usable by the `node` user.
 # Without this they land in /root/.cache/ms-playwright and are invisible at runtime.

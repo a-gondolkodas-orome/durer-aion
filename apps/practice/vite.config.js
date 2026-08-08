@@ -74,11 +74,11 @@ export default defineConfig(() => ({
     isolate: false,
     setupFiles: ['./src/test-setup.ts'],
     // On demand only (`npm run coverage`), never in `npm test` or CI, and with no
-    // thresholds — same posture as stryker, and for a sharper reason: the two
-    // sweeps (plays-to-an-end, renders) execute nearly every line under games/
-    // while asserting almost nothing, so the global percentage is not a measure of
-    // anything. What the report is good for is the opposite question — code no
-    // spec loads at all — which is why `include` is spelled out below.
+    // thresholds, deliberately: the two sweeps (plays-to-an-end, renders) execute
+    // nearly every line under games/ while asserting almost nothing, so the global
+    // percentage is not a measure of anything. What the report is good for is the
+    // opposite question — code no spec loads at all — which is why `include` is
+    // spelled out below.
     coverage: {
       provider: 'v8',
       // Without this, only files a test imported are reported, and a module no
@@ -92,7 +92,7 @@ export default defineConfig(() => ({
         'src/main.tsx'
       ],
       reporter: ['text', 'html'],
-      // /reports is already gitignored, for stryker's html report
+      // /reports is gitignored
       reportsDirectory: 'reports/coverage'
     }
   }

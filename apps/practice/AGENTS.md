@@ -135,8 +135,7 @@ all**. That is why `coverage.include` in `vite.config.js` names every file under
 `src/` rather than letting Vitest report only what a test imported. Run
 `npm run coverage:unswept` for the other half — with the sweeps excluded, what
 drops to near zero is the game logic nothing but a sweep touches. Neither one is
-a measure of whether the bots are right; that is what a bot's own spec, and
-`npx stryker run` for the engine, are for.
+a measure of whether the bots are right; that is what a bot's own spec is for.
 
 ## Planned future directions
 
