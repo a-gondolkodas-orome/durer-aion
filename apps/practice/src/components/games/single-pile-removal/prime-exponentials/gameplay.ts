@@ -29,12 +29,6 @@ export const allPrimePowers = (() => {
   return entries.sort((a, b) => a.value - b.value);
 })();
 
-// Only a genuine prime power that fits within the number may be subtracted, so
-// legality is membership in the enumeration above rather than an arithmetic
-// check, which would also accept a composite base.
-const isSubtractionAllowed = (board: Board, { prime, exponent }: { prime: number; exponent: number }) =>
-  allPrimePowers.some(e => e.prime === prime && e.exponent === exponent && e.value <= board);
-
 export const generateStartBoard = () => {
   if (random(0, 1)) {
     return random(3, 166) * 6;
@@ -47,8 +41,11 @@ export const generateSmallStartBoard = () => random(12, 72);
 
 export const moves = {
   subtractPrimeExponent: {
-    validate: (board: Board, _, entry: { prime: number; exponent: number }) =>
-      isSubtractionAllowed(board, entry),
+    // Only a genuine prime power that fits within the number may be subtracted,
+    // so legality is membership in the enumeration above rather than an
+    // arithmetic check, which would also accept a composite base.
+    validate: (board: Board, _, { prime, exponent }: { prime: number; exponent: number }) =>
+      allPrimePowers.some(e => e.prime === prime && e.exponent === exponent && e.value <= board),
     apply: (
       board: Board,
       { ctx }: { ctx: Ctx },

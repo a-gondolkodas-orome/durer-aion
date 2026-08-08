@@ -1,10 +1,13 @@
 import {
   type Board, type Grid, type Move, type TurnState,
-  getRectangleAt, getRectangles, applyMove, isEmpty, getAllMoves, isRemovalAllowed, moves
+  getRectangleAt, getRectangles, applyMove, isEmpty, getAllMoves, moves
 } from './gameplay';
-import { makeCtx } from 'test-utils';
+import { makeCtx, moveValidator } from 'test-utils';
 
 const g = (rows: number[][]): Grid => rows.map(r => r.map(Boolean));
+
+const isRemovalAllowed = (grid: Grid, move: Move): boolean =>
+  moveValidator(moves.removeLine)({ grid }, move);
 
 describe('getRectangleAt', () => {
   it('returns the bounding box of a solid rectangle', () => {

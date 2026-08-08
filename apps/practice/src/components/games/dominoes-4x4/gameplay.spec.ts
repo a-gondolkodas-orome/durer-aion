@@ -1,7 +1,10 @@
-import { isDominoAllowed, moves, getPossibleMoves, type Board, type Domino } from './gameplay';
-import { makeCtx } from 'test-utils';
+import { moves, getPossibleMoves, type Board, type Domino } from './gameplay';
+import { makeCtx, moveValidator } from 'test-utils';
 
 const asPlayer = (currentPlayer: number) => ({ ctx: makeCtx({ currentPlayer }) });
+
+const isDominoAllowed = (board: Board, player: number, domino: Domino): boolean =>
+  moveValidator(moves.placeDomino, makeCtx({ currentPlayer: player }))(board, domino);
 
 const emptyBoard: Board = [];
 // Player 0 (Árgyélus) places vertical dominoes, player 1 (Félix) horizontal ones.

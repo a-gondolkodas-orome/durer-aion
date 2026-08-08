@@ -10,11 +10,6 @@ export type TurnState = { firstSelectedPile: number }
 export const isPile = (board: Board, pileIndex: number): boolean =>
   Number.isInteger(pileIndex) && pileIndex >= 0 && pileIndex < board.length;
 
-// Merging needs two piles, and they have to be different ones.
-const isMergeAllowed = (board: Board, piles: number[]): boolean =>
-  Array.isArray(piles) && piles.length === 2
-    && isPile(board, piles[0]) && isPile(board, piles[1]) && piles[0] !== piles[1];
-
 export const moves = {
   removeOne: {
     validate: (board: Board, _: { ctx: Ctx<TurnState> }, pileIndex: number) => isPile(board, pileIndex),
@@ -35,7 +30,10 @@ export const moves = {
     }
   },
   mergePiles: {
-    validate: (board: Board, _: { ctx: Ctx<TurnState> }, piles: number[]) => isMergeAllowed(board, piles),
+    // Merging needs two piles, and they have to be different ones.
+    validate: (board: Board, _: { ctx: Ctx<TurnState> }, piles: number[]) =>
+      Array.isArray(piles) && piles.length === 2
+        && isPile(board, piles[0]) && isPile(board, piles[1]) && piles[0] !== piles[1],
     apply: (
       board: Board, _: { ctx: Ctx<TurnState> }, [pileIndex1, pileIndex2]: number[]
     ): MoveOutcome<Board, TurnState> => {

@@ -3,12 +3,13 @@ import {
   canMove,
   generateStartBoard,
   getLegalMoves,
-  isTakeAllowed,
   isTerminal,
   moves,
   type Board
 } from './gameplay';
-import { makeCtx } from 'test-utils';
+import { makeCtx, moveValidator } from 'test-utils';
+
+const isTakeAllowed = moveValidator(moves.takeChips);
 
 describe('two-of-three-takeaway gameplay', () => {
   describe('move mechanics', () => {

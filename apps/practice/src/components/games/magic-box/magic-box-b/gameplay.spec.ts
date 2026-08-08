@@ -2,13 +2,13 @@ import {
   LINES,
   emptyCellsInLine,
   isLineFull,
-  isPlacementAllowed,
   moves,
   placeStoneAt,
   type Board
 } from './gameplay';
 import { makeCtx, moveValidator } from 'test-utils';
 
+const isPlacementAllowed = moveValidator(moves.placeStone);
 const isDesignationAllowed = moveValidator(moves.designateLine);
 
 describe('isLineFull', () => {

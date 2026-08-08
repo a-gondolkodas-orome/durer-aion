@@ -2,7 +2,6 @@ import {
   generateStartBoard,
   generateTestStartBoard,
   isLosingNumber,
-  isSplitAllowed,
   isTerminal,
   isWinningBoard,
   isWinningNumber,
@@ -12,6 +11,7 @@ import {
 import { makeCtx, moveValidator } from 'test-utils';
 
 const isKeepAllowed = moveValidator(moves.keepPile);
+const isSplitAllowed = moveValidator(moves.splitPile);
 
 describe('three-piles-rebuild gameplay', () => {
   describe('isWinningNumber / isLosingNumber', () => {

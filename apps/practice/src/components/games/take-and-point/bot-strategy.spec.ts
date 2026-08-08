@@ -4,7 +4,6 @@ import { chooseRemoval, choosePointing } from './bot-strategy';
 import {
   applyRemoval,
   countMinPiles,
-  isRemovalAllowed,
   minPileSize,
   moves,
   nonEmptyIndices,
@@ -13,6 +12,7 @@ import {
 import { moveValidator } from 'test-utils';
 
 const isPointingAllowed = moveValidator(moves.pointPiles);
+const isRemovalAllowed = moveValidator(moves.takeStones);
 
 // ---- brute-force oracle (independent of the bot) ----
 const cache = new Map<string, boolean>();

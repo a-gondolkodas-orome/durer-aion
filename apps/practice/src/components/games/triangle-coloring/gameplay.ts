@@ -23,12 +23,6 @@ export const triangles = [
   { id: 15, v: [9, 13, 14], neighbors: [14] }
 ];
 
-// A triangle may be coloured while it is still ALLOWED — neither coloured
-// already nor forbidden by a neighbour someone coloured earlier. Both players
-// colour from the same board, so whose turn it is does not enter into legality.
-export const isColoringAllowed = (board: Board, id: number): boolean =>
-  Number.isInteger(id) && id >= 0 && id < triangles.length && board[id] === ALLOWED;
-
 // The board transform a colouring performs, with no turn or game consequences.
 // Shared by the move and by the lookahead search below, which wants the next
 // board and nothing else.
@@ -43,7 +37,11 @@ export const withTriangleColored = (board: Board, id: number): Board => {
 
 export const moves = {
   colorTriangle: {
-    validate: (board: Board, _, id: number) => isColoringAllowed(board, id),
+    // A triangle may be coloured while it is still ALLOWED — neither coloured
+    // already nor forbidden by a neighbour someone coloured earlier. Both players
+    // colour from the same board, so whose turn it is does not enter into legality.
+    validate: (board: Board, _, id: number) =>
+      Number.isInteger(id) && id >= 0 && id < triangles.length && board[id] === ALLOWED,
     apply: (board: Board, { ctx }: { ctx: Ctx }, id: number): MoveOutcome<Board> => {
       const nextBoard = withTriangleColored(board, id);
       if (getAllowedMoves(nextBoard).length === 0) {

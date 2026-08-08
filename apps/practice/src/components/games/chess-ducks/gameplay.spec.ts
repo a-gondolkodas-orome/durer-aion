@@ -1,10 +1,12 @@
 import { range } from 'lodash';
 import {
-  DUCK, FORBIDDEN, moves, isPlacementAllowed, getAllowedMoves, withDuckPlaced, type Board
+  DUCK, FORBIDDEN, moves, getAllowedMoves, withDuckPlaced, type Board
 } from './gameplay';
-import { makeCtx } from 'test-utils';
+import { makeCtx, moveValidator } from 'test-utils';
 
 const asPlayer = (currentPlayer: number) => ({ ctx: makeCtx({ currentPlayer }) });
+
+const isPlacementAllowed = moveValidator(moves.placeDuck);
 
 const emptyBoard = (rows: number, cols: number): Board =>
   range(rows).map(() => range(cols).map(() => null));

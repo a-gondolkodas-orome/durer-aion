@@ -19,10 +19,6 @@ export const applyMove = (board: Board, [i, j]: Move): Board =>
 
 export const isPile = (i: number): boolean => Number.isInteger(i) && i >= 0 && i < 3;
 
-// A move takes one chip from each of two *distinct* non-empty piles.
-export const isTakeAllowed = (board: Board, i: number, j: number): boolean =>
-  isPile(i) && isPile(j) && i !== j && board[i] > 0 && board[j] > 0;
-
 export const getLegalMoves = (board: Board): Move[] => {
   const nonEmpty = board.map((_, i) => i).filter(i => board[i] > 0);
   const moves: Move[] = [];
@@ -74,7 +70,9 @@ export const generateStartBoard = (): Board => {
 
 export const moves = {
   takeChips: {
-    validate: (board: Board, _, i: number, j: number) => isTakeAllowed(board, i, j),
+    // A move takes one chip from each of two *distinct* non-empty piles.
+    validate: (board: Board, _, i: number, j: number) =>
+      isPile(i) && isPile(j) && i !== j && board[i] > 0 && board[j] > 0,
     apply: (
       board: Board, { ctx }: { ctx: Ctx }, i: number, j: number
     ): MoveOutcome<Board> => {

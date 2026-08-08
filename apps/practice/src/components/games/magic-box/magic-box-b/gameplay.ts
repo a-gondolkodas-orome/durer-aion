@@ -31,7 +31,7 @@ export const placeStoneAt = (stones: boolean[], cellId: number): boolean[] =>
 // itself carries — a designated line is waiting for a stone, and only once that
 // stone is placed may the next line be designated. So neither half needs turn
 // state to know whether it is its moment.
-export const isPlacementAllowed = (board: Board, cellId: number): boolean =>
+const isPlacementAllowed = (board: Board, cellId: number): boolean =>
   board.pendingLine !== null
     && LINES[board.pendingLine].includes(cellId)
     && !board.stones[cellId];

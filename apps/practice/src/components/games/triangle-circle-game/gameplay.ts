@@ -43,17 +43,6 @@ export const freeTriangles = (board: Board): number[] => {
   return result;
 };
 
-// The two players never compete for the same resource: the line player only
-// shades edges, the circle player only fills triangles. Each may use anything
-// their opponent has not — and they cannot — touched, so "still free" is the
-// whole of legality on both sides.
-const isShadeAllowed = (board: Board, edgeId: number): boolean =>
-  Number.isInteger(edgeId) && edgeId >= 0 && edgeId < EDGE_COUNT && !board.edges[edgeId];
-
-const isCirclePlacementAllowed = (board: Board, triangleId: number): boolean =>
-  Number.isInteger(triangleId) && triangleId >= 0 && triangleId < TRIANGLE_COUNT
-    && !board.circles[triangleId];
-
 export const applyShade = (board: Board, edgeId: number): Board => {
   const edges = board.edges.slice();
   edges[edgeId] = true;
@@ -97,13 +86,18 @@ export const isWinningShade = (board: Board, edgeId: number): boolean =>
   );
 
 // Each move belongs to exactly one role, so both validators check who is on
-// turn: shading is not a thing the circle player can do at all.
+// turn: shading is not a thing the circle player can do at all. Beyond that the
+// two players never compete for the same resource — the line player only shades
+// edges, the circle player only fills triangles — so "still free" is the whole
+// of legality on both sides.
 export const moves = {
   // Line player shades one edge; they win at once if it completes an un-circled
   // triangle, otherwise the turn passes.
   shadeEdge: {
     validate: (board: Board, { ctx }: { ctx: Ctx }, edgeId: number) =>
-      ctx.currentPlayer === LINE && isShadeAllowed(board, edgeId),
+      ctx.currentPlayer === LINE
+        && Number.isInteger(edgeId) && edgeId >= 0 && edgeId < EDGE_COUNT
+        && !board.edges[edgeId],
     apply: (board: Board, _, edgeId: number): MoveOutcome<Board> => {
       const nextBoard = applyShade(board, edgeId);
       if (isLineWin(nextBoard)) {
@@ -116,7 +110,9 @@ export const moves = {
   // is circled, otherwise the turn passes.
   placeCircle: {
     validate: (board: Board, { ctx }: { ctx: Ctx }, triangleId: number) =>
-      ctx.currentPlayer === CIRCLE && isCirclePlacementAllowed(board, triangleId),
+      ctx.currentPlayer === CIRCLE
+        && Number.isInteger(triangleId) && triangleId >= 0 && triangleId < TRIANGLE_COUNT
+        && !board.circles[triangleId],
     apply: (board: Board, _, triangleId: number): MoveOutcome<Board> => {
       const nextBoard = applyCircle(board, triangleId);
       if (isCircleWin(nextBoard)) {

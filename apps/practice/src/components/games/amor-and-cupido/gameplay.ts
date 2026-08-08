@@ -41,11 +41,6 @@ export const generateStartBoard = (): Board => new Array(EDGES.length).fill(null
 export const getAllowedMoves = (board: Board): number[] =>
   board.flatMap((owner, e) => (owner === null ? [e] : []));
 
-// A pair may be claimed while nobody owns it. Both players claim from the same
-// 15 edges, so whose turn it is does not enter into legality.
-const isClaimAllowed = (board: Board, edge: number): boolean =>
-  Number.isInteger(edge) && edge >= 0 && edge < EDGES.length && board[edge] === null;
-
 // Would claiming `edge` for `player` complete a triangle entirely in their
 // colour? A move can only ever complete the mover's own triangle (you only add
 // to your own colour), so this is the single win condition. `edge` itself is
@@ -95,7 +90,10 @@ export const canonicalKey = (board: Board, toMove: number): string => {
 
 export const moves = {
   claimEdge: {
-    validate: (board: Board, _, edge: number) => isClaimAllowed(board, edge),
+    // A pair may be claimed while nobody owns it. Both players claim from the
+    // same 15 edges, so whose turn it is does not enter into legality.
+    validate: (board: Board, _, edge: number) =>
+      Number.isInteger(edge) && edge >= 0 && edge < EDGES.length && board[edge] === null,
     apply: (board: Board, { ctx }: { ctx: Ctx }, edge: number): MoveOutcome<Board> => {
       const nextBoard = board.slice();
       nextBoard[edge] = ctx.currentPlayer;

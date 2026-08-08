@@ -1,10 +1,14 @@
 import { times, uniqWith, isEqual } from 'lodash';
 import {
   type Board, boardAfterRemoval, generateStartBoard, generateTestStartBoard, hasNoLegalMove,
-  isRemovalAllowed, moves, openPiles
+  moves, openPiles
 } from './gameplay';
 import { isWinningForMover } from './bot-strategy';
-import { makeCtx } from 'test-utils';
+import { makeCtx, moveValidator } from 'test-utils';
+
+// Which pile is open depends on who is taking, so the mover goes into the ctx.
+const isRemovalAllowed = (board: Board, player: number, pileId: number): boolean =>
+  moveValidator(moves.removeStone, makeCtx({ currentPlayer: player }))(board, pileId);
 
 const asPlayer = (currentPlayer: number) => ({ ctx: makeCtx({ currentPlayer }) });
 

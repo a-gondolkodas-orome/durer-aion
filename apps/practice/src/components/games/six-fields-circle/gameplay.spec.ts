@@ -1,7 +1,9 @@
 import {
-  getLegalMoves, hasLegalMove, isOpposite, isRemovalAllowed, moves, type Board, type TurnState
+  getLegalMoves, hasLegalMove, isOpposite, moves, type Board, type TurnState
 } from './gameplay';
-import { makeCtx } from 'test-utils';
+import { makeCtx, moveValidator } from 'test-utils';
+
+const isRemovalAllowed = moveValidator(moves.removeFromTwo);
 
 describe('isRemovalAllowed', () => {
   const board: Board = [2, 1, 0, 3, 1, 1];

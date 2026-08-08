@@ -1,5 +1,7 @@
-import { hasAnyMove, isNodePlayable, legalNodes, moves, type Board } from './gameplay';
-import { makeCtx } from 'test-utils';
+import { hasAnyMove, legalNodes, moves, type Board } from './gameplay';
+import { makeCtx, moveValidator } from 'test-utils';
+
+const isNodePlayable = moveValidator(moves.placeCoin);
 
 // K(2,3): 0=A and 1=B are the hubs, each joined to 2=C, 3=D and 4=E. Neither
 // hub is joined to the other, and C, D, E are not joined to each other.

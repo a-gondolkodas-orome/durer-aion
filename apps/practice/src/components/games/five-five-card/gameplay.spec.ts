@@ -1,7 +1,12 @@
-import { isRemovalAllowed, moves, type Board } from './gameplay';
-import { makeCtx } from 'test-utils';
+import { moves, type Board } from './gameplay';
+import { makeCtx, moveValidator } from 'test-utils';
 
 const asPlayer = (currentPlayer: number) => ({ ctx: makeCtx({ currentPlayer }) });
+
+// The move takes from the other player's hand, so the mover is the opponent of
+// the hand the assertion names.
+const isRemovalAllowed = (board: Board, opponent: number, id: number): boolean =>
+  moveValidator(moves.removeCard, makeCtx({ currentPlayer: 1 - opponent }))(board, id);
 
 // A hand holding exactly the listed values, at their 1-based positions.
 const hand = (values: number[]): (number | null)[] =>

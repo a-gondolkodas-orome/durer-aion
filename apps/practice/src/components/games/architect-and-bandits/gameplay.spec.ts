@@ -1,4 +1,15 @@
-import { type Board, isArchitectStepAllowed, isDestructionAllowed } from './gameplay';
+import { type Board, ARCHITECT, BANDITS, makeMoves } from './gameplay';
+import { makeCtx, moveValidator } from 'test-utils';
+
+const isDestructionAllowed = moveValidator(
+  makeMoves(40).destroyTower, makeCtx({ currentPlayer: BANDITS })
+);
+
+// The step rule reads the day's allowance as well as the board, so each variant
+// asks its own moves.
+const stepAllowedWith = (kmPerDay: number) => moveValidator(
+  makeMoves(kmPerDay).moveArchitect, makeCtx({ currentPlayer: ARCHITECT })
+);
 
 // A fresh day on a regular polygon with `vertexCount` towers, all standing, the
 // architect at A(0).
@@ -14,7 +25,7 @@ describe('isArchitectStepAllowed', () => {
   // Variant A: an 8-vertex wall, 40 km (four edges) per day.
   describe('on the octagon', () => {
     const octagon = boardOn(8);
-    const stepAllowed = (board, target: number) => isArchitectStepAllowed(board, target, 40);
+    const stepAllowed = stepAllowedWith(40);
 
     it('allows a step to either neighbour along the wall', () => {
       expect(stepAllowed(octagon({ architectPosition: 3 }), 2)).toBe(true);
@@ -52,7 +63,7 @@ describe('isArchitectStepAllowed', () => {
   // gives different answers — it reads both off the board and the allowance.
   describe('on the decagon', () => {
     const decagon = boardOn(10);
-    const stepAllowed = (board, target: number) => isArchitectStepAllowed(board, target, 50);
+    const stepAllowed = stepAllowedWith(50);
 
     it('wraps round at vertex 9, which is not a neighbour of A on the octagon', () => {
       expect(stepAllowed(decagon({ architectPosition: 0 }), 9)).toBe(true);

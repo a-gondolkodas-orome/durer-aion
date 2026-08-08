@@ -1,7 +1,9 @@
-import { isRobbable, moves, type Board } from './gameplay';
-import { makeCtx } from 'test-utils';
+import { moves, type Board } from './gameplay';
+import { makeCtx, moveValidator } from 'test-utils';
 
 const asPlayer = (currentPlayer: number) => ({ ctx: makeCtx({ currentPlayer }) });
+
+const isRobbable = moveValidator(moves.rob);
 
 const board = (standing: boolean[]): Board => ({
   circle: standing,

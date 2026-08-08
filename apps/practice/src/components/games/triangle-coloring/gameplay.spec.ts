@@ -1,8 +1,10 @@
 import { range } from 'lodash';
-import { moves, isColoringAllowed } from './gameplay';
-import { makeCtx } from 'test-utils';
+import { moves } from './gameplay';
+import { makeCtx, moveValidator } from 'test-utils';
 
 const asPlayer = (currentPlayer: number) => ({ ctx: makeCtx({ currentPlayer }) });
+
+const isColoringAllowed = moveValidator(moves.colorTriangle);
 
 const [ALLOWED, COLORED, FORBIDDEN] = [1, 2, 3] as const;
 type Board = Parameters<typeof moves.colorTriangle.apply>[0];

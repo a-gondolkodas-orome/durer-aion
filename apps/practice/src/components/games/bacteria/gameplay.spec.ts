@@ -1,9 +1,16 @@
 import {
   moves, applyAttackMove, totalBacteria,
-  hasBacterium, isAttackAllowed, ATTACKER, DEFENDER, type MoveType
+  hasBacterium, ATTACKER, DEFENDER, type Board, type MoveType
 } from './gameplay';
 import { reverse } from 'lodash';
 import { makeCtx } from 'test-utils';
+
+// Each attack type is its own move, so the type the assertion names picks the
+// move its legality is read from.
+const isAttackAllowed = (
+  board: Board, { type, row, col }: { type: MoveType, row: number, col: number }
+): boolean =>
+  moves[type].validate(board, { ctx: makeCtx({ currentPlayer: ATTACKER }) }, { row, col });
 
 describe('moves', () => {
   const meta = { ctx: makeCtx({ currentPlayer: DEFENDER }) };

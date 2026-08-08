@@ -1,5 +1,8 @@
-import { isRemovalAllowed, isSplitAllowed, moves, type Board } from './gameplay';
-import { makeCtx } from 'test-utils';
+import { moves, type Board } from './gameplay';
+import { makeCtx, moveValidator } from 'test-utils';
+
+const isRemovalAllowed = moveValidator(moves.removeMatch);
+const isSplitAllowed = moveValidator(moves.splitPile);
 
 const asPlayer = (currentPlayer: number) => ({ ctx: makeCtx({ currentPlayer }) });
 

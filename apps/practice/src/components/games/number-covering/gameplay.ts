@@ -7,14 +7,13 @@ export const COVERED = -1 as const;
 
 export const getRemaining = (board: Board) => board.filter(i => i !== COVERED);
 
-// Numbers are addressed by their value, which is also their 1-based position;
-// only one that is still showing may be covered.
-const isCoveringAllowed = (board: Board, number: number): boolean =>
-  Number.isInteger(number) && number >= 1 && number <= board.length && board[number - 1] !== COVERED;
-
 export const moves = {
   coverNumber: {
-    validate: (board: Board, _, number: number) => isCoveringAllowed(board, number),
+    // Numbers are addressed by their value, which is also their 1-based
+    // position; only one that is still showing may be covered.
+    validate: (board: Board, _, number: number) =>
+      Number.isInteger(number) && number >= 1 && number <= board.length
+        && board[number - 1] !== COVERED,
     apply: (board: Board, _, number: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard[number-1] = COVERED;

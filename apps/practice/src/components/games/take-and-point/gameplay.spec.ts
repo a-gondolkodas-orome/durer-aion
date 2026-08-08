@@ -10,11 +10,11 @@ import {
   nonEmptyIndices,
   removerWins,
   requiredPointCount,
-  isRemovalAllowed,
   type Board
 } from './gameplay';
 
 const isPointingAllowed = moveValidator(moves.pointPiles);
+const isRemovalAllowed = moveValidator(moves.takeStones);
 
 // Brute-force ground truth: does the player who is about to be pointed at (and
 // then takes) win the rest of the game with optimal play from both sides?

@@ -1,6 +1,9 @@
-import { isPile, moves, type TurnState } from './gameplay';
+import { moves, type TurnState } from './gameplay';
 import { makeCtx, moveValidator } from 'test-utils';
 
+// Taking a match is legal exactly for an index that names a pile, so this is
+// both the removal rule and what `isPile` means.
+const isPile = moveValidator(moves.removeOne);
 const isMergeAllowed = moveValidator(moves.mergePiles);
 
 const asPlayer = (currentPlayer: number) => ({ ctx: makeCtx<TurnState>({ currentPlayer }) });

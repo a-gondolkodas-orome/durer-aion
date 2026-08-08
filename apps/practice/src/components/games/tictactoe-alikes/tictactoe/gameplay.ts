@@ -25,14 +25,6 @@ export const otherPlayerColor = (ctx: Ctx) =>
     ? (ctx.currentPlayer === 0 ? 'red' : 'blue')
     : (ctx.currentPlayer === ctx.chosenRoleIndex ? botColor : pColor);
 
-// Whitening only starts once the board is full, and a player may only whiten one
-// of the *other* player's pieces — never an own or an already whitened one. The
-// phase check is what stops a player from whitening mid-placement; for placing,
-// "the cell is empty" already implies the placing phase, so that move needs no
-// phase check of its own.
-const isWhiteningAllowed = (board: Board, ctx: Ctx, id: number) =>
-  !inPlacingPhase(board) && board[id] === otherPlayerColor(ctx);
-
 export const moves = {
   placePiece: {
     validate: validatePlacement,
@@ -46,7 +38,13 @@ export const moves = {
     }
   },
   whitenPiece: {
-    validate: (board: Board, { ctx }: { ctx: Ctx }, id: number) => isWhiteningAllowed(board, ctx, id),
+    // Whitening only starts once the board is full, and a player may only whiten
+    // one of the *other* player's pieces — never an own or an already whitened
+    // one. The phase check is what stops a player from whitening mid-placement;
+    // for placing, "the cell is empty" already implies the placing phase, so that
+    // move needs no phase check of its own.
+    validate: (board: Board, { ctx }: { ctx: Ctx }, id: number) =>
+      !inPlacingPhase(board) && board[id] === otherPlayerColor(ctx),
     apply: (board: Board, { ctx }: { ctx: Ctx }, id: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard[id] = 'white';

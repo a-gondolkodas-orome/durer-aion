@@ -1,5 +1,7 @@
-import { generateEmptyBoard, hasFullLine, isPlacementAllowed, moves } from './gameplay';
-import { makeCtx } from 'test-utils';
+import { generateEmptyBoard, hasFullLine, moves } from './gameplay';
+import { makeCtx, moveValidator } from 'test-utils';
+
+const isPlacementAllowed = moveValidator(moves.placeStone);
 
 describe('hasFullLine', () => {
   it('should be false for an empty board', () => {

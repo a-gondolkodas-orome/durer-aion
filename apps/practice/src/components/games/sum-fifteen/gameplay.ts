@@ -15,11 +15,6 @@ export const numbersOwnedBy = (owner: Owner, player: 0 | 1): number[] =>
 export const freeNumbers = (owner: Owner): number[] =>
   allNumbers.filter(n => owner[n - 1] === null);
 
-// A player may claim any of 1..9 that nobody has claimed yet. Both players draw
-// from the same nine numbers, so whose turn it is does not enter into legality.
-const isChoiceAllowed = (owner: Owner, n: number): boolean =>
-  Number.isInteger(n) && n >= 1 && n <= allNumbers.length && owner[n - 1] === null;
-
 // The first player owns numbers on even move counts, so the player to move is
 // simply the parity of how many numbers have been claimed.
 export const currentPlayerFromOwner = (owner: Owner): 0 | 1 =>
@@ -53,7 +48,11 @@ export const findWinningTriple = (nums: number[]): number[] | null => {
 
 export const moves = {
   chooseNumber: {
-    validate: (board: Board, _, n: number) => isChoiceAllowed(board.owner, n),
+    // A player may claim any of 1..9 that nobody has claimed yet. Both players
+    // draw from the same nine numbers, so whose turn it is does not enter into
+    // legality.
+    validate: (board: Board, _, n: number) =>
+      Number.isInteger(n) && n >= 1 && n <= allNumbers.length && board.owner[n - 1] === null,
     apply: (board: Board, { ctx }: { ctx: Ctx }, n: number): MoveOutcome<Board> => {
       const player = ctx.currentPlayer as 0 | 1;
       const owner = board.owner.slice() as Board['owner'];

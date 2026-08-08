@@ -50,14 +50,12 @@ export const playerHasLine = (board: Board, playerIndex: number): boolean => {
 
 export const isBoardFull = (board: Board): boolean => board.every((cell) => cell !== null);
 
-// A disc may go on any cell of the board that is still empty; both players draw
-// from the same pool of cells, so whose turn it is does not matter.
-export const isPlacementAllowed = (board: Board, node: number): boolean =>
-  Number.isInteger(node) && node >= 0 && node < CELL_COUNT && board[node] === null;
-
 export const moves = {
   placePiece: {
-    validate: (board: Board, _, node: number) => isPlacementAllowed(board, node),
+    // A disc may go on any cell of the board that is still empty; both players
+    // draw from the same pool of cells, so whose turn it is does not matter.
+    validate: (board: Board, _, node: number) =>
+      Number.isInteger(node) && node >= 0 && node < CELL_COUNT && board[node] === null,
     apply: (board: Board, { ctx }: { ctx: Ctx }, node: number): MoveOutcome<Board> => {
       const nextBoard = board.slice();
       nextBoard[node] = playerColor(ctx.currentPlayer!);

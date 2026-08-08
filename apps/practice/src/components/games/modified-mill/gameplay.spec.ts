@@ -5,13 +5,14 @@ import {
   generateEmptyBoard,
   hasLine,
   isBoardFull,
-  isPlacementAllowed,
   moves,
   playerColor,
   playerHasLine
 } from './gameplay';
 import { LINES } from './board-data';
-import { makeCtx } from 'test-utils';
+import { makeCtx, moveValidator } from 'test-utils';
+
+const isPlacementAllowed = moveValidator(moves.placePiece);
 
 describe('modified mill helpers', () => {
   it('has a 24-cell board and 16 winning lines of three cells each', () => {

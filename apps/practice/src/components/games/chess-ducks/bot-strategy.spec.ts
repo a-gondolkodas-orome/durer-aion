@@ -1,12 +1,14 @@
 import { range } from 'lodash';
 import { runMatch, type MatchResult } from 'strategy-game-factory';
 import {
-  getAllowedMoves, isPlacementAllowed, withDuckPlaced, moves, type Board, type Field
+  getAllowedMoves, withDuckPlaced, moves, type Board, type Field
 } from './gameplay';
 import {
   smartBotStrategy, randomBotStrategy, smartBotOptimalSecondSteps, smartBotOptimalThirdSteps
 } from './bot-strategy';
-import { botNextMoveArgs, makeCtx } from 'test-utils';
+import { botNextMoveArgs, makeCtx, moveValidator } from 'test-utils';
+
+const isPlacementAllowed = moveValidator(moves.placeDuck);
 
 const emptyBoard = (rows: number, cols: number): Board =>
   range(rows).map(() => range(cols).map(() => null));

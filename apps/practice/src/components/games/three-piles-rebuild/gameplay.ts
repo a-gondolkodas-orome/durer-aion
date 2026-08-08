@@ -22,12 +22,6 @@ export const keptPileId = (board: Board): number | undefined =>
 export const withOtherPilesDiscarded = (board: Board, keepId: number): Board =>
   board.map((v, i) => (i === keepId ? v : 0));
 
-// A pile can be kept only at the start of a turn, and only if it can be split.
-const isKeepAllowed = (board: Board, keepId: number): boolean =>
-  Number.isInteger(keepId) && keepId >= 0 && keepId < board.length
-    && keptPileId(board) === undefined
-    && canSplit(board[keepId]);
-
 // The rebuild has to use up the kept pile exactly, in three non-empty parts.
 export const isSplitAllowed = (board: Board, parts: number[]): boolean => {
   const keptId = keptPileId(board);
@@ -86,7 +80,11 @@ export const generateTestStartBoard = (): Board =>
 export const moves = {
   // Step 1 of a turn: keep one pile, discard the other two (shown as 0).
   keepPile: {
-    validate: (board: Board, _, keepId: number) => isKeepAllowed(board, keepId),
+    // A pile can be kept only at the start of a turn, and only if it can be split.
+    validate: (board: Board, _, keepId: number) =>
+      Number.isInteger(keepId) && keepId >= 0 && keepId < board.length
+        && keptPileId(board) === undefined
+        && canSplit(board[keepId]),
     // First half of the turn: keep one pile, then rebuild from it — the turn
     // stays open in between.
     apply: (board: Board, _, keepId: number): MoveOutcome<Board> =>

@@ -24,10 +24,6 @@ export const isArchitectStepAllowed = (board: Board, targetVertex: number, kmPer
   return gap === 1 || gap === board.towers.length - 1; // neighbours, wrapping round
 };
 
-// The bandits knock down one standing tower each night.
-export const isDestructionAllowed = (board: Board, vertex: number): boolean =>
-  isVertex(board, vertex) && board.towers[vertex];
-
 export const makeStartBoard = (vertexCount: number) => (): Board => {
   const towers = Array(vertexCount).fill(false);
   /*
@@ -71,8 +67,9 @@ export const makeMoves = (kmPerDay: number) => ({
     }
   },
   destroyTower: {
+    // The bandits knock down one standing tower each night.
     validate: (board: Board, { ctx }: { ctx: Ctx }, vertex: number) =>
-      ctx.currentPlayer === BANDITS && isDestructionAllowed(board, vertex),
+      ctx.currentPlayer === BANDITS && isVertex(board, vertex) && board.towers[vertex],
     apply: (board: Board, _, vertex: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard.towers[vertex] = false;

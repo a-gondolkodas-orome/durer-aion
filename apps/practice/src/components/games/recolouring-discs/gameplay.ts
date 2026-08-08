@@ -69,15 +69,6 @@ export const placeTargets = (cells: Cell[], color: 'red' | 'blue'): number[] =>
         (j + 1 < cells.length && cells[j + 1] === color))
   );
 
-// A player may only pick up a disc of their own colour, and only drop it on a
-// cell `moveTargets` offers (empty, 1–2 away).
-const isDiscMoveAllowed = (cells: Cell[], player: number, from: number, to: number): boolean =>
-  cells[from] === colorOf(player) && moveTargets(cells, from).includes(to);
-
-// A new disc may only go on an empty cell next to one of the player's own discs.
-export const isPlacementAllowed = (cells: Cell[], player: number, at: number): boolean =>
-  placeTargets(cells, colorOf(player)).includes(at);
-
 export const legalMoves = (cells: Cell[], player: number): Move[] => {
   const color = colorOf(player);
   const result: Move[] = [{ type: 'pass' }];
@@ -150,14 +141,18 @@ const finalize = (nextCells: Board['cells'], ctx: Ctx): MoveOutcome<Board> => {
 // validator.
 export const moves = {
   moveDisc: {
+    // A player may only pick up a disc of their own colour, and only drop it on
+    // a cell `moveTargets` offers (empty, 1–2 away).
     validate: (board: Board, { ctx }: { ctx: Ctx }, from: number, to: number) =>
-      isDiscMoveAllowed(board.cells, ctx.currentPlayer!, from, to),
+      board.cells[from] === colorOf(ctx.currentPlayer!)
+        && moveTargets(board.cells, from).includes(to),
     apply: (board: Board, { ctx }: { ctx: Ctx }, from: number, to: number) =>
       finalize(applyMove(board.cells, ctx.currentPlayer!, { type: 'move', from, to }), ctx)
   },
   placeDisc: {
+    // A new disc may only go on an empty cell next to one of the player's own discs.
     validate: (board: Board, { ctx }: { ctx: Ctx }, at: number) =>
-      isPlacementAllowed(board.cells, ctx.currentPlayer!, at),
+      placeTargets(board.cells, colorOf(ctx.currentPlayer!)).includes(at),
     apply: (board: Board, { ctx }: { ctx: Ctx }, at: number) =>
       finalize(applyMove(board.cells, ctx.currentPlayer!, { type: 'place', to: at }), ctx)
   },

@@ -21,15 +21,10 @@ export const generateStartBoard = (maxDiscs: number) => (): Board => {
 // discs from its own pile — no more, and never from an emptier pile than that.
 // Both players draw on the same two piles, so whose turn it is does not enter
 // into legality.
-export const isRemovalAllowed = (board: Board, count: number): boolean =>
-  (count === 1 || count === 2) && count <= board[0];
-
-const isFlipAllowed = (board: Board, count: number): boolean =>
-  (count === 1 || count === 2) && count <= board[1];
-
 export const moves = {
   removeDiscs: {
-    validate: (board: Board, _, count: number) => isRemovalAllowed(board, count),
+    validate: (board: Board, _, count: number) =>
+      (count === 1 || count === 2) && count <= board[0],
     apply: (board: Board, { ctx }: { ctx: Ctx }, count: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard[0] -= count;
@@ -40,7 +35,8 @@ export const moves = {
     }
   },
   turnDiscs: {
-    validate: (board: Board, _, count: number) => isFlipAllowed(board, count),
+    validate: (board: Board, _, count: number) =>
+      (count === 1 || count === 2) && count <= board[1],
     apply: (board: Board, { ctx }: { ctx: Ctx }, count: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard[1] -= count;

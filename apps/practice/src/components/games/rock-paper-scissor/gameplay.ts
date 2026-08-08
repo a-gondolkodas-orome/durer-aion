@@ -22,14 +22,14 @@ const getWinnerIndex = (board: Board) => {
   return beats(second, first) ? 1 : 0;
 };
 
-// Only a symbol the other player still holds may be taken away.
-export const isRemovalAllowed = (board: Board, opponent: number, idx: number): boolean =>
-  Number.isInteger(idx) && idx >= 0 && idx < board[opponent].length && board[opponent][idx] !== null;
-
 export const moves = {
   removeSymbol: {
-    validate: (board: Board, { ctx }: { ctx: Ctx }, idx: number) =>
-      isRemovalAllowed(board, 1 - ctx.currentPlayer!, idx),
+    // Only a symbol the other player still holds may be taken away.
+    validate: (board: Board, { ctx }: { ctx: Ctx }, idx: number) => {
+      const opponent = 1 - ctx.currentPlayer!;
+      return Number.isInteger(idx) && idx >= 0 && idx < board[opponent].length
+        && board[opponent][idx] !== null;
+    },
     apply: (board: Board, { ctx }: { ctx: Ctx }, idx: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard[1 - ctx.currentPlayer!][idx] = null;

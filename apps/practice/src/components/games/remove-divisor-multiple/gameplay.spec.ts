@@ -1,6 +1,8 @@
 import { range } from 'lodash';
-import { isAllowed, moves } from './gameplay';
-import { makeCtx } from 'test-utils';
+import { moves } from './gameplay';
+import { makeCtx, moveValidator } from 'test-utils';
+
+const isAllowed = moveValidator(moves.removeNumber);
 
 const asPlayer = (currentPlayer: number) => ({ ctx: makeCtx({ currentPlayer }) });
 

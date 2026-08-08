@@ -33,12 +33,6 @@ export const markForbiddenFields = (board: Board, { row, col }: Field): void => 
   }
 };
 
-// A duck goes on a field that is still free — neither holding a duck nor
-// attacked by one. Both players place on the same board, so whose turn it is
-// does not enter into legality.
-export const isPlacementAllowed = (board: Board, field: Field): boolean =>
-  !!field && board[field.row]?.[field.col] === null;
-
 // The board transform a placement performs, with no turn or game consequences.
 // Shared by the move and by the bot's lookahead search, which wants the next
 // board and nothing else.
@@ -51,7 +45,11 @@ export const withDuckPlaced = (board: Board, { row, col }: Field): Board => {
 
 export const moves = {
   placeDuck: {
-    validate: (board: Board, _, field: Field) => isPlacementAllowed(board, field),
+    // A duck goes on a field that is still free — neither holding a duck nor
+    // attacked by one. Both players place on the same board, so whose turn it is
+    // does not enter into legality.
+    validate: (board: Board, _, field: Field) =>
+      !!field && board[field.row]?.[field.col] === null,
     apply: (board: Board, { ctx }: { ctx: Ctx }, field: Field): MoveOutcome<Board> => {
       const nextBoard = withDuckPlaced(board, field);
       if (getAllowedMoves(nextBoard).length === 0) {

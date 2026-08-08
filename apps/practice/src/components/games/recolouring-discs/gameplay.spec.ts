@@ -4,7 +4,6 @@ import {
   RED,
   applyMove,
   encode,
-  isPlacementAllowed,
   legalMoves,
   majorityWinner,
   moveTargets,
@@ -18,6 +17,9 @@ import { makeCtx } from 'test-utils';
 
 const isDiscMoveAllowed = (cells: Cell[], player: number, from: number, to: number) =>
   moves.moveDisc.validate({ cells }, { ctx: makeCtx({ currentPlayer: player }) }, from, to);
+
+const isPlacementAllowed = (cells: Cell[], player: number, at: number) =>
+  moves.placeDisc.validate({ cells }, { ctx: makeCtx({ currentPlayer: player }) }, at);
 
 const cells = (s: string): Cell[] =>
   [...s].map(c => (c === 'R' ? 'red' : c === 'B' ? 'blue' : null));

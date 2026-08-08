@@ -23,15 +23,15 @@ export const getWinnerIndex = (board: Board) => {
   }
 }
 
-// Cards are addressed by their 1-based position in the other player's hand, and
-// only a card still lying there may be taken.
-export const isRemovalAllowed = (board: Board, opponent: number, id: number): boolean =>
-  Number.isInteger(id) && id >= 1 && id <= board[opponent].length && board[opponent][id - 1] !== null;
-
 export const moves = {
   removeCard: {
-    validate: (board: Board, { ctx }: { ctx: Ctx }, id: number) =>
-      isRemovalAllowed(board, 1 - ctx.currentPlayer!, id),
+    // Cards are addressed by their 1-based position in the other player's hand,
+    // and only a card still lying there may be taken.
+    validate: (board: Board, { ctx }: { ctx: Ctx }, id: number) => {
+      const opponent = 1 - ctx.currentPlayer!;
+      return Number.isInteger(id) && id >= 1 && id <= board[opponent].length
+        && board[opponent][id - 1] !== null;
+    },
     apply: (board: Board, { ctx }: { ctx: Ctx }, id: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard[1 - ctx.currentPlayer!][id - 1] = null;

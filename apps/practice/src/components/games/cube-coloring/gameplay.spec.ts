@@ -1,5 +1,8 @@
-import { isAllowedStep, generateStartBoard, moves, neighbours, type Board } from './gameplay';
-import { makeCtx } from 'test-utils';
+import { generateStartBoard, moves, neighbours, type Board } from './gameplay';
+import { makeCtx, moveValidator } from 'test-utils';
+
+const isAllowedStep = (board: Board, vertex: number, color: string | null): boolean =>
+  moveValidator(moves.colorVertex)(board, { vertex, color });
 
 describe('cube-coloring isAllowedStep', () => {
   const empty = (): Board => generateStartBoard();

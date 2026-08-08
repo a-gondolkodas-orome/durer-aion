@@ -1,7 +1,9 @@
-import { isDominoAllowed, moves, getPossibleMoves, type Board, type Domino } from './gameplay';
-import { makeCtx } from 'test-utils';
+import { moves, getPossibleMoves, type Board, type Domino } from './gameplay';
+import { makeCtx, moveValidator } from 'test-utils';
 
 const asPlayer = (currentPlayer: number) => ({ ctx: makeCtx({ currentPlayer }) });
+
+const isDominoAllowed = moveValidator(moves.placeDomino);
 
 const emptyBoard: Board = [];
 

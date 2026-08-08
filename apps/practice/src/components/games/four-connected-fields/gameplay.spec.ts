@@ -1,5 +1,7 @@
-import { hasAnyMove, isNodePlayable, moves, type Board } from './gameplay';
-import { makeCtx } from 'test-utils';
+import { hasAnyMove, moves, type Board } from './gameplay';
+import { makeCtx, moveValidator } from 'test-utils';
+
+const isNodePlayable = moveValidator(moves.placeCoin);
 
 // 0=A and 1=B are the hubs, joined to each other and to both 2=C and 3=D;
 // C and D are not joined.
