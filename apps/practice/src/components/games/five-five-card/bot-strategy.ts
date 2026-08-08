@@ -1,32 +1,26 @@
-import { sample, range } from 'lodash';
+import { sample } from 'lodash';
 import type { BotStrategy } from 'strategy-game-factory';
-import { type Board, getWinnerIndex, type Moves } from './gameplay';
+import { getWinnerIndex, isGameEnd, withCardTaken, type Board, type Card, type Moves } from './gameplay';
 
 type Bot = BotStrategy<Board, Moves>
 
-export const randomBotStrategy: Bot = ({ board, ctx }) => {
-  const opponentIdx = ctx.chosenRoleIndex!;
-  const validIds = range(1, 6).filter(id => board[opponentIdx][id - 1] !== null);
-  return { move: 'removeCard', args: [sample(validIds)!] };
-};
+export const randomBotStrategy: Bot = ({ board, ctx }) =>
+  ({ move: 'removeCard', args: [sample(board[1 - ctx.currentPlayer!])!] });
 
 export const smartBotStrategy: Bot = ({ board, ctx }) => {
   const botPlayerIndex = ctx.currentPlayer!;
-  const opponentIdx = 1 - botPlayerIndex;
 
   let bestScore = -Infinity;
-  let bestMoves: number[] = [];
+  let bestMoves: Card[] = [];
 
-  for (let i = 0; i < 5; i++) {
-    if (board[opponentIdx][i] === null) continue;
-    const nextBoard = board.map(row => [...row]);
-    nextBoard[opponentIdx][i] = null;
-    const score = minimax(nextBoard, 1 - botPlayerIndex, botPlayerIndex);
+  for (const card of board[1 - botPlayerIndex]) {
+    const next = withCardTaken(board, botPlayerIndex, card);
+    const score = minimax(next, 1 - botPlayerIndex, botPlayerIndex);
     if (score > bestScore) {
       bestScore = score;
-      bestMoves = [i + 1];
+      bestMoves = [card];
     } else if (score === bestScore) {
-      bestMoves.push(i + 1);
+      bestMoves.push(card);
     }
   }
 
@@ -34,19 +28,15 @@ export const smartBotStrategy: Bot = ({ board, ctx }) => {
 };
 
 // Return `+1` if the bot's player index won, `-1` otherwise.
-const minimax = (board: Board, currentPlayer, botPlayerIndex): number => {
-  const winner = getWinnerIndex(board);
-  if (winner !== undefined) return winner === botPlayerIndex ? 1 : -1;
+const minimax = (board: Board, currentPlayer: number, botPlayerIndex: number): number => {
+  if (isGameEnd(board)) return getWinnerIndex(board) === botPlayerIndex ? 1 : -1;
 
-  const opponentIdx = 1 - currentPlayer;
   const isMaximizing = currentPlayer === botPlayerIndex;
   let best = isMaximizing ? -Infinity : Infinity;
 
-  for (let i = 0; i < 5; i++) {
-    if (board[opponentIdx][i] === null) continue;
-    const nextBoard = board.map(row => [...row]);
-    nextBoard[opponentIdx][i] = null;
-    const score = minimax(nextBoard, 1 - currentPlayer, botPlayerIndex);
+  for (const card of board[1 - currentPlayer]) {
+    const next = withCardTaken(board, currentPlayer, card);
+    const score = minimax(next, 1 - currentPlayer, botPlayerIndex);
     best = isMaximizing ? Math.max(best, score) : Math.min(best, score);
   }
 

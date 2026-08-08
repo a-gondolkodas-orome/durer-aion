@@ -1,17 +1,20 @@
 import { smartBotStrategy } from './bot-strategy';
-import { moves, type Board } from './gameplay';
-import { botNextMoveArgs, makeCtx } from 'test-utils';
+import { CARDS, generateStartBoard, moves, type Board, type Card } from './gameplay';
+import { botNextMoveArgs, makeCtx, moveValidator } from 'test-utils';
 
-const smartBotRemoval = (board: Board, currentPlayer: number): number =>
+const smartBotRemoval = (board: Board, currentPlayer: number): Card =>
   botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx({ currentPlayer }) }))[0];
 
-const START: Board = [['rock', 'paper', 'scissor'], ['rock', 'paper', 'scissor']];
+const remove = (board: Board, player: number, card: Card) =>
+  moves.removeCard.apply(board, { ctx: makeCtx({ currentPlayer: player }) }, card);
 
-const remove = (board: Board, player: number, idx: number) =>
-  moves.removeSymbol.apply(board, { ctx: makeCtx({ currentPlayer: player }) }, idx);
-
-const takeableIndices = (board: Board, player: number): number[] =>
-  [0, 1, 2].filter(idx => board[1 - player][idx] !== null);
+// Asking the move's own validator about every card in the game — rather than
+// reading the opponent hand directly — keeps the search below exploring exactly
+// the game the player plays.
+const takeableCards = (board: Board, player: number): Card[] => {
+  const isTakeable = moveValidator(moves.removeCard, makeCtx({ currentPlayer: player }));
+  return CARDS.filter(card => isTakeable(board, card));
+};
 
 // Winner under optimal play from `board` with `player` to move. Four moves at
 // three choices each, so a plain memoised search covers the whole game.
@@ -23,8 +26,8 @@ const optimalWinner = (board: Board, player: number): number => {
 
   // if no move wins for the mover, the opponent takes it
   let winner = 1 - player;
-  for (const idx of takeableIndices(board, player)) {
-    const outcome = remove(board, player, idx);
+  for (const card of takeableCards(board, player)) {
+    const outcome = remove(board, player, card);
     const result = outcome.gameEnd
       ? outcome.gameEnd.winnerIndex
       : optimalWinner(outcome.nextBoard, 1 - player);
@@ -34,6 +37,8 @@ const optimalWinner = (board: Board, player: number): number => {
   return winner;
 };
 
+const START = generateStartBoard();
+
 // Every position reachable from the start, paired with the player to move.
 const reachablePositions = (): { board: Board; player: number }[] => {
   const seen = new Map<string, { board: Board; player: number }>();
@@ -41,8 +46,8 @@ const reachablePositions = (): { board: Board; player: number }[] => {
     const key = `${JSON.stringify(board)}|${player}`;
     if (seen.has(key)) return;
     seen.set(key, { board, player });
-    for (const idx of takeableIndices(board, player)) {
-      const outcome = remove(board, player, idx);
+    for (const card of takeableCards(board, player)) {
+      const outcome = remove(board, player, card);
       if (!outcome.gameEnd) visit(outcome.nextBoard, 1 - player);
     }
   };
@@ -52,33 +57,21 @@ const reachablePositions = (): { board: Board; player: number }[] => {
 
 describe('smartBotStrategy', () => {
   it('as a second player remove useless piece in first step', () => {
-    expect(
-      smartBotRemoval([['rock', 'paper', 'scissor'], ['rock', null, 'scissor']], 1)
-    ).toEqual(0);
-    expect(
-      smartBotRemoval([['rock', 'paper', 'scissor'], ['rock', 'paper', null]], 1)
-    ).toEqual(1);
-    expect(
-      smartBotRemoval([['rock', 'paper', 'scissor'], [null, 'paper', 'scissor']], 1)
-    ).toEqual(2);
+    expect(smartBotRemoval([['rock', 'paper', 'scissor'], ['rock', 'scissor']], 1)).toEqual('rock');
+    expect(smartBotRemoval([['rock', 'paper', 'scissor'], ['rock', 'paper']], 1)).toEqual('paper');
+    expect(smartBotRemoval([['rock', 'paper', 'scissor'], ['paper', 'scissor']], 1)).toEqual('scissor');
   });
 
   it('as a second player remove useless piece in second step', () => {
-    expect(
-      smartBotRemoval([[null, 'paper', 'scissor'], [null, null, 'scissor']], 1)
-    ).toEqual(2);
+    expect(smartBotRemoval([['paper', 'scissor'], ['scissor']], 1)).toEqual('scissor');
   });
 
   it('as a first player remove a piece that you cannot beat if possible', () => {
-    expect(
-      smartBotRemoval([['rock', null, 'scissor'], ['rock', null, 'scissor']], 0)
-    ).toEqual(0);
+    expect(smartBotRemoval([['rock', 'scissor'], ['rock', 'scissor']], 0)).toEqual('rock');
   });
 
   it('as a first player remove a piece that can still beat you if possible', () => {
-    expect(
-      smartBotRemoval([['rock', 'paper', null], ['rock', null, 'scissor']], 0)
-    ).toEqual(2);
+    expect(smartBotRemoval([['rock', 'paper'], ['rock', 'scissor']], 0)).toEqual('scissor');
   });
 
   // The second player picks the first player's surviving card last, and a tie

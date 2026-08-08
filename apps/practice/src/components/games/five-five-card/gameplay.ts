@@ -1,44 +1,43 @@
-import { cloneDeep } from 'lodash';
 import type { Ctx, MoveOutcome } from 'strategy-game-factory';
 
-export type Board = (number | null)[][]
+export const CARDS = [1, 2, 3, 4, 5] as const;
 
-const isGameEnd = (board: Board) => {
-  return (
-    board[0].filter(v => v !== null).length === 1 &&
-    board[1].filter(v => v !== null).length === 1
-  );
+export type Card = typeof CARDS[number]
+
+// The cards each player still holds, in `CARDS` order.
+export type Board = [Card[], Card[]]
+
+export const generateStartBoard = (): Board => [[...CARDS], [...CARDS]];
+
+// The board taking `card` leaves behind. A move takes from the *other* hand, so
+// `player` is the mover; the bot's look-ahead plays the same function forward.
+export const withCardTaken = (board: Board, player: number, card: Card): Board => {
+  const nextBoard: Board = [...board];
+  nextBoard[1 - player] = board[1 - player].filter(held => held !== card);
+  return nextBoard;
 };
 
-export const getWinnerIndex = (board: Board) => {
-  if (!isGameEnd(board)) return undefined;
-  const firstPlayerNumber = board[0].find(v => v !== null)!;
-  const secondPlayerNumber = board[1].find(v => v !== null)!
+export const isGameEnd = (board: Board) => board.every(hand => hand.length === 1);
 
-  if (firstPlayerNumber === secondPlayerNumber) return 0;
-  if ((firstPlayerNumber + secondPlayerNumber) % 2 === 0){
-    return firstPlayerNumber < secondPlayerNumber ? 0 : 1;
-  } else {
-    return firstPlayerNumber > secondPlayerNumber ? 0 : 1;
-  }
-}
+// Reached only on an ended board, so each hand's first card is its survivor.
+export const getWinnerIndex = (board: Board) => {
+  const [first] = board[0];
+  const [second] = board[1];
+  if (first === second) return 0;
+
+  const larger = first > second ? 0 : 1;
+  // An odd sum goes to the larger card, an even sum to the smaller.
+  return (first + second) % 2 === 1 ? larger : 1 - larger;
+};
 
 export const moves = {
   removeCard: {
-    // Cards are addressed by their 1-based position in the other player's hand,
-    // and only a card still lying there may be taken.
-    validate: (board: Board, { ctx }: { ctx: Ctx }, id: number) => {
-      const opponent = 1 - ctx.currentPlayer!;
-      return Number.isInteger(id) && id >= 1 && id <= board[opponent].length
-        && board[opponent][id - 1] !== null;
-    },
-    apply: (board: Board, { ctx }: { ctx: Ctx }, id: number): MoveOutcome<Board> => {
-      const nextBoard = cloneDeep(board);
-      nextBoard[1 - ctx.currentPlayer!][id - 1] = null;
-      // getWinnerIndex is undefined exactly while the game is still running.
-      const winnerIndex = getWinnerIndex(nextBoard);
-      if (winnerIndex !== undefined) {
-        return { nextBoard, gameEnd: { winnerIndex } };
+    validate: (board: Board, { ctx }: { ctx: Ctx }, card: Card) =>
+      board[1 - ctx.currentPlayer!].includes(card),
+    apply: (board: Board, { ctx }: { ctx: Ctx }, card: Card): MoveOutcome<Board> => {
+      const nextBoard = withCardTaken(board, ctx.currentPlayer!, card);
+      if (isGameEnd(nextBoard)) {
+        return { nextBoard, gameEnd: { winnerIndex: getWinnerIndex(nextBoard) } };
       }
       return { nextBoard, isTurnEnd: true };
     }

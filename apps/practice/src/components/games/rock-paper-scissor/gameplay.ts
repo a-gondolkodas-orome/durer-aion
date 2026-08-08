@@ -1,42 +1,36 @@
-import { cloneDeep } from 'lodash';
 import type { Ctx, MoveOutcome } from 'strategy-game-factory';
 
-export type Board = ('rock' | 'paper' | 'scissor' | null)[][]
+export const CARDS = ['rock', 'paper', 'scissor'] as const;
 
-const isGameEnd = (board: Board) => {
-  const remaining = (row: Board[number]) => row.filter(symbol => symbol !== null).length;
-  return remaining(board[0]) === 1 && remaining(board[1]) === 1;
-};
+export type Card = typeof CARDS[number]
 
-// A card's index is its symbol: 0 = rock, 1 = paper, 2 = scissor. Each symbol
-// beats the one two places along, so rock beats scissor, paper beats rock and
-// scissor beats paper.
-const beats = (a: number, b: number) => b === (a + 2) % 3;
+// The cards each player still holds, in `CARDS` order.
+export type Board = [Card[], Card[]]
 
-const getWinnerIndex = (board: Board) => {
-  if (!isGameEnd(board)) return undefined;
-  const first = board[0].findIndex(symbol => symbol !== null);
-  const second = board[1].findIndex(symbol => symbol !== null);
-  // Two cards showing the same symbol go to the starting player, so the second
-  // player only takes the round by beating them outright.
-  return beats(second, first) ? 1 : 0;
-};
+export const generateStartBoard = (): Board => [[...CARDS], [...CARDS]];
+
+const BEATS: Record<Card, Card> = { rock: 'scissor', paper: 'rock', scissor: 'paper' };
+
+export const beats = (a: Card, b: Card) => BEATS[a] === b;
+
+const isGameEnd = (board: Board) => board.every(hand => hand.length === 1);
 
 export const moves = {
-  removeSymbol: {
-    // Only a symbol the other player still holds may be taken away.
-    validate: (board: Board, { ctx }: { ctx: Ctx }, idx: number) => {
+  removeCard: {
+    validate: (board: Board, { ctx }: { ctx: Ctx }, card: Card) =>
+      board[1 - ctx.currentPlayer!].includes(card),
+    apply: (board: Board, { ctx }: { ctx: Ctx }, card: Card): MoveOutcome<Board> => {
       const opponent = 1 - ctx.currentPlayer!;
-      return Number.isInteger(idx) && idx >= 0 && idx < board[opponent].length
-        && board[opponent][idx] !== null;
-    },
-    apply: (board: Board, { ctx }: { ctx: Ctx }, idx: number): MoveOutcome<Board> => {
-      const nextBoard = cloneDeep(board);
-      nextBoard[1 - ctx.currentPlayer!][idx] = null;
-      // getWinnerIndex is undefined exactly while the game is still running.
-      const winnerIndex = getWinnerIndex(nextBoard);
-      if (winnerIndex !== undefined) {
-        return { nextBoard, gameEnd: { winnerIndex } };
+      const nextBoard: Board = [...board];
+      nextBoard[opponent] = board[opponent].filter(held => held !== card);
+      if (isGameEnd(nextBoard)) {
+        // Each hand is down to its survivor. Two cards showing the same symbol go
+        // to the starting player, so the second player only takes the round by
+        // beating them outright.
+        return {
+          nextBoard,
+          gameEnd: { winnerIndex: beats(nextBoard[1][0], nextBoard[0][0]) ? 1 : 0 }
+        };
       }
       return { nextBoard, isTurnEnd: true };
     }

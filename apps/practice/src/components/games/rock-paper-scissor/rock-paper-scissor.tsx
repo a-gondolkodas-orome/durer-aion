@@ -1,38 +1,43 @@
+import type { FC } from 'react';
 import { strategyGameFactory, type BoardClientProps, GameBoard } from 'strategy-game-factory';
 import { smartBotStrategy } from './bot-strategy';
 import { RockSvg } from './symbols/rock-svg';
 import { PaperSvg } from './symbols/paper-svg';
 import { ScissorSvg } from '../shared/scissor-svg';
 import { useTranslation } from 'language';
-import { moves, type Board } from './gameplay';
+import { CARDS, generateStartBoard, moves, type Board, type Card } from './gameplay';
 
-const symbolSvgs = [RockSvg, PaperSvg, ScissorSvg];
+const cardSvgs: Record<Card, FC> = {
+  rock: RockSvg,
+  paper: PaperSvg,
+  scissor: ScissorSvg
+};
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
 
   return (
   <GameBoard>
-    <div className="grid grid-cols-3">
+    <div className="grid grid-cols-4 gap-y-3">
       <h2 className="text-center col-start-1">{t({ hu: 'Kezdő', en: 'First' })}</h2>
-      <h2 className="text-center col-start-3">{t({ hu: 'Második', en: 'Second' })}</h2>
+      <h2 className="text-center col-start-4">{t({ hu: 'Második', en: 'Second' })}</h2>
 
-      {[0, 1, 2].map(symbolIdx => {
-        const SymbolSvg = symbolSvgs[symbolIdx];
+      {CARDS.map(card => {
+        const CardSvg = cardSvgs[card];
         return [0, 1].map(playerIdx => (
           <button
-            key={`${playerIdx}-${symbolIdx}`}
-            disabled={playerIdx === ctx.currentPlayer || !moves.removeSymbol.isAllowed(board, symbolIdx)}
-            onClick={() => moves.removeSymbol(board, symbolIdx)}
+            key={`${playerIdx}-${card}`}
+            disabled={playerIdx === ctx.currentPlayer || !moves.removeCard.isAllowed(board, card)}
+            onClick={() => moves.removeCard(board, card)}
             className={`
-              ${playerIdx === 0 ? 'col-start-1' : 'col-start-3'}
+              ${playerIdx === 0 ? 'col-start-1' : 'col-start-4'}
               p-2 m-2 aspect-4/5 bg-surface-elevated rounded-lg drop-shadow-lg
               enabled:border-2 enabled:border-dashed
               enabled:hocus:opacity-50
-              ${board[playerIdx][symbolIdx] === null ? 'opacity-0' : ''}
+              ${board[playerIdx].includes(card) ? '' : 'opacity-0'}
             `}
           >
-            <SymbolSvg />
+            <CardSvg />
           </button>
         ));
       })}
@@ -68,9 +73,6 @@ export const RockPaperScissor = strategyGameFactory({
   BoardClient,
   gameplay: { moves },
   variants: [
-    {
-      botStrategy: smartBotStrategy,
-      generateStartBoard: (): Board => [['rock', 'paper', 'scissor'], ['rock', 'paper', 'scissor']]
-    }
+    { botStrategy: smartBotStrategy, generateStartBoard }
   ]
 });

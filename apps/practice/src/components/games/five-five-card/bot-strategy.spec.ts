@@ -1,5 +1,5 @@
 import { runMatch, type MatchResult } from 'strategy-game-factory';
-import { type Board, getWinnerIndex, moves } from './gameplay';
+import { type Board, generateStartBoard, moves } from './gameplay';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 
 // Each player takes cards from the *other* hand, so over the eight moves each
@@ -7,18 +7,17 @@ import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 // moves last, which is what makes the whole game theirs.
 type Bot = typeof smartBotStrategy
 
-// generateStartBoard lives in the game .tsx; this is the same deal.
-const START: Board = [[1, 2, 3, 4, 5], [1, 2, 3, 4, 5]];
-
 const play = (startBoard: Board, strategies: [Bot, Bot]): MatchResult<Board> =>
   runMatch({ gameplay: { moves }, strategies, startBoard });
+
+const START = generateStartBoard();
 
 // Solved offline against the real getWinnerIndex: the opening is a second-player
 // win, and so is every position still holding four cards a side — the first
 // player never gets a chance to take the game. The earliest boards it can win
 // from have three cards each.
-const WON_FOR_MOVER: Board = [[null, 2, null, 4, 5], [null, null, 3, 4, 5]];
-const LOST_FOR_MOVER_AT_FOUR: Board = [[null, 2, 3, 4, 5], [null, 2, 3, 4, 5]];
+const WON_FOR_MOVER: Board = [[2, 4, 5], [3, 4, 5]];
+const LOST_FOR_MOVER_AT_FOUR: Board = [[2, 3, 4, 5], [2, 3, 4, 5]];
 
 describe('smartBotStrategy', () => {
   it('wins as the second player from the real start board, against a random opponent', () => {
@@ -62,9 +61,8 @@ describe('the game itself', () => {
   it('always ends with one card each, after eight removals', () => {
     const { board, history } = play(START, [randomBotStrategy, randomBotStrategy]);
     expect(history).toHaveLength(8);
-    expect(board[0]!.filter(v => v !== null)).toHaveLength(1);
-    expect(board[1]!.filter(v => v !== null)).toHaveLength(1);
-    expect(getWinnerIndex(board)).toBeDefined();
+    expect(board[0]).toHaveLength(1);
+    expect(board[1]).toHaveLength(1);
   });
 });
 

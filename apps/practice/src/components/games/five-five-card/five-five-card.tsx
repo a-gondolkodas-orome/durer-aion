@@ -1,8 +1,7 @@
-import { range } from 'lodash';
 import { strategyGameFactory, type BoardClientProps, GameBoard } from 'strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { useTranslation } from 'language';
-import { moves, type Board } from './gameplay';
+import { CARDS, generateStartBoard, moves, type Board } from './gameplay';
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
@@ -17,21 +16,21 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         {t({ hu: 'Második', en: 'Second' })}
       </h2>
 
-      {range(5).map(id => (
+      {CARDS.map(card => (
         [0, 1].map(playerIdx => (
           <button
-            key={`${playerIdx}-${id}`}
-            disabled={playerIdx === ctx.currentPlayer || !moves.removeCard.isAllowed(board, id + 1)}
-            onClick={() => moves.removeCard(board, id + 1)}
+            key={`${playerIdx}-${card}`}
+            disabled={playerIdx === ctx.currentPlayer || !moves.removeCard.isAllowed(board, card)}
+            onClick={() => moves.removeCard(board, card)}
             className={`
               ${playerIdx === 0 ? 'col-start-1' : 'col-start-4'}
               aspect-3/2 text-2xl border-4 rounded-lg
               enabled:border-green-400 enabled:border-dashed
               enabled:hocus:border-solid
-              ${board[playerIdx][id] === null ? 'opacity-0' : ''}
+              ${board[playerIdx].includes(card) ? '' : 'opacity-0'}
             `}
           >
-            {board[playerIdx][id]}
+            {card}
           </button>
         ))
       ))}
@@ -72,7 +71,7 @@ export const FiveFiveCard = strategyGameFactory({
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt', en: 'Test' } },
     {
       botStrategy: smartBotStrategy,
-      generateStartBoard: () => [[1, 2, 3, 4, 5], [1, 2, 3, 4, 5]],
+      generateStartBoard,
       label: { hu: 'Teljes', en: 'Full' },
       isDefault: true
     }
