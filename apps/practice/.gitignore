@@ -9,6 +9,7 @@ npm-debug.log*
 stats.html
 # `npm run report:outdated -- --out dependency-report.md` output
 dependency-report.md
-# `npm run coverage` html report
+# coverage output: the `npm run coverage` html report, and the lcov file
+# `npm run coverage:patch` reads
 /reports
 .claude/settings.local.json

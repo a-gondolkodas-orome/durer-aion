@@ -15,6 +15,7 @@
     "test:watch": "vitest",
     "coverage": "vitest run --coverage",
     "coverage:unswept": "vitest run --coverage --exclude \"**/plays-to-an-end.spec.ts\" --exclude \"**/renders.spec.tsx\"",
+    "coverage:patch": "npm run coverage:unswept -- --coverage.reporter=lcovonly && node scripts/patch-coverage.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"src/**/*.{ts,tsx}\" --no-fix",
     "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",

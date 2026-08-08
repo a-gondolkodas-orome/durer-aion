@@ -43,3 +43,49 @@ jobs:
       - name: Build
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: npm run build
+
+  # A separate job rather than another step of `test`, so the coverage run — the suite again, and
+  # instrumented, so a couple of minutes — happens alongside the checks a contributor is actually
+  # waiting on rather than after them, and so a PR failing this one can still be read as passing
+  # everything else at a glance.
+  #
+  # Skipped, not failed, when the PR carries the `skip coverage` label: a diff with nothing worth
+  # asserting — a generated table, a renamed symbol, a batch of copy edits — should not need a green
+  # check invented for it.
+  patch-coverage:
+    if: >-
+      github.event.pull_request.draft == false &&
+      !contains(github.event.pull_request.labels.*.name, 'skip coverage')
+    runs-on: ubuntu-24.04
+    container:
+      image: node:24.11.1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          # The merge base has to exist locally for `<base>...HEAD` to resolve; the default shallow
+          # fetch gives one commit and the diff would come out as the whole repository.
+          fetch-depth: 0
+      # actions/checkout marks the workspace safe itself, but under a HOME it overrides for the
+      # duration of its own steps, so in a container job the setting is gone by the time a later
+      # `run:` calls git — which fails with "detected dubious ownership" rather than anything about
+      # ownership being fine. The other jobs never notice: they run npm, not git.
+      - name: Let git read the checkout
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - name: Cache npm downloads
+        uses: actions/cache@v6
+        with:
+          path: ~/.npm
+          key: npm-${{ hashFiles('package-lock.json') }}
+          restore-keys: npm-
+      - name: Install dependencies
+        run: npm ci
+      # Deliberately not `npm run coverage`: the plays-to-an-end and renders sweeps execute nearly
+      # every line under games/ while asserting almost nothing, so measured against them a new game
+      # with no spec at all reads as fully covered. See the comment atop scripts/patch-coverage.mjs.
+      - name: Measure coverage without the sweeps
+        run: npm run coverage:unswept -- --coverage.reporter=lcovonly
+      # base.sha is the base branch as of the last sync, which is exactly the merge base the diff
+      # should be taken against — commits landed on main since are not this PR's to cover.
+      - name: Report coverage of added lines
+        run: node scripts/patch-coverage.mjs --base ${{ github.event.pull_request.base.sha }}

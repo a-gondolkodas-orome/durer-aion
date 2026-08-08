@@ -45,12 +45,19 @@ compare('Playwright', [
 // instead, the same way the Dockerfile is read above.
 const devcontainer = read('.devcontainer/devcontainer.json');
 
+// A workflow can run more than one containerised job, so every `image: node:` in it is a separate
+// place the version is written down — matching only the first would let a second job drift.
+const workflowNodeImages = file => {
+  const images = [...read(file).matchAll(/^\s*image:\s*node:(.+)$/gm)];
+  return images.length === 0 ? [[file, undefined]] : images.map(([, version], i) => [`${file} job ${i + 1}`, version]);
+};
+
 compare('Node', [
   ['.nvmrc', read('.nvmrc').trim()],
   // ">=24.11.1 <25" — only the lower bound names an exact version.
   ['package.json engines.node', packageJson.engines?.node?.match(/>=\s*(\d+\.\d+\.\d+)/)?.[1]],
-  ['.github/workflows/pr_test.yml', read('.github/workflows/pr_test.yml').match(/^\s*image:\s*node:(.+)$/m)?.[1]],
-  ['.github/workflows/test_and_deploy.yml', read('.github/workflows/test_and_deploy.yml').match(/^\s*image:\s*node:(.+)$/m)?.[1]],
+  ...workflowNodeImages('.github/workflows/pr_test.yml'),
+  ...workflowNodeImages('.github/workflows/test_and_deploy.yml'),
   ['.devcontainer/devcontainer.json node feature', devcontainer.match(/features\/node:1"\s*:\s*\{\s*"version"\s*:\s*"(.+?)"/)?.[1]]
 ]);
 

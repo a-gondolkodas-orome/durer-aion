@@ -137,6 +137,20 @@ all**. That is why `coverage.include` in `vite.config.js` names every file under
 drops to near zero is the game logic nothing but a sweep touches. Neither one is
 a measure of whether the bots are right; that is what a bot's own spec is for.
 
+The one coverage number CI does gate on is a different question again:
+`npm run coverage:patch` (`scripts/patch-coverage.mjs`, run by the
+`patch-coverage` job on every PR) measures the lines a branch **adds** to
+non-JSX files under `src/`, against `coverage:unswept`. Added lines cannot be
+diluted by the rest of the repo, so unlike a global percentage the number means
+the same thing in every PR; and measuring without the sweeps is what stops
+`gameList.ts` registration from reading as coverage. Under 85% fails, diffs
+under twenty measured lines never do, and the `skip coverage` label skips the
+job. The bar is a floor under existing habit, not a stretch above it: measured
+over any range of recent history wide enough to mean anything, this repo already
+sits at 87–96%.
+A gate on either of the other two reports would still be wrong for the reasons
+above — don't add one.
+
 ## Planned future directions
 
 ### Primary (ongoing)

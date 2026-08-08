@@ -120,9 +120,11 @@ npm run lint:fix
 ```bash
 npm run coverage         # line coverage, on demand
 npm run coverage:unswept # the same, without the two all-games sweeps
+npm run coverage:patch   # how much of what your branch adds a spec reaches
 ```
 
-On demand, never part of `npm run test` or CI, and with no threshold to pass.
+The first two are on demand, never part of `npm run test`, and with no threshold
+to pass.
 The plain report is for finding code **no spec loads at all** — it
 lists every file under `src/`, not only the ones a test imported. The global
 percentage is not a target: `plays-to-an-end.spec.ts` and `renders.spec.tsx`
@@ -130,6 +132,17 @@ execute nearly every line under `games/` while asserting almost nothing, so it
 reads high whatever the state of the tests. `coverage:unswept` drops those two,
 and what falls to near zero there is the game logic those sweeps are the only
 thing touching.
+
+`coverage:patch` is the one that runs on every PR. It measures only the lines
+your branch **adds** to non-JSX files under `src/`, and only against
+`coverage:unswept` — so registering a game in `gameList.ts` does not count as
+covering it. Under 85% fails the build, and diffs under twenty measured lines
+never do — below that the percentage is arithmetic rather than a judgement.
+Failing means the added logic is not *unit-tested*, not that it is untested:
+a registered game is still played by `plays-to-an-end.spec.ts`, which catches an
+illegal move or a game that never ends, but nothing there asserts the strategy
+is right. Label the PR `skip coverage` to skip the job when a diff genuinely has
+nothing worth asserting.
 
 ### Build for prod
 
