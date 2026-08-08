@@ -16007,9 +16007,10 @@ export const randomBotStrategy: Bot = ({ board }) => {
 export const smartBotStrategy: Bot = ({ board }) => {
   const numCount = board.numbersOnTable.length;
   const stateId = generateStateID(board);
-  const optimalMoves = strategyDict[numCount]
-    ? strategyDict[numCount][stateId]
-    : [];
+  // A miss on either half falls through to the legal moves below: the book
+  // omits table sizes it was not generated for, and — within a size it covers —
+  // the states that have no legal move at all.
+  const optimalMoves = strategyDict[numCount]?.[stateId] ?? [];
   if (optimalMoves.length) {
     return { move: 'removeNumber', args: [sample(optimalMoves)!] };
   } else {
