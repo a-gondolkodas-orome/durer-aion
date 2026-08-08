@@ -27,11 +27,15 @@ export const smartBotStrategy: Bot = ({ board, ctx }) => {
 
 const winnerCache = new Map<string, number>();
 
-const cacheKey = (stones: boolean[], pendingLine: number | null) => `${stones.join('')}|${pendingLine}`;
+// The winner depends on whose turn it is as well as on the position, so both go
+// in the key. A designation passes the turn without placing a stone, so the
+// stone count does not determine the mover and cannot stand in for it.
+const cacheKey = (stones: boolean[], pendingLine: number | null, toMove: number) =>
+  `${stones.join('')}|${pendingLine}|${toMove}`;
 
 // given it is toMove's turn at this state, who wins the rest of the game with optimal play?
 const winner = (stones: boolean[], pendingLine: number | null, toMove: number): number => {
-  const key = cacheKey(stones, pendingLine);
+  const key = cacheKey(stones, pendingLine, toMove);
   const cached = winnerCache.get(key);
   if (cached !== undefined) return cached;
 

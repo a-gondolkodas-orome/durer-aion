@@ -12,8 +12,11 @@ const emptyCells = (board: Board) => range(0, 9).filter(i => !board[i]);
 const winnerCache = new Map<string, number>();
 
 // given it is someone's turn at this board (no full line yet), which player wins with optimal play?
+// The winner depends on whose turn it is as well as on the board, so both go in
+// the key: the same board is evaluated for either player, and a stale entry from
+// the other player's search would answer the wrong question.
 const winner = (board: Board, toMove: number): number => {
-  const key = board.join('');
+  const key = `${board.join('')}|${toMove}`;
   const cached = winnerCache.get(key);
   if (cached !== undefined) return cached;
 

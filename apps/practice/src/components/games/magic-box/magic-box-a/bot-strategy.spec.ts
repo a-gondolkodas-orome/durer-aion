@@ -35,6 +35,32 @@ describe('smartBotStrategy', () => {
     expect([0, 4, 8]).toContain(smartBotPlacement(board, 0));
   });
 
+  // The search memoises by position, and the same position is asked about for
+  // both roles — vitest runs with `isolate: false`, so another spec that played
+  // this game has already filled that cache by the time this file runs. If whose
+  // turn it is is left out of the memo key, the answers below come back for the
+  // wrong player.
+  it('should force the same win after the cache has been filled for the other role', () => {
+    for (let firstMove = 0; firstMove < 9; firstMove++) {
+      let board = placeStone(generateEmptyBoard(), firstMove);
+      let mover = 0;
+      while (!isGameEnd(board)) {
+        board = placeStone(board, smartBotPlacement(board, mover));
+        mover = 1 - mover;
+      }
+    }
+
+    for (let firstMove = 0; firstMove < 9; firstMove++) {
+      let board = placeStone(generateEmptyBoard(), firstMove);
+      let mover = 1;
+      while (!isGameEnd(board)) {
+        board = placeStone(board, smartBotPlacement(board, mover));
+        mover = 1 - mover;
+      }
+      expect(mover).toBe(1);
+    }
+  });
+
   it('should let the second player always force a win with optimal play from an empty board', () => {
     for (let firstMove = 0; firstMove < 9; firstMove++) {
       let board = placeStone(generateEmptyBoard(), firstMove);
