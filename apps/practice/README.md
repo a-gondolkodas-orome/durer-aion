@@ -41,6 +41,12 @@ Two ways to get started:
   creation only has to run `npm ci`. It also ships the GitHub CLI and keeps `gh`
   and Claude Code logins in named volumes across rebuilds.
 
+Claude Code on the web is neither: its container ships its own Node and starts
+without `node_modules`, so `.claude/hooks/session-start.sh` installs the pinned
+Node through nvm and puts it on `PATH` ahead of the image's own, then runs
+`npm ci` unless the installed tree is already sound. It reads the version from
+`.nvmrc` rather than restating it, so it is not another place to keep in sync.
+
 <details>
 <summary>Devcontainer details</summary>
 
