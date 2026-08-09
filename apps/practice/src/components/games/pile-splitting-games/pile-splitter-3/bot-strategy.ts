@@ -1,5 +1,5 @@
 import { random } from 'lodash';
-import { asTurn, type Bot, type BotStep } from '../bot-strategy';
+import { asTurn, getOptimalDivision, type Bot, type BotStep } from '../bot-strategy';
 import type { Board } from './gameplay';
 
 export { randomBotStrategy } from '../bot-strategy';
@@ -10,7 +10,7 @@ export const getSmartBotStep = (board: Board): BotStep => {
   const start = random(0, 2);
   let removedPileId: number, splitPileId: number;
 
-  if (board[0] % 2 === 1 || board[1] % 2 === 1 || board[2] % 2 === 1) {
+  if (board.some(size => size % 2 === 1)) {
     if (board[start] % 2 === 0) {
       if (board[(start + 1) % 3] % 2 === 0) {
         removedPileId = (start + 1) % 3;
@@ -40,13 +40,13 @@ export const getSmartBotStep = (board: Board): BotStep => {
     return {
       removedPileId,
       pileId: splitPileId,
-      pieceCount: getOptimalDivision(board, splitPileId)
+      pieceCount: getOptimalDivision(board[splitPileId])
     };
-  } else if (board[0] === 2 && board[1] === 2 && board[2] === 2) {
+  } else if (board.every(size => size === 2)) {
     return {
       removedPileId: (start + 1) % 3,
       pileId: start,
-      pieceCount: getOptimalDivision(board, start)
+      pieceCount: getOptimalDivision(board[start])
     };
   } else {
     // this is the case where all piles have even number of pieces
@@ -55,12 +55,4 @@ export const getSmartBotStep = (board: Board): BotStep => {
     const botStep = getSmartBotStep(board.map((x) => x / 2));
     return { ...botStep, pieceCount: botStep.pieceCount * 2 };
   }
-};
-
-const getOptimalDivision = (board: Board, pileId: number): number => {
-  const sum = board[pileId];
-
-  if (sum === 2) return 1;
-
-  return 1 + 2 * Math.ceil(Math.random() * Math.floor((sum - 2) / 2));
 };

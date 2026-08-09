@@ -1,5 +1,5 @@
 import { random } from 'lodash';
-import { asTurn, type Bot } from '../bot-strategy';
+import { asTurn, getOptimalDivision, type Bot } from '../bot-strategy';
 import type { Board } from './gameplay';
 
 export { randomBotStrategy } from '../bot-strategy';
@@ -23,10 +23,4 @@ const getPileToSplit = (board: Board): number => {
   return (board[randomPileIndex] % 2 === 0 || board[1 - randomPileIndex] === 1)
     ? randomPileIndex
     : 1 - randomPileIndex;
-};
-
-const getOptimalDivision = (pieceCountInPile: number): number => {
-  if (pieceCountInPile === 2) return 1;
-
-  return 1 + 2 * random(0, Math.floor((pieceCountInPile - 2) / 2));
 };
