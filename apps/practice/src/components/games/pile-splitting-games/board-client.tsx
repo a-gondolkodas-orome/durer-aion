@@ -81,16 +81,17 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const currentChoiceDescription = (pileId: number) => {
     const pieceCountInPile = board[pileId];
 
-    // A pile is 0 between the bot's `removePile` and its `splitPile`.
-    if (!ctx.isClientMoveAllowed) return pieceCountInPile || '🗑️';
-    if (pileId === removedPileId) {
-      // and likewise between the player's own two moves
-      return pieceCountInPile ? `${pieceCountInPile} → 🗑️` : '🗑️';
-    }
+    // A pile is 0 for the beat between `removePile` and `splitPile` — the
+    // mover's own turn as much as the bot's, since the removal does not end the
+    // turn — and it reads as discarded whatever is selected or hovered meanwhile.
+    if (pieceCountInPile === 0) return '🗑️';
+    if (!ctx.isClientMoveAllowed) return pieceCountInPile;
+    // the pile picked to discard, before the click that dispatches the removal
+    if (pileId === removedPileId) return `${pieceCountInPile} → 🗑️`;
     if (removedPileId === null) {
-      return isHoverPreviewedForRemoval(pileId) ? `${pieceCountInPile} → 🗑️` : pieceCountInPile || '🗑️';
+      return isHoverPreviewedForRemoval(pileId) ? `${pieceCountInPile} → 🗑️` : pieceCountInPile;
     }
-    if (!validHoveredPiece || validHoveredPiece.pileId !== pileId) return pieceCountInPile || '🗑️';
+    if (!validHoveredPiece || validHoveredPiece.pileId !== pileId) return pieceCountInPile;
     return `
       ${pieceCountInPile} → ${validHoveredPiece.pieceId + 1}, ${pieceCountInPile - validHoveredPiece.pieceId - 1}
     `;

@@ -51,9 +51,11 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const currentChoiceDescription = (pileId: number) => {
     const pieceCountInPile = board[pileId];
 
-    // A pile is 0 between the bot's `removePile` and its `splitPile`.
-    if (!ctx.isClientMoveAllowed) return pieceCountInPile || '🗑️';
-    if (!validHoveredPiece) return pieceCountInPile;
+    // A pile is 0 for the beat between `removePile` and `splitPile` — the
+    // mover's own turn as much as the bot's, since the removal does not end the
+    // turn — and it reads as discarded whatever is hovered meanwhile.
+    if (pieceCountInPile === 0) return '🗑️';
+    if (!ctx.isClientMoveAllowed || !validHoveredPiece) return pieceCountInPile;
     if (validHoveredPiece.pileId !== pileId) return `${pieceCountInPile} → 🗑️`;
 
     const split = validHoveredPiece.pieceId + 1;
