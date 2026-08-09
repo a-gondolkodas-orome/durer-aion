@@ -30,21 +30,29 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     if (!ctx.isClientMoveAllowed) return false;
     if (validHoveredPiece === null) return false;
     if (pileId !== validHoveredPiece.pileId) return false;
-    if (validHoveredPiece.pieceId === board[pileId] - 1) return false;
-    if (pieceId > validHoveredPiece.pieceId) return false;
-    return true;
+    return pieceId <= validHoveredPiece.pieceId;
   };
 
-  const toBeRemoved = (pileId) => {
+  const toBeRemoved = (pileId: number) => {
     if (!ctx.isClientMoveAllowed) return false;
     if (validHoveredPiece === null) return false;
     return validHoveredPiece.pileId !== pileId;
   };
 
-  const currentChoiceDescription = (pileId) => {
+  // One class, not a base colour with overrides stacked after it: which of two
+  // `bg-` utilities wins is decided by the order Tailwind emits them, not by
+  // the order they are written here.
+  const pieceColor = ({ pileId, pieceId }: Piece) => {
+    if (toBeRemoved(pileId)) return 'bg-slate-900/40 dark:bg-white/20';
+    if (toBeLeft({ pileId, pieceId })) return 'bg-blue-800/75';
+    return 'bg-blue-800';
+  };
+
+  const currentChoiceDescription = (pileId: number) => {
     const pieceCountInPile = board[pileId];
 
-    if (!ctx.isClientMoveAllowed) return pieceCountInPile;
+    // A pile is 0 between the bot's `removePile` and its `splitPile`.
+    if (!ctx.isClientMoveAllowed) return pieceCountInPile || '🗑️';
     if (!validHoveredPiece) return pieceCountInPile;
     if (validHoveredPiece.pileId !== pileId) return `${pieceCountInPile} → 🗑️`;
 
@@ -67,24 +75,27 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         <p className="text-xl" style={{ transform: 'scaleY(-1)' }}>
           {currentChoiceDescription(pileId)}
         </p>
-          {range(board[pileId]).map(pieceId => (
-            <button
-              key={pieceId}
-              disabled={isDisabled({ pileId, pieceId })}
-              className={`
-                bg-blue-800 w-[20%] aspect-square rounded-full mx-0.5 mt-0.5 align-top
-                ${toBeRemoved(pileId) ? 'bg-slate-900/40 dark:bg-white/20' : ''}
-                ${toBeLeft({ pileId, pieceId }) ? 'bg-blue-800/75' : ''}
-              `}
-              onClick={() => clickPiece({ pileId, pieceId })}
-              {...(isDisabled({ pileId, pieceId }) ? {} : hoverProps({ pileId, pieceId }))}
-            >
-              {!isDisabled({ pileId, pieceId }) &&
-              <p className="text-sm" style={{ transform: 'scaleY(-1)' }}>
-                {pieceId + 1};{board[pileId] - pieceId - 1}
-              </p>}
-            </button>
-          ))}
+          {range(board[pileId]).map(pieceId => {
+            const disabled = isDisabled({ pileId, pieceId });
+
+            return (
+              <button
+                key={pieceId}
+                disabled={disabled}
+                className={`
+                  w-[20%] aspect-square rounded-full mx-0.5 mt-0.5 align-top
+                  ${pieceColor({ pileId, pieceId })}
+                `}
+                onClick={() => clickPiece({ pileId, pieceId })}
+                {...(disabled ? {} : hoverProps({ pileId, pieceId }))}
+              >
+                {!disabled &&
+                <p className="text-sm" style={{ transform: 'scaleY(-1)' }}>
+                  {pieceId + 1};{board[pileId] - pieceId - 1}
+                </p>}
+              </button>
+            );
+          })}
       </div>
     ))}
   </GameBoard>
