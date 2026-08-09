@@ -116,10 +116,21 @@ const invertTransformation = (stepCoords: Coords, type: TransformationType): Coo
   }
 };
 
+// The search reads nothing but which fields are still free, and the order the
+// ducks were placed in cannot be recovered from that — so the same position is
+// reached along many move orders, and without this the recursion re-derives the
+// same subtree once per order. Keyed on the free-field pattern for that reason.
+const winningStateCache = new Map<string, boolean>();
+
+const freeFieldKey = (board: Board): string =>
+  board.map(row => row.map(cell => cell === null ? '.' : '#').join('')).join('/');
+
 // given board *after* your step, are you set up to win the game for sure?
 const isWinningState = (board: Board): boolean => {
-  if (getAllowedMoves(board).length === 0) {
-    return true;
+  const key = freeFieldKey(board);
+  const cached = winningStateCache.get(key);
+  if (cached !== undefined) {
+    return cached;
   }
 
   const allowedPlacesForOther = getAllowedMoves(board);
@@ -127,7 +138,10 @@ const isWinningState = (board: Board): boolean => {
   const optimalPlaceForOther = allowedPlacesForOther.find(({ row, col }) => {
     return isWinningState(withDuckPlaced(board, { row, col }));
   });
-  return optimalPlaceForOther === undefined;
+
+  const isWinning = optimalPlaceForOther === undefined;
+  winningStateCache.set(key, isWinning);
+  return isWinning;
 };
 
 // see scripts/pre-generate-ai-moves/chess-ducks-optimal-2nd-moves.cjs

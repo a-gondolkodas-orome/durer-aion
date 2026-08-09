@@ -40,14 +40,11 @@ describe('smartBotStrategy', () => {
     for (let trial = 0; trial < 3; trial++) {
       expect(play(emptyBoard(rows, cols), [randomBotStrategy, smartBotStrategy]).winnerIndex).toBe(1);
     }
-  }, 20000);
+  });
 
-  // The budget covers the coverage job as well as `npm test`: 4x7 optimal play
-  // is the slowest search in the repo, and V8 instrumentation pushed it past a
-  // 20s limit on a CI runner while taking a third of that uninstrumented.
   it.each([[4, 6], [4, 7]])('wins as the replier on %ix%i in optimal-vs-optimal play', (rows, cols) => {
     expect(play(emptyBoard(rows, cols), [smartBotStrategy, smartBotStrategy]).winnerIndex).toBe(1);
-  }, 45000);
+  });
 });
 
 // The 4x7 opening books are generated offline by
