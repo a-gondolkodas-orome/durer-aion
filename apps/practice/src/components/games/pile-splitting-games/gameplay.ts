@@ -1,9 +1,14 @@
-import { cloneDeep, range } from 'lodash';
+import { range } from 'lodash';
+import type { Ctx, MoveOutcome } from 'strategy-game-factory';
 
-// The three sibling games differ only in how many piles they keep (2, 3 and 4);
-// a board is the list of pile sizes and a turn is always the same two moves —
-// remove one pile entirely, then split another in two.
-type Board = number[];
+// The three sibling games are one game played with a different number of piles
+// (2, 3 and 4): a board is the list of pile sizes, and a turn is always the
+// same two moves — remove one pile entirely, then split another in two. The
+// pile count is the only thing that varies between them, and `board.length`
+// already carries it, so they share these moves outright.
+export type Board = number[];
+export type Piece = { pileId: number; pieceId: number };
+type Split = { pileId: number; pieceCount: number };
 
 // At the start of a turn every pile is non-empty, so the slot emptied by
 // `removePile` is what marks the turn as half-done. That makes both halves of
@@ -33,7 +38,42 @@ export const isSplitAllowed = (board: Board, pileId: number, pieceCount: number)
 // The board `removePile` leaves behind. The board clients need it too: they must
 // judge the split half of the turn before the removal has been dispatched.
 export const withPileRemoved = (board: Board, pileId: number): Board => {
-  const nextBoard = cloneDeep(board);
+  const nextBoard = [...board];
   nextBoard[pileId] = 0;
   return nextBoard;
 };
+
+export const moves = {
+  removePile: {
+    validate: (board: Board, _, pileId: number) => isRemovalAllowed(board, pileId),
+    // First half of the turn: empty a pile, then split another into it — the
+    // turn stays open in between.
+    apply: (board: Board, _, pileId: number): MoveOutcome<Board> =>
+      ({ nextBoard: withPileRemoved(board, pileId) })
+  },
+  splitPile: {
+    validate: (board: Board, _, { pileId, pieceCount }: Split) =>
+      isSplitAllowed(board, pileId, pieceCount),
+    apply: (
+      board: Board,
+      { ctx }: { ctx: Ctx },
+      { pileId, pieceCount }: Split
+    ): MoveOutcome<Board> => {
+      const nextBoard = [...board];
+      // The two halves take the split pile's own slot and the one emptied
+      // earlier this turn, the first half in the lower of the two so that the
+      // board keeps reading left to right.
+      const [lower, upper] = [pileId, emptiedPileId(board)!].sort((a, b) => a - b);
+      nextBoard[lower] = pieceCount;
+      nextBoard[upper] = board[pileId] - pieceCount;
+
+      // Every pile down to a single piece: the opponent cannot split anything.
+      if (nextBoard.every(size => size === 1)) {
+        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
+      }
+      return { nextBoard, isTurnEnd: true };
+    }
+  }
+};
+
+export type Moves = typeof moves;

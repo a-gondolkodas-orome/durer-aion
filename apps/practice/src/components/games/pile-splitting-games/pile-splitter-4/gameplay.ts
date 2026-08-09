@@ -1,60 +1,43 @@
-import { emptiedPileId, isRemovalAllowed, isSplitAllowed, withPileRemoved } from '../gameplay';
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
-import { range, random, isEqual, cloneDeep } from 'lodash';
+import { random, range, times } from 'lodash';
+import type { Board } from '../gameplay';
 
-export const generateStartBoard = (): Board => {
-  if (random(0, 1)) return generateWinningStartBoard();
-  return generateLosingStartBoard();
-};
+// Played on four piles; the rules are the shared pile-splitting ones unchanged.
+export { moves, type Board, type Piece, type Moves } from '../gameplay';
 
-export const generateTestStartBoard = (): Board => {
-  if (random(0, 1)) return generateWinningStartBoard(5, 3, 6);
-  return generateLosingStartBoard(5, 3, 6);
-};
+// Both roles get a start board they can win from about half the time.
+export const generateStartBoard = (): Board => generateStartBoardWonBy(random(0, 1) === 1);
 
+// The test variant plays out faster: smaller piles, and fewer trials spent
+// hunting for a board of the wanted kind.
+export const generateTestStartBoard = (): Board =>
+  generateStartBoardWonBy(random(0, 1) === 1, { pileMin: 3, pileMax: 6, remainingTrials: 5 });
 
-const generateWinningStartBoard = (remainingTrials = 50, pileMin = 5, pileMax = 12): Board => {
-  const board = [
-    random(pileMin, pileMax),
-    random(pileMin, pileMax),
-    random(pileMin, pileMax),
-    random(pileMin, pileMax)
-  ];
-  if (!canWin(board)) {
-    if (remainingTrials > 0) {
-      return generateWinningStartBoard(remainingTrials - 1);
-    }
-    return board;
+type BoardOptions = { pileMin?: number; pileMax?: number; remainingTrials?: number };
+
+// Draw boards until one falls on the wanted side of `canWin`, then vary its
+// shape: doubling, and doubling with one piece taken off, both leave the
+// win/loss class untouched (see `canWin`), so they widen the pool for free.
+// Every option has to be threaded through the retry — a retry that fell back to
+// the defaults is how the test variant used to end up with full-size boards.
+const generateStartBoardWonBy = (
+  moverWins: boolean,
+  { pileMin = 5, pileMax = 12, remainingTrials = 50 }: BoardOptions = {}
+): Board => {
+  const board = times(4, () => random(pileMin, pileMax));
+
+  if (canWin(board) !== moverWins) {
+    if (remainingTrials === 0) return board;
+    return generateStartBoardWonBy(
+      moverWins, { pileMin, pileMax, remainingTrials: remainingTrials - 1 }
+    );
   }
 
-  const r = random(0, 2);
-  if (r === 0) return board;
-  if (r === 1) return board.map(x => x * 2);
-  const modifiedBoard = board.map(x => x * 2);
-  modifiedBoard[random(0, 3)] -= 1;
-  return modifiedBoard;
-};
-
-const generateLosingStartBoard = (remainingTrials = 50, pileMin = 5, pileMax = 12): Board => {
-  const board = [
-    random(pileMin, pileMax),
-    random(pileMin, pileMax),
-    random(pileMin, pileMax),
-    random(pileMin, pileMax)
-  ];
-  if (canWin(board)) {
-    if (remainingTrials > 0) {
-      return generateLosingStartBoard(remainingTrials - 1);
-    }
-    return board;
-  }
-
-  const r = random(0, 2);
-  if (r === 0) return board;
-  if (r === 1) return board.map(x => x * 2);
-  const modifiedBoard = board.map(x => x * 2);
-  modifiedBoard[random(0, 3)] -= 1;
-  return modifiedBoard;
+  const variation = random(0, 2);
+  if (variation === 0) return board;
+  const doubled = board.map(x => x * 2);
+  if (variation === 1) return doubled;
+  doubled[random(0, 3)] -= 1;
+  return doubled;
 };
 
 // Can the player to move force a win? Recursive parity normalisation.
@@ -73,43 +56,3 @@ const canWin = (board: Board): boolean => {
     return canWin(board.map(x => x / 2));
   }
 };
-
-export type Board = number[];
-export type Piece = { pileId: number; pieceId: number };
-
-export const moves = {
-  removePile: {
-    validate: (board: Board, _, pileId: number) => isRemovalAllowed(board, pileId),
-    // First half of the turn: empty a pile, then split another into it — the
-    // turn stays open in between.
-    apply: (board: Board, _, pileId: number): MoveOutcome<Board> =>
-      ({ nextBoard: withPileRemoved(board, pileId) })
-  },
-  splitPile: {
-    validate: (board: Board, _, { pileId, pieceCount }: { pileId: number; pieceCount: number }) =>
-      isSplitAllowed(board, pileId, pieceCount),
-    apply: (
-      board: Board,
-      { ctx }: { ctx: Ctx },
-      { pileId, pieceCount }: { pileId: number; pieceCount: number }
-    ): MoveOutcome<Board> => {
-      const nextBoard = cloneDeep(board);
-      // the slot emptied earlier this turn takes the other half of the split
-      const removedPileId = emptiedPileId(nextBoard)!;
-      if (removedPileId < pileId) {
-        nextBoard[removedPileId] = pieceCount;
-        nextBoard[pileId] = nextBoard[pileId] - pieceCount;
-      } else {
-        nextBoard[removedPileId] = nextBoard[pileId] - pieceCount;
-        nextBoard[pileId] = pieceCount;
-      }
-      // All piles down to a single piece: the opponent cannot split anything.
-      if (isEqual(nextBoard, [1, 1, 1, 1])) {
-        return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
-      }
-      return { nextBoard, isTurnEnd: true };
-    }
-  }
-};
-
-export type Moves = typeof moves;

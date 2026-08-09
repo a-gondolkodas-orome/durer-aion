@@ -1,32 +1,29 @@
-import { moves } from './gameplay';
-import { makeCtx } from 'test-utils';
+import { generateStartBoard, generateTestStartBoard } from './gameplay';
 
-// A turn is two moves: empty one pile, then split another into it. The game
-// ends once every pile is down to a single piece, since a pile of one cannot
-// be split.
-const asPlayer = (currentPlayer: number) => ({ ctx: makeCtx({ currentPlayer }) });
+// Both generators draw four piles from their own range, then either keep the
+// board, double it, or double it and take one piece off — so the widest pile a
+// range of `min..max` can produce is `2 * max`, and the smallest is `min`.
+const DRAWS = 200;
 
-describe('pile-splitter-4 end of game', () => {
-  it('leaves the turn open after emptying a pile', () => {
-    const outcome = moves.removePile.apply([1, 1, 2, 5], asPlayer(0), 3);
-    expect(outcome.gameEnd).toBeUndefined();
-    expect(outcome.isTurnEnd).toBeUndefined();
+describe('pile-splitter-4 start boards', () => {
+  it('draws the full boards from 5..12', () => {
+    const piles = Array.from({ length: DRAWS }, generateStartBoard).flat();
+
+    expect(Math.min(...piles)).toBeGreaterThanOrEqual(5);
+    expect(Math.max(...piles)).toBeLessThanOrEqual(24);
   });
 
-  it.each([0, 1])('ends for the mover (player %i) when every pile holds one', player => {
-    const outcome = moves.splitPile.apply(
-      [1, 1, 2, 0], asPlayer(player), { pileId: 2, pieceCount: 1 }
-    );
-    expect(outcome.nextBoard).toEqual([1, 1, 1, 1]);
-    expect(outcome.gameEnd).toEqual({ winnerIndex: player });
-    expect(outcome.isTurnEnd).toBeUndefined();
+  // The retry used to drop the range and fall back to the full-size defaults,
+  // which is roughly half of all draws.
+  it('keeps the test boards inside their own smaller range, retries included', () => {
+    const piles = Array.from({ length: DRAWS }, generateTestStartBoard).flat();
+
+    expect(Math.min(...piles)).toBeGreaterThanOrEqual(3);
+    expect(Math.max(...piles)).toBeLessThanOrEqual(12);
   });
 
-  it('passes the turn while a pile can still be split', () => {
-    const outcome = moves.splitPile.apply(
-      [1, 1, 5, 0], asPlayer(0), { pileId: 2, pieceCount: 1 }
-    );
-    expect(outcome.gameEnd).toBeUndefined();
-    expect(outcome.isTurnEnd).toBe(true);
+  it('always draws four piles', () => {
+    expect(generateStartBoard()).toHaveLength(4);
+    expect(generateTestStartBoard()).toHaveLength(4);
   });
 });

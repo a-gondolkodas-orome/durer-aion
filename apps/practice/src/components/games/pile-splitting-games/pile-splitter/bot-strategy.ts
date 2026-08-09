@@ -1,24 +1,17 @@
-import { random, sample } from 'lodash';
-import type { BotMove, BotStrategy } from 'strategy-game-factory';
-import type { Board, Moves } from './gameplay';
+import { random } from 'lodash';
+import { asTurn, type Bot } from '../bot-strategy';
+import type { Board } from './gameplay';
 
-type Bot = BotStrategy<Board, Moves>
-
-// A turn is one decision expressed as two moves: which pile to keep, and where
-// to cut it.
-const asTurn = (pileId: number, pieceCount: number): BotMove<Moves>[] => [
-  { move: 'removePile', args: [1 - pileId] },
-  { move: 'splitPile', args: [{ pileId, pieceCount }] }
-];
+export { randomBotStrategy } from '../bot-strategy';
 
 export const smartBotStrategy: Bot = ({ board }) => {
   const pileId = getPileToSplit(board);
-  return asTurn(pileId, getOptimalDivision(board[pileId]));
-};
 
-export const randomBotStrategy: Bot = ({ board }) => {
-  const pileId = sample([0, 1].filter(i => board[i] >= 2))!;
-  return asTurn(pileId, random(1, board[pileId] - 1));
+  return asTurn({
+    removedPileId: 1 - pileId,
+    pileId,
+    pieceCount: getOptimalDivision(board[pileId])
+  });
 };
 
 // The split always leaves an odd half, so only an even pile can be split into

@@ -1,28 +1,10 @@
 import { random, range, sample } from 'lodash';
-import type { BotMove, BotStrategy } from 'strategy-game-factory';
-import type { Board, Moves } from './gameplay';
+import { asTurn, type Bot, type BotStep } from '../bot-strategy';
+import type { Board } from './gameplay';
 
-type Bot = BotStrategy<Board, Moves>
-
-type BotStep = { removedPileId: number; pileId: number; pieceCount: number };
+export { randomBotStrategy } from '../bot-strategy';
 
 export const smartBotStrategy: Bot = ({ board }) => asTurn(getSmartBotStep(board));
-
-export const randomBotStrategy: Bot = ({ board }) => asTurn(getRandomStep(board));
-
-// A turn is one decision expressed as two moves: which pile to discard, and
-// where to cut one of those left.
-const asTurn = ({ removedPileId, pileId, pieceCount }: BotStep): BotMove<Moves>[] => [
-  { move: 'removePile', args: [removedPileId] },
-  { move: 'splitPile', args: [{ pileId, pieceCount }] }
-];
-
-const getRandomStep = (board: Board): BotStep => {
-  const pileId = sample([0, 1, 2, 3].filter(i => board[i] >= 2))!;
-  const removedPileId = sample([0, 1, 2, 3].filter(i => i !== pileId))!;
-  const pieceCount = random(1, board[pileId] - 1);
-  return { removedPileId, pileId, pieceCount };
-};
 
 export const getSmartBotStep = (board: Board): BotStep => {
   const start = random(0, 3);
