@@ -24,7 +24,7 @@ export const isArchitectStepAllowed = (board: Board, targetVertex: number, kmPer
   return gap === 1 || gap === board.towers.length - 1; // neighbours, wrapping round
 };
 
-export const makeStartBoard = (vertexCount: number) => (): Board => {
+export const makeStartBoard = (vertexCount: number): Board => {
   const towers = Array(vertexCount).fill(false);
   /*
   Workaround to have a tower at the start of day 1, as startOfTurnMove or

@@ -7,7 +7,7 @@ export type Move = { cell: number; digit: number };
 const rowOf = (cell: number): number => Math.floor(cell / 3);
 const colOf = (cell: number): number => cell % 3;
 
-export const generateStartBoard = (): Board => Array(9).fill(0);
+export const startBoard: Board = Array(9).fill(0);
 
 export const isFull = (board: Board): boolean => board.every(v => v !== 0);
 

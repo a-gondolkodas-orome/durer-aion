@@ -1,7 +1,7 @@
 import { EDGES, TRIANGLES, TRIANGLE_COUNT } from '../geometry';
 import {
   type Board, LINE,
-  generateStartBoard, applyShade, applyCircle,
+  startBoard, applyShade, applyCircle,
   isLineWin, isCircleWin, liveThreats, freeTriangles
 } from '../gameplay';
 import { OPENING_EDGE, OPENING_EDGES, isLineTurnWon, marchEdges, winningPairHeatEdges } from './forced-win';
@@ -21,7 +21,7 @@ describe('forced-win certificate (line player wins the side-6 board)', () => {
 
   it('after any symmetric opening, every circle reply is answered: two-hot already, ' +
      'or a second pair-heat exists after which ALL circle replies leave two-hot', () => {
-    const empty = generateStartBoard();
+    const empty = startBoard;
     expect(isLineTurnWon(empty)).toBe(false);
 
     for (const opening of OPENING_EDGES) {
@@ -38,7 +38,7 @@ describe('forced-win certificate (line player wins the side-6 board)', () => {
 
 describe('isLineTurnWon (two-hot criterion)', () => {
   it('is false on the empty board and after a boundary shade (one hot only)', () => {
-    const empty = generateStartBoard();
+    const empty = startBoard;
     expect(isLineTurnWon(empty)).toBe(false);
     const boundary = EDGES.find(e => e.triangleIds.length === 1)!;
     expect(isLineTurnWon(applyShade(empty, boundary.id))).toBe(false);
@@ -47,12 +47,12 @@ describe('isLineTurnWon (two-hot criterion)', () => {
   it('is true after one interior shade: both heated triangles stay connected ' +
      'around the removed edge', () => {
     const interior = EDGES[OPENING_EDGE];
-    expect(isLineTurnWon(applyShade(generateStartBoard(), interior.id))).toBe(true);
+    expect(isLineTurnWon(applyShade(startBoard, interior.id))).toBe(true);
   });
 
   it('is true for an uncircled triangle with two shaded sides', () => {
     const [e0, e1] = TRIANGLES[5].edgeIds;
-    expect(isLineTurnWon(applyShade(applyShade(generateStartBoard(), e0), e1))).toBe(true);
+    expect(isLineTurnWon(applyShade(applyShade(startBoard, e0), e1))).toBe(true);
   });
 });
 
@@ -61,7 +61,7 @@ describe('marchEdges', () => {
     const edge = EDGES.find(e => e.triangleIds.length === 2)!;
     const [t1, t2] = edge.triangleIds;
     const other = (t: number) => TRIANGLES[t].edgeIds.find(e => e !== edge.id)!;
-    let board = generateStartBoard();
+    let board = startBoard;
     board = applyShade(board, other(t1));
     board = applyShade(board, other(t2));
     expect(marchEdges(board)).toEqual([edge.id]);
@@ -85,7 +85,7 @@ describe('marchEdges', () => {
     const [A, C] = flank;
     const boundaryEdge = (t: number) => TRIANGLES[t].edgeIds.find(x => EDGES[x].triangleIds.length === 1)!;
 
-    let board = generateStartBoard();
+    let board = startBoard;
     board = applyShade(board, boundaryEdge(A));
     board = applyShade(board, boundaryEdge(C));
 
@@ -116,7 +116,7 @@ describe('bot line player wins against adversarial circle defence', () => {
 
   it('wins for every one of the 36 first circle replies', () => {
     for (let reply = 0; reply < TRIANGLE_COUNT; reply++) {
-      let board = applyCircle(applyShade(generateStartBoard(), OPENING_EDGE), reply);
+      let board = applyCircle(applyShade(startBoard, OPENING_EDGE), reply);
       let won = false;
       for (let round = 0; round < 40; round++) {
         board = playBotTurn(board, LINE, bot).nextBoard;

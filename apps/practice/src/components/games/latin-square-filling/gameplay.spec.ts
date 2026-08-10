@@ -1,6 +1,6 @@
 import {
   applyMove,
-  generateStartBoard,
+  startBoard,
   isFull,
   isTerminal,
   legalDigits,
@@ -51,7 +51,7 @@ describe('latin-square-filling gameplay', () => {
 
   describe('turn bookkeeping', () => {
     it('player 0 moves on even fill counts, player 1 on odd', () => {
-      expect(playerToMove(generateStartBoard())).toBe(0);
+      expect(playerToMove(startBoard)).toBe(0);
       expect(playerToMove([1, 0, 0, 0, 0, 0, 0, 0, 0])).toBe(1);
       expect(playerToMove([1, 2, 0, 0, 0, 0, 0, 0, 0])).toBe(0);
     });
@@ -66,21 +66,21 @@ describe('latin-square-filling gameplay', () => {
 
 describe('isLegalPlacement argument checks', () => {
   it('refuses a digit outside 1..3', () => {
-    const board = generateStartBoard();
+    const board = startBoard;
     expect(isLegalPlacement(board, 0, 0)).toBe(false);
     expect(isLegalPlacement(board, 0, 4)).toBe(false);
     expect(isLegalPlacement(board, 0, 1.5)).toBe(false);
   });
 
   it('refuses a cell outside the 3x3 grid', () => {
-    const board = generateStartBoard();
+    const board = startBoard;
     expect(isLegalPlacement(board, -1, 1)).toBe(false);
     expect(isLegalPlacement(board, 9, 1)).toBe(false);
     expect(isLegalPlacement(board, 0.5, 1)).toBe(false);
   });
 
   it('accepts exactly the moves the generator lists', () => {
-    const board = applyMove(applyMove(generateStartBoard(), { cell: 0, digit: 1 }), { cell: 4, digit: 2 });
+    const board = applyMove(applyMove(startBoard, { cell: 0, digit: 1 }), { cell: 4, digit: 2 });
     const listed = new Set(legalMoves(board).map(m => `${m.cell},${m.digit}`));
     for (let cell = 0; cell < 9; cell++) {
       for (const digit of [1, 2, 3]) {

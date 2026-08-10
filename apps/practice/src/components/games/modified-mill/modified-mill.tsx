@@ -42,7 +42,7 @@ export const ModifiedMill = strategyGameFactory({
       // second player (the losing side) it plays best-effort and may not always
       // punish a mistake — hence notAlwaysOptimal.
       botStrategy: smartBotStrategy,
-      generateStartBoard: generateEmptyBoard,
+      startBoards: [generateEmptyBoard()],
       label: { hu: 'Teljes', en: 'Full' },
       isDefault: true,
       notAlwaysOptimal: true

@@ -1,7 +1,7 @@
 import { strategyGameFactory, type BoardClientProps, GameBoard } from 'strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { useTranslation } from 'language';
-import { CARDS, generateStartBoard, moves, type Board } from './gameplay';
+import { CARDS, startBoard, moves, type Board } from './gameplay';
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
@@ -71,7 +71,7 @@ export const FiveFiveCard = strategyGameFactory({
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt', en: 'Test' } },
     {
       botStrategy: smartBotStrategy,
-      generateStartBoard,
+      startBoards: [startBoard],
       label: { hu: 'Teljes', en: 'Full' },
       isDefault: true
     }

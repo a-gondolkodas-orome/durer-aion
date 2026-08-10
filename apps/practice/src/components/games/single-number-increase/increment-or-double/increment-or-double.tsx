@@ -57,5 +57,5 @@ export const IncrementOrDouble = strategyGameFactory({
   },
   BoardClient,
   gameplay: { moves },
-  variants: [{ botStrategy: smartBotStrategy, generateStartBoard: () => 0 }]
+  variants: [{ botStrategy: smartBotStrategy, startBoards: [0] }]
 });

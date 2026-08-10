@@ -1,5 +1,5 @@
 import { strategyGameFactory } from 'strategy-game-factory';
-import { generateStartBoard, moves } from './gameplay';
+import { startBoard, moves } from './gameplay';
 import { smartBotStrategy } from './bot-strategy';
 import { BoardClient } from './board-client';
 
@@ -31,6 +31,6 @@ export const AmorAndCupido = strategyGameFactory({
   gameplay: { moves },
   variants: [{
     botStrategy: smartBotStrategy,
-    generateStartBoard
+    startBoards: [startBoard]
   }]
 });

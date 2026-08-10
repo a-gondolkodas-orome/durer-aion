@@ -1,14 +1,14 @@
 import { getBotCard, getBotScore } from './bot-strategy';
-import { Sheriff, Thief, generateStartBoard, type Board } from '../gameplay';
+import { Sheriff, Thief, startBoard, type Board } from '../gameplay';
 
 describe('thief-sheriff-mean-9 smart bot', () => {
   describe('as Sheriff', () => {
     it('wins from the starting position', () => {
-      expect(getBotScore(generateStartBoard(), Sheriff)).toBe(1);
+      expect(getBotScore(startBoard, Sheriff)).toBe(1);
     });
 
     it('picks 5 as the unique winning opening move', () => {
-      expect(getBotCard(generateStartBoard(), Sheriff)).toBe(5);
+      expect(getBotCard(startBoard, Sheriff)).toBe(5);
     });
 
     it('picks 4 when Thief took a card from {1,2,3,6}', () => {

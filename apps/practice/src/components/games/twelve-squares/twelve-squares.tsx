@@ -1,7 +1,7 @@
 import { strategyGameFactory, type BoardClientProps, GameBoard } from 'strategy-game-factory';
 import { range } from 'lodash';
 import { ChessBishopSvg } from '../chess-bishops/chess-bishop-svg';
-import { generateStartBoard, moves, type Board } from './gameplay';
+import { startBoard, moves, type Board } from './gameplay';
 import { optimalBotStrategy, randomBotStrategy } from './bot-strategy';
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
@@ -78,7 +78,7 @@ export const TwelveSquares = strategyGameFactory({
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt', en: 'Test' } },
     {
       botStrategy: optimalBotStrategy,
-      generateStartBoard,
+      startBoards: [startBoard],
       label: { hu: 'Teljes', en: 'Full' },
       isDefault: true
     }

@@ -3,7 +3,7 @@ import type { MoveOutcome } from 'strategy-game-factory';
 
 export type Board = string[]
 
-export const generateStartBoard = (): Board => Array(8).fill('');
+export const startBoard: Board = Array(8).fill('');
 export const isColored = (board: Board, i: number) => board[i] !== '';
 
 // The logic-side palette; `nodeColors` in cube-coloring.tsx adds the styling.

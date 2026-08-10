@@ -1,4 +1,4 @@
-import { generateStartBoard, moves } from './gameplay';
+import { startBoard, moves } from './gameplay';
 import { ARCHITECT, BANDITS, KM_PER_EDGE, type Board } from '../gameplay';
 import { makeCtx } from 'test-utils';
 
@@ -75,7 +75,7 @@ describe('architect-and-bandits-b tower building', () => {
   });
 
   it('starts day 1 with a tower already on the architect\'s vertex', () => {
-    const board = generateStartBoard();
+    const board = startBoard;
     expect(board.towers).toHaveLength(VERTEX_COUNT);
     expect(board.architectPosition).toBe(0);
     expect(board.towers[0]).toBe(true);

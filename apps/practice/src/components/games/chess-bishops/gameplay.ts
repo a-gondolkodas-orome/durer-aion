@@ -8,9 +8,7 @@ export type CellValue = null | typeof BISHOP | typeof FORBIDDEN;
 export type Board = CellValue[][];
 export type Field = { row: number; col: number };
 
-export const generateStartBoard = (): Board => {
-  return range(0, 8).map(() => range(0, 8).map(() => null));
-};
+export const startBoard: Board = range(0, 8).map(() => range(0, 8).map(() => null));
 
 export const boardIndices: Field[] = flatMap(range(0, 8), row => range(0, 8).map(col => ({ row, col })));
 

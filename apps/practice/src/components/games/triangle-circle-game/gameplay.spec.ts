@@ -6,7 +6,7 @@ import {
   applyShade,
   freeEdges,
   freeTriangles,
-  generateStartBoard,
+  startBoard,
   isCircleWin,
   isLineWin,
   isWinningShade,
@@ -23,7 +23,7 @@ const isCirclePlacementAllowed = moveValidator(moves.placeCircle, makeCtx({ curr
 
 // Shade the three edges of a triangle on a fresh board.
 const boardWithFullTriangle = (t: number): Board => {
-  let board = generateStartBoard();
+  let board = startBoard;
   for (const e of TRIANGLES[t].edgeIds) board = applyShade(board, e);
   return board;
 };
@@ -34,7 +34,7 @@ const preThreatSetup = () => {
   const edge = EDGES.find(e => e.triangleIds.length === 2)!;
   const [t1, t2] = edge.triangleIds;
   const otherEdge = (t: number) => TRIANGLES[t].edgeIds.find(e => e !== edge.id)!;
-  let board = generateStartBoard();
+  let board = startBoard;
   board = applyShade(board, otherEdge(t1));
   board = applyShade(board, otherEdge(t2));
   return { board, edge: edge.id, t1, t2 };
@@ -42,7 +42,7 @@ const preThreatSetup = () => {
 
 describe('start board', () => {
   it('has no shaded edges and no circles', () => {
-    const board = generateStartBoard();
+    const board = startBoard;
     expect(board.edges).toHaveLength(63);
     expect(board.circles).toHaveLength(36);
     expect(board.edges.some(Boolean)).toBe(false);
@@ -65,7 +65,7 @@ describe('win detection', () => {
   });
 
   it('circle wins only once every triangle is circled', () => {
-    let board = generateStartBoard();
+    let board = startBoard;
     expect(isCircleWin(board)).toBe(false);
     board = { edges: board.edges, circles: new Array(36).fill(true) };
     expect(isCircleWin(board)).toBe(true);
@@ -74,7 +74,7 @@ describe('win detection', () => {
   it('a nearly-complete circle board is not yet a win', () => {
     const circles = new Array(36).fill(true);
     circles[17] = false;
-    expect(isCircleWin({ edges: generateStartBoard().edges, circles })).toBe(false);
+    expect(isCircleWin({ edges: startBoard.edges, circles })).toBe(false);
   });
 });
 
@@ -82,7 +82,7 @@ describe('threat vocabulary', () => {
   it('isWinningShade is true exactly for the third edge of an un-circled 2-edge triangle', () => {
     const t = 5;
     const [e0, e1, e2] = TRIANGLES[t].edgeIds;
-    let board = generateStartBoard();
+    let board = startBoard;
     board = applyShade(board, e0);
     board = applyShade(board, e1);
     expect(isWinningShade(board, e2)).toBe(true);
@@ -93,7 +93,7 @@ describe('threat vocabulary', () => {
   it('a 2-edge un-circled triangle is a live threat; circling it clears the threat', () => {
     const t = 5;
     const [e0, e1] = TRIANGLES[t].edgeIds;
-    let board = applyShade(applyShade(generateStartBoard(), e0), e1);
+    let board = applyShade(applyShade(startBoard, e0), e1);
     expect(liveThreats(board)).toContain(t);
     board = applyCircle(board, t);
     expect(liveThreats(board)).not.toContain(t);
@@ -110,7 +110,7 @@ describe('threat vocabulary', () => {
   });
 
   it('allows shading a free edge and refuses an already shaded or non-existent one', () => {
-    const board = applyShade(generateStartBoard(), 3);
+    const board = applyShade(startBoard, 3);
     expect(isShadeAllowed(board, 4)).toBe(true);
     expect(isShadeAllowed(board, 3)).toBe(false);
     expect(isShadeAllowed(board, -1)).toBe(false);
@@ -118,7 +118,7 @@ describe('threat vocabulary', () => {
   });
 
   it('allows circling a free triangle and refuses an already circled or non-existent one', () => {
-    const board = applyCircle(generateStartBoard(), 2);
+    const board = applyCircle(startBoard, 2);
     expect(isCirclePlacementAllowed(board, 1)).toBe(true);
     expect(isCirclePlacementAllowed(board, 2)).toBe(false);
     expect(isCirclePlacementAllowed(board, -1)).toBe(false);
@@ -126,7 +126,7 @@ describe('threat vocabulary', () => {
   });
 
   it('agrees with the free-edge and free-triangle listings', () => {
-    const board = applyCircle(applyShade(generateStartBoard(), 3), 2);
+    const board = applyCircle(applyShade(startBoard, 3), 2);
     expect(freeEdges(board).every(e => isShadeAllowed(board, e))).toBe(true);
     expect(freeTriangles(board).every(t => isCirclePlacementAllowed(board, t))).toBe(true);
   });
@@ -136,7 +136,7 @@ const meta = { ctx: makeCtx() };
 
 describe('moves.shadeEdge', () => {
   it('shades the edge and passes the turn', () => {
-    const outcome = moves.shadeEdge.apply(generateStartBoard(), meta, 0);
+    const outcome = moves.shadeEdge.apply(startBoard, meta, 0);
     expect(outcome.nextBoard.edges[0]).toBe(true);
     expect(outcome.isTurnEnd).toBe(true);
     expect(outcome.gameEnd).toBeUndefined();
@@ -144,7 +144,7 @@ describe('moves.shadeEdge', () => {
 
   it('ends the game for the line player when it completes an un-circled triangle', () => {
     const [e0, e1, e2] = TRIANGLES[0].edgeIds;
-    const board = applyShade(applyShade(generateStartBoard(), e0), e1);
+    const board = applyShade(applyShade(startBoard, e0), e1);
     const outcome = moves.shadeEdge.apply(board, meta, e2);
     expect(outcome.gameEnd).toEqual({ winnerIndex: LINE });
     expect(outcome.isTurnEnd).toBeUndefined();
@@ -152,7 +152,7 @@ describe('moves.shadeEdge', () => {
 
   it('only passes the turn when the completed triangle is circled', () => {
     const [e0, e1, e2] = TRIANGLES[0].edgeIds;
-    const board = applyCircle(applyShade(applyShade(generateStartBoard(), e0), e1), 0);
+    const board = applyCircle(applyShade(applyShade(startBoard, e0), e1), 0);
     const outcome = moves.shadeEdge.apply(board, meta, e2);
     expect(outcome.isTurnEnd).toBe(true);
     expect(outcome.gameEnd).toBeUndefined();
@@ -161,7 +161,7 @@ describe('moves.shadeEdge', () => {
 
 describe('moves.placeCircle', () => {
   it('places the circle and passes the turn', () => {
-    const outcome = moves.placeCircle.apply(generateStartBoard(), meta, 7);
+    const outcome = moves.placeCircle.apply(startBoard, meta, 7);
     expect(outcome.nextBoard.circles[7]).toBe(true);
     expect(outcome.isTurnEnd).toBe(true);
     expect(outcome.gameEnd).toBeUndefined();
@@ -170,7 +170,7 @@ describe('moves.placeCircle', () => {
   it('ends the game for the circle player when the last triangle gets circled', () => {
     const circles = new Array(TRIANGLE_COUNT).fill(true);
     circles[12] = false;
-    const board = { edges: generateStartBoard().edges, circles };
+    const board = { edges: startBoard.edges, circles };
     const outcome = moves.placeCircle.apply(board, meta, 12);
     expect(outcome.gameEnd).toEqual({ winnerIndex: CIRCLE });
     expect(outcome.isTurnEnd).toBeUndefined();

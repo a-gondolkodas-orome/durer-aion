@@ -2,7 +2,7 @@ import type { Ctx, MoveOutcome } from 'strategy-game-factory';
 
 export type Board = { left: number, right: number }
 
-export const generateStartBoard = (): Board => ({ left: 1, right: 12 });
+export const startBoard: Board = { left: 1, right: 12 };
 
 export const moves = {
   step: {

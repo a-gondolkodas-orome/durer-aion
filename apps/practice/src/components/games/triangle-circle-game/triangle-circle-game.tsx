@@ -1,6 +1,6 @@
 import { strategyGameFactory } from 'strategy-game-factory';
 import { BoardClient } from './board-client';
-import { LINE, generateStartBoard, moves } from './gameplay';
+import { LINE, startBoard, moves } from './gameplay';
 import { smartBotStrategy, randomBotStrategy } from './strategy/bot-strategy';
 
 const rule = {
@@ -46,7 +46,7 @@ export const TriangleCircleGame = strategyGameFactory({
   variants: [
     {
       botStrategy: randomBotStrategy,
-      generateStartBoard,
+      startBoards: [startBoard],
       label: { hu: 'Teszt', en: 'Test' }
     },
     // Smart bot. As the line player it executes a proven forced win (see
@@ -56,7 +56,7 @@ export const TriangleCircleGame = strategyGameFactory({
     // filter + bounded search), hence the notAlwaysOptimal marker.
     {
       botStrategy: smartBotStrategy,
-      generateStartBoard,
+      startBoards: [startBoard],
       label: { hu: 'Teljes', en: 'Full' },
       notAlwaysOptimal: true,
       isDefault: true

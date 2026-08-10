@@ -174,7 +174,7 @@ export const Dominoes4x4 = strategyGameFactory({
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt', en: 'Test' } },
     {
       botStrategy: smartBotStrategy,
-      generateStartBoard: () => [],
+      startBoards: [[]],
       label: { hu: 'Teljes', en: 'Full' },
       isDefault: true
     }

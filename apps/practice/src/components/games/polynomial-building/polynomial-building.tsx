@@ -52,7 +52,7 @@ export const PolynomialBuilding = strategyGameFactory({
     },
     {
       botStrategy: smartBotStrategy,
-      generateStartBoard: (): Board => ({ a: null, b: null, c: null }),
+      startBoards: [{ a: null, b: null, c: null }],
       label: { hu: 'Teljes', en: 'Full' },
       isDefault: true
     }

@@ -1,7 +1,7 @@
 import { range } from 'lodash';
 import { strategyGameFactory, type BoardClientProps, GameBoard } from 'strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
-import { generateStartBoard, moves, type Board, type Field } from './gameplay';
+import { startBoard, moves, type Board, type Field } from './gameplay';
 import { RookSvg } from '../shared/rook-svg';
 
 const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
@@ -75,6 +75,6 @@ export const ChessRook = strategyGameFactory({
   gameplay: { moves },
   variants: [
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt', en: 'Test' } },
-    { botStrategy: smartBotStrategy, generateStartBoard, label: { hu: 'Teljes', en: 'Full' }, isDefault: true }
+    { botStrategy: smartBotStrategy, startBoards: [startBoard], label: { hu: 'Teljes', en: 'Full' }, isDefault: true }
   ]
 });

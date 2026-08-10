@@ -5,7 +5,7 @@ import {
 } from './bot-strategy';
 import {
   applyMove,
-  generateStartBoard,
+  startBoard,
   isFull,
   isTerminal,
   legalMoves,
@@ -23,7 +23,7 @@ describe('latin-square-filling bot', () => {
 const playGame = (
   step0: (b: Board) => Move,
   step1: (b: Board) => Move,
-  start: Board = generateStartBoard()
+  start: Board = startBoard
 ): number => {
   let board = start;
   // safety bound: at most 9 placements
@@ -39,7 +39,7 @@ const playGame = (
 
   describe('optimal winner (minimax)', () => {
     it('is a forced first-player win from the empty board', () => {
-      expect(optimalWinner(generateStartBoard())).toBe(0);
+      expect(optimalWinner(startBoard)).toBe(0);
     });
 
     it('credits a completed Latin square to the first player', () => {
@@ -47,7 +47,7 @@ const playGame = (
     });
 
     it('every legal first move preserves the first player win', () => {
-      const start = generateStartBoard();
+      const start = startBoard;
       for (const move of legalMoves(start)) {
         expect(optimalWinner(applyMove(start, move))).toBe(0);
       }
@@ -87,7 +87,7 @@ const playGame = (
       // predicted by the minimax value — for both winning and losing sides.
       const positions: Board[] = [];
       for (let i = 0; i < 60; i++) {
-        let board = generateStartBoard();
+        let board = startBoard;
         while (!isTerminal(board)) {
           positions.push([...board]);
           board = applyMove(board, getRandomBotStep(board));

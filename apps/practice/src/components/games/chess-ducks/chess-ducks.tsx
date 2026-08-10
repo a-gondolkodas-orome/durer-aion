@@ -1,5 +1,5 @@
 import { strategyGameFactory, type BoardClientProps, GameBoard } from 'strategy-game-factory';
-import { range, sample } from 'lodash';
+import { range } from 'lodash';
 import { DuckSvg } from './rubber-duck-svg';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import {
@@ -10,9 +10,8 @@ import {
   type Field
 } from './gameplay';
 
-const generateStartBoard = (ROWS: number, COLS: number) => (): Board => {
-  return range(0, ROWS).map(() => range(0, COLS).map(() => null));
-};
+const startBoard = (ROWS: number, COLS: number): Board =>
+  range(0, ROWS).map(() => range(0, COLS).map(() => null));
 
 // Board-driven: reads its dimensions from the board, so it renders any size.
 const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
@@ -100,8 +99,7 @@ const getPlayerStepDescription = () => ({
 });
 
 // Test variant covers both sub-games: a 4 × 6 or a 4 × 7 board.
-const generateTestStartBoard = (): Board =>
-  sample([generateStartBoard(4, 6), generateStartBoard(4, 7)])!();
+const testStartBoards: Board[] = [startBoard(4, 6), startBoard(4, 7)];
 
 export const ChessDucks = strategyGameFactory({
   presentation: {
@@ -114,13 +112,13 @@ export const ChessDucks = strategyGameFactory({
     {
       id: 'test',
       botStrategy: randomBotStrategy,
-      generateStartBoard: generateTestStartBoard,
+      startBoards: testStartBoards,
       label: { hu: 'Teszt', en: 'Test' }
     },
     {
       id: '4x6',
       botStrategy: smartBotStrategy,
-      generateStartBoard: generateStartBoard(4, 6),
+      startBoards: [startBoard(4, 6)],
       rule: rule(4, 6),
       label: { hu: '4×6', en: '4×6' },
       isDefault: true
@@ -128,7 +126,7 @@ export const ChessDucks = strategyGameFactory({
     {
       id: '4x7',
       botStrategy: smartBotStrategy,
-      generateStartBoard: generateStartBoard(4, 7),
+      startBoards: [startBoard(4, 7)],
       rule: rule(4, 7),
       label: { hu: '4×7', en: '4×7' }
     }

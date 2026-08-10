@@ -5,7 +5,7 @@ import { RockSvg } from './symbols/rock-svg';
 import { PaperSvg } from './symbols/paper-svg';
 import { ScissorSvg } from '../shared/scissor-svg';
 import { useTranslation } from 'language';
-import { CARDS, generateStartBoard, moves, type Board, type Card } from './gameplay';
+import { CARDS, startBoard, moves, type Board, type Card } from './gameplay';
 
 const cardSvgs: Record<Card, FC> = {
   rock: RockSvg,
@@ -73,6 +73,6 @@ export const RockPaperScissor = strategyGameFactory({
   BoardClient,
   gameplay: { moves },
   variants: [
-    { botStrategy: smartBotStrategy, generateStartBoard }
+    { botStrategy: smartBotStrategy, startBoards: [startBoard] }
   ]
 });

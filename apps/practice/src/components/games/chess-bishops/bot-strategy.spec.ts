@@ -1,7 +1,10 @@
-import lodash from 'lodash';
+import lodash, { cloneDeep } from 'lodash';
 import { smartBotStrategy } from './bot-strategy';
-import { generateStartBoard, BISHOP, markForbiddenFields, type Board, type Field } from './gameplay'
+import { startBoard, BISHOP, markForbiddenFields, type Board, type Field } from './gameplay'
 import { botNextMoveArgs, makeCtx } from 'test-utils';
+
+// This spec steps the board forward, so it needs its own copy of the shared one.
+const freshStartBoard = () => cloneDeep(startBoard);
 
 const smartBotPlacement = (board: Board): Field =>
   botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx() }))[0];
@@ -15,7 +18,7 @@ describe('test bishop strategy', () => {
     it('places 2nd bishop at the horizontal mirror position when horizontal axis is chosen', () => {
       // random(0, 1) === 1 selects the horizontal axis
       vi.spyOn(lodash, 'random').mockReturnValue(1);
-      const board = generateStartBoard();
+      const board = freshStartBoard();
       markForbiddenFields(board, { row: 1, col: 5 });
       board[1][5] = BISHOP;
       const res = smartBotPlacement(board);
@@ -25,7 +28,7 @@ describe('test bishop strategy', () => {
     it('places 2nd bishop at the vertical mirror position when vertical axis is chosen', () => {
       // random(0, 1) === 0 selects the vertical axis
       vi.spyOn(lodash, 'random').mockReturnValue(0);
-      const board = generateStartBoard();
+      const board = freshStartBoard();
       markForbiddenFields(board, { row: 1, col: 5 });
       board[1][5] = BISHOP;
       const res = smartBotPlacement(board);
@@ -33,7 +36,7 @@ describe('test bishop strategy', () => {
     });
 
     it('places 4th bishop at a mirror position according to chosen axis', () => {
-      const board = generateStartBoard();
+      const board = freshStartBoard();
       markForbiddenFields(board, { row: 1, col: 5 });
       board[1][5] = BISHOP;
       const move2 = smartBotPlacement(board);

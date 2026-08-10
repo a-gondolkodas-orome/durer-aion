@@ -136,7 +136,7 @@ export const TriangularGridRopes = strategyGameFactory({
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt', en: 'Test' } },
     {
       botStrategy: smartBotStrategy,
-      generateStartBoard: (): Board => [],
+      startBoards: [[]],
       label: { hu: 'Teljes', en: 'Full' },
       isDefault: true
     }

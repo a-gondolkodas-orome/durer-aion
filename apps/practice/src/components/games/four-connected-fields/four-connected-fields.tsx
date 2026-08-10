@@ -42,7 +42,7 @@ export const FourConnectedFields = strategyGameFactory({
     },
     {
       botStrategy: smartBotStrategy,
-      generateStartBoard: (): Board => [0, 0, 0, 0],
+      startBoards: [[0, 0, 0, 0]],
       label: { hu: 'Teljes', en: 'Full' },
       isDefault: true
     }

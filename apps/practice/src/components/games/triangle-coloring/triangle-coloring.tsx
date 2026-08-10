@@ -113,7 +113,7 @@ export const TriangleColoring = strategyGameFactory({
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt', en: 'Test' } },
     {
       botStrategy: smartBotStrategy,
-      generateStartBoard: () => Array(16).fill(ALLOWED),
+      startBoards: [Array(16).fill(ALLOWED)],
       label: { hu: 'Teljes', en: 'Full' },
       isDefault: true
     }

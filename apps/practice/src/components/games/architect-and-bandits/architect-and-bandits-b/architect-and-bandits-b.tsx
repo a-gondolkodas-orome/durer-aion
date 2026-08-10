@@ -2,7 +2,7 @@ import { strategyGameFactory } from 'strategy-game-factory';
 import { ARCHITECT } from '../gameplay';
 import { makeBoardClient } from '../board-client';
 import { smartBotStrategy } from './bot-strategy';
-import { generateStartBoard, moves, KM_PER_DAY } from './gameplay';
+import { startBoard, moves, KM_PER_DAY } from './gameplay';
 
 const BoardClient = makeBoardClient(KM_PER_DAY);
 
@@ -64,6 +64,6 @@ export const ArchitectAndBanditsB = strategyGameFactory({
   gameplay: { moves, endOfTurnMove: 'startNextDay' },
   variants: [{
     botStrategy: smartBotStrategy,
-    generateStartBoard
+    startBoards: [startBoard]
   }]
 });

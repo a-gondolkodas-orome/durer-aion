@@ -36,7 +36,7 @@ for (let a = 0; a < VERTEX_COUNT; a++) {
 const trianglesByEdge: [number, number, number][][] =
   EDGES.map((_, e) => TRIANGLES.filter(tri => tri.includes(e)));
 
-export const generateStartBoard = (): Board => new Array(EDGES.length).fill(null);
+export const startBoard: Board = new Array(EDGES.length).fill(null);
 
 export const getAllowedMoves = (board: Board): number[] =>
   board.flatMap((owner, e) => (owner === null ? [e] : []));

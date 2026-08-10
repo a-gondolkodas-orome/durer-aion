@@ -1,6 +1,6 @@
 import { strategyGameFactory } from 'strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
-import { generateStartBoard } from '../gameplay';
+import { startBoard } from '../gameplay';
 import { makeBoardClient } from '../board-client';
 import { moves, CARD_COUNT } from './gameplay';
 
@@ -47,6 +47,6 @@ export const ThiefSheriffMean7 = strategyGameFactory({
   gameplay: { moves },
   variants: [
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt', en: 'Test' } },
-    { botStrategy: smartBotStrategy, generateStartBoard, label: { hu: 'Teljes', en: 'Full' }, isDefault: true }
+    { botStrategy: smartBotStrategy, startBoards: [startBoard], label: { hu: 'Teljes', en: 'Full' }, isDefault: true }
   ]
 });

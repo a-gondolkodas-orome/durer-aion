@@ -95,7 +95,7 @@ export const TicTacToe = strategyGameFactory({
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt', en: 'Test' } },
     {
       botStrategy: smartBotStrategy,
-      generateStartBoard: generateEmptyTicTacToeBoard,
+      startBoards: [generateEmptyTicTacToeBoard()],
       label: { hu: 'Teljes', en: 'Full' },
       isDefault: true
     }

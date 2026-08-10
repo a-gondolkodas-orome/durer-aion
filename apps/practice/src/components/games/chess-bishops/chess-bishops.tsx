@@ -2,7 +2,7 @@ import { range, isEqual } from 'lodash';
 import { strategyGameFactory, type BoardClientProps, GameBoard, useHoverPreview } from 'strategy-game-factory';
 import { ChessBishopSvg } from './chess-bishop-svg';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
-import { BISHOP, FORBIDDEN, generateStartBoard, moves, type Board, type Field } from './gameplay';
+import { BISHOP, FORBIDDEN, startBoard, moves, type Board, type Field } from './gameplay';
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { value: validHoveredField, hoverProps } = useHoverPreview<Field>(ctx.moveCount);
@@ -95,6 +95,6 @@ export const ChessBishops = strategyGameFactory({
   gameplay: { moves },
   variants: [
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt', en: 'Test' } },
-    { botStrategy: smartBotStrategy, generateStartBoard, label: { hu: 'Teljes', en: 'Full' }, isDefault: true }
+    { botStrategy: smartBotStrategy, startBoards: [startBoard], label: { hu: 'Teljes', en: 'Full' }, isDefault: true }
   ]
 });

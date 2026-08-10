@@ -12,10 +12,10 @@ export interface Board {
 export const LINE = 0;
 export const CIRCLE = 1;
 
-export const generateStartBoard = (): Board => ({
-  edges: new Array(EDGE_COUNT).fill(false),
-  circles: new Array(TRIANGLE_COUNT).fill(false)
-});
+export const startBoard: Board = {
+edges: new Array(EDGE_COUNT).fill(false),
+circles: new Array(TRIANGLE_COUNT).fill(false)
+};
 
 // How many of a triangle's three edges are shaded.
 export const shadedCount = (board: Board, triangleId: number): number =>

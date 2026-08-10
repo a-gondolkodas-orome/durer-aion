@@ -49,5 +49,5 @@ export const PlusOneTwoThree = strategyGameFactory({
   },
   BoardClient,
   gameplay: { moves },
-  variants: [{ botStrategy: smartBotStrategy, generateStartBoard: () => 0 }]
+  variants: [{ botStrategy: smartBotStrategy, startBoards: [0] }]
 });

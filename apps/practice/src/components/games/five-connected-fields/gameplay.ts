@@ -31,7 +31,7 @@ export const legalNodes = (board: Board): number[] =>
 export const hasAnyMove = (board: Board): boolean =>
   legalNodes(board).length > 0;
 
-export const generateStartBoard = (): Board => [0, 0, 0, 0, 0];
+export const startBoard: Board = [0, 0, 0, 0, 0];
 
 export const moves = {
   placeCoin: {

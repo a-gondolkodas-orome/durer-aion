@@ -7,7 +7,7 @@ export type Card = typeof CARDS[number]
 // The cards each player still holds, in `CARDS` order.
 export type Board = [Card[], Card[]]
 
-export const generateStartBoard = (): Board => [[...CARDS], [...CARDS]];
+export const startBoard: Board = [[...CARDS], [...CARDS]];
 
 const BEATS: Record<Card, Card> = { rock: 'scissor', paper: 'rock', scissor: 'paper' };
 

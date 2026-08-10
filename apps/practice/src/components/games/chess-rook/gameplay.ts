@@ -5,13 +5,10 @@ export type CellValue = null | 'rook' | 'visited';
 export type Field = { row: number; col: number };
 export type Board = { chessBoard: CellValue[][]; rookPosition: Field };
 
-export const generateStartBoard = (): Board => {
-  const board = range(0, 8).map(() => range(0, 8).map((): CellValue => null));
-  board[0][0] = 'rook';
-  return {
-    chessBoard: board,
-    rookPosition: { row: 0, col: 0 }
-  };
+export const startBoard: Board = {
+chessBoard: range(0, 8).map(row =>
+  range(0, 8).map((col): CellValue => (row === 0 && col === 0 ? 'rook' : null))),
+rookPosition: { row: 0, col: 0 }
 };
 
 export const getAllowedMoves = (board: Board): Field[] => {

@@ -7,7 +7,7 @@ export type Card = typeof CARDS[number]
 // The cards each player still holds, in `CARDS` order.
 export type Board = [Card[], Card[]]
 
-export const generateStartBoard = (): Board => [[...CARDS], [...CARDS]];
+export const startBoard: Board = [[...CARDS], [...CARDS]];
 
 // The board taking `card` leaves behind. A move takes from the *other* hand, so
 // `player` is the mover; the bot's look-ahead plays the same function forward.

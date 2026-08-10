@@ -1,7 +1,7 @@
 import { EDGES, TRIANGLES } from '../geometry';
 import {
   LINE, CIRCLE,
-  generateStartBoard, applyShade, applyCircle,
+  startBoard, applyShade, applyCircle,
   isLineWin, isCircleWin, isWinningShade, liveThreats, preThreatEdges
 } from '../gameplay';
 import { smartBotStrategy, randomBotStrategy, makeSmartBotStrategy } from './bot-strategy';
@@ -16,7 +16,7 @@ describe('line-player bot', () => {
   it('takes an immediate win when a triangle has two shaded edges and no circle', () => {
     const t = 5;
     const [e0, e1, e2] = TRIANGLES[t].edgeIds;
-    const board = applyShade(applyShade(generateStartBoard(), e0), e1);
+    const board = applyShade(applyShade(startBoard, e0), e1);
     const played = playBotTurn(board, LINE, smartBotStrategy);
     expect(played.move).toBe('shadeEdge');
     expect(played.arg).toBe(e2);
@@ -26,7 +26,7 @@ describe('line-player bot', () => {
   it('creates a double threat when it can (plays a pre-threat edge)', () => {
     const edge = EDGES.find(e => e.triangleIds.length === 2)!;
     const [t1, t2] = edge.triangleIds;
-    let board = generateStartBoard();
+    let board = startBoard;
     board = applyShade(board, otherEdge(t1, edge.id));
     board = applyShade(board, otherEdge(t2, edge.id));
     // No immediate win available, but shading `edge` makes two live threats.
@@ -37,7 +37,7 @@ describe('line-player bot', () => {
   });
 
   it('always plays a legal (still-free) edge', () => {
-    const board = applyShade(generateStartBoard(), 0);
+    const board = applyShade(startBoard, 0);
     const played = playBotTurn(board, LINE, smartBotStrategy);
     expect(board.edges[played.arg]).toBe(false);
   });
@@ -47,7 +47,7 @@ describe('circle-player bot', () => {
   it('covers the sole live threat', () => {
     const t = 8;
     const [e0, e1] = TRIANGLES[t].edgeIds;
-    const board = applyShade(applyShade(generateStartBoard(), e0), e1);
+    const board = applyShade(applyShade(startBoard, e0), e1);
     const played = playBotTurn(board, CIRCLE, smartBotStrategy);
     expect(played.move).toBe('placeCircle');
     expect(played.arg).toBe(t);
@@ -57,7 +57,7 @@ describe('circle-player bot', () => {
   it('defuses a pre-threat edge by circling one of its triangles', () => {
     const edge = EDGES.find(e => e.triangleIds.length === 2)!;
     const [t1, t2] = edge.triangleIds;
-    let board = generateStartBoard();
+    let board = startBoard;
     board = applyShade(board, otherEdge(t1, edge.id));
     board = applyShade(board, otherEdge(t2, edge.id));
     expect(liveThreats(board)).toHaveLength(0);
@@ -68,7 +68,7 @@ describe('circle-player bot', () => {
   });
 
   it('always circles a still-empty triangle', () => {
-    const board = applyCircle(generateStartBoard(), 0);
+    const board = applyCircle(startBoard, 0);
     const played = playBotTurn(board, CIRCLE, smartBotStrategy);
     expect(board.circles[played.arg]).toBe(false);
   });
@@ -77,7 +77,7 @@ describe('circle-player bot', () => {
 describe('test bot', () => {
   it('takes an immediate win as the line player even though it otherwise plays randomly', () => {
     const [e0, e1, e2] = TRIANGLES[5].edgeIds;
-    const board = applyShade(applyShade(generateStartBoard(), e0), e1);
+    const board = applyShade(applyShade(startBoard, e0), e1);
     const played = playBotTurn(board, LINE, randomBotStrategy);
     expect(played.arg).toBe(e2);
     expect(isLineWin(played.nextBoard)).toBe(true);
@@ -86,7 +86,7 @@ describe('test bot', () => {
 
 describe('full playthroughs terminate with a valid winner', () => {
   const simulate = (lineStrategy: typeof smartBotStrategy, circleStrategy: typeof smartBotStrategy) => {
-    let board = generateStartBoard();
+    let board = startBoard;
     let player = LINE;
     for (let turn = 0; turn < 200; turn++) {
       const played = playBotTurn(board, player, player === LINE ? lineStrategy : circleStrategy);

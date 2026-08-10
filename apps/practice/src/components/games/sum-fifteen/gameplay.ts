@@ -7,7 +7,7 @@ export type Board = { owner: Owner }
 
 export const allNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
-export const generateStartBoard = (): Board => ({ owner: Array(9).fill(null) });
+export const startBoard: Board = { owner: Array(9).fill(null) };
 
 export const numbersOwnedBy = (owner: Owner, player: 0 | 1): number[] =>
   allNumbers.filter(n => owner[n - 1] === player);

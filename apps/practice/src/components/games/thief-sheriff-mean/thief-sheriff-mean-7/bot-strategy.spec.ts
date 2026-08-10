@@ -1,10 +1,10 @@
 import { getBotCard, getBotScore } from './bot-strategy';
-import { Sheriff, Thief, generateStartBoard, type Board } from '../gameplay';
+import { Sheriff, Thief, startBoard, type Board } from '../gameplay';
 
 describe('thief-sheriff-mean-7 smart bot', () => {
   describe('as Sheriff', () => {
     it('wins from the starting position', () => {
-      expect(getBotScore(generateStartBoard(), Sheriff)).toBe(1);
+      expect(getBotScore(startBoard, Sheriff)).toBe(1);
     });
 
     it('picks 4 when holding [5] and Thief holds [2] — the unique winning second move', () => {

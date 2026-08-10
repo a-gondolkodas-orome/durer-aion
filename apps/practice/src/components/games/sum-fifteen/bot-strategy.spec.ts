@@ -3,7 +3,7 @@ import { chooseSmartMove, chooseTestMove, winnerOptimal } from './bot-strategy';
 import {
   currentPlayerFromOwner,
   freeNumbers,
-  generateStartBoard,
+  startBoard,
   hasSum15,
   numbersOwnedBy,
   type Owner
@@ -11,7 +11,7 @@ import {
 
 describe('winnerOptimal', () => {
   it('declares the second player the winner from the empty board (optimal play is a draw)', () => {
-    expect(winnerOptimal(generateStartBoard().owner)).toBe(1);
+    expect(winnerOptimal(startBoard.owner)).toBe(1);
   });
 
   it('lets the current player win when a triple summing to 15 is one move away', () => {
@@ -26,7 +26,7 @@ describe('winnerOptimal', () => {
 // Play out full games; assert the smart bot never loses as the second player,
 // which — since the game has no draws in the players' favour — means it wins.
 const playSmartBotVsRandom = (botPlayer: 0 | 1, rng: () => number): 0 | 1 => {
-  let owner: Owner = generateStartBoard().owner;
+  let owner: Owner = startBoard.owner;
   while (true) {
     const cp = currentPlayerFromOwner(owner);
     const move = cp === botPlayer

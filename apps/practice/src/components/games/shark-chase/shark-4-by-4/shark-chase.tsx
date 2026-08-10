@@ -2,7 +2,7 @@ import { strategyGameFactory, type Ctx } from 'strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { makeBoardClient } from '../board-client';
 import { type Board } from '../gameplay';
-import { generateStartBoard, moves, MAX_TURN } from './gameplay';
+import { startBoard, moves, MAX_TURN } from './gameplay';
 
 const BoardClient = makeBoardClient(MAX_TURN);
 
@@ -71,6 +71,6 @@ export const SharkChase4 = strategyGameFactory({
   gameplay: { moves },
   variants: [
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt', en: 'Test' } },
-    { botStrategy: smartBotStrategy, generateStartBoard, label: { hu: 'Teljes', en: 'Full' }, isDefault: true }
+    { botStrategy: smartBotStrategy, startBoards: [startBoard], label: { hu: 'Teljes', en: 'Full' }, isDefault: true }
   ]
 });

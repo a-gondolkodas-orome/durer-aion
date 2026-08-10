@@ -76,14 +76,14 @@ export const NumberCovering = strategyGameFactory({
     },
     {
       botStrategy: smartBotStrategy,
-      generateStartBoard: () => range(1, 9),
+      startBoards: [range(1, 9)],
       rule: makeRule(8),
       label: { hu: '8 szám', en: '8 numbers' },
       isDefault: true
     },
     {
       botStrategy: smartBotStrategy,
-      generateStartBoard: () => range(1, 11),
+      startBoards: [range(1, 11)],
       rule: makeRule(10),
       label: { hu: '10 szám', en: '10 numbers' }
     }

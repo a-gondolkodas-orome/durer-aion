@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { range, map } from 'lodash';
 import { strategyGameFactory, type BoardClientProps, GameBoard } from 'strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
-import { generateStartBoard, edges, moves, type Board } from './gameplay';
+import { startBoard, edges, moves, type Board } from './gameplay';
 import { useTranslation } from 'language';
 
 // Screen position of each node; the drawn skeleton (see `edges` in gameplay)
@@ -165,6 +165,6 @@ export const CubeColoring = strategyGameFactory({
   gameplay: { moves },
   variants: [
     { botStrategy: randomBotStrategy, label: { hu: 'Teszt', en: 'Test' } },
-    { botStrategy: smartBotStrategy, generateStartBoard, label: { hu: 'Teljes', en: 'Full' }, isDefault: true }
+    { botStrategy: smartBotStrategy, startBoards: [startBoard], label: { hu: 'Teljes', en: 'Full' }, isDefault: true }
   ]
 });
