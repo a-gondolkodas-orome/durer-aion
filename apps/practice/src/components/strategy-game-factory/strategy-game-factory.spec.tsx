@@ -5,7 +5,7 @@ import {
   makeConfig, minimalConfig, ctxAwareConfig, renderGame, warmUpPlayerNameSetup,
   MinimalBoardClient, CtxAwareBoardClient, defaultGameplay, type Board
 } from './spec-helpers';
-import type { BoardClientProps, BotMove, BotStrategy, Ctx, Gameplay, StrategyArgs } from './types';
+import type { BoardClientProps, BotMove, BotStrategy, Ctx, Gameplay, StrategyArgs, VariantInput } from './types';
 
 beforeAll(warmUpPlayerNameSetup);
 
@@ -185,6 +185,97 @@ describe('variant availability by mode', () => {
   });
 });
 
+describe('variant in the URL', () => {
+  const startBoard = (): Board => ['initial'];
+  const named = (name: string) => ({ hu: name, en: name });
+
+  // Alpha is the default and carries no id, so it is addressed by its index;
+  // Beta names one, the way a variant worth a durable link does.
+  const identifiedVariants = () => makeConfig({
+    variants: [
+      { label: named('Alpha'), isDefault: true, botStrategy: () => [], generateStartBoard: startBoard },
+      { id: 'beta', label: named('Beta'), botStrategy: () => [], generateStartBoard: startBoard },
+      { label: named('Gamma'), botStrategy: () => [], generateStartBoard: startBoard }
+    ]
+  });
+
+  const variantRadio = (view: ReturnType<typeof renderGame>, label: string) =>
+    view.getByLabelText(label) as HTMLInputElement;
+  const search = (view: ReturnType<typeof renderGame>) => view.getByTestId('search').textContent;
+
+  it('starts on the variant the URL names by id', () => {
+    const view = renderGame(identifiedVariants(), '/?variant=beta');
+    expect(variantRadio(view, 'Beta').checked).toBe(true);
+  });
+
+  it('starts on the variant the URL names by index when it declares no id', () => {
+    const view = renderGame(identifiedVariants(), '/?variant=2');
+    expect(variantRadio(view, 'Gamma').checked).toBe(true);
+  });
+
+  it('falls back to the default variant when the URL names an unknown one', () => {
+    const view = renderGame(identifiedVariants(), '/?variant=nonsense');
+    expect(variantRadio(view, 'Alpha').checked).toBe(true);
+  });
+
+  it('writes the chosen variant to the URL', () => {
+    const view = renderGame(identifiedVariants());
+    fireEvent.click(variantRadio(view, 'Beta'));
+
+    expect(search(view)).toBe('?variant=beta');
+  });
+
+  it('drops the param when the default variant is chosen back, as ?lang= does for hu', () => {
+    const view = renderGame(identifiedVariants(), '/?variant=beta');
+    fireEvent.click(variantRadio(view, 'Alpha'));
+
+    expect(search(view)).toBe('');
+  });
+
+  it('leaves other params alone', () => {
+    const view = renderGame(identifiedVariants(), '/?lang=en');
+    fireEvent.click(variantRadio(view, 'Beta'));
+
+    expect(search(view)).toBe('?lang=en&variant=beta');
+  });
+
+  it('writes the param on a variant switch made after another one', () => {
+    const view = renderGame(identifiedVariants(), '/?variant=beta');
+    fireEvent.click(variantRadio(view, 'Gamma'));
+
+    expect(variantRadio(view, 'Gamma').checked).toBe(true);
+    expect(search(view)).toBe('?variant=2');
+  });
+
+  // The reason the param is followed rather than read once: a same-route hash
+  // navigation remounts nothing, so a link to a variant of the game already
+  // open would otherwise change the URL and leave the board alone.
+  it('follows the param when it changes without a remount', () => {
+    const view = renderGame(identifiedVariants(), '/?variant=beta');
+    expect(variantRadio(view, 'Beta').checked).toBe(true);
+
+    fireEvent.click(view.getByTestId('go-to-gamma'));
+
+    expect(variantRadio(view, 'Gamma').checked).toBe(true);
+  });
+
+  it('goes back to the default variant when the param is dropped', () => {
+    const view = renderGame(identifiedVariants(), '/?variant=beta');
+
+    fireEvent.click(view.getByTestId('go-to-no-variant'));
+
+    expect(variantRadio(view, 'Alpha').checked).toBe(true);
+  });
+
+  it('stays put when the param names no variant of this game', () => {
+    const view = renderGame(identifiedVariants(), '/?variant=beta');
+
+    fireEvent.click(view.getByTestId('go-to-nonsense'));
+
+    expect(variantRadio(view, 'Beta').checked).toBe(true);
+  });
+});
+
 describe('strategyGameFactory endOfTurnMove', () => {
   beforeAll(() => { vi.useFakeTimers(); });
   afterAll(() => { vi.useRealTimers(); });
@@ -259,7 +350,8 @@ describe('strategyGameFactory endOfTurnMove', () => {
   });
 });
 
-const gameEndingConfig = () => makeConfig({
+const gameEndingConfig = (variants?: VariantInput<Board>[]) => makeConfig({
+  variants,
   BoardClient: ({ board, moves }: BoardClientProps<Board>) => (
     <>
       <button data-testid="end-win-btn" onClick={() => moves.endWin(board)}>win</button>
@@ -307,6 +399,19 @@ describe('win/loss tracking', () => {
     fireEvent.click(getByTestId('start-hh-game-0'));
     fireEvent.click(getByTestId('end-win-btn'));
     expect(localStorage.getItem('stats__0')).toBeNull();
+  });
+
+  // Keyed by the variant's key, so a game that declares ids keeps its tallies
+  // where reordering its variants cannot shuffle them.
+  it('keys the tally by the variant id when there is one', () => {
+    const variants = [
+      { id: 'alpha', isDefault: true, botStrategy: () => [], generateStartBoard: (): Board => [] }
+    ];
+    const { getByTestId } = renderGame(gameEndingConfig(variants));
+    fireEvent.click(getByTestId('role-btn-0'));
+    fireEvent.click(getByTestId('end-win-btn'));
+
+    expect(JSON.parse(localStorage.getItem('stats__alpha')!)).toEqual({ win: 1, loss: 0 });
   });
 
   it('accumulates results across multiple games', () => {
@@ -415,6 +520,27 @@ describe('umami game-finished event', () => {
     expect(lastEvent()[0]).toBe('game-finished');
     expect(lastEvent()[1]).toMatchObject({ mode: 'vsHuman' });
     expect(lastEvent()[1]).not.toHaveProperty('result');
+  });
+
+  // Reported by the same key the URL uses, so a dashboard row and a shared
+  // link name a variant the same way.
+  const identifiedVariants: VariantInput<Board>[] = [
+    { id: 'alpha', isDefault: true, botStrategy: () => [], generateStartBoard: (): Board => [] },
+    { label: { hu: 'Beta', en: 'Beta' }, botStrategy: () => [], generateStartBoard: (): Board => [] }
+  ];
+
+  it('reports the variant by its id', () => {
+    const { getByTestId } = renderGame(gameEndingConfig(identifiedVariants));
+    fireEvent.click(getByTestId('role-btn-0'));
+    fireEvent.click(getByTestId('end-win-btn'));
+    expect(lastEvent()[1]).toMatchObject({ variant: 'alpha' });
+  });
+
+  it('reports the index for a variant that declares no id', () => {
+    const { getByTestId } = renderGame(gameEndingConfig(identifiedVariants), '/?variant=1');
+    fireEvent.click(getByTestId('role-btn-0'));
+    fireEvent.click(getByTestId('end-win-btn'));
+    expect(lastEvent()[1]).toMatchObject({ variant: '1' });
   });
 });
 

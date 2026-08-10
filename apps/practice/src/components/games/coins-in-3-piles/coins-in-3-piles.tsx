@@ -2,7 +2,7 @@ import { strategyGameFactory, type StrategyArgs } from 'strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { BoardClient } from './board-client';
 import {
-  generateArbitraryStartBoard, generateFixedStartBoard, generateTestStartBoard, moves,
+  generateArbitraryStartBoard, startBoardOfCategoryA, generateTestStartBoard, moves,
   type Board, type TurnState
 } from './gameplay';
 
@@ -56,17 +56,20 @@ export const CoinsIn3Piles = strategyGameFactory({
   gameplay: { moves },
   variants: [
     {
+      id: 'test',
       botStrategy: randomBotStrategy,
       generateStartBoard: generateTestStartBoard,
       label: { hu: 'Teszt', en: 'Test' }
     },
     {
+      id: '3-5-7',
       botStrategy: smartBotStrategy,
-      generateStartBoard: generateFixedStartBoard,
+      startBoards: [startBoardOfCategoryA],
       rule: fixedRule,
       label: { hu: '3-5-7 (A)', en: '3-5-7 (A)' }
     },
     {
+      id: 'random',
       botStrategy: smartBotStrategy,
       generateStartBoard: generateArbitraryStartBoard,
       label: { hu: 'Véletlen (B)', en: 'Random (B)' },

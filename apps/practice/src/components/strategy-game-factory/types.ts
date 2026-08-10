@@ -139,9 +139,18 @@ export interface Variant {
 }
 
 export interface VariantInput<TBoard> {
+  // Stable slug this variant is addressable by in the URL (`?variant=3-5-7`).
+  // Optional: a variant without one is addressed by its index, which is enough
+  // for a link that need not outlive a reordering. Declare it where a durable
+  // link matters — the variants that are really separate games.
+  id?: string
   label?: I18nString
   isDefault?: boolean
   generateStartBoard?: () => TBoard
+  // A curated list of start boards, in place of generating one: the variant
+  // plays a random entry. Its order is part of the contract — a competition
+  // hands out `startBoards[attemptIndex]`, so append rather than reorder.
+  startBoards?: TBoard[]
   botStrategy?: BotStrategy<TBoard>
   notAlwaysOptimal?: boolean
   // Optional per-variant rule text. Falls back to `presentation.rule` when

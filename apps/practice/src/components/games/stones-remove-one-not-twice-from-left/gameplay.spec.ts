@@ -1,10 +1,9 @@
-import { times, uniqWith, isEqual } from 'lodash';
 import {
-  type Board, boardAfterRemoval, generateStartBoard, generateTestStartBoard, hasNoLegalMove,
+  type Board, boardAfterRemoval, fullStartBoards, testStartBoards, hasNoLegalMove,
   moves, openPiles
 } from './gameplay';
-import { isWinningForMover } from './bot-strategy';
-import { makeCtx, moveValidator } from 'test-utils';
+import { isWinningForMover, smartBotStrategy } from './bot-strategy';
+import { forcedWinnerIndex, makeCtx, moveValidator } from 'test-utils';
 
 // Which pile is open depends on who is taking, so the mover goes into the ctx.
 const isRemovalAllowed = (board: Board, player: number, pileId: number): boolean =>
@@ -138,21 +137,10 @@ describe('end of game', () => {
   });
 });
 
-// Sampling until the whole list has come up also pins that every board in it is
-// reachable — a board never generated could not be judged below.
-const allStartBoards = (generate: () => Board): Board[] =>
-  uniqWith(times(400, generate), isEqual);
-
 describe.each([
-  ['generateStartBoard', generateStartBoard, 7],
-  ['generateTestStartBoard', generateTestStartBoard, 4]
-] as const)('%s', (_name, generate, expectedCount) => {
-  const boards = allStartBoards(generate);
-
-  it('offers the whole list', () => {
-    expect(boards).toHaveLength(expectedCount);
-  });
-
+  ['fullStartBoards', fullStartBoards],
+  ['testStartBoards', testStartBoards]
+] as const)('%s', (_name, boards) => {
   it('starts everyone unrestricted, with both piles stocked', () => {
     for (const startBoard of boards) {
       expect(startBoard.leftRestriction).toEqual([false, false]);
@@ -164,5 +152,18 @@ describe.each([
     const winnable = boards.filter(startBoard => isWinningForMover(startBoard, 0)).length;
     expect(winnable / boards.length).toBeGreaterThan(0.3);
     expect(winnable / boards.length).toBeLessThan(0.7);
+  });
+
+  // The balance check above trusts `isWinningForMover`. Playing each board out
+  // decides the same question the other way — through the real moves and the
+  // real bot — so a wrong predicate and a bot that fails to exploit it cannot
+  // agree their way past both.
+  it('is decisive, and by the role the predicate names', () => {
+    for (const startBoard of boards) {
+      const winner = forcedWinnerIndex({
+        gameplay: { moves }, botStrategy: smartBotStrategy, startBoard
+      });
+      expect(winner).toBe(isWinningForMover(startBoard, 0) ? 0 : 1);
+    }
   });
 });

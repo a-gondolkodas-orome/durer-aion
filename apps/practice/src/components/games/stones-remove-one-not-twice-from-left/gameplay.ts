@@ -1,5 +1,4 @@
 import type { Ctx, MoveOutcome } from 'strategy-game-factory';
-import { sample } from 'lodash';
 
 export type Board = { piles: [number, number], leftRestriction: [boolean, boolean] }
 
@@ -52,23 +51,11 @@ export const moves = {
 
 export type Moves = typeof moves;
 
-export const generateTestStartBoard = (): Board => ({
-  piles: sample([[3, 4], [4, 3], [3, 3], [4, 4]]) as [number, number],
-  leftRestriction: [false, false]
-});
+const fromPiles = (pairs: [number, number][]): Board[] =>
+  pairs.map(piles => ({ piles, leftRestriction: [false, false] }));
 
-export const generateStartBoard = (): Board => {
-  const piles = sample([
-    [11, 8],
-    [9, 9],
-    [9, 8],
-    [9, 7],
-    [5, 8],
-    [8, 7],
-    [6, 4]
-  ]) as [number, number]
-  return {
-    piles,
-    leftRestriction: [false, false]
-  };
-}
+export const testStartBoards = fromPiles([[3, 4], [4, 3], [3, 3], [4, 4]]);
+
+// Curated so that either role can be the winning one — see gameplay.spec.ts,
+// which judges the whole list rather than a sample of it.
+export const fullStartBoards = fromPiles([[11, 8], [9, 9], [9, 8], [9, 7], [5, 8], [8, 7], [6, 4]]);

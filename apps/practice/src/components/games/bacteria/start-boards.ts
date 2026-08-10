@@ -1,8 +1,8 @@
-import { range, sample } from 'lodash';
+import { range } from 'lodash';
 import type { Board } from './gameplay';
 
 // Curated start boards for the bacteria game. This is the single source of
-// truth: bacteria.tsx samples these for the actual variants, and
+// truth: bacteria.tsx hands these lists to its variants as `startBoards`, and
 // bot-strategy.spec.ts iterates the same boards to prove they stay ~50/50
 // balanced and bot-optimal. Keep it that way — don't copy the data into tests.
 
@@ -48,18 +48,11 @@ const scatteredStartConfigs: { starts: number[], goals: number[] }[] = [
   { starts: [1, 3, 4, 11, 12, 15], goals: [1, 4, 5, 10, 12, 16] }
 ];
 
-// Every curated board, deterministically — for tests that must cover them all.
-export const adjacentStartBoards = (): Board[] =>
+export const adjacentStartBoards: Board[] =
   adjacentStartConfigs.map(({ row, starts, goals }) => buildBoard(11, row, starts, goals));
 
-export const scatteredStartBoards = (): Board[] =>
+export const scatteredStartBoards: Board[] =
   scatteredStartConfigs.map(({ starts, goals }) => buildBoard(17, 0, starts, goals));
 
-// A random curated board — for the actual game variants.
-export const generateAdjacentStartBoard = (): Board => sample(adjacentStartBoards())!;
-
-export const generateScatteredStartBoard = (): Board => sample(scatteredStartBoards())!;
-
 // Test variant covers both sub-games.
-export const generateTestStartBoard = (): Board =>
-  sample([generateAdjacentStartBoard, generateScatteredStartBoard])!();
+export const testStartBoards: Board[] = [...adjacentStartBoards, ...scatteredStartBoards];

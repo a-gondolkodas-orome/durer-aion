@@ -6,14 +6,14 @@ import { GameSidebar } from './game-parts/game-sidebar/game-sidebar';
 import { GameEndDialog } from './game-parts/game-end-dialog';
 import { mapValues, isEqual } from 'lodash';
 import { useTranslation, type TranslatableNode, type I18nString } from 'language';
-import { useLocation } from 'react-router';
+import { useLocation, useSearchParams } from 'react-router';
 import { useGameStats } from './hooks/use-game-stats';
 import { trackEvent } from '../../tracking';
 import type {
   Mode, Ctx, MoveOutcome, Gameplay, GameMoves, ClientGameMoves, BotStrategy, BotMove,
   BoardClientProps, StrategyArgs, Variant as DisplayVariant, VariantInput
 } from './types';
-import { resolveVariants } from './helpers/resolve-variants';
+import { resolveVariants, variantKey } from './helpers/resolve-variants';
 import { createGameStore, createInitialCoreState } from './engine/store';
 import { buildCtx } from './engine/build-ctx';
 import { asBotMoves, isBotTurnUnfinished, unknownMoveMessage } from './engine/bot-turn';
@@ -53,10 +53,22 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
   const { rule, roleLabels, getPlayerStepDescription } = presentation;
   const { moves, endOfTurnMove } = gameplay;
   const { defaultVariantIndex, defaultVariant, resolvedVariants } = resolveVariants(variants);
+  const variantKeys = resolvedVariants.map((variant, index) => variantKey(variant, index));
 
   const Game = () => {
     const { t } = useTranslation();
-    const [selectedVariantIndex, setSelectedVariantIndex] = useState(defaultVariantIndex);
+    const [searchParams, setSearchParams] = useSearchParams();
+    // The variant the URL asks for, or the default — which the param's absence
+    // means, the way it means `hu` for `?lang=`. `-1` is a param naming no
+    // variant of this game, which is ignored rather than obeyed.
+    const requestedVariantIndex = (params: URLSearchParams) => {
+      const requested = params.get('variant');
+      return requested === null ? defaultVariantIndex : variantKeys.indexOf(requested);
+    };
+    const [selectedVariantIndex, setSelectedVariantIndex] = useState(() => {
+      const index = requestedVariantIndex(searchParams);
+      return index === -1 ? defaultVariantIndex : index;
+    });
     const activeVariant = resolvedVariants[selectedVariantIndex] ?? defaultVariant;
     const defaultGenerateStartBoard = defaultVariant.generateStartBoard!;
     const activeGenerateStartBoard = activeVariant.generateStartBoard ?? defaultGenerateStartBoard;
@@ -94,7 +106,7 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
     const isHumanVsHumanGame = mode === 'vsHuman';
 
     const gameId = useLocation().pathname.split('/').pop()!;
-    const { stats, recordResult, resetStats } = useGameStats(gameId, selectedVariantIndex);
+    const { stats, recordResult, resetStats } = useGameStats(gameId, variantKeys[selectedVariantIndex]);
 
     useEffect(() => {
       if (!isHumanVsHumanGame && phase === 'play' && currentPlayer === (1 - chosenRoleIndex!)) {
@@ -134,7 +146,10 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
       trackEvent('game-finished', {
         game: gameId,
         mode: s.mode,
-        variant: selectedVariantIndex,
+        // The same key the URL uses, so a variant reads the same in a dashboard
+        // as in a link. Games that declare no id still report their index, and
+        // for those the value only means anything as long as the order holds.
+        variant: variantKeys[selectedVariantIndex],
         ...(s.mode === 'vsHuman' ? {} : { result: resolvedWinner === s.chosenRoleIndex ? 'win' : 'loss' })
       });
     };
@@ -179,6 +194,14 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
         boardGenerator = defaultGenerateStartBoard;
       }
       setSelectedVariantIndex(finalVariantIndex);
+      // The default variant is the absence of the param, the way `hu` is for
+      // `?lang=`, so a shared link carries a variant only when it says something.
+      setSearchParams(prev => {
+        const next = new URLSearchParams(prev);
+        if (finalVariantIndex === defaultVariantIndex) next.delete('variant');
+        else next.set('variant', variantKeys[finalVariantIndex]);
+        return next;
+      }, { replace: true });
       store.setState(createInitialCoreState(boardGenerator(), newMode));
       setIsGameEndDialogOpen(false);
       setGameUuid(crypto.randomUUID());
@@ -187,6 +210,28 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
     const setDifficulty = (index: number) => {
       resetGameState({ newVariantIndex: index });
     };
+
+    // A shared `?variant=` link has to work even when it points at the game
+    // already open — a same-route hash navigation remounts nothing, so without
+    // this the URL would change and the board would not. Following it restarts
+    // the game, which is what choosing a variant means everywhere else.
+    //
+    // Guarded on the index rather than run unconditionally: `resetGameState`
+    // writes the param itself, so an unguarded effect would re-enter. An index
+    // of -1 — a param naming no variant of this game — is left alone.
+    //
+    // Deriving this during render is not an option: it has to *restart the
+    // game*, which is an event, not a projection of the URL. `searchParams`
+    // alone in the deps for the same reason the language provider does it —
+    // re-running when the selection changes would fight the write path.
+    /* eslint-disable react-hooks/exhaustive-deps */
+    useEffect(() => {
+      const index = requestedVariantIndex(searchParams);
+      if (index !== -1 && index !== selectedVariantIndex) {
+        resetGameState({ newVariantIndex: index });
+      }
+    }, [searchParams]);
+    /* eslint-enable react-hooks/exhaustive-deps */
 
     const getVariantsForMode = (m: Mode): DisplayVariant[] => {
       const humanVsHuman = m === 'vsHuman';

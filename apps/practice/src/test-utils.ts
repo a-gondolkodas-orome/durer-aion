@@ -1,4 +1,7 @@
-import type { BotMove, BotStrategy, Ctx, MoveDefinition } from './components/strategy-game-factory';
+import {
+  runMatch,
+  type BotMove, type BotStrategy, type Ctx, type Gameplay, type MoveDefinition
+} from './components/strategy-game-factory';
 import { asBotMoves } from './components/strategy-game-factory/engine/bot-turn';
 
 // Mock `ctx` for testing move functions and bot strategies. A game that pins
@@ -47,4 +50,40 @@ export const playBotMove = <TBoard, TTurnState = unknown>(
 ): TBoard => {
   const { move, args = [] } = botNextMove(strategy({ board, ctx }));
   return moves[move]!.apply(board, { ctx }, ...args).nextBoard;
+};
+
+// Which role can force the win from `startBoard`, read off the game's own
+// optimal bot playing both sides. Every position of these games has such a
+// role: they are finite, deterministic, perfect-information and cannot end in
+// a draw (`gameEnd` always names a winner), so by Zermelo's theorem one side
+// can always force the win. What a curated board needs asserting is *which*
+// role that is — the team choosing it is the decision a competition is made of.
+//
+// Bots shuffle among equally-optimal moves, so one playout samples one line.
+// Playouts that disagree therefore say nothing about the board: they mean the
+// bot is not optimal, having thrown the win away on some line. That is a bug in
+// the game rather than a fact about the position, so this throws instead of
+// returning a winner nobody can trust.
+export const forcedWinnerIndex = <TBoard, TTurnState = unknown>({
+  gameplay,
+  botStrategy,
+  startBoard,
+  playouts = 5
+}: {
+  gameplay: Gameplay<TBoard, TTurnState>
+  botStrategy: BotStrategy<TBoard>
+  startBoard: TBoard
+  playouts?: number
+}): number => {
+  const winners = new Set(Array.from({ length: playouts }, () => runMatch({
+    gameplay,
+    strategies: [botStrategy, botStrategy],
+    startBoard
+  }).winnerIndex));
+  if (winners.size !== 1) {
+    throw new Error(`forcedWinnerIndex: both roles won over ${playouts} playouts from `
+      + `${JSON.stringify(startBoard)} — one of them can force the win, so the bot `
+      + 'is throwing it away on some line and is not optimal');
+  }
+  return [...winners][0];
 };

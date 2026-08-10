@@ -141,7 +141,7 @@ const playAttackerBotVsDefender = (start: Board, maxPlies = 400): 'attacker' | '
 
 describe('smart bot plays the 9x17 game optimally', () => {
   // The real scattered-variant start boards (generateScatteredStartBoard).
-  const boards = scatteredStartBoards();
+  const boards = scatteredStartBoards;
 
   it('has a mix of attacker- and defender-winning start boards', () => {
     const values = boards.map(board => deficiency(board) >= 1);
@@ -191,7 +191,7 @@ describe('smart bot plays the 9x17 game optimally', () => {
 // seed bacteria on rows 0-2, to confirm the shared board-driven bot is also
 // optimal at width 11.
 describe('smart bot plays the 9x11 adjacent-goals game optimally', () => {
-  const boards = adjacentStartBoards();
+  const boards = adjacentStartBoards;
 
   it('has a mix of attacker- and defender-winning start boards', () => {
     const values = boards.map(board => deficiency(board) >= 1);

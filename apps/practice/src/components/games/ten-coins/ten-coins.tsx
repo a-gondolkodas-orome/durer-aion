@@ -177,11 +177,13 @@ export const TenCoins = strategyGameFactory({
   gameplay: { moves },
   variants: [
     {
+      id: 'test',
       botStrategy: randomBotStrategy,
       generateStartBoard: generateTestStartBoard,
       label: { hu: 'Teszt', en: 'Test' }
     },
     {
+      id: '4-values',
       botStrategy: smartBotStrategy,
       generateStartBoard: generateStartBoardC,
       rule: ruleFor(4),
@@ -189,6 +191,7 @@ export const TenCoins = strategyGameFactory({
       isDefault: true
     },
     {
+      id: '5-values',
       botStrategy: smartBotStrategy,
       generateStartBoard: generateStartBoardD,
       rule: ruleFor(5),

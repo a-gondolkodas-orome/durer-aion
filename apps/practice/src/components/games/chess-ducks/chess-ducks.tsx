@@ -112,11 +112,13 @@ export const ChessDucks = strategyGameFactory({
   gameplay: { moves },
   variants: [
     {
+      id: 'test',
       botStrategy: randomBotStrategy,
       generateStartBoard: generateTestStartBoard,
       label: { hu: 'Teszt', en: 'Test' }
     },
     {
+      id: '4x6',
       botStrategy: smartBotStrategy,
       generateStartBoard: generateStartBoard(4, 6),
       rule: rule(4, 6),
@@ -124,6 +126,7 @@ export const ChessDucks = strategyGameFactory({
       isDefault: true
     },
     {
+      id: '4x7',
       botStrategy: smartBotStrategy,
       generateStartBoard: generateStartBoard(4, 7),
       rule: rule(4, 7),

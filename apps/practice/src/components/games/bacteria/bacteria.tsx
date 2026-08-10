@@ -13,9 +13,9 @@ import {
   type Board
 } from './gameplay';
 import {
-  generateAdjacentStartBoard,
-  generateScatteredStartBoard,
-  generateTestStartBoard
+  adjacentStartBoards,
+  scatteredStartBoards,
+  testStartBoards
 } from './start-boards';
 
 const BacteriaDisplay = ({ count, onGoal, dimmed = false }) => {
@@ -255,19 +255,19 @@ export const Bacteria = strategyGameFactory({
   variants: [
     {
       botStrategy: randomBotStrategy,
-      generateStartBoard: generateTestStartBoard,
+      startBoards: testStartBoards,
       label: { hu: 'Teszt', en: 'Test' }
     },
     {
       botStrategy: smartBotStrategy,
-      generateStartBoard: generateAdjacentStartBoard,
+      startBoards: adjacentStartBoards,
       rule: adjacentRule,
       label: { hu: 'Szomszédos CÉLok', en: 'Adjacent GOALs' },
       isDefault: true
     },
     {
       botStrategy: smartBotStrategy,
-      generateStartBoard: generateScatteredStartBoard,
+      startBoards: scatteredStartBoards,
       rule: scatteredRule,
       label: { hu: 'Szórt CÉLok', en: 'Scattered GOALs' }
     }

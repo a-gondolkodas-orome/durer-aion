@@ -1,4 +1,4 @@
-import { cloneDeep, isEqual, random, sample, sum } from 'lodash';
+import { cloneDeep, isEqual, random, sum } from 'lodash';
 import type { Ctx, MoveOutcome } from 'strategy-game-factory';
 
 export type Board = number[]
@@ -33,15 +33,14 @@ const generateLosingStartBoard = (): Board => {
 export const generateArbitraryStartBoard = (): Board =>
   random(0, 1) ? generateWinningStartBoard() : generateLosingStartBoard();
 
-// "Fixed" sub-game (the original "Change 15 coins"): 3×1, 5×2, 7×3.
-export const generateFixedStartBoard = (): Board => [3, 5, 7];
+// Category A's sub-game (the original "Change 15 coins"): 3×1, 5×2, 7×3.
+export const startBoardOfCategoryA: Board = [3, 5, 7];
 
-// Test variant covers both sub-games: a small arbitrary heap, or the fixed 3-5-7 setup.
+// Test variant covers both sub-games: a small arbitrary heap, or the 3-5-7 setup.
 export const generateTestStartBoard = (): Board =>
-  sample([
-    (): Board => [random(0, 2), random(0, 2), random(1, 3)],
-    generateFixedStartBoard
-  ])!();
+  random(0, 1)
+    ? [random(0, 2), random(0, 2), random(1, 3)]
+    : [...startBoardOfCategoryA];
 
 export const moves = {
   removeCoin: {

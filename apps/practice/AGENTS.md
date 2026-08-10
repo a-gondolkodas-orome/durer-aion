@@ -53,7 +53,8 @@ verifies the table before writing (see `modified-mill-strategy.cjs`).
 
 | File | Holds | React? |
 |---|---|---|
-| `gameplay.ts` | `Board` type, `generateStartBoard`, `moves`, `Moves`, and the legality / win-detection helpers they use | **never** |
+| `gameplay.ts` | `Board` type, `generateStartBoard` / `startBoards`, `moves`, `Moves`, and the legality / win-detection helpers they use | **never** |
+| `start-boards.ts` | curated `startBoards` lists, once they outgrow `gameplay.ts` (`bacteria`) | **never** |
 | `bot-strategy.ts` | `smartBotStrategy`, `randomBotStrategy` and the search or characterisation behind them | never in practice |
 | `board-client.tsx` | `BoardClient` (split out once the JSX outgrows the game file) | yes |
 | `<game>.tsx` | `rule`, `getPlayerStepDescription`, `variants`, the `strategyGameFactory` call | yes |
@@ -89,6 +90,23 @@ Two rules keep the boundary meaningful rather than nominal:
   (`coins-in-3-piles`'s `isLostForMover`), which keeps it in `gameplay.ts`; that
   is accepted for practice games, where the strategy is readable anyway. A
   **competition** game must not do it — curate its start boards instead.
+
+**Curated start boards.** A variant states its start position either as
+`generateStartBoard` or as `startBoards`, a list the engine picks from at
+random (a clone per pick, so a start board stays owned by the match it starts).
+Prefer the list whenever the positions are enumerable: it is what a competition
+hands out one entry of per attempt (#314), so its **order is part of the
+contract** — append, never reorder — and, unlike a generator, a spec can judge
+every board in it instead of sampling until they have all come up.
+
+Curating is only half of it; a competition board has to be **verified**, since
+the team picks a role and must be able to force the win. `forcedWinnerIndex`
+(`test-utils`) plays the game's own optimal bot against itself and names the
+role that wins, throwing when the playouts disagree — which is either a board
+that is not decisive or a bot that is not optimal. Assert the winning role, not
+merely that the game ends: `coins-in-3-piles` pins 3-5-7 as a replier win, and
+`stones-remove-one-not-twice-from-left` plays every curated board out to
+cross-check the predicate its balance test relies on.
 
 Traffic is expected to remain low — no scalability concerns.
 

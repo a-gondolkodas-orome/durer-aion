@@ -12,8 +12,11 @@ const readStats = (key: string): Stats => {
   }
 };
 
-export const useGameStats = (gameId: string, variantIndex: number) => {
-  const storageKey = `stats_${gameId}_${variantIndex}`;
+// Keyed by the variant's key, the same one the URL and the analytics event use
+// — an index would silently hand a variant the tally of whichever one used to
+// sit at its position the next time a game's variants are reordered.
+export const useGameStats = (gameId: string, variantKey: string) => {
+  const storageKey = `stats_${gameId}_${variantKey}`;
 
   // Stamped with the key it was read for, the same shape as
   // useMoveScopedState: switching variant reads the new key during render, so

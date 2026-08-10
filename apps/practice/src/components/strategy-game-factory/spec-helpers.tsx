@@ -6,7 +6,7 @@
 // board that is just a list of strings, a one-move gameplay, and a BoardClient
 // with a single button.
 import { render, fireEvent } from '@testing-library/react';
-import { MemoryRouter } from 'react-router';
+import { Link, MemoryRouter, useLocation } from 'react-router';
 import { strategyGameFactory, type StrategyGameConfig } from './strategy-game-factory';
 import type { BoardClientProps, BotStrategy, Gameplay, VariantInput } from './types';
 
@@ -54,9 +54,25 @@ export const minimalConfig = (gameplay: Gameplay<Board>) => makeConfig({ gamepla
 export const ctxAwareConfig = (botStrategy: BotStrategy<Board> = () => []) =>
   makeConfig({ BoardClient: CtxAwareBoardClient, botStrategy });
 
-export const renderGame = (config: StrategyGameConfig<Board>) => {
+// The factory both reads and writes `?variant=`, so the harness shows the URL
+// next to the game — the same shape language-context.spec.tsx uses. The links
+// navigate within the same route, which is what a shared variant link does and
+// the one case that remounts nothing.
+const UrlProbe = () => <>
+  <span data-testid="search">{useLocation().search}</span>
+  <Link data-testid="go-to-gamma" to="/?variant=2">gamma</Link>
+  <Link data-testid="go-to-no-variant" to="/">no variant</Link>
+  <Link data-testid="go-to-nonsense" to="/?variant=nonsense">nonsense</Link>
+</>;
+
+export const renderGame = (config: StrategyGameConfig<Board>, entry = '/') => {
   const Game = strategyGameFactory(config);
-  return render(<MemoryRouter><Game /></MemoryRouter>);
+  return render(
+    <MemoryRouter initialEntries={[entry]}>
+      <Game />
+      <UrlProbe />
+    </MemoryRouter>
+  );
 };
 
 // Headless UI's PlayerNameSetup is slow on its very first render, enough to

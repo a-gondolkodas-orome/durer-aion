@@ -2,11 +2,11 @@
 import { renderHook, act } from '@testing-library/react';
 import { useGameStats } from './use-game-stats';
 
-const KEY = 'stats_tictactoe_0';
+const KEY = 'stats_tictactoe_full';
 
-const render = (gameId = 'tictactoe', variantIndex = 0) =>
-  renderHook(({ id, index }) => useGameStats(id, index), {
-    initialProps: { id: gameId, index: variantIndex }
+const render = (gameId = 'tictactoe', variantKey = 'full') =>
+  renderHook(({ id, key }) => useGameStats(id, key), {
+    initialProps: { id: gameId, key: variantKey }
   });
 
 beforeEach(() => localStorage.clear());
@@ -46,26 +46,38 @@ describe('useGameStats', () => {
   // The counters are per game *and* per variant, so switching difficulty has
   // to swap to that variant's tally rather than carry the old one over.
   it('swaps to the other tally when the variant changes, and keeps them apart', () => {
-    localStorage.setItem('stats_tictactoe_0', JSON.stringify({ win: 5, loss: 0 }));
-    localStorage.setItem('stats_tictactoe_1', JSON.stringify({ win: 1, loss: 9 }));
+    localStorage.setItem('stats_tictactoe_full', JSON.stringify({ win: 5, loss: 0 }));
+    localStorage.setItem('stats_tictactoe_test', JSON.stringify({ win: 1, loss: 9 }));
 
     const { result, rerender } = render();
     expect(result.current.stats).toEqual({ win: 5, loss: 0 });
 
-    rerender({ id: 'tictactoe', index: 1 });
+    rerender({ id: 'tictactoe', key: 'test' });
     expect(result.current.stats).toEqual({ win: 1, loss: 9 });
 
     act(() => result.current.recordResult('win'));
-    expect(JSON.parse(localStorage.getItem('stats_tictactoe_1')!)).toEqual({ win: 2, loss: 9 });
+    expect(JSON.parse(localStorage.getItem('stats_tictactoe_test')!)).toEqual({ win: 2, loss: 9 });
     // the other variant's tally is untouched
-    expect(JSON.parse(localStorage.getItem('stats_tictactoe_0')!)).toEqual({ win: 5, loss: 0 });
+    expect(JSON.parse(localStorage.getItem('stats_tictactoe_full')!)).toEqual({ win: 5, loss: 0 });
+  });
+
+  // A game that declares no ids keys its tallies by index, as a string.
+  it('keeps index-keyed tallies apart just the same', () => {
+    localStorage.setItem('stats_tictactoe_0', JSON.stringify({ win: 5, loss: 0 }));
+    localStorage.setItem('stats_tictactoe_1', JSON.stringify({ win: 1, loss: 9 }));
+
+    const { result, rerender } = render('tictactoe', '0');
+    expect(result.current.stats).toEqual({ win: 5, loss: 0 });
+
+    rerender({ id: 'tictactoe', key: '1' });
+    expect(result.current.stats).toEqual({ win: 1, loss: 9 });
   });
 
   it('swaps tallies when the game changes too', () => {
-    localStorage.setItem('stats_chess-ducks_0', JSON.stringify({ win: 7, loss: 7 }));
+    localStorage.setItem('stats_chess-ducks_full', JSON.stringify({ win: 7, loss: 7 }));
 
     const { result, rerender } = render();
-    rerender({ id: 'chess-ducks', index: 0 });
+    rerender({ id: 'chess-ducks', key: 'full' });
 
     expect(result.current.stats).toEqual({ win: 7, loss: 7 });
   });
