@@ -9,15 +9,6 @@ import {
 } from './gameplay';
 import { distinctValues, randomBotStrategy, smartBotStrategy } from './bot-strategy';
 
-// --- Exact solver over the non-empty subsets of the present values ------------
-// A move picks a present value K and turns *all* K-coins into some L < K, so the
-// set of distinct values goes from S to (S \ {K}) ∪ {L}. You win when only one
-// distinct value remains after your move.
-
-// Losing positions (second player to move wins): {1,2,3} for values 1..4; and
-// {1,2,3}, {1,4,5}, {2,3,4,5}, {1,2,3,4,5} for values 1..5. Everything else is a
-// first-player win, driven towards one of these (or merged to a single value).
-
 const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProps<Board, TurnState>) => {
   const { t } = useTranslation();
   const selectedValue = ctx.turnState;

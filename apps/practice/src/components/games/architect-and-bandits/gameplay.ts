@@ -26,10 +26,8 @@ export const isArchitectStepAllowed = (board: Board, targetVertex: number, kmPer
 
 export const makeStartBoard = (vertexCount: number): Board => {
   const towers = Array(vertexCount).fill(false);
-  /*
-  Workaround to have a tower at the start of day 1, as startOfTurnMove or
-  similar is not supported by framework.
-  */
+  // Day 1 has to open with a tower already built, and the engine has no
+  // start-of-turn hook (only `endOfTurnMove`), so it goes into the start board.
   towers[0] = true;
   return {
     architectPosition: 0,

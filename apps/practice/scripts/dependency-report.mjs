@@ -1,11 +1,10 @@
-// Every version this project depends on is pinned exactly (`save-exact=true`, plus the lockfile),
-// so nothing ever drifts on its own and nothing ever goes stale loudly either — a dependency four
-// minors behind looks exactly like one released yesterday. This reports what is behind.
+// Under `save-exact=true` a dependency four minors behind looks exactly like one released
+// yesterday, so nothing goes stale loudly. This reports what is behind (README § Dependency
+// updates).
 //
 // It is the outward-facing half of scripts/check-versions.mjs: that one compares the versions
 // written down in this repo against *each other* and fails a build on a mismatch; this one compares
-// them against *upstream* and never fails anything. Deciding to upgrade stays a human act — see the
-// "Dependency updates" section of README.md.
+// them against *upstream* and never fails anything.
 //
 // Three sources, each read-only over the network:
 //   - npm packages: dependencies + devDependencies, against the registry's `latest` dist-tag.

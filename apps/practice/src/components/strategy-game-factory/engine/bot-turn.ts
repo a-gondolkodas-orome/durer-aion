@@ -1,15 +1,11 @@
 import type { BotMove } from '../types';
 import type { CoreState } from './store';
 
-// The bot contract: a strategy NAMES the moves it wants — one, or the whole
-// turn when the turn is one decision — and its caller plays them out: the React
-// shell with a pause between them so the bot appears to think, the headless
-// runner (run-match.ts) immediately.
-//
-// Pacing is therefore the caller's concern, never the strategy's: a bot that
-// scheduled its own follow-up move with setTimeout could not run outside a
-// browser, which is exactly what an authoritative server would have to do
-// (issue #313).
+// A strategy NAMES the moves it wants and its caller plays them out — the React
+// shell paced, the headless runner (run-match.ts) immediately. Pacing is
+// therefore the caller's concern, never the strategy's: a bot that scheduled its
+// own follow-up with setTimeout could not run outside a browser. See
+// src/components/CLAUDE.md § Bot contract.
 export const asBotMoves = (named: BotMove | BotMove[]): BotMove[] =>
   Array.isArray(named) ? named : [named];
 

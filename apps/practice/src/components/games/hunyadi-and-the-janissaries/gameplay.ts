@@ -5,9 +5,9 @@ export type Board = SoldierColor[][];
 export type Soldier = { rowIndex: number; pieceIndex: number; group: SoldierColor };
 
 export const generateStartBoard = (): Board => {
-  // this code is not 50% Hunyadi - 50% Szultan winnin position generator,
-  // but relatively balanced and biased toward situations with more soldiers
-  // and not single-step game
+  // Not an exact 50/50 generator between the two roles, only a roughly balanced
+  // one, biased towards boards with more soldiers so the game lasts more than a
+  // single step.
   const rowCount = 5;
   let board: SoldierColor[][] = [];
   // Complexity score: a soldier counts for more the closer to the castle it

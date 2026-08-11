@@ -34,11 +34,9 @@ export type StrategyGameConfig<TBoard, TTurnState = unknown> = {
   variants: VariantInput<TBoard>[]
 }
 
-// The game component carries the headless half of its own configuration. It is
-// what `runMatch` needs to play the game with no browser, so the catalog-wide
-// conformance spec can reach every registered game without a second registry to
-// keep in step — and it is the shape a competition server would load a game by
-// (issue #313).
+// The game component carries the headless half of its own configuration — what
+// `runMatch` needs to play it with no browser, so the catalog-wide conformance
+// spec reaches every registered game without a second registry to keep in step.
 export type StrategyGame<TBoard, TTurnState = unknown> = React.FC & {
   gameplay: Gameplay<TBoard, TTurnState>
   variants: VariantInput<TBoard>[]
@@ -58,9 +56,8 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
   const Game = () => {
     const { t } = useTranslation();
     const [searchParams, setSearchParams] = useSearchParams();
-    // The variant the URL asks for, or the default — which the param's absence
-    // means, the way it means `hu` for `?lang=`. `-1` is a param naming no
-    // variant of this game, which is ignored rather than obeyed.
+    // The variant the URL asks for, or the default, which the param's absence
+    // means. `-1` is a param naming no variant of this game.
     const requestedVariantIndex = (params: URLSearchParams) => {
       const requested = params.get('variant');
       return requested === null ? defaultVariantIndex : variantKeys.indexOf(requested);
@@ -73,9 +70,8 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
     const defaultGenerateStartBoard = defaultVariant.generateStartBoard!;
     const activeGenerateStartBoard = activeVariant.generateStartBoard ?? defaultGenerateStartBoard;
 
-    // Authoritative game state lives in a synchronous store outside React (see
-    // engine/store.ts); React renders a snapshot of it. Bots and chained
-    // dispatches always read the store, so they can never see stale state.
+    // Authoritative game state lives in a synchronous store outside React
+    // (engine/store.ts); React renders a snapshot of it.
     const [store] = useState(
       () => createGameStore(createInitialCoreState<TBoard, TTurnState>(activeGenerateStartBoard()))
     );
@@ -121,10 +117,8 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
 
     let wrappedGameMoves: GameMoves<TBoard, TTurnState> = {} as GameMoves<TBoard, TTurnState>;
 
-    // An illegal move should never happen through the UI (buttons are disabled)
-    // or a correct bot, so reaching here means a bug or tampering. In dev we
-    // throw loudly to surface the bug; in prod we fail safe: warn, record it,
-    // and no-op so a stray call can't corrupt the board or white-screen a player.
+    // Reaching here means a bug or tampering, so dev throws. Prod fails safe
+    // instead: a stray call must not corrupt the board or white-screen a player.
     const reportIllegalMove = (name: string, moveBoard: TBoard, args: unknown[]) => {
       const message = `strategyGameFactory: illegal move ${name}(${JSON.stringify(args)}) `
         + `rejected on board ${JSON.stringify(moveBoard)}`;
@@ -147,8 +141,7 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
         game: gameId,
         mode: s.mode,
         // The same key the URL uses, so a variant reads the same in a dashboard
-        // as in a link. Games that declare no id still report their index, and
-        // for those the value only means anything as long as the order holds.
+        // as in a link.
         variant: variantKeys[selectedVariantIndex],
         ...(s.mode === 'vsHuman' ? {} : { result: resolvedWinner === s.chosenRoleIndex ? 'win' : 'loss' })
       });
@@ -157,10 +150,8 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
     const dispatchMove = (
       name: string, moveBoard: TBoard, args: unknown[]
     ): MoveOutcome<TBoard, TTurnState> => {
-      // The store board is authoritative; the board argument remains for API
-      // compatibility. A mismatch means a chaining bug — a bot or BoardClient
-      // passed a stale board to the second move of a turn — so fail loudly in
-      // dev; in prod the store board silently wins.
+      // A mismatch means a chaining bug — a stale board passed to the second
+      // move of a turn — so fail loudly in dev; in prod the store board wins.
       if (import.meta.env.DEV && !isEqual(moveBoard, store.getState().board)) {
         throw new Error(`strategyGameFactory: stale board passed to move ${name} — `
           + 'pass the latest nextBoard when chaining moves within a turn');
@@ -211,19 +202,15 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
       resetGameState({ newVariantIndex: index });
     };
 
-    // A shared `?variant=` link has to work even when it points at the game
-    // already open — a same-route hash navigation remounts nothing, so without
-    // this the URL would change and the board would not. Following it restarts
-    // the game, which is what choosing a variant means everywhere else.
+    // Follows a `?variant=` link to the game already open, which a same-route
+    // hash navigation would otherwise leave on the old board (see
+    // src/components/CLAUDE.md § Variants).
     //
-    // Guarded on the index rather than run unconditionally: `resetGameState`
-    // writes the param itself, so an unguarded effect would re-enter. An index
-    // of -1 — a param naming no variant of this game — is left alone.
-    //
-    // Deriving this during render is not an option: it has to *restart the
-    // game*, which is an event, not a projection of the URL. `searchParams`
-    // alone in the deps for the same reason the language provider does it —
-    // re-running when the selection changes would fight the write path.
+    // Guarded on the index because `resetGameState` writes the param itself, so
+    // an unguarded effect would re-enter. Not derivable during render either: it
+    // has to *restart the game*, which is an event, not a projection of the URL.
+    // `searchParams` alone in the deps for the same reason — re-running when the
+    // selection changes would fight the write path.
     /* eslint-disable react-hooks/exhaustive-deps */
     useEffect(() => {
       const index = requestedVariantIndex(searchParams);
@@ -285,14 +272,10 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
       return wrapped;
     });
 
-    // What the BoardClient receives: the same moves, but a dispatch is silently
-    // ignored unless `isAllowed` holds — turn ownership (ctx.isClientMoveAllowed)
-    // AND the move's validator, both judged against the current store state.
-    // This engine-side gate replaces per-handler `if (!allowed) return` guards,
-    // and also covers browsers that fire pointer events on disabled buttons.
-    // Bots and the auto `endOfTurnMove` dispatch use `wrappedGameMoves` instead:
-    // there an illegal move is a bug, and the validator fails loudly (see
-    // `reportIllegalMove`).
+    // What the BoardClient receives: the same moves, but a dispatch that fails
+    // `isAllowed` is silently ignored, judged against the current store state.
+    // Bots and the auto `endOfTurnMove` use `wrappedGameMoves` instead, where an
+    // illegal move fails loudly. See src/components/CLAUDE.md § validate.
     const clientGameMoves: ClientGameMoves<TBoard, TTurnState> = mapValues(moves, ({ validate }, name) => {
       const isAllowed = (moveBoard: TBoard, ...args: unknown[]) => {
         const liveCtx = buildCtx(store.getState(), resolvedPlayerNames);
@@ -327,9 +310,8 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
     };
 
     // Plays the bot's named moves one at a time. The pause before each is what
-    // makes the bot look like it is thinking; keeping it here rather than
-    // inside the strategy is what lets the same strategy run headless
-    // (engine/run-match.ts).
+    // makes the bot look like it is thinking; keeping it out of the strategy is
+    // what lets the same strategy run headless (engine/run-match.ts).
     const runBotTurn = (queue: BotMove[], delay: number, botStrategy: BotStrategy<TBoard>) => {
       botTimeoutRef.current = setTimeout(() => {
         botTimeoutRef.current = null;

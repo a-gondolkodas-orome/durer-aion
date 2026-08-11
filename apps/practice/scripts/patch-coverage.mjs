@@ -1,25 +1,12 @@
 // Reports how much of the *logic* a pull request adds is reached by a spec, and fails the build
-// when too little of it is. Not a coverage threshold: the global percentage is not a measure of
-// anything here (see AGENTS.md § Testing), and a gate on it would be satisfied by registering
-// another game. Only the lines this PR adds are measured, so the number cannot be diluted by the
-// rest of the repo and cannot drift as the repo grows.
+// when too little of it is. What it measures and why, including the 85% floor and the twenty-line
+// exemption, is in AGENTS.md § Coverage. Two implementation choices worth knowing here:
 //
-// Two decisions make it mean what it says:
-//
-//   - It reads the coverage of `npm run coverage:unswept`, not `npm run coverage`. The two sweeps
-//     (plays-to-an-end, renders) execute nearly every line under games/ while asserting almost
-//     nothing, so a new game registered in gameList.ts is *executed* the moment it exists. Measured
-//     against the full run, a game with no spec at all reads as fully covered — precisely the PR
-//     this is here to catch. With the sweeps excluded, what is left is coverage a real spec caused.
-//
+//   - It reads `npm run coverage:unswept`, so what is left is coverage a real spec caused.
 //   - It measures added *lines*, not files. Every non-spec .ts file in src/ is already at non-zero
 //     coverage, because the overview specs import gameList, which transitively loads every game;
 //     the floor is ~10% of top-level import and const lines, not 0%. So "this file is uncovered"
 //     never fires, while "these added lines never ran" does.
-//
-// Failing here means the added logic is not *unit-tested*. It does not mean it is untested: a
-// registered game still gets real conformance checking from the plays-to-an-end sweep, which throws
-// on an illegal move, a move named after the turn ended, and a game that never ends.
 import { appendFileSync, existsSync, readFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';

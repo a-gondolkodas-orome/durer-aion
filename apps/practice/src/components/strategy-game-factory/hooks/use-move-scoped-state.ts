@@ -1,28 +1,21 @@
 import { useState } from 'react';
 
 /**
- * State that lives for exactly one move.
+ * State that lives for exactly one move: the value is stamped with the
+ * `moveCount` at which it was set and exposed only while that stamp matches, so
+ * any move discards it on the very next render — no effect, no reset call, and
+ * no frame in which a stale selection is painted over an advanced board. That
+ * last part is why this exists rather than
+ * `useEffect(() => setX(initial), [ctx.moveCount])`.
  *
- * The value is stamped with the `moveCount` at which it was set, and is
- * exposed only while that stamp still matches. Any move bumps `moveCount`, so
- * a value set under the previous one is gone on the very next render — no
- * effect, no reset call, and no frame in which a stale selection is painted
- * over an advanced board.
+ * Pass `ctx.moveCount` from a BoardClient, or a `moveCount` prop when the state
+ * lives inside a repeated child component.
  *
- * This is the alternative to `useEffect(() => setX(initial), [ctx.moveCount])`,
- * which repairs the state one render too late and has to be remembered on
- * every component that keeps mid-turn UI state.
- *
- * Pass `ctx.moveCount` from a BoardClient, or a `moveCount` prop when the
- * state lives inside a repeated child component.
- *
- * `initial` is returned whenever the stamp is stale, so it must be a stable
- * reference — hoist a non-primitive to module scope rather than writing `[]`
- * or `{}` inline, which would hand out a fresh object on every such render.
- *
- * For mid-turn state the *engine* has to see — anything
- * `getPlayerStepDescription` reads — use `ctx.turnState` and `setTurnState`
- * instead. This hook is local to the component.
+ * Two things to get right:
+ * - `initial` is returned on every stale render, so a non-primitive must be one
+ *   stable reference — hoist it to module scope, never write `[]` inline.
+ * - mid-turn state the *engine* has to see (anything `getPlayerStepDescription`
+ *   reads) belongs in `ctx.turnState`; this hook is local to the component.
  */
 export function useMoveScopedState<T>(moveCount: number, initial: T) {
   const [stamped, setStamped] = useState<{ value: T; moveCount: number } | null>(null);

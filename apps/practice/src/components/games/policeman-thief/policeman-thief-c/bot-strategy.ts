@@ -4,12 +4,11 @@ import type { BotMove, BotStrategy } from 'strategy-game-factory';
 
 type Bot = BotStrategy<Board, Moves>
 
-// ---------------------------------------------------------------------------
-// Minimax core (exhaustive; the graph and rules are fixed so the memo below is
-// valid for the whole session). A "round" is: all policemen move, then the
-// thief moves. The thief wins by completing 3 moves without ever sharing a
-// vertex with a policeman.
-// ---------------------------------------------------------------------------
+// --- Minimax core -----------------------------------------------------------
+// Exhaustive; the graph and rules are fixed so the memo below is valid for the
+// whole session. A "round" is: all policemen move, then the thief moves. The
+// thief wins by completing 3 moves without ever sharing a vertex with a
+// policeman.
 
 const sortedKey = (cops: number[]) => [...cops].sort((a, b) => a - b).join(',');
 
@@ -106,9 +105,7 @@ const argExtreme = <T,>(arr: T[], keyFn: (x: T) => number, wantMax: boolean): T[
 
 const totalCentrality = (v: number) => range(VERTEX_COUNT).reduce((s, u) => s + dist[v][u], 0);
 
-// ---------------------------------------------------------------------------
-// Smart (optimal) bot
-// ---------------------------------------------------------------------------
+// --- Smart (optimal) bot ----------------------------------------------------
 
 const chooseCopPlacement = (copCount: number): number[] => {
   const winning = winningPlacements(copCount);
@@ -168,11 +165,10 @@ export const smartBotStrategy: Bot = ({ board, ctx }) => {
   return board.phase === 'placingThief' ? placeThiefOptimally(board) : moveThiefOptimally(board);
 };
 
-// ---------------------------------------------------------------------------
-// Random test bot: plays random legal moves, but always grabs an immediate
-// catch (police) or a safe step (thief) when one is available. This lets a
-// human thief realistically win, unlike the optimal bot.
-// ---------------------------------------------------------------------------
+// --- Random test bot --------------------------------------------------------
+// Plays random legal moves, but always grabs an immediate catch (police) or a
+// safe step (thief) when one is available, so a human thief can realistically
+// win, unlike against the optimal bot.
 
 const placeCopsRandom = (board: Board): BotMove<Moves>[] =>
   asCopMoves('placeCop', range(board.copCount).map(() => random(0, VERTEX_COUNT - 1)));

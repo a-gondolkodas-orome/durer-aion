@@ -1,11 +1,6 @@
-// Two toolchain versions are written down in more than one place, and both mismatches stay
-// invisible until something fails far from the cause. Fail the test run instead.
-//
-// - playwright: the devcontainer image bakes a Chromium build in at build time, so the version
-//   lives both as a devDependency and as ARG PLAYWRIGHT_VERSION in the Dockerfile. On a mismatch
-//   Playwright looks for a browser revision that is not in the image.
-// - node: pinned in .nvmrc, package.json engines, both GitHub workflows and the node devcontainer
-//   feature. On a mismatch the container quietly runs a different Node than CI does.
+// Playwright and Node are each written down in several places (README § Project setup lists them),
+// and a mismatch stays invisible until something fails far from the cause. Fail the test run
+// instead.
 //
 // Files are compared against each other only — never against the running process.version, so a
 // contributor on a slightly different local patch is not blocked.

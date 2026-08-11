@@ -1,16 +1,14 @@
 import { cloneDeep, sample } from 'lodash';
 import type { VariantInput } from '../types';
 
-// A variant states its start position either as a generator or as a curated
-// list, and everything downstream only ever sees the generator — `startBoards`
-// is the declarative form of `generateStartBoard`, not a second channel.
+// Everything downstream only ever sees the generator, so `startBoards` is the
+// declarative form of `generateStartBoard`, not a second channel.
 //
-// The pick is cloned so that a generator built from a list keeps the guarantee
-// every game is already written against: a start board is freshly owned by the
-// match it starts. Nothing mutates one today, but the list is module-scope data
-// shared by every match, so without the clone one in-place write — which
-// nothing here can detect — would silently corrupt every later game started
-// from that entry, and hand one object to every team of a competition.
+// The pick is cloned to keep the guarantee every game is already written
+// against: a start board is freshly owned by the match it starts. The list is
+// module-scope data shared by every match, so without the clone one in-place
+// write — which nothing here can detect — would corrupt every later game
+// started from that entry, and hand one object to every team of a competition.
 const startBoardGenerator = <TBoard,>({ generateStartBoard, startBoards }: VariantInput<TBoard>) => {
   if (generateStartBoard) return generateStartBoard;
   if (!startBoards) return undefined;

@@ -11,7 +11,6 @@
 */
 
 const { flatMap, range, sample, cloneDeep, shuffle, isEqual } = require('lodash');
-const fs = require('fs');
 
 const boardSize = 8;
 
@@ -193,10 +192,6 @@ uniqueBishopPairs.map(([r1, c1, r2, c2]) => {
   const initialMessage = `Initial steps: ${JSON.stringify({ r1, c1, r2, c2 })}`;
   
   console.log(initialMessage);
-  // fs.appendFileSync(
-  //   './scripts/pre-generate-ai-moves/chess-bishops-third-steps.txt',
-  //   initialMessage + '\n'
-  // );
   
   const startDate = new Date();
   
@@ -211,10 +206,6 @@ uniqueBishopPairs.map(([r1, c1, r2, c2]) => {
   `.replace(/\s+/g, ' ');
   
   console.log(aiMoveMessage);
-  // fs.appendFileSync(
-  //   './scripts/pre-generate-ai-moves/chess-bishops-third-steps.txt',
-  //   aiMoveMessage + '\n'
-  // )
 
   optimalMoves[`${r1};${c1} - ${r2};${c2}`] = optimalMove['move'];
 })

@@ -22,6 +22,9 @@ const isWinningMove = (move: Move): boolean =>
   // leaves the opponent in a losing position.
   move.resultSet.length === 1 || !playerToMoveWins(move.resultSet);
 
+// The exhaustive answer, for reference: the sets losing for the player to move
+// are {1,2,3} over values 1..4, and {1,2,3}, {1,4,5}, {2,3,4,5}, {1,2,3,4,5}
+// over values 1..5. Every other set is a win, driven towards one of those.
 const winMemo: Record<string, boolean> = {};
 const playerToMoveWins = (set: number[]): boolean => {
   const key = set.join(',');

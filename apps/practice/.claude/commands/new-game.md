@@ -15,9 +15,10 @@ If the game rules weren't provided in $ARGUMENTS, ask for them before proceeding
 
 Past Dürer competition problem sets (including written solutions) are archived at https://durerinfo.hu/archivum/feladatsorok/. If the user provides a reference to a specific PDF (year, round, problem number), fetch it and read the problem statement and solution. If they paste the solution text directly, use that. Either way, use the written solution to inform both the board design and the AI strategy — it often contains the key invariant or characterisation that makes the optimal strategy straightforward to implement.
 
+> **Reminder:** Once the game is identified, ask the user to mark it as **in progress** in the [game tracking spreadsheet](https://docs.google.com/spreadsheets/d/1-6u9PCtvf_gDHrs65x36pmDzFt4nZZx_IUuXrgS2aZk/edit?gid=0#gid=0) before implementation starts, to avoid duplicate work by other developers.
+
 Before proceeding further, also collect the following metadata if not already provided in $ARGUMENTS — they are quick to answer and needed throughout implementation:
 
-> **Reminder:** Once the game is identified, ask the user to mark it as **in progress** in the [game tracking spreadsheet](https://docs.google.com/spreadsheets/d/1-6u9PCtvf_gDHrs65x36pmDzFt4nZZx_IUuXrgS2aZk/edit?gid=0#gid=0) before implementation starts, to avoid duplicate work by other developers.
 - **year**: display string (e.g. `"XVI. (22/23)"`) and sort string (e.g. `"22/23"`)
 - **category**: one or more of A, B, C, D, E, E+
 - **round**: `online` or `döntő`
@@ -31,7 +32,7 @@ A game is useful even without an optimal AI: human vs human mode lets real playe
 - **If now:** spend up to ~3 minutes reasoning through the winning strategy. If you arrive at a clear characterisation, explain it to the user before writing code. If after ~3 minutes you haven't found a clean solution, say so explicitly — don't keep the user waiting longer — and ask if they have any hints (e.g. from the official solution, a known invariant, or their own intuition). If hints resolve it, proceed; otherwise fall back to "later" and leave a placeholder.
 - **If later:** implement a simple or random bot strategy as a placeholder and note clearly in a code comment that it is not optimal yet.
 
-If the strategy needs a **precomputed table** (a JSON file of optimal moves, because searching at play time is too slow), commit the script that produces it to `scripts/pre-generate-ai-moves/` in the same PR — never the table alone. A table without a generator cannot be audited or rebuilt when the board changes. Write the script so that re-running it reproduces the committed JSON byte for byte, and so that it verifies the table (e.g. replaying it against every opponent reply) and fails rather than writing one it cannot prove correct. `modified-mill-strategy.cjs` is the worked example.
+If the strategy needs a **precomputed table** (a JSON file of optimal moves, because searching at play time is too slow), commit its generator in the same PR — never the table alone. What the script has to guarantee is in [AGENTS.md § Architecture](../../AGENTS.md#architecture); `modified-mill-strategy.cjs` is the worked example, and it should also verify the table (e.g. replaying it against every opponent reply) rather than write one it cannot prove correct.
 
 Note: written solutions typically only describe what to do from a winning position. The AI also needs a strategy for losing positions — i.e. when the opponent holds the winning advantage but hasn't played optimally. In that case the bot should still play as well as possible: making moves that are hardest to respond to correctly, maximising the chance the human makes a mistake. Ask the user how they want this handled if it isn't obvious from the solution.
 
@@ -44,7 +45,7 @@ Choose the simplest existing game that resembles the new one structurally:
 Read the chosen reference file in full before writing anything.
 
 ### 4. Create the game files
-Create `src/components/games/<game-name>/gameplay.ts` (board type, start boards, moves) and `<game-name>.tsx` (rule text, step description, variants, factory call). Which file holds what — and why `gameplay.ts` must stay React-free — is in [AGENTS.md § Files in a game folder](../../AGENTS.md#architecture); the contract you are implementing — `moves`/`apply`/`validate`, `isAllowed`, the bot contract, `ctx`, `setTurnState`, `useDeferredMove` — is in [src/components/CLAUDE.md § strategyGameFactory API](../../src/components/CLAUDE.md#strategygamefactory-api). Read both rather than guessing from the reference game alone. Authoring decisions on top of them:
+Create `src/components/games/<game-name>/gameplay.ts` (board type, start boards, moves) and `<game-name>.tsx` (rule text, step description, variants, factory call). Which file holds what — and why `gameplay.ts` must stay React-free — is in [AGENTS.md § Files in a game folder](../../AGENTS.md#files-in-a-game-folder); the contract you are implementing — `moves`/`apply`/`validate`, `isAllowed`, the bot contract, `ctx`, `setTurnState`, `useDeferredMove` — is in [src/components/CLAUDE.md § strategyGameFactory API](../../src/components/CLAUDE.md#strategygamefactory-api). Read both rather than guessing from the reference game alone. Authoring decisions on top of them:
 - If the user supplied the rule text, use it verbatim in `rule.hu` by default. Don't silently rephrase, correct, or abbreviate it. **Exception:** when the original wording doesn't fit the online implementation — e.g. it refers to the competition organizers/judges instead of the opponent/computer, or to physical artifacts (paper, pencil, cards on a table) that don't exist in the browser version — it's fine to reword it slightly to fit. In that case, explicitly highlight every change you made to the user (e.g. show before/after) so they can review it. For any other wording change, propose it and wait for approval before applying.
 - For user-facing text referring to the other participant, prefer "other player" / "másik játékos" over "opponent" / "ellenfél" — the latter reads as too harsh, especially in Hungarian
 - `getPlayerStepDescription` should make it obvious what the current player should do — it is the game's instruction line, not a status label
@@ -74,15 +75,10 @@ const { winnerIndex } = runMatch({
 ```
 
 Assert what the checklist asks for: the smart bot wins as the mover from a
-board the mover can win, and as the replier from one it cannot (every move
-loses there, so any opponent must lose). A spec for a single decision needs no
-mock either — read it with `botNextMoveArgs` from `test-utils`.
-
-**How many boards to sweep depends on what the strategy costs** — exhaustive
-where it is cheap, a few representative boards where it searches, with the
-exhaustive argument moved into unit tests of the characterisation itself. See
-[AGENTS.md § Testing](../../AGENTS.md#testing) for the reasoning and the
-measured numbers.
+board the mover can win, and as the replier from one it cannot. [AGENTS.md §
+Testing](../../AGENTS.md#testing) covers the rest — reading a single decision
+with `botNextMoveArgs`, and how many boards to sweep given what the strategy
+costs.
 
 ```bash
 npm run test

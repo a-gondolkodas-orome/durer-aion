@@ -12,13 +12,11 @@ a match completes and names a winner, `renders.spec.tsx` that a board renders at
 all — both drive the *engine*, not the UI. So every claim about what a player
 sees mid-turn is unverified until someone plays the game.
 
-That gap has already cost a bug. PR #461 claimed to have fixed `pile-splitter`
-showing a bare `0` for a pile it had just emptied, where the three- and
-four-pile boards show 🗑️. Only the bot's half of it was actually fixed:
-`removePile` does not end the turn, so on the mover's own `useDeferredMove` beat
-the label took a different branch and still rendered `0`. Lint, typecheck and
-1890 tests were green the whole time. A single playthrough would have caught it,
-and eventually a user did.
+That gap has already cost a bug: a fix for `pile-splitter` showing a bare `0`
+for a pile it had just emptied landed for the bot's half only, because on the
+mover's own `useDeferredMove` beat the label took a different branch. Lint,
+typecheck and the whole suite were green throughout; a single playthrough would
+have caught it, and eventually a user did.
 
 ## Start the dev server
 

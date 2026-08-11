@@ -23,9 +23,6 @@ const boardToMask = (board: Board): number => {
 
 type MaskMove = { domino: Domino; mask: number };
 
-// All legal placements for `player` given the occupied-cell `mask`.
-// player 0 places vertical dominoes (two cells in the same column),
-// player 1 places horizontal dominoes (two cells in the same row).
 const movesForPlayer = (mask: number, player: number): MaskMove[] => {
   const result: MaskMove[] = [];
   for (let row = 0; row < BOARDSIZE; row++) {

@@ -1,13 +1,10 @@
 import { useMoveScopedState } from './use-move-scoped-state';
 
 /**
- * Move-scoped hover state for board previews.
- *
- * The hover is `useMoveScopedState` (which owns the moveCount stamping) plus
- * the pointer/focus plumbing: any move invalidates the preview on the very
- * next render, which is what stops one from "sticking" after a move on touch
- * devices, where no `pointerleave` fires (the original reason the `moveCount`
- * guard was added).
+ * Move-scoped hover state for board previews: `useMoveScopedState` plus the
+ * pointer/focus plumbing, so any move invalidates the preview on the next
+ * render — which is what stops one from "sticking" after a move on touch
+ * devices, where no `pointerleave` fires.
  *
  * Pass `ctx.moveCount` from a BoardClient, or a `moveCount` prop when the hover
  * lives inside a repeated child component.
@@ -18,9 +15,8 @@ import { useMoveScopedState } from './use-move-scoped-state';
  * child's focus previews the container — matching pointer hover.
  *
  * `set`/`clear` are the imperative escape hatch for flows `hoverProps` can't
- * express — e.g. a touch two-tap flow where the first tap (onClick) sets the
- * preview, or handlers that filter by `pointerType`. Values set this way get
- * the same moveCount stamp, so they are invalidated by the next move too.
+ * express — a touch two-tap where the first tap sets the preview, or handlers
+ * filtering by `pointerType`. Values set that way carry the same stamp.
  */
 export function useHoverPreview<T>(moveCount: number) {
   const [value, setHovered, clear] = useMoveScopedState<T | null>(moveCount, null);

@@ -25,9 +25,8 @@ jobs:
       - name: Install dependencies
         id: install
         run: npm ci
-      # Each check runs even after an earlier one failed, so a red build names every
-      # problem at once: a contributor whose only mistake is formatting can see that
-      # the game logic itself passed, without reading the logs.
+      # Each check runs even after an earlier one failed, so a red build names every problem
+      # at once rather than only the first.
       - name: Check tool versions
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: npm run check:versions
@@ -44,14 +43,10 @@ jobs:
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: npm run build
 
-  # A separate job rather than another step of `test`, so the coverage run — the suite again, and
-  # instrumented, so a couple of minutes — happens alongside the checks a contributor is actually
-  # waiting on rather than after them, and so a PR failing this one can still be read as passing
-  # everything else at a glance.
-  #
-  # Skipped, not failed, when the PR carries the `skip coverage` label: a diff with nothing worth
-  # asserting — a generated table, a renamed symbol, a batch of copy edits — should not need a green
-  # check invented for it.
+  # A separate job rather than a step of `test`: the coverage run is the suite again and
+  # instrumented, so it belongs alongside the checks a contributor is waiting on rather than after
+  # them, and a PR failing it still reads as passing everything else at a glance. The
+  # `skip coverage` label skips rather than fails it (AGENTS.md § Coverage).
   patch-coverage:
     if: >-
       github.event.pull_request.draft == false &&
@@ -80,9 +75,7 @@ jobs:
           restore-keys: npm-
       - name: Install dependencies
         run: npm ci
-      # Deliberately not `npm run coverage`: the plays-to-an-end and renders sweeps execute nearly
-      # every line under games/ while asserting almost nothing, so measured against them a new game
-      # with no spec at all reads as fully covered. See the comment atop scripts/patch-coverage.mjs.
+      # Deliberately not `npm run coverage` — see the comment atop scripts/patch-coverage.mjs.
       - name: Measure coverage without the sweeps
         run: npm run coverage:unswept -- --coverage.reporter=lcovonly
       # base.sha is the base branch as of the last sync, which is exactly the merge base the diff

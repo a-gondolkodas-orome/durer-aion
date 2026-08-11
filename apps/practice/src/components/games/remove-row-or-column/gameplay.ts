@@ -52,7 +52,6 @@ export const getRectangles = (grid: Grid): Rect[] => {
   return rects;
 };
 
-// Remove every disc in the chosen row / column of the rectangle containing (r, c).
 export const applyMove = (grid: Grid, { r, c, orientation }: Move): Grid => {
   const rect = getRectangleAt(grid, r, c)!;
   const next = grid.map(row => row.slice());

@@ -53,17 +53,15 @@ export const playBotMove = <TBoard, TTurnState = unknown>(
 };
 
 // Which role can force the win from `startBoard`, read off the game's own
-// optimal bot playing both sides. Every position of these games has such a
-// role: they are finite, deterministic, perfect-information and cannot end in
-// a draw (`gameEnd` always names a winner), so by Zermelo's theorem one side
-// can always force the win. What a curated board needs asserting is *which*
-// role that is — the team choosing it is the decision a competition is made of.
+// optimal bot playing both sides. One always exists: these games are finite,
+// deterministic, perfect-information and cannot end in a draw, so by Zermelo's
+// theorem one side can force the win.
 //
 // Bots shuffle among equally-optimal moves, so one playout samples one line.
-// Playouts that disagree therefore say nothing about the board: they mean the
-// bot is not optimal, having thrown the win away on some line. That is a bug in
-// the game rather than a fact about the position, so this throws instead of
-// returning a winner nobody can trust.
+// Playouts that disagree therefore say nothing about the board — they mean the
+// bot threw the win away on some line, a bug rather than a fact about the
+// position — so this throws instead of returning a winner nobody can trust.
+// See src/components/CLAUDE.md § Curated start boards.
 export const forcedWinnerIndex = <TBoard, TTurnState = unknown>({
   gameplay,
   botStrategy,

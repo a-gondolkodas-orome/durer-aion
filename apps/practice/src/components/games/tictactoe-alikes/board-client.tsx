@@ -11,10 +11,8 @@ import { type Board } from './gameplay';
 export const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   const pieceColor = (id: number) => board[id] === 'red' ? 'bg-red-800' : 'bg-blue-800';
 
-  /*
-  Due to simulating borders with the background peeking through gaps, we need
-  to explicitly give surface background to children.
-  */
+  // The grid gap is the border: the container colour shows through it, so every
+  // cell needs its own background or the gaps disappear into it.
   return (
     <GameBoard>
       <div className="grid grid-cols-3 bg-slate-200 dark:bg-slate-600 gap-1 p-1">

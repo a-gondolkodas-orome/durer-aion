@@ -26,11 +26,9 @@ const rule = {
 export const MagicBoxB = strategyGameFactory({
   presentation: {
     rule,
-    /*
-    Only the first player can move first in the framework implementation, but
-    the rule says the second player moves first, meaning they make a line
-    designation move, and then the first player will make a stone placement move
-    */
+    // The engine always seats player 0 first, but here it is the *second*
+    // player who opens (with a line designation), so the roles are labelled the
+    // other way round rather than the seating being changed.
     roleLabels: [
       { hu: 'Másodszor rakok', en: "I'll place second" },
       { hu: 'Először rakok', en: "I'll place first" }

@@ -1,17 +1,4 @@
 import type { Ctx, MoveOutcome } from 'strategy-game-factory';
-// Recolouring discs — core game logic.
-//
-// A row of `n` fields. Field 0 starts with a red disc, field n-1 with a blue
-// disc. Player 0 (red) moves first, player 1 (blue) second. On a turn a player
-// either moves one own disc 1–2 fields into an empty cell (may jump over a
-// disc), places a new own disc on an empty cell adjacent to one of their own
-// discs, or passes. Whenever a disc *enters* an empty cell, every
-// opposite-coloured disc in an adjacent cell flips to the mover's colour.
-//
-// Red wins the instant red has strictly more than n/2 discs; blue wins the
-// instant blue has at least n/2 discs; if neither happens within 200 plies,
-// blue wins.
-
 import { range, sample } from 'lodash';
 
 export type Cell = 'red' | 'blue' | null;

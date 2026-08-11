@@ -1,9 +1,8 @@
-// Every game's gameplay.ts has to run in plain Node: it is the module a
-// server-authoritative competition mode would validate moves with (see
-// issue #313). ESLint bans `react` and the factory barrel by
-// specifier, but it cannot tell that a specifier like './pebble-pile' resolves
-// to a .tsx — that is what this walk is for, and it follows the .ts files it
-// finds so an indirect pull is caught too.
+// Every game's gameplay.ts has to run in plain Node (AGENTS.md § Files in a
+// game folder). ESLint bans `react` and the factory barrel by specifier, but it
+// cannot tell that a specifier like './pebble-pile' resolves to a .tsx — that is
+// what this walk is for, and it follows the .ts files it finds so an indirect
+// pull is caught too.
 const sources = import.meta.glob('./**/*.{ts,tsx}', { query: '?raw', import: 'default', eager: true }) as
   Record<string, string>;
 

@@ -3,20 +3,86 @@
 Code for the online, client-side versions of past strategy games at the Dürer
 Math Competition.
 
-The deployed version is here:
-https://jatek.durerinfo.hu/ .
-
-# Development
+The deployed version is here: https://jatek.durerinfo.hu/ .
 
 When you push to the default (main) branch, the tests are run, and if they are
 successful, the project is deployed to the live website within a few minutes.
+
+## Project setup
+
+Two ways to get started:
+
+- **Locally**: install the Node.js version in `.nvmrc` globally (or run `nvm use`
+  in the project directory), then run `npm ci`.
+- **Devcontainer**: a fairly minimal setup, written for local Docker. It pins
+  Node and bakes Playwright's Chromium into the image, so container creation
+  only has to run `npm ci`; it also ships the GitHub CLI and keeps `gh` and
+  Claude Code logins in named volumes across rebuilds. Details below.
+
+Claude Code on the web is neither: its container ships its own Node and starts
+without `node_modules`, so `.claude/hooks/session-start.sh` installs the pinned
+Node through nvm and puts it on `PATH` ahead of the image's own, then runs
+`npm ci` unless the installed tree is already sound. It reads the version from
+`.nvmrc` rather than restating it, so it is not another place to keep in sync.
+
+<details>
+<summary>Devcontainer details</summary>
+
+- **Codespaces** supports only a restricted set of devcontainer properties and
+  may ignore the `mounts` block, in which case none of the persistence below
+  happens.
+- **Playwright**: bumping `playwright` in `package.json` means bumping
+  `PLAYWRIGHT_VERSION` in `.devcontainer/Dockerfile` and rebuilding, or
+  Playwright looks for a browser revision that is not in the image.
+- **Node** is pinned in four other places besides the devcontainer feature in
+  `.devcontainer/devcontainer.json` (the image tag only fixes the major):
+  `.nvmrc`, `engines.node`, and the container image in both
+  `.github/workflows/*.yml`. Bump them together, or the container quietly runs
+  a different Node than CI. `npm run test` fails on either mismatch, so you
+  will not find out the hard way.
+- **npm's update notifier is off** (`NPM_CONFIG_UPDATE_NOTIFIER`): the npm that
+  matters is the one bundled with the pinned Node.
+- **`gh`** does not pick up your SSH key or VS Code's credential helper, so run
+  `gh auth login` once inside the container. A fine-grained token limited to
+  this repository is enough.
+- **Named volumes** keep the `gh` and Claude Code logins across rebuilds
+  (`CLAUDE_CONFIG_DIR` points at the default path only so `~/.claude.json` lands
+  inside the volume too). They take their `node` ownership from the image the
+  first time Docker creates them, so a volume from an older version of this
+  setup stays root-owned and **rebuilding does not repair it** — `gh auth login`
+  keeps failing. Remove them and rebuild:
+  `docker volume rm durer-gh-config durer-claude-home`. Volume names are per
+  Docker host, so every clone and worktree on one machine shares the login.
+
+</details>
+
+## Useful npm commands
+
+```bash
+npm run dev              # compiles and hot-reloads for development
+npm run test             # lint, typecheck and unit tests, as GitHub Actions runs them
+npm run lint:fix         # auto-fix simple formatting errors such as trailing spaces
+npm run build            # prod build — some problems only appear here
+
+npm run coverage         # line coverage, on demand
+npm run coverage:unswept # the same, without the two all-games sweeps
+npm run coverage:patch   # how much of what your branch adds a spec reaches
+```
+
+The three coverage commands, and which of them CI gates on, are explained in
+[AGENTS.md § Coverage](AGENTS.md#coverage).
+
+## IDE setup
+
+Recommended VS Code extensions:
+
+- [Eslint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
+- [Tailwind Css](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss)
 
 ## Adding a new game
 
 To keep track of who works on which game, use [this
 table](https://docs.google.com/spreadsheets/d/1-6u9PCtvf_gDHrs65x36pmDzFt4nZZx_IUuXrgS2aZk/edit#gid=0).
-
-TL;DR;
 
 1. Add the game metadata to `src/components/games/gameList.ts`.
 2. Create a folder for the game under `src/components/games` with the standard
@@ -28,157 +94,21 @@ TL;DR;
    `src/components/games/index.ts`, keyed by the game's `gameList` key. The router
    in `src/components/app/app.tsx` picks it up automatically — no edit needed there.
 
-*For more information, see Section [How to Develop](#how-to-develop)*
+Every field, edge case and enforcement rule of the engine API lives in
+[src/components/CLAUDE.md](src/components/CLAUDE.md). *It is recommended to copy
+and modify an existing, similar game.*
 
-## Project setup
+## Anatomy of a game
 
-Two ways to get started:
-
-- **Locally**: install the Node.js version in `.nvmrc` globally (or run `nvm use`
-  in the project directory), then run `npm ci`.
-- **Devcontainer**: there is a (fairly minimal) setup, written for local Docker.
-  It bakes Playwright's Chromium into the image and pins Node, so container
-  creation only has to run `npm ci`. It also ships the GitHub CLI and keeps `gh`
-  and Claude Code logins in named volumes across rebuilds.
-
-Claude Code on the web is neither: its container ships its own Node and starts
-without `node_modules`, so `.claude/hooks/session-start.sh` installs the pinned
-Node through nvm and puts it on `PATH` ahead of the image's own, then runs
-`npm ci` unless the installed tree is already sound. It reads the version from
-`.nvmrc` rather than restating it, so it is not another place to keep in sync.
-
-<details>
-<summary>Devcontainer details</summary>
-
-It is written for local Docker — GitHub Codespaces supports only a restricted
-set of devcontainer properties and may ignore the `mounts` block, in which case
-none of the persistence described below happens.
-
-It bakes a Chromium build for Playwright into the image at build time, so
-container creation only has to run `npm ci`. If you bump `playwright` in
-`package.json`, also bump `PLAYWRIGHT_VERSION` in `.devcontainer/Dockerfile` and
-rebuild the container — otherwise Playwright will look for a browser revision
-that is not in the image.
-
-Node is pinned the same way. The image tag only fixes the major version, so the
-exact one comes from the node devcontainer feature in `.devcontainer/devcontainer.json`
-and must match the three other places it is written down: `.nvmrc`, `engines.node`
-in `package.json`, and the container image in both `.github/workflows/*.yml`. Bump
-them together and rebuild, or the container quietly runs a different Node than CI does.
-
-`npm run test` fails on either mismatch, so you will not find out the hard way.
-
-The container also has npm's update notifier switched off
-(`NPM_CONFIG_UPDATE_NOTIFIER`). The npm that matters here is the one bundled with
-the pinned Node; upgrading it separately would only diverge from CI.
-
-The GitHub CLI (`gh`) is included too. It does not pick up your SSH key or VS Code's
-git credential helper, so run `gh auth login` once inside the container; the login is
-kept in a named Docker volume and survives rebuilds. A fine-grained token limited to
-this repository is enough for the usual PR and CI commands.
-
-Claude Code's config directory (`~/.claude`) is a named volume as well, so its login and
-settings — default permission mode, theme, notifications — survive rebuilds. `CLAUDE_CONFIG_DIR`
-is set to that same default path only so that `~/.claude.json`, which normally sits next to the
-directory, is stored inside the volume too.
-
-Both volumes get their `node` ownership from the image the first time Docker creates them.
-That means a volume created under an older version of this setup stays root-owned, and
-**rebuilding does not repair it** — `gh auth login` keeps failing. If you hit that, remove the
-volumes and rebuild:
-
-```bash
-docker volume rm durer-gh-config durer-claude-home
-```
-
-Volume names are per Docker host, so every clone, worktree and branch checkout on one
-machine shares the same login state.
-
-</details>
-
-## Useful npm commands
-<details>
-<summary>The commands</summary>
-
-### Compiles and hot-reloads for development
-
-```bash
-npm run dev
-```
-
-### Run tests
-
-```bash
-npm run test # lint and tests (as Github Actions)
-```
-
-Simple formatting errors such as trailing spaces can be automatically fixed with
-```bash
-npm run lint:fix
-```
-
-```bash
-npm run coverage         # line coverage, on demand
-npm run coverage:unswept # the same, without the two all-games sweeps
-npm run coverage:patch   # how much of what your branch adds a spec reaches
-```
-
-The first two are on demand, never part of `npm run test`, and with no threshold
-to pass.
-The plain report is for finding code **no spec loads at all** — it
-lists every file under `src/`, not only the ones a test imported. The global
-percentage is not a target: `plays-to-an-end.spec.ts` and `renders.spec.tsx`
-execute nearly every line under `games/` while asserting almost nothing, so it
-reads high whatever the state of the tests. `coverage:unswept` drops those two,
-and what falls to near zero there is the game logic those sweeps are the only
-thing touching.
-
-`coverage:patch` is the one that runs on every PR. It measures only the lines
-your branch **adds** to non-JSX files under `src/`, and only against
-`coverage:unswept` — so registering a game in `gameList.ts` does not count as
-covering it. Under 85% fails the build, and diffs under twenty measured lines
-never do — below that the percentage is arithmetic rather than a judgement.
-Failing means the added logic is not *unit-tested*, not that it is untested:
-a registered game is still played by `plays-to-an-end.spec.ts`, which catches an
-illegal move or a game that never ends, but nothing there asserts the strategy
-is right. Label the PR `skip coverage` to skip the job when a diff genuinely has
-nothing worth asserting.
-
-### Build for prod
-
-(some problems only appear in prod build, not while testing, for example using a
-variable without declaring it)
-
-```bash
-npm run build
-```
-
-</details>
-
-
-## IDE setup
-
-Recommended VS Code extensions:
-
-- [Eslint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
-- [Tailwind Css](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss)
-
-# How to develop
-
-This project uses the React frontend "framework", the [official
-tutorial](https://react.dev/learn) is a good starting point.
-
-The common parts of all games (showing rules, alternating turns, buttons for
-choosing a role, restart game) are extracted to a `strategyGameFactory`.
-
-
-*It is recommended to copy and modify an existing, similar game.*
-
-## Minimal demonstrative example
+This project uses the React frontend "framework"; the [official
+tutorial](https://react.dev/learn) is a good starting point. The common parts of
+all games (showing rules, alternating turns, buttons for choosing a role,
+restart game) are extracted to a `strategyGameFactory`, which a game hands four
+things.
 
 <details>
 
-<summary>The code</summary>
+<summary>A minimal demonstrative example</summary>
 
 ```tsx
 // gameplay.ts — the React-free rules half of the game
@@ -228,30 +158,12 @@ export const PlusOneTwo = strategyGameFactory({
 ```
 </details>
 
-## Anatomy of a game
-
-A game hands `strategyGameFactory` four things. What follows is the shape of
-each; every field, edge case and enforcement rule lives in
-[src/components/CLAUDE.md § strategyGameFactory
-API](src/components/CLAUDE.md#strategygamefactory-api).
-
 **`gameplay.moves`** — a move is one player-initiated change to the board, and
-the unit that keeps the game played by its rules. Each is `{ apply, validate? }`:
-
-```ts
-moves: {
-  removeCoin: {
-    validate: (board, { ctx }, value) => board[value - 1] > 0,
-    apply: (board, { ctx }, value) => ({ nextBoard, isTurnEnd: true })
-  }
-}
-```
-
+the unit that keeps the game played by its rules. Each is `{ apply, validate? }`.
 `apply` is a pure reducer that *returns* everything it causes — the next board,
-and whether the turn passed (`isTurnEnd`), the game ended
-(`gameEnd: { winnerIndex }`) or the mid-turn state changed (`nextTurnState`) —
-rather than causing it. It applies its arguments blindly; legality lives in the
-optional `validate` next to it, which is the single source of truth: the engine
+and whether the turn passed, the game ended or the mid-turn state changed —
+rather than causing it, and it applies its arguments blindly. Legality lives in
+the optional `validate` next to it, the single source of truth: the engine
 enforces it, and the `BoardClient` reads it back as
 `moves.<name>.isAllowed(board, ...args)` to drive `disabled`.
 
@@ -260,18 +172,14 @@ moves, given `board`, `ctx`, `moves` and `setTurnState`. State that only matters
 within a turn (a hover, a pending selection) belongs in the component, not in
 `board`.
 
-**`variants[].botStrategy`** — a pure function of the position that *names* the
-move it wants, `({ board, ctx }) => ({ move, args })`, or an array of those when
-a turn is one decision made of several moves. The engine plays them out and
-paces them, so a bot never calls a move, never threads a board and never uses
-`setTimeout`. Being a pure function, its decision can be read straight off the
-return value in a spec, and `runMatch` can play two strategies against each
-other through the real engine — see [AGENTS.md § Testing](AGENTS.md#testing).
+**`variants[]`** — each supplies `generateStartBoard()` or `startBoards`, and a
+`botStrategy`: a pure function of the position that *names* the move it wants,
+`({ board, ctx }) => ({ move, args })`. See [src/components/CLAUDE.md § Bot
+contract](src/components/CLAUDE.md#bot-contract), and [AGENTS.md §
+Testing](AGENTS.md#testing) for what being a pure function buys a spec.
 
 **`presentation`** — the rule text and `getPlayerStepDescription`, both i18n
 values.
-
-Each variant also supplies `generateStartBoard()`.
 
 ### Where it lives
 
@@ -279,11 +187,8 @@ A game folder splits along one line: `gameplay.ts` holds the `Board` type, the
 start boards, the `moves` and the legality and win-detection helpers they use,
 and never imports React — ESLint enforces that. The rest (`bot-strategy.ts`,
 `board-client.tsx`, `<game>.tsx` with the rule text and the factory call) sits
-on the React side. The split exists because a future server-authoritative
-competition mode has to validate moves in plain Node with the very same module
-(a future server-authoritative competition mode, see issue #313); it also
-lets specs and the bot's move pinning import the rules without dragging in JSX.
-Details in [AGENTS.md § Files in a game folder](AGENTS.md#architecture).
+on the React side. Which file holds what, and why the split exists, is in
+[AGENTS.md § Files in a game folder](AGENTS.md#files-in-a-game-folder).
 
 ### board and ctx
 
@@ -292,21 +197,12 @@ by the framework in `ctx`: `currentPlayer`, `isClientMoveAllowed` (guard every
 player interaction with it), `isHumanVsHumanGame`, `chosenRoleIndex`, and
 `turnState` for multi-stage turns. Never modify either in place.
 
-A multi-stage game pins what its `turnState` holds — `export type TurnState` in
-`gameplay.ts`, `BoardClientProps<Board, TurnState>` on the component — and the
-factory infers the rest of the config from there, so nothing has to cast it
-back. See [src/components/CLAUDE.md § Pinning the turn
-state](src/components/CLAUDE.md#strategygamefactory-api).
-
-Always pass the current `board` as a move's first argument, including to
-subsequent moves within the same turn. The framework's own state is
-authoritative — it lives in a synchronous store outside React — so the argument
-is not what makes the engine correct. It stays because a move is then a pure
-function of its inputs, callable on hypothetical boards by bot look-ahead and
-by specs, and because the explicit threading lets the engine catch chaining
-bugs: a stale board throws in development instead of corrupting the game. See
-[src/components/CLAUDE.md § Game state
-architecture](src/components/CLAUDE.md#game-state-architecture-synchronous-store-outside-react).
+A multi-stage game pins what its `turnState` holds ([§ Pinning the turn
+state](src/components/CLAUDE.md#pinning-the-turn-state)), and every move takes
+the current `board` as its first argument, including subsequent moves within one
+turn ([§ Game state
+architecture](src/components/CLAUDE.md#game-state-architecture-synchronous-store-outside-react)
+for why, given that the store is authoritative either way).
 
 ## Before opening a PR
 
@@ -357,9 +253,9 @@ same table on demand. It opens no pull requests — upgrading stays deliberate,
 majors one at a time as in
 [#168](https://github.com/a-gondolkodas-orome/durer-jatekok/issues/168). Why a
 report rather than dependabot or renovate: the header comment of
-`scripts/dependency-report.mjs`, and `docs/project-review-2026-08.md` §7.
+`scripts/dependency-report.mjs`.
 
-# License
+## License
 
 Copyright (c) 2020-present [A Gondolkodás Öröme
 Alapítvány](https://agondolkodasorome.hu/).

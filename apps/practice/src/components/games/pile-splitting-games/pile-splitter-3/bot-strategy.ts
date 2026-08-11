@@ -49,9 +49,10 @@ export const getSmartBotStep = (board: Board): BotStep => {
       pieceCount: getOptimalDivision(board[start])
     };
   } else {
-    // this is the case where all piles have even number of pieces
-    // should not occur in an optimal game with 37 pieces
-    // with this the enemy also has a strategy when the game starts with 36 pieces
+    // Every pile even and not all 2: halving is the same position one scale
+    // down, so the odd-pile strategy above applies to it. The 37-piece start is
+    // odd, so an optimal line never reaches here — it is the branch that keeps
+    // the bot playing well after the opponent has left one.
     const botStep = getSmartBotStep(board.map((x) => x / 2));
     return { ...botStep, pieceCount: botStep.pieceCount * 2 };
   }

@@ -28,9 +28,8 @@ jobs:
       - name: Install dependencies
         id: install
         run: npm ci
-      # Split as in pr_test.yml, and for the same reason: every check runs even after
-      # an earlier one failed, so a red main names every problem at once. Upload keeps
-      # the default success() guard, so a main that fails any check is never deployed.
+      # Split as in pr_test.yml, for the same reason. Upload keeps the default success() guard,
+      # so a main that fails any check is never deployed.
       - name: Check tool versions
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: npm run check:versions
@@ -65,7 +64,6 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v5
         with:
-          # A healthy deployment here reports success in well under a minute (28s for
-          # the last good one). The action's 10 minute default only ever delays the
-          # report when Pages' own queue is stalled, so fail fast instead.
+          # A healthy deployment reports success in well under a minute, so the action's 10
+          # minute default only ever delays the report when Pages' queue is stalled.
           timeout: 180000

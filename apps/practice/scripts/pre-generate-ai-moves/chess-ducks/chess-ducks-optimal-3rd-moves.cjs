@@ -7,7 +7,6 @@
 */
 
 const { flatMap, range, sample, cloneDeep, shuffle, isEqual } = require('lodash');
-const fs = require('fs');
 
 const [ROWS, COLS] = [4, 7];
 const [DUCK, FORBIDDEN] = [1, 2];
@@ -155,10 +154,6 @@ uniqueDuckPairs.map(([r1, c1, r2, c2]) => {
   const initialMessage = `Initial steps: ${JSON.stringify({ r1, c1, r2, c2 })}`;
   
   console.log(initialMessage);
-  // fs.appendFileSync(
-  //   './scripts/pre-generate-ai-moves/chess-ducks-3rd-steps.txt',
-  //   initialMessage + '\n'
-  // );
   
   const startDate = new Date();
   
@@ -173,10 +168,6 @@ uniqueDuckPairs.map(([r1, c1, r2, c2]) => {
   `.replace(/\s+/g, ' ');
   
   console.log(aiMoveMessage);
-  // fs.appendFileSync(
-  //   './scripts/pre-generate-ai-moves/chess-ducks-3rd-steps.txt',
-  //   aiMoveMessage + '\n'
-  // )
 
   if (optimalMove.optimal) {
     optimalMoves[`${r1};${c1} - ${r2};${c2}`] = optimalMove['move'];

@@ -1,17 +1,15 @@
 import type { Ctx } from '../types';
 import type { CoreState } from './store';
 
-// Derives the ctx games see (moves, validators, BoardClient, bot) from the
-// authoritative CoreState. Called fresh at every use, so consumers always see
-// current values — there is no cached/stale ctx anywhere anymore.
+// Derives the ctx games see from the authoritative CoreState, fresh at every
+// use, so there is no cached ctx to go stale.
 //
 // The fields are listed out rather than spread from `state` on purpose: this is
 // the allow-list defining the public ctx surface. `{ ...state }` would also hand
 // games `board` (a second source of truth competing with the board threaded
-// through moves), the raw `mode` (ctx deliberately exposes only the derived
-// `isHumanVsHumanGame`), and `undoSnapshot`/`currentTurnHasMoves` — engine
-// bookkeeping that would silently become public API, and that an authoritative
-// server must never ship to a client.
+// through moves), the raw `mode` (only the derived `isHumanVsHumanGame` is
+// public), and `undoSnapshot`/`currentTurnHasMoves` — engine bookkeeping that
+// would silently become API.
 export const buildCtx = <TBoard, TTurnState>(
   state: CoreState<TBoard, TTurnState>, resolvedPlayerNames: [string, string]
 ): Ctx<TTurnState> => ({

@@ -4,9 +4,6 @@ import type { Mode, Phase } from '../types';
 // dispatches (setTimeout closures) read and write it synchronously through the
 // store, so they can never observe a stale snapshot — the root cause behind
 // the old board-threading convention and the ctxRef per-field shadow.
-// This module is framework-free (no React import): together with reducer.ts
-// and build-ctx.ts it is the seed of the headless engine a future
-// server-authoritative competition mode needs (issue #313).
 export type CoreState<TBoard, TTurnState = unknown> = {
   board: TBoard
   phase: Phase

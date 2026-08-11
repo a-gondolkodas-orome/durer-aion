@@ -1,13 +1,9 @@
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-// import { visualizer } from 'rollup-plugin-visualizer';
 
 export default defineConfig(() => ({
-  plugins: [
-    react()
-    // visualizer({ open: true })
-  ],
+  plugins: [react()],
   resolve: {
     // Games and their specs sit two to four folders deep under src/, so without
     // these every one of them reaches a shared module through a wall of `../` —
@@ -73,12 +69,9 @@ export default defineConfig(() => ({
     // is still a `vitest run --isolate` away if a leak is ever suspected.
     isolate: false,
     setupFiles: ['./src/test-setup.ts'],
-    // On demand only (`npm run coverage`), never in `npm test` or CI, and with no
-    // thresholds, deliberately: the two sweeps (plays-to-an-end, renders) execute
-    // nearly every line under games/ while asserting almost nothing, so the global
-    // percentage is not a measure of anything. What the report is good for is the
-    // opposite question — code no spec loads at all — which is why `include` is
-    // spelled out below.
+    // On demand only, never in `npm test` or CI, and with no thresholds — see
+    // AGENTS.md § Coverage for why, and for what the report is actually good
+    // for, which is what `include` below is spelled out for.
     coverage: {
       provider: 'v8',
       // Without this, only files a test imported are reported, and a module no

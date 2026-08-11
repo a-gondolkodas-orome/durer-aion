@@ -24,11 +24,8 @@ export type MatchResult<TBoard> = {
 const PLAYER_NAMES: [string, string] = ['0', '1'];
 
 // Plays a whole game outside React: two strategies, the real moves, the real
-// reducer. This is the browser-free half of the match loop an authoritative
-// competition server needs (issue #313) — issue a start
-// board, validate every move, drive the bot, detect the end — and, today, the
-// way a game's spec plays its bots against each other without faking `moves`
-// or re-implementing win detection.
+// reducer — so a game's spec plays its bots against each other without faking
+// `moves` or re-implementing win detection.
 //
 // Everything that goes wrong throws: unlike the shell, which must keep a live
 // game playable, a headless match only ever runs in tests and CI, where a

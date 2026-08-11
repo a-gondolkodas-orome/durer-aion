@@ -3,11 +3,9 @@ import type { I18nString, TranslatableNode } from 'language';
 export type Phase = 'roleSelection' | 'play' | 'gameEnd'
 export type Mode = 'vsComputer' | 'vsHuman'
 
-// TTurnState is the game's own mid-turn state — the half-made selection a
-// multi-stage turn carries between its moves. It names the payload only: the
-// engine adds the `| null` that every turn starts and ends in, so a game never
-// has to spell it out. Left unpinned it is `unknown`, and reading `turnState`
-// then needs a cast, exactly as it did before the parameter existed.
+// TTurnState names the mid-turn payload only — the engine adds the `| null`
+// every turn starts and ends in. See src/components/CLAUDE.md § Pinning the
+// turn state.
 export interface Ctx<TTurnState = unknown> {
   isHumanVsHumanGame: boolean
   resolvedPlayerNames: [string, string]
@@ -24,29 +22,27 @@ export interface Ctx<TTurnState = unknown> {
 // the move returns, so a move never reaches out and changes anything itself.
 export type MoveOutcome<TBoard, TTurnState = unknown> = {
   nextBoard: TBoard
-  // Turn passes to the other player. Omitted/false = turn continues (mid-turn
-  // move of a multi-phase turn). Ignored when `gameEnd` is present.
+  // Turn passes to the other player. Omitted = further moves follow in the same
+  // turn. Ignored when `gameEnd` is present.
   isTurnEnd?: boolean
   // undefined = turnState unchanged; null = cleared; anything else = new value.
   nextTurnState?: TTurnState | null
-  // Terminal: the game is over, naming the winner explicitly (use
-  // `ctx.currentPlayer!` when the mover wins).
+  // Terminal, naming the winner explicitly (`ctx.currentPlayer!` when the mover
+  // wins).
   gameEnd?: { winnerIndex: number }
   // Schedule gameplay.endOfTurnMove after a delay. Ignored when `gameEnd` is
   // present (contradiction; throws in dev).
   autoEndOfTurn?: boolean
 }
-// A move is a pure reducer: board in, outcome out. It is handed nothing it
-// could cause an effect through, so purity is enforced by the type system
-// rather than by convention — which is what lets the same function run in a
-// future authoritative server.
+// A move is a pure reducer: board in, outcome out, handed nothing it could
+// cause an effect through — see AGENTS.md § Files in a game folder for why that
+// matters beyond this repo.
 export type MoveFunction<TBoard, TTurnState = unknown> = (
   board: TBoard, meta: { ctx: Ctx<TTurnState> }, ...args: any[]
 ) => MoveOutcome<TBoard, TTurnState>
-// Pure, side-effect-free legality predicate for a single move, colocated with
-// its `apply`. Because it depends only on `board` + `ctx` (no React), the same
-// function drives the UI (button `disabled`), the engine (illegal-move
-// enforcement) and, in the future, an authoritative server-side check.
+// The single source of truth for a move's legality, colocated with its `apply`
+// and free of React so the UI, the engine and a future server can share it.
+// See src/components/CLAUDE.md § validate.
 type MoveValidator<TBoard, TTurnState = unknown> = (
   board: TBoard, meta: { ctx: Ctx<TTurnState> }, ...args: any[]
 ) => boolean
@@ -59,19 +55,15 @@ export interface Gameplay<TBoard, TTurnState = unknown> {
   // move name auto-executed (after a delay) following moves returning autoEndOfTurn: true
   endOfTurnMove?: string
 }
-// Engine-wrapped moves, callable to dispatch. This is the bot's view: a bot
-// enumerates legal moves through the raw `validate`/its own helpers, because
-// `isAllowed` would be false throughout its turn anyway (see below).
+// Engine-wrapped moves, callable to dispatch. This is the bot's view: no
+// `isAllowed`, which would be false throughout its turn anyway.
 export type GameMoves<TBoard, TTurnState = unknown> = Record<
   string,
   (board: TBoard, ...args: any[]) => MoveOutcome<TBoard, TTurnState>
 >
-// The BoardClient's view: the same dispatchers, plus `isAllowed(board, ...args)`
-// on every move — `ctx.isClientMoveAllowed` (turn ownership) AND the move's
-// `validate`, with `ctx` already bound. That is what a `disabled` state should
-// ask; the same check silently gates every client dispatch, so handlers need no
-// `if (!allowed) return` guards. Assignable to GameMoves, so helpers shared with
-// a bot keep taking the wider type.
+// The BoardClient's view: the same dispatchers plus `isAllowed(board, ...args)`,
+// which is what a `disabled` state should ask. Assignable to GameMoves, so
+// helpers shared with a bot keep taking the wider type.
 export type ClientGameMoves<TBoard, TTurnState = unknown> = Record<
   string,
   ((board: TBoard, ...args: any[]) => MoveOutcome<TBoard, TTurnState>)
@@ -81,47 +73,35 @@ export type StrategyArgs<TBoard, TTurnState = unknown> = {
   board: TBoard
   ctx: Ctx<TTurnState>
 }
-// A game's `moves` object seen as a type — what a game exports as `Moves` so
-// its bots can name moves out of it.
+// A game's `moves` object seen as a type — what a game exports as `Moves`.
 type AnyMoves = Record<string, MoveDefinition<any, any>>
 // What a move takes beyond the board and the meta object: exactly the tail a
 // bot has to supply as `args`.
 type MoveArgs<TApply> =
   TApply extends (board: any, meta: any, ...args: infer TArgs) => any ? TArgs : never
-// A move a bot wants played, named rather than dispatched. Parameterised by the
-// game's `Moves` it pins both halves: naming a move the game does not have, or
-// passing it the wrong arguments, is a typecheck error at the bot. Given only a
-// union of names (or nothing) it still pins the name, leaving `args` unchecked.
+// A move a bot wants played, named rather than dispatched. Given the game's
+// `Moves` it pins the name and the arguments; given only a union of names (or
+// nothing) it still pins the name, leaving `args` unchecked.
 export type BotMove<TMoves extends string | AnyMoves = string> =
   TMoves extends string ? { move: TMoves; args?: unknown[] }
   : TMoves extends AnyMoves
     ? { [K in keyof TMoves]: { move: K; args?: MoveArgs<TMoves[K]['apply']> } }[keyof TMoves]
     : never
-// A bot is a pure function of the position: it names the move it wants, or the
-// whole sequence when the turn is planned as one decision, and the engine plays
-// them out — paced in the browser so the bot appears to think, immediately in a
-// headless match (engine/run-match.ts). Naming moves rather than dispatching
-// them is what keeps a strategy free of timers, of the move wrappers and of any
-// board to thread, so the same function can run on an authoritative server.
-// If the turn is still the bot's once its moves are played, it is asked again
-// (see engine/bot-turn.ts), so naming one move at a time is equally fine.
-// Deliberately not parameterised over the turn state: a bot is asked again with
-// a fresh `ctx` for every move it owes, so it plans a whole turn rather than
-// reading its own half-made selection back — the one consumer `turnState` has
-// no client for. A bot that ever needs it reads `unknown` and casts.
+// A pure function of the position that names what it wants played; the engine
+// plays it out (see src/components/CLAUDE.md § Bot contract). Deliberately not
+// parameterised over the turn state: a bot is asked again with a fresh `ctx`
+// for every move it owes, so it plans a whole turn rather than reading its own
+// half-made selection back.
 export type BotStrategy<TBoard, TMoves extends string | AnyMoves = string> =
   (args: StrategyArgs<TBoard>) => BotMove<TMoves> | BotMove<TMoves>[]
-// A game pins TTurnState by annotating its BoardClient — `BoardClientProps<Board,
-// TurnState>` — and the factory infers the rest of the config from it, so
-// `ctx.turnState` and `setTurnState` are typed with no cast anywhere.
+// Annotating these props is what pins TTurnState for the whole game: the
+// factory infers the rest of the config from it.
 export type BoardClientProps<TBoard, TTurnState = unknown> =
   StrategyArgs<TBoard, TTurnState> & {
     moves: ClientGameMoves<TBoard, TTurnState>
-    // Writes the mid-turn UI state a BoardClient needs to remember (which pile is
-    // selected, which slot is being edited), read back as `ctx.turnState`. The one
-    // path that writes engine state without going through a move: a selection is
-    // not a move, so it must not bump `moveCount` or take an undo snapshot. Moves
-    // never get this — they return `nextTurnState` in their MoveOutcome instead.
+    // The one path that writes engine state without going through a move,
+    // deliberately: a selection is not a move, so it must not bump `moveCount`
+    // or take an undo snapshot. Moves return `nextTurnState` instead.
     setTurnState: (state: TTurnState | null) => void
   }
 
@@ -140,16 +120,15 @@ export interface Variant {
 
 export interface VariantInput<TBoard> {
   // Stable slug this variant is addressable by in the URL (`?variant=3-5-7`).
-  // Optional: a variant without one is addressed by its index, which is enough
-  // for a link that need not outlive a reordering. Declare it where a durable
-  // link matters — the variants that are really separate games.
+  // Optional — without one a variant is addressed by its index, which no
+  // reordering survives. See src/components/CLAUDE.md § Variants.
   id?: string
   label?: I18nString
   isDefault?: boolean
   generateStartBoard?: () => TBoard
   // A curated list of start boards, in place of generating one: the variant
-  // plays a random entry. Its order is part of the contract — a competition
-  // hands out `startBoards[attemptIndex]`, so append rather than reorder.
+  // plays a random entry. Its order is part of the contract — see
+  // src/components/CLAUDE.md § Curated start boards.
   startBoards?: TBoard[]
   botStrategy?: BotStrategy<TBoard>
   notAlwaysOptimal?: boolean
