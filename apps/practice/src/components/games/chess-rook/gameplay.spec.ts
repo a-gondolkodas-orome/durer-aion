@@ -2,12 +2,10 @@ import { cloneDeep } from 'lodash';
 import { startBoard, getAllowedMoves, markVisitedFields, moves } from './gameplay';
 import { makeCtx } from 'test-utils';
 
-// This spec steps the board forward, so it needs its own copy of the shared one.
-const freshStartBoard = () => cloneDeep(startBoard);
 
 describe('markVisitedFields', () => {
   it('should mark visited fields', () => {
-    const board = freshStartBoard();
+    const board = cloneDeep(startBoard);
     markVisitedFields(board, { row: 0, col: 0 }, { row: 6, col: 0 });
     expect(board.chessBoard[0][0]).toEqual('visited');
     expect(board.chessBoard[1][0]).toEqual('visited');
@@ -18,7 +16,7 @@ describe('markVisitedFields', () => {
 
 describe('getAllowedMoves', () => {
   it('should return right and down moves from starting position', () => {
-    const board = freshStartBoard();
+    const board = startBoard;
     const moves = getAllowedMoves(board);
     expect(moves).toHaveLength(14);
     expect(moves).toEqual(expect.arrayContaining([
@@ -28,7 +26,7 @@ describe('getAllowedMoves', () => {
   });
 
   it('should be blocked by visited squares', () => {
-    const board = freshStartBoard();
+    const board = cloneDeep(startBoard);
     markVisitedFields(board, { row: 0, col: 0 }, { row: 0, col: 3 });
     board.chessBoard[0][3] = 'rook';
     board.rookPosition = { row: 0, col: 3 };
@@ -45,7 +43,7 @@ describe('getAllowedMoves', () => {
   });
 
   it('should return no moves when all paths are blocked', () => {
-    const board = freshStartBoard();
+    const board = cloneDeep(startBoard);
     board.chessBoard[0][1] = 'visited';
     board.chessBoard[1][0] = 'visited';
 
@@ -59,7 +57,7 @@ const asPlayer = (currentPlayer: number) => ({ ctx: makeCtx({ currentPlayer }) }
 
 describe('end of game', () => {
   it('ends exactly on the move that strands the rook', () => {
-    let board = freshStartBoard();
+    let board = startBoard;
     let player = 0;
     let outcome = moves.moveRook.apply(board, asPlayer(player), getAllowedMoves(board)[0]);
 

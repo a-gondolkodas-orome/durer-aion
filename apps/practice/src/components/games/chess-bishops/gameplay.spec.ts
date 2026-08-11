@@ -1,9 +1,10 @@
+import { cloneDeep } from 'lodash';
 import { FORBIDDEN, startBoard, getAllowedMoves, markForbiddenFields, moves } from './gameplay';
 import { makeCtx } from 'test-utils';
 
 describe('markForbiddenFields', () => {
   it('should mark forbidden fields', () => {
-    const board = startBoard;
+    const board = cloneDeep(startBoard);
     markForbiddenFields(board, { row: 2, col: 3 });
     const expectedBoard = [
       [null     , FORBIDDEN, null     , null  , null     , FORBIDDEN, null     , null     ],

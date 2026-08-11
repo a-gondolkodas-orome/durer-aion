@@ -1,15 +1,13 @@
-import { range, uniq, cloneDeep } from 'lodash';
+import { cloneDeep, range, uniq } from 'lodash';
 import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
 import { colors, startBoard, isAllowedStep, moves, type Board } from './gameplay';
 import { botNextMoveArgs, makeCtx, moveValidator } from 'test-utils';
 
-// This spec steps the board forward, so it needs its own copy of the shared one.
-const freshStartBoard = () => cloneDeep(startBoard);
 
 type Step = { vertex: number; color: string };
 
 const boardWith = (colored: Record<number, string>): Board => {
-  const board = freshStartBoard();
+  const board = cloneDeep(startBoard);
   Object.entries(colored).forEach(([vertex, color]) => { board[Number(vertex)] = color; });
   return board;
 };
@@ -29,7 +27,7 @@ const stepNamed = (board: Board, seat: { chosenRoleIndex: number }): Step =>
 // strategies, and neither is a search.
 describe('smartBotStrategy as the first player', () => {
   it('opens on the main diagonal, taking both its ends before anything else', () => {
-    const seen = uniq(range(40).map(() => stepNamed(freshStartBoard(), asBotFirst).vertex));
+    const seen = uniq(range(40).map(() => stepNamed(startBoard, asBotFirst).vertex));
     expect(seen.sort()).toEqual([2, 4]);
   });
 
@@ -91,7 +89,7 @@ describe('smartBotStrategy as the second player', () => {
 describe('legality from either seat', () => {
   it('only ever names a colouring the game accepts', () => {
     const boards = [
-      freshStartBoard(),
+      cloneDeep(startBoard),
       boardWith({ 2: 'red' }),
       boardWith({ 0: 'red' }),
       boardWith({ 1: 'red', 3: 'blue' }),
