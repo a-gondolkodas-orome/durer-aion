@@ -33,12 +33,17 @@ is my turn" — that part is `strategy-game-factory`'s own chrome and is identic
 for every game. Board clicking is per game and belongs in your script.
 
 Write the script under `$CLAUDE_JOB_DIR/tmp` or another scratch directory, not
-in the repo. Import the helper by absolute path (Playwright resolves from the
-repo root, which the helper handles):
+in the repo. The helper lives in the repo and the script does not, so it is
+imported by absolute path. The checkout differs per environment — `/workspaces`
+in the devcontainer, somewhere else on the web — so take it from
+`git rev-parse --show-toplevel` and put it in a named constant rather than
+writing a path out and hoping. Playwright itself resolves from the repo root,
+which the helper handles.
 
 ```js
-import { launchGame, sampleDuringBeat, readAll }
-  from '/workspaces/durer-jatekok/.claude/skills/play-game-in-browser/drive.mjs';
+const REPO = '/workspaces/durer-jatekok';   // git rev-parse --show-toplevel
+const { launchGame, sampleDuringBeat, readAll } =
+  await import(`${REPO}/.claude/skills/play-game-in-browser/drive.mjs`);
 
 const { browser, page } = await launchGame('PileSplitter', { mode: 'vsHuman' });
 
@@ -64,6 +69,11 @@ await browser.close();
   computer does not. Without it the board renders with every piece `disabled`,
   which reads exactly like a bug in the code you are testing. `launchGame`
   throws instead if the game did not start.
+
+Running the script with `node` asks for permission every time. That is
+deliberate, not a misconfiguration: the scratch path differs per session, and
+any allowlist entry broad enough to cover it would also authorise running any
+script in the repo unattended.
 
 The UI is Hungarian by default; the `EN` button in the header switches it, which
 is worth doing if your assertions read better in English.
