@@ -1,4 +1,6 @@
-import { getSmartBotStep } from './bot-strategy';
+import { runMatch } from 'strategy-game-factory';
+import { isLosingForMover, moves, type Board } from '../gameplay';
+import { getSmartBotStep, randomBotStrategy, smartBotStrategy } from './bot-strategy';
 
 describe('getSmartBotStep', () => {
   it('odd, odd, odd, odd case: split a non-1 pile', () => {
@@ -40,7 +42,9 @@ describe('getSmartBotStep', () => {
     it('2, 2, 2, 3', () => {
       const botStep = getSmartBotStep([2, 2, 2, 3]);
       expect(botStep.pileId).toEqual(3);
-      expect(botStep.pieceCount).toEqual(1);
+      // 2 and 1; which of the two halves lands in the emptied slot is arbitrary,
+      // and either way the opponent is left with one pile of 1 and three of 2.
+      expect(botStep.pieceCount).toEqual(2);
     });
 
     it('4, 4, 4, 15', () => {
@@ -54,5 +58,36 @@ describe('getSmartBotStep', () => {
       expect(botStep.pileId).toEqual(1);
       expect([3, 4, 7, 8]).toContainEqual(botStep.pieceCount);
     });
+  });
+});
+
+// A full-strength optimality check, end to end: from a position the mover can
+// win the smart bot must win as the mover, and from one it cannot every turn
+// loses, so it must win as the replier whatever the random bot throws at it.
+// See AGENTS.md § Testing.
+describe('pile-splitter-4 smartBotStrategy', () => {
+  // [1, 2, 2, 4] is the position the bot used to give away: it left the
+  // opponent [1, 2, 2, 3], still won for them, where [2, 2, 2, 2] wins.
+  const startBoards: Board[] = [
+    [1, 2, 2, 4], [2, 2, 2, 3], [5, 5, 5, 5], [6, 6, 6, 6], [3, 4, 5, 6],
+    [5, 7, 9, 11], [12, 8, 6, 10], [9, 9, 9, 10], [24, 12, 6, 18], [11, 5, 8, 8]
+  ];
+
+  const winnerAgainstRandom = (startBoard: Board, smartSeat: 0 | 1) => runMatch({
+    gameplay: { moves },
+    strategies: smartSeat === 0
+      ? [smartBotStrategy, randomBotStrategy]
+      : [randomBotStrategy, smartBotStrategy],
+    startBoard
+  }).winnerIndex;
+
+  it.each(startBoards)('wins from %j as the role that can force it', (...startBoard) => {
+    const smartSeat = isLosingForMover(startBoard) ? 1 : 0;
+
+    // Both bots shuffle among their choices, so the board has to hold for every
+    // line the pair of them can produce.
+    for (let i = 0; i < 10; i++) {
+      expect(winnerAgainstRandom(startBoard, smartSeat)).toEqual(smartSeat);
+    }
   });
 });

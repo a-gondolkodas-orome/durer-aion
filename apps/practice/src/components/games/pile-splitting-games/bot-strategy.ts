@@ -8,7 +8,6 @@ export type BotStep = { removedPileId: number; pileId: number; pieceCount: numbe
 
 export type Bot = BotStrategy<Board, Moves>
 
-
 export const asTurn = ({ removedPileId, pileId, pieceCount }: BotStep): BotMove<Moves>[] => [
   { move: 'removePile', args: [removedPileId] },
   { move: 'splitPile', args: [{ pileId, pieceCount }] }

@@ -1,4 +1,8 @@
-import { emptiedPileId, isRemovalAllowed, isSplitAllowed, moves, withPileRemoved } from './gameplay';
+import { range } from 'lodash';
+import {
+  emptiedPileId, isLosingForMover, isRemovalAllowed, isSplitAllowed, moves, withPileRemoved,
+  type Board
+} from './gameplay';
 import { makeCtx } from 'test-utils';
 
 describe('pile-splitting shared turn legality', () => {
@@ -129,4 +133,67 @@ describe('pile-splitting shared turn', () => {
       expect(outcome.isTurnEnd).toBeUndefined();
     }
   );
+});
+
+// `isLosingForMover` is a claim about the game, so it is checked against the
+// game rather than against the parity rule it is written from — restating that
+// rule would pass just as happily with the sign the wrong way round, which is
+// how the four-pile generator carried an inverted copy of it. Every line is
+// searched through the real moves and the real legality predicates, on boards
+// small enough to solve outright.
+const solved = new Map<string, boolean>();
+
+const canWinBySearch = (board: Board): boolean => {
+  // A turn discards a whole pile, so the total strictly shrinks and the search
+  // terminates; only the pile sizes matter, not which slot holds them.
+  const key = `${board.length}|${[...board].sort((a, b) => a - b).join(',')}`;
+  if (solved.has(key)) return solved.get(key)!;
+
+  const won = range(board.length).filter(id => isRemovalAllowed(board, id)).some(removedPileId => {
+    const afterRemoval = withPileRemoved(board, removedPileId);
+
+    return range(board.length).some(pileId => range(1, board[pileId]).some(pieceCount => {
+      if (!isSplitAllowed(afterRemoval, pileId, pieceCount)) return false;
+      const { nextBoard, gameEnd } = moves.splitPile.apply(
+        afterRemoval, asPlayer(0), { pileId, pieceCount }
+      );
+      return gameEnd !== undefined || !canWinBySearch(nextBoard);
+    }));
+  });
+
+  solved.set(key, won);
+  return won;
+};
+
+// Non-decreasing tuples: the value of a position depends on the pile sizes
+// alone, so one ordering of each stands for all of them.
+const boardsUpTo = (pileCount: number, maxPile: number): Board[] =>
+  pileCount === 0
+    ? [[]]
+    : boardsUpTo(pileCount - 1, maxPile).flatMap(rest =>
+      range(rest[rest.length - 1] ?? 1, maxPile + 1).map(size => [...rest, size]));
+
+describe('isLosingForMover', () => {
+  it.each([2, 3, 4])('agrees with a search of every line, on %i piles', pileCount => {
+    const boards = boardsUpTo(pileCount, 6);
+
+    expect(boards.length).toBeGreaterThan(20);
+    boards.forEach(board => {
+      expect([board, isLosingForMover(board)]).toEqual([board, !canWinBySearch(board)]);
+    });
+  });
+
+  it('reads a board with no even pile as lost, whatever the piles are', () => {
+    expect(isLosingForMover([1, 1])).toBe(true);
+    expect(isLosingForMover([3, 5, 7])).toBe(true);
+    expect(isLosingForMover([1, 1, 1, 1])).toBe(true);
+  });
+
+  // The two branches past a decided turn: every pile even halves, and four piles
+  // around a lone odd one top that pile up. Both were the four-pile game's own
+  // reduction, and are what the sibling games now share.
+  it('reduces a position no single turn decides', () => {
+    expect(isLosingForMover([2, 2, 2, 2])).toBe(isLosingForMover([1, 1, 1, 1]));
+    expect(isLosingForMover([1, 2, 2, 2])).toBe(isLosingForMover([2, 2, 2, 2]));
+  });
 });

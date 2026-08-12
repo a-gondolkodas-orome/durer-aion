@@ -77,3 +77,28 @@ export const moves = {
 };
 
 export type Moves = typeof moves;
+
+// Which side can force the win, on 2, 3 and 4 piles alike. A turn leaves every
+// pile odd exactly when it splits an even pile into two odd halves and discards
+// the second even pile if there is one — so a mover facing no even pile has
+// already lost, and one facing a single even pile, or two, has won. Past two
+// the turn cannot decide it, and the position reduces instead: halving every
+// pile leaves the class untouched, as does topping the lone odd pile up to
+// even, and both shrink the board.
+//
+// This characterises the winning strategy, so it would belong with the bot were
+// it not what `pile-splitter-4` draws its start boards against — the exception
+// AGENTS.md § Files in a game folder makes for a practice game's generator.
+export const isLosingForMover = (board: Board): boolean => {
+  const evenPileCount = board.filter(size => size % 2 === 0).length;
+
+  if (evenPileCount === 0) return true;
+  if (evenPileCount <= 2) return false;
+  if (evenPileCount === board.length) return isLosingForMover(board.map(size => size / 2));
+
+  // Every pile but one even, which on this family's widest board means four
+  // piles around a single odd one. Five piles could reach here with two odd
+  // ones, which this does not answer.
+  const oddPileId = board.findIndex(size => size % 2 === 1);
+  return isLosingForMover(board.map((size, i) => i === oddPileId ? size + 1 : size));
+};

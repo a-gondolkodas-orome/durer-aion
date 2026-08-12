@@ -1,5 +1,5 @@
-import { random, range, times } from 'lodash';
-import type { Board } from '../gameplay';
+import { random, times } from 'lodash';
+import { isLosingForMover, type Board } from '../gameplay';
 
 // Played on four piles; the rules are the shared pile-splitting ones unchanged.
 export { moves, type Board, type Piece, type Moves } from '../gameplay';
@@ -14,18 +14,19 @@ export const generateTestStartBoard = (): Board =>
 
 type BoardOptions = { pileMin?: number; pileMax?: number; remainingTrials?: number };
 
-// Draw boards until one falls on the wanted side of `canWin`, then vary its
-// shape: doubling, and doubling with one piece taken off, both leave the
-// win/loss class untouched (see `canWin`), so they widen the pool for free.
-// Every option has to be threaded through the retry — a retry that fell back to
-// the defaults is how the test variant used to end up with full-size boards.
+// Draw boards until one falls on the wanted side of `isLosingForMover`, then
+// vary its shape: doubling, and doubling with one piece taken off, both leave
+// the win/loss class untouched (see `isLosingForMover`), so they widen the pool
+// for free. Every option has to be threaded through the retry — a retry that
+// fell back to the defaults is how the test variant used to end up with
+// full-size boards.
 const generateStartBoardWonBy = (
   moverWins: boolean,
   { pileMin = 5, pileMax = 12, remainingTrials = 50 }: BoardOptions = {}
 ): Board => {
   const board = times(4, () => random(pileMin, pileMax));
 
-  if (canWin(board) !== moverWins) {
+  if (!isLosingForMover(board) !== moverWins) {
     if (remainingTrials === 0) return board;
     return generateStartBoardWonBy(
       moverWins, { pileMin, pileMax, remainingTrials: remainingTrials - 1 }
@@ -38,21 +39,4 @@ const generateStartBoardWonBy = (
   if (variation === 1) return doubled;
   doubled[random(0, 3)] -= 1;
   return doubled;
-};
-
-// Can the player to move force a win? Recursive parity normalisation.
-const canWin = (board: Board): boolean => {
-  const oddPileIndices = range(0, 4).filter(i => board[i] % 2 === 1);
-  const oddPileCount = oddPileIndices.length;
-
-  if (oddPileCount === 4) return true;
-  if (oddPileCount === 3 || oddPileCount === 2) return false;
-
-  if (oddPileCount === 1) {
-    const modifiedBoard = [...board];
-    modifiedBoard[oddPileIndices[0]] += 1;
-    return canWin(modifiedBoard);
-  } else { // oddPileCount === 0
-    return canWin(board.map(x => x / 2));
-  }
 };

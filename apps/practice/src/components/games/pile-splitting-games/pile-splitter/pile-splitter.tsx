@@ -7,8 +7,7 @@ import {
   useDeferredMove
 } from 'strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
-import { isSplitAllowed, withPileRemoved } from '../gameplay';
-import { moves, type Board, type Piece } from './gameplay';
+import { isSplitAllowed, moves, withPileRemoved, type Board, type Piece } from './gameplay';
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { value: validHoveredPiece, hoverProps } = useHoverPreview<Piece>(ctx.moveCount);
