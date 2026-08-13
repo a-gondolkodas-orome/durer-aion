@@ -239,10 +239,17 @@ unwanted should be dropped instead — trailing parameters can simply be left of
 destructuring, which is why bots and `getPlayerStepDescription` write
 `({ board })` rather than underscoring `ctx`.
 
-## Pull request size
+## Pull request scope
 
 Reviewer time is the scarcest resource here, so plan the split **before**
-starting, not after the diff has grown. Two rules cover most cases:
+starting, not after the diff has grown. What decides the split is
+**atomicity, not diff size**: one PR per independent change, so a reviewer
+can accept or reject each on its own. A mechanical change is one PR however
+many files it touches; unrelated fixes to a game's board client and its bot
+strategy are two PRs even though both are small and live in one folder.
+
+Two rules cover the case where a single design change implies a repo-wide
+diff:
 
 - **Separate the design from the sweep.** A change to the `strategyGameFactory`
   contract touches every game, but only the engine, the new shape and a pilot
