@@ -52,7 +52,8 @@
   "scripts": {
     "predeploy": "npx turbo run build --filter=offline-frontend && npm run predeploy --workspace=offline-frontend",
     "deploy": "gh-pages -d apps/offline-frontend/dist",
-    "lint": "turbo lint",
+    "lint": "eslint . --max-warnings=107",
+    "lint:turbo": "turbo lint",
     "check:server": "babel-node --extensions \".ts\" --presets=@babel/preset-typescript --plugins=@babel/plugin-transform-modules-commonjs src/server.ts sanity-check",
     "start": "turbo start",
     "build": "turbo build",
@@ -99,6 +100,9 @@
     ]
   },
   "packageManager": "npm@8.5.0",
+  "engines": {
+    "node": ">=24"
+  },
   "workspaces": [
     "apps/*",
     "packages/*"
