@@ -1,4 +1,6 @@
+import type { MouseEvent } from 'react';
 import { range } from 'lodash';
+import { useTranslation } from 'language';
 import {
   type BoardClientProps,
   GameBoard,
@@ -6,6 +8,7 @@ import {
   useDeferredMove,
   useMoveScopedState
 } from 'strategy-game-factory';
+import { PileArea, PileCard, previewProps, previewsByHover, type DiscardState } from './pile-card';
 import { isSplitAllowed, withPileRemoved, type Board, type Piece } from './gameplay';
 
 // The three- and four-pile siblings are played identically: click the pile to
@@ -14,10 +17,14 @@ import { isSplitAllowed, withPileRemoved, type Board, type Piece } from './gamep
 // `pile-splitter` does not: on two piles the pile to discard is implied, which
 // makes its turn a single click.
 export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
+  const { t } = useTranslation();
   const [removedPileId, setRemovedPileId] = useMoveScopedState<number | null>(ctx.moveCount, null);
-  const { value: validHoveredPiece, hoverProps } = useHoverPreview<Piece>(ctx.moveCount);
+  const { value: validHoveredPiece, ...preview } = useHoverPreview<Piece>(ctx.moveCount);
   const { value: validHoveredPileId, hoverProps: pileHoverProps } = useHoverPreview<number>(ctx.moveCount);
   const deferMove = useDeferredMove(ctx.moveCount);
+  // said by the header button of the pile picked to discard and by its pieces
+  // alike: both undo the pick
+  const keepLabel = t({ hu: 'mégsem dobod el ezt a kupacot', en: 'keep this pile after all' });
 
   const canSelectPile = (pileId: number) =>
     removedPileId === null && moves.removePile.isAllowed(board, pileId);
@@ -45,6 +52,14 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       return;
     }
 
+    // Where nothing hovers, the first tap previews the split and the second
+    // plays it; a mouse or a keyboard has previewed it already, so a single
+    // click or keypress plays the turn as it always has.
+    if (!previewsByHover() && previewedSplitAt(pileId) !== pieceId) {
+      preview.set({ pileId, pieceId });
+      return;
+    }
+
     const { nextBoard } = moves.removePile(board, removedPileId);
 
     deferMove(() => moves.splitPile(nextBoard, { pileId, pieceCount: pieceId + 1 }));
@@ -59,23 +74,22 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const isHoverPreviewedForRemoval = (pileId: number) =>
     canSelectPile(pileId) && validHoveredPileId === pileId;
 
-  const toBeLeft = ({ pileId, pieceId }: Piece) => {
-    if (validHoveredPiece === null) return false;
-    if (removedPileId === null) return false;
-    if (removedPileId === pileId) return false;
-    if (pileId !== validHoveredPiece.pileId) return false;
+  const discardState = (pileId: number): DiscardState => {
+    if (pileId === removedPileId) return 'chosen';
+    if (isHoverPreviewedForRemoval(pileId)) return 'preview';
+    return 'no';
+  };
+
+  const previewedSplitAt = (pileId: number): number | null => {
+    if (validHoveredPiece === null) return null;
+    if (removedPileId === null) return null;
+    if (removedPileId === pileId) return null;
+    if (pileId !== validHoveredPiece.pileId) return null;
     // Picking the pile to discard is not a move, so a piece hovered before that
     // click is still remembered after it — and it may be one this turn cannot
     // be cut at, the top piece above all.
-    if (isDisabled(validHoveredPiece)) return false;
-    return pieceId <= validHoveredPiece.pieceId;
-  };
-
-  const pieceColor = ({ pileId, pieceId }: Piece) => {
-    if (pileId === removedPileId) return 'bg-slate-900/40 dark:bg-white/20';
-    if (isHoverPreviewedForRemoval(pileId)) return 'bg-slate-900/20 dark:bg-white/10';
-    if (toBeLeft({ pileId, pieceId })) return 'bg-blue-800/75';
-    return 'bg-blue-800';
+    if (isDisabled(validHoveredPiece)) return null;
+    return validHoveredPiece.pieceId;
   };
 
   const currentChoiceDescription = (pileId: number) => {
@@ -91,59 +105,85 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     if (removedPileId === null) {
       return isHoverPreviewedForRemoval(pileId) ? `${pieceCountInPile} → 🗑️` : pieceCountInPile;
     }
-    if (!validHoveredPiece || validHoveredPiece.pileId !== pileId) return pieceCountInPile;
-    return `
-      ${pieceCountInPile} → ${validHoveredPiece.pieceId + 1}, ${pieceCountInPile - validHoveredPiece.pieceId - 1}
-    `;
+    const splitAt = previewedSplitAt(pileId);
+    if (splitAt === null) return pieceCountInPile;
+    return `${pieceCountInPile} → ${splitAt + 1}, ${pieceCountInPile - splitAt - 1}`;
   };
 
-  // The piles sit two to a row; the divider between a pair hangs off whichever
-  // of the two is taller. An odd last pile has no partner to be divided from,
-  // and comparing against its missing neighbour is false, as it should be.
-  const hasRightBorder = (pileId: number) => pileId % 2 === 0 && board[pileId] >= board[pileId + 1];
-  const hasLeftBorder = (pileId: number) => pileId % 2 === 1 && board[pileId] > board[pileId - 1];
+  // A piece stands in for the pile as a whole until one has been picked to
+  // discard, and for the pile it was picked from afterwards: either way the
+  // click discards or un-discards the pile, and the piece under the pointer has
+  // nothing to do with it. What it is called, whether it lights up under the
+  // pointer and whether it is worth stopping at while tabbing all follow from
+  // that.
+  const standsForThePile = (pileId: number) =>
+    removedPileId === null || pileId === removedPileId;
 
-  return (
-  <GameBoard>
-    {range(board.length).map(pileId => (
-      <div
-        key={pileId}
-        className={`
-          w-[50%] pl-1 inline-block text-center py-2
-          ${pileId < 2 ? 'border-t-2': ''}
-          ${hasRightBorder(pileId) ? 'border-r-2' : ''}
-          ${hasLeftBorder(pileId) ? 'border-l-2' : ''}
-        `}
-        style={{ transform: 'scaleY(-1)' }}
-        onClick={() => clickPile(pileId)}
+  const pieceLabel = ({ pileId, pieceId }: Piece) => {
+    if (removedPileId === null) {
+      return t({
+        hu: `${board[pileId]} korongos kupac eldobása`,
+        en: `discard the pile of ${board[pileId]}`
+      });
+    }
+    if (pileId === removedPileId) return keepLabel;
+    return t({ hu: `vágás a(z) ${pieceId + 1}. korong után`, en: `split after piece ${pieceId + 1}` });
+  };
+
+  const pieceProps = ({ pileId, pieceId }: Piece) => {
+    const disabled = isDisabled({ pileId, pieceId });
+
+    return {
+      disabled,
+      'aria-label': pieceLabel({ pileId, pieceId }),
+      // where the header button says the same thing, the pieces stay out of the
+      // tab order rather than repeating it once per piece
+      tabIndex: standsForThePile(pileId) ? -1 : undefined,
+      onClick: (e: MouseEvent) => { e.stopPropagation(); clickPiece({ pileId, pieceId }); },
+      ...(disabled ? {} : previewProps({ pileId, pieceId }, preview))
+    };
+  };
+
+  // The discard is a click on the pile as a whole, which the pieces stand in for
+  // — but only this button says so, and only it can be reached from a keyboard.
+  const discardButton = (pileId: number) => {
+    const isChosen = pileId === removedPileId;
+    if (!ctx.isClientMoveAllowed) return null;
+    if (!isChosen && !canSelectPile(pileId)) return null;
+
+    return (
+      <button
+        type="button"
+        aria-label={isChosen ? keepLabel : t({ hu: 'kupac eldobása', en: 'discard this pile' })}
+        className="text-sm leading-none rounded p-1 hocus:bg-slate-200 dark:hocus:bg-slate-700"
+        onClick={e => { e.stopPropagation(); clickPile(pileId); }}
         {...(canSelectPile(pileId) ? pileHoverProps(pileId) : {})}
       >
-        <p className="text-xl" style={{ transform: 'scaleY(-1)' }}>
-          {currentChoiceDescription(pileId)}
-        </p>
-          {range(board[pileId]).map(pieceId => {
-            const disabled = isDisabled({ pileId, pieceId });
+        {isChosen ? '↩️' : '🗑️'}
+      </button>
+    );
+  };
 
-            return (
-              <button
-                key={pieceId}
-                disabled={disabled}
-                className={`
-                  w-[20%] aspect-square rounded-full mx-0.5 mt-0.5 align-top
-                  ${pieceColor({ pileId, pieceId })}
-                `}
-                onClick={(e) => { e.stopPropagation(); clickPiece({ pileId, pieceId }); }}
-                {...(disabled ? {} : hoverProps({ pileId, pieceId }))}
-              >
-                {!disabled && removedPileId !== null && removedPileId !== pileId &&
-                <p className="text-sm" style={{ transform: 'scaleY(-1)' }}>
-                  {pieceId + 1};{board[pileId] - pieceId - 1}
-                </p>}
-              </button>
-            );
-          })}
-      </div>
-    ))}
-  </GameBoard>
+  return (
+    <GameBoard>
+      <PileArea pileCount={board.length}>
+        {range(board.length).map(pileId => (
+          <PileCard
+            key={pileId}
+            size={board[pileId]}
+            caption={currentChoiceDescription(pileId)}
+            discard={discardState(pileId)}
+            splitAfter={previewedSplitAt(pileId)}
+            headerAction={discardButton(pileId)}
+            piecesStandForThePile={standsForThePile(pileId)}
+            pieceProps={pieceId => pieceProps({ pileId, pieceId })}
+            cardProps={{
+              onClick: () => clickPile(pileId),
+              ...(canSelectPile(pileId) ? pileHoverProps(pileId) : {})
+            }}
+          />
+        ))}
+      </PileArea>
+    </GameBoard>
   );
 };
