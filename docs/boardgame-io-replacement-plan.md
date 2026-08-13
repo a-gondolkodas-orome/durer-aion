@@ -248,6 +248,27 @@ tasks, pinned Node) arrives alongside the existing setup, not instead of it.
   durer-aion; the CNAME already lives in `public/`, so the URL is unchanged.
   durer-jatekok gets a README banner; archival waits until Phase 7.
 
+  Migrate the collaboration state, not just the code:
+  - **Open PRs cannot be transferred and their branches are not part of the
+    subtree snapshot — drain them first.** Land or close durer-jatekok's open
+    PRs before the subtree add (3 at the time of writing); one that must
+    survive the cutover is re-created here with its diff replayed under the
+    new prefix (`git apply --directory=apps/practice`). From the subtree add
+    on, durer-jatekok accepts no new PRs.
+  - **Transfer the open issues** (2 at the time of writing) to this repo with
+    GitHub's issue transfer — same-org transfers preserve content, comments
+    and subscribers, and old URLs redirect, so existing `durer-jatekok#NNN`
+    references keep resolving. Recreate the needed labels here first
+    (`new game`, `framework`, …), since transfer drops labels that don't
+    exist in the target.
+  - **Transfer or link relevant Discussions** (durer-jatekok has them
+    enabled): enable Discussions here, transfer the ones still worth
+    having, and let the rest ride on the archived repo, where they stay
+    readable.
+  - From merge day the banner directs new issues and discussions here; the
+    durer-jatekok tracker stays empty rather than frozen mid-conversation,
+    which is what makes the Phase 7 archival a non-event.
+
   Merge the two `.claude/` setups — after the merge only the root
   `.claude/settings.json` loads for sessions opened at the monorepo root, so
   `apps/practice/.claude/settings.json` goes inert rather than conflicting:
