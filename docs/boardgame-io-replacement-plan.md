@@ -127,9 +127,10 @@ lobby REST flow (already bypassed), undo/redo (server-side), websockets.
 ## What must keep working (the standing checklist)
 
 Every phase's verification points back to this list; a phase is done only when
-each item still holds. It is committed to durer-aion as
-`docs/must-keep-working.md` in PR 0.0 and updated only when a capability is
-deliberately retired by a later phase (noted inline).
+each item still holds. It lives as [`docs/must-keep-working.md`](./must-keep-working.md)
+and is updated only when a capability is deliberately retired by a later phase
+(noted inline). The summary below is kept as the plan's rationale for it; the
+checklist file is the one to walk.
 
 **Practice site (durer-jatekok, then `apps/practice`)**
 - `jatek.durerinfo.hu` serves the site; deploy-on-main works; every game
