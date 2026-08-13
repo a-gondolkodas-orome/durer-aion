@@ -1,8 +1,15 @@
 # Replacing boardgame.io with the durer-jatekok engine — migration plan
 
-Status: **agreed plan** — decisions below are settled; execution happens phase by
-phase in this repo. This doc is the coordination artifact
-(as durer-jatekok's `docs/real-competitions-plan.md`, durer-jatekok#318, was for the decision it led to).
+> **Disclaimer**: this is a preliminary draft written by AI (Claude), based on
+> exploration of both repos and maintainer answers to the key decision
+> questions. Treat it as a **living document** — expect it to be corrected and
+> reshaped as phases are executed and reviewed, not followed to the letter.
+
+Status: **draft** — execution happens phase by phase in this repo, and each
+phase should update this doc with what was actually done and learned. This doc
+is the coordination artifact (as durer-jatekok's
+`docs/real-competitions-plan.md`, durer-jatekok#318, was for the decision it
+led to).
 
 ## Context
 
