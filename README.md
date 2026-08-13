@@ -42,30 +42,26 @@ Frontend needs to be built after every change, but the server auto-reloads.
 ### Setting up the server
 
 ```bash
-sudo docker compose --env-file=.env.docker up --build 
+sudo docker compose -f docker-compose.yml -f docker-compose.dev.yml --env-file=.env.docker up --build 
 ```
 
  vagy 
  
 ```bash
-docker compose --env-file=.env.docker up --build 
+docker compose -f docker-compose.yml -f docker-compose.dev.yml --env-file=.env.docker up --build 
 ```
+
+The `-f docker-compose.dev.yml` overlay is what makes the backend auto-reload: it mounts the backend and package sources and swaps the container's command for `npm run dev:server`. Without it you get the production stack described below, which serves the code baked into the image.
 
 (before first run, you will need `npm run build`)
 Also pay attention to create a correct `.env.docker` file based on the `.env.docker.sample` file.
-
-Note: Some newer docker installs have a different compose interface, you may use the compose command like this:
-
-```bash
-sudo docker compose up --build
-```
 
 > Note: 
 > To use this newer docker compose interface please follow the install instructions form the official docker install page: [ linux docker install](https://docs.docker.com/desktop/setup/install/linux/)  
 > 
 > Otherwise you may use this syntax:  
 > ```bash
-> docker-compose up --build
+> docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 > ```
 
 You should be up and running the application on `localhost`.
@@ -90,6 +86,21 @@ npm run build
 
 Except routing, and KOA hooks.
 If you install a package used by the backend, you will have to `docker-compose build`.
+
+## Running the production stack
+
+This is what a deployed instance runs (see `DEPLOYMENT.md`):
+
+```bash
+npm run build                              # builds the frontend into apps/online-frontend/dist
+docker compose --env-file=.env.docker up --build
+```
+
+No `-f` overlay, so the backend container runs the server compiled into the
+image (`npm run start --workspace=online-backend`) rather than a file watcher.
+Code changes need a rebuild; nginx serves the frontend from
+`apps/online-frontend/dist` on the host, so a frontend change needs
+`npm run build` and a page reload, same as in the dev flow.
 
 ## Running developer environment -- without docker (except DB)
 
