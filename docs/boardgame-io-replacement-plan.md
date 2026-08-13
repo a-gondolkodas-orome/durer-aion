@@ -445,6 +445,43 @@ tasks, pinned Node) arrives alongside the existing setup, not instead of it.
   tests in CI; extend the patch-coverage gate to `packages/*`; docs updates;
   archive the durer-jatekok repo with a pointer README.
 
+## Side-effect payoff: open issues the migration can close
+
+At the time of writing this repo has ~78 open issues; a large share are
+obsoleted or directly delivered by migration phases. **Each phase's
+completion includes a sweep of the open-issue list**, closing what the phase
+resolved with a pointer to the landing PR — this is part of the phase's
+definition of done, so the payoff is collected rather than left rotting in
+the tracker. Candidates as mapped today (re-check at each sweep; some are
+"mostly" rather than "fully" solved):
+
+- **Phase 0 (baseline)**: #161 (typecheck), #215 (eslint CI action), #136
+  (devcontainer), #203 (production dockerfile CMD), #122 (backend tests —
+  foundation laid, not finished).
+- **Phase 2 (competition core)**: #78 (state in strategy), #35 / #79
+  (startingPosition mess / per-test-game start positions → curated
+  `startBoards` + `startBoardForAttempt`), #18 (`firstPlayer` a string →
+  `roleIndex`), #5 (rethink end turn → moves return `isTurnEnd`), #54
+  (rethink game over and timer → clock + `CLOSE` events).
+- **Phase 3 (backend)**: #174 (timestamps in logs → `match_events.created_at`),
+  #51 (getTime via SYNC — obsolete, polling GET), #86 (bgio plugins —
+  obsolete), #171 (ctx.currentPlayer vs playerID — obsolete), #17
+  (ai.enumerate vs valid moves — `validate` is the single source of truth,
+  pinned by conformance specs).
+- **Phase 4 (frontend)**: #175 (strategy-game UX → durer-jatekok boards), #4
+  (disable/fade → `isAllowed` gating comes with them), #64 (socketio-lost
+  alert — obsolete, plain HTTP with retries), #57 (BoardWrapper — deleted),
+  #164 (description belongs to strategy — presentation lives in the game
+  config), #209 partially (strategy-game descriptions ship `{hu, en}`).
+- **Phase 5 (offline)**: #133 (bgio localstorage edge case — rewritten), #168
+  (refine localstorage saves).
+- **Phase 7 (cleanup)**: #181 / #182 (eslint warnings/strictness — the
+  ratchet), plus everything bgio-labeled that remains.
+- **Made cheap rather than solved**: #111 (give up a game → one new event on
+  the state machine), #15 (spectator mode → the admin state view is already a
+  read-only client view), #137 (introduce competitions — the
+  `packages/competition` state machine is where that would live).
+
 ## Testing strategy
 
 - Phase 0: durer-aion's jest suites and typecheck run in CI (PR 0.0); both CI
