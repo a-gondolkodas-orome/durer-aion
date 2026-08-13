@@ -263,6 +263,13 @@ diff:
 A mechanical sweep that follows a merged design PR is fine at any size — it is
 skimmable precisely because the pattern was already reviewed.
 
+When an agent opens a pull request, it should assign the person it is working
+for (the `assignees` field via the GitHub API), so agent-opened PRs land in
+that person's queue instead of going unnoticed. Identify them from the session
+context — the user's email, or `git config user.email` — matched against the
+repository's collaborator logins, and leave the PR unassigned rather than
+guess when there is no confident match.
+
 ## Maintenance philosophy
 
 This is a volunteer side-project with limited time. Prefer simple, consistent,
