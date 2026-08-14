@@ -248,7 +248,7 @@ tasks, pinned Node) arrives alongside the existing setup, not instead of it.
         on), `team_import.test.ts`, `Main.test.tsx` (jsdom) — and the
         placeholder `App.test.tsx` deleted. 21 tests green. **#232**
 
-  - [ ] **Typecheck gate** — `tsc --noEmit` per workspace via turbo, gated in
+  - [x] **Typecheck gate** — `tsc --noEmit` per workspace via turbo, gated in
         CI. **#233**
 
   - [x] **Dockerfile `CMD` runs the built server** instead of tsx watch mode;

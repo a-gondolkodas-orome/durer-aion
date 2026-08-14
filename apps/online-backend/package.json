@@ -4,6 +4,7 @@
   
   "scripts": {
     "lint": "cross-env TIMING=1 eslint \"**/*.ts*\" --max-warnings=-1",
+    "typecheck": "tsc --noEmit",
     "build": "npx tsc",
     "start": "cross-env ALLOW_CORS=true node dist/src/server.js",
     "dev": "cross-env ALLOW_CORS=true tsx watch --inspect src/server.ts",

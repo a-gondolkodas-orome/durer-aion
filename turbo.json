@@ -26,6 +26,9 @@
       "env": []
     },
     "lint": {},
+    "typecheck": {
+      "dependsOn": ["^build"]
+    },
     "dev": {
       "dependsOn": [],
       "cache": false,
