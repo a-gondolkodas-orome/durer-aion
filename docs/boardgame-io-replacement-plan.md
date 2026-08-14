@@ -197,6 +197,12 @@ encodes.
 Sizing: S ≈ <150 review lines, M ≈ <500, L = large but isolated or mechanical.
 **Every PR leaves both sites shippable**; each phase boundary is a safe stop.
 
+**Bookkeeping convention**: items below carry a checkbox and, once a PR exists
+for them, its number. **The PR that does the work ticks its own box, in the
+same PR** — so this section is a record of what has shipped, not of what was
+once intended. A planned item that turns out to need several PRs is split here
+into the PRs that actually landed it, rather than being ticked as a whole.
+
 ### Phase 0 — Baseline + repo merge
 
 The migration starts by making durer-aion safe to change: today its CI runs
@@ -213,36 +219,50 @@ additive. `npm ci` at the root, `npm run dev:server` / `dev:online` /
 working unchanged throughout the phase; new tooling (devcontainer, turbo
 tasks, pinned Node) arrives alongside the existing setup, not instead of it.
 
-- **PR 0.0 (M)** durer-aion baseline:
-  - Pin the toolchain: `.nvmrc` + root `engines` (Node 24, matching the
-    Dockerfile), and align every CI job on it with current
-    `actions/checkout`/`setup-node` + npm caching. `engines` stays a warning,
-    not an enforcement (no `engine-strict`) — a developer on another Node
-    minor is nudged, not blocked.
-  - Offer a reproducible environment as a **new, optional**
-    `.devcontainer/` (modeled on durer-jatekok's), rather than changing the
-    documented local setup; developers who ignore it lose nothing.
-  - Rewrite CI as plain npm scripts (drop the lint-action wrapper): `lint`,
-    `build`, `i18n:check`, and a working `test` job. The existing test setup
-    is not merely disabled — **no runner is installed**: `jest` is not a
-    dependency anywhere (only `@types/jest` and a leftover config block), the
-    per-package `test` scripts fail with `jest: not found`, and the
-    commented-out CI job is a CRA-era fossil pinned to Node 16. Adopt
-    **vitest** (ESM/TS-native, and what the practice repo uses, so the merged
-    repo converges on one test stack) and port the three real suites:
-    `gamewrapper.test.ts` (verified 9/9 green under vitest with a two-line
-    `jest → vi` shim — the harness Phase 2's golden parity tests build on),
-    `team_import.test.ts` (`jest.mock` → `vi.mock`), `Main.test.tsx` (needs
-    jsdom). Delete the placeholder `App.test.tsx`. Add a root `typecheck`
-    script (`tsc --noEmit` per workspace via turbo) and gate on it.
-  - Fix the Dockerfile `CMD` to run the built server (`node dist/src/server.js`)
-    instead of tsx watch mode; verify with `docker compose up`.
-  - Commit the "what must keep working" checklist (below) as
-    `docs/must-keep-working.md` in durer-aion — the regression checklist every
-    phase's verification points back to.
-- **PR 0.1 (S)** durer-aion hygiene: delete the dead root `src/`, rename the
+- [ ] **PR 0.0 (M)** durer-aion baseline. Planned as one PR; split during
+  execution into six, because the pieces share a phase and nothing else, and
+  each is independently reviewable and revertible:
+
+  - [x] **The regression checklist** — `docs/must-keep-working.md`, what every
+        phase's verification points back to, so it exists before the first PR
+        that changes anything. **#228**
+
+  - [x] **Toolchain pin + CI on plain npm scripts** — `.nvmrc` + root
+        `engines` (Node 24, matching the Dockerfile; a warning, not
+        `engine-strict`, so a developer on another minor is nudged rather than
+        blocked), every job reading `node-version-file` on current
+        `actions/checkout`/`setup-node` with npm caching, and the
+        `wearerequired/lint-action` wrapper replaced by `npm run lint`.
+        `--max-warnings=107` moves into the root `lint` script so the same
+        gate runs locally and in CI (106 warnings today). CI also triggers on
+        PRs targeting any branch, so stacked PRs get the gates too. **#229**
+
+  - [ ] **vitest + a working test job** — the existing test setup was not
+        merely disabled, **no runner was installed**: `jest` was not a
+        dependency anywhere (only `@types/jest` and a leftover config block),
+        the per-package `test` scripts failed with `jest: not found`, and the
+        commented-out CI job was a CRA-era fossil pinned to Node 16. vitest
+        (ESM/TS-native, and what the practice repo uses, so the merged repo
+        converges on one test stack), with the three real suites ported —
+        `gamewrapper.test.ts` (the harness Phase 2's golden parity tests build
+        on), `team_import.test.ts`, `Main.test.tsx` (jsdom) — and the
+        placeholder `App.test.tsx` deleted. 21 tests green. **#232**
+
+  - [ ] **Typecheck gate** — `tsc --noEmit` per workspace via turbo, gated in
+        CI. **#233**
+
+  - [ ] **Dockerfile `CMD` runs the built server** instead of tsx watch mode;
+        the docker-compose dev flow keeps its auto-reload through a
+        `docker-compose.dev.yml` overlay, which makes `docker-compose.yml`
+        the production stack. **#231**
+
+  - [ ] **Optional `.devcontainer/`** (modeled on durer-jatekok's), offered
+        rather than replacing the documented local setup; developers who
+        ignore it lose nothing. **#234**
+
+- [ ] **PR 0.1 (S)** durer-aion hygiene: delete the dead root `src/`, rename the
   root package `bgio-tutorial` → `durer-aion`, `private: true`.
-- **PR 0.2 (M)** `git subtree add --prefix=apps/practice <durer-jatekok> main`.
+- [ ] **PR 0.2 (M)** `git subtree add --prefix=apps/practice <durer-jatekok> main`.
   Practice stays **outside** npm workspaces initially (own lockfile, own
   `npm ci`). Port its 3 workflows with `working-directory`/`paths` filters;
   recreate the `github-pages` environment and `pages` concurrency group on
@@ -296,7 +316,7 @@ tasks, pinned Node) arrives alongside the existing setup, not instead of it.
     when opening that folder directly, and root-level named configs
     (`.devcontainer/practice/`, `.devcontainer/aion/` from PR 0.0) surface
     both for whoever opens the monorepo root.
-- **PR 0.3 (M)** Join npm workspaces: add to `workspaces`, drop the practice
+- [ ] **PR 0.3 (M)** Join npm workspaces: add to `workspaces`, drop the practice
   lockfile, regenerate the root lockfile (npm nests the conflicting React 19/18,
   Vite, TS, ESLint versions per workspace). Verify both dev servers, builds and
   test suites — nothing else in this PR. Wire practice `test`/`lint`/`build`
@@ -309,17 +329,17 @@ tasks, pinned Node) arrives alongside the existing setup, not instead of it.
 
 ### Phase 1 — Engine hardening + extraction (practice behavior unchanged)
 
-- **PR 1.1 (S)** `isDevMode()` shim (reads `import.meta.env?.DEV` when defined,
+- [ ] **PR 1.1 (S)** `isDevMode()` shim (reads `import.meta.env?.DEV` when defined,
   else `process.env.NODE_ENV`) replacing the two `import.meta.env.DEV` uses —
   done in place so the move-PR stays a pure move.
-- **PR 1.2 (L, mechanical)** `packages/engine`: move the engine core +
+- [ ] **PR 1.2 (L, mechanical)** `packages/engine`: move the engine core +
   `types.ts` + `resolve-variants.ts` (export `"."`, React-free) and
   `game-parts/game-board.tsx`, the hooks, the `language` provider (export
   `"./react"`); tsup build following `packages/schemas`. Practice's
   `strategy-game-factory`/`language` aliases become thin re-export barrels —
   **zero changes in the 85 game files**. Engine specs move along, including the
   import-graph spec.
-- **PR 1.3 (M)** Server-facing API:
+- [ ] **PR 1.3 (M)** Server-facing API:
   `applyClientMove(state, gameplay, name, args)` (validate → reduce → auto
   `endOfTurnMove`; rejects rather than throws — these are client-submitted
   moves) and `playBotTurn(state, gameplay, strategy)` (the bot-turn loop
@@ -329,7 +349,7 @@ tasks, pinned Node) arrives alongside the existing setup, not instead of it.
   every variant start board and match history, and document the contract in
   `types.ts`. Add `startBoardForAttempt(startBoards, attemptIndex)` honoring
   the durer-jatekok#314 append-only order.
-- **PR 1.4 (M)** `packages/games` with the two live games moved wholesale; each
+- [ ] **PR 1.4 (M)** `packages/games` with the two live games moved wholesale; each
   `<game>.tsx` exports a **config object** instead of calling the factory;
   practice wiring calls `strategyGameFactory(config)` at its one export site.
   Add curated competition `startBoards` for remove-divisor-multiple C/D
@@ -337,7 +357,7 @@ tasks, pinned Node) arrives alongside the existing setup, not instead of it.
 
 ### Phase 2 — Competition core (no wiring yet)
 
-- **PR 2.1 (L, isolated)** `packages/competition`: a pure
+- [ ] **PR 2.1 (L, isolated)** `packages/competition`: a pure
   `applyEvent(state, event, gameplay)` state machine —
   `CompetitionMatchState { gameId, category, clock{startAt,endAt},
   tally{tries,losses,streak,points}, attempt{difficulty, roleIndex,
@@ -349,12 +369,12 @@ tasks, pinned Node) arrives alongside the existing setup, not instead of it.
   tests drive the same scripted sequences through the still-installed old
   `gameWrapper` (bgio headless Client) and through `applyEvent`, asserting
   identical points** — pinned against the real oracle, not a transcription.
-- **PR 2.2 (S)** `packages/schemas`: `engine?: 'bgio' | 'v2'` (default
+- [ ] **PR 2.2 (S)** `packages/schemas`: `engine?: 'bgio' | 'v2'` (default
   `'bgio'`) on match statuses (JSON-in-column — no ALTER); the client-view DTO.
 
 ### Phase 3 — Backend swap for strategy (dark launch, side by side)
 
-- **PR 3.1 (M)** Two additive Sequelize models on the shared instance (created
+- [ ] **PR 3.1 (M)** Two additive Sequelize models on the shared instance (created
   with `sync()` like `Teams`):
   - `matches(match_id pk, team_id, kind 'STRATEGY'|'RELAY', game_id,
     state jsonb, version int, timestamps)` — snapshot + optimistic concurrency.
@@ -362,7 +382,7 @@ tasks, pinned Node) arrives alongside the existing setup, not instead of it.
     payload jsonb, created_at; pk (match_id, seq))` — append-only log; a spec
     replays events through `applyEvent` and reproduces `state`. The bgio
     `Games` table is untouched and coexists.
-- **PR 3.2 (L)** v2 routes in `apps/online-backend/src/server/strategy-v2.ts`:
+- [ ] **PR 3.2 (L)** v2 routes in `apps/online-backend/src/server/strategy-v2.ts`:
   - `POST /api/team/:GUID/strategy/start` — reuses the `allowedToStart`/
     stale-check gating; writes an `engine:'v2'` match status.
   - `GET /api/match/:matchID?since=<seq>` — client view + `serverNow` +
@@ -379,12 +399,12 @@ tasks, pinned Node) arrives alongside the existing setup, not instead of it.
     hijack, no `_stateID`. Rollout flag `STRATEGY_V2_CATEGORIES` (env, comma
     list, default empty) chooses per team category at match creation; both
     engines share one process and one Postgres.
-- **PR 3.3 (S)** Supertest conformance: HTTP move sequences produce identical
+- [ ] **PR 3.3 (S)** Supertest conformance: HTTP move sequences produce identical
   boards/winners to `runMatch`/`applyEvent` directly.
 
 ### Phase 4 — Frontend swap for strategy
 
-- **PR 4.1 (L, isolated)** `common-frontend/src/client/strategy-shell/`: one
+- [ ] **PR 4.1 (L, isolated)** `common-frontend/src/client/strategy-shell/`: one
   component tree for online and offline — difficulty + role choice, the
   existing `Countdown` pointed at the v2 GET, points/tries, end-of-attempt
   flow, and a board adapter rendering `config.BoardClient` with
@@ -396,53 +416,53 @@ tasks, pinned Node) arrives alongside the existing setup, not instead of it.
   competition frontends with content globs over `packages/games`; the board is
   wrapped in the `engine/react` language provider fed from the i18next
   language.
-- **PR 4.2 (M)** online-frontend routing: `engine === 'v2'` → new shell, else
+- [ ] **PR 4.2 (M)** online-frontend routing: `engine === 'v2'` → new shell, else
   the untouched bgio client. Delete nothing.
-- **PR 4.3 (S)** Staging pilot + **Rehearsal #1** — a volunteer dry-run: both
+- [ ] **PR 4.3 (S)** Staging pilot + **Rehearsal #1** — a volunteer dry-run: both
   games, add-minutes, reset, a forced timeout, `admin.py` against v2. **Gates
   everything after it.**
-- **PR 4.4 (S)** Production flip (all categories v2); the bgio path is kept as
+- [ ] **PR 4.4 (S)** Production flip (all categories v2); the bgio path is kept as
   an env-flag rollback for one full competition cycle.
 
 ### Phase 5 — offline-frontend port
 
-- **PR 5.1 (M)** `OfflineClientRepository` v2: `applyEvent` + `playBotTurn`
+- [ ] **PR 5.1 (M)** `OfflineClientRepository` v2: `applyEvent` + `playBotTurn`
   run in-browser (bot from `packages/games`), the snapshot JSON-persisted to
   localStorage (safe by the PR 1.3 contract); same shell. Scoring and clock
   are identical to online by construction — same `packages/competition`.
-- **PR 5.2 (S)** Delete the offline bgio paths (`myclient.ts`,
+- [ ] **PR 5.2 (S)** Delete the offline bgio paths (`myclient.ts`,
   `botwrapper.ts`, `client_factory.tsx`); the gh-pages deploy is unchanged.
 
 ### Phase 6 — Relay rebuild (plain REST)
 
-- **PR 6.1 (M)** Pure problem bank: strip bgio types from
+- [ ] **PR 6.1 (M)** Pure problem bank: strip bgio types from
   `packages/strategy/.../relay/strategy.ts`; export `problems[category]` and
   `grade(category, problemIndex, answer)` including the per-try points ladder;
   golden tests against the old relay game.
-- **PR 6.2 (L)** Relay REST on the same `matches`/`match_events` tables
+- [ ] **PR 6.2 (L)** Relay REST on the same `matches`/`match_events` tables
   (`kind:'RELAY'`, 60-minute clock): `POST .../relay/start`,
   `GET /api/relay/:matchID`, `POST .../answer`. Problem text is served per
   current problem only — the bank is never shipped to online clients. Same
   auth/admin/add-minutes dispatch; `RELAY_V2_CATEGORIES` flag; the bgio relay
   is untouched as fallback.
-- **PR 6.3 (M)** Relay frontends rewired behind the `engine` discriminator;
+- [ ] **PR 6.3 (M)** Relay frontends rewired behind the `engine` discriminator;
   offline relay runs the same logic locally.
-- **Milestone: Rehearsal #2** — full dry-run with both rounds on v2 and
+- [ ] **Milestone: Rehearsal #2** — full dry-run with both rounds on v2 and
   `admin.py` end-to-end; **one real competition runs on the new stack before
   Phase 7 deletes anything**.
 
 ### Phase 7 — boardgame.io removal + cleanup
 
-- **PR 7.1 (M)** De-bgio the server: a plain Koa app; delete
+- [ ] **PR 7.1 (M)** De-bgio the server: a plain Koa app; delete
   `socketio_botmoves.ts`, both `botwrapper.ts` copies, the
   `injectPlayer`/`injectBot`/bgio branches; remove the nginx `/socket.io/`
   block (which also closes the unauthenticated-lobby-endpoints TODO by
   removing the endpoints).
-- **PR 7.2 (M)** Delete `packages/game` (gamewrapper, the 11 dead game dirs,
+- [ ] **PR 7.2 (M)** Delete `packages/game` (gamewrapper, the 11 dead game dirs,
   the bgio relay) and the bgio client code; drop `boardgame.io` +
   `bgio-postgres`; delete `.npmrc`. The bgio `Games` table is kept read-only
   until its data is archived — dropped by an admin action later, not by code.
-- **PR 7.3 (S)** ESLint `--max-warnings` ratchet toward 0; un-comment/port
+- [ ] **PR 7.3 (S)** ESLint `--max-warnings` ratchet toward 0; un-comment/port
   tests in CI; extend the patch-coverage gate to `packages/*`; docs updates;
   archive the durer-jatekok repo with a pointer README.
 
