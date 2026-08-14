@@ -317,7 +317,15 @@ describe('strategyGameFactory endOfTurnMove', () => {
     };
 
     const { getByTestId } = renderGame(minimalConfig({ moves, endOfTurnMove: 'autoMove' }));
-    fireEvent.click(getByTestId('role-btn-0'));
+    // human-vs-human as in the test above, and here it is what makes the test
+    // deterministic: `mainMove` passes the turn, so against the computer the
+    // bot's own beat is on the schedule too. That beat is spread over
+    // 750-1250ms, so advancing 750 fires it on the roll that lands at the low
+    // end — one run in 500 — and `minimalConfig`'s bot names no move, which is
+    // a dev-mode throw. Without a bot, the only thing that could be scheduled
+    // is the endOfTurnMove under test.
+    fireEvent.click(getByTestId('mode-vsHuman'));
+    fireEvent.click(getByTestId('start-hh-game-0'));
     fireEvent.click(getByTestId('move-btn'));
     act(() => { vi.advanceTimersByTime(750); });
 
