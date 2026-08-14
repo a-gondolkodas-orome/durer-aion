@@ -20,7 +20,6 @@
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^13.5.0",
-    "@types/jest": "^27.5.2",
     "@types/koa-basic-auth": "^2.0.4",
     "@types/koa-mount": "^4.0.1",
     "@types/node": "^16.11.41",
@@ -58,6 +57,8 @@
     "start": "turbo start",
     "build": "turbo build",
     "spell-check": "cspell \"**/*.{ts,tsx}\" --no-progress",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "dev:server": "turbo dev --filter=online-backend --filter=game --filter=schemas --filter=strategy",
     "dev:online": "turbo dev --filter=online-frontend --filter=game --filter=common-frontend",
     "dev:offline": "turbo dev --filter=offline-frontend --filter=game --filter=strategy --filter=common-frontend",
@@ -71,21 +72,6 @@
     "rules": {
       "import/no-anonymous-default-export": 0
     }
-  },
-  "jest": {
-    "moduleNameMapper": {
-      "axios": "axios/dist/node/axios.cjs"
-    },
-    "collectCoverageFrom": [
-      "src/{client,common,games}/**/*.{ts,tsx}"
-    ],
-    "coverageReporters": [
-      "text",
-      "json",
-      "html",
-      "cobertura",
-      "lcov"
-    ]
   },
   "browserslist": {
     "production": [
@@ -111,6 +97,7 @@
     "@eslint/js": "^9.37.0",
     "@lingual/i18n-check": "^0.9.5",
     "@sentry/types": "^7.57.0",
+    "@testing-library/dom": "^10.4.1",
     "@types/koa__cors": "^5.0.1",
     "@types/pg": "^8.6.5",
     "@types/react-syntax-highlighter": "^15.5.13",
@@ -119,12 +106,14 @@
     "cspell": "^6.31.1",
     "eslint": "^9.37.0",
     "gh-pages": "^4.0.0",
+    "jsdom": "^30.0.1",
     "nodemon": "^2.0.18",
     "ts-node": "^10.9.2",
     "tsup": "^8.5.0",
     "tsx": "^4.21.0",
     "turbo": "^2.5.3",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.46.0"
+    "typescript-eslint": "^8.46.0",
+    "vitest": "^4.1.10"
   }
 }
