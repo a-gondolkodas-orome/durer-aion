@@ -25,7 +25,6 @@
     "scripts/test.tsv*",
     "src/games/relay/strategy.ts",
     "src/games/14od/strategy.ts",
-    "src/lobby.tsx",
     "src/games/ten-coins/main.tsx",
     "src/games/chess-bishops/main.tsx",
     "src/games/superstitious-counting/main.tsx",

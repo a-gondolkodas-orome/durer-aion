@@ -40,7 +40,6 @@ export default defineConfig(
       '**/build/**',
       '**/node_modules/**',
       '**/*.config.{js,mjs,cjs,ts}',
-      './src/**'
     ],
   }
 );
