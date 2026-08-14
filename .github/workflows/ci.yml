@@ -4,87 +4,43 @@ on:
   push:
     branches:
       - main
+  # Every pull request, whatever it targets — a PR stacked on another branch
+  # gets the same gates as one straight onto main.
   pull_request:
-    branches:
-      - main
 
 jobs:
   lint:
-    name: linters
+    name: lint
     runs-on: ubuntu-latest
     steps:
-      - name: Check out Git repository
-        uses: actions/checkout@v2
-      - name: Set up Node.js
-        uses: actions/setup-node@v1
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 24
-      - name: Install Node.js dependencies
-        run: npm ci
-      - name: Run linters
-        uses: wearerequired/lint-action@v2
-        with:
-          eslint: true
-          commit: "false"
-          eslint_extensions: "js,ts,jsx,tsx"
-          eslint_args: "--max-warnings=107" # TODO: change it to 0 after the big refactor
-
-  # lint:
-  #   name: lint
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Check out Git repository
-  #       uses: actions/checkout@v2
-  #     - name: Set up Node.js
-  #       uses: actions/setup-node@v1
-  #       with:
-  #         node-version: 24
-  #     - name: Install Node.js dependencies
-  #       run: npm ci
-  #     - name: Run lint
-  #       run: npm run lint
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
 
   build:
     name: build
     runs-on: ubuntu-latest
     steps:
-      - name: Check out Git repository
-        uses: actions/checkout@v2
-      - name: Set up Node.js
-        uses: actions/setup-node@v1
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 24
-      - name: Install Node.js dependencies
-        run: npm ci
-      - name: Run build
-        run: npm run build
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run build
 
   i18n:
     name: i18n
     runs-on: ubuntu-latest
     steps:
-      - name: Check out Git repository
-        uses: actions/checkout@v2
-      - name: Set up Node.js
-        uses: actions/setup-node@v1
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 22
-      - name: Install Node.js dependencies
-        run: npm ci
-      - name: Run i18next validation
-        run: npm run i18n:check
-
-  # tests:
-  #   name: client tests
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Check out Git repository
-  #       uses: actions/checkout@v2
-  #     - name: Set up Node.js
-  #       uses: actions/setup-node@v1
-  #       with:
-  #         node-version: 16
-  #     - name: Install Node.js dependencies
-  #       run: npm ci
-  #     - name: Run (client) tests
-  #       run: npm run test
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run i18n:check

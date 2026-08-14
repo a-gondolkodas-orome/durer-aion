@@ -16,7 +16,7 @@ All demos are in Hungarian.
 
 ## Requirements
 
-- [Node.js](https://nodejs.org/) version 19 or above (which can be checked by running `node -v`).
+- [Node.js](https://nodejs.org/) — the version in [`.nvmrc`](./.nvmrc) (Node 24), which is what CI and the Docker image run. With [nvm](https://github.com/nvm-sh/nvm) installed, `nvm use` in the repo root picks it up. Older versions may still work; `npm` will warn rather than stop you.
 - [Docker](https://www.docker.com/)
 
 ## Installation
