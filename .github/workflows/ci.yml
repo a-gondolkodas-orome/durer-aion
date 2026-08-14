@@ -4,9 +4,9 @@ on:
   push:
     branches:
       - main
+  # Every pull request, whatever it targets — a PR stacked on another branch
+  # gets the same gates as one straight onto main.
   pull_request:
-    branches:
-      - main
 
 jobs:
   lint:
