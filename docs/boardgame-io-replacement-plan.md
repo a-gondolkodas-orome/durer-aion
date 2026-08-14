@@ -251,7 +251,7 @@ tasks, pinned Node) arrives alongside the existing setup, not instead of it.
   - [ ] **Typecheck gate** — `tsc --noEmit` per workspace via turbo, gated in
         CI. **#233**
 
-  - [ ] **Dockerfile `CMD` runs the built server** instead of tsx watch mode;
+  - [x] **Dockerfile `CMD` runs the built server** instead of tsx watch mode;
         the docker-compose dev flow keeps its auto-reload through a
         `docker-compose.dev.yml` overlay, which makes `docker-compose.yml`
         the production stack. **#231**
