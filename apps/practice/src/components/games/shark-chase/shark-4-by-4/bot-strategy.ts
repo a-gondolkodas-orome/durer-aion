@@ -47,14 +47,10 @@ const getOptimalSubmarineMoveByBot = (board: Board): { from: number; to: number 
   return undefined;
 };
 
-// The middle of the lake first, then its edges, then its corners.
-const preferenceRings = [[5, 6, 9, 10], [1, 2, 4, 7, 8, 11, 13, 14], [0, 3, 12, 15]];
-
 export const {
   randomBotStrategy, smartBotStrategy, getNextSharkPositionByAI
 } = makeSharkBots({
   size: 4,
   maxTurn: MAX_TURN,
-  preferenceRings,
   scriptedSubmarineMove: getOptimalSubmarineMoveByBot
 });

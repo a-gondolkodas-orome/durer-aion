@@ -1,21 +1,37 @@
-import { range, sample } from 'lodash';
+import { range, sample, sortBy } from 'lodash';
 import type { BotMove, BotStrategy } from 'strategy-game-factory';
 import { isSubmarineMoveAllowed, type Board, type Moves } from './gameplay';
 import { makeGeometry } from './bot-geometry';
 
 type Bot = BotStrategy<Board, Moves>
 
+// Where the shark would rather be when nothing it can reach is safe: the middle
+// of the lake first, then outwards. The rings are the sectors grouped by how far
+// they are from the centre — Manhattan distance, with Chebyshev separating the
+// diagonal ring from the straight one where both are two steps out — which is
+// exactly the two hand-written lists this replaces (bot-search.spec.ts pins that).
+export const preferenceRings = (size: number): number[][] => {
+  const centre = (size - 1) / 2;
+  const rings: { manhattan: number; chebyshev: number; cells: number[] }[] = [];
+
+  for (const cell of range(size * size)) {
+    const row = Math.abs(Math.floor(cell / size) - centre);
+    const column = Math.abs((cell % size) - centre);
+    const [manhattan, chebyshev] = [row + column, Math.max(row, column)];
+    const ring = rings.find(r => r.manhattan === manhattan && r.chebyshev === chebyshev);
+    if (ring) ring.cells.push(cell); else rings.push({ manhattan, chebyshev, cells: [cell] });
+  }
+
+  return sortBy(rings, ['manhattan', 'chebyshev']).map(ring => ring.cells);
+};
+
 // Both bots of both lakes. What is genuinely per-variant is passed in: the size
 // of the lake, the day the shark has to reach, the researchers' scripted line,
 // and — on 5×5 — the precomputed answer that spares the live search on the early
 // days it is too slow for.
-export const makeSharkBots = ({
-  size, maxTurn, preferenceRings, scriptedSubmarineMove, survivingSectors
-}: {
+export const makeSharkBots = ({ size, maxTurn, scriptedSubmarineMove, survivingSectors }: {
   size: number
   maxTurn: number
-  // sectors the shark prefers when nothing it can reach is safe, best group first
-  preferenceRings: number[][]
   scriptedSubmarineMove: (board: Board) => { from: number; to: number } | undefined
   survivingSectors?: (board: Board, reachable: number[]) => number[] | undefined
 }) => {
@@ -113,6 +129,8 @@ export const makeSharkBots = ({
     return undefined;
   };
 
+  const rings = preferenceRings(size);
+
   // Greedy fallback used only when no move guarantees survival (game is already
   // lost): picks the reachable sector with the largest "safe" connected component
   // (sectors not adjacent to any submarine), preferring the middle of the lake.
@@ -128,7 +146,7 @@ export const makeSharkBots = ({
       pool.filter(i => ring.includes(i) && componentSizes[i] === maxi);
 
     let possibleMoves: number[] = [];
-    for (const ring of preferenceRings) {
+    for (const ring of rings) {
       possibleMoves = matching(ring);
       if (possibleMoves.length > 0) break;
     }

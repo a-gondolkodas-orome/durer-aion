@@ -83,22 +83,11 @@ const precomputedSurvivingSectors = (board: Board, reachable: number[]): number[
   return exception === undefined ? reachable : [exception];
 };
 
-// The centre sector first, then working outwards.
-const preferenceRings = [
-  [12],
-  [7, 11, 13, 17],
-  [6, 8, 16, 18],
-  [2, 10, 14, 22],
-  [1, 3, 5, 9, 15, 19, 21, 23],
-  [0, 4, 20, 24]
-];
-
 export const {
   randomBotStrategy, smartBotStrategy, getNextSharkPositionByAI
 } = makeSharkBots({
   size: 5,
   maxTurn: MAX_TURN,
-  preferenceRings,
   scriptedSubmarineMove: getOptimalSubmarineMoveByBot,
   survivingSectors: precomputedSurvivingSectors
 });
