@@ -1,8 +1,7 @@
 {
-  "name": "bgio-tutorial",
+  "name": "durer-aion",
   "version": "0.1.0",
-  "private": false,
-  "proxy": "http://localhost:8000",
+  "private": true,
   "dependencies": {
     "@babel/cli": "^7.18.6",
     "@babel/node": "^7.18.6",
@@ -53,7 +52,6 @@
     "deploy": "gh-pages -d apps/offline-frontend/dist",
     "lint": "eslint . --max-warnings=107",
     "lint:turbo": "turbo lint",
-    "check:server": "babel-node --extensions \".ts\" --presets=@babel/preset-typescript --plugins=@babel/plugin-transform-modules-commonjs src/server.ts sanity-check",
     "start": "turbo start",
     "build": "turbo build",
     "spell-check": "cspell \"**/*.{ts,tsx}\" --no-progress",

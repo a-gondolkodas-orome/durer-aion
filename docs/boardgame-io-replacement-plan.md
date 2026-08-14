@@ -260,7 +260,7 @@ tasks, pinned Node) arrives alongside the existing setup, not instead of it.
         rather than replacing the documented local setup; developers who
         ignore it lose nothing. **#234**
 
-- [ ] **PR 0.1 (S)** durer-aion hygiene: delete the dead root `src/`, rename the
+- [x] **PR 0.1 (S)** durer-aion hygiene: delete the dead root `src/`, rename the
   root package `bgio-tutorial` → `durer-aion`, `private: true`.
 - [ ] **PR 0.2 (M)** `git subtree add --prefix=apps/practice <durer-jatekok> main`.
   Practice stays **outside** npm workspaces initially (own lockfile, own
