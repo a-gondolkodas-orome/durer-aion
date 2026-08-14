@@ -237,7 +237,7 @@ tasks, pinned Node) arrives alongside the existing setup, not instead of it.
         gate runs locally and in CI (106 warnings today). CI also triggers on
         PRs targeting any branch, so stacked PRs get the gates too. **#229**
 
-  - [ ] **vitest + a working test job** — the existing test setup was not
+  - [x] **vitest + a working test job** — the existing test setup was not
         merely disabled, **no runner was installed**: `jest` was not a
         dependency anywhere (only `@types/jest` and a leftover config block),
         the per-package `test` scripts failed with `jest: not found`, and the

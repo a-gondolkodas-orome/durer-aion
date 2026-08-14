@@ -1,3 +1,4 @@
+import { vi } from "vitest";
 import { TeamModelDto } from "../dto/TeamStateDto";
 
 export const mockTeamState: TeamModelDto = {
@@ -30,12 +31,12 @@ export const MockTeamState = {
   mockStrategy: () => setPageState("STRATEGY"),  
   mockHook: {  
     useTeamState: () => teamState,  
-    useRefreshTeamState: jest.fn(),  
-    useLogin: jest.fn(),  
-    useLogout: jest.fn(),  
-    useStartRelay: jest.fn(),  
-    useStartStrategy: jest.fn(),  
-    useToHome: jest.fn(),  
+    useRefreshTeamState: vi.fn(),  
+    useLogin: vi.fn(),  
+    useLogout: vi.fn(),  
+    useStartRelay: vi.fn(),  
+    useStartStrategy: vi.fn(),  
+    useToHome: vi.fn(),  
     LoadTeamState: () => null,  
   },  
 };
