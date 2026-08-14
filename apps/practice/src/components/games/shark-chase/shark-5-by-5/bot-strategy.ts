@@ -1,89 +1,15 @@
-import { sample } from 'lodash';
-import type { BotMove, BotStrategy } from 'strategy-game-factory';
-import { isSubmarineMoveAllowed, type Board } from '../gameplay';
-import { makeGeometry } from '../bot-geometry';
-import type { Moves } from './gameplay';
-
-type Bot = BotStrategy<Board, Moves>
-
-const {
-  getAdjacentCells, findSubmarineNextToShark, distanceFromShark,
-  isReachableWithoutDeath, getIntermediateSharkPosition, getComponentSizes
-} = makeGeometry(5);
+import type { Board } from '../gameplay';
+import { makeSharkBots } from '../bot-search';
+import { MAX_TURN } from './gameplay';
 import sharkExceptionMoves from './shark-exception-moves.json';
 
-
-// The shark's turn is a route of up to two steps, named as a whole: the halfway
-// cell is only chosen to reach the target safely, so the two are one decision.
-// Standing still is the one single-step turn — any real first step leaves the
-// turn open for a second, so a route that stops after `via` would strand the
-// bot mid-turn. Returning to `from` is a two-step route like any other.
-const asSharkRoute = (from: number, via: number, to: number): BotMove<Moves>[] =>
-  via === from
-    ? [{ move: 'moveShark', args: [from] }]
-    : [{ move: 'moveShark', args: [via] }, { move: 'moveShark', args: [to] }];
-
-export const randomBotStrategy: Bot = ({ board, ctx }) => {
-  if (ctx.chosenRoleIndex === 0) {
-    const safeMoves = [...getAdjacentCells(board.shark).filter(c => board.submarines[c] === 0), board.shark];
-    const firstPos = sample(safeMoves)!;
-    // Staying put is the whole turn; a real first step earns a second one.
-    if (firstPos === board.shark) return { move: 'moveShark', args: [firstPos] };
-    const safeCells = getAdjacentCells(firstPos).filter(c => board.submarines[c] === 0);
-    return asSharkRoute(board.shark, firstPos, sample([...safeCells, firstPos])!);
-  } else {
-    const winningFrom = findSubmarineNextToShark(board);
-    if (winningFrom !== undefined) {
-      return { move: 'moveSubmarine', args: [{ from: winningFrom, to: board.shark }] };
-    }
-    const validMoves: { from: number; to: number }[] = [];
-    board.submarines.forEach((count, from) => {
-      if (count >= 1) getAdjacentCells(from).forEach(to => validMoves.push({ from, to }));
-    });
-    const approachingMoves = validMoves.filter(
-      ({ from, to }) => distanceFromShark(board.shark, to) < distanceFromShark(board.shark, from)
-    );
-    return {
-      move: 'moveSubmarine',
-      args: [sample(approachingMoves.length > 0 ? approachingMoves : validMoves)!]
-    };
-  }
-};
-
-export const smartBotStrategy: Bot = ({ board, ctx }) => {
-  if (ctx.chosenRoleIndex === 0) {
-    const finalPos = getNextSharkPositionByAI(board);
-    const firstPos = getIntermediateSharkPosition(board.submarines, board.shark, finalPos);
-    return asSharkRoute(board.shark, firstPos, finalPos);
-  }
-  const move = getSubmarineMove(board);
-  // Nothing left that wins: the position is already lost, and a bot that plays
-  // on beats one that throws inside the engine's timeout, where nothing catches
-  // it and the board never moves again.
-  return move
-    ? { move: 'moveSubmarine', args: [move] }
-    : randomBotStrategy({ board, ctx });
-};
-
-// `getOptimalSubmarineMoveByBot` is a table, not a search: it has no entry for
-// the last day, and a shark stepping between its two branches leaves it naming
-// a submarine that is not on that sector — from day 12 its second branch names
-// sector 0, which never holds one. Both are positions the shark only reaches by
-// playing badly, so rather than write more table for them, ask the search for a
-// move that still wins. It is cheap here: the table covers every day up to the
-// first branch, so the search only ever runs with few days left.
-const getSubmarineMove = (board: Board): { from: number; to: number } | undefined => {
-  const scripted = getOptimalSubmarineMoveByBot(board);
-  if (scripted && isSubmarineMoveAllowed(board, scripted.from, scripted.to)) return scripted;
-  return findWinningSubmarineMove(board);
-};
-
+// The researchers' winning line on the 5 × 5 lake: a move per day, branching on
+// where the shark is once the two halves of the lake need different answers. It
+// stops where the shark can no longer be alive — and its second branch is wrong
+// from day 12 on, naming a submarine on sector 0, which never holds one.
+// `makeSharkBots` searches for a move wherever this names none or names one the
+// position does not allow, which is what covers both.
 const getOptimalSubmarineMoveByBot = (board: Board): { from: number; to: number } | undefined => {
-  const submarineNextToShark = findSubmarineNextToShark(board);
-  if (submarineNextToShark !== undefined) {
-    return { from: submarineNextToShark, to: board.shark }
-  }
-
   switch(board.turn){
     case 1:
       return { from: 8, to: 7 };
@@ -101,10 +27,10 @@ const getOptimalSubmarineMoveByBot = (board: Board): { from: number; to: number 
       return { from: 13, to: 12 };
     case 8:
       return { from: 16, to: 21 };
-		case 9:
-			return { from: 4, to: 9 };
+    case 9:
+      return { from: 4, to: 9 };
     default:
-      if ( [0,1,5,6,10,15].includes(board.shark) ) {
+      if ([0, 1, 5, 6, 10, 15].includes(board.shark)) {
         switch(board.turn) {
           case 10:
             return { from: 9, to: 8 };
@@ -114,13 +40,8 @@ const getOptimalSubmarineMoveByBot = (board: Board): { from: number; to: number 
             return { from: 7, to: 6 };
           case 13:
             return { from: 6, to: 5 };
-					case 14:
-						if ( board.shark == 15 ) {
-							return { from: 5, to: 10 };
-						}
-						else {
-							return { from: 3, to: 2 };
-						}
+          case 14:
+            return board.shark === 15 ? { from: 5, to: 10 } : { from: 3, to: 2 };
         }
       } else {
         switch(board.turn){
@@ -132,158 +53,52 @@ const getOptimalSubmarineMoveByBot = (board: Board): { from: number; to: number 
             return { from: 0, to: 4 };
           case 13:
             return { from: 4, to: 8 };
-					case 14:
-						return { from: 21, to: 22 };
+          case 14:
+            return { from: 21, to: 22 };
+        }
       }
-      break;
-    }
   }
   return undefined;
 };
 
-
-// Greedy fallback used only when no move guarantees survival (game is already lost):
-// picks the reachable cell with the largest "safe" connected component (cells not
-// adjacent to any submarine), preferring central cells, then progressively further out.
-const selectByLocationPreference = (submarines: number[], pool: number[]): number => {
-  const componentSizes = getComponentSizes(submarines);
-
-  let maxi = 1;
-  for (const i of pool) {
-    if (maxi < componentSizes[i]) maxi = componentSizes[i];
-  }
-
-  const matching = (group: number[]) => pool.filter(i => group.includes(i) && componentSizes[i] === maxi);
-
-  const groups = [[12], [7, 11, 13, 17], [6, 8, 16, 18], [2, 10, 14, 22], [1, 3, 5, 9, 15, 19, 21, 23], [0, 4, 20, 24]];
-  let possibleMoves: number[] = [];
-  for (const group of groups) {
-    possibleMoves = matching(group);
-    if (possibleMoves.length > 0) break;
-  }
-
-  return sample(possibleMoves.length > 0 ? possibleMoves : pool)!;
-}
-
-// Is the shark guaranteed to survive to day 15 if it moves to `to` on its current
-// turn, assuming the researchers then play optimally against it from here on?
-const isMoveWinning = (submarines: number[], to: number, turn: number, memo: Map<string, boolean>): boolean => {
-  const nextTurn = turn + 1;
-  if (nextTurn > 15) return true;
-  return canSharkSurviveSubmarineTurn(submarines, to, nextTurn, memo);
-}
-
-const stateKey = (submarines: number[], shark: number, turn: number, phase: 'sub' | 'shark'): string =>
-  `${submarines.join(',')}|${shark}|${turn}|${phase}`;
-
-// Researchers move next (one submarine, one adjacent step); can they force a capture
-// from here, however the shark plays afterwards?
-const canSharkSurviveSubmarineTurn = (
-  submarines: number[], shark: number, turn: number, memo: Map<string, boolean>
-): boolean => {
-  const key = stateKey(submarines, shark, turn, 'sub');
-  const cached = memo.get(key);
-  if (cached !== undefined) return cached;
-
-  let sharkSurvives = true;
-  outer: for (let from = 0; from < 25; from++) {
-    if (submarines[from] === 0) continue;
-    for (const to of getAdjacentCells(from)) {
-      const nextSubmarines = submarines.slice();
-      nextSubmarines[from] -= 1;
-      nextSubmarines[to] += 1;
-      const sharkSurvivesHere =
-        nextSubmarines[shark] < 1 && canSharkSurviveSharkTurn(nextSubmarines, shark, turn, memo);
-      if (!sharkSurvivesHere) {
-        sharkSurvives = false;
-        break outer;
-      }
-    }
-  }
-  memo.set(key, sharkSurvives);
-  return sharkSurvives;
-}
-
-// Shark moves next; does it have at least one move (of up to 2 steps) keeping it safe?
-const canSharkSurviveSharkTurn = (
-  submarines: number[], shark: number, turn: number, memo: Map<string, boolean>
-): boolean => {
-  const key = stateKey(submarines, shark, turn, 'shark');
-  const cached = memo.get(key);
-  if (cached !== undefined) return cached;
-
-  let sharkSurvives = false;
-  for (let to = 0; to < 25; to++) {
-    if (isReachableWithoutDeath(submarines, shark, to) && isMoveWinning(submarines, to, turn, memo)) {
-      sharkSurvives = true;
-      break;
-    }
-  }
-  memo.set(key, sharkSurvives);
-  return sharkSurvives;
-}
-
-// The exact search below is fast once few turns remain, but can take a few seconds
-// on the first several turns since the reachable state space is still large. In the
-// huge majority of early-game states the cheap heuristic already picks a winning move
-// on its own, so up to PRECOMPUTE_MAX_TURN we only consult a small precomputed table of
-// the rare exceptions (states where the heuristic would pick a losing move), stored in
-// shark-exception-moves.json, and use the heuristic directly everywhere else - skipping
-// the expensive search entirely for early turns. Regenerate via
-// scripts/pre-generate-ai-moves/shark-chase-5/shark-chase-5-exceptions.cjs if the game
-// rules or heuristic ever change.
+// The exact search is fast once few days remain, but can take seconds on the
+// first several, where the reachable state space is still large. In the huge
+// majority of early-game positions the location preference already picks a
+// winning sector on its own, so up to PRECOMPUTE_MAX_TURN a small precomputed
+// table names the rare exceptions — the positions where the preference would
+// pick a losing sector — and everywhere else the preference is used as it
+// stands, skipping the search entirely. Regenerate the table via
+// scripts/pre-generate-ai-moves/shark-chase-5/shark-chase-5-exceptions.cjs if
+// the game rules or the preference ever change.
 const PRECOMPUTE_MAX_TURN = 8;
 
 const exceptionKey = (submarines: number[], shark: number, turn: number): string =>
   `${submarines.join(',')}|${shark}|${turn}`;
 
-// Shared across calls: isMoveWinning/canSharkSurviveSubmarineTurn/canSharkSurviveSharkTurn
-// are pure functions of (submarines, shark, turn), so results from earlier moves/tests
-// remain valid and are worth keeping.
-const sharkSurvivalMemo = new Map<string, boolean>();
-
-// The move the researchers want wherever the script does not apply: the one
-// after which the shark has no reply that survives the remaining days. This is
-// `canSharkSurviveSubmarineTurn`'s own loop, asked for the move it stops at
-// rather than for whether one exists.
-const findWinningSubmarineMove = (board: Board): { from: number; to: number } | undefined => {
-  const { submarines, shark, turn } = board;
-  for (let from = 0; from < 25; from++) {
-    if (submarines[from] === 0) continue;
-    for (const to of getAdjacentCells(from)) {
-      const nextSubmarines = submarines.slice();
-      nextSubmarines[from] -= 1;
-      nextSubmarines[to] += 1;
-      // The search plays on from a live position, so catching the shark — which
-      // ends the game there and then — is asked separately.
-      if (nextSubmarines[shark] >= 1) return { from, to };
-      if (!canSharkSurviveSharkTurn(nextSubmarines, shark, turn, sharkSurvivalMemo)) {
-        return { from, to };
-      }
-    }
-  }
-  return undefined;
+const precomputedSurvivingSectors = (board: Board, reachable: number[]): number[] | undefined => {
+  if (board.turn > PRECOMPUTE_MAX_TURN) return undefined;
+  const exception = sharkExceptionMoves[exceptionKey(board.submarines, board.shark, board.turn)];
+  // Naming every reachable sector is what leaves the preference to choose freely
+  // among them, which is the whole of the heuristic these days are played by.
+  return exception === undefined ? reachable : [exception];
 };
 
-// Always a sector: the shark's own one is reachable whenever the game is still
-// running, so the pool the preference falls back on is never empty.
-export const getNextSharkPositionByAI = (board: Board): number => {
-  const { submarines, shark, turn } = board;
-  const reachable: number[] = [];
-  for (let i = 0; i < 25; i++) {
-    if (isReachableWithoutDeath(submarines, shark, i)) {
-      reachable.push(i);
-    }
-  }
+// The centre sector first, then working outwards.
+const preferenceRings = [
+  [12],
+  [7, 11, 13, 17],
+  [6, 8, 16, 18],
+  [2, 10, 14, 22],
+  [1, 3, 5, 9, 15, 19, 21, 23],
+  [0, 4, 20, 24]
+];
 
-  if (turn <= PRECOMPUTE_MAX_TURN) {
-    const exception = sharkExceptionMoves[exceptionKey(submarines, shark, turn)];
-    return exception !== undefined ? exception : selectByLocationPreference(submarines, reachable);
-  }
-
-  const winningMoves = reachable.filter(to => isMoveWinning(submarines, to, turn, sharkSurvivalMemo));
-
-  return selectByLocationPreference(submarines, winningMoves.length > 0 ? winningMoves : reachable);
-}
-
-
+export const {
+  randomBotStrategy, smartBotStrategy, getNextSharkPositionByAI
+} = makeSharkBots({
+  size: 5,
+  maxTurn: MAX_TURN,
+  preferenceRings,
+  scriptedSubmarineMove: getOptimalSubmarineMoveByBot,
+  survivingSectors: precomputedSurvivingSectors
+});

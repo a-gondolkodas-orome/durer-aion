@@ -89,3 +89,7 @@ export const makeGameplay = (maxTurn: number) => {
 
   return { isGameEnd, getWinnerIndex, moves };
 };
+
+// Both lakes are played with the same moves, so a bot of either is pinned by
+// the same type (src/components/CLAUDE.md § Bot contract).
+export type Moves = ReturnType<typeof makeGameplay>['moves'];
