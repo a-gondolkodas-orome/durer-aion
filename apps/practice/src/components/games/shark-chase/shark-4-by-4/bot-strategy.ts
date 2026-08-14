@@ -1,6 +1,6 @@
 import { sample } from 'lodash';
 import type { BotMove, BotStrategy } from 'strategy-game-factory';
-import type { Board } from '../gameplay';
+import { isSubmarineMoveAllowed, type Board } from '../gameplay';
 import { makeGeometry } from '../bot-geometry';
 import type { Moves } from './gameplay';
 
@@ -51,13 +51,30 @@ export const randomBotStrategy: Bot = ({ board, ctx }) => {
 
 export const smartBotStrategy: Bot = ({ board, ctx }) => {
   if (ctx.chosenRoleIndex === 0) {
-    const finalPos = getNextSharkPositionByAI(board)!;
+    const finalPos = getNextSharkPositionByAI(board);
     const firstPos = getIntermediateSharkPosition(board.submarines, board.shark, finalPos);
     return asSharkRoute(board.shark, firstPos, finalPos);
-  } else {
-    const { from, to } = getOptimalSubmarineMoveByBot(board)!;
-    return { move: 'moveSubmarine', args: [{ from, to }] };
   }
+  const move = getSubmarineMove(board);
+  // Nothing left that wins: the position is already lost, and a bot that plays
+  // on beats one that throws inside the engine's timeout, where nothing catches
+  // it and the board never moves again.
+  return move
+    ? { move: 'moveSubmarine', args: [move] }
+    : randomBotStrategy({ board, ctx });
+};
+
+// `getOptimalSubmarineMoveByBot` is a table, not a search: it has no entry for
+// the last day, and a shark stepping between its two branches would leave it
+// naming a submarine that is not on that sector. Both are positions the shark
+// only reaches by playing badly, so rather than write more table for them, ask
+// the search for a move that still wins. It is cheap here: the table covers
+// every day up to the first branch, so the search only ever runs with few days
+// left.
+const getSubmarineMove = (board: Board): { from: number; to: number } | undefined => {
+  const scripted = getOptimalSubmarineMoveByBot(board);
+  if (scripted && isSubmarineMoveAllowed(board, scripted.from, scripted.to)) return scripted;
+  return findWinningSubmarineMove(board);
 };
 
 const getOptimalSubmarineMoveByBot = (board: Board): { from: number; to: number } | undefined => {
@@ -192,7 +209,32 @@ const canSharkSurviveSharkTurn = (
 // remain valid and are worth keeping.
 const sharkSurvivalMemo = new Map<string, boolean>();
 
-export const getNextSharkPositionByAI = (board: Board): number | undefined => {
+// The move the researchers want wherever the script does not apply: the one
+// after which the shark has no reply that survives the remaining days. This is
+// `canSharkSurviveSubmarineTurn`'s own loop, asked for the move it stops at
+// rather than for whether one exists.
+const findWinningSubmarineMove = (board: Board): { from: number; to: number } | undefined => {
+  const { submarines, shark, turn } = board;
+  for (let from = 0; from < 16; from++) {
+    if (submarines[from] === 0) continue;
+    for (const to of getAdjacentCells(from)) {
+      const nextSubmarines = submarines.slice();
+      nextSubmarines[from] -= 1;
+      nextSubmarines[to] += 1;
+      // The search plays on from a live position, so catching the shark — which
+      // ends the game there and then — is asked separately.
+      if (nextSubmarines[shark] >= 1) return { from, to };
+      if (!canSharkSurviveSharkTurn(nextSubmarines, shark, turn, sharkSurvivalMemo)) {
+        return { from, to };
+      }
+    }
+  }
+  return undefined;
+};
+
+// Always a sector: the shark's own one is reachable whenever the game is still
+// running, so the pool the preference falls back on is never empty.
+export const getNextSharkPositionByAI = (board: Board): number => {
   const { submarines, shark, turn } = board;
   const reachable: number[] = [];
   for (let i = 0; i < 16; i++) {

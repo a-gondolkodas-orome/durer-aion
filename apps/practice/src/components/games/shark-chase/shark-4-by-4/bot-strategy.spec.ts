@@ -1,6 +1,6 @@
 import { cloneDeep } from 'lodash';
 import { runMatch } from 'strategy-game-factory';
-import { forcedWinnerIndex } from 'test-utils';
+import { botNextMove, forcedWinnerIndex, makeCtx, moveValidator } from 'test-utils';
 import { getNextSharkPositionByAI, randomBotStrategy, smartBotStrategy } from './bot-strategy';
 import { RESEARCHERS, type Board } from '../gameplay';
 import { moves, startBoard } from './gameplay';
@@ -122,5 +122,23 @@ describe('the researchers\' scripted line', () => {
     expect(forcedWinnerIndex({
       gameplay: { moves }, botStrategy: smartBotStrategy, startBoard
     })).toBe(RESEARCHERS);
+  });
+
+  it('still names a legal move where the table has no entry', () => {
+    // The table stops at day 10, and the last day is 11. The two tests above say
+    // the shark cannot reach that day, so this is the position the script is not
+    // written for — reached by hand, since the point is what happens if it ever
+    // is: the bot used to name `undefined` here and throw inside the engine's
+    // timeout, leaving the board frozen for good.
+    const submarines = Array(16).fill(0);
+    submarines[0] = 1;
+    const board = makeBoard(submarines, 15, 11);
+    const { move, args } = botNextMove(smartBotStrategy({
+      board, ctx: makeCtx({ currentPlayer: RESEARCHERS, chosenRoleIndex: 1 })
+    }));
+    expect(move).toBe('moveSubmarine');
+    expect(moveValidator(moves.moveSubmarine, makeCtx({ currentPlayer: RESEARCHERS }))(
+      board, ...args as [{ from: number; to: number }]
+    )).toBe(true);
   });
 });
