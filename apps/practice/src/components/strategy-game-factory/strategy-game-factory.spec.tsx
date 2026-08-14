@@ -64,6 +64,17 @@ describe('Bot behavior by mode', () => {
       .toThrow(/named unknown move 'mianMove' \(this game has: mainMove\)/);
   });
 
+  // What keeps a stray beat from failing a spec that is watching for something
+  // else: the helpers' default bot names a move rather than nothing, so the
+  // turn comes back instead of throwing (#490).
+  it('plays a legal move when the config leaves the bot to the spec helpers', () => {
+    const { getByTestId } = renderGame(ctxAwareConfig());
+    fireEvent.click(getByTestId('role-btn-0'));
+    fireEvent.click(getByTestId('move-btn')); // endTurn → bot's turn
+    act(() => { vi.advanceTimersByTime(1500); }); // must not throw
+    expect((getByTestId('move-btn') as HTMLButtonElement).disabled).toBe(false);
+  });
+
   it('calls botStrategy when it becomes the computer turn', () => {
     const botStrategy = vi.fn((): BotMove => ({ move: 'mainMove' }));
     const { getByTestId } = renderGame(ctxAwareConfig(botStrategy));
@@ -319,11 +330,10 @@ describe('strategyGameFactory endOfTurnMove', () => {
     const { getByTestId } = renderGame(minimalConfig({ moves, endOfTurnMove: 'autoMove' }));
     // human-vs-human as in the test above, and here it is what makes the test
     // deterministic: `mainMove` passes the turn, so against the computer the
-    // bot's own beat is on the schedule too. That beat is spread over
-    // 750-1250ms, so advancing 750 fires it on the roll that lands at the low
-    // end — one run in 500 — and `minimalConfig`'s bot names no move, which is
-    // a dev-mode throw. Without a bot, the only thing that could be scheduled
-    // is the endOfTurnMove under test.
+    // bot's own beat would be on the schedule too, spread over 750-1250ms —
+    // and advancing 750 fires it on the roll that lands at the low end.
+    // Without a bot, the only thing that can be scheduled is the endOfTurnMove
+    // under test.
     fireEvent.click(getByTestId('mode-vsHuman'));
     fireEvent.click(getByTestId('start-hh-game-0'));
     fireEvent.click(getByTestId('move-btn'));
@@ -553,7 +563,7 @@ describe('umami game-finished event', () => {
 });
 
 describe('move validate enforcement', () => {
-  const guardedConfig = (botStrategy: BotStrategy<Board> = () => []) => makeConfig({
+  const guardedConfig = (botStrategy?: BotStrategy<Board>) => makeConfig({
     BoardClient: ({ board, moves }: BoardClientProps<Board>) => (
       <>
         <button data-testid="legal-btn" onClick={() => moves.guarded(board, 'ok')}>legal</button>
@@ -646,6 +656,24 @@ describe('move validate enforcement', () => {
       fireEvent.click(getByTestId('hand-over-btn')); // → bot's turn
       act(() => { vi.advanceTimersByTime(1500); });
       expect(Object.keys(seen[0]!)).toEqual(['board', 'ctx']);
+    } finally {
+      vi.clearAllTimers();
+      vi.useRealTimers();
+    }
+  });
+
+  // The default bot names the first move the position allows, so it has to ask
+  // `validate` rather than pick blindly: `guarded` is illegal with no args,
+  // which leaves `handOver`.
+  it('leaves the default bot naming the first move a validator does allow', () => {
+    vi.useFakeTimers();
+    try {
+      const { getByTestId } = renderGame(guardedConfig());
+      fireEvent.click(getByTestId('role-btn-0'));
+      fireEvent.click(getByTestId('hand-over-btn')); // → bot's turn
+      act(() => { vi.advanceTimersByTime(1500); });
+      expect(getByTestId('board').textContent).toBe('initial'); // handOver, not guarded
+      expect(getByTestId('can-ok').textContent).toBe('true'); // and the turn came back
     } finally {
       vi.clearAllTimers();
       vi.useRealTimers();
@@ -1011,7 +1039,7 @@ describe('outcome-returning moves (apply)', () => {
   });
 
   describe('validate on outcome-returning moves', () => {
-    const guardedV2Config = (botStrategy: BotStrategy<Board> = () => []) => makeConfig({
+    const guardedV2Config = (botStrategy?: BotStrategy<Board>) => makeConfig({
       BoardClient: ({ board, moves }: BoardClientProps<Board>) => (
         <>
           <button data-testid="legal-btn" onClick={() => moves.guarded(board, 'ok')}>legal</button>

@@ -32,10 +32,24 @@ export const defaultGameplay: Gameplay<Board> = {
   }
 };
 
+// Naming no move is a bug in a strategy, so the engine throws for it in dev
+// (see src/components/CLAUDE.md § Bot contract). A do-nothing default therefore
+// left every vsComputer spec one stray scheduled beat away from failing on a
+// strategy it never meant to test — which is exactly how #490 came about. The
+// default plays instead: whatever gameplay the config carries, it names the
+// first move the position allows. A spec that cares what the bot plays passes
+// its own.
+const playsFirstLegalMove = (gameplay: Gameplay<Board>): BotStrategy<Board> =>
+  ({ board, ctx }) => {
+    const name = Object.keys(gameplay.moves)
+      .find(key => gameplay.moves[key]!.validate?.(board, { ctx }) ?? true);
+    return name ? [{ move: name }] : [];
+  };
+
 export const makeConfig = ({
   BoardClient = MinimalBoardClient,
   gameplay = defaultGameplay,
-  botStrategy = (() => []) as BotStrategy<Board>,
+  botStrategy = playsFirstLegalMove(gameplay),
   variants
 }: {
   BoardClient?: StrategyGameConfig<Board>['BoardClient']
@@ -51,7 +65,7 @@ export const makeConfig = ({
 
 export const minimalConfig = (gameplay: Gameplay<Board>) => makeConfig({ gameplay });
 
-export const ctxAwareConfig = (botStrategy: BotStrategy<Board> = () => []) =>
+export const ctxAwareConfig = (botStrategy?: BotStrategy<Board>) =>
   makeConfig({ BoardClient: CtxAwareBoardClient, botStrategy });
 
 // The factory both reads and writes `?variant=`, so the harness shows the URL
