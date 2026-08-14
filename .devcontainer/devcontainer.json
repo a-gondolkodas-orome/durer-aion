@@ -6,6 +6,9 @@
       "moby": false
     }
   },
+  "containerEnv": {
+    "DEV_SERVER_HOST": "true"
+  },
   "portsAttributes": {
     "5173": { "label": "online-frontend / offline-frontend (vite)" },
     "8000": { "label": "online-backend" },

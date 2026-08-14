@@ -21,6 +21,12 @@ export default defineConfig(() => {
       preserveSymlinks: true, // this is needed to make sure that linked packages are properly resolved (like game and schemas
     },
     server: {
+      // Vite binds loopback by default. In a dev container the browser reaches
+      // it from outside the container's network namespace, where a
+      // loopback-only bind is simply unreachable — the request hangs rather
+      // than failing. `.devcontainer` sets DEV_SERVER_HOST for that case;
+      // outside a container nothing changes.
+      host: process.env.DEV_SERVER_HOST === "true" || undefined,
       fs: {
         allow: [
           "..", // allow Vite to serve files outside project root

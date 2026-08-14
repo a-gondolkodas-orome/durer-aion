@@ -26,6 +26,11 @@ own values are never overwritten.
   only — VS Code forwards each port when something actually starts listening
   on it. They are deliberately *not* in `forwardPorts`, which forwards
   eagerly and logs `ECONNREFUSED` against ports no server has bound yet.
+- **`DEV_SERVER_HOST=true`**, which makes the vite dev servers listen on all
+  interfaces instead of loopback only. Without it the forwarded port accepts
+  the connection and then hangs, because a loopback-bound server inside the
+  container is not reachable from outside its network namespace. Set only
+  here, so running vite on your own machine is unaffected.
 - **ESLint and cspell extensions**, so editor feedback matches
   `npm run lint` and `npm run spell-check`.
 
