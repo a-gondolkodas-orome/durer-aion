@@ -256,7 +256,7 @@ tasks, pinned Node) arrives alongside the existing setup, not instead of it.
         `docker-compose.dev.yml` overlay, which makes `docker-compose.yml`
         the production stack. **#231**
 
-  - [ ] **Optional `.devcontainer/`** (modeled on durer-jatekok's), offered
+  - [x] **Optional `.devcontainer/`** (modeled on durer-jatekok's), offered
         rather than replacing the documented local setup; developers who
         ignore it lose nothing. **#234**
 
