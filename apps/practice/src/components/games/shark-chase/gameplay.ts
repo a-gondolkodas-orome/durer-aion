@@ -1,3 +1,6 @@
+import { cloneDeep } from 'lodash';
+import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+
 // Both variants play the same chase, differing only in how many sectors a side
 // of the lake has (4 vs 5) and how many days the shark must survive.
 export type Board = { submarines: number[]; shark: number; turn: number; sharkMovesInTurn: number }
@@ -29,3 +32,60 @@ export const isSubmarineMoveAllowed = (board: Board, from: number, to: number): 
 // gives up the second half of its night.
 export const isSharkMoveAllowed = (board: Board, to: number): boolean =>
   isSector(board, to) && distance(board.shark, to, sideLength(board)) <= 1;
+
+// The rules are the same chase on both lakes; only the last day differs, so it
+// is the one thing the moves are built with. The lake's size they read off the
+// board.
+export const makeGameplay = (maxTurn: number) => {
+  const isGameEnd = (board: Board): boolean =>
+    board.submarines[board.shark] >= 1 || board.turn > maxTurn;
+
+  const getWinnerIndex = (board: Board): number =>
+    board.submarines[board.shark] >= 1 ? RESEARCHERS : SHARK;
+
+  const moves = {
+    moveSubmarine: {
+      validate: (board: Board, { ctx }: { ctx: Ctx }, move: { from: number; to: number }) =>
+        ctx.currentPlayer === RESEARCHERS && !!move && isSubmarineMoveAllowed(board, move.from, move.to),
+      apply: (
+        board: Board, _, { from, to }: { from: number; to: number }
+      ): MoveOutcome<Board> => {
+        const nextBoard = cloneDeep(board);
+        nextBoard.submarines[from] -= 1;
+        nextBoard.submarines[to] += 1;
+        if (isGameEnd(nextBoard)) {
+          return { nextBoard, gameEnd: { winnerIndex: getWinnerIndex(nextBoard) } };
+        }
+        return { nextBoard, isTurnEnd: true };
+      }
+    },
+    moveShark: {
+      validate: (board: Board, { ctx }: { ctx: Ctx }, to: number) =>
+        ctx.currentPlayer === SHARK && isSharkMoveAllowed(board, to),
+      apply: (board: Board, _, to: number): MoveOutcome<Board> => {
+        const nextBoard = cloneDeep(board);
+        nextBoard.shark = to;
+
+        const isAnotherSharkMoveAllowed = (
+          board.submarines[to] === 0 &&
+            to !== board.shark &&
+            board.sharkMovesInTurn === 0
+        );
+        // A free first step earns a second one, so the turn stays open.
+        if (isAnotherSharkMoveAllowed) {
+          nextBoard.sharkMovesInTurn = 1;
+          return { nextBoard };
+        }
+
+        nextBoard.turn += 1;
+        nextBoard.sharkMovesInTurn = 0;
+        if (isGameEnd(nextBoard)) {
+          return { nextBoard, gameEnd: { winnerIndex: getWinnerIndex(nextBoard) } };
+        }
+        return { nextBoard, isTurnEnd: true };
+      }
+    }
+  };
+
+  return { isGameEnd, getWinnerIndex, moves };
+};
