@@ -1,5 +1,7 @@
-import { getNextSharkPositionByAI } from './bot-strategy';
-import type { Board } from '../gameplay';
+import { forcedWinnerIndex } from 'test-utils';
+import { getNextSharkPositionByAI, smartBotStrategy } from './bot-strategy';
+import { RESEARCHERS, type Board } from '../gameplay';
+import { moves, startBoard } from './gameplay';
 
 const makeBoard = (submarines: number[], shark: number, turn: number): Board => ({
   submarines, shark, turn, sharkMovesInTurn: 0
@@ -36,5 +38,16 @@ describe('getNextSharkPositionByAI', () => {
     const shark = 0;
     const position = getNextSharkPositionByAI(makeBoard(submarines, shark, 8));
     expect(position).toEqual(5);
+  });
+});
+
+// The same property the 4 × 4 spec pins. The run against a randomly fleeing
+// shark is missing on purpose: this script does not survive one — a bug in the
+// script rather than in the spec, and its own change to make.
+describe('the researchers\' scripted line', () => {
+  it('catches the optimal shark from the start board', () => {
+    expect(forcedWinnerIndex({
+      gameplay: { moves }, botStrategy: smartBotStrategy, startBoard
+    })).toBe(RESEARCHERS);
   });
 });
