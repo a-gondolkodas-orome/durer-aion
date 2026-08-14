@@ -6,14 +6,13 @@
       "moby": false
     }
   },
-  "forwardPorts": [5173, 8000, 80, 5432],
   "portsAttributes": {
     "5173": { "label": "online-frontend / offline-frontend (vite)" },
     "8000": { "label": "online-backend" },
     "80": { "label": "nginx (docker compose)" },
     "5432": { "label": "postgres" }
   },
-  "postCreateCommand": "npm ci",
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
   "customizations": {
     "vscode": {
       "extensions": [
