@@ -16,7 +16,9 @@ Codespace. `npm ci` runs automatically once the container is created.
 - **Node 24**, matching the `Dockerfile` and CI.
 - **Docker inside the container**, so every documented flow works unchanged
   from a terminal in here — `docker run … bitnami/postgresql` for the
-  database, and `docker compose up --build` for the full stack.
+  database, and `docker compose up --build` for the full stack. It installs
+  Docker CE rather than Moby (`"moby": false`), because the Node 24 image is
+  Debian trixie-based and Debian does not package `moby-cli` there.
 - **Forwarded ports**: 5173 (vite dev servers), 8000 (online-backend),
   80 (nginx, when running docker compose), 5432 (postgres).
 - **ESLint and cspell extensions**, so editor feedback matches

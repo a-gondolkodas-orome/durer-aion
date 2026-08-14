@@ -2,7 +2,9 @@
   "name": "durer-aion",
   "image": "mcr.microsoft.com/devcontainers/typescript-node:24",
   "features": {
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "moby": false
+    }
   },
   "forwardPorts": [5173, 8000, 80, 5432],
   "portsAttributes": {
