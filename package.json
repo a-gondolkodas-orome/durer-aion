@@ -57,6 +57,7 @@
     "start": "turbo start",
     "build": "turbo build",
     "spell-check": "cspell \"**/*.{ts,tsx}\" --no-progress",
+    "typecheck": "turbo typecheck",
     "test": "vitest run",
     "test:watch": "vitest",
     "dev:server": "turbo dev --filter=online-backend --filter=game --filter=schemas --filter=strategy",
