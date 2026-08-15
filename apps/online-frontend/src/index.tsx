@@ -21,7 +21,6 @@ import { reportWebVitals } from 'common-frontend';
 // import { Client_E as RemoveFromCircleClient_E, ClientWithBot_E as RemoveFromCircleWithBotClient_E } from './games/remove-from-circle/main';
 // import Lobby from './lobby';
 
-import { RecoilRoot } from 'recoil';
 
 import * as Sentry from "@sentry/react";
 import { BrowserTracing } from "@sentry/tracing";
@@ -42,7 +41,6 @@ if (!root) throw new Error('Root container not found');
 /*if ( false ) { /* TODO competitive mode should be another frontend
   render(
     <React.StrictMode>
-      <RecoilRoot>
         <Layout>
           <HashRouter basename="/">
             <Routes>
@@ -83,16 +81,13 @@ if (!root) throw new Error('Root container not found');
             </Routes>
           </HashRouter>
         </Layout>
-      </RecoilRoot>
     </React.StrictMode>,
     root
   ); 
 } else {*/
   ReactDOM.createRoot(root).render((
     <React.StrictMode>
-      <RecoilRoot>
         <App />
-      </RecoilRoot>
     </React.StrictMode>
   ));
 //}
