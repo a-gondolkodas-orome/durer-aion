@@ -21,6 +21,10 @@ defaults:
 
 jobs:
   test:
+    # ci.yml also has a job called `test`, and the checks list shows job names, not workflow
+    # names — two entries reading `test` would be ambiguous both to a reader and to whoever
+    # configures required checks.
+    name: practice-test
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-24.04
     container:
@@ -60,6 +64,7 @@ jobs:
   # them, and a PR failing it still reads as passing everything else at a glance. The
   # `skip coverage` label skips rather than fails it (AGENTS.md § Coverage).
   patch-coverage:
+    name: practice-patch-coverage
     if: >-
       github.event.pull_request.draft == false &&
       !contains(github.event.pull_request.labels.*.name, 'skip coverage')
