@@ -1,12 +1,15 @@
 // Reports how much of the *logic* a pull request adds is reached by a spec, and fails the build
 // when too little of it is. What it measures and why, including the 85% floor and the twenty-line
-// exemption, is in AGENTS.md § Coverage. Two implementation choices worth knowing here:
+// exemption, is in AGENTS.md § Coverage. Three implementation choices worth knowing here:
 //
 //   - It reads `npm run coverage:unswept`, so what is left is coverage a real spec caused.
 //   - It measures added *lines*, not files. Every non-spec .ts file in src/ is already at non-zero
 //     coverage, because the overview specs import gameList, which transitively loads every game;
 //     the floor is ~10% of top-level import and const lines, not 0%. So "this file is uncovered"
 //     never fires, while "these added lines never ran" does.
+//   - "Added" means added against the base branch *and* against the upstream one. A branch that
+//     merges main back in adds all of main's lines against its base, and none of them are its to
+//     cover; see `intersectAddedLines`.
 import { appendFileSync, existsSync, readFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -52,6 +55,25 @@ export const parseAddedLines = diff => {
   }
   return added;
 };
+
+// Keeps only the lines a branch added against *both* commits it is compared with — its base and
+// the upstream branch it may have merged in. One base is not enough to express "this branch's
+// work": a PR stacked on an older branch, or one that merged main to resolve a conflict, adds
+// every line main gained since the fork when measured against its base alone, and that is how a
+// contributor ends up asked to cover somebody else's game. Both diffs are taken against the same
+// HEAD, so a line number means the same file position in each and the intersection is exact.
+//
+// When the branch merged nothing, the two comparisons are the same commit and this is the identity
+// — which is what keeps every ordinary PR's verdict unchanged.
+export const intersectAddedLines = (added, alsoAdded) =>
+  new Map(
+    [...added]
+      .map(([path, lines]) => {
+        const other = alsoAdded.get(path);
+        return [path, other ? new Set([...lines].filter(line => other.has(line))) : new Set()];
+      })
+      .filter(([, lines]) => lines.size > 0)
+  );
 
 // lcov.info in, { path -> { line -> hit count } } out. Only executable lines get a DA record, so
 // blank lines, comments and type-only declarations drop out of the measurement by themselves.
@@ -167,17 +189,39 @@ export const formatReport = files => {
   };
 };
 
-const git = (...args) => execFileSync('git', args, { cwd: root, encoding: 'utf8' });
+// `maxBuffer` because the default is 1 MB and a diff is not a status line: a branch stacked on an
+// older base, or one adding a pre-generated moves table, goes past it and execFileSync kills git
+// with SIGTERM. What surfaces is `spawnSync git ENOBUFS` — which reads as git having failed, and
+// sends whoever is looking at it hunting a git problem that does not exist.
+const git = (...args) =>
+  execFileSync('git', args, { cwd: root, encoding: 'utf8', maxBuffer: 512 * 1024 * 1024 });
+
+// For the questions where "git cannot answer that" is itself an answer — a remote-tracking ref the
+// checkout does not have, two histories with no common ancestor — rather than something to abort on.
+const askGit = (...args) => {
+  try {
+    return git(...args).trim();
+  } catch {
+    return null;
+  }
+};
+
+const flag = (name, fallback) =>
+  (process.argv.includes(name) && process.argv[process.argv.indexOf(name) + 1]) || fallback;
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const base = (process.argv.includes('--base') && process.argv[process.argv.indexOf('--base') + 1]) || 'origin/main';
+  const base = flag('--base', 'origin/main');
+  // The branch this one is ultimately headed for, which is not always the branch it is opened
+  // against — a PR stacked on another PR has that PR's branch as its base. Passed by the workflow
+  // from the base repository's default branch.
+  const upstream = flag('--upstream', 'origin/main');
 
-  let mergeBase;
+  let baseMergeBase;
   try {
     // Against the merge base rather than the tip of the base branch: commits landed on main since
     // this branch forked are not its to cover. Needs the full history (`fetch-depth: 0` in CI) —
     // under the default shallow fetch there is no common ancestor to find.
-    mergeBase = git('merge-base', base, 'HEAD').trim();
+    baseMergeBase = git('merge-base', base, 'HEAD').trim();
   } catch {
     // git's own error is on stderr above; naming one cause here would have sent the first CI
     // failure of this job hunting a shallow fetch when the problem was file ownership.
@@ -192,7 +236,22 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   // the rest as `src/…` rather than `apps/practice/src/…`, which is what `isMeasured` tests and
   // what lcov's SF records say. Without it every path fails `isMeasured` and the job passes every
   // PR with "nothing to measure". At the repository root it is a no-op.
-  const diff = git('diff', '--unified=0', '--relative', mergeBase);
+  const addedLines = mergeBase => parseAddedLines(git('diff', '--unified=0', '--relative', mergeBase));
+
+  let added = addedLines(baseMergeBase);
+  // Skipped rather than fatal when the upstream branch is not in the checkout: the report is then
+  // the one this job produced before any of this existed, and a coverage gate is not the place to
+  // fail a PR over a missing remote-tracking ref. Said out loud so a surprising verdict has its
+  // cause on the same page.
+  const upstreamRef = askGit('rev-parse', '--verify', '--quiet', `${upstream}^{commit}`);
+  const upstreamMergeBase = upstreamRef && askGit('merge-base', upstreamRef, 'HEAD');
+  if (!upstreamRef) {
+    console.log(`\`${upstream}\` is not in this checkout, so lines already on it are counted too.\n`);
+  } else if (upstreamMergeBase && upstreamMergeBase !== baseMergeBase) {
+    // The branch forked from upstream somewhere other than where it forked from its base — it
+    // merged upstream in, or it is stacked on a branch that predates commits it now carries.
+    added = intersectAddedLines(added, addedLines(upstreamMergeBase));
+  }
 
   const lcovPath = `${root}reports/coverage/lcov.info`;
   if (!existsSync(lcovPath)) {
@@ -201,7 +260,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   }
   const lcov = readFileSync(lcovPath, 'utf8');
 
-  const { passed, markdown } = formatReport(collect(parseAddedLines(diff), parseLcov(lcov)));
+  const { passed, markdown } = formatReport(collect(added, parseLcov(lcov)));
 
   console.log(markdown);
   if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${markdown}\n`);

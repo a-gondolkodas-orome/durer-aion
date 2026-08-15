@@ -96,6 +96,13 @@ jobs:
       - name: Measure coverage without the sweeps
         run: npm run coverage:unswept -- --coverage.reporter=lcovonly
       # base.sha is the base branch as of the last sync, which is exactly the merge base the diff
-      # should be taken against — commits landed on main since are not this PR's to cover.
+      # should be taken against — commits landed on main since are not this PR's to cover. The base
+      # is not always the default branch: a PR stacked on another PR is measured against that PR's
+      # branch, and everything it merged from the default branch to get there would otherwise count
+      # as its own. `--upstream` is what the script subtracts; `fetch-depth: 0` above is what puts
+      # the ref in the checkout.
       - name: Report coverage of added lines
-        run: node scripts/patch-coverage.mjs --base ${{ github.event.pull_request.base.sha }}
+        run: >-
+          node scripts/patch-coverage.mjs
+          --base ${{ github.event.pull_request.base.sha }}
+          --upstream origin/${{ github.event.pull_request.base.repo.default_branch }}

@@ -3,7 +3,14 @@
 // counted in the wrong place — an off-by-one in a hunk header, or a .tsx file slipping into the
 // measurement — which would fail a PR for lines it never wrote, the fastest way to get a check
 // deleted.
-import { collect, formatReport, isMeasured, parseAddedLines, parseLcov } from './patch-coverage.mjs';
+import {
+  collect,
+  formatReport,
+  intersectAddedLines,
+  isMeasured,
+  parseAddedLines,
+  parseLcov
+} from './patch-coverage.mjs';
 
 describe('isMeasured', () => {
   it('measures the framework-free half of a game', () => {
@@ -74,6 +81,35 @@ describe('parseAddedLines', () => {
 
     expect(added.get('src/a.ts')).toEqual(new Set([2]));
     expect(added.has('src/gone.ts')).toBe(false);
+  });
+});
+
+describe('intersectAddedLines', () => {
+  const lines = entries => new Map(entries.map(([path, numbers]) => [path, new Set(numbers)]));
+
+  it('keeps a line the branch added against both comparisons', () => {
+    const own = intersectAddedLines(lines([['src/a.ts', [1, 2, 3]]]), lines([['src/a.ts', [2, 3, 9]]]));
+
+    expect(own.get('src/a.ts')).toEqual(new Set([2, 3]));
+  });
+
+  it('drops a file the branch only added against its base — the merge brought it in', () => {
+    const own = intersectAddedLines(lines([['src/a.ts', [1]], ['src/merged.ts', [1, 2]]]), lines([['src/a.ts', [1]]]));
+
+    expect(own.has('src/merged.ts')).toBe(false);
+    expect(own.get('src/a.ts')).toEqual(new Set([1]));
+  });
+
+  it('drops a file whose lines all came from elsewhere rather than leaving it empty', () => {
+    const own = intersectAddedLines(lines([['src/a.ts', [1, 2]]]), lines([['src/a.ts', [7]]]));
+
+    expect(own.has('src/a.ts')).toBe(false);
+  });
+
+  it('is the identity when the branch merged nothing in — every ordinary PR', () => {
+    const added = lines([['src/a.ts', [1, 2]], ['src/b.ts', [9]]]);
+
+    expect(intersectAddedLines(added, added)).toEqual(added);
   });
 });
 
