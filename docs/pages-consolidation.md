@@ -66,22 +66,20 @@ a direct descendant of its wording, which is how we know the lineage.
 **This is a sequencing constraint, not a footnote.** A repository serves one
 Pages source at a time, so the moment durer-aion's source switches from the
 `gh-pages` branch to Actions, relay practice goes offline — and cannot come
-back until #224 lands. Three ways out:
+back until #224 lands.
 
-1. **Carry the artifact forward** (recommended default). It hardcodes
-   `/durer-aion/` in 14 places across `index.html`, `asset-manifest.json` and
-   the main JS bundle, so it can be rebased to `/valto/` and dropped into the
-   new artifact as a frozen snapshot, replaced wholesale when #224 lands. Costs
-   a committed build output — or a workflow step that reads the `gh-pages`
-   branch, which trades the ugliness for a hidden dependency on a branch we
-   intend to delete.
-2. **Land #224 before the cutover.** Cleanest end state — `/valto/` is built
-   from source, no snapshot, and the stale 2023 build is retired rather than
-   preserved. It puts a 48-file contributor PR, currently conflicted, on the
-   critical path of the deploy move.
-3. **Accept the gap.** Only reasonable if relay practice has few enough users
-   that a known outage between the cutover and #224 is acceptable — a question
-   for the maintainers, not an engineering one.
+**Decided: preserve the 2023 build.** The artifact hardcodes `/durer-aion/` in
+14 places across `index.html`, `asset-manifest.json` and the main JS bundle;
+rewriting those to `/valto/` rebases it, and it goes into the new artifact as a
+frozen snapshot. `/valto/` therefore serves the existing relay practice from
+the first deploy, and #224 replaces the folder wholesale when it merges.
+
+The snapshot is a committed build output, which is ugly and worth saying out
+loud — but the alternative, a workflow step that reads the `gh-pages` branch,
+hides a dependency on a branch we intend to delete. Rejected alternatives:
+landing #224 before the cutover puts a 48-file contributor PR, currently
+conflicted, on the critical path of the deploy move; accepting an outage costs
+users a working site for no engineering gain.
 
 ## Target layout
 
@@ -93,8 +91,8 @@ gyakorlo.durerinfo.hu/
   /                 home page — what this site is, and where to go
   /jatekok/         apps/practice                 strategy game practice
                                                   (today's jatek.durerinfo.hu)
-  /valto/           apps/relay-practise-frontend  relay practice (#224), or the
-                                                  frozen 2023 build until it lands
+  /valto/           the frozen 2023 relay practice build, rebased from
+                    /durer-aion/; replaced by apps/relay-practise-frontend (#224)
   /proba-verseny/   apps/offline-frontend         competition dry run, both rounds
 ```
 
@@ -251,15 +249,17 @@ The same reasoning applies to paths: if both languages feel necessary, make one
 canonical and let the other be a redirect stub, rather than serving the same
 build at two addresses.
 
+## Decisions taken
+
+- **Domain**: `gyakorlo.durerinfo.hu`. An English alias stays possible later as
+  a DNS-level 301, never as a second Pages domain.
+- **Paths**: Hungarian throughout — `/jatekok/`, `/valto/`, `/proba-verseny/`.
+- **Relay continuity**: carry the 2023 build forward, rebased to `/valto/`,
+  until #224 replaces it.
+
 ## Open questions
 
-1. ~~**Domain name.**~~ Decided: `gyakorlo.durerinfo.hu`. An English alias
-   stays possible later as a DNS-level 301, never as a second Pages domain.
-2. **Which of the three relay options** to take at cutover (above). This is
-   the one that decides whether relay practice stays up.
-3. ~~**Path language.**~~ Decided: Hungarian throughout — `/jatekok/`,
-   `/valto/`, `/proba-verseny/`.
-4. **What happens to the 2023 `gh-pages` branch** once #224's relay app serves
+1. **What happens to the 2023 `gh-pages` branch** once #224's relay app serves
    `/valto/`. Deleting the branch is safe after the Pages source moves to
    Actions, but the old `github.io/durer-aion/` URL then 404s unless the home
    page inherits it — which it does, since that URL redirects to the custom
