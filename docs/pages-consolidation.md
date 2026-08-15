@@ -41,10 +41,13 @@ log — to an S3 bucket keyed by join code and timestamp
 - Anyone who has the URL can write to that bucket, which is why its address has
   always been obscure. `/proba-verseny/` stays off the home page for the same
   reason.
-- `sendData` **throws** when those vars are unset, so whatever builds it needs
-  them in the environment. They are placeholders in `.env.sample`, and the real
-  values are not in this repo — **this is a prerequisite for `/proba-verseny/`,
-  not a detail**: without them that subpage throws on the first move.
+- `sendData` currently **throws** when those vars are unset, which would make
+  them a hard prerequisite for `/proba-verseny/`. They are not: the fix is to
+  make the upload a no-op when unconfigured instead of throwing, so the
+  practice deploy ships without the bucket while the per-competition deploy
+  from the year's private repo keeps sending exactly as it does today. That
+  one-line change belongs to the PR that adds the subpage — see the action
+  items.
 
 Note that `apps/offline-frontend`'s `predeploy` carries
 `PUBLIC_URL=/durer19o-xn7ElDP7nQm2M1`, which is **not** a URL this site has to
@@ -137,6 +140,41 @@ replace that repo's published content with a redirect stub.
 Pages. If it does not, durer-jatekok stays un-archived with a README banner
 instead of being archived.
 
+## Analytics: what the move does to umami
+
+The practice site is tracked by self-hosted umami at `umami.durerinfo.hu`,
+loaded from `apps/practice/index.html`. Two halves, and only one of them is a
+problem.
+
+**The URL space is safe.** `usePageviewTracking` reports
+`location.pathname + location.search` from react-router, which under a hash
+router is the path *inside* the hash (`/game/ChessRook`). It never includes the
+site's base, so serving the app at `/jatekok/` changes nothing about what umami
+records — history stays comparable across the move, and no report breaks.
+
+**The domain allow-list is not.** The script tag carries
+
+```html
+data-domains="jatek.durerinfo.hu"
+```
+
+and umami no-ops off the listed hostnames — the code comments say as much
+("off the production domain, which is left untracked"). So on
+`gyakorlo.durerinfo.hu` **tracking stops silently**: no error, no warning, just
+no data, which is the kind of failure nobody notices for a month.
+
+Two consequences for the sequence:
+
+- Step 2 must update `data-domains`. During the overlap the attribute takes a
+  comma-separated list, so `jatek.durerinfo.hu,gyakorlo.durerinfo.hu` keeps
+  both tracked while the old domain still serves, and can be trimmed after the
+  cutover.
+- Worth checking the website's own domain field in the umami dashboard at the
+  same time, which lives outside this repo.
+
+The repo merge itself changed nothing here: the site is still deployed from
+durer-jatekok, at the same domain, with the same script tag.
+
 ## Sequence
 
 Ordered so that nothing user-visible changes until the new site has been
@@ -147,7 +185,7 @@ re-adding it.
 | # | who | what |
 | --- | --- | --- |
 | 1 | **teammate** | DNS record for `gyakorlo.durerinfo.hu` → durer-aion's Pages |
-| 2 | dev | PR: practice's workflows ported to the repo root with `paths` filters; Pages built from Actions; `apps/practice` built at base `/jatekok/`; static home page at `/`; `public/CNAME` = the new domain; `check:versions` taught its new workflow paths |
+| 2 | dev | PR: practice's workflows ported to the repo root with `paths` filters; Pages built from Actions; `apps/practice` built at base `/jatekok/`; static home page at `/`; `public/CNAME` = the new domain; `data-domains` extended to both domains; `check:versions` taught its new workflow paths |
 | 3 | maintainer | Settings → Pages: source = GitHub Actions, custom domain = `gyakorlo.durerinfo.hu` |
 | 4 | everyone | **Verify.** `jatek.durerinfo.hu` is still served by durer-jatekok throughout, so both sites are live at once and there is no rush. |
 | 5 | maintainer | Cut over: replace durer-jatekok's published content with the redirect stub |
@@ -217,10 +255,8 @@ build at two addresses.
 
 1. ~~**Domain name.**~~ Decided: `gyakorlo.durerinfo.hu`. An English alias
    stays possible later as a DNS-level 301, never as a second Pages domain.
-2. **Who holds the real S3 values** (`VITE_S3_BUCKET_NAME`, `VITE_S3_FOLDER`).
-   They are the one hard blocker for `/proba-verseny/` — `sendData` throws
-   without them — and they are not in this repo. Needed as build secrets before
-   that subpage can ship; the other two subpages do not depend on them.
+2. **Which of the three relay options** to take at cutover (above). This is
+   the one that decides whether relay practice stays up.
 3. ~~**Path language.**~~ Decided: Hungarian throughout — `/jatekok/`,
    `/valto/`, `/proba-verseny/`.
 4. **What happens to the 2023 `gh-pages` branch** once #224's relay app serves
@@ -228,3 +264,23 @@ build at two addresses.
    Actions, but the old `github.io/durer-aion/` URL then 404s unless the home
    page inherits it — which it does, since that URL redirects to the custom
    domain once one is set.
+
+## Action items to decide on later
+
+Deliberately deferred, so they do not block the consolidation.
+
+- **Make `sendData` optional.** One line in `apps/offline-frontend/src/sendData.ts`:
+  return instead of throwing when `VITE_S3_BUCKET_NAME` / `VITE_S3_FOLDER` are
+  unset. Ships with the `/proba-verseny/` PR.
+- **Decide whether the practice dry run should upload at all.** durer-jatekok
+  now has umami, which covers the "how is it being used" question that the S3
+  dump used to answer, for a fraction of the data and none of the
+  anyone-can-write exposure. If umami is enough here, the S3 path can go from
+  the practice deploy entirely and stay only in the per-competition build —
+  and then `/proba-verseny/` need not stay off the home page either.
+- **Clean up `PUBLIC_URL=/durer19o-xn7ElDP7nQm2M1`** from
+  `apps/offline-frontend/package.json`. A committed per-competition value that
+  `DEPLOYMENT.md` says should never have been committed.
+- **Consider umami for the other subpages.** `/valto/` and `/proba-verseny/`
+  have no tracking today. Not required, but the one-line script tag is the
+  cheapest moment to add it while the pages are being assembled anyway.
