@@ -1,0 +1,84 @@
+name: pr-test
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+concurrency:
+  group: pr-test-${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-24.04
+    container:
+      image: node:24.11.1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Cache npm downloads
+        uses: actions/cache@v6
+        with:
+          path: ~/.npm
+          key: npm-${{ hashFiles('package-lock.json') }}
+          restore-keys: npm-
+      - name: Install dependencies
+        id: install
+        run: npm ci
+      # Each check runs even after an earlier one failed, so a red build names every problem
+      # at once rather than only the first.
+      - name: Check tool versions
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: npm run check:versions
+      - name: Lint
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: npm run lint
+      - name: Typecheck
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: npm run typecheck
+      - name: Unit tests
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: npm run test:unit
+      - name: Build
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: npm run build
+
+  # A separate job rather than a step of `test`: the coverage run is the suite again and
+  # instrumented, so it belongs alongside the checks a contributor is waiting on rather than after
+  # them, and a PR failing it still reads as passing everything else at a glance. The
+  # `skip coverage` label skips rather than fails it (AGENTS.md § Coverage).
+  patch-coverage:
+    if: >-
+      github.event.pull_request.draft == false &&
+      !contains(github.event.pull_request.labels.*.name, 'skip coverage')
+    runs-on: ubuntu-24.04
+    container:
+      image: node:24.11.1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          # The merge base has to exist locally for `<base>...HEAD` to resolve; the default shallow
+          # fetch gives one commit and the diff would come out as the whole repository.
+          fetch-depth: 0
+      # actions/checkout marks the workspace safe itself, but under a HOME it overrides for the
+      # duration of its own steps, so in a container job the setting is gone by the time a later
+      # `run:` calls git — which fails with "detected dubious ownership" rather than anything about
+      # ownership being fine. The other jobs never notice: they run npm, not git.
+      - name: Let git read the checkout
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - name: Cache npm downloads
+        uses: actions/cache@v6
+        with:
+          path: ~/.npm
+          key: npm-${{ hashFiles('package-lock.json') }}
+          restore-keys: npm-
+      - name: Install dependencies
+        run: npm ci
+      # Deliberately not `npm run coverage` — see the comment atop scripts/patch-coverage.mjs.
+      - name: Measure coverage without the sweeps
+        run: npm run coverage:unswept -- --coverage.reporter=lcovonly
+      # base.sha is the base branch as of the last sync, which is exactly the merge base the diff
+      # should be taken against — commits landed on main since are not this PR's to cover.
+      - name: Report coverage of added lines
+        run: node scripts/patch-coverage.mjs --base ${{ github.event.pull_request.base.sha }}

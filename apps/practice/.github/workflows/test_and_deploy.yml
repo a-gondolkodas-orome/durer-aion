@@ -1,0 +1,69 @@
+name: test-and-deploy
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    container:
+      image: node:24.11.1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      # A run restores caches from its own branch or the default branch only, so a
+      # PR's first build can warm-start only if main has written an entry. Same key
+      # as pr_test.yml on purpose — main is the shared base every PR restores from.
+      - name: Cache npm downloads
+        uses: actions/cache@v6
+        with:
+          path: ~/.npm
+          key: npm-${{ hashFiles('package-lock.json') }}
+          restore-keys: npm-
+      - name: Install dependencies
+        id: install
+        run: npm ci
+      # Split as in pr_test.yml, for the same reason. Upload keeps the default success() guard,
+      # so a main that fails any check is never deployed.
+      - name: Check tool versions
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: npm run check:versions
+      - name: Lint
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: npm run lint
+      - name: Typecheck
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: npm run typecheck
+      - name: Unit tests
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: npm run test:unit
+      - name: Build
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: npm run build
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    runs-on: ubuntu-24.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
+        with:
+          # A healthy deployment reports success in well under a minute, so the action's 10
+          # minute default only ever delays the report when Pages' queue is stalled.
+          timeout: 180000

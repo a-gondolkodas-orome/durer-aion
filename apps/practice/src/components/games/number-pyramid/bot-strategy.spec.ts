@@ -1,0 +1,148 @@
+import { isP2WinningPosition, randomBotStrategy, smartBotStrategy } from './bot-strategy';
+import type { Board, Slot } from './gameplay';
+import { botNextMoveArgs, makeCtx } from 'test-utils';
+
+const active = (value: number): Slot => ({ value, state: 'active' });
+const consumed = (value: number): Slot => ({ value, state: 'consumed' });
+
+const makeBoard = (level0Values, target, opts: { sortedInitial? } = {}): Board => {
+  const sorted = opts.sortedInitial ?? [...level0Values].sort((a, b) => b - a);
+  return {
+    levels: [
+      level0Values.map(active),
+      Array(4).fill(null),
+      Array(2).fill(null),
+      Array(1).fill(null)
+    ],
+    target,
+    sortedInitial: sorted
+  };
+};
+
+describe('isP2WinningPosition', () => {
+  it('returns true when extremes < k and inner sum >= k', () => {
+    // [9,8,7,6,5,4,2,2]: extremes=9+8+2+2=21, inner=7+6+5+4=22
+    const s = [9, 8, 7, 6, 5, 4, 2, 2];
+    expect(isP2WinningPosition(makeBoard(s, 22))).toBe(true);
+    expect(isP2WinningPosition(makeBoard(s, 21))).toBe(false); // k <= extremes
+    expect(isP2WinningPosition(makeBoard(s, 23))).toBe(false); // k > inner
+  });
+
+  it('returns false when extremes >= k', () => {
+    const s = [10, 9, 6, 5, 4, 3, 2, 2]; // extremes=23, inner=18
+    expect(isP2WinningPosition(makeBoard(s, 20))).toBe(false);
+  });
+
+  it('returns false when inner sum < k', () => {
+    const s = [8, 7, 6, 5, 4, 4, 3, 3]; // extremes=21, inner=22
+    expect(isP2WinningPosition(makeBoard(s, 25))).toBe(false);
+  });
+});
+
+describe('randomBotStrategy', () => {
+  it('takes winning pair on level 0 when available', () => {
+    const board = makeBoard([10, 9, 3, 2, 2, 2, 2, 2], 15);
+    const captured = botNextMoveArgs(randomBotStrategy({ board, ctx: makeCtx() }));
+    expect(captured[0].levelIdx).toBe(0);
+    const vals = captured[0].indices.map((i) => board.levels[0][i]!.value);
+    expect(vals[0] + vals[1]).toBeGreaterThanOrEqual(15);
+  });
+
+  it('takes winning pair on a higher level when available', () => {
+    const board = makeBoard([3, 3, 3, 3, 3, 3, 3, 3], 100);
+    board.levels[1][0] = active(60);
+    board.levels[1][1] = active(50);
+    const captured = botNextMoveArgs(randomBotStrategy({ board, ctx: makeCtx() }));
+    expect(captured[0].levelIdx).toBe(1);
+  });
+
+  it('ignores consumed slots when checking for a win', () => {
+    // 10 is consumed, so 9+3=12 < 15: no win available, bot picks any pair
+    const board = makeBoard([10, 9, 3, 2, 2, 2, 2, 2], 15);
+    board.levels[0][0] = consumed(10);
+    const captured = botNextMoveArgs(randomBotStrategy({ board, ctx: makeCtx() }));
+    const vals = captured[0].indices.map((i) => board.levels[0][i]!.value);
+    expect(vals[0] + vals[1]).toBeLessThan(15);
+  });
+
+  it('makes a valid move when no winning pair exists', () => {
+    const board = makeBoard([5, 4, 3, 2, 2, 2, 2, 2], 20);
+    const captured = botNextMoveArgs(randomBotStrategy({ board, ctx: makeCtx() }));
+    expect(captured).toHaveLength(1);
+    expect(captured[0].indices).toHaveLength(2);
+  });
+});
+
+describe('smartBotStrategy', () => {
+  it('takes an immediate winning move when available', () => {
+    // P1-winning board (extremes=23, inner=9, k=15). Level 1 holds a non-winning
+    // active pair (5+4=9 < 15) which the winning-strategy prefers over level 0;
+    // findImmediateWin must override and take the level-0 win (10+9 >= 15).
+    const board = makeBoard([10, 9, 3, 2, 2, 2, 2, 2], 15);
+    board.levels[1][0] = active(5);
+    board.levels[1][1] = active(4);
+    const captured = botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx({ currentPlayer: 0 }) }));
+    expect(captured).toHaveLength(1);
+    expect(captured[0].levelIdx).toBe(0);
+    const vals = captured[0].indices.map((i) => board.levels[0][i]!.value);
+    expect(vals[0] + vals[1]).toBeGreaterThanOrEqual(15);
+  });
+
+  it('P1 in a winning position combines largest pair from level 0', () => {
+    // [8,7,6,5,4,4,3,3]: extremes=21, inner=19, k=23 → P1 wins (inner < k)
+    const board = makeBoard([8, 7, 6, 5, 4, 4, 3, 3], 23);
+    const captured = botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx({ currentPlayer: 0 }) }));
+    expect(captured).toHaveLength(1);
+    const vals = captured[0].indices.map((i) => board.levels[0][i]!.value);
+    expect(Math.max(...vals)).toBe(8);
+  });
+
+  it('P1 in a winning position prefers level 1 over level 0', () => {
+    // level-1 pair 5+4=9 < k=23, so this is NOT an immediate win: the choice of
+    // level 1 must come from the strategy's level priority, not findImmediateWin
+    const board = makeBoard([8, 7, 6, 5, 4, 4, 3, 3], 23);
+    board.levels[1][0] = active(5);
+    board.levels[1][1] = active(4);
+    const captured = botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx({ currentPlayer: 0 }) }));
+    expect(captured[0].levelIdx).toBe(1);
+  });
+
+  it('P2 in a winning position combines smallest pair from level 0', () => {
+    // [9,8,7,6,5,4,2,2]: extremes=21, inner=22, k=22 → P2 wins
+    const board = makeBoard([9, 8, 7, 6, 5, 4, 2, 2], 22);
+    const captured = botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx({ currentPlayer: 1 }) }));
+    expect(captured).toHaveLength(1);
+    const vals = captured[0].indices.map((i) => board.levels[0][i]!.value);
+    expect(Math.max(...vals)).toBe(2);
+  });
+
+  it('P2 in a winning position prefers level 1 over level 0', () => {
+    const board = makeBoard([9, 8, 7, 6, 5, 4, 2, 2], 22);
+    board.levels[1][0] = active(11);
+    board.levels[1][1] = active(10);
+    const captured = botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx({ currentPlayer: 1 }) }));
+    expect(captured[0].levelIdx).toBe(1);
+  });
+
+  it('immediate win on a higher level takes priority over strategy', () => {
+    // P1-winning board: level 1 has a non-winning active pair (5+4 < 23) that the
+    // winning-strategy would pick first, but level 2 has an immediate win (12+12 >= 23).
+    // findImmediateWin must override the level-priority strategy and choose level 2.
+    const board = makeBoard([8, 7, 6, 5, 4, 4, 3, 3], 23);
+    board.levels[1][0] = active(5);
+    board.levels[1][1] = active(4);
+    board.levels[2][0] = active(12);
+    board.levels[2][1] = active(12);
+    const captured = botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx({ currentPlayer: 0 }) }));
+    expect(captured[0].levelIdx).toBe(2);
+    const vals = captured[0].indices.map((i) => board.levels[2][i]!.value);
+    expect(vals[0] + vals[1]).toBeGreaterThanOrEqual(23);
+  });
+
+  it('losing bot falls back to lowest available level', () => {
+    // P2-winning board, but current player is P1 (losing) → fallback loop picks level 0
+    const board = makeBoard([9, 8, 7, 6, 5, 4, 2, 2], 22);
+    const captured = botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx({ currentPlayer: 0 }) }));
+    expect(captured[0].levelIdx).toBe(0);
+  });
+});
