@@ -16,7 +16,8 @@ custom domains, or two independent sites, in one repo.
 durer-aion's single slot is already taken, by the `gh-pages` branch. Once
 `apps/practice` deploys from here too, and #224 adds a relay practice app,
 three things want that one slot. They can share it — as subpaths of one
-artifact — but only if we lay them out deliberately.
+artifact — but only if we lay them out deliberately, which is what this
+document decides.
 
 ## The four sites
 
@@ -24,7 +25,7 @@ artifact — but only if we lay them out deliberately.
 | --- | --- | --- |
 | **Strategy game practice** | `jatek.durerinfo.hu` (durer-jatekok, Pages from Actions) | The live practice site. Hash-routed, so every deep link is `#/game/…`. |
 | **Relay practice** | `https://a-gondolkodas-orome.github.io/durer-aion/` (durer-aion `gh-pages` branch) | A Create React App build from **August 2023**. #224 is building its modern replacement as `apps/relay-practise-frontend`. |
-| **Competition dry run** | deployed per competition from that year's private repo, e.g. `github.io/durer19o-xn7ElDP7nQm2M1/` | `apps/offline-frontend`: the full competition shell, both rounds, in-browser bots. Also uploads play data to S3 (see below). |
+| **Competition dry run** | no permanent home — built per competition and deployed from that year's private repo | `apps/offline-frontend`: the full competition shell, both rounds, in-browser bots. Also uploads play data to S3 (see below). |
 | **The real competition** | `verseny.durerinfo.hu` | nginx + docker, **not** GitHub Pages. Unaffected by any of this. |
 
 ### About the competition dry run
@@ -37,37 +38,50 @@ It also posts every start/step/end — including `G`, `ctx` and the full match
 log — to an S3 bucket keyed by join code and timestamp
 (`VITE_S3_BUCKET_NAME` / `VITE_S3_FOLDER`). Two consequences:
 
-- Anyone who has the URL can write to that bucket, which is why its address is
-  obscure and unlinked. Any permanent home for it should stay unlinked.
+- Anyone who has the URL can write to that bucket, which is why its address has
+  always been obscure. `/proba-verseny/` stays off the home page for the same
+  reason.
 - `sendData` **throws** when those vars are unset, so whatever builds it needs
-  them in the environment. They are placeholders in `.env.sample`; the real
-  values are not in this repo.
+  them in the environment. They are placeholders in `.env.sample`, and the real
+  values are not in this repo — **this is a prerequisite for `/proba-verseny/`,
+  not a detail**: without them that subpage throws on the first move.
 
-`PUBLIC_URL=/durer19o-xn7ElDP7nQm2M1` in `apps/offline-frontend/package.json`
-is a leftover: per `DEPLOYMENT.md` that value is a *repository name*, set
-locally at deploy time and explicitly not meant to be committed.
+Note that `apps/offline-frontend`'s `predeploy` carries
+`PUBLIC_URL=/durer19o-xn7ElDP7nQm2M1`, which is **not** a URL this site has to
+preserve. Per `DEPLOYMENT.md` that value is a *repository name*, set locally at
+deploy time for one competition and explicitly not meant to be committed. It
+gets replaced by the `/proba-verseny/` base, and giving the dry run a permanent
+home here is new — it has never had one.
 
 ## Target layout
 
-One Pages site on durer-aion, one artifact, built by one workflow:
+One Pages site on durer-aion, **one home page and three subpages**, all in one
+artifact built by one workflow:
 
 ```
 gyakorlo.durerinfo.hu/
-  /                  a home page linking to the two practice sites
-  /strategy-game/    apps/practice          (today's jatek.durerinfo.hu)
-  /relay/            apps/relay-practise-frontend  (#224; replaces the 2023 build)
-  /<unlinked>/       apps/offline-frontend  (optional — see open questions)
+  /                 home page — what this site is, and where to go
+  /strategy-game/   apps/practice                 strategy game practice
+                                                  (today's jatek.durerinfo.hu)
+  /relay/           apps/relay-practise-frontend  relay practice
+                                                  (#224; replaces the 2023 build)
+  /proba-verseny/   apps/offline-frontend         competition dry run, both rounds
 ```
 
-`jatek.durerinfo.hu` stays on the durer-jatekok repo and becomes a redirect.
+`jatek.durerinfo.hu` stays on the durer-jatekok repo and becomes a redirect
+into `/strategy-game/`.
 
-### Why a home page is not optional
+### The home page
 
 The moment the domain exists, `/` serves something or visitors get a bare 404.
-A ten-line static `index.html` with two links is enough for the first step; a
-designed one can follow. It also answers the "I landed on the wrong subpage"
-problem — the site now holds two different things, and the root is where that
-becomes visible.
+A ten-line static `index.html` is enough for the first step; a designed one can
+follow. It also answers the "I landed on the wrong subpage" problem — the site
+holds several different things now, and the root is where that becomes visible.
+
+**It should link the two practice sites, and not `/proba-verseny/`.** The dry
+run uploads play data to a shared S3 bucket (below), so it is meant to be
+handed to testers rather than discovered — the same reason its address has
+always been obscure. It stays reachable by anyone who has the link.
 
 ## The redirect, and why GitHub does not give it to us
 
@@ -111,7 +125,7 @@ re-adding it.
 | 4 | everyone | **Verify.** `jatek.durerinfo.hu` is still served by durer-jatekok throughout, so both sites are live at once and there is no rush. |
 | 5 | maintainer | Cut over: replace durer-jatekok's published content with the redirect stub |
 | 6 | **teammate** | Repoint the links on durerinfo.hu |
-| 7 | dev | Later: #224's relay app at `/relay/`, then the designed home page |
+| 7 | dev | Later, in either order: `/proba-verseny/` (needs the S3 values first), #224's relay app at `/relay/`, then the designed home page |
 
 Steps 1–4 have no user-visible effect. Step 5 is the only irreversible-feeling
 moment and it is a one-file revert.
@@ -140,13 +154,16 @@ independently.
 1. **Domain name** — `gyakorlo.durerinfo.hu` or `practice.durerinfo.hu`. The
    audience and the domain are Hungarian, which argues for `gyakorlo`. Decide
    *before* step 1: changing it afterwards repeats the whole sequence.
-2. **Does the competition dry run get a permanent home here?** Its
-   competition-time deploy comes from the year's private repo, so publishing it
-   at `/competition` (or `/proba-verseny`, which says "dry run" out loud on a
-   domain called *gyakorlo*) would be a new, permanently available site rather
-   than a migration of an existing one. If yes, it needs the S3 variables in
-   the build environment and should stay off the home page.
-3. **What happens to the 2023 `gh-pages` branch** once #224's relay app serves
+2. **Who holds the real S3 values** (`VITE_S3_BUCKET_NAME`, `VITE_S3_FOLDER`).
+   They are the one hard blocker for `/proba-verseny/` — `sendData` throws
+   without them — and they are not in this repo. Needed as build secrets before
+   that subpage can ship; the other two subpages do not depend on them.
+3. **Path language.** `proba-verseny` is Hungarian while `strategy-game` and
+   `relay` are English. Consistent naming either way would read better —
+   Hungarian throughout (`jatekok`, `valto`, `proba-verseny`) or English
+   throughout — but the paths are cheap to change now and expensive later, once
+   they are linked from durerinfo.hu.
+4. **What happens to the 2023 `gh-pages` branch** once #224's relay app serves
    `/relay/`. Deleting the branch is safe after the Pages source moves to
    Actions, but the old `github.io/durer-aion/` URL then 404s unless the home
    page inherits it — which it does, since that URL redirects to the custom
