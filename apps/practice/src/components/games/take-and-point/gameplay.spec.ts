@@ -1,0 +1,178 @@
+import { describe, it, expect } from 'vitest';
+import { makeCtx, moveValidator } from 'test-utils';
+import {
+  applyRemoval,
+  countMinPiles,
+  generateStartBoard,
+  isTerminal,
+  minPileSize,
+  moves,
+  nonEmptyIndices,
+  removerWins,
+  requiredPointCount,
+  type Board
+} from './gameplay';
+
+const isPointingAllowed = moveValidator(moves.pointPiles);
+const isRemovalAllowed = moveValidator(moves.takeStones);
+
+// Brute-force ground truth: does the player who is about to be pointed at (and
+// then takes) win the rest of the game with optimal play from both sides?
+const cache = new Map<string, boolean>();
+const nextTakerWins = (piles: number[]): boolean => {
+  const live = piles.filter(p => p > 0).sort((a, b) => a - b);
+  const key = live.join(',');
+  const cached = cache.get(key);
+  if (cached !== undefined) return cached;
+
+  const indices = live.map((_, i) => i);
+  // The pointer (adversary) picks the pointing; they win if ANY pointing stops
+  // the taker. A pointing is 2 distinct piles, or the single pile if only one.
+  const pointings: number[][] = indices.length === 1
+    ? [[0]]
+    : indices.flatMap((a, i) => indices.slice(i + 1).map(b => [a, b]));
+
+  let takerWins = true;
+  for (const pointing of pointings) {
+    let takerCanWin = false;
+    for (const idx of pointing) {
+      for (let amount = 1; amount <= live[idx]; amount++) {
+        const next = applyRemoval(live, idx, amount);
+        if (next.every(p => p === 0)) {
+          takerCanWin = true; // taker grabs the last stone
+        } else if (!nextTakerWins(next)) {
+          takerCanWin = true; // taker leaves opponent in a losing spot
+        }
+        if (takerCanWin) break;
+      }
+      if (takerCanWin) break;
+    }
+    if (!takerCanWin) { takerWins = false; break; }
+  }
+
+  cache.set(key, takerWins);
+  return takerWins;
+};
+
+const enumeratePiles = (maxPiles: number, maxSize: number): number[][] => {
+  const result: number[][] = [];
+  const recurse = (current: number[], minNext: number) => {
+    if (current.length >= 1) result.push([...current]);
+    if (current.length === maxPiles) return;
+    for (let s = minNext; s <= maxSize; s++) recurse([...current, s], s);
+  };
+  recurse([], 1);
+  return result;
+};
+
+describe('take-and-point characterisation', () => {
+  it('matches brute-force minimax: winning iff the smallest pile size occurs an odd number of times', () => {
+    for (const piles of enumeratePiles(5, 6)) {
+      expect(removerWins(piles)).toBe(nextTakerWins(piles));
+    }
+  });
+});
+
+describe('helpers', () => {
+  it('minPileSize / countMinPiles ignore empty piles', () => {
+    expect(minPileSize([0, 3, 2, 2])).toBe(2);
+    expect(countMinPiles([0, 3, 2, 2])).toBe(2);
+    expect(removerWins([0, 3, 2, 2])).toBe(false);
+    expect(removerWins([0, 3, 2, 2, 2])).toBe(true);
+  });
+
+  it('applyRemoval only changes the targeted pile', () => {
+    expect(applyRemoval([4, 2, 5], 0, 3)).toEqual([1, 2, 5]);
+    expect(applyRemoval([4, 2, 5], 2, 5)).toEqual([4, 2, 0]);
+  });
+
+  it('nonEmptyIndices / isTerminal', () => {
+    expect(nonEmptyIndices([0, 3, 0, 2])).toEqual([1, 3]);
+    expect(isTerminal({ piles: [0, 0, 0], pointed: null })).toBe(true);
+    expect(isTerminal({ piles: [0, 1, 0], pointed: null })).toBe(false);
+  });
+
+  it('generateStartBoard yields a playable, balanced position', () => {
+    let odd = 0;
+    const samples = 400;
+    for (let n = 0; n < samples; n++) {
+      const { piles, pointed } = generateStartBoard();
+      expect(pointed).toBeNull();
+      expect(nonEmptyIndices(piles).length).toBeGreaterThanOrEqual(3);
+      expect(piles.every(p => p >= 1 && p <= 6)).toBe(true);
+      if (removerWins(piles)) odd++;
+    }
+    // Roughly 50/50 between the two roles.
+    expect(odd / samples).toBeGreaterThan(0.3);
+    expect(odd / samples).toBeLessThan(0.7);
+  });
+});
+
+describe('legality', () => {
+  it('requires two piles while more than one is non-empty, one when a single pile is left', () => {
+    expect(requiredPointCount([3, 2, 1])).toBe(2);
+    expect(requiredPointCount([0, 4, 0])).toBe(1);
+  });
+
+  it('accepts pointing at the required number of distinct non-empty piles', () => {
+    const board = { piles: [3, 2, 0], pointed: null };
+    expect(isPointingAllowed(board, [0, 1])).toBe(true);
+    expect(isPointingAllowed(board, [0])).toBe(false); // too few
+    expect(isPointingAllowed(board, [0, 1, 2])).toBe(false); // too many
+    expect(isPointingAllowed(board, [0, 0])).toBe(false); // same pile twice
+    expect(isPointingAllowed(board, [0, 2])).toBe(false); // pile 2 is empty
+    expect(isPointingAllowed(board, [0, 9])).toBe(false); // no such pile
+  });
+
+  it('refuses pointing once someone has already pointed this turn', () => {
+    expect(isPointingAllowed({ piles: [3, 2, 0], pointed: [0, 1] }, [0, 1])).toBe(false);
+  });
+
+  it('accepts taking between one stone and the whole of a pointed pile', () => {
+    const board = { piles: [3, 2, 4], pointed: [0, 1] };
+    expect(isRemovalAllowed(board, 0, 1)).toBe(true);
+    expect(isRemovalAllowed(board, 0, 3)).toBe(true);
+    expect(isRemovalAllowed(board, 0, 4)).toBe(false); // more than the pile holds
+    expect(isRemovalAllowed(board, 0, 0)).toBe(false);
+    expect(isRemovalAllowed(board, 0, 1.5)).toBe(false);
+    expect(isRemovalAllowed(board, 2, 1)).toBe(false); // pile 2 was not pointed at
+  });
+
+  it('refuses taking before anyone has pointed', () => {
+    expect(isRemovalAllowed({ piles: [3, 2, 4], pointed: null }, 0, 1)).toBe(false);
+  });
+});
+
+const asPlayer = (currentPlayer: number) => ({ ctx: makeCtx({ currentPlayer }) });
+
+const board = (piles: number[], pointed: number[] | null = [0, 1]): Board => ({ piles, pointed });
+
+describe('moves.takeStones end of game', () => {
+  it.each([0, 1])('ends the game for the mover (player %i) on the last stone', player => {
+    const outcome = moves.takeStones.apply(board([0, 3]), asPlayer(player), 1, 3);
+    expect(outcome.nextBoard.piles).toEqual([0, 0]);
+    expect(outcome.gameEnd).toEqual({ winnerIndex: player });
+  });
+
+  it('leaves the turn open while stones remain — the mover still has to point', () => {
+    const outcome = moves.takeStones.apply(board([2, 3]), asPlayer(0), 1, 3);
+    expect(outcome.nextBoard.piles).toEqual([2, 0]);
+    expect(outcome.gameEnd).toBeUndefined();
+    // NOT isTurnEnd: the same player now points at piles for the opponent
+    expect(outcome.isTurnEnd).toBeUndefined();
+  });
+
+  it('clears the pointing when stones are taken', () => {
+    const outcome = moves.takeStones.apply(board([2, 3], [0, 1]), asPlayer(0), 0, 1);
+    expect(outcome.nextBoard.pointed).toBeNull();
+  });
+});
+
+describe('moves.pointPiles', () => {
+  it('hands the turn over and never ends the game', () => {
+    const outcome = moves.pointPiles.apply(board([2, 3], null), asPlayer(0), [0, 1]);
+    expect(outcome.nextBoard.pointed).toEqual([0, 1]);
+    expect(outcome.isTurnEnd).toBe(true);
+    expect(outcome.gameEnd).toBeUndefined();
+  });
+});

@@ -1,0 +1,131 @@
+---
+description: Implement a new Dürer competition game from scratch
+---
+
+Implement a new Dürer competition game. The game to implement: $ARGUMENTS
+
+## Steps
+
+### 1. Understand the game
+If the game rules weren't provided in $ARGUMENTS, ask for them before proceeding. You need to know:
+- What the board/state looks like
+- What moves each player can make on their turn
+- What the win condition is
+- Whether there are meaningful variants (e.g. different starting configurations)
+
+Past Dürer competition problem sets (including written solutions) are archived at https://durerinfo.hu/archivum/feladatsorok/. If the user provides a reference to a specific PDF (year, round, problem number), fetch it and read the problem statement and solution. If they paste the solution text directly, use that. Either way, use the written solution to inform both the board design and the AI strategy — it often contains the key invariant or characterisation that makes the optimal strategy straightforward to implement.
+
+> **Reminder:** Once the game is identified, ask the user to mark it as **in progress** in the [game tracking spreadsheet](https://docs.google.com/spreadsheets/d/1-6u9PCtvf_gDHrs65x36pmDzFt4nZZx_IUuXrgS2aZk/edit?gid=0#gid=0) before implementation starts, to avoid duplicate work by other developers.
+
+Before proceeding further, also collect the following metadata if not already provided in $ARGUMENTS — they are quick to answer and needed throughout implementation:
+
+- **year**: display string (e.g. `"XVI. (22/23)"`) and sort string (e.g. `"22/23"`)
+- **category**: one or more of A, B, C, D, E, E+
+- **round**: `online` or `döntő`
+- **short name**: shown on the overview card (bilingual if needed)
+- **camelCase key**: used as the folder name, route path, and `gameList` key (e.g. `PlusTwoThree`)
+- **credit**: `suggestedBy` and/or `developedBy` — optional, but ask explicitly so it isn't forgotten
+
+### 2. Plan the AI strategy
+A game is useful even without an optimal AI: human vs human mode lets real players test and play immediately, and a placeholder random/simple bot is enough to get started. Ask the user whether they want the optimal strategy implemented now or later.
+
+- **If now:** spend up to ~3 minutes reasoning through the winning strategy. If you arrive at a clear characterisation, explain it to the user before writing code. If after ~3 minutes you haven't found a clean solution, say so explicitly — don't keep the user waiting longer — and ask if they have any hints (e.g. from the official solution, a known invariant, or their own intuition). If hints resolve it, proceed; otherwise fall back to "later" and leave a placeholder.
+- **If later:** implement a simple or random bot strategy as a placeholder and note clearly in a code comment that it is not optimal yet.
+
+If the strategy needs a **precomputed table** (a JSON file of optimal moves, because searching at play time is too slow), commit its generator in the same PR — never the table alone. What the script has to guarantee is in [AGENTS.md § Architecture](../../AGENTS.md#architecture); `modified-mill-strategy.cjs` is the worked example, and it should also verify the table (e.g. replaying it against every opponent reply) rather than write one it cannot prove correct.
+
+Note: written solutions typically only describe what to do from a winning position. The AI also needs a strategy for losing positions — i.e. when the opponent holds the winning advantage but hasn't played optimally. In that case the bot should still play as well as possible: making moves that are hardest to respond to correctly, maximising the chance the human makes a mistake. Ask the user how they want this handled if it isn't obvious from the solution.
+
+### 3. Pick a reference game to copy
+Choose the simplest existing game that resembles the new one structurally:
+- Number/token games with simple state: `src/components/games/single-number-increase/plus-one-two-three/plus-one-two-three.tsx`
+- Games with variants (multiple starting configs): look in `src/components/games/pile-splitting-games/`
+- Grid/board games: `src/components/games/chess-rook/` or `src/components/games/shark-chase/`
+
+Read the chosen reference file in full before writing anything.
+
+### 4. Create the game files
+Create `src/components/games/<game-name>/gameplay.ts` (board type, start boards, moves) and `<game-name>.tsx` (rule text, step description, variants, factory call). Which file holds what — and why `gameplay.ts` must stay React-free — is in [AGENTS.md § Files in a game folder](../../AGENTS.md#files-in-a-game-folder); the contract you are implementing — `moves`/`apply`/`validate`, `isAllowed`, the bot contract, `ctx`, `setTurnState`, `useDeferredMove` — is in [src/components/CLAUDE.md § strategyGameFactory API](../../src/components/CLAUDE.md#strategygamefactory-api). Read both rather than guessing from the reference game alone. Authoring decisions on top of them:
+- If the user supplied the rule text, use it verbatim in `rule.hu` by default. Don't silently rephrase, correct, or abbreviate it. **Exception:** when the original wording doesn't fit the online implementation — e.g. it refers to the competition organizers/judges instead of the opponent/computer, or to physical artifacts (paper, pencil, cards on a table) that don't exist in the browser version — it's fine to reword it slightly to fit. In that case, explicitly highlight every change you made to the user (e.g. show before/after) so they can review it. For any other wording change, propose it and wait for approval before applying.
+- For user-facing text referring to the other participant, prefer "other player" / "másik játékos" over "opponent" / "ellenfél" — the latter reads as too harsh, especially in Hungarian
+- `getPlayerStepDescription` should make it obvious what the current player should do — it is the game's instruction line, not a status label
+- Pull `name`, `title`, `credit` from `gameList` rather than hardcoding them
+
+### 5. Re-export the component from `src/components/games/index.ts`
+Add one `export { YourGame } from './path/...'` line to the barrel, keyed by the
+game's `gameList` key (alias if the export name differs, e.g.
+`export { FooA as Foo } from '...'`), keeping alphabetical order. The route is the
+key, and the router in `src/components/app/app.tsx` derives it from `gameList`
+automatically — no edit is needed there.
+
+### 6. Add metadata to `src/components/games/gameList.ts`
+Using the metadata collected in Step 1, add the entry in alphabetical order by key. Use `title` only if a longer display name is needed on the game page beyond the short name.
+
+### 7. Run tests and verify
+If the optimal AI was implemented, write a spec that plays it rather than one
+that eyeballs a single decision. `runMatch` (from `strategy-game-factory`) plays
+a whole game headless through the real moves, validators and win detection:
+
+```typescript
+const { winnerIndex } = runMatch({
+  gameplay: { moves },
+  strategies: [smartBotStrategy, randomBotStrategy],
+  startBoard
+});
+```
+
+Assert what the checklist asks for: the smart bot wins as the mover from a
+board the mover can win, and as the replier from one it cannot. [AGENTS.md §
+Testing](../../AGENTS.md#testing) covers the rest — reading a single decision
+with `botNextMoveArgs`, and how many boards to sweep given what the strategy
+costs.
+
+```bash
+npm run test
+```
+Then start the dev server and manually verify the game:
+```bash
+npm run dev
+```
+
+### 8. Go through the checklist
+Before declaring the game done, walk [src/components/CLAUDE.md § New game
+checklist](../../src/components/CLAUDE.md#new-game-checklist) and verify each item against the
+running game, not against your intent to have satisfied it. Two of them are
+worth naming here because they are the ones that quietly go unchecked:
+
+- the optimality claim must be backed by the `runMatch` spec from step 7, not by
+  eyeballing a few of the bot's moves
+- the game must be played through in **both** `vsComputer` and `vsHuman` mode
+
+### 9. Offer a test bot variant (only if optimal AI was implemented)
+If the optimal AI strategy was implemented in step 2, ask the user:
+
+> "Do you want a 'test bot' variant that plays randomly but wins if it can in 1 move?"
+
+**If yes**, update the game file:
+
+1. Add a `randomBotStrategy` function — pick a random valid move, but if any move wins immediately (wins in 1 turn), pick one of those winning moves instead. Follow the pattern in `src/components/games/ten-digit-number/ten-digit-number.tsx`.
+
+2. Rename the existing optimal bot strategy to `smartBotStrategy` (or a similarly descriptive name).
+
+3. Restructure `variants` to put the test bot first and the smart bot second (marked `isDefault: true`):
+   ```typescript
+   variants: [
+     {
+       botStrategy: randomBotStrategy,
+       label: { hu: 'Teszt 🤖', en: 'Test 🤖' }
+     },
+     {
+       botStrategy: smartBotStrategy,
+       generateStartBoard: ...,
+       label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
+       isDefault: true
+     }
+   ]
+   ```
+   By default `generateStartBoard` stays on the `isDefault` variant only. If the test variant benefits from a simpler starting position, add its own `generateStartBoard` override.
+
+4. Re-run `npm run test` and verify both variants work in the dev server before declaring done.
+
+**If no**, skip and declare the game done.

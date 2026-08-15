@@ -40,6 +40,11 @@ export default defineConfig(
       '**/build/**',
       '**/node_modules/**',
       '**/*.config.{js,mjs,cjs,ts}',
+      // apps/practice is linted by its own eslint config, through its own
+      // `npm run lint`. Until the workspaces are unified it is not part of
+      // this repo's install, so linting it from here would resolve neither
+      // its plugins nor its tsconfig.
+      'apps/practice/**',
     ],
   }
 );

@@ -219,7 +219,7 @@ additive. `npm ci` at the root, `npm run dev:server` / `dev:online` /
 working unchanged throughout the phase; new tooling (devcontainer, turbo
 tasks, pinned Node) arrives alongside the existing setup, not instead of it.
 
-- [ ] **PR 0.0 (M)** durer-aion baseline. Planned as one PR; split during
+- [x] **PR 0.0 (M)** durer-aion baseline. Planned as one PR; split during
   execution into six, because the pieces share a phase and nothing else, and
   each is independently reviewable and revertible:
 
@@ -262,11 +262,32 @@ tasks, pinned Node) arrives alongside the existing setup, not instead of it.
 
 - [x] **PR 0.1 (S)** durer-aion hygiene: delete the dead root `src/`, rename the
   root package `bgio-tutorial` → `durer-aion`, `private: true`.
-- [ ] **PR 0.2 (M)** `git subtree add --prefix=apps/practice <durer-jatekok> main`.
-  Practice stays **outside** npm workspaces initially (own lockfile, own
-  `npm ci`). Port its 3 workflows with `working-directory`/`paths` filters;
-  recreate the `github-pages` environment and `pages` concurrency group on
-  durer-aion; the CNAME already lives in `public/`, so the URL is unchanged.
+- [ ] **PR 0.2 (M)** merge durer-jatekok in as `apps/practice`. Split during
+  execution into three, because the deploy switch carries all of the risk and
+  should not ride inside a 570-file diff:
+
+  - [x] **Import the code** — practice stays **outside** npm workspaces (own
+        lockfile, own `npm ci`), and the root's lint/test/typecheck/build/
+        spell-check are pointed away from it. Its workflows come along under
+        `apps/practice/.github/`, where GitHub does not read them, so
+        durer-jatekok keeps deploying the site until the next PR.
+
+        Done with `git filter-repo --to-subdirectory-filter` + a merge rather
+        than `git subtree add`: after a plain subtree add, `git log` and
+        `git blame` on a practice file stop at the import commit, which
+        defeats the point of preserving the history. Rewriting the paths first
+        makes both traverse all 1029 commits. **The PR must be merged with a
+        merge commit — a squash would flatten that history back to one.**
+  - [ ] **Move the deploy here** — port the three workflows to the root with
+        `paths` filters, and consolidate GitHub Pages: one site, one artifact,
+        practice at `/` and durer-aion's practice builds at subpaths, since a
+        repo has exactly one Pages site and durer-aion's `gh-pages` branch
+        deploy already claims it. `check:versions` needs its workflow paths
+        updated in the same PR — it reads them relative to `apps/practice/`,
+        where they will no longer be.
+  - [ ] **Merge the tooling** — the two `.claude/` setups, the SessionStart
+        hook, and `claude.md` → `CLAUDE.md` rewritten for the monorepo.
+
   durer-jatekok gets a README banner; archival waits until Phase 7.
 
   Migrate the collaboration state, not just the code:

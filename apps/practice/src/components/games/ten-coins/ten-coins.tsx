@@ -1,0 +1,192 @@
+import { range } from 'lodash';
+import {
+  strategyGameFactory, type BoardClientProps, type StrategyArgs, GameBoard
+} from 'strategy-game-factory';
+import { useTranslation } from 'language';
+import {
+  generateStartBoardC, generateStartBoardD, generateTestStartBoard, moves,
+  type Board, type TurnState
+} from './gameplay';
+import { distinctValues, randomBotStrategy, smartBotStrategy } from './bot-strategy';
+
+const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProps<Board, TurnState>) => {
+  const { t } = useTranslation();
+  const selectedValue = ctx.turnState;
+  const presentValues = distinctValues(board);
+
+  // Asking about L = 1 asks whether these coins can be changed at all: it is the
+  // most generous target, so value-1 coins fall out as unselectable.
+  const selectValue = (v: number) => {
+    if (!moves.convert.isAllowed(board, v, 1)) return;
+    setTurnState(selectedValue === v ? null : v);
+  };
+
+  const chooseTarget = (l: number) => {
+    moves.convert(board, selectedValue, l);
+    setTurnState(null);
+  };
+
+  return (
+    <GameBoard>
+      <div className="flex flex-wrap items-end gap-3">
+        {presentValues.map(v => {
+          const count = board.filter(c => c === v).length;
+          const isSelected = selectedValue === v;
+          return (
+            <button
+              key={v}
+              disabled={!moves.convert.isAllowed(board, v, 1)}
+              onClick={() => selectValue(v)}
+              aria-pressed={isSelected}
+              aria-label={t({
+                hu: `${count} darab ${v} értékű érme`,
+                en: `${count} coins of value ${v}`
+              })}
+              className={`
+                flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-colors
+                ${isSelected
+                  ? 'border-blue-500 bg-blue-100 dark:bg-blue-900'
+                  : 'border-transparent enabled:hocus:bg-slate-100 dark:enabled:hocus:bg-slate-700'}
+                disabled:cursor-default
+              `}
+            >
+              {/* rotate(180deg) fills the pile from the bottom, leaving the
+                  incomplete row on top; each coin re-rotates so it stays upright. */}
+              <div className="flex flex-wrap gap-1 justify-center max-w-36"
+                style={{ transform: 'rotate(180deg)' }}
+              >
+                {range(count).map(i => (
+                  <div key={i} style={{ transform: 'rotate(180deg)' }}>
+                    <Coin value={v} />
+                  </div>
+                ))}
+              </div>
+              <span className="text-sm font-semibold">
+                {t({ hu: `${count} db`, en: `×${count}` })}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {selectedValue !== null && (
+        <div className="mt-6 pt-4 border-t flex flex-wrap items-center gap-3">
+          <span className="text-sm font-semibold">
+            {t({ hu: 'Legyen belőlük:', en: 'Change them to:' })}
+          </span>
+          {range(1, selectedValue).map(l => (
+            <button
+              key={l}
+              disabled={!moves.convert.isAllowed(board, selectedValue, l)}
+              onClick={() => chooseTarget(l)}
+              aria-label={t({ hu: `${l} értékű érme`, en: `value ${l} coin` })}
+              className="rounded-full transition-transform enabled:hocus:scale-110
+                focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+            >
+              <Coin value={l} />
+            </button>
+          ))}
+        </div>
+      )}
+    </GameBoard>
+  );
+};
+
+const coinColors: Record<number, string> = {
+  1: 'bg-slate-200 border-slate-500 text-slate-800 dark:bg-slate-600 dark:border-slate-300 dark:text-slate-100',
+  2: 'bg-blue-200 border-blue-600 text-blue-900 dark:bg-blue-800 dark:border-blue-300 dark:text-blue-100',
+  3: 'bg-green-200 border-green-600 text-green-900 dark:bg-green-800 dark:border-green-300 dark:text-green-100',
+  4: 'bg-red-200 border-red-600 text-red-900 dark:bg-red-800 dark:border-red-300 dark:text-red-100',
+  5: 'bg-yellow-200 border-yellow-600 text-yellow-900 dark:bg-yellow-800 dark:border-yellow-300 dark:text-yellow-100'
+};
+
+const Coin = ({ value }: { value: number }) => (
+  <div className={`w-10 h-10 rounded-full border-2 flex items-center justify-center
+    text-lg font-bold ${coinColors[value]}`}
+  >
+    {value}
+  </div>
+);
+
+const getPlayerStepDescription = ({ ctx }: StrategyArgs<Board, TurnState>) => {
+  if (ctx.turnState !== null) {
+    return {
+      hu: `Válaszd ki, mi legyen a(z) ${ctx.turnState} értékű érmék új (kisebb) értéke.`,
+      en: `Choose the new (smaller) value for the coins worth ${ctx.turnState}.`
+    };
+  }
+  return {
+    hu: 'Válaszd ki, melyik értékű érméket változtatod meg (egyszerre az összeset).',
+    en: 'Choose which coin value to change (all of them at once).'
+  };
+};
+
+const ruleFor = (maxValue: number) => ({
+  hu: <>
+    Kezdetben van 10 érme az asztalon, melyek értékei 1 és {maxValue} közé eső egészek lehetnek.
+    A két játékos felváltva lép. A soron lévő játékos kiválaszt egy K értéket, amire igaz,
+    hogy van az asztalon K értékű érme, és az összes K értékű érmét átváltoztatja valamilyen
+    kisebb L értékűre (mindet ugyanarra az L értékre, ahol az L érték 1 és K−1 közötti).
+    Az nyer, akinek a lépése után minden érme azonos értékű lesz. A kezdőállás ismeretében
+    Te döntheted el, hogy a kezdő vagy a második játékos bőrébe szeretnél-e bújni.
+  </>,
+  en: <>
+    There are 10 coins on the table to start, each with an integer value between 1 and {maxValue}.
+    The two players move alternately. On their turn the current player chooses a value K such
+    that at least one coin of value K is on the table, and turns all coins of value K into some
+    smaller value L (all to the same L, where L is between 1 and K−1). Whoever makes all coins
+    equal in value after their move wins. Knowing the starting position, you may decide whether
+    to play as the first or the second player.
+  </>
+});
+
+const genericRule = {
+  hu: <>
+    Kezdetben van 10 érme az asztalon, melyek értékei kis pozitív egészek (1-től 4-ig vagy 5-ig).
+    A két játékos felváltva lép. A soron lévő játékos kiválaszt egy K értéket, amire igaz,
+    hogy van az asztalon K értékű érme, és az összes K értékű érmét átváltoztatja valamilyen
+    kisebb L értékűre (mindet ugyanarra az L értékre, ahol az L érték 1 és K−1 közötti).
+    Az nyer, akinek a lépése után minden érme azonos értékű lesz. A kezdőállás ismeretében
+    Te döntheted el, hogy a kezdő vagy a második játékos bőrébe szeretnél-e bújni.
+  </>,
+  en: <>
+    There are 10 coins on the table to start, each a small positive integer (1 to 4, or 1 to 5).
+    The two players move alternately. On their turn the current player chooses a value K such
+    that at least one coin of value K is on the table, and turns all coins of value K into some
+    smaller value L (all to the same L, where L is between 1 and K−1). Whoever makes all coins
+    equal in value after their move wins. Knowing the starting position, you may decide whether
+    to play as the first or the second player.
+  </>
+};
+
+export const TenCoins = strategyGameFactory({
+  presentation: {
+    rule: genericRule,
+    getPlayerStepDescription
+  },
+  BoardClient,
+  gameplay: { moves },
+  variants: [
+    {
+      id: 'test',
+      botStrategy: randomBotStrategy,
+      generateStartBoard: generateTestStartBoard,
+      label: { hu: 'Teszt', en: 'Test' }
+    },
+    {
+      id: '4-values',
+      botStrategy: smartBotStrategy,
+      generateStartBoard: generateStartBoardC,
+      rule: ruleFor(4),
+      label: { hu: '4 érték', en: '4 values' },
+      isDefault: true
+    },
+    {
+      id: '5-values',
+      botStrategy: smartBotStrategy,
+      generateStartBoard: generateStartBoardD,
+      rule: ruleFor(5),
+      label: { hu: '5 érték', en: '5 values' }
+    }
+  ]
+});

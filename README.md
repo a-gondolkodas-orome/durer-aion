@@ -25,6 +25,23 @@ All demos are in Hungarian.
 npm ci
 ```
 
+## The practice site (`apps/practice`)
+
+The practice site (https://jatek.durerinfo.hu) lives in `apps/practice`, merged
+in from the durer-jatekok repository with its history. **It is not part of this
+repo's npm workspaces yet**, so it installs and runs on its own:
+
+```bash
+cd apps/practice
+npm ci
+npm run dev     # the practice site
+npm test        # its own lint + typecheck + unit tests
+```
+
+Root commands (`npm ci`, `npm run lint`, `npm test`, `npm run build`,
+`npm run typecheck`) deliberately skip it — it has its own toolchain, its own
+lockfile and its own eslint config until the workspaces are unified.
+
 ## Running offline-frontend
 
 Create the `apps/offline-frontend/.env` file by copying the `.env.sample` in that folder. Then run:
