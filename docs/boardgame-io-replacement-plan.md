@@ -279,12 +279,13 @@ tasks, pinned Node) arrives alongside the existing setup, not instead of it.
         makes both traverse all 1029 commits. **The PR must be merged with a
         merge commit — a squash would flatten that history back to one.**
   - [ ] **Move the deploy here** — port the three workflows to the root with
-        `paths` filters, and consolidate GitHub Pages: one site, one artifact,
-        practice at `/` and durer-aion's practice builds at subpaths, since a
-        repo has exactly one Pages site and durer-aion's `gh-pages` branch
-        deploy already claims it. `check:versions` needs its workflow paths
-        updated in the same PR — it reads them relative to `apps/practice/`,
-        where they will no longer be.
+        `paths` filters, and consolidate GitHub Pages onto one site serving
+        one artifact, since a repo has exactly one Pages site and durer-aion's
+        `gh-pages` branch deploy already claims it. Planned in detail in
+        [`docs/pages-consolidation.md`](./pages-consolidation.md): it needs a
+        new domain, a redirect GitHub does not provide for us, and changes to
+        durerinfo.hu, so it is sequenced across this repo and two people
+        outside it.
   - [ ] **Merge the tooling** — the two `.claude/` setups, the SessionStart
         hook, and `claude.md` → `CLAUDE.md` rewritten for the monorepo.
 
