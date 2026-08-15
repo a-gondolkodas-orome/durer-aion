@@ -240,9 +240,10 @@ argument for doing this move in its own PR rather than inside the deploy switch:
   `git diff --relative` restores both the paths and the scoping.
 
 Two more the move introduces rather than breaks: the `OPS` label the report
-issue carries does not exist in this repo (`gh issue create` fails outright on
-an unknown label, so the workflow creates it), and the issue title now names the
-app, since this repo holds four.
+issue carries did not exist in this repo, and `gh issue create` fails outright
+on an unknown label — created by hand rather than by the workflow, since a
+label is repository state, not something a monthly job should reassert; and the
+issue title now names the app, since this repo holds four.
 
 ## Code changes step 1 needs
 

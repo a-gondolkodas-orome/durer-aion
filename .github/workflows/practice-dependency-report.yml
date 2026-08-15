@@ -39,10 +39,6 @@ jobs:
           # otherwise reconcile against this one's issue.
           TITLE: Dependency update report (practice)
         run: |
-          # durer-aion has no OPS label — it came with durer-jatekok's issue tracker, not with
-          # its code — and `gh issue create` fails outright on a label that does not exist.
-          # `--force` makes this a no-op once it does.
-          gh label create OPS --color ededed --description 'Repository operations' --force
           # Matched on the title, not the OPS label, so a hand-edited label cannot cause a
           # duplicate issue. --limit outruns gh's default page of 30.
           number=$(gh issue list --state open --limit 100 --json number,title \
