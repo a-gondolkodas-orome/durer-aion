@@ -89,7 +89,9 @@
     "node": ">=24"
   },
   "workspaces": [
-    "apps/*",
+    "apps/offline-frontend",
+    "apps/online-backend",
+    "apps/online-frontend",
     "packages/*"
   ],
   "devDependencies": {

@@ -1,2 +1,5 @@
 node_modules
 .env.*
+# The backend image has no use for the practice site, and copying it would
+# invalidate the image cache on every practice change.
+apps/practice
