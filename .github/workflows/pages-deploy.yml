@@ -83,7 +83,10 @@ jobs:
       # in any of them blocks the whole deploy — the accepted cost of a single Pages site.
       - name: Assemble the site
         run: |
-          set -euo pipefail
+          # `set -eu`, not `set -euo pipefail`: this job runs in the node container, where the
+          # runner falls back to `sh -e {0}` (dash) — which has no `pipefail` and fails the
+          # step on the `set` line itself. Nothing here is a pipeline, so it buys nothing.
+          set -eu
           mkdir -p site
           cp -r pages/home/. site/
           mkdir -p site/jatekok && cp -r apps/practice/dist/. site/jatekok/
