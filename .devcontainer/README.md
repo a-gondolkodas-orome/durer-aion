@@ -9,9 +9,15 @@ before, and developers who ignore this folder lose nothing.
 Open the repo in VS Code with the
 [Dev Containers extension](https://code.visualstudio.com/docs/devcontainers/containers)
 and accept the "Reopen in Container" prompt, or open the repo in a GitHub
-Codespace. `.devcontainer/post-create.sh` then runs `npm ci` and seeds each
-app's `.env` from its `.env.sample` — only where no `.env` exists yet, so your
-own values are never overwritten.
+Codespace. `.devcontainer/post-create.sh` then runs `npm ci` and seeds every
+gitignored env file from its committed sample — only where the file does not
+exist yet, so your own values are never overwritten:
+
+| sample | seeded file | used by |
+| --- | --- | --- |
+| `.env.docker.sample` | `.env.docker` | `docker compose --env-file` |
+| `.env.local.sample` | `.env.local` | `common-frontend`'s tsup config |
+| `apps/<app>/.env.sample` | `apps/<app>/.env` | that app's dev server |
 
 ## What's in it
 
@@ -41,7 +47,8 @@ It does not import teams, and it does not start any service: you still run
 database still comes up with the `docker run … bitnami/postgresql` command from
 the root `README.md`.
 
-The seeded `.env` files carry the sample values, which are enough to run
-offline-frontend. For the online round you will want to edit
-`apps/online-backend/.env` — the sample's credentials and competition window
-are placeholders.
+The seeded env files carry the sample values, which are enough to run
+offline-frontend and to bring the docker stack up. For anything involving the
+online round you will want to edit `apps/online-backend/.env` and
+`.env.docker` — their bot/admin credentials, database password and competition
+window are all placeholders.
