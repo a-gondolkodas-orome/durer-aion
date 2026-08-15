@@ -386,9 +386,25 @@ tasks, pinned Node) arrives alongside the existing setup, not instead of it.
     when opening that folder directly, and root-level named configs
     (`.devcontainer/practice/`, `.devcontainer/aion/` from PR 0.0) surface
     both for whoever opens the monorepo root.
-- [ ] **PR 0.3a (M)** **One React major across the monorepo** — a prerequisite
+- [x] **PR 0.3a (M)** **One React major across the monorepo** — a prerequisite
   that was not in the original plan. It was found by attempting PR 0.3 below and
-  measuring what broke; the attempt was reverted rather than landed.
+  measuring what broke; that attempt was reverted rather than landed.
+
+  **Done, in two PRs.** The blocker turned out to be a single dependency:
+  Recoil, used for exactly one atom, reaching into React's
+  `__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED`, which React 19 removed.
+  It was replaced with a ~20-line `useSyncExternalStore` store first, on React
+  18, so that change stands on its own; the version bump then needed **one line**
+  of source change (`React.ReactNodeArray`, gone from React 19's types).
+
+  Everything else survived unchanged, which was the open question: boardgame.io
+  0.50.2's React client mounts and its reducer runs, verified by playing through
+  login → disclaimer → relay and → strategy in Chromium on both majors and
+  getting **identical** output, down to the reducer's rejection of an illegal
+  move. MUI 5.16, notistack 2, `react-text-mask` and Sentry 7 all work at
+  runtime despite peer ranges that stop at 18 — those ranges are advisory here,
+  and `legacy-peer-deps` was already on for boardgame.io's sake. Bumping them is
+  worth doing on its own schedule, not as part of this.
 
   **npm nests the conflicting *direct* dependencies, but it hoists everything
   else** — and a hoisted package binds to whatever React sits at the root. That

@@ -37,14 +37,14 @@ regression checklist every change is measured against.
 
 ## Tech Stack
 
-- **Frontend**: React 18, Vite, MUI (Material-UI), React Router
+- **Frontend**: React 19, Vite, MUI (Material-UI), React Router
 - **Backend**: boardgame.io server, Koa, PostgreSQL (via bgio-postgres)
 - **Build**: Turborepo, TypeScript, tsup
 - **Testing**: vitest, React Testing Library. Suites are `*.test.ts(x)` under
   the root config and `*.spec.ts(x)` in `apps/practice`; both run through
   vitest, and neither uses Jest.
-- **`apps/practice`** is its own stack: React 19, its own Vite/TS/ESLint
-  versions, Tailwind. See its `package.json` rather than assuming this one's.
+- **`apps/practice`** is on the same React major but its own Vite/TS/ESLint
+  versions, plus Tailwind. See its `package.json` rather than assuming this one's.
 
 ## Development Commands
 
