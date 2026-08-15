@@ -310,9 +310,12 @@ tasks, pinned Node) arrives alongside the existing setup, not instead of it.
     - [x] **The 2023 relay build preserved** — committed at `pages/valto-2023/`
           with a script that rebases it onto whatever prefix serves it, so
           switching the Pages source does not take relay practice offline.
-    - [ ] **The deploy itself** — `test-and-deploy` replaced by a root workflow
-          that assembles one artifact, and Pages switched from the `gh-pages`
-          branch to Actions.
+    - [x] **The deploy itself** — `test-and-deploy` replaced by
+          `pages-deploy.yml`, which builds each app against its own subpath,
+          rebases the frozen relay artifact and uploads one artifact. It takes
+          effect only once a maintainer sets Pages' source to Actions, which is
+          step 2 of the pages doc's sequence and the point where
+          `github.io/durer-aion/` becomes the home page.
   - [ ] **Merge the tooling** — the two `.claude/` setups, the SessionStart
         hook, and `claude.md` → `CLAUDE.md` rewritten for the monorepo.
 

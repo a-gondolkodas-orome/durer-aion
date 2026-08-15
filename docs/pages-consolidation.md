@@ -214,14 +214,14 @@ path kept, which is the same behaviour already verified for
 | # | who | what |
 | --- | --- | --- |
 | 0 | dev | **Done.** Groundwork with no effect on any deploy: practice's two non-deploy workflows ported to the repo root with `paths` filters, and every script that reads the repo's layout taught the new one |
-| 1 | dev | PR: `test-and-deploy` replaced by a root workflow that builds the three subpages into one artifact; Pages built from Actions; static home page; `data-domains` extended |
+| 1 | dev | **Done, awaiting merge.** `test-and-deploy` replaced by a root workflow that builds the three subpages into one artifact; static home page; `data-domains` extended. Deploys nothing until step 2 |
 | 2 | maintainer | Settings → Pages: source = GitHub Actions. **No custom domain yet.** |
 | 3 | everyone | **Verify** on the github.io URL, for as long as it takes. `jatek.durerinfo.hu` is still served by durer-jatekok, untouched. |
 | 4 | **teammate** | DNS record for `gyakorlo.durerinfo.hu` → durer-aion's Pages |
 | 5 | dev + maintainer | Add `public/CNAME`, rebuild with the base path switched, set the custom domain in Settings |
 | 6 | maintainer | Cut over: replace durer-jatekok's published content with the redirect stub |
 | 7 | **teammate** | Repoint the links on durerinfo.hu |
-| 8 | dev | Later, in any order: `/proba-verseny/`, #224's relay app at `/valto/`, the designed home page |
+| 8 | dev | Later, in any order: #224's relay app replacing the frozen `/valto/`, the designed home page |
 
 Steps 1–5 have no effect on `jatek.durerinfo.hu`. Step 6 is the only
 irreversible-feeling moment, and it is a one-file revert.
@@ -275,11 +275,19 @@ issue title now names the app, since this repo holds four.
   asset paths and 404 every file under the subpath. Same trap as
   `DEV_SERVER_HOST` in the dev container; verified by removing the entry and
   watching the paths lose their prefix.
-- [ ] `apps/practice/public/CNAME`: added at **step 5**, not before — a CNAME file
-  present while Settings has no custom domain configured is at best inert and at
-  worst confusing.
-- [ ] A root workflow that builds each app and assembles one `dist/` tree, then
-  `upload-pages-artifact` + `deploy-pages` once.
+- [x] **The `CNAME` file** — done, by deletion. `apps/practice/public/CNAME`
+  already existed and said `jatek.durerinfo.hu`: harmless in durer-jatekok,
+  where practice *is* the site, and wrong here, where it would be copied into
+  `/jatekok/CNAME`. At the artifact **root** it would be worse than wrong — it
+  would tell this repo's Pages its domain is `jatek.durerinfo.hu`, the one
+  domain that must keep pointing at durer-jatekok. Deleted, and the deploy
+  asserts no `CNAME` reappears. The real one goes in at **step 5**, at the root
+  of the assembled site rather than inside an app.
+- [x] **A root workflow** — done. `pages-deploy.yml` builds each app against its
+  own subpath, rebases the frozen relay artifact, assembles one `site/` tree and
+  runs `upload-pages-artifact` + `deploy-pages` once. It carries practice's
+  `check:versions` / lint / typecheck / test gates, which `pr-test` only runs on
+  pull requests — without them a push to `main` would deploy checks nobody ran.
 - Practice's workflows keep their own conventions (`checkout@v7`, `cache@v6`,
   containerised `node:24.11.1`) rather than being harmonised with durer-aion's
   `setup-node` + `.nvmrc` jobs; converging them is separate work.
@@ -362,3 +370,10 @@ Deliberately deferred, so they do not block the consolidation.
 - [ ] **Consider umami for the other subpages.** `/valto/` and `/proba-verseny/`
   have no tracking today. Not required, but the one-line script tag is the
   cheapest moment to add it while the pages are being assembled anyway.
+- [ ] **`/proba-verseny/` renders nothing when `cdn.jsdelivr.net` is
+  unreachable.** Its `index.html` pulls `latex.js` from the CDN, and with that
+  request blocked the page stays blank — not a degraded render, an empty one.
+  Found while verifying the assembled site, and reproducible on a plain
+  root-base build too, so it is the app's own single point of failure rather
+  than anything the consolidation introduces. Vendoring the script or making
+  the failure non-fatal would fix it.
