@@ -247,15 +247,25 @@ issue title now names the app, since this repo holds four.
 
 ## Code changes step 1 needs
 
-- `apps/practice/vite.config.js`: `base: '/'` → a **parameterised** base, since
-  it differs before and after the custom domain — `/durer-aion/jatekok/` on the
-  default domain, `/jatekok/` after. Read it from one env var set by the
-  workflow so the switch at step 5 is a single line, not an edit in every app.
-  The same variable rebases the frozen relay artifact and the home page's links.
-- `apps/practice/public/CNAME`: added at **step 5**, not before — a CNAME file
+- [x] **A parameterised base path** — done. Both vite apps read `SITE_BASE`
+  and fall back to what they serve today, so nothing changes until a deploy
+  sets it. The prefix differs before and after the custom domain
+  (`/durer-aion/jatekok/` vs `/jatekok/`), so the workflow composes all three
+  subpaths from one variable and step 5 edits one line rather than one per app.
+  Not `VITE_`-prefixed on purpose: vite would embed it in the client bundle,
+  and it is a build input, not application config.
+
+  **`SITE_BASE` has to be in `turbo.json`'s `globalEnv`.** Turborepo 2 runs
+  strict env mode and passes through nothing it was not told about, so without
+  the entry the variable reaches turbo and not vite — and the build succeeds,
+  quietly falling back to `/`. The site would then deploy with root-absolute
+  asset paths and 404 every file under the subpath. Same trap as
+  `DEV_SERVER_HOST` in the dev container; verified by removing the entry and
+  watching the paths lose their prefix.
+- [ ] `apps/practice/public/CNAME`: added at **step 5**, not before — a CNAME file
   present while Settings has no custom domain configured is at best inert and at
   worst confusing.
-- A root workflow that builds each app and assembles one `dist/` tree, then
+- [ ] A root workflow that builds each app and assembles one `dist/` tree, then
   `upload-pages-artifact` + `deploy-pages` once.
 - Practice's workflows keep their own conventions (`checkout@v7`, `cache@v6`,
   containerised `node:24.11.1`) rather than being harmonised with durer-aion's

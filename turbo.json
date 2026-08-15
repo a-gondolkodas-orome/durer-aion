@@ -9,7 +9,8 @@
     "DATABASE_URL",
     "GAME_GLOBAL_START_T",
     "GAME_GLOBAL_END_T",
-    "DEV_SERVER_HOST"
+    "DEV_SERVER_HOST",
+    "SITE_BASE"
   ],
   "tasks": {
     "start": {
