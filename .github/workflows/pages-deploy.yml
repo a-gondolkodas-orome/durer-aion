@@ -1,0 +1,117 @@
+name: pages-deploy
+on:
+  push:
+    branches: [main]
+  # Flipping the Pages source in Settings does not itself trigger a build, and neither does
+  # changing the custom domain — both need a redeploy a maintainer can start from here.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+env:
+  # The one line that moves the whole site. `/durer-aion/` while it is served from the default
+  # Pages domain; `/` once gyakorlo.durerinfo.hu is configured, which is step 5 of
+  # docs/pages-consolidation.md § Sequence. Every subpath below is composed from it, so the
+  # switch stays one edit rather than one per app.
+  SITE_ROOT: /durer-aion/
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    # Practice's pin, which also satisfies the root .nvmrc (`24`). One container builds both
+    # rather than two jobs handing a partial artifact to each other.
+    container:
+      image: node:24.11.1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      # offline-frontend's vite config stamps the build with `git rev-parse HEAD`, and in a
+      # container job actions/checkout's safe.directory setting is gone by the time a later
+      # step runs git — it fails with "detected dubious ownership".
+      - name: Let git read the checkout
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Cache npm downloads
+        uses: actions/cache@v6
+        with:
+          path: ~/.npm
+          key: npm-pages-${{ hashFiles('package-lock.json', 'apps/practice/package-lock.json') }}
+          restore-keys: npm-pages-
+
+      - name: Install dependencies
+        id: install
+        run: npm ci
+      - name: Install practice dependencies
+        id: install-practice
+        working-directory: apps/practice
+        run: npm ci
+
+      # apps/practice keeps its own gates here, as its deploy workflow did: pr-test only runs on
+      # pull requests, so without these a check nobody ran on main would ship. The rest of the
+      # monorepo is covered by ci.yml on the same push, and by the build below.
+      - name: Check tool versions
+        if: ${{ !cancelled() && steps.install-practice.outcome == 'success' }}
+        working-directory: apps/practice
+        run: npm run check:versions
+      - name: Lint practice
+        if: ${{ !cancelled() && steps.install-practice.outcome == 'success' }}
+        working-directory: apps/practice
+        run: npm run lint
+      - name: Typecheck practice
+        if: ${{ !cancelled() && steps.install-practice.outcome == 'success' }}
+        working-directory: apps/practice
+        run: npm run typecheck
+      - name: Test practice
+        if: ${{ !cancelled() && steps.install-practice.outcome == 'success' }}
+        working-directory: apps/practice
+        run: npm run test:unit
+
+      - name: Build strategy game practice
+        working-directory: apps/practice
+        run: npm run build
+        env:
+          SITE_BASE: ${{ env.SITE_ROOT }}jatekok/
+      - name: Build the competition dry run
+        run: npx turbo build --filter=offline-frontend
+        env:
+          SITE_BASE: ${{ env.SITE_ROOT }}proba-verseny/
+
+      # One artifact, so the layout is assembled here rather than by each app. A build failure
+      # in any of them blocks the whole deploy — the accepted cost of a single Pages site.
+      - name: Assemble the site
+        run: |
+          set -euo pipefail
+          mkdir -p site
+          cp -r pages/home/. site/
+          mkdir -p site/jatekok && cp -r apps/practice/dist/. site/jatekok/
+          mkdir -p site/proba-verseny && cp -r apps/offline-frontend/dist/. site/proba-verseny/
+          # The 2023 relay build cannot be rebuilt (pages/README.md), so it is rebased rather
+          # than compiled. The script fails loudly if any occurrence is left behind.
+          node scripts/rebase-static-site.mjs pages/valto-2023 site/valto /durer-aion/ "${SITE_ROOT}valto/"
+          find site -maxdepth 2 -name CNAME -print
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    runs-on: ubuntu-24.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
+        with:
+          # A healthy deployment reports success in well under a minute, so the action's 10
+          # minute default only ever delays the report when Pages' queue is stalled.
+          timeout: 180000

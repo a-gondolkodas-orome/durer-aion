@@ -1,13 +1,21 @@
 # Prebuilt pages
 
-Static sites the Pages deploy serves that are **not built from this repository's
-source**. Everything else the site serves is built by the deploy workflow from
-`apps/`; what lands here is what cannot be.
+What the Pages deploy serves that **no app build produces** — a hand-written page
+and a frozen artifact. Everything else comes from `apps/`, built by
+`.github/workflows/pages-deploy.yml`, which assembles all of it into `site/`.
 
 Nothing under a subdirectory here is documented in the subdirectory itself — the
 deploy copies those trees verbatim, so a README would be published along with
 them (and, since this one names the old base path, would trip the rebase check
 on the way).
+
+## `home/` — the site's front page
+
+One file, no assets, no build step: the signpost for the subpages around it.
+Its links are **relative**, so it works under `/durer-aion/` and under a custom
+domain alike with nothing to rebase. It links the two practice sites and not
+`/proba-verseny/`, which uploads play data to a shared bucket and is meant to be
+handed to testers rather than discovered.
 
 ## `valto-2023/` — the 2023 relay practice build
 
