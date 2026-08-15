@@ -84,7 +84,9 @@ users a working site for no engineering gain.
 ## Target layout
 
 One Pages site on durer-aion, **one home page and three subpages**, all in one
-artifact built by one workflow:
+artifact built by one workflow. Shown at the end state; until the custom domain
+is added everything sits under the `/durer-aion/` project prefix instead (see
+Sequence).
 
 ```
 gyakorlo.durerinfo.hu/
@@ -101,8 +103,8 @@ into `/jatekok/`.
 
 ### The home page
 
-The moment the domain exists, `/` serves something or visitors get a bare 404.
-A ten-line static `index.html` is enough for the first step; a designed one can
+From the first deploy the site root serves something or visitors get a bare
+404. A ten-line static `index.html` is enough to start with; a designed one can
 follow. It also answers the "I landed on the wrong subpage" problem — the site
 holds several different things now, and the root is where that becomes visible.
 
@@ -163,10 +165,11 @@ no data, which is the kind of failure nobody notices for a month.
 
 Two consequences for the sequence:
 
-- Step 2 must update `data-domains`. During the overlap the attribute takes a
-  comma-separated list, so `jatek.durerinfo.hu,gyakorlo.durerinfo.hu` keeps
-  both tracked while the old domain still serves, and can be trimmed after the
-  cutover.
+- The attribute takes a comma-separated list, so it should name every host the
+  site is served from during the transition:
+  `jatek.durerinfo.hu,a-gondolkodas-orome.github.io,gyakorlo.durerinfo.hu`.
+  That keeps the github.io staging deploy tracked too, and it can be trimmed to
+  the final domain after the cutover.
 - Worth checking the website's own domain field in the umami dashboard at the
   same time, which lives outside this repo.
 
@@ -175,28 +178,56 @@ durer-jatekok, at the same domain, with the same script tag.
 
 ## Sequence
 
-Ordered so that nothing user-visible changes until the new site has been
-verified, and so no domain is ever moved between repos — GitHub enforces
-custom-domain uniqueness, and moving one means downtime between removing and
-re-adding it.
+**The custom domain is not a prerequisite.** The whole site can be built,
+deployed and verified on durer-aion's default Pages URL first, which takes the
+DNS record off the critical path — nobody outside the repo is needed until the
+very end.
+
+On the default domain the site lives under the project prefix:
+
+```
+a-gondolkodas-orome.github.io/durer-aion/                 home page
+a-gondolkodas-orome.github.io/durer-aion/jatekok/         strategy game practice
+a-gondolkodas-orome.github.io/durer-aion/valto/           relay practice
+a-gondolkodas-orome.github.io/durer-aion/proba-verseny/   competition dry run
+```
+
+and adding the custom domain later moves it to `gyakorlo.durerinfo.hu/jatekok/`
+and so on. **Interim links survive that move**: GitHub redirects the default
+domain to the custom one with the project prefix stripped and the rest of the
+path kept, which is the same behaviour already verified for
+`github.io/durer-jatekok` → `jatek.durerinfo.hu`.
 
 | # | who | what |
 | --- | --- | --- |
-| 1 | **teammate** | DNS record for `gyakorlo.durerinfo.hu` → durer-aion's Pages |
-| 2 | dev | PR: practice's workflows ported to the repo root with `paths` filters; Pages built from Actions; `apps/practice` built at base `/jatekok/`; static home page at `/`; `public/CNAME` = the new domain; `data-domains` extended to both domains; `check:versions` taught its new workflow paths |
-| 3 | maintainer | Settings → Pages: source = GitHub Actions, custom domain = `gyakorlo.durerinfo.hu` |
-| 4 | everyone | **Verify.** `jatek.durerinfo.hu` is still served by durer-jatekok throughout, so both sites are live at once and there is no rush. |
-| 5 | maintainer | Cut over: replace durer-jatekok's published content with the redirect stub |
-| 6 | **teammate** | Repoint the links on durerinfo.hu |
-| 7 | dev | Later, in either order: `/proba-verseny/` (needs the S3 values first), #224's relay app at `/valto/`, then the designed home page |
+| 1 | dev | PR: practice's workflows ported to the repo root with `paths` filters; Pages built from Actions; the three subpages assembled into one artifact; static home page; `data-domains` extended; `check:versions` taught its new workflow paths |
+| 2 | maintainer | Settings → Pages: source = GitHub Actions. **No custom domain yet.** |
+| 3 | everyone | **Verify** on the github.io URL, for as long as it takes. `jatek.durerinfo.hu` is still served by durer-jatekok, untouched. |
+| 4 | **teammate** | DNS record for `gyakorlo.durerinfo.hu` → durer-aion's Pages |
+| 5 | dev + maintainer | Add `public/CNAME`, rebuild with the base path switched, set the custom domain in Settings |
+| 6 | maintainer | Cut over: replace durer-jatekok's published content with the redirect stub |
+| 7 | **teammate** | Repoint the links on durerinfo.hu |
+| 8 | dev | Later, in any order: `/proba-verseny/`, #224's relay app at `/valto/`, the designed home page |
 
-Steps 1–4 have no user-visible effect. Step 5 is the only irreversible-feeling
-moment and it is a one-file revert.
+Steps 1–5 have no effect on `jatek.durerinfo.hu`. Step 6 is the only
+irreversible-feeling moment, and it is a one-file revert.
 
-## Code changes step 2 needs
+One thing does change visibly at step 2: `github.io/durer-aion/` stops being
+the 2023 relay practice and becomes the new home page, with relay practice one
+click away at `/durer-aion/valto/`. That is the intended end state arriving
+early rather than a regression — and it is why the frozen relay build ships in
+the very first deploy rather than later.
 
-- `apps/practice/vite.config.js`: `base: '/'` → `'/jatekok/'`.
-- `apps/practice/public/CNAME`: → the new domain (it is the file Pages reads).
+## Code changes step 1 needs
+
+- `apps/practice/vite.config.js`: `base: '/'` → a **parameterised** base, since
+  it differs before and after the custom domain — `/durer-aion/jatekok/` on the
+  default domain, `/jatekok/` after. Read it from one env var set by the
+  workflow so the switch at step 5 is a single line, not an edit in every app.
+  The same variable rebases the frozen relay artifact and the home page's links.
+- `apps/practice/public/CNAME`: added at **step 5**, not before — a CNAME file
+  present while Settings has no custom domain configured is at best inert and at
+  worst confusing.
 - `apps/practice/scripts/check-versions.mjs`: it reads
   `.github/workflows/pr_test.yml` and `test_and_deploy.yml` relative to
   `apps/practice/`, where they will no longer be. It gates `npm test` and both
