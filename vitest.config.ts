@@ -9,6 +9,6 @@ export default defineConfig({
     // Most suites are plain Node. Component tests opt into a DOM per file with
     // a `// @vitest-environment jsdom` docblock.
     environment: 'node',
-    include: ['{apps,packages}/*/src/**/*.test.{ts,tsx}'],
+    include: ['{apps,packages}/*/src/**/*.test.{ts,tsx}', 'scripts/**/*.test.mjs'],
   },
 });

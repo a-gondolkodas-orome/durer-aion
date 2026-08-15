@@ -305,6 +305,11 @@ tasks, pinned Node) arrives alongside the existing setup, not instead of it.
           `dependency-report` moved to the root with `paths` filters. Leaving
           the directory they resolved paths from broke three scripts, all of
           them silently; see the pages doc.
+    - [x] **A parameterised base path** — both vite apps read `SITE_BASE`, so
+          the deploy composes all three subpaths from one variable.
+    - [x] **The 2023 relay build preserved** — committed at `pages/valto-2023/`
+          with a script that rebases it onto whatever prefix serves it, so
+          switching the Pages source does not take relay practice offline.
     - [ ] **The deploy itself** — `test-and-deploy` replaced by a root workflow
           that assembles one artifact, and Pages switched from the `gh-pages`
           branch to Actions.

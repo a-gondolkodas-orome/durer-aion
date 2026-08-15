@@ -33,6 +33,14 @@ export default defineConfig(
       'prefer-const': 'warn',
     },
   },
+  // Build and repo tooling under scripts/ runs in Node, not the browser, so `process` and
+  // `console` are globals rather than undefined names.
+  {
+    files: ['scripts/**/*.mjs'],
+    languageOptions: {
+      globals: { process: 'readonly', console: 'readonly' },
+    },
+  },
   // Global ignores
   {
     ignores: [
@@ -45,6 +53,8 @@ export default defineConfig(
       // this repo's install, so linting it from here would resolve neither
       // its plugins nor its tsconfig.
       'apps/practice/**',
+      // A frozen 2023 build output, kept byte for byte. See pages/valto-2023/README.md.
+      'pages/**',
     ],
   }
 );

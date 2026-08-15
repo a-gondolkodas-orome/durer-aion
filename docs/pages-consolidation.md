@@ -68,11 +68,11 @@ Pages source at a time, so the moment durer-aion's source switches from the
 `gh-pages` branch to Actions, relay practice goes offline — and cannot come
 back until #224 lands.
 
-**Decided: preserve the 2023 build.** The artifact hardcodes `/durer-aion/` in
-14 places across `index.html`, `asset-manifest.json` and the main JS bundle;
-rewriting those to `/valto/` rebases it, and it goes into the new artifact as a
-frozen snapshot. `/valto/` therefore serves the existing relay practice from
-the first deploy, and #224 replaces the folder wholesale when it merges.
+**Decided: preserve the 2023 build — done.** It is committed at
+`pages/valto-2023/`, and `scripts/rebase-static-site.mjs` rewrites the
+`/durer-aion/` baked into it to whatever prefix the deploy serves it from.
+`/valto/` therefore serves the existing relay practice from the first deploy,
+and #224 replaces the directory wholesale when it merges.
 
 The snapshot is a committed build output, which is ugly and worth saying out
 loud — but the alternative, a workflow step that reads the `gh-pages` branch,
@@ -80,6 +80,19 @@ hides a dependency on a branch we intend to delete. Rejected alternatives:
 landing #224 before the cutover puts a 48-file contributor PR, currently
 conflicted, on the critical path of the deploy move; accepting an outage costs
 users a working site for no engineering gain.
+
+Two things found while doing it:
+
+- **The 2023 source is not lost after all.** The bundle's source map carries
+  `sourcesContent` for all 830 modules, including the 106 original app sources
+  (`pages/GithubPagesMain.tsx`, `client/relay-rounds.ts`,
+  `games/relay/problems.ts`, …). That settles the open question below: deleting
+  the `gh-pages` branch is only safe *because* the artifact — map included — is
+  committed here.
+- **This build ignores the hash route.** Every `#/…` path renders the same page,
+  so unlike durer-jatekok's `#/game/…` links there are no relay deep links to
+  preserve. Verified by serving the original and the rebased copy side by side
+  and diffing the rendered text on four routes: identical, no failed requests.
 
 ## Target layout
 
@@ -325,9 +338,10 @@ build at two addresses.
 
 1. **What happens to the 2023 `gh-pages` branch** once #224's relay app serves
    `/valto/`. Deleting the branch is safe after the Pages source moves to
-   Actions, but the old `github.io/durer-aion/` URL then 404s unless the home
-   page inherits it — which it does, since that URL redirects to the custom
-   domain once one is set.
+   Actions *and* the artifact is committed here — which it now is, source map
+   and all, so the branch holds nothing that is not also on `main`. The old
+   `github.io/durer-aion/` URL then 404s unless the home page inherits it —
+   which it does, since that URL redirects to the custom domain once one is set.
 
 ## Action items to decide on later
 
