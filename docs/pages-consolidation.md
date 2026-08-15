@@ -67,12 +67,12 @@ back until #224 lands. Three ways out:
 
 1. **Carry the artifact forward** (recommended default). It hardcodes
    `/durer-aion/` in 14 places across `index.html`, `asset-manifest.json` and
-   the main JS bundle, so it can be rebased to `/relay/` and dropped into the
+   the main JS bundle, so it can be rebased to `/valto/` and dropped into the
    new artifact as a frozen snapshot, replaced wholesale when #224 lands. Costs
    a committed build output — or a workflow step that reads the `gh-pages`
    branch, which trades the ugliness for a hidden dependency on a branch we
    intend to delete.
-2. **Land #224 before the cutover.** Cleanest end state — `/relay/` is built
+2. **Land #224 before the cutover.** Cleanest end state — `/valto/` is built
    from source, no snapshot, and the stale 2023 build is retired rather than
    preserved. It puts a 48-file contributor PR, currently conflicted, on the
    critical path of the deploy move.
@@ -88,15 +88,15 @@ artifact built by one workflow:
 ```
 gyakorlo.durerinfo.hu/
   /                 home page — what this site is, and where to go
-  /strategy-game/   apps/practice                 strategy game practice
+  /jatekok/         apps/practice                 strategy game practice
                                                   (today's jatek.durerinfo.hu)
-  /relay/           apps/relay-practise-frontend  relay practice (#224), or the
+  /valto/           apps/relay-practise-frontend  relay practice (#224), or the
                                                   frozen 2023 build until it lands
   /proba-verseny/   apps/offline-frontend         competition dry run, both rounds
 ```
 
 `jatek.durerinfo.hu` stays on the durer-jatekok repo and becomes a redirect
-into `/strategy-game/`.
+into `/jatekok/`.
 
 ### The home page
 
@@ -129,7 +129,7 @@ replace that repo's published content with a redirect stub.
   // location.hash is the point: fragments never reach the server, so the
   // preservation has to happen in the browser. Every deep link on the
   // practice site is a fragment, so this one line covers all of them.
-  location.replace('https://gyakorlo.durerinfo.hu/strategy-game/' + location.hash);
+  location.replace('https://gyakorlo.durerinfo.hu/jatekok/' + location.hash);
 </script>
 ```
 
@@ -147,19 +147,19 @@ re-adding it.
 | # | who | what |
 | --- | --- | --- |
 | 1 | **teammate** | DNS record for `gyakorlo.durerinfo.hu` → durer-aion's Pages |
-| 2 | dev | PR: practice's workflows ported to the repo root with `paths` filters; Pages built from Actions; `apps/practice` built at base `/strategy-game/`; static home page at `/`; `public/CNAME` = the new domain; `check:versions` taught its new workflow paths |
+| 2 | dev | PR: practice's workflows ported to the repo root with `paths` filters; Pages built from Actions; `apps/practice` built at base `/jatekok/`; static home page at `/`; `public/CNAME` = the new domain; `check:versions` taught its new workflow paths |
 | 3 | maintainer | Settings → Pages: source = GitHub Actions, custom domain = `gyakorlo.durerinfo.hu` |
 | 4 | everyone | **Verify.** `jatek.durerinfo.hu` is still served by durer-jatekok throughout, so both sites are live at once and there is no rush. |
 | 5 | maintainer | Cut over: replace durer-jatekok's published content with the redirect stub |
 | 6 | **teammate** | Repoint the links on durerinfo.hu |
-| 7 | dev | Later, in either order: `/proba-verseny/` (needs the S3 values first), #224's relay app at `/relay/`, then the designed home page |
+| 7 | dev | Later, in either order: `/proba-verseny/` (needs the S3 values first), #224's relay app at `/valto/`, then the designed home page |
 
 Steps 1–4 have no user-visible effect. Step 5 is the only irreversible-feeling
 moment and it is a one-file revert.
 
 ## Code changes step 2 needs
 
-- `apps/practice/vite.config.js`: `base: '/'` → `'/strategy-game/'`.
+- `apps/practice/vite.config.js`: `base: '/'` → `'/jatekok/'`.
 - `apps/practice/public/CNAME`: → the new domain (it is the file Pages reads).
 - `apps/practice/scripts/check-versions.mjs`: it reads
   `.github/workflows/pr_test.yml` and `test_and_deploy.yml` relative to
@@ -175,6 +175,14 @@ moment and it is a one-file revert.
 failure in any app blocks the deploy of all of them. Acceptable — they share a
 repo and a CI run — but it is a change from today, where the sites deploy
 independently.
+
+## Decided: Hungarian names
+
+**Domain: `gyakorlo.durerinfo.hu`. Paths: `/jatekok/`, `/valto/`,
+`/proba-verseny/`.** One canonical language throughout, with English reachable
+in one click from every page. The reasoning below is kept because it is the
+argument for *one* canonical name rather than two, which still governs any
+later request for an English alias.
 
 ## One domain or two, and in which language
 
@@ -207,20 +215,16 @@ build at two addresses.
 
 ## Open questions
 
-1. **Domain name** — `gyakorlo.durerinfo.hu` or `practice.durerinfo.hu`.
-   Decide *before* step 1: changing it afterwards repeats the whole sequence.
-   See "One domain or two" below for why one canonical name plus an optional
-   redirect beats two real ones.
+1. ~~**Domain name.**~~ Decided: `gyakorlo.durerinfo.hu`. An English alias
+   stays possible later as a DNS-level 301, never as a second Pages domain.
 2. **Who holds the real S3 values** (`VITE_S3_BUCKET_NAME`, `VITE_S3_FOLDER`).
    They are the one hard blocker for `/proba-verseny/` — `sendData` throws
    without them — and they are not in this repo. Needed as build secrets before
    that subpage can ship; the other two subpages do not depend on them.
-3. **Path language.** `proba-verseny` is Hungarian while `strategy-game` and
-   `relay` are English. Pick one language and stay in it — Hungarian
-   (`jatekok`, `valto`, `proba-verseny`) or English throughout. Cheap now,
-   expensive once durerinfo.hu links to them.
+3. ~~**Path language.**~~ Decided: Hungarian throughout — `/jatekok/`,
+   `/valto/`, `/proba-verseny/`.
 4. **What happens to the 2023 `gh-pages` branch** once #224's relay app serves
-   `/relay/`. Deleting the branch is safe after the Pages source moves to
+   `/valto/`. Deleting the branch is safe after the Pages source moves to
    Actions, but the old `github.io/durer-aion/` URL then 404s unless the home
    page inherits it — which it does, since that URL redirects to the custom
    domain once one is set.
