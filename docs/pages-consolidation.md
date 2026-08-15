@@ -24,7 +24,7 @@ document decides.
 | what | where it is today | notes |
 | --- | --- | --- |
 | **Strategy game practice** | `jatek.durerinfo.hu` (durer-jatekok, Pages from Actions) | The live practice site. Hash-routed, so every deep link is `#/game/…`. |
-| **Relay practice** | `https://a-gondolkodas-orome.github.io/durer-aion/` (durer-aion `gh-pages` branch) | A Create React App build from **August 2023**. #224 is building its modern replacement as `apps/relay-practise-frontend`. |
+| **Relay practice** | `https://a-gondolkodas-orome.github.io/durer-aion/` (durer-aion `gh-pages` branch) | Live: pick a past year's problem set, 90 minutes. A Create React App build from **August 2023** whose source no longer exists — see below. #224 is building its replacement as `apps/relay-practise-frontend`. |
 | **Competition dry run** | no permanent home — built per competition and deployed from that year's private repo | `apps/offline-frontend`: the full competition shell, both rounds, in-browser bots. Also uploads play data to S3 (see below). |
 | **The real competition** | `verseny.durerinfo.hu` | nginx + docker, **not** GitHub Pages. Unaffected by any of this. |
 
@@ -53,6 +53,33 @@ deploy time for one competition and explicitly not meant to be committed. It
 gets replaced by the `/proba-verseny/` base, and giving the dry run a permanent
 home here is new — it has never had one.
 
+### The live relay practice site cannot be rebuilt
+
+Nothing on `main` builds it. Its source went away in the monorepo restructure
+(#138) — `SelectRound` and `LoginToRelay` exist only in #224 — so what is
+serving today is an orphaned artifact on the `gh-pages` branch. #224's copy is
+a direct descendant of its wording, which is how we know the lineage.
+
+**This is a sequencing constraint, not a footnote.** A repository serves one
+Pages source at a time, so the moment durer-aion's source switches from the
+`gh-pages` branch to Actions, relay practice goes offline — and cannot come
+back until #224 lands. Three ways out:
+
+1. **Carry the artifact forward** (recommended default). It hardcodes
+   `/durer-aion/` in 14 places across `index.html`, `asset-manifest.json` and
+   the main JS bundle, so it can be rebased to `/relay/` and dropped into the
+   new artifact as a frozen snapshot, replaced wholesale when #224 lands. Costs
+   a committed build output — or a workflow step that reads the `gh-pages`
+   branch, which trades the ugliness for a hidden dependency on a branch we
+   intend to delete.
+2. **Land #224 before the cutover.** Cleanest end state — `/relay/` is built
+   from source, no snapshot, and the stale 2023 build is retired rather than
+   preserved. It puts a 48-file contributor PR, currently conflicted, on the
+   critical path of the deploy move.
+3. **Accept the gap.** Only reasonable if relay practice has few enough users
+   that a known outage between the cutover and #224 is acceptable — a question
+   for the maintainers, not an engineering one.
+
 ## Target layout
 
 One Pages site on durer-aion, **one home page and three subpages**, all in one
@@ -63,8 +90,8 @@ gyakorlo.durerinfo.hu/
   /                 home page — what this site is, and where to go
   /strategy-game/   apps/practice                 strategy game practice
                                                   (today's jatek.durerinfo.hu)
-  /relay/           apps/relay-practise-frontend  relay practice
-                                                  (#224; replaces the 2023 build)
+  /relay/           apps/relay-practise-frontend  relay practice (#224), or the
+                                                  frozen 2023 build until it lands
   /proba-verseny/   apps/offline-frontend         competition dry run, both rounds
 ```
 
@@ -149,20 +176,49 @@ failure in any app blocks the deploy of all of them. Acceptable — they share a
 repo and a CI run — but it is a change from today, where the sites deploy
 independently.
 
+## One domain or two, and in which language
+
+Both sites already serve Hungarian and English and let the visitor switch
+in-app — durer-aion through i18next (`supportedLngs: ['en', 'hu']`,
+`fallbackLng: 'hu'`), practice through its own `LanguageProvider` and
+`LanguageSelector`. **The address selects nothing.** Whatever domain or path
+someone arrives through, they get the language they choose, so a bilingual URL
+scheme buys recognisability at the door and no functionality at all.
+
+That makes duplicated content a bad trade: two paths, or two domains, serving
+the same build doubles the URL surface for a cosmetic gain, and whichever one a
+person happens to copy is the one that spreads. Ranked:
+
+1. **One canonical domain, bilingual home page.** The home page is being built
+   anyway and is the natural signpost — it can greet in both languages and
+   label each subpage in both. An international visitor who cannot parse
+   *gyakorlo* still lands somewhere immediately legible.
+2. **Plus an alias that redirects**, if the second name is worth it. This must
+   be a **301 at the DNS/CDN layer**, not a second Pages custom domain: a repo
+   has exactly one, and a hostname merely pointed at Pages without being *the*
+   configured domain gets a 404. Strictly additive, keeps one real URL, and
+   depends on whether durerinfo.hu's DNS provider supports redirect rules.
+3. **Two real sites** — only possible with a second repository, and it means
+   maintaining two deploys of one artifact. Not worth it for a signpost.
+
+The same reasoning applies to paths: if both languages feel necessary, make one
+canonical and let the other be a redirect stub, rather than serving the same
+build at two addresses.
+
 ## Open questions
 
-1. **Domain name** — `gyakorlo.durerinfo.hu` or `practice.durerinfo.hu`. The
-   audience and the domain are Hungarian, which argues for `gyakorlo`. Decide
-   *before* step 1: changing it afterwards repeats the whole sequence.
+1. **Domain name** — `gyakorlo.durerinfo.hu` or `practice.durerinfo.hu`.
+   Decide *before* step 1: changing it afterwards repeats the whole sequence.
+   See "One domain or two" below for why one canonical name plus an optional
+   redirect beats two real ones.
 2. **Who holds the real S3 values** (`VITE_S3_BUCKET_NAME`, `VITE_S3_FOLDER`).
    They are the one hard blocker for `/proba-verseny/` — `sendData` throws
    without them — and they are not in this repo. Needed as build secrets before
    that subpage can ship; the other two subpages do not depend on them.
 3. **Path language.** `proba-verseny` is Hungarian while `strategy-game` and
-   `relay` are English. Consistent naming either way would read better —
-   Hungarian throughout (`jatekok`, `valto`, `proba-verseny`) or English
-   throughout — but the paths are cheap to change now and expensive later, once
-   they are linked from durerinfo.hu.
+   `relay` are English. Pick one language and stay in it — Hungarian
+   (`jatekok`, `valto`, `proba-verseny`) or English throughout. Cheap now,
+   expensive once durerinfo.hu links to them.
 4. **What happens to the 2023 `gh-pages` branch** once #224's relay app serves
    `/relay/`. Deleting the branch is safe after the Pages source moves to
    Actions, but the old `github.io/durer-aion/` URL then 404s unless the home
