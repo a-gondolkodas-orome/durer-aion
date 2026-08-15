@@ -5,8 +5,11 @@ what. A sub-plan of [the migration plan](./boardgame-io-replacement-plan.md)'s
 PR 0.2, written up separately because it needs DNS changes and edits to
 durerinfo.hu that live outside this repo.
 
-Status: **in progress** — the sequence below has not started; groundwork the
-first step depends on is landing ahead of it. Ticked boxes are done.
+Status: **live on the default domain** — steps 0–3 are done. All four pages
+serve from `a-gondolkodas-orome.github.io/durer-aion/`, built from `main` by
+`.github/workflows/pages-deploy.yml`. What remains is the custom domain and
+the `jatek.durerinfo.hu` cutover, which start with a DNS record outside this
+repo. `jatek.durerinfo.hu` is unaffected so far.
 
 ## Why this is needed at all
 
@@ -214,10 +217,10 @@ path kept, which is the same behaviour already verified for
 | # | who | what |
 | --- | --- | --- |
 | 0 | dev | **Done.** Groundwork with no effect on any deploy: practice's two non-deploy workflows ported to the repo root with `paths` filters, and every script that reads the repo's layout taught the new one |
-| 1 | dev | **Done, awaiting merge.** `test-and-deploy` replaced by a root workflow that builds the three subpages into one artifact; static home page; `data-domains` extended. Deploys nothing until step 2 |
-| 2 | maintainer | Settings → Pages: source = GitHub Actions. **No custom domain yet.** |
-| 3 | everyone | **Verify** on the github.io URL, for as long as it takes. `jatek.durerinfo.hu` is still served by durer-jatekok, untouched. |
-| 4 | **teammate** | DNS record for `gyakorlo.durerinfo.hu` → durer-aion's Pages |
+| 1 | dev | **Done.** `test-and-deploy` replaced by a root workflow that builds the three subpages into one artifact; static home page; `data-domains` extended |
+| 2 | maintainer | **Done.** Settings → Pages: source = GitHub Actions, no custom domain. See the note below — the first deploy went live before the setting was changed |
+| 3 | everyone | **Done.** All four pages verified live on the github.io URL. `jatek.durerinfo.hu` is still served by durer-jatekok, untouched |
+| 4 | **teammate** | **← next.** DNS record for `gyakorlo.durerinfo.hu` → durer-aion's Pages |
 | 5 | dev + maintainer | Add `public/CNAME`, rebuild with the base path switched, set the custom domain in Settings |
 | 6 | maintainer | Cut over: replace durer-jatekok's published content with the redirect stub |
 | 7 | **teammate** | Repoint the links on durerinfo.hu |
@@ -225,6 +228,20 @@ path kept, which is the same behaviour already verified for
 
 Steps 1–5 have no effect on `jatek.durerinfo.hu`. Step 6 is the only
 irreversible-feeling moment, and it is a one-file revert.
+
+**What actually happened at step 2, because it is worth knowing next time.**
+The switch was not the trigger. The first `pages-deploy` run on `main` created
+a Pages deployment through the API, and GitHub published it — `updating_pages`
+→ success, the site serving the new artifact — while Settings still read
+"Deploy from a branch". So a repository whose Pages source is a branch will
+still serve an Actions artifact once a workflow deploys one, and the *setting*
+is what gets reconciled, not the deploy that gets rejected. The setting was
+then changed explicitly, which is still worth doing: leaving it on the branch
+keeps `gh-pages` as a competing source.
+
+Practical consequence: **the deploy workflow going green is itself the
+cutover.** There is no separate moment to hold, and no arrangement where the
+artifact sits staged while someone decides.
 
 One thing does change visibly at step 2: `github.io/durer-aion/` stops being
 the 2023 relay practice and becomes the new home page, with relay practice one
@@ -344,12 +361,13 @@ build at two addresses.
 
 ## Open questions
 
-1. **What happens to the 2023 `gh-pages` branch** once #224's relay app serves
-   `/valto/`. Deleting the branch is safe after the Pages source moves to
-   Actions *and* the artifact is committed here — which it now is, source map
-   and all, so the branch holds nothing that is not also on `main`. The old
-   `github.io/durer-aion/` URL then 404s unless the home page inherits it —
-   which it does, since that URL redirects to the custom domain once one is set.
+1. **What happens to the 2023 `gh-pages` branch.** Both preconditions for
+   deleting it now hold: the Pages source is Actions, and the artifact is
+   committed here — source map and all — so the branch holds nothing that is
+   not also on `main`. It is now inert either way, and the only reason left to
+   keep it is as a rollback that needs no rebuild. Reasonable to delete once
+   `/valto/` has served real traffic for a while; no rush, and nothing depends
+   on the timing.
 
 ## Action items to decide on later
 

@@ -312,10 +312,16 @@ tasks, pinned Node) arrives alongside the existing setup, not instead of it.
           switching the Pages source does not take relay practice offline.
     - [x] **The deploy itself** — `test-and-deploy` replaced by
           `pages-deploy.yml`, which builds each app against its own subpath,
-          rebases the frozen relay artifact and uploads one artifact. It takes
-          effect only once a maintainer sets Pages' source to Actions, which is
-          step 2 of the pages doc's sequence and the point where
-          `github.io/durer-aion/` becomes the home page.
+          rebases the frozen relay artifact and uploads one artifact. **Live**:
+          all four pages serve from `github.io/durer-aion/`, and relay practice
+          moved from that root to `/valto/` without an outage, which is what the
+          committed 2023 artifact was for.
+
+          Two things the first run taught, both in the pages doc: the build job
+          runs under `sh`, not bash, so `set -o pipefail` fails the step; and a
+          Pages deployment from Actions goes live even while Settings still says
+          "Deploy from a branch" — the workflow going green *is* the cutover,
+          with the setting reconciled afterwards.
   - [ ] **Merge the tooling** — the two `.claude/` setups, the SessionStart
         hook, and `claude.md` → `CLAUDE.md` rewritten for the monorepo.
 
