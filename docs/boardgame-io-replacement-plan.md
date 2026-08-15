@@ -386,16 +386,63 @@ tasks, pinned Node) arrives alongside the existing setup, not instead of it.
     when opening that folder directly, and root-level named configs
     (`.devcontainer/practice/`, `.devcontainer/aion/` from PR 0.0) surface
     both for whoever opens the monorepo root.
+- [ ] **PR 0.3a (M)** **One React major across the monorepo** — a prerequisite
+  that was not in the original plan. It was found by attempting PR 0.3 below and
+  measuring what broke; the attempt was reverted rather than landed.
+
+  **npm nests the conflicting *direct* dependencies, but it hoists everything
+  else** — and a hoisted package binds to whatever React sits at the root. That
+  is React 18, while practice is on 19. Which packages land wrong is decided by
+  their own peer range, not by anything we control:
+
+  | peer range | what npm does | binds |
+  | --- | --- | --- |
+  | `^19.2.8` (`react-dom`), `>=19.2.7` (`react-router`) | must nest — root's 18 does not satisfy it | 19 ✔ |
+  | `^18 \|\| ^19` (`@headlessui/react`, `@testing-library/react`) | may hoist — one copy satisfies both | 18 ✘ |
+
+  So the packages that *support both majors* are exactly the ones that break,
+  and the set shifts silently as dependencies are bumped. Measured on the
+  attempt: **157 of practice's 1972 tests failed**, every one of them
+  `Cannot read properties of null (reading 'useRef'/'useState')` — the signature
+  of two Reacts in one render.
+
+  Two things narrow it but do not solve it, both verified:
+  - `resolve.dedupe: ['react', 'react-dom']` in practice's vite config **fixes
+    the build** — `react-vendor` goes back to 290.88 kB from the 426.42 kB that
+    two bundled Reacts produced. Worth keeping when 0.3 is retried.
+  - It does **not** fix the test run: vitest externalises `node_modules`, so
+    resolution happens in Node, past vite. `test.server.deps.inline: true` — the
+    documented lever, inlining everything — changed nothing; manually nesting
+    `@testing-library/react` by hand cut the failures to 86, which is what
+    identified hoisting as the mechanism rather than any one package.
+
+  npm has no per-workspace `nohoist`, so there is no configuration answer. The
+  way through is to put the monorepo on one React major. `@mui/material@5.16`
+  already declares `^17 || ^18 || ^19`, so the upgrade may be smaller than it
+  looks — but it touches the live competition frontend and needs its own
+  verification, which is exactly why it is not a line inside PR 0.3.
+
 - [ ] **PR 0.3 (M)** Join npm workspaces: add to `workspaces`, drop the practice
-  lockfile, regenerate the root lockfile (npm nests the conflicting React 19/18,
-  Vite, TS, ESLint versions per workspace). Verify both dev servers, builds and
-  test suites — nothing else in this PR. Wire practice `test`/`lint`/`build`
+  lockfile, regenerate the root lockfile. **Blocked on 0.3a** — attempted and
+  reverted, see above. Verify both dev servers, builds and test suites —
+  nothing else in this PR. Wire practice `test`/`lint`/`build`
   into `turbo.json`. Existing commands are untouched: the one visible change
   for durer-aion developers is that the root `npm ci` now also installs
   practice's dependencies (slower, not different); practice developers switch
   from repo-root commands to `apps/practice`-rooted ones — the one workflow
   break the merge genuinely forces, called out in the practice README and
   CLAUDE.md in the same PR.
+
+  Two smaller things the attempt also surfaced, both to handle when it is
+  retried:
+  - **`apps/practice/.npmrc` stops being read.** npm reads only the `.npmrc` of
+    the directory it runs in, so installing from the root ignores practice's
+    `save-exact=true` and applies the root's `legacy-peer-deps=true` to it
+    instead — a pinning convention silently dropped and a peer-check silently
+    disabled. Both settings need a deliberate home before the merge.
+  - **Node engines diverge**: practice requires `>=24.11.1 <25`, the root `>=24`.
+    Harmless as a warning today, but `npm ci` from the root emits `EBADENGINE`
+    for practice on any Node 24 below 24.11.1.
 
 ### Phase 1 — Engine hardening + extraction (practice behavior unchanged)
 
