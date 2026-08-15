@@ -278,6 +278,17 @@ tasks, pinned Node) arrives alongside the existing setup, not instead of it.
         defeats the point of preserving the history. Rewriting the paths first
         makes both traverse all 1029 commits. **The PR must be merged with a
         merge commit — a squash would flatten that history back to one.**
+
+        **Learned the hard way — rewrite the commit *messages* too.** The
+        imported commits carry 78 closing keywords (`fixes #64`,
+        `Resolves #144`, …), each meaning a durer-jatekok issue. GitHub
+        applies closing keywords in commits pushed to the default branch to
+        the *receiving* repo, so merging this closed 14 unrelated durer-aion
+        issues and one open PR, all within nine seconds. The same filter-repo
+        pass can prevent it with a `--message-callback` rewriting `#N` to
+        `durer-jatekok#N`, which also keeps the references meaningful. Do that
+        before any future repo import; afterwards the only remedy is reopening
+        by hand.
   - [ ] **Move the deploy here** — port the three workflows to the root with
         `paths` filters, and consolidate GitHub Pages onto one site serving
         one artifact, since a repo has exactly one Pages site and durer-aion's
