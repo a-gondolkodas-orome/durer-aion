@@ -1,11 +1,26 @@
 import { LOCAL_STORAGE_TEAMSTATE, TeamModelDto } from "common-frontend";
 
 
+let warnedAboutMissingBucket = false;
+
+// Uploading play data is a side channel for the organisers, not something a
+// team's move depends on — and `sendGameData` runs inside game reducers, so
+// throwing here breaks the round itself. Builds without a bucket configured
+// (the practice deploy) therefore drop the data and carry on; the
+// per-competition build sets the vars and uploads as before.
 function sendData(fileName: string, data: string){
   const bucketName = import.meta.env.VITE_S3_BUCKET_NAME;
   const folder = import.meta.env.VITE_S3_FOLDER;
   if (!bucketName || !folder) {
-    throw new Error('S3 bucket name or folder is not defined.');
+    // Silence is the failure mode a competition deploy would notice too late,
+    // so say it once — on the console, where it costs a player nothing.
+    if (!warnedAboutMissingBucket) {
+      warnedAboutMissingBucket = true;
+      console.warn(
+        'VITE_S3_BUCKET_NAME / VITE_S3_FOLDER are unset: play data is not being uploaded.'
+      );
+    }
+    return;
   }
   const fd = new FormData();
   fd.append('key', folder + '/' + fileName);

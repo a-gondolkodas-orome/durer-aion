@@ -5,7 +5,8 @@ what. A sub-plan of [the migration plan](./boardgame-io-replacement-plan.md)'s
 PR 0.2, written up separately because it needs DNS changes and edits to
 durerinfo.hu that live outside this repo.
 
-Status: **proposed** — nothing here has been executed.
+Status: **in progress** — the sequence below has not started; groundwork the
+first step depends on is landing ahead of it. Ticked boxes are done.
 
 ## Why this is needed at all
 
@@ -41,13 +42,12 @@ log — to an S3 bucket keyed by join code and timestamp
 - Anyone who has the URL can write to that bucket, which is why its address has
   always been obscure. `/proba-verseny/` stays off the home page for the same
   reason.
-- `sendData` currently **throws** when those vars are unset, which would make
-  them a hard prerequisite for `/proba-verseny/`. They are not: the fix is to
-  make the upload a no-op when unconfigured instead of throwing, so the
-  practice deploy ships without the bucket while the per-competition deploy
-  from the year's private repo keeps sending exactly as it does today. That
-  one-line change belongs to the PR that adds the subpage — see the action
-  items.
+- `sendData` used to **throw** when those vars are unset, which would have made
+  them a hard prerequisite for `/proba-verseny/`. They are not, and it no
+  longer does: an unconfigured build warns once on the console and skips the
+  upload, so the practice deploy ships without a bucket while the
+  per-competition deploy from the year's private repo keeps sending exactly as
+  it does today.
 
 Note that `apps/offline-frontend`'s `predeploy` carries
 `PUBLIC_URL=/durer19o-xn7ElDP7nQm2M1`, which is **not** a URL this site has to
@@ -300,18 +300,18 @@ build at two addresses.
 
 Deliberately deferred, so they do not block the consolidation.
 
-- **Make `sendData` optional.** One line in `apps/offline-frontend/src/sendData.ts`:
-  return instead of throwing when `VITE_S3_BUCKET_NAME` / `VITE_S3_FOLDER` are
-  unset. Ships with the `/proba-verseny/` PR.
-- **Decide whether the practice dry run should upload at all.** durer-jatekok
+- [x] **Make `sendData` optional** — done: it returns instead of throwing when
+  `VITE_S3_BUCKET_NAME` / `VITE_S3_FOLDER` are unset, so `/proba-verseny/` can
+  deploy without a bucket.
+- [ ] **Decide whether the practice dry run should upload at all.** durer-jatekok
   now has umami, which covers the "how is it being used" question that the S3
   dump used to answer, for a fraction of the data and none of the
   anyone-can-write exposure. If umami is enough here, the S3 path can go from
   the practice deploy entirely and stay only in the per-competition build —
   and then `/proba-verseny/` need not stay off the home page either.
-- **Clean up `PUBLIC_URL=/durer19o-xn7ElDP7nQm2M1`** from
+- [ ] **Clean up `PUBLIC_URL=/durer19o-xn7ElDP7nQm2M1`** from
   `apps/offline-frontend/package.json`. A committed per-competition value that
   `DEPLOYMENT.md` says should never have been committed.
-- **Consider umami for the other subpages.** `/valto/` and `/proba-verseny/`
+- [ ] **Consider umami for the other subpages.** `/valto/` and `/proba-verseny/`
   have no tracking today. Not required, but the one-line script tag is the
   cheapest moment to add it while the pages are being assembled anyway.
