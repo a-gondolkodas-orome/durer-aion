@@ -1,16 +1,5 @@
 {
-  "hooks": {
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/session-start.sh"
-          }
-        ]
-      }
-    ]
-  },
+  "//": "Only loaded when apps/practice is opened as the project root — the supported way to work on the practice site alone, and what its own .devcontainer expects. A session opened at the monorepo root reads the root .claude/settings.json instead, which carries the union of both allowlists and the SessionStart hook. Keep the two in sync when adding a script here.",
   "permissions": {
     "allow": [
       "Bash(npm run typecheck)",

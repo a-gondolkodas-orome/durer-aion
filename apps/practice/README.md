@@ -20,10 +20,13 @@ Two ways to get started:
   Claude Code logins in named volumes across rebuilds. Details below.
 
 Claude Code on the web is neither: its container ships its own Node and starts
-without `node_modules`, so `.claude/hooks/session-start.sh` installs the pinned
-Node through nvm and puts it on `PATH` ahead of the image's own, then runs
-`npm ci` unless the installed tree is already sound. It reads the version from
+without `node_modules`, so the monorepo's `.claude/hooks/session-start.sh`
+installs the pinned Node through nvm and puts it on `PATH` ahead of the image's
+own, then runs `npm ci` in every project whose tree is unsound — this one
+included, since it still has its own lockfile. It reads the version from
 `.nvmrc` rather than restating it, so it is not another place to keep in sync.
+The hook lives at the repository root because only the root
+`.claude/settings.json` is loaded for a session opened there.
 
 <details>
 <summary>Devcontainer details</summary>

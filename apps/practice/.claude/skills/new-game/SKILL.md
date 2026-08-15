@@ -1,13 +1,17 @@
 ---
-description: Implement a new Dürer competition game from scratch
+name: new-game
+description: Implement a new Dürer competition game from scratch, under apps/practice. Use when asked to add, implement or port a Dürer strategy game — it covers the game folder layout, the gameplay/bot split, curated start boards, specs and registration.
 ---
 
-Implement a new Dürer competition game. The game to implement: $ARGUMENTS
+# Implement a new Dürer competition game
+
+The game to implement is whatever the caller named — the skill arguments, or
+the request that triggered this.
 
 ## Steps
 
 ### 1. Understand the game
-If the game rules weren't provided in $ARGUMENTS, ask for them before proceeding. You need to know:
+If the game rules weren't given, ask for them before proceeding. You need to know:
 - What the board/state looks like
 - What moves each player can make on their turn
 - What the win condition is
@@ -17,7 +21,7 @@ Past Dürer competition problem sets (including written solutions) are archived 
 
 > **Reminder:** Once the game is identified, ask the user to mark it as **in progress** in the [game tracking spreadsheet](https://docs.google.com/spreadsheets/d/1-6u9PCtvf_gDHrs65x36pmDzFt4nZZx_IUuXrgS2aZk/edit?gid=0#gid=0) before implementation starts, to avoid duplicate work by other developers.
 
-Before proceeding further, also collect the following metadata if not already provided in $ARGUMENTS — they are quick to answer and needed throughout implementation:
+Before proceeding further, also collect the following metadata if not already provided — they are quick to answer and needed throughout implementation:
 
 - **year**: display string (e.g. `"XVI. (22/23)"`) and sort string (e.g. `"22/23"`)
 - **category**: one or more of A, B, C, D, E, E+
