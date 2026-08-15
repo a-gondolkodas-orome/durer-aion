@@ -146,7 +146,10 @@ what drops to near zero there is the game logic nothing but a sweep touches.
 
 `coverage:patch` (`scripts/patch-coverage.mjs`, run by the `patch-coverage` job
 on every PR) is the one number CI gates on: the lines a branch **adds** to
-non-JSX files under `src/`, measured against `coverage:unswept`. Added lines
+non-JSX files under `src/`, measured against `coverage:unswept`. Added means
+added against the base branch *and* against `main` — a branch that merged `main`
+in, or one stacked on a PR that predates it, is not asked to cover the lines
+that came with it. Added lines
 cannot be diluted by the rest of the repo, so the number means the same thing in
 every PR, and excluding the sweeps is what stops `gameList.ts` registration from
 reading as coverage. Under 85% fails, diffs under twenty measured lines never
