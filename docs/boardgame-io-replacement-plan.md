@@ -322,8 +322,20 @@ tasks, pinned Node) arrives alongside the existing setup, not instead of it.
           Pages deployment from Actions goes live even while Settings still says
           "Deploy from a branch" — the workflow going green *is* the cutover,
           with the setting reconciled afterwards.
-  - [ ] **Merge the tooling** — the two `.claude/` setups, the SessionStart
+  - [x] **Merge the tooling** — the two `.claude/` setups, the SessionStart
         hook, and `claude.md` → `CLAUDE.md` rewritten for the monorepo.
+
+        Two corrections to what was planned below. **`claude.md` was never
+        being read at all**: Claude Code looks for `CLAUDE.md`, and on a
+        case-sensitive filesystem the lowercase name simply does not match — so
+        the root memory file has been inert since it was written, which is part
+        of why it still described Jest. **And subdirectory *commands* are not
+        surfaced, only subdirectory skills are** — `new-game` was invisible
+        under `apps/practice/.claude/commands/` and appeared immediately when
+        moved to `.claude/skills/new-game/`. It is a skill now.
+
+        The hook installs one project per lockfile rather than a fixed list, so
+        PR 0.3 removing practice's lockfile narrows it to the root with no edit.
 
   durer-jatekok gets a README banner; archival waits until Phase 7.
 
