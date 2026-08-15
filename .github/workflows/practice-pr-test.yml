@@ -1,14 +1,30 @@
-name: pr-test
+name: practice-pr-test
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
+    # apps/practice has its own lockfile and its own toolchain, so nothing outside it can
+    # change what these jobs measure. ci.yml covers the rest of the monorepo and carries no
+    # paths filter, so every PR still gets a gate.
+    paths:
+      - 'apps/practice/**'
+      - '.github/workflows/practice-pr-test.yml'
 
 concurrency:
-  group: pr-test-${{ github.head_ref }}
+  group: practice-pr-test-${{ github.head_ref }}
   cancel-in-progress: true
+
+# Every `run:` here is an npm script of apps/practice, which is its own npm project rather
+# than a workspace of the root one.
+defaults:
+  run:
+    working-directory: apps/practice
 
 jobs:
   test:
+    # ci.yml also has a job called `test`, and the checks list shows job names, not workflow
+    # names — two entries reading `test` would be ambiguous both to a reader and to whoever
+    # configures required checks.
+    name: practice-test
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-24.04
     container:
@@ -20,8 +36,8 @@ jobs:
         uses: actions/cache@v6
         with:
           path: ~/.npm
-          key: npm-${{ hashFiles('package-lock.json') }}
-          restore-keys: npm-
+          key: npm-practice-${{ hashFiles('apps/practice/package-lock.json') }}
+          restore-keys: npm-practice-
       - name: Install dependencies
         id: install
         run: npm ci
@@ -48,6 +64,7 @@ jobs:
   # them, and a PR failing it still reads as passing everything else at a glance. The
   # `skip coverage` label skips rather than fails it (AGENTS.md § Coverage).
   patch-coverage:
+    name: practice-patch-coverage
     if: >-
       github.event.pull_request.draft == false &&
       !contains(github.event.pull_request.labels.*.name, 'skip coverage')
@@ -71,8 +88,8 @@ jobs:
         uses: actions/cache@v6
         with:
           path: ~/.npm
-          key: npm-${{ hashFiles('package-lock.json') }}
-          restore-keys: npm-
+          key: npm-practice-${{ hashFiles('apps/practice/package-lock.json') }}
+          restore-keys: npm-practice-
       - name: Install dependencies
         run: npm ci
       # Deliberately not `npm run coverage` — see the comment atop scripts/patch-coverage.mjs.

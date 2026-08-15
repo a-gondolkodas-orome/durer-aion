@@ -296,7 +296,18 @@ tasks, pinned Node) arrives alongside the existing setup, not instead of it.
         [`docs/pages-consolidation.md`](./pages-consolidation.md): it needs a
         new domain, a redirect GitHub does not provide for us, and changes to
         durerinfo.hu, so it is sequenced across this repo and two people
-        outside it.
+        outside it. Split again during execution, deploy last:
+
+    - [x] **Play data upload made optional** — `sendData` no-ops instead of
+          throwing when no S3 bucket is configured, so `/proba-verseny/` can
+          deploy without one.
+    - [x] **The two non-deploy workflows ported** — `pr-test` and
+          `dependency-report` moved to the root with `paths` filters. Leaving
+          the directory they resolved paths from broke three scripts, all of
+          them silently; see the pages doc.
+    - [ ] **The deploy itself** — `test-and-deploy` replaced by a root workflow
+          that assembles one artifact, and Pages switched from the `gh-pages`
+          branch to Actions.
   - [ ] **Merge the tooling** — the two `.claude/` setups, the SessionStart
         hook, and `claude.md` → `CLAUDE.md` rewritten for the monorepo.
 

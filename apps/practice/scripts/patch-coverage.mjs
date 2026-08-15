@@ -186,7 +186,13 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   }
   // No second commit, so the working tree is what gets compared: run this before committing and it
   // still measures what you just wrote. In CI the tree is clean and this is `<base>...HEAD`.
-  const diff = git('diff', '--unified=0', mergeBase);
+  //
+  // `--relative` does two things this needs in a monorepo, and neither would have failed loudly:
+  // it drops changes outside apps/practice, which are not this report's to measure, and it prints
+  // the rest as `src/…` rather than `apps/practice/src/…`, which is what `isMeasured` tests and
+  // what lcov's SF records say. Without it every path fails `isMeasured` and the job passes every
+  // PR with "nothing to measure". At the repository root it is a no-op.
+  const diff = git('diff', '--unified=0', '--relative', mergeBase);
 
   const lcovPath = `${root}reports/coverage/lcov.info`;
   if (!existsSync(lcovPath)) {

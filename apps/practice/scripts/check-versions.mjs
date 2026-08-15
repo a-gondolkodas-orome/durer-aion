@@ -10,6 +10,10 @@ import { fileURLToPath } from 'node:url';
 const root = fileURLToPath(new URL('..', import.meta.url));
 const read = file => readFileSync(`${root}${file}`, 'utf8');
 
+// GitHub only reads .github/workflows at the repository root, so this app's workflows live
+// there rather than beside the code they run — one directory up from apps/.
+const repoRoot = fileURLToPath(new URL('../../../', import.meta.url));
+
 const errors = [];
 
 // Reports a mismatch as a list of "where it is written down" -> "what it says".
@@ -41,18 +45,21 @@ compare('Playwright', [
 const devcontainer = read('.devcontainer/devcontainer.json');
 
 // A workflow can run more than one containerised job, so every `image: node:` in it is a separate
-// place the version is written down — matching only the first would let a second job drift.
-const workflowNodeImages = file => {
-  const images = [...read(file).matchAll(/^\s*image:\s*node:(.+)$/gm)];
-  return images.length === 0 ? [[file, undefined]] : images.map(([, version], i) => [`${file} job ${i + 1}`, version]);
+// place the version is written down — matching only the first would let a second job drift. The
+// path is passed in full because the workflows no longer share one base directory.
+const workflowNodeImages = (label, path) => {
+  const images = [...readFileSync(path, 'utf8').matchAll(/^\s*image:\s*node:(.+)$/gm)];
+  return images.length === 0 ? [[label, undefined]] : images.map(([, version], i) => [`${label} job ${i + 1}`, version]);
 };
 
 compare('Node', [
   ['.nvmrc', read('.nvmrc').trim()],
   // ">=24.11.1 <25" — only the lower bound names an exact version.
   ['package.json engines.node', packageJson.engines?.node?.match(/>=\s*(\d+\.\d+\.\d+)/)?.[1]],
-  ...workflowNodeImages('.github/workflows/pr_test.yml'),
-  ...workflowNodeImages('.github/workflows/test_and_deploy.yml'),
+  ...workflowNodeImages('.github/workflows/practice-pr-test.yml', `${repoRoot}.github/workflows/practice-pr-test.yml`),
+  // Still under apps/practice/, where GitHub does not read it: durer-jatekok deploys the site
+  // until the Pages consolidation moves this one too.
+  ...workflowNodeImages('apps/practice/.github/workflows/test_and_deploy.yml', `${root}.github/workflows/test_and_deploy.yml`),
   ['.devcontainer/devcontainer.json node feature', devcontainer.match(/features\/node:1"\s*:\s*\{\s*"version"\s*:\s*"(.+?)"/)?.[1]]
 ]);
 

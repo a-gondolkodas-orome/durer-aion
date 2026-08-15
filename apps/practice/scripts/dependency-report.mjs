@@ -21,6 +21,11 @@ import { fileURLToPath } from 'node:url';
 const root = fileURLToPath(new URL('..', import.meta.url));
 const read = file => readFileSync(`${root}${file}`, 'utf8');
 
+// GitHub only reads .github/workflows at the repository root, so the action pins this reports
+// on are the whole monorepo's, while the npm and Node rows stay this app's. Scanning only the
+// `practice-` ones would leave the others' pins unwatched, which is the opposite of the point.
+const workflowsDir = fileURLToPath(new URL('../../../.github/workflows/', import.meta.url));
+
 const NODE = 'Node (.nvmrc)';
 
 // Bumping either of these means editing files beyond the one this report names, so say so in the
@@ -62,11 +67,11 @@ const npmRows = () => {
 };
 
 const actionRows = () => {
-  const workflows = readdirSync(`${root}.github/workflows`).filter(file => /\.ya?ml$/.test(file));
+  const workflows = readdirSync(workflowsDir).filter(file => /\.ya?ml$/.test(file));
   // Actions are pinned to a major tag (`@v7`), so only the major is ever comparable — a patch
   // release inside v7 is picked up without any edit here.
   const used = new Set(
-    workflows.flatMap(file => [...read(`.github/workflows/${file}`).matchAll(/uses:\s*(\S+?)@(v\d+)/g)].map(
+    workflows.flatMap(file => [...readFileSync(`${workflowsDir}${file}`, 'utf8').matchAll(/uses:\s*(\S+?)@(v\d+)/g)].map(
       ([, action, tag]) => `${action}@${tag}`
     ))
   );
