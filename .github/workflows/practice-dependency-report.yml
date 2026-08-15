@@ -1,4 +1,4 @@
-name: dependency-report
+name: practice-dependency-report
 on:
   schedule:
     # 06:00 UTC on the 1st. GitHub disables a scheduled workflow after 60 days without
@@ -9,6 +9,12 @@ on:
 permissions:
   contents: read
   issues: write
+
+# The report is about apps/practice's dependencies, and the script resolves everything it
+# reads from its own location — except the workflows, which now live at the repo root.
+defaults:
+  run:
+    working-directory: apps/practice
 
 jobs:
   report:
@@ -29,8 +35,14 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BEHIND: ${{ steps.report.outputs.behind }}
-          TITLE: Dependency update report
+          # Named for the app: this repo holds four, and a later report on the rest would
+          # otherwise reconcile against this one's issue.
+          TITLE: Dependency update report (practice)
         run: |
+          # durer-aion has no OPS label — it came with durer-jatekok's issue tracker, not with
+          # its code — and `gh issue create` fails outright on a label that does not exist.
+          # `--force` makes this a no-op once it does.
+          gh label create OPS --color ededed --description 'Repository operations' --force
           # Matched on the title, not the OPS label, so a hand-edited label cannot cause a
           # duplicate issue. --limit outruns gh's default page of 30.
           number=$(gh issue list --state open --limit 100 --json number,title \

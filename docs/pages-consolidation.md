@@ -200,7 +200,8 @@ path kept, which is the same behaviour already verified for
 
 | # | who | what |
 | --- | --- | --- |
-| 1 | dev | PR: practice's workflows ported to the repo root with `paths` filters; Pages built from Actions; the three subpages assembled into one artifact; static home page; `data-domains` extended; `check:versions` taught its new workflow paths |
+| 0 | dev | **Done.** Groundwork with no effect on any deploy: practice's two non-deploy workflows ported to the repo root with `paths` filters, and every script that reads the repo's layout taught the new one |
+| 1 | dev | PR: `test-and-deploy` replaced by a root workflow that builds the three subpages into one artifact; Pages built from Actions; static home page; `data-domains` extended |
 | 2 | maintainer | Settings → Pages: source = GitHub Actions. **No custom domain yet.** |
 | 3 | everyone | **Verify** on the github.io URL, for as long as it takes. `jatek.durerinfo.hu` is still served by durer-jatekok, untouched. |
 | 4 | **teammate** | DNS record for `gyakorlo.durerinfo.hu` → durer-aion's Pages |
@@ -218,6 +219,31 @@ click away at `/durer-aion/valto/`. That is the intended end state arriving
 early rather than a regression — and it is why the frozen relay build ships in
 the very first deploy rather than later.
 
+## What moving a workflow out of its app broke (step 0)
+
+GitHub only reads `.github/workflows/` at the repository root, so practice's
+workflows have to leave the directory their scripts resolve paths from. Three
+things depended on that and **none of them failed loudly**, which is the
+argument for doing this move in its own PR rather than inside the deploy switch:
+
+- `check-versions.mjs` reads the workflows to compare their `image: node:` pins
+  against `.nvmrc`. It gates `npm test` and both workflows, so this one at least
+  breaks visibly — with `ENOENT`, not with an explanation.
+- `dependency-report.mjs` *lists* `.github/workflows/`, so it would have
+  reported no action pins at all — a monthly report quietly going half blank.
+  It now scans the root directory, which makes the action rows the whole
+  monorepo's while the npm and Node rows stay practice's.
+- `patch-coverage.mjs` diffs against the merge base and matches `src/…` paths
+  against lcov. Run from a subdirectory git prints `apps/practice/src/…`, which
+  matches nothing, so the job would have passed **every** PR with "nothing to
+  measure" — a coverage gate that reports success while measuring zero lines.
+  `git diff --relative` restores both the paths and the scoping.
+
+Two more the move introduces rather than breaks: the `OPS` label the report
+issue carries does not exist in this repo (`gh issue create` fails outright on
+an unknown label, so the workflow creates it), and the issue title now names the
+app, since this repo holds four.
+
 ## Code changes step 1 needs
 
 - `apps/practice/vite.config.js`: `base: '/'` → a **parameterised** base, since
@@ -228,10 +254,6 @@ the very first deploy rather than later.
 - `apps/practice/public/CNAME`: added at **step 5**, not before — a CNAME file
   present while Settings has no custom domain configured is at best inert and at
   worst confusing.
-- `apps/practice/scripts/check-versions.mjs`: it reads
-  `.github/workflows/pr_test.yml` and `test_and_deploy.yml` relative to
-  `apps/practice/`, where they will no longer be. It gates `npm test` and both
-  workflows, so it breaks the moment they move.
 - A root workflow that builds each app and assembles one `dist/` tree, then
   `upload-pages-artifact` + `deploy-pages` once.
 - Practice's workflows keep their own conventions (`checkout@v7`, `cache@v6`,
