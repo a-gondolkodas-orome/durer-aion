@@ -219,7 +219,7 @@ additive. `npm ci` at the root, `npm run dev:server` / `dev:online` /
 working unchanged throughout the phase; new tooling (devcontainer, turbo
 tasks, pinned Node) arrives alongside the existing setup, not instead of it.
 
-- [ ] **PR 0.0 (M)** durer-aion baseline. Planned as one PR; split during
+- [x] **PR 0.0 (M)** durer-aion baseline. Planned as one PR; split during
   execution into six, because the pieces share a phase and nothing else, and
   each is independently reviewable and revertible:
 
