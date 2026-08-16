@@ -26,10 +26,9 @@ export default defineConfig(() => ({
       }
     ]
   },
-  // Served from the site root today (jatek.durerinfo.hu) and from a subpath once the Pages
-  // consolidation lands — `/durer-aion/jatekok/` on the default Pages domain, `/jatekok/` after
-  // the custom domain. The deploy workflow composes the whole prefix from one variable, so the
-  // switch is one line there rather than an edit in every app. See docs/pages-consolidation.md.
+  // Served from `/jatekok/` on gyakorlo.durerinfo.hu, and from the site root by `npm run dev`.
+  // The deploy workflow composes the whole prefix from one variable, so moving the site is one
+  // line there rather than an edit in every app. See docs/pages-consolidation.md.
   base: process.env.SITE_BASE || '/',
   build: {
     rollupOptions: {

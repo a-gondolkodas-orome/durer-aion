@@ -220,14 +220,21 @@ path kept, which is the same behaviour already verified for
 | 1 | dev | **Done.** `test-and-deploy` replaced by a root workflow that builds the three subpages into one artifact; static home page; `data-domains` extended |
 | 2 | maintainer | **Done.** Settings → Pages: source = GitHub Actions, no custom domain. See the note below — the first deploy went live before the setting was changed |
 | 3 | everyone | **Done.** All four pages verified live on the github.io URL. `jatek.durerinfo.hu` is still served by durer-jatekok, untouched |
-| 4 | **teammate** | **← next.** DNS record for `gyakorlo.durerinfo.hu` → durer-aion's Pages |
-| 5 | dev + maintainer | Add `public/CNAME`, rebuild with the base path switched, set the custom domain in Settings |
+| 4 | teammate | **Done.** DNS record for `gyakorlo.durerinfo.hu` → durer-aion's Pages |
+| 5 | dev + maintainer | **← next.** `pages/home/CNAME` (which is the artifact root, so no `public/` is involved) and `SITE_ROOT: /`, in one PR because neither half works alone; then confirm the custom domain in Settings |
 | 6 | maintainer | Cut over: replace durer-jatekok's published content with the redirect stub |
 | 7 | **teammate** | Repoint the links on durerinfo.hu |
 | 8 | dev | Later, in any order: #224's relay app replacing the frozen `/valto/`, the designed home page |
 
 Steps 1–5 have no effect on `jatek.durerinfo.hu`. Step 6 is the only
 irreversible-feeling moment, and it is a one-file revert.
+
+**Why step 5 is one PR and not two.** The base path and the domain have to move
+together: a `/durer-aion/`-based build served from the domain root asks for
+assets nobody serves, and a `/`-based build on the default domain does the same.
+There is no ordering that avoids a broken window, so the two land in one merge —
+and since the deploy workflow going green *is* the cutover (below), that merge is
+the moment the site changes address.
 
 **What actually happened at step 2, because it is worth knowing next time.**
 The switch was not the trigger. The first `pages-deploy` run on `main` created
