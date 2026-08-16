@@ -93,13 +93,18 @@ export default defineConfig(() => ({
       provider: 'v8',
       // Without this, only files a test imported are reported, and a module no
       // spec touches is missing from the report rather than showing up at 0%.
-      include: ['src/**/*.{ts,tsx}'],
+      // The engine package counts as this app's source for coverage purposes:
+      // its specs run here, and patch-coverage gates its added lines the same
+      // way (allowExternal is what lets v8 keep files above the app root).
+      allowExternal: true,
+      include: ['src/**/*.{ts,tsx}', '../../packages/engine/src/**/*.ts'],
       exclude: [
         'src/**/*.spec.{ts,tsx}',
         'src/test-utils.ts',
         'src/test-setup.ts',
         'src/**/spec-helpers.tsx',
-        'src/main.tsx'
+        'src/main.tsx',
+        '../../packages/engine/src/**/*.spec.ts'
       ],
       reporter: ['text', 'html'],
       // /reports is gitignored

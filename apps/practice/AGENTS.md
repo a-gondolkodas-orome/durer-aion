@@ -146,7 +146,9 @@ what drops to near zero there is the game logic nothing but a sweep touches.
 
 `coverage:patch` (`scripts/patch-coverage.mjs`, run by the `patch-coverage` job
 on every PR) is the one number CI gates on: the lines a branch **adds** to
-non-JSX files under `src/`, measured against `coverage:unswept`. Added means
+non-JSX files under `src/` — and under `packages/engine/src/`, which is this
+app's engine moved out, its specs running in this suite — measured against
+`coverage:unswept`. Added means
 added against the base branch *and* against `main` — a branch that merged `main`
 in, or one stacked on a PR that predates it, is not asked to cover the lines
 that came with it. Added lines

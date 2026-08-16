@@ -547,9 +547,19 @@ reviewed wiring.
   - **`import.meta` is empty in the cjs output**, which is what `isDevMode`
     wants there. esbuild's warning is silenced with that written next to it.
 
-  **Known gap, deliberately not fixed here.** `coverage:patch` measures added
-  lines under `apps/practice/src`, so engine changes are no longer measured by
-  it — it will pass them silently. Widening the gate is its own change.
+  **The move silently narrowed two gates, and both are restored in the same PR**
+  (the maintainer's call, and the right one: neither is new policy — each keeps a
+  check meaning what it meant before the move, so they belong with it):
+  - `coverage:patch` measured added lines under `apps/practice/src` only. It now
+    measures `packages/engine/src` too: coverage runs with `allowExternal`, lcov
+    paths and the diff are joined in repo-relative form, and the diff runs from
+    the repo root (`--relative` would drop the engine's half). One limitation:
+    lcov's manufactured empty records don't extend outside the app root, so an
+    engine module nothing imports is absent rather than flagged "unloaded" —
+    moot today, since everything engine exports is loaded through its barrel.
+  - `practice-pr-test`'s `paths` filter only watched `apps/practice/**`, so an
+    engine-only PR would have skipped practice's 1988 specs and the coverage
+    gate entirely. `packages/engine/**` is in the filter now.
 - [ ] **PR 1.2b (M, mechanical)** The same package's `"./react"` export:
   `game-parts/game-board.tsx`, the hooks, the `language` provider. A boundary
   spec belongs here rather than in 1.2a — with two entry points there is
