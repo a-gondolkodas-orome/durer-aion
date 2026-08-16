@@ -1,4 +1,4 @@
-import { isDevMode } from '../../../dev-mode';
+import { isDevMode } from 'engine';
 
 // A branch a game's strategy holds to be unreachable — every vertex banned
 // while the game has not ended, a mirror move the symmetry argument says must

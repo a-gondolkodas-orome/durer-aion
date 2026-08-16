@@ -104,7 +104,7 @@ Game-specific logic is also worth testing when the winning strategy is
 non-trivial. Because bots name their moves, a spec can read a decision straight
 off the return value (`botNextMoveArgs` in `test-utils`, imported as
 `from 'test-utils'` — an alias, so no `../../../`), and `runMatch`
-(`strategy-game-factory/engine/run-match.ts`) plays two strategies against each
+(`packages/engine/src/run-match.ts`) plays two strategies against each
 other through the real moves and the real reducer — no fake `moves` object, no
 hand-rolled game loop. That is what turns "the AI is truly optimal" into a test:
 the smart bot must win as the mover from a winning start board, and as the

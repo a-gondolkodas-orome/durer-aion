@@ -98,8 +98,9 @@ frontends gain a Tailwind build step and the small `language` provider.
 The React-free core (`engine/`, `types.ts`, `resolve-variants.ts`; lodash-only)
 is most of the value, but four gaps block server use today:
 
-- `import.meta.env.DEV` in `engine/reducer.ts` and
-  `games/shared/unexpected-state.ts` breaks bare Node (vitest shims it).
+- ~~`import.meta.env.DEV` in `engine/reducer.ts` and
+  `games/shared/unexpected-state.ts` breaks bare Node (vitest shims it).~~
+  Closed by PR 1.1; the core is now `packages/engine` (PR 1.2a).
 - No React-free registry: `Game.gameplay`/`Game.variants` hang off the React
   component, and variant wiring lives in each `<game>.tsx`.
 - No authoritative-move API: nothing shaped like
@@ -497,13 +498,62 @@ tasks, pinned Node) arrives alongside the existing setup, not instead of it.
   A module-scope constant would fold, but it would also capture its value at
   import time and make `vi.stubEnv('DEV', …)` a no-op for every existing
   prod-behaviour spec.
-- [ ] **PR 1.2 (L, mechanical)** `packages/engine`: move the engine core +
-  `types.ts` + `resolve-variants.ts` (export `"."`, React-free) and
-  `game-parts/game-board.tsx`, the hooks, the `language` provider (export
-  `"./react"`); tsup build following `packages/schemas`. Practice's
-  `strategy-game-factory`/`language` aliases become thin re-export barrels —
-  **zero changes in the 85 game files**. Engine specs move along, including the
-  import-graph spec.
+**PR 1.2 was split in two.** The React-free half and the React half are separate
+decisions with separate consumers, and all of the wiring a reviewer should argue
+about — how practice consumes the package, where its specs run, what keeps it
+framework-free — belongs to the first. The second is then a sweep on top of
+reviewed wiring.
+
+- [x] **PR 1.2a (L, mechanical)** `packages/engine`, export `"."`: the engine
+  core + `types.ts` + `resolve-variants.ts` + `dev-mode.ts` and their specs,
+  tsup build following `packages/schemas`. Practice's `strategy-game-factory`
+  barrel re-exports it, offering exactly what it offered before —
+  **zero changes in the 85 game files**.
+
+  **The app reads the package's source, not its build.** A workspace `main`
+  pointing at `dist` is right for the node hosts this exists for and wrong for
+  practice: it would mean building before `npm run dev`, and no HMR into engine
+  source. A Vite alias (mirrored in `tsconfig` `paths`) points `engine` at the
+  source, exactly as when these files sat under `src/`. Its specs moved with it
+  and still run from `apps/practice`, through the same alias — they were written
+  against that setup, and it is the app that exercises the engine in a browser.
+
+  **The i18n value types moved with it.** `types.ts` types a variant's `label`
+  and `rule`, so the engine has to name `I18nString`/`TranslatableNode` — the
+  shape a game writes text in is part of its configuration. `language/` keeps
+  the provider and the `t()` hook and re-exports the types from the engine.
+  `TranslatableNode` is the one place React is named, as a type only.
+
+  **What the boundary rests on**, now that practice's ESLint no longer covers
+  these files: the root config gains a block for `packages/engine/**` banning
+  React by specifier (`import type` allowed — it is erased), and the package
+  holds no `.tsx` at all. Two of that config's rules
+  (`no-non-null-assertion`, `consistent-type-definitions`) are off there so a
+  move does not become a rewrite, and its `--max-warnings` cap rises 107 → 117
+  for the ten `no-explicit-any` in the moved `types.ts`. Both revert when the
+  two ESLint setups are unified.
+
+  Three things the build turned up, none of which a spec would have:
+  - **`import.meta.env` must be written out literally.** A type assertion around
+    `import.meta` stops Vite substituting it — and it fails *silently*, since
+    every host then looks like a host with no Vite. Cost an afternoon; the
+    comment in `dev-mode.ts` is there to stop it costing another.
+  - **lodash breaks the esm output in a real node.** `import { cloneDeep } from
+    'lodash'` is a named import from a CommonJS module, which a bundler's
+    interop hides and bare node rejects outright. `noExternal: ['lodash']`
+    bundles it in — the browser pays nothing, since practice reads the source.
+    Every other package here has the same latent trap, unnoticed because only
+    the cjs output is consumed.
+  - **`import.meta` is empty in the cjs output**, which is what `isDevMode`
+    wants there. esbuild's warning is silenced with that written next to it.
+
+  **Known gap, deliberately not fixed here.** `coverage:patch` measures added
+  lines under `apps/practice/src`, so engine changes are no longer measured by
+  it — it will pass them silently. Widening the gate is its own change.
+- [ ] **PR 1.2b (M, mechanical)** The same package's `"./react"` export:
+  `game-parts/game-board.tsx`, the hooks, the `language` provider. A boundary
+  spec belongs here rather than in 1.2a — with two entry points there is
+  something for one to assert.
 - [ ] **PR 1.3 (M)** Server-facing API:
   `applyClientMove(state, gameplay, name, args)` (validate → reduce → auto
   `endOfTurnMove`; rejects rather than throws — these are client-submitted

@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { GameEndDialog } from './game-end-dialog';
-import type { Ctx, Variant } from '../types';
+import type { Ctx, Variant } from 'engine';
 
 // The dialog offers a *draft* mode/variant that only takes effect on "new
 // game". Abandoning the dialog has to discard the draft, which is why the

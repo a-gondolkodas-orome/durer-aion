@@ -10,10 +10,13 @@
 type NodeGlobal = { process?: { env?: Record<string, string | undefined> } };
 
 export const isDevMode = (): boolean => {
-  // Read on every call, and written out in full: Vite replaces this exact
-  // expression at build time, and `vi.stubEnv('DEV', …)` mutates the object a
-  // spec is already running against, so hoisting it to module scope would pin
-  // whichever value happened to be current when the module first loaded.
+  // Read on every call, and written out **exactly** like this. Vite substitutes
+  // this expression, and it matches on the shape: hoisting it to module scope
+  // pins whichever value was current at import time (and makes
+  // `vi.stubEnv('DEV', …)` a no-op), while so much as a type assertion around
+  // `import.meta` stops the substitution altogether — which fails silently, as
+  // every host then looks like a host with no Vite. `vite/client` types it,
+  // which is why the tsconfig references them.
   const viteDev: boolean | undefined = import.meta.env?.DEV;
   if (viteDev !== undefined) return viteDev;
   return (globalThis as NodeGlobal).process?.env?.NODE_ENV !== 'production';

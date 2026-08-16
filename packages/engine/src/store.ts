@@ -1,4 +1,4 @@
-import type { Mode, Phase } from '../types';
+import type { Mode, Phase } from './types';
 
 // The engine's authoritative game state, held OUTSIDE React. Bots and chained
 // dispatches (setTimeout closures) read and write it synchronously through the

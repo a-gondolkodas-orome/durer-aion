@@ -12,7 +12,8 @@
       // Mirrors the aliases in vite.config.js — keep the two in sync.
       "test-utils": ["./src/test-utils.ts"],
       "strategy-game-factory": ["./src/components/strategy-game-factory/index.ts"],
-      "language": ["./src/language/index.ts"]
+      "language": ["./src/language/index.ts"],
+      "engine": ["../../packages/engine/index.ts"]
     },
     "skipLibCheck": true,
     "types": ["vitest/globals", "vite/client"]

@@ -1,7 +1,7 @@
 import { cloneDeep } from 'lodash';
-import type { MoveOutcome, MoveDefinition } from '../types';
+import type { MoveOutcome, MoveDefinition } from './types';
 import { buildCtx } from './build-ctx';
-import { isDevMode } from '../../../dev-mode';
+import { isDevMode } from './dev-mode';
 import type { CoreState } from './store';
 
 type MoveTransition<TBoard, TTurnState> = {

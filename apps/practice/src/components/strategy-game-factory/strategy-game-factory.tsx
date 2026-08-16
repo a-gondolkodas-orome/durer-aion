@@ -9,17 +9,13 @@ import { useTranslation, type TranslatableNode, type I18nString } from 'language
 import { useLocation, useSearchParams } from 'react-router';
 import { useGameStats } from './hooks/use-game-stats';
 import { trackEvent } from '../../tracking';
-import type {
-  Mode, Ctx, MoveOutcome, Gameplay, GameMoves, ClientGameMoves, BotStrategy, BotMove,
-  BoardClientProps, StrategyArgs, Variant as DisplayVariant, VariantInput
-} from './types';
-import { resolveVariants, variantKey } from './helpers/resolve-variants';
-import { createGameStore, createInitialCoreState } from './engine/store';
-import { buildCtx } from './engine/build-ctx';
-import { asBotMoves, isBotTurnUnfinished, unknownMoveMessage } from './engine/bot-turn';
-import { reduceMove } from './engine/reducer';
-import { isDevMode } from '../../dev-mode';
-import { stepDelay } from './engine/timing';
+import {
+  resolveVariants, variantKey, createGameStore, createInitialCoreState, buildCtx,
+  asBotMoves, isBotTurnUnfinished, unknownMoveMessage, reduceMove, stepDelay, isDevMode,
+  type Mode, type Ctx, type MoveOutcome, type Gameplay, type GameMoves, type ClientGameMoves,
+  type BotStrategy, type BotMove, type BoardClientProps, type StrategyArgs,
+  type Variant as DisplayVariant, type VariantInput
+} from 'engine';
 import { resolvePlayerNames } from './game-parts/common/player-names';
 
 export interface Presentation<TBoard, TTurnState = unknown> {

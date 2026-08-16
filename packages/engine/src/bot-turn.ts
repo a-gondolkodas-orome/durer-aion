@@ -1,4 +1,4 @@
-import type { BotMove } from '../types';
+import type { BotMove } from './types';
 import type { CoreState } from './store';
 
 // A strategy NAMES the moves it wants and its caller plays them out — the React
