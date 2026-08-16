@@ -249,11 +249,17 @@ For an example of internationalizing an existing game, see
 ## Dependency updates
 
 Every version is pinned exactly by `package-lock.json`, so nothing drifts on its
-own — and nothing goes stale loudly either. The report and `npm run
-check:versions` both read the lockfile rather than the range in `package.json`,
-so they say what is *installed* and keep meaning that whether or not
-`save-exact=true` is in force. `.github/workflows/dependency_report.yml`
-runs monthly and keeps one `OPS` issue in sync with whatever is behind (npm
+own — and nothing goes stale loudly either. `package.json` carries ranges; the
+lockfile is what `npm ci` installs and what this report and `npm run
+check:versions` both read, so they say what is actually *installed* rather than
+what would be accepted.
+
+`playwright` is the one dependency still pinned exactly, deliberately: the
+devcontainer image bakes browser binaries for one specific version, so an
+incidental bump inside a range would be a broken container rather than a newer
+library. `check:versions` fails if it and `.devcontainer/Dockerfile` disagree.
+
+`.github/workflows/dependency_report.yml` runs monthly and keeps one `OPS` issue in sync with whatever is behind (npm
 packages, actions, the Node in `.nvmrc`); `npm run report:outdated` prints the
 same table on demand. It opens no pull requests — upgrading stays deliberate,
 majors one at a time as in
