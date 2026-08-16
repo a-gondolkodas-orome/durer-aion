@@ -6,9 +6,9 @@ Real-time multiplayer framework for online math competitions with interactive ga
 
 An offline version of the 2023 framework is available [here](https://a-gondolkodas-orome.github.io/durer-jatekok-new/)
 
-An offline version of previous relay games is available [here](https://a-gondolkodas-orome.github.io/durer-aion/)
+An offline version of previous relay games is available [here](https://gyakorlo.durerinfo.hu/valto/)
 
-Strategy games are available [here](https://a-gondolkodas-orome.github.io/durer-jatekok/) (this one is based on [another framework](https://github.com/a-gondolkodas-orome/durer-jatekok))
+Strategy games are available [here](https://gyakorlo.durerinfo.hu/jatekok/)
 
 All demos are in Hungarian.
 
