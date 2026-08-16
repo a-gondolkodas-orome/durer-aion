@@ -37,7 +37,7 @@ regression checklist every change is measured against.
 
 ## Tech Stack
 
-- **Frontend**: React 18, Vite, MUI (Material-UI), Recoil, React Router
+- **Frontend**: React 18, Vite, MUI (Material-UI), React Router
 - **Backend**: boardgame.io server, Koa, PostgreSQL (via bgio-postgres)
 - **Build**: Turborepo, TypeScript, tsup
 - **Testing**: vitest, React Testing Library. Suites are `*.test.ts(x)` under

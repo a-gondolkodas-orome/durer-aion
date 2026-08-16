@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import { reportWebVitals } from 'common-frontend';
-import { RecoilRoot } from 'recoil';
 
 import * as Sentry from "@sentry/react";
 import { BrowserTracing } from "@sentry/tracing";
@@ -22,9 +21,7 @@ const root = document.getElementById('root');
 if (!root) throw new Error('Root container not found');
 ReactDOM.createRoot(root).render((
   <React.StrictMode>
-    <RecoilRoot>
       <App />
-    </RecoilRoot>
   </React.StrictMode>
 ));
 
