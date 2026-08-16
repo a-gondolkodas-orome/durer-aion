@@ -2,19 +2,22 @@ name: practice-pr-test
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
-    # apps/practice has its own lockfile and its own toolchain, so nothing outside it can
-    # change what these jobs measure. ci.yml covers the rest of the monorepo and carries no
-    # paths filter, so every PR still gets a gate.
+    # apps/practice keeps its own ESLint, TypeScript and Vite, so most of the monorepo
+    # cannot change what these jobs measure — but its dependencies now resolve through the
+    # root lockfile, so that counts too. ci.yml covers the rest and carries no paths filter,
+    # so every PR still gets a gate.
     paths:
       - 'apps/practice/**'
+      - 'package.json'
+      - 'package-lock.json'
       - '.github/workflows/practice-pr-test.yml'
 
 concurrency:
   group: practice-pr-test-${{ github.head_ref }}
   cancel-in-progress: true
 
-# Every `run:` here is an npm script of apps/practice, which is its own npm project rather
-# than a workspace of the root one.
+# Every `run:` here is an npm script of apps/practice. It is a workspace of the root
+# project now, so the install below is the exception — it runs at the repository root.
 defaults:
   run:
     working-directory: apps/practice
@@ -36,10 +39,14 @@ jobs:
         uses: actions/cache@v6
         with:
           path: ~/.npm
-          key: npm-practice-${{ hashFiles('apps/practice/package-lock.json') }}
-          restore-keys: npm-practice-
+          key: npm-${{ hashFiles('package-lock.json') }}
+          restore-keys: npm-
+      # At the root, not in apps/practice: there is one lockfile now, and `npm ci` from a
+      # workspace directory installs that workspace's subtree and leaves the root's own
+      # dependencies unmet — which the other apps then fail to build against.
       - name: Install dependencies
         id: install
+        working-directory: .
         run: npm ci
       # Each check runs even after an earlier one failed, so a red build names every problem
       # at once rather than only the first.
@@ -88,9 +95,10 @@ jobs:
         uses: actions/cache@v6
         with:
           path: ~/.npm
-          key: npm-practice-${{ hashFiles('apps/practice/package-lock.json') }}
-          restore-keys: npm-practice-
+          key: npm-${{ hashFiles('package-lock.json') }}
+          restore-keys: npm-
       - name: Install dependencies
+        working-directory: .
         run: npm ci
       # Deliberately not `npm run coverage` — see the comment atop scripts/patch-coverage.mjs.
       - name: Measure coverage without the sweeps

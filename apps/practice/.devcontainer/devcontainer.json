@@ -34,7 +34,10 @@
       }
     }
   },
-  "postCreateCommand": "npm ci",
+  // At the repository root, not here: this app is a workspace of the monorepo, there is
+  // one lockfile at the root, and `npm ci` from a workspace directory leaves the root's own
+  // dependencies unmet while still exiting 0.
+  "postCreateCommand": "npm ci --prefix ../..",
   "forwardPorts": [8012],
   "portsAttributes": {
     "8012": {

@@ -438,27 +438,37 @@ tasks, pinned Node) arrives alongside the existing setup, not instead of it.
   looks — but it touches the live competition frontend and needs its own
   verification, which is exactly why it is not a line inside PR 0.3.
 
-- [ ] **PR 0.3 (M)** Join npm workspaces: add to `workspaces`, drop the practice
-  lockfile, regenerate the root lockfile. **Blocked on 0.3a** — attempted and
-  reverted, see above. Verify both dev servers, builds and test suites —
-  nothing else in this PR. Wire practice `test`/`lint`/`build`
-  into `turbo.json`. Existing commands are untouched: the one visible change
-  for durer-aion developers is that the root `npm ci` now also installs
-  practice's dependencies (slower, not different); practice developers switch
-  from repo-root commands to `apps/practice`-rooted ones — the one workflow
-  break the merge genuinely forces, called out in the practice README and
-  CLAUDE.md in the same PR.
+- [x] **PR 0.3 (M)** Join npm workspaces: `apps/practice` added to `workspaces`,
+  its lockfile dropped, the root lockfile regenerated. Unblocked by 0.3a — with
+  one React major, npm's hoisting no longer binds practice's dependencies to a
+  different copy, and its 1972 specs pass from a single root install with no
+  `resolve.dedupe` needed.
 
-  Two smaller things the attempt also surfaced, both to handle when it is
-  retried:
-  - **`apps/practice/.npmrc` stops being read.** npm reads only the `.npmrc` of
-    the directory it runs in, so installing from the root ignores practice's
-    `save-exact=true` and applies the root's `legacy-peer-deps=true` to it
-    instead — a pinning convention silently dropped and a peer-check silently
-    disabled. Both settings need a deliberate home before the merge.
-  - **Node engines diverge**: practice requires `>=24.11.1 <25`, the root `>=24`.
-    Harmless as a warning today, but `npm ci` from the root emits `EBADENGINE`
-    for practice on any Node 24 below 24.11.1.
+  Turbo needed no wiring: a workspace is a turbo package, so `npm run build` and
+  `npm run typecheck` cover practice already. `npm run lint` and `npm test` still
+  do not, and should not — practice has its own ESLint 10 config and its own
+  vitest setup, and both run from `apps/practice`.
+
+  **The install rule this creates, which is the one thing that bites.** There is
+  one lockfile now, and `npm ci` *from* `apps/practice` installs only that
+  workspace's subtree, leaves the root's own dependencies unmet, and **exits 0**
+  — so the failure surfaces later as another app failing to build. Every install
+  runs at the root: the two workflows, the practice devcontainer
+  (`npm ci --prefix ../..`) and the README all say so.
+
+  The two things the reverted attempt surfaced, both resolved:
+  - **`apps/practice/.npmrc` would have been ignored outright.** Not merely
+    bypassed — npm refuses a workspace's own `.npmrc` (`ignoring workspace
+    config at …`) even for a command run from that directory, so
+    `save-exact=true` could not have stayed there. That forced the question
+    rather than answering it, and the answer was to drop exact pinning
+    altogether (#258, #259) rather than promote it repo-wide, so by the time
+    this landed there was nothing left to relocate. The root's
+    `legacy-peer-deps=true` does now apply to practice, which costs it
+    peer-dependency checking; that setting exists for
+    boardgame.io/bgio-postgres and goes away with them in Phase 7.
+  - **Node engines aligned**: the root moved from `>=24` to `>=24.11.1`, so a
+    root `npm ci` no longer warns `EBADENGINE` for practice.
 
 ### Phase 1 — Engine hardening + extraction (practice behavior unchanged)
 

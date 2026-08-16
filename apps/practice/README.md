@@ -13,7 +13,10 @@ successful, the project is deployed to the live website within a few minutes.
 Two ways to get started:
 
 - **Locally**: install the Node.js version in `.nvmrc` globally (or run `nvm use`
-  in the project directory), then run `npm ci`.
+  in this directory), then run `npm ci` **at the repository root**. This app is a
+  workspace of the monorepo now: there is one lockfile, at the root, and running
+  `npm ci` here installs only this subtree and leaves the root's own dependencies
+  unmet — exiting 0 while doing it. Every other command below runs from here.
 - **Devcontainer**: a fairly minimal setup, written for local Docker. It pins
   Node and bakes Playwright's Chromium into the image, so container creation
   only has to run `npm ci`; it also ships the GitHub CLI and keeps `gh` and
@@ -22,9 +25,9 @@ Two ways to get started:
 Claude Code on the web is neither: its container ships its own Node and starts
 without `node_modules`, so the monorepo's `.claude/hooks/session-start.sh`
 installs the pinned Node through nvm and puts it on `PATH` ahead of the image's
-own, then runs `npm ci` in every project whose tree is unsound — this one
-included, since it still has its own lockfile. It reads the version from
-`.nvmrc` rather than restating it, so it is not another place to keep in sync.
+own, then runs `npm ci` for every lockfile in the repository — one, since this
+app joined the workspaces. It reads the version from `.nvmrc` rather than
+restating it, so it is not another place to keep in sync.
 The hook lives at the repository root because only the root
 `.claude/settings.json` is loaded for a session opened there.
 
