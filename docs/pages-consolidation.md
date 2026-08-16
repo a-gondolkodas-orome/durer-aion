@@ -395,10 +395,19 @@ Deliberately deferred, so they do not block the consolidation.
 - [ ] **Consider umami for the other subpages.** `/valto/` and `/proba-verseny/`
   have no tracking today. Not required, but the one-line script tag is the
   cheapest moment to add it while the pages are being assembled anyway.
-- [ ] **`/proba-verseny/` renders nothing when `cdn.jsdelivr.net` is
+- [x] **`/proba-verseny/` renders nothing when `cdn.jsdelivr.net` is
   unreachable.** Its `index.html` pulls `latex.js` from the CDN, and with that
   request blocked the page stays blank — not a degraded render, an empty one.
   Found while verifying the assembled site, and reproducible on a plain
   root-base build too, so it is the app's own single point of failure rather
   than anything the consolidation introduces. Vendoring the script or making
-  the failure non-fatal would fix it.
+  the failure non-fatal would fix it. Done, the non-fatal way: the CDN is now
+  reached through a caught `import()` instead of a static one. The static form
+  was the whole cause — Vite bundles every module script in `index.html` into
+  one entry chunk, so the app's own bootstrap sat behind the CDN fetch and died
+  with it. Both frontends carried the same snippet, so both are fixed; the
+  online one is the real competition and had the same single point of failure.
+  A task now falls back to its LaTeX source (`latex-js:not(:defined)` keeps the
+  line breaks) rather than to nothing. Vendoring remains open as the stronger
+  fix, and is now an independent choice about rendering quality offline rather
+  than about whether the page comes up at all.
