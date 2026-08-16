@@ -38,34 +38,32 @@ jobs:
         uses: actions/cache@v6
         with:
           path: ~/.npm
-          key: npm-pages-${{ hashFiles('package-lock.json', 'apps/practice/package-lock.json') }}
+          key: npm-pages-${{ hashFiles('package-lock.json') }}
           restore-keys: npm-pages-
 
+      # One install for the whole monorepo: apps/practice is a workspace now, so the root
+      # lockfile covers it too.
       - name: Install dependencies
         id: install
-        run: npm ci
-      - name: Install practice dependencies
-        id: install-practice
-        working-directory: apps/practice
         run: npm ci
 
       # apps/practice keeps its own gates here, as its deploy workflow did: pr-test only runs on
       # pull requests, so without these a check nobody ran on main would ship. The rest of the
       # monorepo is covered by ci.yml on the same push, and by the build below.
       - name: Check tool versions
-        if: ${{ !cancelled() && steps.install-practice.outcome == 'success' }}
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         working-directory: apps/practice
         run: npm run check:versions
       - name: Lint practice
-        if: ${{ !cancelled() && steps.install-practice.outcome == 'success' }}
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         working-directory: apps/practice
         run: npm run lint
       - name: Typecheck practice
-        if: ${{ !cancelled() && steps.install-practice.outcome == 'success' }}
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         working-directory: apps/practice
         run: npm run typecheck
       - name: Test practice
-        if: ${{ !cancelled() && steps.install-practice.outcome == 'success' }}
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         working-directory: apps/practice
         run: npm run test:unit
 

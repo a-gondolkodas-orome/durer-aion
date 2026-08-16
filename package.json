@@ -85,12 +85,13 @@
   },
   "packageManager": "npm@8.5.0",
   "engines": {
-    "node": ">=24"
+    "node": ">=24.11.1"
   },
   "workspaces": [
     "apps/offline-frontend",
     "apps/online-backend",
     "apps/online-frontend",
+    "apps/practice",
     "packages/*"
   ],
   "devDependencies": {

@@ -20,14 +20,19 @@ packages/
 pages/                # static content the Pages deploy serves but no app builds
 ```
 
-**`apps/practice` is not a workspace yet.** It came from a separate repository
-and still has its own `package-lock.json`, its own `npm ci`, its own ESLint and
-its own toolchain pins. The root's lint, test, typecheck, build and spell-check
-deliberately skip it, and it is gated by its own CI workflow instead. Work on it
-from `apps/practice`, not from the root. Its own
-[`AGENTS.md`](apps/practice/AGENTS.md) loads automatically when you work under
-that directory and is the authority on everything inside it — memory files nest
-by directory; settings do not.
+**`apps/practice` is a workspace, but not like the others.** One root `npm ci`
+installs it, and turbo builds and typechecks it with everything else — but it
+keeps its own ESLint, TypeScript and Vite versions (npm nests them), its own
+`eslint.config.js`, its own vitest setup and its own CI workflow. So the root's
+`npm run lint` and `npm test` still skip it, and its checks run from
+`apps/practice`. Its own [`AGENTS.md`](apps/practice/AGENTS.md) loads
+automatically when you work under that directory and is the authority on
+everything inside it — memory files nest by directory; settings do not.
+
+**Do not run `npm ci` from `apps/practice`.** There is one lockfile, at the
+root; from a workspace directory npm installs that workspace's subtree and
+leaves the root's own dependencies unmet, which the other apps then fail to
+build against. It exits 0 while doing it.
 
 The whole repo is being reshaped: see
 [`docs/boardgame-io-replacement-plan.md`](docs/boardgame-io-replacement-plan.md),
@@ -78,12 +83,12 @@ npm run i18n:check
 npm run spell-check
 ```
 
-None of the above reach `apps/practice`. Its equivalents run from that
-directory:
+`npm ci`, `npm run build` and `npm run typecheck` cover `apps/practice` too;
+`npm run lint` and `npm test` do not, because it has its own ESLint and vitest
+setups. Its own checks run from that directory, with no install of their own:
 
 ```bash
 cd apps/practice
-npm ci
 npm run dev
 npm test              # check:versions + lint + typecheck + unit
 npm run coverage:patch
