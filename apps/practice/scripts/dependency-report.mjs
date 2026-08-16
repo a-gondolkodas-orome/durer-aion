@@ -1,5 +1,5 @@
-// Under `save-exact=true` a dependency four minors behind looks exactly like one released
-// yesterday, so nothing goes stale loudly. This reports what is behind (README § Dependency
+// A lockfile pins every dependency exactly, so a package four minors behind looks exactly like one
+// released yesterday until something asks. This reports what is behind (README § Dependency
 // updates).
 //
 // It is the outward-facing half of scripts/check-versions.mjs: that one compares the versions
@@ -11,12 +11,13 @@
 //   - GitHub Actions: every `uses:` in .github/workflows, against the action's latest release.
 //   - Node: .nvmrc, against the newest release sharing its major.
 //
-// Deliberately not `npm outdated`: under save-exact the manifest version *is* the installed
-// version, so the registry can be asked directly and this needs no install and no node_modules.
+// Deliberately not `npm outdated`: the lockfile already names the installed version, so the
+// registry can be asked directly and this needs no install and no node_modules.
 // Deliberately not `npm audit` either — advisories are Dependabot alerts' job, and they arrive with
 // an urgency a monthly digest would only dilute.
 import { appendFileSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { resolvedVersion } from './resolved-versions.mjs';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const read = file => readFileSync(`${root}${file}`, 'utf8');
@@ -61,8 +62,10 @@ const checkVersion = async (name, current, lookup) => {
 const npmRows = () => {
   const packageJson = JSON.parse(read('package.json'));
   const packages = { ...packageJson.dependencies, ...packageJson.devDependencies };
-  return Object.entries(packages).map(([name, current]) =>
-    checkVersion(name, current, async () => (await fetchJson(`https://registry.npmjs.org/${name}/latest`)).version)
+  // The installed version, not the declared range: comparing `^1.2.0` against the registry's
+  // `1.5.0` would report every dependency as behind forever. See resolved-versions.mjs.
+  return Object.entries(packages).map(([name, declared]) =>
+    checkVersion(name, resolvedVersion(name) ?? declared, async () => (await fetchJson(`https://registry.npmjs.org/${name}/latest`)).version)
   );
 };
 
