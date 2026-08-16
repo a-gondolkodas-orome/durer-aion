@@ -7,7 +7,9 @@ export interface FormProps {
     onSubmit: (values: FormikValues, setSubmitting: (arg0: boolean) => void) => void;
     validationSchema?: any;
 
-    children: React.ReactNode | React.ReactNodeArray;
+    // `ReactNode` has included arrays since React 18's types; `ReactNodeArray`
+    // was the deprecated alias for that half and is gone in React 19's.
+    children: React.ReactNode;
 
     className?: string;
     style?: CSSProperties;
