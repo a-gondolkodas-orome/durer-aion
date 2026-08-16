@@ -1,6 +1,7 @@
 import { cloneDeep } from 'lodash';
 import type { MoveOutcome, MoveDefinition } from '../types';
 import { buildCtx } from './build-ctx';
+import { isDevMode } from '../../../dev-mode';
 import type { CoreState } from './store';
 
 type MoveTransition<TBoard, TTurnState> = {
@@ -44,7 +45,7 @@ export const reduceMove = <TBoard, TTurnState>(
     next.turnState = result.nextTurnState;
   }
   if (result.gameEnd) {
-    if (import.meta.env.DEV && (result.isTurnEnd || result.autoEndOfTurn)) {
+    if (isDevMode() && (result.isTurnEnd || result.autoEndOfTurn)) {
       throw new Error(`strategyGameFactory: move ${name} returned gameEnd `
         + 'together with isTurnEnd/autoEndOfTurn');
     }

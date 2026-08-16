@@ -18,6 +18,7 @@ import { createGameStore, createInitialCoreState } from './engine/store';
 import { buildCtx } from './engine/build-ctx';
 import { asBotMoves, isBotTurnUnfinished, unknownMoveMessage } from './engine/bot-turn';
 import { reduceMove } from './engine/reducer';
+import { isDevMode } from '../../dev-mode';
 import { stepDelay } from './engine/timing';
 import { resolvePlayerNames } from './game-parts/common/player-names';
 
@@ -122,7 +123,7 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
     const reportIllegalMove = (name: string, moveBoard: TBoard, args: unknown[]) => {
       const message = `strategyGameFactory: illegal move ${name}(${JSON.stringify(args)}) `
         + `rejected on board ${JSON.stringify(moveBoard)}`;
-      if (import.meta.env.DEV) {
+      if (isDevMode()) {
         throw new Error(message);
       }
       console.warn(message);
@@ -152,7 +153,7 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
     ): MoveOutcome<TBoard, TTurnState> => {
       // A mismatch means a chaining bug — a stale board passed to the second
       // move of a turn — so fail loudly in dev; in prod the store board wins.
-      if (import.meta.env.DEV && !isEqual(moveBoard, store.getState().board)) {
+      if (isDevMode() && !isEqual(moveBoard, store.getState().board)) {
         throw new Error(`strategyGameFactory: stale board passed to move ${name} — `
           + 'pass the latest nextBoard when chaining moves within a turn');
       }
@@ -303,7 +304,7 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
       // the strategy — loud in dev, and in prod a stalled bot beats a crash.
       if (!named.length) {
         const message = 'strategyGameFactory: botStrategy named no move to play';
-        if (import.meta.env.DEV) throw new Error(message);
+        if (isDevMode()) throw new Error(message);
         console.warn(message);
       }
       return named;
@@ -320,7 +321,7 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
         if (!named.length) return;
         const [{ move, args = [] }, ...rest] = named;
         if (!moves[move]) {
-          if (import.meta.env.DEV) throw new Error(unknownMoveMessage(move, moves));
+          if (isDevMode()) throw new Error(unknownMoveMessage(move, moves));
           console.warn(unknownMoveMessage(move, moves));
           return;
         }
@@ -330,7 +331,7 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
         if (!isBotTurnUnfinished(store.getState(), playerBefore)) {
           // A turn planned as a whole may win partway through — the rest of the
           // plan is then moot rather than wrong.
-          if (import.meta.env.DEV && rest.length && store.getState().phase !== 'gameEnd') {
+          if (isDevMode() && rest.length && store.getState().phase !== 'gameEnd') {
             throw new Error(`strategyGameFactory: botStrategy named moves after ${move} ended its turn`);
           }
           return;

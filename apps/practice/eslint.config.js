@@ -63,7 +63,10 @@ export default [
     // (AGENTS.md § Files in a game folder). Beyond each game's gameplay.ts that
     // is start-boards.ts, the curated data a competition hands out, and the .ts
     // half of games/shared/ — its *-svg.tsx siblings are deliberately unmatched.
+    // dev-mode.ts is in it for the reason it exists: both halves ask it whether
+    // to fail loudly, and it is what makes them loadable outside Vite at all.
     files: [
+      'src/dev-mode.ts',
       'src/components/games/**/gameplay.ts',
       'src/components/games/**/start-boards.ts',
       'src/components/games/shared/**/*.ts',
