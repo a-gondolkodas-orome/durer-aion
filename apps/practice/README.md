@@ -248,8 +248,11 @@ For an example of internationalizing an existing game, see
 
 ## Dependency updates
 
-Every version is pinned exactly (`save-exact=true`), so nothing drifts on its own
-— and nothing goes stale loudly either. `.github/workflows/dependency_report.yml`
+Every version is pinned exactly by `package-lock.json`, so nothing drifts on its
+own — and nothing goes stale loudly either. The report and `npm run
+check:versions` both read the lockfile rather than the range in `package.json`,
+so they say what is *installed* and keep meaning that whether or not
+`save-exact=true` is in force. `.github/workflows/dependency_report.yml`
 runs monthly and keeps one `OPS` issue in sync with whatever is behind (npm
 packages, actions, the Node in `.nvmrc`); `npm run report:outdated` prints the
 same table on demand. It opens no pull requests — upgrading stays deliberate,
