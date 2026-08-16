@@ -72,6 +72,10 @@ jobs:
         run: npm run build
         env:
           SITE_BASE: ${{ env.SITE_ROOT }}jatekok/
+      - name: Build the relay practice
+        run: npx turbo build --filter=relay-practise-frontend
+        env:
+          SITE_BASE: ${{ env.SITE_ROOT }}valto/
       - name: Build the competition dry run
         run: npx turbo build --filter=offline-frontend
         env:
@@ -88,10 +92,8 @@ jobs:
           mkdir -p site
           cp -r pages/home/. site/
           mkdir -p site/jatekok && cp -r apps/practice/dist/. site/jatekok/
+          mkdir -p site/valto && cp -r apps/relay-practise-frontend/dist/. site/valto/
           mkdir -p site/proba-verseny && cp -r apps/offline-frontend/dist/. site/proba-verseny/
-          # The 2023 relay build cannot be rebuilt (pages/README.md), so it is rebased rather
-          # than compiled. The script fails loudly if any occurrence is left behind.
-          node scripts/rebase-static-site.mjs pages/valto-2023 site/valto /durer-aion/ "${SITE_ROOT}valto/"
           find site -maxdepth 2 -name CNAME -print
 
       - name: Upload Pages artifact

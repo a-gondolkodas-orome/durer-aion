@@ -7,7 +7,9 @@ export default defineConfig(() => {
   process.env.VITE_GIT_COMMIT_HASH = execSync('git rev-parse HEAD').toString().trimEnd();
 
   return {
-    base: process.env.PUBLIC_URL || '/',
+    // SITE_BASE is the Pages deploy's prefix, composed by the workflow from one variable so the
+    // subpages move together (docs/pages-consolidation.md). This app is served from /valto/.
+    base: process.env.SITE_BASE || process.env.PUBLIC_URL || '/',
     plugins: [react()],
     resolve: {
       alias: {

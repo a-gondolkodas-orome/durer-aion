@@ -28,7 +28,7 @@ document decides.
 | what | where it is today | notes |
 | --- | --- | --- |
 | **Strategy game practice** | `jatek.durerinfo.hu` (durer-jatekok, Pages from Actions) | The live practice site. Hash-routed, so every deep link is `#/game/…`. |
-| **Relay practice** | `https://a-gondolkodas-orome.github.io/durer-aion/` (durer-aion `gh-pages` branch) | Live: pick a past year's problem set, 90 minutes. A Create React App build from **August 2023** whose source no longer exists — see below. #224 is building its replacement as `apps/relay-practise-frontend`. |
+| **Relay practice** | `/valto/` on this site | Pick a past year's problem set, 90 minutes. Was a Create React App build from **August 2023** whose source no longer exists — see below; #224 replaced it with `apps/relay-practise-frontend`, which the deploy builds like every other subpage. |
 | **Competition dry run** | no permanent home — built per competition and deployed from that year's private repo | `apps/offline-frontend`: the full competition shell, both rounds, in-browser bots. Also uploads play data to S3 (see below). |
 | **The real competition** | `verseny.durerinfo.hu` | nginx + docker, **not** GitHub Pages. Unaffected by any of this. |
 
@@ -59,28 +59,26 @@ deploy time for one competition and explicitly not meant to be committed. It
 gets replaced by the `/proba-verseny/` base, and giving the dry run a permanent
 home here is new — it has never had one.
 
-### The live relay practice site cannot be rebuilt
+### The old relay practice site could not be rebuilt — and no longer has to be
 
-Nothing on `main` builds it. Its source went away in the monorepo restructure
-(#138) — `SelectRound` and `LoginToRelay` exist only in #224 — so what is
-serving today is an orphaned artifact on the `gh-pages` branch. #224's copy is
-a direct descendant of its wording, which is how we know the lineage.
+Nothing on `main` built it. Its source went away in the monorepo restructure
+(#138) — `SelectRound` and `LoginToRelay` existed only in #224 — so what served
+until #224 landed was an orphaned artifact from the `gh-pages` branch. #224's
+copy is a direct descendant of its wording, which is how we know the lineage.
 
-**This is a sequencing constraint, not a footnote.** A repository serves one
-Pages source at a time, so the moment durer-aion's source switches from the
-`gh-pages` branch to Actions, relay practice goes offline — and cannot come
-back until #224 lands.
+**This was a sequencing constraint, not a footnote.** A repository serves one
+Pages source at a time, so the moment durer-aion's source switched from the
+`gh-pages` branch to Actions, relay practice would have gone offline until #224
+landed. **Decided: preserve the 2023 build until then — done, and now spent.**
+It was committed at `pages/valto-2023/` and rebased into `/valto/` by
+`scripts/rebase-static-site.mjs`; #224 replaced the directory wholesale, and
+both it and the script are gone from the working tree. `/valto/` is now built
+from `apps/relay-practise-frontend` like every other subpage.
 
-**Decided: preserve the 2023 build — done.** It is committed at
-`pages/valto-2023/`, and `scripts/rebase-static-site.mjs` rewrites the
-`/durer-aion/` baked into it to whatever prefix the deploy serves it from.
-`/valto/` therefore serves the existing relay practice from the first deploy,
-and #224 replaces the directory wholesale when it merges.
-
-The snapshot is a committed build output, which is ugly and worth saying out
+The snapshot was a committed build output, which is ugly and worth saying out
 loud — but the alternative, a workflow step that reads the `gh-pages` branch,
 hides a dependency on a branch we intend to delete. Rejected alternatives:
-landing #224 before the cutover puts a 48-file contributor PR, currently
+landing #224 before the cutover would have put a 48-file contributor PR, then
 conflicted, on the critical path of the deploy move; accepting an outage costs
 users a working site for no engineering gain.
 
@@ -90,10 +88,11 @@ Two things found while doing it:
   `sourcesContent` for all 830 modules, including the 106 original app sources
   (`pages/GithubPagesMain.tsx`, `client/relay-rounds.ts`,
   `games/relay/problems.ts`, …). That settles the open question below: deleting
-  the `gh-pages` branch is only safe *because* the artifact — map included — is
-  committed here.
-- **This build ignores the hash route.** Every `#/…` path renders the same page,
-  so unlike durer-jatekok's `#/game/…` links there are no relay deep links to
+  the `gh-pages` branch is only safe *because* the artifact — map included — was
+  committed here, and it stays reachable in this repository's history now that
+  the directory itself is gone (`pages/README.md` says how to read it).
+- **That build ignored the hash route.** Every `#/…` path rendered the same page,
+  so unlike durer-jatekok's `#/game/…` links there were no relay deep links to
   preserve. Verified by serving the original and the rebased copy side by side
   and diffing the rendered text on four routes: identical, no failed requests.
 
@@ -109,8 +108,7 @@ gyakorlo.durerinfo.hu/
   /                 home page — what this site is, and where to go
   /jatekok/         apps/practice                 strategy game practice
                                                   (today's jatek.durerinfo.hu)
-  /valto/           the frozen 2023 relay practice build, rebased from
-                    /durer-aion/; replaced by apps/relay-practise-frontend (#224)
+  /valto/           apps/relay-practise-frontend  relay practice (#224)
   /proba-verseny/   apps/offline-frontend         competition dry run, both rounds
 ```
 
@@ -224,7 +222,7 @@ path kept, which is the same behaviour already verified for
 | 5 | dev + maintainer | Add `public/CNAME`, rebuild with the base path switched, set the custom domain in Settings |
 | 6 | maintainer | Cut over: replace durer-jatekok's published content with the redirect stub |
 | 7 | **teammate** | Repoint the links on durerinfo.hu |
-| 8 | dev | Later, in any order: #224's relay app replacing the frozen `/valto/`, the designed home page |
+| 8 | dev | Later, in any order: ~~#224's relay app replacing the frozen `/valto/`~~ **done**, the designed home page |
 
 Steps 1–5 have no effect on `jatek.durerinfo.hu`. Step 6 is the only
 irreversible-feeling moment, and it is a one-file revert.
@@ -301,7 +299,7 @@ issue title now names the app, since this repo holds four.
   asserts no `CNAME` reappears. The real one goes in at **step 5**, at the root
   of the assembled site rather than inside an app.
 - [x] **A root workflow** — done. `pages-deploy.yml` builds each app against its
-  own subpath, rebases the frozen relay artifact, assembles one `site/` tree and
+  own subpath, assembles one `site/` tree and
   runs `upload-pages-artifact` + `deploy-pages` once. It carries practice's
   `check:versions` / lint / typecheck / test gates, which `pr-test` only runs on
   pull requests — without them a push to `main` would deploy checks nobody ran.
@@ -357,14 +355,14 @@ build at two addresses.
   a DNS-level 301, never as a second Pages domain.
 - **Paths**: Hungarian throughout — `/jatekok/`, `/valto/`, `/proba-verseny/`.
 - **Relay continuity**: carry the 2023 build forward, rebased to `/valto/`,
-  until #224 replaces it.
+  until #224 replaces it. **Done — #224 has replaced it.**
 
 ## Open questions
 
 1. **What happens to the 2023 `gh-pages` branch.** Both preconditions for
    deleting it now hold: the Pages source is Actions, and the artifact is
    committed here — source map and all — so the branch holds nothing that is
-   not also on `main`. It is now inert either way, and the only reason left to
+   not also in this repository's history. It is now inert either way, and the only reason left to
    keep it is as a rollback that needs no rebuild. Reasonable to delete once
    `/valto/` has served real traffic for a while; no rush, and nothing depends
    on the timing.

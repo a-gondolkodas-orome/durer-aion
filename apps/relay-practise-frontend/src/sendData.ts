@@ -1,11 +1,23 @@
 import { LOCAL_STORAGE_TEAMSTATE, TeamModelDto } from "common-frontend";
 
 
+let warnedAboutMissingBucket = false;
+
+// Same reasoning as apps/offline-frontend/src/sendData.ts: `sendGameData` runs from
+// `startRelay` and from the game reducers, so throwing here breaks the round itself.
+// The /valto/ deploy configures no bucket at all, so an unconfigured build drops the
+// data and carries on.
 function sendData(fileName: string, data: string){
   const bucketName = import.meta.env.VITE_S3_BUCKET_NAME;
   const folder = import.meta.env.VITE_S3_FOLDER;
   if (!bucketName || !folder) {
-    throw new Error('S3 bucket name or folder is not defined.');
+    if (!warnedAboutMissingBucket) {
+      warnedAboutMissingBucket = true;
+      console.warn(
+        'VITE_S3_BUCKET_NAME / VITE_S3_FOLDER are unset: play data is not being uploaded.'
+      );
+    }
+    return;
   }
   const fd = new FormData();
   fd.append('key', folder + '/' + fileName);

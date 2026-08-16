@@ -53,7 +53,7 @@ export default defineConfig(
       // this repo's install, so linting it from here would resolve neither
       // its plugins nor its tsconfig.
       'apps/practice/**',
-      // A frozen 2023 build output, kept byte for byte. See pages/valto-2023/README.md.
+      // Hand-written pages the deploy copies verbatim, with no build step. See pages/README.md.
       'pages/**',
     ],
   }
