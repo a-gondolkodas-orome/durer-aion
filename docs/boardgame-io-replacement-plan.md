@@ -472,9 +472,31 @@ tasks, pinned Node) arrives alongside the existing setup, not instead of it.
 
 ### Phase 1 — Engine hardening + extraction (practice behavior unchanged)
 
-- [ ] **PR 1.1 (S)** `isDevMode()` shim (reads `import.meta.env?.DEV` when defined,
-  else `process.env.NODE_ENV`) replacing the two `import.meta.env.DEV` uses —
-  done in place so the move-PR stays a pure move.
+- [x] **PR 1.1 (S)** `isDevMode()` shim (reads `import.meta.env?.DEV` when defined,
+  else `process.env.NODE_ENV`) replacing the `import.meta.env.DEV` uses — done in
+  place so the move-PR stays a pure move.
+
+  **Seven uses, not the two this said.** Five are in the React shell, which Vite
+  will always build; they were converted anyway, so the policy lives in one place
+  and 1.2 has nothing left to decide per call site. Only the two React-free ones
+  (`engine/reducer.ts`, `games/shared/unexpected-state.ts`) were actually broken
+  outside Vite, and the spec pins that directly: it imports the module in a bare
+  `node`, which runs the `.ts` unbuilt (type stripping, on by default since
+  23.6), where the old expression threw `TypeError: Cannot read properties of
+  undefined (reading 'DEV')` before any game logic ran.
+
+  The shim sits at `src/dev-mode.ts`, not in `engine/`, because the React-free
+  ESLint group bans the whole `strategy-game-factory/` subtree from `games/`, not
+  merely its barrel — the pattern is gitignore-shaped. It joins that group
+  itself. In 1.2 it moves into `packages/engine` and `games/` imports it from
+  there, which is the barrel-shaped import the rule is really after.
+
+  Cost, since it is a real one: a call boundary is opaque to the bundler where
+  `import.meta.env.DEV` folded to a literal, so two dev-only `throw` branches now
+  survive minification — **+618 bytes raw, +206 gzipped** across the whole site.
+  A module-scope constant would fold, but it would also capture its value at
+  import time and make `vi.stubEnv('DEV', …)` a no-op for every existing
+  prod-behaviour spec.
 - [ ] **PR 1.2 (L, mechanical)** `packages/engine`: move the engine core +
   `types.ts` + `resolve-variants.ts` (export `"."`, React-free) and
   `game-parts/game-board.tsx`, the hooks, the `language` provider (export
