@@ -1,1 +1,6 @@
 import_teams.sh text eol=lf
+
+# A frozen 2023 build output, kept byte for byte (pages/valto-2023/README.md). Marked vendored so
+# it stays out of the repo's language stats, and -diff so a 4 MB minified bundle and its source map
+# are not rendered as a diff by anything that honours the attribute.
+pages/valto-2023/** linguist-vendored -diff

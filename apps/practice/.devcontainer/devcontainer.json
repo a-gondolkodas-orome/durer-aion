@@ -1,0 +1,47 @@
+{
+  "name": "React Dev Container",
+  "build": { "dockerfile": "Dockerfile" },
+  "features": {
+    // Keep in sync with .nvmrc, package.json engines and .github/workflows/*.yml —
+    // `npm run check:versions` fails on a mismatch. Listed first so the features that
+    // install global npm packages run against this Node.
+    "ghcr.io/devcontainers/features/node:1": { "version": "24.11.1" },
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/anthropics/devcontainer-features/claude-code:1": {}
+  },
+  "mounts": [
+    "source=durer-gh-config,target=/home/node/.config/gh,type=volume",
+    "source=durer-claude-home,target=/home/node/.claude,type=volume"
+  ],
+  "containerEnv": {
+    "CLAUDE_CONFIG_DIR": "/home/node/.claude"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint"
+        , "bradlc.vscode-tailwindcss"
+        , "esbenp.prettier-vscode"
+        , "anthropic.claude-code"
+      ],
+      "settings": {
+        "editor.tabSize": 2,
+        "editor.codeActionsOnSave": { "source.fixAll.eslint": "explicit" },
+        "tailwindCSS.experimental.configFile": "src/styles.css",
+        "javascript.updateImportsOnFileMove.enabled": "always",
+        "files.insertFinalNewline": true,
+        "files.trimFinalNewlines": true
+      }
+    }
+  },
+  // At the repository root, not here: this app is a workspace of the monorepo, there is
+  // one lockfile at the root, and `npm ci` from a workspace directory leaves the root's own
+  // dependencies unmet while still exiting 0.
+  "postCreateCommand": "npm ci --prefix ../..",
+  "forwardPorts": [8012],
+  "portsAttributes": {
+    "8012": {
+      "label": "Dev Server"
+    }
+  }
+}

@@ -7,7 +7,10 @@ export default defineConfig(() => {
   process.env.VITE_GIT_COMMIT_HASH = execSync('git rev-parse HEAD').toString().trimEnd();
 
   return {
-    base: process.env.PUBLIC_URL || '/',
+    // SITE_BASE is the Pages deploy's prefix, composed by the workflow from one variable so the
+    // three subpages move together (docs/pages-consolidation.md). PUBLIC_URL stays supported
+    // because DEPLOYMENT.md's per-competition deploy sets it, and that build is not this one.
+    base: process.env.SITE_BASE || process.env.PUBLIC_URL || '/',
     plugins: [react()],
     resolve: {
       alias: {
@@ -21,6 +24,12 @@ export default defineConfig(() => {
       preserveSymlinks: true, // this is needed to make sure that linked packages are properly resolved (like game and schemas
     },
     server: {
+      // Vite binds loopback by default. In a dev container the browser reaches
+      // it from outside the container's network namespace, where a
+      // loopback-only bind is simply unreachable — the request hangs rather
+      // than failing. `.devcontainer` sets DEV_SERVER_HOST for that case;
+      // outside a container nothing changes.
+      host: process.env.DEV_SERVER_HOST === "true" || undefined,
       fs: {
         allow: [
           "..", // allow Vite to serve files outside project root

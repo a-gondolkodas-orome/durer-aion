@@ -10,7 +10,7 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "lint": "cross-env TIMING=1 eslint \"src/**/*.ts*\" --max-warnings=-1",
-    "test": "jest --passWithNoTests",
+    "typecheck": "tsc --noEmit",
     "build": "npx tsup",
     "dev": "npx tsup --watch --onSuccess \"echo rebuilt schemas\""
   },

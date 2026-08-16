@@ -1,0 +1,94 @@
+import { difference, range, shuffle, sample } from 'lodash';
+import { isAllowedStep, isColored, neighbours, colors, type Board, type Moves } from './gameplay';
+import type { BotStrategy } from 'strategy-game-factory';
+import { reportUnexpectedState } from '../shared/unexpected-state';
+
+type Bot = BotStrategy<Board, Moves>
+
+export const randomBotStrategy: Bot = ({ board }) => {
+  const validMoves: { vertex: number, color: string }[] = [];
+  for (const vertex of range(0, 8)) {
+    if (isColored(board, vertex)) continue;
+    for (const color of colors) {
+      if (isAllowedStep(board, vertex, color)) {
+        validMoves.push({ vertex, color });
+      }
+    }
+  }
+  return { move: 'colorVertex', args: [sample(validMoves)!] };
+};
+
+export const smartBotStrategy: Bot = ({ board, ctx }) => {
+  const step = ctx.chosenRoleIndex === 0
+    ? makeOptimalStepAsSecond(board)
+    : makeOptimalStepAsFirst(board);
+  // Only reachable after the unexpected state below: with no colourable vertex
+  // left there is no move to name, and naming none stalls the bot rather than
+  // crashing on an undefined step.
+  if (!step) return [];
+  return { move: 'colorVertex', args: [step] };
+};
+
+const makeOptimalStepAsFirst = (board: Board) => {
+  const mainDiagonal = shuffle([2, 4]);
+  const otherVertices = shuffle([0, 1, 3, 5, 6, 7]);
+  const vertexToColor = [...mainDiagonal, ...otherVertices].find(v => !isColored(board, v))!;
+  const allowedColors = colors.filter(c => isAllowedStep(board, vertexToColor, c));
+  return { vertex: vertexToColor, color: sample(allowedColors)! };
+};
+
+const makeOptimalStepAsSecond = (board: Board) => {
+  const emptyVertices = shuffle(range(0, 8)).filter(v => !isColored(board, v));
+
+  // try to immediately make a vertex uncolorable
+  for (const vertex of emptyVertices) {
+    const missingColors = getMissingColors(board, vertex);
+    if (missingColors.length === 1) {
+      for (const v of getEmptyNeighbours(board, vertex)) {
+        if (isAllowedStep(board, v, missingColors[0])) {
+          return { vertex: v, color: missingColors[0] };
+        }
+      }
+    }
+  }
+
+  // if player does not start on main diagonal, color opposing node with same color
+  const pairs = shuffle([[0, 6], [6, 0], [1, 7], [7, 1], [3, 5], [5, 3]]);
+  for (const p of pairs) {
+    if (isColored(board, p[0]) && isAllowedStep(board, p[1], board[p[0]])) {
+      return { vertex: p[1], color: board[p[0]] };
+    }
+  }
+
+  // make a non-neighboring step if possible
+  for (const vertex of emptyVertices) {
+    const missingColors = getMissingColors(board, vertex);
+    if (missingColors.length === 2) {
+      for (const v of getEmptyNeighbours(board, vertex)) {
+        if (isAllowedStep(board, v, missingColors[0])) {
+          return { vertex: v, color: missingColors[0] };
+        }
+      }
+    }
+  }
+  // every vertex is either banned or has no colored neighbor
+  for (const vertex of emptyVertices) {
+    for (const color of shuffle(colors)) {
+      if (isAllowedStep(board, vertex, color)) {
+        return { vertex, color };
+      }
+    }
+  }
+  // if all vertices are banned we should have a game end
+  reportUnexpectedState('cube-coloring: no colourable vertex left but the game has not ended');
+  return undefined;
+};
+
+const getMissingColors = (board: Board, vertex) => {
+  const nbColors = neighbours[vertex].map(v => board[v]);
+  return difference(colors, nbColors);
+};
+
+const getEmptyNeighbours = (board: Board, vertex) => {
+  return neighbours[vertex].filter(i => !isColored(board, i));
+};

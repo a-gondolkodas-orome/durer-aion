@@ -1,0 +1,39 @@
+import { strategyGameFactory } from 'strategy-game-factory';
+import { generateEmptyTicTacToeBoard } from '../gameplay';
+import { BoardClient } from '../board-client';
+import { moves } from './gameplay';
+import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
+
+const rule = {
+  hu: <>
+    A 3×3-as antiamőba játékban a kezdő piros, a második kék korongokat rak le. Felváltva
+    lépnek, és az veszít, akinek először lesz a saját színéből három korongja egy sorban, oszlopban vagy
+    átlóban. Ha mind a kilenc mező foglalt és nincs ilyen koronghármas, akkor a kezdő nyer.
+  </>,
+  en: <>
+    In the 3×3 anti-tic-tac-toe game the first player places red, the second places blue pieces.
+    They alternate turns, and the first player to get three of their own colour in a row, column,
+    or diagonal loses. If all nine squares are occupied and no such triple exists, the first player wins.
+  </>
+};
+
+export const AntiTicTacToe = strategyGameFactory({
+  presentation: {
+    rule,
+    getPlayerStepDescription: () => ({
+      hu: 'Helyezz le egy korongot egy üres mezőre kattintással.',
+      en: 'Click on an empty square to place a piece.'
+    })
+  },
+  BoardClient,
+  gameplay: { moves },
+  variants: [
+    { botStrategy: randomBotStrategy, label: { hu: 'Teszt', en: 'Test' } },
+    {
+      botStrategy: smartBotStrategy,
+      startBoards: [generateEmptyTicTacToeBoard()],
+      label: { hu: 'Teljes', en: 'Full' },
+      isDefault: true
+    }
+  ]
+});

@@ -1,19 +1,15 @@
 import { UserModel } from "./user-model";
-import { useRecoilState } from 'recoil';
-import { currentStateAtom } from "./user-atom";
+import { setTeamState, useTeamStateValue } from "./team-state-store";
 import { TeamModelDto } from "../dto/TeamStateDto";
 import { useEffect } from "react";
 import { useClientRepo } from "../api-repository-interface";
 
 export const useTeamState = (): TeamModelDto | null => {
-  const [teamState, ] = useRecoilState(currentStateAtom);
-
-  return teamState;
+  return useTeamStateValue();
 };
 
 export const LoadTeamState = () => {
   const repo = useClientRepo();
-  const [, setTeamState] = useRecoilState(currentStateAtom);
 
   useEffect(() => {
       if (typeof window === 'undefined') {
@@ -36,7 +32,6 @@ export const LoadTeamState = () => {
 };
 
 export const useRefreshTeamState = () => {
-  const [, setTeamState] = useRecoilState(currentStateAtom);
   const repo = useClientRepo();
   return async () => {
     const userModel = new UserModel(repo);
@@ -95,7 +90,6 @@ export const useAddMinutes = () => {
 
 export const useLogin = () => {
   const repo = useClientRepo();
-  const [, setTeamState] = useRecoilState(currentStateAtom);
   return async (joinCode: string) => {
     const userModel = new UserModel(repo);
     console.log("joinCode", joinCode);
@@ -110,7 +104,6 @@ export const useLogin = () => {
 
 export const useLogout = () => {
   const repo = useClientRepo();
-  const [, setTeamState] = useRecoilState(currentStateAtom);
   return () => {
     const userModel = new UserModel(repo);
     userModel.logout();
@@ -120,7 +113,6 @@ export const useLogout = () => {
 
 export const useStartRelay = () => {
   const repo = useClientRepo();
-  const [, setTeamState] = useRecoilState(currentStateAtom);
   return async () => {
     const userModel = new UserModel(repo);
     await userModel.startRelay()
@@ -130,7 +122,6 @@ export const useStartRelay = () => {
 };
 
 export const useToHome = () => {
-  const [, setTeamState] = useRecoilState(currentStateAtom);
   const repo = useClientRepo();
   return async () => {
     const userModel = new UserModel(repo);
@@ -141,7 +132,6 @@ export const useToHome = () => {
 };
 
 export const useStartStrategy = () => {
-  const [, setTeamState] = useRecoilState(currentStateAtom);
   const repo = useClientRepo();
   return async () => {
     const userModel = new UserModel(repo);

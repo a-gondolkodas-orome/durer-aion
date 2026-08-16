@@ -33,3 +33,6 @@ __pycache__
 .turbo
 
 **/dist
+
+# The Pages tree the deploy assembles from pages/ and each app's dist/.
+/site

@@ -1,4 +1,16 @@
 {
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/session-start.sh"
+          }
+        ]
+      }
+    ]
+  },
   "permissions": {
     "allow": [
       "Bash(gh issue view*)",
@@ -11,7 +23,24 @@
       "Bash(gh pr status*)",
       "Bash(gh search *)",
       "Bash(gh repo view*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(npm run build)",
+      "Bash(npm run lint)",
+      "Bash(npm run typecheck)",
+      "Bash(npm test)",
+      "Bash(npm run test)",
+      "Bash(npm run test:unit)",
+      "Bash(npm run dev)",
+      "Bash(npm run i18n:check)",
+      "Bash(npm run spell-check)",
+      "Bash(npm run coverage)",
+      "Bash(npm run coverage:unswept)",
+      "Bash(npm run coverage:patch)",
+      "Bash(npm run check:versions)",
+      "Bash(npm run report:outdated)",
+      "Bash(npx tsc --noEmit)",
+      "Bash(npx turbo run *)",
+      "Bash(npm view *)"
     ],
     "deny": [
       "Bash(gh pr merge*)",

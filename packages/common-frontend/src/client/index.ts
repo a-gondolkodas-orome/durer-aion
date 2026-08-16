@@ -24,7 +24,7 @@ export * from './components/teamstates/Relay';
 export * from './components/teamstates/Strategy';
 export * from './components/teamstates/GameContext';
 export * from './dto/TeamStateDto';
-export * from './hooks/user-atom';
+export * from './hooks/team-state-store';
 export * from './hooks/user-hooks';
 export * from './hooks/user-model';
 export * from './utils/DateFormatter';
