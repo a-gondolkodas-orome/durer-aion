@@ -14,7 +14,8 @@
       "strategy-game-factory": ["./src/components/strategy-game-factory/index.ts"],
       "language": ["./src/language/index.ts"],
       "engine": ["../../packages/engine/index.ts"],
-      "engine/react": ["../../packages/engine/react.ts"]
+      "engine/react": ["../../packages/engine/react.ts"],
+      "games": ["../../packages/games/index.ts"]
     },
     "skipLibCheck": true,
     "types": ["vitest/globals", "vite/client"]

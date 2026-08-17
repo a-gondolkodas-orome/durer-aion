@@ -38,12 +38,12 @@ export default defineConfig(
       'prefer-const': 'error',
     },
   },
-  // packages/engine is apps/practice's engine, moved out of it (Phase 1 of
-  // docs/boardgame-io-replacement-plan.md). Two rules of this config disagree with the
-  // conventions that code was written under, and rewriting it would turn a move into a
-  // rewrite — they stay off here until the two ESLint setups are unified.
+  // packages/engine and packages/games are apps/practice code moved out of it (Phase 1
+  // of docs/boardgame-io-replacement-plan.md). Two rules of this config disagree with
+  // the conventions that code was written under, and rewriting it would turn a move
+  // into a rewrite — they stay off here until the two ESLint setups are unified.
   {
-    files: ['packages/engine/**/*.{ts,tsx}'],
+    files: ['packages/engine/**/*.{ts,tsx}', 'packages/games/**/*.{ts,tsx}'],
     rules: {
       '@typescript-eslint/no-non-null-assertion': 'off',
       '@typescript-eslint/consistent-type-definitions': 'off',
@@ -64,6 +64,23 @@ export default defineConfig(
           group: ['react', 'react/*', 'react-*', '*.tsx', '**/*.tsx'],
           allowTypeImports: true,
           message: 'packages/engine runs with no framework attached; keep React on the app side.',
+        }],
+      }],
+    },
+  },
+  // A game's .ts half — gameplay, bot, curated start boards — is what a competition
+  // server validates moves and plays bot turns with, so it runs in plain Node; only
+  // the game's .tsx (its board client and config) may be React-flavoured. Same
+  // blind spot as above: `gameplay-react-free.spec.ts` in apps/practice watches what
+  // a relative import resolves to.
+  {
+    files: ['packages/games/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': ['error', {
+        patterns: [{
+          group: ['react', 'react/*', 'react-*', '*.tsx', '**/*.tsx'],
+          allowTypeImports: true,
+          message: 'A game\'s .ts half runs in plain Node; move anything React-flavoured into the game .tsx.',
         }],
       }],
     },

@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { Ctx, MoveOutcome } from 'engine';
 import { range, cloneDeep, sample, random } from 'lodash';
 
 export type Board = { numbersOnTable: boolean[], previousMove: number | null }
@@ -24,7 +24,7 @@ export const isAllowed = (board: Board, n: number) => {
 
 export const moves = {
   removeNumber: {
-    validate: (board: Board, _, n: number) => isAllowed(board, n),
+    validate: (board: Board, _: { ctx: Ctx }, n: number) => isAllowed(board, n),
     apply: (board: Board, { ctx }: { ctx: Ctx }, n: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard.numbersOnTable[n - 1] = false;

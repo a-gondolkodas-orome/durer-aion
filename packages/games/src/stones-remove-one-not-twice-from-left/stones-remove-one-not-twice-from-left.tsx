@@ -1,10 +1,19 @@
-import { strategyGameFactory, type BoardClientProps, GameBoard, useHoverPreview } from 'strategy-game-factory';
+import type { BoardClientProps, StrategyGameConfig } from 'engine';
+import { GameBoard, useHoverPreview, useTranslation } from 'engine/react';
 import { range } from 'lodash';
-import { useTranslation } from 'language';
 import { fullStartBoards, testStartBoards, moves, type Board } from './gameplay';
 import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
 
-const StonePile = ({ count, onClick, disabled, restricted, hovered, hoverProps }) => {
+const StonePile = ({ count, onClick, disabled, restricted, hovered, hoverProps }: {
+  count: number
+  onClick: () => void
+  disabled: boolean
+  restricted: boolean
+  hovered: boolean
+  // `useHoverPreview`'s hoverProps(value), or {} on a pile that may not drive
+  // a preview — either way a bag of handlers to spread onto the button.
+  hoverProps: Record<string, () => void>
+}) => {
   return (
     <button
       className={`w-full flex-1 flex flex-wrap content-start justify-center gap-2 p-2
@@ -30,7 +39,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
   const { value: hoveredPile, hoverProps } = useHoverPreview<number>(ctx.moveCount);
 
-  const isMoveAllowed = pileId => moves.removeStone.isAllowed(board, pileId);
+  const isMoveAllowed = (pileId: number) => moves.removeStone.isAllowed(board, pileId);
 
   return (
     <GameBoard>
@@ -75,7 +84,7 @@ const getPlayerStepDescription = () => ({
   en: 'Click the pile you want to remove a stone from.'
 });
 
-export const StonesRemoveOneNotTwiceFromLeft = strategyGameFactory({
+export const stonesRemoveOneNotTwiceFromLeftConfig: StrategyGameConfig<Board> = {
   presentation: {
     rule,
     getPlayerStepDescription
@@ -95,4 +104,4 @@ export const StonesRemoveOneNotTwiceFromLeft = strategyGameFactory({
       isDefault: true
     }
   ]
-});
+};
