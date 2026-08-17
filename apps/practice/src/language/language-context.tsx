@@ -1,14 +1,13 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router';
-import type { Language } from './translate';
+import { LanguageProvider as ProvideLanguage } from 'engine/react';
+import type { Language } from 'engine';
 
-interface LanguageContextValue {
-  language: Language
-  setLanguage: (lang: Language) => void
-}
-
-const LanguageContext = createContext<LanguageContextValue>({ language: 'hu', setLanguage: () => {} });
-
+// The stateful half of the language plumbing, and the reason it stays in this
+// app: the language lives in the URL (`?lang=`) and localStorage, and the URL
+// half rides this app's router. The engine's provider is deliberately
+// controlled and router-free (see packages/engine/src/react/language.tsx); this
+// wrapper owns the state and hands it down.
 export const LanguageProvider = ({ children }: { children: React.ReactNode }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [language, setLanguageState] = useState<Language>(
@@ -53,10 +52,8 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
   };
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage }}>
+    <ProvideLanguage language={language} setLanguage={setLanguage}>
       {children}
-    </LanguageContext.Provider>
+    </ProvideLanguage>
   );
 };
-
-export const useLanguage = () => useContext(LanguageContext);

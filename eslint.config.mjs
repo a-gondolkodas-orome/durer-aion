@@ -38,13 +38,22 @@ export default defineConfig(
   // conventions that code was written under, and rewriting it would turn a move into a
   // rewrite — they stay off here until the two ESLint setups are unified.
   {
-    files: ['packages/engine/**/*.ts'],
+    files: ['packages/engine/**/*.{ts,tsx}'],
     rules: {
       '@typescript-eslint/no-non-null-assertion': 'off',
       '@typescript-eslint/consistent-type-definitions': 'off',
-      // What the package is for. `import type` is allowed because it is erased: i18n.ts
-      // has to name React's node type to say what a game's rule text may be, and naming
-      // it costs a bare node nothing.
+    },
+  },
+  // The core of the package is what a bare node server imports; its React client half
+  // lives in src/react/ and is exempt — that is the whole point of the split. What this
+  // rule cannot see is a relative import resolving into src/react/; the walk in
+  // packages/engine/src/react-free.spec.ts pins that. `import type` is allowed because
+  // it is erased: i18n.ts has to name React's node type to say what a game's rule text
+  // may be, and naming it costs a bare node nothing.
+  {
+    files: ['packages/engine/**/*.ts'],
+    ignores: ['packages/engine/react.ts', 'packages/engine/src/react/**'],
+    rules: {
       '@typescript-eslint/no-restricted-imports': ['error', {
         patterns: [{
           group: ['react', 'react/*', 'react-*', '*.tsx', '**/*.tsx'],

@@ -14,7 +14,4 @@ export type {
 
 export { strategyGameFactory } from './strategy-game-factory';
 export type { Presentation, StrategyGame, StrategyGameConfig } from './strategy-game-factory';
-export { GameBoard } from './game-parts/game-board';
-export { useHoverPreview } from './hooks/use-hover-preview';
-export { useMoveScopedState } from './hooks/use-move-scoped-state';
-export { useDeferredMove } from './hooks/use-deferred-move';
+export { GameBoard, useHoverPreview, useMoveScopedState, useDeferredMove } from 'engine/react';

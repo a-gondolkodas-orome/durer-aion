@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { stepDelay } from 'engine';
+import { stepDelay } from '../timing';
 
 // A few games submit a two-part turn from one click — discard a pile, then
 // split another — and play the second move a beat later so the board reads as

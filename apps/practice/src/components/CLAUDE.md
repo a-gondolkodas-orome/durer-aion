@@ -264,7 +264,8 @@ state without going through a move, deliberately: a selection is not a move, so
 it must not bump `moveCount` or take an undo snapshot. Moves never get it; they
 return `nextTurnState` instead.
 
-Three hooks in `strategy-game-factory/hooks/` cover the rest; each carries its
+Three hooks from `engine/react` (re-exported by the factory barrel) cover the
+rest; each carries its
 own usage notes and footguns in its JSDoc, so reach for them rather than
 re-deriving the pattern:
 

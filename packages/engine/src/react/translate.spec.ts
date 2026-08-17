@@ -1,5 +1,6 @@
 import { createElement } from 'react';
-import { translate, type TranslatableNode } from './translate';
+import { translate } from './translate';
+import type { TranslatableNode } from '../i18n';
 
 // Games add English game by game, so a value may be a plain string, a fully
 // translated pair, or a pair that only has Hungarian yet — and every one of
