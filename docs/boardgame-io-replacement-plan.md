@@ -536,7 +536,11 @@ reviewed wiring.
   accepts every concrete signature), and the one genuinely bivariant `any[]` —
   a move's args, declared specific by the game yet dispatched as `unknown[]` by
   the engine — is aliased once as `BivariantArgs` with its reason and a single
-  targeted disable. The two rules stay off until the ESLint setups unify.
+  targeted disable. The two rules stay off until the ESLint setups unify. The cap then went
+  to **zero**: the legacy bgio directories' 106 `no-explicit-any` — interop
+  nobody will type out before Phase 7 deletes that code — have the rule off
+  with the reason in the config, and everywhere else a new warning of any kind
+  now fails the job instead of accumulating.
 
   Three things the build turned up, none of which a spec would have:
   - **`import.meta.env` must be written out literally.** A type assertion around

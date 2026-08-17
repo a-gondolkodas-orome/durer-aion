@@ -49,7 +49,7 @@
   "scripts": {
     "predeploy": "npx turbo run build --filter=offline-frontend && npm run predeploy --workspace=offline-frontend",
     "deploy": "gh-pages -d apps/offline-frontend/dist",
-    "lint": "eslint . --max-warnings=107",
+    "lint": "eslint . --max-warnings=0",
     "lint:turbo": "turbo lint",
     "start": "turbo start",
     "build": "turbo build",
