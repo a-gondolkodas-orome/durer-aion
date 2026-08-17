@@ -39,6 +39,17 @@ export type StrategyGame<TBoard, TTurnState = unknown> = React.FC & {
   variants: VariantInput<TBoard>[]
 }
 
+// The id only remounts the board subtree on restart, so uniqueness within one
+// browser session is all it carries — but `crypto.randomUUID` exists only in
+// secure contexts, and this site is served over plain http too (a domain
+// without enforced https reached every game route rendering the error page,
+// while the overview, which never calls it, worked). Never let a remount key
+// depend on the transport.
+const newGameUuid = () =>
+  typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+    ? crypto.randomUUID()
+    : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+
 export const strategyGameFactory = <TBoard, TTurnState = unknown>({
   presentation,
   BoardClient,
@@ -76,7 +87,7 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
     const { board, phase, mode, currentPlayer, chosenRoleIndex, undoSnapshot } = state;
 
     const [isGameEndDialogOpen, setIsGameEndDialogOpen] = useState(false);
-    const [gameUuid, setGameUuid] = useState(crypto.randomUUID());
+    const [gameUuid, setGameUuid] = useState(newGameUuid);
     const botTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const [playerNames, setPlayerNames] = useState<[string, string]>(() => {
       try {
@@ -192,7 +203,7 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
       }, { replace: true });
       store.setState(createInitialCoreState(boardGenerator(), newMode));
       setIsGameEndDialogOpen(false);
-      setGameUuid(crypto.randomUUID());
+      setGameUuid(newGameUuid());
     };
 
     const setDifficulty = (index: number) => {

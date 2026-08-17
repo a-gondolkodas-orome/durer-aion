@@ -9,6 +9,24 @@ import type { BoardClientProps, BotMove, BotStrategy, Ctx, Gameplay, StrategyArg
 
 beforeAll(warmUpPlayerNameSetup);
 
+describe('in an insecure context (plain http)', () => {
+  // Secure contexts alone define crypto.randomUUID, and jsdom is not the judge
+  // of that — so take the whole object away, as http really presents it. Seen
+  // live: every game route on http://gyakorlo.durerinfo.hu rendered the error
+  // page while the overview worked, since only game mounts minted an id.
+  it('still mounts a game without crypto.randomUUID', () => {
+    vi.stubGlobal('crypto', {});
+    try {
+      // The crash was in the shell's own mount (the game-uuid useState), so
+      // reaching the role chooser at all is the assertion.
+      const { getByTestId } = renderGame(minimalConfig(defaultGameplay));
+      expect(getByTestId('role-btn-0')).toBeDefined();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+});
+
 describe('isClientMoveAllowed', () => {
   it('allows both players to move in vsHuman mode', () => {
     const { getByTestId } = renderGame(ctxAwareConfig());
