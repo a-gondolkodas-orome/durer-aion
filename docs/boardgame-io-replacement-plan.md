@@ -529,9 +529,14 @@ reviewed wiring.
   React by specifier (`import type` allowed — it is erased), and the package
   holds no `.tsx` at all. Two of that config's rules
   (`no-non-null-assertion`, `consistent-type-definitions`) are off there so a
-  move does not become a rewrite, and its `--max-warnings` cap rises 107 → 117
-  for the ten `no-explicit-any` in the moved `types.ts`. Both revert when the
-  two ESLint setups are unified.
+  move does not become a rewrite, and its `--max-warnings` cap rose 107 → 117
+  for the ten `no-explicit-any` in the moved `types.ts` — reverted since: nine
+  of the ten anys became precise types (`unknown[]` where only calls need
+  accepting, `never` in constraint and inference patterns, where contravariance
+  accepts every concrete signature), and the one genuinely bivariant `any[]` —
+  a move's args, declared specific by the game yet dispatched as `unknown[]` by
+  the engine — is aliased once as `BivariantArgs` with its reason and a single
+  targeted disable. The two rules stay off until the ESLint setups unify.
 
   Three things the build turned up, none of which a spec would have:
   - **`import.meta.env` must be written out literally.** A type assertion around
