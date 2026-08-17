@@ -34,17 +34,28 @@ export type MoveOutcome<TBoard, TTurnState = unknown> = {
   // present (contradiction; throws in dev).
   autoEndOfTurn?: boolean
 }
+// The engine's one deliberate `any`, aliased so its reason is written once: a
+// game declares a move's arguments specifically (`count: number`), while the
+// engine dispatches whatever arrived as `unknown[]`. Only `any[]` allows both —
+// `unknown[]` rejects the game's declaration (contravariance), `never[]`
+// rejects the engine's dispatch — so this is the bivariance hack every game's
+// move typing rests on, not a shortcut. Argument *checking* is not lost: bots
+// are pinned through `BotMove<Moves>` below, which reads the specific
+// signature back out.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type BivariantArgs = any[]
+
 // A move is a pure reducer: board in, outcome out, handed nothing it could
 // cause an effect through — see AGENTS.md § Files in a game folder for why that
 // matters beyond this repo.
 export type MoveFunction<TBoard, TTurnState = unknown> = (
-  board: TBoard, meta: { ctx: Ctx<TTurnState> }, ...args: any[]
+  board: TBoard, meta: { ctx: Ctx<TTurnState> }, ...args: BivariantArgs
 ) => MoveOutcome<TBoard, TTurnState>
 // The single source of truth for a move's legality, colocated with its `apply`
 // and free of React so the UI, the engine and a future server can share it.
 // See src/components/CLAUDE.md § validate.
 type MoveValidator<TBoard, TTurnState = unknown> = (
-  board: TBoard, meta: { ctx: Ctx<TTurnState> }, ...args: any[]
+  board: TBoard, meta: { ctx: Ctx<TTurnState> }, ...args: BivariantArgs
 ) => boolean
 export type MoveDefinition<TBoard, TTurnState = unknown> = {
   apply: MoveFunction<TBoard, TTurnState>
@@ -59,26 +70,29 @@ export interface Gameplay<TBoard, TTurnState = unknown> {
 // `isAllowed`, which would be false throughout its turn anyway.
 export type GameMoves<TBoard, TTurnState = unknown> = Record<
   string,
-  (board: TBoard, ...args: any[]) => MoveOutcome<TBoard, TTurnState>
+  (board: TBoard, ...args: unknown[]) => MoveOutcome<TBoard, TTurnState>
 >
 // The BoardClient's view: the same dispatchers plus `isAllowed(board, ...args)`,
 // which is what a `disabled` state should ask. Assignable to GameMoves, so
 // helpers shared with a bot keep taking the wider type.
 export type ClientGameMoves<TBoard, TTurnState = unknown> = Record<
   string,
-  ((board: TBoard, ...args: any[]) => MoveOutcome<TBoard, TTurnState>)
-    & { isAllowed: (board: TBoard, ...args: any[]) => boolean }
+  ((board: TBoard, ...args: unknown[]) => MoveOutcome<TBoard, TTurnState>)
+    & { isAllowed: (board: TBoard, ...args: unknown[]) => boolean }
 >
 export type StrategyArgs<TBoard, TTurnState = unknown> = {
   board: TBoard
   ctx: Ctx<TTurnState>
 }
 // A game's `moves` object seen as a type — what a game exports as `Moves`.
-type AnyMoves = Record<string, MoveDefinition<any, any>>
+// Matched on shape, not on MoveDefinition: `never` parameters accept every
+// concrete signature (contravariance), which is all a constraint needs.
+type AnyMoves = Record<string, { apply: (...args: never[]) => unknown }>
 // What a move takes beyond the board and the meta object: exactly the tail a
-// bot has to supply as `args`.
+// bot has to supply as `args`. The pattern's `never`s accept any board and
+// meta for the same reason AnyMoves' do.
 type MoveArgs<TApply> =
-  TApply extends (board: any, meta: any, ...args: infer TArgs) => any ? TArgs : never
+  TApply extends (board: never, meta: never, ...args: infer TArgs) => unknown ? TArgs : never
 // A move a bot wants played, named rather than dispatched. Given the game's
 // `Moves` it pins the name and the arguments; given only a union of names (or
 // nothing) it still pins the name, leaving `args` unchecked.
