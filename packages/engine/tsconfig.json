@@ -3,6 +3,7 @@
   "exclude": ["dist", "build", "node_modules"],
   "compilerOptions": {
     "target": "ES2022",
+    "jsx": "react-jsx",
     "lib": ["ES2022", "DOM"],
     "composite": false,
     "declaration": true,

@@ -560,10 +560,44 @@ reviewed wiring.
   - `practice-pr-test`'s `paths` filter only watched `apps/practice/**`, so an
     engine-only PR would have skipped practice's 1988 specs and the coverage
     gate entirely. `packages/engine/**` is in the filter now.
-- [ ] **PR 1.2b (M, mechanical)** The same package's `"./react"` export:
-  `game-parts/game-board.tsx`, the hooks, the `language` provider. A boundary
-  spec belongs here rather than in 1.2a — with two entry points there is
-  something for one to assert.
+- [x] **PR 1.2b (M)** The same package's `"./react"` export — `GameBoard`, the
+  three BoardClient hooks, and the language plumbing — plus the boundary spec
+  that 1.2a had nothing to assert against.
+
+  **The language provider split in two, and the plan's "move the provider" was
+  wrong as written.** The provider is coupled to react-router (`useSearchParams`
+  drives `?lang=`), and a router cannot enter the engine: practice is on
+  react-router 8, the competition frontends on react-router-dom 6, so no peer
+  range satisfies both. The split: the engine gets a **controlled** provider —
+  the context, `useLanguage`, `translate`, `useTranslation`; the host owns where
+  the language lives — and practice keeps its stateful URL/localStorage wrapper
+  and the selector, both of which ride its router and chrome. A competition
+  frontend brings its own wrapper in Phase 4.
+
+  **The boundary spec** (`packages/engine/src/react-free.spec.ts`) walks the
+  value-import graph from the core entry and asserts nothing under `react/` and
+  no `.tsx` is reached — ESLint bans React *by specifier* and cannot see what a
+  relative import resolves to, and the ban now has a deliberate hole (the
+  react/ subtree), so the walk is what holds the line. Verified it can fail: a
+  smuggled `export … from './react/game-board'` turns it red. Type-only edges
+  are exempt — they are erased.
+
+  Two things only doing it surfaced:
+  - **Tailwind stops at the app root.** `GameBoard`'s utility classes moved out
+    of automatic source detection; `@source "../../../packages/engine/src/react"`
+    in `styles.css` puts them back. Without it the classes survive only as long
+    as some in-app file happens to use the same ones.
+  - **The browser-check skill broke with the workspace join** — `drive.mjs`
+    resolved playwright from `apps/practice/node_modules`, which hoisting
+    emptied. Found by walking the play-game-in-browser skill for this PR's
+    verification (GameBoard, the hooks and the language plumbing are exactly
+    what no spec sees); fixed to try both install locations, with an
+    `executablePath` override for containers that bake their own Chromium.
+
+  Verified by playing: PileSplitter's mid-turn 🗑️ state on the mover's own
+  `useDeferredMove` beat (the exact display the skill's cautionary bug lived
+  in), a full two-move turn passing to the other player, HU↔EN flipping text
+  and the `?lang=` param both ways, and ChessRook's hover preview.
 - [ ] **PR 1.3 (M)** Server-facing API:
   `applyClientMove(state, gameplay, name, args)` (validate → reduce → auto
   `endOfTurnMove`; rejects rather than throws — these are client-submitted

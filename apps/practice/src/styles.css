@@ -1,4 +1,9 @@
 @import "tailwindcss";
+/* Tailwind's automatic source detection stops at this app's root, and the engine's
+   React half carries utility classes of its own (GameBoard). Without this line its
+   classes are silently missing from the build whenever no in-app file happens to
+   use the same ones. */
+@source "../../../packages/engine/src/react";
 @variant dark (&:where(.dark, .dark *));
 
 @custom-variant hocus {

@@ -4,10 +4,18 @@
 // calling script — a `BoardClient` is exactly the thing these helpers cannot
 // know about.
 //
-// Playwright is a dependency of this repo but nothing imports it (see the "//"
-// note in package.json), so resolve it from the repo root rather than from the
-// caller's directory, which is usually somewhere under /tmp.
-const playwright = new URL('../../../node_modules/playwright/index.mjs', import.meta.url).href;
+// Playwright is a dependency of this app but nothing imports it (see the "//"
+// note in package.json), so resolve it explicitly rather than from the
+// caller's directory, which is usually somewhere under /tmp. Since the
+// workspace join there is one install at the monorepo root, and npm decides
+// per version conflict whether a package hoists there or nests here — so try
+// both, nearest first.
+import { existsSync } from 'node:fs';
+
+const playwright = ['../../../node_modules/playwright/index.mjs', '../../../../../node_modules/playwright/index.mjs']
+  .map(candidate => new URL(candidate, import.meta.url))
+  .find(url => existsSync(url))?.href
+  ?? (() => { throw new Error('playwright not found in apps/practice or the repo root — run npm ci at the root'); })();
 
 export const DEV_URL = 'http://localhost:8012';
 
@@ -18,7 +26,12 @@ const START_BUTTON = { vsComputerFirst: 'Kezdő leszek', vsComputerSecond: 'Más
 // the `#`; a bare /game/<id> silently renders the overview instead.
 export const launchGame = async (gameId, { mode = 'vsComputerFirst', variant, viewport } = {}) => {
   const { chromium } = await import(playwright);
-  const browser = await chromium.launch();
+  // Claude Code's web container bakes one Chromium and asks that it be used as-is
+  // (PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD is set there); when playwright's pinned
+  // revision is newer than the baked one, this is the documented way through.
+  const browser = await chromium.launch(
+    process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE } : {}
+  );
   const page = await browser.newPage({ viewport: viewport ?? { width: 900, height: 1100 } });
 
   await page.goto(`${DEV_URL}/#/game/${gameId}`);

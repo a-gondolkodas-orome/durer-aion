@@ -1,4 +1,4 @@
-import { useLanguage } from './language-context';
+import { useLanguage } from 'engine/react';
 
 export const LanguageSelector = () => {
   const { language, setLanguage } = useLanguage();

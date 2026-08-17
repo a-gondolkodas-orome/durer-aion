@@ -31,6 +31,10 @@ export default defineConfig(() => ({
       {
         find: /^engine$/,
         replacement: fileURLToPath(new URL('../../packages/engine/index.ts', import.meta.url))
+      },
+      {
+        find: /^engine\/react$/,
+        replacement: fileURLToPath(new URL('../../packages/engine/react.ts', import.meta.url))
       }
     ]
   },
@@ -84,7 +88,7 @@ export default defineConfig(() => ({
     // written against this setup, and this is the app that exercises the engine
     // in a browser. Vitest resolves them through the alias above, so they test
     // the source rather than a build.
-    include: ['**/*.{test,spec}.?(c|m)[jt]s?(x)', '../../packages/engine/src/**/*.spec.ts'],
+    include: ['**/*.{test,spec}.?(c|m)[jt]s?(x)', '../../packages/engine/src/**/*.spec.{ts,tsx}'],
     // On demand only, never in `npm test` or CI, and with no thresholds — see
     // AGENTS.md § Coverage for why, and for what the report is actually good
     // for, which is what `include` below is spelled out for.
@@ -96,14 +100,14 @@ export default defineConfig(() => ({
       // its specs run here, and patch-coverage gates its added lines the same
       // way (allowExternal is what lets v8 keep files above the app root).
       allowExternal: true,
-      include: ['src/**/*.{ts,tsx}', '../../packages/engine/src/**/*.ts'],
+      include: ['src/**/*.{ts,tsx}', '../../packages/engine/src/**/*.{ts,tsx}'],
       exclude: [
         'src/**/*.spec.{ts,tsx}',
         'src/test-utils.ts',
         'src/test-setup.ts',
         'src/**/spec-helpers.tsx',
         'src/main.tsx',
-        '../../packages/engine/src/**/*.spec.ts'
+        '../../packages/engine/src/**/*.spec.{ts,tsx}'
       ],
       reporter: ['text', 'html'],
       // /reports is gitignored
