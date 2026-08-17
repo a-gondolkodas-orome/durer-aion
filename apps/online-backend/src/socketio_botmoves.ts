@@ -4,7 +4,7 @@ import type { Game, Server, State, StorageAPI } from "boardgame.io";
 import { getFilterPlayerView } from "boardgame.io/internal";
 import { Master } from "boardgame.io/master";
 import { SocketIO } from "boardgame.io/server";
-import { isMakeMovePayloadReadOnly, currentPlayer } from "game";
+import { isMakeMovePayloadReadOnly, currentPlayer, PlayerIDType } from "game";
 import { getBotCredentials } from "./server/common";
 import { CorsOptionsDelegate } from "cors";
 
@@ -83,7 +83,7 @@ export async function fetch(
 }
 
 /// Bot's playerID is '1', because the gameWrapper uses player '0' for the human player. 
-export const BOT_ID = "1";
+export const BOT_ID = PlayerIDType.JUDGE_PLAYER;
 
 /** This is a special transport specifically designed for replacing a player's move
  * with a bot's move.
