@@ -8,10 +8,10 @@ export type {
   Phase, Mode, Ctx,
   MoveOutcome, MoveFunction, MoveDefinition, Gameplay, GameMoves, ClientGameMoves,
   StrategyArgs, BotStrategy, BotMove, BoardClientProps,
-  Variant, VariantInput,
+  Variant, VariantInput, Presentation, StrategyGameConfig,
   MatchMove, MatchResult
 } from 'engine';
 
 export { strategyGameFactory } from './strategy-game-factory';
-export type { Presentation, StrategyGame, StrategyGameConfig } from './strategy-game-factory';
+export type { StrategyGame } from './strategy-game-factory';
 export { GameBoard, useHoverPreview, useMoveScopedState, useDeferredMove } from 'engine/react';

@@ -1,3 +1,6 @@
+// Type-only, so it is erased: naming React's component type is what lets a
+// game's whole config be described here, and it costs a bare node nothing.
+import type { ComponentType } from 'react';
 import type { I18nString, TranslatableNode } from './i18n';
 
 export type Phase = 'roleSelection' | 'play' | 'gameEnd'
@@ -150,4 +153,21 @@ export interface VariantInput<TBoard> {
   // omitted — used when sibling games are merged into one game whose variants
   // differ only in their rule wording (e.g. board size / coin values).
   rule?: TranslatableNode
+}
+
+export interface Presentation<TBoard, TTurnState = unknown> {
+  rule: TranslatableNode
+  roleLabels?: [I18nString, I18nString]
+  getPlayerStepDescription: (args: StrategyArgs<TBoard, TTurnState>) => TranslatableNode
+}
+
+// A whole game as data. This is the shape a game package exports and every
+// host consumes: `strategyGameFactory` turns it into a practice page, and a
+// competition shell renders its `BoardClient` and plays its `gameplay` —
+// which is why it lives here rather than with any one of those hosts.
+export type StrategyGameConfig<TBoard, TTurnState = unknown> = {
+  presentation: Presentation<TBoard, TTurnState>
+  BoardClient: ComponentType<BoardClientProps<TBoard, TTurnState>>
+  gameplay: Gameplay<TBoard, TTurnState>
+  variants: VariantInput<TBoard>[]
 }

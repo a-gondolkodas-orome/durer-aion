@@ -1,11 +1,12 @@
 // @vitest-environment jsdom
 import { fireEvent, act } from '@testing-library/react';
-import type { StrategyGameConfig } from './strategy-game-factory';
 import {
   makeConfig, minimalConfig, ctxAwareConfig, renderGame, warmUpPlayerNameSetup,
   MinimalBoardClient, CtxAwareBoardClient, defaultGameplay, type Board
 } from './spec-helpers';
-import type { BoardClientProps, BotMove, BotStrategy, Ctx, Gameplay, StrategyArgs, VariantInput } from 'engine';
+import type {
+  BoardClientProps, BotMove, BotStrategy, Ctx, Gameplay, StrategyArgs, StrategyGameConfig, VariantInput
+} from 'engine';
 
 beforeAll(warmUpPlayerNameSetup);
 
