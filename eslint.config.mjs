@@ -25,12 +25,17 @@ export default defineConfig(
         tsconfigRootDir: import.meta.dirname,
       },
     },
+    // 'error', not 'warn': the lint script fails on any warning anyway
+    // (--max-warnings=0), so 'warn' only made the editor and a bare `npx eslint`
+    // disagree with CI. These were warnings while the repo had violations to
+    // surface without blocking; it no longer does. The cap stays as a backstop,
+    // so a rule added at 'warn' severity later cannot quietly accumulate either.
     rules: {
-      '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
-      '@typescript-eslint/no-empty-function': 'warn',
-      '@typescript-eslint/no-empty-object-type': 'warn',
-      'prefer-const': 'warn',
+      '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-empty-function': 'error',
+      '@typescript-eslint/no-empty-object-type': 'error',
+      'prefer-const': 'error',
     },
   },
   // packages/engine is apps/practice's engine, moved out of it (Phase 1 of
