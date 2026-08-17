@@ -18,6 +18,8 @@ export { runMatch } from './run-match';
 export type { MatchResult } from './run-match';
 export { playBotTurn } from './play-bot-turn';
 export type { MatchMove } from './play-bot-turn';
+export { applyClientMove } from './apply-client-move';
+export type { ClientMoveRejection, ClientMoveResult } from './apply-client-move';
 
 // The move interpreter and the state it interprets against. A host — the React
 // shell, `runMatch`, or the server routes Phase 3 adds — owns the store and
