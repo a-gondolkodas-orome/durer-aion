@@ -1,5 +1,5 @@
 import type { I18nString } from 'language';
-import type { Ctx } from '../../types';
+import type { Ctx } from 'engine';
 
 export const getCtaText = ({
   phase,

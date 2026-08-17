@@ -1,4 +1,4 @@
-import type { I18nString, TranslatableNode } from 'language';
+import type { I18nString, TranslatableNode } from './i18n';
 
 export type Phase = 'roleSelection' | 'play' | 'gameEnd'
 export type Mode = 'vsComputer' | 'vsHuman'

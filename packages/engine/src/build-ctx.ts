@@ -1,4 +1,4 @@
-import type { Ctx } from '../types';
+import type { Ctx } from './types';
 import type { CoreState } from './store';
 
 // Derives the ctx games see from the authoritative CoreState, fresh at every

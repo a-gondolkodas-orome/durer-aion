@@ -1,12 +1,11 @@
 import type React from 'react';
 import { useLanguage } from './language-context';
+import type { I18nNode, Language, Translatable, TranslatableNode } from 'engine';
 
-export interface I18nString { hu: string; en?: string }
-export type Language = keyof I18nString
-export type Translatable = I18nString | string
-
-export interface I18nNode { hu: React.ReactNode; en?: React.ReactNode }
-export type TranslatableNode = I18nNode | React.ReactNode
+// Re-exported rather than declared: a game's text shape is part of its
+// configuration, so the engine names it (packages/engine/src/i18n.ts). This
+// module is the React binding that resolves one to what a reader sees.
+export type { I18nString, I18nNode, Language, Translatable, TranslatableNode } from 'engine';
 
 const isI18nLike = (v: unknown): v is I18nNode =>
   typeof v === 'object' && v !== null && 'hu' in v;

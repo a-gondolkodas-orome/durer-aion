@@ -9,26 +9,48 @@ import {
   intersectAddedLines,
   isMeasured,
   parseAddedLines,
-  parseLcov
+  parseLcov,
+  repoRelativeLcovPath
 } from './patch-coverage.mjs';
 
 describe('isMeasured', () => {
   it('measures the framework-free half of a game', () => {
-    expect(isMeasured('src/components/games/cube-coloring/gameplay.ts')).toBe(true);
-    expect(isMeasured('src/components/games/cube-coloring/bot-strategy.ts')).toBe(true);
+    expect(isMeasured('apps/practice/src/components/games/cube-coloring/gameplay.ts')).toBe(true);
+    expect(isMeasured('apps/practice/src/components/games/cube-coloring/bot-strategy.ts')).toBe(true);
+  });
+
+  it('measures the engine package — this suite is where its specs run', () => {
+    expect(isMeasured('packages/engine/src/reducer.ts')).toBe(true);
+    expect(isMeasured('packages/engine/src/reducer.spec.ts')).toBe(false);
   });
 
   it('leaves JSX out — it is swept by renders.spec.tsx, not unit-tested', () => {
-    expect(isMeasured('src/components/games/cube-coloring/cube-coloring.tsx')).toBe(false);
-    expect(isMeasured('src/components/games/cube-coloring/board-client.tsx')).toBe(false);
+    expect(isMeasured('apps/practice/src/components/games/cube-coloring/cube-coloring.tsx')).toBe(false);
+    expect(isMeasured('apps/practice/src/components/games/cube-coloring/board-client.tsx')).toBe(false);
   });
 
-  it('leaves out specs, test helpers and anything outside src/', () => {
-    expect(isMeasured('src/components/games/cube-coloring/gameplay.spec.ts')).toBe(false);
-    expect(isMeasured('src/test-utils.ts')).toBe(false);
-    expect(isMeasured('src/test-setup.ts')).toBe(false);
-    expect(isMeasured('scripts/patch-coverage.mjs')).toBe(false);
-    expect(isMeasured('vite.config.js')).toBe(false);
+  it('leaves out specs, test helpers and everything outside the measured roots', () => {
+    expect(isMeasured('apps/practice/src/components/games/cube-coloring/gameplay.spec.ts')).toBe(false);
+    expect(isMeasured('apps/practice/src/test-utils.ts')).toBe(false);
+    expect(isMeasured('apps/practice/src/test-setup.ts')).toBe(false);
+    expect(isMeasured('apps/practice/scripts/patch-coverage.mjs')).toBe(false);
+    expect(isMeasured('apps/practice/vite.config.js')).toBe(false);
+    // The rest of the monorepo has its own CI; measuring its diffs here would gate
+    // other apps' code on this app's specs.
+    expect(isMeasured('packages/schemas/src/model.ts')).toBe(false);
+    expect(isMeasured('apps/online-backend/src/server.ts')).toBe(false);
+  });
+});
+
+describe('repoRelativeLcovPath', () => {
+  it("prefixes this app's own records", () => {
+    expect(repoRelativeLcovPath('src/components/games/gameList.ts'))
+      .toBe('apps/practice/src/components/games/gameList.ts');
+  });
+
+  it("resolves the engine's ../../ records to the repo root", () => {
+    expect(repoRelativeLcovPath('../../packages/engine/src/reducer.ts'))
+      .toBe('packages/engine/src/reducer.ts');
   });
 });
 
@@ -133,49 +155,49 @@ describe('parseLcov', () => {
 
 describe('collect', () => {
   const hits = parseLcov(
-    ['SF:src/a.ts', 'DA:1,3', 'DA:2,0', 'DA:4,0', 'end_of_record', 'SF:src/b.ts', 'DA:9,2', 'end_of_record'].join('\n')
+    ['SF:apps/practice/src/a.ts', 'DA:1,3', 'DA:2,0', 'DA:4,0', 'end_of_record', 'SF:apps/practice/src/b.ts', 'DA:9,2', 'end_of_record'].join('\n')
   );
 
   it('splits added lines into measured and never-reached', () => {
-    const files = collect(new Map([['src/a.ts', new Set([1, 2, 4])]]), hits);
+    const files = collect(new Map([['apps/practice/src/a.ts', new Set([1, 2, 4])]]), hits);
 
-    expect(files).toEqual([{ path: 'src/a.ts', measured: 3, uncovered: [2, 4], unloaded: false }]);
+    expect(files).toEqual([{ path: 'apps/practice/src/a.ts', measured: 3, uncovered: [2, 4], unloaded: false }]);
   });
 
   it('skips an added line with no DA record — a blank, a comment or a type-only declaration', () => {
-    const files = collect(new Map([['src/a.ts', new Set([1, 2, 3])]]), hits);
+    const files = collect(new Map([['apps/practice/src/a.ts', new Set([1, 2, 3])]]), hits);
 
-    expect(files).toEqual([{ path: 'src/a.ts', measured: 2, uncovered: [2], unloaded: false }]);
+    expect(files).toEqual([{ path: 'apps/practice/src/a.ts', measured: 2, uncovered: [2], unloaded: false }]);
   });
 
   it('drops a file the report does not mention rather than counting it as uncovered', () => {
-    expect(collect(new Map([['src/types.ts', new Set([1, 2])]]), hits)).toEqual([]);
+    expect(collect(new Map([['apps/practice/src/types.ts', new Set([1, 2])]]), hits)).toEqual([]);
   });
 
   // An empty lcov record, not a missing one: v8 sees only the files something imported, and
   // coverage.include adds the rest as records with no DA lines. Dropping those would let a module
   // nothing in the repo touches pass as "nothing to measure".
   it('flags a file whose record has no lines at all rather than dropping it', () => {
-    const withEmpty = parseLcov(['SF:src/a.ts', 'DA:1,3', 'end_of_record', 'SF:src/new.ts', 'end_of_record'].join('\n'));
-    const files = collect(new Map([['src/new.ts', new Set([1, 2, 3])]]), withEmpty);
+    const withEmpty = parseLcov(['SF:apps/practice/src/a.ts', 'DA:1,3', 'end_of_record', 'SF:apps/practice/src/new.ts', 'end_of_record'].join('\n'));
+    const files = collect(new Map([['apps/practice/src/new.ts', new Set([1, 2, 3])]]), withEmpty);
 
-    expect(files).toEqual([{ path: 'src/new.ts', measured: 0, uncovered: [], unloaded: true }]);
+    expect(files).toEqual([{ path: 'apps/practice/src/new.ts', measured: 0, uncovered: [], unloaded: true }]);
   });
 
   it('drops a file whose added lines are all unmeasurable', () => {
-    expect(collect(new Map([['src/b.ts', new Set([3, 4])]]), hits)).toEqual([]);
+    expect(collect(new Map([['apps/practice/src/b.ts', new Set([3, 4])]]), hits)).toEqual([]);
   });
 
   it('never measures JSX', () => {
-    const jsxHits = parseLcov(['SF:src/a.tsx', 'DA:1,0', 'end_of_record'].join('\n'));
+    const jsxHits = parseLcov(['SF:apps/practice/src/a.tsx', 'DA:1,0', 'end_of_record'].join('\n'));
 
-    expect(collect(new Map([['src/a.tsx', new Set([1])]]), jsxHits)).toEqual([]);
+    expect(collect(new Map([['apps/practice/src/a.tsx', new Set([1])]]), jsxHits)).toEqual([]);
   });
 
   it('puts the worst file first', () => {
-    const files = collect(new Map([['src/b.ts', new Set([9])], ['src/a.ts', new Set([1, 2, 4])]]), hits);
+    const files = collect(new Map([['apps/practice/src/b.ts', new Set([9])], ['apps/practice/src/a.ts', new Set([1, 2, 4])]]), hits);
 
-    expect(files.map(({ path }) => path)).toEqual(['src/a.ts', 'src/b.ts']);
+    expect(files.map(({ path }) => path)).toEqual(['apps/practice/src/a.ts', 'apps/practice/src/b.ts']);
   });
 });
 

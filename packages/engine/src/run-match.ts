@@ -1,4 +1,4 @@
-import type { BotStrategy, Gameplay } from '../types';
+import type { BotStrategy, Gameplay } from './types';
 import { buildCtx } from './build-ctx';
 import { asBotMoves, isBotTurnUnfinished, unknownMoveMessage } from './bot-turn';
 import { reduceMove } from './reducer';

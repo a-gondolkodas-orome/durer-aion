@@ -1,6 +1,6 @@
 import { reduceMove } from './reducer';
 import { createInitialCoreState, type CoreState } from './store';
-import type { MoveDefinition } from '../types';
+import type { MoveDefinition } from './types';
 
 type Board = string[];
 

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { render, fireEvent } from '@testing-library/react';
 import { ModeSelector, DifficultySelector } from './game-controls';
-import type { Variant } from '../../types';
+import type { Variant } from 'engine';
 
 // The sidebar and the game-end dialog render these selectors into the same
 // document at the same time. Radios sharing a `name` are one native group with

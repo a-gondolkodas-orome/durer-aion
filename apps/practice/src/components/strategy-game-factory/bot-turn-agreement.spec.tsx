@@ -2,13 +2,15 @@
 import { render, fireEvent, act } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { strategyGameFactory, type StrategyGameConfig } from '../strategy-game-factory';
-import { runMatch } from './run-match';
-import type { BotMove, BotStrategy, Ctx, Gameplay, MoveOutcome } from '../types';
+import {
+  runMatch,
+  type BotMove, type BotStrategy, type Ctx, type Gameplay, type MoveOutcome
+} from 'engine';
 
 // The React shell and the headless runner play a named turn out separately —
 // one paced by a timer, one straight through. What they must never disagree on
 // is *which* moves get played. This plays the same turn through both and
-// compares; it is the standing check behind engine/bot-turn.ts, where the
+// compares; it is the standing check behind the engine package's bot-turn.ts, where the
 // sequencing decisions live precisely so that these two cannot drift apart.
 
 type Board = number

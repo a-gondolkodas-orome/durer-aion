@@ -5,7 +5,7 @@ import {
   makeConfig, minimalConfig, ctxAwareConfig, renderGame, warmUpPlayerNameSetup,
   MinimalBoardClient, CtxAwareBoardClient, defaultGameplay, type Board
 } from './spec-helpers';
-import type { BoardClientProps, BotMove, BotStrategy, Ctx, Gameplay, StrategyArgs, VariantInput } from './types';
+import type { BoardClientProps, BotMove, BotStrategy, Ctx, Gameplay, StrategyArgs, VariantInput } from 'engine';
 
 beforeAll(warmUpPlayerNameSetup);
 

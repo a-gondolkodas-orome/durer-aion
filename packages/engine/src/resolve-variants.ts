@@ -1,5 +1,5 @@
 import { cloneDeep, sample } from 'lodash';
-import type { VariantInput } from '../types';
+import type { VariantInput } from './types';
 
 // Everything downstream only ever sees the generator, so `startBoards` is the
 // declarative form of `generateStartBoard`, not a second channel.
