@@ -632,11 +632,36 @@ reviewed wiring.
     as-is** — 289 cases, no game needed changing.
   - The slow-variant list both all-games sweeps consult moved to its own
     module, so one list owns the decision.
-- [ ] **PR 1.4 (M)** `packages/games` with the two live games moved wholesale; each
+- [x] **PR 1.4 (M)** `packages/games` with the two live games moved wholesale; each
   `<game>.tsx` exports a **config object** instead of calling the factory;
-  practice wiring calls `strategyGameFactory(config)` at its one export site.
-  Add curated competition `startBoards` for remove-divisor-multiple C/D
-  (currently generator-based), each pinned by `forcedWinnerIndex` specs.
+  practice wiring calls `strategyGameFactory(config)` at its one export site
+  (its `games/index.ts` barrel — the config-to-page step, so the package stays
+  host-agnostic). Curated competition `startBoards` for
+  remove-divisor-multiple C/D, ported from the old 19ocd `startingPosition`:
+  C = 6 then 7 numbers, D = 10 then 11, in hand-out order. The
+  `forcedWinnerIndex` specs pin each pair's winners as `[1, 0]` — the roles
+  flip mid-streak by design, so a team's two consecutive wins need both seats.
+
+  What doing it decided or surfaced:
+  - **`StrategyGameConfig` and `Presentation` moved into the engine's core
+    types** (a type-only React import, erased at runtime): a game package
+    cannot reach into an app for its export's type, and Phase 4's shell will
+    consume the same config type. The factory imports them back.
+  - **`packages/games` is strict-clean, unlike apps/practice** (which keeps
+    `noImplicitAny: false`): offline-frontend blanket-includes every package's
+    src under full strict, so the moved files took a handful of
+    behaviour-neutral annotations rather than an exclusion that Phase 5 —
+    when offline starts importing the package for real — would have to undo.
+  - **Every sweep followed the move**: Tailwind's `@source`, the start-board
+    deep-freeze in test-setup, the gameplay react-free walk (now spanning both
+    trees — verified it goes red on a smuggled `.tsx` import), vitest
+    include + coverage globs, patch-coverage's measured roots, and the
+    practice-pr-test paths filter. Both games were then played in a browser:
+    board styling, the hover preview and the mid-game legality colouring all
+    survived the move.
+  - **No build step yet, deliberately**: practice reads the package's source
+    through an alias exactly as it reads the engine's, and no node host
+    imports it before Phase 3 — the tsup build is that phase's first move.
 
 ### Phase 2 — Competition core (no wiring yet)
 

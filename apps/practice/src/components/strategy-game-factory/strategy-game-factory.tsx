@@ -5,7 +5,7 @@ import { GameRule } from './game-parts/game-rule';
 import { GameSidebar } from './game-parts/game-sidebar/game-sidebar';
 import { GameEndDialog } from './game-parts/game-end-dialog';
 import { mapValues, isEqual } from 'lodash';
-import { useTranslation, type TranslatableNode, type I18nString } from 'language';
+import { useTranslation } from 'language';
 import { useLocation, useSearchParams } from 'react-router';
 import { useGameStats } from './hooks/use-game-stats';
 import { trackEvent } from '../../tracking';
@@ -13,23 +13,10 @@ import {
   resolveVariants, variantKey, createGameStore, createInitialCoreState, buildCtx,
   asBotMoves, isBotTurnUnfinished, unknownMoveMessage, reduceMove, stepDelay, isDevMode,
   type Mode, type Ctx, type MoveOutcome, type Gameplay, type GameMoves, type ClientGameMoves,
-  type BotStrategy, type BotMove, type BoardClientProps, type StrategyArgs,
-  type Variant as DisplayVariant, type VariantInput
+  type BotStrategy, type BotMove,
+  type StrategyGameConfig, type Variant as DisplayVariant, type VariantInput
 } from 'engine';
 import { resolvePlayerNames } from './game-parts/common/player-names';
-
-export interface Presentation<TBoard, TTurnState = unknown> {
-  rule: TranslatableNode
-  roleLabels?: [I18nString, I18nString]
-  getPlayerStepDescription: (args: StrategyArgs<TBoard, TTurnState>) => TranslatableNode
-}
-
-export type StrategyGameConfig<TBoard, TTurnState = unknown> = {
-  presentation: Presentation<TBoard, TTurnState>
-  BoardClient: React.ComponentType<BoardClientProps<TBoard, TTurnState>>
-  gameplay: Gameplay<TBoard, TTurnState>
-  variants: VariantInput<TBoard>[]
-}
 
 // The game component carries the headless half of its own configuration — what
 // `runMatch` needs to play it with no browser, so the catalog-wide conformance

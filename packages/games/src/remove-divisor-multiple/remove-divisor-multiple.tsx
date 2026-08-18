@@ -1,6 +1,6 @@
-import { strategyGameFactory, type BoardClientProps, GameBoard } from 'strategy-game-factory';
+import type { BoardClientProps, StrategyGameConfig } from 'engine';
+import { GameBoard, useTranslation } from 'engine/react';
 import { range } from 'lodash';
-import { useTranslation } from 'language';
 import { generateStartBoard, generateTestStartBoard, isAllowed, moves, type Board } from './gameplay';
 import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
 
@@ -9,9 +9,9 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   // Two different questions: `isLegal` marks the numbers that could be removed
   // from this position — shown in blue whoever is on turn — while `isAllowed`
   // additionally requires that it is this client's move, and gates the buttons.
-  const isLegal = n => isAllowed(board, n);
+  const isLegal = (n: number) => isAllowed(board, n);
 
-  const removeNumber = n => moves.removeNumber(board, n);
+  const removeNumber = (n: number) => moves.removeNumber(board, n);
 
   return (
     <GameBoard>
@@ -60,7 +60,7 @@ const getPlayerStepDescription = () => ({
   en: 'Choose one of the numbers that can be removed.'
 });
 
-export const RemoveDivisorMultiple = strategyGameFactory({
+export const removeDivisorMultipleConfig: StrategyGameConfig<Board> = {
   presentation: {
     rule,
     getPlayerStepDescription
@@ -80,4 +80,4 @@ export const RemoveDivisorMultiple = strategyGameFactory({
       isDefault: true
     }
   ]
-});
+};

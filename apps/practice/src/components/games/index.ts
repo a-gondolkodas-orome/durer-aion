@@ -14,7 +14,15 @@ That indirection is the point: renaming or moving a component only touches its
 line here — the key, and therefore the route, never changes. Keep entries in abc
 order by key. `gameList.spec.ts` guards that this set of keys and
 `gameList` stay in one-to-one sync.
+
+A game that has moved to `packages/games` exports a config object rather than a
+component, and this file is where it becomes a page: the one
+`strategyGameFactory(config)` call per game, in its abc slot like any other
+entry. That keeps the package host-agnostic — a competition shell consumes the
+same config without this wrapping.
 */
+import { strategyGameFactory } from 'strategy-game-factory';
+import { removeDivisorMultipleConfig, stonesRemoveOneNotTwiceFromLeftConfig } from 'games';
 
 export { AddReduceDouble } from './add-reduce-double/add-reduce-double';
 export { AmorAndCupido } from './amor-and-cupido/amor-and-cupido';
@@ -62,7 +70,7 @@ export { PolynomialBuilding } from './polynomial-building/polynomial-building';
 export { PrimeExponentials } from './single-pile-removal/prime-exponentials/prime-exponentials';
 export { PrimelyToZero } from './single-pile-removal/primely-to-zero/primely-to-zero';
 export { RecolouringDiscs } from './recolouring-discs/recolouring-discs';
-export { RemoveDivisorMultiple } from './remove-divisor-multiple/remove-divisor-multiple';
+export const RemoveDivisorMultiple = strategyGameFactory(removeDivisorMultipleConfig);
 export { RemoveRowOrColumn } from './remove-row-or-column/remove-row-or-column';
 export { RockPaperScissor } from './rock-paper-scissor/rock-paper-scissor';
 export { RookToCorner } from './rook-to-corner/rook-to-corner';
@@ -70,9 +78,8 @@ export { SharkChase4 } from './shark-chase/shark-4-by-4/shark-chase';
 export { SharkChase5 } from './shark-chase/shark-5-by-5/shark-chase';
 export { DiscsFlipOrRemove } from './discs-flip-or-remove/discs-flip-or-remove';
 export { SixFieldsCircle } from './six-fields-circle/six-fields-circle';
-export {
-  StonesRemoveOneNotTwiceFromLeft
-} from './stones-remove-one-not-twice-from-left/stones-remove-one-not-twice-from-left';
+export const StonesRemoveOneNotTwiceFromLeft =
+  strategyGameFactory(stonesRemoveOneNotTwiceFromLeftConfig);
 export { SumFifteen } from './sum-fifteen/sum-fifteen';
 export { SuperstitiousCounting } from './single-number-increase/superstitious-counting/superstitious-counting';
 export { Take1OrHalve } from './single-pile-removal/take-1-or-halve/take-1-or-halve';

@@ -32,7 +32,7 @@ const THRESHOLD = 85;
 // The engine package is measured alongside this app's src: it is this app's engine, moved out
 // (docs/boardgame-io-replacement-plan.md, PR 1.2a), its specs run in this suite, and leaving it
 // out would mean the one gated number stopped gating exactly the code the migration lives on.
-const MEASURED_ROOTS = ['apps/practice/src/', 'packages/engine/src/'];
+const MEASURED_ROOTS = ['apps/practice/src/', 'packages/engine/src/', 'packages/games/src/'];
 
 // The .tsx half is the JSX half, and is swept by renders.spec.tsx rather than unit-tested; the
 // exclusions mirror `coverage.exclude` in vite.config.js, which are absent from the report anyway.
