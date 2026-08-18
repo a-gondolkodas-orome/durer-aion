@@ -607,16 +607,31 @@ reviewed wiring.
   `useDeferredMove` beat (the exact display the skill's cautionary bug lived
   in), a full two-move turn passing to the other player, HU↔EN flipping text
   and the `?lang=` param both ways, and ChessRook's hover preview.
-- [ ] **PR 1.3 (M)** Server-facing API:
-  `applyClientMove(state, gameplay, name, args)` (validate → reduce → auto
-  `endOfTurnMove`; rejects rather than throws — these are client-submitted
-  moves) and `playBotTurn(state, gameplay, strategy)` (the bot-turn loop
-  factored out of `run-match.ts`, returning the named moves + resulting state).
-  Extend the bot-turn-agreement spec to **three hosts** (React shell /
-  `runMatch` / `playBotTurn`). Add a JSON round-trip serialization spec over
-  every variant start board and match history, and document the contract in
-  `types.ts`. Add `startBoardForAttempt(startBoards, attemptIndex)` honoring
-  the durer-jatekok#314 append-only order.
+- [x] **PR 1.3 (M)** Server-facing API, delivered as planned in four commits —
+  `playBotTurn` (factored out of `run-match.ts`, which now drives its turns
+  through it, so the two agree partly by construction; the agreement spec pins
+  all three hosts anyway), `applyClientMove` (validate → reduce → auto
+  `endOfTurnMove`; rejects with a typed reason, since a team's move is wire
+  input to refuse, not a caller bug — but a failing *auto* move still throws,
+  being the game's own), `startBoardForAttempt` (append-only stability pinned
+  as a property: appending entries changes no earlier answer), and the JSON
+  round-trip sweep + the contract documented in `types.ts`.
+
+  Decisions beyond the plan's text, each small:
+  - `applyClientMove` takes an optional `asPlayer` — the seat the server
+    believes the client holds — turning "whose turn is it" into a `notYourTurn`
+    rejection rather than a check every route must remember. It is the same
+    check the shell folds into `isClientMoveAllowed`.
+  - `playBotTurn` gains the one guard `runMatch`'s game-level `maxMoves` never
+    provided: a turn that never closes throws rather than looping a server
+    forever.
+  - The sweep judges round-trips with `toEqual`, which is exactly the
+    behavioural bar: a dropped `undefined` object member reads back
+    `undefined` either way and passes; an array hole becoming `null` or a
+    `Date` collapsing to a string does not. **Every registered game passed
+    as-is** — 289 cases, no game needed changing.
+  - The slow-variant list both all-games sweeps consult moved to its own
+    module, so one list owns the decision.
 - [x] **PR 1.4 (M)** `packages/games` with the two live games moved wholesale; each
   `<game>.tsx` exports a **config object** instead of calling the factory;
   practice wiring calls `strategyGameFactory(config)` at its one export site

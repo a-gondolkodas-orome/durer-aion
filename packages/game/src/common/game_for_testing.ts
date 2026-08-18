@@ -13,7 +13,7 @@ export function createGameWithMoveWithoutStartingPosition(setup: SetupFunction<G
     moves: {
       move: (...args) => move(...args),
     },
-    possibleMoves: () => [null, "move"],
+    possibleMoves: () => [{ move: "move" }],
   };
   return game;
 }
@@ -28,7 +28,7 @@ export function createGameWithMove(setup: SetupFunction<G>, startingPosition: St
     moves: {
       move: (...args) => move(...args),
     },
-    possibleMoves: () => [null, "move"],
+    possibleMoves: () => [{ move: "move" }],
   };
   return game;
 }

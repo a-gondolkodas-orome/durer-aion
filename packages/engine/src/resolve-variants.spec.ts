@@ -1,4 +1,4 @@
-import { resolveVariants } from './resolve-variants';
+import { resolveVariants, startBoardForAttempt } from './resolve-variants';
 import type { VariantInput } from './types';
 
 type Board = string[];
@@ -148,5 +148,37 @@ describe('resolveVariants', () => {
       ];
       expect(() => resolveVariants(variants)).not.toThrow();
     });
+  });
+});
+
+describe('startBoardForAttempt', () => {
+  const boards = [{ id: 'first' }, { id: 'second' }, { id: 'third' }];
+
+  it('hands out the list in order, then stays on the last board', () => {
+    expect([0, 1, 2, 3, 4].map(attempt => startBoardForAttempt(boards, attempt).id))
+      .toEqual(['first', 'second', 'third', 'third', 'third']);
+  });
+
+  // The append-only contract, as a property: a longer list answers every
+  // in-range index of the shorter one identically.
+  it('keeps every earlier answer when boards are appended', () => {
+    const appended = [...boards, { id: 'fourth' }];
+
+    [0, 1, 2].forEach(attempt => {
+      expect(startBoardForAttempt(appended, attempt)).toEqual(startBoardForAttempt(boards, attempt));
+    });
+  });
+
+  it('clones, so an attempt owns its board', () => {
+    const board = startBoardForAttempt(boards, 0);
+    board.id = 'scribbled';
+
+    expect(startBoardForAttempt(boards, 0).id).toBe('first');
+  });
+
+  it('throws on an empty list and on a fractional or negative attempt', () => {
+    expect(() => startBoardForAttempt([], 0)).toThrow(/non-empty/);
+    expect(() => startBoardForAttempt(boards, -1)).toThrow(/non-negative integer/);
+    expect(() => startBoardForAttempt(boards, 1.5)).toThrow(/non-negative integer/);
   });
 });
