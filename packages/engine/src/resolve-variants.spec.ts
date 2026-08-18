@@ -154,9 +154,9 @@ describe('resolveVariants', () => {
 describe('startBoardForAttempt', () => {
   const boards = [{ id: 'first' }, { id: 'second' }, { id: 'third' }];
 
-  it('hands out the list in order, then wraps around', () => {
+  it('hands out the list in order, then stays on the last board', () => {
     expect([0, 1, 2, 3, 4].map(attempt => startBoardForAttempt(boards, attempt).id))
-      .toEqual(['first', 'second', 'third', 'first', 'second']);
+      .toEqual(['first', 'second', 'third', 'third', 'third']);
   });
 
   // The append-only contract, as a property: a longer list answers every

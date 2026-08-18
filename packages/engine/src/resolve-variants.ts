@@ -16,8 +16,10 @@ const startBoardGenerator = <TBoard,>({ generateStartBoard, startBoards }: Varia
 };
 
 // The board a competition hands a team for its Nth attempt at a game: the
-// curated list in declaration order, wrapping around when attempts outlast it.
-// Deterministic on purpose — every team's attempt N gets the same board — and
+// curated list in declaration order, staying on the last board once attempts
+// outlast it — the designers' ramp ends there, and cycling back would hand out
+// an easier board the team already beat (the old stones game clamped the same
+// way). Deterministic on purpose — every team's attempt N gets the same board — and
 // the list's append-only contract (src/components/CLAUDE.md § Curated start
 // boards) is what makes the index stable: appending entries never changes what
 // an earlier index meant, while reordering silently would.
@@ -32,7 +34,7 @@ export const startBoardForAttempt = <TBoard,>(startBoards: TBoard[], attemptInde
   if (!Number.isInteger(attemptIndex) || attemptIndex < 0) {
     throw new Error(`startBoardForAttempt: attemptIndex must be a non-negative integer, got ${attemptIndex}`);
   }
-  return cloneDeep(startBoards[attemptIndex % startBoards.length]!);
+  return cloneDeep(startBoards[Math.min(attemptIndex, startBoards.length - 1)]!);
 };
 
 // How a variant is named in the URL. The index fallback keeps every variant
