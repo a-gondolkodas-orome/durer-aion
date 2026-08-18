@@ -1,0 +1,16 @@
+{
+  "name": "competition",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The competition rules as a pure state machine: attempts, the scoring ladder, the clock and its grace — applyEvent(state, event, gameplay).",
+  "license": "MIT",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "engine": "*"
+  },
+  "devDependencies": {
+    "vite": "^7.0.3"
+  }
+}
