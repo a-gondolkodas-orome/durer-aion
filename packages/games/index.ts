@@ -7,8 +7,5 @@
 // from Phase 3 on.
 export { removeDivisorMultipleConfig } from './src/remove-divisor-multiple/remove-divisor-multiple';
 export {
-  competitionStartBoardsC, competitionStartBoardsD
-} from './src/remove-divisor-multiple/start-boards';
-export {
   stonesRemoveOneNotTwiceFromLeftConfig
 } from './src/stones-remove-one-not-twice-from-left/stones-remove-one-not-twice-from-left';
