@@ -3,15 +3,18 @@ import { render, fireEvent, act } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { strategyGameFactory, type StrategyGameConfig } from '../strategy-game-factory';
 import {
-  runMatch,
+  runMatch, playBotTurn, createInitialCoreState,
   type BotMove, type BotStrategy, type Ctx, type Gameplay, type MoveOutcome
 } from 'engine';
 
-// The React shell and the headless runner play a named turn out separately —
-// one paced by a timer, one straight through. What they must never disagree on
-// is *which* moves get played. This plays the same turn through both and
-// compares; it is the standing check behind the engine package's bot-turn.ts, where the
-// sequencing decisions live precisely so that these two cannot drift apart.
+// Three hosts play a named turn out separately — the React shell paced by a
+// timer, runMatch and playBotTurn (the competition server's host) straight
+// through. What they must never disagree on is *which* moves get played. This
+// plays the same turn through all three and compares; it is the standing check
+// behind the engine package's bot-turn.ts, where the sequencing decisions live
+// precisely so that these hosts cannot drift apart. runMatch drives its turns
+// through playBotTurn, so those two agree by construction — pinned here anyway,
+// so a refactor that unwinds that cannot silently spend the guarantee.
 
 type Board = number
 
@@ -69,6 +72,16 @@ const playHeadless = (gameplay: Gameplay<Board>, strategy: BotStrategy<Board>) =
   runMatch({ gameplay, strategies: [strategy, strategy], startBoard: 0 });
 };
 
+// One turn exactly, as a server plays it: seat 0 to move, the notional human
+// holding seat 1 — the same opening turn the shell plays above.
+const playOpeningTurnViaPlayBotTurn = (gameplay: Gameplay<Board>, strategy: BotStrategy<Board>) => {
+  playBotTurn(
+    { ...createInitialCoreState<Board>(0), phase: 'play', currentPlayer: 0, chosenRoleIndex: 1 },
+    gameplay,
+    strategy
+  );
+};
+
 beforeEach(() => {
   vi.useFakeTimers();
   // stepDelay() spreads the beat; pinning it keeps the timer advance exact
@@ -83,30 +96,38 @@ describe.each([
   ['a turn named whole', namesWholeTurn],
   ['a turn named one move at a time', namesOneAtATime]
 ])('%s', (_name, strategy) => {
-  it('plays the same moves in the shell as headless', () => {
+  it('plays the same moves in the shell, in runMatch and in playBotTurn', () => {
     const headlessLog: string[] = [];
     playHeadless(makeGameplay(headlessLog), strategy);
 
     const shellLog: string[] = [];
     playOpeningTurnInShell(makeGameplay(shellLog), strategy);
 
+    const serverLog: string[] = [];
+    playOpeningTurnViaPlayBotTurn(makeGameplay(serverLog), strategy);
+
     expect(shellLog).toEqual(['a', 'b', 'c']);
     // the headless match plays on past the opening turn; its first three are it
     expect(headlessLog.slice(0, 3)).toEqual(shellLog);
+    expect(serverLog).toEqual(shellLog);
   });
 });
 
 // The interesting divergence risk: a planned turn that wins partway leaves
 // moves behind, and both callers have to drop them rather than call it a bug.
 describe('a turn that wins partway through', () => {
-  it('drops the moves the win made moot, in both', () => {
+  it('drops the moves the win made moot, in all three', () => {
     const headlessLog: string[] = [];
     playHeadless(makeGameplay(headlessLog, true), namesWholeTurn);
 
     const shellLog: string[] = [];
     playOpeningTurnInShell(makeGameplay(shellLog, true), namesWholeTurn);
 
+    const serverLog: string[] = [];
+    playOpeningTurnViaPlayBotTurn(makeGameplay(serverLog, true), namesWholeTurn);
+
     expect(shellLog).toEqual(['a', 'b']);
     expect(headlessLog).toEqual(shellLog);
+    expect(serverLog).toEqual(shellLog);
   });
 });

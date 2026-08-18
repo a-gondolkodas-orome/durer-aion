@@ -1,17 +1,6 @@
 import type { BotStrategy, Gameplay } from './types';
-import { buildCtx } from './build-ctx';
-import { asBotMoves, isBotTurnUnfinished, unknownMoveMessage } from './bot-turn';
-import { reduceMove } from './reducer';
+import { playBotTurn, type MatchMove } from './play-bot-turn';
 import { createInitialCoreState, type CoreState } from './store';
-
-export type MatchMove<TBoard> = {
-  player: number
-  move: string
-  args: unknown[]
-  // the board the move produced, so a test can judge a position without
-  // re-implementing the move it came from
-  board: TBoard
-}
 
 export type MatchResult<TBoard> = {
   winnerIndex: number
@@ -19,19 +8,16 @@ export type MatchResult<TBoard> = {
   history: MatchMove<TBoard>[]
 }
 
-// Names only ever reach presentation code; a headless match has no players to
-// name, so any placeholder does.
-const PLAYER_NAMES: [string, string] = ['0', '1'];
-
 // Plays a whole game outside React: two strategies, the real moves, the real
 // reducer — so a game's spec plays its bots against each other without faking
-// `moves` or re-implementing win detection.
+// `moves` or re-implementing win detection. Each turn is played by playBotTurn,
+// the same host a competition server uses, so the two cannot drift.
 //
 // Everything that goes wrong throws: unlike the shell, which must keep a live
 // game playable, a headless match only ever runs in tests and CI, where a
 // silent no-op would hide the bug it exists to catch.
 export const runMatch = <TBoard, TTurnState = unknown>({
-  gameplay: { moves, endOfTurnMove },
+  gameplay,
   strategies,
   startBoard,
   maxMoves = 500
@@ -49,24 +35,6 @@ export const runMatch = <TBoard, TTurnState = unknown>({
   };
   const history: MatchMove<TBoard>[] = [];
 
-  const play = (name: string, args: unknown[]) => {
-    if (!moves[name]) throw new Error(unknownMoveMessage(name, moves));
-    const transition = reduceMove(state, moves[name]!, name, args, PLAYER_NAMES);
-    if (transition.illegal) {
-      throw new Error(`runMatch: illegal move ${name}(${JSON.stringify(args)}) `
-        + `rejected on board ${JSON.stringify(state.board)}`);
-    }
-    history.push({
-      player: state.currentPlayer!, move: name, args, board: transition.result.nextBoard
-    });
-    state = transition.state;
-    // The shell delays the auto endOfTurnMove only to animate it; headless
-    // there is nothing to animate, so it runs straight away.
-    if (endOfTurnMove && transition.autoEndOfTurn) {
-      play(endOfTurnMove, []);
-    }
-  };
-
   while (state.phase === 'play') {
     if (history.length >= maxMoves) {
       throw new Error(`runMatch: no game end after ${maxMoves} moves`);
@@ -77,24 +45,9 @@ export const runMatch = <TBoard, TTurnState = unknown>({
     // seats here are bots, so the seat about to move is "the computer" and the
     // other one is the notional human.
     state = { ...state, chosenRoleIndex: 1 - player };
-    const named = asBotMoves(
-      strategies[player]({ board: state.board, ctx: buildCtx(state, PLAYER_NAMES) })
-    );
-    if (!named.length) {
-      throw new Error(`runMatch: the strategy of player ${player} named no move`);
-    }
-    for (const [i, { move, args = [] }] of named.entries()) {
-      if (i > 0 && !isBotTurnUnfinished(state, player)) {
-        // A turn planned as a whole may win partway through — the rest of the
-        // plan is then moot rather than wrong.
-        if (state.phase === 'gameEnd') break;
-        throw new Error(`runMatch: the strategy of player ${player} named moves after `
-          + `${named[i - 1]!.move} ended its turn`);
-      }
-      play(move, args);
-    }
-    // Nothing to schedule and nothing to pace: a strategy that named only the
-    // first move of its turn is simply asked again by the loop.
+    const turn = playBotTurn(state, gameplay, strategies[player]!, { maxMoves });
+    history.push(...turn.moves);
+    state = turn.state;
   }
 
   return { winnerIndex: state.winnerIndex!, board: state.board, history };

@@ -1,5 +1,14 @@
 import type { I18nString, TranslatableNode } from './i18n';
 
+// The serialization contract every game's TBoard and TTurnState sign up to:
+// both must survive JSON.parse(JSON.stringify(x)) with their behaviour intact.
+// A competition server persists and transports them as JSON (a jsonb column,
+// an HTTP body), so no functions, class instances, Dates, Maps, Sets or array
+// holes; an `undefined` object member is dropped in transit, which only
+// behaves the same because readers here treat a missing key as undefined.
+// Pinned across every registered game by apps/practice's
+// games/json-round-trip.spec.ts.
+
 export type Phase = 'roleSelection' | 'play' | 'gameEnd'
 export type Mode = 'vsComputer' | 'vsHuman'
 

@@ -178,14 +178,14 @@ asks the strategy again while the turn is still its own. Naming a move after the
 turn ended is a bug (dev: throw); naming moves the game-winning move made moot
 is fine (they are dropped).
 
-Two hosts play a named turn out: the browser shell in
-`strategy-game-factory.tsx` and the headless runner in the engine package's
-`run-match.ts`.
-They differ deliberately in pacing and in how loudly they complain — a bad
-strategy must not crash the site in production, while headless it should throw —
-but *which* moves land has to be identical, which
-`strategy-game-factory/bot-turn-agreement.spec.tsx` pins by playing the same turn
-through both.
+Three hosts play a named turn out: the browser shell in
+`strategy-game-factory.tsx`, and headlessly `runMatch` and `playBotTurn` in the
+engine package — the latter being how a competition server answers a team's
+move, with `runMatch` driving its turns through it. They differ deliberately in
+pacing and in how loudly they complain — a bad strategy must not crash the site
+in production, while headless it should throw — but *which* moves land has to
+be identical, which `strategy-game-factory/bot-turn-agreement.spec.tsx` pins by
+playing the same turn through all of them.
 
 Left unpinned, neither a mistyped move name nor wrong arguments surface until
 the bot plays the move (dev: throw). A game pins both by exporting its moves as
