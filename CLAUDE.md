@@ -44,7 +44,7 @@ regression checklist every change is measured against.
 
 - **Frontend**: React 19, Vite, MUI (Material-UI), React Router
 - **Backend**: boardgame.io server, Koa, PostgreSQL (via bgio-postgres)
-- **Build**: Turborepo, TypeScript, tsup
+- **Build**: Turborepo, TypeScript, tsdown
 - **Testing**: vitest, React Testing Library. Suites are `*.test.ts(x)` under
   the root config and `*.spec.ts(x)` in `apps/practice`; both run through
   vitest, and neither uses Jest.
