@@ -205,3 +205,7 @@ plan's *Competition secrecy* section has the details.
 - Permission to commit to someone else's branch is not permission to comment on
   their PR. An agent asks first before posting to a thread it does not own — the
   commit messages already carry the reasoning, and the thread is the author's.
+- Keep PR descriptions and review comments short. Say what changed and why, and
+  stop; the diff, the commit messages and the linked docs carry the rest. Length
+  is not thoroughness — it costs the reviewer the time the change was meant to
+  save.
