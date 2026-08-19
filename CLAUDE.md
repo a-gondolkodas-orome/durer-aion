@@ -202,3 +202,13 @@ plan's *Competition secrecy* section has the details.
   reviewer can accept or reject them separately.
 - An agent opening a PR assigns the person it is working for, so it lands in
   their queue rather than going unnoticed.
+- Permission to commit to someone else's branch is not permission to comment on
+  their PR. An agent asks first before posting to a thread it does not own — the
+  commit messages already carry the reasoning, and the thread is the author's.
+- Keep PR descriptions and review comments short. Say what changed and why, and
+  stop; the diff, the commit messages and the linked docs carry the rest. Length
+  is not thoroughness — it costs the reviewer the time the change was meant to
+  save.
+- Do not `@`-mention anyone not already involved in the thread: a mention is a
+  notification. Naming a person plainly, or referring to their PR by number,
+  says the same thing without pulling them in.
