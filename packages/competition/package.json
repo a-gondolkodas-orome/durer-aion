@@ -4,8 +4,22 @@
   "private": true,
   "description": "The competition rules as a pure state machine: attempts, the scoring ladder, the clock and its grace — applyEvent(state, event, gameplay).",
   "license": "MIT",
+  "files": [
+    "dist/**"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build": "npx tsup"
   },
   "dependencies": {
     "engine": "*"
