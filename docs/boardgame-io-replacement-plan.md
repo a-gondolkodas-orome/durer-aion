@@ -742,7 +742,7 @@ reviewed wiring.
   and `applyEvent` real; verified red when an event is silently dropped).
   Doing it pulled Phase 3's first move in: `packages/competition` got its
   tsup build, and the backend now depends on `competition` + `engine`.
-- [ ] **PR 3.2 (L)** v2 routes in `apps/online-backend/src/server/strategy-v2.ts`:
+- [x] **PR 3.2 (L)** v2 routes in `apps/online-backend/src/server/strategy-v2.ts`:
   - `POST /api/team/:GUID/strategy/start` — reuses the `allowedToStart`/
     stale-check gating; writes an `engine:'v2'` match status.
   - `GET /api/match/:matchID?since=<seq>` — client view + `serverNow` +
@@ -759,6 +759,34 @@ reviewed wiring.
     hijack, no `_stateID`. Rollout flag `STRATEGY_V2_CATEGORIES` (env, comma
     list, default empty) chooses per team category at match creation; both
     engines share one process and one Postgres.
+
+  Delivered as specified, plus what it forced into existence:
+  - **`packages/games` grew a react-free `./server` entry** — its first
+    build, covering only that entry: each game folder assembles a
+    `CompetitionGame` slice (gameplay, live/test bots, hand-out boards per
+    category, test-board generator) in `competition.ts`, and the server never
+    loads the `.tsx` half, which is what keeps the optimal bots out of every
+    client bundle. Practice keeps reading `index.ts` source through its alias.
+  - **Stones' competition boards curated** (the old
+    `[numberOfLoss][winningStreak]` table flattened into loss-indexed pairs),
+    each pinned by `forcedWinnerIndex` — unlike remove-divisor-multiple, the
+    winning role does not flip within every pair; the winner list is itself
+    curated and asserted whole.
+  - **The hand-out policy written once**: `startBoardIndexForTally`
+    (packages/competition) reads the pairs layout every list shares — pair =
+    prior losses, clamped like the old stones table; member = streak. Pure
+    over the tally; the chosen board rides in the START_ATTEMPT event, so
+    replay needs no policy.
+  - **The wire contract is intents-only**: a team POSTs
+    `START_ATTEMPT{difficulty} | CHOOSE_ROLE{roleIndex} | MOVE{name,args}`;
+    the board handed out and every `at` timestamp are stamped server-side.
+    The request-independent heart (`applyTeamEventWithBotReplies`) is
+    unit-tested without koa or a DB, on a stub Nim.
+  - Registration is `strategy-v2-games.ts` (category → `CompetitionGame`, the
+    v2 counterpart of `strategyNames`), pinned by a spec that a category's
+    game deals live boards for that category, in pairs.
+  - This PR stacks on PR 3.1 (the match store) — its first consumer, and the
+    APIs of Phases 1–2 needed no reshaping to be driven by real routes.
 - [ ] **PR 3.3 (S)** Supertest conformance: HTTP move sequences produce identical
   boards/winners to `runMatch`/`applyEvent` directly.
 
