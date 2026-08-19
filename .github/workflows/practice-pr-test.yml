@@ -76,7 +76,7 @@ jobs:
   # them, and a PR failing it still reads as passing everything else at a glance. The
   # `skip coverage` label skips rather than fails it (AGENTS.md § Coverage).
   patch-coverage:
-    name: practice-patch-coverage
+    name: patch-coverage
     if: >-
       github.event.pull_request.draft == false &&
       !contains(github.event.pull_request.labels.*.name, 'skip coverage')
