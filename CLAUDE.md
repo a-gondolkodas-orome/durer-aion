@@ -202,3 +202,6 @@ plan's *Competition secrecy* section has the details.
   reviewer can accept or reject them separately.
 - An agent opening a PR assigns the person it is working for, so it lands in
   their queue rather than going unnoticed.
+- Permission to commit to someone else's branch is not permission to comment on
+  their PR. An agent asks first before posting to a thread it does not own — the
+  commit messages already carry the reasoning, and the thread is the author's.
