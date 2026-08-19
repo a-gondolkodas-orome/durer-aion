@@ -4,8 +4,19 @@
   "private": true,
   "description": "The live competition games as self-contained folders: gameplay, bot, curated start boards, board client and specs.",
   "license": "MIT",
+  "files": [
+    "dist/**"
+  ],
+  "exports": {
+    "./server": {
+      "types": "./dist/server.d.ts",
+      "import": "./dist/server.mjs",
+      "require": "./dist/server.js"
+    }
+  },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build": "npx tsup"
   },
   "dependencies": {
     "engine": "*",
