@@ -1,4 +1,4 @@
-name: practice-pr-test
+name: CI:practice
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
