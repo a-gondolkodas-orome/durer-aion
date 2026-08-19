@@ -209,3 +209,6 @@ plan's *Competition secrecy* section has the details.
   stop; the diff, the commit messages and the linked docs carry the rest. Length
   is not thoroughness — it costs the reviewer the time the change was meant to
   save.
+- Do not `@`-mention anyone not already involved in the thread: a mention is a
+  notification. Naming a person plainly, or referring to their PR by number,
+  says the same thing without pulling them in.
