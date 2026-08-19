@@ -703,8 +703,18 @@ reviewed wiring.
     CI test job runs with no build step. The practice-suite patch-coverage
     gate therefore doesn't see this package — extending that gate to
     `packages/*` is already PR 7.3's item.
-- [ ] **PR 2.2 (S)** `packages/schemas`: `engine?: 'bgio' | 'v2'` (default
+- [x] **PR 2.2 (S)** `packages/schemas`: `engine?: 'bgio' | 'v2'` (default
   `'bgio'`) on match statuses (JSON-in-column — no ALTER); the client-view DTO.
+
+  One placement deviation: the DTO (`StrategyMatchClientView` + `toClientView`)
+  lives in `packages/competition`, not schemas — it is a projection of
+  `CompetitionMatchState`, and a projection kept apart from its source type is
+  a drift hazard; Phase 3's routes and Phase 4's shell import the competition
+  package anyway. The projection strips the engine host's own bookkeeping
+  (`undoSnapshot` — a second board copy per response — `currentTurnHasMoves`,
+  `mode`) and `startBoardIndex` (hand-out bookkeeping), carries
+  `serverNow` next to the clock, and its spec asserts the key sets, so a field
+  added to the state later cannot leak to clients by default.
 
 ### Phase 3 — Backend swap for strategy (dark launch, side by side)
 

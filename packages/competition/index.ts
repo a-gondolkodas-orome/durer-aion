@@ -10,3 +10,5 @@ export type {
 export {
   applyEvent, createCompetitionMatchState, pointsForSecondWin, LENGTH_OF_COMPETITION_MINUTES
 } from './src/apply-event';
+export { toClientView } from './src/client-view';
+export type { StrategyMatchClientView } from './src/client-view';

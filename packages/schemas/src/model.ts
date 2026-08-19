@@ -1,3 +1,11 @@
+// Which implementation owns a match's play, chosen when the match is created
+// and read wherever a matchID is dispatched on (routes, closing, admin views).
+// Absent means 'bgio': the statuses are JSON in a column, so every row written
+// before this field existed reads as the engine that wrote it, with no ALTER
+// and no backfill. 'v2' is the packages/engine + packages/competition stack
+// (Phase 3 of docs/boardgame-io-replacement-plan.md).
+export type MatchEngine = 'bgio' | 'v2';
+
 export interface NotStartedMatchStatus {
   state: 'NOT STARTED';
 }
@@ -7,6 +15,7 @@ export interface InProgressMatchStatus {
   startAt: Date;
   endAt: Date;
   matchID: string;
+  engine?: MatchEngine;
 }
 
 export interface FinishedMatchStatus {
@@ -15,6 +24,7 @@ export interface FinishedMatchStatus {
   endAt: Date;
   matchID: string;
   score: number;
+  engine?: MatchEngine;
 }
 
 export type MatchStatus = NotStartedMatchStatus | InProgressMatchStatus | FinishedMatchStatus;
