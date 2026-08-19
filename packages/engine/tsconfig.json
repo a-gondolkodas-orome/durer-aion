@@ -1,0 +1,23 @@
+{
+  "include": ["."],
+  "exclude": ["dist", "build", "node_modules"],
+  "compilerOptions": {
+    "target": "ES2022",
+    "jsx": "react-jsx",
+    "lib": ["ES2022", "DOM"],
+    "composite": false,
+    "declaration": true,
+    "declarationMap": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    // vite/client is here for one type: `import.meta.env`, which isDevMode reads
+    // when a Vite host defined it. Nothing in this package needs Vite to run.
+    "types": ["vitest/globals", "vite/client"]
+  }
+}

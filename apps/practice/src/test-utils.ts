@@ -1,8 +1,7 @@
 import {
-  runMatch,
+  runMatch, asBotMoves,
   type BotMove, type BotStrategy, type Ctx, type Gameplay, type MoveDefinition
-} from './components/strategy-game-factory';
-import { asBotMoves } from './components/strategy-game-factory/engine/bot-turn';
+} from 'engine';
 
 // Mock `ctx` for testing move functions and bot strategies. A game that pins
 // its mid-turn state names it — `makeCtx<TurnState>({ turnState: … })` — so the

@@ -7,8 +7,10 @@
 // with a single button.
 import { render, fireEvent } from '@testing-library/react';
 import { Link, MemoryRouter, useLocation } from 'react-router';
-import { strategyGameFactory, type StrategyGameConfig } from './strategy-game-factory';
-import type { BoardClientProps, BotStrategy, Gameplay, VariantInput } from './types';
+import { strategyGameFactory } from './strategy-game-factory';
+import type {
+  BoardClientProps, BotStrategy, Gameplay, StrategyGameConfig, VariantInput
+} from 'engine';
 
 export type Board = string[];
 

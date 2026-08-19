@@ -13,8 +13,12 @@
 import { appendFileSync, existsSync, readFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { posix } from 'node:path';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
+// Diffs run here: the measured set spans two workspaces (below), so a diff taken
+// from apps/practice would drop the engine's half before anything measured it.
+const repoRoot = fileURLToPath(new URL('../../../', import.meta.url));
 
 // Below this, the percentage says more about arithmetic than about testing: at twelve lines two
 // uncovered ones are already 83%, which is how #450 — a two-line fix to a memo key — would have been
@@ -25,14 +29,24 @@ const MIN_MEASURED_LINES = 20;
 // habit rather than a stretch above it: what fails here is untested logic, not an imperfect diff.
 const THRESHOLD = 85;
 
+// The engine package is measured alongside this app's src: it is this app's engine, moved out
+// (docs/boardgame-io-replacement-plan.md, PR 1.2a), its specs run in this suite, and leaving it
+// out would mean the one gated number stopped gating exactly the code the migration lives on.
+const MEASURED_ROOTS = ['apps/practice/src/', 'packages/engine/src/', 'packages/games/src/'];
+
 // The .tsx half is the JSX half, and is swept by renders.spec.tsx rather than unit-tested; the
 // exclusions mirror `coverage.exclude` in vite.config.js, which are absent from the report anyway.
+// Paths are repo-relative — both the diff and the normalized lcov speak that form.
 export const isMeasured = path =>
-  path.startsWith('src/') &&
+  MEASURED_ROOTS.some(measuredRoot => path.startsWith(measuredRoot)) &&
   path.endsWith('.ts') &&
   !path.endsWith('.spec.ts') &&
-  path !== 'src/test-utils.ts' &&
-  path !== 'src/test-setup.ts';
+  path !== 'apps/practice/src/test-utils.ts' &&
+  path !== 'apps/practice/src/test-setup.ts';
+
+// lcov SF records are relative to the coverage run's root, this app: `src/…` for its own files,
+// `../../packages/engine/src/…` for the engine's. The diff speaks repo-relative; meet it there.
+export const repoRelativeLcovPath = path => posix.normalize(posix.join('apps/practice', path));
 
 // `git diff --unified=0` output in, { path -> Set of added line numbers } out. A hunk header reads
 // `@@ -12,0 +13,4 @@`, where the count after the comma defaults to 1 when omitted.
@@ -194,7 +208,7 @@ export const formatReport = files => {
 // with SIGTERM. What surfaces is `spawnSync git ENOBUFS` — which reads as git having failed, and
 // sends whoever is looking at it hunting a git problem that does not exist.
 const git = (...args) =>
-  execFileSync('git', args, { cwd: root, encoding: 'utf8', maxBuffer: 512 * 1024 * 1024 });
+  execFileSync('git', args, { cwd: repoRoot, encoding: 'utf8', maxBuffer: 512 * 1024 * 1024 });
 
 // For the questions where "git cannot answer that" is itself an answer — a remote-tracking ref the
 // checkout does not have, two histories with no common ancestor — rather than something to abort on.
@@ -231,12 +245,11 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   // No second commit, so the working tree is what gets compared: run this before committing and it
   // still measures what you just wrote. In CI the tree is clean and this is `<base>...HEAD`.
   //
-  // `--relative` does two things this needs in a monorepo, and neither would have failed loudly:
-  // it drops changes outside apps/practice, which are not this report's to measure, and it prints
-  // the rest as `src/…` rather than `apps/practice/src/…`, which is what `isMeasured` tests and
-  // what lcov's SF records say. Without it every path fails `isMeasured` and the job passes every
-  // PR with "nothing to measure". At the repository root it is a no-op.
-  const addedLines = mergeBase => parseAddedLines(git('diff', '--unified=0', '--relative', mergeBase));
+  // From the repository root, so the diff carries both measured workspaces; `isMeasured` is what
+  // scopes it. The trap is the same one `--relative` used to guard when this ran from
+  // apps/practice: the diff's paths and the normalized lcov paths must agree exactly, or every
+  // path fails the join and the job passes every PR with "nothing to measure".
+  const addedLines = mergeBase => parseAddedLines(git('diff', '--unified=0', mergeBase));
 
   let added = addedLines(baseMergeBase);
   // Skipped rather than fatal when the upstream branch is not in the checkout: the report is then
@@ -259,8 +272,9 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     process.exit(1);
   }
   const lcov = readFileSync(lcovPath, 'utf8');
+  const hits = new Map([...parseLcov(lcov)].map(([path, lines]) => [repoRelativeLcovPath(path), lines]));
 
-  const { passed, markdown } = formatReport(collect(added, parseLcov(lcov)));
+  const { passed, markdown } = formatReport(collect(added, hits));
 
   console.log(markdown);
   if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${markdown}\n`);

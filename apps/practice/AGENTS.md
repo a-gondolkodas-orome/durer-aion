@@ -104,7 +104,7 @@ Game-specific logic is also worth testing when the winning strategy is
 non-trivial. Because bots name their moves, a spec can read a decision straight
 off the return value (`botNextMoveArgs` in `test-utils`, imported as
 `from 'test-utils'` — an alias, so no `../../../`), and `runMatch`
-(`strategy-game-factory/engine/run-match.ts`) plays two strategies against each
+(`packages/engine/src/run-match.ts`) plays two strategies against each
 other through the real moves and the real reducer — no fake `moves` object, no
 hand-rolled game loop. That is what turns "the AI is truly optimal" into a test:
 the smart bot must win as the mover from a winning start board, and as the
@@ -146,7 +146,9 @@ what drops to near zero there is the game logic nothing but a sweep touches.
 
 `coverage:patch` (`scripts/patch-coverage.mjs`, run by the `patch-coverage` job
 on every PR) is the one number CI gates on: the lines a branch **adds** to
-non-JSX files under `src/`, measured against `coverage:unswept`. Added means
+non-JSX files under `src/` — and under `packages/engine/src/`, which is this
+app's engine moved out, its specs running in this suite — measured against
+`coverage:unswept`. Added means
 added against the base branch *and* against `main` — a branch that merged `main`
 in, or one stacked on a PR that predates it, is not asked to cover the lines
 that came with it. Added lines

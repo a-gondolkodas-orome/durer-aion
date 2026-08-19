@@ -10,9 +10,9 @@ them.
 
 ## `home/` — the site's front page
 
-One file, no assets, no build step: the signpost for the subpages around it.
-Its links are **relative**, so it works under `/durer-aion/` and under a custom
-domain alike with nothing to rebase. It links the two practice sites and not
+One page and its favicon, no build step: the signpost for the subpages around
+it. Its links are **relative**, so it works under `/durer-aion/` and under a
+custom domain alike with nothing to rebase. It links the two practice sites and not
 `/proba-verseny/`, which uploads play data to a shared bucket and is meant to be
 handed to testers rather than discovered.
 

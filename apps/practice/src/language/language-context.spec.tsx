@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Link, MemoryRouter, useLocation } from 'react-router';
-import { LanguageProvider, useLanguage } from './language-context';
+import { LanguageProvider } from './language-context';
+import { useLanguage } from 'engine/react';
 
 // The provider reads the language from two places at once — the `?lang=` param and
 // localStorage — and writes both, so the harness exposes the URL as well.

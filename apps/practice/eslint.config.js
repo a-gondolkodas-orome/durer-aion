@@ -63,11 +63,12 @@ export default [
     // (AGENTS.md § Files in a game folder). Beyond each game's gameplay.ts that
     // is start-boards.ts, the curated data a competition hands out, and the .ts
     // half of games/shared/ — its *-svg.tsx siblings are deliberately unmatched.
+    // The engine's own React-free half is no longer here to list; it is guarded
+    // by the root config, which is what lints packages/engine.
     files: [
       'src/components/games/**/gameplay.ts',
       'src/components/games/**/start-boards.ts',
-      'src/components/games/shared/**/*.ts',
-      'src/components/strategy-game-factory/engine/**/*.ts'
+      'src/components/games/shared/**/*.ts'
     ],
     plugins: { '@typescript-eslint': tsPlugin },
     rules: {

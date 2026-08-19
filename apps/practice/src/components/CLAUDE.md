@@ -172,18 +172,20 @@ whole turn at once is the right shape when the turn is one decision made of
 several moves (`pile-splitter`: discard a pile, split another; `magic-box`:
 place a stone, designate a line); naming one move and being asked again with
 the updated `board`/`ctx` is equally fine (`take-and-point`). The engine plays
-the named moves out — with `stepDelay()` (`engine/timing.ts`) between them in
+the named moves out — with `stepDelay()` (the engine package's `timing.ts`) between them in
 the browser so the bot appears to think, immediately in a headless match — and
 asks the strategy again while the turn is still its own. Naming a move after the
 turn ended is a bug (dev: throw); naming moves the game-winning move made moot
 is fine (they are dropped).
 
-Two hosts play a named turn out: the browser shell in
-`strategy-game-factory.tsx` and the headless runner in `engine/run-match.ts`.
-They differ deliberately in pacing and in how loudly they complain — a bad
-strategy must not crash the site in production, while headless it should throw —
-but *which* moves land has to be identical, which
-`engine/bot-turn-agreement.spec.tsx` pins by playing the same turn through both.
+Three hosts play a named turn out: the browser shell in
+`strategy-game-factory.tsx`, and headlessly `runMatch` and `playBotTurn` in the
+engine package — the latter being how a competition server answers a team's
+move, with `runMatch` driving its turns through it. They differ deliberately in
+pacing and in how loudly they complain — a bad strategy must not crash the site
+in production, while headless it should throw — but *which* moves land has to
+be identical, which `strategy-game-factory/bot-turn-agreement.spec.tsx` pins by
+playing the same turn through all of them.
 
 Left unpinned, neither a mistyped move name nor wrong arguments surface until
 the bot plays the move (dev: throw). A game pins both by exporting its moves as
@@ -262,7 +264,8 @@ state without going through a move, deliberately: a selection is not a move, so
 it must not bump `moveCount` or take an undo snapshot. Moves never get it; they
 return `nextTurnState` instead.
 
-Three hooks in `strategy-game-factory/hooks/` cover the rest; each carries its
+Three hooks from `engine/react` (re-exported by the factory barrel) cover the
+rest; each carries its
 own usage notes and footguns in its JSDoc, so reach for them rather than
 re-deriving the pattern:
 
@@ -289,13 +292,13 @@ const clickPiece = ({ pileId, pieceId }: Piece) => {
 
 Authoritative game state (`board`, `phase`, `currentPlayer`, `turnState`,
 `moveCount`, …) lives in a small synchronous store outside React
-(`strategy-game-factory/engine/store.ts`); the factory component subscribes via
+(the engine package's `store.ts`); the factory component subscribes via
 `useSyncExternalStore` and renders snapshots of it. Every dispatch — from the
 `BoardClient`, a bot, or the auto `endOfTurnMove` — is validated and applied by
-a framework-free reducer (`engine/reducer.ts`) against `store.getState()`, so
+a framework-free reducer (its `reducer.ts`) against `store.getState()`, so
 bots and chained `setTimeout` dispatches can never observe a stale render
 snapshot. Validators may depend on **any** `ctx` field, which is always derived
-fresh from the store (`engine/build-ctx.ts`). This boardgame.io-style
+fresh from the store (its `build-ctx.ts`). This boardgame.io-style
 architecture replaced per-field workarounds (a render-synced `ctxRef` shadow)
 that made staleness a reviewable hazard; "boardgame.io-style" means the
 architecture only — see [AGENTS.md § Planned future
@@ -312,10 +315,14 @@ Two conventions to keep in mind:
   because it keeps a move a pure function of its inputs, callable on
   hypothetical boards outside a live game — bot look-ahead and specs both do
   that.
-- The `engine/` modules are React-free by design, for the reason each game's
-  `gameplay.ts` is ([AGENTS.md § Files in a game
+- The engine now lives in `packages/engine`, imported as `engine` — the same
+  package a competition server imports, which is why it is React-free, for the
+  reason each game's `gameplay.ts` is ([AGENTS.md § Files in a game
   folder](../../AGENTS.md#files-in-a-game-folder)). Don't import React (or
-  anything React-flavoured) there; ESLint enforces it.
+  anything React-flavoured) there; the root ESLint config enforces it, allowing
+  only `import type`, which is erased. This app reads the package's *source*
+  through an alias, so editing it needs no build step and its specs run in
+  `npm test` here.
 
 ## New game checklist
 

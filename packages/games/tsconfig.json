@@ -1,0 +1,31 @@
+{
+  "include": ["."],
+  "exclude": ["dist", "build", "node_modules"],
+  "compilerOptions": {
+    "target": "ES2022",
+    "jsx": "react-jsx",
+    "lib": ["ES2022", "DOM"],
+    "composite": false,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "paths": {
+      // The engine resolves to source, as it does in apps/practice — these
+      // files are bundled and tested through that app's aliases, and `tsc`
+      // here must see the same modules. `test-utils` reaches into the app
+      // because the specs run in its vitest suite and use its helpers; it is
+      // spec-only plumbing, not a dependency of the games themselves.
+      "engine": ["../engine/index.ts"],
+      "engine/react": ["../engine/react.ts"],
+      "test-utils": ["../../apps/practice/src/test-utils.ts"]
+    },
+    // vite/client is here for the same one type engine's tsconfig names it for:
+    // `import.meta.env` in the engine source these paths resolve into.
+    "types": ["vitest/globals", "vite/client"]
+  }
+}

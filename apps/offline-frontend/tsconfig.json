@@ -34,9 +34,18 @@
     "../../packages/*/index.d.ts", 
     "../../packages/*/index.ts"
   ],
+  // This app typechecks every package's src, not only its own, so it also has to
+  // skip every package's suites — and packages/engine came from apps/practice,
+  // where suites are named .spec rather than .test (root CLAUDE.md § Tech Stack).
+  // A `**/` pattern is anchored at this directory and so never reaches up into
+  // packages/; the paths below have to walk the same way `include` does.
   "exclude": [
     "**/*.test.ts",
     "**/*.test.tsx",
-    "**/__tests__/**"
+    "**/__tests__/**",
+    "../../packages/*/src/**/*.test.ts",
+    "../../packages/*/src/**/*.test.tsx",
+    "../../packages/*/src/**/*.spec.ts",
+    "../../packages/*/src/**/*.spec.tsx"
   ]
 }

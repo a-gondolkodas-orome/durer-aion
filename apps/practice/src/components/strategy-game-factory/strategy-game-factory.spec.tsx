@@ -1,13 +1,32 @@
 // @vitest-environment jsdom
 import { fireEvent, act } from '@testing-library/react';
-import type { StrategyGameConfig } from './strategy-game-factory';
 import {
   makeConfig, minimalConfig, ctxAwareConfig, renderGame, warmUpPlayerNameSetup,
   MinimalBoardClient, CtxAwareBoardClient, defaultGameplay, type Board
 } from './spec-helpers';
-import type { BoardClientProps, BotMove, BotStrategy, Ctx, Gameplay, StrategyArgs, VariantInput } from './types';
+import type {
+  BoardClientProps, BotMove, BotStrategy, Ctx, Gameplay, StrategyArgs, StrategyGameConfig, VariantInput
+} from 'engine';
 
 beforeAll(warmUpPlayerNameSetup);
+
+describe('in an insecure context (plain http)', () => {
+  // Secure contexts alone define crypto.randomUUID, and jsdom is not the judge
+  // of that — so take the whole object away, as http really presents it. Seen
+  // live: every game route on http://gyakorlo.durerinfo.hu rendered the error
+  // page while the overview worked, since only game mounts minted an id.
+  it('still mounts a game without crypto.randomUUID', () => {
+    vi.stubGlobal('crypto', {});
+    try {
+      // The crash was in the shell's own mount (the game-uuid useState), so
+      // reaching the role chooser at all is the assertion.
+      const { getByTestId } = renderGame(minimalConfig(defaultGameplay));
+      expect(getByTestId('role-btn-0')).toBeDefined();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+});
 
 describe('isClientMoveAllowed', () => {
   it('allows both players to move in vsHuman mode', () => {

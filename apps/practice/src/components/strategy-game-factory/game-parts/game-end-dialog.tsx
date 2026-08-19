@@ -3,7 +3,7 @@ import { Dialog, DialogPanel, DialogTitle, Description } from '@headlessui/react
 import { useTranslation } from 'language';
 import { ModeSelector, DifficultySelector } from './common/game-controls';
 import { getCtaText } from './common/cta-text';
-import type { Ctx, Variant, Mode } from '../types';
+import type { Ctx, Variant, Mode } from 'engine';
 
 // The mode/variant a player picks here is a draft: it only takes effect on "new
 // game", and abandoning the dialog must discard it. That reset is what mounting

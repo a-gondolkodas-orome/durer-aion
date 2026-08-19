@@ -8,6 +8,11 @@ on:
     # so every PR still gets a gate.
     paths:
       - 'apps/practice/**'
+      # The engine and games packages are this app's code, moved out (PRs 1.2a and 1.4):
+      # their specs run in this suite and patch-coverage gates their added lines, so a
+      # package-only PR must trigger both.
+      - 'packages/engine/**'
+      - 'packages/games/**'
       - 'package.json'
       - 'package-lock.json'
       - '.github/workflows/practice-pr-test.yml'

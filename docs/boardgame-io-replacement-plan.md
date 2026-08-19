@@ -98,8 +98,9 @@ frontends gain a Tailwind build step and the small `language` provider.
 The React-free core (`engine/`, `types.ts`, `resolve-variants.ts`; lodash-only)
 is most of the value, but four gaps block server use today:
 
-- `import.meta.env.DEV` in `engine/reducer.ts` and
-  `games/shared/unexpected-state.ts` breaks bare Node (vitest shims it).
+- ~~`import.meta.env.DEV` in `engine/reducer.ts` and
+  `games/shared/unexpected-state.ts` breaks bare Node (vitest shims it).~~
+  Closed by PR 1.1; the core is now `packages/engine` (PR 1.2a).
 - No React-free registry: `Game.gameplay`/`Game.variants` hang off the React
   component, and variant wiring lives in each `<game>.tsx`.
 - No authoritative-move API: nothing shaped like
@@ -472,31 +473,195 @@ tasks, pinned Node) arrives alongside the existing setup, not instead of it.
 
 ### Phase 1 — Engine hardening + extraction (practice behavior unchanged)
 
-- [ ] **PR 1.1 (S)** `isDevMode()` shim (reads `import.meta.env?.DEV` when defined,
-  else `process.env.NODE_ENV`) replacing the two `import.meta.env.DEV` uses —
-  done in place so the move-PR stays a pure move.
-- [ ] **PR 1.2 (L, mechanical)** `packages/engine`: move the engine core +
-  `types.ts` + `resolve-variants.ts` (export `"."`, React-free) and
-  `game-parts/game-board.tsx`, the hooks, the `language` provider (export
-  `"./react"`); tsup build following `packages/schemas`. Practice's
-  `strategy-game-factory`/`language` aliases become thin re-export barrels —
-  **zero changes in the 85 game files**. Engine specs move along, including the
-  import-graph spec.
-- [ ] **PR 1.3 (M)** Server-facing API:
-  `applyClientMove(state, gameplay, name, args)` (validate → reduce → auto
-  `endOfTurnMove`; rejects rather than throws — these are client-submitted
-  moves) and `playBotTurn(state, gameplay, strategy)` (the bot-turn loop
-  factored out of `run-match.ts`, returning the named moves + resulting state).
-  Extend the bot-turn-agreement spec to **three hosts** (React shell /
-  `runMatch` / `playBotTurn`). Add a JSON round-trip serialization spec over
-  every variant start board and match history, and document the contract in
-  `types.ts`. Add `startBoardForAttempt(startBoards, attemptIndex)` honoring
-  the durer-jatekok#314 append-only order.
-- [ ] **PR 1.4 (M)** `packages/games` with the two live games moved wholesale; each
+- [x] **PR 1.1 (S)** `isDevMode()` shim (reads `import.meta.env?.DEV` when defined,
+  else `process.env.NODE_ENV`) replacing the `import.meta.env.DEV` uses — done in
+  place so the move-PR stays a pure move.
+
+  **Seven uses, not the two this said.** Five are in the React shell, which Vite
+  will always build; they were converted anyway, so the policy lives in one place
+  and 1.2 has nothing left to decide per call site. Only the two React-free ones
+  (`engine/reducer.ts`, `games/shared/unexpected-state.ts`) were actually broken
+  outside Vite, and the spec pins that directly: it imports the module in a bare
+  `node`, which runs the `.ts` unbuilt (type stripping, on by default since
+  23.6), where the old expression threw `TypeError: Cannot read properties of
+  undefined (reading 'DEV')` before any game logic ran.
+
+  The shim sits at `src/dev-mode.ts`, not in `engine/`, because the React-free
+  ESLint group bans the whole `strategy-game-factory/` subtree from `games/`, not
+  merely its barrel — the pattern is gitignore-shaped. It joins that group
+  itself. In 1.2 it moves into `packages/engine` and `games/` imports it from
+  there, which is the barrel-shaped import the rule is really after.
+
+  Cost, since it is a real one: a call boundary is opaque to the bundler where
+  `import.meta.env.DEV` folded to a literal, so two dev-only `throw` branches now
+  survive minification — **+618 bytes raw, +206 gzipped** across the whole site.
+  A module-scope constant would fold, but it would also capture its value at
+  import time and make `vi.stubEnv('DEV', …)` a no-op for every existing
+  prod-behaviour spec.
+**PR 1.2 was split in two.** The React-free half and the React half are separate
+decisions with separate consumers, and all of the wiring a reviewer should argue
+about — how practice consumes the package, where its specs run, what keeps it
+framework-free — belongs to the first. The second is then a sweep on top of
+reviewed wiring.
+
+- [x] **PR 1.2a (L, mechanical)** `packages/engine`, export `"."`: the engine
+  core + `types.ts` + `resolve-variants.ts` + `dev-mode.ts` and their specs,
+  tsup build following `packages/schemas`. Practice's `strategy-game-factory`
+  barrel re-exports it, offering exactly what it offered before —
+  **zero changes in the 85 game files**.
+
+  **The app reads the package's source, not its build.** A workspace `main`
+  pointing at `dist` is right for the node hosts this exists for and wrong for
+  practice: it would mean building before `npm run dev`, and no HMR into engine
+  source. A Vite alias (mirrored in `tsconfig` `paths`) points `engine` at the
+  source, exactly as when these files sat under `src/`. Its specs moved with it
+  and still run from `apps/practice`, through the same alias — they were written
+  against that setup, and it is the app that exercises the engine in a browser.
+
+  **The i18n value types moved with it.** `types.ts` types a variant's `label`
+  and `rule`, so the engine has to name `I18nString`/`TranslatableNode` — the
+  shape a game writes text in is part of its configuration. `language/` keeps
+  the provider and the `t()` hook and re-exports the types from the engine.
+  `TranslatableNode` is the one place React is named, as a type only.
+
+  **What the boundary rests on**, now that practice's ESLint no longer covers
+  these files: the root config gains a block for `packages/engine/**` banning
+  React by specifier (`import type` allowed — it is erased), and the package
+  holds no `.tsx` at all. Two of that config's rules
+  (`no-non-null-assertion`, `consistent-type-definitions`) are off there so a
+  move does not become a rewrite, and its `--max-warnings` cap rose 107 → 117
+  for the ten `no-explicit-any` in the moved `types.ts` — reverted since: nine
+  of the ten anys became precise types (`unknown[]` where only calls need
+  accepting, `never` in constraint and inference patterns, where contravariance
+  accepts every concrete signature), and the one genuinely bivariant `any[]` —
+  a move's args, declared specific by the game yet dispatched as `unknown[]` by
+  the engine — is aliased once as `BivariantArgs` with its reason and a single
+  targeted disable. The two rules stay off until the ESLint setups unify. The cap then went
+  to **zero**: the legacy bgio directories' 106 `no-explicit-any` — interop
+  nobody will type out before Phase 7 deletes that code — have the rule off
+  with the reason in the config, and everywhere else a new warning of any kind
+  now fails the job instead of accumulating.
+
+  Three things the build turned up, none of which a spec would have:
+  - **`import.meta.env` must be written out literally.** A type assertion around
+    `import.meta` stops Vite substituting it — and it fails *silently*, since
+    every host then looks like a host with no Vite. Cost an afternoon; the
+    comment in `dev-mode.ts` is there to stop it costing another.
+  - **lodash breaks the esm output in a real node.** `import { cloneDeep } from
+    'lodash'` is a named import from a CommonJS module, which a bundler's
+    interop hides and bare node rejects outright. `noExternal: ['lodash']`
+    bundles it in — the browser pays nothing, since practice reads the source.
+    Every other package here has the same latent trap, unnoticed because only
+    the cjs output is consumed.
+  - **`import.meta` is empty in the cjs output**, which is what `isDevMode`
+    wants there. esbuild's warning is silenced with that written next to it.
+
+  **The move silently narrowed two gates, and both are restored in the same PR**
+  (the maintainer's call, and the right one: neither is new policy — each keeps a
+  check meaning what it meant before the move, so they belong with it):
+  - `coverage:patch` measured added lines under `apps/practice/src` only. It now
+    measures `packages/engine/src` too: coverage runs with `allowExternal`, lcov
+    paths and the diff are joined in repo-relative form, and the diff runs from
+    the repo root (`--relative` would drop the engine's half). One limitation:
+    lcov's manufactured empty records don't extend outside the app root, so an
+    engine module nothing imports is absent rather than flagged "unloaded" —
+    moot today, since everything engine exports is loaded through its barrel.
+  - `practice-pr-test`'s `paths` filter only watched `apps/practice/**`, so an
+    engine-only PR would have skipped practice's 1988 specs and the coverage
+    gate entirely. `packages/engine/**` is in the filter now.
+- [x] **PR 1.2b (M)** The same package's `"./react"` export — `GameBoard`, the
+  three BoardClient hooks, and the language plumbing — plus the boundary spec
+  that 1.2a had nothing to assert against.
+
+  **The language provider split in two, and the plan's "move the provider" was
+  wrong as written.** The provider is coupled to react-router (`useSearchParams`
+  drives `?lang=`), and a router cannot enter the engine: practice is on
+  react-router 8, the competition frontends on react-router-dom 6, so no peer
+  range satisfies both. The split: the engine gets a **controlled** provider —
+  the context, `useLanguage`, `translate`, `useTranslation`; the host owns where
+  the language lives — and practice keeps its stateful URL/localStorage wrapper
+  and the selector, both of which ride its router and chrome. A competition
+  frontend brings its own wrapper in Phase 4.
+
+  **The boundary spec** (`packages/engine/src/react-free.spec.ts`) walks the
+  value-import graph from the core entry and asserts nothing under `react/` and
+  no `.tsx` is reached — ESLint bans React *by specifier* and cannot see what a
+  relative import resolves to, and the ban now has a deliberate hole (the
+  react/ subtree), so the walk is what holds the line. Verified it can fail: a
+  smuggled `export … from './react/game-board'` turns it red. Type-only edges
+  are exempt — they are erased.
+
+  Two things only doing it surfaced:
+  - **Tailwind stops at the app root.** `GameBoard`'s utility classes moved out
+    of automatic source detection; `@source "../../../packages/engine/src/react"`
+    in `styles.css` puts them back. Without it the classes survive only as long
+    as some in-app file happens to use the same ones.
+  - **The browser-check skill broke with the workspace join** — `drive.mjs`
+    resolved playwright from `apps/practice/node_modules`, which hoisting
+    emptied. Found by walking the play-game-in-browser skill for this PR's
+    verification (GameBoard, the hooks and the language plumbing are exactly
+    what no spec sees); fixed to try both install locations, with an
+    `executablePath` override for containers that bake their own Chromium.
+
+  Verified by playing: PileSplitter's mid-turn 🗑️ state on the mover's own
+  `useDeferredMove` beat (the exact display the skill's cautionary bug lived
+  in), a full two-move turn passing to the other player, HU↔EN flipping text
+  and the `?lang=` param both ways, and ChessRook's hover preview.
+- [x] **PR 1.3 (M)** Server-facing API, delivered as planned in four commits —
+  `playBotTurn` (factored out of `run-match.ts`, which now drives its turns
+  through it, so the two agree partly by construction; the agreement spec pins
+  all three hosts anyway), `applyClientMove` (validate → reduce → auto
+  `endOfTurnMove`; rejects with a typed reason, since a team's move is wire
+  input to refuse, not a caller bug — but a failing *auto* move still throws,
+  being the game's own), `startBoardForAttempt` (append-only stability pinned
+  as a property: appending entries changes no earlier answer), and the JSON
+  round-trip sweep + the contract documented in `types.ts`.
+
+  Decisions beyond the plan's text, each small:
+  - `applyClientMove` takes an optional `asPlayer` — the seat the server
+    believes the client holds — turning "whose turn is it" into a `notYourTurn`
+    rejection rather than a check every route must remember. It is the same
+    check the shell folds into `isClientMoveAllowed`.
+  - `playBotTurn` gains the one guard `runMatch`'s game-level `maxMoves` never
+    provided: a turn that never closes throws rather than looping a server
+    forever.
+  - The sweep judges round-trips with `toEqual`, which is exactly the
+    behavioural bar: a dropped `undefined` object member reads back
+    `undefined` either way and passes; an array hole becoming `null` or a
+    `Date` collapsing to a string does not. **Every registered game passed
+    as-is** — 289 cases, no game needed changing.
+  - The slow-variant list both all-games sweeps consult moved to its own
+    module, so one list owns the decision.
+- [x] **PR 1.4 (M)** `packages/games` with the two live games moved wholesale; each
   `<game>.tsx` exports a **config object** instead of calling the factory;
-  practice wiring calls `strategyGameFactory(config)` at its one export site.
-  Add curated competition `startBoards` for remove-divisor-multiple C/D
-  (currently generator-based), each pinned by `forcedWinnerIndex` specs.
+  practice wiring calls `strategyGameFactory(config)` at its one export site
+  (its `games/index.ts` barrel — the config-to-page step, so the package stays
+  host-agnostic). Curated competition `startBoards` for
+  remove-divisor-multiple C/D, ported from the old 19ocd `startingPosition`:
+  C = 6 then 7 numbers, D = 10 then 11, in hand-out order. The
+  `forcedWinnerIndex` specs pin each pair's winners as `[1, 0]` — the roles
+  flip mid-streak by design, so a team's two consecutive wins need both seats.
+
+  What doing it decided or surfaced:
+  - **`StrategyGameConfig` and `Presentation` moved into the engine's core
+    types** (a type-only React import, erased at runtime): a game package
+    cannot reach into an app for its export's type, and Phase 4's shell will
+    consume the same config type. The factory imports them back.
+  - **`packages/games` is strict-clean, unlike apps/practice** (which keeps
+    `noImplicitAny: false`): offline-frontend blanket-includes every package's
+    src under full strict, so the moved files took a handful of
+    behaviour-neutral annotations rather than an exclusion that Phase 5 —
+    when offline starts importing the package for real — would have to undo.
+  - **Every sweep followed the move**: Tailwind's `@source`, the start-board
+    deep-freeze in test-setup, the gameplay react-free walk (now spanning both
+    trees — verified it goes red on a smuggled `.tsx` import), vitest
+    include + coverage globs, patch-coverage's measured roots, and the
+    practice-pr-test paths filter. Both games were then played in a browser:
+    board styling, the hover preview and the mid-game legality colouring all
+    survived the move.
+  - **No build step yet, deliberately**: practice reads the package's source
+    through an alias exactly as it reads the engine's, and no node host
+    imports it before Phase 3 — the tsup build is that phase's first move.
 
 ### Phase 2 — Competition core (no wiring yet)
 

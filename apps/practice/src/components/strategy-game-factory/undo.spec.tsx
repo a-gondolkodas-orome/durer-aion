@@ -4,7 +4,7 @@ import {
   makeConfig, ctxAwareConfig, renderGame, warmUpPlayerNameSetup,
   CtxAwareBoardClient, type Board
 } from './spec-helpers';
-import type { BoardClientProps, BotMove, Gameplay } from './types';
+import type { BoardClientProps, BotMove, Gameplay } from 'engine';
 
 // Undo rewinds a whole turn, not a move: the snapshot is taken at the first
 // move of a turn and cleared once the turn passes. Against the computer it also

@@ -26,7 +26,11 @@ Frozen here rather than at each export so it stays test-only, and so a board
 added later is covered without anyone remembering to opt in.
 */
 const boardModules = import.meta.glob(
-  './components/games/**/{gameplay,start-boards}.ts', { eager: true }
+  [
+    './components/games/**/{gameplay,start-boards}.ts',
+    '../../../packages/games/src/**/{gameplay,start-boards}.ts'
+  ],
+  { eager: true }
 ) as Record<string, Record<string, unknown>>;
 
 const deepFreeze = (value: unknown) => {

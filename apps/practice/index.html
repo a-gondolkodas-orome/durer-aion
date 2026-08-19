@@ -26,7 +26,9 @@
       }, { passive: true });
     </script>
     <link rel="stylesheet" href="/src/styles.css">
-    <link rel="icon" href="data:,">
+    <!-- Relative, not root-absolute: the site is served from `/jatekok/` and the app routes
+         with a hash, so the document path never moves off it and there is nothing to rebase. -->
+    <link rel="icon" href="favicon.png">
   </head>
   <body>
     <div id="app"></div>

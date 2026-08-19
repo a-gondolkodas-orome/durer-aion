@@ -79,7 +79,7 @@ The UI is Hungarian by default; the `EN` button in the header switches it, which
 is worth doing if your assertions read better in English.
 
 `sampleDuringBeat(page, read)` polls for 1.6 s. Mid-turn states last one
-`stepDelay()` beat — 750–1250 ms, `strategy-game-factory/engine/timing.ts` — so
+`stepDelay()` beat — 750–1250 ms, `packages/engine/src/timing.ts` — so
 they must be sampled, not awaited: by the time a `waitFor` on the next state
 resolves, the frame you wanted is gone. This is the only way to see the board
 between the two halves of a turn, which is where multi-move games go wrong.

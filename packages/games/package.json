@@ -1,0 +1,22 @@
+{
+  "name": "games",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The live competition games as self-contained folders: gameplay, bot, curated start boards, board client and specs.",
+  "license": "MIT",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "engine": "*",
+    "lodash": "^4.17.21"
+  },
+  "peerDependencies": {
+    "react": "^19.2.0"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.182",
+    "@types/react": "^19.2.0",
+    "vite": "^7.0.3"
+  }
+}

@@ -218,14 +218,21 @@ path kept, which is the same behaviour already verified for
 | 1 | dev | **Done.** `test-and-deploy` replaced by a root workflow that builds the three subpages into one artifact; static home page; `data-domains` extended |
 | 2 | maintainer | **Done.** Settings → Pages: source = GitHub Actions, no custom domain. See the note below — the first deploy went live before the setting was changed |
 | 3 | everyone | **Done.** All four pages verified live on the github.io URL. `jatek.durerinfo.hu` is still served by durer-jatekok, untouched |
-| 4 | **teammate** | **← next.** DNS record for `gyakorlo.durerinfo.hu` → durer-aion's Pages |
-| 5 | dev + maintainer | Add `public/CNAME`, rebuild with the base path switched, set the custom domain in Settings |
+| 4 | teammate | **Done.** DNS record for `gyakorlo.durerinfo.hu` → durer-aion's Pages |
+| 5 | dev + maintainer | **← next.** `pages/home/CNAME` (which is the artifact root, so no `public/` is involved) and `SITE_ROOT: /`, in one PR because neither half works alone; then confirm the custom domain in Settings |
 | 6 | maintainer | Cut over: replace durer-jatekok's published content with the redirect stub |
 | 7 | **teammate** | Repoint the links on durerinfo.hu |
 | 8 | dev | Later, in any order: ~~#224's relay app replacing the frozen `/valto/`~~ **done**, the designed home page |
 
 Steps 1–5 have no effect on `jatek.durerinfo.hu`. Step 6 is the only
 irreversible-feeling moment, and it is a one-file revert.
+
+**Why step 5 is one PR and not two.** The base path and the domain have to move
+together: a `/durer-aion/`-based build served from the domain root asks for
+assets nobody serves, and a `/`-based build on the default domain does the same.
+There is no ordering that avoids a broken window, so the two land in one merge —
+and since the deploy workflow going green *is* the cutover (below), that merge is
+the moment the site changes address.
 
 **What actually happened at step 2, because it is worth knowing next time.**
 The switch was not the trigger. The first `pages-deploy` run on `main` created
@@ -386,10 +393,19 @@ Deliberately deferred, so they do not block the consolidation.
 - [ ] **Consider umami for the other subpages.** `/valto/` and `/proba-verseny/`
   have no tracking today. Not required, but the one-line script tag is the
   cheapest moment to add it while the pages are being assembled anyway.
-- [ ] **`/proba-verseny/` renders nothing when `cdn.jsdelivr.net` is
+- [x] **`/proba-verseny/` renders nothing when `cdn.jsdelivr.net` is
   unreachable.** Its `index.html` pulls `latex.js` from the CDN, and with that
   request blocked the page stays blank — not a degraded render, an empty one.
   Found while verifying the assembled site, and reproducible on a plain
   root-base build too, so it is the app's own single point of failure rather
   than anything the consolidation introduces. Vendoring the script or making
-  the failure non-fatal would fix it.
+  the failure non-fatal would fix it. Done, the non-fatal way: the CDN is now
+  reached through a caught `import()` instead of a static one. The static form
+  was the whole cause — Vite bundles every module script in `index.html` into
+  one entry chunk, so the app's own bootstrap sat behind the CDN fetch and died
+  with it. Both frontends carried the same snippet, so both are fixed; the
+  online one is the real competition and had the same single point of failure.
+  A task now falls back to its LaTeX source (`latex-js:not(:defined)` keeps the
+  line breaks) rather than to nothing. Vendoring remains open as the stronger
+  fix, and is now an independent choice about rendering quality offline rather
+  than about whether the page comes up at all.
