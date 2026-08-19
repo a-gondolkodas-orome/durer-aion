@@ -17,6 +17,7 @@ import { Server } from 'boardgame.io/server';
 import botWrapper from './botwrapper';
 import cors from '@koa/cors';
 import { configureTeamsRouter } from './server/router';
+import { configureStrategyV2Router } from './server/strategy-v2';
 import { TeamsRepository } from './server/db';
 import { MatchesRepository } from './server/match-store';
 import { getBotCredentials, getGameStartAndEndTime, relayNames } from './server/common';
@@ -82,7 +83,7 @@ getBotCredentials(); // give love if no creds are supplied
 getAdminCredentials(); // give love if no creds are supplied
 getGameStartAndEndTime(); // give love if no creds are supplied
 
-const { db, teams } = getDb();
+const { db, teams, matches } = getDb();
 
 // node: argv[0] vs server.ts: argv[1]
 if (argv[2] === "import") {
@@ -102,7 +103,7 @@ if (argv[2] === "import") {
     { https: undefined },
     botSetup,
     async function onFinishedMatch(matchID) {
-      await closeMatch(matchID, teams, db);
+      await closeMatch(matchID, teams, db, matches);
     },
   );
   const server = Server({
@@ -126,7 +127,8 @@ if (argv[2] === "import") {
 
   //TODO regex mount protection for Boardgame.io endpoints
 
-  configureTeamsRouter(server.router, teams, games);
+  configureTeamsRouter(server.router, teams, games, matches);
+  configureStrategyV2Router(server.router, teams, matches);
 
   Sentry.init({ dsn: "https://1f4c47a1692b4936951908e2669a1e99@sentry.durerinfo.hu/4" });
 

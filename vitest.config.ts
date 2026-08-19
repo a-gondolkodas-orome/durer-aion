@@ -15,6 +15,10 @@ export default defineConfig({
       {
         find: /^competition$/,
         replacement: fileURLToPath(new URL('./packages/competition/index.ts', import.meta.url))
+      },
+      {
+        find: /^games\/server$/,
+        replacement: fileURLToPath(new URL('./packages/games/server.ts', import.meta.url))
       }
     ]
   },

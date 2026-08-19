@@ -25,3 +25,15 @@ export const relayNames = {
   D: 'relay_d',
   E: 'relay_e',
 }
+
+// The v2 rollout flag: which team categories start strategy matches on the
+// engine+competition stack instead of boardgame.io. Default empty — the v2
+// routes exist but nothing reaches them (the dark launch of Phase 3). Read
+// per request rather than at startup, so a rehearsal can flip it per process
+// restart without ordering surprises.
+export function getStrategyV2Categories(): string[] {
+  return (env.STRATEGY_V2_CATEGORIES ?? '')
+    .split(',')
+    .map(category => category.trim())
+    .filter(Boolean);
+}

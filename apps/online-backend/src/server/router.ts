@@ -8,19 +8,25 @@ import { getFilterPlayerView } from "boardgame.io/internal";
 import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus, createGame, injectBot, injectPlayer } from './team_manage';
 import { import_teams_from_tsv } from './team_import';
 import { PlayerIDType } from 'game';
+import { MatchesRepository } from './match-store';
+import { applyEvent } from 'competition';
+import type { CompetitionMatchState } from 'competition';
 
 /**
- * 
+ *
  * Big factory to set up the Router for the API, anso contains API function implementations.
- * 
+ *
  * @param router - Koa Router
  * @param teams - List of teams, provided as a TeamsRepository
  * @param games - List of possible games for teams
+ * @param matches - The v2 match store; the admin and stale-close paths
+ *   dispatch on which table holds a matchID
  */
 export function configureTeamsRouter(
   router: Router<any, Server.AppCtx>,
   teams: TeamsRepository,
-  games: Game<any, Record<string, unknown>, any>[]
+  games: Game<any, Record<string, unknown>, any>[],
+  matches: MatchesRepository
 ) {
   /**
    * Get the log data about a specific match.
@@ -31,6 +37,12 @@ export function configureTeamsRouter(
   router.get("/game/admin/:matchId/logs", async (ctx) => {
     //It is already authenticated by the admin mount routing
     const matchID = ctx.params.matchId;
+    // v2 matches keep their log in MatchEvents; same URL, dispatched by
+    // which table holds the id.
+    if (await matches.getMatch(matchID)) {
+      ctx.body = await matches.eventsSince(matchID, -1);
+      return;
+    }
     const { log } = await (ctx.db as StorageAPI.Async).fetch(matchID, {
       log: true,
     });
@@ -48,6 +60,11 @@ export function configureTeamsRouter(
    */
   router.get("/game/admin/:matchId/state", async (ctx) => {
     const matchID = ctx.params.matchId;
+    const v2Match = await matches.getMatch(matchID);
+    if (v2Match) {
+      ctx.body = v2Match;
+      return;
+    }
     const { state } = await (ctx.db as StorageAPI.Async).fetch(matchID, {
       state: true,
     });
@@ -67,6 +84,46 @@ export function configureTeamsRouter(
   router.get("/game/admin/:matchId/addminutes/:minutes", async (ctx) => {
     const matchID = ctx.params.matchId;
     const minutes = Number(ctx.params.minutes);
+    const v2Match = await matches.getMatch(matchID);
+    if (v2Match) {
+      // ADD_MINUTES is an ordinary event on the log — no transport hijack,
+      // no _stateID. The client's countdown picks the new horn up by polling.
+      if (!Number.isInteger(minutes) || minutes <= 0) {
+        ctx.throw(400, `Minutes must be a positive integer, got ${ctx.params.minutes}.`);
+      }
+      const state = v2Match.state as CompetitionMatchState<unknown>;
+      if (state.finished) {
+        ctx.throw(501, 'Restarting an already finished match is not supported right now.');
+      }
+      const event = { type: 'ADD_MINUTES' as const, at: new Date().toISOString(), minutes };
+      const applied = applyEvent(state, event, { moves: {} });
+      if (!applied.ok) {
+        ctx.throw(500, `ADD_MINUTES rejected: ${applied.rejection}`);
+        return;
+      }
+      const appended = await matches.appendEvents({
+        matchId: matchID,
+        knownVersion: v2Match.version,
+        events: [{ actor: 'admin', type: 'ADD_MINUTES', payload: event }],
+        state: applied.state,
+      });
+      if (!appended.ok) {
+        ctx.throw(409, 'The match moved while adding minutes — retry.');
+        return;
+      }
+      const team = await teams.getTeam({ teamId: v2Match.teamId }) ??
+        ctx.throw(500, `Match found, but assigned team ${v2Match.teamId} was not found.`);
+      const newEndDate = new Date(applied.state.clock.endAt);
+      if (team.strategyMatch.state === 'IN PROGRESS' && team.strategyMatch.matchID === matchID) {
+        await team.update({ strategyMatch: { ...team.strategyMatch, endAt: newEndDate } });
+      } else {
+        ctx.throw(501, 'Restarting an already finished match is not supported right now.');
+      }
+      team.other += ` te[${matchID}]:${minutes}`;
+      await team.save();
+      ctx.body = { updatedEndTime: newEndDate, matchID: matchID, team: team };
+      return;
+    }
     const { state, metadata } = await (ctx.db as StorageAPI.Async).fetch(
       matchID,
       {
@@ -334,7 +391,8 @@ export function configureTeamsRouter(
         await closeMatch(
           (team[staleInfo.gameState] as InProgressMatchStatus).matchID,
           teams,
-          ctx.db
+          ctx.db,
+          matches
         );
         team =
           (await teams.getTeam({ teamId: GUID })) ??
@@ -354,7 +412,7 @@ export function configureTeamsRouter(
 
     //check if in progress, it is not allowed to play
     //check if it can be started, throw error if not
-    const { game, team } = await getNewGame(ctx, teams, games, "RELAY");
+    const { game, team } = await getNewGame(ctx, teams, games, "RELAY", matches);
 
     // about to start a game
     const body: LobbyAPI.CreatedMatch = await createGame(game, ctx);
@@ -382,7 +440,7 @@ export function configureTeamsRouter(
     const GUID = ctx.params.GUID;
     //check if in progress, it is not allowed to play
     //check if it can be started, throw error if not
-    const { game, team } = await getNewGame(ctx, teams, games, "STRATEGY");
+    const { game, team } = await getNewGame(ctx, teams, games, "STRATEGY", matches);
     //about to start
 
     const body: LobbyAPI.CreatedMatch = await createGame(game, ctx);

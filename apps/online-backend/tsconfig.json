@@ -18,6 +18,7 @@
       "strategy": ["../../packages/strategy"],
       "schemas": ["../../packages/schemas"],
       "competition": ["../../packages/competition"],
+      "games/server": ["../../packages/games/dist/server.d.ts"],
       "engine": ["../../packages/engine"],
       "common-frontend": ["../../packages/common-frontend"]
     },

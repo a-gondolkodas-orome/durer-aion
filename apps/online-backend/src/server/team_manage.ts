@@ -10,6 +10,9 @@ import {
 } from "schemas";
 import { BOT_ID, fetch } from "../socketio_botmoves";
 import { TeamModel } from "./model";
+import { MatchesRepository, MatchModel } from "./match-store";
+import { applyEvent } from "competition";
+import type { CompetitionMatchState } from "competition";
 
 /** Joins a player to a match where the bot's side is not connected.
  * @param db: Database context
@@ -207,11 +210,54 @@ function inferenceGameType(gameName: string) {
   throw new Error(`Unregistered gamename: ${gameName} `);
 }
 
+// A v2 match closes from its own state; only the team's status update is
+// shared with the bgio path. Not exported: closeMatch below dispatches by
+// which table holds the id, so callers never choose an engine themselves.
+async function closeMatchV2(
+  match: MatchModel,
+  teams: TeamsRepository,
+  matches: MatchesRepository
+) {
+  let state = match.state as CompetitionMatchState<unknown>;
+  if (!state.finished) {
+    const closeEvent = { type: "CLOSE" as const, at: new Date().toISOString() };
+    const closed = applyEvent(state, closeEvent, { moves: {} });
+    if (!closed.ok) throw new Error(`CLOSE rejected on match ${match.matchId}: ${closed.rejection}`);
+    const appended = await matches.appendEvents({
+      matchId: match.matchId,
+      knownVersion: match.version,
+      events: [{ actor: "system", type: "CLOSE", payload: closeEvent }],
+      state: closed.state,
+    });
+    // Losing this race means a concurrent request moved the match; whatever
+    // it did, the stale check that sent us here will fire again.
+    if (!appended.ok) return;
+    state = closed.state;
+  }
+
+  const team = await teams.getTeam({ teamId: match.teamId });
+  if (team == null) throw new Error(`Match ${match.matchId} belongs to unknown team ${match.teamId}`);
+  console.log(`Closing v2 match: ${match.matchId}, points: ${state.tally.points}`);
+  if (
+    team.strategyMatch.state === "IN PROGRESS" &&
+    team.strategyMatch.matchID === match.matchId
+  ) {
+    await team.update({
+      strategyMatch: await endMatchStatus(team.strategyMatch, state.tally.points),
+    });
+  }
+}
+
 export async function closeMatch(
   matchId: string,
   teams: TeamsRepository,
-  db: StorageAPI.Async | StorageAPI.Sync
+  db: StorageAPI.Async | StorageAPI.Sync,
+  matches?: MatchesRepository
 ) {
+  if (matches) {
+    const v2Match = await matches.getMatch(matchId);
+    if (v2Match) return closeMatchV2(v2Match, teams, matches);
+  }
   const currentMatch = await db.fetch(matchId, { state: true, metadata: true });
   const teamId = currentMatch.metadata.players[0].name;
   if (!teamId)
@@ -243,7 +289,8 @@ export async function getNewGame(
   ctx: Server.AppCtx,
   teams: TeamsRepository,
   games: Game<any, Record<string, unknown>, any>[],
-  gameType: "RELAY" | "STRATEGY"
+  gameType: "RELAY" | "STRATEGY",
+  matches?: MatchesRepository
 ) {
   const GUID = ctx.params.GUID;
   const team: TeamModel =
@@ -256,7 +303,8 @@ export async function getNewGame(
     await closeMatch(
       (team[staleInfo.gameState] as InProgressMatchStatus).matchID,
       teams,
-      ctx.db
+      ctx.db,
+      matches
     );
   }
 
