@@ -17,6 +17,8 @@
       "game": ["../../packages/game"],
       "strategy": ["../../packages/strategy"],
       "schemas": ["../../packages/schemas"],
+      "competition": ["../../packages/competition"],
+      "engine": ["../../packages/engine"],
       "common-frontend": ["../../packages/common-frontend"]
     },
     "outDir": "dist",
