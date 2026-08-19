@@ -1,6 +1,19 @@
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
+  resolve: {
+    // packages/competition reads the engine's source, the way apps/practice
+    // does through its own alias: the CI test job runs with no build step, so
+    // resolving `engine` to its dist would fail there and silently test a
+    // stale build everywhere else.
+    alias: [
+      {
+        find: /^engine$/,
+        replacement: fileURLToPath(new URL('./packages/engine/index.ts', import.meta.url))
+      }
+    ]
+  },
   test: {
     // The suites import from 'vitest' explicitly, so they typecheck without an
     // ambient-types entry in every workspace tsconfig. Globals stay on because

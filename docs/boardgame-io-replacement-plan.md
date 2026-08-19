@@ -665,7 +665,7 @@ reviewed wiring.
 
 ### Phase 2 — Competition core (no wiring yet)
 
-- [ ] **PR 2.1 (L, isolated)** `packages/competition`: a pure
+- [x] **PR 2.1 (L, isolated)** `packages/competition`: a pure
   `applyEvent(state, event, gameplay)` state machine —
   `CompetitionMatchState { gameId, category, clock{startAt,endAt},
   tally{tries,losses,streak,points}, attempt{difficulty, roleIndex,
@@ -676,7 +676,33 @@ reviewed wiring.
   The 10-second late-move grace lives here too, unit-tested. **Golden parity
   tests drive the same scripted sequences through the still-installed old
   `gameWrapper` (bgio headless Client) and through `applyEvent`, asserting
-  identical points** — pinned against the real oracle, not a transcription.
+  identical points** — 13 scripted sequences (the whole ladder, broken
+  streaks, test games woven through, matches left open), verified able to
+  fail: a wrong ladder rung turns exactly the one-loss scripts red.
+
+  Decisions the plan's text left open:
+  - **Event granularity is "one event per application path."** A team `MOVE`
+    is one client move, its auto `endOfTurnMove` playing inside the same
+    event — `applyClientMove` verbatim, rejection taxonomy included. A bot
+    `MOVE` is one move of the list `playBotTurn` named (autos are their own
+    events), applied by `reduceMove` alone and throwing on any failure. Each
+    event replays through the path it was accepted through, which is what
+    makes the log a fold.
+  - **Non-determinism rides in the event, never in `applyEvent`**: the board
+    handed out (`START_ATTEMPT.board`, with `startBoardIndex` as metadata)
+    and every event's `at` timestamp — the clock rules read `at`, no wall
+    clock, so a replay is exact.
+  - **The grace keeps the old ordering**: a move beyond the 10 seconds still
+    lands *before* the match closes (the old `turn.onMove` ran after the
+    move), so a double win completed late still banks its points; the bot's
+    side closes at the horn with no grace (the old judge `turn.onEnd`).
+    `CLOSE` is idempotent — an admin close racing a stale-match close is a
+    benign double.
+  - **Its suites run in the root vitest** (`*.test.ts`), next to the oracle's
+    own harness; the root config gained the engine source alias because the
+    CI test job runs with no build step. The practice-suite patch-coverage
+    gate therefore doesn't see this package — extending that gate to
+    `packages/*` is already PR 7.3's item.
 - [ ] **PR 2.2 (S)** `packages/schemas`: `engine?: 'bgio' | 'v2'` (default
   `'bgio'`) on match statuses (JSON-in-column — no ALTER); the client-view DTO.
 

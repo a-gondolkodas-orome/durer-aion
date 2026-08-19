@@ -38,12 +38,17 @@ export default defineConfig(
       'prefer-const': 'error',
     },
   },
-  // packages/engine and packages/games are apps/practice code moved out of it (Phase 1
-  // of docs/boardgame-io-replacement-plan.md). Two rules of this config disagree with
-  // the conventions that code was written under, and rewriting it would turn a move
+  // packages/engine and packages/games are apps/practice code moved out of it (Phases
+  // 1-2 of docs/boardgame-io-replacement-plan.md), and packages/competition is new code
+  // written in the same dialect, composing the engine's types. Two rules of this config
+  // disagree with the conventions that code follows, and rewriting it would turn a move
   // into a rewrite — they stay off here until the two ESLint setups are unified.
   {
-    files: ['packages/engine/**/*.{ts,tsx}', 'packages/games/**/*.{ts,tsx}'],
+    files: [
+      'packages/engine/**/*.{ts,tsx}',
+      'packages/games/**/*.{ts,tsx}',
+      'packages/competition/**/*.ts',
+    ],
     rules: {
       '@typescript-eslint/no-non-null-assertion': 'off',
       '@typescript-eslint/consistent-type-definitions': 'off',
@@ -81,6 +86,20 @@ export default defineConfig(
           group: ['react', 'react/*', 'react-*', '*.tsx', '**/*.tsx'],
           allowTypeImports: true,
           message: 'A game\'s .ts half runs in plain Node; move anything React-flavoured into the game .tsx.',
+        }],
+      }],
+    },
+  },
+  // The competition state machine is the server's scoring and clock authority; nothing
+  // React may enter it.
+  {
+    files: ['packages/competition/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': ['error', {
+        patterns: [{
+          group: ['react', 'react/*', 'react-*', '*.tsx', '**/*.tsx'],
+          allowTypeImports: true,
+          message: 'packages/competition runs in plain Node with no framework attached.',
         }],
       }],
     },
