@@ -27,7 +27,7 @@ export interface MyGameState {
 
 const lengthOfCompetition = 60 * 60; // seconds
 
-export function RelayWrapper(sendRelayFunction = (..._inputs: any[]) => undefined): Game<MyGameState> {
+export function RelayWrapper(sendRelayFunction: (..._inputs: any[]) => void = () => undefined): Game<MyGameState> {
   const GameRelay: Game<MyGameState> = {
     name: "relay",
     setup: () => {

@@ -1,0 +1,63 @@
+import { range } from 'lodash';
+import { strategyGameFactory, type BoardClientProps, GameBoard } from 'strategy-game-factory';
+import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
+import { startBoard, moves, type Board } from './gameplay';
+
+const BoardClient = ({ board, moves }: BoardClientProps<Board>) => (
+  <GameBoard>
+    <div className="grid grid-cols-2 border-t-2 border-l-2">
+      {range(board.length).map(id =>
+        <button
+          key={id}
+          disabled={!moves.addPiece.isAllowed(board, id)}
+          onClick={() => moves.addPiece(board, id)}
+          className="aspect-square border-r-2 border-b-2 p-[4%]"
+        >
+          {range(board[id]).map((i) =>
+            <span
+              key={i}
+              className={`
+                m-[3%] aspect-square inline-block bg-blue-800 rounded-full
+                ${board[id] <= 4 ? 'w-[40%]' : 'w-[25%]'}
+              `}
+            >
+            </span>
+          )}
+      </button>
+      )}
+    </div>
+  </GameBoard>
+);
+
+const getPlayerStepDescription = () => ({
+  hu: 'Kattints arra a mezőre, ahova korongot szeretnél lerakni.',
+  en: 'Click the square where you want to place a piece.'
+});
+
+const rule = {
+  hu: <>
+    Adott egy 2 × 2-es táblázat, és hozzá mindkét játékosnak van 3 db korongja. A
+    játék során felváltva tesznek le ezekből egyet-egyet a táblázat tetszőleges mezőjére. A második
+    játékos akkor nyer, ha a játék végén minden mezőben különböző számú korong található. (Azaz
+    0, 1, 2, 3 a kiosztás a végén valamilyen sorrendben).
+  </>,
+  en: <>
+    There is a board with 4 squares. Both players take turns placing one piece at a time,
+    for a total of 3 pieces each. The second player wins if, at the end of the game,
+    all squares hold a different number of pieces — i.e.,
+    there is exactly one square with 3 pieces, one with 2, one with 1, and one with 0.
+  </>
+};
+
+export const TwoTimesTwo = strategyGameFactory({
+  presentation: {
+    rule,
+    getPlayerStepDescription
+  },
+  BoardClient,
+  gameplay: { moves },
+  variants: [
+    { botStrategy: randomBotStrategy, label: { hu: 'Teszt', en: 'Test' } },
+    { botStrategy: smartBotStrategy, startBoards: [startBoard], label: { hu: 'Teljes', en: 'Full' }, isDefault: true }
+  ]
+});

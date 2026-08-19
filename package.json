@@ -1,8 +1,7 @@
 {
-  "name": "bgio-tutorial",
+  "name": "durer-aion",
   "version": "0.1.0",
-  "private": false,
-  "proxy": "http://localhost:8000",
+  "private": true,
   "dependencies": {
     "@babel/cli": "^7.18.6",
     "@babel/node": "^7.18.6",
@@ -20,12 +19,11 @@
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^13.5.0",
-    "@types/jest": "^27.5.2",
     "@types/koa-basic-auth": "^2.0.4",
     "@types/koa-mount": "^4.0.1",
     "@types/node": "^16.11.41",
-    "@types/react": "^18.0.14",
-    "@types/react-dom": "^18.0.5",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^4.6.0",
     "axios": "^1.4.0",
     "bgio-postgres": "^1.0.13",
@@ -37,12 +35,11 @@
     "koa-mount": "^4.0.0",
     "nanoid": "^3.0.0",
     "notistack": "^2.0.8",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
     "react-router-dom": "^6.3.0",
     "react-syntax-highlighter": "^15.6.1",
     "react-text-mask": "^5.5.0",
-    "recoil": "^0.7.7",
     "swr": "^2.2.5",
     "urlcat": "^2.0.4",
     "vite": "^7.0.3",
@@ -52,11 +49,14 @@
   "scripts": {
     "predeploy": "npx turbo run build --filter=offline-frontend && npm run predeploy --workspace=offline-frontend",
     "deploy": "gh-pages -d apps/offline-frontend/dist",
-    "lint": "turbo lint",
-    "check:server": "babel-node --extensions \".ts\" --presets=@babel/preset-typescript --plugins=@babel/plugin-transform-modules-commonjs src/server.ts sanity-check",
+    "lint": "eslint . --max-warnings=120",
+    "lint:turbo": "turbo lint",
     "start": "turbo start",
     "build": "turbo build",
     "spell-check": "cspell \"**/*.{ts,tsx}\" --no-progress",
+    "typecheck": "turbo typecheck",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "dev:server": "turbo dev --filter=online-backend --filter=game --filter=schemas --filter=strategy",
     "dev:online": "turbo dev --filter=online-frontend --filter=game --filter=common-frontend",
     "dev:offline": "turbo dev --filter=offline-frontend --filter=game --filter=strategy --filter=common-frontend",
@@ -72,21 +72,6 @@
       "import/no-anonymous-default-export": 0
     }
   },
-  "jest": {
-    "moduleNameMapper": {
-      "axios": "axios/dist/node/axios.cjs"
-    },
-    "collectCoverageFrom": [
-      "src/{client,common,games}/**/*.{ts,tsx}"
-    ],
-    "coverageReporters": [
-      "text",
-      "json",
-      "html",
-      "cobertura",
-      "lcov"
-    ]
-  },
   "browserslist": {
     "production": [
       ">0.2%",
@@ -100,14 +85,22 @@
     ]
   },
   "packageManager": "npm@8.5.0",
+  "engines": {
+    "node": ">=24.11.1"
+  },
   "workspaces": [
-    "apps/*",
+    "apps/offline-frontend",
+    "apps/online-backend",
+    "apps/online-frontend",
+    "apps/practice",
+    "apps/relay-practise-frontend",
     "packages/*"
   ],
   "devDependencies": {
     "@eslint/js": "^9.37.0",
     "@lingual/i18n-check": "^0.9.5",
     "@sentry/types": "^7.57.0",
+    "@testing-library/dom": "^10.4.1",
     "@types/koa__cors": "^5.0.1",
     "@types/pg": "^8.6.5",
     "@types/react-syntax-highlighter": "^15.5.13",
@@ -116,12 +109,14 @@
     "cspell": "^6.31.1",
     "eslint": "^9.37.0",
     "gh-pages": "^4.0.0",
+    "jsdom": "^30.0.1",
     "nodemon": "^2.0.18",
     "ts-node": "^10.9.2",
     "tsup": "^8.5.0",
     "tsx": "^4.21.0",
     "turbo": "^2.5.3",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.46.0"
+    "typescript-eslint": "^8.46.0",
+    "vitest": "^4.1.10"
   }
 }

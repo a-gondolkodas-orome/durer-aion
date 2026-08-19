@@ -1,0 +1,65 @@
+{
+  "name": "durer-jatekok",
+  "version": "0.1.0",
+  "private": true,
+  "license": "CC-BY-NC-SA-4.0",
+  "type": "module",
+  "engines": {
+    "node": ">=24.11.1 <25"
+  },
+  "scripts": {
+    "test:unit": "vitest run",
+    "test": "npm run check:versions && npm run lint && npm run typecheck && npm run test:unit",
+    "check:versions": "node scripts/check-versions.mjs",
+    "report:outdated": "node scripts/dependency-report.mjs",
+    "test:watch": "vitest",
+    "coverage": "vitest run --coverage",
+    "coverage:unswept": "vitest run --coverage --exclude \"**/plays-to-an-end.spec.ts\" --exclude \"**/renders.spec.tsx\"",
+    "coverage:patch": "npm run coverage:unswept -- --coverage.reporter=lcovonly && node scripts/patch-coverage.mjs",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint \"src/**/*.{ts,tsx}\" --no-fix",
+    "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@headlessui/react": "^2.2.10",
+    "lodash": "^4.18.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-router": "^8.3.0"
+  },
+  "//": [
+    "playwright is imported by no code here. It is a dependency so that its version is written down where the devcontainer's ARG PLAYWRIGHT_VERSION can be checked against it, which `npm run check:versions` does."
+  ],
+  "devDependencies": {
+    "@eslint-react/eslint-plugin": "^5.18.3",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@testing-library/react": "^16.3.2",
+    "@types/lodash": "^4.17.25",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@typescript-eslint/eslint-plugin": "^8.66.0",
+    "@typescript-eslint/parser": "^8.66.0",
+    "@vitejs/plugin-react": "^6.0.5",
+    "@vitest/coverage-v8": "^4.1.10",
+    "eslint": "^10.8.1",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "jsdom": "^29.1.1",
+    "playwright": "1.62.1",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^6.0.3",
+    "vite": "^8.2.1",
+    "vitest": "^4.1.10"
+  },
+  "browserslist": "> 0.5%, last 2 versions, not dead",
+  "postcss": {
+    "plugins": {
+      "@tailwindcss/postcss": {}
+    }
+  },
+  "prettier": {
+    "trailingComma": "none",
+    "printWidth": 120
+  }
+}

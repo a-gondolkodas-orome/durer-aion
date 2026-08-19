@@ -1,20 +1,21 @@
 import { TeamsRepository } from './db';
 import { import_teams_from_tsv } from './team_import';
 import { readFileSync } from 'fs';
+import { vi, describe, beforeEach, it, expect, type Mock } from 'vitest';
 
-jest.mock('fs');
-jest.mock('./db');
+vi.mock('fs');
+vi.mock('./db');
 
 describe('import_teams_from_tsv', () => {
   let mockDb: any;
   let mockTeamsRepo: TeamsRepository;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
 
     mockDb = {
       sequelize: {
-        sync: jest.fn(),
+        sync: vi.fn(),
       },
     };
 
@@ -26,7 +27,7 @@ describe('import_teams_from_tsv', () => {
     Teamname\tCategory\tEmail\tOther\tID\tLogin Code\tCredentials
     Test Team\tC\ttest@example.com\tSome Info\t\t\t
     `;
-    (readFileSync as jest.Mock).mockReturnValue(fileContent.trim());
+    (readFileSync as Mock).mockReturnValue(fileContent.trim());
 
     const result = await import_teams_from_tsv(mockTeamsRepo, 'dummy_file.tsv');
 
@@ -40,7 +41,7 @@ describe('import_teams_from_tsv', () => {
     Teamname\tCategory\tOther\tEmail\tID\tLogin Code\tCredentials
     Test Team\tC\ttest@example.com\tSome Info\t\t\t
     `;
-    (readFileSync as jest.Mock).mockReturnValue(fileContent.trim());
+    (readFileSync as Mock).mockReturnValue(fileContent.trim());
 
     const result = await import_teams_from_tsv(mockTeamsRepo, 'dummy_file.tsv');
 
@@ -52,7 +53,7 @@ describe('import_teams_from_tsv', () => {
     Teamname\tCategory\tEmail\tOther\tID\tLogin Code\tCredentials
     Test Team\tX\ttest@example.com\tSome Info\t\t\t
     `;
-    (readFileSync as jest.Mock).mockReturnValue(fileContent.trim());
+    (readFileSync as Mock).mockReturnValue(fileContent.trim());
 
     const result = await import_teams_from_tsv(mockTeamsRepo, 'dummy_file.tsv');
 
@@ -66,7 +67,7 @@ describe('import_teams_from_tsv', () => {
     Teamname\tCategory\tEmail\tOther\tID\tLogin Code\tCredentials
     Test Team\tC\ttest@example.com\tSome Info\t\t111-222-111\t67676767-6767-6767-6767-676767676768
     `;
-    (readFileSync as jest.Mock).mockReturnValue(fileContent.trim());
+    (readFileSync as Mock).mockReturnValue(fileContent.trim());
 
     const result = await import_teams_from_tsv(mockTeamsRepo, 'dummy_file.tsv');
 
@@ -83,7 +84,7 @@ describe('import_teams_from_tsv', () => {
     Teamname\tCategory\tEmail\tOther\tID\tLogin Code\tCredentials
     Test Team\tC\ttest@example.com\tSome Info\tcustom-id\t\t67676767-6767-6767-6767-676767676768
     `;
-    (readFileSync as jest.Mock).mockReturnValue(fileContent.trim());
+    (readFileSync as Mock).mockReturnValue(fileContent.trim());
 
     const result = await import_teams_from_tsv(mockTeamsRepo, 'dummy_file.tsv');
 
@@ -100,7 +101,7 @@ describe('import_teams_from_tsv', () => {
     Teamname\tCategory\tEmail\tOther\tID\tLogin Code\tCredentials
     Test Team\tC\ttest@example.com\tSome Info\tcustom-id\tABC-123-XYZ\t
     `;
-    (readFileSync as jest.Mock).mockReturnValue(fileContent.trim());
+    (readFileSync as Mock).mockReturnValue(fileContent.trim());
 
     const result = await import_teams_from_tsv(mockTeamsRepo, 'dummy_file.tsv');
 

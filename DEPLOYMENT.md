@@ -111,7 +111,7 @@ git clone git@github.com:a-gondolkodas-orome/durer-aion.git
 
 ## Build and run your application
 
-After all of this, you should be able to follow the reademe on how to build your application, and host it.
+After all of this, you should be able to follow the reademe on how to build your application, and host it — the "Running the production stack" section, i.e. plain `docker compose up --build` with no `-f docker-compose.dev.yml` overlay.
 It will be hosted default on port 80, and all the stuff will be running in the docker container(s).
 You still need to set up the ssl certificate, and DNS.
 

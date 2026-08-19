@@ -1,0 +1,27 @@
+{
+  "name": "durer-aion",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:24",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "moby": false
+    }
+  },
+  "containerEnv": {
+    "DEV_SERVER_HOST": "true"
+  },
+  "portsAttributes": {
+    "5173": { "label": "online-frontend / offline-frontend (vite)" },
+    "8000": { "label": "online-backend" },
+    "80": { "label": "nginx (docker compose)" },
+    "5432": { "label": "postgres" }
+  },
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "streetsidesoftware.code-spell-checker"
+      ]
+    }
+  }
+}

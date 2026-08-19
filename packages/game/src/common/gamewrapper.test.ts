@@ -1,3 +1,4 @@
+import { describe, test, beforeEach, expect, vi } from "vitest";
 import { gameWrapper } from "./gamewrapper";
 import { Client } from "boardgame.io/client";
 import {
@@ -6,16 +7,16 @@ import {
 } from "./game_for_testing";
 
 describe("gameWrapper", () => {
-  const setup = jest.fn();
+  const setup = vi.fn();
 
-  const move = jest.fn();
-  const startingPosition = jest.fn();
+  const move = vi.fn();
+  const startingPosition = vi.fn();
   const wrappedGame = gameWrapper(
     createGameWithMoveWithoutStartingPosition(setup, move)
   );
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
 
     setup.mockReturnValue({ data: "setup" });
     startingPosition.mockReturnValue({ data: "startingPosition" });
@@ -80,7 +81,7 @@ describe("gameWrapper high-level logic", () => {
   const wrappedGame = gameWrapper(createGameWithoutStartingPosition(setup));
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test("win once", () => {

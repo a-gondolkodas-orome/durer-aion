@@ -1,0 +1,101 @@
+import { range } from 'lodash';
+import { strategyGameFactory, type BoardClientProps, GameBoard } from 'strategy-game-factory';
+import { generateEmptyTicTacToeBoard } from '../gameplay';
+import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
+import { inPlacingPhase, moves, otherPlayerColor, type Board } from './gameplay';
+
+const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
+  const gameIsInPlacingPhase = inPlacingPhase(board);
+  const clickField = (id) => {
+    if (gameIsInPlacingPhase) {
+      moves.placePiece(board, id);
+    } else {
+      moves.whitenPiece(board, id);
+    }
+  };
+  const isMoveAllowed = (id) => gameIsInPlacingPhase
+    ? moves.placePiece.isAllowed(board, id)
+    : moves.whitenPiece.isAllowed(board, id);
+  const pieceColor = (id) => {
+    const colorCode = board[id];
+    if (colorCode === 'red') return 'bg-red-800';
+    if (colorCode === 'white') return 'bg-slate-50 dark:bg-slate-600';
+    return 'bg-blue-800';
+  };
+
+  // The grid gap is the border: the container colour shows through it, so every
+  // cell needs its own background or the gaps disappear into it.
+  return (
+  <GameBoard>
+    <div className="grid grid-cols-3 bg-slate-200 dark:bg-slate-600 gap-1 p-1">
+      {range(9).map(id => (
+        <button
+          key={id}
+          disabled={!isMoveAllowed(id)}
+          onClick={() => clickField(id)}
+          className="aspect-square p-[25%] bg-surface-elevated"
+        >
+          {board[id] && (
+            <span
+              className={`
+                w-full aspect-square block rounded-full
+                ${!gameIsInPlacingPhase && isMoveAllowed(id) ? 'hover:opacity-50' : ''}
+                ${pieceColor(id)}
+                ${board[id] === 'white' ? 'border-4 border-slate-900 dark:border-slate-300' : ''}
+              `}
+            ></span>
+          )}
+      </button>
+      ))}
+    </div>
+  </GameBoard>
+  );
+};
+
+const getPlayerStepDescription = ({ board, ctx }) => {
+  return inPlacingPhase(board)
+    ? {
+      hu: 'Helyezz le egy korongot egy üres mezőre kattintással.',
+      en: 'Click an empty cell to place a piece.'
+    }
+    : {
+      hu: `Kattints egy ${otherPlayerColor(ctx) === 'red' ? 'piros' : 'kék'} korongra.`,
+      en: `Click a ${otherPlayerColor(ctx)} piece.`
+    };
+}
+
+const rule = {
+  hu: <>
+    Két játékos játszik egy 3 × 3-as táblán kék és piros korongokkal a szokásos amőba
+    szabályai szerint, tehát felváltva tesznek le korongokat, és ha egy sorban, oszlopban vagy átlóban
+    összegyűlik három azonos színű korong, az adott játékos nyer. Ha az első 9 korong lehelyezése
+    után döntetlen az állás (azaz egyik játékos sem nyert), akkor tovább folytatják a játékot, a soron
+    következő játékos a másik játékos egy már lehelyezett korongját fehérre színezheti. Ezek után az nyer,
+    aki először hoz létre három fehér korongot egy sorban, oszlopban vagy átlóban.
+  </>,
+  en: <>
+    Two players play a game of ordinary tic-tac-toe on a 3 × 3 board with red and
+    blue disks. That is, if there are three disks of the same colour in a row, column or diagonal,
+    then the person placing that colour wins. In case no one wins after the placement of the first
+    9 disks, the next player colours one of the other player&apos;s already placed disks white. Now
+    whoever first creates three white disks in a row, column or diagonal, wins.
+  </>
+};
+
+export const TicTacToe = strategyGameFactory({
+  presentation: {
+    rule,
+    getPlayerStepDescription
+  },
+  BoardClient,
+  gameplay: { moves },
+  variants: [
+    { botStrategy: randomBotStrategy, label: { hu: 'Teszt', en: 'Test' } },
+    {
+      botStrategy: smartBotStrategy,
+      startBoards: [generateEmptyTicTacToeBoard()],
+      label: { hu: 'Teljes', en: 'Full' },
+      isDefault: true
+    }
+  ]
+});

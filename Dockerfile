@@ -12,10 +12,10 @@ RUN npm ci
 # Copy source code
 COPY . .
 
-# Initial build needed: dev mode (tsc --watch + nodemon) expects dist/ to already exist
 RUN npx turbo build --filter=online-backend
 
 EXPOSE 8000
 
-# dev:server -> live restart
-CMD [ "npm", "run", "dev:server" ]
+# Run the server that was just built. docker-compose.dev.yml overrides this with
+# the watching dev server for local development.
+CMD [ "npm", "run", "start", "--workspace=online-backend" ]

@@ -4,6 +4,7 @@
   
   "scripts": {
     "lint": "cross-env TIMING=1 eslint \"**/*.ts*\" --max-warnings=-1",
+    "typecheck": "tsc --noEmit",
     "build": "npx tsc",
     "start": "cross-env ALLOW_CORS=true node dist/src/server.js",
     "dev": "cross-env ALLOW_CORS=true tsx watch --inspect src/server.ts",
@@ -17,7 +18,6 @@
     "@babel/node": "^7.18.6",
     "@babel/plugin-transform-modules-commonjs": "^7.18.6",
     "@babel/preset-typescript": "^7.18.6",
-    "@types/jest": "^27.5.2",
     "@types/node": "^16.11.41",
     "boardgame.io": "^0.50.2",
     "web-vitals": "^2.1.4",

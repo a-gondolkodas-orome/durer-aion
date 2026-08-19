@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="hu">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dürer gyakorlás</title>
+    <meta name="description" content="A Dürer Verseny gyakorlóoldalai: stratégiai játékok és váltóversenyek." />
+    <!--
+      Deliberately one file with no assets and no build step. It is the signpost for the
+      three subpages around it, and links are relative so it works under /durer-aion/ and
+      under a custom domain alike, with nothing to rebase. A designed version can replace
+      it later; until then a bare 404 at the site root is the thing to avoid.
+    -->
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #f8fafc;
+        --fg: #0f172a;
+        --muted: #475569;
+        --card: #ffffff;
+        --border: #e2e8f0;
+        --accent: #1d4ed8;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0f172a;
+          --fg: #f1f5f9;
+          --muted: #94a3b8;
+          --card: #1e293b;
+          --border: #334155;
+          --accent: #93c5fd;
+        }
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        padding: 3rem 1.25rem;
+        background: var(--bg);
+        color: var(--fg);
+        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+        line-height: 1.6;
+      }
+      main { max-width: 42rem; margin: 0 auto; }
+      h1 { font-size: 1.75rem; margin: 0 0 0.25rem; }
+      .sub { color: var(--muted); margin: 0 0 2.5rem; }
+      .card {
+        display: block;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 1rem;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 0.75rem;
+        text-decoration: none;
+        color: inherit;
+      }
+      .card:hover, .card:focus-visible { border-color: var(--accent); }
+      .card h2 { margin: 0 0 0.25rem; font-size: 1.15rem; color: var(--accent); }
+      .card p { margin: 0; color: var(--muted); }
+      .card p + p { margin-top: 0.35rem; font-style: italic; }
+      footer { margin-top: 3rem; color: var(--muted); font-size: 0.9rem; }
+      footer a { color: inherit; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Dürer gyakorlás</h1>
+      <p class="sub">Practice sites for the Dürer competition</p>
+
+      <a class="card" href="jatekok/">
+        <h2>Játékok</h2>
+        <p>Korábbi versenyek stratégiai játékai — játssz a gép, vagy egymás ellen.</p>
+        <p>Strategy games from past competitions, playable against the computer or a friend.</p>
+      </a>
+
+      <a class="card" href="valto/">
+        <h2>Váltóverseny</h2>
+        <p>Korábbi évek váltóversenyeinek feladatsorai, 90 perces gyakorlásra.</p>
+        <p>Relay problem sets from past years, for a 90-minute practice round.</p>
+      </a>
+
+      <footer>
+        <a href="https://durerinfo.hu/">durerinfo.hu</a>
+      </footer>
+    </main>
+  </body>
+</html>
