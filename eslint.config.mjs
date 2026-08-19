@@ -86,7 +86,7 @@ export default defineConfig(
     },
   },
   // The boardgame.io-era code, which the migration replaces (Phases 3-5 of
-  // docs/boardgame-io-replacement-plan.md) and Phase 7 deletes. Its 106 `any`s are bgio
+  // docs/boardgame-io-replacement-plan.md) and Phase 7 deletes. Its 120 `any`s are bgio
   // interop nobody will type out before the deletion, and as warnings they only buried the
   // signal — every new warning showed up below them. Off here, and zero-tolerance
   // (--max-warnings=0) everywhere else, is the trade that keeps the gate meaningful.
@@ -95,6 +95,7 @@ export default defineConfig(
       'apps/offline-frontend/**',
       'apps/online-frontend/**',
       'apps/online-backend/**',
+      'apps/relay-practise-frontend/**',
       'packages/game/**',
       'packages/strategy/**',
       'packages/common-frontend/**',
