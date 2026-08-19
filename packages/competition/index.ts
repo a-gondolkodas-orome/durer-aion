@@ -12,3 +12,4 @@ export {
 } from './src/apply-event';
 export { toClientView } from './src/client-view';
 export type { StrategyMatchClientView } from './src/client-view';
+export { startBoardIndexForTally } from './src/start-board-policy';
