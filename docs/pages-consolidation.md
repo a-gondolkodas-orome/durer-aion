@@ -405,6 +405,8 @@ Deliberately deferred, so they do not block the consolidation.
   one entry chunk, so the app's own bootstrap sat behind the CDN fetch and died
   with it. Both frontends carried the same snippet, so both are fixed; the
   online one is the real competition and had the same single point of failure.
+  `apps/relay-practise-frontend` started as a copy of the offline one, so it
+  carried the snippet too and is fixed the same way.
   A task now falls back to its LaTeX source (`latex-js:not(:defined)` keeps the
   line breaks) rather than to nothing. Vendoring remains open as the stronger
   fix, and is now an independent choice about rendering quality offline rather
