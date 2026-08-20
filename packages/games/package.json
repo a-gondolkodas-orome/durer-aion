@@ -16,7 +16,7 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "build": "npx tsup"
+    "build": "npx tsdown"
   },
   "dependencies": {
     "engine": "*",
