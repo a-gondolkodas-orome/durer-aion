@@ -24,8 +24,8 @@
   "license": "MIT",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "build": "npx tsup",
-    "dev": "npx tsup --watch --onSuccess \"echo rebuilt engine\""
+    "build": "npx tsdown",
+    "dev": "npx tsdown --watch --onSuccess \"echo rebuilt engine\""
   },
   "dependencies": {
     "lodash": "^4.17.21"

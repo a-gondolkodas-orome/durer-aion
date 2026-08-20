@@ -24,7 +24,7 @@ export default defineConfig(() => ({
         find: /^language$/,
         replacement: fileURLToPath(new URL('./src/language/index.ts', import.meta.url))
       },
-      // The engine is a workspace package, whose `main` is a tsup build — right for
+      // The engine is a workspace package, whose `main` is a bundler build — right for
       // the node hosts that will import it, wrong here: it would mean building
       // before `npm run dev` and no HMR into engine source. This app reads the
       // source, exactly as it did when these files sat under src/.

@@ -11,8 +11,8 @@
   "scripts": {
     "lint": "cross-env TIMING=1 eslint \"src/**/*.ts*\" --max-warnings=-1",
     "typecheck": "tsc --noEmit",
-    "build": "npx tsup",
-    "dev": "npx tsup --watch --onSuccess \"echo rebuilt schemas\""
+    "build": "npx tsdown",
+    "dev": "npx tsdown --watch --onSuccess \"echo rebuilt schemas\""
   },
   "keywords": [],
   "author": "",
