@@ -22,6 +22,11 @@
       "engine": ["../../packages/engine"],
       "common-frontend": ["../../packages/common-frontend"]
     },
+    // Pinned, not inferred. tsc otherwise derives the root from the common
+    // parent of its inputs, which was the app directory only because a stray
+    // config file sat there — deleting it moved the build to dist/server.js and
+    // broke `npm start`, which the Dockerfile's CMD runs.
+    "rootDir": ".",
     "outDir": "dist",
     "skipLibCheck": true,
   }

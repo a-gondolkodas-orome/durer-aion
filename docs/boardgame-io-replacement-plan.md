@@ -178,7 +178,7 @@ durer-aion/ (root renamed from bgio-tutorial)
     offline-frontend/  # same shells + in-browser bot + localStorage
   packages/
     engine/            # React-free core ("." export, ESLint-enforced) + "engine/react" subpath
-                       #   (game-board, hooks, language provider); tsup build like packages/schemas
+                       #   (game-board, hooks, language provider); tsdown build like packages/schemas
     games/             # competition games as full folders exporting factory-agnostic config objects
     competition/       # React-free match state machine: attempts, role choice, test/live, clock,
                        #   streak ladder, start-board-per-attempt, event types
@@ -661,7 +661,7 @@ reviewed wiring.
     survived the move.
   - **No build step yet, deliberately**: practice reads the package's source
     through an alias exactly as it reads the engine's, and no node host
-    imports it before Phase 3 — the tsup build is that phase's first move.
+    imports it before Phase 3 — the tsdown build is that phase's first move.
 
 ### Phase 2 — Competition core (no wiring yet)
 
@@ -741,7 +741,7 @@ reviewed wiring.
   *stored* snapshot (SQL faked in memory — CI has no Postgres — repository
   and `applyEvent` real; verified red when an event is silently dropped).
   Doing it pulled Phase 3's first move in: `packages/competition` got its
-  tsup build, and the backend now depends on `competition` + `engine`.
+  tsdown build, and the backend now depends on `competition` + `engine`.
 - [x] **PR 3.2 (L)** v2 routes in `apps/online-backend/src/server/strategy-v2.ts`:
   - `POST /api/team/:GUID/strategy/start` — reuses the `allowedToStart`/
     stale-check gating; writes an `engine:'v2'` match status.
