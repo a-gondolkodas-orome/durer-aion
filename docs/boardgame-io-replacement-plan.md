@@ -178,7 +178,7 @@ durer-aion/ (root renamed from bgio-tutorial)
     offline-frontend/  # same shells + in-browser bot + localStorage
   packages/
     engine/            # React-free core ("." export, ESLint-enforced) + "engine/react" subpath
-                       #   (game-board, hooks, language provider); tsup build like packages/schemas
+                       #   (game-board, hooks, language provider); tsdown build like packages/schemas
     games/             # competition games as full folders exporting factory-agnostic config objects
     competition/       # React-free match state machine: attempts, role choice, test/live, clock,
                        #   streak ladder, start-board-per-attempt, event types
@@ -661,7 +661,7 @@ reviewed wiring.
     survived the move.
   - **No build step yet, deliberately**: practice reads the package's source
     through an alias exactly as it reads the engine's, and no node host
-    imports it before Phase 3 — the tsup build is that phase's first move.
+    imports it before Phase 3 — the tsdown build is that phase's first move.
 
 ### Phase 2 — Competition core (no wiring yet)
 
