@@ -741,7 +741,7 @@ reviewed wiring.
   *stored* snapshot (SQL faked in memory — CI has no Postgres — repository
   and `applyEvent` real; verified red when an event is silently dropped).
   Doing it pulled Phase 3's first move in: `packages/competition` got its
-  tsup build, and the backend now depends on `competition` + `engine`.
+  tsdown build, and the backend now depends on `competition` + `engine`.
 - [ ] **PR 3.2 (L)** v2 routes in `apps/online-backend/src/server/strategy-v2.ts`:
   - `POST /api/team/:GUID/strategy/start` — reuses the `allowedToStart`/
     stale-check gating; writes an `engine:'v2'` match status.
