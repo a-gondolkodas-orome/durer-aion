@@ -127,8 +127,8 @@ if (argv[2] === "import") {
   Sentry.init({ dsn: "https://1f4c47a1692b4936951908e2669a1e99@sentry.durerinfo.hu/4" });
 
   server.app.on("error", (err, ctx) => {
-    Sentry.withScope(function (scope: any) {
-      scope.addEventProcessor(function (event: any) {
+    Sentry.withScope(function (scope: Sentry.Scope) {
+      scope.addEventProcessor(function (event: Sentry.Event) {
         return Sentry.addRequestDataToEvent(event, ctx.request);
       });
       Sentry.captureException(err);

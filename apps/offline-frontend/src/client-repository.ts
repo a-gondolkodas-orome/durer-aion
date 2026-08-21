@@ -82,8 +82,8 @@ export class OfflineClientRepository implements ClientRepository {
     return Promise.resolve(teamState) as Promise<TeamModelDto>;
   }
 
-  async getAll(): Promise<any> {
-    return null;
+  async getAll(): Promise<TeamModelDto[]> {
+    return [];
   }
 
   async resetRelay(_teamId: string): Promise<TeamModelDto> {

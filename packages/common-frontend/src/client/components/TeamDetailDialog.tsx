@@ -38,8 +38,8 @@ export function TeamDetailDialog(props: {data: TeamModelDto, setConfirmDialog: D
       // Dynamically import to avoid circular deps
       await repoRemoveTeam(teamId);
       enqueueSnackbar('Csapat törölve', { variant: 'success' });
-    } catch (e: any) {
-      enqueueSnackbar(e?.message || 'Hiba történt', { variant: 'error' });
+    } catch (e: unknown) {
+      enqueueSnackbar((e instanceof Error && e.message) || 'Hiba történt', { variant: 'error' });
     } finally {
       setRemoving(false);
     }

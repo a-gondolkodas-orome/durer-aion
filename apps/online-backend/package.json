@@ -2,7 +2,7 @@
  "name": "online-backend",
  "version": "0.0.0",
  "scripts": {
-  "lint": "cross-env TIMING=1 eslint \"**/*.ts*\" --max-warnings=-1",
+  "lint": "cross-env TIMING=1 eslint \"**/*.ts*\" --max-warnings=0",
   "typecheck": "tsc --noEmit",
   "build": "npx tsc",
   "start": "cross-env ALLOW_CORS=true node dist/src/server.js",

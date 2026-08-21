@@ -1,3 +1,4 @@
+import type { Ctx, LogEntry } from "boardgame.io";
 import { LOCAL_STORAGE_TEAMSTATE, TeamModelDto } from "common-frontend";
 
 
@@ -62,10 +63,12 @@ export function sendDataLogin(teamState: TeamModelDto){
 interface SendGameDataParams {
   component: "relay" | "strategy";
   phase: "start" | "step" | "end";
-  answer?: number;
-  G?: any;
-  ctx?: any;
-  log?: any;
+  answer?: number | null;
+  // Only these two fields are read here (relay's problem counter and the
+  // wrapper's score); the rest of G rides along in the JSON payload.
+  G?: { currentProblem?: number; points?: number };
+  ctx?: Ctx;
+  log?: LogEntry[];
 }
 
 export function sendGameData(params: SendGameDataParams){
@@ -78,7 +81,7 @@ export function sendGameData(params: SendGameDataParams){
     case "step":
       switch (component) {
         case "relay": {
-          const problemNumber = G.currentProblem;
+          const problemNumber = G?.currentProblem;
           sendData(joinCode+"_"+randomID+"_"+component+"_"+problemNumber+"_"+answer+"_"+now(), JSON.stringify({G, ctx}));
           break;
         }
@@ -90,7 +93,7 @@ export function sendGameData(params: SendGameDataParams){
       }
       break;
     case "end": {
-      const points = G.points;
+      const points = G?.points;
       sendData(joinCode+"_"+randomID+"_"+component+"end_"+points+"_"+now(), JSON.stringify({G, ctx}));
       break;
     }

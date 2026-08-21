@@ -6,7 +6,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import importedTheme from './theme';
 import { deepmerge } from '@mui/utils';
 
-export type LayoutProps = React.HTMLProps<any>;
+export type LayoutProps = React.HTMLProps<HTMLElement>;
 
 export const Layout: React.FunctionComponent<LayoutProps> = (props: LayoutProps) => {
     return <React.Fragment>

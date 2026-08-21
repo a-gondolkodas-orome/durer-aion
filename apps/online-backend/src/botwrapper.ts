@@ -15,7 +15,7 @@ export default function botWrapper<T_SpecificGameState, T_Move>(botstrategy: Bot
       await new Promise(resolve => setTimeout(resolve, 400));
     }
 
-    async play(state: State<T_SpecificGameState>, playerID: string): Promise<{ action: BotAction; metadata?: any; }> {
+    async play(state: State<T_SpecificGameState>, playerID: string): Promise<{ action: BotAction; metadata?: unknown; }> {
       await this.wait();
       const [move, moveName] = botstrategy(state, playerID);
       if (move === undefined) {
