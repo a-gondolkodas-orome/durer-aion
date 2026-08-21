@@ -111,7 +111,7 @@ git clone git@github.com:a-gondolkodas-orome/durer-aion.git
 
 ## Build and run your application
 
-After all of this, you should be able to follow the reademe on how to build your application, and host it — the "Running the production stack" section, i.e. plain `docker compose up --build` with no `-f docker-compose.dev.yml` overlay.
+After all of this, you should be able to follow the reademe on how to build your application, and host it — the "Running the production stack" section, i.e. `npm run stack:prod`, which builds and then brings compose up with no `-f docker-compose.dev.yml` overlay.
 It will be hosted default on port 80, and all the stuff will be running in the docker container(s).
 You still need to set up the ssl certificate, and DNS.
 
@@ -136,7 +136,17 @@ This will give you a bash terminal ito that container, with sudo.
 To run the import script use the following:
 
 ```bash
-sudo docker exec -t durer-aion-backend-1 ./scripts/import_teams.sh scripts/test.tsv
+npm run teams:import
+```
+
+That runs `scripts/import_teams.sh` inside the backend container. It resolves
+the container by compose service name, so it does not care what the checkout
+directory is called. For a TSV other than `scripts/test.tsv`, drop the file
+into `scripts/` — the directory is mounted into the container in production
+too — and run it directly:
+
+```bash
+docker compose --env-file=.env.docker exec backend ./scripts/import_teams.sh scripts/<file>.tsv
 ```
 
 ## Add to a custom domain

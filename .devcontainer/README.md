@@ -9,9 +9,9 @@ before, and developers who ignore this folder lose nothing.
 Open the repo in VS Code with the
 [Dev Containers extension](https://code.visualstudio.com/docs/devcontainers/containers)
 and accept the "Reopen in Container" prompt, or open the repo in a GitHub
-Codespace. `.devcontainer/post-create.sh` then runs `npm ci` and seeds every
-gitignored env file from its committed sample — only where the file does not
-exist yet, so your own values are never overwritten:
+Codespace. `.devcontainer/post-create.sh` then runs `npm ci` and `npm run
+setup`, which seeds every gitignored env file from its committed sample — only
+where the file does not exist yet, so your own values are never overwritten:
 
 | sample | seeded file | used by |
 | --- | --- | --- |
@@ -43,9 +43,8 @@ exist yet, so your own values are never overwritten:
 ## What it does not do
 
 It does not import teams, and it does not start any service: you still run
-`npm run dev:offline` (or `dev:server` / `dev:online`) yourself, and the
-database still comes up with the `docker run … bitnami/postgresql` command from
-the root `README.md`.
+`npm run stack:up` (or `dev:offline` / `dev:server` / `dev:online`) yourself,
+and `npm run teams:import` after it.
 
 The seeded env files carry the sample values, which are enough to run
 offline-frontend and to bring the docker stack up. For anything involving the

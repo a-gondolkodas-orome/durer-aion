@@ -10,7 +10,9 @@ which PR retired it and what replaced it.
 
 This is a hand-walked checklist, not an automated suite. Where an item is
 covered by a test or a CI job, that is noted; everything else is checked by
-someone actually doing it.
+someone actually doing it. `README.md`, under *Checking it works*, is how:
+which command brings up what, and which URL and join code exercises each item
+below.
 
 ## Online competition round
 
@@ -74,6 +76,7 @@ tooling arrives alongside the existing setup, not instead of it.)*
 - `npm ci` at the repo root installs everything.
 - `npm run dev:server`, `npm run dev:online`, `npm run dev:offline` start what
   they say they start.
-- The docker-compose dev flow from the README works, backend auto-reload
-  included.
+- `npm run setup` seeds every env file the README expects, and overwrites none.
+- The docker-compose dev flow from the README works — `npm run stack:up` then
+  `npm run teams:import` — backend auto-reload included.
 - The setup steps written in `README.md` are accurate.

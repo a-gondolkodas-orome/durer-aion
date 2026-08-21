@@ -17,158 +17,207 @@ All demos are in Hungarian.
 ## Requirements
 
 - [Node.js](https://nodejs.org/) — the version in [`.nvmrc`](./.nvmrc) (Node 24), which is what CI and the Docker image run. With [nvm](https://github.com/nvm-sh/nvm) installed, `nvm use` in the repo root picks it up. Older versions may still work; `npm` will warn rather than stop you.
-- [Docker](https://www.docker.com/)
+- [Docker](https://www.docker.com/), with your user in the `docker` group so the
+  commands below need no `sudo` — `DEPLOYMENT.md` has the three lines that do
+  it. Plain `sudo docker …` works too, but never `sudo npm run …`: that runs
+  npm as root and leaves root-owned files behind in `node_modules`.
 
-## Installation
+## The whole stack in four commands
 
-```
+```bash
 npm ci
+npm run setup         # creates the gitignored .env files from their samples
+npm run stack:up      # builds everything, then starts nginx + backend + postgres
+npm run teams:import  # in a second terminal, once the stack is up
 ```
+
+Open <http://localhost> and log in with the join code `000-0000-000`.
+`npm run stack:down` stops it again.
+
+That is the whole online round: the site teams see, the game server they play
+against, and the database behind it.
+
+| where | what |
+| --- | --- |
+| <http://localhost> | the competition site — team login, chooser, relay and strategy matches |
+| <http://localhost/admin> | the admin pages; the browser asks for basic auth, user `admin`, password `ADMIN_CREDENTIALS` from `.env.docker` |
+| `localhost:5432` | postgres, if you want to look at the data directly |
+
+`npm run teams:import` loads `scripts/test.tsv`. Its first three teams cover the
+three age categories — `000-0000-000` is a category C join code, `001-0000-000`
+is D, `002-0000-000` is E — and there are a thousand more behind them.
+
+### Editing code with the stack up
+
+The backend reloads itself: `stack:up` adds the `docker-compose.dev.yml`
+overlay, which mounts the backend and shared package sources and runs
+`npm run dev:server` in the container. Routing changes and Koa hooks are the
+exception, and a new backend dependency needs the image rebuilt — `stack:up`
+again.
+
+nginx serves the frontend from `apps/online-frontend/dist` on the host, so a
+frontend change needs `npm run build` and a page reload. If you are mostly
+working on the frontend, the route below reloads it for you.
+
+## Running it without docker (except the database)
+
+Everything reloads, including the frontend. Three terminals:
+
+```bash
+npm run db:up       # postgres in a throwaway container
+npm run dev:server  # backend on :8000
+npm run dev:online  # frontend on :5173
+```
+
+Then import the teams once, and open <http://localhost:5173>:
+
+```bash
+npm run teams:import:local
+```
+
+Here the frontend calls the backend across origins — `dev:online` sets
+`VITE_SERVER_URL` and `dev:server` sets `ALLOW_CORS` — where the docker stack
+puts both behind nginx on one origin. That difference is why anything touching
+routing, the socket transport or the built assets wants a `stack:up` run before
+you believe it.
+
+`db:up` keeps its data inside the throwaway container, so stopping it discards
+everything and the next start needs the import again. The docker stack keeps
+postgres in a named volume: `npm run stack:down` preserves it, and
+`npm run stack:down -- --volumes` wipes it.
+
+## Running the production stack
+
+What a deployed instance runs (see [`DEPLOYMENT.md`](./DEPLOYMENT.md)):
+
+```bash
+npm run stack:prod
+```
+
+The same compose file without the dev overlay, so the container runs the server
+compiled into the image instead of a watcher, and code changes need the command
+again. Worth a run before a competition, and before merging anything that
+touches the `Dockerfile`, nginx or the routes.
+
+# Checking it works
+
+[`docs/must-keep-working.md`](docs/must-keep-working.md) is the list of what
+must not break. This is how to exercise each part of it locally. Do it against
+`npm run stack:up` — that is the only setup that covers nginx, the socket
+transport and the built frontend at once.
+
+## A team playing the round
+
+1. <http://localhost>, join code `000-0000-000`: disclaimer, then the chooser
+   offers the relay and the strategy game.
+2. Play the **relay** through to the end.
+3. Play the **strategy** game through to the end against the server bot,
+   choosing a role first.
+4. Reload mid-match, in both. Resuming without loss of state is the thing that
+   breaks quietly.
+5. Open the same join code in a second tab mid-match: the running match must
+   not fork.
+6. Finish both and check the combined score on the finished screen.
+
+Join codes `001-0000-000` and `002-0000-000` are categories D and E, which get
+different games.
+
+## Admin and operations
+
+At <http://localhost/admin>, user `admin`, password from `.env.docker`:
+
+- the team list, and a team's details from it — `/admin/<teamId>` opens one
+  team directly;
+- per-match state dump, per-match log dump, per-category stats;
+- the actions on a running match: add minutes, relay reset, strategy reset,
+  soft delete. Start a match as a team in another tab first, then act on it
+  from here.
+
+Team import has two paths and both need checking: `npm run teams:import`, which
+runs `scripts/import_teams.sh` inside the container, and the TSV upload on the
+admin page.
+
+`scripts/admin.py` is the post-competition scoring pull. Against the docker
+stack set its `BASE_URL` to `http://localhost` — the backend's port 8000 is not
+published, nginx proxies `/team` and `/game` — and `ADMIN_PASSWORD` to match
+`.env.docker`. Against `npm run dev:server` its default `http://localhost:8000`
+is right.
+
+## The offline practice build
+
+```bash
+npm run dev:offline
+```
+
+<http://localhost:5173>, with no backend and no database: the games run against
+the in-browser bot and persist to localStorage. Reload mid-game to check the
+persistence.
 
 ## The practice site (`apps/practice`)
 
 The practice site (https://jatek.durerinfo.hu) lives in `apps/practice`, merged
-in from the durer-jatekok repository with its history. **It is not part of this
-repo's npm workspaces yet**, so it installs and runs on its own:
+in from the durer-jatekok repository with its history. The root `npm ci`
+installs it and `npm run build` and `npm run typecheck` cover it — but it keeps
+its own ESLint and vitest setups, so the root `npm run lint` and `npm test`
+skip it and its checks run from its own directory:
 
 ```bash
 cd apps/practice
-npm ci
-npm run dev     # the practice site
-npm test        # its own lint + typecheck + unit tests
+npm run dev   # the practice site
+npm test      # its own version check, lint, typecheck and unit tests
 ```
 
-Root commands (`npm ci`, `npm run lint`, `npm test`, `npm run build`,
-`npm run typecheck`) deliberately skip it — it has its own toolchain, its own
-lockfile and its own eslint config until the workspaces are unified.
+**Do not run `npm ci` from `apps/practice`.** There is one lockfile, at the
+root; from a workspace directory npm installs that workspace's subtree and
+leaves the root's own dependencies unmet, while exiting 0.
+[`apps/practice/AGENTS.md`](apps/practice/AGENTS.md) is the authority on
+everything under that directory.
 
-## Running offline-frontend
-
-Create the `apps/offline-frontend/.env` file by copying the `.env.sample` in that folder. Then run:
-
-```
-npm run dev:offline
-```
-
-Offline frontend reloads automatically (except if you change `.env` file), but does not have a debugger yet.
-
-## Running developer environment -- Docker way
-
-Frontend needs to be built after every change, but the server auto-reloads.
-
-### Setting up the server
+## The checks CI runs
 
 ```bash
-sudo docker compose -f docker-compose.yml -f docker-compose.dev.yml --env-file=.env.docker up --build 
+npm run lint
+npm run typecheck
+npm test
+npm run spell-check
+npm run i18n:check
 ```
 
- vagy 
- 
-```bash
-docker compose -f docker-compose.yml -f docker-compose.dev.yml --env-file=.env.docker up --build 
-```
+# Configuration you may want to change
 
-The `-f docker-compose.dev.yml` overlay is what makes the backend auto-reload: it mounts the backend and package sources and swaps the container's command for `npm run dev:server`. Without it you get the production stack described below, which serves the code baked into the image.
+`npm run setup` creates each of these from its committed `*.sample` twin, and
+never overwrites one that already exists. The sample values run the stack
+locally and are meaningless anywhere else.
 
-(before first run, you will need `npm run build`)
-Also pay attention to create a correct `.env.docker` file based on the `.env.docker.sample` file.
+| file | what reads it |
+| --- | --- |
+| `.env.docker` | the docker stack — bot and admin credentials, the postgres password, the competition window |
+| `apps/online-backend/.env` | the same settings for `npm run dev:server`, plus `DATABASE_URL` |
+| `apps/online-frontend/.env` | accent colour and language of the competition site |
+| `apps/offline-frontend/.env` | the same, for the offline build |
+| `.env.local` | `VITE_FEEDBACK_URL`, read by `common-frontend`'s build |
 
-> Note: 
-> To use this newer docker compose interface please follow the install instructions form the official docker install page: [ linux docker install](https://docs.docker.com/desktop/setup/install/linux/)  
-> 
-> Otherwise you may use this syntax:  
-> ```bash
-> docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build
-> ```
+Whatever reads one of them takes the change at start: vite does not pick up
+`.env` edits, and the docker stack reads `.env.docker` at `up`.
 
-You should be up and running the application on `localhost`.
-
-### Importing teams
-
-```bash
-docker exec -t durer-aion-backend-1 ./scripts/import_teams.sh ./scripts/test.tsv
-```
-
-### Reload frontend manually
-
-```
-npm run build
-```
-
-...and reload page
-
-### Backend reloads automatically
-
-:)
-
-Except routing, and KOA hooks.
-If you install a package used by the backend, you will have to `docker-compose build`.
-
-## Running the production stack
-
-This is what a deployed instance runs (see `DEPLOYMENT.md`):
-
-```bash
-npm run build                              # builds the frontend into apps/online-frontend/dist
-docker compose --env-file=.env.docker up --build
-```
-
-No `-f` overlay, so the backend container runs the server compiled into the
-image (`npm run start --workspace=online-backend`) rather than a file watcher.
-Code changes need a rebuild; nginx serves the frontend from
-`apps/online-frontend/dist` on the host, so a frontend change needs
-`npm run build` and a page reload, same as in the dev flow.
-
-## Running developer environment -- without docker (except DB)
-
-Both frontend and server auto-reloads.
-
-- Set up the database (in Windows you can run it without sudo):
-
-```bash
-sudo docker run -it --rm -e POSTGRESQL_PASSWORD=postgres -p 127.0.0.1:5432:5432 bitnami/postgresql
-```
-- After that you should import teams.
-
-```bash
-./scripts/import_teams.sh scripts/test.tsv # On linux/unix
-.\scripts\import_teams.ps1 scripts\test.tsv # On Windows
-```
-
-- Create the `apps/online-backend/.env` file. (see `.env.sample` in that folder)
-
-- Run the following two commands in two separate terminal:
-
-```bash
-npm run dev:server
-```
-> This starts the backend with the earlier started db. Changing the code of server it auto-reloads itself.
-```bash
-npm run dev:online
-```
-> This starts the frontend. Changing the code of frontend it auto-reloads itself. Note: you can use the backend without the frontend.
-
-You should be up and running the application on `localhost:5173`.
-
-### Debugging (TODO)
+# Debugging (TODO)
 VS code gives you two options to debug the application. Both of them needs some setup first, and they can't be used at the same time.
 
 Breakpoints work either on the server, or on the frontend, but not on both at the same time. See different debugging options for further references.
 
-#### Debugging server
+## Debugging server
 
 If you want to debug the server then instead of running `npm run dev:server` go to `Run and Debug` menu in VSCode and select `Node.JS... -> Run Script: dev:server`
 
 ![image](https://github.com/a-gondolkodas-orome/durer-aion/assets/22480910/20fcba7b-148b-41c4-988d-83f9174708f5)
 
 
-#### Debugging Frontend
+## Debugging Frontend
 
 If you want to use the Debugger to debug frontend code, you can use the `Debug Frontend` option.
 In this case, you still have to start the frontend, and the backend manually.
 
-
-## How to create a new game
+# How to create a new game
 
 1) Copy 4 files (board, game, main, strategy) to a new directory in `src/games/`.
 1) Add game in `index.tsx` (frontend-only code)
