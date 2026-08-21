@@ -179,9 +179,14 @@ everything under that directory.
 npm run lint
 npm run typecheck
 npm test
-npm run spell-check
+npm run build
 npm run i18n:check
 ```
+
+Those are the five jobs in `.github/workflows/ci.yml`; `apps/practice` has its
+own two (`practice-test` and `patch-coverage`), which run from its directory.
+`npm run spell-check` exists but is not one of them — it reports on the
+Hungarian problem text as well, so it is a thing to read, not a gate.
 
 # Configuration you may want to change
 
