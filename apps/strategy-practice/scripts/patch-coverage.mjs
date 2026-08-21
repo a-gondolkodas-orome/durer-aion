@@ -17,7 +17,7 @@ import { posix } from 'node:path';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 // Diffs run here: the measured set spans two workspaces (below), so a diff taken
-// from apps/practice would drop the engine's half before anything measured it.
+// from apps/strategy-practice would drop the engine's half before anything measured it.
 const repoRoot = fileURLToPath(new URL('../../../', import.meta.url));
 
 // Below this, the percentage says more about arithmetic than about testing: at twelve lines two
@@ -32,7 +32,7 @@ const THRESHOLD = 85;
 // The engine and games packages are measured alongside this app's src: they are this app's
 // engine and games moved out, and their specs run in this suite — leaving them out would mean
 // the one gated number stopped gating exactly the code this app runs on.
-const MEASURED_ROOTS = ['apps/practice/src/', 'packages/engine/src/', 'packages/games/src/'];
+const MEASURED_ROOTS = ['apps/strategy-practice/src/', 'packages/engine/src/', 'packages/games/src/'];
 
 // The .tsx half is the JSX half, and is swept by renders.spec.tsx rather than unit-tested; the
 // exclusions mirror `coverage.exclude` in vite.config.js, which are absent from the report anyway.
@@ -41,12 +41,12 @@ export const isMeasured = path =>
   MEASURED_ROOTS.some(measuredRoot => path.startsWith(measuredRoot)) &&
   path.endsWith('.ts') &&
   !path.endsWith('.spec.ts') &&
-  path !== 'apps/practice/src/test-utils.ts' &&
-  path !== 'apps/practice/src/test-setup.ts';
+  path !== 'apps/strategy-practice/src/test-utils.ts' &&
+  path !== 'apps/strategy-practice/src/test-setup.ts';
 
 // lcov SF records are relative to the coverage run's root, this app: `src/…` for its own files,
 // `../../packages/engine/src/…` for the engine's. The diff speaks repo-relative; meet it there.
-export const repoRelativeLcovPath = path => posix.normalize(posix.join('apps/practice', path));
+export const repoRelativeLcovPath = path => posix.normalize(posix.join('apps/strategy-practice', path));
 
 // `git diff --unified=0` output in, { path -> Set of added line numbers } out. A hunk header reads
 // `@@ -12,0 +13,4 @@`, where the count after the comma defaults to 1 when omitted.
@@ -247,7 +247,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   //
   // From the repository root, so the diff carries both measured workspaces; `isMeasured` is what
   // scopes it. The trap is the same one `--relative` used to guard when this ran from
-  // apps/practice: the diff's paths and the normalized lcov paths must agree exactly, or every
+  // apps/strategy-practice: the diff's paths and the normalized lcov paths must agree exactly, or every
   // path fails the join and the job passes every PR with "nothing to measure".
   const addedLines = mergeBase => parseAddedLines(git('diff', '--unified=0', mergeBase));
 

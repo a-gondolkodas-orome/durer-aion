@@ -5,6 +5,6 @@ export function strategy(_state: State<GameStateMixin>, _botID: string): [undefi
   return [undefined, ""];
 }
 
-export function startingPosition({ _G, _ctx}: any): {coins: number[]} {
+export function startingPosition(_: Pick<State<GameStateMixin>, 'G' | 'ctx'>): {coins: number[]} {
   return {coins: [1,1,1,2,2,2,3,3,3,3]};
 }

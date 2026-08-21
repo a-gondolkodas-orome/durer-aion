@@ -153,25 +153,27 @@ npm run dev:offline
 the in-browser bot and persist to localStorage. Reload mid-game to check the
 persistence.
 
-## The practice site (`apps/practice`)
+## The practice site (`apps/strategy-practice`)
 
-The practice site (https://jatek.durerinfo.hu) lives in `apps/practice`, merged
-in from the durer-jatekok repository with its history. The root `npm ci`
-installs it and `npm run build` and `npm run typecheck` cover it — but it keeps
-its own ESLint and vitest setups, so the root `npm run lint` and `npm test`
-skip it and its checks run from its own directory:
+The strategy-game practice site (https://gyakorlo.durerinfo.hu) lives in
+`apps/strategy-practice`, merged in from the durer-jatekok repository with its
+history and renamed from `apps/practice` when the relay practice app arrived
+(pre-rename history: `git log -- apps/practice`). The root `npm ci` installs it
+and `npm run build` and `npm run typecheck` cover it — but it keeps its own
+ESLint and vitest setups, so the root `npm run lint` and `npm test` skip it and
+its checks run from its own directory:
 
 ```bash
-cd apps/practice
+cd apps/strategy-practice
 npm run dev   # the practice site
 npm test      # its own version check, lint, typecheck and unit tests
 ```
 
-**Do not run `npm ci` from `apps/practice`.** There is one lockfile, at the
-root; from a workspace directory npm installs that workspace's subtree and
+**Do not run `npm ci` from `apps/strategy-practice`.** There is one lockfile, at
+the root; from a workspace directory npm installs that workspace's subtree and
 leaves the root's own dependencies unmet, while exiting 0.
-[`apps/practice/AGENTS.md`](apps/practice/AGENTS.md) is the authority on
-everything under that directory.
+[`apps/strategy-practice/AGENTS.md`](apps/strategy-practice/AGENTS.md) is the
+authority on everything under that directory.
 
 ## The checks CI runs
 
@@ -183,8 +185,9 @@ npm run build
 npm run i18n:check
 ```
 
-Those are the five jobs in `.github/workflows/ci.yml`; `apps/practice` has its
-own two (`practice-test` and `patch-coverage`), which run from its directory.
+Those are the five jobs in `.github/workflows/ci.yml`; `apps/strategy-practice`
+has its own two (`practice-test` and `patch-coverage`), which run from its
+directory.
 `npm run spell-check` exists but is not one of them — it reports on the
 Hungarian problem text as well, so it is a thing to read, not a gate.
 

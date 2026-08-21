@@ -41,7 +41,7 @@ writing a path out and hoping. Playwright itself resolves from the repo root,
 which the helper handles.
 
 ```js
-const REPO = '/workspaces/durer-jatekok';   // git rev-parse --show-toplevel
+const REPO = '/workspaces/durer-aion';      // git rev-parse --show-toplevel
 const { launchGame, sampleDuringBeat, readAll } =
   await import(`${REPO}/.claude/skills/play-game-in-browser/drive.mjs`);
 

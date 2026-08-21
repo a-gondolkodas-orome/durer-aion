@@ -10,7 +10,7 @@ describe('findResolved', () => {
   });
 
   it('reads one npm nested under this workspace', () => {
-    expect(findResolved(lockfile({ 'apps/practice/node_modules/vite': { version: '8.2.1' } }), 'vite'))
+    expect(findResolved(lockfile({ 'apps/strategy-practice/node_modules/vite': { version: '8.2.1' } }), 'vite'))
       .toBe('8.2.1');
   });
 
@@ -20,7 +20,7 @@ describe('findResolved', () => {
   it('prefers the nested copy when a package is in both places', () => {
     const both = lockfile({
       'node_modules/typescript': { version: '5.9.3' },
-      'apps/practice/node_modules/typescript': { version: '6.0.3' }
+      'apps/strategy-practice/node_modules/typescript': { version: '6.0.3' }
     });
 
     expect(findResolved(both, 'typescript')).toBe('6.0.3');

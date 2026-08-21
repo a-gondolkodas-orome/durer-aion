@@ -1,3 +1,4 @@
+import type { PostgresStore } from 'bgio-postgres';
 import { TeamsRepository } from './db';
 import { import_teams_from_tsv } from './team_import';
 import { readFileSync } from 'fs';
@@ -7,7 +8,7 @@ vi.mock('fs');
 vi.mock('./db');
 
 describe('import_teams_from_tsv', () => {
-  let mockDb: any;
+  let mockDb: PostgresStore;
   let mockTeamsRepo: TeamsRepository;
 
   beforeEach(() => {
@@ -17,7 +18,7 @@ describe('import_teams_from_tsv', () => {
       sequelize: {
         sync: vi.fn(),
       },
-    };
+    } as unknown as PostgresStore;
 
     mockTeamsRepo = new TeamsRepository(mockDb);
   });

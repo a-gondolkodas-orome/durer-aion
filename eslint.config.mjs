@@ -38,7 +38,7 @@ export default defineConfig(
       'prefer-const': 'error',
     },
   },
-  // packages/engine and packages/games are apps/practice code moved out of it, still
+  // packages/engine and packages/games are apps/strategy-practice code moved out of it, still
   // written in that app's dialect and composing its types. Two rules of this config
   // disagree with the conventions that code follows, and rewriting it would turn a move
   // into a rewrite — they stay off here until the two ESLint setups are unified.
@@ -74,7 +74,7 @@ export default defineConfig(
   // A game's .ts half — gameplay, bot, curated start boards — is what a competition
   // server validates moves and plays bot turns with, so it runs in plain Node; only
   // the game's .tsx (its board client and config) may be React-flavoured. Same
-  // blind spot as above: `gameplay-react-free.spec.ts` in apps/practice watches what
+  // blind spot as above: `gameplay-react-free.spec.ts` in apps/strategy-practice watches what
   // a relative import resolves to.
   {
     files: ['packages/games/**/*.ts'],
@@ -88,18 +88,27 @@ export default defineConfig(
       }],
     },
   },
-  // The boardgame.io-facing code. Its 106 `any`s are bgio interop nobody is going to
-  // type out, and as warnings they only buried the signal — every new warning showed up
-  // below them. Off here, and zero-tolerance (--max-warnings=0) everywhere else, is the
-  // trade that keeps the gate meaningful.
+  // no-explicit-any is on for the boardgame.io-facing code; what remains exempt
+  // is the genuine interop core, per file. This list only shrinks: type a file,
+  // delete its line — never add one. New code goes through the rule everywhere.
   {
     files: [
-      'apps/offline-frontend/**',
-      'apps/online-frontend/**',
-      'apps/online-backend/**',
-      'packages/game/**',
-      'packages/strategy/**',
-      'packages/common-frontend/**',
+      // Copied bgio server internals whose types upstream does not export.
+      'apps/online-backend/src/socketio_botmoves.ts',
+      // bgio move-context destructuring; two TODO markers track it.
+      'packages/game/src/common/gamewrapper.ts',
+      // Wire-shape casts on match state, pending a typed DTO field.
+      'packages/common-frontend/src/client/components/TeamDetailDialog.tsx',
+      // The client-factory family shares one untyped board/game plumbing shape;
+      // its fix is the BoardProps<G> refactor the TODO in boardwrapper.tsx names,
+      // and exempting only part of the family would be arbitrary.
+      'apps/offline-frontend/src/client_factory.tsx',
+      'packages/common-frontend/src/common/client_factory.tsx',
+      'packages/common-frontend/src/common/myclient.ts',
+      'apps/offline-frontend/src/myclient.ts',
+      'packages/common-frontend/src/common/boardwrapper.tsx',
+      // #224 lands first; the relay app joins the per-file ratchet after.
+      'apps/relay-practise-frontend/**',
     ],
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
@@ -120,11 +129,10 @@ export default defineConfig(
       '**/build/**',
       '**/node_modules/**',
       '**/*.config.{js,mjs,cjs,ts}',
-      // apps/practice is linted by its own eslint config, through its own
-      // `npm run lint`. Until the workspaces are unified it is not part of
-      // this repo's install, so linting it from here would resolve neither
-      // its plugins nor its tsconfig.
-      'apps/practice/**',
+      // apps/strategy-practice is linted by its own eslint config, through its
+      // own `npm run lint` — it keeps its own ESLint version and plugins (npm
+      // nests them), which this config's flat resolution would not find.
+      'apps/strategy-practice/**',
       // A frozen 2023 build output, kept byte for byte. See pages/valto-2023/README.md.
       'pages/**',
     ],

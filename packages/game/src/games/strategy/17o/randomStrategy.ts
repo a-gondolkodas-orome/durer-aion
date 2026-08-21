@@ -8,7 +8,7 @@ export function strategy(state: State<GameStateMixin>, botID: string): [undefine
   return [undefined, ""];
 }
 
-export function startingPosition({ G, ctx}: any): {pile: number} {
+export function startingPosition({ G, ctx }: Pick<State<GameStateMixin>, 'G' | 'ctx'>): {pile: number} {
   if (!G || !ctx) {
     console.error('Unimplemented.');
   }
