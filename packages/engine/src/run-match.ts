@@ -11,7 +11,7 @@ export type MatchResult<TBoard> = {
 // Plays a whole game outside React: two strategies, the real moves, the real
 // reducer — so a game's spec plays its bots against each other without faking
 // `moves` or re-implementing win detection. Each turn is played by playBotTurn,
-// the same host a competition server uses, so the two cannot drift.
+// the engine's one headless turn loop.
 //
 // Everything that goes wrong throws: unlike the shell, which must keep a live
 // game playable, a headless match only ever runs in tests and CI, where a
