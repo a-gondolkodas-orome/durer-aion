@@ -1,8 +1,7 @@
 # GitHub Pages consolidation
 
 How the practice sites move onto one GitHub Pages site, and who has to do
-what. A sub-plan of [the migration plan](./boardgame-io-replacement-plan.md)'s
-PR 0.2, written up separately because it needs DNS changes and edits to
+what. Written up on its own because it needs DNS changes and edits to
 durerinfo.hu that live outside this repo.
 
 Status: **live on the default domain** — steps 0–3 are done. All four pages
