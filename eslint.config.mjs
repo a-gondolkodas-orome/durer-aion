@@ -38,9 +38,8 @@ export default defineConfig(
       'prefer-const': 'error',
     },
   },
-  // packages/engine and packages/games are apps/practice code moved out of it (Phases
-  // 1-2 of docs/boardgame-io-replacement-plan.md), and packages/competition is new code
-  // written in the same dialect, composing the engine's types. Two rules of this config
+  // packages/engine and packages/games are apps/practice code moved out of it, still
+  // written in that app's dialect and composing its types. Two rules of this config
   // disagree with the conventions that code follows, and rewriting it would turn a move
   // into a rewrite — they stay off here until the two ESLint setups are unified.
   {
@@ -104,11 +103,10 @@ export default defineConfig(
       }],
     },
   },
-  // The boardgame.io-era code, which the migration replaces (Phases 3-5 of
-  // docs/boardgame-io-replacement-plan.md) and Phase 7 deletes. Its 106 `any`s are bgio
-  // interop nobody will type out before the deletion, and as warnings they only buried the
-  // signal — every new warning showed up below them. Off here, and zero-tolerance
-  // (--max-warnings=0) everywhere else, is the trade that keeps the gate meaningful.
+  // The boardgame.io-facing code. Its 106 `any`s are bgio interop nobody is going to
+  // type out, and as warnings they only buried the signal — every new warning showed up
+  // below them. Off here, and zero-tolerance (--max-warnings=0) everywhere else, is the
+  // trade that keeps the gate meaningful.
   {
     files: [
       'apps/offline-frontend/**',
