@@ -1,7 +1,9 @@
-# durer-jatekok
+# strategy-practice
 
 Code for the online, client-side versions of past strategy games at the Dürer
-Math Competition.
+Math Competition. Merged into the monorepo from the durer-jatekok repository;
+lived as `apps/practice` until the relay practice app made that name ambiguous
+(pre-rename history: `git log -- apps/practice`).
 
 The deployed version is here: https://jatek.durerinfo.hu/ .
 

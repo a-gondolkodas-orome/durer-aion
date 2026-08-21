@@ -10,7 +10,7 @@ permissions:
   contents: read
   issues: write
 
-# The report is about apps/practice's dependencies, and the script resolves everything it
+# The report is about apps/strategy-practice's dependencies, and the script resolves everything it
 # reads from its own location — except the workflows, which now live at the repo root.
 defaults:
   run:

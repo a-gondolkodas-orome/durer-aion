@@ -1,6 +1,6 @@
 ---
 name: new-game
-description: Implement a new Dürer competition game from scratch, under apps/practice. Use when asked to add, implement or port a Dürer strategy game — it covers the game folder layout, the gameplay/bot split, curated start boards, specs and registration.
+description: Implement a new Dürer competition game from scratch, under apps/strategy-practice. Use when asked to add, implement or port a Dürer strategy game — it covers the game folder layout, the gameplay/bot split, curated start boards, specs and registration.
 ---
 
 # Implement a new Dürer competition game

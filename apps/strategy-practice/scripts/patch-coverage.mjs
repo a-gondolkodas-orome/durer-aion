@@ -17,7 +17,7 @@ import { posix } from 'node:path';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 // Diffs run here: the measured set spans two workspaces (below), so a diff taken
-// from apps/practice would drop the engine's half before anything measured it.
+// from apps/strategy-practice would drop the engine's half before anything measured it.
 const repoRoot = fileURLToPath(new URL('../../../', import.meta.url));
 
 // Below this, the percentage says more about arithmetic than about testing: at twelve lines two
@@ -247,7 +247,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   //
   // From the repository root, so the diff carries both measured workspaces; `isMeasured` is what
   // scopes it. The trap is the same one `--relative` used to guard when this ran from
-  // apps/practice: the diff's paths and the normalized lcov paths must agree exactly, or every
+  // apps/strategy-practice: the diff's paths and the normalized lcov paths must agree exactly, or every
   // path fails the join and the job passes every PR with "nothing to measure".
   const addedLines = mergeBase => parseAddedLines(git('diff', '--unified=0', mergeBase));
 

@@ -15,7 +15,7 @@
     "strict": true,
     "noEmit": true,
     "paths": {
-      // The engine resolves to source, as it does in apps/practice — these
+      // The engine resolves to source, as it does in apps/strategy-practice — these
       // files are bundled and tested through that app's aliases, and `tsc`
       // here must see the same modules. `test-utils` reaches into the app
       // because the specs run in its vitest suite and use its helpers; it is

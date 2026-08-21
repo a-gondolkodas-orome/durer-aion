@@ -41,13 +41,13 @@ jobs:
           key: npm-pages-${{ hashFiles('package-lock.json') }}
           restore-keys: npm-pages-
 
-      # One install for the whole monorepo: apps/practice is a workspace now, so the root
+      # One install for the whole monorepo: apps/strategy-practice is a workspace now, so the root
       # lockfile covers it too.
       - name: Install dependencies
         id: install
         run: npm ci
 
-      # apps/practice keeps its own gates here, as its deploy workflow did: pr-test only runs on
+      # apps/strategy-practice keeps its own gates here, as its deploy workflow did: pr-test only runs on
       # pull requests, so without these a check nobody ran on main would ship. The rest of the
       # monorepo is covered by ci.yml on the same push, and by the build below.
       - name: Check tool versions
