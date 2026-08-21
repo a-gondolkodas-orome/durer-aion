@@ -1,7 +1,7 @@
 import { isAllowed, type Board, type Moves } from './gameplay';
 import { range, sample } from 'lodash';
 import type { BotStrategy } from 'engine';
-// generated with apps/practice/scripts/pre-generate-ai-moves/remove-divisor-multiple.py,
+// generated with apps/strategy-practice/scripts/pre-generate-ai-moves/remove-divisor-multiple.py,
 // pasted verbatim from the generator's JSON output. The annotation is what the
 // lookup below indexes by — a table size, then a state id.
 const strategyDict: Record<number, Record<string, number[]>> = {

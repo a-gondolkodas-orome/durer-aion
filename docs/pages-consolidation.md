@@ -17,7 +17,7 @@ repo. `jatek.durerinfo.hu` is unaffected so far.
 custom domains, or two independent sites, in one repo.
 
 durer-aion's single slot is already taken, by the `gh-pages` branch. Once
-`apps/practice` deploys from here too, and #224 adds a relay practice app,
+`apps/strategy-practice` deploys from here too, and #224 adds a relay practice app,
 three things want that one slot. They can share it — as subpaths of one
 artifact — but only if we lay them out deliberately, which is what this
 document decides.
@@ -106,7 +106,7 @@ Sequence).
 ```
 gyakorlo.durerinfo.hu/
   /                 home page — what this site is, and where to go
-  /jatekok/         apps/practice                 strategy game practice
+  /jatekok/         apps/strategy-practice        strategy game practice
                                                   (today's jatek.durerinfo.hu)
   /valto/           the frozen 2023 relay practice build, rebased from
                     /durer-aion/; replaced by apps/relay-practise-frontend (#224)
@@ -158,7 +158,7 @@ instead of being archived.
 ## Analytics: what the move does to umami
 
 The practice site is tracked by self-hosted umami at `umami.durerinfo.hu`,
-loaded from `apps/practice/index.html`. Two halves, and only one of them is a
+loaded from `apps/strategy-practice/index.html`. Two halves, and only one of them is a
 problem.
 
 **The URL space is safe.** `usePageviewTracking` reports
@@ -270,7 +270,7 @@ argument for doing this move in its own PR rather than inside the deploy switch:
   It now scans the root directory, which makes the action rows the whole
   monorepo's while the npm and Node rows stay practice's.
 - `patch-coverage.mjs` diffs against the merge base and matches `src/…` paths
-  against lcov. Run from a subdirectory git prints `apps/practice/src/…`, which
+  against lcov. Run from a subdirectory git prints `apps/strategy-practice/src/…`, which
   matches nothing, so the job would have passed **every** PR with "nothing to
   measure" — a coverage gate that reports success while measuring zero lines.
   `git diff --relative` restores both the paths and the scoping.

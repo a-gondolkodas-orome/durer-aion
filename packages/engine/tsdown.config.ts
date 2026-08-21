@@ -21,7 +21,7 @@ export default defineConfig({
     // `import { cloneDeep } from 'lodash'` outright — a bundler's interop is what
     // hides that everywhere else. Bundling it in is what makes this package
     // loadable by the hosts it exists for. Nothing browser-facing pays for it:
-    // apps/practice reads the source through an alias, not this build.
+    // apps/strategy-practice reads the source through an alias, not this build.
     alwaysBundle: ['lodash'],
 
     // Leave a subpath import as written; resolving it is tsdown's default, and

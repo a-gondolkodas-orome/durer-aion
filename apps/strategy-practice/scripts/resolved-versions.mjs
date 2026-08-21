@@ -23,7 +23,7 @@ const lockfilePath = [`${appDir}package-lock.json`, `${repoRoot}package-lock.jso
 // legitimately lives in either place — and which one is not stable across installs. Check the
 // nested path first: when a package is in both, the nested copy is the one this app resolves.
 export const findResolved = (lockfile, name) =>
-  lockfile?.packages?.[`apps/practice/node_modules/${name}`]?.version ??
+  lockfile?.packages?.[`apps/strategy-practice/node_modules/${name}`]?.version ??
   lockfile?.packages?.[`node_modules/${name}`]?.version;
 
 let cached;

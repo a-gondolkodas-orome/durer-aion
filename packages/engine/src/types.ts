@@ -9,7 +9,7 @@ import type { I18nString, TranslatableNode } from './i18n';
 // body, localStorage), so no functions, class instances, Dates, Maps, Sets or
 // array holes; an `undefined` object member is dropped in transit, which only
 // behaves the same because readers here treat a missing key as undefined.
-// Pinned across every registered game by apps/practice's
+// Pinned across every registered game by apps/strategy-practice's
 // games/json-round-trip.spec.ts.
 
 export type Phase = 'roleSelection' | 'play' | 'gameEnd'
