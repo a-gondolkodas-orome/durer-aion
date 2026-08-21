@@ -28,11 +28,15 @@ All demos are in Hungarian.
 npm ci
 npm run setup         # creates the gitignored .env files from their samples
 npm run stack:up      # builds everything, then starts nginx + backend + postgres
-npm run teams:import  # in a second terminal, once the stack is up
+npm run teams:import  # once postgres is accepting connections, a few seconds later
 ```
 
 Open `http://localhost` and log in with the join code `000-0000-000`.
-`npm run stack:down` stops it again.
+
+The stack runs in the background, so that is one terminal, not two, and closing
+it leaves the stack up. `npm run stack:logs` follows the output of all three
+containers — Ctrl-C stops watching, not the stack. `npm run stack:down` is what
+stops it.
 
 That is the whole online round: the site teams see, the game server they play
 against, and the database behind it.
@@ -51,9 +55,10 @@ is D, `002-0000-000` is E — and there are a thousand more behind them.
 
 The backend reloads itself: `stack:up` adds the `docker-compose.dev.yml`
 overlay, which mounts the backend and shared package sources and runs
-`npm run dev:server` in the container. Routing changes and Koa hooks are the
-exception, and a new backend dependency needs the image rebuilt — `stack:up`
-again.
+`npm run dev:server` in the container. `npm run stack:logs` is where you see it
+reload, and where a crash on your edit shows up. Routing changes and Koa hooks
+are the exception, and a new backend dependency needs the image rebuilt —
+`stack:up` again.
 
 nginx serves the frontend from `apps/online-frontend/dist` on the host, so a
 frontend change needs `npm run build` and a page reload. If you are mostly
@@ -96,7 +101,8 @@ npm run stack:prod
 
 The same compose file without the dev overlay, so the container runs the server
 compiled into the image instead of a watcher, and code changes need the command
-again. Worth a run before a competition, and before merging anything that
+again. Detached like `stack:up`, so an ssh session dropping does not take the
+stack with it. Worth a run before a competition, and before merging anything that
 touches the `Dockerfile`, nginx or the routes.
 
 # Checking it works

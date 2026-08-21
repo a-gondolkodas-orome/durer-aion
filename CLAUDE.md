@@ -58,9 +58,10 @@ regression checklist every change is measured against.
 npm ci
 npm run setup
 
-# The whole online round in docker: nginx + backend + postgres
+# The whole online round in docker: nginx + backend + postgres (detached)
 npm run stack:up      # builds, then brings the stack up on http://localhost
-npm run teams:import  # loads scripts/test.tsv, once the stack is up
+npm run teams:import  # loads scripts/test.tsv, once postgres is accepting connections
+npm run stack:logs    # follow all three containers; Ctrl-C stops watching, not the stack
 npm run stack:down
 
 # The same thing without docker (except the DB), everything reloading
