@@ -46,7 +46,6 @@ export default defineConfig(
     files: [
       'packages/engine/**/*.{ts,tsx}',
       'packages/games/**/*.{ts,tsx}',
-      'packages/competition/**/*.ts',
     ],
     rules: {
       '@typescript-eslint/no-non-null-assertion': 'off',
@@ -85,20 +84,6 @@ export default defineConfig(
           group: ['react', 'react/*', 'react-*', '*.tsx', '**/*.tsx'],
           allowTypeImports: true,
           message: 'A game\'s .ts half runs in plain Node; move anything React-flavoured into the game .tsx.',
-        }],
-      }],
-    },
-  },
-  // The competition state machine is the server's scoring and clock authority; nothing
-  // React may enter it.
-  {
-    files: ['packages/competition/**/*.ts'],
-    rules: {
-      '@typescript-eslint/no-restricted-imports': ['error', {
-        patterns: [{
-          group: ['react', 'react/*', 'react-*', '*.tsx', '**/*.tsx'],
-          allowTypeImports: true,
-          message: 'packages/competition runs in plain Node with no framework attached.',
         }],
       }],
     },
