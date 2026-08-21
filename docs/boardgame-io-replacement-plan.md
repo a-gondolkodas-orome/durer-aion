@@ -748,7 +748,19 @@ reviewed wiring.
 
 ### Phase 4 — Frontend swap for strategy
 
-- [ ] **PR 4.1 (L, isolated)** `common-frontend/src/client/strategy-shell/`: one
+- [ ] **PR 4.1a (S)** Tailwind into the two competition frontends — the build
+  step the *Board UI decision* above accepts — with content globs over
+  `packages/games`. **On its own, before the shell**, because it is the first
+  change in the migration that can visibly break pages no phase touches. Those
+  apps are MUI with no Tailwind today, and practice's `@import "tailwindcss"`
+  brings Preflight with it: a global reset that drops heading and paragraph
+  margins, unstyles buttons and lists, and zeroes every border width. It would
+  restyle login, the chooser, relay and admin, it would do so whatever
+  `STRATEGY_V2_CATEGORIES` says, and CI would not notice — the checklist's UI
+  items are walked by hand. So decide Preflight deliberately (scope it, drop it
+  in favour of MUI's `CssBaseline`, or accept it and adjust the chrome), and
+  verify by walking those screens. Alone in a PR, it is also revertible alone.
+- [ ] **PR 4.1b (L, isolated)** `common-frontend/src/client/strategy-shell/`: one
   component tree for online and offline — difficulty + role choice, the
   existing `Countdown` pointed at the v2 GET, points/tries, end-of-attempt
   flow, and a board adapter rendering `config.BoardClient` with
@@ -756,10 +768,8 @@ reviewed wiring.
   authoritative response; `.isAllowed` runs `validate` + `buildCtx`
   client-side (the packages are isomorphic, so disabled-state logic is exact,
   not duplicated); bot events are paced for display. Talks through the
-  existing `ClientRepository` interface (+3 v2 calls). Tailwind added to both
-  competition frontends with content globs over `packages/games`; the board is
-  wrapped in the `engine/react` language provider fed from the i18next
-  language.
+  existing `ClientRepository` interface (+3 v2 calls). The board is wrapped in
+  the `engine/react` language provider fed from the i18next language.
 - [ ] **PR 4.2 (M)** online-frontend routing: `engine === 'v2'` → new shell, else
   the untouched bgio client. Delete nothing.
 - [ ] **PR 4.3 (S)** Staging pilot + **Rehearsal #1** — a volunteer dry-run: both
@@ -893,7 +903,11 @@ the tracker. Candidates as mapped today (re-check at each sweep; some are
 10. **Volunteer bandwidth**: every phase boundary is a safe stop with both
     rounds playable; only the two rehearsals are hard gates before a real
     competition.
-11. **Migration churn vs an active private repo**: refactoring the repo shape
+11. **A global CSS reset reaching the competition chrome**: Tailwind's
+    Preflight restyles pages the migration otherwise never touches, and no
+    automated check covers it. Isolated to PR 4.1a, which decides Preflight's
+    scope explicitly and lands nothing else.
+12. **Migration churn vs an active private repo**: refactoring the repo shape
     while a year's private repo carries an unmerged secret game forces the
     game team to absorb the refactors through `-X ours` syncs repeatedly.
     Mitigation: schedule the disruptive phases between private-repo cycles,
