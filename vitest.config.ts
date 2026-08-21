@@ -11,6 +11,10 @@ export default defineConfig({
       {
         find: /^engine$/,
         replacement: fileURLToPath(new URL('./packages/engine/index.ts', import.meta.url))
+      },
+      {
+        find: /^competition$/,
+        replacement: fileURLToPath(new URL('./packages/competition/index.ts', import.meta.url))
       }
     ]
   },

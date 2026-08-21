@@ -718,7 +718,7 @@ reviewed wiring.
 
 ### Phase 3 — Backend swap for strategy (dark launch, side by side)
 
-- [ ] **PR 3.1 (M)** Two additive Sequelize models on the shared instance (created
+- [x] **PR 3.1 (M)** Two additive Sequelize models on the shared instance (created
   with `sync()` like `Teams`):
   - `matches(match_id pk, team_id, kind 'STRATEGY'|'RELAY', game_id,
     state jsonb, version int, timestamps)` — snapshot + optimistic concurrency.
@@ -726,6 +726,22 @@ reviewed wiring.
     payload jsonb, created_at; pk (match_id, seq))` — append-only log; a spec
     replays events through `applyEvent` and reproduces `state`. The bgio
     `Games` table is untouched and coexists.
+
+  As landed (`apps/online-backend/src/server/match-store.ts`): tables are
+  `Matches`/`MatchEvents` with camelCase attributes — the repo's convention
+  (`Teams`) wins over this sketch's snake_case. `MatchesRepository` carries
+  exactly what a route needs and nothing speculative: `createMatch`,
+  `getMatch`, `appendEvents` (one transaction per accepted request — the
+  version guard both makes lost updates a `conflict` for a 409 and serialises
+  `max(seq)`), `eventsSince` for the polling GET. The event's `payload` is
+  the whole `CompetitionEvent`, self-contained for replay; the `actor` column
+  duplicates only attribution, so an admin's ADD_MINUTES is queryable without
+  parsing payloads. The replay spec drives a scripted match through the
+  repository the way a route will and re-folds the *stored* rows into the
+  *stored* snapshot (SQL faked in memory — CI has no Postgres — repository
+  and `applyEvent` real; verified red when an event is silently dropped).
+  Doing it pulled Phase 3's first move in: `packages/competition` got its
+  tsdown build, and the backend now depends on `competition` + `engine`.
 - [ ] **PR 3.2 (L)** v2 routes in `apps/online-backend/src/server/strategy-v2.ts`:
   - `POST /api/team/:GUID/strategy/start` — reuses the `allowedToStart`/
     stale-check gating; writes an `engine:'v2'` match status.

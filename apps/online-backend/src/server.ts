@@ -18,6 +18,7 @@ import botWrapper from './botwrapper';
 import cors from '@koa/cors';
 import { configureTeamsRouter } from './server/router';
 import { TeamsRepository } from './server/db';
+import { MatchesRepository } from './server/match-store';
 import { getBotCredentials, getGameStartAndEndTime, relayNames } from './server/common';
 import { import_teams_from_tsv_locally } from './server/team_import';
 
@@ -37,6 +38,9 @@ function getDb() {
     return {
       db,
       teams: new TeamsRepository(db),
+      // Constructed before the server starts so the same sync() that creates
+      // Teams creates the v2 match tables; the routes arrive in PR 3.2.
+      matches: new MatchesRepository(db),
     }
   } else {
     throw new Error('Failed to load DB data. Only postgres is supported!');
