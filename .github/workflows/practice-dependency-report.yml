@@ -14,7 +14,7 @@ permissions:
 # reads from its own location — except the workflows, which now live at the repo root.
 defaults:
   run:
-    working-directory: apps/practice
+    working-directory: apps/strategy-practice
 
 jobs:
   report:

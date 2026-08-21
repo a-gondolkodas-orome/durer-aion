@@ -7,7 +7,7 @@ on:
     # root lockfile, so that counts too. ci.yml covers the rest and carries no paths filter,
     # so every PR still gets a gate.
     paths:
-      - 'apps/practice/**'
+      - 'apps/strategy-practice/**'
       # The engine and games packages are this app's code, moved out (PRs 1.2a and 1.4):
       # their specs run in this suite and patch-coverage gates their added lines, so a
       # package-only PR must trigger both.
@@ -25,7 +25,7 @@ concurrency:
 # project now, so the install below is the exception — it runs at the repository root.
 defaults:
   run:
-    working-directory: apps/practice
+    working-directory: apps/strategy-practice
 
 jobs:
   test:

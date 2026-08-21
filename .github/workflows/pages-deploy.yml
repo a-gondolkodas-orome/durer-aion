@@ -52,23 +52,23 @@ jobs:
       # monorepo is covered by ci.yml on the same push, and by the build below.
       - name: Check tool versions
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
-        working-directory: apps/practice
+        working-directory: apps/strategy-practice
         run: npm run check:versions
       - name: Lint practice
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
-        working-directory: apps/practice
+        working-directory: apps/strategy-practice
         run: npm run lint
       - name: Typecheck practice
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
-        working-directory: apps/practice
+        working-directory: apps/strategy-practice
         run: npm run typecheck
       - name: Test practice
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
-        working-directory: apps/practice
+        working-directory: apps/strategy-practice
         run: npm run test:unit
 
       - name: Build strategy game practice
-        working-directory: apps/practice
+        working-directory: apps/strategy-practice
         run: npm run build
         env:
           SITE_BASE: ${{ env.SITE_ROOT }}jatekok/
@@ -87,7 +87,7 @@ jobs:
           set -eu
           mkdir -p site
           cp -r pages/home/. site/
-          mkdir -p site/jatekok && cp -r apps/practice/dist/. site/jatekok/
+          mkdir -p site/jatekok && cp -r apps/strategy-practice/dist/. site/jatekok/
           mkdir -p site/proba-verseny && cp -r apps/offline-frontend/dist/. site/proba-verseny/
           # The 2023 relay build cannot be rebuilt (pages/README.md), so it is rebased rather
           # than compiled. The script fails loudly if any occurrence is left behind.

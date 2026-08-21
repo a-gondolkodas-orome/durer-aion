@@ -22,7 +22,7 @@
       // spec-only plumbing, not a dependency of the games themselves.
       "engine": ["../engine/index.ts"],
       "engine/react": ["../engine/react.ts"],
-      "test-utils": ["../../apps/practice/src/test-utils.ts"]
+      "test-utils": ["../../apps/strategy-practice/src/test-utils.ts"]
     },
     // vite/client is here for the same one type engine's tsconfig names it for:
     // `import.meta.env` in the engine source these paths resolve into.
