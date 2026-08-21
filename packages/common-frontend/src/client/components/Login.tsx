@@ -1,5 +1,5 @@
 import { Stack } from '@mui/system';
-import { Field } from 'formik';
+import { Field, type FieldProps } from 'formik';
 import { useSnackbar } from 'notistack';
 import { useLogin } from '../hooks/user-hooks';
 import Form from './form';
@@ -81,7 +81,7 @@ export function Login() {
           ({
             field, 
             form: { handleChange },
-          }: any) => <MaskedInput
+          }: FieldProps) => <MaskedInput
             {...field}
             mask={idMask}
             onChange={handleChange}

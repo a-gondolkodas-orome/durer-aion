@@ -3,7 +3,7 @@ import { MyGameState } from './game';
 import { GameStateMixin, GUESSER_PLAYER, JUDGE_PLAYER } from '../../../common';
 import { moveMap } from './moveMap';
 
-function startingPosition({ G, _ctx}: any, _category: "E"): MyGameState {
+function startingPosition({ G }: Pick<State<MyGameState & GameStateMixin>, 'G' | 'ctx'>, _category: "E"): MyGameState {
   const initialPositions = [
     [[11, 8], [9, 9]],
     [[9, 8], [9, 7]],

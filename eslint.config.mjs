@@ -88,19 +88,27 @@ export default defineConfig(
       }],
     },
   },
-  // The boardgame.io-facing code. Its 120 `any`s are bgio interop nobody is going to
-  // type out, and as warnings they only buried the signal — every new warning showed up
-  // below them. Off here, and zero-tolerance (--max-warnings=0) everywhere else, is the
-  // trade that keeps the gate meaningful.
+  // no-explicit-any is on for the boardgame.io-facing code; what remains exempt
+  // is the genuine interop core, per file. This list only shrinks: type a file,
+  // delete its line — never add one. New code goes through the rule everywhere.
   {
     files: [
-      'apps/offline-frontend/**',
-      'apps/online-frontend/**',
-      'apps/online-backend/**',
+      // Copied bgio server internals whose types upstream does not export.
+      'apps/online-backend/src/socketio_botmoves.ts',
+      // bgio move-context destructuring; two TODO markers track it.
+      'packages/game/src/common/gamewrapper.ts',
+      // Wire-shape casts on match state, pending a typed DTO field.
+      'packages/common-frontend/src/client/components/TeamDetailDialog.tsx',
+      // The client-factory family shares one untyped board/game plumbing shape;
+      // its fix is the BoardProps<G> refactor the TODO in boardwrapper.tsx names,
+      // and exempting only part of the family would be arbitrary.
+      'apps/offline-frontend/src/client_factory.tsx',
+      'packages/common-frontend/src/common/client_factory.tsx',
+      'packages/common-frontend/src/common/myclient.ts',
+      'apps/offline-frontend/src/myclient.ts',
+      'packages/common-frontend/src/common/boardwrapper.tsx',
+      // #224 lands first; the relay app joins the per-file ratchet after.
       'apps/relay-practise-frontend/**',
-      'packages/game/**',
-      'packages/strategy/**',
-      'packages/common-frontend/**',
     ],
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',

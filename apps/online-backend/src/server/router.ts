@@ -1,13 +1,14 @@
 import koaBody from 'koa-body';
 import * as Router from '@koa/router';
-import type { Game, LobbyAPI, Server, StorageAPI } from 'boardgame.io';
+import type { DefaultState } from 'koa';
+import type { LobbyAPI, Server, StorageAPI } from 'boardgame.io';
 import { TeamsRepository } from './db';
 import { InProgressMatchStatus } from 'schemas';
 import { TransportAPI } from '../socketio_botmoves';
 import { getFilterPlayerView } from "boardgame.io/internal";
 import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus, createGame, injectBot, injectPlayer } from './team_manage';
 import { import_teams_from_tsv } from './team_import';
-import { PlayerIDType } from 'game';
+import { AnyBgioGame, PlayerIDType } from 'game';
 
 /**
  * 
@@ -18,9 +19,9 @@ import { PlayerIDType } from 'game';
  * @param games - List of possible games for teams
  */
 export function configureTeamsRouter(
-  router: Router<any, Server.AppCtx>,
+  router: Router<DefaultState, Server.AppCtx>,
   teams: TeamsRepository,
-  games: Game<any, Record<string, unknown>, any>[]
+  games: AnyBgioGame[]
 ) {
   /**
    * Get the log data about a specific match.

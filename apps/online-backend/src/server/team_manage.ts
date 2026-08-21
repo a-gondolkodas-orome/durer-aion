@@ -1,8 +1,8 @@
 import { createMatch } from "boardgame.io/internal";
 import { nanoid } from "nanoid";
 import { getBotCredentials, getGameStartAndEndTime, relayNames } from "./common";
-import { PlayerIDType, strategyNames } from "game";
-import { Game, LobbyAPI, Server, StorageAPI } from "boardgame.io";
+import { AnyBgioGame, PlayerIDType, strategyNames } from "game";
+import { LobbyAPI, Server, StorageAPI } from "boardgame.io";
 import { TeamsRepository } from "./db";
 import {
   FinishedMatchStatus,
@@ -79,12 +79,12 @@ export function checkGlobalTime(): "WAITING" | "FINISHED" | undefined {
  * Creates a game based on context, and given Game.
  * This is the interface between the API, and BGio components.
  * 
- * @param {Game<any, Record<string, unknown>, any>} game - Game object
+ * @param {AnyBgioGame} game - Game object
  * @param {Server.AppCtx} ctx - Context of the Koa & BGio call
  * @returns {LobbyAPI.CreatedMatch} - MatchID for the created game
  */
 export async function createGame(
-  game: Game<any, Record<string, unknown>, any>,
+  game: AnyBgioGame,
   ctx: Server.AppCtx
 ) {
   const matchID: string = nanoid(11);
@@ -242,7 +242,7 @@ export async function closeMatch(
 export async function getNewGame(
   ctx: Server.AppCtx,
   teams: TeamsRepository,
-  games: Game<any, Record<string, unknown>, any>[],
+  games: AnyBgioGame[],
   gameType: "RELAY" | "STRATEGY"
 ) {
   const GUID = ctx.params.GUID;
@@ -270,7 +270,7 @@ export async function getNewGame(
       ? relayNames[team.category as keyof typeof relayNames]
       : strategyNames[team.category as keyof typeof strategyNames];
 
-  const game: Game<any, Record<string, unknown>> = games.find(
+  const game: AnyBgioGame = games.find(
     (g) => g.name === gameName
   ) ?? ctx.throw(404, "Game " + gameName + " not found");
 
