@@ -5,7 +5,7 @@ import './style.css';
 type MyGameProps = BoardProps<MyGameState>;
 
 // Helper function: returns html element of rook
-function addRook(cellID : Position, G: any) {
+function addRook(cellID : Position, G: MyGameState) {
   if (G.rookPosition[0] === cellID[0] && G.rookPosition[1] === cellID[1])
     return <img className="rook" src="bastya.svg" alt="Bábu" />
 }

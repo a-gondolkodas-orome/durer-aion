@@ -1,4 +1,12 @@
-import { Ctx, MoveMap, TurnConfig } from "boardgame.io";
+import { Ctx, Game, MoveMap, TurnConfig } from "boardgame.io";
+import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
+
+// boardgame.io's own Game interface defaults its generics to `any` (quoted
+// below); a caller that spells that out trips no-explicit-any on bgio's
+// defaults rather than on a choice of ours. One caged alias keeps the ban
+// meaningful everywhere else.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type AnyBgioGame = Game<any, Record<string, unknown>, any>;
 
 export enum PlayerIDType {
   GUESSER_PLAYER = '0',
@@ -27,12 +35,15 @@ export interface GameStateTimer {
 }
 
 export type SetupFunction<G> = () => G;
-export type StartingPositionFunction<G> = (_: {G: G & GameStateMixin; ctx: Ctx; playerID: PlayerIDType; random: any}) => G;
+export type StartingPositionFunction<G> = (_: {G: G & GameStateMixin; ctx: Ctx; playerID: PlayerIDType; random: RandomAPI}) => G;
 
 /// GameWrapper's mixin.
 /// setup() is defined here, as it returns G instead of G & WrapperState 
 interface GameMixin<G> {
-  possibleMoves: (G: G, ctx: Ctx, playerID: PlayerIDType) => any[];
+  // Implementations disagree on the element shape (some return bgio
+  // AiEnumerate entries, the 15o games raw numbers); unknown[] states only
+  // what is common. gamewrapper adapts it for bgio's ai.enumerate.
+  possibleMoves: (G: G, ctx: Ctx, playerID: PlayerIDType) => unknown[];
   setup: SetupFunction<G>,
   startingPosition?: StartingPositionFunction<G>;
 }

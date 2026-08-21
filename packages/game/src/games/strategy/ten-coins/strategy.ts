@@ -1,5 +1,6 @@
 import { State } from 'boardgame.io';
 import { MyGameState } from './game';
+import { GameStateMixin } from '../../../common/types';
 
 const strategyMap = new Map<string, undefined | number[]>([
   ["11000", [2,1]],
@@ -35,7 +36,7 @@ const strategyMap = new Map<string, undefined | number[]>([
 
 export function strategyWrapper(category: "C" | "D" | "E")
 {
-  return (state: State<MyGameState>, _botID: string): [number[] | {coins: number[]} | undefined, string] => {
+  return (state: State<MyGameState & GameStateMixin>, _botID: string): [number[] | {coins: number[]} | undefined, string] => {
     if(state.ctx.phase === "startNewGame") {
       return [startingPosition({G: state.G, ctx: state.ctx}, category), "setStartingPosition"];
     }
@@ -53,7 +54,7 @@ export function strategyWrapper(category: "C" | "D" | "E")
   }
 }
 
-function startingPosition({ G, _ctx}: any, category: "C" | "D" | "E"): {coins: number[]} {
+function startingPosition({ G }: Pick<State<MyGameState & GameStateMixin>, 'G' | 'ctx'>, category: "C" | "D" | "E"): {coins: number[]} {
   if (category === "C"){
     // C Category
     if (G.difficulty === "test") {

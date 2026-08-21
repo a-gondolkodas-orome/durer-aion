@@ -1,4 +1,4 @@
-import { Game } from "boardgame.io";
+import { Ctx, Game } from "boardgame.io";
 import { INVALID_MOVE, TurnOrder } from "boardgame.io/core";
 // import { sendDataRelayEnd } from "../../common/sendData";
 import { GUESSER_PLAYER, JUDGE_PLAYER, otherPlayer, PlayerIDType } from "../../common/types";
@@ -27,7 +27,17 @@ export interface MyGameState {
 
 const lengthOfCompetition = 60 * 60; // seconds
 
-export function RelayWrapper(sendRelayFunction: (..._inputs: any[]) => void = () => undefined): Game<MyGameState> {
+// What the wrapper reports after each answered step; hosts accept a superset
+// of this shape (the offline frontend's SendGameDataParams).
+export interface RelayStepReport {
+  component: "relay";
+  phase: "step";
+  answer: number | null;
+  G: MyGameState;
+  ctx: Ctx;
+}
+
+export function RelayWrapper(sendRelayFunction: (_report: RelayStepReport) => void = () => undefined): Game<MyGameState> {
   const GameRelay: Game<MyGameState> = {
     name: "relay",
     setup: () => {

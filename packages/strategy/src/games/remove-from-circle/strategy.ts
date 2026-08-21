@@ -45,7 +45,7 @@ export function strategyWrapper(category: "C" | "D" | "E") {
   }
 }
 
-function startingPosition({ G, _ctx }: any, category: "C" | "D" | "E"): { circle: boolean[], firstMove: number, lastMove: number} {
+function startingPosition({ G }: Pick<State<RemoveFromCircleGameState & GameStateMixin>, 'G' | 'ctx'>, category: "C" | "D" | "E"): { circle: boolean[], firstMove: number, lastMove: number} {
   if (category === "C") {
     // C Category
     return { circle: Array(7).fill(true), firstMove:-1, lastMove:-1};

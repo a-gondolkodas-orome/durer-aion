@@ -18,7 +18,7 @@ export function strategyWrapper(category: "C" | "D") {
   }
 }
 
-function startingPosition({ G, _ctx }: any, category: "C" | "D"): MyGameState | undefined {
+function startingPosition({ G }: Pick<State<MyGameState & GameStateMixin>, 'G' | 'ctx'>, category: "C" | "D"): MyGameState | undefined {
   if (category === "C") {
     if (G.difficulty === "live") {
       if (G.winningStreak % 2 === 0) {

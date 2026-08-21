@@ -1,10 +1,11 @@
 import { MyGameState } from './game';
 import { BoardProps } from 'boardgame.io/react';
+import type { Theme } from '@mui/material/styles';
 import Stack from '@mui/material/Stack';
 import { Button, Typography, Box } from '@mui/material';
 import { GUESSER_PLAYER } from '../../../common';
 
-export function MyBoard({ G, ctx, moves }: BoardProps<MyGameState>, _theme: any) {
+export function MyBoard({ G, ctx, moves }: BoardProps<MyGameState>, _theme?: Theme) {
   const currentPlayerLastFromLeft = G.lastMoveFromLeftByPlayer[GUESSER_PLAYER];
   const canTakeFromLeft = G.stonesLeft > 0 && !currentPlayerLastFromLeft;
   const canTakeFromRight = G.stonesRight > 0;

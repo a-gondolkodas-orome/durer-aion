@@ -1,12 +1,13 @@
 import { MyGameState } from './game';
 import { BoardProps } from 'boardgame.io/react';
+import type { Theme } from '@mui/material/styles';
 import { useRef} from 'react';
 import Stack from '@mui/material/Stack';
 import { Button } from '@mui/material';
 
 import KeyboardDoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
 
-export function MyBoard({ G, ctx, moves }: BoardProps<MyGameState>, theme: any) {
+export function MyBoard({ G, ctx, moves }: BoardProps<MyGameState>, theme: Theme) {
   // TODO: use formik
   // create refs to store the text input elements
   const inputK = useRef<HTMLInputElement>(null);

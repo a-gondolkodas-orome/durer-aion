@@ -31,7 +31,7 @@ export function strategyWrapper(category: "C" | "D" | "E") {
   }
 }
 
-function startingPosition({ G }: any, category: "C" | "D" | "E"): { pile: number } {
+function startingPosition({ G }: Pick<State<MyGameState & GameStateMixin>, 'G' | 'ctx'>, category: "C" | "D" | "E"): { pile: number } {
   
   if (category === "C") {
     // C Category
