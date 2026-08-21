@@ -27,11 +27,20 @@ where the file does not exist yet, so your own values are never overwritten:
   database, and `docker compose up --build` for the full stack. It installs
   Docker CE rather than Moby (`"moby": false`), because the Node 24 image is
   Debian trixie-based and Debian does not package `moby-cli` there.
-- **Labelled ports**: 5173 (vite dev servers), 8000 (online-backend),
-  80 (nginx, when running docker compose), 5432 (postgres). These are labels
-  only — VS Code forwards each port when something actually starts listening
-  on it. They are deliberately *not* in `forwardPorts`, which forwards
-  eagerly and logs `ECONNREFUSED` against ports no server has bound yet.
+- **Labelled ports**: 5173 (vite dev servers), 8012 (strategy-practice),
+  8000 (online-backend), 8080 (nginx, when running docker compose), 5432
+  (postgres). These are labels only — VS Code forwards each port when something
+  actually starts listening on it. They are deliberately *not* in
+  `forwardPorts`, which forwards eagerly and logs `ECONNREFUSED` against ports
+  no server has bound yet. The flip side is that an empty Ports panel means
+  nothing is running, not that forwarding is broken.
+- **`WEB_PORT=8080`**, which moves the compose stack's nginx off port 80. The
+  inner dockerd publishes it on this container's own interfaces, so
+  auto-forwarding sees it and `DEV_SERVER_HOST` has nothing to do with it — but
+  VS Code forwards a container port to the *same* port number on your machine,
+  and binding a privileged one there needs root it does not have. Read by
+  `docker-compose.yml`, where the default is still 80; shell environment beats
+  `--env-file` in compose interpolation, so setting it here is enough.
 - **`DEV_SERVER_HOST=true`**, which makes the vite dev servers listen on all
   interfaces instead of loopback only. Without it the forwarded port accepts
   the connection and then hangs, because a loopback-bound server inside the

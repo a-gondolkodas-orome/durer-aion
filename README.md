@@ -28,15 +28,16 @@ All demos are in Hungarian.
 npm ci
 npm run setup         # creates the gitignored .env files from their samples
 npm run stack:up      # builds everything, then starts nginx + backend + postgres
-npm run teams:import  # once postgres is accepting connections, a few seconds later
+npm run teams:import  # loads scripts/test.tsv
 ```
 
 Open `http://localhost` and log in with the join code `000-0000-000`.
 
-The stack runs in the background, so that is one terminal, not two, and closing
-it leaves the stack up. `npm run stack:logs` follows the output of all three
-containers — Ctrl-C stops watching, not the stack. `npm run stack:down` is what
-stops it.
+`stack:up` returns once the containers are actually up, and fails if they are
+not — so if it came back clean, the stack is running. It runs in the background,
+so that is one terminal, not two, and closing it leaves the stack up.
+`npm run stack:logs` follows the output of all three containers — Ctrl-C stops
+watching, not the stack. `npm run stack:down` is what stops it.
 
 That is the whole online round: the site teams see, the game server they play
 against, and the database behind it.
@@ -46,6 +47,30 @@ against, and the database behind it.
 | `http://localhost` | the competition site — team login, chooser, relay and strategy matches |
 | `http://localhost/admin` | the admin pages; the browser asks for basic auth, user `admin`, password `ADMIN_CREDENTIALS` from `.env.docker` |
 | `localhost:5432` | postgres, if you want to look at the data directly |
+
+**Only one of the two flows at a time.** The stack's postgres and
+`npm run db:up` both bind 5432, so `stack:up` fails while the other one holds
+it. Stop the one you are not using — `npm run stack:down`, or Ctrl-C the
+`db:up` terminal — before starting the other.
+
+### In the dev container
+
+The stack is on **8080** there, not 80: VS Code forwards a container port to the
+same port number on your machine, and binding a privileged one needs root it
+does not have. Everything above is otherwise unchanged — read `8080` for `80`,
+so `http://localhost:8080/admin` for the admin pages.
+
+Open the address VS Code's **Ports** panel gives for 8080 rather than typing one:
+in a Codespace it is a rewritten `*.app.github.dev` URL, not localhost at all. A
+port shows up there only once something binds it, so an empty panel means the
+stack is not running — start with `npm run stack:ps`, then `npm run stack:logs`.
+
+### When a URL shows nothing
+
+```bash
+npm run stack:ps    # which services are up
+npm run stack:logs  # and why one is not
+```
 
 `npm run teams:import` loads `scripts/test.tsv`. Its first three teams cover the
 three age categories — `000-0000-000` is a category C join code, `001-0000-000`
@@ -139,6 +164,12 @@ At `http://localhost/admin`, user `admin`, password from `.env.docker`:
   soft delete. Start a match as a team in another tab first, then act on it
   from here.
 
+This is the one thing the stack is required for. The admin pages do not work
+from `dev:online` on 5173: basic auth cannot ride a cross-origin request, and
+the backend answers those with `Access-Control-Allow-Origin: *`, which may not
+carry credentials. Through nginx it is all one origin, so the browser's password
+prompt is all it takes.
+
 Team import has two paths and both need checking: `npm run teams:import`, which
 runs `scripts/import_teams.sh` inside the container, and the TSV upload on the
 admin page.
@@ -171,9 +202,13 @@ its checks run from its own directory:
 
 ```bash
 cd apps/strategy-practice
-npm run dev   # the practice site
+npm run dev   # the practice site, on http://localhost:8012
 npm test      # its own version check, lint, typecheck and unit tests
 ```
+
+Its vite config binds all interfaces and pins port 8012, so it forwards out of
+the dev container with no extra setup, and does not collide with the 5173 the
+other two frontends share.
 
 **Do not run `npm ci` from `apps/strategy-practice`.** There is one lockfile, at
 the root; from a workspace directory npm installs that workspace's subtree and
