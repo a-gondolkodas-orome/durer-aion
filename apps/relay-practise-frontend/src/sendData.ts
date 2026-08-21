@@ -59,7 +59,7 @@ export function sendDataLogin(teamState: TeamModelDto){
 interface SendGameDataParams {
   component: "relay" | "strategy";
   phase: "start" | "step" | "end";
-  answer?: number;
+  answer?: number | null;
   G?: any;
   ctx?: any;
   log?: any;
