@@ -196,6 +196,24 @@ npm run dev:offline
 the in-browser bot and persist to localStorage. Reload mid-game to check the
 persistence.
 
+## The public Pages site
+
+```bash
+npm run site:build   # home + /jatekok/ + /proba-verseny/ + /valto/ into site/
+npm run site:serve   # on http://localhost:4321
+```
+
+`site:build` is the same script `.github/workflows/pages-deploy.yml` runs, so
+this is the artifact a push to `main` would publish rather than an
+approximation of it — base paths, the rebased 2023 relay build and the CNAME
+assertion included. Worth a look before merging anything that touches an app on
+the site, because the workflow going green *is* the cutover: there is no staging
+step between it and gyakorlo.durerinfo.hu.
+
+The one thing it cannot reproduce is the upload itself, and GitHub's own serving
+behaviour around 404s. CI builds in `node:24.11.1`; to match that too, run the
+same command under `docker run -v "$PWD":/w -w /w node:24.11.1 npm run site:build`.
+
 ## The practice site (`apps/strategy-practice`)
 
 The strategy-game practice site (https://gyakorlo.durerinfo.hu) lives in

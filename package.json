@@ -69,6 +69,8 @@
     "stack:prod": "npm run build && docker compose --env-file=.env.docker up --build --wait",
     "teams:import": "docker compose --env-file=.env.docker exec backend ./scripts/import_teams.sh scripts/test.tsv",
     "teams:import:local": "npx turbo build --filter=online-backend && cd apps/online-backend && node dist/src/server.js import ../../scripts/test.tsv",
+    "site:build": "node scripts/assemble-site.mjs",
+    "site:serve": "node scripts/serve-site.mjs",
     "db:up": "docker run -it --rm -e POSTGRESQL_PASSWORD=postgres -p 127.0.0.1:5432:5432 bitnami/postgresql",
     "i18n:check": "i18n-check --format i18next --source hu --locales packages/common-frontend/public --unused ./**/src"
   },

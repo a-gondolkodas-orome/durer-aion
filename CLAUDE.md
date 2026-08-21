@@ -172,7 +172,9 @@ docker compose, not GitHub Pages.
 One site, one artifact, built by `.github/workflows/pages-deploy.yml` on every
 push to `main`: a home page plus `/jatekok/` (practice), `/valto/` (a frozen
 2023 relay build) and `/proba-verseny/` (the offline dry run). The whole prefix
-comes from one `SITE_ROOT` variable in that workflow. See
+comes from one `SITE_ROOT` constant in `scripts/assemble-site.mjs`, which both
+the workflow and `npm run site:build` call — so `npm run site:serve` previews
+the deploy's own code, not a copy of it. See
 [`docs/pages-consolidation.md`](docs/pages-consolidation.md).
 
 **A push to `main` deploys the public site.** There is no staging step and no

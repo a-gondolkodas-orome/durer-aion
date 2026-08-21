@@ -135,6 +135,10 @@ export default defineConfig(
       'apps/strategy-practice/**',
       // A frozen 2023 build output, kept byte for byte. See pages/valto-2023/README.md.
       'pages/**',
+      // The assembled Pages artifact `npm run site:build` writes: every app's built
+      // bundles, plus a copy of pages/. Gitignored, but eslint has its own ignore list
+      // and would otherwise lint minified output the moment anyone previews the site.
+      'site/**',
     ],
   }
 );
