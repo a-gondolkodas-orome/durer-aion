@@ -32,7 +32,12 @@
       "dependsOn": ["^build"]
     },
     "dev": {
-      "dependsOn": [],
+      // Build the workspace's dependencies before starting anything. Without
+      // this the backend's `tsx watch` races the package watchers' first build
+      // and imports `game` while its dist does not exist yet — which resolves
+      // to the package's source barrel and dies on JSX the server never meant
+      // to load. The watchers keep it fresh from there.
+      "dependsOn": ["^build"],
       "cache": false,
       "persistent": true
     }
