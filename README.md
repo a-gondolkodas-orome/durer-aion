@@ -195,20 +195,27 @@ persistence.
 The strategy-game practice site (https://gyakorlo.durerinfo.hu) lives in
 `apps/strategy-practice`, merged in from the durer-jatekok repository with its
 history and renamed from `apps/practice` when the relay practice app arrived
-(pre-rename history: `git log -- apps/practice`). The root `npm ci` installs it
-and `npm run build` and `npm run typecheck` cover it — but it keeps its own
-ESLint and vitest setups, so the root `npm run lint` and `npm test` skip it and
-its checks run from its own directory:
+(pre-rename history: `git log -- apps/practice`). It is a workspace, so it runs
+from the root like the other frontends:
 
 ```bash
-cd apps/strategy-practice
-npm run dev   # the practice site, on http://localhost:8012
-npm test      # its own version check, lint, typecheck and unit tests
+npm run dev:practice   # the practice site, on http://localhost:8012
 ```
 
 Its vite config binds all interfaces and pins port 8012, so it forwards out of
 the dev container with no extra setup, and does not collide with the 5173 the
 other two frontends share.
+
+`npm ci`, `npm run build` and `npm run typecheck` at the root cover it, but its
+own ESLint and vitest setups mean the root's `npm run lint` and `npm test` skip
+it. Its suite runs from anywhere by naming the workspace:
+
+```bash
+npm test --workspace=strategy-practice   # version check, lint, typecheck, unit
+```
+
+`cd apps/strategy-practice` if you are going to iterate in there — the rest of
+its scripts, `coverage:patch` among them, work the same either way.
 
 **Do not run `npm ci` from `apps/strategy-practice`.** There is one lockfile, at
 the root; from a workspace directory npm installs that workspace's subtree and

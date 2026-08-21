@@ -60,6 +60,7 @@
     "dev:server": "turbo dev --filter=online-backend --filter=game --filter=schemas --filter=strategy",
     "dev:online": "turbo dev --filter=online-frontend --filter=game --filter=common-frontend",
     "dev:offline": "turbo dev --filter=offline-frontend --filter=game --filter=strategy --filter=common-frontend",
+    "dev:practice": "npm run dev --workspace=strategy-practice",
     "setup": "node scripts/seed-env-files.mjs",
     "stack:up": "npm run build && docker compose -f docker-compose.yml -f docker-compose.dev.yml --env-file=.env.docker up --build --wait",
     "stack:down": "docker compose -f docker-compose.yml -f docker-compose.dev.yml --env-file=.env.docker down",

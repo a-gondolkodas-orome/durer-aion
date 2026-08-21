@@ -98,10 +98,9 @@ npm run spell-check
 setups. Its own checks run from that directory, with no install of their own:
 
 ```bash
-cd apps/strategy-practice
-npm run dev
-npm test              # check:versions + lint + typecheck + unit
-npm run coverage:patch
+npm run dev:practice                     # from the root; it is a workspace
+npm test --workspace=strategy-practice   # check:versions + lint + typecheck + unit
+cd apps/strategy-practice && npm run coverage:patch
 ```
 
 Every long docker invocation lives in a root npm script rather than in prose,
