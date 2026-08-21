@@ -31,7 +31,7 @@ npm run stack:up      # builds everything, then starts nginx + backend + postgre
 npm run teams:import  # in a second terminal, once the stack is up
 ```
 
-Open <http://localhost> and log in with the join code `000-0000-000`.
+Open `http://localhost` and log in with the join code `000-0000-000`.
 `npm run stack:down` stops it again.
 
 That is the whole online round: the site teams see, the game server they play
@@ -39,8 +39,8 @@ against, and the database behind it.
 
 | where | what |
 | --- | --- |
-| <http://localhost> | the competition site — team login, chooser, relay and strategy matches |
-| <http://localhost/admin> | the admin pages; the browser asks for basic auth, user `admin`, password `ADMIN_CREDENTIALS` from `.env.docker` |
+| `http://localhost` | the competition site — team login, chooser, relay and strategy matches |
+| `http://localhost/admin` | the admin pages; the browser asks for basic auth, user `admin`, password `ADMIN_CREDENTIALS` from `.env.docker` |
 | `localhost:5432` | postgres, if you want to look at the data directly |
 
 `npm run teams:import` loads `scripts/test.tsv`. Its first three teams cover the
@@ -69,7 +69,7 @@ npm run dev:server  # backend on :8000
 npm run dev:online  # frontend on :5173
 ```
 
-Then import the teams once, and open <http://localhost:5173>:
+Then import the teams once, and open `http://localhost:5173`:
 
 ```bash
 npm run teams:import:local
@@ -108,7 +108,7 @@ transport and the built frontend at once.
 
 ## A team playing the round
 
-1. <http://localhost>, join code `000-0000-000`: disclaimer, then the chooser
+1. `http://localhost`, join code `000-0000-000`: disclaimer, then the chooser
    offers the relay and the strategy game.
 2. Play the **relay** through to the end.
 3. Play the **strategy** game through to the end against the server bot,
@@ -124,7 +124,7 @@ different games.
 
 ## Admin and operations
 
-At <http://localhost/admin>, user `admin`, password from `.env.docker`:
+At `http://localhost/admin`, user `admin`, password from `.env.docker`:
 
 - the team list, and a team's details from it — `/admin/<teamId>` opens one
   team directly;
@@ -149,7 +149,7 @@ is right.
 npm run dev:offline
 ```
 
-<http://localhost:5173>, with no backend and no database: the games run against
+`http://localhost:5173`, with no backend and no database: the games run against
 the in-browser bot and persist to localStorage. Reload mid-game to check the
 persistence.
 
