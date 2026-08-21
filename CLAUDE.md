@@ -34,10 +34,10 @@ root; from a workspace directory npm installs that workspace's subtree and
 leaves the root's own dependencies unmet, which the other apps then fail to
 build against. It exits 0 while doing it.
 
-The whole repo is being reshaped: see
-[`docs/boardgame-io-replacement-plan.md`](docs/boardgame-io-replacement-plan.md),
-the coordination artifact for replacing boardgame.io with practice's engine, and
-[`docs/must-keep-working.md`](docs/must-keep-working.md), the standing
+A plan to replace boardgame.io with practice's engine was drafted and then
+deprioritized — upstream is actively maintained again (issue #277); don't
+build toward that replacement.
+[`docs/must-keep-working.md`](docs/must-keep-working.md) is the standing
 regression checklist every change is measured against.
 
 ## Tech Stack
@@ -109,12 +109,10 @@ works* — how to exercise each item of `docs/must-keep-working.md` by hand.
 
 ## Creating a New Game
 
-**Check the migration plan before building on this shape.** Phases 1–2 replace
-it with practice's `strategyGameFactory`, where a game is one self-contained
-folder — gameplay, bot, curated start boards, board client and specs together.
-A new game written the old way becomes migration debt. For a game on the
-*practice* site, the `new-game` skill under `apps/practice` is the current
-route.
+The steps below are for a game in the *live competition* (boardgame.io). For
+a game on the *practice* site, the `new-game` skill under `apps/practice` is
+the route — there a game is one self-contained folder: gameplay, bot, curated
+start boards, board client and specs together.
 
 1. Create game files in `packages/game/src/games/<game-name>/`:
    - `game.ts` - boardgame.io game definition
@@ -185,8 +183,7 @@ A new competition's game must stay secret until after the competition, which is
 why each year has a private synced repo: `sync.yml` mirrors any pushed `sync-*`
 branch into it, the game is developed and deployed from there, and a merge-back
 PR publishes it afterwards. Nothing about an unreleased game may appear in a
-public commit — including engine changes phrased around its needs. The migration
-plan's *Competition secrecy* section has the details.
+public commit — including engine changes phrased around its needs.
 
 ## Key Conventions
 

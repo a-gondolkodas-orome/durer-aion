@@ -1,12 +1,12 @@
 # What must keep working
 
-The regression checklist for the boardgame.io replacement migration
-(`docs/boardgame-io-replacement-plan.md`).
+The standing regression checklist for this repo: what the two sites and the
+live competition must keep doing through any change.
 
-Every phase of that migration is verified against this list: **a phase is done
-only when each item below still holds**. Items are removed only when a
-capability is deliberately retired by a phase — with an inline note saying
-which PR retired it and what replaced it.
+Structural changes are verified against this list: **a change is done only
+when each item below still holds**. Items are removed only when a capability
+is deliberately retired — with an inline note saying which PR retired it and
+what replaced it.
 
 This is a hand-walked checklist, not an automated suite. Where an item is
 covered by a test or a CI job, that is noted; everything else is checked by

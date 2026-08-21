@@ -19,19 +19,16 @@ export const HEADLESS_PLAYER_NAMES: [string, string] = ['0', '1'];
 
 // Plays one whole bot turn — asking the strategy again while the turn is still
 // its own, and running the auto endOfTurnMove straight away, since there is
-// nothing to animate. The third host of the bot contract, next to the React
-// shell and runMatch (which drives its turns through this): the competition
-// server answers a team's move by calling this until it is the team's turn
-// again or the game ended.
+// nothing to animate. The headless host of the bot contract, next to the React
+// shell: runMatch drives every one of its turns through this.
 //
-// Everything that goes wrong throws: the strategy is the caller's own code
-// (the server ships the bot), so a bad name, an illegal move or a turn that
-// never closes is a bug to surface, not input to tolerate — unlike a team's
-// move, which applyClientMove rejects instead.
+// Everything that goes wrong throws: the strategy is the caller's own code,
+// so a bad name, an illegal move or a turn that never closes is a bug to
+// surface, not input to tolerate.
 //
 // `state.chosenRoleIndex` is read by strategies to learn their seat and is
 // taken as given here: the host owns it (the shell sets it at role selection,
-// runMatch flips it per turn, a server sets it when the team chooses).
+// runMatch flips it per turn).
 export const playBotTurn = <TBoard, TTurnState = unknown>(
   initialState: CoreState<TBoard, TTurnState>,
   gameplay: Gameplay<TBoard, TTurnState>,

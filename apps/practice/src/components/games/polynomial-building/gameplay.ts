@@ -113,7 +113,10 @@ export const moves = {
     validate: (board: Board, _, coef: Coef, value: number) =>
       COEFS.includes(coef) && board[coef] === null && Number.isSafeInteger(value),
     apply: (board: Board, _, coef: Coef, value: number): MoveOutcome<Board> => {
-      const nextBoard = { ...board, [coef]: value };
+      // Normalise -0 to 0 as the value enters the board: completionValue's
+      // negations produce -0 (so the bot plays it), and -0 does not survive a
+      // JSON round trip.
+      const nextBoard = { ...board, [coef]: value === 0 ? 0 : value };
       const filled = nextBoard.a !== null && nextBoard.b !== null && nextBoard.c !== null;
       if (filled) {
         // A (player 0) wins iff all three roots are integers; otherwise B (player 1).
