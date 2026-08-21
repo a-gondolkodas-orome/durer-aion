@@ -12,7 +12,7 @@ function apiAxiosInstance(): AxiosInstance {
   });
 }
 
-function makeAxiosError(any_error: any): AxiosError {
+function makeAxiosError(any_error: unknown): AxiosError {
   if(!axios.isAxiosError(any_error)){
     throw  any_error;
   }
@@ -33,7 +33,7 @@ export class RealClientRepository implements ClientRepository {
     let result;
     try {
       result = await apiAxiosInstance().get(url);
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error(e)
       // here we can set message according to status (or data)
       throw new Error('Váratlan hiba történt');
@@ -64,7 +64,7 @@ export class RealClientRepository implements ClientRepository {
     let result;
     try {
       result = await apiAxiosInstance().get(url);
-    } catch (e: any) {
+    } catch (e: unknown) {
       const err = makeAxiosError(e);
       if(err.response?.status === 404) {
         throw new Error('Nem létező kód');
@@ -87,7 +87,7 @@ export class RealClientRepository implements ClientRepository {
     let result;
     try {
       result = await apiAxiosInstance().get(url);
-    } catch (e: any) {
+    } catch (e: unknown) {
       const err = makeAxiosError(e)
       console.error(err.message)
       // here we can set message according to status (or data)
@@ -106,7 +106,7 @@ export class RealClientRepository implements ClientRepository {
     let result;
     try {
       result = await apiAxiosInstance().get(url);
-    } catch (e: any) {
+    } catch (e: unknown) {
       const err = makeAxiosError(e);
       console.error(err.message)
       // here we can set message according to status (or data)
@@ -125,7 +125,7 @@ export class RealClientRepository implements ClientRepository {
     let result;
     try {
       result = await apiAxiosInstance().get(url);
-    } catch (e: any) {
+    } catch (e: unknown) {
       const err = makeAxiosError(e);
       console.error(err.message)
       // here we can set message according to status (or data)
@@ -141,7 +141,7 @@ export class RealClientRepository implements ClientRepository {
     let result;
     try {
       result = await apiAxiosInstance().get(url);
-    } catch (e: any) {
+    } catch (e: unknown) {
       const err = makeAxiosError(e);
       console.error(err.message)
       // here we can set message according to status (or data)
@@ -158,7 +158,7 @@ export class RealClientRepository implements ClientRepository {
     let result;
     try {
       result = await apiAxiosInstance().get(url);
-    } catch (e: any) {
+    } catch (e: unknown) {
       const err = makeAxiosError(e);
       console.error(err.message)
       // here we can set message according to status (or data)
@@ -174,7 +174,7 @@ export class RealClientRepository implements ClientRepository {
     let result;
     try {
       result = await apiAxiosInstance().get(url);
-    } catch (e: any) {
+    } catch (e: unknown) {
       const err = makeAxiosError(e);
       console.error(err.message)
       // here we can set message according to status (or data)
@@ -191,7 +191,7 @@ export class RealClientRepository implements ClientRepository {
     let result;
     try {
       result = await apiAxiosInstance().get(url);
-    } catch (e: any) {
+    } catch (e: unknown) {
       const err = makeAxiosError(e);
       console.error(err.message)
       // here we can set message according to status (or data)
@@ -210,7 +210,7 @@ export class RealClientRepository implements ClientRepository {
     let result;
     try {
       result = await apiAxiosInstance().get(url);
-    } catch (e: any) {
+    } catch (e: unknown) {
       const err = makeAxiosError(e);
       console.error(err.message)
       // here we can set message according to status (or data)
@@ -226,7 +226,7 @@ export class RealClientRepository implements ClientRepository {
     let result;
     try {
       result = await apiAxiosInstance().get(url);
-    } catch (e: any) {
+    } catch (e: unknown) {
       const err = makeAxiosError(e);
       console.error(err.message)
       // here we can set message according to status (or data)
@@ -241,7 +241,7 @@ export class RealClientRepository implements ClientRepository {
     });
     try {
       await apiAxiosInstance().delete(url);
-    } catch (e: any) {
+    } catch (e: unknown) {
       const err = makeAxiosError(e);
       console.error(err.message)
       throw e;
