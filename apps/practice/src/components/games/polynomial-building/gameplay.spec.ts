@@ -135,4 +135,12 @@ describe('end of game', () => {
     expect(outcome.gameEnd).toBeUndefined();
     expect(outcome.isTurnEnd).toBe(true);
   });
+
+  it('stores -0 as 0, the JSON-stable zero', () => {
+    // completionValue negates root sums and products, so a winning bot move can
+    // arrive as -0 — here roots 0, 1, -1 give a = -(1 + b) = -0.
+    expect(Object.is(completionValue({ a: null, b: -1, c: 0 }), -0)).toBe(true);
+    const outcome = moves.setCoefficient.apply(board(null, -1, 0), meta, 'a', -0);
+    expect(Object.is(outcome.nextBoard.a, 0)).toBe(true);
+  });
 });

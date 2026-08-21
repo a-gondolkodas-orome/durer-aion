@@ -9,7 +9,7 @@ npm ci
 # should not make you remember. Seed every one of them:
 #
 #   .env.docker.sample            -> .env.docker   (docker compose --env-file)
-#   .env.local.sample             -> .env.local    (read by common-frontend's tsup config)
+#   .env.local.sample             -> .env.local    (read by common-frontend's tsdown config)
 #   apps/<app>/.env.sample        -> apps/<app>/.env
 #
 # Never overwrite an existing file: a developer's own values live there, and

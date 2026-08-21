@@ -34,17 +34,17 @@ root; from a workspace directory npm installs that workspace's subtree and
 leaves the root's own dependencies unmet, which the other apps then fail to
 build against. It exits 0 while doing it.
 
-The whole repo is being reshaped: see
-[`docs/boardgame-io-replacement-plan.md`](docs/boardgame-io-replacement-plan.md),
-the coordination artifact for replacing boardgame.io with practice's engine, and
-[`docs/must-keep-working.md`](docs/must-keep-working.md), the standing
+A plan to replace boardgame.io with practice's engine was drafted and then
+deprioritized — upstream is actively maintained again (issue #277); don't
+build toward that replacement.
+[`docs/must-keep-working.md`](docs/must-keep-working.md) is the standing
 regression checklist every change is measured against.
 
 ## Tech Stack
 
 - **Frontend**: React 19, Vite, MUI (Material-UI), React Router
 - **Backend**: boardgame.io server, Koa, PostgreSQL (via bgio-postgres)
-- **Build**: Turborepo, TypeScript, tsup
+- **Build**: Turborepo, TypeScript, tsdown
 - **Testing**: vitest, React Testing Library. Suites are `*.test.ts(x)` under
   the root config and `*.spec.ts(x)` in `apps/practice`; both run through
   vitest, and neither uses Jest.
@@ -108,12 +108,10 @@ Import test teams:
 
 ## Creating a New Game
 
-**Check the migration plan before building on this shape.** Phases 1–2 replace
-it with practice's `strategyGameFactory`, where a game is one self-contained
-folder — gameplay, bot, curated start boards, board client and specs together.
-A new game written the old way becomes migration debt. For a game on the
-*practice* site, the `new-game` skill under `apps/practice` is the current
-route.
+The steps below are for a game in the *live competition* (boardgame.io). For
+a game on the *practice* site, the `new-game` skill under `apps/practice` is
+the route — there a game is one self-contained folder: gameplay, bot, curated
+start boards, board client and specs together.
 
 1. Create game files in `packages/game/src/games/<game-name>/`:
    - `game.ts` - boardgame.io game definition
@@ -183,8 +181,7 @@ A new competition's game must stay secret until after the competition, which is
 why each year has a private synced repo: `sync.yml` mirrors any pushed `sync-*`
 branch into it, the game is developed and deployed from there, and a merge-back
 PR publishes it afterwards. Nothing about an unreleased game may appear in a
-public commit — including engine changes phrased around its needs. The migration
-plan's *Competition secrecy* section has the details.
+public commit — including engine changes phrased around its needs.
 
 ## Key Conventions
 
@@ -202,3 +199,13 @@ plan's *Competition secrecy* section has the details.
   reviewer can accept or reject them separately.
 - An agent opening a PR assigns the person it is working for, so it lands in
   their queue rather than going unnoticed.
+- Permission to commit to someone else's branch is not permission to comment on
+  their PR. An agent asks first before posting to a thread it does not own — the
+  commit messages already carry the reasoning, and the thread is the author's.
+- Keep PR descriptions and review comments short. Say what changed and why, and
+  stop; the diff, the commit messages and the linked docs carry the rest. Length
+  is not thoroughness — it costs the reviewer the time the change was meant to
+  save.
+- Do not `@`-mention anyone not already involved in the thread: a mention is a
+  notification. Naming a person plainly, or referring to their PR by number,
+  says the same thing without pulling them in.

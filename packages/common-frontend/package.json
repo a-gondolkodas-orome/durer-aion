@@ -11,8 +11,8 @@
   "scripts": {
     "lint": "cross-env TIMING=1 eslint \"src/**/*.ts*\" --max-warnings=-1",
     "typecheck": "tsc --noEmit",
-    "build": "npx tsup",
-    "dev": "npx tsup --watch --onSuccess \"echo rebuilt game\""
+    "build": "npx tsdown",
+    "dev": "npx tsdown --watch --onSuccess \"echo rebuilt common-frontend\""
   },
   "dependencies": {
     "@babel/cli": "^7.18.6",
