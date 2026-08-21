@@ -25,15 +25,16 @@ All demos are in Hungarian.
 npm ci
 ```
 
-## The practice site (`apps/practice`)
+## The practice site (`apps/strategy-practice`)
 
-The practice site (https://jatek.durerinfo.hu) lives in `apps/practice`, merged
-in from the durer-jatekok repository with its history. **It is not part of this
-repo's npm workspaces yet**, so it installs and runs on its own:
+The strategy-game practice site (https://gyakorlo.durerinfo.hu) lives in
+`apps/strategy-practice`, merged in from the durer-jatekok repository with its
+history and renamed from `apps/practice` when the relay practice app arrived
+(pre-rename history: `git log -- apps/practice`). It is a workspace: one root
+`npm ci` installs it, and its own checks run from its directory:
 
 ```bash
-cd apps/practice
-npm ci
+cd apps/strategy-practice
 npm run dev     # the practice site
 npm test        # its own lint + typecheck + unit tests
 ```

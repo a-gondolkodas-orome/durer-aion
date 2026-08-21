@@ -38,7 +38,7 @@ export default defineConfig(
       'prefer-const': 'error',
     },
   },
-  // packages/engine and packages/games are apps/practice code moved out of it, still
+  // packages/engine and packages/games are apps/strategy-practice code moved out of it, still
   // written in that app's dialect and composing its types. Two rules of this config
   // disagree with the conventions that code follows, and rewriting it would turn a move
   // into a rewrite — they stay off here until the two ESLint setups are unified.
@@ -74,7 +74,7 @@ export default defineConfig(
   // A game's .ts half — gameplay, bot, curated start boards — is what a competition
   // server validates moves and plays bot turns with, so it runs in plain Node; only
   // the game's .tsx (its board client and config) may be React-flavoured. Same
-  // blind spot as above: `gameplay-react-free.spec.ts` in apps/practice watches what
+  // blind spot as above: `gameplay-react-free.spec.ts` in apps/strategy-practice watches what
   // a relative import resolves to.
   {
     files: ['packages/games/**/*.ts'],
@@ -121,11 +121,10 @@ export default defineConfig(
       '**/build/**',
       '**/node_modules/**',
       '**/*.config.{js,mjs,cjs,ts}',
-      // apps/practice is linted by its own eslint config, through its own
-      // `npm run lint`. Until the workspaces are unified it is not part of
-      // this repo's install, so linting it from here would resolve neither
-      // its plugins nor its tsconfig.
-      'apps/practice/**',
+      // apps/strategy-practice is linted by its own eslint config, through its
+      // own `npm run lint` — it keeps its own ESLint version and plugins (npm
+      // nests them), which this config's flat resolution would not find.
+      'apps/strategy-practice/**',
       // Hand-written pages the deploy copies verbatim, with no build step. See pages/README.md.
       'pages/**',
     ],

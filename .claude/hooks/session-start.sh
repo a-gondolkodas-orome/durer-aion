@@ -83,11 +83,9 @@ fi
 # because the container state is cached. A sound tree answers in well under a
 # second, so repeat startups stay fast.
 #
-# One install per lockfile, rather than one at the root: apps/practice is still
-# its own npm project with its own lockfile, and the root install does not reach
-# it. Driving the loop off the lockfiles rather than a hardcoded list means this
-# needs no edit when PR 0.3 folds practice into the workspaces — its lockfile
-# goes away and the loop narrows to the root on its own.
+# One install per lockfile rather than a hardcoded path: today only the root
+# lockfile exists (every app is a workspace), and the loop narrows or widens on
+# its own if that ever changes.
 for lockfile in package-lock.json apps/*/package-lock.json; do
   [ -f "$lockfile" ] || continue
   project=$(dirname "$lockfile")

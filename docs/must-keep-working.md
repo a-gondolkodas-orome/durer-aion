@@ -47,8 +47,8 @@ someone actually doing it.
 
 ## Practice site
 
-*(Applies from the subtree merge in PR 0.2 on, when durer-jatekok becomes
-`apps/practice`.)*
+*(Applies from the subtree merge in PR 0.2 on, when durer-jatekok became a
+workspace — `apps/practice` then, `apps/strategy-practice` since the rename.)*
 
 - `jatek.durerinfo.hu` serves the site and deploy-on-main works.
 - Every game is playable in both modes.

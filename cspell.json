@@ -18,7 +18,7 @@
     "*.log",
     "package.json",
     "coverage/**/*",
-    "apps/practice/**",
+    "apps/strategy-practice/**",
     "docker-compose*",
     "readme.md",
     "src/teamData.ts",

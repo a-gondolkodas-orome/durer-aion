@@ -15,7 +15,7 @@ import { existsSync } from 'node:fs';
 const playwright = ['../../../node_modules/playwright/index.mjs', '../../../../../node_modules/playwright/index.mjs']
   .map(candidate => new URL(candidate, import.meta.url))
   .find(url => existsSync(url))?.href
-  ?? (() => { throw new Error('playwright not found in apps/practice or the repo root — run npm ci at the root'); })();
+  ?? (() => { throw new Error('playwright not found in the app or the repo root — run npm ci at the root'); })();
 
 export const DEV_URL = 'http://localhost:8012';
 

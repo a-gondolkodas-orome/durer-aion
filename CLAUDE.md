@@ -11,7 +11,7 @@ apps/
   online-frontend/    # React frontend for multiplayer (Vite)
   online-backend/     # Node.js server with boardgame.io + Koa
   offline-frontend/   # Standalone practice version (Vite)
-  practice/           # the public strategy game practice site (durer-jatekok)
+  strategy-practice/  # the public strategy game practice site (from the durer-jatekok repo)
 packages/
   game/               # Game logic (boardgame.io games)
   strategy/           # AI/bot strategies for games
@@ -20,16 +20,16 @@ packages/
 pages/                # static content the Pages deploy serves but no app builds
 ```
 
-**`apps/practice` is a workspace, but not like the others.** One root `npm ci`
+**`apps/strategy-practice` is a workspace, but not like the others.** One root `npm ci`
 installs it, and turbo builds and typechecks it with everything else — but it
 keeps its own ESLint, TypeScript and Vite versions (npm nests them), its own
 `eslint.config.js`, its own vitest setup and its own CI workflow. So the root's
 `npm run lint` and `npm test` still skip it, and its checks run from
-`apps/practice`. Its own [`AGENTS.md`](apps/practice/AGENTS.md) loads
+`apps/strategy-practice`. Its own [`AGENTS.md`](apps/strategy-practice/AGENTS.md) loads
 automatically when you work under that directory and is the authority on
 everything inside it — memory files nest by directory; settings do not.
 
-**Do not run `npm ci` from `apps/practice`.** There is one lockfile, at the
+**Do not run `npm ci` from `apps/strategy-practice`.** There is one lockfile, at the
 root; from a workspace directory npm installs that workspace's subtree and
 leaves the root's own dependencies unmet, which the other apps then fail to
 build against. It exits 0 while doing it.
@@ -46,9 +46,9 @@ regression checklist every change is measured against.
 - **Backend**: boardgame.io server, Koa, PostgreSQL (via bgio-postgres)
 - **Build**: Turborepo, TypeScript, tsdown
 - **Testing**: vitest, React Testing Library. Suites are `*.test.ts(x)` under
-  the root config and `*.spec.ts(x)` in `apps/practice`; both run through
+  the root config and `*.spec.ts(x)` in `apps/strategy-practice`; both run through
   vitest, and neither uses Jest.
-- **`apps/practice`** is on the same React major but its own Vite/TS/ESLint
+- **`apps/strategy-practice`** is on the same React major but its own Vite/TS/ESLint
   versions, plus Tailwind. See its `package.json` rather than assuming this one's.
 
 ## Development Commands
@@ -83,12 +83,12 @@ npm run i18n:check
 npm run spell-check
 ```
 
-`npm ci`, `npm run build` and `npm run typecheck` cover `apps/practice` too;
+`npm ci`, `npm run build` and `npm run typecheck` cover `apps/strategy-practice` too;
 `npm run lint` and `npm test` do not, because it has its own ESLint and vitest
 setups. Its own checks run from that directory, with no install of their own:
 
 ```bash
-cd apps/practice
+cd apps/strategy-practice
 npm run dev
 npm test              # check:versions + lint + typecheck + unit
 npm run coverage:patch
@@ -109,7 +109,7 @@ Import test teams:
 ## Creating a New Game
 
 The steps below are for a game in the *live competition* (boardgame.io). For
-a game on the *practice* site, the `new-game` skill under `apps/practice` is
+a game on the *practice* site, the `new-game` skill under `apps/strategy-practice` is
 the route — there a game is one self-contained folder: gameplay, bot, curated
 start boards, board client and specs together.
 

@@ -92,8 +92,8 @@
     "apps/offline-frontend",
     "apps/online-backend",
     "apps/online-frontend",
-    "apps/practice",
     "apps/relay-practise-frontend",
+    "apps/strategy-practice",
     "packages/*"
   ],
   "devDependencies": {
