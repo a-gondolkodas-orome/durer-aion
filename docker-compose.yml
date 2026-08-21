@@ -2,7 +2,10 @@ services:
   web:
     build: ./apps/online-frontend/nginx
     ports:
-      - 80:80
+      # Port 80 everywhere except the dev container, which sets WEB_PORT=8080:
+      # VS Code forwards a container port to the same port on your machine, and
+      # binding a privileged one there needs root it does not have.
+      - ${WEB_PORT:-80}:80
     volumes:
       - ./apps/online-frontend/dist:/usr/share/nginx/html
     depends_on:
@@ -21,7 +24,10 @@ services:
       # so this is mounted in production too.
       - ./scripts:/usr/src/app/scripts
     depends_on:
-      - postgres
+      postgres:
+        # Not just "started": the server connects on boot, and the team import
+        # runs against a container that has to be taking connections already.
+        condition: service_healthy
   postgres:
     ports:
       - 5432:5432
@@ -30,5 +36,10 @@ services:
       - postgresdb:/var/lib/postgresql/data
     environment:
       - POSTGRESQL_PASSWORD=${POSTGRESQL_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
 volumes:
   postgresdb: {}
