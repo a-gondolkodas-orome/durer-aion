@@ -72,6 +72,12 @@ npm run stack:ps    # which services are up
 npm run stack:logs  # and why one is not
 ```
 
+If `stack:up` itself fails with `network <id> does not exist`, that is docker's
+own state rather than anything here — usually its daemon restarted while an
+earlier stack was still around. `npm run stack:down` and retry; if it repeats,
+restart docker. The `postgresdb` volume survives all of that, so imported teams
+do not need loading again.
+
 `npm run teams:import` loads `scripts/test.tsv`. Its first three teams cover the
 three age categories — `000-0000-000` is a category C join code, `001-0000-000`
 is D, `002-0000-000` is E — and there are a thousand more behind them.
