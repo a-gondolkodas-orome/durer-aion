@@ -23,7 +23,7 @@ export function Finished(props: {state: TeamModelDto}) {
       padding: '30px',
       backgroundColor: theme.palette.background.paper,
       marginTop: "30px",
-    }} data-testId="finishedRoot">
+    }} data-testid="finishedRoot">
       <Stack sx={{
         fontSize: 18,
         fontWeight: 'bold',

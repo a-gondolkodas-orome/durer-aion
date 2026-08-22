@@ -98,7 +98,7 @@ npm run spell-check
 setups. Its own checks run from that directory, with no install of their own:
 
 ```bash
-npm run dev:practice                     # from the root; it is a workspace
+npm run dev:strategy-practice                     # from the root; it is a workspace
 npm test --workspace=strategy-practice   # check:versions + lint + typecheck + unit
 cd apps/strategy-practice && npm run coverage:patch
 ```
@@ -170,8 +170,8 @@ docker compose, not GitHub Pages.
 ## GitHub Pages Deployment
 
 One site, one artifact, built by `.github/workflows/pages-deploy.yml` on every
-push to `main`: a home page plus `/jatekok/` (practice), `/valto/` (a frozen
-2023 relay build) and `/proba-verseny/` (the offline dry run). The whole prefix
+push to `main`: a home page plus `/jatekok/` (strategy practice), `/valto/`
+(relay practice) and `/proba-verseny/` (the offline dry run). The whole prefix
 comes from one `SITE_ROOT` constant in `scripts/assemble-site.mjs`, which both
 the workflow and `npm run site:build` call — so `npm run site:serve` previews
 the deploy's own code, not a copy of it. See

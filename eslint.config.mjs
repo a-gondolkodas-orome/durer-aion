@@ -133,7 +133,7 @@ export default defineConfig(
       // own `npm run lint` — it keeps its own ESLint version and plugins (npm
       // nests them), which this config's flat resolution would not find.
       'apps/strategy-practice/**',
-      // A frozen 2023 build output, kept byte for byte. See pages/valto-2023/README.md.
+      // Hand-written pages the deploy copies verbatim, with no build step. See pages/README.md.
       'pages/**',
       // The assembled Pages artifact `npm run site:build` writes: every app's built
       // bundles, plus a copy of pages/. Gitignored, but eslint has its own ignore list

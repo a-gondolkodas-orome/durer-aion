@@ -43,24 +43,45 @@
     "logout": "logout",
     "logoutofthiswholething": "",
     "subtitle": "Online round",
-    "title": "XIX. Dürer Competition"
+    "title": "XIX. Dürer Competition",
+    "titlePlain": "Dürer Competition",
+    "relayPractise": "Practising relays"
   },
   "login": {
     "afterTitle": ".",
     "beforeTitle": "Welcome to the online round interface of the ",
     "error": {
       "empty": "You didn't give any code!",
-      "wrongid": "Incorrect log-in code."
+      "wrongid": "Incorrect log-in code.",
+      "noRound": "No round selected!"
     },
     "fallback": "If you can't find the email, write to us at the verseny (at) durerinfo (dot) hu email address.",
     "greeting": "Dear Competitor!",
     "loginButton": "Log in",
-    "loginInstruction": "To log in, check your emails and enter the code you find there here:"
+    "loginInstruction": "To log in, check your emails and enter the code you find there here:",
+    "relayPractise": "Practise relay tasks",
+    "relayPractiseDescription": "You can try out yourselves with relay-type tasks from former competitions. Choose the desired set of tasks (by year & category), for which you'll have 90 minutes to complete.",
+    "competitionType": {
+      "local": "Local round #{{num}}, {{category}}",
+      "final": "Final round #{{num}}, {{category}}",
+      "online": "Online round #{{num}}, {{category}}"
+    },
+    "proceedButton": "Proceed",
+    "yearSelector": "Competition number:",
+    "roundTypeSelector": "Round type:",
+    "categorySelector": "Category:",
+    "yearOption": "#{{num}}",
+    "roundType": {
+      "local": "Local",
+      "final": "Final",
+      "online": "Online"
+    }
   },
   "relay": {
     "endTable": {
       "all": "Total points",
       "back": "Back to competition",
+      "selectOtherRound": "Select other round",
       "point": "Points",
       "reminder": "Don't forget to play with the strategy game too if you haven't done yet!",
       "task": "Task",
@@ -73,6 +94,7 @@
       "duplicate": "You've already tried this guess",
       "empty": "You didn't give any answer!",
       "integer": "You must give an integer",
+      "missingTest": "The problems of this test ({{test}}) are not available yet.",
       "range": "The solution is between 0 and 9999",
       "type": "Answer must be a number"
     },

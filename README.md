@@ -209,8 +209,7 @@ npm run site:serve   # on http://localhost:4321
 
 `site:build` is the same script `.github/workflows/pages-deploy.yml` runs, so
 this is the artifact a push to `main` would publish rather than an
-approximation of it — base paths, the rebased 2023 relay build and the CNAME
-assertion included. Worth a look before merging anything that touches an app on
+approximation of it — base paths and the CNAME assertion included. Worth a look before merging anything that touches an app on
 the site, because the workflow going green *is* the cutover: there is no staging
 step between it and gyakorlo.durerinfo.hu.
 
@@ -227,7 +226,7 @@ history and renamed from `apps/practice` when the relay practice app arrived
 from the root like the other frontends:
 
 ```bash
-npm run dev:practice   # the practice site, on http://localhost:8012
+npm run dev:strategy-practice   # the practice site, on http://localhost:8012
 ```
 
 Its vite config binds all interfaces and pins port 8012, so it forwards out of

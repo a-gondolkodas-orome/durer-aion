@@ -40,6 +40,11 @@ run('npm', ['run', 'build'], {
   env: { SITE_BASE: `${SITE_ROOT}jatekok/` },
 });
 
+step('Build the relay practice');
+run('npx', ['turbo', 'build', '--filter=relay-practise-frontend'], {
+  env: { SITE_BASE: `${SITE_ROOT}valto/` },
+});
+
 step('Build the competition dry run');
 run('npx', ['turbo', 'build', '--filter=offline-frontend'], {
   env: { SITE_BASE: `${SITE_ROOT}proba-verseny/` },
@@ -52,17 +57,8 @@ rmSync(site, { recursive: true, force: true });
 mkdirSync(site, { recursive: true });
 cpSync(join(repoRoot, 'pages/home'), site, { recursive: true });
 cpSync(join(repoRoot, 'apps/strategy-practice/dist'), join(site, 'jatekok'), { recursive: true });
+cpSync(join(repoRoot, 'apps/relay-practise-frontend/dist'), join(site, 'valto'), { recursive: true });
 cpSync(join(repoRoot, 'apps/offline-frontend/dist'), join(site, 'proba-verseny'), { recursive: true });
-
-// The 2023 relay build cannot be rebuilt (pages/README.md), so it is rebased rather than
-// compiled. The script fails loudly if any occurrence is left behind.
-run('node', [
-  'scripts/rebase-static-site.mjs',
-  'pages/valto-2023',
-  'site/valto',
-  '/durer-aion/',
-  `${SITE_ROOT}valto/`,
-]);
 
 // The custom domain is declared by this file at the artifact root, so a deploy that shipped
 // without it would quietly hand the site back to the default domain — with every path in it

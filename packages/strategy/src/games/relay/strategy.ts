@@ -1,11 +1,13 @@
 import { State } from 'boardgame.io';
 import { MyGameState } from 'game';
 
-interface Problem {
+export interface Problem {
   problemText: string;
   answer: number;
   points: number;
   url?: string;
+  help1?: string;
+  help2?: string;
 }
 
 interface RelayProblems {
@@ -170,27 +172,31 @@ const problems : RelayProblems ={
   ],
 }
 
-export function strategy(category: "C" | "D" | "E"){
+export function relayStrategy(problemList: Problem[]){
   return (state: State<MyGameState>, _botID: string): [(number|string|boolean)[], string] => {
     if (state.G.numberOfTry === 0) {
-      const url = problems[category][state.G.currentProblem].url ?? "";
-      return [[problems[category][state.G.currentProblem].problemText, 3, url], "firstProblem"];
+      const url = problemList[state.G.currentProblem].url ?? "";
+      return [[problemList[state.G.currentProblem].problemText, 3, url], "firstProblem"];
     }
     let correctnessPreviousAnswer = false;
-    if(state.G.answer === problems[category][state.G.currentProblem].answer){
+    if(state.G.answer === problemList[state.G.currentProblem].answer){
       correctnessPreviousAnswer = true;
     } else if (state.G.numberOfTry < 3){
       // One more try
       return [[state.G.currentProblemMaxPoints - 1], "nextTry"];
     }
-  
+
     // Next problem if there is one and the time is not over
-    if (state.G.currentProblem < 8) { // TODO: it should be 9 if we count from 1 and not from 0. But it is currently 8 because we count from 0.
-      const url = problems[category][state.G.currentProblem+1].url ?? "";
-      const nextProblem = problems[category][state.G.currentProblem + 1];
+    if (state.G.currentProblem < problemList.length - 1) {
+      const url = problemList[state.G.currentProblem+1].url ?? "";
+      const nextProblem = problemList[state.G.currentProblem + 1];
       return [[nextProblem.problemText, nextProblem.points, correctnessPreviousAnswer, url], "newProblem"];
     }
     // End of the game
     return [[correctnessPreviousAnswer], "endGame"];
   }
+}
+
+export function strategy(category: "C" | "D" | "E"){
+  return relayStrategy(problems[category]);
 }

@@ -41,24 +41,45 @@
   "header": {
     "logout": "kilépés",
     "subtitle": "Online forduló",
-    "title": "XIX. Dürer Verseny"
+    "title": "XIX. Dürer Verseny",
+    "titlePlain": "Dürer Verseny",
+    "relayPractise": "Váltók gyakorlása"
   },
   "login": {
     "afterTitle": " online fordulójának felületén.",
     "beforeTitle": "Üdvözlünk a ",
     "error": {
       "empty": "Nem adtál meg kódot!",
-      "wrongid": "Rossz belépési kód!"
+      "wrongid": "Rossz belépési kód!",
+      "noRound": "Nem választottál még fordulót!"
     },
     "fallback": "Ha nem találjátok az emailt, akkor írjatok nekünk a verseny [K] durerinfo [P] hu email címre.",
     "greeting": "Kedves Versenyző!",
     "loginButton": "Belépés",
-    "loginInstruction": "Belépéshez nézd meg az emailjeidet, és üsd be az ott található kódot ide:"
+    "loginInstruction": "Belépéshez nézd meg az emailjeidet, és üsd be az ott található kódot ide:",
+    "relayPractise": "Váltóversenyek gyakorlása",
+    "relayPractiseDescription": "Ki tudjátok próbálni a korábbi évek váltó típusú versenyfeladatait. Válaszd ki a megfelelő feladatsort (év és kategória szerint), amelynek kitöltésére 90 perced lesz.",
+    "competitionType": {
+      "local": "{{num}}. helyi {{category}}",
+      "final": "{{num}}. döntő {{category}}",
+      "online": "{{num}}. internetes {{category}}"
+    },
+    "proceedButton": "Tovább",
+    "yearSelector": "Verseny sorszáma:",
+    "roundTypeSelector": "Forduló típusa:",
+    "categorySelector": "Kategória:",
+    "yearOption": "{{num}}.",
+    "roundType": {
+      "local": "Helyi",
+      "final": "Döntő",
+      "online": "Internetes"
+    }
   },
   "relay": {
     "endTable": {
       "all": "Összpontszám",
       "back": "Vissza a versenyhez",
+      "selectOtherRound": "Fordulóválasztás",
       "point": "Pontszám",
       "reminder": "Ne feledkezzetek meg a stratégiás játékról, ha azzal még nem játszottatok!",
       "task": "Feladat",
@@ -70,6 +91,7 @@
       "duplicate": "Ezt a választ már próbáltátok",
       "empty": "Nem írtál semmilyen választ!",
       "integer": "Egész számot kell írni",
+      "missingTest": "Ennek a feladatsornak ({{test}}) a feladatai még nem érhetőek el.",
       "range": "A megoldás 0 és 9999 között van",
       "type": "Számot kell írnod"
     },
