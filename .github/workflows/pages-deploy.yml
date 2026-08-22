@@ -11,13 +11,6 @@ permissions:
   pages: write
   id-token: write
 
-env:
-  # The one line that moves the whole site. `/` now that gyakorlo.durerinfo.hu resolves and the
-  # site is served from it; it was `/durer-aion/` while it lived on the default Pages domain,
-  # where a project site sits under its repo name. Every subpath below is composed from it, so
-  # the switch stays one edit rather than one per app. See docs/pages-consolidation.md § Sequence.
-  SITE_ROOT: /
-
 jobs:
   build:
     runs-on: ubuntu-24.04
@@ -67,37 +60,12 @@ jobs:
         working-directory: apps/strategy-practice
         run: npm run test:unit
 
-      - name: Build strategy game practice
-        working-directory: apps/strategy-practice
-        run: npm run build
-        env:
-          SITE_BASE: ${{ env.SITE_ROOT }}jatekok/
-      - name: Build the relay practice
-        run: npx turbo build --filter=relay-practise-frontend
-        env:
-          SITE_BASE: ${{ env.SITE_ROOT }}valto/
-      - name: Build the competition dry run
-        run: npx turbo build --filter=offline-frontend
-        env:
-          SITE_BASE: ${{ env.SITE_ROOT }}proba-verseny/
-
-      # One artifact, so the layout is assembled here rather than by each app. A build failure
-      # in any of them blocks the whole deploy — the accepted cost of a single Pages site.
-      - name: Assemble the site
-        run: |
-          # `set -eu`, not `set -euo pipefail`: this job runs in the node container, where the
-          # runner falls back to `sh -e {0}` (dash) — which has no `pipefail` and fails the
-          # step on the `set` line itself. Nothing here is a pipeline, so it buys nothing.
-          set -eu
-          mkdir -p site
-          cp -r pages/home/. site/
-          mkdir -p site/jatekok && cp -r apps/strategy-practice/dist/. site/jatekok/
-          mkdir -p site/valto && cp -r apps/relay-practise-frontend/dist/. site/valto/
-          mkdir -p site/proba-verseny && cp -r apps/offline-frontend/dist/. site/proba-verseny/
-          # The custom domain is declared by this file at the artifact root, so a deploy that
-          # shipped without it would quietly hand the site back to the default domain — with
-          # every path in it still root-absolute. Check rather than trust the copy above.
-          test "$(cat site/CNAME)" = gyakorlo.durerinfo.hu
+      # Builds each app and assembles the one artifact. The same script backs
+      # `npm run site:build`, so what a maintainer previews locally with `npm run site:serve`
+      # is this deploy's own code — the site root, the subpaths, the CNAME assertion and all.
+      # A build failure in any app blocks the whole deploy, the accepted cost of a single site.
+      - name: Build and assemble the site
+        run: node scripts/assemble-site.mjs
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v5

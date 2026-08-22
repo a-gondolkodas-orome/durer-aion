@@ -12,7 +12,7 @@
     "lint": "cross-env TIMING=1 eslint \"src/**/*.ts*\" --max-warnings=0",
     "typecheck": "tsc --noEmit",
     "build": "npx tsdown",
-    "dev": "npx tsdown --watch --onSuccess \"echo rebuilt game\""
+    "dev": "npx tsdown --watch --no-clean --onSuccess \"echo rebuilt game\""
   },
   "dependencies": {
     "@babel/cli": "^7.18.6",

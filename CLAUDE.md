@@ -54,15 +54,25 @@ regression checklist every change is measured against.
 ## Development Commands
 
 ```bash
-# Install dependencies
+# Install dependencies, then create the gitignored .env files from their samples
 npm ci
+npm run setup
+
+# The whole online round in docker: nginx + backend + postgres (detached)
+npm run stack:up      # builds, then brings the stack up on http://localhost
+npm run teams:import  # loads scripts/test.tsv, once postgres is accepting connections
+npm run stack:ps      # which services are up, when a URL shows nothing
+npm run stack:logs    # follow all three containers; Ctrl-C stops watching, not the stack
+npm run stack:down
+
+# The same thing without docker (except the DB), everything reloading
+npm run db:up              # postgres (terminal 1)
+npm run dev:server         # Backend on :8000 (terminal 2)
+npm run dev:online         # Frontend on :5173 (terminal 3)
+npm run teams:import:local
 
 # Run offline frontend (practice mode)
 npm run dev:offline
-
-# Run online backend + frontend (requires PostgreSQL)
-npm run dev:server    # Backend (terminal 1)
-npm run dev:online    # Frontend (terminal 2)
 
 # Build all packages
 npm run build
@@ -88,23 +98,15 @@ npm run spell-check
 setups. Its own checks run from that directory, with no install of their own:
 
 ```bash
-cd apps/strategy-practice
-npm run dev
-npm test              # check:versions + lint + typecheck + unit
-npm run coverage:patch
+npm run dev:practice                     # from the root; it is a workspace
+npm test --workspace=strategy-practice   # check:versions + lint + typecheck + unit
+cd apps/strategy-practice && npm run coverage:patch
 ```
 
-## Database Setup (for online mode)
-
-Start PostgreSQL via Docker:
-```bash
-docker run -it --rm -e POSTGRESQL_PASSWORD=postgres -p 127.0.0.1:5432:5432 bitnami/postgresql
-```
-
-Import test teams:
-```bash
-./scripts/import_teams.sh scripts/test.tsv
-```
+Every long docker invocation lives in a root npm script rather than in prose,
+so it is written down once. [`README.md`](README.md) is the authority on
+running things locally: how to bring the stack up, and — under *Checking it
+works* — how to exercise each item of `docs/must-keep-working.md` by hand.
 
 ## Creating a New Game
 
@@ -152,13 +154,14 @@ start boards, board client and specs together.
 - `apps/offline-frontend/.env` - Offline frontend config
 - `.env.docker`, `.env.local` - Docker compose config (copy from the `.sample` files)
 
-The dev container seeds every `*.sample` it finds; outside it, copy them by hand.
+`npm run setup` creates all of them from their samples, never overwriting one
+that exists. The dev container runs it for you.
 
 ## Docker Deployment
 
 ```bash
-# Build and run with Docker Compose
-docker compose --env-file=.env.docker up --build
+# Build and run the production stack (no dev overlay)
+npm run stack:prod
 ```
 
 That is how `verseny.durerinfo.hu`, the real competition, is deployed — nginx +
@@ -169,7 +172,9 @@ docker compose, not GitHub Pages.
 One site, one artifact, built by `.github/workflows/pages-deploy.yml` on every
 push to `main`: a home page plus `/jatekok/` (practice), `/valto/` (a frozen
 2023 relay build) and `/proba-verseny/` (the offline dry run). The whole prefix
-comes from one `SITE_ROOT` variable in that workflow. See
+comes from one `SITE_ROOT` constant in `scripts/assemble-site.mjs`, which both
+the workflow and `npm run site:build` call — so `npm run site:serve` previews
+the deploy's own code, not a copy of it. See
 [`docs/pages-consolidation.md`](docs/pages-consolidation.md).
 
 **A push to `main` deploys the public site.** There is no staging step and no
