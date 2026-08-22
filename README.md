@@ -209,8 +209,7 @@ npm run site:serve   # on http://localhost:4321
 
 `site:build` is the same script `.github/workflows/pages-deploy.yml` runs, so
 this is the artifact a push to `main` would publish rather than an
-approximation of it — base paths, the rebased 2023 relay build and the CNAME
-assertion included. Worth a look before merging anything that touches an app on
+approximation of it — base paths and the CNAME assertion included. Worth a look before merging anything that touches an app on
 the site, because the workflow going green *is* the cutover: there is no staging
 step between it and gyakorlo.durerinfo.hu.
 
