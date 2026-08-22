@@ -2,7 +2,9 @@ services:
   web:
     build: ./apps/online-frontend/nginx
     ports:
-      - 80:80
+      # 80 unless WEB_PORT says otherwise — an escape hatch for a machine where
+      # something already holds port 80, or that cannot bind a privileged one.
+      - ${WEB_PORT:-80}:80
     volumes:
       - ./apps/online-frontend/dist:/usr/share/nginx/html
     depends_on:
@@ -21,7 +23,26 @@ services:
       # so this is mounted in production too.
       - ./scripts:/usr/src/app/scripts
     depends_on:
-      - postgres
+      postgres:
+        # Not just "started": the server connects on boot, and the team import
+        # runs against a container that has to be taking connections already.
+        condition: service_healthy
+    healthcheck:
+      # A container that is up proves nothing here: under the dev overlay turbo
+      # keeps the package watchers alive even when the server task has died, so
+      # `ps` reads healthy while nginx 502s every request. /games is
+      # boardgame.io's lobby route — unauthenticated, and only reachable once
+      # db.connect() has synced and the port is open. node, not curl, because
+      # node is the one binary the image is guaranteed to have; node:http rather
+      # than fetch, because fetch honours proxy environment variables and a
+      # health probe at a loopback address should not depend on those.
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:8000/games',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      # Sized for the dev overlay, which boots three tsdown watchers alongside
+      # the server. Failures inside it do not count against retries.
+      start_period: 90s
   postgres:
     ports:
       - 5432:5432
@@ -30,5 +51,10 @@ services:
       - postgresdb:/var/lib/postgresql/data
     environment:
       - POSTGRESQL_PASSWORD=${POSTGRESQL_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
 volumes:
   postgresdb: {}

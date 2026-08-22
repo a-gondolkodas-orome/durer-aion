@@ -11,6 +11,7 @@
   },
   "portsAttributes": {
     "5173": { "label": "online-frontend / offline-frontend (vite)" },
+    "8012": { "label": "strategy-practice (vite)" },
     "8000": { "label": "online-backend" },
     "80": { "label": "nginx (docker compose)" },
     "5432": { "label": "postgres" }

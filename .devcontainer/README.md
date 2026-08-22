@@ -9,9 +9,9 @@ before, and developers who ignore this folder lose nothing.
 Open the repo in VS Code with the
 [Dev Containers extension](https://code.visualstudio.com/docs/devcontainers/containers)
 and accept the "Reopen in Container" prompt, or open the repo in a GitHub
-Codespace. `.devcontainer/post-create.sh` then runs `npm ci` and seeds every
-gitignored env file from its committed sample — only where the file does not
-exist yet, so your own values are never overwritten:
+Codespace. `.devcontainer/post-create.sh` then runs `npm ci` and `npm run
+setup`, which seeds every gitignored env file from its committed sample — only
+where the file does not exist yet, so your own values are never overwritten:
 
 | sample | seeded file | used by |
 | --- | --- | --- |
@@ -27,11 +27,13 @@ exist yet, so your own values are never overwritten:
   database, and `docker compose up --build` for the full stack. It installs
   Docker CE rather than Moby (`"moby": false`), because the Node 24 image is
   Debian trixie-based and Debian does not package `moby-cli` there.
-- **Labelled ports**: 5173 (vite dev servers), 8000 (online-backend),
-  80 (nginx, when running docker compose), 5432 (postgres). These are labels
-  only — VS Code forwards each port when something actually starts listening
-  on it. They are deliberately *not* in `forwardPorts`, which forwards
-  eagerly and logs `ECONNREFUSED` against ports no server has bound yet.
+- **Labelled ports**: 5173 (vite dev servers), 8012 (strategy-practice),
+  8000 (online-backend), 80 (nginx, when running docker compose), 5432
+  (postgres). These are labels only — VS Code forwards each port when something
+  actually starts listening on it. They are deliberately *not* in
+  `forwardPorts`, which forwards eagerly and logs `ECONNREFUSED` against ports
+  no server has bound yet. The flip side is that an empty Ports panel means
+  nothing is running, not that forwarding is broken.
 - **`DEV_SERVER_HOST=true`**, which makes the vite dev servers listen on all
   interfaces instead of loopback only. Without it the forwarded port accepts
   the connection and then hangs, because a loopback-bound server inside the
@@ -43,9 +45,8 @@ exist yet, so your own values are never overwritten:
 ## What it does not do
 
 It does not import teams, and it does not start any service: you still run
-`npm run dev:offline` (or `dev:server` / `dev:online`) yourself, and the
-database still comes up with the `docker run … bitnami/postgresql` command from
-the root `README.md`.
+`npm run stack:up` (or `dev:offline` / `dev:server` / `dev:online`) yourself,
+and `npm run teams:import` after it.
 
 The seeded env files carry the sample values, which are enough to run
 offline-frontend and to bring the docker stack up. For anything involving the
