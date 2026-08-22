@@ -55,15 +55,19 @@ it. Stop the one you are not using — `npm run stack:down`, or Ctrl-C the
 
 ### In the dev container
 
-The stack is on **8080** there, not 80: VS Code forwards a container port to the
-same port number on your machine, and binding a privileged one needs root it
-does not have. Everything above is otherwise unchanged — read `8080` for `80`,
-so `http://localhost:8080/admin` for the admin pages.
+Everything above works unchanged: the inner dockerd publishes port 80 on the
+container's own interfaces, VS Code forwards it, and `http://localhost` is the
+address.
 
-Open the address VS Code's **Ports** panel gives for 8080 rather than typing one:
-in a Codespace it is a rewritten `*.app.github.dev` URL, not localhost at all. A
-port shows up there only once something binds it, so an empty panel means the
-stack is not running — start with `npm run stack:ps`, then `npm run stack:logs`.
+Take the address from VS Code's **Ports** panel rather than typing one if you
+are in a Codespace, where it is a rewritten `*.app.github.dev` URL and not
+localhost at all. A port appears there only once something binds it, so an empty
+panel means the stack is not running — `npm run stack:ps`, then
+`npm run stack:logs`.
+
+If something on your machine already holds port 80, or VS Code cannot bind it,
+set `WEB_PORT` to move the stack: `WEB_PORT=8080 npm run stack:up`, then read
+`8080` for `80` in everything above.
 
 ### When a URL shows nothing
 

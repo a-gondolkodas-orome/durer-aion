@@ -7,14 +7,13 @@
     }
   },
   "containerEnv": {
-    "DEV_SERVER_HOST": "true",
-    "WEB_PORT": "8080"
+    "DEV_SERVER_HOST": "true"
   },
   "portsAttributes": {
     "5173": { "label": "online-frontend / offline-frontend (vite)" },
     "8012": { "label": "strategy-practice (vite)" },
     "8000": { "label": "online-backend" },
-    "8080": { "label": "nginx (docker compose)" },
+    "80": { "label": "nginx (docker compose)" },
     "5432": { "label": "postgres" }
   },
   "postCreateCommand": "bash .devcontainer/post-create.sh",
