@@ -226,7 +226,7 @@ history and renamed from `apps/practice` when the relay practice app arrived
 from the root like the other frontends:
 
 ```bash
-npm run dev:practice   # the practice site, on http://localhost:8012
+npm run dev:strategy-practice   # the practice site, on http://localhost:8012
 ```
 
 Its vite config binds all interfaces and pins port 8012, so it forwards out of

@@ -98,7 +98,7 @@ npm run spell-check
 setups. Its own checks run from that directory, with no install of their own:
 
 ```bash
-npm run dev:practice                     # from the root; it is a workspace
+npm run dev:strategy-practice                     # from the root; it is a workspace
 npm test --workspace=strategy-practice   # check:versions + lint + typecheck + unit
 cd apps/strategy-practice && npm run coverage:patch
 ```
