@@ -136,7 +136,9 @@ npm run stack:prod
 
 The same compose file without the dev overlay, so the container runs the server
 compiled into the image instead of a watcher, and code changes need the command
-again. Detached like `stack:up`, so an ssh session dropping does not take the
+again. The overlay is also what publishes postgres on `localhost:5432`, so
+under `stack:prod` the database is reachable only from the `backend` container.
+Detached like `stack:up`, so an ssh session dropping does not take the
 stack with it. Worth a run before a competition, and before merging anything that
 touches the `Dockerfile`, nginx or the routes.
 
