@@ -43,16 +43,29 @@ Behind by one to four majors, and dead weight. Removing them *is* the upgrade.
 | --- | --- | --- |
 | `web-vitals` | 2.1.4 → 6.1.1 | `reportWebVitals` used the retired v2 `getCLS`/`getFID` API, and both frontends called it with no handler — it measured nothing and reported nowhere. Source deleted with it. |
 | `@babel/cli`, `@babel/node`, `@babel/plugin-transform-modules-commonjs`, `@babel/preset-typescript` | 7.2x → 8.x | No `.babelrc` or `babel.config.*` exists. Their only consumers were `build_old` and `start_old`, superseded by `tsc` and `tsx watch`. |
-| `gh-pages` | 4.0.0 → 6.3.0 | Critical (prototype pollution). Pages ships from `.github/workflows/pages-deploy.yml` via `scripts/assemble-site.mjs`; nothing referenced `gh-pages` or the `deploy`/`predeploy` scripts. |
 | `nodemon` | 2.0.22 → 3.1.14 | High, via `simple-update-notifier`. Only consumer was `start_old`. |
 | `npm` | 11.6.0 → 12.0.2 | High, via `glob`, `tar`, `pacote`, `sigstore`. `npm` as a *dependency* of two frontends was a copy-paste accident. |
 | `install` | — | The same accident, sitting next to it. |
 | `@testing-library/user-event` | 13.5.0 → 14.6.6 | Zero usages in the repo. |
 | `concurrently` | 9.2.1 → 10.0.5 | Critical, via `shell-quote`. Referenced by no npm script — the multi-terminal dev flow in `README.md` uses separate terminals. |
 
-Alongside them: the `build_old`/`start_old`/`deploy`/`predeploy` scripts, the
-empty `apps/practice/` left by the rename in #291, and the `eslintConfig`
-(`extends: react-app`) blocks that have been inert since flat config landed.
+Alongside them: the `build_old`/`start_old` scripts, the empty `apps/practice/`
+left by the rename in #291, and the `eslintConfig` (`extends: react-app`)
+blocks that have been inert since flat config landed.
+
+**`gh-pages` and the `deploy`/`predeploy` scripts are not in this list, and
+that was a mistake worth recording.** They look dead from inside this
+repository — no workflow, no README, no CI job calls them, and the public Pages
+site ships from `pages-deploy.yml` instead. They are not: a maintainer runs
+`npm run deploy` **by hand from the year's private repo** to publish the
+offline dry run for testers before a competition, which #305 documents. The
+whole point of the private-repo flow (see *Competition Secrecy* in `CLAUDE.md`)
+is that it leaves no public trace — so "nothing here references it" is not
+evidence a deploy path is dead. Ask before deleting one.
+
+`gh-pages` is therefore **kept and upgraded** — 4.0.0 → ^6.3.0, which is where
+the critical prototype-pollution advisory is fixed. Same outcome for the
+advisory, without removing a workflow.
 
 Then every remaining package moved to the workspace that imports it. That is
 what makes the later tiers one-line edits.
@@ -88,6 +101,10 @@ Majors that cost nothing here:
 - **`cspell` 6 → 10**, **`notistack` 2 → 3**, **`urlcat` 2 → 3**,
   **`react-syntax-highlighter` 15 → 16**. Each has a handful of call sites, all
   on the API the new major keeps.
+- **`gh-pages` 4 → 6**, closing the critical above. The `deploy` scripts pass
+  `-d <dir>` and nothing else, which every major has kept. **Not exercised** —
+  the deploy it serves runs from the private repo, so a real check means running
+  `npm run deploy` there once.
 
 Tiers 0 and 1 together took advisories from **59 (4 critical, 32 high) to 15
 (0 critical, 5 high)**, and no source file changed except the two deletions
