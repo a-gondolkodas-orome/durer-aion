@@ -57,6 +57,16 @@ empty `apps/practice/` left by the rename in #291, and the `eslintConfig`
 Then every remaining package moved to the workspace that imports it. That is
 what makes the later tiers one-line edits.
 
+That move surfaced one thing worth knowing before the next removal.
+`packages/game` and `packages/common-frontend` both set `target: ES6` with no
+`lib` and both call `Array.prototype.at`, which is ES2022. They compiled only
+because `@types/node` sat in their dependency blocks and its
+`compatibility/indexable.d.ts` declares `.at()` — a Node types polyfill
+standing in for a lib neither config asked for, in two packages that do not
+run in Node. Both now name `["ES2022", "DOM"]`, as `packages/engine` and
+`packages/games` already did. Expect more of this: a dependency nobody imports
+can still be holding something up.
+
 ## Tier 1 — taken
 
 In-range or trivially compatible. No source change beyond the ranges.
@@ -78,6 +88,12 @@ Majors that cost nothing here:
 - **`cspell` 6 → 10**, **`notistack` 2 → 3**, **`urlcat` 2 → 3**,
   **`react-syntax-highlighter` 15 → 16**. Each has a handful of call sites, all
   on the API the new major keeps.
+
+Tiers 0 and 1 together took advisories from **59 (4 critical, 32 high) to 15
+(0 critical, 5 high)**, and no source file changed except the two deletions
+above. Verify with a clean `npm ci` rather than an incremental install: this
+tree holds two react-router majors and two Vite majors, and which one hoists
+depends on install order.
 
 ## Tier 2 — doable, needs code changes
 
