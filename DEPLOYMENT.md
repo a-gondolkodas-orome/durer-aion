@@ -107,8 +107,9 @@ Never `sudo npm run …`; it leaves root-owned files in `node_modules`.
 ## 2. Get the code
 
 The competition game stays secret until after the competition, so the live deployment
-clones the year's **private** repository (see *Competition Secrecy* in
-[`CLAUDE.md`](./CLAUDE.md)). That needs a deploy key:
+clones the year's **private** repository (see *Competition secrecy* in
+[`README.md`](./README.md), which also covers what to set up when that repo is
+created). That needs a deploy key:
 [generate a keypair](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
 on the machine, add the public half to that repository's deploy keys, and point ssh at the
 private half in `~/.ssh/config` — an `ssh-agent` does not survive a reboot:
