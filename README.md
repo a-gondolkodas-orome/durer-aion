@@ -284,6 +284,35 @@ locally and are meaningless anywhere else.
 Whatever reads one of them takes the change at start: vite does not pick up
 `.env` edits, and the docker stack reads `.env.docker` at `up`.
 
+# Competition secrecy
+
+A new competition's game must stay secret until after the competition, which is
+why each year has a private synced repo: `sync.yml` mirrors any pushed `sync-*`
+branch into it, the game is developed and deployed from there, and a merge-back
+PR publishes it afterwards. Nothing about an unreleased game may appear in a
+public commit — including engine changes phrased around its needs.
+
+## Setting up the year's private repo
+
+The mirror carries `.github/workflows` along with the code, so every workflow in
+this repository also lands there under that repo's own triggers. Two of them are
+guarded to run only in the public repository (`pages-deploy.yml`, which would
+otherwise publish the secret game to Pages on a push to `main`, and `sync.yml`,
+which would otherwise mirror back). The rest are left to run, so the game gets
+lint, typecheck and tests while it is being developed.
+
+When the repo is created:
+
+- **Turn Actions off** (Settings → Actions → Disable) unless you want those
+  checks. The guards make the dangerous jobs no-ops either way; this makes the
+  question moot rather than answered, and it is easier to do once now than to
+  re-derive later.
+- **Enable Pages**, which is what serves the testers' dry run — see
+  *The dry run for testers* in [`DEPLOYMENT.md`](./DEPLOYMENT.md). That site is
+  public, protected only by the repository's unguessable name.
+- **Set `PUBLIC_URL`** in `apps/offline-frontend/package.json` to the new repo's
+  name, so the dry run's asset paths resolve.
+
 # Debugging (TODO)
 VS code gives you two options to debug the application. Both of them needs some setup first, and they can't be used at the same time.
 
