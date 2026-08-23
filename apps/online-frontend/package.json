@@ -51,7 +51,6 @@
     "swr": "^2.2.5",
     "typescript": "^5.9.3",
     "urlcat": "^2.0.4",
-    "web-vitals": "^2.1.4",
     "yup": "^0.32.11"
   },
   "devDependencies": {

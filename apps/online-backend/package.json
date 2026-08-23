@@ -22,7 +22,6 @@
   "game": "*",
   "schemas": "*",
   "strategy": "*",
-  "web-vitals": "^2.1.4",
   "yup": "^0.32.11"
  },
  "devDependencies": {
