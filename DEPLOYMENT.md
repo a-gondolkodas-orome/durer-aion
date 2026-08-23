@@ -54,9 +54,8 @@ costs at the time of writing and what actually stops the bill:
 
 | provider | size | ~cost | stopping the bill |
 | --- | --- | --- | --- |
-| DigitalOcean | Basic, 2 vCPU / 4 GB / 80 GB | $24/mo, $0.036/h | **destroy** the droplet; powering it off still bills |
-| Hetzner | CX22 | ~€4.30/mo including the IPv4, hourly | delete the server |
 | Azure | Standard B2s | ~$30/mo, ~$0.042/h | deallocating stops compute, the managed disk keeps billing |
+| DigitalOcean | Basic, 2 vCPU / 4 GB / 80 GB | $24/mo, $0.036/h | **destroy** the droplet; powering it off still bills |
 | AWS | t3.medium | ~$30/mo, ~$0.042/h | stopping stops compute, the EBS volume keeps billing |
 
 Add swap on anything at or below 4 GB — the builds are what need it:
