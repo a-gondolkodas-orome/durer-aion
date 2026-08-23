@@ -128,7 +128,7 @@ export default defineConfig(
       '**/dist/**',
       '**/build/**',
       '**/node_modules/**',
-      '**/*.config.{js,mjs,cjs,ts}',
+      '**/*.config.{js,mjs,cjs,ts,mts}',
       // apps/strategy-practice is linted by its own eslint config, through its
       // own `npm run lint` — it keeps its own ESLint version and plugins (npm
       // nests them), which this config's flat resolution would not find.
