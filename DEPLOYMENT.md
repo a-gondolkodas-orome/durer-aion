@@ -344,21 +344,18 @@ npm run deploy
 ```
 
 npm runs the root `predeploy` first, which builds `offline-frontend` with `PUBLIC_URL` as
-its base path; `deploy` pushes `apps/offline-frontend/dist` to the `gh-pages` branch.
-`PUBLIC_URL` lives in `apps/offline-frontend/package.json` and must match the path Pages
-serves the build from — for a project site, the repository name.
+its base path; `deploy` pushes `apps/offline-frontend/dist` to the `gh-pages` branch of the
+private repo, which has Pages enabled and serves it. `PUBLIC_URL` lives in
+`apps/offline-frontend/package.json` and is that repo's name, so set it when the year's repo
+is created and the build's asset paths follow.
 
-**This is hidden by an unguessable URL, not by access control.** Anyone with the link can
-open it, so treat the link as the secret.
+**The site is public.** Pages serves it to anyone; the deliberately unguessable repository
+name is the whole of the protection. Treat the link as the secret, and understand that this
+is obscurity rather than access control — a known risk, accepted, because the audience is a
+handful of testers and the exposure lasts weeks.
 
 **Nothing publishes it automatically.** A maintainer runs the command when there is
 something for testers to see.
-
-> **Confirm before relying on this.** Which repository the `gh-pages` push lands in — the
-> private repo's own Pages, or a separate obscurely-named repo — is not recorded anywhere,
-> and Pages on a genuinely private repository needs a paid plan. Check where `origin`
-> points and what `PUBLIC_URL` is set to before the first deploy of a season, and write the
-> answer here.
 
 ---
 
