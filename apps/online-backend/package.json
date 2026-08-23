@@ -1,25 +1,40 @@
 {
- "name": "online-backend",
- "version": "0.0.0",
- "scripts": {
-  "lint": "cross-env TIMING=1 eslint \"**/*.ts*\" --max-warnings=0",
-  "typecheck": "tsc --noEmit",
-  "build": "npx tsc",
-  "start": "cross-env ALLOW_CORS=true node dist/src/server.js",
-  "dev": "cross-env ALLOW_CORS=true tsx watch --inspect src/server.ts",
-  "spell-check": "cspell \"**/*.{ts,tsx}\" --no-progress"
- },
- "license": "MIT",
- "dependencies": {
-  "@types/node": "^16.11.41",
-  "boardgame.io": "^0.50.2",
-  "game": "*",
-  "schemas": "*",
-  "strategy": "*",
-  "yup": "^0.32.11"
- },
- "devDependencies": {
-  "cspell": "^6.31.1",
-  "turbo": "^2.5.3"
- }
+  "name": "online-backend",
+  "version": "0.0.0",
+  "scripts": {
+    "lint": "cross-env TIMING=1 eslint \"**/*.ts*\" --max-warnings=0",
+    "typecheck": "tsc --noEmit",
+    "build": "npx tsc",
+    "start": "cross-env ALLOW_CORS=true node dist/src/server.js",
+    "dev": "cross-env ALLOW_CORS=true tsx watch --inspect src/server.ts",
+    "spell-check": "cspell \"**/*.{ts,tsx}\" --no-progress"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@koa/cors": "^5.0.0",
+    "@koa/router": "^10.1.1",
+    "@sentry/node": "^7.58.1",
+    "bgio-postgres": "^1.0.13",
+    "boardgame.io": "^0.50.2",
+    "dotenv": "^16.3.1",
+    "game": "*",
+    "koa": "^2.16.2",
+    "koa-basic-auth": "^4.0.0",
+    "koa-body": "^5.0.0",
+    "koa-mount": "^4.0.0",
+    "nanoid": "^3.0.0",
+    "schemas": "*",
+    "sequelize": "^6.37.7",
+    "socket.io": "^4.8.1",
+    "strategy": "*"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/koa-basic-auth": "^2.0.4",
+    "@types/koa-mount": "^4.0.1",
+    "@types/koa__cors": "^5.0.1",
+    "@types/node": "^16.11.41",
+    "@types/pg": "^8.6.5",
+    "tsx": "^4.21.0"
+  }
 }
