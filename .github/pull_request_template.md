@@ -1,5 +1,3 @@
-# Description
-
 ## Motivation
 
 <!--- Summarize the goal of your work and what motivated it. --->
