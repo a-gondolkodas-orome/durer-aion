@@ -16,14 +16,5 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ],
-    "rules": {
-      "import/no-anonymous-default-export": 0
-    }
-  }
+  "license": "ISC"
 }
