@@ -62,7 +62,7 @@
     "eslint": "^9.37.0",
     "jsdom": "^30.0.1",
     "tsdown": "^0.22.14",
-    "turbo": "^2.5.3",
+    "turbo": "^2.10.11",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.0",
     "vitest": "^4.1.10"
