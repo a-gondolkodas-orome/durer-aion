@@ -182,11 +182,12 @@ separate approval — the workflow going green is the cutover.
 
 ## Competition Secrecy
 
-A new competition's game must stay secret until after the competition, which is
-why each year has a private synced repo: `sync.yml` mirrors any pushed `sync-*`
-branch into it, the game is developed and deployed from there, and a merge-back
-PR publishes it afterwards. Nothing about an unreleased game may appear in a
-public commit — including engine changes phrased around its needs.
+A new competition's game must stay secret until after the competition, so each
+year has a private synced repo and the game is developed and deployed from
+there. **Nothing about an unreleased game may appear in a public commit** —
+including engine changes phrased around its needs.
+[`README.md`](README.md), under *Competition secrecy*, is the authority: how the
+mirror works, and what to set up when the year's repo is created.
 
 ## Key Conventions
 
