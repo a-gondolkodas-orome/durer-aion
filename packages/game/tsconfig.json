@@ -11,6 +11,11 @@
     "isolatedModules": true,
     "module": "ESNext",
     "target": "ES6",
+    // Named, not inherited: remove-from-circle uses Array.prototype.at, which is ES2022.
+    // Until now it typechecked only because @types/node was in this package's dependency
+    // block and its compatibility/indexable.d.ts declares .at() — a Node types polyfill
+    // standing in for a lib this config never asked for. Same pair as engine and games.
+    "lib": ["ES2022", "DOM"],
     "moduleResolution": "node",
     "noUnusedLocals": false,
     "noUnusedParameters": false,

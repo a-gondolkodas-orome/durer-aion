@@ -11,6 +11,9 @@
     "isolatedModules": true,
     "module": "ESNext",
     "target": "ES6",
+    // Main.tsx uses Array.prototype.at; see packages/game/tsconfig.json for why naming
+    // the lib is not optional here.
+    "lib": ["ES2022", "DOM"],
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "noUnusedLocals": false,
