@@ -13,6 +13,10 @@ permissions:
 
 jobs:
   build:
+    # This workflow syncs into the year's private repo with everything else (sync.yml), where a
+    # push to main would build the site from the secret game and publish it. Only the public
+    # repo may run it.
+    if: github.repository == 'a-gondolkodas-orome/durer-aion'
     runs-on: ubuntu-24.04
     # Practice's pin, which also satisfies the root .nvmrc (`24`). One container builds both
     # rather than two jobs handing a partial artifact to each other.
@@ -73,6 +77,7 @@ jobs:
           path: site
 
   deploy:
+    if: github.repository == 'a-gondolkodas-orome/durer-aion'
     needs: build
     concurrency:
       group: pages
