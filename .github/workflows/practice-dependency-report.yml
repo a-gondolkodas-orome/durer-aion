@@ -18,6 +18,10 @@ defaults:
 
 jobs:
   report:
+    # #308 guarded sync.yml and pages-deploy.yml the same way. This one is a cron with
+    # `issues: write`, so in the year's private mirror it would open dependency issues
+    # there every month, about the public repo's dependencies, on billed minutes.
+    if: github.repository == 'a-gondolkodas-orome/durer-aion'
     runs-on: ubuntu-24.04
     # No pinned container, unlike the other two workflows: this job only reads version strings and
     # fetches URLs, and pinning Node here would add a place check-versions.mjs does not look at.
