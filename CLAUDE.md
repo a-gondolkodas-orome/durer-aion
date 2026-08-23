@@ -39,6 +39,10 @@ deprioritized — upstream is actively maintained again (issue #277); don't
 build toward that replacement.
 [`docs/must-keep-working.md`](docs/must-keep-working.md) is the standing
 regression checklist every change is measured against.
+[`docs/dependency-upgrades.md`](docs/dependency-upgrades.md) owns the version
+decisions: what is behind, what a move would cost, and what is blocked on
+boardgame.io's own tree — including why `npm audit fix --force` must not be run
+here.
 
 ## Tech Stack
 
