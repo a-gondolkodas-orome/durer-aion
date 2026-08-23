@@ -7,6 +7,9 @@ there is no pipeline and no registry.
 > **Not re-run end to end yet.** Rewritten against the current repository, but the test
 > deployment that proves it has not happened. Correct this file from what actually happens.
 
+Testers who only need to try the games and the UX get a lighter option with no server at
+all — see *The dry run for testers* at the end.
+
 `npm run stack:prod` starts three containers, defined in
 [`docker-compose.yml`](./docker-compose.yml):
 
@@ -329,6 +332,33 @@ says why. Usually a missing variable in `.env.docker` — the server validates t
 and exits.
 
 **The competition says it is over.** `GAME_GLOBAL_END_T` in `.env.docker`; see step 4.
+
+## The dry run for testers
+
+The offline build of the competition, published to GitHub Pages from the year's private
+repo, so testers can play the upcoming games and try the UX before there is a server. One
+command, from a checkout of that repo:
+
+```bash
+npm run deploy
+```
+
+npm runs the root `predeploy` first, which builds `offline-frontend` with `PUBLIC_URL` as
+its base path; `deploy` pushes `apps/offline-frontend/dist` to the `gh-pages` branch.
+`PUBLIC_URL` lives in `apps/offline-frontend/package.json` and must match the path Pages
+serves the build from — for a project site, the repository name.
+
+**This is hidden by an unguessable URL, not by access control.** Anyone with the link can
+open it, so treat the link as the secret.
+
+**Nothing publishes it automatically.** A maintainer runs the command when there is
+something for testers to see.
+
+> **Confirm before relying on this.** Which repository the `gh-pages` push lands in — the
+> private repo's own Pages, or a separate obscurely-named repo — is not recorded anywhere,
+> and Pages on a genuinely private repository needs a paid plan. Check where `origin`
+> points and what `PUBLIC_URL` is set to before the first deploy of a season, and write the
+> answer here.
 
 ---
 
