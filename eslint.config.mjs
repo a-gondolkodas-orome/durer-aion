@@ -93,12 +93,6 @@ export default defineConfig(
   // delete its line — never add one. New code goes through the rule everywhere.
   {
     files: [
-      // Copied bgio server internals whose types upstream does not export.
-      'apps/online-backend/src/socketio_botmoves.ts',
-      // bgio move-context destructuring; two TODO markers track it.
-      'packages/game/src/common/gamewrapper.ts',
-      // Wire-shape casts on match state, pending a typed DTO field.
-      'packages/common-frontend/src/client/components/TeamDetailDialog.tsx',
       // #224 lands first; the relay app joins the per-file ratchet after.
       'apps/relay-practise-frontend/**',
     ],

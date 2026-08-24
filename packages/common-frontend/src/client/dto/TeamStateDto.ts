@@ -1,5 +1,5 @@
 import { Ctx } from "boardgame.io";
-import { MyGameState } from "game";
+import { GameStateMixin, MyGameState as RelayGameState } from "game";
 
 export interface TeamModelDto {
   teamId: string;
@@ -13,8 +13,13 @@ export interface TeamModelDto {
   strategyMatch: MatchStatus;
 }
 
+/// One admin endpoint serves both kinds of match, and the payload carries no
+/// discriminant of its own: a relay match's G is the relay game state, a
+/// strategy match's is whatever the game defines plus gameWrapper's mixin — of
+/// which only the mixin half is common to every strategy game. A reader tells
+/// the two apart by a field only one of them has.
 export interface MatchStateDto {
-  G: MyGameState;
+  G: RelayGameState | GameStateMixin;
   ctx:	Ctx;
   deltalog:	MatchStateLogDto[];
 }

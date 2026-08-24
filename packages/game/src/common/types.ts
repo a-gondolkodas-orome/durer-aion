@@ -1,5 +1,9 @@
-import { Ctx, Game, MoveMap, TurnConfig } from "boardgame.io";
-import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
+import { Ctx, DefaultPluginAPIs, Game, MoveMap, TurnConfig } from "boardgame.io";
+
+// boardgame.io does not export its plugin APIs by name. Taking them off the
+// context type it does export keeps this out of the package's build layout,
+// which is not an API and can be rearranged by a patch release.
+export type RandomAPI = DefaultPluginAPIs['random'];
 
 // boardgame.io's own Game interface defaults its generics to `any` (quoted
 // below); a caller that spells that out trips no-explicit-any on bgio's
