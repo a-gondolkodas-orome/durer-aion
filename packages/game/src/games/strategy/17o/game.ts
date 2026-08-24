@@ -5,7 +5,7 @@ export interface MyGameState {
   pile: number;
 }
 
-export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<MyGameState>)
+export const MyGame: GameType<MyGameState> = { // TODO: solve type (It was Game<MyGameState>)
   name: "17o",
   setup: () => {
     return {pile: 0}

@@ -7,7 +7,7 @@ export interface MyGameState {
   board: Cell[];
 }
 
-export const MyGame: GameType<MyGameState> = { // TOOO: solve type I was Game<MyGameState>
+export const MyGame: GameType<MyGameState> = { // TODO: solve type I was Game<MyGameState>
   name: "chess-bishops",
   setup: () => ({ board: Array(64).fill(null) }),
   moves: {

@@ -7,7 +7,7 @@ export interface MyGameState {
   restricted: null | number;
 }
 
-export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<MyGameState>)
+export const MyGame: GameType<MyGameState> = { // TODO: solve type (It was Game<MyGameState>)
   name: "superstitious-counting",
   setup: () => ({ current: 0, target: 100, restricted: null }), // TODO: Random
 

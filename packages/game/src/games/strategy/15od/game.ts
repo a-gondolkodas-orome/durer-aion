@@ -5,7 +5,7 @@ export type MyGameState = Record<string, never>;
 export type Position = [number, number];
 
 export const MyGame: GameType<MyGameState> = {
-  // TOOO: solve type
+  // TODO: solve type
   name: "15od",
   setup: () => ({ }),
 

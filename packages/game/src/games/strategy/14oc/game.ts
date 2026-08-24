@@ -10,7 +10,7 @@ export interface MyGameState {
 }
 
 export const MyGame: GameType<MyGameState> = {
-  // TOOO: solve type
+  // TODO: solve type
   name: "14oc",
   setup: () => ({ rookPosition: [-1, -1] }),
 

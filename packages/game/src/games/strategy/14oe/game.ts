@@ -8,7 +8,7 @@ export interface MyGameState {
 }
 
 export const MyGame: GameType<MyGameState> = {
-  // TOOO: solve type
+  // TODO: solve type
   name: "14oe",
   setup: () => ({
     playerNumbers: [],
