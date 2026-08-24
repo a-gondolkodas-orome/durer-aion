@@ -53,7 +53,7 @@
     "lint:turbo": "turbo lint",
     "start": "turbo start",
     "build": "turbo build",
-    "spell-check": "cspell \"**/*.{ts,tsx}\" --no-progress",
+    "spell-check": "cspell \"**/*.{ts,mts,tsx}\" --no-progress",
     "typecheck": "turbo typecheck",
     "test": "vitest run",
     "test:watch": "vitest",
