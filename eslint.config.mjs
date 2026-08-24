@@ -93,14 +93,6 @@ export default defineConfig(
   // delete its line — never add one. New code goes through the rule everywhere.
   {
     files: [
-      // The client-factory family shares one untyped board/game plumbing shape;
-      // its fix is the BoardProps<G> refactor the TODO in boardwrapper.tsx names,
-      // and exempting only part of the family would be arbitrary.
-      'apps/offline-frontend/src/client_factory.tsx',
-      'packages/common-frontend/src/common/client_factory.tsx',
-      'packages/common-frontend/src/common/myclient.ts',
-      'apps/offline-frontend/src/myclient.ts',
-      'packages/common-frontend/src/common/boardwrapper.tsx',
       // #224 lands first; the relay app joins the per-file ratchet after.
       'apps/relay-practise-frontend/**',
     ],
