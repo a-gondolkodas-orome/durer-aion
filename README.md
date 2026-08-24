@@ -315,7 +315,7 @@ When the repo is created:
 - **Set `PUBLIC_URL`** in `apps/offline-frontend/package.json` to the new repo's
   name, so the dry run's asset paths resolve.
 
-# Debugging (TODO)
+# Debugging
 VS code gives you two options to debug the application. Both of them needs some setup first, and they can't be used at the same time.
 
 Breakpoints work either on the server, or on the frontend, but not on both at the same time. See different debugging options for further references.

@@ -1,7 +1,5 @@
 import { INVALID_MOVE } from 'boardgame.io/core';
 import { GameType, GUESSER_PLAYER, JUDGE_PLAYER } from '../../../common/types';
-// import { sendDataStrategyEnd } from '../../common/sendData';
-// import { IS_OFFLINE_MODE } from '../../client/utils/util';
 
 export interface RemoveFromCircleGameState {
   circle: boolean[];
@@ -78,11 +76,6 @@ export const MyGameWrapper = function (category: "C" | "D" | "E") {
                   G.points = 2;
                   break;
               }
-              /* refactor this sholud not be here at board
-              if (IS_OFFLINE_MODE) {
-                localStorage.setItem("StrategyPoints", G.points.toString());
-                sendDataStrategyEnd(null, G, ctx);
-              } */
               events.endGame();
             }
           } else if (G.winner === JUDGE_PLAYER) {

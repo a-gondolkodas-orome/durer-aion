@@ -2,22 +2,11 @@ import { MyGameState } from './game';
 import { BoardProps } from 'boardgame.io/react';
 import Stack from '@mui/material/Stack';
 import { Button } from '@mui/material';
-// import { sendDataStrategyStep } from '../../common/sendData';
-// import { IS_OFFLINE_MODE } from '../../client/utils/util';
-
 
 type MyGameProps = BoardProps<MyGameState>;
 
 export function MyBoard({ G, ctx, moves }: MyGameProps) {
-  // TODO: use formik
-  // create refs to store the text input elements
-
-
   const onClick = (pile: number) => {
-    /* TODO refactor this sholud not be here at board
-    if(IS_OFFLINE_MODE){
-      sendDataStrategyStep(null, pile, G, ctx);
-    }*/
     moves.changePile(pile)
   };
 

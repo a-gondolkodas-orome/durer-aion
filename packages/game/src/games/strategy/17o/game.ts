@@ -1,8 +1,5 @@
 import { INVALID_MOVE } from 'boardgame.io/core';
 import { GameType, GUESSER_PLAYER, JUDGE_PLAYER, PlayerIDType } from '../../../common/types';
-// import { sendDataStrategyEnd } from '../../common/sendData';
-// import { IS_OFFLINE_MODE } from '../../client/utils/util';
-
 
 export interface MyGameState {
   pile: number;
@@ -56,11 +53,6 @@ export const MyGame: GameType<MyGameState> = { // TOOO: solve type (It was Game<
                 G.points = 2;
                 break;
             }
-            /* TODO refactor this sholud not be here at board
-            if (IS_OFFLINE_MODE) {
-              localStorage.setItem("StrategyPoints", G.points.toString());
-              sendDataStrategyEnd(null, G, ctx);
-            }*/
             events.endGame();
           }
         } else if (G.winner === JUDGE_PLAYER) {
