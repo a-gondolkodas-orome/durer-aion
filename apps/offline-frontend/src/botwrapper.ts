@@ -1,6 +1,5 @@
 import { State } from 'boardgame.io';
 import { Bot } from 'boardgame.io/ai';
-import { BotAction } from 'boardgame.io/dist/types/src/ai/bot';
 
 // Determine the next move for the bot and which move function to use.
 type BotStrategy<T_SpecificGameState, T_Move> = (state: State<T_SpecificGameState>, botID: string) => [T_Move | undefined, string];
@@ -15,7 +14,7 @@ export default function botWrapper<T_SpecificGameState, T_Move>(botstrategy: Bot
       await new Promise(resolve => setTimeout(resolve, 400));
     }
 
-    async play(state: State<T_SpecificGameState>, playerID: string): Promise<{ action: BotAction; metadata?: unknown; }> {
+    async play(state: State<T_SpecificGameState>, playerID: string): ReturnType<Bot['play']> {
       await this.wait();
       const [move, moveName] = botstrategy(state, playerID);
       if (move === undefined) {

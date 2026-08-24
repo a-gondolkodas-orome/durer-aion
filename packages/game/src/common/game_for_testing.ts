@@ -1,6 +1,5 @@
 import { Ctx } from "boardgame.io";
-import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
-import { GameStateMixin, GameType, GUESSER_PLAYER, JUDGE_PLAYER, SetupFunction, StartingPositionFunction } from "./types";
+import { GameStateMixin, GameType, GUESSER_PLAYER, JUDGE_PLAYER, RandomAPI, SetupFunction, StartingPositionFunction } from "./types";
 
 interface G { data: string }
 
