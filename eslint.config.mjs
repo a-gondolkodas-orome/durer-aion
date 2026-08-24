@@ -95,8 +95,6 @@ export default defineConfig(
     files: [
       // Copied bgio server internals whose types upstream does not export.
       'apps/online-backend/src/socketio_botmoves.ts',
-      // bgio move-context destructuring; two TODO markers track it.
-      'packages/game/src/common/gamewrapper.ts',
       // Wire-shape casts on match state, pending a typed DTO field.
       'packages/common-frontend/src/client/components/TeamDetailDialog.tsx',
       // The client-factory family shares one untyped board/game plumbing shape;
