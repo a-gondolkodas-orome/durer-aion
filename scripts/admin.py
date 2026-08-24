@@ -120,7 +120,7 @@ export_results_tsv(team_states_dict, relay_states, strategy_states)
 #   def add_minutes_team(team):
 #       if type == 'relay' and team['relayMatch']['state'] == 'IN PROGRESS':
 #           url = baseurl + f'/game/admin/{ team['relayMatch']['matchID']}/addminutes/{minutes}'
-#           response = requests.get(url, auth=HTTPBasicAuth(username, password))
+#           response = requests.post(url, auth=HTTPBasicAuth(username, password))
 #           if response.status_code != 200:
 #             print(response)
 #             print(f'Error at adding minutes to team {team['teamId']}')
@@ -128,7 +128,7 @@ export_results_tsv(team_states_dict, relay_states, strategy_states)
 #             print(f'Addded {minutes} min to team {team['teamId']}')
 #       elif type == 'strategy' and team['strategyMatch']['state'] == 'IN PROGRESS':
 #         url = baseurl + f'/game/{ team['strategyMatch']['matchID']}/addminutes/{minutes}'
-#         response = requests.get(url, auth=HTTPBasicAuth(username, password))
+#         response = requests.post(url, auth=HTTPBasicAuth(username, password))
 #         if response.status_code != 200:
 #           print(response)
 #           print(f'Error at adding minutes to team {team['teamId']}')   

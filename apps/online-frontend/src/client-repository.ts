@@ -157,7 +157,7 @@ export class RealClientRepository implements ClientRepository {
     });
     let result;
     try {
-      result = await apiAxiosInstance().get(url);
+      result = await apiAxiosInstance().post(url);
     } catch (e: unknown) {
       const err = makeAxiosError(e);
       console.error(err.message)
@@ -173,7 +173,7 @@ export class RealClientRepository implements ClientRepository {
     });
     let result;
     try {
-      result = await apiAxiosInstance().get(url);
+      result = await apiAxiosInstance().post(url);
     } catch (e: unknown) {
       const err = makeAxiosError(e);
       console.error(err.message)
@@ -190,7 +190,7 @@ export class RealClientRepository implements ClientRepository {
     });
     let result;
     try {
-      result = await apiAxiosInstance().get(url);
+      result = await apiAxiosInstance().post(url);
     } catch (e: unknown) {
       const err = makeAxiosError(e);
       console.error(err.message)
