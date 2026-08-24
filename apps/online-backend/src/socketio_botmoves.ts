@@ -1,15 +1,24 @@
 // Demultiplexes to real transport or bots
 import type IOTypes from 'socket.io';
-import type { Game, Server, State, StorageAPI } from "boardgame.io";
+import type { Game, PlayerID, Server, State, StorageAPI } from "boardgame.io";
+import type { Bot } from "boardgame.io/ai";
 import { getFilterPlayerView } from "boardgame.io/internal";
 import { Master } from "boardgame.io/master";
-import { SocketIO } from "boardgame.io/server";
+import { GenericPubSub, SocketIO } from "boardgame.io/server";
 import { isMakeMovePayloadReadOnly, currentPlayer, PlayerIDType } from "game";
 import { getBotCredentials } from "./server/common";
 import { CorsOptionsDelegate } from "cors";
 
+// boardgame.io does not export the types its own transport is written against.
+// Naming them off what it does export keeps this file out of the package's
+// build layout, which is not an API and can be rearranged by a patch release.
+type MasterTransport = ConstructorParameters<typeof Master>[2];
+type IntermediateTransportData = Parameters<MasterTransport['sendAll']>[0];
+type TransportData = ReturnType<ReturnType<typeof getFilterPlayerView>>;
+type SocketOpts = NonNullable<ConstructorParameters<typeof SocketIO>[0]>;
+
 /** Copied from boardgame.io/dist/src/client/transport/local.ts */
-function GetBotPlayer(state: State, bots: Record<string, any>) {
+function GetBotPlayer(state: State, bots: Record<PlayerID, Bot>) {
   if (state.ctx.gameover !== undefined) {
     return null;
   }
@@ -34,12 +43,12 @@ export enum Type {
 }
 
 /** Copied from boardgame.io/dist/src/server/transport.ts */
-export function isSynchronous(storageAPI: any): any {
+export function isSynchronous(storageAPI: StorageAPI.Sync | StorageAPI.Async): storageAPI is StorageAPI.Sync {
   return storageAPI.type() === Type.SYNC;
 }
 
 /** Used by TransportAPI. Copied from boardgame.io/dist/src/server/transport.ts */
-const emit = (socket: any, { type, args }: any) => {
+const emit = (socket: IOTypes.Socket, { type, args }: TransportData) => {
   socket.emit(type, ...args);
 };
 
@@ -51,15 +60,20 @@ function getPubSubChannelId(matchID: string): string {
 /** Copied from boardgame.io/dist/src/server/transport.ts */
 export const TransportAPI = (
   matchID: string,
-  socket: any,
-  filterPlayerView: any,
-  pubSub: any
-): any => {
-  const send: (arg1: any, ...arg2: any) => void = ({ playerID, ...data }) => {
+  // Null where the caller only needs sendAll and has no socket to send a
+  // per-player message on — see the router's add-minutes handler.
+  socket: IOTypes.Socket | null,
+  filterPlayerView: ReturnType<typeof getFilterPlayerView>,
+  pubSub: GenericPubSub<IntermediateTransportData>
+): MasterTransport => {
+  const send: MasterTransport['send'] = ({ playerID, ...data }) => {
+    if (socket === null) {
+      throw new Error("TransportAPI.send needs a socket; this one was built for sendAll only.");
+    }
     emit(socket, filterPlayerView(playerID, data));
   };
 
-  const sendAll = (payload: any) => {
+  const sendAll: MasterTransport['sendAll'] = (payload) => {
     pubSub.publish(getPubSubChannelId(matchID), payload);
   };
 
@@ -67,16 +81,13 @@ export const TransportAPI = (
 };
 
 /** Copied from boardgame.io/dist/src/master/master.ts */
-export async function fetch(
+export async function fetch<T_Opts extends StorageAPI.FetchOpts>(
   db: StorageAPI.Async | StorageAPI.Sync,
   matchID: string,
-  partial: Partial<{
-    state: boolean;
-    metadata: boolean;
-    logs: boolean;
-    initialState: boolean;
-  }>
-) {
+  // Which fields come back depends on which ones were asked for, so callers
+  // pass this `as const` — a widened `{ state: boolean }` names no field.
+  partial: T_Opts
+): Promise<StorageAPI.FetchResult<T_Opts>> {
   return isSynchronous(db)
     ? db.fetch(matchID, partial)
     : await db.fetch(matchID, partial);
@@ -93,15 +104,15 @@ export const BOT_ID = PlayerIDType.JUDGE_PLAYER;
  * Modifying the server is also needed to fill the bot's slot in the lobby (see injectBots()).
  */
 export class SocketIOButBotMoves extends SocketIO {
-  bots: Record<string, any>;
+  bots: Record<string, Bot>;
   onFinishedMatch: (matchID: string) => Promise<void>;
   unFinishedMatches = new Set<string>();
   constructor(
-    anything: any,
-    bots: Record<string, any>,
+    socketOpts: SocketOpts,
+    bots: Record<string, Bot>,
     onFinishedMatch: (matchID: string) => Promise<void> = async () => undefined
   ) {
-    super({ ...anything });
+    super({ ...socketOpts });
     this.bots = bots;
     this.onFinishedMatch = onFinishedMatch;
   }
@@ -123,14 +134,13 @@ export class SocketIOButBotMoves extends SocketIO {
       /** This should be in sync with how socket data is communicated.
        * See boardgame.io/dist/src/server/transport/socketio.ts
        */
-      nsp.on("connection", (socket: any) => {
-        socket.on("update", async (...args: Parameters<any>) => {
+      nsp.on("connection", (socket: IOTypes.Socket) => {
+        socket.on("update", async (...args: Parameters<Master['onUpdate']>) => {
           // The arguments are stale: we react to a player's step
           // But we are on the same API that reacts to it
           // Basically we assume that a socket.on('update', ...)
           // already updated the game state, making StateID and PlayerID stale
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const [actionData, _, matchID, stalePlayerID]: any[] = args;
+          const [actionData, , matchID, stalePlayerID] = args;
           //this in theory means, that the match already exist
           //also we assume, this event can't happen, after the game is finished
           this.unFinishedMatches.add(matchID);
@@ -157,7 +167,7 @@ export class SocketIOButBotMoves extends SocketIO {
 
             const {  state  } = await fetch(app.context.db, matchID, {
                state: true,
-             });
+             } as const);
             if (currentPlayer(state.ctx) !== BOT_ID) {
               // Not a real action, possibly a failed move.
               return;
@@ -166,15 +176,18 @@ export class SocketIOButBotMoves extends SocketIO {
               // Game is over, no need to react
               return;
             }
-            let botAction = undefined;
+            const botPlayer = GetBotPlayer(state, { [BOT_ID]: bot });
+            if (botPlayer === null) {
+              // Only reachable with ctx.gameover set to something falsy, which
+              // the check above lets through and which no game here produces.
+              return;
+            }
+            let botAction;
             if (
               state.ctx.phase === "play" ||
               state.ctx.phase === "startNewGame"
             )  {
-              botAction = await bot.play(
-                state,
-                GetBotPlayer(state, { [BOT_ID]: bot }) as any
-              );
+              botAction = await bot.play(state, botPlayer);
             } else {
               return;
             }
@@ -208,7 +221,7 @@ export class SocketIOButBotMoves extends SocketIO {
           await matchQueue.add(async () => {
             const {  state  } = await fetch(app.context.db, matchID, {
                state: true,
-             });
+             } as const);
             if (state.ctx.gameover) {
               if (this.unFinishedMatches.has(matchID)) {
                 this.unFinishedMatches.delete(matchID);
