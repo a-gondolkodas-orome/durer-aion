@@ -93,8 +93,6 @@ export default defineConfig(
   // delete its line — never add one. New code goes through the rule everywhere.
   {
     files: [
-      // Wire-shape casts on match state, pending a typed DTO field.
-      'packages/common-frontend/src/client/components/TeamDetailDialog.tsx',
       // The client-factory family shares one untyped board/game plumbing shape;
       // its fix is the BoardProps<G> refactor the TODO in boardwrapper.tsx names,
       // and exempting only part of the family would be arbitrary.
