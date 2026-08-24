@@ -93,8 +93,6 @@ export default defineConfig(
   // delete its line — never add one. New code goes through the rule everywhere.
   {
     files: [
-      // Copied bgio server internals whose types upstream does not export.
-      'apps/online-backend/src/socketio_botmoves.ts',
       // Wire-shape casts on match state, pending a typed DTO field.
       'packages/common-frontend/src/client/components/TeamDetailDialog.tsx',
       // The client-factory family shares one untyped board/game plumbing shape;
