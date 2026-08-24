@@ -3,7 +3,7 @@ import { Bot } from 'boardgame.io/ai';
 import { BotAction } from 'boardgame.io/dist/types/src/ai/bot';
 
 // Determine the next move for the bot and which move function to use.
-type BotStrategy<T_SpecificGameState, T_Move> = (state: State<T_SpecificGameState>, botID: string) => [T_Move | undefined, string];
+export type BotStrategy<T_SpecificGameState, T_Move> = (state: State<T_SpecificGameState>, botID: string) => [T_Move | undefined, string];
 
 /// wraps a convenient strategy to a full Boardgame.io Bot class
 /// @param strategy Must calculate the move to be made or `undefined` if a random move is to be made
