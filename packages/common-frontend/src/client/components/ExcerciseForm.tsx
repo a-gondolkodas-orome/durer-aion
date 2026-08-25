@@ -54,6 +54,10 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
         style={{ position: "relative", zIndex: 2 }}
         key={`result-${props.attempt}`}
         initialValues={{ result: '' }}
+        // The input is focused for you when a task arrives, so clicking away to
+        // read it would otherwise report an empty guess before anyone has had a
+        // chance to make one.
+        validateOnBlur={false}
         validationSchema={Yup.object().shape({
           result: Yup.number()
             .integer(t('relay.error.integer'))
