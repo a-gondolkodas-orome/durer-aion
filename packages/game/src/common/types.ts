@@ -49,6 +49,12 @@ interface GameMixin<G> {
   // what is common. gamewrapper adapts it for bgio's ai.enumerate.
   possibleMoves: (G: G, ctx: Ctx, playerID: PlayerIDType) => unknown[];
   setup: SetupFunction<G>,
+  // A game may set its opening position here, or leave it to the bot, which
+  // sends it as the `setStartingPosition` move; the live games do the latter.
+  // Prefer this one when the position is not the bot's secret: it receives
+  // bgio's seeded `random`, so server and client agree on what was drawn,
+  // which `Math.random` in a strategy cannot give you. See CLAUDE.md,
+  // *Creating a New Game*.
   startingPosition?: StartingPositionFunction<G>;
 }
 
