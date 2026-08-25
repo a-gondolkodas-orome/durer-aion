@@ -109,7 +109,12 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
             }}
           />
         }</Field>
-        <ErrorMessage name="result" />
+        {/* The message's line is reserved whether or not there is an error, so
+            that validating an empty or malformed guess does not resize the
+            panel the form sits in. */}
+        <Stack sx={{ minHeight: '1.5em' }}>
+          <ErrorMessage name="result" />
+        </Stack>
         <Stack sx={{marginTop: '20px'}}>
           {props.previousTries.map((data, idx) => {
             return <Stack sx={{
