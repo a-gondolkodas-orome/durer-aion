@@ -9,6 +9,7 @@ import '@testing-library/jest-dom';
 // initialised the same way the apps initialise it: by importing this module.
 import '../../common/i18n';
 import { ClientRepoProvider, MockClientRepository } from '../api-repository-interface';
+import { ThemeProvider } from '@mui/material/styles';
 import { Main } from './Main';
 
 vi.mock('react-syntax-highlighter/dist/esm/styles/prism', () => ({
@@ -19,13 +20,19 @@ vi.mock('../hooks/user-hooks', () => {
   return MockTeamState.mockHook;
 });
 
+// `Layout` merges its own theme into the surrounding one, so `Main` needs an
+// outer theme to merge with — the apps pass their accent colour here.
+const outerTheme = { palette: { primary: { main: '#11009E', contrastText: '#fff' } } };
+
 // `Header` reads the client repository off context, so `Main` cannot render
 // outside a provider — same as in the apps.
 const renderMain = () =>
   render(
-    <ClientRepoProvider value={new MockClientRepository()}>
-      <Main language="hu" gitCommitHash="test" />
-    </ClientRepoProvider>
+    <ThemeProvider theme={outerTheme}>
+      <ClientRepoProvider value={new MockClientRepository()}>
+        <Main language="hu" gitCommitHash="test" />
+      </ClientRepoProvider>
+    </ThemeProvider>
   );
 
 test('renders', () => {

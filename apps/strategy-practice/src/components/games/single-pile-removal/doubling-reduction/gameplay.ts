@@ -1,18 +1,18 @@
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 import { random, sample } from 'lodash';
 import { type Board, validateTake } from '../gameplay';
 
 export const moves = {
   take: {
     validate: validateTake,
-    apply: (board: Board, { ctx }: { ctx: Ctx }, count: number): MoveOutcome<Board> => {
+    apply: (board, { ctx }, count: number): MoveOutcome<Board> => {
       // Next player may take strictly less than twice this take, i.e. up to 2·count − 1.
       const nextBoard: Board = { stones: board.stones - count, maxTake: 2 * count - 1 };
       if (nextBoard.stones === 0) return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       return { nextBoard, isTurnEnd: true };
     }
   }
-};
+} satisfies MoveDefs<Board>;
 
 export type Moves = typeof moves;
 

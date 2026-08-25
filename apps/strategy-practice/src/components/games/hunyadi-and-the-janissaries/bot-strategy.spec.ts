@@ -1,5 +1,10 @@
 import { getOptimalGroupToKill, getOptimalSoldierGroups } from './bot-strategy';
-import { moves, type Board } from './gameplay';
+import { moves, SULTAN, type Board } from './gameplay';
+import { makeCtx } from 'test-utils';
+
+// `setGroupOfSoldiers` is the sultan's move; it reads the board and the
+// soldiers it is handed, never the context.
+const asSultan = { ctx: makeCtx({ currentPlayer: SULTAN }) };
 
 describe('HunyadiAndTheJanissaries strategy', () => {
   describe('getOptimalGroupToKill', () => {
@@ -18,7 +23,7 @@ describe('HunyadiAndTheJanissaries strategy', () => {
     it('should split first row evenly if there are more soldiers', () => {
       const board = [[], ['blue', 'blue']] as Board;
       const soldiers = getOptimalSoldierGroups(board);
-      const { nextBoard } = moves.setGroupOfSoldiers.apply(board, {}, soldiers);
+      const { nextBoard } = moves.setGroupOfSoldiers.apply(board, asSultan, soldiers);
       expect([[[], ['red', 'blue']], [[], ['blue', 'red']]]).toContainEqual(nextBoard);
     });
 
@@ -31,7 +36,7 @@ describe('HunyadiAndTheJanissaries strategy', () => {
         ['blue', 'blue', 'blue', 'blue']
       ] as Board;
       const soldiers = getOptimalSoldierGroups(board);
-      const { nextBoard } = moves.setGroupOfSoldiers.apply(board, {}, soldiers);
+      const { nextBoard } = moves.setGroupOfSoldiers.apply(board, asSultan, soldiers);
       expect([
         [[], ['blue'], ['red'], [], ['red', 'red', 'red', 'red']],
         [[], ['red'], ['blue'], [], ['blue', 'blue', 'blue', 'blue']]
@@ -47,7 +52,7 @@ describe('HunyadiAndTheJanissaries strategy', () => {
         ['blue', 'blue']
       ] as Board;
       const soldiers = getOptimalSoldierGroups(board);
-      const { nextBoard } = moves.setGroupOfSoldiers.apply(board, {}, soldiers);
+      const { nextBoard } = moves.setGroupOfSoldiers.apply(board, asSultan, soldiers);
       expect([
         [[], ['blue'], ['red', 'red', 'blue'], ['red'], ['red', 'red']],
         [[], ['red'], ['blue', 'blue', 'red'], ['blue'], ['blue', 'blue']]

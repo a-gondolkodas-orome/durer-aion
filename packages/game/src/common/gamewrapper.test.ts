@@ -131,8 +131,6 @@ describe("gameWrapper high-level logic", () => {
 
     client.moves.win();
 
-    console.log(client.getState());
-
     expect(client.getState()?.ctx.phase).toStrictEqual(null);
     expect(client.getState()?.G.numberOfTries).toStrictEqual(2);
     expect(client.getState()?.G.numberOfLoss).toStrictEqual(0);

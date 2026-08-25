@@ -65,7 +65,7 @@ export function configureTeamsRouter(
  * @param {integer} minutes - How many minutes to add
  * @returns {State<any>} - A match state object object.
  */
-  router.get("/game/admin/:matchId/addminutes/:minutes", async (ctx) => {
+  router.post("/game/admin/:matchId/addminutes/:minutes", async (ctx) => {
     const matchID = ctx.params.matchId;
     const minutes = Number(ctx.params.minutes);
     const { state, metadata } = await (ctx.db as StorageAPI.Async).fetch(
@@ -185,7 +185,7 @@ export function configureTeamsRouter(
      * @param {string} teamID - The ID of the team.
      * @returns {TeamModel} - Returns the modified team model.
      */
-  router.get("/team/admin/:teamID/reset/strategy", async (ctx) => {
+  router.post("/team/admin/:teamID/reset/strategy", async (ctx) => {
     const teamId = ctx.params.teamID;
     const team = await teams.getTeam({ teamId });
 
@@ -211,7 +211,7 @@ export function configureTeamsRouter(
      * @param {string} teamID - The ID of the team.
      * @returns {TeamModel} - Returns the modified team model.
      */
-  router.get("/team/admin/:teamID/reset/relay", async (ctx) => {
+  router.post("/team/admin/:teamID/reset/relay", async (ctx) => {
     const teamId = ctx.params.teamID;
     const team = await teams.getTeam({ teamId });
 

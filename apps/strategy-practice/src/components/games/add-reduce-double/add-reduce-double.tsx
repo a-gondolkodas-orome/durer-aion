@@ -33,7 +33,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     return true;
   };
 
-  const currentChoiceDescription = (pileId) => {
+  const currentChoiceDescription = (pileId: number) => {
     const pieceCountInPile = board[pileId];
 
     if (!ctx.isClientMoveAllowed) return pieceCountInPile;

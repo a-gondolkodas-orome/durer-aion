@@ -1,6 +1,6 @@
 import { cloneDeep } from 'lodash';
 import { Sheriff, Thief, hasWinningTriple, getUntakenCards, isCardAvailable, type Board } from '../gameplay';
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 
 export const CARD_COUNT = 7;
 
@@ -18,8 +18,8 @@ export const moves = {
   takeCard: {
     // A step takes a single card; the sweep of whatever is left at the end of
     // the game happens inside `applyTakeCard`, not as a move argument.
-    validate: (board: Board, _, idx: number) => isCardAvailable(board, CARD_COUNT, idx),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, idx: number): MoveOutcome<Board> => {
+    validate: (board, _, idx: number) => isCardAvailable(board, CARD_COUNT, idx),
+    apply: (board, { ctx }, idx: number): MoveOutcome<Board> => {
       const nextBoard = applyTakeCard(board, ctx.currentPlayer!, idx);
       if (nextBoard.numTurns >= 5) {
         const winner = hasWinningTriple(nextBoard.cards[Thief]) ? Thief : Sheriff;
@@ -28,7 +28,7 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-};
+} satisfies MoveDefs<Board>;
 
 export type Moves = typeof moves;
 

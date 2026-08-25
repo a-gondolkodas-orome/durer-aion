@@ -1,5 +1,5 @@
 import { range, random } from 'lodash';
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 
 // A board is the list of pile sizes; every pile has at least one match.
 export type Board = number[];
@@ -17,9 +17,9 @@ const isSplitAllowed = (board: Board, pileId: number, firstPart: number): boolea
 export const moves = {
   removeMatch: {
     // Empty piles are dropped from the board, so every pile has a match to give up.
-    validate: (board: Board, _, pileId: number) =>
+    validate: (board, _, pileId: number) =>
       isPileId(board, pileId) && board[pileId] >= 1,
-    apply: (board: Board, { ctx }: { ctx: Ctx }, pileId: number): MoveOutcome<Board> => {
+    apply: (board, { ctx }, pileId: number): MoveOutcome<Board> => {
       const nextBoard = board
         .map((n, i) => (i === pileId ? n - 1 : n))
         .filter(n => n > 0);
@@ -30,9 +30,9 @@ export const moves = {
     }
   },
   splitPile: {
-    validate: (board: Board, _, pileId: number, firstPart: number) =>
+    validate: (board, _, pileId: number, firstPart: number) =>
       isSplitAllowed(board, pileId, firstPart),
-    apply: (board: Board, _, pileId: number, firstPart: number): MoveOutcome<Board> => {
+    apply: (board, _, pileId: number, firstPart: number): MoveOutcome<Board> => {
       const size = board[pileId];
       const nextBoard = board.flatMap((n, i) =>
         i === pileId ? [firstPart, size - firstPart] : [n]
@@ -41,7 +41,7 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-};
+} satisfies MoveDefs<Board>;
 
 export type Moves = typeof moves;
 

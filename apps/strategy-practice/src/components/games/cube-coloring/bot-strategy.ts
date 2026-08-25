@@ -84,11 +84,11 @@ const makeOptimalStepAsSecond = (board: Board) => {
   return undefined;
 };
 
-const getMissingColors = (board: Board, vertex) => {
+const getMissingColors = (board: Board, vertex: number) => {
   const nbColors = neighbours[vertex].map(v => board[v]);
   return difference(colors, nbColors);
 };
 
-const getEmptyNeighbours = (board: Board, vertex) => {
+const getEmptyNeighbours = (board: Board, vertex: number) => {
   return neighbours[vertex].filter(i => !isColored(board, i));
 };

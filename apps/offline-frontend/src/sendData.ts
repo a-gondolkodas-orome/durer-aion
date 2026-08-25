@@ -1,4 +1,4 @@
-import type { Ctx, LogEntry } from "boardgame.io";
+import type { Ctx } from "boardgame.io";
 import { LOCAL_STORAGE_TEAMSTATE, TeamModelDto } from "common-frontend";
 
 
@@ -68,7 +68,9 @@ interface SendGameDataParams {
   // wrapper's score); the rest of G rides along in the JSON payload.
   G?: { currentProblem?: number; points?: number };
   ctx?: Ctx;
-  log?: LogEntry[];
+  // Only ever JSON-stringified here, so whatever a caller reports as its log
+  // is passed through: gameWrapper's move context carries the log plugin.
+  log?: unknown;
 }
 
 export function sendGameData(params: SendGameDataParams){

@@ -92,7 +92,7 @@ export const smartBotStrategy: Bot = ({ board, ctx }) => {
 };
 
 // given board *after* your step, are you set up to win the game for sure?
-const isWinningState = (board: Board, amIFirst) => {
+const isWinningState = (board: Board, amIFirst: boolean): boolean => {
   if (isGameEnd(board)) {
     return true;
   }

@@ -4,7 +4,7 @@ import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
 import { generateStartBoard, isRobbable, moves, type Board } from './gameplay';
 
 const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
-  const getCoords = (index) => {
+  const getCoords = (index: number) => {
     const step = Math.PI * 2/board.circle.length;
     const angle = index * step + (board.firstMove === null ? 0 : board.firstMove * step);
     return { x: 55 + 50 * Math.cos(angle), y: 55 + 50 * Math.sin(angle) };
@@ -13,11 +13,11 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   // Two different questions: `isAllowedBank` marks the banks that could be
   // robbed from this position — shown in green whoever is on turn — while
   // `isAllowedMove` additionally requires that it is this client's move.
-  const isAllowedMove = index => moves.rob.isAllowed(board, index);
+  const isAllowedMove = (index: number) => moves.rob.isAllowed(board, index);
 
-  const isAllowedBank = index => isRobbable(board, index);
+  const isAllowedBank = (index: number) => isRobbable(board, index);
 
-  const getBankColor = index => {
+  const getBankColor = (index: number) => {
     if (index === board.lastMove) return 'fill-red-800 stroke-red-600';
     if (board.circle[index] === false) return 'fill-red-800';
     if (!isAllowedBank(index)) return 'fill-slate-400';

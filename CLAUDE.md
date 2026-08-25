@@ -44,7 +44,10 @@ regression checklist every change is measured against.
 
 - **Frontend**: React 19, Vite, MUI (Material-UI), React Router
 - **Backend**: boardgame.io server, Koa, PostgreSQL (via bgio-postgres)
-- **Build**: Turborepo, TypeScript, tsdown
+- **Build**: Turborepo, TypeScript, tsdown. Each package's build config is
+  `tsdown.config.mts`, not `.ts`: the packages ship CommonJS and so carry no
+  `"type": "module"`, which leaves node guessing at the config's module system
+  and warning about it on every build.
 - **Testing**: vitest, React Testing Library. Suites are `*.test.ts(x)` under
   the root config and `*.spec.ts(x)` in `apps/strategy-practice`; both run through
   vitest, and neither uses Jest.
@@ -148,6 +151,14 @@ start boards, board client and specs together.
 }
 ```
 
+A move takes as many arguments as you give it — `moves.changeCoins(K, L)` for
+a "pick two values, then commit" turn, driven by form inputs rather than by a
+click on the board. The two live games are both single-click, single-argument;
+nothing in the wrapper requires that.
+
+The opening position has two homes, and `GameMixin.startingPosition` in
+`packages/game/src/common/types.ts` says which to pick.
+
 ## Environment Files
 
 - `apps/online-backend/.env` - Backend config (copy from `.env.sample`)
@@ -182,11 +193,12 @@ separate approval — the workflow going green is the cutover.
 
 ## Competition Secrecy
 
-A new competition's game must stay secret until after the competition, which is
-why each year has a private synced repo: `sync.yml` mirrors any pushed `sync-*`
-branch into it, the game is developed and deployed from there, and a merge-back
-PR publishes it afterwards. Nothing about an unreleased game may appear in a
-public commit — including engine changes phrased around its needs.
+A new competition's game must stay secret until after the competition, so each
+year has a private synced repo and the game is developed and deployed from
+there. **Nothing about an unreleased game may appear in a public commit** —
+including engine changes phrased around its needs.
+[`README.md`](README.md), under *Competition secrecy*, is the authority: how the
+mirror works, and what to set up when the year's repo is created.
 
 ## Key Conventions
 

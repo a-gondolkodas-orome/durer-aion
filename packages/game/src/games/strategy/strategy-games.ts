@@ -23,15 +23,17 @@ export const StrategyWrappers = {
   E: () => stonesStrategy("E"),
 }
 
-export function MyBoardWrapper(category: "C" | "D" | "E") {
-  switch (category) {
-    case "C":
-      return Board19ocd;
-    case "D":
-      return Board19ocd;
-    case "E":
-      return StonesBoard;
-  }
+const boards = {
+  C: Board19ocd,
+  D: Board19ocd,
+  E: StonesBoard,
+};
+
+// Generic over the category so the caller keeps the board's own state type: a
+// plain "C" | "D" | "E" parameter would widen the result to a union of boards,
+// which no single game's client can accept.
+export function MyBoardWrapper<T_Category extends keyof typeof boards>(category: T_Category): (typeof boards)[T_Category] {
+  return boards[category];
 }
 
 export const MyGameWrappers = {

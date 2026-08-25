@@ -1,6 +1,10 @@
 import { State } from 'boardgame.io';
-import { BotAction } from 'boardgame.io/dist/types/src/ai/bot';
 import { Bot } from 'boardgame.io/ai';
+
+// boardgame.io does not export the name for what a bot may answer with. Taking
+// it off the Bot class it does export keeps this out of the package's build
+// layout, which is not an API and can be rearranged by a patch release.
+type BotAction = ReturnType<Bot['enumerate']>[number];
 
 // Determine the next move for the bot and which move function to use.
 type BotStrategy<T_SpecificGameState, T_Move> = (state: State<T_SpecificGameState>, botID: string) => [T_Move | undefined, string];

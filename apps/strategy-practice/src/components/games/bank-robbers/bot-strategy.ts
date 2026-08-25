@@ -15,7 +15,7 @@ export const smartBotStrategy: Bot = ({ board }) => {
   return { move: 'rob', args: [bankIndex] };
 }
 
-function convertToBinary(L) {
+function convertToBinary(L: boolean[]) {
   let index = 0;
   for (let i = 0; i < L.length; i++) {
     index = index + (L[i] ? 2 ** (L.length - i - 1) : 0);

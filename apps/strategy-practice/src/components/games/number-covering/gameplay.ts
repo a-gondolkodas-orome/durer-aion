@@ -1,4 +1,4 @@
-import type { MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 import { range, sum, sample, cloneDeep } from 'lodash';
 
 export type Board = number[]
@@ -11,10 +11,10 @@ export const moves = {
   coverNumber: {
     // Numbers are addressed by their value, which is also their 1-based
     // position; only one that is still showing may be covered.
-    validate: (board: Board, _, number: number) =>
+    validate: (board, _, number: number) =>
       Number.isInteger(number) && number >= 1 && number <= board.length
         && board[number - 1] !== COVERED,
-    apply: (board: Board, _, number: number): MoveOutcome<Board> => {
+    apply: (board, _, number: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard[number-1] = COVERED;
 
@@ -25,7 +25,7 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-}
+} satisfies MoveDefs<Board>
 
 export type Moves = typeof moves;
 

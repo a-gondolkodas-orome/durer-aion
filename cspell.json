@@ -3,7 +3,6 @@
   "words": [
     "formik",
     "notistack",
-    "tictactoe",
     "teamname",
     "boardgame",
     "gameover",
@@ -24,12 +23,7 @@
     "src/teamData.ts",
     "src/client/text-constants.ts",
     "scripts/test.tsv*",
-    "src/games/relay/strategy.ts",
-    "src/games/14od/strategy.ts",
-    "src/games/ten-coins/main.tsx",
-    "src/games/chess-bishops/main.tsx",
-    "src/games/superstitious-counting/main.tsx",
-    "src/games/superstitious-counting/board.tsx"
+    "src/games/relay/strategy.ts"
   ],
   "languageSettings": [
     {

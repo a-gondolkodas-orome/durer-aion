@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 
 export type Board = number[]
 export type MoveType = 'remove' | 'merge'
@@ -12,10 +12,8 @@ export const isPile = (board: Board, pileIndex: number): boolean =>
 
 export const moves = {
   removeOne: {
-    validate: (board: Board, _: { ctx: Ctx<TurnState> }, pileIndex: number) => isPile(board, pileIndex),
-    apply: (
-      board: Board, { ctx }: { ctx: Ctx<TurnState> }, pileIndex: number
-    ): MoveOutcome<Board, TurnState> => {
+    validate: (board, _, pileIndex: number) => isPile(board, pileIndex),
+    apply: (board, { ctx }, pileIndex: number): MoveOutcome<Board, TurnState> => {
       const newSize = board[pileIndex] - 1;
       const nextBoard = [
         ...board.slice(0, pileIndex),
@@ -31,12 +29,10 @@ export const moves = {
   },
   mergePiles: {
     // Merging needs two piles, and they have to be different ones.
-    validate: (board: Board, _: { ctx: Ctx<TurnState> }, piles: number[]) =>
+    validate: (board, _, piles: number[]) =>
       Array.isArray(piles) && piles.length === 2
         && isPile(board, piles[0]) && isPile(board, piles[1]) && piles[0] !== piles[1],
-    apply: (
-      board: Board, _: { ctx: Ctx<TurnState> }, [pileIndex1, pileIndex2]: number[]
-    ): MoveOutcome<Board, TurnState> => {
+    apply: (board, _, [pileIndex1, pileIndex2]: number[]): MoveOutcome<Board, TurnState> => {
       const [firstIdx, secondIdx] = [pileIndex1, pileIndex2].sort((a, b) => a - b);
       const merged = board[firstIdx] + board[secondIdx];
       const nextBoard = board.filter((_, i) => i !== firstIdx && i !== secondIdx);
@@ -45,6 +41,6 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-};
+} satisfies MoveDefs<Board, TurnState>;
 
 export type Moves = typeof moves;

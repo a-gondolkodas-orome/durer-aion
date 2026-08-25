@@ -1,10 +1,10 @@
 import { type BotStrategy } from 'strategy-game-factory';
 import { botNextMoveArgs, makeCtx } from 'test-utils';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
-import { type Board, type Coef, hasThreeIntegerRoots, canComplete } from './gameplay';
+import { type Board, type Coef, type Moves, hasThreeIntegerRoots, canComplete } from './gameplay';
 
 // Run a bot on a board and read back the single move it names.
-const runWith = (strategy: BotStrategy<Board>) => (board: Board): { coef: Coef; value: number } => {
+const runWith = (strategy: BotStrategy<Board, Moves>) => (board: Board): { coef: Coef; value: number } => {
   const [coef, value] = botNextMoveArgs(strategy({ board, ctx: makeCtx({ phase: 'play', currentPlayer: 0 }) }));
   return { coef, value };
 };

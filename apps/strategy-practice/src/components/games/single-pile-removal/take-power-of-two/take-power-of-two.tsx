@@ -8,7 +8,15 @@ import { useTranslation } from 'language';
 import { generateStartBoard, generateTestStartBoard, getAvailableExponents, moves, type Board } from './gameplay';
 import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
 
-const ExponentsTable = ({ isPowerAllowed, board, choosePower, hovered, hoverProps }) => {
+const ExponentsTable = (
+  { isPowerAllowed, board, choosePower, hovered, hoverProps }: {
+    isPowerAllowed: (exponent: number) => boolean;
+    board: Board;
+    choosePower: (exponent: number) => void;
+    hovered: number | null;
+    hoverProps: ReturnType<typeof useHoverPreview<number>>['hoverProps'];
+  }
+) => {
   const { t } = useTranslation();
   const availableExponents = getAvailableExponents(board);
 

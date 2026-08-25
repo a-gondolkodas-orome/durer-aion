@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 
 export type Grid = boolean[][]
 export type Board = { grid: Grid }
@@ -72,10 +72,10 @@ export const moves = {
     // are removable, so "there is a disc at (r, c)" is the whole of legality —
     // but it matters, since applyMove reads the rectangle around that disc and
     // there is none around an empty cell.
-    validate: (board: Board, _: { ctx: Ctx<TurnState> }, move: Move) =>
+    validate: (board, _, move: Move) =>
       !!move && (move.orientation === 'row' || move.orientation === 'col')
         && board.grid[move.r]?.[move.c] === true,
-    apply: (board: Board, { ctx }: { ctx: Ctx<TurnState> }, move: Move): MoveOutcome<Board, TurnState> => {
+    apply: (board, { ctx }, move: Move): MoveOutcome<Board, TurnState> => {
       const nextBoard = { grid: applyMove(board.grid, move) };
       // nextTurnState clears the disc the BoardClient parked in ctx.turnState
       // while the player was choosing between its row and its column.
@@ -85,7 +85,7 @@ export const moves = {
       return { nextBoard, nextTurnState: null, isTurnEnd: true };
     }
   }
-};
+} satisfies MoveDefs<Board, TurnState>;
 
 export type Moves = typeof moves;
 

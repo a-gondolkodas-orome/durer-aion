@@ -17,7 +17,7 @@ export const smartBotStrategy: Bot = ({ board }) => {
 };
 
 // given board *after* your step, are you set up to win the game for sure?
-const isWinningState = (board: Board) => {
+const isWinningState = (board: Board): boolean => {
   const allowedPlacesForOther = getAllowedMoves(board);
   if (allowedPlacesForOther.length === 0) {
     return true;

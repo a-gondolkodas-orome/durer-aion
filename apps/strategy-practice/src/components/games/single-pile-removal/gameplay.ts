@@ -1,3 +1,5 @@
+import type { MoveValidator } from 'strategy-game-factory';
+
 // Shared board shape for the pebble take-away games (three-more, waning-stones,
 // doubling-reduction). `stones` is the number of pebbles left in the pile.
 // `maxTake` is the most a player may take this turn: each game bakes its opening
@@ -11,5 +13,5 @@ export const cap = (board: Board): number => Math.min(board.maxTake, board.stone
 // A take is legal when it removes a whole number of pebbles, at least one and at
 // most this turn's cap. The three games differ only in how the *next* cap is
 // derived, so they share this one validator.
-export const validateTake = (board: Board, _, count: number): boolean =>
+export const validateTake: MoveValidator<Board> = (board, _, count: number) =>
   Number.isInteger(count) && count >= 1 && count <= cap(board);

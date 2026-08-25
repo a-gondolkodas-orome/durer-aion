@@ -14,7 +14,7 @@ export const randomBotStrategy: Bot = ({ board }) => {
   }
 };
 
-const opponentCanWinNext = (board: Board, position) => {
+const opponentCanWinNext = (board: Board, position: number) => {
   const boardCopy = [...board];
   boardCopy[position] = botColor;
   return range(0, 9).filter(i => isNull(boardCopy[i])).some(i => {
@@ -83,7 +83,7 @@ const getOptimalBotFlippingPosition = (board: Board) => {
 const isWinningStateCache = new Map();
 
 // given board *after* your step, are you set up to win the game for sure?
-const isWinningState = (board: Board, amIBot: boolean) => {
+const isWinningState = (board: Board, amIBot: boolean): boolean => {
   const key = board.join(',') + '|' + amIBot;
   if (isWinningStateCache.has(key)) return isWinningStateCache.get(key);
 

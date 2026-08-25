@@ -24,10 +24,24 @@ export default defineConfig({
     // apps/strategy-practice reads the source through an alias, not this build.
     alwaysBundle: ['lodash'],
 
+    // What gets bundled is decided by `alwaysBundle` above, so tsdown's hint
+    // asking for a list has nothing left to tell us. `onlyBundle: ['lodash']`
+    // would be the tighter answer, but its own check runs over the declaration
+    // pass too, where lodash is absent, so it reports the entry as unused on
+    // every build.
+    onlyBundle: false,
+
     // Leave a subpath import as written; resolving it is tsdown's default, and
     // for a dependency with no `exports` map it lands on the package's CJS entry.
     resolveDepSubpath: false,
   },
+
+  // The cjs build replaces `import.meta` with `{}`, which is what dev-mode.ts
+  // wants there — reading `.env?.DEV` off it yields undefined and the NODE_ENV
+  // fallback decides. rolldown warns anyway, once per build. The fix it suggests,
+  // `transform.define`, is not per-format and would erase the expression from the
+  // esm output too, where Vite's substitution is the whole point.
+  suppressWarnings: ['EMPTY_IMPORT_META'],
 
   outputOptions: {
     // rolldown keeps comments, so a package that bundles a dependency in also

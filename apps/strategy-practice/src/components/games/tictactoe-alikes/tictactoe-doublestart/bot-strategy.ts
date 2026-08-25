@@ -24,10 +24,10 @@ export const smartBotStrategy: Bot = ({ board, ctx }) => {
     const opening = sample([[0, 2], [2, 8], [6, 8], [0, 6]])!;
     return placements(opening[0], opening[1]);
   }
-  return placements(getOptimalBotPlacingPosition(board, ctx.chosenRoleIndex)!);
+  return placements(getOptimalBotPlacingPosition(board, ctx.chosenRoleIndex!)!);
 };
 
-const getOptimalBotPlacingPosition = (board: Board, chosenRoleIndex) => {
+const getOptimalBotPlacingPosition = (board: Board, chosenRoleIndex: number) => {
   const botColor = roleColors[1 - chosenRoleIndex];
   const opponentColor = roleColors[chosenRoleIndex];
 
@@ -50,7 +50,7 @@ const getOptimalBotPlacingPosition = (board: Board, chosenRoleIndex) => {
 };
 
 // given board *after* your step, are you set up to win the game for sure?
-const isWinningState = (board: Board, amIFirst) => {
+const isWinningState = (board: Board, amIFirst: boolean): boolean => {
   if (isGameEnd(board)) {
     return amIFirst === hasFirstPlayerWon(board);
   }

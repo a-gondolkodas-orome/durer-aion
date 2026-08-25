@@ -18,7 +18,12 @@ const cubeCoords = [
   { cx: '25%', cy: '74%' }
 ];
 
-export const nodeColors = {
+// Keyed by `colors` in gameplay — the logic-side palette — which is why this is
+// only ever indexed with a board cell rather than a literal key. An uncoloured
+// cell holds '' and misses; the two lookups below guard for that themselves.
+export const nodeColors: Record<
+  string, { bg: string; name: { hu: string; en: string }; svg: string }
+> = {
   'red': {
     bg: 'bg-red-500 text-inherit enabled:hocus:bg-red-600',
     name: { hu: 'Piros', en: 'Red' },
@@ -43,14 +48,14 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const [x, setX] = useState(0);
   const [y, setY] = useState(0);
 
-  const isColoringAllowed = (vertex) => moves.colorVertex.isAllowed(board, { vertex, color });
+  const isColoringAllowed = (vertex: number) => moves.colorVertex.isAllowed(board, { vertex, color });
 
-  const pick = (pickedColor) => {
+  const pick = (pickedColor: string) => {
     if (!ctx.isClientMoveAllowed) return;
     setColor(pickedColor === color ? null : pickedColor);
   };
 
-  const drawPickedColor = (event) => {
+  const drawPickedColor = (event: React.MouseEvent<SVGSVGElement>) => {
     const svg = event.currentTarget as SVGSVGElement;
     setX(event.nativeEvent.offsetX / svg.clientWidth * 100);
     setY(event.nativeEvent.offsetY / svg.clientHeight * 100);
@@ -63,7 +68,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     return Math.hypot(x - cx, y - cy) < 6;
   });
 
-  const setVertexColor = (vertex) => {
+  const setVertexColor = (vertex: number) => {
     // the engine ignores disallowed dispatches, but the guard is still needed
     // here: a rejected click must not clear the colour selection below
     if (!isColoringAllowed(vertex)) return;

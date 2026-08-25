@@ -19,7 +19,7 @@ export const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   const { stones, pendingLine } = board;
 
 
-  const isCellHighlighted = (id) => pendingLine !== null && LINES[pendingLine].includes(id);
+  const isCellHighlighted = (id: number) => pendingLine !== null && LINES[pendingLine].includes(id);
 
   const selectorButtonClass = 'secondary-button flex items-center justify-center text-lg';
 

@@ -93,20 +93,6 @@ export default defineConfig(
   // delete its line — never add one. New code goes through the rule everywhere.
   {
     files: [
-      // Copied bgio server internals whose types upstream does not export.
-      'apps/online-backend/src/socketio_botmoves.ts',
-      // bgio move-context destructuring; two TODO markers track it.
-      'packages/game/src/common/gamewrapper.ts',
-      // Wire-shape casts on match state, pending a typed DTO field.
-      'packages/common-frontend/src/client/components/TeamDetailDialog.tsx',
-      // The client-factory family shares one untyped board/game plumbing shape;
-      // its fix is the BoardProps<G> refactor the TODO in boardwrapper.tsx names,
-      // and exempting only part of the family would be arbitrary.
-      'apps/offline-frontend/src/client_factory.tsx',
-      'packages/common-frontend/src/common/client_factory.tsx',
-      'packages/common-frontend/src/common/myclient.ts',
-      'apps/offline-frontend/src/myclient.ts',
-      'packages/common-frontend/src/common/boardwrapper.tsx',
       // #224 lands first; the relay app joins the per-file ratchet after.
       'apps/relay-practise-frontend/**',
     ],
@@ -128,7 +114,7 @@ export default defineConfig(
       '**/dist/**',
       '**/build/**',
       '**/node_modules/**',
-      '**/*.config.{js,mjs,cjs,ts}',
+      '**/*.config.{js,mjs,cjs,ts,mts}',
       // apps/strategy-practice is linted by its own eslint config, through its
       // own `npm run lint` — it keeps its own ESLint version and plugins (npm
       // nests them), which this config's flat resolution would not find.

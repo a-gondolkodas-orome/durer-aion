@@ -1,22 +1,24 @@
 import { range } from 'lodash';
-import { strategyGameFactory, type BoardClientProps, GameBoard } from 'strategy-game-factory';
+import {
+  strategyGameFactory, GameBoard, type BoardClientProps, type StrategyArgs
+} from 'strategy-game-factory';
 import { generateEmptyTicTacToeBoard } from '../gameplay';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { inPlacingPhase, moves, otherPlayerColor, type Board } from './gameplay';
 
 const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   const gameIsInPlacingPhase = inPlacingPhase(board);
-  const clickField = (id) => {
+  const clickField = (id: number) => {
     if (gameIsInPlacingPhase) {
       moves.placePiece(board, id);
     } else {
       moves.whitenPiece(board, id);
     }
   };
-  const isMoveAllowed = (id) => gameIsInPlacingPhase
+  const isMoveAllowed = (id: number) => gameIsInPlacingPhase
     ? moves.placePiece.isAllowed(board, id)
     : moves.whitenPiece.isAllowed(board, id);
-  const pieceColor = (id) => {
+  const pieceColor = (id: number) => {
     const colorCode = board[id];
     if (colorCode === 'red') return 'bg-red-800';
     if (colorCode === 'white') return 'bg-slate-50 dark:bg-slate-600';
@@ -52,7 +54,7 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const getPlayerStepDescription = ({ board, ctx }) => {
+const getPlayerStepDescription = ({ board, ctx }: StrategyArgs<Board>) => {
   return inPlacingPhase(board)
     ? {
       hu: 'Helyezz le egy korongot egy üres mezőre kattintással.',

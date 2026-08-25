@@ -1,4 +1,4 @@
-import type { MoveOutcome, Ctx } from 'strategy-game-factory';
+import type { Ctx, MoveDefs, MoveOutcome } from 'strategy-game-factory';
 import { isNull, some, groupBy, range, cloneDeep } from 'lodash';
 import { hasWinningSubset, type Board, validatePlacement } from '../gameplay';
 
@@ -28,7 +28,7 @@ export const otherPlayerColor = (ctx: Ctx) =>
 export const moves = {
   placePiece: {
     validate: validatePlacement,
-    apply: (board: Board, { ctx }: { ctx: Ctx }, id: number): MoveOutcome<Board> => {
+    apply: (board, { ctx }, id: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard[id] = currentPlayerColor(ctx);
       if (isGameEnd(nextBoard)) {
@@ -43,9 +43,9 @@ export const moves = {
     // one. The phase check is what stops a player from whitening mid-placement;
     // for placing, "the cell is empty" already implies the placing phase, so that
     // move needs no phase check of its own.
-    validate: (board: Board, { ctx }: { ctx: Ctx }, id: number) =>
+    validate: (board, { ctx }, id: number) =>
       !inPlacingPhase(board) && board[id] === otherPlayerColor(ctx),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, id: number): MoveOutcome<Board> => {
+    apply: (board, { ctx }, id: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard[id] = 'white';
       if (isGameEnd(nextBoard)) {
@@ -54,6 +54,6 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-}
+} satisfies MoveDefs<Board>
 
 export type Moves = typeof moves;
