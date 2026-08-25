@@ -1,15 +1,15 @@
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 import { random } from 'lodash';
 
 export type Board = number[]
 
 export const moves = {
   add1: {
-    apply: (board: Board): MoveOutcome<Board> =>
+    apply: (board): MoveOutcome<Board> =>
       ({ nextBoard: [board[0], board[1] + 1], isTurnEnd: true })
   },
   subtract: {
-    apply: (board: Board, { ctx }: { ctx: Ctx }): MoveOutcome<Board> => {
+    apply: (board, { ctx }): MoveOutcome<Board> => {
       const nextBoard = [board[0] - board[1], board[1]];
       if (board[0] - board[1] <= 0) {
         return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
@@ -17,7 +17,7 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-};
+} satisfies MoveDefs<Board>;
 
 export type Moves = typeof moves;
 

@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 import { flatMap, range, some, isEqual, cloneDeep } from 'lodash';
 
 export const BISHOP = 1 as const;
@@ -35,9 +35,9 @@ export const markForbiddenFields = (board: Board, { row, col }: Field): void => 
 
 export const moves = {
   placeBishop: {
-    validate: (board: Board, _, target: Field) =>
+    validate: (board, _, target: Field) =>
       some(getAllowedMoves(board), field => isEqual(field, target)),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, { row, col }: Field): MoveOutcome<Board> => {
+    apply: (board, { ctx }, { row, col }: Field): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       markForbiddenFields(nextBoard, { row, col });
       nextBoard[row][col] = BISHOP;
@@ -47,6 +47,6 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-};
+} satisfies MoveDefs<Board>;
 
 export type Moves = typeof moves;

@@ -1,6 +1,7 @@
 import { cap, validateTake, type Board } from './gameplay';
+import { makeCtx } from 'test-utils';
 
-const isTakeAllowed = (board: Board, count: number) => validateTake(board, undefined, count);
+const isTakeAllowed = (board: Board, count: number) => validateTake(board, { ctx: makeCtx() }, count);
 
 describe('pebble-pile shared take legality', () => {
   describe('cap', () => {

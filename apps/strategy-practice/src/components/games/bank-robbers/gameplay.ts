@@ -1,12 +1,12 @@
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 import { range, cloneDeep, random, sample } from 'lodash';
 
 export type Board = { circle: boolean[], lastMove: number | null, firstMove: number | null }
 
 export const moves = {
   rob: {
-    validate: (board: Board, _, index: number) => isRobbable(board, index),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, index: number): MoveOutcome<Board> => {
+    validate: (board, _, index: number) => isRobbable(board, index),
+    apply: (board, { ctx }, index: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       // so that ai strategy can be simpler: first move is always the same
       const transformedMove = board.firstMove === null ? 0 : index;
@@ -21,7 +21,7 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-}
+} satisfies MoveDefs<Board>
 
 export type Moves = typeof moves;
 

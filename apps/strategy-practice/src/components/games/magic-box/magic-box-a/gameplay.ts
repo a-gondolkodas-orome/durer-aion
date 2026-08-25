@@ -1,4 +1,4 @@
-import type { MoveOutcome, Ctx } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 export type Board = boolean[]
 
 /*
@@ -28,9 +28,9 @@ export const isGameEnd = hasFullLine;
 export const moves = {
   placeStone: {
     // A stone goes into any compartment that is still empty.
-    validate: (board: Board, _, id: number) =>
+    validate: (board, _, id: number) =>
       Number.isInteger(id) && id >= 0 && id < board.length && !board[id],
-    apply: (board: Board, { ctx }: { ctx: Ctx }, id: number): MoveOutcome<Board> => {
+    apply: (board, { ctx }, id: number): MoveOutcome<Board> => {
       const nextBoard = placeStone(board, id);
       // The box breaks under the stone just placed, so the mover loses.
       if (isGameEnd(nextBoard)) {
@@ -39,6 +39,6 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-}
+} satisfies MoveDefs<Board>
 
 export type Moves = typeof moves;

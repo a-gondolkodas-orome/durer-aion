@@ -1,5 +1,5 @@
 import { random, cloneDeep } from 'lodash';
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 
 export type Board = number[];
 export type Piece = { pileId: number; pieceId: number };
@@ -19,13 +19,9 @@ const isSpreadAllowed = (board: Board, pileId: number, pieceCount: number): bool
 
 export const moves = {
   spreadPieces: {
-    validate: (board: Board, _, { pileId, pieceCount }: { pileId: number; pieceCount: number }) =>
+    validate: (board, _, { pileId, pieceCount }: { pileId: number; pieceCount: number }) =>
       isSpreadAllowed(board, pileId, pieceCount),
-    apply: (
-      board: Board,
-      { ctx }: { ctx: Ctx },
-      { pileId, pieceCount }: { pileId: number; pieceCount: number }
-    ): MoveOutcome<Board> => {
+    apply: (board, { ctx }, { pileId, pieceCount }: { pileId: number; pieceCount: number }): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard[pileId] = board[pileId] - pieceCount;
       for (let i = pileId - pieceCount; i < pileId; i++) {
@@ -38,6 +34,6 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-};
+} satisfies MoveDefs<Board>;
 
 export type Moves = typeof moves;

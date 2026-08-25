@@ -1,5 +1,5 @@
 import { cloneDeep } from 'lodash';
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 
 // Both variants play the same chase, differing only in how many sectors a side
 // of the lake has (4 vs 5) and how many days the shark must survive.
@@ -45,11 +45,9 @@ export const makeGameplay = (maxTurn: number) => {
 
   const moves = {
     moveSubmarine: {
-      validate: (board: Board, { ctx }: { ctx: Ctx }, move: { from: number; to: number }) =>
+      validate: (board, { ctx }, move: { from: number; to: number }) =>
         ctx.currentPlayer === RESEARCHERS && !!move && isSubmarineMoveAllowed(board, move.from, move.to),
-      apply: (
-        board: Board, _, { from, to }: { from: number; to: number }
-      ): MoveOutcome<Board> => {
+      apply: (board, _, { from, to }: { from: number; to: number }): MoveOutcome<Board> => {
         const nextBoard = cloneDeep(board);
         nextBoard.submarines[from] -= 1;
         nextBoard.submarines[to] += 1;
@@ -60,9 +58,9 @@ export const makeGameplay = (maxTurn: number) => {
       }
     },
     moveShark: {
-      validate: (board: Board, { ctx }: { ctx: Ctx }, to: number) =>
+      validate: (board, { ctx }, to: number) =>
         ctx.currentPlayer === SHARK && isSharkMoveAllowed(board, to),
-      apply: (board: Board, _, to: number): MoveOutcome<Board> => {
+      apply: (board, _, to: number): MoveOutcome<Board> => {
         const nextBoard = cloneDeep(board);
         nextBoard.shark = to;
 
@@ -85,7 +83,7 @@ export const makeGameplay = (maxTurn: number) => {
         return { nextBoard, isTurnEnd: true };
       }
     }
-  };
+  } satisfies MoveDefs<Board>;
 
   return { isGameEnd, getWinnerIndex, moves };
 };

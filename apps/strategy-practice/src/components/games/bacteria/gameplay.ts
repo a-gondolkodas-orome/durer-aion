@@ -1,5 +1,5 @@
 import { cloneDeep } from 'lodash';
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { Ctx, MoveDefs, MoveOutcome } from 'strategy-game-factory';
 
 export type Board = { bacteria: number[][], goals: number[] };
 export type Cell = { row: number; col: number };
@@ -111,9 +111,9 @@ const attackerMove = (type: MoveType) => ({
 
 export const moves = {
   defend: {
-    validate: (board: Board, { ctx }: { ctx: Ctx }, cell: Cell) =>
+    validate: (board, { ctx }, cell: Cell) =>
       ctx.currentPlayer === DEFENDER && hasBacterium(board, cell),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, { row, col }: Cell): MoveOutcome<Board> => {
+    apply: (board, { ctx }, { row, col }: Cell): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard.bacteria[row][col] -= 1;
 
@@ -127,7 +127,7 @@ export const moves = {
   shiftLeft: attackerMove('shiftLeft'),
   jump: attackerMove('jump'),
   spread: attackerMove('spread')
-};
+} satisfies MoveDefs<Board>;
 
 export type Moves = typeof moves;
 

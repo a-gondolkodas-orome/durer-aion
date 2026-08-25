@@ -1,5 +1,5 @@
 import { sum, isEqual, cloneDeep } from 'lodash';
-import type { MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 import { isPlacementAllowed } from '../gameplay';
 
 export type Board = number[]
@@ -8,8 +8,8 @@ export const startBoard: Board = [0, 0, 0, 0];
 
 export const moves = {
   addPiece: {
-    validate: (board: Board, _, pileId: number) => isPlacementAllowed(board, pileId),
-    apply: (board: Board, _, pileId: number): MoveOutcome<Board> => {
+    validate: (board, _, pileId: number) => isPlacementAllowed(board, pileId),
+    apply: (board, _, pileId: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard[pileId] += 1;
       if (sum(nextBoard) === 6) {
@@ -19,6 +19,6 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-}
+} satisfies MoveDefs<Board>
 
 export type Moves = typeof moves;

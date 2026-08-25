@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 import { random, sample } from 'lodash';
 
 // Six fields sit on a circle, indices 0..5 clockwise. Each field holds some
@@ -80,8 +80,8 @@ export const sampleNonEmptyField = (board: Board, [a, b]: Move): number => {
 
 export const moves = {
   removeFromTwo: {
-    validate: (board: Board, _: { ctx: Ctx<TurnState> }, move: Move) => isRemovalAllowed(board, move),
-    apply: (board: Board, { ctx }: { ctx: Ctx<TurnState> }, [i, j]: Move): MoveOutcome<Board, TurnState> => {
+    validate: (board, _, move: Move) => isRemovalAllowed(board, move),
+    apply: (board, { ctx }, [i, j]: Move): MoveOutcome<Board, TurnState> => {
       const nextBoard = board.slice();
       nextBoard[i] -= 1;
       nextBoard[j] -= 1;
@@ -91,6 +91,6 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-};
+} satisfies MoveDefs<Board, TurnState>;
 
 export type Moves = typeof moves;

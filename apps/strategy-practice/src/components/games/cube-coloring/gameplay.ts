@@ -1,5 +1,5 @@
 import { cloneDeep, every, range, some } from 'lodash';
-import type { MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 
 export type Board = string[]
 
@@ -52,9 +52,9 @@ const isGameEnd = (board: Board) => {
 
 export const moves = {
   colorVertex: {
-    validate: (board: Board, _, { vertex, color }: { vertex: number; color: string | null }) =>
+    validate: (board, _, { vertex, color }: { vertex: number; color: string | null }) =>
       isAllowedStep(board, vertex, color),
-    apply: (board: Board, _, { vertex, color }: { vertex: number; color: string }): MoveOutcome<Board> => {
+    apply: (board, _, { vertex, color }: { vertex: number; color: string }): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard[vertex] = color;
       if (isGameEnd(nextBoard)) {
@@ -66,6 +66,6 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-}
+} satisfies MoveDefs<Board>
 
 export type Moves = typeof moves;

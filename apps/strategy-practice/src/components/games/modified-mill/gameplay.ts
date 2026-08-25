@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 import { range } from 'lodash';
 import { LINES, COORDS } from './board-data';
 
@@ -54,9 +54,9 @@ export const moves = {
   placePiece: {
     // A disc may go on any cell of the board that is still empty; both players
     // draw from the same pool of cells, so whose turn it is does not matter.
-    validate: (board: Board, _, node: number) =>
+    validate: (board, _, node: number) =>
       Number.isInteger(node) && node >= 0 && node < CELL_COUNT && board[node] === null,
-    apply: (board: Board, { ctx }: { ctx: Ctx }, node: number): MoveOutcome<Board> => {
+    apply: (board, { ctx }, node: number): MoveOutcome<Board> => {
       const nextBoard = board.slice();
       nextBoard[node] = playerColor(ctx.currentPlayer!);
       if (playerHasLine(nextBoard, ctx.currentPlayer!)) {
@@ -68,6 +68,6 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-};
+} satisfies MoveDefs<Board>;
 
 export type Moves = typeof moves;
