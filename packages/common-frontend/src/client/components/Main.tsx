@@ -46,7 +46,7 @@ export function Main(props: { language: string, gitCommitHash: string }) {
           paddingBottom: "50px",
           maxWidth: "1200px",
         }}
-        data-testId="mainRoot"
+        data-testid="mainRoot"
       >
         {admin && <Admin teamId={window.location.pathname.split('/').at(2)}/>}
         {!teamState && <Login />}
