@@ -112,6 +112,10 @@ type AnyMoves = Record<string, { apply: (...args: never[]) => unknown }>
 // meta for the same reason AnyMoves' do.
 type MoveArgs<TApply> =
   TApply extends (board: never, meta: never, ...args: infer TArgs) => unknown ? TArgs : never
+// Any named move, as a shape rather than through `BotMove` below. `BotMove` is
+// a conditional type, so nothing can be inferred through it; a helper that wants
+// to keep hold of a concrete move's argument tuple takes this instead.
+export type NamedBotMove = { move: string; args?: unknown[] }
 // A move a bot wants played, named rather than dispatched. Given the game's
 // `Moves` it pins the name and the arguments; given only a union of names (or
 // nothing) it still pins the name, leaving `args` unchecked.
