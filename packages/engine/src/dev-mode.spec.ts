@@ -28,7 +28,15 @@ describe('isDevMode', () => {
 
     const isDevModeInBareNode = (nodeEnv?: string) => execFileSync(
       execPath,
-      ['--input-type=module', '-e', `import('${moduleUrl}').then(m => process.stdout.write(String(m.isDevMode())))`],
+      // The package ships CommonJS from `main`, so it cannot declare
+      // `"type": "module"` — which is the only thing that would stop node
+      // warning about having to guess this file's module system, once per
+      // child, into the test run's output.
+      [
+        '--disable-warning=MODULE_TYPELESS_PACKAGE_JSON',
+        '--input-type=module',
+        '-e', `import('${moduleUrl}').then(m => process.stdout.write(String(m.isDevMode())))`,
+      ],
       // A key set to undefined is dropped rather than passed as "undefined", which
       // is what makes the unset case below reachable at all — vitest sets NODE_ENV.
       { env: { ...env, NODE_ENV: nodeEnv }, encoding: 'utf8' }
