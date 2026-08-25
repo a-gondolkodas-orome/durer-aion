@@ -6,10 +6,25 @@ import {
   useHoverPreview
 } from 'strategy-game-factory';
 import { useTranslation } from 'language';
-import { allPrimePowers, generateSmallStartBoard, generateStartBoard, moves, type Board } from './gameplay';
+import {
+  allPrimePowers, generateSmallStartBoard, generateStartBoard, moves,
+  type Board, type PrimePower
+} from './gameplay';
+
+// What the three presentational pieces below all need to judge and dispatch an
+// entry. `hoverProps` is read off the hook rather than restated, so it cannot
+// drift from it.
+type EntryProps = {
+  board: Board;
+  isEntryAllowed: (entry: PrimePower) => boolean;
+  chooseEntry: (entry: PrimePower) => void;
+  hoverProps: ReturnType<typeof useHoverPreview<PrimePower>>['hoverProps'];
+};
 import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
 
-const PrimePowerButton = ({ entry, board, isEntryAllowed, chooseEntry, hoverProps }) => {
+const PrimePowerButton = (
+  { entry, board, isEntryAllowed, chooseEntry, hoverProps }: EntryProps & { entry: PrimePower }
+) => {
   const { prime, exponent, value } = entry;
   const isAboveBoard = value > board;
   const isActive = isEntryAllowed(entry);
@@ -32,7 +47,10 @@ const PrimePowerButton = ({ entry, board, isEntryAllowed, chooseEntry, hoverProp
   );
 };
 
-const PrimePowerGrid = ({ board, visiblePowers, isEntryAllowed, chooseEntry, hoverProps }) => {
+const PrimePowerGrid = (
+  { board, visiblePowers, isEntryAllowed, chooseEntry, hoverProps }:
+    EntryProps & { visiblePowers: PrimePower[] }
+) => {
   return (
     <div className="flex flex-wrap gap-1 items-end">
       {visiblePowers.map(entry => (
@@ -49,7 +67,10 @@ const PrimePowerGrid = ({ board, visiblePowers, isEntryAllowed, chooseEntry, hov
   );
 };
 
-const HoverPreview = ({ hovered, board, isEntryAllowed }) => {
+const HoverPreview = (
+  { hovered, board, isEntryAllowed }:
+    Pick<EntryProps, 'board' | 'isEntryAllowed'> & { hovered: PrimePower | null }
+) => {
   const { t } = useTranslation();
   return (
     <div className="min-h-6 mb-2">
@@ -64,12 +85,12 @@ const HoverPreview = ({ hovered, board, isEntryAllowed }) => {
 };
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const { value: hovered, hoverProps } = useHoverPreview<typeof allPrimePowers[0]>(ctx.moveCount);
+  const { value: hovered, hoverProps } = useHoverPreview<PrimePower>(ctx.moveCount);
   const [visiblePowers] = useState(() => allPrimePowers.filter(e => e.value <= board));
-  const isEntryAllowed = (entry: typeof allPrimePowers[0]) =>
+  const isEntryAllowed = (entry: PrimePower) =>
     moves.subtractPrimeExponent.isAllowed(board, entry);
 
-  const chooseEntry = ({ prime, exponent }) => {
+  const chooseEntry = ({ prime, exponent }: PrimePower) => {
     moves.subtractPrimeExponent(board, { prime, exponent });
   };
 

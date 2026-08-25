@@ -15,7 +15,7 @@ const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProps<Board
   // The merge branch is a two-click sequence held in turn state, so this one
   // keeps its guard: without it a click during the bot's turn would still move
   // the selection around.
-  const handlePileClick = (pileIndex) => {
+  const handlePileClick = (pileIndex: number) => {
     if (!ctx.isClientMoveAllowed) return;
     if (moveType === 'remove') {
       moves.removeOne(board, pileIndex);
