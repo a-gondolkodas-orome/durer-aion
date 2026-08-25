@@ -1,6 +1,8 @@
 import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 import { range, random, sample, difference, cloneDeep } from 'lodash';
-export const neighbours = {
+// The cube graph the chase is played on, as an adjacency list keyed by
+// intersection — the same shape policeman-thief-c uses.
+export const neighbours: Record<number, number[]> = {
   0: [1, 2, 4],
   1: [0, 3, 5],
   2: [0, 3, 6],
@@ -36,7 +38,9 @@ export type Board = {
 export const generateStartBoardA = (): Board => {
   const policeStartPosition = random(0, 7);
   const immediatePoliceWinPositions = [policeStartPosition, ...neighbours[policeStartPosition]];
-  const thiefStartPosition = sample(difference(range(0, 8), immediatePoliceWinPositions));
+  // Every intersection has exactly three neighbours, so this removes four of
+  // the eight and always leaves the thief somewhere to start.
+  const thiefStartPosition = sample(difference(range(0, 8), immediatePoliceWinPositions))!;
   return {
     turnCount: 0,
     policemen: [policeStartPosition, policeStartPosition],
@@ -56,7 +60,7 @@ export const generateStartBoardB = (): Board => {
   if (thiefStartPositionOptions.length === 0) {
     return generateStartBoardB();
   }
-  const thiefStartPosition = sample(thiefStartPositionOptions);
+  const thiefStartPosition = sample(thiefStartPositionOptions)!;
   return {
     turnCount: 0,
     policemen: policeStartPosition,

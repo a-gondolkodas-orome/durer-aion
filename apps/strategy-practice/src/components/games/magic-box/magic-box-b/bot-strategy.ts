@@ -21,7 +21,7 @@ export const randomBotStrategy: Bot = ({ board }) => {
 };
 
 export const smartBotStrategy: Bot = ({ board, ctx }) => {
-  const { cell, line } = getOptimalAction(board, ctx.chosenRoleIndex);
+  const { cell, line } = getOptimalAction(board, ctx.chosenRoleIndex!);
   return asTurn(board.pendingLine, cell, line);
 };
 
@@ -62,7 +62,7 @@ const winner = (stones: boolean[], pendingLine: number | null, toMove: number): 
   return result;
 };
 
-export const getOptimalAction = (board: Board, chosenRoleIndex) => {
+export const getOptimalAction = (board: Board, chosenRoleIndex: number) => {
   const { stones, pendingLine } = board;
   const placementCells = pendingLine === null ? [undefined] : emptyCellsInLine(stones, pendingLine);
 
