@@ -151,6 +151,14 @@ start boards, board client and specs together.
 }
 ```
 
+A move takes as many arguments as you give it — `moves.changeCoins(K, L)` for
+a "pick two values, then commit" turn, driven by form inputs rather than by a
+click on the board. The two live games are both single-click, single-argument;
+nothing in the wrapper requires that.
+
+The opening position has two homes, and `GameMixin.startingPosition` in
+`packages/game/src/common/types.ts` says which to pick.
+
 ## Environment Files
 
 - `apps/online-backend/.env` - Backend config (copy from `.env.sample`)

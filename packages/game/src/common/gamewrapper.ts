@@ -1,4 +1,4 @@
-import { AiEnumerate, Ctx, DefaultPluginAPIs, FnContext, Game, PlayerID } from 'boardgame.io';
+import { Ctx, DefaultPluginAPIs, FnContext, Game, PlayerID } from 'boardgame.io';
 import { INVALID_MOVE, TurnOrder } from 'boardgame.io/core';
 import { GameStateMixin, GameType, GUESSER_PLAYER, JUDGE_PLAYER, PlayerIDType } from './types';
 
@@ -137,11 +137,10 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
         }
       },
     },
-    // boardgame.io types playerID as a plain string, and its AiEnumerate entries
-    // are narrower than what the games return (see GameMixin in ./types).
+    // boardgame.io types playerID as a plain string.
     ai: {
       enumerate: (G, ctx, playerID) =>
-        game.possibleMoves(G, ctx, playerID as PlayerIDType) as AiEnumerate,
+        game.possibleMoves(G, ctx, playerID as PlayerIDType),
     }
   };
 
