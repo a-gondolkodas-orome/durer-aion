@@ -33,14 +33,14 @@ machine, follow the same steps with the right-hand values — each is repeated a
 | | live competition | test drive |
 | --- | --- | --- |
 | code from | the year's private repo, deploy key | the public repo, HTTPS clone |
-| domain | the real subdomain, static IP | a throwaway domain, ~$1–3/yr |
+| domain | the real subdomain, static IP | a subdomain of one you already own |
 | `.env.docker` | real secrets, rotated afterwards | throwaway values, still off the samples |
 | competition window | the real start and end | anything covering your session |
 | teams | the real TSV; the `.export` goes back to the organisers | `scripts/test.tsv` |
 | database | must survive; there are no backups | expendable |
 | HTTP→HTTPS redirect | wanted; needs a repo change | skip |
 | certificate renewal | set up the cron | skip |
-| afterwards | stays up; a reboot takes the site down | tear the machine down |
+| afterwards | stays up; a reboot takes the site down | tear the machine down **and delete the DNS record** |
 
 ## What the machine needs
 
@@ -276,7 +276,12 @@ sudo docker run --rm -v /etc/letsencrypt:/etc/letsencrypt \
 docker compose --env-file=.env.docker exec web nginx -s reload
 ```
 
-> **Test drive:** a throwaway domain works the same. Skip the renewal cron.
+> **Test drive:** use a subdomain of a domain you already own — one A record at the VM's
+> IP, no registrar, no cost. Skip the renewal cron. Three things to check on the parent
+> domain first: a CAA record refuses issuance (`dig CAA example.hu`); HSTS with
+> `includeSubDomains` makes port 80 unusable in a browser and a cert mistake unrecoverable;
+> and the name reaches certificate transparency logs, so keep it neutral rather than a hint
+> at the unreleased game.
 
 ## 9. Updating a deployment
 
@@ -297,6 +302,9 @@ No service has a restart policy, so a reboot leaves the site down until someone 
 
 > **Test drive:** tear the machine down instead, per the last column of the provider table.
 > Stopping is not deleting on any of them, and on DigitalOcean it does not stop the bill.
+> **Delete the DNS record too.** The IP goes back to the provider's pool, and a record left
+> pointing at it lets whoever gets that IP next serve their own content — with their own
+> valid certificate — on a subdomain of your domain.
 
 ## Getting inside a container
 
