@@ -51,7 +51,7 @@ export const smartBotStrategy: Bot = ({ board, ctx }) => {
 const emptyCells = (board: Board) => range(0, 9).filter(i => isNull(board[i]));
 
 // given board *after* your step, are you set up to win the game for sure?
-const isWinningState = (board: Board, amIFirst) => {
+const isWinningState = (board: Board, amIFirst: boolean): boolean => {
   if (isGameEnd(board)) {
     return amIFirst === hasFirstPlayerWon(board);
   }

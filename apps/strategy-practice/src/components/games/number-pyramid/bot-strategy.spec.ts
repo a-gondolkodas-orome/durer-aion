@@ -5,7 +5,9 @@ import { botNextMoveArgs, makeCtx } from 'test-utils';
 const active = (value: number): Slot => ({ value, state: 'active' });
 const consumed = (value: number): Slot => ({ value, state: 'consumed' });
 
-const makeBoard = (level0Values, target, opts: { sortedInitial? } = {}): Board => {
+const makeBoard = (
+  level0Values: number[], target: number, opts: { sortedInitial?: number[] } = {}
+): Board => {
   const sorted = opts.sortedInitial ?? [...level0Values].sort((a, b) => b - a);
   return {
     levels: [
@@ -44,7 +46,7 @@ describe('randomBotStrategy', () => {
     const board = makeBoard([10, 9, 3, 2, 2, 2, 2, 2], 15);
     const captured = botNextMoveArgs(randomBotStrategy({ board, ctx: makeCtx() }));
     expect(captured[0].levelIdx).toBe(0);
-    const vals = captured[0].indices.map((i) => board.levels[0][i]!.value);
+    const vals = captured[0].indices.map((i: number) => board.levels[0][i]!.value);
     expect(vals[0] + vals[1]).toBeGreaterThanOrEqual(15);
   });
 
@@ -61,7 +63,7 @@ describe('randomBotStrategy', () => {
     const board = makeBoard([10, 9, 3, 2, 2, 2, 2, 2], 15);
     board.levels[0][0] = consumed(10);
     const captured = botNextMoveArgs(randomBotStrategy({ board, ctx: makeCtx() }));
-    const vals = captured[0].indices.map((i) => board.levels[0][i]!.value);
+    const vals = captured[0].indices.map((i: number) => board.levels[0][i]!.value);
     expect(vals[0] + vals[1]).toBeLessThan(15);
   });
 
@@ -84,7 +86,7 @@ describe('smartBotStrategy', () => {
     const captured = botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx({ currentPlayer: 0 }) }));
     expect(captured).toHaveLength(1);
     expect(captured[0].levelIdx).toBe(0);
-    const vals = captured[0].indices.map((i) => board.levels[0][i]!.value);
+    const vals = captured[0].indices.map((i: number) => board.levels[0][i]!.value);
     expect(vals[0] + vals[1]).toBeGreaterThanOrEqual(15);
   });
 
@@ -93,7 +95,7 @@ describe('smartBotStrategy', () => {
     const board = makeBoard([8, 7, 6, 5, 4, 4, 3, 3], 23);
     const captured = botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx({ currentPlayer: 0 }) }));
     expect(captured).toHaveLength(1);
-    const vals = captured[0].indices.map((i) => board.levels[0][i]!.value);
+    const vals = captured[0].indices.map((i: number) => board.levels[0][i]!.value);
     expect(Math.max(...vals)).toBe(8);
   });
 
@@ -112,7 +114,7 @@ describe('smartBotStrategy', () => {
     const board = makeBoard([9, 8, 7, 6, 5, 4, 2, 2], 22);
     const captured = botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx({ currentPlayer: 1 }) }));
     expect(captured).toHaveLength(1);
-    const vals = captured[0].indices.map((i) => board.levels[0][i]!.value);
+    const vals = captured[0].indices.map((i: number) => board.levels[0][i]!.value);
     expect(Math.max(...vals)).toBe(2);
   });
 
@@ -135,7 +137,7 @@ describe('smartBotStrategy', () => {
     board.levels[2][1] = active(12);
     const captured = botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx({ currentPlayer: 0 }) }));
     expect(captured[0].levelIdx).toBe(2);
-    const vals = captured[0].indices.map((i) => board.levels[2][i]!.value);
+    const vals = captured[0].indices.map((i: number) => board.levels[2][i]!.value);
     expect(vals[0] + vals[1]).toBeGreaterThanOrEqual(23);
   });
 

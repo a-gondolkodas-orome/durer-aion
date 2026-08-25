@@ -6,8 +6,9 @@ import { availableDigits, totalDigits, type Board, type Moves } from './gameplay
 // Jenő is player 0 (first mover), Béla is player 1.
 // Béla wins iff the final digit sum ≡ 0 (mod 9).
 const winnerFromState = (() => {
-  const memo = {};
-  const compute = (sumMod9, turnsLeft) => {
+  // key `sumMod9,turnsLeft` -> the player index that wins from there.
+  const memo: Record<string, number> = {};
+  const compute = (sumMod9: number, turnsLeft: number): number => {
     const key = `${sumMod9},${turnsLeft}`;
     if (key in memo) return memo[key];
     if (turnsLeft === 0) return (memo[key] = sumMod9 === 0 ? 1 : 0);
@@ -20,7 +21,7 @@ const winnerFromState = (() => {
     return (memo[key] = 1 - currentPlayer);
   };
   for (let t = 0; t <= totalDigits; t++) for (let s = 0; s < 9; s++) compute(s, t);
-  return (sumMod9, turnsLeft) => memo[`${sumMod9},${turnsLeft}`];
+  return (sumMod9: number, turnsLeft: number) => memo[`${sumMod9},${turnsLeft}`];
 })();
 
 type Bot = BotStrategy<Board, Moves>
@@ -54,7 +55,7 @@ export const smartBotStrategy: Bot = ({ board }) => {
   }
 
   // Losing position: minimise opponent's winning replies, pick randomly among equally bad moves.
-  const opponentWinCount = d => {
+  const opponentWinCount = (d: number) => {
     const nextSumMod9 = (board.sumMod9 + d) % 9;
     if (turnsLeft < 2) return 0;
     return availableDigits.filter(

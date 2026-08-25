@@ -75,7 +75,9 @@ export const mirrorNodes: Record<Direction, number[]> = {
   'z': [6, 3, 7, 1, 4, 8, 0, 2, 5, 9]
 };
 
-const superSets = {
+// Keyed by the `from-to` pair an edge spells out, so only ever indexed with a
+// built key rather than a literal one.
+const superSets: Record<string, number[][]> = {
   '0-1': [[0, 3], [0, 6]],
   '0-3': [[0, 6]],
   '1-3': [[0, 3], [1, 6], [0, 6]],

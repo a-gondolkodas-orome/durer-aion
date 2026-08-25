@@ -9,11 +9,14 @@ const PlaceholderSlot = () => (
   <button disabled className={`${chipBase} border-dashed text-transparent select-none`}>0</button>
 );
 
-const ConsumedSlot = ({ value }) => (
+const ConsumedSlot = ({ value }: { value: number }) => (
   <button disabled className={`${chipBase} opacity-40 line-through`}>{value}</button>
 );
 
-const ActiveSlot = ({ value, isSelected, isDisabled, onClick }) => (
+const ActiveSlot = (
+  { value, isSelected, isDisabled, onClick }:
+    { value: number; isSelected: boolean; isDisabled: boolean; onClick: () => void }
+) => (
   <button
     className={`${chipBase} ${
       isSelected ? 'bg-blue-500 border-blue-400 text-white'
@@ -31,7 +34,7 @@ export const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProp
   const { t } = useTranslation();
   const { turnState } = ctx;
 
-  const handleClick = ({ levelIdx, slotIdx }) => {
+  const handleClick = ({ levelIdx, slotIdx }: TurnState) => {
     if (!ctx.isClientMoveAllowed) return;
     const slot = board.levels[levelIdx][slotIdx];
     if (!slot || slot.state !== 'active') return;

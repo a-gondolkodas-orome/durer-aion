@@ -19,7 +19,11 @@ const primeList = [
 ];
 /* eslint-enable array-element-newline */
 
-export const allPrimePowers = (() => {
+// One subtractable entry: the base, the power it is raised to, and the number
+// that comes out. The board renders all three, so all three are named.
+export type PrimePower = { prime: number; exponent: number; value: number };
+
+export const allPrimePowers: PrimePower[] = (() => {
   const entries = [{ prime: 2, exponent: 0, value: 1 }];
   for (const p of primeList) {
     for (let e = 1; p ** e < 1000; e++) {

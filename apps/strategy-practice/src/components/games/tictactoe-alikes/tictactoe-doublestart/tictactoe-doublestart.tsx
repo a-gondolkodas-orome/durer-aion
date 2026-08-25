@@ -1,10 +1,10 @@
-import { strategyGameFactory } from 'strategy-game-factory';
+import { strategyGameFactory, type StrategyArgs } from 'strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { generateEmptyTicTacToeBoard } from '../gameplay';
 import { BoardClient } from '../board-client';
-import { isDuringFirstMove, moves } from './gameplay';
+import { isDuringFirstMove, moves, type Board } from './gameplay';
 
-const getPlayerStepDescription = ({ board }) => {
+const getPlayerStepDescription = ({ board }: StrategyArgs<Board>) => {
   return isDuringFirstMove(board)
     ? {
       hu: 'Helyezz le két korongot egy-egy üres mezőre kattintással.',

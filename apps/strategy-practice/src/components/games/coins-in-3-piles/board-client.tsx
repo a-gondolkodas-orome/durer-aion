@@ -3,12 +3,12 @@ import { useTranslation } from 'language';
 import type { Board, TurnState } from './gameplay';
 import { GameBoard, type BoardClientProps, useHoverPreview } from 'strategy-game-factory';
 
-const getCoinBgColor = (coinValue) => {
+const getCoinBgColor = (coinValue: number) => {
   if (coinValue === 1) return 'bg-yellow-700';
   if (coinValue === 2) return 'bg-stone-500';
   return 'bg-yellow-400';
 };
-const getCoinShadowColor = (coinValue) => {
+const getCoinShadowColor = (coinValue: number) => {
   if (coinValue === 1) return 'shadow-yellow-700';
   if (coinValue === 2) return 'shadow-stone-500';
   return 'shadow-yellow-400';
@@ -21,18 +21,18 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board, TurnS
 
   const wasCoinAlreadyRemovedInTurn = valueOfRemovedCoin !== null;
 
-  const isRemovalAllowed = coinValue => moves.removeCoin.isAllowed(board, coinValue);
-  const isAddAllowed = coinValue => moves.addCoin.isAllowed(board, coinValue);
+  const isRemovalAllowed = (coinValue: number) => moves.removeCoin.isAllowed(board, coinValue);
+  const isAddAllowed = (coinValue: number) => moves.addCoin.isAllowed(board, coinValue);
   const isPassAllowed = () => moves.passAddition.isAllowed(board);
 
 
-  const shouldShowCoinToBeRemoved = (coinValue) => {
+  const shouldShowCoinToBeRemoved = (coinValue: number) => {
     if (!ctx.isClientMoveAllowed) return false;
     if (wasCoinAlreadyRemovedInTurn) return false;
     return coinValue === validHoveredPile && board[coinValue - 1] !== 0;
   };
 
-  const shouldShowCoinToBeAdded = (coinValue) => {
+  const shouldShowCoinToBeAdded = (coinValue: number) => {
     if (!wasCoinAlreadyRemovedInTurn) return false;
     return valueOfRemovedCoin! > coinValue && coinValue === validHoveredPile;
   };

@@ -21,9 +21,9 @@ export const smartBotStrategy: Bot = ({ board: { current, target, restricted } }
   return { move: 'step', args: [(target - current) % 14 - 1] };
 };
 
-const randomStep = (restricted) => {
-  let step = restricted;
-  while(step === restricted){
+const randomStep = (restricted: number | null): number => {
+  let step = random(1, 12);
+  while (step === restricted) {
     step = random(1, 12);
   }
   return step;
