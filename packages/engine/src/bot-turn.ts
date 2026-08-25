@@ -1,4 +1,4 @@
-import type { BotMove } from './types';
+import type { NamedBotMove } from './types';
 import type { CoreState } from './store';
 
 // A strategy NAMES the moves it wants and its caller plays them out — the React
@@ -6,7 +6,7 @@ import type { CoreState } from './store';
 // therefore the caller's concern, never the strategy's: a bot that scheduled its
 // own follow-up with setTimeout could not run outside a browser. See
 // src/components/CLAUDE.md § Bot contract.
-export const asBotMoves = (named: BotMove | BotMove[]): BotMove[] =>
+export const asBotMoves = <TMove extends NamedBotMove>(named: TMove | TMove[]): TMove[] =>
   Array.isArray(named) ? named : [named];
 
 // A move name is a string, so a typo in a strategy only shows up here. Say
