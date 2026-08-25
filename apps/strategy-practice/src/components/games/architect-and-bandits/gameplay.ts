@@ -1,5 +1,5 @@
 import { cloneDeep } from 'lodash';
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 
 // Both variants play the same game on a regular polygon, differing only in how
 // many vertices the wall has and how far the architect may walk in a day.
@@ -39,11 +39,11 @@ export const makeStartBoard = (vertexCount: number): Board => {
 
 export const makeMoves = (kmPerDay: number) => ({
   moveArchitect: {
-    validate: (board: Board, { ctx }: { ctx: Ctx }, targetVertex: number) =>
+    validate: (board, { ctx }, targetVertex: number) =>
       ctx.currentPlayer === ARCHITECT && isArchitectStepAllowed(board, targetVertex, kmPerDay),
     // The architect keeps walking within the day, so the turn stays open until
     // `endDay`.
-    apply: (board: Board, _, targetVertex: number): MoveOutcome<Board> => {
+    apply: (board, _, targetVertex: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard.architectPosition = targetVertex;
       nextBoard.towers[targetVertex] = true;
@@ -53,8 +53,8 @@ export const makeMoves = (kmPerDay: number) => ({
   },
 
   endDay: {
-    validate: (_board: Board, { ctx }: { ctx: Ctx }) => ctx.currentPlayer === ARCHITECT,
-    apply: (board: Board): MoveOutcome<Board> => {
+    validate: (_board, { ctx }) => ctx.currentPlayer === ARCHITECT,
+    apply: (board): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard.kmUsedToday = 0;
       if (board.day === 4) {
@@ -66,16 +66,16 @@ export const makeMoves = (kmPerDay: number) => ({
   },
   destroyTower: {
     // The bandits knock down one standing tower each night.
-    validate: (board: Board, { ctx }: { ctx: Ctx }, vertex: number) =>
+    validate: (board, { ctx }, vertex: number) =>
       ctx.currentPlayer === BANDITS && isVertex(board, vertex) && board.towers[vertex],
-    apply: (board: Board, _, vertex: number): MoveOutcome<Board> => {
+    apply: (board, _, vertex: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard.towers[vertex] = false;
       return { nextBoard, autoEndOfTurn: true };
     }
   },
   startNextDay: {
-    apply: (board: Board): MoveOutcome<Board> => {
+    apply: (board): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard.day += 1;
       nextBoard.kmUsedToday = 0;
@@ -83,6 +83,6 @@ export const makeMoves = (kmPerDay: number) => ({
       return { nextBoard, isTurnEnd: true };
     }
   }
-});
+} satisfies MoveDefs<Board>);
 
 export type Moves = ReturnType<typeof makeMoves>;

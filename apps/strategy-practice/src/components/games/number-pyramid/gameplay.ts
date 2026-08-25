@@ -1,5 +1,5 @@
 import { random, sample, shuffle, sum } from 'lodash';
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 
 export type Slot = { value: number; state: 'active' | 'consumed' };
 export type Level = (Slot | null)[];
@@ -43,14 +43,10 @@ export const generateStartBoard = (tries = 0): Board => {
 
 export const moves = {
   combineTwo: {
-    validate: (
-      board: Board,
-      _: { ctx: Ctx<TurnState> },
-      move: { levelIdx: number; indices: number[] }
-    ) => isCombineAllowed(board, move),
+    validate: (board, _, move: { levelIdx: number; indices: number[] }) => isCombineAllowed(board, move),
     apply: (
-      board: Board,
-      { ctx }: { ctx: Ctx<TurnState> },
+      board,
+      { ctx },
       { levelIdx, indices }: { levelIdx: number; indices: number[] }
     ): MoveOutcome<Board, TurnState> => {
       const { nextBoard, combinedValue } = applyMoveToBoard(board, levelIdx, indices);
@@ -63,7 +59,7 @@ export const moves = {
       return { nextBoard, nextTurnState: null, isTurnEnd: true };
     }
   }
-};
+} satisfies MoveDefs<Board, TurnState>;
 
 export type Moves = typeof moves;
 

@@ -66,13 +66,20 @@ export type MoveFunction<TBoard, TTurnState = unknown> = (
 // The single source of truth for a move's legality, colocated with its `apply`
 // and free of React so the UI, the engine and a future server can share it.
 // See src/components/CLAUDE.md § validate.
-type MoveValidator<TBoard, TTurnState = unknown> = (
+// Exported so a validator shared by sibling games can be written outside any
+// `moves` object and still be typed by the contract rather than by hand.
+export type MoveValidator<TBoard, TTurnState = unknown> = (
   board: TBoard, meta: { ctx: Ctx<TTurnState> }, ...args: BivariantArgs
 ) => boolean
 export type MoveDefinition<TBoard, TTurnState = unknown> = {
   apply: MoveFunction<TBoard, TTurnState>
   validate?: MoveValidator<TBoard, TTurnState>
 }
+// What a game's `moves` object is checked against, always as a `satisfies`
+// clause rather than an annotation — see apps/strategy-practice
+// src/components/CLAUDE.md § moves for why, and for what it types.
+export type MoveDefs<TBoard, TTurnState = unknown> =
+  Record<string, MoveDefinition<TBoard, TTurnState>>
 export interface Gameplay<TBoard, TTurnState = unknown> {
   moves: Record<string, MoveDefinition<TBoard, TTurnState>>
   // move name auto-executed (after a delay) following moves returning autoEndOfTurn: true

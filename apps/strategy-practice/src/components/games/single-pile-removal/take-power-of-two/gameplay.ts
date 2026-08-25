@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 import { range, random } from 'lodash';
 
 export const generateStartBoard = () => {
@@ -30,8 +30,8 @@ export const moves = {
   subtractPowerOfTwo: {
     // A power of 2 may be subtracted only if it does not exceed the number —
     // exactly the exponents the board already offers.
-    validate: (board: Board, _, exponent: number) => getAvailableExponents(board).includes(exponent),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, exponent: number): MoveOutcome<Board> => {
+    validate: (board, _, exponent: number) => getAvailableExponents(board).includes(exponent),
+    apply: (board, { ctx }, exponent: number): MoveOutcome<Board> => {
       const nextBoard = board - 2 ** exponent;
       if (nextBoard === 0) {
         return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
@@ -39,6 +39,6 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-}
+} satisfies MoveDefs<Board>
 
 export type Moves = typeof moves;

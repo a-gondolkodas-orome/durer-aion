@@ -1,5 +1,5 @@
 import { sum, isEqual, random, cloneDeep } from 'lodash';
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 import { isPlacementAllowed } from '../gameplay';
 
 export type Board = number[]
@@ -16,10 +16,8 @@ export const generateStartBoard = (): Board => {
 
 export const moves = {
   addPiece: {
-    validate: (board: Board, _: { ctx: Ctx<TurnState> }, pileId: number) => isPlacementAllowed(board, pileId),
-    apply: (
-      board: Board, { ctx }: { ctx: Ctx<TurnState> }, pileId: number
-    ): MoveOutcome<Board, TurnState> => {
+    validate: (board, _, pileId: number) => isPlacementAllowed(board, pileId),
+    apply: (board, { ctx }, pileId: number): MoveOutcome<Board, TurnState> => {
       const nextBoard = cloneDeep(board);
       nextBoard[pileId] += 1;
       // The second player places two squares at a time, so on the first half of
@@ -35,6 +33,6 @@ export const moves = {
       return { nextBoard, nextTurnState: null, isTurnEnd: true };
     }
   }
-}
+} satisfies MoveDefs<Board, TurnState>
 
 export type Moves = typeof moves;

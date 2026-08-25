@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 import { random } from 'lodash';
 
 export type Piece = { id: number; w: number; h: number };
@@ -113,8 +113,8 @@ export const generateTestStartBoard = (): Board => {
 
 export const moves = {
   breakPiece: {
-    validate: (board: Board, _, move: Move) => isBreakAllowed(board, move),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, move: Move): MoveOutcome<Board> => {
+    validate: (board, _, move: Move) => isBreakAllowed(board, move),
+    apply: (board, { ctx }, move: Move): MoveOutcome<Board> => {
       const nextBoard = applyBreak(board, move);
       if (!hasSafeBreak(nextBoard.pieces)) {
         return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
@@ -122,6 +122,6 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-};
+} satisfies MoveDefs<Board>;
 
 export type Moves = typeof moves;

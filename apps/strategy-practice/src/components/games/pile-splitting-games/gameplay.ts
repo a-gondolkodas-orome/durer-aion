@@ -1,5 +1,5 @@
 import { range } from 'lodash';
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 
 // The three sibling games are one game played with a different number of piles
 // (2, 3 and 4): a board is the list of pile sizes, and a turn is always the
@@ -45,20 +45,16 @@ export const withPileRemoved = (board: Board, pileId: number): Board => {
 
 export const moves = {
   removePile: {
-    validate: (board: Board, _, pileId: number) => isRemovalAllowed(board, pileId),
+    validate: (board, _, pileId: number) => isRemovalAllowed(board, pileId),
     // First half of the turn: empty a pile, then split another into it — the
     // turn stays open in between.
-    apply: (board: Board, _, pileId: number): MoveOutcome<Board> =>
+    apply: (board, _, pileId: number): MoveOutcome<Board> =>
       ({ nextBoard: withPileRemoved(board, pileId) })
   },
   splitPile: {
-    validate: (board: Board, _, { pileId, pieceCount }: Split) =>
+    validate: (board, _, { pileId, pieceCount }: Split) =>
       isSplitAllowed(board, pileId, pieceCount),
-    apply: (
-      board: Board,
-      { ctx }: { ctx: Ctx },
-      { pileId, pieceCount }: Split
-    ): MoveOutcome<Board> => {
+    apply: (board, { ctx }, { pileId, pieceCount }: Split): MoveOutcome<Board> => {
       const nextBoard = [...board];
       // The two halves take the split pile's own slot and the one emptied
       // earlier this turn, the first half in the lower of the two so that the
@@ -74,7 +70,7 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-};
+} satisfies MoveDefs<Board>;
 
 export type Moves = typeof moves;
 

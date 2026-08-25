@@ -1,5 +1,5 @@
 import { cloneDeep, isEqual, random, sum } from 'lodash';
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { Ctx, MoveDefs, MoveOutcome } from 'strategy-game-factory';
 
 export type Board = number[]
 // The coin taken in the first half of the turn, while the player decides what
@@ -44,9 +44,9 @@ export const generateTestStartBoard = (): Board =>
 
 export const moves = {
   removeCoin: {
-    validate: (board: Board, { ctx }: { ctx: Ctx<TurnState> }, value: number) =>
+    validate: (board, { ctx }, value: number) =>
       ctx.turnState === null && value >= 1 && value <= 3 && board[value - 1] > 0,
-    apply: (board: Board, { ctx }: { ctx: Ctx<TurnState> }, value: number): MoveOutcome<Board, TurnState> => {
+    apply: (board, { ctx }, value: number): MoveOutcome<Board, TurnState> => {
       const nextBoard = cloneDeep(board);
       nextBoard[value - 1] -= 1;
       if (value === 1) {
@@ -59,21 +59,21 @@ export const moves = {
     }
   },
   addCoin: {
-    validate: (_board: Board, { ctx }: { ctx: Ctx<TurnState> }, value: number) => {
+    validate: (_board, { ctx }, value: number) => {
       const removed = ctx.turnState?.removedCoinValue;
       return removed != null && value >= 1 && value < removed;
     },
-    apply: (board: Board, { ctx }: { ctx: Ctx<TurnState> }, value: number) => {
+    apply: (board, { ctx }, value: number) => {
       const nextBoard = cloneDeep(board);
       nextBoard[value - 1] += 1;
       return finishPlaceBack(nextBoard, ctx);
     }
   },
   passAddition: {
-    validate: (_board: Board, { ctx }: { ctx: Ctx<TurnState> }) => ctx.turnState !== null,
-    apply: (board: Board, { ctx }: { ctx: Ctx<TurnState> }) => finishPlaceBack(board, ctx)
+    validate: (_board, { ctx }) => ctx.turnState !== null,
+    apply: (board, { ctx }) => finishPlaceBack(board, ctx)
   }
-}
+} satisfies MoveDefs<Board, TurnState>
 
 export type Moves = typeof moves
 

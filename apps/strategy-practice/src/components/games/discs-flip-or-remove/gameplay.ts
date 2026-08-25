@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 import { range, isEqual, random, sample, difference, cloneDeep } from 'lodash';
 
 export type Board = [number, number]
@@ -23,9 +23,9 @@ export const generateStartBoard = (maxDiscs: number) => (): Board => {
 // into legality.
 export const moves = {
   removeDiscs: {
-    validate: (board: Board, _, count: number) =>
+    validate: (board, _, count: number) =>
       (count === 1 || count === 2) && count <= board[0],
-    apply: (board: Board, { ctx }: { ctx: Ctx }, count: number): MoveOutcome<Board> => {
+    apply: (board, { ctx }, count: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard[0] -= count;
       if (isEqual(nextBoard, [0, 0])) {
@@ -35,9 +35,9 @@ export const moves = {
     }
   },
   turnDiscs: {
-    validate: (board: Board, _, count: number) =>
+    validate: (board, _, count: number) =>
       (count === 1 || count === 2) && count <= board[1],
-    apply: (board: Board, { ctx }: { ctx: Ctx }, count: number): MoveOutcome<Board> => {
+    apply: (board, { ctx }, count: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard[1] -= count;
       nextBoard[0] += count;
@@ -47,7 +47,7 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-};
+} satisfies MoveDefs<Board>;
 
 export type Moves = typeof moves;
 

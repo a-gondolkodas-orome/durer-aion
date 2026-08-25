@@ -79,10 +79,10 @@ const asPlayer = (currentPlayer: number) => ({ ctx: makeCtx({ currentPlayer }) }
 // sibling games play this same turn on 2, 3 and 4 piles.
 describe('pile-splitting shared turn', () => {
   it('gates each half of the turn on the legality above', () => {
-    expect(moves.removePile.validate([1, 2, 5], null, 0)).toBe(true);
-    expect(moves.removePile.validate([1, 2, 0], null, 0)).toBe(false);
-    expect(moves.splitPile.validate([1, 2, 0], null, { pileId: 1, pieceCount: 1 })).toBe(true);
-    expect(moves.splitPile.validate([1, 2, 5], null, { pileId: 1, pieceCount: 1 })).toBe(false);
+    expect(moves.removePile.validate([1, 2, 5], asPlayer(0), 0)).toBe(true);
+    expect(moves.removePile.validate([1, 2, 0], asPlayer(0), 0)).toBe(false);
+    expect(moves.splitPile.validate([1, 2, 0], asPlayer(0), { pileId: 1, pieceCount: 1 })).toBe(true);
+    expect(moves.splitPile.validate([1, 2, 5], asPlayer(0), { pileId: 1, pieceCount: 1 })).toBe(false);
   });
 
   it('leaves the turn open after emptying a pile', () => {

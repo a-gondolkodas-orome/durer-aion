@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 import { every, range, last, uniqWith, isEqual, cloneDeep } from 'lodash';
 
 //    0
@@ -169,8 +169,8 @@ export const getTrivialMoves = (board: Board) => {
 
 export const moves = {
   stretchRope: {
-    validate: (board: Board, _, edge: Edge) => isAllowed(board, edge),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, { from, to }: Edge): MoveOutcome<Board> => {
+    validate: (board, _, edge: Edge) => isAllowed(board, edge),
+    apply: (board, { ctx }, { from, to }: Edge): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       // A rope is stretched as far as it legally reaches, not just between the
       // two nodes that were clicked.
@@ -181,6 +181,6 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-}
+} satisfies MoveDefs<Board>
 
 export type Moves = typeof moves;

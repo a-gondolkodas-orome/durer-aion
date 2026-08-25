@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 import { random } from 'lodash';
 
 export type Board = number
@@ -44,13 +44,9 @@ export const moves = {
     // Only a genuine prime power that fits within the number may be subtracted,
     // so legality is membership in the enumeration above rather than an
     // arithmetic check, which would also accept a composite base.
-    validate: (board: Board, _, { prime, exponent }: { prime: number; exponent: number }) =>
+    validate: (board, _, { prime, exponent }: { prime: number; exponent: number }) =>
       allPrimePowers.some(e => e.prime === prime && e.exponent === exponent && e.value <= board),
-    apply: (
-      board: Board,
-      { ctx }: { ctx: Ctx },
-      { prime, exponent }: { prime: number; exponent: number }
-    ): MoveOutcome<Board> => {
+    apply: (board, { ctx }, { prime, exponent }: { prime: number; exponent: number }): MoveOutcome<Board> => {
       const nextBoard = board - prime ** exponent;
       if (nextBoard === 0) {
         return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
@@ -58,6 +54,6 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-};
+} satisfies MoveDefs<Board>;
 
 export type Moves = typeof moves;

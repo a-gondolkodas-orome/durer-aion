@@ -123,6 +123,16 @@ turn); `gameEnd: { winnerIndex }` ends the game with an always-explicit winner
 what makes a move a pure reducer, and what lets the same function run in a
 future authoritative competition server (issue #313).
 
+The object carries a `satisfies MoveDefs<Board>` clause — `MoveDefs<Board,
+TurnState>` where the game names a turn state. `satisfies` rather than an
+annotation, because `Moves` is read back as `typeof moves` and only `satisfies`
+leaves each move's specific arguments there for `BotMove<Moves>` to pin.
+Writing it is also what types `board` and the meta slot, so no move annotates
+either — only the game-specific args, which the engine dispatches as `any[]`
+and so nothing can infer. A validator shared by sibling games sits outside any
+`moves` object, where that clause cannot reach it, and takes the contract
+directly: `export const validateTake: MoveValidator<Board> = …`.
+
 Always pass the current `board` as first arg when chaining moves within a turn.
 `apply` does not validate its arguments — it applies them blindly; legality is
 enforced by `validate` and/or the `BoardClient`'s `disabled` gating.
@@ -149,7 +159,7 @@ turn) and `cube-coloring` (reuses the existing `isAllowedStep` helper).
 Both halves take `(board, { ctx }, ...args)`, and the meta slot sits *before* the
 game-specific args, so it has to be written even when the move ignores it — as
 `_`, or `_board` when it is the board that goes unread (AGENTS.md § Unused
-parameters).
+parameters). Written, not typed: the `satisfies` clause above types both slots.
 
 #### `moves.<name>.isAllowed(board, ...args)`
 
@@ -244,9 +254,9 @@ const BoardClient = ({ ctx, setTurnState }: BoardClientProps<Board, TurnState>) 
 ```
 
 The factory infers `TTurnState` from the config, so the game file's
-`getPlayerStepDescription` takes `StrategyArgs<Board, TurnState>`, each move's
-meta takes `{ ctx: Ctx<TurnState> }` and its `apply` returns
-`MoveOutcome<Board, TurnState>` — annotate all of them, since inference reads
+`getPlayerStepDescription` takes `StrategyArgs<Board, TurnState>`, the moves
+object says `satisfies MoveDefs<Board, TurnState>` and each `apply` returns
+`MoveOutcome<Board, TurnState>` — name it at all of them, since inference reads
 every one of those sites and a leftover bare `Ctx` contradicts the rest. A spec
 that builds a ctx names it too: `makeCtx<TurnState>({ … })`. Games with no
 mid-turn state say nothing and keep compiling.

@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 
 export type Board = number
 
@@ -7,10 +7,10 @@ export const moves = {
     // Only a non-zero digit that actually appears in the current number may be
     // subtracted. Both players draw from the same number, so whose turn it is
     // does not enter into legality.
-    validate: (board: Board, _, digit: number) =>
+    validate: (board, _, digit: number) =>
       Number.isInteger(digit) && digit >= 1 && digit <= 9
         && String(board).includes(String(digit)),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, digit: number): MoveOutcome<Board> => {
+    apply: (board, { ctx }, digit: number): MoveOutcome<Board> => {
       const nextBoard = board - digit;
       if (nextBoard === 0) {
         return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
@@ -18,7 +18,7 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-};
+} satisfies MoveDefs<Board>;
 
 export type Moves = typeof moves;
 
