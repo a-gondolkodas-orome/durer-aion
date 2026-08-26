@@ -8,6 +8,7 @@
 //
 // Three sources, each read-only over the network:
 //   - npm packages: dependencies + devDependencies, against the registry's `latest` dist-tag.
+//     Workspaces are not among them — see npmRows below.
 //   - GitHub Actions: every `uses:` in .github/workflows, against the action's latest release.
 //   - Node: .nvmrc, against the newest release sharing its major.
 //
@@ -17,7 +18,7 @@
 // an urgency a monthly digest would only dilute.
 import { appendFileSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { resolvedVersion } from './resolved-versions.mjs';
+import { isWorkspaceLink, resolvedVersion } from './resolved-versions.mjs';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const read = file => readFileSync(`${root}${file}`, 'utf8');
@@ -62,11 +63,15 @@ const checkVersion = async (name, current, lookup) => {
 const npmRows = () => {
   const packageJson = JSON.parse(read('package.json'));
   const packages = { ...packageJson.dependencies, ...packageJson.devDependencies };
-  // The installed version, not the declared range: comparing `^1.2.0` against the registry's
-  // `1.5.0` would report every dependency as behind forever. See resolved-versions.mjs.
-  return Object.entries(packages).map(([name, declared]) =>
-    checkVersion(name, resolvedVersion(name) ?? declared, async () => (await fetchJson(`https://registry.npmjs.org/${name}/latest`)).version)
-  );
+  return Object.entries(packages)
+    // A sibling workspace has no upstream to be behind: it is this repo, and the registry answers
+    // about whatever public package happens to share its name. See resolved-versions.mjs.
+    .filter(([name]) => !isWorkspaceLink(name))
+    // The installed version, not the declared range: comparing `^1.2.0` against the registry's
+    // `1.5.0` would report every dependency as behind forever. See resolved-versions.mjs.
+    .map(([name, declared]) =>
+      checkVersion(name, resolvedVersion(name) ?? declared, async () => (await fetchJson(`https://registry.npmjs.org/${name}/latest`)).version)
+    );
 };
 
 const actionRows = () => {

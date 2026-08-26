@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { findResolved } from './resolved-versions.mjs';
+import { findResolved, findWorkspaceLink } from './resolved-versions.mjs';
 
 const lockfile = packages => ({ packages });
 
@@ -39,5 +39,33 @@ describe('findResolved', () => {
 
   it('is undefined when there is no lockfile at all', () => {
     expect(findResolved(null, 'vite')).toBeUndefined();
+  });
+});
+
+describe('findWorkspaceLink', () => {
+  // What npm writes for a workspace dependency: the directory it points at, and no version.
+  const link = { resolved: 'packages/engine', link: true };
+
+  it('recognises a workspace linked into the root of the tree', () => {
+    expect(findWorkspaceLink(lockfile({ 'node_modules/engine': link }), 'engine')).toBe(true);
+  });
+
+  it('recognises one linked under this workspace', () => {
+    expect(findWorkspaceLink(lockfile({ 'apps/strategy-practice/node_modules/engine': link }), 'engine')).toBe(true);
+  });
+
+  it('is false for a package installed from the registry', () => {
+    expect(findWorkspaceLink(lockfile({ 'node_modules/vite': { version: '8.2.1' } }), 'vite')).toBe(false);
+  });
+
+  it('is false for a package the lockfile does not mention', () => {
+    expect(findWorkspaceLink(lockfile({}), 'engine')).toBe(false);
+  });
+
+  // Without a lockfile the report falls back to declared ranges, and `"engine": "*"` would be
+  // reported against a stranger's package. Nothing is claimed to be a workspace on no evidence,
+  // so the caller keeps the row — a wrong row is visible, a silently dropped one is not.
+  it('is false when there is no lockfile at all', () => {
+    expect(findWorkspaceLink(null, 'engine')).toBe(false);
   });
 });

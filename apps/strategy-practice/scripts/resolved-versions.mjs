@@ -22,9 +22,16 @@ const lockfilePath = [`${appDir}package-lock.json`, `${repoRoot}package-lock.jso
 // npm hoists what it can to the root of the tree and nests the rest, so a workspace's dependency
 // legitimately lives in either place — and which one is not stable across installs. Check the
 // nested path first: when a package is in both, the nested copy is the one this app resolves.
-export const findResolved = (lockfile, name) =>
-  lockfile?.packages?.[`apps/strategy-practice/node_modules/${name}`]?.version ??
-  lockfile?.packages?.[`node_modules/${name}`]?.version;
+const entries = (lockfile, name) =>
+  [`apps/strategy-practice/node_modules/${name}`, `node_modules/${name}`].map(path => lockfile?.packages?.[path]);
+
+export const findResolved = (lockfile, name) => entries(lockfile, name).map(entry => entry?.version).find(Boolean);
+
+// A dependency on one of this repo's own workspaces — `"engine": "*"` — is not installed from the
+// registry at all: npm links the directory, and the lockfile entry says `link: true` and carries no
+// version. Names like `engine` and `games` also belong to unrelated packages on the public
+// registry, so a caller that cannot tell the difference ends up asking about a stranger's package.
+export const findWorkspaceLink = (lockfile, name) => entries(lockfile, name).some(entry => entry?.link === true);
 
 let cached;
 const lockfile = () => {
@@ -38,3 +45,6 @@ const lockfile = () => {
 // The installed version of `name`, or undefined when the lockfile cannot answer — callers decide
 // whether that is a failure (check-versions) or a reason to fall back (dependency-report).
 export const resolvedVersion = name => findResolved(lockfile(), name);
+
+// Whether `name` is one of this repo's workspaces rather than a published package.
+export const isWorkspaceLink = name => findWorkspaceLink(lockfile(), name);
