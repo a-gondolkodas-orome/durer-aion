@@ -48,6 +48,9 @@ export default defineConfig(
       // A deprecated API still compiles; this is the only thing that says so before
       // the removal lands.
       '@typescript-eslint/no-deprecated': 'error',
+      // An async function handed to something that ignores what it returns: React
+      // event handlers, addEventListener, Array.forEach. The await never happens.
+      '@typescript-eslint/no-misused-promises': 'error',
     },
   },
   // packages/engine and packages/games are apps/strategy-practice code moved out of it, still

@@ -73,7 +73,7 @@ export function TeamDetailDialog(props: {data: TeamModelDto, setConfirmDialog: D
       {teamState.relayMatch.state !== "NOT STARTED" && <Button sx={{
         maxWidth: "125px",
       }}
-          onClick={async ()=>{
+          onClick={()=>{
             props.setConfirmDialog({
               text: `Erősítsd meg, hogy ${teamState.teamName} csapatnak alaphelyzetbe akarod állítani a váltó állását`,
               confirm: async () => {
@@ -95,7 +95,7 @@ export function TeamDetailDialog(props: {data: TeamModelDto, setConfirmDialog: D
       {teamState.strategyMatch.state !== "NOT STARTED" && <Button sx={{
         maxWidth: "125px",
       }}
-          onClick={async ()=>{
+          onClick={()=>{
             props.setConfirmDialog({
               text: `Erősítsd meg, hogy ${teamState.teamName} csapatnak alaphelyzetbe akarod állítani a stratégiás állását`,
               confirm: async () => {
@@ -142,7 +142,7 @@ function MatchStatusField(props: {name: string, data: MatchStatus, isRelay: bool
             .typeError('Számot kell írni')
             .required('Nincs megadva érték')
           })}
-        onSubmit={async (values) => { 
+        onSubmit={(values) => { 
           props.setConfirmDialog({
             text: `Erősítsd meg, hogy ${props.name} csapatnak meg akarod növelni az idejét ${values.time} perccel`,
             confirm: async () => {
