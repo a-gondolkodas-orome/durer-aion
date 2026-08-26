@@ -185,7 +185,8 @@ export function strategy(category: "C" | "D" | "E"){
     }
   
     // Next problem if there is one and the time is not over
-    if (state.G.currentProblem < 8) { // TODO: it should be 9 if we count from 1 and not from 0. But it is currently 8 because we count from 0.
+    // 8, not 9: currentProblem counts from 0.
+    if (state.G.currentProblem < 8) {
       const url = problems[category][state.G.currentProblem+1].url ?? "";
       const nextProblem = problems[category][state.G.currentProblem + 1];
       return [[nextProblem.problemText, nextProblem.points, correctnessPreviousAnswer, url], "newProblem"];
