@@ -24,7 +24,7 @@ describe("gameWrapper", () => {
 
   test("whether client calls into wrapped setup", () => {
     Client({ game: wrappedGame, numPlayers: 2 });
-    expect(setup).toBeCalled();
+    expect(setup).toHaveBeenCalled();
   });
 
   test("whether default state is consistent", () => {
@@ -71,7 +71,7 @@ describe("gameWrapper", () => {
     });
     client.moves.move("move");
 
-    expect(move).toBeCalled();
+    expect(move).toHaveBeenCalled();
     expect(client.getState()?.G.data).toStrictEqual("move");
   });
 });
