@@ -36,3 +36,6 @@ __pycache__
 
 # The Pages tree the deploy assembles from pages/ and each app's dist/.
 /site
+
+# `npm run report:outdated -- --out dependency-report.md` output
+/dependency-report.md
