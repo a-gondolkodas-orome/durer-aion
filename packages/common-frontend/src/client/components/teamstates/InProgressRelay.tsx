@@ -22,6 +22,13 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
   const toHome = useToHome();
   const theme = useTheme();
   const { t } = useTranslation();
+  // Named so the handler below can stay synchronous: React ignores what an
+  // event handler returns, so an async one leaves its promise unhandled.
+  const backToHome = async () => {
+    await refreshState();
+    await toHome();
+    window.location.reload();
+  };
 
   useEffect(()=>{
     if (!ctx.gameover) {
@@ -64,11 +71,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
         }}
         open={
           finished
-        } onClose={async () => { 
-          refreshState()
-          await toHome();
-          window.location.reload(); 
-           }}>
+        } onClose={() => void backToHome()}>
           {<RelayEndTable allPoints={G.points} task={
            // TODO .maxpoints
            [3, 3, 4, 4, 4, 5, 5, 6, 6].map((it, idx)=>({

@@ -49,7 +49,7 @@ export function ConfirmDialog(props: {confirmDialog: ConfirmDialogInterface | nu
         color='primary'
         variant='contained'
         onClick={()=>{
-          confirmDialog.confirm()
+          void confirmDialog.confirm()
           setConfirmDialog(null);
         }}
       >

@@ -39,6 +39,9 @@ export default defineConfig(
       // An object interpolated into a string prints `[object Object]`, which is
       // never what the message meant to say.
       '@typescript-eslint/no-base-to-string': 'error',
+      // A promise nobody waits for: the caller reports success before the work has
+      // landed, and a failure surfaces only as an unhandled rejection.
+      '@typescript-eslint/no-floating-promises': 'error',
     },
   },
   // packages/engine and packages/games are apps/strategy-practice code moved out of it, still

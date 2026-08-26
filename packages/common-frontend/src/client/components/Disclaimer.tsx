@@ -150,7 +150,7 @@ export function Disclaimer(props: {teamName: string, category: string}) {
         variant="contained"
         color="primary"
         onClick={() => {
-          goHome();
+          void goHome();
         }}
       >
         {t('disclaimer.continue')}

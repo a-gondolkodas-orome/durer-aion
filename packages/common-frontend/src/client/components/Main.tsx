@@ -15,7 +15,7 @@ export function Main(props: { language: string, gitCommitHash: string }) {
   const teamState = useTeamState();
   const [frontendState, setFrontEndState] = useState<"R" | "S" | null>(null);
   const [admin, setAdmin] = useState<boolean>(false);
-  i18next.changeLanguage(props.language);
+  void i18next.changeLanguage(props.language);
 
   useEffect(() => {
     if (window.location.pathname.includes('/admin')) {

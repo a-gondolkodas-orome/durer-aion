@@ -83,7 +83,10 @@ const { db, teams } = getDb();
 // node: argv[0] vs server.ts: argv[1]
 if (argv[2] === "import") {
   const filename = argv[3];
-  import_teams_from_tsv_locally(teams, filename).then(() => exit(0));
+  import_teams_from_tsv_locally(teams, filename).then(() => exit(0)).catch((e: unknown) => {
+    console.error("team import failed", e);
+    exit(1);
+  });
 } else {
   const botSetup = Object.fromEntries(
     games.map((game, idx) =>
@@ -135,5 +138,5 @@ if (argv[2] === "import") {
     });
   });
 
-  server.run(PORT);
+  void server.run(PORT);
 }
