@@ -1,10 +1,32 @@
 # %%
+import os
 import requests
+from getpass import getpass
 from requests.auth import HTTPBasicAuth
 import json
 from tqdm import tqdm
-ADMIN_PASSWORD = "TODO"
-BASE_URL = 'http://localhost:8000' # 'https://verseny.durerinfo.hu'
+
+def read_admin_password():
+  """
+    The admin password, from DURER_ADMIN_PASSWORD or, when run interactively,
+    a prompt. Never a literal in this file: it is tracked, and the very next
+    line can point the script at production.
+  """
+  password = os.environ.get('DURER_ADMIN_PASSWORD')
+  if not password:
+    try:
+      password = getpass('Admin password (or set DURER_ADMIN_PASSWORD): ')
+    except (EOFError, KeyboardInterrupt):
+      password = None
+  if not password:
+    raise SystemExit(
+      'No admin password. Set DURER_ADMIN_PASSWORD to the backend\'s '
+      'ADMIN_CREDENTIALS, or enter it at the prompt.'
+    )
+  return password
+
+ADMIN_PASSWORD = read_admin_password()
+BASE_URL = os.environ.get('DURER_BASE_URL', 'http://localhost:8000')
 FORCE_DOWNLOAD = False
 
 # %%
