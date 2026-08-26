@@ -267,8 +267,9 @@ argument for doing this move in its own PR rather than inside the deploy switch:
   breaks visibly — with `ENOENT`, not with an explanation.
 - `dependency-report.mjs` *lists* `.github/workflows/`, so it would have
   reported no action pins at all — a monthly report quietly going half blank.
-  It now scans the root directory, which makes the action rows the whole
-  monorepo's while the npm and Node rows stay practice's.
+  It now scans the root directory, which made the action rows the whole
+  monorepo's while the npm and Node rows stayed practice's — the rest followed
+  in #319.
 - `patch-coverage.mjs` diffs against the merge base and matches `src/…` paths
   against lcov. Run from a subdirectory git prints `apps/strategy-practice/src/…`, which
   matches nothing, so the job would have passed **every** PR with "nothing to

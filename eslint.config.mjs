@@ -100,12 +100,12 @@ export default defineConfig(
       '@typescript-eslint/no-explicit-any': 'off',
     },
   },
-  // Build and repo tooling under scripts/ runs in Node, not the browser, so `process` and
-  // `console` are globals rather than undefined names.
+  // Build and repo tooling under scripts/ runs in Node, not the browser, so `process`, `console`,
+  // `URL` and `fetch` are globals rather than undefined names.
   {
     files: ['scripts/**/*.mjs'],
     languageOptions: {
-      globals: { process: 'readonly', console: 'readonly' },
+      globals: { process: 'readonly', console: 'readonly', URL: 'readonly', fetch: 'readonly' },
     },
   },
   // Global ignores

@@ -278,6 +278,32 @@ directory.
 `npm run spell-check` exists but is not one of them — it reports on the
 Hungarian problem text as well, so it is a thing to read, not a gate.
 
+## Dependency updates
+
+`package.json` files carry ranges; `package-lock.json` is what `npm ci` actually
+installs. Everything here that compares a version reads the lockfile, so it
+reports what is installed rather than what would be accepted.
+
+`.github/workflows/dependency-report.yml` runs on the 1st of each month and
+keeps one `OPS` issue in sync with whatever is behind: every workspace's
+dependencies, every action pinned in `.github/workflows/`, and each `.nvmrc`.
+`npm run report:outdated` prints the same table on demand, and needs no install
+— it asks the registry directly rather than shelling out to `npm outdated`.
+
+A row is one *upgrade*, not one package. The same name pinned at two versions is
+two rows, because `apps/strategy-practice` deliberately runs ahead of the rest on
+eslint, vite and typescript; the `written down in` column lists every file the
+bump has to touch, which is the honest measure of how big it is.
+
+The report opens no pull requests — upgrading stays deliberate, majors one at a
+time as in
+[#168](https://github.com/a-gondolkodas-orome/durer-jatekok/issues/168). Why a
+report rather than dependabot or renovate: the header comment of
+`scripts/dependency-report.mjs`. Two versions are written down in files no
+`package.json` names — Playwright and `apps/strategy-practice`'s Node — and
+[that app's README](apps/strategy-practice/README.md#project-setup) lists where;
+`npm run check:versions --workspace=strategy-practice` fails until they agree.
+
 # Configuration you may want to change
 
 `npm run setup` creates each of these from its committed `*.sample` twin, and
