@@ -1,8 +1,6 @@
 import { Ctx, Game } from "boardgame.io";
 import { INVALID_MOVE, TurnOrder } from "boardgame.io/core";
-// import { sendDataRelayEnd } from "../../common/sendData";
 import { GUESSER_PLAYER, JUDGE_PLAYER, otherPlayer, PlayerIDType } from "../../common/types";
-// import { IS_OFFLINE_MODE } from "../../client/utils/util";
 
 interface Answer {
   answer: number;
@@ -177,10 +175,6 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayStepReport) => vo
             G.correctnessPreviousAnswer = correctnessPreviousAnswer;
             if (correctnessPreviousAnswer) {
               G.points += G.currentProblemMaxPoints;
-              /* TODO refactor so offline works properly send data should not be here
-              if (IS_OFFLINE_MODE) {
-                sendDataRelayEnd(null, G, ctx);
-              }*/
               G.previousPoints[G.currentProblem] = G.currentProblemMaxPoints;
             } else {
               G.previousPoints[G.currentProblem] = 0;
