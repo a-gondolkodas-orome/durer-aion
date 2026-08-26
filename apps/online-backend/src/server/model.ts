@@ -1,8 +1,23 @@
-import { DataTypes, Model, ModelAttributes } from "sequelize";
+import {
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+  ModelAttributes,
+} from "sequelize";
 import { MatchStatus } from "schemas";
 
+// Sequelize adds the timestamp columns itself, and only for names the attribute
+// list leaves free. Omitting them from the attribute types therefore keeps them
+// out of the exhaustive column lists below without losing the declared fields.
+export interface OmitTimestamps {
+  omit: "createdAt" | "updatedAt";
+}
 
-export class TeamModel extends Model {
+export class TeamModel extends Model<
+  InferAttributes<TeamModel, OmitTimestamps>,
+  InferCreationAttributes<TeamModel, OmitTimestamps>
+> {
   declare teamId: string;
   // Important fields
   declare joinCode: string;
@@ -24,7 +39,13 @@ export class TeamModel extends Model {
   declare readonly updatedAt: Date;
 }
 
-export const teamAttributes: ModelAttributes = {
+// Naming the attributes is what makes the column list exhaustive: a field
+// declared above with no column here — or a column here that no field
+// declares — is a type error.
+export const teamAttributes: ModelAttributes<
+  TeamModel,
+  InferAttributes<TeamModel, OmitTimestamps>
+> = {
   teamId: {
     type: DataTypes.STRING,
     unique: {
