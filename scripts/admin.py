@@ -56,11 +56,14 @@ for team in team_states:
     team_states_dict[team['joinCode']] = team
 
 # %%
+MATCH_TYPES = ['relay', 'strategy']
+MATCH_DATA_TYPES = ['state', 'logs']
+
 def get_matchdatas(team_states, match_type:str, match_data_type:str, force_download:bool = False):
-  if match_type not in ['relay','strategy']:
-      raise ValueError(f'Wrong match_type: {match_type}, only {['relay','strategy']} allowed')
-  if match_data_type not in ['state','logs']:
-      raise ValueError(f'Wrong match_data_type: {match_data_type}, only {['state','logs']} allowed')
+  if match_type not in MATCH_TYPES:
+      raise ValueError(f'Wrong match_type: {match_type}, only {MATCH_TYPES} allowed')
+  if match_data_type not in MATCH_DATA_TYPES:
+      raise ValueError(f'Wrong match_data_type: {match_data_type}, only {MATCH_DATA_TYPES} allowed')
   file_name = f'matchdatas_{match_type}_{match_data_type}.json'
   if not force_download:
     try:
