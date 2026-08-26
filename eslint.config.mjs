@@ -42,6 +42,9 @@ export default defineConfig(
       // A promise nobody waits for: the caller reports success before the work has
       // landed, and a failure surfaces only as an unhandled rejection.
       '@typescript-eslint/no-floating-promises': 'error',
+      // `for…in` over an array walks its keys as strings, and its own properties
+      // too. No violations today; this keeps it that way.
+      '@typescript-eslint/no-for-in-array': 'error',
     },
   },
   // packages/engine and packages/games are apps/strategy-practice code moved out of it, still
