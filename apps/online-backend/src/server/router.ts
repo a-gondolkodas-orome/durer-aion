@@ -156,7 +156,7 @@ export function configureTeamsRouter(
     )
 
     team.other += ` te[${matchID}]:${minutes}`;
-    team.save();
+    await team.save();
 
     ctx.body = { updatedEndTime: newEndDate, matchID: matchID, team: team };
 
@@ -201,7 +201,7 @@ export function configureTeamsRouter(
     if (team.strategyMatch.state !== 'NOT STARTED')
       team.other += ` prevstratid:${team.strategyMatch.matchID}`
     team.strategyMatch = { state: 'NOT STARTED' }
-    team.save();
+    await team.save();
     ctx.body = team;
   });
 
@@ -227,7 +227,7 @@ export function configureTeamsRouter(
     if (team.relayMatch.state !== 'NOT STARTED')
       team.other += ` prevrelayid:${team.relayMatch.matchID}`
     team.relayMatch = { state: 'NOT STARTED' }
-    team.save();
+    await team.save();
     ctx.body = team;
   });
 
@@ -367,7 +367,7 @@ export function configureTeamsRouter(
     if (match.startAt === null || match.endAt === null) {
       console.error(`GAME [${game.name}] initialiser doesn't initialise the timer!!!`)
     }
-    team.update({
+    await team.update({
       pageState: "RELAY",
       relayMatch: match,
     });
@@ -391,7 +391,7 @@ export function configureTeamsRouter(
     await injectBot(ctx.db, body.matchID);
 
     //created new game, updated team state accordingly
-    team.update({
+    await team.update({
       pageState: "STRATEGY",
       strategyMatch: await startMatchStatus(body.matchID, ctx),
     });
@@ -412,7 +412,7 @@ export function configureTeamsRouter(
       ctx.throw(403, "Not allowed, match in progress.")
 
     //update team state to go home
-    team.update({
+    await team.update({
       pageState: "HOME",
     });
     ctx.body = team;

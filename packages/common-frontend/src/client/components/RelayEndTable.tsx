@@ -16,6 +16,13 @@ export function RelayEndTable(props: {allPoints: number, task: {max: number, got
   const refreshState = useRefreshTeamState();
   const toHome = useToHome();
   const { t } = useTranslation();
+  // Named so the handlers below can stay synchronous: React ignores what an
+  // event handler returns, so an async one leaves its promise unhandled.
+  const backToHome = async () => {
+    await refreshState();
+    await toHome();
+    window.location.reload();
+  };
 
   return (
     <Stack sx={{
@@ -150,11 +157,7 @@ export function RelayEndTable(props: {allPoints: number, task: {max: number, got
         fontSize: '26px',
         alignSelf: 'center',
         textTransform: 'none',
-      }} variant='contained' color='primary' onClick={async ()=>{
-        await refreshState();
-        await toHome();
-        window.location.reload(); 
-      }}>
+      }} variant='contained' color='primary' onClick={() => void backToHome()}>
         {t('relay.endTable.back')}
       </Button>
     </Stack>

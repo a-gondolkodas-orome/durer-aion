@@ -3,7 +3,7 @@ import { BoardProps } from 'boardgame.io/react';
 import type { Theme } from '@mui/material/styles';
 import Stack from '@mui/material/Stack';
 import { Button, Typography, Box } from '@mui/material';
-import { GUESSER_PLAYER } from '../../../common';
+import { asPlayerID, GUESSER_PLAYER } from '../../../common';
 
 export function MyBoard({ G, ctx, moves }: BoardProps<MyGameState>, _theme?: Theme) {
   const currentPlayerLastFromLeft = G.lastMoveFromLeftByPlayer[GUESSER_PLAYER];
@@ -103,7 +103,7 @@ export function MyBoard({ G, ctx, moves }: BoardProps<MyGameState>, _theme?: The
         <Button 
           variant='contained'
           color='primary' 
-          disabled={ctx.phase !== 'play' || !canTakeFromLeft || ctx.currentPlayer !== GUESSER_PLAYER} 
+          disabled={ctx.phase !== 'play' || !canTakeFromLeft || asPlayerID(ctx.currentPlayer) !== GUESSER_PLAYER} 
           onClick={() => moves.takeStone(true)}
           sx={{ minWidth: '150px' }}
         >
@@ -118,7 +118,7 @@ export function MyBoard({ G, ctx, moves }: BoardProps<MyGameState>, _theme?: The
         <Button 
           variant='contained' 
           color='primary'
-          disabled={ctx.phase !== 'play' || !canTakeFromRight || ctx.currentPlayer !== GUESSER_PLAYER} 
+          disabled={ctx.phase !== 'play' || !canTakeFromRight || asPlayerID(ctx.currentPlayer) !== GUESSER_PLAYER} 
           onClick={() => moves.takeStone(false)}
           sx={{ minWidth: '150px' }}
         >

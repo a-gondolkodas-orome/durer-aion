@@ -36,6 +36,18 @@ export default defineConfig(
       '@typescript-eslint/no-empty-function': 'error',
       '@typescript-eslint/no-empty-object-type': 'error',
       'prefer-const': 'error',
+      // The type-aware rules whose violations are defects rather than style: a
+      // promise nobody waits for, an async function handed to something that
+      // ignores what it returns, an enum compared to a bare literal, an object
+      // interpolated into a string as `[object Object]`. The rest of what
+      // typescript-eslint's *TypeChecked presets would add is opinion, and #182
+      // is where adopting them wholesale is argued.
+      '@typescript-eslint/no-floating-promises': 'error',
+      '@typescript-eslint/no-misused-promises': 'error',
+      '@typescript-eslint/no-unsafe-enum-comparison': 'error',
+      '@typescript-eslint/no-base-to-string': 'error',
+      '@typescript-eslint/no-for-in-array': 'error',
+      '@typescript-eslint/no-deprecated': 'error',
     },
   },
   // packages/engine and packages/games are apps/strategy-practice code moved out of it, still
@@ -86,18 +98,6 @@ export default defineConfig(
           message: 'A game\'s .ts half runs in plain Node; move anything React-flavoured into the game .tsx.',
         }],
       }],
-    },
-  },
-  // no-explicit-any is on for the boardgame.io-facing code; what remains exempt
-  // is the genuine interop core, per file. This list only shrinks: type a file,
-  // delete its line — never add one. New code goes through the rule everywhere.
-  {
-    files: [
-      // #224 lands first; the relay app joins the per-file ratchet after.
-      'apps/relay-practise-frontend/**',
-    ],
-    rules: {
-      '@typescript-eslint/no-explicit-any': 'off',
     },
   },
   // Build and repo tooling under scripts/ runs in Node, not the browser, so `process`, `console`,

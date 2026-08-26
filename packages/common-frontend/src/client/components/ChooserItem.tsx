@@ -141,9 +141,9 @@ export function ChooserItem(props: {
         textTransform: 'none',
       }} variant='contained' color='primary' onClick={()=>{
         if (props.type === "relay") {
-          startRelay()
+          void startRelay()
         } else {
-          startStrategy()
+          void startStrategy()
         }
       }} disabled={props.status.state !== "NOT STARTED"}>
         {t('chooser.start')}

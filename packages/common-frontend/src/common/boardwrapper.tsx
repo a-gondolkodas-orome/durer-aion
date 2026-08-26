@@ -29,6 +29,13 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
     const isOffline = useClientRepo().version === "OFFLINE";
     const theme = useTheme();
     const { t } = useTranslation();
+    // Named so the handler below can stay synchronous: React ignores what an
+    // event handler returns, so an async one leaves its promise unhandled.
+    const backToHome = async () => {
+      await refreshState();
+      await toHome();
+      window.location.reload();
+    };
 
     useEffect(() => {
       if (!ctx.gameover) {
@@ -63,11 +70,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
           }}
           open={
             finished
-          } onClose={async () => {
-            await refreshState();
-            await toHome();
-            window.location.reload();
-          }}>
+          } onClose={() => void backToHome()}>
           <StrategyEndTable allPoints={G.points} numOfTries={G.numberOfTries} />
         </Dialog>
         <Stack sx={{
@@ -286,9 +289,9 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
                     {ctx.phase === 'chooseRole' && t('strategy.guide.ifFirstPlayer')}
                     {ctx.phase === 'play' && ctx.currentPlayer === "0" && t('strategy.guide.yourTurn')}
                     {ctx.phase === 'play' && ctx.currentPlayer === "1" && t('strategy.guide.waitingForServer')}
-                    {ctx.phase === 'startNewGame' && G.winner === "0" && G.difficulty === "live" && t('strategy.guide.realGameWin')}
-                    {ctx.phase === 'startNewGame' && G.winner === "0" && G.difficulty === "test" && t('strategy.guide.testGameWin')}
-                    {ctx.phase === 'startNewGame' && G.winner === "1" && t('strategy.guide.botWins')}
+                    {ctx.phase === 'startNewGame' && G.winner === GUESSER_PLAYER && G.difficulty === "live" && t('strategy.guide.realGameWin')}
+                    {ctx.phase === 'startNewGame' && G.winner === GUESSER_PLAYER && G.difficulty === "test" && t('strategy.guide.testGameWin')}
+                    {ctx.phase === 'startNewGame' && G.winner === JUDGE_PLAYER && t('strategy.guide.botWins')}
                     {finished && t('strategy.guide.endOfGame')}
                   </Stack>
                   </Stack>

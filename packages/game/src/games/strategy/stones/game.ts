@@ -1,5 +1,5 @@
 import { INVALID_MOVE } from 'boardgame.io/core';
-import { GameType, GUESSER_PLAYER, JUDGE_PLAYER, otherPlayer, PlayerIDType } from '../../../common/types';
+import { asPlayerID, GameType, GUESSER_PLAYER, JUDGE_PLAYER, otherPlayer, PlayerIDType } from '../../../common/types';
 
 export interface MyGameState {
   stonesLeft: number;
@@ -91,7 +91,7 @@ export const MyGameWrapper = (_category: "E") => {
 
     turn: {
       onMove: ({ G, _ctx, playerID, events }) => {
-        if (playerID === GUESSER_PLAYER) {
+        if (asPlayerID(playerID) === GUESSER_PLAYER) {
           const currentTime = new Date();
           if (currentTime.getTime() - new Date(G.end).getTime() > 1000 * 10) {
             events.endGame();

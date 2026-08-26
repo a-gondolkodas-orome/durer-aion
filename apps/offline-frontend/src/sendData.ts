@@ -31,7 +31,7 @@ function sendData(fileName: string, data: string){
   fetch(
     bucketName,
     { method: 'POST', body: fd, mode: 'cors'}).then(res => console.log(res.status)
-  );
+  ).catch((e: unknown) => console.warn('play data upload failed', e));
 }
 
 const randomID = Math.floor(Math.random() * 900000)+100000;

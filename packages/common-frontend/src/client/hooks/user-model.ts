@@ -136,7 +136,7 @@ export class UserModel {
   async login(joinCode: string): Promise<string | null> {
     const guid = await this.repo.joinWithCode(joinCode);
     console.log("login guid", guid);
-    this.saveGUID(guid);
+    await this.saveGUID(guid);
     return null;
   }
 
@@ -162,8 +162,8 @@ export class UserModel {
     if (typeof window !== "undefined" && !UserModel.wasListenerAddedYet) {
       UserModel.wasListenerAddedYet = true;
       let previousValue: TeamModelDto | null = null;
-      window.addEventListener("storage", async (event) => {
-        if (event?.key !== LOCAL_STORAGE_GUID) {
+      const onGuidChanged = async (event: StorageEvent) => {
+        if (event.key !== LOCAL_STORAGE_GUID) {
           return;
         }
 
@@ -173,6 +173,9 @@ export class UserModel {
           setTeamState(value);
           previousValue = value;
         }
+      };
+      window.addEventListener("storage", (event) => {
+        void onGuidChanged(event);
       });
     }
   }

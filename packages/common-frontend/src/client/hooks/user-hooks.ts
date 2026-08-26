@@ -22,6 +22,9 @@ export const LoadTeamState = () => {
           .getTeamState()
           .then(teamState => {
             setTeamState(teamState);
+          })
+          .catch((e: unknown) => {
+            console.error("could not load the team state", e);
           });
 
       

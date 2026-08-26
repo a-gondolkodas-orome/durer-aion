@@ -1,6 +1,6 @@
 import { Ctx, DefaultPluginAPIs, FnContext, Game, PlayerID } from 'boardgame.io';
 import { INVALID_MOVE, TurnOrder } from 'boardgame.io/core';
-import { GameStateMixin, GameType, GUESSER_PLAYER, JUDGE_PLAYER, PlayerIDType } from './types';
+import { asPlayerID, GameStateMixin, GameType, GUESSER_PLAYER, JUDGE_PLAYER, PlayerIDType } from './types';
 
 /// What boardgame.io hands a move. The wrapper's own moves read and write only
 /// the mixin, so they name that as their state: a move whose context is the
@@ -15,7 +15,7 @@ function chooseRole({ G }: MoveContext, firstPlayer: PlayerIDType): void {
 }
 
 function chooseNewGameType({ G, playerID, events }: MoveContext, difficulty: string) {
-  if (playerID !== GUESSER_PLAYER) {
+  if (asPlayerID(playerID) !== GUESSER_PLAYER) {
     return INVALID_MOVE;
   };
   G.difficulty = difficulty;
@@ -26,7 +26,7 @@ function chooseNewGameType({ G, playerID, events }: MoveContext, difficulty: str
 };
 
 function setStartingPosition({ G, playerID, events }: MoveContext, startingPosition: Record<string, unknown>) {
-  if (playerID !== JUDGE_PLAYER) {
+  if (asPlayerID(playerID) !== JUDGE_PLAYER) {
     return INVALID_MOVE;
   };
   events.endTurn();
@@ -44,7 +44,7 @@ export function isMakeMovePayloadReadOnly(payload_type: string) {
 
 
 function getTime({ G, playerID }: MoveContext) {
-  if (playerID !== GUESSER_PLAYER) {
+  if (asPlayerID(playerID) !== GUESSER_PLAYER) {
     return INVALID_MOVE;
   }
   G.millisecondsRemaining = new Date(G.end).getTime() - new Date().getTime();

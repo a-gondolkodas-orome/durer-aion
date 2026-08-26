@@ -4,7 +4,7 @@ import enTranslation from '../../public/locales/en/translation.json';
 import huTranslation from '../../public/locales/hu/translation.json';
 
 
-i18next
+void i18next
   .use(initReactI18next)
   .init({
     debug: process.env.NODE_ENV === 'development',
