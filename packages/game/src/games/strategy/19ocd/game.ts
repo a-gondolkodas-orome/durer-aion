@@ -1,5 +1,5 @@
 import { INVALID_MOVE } from 'boardgame.io/core';
-import { GameType, GUESSER_PLAYER, JUDGE_PLAYER, PlayerIDType } from '../../../common/types';
+import { asPlayerID, GameType, GUESSER_PLAYER, JUDGE_PLAYER, PlayerIDType } from '../../../common/types';
 
 export interface MyGameState {
   numbersOnTable: boolean[];
@@ -39,7 +39,7 @@ export const MyGameWrapper = function (category: "C" | "D") {
         const isGameEnd = MyGame.possibleMoves(G, ctx, playerID as PlayerIDType).length === 0;
 
         if (isGameEnd) {
-          G.winner = ctx.currentPlayer === GUESSER_PLAYER ? GUESSER_PLAYER : JUDGE_PLAYER;
+          G.winner = asPlayerID(ctx.currentPlayer) === GUESSER_PLAYER ? GUESSER_PLAYER : JUDGE_PLAYER;
         }
 
         if (G.difficulty === "live") {
@@ -82,7 +82,7 @@ export const MyGameWrapper = function (category: "C" | "D") {
     turn: {
       onMove: ({ G, playerID, events }) => {
 
-        if (playerID === GUESSER_PLAYER) {
+        if (asPlayerID(playerID) === GUESSER_PLAYER) {
           const currentTime = new Date();
           if (currentTime.getTime() - new Date(G.end).getTime() > 1000 * 10) {
             // Do not accept any answer if the time is over since more than 10 seconds

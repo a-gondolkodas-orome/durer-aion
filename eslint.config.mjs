@@ -48,6 +48,9 @@ export default defineConfig(
       // A deprecated API still compiles; this is the only thing that says so before
       // the removal lands.
       '@typescript-eslint/no-deprecated': 'error',
+      // An enum compared against a bare literal works only while their values agree,
+      // and nothing points here on the day they stop.
+      '@typescript-eslint/no-unsafe-enum-comparison': 'error',
     },
   },
   // packages/engine and packages/games are apps/strategy-practice code moved out of it, still

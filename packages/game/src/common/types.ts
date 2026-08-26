@@ -22,6 +22,16 @@ export function otherPlayer(playerID: PlayerIDType): PlayerIDType {
 
 export const { GUESSER_PLAYER, JUDGE_PLAYER } = PlayerIDType;
 
+const PLAYER_IDS: readonly string[] = Object.values(PlayerIDType);
+// boardgame.io types a player id as a bare `string` — on `ctx.currentPlayer` and on
+// the `playerID` a move receives. Every game here is two-player, so the only values
+// either can carry are this enum's own; narrowing once, behind a runtime check, is
+// what lets the comparison sites stay honest instead of casting at each of them.
+// Returns null for anything else, which compares equal to neither player.
+export function asPlayerID(playerID: string | null | undefined): PlayerIDType | null {
+  return playerID != null && PLAYER_IDS.includes(playerID) ? (playerID as PlayerIDType) : null;
+}
+
 export interface GameStateMixin extends GameStateTimer {
   firstPlayer: null | PlayerIDType;
   winner: PlayerIDType | "draw" | null;

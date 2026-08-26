@@ -286,9 +286,9 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
                     {ctx.phase === 'chooseRole' && t('strategy.guide.ifFirstPlayer')}
                     {ctx.phase === 'play' && ctx.currentPlayer === "0" && t('strategy.guide.yourTurn')}
                     {ctx.phase === 'play' && ctx.currentPlayer === "1" && t('strategy.guide.waitingForServer')}
-                    {ctx.phase === 'startNewGame' && G.winner === "0" && G.difficulty === "live" && t('strategy.guide.realGameWin')}
-                    {ctx.phase === 'startNewGame' && G.winner === "0" && G.difficulty === "test" && t('strategy.guide.testGameWin')}
-                    {ctx.phase === 'startNewGame' && G.winner === "1" && t('strategy.guide.botWins')}
+                    {ctx.phase === 'startNewGame' && G.winner === GUESSER_PLAYER && G.difficulty === "live" && t('strategy.guide.realGameWin')}
+                    {ctx.phase === 'startNewGame' && G.winner === GUESSER_PLAYER && G.difficulty === "test" && t('strategy.guide.testGameWin')}
+                    {ctx.phase === 'startNewGame' && G.winner === JUDGE_PLAYER && t('strategy.guide.botWins')}
                     {finished && t('strategy.guide.endOfGame')}
                   </Stack>
                   </Stack>

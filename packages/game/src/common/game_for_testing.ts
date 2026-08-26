@@ -41,7 +41,7 @@ export function createGameWithoutStartingPosition(setup: SetupFunction<G>): Game
       win: ({ G, events }) => {
         G.winner = GUESSER_PLAYER;
         if (G.difficulty === "live") {
-          if (G.winner === "0") {
+          if (G.winner === GUESSER_PLAYER) {
             G.winningStreak = G.winningStreak + 1;
             if (G.winningStreak >= 2) {
               switch (G.numberOfLoss) {
@@ -66,7 +66,7 @@ export function createGameWithoutStartingPosition(setup: SetupFunction<G>): Game
               }
               events.endGame();
             }
-          } else if (G.winner === "1") {
+          } else if (G.winner === JUDGE_PLAYER) {
             G.winningStreak = 0;
             G.numberOfLoss += 1;
           }
@@ -76,7 +76,7 @@ export function createGameWithoutStartingPosition(setup: SetupFunction<G>): Game
       lose: ({ G, events }) => {
         G.winner = JUDGE_PLAYER;
         if (G.difficulty === "live") {
-          if (G.winner === "1") {
+          if (G.winner === JUDGE_PLAYER) {
             G.winningStreak = 0;
             G.numberOfLoss += 1;
           }
