@@ -3,25 +3,25 @@ import { MatchStatus } from "schemas";
 
 
 export class TeamModel extends Model {
-  public teamId!: string;
+  declare teamId: string;
   // Important fields
-  public joinCode!: string;
-  public teamName!: string;
-  public category!: string;
-  public credentials!: string;
-  public email!: string;
+  declare joinCode: string;
+  declare teamName: string;
+  declare category: string;
+  declare credentials: string;
+  declare email: string;
 
-  public pageState!: 'DISCLAIMER'|'HOME'|'RELAY'|'STRATEGY';
+  declare pageState: 'DISCLAIMER'|'HOME'|'RELAY'|'STRATEGY';
 
-  public relayMatch!: MatchStatus;
-  public strategyMatch!: MatchStatus;
+  declare relayMatch: MatchStatus;
+  declare strategyMatch: MatchStatus;
 
   // Search fields
-  public other!: string;
+  declare other: string;
 
   // timestamps!
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
+  declare readonly createdAt: Date;
+  declare readonly updatedAt: Date;
 }
 
 export const teamAttributes: ModelAttributes = {

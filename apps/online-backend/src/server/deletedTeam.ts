@@ -2,8 +2,8 @@ import { DataTypes, ModelAttributes } from "sequelize";
 import { TeamModel, teamAttributes } from "./model";
 
 export class DeletedTeamModel extends TeamModel {
-  public deletedAt!: Date;
-  public deletionId!: number;
+  declare deletedAt: Date;
+  declare deletionId: number;
 }
 const teamAttributesWithNoUnique = Object.fromEntries(
   Object.entries(teamAttributes).map(([key, value]) => [
