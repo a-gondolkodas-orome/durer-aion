@@ -36,6 +36,9 @@ export default defineConfig(
       '@typescript-eslint/no-empty-function': 'error',
       '@typescript-eslint/no-empty-object-type': 'error',
       'prefer-const': 'error',
+      // An object interpolated into a string prints `[object Object]`, which is
+      // never what the message meant to say.
+      '@typescript-eslint/no-base-to-string': 'error',
     },
   },
   // packages/engine and packages/games are apps/strategy-practice code moved out of it, still
