@@ -136,7 +136,7 @@ export class UserModel {
   async login(joinCode: string): Promise<string | null> {
     const guid = await this.repo.joinWithCode(joinCode);
     console.log("login guid", guid);
-    this.saveGUID(guid);
+    await this.saveGUID(guid);
     return null;
   }
 

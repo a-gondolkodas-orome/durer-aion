@@ -269,13 +269,13 @@ export function Admin(props: {teamId?: string}) {
                 text: 'Biztosan törlöd az összes csapatot? Ez a művelet nem visszavonható!',
                 confirm: async () => {
                   try {
-                    data.forEach(team => {
-                      removeTeam(team.teamId);
-                    });
+                    for (const team of data) {
+                      await removeTeam(team.teamId);
+                    }
                     enqueueSnackbar('Összes csapat törölve', { variant: 'success' });
                     // Refresh the list
                     if (typeof window !== 'undefined') {
-                      getAll();
+                      await getAll();
                     }
                   } catch (e) {
                     const message = e instanceof Error ? e.message : "Váratlan hiba történt";

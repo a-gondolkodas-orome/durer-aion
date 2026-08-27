@@ -195,7 +195,7 @@ function MatchStatusField(props: {name: string, data: MatchStatus, isRelay: bool
       variant='contained'
       color='primary'
       onClick={()=>{
-        getLogs(inProgressState.matchID).then(logs=>{
+        void getLogs(inProgressState.matchID).then(logs=>{
           setMatchLogs(logs);
         });
       }}>logok Lekérése</Button>
@@ -233,7 +233,7 @@ function MatchStatusField(props: {name: string, data: MatchStatus, isRelay: bool
           variant='contained'
           color='primary'
           onClick={()=>{
-            getLogs(finishedState.matchID).then(logs=>{
+            void getLogs(finishedState.matchID).then(logs=>{
               setMatchLogs(logs);
             });
           }}>logok Lekérése</Button>
