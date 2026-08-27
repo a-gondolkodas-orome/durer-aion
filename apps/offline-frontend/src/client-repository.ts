@@ -8,7 +8,7 @@ export class OfflineClientRepository implements ClientRepository {
   
   version = "OFFLINE" as const;
   
-  startRelay(_joinCode: string): Promise<string> {
+  startRelay(_joinCode: string): Promise<void> {
     const teamState = getTeamStateFromLocal();
     if (!(teamState.pageState === 'HOME' && teamState.relayMatch.state === 'NOT STARTED' && teamState.strategyMatch.state !== 'IN PROGRESS')) {
       throw new Error(i18n.t('error.unexpected'));
@@ -27,10 +27,10 @@ export class OfflineClientRepository implements ClientRepository {
     localStorage.setItem(LOCAL_STORAGE_TEAMSTATE,
       JSON.stringify(newState)
     );
-    return Promise.resolve("ok");
+    return Promise.resolve();
   }
 
-  startStrategy(_joinCode: string): Promise<string> {
+  startStrategy(_joinCode: string): Promise<void> {
     const teamState = getTeamStateFromLocal();
     if (!(teamState.pageState === 'HOME' && teamState.strategyMatch.state === 'NOT STARTED' && teamState.relayMatch.state !== 'IN PROGRESS')) {
       throw new Error(i18n.t('error.unexpected'));
@@ -50,10 +50,10 @@ export class OfflineClientRepository implements ClientRepository {
     localStorage.setItem(LOCAL_STORAGE_TEAMSTATE,
       JSON.stringify(newState)
     );
-    return Promise.resolve("ok");
+    return Promise.resolve();
   }
 
-  toHome(_joinCode: string): Promise<string> {
+  toHome(_joinCode: string): Promise<void> {
     const teamState = getTeamStateFromLocal();
     const newState = {...teamState, pageState: 'HOME'}
     if (teamState.relayMatch.state === "IN PROGRESS"){
@@ -75,7 +75,7 @@ export class OfflineClientRepository implements ClientRepository {
       }
     }
     localStorage.setItem(LOCAL_STORAGE_TEAMSTATE, JSON.stringify(newState));
-    return Promise.resolve("ok");
+    return Promise.resolve();
   }
 
   getTeamState(_joinCode: string): Promise<TeamModelDto> {
@@ -95,14 +95,14 @@ export class OfflineClientRepository implements ClientRepository {
     throw Error("NOT call this");
   }
 
-  async addMinutes(_matchId: string, _minutes: number): Promise<string> {
-    return Promise.resolve("OK");
+  async addMinutes(_matchId: string, _minutes: number): Promise<void> {
+    return Promise.resolve();
   }
 
   async getMatchState(_matchId: string): Promise<MatchStateDto> {
     throw Error("NOT call this");
   }
-  async getMatchLogs(_matchId: string): Promise<MatchStateDto> {
+  async getMatchLogs(_matchId: string): Promise<unknown> {
     throw Error("NOT call this");
   }
   async removeTeam(_teamId: string): Promise<void> {

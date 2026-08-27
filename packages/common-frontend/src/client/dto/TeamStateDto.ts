@@ -1,17 +1,21 @@
 import { Ctx } from "boardgame.io";
 import { GameStateMixin, MyGameState as RelayGameState } from "game";
 
-export interface TeamModelDto {
-  teamId: string;
-  joinCode: string;
-  teamName: string;
-  category: string;
-  credentials: string;
-  email: string;
-  pageState: 'DISCLAIMER'|'HOME'|'RELAY'|'STRATEGY'
-  relayMatch: MatchStatus;
-  strategyMatch: MatchStatus;
-}
+// The team-shaped DTOs live in packages/schemas, next to the backend that
+// serves them; re-exported here so the apps keep importing everything from
+// common-frontend. MatchStateDto stays local: its G comes from the game
+// package, which schemas cannot depend on.
+export {
+  parseTeamModelDto,
+} from "schemas";
+export type {
+  FinishedMatchStatus,
+  InProgressMatchStatus,
+  MatchStatus,
+  NotStartedMatchStatus,
+  PageState,
+  TeamModelDto,
+} from "schemas";
 
 /// One admin endpoint serves both kinds of match, and the payload carries no
 /// discriminant of its own: a relay match's G is the relay game state, a
@@ -33,23 +37,20 @@ export interface MatchStateLogDto {
   automatic: boolean;
 }
 
-export interface FinishedMatchStatus {
-  state: 'FINISHED';
-  startAt: Date;
-  endAt: Date;
-  matchID: string;
-  score: number;
+// Shallow by design, unlike parseTeamModelDto: G's inner shape is whatever
+// the year's game defines, and the only consumer is the admin dialog, which
+// already reads G by the discriminant convention above. Checking that the
+// containers are there catches a wrong-endpoint or error payload; the rest
+// stays the game's contract.
+export function parseMatchStateDto(value: unknown): MatchStateDto | null {
+  if (typeof value !== 'object' || value === null) {
+    return null;
+  }
+  if (
+    !('G' in value) || typeof value.G !== 'object' || value.G === null ||
+    !('ctx' in value) || typeof value.ctx !== 'object' || value.ctx === null
+  ) {
+    return null;
+  }
+  return value as MatchStateDto;
 }
-
-export interface NotStartedMatchStatus {
-  state: 'NOT STARTED';
-}
-
-export interface InProgressMatchStatus {
-  state: 'IN PROGRESS';
-  startAt: Date;
-  endAt: Date;
-  matchID: string;
-}
-
-export type MatchStatus = NotStartedMatchStatus | InProgressMatchStatus | FinishedMatchStatus;

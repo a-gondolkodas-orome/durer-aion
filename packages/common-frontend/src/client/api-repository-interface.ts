@@ -12,35 +12,39 @@ export interface ClientRepository {
   joinWithCode(
     code: string,
   ): Promise<string>
+  // The play/goHome/addminutes responses carry payloads no caller reads;
+  // these report success or throw, rather than pass unread data along typed.
   startRelay(
     code: string,
-  ): Promise<string>
+  ): Promise<void>
   startStrategy(
     code: string,
-  ): Promise<string>
+  ): Promise<void>
   toHome(
     code: string,
-  ): Promise<string>
+  ): Promise<void>
   getAll(): Promise<TeamModelDto[]>
   getMatchState(matchId: string): Promise<MatchStateDto>
-  getMatchLogs(matchId: string): Promise<MatchStateDto>
+  // The admin dialog stringifies whatever came back, so the log payload is
+  // unknown on purpose.
+  getMatchLogs(matchId: string): Promise<unknown>
   resetRelay(teamId: string): Promise<TeamModelDto>
   resetStrategy(teamId: string): Promise<TeamModelDto>
-  addMinutes(matchId: string, minutes: number): Promise<string>
+  addMinutes(matchId: string, minutes: number): Promise<void>
   removeTeam(teamId: string): Promise<void>;
 
 }
 
 export class MockClientRepository implements ClientRepository {
   version = "MOCK" as const;
-  startRelay(_code: string): Promise<string> {
-    return Promise.resolve("ok");
+  startRelay(_code: string): Promise<void> {
+    return Promise.resolve();
   }
-  startStrategy(_code: string): Promise<string> {
-    return Promise.resolve("ok");
+  startStrategy(_code: string): Promise<void> {
+    return Promise.resolve();
   }
-  toHome(_code: string): Promise<string> {
-    return Promise.resolve("ok");
+  toHome(_code: string): Promise<void> {
+    return Promise.resolve();
   }
   getTeamState(guid: string): Promise<TeamModelDto> {
     if (guid === "1") {
@@ -227,7 +231,7 @@ export class MockClientRepository implements ClientRepository {
   getMatchState(_matchId: string): Promise<MatchStateDto> {
     throw Error("NOT call this");
   }
-  getMatchLogs(_matchId: string): Promise<MatchStateDto> {
+  getMatchLogs(_matchId: string): Promise<unknown> {
     throw Error("NOT call this");
   }
   resetRelay(_teamId: string): Promise<TeamModelDto> {
@@ -236,8 +240,8 @@ export class MockClientRepository implements ClientRepository {
   resetStrategy(_teamId: string): Promise<TeamModelDto> {
     throw Error("NOT call this");
   }
-  addMinutes(_matchId: string, _minutes: number): Promise<string> {
-    return Promise.resolve("OK");
+  addMinutes(_matchId: string, _minutes: number): Promise<void> {
+    return Promise.resolve();
   }
   removeTeam(_teamId: string): Promise<void> {
     throw Error("NOT call this");

@@ -1,6 +1,6 @@
 import urlcat from "urlcat";
 import axios, { AxiosInstance,AxiosError } from 'axios';
-import { ClientRepository, TeamModelDto, MatchStateDto } from "common-frontend";
+import { ClientRepository, TeamModelDto, MatchStateDto, parseTeamModelDto, parseMatchStateDto } from "common-frontend";
 
 const serverUrl = import.meta.env.VITE_SERVER_URL || '/';
 function apiAxiosInstance(): AxiosInstance {
@@ -18,6 +18,17 @@ function makeAxiosError(any_error: unknown): AxiosError {
   return axiosError;
 }
 
+// A response that fails its parser is thrown as the same generic error a
+// transport failure already gets; the console keeps the evidence.
+function parseOrThrow<T>(url: string, data: unknown, parse: (value: unknown) => T | null): T {
+  const parsed = parse(data);
+  if (parsed === null) {
+    console.error(`unexpected response shape from ${url}`, data);
+    throw new Error('Váratlan hiba történt');
+  }
+  return parsed;
+}
+
 export class RealClientRepository implements ClientRepository {
 
   version = "ONLINE" as const;
@@ -30,26 +41,14 @@ export class RealClientRepository implements ClientRepository {
     });
     let result;
     try {
-      result = await apiAxiosInstance().get(url);
+      result = await apiAxiosInstance().get<unknown>(url);
     } catch (e: unknown) {
       console.error(e)
       // here we can set message according to status (or data)
       throw new Error('Váratlan hiba történt');
     }
 
-    if (result.data.relayMatch.startAt) {
-      result.data.relayMatch.startAt = new Date(result.data.relayMatch.startAt);
-    }
-    if (result.data.relayMatch.endAt) {
-      result.data.relayMatch.endAt = new Date(result.data.relayMatch.endAt);
-    }
-    if (result.data.strategyMatch.startAt) {
-      result.data.strategyMatch.startAt = new Date(result.data.strategyMatch.startAt);
-    }
-    if (result.data.strategyMatch.endAt) {
-      result.data.strategyMatch.endAt = new Date(result.data.strategyMatch.endAt);
-    }
-    return result.data as TeamModelDto;
+    return parseOrThrow(url, result.data, parseTeamModelDto);
   }
 
   async joinWithCode(
@@ -61,7 +60,7 @@ export class RealClientRepository implements ClientRepository {
     console.log("joinWithCode url", url);
     let result;
     try {
-      result = await apiAxiosInstance().get(url);
+      result = await apiAxiosInstance().get<unknown>(url);
     } catch (e: unknown) {
       const err = makeAxiosError(e);
       if(err.response?.status === 404) {
@@ -70,67 +69,62 @@ export class RealClientRepository implements ClientRepository {
       // here we can set message according to status (or data)
       throw new Error('Váratlan hiba történt');
     }
-    
+
     console.log("joinWithCode result", result);
 
-    return result.data as string;
+    if (typeof result.data !== 'string') {
+      console.error(`unexpected response shape from ${url}`, result.data);
+      throw new Error('Váratlan hiba történt');
+    }
+    return result.data;
   }
 
   async startRelay(
     guid: string,
-  ): Promise<string> {
+  ): Promise<void> {
     const url = urlcat('/team/:guid/relay/play', {
       guid,
     });
-    let result;
     try {
-      result = await apiAxiosInstance().get(url);
+      await apiAxiosInstance().get(url);
     } catch (e: unknown) {
       const err = makeAxiosError(e)
       console.error(err.message)
       // here we can set message according to status (or data)
       throw new Error('Váratlan hiba történt');
     }
-
-    return result.data as string;
   }
 
   async startStrategy(
     guid: string,
-  ): Promise<string> {
+  ): Promise<void> {
     const url = urlcat('/team/:guid/strategy/play', {
       guid,
     });
-    let result;
     try {
-      result = await apiAxiosInstance().get(url);
+      await apiAxiosInstance().get(url);
     } catch (e: unknown) {
       const err = makeAxiosError(e);
       console.error(err.message)
       // here we can set message according to status (or data)
       throw new Error('Váratlan hiba történt');
     }
-
-    return result.data as string;
   }
 
   async toHome(
     guid: string,
-  ): Promise<string> {
+  ): Promise<void> {
     const url = urlcat('/team/:guid/goHome', {
       guid,
     });
-    let result;
     try {
-      result = await apiAxiosInstance().get(url);
+      await apiAxiosInstance().get(url);
     } catch (e: unknown) {
       const err = makeAxiosError(e);
       console.error(err.message)
       // here we can set message according to status (or data)
       throw new Error('Váratlan hiba történt');
     }
-
-    return result.data as string;
   }
 
   async getAll(): Promise<TeamModelDto[]> {
@@ -138,7 +132,7 @@ export class RealClientRepository implements ClientRepository {
     });
     let result;
     try {
-      result = await apiAxiosInstance().get(url);
+      result = await apiAxiosInstance().get<unknown>(url);
     } catch (e: unknown) {
       const err = makeAxiosError(e);
       console.error(err.message)
@@ -146,7 +140,11 @@ export class RealClientRepository implements ClientRepository {
       throw new Error('Váratlan hiba történt');
     }
 
-    return result.data as TeamModelDto[];
+    if (!Array.isArray(result.data)) {
+      console.error(`unexpected response shape from ${url}`, result.data);
+      throw new Error('Váratlan hiba történt');
+    }
+    return result.data.map(team => parseOrThrow(url, team, parseTeamModelDto));
   }
 
   async resetRelay(teamId: string): Promise<TeamModelDto> {
@@ -155,14 +153,14 @@ export class RealClientRepository implements ClientRepository {
     });
     let result;
     try {
-      result = await apiAxiosInstance().post(url);
+      result = await apiAxiosInstance().post<unknown>(url);
     } catch (e: unknown) {
       const err = makeAxiosError(e);
       console.error(err.message)
       // here we can set message according to status (or data)
       throw new Error('Váratlan hiba történt');
     }
-    return result.data as TeamModelDto;
+    return parseOrThrow(url, result.data, parseTeamModelDto);
   }
 
   async resetStrategy(teamId: string): Promise<TeamModelDto> {
@@ -171,24 +169,23 @@ export class RealClientRepository implements ClientRepository {
     });
     let result;
     try {
-      result = await apiAxiosInstance().post(url);
+      result = await apiAxiosInstance().post<unknown>(url);
     } catch (e: unknown) {
       const err = makeAxiosError(e);
       console.error(err.message)
       // here we can set message according to status (or data)
       throw new Error('Váratlan hiba történt');
     }
-    return result.data as TeamModelDto;
+    return parseOrThrow(url, result.data, parseTeamModelDto);
   }
 
-  async addMinutes(matchId: string, minutes: number): Promise<string> {
+  async addMinutes(matchId: string, minutes: number): Promise<void> {
     const url = urlcat('/game/admin/:matchId/addminutes/:minutes', {
       matchId,
       minutes,
     });
-    let result;
     try {
-      result = await apiAxiosInstance().post(url);
+      await apiAxiosInstance().post(url);
     } catch (e: unknown) {
       const err = makeAxiosError(e);
       console.error(err.message)
@@ -198,7 +195,6 @@ export class RealClientRepository implements ClientRepository {
       }
       throw new Error('Váratlan hiba történt');
     }
-    return result.data;
   }
 
   async getMatchState(matchId: string): Promise<MatchStateDto> {
@@ -207,23 +203,23 @@ export class RealClientRepository implements ClientRepository {
     });
     let result;
     try {
-      result = await apiAxiosInstance().get(url);
+      result = await apiAxiosInstance().get<unknown>(url);
     } catch (e: unknown) {
       const err = makeAxiosError(e);
       console.error(err.message)
       // here we can set message according to status (or data)
       throw new Error('Váratlan hiba történt');
     }
-    return result.data as MatchStateDto;
+    return parseOrThrow(url, result.data, parseMatchStateDto);
   }
 
-  async getMatchLogs(matchId: string): Promise<MatchStateDto> {
+  async getMatchLogs(matchId: string): Promise<unknown> {
     const url = urlcat('/game/admin/:matchId/logs', {
       matchId,
     });
     let result;
     try {
-      result = await apiAxiosInstance().get(url);
+      result = await apiAxiosInstance().get<unknown>(url);
     } catch (e: unknown) {
       const err = makeAxiosError(e);
       console.error(err.message)
