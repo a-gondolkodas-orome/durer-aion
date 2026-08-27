@@ -97,18 +97,6 @@ export default defineConfig(
       }],
     },
   },
-  // no-explicit-any is on for the boardgame.io-facing code; what remains exempt
-  // is the genuine interop core, per file. This list only shrinks: type a file,
-  // delete its line — never add one. New code goes through the rule everywhere.
-  {
-    files: [
-      // #224 lands first; the relay app joins the per-file ratchet after.
-      'apps/relay-practise-frontend/**',
-    ],
-    rules: {
-      '@typescript-eslint/no-explicit-any': 'off',
-    },
-  },
   // Build and repo tooling under scripts/ runs in Node, not the browser, so `process`, `console`,
   // `URL` and `fetch` are globals rather than undefined names.
   {
