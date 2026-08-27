@@ -216,12 +216,12 @@ export async function closeMatch(
   const teamId = currentMatch.metadata.players[0].name;
   if (!teamId)
     throw new Error(
-      `Match teamId is not valid, the match has the following players:${currentMatch.metadata.players}`
+      `Match teamId is not valid, the match has the following players:${JSON.stringify(currentMatch.metadata.players)}`
     );
   const team: TeamModel | null = (await teams.getTeam({ teamId })) ?? null;
   if (team == null)
     throw new Error(
-      `Match team is not found, the match has the following players:${currentMatch.metadata.players}`
+      `Match team is not found, the match has the following players:${JSON.stringify(currentMatch.metadata.players)}`
     );
 
   const type = inferenceGameType(currentMatch.metadata.gameName);

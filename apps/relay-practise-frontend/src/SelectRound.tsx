@@ -196,7 +196,7 @@ export default function SelectRelayRound() {
                 borderRadius: "10px",
                 textTransform: "none",
               }}
-              onClick={handleProceed}>
+              onClick={() => void handleProceed()}>
                 {t('login.proceedButton')}
         </Button>
     </Box>

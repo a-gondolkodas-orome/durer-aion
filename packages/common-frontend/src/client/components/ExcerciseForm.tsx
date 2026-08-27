@@ -73,14 +73,14 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
           }
           try {
             props.onSubmit(parseInt(values.result))
-            refreshState()
+            void refreshState()
           } catch (e: unknown) {
             console.log(e)
             const message = e instanceof Error ? e.message : "Váratlan hiba történt";
             enqueueSnackbar(message, { variant: 'error' });
             if (message === "cannot make move after game end") {
               // TODO: this error should be handled better, currently it never happens
-              refreshState();
+              void refreshState();
             }
           }
           setSentAnswer(1);

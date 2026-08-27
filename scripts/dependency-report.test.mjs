@@ -2,9 +2,10 @@
 // spec that mocked them would assert the mock. The sorting into patch/minor vs major, and the
 // handling of a failed lookup, are where the report could quietly mislead — a row dropped instead
 // of reported would read as "up to date".
+import { describe, expect, it } from 'vitest';
 import { formatReport } from './dependency-report.mjs';
 
-const row = (name, current, latest) => ({ name, current, latest });
+const row = (name, current, latest, where = ['root']) => ({ name, current, latest, where });
 
 describe('formatReport', () => {
   it('says so plainly when nothing is behind', () => {
@@ -33,10 +34,13 @@ describe('formatReport', () => {
   });
 
   it('compares majors past the leading v, so an action tag is not read as a bump', () => {
-    const report = formatReport([row('actions/checkout', 'v7', 'v7'), row('actions/cache', 'v4', 'v6')]);
+    const report = formatReport([
+      row('actions/checkout', 'v7', 'v7', ['ci.yml']),
+      row('actions/cache', 'v4', 'v6', ['pages-deploy.yml'])
+    ]);
 
     expect(report).toContain('### Major (1)');
-    expect(report).toContain('| `actions/cache` | v4 | v6 |');
+    expect(report).toContain('| `actions/cache` | v4 | v6 | pages-deploy.yml |');
   });
 
   it('omits a section that has no rows', () => {
@@ -46,31 +50,44 @@ describe('formatReport', () => {
     expect(report).not.toContain('### Major');
   });
 
-  it('warns on the two versions that are written down in more than one file', () => {
+  // The column a monorepo needs and a single app did not: a bump is as big as the number of files
+  // it has to touch, and that is not visible from the version alone.
+  it('says where each version is written down', () => {
     const report = formatReport([
-      row('playwright', '1.62.0', '1.62.1'),
-      row('Node (.nvmrc)', '24.11.1', '24.19.0'),
-      row('vite', '8.1.5', '8.2.1')
+      row('typescript', '5.9.3', '7.0.2', ['root', 'packages/game', 'apps/online-frontend']),
+      row('playwright', '1.62.0', '1.62.1', ['apps/strategy-practice', 'apps/strategy-practice/.devcontainer/Dockerfile'])
     ]);
 
-    expect(report).toContain('`playwright` <br> ⚠️ .devcontainer/Dockerfile too');
-    expect(report).toContain('`Node (.nvmrc)` <br> ⚠️ 5 files — see README');
-    expect(report).toContain('| `vite` | 8.1.5 | 8.2.1 |');
+    expect(report).toContain('| `typescript` | 5.9.3 | 7.0.2 | root, packages/game, apps/online-frontend |');
+    expect(report).toContain('| `playwright` | 1.62.0 | 1.62.1 | apps/strategy-practice, apps/strategy-practice/.devcontainer/Dockerfile |');
+  });
+
+  // apps/strategy-practice runs ahead of the rest on several of these deliberately. Collapsing the
+  // two into one row would name one version and mislead about the other; they are two upgrades.
+  it('keeps one name pinned at two versions as two rows', () => {
+    const report = formatReport([
+      row('typescript', '5.9.3', '7.0.2', ['root', 'packages/game']),
+      row('typescript', '6.0.3', '7.0.2', ['apps/strategy-practice'])
+    ]);
+
+    expect(report).toContain('2 of 2 pinned versions are behind.');
+    expect(report).toContain('| `typescript` | 5.9.3 | 7.0.2 | root, packages/game |');
+    expect(report).toContain('| `typescript` | 6.0.3 | 7.0.2 | apps/strategy-practice |');
   });
 
   it('reports a failed lookup rather than dropping the row', () => {
     const report = formatReport([
-      { name: 'actions/cache', current: 'v6', error: 'HTTP 403' },
+      { name: 'actions/cache', current: 'v6', where: ['.github/workflows/ci.yml'], error: 'HTTP 403' },
       row('vite', '8.1.5', '8.1.5')
     ]);
 
     expect(report).toContain('### Could not check (1)');
-    expect(report).toContain('- `actions/cache` (pinned v6): HTTP 403');
+    expect(report).toContain('- `actions/cache` (pinned v6 in .github/workflows/ci.yml): HTTP 403');
   });
 
   it('does not claim everything is current when a lookup failed and nothing else is behind', () => {
     const report = formatReport([
-      { name: 'actions/cache', current: 'v6', error: 'HTTP 403' },
+      { name: 'actions/cache', current: 'v6', where: ['.github/workflows/ci.yml'], error: 'HTTP 403' },
       row('vite', '8.1.5', '8.1.5')
     ]);
 

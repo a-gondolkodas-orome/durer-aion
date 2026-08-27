@@ -36,6 +36,21 @@ export default defineConfig(
       '@typescript-eslint/no-empty-function': 'error',
       '@typescript-eslint/no-empty-object-type': 'error',
       'prefer-const': 'error',
+      // An object interpolated into a string prints `[object Object]`, which is
+      // never what the message meant to say.
+      '@typescript-eslint/no-base-to-string': 'error',
+      // A promise nobody waits for: the caller reports success before the work has
+      // landed, and a failure surfaces only as an unhandled rejection.
+      '@typescript-eslint/no-floating-promises': 'error',
+      // `for…in` over an array walks its keys as strings, and its own properties
+      // too. No violations today; this keeps it that way.
+      '@typescript-eslint/no-for-in-array': 'error',
+      // A deprecated API still compiles; this is the only thing that says so before
+      // the removal lands.
+      '@typescript-eslint/no-deprecated': 'error',
+      // An async function handed to something that ignores what it returns: React
+      // event handlers, addEventListener, Array.forEach. The await never happens.
+      '@typescript-eslint/no-misused-promises': 'error',
     },
   },
   // packages/engine and packages/games are apps/strategy-practice code moved out of it, still
@@ -88,24 +103,12 @@ export default defineConfig(
       }],
     },
   },
-  // no-explicit-any is on for the boardgame.io-facing code; what remains exempt
-  // is the genuine interop core, per file. This list only shrinks: type a file,
-  // delete its line — never add one. New code goes through the rule everywhere.
-  {
-    files: [
-      // #224 lands first; the relay app joins the per-file ratchet after.
-      'apps/relay-practise-frontend/**',
-    ],
-    rules: {
-      '@typescript-eslint/no-explicit-any': 'off',
-    },
-  },
-  // Build and repo tooling under scripts/ runs in Node, not the browser, so `process` and
-  // `console` are globals rather than undefined names.
+  // Build and repo tooling under scripts/ runs in Node, not the browser, so `process`, `console`,
+  // `URL` and `fetch` are globals rather than undefined names.
   {
     files: ['scripts/**/*.mjs'],
     languageOptions: {
-      globals: { process: 'readonly', console: 'readonly' },
+      globals: { process: 'readonly', console: 'readonly', URL: 'readonly', fetch: 'readonly' },
     },
   },
   // Global ignores

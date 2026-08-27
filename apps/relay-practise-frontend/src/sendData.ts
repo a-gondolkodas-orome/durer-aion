@@ -1,3 +1,4 @@
+import type { Ctx } from "boardgame.io";
 import { LOCAL_STORAGE_TEAMSTATE, TeamModelDto } from "common-frontend";
 
 
@@ -27,7 +28,7 @@ function sendData(fileName: string, data: string){
   fetch(
     bucketName,
     { method: 'POST', body: fd, mode: 'cors'}).then(res => console.log(res.status)
-  );
+  ).catch((e: unknown) => console.warn('play data upload failed', e));
 }
 
 const randomID = Math.floor(Math.random() * 900000)+100000;
@@ -60,9 +61,13 @@ interface SendGameDataParams {
   component: "relay" | "strategy";
   phase: "start" | "step" | "end";
   answer?: number | null;
-  G?: any;
-  ctx?: any;
-  log?: any;
+  // Only these two fields are read here (relay's problem counter and the
+  // wrapper's score); the rest of G rides along in the JSON payload.
+  G?: { currentProblem?: number; points?: number };
+  ctx?: Ctx;
+  // Only ever JSON-stringified here, so whatever a caller reports as its log
+  // is passed through: gameWrapper's move context carries the log plugin.
+  log?: unknown;
 }
 
 export function sendGameData(params: SendGameDataParams){
@@ -75,7 +80,7 @@ export function sendGameData(params: SendGameDataParams){
     case "step":
       switch (component) {
         case "relay": {
-          const problemNumber = G.currentProblem;
+          const problemNumber = G?.currentProblem;
           sendData(joinCode+"_"+randomID+"_"+component+"_"+problemNumber+"_"+answer+"_"+now(), JSON.stringify({G, ctx}));
           break;
         }
@@ -87,7 +92,7 @@ export function sendGameData(params: SendGameDataParams){
       }
       break;
     case "end": {
-      const points = G.points;
+      const points = G?.points;
       sendData(joinCode+"_"+randomID+"_"+component+"end_"+points+"_"+now(), JSON.stringify({G, ctx}));
       break;
     }

@@ -25,7 +25,7 @@ describe('useDeferredMove', () => {
 
     // the first move of the turn has landed by now
     rerender({ count: 1 });
-    act(() => vi.advanceTimersByTime(BEAT));
+    act(() => { vi.advanceTimersByTime(BEAT); });
     expect(playSecondMove).toHaveBeenCalledOnce();
   });
 
@@ -38,7 +38,7 @@ describe('useDeferredMove', () => {
 
     act(() => result.current(playSecondMove));
     rerender({ count: 0 });
-    act(() => vi.advanceTimersByTime(BEAT * 2));
+    act(() => { vi.advanceTimersByTime(BEAT * 2); });
 
     expect(playSecondMove).not.toHaveBeenCalled();
   });
@@ -49,7 +49,7 @@ describe('useDeferredMove', () => {
 
     act(() => result.current(playSecondMove));
     rerender({ count: 5 });
-    act(() => vi.advanceTimersByTime(BEAT * 2));
+    act(() => { vi.advanceTimersByTime(BEAT * 2); });
 
     expect(playSecondMove).not.toHaveBeenCalled();
   });
@@ -64,7 +64,7 @@ describe('useDeferredMove', () => {
     act(() => result.current(playSecondMove));
     rerender({ count: 1 });
     rerender({ count: 0 });
-    act(() => vi.advanceTimersByTime(BEAT * 2));
+    act(() => { vi.advanceTimersByTime(BEAT * 2); });
 
     expect(playSecondMove).not.toHaveBeenCalled();
   });
@@ -75,7 +75,7 @@ describe('useDeferredMove', () => {
 
     act(() => result.current(playSecondMove));
     unmount();
-    act(() => vi.advanceTimersByTime(BEAT * 2));
+    act(() => { vi.advanceTimersByTime(BEAT * 2); });
 
     expect(playSecondMove).not.toHaveBeenCalled();
   });
@@ -88,7 +88,7 @@ describe('useDeferredMove', () => {
     act(() => result.current(first));
     act(() => result.current(second));
     rerender({ count: 1 });
-    act(() => vi.advanceTimersByTime(BEAT));
+    act(() => { vi.advanceTimersByTime(BEAT); });
 
     expect(first).not.toHaveBeenCalled();
     expect(second).toHaveBeenCalledOnce();
@@ -100,11 +100,11 @@ describe('useDeferredMove', () => {
 
     act(() => result.current(playSecondMove));
     rerender({ count: 1 });
-    act(() => vi.advanceTimersByTime(BEAT));
+    act(() => { vi.advanceTimersByTime(BEAT); });
 
     act(() => result.current(playSecondMove));
     rerender({ count: 3 });
-    act(() => vi.advanceTimersByTime(BEAT));
+    act(() => { vi.advanceTimersByTime(BEAT); });
 
     expect(playSecondMove).toHaveBeenCalledTimes(2);
   });

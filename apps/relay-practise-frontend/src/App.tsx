@@ -24,7 +24,7 @@ function App() {
   const { t } = useTranslation();
 
   useEffect(() => {
-    i18next.changeLanguage(import.meta.env.VITE_LANGUAGE);
+    void i18next.changeLanguage(import.meta.env.VITE_LANGUAGE);
   }, [])
 
   // The teamName is the join code of the selected test (`<num>_<H|D|O>_<category>`),

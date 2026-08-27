@@ -1,4 +1,4 @@
-name: practice-dependency-report
+name: dependency-report
 on:
   schedule:
     # 06:00 UTC on the 1st. GitHub disables a scheduled workflow after 60 days without
@@ -10,12 +10,6 @@ permissions:
   contents: read
   issues: write
 
-# The report is about apps/strategy-practice's dependencies, and the script resolves everything it
-# reads from its own location — except the workflows, which now live at the repo root.
-defaults:
-  run:
-    working-directory: apps/strategy-practice
-
 jobs:
   report:
     # #308 guarded sync.yml and pages-deploy.yml the same way. This one is a cron with
@@ -24,7 +18,8 @@ jobs:
     if: github.repository == 'a-gondolkodas-orome/durer-aion'
     runs-on: ubuntu-24.04
     # No pinned container, unlike the other two workflows: this job only reads version strings and
-    # fetches URLs, and pinning Node here would add a place check-versions.mjs does not look at.
+    # fetches URLs, and pinning Node here would add a place check-versions.mjs does not look at —
+    # and one more row for this very report to nag about.
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -39,9 +34,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BEHIND: ${{ steps.report.outputs.behind }}
-          # Named for the app: this repo holds four, and a later report on the rest would
-          # otherwise reconcile against this one's issue.
-          TITLE: Dependency update report (practice)
+          # One report for the whole repo, so one issue. Matched on this title below, so it is
+          # the issue's identity — renaming it by hand orphans the old one and opens a new one.
+          TITLE: Dependency update report
         run: |
           # Matched on the title, not the OPS label, so a hand-edited label cannot cause a
           # duplicate issue. --limit outruns gh's default page of 30.

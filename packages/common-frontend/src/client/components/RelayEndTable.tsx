@@ -33,6 +33,19 @@ export function RelayEndTable(props: {allPoints: number, task: {max: number, got
   const toHome = useToHome();
   const logout = useLogout();
   const { t } = useTranslation();
+  // Named so the handlers below can stay synchronous: React ignores what an
+  // event handler returns, so an async one leaves its promise unhandled.
+  const backToHome = async () => {
+    await refreshState();
+    await toHome();
+    if (props.selectRound) {
+      // Logging out leads back to the round selector, and it also clears
+      // the saved match so the round can be replayed later
+      logout();
+    } else {
+      window.location.reload();
+    }
+  };
 
   return (
     <Stack sx={{
@@ -137,17 +150,7 @@ export function RelayEndTable(props: {allPoints: number, task: {max: number, got
         fontSize: '26px',
         alignSelf: 'center',
         textTransform: 'none',
-      }} variant='contained' color='primary' onClick={async ()=>{
-        await refreshState();
-        await toHome();
-        if (props.selectRound) {
-          // Logging out leads back to the round selector, and it also clears
-          // the saved match so the round can be replayed later
-          logout();
-        } else {
-          window.location.reload();
-        }
-      }}>
+      }} variant='contained' color='primary' onClick={() => void backToHome()}>
         {props.selectRound ? t('relay.endTable.selectOtherRound') : t('relay.endTable.back')}
       </Button>
     </Stack>
