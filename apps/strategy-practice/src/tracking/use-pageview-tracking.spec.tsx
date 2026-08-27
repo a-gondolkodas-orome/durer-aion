@@ -41,7 +41,7 @@ describe('usePageviewTracking', () => {
   it('tracks again on route change', () => {
     const Nav = () => {
       const navigate = useNavigate();
-      return <button onClick={() => navigate('/game/TicTacToe')}>go</button>;
+      return <button onClick={() => void navigate('/game/TicTacToe')}>go</button>;
     };
     const { getByText } = render(
       <MemoryRouter initialEntries={['/']}>
