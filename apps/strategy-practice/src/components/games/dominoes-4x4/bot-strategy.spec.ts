@@ -5,7 +5,7 @@ import { getPossibleMoves, type Board, type Domino, type Field } from './gamepla
 const fieldKey = ({ row, col }: Field) => `${row},${col}`;
 
 const captureMove = (board: Board, player: number, strategy: typeof smartBotStrategy): Domino =>
-  botNextMoveArgs(strategy({ board, ctx: makeCtx({ currentPlayer: player }) }))[0] as Domino;
+  botNextMoveArgs(strategy({ board, ctx: makeCtx({ currentPlayer: player }) }))[0];
 
 describe('isWinningForPlayerToMove', () => {
   it('the empty 4x4 board is a win for Árgyélus (the vertical player to move)', () => {

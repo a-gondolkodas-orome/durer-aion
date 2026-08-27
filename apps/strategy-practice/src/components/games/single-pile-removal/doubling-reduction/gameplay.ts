@@ -26,8 +26,8 @@ const startBoard = (stones: number): Board => ({ stones, maxTake: stones - 1 });
 // since taking 1 caps the next player at 1 too).
 export const generateStartBoard = (): Board => startBoard(
   random(0, 1)
-    ? sample([16, 32])!
-    : sample([20, 24, 40, 48])!
+    ? sample([16, 32])
+    : sample([20, 24, 40, 48])
 );
 
-export const generateTestStartBoard = (): Board => startBoard(sample([8, 12, 16, 20])!);
+export const generateTestStartBoard = (): Board => startBoard(sample([8, 12, 16, 20]));

@@ -51,6 +51,10 @@ export default defineConfig(
       // An async function handed to something that ignores what it returns: React
       // event handlers, addEventListener, Array.forEach. The await never happens.
       '@typescript-eslint/no-misused-promises': 'error',
+      // A type assertion the compiler already knows is redundant. Deleting them is
+      // what keeps the ones that remain worth reading: a stray `!` is where a null
+      // dereference hides.
+      '@typescript-eslint/no-unnecessary-type-assertion': 'error',
     },
   },
   // packages/engine and packages/games are apps/strategy-practice code moved out of it, still

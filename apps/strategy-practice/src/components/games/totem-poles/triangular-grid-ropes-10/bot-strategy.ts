@@ -27,10 +27,10 @@ export const smartBotStrategy: Bot = ({ board, ctx }) => {
   const allowedMoves = getAllowedMoves(board);
   if (ctx.chosenRoleIndex === 1) {
     if (board.length === 0) {
-      const opening = sample([{ from: 3, to: 5 }, { from: 1, to: 8 }, { from: 2, to: 7 }])!;
+      const opening = sample([{ from: 3, to: 5 }, { from: 1, to: 8 }, { from: 2, to: 7 }]);
       return { move: 'stretchRope', args: [opening] };
     } else {
-      const symDir = edgeDirection(board[0]!)!;
+      const symDir = edgeDirection(board[0])!;
       const lastMove = last(board)!;
       if (edgeDirection(lastMove) === symDir) {
         // The mirroring strategy keeps the position symmetric, so an edge in

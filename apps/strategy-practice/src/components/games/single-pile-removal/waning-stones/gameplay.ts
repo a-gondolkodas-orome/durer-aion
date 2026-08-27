@@ -22,8 +22,8 @@ const startBoard = (stones: number): Board => ({ stones, maxTake: Math.floor(sto
 // with ~50% probability.
 export const generateStartBoard = (): Board => startBoard(
   random(0, 1)
-    ? sample([8, 16, 32, 64])!
+    ? sample([8, 16, 32, 64])
     : sample(range(8, 66).filter(n => (n & (n - 1)) !== 0))!
 );
 
-export const generateTestStartBoard = (): Board => startBoard(sample([6, 8, 9, 10, 12])!);
+export const generateTestStartBoard = (): Board => startBoard(sample([6, 8, 9, 10, 12]));

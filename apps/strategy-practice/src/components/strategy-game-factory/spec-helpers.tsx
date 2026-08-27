@@ -44,7 +44,7 @@ export const defaultGameplay: Gameplay<Board> = {
 const playsFirstLegalMove = (gameplay: Gameplay<Board>): BotStrategy<Board> =>
   ({ board, ctx }) => {
     const name = Object.keys(gameplay.moves)
-      .find(key => gameplay.moves[key]!.validate?.(board, { ctx }) ?? true);
+      .find(key => gameplay.moves[key].validate?.(board, { ctx }) ?? true);
     return name ? [{ move: name }] : [];
   };
 

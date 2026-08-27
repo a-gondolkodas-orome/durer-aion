@@ -22,7 +22,7 @@ export const smartBotStrategy: Bot = ({ board }) => {
   if (board.length === 0) {
     // The bot opens (and, from the empty board, is on the losing side). Open on
     // a side of the medial triangle — a natural, symmetric first move.
-    return { move: 'stretchRope', args: [sample([{ from: 3, to: 5 }, { from: 3, to: 12 }, { from: 5, to: 12 }])!] };
+    return { move: 'stretchRope', args: [sample([{ from: 3, to: 5 }, { from: 3, to: 12 }, { from: 5, to: 12 }])] };
   }
   const winningMove = findWinningMove(board);
   return { move: 'stretchRope', args: [winningMove ?? sample(getAllowedMoves(board))!] };

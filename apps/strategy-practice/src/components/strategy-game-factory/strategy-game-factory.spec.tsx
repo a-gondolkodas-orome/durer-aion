@@ -490,9 +490,9 @@ describe('per-variant rule', () => {
 
     // the variant radios' group name is a useId, so select them by the
     // fieldset they live in rather than by a fixed name
-    const variantFieldset = container.querySelectorAll('fieldset')[1]!;
+    const variantFieldset = container.querySelectorAll('fieldset')[1];
     const radios = variantFieldset.querySelectorAll('input[type="radio"]');
-    fireEvent.click(radios[1]!);
+    fireEvent.click(radios[1]);
 
     expect(getByText('RULE_TWO')).toBeTruthy();
     expect(queryByText('RULE_ONE')).toBeNull();
@@ -674,7 +674,7 @@ describe('move validate enforcement', () => {
       fireEvent.click(getByTestId('role-btn-0'));
       fireEvent.click(getByTestId('hand-over-btn')); // → bot's turn
       act(() => { vi.advanceTimersByTime(1500); });
-      expect(Object.keys(seen[0]!)).toEqual(['board', 'ctx']);
+      expect(Object.keys(seen[0])).toEqual(['board', 'ctx']);
     } finally {
       vi.clearAllTimers();
       vi.useRealTimers();

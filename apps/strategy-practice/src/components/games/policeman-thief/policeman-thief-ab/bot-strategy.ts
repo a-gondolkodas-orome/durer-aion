@@ -12,7 +12,7 @@ type Position = { policemen: [number, number], thief: number, turnCount: number 
 type PoliceTurn = [number, number]
 
 const positionOf = (board: Board): Position => ({
-  policemen: [board.policemen[0]!, board.policemen[1]!],
+  policemen: [board.policemen[0], board.policemen[1]],
   thief: board.thief,
   turnCount: board.turnCount
 });

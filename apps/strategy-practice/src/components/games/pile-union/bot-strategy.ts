@@ -20,11 +20,11 @@ const allMoves = (board: Board): MoveAction[] => {
 const boardAfter = (board: Board, move: MoveAction): Board => {
   if (move.type === 'remove') {
     const next = board.filter((_, idx) => idx !== move.i);
-    if (board[move.i]! > 1) next.push(board[move.i]! - 1);
+    if (board[move.i] > 1) next.push(board[move.i] - 1);
     return next;
   }
   const next = board.filter((_, idx) => idx !== move.i && idx !== move.j);
-  next.push(board[move.i]! + board[move.j]!);
+  next.push(board[move.i] + board[move.j]);
   return next;
 };
 

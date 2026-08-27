@@ -3,7 +3,7 @@ import { useAddMinutes, useGetLogs, useMatchState, useResetRelay, useResetStrate
 import { Button } from '@mui/material';
 import { Dispatch, useState } from 'react';
 import useSWR from 'swr';
-import { TeamModelDto, InProgressMatchStatus, FinishedMatchStatus, MatchStatus } from '../dto/TeamStateDto';
+import { TeamModelDto, MatchStatus } from '../dto/TeamStateDto';
 import { formatTime } from '../utils/DateFormatter';
 import { ErrorMessage, Field, FieldProps } from 'formik';
 import Form from "./form";
@@ -126,7 +126,7 @@ function MatchStatusField(props: {name: string, data: MatchStatus, isRelay: bool
 
   switch (props.data.state) {
     case "IN PROGRESS": {
-      const inProgressState = props.data as InProgressMatchStatus 
+      const inProgressState = props.data 
       return (
         <><Stack>
           Folyamatban <br/>
@@ -216,7 +216,7 @@ function MatchStatusField(props: {name: string, data: MatchStatus, isRelay: bool
       )
     }
     case "FINISHED": {
-      const finishedState = props.data as FinishedMatchStatus 
+      const finishedState = props.data 
       return (
         <Stack>
           Végzett <br/>

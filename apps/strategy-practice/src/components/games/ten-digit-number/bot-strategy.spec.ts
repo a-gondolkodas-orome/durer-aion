@@ -106,7 +106,7 @@ describe('smartBotStrategy', () => {
   it('moves onto the losing residue for the opponent', () => {
     for (const start of WON_FOR_MOVER) {
       for (let trial = 0; trial < 10; trial++) {
-        const after = play(start, [smartBotStrategy, randomBotStrategy]).history[0]!.board;
+        const after = play(start, [smartBotStrategy, randomBotStrategy]).history[0].board;
         expect(winnerFor(after)).toBe(0);
       }
     }
@@ -134,7 +134,7 @@ describe('randomBotStrategy', () => {
     let chances = 0;
     for (let trial = 0; trial < 60; trial++) {
       const { board: final, winnerIndex } = play(board([]), [randomBotStrategy, randomBotStrategy]);
-      const beforeLast = ((final.sumMod9 - final.digits[9]!) % 9 + 9) % 9;
+      const beforeLast = ((final.sumMod9 - final.digits[9]) % 9 + 9) % 9;
       if (!availableDigits.some(d => (beforeLast + d) % 9 === 0)) continue;
       chances++;
       expect(winnerIndex).toBe(1);

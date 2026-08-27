@@ -69,7 +69,7 @@ describe('smartBotStrategy', () => {
     for (const board of WON_FOR_MOVER) {
       for (let trial = 0; trial < 10; trial++) {
         const { history } = play(board, [smartBotStrategy, randomBotStrategy]);
-        expect(xorSum(history[0]!.board)).toBe(0);
+        expect(xorSum(history[0].board)).toBe(0);
       }
     }
   });

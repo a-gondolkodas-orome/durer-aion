@@ -1,7 +1,7 @@
 import { isEqual } from 'lodash';
 import { botNextMoveArgs, makeCtx } from 'test-utils';
 import { getExactWinningMove, smartBotStrategy } from './bot-strategy';
-import { ALL_FIELDS, BOARDSIZE, type Board, type Domino, type Field } from './gameplay';
+import { ALL_FIELDS, BOARDSIZE, type Board, type Field } from './gameplay';
 
 const fieldKey = ({ row, col }: Field) => `${row},${col}`;
 
@@ -86,7 +86,7 @@ describe('smartBotStrategy', () => {
   it('always mirrors through the board center when playing second, regardless of position', () => {
     const board: Board = [[{ row: 0, col: 0 }, { row: 0, col: 1 }]];
     const [placed] = botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx({ chosenRoleIndex: 0 }) }));
-    expect(new Set((placed as Domino).map(fieldKey))).toEqual(new Set([
+    expect(new Set(placed.map(fieldKey))).toEqual(new Set([
       fieldKey({ row: BOARDSIZE - 1, col: BOARDSIZE - 1 }),
       fieldKey({ row: BOARDSIZE - 1, col: BOARDSIZE - 2 })
     ]));
@@ -99,7 +99,7 @@ describe('smartBotStrategy', () => {
     ];
     const board = coverEverythingExcept([...isolatedDomino, ...square2x2]);
     const [named] = botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx({ chosenRoleIndex: 1 }) }));
-    const placed = named as Domino;
+    const placed = named;
 
     expect(placed).toBeDefined();
     const covered = new Set(board.flat().map(fieldKey));
