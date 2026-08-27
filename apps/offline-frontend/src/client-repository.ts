@@ -1,6 +1,7 @@
 import { ClientRepository, LOCAL_STORAGE_TEAMSTATE, TeamModelDto, MatchStateDto } from "common-frontend";
 import { teamData } from "./teamData";
 import { sendDataLogin, sendGameData } from "./sendData";
+import { readStoredTeamState } from "./stored-team-state";
 import i18n from "i18next";
 
 export class OfflineClientRepository implements ClientRepository {
@@ -112,14 +113,7 @@ export class OfflineClientRepository implements ClientRepository {
     // return the joincode if it is in the teamData.ts file
 
     const i = teamData.findIndex(e => e.join_code === joinCode);
-    let pageState = "DISCLAIMER"
-    if (typeof localStorage !== "undefined") {
-      const teamStateString = localStorage.getItem(LOCAL_STORAGE_TEAMSTATE);
-      if (teamStateString !== null){
-        const teamState = JSON.parse(teamStateString);
-        pageState = teamState.pageState;
-      }
-    }
+    const pageState = readStoredTeamState()?.pageState ?? "DISCLAIMER";
 
     if (i > -1) {
       const i = teamData.findIndex(e => e.join_code === joinCode);
@@ -154,14 +148,11 @@ export class OfflineClientRepository implements ClientRepository {
 
 
 const getTeamStateFromLocal = (): TeamModelDto => {
-  if (typeof localStorage === "undefined") {
+  const teamState = readStoredTeamState();
+  if (teamState === null) {
     throw new Error(i18n.t('error.unexpected'));
   }
-  const teamstateString = localStorage.getItem(LOCAL_STORAGE_TEAMSTATE);
-  if (teamstateString === null) {
-    throw new Error(i18n.t('error.unexpected'));
-  }
-  return JSON.parse(teamstateString);
+  return teamState;
 }
 
 const addMin = (from: Date, t: number): Date => {
