@@ -419,26 +419,6 @@ export function configureTeamsRouter(
   });
 
   /**
-   * Let a team get their relay results
-   * TODO: implement
-   * 
-   * @param {string} GUID - TeamId
-   */
-  router.get("/team/:GUID/relay/result", koaBody(), async (ctx) => {
-    ctx.throw(501, "Not implemented yet.");
-  });
-
-  /**
-   * Let a team get their strategy results
-   * TODO: implement
-   * 
-   * @param {string} GUID - TeamId
-   */
-  router.get("/team/:GUID/strategy/result", koaBody(), async (ctx) => {
-    ctx.throw(501, "Not implemented yet.");
-  });
-
-  /**
    * Create a new BGio game
    * 
    * @param {string} nameid - game ID to create

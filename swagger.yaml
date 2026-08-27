@@ -391,36 +391,6 @@ paths:
         "403":
           description: Not allowed, match in progress
 
-  /team/{GUID}/relay/result:
-    get:
-      summary: Let a team get their relay results
-      parameters:
-        - name: GUID
-          in: path
-          required: true
-          schema:
-            $ref: "#/components/schemas/GUID"
-      tags:
-      - user
-      responses:
-        "501":
-          description: Not implemented yet
-
-  /team/{GUID}/strategy/result:
-    get:
-      summary: Let a team get their strategy results
-      parameters:
-        - name: GUID
-          in: path
-          required: true
-          schema:
-            $ref: "#/components/schemas/GUID"
-      tags:
-      - user
-      responses:
-        "501":
-          description: Not implemented yet
-
   /games/{nameid}/create:
     post:
       summary: Create a new BGio game
