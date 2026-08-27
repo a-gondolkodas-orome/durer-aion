@@ -55,6 +55,10 @@ export default defineConfig(
       // what keeps the ones that remain worth reading: a stray `!` is where a null
       // dereference hides.
       '@typescript-eslint/no-unnecessary-type-assertion': 'error',
+      // A catch callback's parameter is implicitly `any`, so reading `.message` off
+      // it yields undefined for anything that is not an Error — and the UI shows an
+      // empty error where the reason should be.
+      '@typescript-eslint/use-unknown-in-catch-callback-variable': 'error',
     },
   },
   // packages/engine and packages/games are apps/strategy-practice code moved out of it, still
