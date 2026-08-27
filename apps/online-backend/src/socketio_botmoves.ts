@@ -2,7 +2,7 @@
 import type IOTypes from 'socket.io';
 import type { Game, PlayerID, Server, State, StorageAPI } from "boardgame.io";
 import type { Bot } from "boardgame.io/ai";
-import { getFilterPlayerView } from "boardgame.io/internal";
+import { getFilterPlayerView, Sync as SyncStorage } from "boardgame.io/internal";
 import { Master } from "boardgame.io/master";
 import { GenericPubSub, SocketIO } from "boardgame.io/server";
 import { isMakeMovePayloadReadOnly, currentPlayer, PlayerIDType } from "game";
@@ -36,15 +36,12 @@ function GetBotPlayer(state: State, bots: Record<PlayerID, Bot>) {
   return null;
 }
 
-/** Copied from boardgame.io/dist/src/server/db/base.ts */
-export enum Type {
-  SYNC = 0,
-  ASYNC = 1,
-}
-
-/** Copied from boardgame.io/dist/src/server/transport.ts */
+/** Copied from boardgame.io/dist/src/server/transport.ts. The `Type` enum the
+ *  comparison needs is not exported, so the sync value is read off the `Sync`
+ *  base class boardgame.io does export — a copy of the enum would be a second,
+ *  unrelated one that only happens to share its numbers today (#328). */
 export function isSynchronous(storageAPI: StorageAPI.Sync | StorageAPI.Async): storageAPI is StorageAPI.Sync {
-  return storageAPI.type() === Type.SYNC;
+  return storageAPI.type() === SyncStorage.prototype.type();
 }
 
 /** Used by TransportAPI. Copied from boardgame.io/dist/src/server/transport.ts */
