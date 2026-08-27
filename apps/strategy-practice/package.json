@@ -31,7 +31,8 @@
     "react-router": "^8.3.0"
   },
   "//": [
-    "playwright is imported by no code here. It is a dependency so that its version is written down where the devcontainer's ARG PLAYWRIGHT_VERSION can be checked against it, which `npm run check:versions` does."
+    "playwright is imported by no code here. It is a dependency so that its version is written down where the devcontainer's ARG PLAYWRIGHT_VERSION can be checked against it, which `npm run check:versions` does.",
+    "typescript is held to the root's version, not the newest, so that npm dedupes it to a single install. With a newer version nested here, the type-aware lint rules crash: npm hoists their helper ts-api-utils to the root, where it binds the root's typescript, and the flags it then reads off this app's parser's types are another version's (issue #355). Lift the pin when the root moves majors."
   ],
   "devDependencies": {
     "@eslint-react/eslint-plugin": "^5.18.3",
@@ -49,7 +50,7 @@
     "jsdom": "^29.1.1",
     "playwright": "1.62.1",
     "tailwindcss": "^4.3.3",
-    "typescript": "^6.0.3",
+    "typescript": "^5.9.3",
     "vite": "^8.2.1",
     "vitest": "^4.1.10"
   },
