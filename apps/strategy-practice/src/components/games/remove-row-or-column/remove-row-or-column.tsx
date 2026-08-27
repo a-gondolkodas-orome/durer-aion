@@ -59,7 +59,7 @@ const multipleRule = {
 };
 
 // Test variant covers both sub-games: a single rectangle or several rectangles.
-const generateTestStartBoard = () => sample([generateSingleBoard, generateMultipleBoard])!();
+const generateTestStartBoard = () => sample([generateSingleBoard, generateMultipleBoard])();
 
 export const RemoveRowOrColumn = strategyGameFactory({
   presentation: {

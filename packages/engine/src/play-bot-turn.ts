@@ -45,7 +45,7 @@ export const playBotTurn = <TBoard, TTurnState = unknown>(
 
   const play = (name: string, args: unknown[]) => {
     if (!moveDefinitions[name]) throw new Error(unknownMoveMessage(name, moveDefinitions));
-    const transition = reduceMove(state, moveDefinitions[name]!, name, args, HEADLESS_PLAYER_NAMES);
+    const transition = reduceMove(state, moveDefinitions[name], name, args, HEADLESS_PLAYER_NAMES);
     if (transition.illegal) {
       throw new Error(`playBotTurn: illegal move ${name}(${JSON.stringify(args)}) `
         + `rejected on board ${JSON.stringify(state.board)}`);
@@ -77,7 +77,7 @@ export const playBotTurn = <TBoard, TTurnState = unknown>(
         // plan is then moot rather than wrong.
         if (state.phase === 'gameEnd') break;
         throw new Error(`playBotTurn: the strategy of player ${player} named moves after `
-          + `${named[i - 1]!.move} ended its turn`);
+          + `${named[i - 1].move} ended its turn`);
       }
       play(move, args);
     }

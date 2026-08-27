@@ -47,8 +47,8 @@ const isGameEnd = (board: Board) => {
 
 export const generateStartBoard = (): Board => {
   const numCount = random(0, 2) === 0
-    ? sample([6, 10])!
-    : sample([7, 8, 9, 11, 12, 13, 14, 15])!;
+    ? sample([6, 10])
+    : sample([7, 8, 9, 11, 12, 13, 14, 15]);
   return ({
     numbersOnTable: Array(numCount).fill(true),
     previousMove: null
@@ -57,8 +57,8 @@ export const generateStartBoard = (): Board => {
 
 export const generateTestStartBoard = (): Board => {
   const numCount = random(0, 2) === 0
-    ? sample([6])!
-    : sample([7, 8, 9])!;
+    ? sample([6])
+    : sample([7, 8, 9]);
   return ({
     numbersOnTable: Array(numCount).fill(true),
     previousMove: null

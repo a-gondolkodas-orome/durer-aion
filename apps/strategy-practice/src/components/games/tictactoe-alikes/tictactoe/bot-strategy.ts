@@ -37,7 +37,7 @@ export const smartBotStrategy: Bot = ({ board }) => {
 const getOptimalBotPlacingPosition = (board: Board) => {
   const allowedPlaces = getAllowedPlaces({ board, amIBot: true });
 
-  if (allowedPlaces.length === 9) return sample([0, 2, 4, 6, 8])!;
+  if (allowedPlaces.length === 9) return sample([0, 2, 4, 6, 8]);
 
   const instantWinningPlace = allowedPlaces.find((i) => {
     const localBoard = [...board];

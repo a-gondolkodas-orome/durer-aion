@@ -34,7 +34,7 @@ export const moveValidator = <TBoard, TArgs extends unknown[], TTurnState = unkn
 // straight off the return value. A strategy that named a whole turn returns
 // several; the one it would play next is the first.
 export const botNextMove = <TMove extends NamedBotMove>(named: TMove | TMove[]): TMove =>
-  asBotMoves(named)[0]!;
+  asBotMoves(named)[0];
 
 // The strategy's own move type carries each move's argument tuple, so a spec
 // reading `args[0]` is checked against what that move actually takes. The cast
@@ -42,7 +42,7 @@ export const botNextMove = <TMove extends NamedBotMove>(named: TMove | TMove[]):
 export const botNextMoveArgs = <TMove extends NamedBotMove>(
   named: TMove | TMove[]
 ): NonNullable<TMove['args']> =>
-  (botNextMove(named).args ?? []) as NonNullable<TMove['args']>;
+  botNextMove(named).args ?? [];
 
 // Ask a strategy for its turn and play its next move through the game's own
 // move, as the engine would. Lets a spec step a position forward by one bot
@@ -54,7 +54,7 @@ export const playBotMove = <TBoard, TTurnState = unknown>(
   ctx: Ctx<TTurnState> = makeCtx()
 ): TBoard => {
   const { move, args = [] } = botNextMove(strategy({ board, ctx }));
-  return moves[move]!.apply(board, { ctx }, ...args).nextBoard;
+  return moves[move].apply(board, { ctx }, ...args).nextBoard;
 };
 
 // Which role can force the win from `startBoard`, read off the game's own

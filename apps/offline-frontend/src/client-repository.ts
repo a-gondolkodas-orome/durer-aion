@@ -79,7 +79,7 @@ export class OfflineClientRepository implements ClientRepository {
 
   getTeamState(_joinCode: string): Promise<TeamModelDto> {
     const teamState = getTeamStateFromLocal();
-    return Promise.resolve(teamState) as Promise<TeamModelDto>;
+    return Promise.resolve(teamState);
   }
 
   async getAll(): Promise<TeamModelDto[]> {

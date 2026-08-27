@@ -34,7 +34,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board, TurnS
 
   const shouldShowCoinToBeAdded = (coinValue: number) => {
     if (!wasCoinAlreadyRemovedInTurn) return false;
-    return valueOfRemovedCoin! > coinValue && coinValue === validHoveredPile;
+    return valueOfRemovedCoin > coinValue && coinValue === validHoveredPile;
   };
 
   return (

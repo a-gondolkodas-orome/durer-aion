@@ -48,7 +48,7 @@ const boardFromSet = (set: number[]): Board => {
 export const generateStartBoardC = (): Board => boardFromSet(
   random(0, 1) === 0
     ? [1, 2, 3]
-    : sample([[1, 2, 4], [1, 3, 4], [2, 3, 4], [1, 2, 3, 4]])!
+    : sample([[1, 2, 4], [1, 3, 4], [2, 3, 4], [1, 2, 3, 4]])
 );
 
 // Category D (values 1..5). Same idea over the larger set of losing/winning sets.
@@ -72,4 +72,4 @@ export const generateStartBoardD = (): Board => boardFromSet(
 );
 
 // Test variant covers both sub-games: a values-1..4 or a values-1..5 start.
-export const generateTestStartBoard = (): Board => sample([generateStartBoardC, generateStartBoardD])!();
+export const generateTestStartBoard = (): Board => sample([generateStartBoardC, generateStartBoardD])();

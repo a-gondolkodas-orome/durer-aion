@@ -8,7 +8,7 @@ import { type Board, type Moves } from './gameplay';
 // even, winning number, so play randomly to maximise the chance the human errs.
 const getBotNextNumber = (board: Board): number => {
   if (board % 2 === 0) return board + 1;
-  return sample([board + 1, board * 2])!;
+  return sample([board + 1, board * 2]);
 };
 
 type Bot = BotStrategy<Board, Moves>

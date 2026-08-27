@@ -55,7 +55,7 @@ export const moves = {
       Number.isInteger(n) && n >= 1 && n <= allNumbers.length && board.owner[n - 1] === null,
     apply: (board, { ctx }, n: number): MoveOutcome<Board> => {
       const player = ctx.currentPlayer as 0 | 1;
-      const owner = board.owner.slice() as Board['owner'];
+      const owner = board.owner.slice();
       owner[n - 1] = player;
       const nextBoard = { owner };
 

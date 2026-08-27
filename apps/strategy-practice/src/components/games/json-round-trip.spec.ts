@@ -1,7 +1,7 @@
 import * as games from './index';
 import {
   resolveVariants, runMatch,
-  type Gameplay, type StrategyGame, type VariantInput
+  type StrategyGame
 } from 'strategy-game-factory';
 import { SLOW_VARIANTS } from './slow-variants';
 
@@ -27,13 +27,13 @@ type Entry = [string, StrategyGame<unknown>];
 const entries = Object.entries(games) as Entry[];
 
 const variantCases = entries.flatMap(([name, Game]) => {
-  const { defaultVariant, resolvedVariants } = resolveVariants(Game.variants as VariantInput<unknown>[]);
-  return (Game.variants as VariantInput<unknown>[]).map((variant, variantIndex) => {
-    const resolved = resolvedVariants[variantIndex]!;
+  const { defaultVariant, resolvedVariants } = resolveVariants(Game.variants);
+  return Game.variants.map((variant, variantIndex) => {
+    const resolved = resolvedVariants[variantIndex];
     return {
       name: `${name}[${variantIndex}]`,
       variant,
-      gameplay: Game.gameplay as Gameplay<unknown>,
+      gameplay: Game.gameplay,
       // A variant with no start position of its own plays the default one's —
       // resolved exactly as the factory and the plays-to-an-end sweep resolve it.
       generateStartBoard: resolved.generateStartBoard ?? defaultVariant.generateStartBoard!,

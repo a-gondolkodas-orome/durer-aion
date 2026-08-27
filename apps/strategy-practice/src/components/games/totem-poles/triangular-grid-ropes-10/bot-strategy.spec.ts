@@ -19,7 +19,7 @@ const askMover = (board: Board): Edge =>
   botNextMoveArgs(smartBotStrategy({ board, ctx: makeCtx({ currentPlayer: 0, chosenRoleIndex: 1 }) }))[0];
 
 const mirrorOf = (direction: keyof typeof mirrorNodes, { from, to }: Edge): Edge =>
-  ({ from: mirrorNodes[direction][from]!, to: mirrorNodes[direction][to]! });
+  ({ from: mirrorNodes[direction][from], to: mirrorNodes[direction][to] });
 
 const isSameEdge = (a: Edge, b: Edge) => isEqual(a, b) || isEqual(a, { from: b.to, to: b.from });
 

@@ -102,7 +102,7 @@ export const FIRST_PLAYER_WIN_SIZES = [7, 9, 10, 11];
 export const SECOND_PLAYER_WIN_SIZES = [8, 12];
 
 export const generateStartBoard = (): Board => {
-  const pool = sample([FIRST_PLAYER_WIN_SIZES, SECOND_PLAYER_WIN_SIZES])!;
+  const pool = sample([FIRST_PLAYER_WIN_SIZES, SECOND_PLAYER_WIN_SIZES]);
   return { cells: startCells(sample(pool)!) };
 };
 

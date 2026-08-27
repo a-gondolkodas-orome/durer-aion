@@ -73,6 +73,10 @@ export default [
       // An async function handed to something that ignores what it returns: React
       // event handlers, addEventListener, Array.forEach. The await never happens.
       '@typescript-eslint/no-misused-promises': 'error',
+      // A type assertion the compiler already knows is redundant. Deleting them is
+      // what keeps the ones that remain worth reading: a stray `!` is where a null
+      // dereference hides.
+      '@typescript-eslint/no-unnecessary-type-assertion': 'error',
       'no-restricted-syntax': ['error', {
         selector: 'TSAsExpression > TSNeverKeyword.typeAnnotation',
         message: "'as never' is not allowed; use a more specific type or fix the underlying type instead."

@@ -4,6 +4,10 @@
 // not say what it resolves to — './something' reaching a .tsx, or anything
 // under react/, is invisible to it. This walk pins the boundary the package
 // exists for: everything reachable from the core entry stays framework-free.
+// The assertion is not redundant, whatever the rule says: `tsc` types this glob
+// as Record<string, unknown> and fails without it. ESLint's own program resolves
+// vite/client's overload differently, so the two disagree about this one line.
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
 const sources = import.meta.glob('./**/*.{ts,tsx}', { query: '?raw', import: 'default', eager: true }) as
   Record<string, string>;
 

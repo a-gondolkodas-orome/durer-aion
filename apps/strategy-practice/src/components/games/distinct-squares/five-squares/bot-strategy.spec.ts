@@ -18,7 +18,7 @@ const play = (
 
 const namedSquares = (strategy: typeof smartBotStrategy, board: Board, currentPlayer: number) => {
   const named = strategy({ board, ctx: makeCtx({ currentPlayer }) });
-  return (Array.isArray(named) ? named : [named]).map(({ args }) => args![0] as number);
+  return (Array.isArray(named) ? named : [named]).map(({ args }) => args![0]);
 };
 
 // The second player wins exactly when the ten pieces end up spread over five
