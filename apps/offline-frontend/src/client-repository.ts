@@ -1,4 +1,4 @@
-import { ClientRepository, LOCAL_STORAGE_TEAMSTATE, TeamModelDto, MatchStateDto } from "common-frontend";
+import { ClientRepository, LOCAL_STORAGE_TEAMSTATE, TeamModelDto, MatchStateDto, BoardMoves } from "common-frontend";
 import { teamData } from "./teamData";
 import { sendDataLogin, sendGameData } from "./sendData";
 import { readStoredTeamState } from "./stored-team-state";
@@ -107,6 +107,14 @@ export class OfflineClientRepository implements ClientRepository {
   }
   async removeTeam(_teamId: string): Promise<void> {
     throw Error("NOT call this");
+  }
+
+  // The local boardgame.io client judges the answer with the bundled bot, and
+  // its step report already goes out through RelayWrapper's sendGameData hook,
+  // so nothing is sent from here.
+  submitRelayAnswer(answer: number, moves: BoardMoves): Promise<void> {
+    moves.submitAnswer(answer);
+    return Promise.resolve();
   }
 
   joinWithCode(joinCode: string): Promise<string> {

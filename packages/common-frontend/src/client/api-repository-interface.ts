@@ -1,8 +1,16 @@
 
 import { MatchStateDto, TeamModelDto } from "./dto/TeamStateDto";
 import { createContext, useContext } from 'react';
+import type { BoardProps } from 'boardgame.io/react';
 
 export const LOCAL_STORAGE_TEAMSTATE = "aegnjrlearnjla";
+
+// The relay answer is judged where the match runs — on the server online, by
+// the local bot offline — so submission stays a boardgame.io move in both
+// builds. The board hands over its whole `moves` prop, which boardgame.io
+// types as a plain string-keyed record, and the repository owns knowing which
+// move carries the answer.
+export type BoardMoves = BoardProps['moves'];
 
 export interface ClientRepository {
   version: "MOCK" | "OFFLINE" | "ONLINE"
@@ -28,6 +36,7 @@ export interface ClientRepository {
   resetStrategy(teamId: string): Promise<TeamModelDto>
   addMinutes(matchId: string, minutes: number): Promise<string>
   removeTeam(teamId: string): Promise<void>;
+  submitRelayAnswer(answer: number, moves: BoardMoves): Promise<void>;
 
 }
 
@@ -241,6 +250,10 @@ export class MockClientRepository implements ClientRepository {
   }
   removeTeam(_teamId: string): Promise<void> {
     throw Error("NOT call this");
+  }
+  submitRelayAnswer(answer: number, moves: BoardMoves): Promise<void> {
+    moves.submitAnswer(answer);
+    return Promise.resolve();
   }
 }
 

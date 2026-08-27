@@ -20,7 +20,7 @@ function sanitizeValue(value: string) {
 export interface MyProps {
   previousTries: number[];
   previousCorrectness: boolean | null;
-  onSubmit: (result: number) => void;
+  onSubmit: (result: number) => Promise<void>;
   attempt: number;
 }
 
@@ -71,18 +71,14 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
             enqueueSnackbar(t('relay.error.duplicate'), { variant: 'error' });
             return;
           }
-          try {
-            props.onSubmit(parseInt(values.result))
-            void refreshState()
-          } catch (e: unknown) {
-            console.log(e)
-            const message = e instanceof Error ? e.message : "Váratlan hiba történt";
-            enqueueSnackbar(message, { variant: 'error' });
-            if (message === "cannot make move after game end") {
-              // TODO: this error should be handled better, currently it never happens
+          props.onSubmit(parseInt(values.result))
+            .then(() => {
               void refreshState();
-            }
-          }
+            })
+            .catch((e: unknown) => {
+              console.log(e);
+              enqueueSnackbar(e instanceof Error ? e.message : t('error.unexpected'), { variant: 'error' });
+            });
           setSentAnswer(1);
         }}>
         <Field
