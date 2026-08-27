@@ -77,6 +77,10 @@ export default [
       // what keeps the ones that remain worth reading: a stray `!` is where a null
       // dereference hides.
       '@typescript-eslint/no-unnecessary-type-assertion': 'error',
+      // A catch callback's parameter is implicitly `any`, so reading `.message` off
+      // it yields undefined for anything that is not an Error — and the UI shows an
+      // empty error where the reason should be.
+      '@typescript-eslint/use-unknown-in-catch-callback-variable': 'error',
       'no-restricted-syntax': ['error', {
         selector: 'TSAsExpression > TSNeverKeyword.typeAnnotation',
         message: "'as never' is not allowed; use a more specific type or fix the underlying type instead."
