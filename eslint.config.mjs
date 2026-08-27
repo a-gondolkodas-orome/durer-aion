@@ -45,6 +45,9 @@ export default defineConfig(
       // `for…in` over an array walks its keys as strings, and its own properties
       // too. No violations today; this keeps it that way.
       '@typescript-eslint/no-for-in-array': 'error',
+      // A deprecated API still compiles; this is the only thing that says so before
+      // the removal lands.
+      '@typescript-eslint/no-deprecated': 'error',
     },
   },
   // packages/engine and packages/games are apps/strategy-practice code moved out of it, still
