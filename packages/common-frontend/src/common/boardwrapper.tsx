@@ -29,6 +29,13 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
     const isOffline = useClientRepo().version === "OFFLINE";
     const theme = useTheme();
     const { t } = useTranslation();
+    // Named so the handler below can stay synchronous: React ignores what an
+    // event handler returns, so an async one leaves its promise unhandled.
+    const backToHome = async () => {
+      await refreshState();
+      await toHome();
+      window.location.reload();
+    };
 
     useEffect(() => {
       if (!ctx.gameover) {
@@ -63,11 +70,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
           }}
           open={
             finished
-          } onClose={async () => {
-            await refreshState();
-            await toHome();
-            window.location.reload();
-          }}>
+          } onClose={() => void backToHome()}>
           <StrategyEndTable allPoints={G.points} numOfTries={G.numberOfTries} />
         </Dialog>
         <Stack sx={{

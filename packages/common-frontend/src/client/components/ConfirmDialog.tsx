@@ -30,7 +30,7 @@ export function ConfirmDialog(props: {confirmDialog: ConfirmDialogInterface | nu
   }}
   open={
     confirmDialog != null
-  } onClose={async () => {
+  } onClose={() => {
       setConfirmDialog(null); 
      }}>
     {confirmDialog && <Stack
