@@ -37,7 +37,6 @@ export async function import_teams_from_tsv_locally(teams: TeamsRepository, file
   }
   console.info("Summary:");
   console.info(`Successfully imported ${successful} teams, failed ${failed} times.`);
-  // TODO: Move the file
   export_table.unshift(expected_header);
   writeFileSync(`${filename}.export`, export_table.map(row => row.join('\t')).join('\n'), { 'encoding': 'utf-8' });
 }
