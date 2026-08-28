@@ -5,11 +5,11 @@ import type { BoardProps } from 'boardgame.io/react';
 
 export const LOCAL_STORAGE_TEAMSTATE = "aegnjrlearnjla";
 
-// The relay answer is judged where the match runs — on the server online, by
-// the local bot offline — so submission stays a boardgame.io move in both
-// builds. The board hands over its whole `moves` prop, which boardgame.io
-// types as a plain string-keyed record, and the repository owns knowing which
-// move carries the answer.
+// The relay match is judged and timed where it runs — on the server online,
+// by the local bot offline — so the board's actions stay boardgame.io moves
+// in both builds. The board hands over its whole `moves` prop, which
+// boardgame.io types as a plain string-keyed record, and the repository owns
+// knowing which move carries each action.
 export type BoardMoves = BoardProps['moves'];
 
 export interface ClientRepository {
@@ -37,6 +37,10 @@ export interface ClientRepository {
   addMinutes(matchId: string, minutes: number): Promise<string>
   removeTeam(teamId: string): Promise<void>;
   submitRelayAnswer(answer: number, moves: BoardMoves): Promise<void>;
+  // Unlike startRelay, which moves the team to the relay page, this dispatches
+  // the opening move of the match once the board is up.
+  startRelayGame(moves: BoardMoves): Promise<void>;
+  syncRelayTime(moves: BoardMoves): Promise<void>;
 
 }
 
@@ -253,6 +257,14 @@ export class MockClientRepository implements ClientRepository {
   }
   submitRelayAnswer(answer: number, moves: BoardMoves): Promise<void> {
     moves.submitAnswer(answer);
+    return Promise.resolve();
+  }
+  startRelayGame(moves: BoardMoves): Promise<void> {
+    moves.startGame();
+    return Promise.resolve();
+  }
+  syncRelayTime(moves: BoardMoves): Promise<void> {
+    moves.getTime();
     return Promise.resolve();
   }
 }

@@ -37,9 +37,9 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
       // Otherwise, it would run on every render.
       const gameNotStarted = G.numberOfTry === 0;
       if (gameNotStarted) {
-        moves.startGame();
+        void clientRepo.startRelayGame(moves);
       } else {
-        moves.getTime();
+        void clientRepo.syncRelayTime(moves);
       }
     }
     setGameover(ctx.gameover)
@@ -166,7 +166,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
             {!finished && <Countdown
               msRemaining={msRemaining ?? null}
               setMsRemaining={setMsRemaining}
-              getServerTimer={moves.getTime}
+              getServerTimer={() => void clientRepo.syncRelayTime(moves)}
               endTime={new Date(G.end)}
               serverRemainingMs={G.millisecondsRemaining} />}
           </Stack>

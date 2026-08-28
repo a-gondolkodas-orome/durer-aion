@@ -117,6 +117,16 @@ export class OfflineClientRepository implements ClientRepository {
     return Promise.resolve();
   }
 
+  startRelayGame(moves: BoardMoves): Promise<void> {
+    moves.startGame();
+    return Promise.resolve();
+  }
+
+  syncRelayTime(moves: BoardMoves): Promise<void> {
+    moves.getTime();
+    return Promise.resolve();
+  }
+
   joinWithCode(joinCode: string): Promise<string> {
     // return the joincode if it is in the teamData.ts file
 

@@ -246,10 +246,21 @@ export class RealClientRepository implements ClientRepository {
     }
   }
 
-  // Scoring is server-authoritative, so the answer travels as the move itself
-  // over the match's socket rather than as a separate HTTP call.
+  // Scoring and the clock are server-authoritative, so these travel as the
+  // moves themselves over the match's socket rather than as separate HTTP
+  // calls.
   submitRelayAnswer(answer: number, moves: BoardMoves): Promise<void> {
     moves.submitAnswer(answer);
+    return Promise.resolve();
+  }
+
+  startRelayGame(moves: BoardMoves): Promise<void> {
+    moves.startGame();
+    return Promise.resolve();
+  }
+
+  syncRelayTime(moves: BoardMoves): Promise<void> {
+    moves.getTime();
     return Promise.resolve();
   }
 }
