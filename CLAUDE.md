@@ -212,6 +212,15 @@ mirror works, and what to set up when the year's repo is created.
   exists. A comment restating the line below it is noise.
 - Say a thing once: rationale lives in the doc that owns the decision, and
   comments point at it rather than restating it.
+- Cover major new functionality with unit tests. For a new game that means the
+  game logic first: move validators and the strategy — the pure functions where
+  a wrong branch decides a competition. Trivial wiring (exports, registration,
+  pass-through props) needs no tests, and exhausting every branch is not the
+  goal: test the rules and the edge cases that could plausibly be gotten wrong.
+- Every regression fixed gets a unit test that fails without the fix.
+  [`docs/must-keep-working.md`](docs/must-keep-working.md) catches
+  whole-feature breakage by hand; the test pins the specific bug so it cannot
+  quietly return.
 - PRs are split by **atomicity, not size** — one independent change each, so a
   reviewer can accept or reject them separately.
 - An agent opening a PR assigns the person it is working for, so it lands in
