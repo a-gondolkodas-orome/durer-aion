@@ -25,6 +25,9 @@ below.
 - Reload or disconnect mid-match resumes without loss of state.
 - A second browser tab cannot corrupt a running match.
 - The clock cannot be gamed from the client.
+- The served online bundle contains no bot strategy — competitors must not be
+  able to read the bot out of the client. *(Covered by `npm run bundle:check`
+  in CI's build job.)*
 - The final score (relay + strategy) shows on the finished screen.
 
 ## Admin / operations
