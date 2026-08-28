@@ -1,6 +1,6 @@
 import urlcat from "urlcat";
 import axios, { AxiosInstance,AxiosError } from 'axios';
-import { ClientRepository, TeamModelDto, MatchStateDto } from "common-frontend";
+import { ClientRepository, TeamModelDto, MatchStateDto, BoardMoves } from "common-frontend";
 
 const serverUrl = import.meta.env.VITE_SERVER_URL || '/';
 function apiAxiosInstance(): AxiosInstance {
@@ -244,5 +244,23 @@ export class RealClientRepository implements ClientRepository {
       console.error(err.message)
       throw e;
     }
+  }
+
+  // Scoring and the clock are server-authoritative, so these travel as the
+  // moves themselves over the match's socket rather than as separate HTTP
+  // calls.
+  submitRelayAnswer(answer: number, moves: BoardMoves): Promise<void> {
+    moves.submitAnswer(answer);
+    return Promise.resolve();
+  }
+
+  startRelayGame(moves: BoardMoves): Promise<void> {
+    moves.startGame();
+    return Promise.resolve();
+  }
+
+  syncRelayTime(moves: BoardMoves): Promise<void> {
+    moves.getTime();
+    return Promise.resolve();
   }
 }

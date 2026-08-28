@@ -18,6 +18,7 @@ type MyGameProps = BoardProps<MyGameState>;
 export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
   const [msRemaining, setMsRemaining] = useState(G.millisecondsRemaining);
   const [gameover, setGameover] = useState(ctx.gameover);
+  const clientRepo = useClientRepo();
   const refreshState = useRefreshTeamState();
   const toHome = useToHome();
   const theme = useTheme();
@@ -36,9 +37,9 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
       // Otherwise, it would run on every render.
       const gameNotStarted = G.numberOfTry === 0;
       if (gameNotStarted) {
-        moves.startGame();
+        void clientRepo.startRelayGame(moves);
       } else {
-        moves.getTime();
+        void clientRepo.syncRelayTime(moves);
       }
     }
     setGameover(ctx.gameover)
@@ -47,7 +48,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
     setMsRemaining(G.millisecondsRemaining);
   }, [G.millisecondsRemaining]);
   const finished = msRemaining < - 5000 || gameover === true
-  const isOffline = useClientRepo().version === "OFFLINE";
+  const isOffline = clientRepo.version === "OFFLINE";
   return (
     <>
       <Dialog 
@@ -152,10 +153,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
             previousTries={G.previousAnswers[G.currentProblem].map(it=>it.answer)} 
             previousCorrectness={!finished ? G.correctnessPreviousAnswer : null}
             attempt={(G.currentProblem+1) * 3 + G.numberOfTry}
-            onSubmit={(input: number) => {
-              moves.submitAnswer(input);
-              // TODO this should be done in repository
-            }}
+            onSubmit={(input: number) => clientRepo.submitRelayAnswer(input, moves)}
           />
           <Stack sx={{
             marginTop: "15px",
@@ -168,7 +166,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
             {!finished && <Countdown
               msRemaining={msRemaining ?? null}
               setMsRemaining={setMsRemaining}
-              getServerTimer={moves.getTime}
+              getServerTimer={() => void clientRepo.syncRelayTime(moves)}
               endTime={new Date(G.end)}
               serverRemainingMs={G.millisecondsRemaining} />}
           </Stack>
