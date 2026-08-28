@@ -13,8 +13,10 @@ apps/
   offline-frontend/   # Standalone practice version (Vite)
   strategy-practice/  # the public strategy game practice site (from the durer-jatekok repo)
 packages/
-  game/               # Game logic (boardgame.io games)
-  strategy/           # AI/bot strategies for games
+  game/               # Game logic (boardgame.io games); strategy games carry their bot and board in their own folder
+  strategy/           # AI/bot strategy for the relay game (strategy games keep theirs in packages/game)
+  engine/             # the practice site's strategy-game engine: rules, moves, bots, match state, no framework
+  games/              # competition games in the practice engine's format; only strategy-practice consumes it
   common-frontend/    # Shared React components
   schemas/            # TypeScript models/types
 pages/                # static content the Pages deploy serves but no app builds
@@ -89,6 +91,9 @@ npm run typecheck
 # Unit tests
 npm test
 
+# No bot strategy in the built online client (needs a build first; CI runs it)
+npm run bundle:check
+
 # Translation key check
 npm run i18n:check
 
@@ -97,8 +102,8 @@ npm run spell-check
 ```
 
 `npm ci`, `npm run build` and `npm run typecheck` cover `apps/strategy-practice` too;
-`npm run lint` and `npm test` do not, because it has its own ESLint and vitest
-setups. Its own checks run from that directory, with no install of their own:
+`npm run lint` and `npm test` do not — *Project Structure* above says why. Its
+checks run from that directory, with no install of their own:
 
 ```bash
 npm run dev:practice                     # from the root; it is a workspace
@@ -118,19 +123,29 @@ a game on the *practice* site, the `new-game` skill under `apps/strategy-practic
 the route — there a game is one self-contained folder: gameplay, bot, curated
 start boards, board client and specs together.
 
-1. Create game files in `packages/game/src/games/<game-name>/`:
+1. Create the game as one self-contained folder in
+   `packages/game/src/games/strategy/<game-name>/` — `stones/` and `19ocd/`
+   are the live examples:
    - `game.ts` - boardgame.io game definition
-   - `index.ts` - exports
+   - `strategy.ts` - the server bot, plus any lookup tables it imports
+   - `board.tsx` - React component for the game board
+   - `main.tsx` - the game description shown to players
+   - `index.ts` - re-exports
 
-2. Create strategy in `packages/strategy/src/games/<game-name>/`:
-   - `strategy.ts` - bot/AI logic
+2. Register it in `packages/game/src/games/strategy/strategy-games.ts`. The
+   apps import everything from the `game` package:
+   `apps/online-backend/src/server.ts` wires the bot, the frontends the
+   boards and descriptions.
 
-3. Create board UI in `packages/common-frontend/src/client/`:
-   - `board.tsx` - React component for game board
-
-4. Register the game in:
-   - Frontend index/lobby files
-   - Server configuration
+**The live client must not ship the bot.** `apps/online-frontend` never
+imports the strategy exports — only the backend does, and the offline
+practice build deliberately does (its bot runs in the browser, after the
+game is public). Tree-shaking of the `game` package's ESM build is all that
+keeps the bot out of the served bundle, so one stray import from
+`strategy.ts` into a board hands every competitor the bot's tables.
+`npm run bundle:check` asserts this after a build and CI runs it; the check
+recognizes a bot by its distinctive string literals, so a strategy needs at
+least one — a lookup table counts, and the check fails a game it cannot see.
 
 ### Game Structure (boardgame.io)
 
@@ -140,9 +155,9 @@ start boards, board client and specs together.
   moves: {
     moveName: ({ G, ctx }) => void,  // Player actions
   },
-  // Optional:
-  startingPosition: ({ G, ctx }) => G,
-  possibleMoves: ({ G, ctx }) => Move[],
+  // Wrapper additions (see packages/game/src/common/types.ts):
+  possibleMoves: (G, ctx, playerID) => PossibleMove[],
+  startingPosition: ({ G, ctx, playerID, random }) => G,  // optional
   turn: {
     minMoves: 1,
     maxMoves: 1,
@@ -203,7 +218,8 @@ mirror works, and what to set up when the year's repo is created.
 ## Key Conventions
 
 - Games are organized by type: `strategy/` (two-player), `relay/` (team relay)
-- Each game exports: `game`, `strategy`, `Board` component
+- Each game's folder exports its game wrapper, strategy wrapper and board
+  through its `index.ts`
 - Use Hungarian for user-facing text (competition is in Hungarian); both
   practice sites also offer English through their own language switchers
 - Winner is tracked in `G.winner` state field
