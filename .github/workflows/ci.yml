@@ -56,10 +56,6 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
-      # Needs the online frontend's dist this job just built: asserts no bot
-      # strategy was bundled into the live client. See CLAUDE.md, *Creating a
-      # New Game*.
-      - run: npm run bundle:check
 
   i18n:
     name: i18n

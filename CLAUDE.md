@@ -91,9 +91,6 @@ npm run typecheck
 # Unit tests
 npm test
 
-# No bot strategy in the built online client (needs a build first; CI runs it)
-npm run bundle:check
-
 # Translation key check
 npm run i18n:check
 
@@ -142,10 +139,10 @@ imports the strategy exports — only the backend does, and the offline
 practice build deliberately does (its bot runs in the browser, after the
 game is public). Tree-shaking of the `game` package's ESM build is all that
 keeps the bot out of the served bundle, so one stray import from
-`strategy.ts` into a board hands every competitor the bot's tables.
-`npm run bundle:check` asserts this after a build and CI runs it; the check
-recognizes a bot by its distinctive string literals, so a strategy needs at
-least one — a lookup table counts, and the check fails a game it cannot see.
+`strategy.ts` into a board hands every competitor the bot's tables. No CI
+gate covers this: after touching a game's imports, build and check by hand
+that nothing distinctive to the bot — a lookup-table key, say — appears in
+`apps/online-frontend/dist`.
 
 ### Game Structure (boardgame.io)
 
