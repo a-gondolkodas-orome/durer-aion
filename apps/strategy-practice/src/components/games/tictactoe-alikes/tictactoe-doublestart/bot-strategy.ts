@@ -21,7 +21,7 @@ export const randomBotStrategy: Bot = ({ board }) => {
 export const smartBotStrategy: Bot = ({ board, ctx }) => {
   if (emptyCells(board).length === 9) {
     // two neighbouring corners, chosen randomly
-    const opening = sample([[0, 2], [2, 8], [6, 8], [0, 6]])!;
+    const opening = sample([[0, 2], [2, 8], [6, 8], [0, 6]]);
     return placements(opening[0], opening[1]);
   }
   return placements(getOptimalBotPlacingPosition(board, ctx.chosenRoleIndex!)!);

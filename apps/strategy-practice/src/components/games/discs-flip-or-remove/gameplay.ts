@@ -52,4 +52,4 @@ export const moves = {
 export type Moves = typeof moves;
 
 // Test variant covers both sub-games: a 6-disc or a 10-disc start position.
-export const generateTestStartBoard = (): Board => sample([generateStartBoard(6), generateStartBoard(10)])!();
+export const generateTestStartBoard = (): Board => sample([generateStartBoard(6), generateStartBoard(10)])();

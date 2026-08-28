@@ -110,7 +110,7 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
 
     const resolvedPlayerNames = resolvePlayerNames(playerNames, t);
 
-    let wrappedGameMoves: GameMoves<TBoard, TTurnState> = {} as GameMoves<TBoard, TTurnState>;
+    let wrappedGameMoves: GameMoves<TBoard, TTurnState> = {};
 
     // Reaching here means a bug or tampering, so dev throws. Prod fails safe
     // instead: a stray call must not corrupt the board or white-screen a player.
@@ -152,7 +152,7 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
           + 'pass the latest nextBoard when chaining moves within a turn');
       }
       const transition = reduceMove(
-        store.getState(), moves[name]!, name, args, resolvedPlayerNames
+        store.getState(), moves[name], name, args, resolvedPlayerNames
       );
       if (transition.illegal) {
         reportIllegalMove(name, moveBoard, args);
@@ -165,7 +165,7 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
       if (endOfTurnMove && transition.autoEndOfTurn) {
         botTimeoutRef.current = setTimeout(() => {
           botTimeoutRef.current = null;
-          wrappedGameMoves[endOfTurnMove]!(transition.result.nextBoard);
+          wrappedGameMoves[endOfTurnMove](transition.result.nextBoard);
         }, stepDelay());
       }
       return transition.result;
@@ -240,9 +240,9 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
         botTimeoutRef.current = null;
       }
       store.setState({
-        board: undoSnapshot!.board,
-        currentPlayer: undoSnapshot!.currentPlayer,
-        moveCount: undoSnapshot!.moveCount,
+        board: undoSnapshot.board,
+        currentPlayer: undoSnapshot.currentPlayer,
+        moveCount: undoSnapshot.moveCount,
         turnState: null,
         undoSnapshot: null,
         currentTurnHasMoves: false
@@ -280,7 +280,7 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
       const clientWrapped: ClientGameMoves<TBoard, TTurnState>[string] = Object.assign(
         (moveBoard: TBoard, ...args: unknown[]) =>
           isAllowed(moveBoard, ...args)
-            ? wrappedGameMoves[name]!(moveBoard, ...args)
+            ? wrappedGameMoves[name](moveBoard, ...args)
             : { nextBoard: moveBoard },
         { isAllowed }
       );
@@ -321,7 +321,7 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
         }
         // The board comes from the store, so a bot has no board to pass and
         // therefore no way to pass a stale one.
-        wrappedGameMoves[move]!(store.getState().board, ...args);
+        wrappedGameMoves[move](store.getState().board, ...args);
         if (!isBotTurnUnfinished(store.getState(), playerBefore)) {
           // A turn planned as a whole may win partway through — the rest of the
           // plan is then moot rather than wrong.

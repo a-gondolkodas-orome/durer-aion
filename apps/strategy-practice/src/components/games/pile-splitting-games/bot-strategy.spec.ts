@@ -42,7 +42,7 @@ const playSmartTurn = (botStrategy: BotStrategy<Board>, board: Board): Board => 
   const turnMoves: Record<string, MoveDefinition<Board>> = moves;
 
   return (Array.isArray(named) ? named : [named]).reduce((current, { move, args = [] }) => {
-    const definition = turnMoves[move]!;
+    const definition = turnMoves[move];
     expect([board, move, definition.validate!(current, { ctx }, ...args)])
       .toEqual([board, move, true]);
     return definition.apply(current, { ctx }, ...args).nextBoard;

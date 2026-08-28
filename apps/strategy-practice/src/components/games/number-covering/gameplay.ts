@@ -30,4 +30,4 @@ export const moves = {
 export type Moves = typeof moves;
 
 // Test variant covers both sub-games: numbers 1–8 or 1–10.
-export const generateTestStartBoard = (): Board => range(1, sample([9, 11])!);
+export const generateTestStartBoard = (): Board => range(1, sample([9, 11]));

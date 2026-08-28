@@ -56,7 +56,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   };
 
   const drawPickedColor = (event: React.MouseEvent<SVGSVGElement>) => {
-    const svg = event.currentTarget as SVGSVGElement;
+    const svg = event.currentTarget;
     setX(event.nativeEvent.offsetX / svg.clientWidth * 100);
     setY(event.nativeEvent.offsetY / svg.clientHeight * 100);
   };

@@ -157,7 +157,7 @@ const BoardClient = ({ board: { bacteria, goals }, ctx, moves }: BoardClientProp
     const goal = isGoal({ row, col });
     if (attackRow !== null && isAllowedAttack({ row, col })) {
       const attack = { attackRow, attackCol: attackCol!, row, col };
-      const previewCount = isJump(attack) ? 1 : bacteria[attackRow!][attackCol!];
+      const previewCount = isJump(attack) ? 1 : bacteria[attackRow][attackCol!];
       return <BacteriaDisplay count={previewCount} onGoal={goal} dimmed />;
     }
     if (count > 0) return <BacteriaDisplay count={count} onGoal={goal} />;

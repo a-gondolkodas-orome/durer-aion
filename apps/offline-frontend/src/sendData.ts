@@ -1,5 +1,6 @@
 import type { Ctx } from "boardgame.io";
-import { LOCAL_STORAGE_TEAMSTATE, TeamModelDto } from "common-frontend";
+import { TeamModelDto } from "common-frontend";
+import { readStoredTeamState } from "./stored-team-state";
 
 
 let warnedAboutMissingBucket = false;
@@ -47,11 +48,10 @@ function getJoinCode(teamState?: TeamModelDto){
   if (teamState !== undefined) {
     return teamState.joinCode;
   }
-  const teamstateString = localStorage.getItem(LOCAL_STORAGE_TEAMSTATE);
-  if (teamstateString === null) {
+  const teamStateStorage = readStoredTeamState();
+  if (teamStateStorage === null) {
     throw new Error('Váratlan hiba történt (toHome)');
   }
-  const teamStateStorage = JSON.parse(teamstateString);
   return teamStateStorage.joinCode;
 }
 

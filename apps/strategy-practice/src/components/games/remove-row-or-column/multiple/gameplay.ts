@@ -39,7 +39,7 @@ const SIDES = [2, 3, 4];
 const MAX_WIDTH = 11; // keep the board comfortably within a mobile screen
 
 const randomDims = (): Dims[] =>
-  range(sample([2, 3])!).map(() => ({ h: sample(SIDES)!, w: sample(SIDES)! }));
+  range(sample([2, 3])).map(() => ({ h: sample(SIDES)!, w: sample(SIDES)! }));
 
 const totalWidth = (dims: Dims[]): number =>
   dims.reduce((sum, d) => sum + d.w, 0) + (dims.length - 1);

@@ -12,7 +12,7 @@ const cache = new Map<string, boolean>();
 
 const cacheKey = (board: Board, player: number) =>
   `${board.piles[0]},${board.piles[1]},`
-    + `${+board.leftRestriction[player]!}${+board.leftRestriction[1 - player]!}`;
+    + `${+board.leftRestriction[player]}${+board.leftRestriction[1 - player]}`;
 
 // Does the player to move win with perfect play? The game is small enough to
 // solve exactly, so the bot needs no parity rule of thumb: it asks this of every
