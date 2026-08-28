@@ -136,7 +136,7 @@ export class OfflineClientRepository implements ClientRepository {
     if (i > -1) {
       const i = teamData.findIndex(e => e.join_code === joinCode);
       const currentTeamData = teamData[i];
-      const teamState = {
+      const teamState: TeamModelDto = {
         teamId: "1",
         joinCode: joinCode,
         teamName: currentTeamData.teamname,
@@ -152,7 +152,7 @@ export class OfflineClientRepository implements ClientRepository {
         },
       }
 
-      sendDataLogin(teamState as TeamModelDto); // TODO: remove as TeamModelDto
+      sendDataLogin(teamState);
       localStorage.setItem(LOCAL_STORAGE_TEAMSTATE,
         JSON.stringify(teamState)
       );
