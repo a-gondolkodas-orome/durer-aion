@@ -12,7 +12,7 @@ export function ConfirmDialog(props: {confirmDialog: ConfirmDialogInterface | nu
   const [confirmDialog, setConfirmDialog] = [props.confirmDialog, props.setConfirmDialog];
   return <Dialog 
   maxWidth={false} 
-  PaperProps={{
+  slotProps={{ paper: {
     sx: {
       marginLeft: {
         xs: 0,
@@ -27,7 +27,7 @@ export function ConfirmDialog(props: {confirmDialog: ConfirmDialogInterface | nu
         md: 'calc(100% - 64px)'
       },
     }
-  }}
+  } }}
   open={
     confirmDialog != null
   } onClose={() => {

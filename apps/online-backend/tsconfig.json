@@ -4,6 +4,10 @@
   "compilerOptions": {
     "module": "commonjs",
     "moduleResolution": "node",
+    // node10 resolution is deprecated and stops working in TS 7; migrating these
+    // configs off it (bundler for the Vite-built code, nodenext for the backend) is
+    // its own change. This is TS 6\'s sanctioned bridge until then.
+    "ignoreDeprecations": "6.0",
     "target": "ES2020",
     "lib": ["ES2020"],
     "esModuleInterop": true,

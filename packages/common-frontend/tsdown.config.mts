@@ -1,7 +1,7 @@
 import { defineConfig } from 'tsdown'
 import * as dotenv from 'dotenv'
 
-dotenv.config({ path: "../../.env.local" });
+dotenv.config({ path: "../../.env.local", quiet: true });
 
 const envVars = Object.keys(process.env)
   .filter(key => key.startsWith('VITE_'))

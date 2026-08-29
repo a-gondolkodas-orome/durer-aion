@@ -8,9 +8,6 @@ void i18next
   .use(initReactI18next)
   .init({
     debug: process.env.NODE_ENV === 'development',
-    // i18next advertises its paid hosting on every init otherwise, in the
-    // browser console and in the test output alike.
-    showSupportNotice: false,
     load: 'languageOnly',
     supportedLngs: ['en', 'hu'],
     fallbackLng: 'hu',

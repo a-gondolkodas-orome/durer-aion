@@ -119,14 +119,14 @@ export function Header(props: { teamName: string | null, admin: boolean, titles?
           onClose={()=>{
             setMobileMenuOpen(false)
           }}
-          PaperProps = {{
+          slotProps={{ paper: {
             sx: {
               width: '100%',
               textAlign: 'center',
               padding: '30px',
               top: 0
             }
-          }}
+          } }}
         >
           {props.teamName && <>
               <Stack sx={{
