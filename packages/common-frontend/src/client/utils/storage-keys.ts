@@ -1,5 +1,10 @@
-import { LOCAL_STORAGE_TEAMSTATE } from "../api-repository-interface";
-import { BGIO_LOCALSTORAGE_PREFIX } from "./util";
+// This module stays import-free: the unit tests load it without the workspace
+// packages' dist builds, which the CI test job does not produce.
+
+// The two names the apps have always used; their historical homes re-export
+// them. The GUID key below never had an exported constant.
+export const LOCAL_STORAGE_TEAMSTATE = "aegnjrlearnjla";
+export const BGIO_LOCALSTORAGE_PREFIX = "bgio_";
 
 // gyakorlo.durerinfo.hu serves more than one of these apps from a single
 // origin, so they share one localStorage: with the same keys, a login in one
