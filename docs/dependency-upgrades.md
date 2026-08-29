@@ -7,11 +7,10 @@ is installed, never why it is that one. The tiers below are the ordering — eac
 one is cheaper than the one after it, and doing them out of order makes the
 later ones harder.
 
-`apps/strategy-practice` is not covered here. It keeps its own ESLint,
-TypeScript and Vite (see `CLAUDE.md`), and
-`.github/workflows/practice-dependency-report.yml` already reports on them
-monthly. The gap this doc exists to close is that the rest of the monorepo has
-no equivalent — see *Keeping this from happening again*.
+`apps/strategy-practice` keeps its own ESLint, TypeScript and Vite (see
+`CLAUDE.md`), so its versions are its own call; everything else here is the
+monorepo's. `scripts/dependency-report.mjs` reports monthly on all of it since
+#354 — that says *what* is behind. This doc says what to do about it.
 
 ## The shape of the problem
 
@@ -107,22 +106,22 @@ Majors that cost nothing here:
   `npm run deploy` there once.
 
 Tiers 0 and 1 together took advisories from **59 (4 critical, 32 high) to 15
-(0 critical, 5 high)**, and no source file changed except the two deletions
-above. Verify with a clean `npm ci` rather than an incremental install: this
-tree holds two react-router majors and two Vite majors, and which one hoists
-depends on install order.
+(0 critical, 5 high)** and the install from **1248 packages to 901**, with no
+source file changed except the deletions above. Verify with a clean `npm ci`
+rather than an incremental install: this tree holds two react-router majors and
+two Vite majors, and which one hoists depends on install order.
 
 ## Tier 2 — doable, needs code changes
 
 Not done yet. Each is small in lines and non-trivial in what it touches.
 
-- **Sentry 7 → 10.** `@sentry/tracing` no longer exists — it was folded into the
-  SDK at v8 — so `new BrowserTracing()` becomes
-  `Sentry.browserTracingIntegration()` in both frontends' `index.tsx`, and
-  `@sentry/types` merges into the core packages. Roughly ten lines. The catch is
+- **Sentry 7 → 10.** Smaller than it was: #361 already moved all three
+  frontends onto `Sentry.browserTracingIntegration()`, which is the call v8
+  wants, and `@sentry/tracing` and `@sentry/types` have since been dropped as
+  the imports they had left. What remains is the major itself. The catch is
   that v8+ wants `Sentry.init()` to run before the modules it instruments are
-  imported, and the backend inits well down `server.ts`. *"Sentry receives
-  events" is a `must-keep-working.md` item: this needs a real event at
+  imported, and `apps/online-backend` inits well down `server.ts`. *"Sentry
+  receives events" is a `must-keep-working.md` item: this needs a real event at
   `sentry.durerinfo.hu` from a `stack:prod` run, not a green build.*
 - **`yup` 0.32 → 1.** Three schema files in `packages/common-frontend`. v1 is a
   TypeScript rewrite: optional/`required()` narrowing and `nullable()` semantics
@@ -148,11 +147,15 @@ Not done yet. Each is small in lines and non-trivial in what it touches.
   walked, so a regression is bisectable.
 - **`@mui/x-data-grid` 7 → 9** is one import site but peers `@mui/material ^7.3
   || ^9`. It cannot move until MUI reaches 7.
-- **`react-router-dom` 6 → 7/8.** Two bare `Link` imports; trivial as code. It
-  is here because practice is on `react-router` 8 and
+- **`react-router-dom` 6 → 7/8.** Two bare `Link` imports; trivial as code, and
+  the one item in this tier with an open advisory behind it: the moderate
+  covering `<=7.17.0` is not fixed by the 6.30.6 patch in tier 1, only by
+  moving to 7.18 or later. It is still here rather than in tier 1 because
+  practice is on `react-router` 8 and
   `packages/engine/src/react/language.tsx` documents that the two halves cannot
-  share a peer range today. The version worth landing on is 8, and choosing it
-  is a decision about unifying the two frontends' stacks rather than a bump.
+  share a peer range today. The version worth landing on is 8, which makes this
+  a decision about unifying the frontends' stacks rather than a bump — but it
+  is now a decision with a clock on it.
 - **`typescript` 5.9 → 6.** Practice is on 6, the root on 5.9, latest is 7. The
   root should reach 6 before anyone considers 7.
 - **`nanoid` 3 → 6.** v6 is ESM-only and `apps/online-backend` compiles to
@@ -184,17 +187,22 @@ server.
 
 - It reports `game`, `games`, `strategy`, `common-frontend`, `engine` and
   `schemas` as behind. They are not: those are the workspaces, correctly
-  symlinked. npm is comparing them against unrelated public packages that happen
-  to share the names. Harmless while they are workspaces — worth remembering if
-  one is ever removed, because the public package would then install silently.
+  symlinked, and npm is comparing them against unrelated public packages that
+  happen to share the names. `npm run report:outdated` leaves them out (#353);
+  bare `npm outdated` does not. Harmless while they are workspaces — worth
+  remembering if one is ever removed, because the public package of that name
+  would then install silently.
 - `jsdom` is inverted: the root is on 30, `apps/strategy-practice` on 29.
 
 ## Keeping this from happening again
 
-`apps/strategy-practice/scripts/dependency-report.mjs` already does what
-producing this document did by hand — resolve installed versions from the
-lockfile, ask the registry, reconcile one issue monthly, open no pull requests.
-It reads only its own `package.json`. Teaching it a list of package.json paths,
-and pointing `practice-dependency-report.yml` at all of them, is what would stop
-the root drifting three majors behind again. That is a change to practice-owned
-code under its own `AGENTS.md`, so it belongs in its own PR.
+Already handled, and not by this branch. `scripts/dependency-report.mjs` reads
+every workspace's `package.json` plus the root's (#354), skips this repo's own
+workspaces so their names cannot be confused with public packages (#353), and
+`dependency-report.yml` reconciles one issue from it monthly in the public repo
+only. `npm run report:outdated` prints the same table on demand.
+
+So the standing question is no longer *what is behind* — the report answers
+that every month. It is whether each row is a tier-1 bump, a tier-2 migration,
+or blocked, and that is what this document is for. Add a row here when the
+answer costs more than a version bump to work out a second time.
