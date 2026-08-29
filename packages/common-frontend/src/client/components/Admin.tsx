@@ -147,7 +147,7 @@ export function Admin(props: {teamId?: string}) {
                   <Button
                     color='primary'
                     variant='contained'
-                    onClick={() => {setSelectedRow(renderData.row as TeamModelDto)}}>
+                    onClick={() => {setSelectedRow(renderData.row)}}>
                       Szerkesztés
                   </Button>
                 )
