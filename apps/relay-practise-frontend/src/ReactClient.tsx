@@ -27,8 +27,13 @@ export function RelayClient({ teamName }: {
       setMissing(true);
       return;
     }
-    setProblems(loadProblemSet(teamName));
-    return;
+    // loadProblemSet throws on a code with no bundled set — reachable through a
+    // stale stored teamState, never through the round selector.
+    try {
+      setProblems(loadProblemSet(teamName));
+    } catch {
+      setMissing(true);
+    }
   }, [teamName]);
 
   const ClientWithBot = useMemo(() => {
