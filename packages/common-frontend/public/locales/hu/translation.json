@@ -58,7 +58,7 @@
     "loginButton": "Belépés",
     "loginInstruction": "Belépéshez nézd meg az emailjeidet, és üsd be az ott található kódot ide:",
     "relayPractise": "Váltóversenyek gyakorlása",
-    "relayPractiseDescription": "Ki tudjátok próbálni a korábbi évek váltó típusú versenyfeladatait. Válaszd ki a megfelelő feladatsort (év és kategória szerint), amelynek kitöltésére 90 perced lesz.",
+    "relayPractiseDescription": "Ki tudjátok próbálni a korábbi évek váltó típusú versenyfeladatait. Válaszd ki a megfelelő feladatsort (év és kategória szerint), amelynek kitöltésére 60 perced lesz.",
     "competitionType": {
       "local": "{{num}}. helyi {{category}}",
       "final": "{{num}}. döntő {{category}}",

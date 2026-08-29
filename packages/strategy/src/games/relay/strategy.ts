@@ -175,8 +175,8 @@ const problems : RelayProblems ={
 export function relayStrategy(problemList: Problem[]){
   return (state: State<MyGameState>, _botID: string): [(number|string|boolean)[], string] => {
     if (state.G.numberOfTry === 0) {
-      const url = problemList[state.G.currentProblem].url ?? "";
-      return [[problemList[state.G.currentProblem].problemText, 3, url], "firstProblem"];
+      const firstProblem = problemList[state.G.currentProblem];
+      return [[firstProblem.problemText, firstProblem.points, firstProblem.url ?? ""], "firstProblem"];
     }
     let correctnessPreviousAnswer = false;
     if(state.G.answer === problemList[state.G.currentProblem].answer){
