@@ -19,7 +19,6 @@
     "@emotion/styled": "^11.13.0",
     "@mui/material": "^5.16.7",
     "@sentry/react": "^7.16.0",
-    "@sentry/tracing": "^7.16.0",
     "boardgame.io": "^0.50.2",
     "buffer": "^6.0.3",
     "common-frontend": "*",
@@ -31,7 +30,6 @@
     "strategy": "*"
   },
   "devDependencies": {
-    "@sentry/types": "^7.57.0",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^4.6.0",
