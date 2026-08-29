@@ -11,6 +11,11 @@
     "isolatedModules": true,
     "module": "ESNext",
     "target": "ES6",
+    // Named, not inherited: Main.tsx uses Array.prototype.at, which is ES2022. It
+    // typechecked only because @types/node was in this package's dependency block and
+    // its compatibility/indexable.d.ts declares .at() — a Node types polyfill standing
+    // in for a lib this config never asked for, in a package that does not run in Node.
+    "lib": ["ES2022", "DOM"],
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "noUnusedLocals": false,

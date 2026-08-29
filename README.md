@@ -201,7 +201,7 @@ environment variables and holds no credential of its own:
 DURER_BASE_URL=http://localhost python3 scripts/admin.py   # prompts for the password
 ```
 
-## The offline practice build
+## The offline dry run (`/proba-verseny/`)
 
 ```bash
 npm run dev:offline
@@ -209,18 +209,19 @@ npm run dev:offline
 
 `http://localhost:5173`, with no backend and no database: the games run against
 the in-browser bot and persist to localStorage. Reload mid-game to check the
-persistence.
+persistence. This is the dry run of the competition round — not to be confused
+with the two practice sites below.
 
 ## The relay practice site (`apps/relay-practise-frontend`)
 
 ```bash
-npm run dev:relay-practise
+npm run dev:relay-practice
 ```
 
-`http://localhost:5173`, again with no backend: pick a past year's relay
+`http://localhost:5173`, again with no backend: the `/valto/` subpage of the
+Pages site, where #224 replaced the frozen 2023 build. Pick a past year's relay
 problem set and play it through against the in-browser bot, with progress in
-localStorage — reload mid-round to check it resumes. This is what the Pages
-deploy serves at `/valto/`; it replaced the frozen 2023 build there (#224).
+localStorage — reload mid-round to check it resumes.
 
 ## The public Pages site
 
@@ -239,7 +240,7 @@ The one thing it cannot reproduce is the upload itself, and GitHub's own serving
 behaviour around 404s. CI builds in `node:24.11.1`; to match that too, run the
 same command under `docker run -v "$PWD":/w -w /w node:24.11.1 npm run site:build`.
 
-## The practice site (`apps/strategy-practice`)
+## The strategy practice site (`apps/strategy-practice`)
 
 The strategy-game practice site (https://gyakorlo.durerinfo.hu) lives in
 `apps/strategy-practice`, merged in from the durer-jatekok repository with its
@@ -248,7 +249,7 @@ history and renamed from `apps/practice` when the relay practice app arrived
 from the root like the other frontends:
 
 ```bash
-npm run dev:strategy-practice   # the practice site, on http://localhost:8012
+npm run dev:strategy-practice   # the strategy practice site, on http://localhost:8012
 ```
 
 Its vite config binds all interfaces and pins port 8012, so it forwards out of
