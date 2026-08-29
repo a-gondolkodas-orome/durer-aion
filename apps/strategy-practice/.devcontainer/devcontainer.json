@@ -5,7 +5,7 @@
     // Keep in sync with .nvmrc, package.json engines and .github/workflows/*.yml —
     // `npm run check:versions` fails on a mismatch. Listed first so the features that
     // install global npm packages run against this Node.
-    "ghcr.io/devcontainers/features/node:1": { "version": "24.11.1" },
+    "ghcr.io/devcontainers/features/node:1": { "version": "24.20.0" },
     "ghcr.io/devcontainers/features/github-cli:1": {},
     "ghcr.io/anthropics/devcontainer-features/claude-code:1": {}
   },

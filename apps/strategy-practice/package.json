@@ -5,7 +5,7 @@
   "license": "CC-BY-NC-SA-4.0",
   "type": "module",
   "engines": {
-    "node": ">=24.11.1 <25"
+    "node": ">=24.20.0 <25"
   },
   "scripts": {
     "test:unit": "vitest run",

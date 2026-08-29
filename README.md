@@ -237,8 +237,8 @@ the site, because the workflow going green *is* the cutover: there is no staging
 step between it and gyakorlo.durerinfo.hu.
 
 The one thing it cannot reproduce is the upload itself, and GitHub's own serving
-behaviour around 404s. CI builds in `node:24.11.1`; to match that too, run the
-same command under `docker run -v "$PWD":/w -w /w node:24.11.1 npm run site:build`.
+behaviour around 404s. CI builds in `node:24.20.0`; to match that too, run the
+same command under `docker run -v "$PWD":/w -w /w node:24.20.0 npm run site:build`.
 
 ## The strategy practice site (`apps/strategy-practice`)
 

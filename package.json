@@ -47,7 +47,7 @@
   },
   "packageManager": "npm@8.5.0",
   "engines": {
-    "node": ">=24.11.1"
+    "node": ">=24.20.0"
   },
   "workspaces": [
     "apps/offline-frontend",
