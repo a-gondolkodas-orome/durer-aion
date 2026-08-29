@@ -17,8 +17,13 @@ const theme = {
   },
 }
 
+// Module scope, not component scope: App re-renders on every teamState change,
+// and a lazy component or repository created in its body would get a new
+// identity each time — remounting the whole game client after every answer.
+const RelayClient = React.lazy(() => import('./ReactClient').then(module => ({ default: module.RelayClient })));
+const clientRepository = new OfflineClientRepository();
+
 function App() {
-  const RelayClient = React.lazy(() => import('./ReactClient').then(module => ({ default: module.RelayClient })));
   // There is no real login here: the round selector stores the chosen test as
   // the "logged in team", which is what drives the header title below and the
   // switch between the selector and the game.
@@ -50,8 +55,8 @@ function App() {
         RelayClient: RelayClient,
     }}>
       <ThemeProvider theme={theme}>
-        <ClientRepoProvider 
-          value={new OfflineClientRepository()}>
+        <ClientRepoProvider
+          value={clientRepository}>
           <Layout>
             <LoadTeamState />
             <Header teamName={teamState?.teamName ?? null} admin={true} titles={titles}/>

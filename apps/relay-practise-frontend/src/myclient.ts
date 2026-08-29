@@ -6,7 +6,9 @@ import { RelayWrapper } from 'game';
 import botWrapper from './botwrapper';
 import type { BotStrategy } from './botwrapper';
 import { sendGameData } from './sendData';
-import { BGIO_LOCALSTORAGE_PREFIX } from 'common-frontend/src/client/utils/util';
+// Through the package entry, not the src path: a deep import would load a
+// second copy of the module, one the app's setLocalStorageNamespace never set.
+import { bgioStoragePrefix } from 'common-frontend';
 import type { ReactNode } from 'react';
 //import { Debug } from 'boardgame.io/debug';
 
@@ -24,7 +26,7 @@ export function ClientRelayWithBot(
       {
         bots: { '1': botWrapper(strategy) },
         persist: true,
-        storageKey: BGIO_LOCALSTORAGE_PREFIX + game.name,
+        storageKey: bgioStoragePrefix() + game.name,
       }
     ),
     numPlayers: 2,

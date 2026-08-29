@@ -2,9 +2,12 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
-import { reportWebVitals } from 'common-frontend';
+import { reportWebVitals, setLocalStorageNamespace } from 'common-frontend';
 
 import * as Sentry from "@sentry/react";
+
+// This app shares its origin (gyakorlo.durerinfo.hu) with the offline dry run.
+setLocalStorageNamespace('relay-practise');
 
 Sentry.init({
   // TODO: DSN only works when we give sentry to the people...

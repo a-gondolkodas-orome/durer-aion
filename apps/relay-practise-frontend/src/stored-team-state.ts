@@ -1,4 +1,4 @@
-import { LOCAL_STORAGE_TEAMSTATE, TeamModelDto, MatchStatus } from "common-frontend";
+import { teamStateStorageKey, TeamModelDto, MatchStatus } from "common-frontend";
 
 // The one place the stored team state is parsed (#367): every read goes through
 // this validation instead of trusting JSON.parse's `any`. Anything that does
@@ -53,7 +53,7 @@ export function readStoredTeamState(): TeamModelDto | null {
   if (typeof localStorage === 'undefined') {
     return null;
   }
-  const stored = localStorage.getItem(LOCAL_STORAGE_TEAMSTATE);
+  const stored = localStorage.getItem(teamStateStorageKey());
   if (stored === null) {
     return null;
   }

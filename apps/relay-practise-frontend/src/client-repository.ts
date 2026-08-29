@@ -1,4 +1,4 @@
-import { ClientRepository, LOCAL_STORAGE_TEAMSTATE, TeamModelDto, MatchStateDto, BoardMoves } from "common-frontend";
+import { ClientRepository, teamStateStorageKey, TeamModelDto, MatchStateDto, BoardMoves } from "common-frontend";
 import { teamData } from "./teamData";
 import { sendDataLogin, sendGameData } from "./sendData";
 import { readStoredTeamState } from "./stored-team-state";
@@ -24,7 +24,7 @@ export class OfflineClientRepository implements ClientRepository {
       },
     }
     sendGameData({component: "relay", phase: "start"});
-    localStorage.setItem(LOCAL_STORAGE_TEAMSTATE,
+    localStorage.setItem(teamStateStorageKey(),
       JSON.stringify(newState)
     );
     return Promise.resolve("ok");
@@ -48,7 +48,7 @@ export class OfflineClientRepository implements ClientRepository {
         score: score,
       }
     }
-    localStorage.setItem(LOCAL_STORAGE_TEAMSTATE, JSON.stringify(newState));
+    localStorage.setItem(teamStateStorageKey(), JSON.stringify(newState));
     return Promise.resolve("ok");
   }
 
@@ -128,7 +128,7 @@ export class OfflineClientRepository implements ClientRepository {
       }
 
       sendDataLogin(teamState);
-      localStorage.setItem(LOCAL_STORAGE_TEAMSTATE,
+      localStorage.setItem(teamStateStorageKey(),
         JSON.stringify(teamState)
       );
       return Promise.resolve(joinCode);
