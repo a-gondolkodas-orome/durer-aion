@@ -60,7 +60,9 @@
     "dev:server": "turbo dev --filter=online-backend --filter=game --filter=schemas --filter=strategy",
     "dev:online": "turbo dev --filter=online-frontend --filter=game --filter=common-frontend",
     "dev:offline": "turbo dev --filter=offline-frontend --filter=game --filter=strategy --filter=common-frontend",
-    "dev:practice": "npm run dev --workspace=strategy-practice",
+    "dev:relay-practise": "turbo dev --filter=relay-practise-frontend --filter=game --filter=strategy --filter=common-frontend",
+    "dev:relay-practice": "npm run dev:relay-practise",
+    "dev:strategy-practice": "npm run dev --workspace=strategy-practice",
     "setup": "node scripts/seed-env-files.mjs",
     "report:outdated": "node scripts/dependency-report.mjs",
     "stack:up": "npm run build && docker compose -f docker-compose.yml -f docker-compose.dev.yml --env-file=.env.docker up --build --wait",
@@ -104,6 +106,7 @@
     "apps/offline-frontend",
     "apps/online-backend",
     "apps/online-frontend",
+    "apps/relay-practise-frontend",
     "apps/strategy-practice",
     "packages/*"
   ],

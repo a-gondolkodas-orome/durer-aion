@@ -3,7 +3,7 @@ import { MatchStateDto, TeamModelDto } from "./dto/TeamStateDto";
 import { createContext, useContext } from 'react';
 import type { BoardProps } from 'boardgame.io/react';
 
-export const LOCAL_STORAGE_TEAMSTATE = "aegnjrlearnjla";
+export { LOCAL_STORAGE_TEAMSTATE } from "./utils/storage-keys";
 
 // The relay match is judged and timed where it runs — on the server online,
 // by the local bot offline — so the board's actions stay boardgame.io moves

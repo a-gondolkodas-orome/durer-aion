@@ -55,5 +55,5 @@ createServer(async (req, res) => {
   console.log('  /              home');
   console.log('  /jatekok/      strategy practice');
   console.log('  /proba-verseny/ competition dry run');
-  console.log('  /valto/        the frozen 2023 relay build');
+  console.log('  /valto/        relay practice');
 });

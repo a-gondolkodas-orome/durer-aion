@@ -47,7 +47,7 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayStepReport) => vo
         correctnessPreviousAnswer: null,
         previousAnswers: [[]],
         previousPoints: [],
-        currentProblemMaxPoints: 3, // TODO: get from the problem list, TODO: rename this function to currentProblemAvailablePoints
+        currentProblemMaxPoints: 3, // placeholder; the judge's firstProblem move sets the problem list's value. TODO: rename to currentProblemAvailablePoints
         numberOfTry: 0,
         millisecondsRemaining: 1000 * lengthOfCompetition,
         start: new Date().toISOString(),
@@ -72,6 +72,7 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayStepReport) => vo
             }
             G.url = url;
             G.problemText = problemText;
+            G.currentProblemMaxPoints = nextProblemMaxPoints;
             G.numberOfTry = 1;
             events.endTurn();
           },
