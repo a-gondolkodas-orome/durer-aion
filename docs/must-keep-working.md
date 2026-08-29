@@ -60,6 +60,15 @@ workspace — `apps/practice` then, `apps/strategy-practice` since the rename.)*
 - Its existing CI gates — lint, typecheck, unit tests, patch coverage — stay
   green.
 
+## Relay practice site
+
+*(Applies from #224, which replaced the frozen 2023 build at `/valto/` with
+`apps/relay-practise-frontend`.)*
+
+- `/valto/` on the Pages site serves the relay practice: pick a past year's
+  problem set and play it through against the in-browser bot, with
+  localStorage persistence that survives a reload.
+
 ## Competition secrecy flow
 
 See the plan's "Competition secrecy: the yearly private-repo flow" section for
@@ -77,8 +86,8 @@ why this matters.
 tooling arrives alongside the existing setup, not instead of it.)*
 
 - `npm ci` at the repo root installs everything.
-- `npm run dev:server`, `npm run dev:online`, `npm run dev:offline` start what
-  they say they start.
+- `npm run dev:server`, `npm run dev:online`, `npm run dev:offline` and
+  `npm run dev:relay-practise` start what they say they start.
 - `npm run setup` seeds every env file the README expects, and overwrites none.
 - The docker-compose dev flow from the README works — `npm run stack:up` then
   `npm run teams:import` — backend auto-reload included.

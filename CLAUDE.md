@@ -11,6 +11,7 @@ apps/
   online-frontend/    # React frontend for multiplayer (Vite)
   online-backend/     # Node.js server with boardgame.io + Koa
   offline-frontend/   # Standalone practice version (Vite)
+  relay-practise-frontend/ # the public relay practice site (/valto/ on the Pages site), in-browser bot
   strategy-practice/  # the public strategy game practice site (from the durer-jatekok repo)
 packages/
   game/               # Game logic (boardgame.io games); strategy games carry their bot and board in their own folder
@@ -78,6 +79,9 @@ npm run teams:import:local
 
 # Run offline frontend (practice mode)
 npm run dev:offline
+
+# Run relay practice frontend (the Pages site's /valto/)
+npm run dev:relay-practise
 
 # Build all packages
 npm run build
@@ -175,6 +179,7 @@ The opening position has two homes, and `GameMixin.startingPosition` in
 
 - `apps/online-backend/.env` - Backend config (copy from `.env.sample`)
 - `apps/offline-frontend/.env` - Offline frontend config
+- `apps/relay-practise-frontend/.env` - Relay practice frontend config
 - `.env.docker`, `.env.local` - Docker compose config (copy from the `.sample` files)
 
 `npm run setup` creates all of them from their samples, never overwriting one
@@ -217,7 +222,7 @@ mirror works, and what to set up when the year's repo is created.
 - Games are organized by type: `strategy/` (two-player), `relay/` (team relay)
 - Each game's folder exports its game wrapper, strategy wrapper and board
   through its `index.ts`
-- Use Hungarian for user-facing text (competition is in Hungarian); both
+- Use Hungarian for user-facing text (competition is in Hungarian); the
   practice sites also offer English through their own language switchers
 - Winner is tracked in `G.winner` state field
 - Comment what is not evident from the code — a rule the condition alone does

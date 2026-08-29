@@ -211,6 +211,17 @@ npm run dev:offline
 the in-browser bot and persist to localStorage. Reload mid-game to check the
 persistence.
 
+## The relay practice site (`apps/relay-practise-frontend`)
+
+```bash
+npm run dev:relay-practise
+```
+
+`http://localhost:5173`, again with no backend: pick a past year's relay
+problem set and play it through against the in-browser bot, with progress in
+localStorage — reload mid-round to check it resumes. This is what the Pages
+deploy serves at `/valto/`; it replaced the frozen 2023 build there (#224).
+
 ## The public Pages site
 
 ```bash
@@ -242,7 +253,7 @@ npm run dev:strategy-practice   # the practice site, on http://localhost:8012
 
 Its vite config binds all interfaces and pins port 8012, so it forwards out of
 the dev container with no extra setup, and does not collide with the 5173 the
-other two frontends share.
+other frontends share.
 
 `npm ci`, `npm run build` and `npm run typecheck` at the root cover it, but its
 own ESLint and vitest setups mean the root's `npm run lint` and `npm test` skip
@@ -315,6 +326,7 @@ locally and are meaningless anywhere else.
 | `apps/online-backend/.env` | the same settings for `npm run dev:server`, plus `DATABASE_URL` |
 | `apps/online-frontend/.env` | accent colour and language of the competition site |
 | `apps/offline-frontend/.env` | the same, for the offline build |
+| `apps/relay-practise-frontend/.env` | the same, for the relay practice site |
 | `.env.local` | `VITE_FEEDBACK_URL`, read by `common-frontend`'s build |
 
 Whatever reads one of them takes the change at start: vite does not pick up
