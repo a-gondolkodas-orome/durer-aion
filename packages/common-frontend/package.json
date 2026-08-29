@@ -32,7 +32,7 @@
     "react-text-mask": "^5.5.0",
     "schemas": "*",
     "swr": "^2.2.5",
-    "yup": "^0.32.11"
+    "yup": "^1.7.1"
   },
   "devDependencies": {
     "@types/react": "^19.2.0",
