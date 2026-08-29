@@ -5,7 +5,9 @@ import { botNextMoveArgs, makeCtx } from 'test-utils';
 const active = (value: number): Slot => ({ value, state: 'active' });
 const consumed = (value: number): Slot => ({ value, state: 'consumed' });
 
-const makeBoard = (level0Values, target, opts: { sortedInitial? } = {}): Board => {
+const makeBoard = (
+  level0Values: number[], target: number, opts: { sortedInitial?: number[] } = {}
+): Board => {
   const sorted = opts.sortedInitial ?? [...level0Values].sort((a, b) => b - a);
   return {
     levels: [

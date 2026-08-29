@@ -4,12 +4,11 @@ import './index.css';
 import App from './App';
 
 import * as Sentry from "@sentry/react";
-import { BrowserTracing } from "@sentry/tracing";
 
 Sentry.init({
   // TODO: DSN only works when we give sentry to the people...
   dsn: "https://c94695b2ab564e258774e5d0e5c97d79@sentry.durerinfo.hu/2",
-  integrations: [new BrowserTracing()],
+  integrations: [Sentry.browserTracingIntegration()],
 
   // Set tracesSampleRate to 1.0 to capture 100%
   // of transactions for performance monitoring.

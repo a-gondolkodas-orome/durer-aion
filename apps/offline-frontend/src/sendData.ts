@@ -1,5 +1,6 @@
-import type { Ctx, LogEntry } from "boardgame.io";
-import { LOCAL_STORAGE_TEAMSTATE, TeamModelDto } from "common-frontend";
+import type { Ctx } from "boardgame.io";
+import { TeamModelDto } from "common-frontend";
+import { readStoredTeamState } from "./stored-team-state";
 
 
 let warnedAboutMissingBucket = false;
@@ -31,7 +32,7 @@ function sendData(fileName: string, data: string){
   fetch(
     bucketName,
     { method: 'POST', body: fd, mode: 'cors'}).then(res => console.log(res.status)
-  );
+  ).catch((e: unknown) => console.warn('play data upload failed', e));
 }
 
 const randomID = Math.floor(Math.random() * 900000)+100000;
@@ -47,11 +48,10 @@ function getJoinCode(teamState?: TeamModelDto){
   if (teamState !== undefined) {
     return teamState.joinCode;
   }
-  const teamstateString = localStorage.getItem(LOCAL_STORAGE_TEAMSTATE);
-  if (teamstateString === null) {
+  const teamStateStorage = readStoredTeamState();
+  if (teamStateStorage === null) {
     throw new Error('Váratlan hiba történt (toHome)');
   }
-  const teamStateStorage = JSON.parse(teamstateString);
   return teamStateStorage.joinCode;
 }
 
@@ -68,7 +68,9 @@ interface SendGameDataParams {
   // wrapper's score); the rest of G rides along in the JSON payload.
   G?: { currentProblem?: number; points?: number };
   ctx?: Ctx;
-  log?: LogEntry[];
+  // Only ever JSON-stringified here, so whatever a caller reports as its log
+  // is passed through: gameWrapper's move context carries the log plugin.
+  log?: unknown;
 }
 
 export function sendGameData(params: SendGameDataParams){

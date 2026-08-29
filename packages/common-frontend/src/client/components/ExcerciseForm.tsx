@@ -20,7 +20,7 @@ function sanitizeValue(value: string) {
 export interface MyProps {
   previousTries: number[];
   previousCorrectness: boolean | null;
-  onSubmit: (result: number) => void;
+  onSubmit: (result: number) => Promise<void>;
   attempt: number;
 }
 
@@ -54,6 +54,10 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
         style={{ position: "relative", zIndex: 2 }}
         key={`result-${props.attempt}`}
         initialValues={{ result: '' }}
+        // The input is focused for you when a task arrives, so clicking away to
+        // read it would otherwise report an empty guess before anyone has had a
+        // chance to make one.
+        validateOnBlur={false}
         validationSchema={Yup.object().shape({
           result: Yup.number()
             .integer(t('relay.error.integer'))
@@ -67,18 +71,14 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
             enqueueSnackbar(t('relay.error.duplicate'), { variant: 'error' });
             return;
           }
-          try {
-            props.onSubmit(parseInt(values.result))
-            refreshState()
-          } catch (e: unknown) {
-            console.log(e)
-            const message = e instanceof Error ? e.message : "Váratlan hiba történt";
-            enqueueSnackbar(message, { variant: 'error' });
-            if (message === "cannot make move after game end") {
-              // TODO: this error should be handled better, currently it never happens
-              refreshState();
-            }
-          }
+          props.onSubmit(parseInt(values.result))
+            .then(() => {
+              void refreshState();
+            })
+            .catch((e: unknown) => {
+              console.log(e);
+              enqueueSnackbar(e instanceof Error ? e.message : t('error.unexpected'), { variant: 'error' });
+            });
           setSentAnswer(1);
         }}>
         <Field
@@ -109,7 +109,12 @@ export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) 
             }}
           />
         }</Field>
-        <ErrorMessage name="result" />
+        {/* The message's line is reserved whether or not there is an error, so
+            that validating an empty or malformed guess does not resize the
+            panel the form sits in. */}
+        <Stack sx={{ minHeight: '1.5em' }}>
+          <ErrorMessage name="result" />
+        </Stack>
         <Stack sx={{marginTop: '20px'}}>
           {props.previousTries.map((data, idx) => {
             return <Stack sx={{

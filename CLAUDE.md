@@ -13,8 +13,10 @@ apps/
   offline-frontend/   # Standalone practice version (Vite)
   strategy-practice/  # the public strategy game practice site (from the durer-jatekok repo)
 packages/
-  game/               # Game logic (boardgame.io games)
-  strategy/           # AI/bot strategies for games
+  game/               # Game logic (boardgame.io games); strategy games carry their bot and board in their own folder
+  strategy/           # AI/bot strategy for the relay game (strategy games keep theirs in packages/game)
+  engine/             # the practice site's strategy-game engine: rules, moves, bots, match state, no framework
+  games/              # competition games in the practice engine's format; only strategy-practice consumes it
   common-frontend/    # Shared React components
   schemas/            # TypeScript models/types
 pages/                # static content the Pages deploy serves but no app builds
@@ -48,7 +50,10 @@ here.
 
 - **Frontend**: React 19, Vite, MUI (Material-UI), React Router
 - **Backend**: boardgame.io server, Koa, PostgreSQL (via bgio-postgres)
-- **Build**: Turborepo, TypeScript, tsdown
+- **Build**: Turborepo, TypeScript, tsdown. Each package's build config is
+  `tsdown.config.mts`, not `.ts`: the packages ship CommonJS and so carry no
+  `"type": "module"`, which leaves node guessing at the config's module system
+  and warning about it on every build.
 - **Testing**: vitest, React Testing Library. Suites are `*.test.ts(x)` under
   the root config and `*.spec.ts(x)` in `apps/strategy-practice`; both run through
   vitest, and neither uses Jest.
@@ -98,11 +103,11 @@ npm run spell-check
 ```
 
 `npm ci`, `npm run build` and `npm run typecheck` cover `apps/strategy-practice` too;
-`npm run lint` and `npm test` do not, because it has its own ESLint and vitest
-setups. Its own checks run from that directory, with no install of their own:
+`npm run lint` and `npm test` do not — *Project Structure* above says why. Its
+checks run from that directory, with no install of their own:
 
 ```bash
-npm run dev:practice                     # from the root; it is a workspace
+npm run dev:strategy-practice                     # from the root; it is a workspace
 npm test --workspace=strategy-practice   # check:versions + lint + typecheck + unit
 cd apps/strategy-practice && npm run coverage:patch
 ```
@@ -119,19 +124,29 @@ a game on the *practice* site, the `new-game` skill under `apps/strategy-practic
 the route — there a game is one self-contained folder: gameplay, bot, curated
 start boards, board client and specs together.
 
-1. Create game files in `packages/game/src/games/<game-name>/`:
+1. Create the game as one self-contained folder in
+   `packages/game/src/games/strategy/<game-name>/` — `stones/` and `19ocd/`
+   are the live examples:
    - `game.ts` - boardgame.io game definition
-   - `index.ts` - exports
+   - `strategy.ts` - the server bot, plus any lookup tables it imports
+   - `board.tsx` - React component for the game board
+   - `main.tsx` - the game description shown to players
+   - `index.ts` - re-exports
 
-2. Create strategy in `packages/strategy/src/games/<game-name>/`:
-   - `strategy.ts` - bot/AI logic
+2. Register it in `packages/game/src/games/strategy/strategy-games.ts`. The
+   apps import everything from the `game` package:
+   `apps/online-backend/src/server.ts` wires the bot, the frontends the
+   boards and descriptions.
 
-3. Create board UI in `packages/common-frontend/src/client/`:
-   - `board.tsx` - React component for game board
-
-4. Register the game in:
-   - Frontend index/lobby files
-   - Server configuration
+**The live client must not ship the bot.** `apps/online-frontend` never
+imports the strategy exports — only the backend does, and the offline
+practice build deliberately does (its bot runs in the browser, after the
+game is public). Tree-shaking of the `game` package's ESM build is all that
+keeps the bot out of the served bundle, so one stray import from
+`strategy.ts` into a board hands every competitor the bot's tables. No CI
+gate covers this: after touching a game's imports, build and check by hand
+that nothing distinctive to the bot — a lookup-table key, say — appears in
+`apps/online-frontend/dist`.
 
 ### Game Structure (boardgame.io)
 
@@ -141,9 +156,9 @@ start boards, board client and specs together.
   moves: {
     moveName: ({ G, ctx }) => void,  // Player actions
   },
-  // Optional:
-  startingPosition: ({ G, ctx }) => G,
-  possibleMoves: ({ G, ctx }) => Move[],
+  // Wrapper additions (see packages/game/src/common/types.ts):
+  possibleMoves: (G, ctx, playerID) => PossibleMove[],
+  startingPosition: ({ G, ctx, playerID, random }) => G,  // optional
   turn: {
     minMoves: 1,
     maxMoves: 1,
@@ -151,6 +166,14 @@ start boards, board client and specs together.
   },
 }
 ```
+
+A move takes as many arguments as you give it — `moves.changeCoins(K, L)` for
+a "pick two values, then commit" turn, driven by form inputs rather than by a
+click on the board. The two live games are both single-click, single-argument;
+nothing in the wrapper requires that.
+
+The opening position has two homes, and `GameMixin.startingPosition` in
+`packages/game/src/common/types.ts` says which to pick.
 
 ## Environment Files
 
@@ -174,8 +197,8 @@ docker compose, not GitHub Pages.
 ## GitHub Pages Deployment
 
 One site, one artifact, built by `.github/workflows/pages-deploy.yml` on every
-push to `main`: a home page plus `/jatekok/` (practice), `/valto/` (a frozen
-2023 relay build) and `/proba-verseny/` (the offline dry run). The whole prefix
+push to `main`: a home page plus `/jatekok/` (strategy practice), `/valto/`
+(relay practice) and `/proba-verseny/` (the offline dry run). The whole prefix
 comes from one `SITE_ROOT` constant in `scripts/assemble-site.mjs`, which both
 the workflow and `npm run site:build` call — so `npm run site:serve` previews
 the deploy's own code, not a copy of it. See
@@ -186,16 +209,18 @@ separate approval — the workflow going green is the cutover.
 
 ## Competition Secrecy
 
-A new competition's game must stay secret until after the competition, which is
-why each year has a private synced repo: `sync.yml` mirrors any pushed `sync-*`
-branch into it, the game is developed and deployed from there, and a merge-back
-PR publishes it afterwards. Nothing about an unreleased game may appear in a
-public commit — including engine changes phrased around its needs.
+A new competition's game must stay secret until after the competition, so each
+year has a private synced repo and the game is developed and deployed from
+there. **Nothing about an unreleased game may appear in a public commit** —
+including engine changes phrased around its needs.
+[`README.md`](README.md), under *Competition secrecy*, is the authority: how the
+mirror works, and what to set up when the year's repo is created.
 
 ## Key Conventions
 
 - Games are organized by type: `strategy/` (two-player), `relay/` (team relay)
-- Each game exports: `game`, `strategy`, `Board` component
+- Each game's folder exports its game wrapper, strategy wrapper and board
+  through its `index.ts`
 - Use Hungarian for user-facing text (competition is in Hungarian); both
   practice sites also offer English through their own language switchers
 - Winner is tracked in `G.winner` state field
@@ -204,6 +229,15 @@ public commit — including engine changes phrased around its needs.
   exists. A comment restating the line below it is noise.
 - Say a thing once: rationale lives in the doc that owns the decision, and
   comments point at it rather than restating it.
+- Cover major new functionality with unit tests. For a new game that means the
+  game logic first: move validators and the strategy — the pure functions where
+  a wrong branch decides a competition. Trivial wiring (exports, registration,
+  pass-through props) needs no tests, and exhausting every branch is not the
+  goal: test the rules and the edge cases that could plausibly be gotten wrong.
+- Every regression fixed gets a unit test that fails without the fix.
+  [`docs/must-keep-working.md`](docs/must-keep-working.md) catches
+  whole-feature breakage by hand; the test pins the specific bug so it cannot
+  quietly return.
 - PRs are split by **atomicity, not size** — one independent change each, so a
   reviewer can accept or reject them separately.
 - An agent opening a PR assigns the person it is working for, so it lands in

@@ -1,13 +1,11 @@
 import urlcat from "urlcat";
 import axios, { AxiosInstance,AxiosError } from 'axios';
-import { ClientRepository, TeamModelDto, MatchStateDto } from "common-frontend";
+import { ClientRepository, TeamModelDto, MatchStateDto, BoardMoves } from "common-frontend";
 
 const serverUrl = import.meta.env.VITE_SERVER_URL || '/';
 function apiAxiosInstance(): AxiosInstance {
-  const apiUrl = serverUrl; // TODO: env or something
-
   return axios.create({
-    baseURL: apiUrl,
+    baseURL: serverUrl,
     timeout: 10000,
   });
 }
@@ -157,7 +155,7 @@ export class RealClientRepository implements ClientRepository {
     });
     let result;
     try {
-      result = await apiAxiosInstance().get(url);
+      result = await apiAxiosInstance().post(url);
     } catch (e: unknown) {
       const err = makeAxiosError(e);
       console.error(err.message)
@@ -173,7 +171,7 @@ export class RealClientRepository implements ClientRepository {
     });
     let result;
     try {
-      result = await apiAxiosInstance().get(url);
+      result = await apiAxiosInstance().post(url);
     } catch (e: unknown) {
       const err = makeAxiosError(e);
       console.error(err.message)
@@ -190,7 +188,7 @@ export class RealClientRepository implements ClientRepository {
     });
     let result;
     try {
-      result = await apiAxiosInstance().get(url);
+      result = await apiAxiosInstance().post(url);
     } catch (e: unknown) {
       const err = makeAxiosError(e);
       console.error(err.message)
@@ -246,5 +244,23 @@ export class RealClientRepository implements ClientRepository {
       console.error(err.message)
       throw e;
     }
+  }
+
+  // Scoring and the clock are server-authoritative, so these travel as the
+  // moves themselves over the match's socket rather than as separate HTTP
+  // calls.
+  submitRelayAnswer(answer: number, moves: BoardMoves): Promise<void> {
+    moves.submitAnswer(answer);
+    return Promise.resolve();
+  }
+
+  startRelayGame(moves: BoardMoves): Promise<void> {
+    moves.startGame();
+    return Promise.resolve();
+  }
+
+  syncRelayTime(moves: BoardMoves): Promise<void> {
+    moves.getTime();
+    return Promise.resolve();
   }
 }

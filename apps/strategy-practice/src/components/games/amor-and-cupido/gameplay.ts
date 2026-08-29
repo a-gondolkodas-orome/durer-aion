@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 // Triangle achievement game on the complete graph K6 (6 people, 15 possible
 // pairs/edges). Each edge is owned by player 0, player 1, or nobody (null).
 // A player wins by owning all three edges of one of the 20 triangles.
@@ -92,9 +92,9 @@ export const moves = {
   claimEdge: {
     // A pair may be claimed while nobody owns it. Both players claim from the
     // same 15 edges, so whose turn it is does not enter into legality.
-    validate: (board: Board, _, edge: number) =>
+    validate: (board, _, edge: number) =>
       Number.isInteger(edge) && edge >= 0 && edge < EDGES.length && board[edge] === null,
-    apply: (board: Board, { ctx }: { ctx: Ctx }, edge: number): MoveOutcome<Board> => {
+    apply: (board, { ctx }, edge: number): MoveOutcome<Board> => {
       const nextBoard = board.slice();
       nextBoard[edge] = ctx.currentPlayer;
       if (completesTriangle(board, ctx.currentPlayer!, edge)) {
@@ -103,6 +103,6 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-};
+} satisfies MoveDefs<Board>;
 
 export type Moves = typeof moves;

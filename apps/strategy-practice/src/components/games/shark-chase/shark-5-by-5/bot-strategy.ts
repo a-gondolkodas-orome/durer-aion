@@ -1,7 +1,10 @@
 import type { Board } from '../gameplay';
 import { makeSharkBots } from '../bot-search';
 import { MAX_TURN } from './gameplay';
-import sharkExceptionMoves from './shark-exception-moves.json';
+// Keyed by `exceptionKey` below; the value is the one sector the shark must
+// take in that position.
+import sharkExceptionMovesJson from './shark-exception-moves.json';
+const sharkExceptionMoves: Record<string, number> = sharkExceptionMovesJson;
 
 // The researchers' winning line on the 5 × 5 lake: a move per day, branching on
 // where the shark is once the two halves of the lake need different answers. It

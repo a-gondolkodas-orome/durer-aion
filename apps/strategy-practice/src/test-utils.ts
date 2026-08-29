@@ -1,6 +1,6 @@
 import {
   runMatch, asBotMoves,
-  type BotMove, type BotStrategy, type Ctx, type Gameplay, type MoveDefinition
+  type BotStrategy, type Ctx, type Gameplay, type MoveDefinition, type NamedBotMove
 } from 'engine';
 
 // Mock `ctx` for testing move functions and bot strategies. A game that pins
@@ -33,9 +33,15 @@ export const moveValidator = <TBoard, TArgs extends unknown[], TTurnState = unkn
 // A bot names its moves rather than playing them, so a spec reads its decision
 // straight off the return value. A strategy that named a whole turn returns
 // several; the one it would play next is the first.
-export const botNextMove = (named: BotMove | BotMove[]): BotMove => asBotMoves(named)[0]!;
+export const botNextMove = <TMove extends NamedBotMove>(named: TMove | TMove[]): TMove =>
+  asBotMoves(named)[0];
 
-export const botNextMoveArgs = (named: BotMove | BotMove[]): any[] =>
+// The strategy's own move type carries each move's argument tuple, so a spec
+// reading `args[0]` is checked against what that move actually takes. The cast
+// is for the fallback only: a move that names no `args` yields the empty tuple.
+export const botNextMoveArgs = <TMove extends NamedBotMove>(
+  named: TMove | TMove[]
+): NonNullable<TMove['args']> =>
   botNextMove(named).args ?? [];
 
 // Ask a strategy for its turn and play its next move through the game's own
@@ -48,7 +54,7 @@ export const playBotMove = <TBoard, TTurnState = unknown>(
   ctx: Ctx<TTurnState> = makeCtx()
 ): TBoard => {
   const { move, args = [] } = botNextMove(strategy({ board, ctx }));
-  return moves[move]!.apply(board, { ctx }, ...args).nextBoard;
+  return moves[move].apply(board, { ctx }, ...args).nextBoard;
 };
 
 // Which role can force the win from `startBoard`, read off the game's own

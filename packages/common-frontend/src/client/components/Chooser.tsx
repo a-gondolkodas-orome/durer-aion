@@ -30,7 +30,7 @@ export function Chooser(props: {
         },
         flexDirection: "column",
       }}
-      data-testId={"chooserRoot"}
+      data-testid={"chooserRoot"}
     >
       {finished && (
         <Stack

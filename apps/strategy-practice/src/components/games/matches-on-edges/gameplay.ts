@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 import { random, sample } from 'lodash';
 
 // Board: a 1 x n strip of cells (indices 0..n-1). Between cell i and cell i+1
@@ -148,11 +148,9 @@ export const moves = {
     // inside a single match-free block — so this is not a bounds check but the
     // game's whole move rule. Matching against the generated list keeps the two
     // definitions from drifting; there are only O(n) legal moves.
-    validate: (board: Board, _, a: number, b: number) =>
+    validate: (board, _, a: number, b: number) =>
       legalMoves(board).some(m => m.a === a && m.b === b),
-    apply: (
-      board: Board, { ctx }: { ctx: Ctx }, a: number, b: number
-    ): MoveOutcome<Board> => {
+    apply: (board, { ctx }, a: number, b: number): MoveOutcome<Board> => {
       const nextBoard = applyMove(board, a, b);
       if (isTerminal(nextBoard)) {
         return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
@@ -160,6 +158,6 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-};
+} satisfies MoveDefs<Board>;
 
 export type Moves = typeof moves;

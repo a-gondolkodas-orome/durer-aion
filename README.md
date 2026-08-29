@@ -136,7 +136,9 @@ npm run stack:prod
 
 The same compose file without the dev overlay, so the container runs the server
 compiled into the image instead of a watcher, and code changes need the command
-again. Detached like `stack:up`, so an ssh session dropping does not take the
+again. The overlay is also what publishes postgres on `localhost:5432`, so
+under `stack:prod` the database is reachable only from the `backend` container.
+Detached like `stack:up`, so an ssh session dropping does not take the
 stack with it. Worth a run before a competition, and before merging anything that
 touches the `Dockerfile`, nginx or the routes.
 
@@ -184,11 +186,20 @@ Team import has two paths and both need checking: `npm run teams:import`, which
 runs `scripts/import_teams.sh` inside the container, and the TSV upload on the
 admin page.
 
-`scripts/admin.py` is the post-competition scoring pull. Against the docker
-stack set its `BASE_URL` to `http://localhost` — the backend's port 8000 is not
-published, nginx proxies `/team` and `/game` — and `ADMIN_PASSWORD` to match
-`.env.docker`. Against `npm run dev:server` its default `http://localhost:8000`
-is right.
+`scripts/admin.py` is the post-competition scoring pull. It reads two
+environment variables and holds no credential of its own:
+
+- `DURER_ADMIN_PASSWORD` — the backend's `ADMIN_CREDENTIALS`. Unset, the script
+  prompts for it; with no terminal to prompt on, it stops rather than sending an
+  unauthenticated request.
+- `DURER_BASE_URL` — defaults to `http://localhost:8000`, which is right against
+  `npm run dev:server`. Against the docker stack set it to `http://localhost`:
+  the backend's port 8000 is not published, nginx proxies `/team` and `/game`.
+  Production is `https://verseny.durerinfo.hu`.
+
+```bash
+DURER_BASE_URL=http://localhost python3 scripts/admin.py   # prompts for the password
+```
 
 ## The offline practice build
 
@@ -209,8 +220,7 @@ npm run site:serve   # on http://localhost:4321
 
 `site:build` is the same script `.github/workflows/pages-deploy.yml` runs, so
 this is the artifact a push to `main` would publish rather than an
-approximation of it — base paths, the rebased 2023 relay build and the CNAME
-assertion included. Worth a look before merging anything that touches an app on
+approximation of it — base paths and the CNAME assertion included. Worth a look before merging anything that touches an app on
 the site, because the workflow going green *is* the cutover: there is no staging
 step between it and gyakorlo.durerinfo.hu.
 
@@ -227,7 +237,7 @@ history and renamed from `apps/practice` when the relay practice app arrived
 from the root like the other frontends:
 
 ```bash
-npm run dev:practice   # the practice site, on http://localhost:8012
+npm run dev:strategy-practice   # the practice site, on http://localhost:8012
 ```
 
 Its vite config binds all interfaces and pins port 8012, so it forwards out of
@@ -267,6 +277,32 @@ directory.
 `npm run spell-check` exists but is not one of them — it reports on the
 Hungarian problem text as well, so it is a thing to read, not a gate.
 
+## Dependency updates
+
+`package.json` files carry ranges; `package-lock.json` is what `npm ci` actually
+installs. Everything here that compares a version reads the lockfile, so it
+reports what is installed rather than what would be accepted.
+
+`.github/workflows/dependency-report.yml` runs on the 1st of each month and
+keeps one `OPS` issue in sync with whatever is behind: every workspace's
+dependencies, every action pinned in `.github/workflows/`, and each `.nvmrc`.
+`npm run report:outdated` prints the same table on demand, and needs no install
+— it asks the registry directly rather than shelling out to `npm outdated`.
+
+A row is one *upgrade*, not one package. The same name pinned at two versions is
+two rows, because `apps/strategy-practice` deliberately runs ahead of the rest on
+eslint, vite and typescript; the `written down in` column lists every file the
+bump has to touch, which is the honest measure of how big it is.
+
+The report opens no pull requests — upgrading stays deliberate, majors one at a
+time as in
+[#168](https://github.com/a-gondolkodas-orome/durer-jatekok/issues/168). Why a
+report rather than dependabot or renovate: the header comment of
+`scripts/dependency-report.mjs`. Two versions are written down in files no
+`package.json` names — Playwright and `apps/strategy-practice`'s Node — and
+[that app's README](apps/strategy-practice/README.md#project-setup) lists where;
+`npm run check:versions --workspace=strategy-practice` fails until they agree.
+
 # Configuration you may want to change
 
 `npm run setup` creates each of these from its committed `*.sample` twin, and
@@ -284,7 +320,36 @@ locally and are meaningless anywhere else.
 Whatever reads one of them takes the change at start: vite does not pick up
 `.env` edits, and the docker stack reads `.env.docker` at `up`.
 
-# Debugging (TODO)
+# Competition secrecy
+
+A new competition's game must stay secret until after the competition, which is
+why each year has a private synced repo: `sync.yml` mirrors any pushed `sync-*`
+branch into it, the game is developed and deployed from there, and a merge-back
+PR publishes it afterwards. Nothing about an unreleased game may appear in a
+public commit — including engine changes phrased around its needs.
+
+## Setting up the year's private repo
+
+The mirror carries `.github/workflows` along with the code, so every workflow in
+this repository also lands there under that repo's own triggers. Two of them are
+guarded to run only in the public repository (`pages-deploy.yml`, which would
+otherwise publish the secret game to Pages on a push to `main`, and `sync.yml`,
+which would otherwise mirror back). The rest are left to run, so the game gets
+lint, typecheck and tests while it is being developed.
+
+When the repo is created:
+
+- **Turn Actions off** (Settings → Actions → Disable) unless you want those
+  checks. The guards make the dangerous jobs no-ops either way; this makes the
+  question moot rather than answered, and it is easier to do once now than to
+  re-derive later.
+- **Enable Pages**, which is what serves the testers' dry run — see
+  *The dry run for testers* in [`DEPLOYMENT.md`](./DEPLOYMENT.md). That site is
+  public, protected only by the repository's unguessable name.
+- **Set `PUBLIC_URL`** in `apps/offline-frontend/package.json` to the new repo's
+  name, so the dry run's asset paths resolve.
+
+# Debugging
 VS code gives you two options to debug the application. Both of them needs some setup first, and they can't be used at the same time.
 
 Breakpoints work either on the server, or on the frontend, but not on both at the same time. See different debugging options for further references.

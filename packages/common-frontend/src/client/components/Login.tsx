@@ -33,7 +33,7 @@ export function Login() {
         xs: "10px",
         md: "0px",
       },
-    }} data-testId="loginRoot">
+    }} data-testid="loginRoot">
       <Stack sx={{
         marginTop: {
           sx: "25px",
@@ -68,8 +68,10 @@ export function Login() {
                 enqueueSnackbar(t('login.error.empty'), { variant: 'error' });
                 return;
               }
-              login(values.joinCode).catch(err => {
-                enqueueSnackbar(err?.message, { variant: 'error' });
+              login(values.joinCode).catch((err: unknown) => {
+                // A rejection that is not an Error has no `message`, and the snackbar
+                // then shows an empty box where the reason should be.
+                enqueueSnackbar(err instanceof Error ? err.message : t('error.unexpected'), { variant: 'error' });
               });
             }}>
             <Field 

@@ -45,7 +45,7 @@ export const runMatch = <TBoard, TTurnState = unknown>({
     // seats here are bots, so the seat about to move is "the computer" and the
     // other one is the notional human.
     state = { ...state, chosenRoleIndex: 1 - player };
-    const turn = playBotTurn(state, gameplay, strategies[player]!, { maxMoves });
+    const turn = playBotTurn(state, gameplay, strategies[player], { maxMoves });
     history.push(...turn.moves);
     state = turn.state;
   }

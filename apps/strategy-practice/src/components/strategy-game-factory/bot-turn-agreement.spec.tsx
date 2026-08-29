@@ -44,7 +44,7 @@ const wholeTurn: BotMove[] = [
 // Two shapes the bot contract allows: name the whole turn, or name one move and
 // be asked again while the turn is still yours.
 const namesWholeTurn: BotStrategy<Board> = () => wholeTurn;
-const namesOneAtATime: BotStrategy<Board> = ({ board }) => wholeTurn[board % 3]!;
+const namesOneAtATime: BotStrategy<Board> = ({ board }) => wholeTurn[board % 3];
 
 const BoardClient = () => <div data-testid="board" />;
 

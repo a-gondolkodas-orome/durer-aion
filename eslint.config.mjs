@@ -36,6 +36,29 @@ export default defineConfig(
       '@typescript-eslint/no-empty-function': 'error',
       '@typescript-eslint/no-empty-object-type': 'error',
       'prefer-const': 'error',
+      // An object interpolated into a string prints `[object Object]`, which is
+      // never what the message meant to say.
+      '@typescript-eslint/no-base-to-string': 'error',
+      // A promise nobody waits for: the caller reports success before the work has
+      // landed, and a failure surfaces only as an unhandled rejection.
+      '@typescript-eslint/no-floating-promises': 'error',
+      // `for…in` over an array walks its keys as strings, and its own properties
+      // too. No violations today; this keeps it that way.
+      '@typescript-eslint/no-for-in-array': 'error',
+      // A deprecated API still compiles; this is the only thing that says so before
+      // the removal lands.
+      '@typescript-eslint/no-deprecated': 'error',
+      // An async function handed to something that ignores what it returns: React
+      // event handlers, addEventListener, Array.forEach. The await never happens.
+      '@typescript-eslint/no-misused-promises': 'error',
+      // A type assertion the compiler already knows is redundant. Deleting them is
+      // what keeps the ones that remain worth reading: a stray `!` is where a null
+      // dereference hides.
+      '@typescript-eslint/no-unnecessary-type-assertion': 'error',
+      // A catch callback's parameter is implicitly `any`, so reading `.message` off
+      // it yields undefined for anything that is not an Error — and the UI shows an
+      // empty error where the reason should be.
+      '@typescript-eslint/use-unknown-in-catch-callback-variable': 'error',
     },
   },
   // packages/engine and packages/games are apps/strategy-practice code moved out of it, still
@@ -88,38 +111,12 @@ export default defineConfig(
       }],
     },
   },
-  // no-explicit-any is on for the boardgame.io-facing code; what remains exempt
-  // is the genuine interop core, per file. This list only shrinks: type a file,
-  // delete its line — never add one. New code goes through the rule everywhere.
-  {
-    files: [
-      // Copied bgio server internals whose types upstream does not export.
-      'apps/online-backend/src/socketio_botmoves.ts',
-      // bgio move-context destructuring; two TODO markers track it.
-      'packages/game/src/common/gamewrapper.ts',
-      // Wire-shape casts on match state, pending a typed DTO field.
-      'packages/common-frontend/src/client/components/TeamDetailDialog.tsx',
-      // The client-factory family shares one untyped board/game plumbing shape;
-      // its fix is the BoardProps<G> refactor the TODO in boardwrapper.tsx names,
-      // and exempting only part of the family would be arbitrary.
-      'apps/offline-frontend/src/client_factory.tsx',
-      'packages/common-frontend/src/common/client_factory.tsx',
-      'packages/common-frontend/src/common/myclient.ts',
-      'apps/offline-frontend/src/myclient.ts',
-      'packages/common-frontend/src/common/boardwrapper.tsx',
-      // #224 lands first; the relay app joins the per-file ratchet after.
-      'apps/relay-practise-frontend/**',
-    ],
-    rules: {
-      '@typescript-eslint/no-explicit-any': 'off',
-    },
-  },
-  // Build and repo tooling under scripts/ runs in Node, not the browser, so `process` and
-  // `console` are globals rather than undefined names.
+  // Build and repo tooling under scripts/ runs in Node, not the browser, so `process`, `console`,
+  // `URL` and `fetch` are globals rather than undefined names.
   {
     files: ['scripts/**/*.mjs'],
     languageOptions: {
-      globals: { process: 'readonly', console: 'readonly' },
+      globals: { process: 'readonly', console: 'readonly', URL: 'readonly', fetch: 'readonly' },
     },
   },
   // Global ignores
@@ -133,7 +130,7 @@ export default defineConfig(
       // own `npm run lint` — it keeps its own ESLint version and plugins (npm
       // nests them), which this config's flat resolution would not find.
       'apps/strategy-practice/**',
-      // A frozen 2023 build output, kept byte for byte. See pages/valto-2023/README.md.
+      // Hand-written pages the deploy copies verbatim, with no build step. See pages/README.md.
       'pages/**',
       // The assembled Pages artifact `npm run site:build` writes: every app's built
       // bundles, plus a copy of pages/. Gitignored, but eslint has its own ignore list

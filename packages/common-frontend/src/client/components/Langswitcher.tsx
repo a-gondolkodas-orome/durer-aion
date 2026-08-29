@@ -83,7 +83,7 @@ export function LanguageDropdown({ fontColor } : { fontColor?: string }) {
     <Select<string>
       value={i18n.language}
       variant="standard"
-      onChange={(e) => i18n.changeLanguage(e.target.value)}
+      onChange={(e) => { void i18n.changeLanguage(e.target.value); }}
       sx={selectSx(theme, fontColor)}
       renderValue={(value) => (
         <Stack sx={{ display: "flex", alignItems: "center", gap: "8px", flexDirection: "row" }}>

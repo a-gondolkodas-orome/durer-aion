@@ -6,7 +6,7 @@
 export { resolveVariants, variantKey, runMatch } from 'engine';
 export type {
   Phase, Mode, Ctx,
-  MoveOutcome, MoveFunction, MoveDefinition, Gameplay, GameMoves, ClientGameMoves,
+  MoveOutcome, MoveFunction, MoveDefinition, MoveDefs, MoveValidator, Gameplay, GameMoves, ClientGameMoves,
   StrategyArgs, BotStrategy, BotMove, BoardClientProps,
   Variant, VariantInput, Presentation, StrategyGameConfig,
   MatchMove, MatchResult

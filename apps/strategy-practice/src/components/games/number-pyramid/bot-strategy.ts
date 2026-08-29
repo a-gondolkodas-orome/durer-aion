@@ -22,7 +22,7 @@ export const smartBotStrategy: Bot = ({ board, ctx }) => {
 
   const botIsWinner = isP2WinningPosition(board) === (ctx.currentPlayer === 1);
 
-  const tryLevel = (levelIdx, order: 'asc' | 'desc' = 'desc'): BotMove<Moves> | null => {
+  const tryLevel = (levelIdx: number, order: 'asc' | 'desc' = 'desc'): BotMove<Moves> | null => {
     if (!hasActivePair(board.levels[levelIdx])) return null;
     const level = board.levels[levelIdx];
     const indices = orderBy(activeSlotIndices(level), (i) => level[i]!.value, order).slice(0, 2);

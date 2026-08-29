@@ -6,7 +6,7 @@
 // contributor on a slightly different local patch is not blocked.
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { resolvedVersion } from './resolved-versions.mjs';
+import { resolvedVersion } from '../../../scripts/resolved-versions.mjs';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const read = file => readFileSync(`${root}${file}`, 'utf8');
@@ -37,10 +37,10 @@ const compare = (what, sources) => {
 const packageJson = JSON.parse(read('package.json'));
 
 // The lockfile rather than package.json: the devcontainer bakes browsers for the Playwright
-// that gets *installed*, and only the lockfile names that. The two agree under save-exact — see
-// resolved-versions.mjs for why reading the range instead is a trap rather than a shortcut.
+// that gets *installed*, and only the lockfile names that — see resolved-versions.mjs for why
+// reading the declared range instead is a trap rather than a shortcut.
 compare('Playwright', [
-  ['package-lock.json playwright', resolvedVersion('playwright')],
+  ['package-lock.json playwright', resolvedVersion('playwright', 'apps/strategy-practice')],
   ['.devcontainer/Dockerfile PLAYWRIGHT_VERSION', read('.devcontainer/Dockerfile').match(/^ARG PLAYWRIGHT_VERSION=(.+)$/m)?.[1]]
 ]);
 

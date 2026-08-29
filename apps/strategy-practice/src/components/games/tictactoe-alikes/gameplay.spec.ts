@@ -1,6 +1,7 @@
 import { validatePlacement, generateEmptyTicTacToeBoard, type Board } from './gameplay';
+import { makeCtx } from 'test-utils';
 
-const isPlacementAllowed = (board: Board, id: number) => validatePlacement(board, undefined, id);
+const isPlacementAllowed = (board: Board, id: number) => validatePlacement(board, { ctx: makeCtx() }, id);
 
 describe('tictactoe-alikes shared placement legality', () => {
   it('allows placing on any cell of an empty board', () => {

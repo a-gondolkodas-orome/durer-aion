@@ -1,4 +1,5 @@
 import { random, flatten, cloneDeep, sum, tail } from 'lodash';
+import type { MoveDefs } from 'strategy-game-factory';
 
 export type SoldierColor = 'blue' | 'red';
 export type Board = SoldierColor[][];
@@ -63,9 +64,9 @@ const isSoldierAssignmentAllowed = (board: Board, soldiers: Soldier[]): boolean 
 
 export const moves = {
   killGroup: {
-    validate: (_board: Board, { ctx }, group: SoldierColor) =>
+    validate: (_board, { ctx }, group: SoldierColor) =>
       ctx.currentPlayer === HUNYADI && isColor(group),
-    apply: (board: Board, _, group: SoldierColor) => {
+    apply: (board, _, group: SoldierColor) => {
       const nextBoard = board.map(row => row.filter(soldier => soldier !== group));
 
       if (flatten(nextBoard).length === 0) {
@@ -75,13 +76,13 @@ export const moves = {
     }
   },
   finalizeSeparation: {
-    validate: (_board: Board, { ctx }) => ctx.currentPlayer === SULTAN,
-    apply: (board: Board) => ({ nextBoard: board, isTurnEnd: true })
+    validate: (_board, { ctx }) => ctx.currentPlayer === SULTAN,
+    apply: (board) => ({ nextBoard: board, isTurnEnd: true })
   },
   setGroupOfSoldiers: {
-    validate: (board: Board, { ctx }, soldiers: Soldier[]) =>
+    validate: (board, { ctx }, soldiers: Soldier[]) =>
       ctx.currentPlayer === SULTAN && isSoldierAssignmentAllowed(board, soldiers),
-    apply: (board: Board, _, soldiers: Soldier[]) => {
+    apply: (board, _, soldiers: Soldier[]) => {
       const nextBoard = cloneDeep(board);
       for (const soldier of soldiers) {
         nextBoard[soldier.rowIndex][soldier.pieceIndex] = soldier.group;
@@ -91,7 +92,7 @@ export const moves = {
   },
   // endOfTurn move automatically initiated by game engine
   stepUp: {
-    apply: (board: Board) => {
+    apply: (board) => {
       const nextBoard = [...tail(board), []];
       if (nextBoard[0].length > 0) {
         return { nextBoard, gameEnd: { winnerIndex: SULTAN } };
@@ -99,7 +100,7 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-};
+} satisfies MoveDefs<Board>;
 
 export type Moves = typeof moves;
 

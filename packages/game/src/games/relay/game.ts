@@ -1,8 +1,6 @@
 import { Ctx, Game } from "boardgame.io";
 import { INVALID_MOVE, TurnOrder } from "boardgame.io/core";
-// import { sendDataRelayEnd } from "../../common/sendData";
 import { GUESSER_PLAYER, JUDGE_PLAYER, otherPlayer, PlayerIDType } from "../../common/types";
-// import { IS_OFFLINE_MODE } from "../../client/utils/util";
 
 interface Answer {
   answer: number;
@@ -49,7 +47,7 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayStepReport) => vo
         correctnessPreviousAnswer: null,
         previousAnswers: [[]],
         previousPoints: [],
-        currentProblemMaxPoints: 3, // TODO: get from the problem list, TODO: rename this function to currentProblemAvailablePoints
+        currentProblemMaxPoints: 3, // placeholder; the judge's firstProblem move sets the problem list's value. TODO: rename to currentProblemAvailablePoints
         numberOfTry: 0,
         millisecondsRemaining: 1000 * lengthOfCompetition,
         start: new Date().toISOString(),
@@ -74,6 +72,7 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayStepReport) => vo
             }
             G.url = url;
             G.problemText = problemText;
+            G.currentProblemMaxPoints = nextProblemMaxPoints;
             G.numberOfTry = 1;
             events.endTurn();
           },
@@ -177,10 +176,6 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayStepReport) => vo
             G.correctnessPreviousAnswer = correctnessPreviousAnswer;
             if (correctnessPreviousAnswer) {
               G.points += G.currentProblemMaxPoints;
-              /* TODO refactor so offline works properly send data should not be here
-              if (IS_OFFLINE_MODE) {
-                sendDataRelayEnd(null, G, ctx);
-              }*/
               G.previousPoints[G.currentProblem] = G.currentProblemMaxPoints;
             } else {
               G.previousPoints[G.currentProblem] = 0;

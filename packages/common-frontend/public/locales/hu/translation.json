@@ -7,7 +7,7 @@
       "final": "Végső pontszám",
       "title": "Vége a versenynek!"
     },
-    "gameDescriptionHtml": "<p>Ebben a feladatban egy kétszemélyes stratégiás játékot játszhattok, ahol az egyik játékos Ti lesztek, a másik játékos pedig a gép. Győzzétek le a gépet <b>kétszer egymás után</b> ebben a játékban! A kezdő helyzet ismeretében Ti dönthetitek el, hogy a kezdő vagy a második játékos bőrébe szeretnétek bújni.</p>         \n            <p>A sikeres teljesítésért az alábbiak szerint kaptok pontot:\n              <ul>\n                <li>Ha egyszer sem veszítetek, akkor 12 pontot kaptok.</li>\n                <li>1, 2, 3, 4, illetve 5 vereség esetén a kapott pontszám 9-re, 6-ra, 4-re, 3-ra, illetve 2-re csökken.</li>\n                <li>Ennél több vereség esetén is 2 pontot kaptok, ha sikerül teljesítenetek a játékot.</li>\n                <li>Ha 30 perc alatt nem győzitek le kétszer egymás után a gépet, akkor 0 pontot kaptok.</li>\n              </ul>\n            </p>\n            <p>\n              Ha készen álltok, kattintsatok a lenti gombra és onnantól kezdve összesen 30 perc áll rendelkezésetekre.\n            </p>",
+    "gameDescriptionHtml": "<p>Ebben a feladatban egy kétszemélyes stratégiás játékot játszhattok, ahol az egyik játékos Ti lesztek, a másik játékos pedig a gép. Győzzétek le a gépet <b>kétszer egymás után</b> ebben a játékban! A kezdő helyzet ismeretében Ti dönthetitek el, hogy a kezdő vagy a második játékos bőrébe szeretnétek bújni.</p>         \n            <p>A sikeres teljesítésért az alábbiak szerint kaptok pontot:</p>\n              <ul>\n                <li>Ha egyszer sem veszítetek, akkor 12 pontot kaptok.</li>\n                <li>1, 2, 3, 4, illetve 5 vereség esetén a kapott pontszám 9-re, 6-ra, 4-re, 3-ra, illetve 2-re csökken.</li>\n                <li>Ennél több vereség esetén is 2 pontot kaptok, ha sikerül teljesítenetek a játékot.</li>\n                <li>Ha 30 perc alatt nem győzitek le kétszer egymás után a gépet, akkor 0 pontot kaptok.</li>\n              </ul>\n            <p>\n              Ha készen álltok, kattintsatok a lenti gombra és onnantól kezdve összesen 30 perc áll rendelkezésetekre.\n            </p>",
     "pointsNotSettled": "A pontszámotok csak tájékoztató jellegű, a végleges pontszámotokat a beküldött válaszok alapján újraértékeljük.",
     "relayDescription": "A váltófeladatok rövid szöveges feladatok, melyekre a válasz egy egész szám (legalább 0 és legfeljebb 9999). Minden váltófeladatra maximum 3 tippet adhattok le, egy-egy rossz tipp után az adott feladatra megszerezhető pontszám 1-gyel csökken. Helyes tipp vagy három rossz tipp után megkapjátok a következő feladatot. A váltófeladatokra összesen 60 perc áll rendelkezésre, és összesen 40 pont szerezhető velük hibátlan teljesítés esetén. (Az egyes feladatokra kapható pontszám 3-tól 6-ig terjed.)",
     "result": "Eredmények",
@@ -41,24 +41,45 @@
   "header": {
     "logout": "kilépés",
     "subtitle": "Online forduló",
-    "title": "XIX. Dürer Verseny"
+    "title": "XIX. Dürer Verseny",
+    "titlePlain": "Dürer Verseny",
+    "relayPractise": "Váltók gyakorlása"
   },
   "login": {
     "afterTitle": " online fordulójának felületén.",
     "beforeTitle": "Üdvözlünk a ",
     "error": {
       "empty": "Nem adtál meg kódot!",
-      "wrongid": "Rossz belépési kód!"
+      "wrongid": "Rossz belépési kód!",
+      "noRound": "Nem választottál még fordulót!"
     },
     "fallback": "Ha nem találjátok az emailt, akkor írjatok nekünk a verseny [K] durerinfo [P] hu email címre.",
     "greeting": "Kedves Versenyző!",
     "loginButton": "Belépés",
-    "loginInstruction": "Belépéshez nézd meg az emailjeidet, és üsd be az ott található kódot ide:"
+    "loginInstruction": "Belépéshez nézd meg az emailjeidet, és üsd be az ott található kódot ide:",
+    "relayPractise": "Váltóversenyek gyakorlása",
+    "relayPractiseDescription": "Ki tudjátok próbálni a korábbi évek váltó típusú versenyfeladatait. Válaszd ki a megfelelő feladatsort (év és kategória szerint), amelynek kitöltésére 60 perced lesz.",
+    "competitionType": {
+      "local": "{{num}}. helyi {{category}}",
+      "final": "{{num}}. döntő {{category}}",
+      "online": "{{num}}. internetes {{category}}"
+    },
+    "proceedButton": "Tovább",
+    "yearSelector": "Verseny sorszáma:",
+    "roundTypeSelector": "Forduló típusa:",
+    "categorySelector": "Kategória:",
+    "yearOption": "{{num}}.",
+    "roundType": {
+      "local": "Helyi",
+      "final": "Döntő",
+      "online": "Internetes"
+    }
   },
   "relay": {
     "endTable": {
       "all": "Összpontszám",
       "back": "Vissza a versenyhez",
+      "selectOtherRound": "Fordulóválasztás",
       "point": "Pontszám",
       "reminder": "Ne feledkezzetek meg a stratégiás játékról, ha azzal még nem játszottatok!",
       "task": "Feladat",
@@ -70,6 +91,7 @@
       "duplicate": "Ezt a választ már próbáltátok",
       "empty": "Nem írtál semmilyen választ!",
       "integer": "Egész számot kell írni",
+      "missingTest": "Ennek a feladatsornak ({{test}}) a feladatai még nem érhetőek el.",
       "range": "A megoldás 0 és 9999 között van",
       "type": "Számot kell írnod"
     },

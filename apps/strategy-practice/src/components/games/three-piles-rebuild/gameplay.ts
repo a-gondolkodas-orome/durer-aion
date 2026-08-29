@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 import { random, range, sample } from 'lodash';
 
 export type Board = number[]; // always length 3
@@ -81,19 +81,19 @@ export const moves = {
   // Step 1 of a turn: keep one pile, discard the other two (shown as 0).
   keepPile: {
     // A pile can be kept only at the start of a turn, and only if it can be split.
-    validate: (board: Board, _, keepId: number) =>
+    validate: (board, _, keepId: number) =>
       Number.isInteger(keepId) && keepId >= 0 && keepId < board.length
         && keptPileId(board) === undefined
         && canSplit(board[keepId]),
     // First half of the turn: keep one pile, then rebuild from it — the turn
     // stays open in between.
-    apply: (board: Board, _, keepId: number): MoveOutcome<Board> =>
+    apply: (board, _, keepId: number): MoveOutcome<Board> =>
       ({ nextBoard: withOtherPilesDiscarded(board, keepId) })
   },
   // Step 2: rebuild three new piles from the kept pile's pebbles.
   splitPile: {
-    validate: (board: Board, _, parts: number[]) => isSplitAllowed(board, parts),
-    apply: (_board: Board, { ctx }: { ctx: Ctx }, parts: number[]): MoveOutcome<Board> => {
+    validate: (board, _, parts: number[]) => isSplitAllowed(board, parts),
+    apply: (_board, { ctx }, parts: number[]): MoveOutcome<Board> => {
       const nextBoard = [...parts];
       if (isTerminal(nextBoard)) {
         return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
@@ -101,6 +101,6 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-};
+} satisfies MoveDefs<Board>;
 
 export type Moves = typeof moves;

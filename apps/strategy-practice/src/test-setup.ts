@@ -25,6 +25,10 @@ costs the games nothing; specs take theirs with `cloneDeep`.
 Frozen here rather than at each export so it stays test-only, and so a board
 added later is covered without anyone remembering to opt in.
 */
+// The assertion below is not redundant, whatever the rule says: `tsc` types this
+// glob as Record<string, unknown> and fails without it. ESLint's own program
+// resolves vite/client's overload differently, so the two disagree here.
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
 const boardModules = import.meta.glob(
   [
     './components/games/**/{gameplay,start-boards}.ts',

@@ -1,14 +1,12 @@
-import { LOCAL_STORAGE_TEAMSTATE } from "../api-repository-interface";
 import type { ClientRepository } from "../api-repository-interface";
 import type { MatchStateDto, TeamModelDto } from "../dto/TeamStateDto";
-import { BGIO_LOCALSTORAGE_PREFIX } from "../utils/util";
+import { bgioStoragePrefix, guidStorageKey, teamStateStorageKey } from "../utils/storage-keys";
 
-const LOCAL_STORAGE_GUID = "kjqAEKeFkMpOvOZrzcvp";
 function removeGameStateLocalStorage() {
   let idx = 0;
   let key = localStorage.key(idx);
   while (key !== null) {
-    if (key.startsWith(BGIO_LOCALSTORAGE_PREFIX)) {
+    if (key.startsWith(bgioStoragePrefix())) {
       localStorage.removeItem(key);
     }
     idx++;
@@ -21,7 +19,7 @@ export class UserModel {
   constructor(private repo: ClientRepository) {}
 
   private async saveGUID(guid: string) {
-    localStorage.setItem(LOCAL_STORAGE_GUID, guid);
+    localStorage.setItem(guidStorageKey(), guid);
   }
 
   getGuid(): string | null {
@@ -29,7 +27,7 @@ export class UserModel {
       return null;
     }
 
-    const guid = localStorage.getItem(LOCAL_STORAGE_GUID);
+    const guid = localStorage.getItem(guidStorageKey());
 
     if (!guid) {
       return null;
@@ -126,8 +124,8 @@ export class UserModel {
   }
 
   logout() {
-    localStorage.removeItem(LOCAL_STORAGE_GUID);
-    localStorage.removeItem(LOCAL_STORAGE_TEAMSTATE);
+    localStorage.removeItem(guidStorageKey());
+    localStorage.removeItem(teamStateStorageKey());
     localStorage.removeItem("RelayPoints");
     localStorage.removeItem("StrategyPoints");
     removeGameStateLocalStorage();
@@ -136,7 +134,7 @@ export class UserModel {
   async login(joinCode: string): Promise<string | null> {
     const guid = await this.repo.joinWithCode(joinCode);
     console.log("login guid", guid);
-    this.saveGUID(guid);
+    await this.saveGUID(guid);
     return null;
   }
 
@@ -162,8 +160,8 @@ export class UserModel {
     if (typeof window !== "undefined" && !UserModel.wasListenerAddedYet) {
       UserModel.wasListenerAddedYet = true;
       let previousValue: TeamModelDto | null = null;
-      window.addEventListener("storage", async (event) => {
-        if (event?.key !== LOCAL_STORAGE_GUID) {
+      const onGuidChanged = async (event: StorageEvent) => {
+        if (event.key !== guidStorageKey()) {
           return;
         }
 
@@ -173,6 +171,9 @@ export class UserModel {
           setTeamState(value);
           previousValue = value;
         }
+      };
+      window.addEventListener("storage", (event) => {
+        void onGuidChanged(event);
       });
     }
   }

@@ -1,10 +1,10 @@
 import { type BotStrategy } from 'strategy-game-factory';
 import { botNextMoveArgs, makeCtx } from 'test-utils';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
-import { type Board, type Coef, hasThreeIntegerRoots, canComplete } from './gameplay';
+import { type Board, type Coef, type Moves, hasThreeIntegerRoots, canComplete } from './gameplay';
 
 // Run a bot on a board and read back the single move it names.
-const runWith = (strategy: BotStrategy<Board>) => (board: Board): { coef: Coef; value: number } => {
+const runWith = (strategy: BotStrategy<Board, Moves>) => (board: Board): { coef: Coef; value: number } => {
   const [coef, value] = botNextMoveArgs(strategy({ board, ctx: makeCtx({ phase: 'play', currentPlayer: 0 }) }));
   return { coef, value };
 };
@@ -52,9 +52,9 @@ describe('smartBotStrategy — first player (integer roots)', () => {
 describe('smartBotStrategy — second player (prevent)', () => {
   it('blocks every losing first move (anything other than c=0 or b=-1)', () => {
     const blunders: Board[] = [
-      ...range(-50, 50).map(a => ({ a, b: null, c: null } as Board)),
-      ...range(-50, 50).filter(b => b !== -1).map(b => ({ a: null, b, c: null } as Board)),
-      ...range(-50, 50).filter(c => c !== 0).map(c => ({ a: null, b: null, c } as Board))
+      ...range(-50, 50).map(a => ({ a, b: null, c: null })),
+      ...range(-50, 50).filter(b => b !== -1).map(b => ({ a: null, b, c: null })),
+      ...range(-50, 50).filter(c => c !== 0).map(c => ({ a: null, b: null, c }))
     ];
     for (const board of blunders) {
       const { coef, value } = runBot(board);
@@ -82,8 +82,8 @@ describe('smartBotStrategy — second player (prevent)', () => {
   });
 
   it.each([
-    { first: { a: null, b: null, c: 0 } as Board, trapCoef: 'b' as Coef },
-    { first: { a: null, b: -1, c: null } as Board, trapCoef: 'a' as Coef }
+    { first: { a: null, b: null, c: 0 }, trapCoef: 'b' },
+    { first: { a: null, b: -1, c: null }, trapCoef: 'a' }
   ])('plays a legal, non-losing trap when the first player sealed the win with $first',
     ({ first, trapCoef }) => {
       const { coef, value } = runBot(first);
