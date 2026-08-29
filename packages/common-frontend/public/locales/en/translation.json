@@ -60,7 +60,7 @@
     "loginButton": "Log in",
     "loginInstruction": "To log in, check your emails and enter the code you find there here:",
     "relayPractise": "Practise relay tasks",
-    "relayPractiseDescription": "You can try out yourselves with relay-type tasks from former competitions. Choose the desired set of tasks (by year & category), for which you'll have 90 minutes to complete.",
+    "relayPractiseDescription": "You can try out yourselves with relay-type tasks from former competitions. Choose the desired set of tasks (by year & category), for which you'll have 60 minutes to complete.",
     "competitionType": {
       "local": "Local round #{{num}}, {{category}}",
       "final": "Final round #{{num}}, {{category}}",
