@@ -5,8 +5,8 @@ import { BoardProps } from 'boardgame.io/react';
 import { MyGameState } from 'game';
 import { Dialog } from '@mui/material';
 import { useRefreshTeamState, useToHome } from '../../hooks/user-hooks';
-import { ExcerciseTask } from '../ExcerciseTask';
-import { ExcerciseForm } from '../ExcerciseForm';
+import { ExerciseTask } from '../ExerciseTask';
+import { ExerciseForm } from '../ExerciseForm';
 import { RelayEndTable } from '../RelayEndTable';
 import { useClientRepo } from '../../api-repository-interface';
 import { useTheme } from '@mui/material/styles';
@@ -130,7 +130,7 @@ export function InProgressRelay({ G, ctx, moves, maxPointsList, selectRoundOnEnd
           },
           padding: '30px',
         }}>
-          <ExcerciseTask 
+          <ExerciseTask 
             task={G.problemText}
             maxPoints={G.currentProblemMaxPoints}
             serial={G.currentProblem+1}
@@ -157,7 +157,7 @@ export function InProgressRelay({ G, ctx, moves, maxPointsList, selectRoundOnEnd
           borderRadius: "25px",
           padding: '30px',
         }}>
-          <ExcerciseForm 
+          <ExerciseForm 
             previousTries={G.previousAnswers[G.currentProblem].map(it=>it.answer)} 
             previousCorrectness={!finished ? G.correctnessPreviousAnswer : null}
             attempt={(G.currentProblem+1) * 3 + G.numberOfTry}

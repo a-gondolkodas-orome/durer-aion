@@ -64,7 +64,7 @@ export class UserModel {
     return res;
   }
 
-  async resetRealy(teamId: string): Promise<TeamModelDto> {
+  async resetRelay(teamId: string): Promise<TeamModelDto> {
     return this.repo.resetRelay(teamId);
   }
 
