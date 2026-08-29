@@ -22,7 +22,7 @@
     "@mui/system": "^5.18.0",
     "@mui/utils": "^5.17.1",
     "@mui/x-data-grid": "^7.16.0",
-    "dotenv": "^16.3.1",
+    "dotenv": "^17.4.2",
     "formik": "^2.4.2",
     "game": "*",
     "i18next": "^25.10.10",

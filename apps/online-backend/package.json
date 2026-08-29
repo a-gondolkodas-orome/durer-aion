@@ -16,7 +16,7 @@
     "@sentry/node": "^7.58.1",
     "bgio-postgres": "^1.0.13",
     "boardgame.io": "^0.50.2",
-    "dotenv": "^16.3.1",
+    "dotenv": "^17.4.2",
     "game": "*",
     "koa": "^2.16.2",
     "koa-basic-auth": "^4.0.0",
@@ -30,9 +30,9 @@
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
+    "@types/koa__cors": "^5.0.1",
     "@types/koa-basic-auth": "^2.0.4",
     "@types/koa-mount": "^4.0.1",
-    "@types/koa__cors": "^5.0.1",
     "@types/node": "^24.10.1",
     "@types/pg": "^8.6.5",
     "tsx": "^4.21.0"
