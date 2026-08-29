@@ -38,13 +38,14 @@ build against. It exits 0 while doing it.
 
 A plan to replace boardgame.io with practice's engine was drafted and then
 deprioritized — upstream is actively maintained again (issue #277); don't
-build toward that replacement.
+build toward that replacement. Its remaining `npm audit` advisories are its own
+transitive tree — `ws` through `koa-socket-2`, `@koa/cors@3`, `engine.io` — and
+cannot be fixed from here. **Never run `npm audit fix --force`:** its fix for
+them is `boardgame.io@0.22.1`, a four-year downgrade that would take the
+competition with it. What is behind otherwise is `npm run report:outdated`'s
+job, monthly.
 [`docs/must-keep-working.md`](docs/must-keep-working.md) is the standing
 regression checklist every change is measured against.
-[`docs/dependency-upgrades.md`](docs/dependency-upgrades.md) owns the version
-decisions: what is behind, what a move would cost, and what is blocked on
-boardgame.io's own tree — including why `npm audit fix --force` must not be run
-here.
 
 ## Tech Stack
 
