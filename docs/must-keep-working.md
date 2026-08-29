@@ -71,8 +71,7 @@ workspace — `apps/practice` then, `apps/strategy-practice` since the rename.)*
 
 ## Competition secrecy flow
 
-See the plan's "Competition secrecy: the yearly private-repo flow" section for
-why this matters.
+See `README.md`, under *Competition secrecy*, for why this matters.
 
 - Pushing a `sync-*` branch mirrors it into the year's private repo
   (`sync.yml`).

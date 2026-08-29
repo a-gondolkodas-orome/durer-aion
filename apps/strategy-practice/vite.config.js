@@ -45,7 +45,7 @@ export default defineConfig(() => ({
   },
   // Served from `/jatekok/` on gyakorlo.durerinfo.hu, and from the site root by `npm run dev`.
   // The deploy workflow composes the whole prefix from one variable, so moving the site is one
-  // line there rather than an edit in every app. See docs/pages-consolidation.md.
+  // line there rather than an edit in every app. See scripts/assemble-site.mjs.
   base: process.env.SITE_BASE || '/',
   build: {
     rollupOptions: {
