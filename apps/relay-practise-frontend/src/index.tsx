@@ -14,10 +14,9 @@ Sentry.init({
   dsn: "https://c94695b2ab564e258774e5d0e5c97d79@sentry.durerinfo.hu/2",
   integrations: [Sentry.browserTracingIntegration()],
 
-  // Set tracesSampleRate to 1.0 to capture 100%
-  // of transactions for performance monitoring.
-  // We recommend adjusting this value in production
-  tracesSampleRate: 1.0,
+  // Error reports matter here; performance traces from a public practice site
+  // do not need full sampling.
+  tracesSampleRate: 0.1,
 });
 const root = document.getElementById('root');
 if (!root) throw new Error('Root container not found');

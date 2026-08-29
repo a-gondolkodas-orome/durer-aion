@@ -6,12 +6,11 @@ import { InProgressRelay } from "common-frontend";
 import { ClientFactoryRelay } from "./client_factory";
 import { loadProblemSet } from "./problems";
 
-const description = <p className="text-justify"></p>
+const description = <p></p>
 
 // The teamName is the join code of the selected test (`<year>_<H|D>_<category>`,
 // e.g. "12_D_C+"), so it identifies which problem set to load.
 export function RelayClient({ teamName }: {
-  category?: undefined | 'A' | 'B' | 'C' | 'D' | 'E' | 'C+' | 'D+' | 'E+',
   teamName?: string,
   matchID?: string,
   credentials?: string,

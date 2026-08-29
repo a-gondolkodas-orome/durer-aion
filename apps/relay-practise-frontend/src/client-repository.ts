@@ -30,27 +30,9 @@ export class OfflineClientRepository implements ClientRepository {
     return Promise.resolve("ok");
   }
 
+  // Relay-only app: nothing renders a strategy game, so nothing may call this.
   startStrategy(_joinCode: string): Promise<string> {
-    const teamState = getTeamStateFromLocal();
-    if (!(teamState.pageState === 'HOME' && teamState.strategyMatch.state === 'NOT STARTED' && teamState.relayMatch.state !== 'IN PROGRESS')) {
-      throw new Error(i18n.t('error.unexpected'));
-    }
-    const newState = {
-      ...teamState,
-      pageState: 'STRATEGY',
-      strategyMatch: {
-        state: 'IN PROGRESS',
-        startAt: new Date(),
-        endAt: addMin(new Date(), 30),
-        matchID: "",
-      },
-    }
-    
-  sendGameData({component: "strategy", phase: "start"});
-    localStorage.setItem(teamStateStorageKey(),
-      JSON.stringify(newState)
-    );
-    return Promise.resolve("ok");
+    throw Error("NOT call this");
   }
 
   toHome(_joinCode: string): Promise<string> {
@@ -64,14 +46,6 @@ export class OfflineClientRepository implements ClientRepository {
         state: "FINISHED",
         endAt: new Date(),
         score: score,
-      }
-    }
-    if (teamState.strategyMatch.state === "IN PROGRESS"){
-      newState.strategyMatch = {
-        ...teamState.strategyMatch,
-        state: "FINISHED",
-        endAt: new Date(),
-        score: Number(localStorage.getItem("StrategyPoints")),
       }
     }
     localStorage.setItem(teamStateStorageKey(), JSON.stringify(newState));
