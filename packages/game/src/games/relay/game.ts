@@ -25,8 +25,9 @@ export interface MyGameState {
 
 const lengthOfCompetition = 60 * 60; // seconds
 
-// What the wrapper reports after each answered step; hosts accept a superset
-// of this shape (the offline frontend's SendGameDataParams).
+// What the wrapper reports after each answered step and when the play phase
+// ends; hosts accept a superset of this shape (the offline frontend's
+// SendGameDataParams).
 export interface RelayStepReport {
   component: "relay";
   phase: "step";
@@ -35,7 +36,16 @@ export interface RelayStepReport {
   ctx: Ctx;
 }
 
-export function RelayWrapper(sendRelayFunction: (_report: RelayStepReport) => void = () => undefined): Game<MyGameState> {
+export interface RelayEndReport {
+  component: "relay";
+  phase: "end";
+  G: MyGameState;
+  ctx: Ctx;
+}
+
+export type RelayReport = RelayStepReport | RelayEndReport;
+
+export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void = () => undefined): Game<MyGameState> {
   const GameRelay: Game<MyGameState> = {
     name: "relay",
     setup: () => {
@@ -122,10 +132,8 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayStepReport) => vo
             }
           }
         },
-        onEnd: ({G, _ctx, _playerID, _events, _random, _log}) => {
-          if (typeof localStorage !== "undefined") {
-            localStorage.setItem("RelayPoints", G.points.toString());
-          }
+        onEnd: ({G, ctx, _playerID, _events, _random, _log}) => {
+          sendRelayFunction({component: "relay", phase: "end", G: G, ctx: ctx});
         },
         moves: {
           newProblem({ G, _ctx, playerID, events }, problemText: string, nextProblemMaxPoints: number, correctnessPreviousAnswer: boolean, url: string) {

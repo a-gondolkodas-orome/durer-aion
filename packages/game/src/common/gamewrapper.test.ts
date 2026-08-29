@@ -138,6 +138,38 @@ describe("gameWrapper high-level logic", () => {
     expect(client.getState()?.G.points).toStrictEqual(12);
   });
 
+  // The offline app persists the score from these reports (issue #168), so a
+  // play-phase exit that stops reporting silently zeroes practice scores.
+  // G is an immer draft revoked after the reducer returns, so the report's
+  // values are copied at call time — as the real consumers read them.
+  test("reports the end of each round with the current points", () => {
+    const reports: { phase: string; points: number }[] = [];
+    const client = Client({
+      game: gameWrapper(createGameWithoutStartingPosition(setup), (report) => {
+        reports.push({ phase: report.phase, points: report.G.points });
+      }),
+      numPlayers: 2,
+    });
+    client.start();
+    client.moves.chooseNewGameType("live");
+    client.moves.setStartingPosition({ data: "startingPosition" });
+    client.moves.chooseRole("0");
+
+    client.moves.win();
+
+    client.moves.chooseNewGameType("live");
+    client.moves.setStartingPosition({ data: "startingPosition" });
+    client.moves.chooseRole("0");
+
+    client.moves.win();
+
+    const endReports = reports.filter((report) => report.phase === "end");
+    expect(endReports).toStrictEqual([
+      { phase: "end", points: 0 },
+      { phase: "end", points: 12 },
+    ]);
+  });
+
   test("win in test", () => {
     const client = Client({ game: wrappedGame, numPlayers: 2 });
     client.start();
