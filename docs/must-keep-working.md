@@ -45,12 +45,12 @@ below.
   serving stack, team import runs inside the container, and Sentry receives
   events.
 
-## Offline practice build
+## Offline dry-run build (`/proba-verseny/`)
 
 - The gh-pages build serves the competition games with the in-browser bot and
   localStorage persistence that survives a reload.
 
-## Practice site
+## Strategy practice site
 
 *(Applies from the subtree merge in PR 0.2 on, when durer-jatekok became a
 workspace — `apps/practice` then, `apps/strategy-practice` since the rename.)*
@@ -69,7 +69,8 @@ why this matters.
   (`sync.yml`).
 - A competition game can be developed and deployed from the private repo with
   zero trace in the public repo.
-- The post-competition merge-back PR publishes that game as a practice game.
+- The post-competition merge-back PR publishes that game as a strategy
+  practice game.
 
 ## Developer workflows
 

@@ -155,7 +155,7 @@ instead of being archived.
 
 ## Analytics: what the move does to umami
 
-The practice site is tracked by self-hosted umami at `umami.durerinfo.hu`,
+The strategy practice site is tracked by self-hosted umami at `umami.durerinfo.hu`,
 loaded from `apps/strategy-practice/index.html`. Two halves, and only one of them is a
 problem.
 

@@ -10,17 +10,25 @@ This is a **Turborepo monorepo** with npm workspaces:
 apps/
   online-frontend/    # React frontend for multiplayer (Vite)
   online-backend/     # Node.js server with boardgame.io + Koa
-  offline-frontend/   # Standalone practice version (Vite)
-  strategy-practice/  # the public strategy game practice site (from the durer-jatekok repo)
+  offline-frontend/   # the offline dry run, served at /proba-verseny/ (Vite)
+  relay-practise-frontend/  # the public relay practice site, served at /valto/
+  strategy-practice/  # the public strategy game practice site (from the durer-jatekok repo), served at /jatekok/
 packages/
   game/               # Game logic (boardgame.io games); strategy games carry their bot and board in their own folder
   strategy/           # AI/bot strategy for the relay game (strategy games keep theirs in packages/game)
-  engine/             # the practice site's strategy-game engine: rules, moves, bots, match state, no framework
-  games/              # competition games in the practice engine's format; only strategy-practice consumes it
+  engine/             # the strategy practice site's game engine: rules, moves, bots, match state, no framework
+  games/              # competition games in that engine's format; only strategy-practice consumes it
   common-frontend/    # Shared React components
   schemas/            # TypeScript models/types
 pages/                # static content the Pages deploy serves but no app builds
 ```
+
+**"Practice" alone is ambiguous — say which one.** The *strategy practice*
+site (`apps/strategy-practice`, `/jatekok/`), the *relay practice* site
+(`apps/relay-practise-frontend`, `/valto/`), and the offline *dry run*
+(`apps/offline-frontend`, `/proba-verseny/`) are three different apps. The
+first two are the practice sites; the dry run is a rehearsal of the
+competition round, not a practice site.
 
 **`apps/strategy-practice` is a workspace, but not like the others.** One root `npm ci`
 installs it, and turbo builds and typechecks it with everything else — but it
@@ -36,7 +44,7 @@ root; from a workspace directory npm installs that workspace's subtree and
 leaves the root's own dependencies unmet, which the other apps then fail to
 build against. It exits 0 while doing it.
 
-A plan to replace boardgame.io with practice's engine was drafted and then
+A plan to replace boardgame.io with the strategy practice engine was drafted and then
 deprioritized — upstream is actively maintained again (issue #277); don't
 build toward that replacement.
 [`docs/must-keep-working.md`](docs/must-keep-working.md) is the standing
@@ -76,8 +84,11 @@ npm run dev:server         # Backend on :8000 (terminal 2)
 npm run dev:online         # Frontend on :5173 (terminal 3)
 npm run teams:import:local
 
-# Run offline frontend (practice mode)
+# Run offline frontend (the /proba-verseny/ dry run)
 npm run dev:offline
+
+# Run the relay practice site (/valto/)
+npm run dev:relay-practice
 
 # Build all packages
 npm run build
@@ -116,7 +127,7 @@ works* — how to exercise each item of `docs/must-keep-working.md` by hand.
 ## Creating a New Game
 
 The steps below are for a game in the *live competition* (boardgame.io). For
-a game on the *practice* site, the `new-game` skill under `apps/strategy-practice` is
+a game on the *strategy practice* site, the `new-game` skill under `apps/strategy-practice` is
 the route — there a game is one self-contained folder: gameplay, bot, curated
 start boards, board client and specs together.
 
@@ -136,7 +147,7 @@ start boards, board client and specs together.
 
 **The live client must not ship the bot.** `apps/online-frontend` never
 imports the strategy exports — only the backend does, and the offline
-practice build deliberately does (its bot runs in the browser, after the
+dry-run build deliberately does (its bot runs in the browser, after the
 game is public). Tree-shaking of the `game` package's ESM build is all that
 keeps the bot out of the served bundle, so one stray import from
 `strategy.ts` into a board hands every competitor the bot's tables. No CI
@@ -217,8 +228,9 @@ mirror works, and what to set up when the year's repo is created.
 - Games are organized by type: `strategy/` (two-player), `relay/` (team relay)
 - Each game's folder exports its game wrapper, strategy wrapper and board
   through its `index.ts`
-- Use Hungarian for user-facing text (competition is in Hungarian); both
-  practice sites also offer English through their own language switchers
+- Use Hungarian for user-facing text (competition is in Hungarian); the
+  strategy and relay practice sites also offer English through their own
+  language switchers
 - Winner is tracked in `G.winner` state field
 - Comment what is not evident from the code — a rule the condition alone does
   not imply, a non-obvious invariant, why an apparently redundant branch
