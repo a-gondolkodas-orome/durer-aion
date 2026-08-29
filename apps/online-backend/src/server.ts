@@ -131,8 +131,15 @@ if (argv[2] === "import") {
 
   server.app.on("error", (err, ctx) => {
     Sentry.withScope(function (scope: Sentry.Scope) {
-      scope.addEventProcessor(function (event: Sentry.Event) {
-        return Sentry.addRequestDataToEvent(event, ctx.request);
+      // addRequestDataToEvent is gone since v9; the default requestData
+      // integration picks the request up from this metadata key instead.
+      scope.setSDKProcessingMetadata({
+        normalizedRequest: {
+          url: ctx.request.href,
+          method: ctx.request.method,
+          query_string: ctx.request.querystring,
+          headers: ctx.request.headers,
+        },
       });
       Sentry.captureException(err);
     });

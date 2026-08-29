@@ -18,7 +18,7 @@
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
     "@mui/material": "^5.16.7",
-    "@sentry/react": "^7.16.0",
+    "@sentry/react": "^10.72.0",
     "boardgame.io": "0.50.*",
     "buffer": "^6.0.3",
     "common-frontend": "*",
