@@ -62,7 +62,7 @@ export function InProgressRelay({ G, ctx, moves, maxPointsList, selectRoundOnEnd
     <>
       <Dialog 
         maxWidth={false} 
-        PaperProps={{
+        slotProps={{ paper: {
           sx: {
             marginLeft: {
               xs: 0,
@@ -78,7 +78,7 @@ export function InProgressRelay({ G, ctx, moves, maxPointsList, selectRoundOnEnd
             },
             backgroundColor: theme.palette.background.paper,
           }
-        }}
+        } }}
         open={
           finished
         } onClose={() => void backToHome()}>

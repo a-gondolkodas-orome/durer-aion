@@ -25,7 +25,6 @@
     "welcome": "Dear Team <i>{{tname}}</i>, welcome to the online round!"
   },
   "error": {
-    "notFound": "This page was not found.",
     "unexpected": "An unexpected error occurred"
   },
   "general": {
@@ -33,7 +32,6 @@
     "points_one": "1 point",
     "points_other": "{{count}} points",
     "remainingTime": "Remaining time",
-    "returnHome": "Back to main page",
     "warning": {
       "timeNotMatch": "Your computer's clock is not synchronized with the server's clock, the displayed remaining time is not perfect, reloading the page may solve the problem",
       "timeNotReal": "The clock is for informational purposes only. You will see a different time on other devices and browsers, but we will still only consider answers received on time."

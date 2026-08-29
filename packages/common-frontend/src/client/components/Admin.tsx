@@ -1,8 +1,8 @@
 import { Stack } from '@mui/system';
 import { useAddMinutes, useAll, useRemoveTeam } from '../hooks/user-hooks';
-import { Button, Dialog, Table, TableCell, TableRow, IconButton } from '@mui/material';
+import { Button, Dialog, Table, TableBody, TableCell, TableHead, TableRow, IconButton } from '@mui/material';
 import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import useSWR from 'swr';
 import { DataGrid } from '@mui/x-data-grid';
 import { TeamModelDto } from '../dto/TeamStateDto';
@@ -56,7 +56,7 @@ export function Admin(props: {teamId?: string}) {
     }} data-testid="adminRoot">
       <Dialog 
         maxWidth={false} 
-        PaperProps={{
+        slotProps={{ paper: {
           sx: {
             marginLeft: {
               xs: 0,
@@ -71,7 +71,7 @@ export function Admin(props: {teamId?: string}) {
               md: 'calc(100% - 64px)'
             },
           }
-        }}
+        } }}
         open={
           selectedRow != null
         } onClose={() => {
@@ -324,26 +324,30 @@ function Stats(props: {data: TeamModelDto[]}) {
     }
   })
   return <Table>
-    <TableRow>
-      <TableCell>Kategória</TableCell>
-      <TableCell>Összesen</TableCell>
-      <TableCell>Váltó</TableCell>
-      <TableCell>Stratégiás</TableCell>
-      <TableCell>Teljes verseny</TableCell>
-      <TableCell>Relay-Pontszámok</TableCell>
-      <TableCell>Strategy-Pontszámok</TableCell>
-    </TableRow>
-    {stat.map(s=> (
+    <TableHead>
       <TableRow>
-        <TableCell>{s.category}</TableCell>
-        <TableCell>{s.all}</TableCell>
-        <TableCell><Progress notStarted={s.all - s.relayInProgress - s.relay} inProgress={s.relayInProgress} finished={s.relay}/></TableCell>
-        <TableCell><Progress notStarted={s.all - s.strategyInProgress - s.strategy} inProgress={s.strategyInProgress} finished={s.strategy}/></TableCell>
-        <TableCell><Progress notStarted={s.notStarted} inProgress={s.all - s.notStarted - s.finished} finished={s.finished}/></TableCell>
-        <TableCell>{s.relayPoints.sort((a, b)=>a.point-b.point).map(it=><>{it.point}: {it.count} db <br/></>)}</TableCell>
-        <TableCell>{s.strategyPoints.sort((a, b)=>a.point-b.point).map(it=><>{it.point}: {it.count} db <br/></>)}</TableCell>
+        <TableCell>Kategória</TableCell>
+        <TableCell>Összesen</TableCell>
+        <TableCell>Váltó</TableCell>
+        <TableCell>Stratégiás</TableCell>
+        <TableCell>Teljes verseny</TableCell>
+        <TableCell>Relay-Pontszámok</TableCell>
+        <TableCell>Strategy-Pontszámok</TableCell>
       </TableRow>
-    ))}
+    </TableHead>
+    <TableBody>
+      {stat.map(s=> (
+        <TableRow key={s.category}>
+          <TableCell>{s.category}</TableCell>
+          <TableCell>{s.all}</TableCell>
+          <TableCell><Progress notStarted={s.all - s.relayInProgress - s.relay} inProgress={s.relayInProgress} finished={s.relay}/></TableCell>
+          <TableCell><Progress notStarted={s.all - s.strategyInProgress - s.strategy} inProgress={s.strategyInProgress} finished={s.strategy}/></TableCell>
+          <TableCell><Progress notStarted={s.notStarted} inProgress={s.all - s.notStarted - s.finished} finished={s.finished}/></TableCell>
+          <TableCell>{s.relayPoints.sort((a, b)=>a.point-b.point).map(it=><Fragment key={it.point}>{it.point}: {it.count} db <br/></Fragment>)}</TableCell>
+          <TableCell>{s.strategyPoints.sort((a, b)=>a.point-b.point).map(it=><Fragment key={it.point}>{it.point}: {it.count} db <br/></Fragment>)}</TableCell>
+        </TableRow>
+      ))}
+    </TableBody>
   </Table>
 }
 

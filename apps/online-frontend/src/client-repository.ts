@@ -34,7 +34,7 @@ export class RealClientRepository implements ClientRepository {
     } catch (e: unknown) {
       console.error(e)
       // here we can set message according to status (or data)
-      throw new Error('Váratlan hiba történt');
+      throw new Error('Váratlan hiba történt', { cause: e });
     }
 
     if (result.data.relayMatch.startAt) {
@@ -65,10 +65,10 @@ export class RealClientRepository implements ClientRepository {
     } catch (e: unknown) {
       const err = makeAxiosError(e);
       if(err.response?.status === 404) {
-        throw new Error('Nem létező kód');
+        throw new Error('Nem létező kód', { cause: e });
       }
       // here we can set message according to status (or data)
-      throw new Error('Váratlan hiba történt');
+      throw new Error('Váratlan hiba történt', { cause: e });
     }
     
     console.log("joinWithCode result", result);
@@ -89,7 +89,7 @@ export class RealClientRepository implements ClientRepository {
       const err = makeAxiosError(e)
       console.error(err.message)
       // here we can set message according to status (or data)
-      throw new Error('Váratlan hiba történt');
+      throw new Error('Váratlan hiba történt', { cause: e });
     }
 
     return result.data as string;
@@ -108,7 +108,7 @@ export class RealClientRepository implements ClientRepository {
       const err = makeAxiosError(e);
       console.error(err.message)
       // here we can set message according to status (or data)
-      throw new Error('Váratlan hiba történt');
+      throw new Error('Váratlan hiba történt', { cause: e });
     }
 
     return result.data as string;
@@ -127,7 +127,7 @@ export class RealClientRepository implements ClientRepository {
       const err = makeAxiosError(e);
       console.error(err.message)
       // here we can set message according to status (or data)
-      throw new Error('Váratlan hiba történt');
+      throw new Error('Váratlan hiba történt', { cause: e });
     }
 
     return result.data as string;
@@ -143,7 +143,7 @@ export class RealClientRepository implements ClientRepository {
       const err = makeAxiosError(e);
       console.error(err.message)
       // here we can set message according to status (or data)
-      throw new Error('Váratlan hiba történt');
+      throw new Error('Váratlan hiba történt', { cause: e });
     }
 
     return result.data as TeamModelDto[];
@@ -160,7 +160,7 @@ export class RealClientRepository implements ClientRepository {
       const err = makeAxiosError(e);
       console.error(err.message)
       // here we can set message according to status (or data)
-      throw new Error('Váratlan hiba történt');
+      throw new Error('Váratlan hiba történt', { cause: e });
     }
     return result.data as TeamModelDto;
   }
@@ -176,7 +176,7 @@ export class RealClientRepository implements ClientRepository {
       const err = makeAxiosError(e);
       console.error(err.message)
       // here we can set message according to status (or data)
-      throw new Error('Váratlan hiba történt');
+      throw new Error('Váratlan hiba történt', { cause: e });
     }
     return result.data as TeamModelDto;
   }
@@ -194,9 +194,9 @@ export class RealClientRepository implements ClientRepository {
       console.error(err.message)
       // here we can set message according to status (or data)
       if (err.code === "501") {
-        throw new Error('Lejárt játékot már nem lehet módosítani');
+        throw new Error('Lejárt játékot már nem lehet módosítani', { cause: e });
       }
-      throw new Error('Váratlan hiba történt');
+      throw new Error('Váratlan hiba történt', { cause: e });
     }
     return result.data;
   }
@@ -212,7 +212,7 @@ export class RealClientRepository implements ClientRepository {
       const err = makeAxiosError(e);
       console.error(err.message)
       // here we can set message according to status (or data)
-      throw new Error('Váratlan hiba történt');
+      throw new Error('Váratlan hiba történt', { cause: e });
     }
     return result.data as MatchStateDto;
   }
@@ -228,7 +228,7 @@ export class RealClientRepository implements ClientRepository {
       const err = makeAxiosError(e);
       console.error(err.message)
       // here we can set message according to status (or data)
-      throw new Error('Váratlan hiba történt');
+      throw new Error('Váratlan hiba történt', { cause: e });
     }
     return result.data;
   }

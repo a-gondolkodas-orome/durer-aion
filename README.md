@@ -237,8 +237,8 @@ the site, because the workflow going green *is* the cutover: there is no staging
 step between it and gyakorlo.durerinfo.hu.
 
 The one thing it cannot reproduce is the upload itself, and GitHub's own serving
-behaviour around 404s. CI builds in `node:24.11.1`; to match that too, run the
-same command under `docker run -v "$PWD":/w -w /w node:24.11.1 npm run site:build`.
+behaviour around 404s. CI builds in `node:24.20.0`; to match that too, run the
+same command under `docker run -v "$PWD":/w -w /w node:24.20.0 npm run site:build`.
 
 ## The strategy practice site (`apps/strategy-practice`)
 
@@ -320,6 +320,30 @@ report rather than dependabot or renovate: the header comment of
 `package.json` names — Playwright and `apps/strategy-practice`'s Node — and
 [that app's README](apps/strategy-practice/README.md#project-setup) lists where;
 `npm run check:versions --workspace=strategy-practice` fails until they agree.
+
+### Held back deliberately
+
+The report will keep listing these as behind; that is it doing its job of
+remembering. Each stays where it is until the named blocker moves (#317):
+
+- **`koa` 2 → 3**: the server's Koa app is constructed by boardgame.io, which
+  pins `koa@^2` — the backend's own `koa` entry only has to agree with the
+  instance it receives. Nothing here constructs a Koa 3 app to upgrade.
+- **`@koa/router` 10 → 15**: same shape — the backend never constructs a
+  router, it types `server.router`, boardgame.io's own `@koa/router@10`
+  instance. v15's types do not even structurally match that object.
+- **`typescript` 6.0 → 7**: `typescript-eslint` caps `typescript` at
+  `<6.1.0`. 6.0 is the highest version inside the cap; it deprecates the
+  `node10` module resolution eight tsconfigs still use, bridged with
+  `ignoreDeprecations: "6.0"` until the resolution migration happens as its
+  own change — that migration is also the real prerequisite for 7.0, where
+  `node10` stops working entirely.
+- **`@types/node` 24 → 26**: not a blocker but a policy — the types track the
+  Node major the repo actually runs (`.nvmrc`), so they move when Node does.
+
+Both halves of the boardgame.io situation — why its transitive advisories
+cannot be fixed from here and why `npm audit fix --force` must never be run —
+are in [`CLAUDE.md`](CLAUDE.md).
 
 # Configuration you may want to change
 

@@ -14,6 +14,10 @@
     "lib": ["dom", "dom.iterable", "esnext"],
     "module": "esnext",
     "moduleResolution": "node",
+    // node10 resolution is deprecated and stops working in TS 7; migrating these
+    // configs off it (bundler for the Vite-built code, nodenext for the backend) is
+    // its own change. This is TS 6\'s sanctioned bridge until then.
+    "ignoreDeprecations": "6.0",
     "noEmit": true,
     "noFallthroughCasesInSwitch": true,
     "resolveJsonModule": true,

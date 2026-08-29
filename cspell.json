@@ -43,6 +43,7 @@
     "nameid",
     "notistack",
     "onwarn",
+    "prebundle",
     "prevrelayid",
     "prevstratid",
     "socketio",
