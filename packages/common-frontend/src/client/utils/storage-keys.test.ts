@@ -36,4 +36,21 @@ describe("storage keys", () => {
     expect(localStorage.getItem("kjqAEKeFkMpOvOZrzcvp")).toStrictEqual("other app's guid");
     expect(localStorage.getItem("bgio_relay_state")).toStrictEqual("other app's saved match");
   });
+
+  // Regression: the removal loop incremented its index after removeItem, which
+  // shifts the remaining keys down one slot — so of adjacent matching keys,
+  // every other one survived logout (issue #382).
+  test("logout removes every matching key, not every other one", () => {
+    localStorage.clear();
+
+    const matchingKeys = ["relay_6_d_a_initial", "relay_6_d_a_state", "relay_6_d_a_metadata", "relay_6_d_a_log"]
+      .map(suffix => bgioStoragePrefix() + suffix);
+    matchingKeys.forEach(key => localStorage.setItem(key, "own saved match"));
+    localStorage.setItem("bgio_relay_state", "other app's saved match");
+
+    new UserModel({} as ClientRepository).logout();
+
+    matchingKeys.forEach(key => expect(localStorage.getItem(key)).toBeNull());
+    expect(localStorage.getItem("bgio_relay_state")).toStrictEqual("other app's saved match");
+  });
 });

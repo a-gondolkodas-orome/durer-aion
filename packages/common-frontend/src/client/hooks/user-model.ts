@@ -3,15 +3,12 @@ import type { MatchStateDto, TeamModelDto } from "../dto/TeamStateDto";
 import { bgioStoragePrefix, guidStorageKey, teamStateStorageKey } from "../utils/storage-keys";
 
 function removeGameStateLocalStorage() {
-  let idx = 0;
-  let key = localStorage.key(idx);
-  while (key !== null) {
-    if (key.startsWith(bgioStoragePrefix())) {
-      localStorage.removeItem(key);
-    }
-    idx++;
-    key = localStorage.key(idx);
-  }
+  // Collect first, remove after: removeItem inside a key(idx) loop shifts the
+  // remaining keys down, so every key right after a removed one is skipped.
+  const keys = [...Array(localStorage.length).keys()]
+    .map(idx => localStorage.key(idx))
+    .filter((key): key is string => key !== null && key.startsWith(bgioStoragePrefix()));
+  keys.forEach(key => localStorage.removeItem(key));
 }
 
 export class UserModel {
