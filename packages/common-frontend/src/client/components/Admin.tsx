@@ -56,7 +56,7 @@ export function Admin(props: {teamId?: string}) {
     }} data-testid="adminRoot">
       <Dialog 
         maxWidth={false} 
-        PaperProps={{
+        slotProps={{ paper: {
           sx: {
             marginLeft: {
               xs: 0,
@@ -71,7 +71,7 @@ export function Admin(props: {teamId?: string}) {
               md: 'calc(100% - 64px)'
             },
           }
-        }}
+        } }}
         open={
           selectedRow != null
         } onClose={() => {

@@ -51,7 +51,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
       <>
         <Dialog
           maxWidth={false}
-          PaperProps={{
+          slotProps={{ paper: {
             sx: {
               marginLeft: {
                 xs: 0,
@@ -67,7 +67,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
               },
               backgroundColor: theme.palette.background.paper,
             }
-          }}
+          } }}
           open={
             finished
           } onClose={() => void backToHome()}>
