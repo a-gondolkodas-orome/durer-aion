@@ -38,5 +38,6 @@ const map = JSON.parse(fs.readFileSync('/tmp/map.json', 'utf8'));
 console.log(map.sourcesContent[map.sources.indexOf('client/relay-rounds.ts')]);
 ```
 
-The reasoning in full is in
-[`docs/pages-consolidation.md`](../docs/pages-consolidation.md).
+The reasoning in full is in `docs/pages-consolidation.md`, deleted — like the
+snapshot — once the consolidation was done, and readable the same way, from git
+history.

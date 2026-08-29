@@ -255,17 +255,12 @@ The b) version is deployed on github pages. The site will be available at https:
 
 ## Edit package.json
 
-Find the 
+In `apps/offline-frontend/package.json`, replace the `repository-name`
+placeholder in the predeploy line with the year's actual repository name:
 ```
-  "scripts": {
-    "predeploy": "cross-env PUBLIC_URL=/durer-aion REACT_APP_WHICH_VERSION=c npm run build",
+    "predeploy": "cross-env PUBLIC_URL=/repository-name npm run build",
 ```
-lines in the package.json file, and change the predeploy line to 
-```
-    "predeploy": "cross-env PUBLIC_URL=/repository-name REACT_APP_WHICH_VERSION=c npm run build",
-```
-*Note: REACT_APP_WHICH_VERSION can be anything else than 'gh-pages'. If it's set to 'gh pages' the site will display a list of links to games, determined by src/index.tsx*
-<br>You do **not** need to commit the change just save it locally.
+You do **not** need to commit the change, just save it locally.
 ## Deploy to pages
 
 Run

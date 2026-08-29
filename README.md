@@ -218,8 +218,10 @@ with the two practice sites below.
 npm run dev:relay-practice
 ```
 
-`http://localhost:5173`: the `/valto/` subpage of the Pages site — pick a past
-year's relay problem set and play it, with no backend.
+`http://localhost:5173`, again with no backend: the `/valto/` subpage of the
+Pages site, where #224 replaced the frozen 2023 build. Pick a past year's relay
+problem set and play it through against the in-browser bot, with progress in
+localStorage — reload mid-round to check it resumes.
 
 ## The public Pages site
 
@@ -325,6 +327,7 @@ locally and are meaningless anywhere else.
 | `apps/online-backend/.env` | the same settings for `npm run dev:server`, plus `DATABASE_URL` |
 | `apps/online-frontend/.env` | accent colour and language of the competition site |
 | `apps/offline-frontend/.env` | the same, for the offline build |
+| `apps/relay-practise-frontend/.env` | the same, for the relay practice site |
 | `.env.local` | `VITE_FEEDBACK_URL`, read by `common-frontend`'s build |
 
 Whatever reads one of them takes the change at start: vite does not pick up

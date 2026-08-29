@@ -8,7 +8,7 @@ export default defineConfig(() => {
 
   return {
     // SITE_BASE is the Pages deploy's prefix, composed by the workflow from one variable so the
-    // subpages move together (docs/pages-consolidation.md). This app is served from /valto/.
+    // subpages move together (scripts/assemble-site.mjs). This app is served from /valto/.
     base: process.env.SITE_BASE || process.env.PUBLIC_URL || '/',
     plugins: [react()],
     resolve: {

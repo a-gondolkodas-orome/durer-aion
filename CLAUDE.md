@@ -191,6 +191,7 @@ The opening position has two homes, and `GameMixin.startingPosition` in
 
 - `apps/online-backend/.env` - Backend config (copy from `.env.sample`)
 - `apps/offline-frontend/.env` - Offline frontend config
+- `apps/relay-practise-frontend/.env` - Relay practice frontend config
 - `.env.docker`, `.env.local` - Docker compose config (copy from the `.sample` files)
 
 `npm run setup` creates all of them from their samples, never overwriting one
@@ -213,8 +214,7 @@ push to `main`: a home page plus `/jatekok/` (strategy practice), `/valto/`
 (relay practice) and `/proba-verseny/` (the offline dry run). The whole prefix
 comes from one `SITE_ROOT` constant in `scripts/assemble-site.mjs`, which both
 the workflow and `npm run site:build` call — so `npm run site:serve` previews
-the deploy's own code, not a copy of it. See
-[`docs/pages-consolidation.md`](docs/pages-consolidation.md).
+the deploy's own code, not a copy of it.
 
 **A push to `main` deploys the public site.** There is no staging step and no
 separate approval — the workflow going green is the cutover.
