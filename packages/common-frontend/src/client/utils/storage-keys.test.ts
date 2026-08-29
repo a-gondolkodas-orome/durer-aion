@@ -1,3 +1,4 @@
+// cspell:ignore aegnjrlearnjla Zrzcvp
 // @vitest-environment jsdom
 import { describe, test, expect } from "vitest";
 import { setLocalStorageNamespace, teamStateStorageKey, guidStorageKey, bgioStoragePrefix, relayPointsStorageKey, strategyPointsStorageKey } from "./storage-keys";

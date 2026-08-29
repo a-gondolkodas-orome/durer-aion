@@ -1,3 +1,4 @@
+// cspell:ignore asjdgaskjd
 
 import { MatchStateDto, TeamModelDto } from "./dto/TeamStateDto";
 import { createContext, useContext } from 'react';

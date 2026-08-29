@@ -281,13 +281,17 @@ npm run typecheck
 npm test
 npm run build
 npm run i18n:check
+npm run spell-check
 ```
 
-Those are the five jobs in `.github/workflows/ci.yml`; `apps/strategy-practice`
+Those are the six jobs in `.github/workflows/ci.yml`; `apps/strategy-practice`
 has its own two (`practice-test` and `patch-coverage`), which run from its
 directory.
-`npm run spell-check` exists but is not one of them — it reports on the
-Hungarian problem text as well, so it is a thing to read, not a gate.
+`npm run spell-check` checks English and Hungarian alike (via
+`@cspell/dict-hu-hu`, with both British and American spellings accepted); the
+big files of past competition problem text are ignored as content rather than
+code, and project vocabulary lives in `cspell.json`'s `words` list — the same
+config the VS Code Code Spell Checker extension reads.
 
 ## Dependency updates
 

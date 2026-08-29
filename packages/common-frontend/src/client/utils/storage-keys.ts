@@ -1,3 +1,4 @@
+// cspell:ignore aegnjrlearnjla Zrzcvp
 // This module stays import-free: the unit tests load it without the workspace
 // packages' dist builds, which the CI test job does not produce.
 

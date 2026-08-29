@@ -9,7 +9,7 @@
     "lint:turbo": "turbo lint",
     "start": "turbo start",
     "build": "turbo build",
-    "spell-check": "cspell \"**/*.{ts,mts,tsx}\" --no-progress",
+    "spell-check": "cspell \"**/*.{ts,mts,tsx}\" \"packages/common-frontend/public/locales/**/*.json\" --no-progress",
     "typecheck": "turbo typecheck",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -58,6 +58,7 @@
     "packages/*"
   ],
   "devDependencies": {
+    "@cspell/dict-hu-hu": "^1.1.2",
     "@eslint/js": "^9.37.0",
     "@lingual/i18n-check": "^0.9.5",
     "@testing-library/dom": "^10.4.1",
