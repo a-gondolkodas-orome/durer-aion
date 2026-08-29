@@ -288,10 +288,12 @@ Those are the six jobs in `.github/workflows/ci.yml`; `apps/strategy-practice`
 has its own two (`practice-test` and `patch-coverage`), which run from its
 directory.
 `npm run spell-check` checks English and Hungarian alike (via
-`@cspell/dict-hu-hu`, with both British and American spellings accepted); the
-big files of past competition problem text are ignored as content rather than
-code, and project vocabulary lives in `cspell.json`'s `words` list — the same
-config the VS Code Code Spell Checker extension reads.
+`@cspell/dict-hu-hu`, with both British and American spellings accepted),
+past competition problem text included. Technical vocabulary lives in
+`cspell.json`'s `words` list and the agglutinated Hungarian forms the
+dictionary misses in `hungarian-words.txt` — the same config the VS Code
+Code Spell Checker extension reads. Only `teamData.ts` (arbitrary team
+names) stays ignored as data.
 
 ## Dependency updates
 
