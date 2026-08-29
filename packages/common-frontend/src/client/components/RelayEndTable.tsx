@@ -1,4 +1,4 @@
-import { Button, Table, TableCell, TableRow } from '@mui/material';
+import { Button, Table, TableBody, TableCell, TableRow } from '@mui/material';
 import { Stack } from '@mui/system';
 import { Fragment } from 'react';
 import { useLogout, useRefreshTeamState, useToHome } from '../hooks/user-hooks';
@@ -93,6 +93,7 @@ export function RelayEndTable(props: {allPoints: number, task: {max: number, got
             fontSize: '11px',
         }
     }}>
+            <TableBody>
             {chunkTasks(props.task).map((chunk, chunkIdx)=><Fragment key={chunkIdx}>
               <TableRow>
                 <TableCell>{t('relay.endTable.task')}</TableCell>
@@ -107,6 +108,7 @@ export function RelayEndTable(props: {allPoints: number, task: {max: number, got
                 </TableCell>)}
             </TableRow>
             </Fragment>)}
+            </TableBody>
         </Table>
         <Stack sx={{
           marginTop: '25px',
@@ -127,7 +129,7 @@ export function RelayEndTable(props: {allPoints: number, task: {max: number, got
           }
         }}>
           {pointColours.map((colour, attempt) => (
-            <Stack sx={{display: 'flex' }}>
+            <Stack key={attempt} sx={{display: 'flex' }}>
               <Stack sx={{ backgroundColor: colour }}></Stack>
               <span>{attempt === 3 ? t('relay.endTable.wrong') : t('relay.endTable.try', {count: attempt + 1})}</span>
             </Stack>
@@ -186,62 +188,28 @@ export function RelayEndTableData(props: {allPoints: number, task: {max: number,
             fontSize: '11px',
         }
     }}>
-            <TableRow>
-                <TableCell>{t('relay.endTable.task')}</TableCell>
-                {props.task.slice(0, 10).map((data, idx)=><TableCell>
-                    {idx+1}.
-                </TableCell>)}
-            </TableRow>
-            <TableRow>
-                <TableCell>{t('relay.endTable.point')}</TableCell>
-                {props.task.slice(0, 10).map((data, _idx)=>{
-                    let currStyle = { backgroundColor: '#fff' };
-                    if(data.got !== null){
-                      if(data.max - data.got < 3) {
-                        currStyle = { backgroundColor: pointColours[data.max - data.got] }
-                      } else {
-                        currStyle = { backgroundColor: pointColours[3] }
-                      }
-                    }
-                return <TableCell sx={currStyle}>
-                    {data.got}
-                </TableCell>})}
-            </TableRow><TableRow>
-                <TableCell>Válaszok</TableCell>
-                {props.task.slice(0, 10).map((data, _idx)=>{
-                return <TableCell>
-                    {data.answers.join(", ")}
-                </TableCell>})}
-            </TableRow>
-            {props.task.length > 10 && <>
+            <TableBody>
+            {chunkTasks(props.task).map((chunk, chunkIdx)=><Fragment key={chunkIdx}>
               <TableRow>
                 <TableCell>{t('relay.endTable.task')}</TableCell>
-                {props.task.slice(10).map((data, idx)=><TableCell>
-                    {idx+11}.
+                {chunk.map((_data, idx)=><TableCell key={idx}>
+                    {chunkIdx*10 + idx+1}.
                 </TableCell>)}
             </TableRow>
             <TableRow>
                 <TableCell>{t('relay.endTable.point')}</TableCell>
-                {props.task.slice(10).map((data, _idx)=>{
-                    let currStyle = { backgroundColor: '#fff' };
-                    if(data.got !== null){
-                      if(data.max - data.got < 3) {
-                        currStyle = { backgroundColor: pointColours[data.max - data.got] }
-                      } else {
-                        currStyle = { backgroundColor: pointColours[3] }
-                      }
-                    }
-                return <TableCell sx={currStyle}>
+                {chunk.map((data, idx)=><TableCell key={idx} sx={pointCellStyle(data)}>
                     {data.got}
-                </TableCell>})}
-            </TableRow><TableRow>
-                <TableCell>Válaszok</TableCell>
-                {props.task.slice(10).map((data, _idx)=>{
-                return <TableCell>
-                    {data.answers.join(", ")}
-                </TableCell>})}
+                </TableCell>)}
             </TableRow>
-            </>}
+            <TableRow>
+                <TableCell>Válaszok</TableCell>
+                {chunk.map((data, idx)=><TableCell key={idx}>
+                    {data.answers.join(", ")}
+                </TableCell>)}
+            </TableRow>
+            </Fragment>)}
+            </TableBody>
         </Table>
   )
 }
