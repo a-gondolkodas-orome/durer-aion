@@ -21,3 +21,5 @@ export function setLocalStorageNamespace(appName: string) {
 export const teamStateStorageKey = () => namespace + LOCAL_STORAGE_TEAMSTATE;
 export const guidStorageKey = () => namespace + "kjqAEKeFkMpOvOZrzcvp";
 export const bgioStoragePrefix = () => namespace + BGIO_LOCALSTORAGE_PREFIX;
+export const relayPointsStorageKey = () => namespace + "RelayPoints";
+export const strategyPointsStorageKey = () => namespace + "StrategyPoints";

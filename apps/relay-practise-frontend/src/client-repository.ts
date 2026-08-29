@@ -1,4 +1,4 @@
-import { ClientRepository, teamStateStorageKey, TeamModelDto, MatchStateDto, BoardMoves } from "common-frontend";
+import { ClientRepository, relayPointsStorageKey, teamStateStorageKey, TeamModelDto, MatchStateDto, BoardMoves } from "common-frontend";
 import { teamData } from "./teamData";
 import { sendDataLogin, sendGameData } from "./sendData";
 import { readStoredTeamState } from "./stored-team-state";
@@ -39,7 +39,7 @@ export class OfflineClientRepository implements ClientRepository {
     const teamState = getTeamStateFromLocal();
     const newState = {...teamState, pageState: 'HOME'}
     if (teamState.relayMatch.state === "IN PROGRESS"){
-      const score = Number(localStorage.getItem("RelayPoints"))
+      const score = Number(localStorage.getItem(relayPointsStorageKey()))
       sendGameData({component: "relay", phase: "end", G: {points: score}})
       newState.relayMatch = {
         ...teamState.relayMatch,

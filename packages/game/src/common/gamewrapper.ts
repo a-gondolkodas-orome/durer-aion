@@ -130,9 +130,6 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
           },
         },
         onEnd: ({G, ctx}) => {
-          if (typeof localStorage !== "undefined") {
-            localStorage.setItem("StrategyPoints", G.points.toString());
-          }
           sendStrategyFunction({component: "strategy", phase: "end", G: G, ctx: ctx});
         }
       },
