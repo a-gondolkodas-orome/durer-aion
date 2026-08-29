@@ -60,7 +60,7 @@ export function sendDataLogin(teamState: TeamModelDto){
   sendData(code+"_"+randomID+"_login_"+now(), "code");
 }
 
-interface SendGameDataParams {
+export interface SendGameDataParams {
   component: "relay" | "strategy";
   phase: "start" | "step" | "end";
   answer?: number | null;

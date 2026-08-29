@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, test, expect } from "vitest";
-import { setLocalStorageNamespace, teamStateStorageKey, guidStorageKey, bgioStoragePrefix } from "./storage-keys";
+import { setLocalStorageNamespace, teamStateStorageKey, guidStorageKey, bgioStoragePrefix, relayPointsStorageKey, strategyPointsStorageKey } from "./storage-keys";
 import { UserModel } from "../hooks/user-model";
 import type { ClientRepository } from "../api-repository-interface";
 
@@ -12,6 +12,8 @@ describe("storage keys", () => {
     expect(teamStateStorageKey()).toStrictEqual("aegnjrlearnjla");
     expect(guidStorageKey()).toStrictEqual("kjqAEKeFkMpOvOZrzcvp");
     expect(bgioStoragePrefix()).toStrictEqual("bgio_");
+    expect(relayPointsStorageKey()).toStrictEqual("RelayPoints");
+    expect(strategyPointsStorageKey()).toStrictEqual("StrategyPoints");
   });
 
   // Regression: the apps at gyakorlo.durerinfo.hu shared every key, so a login
@@ -23,18 +25,26 @@ describe("storage keys", () => {
     localStorage.setItem("aegnjrlearnjla", "other app's team state");
     localStorage.setItem("kjqAEKeFkMpOvOZrzcvp", "other app's guid");
     localStorage.setItem("bgio_relay_state", "other app's saved match");
+    localStorage.setItem("RelayPoints", "other app's relay score");
+    localStorage.setItem("StrategyPoints", "other app's strategy score");
     localStorage.setItem(teamStateStorageKey(), "own team state");
     localStorage.setItem(guidStorageKey(), "own guid");
     localStorage.setItem(bgioStoragePrefix() + "relay_6_d_a_state", "own saved match");
+    localStorage.setItem(relayPointsStorageKey(), "own relay score");
+    localStorage.setItem(strategyPointsStorageKey(), "own strategy score");
 
     new UserModel({} as ClientRepository).logout();
 
     expect(localStorage.getItem(teamStateStorageKey())).toBeNull();
     expect(localStorage.getItem(guidStorageKey())).toBeNull();
     expect(localStorage.getItem(bgioStoragePrefix() + "relay_6_d_a_state")).toBeNull();
+    expect(localStorage.getItem(relayPointsStorageKey())).toBeNull();
+    expect(localStorage.getItem(strategyPointsStorageKey())).toBeNull();
     expect(localStorage.getItem("aegnjrlearnjla")).toStrictEqual("other app's team state");
     expect(localStorage.getItem("kjqAEKeFkMpOvOZrzcvp")).toStrictEqual("other app's guid");
     expect(localStorage.getItem("bgio_relay_state")).toStrictEqual("other app's saved match");
+    expect(localStorage.getItem("RelayPoints")).toStrictEqual("other app's relay score");
+    expect(localStorage.getItem("StrategyPoints")).toStrictEqual("other app's strategy score");
   });
 
   // Regression: the removal loop incremented its index after removeItem, which

@@ -5,7 +5,7 @@ import type {GameRelay, MyGameState as RelayGameState} from 'game';
 import { RelayWrapper } from 'game';
 import botWrapper from './botwrapper';
 import type { BotStrategy } from './botwrapper';
-import { sendGameData } from './sendData';
+import { handleGameReport } from './game-report';
 // Through the package entry, not the src path: a deep import would load a
 // second copy of the module, one the app's setLocalStorageNamespace never set.
 import { bgioStoragePrefix } from 'common-frontend';
@@ -20,7 +20,7 @@ export function ClientRelayWithBot(
   strategy: BotStrategy<RelayGameState, (number | string | boolean)[]>,
   _description: ReactNode){
   return Client({
-    game: RelayWrapper(sendGameData),
+    game: RelayWrapper(handleGameReport),
     board: board,
     multiplayer: Local(
       {

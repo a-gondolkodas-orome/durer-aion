@@ -1,6 +1,6 @@
 import type { ClientRepository } from "../api-repository-interface";
 import type { MatchStateDto, TeamModelDto } from "../dto/TeamStateDto";
-import { bgioStoragePrefix, guidStorageKey, teamStateStorageKey } from "../utils/storage-keys";
+import { bgioStoragePrefix, guidStorageKey, relayPointsStorageKey, strategyPointsStorageKey, teamStateStorageKey } from "../utils/storage-keys";
 
 function removeGameStateLocalStorage() {
   // Collect first, remove after: removeItem inside a key(idx) loop shifts the
@@ -123,8 +123,8 @@ export class UserModel {
   logout() {
     localStorage.removeItem(guidStorageKey());
     localStorage.removeItem(teamStateStorageKey());
-    localStorage.removeItem("RelayPoints");
-    localStorage.removeItem("StrategyPoints");
+    localStorage.removeItem(relayPointsStorageKey());
+    localStorage.removeItem(strategyPointsStorageKey());
     removeGameStateLocalStorage();
   }
 

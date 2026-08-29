@@ -8,7 +8,7 @@ import { RelayWrapper } from 'game';
 import { State } from 'boardgame.io';
 import botWrapper from './botwrapper';
 import type { BotStrategy } from './botwrapper';
-import { sendGameData } from './sendData';
+import { handleGameReport } from './game-report';
 import { BGIO_LOCALSTORAGE_PREFIX } from 'common-frontend/src/client/utils/util';
 import type { ReactNode } from 'react';
 //import { Debug } from 'boardgame.io/debug';
@@ -20,7 +20,7 @@ export function ClientWithBot<T_SpecificGameState,T_SpecificPosition>(
   description: ReactNode
   ){
   return Client({
-    game: gameWrapper(game, sendGameData),
+    game: gameWrapper(game, handleGameReport),
     board: boardWrapper(board, description),
     multiplayer: Local(
       {
@@ -42,7 +42,7 @@ export function ClientRelayWithBot(
   strategy: BotStrategy<RelayGameState, (number | string | boolean)[]>,
   _description: ReactNode){
   return Client({
-    game: RelayWrapper(sendGameData),
+    game: RelayWrapper(handleGameReport),
     board: board,
     multiplayer: Local(
       {
