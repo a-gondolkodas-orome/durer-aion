@@ -327,11 +327,10 @@ remembering. Each stays where it is until the named blocker moves (#317):
   router, it types `server.router`, boardgame.io's own `@koa/router@10`
   instance. v15's types do not even structurally match that object.
 - **`typescript` 6.0 → 7**: `typescript-eslint` caps `typescript` at
-  `<6.1.0`. 6.0 is the highest version inside the cap; it deprecates the
-  `node10` module resolution eight tsconfigs still use, bridged with
-  `ignoreDeprecations: "6.0"` until the resolution migration happens as its
-  own change — that migration is also the real prerequisite for 7.0, where
-  `node10` stops working entirely.
+  `<6.1.0`, and 6.0 is the highest version inside the cap. That cap is the
+  only remaining blocker: every tsconfig is off the `node10` resolution 7.0
+  removes (`bundler` for the Vite- and tsdown-built code, `nodenext` for the
+  backend).
 - **`@types/node` 24 → 26**: not a blocker but a policy — the types track the
   Node major the repo actually runs (`.nvmrc`), so they move when Node does.
 
