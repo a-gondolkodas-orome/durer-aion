@@ -326,11 +326,16 @@ remembering. Each stays where it is until the named blocker moves (#317):
 - **`@koa/router` 10 → 15**: same shape — the backend never constructs a
   router, it types `server.router`, boardgame.io's own `@koa/router@10`
   instance. v15's types do not even structurally match that object.
-- **`typescript` 6.0 → 7**: `typescript-eslint` caps `typescript` at
-  `<6.1.0`, and 6.0 is the highest version inside the cap. That cap is the
-  only remaining blocker: every tsconfig is off the `node10` resolution 7.0
-  removes (`bundler` for the Vite- and tsdown-built code, `nodenext` for the
-  backend).
+- **root `typescript` 6.0 → 7**: only the root copy is held. Every
+  compiling workspace names `typescript@^7` itself, so `tsc` — typecheck and
+  the backend build — is the native TS 7 compiler; the root copy exists for
+  `typescript-eslint`, which needs the TS 6 JS API that `typescript@7` no
+  longer ships (its main entry is version info only). It moves when
+  typescript-eslint supports TS ≥ 7.1
+  ([typescript-eslint#10940](https://github.com/typescript-eslint/typescript-eslint/issues/10940));
+  until then lint type-checks with 6.0 semantics, which TS 7.0 matches by
+  design. When it moves, collapse the per-workspace entries back into the
+  root one.
 - **`@types/node` 24 → 26**: not a blocker but a policy — the types track the
   Node major the repo actually runs (`.nvmrc`), so they move when Node does.
 

@@ -17,5 +17,8 @@
   "dependencies": {
     "boardgame.io": "^0.50.2",
     "game": "*"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2"
   }
 }
