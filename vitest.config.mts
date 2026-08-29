@@ -1,3 +1,6 @@
+// .mts, not .ts: the root package.json is not a module, so Vite loads a .ts config as
+// CommonJS and warns that the ESM syntax below will stop working once its native config
+// loader becomes the default.
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
