@@ -65,13 +65,10 @@ interface SendGameDataParams {
   // wrapper's score); the rest of G rides along in the JSON payload.
   G?: { currentProblem?: number; points?: number };
   ctx?: Ctx;
-  // Only ever JSON-stringified here, so whatever a caller reports as its log
-  // is passed through: gameWrapper's move context carries the log plugin.
-  log?: unknown;
 }
 
 export function sendGameData(params: SendGameDataParams){
-  const {component, phase, answer, G, ctx, log} = params;
+  const {component, phase, answer, G, ctx} = params;
   const joinCode = getJoinCode();
   switch (phase) {
     case "start":
@@ -84,9 +81,6 @@ export function sendGameData(params: SendGameDataParams){
           sendData(joinCode+"_"+randomID+"_"+component+"_"+problemNumber+"_"+answer+"_"+now(), JSON.stringify({G, ctx}));
           break;
         }
-        case "strategy":
-          sendData(joinCode+"_"+randomID+"_stratstep_"+now(), JSON.stringify({G, ctx, log}));
-          break;
         default:
           break;
       }

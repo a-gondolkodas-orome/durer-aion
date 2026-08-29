@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import './App.css';
 import i18next from "i18next";
 import { useTranslation } from 'react-i18next';
 import { GameProvider, ClientRepoProvider, Header, Layout, Relay, useTeamState, LoadTeamState } from 'common-frontend';
@@ -20,6 +19,9 @@ const theme = {
 
 function App() {
   const RelayClient = React.lazy(() => import('./ReactClient').then(module => ({ default: module.RelayClient })));
+  // There is no real login here: the round selector stores the chosen test as
+  // the "logged in team", which is what drives the header title below and the
+  // switch between the selector and the game.
   const teamState = useTeamState();
   const { t } = useTranslation();
 
