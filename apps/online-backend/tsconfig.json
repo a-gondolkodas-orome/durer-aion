@@ -2,12 +2,12 @@
   "include": ["."],
   "exclude": ["dist", "build", "node_modules"],
   "compilerOptions": {
-    "module": "commonjs",
-    "moduleResolution": "node",
-    // node10 resolution is deprecated and stops working in TS 7; migrating these
-    // configs off it (bundler for the Vite-built code, nodenext for the backend) is
-    // its own change. This is TS 6\'s sanctioned bridge until then.
-    "ignoreDeprecations": "6.0",
+    // nodenext, not commonjs/node10: Node runs this output, so tsc should model
+    // Node's real resolution (the `exports` field, require() of ESM on Node ≥ 22 —
+    // which the runtime already relies on for nanoid 6). With no `type: module` in
+    // package.json the emit is still CommonJS, same as before.
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "target": "ES2020",
     "lib": ["ES2020"],
     "esModuleInterop": true,
@@ -16,7 +16,7 @@
     "allowSyntheticDefaultImports": true,
     "isolatedModules": true,
     "noEmit": false,
-    "baseUrl": ".",            // so you can use paths if needed
+    // No baseUrl (deprecated in TS 6): paths entries resolve relative to this file.
     "paths": {
       "game": ["../../packages/game"],
       "strategy": ["../../packages/strategy"],

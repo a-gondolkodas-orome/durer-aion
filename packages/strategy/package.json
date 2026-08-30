@@ -15,7 +15,7 @@
     "dev": "npx tsdown --watch --no-clean --onSuccess \"echo rebuilt strategy\""
   },
   "dependencies": {
-    "boardgame.io": "^0.50.2",
+    "boardgame.io": "0.50.2",
     "game": "*"
   }
 }

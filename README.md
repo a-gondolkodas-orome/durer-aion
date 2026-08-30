@@ -303,9 +303,20 @@ for a human to fix or bless.
 
 ## Dependency updates
 
-`package.json` files carry ranges; `package-lock.json` is what `npm ci` actually
-installs. Everything here that compares a version reads the lockfile, so it
-reports what is installed rather than what would be accepted.
+Every dependency is pinned exactly, in every workspace — `save-exact` in
+`.npmrc` keeps new ones that way — so `package.json` says what is installed and
+nothing moves without a visible diff. A package that several workspaces share
+is pinned to the same number everywhere: differing exact pins force npm to nest
+a duplicate, which some packages do not survive (the typescript note in
+[`apps/strategy-practice/package.json`](apps/strategy-practice/package.json));
+`npm ls <package>` showing one deduped install is the check. Peer dependencies
+keep ranges — they state compatibility, not an install. `package-lock.json` is
+still what `npm ci` installs, and everything here that compares a version reads
+it.
+
+`npm run update:minors` is the routine sweep: it bumps every pin to the newest
+release inside its major, across all workspaces at once, then prints what to
+run next (`npm install`, then the usual gates). It never crosses a major.
 
 `.github/workflows/dependency-report.yml` runs on the 1st of each month and
 keeps one `OPS` issue in sync with whatever is behind: every workspace's
@@ -314,8 +325,8 @@ dependencies, every action pinned in `.github/workflows/`, and each `.nvmrc`.
 — it asks the registry directly rather than shelling out to `npm outdated`.
 
 A row is one *upgrade*, not one package. The same name pinned at two versions is
-two rows, because `apps/strategy-practice` deliberately runs ahead of the rest on
-eslint, vite and typescript; the `written down in` column lists every file the
+two rows, because `apps/strategy-practice` has deliberately run ahead of the rest
+on eslint, vite and typescript; the `written down in` column lists every file the
 bump has to touch, which is the honest measure of how big it is.
 
 The report opens no pull requests — upgrading stays deliberate, majors one at a
@@ -339,11 +350,10 @@ remembering. Each stays where it is until the named blocker moves (#317):
   router, it types `server.router`, boardgame.io's own `@koa/router@10`
   instance. v15's types do not even structurally match that object.
 - **`typescript` 6.0 → 7**: `typescript-eslint` caps `typescript` at
-  `<6.1.0`. 6.0 is the highest version inside the cap; it deprecates the
-  `node10` module resolution eight tsconfigs still use, bridged with
-  `ignoreDeprecations: "6.0"` until the resolution migration happens as its
-  own change — that migration is also the real prerequisite for 7.0, where
-  `node10` stops working entirely.
+  `<6.1.0`, and 6.0 is the highest version inside the cap. That cap is the
+  only remaining blocker: every tsconfig is off the `node10` resolution 7.0
+  removes (`bundler` for the Vite- and tsdown-built code, `nodenext` for the
+  backend).
 - **`@types/node` 24 → 26**: not a blocker but a policy — the types track the
   Node major the repo actually runs (`.nvmrc`), so they move when Node does.
 

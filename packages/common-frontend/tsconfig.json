@@ -16,11 +16,7 @@
     // its compatibility/indexable.d.ts declares .at() — a Node types polyfill standing
     // in for a lib this config never asked for, in a package that does not run in Node.
     "lib": ["ES2022", "DOM"],
-    "moduleResolution": "node",
-    // node10 resolution is deprecated and stops working in TS 7; migrating these
-    // configs off it (bundler for the Vite-built code, nodenext for the backend) is
-    // its own change. This is TS 6\'s sanctioned bridge until then.
-    "ignoreDeprecations": "6.0",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
