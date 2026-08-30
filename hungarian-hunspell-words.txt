@@ -206,7 +206,6 @@ felcserélgetjük
 felcserélhető
 felcserélne
 felcserélte
-Felcseréltem
 felcseréltem
 feldarabolni
 feleltethetők
@@ -225,13 +224,11 @@ felírjuk
 felírni
 felírod
 felírt
-Felírta
 felírta
 felírtak
 felírták
 Felírtam
 felírva
-Felírva
 feljegyeznie
 feljutni
 fellelhető
@@ -246,11 +243,9 @@ felsorolták
 felszállni
 felszállnunk
 feltehetjük
-Feltehetjük
 feltehetünk
 feltüntettük
 felváltva
-Felváltva
 Fenntartjuk
 festhetjük
 festhetünk
@@ -267,7 +262,6 @@ gyűjthetnek
 gyűjthettek
 hagyhatók
 halasztásánál
-Hányszorosa
 hányszorosa
 háromágyas
 háromágyasak
@@ -287,7 +281,6 @@ használatosak
 használhatunk
 hatszöget
 hátulról
-Hátulról
 házasságok
 hegyesszöget
 helyezéseinek
@@ -304,7 +297,6 @@ hozzáadni
 hozzáadsz
 hozzáadta
 hozzáadtam
-Hozzáadtam
 hozzáadunk
 hozzáragasztása
 hozzárendelünk
@@ -333,7 +325,6 @@ kaphatók
 kaphatták
 kaphattok
 kaphatunk
-Kaphatunk
 képezhetők
 kérésére
 keresésénél
@@ -433,7 +424,6 @@ kiszámítani
 Kiszámította
 kiszámítottuk
 kiszámolhatjátok
-Kiszámoljuk
 kiszámoljuk
 kiszámolni
 kiszámolt
@@ -455,7 +445,6 @@ kitöltéssel
 kitölthető
 kitöltöttük
 kitöltve
-Kitöltve
 kitöröljük
 kitörölve
 kitüntetett
@@ -467,14 +456,12 @@ kiválasztottunk
 kiválasztva
 Kíváncsiságában
 kivonandó
-Kivonandó
 kivonja
 kivonjuk
 kivonni
 Kivonok
 kivonsz
 kivonta
-Kivontam
 kivontam
 kivonva
 kizárt
@@ -482,7 +469,6 @@ korlátozást
 korongok
 korongokat
 korongokból
-Korongokból
 korongokkal
 korongoknak
 kölcsönkérne
@@ -518,7 +504,6 @@ legnagyobbika
 legnépesebb
 legokosabb
 legolcsóbban
-Legrosszabb
 legrosszabb
 legrövidebb
 legtöbbje
@@ -595,7 +580,6 @@ megfordítanunk
 megfordíthatjuk
 megfordítjuk
 megfordítva
-Megfordítva
 megfordulnak
 meggondolásából
 meggondolni
@@ -617,7 +601,6 @@ megkaphattam
 megkapjátok
 megkapjuk
 megkapni
-Megkérdeztünk
 megkérdeztünk
 megkétszerezi
 megkétszereződött
@@ -733,7 +716,6 @@ oszthatót
 összeadják
 összeadjuk
 összeadni
-Összeadni
 összeadom
 összeadta
 összeadtam
@@ -796,7 +778,6 @@ ráírva
 rálépni
 Rámutatok
 ráragasztottunk
-Rekurzívan
 rekurzívan
 rendezéssel
 rendezheti

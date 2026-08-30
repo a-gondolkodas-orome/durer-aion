@@ -89,10 +89,15 @@ const readWords = (file) =>
   readFileSync(file, "utf-8")
     .split("\n")
     .filter((l) => l.trim() !== "" && !l.startsWith("#"));
-const handWords = new Set(readWords(handFile));
+// Case-insensitive: a lowercase hand-file entry covers its capitalized uses.
+const handWords = new Set(readWords(handFile).map((w) => w.toLowerCase()));
+const inHandFile = (w) => handWords.has(w.toLowerCase());
 
-const accepted = flagged
-  .filter((w) => !rejected.has(w) && !handWords.has(w))
+// A lowercase dictionary entry already matches Title-case and ALL-CAPS uses,
+// so a capitalized form whose lowercase twin is also accepted is redundant.
+const acceptedSet = new Set(flagged.filter((w) => !rejected.has(w) && !inHandFile(w)));
+const accepted = [...acceptedSet]
+  .filter((w) => w === w.toLowerCase() || !acceptedSet.has(w.toLowerCase()))
   .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase(), "hu"));
 
 const header = readFileSync(generatedFile, "utf-8")
@@ -101,7 +106,7 @@ const header = readFileSync(generatedFile, "utf-8")
 writeFileSync(generatedFile, [...header, ...accepted, ""].join("\n"));
 console.log(`hungarian-hunspell-words.txt: ${accepted.length} words (hunspell-approved)`);
 
-const needsHuman = [...rejected].filter((w) => !handWords.has(w)).sort();
+const needsHuman = [...rejected].filter((w) => !inHandFile(w)).sort();
 if (needsHuman.length > 0) {
   console.log("\nhunspell does not know these - fix the typo, or add to hungarian-words.txt:");
   for (const w of needsHuman) console.log("  " + w);
