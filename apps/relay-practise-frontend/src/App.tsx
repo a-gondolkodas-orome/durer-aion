@@ -59,7 +59,7 @@ function App() {
           value={clientRepository}>
           <Layout>
             <LoadTeamState />
-            <Header teamName={teamState?.teamName ?? null} admin={true} titles={titles} homeaddress='/..'/>
+            <Header teamName={teamState?.teamName ?? null} admin={true} titles={titles} homeAddress='/..'/>
             <Container
               sx={{
                 paddingLeft: {
