@@ -71,7 +71,7 @@ export const useResetRelay = () => {
   const repo = useClientRepo();
   return async (teamId: string) => {
     const userModel = new UserModel(repo);
-    return await userModel.resetRealy(teamId);
+    return await userModel.resetRelay(teamId);
   };
 };
 

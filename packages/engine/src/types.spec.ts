@@ -1,3 +1,4 @@
+// cspell:ignore takee
 import type { BotMove, Ctx, MoveOutcome } from './types';
 
 // A miniature game to pin `BotMove` against. Its `apply` signatures are what

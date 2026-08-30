@@ -134,7 +134,7 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
           onerror(`Failed to validate team when adding to DB: ${err.errors.map(e => e.message).join(', ')}`);
           ok = false;
         } else {
-          console.log('We experienced an unexpected error during import. This type of error is not handled in the import scritp, please file a bug report in the GitHub repository!')
+          console.log('We experienced an unexpected error during import. This type of error is not handled in the import script, please file a bug report in the GitHub repository!')
           throw err;
         }
       }

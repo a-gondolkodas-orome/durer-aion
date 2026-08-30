@@ -6,10 +6,6 @@ import {
   strategyNames,
 } from 'game';
 import { RelayStrategy } from 'strategy';
-//import { 
-//  RelayStrategy,
-//  strategyWrapper as StrategyStrategyremovefromcirclee,
-//} from 'strategy';
 import { PostgresStore } from 'bgio-postgres';
 import { argv, env, exit } from 'process';
 import { SocketIOButBotMoves } from './socketio_botmoves';

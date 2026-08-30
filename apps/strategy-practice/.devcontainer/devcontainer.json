@@ -23,6 +23,7 @@
         , "bradlc.vscode-tailwindcss"
         , "esbenp.prettier-vscode"
         , "anthropic.claude-code"
+        , "streetsidesoftware.code-spell-checker"
       ],
       "settings": {
         "editor.tabSize": 2,

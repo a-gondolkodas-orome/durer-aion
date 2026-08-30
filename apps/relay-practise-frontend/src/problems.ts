@@ -39,7 +39,7 @@ export const problems: RelayProblems = {
       answer: 31,
       points: 3,
       help1: "Egy rab akkor szabadul, ha páratlan sok őr változtat a cellájának a nyitottságán.",
-      help2: "Például az első és a negyedik rab kiszabadul, de a műsodik nem.",
+      help2: "Például az első és a negyedik rab kiszabadul, de a második nem.",
     },
     {
       problemText: "<p>Mennyi azon prímszámok összege, amelyekből 14-et kivonva egy-egy prímszám négyzetét kapjuk?</p>",
@@ -408,7 +408,7 @@ export const problems: RelayProblems = {
     },
     {
       problemText:
-        "<p>Egy szigeten a lovagok mindig igazat mondanak, a lókötök mindig hazudnak. A szigetnek száz lakosa és három felekezete van: a Napimádók, a Holdimádók és a Földimádók. Minden lakos, akár lovag, akár lókötő, pontosan egy felekezethez tartozik. Egy felmérés alkalmával minden lakosnak meg kellett válaszolnia a következő három kérdés mindegyikét: Te Napimádó vagy? Te Holdimádó vagy? Te Földimádó vagy? Az első kérdésre hatvan, a másodikra negyven, a harmadikra harminc IGEN válasz érkezett. Hány lovag él a szigeten?</p>",
+        "<p>Egy szigeten a lovagok mindig igazat mondanak, a lókötők mindig hazudnak. A szigetnek száz lakosa és három felekezete van: a Napimádók, a Holdimádók és a Földimádók. Minden lakos, akár lovag, akár lókötő, pontosan egy felekezethez tartozik. Egy felmérés alkalmával minden lakosnak meg kellett válaszolnia a következő három kérdés mindegyikét: Te Napimádó vagy? Te Holdimádó vagy? Te Földimádó vagy? Az első kérdésre hatvan, a másodikra negyven, a harmadikra harminc IGEN válasz érkezett. Hány lovag él a szigeten?</p>",
       answer: 70,
       points: 5,
       help1: "Egy Holdimádó lókötő hány kérdésre válaszol igennel? És egy Holdimádó lovag?",
@@ -521,7 +521,7 @@ export const problems: RelayProblems = {
         "<p>Adott egy háromszög, amelynek oldalai (méterben mérve) egymást követő egész számok. Ennek a háromszögnek a középső oldalához tartozó magassága két olyan részre osztja a középső oldalt, amelyek különbsége \\(x\\).</p><p>Hány méter hosszú \\(x\\)?</p>",
       answer: 4,
       points: 4,
-      help1: "Egy derkészögű háromszög oldalai között mi a kapcsolat?",
+      help1: "Egy derékszögű háromszög oldalai között mi a kapcsolat?",
       help2: "Két, ügyesen felírt Pitagorasz-tételt kell átalakítani. ",
     },
     {
@@ -538,7 +538,7 @@ export const problems: RelayProblems = {
         "<p>Adott a síkon hét pont, semelyik három sincs egy egyenesen. Behúzzuk az általuk alkotott szakaszok felezőmerőlegeseit. A sík minden pontját, ahol legalább két felezőmerőleges találkozik, pirosra festjük. Legfeljebb hány piros pont keletkezhet?</p>",
       answer: 140,
       points: 5,
-      help1: "Mit mondhatunk három pont által meghatározott szakaszfelező merőlegesek metszésponjáról?",
+      help1: "Mit mondhatunk három pont által meghatározott szakaszfelező merőlegesek metszéspontjáról?",
       help2: "Valóban, csak a háromszögeket kell megszámolni! Hét pontból hányféleképpen választható ki három?",
     },
     {
@@ -639,7 +639,7 @@ export const problems: RelayProblems = {
       points: 4,
       help1: "Hány egyenest húztunk be? Hány háromszöget határoznak meg a pontok?",
       help2:
-        "Mit mondhatunk három pont által meghatározott szakaszfelező merőlegesek metszésponjáról? Háromszögenként hányszor számoltuk feleslegesen?",
+        "Mit mondhatunk három pont által meghatározott szakaszfelező merőlegesek metszéspontjáról? Háromszögenként hányszor számoltuk feleslegesen?",
     },
     {
       problemText:
@@ -666,7 +666,7 @@ export const problems: RelayProblems = {
       answer: 36,
       points: 5,
       help1:
-        "Válogassátok szét az eseteket aszerint, hogy hány fityinges a legnagyobb érme, amit felasználtok a fizetéshez!",
+        "Válogassátok szét az eseteket aszerint, hogy hány fityinges a legnagyobb érme, amit felhasználtok a fizetéshez!",
       help2:
         "Egy-egy lehetséges fizetéshez csökkenő sorrendben írjátok fel a felhasználandó érméket. Érdemes táblázatot is készítenetek.",
     },
@@ -694,9 +694,9 @@ export const problems: RelayProblems = {
       answer: 242,
       points: 6,
       help1:
-        "Írjátok fel az egyenletet gyöktényezős alakban (ismeretlen gyökökkel), végezzétek el a szorzást, és hasonlítsátok össze a két polinom együtthatóit! (Ezzel a Viéte-formulákat kapjátok.)",
+        "Írjátok fel az egyenletet gyöktényezős alakban (ismeretlen gyökökkel), végezzétek el a szorzást, és hasonlítsátok össze a két polinom együtthatóit! (Ezzel a Viète-formulákat kapjátok.)",
       help2:
-        "A gyökök negyyedik hatványainak összege a kapott képletekből kifejezhetők.<br>(A Newton-Girard-formulák és az elemi szimmetrikus polinomok jól használhatóak.)",
+        "A gyökök negyedik hatványainak összege a kapott képletekből kifejezhetők.<br>(A Newton-Girard-formulák és az elemi szimmetrikus polinomok jól használhatóak.)",
     },
   ],
   "3_D_B": [
@@ -747,7 +747,7 @@ export const problems: RelayProblems = {
         "<p>Egy tetraéder éleit piros és kék színekkel színezzük. Két színezést azonosnak tekintünk, ha a kétféleképpen színezett tetraéderek egymásba vihetők (egybevágók). Hányféleképpen színezhetünk?</p>",
       answer: 11,
       points: 4,
-      help1: "Rajzoljátok le a tetraáder élhálóját, és próbálkozzatok esetszétválasztással!",
+      help1: "Rajzoljátok le a tetraéder élhálóját, és próbálkozzatok esetszétválasztással!",
       help2: "Válogassátok szét a színezéseket aszerint, hogy hány kék él van!",
     },
     {
@@ -848,7 +848,7 @@ export const problems: RelayProblems = {
         "<p>Egy tetraéder éleit piros és kék színekkel színezzük. Két színezést azonosnak tekintünk, ha a kétféleképpen színezett tetraéderek egybevágósági transzformációval egymásba vihetők. Hányféleképpen színezhetünk?</p>",
       answer: 11,
       points: 4,
-      help1: "Rajzoljátok le a tetraáder élhálóját, és próbálkozzatok esetszétválasztással!",
+      help1: "Rajzoljátok le a tetraéder élhálóját, és próbálkozzatok esetszétválasztással!",
       help2: "Válogassátok szét a színezéseket aszerint, hogy hány kék él van!",
     },
     {
@@ -899,7 +899,7 @@ export const problems: RelayProblems = {
     },
     {
       problemText:
-        "<p>A \\(PQRS\\) téglalap 9 kis négyzetre van oszta, az ábrán látható módon. Minden négyzet különböző oldalhosszúságú, a legkisebb négyzet oldala 2 egység hosszú. Hány egység hosszú a második legkisebb négyzet odala?</p><p><i>Az négyzetek az ábrán nem méretarányosak.</i></p>",
+        "<p>A \\(PQRS\\) téglalap 9 kis négyzetre van osztva, az ábrán látható módon. Minden négyzet különböző oldalhosszúságú, a legkisebb négyzet oldala 2 egység hosszú. Hány egység hosszú a második legkisebb négyzet oldala?</p><p><i>Az négyzetek az ábrán nem méretarányosak.</i></p>",
       answer: 5,
       points: 5,
       help1: "Paraméterezzétek valamelyik négyzet oldalát!",
@@ -967,7 +967,7 @@ export const problems: RelayProblems = {
       answer: 1500,
       points: 4,
       help1:
-        "Csoportosítsátok ügyesen a táblázat mezőit! Vagy írjátok fel, hogy milyen számok szerpelnek a táblázat szélső soraiban, illetve oszlopaiban!",
+        "Csoportosítsátok ügyesen a táblázat mezőit! Vagy írjátok fel, hogy milyen számok szerepelnek a táblázat szélső soraiban, illetve oszlopaiban!",
       help2: "Egy számtani sorozatban a számok összege az első és az utolsó tag átlaga, szorozva a tagok számával.",
     },
     {
@@ -981,7 +981,7 @@ export const problems: RelayProblems = {
     },
     {
       problemText:
-        "<p>A \\(PQRS\\) téglalap 9 kis négyzetre van oszta, az ábrán látható módon. Minden négyzet különböző oldalhosszúságú, a legkisebb négyzet oldala 2 egység hosszú. Hány egység hosszú a második legkisebb négyzet odala?</p><p><i>Az négyzetek az ábrán nem méretarányosak.</i></p>",
+        "<p>A \\(PQRS\\) téglalap 9 kis négyzetre van osztva, az ábrán látható módon. Minden négyzet különböző oldalhosszúságú, a legkisebb négyzet oldala 2 egység hosszú. Hány egység hosszú a második legkisebb négyzet oldala?</p><p><i>Az négyzetek az ábrán nem méretarányosak.</i></p>",
       answer: 5,
       points: 4,
       help1: "Paraméterezzétek valamelyik négyzet oldalát!",
@@ -1004,7 +1004,7 @@ export const problems: RelayProblems = {
       points: 5,
       help1:
         "Legfeljebb mennyi lehet <em>x</em> értéke?<br>(És hányféleképpen osztható szét 97 alma három tetszőleges részre, két körte segítségével?)",
-      help2: "Számoljátok összet a megoldásokat <em>x</em> lehetséges értékei szerint!",
+      help2: "Számoljátok össze a megoldásokat <em>x</em> lehetséges értékei szerint!",
     },
     {
       problemText:
@@ -1097,7 +1097,7 @@ export const problems: RelayProblems = {
     },
     {
       problemText:
-        "<p>Réka és Regina a piacon mindketten vettek répát és retket. Réka és Regina összesen ugyanannyi répát vett, mint retket. Réka répáinak száma megegyegyezik Regina zöldségeinek számával. Regina 8 répát vett. Hány retket vett Réka?</p>",
+        "<p>Réka és Regina a piacon mindketten vettek répát és retket. Réka és Regina összesen ugyanannyi répát vett, mint retket. Réka répáinak száma megegyezik Regina zöldségeinek számával. Regina 8 répát vett. Hány retket vett Réka?</p>",
       answer: 16,
       points: 4,
       help1: "Jelöljétek változókkal, hogy ki hány dolgot vett, és írjatok fel egyenleteket!",
@@ -1155,7 +1155,7 @@ export const problems: RelayProblems = {
       answer: 4,
       points: 6,
       help1: "A nem origóból induló bolhák eljuthatnak-e a (4,4) pontba?",
-      help2: "Az origóból induló bolhának leglább kétszer kell ugrania.",
+      help2: "Az origóból induló bolhának legalább kétszer kell ugrania.",
     },
     {
       problemText:
@@ -1245,7 +1245,7 @@ export const problems: RelayProblems = {
       answer: 161,
       points: 5,
       help1:
-        "Képzeletben kezdjtek el kilométerenként mozgatni a kocsmát a főúton! Hol fogjátok elérni a legalacsonyabb átlagot?",
+        "Képzeletben kezdjetek el kilométerenként mozgatni a kocsmát a főúton! Hol fogjátok elérni a legalacsonyabb átlagot?",
       help2:
         "Addig érdemes mozgatnotok a kocsmát, amíg a kocsmából az egyik irányba elindulva több lakos van az úton, mint a másik irányba.",
       url: "https://durerinfo.hu/wp-content/uploads/2019/07/4_D_C_9.png",
@@ -1291,7 +1291,7 @@ export const problems: RelayProblems = {
         "<p>Áttentő Redáz azzal játszik, hogy két barna, három zöld és négy kék szemgolyót helyez egymás mellé egy sorban, és rettentőmód figyel arra, hogy a két barna egymás mellett legyen, de zöld és barna ne kerülhessen egymás mellé. Hányféleképpen rendezheti el a szemgolyókat, ha tudjuk, hogy az azonos színű szemgolyókat nem tudja megkülönböztetni?</p>",
       answer: 100,
       points: 3,
-      help1: "A barna szemgolyók egymás mellett vannak, és melletük kizárólag kék(ek) lehetnek.",
+      help1: "A barna szemgolyók egymás mellett vannak, és mellettük kizárólag kék(ek) lehetnek.",
       help2: "Bontsátok esetekre a lehetséges elrendezéseket a barna szemgolyók helyei szerint.",
     },
     {
@@ -1344,7 +1344,7 @@ export const problems: RelayProblems = {
       answer: 161,
       points: 4,
       help1:
-        "Képzeletben kezdjtek el kilométerenként mozgatni a kocsmát a főúton! Hol fogjátok elérni a legalacsonyabb átlagot?",
+        "Képzeletben kezdjetek el kilométerenként mozgatni a kocsmát a főúton! Hol fogjátok elérni a legalacsonyabb átlagot?",
       help2:
         "Addig érdemes mozgatnotok a kocsmát, amíg a kocsmából az egyik irányba elindulva több lakos van az úton, mint a másik irányba.",
       url: "https://durerinfo.hu/wp-content/uploads/2019/07/4_D_D_7.png",
@@ -1554,7 +1554,7 @@ export const problems: RelayProblems = {
       points: 4,
       help1: "Vezessetek be változót egy ilyen téglalap valamelyik oldalának hosszára!",
       help2:
-        "Adott kerületű téglalapok közül annak nagyobb a területe, amelyiknek kisebb a hoszabb és rövidebb oldalai hossza közti különbség.",
+        "Adott kerületű téglalapok közül annak nagyobb a területe, amelyiknek kisebb a hosszabb és rövidebb oldalai hossza közti különbség.",
     },
     {
       problemText:
@@ -1576,7 +1576,7 @@ export const problems: RelayProblems = {
     },
     {
       problemText:
-        "<p>Valaki leírta az egész számokat egymás mögé (elválsztójel, illetve szünet nélkül) 1-től 2012-ig. Melyik számjegy áll a 2012-edik helyen?</p>",
+        "<p>Valaki leírta az egész számokat egymás mögé (elválasztójel, illetve szünet nélkül) 1-től 2012-ig. Melyik számjegy áll a 2012-edik helyen?</p>",
       answer: 0,
       points: 5,
       help1: "9 darab egyjegyű számot írunk le.",
@@ -1624,7 +1624,7 @@ export const problems: RelayProblems = {
         "<p>Egy \\(7\\times7\\)-es tábla minél kevesebb mezejét szeretnénk kiszínezni úgy, hogy már ne tudjuk lerakni az ábrán látható keresztet csupa színezetlen mezőre. Hány mezőt kell mindenképpen kiszínezni?</p>",
       answer: 7,
       points: 6,
-      help1: "Ha a kereszt le van rakva a tábára, akkor a közepe a belső 5&times;5-ös részben van.",
+      help1: "Ha a kereszt le van rakva a táblára, akkor a közepe a belső 5&times;5-ös részben van.",
       help2:
         "A tábla középső 5&times;5-ös négyzetébe igen, de a középső 3&times;3-as négyzetbe már nem tartozó kisnégyzetek közül legalább hányat kell kiszínezni? Próbálkozzatok az 5&times;5-ös négyzet sarkaival vagy a sarkokkal szomszédos négyzetekből indulva.",
       url: "https://durerinfo.hu/wp-content/uploads/2019/07/5_D_B_13.png",
@@ -1642,7 +1642,7 @@ export const problems: RelayProblems = {
     },
     {
       problemText:
-        "<p>Valaki leírta az egész számokat egymás mögé (elválsztójel, illetve szünet nélkül) 1-től 2012-ig. Melyik számjegy áll a 2012-edik helyen?</p>",
+        "<p>Valaki leírta az egész számokat egymás mögé (elválasztójel, illetve szünet nélkül) 1-től 2012-ig. Melyik számjegy áll a 2012-edik helyen?</p>",
       answer: 0,
       points: 3,
       help1: "9 darab egyjegyű számot írunk le.",
@@ -1699,7 +1699,7 @@ export const problems: RelayProblems = {
       answer: 30,
       points: 5,
       help1: "Ha egy szám 4-nél nagyobb és mágikus, akkor kettővel osztható.",
-      help2: "Ha egy szám 9-nél nagyob és mágikus, akkor 3-mal osztható, és így tovább.",
+      help2: "Ha egy szám 9-nél nagyobb és mágikus, akkor 3-mal osztható, és így tovább.",
     },
     {
       problemText:
@@ -1725,7 +1725,7 @@ export const problems: RelayProblems = {
         "<p>Egy \\(7\\times7\\)-es tábla minél kevesebb mezejét szeretnénk kiszínezni úgy, hogy már ne tudjuk lerakni az ábrán látható keresztet csupa színezetlen mezőre. Hány mezőt kell mindenképpen kiszínezni?</p>",
       answer: 7,
       points: 6,
-      help1: "Ha a kereszt le van rakva a tábára, akkor a közepe a belső 5&times;5-ös részben van.",
+      help1: "Ha a kereszt le van rakva a táblára, akkor a közepe a belső 5&times;5-ös részben van.",
       help2:
         "A tábla középső 5&times;5-ös négyzetébe igen, de a középső 3&times;3-as négyzetbe már nem tartozó kisnégyzetek közül legalább hányat kell kiszínezni? Próbálkozzatok az 5&times;5-ös négyzet sarkaival vagy a sarkokkal szomszédos négyzetekből indulva.",
       url: "https://durerinfo.hu/wp-content/uploads/2019/07/5_D_C_11.png",
@@ -1736,7 +1736,7 @@ export const problems: RelayProblems = {
       answer: 3016,
       points: 6,
       help1:
-        "Ha csak a legkisebb (vagy csak a legnagyobb) tömegú golyót szeretnénk megtalálni, ahhoz hány mérést kell elvégeznünk?",
+        "Ha csak a legkisebb (vagy csak a legnagyobb) tömegű golyót szeretnénk megtalálni, ahhoz hány mérést kell elvégeznünk?",
       help2:
         "Ha egy golyó egy mérésen a könnyebbiknek bizonyul, az már nem lehet a legnehezebb golyó, illetve fordítva.",
     },
@@ -1761,7 +1761,7 @@ export const problems: RelayProblems = {
     },
     {
       problemText:
-        "<p>Valaki leírta az egész számokat egymás mögé (elválsztójel, illetve szünet nélkül) 1-től 2012-ig. Melyik számjegy áll a 2012-edik helyen?</p>",
+        "<p>Valaki leírta az egész számokat egymás mögé (elválasztójel, illetve szünet nélkül) 1-től 2012-ig. Melyik számjegy áll a 2012-edik helyen?</p>",
       answer: 0,
       points: 3,
       help1: "9 darab egyjegyű számot írunk le.",
@@ -1818,7 +1818,7 @@ export const problems: RelayProblems = {
       answer: 30,
       points: 5,
       help1: "Ha egy szám 4-nél nagyobb és mágikus, akkor kettővel osztható.",
-      help2: "Ha egy szám 9-nél nagyob és mágikus, akkor 3-mal osztható, és így tovább.",
+      help2: "Ha egy szám 9-nél nagyobb és mágikus, akkor 3-mal osztható, és így tovább.",
     },
     {
       problemText:
@@ -1834,7 +1834,7 @@ export const problems: RelayProblems = {
         "<p>Egy \\(7\\times7\\)-es tábla minél kevesebb mezejét szeretnénk kiszínezni úgy, hogy már ne tudjuk lerakni az ábrán látható keresztet csupa színezetlen mezőre. Hány mezőt kell mindenképpen kiszínezni?</p>",
       answer: 7,
       points: 5,
-      help1: "Ha a kereszt le van rakva a tábára, akkor a közepe a belső 5&times;5-ös részben van.",
+      help1: "Ha a kereszt le van rakva a táblára, akkor a közepe a belső 5&times;5-ös részben van.",
       help2:
         "A tábla középső 5&times;5-ös négyzetébe igen, de a középső 3&times;3-as négyzetbe már nem tartozó kisnégyzetek közül legalább hányat kell kiszínezni? Próbálkozzatok az 5&times;5-ös négyzet sarkaival vagy a sarkokkal szomszédos négyzetekből indulva.",
       url: "https://durerinfo.hu/wp-content/uploads/2019/07/5_D_D_10.png",
@@ -1854,7 +1854,7 @@ export const problems: RelayProblems = {
       answer: 3016,
       points: 6,
       help1:
-        "Ha csak a legkisebb (vagy csak a legnagyobb) tömegú golyót szeretnénk megtalálni, ahhoz hány mérést kell elvégeznünk?",
+        "Ha csak a legkisebb (vagy csak a legnagyobb) tömegű golyót szeretnénk megtalálni, ahhoz hány mérést kell elvégeznünk?",
       help2:
         "Ha egy golyó egy mérésen a könnyebbiknek bizonyul, az már nem lehet a legnehezebb golyó, illetve fordítva.",
     },
@@ -2033,7 +2033,7 @@ export const problems: RelayProblems = {
       answer: 42,
       points: 5,
       help1: "Jelöljétek például x-szel az egyik szög nagyságát, és fejezzétek ki vele a többit.",
-      help2: "A szögeket összadva, egy egyenletet kaptok <em>x</em>-re. Mennyi is a hétszög belső szögeinek összege?\r",
+      help2: "A szögeket összeadva, egy egyenletet kaptok <em>x</em>-re. Mennyi is a hétszög belső szögeinek összege?\r",
     },
     {
       problemText: "<p>Mennyi a 100 legkisebb pozitív páros szám számjegyeinek összege?</p>",
@@ -2381,7 +2381,7 @@ export const problems: RelayProblems = {
       points: 3,
       help1: "Gondolkodjatok visszafelé!",
       help2:
-        "Például amikor végül lefelé hét lépcsőfokot mászott, és az első lépcsőfokra jutott, akkor a nyolcadik lépcsófokról jött.\r",
+        "Például amikor végül lefelé hét lépcsőfokot mászott, és az első lépcsőfokra jutott, akkor a nyolcadik lépcsőfokról jött.\r",
     },
     {
       problemText:
@@ -2426,7 +2426,7 @@ export const problems: RelayProblems = {
       answer: 7,
       points: 4,
       help1: "Gondolkozzatok visszafelé!",
-      help2: "Probáljátok ki konkrét számokkal, ha 12 tojásom lett volna kezdetben, mi történt volna, és ha 11?\r",
+      help2: "Próbáljátok ki konkrét számokkal, ha 12 tojásom lett volna kezdetben, mi történt volna, és ha 11?\r",
     },
     {
       problemText:
@@ -2454,7 +2454,7 @@ export const problems: RelayProblems = {
     },
     {
       problemText:
-        "<p>Töltsük ki a táblázat üres mezőit pozitív egész számokkal úgy, hogy teljesüljön a következő állítás: akárhogyan is választunk ki a táblázatból három számot úgy, hogy mindegyik oszlopból és mindegyik sorból csak egyet válasszunk, a szorzat mindigugyanaz lesz. <br> Mennyi a beírandó négy szám összege?</p>",
+        "<p>Töltsük ki a táblázat üres mezőit pozitív egész számokkal úgy, hogy teljesüljön a következő állítás: akárhogyan is választunk ki a táblázatból három számot úgy, hogy mindegyik oszlopból és mindegyik sorból csak egyet válasszunk, a szorzat mindig ugyanaz lesz. <br> Mennyi a beírandó négy szám összege?</p>",
       answer: 54,
       points: 5,
       help1: "Mik lehetnek a szorzat prímosztói? ",
@@ -2529,7 +2529,7 @@ export const problems: RelayProblems = {
       answer: 7,
       points: 3,
       help1: "Gondolkozzatok visszafelé!",
-      help2: "Probáljátok ki konkrét számokkal, ha 12 tojásom lett volna kezdetben, mi történt volna, és ha 11?\r",
+      help2: "Próbáljátok ki konkrét számokkal, ha 12 tojásom lett volna kezdetben, mi történt volna, és ha 11?\r",
     },
     {
       problemText:
@@ -2600,7 +2600,7 @@ export const problems: RelayProblems = {
     },
     {
       problemText:
-        "<p>Egy kaput furcsa zár őriz. Annak, aki be akar jutni, a mellékelt rajz vonalain kell végigvezetni mutatóujját úgy, hogy a hét csomópont közti tíz szakasz mindegyikét pontosan egyszer járja végig egyetlen folytonos vonalban, tehát az ujj elemelése nélkül. A sok lehetőség közül csak az egyik nyitja az ajtót. Ha mindenképpen be szeretnénk menni, 1egrosszabb esetben hányszor kell próbálkoznunk?</p>",
+        "<p>Egy kaput furcsa zár őriz. Annak, aki be akar jutni, a mellékelt rajz vonalain kell végigvezetni mutatóujját úgy, hogy a hét csomópont közti tíz szakasz mindegyikét pontosan egyszer járja végig egyetlen folytonos vonalban, tehát az ujj elemelése nélkül. A sok lehetőség közül csak az egyik nyitja az ajtót. Ha mindenképpen be szeretnénk menni, legrosszabb esetben hányszor kell próbálkoznunk?</p>",
       answer: 144,
       points: 6,
       help1: "Melyik csomópontból indulhat és melyikbe érkezhet a mutatóujja?  ",
@@ -2631,7 +2631,7 @@ export const problems: RelayProblems = {
       answer: 33,
       points: 3,
       help1: "A pályát a zászlók egyenlő részekre osztják, hány részt tett meg a hatodik zászlóig? ",
-      help2: "Mennyii idő alatt jut el egyik zászlótól a köveztkezőig? Összesen hány szakaszból áll a pálya?\r",
+      help2: "Mennyii idő alatt jut el egyik zászlótól a következőig? Összesen hány szakaszból áll a pálya?\r",
     },
     {
       problemText:
@@ -2663,7 +2663,7 @@ export const problems: RelayProblems = {
       answer: 22,
       points: 4,
       help1: "Hány igaz lehet a helyes megoldások között? ",
-      help2: "Lehet-e például 6 igaz és 4 hamis? Próbájlatok minél rosszabb tesztet írni.\r",
+      help2: "Lehet-e például 6 igaz és 4 hamis? Próbáljátok minél rosszabb tesztet írni.\r",
     },
     {
       problemText:
@@ -2671,7 +2671,7 @@ export const problems: RelayProblems = {
       answer: 50,
       points: 4,
       help1: "A két kerítéses oldalt és a bezárt szögüket érdemes vizsgálni.",
-      help2: "Adott két oldalhossz, mekkora bezárt szög esetén lesz a terület a legynagyobb?\r",
+      help2: "Adott két oldalhossz, mekkora bezárt szög esetén lesz a terület a legnagyobb?\r",
     },
     {
       problemText:
@@ -2685,7 +2685,7 @@ export const problems: RelayProblems = {
       problemText: "<p>Mekkora a szabályos 9 ágú csillag ábrán jelölt külső szöge?</p>",
       answer: 60,
       points: 4,
-      help1: "Rajzoljatok egy egyszerúbb ábrát, amin csak néhány oldal szerepel.",
+      help1: "Rajzoljatok egy egyszerűbb ábrát, amin csak néhány oldal szerepel.",
       help2: "Kerületi szögekkel számoljatok.\r",
       url: "https://durerinfo.hu/wp-content/uploads/2019/07/7_D_C_8.png",
     },
@@ -2867,7 +2867,7 @@ export const problems: RelayProblems = {
       answer: 9,
       points: 6,
       help1: "Legfeljebb hány részre lehet vágni két vágással?",
-      help2: "Keressétek meg azt a vágást, amikr két vágással 5 szeletre vágjuk.\r",
+      help2: "Keressétek meg azt a vágást, amikor két vágással 5 szeletre vágjuk.\r",
       url: "https://durerinfo.hu/wp-content/uploads/2019/07/7_H_A_14.png",
     },
     {
@@ -2901,7 +2901,7 @@ export const problems: RelayProblems = {
       answer: 343,
       points: 3,
       help1: "Hány aranytallérba kerül egy napnyi élelem?",
-      help2: "Az egy napnyi élelem súla a fejek száma megszorozva 7 kilogrammal.\r",
+      help2: "Az egy napnyi élelem súlya a fejek száma megszorozva 7 kilogrammal.\r",
     },
     {
       problemText:
@@ -3003,7 +3003,7 @@ export const problems: RelayProblems = {
       points: 6,
       help1: "Hány részre osztja a síkot 14 általános helyzetű egyenes?",
       help2:
-        "Vannak párhuzamos egyenesek a szabályos 14-szög oldalegenesei között? És egy ponton átmenő egyeneshármasok?",
+        "Vannak párhuzamos egyenesek a szabályos 14-szög oldalegyenesei között? És egy ponton átmenő egyeneshármasok?",
     },
   ],
   "8_D_A": [
@@ -3068,7 +3068,7 @@ export const problems: RelayProblems = {
         "<p>Egy virágárusnál többféle összeállításban kaphatók a csokrok. Egy-egy csokor ára úgy adódik, hogy a benne lévő virágok árát összeadják. (Az egyforma virágokért azonos összeget kell fizetni.) Az egy nárciszból, két rózsából és egy tulipánból álló csomagért 210 Ft-ot, az egy tulipánból, egy rózsából és két nárciszból állóért 190 Ft-ot kell fizetni, a két rózsából és két tulipánból álló csokor 240 Ft-ba kerül. Mennyit kell fizetnünk, ha mi egy olyan csokrot szeretnénk vásárolni, amelyben két rózsa, három nárcisz és egy tulipán van?</p>",
       answer: 280,
       points: 4,
-      help1: "A harmadik csokor ára miatt egy rózs és egy tulipán árát összeadva 120 Ft-ot kapunk.",
+      help1: "A harmadik csokor ára miatt egy rózsa és egy tulipán árát összeadva 120 Ft-ot kapunk.",
       help2: "Az első segítség és a második csokor miatt két szál nárcisz 70 Ft-ba kerül.\r",
     },
     {
@@ -3076,7 +3076,7 @@ export const problems: RelayProblems = {
       answer: 450,
       points: 5,
       help1:
-        "Ha az első két jegyét mehatározzuk egy háromjegyű számnak, akkor hányféle lehet a harmadik jegye, ha tudjuk, hogy páros sok páros számjegye van?",
+        "Ha az első két jegyét meghatározzuk egy háromjegyű számnak, akkor hányféle lehet a harmadik jegye, ha tudjuk, hogy páros sok páros számjegye van?",
       help2:
         "Állítsátok párba a háromjegyű számokat úgy, hogy az egyes párokban különböző a paritása a páros számjegyeknek!\r",
     },
@@ -3135,7 +3135,7 @@ export const problems: RelayProblems = {
       points: 6,
       help1:
         "Mivel a számunkat 4-gyel megszorozva ötjegyű számot kapunk, az első jegy 1-es vagy kettes. Megfordítva párosnak kell legyen, így kettessel kezdődik.",
-      help2: "Mivel az utolsó jegy 8-as, a második jegy lefgeljebb 2 lehet, tehát 0 vagy 1.",
+      help2: "Mivel az utolsó jegy 8-as, a második jegy legfeljebb 2 lehet, tehát 0 vagy 1.",
     },
   ],
   "8_D_B": [
@@ -3224,7 +3224,7 @@ export const problems: RelayProblems = {
     },
     {
       problemText:
-        "<p>Rajzoltam három háromszöget úgy, hogy 9 oldalegyenesük közül semely kettő nem esett egybe. A sík azon pontjait, melyeken mindegyik háromszögvonal átment, pirossal megjelöltem.<br>Legfejebb hány pontot jelölhettem meg pirossal?</p>",
+        "<p>Rajzoltam három háromszöget úgy, hogy 9 oldalegyenesük közül semely kettő nem esett egybe. A sík azon pontjait, melyeken mindegyik háromszögvonal átment, pirossal megjelöltem.<br>Legfeljebb hány pontot jelölhettem meg pirossal?</p>",
       answer: 4,
       points: 5,
       help1: "Hány pontban metszheti egymást legfeljebb az első két háromszögvonal?",
@@ -3262,7 +3262,7 @@ export const problems: RelayProblems = {
       points: 6,
       help1:
         "Mivel a számunkat 4-gyel megszorozva ötjegyű számot kapunk, az első jegy 1-es vagy kettes. Megfordítva párosnak kell legyen, így kettessel kezdődik.",
-      help2: "Mivel az utolsó jegy 8-as, a második jegy lefgeljebb 2 lehet, tehát 0 vagy 1.\r",
+      help2: "Mivel az utolsó jegy 8-as, a második jegy legfeljebb 2 lehet, tehát 0 vagy 1.\r",
     },
     {
       problemText:
@@ -3323,7 +3323,7 @@ export const problems: RelayProblems = {
       points: 4,
       help1: "Hányféle párbaállítás létezik?",
       help2:
-        "A helyes párbaállítások megszámolhatóak úgy, hogy meghatérozzuk az Ajtósi gyerekek párjait, majd a maradék négy ember párosításainak számával megszorozzuk.\r",
+        "A helyes párbaállítások megszámolhatóak úgy, hogy meghatározzuk az Ajtósi gyerekek párjait, majd a maradék négy ember párosításainak számával megszorozzuk.\r",
     },
     {
       problemText:
@@ -3360,7 +3360,7 @@ export const problems: RelayProblems = {
     },
     {
       problemText:
-        "<p>Egy 0-kból és 1-ekből álló sorozatokat vizsgálunk. Ezeken megengedett átalakításnak nevezzük a következőket:</p><p><ol><li>Három szomszédos 0 törlése <i>Péllául:</i> 101<b>000</b>101 → 101101<li>Három szomszédos 1 törlése <i>Péllául:</i> 1<b>111</b>01001 → 101001<li>01 kicserélése 10-ra <i>Péllául:</i> 10<b>01</b>101 → 1010101)</ul></p><p>Az összes 10 hosszúságú 0/1 sorozat közül hányból érhető el megengedett lépések egymásutánjával egy 0 vagy egy 1 hosszúságú sorozat?</p>",
+        "<p>Egy 0-kból és 1-ekből álló sorozatokat vizsgálunk. Ezeken megengedett átalakításnak nevezzük a következőket:</p><p><ol><li>Három szomszédos 0 törlése <i>Például:</i> 101<b>000</b>101 → 101101<li>Három szomszédos 1 törlése <i>Például:</i> 1<b>111</b>01001 → 101001<li>01 kicserélése 10-ra <i>Például:</i> 10<b>01</b>101 → 1010101)</ul></p><p>Az összes 10 hosszúságú 0/1 sorozat közül hányból érhető el megengedett lépések egymásutánjával egy 0 vagy egy 1 hosszúságú sorozat?</p>",
       answer: 682,
       points: 5,
       help1: "Milyen esetben nem tudunk semmilyen megengedett átalakítást végrehajtani a sorozatunkon?",
@@ -3558,7 +3558,7 @@ export const problems: RelayProblems = {
       problemText: "<p>Mennyi a számjegyek összege a legnagyobb nyolcjegyű páros számban?</p>",
       answer: 71,
       points: 3,
-      help1: "Egy szém akkor páros, ha az utolsó jegye páros.",
+      help1: "Egy szám akkor páros, ha az utolsó jegye páros.",
       help2: "A kérdezett szám 99999998.\r",
     },
     {
@@ -3757,7 +3757,7 @@ export const problems: RelayProblems = {
     },
     {
       problemText:
-        "<p>Egy egyenlőszárú háromszöget különlegesnek nevezünk, ha az egyik belső szögfelezöje két egyenlőszárú háromszögre vágja szét. Albert megkereste a különleges egyenlőszárú háromszögekben előforduló lehető legkisebb szöget. Hány fokos ez a szög?</p>",
+        "<p>Egy egyenlőszárú háromszöget különlegesnek nevezünk, ha az egyik belső szögfelezője két egyenlőszárú háromszögre vágja szét. Albert megkereste a különleges egyenlőszárú háromszögekben előforduló lehető legkisebb szöget. Hány fokos ez a szög?</p>",
       answer: 36,
       points: 5,
       help1: "Két háromszög alakul ki, ami lehet egyenlő szárú a felvágásnál.",
@@ -3770,7 +3770,7 @@ export const problems: RelayProblems = {
       points: 5,
       help1:
         "Mivel a számunkat 4-gyel megszorozva ötjegyű számot kapunk, az első jegy 1-es vagy kettes. Megfordítva párosnak kell legyen, így kettessel kezdődik.",
-      help2: "Mivel az utolsó jegy 8-as, a második jegy lefgeljebb 2 lehet, tehát 0 vagy 1.\r",
+      help2: "Mivel az utolsó jegy 8-as, a második jegy legfeljebb 2 lehet, tehát 0 vagy 1.\r",
     },
     {
       problemText:
@@ -3891,7 +3891,7 @@ export const problems: RelayProblems = {
     },
     {
       problemText:
-        "<p>Az \\(ABCD\\) négyzetet papírból vágtuk ki, amelynek területe 100 egység. Jelölje \\(E\\) az \\(AB\\) oldal felezőpontját. Az \\(EC\\) egyenes mentén behatjuk a papírlapot, így keletkezik egy kétrétegű és egy egyrétű rész. Mekkora az egyrétegű rész területe?</p>",
+        "<p>Az \\(ABCD\\) négyzetet papírból vágtuk ki, amelynek területe 100 egység. Jelölje \\(E\\) az \\(AB\\) oldal felezőpontját. Az \\(EC\\) egyenes mentén behajtjuk a papírlapot, így keletkezik egy kétrétegű és egy egyrétű rész. Mekkora az egyrétegű rész területe?</p>",
       answer: 50,
       points: 5,
       help1: "Mekkora a felhajtott háromszög területe?",
@@ -3929,7 +3929,7 @@ export const problems: RelayProblems = {
       points: 6,
       help1: "Próbálkozz kisebb számokra!",
       help2:
-        "Indulj el alulról! Mekkora a legkisebb zsák? Mekkora legyen a következő? És a következő, amit nem zudunk kifizetni? Észrevestel szabályosságot?",
+        "Indulj el alulról! Mekkora a legkisebb zsák? Mekkora legyen a következő? És a következő, amit nem tudunk kifizetni? Észrevettél szabályosságot?",
     },
   ],
   "9_D_B": [
@@ -3970,7 +3970,7 @@ export const problems: RelayProblems = {
         "<p>Bandi bácsi pincéjében két azonos tömegű üres hordó áll. Ha az egyiket teletöltenénk, a másikat pontosan félig, akkor a teli hordó tömege 101 kg, a másiké 59 kg lenne. Mennyi az üres hordó tömege?</p>",
       answer: 17,
       points: 4,
-      help1: "Mi a külöbség a két hordó között?",
+      help1: "Mi a különbség a két hordó között?",
       help2: "Mennyi fél hordónyi bor tömege?\r",
     },
     {
@@ -4004,8 +4004,8 @@ export const problems: RelayProblems = {
         "<p>Az \\(RS\\) fal mentén, az \\(S\\) pontban álló focista elrúg egy labdát, ami a \\(P\\) pontban találja el a másik falat, ahonnan elpattan a \\(T\\) pont felé úgy, hogy az ábrán jelölt két \\(x\\) szög megegyezik, ráadásul az \\(RS\\) egyenes merőleges a \\(TP\\) egyenesre. Hány fokos az \\(x\\) szög, ha a focista 26&deg-os szögben rúgta el a labdát az \\(RS\\) falhoz képest?</p>",
       answer: 32,
       points: 5,
-      help1: "Rajzoljuk be a TP és RS egyenesek metszépontját. Mit veszünk észre?",
-      help2: "Kapunk egy derékszögű háromszöget, aminek hegyesszögeit isemrjük (26 illetve 2x)\r",
+      help1: "Rajzoljuk be a TP és RS egyenesek metszéspontját. Mit veszünk észre?",
+      help2: "Kapunk egy derékszögű háromszöget, aminek hegyesszögeit ismerjük (26 illetve 2x)\r",
       url: "https://durerinfo.hu/wp-content/uploads/2019/07/9_D_B_9.png",
     },
     {
@@ -4092,15 +4092,15 @@ export const problems: RelayProblems = {
       points: 3,
       help1: "Mi történik, ha csak sorbaírjuk a számokat? Mit történik, ha ezen az egyszerű álláson változtatunk?",
       help2:
-        "Ha van olyan szomszédos számhármas, hogy a középső a legnagyobb/legkisebb. Ezt a hármast növekvő sorrendbe rendezve csökketnünk az összegen.",
+        "Ha van olyan szomszédos számhármas, hogy a középső a legnagyobb/legkisebb. Ezt a hármast növekvő sorrendbe rendezve csökkenthetünk az összegen.",
     },
     {
       problemText:
         "<p>Az \\(RS\\) fal mentén, az \\(S\\) pontban álló focista elrúg egy labdát, ami a \\(P\\) pontban találja el a másik falat, ahonnan elpattan a \\(T\\) pont felé úgy, hogy az ábrán jelölt két \\(x\\) szög megegyezik, ráadásul az \\(RS\\) egyenes merőleges a \\(TP\\) egyenesre. Hány fokos az \\(x\\) szög, ha a focista 26&deg-os szögben rúgta el a labdát az \\(RS\\) falhoz képest?</p>",
       answer: 32,
       points: 3,
-      help1: "Rajzoljuk be a TP és RS egyenesek metszépontját. MIt veszünk észre?",
-      help2: "Kapunk egy derékszögű háromszöget, aminek hegyesszögeit isemrjük (26 illetve 2x)",
+      help1: "Rajzoljuk be a TP és RS egyenesek metszéspontját. Mit veszünk észre?",
+      help2: "Kapunk egy derékszögű háromszöget, aminek hegyesszögeit ismerjük (26 illetve 2x)",
       url: "https://durerinfo.hu/wp-content/uploads/2019/07/9_D_C_4.png",
     },
     {
@@ -4128,7 +4128,7 @@ export const problems: RelayProblems = {
       answer: 6,
       points: 4,
       help1:
-        "Ha egy konvex sokszögnek sok a kicsi szöge, az azt jelenti, hogy ha körbe akajŕjuk sétálni, akkor azokon a sarkokon sokat fordulunk. Mennyit fordulunk a sokszög egy teljes megkerülésénél?",
+        "Ha egy konvex sokszögnek sok a kicsi szöge, az azt jelenti, hogy ha körbe akarjuk sétálni, akkor azokon a sarkokon sokat fordulunk. Mennyit fordulunk a sokszög egy teljes megkerülésénél?",
       help2:
         "4 vagy több nemtompa szöge nem lehet. Ha három van, hány szöge lehet legfeljebb? Erre van is jó konstrukció?",
     },
@@ -4138,7 +4138,7 @@ export const problems: RelayProblems = {
       answer: 120,
       points: 4,
       help1:
-        "Sebesség helyett az út dőtartamával számoljunk. A sebességkorlátozás azt jelenti, hogy az út ideje azokon a szakaszokon megnő valamennyivel. Mennyivel?",
+        "Sebesség helyett az út időtartamával számoljunk. A sebességkorlátozás azt jelenti, hogy az út ideje azokon a szakaszokon megnő valamennyivel. Mennyivel?",
       help2:
         "Ha <em>x</em> a távolság, akkor mindkét sebességkorlátozás <em>(x/80-x/96)</em>-tal növeli az út idejét. Mindkét korlátozás feloldásával az út ideje <em>x/80-2&sdot;(x/80-x/96)</em>. Ebből számoljuk ki a sebességet.",
     },
@@ -4156,7 +4156,7 @@ export const problems: RelayProblems = {
       answer: 26,
       points: 5,
       help1:
-        "Két konvex négyszög legfeljebb 8 pontban metszi egymást. Minden két szomszédos metszéspont közötti szakasz egyértelműen felel meg egy újonann létrjött területrésznek. ",
+        "Két konvex négyszög legfeljebb 8 pontban metszi egymást. Minden két szomszédos metszéspont közötti szakasz egyértelműen felel meg egy újonnan létrejött területrésznek. ",
       help2: "Ezt a gondolatmenetet megismételjük a 3. hozzáadott négyszöghöz is, 16 új metszéspontot kapunk.",
     },
     {
@@ -4167,7 +4167,7 @@ export const problems: RelayProblems = {
       help1:
         "Könnyen látható, hogy legfeljebb 4 számot választhatunk. Válasszuk szét az eseteket asszerint, hogy hány számot választunk ki.",
       help2:
-        "Ha <em>k</em> darab számot választottunk, akkor az első <em>k-1</em> után a következő két számot nem választhattuk. Tehát <em>k-1</em> hármasblokk (tehát a kiválasztott szám és az utána lévő két üres mező, amik garantálják, hogy ne válaszzunk rossz halmazt) és egy egyesblokk közé szeretnénk beszúrni a megmaradt üres mezőket (pontosan így kapunk jó halmazokat).",
+        "Ha <em>k</em> darab számot választottunk, akkor az első <em>k-1</em> után a következő két számot nem választhattuk. Tehát <em>k-1</em> hármasblokk (tehát a kiválasztott szám és az utána lévő két üres mező, amik garantálják, hogy ne válasszunk rossz halmazt) és egy egyesblokk közé szeretnénk beszúrni a megmaradt üres mezőket (pontosan így kapunk jó halmazokat).",
     },
     {
       problemText:
@@ -4242,7 +4242,7 @@ export const problems: RelayProblems = {
       answer: 6,
       points: 3,
       help1:
-        "Ha egy konvex sokszögnek sok a kicsi szöge, az azt jelenti, hogy ha körbe akajŕjuk sétálni, akkor azokon a sarkokon sokat fordulunk. Mennyit fordulunk a sokszög egy teljes megkerülésénél?",
+        "Ha egy konvex sokszögnek sok a kicsi szöge, az azt jelenti, hogy ha körbe akarjuk sétálni, akkor azokon a sarkokon sokat fordulunk. Mennyit fordulunk a sokszög egy teljes megkerülésénél?",
       help2:
         "4 vagy több nemtompa szöge nem lehet. Ha három van,hány szöge lehet legfeljebb? Erre van is jó konstrukció?\r",
     },
@@ -4252,7 +4252,7 @@ export const problems: RelayProblems = {
       answer: 120,
       points: 3,
       help1:
-        "Sebesség helyett az út dőtartamával számoljunk. A sebességkorlátozás azt jelenti, hogy az út ideje azokon a szakaszokon megnő valamennyivel. Mennyivel?",
+        "Sebesség helyett az út időtartamával számoljunk. A sebességkorlátozás azt jelenti, hogy az út ideje azokon a szakaszokon megnő valamennyivel. Mennyivel?",
       help2:
         "Ha <em>x</em> a távolság, akkor mindkét sebességkorlátozás <em>(x/80-x/96)</em>-tal növeli az út idejét. Mindkét korlátozás feloldásával az út ideje <em>x/80-2&sdot;(x/80-x/96)</em>. Ebből számoljuk ki a sebességet.\r",
     },
@@ -4270,7 +4270,7 @@ export const problems: RelayProblems = {
       answer: 26,
       points: 4,
       help1:
-        "Két konvex négyszög legfeljebb 8 pontban metszi egymást. Minden két szomszédos metszéspont közötti szakasz egyértelműen felel meg egy újonann létrjött területrésznek. ",
+        "Két konvex négyszög legfeljebb 8 pontban metszi egymást. Minden két szomszédos metszéspont közötti szakasz egyértelműen felel meg egy újonnan létrejött területrésznek. ",
       help2: "Ezt a gondolatmenetet megismételjük a 3. hozzáadott négyszöghöz is, 16 új metszéspontot kapunk.\r",
     },
     {
@@ -4281,7 +4281,7 @@ export const problems: RelayProblems = {
       help1:
         "Könnyen látható, hogy legfeljebb 4 számot választhatunk. Válasszuk szét az eseteket asszerint, hogy hány számot választunk ki.",
       help2:
-        "Ha <em>k</em> darab számot választottunk, akkor az első <em>k-1</em> után a következő két számot nem választhattuk. Tehát <em>k-1</em> hármasblokk (tehát a kiválasztott szám és az utána lévő két üres mező, amik garantálják, hogy ne válaszzunk rossz halmazt) és egy egyesblokk közé szeretnénk beszúrni a megmaradt üres mezőket (pontosan így kapunk jó halmazokat).\r",
+        "Ha <em>k</em> darab számot választottunk, akkor az első <em>k-1</em> után a következő két számot nem választhattuk. Tehát <em>k-1</em> hármasblokk (tehát a kiválasztott szám és az utána lévő két üres mező, amik garantálják, hogy ne válasszunk rossz halmazt) és egy egyesblokk közé szeretnénk beszúrni a megmaradt üres mezőket (pontosan így kapunk jó halmazokat).\r",
     },
     {
       problemText:
@@ -4316,7 +4316,7 @@ export const problems: RelayProblems = {
         "<p>Albert és Berta az alábbi játékot játsszák. Albert egy 9, 5 m sugarú kör közepén áll. Egy lépésben kiválaszt egy irányt, Berta pedig eldöntheti, hogy abba az irányba vagy az ellenkezőbe menjen-e Albert 1 métert. Albert legkevesebb hány lépésben tudja biztosan elérni vagy átlépni a körvonalat?</p>",
       answer: 91,
       points: 5,
-      help1: "Berta mindig a kör közelébe vinne minket. Hogyan oldhatjuk meg, hogy a választasa ne számítson?",
+      help1: "Berta mindig a kör közelébe vinne minket. Hogyan oldhatjuk meg, hogy a választása ne számítson?",
       help2:
         "A pont, ahol vagyunk, illeszkedik (az első lépés után pontosan 1) sugárra. Így egy szép formula adódik az <em>n.</em> lépés utáni távolságra \r",
     },
@@ -4334,9 +4334,9 @@ export const problems: RelayProblems = {
       answer: 50,
       points: 6,
       help1:
-        "Készítsük el a táblázat egy részét! Vizsgáljuk meg a 2×2-es, 4×4-es résztábázatok rendszerét! Mit veszünk észre?",
+        "Készítsük el a táblázat egy részét! Vizsgáljuk meg a 2×2-es, 4×4-es résztáblázatok rendszerét! Mit veszünk észre?",
       help2:
-        "Ha mindkét koordinátának ugyanannál a kettőhatványnál épp nagyobbak (esetünkben például 64, hisz ennél mindkettő számunk nagyobb, de a 128-nal mindkettő nemnagyobb), akkor mindkettőből levonhatjuk azt a  kettőhatványt, és egy ugyanolyan értékű mezőre jutunk. Ha van egy, a két koordinátát elválasztó kettő hatvány, akkor az ilyenek közül a legnagyobbat leírjuk, levonjuk a nagyobb koordinatából, így a mezőnk értéke a most kapott mező értéke és a leírt kettő hatvány összege lesz.\r",
+        "Ha mindkét koordinátának ugyanannál a kettőhatványnál épp nagyobbak (esetünkben például 64, hisz ennél mindkettő számunk nagyobb, de a 128-nal mindkettő nemnagyobb), akkor mindkettőből levonhatjuk azt a  kettőhatványt, és egy ugyanolyan értékű mezőre jutunk. Ha van egy, a két koordinátát elválasztó kettő hatvány, akkor az ilyenek közül a legnagyobbat leírjuk, levonjuk a nagyobb koordinátából, így a mezőnk értéke a most kapott mező értéke és a leírt kettő hatvány összege lesz.\r",
     },
     {
       problemText:
@@ -4384,15 +4384,15 @@ export const problems: RelayProblems = {
       answer: 26,
       points: 3,
       help1: "Mely számok lehetnek a mediánok?",
-      help2: "Vizsgáld meg a három esetet: ha a meadián a 6, a 9 vagy a keresett szám.\r",
+      help2: "Vizsgáld meg a három esetet: ha a medián a 6, a 9 vagy a keresett szám.\r",
     },
     {
       problemText:
         "<p>Az \\(RS\\) fal mentén, az \\(S\\) pontban álló focista elrúg egy labdát, ami a \\(P\\) pontban találja el a másik falat, ahonnan elpattan a \\(T\\) pont felé úgy, hogy az ábrán jelölt két \\(x\\) szög megegyezik, ráadásul az \\(RS\\) egyenes merőleges a \\(TP\\) egyenesre. Hány fokos az \\(x\\) szög, ha a focista 26&deg-os szögben rúgta el a labdát az \\(RS\\) falhoz képest?</p>",
       answer: 32,
       points: 3,
-      help1: "Rajzoljuk be a TP és RS egyenesek metszépontját. MIt veszünk észre?",
-      help2: "Kapunk egy derékszögű háromszöget, aminek hegyesszögeit isemrjük (26 illetve 2x)\r",
+      help1: "Rajzoljuk be a TP és RS egyenesek metszéspontját. Mit veszünk észre?",
+      help2: "Kapunk egy derékszögű háromszöget, aminek hegyesszögeit ismerjük (26 illetve 2x)\r",
       url: "https://durerinfo.hu/wp-content/uploads/2019/07/9_D_D_3.png",
     },
     {
@@ -4438,7 +4438,7 @@ export const problems: RelayProblems = {
       answer: 120,
       points: 4,
       help1:
-        "Sebesség helyett az út dőtartamával számoljunk. A sebességkorlátozás azt jelenti, hogy az út ideje azokon a szakaszokon megnő valamennyivel. Mennyivel?",
+        "Sebesség helyett az út időtartamával számoljunk. A sebességkorlátozás azt jelenti, hogy az út ideje azokon a szakaszokon megnő valamennyivel. Mennyivel?",
       help2:
         "Ha <em>x</em> a távolság, akkor mindkét sebességkorlátozás <em>(x/80-x/96)</em>-tal növeli az út idejét. Mindkét korlátozás feloldásával az út ideje <em>x/80-2&sdot;(x/80-x/96)</em>. Ebből számoljuk ki a sebességet.\r",
     },
@@ -4476,7 +4476,7 @@ export const problems: RelayProblems = {
       help1:
         "Könnyen látható, hogy legfeljebb 4 számot választhatunk. Válasszuk szét az eseteket asszerint, hogy hány számot választunk ki.",
       help2:
-        "Ha <em>k</em> darab számot választottunk, akkor az első <em>k-1</em> után a következő két számot nem választhattuk. Tehát <em>k-1</em> hármasblokk (tehát a kiválasztott szám és az utána lévő két üres mező, amik garantálják, hogy ne válaszzunk rossz halmazt) és egy egyesblokk közé szeretnénk beszúrni a megmaradt üres mezőket (pontosan így kapunk jó halmazokat).\r",
+        "Ha <em>k</em> darab számot választottunk, akkor az első <em>k-1</em> után a következő két számot nem választhattuk. Tehát <em>k-1</em> hármasblokk (tehát a kiválasztott szám és az utána lévő két üres mező, amik garantálják, hogy ne válasszunk rossz halmazt) és egy egyesblokk közé szeretnénk beszúrni a megmaradt üres mezőket (pontosan így kapunk jó halmazokat).\r",
     },
     {
       problemText:
@@ -4514,9 +4514,9 @@ export const problems: RelayProblems = {
       answer: 50,
       points: 6,
       help1:
-        "Készítsük el a táblázat egy részét! Vizsgáljuk meg a 2×2-es, 4×4-es résztábázatok rendszerét! Mit veszünk észre?",
+        "Készítsük el a táblázat egy részét! Vizsgáljuk meg a 2×2-es, 4×4-es résztáblázatok rendszerét! Mit veszünk észre?",
       help2:
-        "Ha mindkét koordinátának ugyanannál a kettőhatványnál épp nagyobbak (esetünkben például 64, hisz ennél mindkettő számunk nagyobb, de a 128-nal mindkettő nemnagyobb), akkor mindkettőből levonhatjuk azt a  kettőhatványt, és egy ugyanolyan értékű mezőre jutunk. Ha van egy, a két koordinátát elválasztó kettő hatvány, akkor az ilyenek közül a legnagyobbat leírjuk, levonjuk a nagyobb koordinatából, így a mezőnk értéke a most kapott mező értéke és a leírt kettő hatvány összege lesz.",
+        "Ha mindkét koordinátának ugyanannál a kettőhatványnál épp nagyobbak (esetünkben például 64, hisz ennél mindkettő számunk nagyobb, de a 128-nal mindkettő nemnagyobb), akkor mindkettőből levonhatjuk azt a  kettőhatványt, és egy ugyanolyan értékű mezőre jutunk. Ha van egy, a két koordinátát elválasztó kettő hatvány, akkor az ilyenek közül a legnagyobbat leírjuk, levonjuk a nagyobb koordinátából, így a mezőnk értéke a most kapott mező értéke és a leírt kettő hatvány összege lesz.",
     },
   ],
   "9_D_D+": [
@@ -4554,7 +4554,7 @@ export const problems: RelayProblems = {
       answer: 120,
       points: 3,
       help1:
-        "Sebesség helyett az út dőtartamával számoljunk.A sebességkorlátozás azt jelenti, hogy az út ideje azokon a szakaszokon megnő valamennyivel. Mennyivel?",
+        "Sebesség helyett az út időtartamával számoljunk.A sebességkorlátozás azt jelenti, hogy az út ideje azokon a szakaszokon megnő valamennyivel. Mennyivel?",
       help2:
         "Ha <em>x</em> a távolság, akkor mindkét sebességkorlátozás <em>(x/80-x/96)</em>-tal növeli az út idejét. Mindkét korlátozás feloldásával az út ideje <em>x/80-2&sdot;(x/80-x/96)</em>. Ebből számoljuk ki a sebességet.\r",
     },
@@ -4592,7 +4592,7 @@ export const problems: RelayProblems = {
       help1:
         "Könnyen látható, hogy legfeljebb 4 számot választhatunk. Válasszuk szét az eseteket asszerint, hogy hány számot választunk ki.",
       help2:
-        "Ha <em>k</em> darab számot választottunk, akkor az első <em>k-1</em> után a következő két számot nem választhattuk. Tehát <em>k-1</em> hármasblokk (tehát a kiválasztott szám és az utána lévő két üres mező, amik garantálják, hogy ne válaszzunk rossz halmazt) és egy egyesblokk közé szeretnénk beszúrni a megmaradt üres mezőket (pontosan így kapunk jó halmazokat).\r",
+        "Ha <em>k</em> darab számot választottunk, akkor az első <em>k-1</em> után a következő két számot nem választhattuk. Tehát <em>k-1</em> hármasblokk (tehát a kiválasztott szám és az utána lévő két üres mező, amik garantálják, hogy ne válasszunk rossz halmazt) és egy egyesblokk közé szeretnénk beszúrni a megmaradt üres mezőket (pontosan így kapunk jó halmazokat).\r",
     },
     {
       problemText:
@@ -4630,9 +4630,9 @@ export const problems: RelayProblems = {
       answer: 50,
       points: 5,
       help1:
-        "Készítsük el a táblázat egy részét! Vizsgáljuk meg a 2×2-es, 4×4-es résztábázatok rendszerét! Mit veszünk észre?",
+        "Készítsük el a táblázat egy részét! Vizsgáljuk meg a 2×2-es, 4×4-es résztáblázatok rendszerét! Mit veszünk észre?",
       help2:
-        "Ha mindkét koordinátának ugyanannál a kettőhatványnál épp nagyobbak (esetünkben például 64, hisz ennél mindkettő számunk nagyobb, de a 128-nal mindkettő nemnagyobb), akkor mindkettőből levonhatjuk azt a  kettőhatványt, és egy ugyanolyan értékű mezőre jutunk. Ha van egy, a két koordinátát elválasztó kettő hatvány, akkor az ilyenek közül a legnagyobbat leírjuk, levonjuk a nagyobb koordinatából, így a mezőnk értéke a most kapott mező értéke és a leírt kettő hatvány összege lesz.\r",
+        "Ha mindkét koordinátának ugyanannál a kettőhatványnál épp nagyobbak (esetünkben például 64, hisz ennél mindkettő számunk nagyobb, de a 128-nal mindkettő nemnagyobb), akkor mindkettőből levonhatjuk azt a  kettőhatványt, és egy ugyanolyan értékű mezőre jutunk. Ha van egy, a két koordinátát elválasztó kettő hatvány, akkor az ilyenek közül a legnagyobbat leírjuk, levonjuk a nagyobb koordinátából, így a mezőnk értéke a most kapott mező értéke és a leírt kettő hatvány összege lesz.\r",
     },
     {
       problemText:
@@ -5057,7 +5057,7 @@ export const problems: RelayProblems = {
         "<p>Albrechtke téglalap alakú szobáját \\(68\\cdot119 = 8092\\) négyzetalakú járólappal fedték le. Albrechtke megrajzolta a padlón a szobája egyik átlóját. Hány járólapon megy keresztül ez a vonal, ha azok a járólapok nem számítanak, amelyek csak egy pontban érintkeznek vele?</p>",
       answer: 170,
       points: 6,
-      help1: "Először elég egy 4×7-es téglalapot megvizsgáni. ",
+      help1: "Először elég egy 4×7-es téglalapot megvizsgálni. ",
       help2: "Hány függőleges, hány vízszintes járólap oldalon megy át az átló?",
     },
   ],
@@ -5179,7 +5179,7 @@ export const problems: RelayProblems = {
         "<p>Albrechtke téglalap alakú szobáját \\(68\\cdot119 = 8092\\) négyzetalakú járólappal fedték le. Albrechtke megrajzolta a padlón a szobája egyik átlóját. Hány járólapon megy keresztül ez a vonal, ha azok a járólapok nem számítanak, amelyek csak egy pontban érintkeznek vele?</p>",
       answer: 170,
       points: 6,
-      help1: "Először elég egy 4×7-es téglalapot megvizsgáni. ",
+      help1: "Először elég egy 4×7-es téglalapot megvizsgálni. ",
       help2: "Hány függőleges, hány vízszintes járólap oldalon megy át az átló?\r",
     },
     {
@@ -5316,7 +5316,7 @@ export const problems: RelayProblems = {
       answer: 12,
       points: 6,
       help1: "Hány kis háromszögből áll egy n cm oldalú háromszög?",
-      help2: "A 6 oldalú háromszög nem rakható ki ezeből az idomokból. \r",
+      help2: "A 6 oldalú háromszög nem rakható ki ezekből az idomokból. \r",
       url: "https://durerinfo.hu/wp-content/uploads/2019/07/10_D_C_14.png",
     },
     {
@@ -5335,7 +5335,7 @@ export const problems: RelayProblems = {
       points: 6,
       help1: "Kisebb számokra vizsgáld meg a feladat (2-2, 2-3, 3-3 város). Felfedezel valamilyen szabályszerűséget?",
       help2:
-        "A két felső város között mindenkképpen kell hidat építeni. Ezt a hidat elkezdhetjük lefelé mozgatni. Így a hidak végpontjai végigvándorolnak a városokon. A 10 város közül mikor kerülnek sorra balparti városok? Elő tudjuk ezt írni?",
+        "A két felső város között mindenképpen kell hidat építeni. Ezt a hidat elkezdhetjük lefelé mozgatni. Így a hidak végpontjai végigvándorolnak a városokon. A 10 város közül mikor kerülnek sorra balparti városok? Elő tudjuk ezt írni?",
     },
   ],
   "10_D_C+": [
@@ -5422,7 +5422,7 @@ export const problems: RelayProblems = {
       answer: 12,
       points: 5,
       help1: "Hány kis háromszögből áll egy n cm oldalú háromszög?",
-      help2: "A 6 oldalú háromszög nem rakható ki ezeből az idomokból. \r",
+      help2: "A 6 oldalú háromszög nem rakható ki ezekből az idomokból. \r",
       url: "https://durerinfo.hu/wp-content/uploads/2019/07/10_D_Cp_10.png",
     },
     {
@@ -5441,7 +5441,7 @@ export const problems: RelayProblems = {
       points: 5,
       help1: "Kisebb számokra vizsgáld meg a feladatot (2-2, 2-3, 3-3 város). Felfedezel valamilyen szabályszerűséget?",
       help2:
-        "A két felső város között mindenkképpen kell hidat építeni. Ezt a hidat elkezdhetjük lefelé mozgatni. Így a hidak végpontjai végigvándorolnak a városokon. A 10 város közül mikor kerülnek sorra balparti városok? Elő tudjuk ezt írni?\r",
+        "A két felső város között mindenképpen kell hidat építeni. Ezt a hidat elkezdhetjük lefelé mozgatni. Így a hidak végpontjai végigvándorolnak a városokon. A 10 város közül mikor kerülnek sorra balparti városok? Elő tudjuk ezt írni?\r",
     },
     {
       problemText:
@@ -5488,7 +5488,7 @@ export const problems: RelayProblems = {
     },
     {
       problemText:
-        "<p>Egy autó 100 kilométeren kétszer annyit fogyaszt, ha 120 km/h-val megy, mint ha 30 km/hval menne. Ha 120-szal két órát tud menni egy tank benzinnel, akkor 30-cal hány percenként kell megállnia tankolni?</p>",
+        "<p>Egy autó 100 kilométeren kétszer annyit fogyaszt, ha 120 km/h-val megy, mint ha 30 km/h-val menne. Ha 120-szal két órát tud menni egy tank benzinnel, akkor 30-cal hány percenként kell megállnia tankolni?</p>",
       answer: 960,
       points: 3,
       help1:
@@ -5527,7 +5527,7 @@ export const problems: RelayProblems = {
         "<p>Melyik az a legnagyobb \\(n\\) egész szám, melyre bármilyen pozitív egész \\(k\\) esetén \\(2016^n\\) osztja a \\(k(k + 1)(k + 2)\\cdots(k + 2015)\\) szorzatot?</p>",
       answer: 334,
       points: 4,
-      help1: "Bontsd prímtényezőkre a 2016-ot. 2016 szomszédos egész szorzata midnig osztható 2016!-sal. ",
+      help1: "Bontsd prímtényezőkre a 2016-ot. 2016 szomszédos egész szorzata mindig osztható 2016!-sal. ",
       help2: "Határozd meg a 2, 3, 7 kitevőit a 2016! szorzatban. \r",
     },
     {
@@ -5609,7 +5609,7 @@ export const problems: RelayProblems = {
       points: 6,
       help1:
         "Kösd össze a C csúcsot a kör középpontjával. Az így létrejövő háromszögben a CP egyenesnek kitüntetett szerepe van. ",
-      help2: "Vetísd le a P pontot BC oldalra. Hova esik a vetület?\r",
+      help2: "Vetítsd le a P pontot BC oldalra. Hova esik a vetület?\r",
     },
     {
       problemText:
@@ -5637,7 +5637,7 @@ export const problems: RelayProblems = {
         "<p>Melyik az a legnagyobb \\(n\\) egész szám, melyre bármilyen pozitív egész \\(k\\) esetén \\(2016^n\\) osztja a \\(k(k + 1)(k + 2)\\cdots(k + 2015)\\) szorzatot?</p>",
       answer: 334,
       points: 3,
-      help1: "Bontsd prímtényezőkre a 2016-ot. 2016 szomszédos egész szorzata midnig osztható 2016!-sal. ",
+      help1: "Bontsd prímtényezőkre a 2016-ot. 2016 szomszédos egész szorzata mindig osztható 2016!-sal. ",
       help2: "Határozd meg a 2, 3, 7 kitevőit a 2016! szorzatban. \r",
     },
     {
@@ -5719,7 +5719,7 @@ export const problems: RelayProblems = {
       points: 5,
       help1:
         "Kösd össze a C csúcsot a kör középpontjával. Az így létrejövő háromszögben a CP egyenesnek kitüntetett szerepe van. ",
-      help2: "Vetísd le a P pontot BC oldalra. Hova esik a vetület?\r",
+      help2: "Vetítsd le a P pontot BC oldalra. Hova esik a vetület?\r",
     },
     {
       problemText:
@@ -5801,7 +5801,7 @@ export const problems: RelayProblems = {
       answer: 288,
       points: 4,
       help1: "Mivel ekkor a szám kilenccel is osztható, ezért a jegyek összege legalább 18. ",
-      help2: "A szám néggyel is oosztható, ezért a szám 88-ra végződik. \r",
+      help2: "A szám néggyel is osztható, ezért a szám 88-ra végződik. \r",
     },
     {
       problemText:
@@ -5859,7 +5859,7 @@ export const problems: RelayProblems = {
         "<p>Halasztó Henrik király a születésnapján elhatározta, hogy másnapra összehívja tanácsosait, ám estére meggondolta magát és elhalasztotta egy nappal a tanácskozást. Másnap este ismét úgy gondolta, hogy jobb lenne egy későbbi időpont, ezért most még két nappal későbbre tette az időpontot. Amikor hetedszerre halasztotta el a tanácskozás időpontját, a tanácsosok kiszámolták, hogy így pont 43-at kapnak, ha a találkozó hónapjának és napjának számát összeadják. Tudjuk, hogy a király mindig az előző halasztásánál kétszer olyan hosszú idővel halasztotta el a tanácskozást. Mennyit kapunk, ha Halasztó Henrik születésnapján a hónap sorszámának 100-szorosát és a napjának számát összeadjuk?</p>",
       answer: 825,
       points: 5,
-      help1: "Csak egy olyan nap van, ahol a nap és a hónap sorzsámának összege 43. ",
+      help1: "Csak egy olyan nap van, ahol a nap és a hónap sorszámának összege 43. ",
       help2: "Szilveszterkor volt a tanácskozás, előtte 1+2+...+64 nappal volt a tanácskozás.\r",
     },
     {
@@ -5913,7 +5913,7 @@ export const problems: RelayProblems = {
       answer: 288,
       points: 3,
       help1: "Mivel ekkor a szám kilenccel is osztható, ezért a jegyek összege legalább 18. ",
-      help2: "A szám néggyel is oosztható, ezért a szám 88-ra végződik. \r",
+      help2: "A szám néggyel is osztható, ezért a szám 88-ra végződik. \r",
     },
     {
       problemText:
@@ -5964,7 +5964,7 @@ export const problems: RelayProblems = {
         "<p>Halasztó Henrik király a születésnapján elhatározta, hogy másnapra összehívja tanácsosait, ám estére meggondolta magát és elhalasztotta egy nappal a tanácskozást. Másnap este ismét úgy gondolta, hogy jobb lenne egy későbbi időpont, ezért most még két nappal későbbre tette az időpontot. Amikor hetedszerre halasztotta el a tanácskozás időpontját, a tanácsosok kiszámolták, hogy így pont 43-at kapnak, ha a találkozó hónapjának és napjának számát összeadják. Tudjuk, hogy a király mindig az előző halasztásánál kétszer olyan hosszú idővel halasztotta el a tanácskozást.</p><p>Mennyit kapunk, ha Halasztó Henrik születésnapján a hónap sorszámának 100-szorosát és a\r napjának számát összeadjuk?</p>",
       answer: 825,
       points: 5,
-      help1: "Csak egy olyan nap van, ahol a nap és a hónap sorzsámának összege 43. ",
+      help1: "Csak egy olyan nap van, ahol a nap és a hónap sorszámának összege 43. ",
       help2: "Szilveszterkor volt a tanácskozás, előtte 1+2+...+64 nappal volt a tanácskozás.\r",
     },
     {
@@ -6080,7 +6080,7 @@ export const problems: RelayProblems = {
       answer: 8,
       points: 4,
       help1:
-        "A legfiatalabb unoka legalább 5 éves. a második legfiatalabb lrgalább 6 éves... legalább mennyi az összkora 9 unokának?",
+        "A legfiatalabb unoka legalább 5 éves. a második legfiatalabb legalább 6 éves... legalább mennyi az összkora 9 unokának?",
       help2:
         "Kilenc unoka legalább 81 éves, és ez abba az esetben történhet meg, ha a 5-től 13-ig minden kor szerepel közöttük. EL tudunk hagyni egyet úgy, hogy 70 legyen a maradék összege?\r",
     },
@@ -6126,16 +6126,16 @@ export const problems: RelayProblems = {
       answer: 5,
       points: 5,
       help1:
-        "könnyű kifejezni AB és DE szakaszok hosszkülönbségét az első 2 adatból. ennek mintájára BC;EF , CD;FG , DE;GH szakaszok különbségei is könnyen meghatározhatók. DF és FH sszakaszok hossza pedig adódik az utolsó két egyenletből.",
+        "könnyű kifejezni AB és DE szakaszok hosszkülönbségét az első 2 adatból. ennek mintájára BC;EF , CD;FG , DE;GH szakaszok különbségei is könnyen meghatározhatók. DF és FH szakaszok hossza pedig adódik az utolsó két egyenletből.",
       help2:
-        "Ha az előző segíteségből minden megvan, egyszerűen adódik EF távolság, FG távolság, (a DH távolság, majd ebből a ) GH távolság, ezekből az első egyenleteinkből könnyen kijön minden szomszédos fogadó távolsága, így AB is.\r",
+        "Ha az előző segítségből minden megvan, egyszerűen adódik EF távolság, FG távolság, (a DH távolság, majd ebből a ) GH távolság, ezekből az első egyenleteinkből könnyen kijön minden szomszédos fogadó távolsága, így AB is.\r",
     },
     {
       problemText:
         "<p>Frédi új kifutót akar készíteni Dínónak. Egy olyan téglalap alakú területet szeretne elkeríteni, melynek minden oldala méterben mérve egész szám. Az építkezéshez 24 méternyi kerítés áll rendelkezésre, de ezt nem feltétlenül használja fel mind. Hányféleképpen nézhet ki Dínó kifutója, ha tudjuk, hogy a kifutó területe 22 m<sup>2</sup> -nél nagyobb?<br><i>A téglalapok szélességét és hosszúságát nem különböztetjük meg, vagyis például az \\(1\\times2\\)-es és a \\(2\\times1\\)-es téglalapok ugyanúgy néznek ki.</i></p>",
       answer: 9,
       points: 6,
-      help1: "Nézzük végig az egyes eseteket a terület szerint. A területnek nem lehet 11-nél negyobb prímosztója.",
+      help1: "Nézzük végig az egyes eseteket a terület szerint. A területnek nem lehet 11-nél nagyobb prímosztója.",
       help2: "37 vagy nagyobb területű téglalapot nem tudunk körbekeríteni.\r",
     },
     {
@@ -6144,7 +6144,7 @@ export const problems: RelayProblems = {
       answer: 3,
       points: 6,
       help1:
-        "Kezdjétek el bejelölgetni, hogy hol van biztosan kincs, és hol nincs biztosan kincs. Jó kiindulások az alsó 3-as szomszédai, illetva a balszélső sor felső kettesének szomszédai. Ha ez az elindulás megvan, egy ponton ívül egyértelmű, hogyan kell előrehaladnunk a kitöltéssel.",
+        "Kezdjétek el bejelölgetni, hogy hol van biztosan kincs, és hol nincs biztosan kincs. Jó kiindulások az alsó 3-as szomszédai, illetve a balszélső sor felső kettesének szomszédai. Ha ez az elindulás megvan, egy ponton ívül egyértelmű, hogyan kell előrehaladnunk a kitöltéssel.",
       help2:
         "Ha egy onton elakadtok ez a gondolat kell még nektek: A középső oszlop felülről második mezőjében van kincs (gondoljátok meg, mi lenne, ha nem lenne!)\r",
       url: "https://durerinfo.hu/wp-content/uploads/2019/07/11_D_A_14.png",
@@ -6179,7 +6179,7 @@ export const problems: RelayProblems = {
       help1:
         "Számoljuk azt, hogy 6-a mennyi nappal van eltolódva januárhoz képest (ezt a hónapok hetes maradékával lehet jól mérni). Tehát így néz ki a sorozatunk januártól:0,3,3,6...",
       help2:
-        "A sorozatot úgy képezzük, hogy az előző taghoz hozzáadjuk a k=ovetkező hónap napszámának hetes maradékát, majd maradékosan osztunk 7-tel. A szombatok a nulláknak felelnek meg.\r",
+        "A sorozatot úgy képezzük, hogy az előző taghoz hozzáadjuk a következő hónap napszámának hetes maradékát, majd maradékosan osztunk 7-tel. A szombatok a nulláknak felelnek meg.\r",
     },
     {
       problemText:
@@ -6187,7 +6187,7 @@ export const problems: RelayProblems = {
       answer: 23,
       points: 3,
       help1:
-        "Ha Harry nagyon peches, 14 húzás után lehet, hogy még mindig csak egyszínű egere van. 15.-re viszont már biztosan leszkét  különbözű színű egere. Hogy módosítsuk ezt 3-ra?",
+        "Ha Harry nagyon peches, 14 húzás után lehet, hogy még mindig csak egyszínű egere van. 15.-re viszont már biztosan lesz két  különböző színű egere. Hogy módosítsuk ezt 3-ra?",
       help2:
         "Ha a két legnépesebb csoport számánál nem többet húzunk, akkor előfordulhat, hogy ebből a két csoportból húztunk csak.\r",
     },
@@ -6221,7 +6221,7 @@ export const problems: RelayProblems = {
     },
     {
       problemText:
-        "<p>Tibor január 6-án, míg öccse, Zalán, pár évvel később, január 5-én született. Szüleik Tibor születésekor vettek egy 24 darabos gyertyakészletet, melyből mindig annyi darabot tesznek fel Tibor, illetve Zalán tortájára, ahány éves az adott fiú. (A használt gyertyákat az ünnepség után kidobjá.) Most éppen annyi gyertya maradt meg a készletből, hogy Tibor mai születésnapjára elég legyen. Hányadik születésnapját ünnepelte Tibor, mikor Zalán egynapos volt?</p>",
+        "<p>Tibor január 6-án, míg öccse, Zalán, pár évvel később, január 5-én született. Szüleik Tibor születésekor vettek egy 24 darabos gyertyakészletet, melyből mindig annyi darabot tesznek fel Tibor, illetve Zalán tortájára, ahány éves az adott fiú. (A használt gyertyákat az ünnepség után kidobják.) Most éppen annyi gyertya maradt meg a készletből, hogy Tibor mai születésnapjára elég legyen. Hányadik születésnapját ünnepelte Tibor, mikor Zalán egynapos volt?</p>",
       answer: 4,
       points: 4,
       help1:
@@ -6253,16 +6253,16 @@ export const problems: RelayProblems = {
       answer: 5,
       points: 5,
       help1:
-        "könnyű kifejezni AB és DE szakaszok hosszkülönbségét az első 2 adatból. ennek mintájára BC;EF , CD;FG , DE;GH szakaszok különbségei is könnyen meghatározhatók. DF és FH sszakaszok hossza pedig adódik az utolsó két egyenletből.",
+        "könnyű kifejezni AB és DE szakaszok hosszkülönbségét az első 2 adatból. ennek mintájára BC;EF , CD;FG , DE;GH szakaszok különbségei is könnyen meghatározhatók. DF és FH szakaszok hossza pedig adódik az utolsó két egyenletből.",
       help2:
-        "Ha az előző segíteségből minden megvan, egyszerűen adódik EF távolság, FG távolság, (a DH távolság, majd ebből a ) GH távolság, ezekből az első egyenleteinkből könnyen kijön minden szomszédos fogadó távolsága, így AB is.\r",
+        "Ha az előző segítségből minden megvan, egyszerűen adódik EF távolság, FG távolság, (a DH távolság, majd ebből a ) GH távolság, ezekből az első egyenleteinkből könnyen kijön minden szomszédos fogadó távolsága, így AB is.\r",
     },
     {
       problemText:
         "<p>Frédi új kifutót akar készíteni Dínónak. Egy olyan téglalap alakú területet szeretne elkeríteni, melynek minden oldala méterben mérve egész szám. Az építkezéshez 24 méternyi kerítés áll rendelkezésre, de ezt nem feltétlenül használja fel mind. Hányféleképpen nézhet ki Dínó kifutója, ha tudjuk, hogy a kifutó területe 22 m<sup>2</sup> -nél nagyobb?<br><i>A téglalapok szélességét és hosszúságát nem különböztetjük meg, vagyis például az \\(1\\times2\\)-es és a \\(2\\times1\\)-es téglalapok ugyanúgy néznek ki.</i></p>",
       answer: 9,
       points: 5,
-      help1: "Nézzük végig az egyes eseteket a terület szerint. A területnek nem lehet 11-nél negyobb prímosztója.",
+      help1: "Nézzük végig az egyes eseteket a terület szerint. A területnek nem lehet 11-nél nagyobb prímosztója.",
       help2: "37 vagy nagyobb területű téglalapot nem tudunk körbekeríteni.\r",
     },
     {
@@ -6271,7 +6271,7 @@ export const problems: RelayProblems = {
       answer: 3,
       points: 5,
       help1:
-        "Kezdjétek el bejelölgetni, hogy hol van biztosan kincs, és hol nincs biztosan kincs. Jó kiindulások az alsó 3-as szomszédai, illetva a balszélső sor felső kettesének szomszédai. Ha ez az elindulás megvan, egy ponton ívül egyértelmű, hogyan kell előrehaladnunk a kitöltéssel.",
+        "Kezdjétek el bejelölgetni, hogy hol van biztosan kincs, és hol nincs biztosan kincs. Jó kiindulások az alsó 3-as szomszédai, illetve a balszélső sor felső kettesének szomszédai. Ha ez az elindulás megvan, egy ponton ívül egyértelmű, hogyan kell előrehaladnunk a kitöltéssel.",
       help2:
         "Ha egy onton elakadtok ez a gondolat kell még nektek: A középső oszlop felülről második mezőjében van kincs (gondoljátok meg, mi lenne, ha nem lenne!)\r",
       url: "https://durerinfo.hu/wp-content/uploads/2019/07/11_D_B_11.png",
@@ -6293,7 +6293,7 @@ export const problems: RelayProblems = {
       help1:
         "Ha úgy szedjük el az ajándékokat, hogy mindig a legfelső sort ürítjük le először, könnyen számolható, hogy mennyi lehetőség volt. Hogyan történhetett az, hogy nem így vettük el a csomagokat?",
       help2:
-        "Lényegében egyfélképpen (tükrözés miatt 2-félképpen). ilyen esetben mara egy kicsi piramis, amit már tudjuk, hányféleképpen szedhetünk le.\r",
+        "Lényegében egyféleképpen (tükrözés miatt 2-féleképpen). ilyen esetben mara egy kicsi piramis, amit már tudjuk, hányféleképpen szedhetünk le.\r",
       url: "https://durerinfo.hu/wp-content/uploads/2019/07/11_D_B_13.png",
     },
     {
@@ -6473,7 +6473,7 @@ export const problems: RelayProblems = {
       points: 3,
       help1: "ABC és EBD háromszögek hasonlóak",
       help2:
-        "A hasonlóságból CE és ED szakaszok hossza kiszámolható, majd a négyszöget ACE és ADE háromszöekre bontva a terület is.",
+        "A hasonlóságból CE és ED szakaszok hossza kiszámolható, majd a négyszöget ACE és ADE háromszögekre bontva a terület is.",
     },
     {
       problemText:
@@ -6596,7 +6596,7 @@ export const problems: RelayProblems = {
       answer: 409,
       points: 6,
       help1:
-        "Átfogalmazzuk a feladatot: egy 7x7-es táblázatot nézünk, ennek mezőit választjuk ki. A 'jó' esetek azok, amikor veszünk egy 'bástyelrendezést', majd hozzáveszünk egy pontot.",
+        "Átfogalmazzuk a feladatot: egy 7x7-es táblázatot nézünk, ennek mezőit választjuk ki. A 'jó' esetek azok, amikor veszünk egy 'bástyaelrendezést', majd hozzáveszünk egy pontot.",
       help2:
         "A rossz esetek azok, amikor van egy oszlop, és egy sor is, ahol van 2-2 kiválasztott mező, de a közös mező nincs kiválasztva. A valószínűség a jó és a rossz esetek hányadosából kiszámolható",
     },
@@ -6859,7 +6859,7 @@ export const problems: RelayProblems = {
       answer: 620,
       points: 6,
       help1: "Az egyenletnek lehet 1 valós és 2 komplex gyöke, vagy 3 valós gyöke.",
-      help2: "A Viéte-formulák alapján írjátok fel a komplex gyökök valós részének lehetséges értékeit.\r",
+      help2: "A Viète-formulák alapján írjátok fel a komplex gyökök valós részének lehetséges értékeit.\r",
     },
     {
       problemText:
@@ -6925,7 +6925,7 @@ export const problems: RelayProblems = {
       answer: 78,
       points: 4,
       help1: "Számítsd ki külön-külön a részek nagyságát!",
-      help2: "Rakd össze a háromszögeket úgy, hogy téglalpokat kapj!",
+      help2: "Rakd össze a háromszögeket úgy, hogy téglalapokat kapj!",
       url: "https://durerinfo.hu/wp-content/uploads/2019/07/11_H_A_7.png",
     },
     {
@@ -6947,7 +6947,7 @@ export const problems: RelayProblems = {
     },
     {
       problemText:
-        "<p>Egy lakótelepen 16 új házat építenek, egy \\(4\\times4\\)-es rács szerint. A kreatív építők úgy tervezték a lakótelepet, hogy minden háznak 1, 2, 3 vagy 4 emelete legyen. Ezenkívül arra is figyeltek, hogy ne legyen két azonos magasságú épület semelyik sorban vagy oszlopban. Annáék egy lakást szeretnének vásárolni, ezért körbejárták a lakótelepet. Néhány sorban, illetve oszlopban felírták, hogy ha onnan benéznek, hány házat látnak. Egy házat akkor lehet látni, ha nincs előtte magasabb ház. A végén úgy döntöttek, hogyaz \\(A\\), \\(B\\) vagy \\(C\\) épületben vesznek lakást. Hány emelete van ennek a 3 háznak összesen?</p>",
+        "<p>Egy lakótelepen 16 új házat építenek, egy \\(4\\times4\\)-es rács szerint. A kreatív építők úgy tervezték a lakótelepet, hogy minden háznak 1, 2, 3 vagy 4 emelete legyen. Ezenkívül arra is figyeltek, hogy ne legyen két azonos magasságú épület semelyik sorban vagy oszlopban. Annáék egy lakást szeretnének vásárolni, ezért körbejárták a lakótelepet. Néhány sorban, illetve oszlopban felírták, hogy ha onnan benéznek, hány házat látnak. Egy házat akkor lehet látni, ha nincs előtte magasabb ház. A végén úgy döntöttek, hogy az \\(A\\), \\(B\\) vagy \\(C\\) épületben vesznek lakást. Hány emelete van ennek a 3 háznak összesen?</p>",
       answer: 6,
       points: 5,
       help1: "Milyen háznak kell állnia az 1-es mellett, illetve milyennek a 4-es mellett?",
@@ -6989,7 +6989,7 @@ export const problems: RelayProblems = {
     },
     {
       problemText:
-        "<p>Martin, Martina, Marcell és Marcella maratonon indultak. Hányféle sorrendben érhettek célba, ha köztük holtverseny is lehetett (azaz elképzelhető, hogy egyszerre ketten vagytöbben is beértek a célba)?</p>",
+        "<p>Martin, Martina, Marcell és Marcella maratonon indultak. Hányféle sorrendben érhettek célba, ha köztük holtverseny is lehetett (azaz elképzelhető, hogy egyszerre ketten vagy többen is beértek a célba)?</p>",
       answer: 75,
       points: 6,
       help1: "Hányféle különböző megoldás van, ha csak azt nézzük, hogy hol van holtverseny?",
@@ -7027,7 +7027,7 @@ export const problems: RelayProblems = {
       answer: 78,
       points: 3,
       help1: "Számítsd ki külön-külön a részek nagyságát!",
-      help2: "Rakd össze a háromszögeket úgy, hogy téglalpokat kapj!\r",
+      help2: "Rakd össze a háromszögeket úgy, hogy téglalapokat kapj!\r",
       url: "https://durerinfo.hu/wp-content/uploads/2019/07/11_H_B_4.png",
     },
     {
@@ -7049,7 +7049,7 @@ export const problems: RelayProblems = {
     },
     {
       problemText:
-        "<p>Egy lakótelepen 16 új házat építenek, egy \\(4\\times4\\)-es rács szerint. A kreatív építők úgy tervezték a lakótelepet, hogy minden háznak 1, 2, 3 vagy 4 emelete legyen. Ezenkívül arra is figyeltek, hogy ne legyen két azonos magasságú épület semelyik sorban vagy oszlopban. Annáék egy lakást szeretnének vásárolni, ezért körbejárták a lakótelepet. Néhány sorban, illetve oszlopban felírták, hogy ha onnan benéznek, hány házat látnak. Egy házat akkor lehet látni, ha nincs előtte magasabb ház. A végén úgy döntöttek, hogyaz \\(A\\), \\(B\\) vagy \\(C\\) épületben vesznek lakást. Hány emelete van ennek a 3 háznak összesen?</p>",
+        "<p>Egy lakótelepen 16 új házat építenek, egy \\(4\\times4\\)-es rács szerint. A kreatív építők úgy tervezték a lakótelepet, hogy minden háznak 1, 2, 3 vagy 4 emelete legyen. Ezenkívül arra is figyeltek, hogy ne legyen két azonos magasságú épület semelyik sorban vagy oszlopban. Annáék egy lakást szeretnének vásárolni, ezért körbejárták a lakótelepet. Néhány sorban, illetve oszlopban felírták, hogy ha onnan benéznek, hány házat látnak. Egy házat akkor lehet látni, ha nincs előtte magasabb ház. A végén úgy döntöttek, hogy az \\(A\\), \\(B\\) vagy \\(C\\) épületben vesznek lakást. Hány emelete van ennek a 3 háznak összesen?</p>",
       answer: 6,
       points: 4,
       help1: "Milyen háznak kell állnia az 1-es mellett, illetve milyennek a 4-es mellett?",
@@ -7216,7 +7216,7 @@ export const problems: RelayProblems = {
       answer: 45,
       points: 5,
       help1:
-        "Induljatonk ki abból az esetből, amikor 1-1 darab van minden nagyobb érméből, és az összes többi egycentes.",
+        "Induljatok ki abból az esetből, amikor 1-1 darab van minden nagyobb érméből, és az összes többi egycentes.",
       help2:
         "Váltsatok be néhány egycentest nagyobb érmékre, hogy csökkenjen az érmék száma a kellő számúra csökkenjen!<br><i>Ha 10 darab egycentest beváltotok egy tízcentesre, akkor pont 9-cel csökken az érmék száma.</i>",
     },
@@ -7265,7 +7265,7 @@ export const problems: RelayProblems = {
       points: 6,
       help1: "3, 4, 5 egyenesnek legfeljebb hány metszéspontja lehet a síkon?",
       help2:
-        "Ha már 5 átlót berajzoltatok úgy, hogy azoknak a lehető legtöbb metszéspontjuk legyen, akkor a hatodik legfelejbb hány új metszéspontot ad?<br><i>Az egy csúcsból induló átlók nem metszhetik egymást csúcstól különböző pontban.</i>",
+        "Ha már 5 átlót berajzoltatok úgy, hogy azoknak a lehető legtöbb metszéspontjuk legyen, akkor a hatodik legfeljebb hány új metszéspontot ad?<br><i>Az egy csúcsból induló átlók nem metszhetik egymást csúcstól különböző pontban.</i>",
     },
   ],
   "12_D_B": [
@@ -7327,7 +7327,7 @@ export const problems: RelayProblems = {
       answer: 45,
       points: 4,
       help1:
-        "Induljatonk ki abból az esetből, amikor 1-1 darab van minden nagyobb érméből, és az összes többi egycentes.",
+        "Induljatok ki abból az esetből, amikor 1-1 darab van minden nagyobb érméből, és az összes többi egycentes.",
       help2:
         "Váltsatok be néhány egycentest nagyobb érmékre, hogy csökkenjen az érmék száma!<br><i>Ha 10 darab egycentest beváltotok egy tízcentesre, akkor mennyivel csökken az érmék száma?</i>",
     },
@@ -7404,7 +7404,7 @@ export const problems: RelayProblems = {
       points: 6,
       help1: "3, 4, 5, 6 egyenesnek legfeljebb hány metszéspontja lehet a síkon?",
       help2:
-        "Ha már 6 átlót berajzoltatok úgy, hogy azoknak a lehető legtöbb metszéspontjuk legyen, akkor a hetedik legfelejbb hány új metszéspontot ad?<br><i>Az egy csúcsból induló átlók nem metszhetik egymást csúcstól különböző pontban.</i>",
+        "Ha már 6 átlót berajzoltatok úgy, hogy azoknak a lehető legtöbb metszéspontjuk legyen, akkor a hetedik legfeljebb hány új metszéspontot ad?<br><i>Az egy csúcsból induló átlók nem metszhetik egymást csúcstól különböző pontban.</i>",
     },
     {
       problemText:
@@ -7714,7 +7714,7 @@ export const problems: RelayProblems = {
       answer: 108,
       points: 6,
       help1:
-        "Hosszabbítsátok meg a háromszög egyik szárát, és egészítsétek ki egy nagyobb háromszöggé! Vegyétek figyelembe, hogy a háromszög rövidebb szögfelezője felezi az alapot, és fele olyan hosszú, mint a hosszab szögfelezők.<br><i>(A szögfelező-tétel bizonyítása is adhat ötletet.)</i>",
+        "Hosszabbítsátok meg a háromszög egyik szárát, és egészítsétek ki egy nagyobb háromszöggé! Vegyétek figyelembe, hogy a háromszög rövidebb szögfelezője felezi az alapot, és fele olyan hosszú, mint a hosszabb szögfelezők.<br><i>(A szögfelező-tétel bizonyítása is adhat ötletet.)</i>",
       help2:
         "A meghosszabbított szárt metsszétek el az alap végpontjába állított merőlegessel! Ez egy derékszögű háromszög befogója. Az eredeti háromszög rövidebb szögfelezője egy nevezetes vonal ebben a derékszögű háromszögben is. Betűzzétek meg valamelyik szöget, és fejezzétek ki vele a többit!",
     },
@@ -7918,7 +7918,7 @@ export const problems: RelayProblems = {
       answer: 1,
       points: 4,
       help1:
-        "Vizsgáljátok a <em>(CSQ, QAB)</em>, illetve az <em>(ADP, PRB)</em> háromszögpárok összeterületeit és azok különbségét!",
+        "Vizsgáljátok a <em>(CSQ, QAB)</em>, illetve az <em>(ADP, PRB)</em> háromszögpárok összterületeit és azok különbségét!",
       help2: "Az egyes háromszögpárok által fedett négy-négy szürke terület összegei egyenlők egymással.\r",
       url: "https://durerinfo.hu/wp-content/uploads/2019/07/12_D_Ep_6.png",
     },
@@ -7964,7 +7964,7 @@ export const problems: RelayProblems = {
       points: 5,
       help1: "Ellenőrizzétek a paritást és az 1009-es oszthatóságot! Alkalmazzátok a kis-Fermat-tételt!",
       help2:
-        "A <em>k</em>-hatványok <em>k</em>-val megegyező paritásúak. Az 1009-es oszthatósághoz pedig a négyzetek összegét vizsgéljátok (a kis-Fermat-tétel alapján).<br>Az összegképlet alapján megkaphatjátok a legkisebb megfelelő <em>N</em> értéket.\r",
+        "A <em>k</em>-hatványok <em>k</em>-val megegyező paritásúak. Az 1009-es oszthatósághoz pedig a négyzetek összegét vizsgáljátok (a kis-Fermat-tétel alapján).<br>Az összegképlet alapján megkaphatjátok a legkisebb megfelelő <em>N</em> értéket.\r",
     },
     {
       problemText:
@@ -7973,7 +7973,7 @@ export const problems: RelayProblems = {
       points: 5,
       help1: "Tekintsétek a két oldal fokszámát az egyenletben. Mi derül ki belőle?",
       help2:
-        "<em>P</em>-t egy paramétertől függően meg lehet határozni. <em>Q</em>-t írjátok fel ismeretlen együttthatókkal, majd egyeztessétek azokat az első egyenlet alapján.<br>A konstansoknál segít, ha az <em>af<sup>2</sup></em> tagot igyekeztek kiküszöbölni.\r",
+        "<em>P</em>-t egy paramétertől függően meg lehet határozni. <em>Q</em>-t írjátok fel ismeretlen együtthatókkal, majd egyeztessétek azokat az első egyenlet alapján.<br>A konstansoknál segít, ha az <em>af<sup>2</sup></em> tagot igyekeztek kiküszöbölni.\r",
     },
     {
       problemText:
@@ -8025,7 +8025,7 @@ export const problems: RelayProblems = {
     },
     {
       problemText:
-        "<p>Nagymama palacsintát sütött unokáinak. Anna három palacsintát evett, Bori kettővel többet, mint Anna. Cézár pont annyi palacsintát evett, mint a két lány együttvéve. Amikor nagymama elrakta a maradékot, megállapította, hogy pont ugyannyi palacsinta maradt meg, mint ahányat megettek az unokák.</p><p>Hány palacsintát sütött összesen Nagymama, ha ő maga nem evett meg egyet sem?</p>",
+        "<p>Nagymama palacsintát sütött unokáinak. Anna három palacsintát evett, Bori kettővel többet, mint Anna. Cézár pont annyi palacsintát evett, mint a két lány együttvéve. Amikor nagymama elrakta a maradékot, megállapította, hogy pont ugyanannyi palacsinta maradt meg, mint ahányat megettek az unokák.</p><p>Hány palacsintát sütött összesen Nagymama, ha ő maga nem evett meg egyet sem?</p>",
       answer: 32,
       points: 3,
       help1: "Cézár 8 palacsintát evett meg.",
@@ -8118,7 +8118,7 @@ export const problems: RelayProblems = {
         "<p>Legfeljebb hányat lehet kiválasztani az \\(1, 2, \\ldots, 64\\) számok közül úgy, hogy ne legyen a kiválasztottak közt két olyan szám, amelyek közül az egyik kétszerese a másiknak?</p>",
       answer: 43,
       points: 6,
-      help1: "Legfeljebb hány számot lehet kiválaszatni az 1, 2, 4, 8, 16, 32 és a 64 közül?",
+      help1: "Legfeljebb hány számot lehet kiválasztani az 1, 2, 4, 8, 16, 32 és a 64 közül?",
       help2:
         "Válasszátok ki a páratlan számokat! Továbbá a 4-gyel osztható, de 8-cal nem osztható számokat. Meg a 16-tal osztható, de 32-vel nem oszthatóakat. És a 64-et is.",
     },
@@ -8170,7 +8170,7 @@ export const problems: RelayProblems = {
     },
     {
       problemText:
-        "<p>A képen Nürnberg egy részének térképe látható, minden egyenes szakasz egy-egy utcát jelöl. Dürer festőműhelye az M-mel, lakása az L-lel jelölt kereszteződésnél található.<br>Dürer nagyon kedvel errefelé sétálni, ezért egyik nap úgy ment haza, hogy közben minéltöbb utcát járhasson végig. Ha egy utcába bement, akkor azon végig is sétált. Egyetlen utcát sem járt végig egynél többször, de többször is járhatott ugyanabban a kereszteződésben.</p><p>Legfeljebb hány utcán sétálhatott végig?</p>",
+        "<p>A képen Nürnberg egy részének térképe látható, minden egyenes szakasz egy-egy utcát jelöl. Dürer festőműhelye az M-mel, lakása az L-lel jelölt kereszteződésnél található.<br>Dürer nagyon kedvel errefelé sétálni, ezért egyik nap úgy ment haza, hogy közben minél több utcát járhasson végig. Ha egy utcába bement, akkor azon végig is sétált. Egyetlen utcát sem járt végig egynél többször, de többször is járhatott ugyanabban a kereszteződésben.</p><p>Legfeljebb hány utcán sétálhatott végig?</p>",
       answer: 15,
       points: 3,
       help1: "Ha egy kereszteződésben 4 út találkozik, Dürer maximum kétszer járhatott ott.",
@@ -8239,7 +8239,7 @@ export const problems: RelayProblems = {
         "<p>Legfeljebb hányat lehet kiválasztani az \\(1, 2, \\ldots, 128\\) számok közül úgy, hogy ne legyen a kiválasztottak közt két olyan szám, amelyek közül az egyik kétszerese a másiknak?</p>",
       answer: 85,
       points: 5,
-      help1: "Legfeljebb hány számot lehet kiválaszatni az 1, 2, 4, 8, 16, 32, 64 és a 128 közül?",
+      help1: "Legfeljebb hány számot lehet kiválasztani az 1, 2, 4, 8, 16, 32, 64 és a 128 közül?",
       help2:
         "Válasszátok ki a páratlan számokat! Továbbá a 4-gyel osztható, de 8-cal nem osztható számokat. Meg a 16-tal osztható, de 32-vel nem oszthatóakat. Végül a 64-et is.",
     },

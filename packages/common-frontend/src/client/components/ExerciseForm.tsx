@@ -24,7 +24,7 @@ export interface MyProps {
   attempt: number;
 }
 
-export const ExcerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) => {
+export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) => {
   const theme = useTheme();
   const { enqueueSnackbar } = useSnackbar();
   const refreshState = useRefreshTeamState();

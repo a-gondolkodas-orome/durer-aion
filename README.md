@@ -281,13 +281,25 @@ npm run typecheck
 npm test
 npm run build
 npm run i18n:check
+npm run spell-check
 ```
 
-Those are the five jobs in `.github/workflows/ci.yml`; `apps/strategy-practice`
+Those are the six jobs in `.github/workflows/ci.yml`; `apps/strategy-practice`
 has its own two (`practice-test` and `patch-coverage`), which run from its
 directory.
-`npm run spell-check` exists but is not one of them — it reports on the
-Hungarian problem text as well, so it is a thing to read, not a gate.
+`npm run spell-check` checks English and Hungarian alike (via
+`@cspell/dict-hu-hu`, with both British and American spellings accepted),
+past competition problem text included — the same config the VS Code Code
+Spell Checker extension reads. Only `teamData.ts` (arbitrary team names)
+stays ignored as data. Vocabulary the dictionaries lack lives in three
+places: technical identifiers in `cspell.json`'s `words` list; the
+competition's own coinages and proper nouns in `hungarian-words.txt`
+(hand-curated, small); and the everyday agglutinated forms
+`@cspell/dict-hu-hu` misses in `hungarian-hunspell-words.txt`, which no
+one maintains by hand — `npm run spell-check:hu-triage` regenerates it,
+validating every word against real hunspell (needs
+`apt install hunspell hunspell-hu`) and printing whatever hunspell rejects
+for a human to fix or bless.
 
 ## Dependency updates
 

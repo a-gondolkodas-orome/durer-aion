@@ -2,14 +2,14 @@ import React from "react";
 import { Stack } from "@mui/system";
 import { useTranslation, Trans } from "react-i18next";
 
-export interface ExcerciseTaskProps {
+export interface ExerciseTaskProps {
   task: string;
   serial: number;
   maxPoints: number;
   pictureUrl: string | null;
 }
 
-export const ExcerciseTask: React.FunctionComponent<ExcerciseTaskProps> = (props: ExcerciseTaskProps) => {
+export const ExerciseTask: React.FunctionComponent<ExerciseTaskProps> = (props: ExerciseTaskProps) => {
   const completestring = `<latex-js hyphenate="false">${props.task}
 </latex-js>`;
   const { t } = useTranslation();

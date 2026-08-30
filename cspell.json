@@ -1,13 +1,110 @@
 {
-  "language": "en",
+  "version": "0.2",
+  "language": "en,en-GB,hu",
+  "import": [
+    "@cspell/dict-hu-hu/cspell-ext.json"
+  ],
+  "dictionaries": [
+    "hu-hu",
+    "en-gb",
+    "hu-extra",
+    "hu-hunspell"
+  ],
   "words": [
-    "formik",
-    "notistack",
-    "teamname",
+    "addminutes",
+    "alikes",
+    "argmax",
+    "argmin",
+    "bgio",
+    "bivariance",
+    "Bivariant",
     "boardgame",
+    "BOARDSIZE",
+    "boardwrapper",
+    "botless",
+    "botmoves",
+    "botstrategy",
+    "botwrapper",
+    "catshark",
+    "chebyshev",
+    "coef",
+    "COEFS",
+    "completestring",
+    "creds",
+    "deltalog",
+    "dispatchable",
+    "Dists",
+    "doublestart",
+    "dropdownid",
+    "durerbackground",
+    "formik",
+    "gamename",
+    "gameobject",
     "gameover",
+    "gamestate",
+    "gamewrapper",
+    "guessnum",
+    "headlessly",
+    "hflip",
+    "joincode",
+    "langcode",
+    "Langswitcher",
+    "Lngs",
+    "logoutofthiswholething",
+    "matchid",
+    "maxpoints",
+    "memoises",
+    "midgame",
+    "minpoints",
+    "monic",
+    "multiset",
+    "multisets",
+    "nameid",
+    "negamax",
+    "newcops",
+    "notistack",
+    "onwarn",
+    "playout",
+    "playouts",
+    "playthroughs",
+    "pointings",
+    "Policemanthief",
+    "prebundle",
+    "prevrelayid",
+    "prevstratid",
+    "Robbable",
+    "RRBBBB",
     "socketio",
-    "authorative"
+    "splittable",
+    "Sprague",
+    "strat",
+    "strategydict",
+    "stratstep",
+    "subtable",
+    "supersegments",
+    "teamname",
+    "teamstate",
+    "teamstates",
+    "tictactoe",
+    "timeto",
+    "tname",
+    "tris",
+    "TYPELESS",
+    "unattacked",
+    "uncircled",
+    "uncolorable",
+    "uncompletable",
+    "unconfigured",
+    "unmemoised",
+    "unparseable",
+    "unsplittable",
+    "unstarted",
+    "unstub",
+    "urlcat",
+    "Vieta",
+    "wrongid",
+    "xors",
+    "yearidx"
   ],
   "flagWords": [],
   "ignorePaths": [
@@ -17,17 +114,38 @@
     "*.log",
     "package.json",
     "coverage/**/*",
-    "apps/strategy-practice/**",
     "docker-compose*",
     "readme.md",
-    "src/teamData.ts",
-    "src/client/text-constants.ts",
     "scripts/test.tsv*",
-    "src/games/relay/strategy.ts"
+    "**/src/teamData.ts"
   ],
   "languageSettings": [
     {
       "languageId": "typescript"
+    }
+  ],
+  "dictionaryDefinitions": [
+    {
+      "name": "hu-extra",
+      "path": "./hungarian-words.txt",
+      "addWords": true
+    },
+    {
+      "name": "hu-hunspell",
+      "path": "./hungarian-hunspell-words.txt"
+    }
+  ],
+  "overrides": [
+    {
+      "filename": [
+        "apps/relay-practise-frontend/src/problems.ts",
+        "packages/strategy/src/games/relay/strategy.ts"
+      ],
+      "ignoreRegExpList": [
+        "/\\\\+[a-zA-Z]+/g",
+        "/&[a-z]+;/g",
+        "/\\b[A-Z]{2,}\\b/g"
+      ]
     }
   ]
 }

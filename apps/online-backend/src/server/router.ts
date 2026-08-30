@@ -12,7 +12,7 @@ import { AnyBgioGame, PlayerIDType } from 'game';
 
 /**
  * 
- * Big factory to set up the Router for the API, anso contains API function implementations.
+ * Big factory to set up the Router for the API, and also contains API function implementations.
  * 
  * @param router - Koa Router
  * @param teams - List of teams, provided as a TeamsRepository
@@ -102,7 +102,7 @@ export function configureTeamsRouter(
     //Update team
     if (team.strategyMatch.state === "IN PROGRESS") {
       if (team.strategyMatch.matchID !== matchID) {
-        ctx.throw(501, `IN PROGRESS strategy match found (${team.strategyMatch.matchID}), but it does not match with matchID (${matchID}). (Probabaly you are using an old matchID.)`);
+        ctx.throw(501, `IN PROGRESS strategy match found (${team.strategyMatch.matchID}), but it does not match with matchID (${matchID}). (Probably you are using an old matchID.)`);
       }
       await team.update({
         strategyMatch: {
@@ -115,7 +115,7 @@ export function configureTeamsRouter(
     }
     else if (team.relayMatch.state === "IN PROGRESS") {
       if (team.relayMatch.matchID !== matchID) {
-        ctx.throw(501, `IN PROGRESS relay match found (${team.relayMatch.matchID}), but it does not match with matchID (${matchID}). (Probabaly you are using an old matchID.)`);
+        ctx.throw(501, `IN PROGRESS relay match found (${team.relayMatch.matchID}), but it does not match with matchID (${matchID}). (Probably you are using an old matchID.)`);
       }
       await team.update({
         relayMatch: {
@@ -143,8 +143,8 @@ export function configureTeamsRouter(
     This is a bit hacky, but it mainly simulates a similar effect as what would happen if a different user changes teh gamestate irl
     This is generally equal to what would happen if multiple players play the game, and one does some actions.
     The other players would see the updated gamestate, and the frontend would update accordingly.
-    The normal way to use this, is to create a Master authorative object, which handels validations, and other logics.
-    Here we already handeled the validation, and uploded it to the database, so we can just send the updated gamestate to the frontend.
+    The normal way to use this, is to create a Master authoritative object, which handles validations, and other logics.
+    Here we already handled the validation, and uploaded it to the database, so we can just send the updated gamestate to the frontend.
     This is possible, because the publish functionality of the PubSub implementation,if we use a SendAll function, can be reconstructed easily from the transport layer we defined from the botmoves already. */
     const my_transportAPI = TransportAPI(matchID, null /* we are only using sendAll */, getFilterPlayerView(game), ctx.durer_transport.pubSub)
 
@@ -281,7 +281,7 @@ export function configureTeamsRouter(
  */
   router.put("/team/admin/import", koaBody({ multipart: true }), async (ctx) => {
     const { file } = ctx.request.files ?? ctx.throw(400, 'No files uploaded!');
-    // Check if multiple files are uploded
+    // Check if multiple files are uploaded
     if (Array.isArray(file)) {
       ctx.throw(400, 'Multiple files are not supported.');
       return;
@@ -303,7 +303,7 @@ export function configureTeamsRouter(
    * Get team ID based on login token
    * 
    * @param {string} token: Login token
-   * @returns {srting } - TeamId for the team
+   * @returns {string} - TeamId for the team
    */
   router.get("/team/join/:token", koaBody(), async (ctx) => {
     const connect_token: string = ctx.params.token ?? "no-token";
