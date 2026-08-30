@@ -4,7 +4,7 @@ import { Button, Dialog, Table, TableBody, TableCell, TableHead, TableRow, IconB
 import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
 import { Fragment, useEffect, useState } from 'react';
 import useSWR from 'swr';
-import { DataGrid } from '@mui/x-data-grid';
+import { DataGrid, ExportCsv, Toolbar } from '@mui/x-data-grid';
 import { TeamModelDto } from '../dto/TeamStateDto';
 import { TeamDetailDialog } from './TeamDetailDialog';
 import Form from './form';
@@ -16,6 +16,22 @@ import { ConfirmDialogInterface, ConfirmDialog } from './ConfirmDialog';
 import * as Yup from 'yup';
 import { alpha } from '@mui/system'
 import { FieldProps } from "formik"
+
+// Only the export button: the columns/filter/density controls the stock
+// GridToolbar also carries are not what this page is for.
+function TeamsToolbar() {
+  return (
+    <Toolbar>
+      <ExportCsv
+        // allColumns so the `other` column, hidden by default below, is still
+        // in the file; the two button columns opt out with disableExport.
+        options={{ fileName: 'durer-csapatok', utf8WithBom: true, allColumns: true }}
+      >
+        Letöltés CSV-ként
+      </ExportCsv>
+    </Toolbar>
+  );
+}
 
 export function Admin(props: {teamId?: string}) {
   const theme = useTheme();
@@ -142,6 +158,7 @@ export function Admin(props: {teamId?: string}) {
               field: 'view',
               width: 170,
               headerName: '',
+              disableExport: true,
               renderCell: (renderData) => {
                 return (
                   <Button
@@ -157,6 +174,7 @@ export function Admin(props: {teamId?: string}) {
               field: 'view_tab',
               width: 170,
               headerName: '',
+              disableExport: true,
               renderCell: (renderData) => {
                 return (
                   <Button
@@ -192,6 +210,8 @@ export function Admin(props: {teamId?: string}) {
             },
           }}
           pageSizeOptions={[10, 25, 50]}
+          showToolbar
+          slots={{ toolbar: TeamsToolbar }}
           sx={{
             height: "auto",
           }}
