@@ -7,7 +7,8 @@
   "dictionaries": [
     "hu-hu",
     "en-gb",
-    "hu-extra"
+    "hu-extra",
+    "hu-hunspell"
   ],
   "words": [
     "addminutes",
@@ -87,6 +88,10 @@
       "name": "hu-extra",
       "path": "./hungarian-words.txt",
       "addWords": true
+    },
+    {
+      "name": "hu-hunspell",
+      "path": "./hungarian-hunspell-words.txt"
     }
   ],
   "overrides": [

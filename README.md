@@ -289,11 +289,17 @@ has its own two (`practice-test` and `patch-coverage`), which run from its
 directory.
 `npm run spell-check` checks English and Hungarian alike (via
 `@cspell/dict-hu-hu`, with both British and American spellings accepted),
-past competition problem text included. Technical vocabulary lives in
-`cspell.json`'s `words` list and the agglutinated Hungarian forms the
-dictionary misses in `hungarian-words.txt` — the same config the VS Code
-Code Spell Checker extension reads. Only `teamData.ts` (arbitrary team
-names) stays ignored as data.
+past competition problem text included — the same config the VS Code Code
+Spell Checker extension reads. Only `teamData.ts` (arbitrary team names)
+stays ignored as data. Vocabulary the dictionaries lack lives in three
+places: technical identifiers in `cspell.json`'s `words` list; the
+competition's own coinages and proper nouns in `hungarian-words.txt`
+(hand-curated, small); and the everyday agglutinated forms
+`@cspell/dict-hu-hu` misses in `hungarian-hunspell-words.txt`, which no
+one maintains by hand — `npm run spell-check:hu-triage` regenerates it,
+validating every word against real hunspell (needs
+`apt install hunspell hunspell-hu`) and printing whatever hunspell rejects
+for a human to fix or bless.
 
 ## Dependency updates
 
