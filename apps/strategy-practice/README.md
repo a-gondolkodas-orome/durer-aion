@@ -270,7 +270,7 @@ does the same for the five files the Node version is written down in.
 Copyright (c) 2020-present [A Gondolkodás Öröme
 Alapítvány](https://agondolkodasorome.hu/).
 
-The promblems originate from the [Dürer Math Competition](https://durerinfo.hu/)
+The problems originate from the [Dürer Math Competition](https://durerinfo.hu/)
 and remain the intellectual property of their respective authors.
 
 This project is licensed under [Creative Commons

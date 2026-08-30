@@ -290,8 +290,11 @@ directory.
 `npm run spell-check` checks English and Hungarian alike (via
 `@cspell/dict-hu-hu`, with both British and American spellings accepted),
 past competition problem text included — the same config the VS Code Code
-Spell Checker extension reads. Only `teamData.ts` (arbitrary team names)
-stays ignored as data. Vocabulary the dictionaries lack lives in three
+Spell Checker extension reads. It covers the sources, the translation
+JSONs and every markdown file in the repository, the ones under dot
+directories included — hence the three markdown globs in the script, since
+`**/*.md` alone skips `.github/` and friends. Only `teamData.ts` (arbitrary
+team names) stays ignored as data. Vocabulary the dictionaries lack lives in three
 places: technical identifiers in `cspell.json`'s `words` list; the
 competition's own coinages and proper nouns in `hungarian-words.txt`
 (hand-curated, small); and the everyday agglutinated forms
