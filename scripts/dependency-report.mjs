@@ -27,7 +27,7 @@ const WORKFLOWS = '.github/workflows/';
 
 // Places a version is written down that no package.json names, so a bump has to touch them in the
 // same commit. `npm run check:versions` fails until they agree; this only says where to look.
-const ALSO_WRITTEN_IN = {
+export const ALSO_WRITTEN_IN = {
   playwright: ['apps/strategy-practice/.devcontainer/Dockerfile']
 };
 
@@ -64,7 +64,7 @@ const checkVersion = async (name, current, where, lookup) => {
 // The workspaces npm installs, plus '' for the root package, which carries the shared build and
 // test tooling. Read from the `workspaces` field rather than globbed off disk: a directory left
 // behind by a rename keeps its node_modules and has no package.json to read.
-const workspaces = () => {
+export const workspaces = () => {
   const { workspaces: patterns } = JSON.parse(read('package.json'));
   return ['', ...patterns.flatMap(pattern => {
     if (!pattern.endsWith('/*')) return [pattern];

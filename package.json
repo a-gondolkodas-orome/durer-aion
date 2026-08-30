@@ -21,6 +21,7 @@
     "dev:strategy-practice": "npm run dev --workspace=strategy-practice",
     "setup": "node scripts/seed-env-files.mjs",
     "report:outdated": "node scripts/dependency-report.mjs",
+    "update:minors": "node scripts/update-minors.mjs",
     "stack:up": "npm run build && docker compose -f docker-compose.yml -f docker-compose.dev.yml --env-file=.env.docker up --build --wait",
     "stack:down": "docker compose -f docker-compose.yml -f docker-compose.dev.yml --env-file=.env.docker down",
     "stack:logs": "docker compose --env-file=.env.docker logs -f",
