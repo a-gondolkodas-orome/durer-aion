@@ -152,24 +152,26 @@ Edit `.env.docker` before the first `up`:
 - `BOT_CREDENTIALS` — sample value `bot_passwd`.
 - `POSTGRESQL_PASSWORD` — sample value `postgres_passwd`. It is also in the backend's
   `DATABASE_URL`, so change it here and nowhere else.
-- `GAME_GLOBAL_START_T` and `GAME_GLOBAL_END_T` — the competition window. **The sample end
-  date is in the past**, so leaving it serves a competition that is already over.
+- `GAME_GLOBAL_START_T` and `GAME_GLOBAL_END_T` — the competition window. Teams cannot log
+  in outside it. The sample end date is far future so the stack runs out of the box; set
+  both to the real window.
 
 The other files `npm run setup` creates are frontend build settings; the samples are fine.
 [`README.md`](./README.md), under *Configuration you may want to change*, says what reads
 which.
 
-> **Test drive:** throwaway values are fine, but still change all three off the samples —
-> the machine is on the internet. Set the window to cover your session.
+> **Test drive:** throwaway values are fine, but still change all three credentials off the
+> samples — the machine is on the internet. The sample window needs no change.
 
 ## 5. Close the ports
 
-Before bringing the stack up. `docker-compose.yml` publishes postgres on every interface,
-so until 5432 is closed this machine is a reachable database.
+Use the provider's firewall — Azure network security group, DigitalOcean cloud firewall,
+AWS security group — and allow **22, 80 and 443** inbound only.
 
-Use the provider's firewall — DigitalOcean cloud firewall, Azure network security group,
-AWS security group — and allow **22, 80 and 443** inbound only. Host `ufw` is not enough:
-docker's own iptables rules for published ports bypass it.
+The stack publishes nothing else: postgres has no `ports:` in `docker-compose.yml`, only in
+the dev overlay, and there on loopback. The firewall is what keeps it that way if a later
+change publishes something. Host `ufw` is not enough on its own — docker's own iptables
+rules for published ports bypass it.
 
 ## 6. Bring it up
 
@@ -297,8 +299,8 @@ arguments.
 that changed a column needs the change applied by hand**, or the volume dropped
 (`npm run stack:down -- --volumes`, then import the teams again) if the data is expendable.
 
-No service has a restart policy, so a reboot leaves the site down until someone runs
-`stack:prod` again.
+All three services are `restart: unless-stopped`, so a reboot brings the stack back by
+itself — with whatever image and `dist` were last built, since nothing rebuilds on boot.
 
 > **Test drive:** tear the machine down instead, per the last column of the provider table.
 > Stopping is not deleting on any of them, and on DigitalOcean it does not stop the bill.
@@ -313,9 +315,9 @@ npm run stack:ps                                          # what is running
 docker compose --env-file=.env.docker exec backend bash   # a shell in one
 ```
 
-`scripts/admin.py` is the post-competition scoring pull. Point its `BASE_URL` at the site's
-URL — port 8000 is not published, nginx is the way in — and its `ADMIN_PASSWORD` at
-`ADMIN_CREDENTIALS`.
+`scripts/admin.py` is the post-competition scoring pull. Set `DURER_BASE_URL` to the site's
+URL — port 8000 is not published, nginx is the way in — and `DURER_ADMIN_PASSWORD` to
+`ADMIN_CREDENTIALS`, or let it prompt.
 
 ## Checking it works
 
@@ -354,8 +356,9 @@ npm run deploy
 npm runs the root `predeploy` first, which builds `offline-frontend` with `PUBLIC_URL` as
 its base path; `deploy` pushes `apps/offline-frontend/dist` to the `gh-pages` branch of the
 private repo, which has Pages enabled and serves it. `PUBLIC_URL` lives in
-`apps/offline-frontend/package.json` and is that repo's name, so set it when the year's repo
-is created and the build's asset paths follow.
+`apps/offline-frontend/package.json` as a `/repository-name` placeholder — replace it with
+the year's actual repo name so the asset paths resolve, and keep the change local rather
+than committing it.
 
 **The site is public.** Pages serves it to anyone; the deliberately unguessable repository
 name is the whole of the protection. Treat the link as the secret, and understand that this
@@ -369,4 +372,4 @@ something for testers to see.
 
 The public practice site (`gyakorlo.durerinfo.hu`) is a different thing entirely: built and
 published by `.github/workflows/pages-deploy.yml` on every push to `main`, no server
-involved. See [`docs/pages-consolidation.md`](./docs/pages-consolidation.md).
+involved. `scripts/assemble-site.mjs` is what it runs.
