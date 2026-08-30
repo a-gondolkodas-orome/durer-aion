@@ -7918,7 +7918,7 @@ export const problems: RelayProblems = {
       answer: 1,
       points: 4,
       help1:
-        "Vizsgáljátok a <em>(CSQ, QAB)</em>, illetve az <em>(ADP, PRB)</em> háromszögpárok összeterületeit és azok különbségét!",
+        "Vizsgáljátok a <em>(CSQ, QAB)</em>, illetve az <em>(ADP, PRB)</em> háromszögpárok összterületeit és azok különbségét!",
       help2: "Az egyes háromszögpárok által fedett négy-négy szürke terület összegei egyenlők egymással.\r",
       url: "https://durerinfo.hu/wp-content/uploads/2019/07/12_D_Ep_6.png",
     },
