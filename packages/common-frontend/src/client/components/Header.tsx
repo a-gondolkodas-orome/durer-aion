@@ -9,7 +9,7 @@ import { LanguageDropdown } from './Langswitcher';
 
 // titles[0] and titles[1] are translation keys for the two side titles;
 // titles[2] is an optional, already-translated text shown instead of the team name
-export function Header(props: { teamName: string | null, admin: boolean, titles?: string[], homeaddress?: string}) {
+export function Header(props: { teamName: string | null, admin: boolean, titles?: string[], homeAddress?: string}) {
   const { t } = useTranslation();
   const theme = useTheme();
   const logout = useLogout();
@@ -42,10 +42,10 @@ export function Header(props: { teamName: string | null, admin: boolean, titles?
           fontWeight: 'bold',
           paddingTop: '20px',
           whiteSpace: 'nowrap',
-          cursor: props.homeaddress ? 'pointer' : 'default',
+          cursor: props.homeAddress ? 'pointer' : 'default',
         }} onClick={() => {
-          if (props.homeaddress) {
-            window.location.href = props.homeaddress;
+          if (props.homeAddress) {
+            window.location.href = props.homeAddress;
           }
         }}>{(props.titles) ? t(props.titles[0]) : t('header.title')}</Stack>
         {
