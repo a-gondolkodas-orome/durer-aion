@@ -1,30 +1,51 @@
-import { DataTypes, Model, ModelAttributes } from "sequelize";
+import {
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+  ModelAttributes,
+} from "sequelize";
 import { MatchStatus } from "schemas";
 
-
-export class TeamModel extends Model {
-  public teamId!: string;
-  // Important fields
-  public joinCode!: string;
-  public teamName!: string;
-  public category!: string;
-  public credentials!: string;
-  public email!: string;
-
-  public pageState!: 'DISCLAIMER'|'HOME'|'RELAY'|'STRATEGY';
-
-  public relayMatch!: MatchStatus;
-  public strategyMatch!: MatchStatus;
-
-  // Search fields
-  public other!: string;
-
-  // timestamps!
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
+// Sequelize adds the timestamp columns itself, and only for names the attribute
+// list leaves free. Omitting them from the attribute types therefore keeps them
+// out of the exhaustive column lists below without losing the declared fields.
+export interface OmitTimestamps {
+  omit: "createdAt" | "updatedAt";
 }
 
-export const teamAttributes: ModelAttributes = {
+export class TeamModel extends Model<
+  InferAttributes<TeamModel, OmitTimestamps>,
+  InferCreationAttributes<TeamModel, OmitTimestamps>
+> {
+  declare teamId: string;
+  // Important fields
+  declare joinCode: string;
+  declare teamName: string;
+  declare category: string;
+  declare credentials: string;
+  declare email: string;
+
+  declare pageState: 'DISCLAIMER'|'HOME'|'RELAY'|'STRATEGY';
+
+  declare relayMatch: MatchStatus;
+  declare strategyMatch: MatchStatus;
+
+  // Search fields
+  declare other: string;
+
+  // timestamps!
+  declare readonly createdAt: Date;
+  declare readonly updatedAt: Date;
+}
+
+// Naming the attributes is what makes the column list exhaustive: a field
+// declared above with no column here — or a column here that no field
+// declares — is a type error.
+export const teamAttributes: ModelAttributes<
+  TeamModel,
+  InferAttributes<TeamModel, OmitTimestamps>
+> = {
   teamId: {
     type: DataTypes.STRING,
     unique: {

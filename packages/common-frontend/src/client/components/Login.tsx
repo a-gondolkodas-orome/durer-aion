@@ -5,7 +5,24 @@ import { useLogin } from '../hooks/user-hooks';
 import Form from './form';
 import { useTheme } from '@mui/material/styles';
 import { Button } from '@mui/material';
-import MaskedInput from "react-text-mask";
+import * as reactTextMask from "react-text-mask";
+
+// react-text-mask's 2018 UMD build assigns __esModule at runtime, where
+// Vite 8's rolldown prebundle cannot see it, so a plain default import hands
+// this component to React as the raw CJS exports object and the login form
+// crashes. Unwrap however many .default layers the bundler of the day adds.
+const unwrapDefault = (mod: unknown): unknown => {
+  let current = mod;
+  while (
+    current &&
+    typeof current !== "function" &&
+    (current as { default?: unknown }).default !== undefined
+  ) {
+    current = (current as { default: unknown }).default;
+  }
+  return current;
+};
+const MaskedInput = unwrapDefault(reactTextMask) as typeof reactTextMask.default;
 import { useTranslation } from 'react-i18next';
 
 const idMask = [/\d/, /\d/,  /\d/, "-", /\d/, /\d/, /\d/, /\d/, "-", /\d/, /\d/, /\d/ ];
@@ -33,7 +50,7 @@ export function Login() {
         xs: "10px",
         md: "0px",
       },
-    }} data-testId="loginRoot">
+    }} data-testid="loginRoot">
       <Stack sx={{
         marginTop: {
           sx: "25px",
@@ -68,8 +85,10 @@ export function Login() {
                 enqueueSnackbar(t('login.error.empty'), { variant: 'error' });
                 return;
               }
-              login(values.joinCode).catch(err => {
-                enqueueSnackbar(err?.message, { variant: 'error' });
+              login(values.joinCode).catch((err: unknown) => {
+                // A rejection that is not an Error has no `message`, and the snackbar
+                // then shows an empty box where the reason should be.
+                enqueueSnackbar(err instanceof Error ? err.message : t('error.unexpected'), { variant: 'error' });
               });
             }}>
             <Field 

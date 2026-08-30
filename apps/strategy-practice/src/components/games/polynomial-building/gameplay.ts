@@ -1,4 +1,4 @@
-import type { MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 export type Coef = 'a' | 'b' | 'c'
 export type Board = { a: number | null; b: number | null; c: number | null }
 
@@ -110,9 +110,9 @@ export const moves = {
     // enter into legality. The safe-integer bound is what keeps the root
     // arithmetic exact; the board client caps the input at 12 digits for the
     // same reason.
-    validate: (board: Board, _, coef: Coef, value: number) =>
+    validate: (board, _, coef: Coef, value: number) =>
       COEFS.includes(coef) && board[coef] === null && Number.isSafeInteger(value),
-    apply: (board: Board, _, coef: Coef, value: number): MoveOutcome<Board> => {
+    apply: (board, _, coef: Coef, value: number): MoveOutcome<Board> => {
       // Normalise -0 to 0 as the value enters the board: completionValue's
       // negations produce -0 (so the bot plays it), and -0 does not survive a
       // JSON round trip.
@@ -126,6 +126,6 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-};
+} satisfies MoveDefs<Board>;
 
 export type Moves = typeof moves;

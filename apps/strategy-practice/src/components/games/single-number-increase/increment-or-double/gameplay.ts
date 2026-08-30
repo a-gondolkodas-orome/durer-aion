@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { Ctx, MoveDefs, MoveOutcome } from 'strategy-game-factory';
 
 // `board` is the last number said. 0 means nothing has been said yet, so the
 // starting player must open with 1 (their only legal move from 0).
@@ -16,12 +16,12 @@ export const say = (next: number, ctx: Ctx): MoveOutcome<Board> => {
 };
 
 export const moves = {
-  increment: { apply: (board: Board, { ctx }: { ctx: Ctx }) => say(board + 1, ctx) },
+  increment: { apply: (board, { ctx }) => say(board + 1, ctx) },
   double: {
     // Doubling nothing says nothing, so the opening move can only be x+1 = 1.
-    validate: (board: Board) => board >= 1,
-    apply: (board: Board, { ctx }: { ctx: Ctx }) => say(board * 2, ctx)
+    validate: (board) => board >= 1,
+    apply: (board, { ctx }) => say(board * 2, ctx)
   }
-};
+} satisfies MoveDefs<Board>;
 
 export type Moves = typeof moves;

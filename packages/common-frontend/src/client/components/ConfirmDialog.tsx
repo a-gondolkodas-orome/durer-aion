@@ -12,7 +12,7 @@ export function ConfirmDialog(props: {confirmDialog: ConfirmDialogInterface | nu
   const [confirmDialog, setConfirmDialog] = [props.confirmDialog, props.setConfirmDialog];
   return <Dialog 
   maxWidth={false} 
-  PaperProps={{
+  slotProps={{ paper: {
     sx: {
       marginLeft: {
         xs: 0,
@@ -27,10 +27,10 @@ export function ConfirmDialog(props: {confirmDialog: ConfirmDialogInterface | nu
         md: 'calc(100% - 64px)'
       },
     }
-  }}
+  } }}
   open={
     confirmDialog != null
-  } onClose={async () => {
+  } onClose={() => {
       setConfirmDialog(null); 
      }}>
     {confirmDialog && <Stack
@@ -49,7 +49,7 @@ export function ConfirmDialog(props: {confirmDialog: ConfirmDialogInterface | nu
         color='primary'
         variant='contained'
         onClick={()=>{
-          confirmDialog.confirm()
+          void confirmDialog.confirm()
           setConfirmDialog(null);
         }}
       >

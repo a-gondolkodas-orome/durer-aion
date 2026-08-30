@@ -25,6 +25,9 @@ below.
 - Reload or disconnect mid-match resumes without loss of state.
 - A second browser tab cannot corrupt a running match.
 - The clock cannot be gamed from the client.
+- The served online bundle contains no bot strategy — competitors must not be
+  able to read the bot out of the client. *(By hand: build, then grep
+  `apps/online-frontend/dist` for a string from the bot's lookup tables.)*
 - The final score (relay + strategy) shows on the finished screen.
 
 ## Admin / operations
@@ -42,12 +45,12 @@ below.
   serving stack, team import runs inside the container, and Sentry receives
   events.
 
-## Offline practice build
+## Offline dry-run build (`/proba-verseny/`)
 
 - The gh-pages build serves the competition games with the in-browser bot and
   localStorage persistence that survives a reload.
 
-## Practice site
+## Strategy practice site
 
 *(Applies from the subtree merge in PR 0.2 on, when durer-jatekok became a
 workspace — `apps/practice` then, `apps/strategy-practice` since the rename.)*
@@ -57,16 +60,25 @@ workspace — `apps/practice` then, `apps/strategy-practice` since the rename.)*
 - Its existing CI gates — lint, typecheck, unit tests, patch coverage — stay
   green.
 
+## Relay practice site
+
+*(Applies from #224, which replaced the frozen 2023 build at `/valto/` with
+`apps/relay-practise-frontend`.)*
+
+- `/valto/` on the Pages site serves the relay practice: pick a past year's
+  problem set and play it through against the in-browser bot, with
+  localStorage persistence that survives a reload.
+
 ## Competition secrecy flow
 
-See the plan's "Competition secrecy: the yearly private-repo flow" section for
-why this matters.
+See `README.md`, under *Competition secrecy*, for why this matters.
 
 - Pushing a `sync-*` branch mirrors it into the year's private repo
   (`sync.yml`).
 - A competition game can be developed and deployed from the private repo with
   zero trace in the public repo.
-- The post-competition merge-back PR publishes that game as a practice game.
+- The post-competition merge-back PR publishes that game as a strategy
+  practice game.
 
 ## Developer workflows
 
@@ -74,8 +86,8 @@ why this matters.
 tooling arrives alongside the existing setup, not instead of it.)*
 
 - `npm ci` at the repo root installs everything.
-- `npm run dev:server`, `npm run dev:online`, `npm run dev:offline` start what
-  they say they start.
+- `npm run dev:server`, `npm run dev:online`, `npm run dev:offline` and
+  `npm run dev:relay-practice` start what they say they start.
 - `npm run setup` seeds every env file the README expects, and overwrites none.
 - The docker-compose dev flow from the README works — `npm run stack:up` then
   `npm run teams:import` — backend auto-reload included.

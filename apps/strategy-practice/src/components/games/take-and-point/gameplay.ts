@@ -1,5 +1,5 @@
 import { random, range, shuffle, uniq } from 'lodash';
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 
 // piles: sizes of the piles; a value of 0 means that pile is empty (kept in the
 // array so pile indices stay stable across a game). pointed: indices of the
@@ -66,11 +66,9 @@ export const moves = {
   // Take `amount` stones from a pointed pile. The turn does NOT end here: the
   // same player then points at piles for the other player (see `pointPiles`).
   takeStones: {
-    validate: (board: Board, _, index: number, amount: number) =>
+    validate: (board, _, index: number, amount: number) =>
       isRemovalAllowed(board, index, amount),
-    apply: (
-      board: Board, { ctx }: { ctx: Ctx }, index: number, amount: number
-    ): MoveOutcome<Board> => {
+    apply: (board, { ctx }, index: number, amount: number): MoveOutcome<Board> => {
       const nextBoard: Board = { piles: applyRemoval(board.piles, index, amount), pointed: null };
       if (isTerminal(nextBoard)) {
         return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
@@ -81,10 +79,10 @@ export const moves = {
 
   // Point at the piles the other player will choose from, then hand over the turn.
   pointPiles: {
-    validate: (board: Board, _, indices: number[]) => isPointingAllowed(board, indices),
-    apply: (board: Board, _, indices: number[]): MoveOutcome<Board> =>
+    validate: (board, _, indices: number[]) => isPointingAllowed(board, indices),
+    apply: (board, _, indices: number[]): MoveOutcome<Board> =>
       ({ nextBoard: { piles: board.piles, pointed: indices }, isTurnEnd: true })
   }
-};
+} satisfies MoveDefs<Board>;
 
 export type Moves = typeof moves;

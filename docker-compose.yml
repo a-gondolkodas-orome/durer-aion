@@ -1,6 +1,7 @@
 services:
   web:
     build: ./apps/online-frontend/nginx
+    restart: unless-stopped
     ports:
       # 80 unless WEB_PORT says otherwise — an escape hatch for a machine where
       # something already holds port 80, or that cannot bind a privileged one.
@@ -11,6 +12,7 @@ services:
       - backend
   backend:
     build: .
+    restart: unless-stopped
     environment:
       - DATABASE_URL=postgresql://postgres:${POSTGRESQL_PASSWORD}@postgres/postgres
       - PORT=8000
@@ -44,9 +46,12 @@ services:
       # the server. Failures inside it do not count against retries.
       start_period: 90s
   postgres:
-    ports:
-      - 5432:5432
+    # No `ports:` here on purpose: only `backend` talks to the database, and it
+    # does so over the compose network. Publishing 5432 on a deployed host puts
+    # the database on the internet behind nothing but POSTGRESQL_PASSWORD.
+    # docker-compose.dev.yml publishes it on loopback for local psql.
     image: bitnami/postgresql
+    restart: unless-stopped
     volumes:
       - postgresdb:/var/lib/postgresql/data
     environment:

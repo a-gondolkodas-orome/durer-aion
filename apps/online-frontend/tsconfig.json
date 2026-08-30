@@ -13,7 +13,7 @@
     "jsx": "react-jsx",
     "lib": ["dom", "dom.iterable", "esnext"],
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "noEmit": true,
     "noFallthroughCasesInSwitch": true,
     "resolveJsonModule": true,
@@ -22,7 +22,12 @@
     "target": "ESNext",
     "types": ["vite/client"],
     "paths": {
-      "game": ["../../packages/game/src"]
+      "game": ["../../packages/game/src"],
+      // urlcat 3.1.0's exports map has no types condition, so bundler resolution
+      // finds index.mjs but no declarations (node10 read the legacy top-level
+      // `types` field instead). Point tsc at the shipped d.ts; Vite resolves the
+      // runtime module itself and ignores tsconfig paths.
+      "urlcat": ["../../node_modules/urlcat/dist/index.d.ts"]
     }
   },
   "include": [

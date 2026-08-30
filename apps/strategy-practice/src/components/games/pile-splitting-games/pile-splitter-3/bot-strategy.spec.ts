@@ -35,7 +35,7 @@ describe('getSmartBotStep', () => {
     }
   });
 
-  it('even, even, even case: follow strategy for halfed piles', () => {
+  it('even, even, even case: follow strategy for halved piles', () => {
     for (let i = 0; i < ITERATIONS; i++) {
       const botStep = getSmartBotStep([10, 14, 4]);
       expect(botStep.pileId).toEqual(2);

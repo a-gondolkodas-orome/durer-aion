@@ -1,8 +1,6 @@
 import { Ctx, Game } from "boardgame.io";
 import { INVALID_MOVE, TurnOrder } from "boardgame.io/core";
-// import { sendDataRelayEnd } from "../../common/sendData";
 import { GUESSER_PLAYER, JUDGE_PLAYER, otherPlayer, PlayerIDType } from "../../common/types";
-// import { IS_OFFLINE_MODE } from "../../client/utils/util";
 
 interface Answer {
   answer: number;
@@ -27,8 +25,9 @@ export interface MyGameState {
 
 const lengthOfCompetition = 60 * 60; // seconds
 
-// What the wrapper reports after each answered step; hosts accept a superset
-// of this shape (the offline frontend's SendGameDataParams).
+// What the wrapper reports after each answered step and when the play phase
+// ends; hosts accept a superset of this shape (the offline frontend's
+// SendGameDataParams).
 export interface RelayStepReport {
   component: "relay";
   phase: "step";
@@ -37,7 +36,16 @@ export interface RelayStepReport {
   ctx: Ctx;
 }
 
-export function RelayWrapper(sendRelayFunction: (_report: RelayStepReport) => void = () => undefined): Game<MyGameState> {
+export interface RelayEndReport {
+  component: "relay";
+  phase: "end";
+  G: MyGameState;
+  ctx: Ctx;
+}
+
+export type RelayReport = RelayStepReport | RelayEndReport;
+
+export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void = () => undefined): Game<MyGameState> {
   const GameRelay: Game<MyGameState> = {
     name: "relay",
     setup: () => {
@@ -49,7 +57,7 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayStepReport) => vo
         correctnessPreviousAnswer: null,
         previousAnswers: [[]],
         previousPoints: [],
-        currentProblemMaxPoints: 3, // TODO: get from the problem list, TODO: rename this function to currentProblemAvailablePoints
+        currentProblemMaxPoints: 3, // placeholder; the judge's firstProblem move sets the problem list's value. TODO: rename to currentProblemAvailablePoints
         numberOfTry: 0,
         millisecondsRemaining: 1000 * lengthOfCompetition,
         start: new Date().toISOString(),
@@ -74,6 +82,7 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayStepReport) => vo
             }
             G.url = url;
             G.problemText = problemText;
+            G.currentProblemMaxPoints = nextProblemMaxPoints;
             G.numberOfTry = 1;
             events.endTurn();
           },
@@ -123,10 +132,8 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayStepReport) => vo
             }
           }
         },
-        onEnd: ({G, _ctx, _playerID, _events, _random, _log}) => {
-          if (typeof localStorage !== "undefined") {
-            localStorage.setItem("RelayPoints", G.points.toString());
-          }
+        onEnd: ({G, ctx, _playerID, _events, _random, _log}) => {
+          sendRelayFunction({component: "relay", phase: "end", G: G, ctx: ctx});
         },
         moves: {
           newProblem({ G, _ctx, playerID, events }, problemText: string, nextProblemMaxPoints: number, correctnessPreviousAnswer: boolean, url: string) {
@@ -177,10 +184,6 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayStepReport) => vo
             G.correctnessPreviousAnswer = correctnessPreviousAnswer;
             if (correctnessPreviousAnswer) {
               G.points += G.currentProblemMaxPoints;
-              /* TODO refactor so offline works properly send data should not be here
-              if (IS_OFFLINE_MODE) {
-                sendDataRelayEnd(null, G, ctx);
-              }*/
               G.previousPoints[G.currentProblem] = G.currentProblemMaxPoints;
             } else {
               G.previousPoints[G.currentProblem] = 0;

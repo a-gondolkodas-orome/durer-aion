@@ -2,6 +2,7 @@ import { createContext, useContext } from "react";
 
 interface ClientProps {
   category?: 'C' | 'D' | 'E';
+  teamName?: string;
   matchID?: string;
   credentials?: string;
 };

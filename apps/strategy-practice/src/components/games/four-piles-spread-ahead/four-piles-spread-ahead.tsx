@@ -36,7 +36,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     );
   };
 
-  const currentChoiceDescription = (pileId) => {
+  const currentChoiceDescription = (pileId: number) => {
     const pieceCountInPile = board[pileId];
     const pileName = language === 'en' ? 'pile' : 'kupac';
 
@@ -64,14 +64,14 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     return 'bg-blue-800';
   };
 
-  const leftBorder = (pileId) => {
+  const leftBorder = (pileId: number) => {
     return (
       (pileId === 1 && board[1] > board[0]) ||
       (pileId === 3 && board[3] > board[2])
     );
   };
 
-  const rightBorder = (pileId) => {
+  const rightBorder = (pileId: number) => {
     return (
       (pileId === 0 && board[1] <= board[0]) ||
       (pileId === 2 && board[3] <= board[2])

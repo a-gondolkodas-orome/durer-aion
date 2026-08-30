@@ -24,11 +24,11 @@ const referenceMoverLoses = (() => {
     let canWin = false;
     for (let i = 0; i < piles.length && !canWin; i++) {
       const afterRemove = piles.filter((_, idx) => idx !== i);
-      if (piles[i]! > 1) afterRemove.push(piles[i]! - 1);
+      if (piles[i] > 1) afterRemove.push(piles[i] - 1);
       if (value(afterRemove)) canWin = true;
       for (let j = i + 1; j < piles.length && !canWin; j++) {
         const afterMerge = piles.filter((_, idx) => idx !== i && idx !== j);
-        afterMerge.push(piles[i]! + piles[j]!);
+        afterMerge.push(piles[i] + piles[j]);
         if (value(afterMerge)) canWin = true;
       }
     }
@@ -59,7 +59,7 @@ describe('smartBotStrategy', () => {
   // the move it names has to leave the opponent a lost one.
   it('names a winning move from every board that has one', () => {
     for (const board of WON_FOR_MOVER) {
-      const after = play(board, [smartBotStrategy, randomBotStrategy]).history[0]!.board;
+      const after = play(board, [smartBotStrategy, randomBotStrategy]).history[0].board;
       expect({ board, after, lost: referenceMoverLoses(after) })
         .toEqual({ board, after, lost: true });
     }

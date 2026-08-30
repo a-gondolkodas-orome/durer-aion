@@ -37,7 +37,7 @@ export function Disclaimer(props: {teamName: string, category: string}) {
           md: "30px",
         }
       }}
-      data-testId={"disclaimerRoot"}
+      data-testid={"disclaimerRoot"}
     >
       <Stack
         sx={{
@@ -150,7 +150,7 @@ export function Disclaimer(props: {teamName: string, category: string}) {
         variant="contained"
         color="primary"
         onClick={() => {
-          goHome();
+          void goHome();
         }}
       >
         {t('disclaimer.continue')}

@@ -1,6 +1,7 @@
-import { ClientRepository, LOCAL_STORAGE_TEAMSTATE, TeamModelDto, MatchStateDto } from "common-frontend";
+import { ClientRepository, LOCAL_STORAGE_TEAMSTATE, TeamModelDto, MatchStateDto, BoardMoves, relayPointsStorageKey, strategyPointsStorageKey } from "common-frontend";
 import { teamData } from "./teamData";
 import { sendDataLogin, sendGameData } from "./sendData";
+import { readStoredTeamState } from "./stored-team-state";
 import i18n from "i18next";
 
 export class OfflineClientRepository implements ClientRepository {
@@ -56,7 +57,7 @@ export class OfflineClientRepository implements ClientRepository {
     const teamState = getTeamStateFromLocal();
     const newState = {...teamState, pageState: 'HOME'}
     if (teamState.relayMatch.state === "IN PROGRESS"){
-      const score = Number(localStorage.getItem("RelayPoints"))
+      const score = Number(localStorage.getItem(relayPointsStorageKey()))
       sendGameData({component: "relay", phase: "end", G: {points: score}})
       newState.relayMatch = {
         ...teamState.relayMatch,
@@ -70,7 +71,7 @@ export class OfflineClientRepository implements ClientRepository {
         ...teamState.strategyMatch,
         state: "FINISHED",
         endAt: new Date(),
-        score: Number(localStorage.getItem("StrategyPoints")),
+        score: Number(localStorage.getItem(strategyPointsStorageKey())),
       }
     }
     localStorage.setItem(LOCAL_STORAGE_TEAMSTATE, JSON.stringify(newState));
@@ -79,7 +80,7 @@ export class OfflineClientRepository implements ClientRepository {
 
   getTeamState(_joinCode: string): Promise<TeamModelDto> {
     const teamState = getTeamStateFromLocal();
-    return Promise.resolve(teamState) as Promise<TeamModelDto>;
+    return Promise.resolve(teamState);
   }
 
   async getAll(): Promise<TeamModelDto[]> {
@@ -108,23 +109,34 @@ export class OfflineClientRepository implements ClientRepository {
     throw Error("NOT call this");
   }
 
+  // The local boardgame.io client judges the answer with the bundled bot, and
+  // its step report already goes out through RelayWrapper's sendGameData hook,
+  // so nothing is sent from here.
+  submitRelayAnswer(answer: number, moves: BoardMoves): Promise<void> {
+    moves.submitAnswer(answer);
+    return Promise.resolve();
+  }
+
+  startRelayGame(moves: BoardMoves): Promise<void> {
+    moves.startGame();
+    return Promise.resolve();
+  }
+
+  syncRelayTime(moves: BoardMoves): Promise<void> {
+    moves.getTime();
+    return Promise.resolve();
+  }
+
   joinWithCode(joinCode: string): Promise<string> {
     // return the joincode if it is in the teamData.ts file
 
     const i = teamData.findIndex(e => e.join_code === joinCode);
-    let pageState = "DISCLAIMER"
-    if (typeof localStorage !== "undefined") {
-      const teamStateString = localStorage.getItem(LOCAL_STORAGE_TEAMSTATE);
-      if (teamStateString !== null){
-        const teamState = JSON.parse(teamStateString);
-        pageState = teamState.pageState;
-      }
-    }
+    const pageState = readStoredTeamState()?.pageState ?? "DISCLAIMER";
 
     if (i > -1) {
       const i = teamData.findIndex(e => e.join_code === joinCode);
       const currentTeamData = teamData[i];
-      const teamState = {
+      const teamState: TeamModelDto = {
         teamId: "1",
         joinCode: joinCode,
         teamName: currentTeamData.teamname,
@@ -140,7 +152,7 @@ export class OfflineClientRepository implements ClientRepository {
         },
       }
 
-      sendDataLogin(teamState as TeamModelDto); // TODO: remove as TeamModelDto
+      sendDataLogin(teamState);
       localStorage.setItem(LOCAL_STORAGE_TEAMSTATE,
         JSON.stringify(teamState)
       );
@@ -154,14 +166,11 @@ export class OfflineClientRepository implements ClientRepository {
 
 
 const getTeamStateFromLocal = (): TeamModelDto => {
-  if (typeof localStorage === "undefined") {
+  const teamState = readStoredTeamState();
+  if (teamState === null) {
     throw new Error(i18n.t('error.unexpected'));
   }
-  const teamstateString = localStorage.getItem(LOCAL_STORAGE_TEAMSTATE);
-  if (teamstateString === null) {
-    throw new Error(i18n.t('error.unexpected'));
-  }
-  return JSON.parse(teamstateString);
+  return teamState;
 }
 
 const addMin = (from: Date, t: number): Date => {

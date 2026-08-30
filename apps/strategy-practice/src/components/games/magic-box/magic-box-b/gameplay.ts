@@ -1,4 +1,4 @@
-import type { MoveOutcome, Ctx } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 
 export type Board = { stones: boolean[]; pendingLine: number | null }
 
@@ -44,18 +44,18 @@ const isDesignationAllowed = (board: Board, lineIndex: number): boolean =>
 
 export const moves = {
   placeStone: {
-    validate: (board: Board, _, cellId: number) => isPlacementAllowed(board, cellId),
+    validate: (board, _, cellId: number) => isPlacementAllowed(board, cellId),
     // First half of the turn: place a stone, then designate a line — the turn
     // stays open in between.
-    apply: (board: Board, _, cellId: number): MoveOutcome<Board> => {
+    apply: (board, _, cellId: number): MoveOutcome<Board> => {
       const nextBoard: Board = { stones: placeStoneAt(board.stones, cellId), pendingLine: null };
       return { nextBoard };
     }
   },
 
   designateLine: {
-    validate: (board: Board, _, lineIndex: number) => isDesignationAllowed(board, lineIndex),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, lineIndex: number): MoveOutcome<Board> => {
+    validate: (board, _, lineIndex: number) => isDesignationAllowed(board, lineIndex),
+    apply: (board, { ctx }, lineIndex: number): MoveOutcome<Board> => {
       const nextBoard: Board = { stones: board.stones, pendingLine: lineIndex };
       // A full designated line leaves the other player nowhere to place.
       if (isLineFull(nextBoard.stones, lineIndex)) {
@@ -64,6 +64,6 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-};
+} satisfies MoveDefs<Board>;
 
 export type Moves = typeof moves;

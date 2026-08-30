@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 import { random, sortBy } from 'lodash';
 
 // Stones in each of the four piles.
@@ -104,8 +104,8 @@ export const generateStartBoard = (): Board => {
 
 export const moves = {
   takeStones: {
-    validate: (board: Board, _, move: Move) => isMoveLegal(board, move),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, move: Move): MoveOutcome<Board> => {
+    validate: (board, _, move: Move) => isMoveLegal(board, move),
+    apply: (board, { ctx }, move: Move): MoveOutcome<Board> => {
       const nextBoard = applyMove(board, move);
       if (isTerminal(nextBoard)) {
         return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
@@ -113,6 +113,6 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-};
+} satisfies MoveDefs<Board>;
 
 export type Moves = typeof moves;

@@ -22,7 +22,7 @@ sudo mkswap /swapfile
 sudo swapon /swapfile
 ```
 
-It is also higly recommended to use tmux or any other solution for permanent shells in case you get disconnected.
+It is also highly recommended to use tmux or any other solution for permanent shells in case you get disconnected.
 
 ```bash
 sudo apt install tmux -y
@@ -89,7 +89,7 @@ eval "$(ssh-agent -s)"
 ssh-add ~/.ssh/deploy_key
 ```
 
-An alternative to this is to set it up inside the `.ssh/config` to connect with this key. This is prefered if you plan to restart the instance at least one time. The reason is that otherwise you have to restart the agent, and readd your keys, because they are not persistent.
+An alternative to this is to set it up inside the `.ssh/config` to connect with this key. This is preferred if you plan to restart the instance at least one time. The reason is that otherwise you have to restart the agent, and readd your keys, because they are not persistent.
 
 ```config 
 Host git github.com
@@ -111,13 +111,13 @@ git clone git@github.com:a-gondolkodas-orome/durer-aion.git
 
 ## Build and run your application
 
-After all of this, you should be able to follow the reademe on how to build your application, and host it — the "Running the production stack" section, i.e. `npm run stack:prod`, which builds and then brings compose up with no `-f docker-compose.dev.yml` overlay.
+After all of this, you should be able to follow the readme on how to build your application, and host it — the "Running the production stack" section, i.e. `npm run stack:prod`, which builds and then brings compose up with no `-f docker-compose.dev.yml` overlay.
 It will be hosted default on port 80, and all the stuff will be running in the docker container(s).
 You still need to set up the ssl certificate, and DNS.
 
 ## Access your docker containers
 
-To access your docker coantainers, you have to find your containers first:
+To access your docker containers, you have to find your containers first:
 
 ```bash
 sudo docker ps
@@ -153,12 +153,12 @@ docker compose --env-file=.env.docker exec backend ./scripts/import_teams.sh scr
 
 After assigning a static ip address to the instance, you can use DNS to resolve it to the correct URL. You have to add an A record to your DNS, and then you can access the new website trough a fancy url. 
 * Set up an elastic IP
-* Set up an A record for the static IP adress. (This actually breaks the ssh connection, and you have to modify the trusted hosts list, if the instance is swapped)
+* Set up an A record for the static IP address. (This actually breaks the ssh connection, and you have to modify the trusted hosts list, if the instance is swapped)
 
 ## Add SSL
 This is subject to change, will be updated by @HajosB144 .
 
-### Use letsencript to get a ssl certificate for the virtual machine:
+### Use Let's Encrypt to get a ssl certificate for the virtual machine:
 
 Install certbot ([example installation here](https://certbot.eff.org/instructions?ws=nginx&os=snap))
 
@@ -169,7 +169,7 @@ sudo certbot --nginx -d <your_server_url name>
 
 
 ### Mount a directory to store the certs
-If you want to set up the SSL termiantaion from the inside of the docker enviroment, you have to copy the setup from the local settings.
+If you want to set up the SSL termination from the inside of the docker environment, you have to copy the setup from the local settings.
 
 
 Make directory
@@ -200,13 +200,13 @@ sudo docker run -p 80:80 -p 443:443 -it --rm --name certbot \
             certbot/certbot certonly --standalone
 ```
 
-This only generates thecerts, but not the ngnix setup enhancement.
+This only generates the certs, but not the nginx setup enhancement.
 If you want to do that as well, you may try:
 
 ```bash
 sudo docker run -p 80:80 -p 443:443 -it --rm --name certbot \
             -v "/opt/fake-letsencrypt:/etc/letsencrypt" \
-            certbot/certbot --standalone --ngnix
+            certbot/certbot --standalone --nginx
 ```
 
 After this, apply the following changes to `nginx/nginx.conf`
@@ -255,17 +255,12 @@ The b) version is deployed on github pages. The site will be available at https:
 
 ## Edit package.json
 
-Find the 
+In `apps/offline-frontend/package.json`, replace the `repository-name`
+placeholder in the predeploy line with the year's actual repository name:
 ```
-  "scripts": {
-    "predeploy": "cross-env PUBLIC_URL=/durer-aion REACT_APP_WHICH_VERSION=c npm run build",
+    "predeploy": "cross-env PUBLIC_URL=/repository-name npm run build",
 ```
-lines in the package.json file, and change the predeploy line to 
-```
-    "predeploy": "cross-env PUBLIC_URL=/repository-name REACT_APP_WHICH_VERSION=c npm run build",
-```
-*Note: REACT_APP_WHICH_VERSION can be anything else than 'gh-pages'. If it's set to 'gh pages' the site will display a list of links to games, determined by src/index.tsx*
-<br>You do **not** need to commit the change just save it locally.
+You do **not** need to commit the change, just save it locally.
 ## Deploy to pages
 
 Run
@@ -278,7 +273,7 @@ After this the site should be available on github.io.
 # Troubleshoot
 
 ## npm ci
-If the `npm ci` command returns with EACCESS error message, try 
+If the `npm ci` command returns with EACCES error message, try 
 ```
 sudo chown -R `whoami` node_modules
 ```

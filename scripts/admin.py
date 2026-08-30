@@ -1,10 +1,32 @@
 # %%
+import os
 import requests
+from getpass import getpass
 from requests.auth import HTTPBasicAuth
 import json
 from tqdm import tqdm
-ADMIN_PASSWORD = "TODO"
-BASE_URL = 'http://localhost:8000' # 'https://verseny.durerinfo.hu'
+
+def read_admin_password():
+  """
+    The admin password, from DURER_ADMIN_PASSWORD or, when run interactively,
+    a prompt. Never a literal in this file: it is tracked, and the very next
+    line can point the script at production.
+  """
+  password = os.environ.get('DURER_ADMIN_PASSWORD')
+  if not password:
+    try:
+      password = getpass('Admin password (or set DURER_ADMIN_PASSWORD): ')
+    except (EOFError, KeyboardInterrupt):
+      password = None
+  if not password:
+    raise SystemExit(
+      'No admin password. Set DURER_ADMIN_PASSWORD to the backend\'s '
+      'ADMIN_CREDENTIALS, or enter it at the prompt.'
+    )
+  return password
+
+ADMIN_PASSWORD = read_admin_password()
+BASE_URL = os.environ.get('DURER_BASE_URL', 'http://localhost:8000')
 FORCE_DOWNLOAD = False
 
 # %%
@@ -34,11 +56,14 @@ for team in team_states:
     team_states_dict[team['joinCode']] = team
 
 # %%
+MATCH_TYPES = ['relay', 'strategy']
+MATCH_DATA_TYPES = ['state', 'logs']
+
 def get_matchdatas(team_states, match_type:str, match_data_type:str, force_download:bool = False):
-  if match_type not in ['relay','strategy']:
-      raise ValueError(f'Wrong match_type: {match_type}, only {['relay','strategy']} allowed')
-  if match_data_type not in ['state','logs']:
-      raise ValueError(f'Wrong match_data_type: {match_data_type}, only {['state','logs']} allowed')
+  if match_type not in MATCH_TYPES:
+      raise ValueError(f'Wrong match_type: {match_type}, only {MATCH_TYPES} allowed')
+  if match_data_type not in MATCH_DATA_TYPES:
+      raise ValueError(f'Wrong match_data_type: {match_data_type}, only {MATCH_DATA_TYPES} allowed')
   file_name = f'matchdatas_{match_type}_{match_data_type}.json'
   if not force_download:
     try:
@@ -120,7 +145,7 @@ export_results_tsv(team_states_dict, relay_states, strategy_states)
 #   def add_minutes_team(team):
 #       if type == 'relay' and team['relayMatch']['state'] == 'IN PROGRESS':
 #           url = baseurl + f'/game/admin/{ team['relayMatch']['matchID']}/addminutes/{minutes}'
-#           response = requests.get(url, auth=HTTPBasicAuth(username, password))
+#           response = requests.post(url, auth=HTTPBasicAuth(username, password))
 #           if response.status_code != 200:
 #             print(response)
 #             print(f'Error at adding minutes to team {team['teamId']}')
@@ -128,7 +153,7 @@ export_results_tsv(team_states_dict, relay_states, strategy_states)
 #             print(f'Addded {minutes} min to team {team['teamId']}')
 #       elif type == 'strategy' and team['strategyMatch']['state'] == 'IN PROGRESS':
 #         url = baseurl + f'/game/{ team['strategyMatch']['matchID']}/addminutes/{minutes}'
-#         response = requests.get(url, auth=HTTPBasicAuth(username, password))
+#         response = requests.post(url, auth=HTTPBasicAuth(username, password))
 #         if response.status_code != 200:
 #           print(response)
 #           print(f'Error at adding minutes to team {team['teamId']}')   

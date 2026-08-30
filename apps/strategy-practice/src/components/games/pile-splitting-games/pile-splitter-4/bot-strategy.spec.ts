@@ -26,7 +26,7 @@ describe('getSmartBotStep', () => {
     expect(botStep.removedPileId).not.toEqual(botStep.pileId);
   });
 
-  it('even, even, even, even case: follow strategy for halfed piles recursively', () => {
+  it('even, even, even, even case: follow strategy for halved piles recursively', () => {
     const botStep = getSmartBotStep([20, 28, 8, 12]);
     expect(botStep.pileId).toEqual(2);
     expect(botStep.pieceCount).toEqual(4);

@@ -15,7 +15,10 @@ export function Main(props: { language: string, gitCommitHash: string }) {
   const teamState = useTeamState();
   const [frontendState, setFrontEndState] = useState<"R" | "S" | null>(null);
   const [admin, setAdmin] = useState<boolean>(false);
-  i18next.changeLanguage(props.language);
+
+  useEffect(() => {
+    void i18next.changeLanguage(props.language);
+  }, [props.language])
 
   useEffect(() => {
     if (window.location.pathname.includes('/admin')) {
@@ -46,7 +49,7 @@ export function Main(props: { language: string, gitCommitHash: string }) {
           paddingBottom: "50px",
           maxWidth: "1200px",
         }}
-        data-testId="mainRoot"
+        data-testid="mainRoot"
       >
         {admin && <Admin teamId={window.location.pathname.split('/').at(2)}/>}
         {!teamState && <Login />}

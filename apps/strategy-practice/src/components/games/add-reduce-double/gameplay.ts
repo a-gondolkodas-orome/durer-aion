@@ -1,5 +1,5 @@
 import { isEqual, cloneDeep } from 'lodash';
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 
 export type Board = number[];
 export type Piece = { pileId: number; pieceId: number };
@@ -17,8 +17,8 @@ const isTransferAllowed = (board: Board, { pileId, pieceCount }: Transfer): bool
 
 export const moves = {
   moveHalvedPieces: {
-    validate: (board: Board, _, piece: Transfer) => isTransferAllowed(board, piece),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, { pileId, pieceCount }: Transfer): MoveOutcome<Board> => {
+    validate: (board, _, piece: Transfer) => isTransferAllowed(board, piece),
+    apply: (board, { ctx }, { pileId, pieceCount }: Transfer): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard[pileId] -= pieceCount;
       nextBoard[1 - pileId] += pieceCount / 2;
@@ -29,6 +29,6 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-};
+} satisfies MoveDefs<Board>;
 
 export type Moves = typeof moves;

@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 
 export const CARDS = ['rock', 'paper', 'scissor'] as const;
 
@@ -17,9 +17,9 @@ const isGameEnd = (board: Board) => board.every(hand => hand.length === 1);
 
 export const moves = {
   removeCard: {
-    validate: (board: Board, { ctx }: { ctx: Ctx }, card: Card) =>
+    validate: (board, { ctx }, card: Card) =>
       board[1 - ctx.currentPlayer!].includes(card),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, card: Card): MoveOutcome<Board> => {
+    apply: (board, { ctx }, card: Card): MoveOutcome<Board> => {
       const opponent = 1 - ctx.currentPlayer!;
       const nextBoard: Board = [...board];
       nextBoard[opponent] = board[opponent].filter(held => held !== card);
@@ -35,6 +35,6 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-}
+} satisfies MoveDefs<Board>
 
 export type Moves = typeof moves;

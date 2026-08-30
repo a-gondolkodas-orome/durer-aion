@@ -1,21 +1,45 @@
-import { DataTypes, ModelAttributes } from "sequelize";
-import { TeamModel, teamAttributes } from "./model";
+import {
+  CreationOptional,
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+  ModelAttributes,
+} from "sequelize";
+import { TeamModel, teamAttributes, OmitTimestamps } from "./model";
 
 export class DeletedTeamModel extends TeamModel {
-  public deletedAt!: Date;
-  public deletionId!: number;
-}
-const teamAttributesWithNoUnique = Object.fromEntries(
-  Object.entries(teamAttributes).map(([key, value]) => [
-    key,
-    typeof value === "object" && value !== null
-      ? { ...value, unique: false }
-      : value,
-  ])
-);
+  declare deletedAt: Date;
+  declare deletionId: CreationOptional<number>;
 
-export const deletedTeamAttributes: ModelAttributes = {
-  ...teamAttributesWithNoUnique,
+  // Sequelize reads a model's attribute and creation-attribute types off these
+  // two members. The ones inherited from TeamModel still describe TeamModel, so
+  // without redeclaring them the archive's own columns stay invisible to
+  // `init` and `create`.
+  declare _attributes: InferAttributes<DeletedTeamModel, OmitTimestamps>;
+  declare _creationAttributes: InferCreationAttributes<DeletedTeamModel, OmitTimestamps>;
+}
+
+// The archive keeps a row per deletion, so a team deleted twice would collide
+// with itself on every column the live table declares unique.
+function withoutUniqueness<M extends Model, TAttributes>(
+  attributes: ModelAttributes<M, TAttributes>
+): ModelAttributes<M, TAttributes> {
+  return Object.fromEntries(
+    Object.entries(attributes).map(([name, column]) => [
+      name,
+      typeof column === "object" && column !== null
+        ? { ...column, unique: false }
+        : column,
+    ])
+  ) as ModelAttributes<M, TAttributes>;
+}
+
+export const deletedTeamAttributes: ModelAttributes<
+  DeletedTeamModel,
+  InferAttributes<DeletedTeamModel, OmitTimestamps>
+> = {
+  ...withoutUniqueness(teamAttributes),
   deletedAt: {
     type: DataTypes.DATE,
     primaryKey: true,

@@ -1,34 +1,40 @@
 {
- "name": "online-backend",
- "version": "0.0.0",
- "scripts": {
-  "lint": "cross-env TIMING=1 eslint \"**/*.ts*\" --max-warnings=0",
-  "typecheck": "tsc --noEmit",
-  "build": "npx tsc",
-  "start": "cross-env ALLOW_CORS=true node dist/src/server.js",
-  "dev": "cross-env ALLOW_CORS=true tsx watch --inspect src/server.ts",
-  "build_old": "babel-node --extensions \".ts\" --presets=@babel/preset-typescript --plugins=@babel/plugin-transform-modules-commonjs src/server.ts sanity-check",
-  "start_old": "nodemon -e js,ts --exec babel-node --extensions \".ts\" --presets=@babel/preset-typescript --plugins=@babel/plugin-transform-modules-commonjs src/server.ts",
-  "spell-check": "cspell \"**/*.{ts,tsx}\" --no-progress"
- },
- "license": "MIT",
- "dependencies": {
-  "@babel/cli": "^7.18.6",
-  "@babel/node": "^7.18.6",
-  "@babel/plugin-transform-modules-commonjs": "^7.18.6",
-  "@babel/preset-typescript": "^7.18.6",
-  "@types/node": "^16.11.41",
-  "boardgame.io": "^0.50.2",
-  "game": "*",
-  "schemas": "*",
-  "strategy": "*",
-  "web-vitals": "^2.1.4",
-  "yup": "^0.32.11"
- },
- "devDependencies": {
-  "cspell": "^6.31.1",
-  "gh-pages": "^4.0.0",
-  "nodemon": "^2.0.18",
-  "turbo": "^2.5.3"
- }
+  "name": "online-backend",
+  "version": "0.0.0",
+  "scripts": {
+    "lint": "cross-env TIMING=1 eslint \"**/*.ts*\" --max-warnings=0",
+    "typecheck": "tsc --noEmit",
+    "build": "npx tsc",
+    "start": "cross-env ALLOW_CORS=true node dist/src/server.js",
+    "dev": "cross-env ALLOW_CORS=true tsx watch --inspect src/server.ts",
+    "spell-check": "cspell \"**/*.{ts,tsx}\" --no-progress"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@koa/cors": "5.0.0",
+    "@koa/router": "10.1.1",
+    "@sentry/node": "10.72.0",
+    "bgio-postgres": "1.0.16",
+    "boardgame.io": "0.50.2",
+    "dotenv": "17.4.2",
+    "game": "*",
+    "koa": "2.16.4",
+    "koa-basic-auth": "4.0.0",
+    "koa-body": "8.0.0",
+    "koa-mount": "4.2.0",
+    "nanoid": "6.0.1",
+    "schemas": "*",
+    "sequelize": "6.37.8",
+    "socket.io": "4.8.3",
+    "strategy": "*"
+  },
+  "devDependencies": {
+    "@types/cors": "2.8.19",
+    "@types/koa__cors": "5.0.1",
+    "@types/koa-basic-auth": "2.0.7",
+    "@types/koa-mount": "4.0.5",
+    "@types/node": "24.13.3",
+    "@types/pg": "8.23.1",
+    "tsx": "4.23.13"
+  }
 }

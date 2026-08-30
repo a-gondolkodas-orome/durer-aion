@@ -1,5 +1,5 @@
 import { cloneDeep, isEqual, range, some } from 'lodash';
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 
 export type CellValue = null | 'rook' | 'visited';
 export type Field = { row: number; col: number };
@@ -40,9 +40,9 @@ export const getAllowedMoves = (board: Board): Field[] => {
 
 export const moves = {
   moveRook: {
-    validate: (board: Board, _, target: Field) =>
+    validate: (board, _, target: Field) =>
       some(getAllowedMoves(board), field => isEqual(field, target)),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, { row, col }: Field): MoveOutcome<Board> => {
+    apply: (board, { ctx }, { row, col }: Field): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       markVisitedFields(nextBoard, nextBoard.rookPosition, { row, col });
 
@@ -55,7 +55,7 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-};
+} satisfies MoveDefs<Board>;
 
 export type Moves = typeof moves;
 

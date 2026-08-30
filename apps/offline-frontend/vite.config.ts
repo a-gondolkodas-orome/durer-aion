@@ -8,7 +8,7 @@ export default defineConfig(() => {
 
   return {
     // SITE_BASE is the Pages deploy's prefix, composed by the workflow from one variable so the
-    // three subpages move together (docs/pages-consolidation.md). PUBLIC_URL stays supported
+    // three subpages move together (scripts/assemble-site.mjs). PUBLIC_URL stays supported
     // because DEPLOYMENT.md's per-competition deploy sets it, and that build is not this one.
     base: process.env.SITE_BASE || process.env.PUBLIC_URL || '/',
     plugins: [react()],

@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 import { cloneDeep, random } from 'lodash';
 // Modified Petersen graph: the standard Petersen graph (outer 5-cycle, inner
 // pentagram, 5 spokes) with each of the 5 outer edges subdivided by an extra
@@ -126,9 +126,9 @@ export const generateStartBoard = (): Board => ({
 export const moves = {
   // Police placement: one click per policeman; police may share a vertex.
   placeCop: {
-    validate: (board: Board, _, vertex: number) =>
+    validate: (board, _, vertex: number) =>
       board.phase === 'placingCops' && isVertex(vertex),
-    apply: (board: Board, _, vertex: number): MoveOutcome<Board> => {
+    apply: (board, _, vertex: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard.policemen.push(vertex);
       // Every policeman is placed within one turn; the turn ends with the last.
@@ -141,9 +141,9 @@ export const moves = {
   },
   // Thief picks a starting vertex; it may not be one already holding a policeman.
   placeThief: {
-    validate: (board: Board, _, vertex: number) =>
+    validate: (board, _, vertex: number) =>
       board.phase === 'placingThief' && isVertex(vertex) && !board.policemen.includes(vertex),
-    apply: (board: Board, _, vertex: number): MoveOutcome<Board> => {
+    apply: (board, _, vertex: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard.thief = vertex;
       nextBoard.phase = 'chasing';
@@ -154,10 +154,10 @@ export const moves = {
   // Chasing: move the current policeman along one edge. Catching the thief
   // (landing on its vertex) ends the game immediately for the police.
   moveCop: {
-    validate: (board: Board, { ctx }: { ctx: Ctx }, vertex: number) =>
+    validate: (board, { ctx }, vertex: number) =>
       board.phase === 'chasing' && ctx.currentPlayer === POLICE
         && isNeighbour(board.policemen[board.copCursor], vertex),
-    apply: (board: Board, _, vertex: number): MoveOutcome<Board> => {
+    apply: (board, _, vertex: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard.policemen[nextBoard.copCursor] = vertex;
       nextBoard.copCursor += 1;
@@ -175,10 +175,10 @@ export const moves = {
   // Chasing: move the thief along one edge. Stepping onto a policeman loses;
   // completing a third move without being caught wins.
   moveThief: {
-    validate: (board: Board, { ctx }: { ctx: Ctx }, vertex: number) =>
+    validate: (board, { ctx }, vertex: number) =>
       board.phase === 'chasing' && ctx.currentPlayer === THIEF
         && isNeighbour(board.thief!, vertex),
-    apply: (board: Board, _, vertex: number): MoveOutcome<Board> => {
+    apply: (board, _, vertex: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard.thief = vertex;
       nextBoard.thiefMoveCount += 1;
@@ -191,6 +191,6 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-};
+} satisfies MoveDefs<Board>;
 
 export type Moves = typeof moves;

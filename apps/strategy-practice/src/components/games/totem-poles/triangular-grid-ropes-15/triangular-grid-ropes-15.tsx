@@ -14,7 +14,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 
   // The click handler keeps its guards: a rejected click must leave the local
   // node selection alone, which the engine's silent gating cannot do for us.
-  const connectNode = node => {
+  const connectNode = (node: number) => {
     if (!ctx.isClientMoveAllowed) return;
     if (firstNode === null) {
       setFirstNode(node);

@@ -8,7 +8,7 @@ export const smartBotStrategy: Bot = ({ board }) => {
   const rem = board[0] % 3;
   if (rem === 0) {
     const randomNonEmptyPile = sample(filter([0, 1], (i) => board[i] > 0))!;
-    const amount = board[randomNonEmptyPile] > 1 ? sample([1, 2])! : 1;
+    const amount = board[randomNonEmptyPile] > 1 ? sample([1, 2]) : 1;
     if (randomNonEmptyPile === 0) {
       return { move: 'removeDiscs', args: [amount] };
     } else {

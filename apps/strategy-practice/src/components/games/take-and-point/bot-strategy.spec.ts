@@ -174,7 +174,7 @@ const playGame = (startPiles: number[], botSide: number): number => {
   let state: { piles: number[]; pointed: number[] | null; current: number } =
     { piles: startPiles, pointed: null, current: 0 };
   for (let guard = 0; guard < 1000; guard++) {
-    const result = playTurn(state, strategies as any);
+    const result = playTurn(state, strategies);
     if ('winner' in result) return result.winner;
     state = result;
   }

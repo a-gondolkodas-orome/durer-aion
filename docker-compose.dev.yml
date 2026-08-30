@@ -19,3 +19,8 @@ services:
       # - /usr/src/app/node_modules
       # Keep dist from image (so build output survives)
       - /usr/src/app/apps/online-backend/dist
+  postgres:
+    ports:
+      # Loopback only, and only in dev: enough for psql or a GUI client on the
+      # host, while the base file keeps the deployed database unpublished.
+      - 127.0.0.1:5432:5432

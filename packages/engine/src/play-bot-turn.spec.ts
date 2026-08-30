@@ -1,3 +1,4 @@
+// cspell:ignore tkae
 import type { BotStrategy, Ctx, Gameplay, MoveOutcome } from './types';
 import { playBotTurn } from './play-bot-turn';
 import { createInitialCoreState, type CoreState } from './store';

@@ -7,7 +7,7 @@
 const sources = import.meta.glob(
   ['./**/*.{ts,tsx}', '../../../../../packages/games/src/**/*.{ts,tsx}'],
   { query: '?raw', import: 'default', eager: true }
-) as Record<string, string>;
+);
 
 const gameplayModules = Object.keys(sources).filter(path => path.endsWith('/gameplay.ts'));
 

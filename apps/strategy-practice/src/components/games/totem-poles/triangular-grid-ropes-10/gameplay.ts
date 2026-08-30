@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 import { every, range, last, uniqWith, isEqual, cloneDeep } from 'lodash';
 
 //    0
@@ -49,8 +49,8 @@ export const isGameEnd = (board: Board) => {
 export const getAllowedSuperset = (board: Board, { from, to }: { from: number | null; to: number | null }) => {
   if (from == null || to == null || from === to) return null;
   if (!isAllowed(board, { from, to })) return { from, to };
-  const edgeSupsersets = superSets[`${from}-${to}`] || superSets[`${to}-${from}`] || [];
-  const allowedSupersets = edgeSupsersets.filter((e: number[]) => isAllowed(board, { from: e[0], to: e[1] }));
+  const edgeSupersets = superSets[`${from}-${to}`] || superSets[`${to}-${from}`] || [];
+  const allowedSupersets = edgeSupersets.filter((e: number[]) => isAllowed(board, { from: e[0], to: e[1] }));
   if (allowedSupersets.length > 0) {
     const e = last(allowedSupersets)!;
     return { from: e[0], to: e[1] };
@@ -75,7 +75,9 @@ export const mirrorNodes: Record<Direction, number[]> = {
   'z': [6, 3, 7, 1, 4, 8, 0, 2, 5, 9]
 };
 
-const superSets = {
+// Keyed by the `from-to` pair an edge spells out, so only ever indexed with a
+// built key rather than a literal one.
+const superSets: Record<string, number[][]> = {
   '0-1': [[0, 3], [0, 6]],
   '0-3': [[0, 6]],
   '1-3': [[0, 3], [1, 6], [0, 6]],
@@ -169,8 +171,8 @@ export const getTrivialMoves = (board: Board) => {
 
 export const moves = {
   stretchRope: {
-    validate: (board: Board, _, edge: Edge) => isAllowed(board, edge),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, { from, to }: Edge): MoveOutcome<Board> => {
+    validate: (board, _, edge: Edge) => isAllowed(board, edge),
+    apply: (board, { ctx }, { from, to }: Edge): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       // A rope is stretched as far as it legally reaches, not just between the
       // two nodes that were clicked.
@@ -181,6 +183,6 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-}
+} satisfies MoveDefs<Board>
 
 export type Moves = typeof moves;

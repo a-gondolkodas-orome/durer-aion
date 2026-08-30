@@ -12,7 +12,7 @@ import { AnyBgioGame, PlayerIDType } from 'game';
 
 /**
  * 
- * Big factory to set up the Router for the API, anso contains API function implementations.
+ * Big factory to set up the Router for the API, and also contains API function implementations.
  * 
  * @param router - Koa Router
  * @param teams - List of teams, provided as a TeamsRepository
@@ -65,7 +65,7 @@ export function configureTeamsRouter(
  * @param {integer} minutes - How many minutes to add
  * @returns {State<any>} - A match state object object.
  */
-  router.get("/game/admin/:matchId/addminutes/:minutes", async (ctx) => {
+  router.post("/game/admin/:matchId/addminutes/:minutes", async (ctx) => {
     const matchID = ctx.params.matchId;
     const minutes = Number(ctx.params.minutes);
     const { state, metadata } = await (ctx.db as StorageAPI.Async).fetch(
@@ -102,7 +102,7 @@ export function configureTeamsRouter(
     //Update team
     if (team.strategyMatch.state === "IN PROGRESS") {
       if (team.strategyMatch.matchID !== matchID) {
-        ctx.throw(501, `IN PROGRESS strategy match found (${team.strategyMatch.matchID}), but it does not match with matchID (${matchID}). (Probabaly you are using an old matchID.)`);
+        ctx.throw(501, `IN PROGRESS strategy match found (${team.strategyMatch.matchID}), but it does not match with matchID (${matchID}). (Probably you are using an old matchID.)`);
       }
       await team.update({
         strategyMatch: {
@@ -115,7 +115,7 @@ export function configureTeamsRouter(
     }
     else if (team.relayMatch.state === "IN PROGRESS") {
       if (team.relayMatch.matchID !== matchID) {
-        ctx.throw(501, `IN PROGRESS relay match found (${team.relayMatch.matchID}), but it does not match with matchID (${matchID}). (Probabaly you are using an old matchID.)`);
+        ctx.throw(501, `IN PROGRESS relay match found (${team.relayMatch.matchID}), but it does not match with matchID (${matchID}). (Probably you are using an old matchID.)`);
       }
       await team.update({
         relayMatch: {
@@ -143,8 +143,8 @@ export function configureTeamsRouter(
     This is a bit hacky, but it mainly simulates a similar effect as what would happen if a different user changes teh gamestate irl
     This is generally equal to what would happen if multiple players play the game, and one does some actions.
     The other players would see the updated gamestate, and the frontend would update accordingly.
-    The normal way to use this, is to create a Master authorative object, which handels validations, and other logics.
-    Here we already handeled the validation, and uploded it to the database, so we can just send the updated gamestate to the frontend.
+    The normal way to use this, is to create a Master authoritative object, which handles validations, and other logics.
+    Here we already handled the validation, and uploaded it to the database, so we can just send the updated gamestate to the frontend.
     This is possible, because the publish functionality of the PubSub implementation,if we use a SendAll function, can be reconstructed easily from the transport layer we defined from the botmoves already. */
     const my_transportAPI = TransportAPI(matchID, null /* we are only using sendAll */, getFilterPlayerView(game), ctx.durer_transport.pubSub)
 
@@ -156,7 +156,7 @@ export function configureTeamsRouter(
     )
 
     team.other += ` te[${matchID}]:${minutes}`;
-    team.save();
+    await team.save();
 
     ctx.body = { updatedEndTime: newEndDate, matchID: matchID, team: team };
 
@@ -185,7 +185,7 @@ export function configureTeamsRouter(
      * @param {string} teamID - The ID of the team.
      * @returns {TeamModel} - Returns the modified team model.
      */
-  router.get("/team/admin/:teamID/reset/strategy", async (ctx) => {
+  router.post("/team/admin/:teamID/reset/strategy", async (ctx) => {
     const teamId = ctx.params.teamID;
     const team = await teams.getTeam({ teamId });
 
@@ -201,7 +201,7 @@ export function configureTeamsRouter(
     if (team.strategyMatch.state !== 'NOT STARTED')
       team.other += ` prevstratid:${team.strategyMatch.matchID}`
     team.strategyMatch = { state: 'NOT STARTED' }
-    team.save();
+    await team.save();
     ctx.body = team;
   });
 
@@ -211,7 +211,7 @@ export function configureTeamsRouter(
      * @param {string} teamID - The ID of the team.
      * @returns {TeamModel} - Returns the modified team model.
      */
-  router.get("/team/admin/:teamID/reset/relay", async (ctx) => {
+  router.post("/team/admin/:teamID/reset/relay", async (ctx) => {
     const teamId = ctx.params.teamID;
     const team = await teams.getTeam({ teamId });
 
@@ -227,7 +227,7 @@ export function configureTeamsRouter(
     if (team.relayMatch.state !== 'NOT STARTED')
       team.other += ` prevrelayid:${team.relayMatch.matchID}`
     team.relayMatch = { state: 'NOT STARTED' }
-    team.save();
+    await team.save();
     ctx.body = team;
   });
 
@@ -281,7 +281,7 @@ export function configureTeamsRouter(
  */
   router.put("/team/admin/import", koaBody({ multipart: true }), async (ctx) => {
     const { file } = ctx.request.files ?? ctx.throw(400, 'No files uploaded!');
-    // Check if multiple files are uploded
+    // Check if multiple files are uploaded
     if (Array.isArray(file)) {
       ctx.throw(400, 'Multiple files are not supported.');
       return;
@@ -303,7 +303,7 @@ export function configureTeamsRouter(
    * Get team ID based on login token
    * 
    * @param {string} token: Login token
-   * @returns {srting } - TeamId for the team
+   * @returns {string} - TeamId for the team
    */
   router.get("/team/join/:token", koaBody(), async (ctx) => {
     const connect_token: string = ctx.params.token ?? "no-token";
@@ -367,7 +367,7 @@ export function configureTeamsRouter(
     if (match.startAt === null || match.endAt === null) {
       console.error(`GAME [${game.name}] initialiser doesn't initialise the timer!!!`)
     }
-    team.update({
+    await team.update({
       pageState: "RELAY",
       relayMatch: match,
     });
@@ -391,7 +391,7 @@ export function configureTeamsRouter(
     await injectBot(ctx.db, body.matchID);
 
     //created new game, updated team state accordingly
-    team.update({
+    await team.update({
       pageState: "STRATEGY",
       strategyMatch: await startMatchStatus(body.matchID, ctx),
     });
@@ -412,30 +412,10 @@ export function configureTeamsRouter(
       ctx.throw(403, "Not allowed, match in progress.")
 
     //update team state to go home
-    team.update({
+    await team.update({
       pageState: "HOME",
     });
     ctx.body = team;
-  });
-
-  /**
-   * Let a team get their relay results
-   * TODO: implement
-   * 
-   * @param {string} GUID - TeamId
-   */
-  router.get("/team/:GUID/relay/result", koaBody(), async (ctx) => {
-    ctx.throw(501, "Not implemented yet.");
-  });
-
-  /**
-   * Let a team get their strategy results
-   * TODO: implement
-   * 
-   * @param {string} GUID - TeamId
-   */
-  router.get("/team/:GUID/strategy/result", koaBody(), async (ctx) => {
-    ctx.throw(501, "Not implemented yet.");
   });
 
   /**

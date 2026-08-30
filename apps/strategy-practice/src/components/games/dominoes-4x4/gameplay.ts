@@ -1,5 +1,5 @@
 import { range, cloneDeep, isEqual, flatMap } from 'lodash';
-import type { MoveOutcome, Ctx } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 
 export type Field = { row: number, col: number }
 export type Domino = [Field, Field]
@@ -32,9 +32,9 @@ const isDominoAllowed = (board: Board, player: number, domino: Domino): boolean 
 
 export const moves = {
   placeDomino: {
-    validate: (board: Board, { ctx }: { ctx: Ctx }, domino: Domino) =>
+    validate: (board, { ctx }, domino: Domino) =>
       isDominoAllowed(board, ctx.currentPlayer!, domino),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, domino: Domino): MoveOutcome<Board> => {
+    apply: (board, { ctx }, domino: Domino): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard.push(domino);
       const nextPlayer = 1 - ctx.currentPlayer!;
@@ -44,6 +44,6 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-};
+} satisfies MoveDefs<Board>;
 
 export type Moves = typeof moves;

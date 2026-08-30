@@ -27,7 +27,7 @@ const askSmartBot = (board: Board): Field =>
 
 const at = (key: string): Field => {
   const [row, col] = key.split(';').map(Number);
-  return { row: row!, col: col! };
+  return { row, col };
 };
 
 // Both board sizes are a win for the second player, so that is the side whose
@@ -79,7 +79,7 @@ describe('opening books', () => {
   it('still finds its third-step entry for every pair it covers', () => {
     for (const [pair, answer] of Object.entries(smartBotOptimalThirdSteps)) {
       const [first, second] = pair.split(' - ').map(at);
-      expect(askSmartBot(boardWithDucks(7, first!, second!))).toEqual(answer);
+      expect(askSmartBot(boardWithDucks(7, first, second))).toEqual(answer);
     }
   });
 
@@ -92,8 +92,8 @@ describe('opening books', () => {
 
     for (const [pair, answer] of Object.entries(smartBotOptimalThirdSteps)) {
       const [first, second] = pair.split(' - ').map(at);
-      const mirrored = boardWithDucks(7, flip(first!), flip(second!));
-      if (JSON.stringify(mirrored) === JSON.stringify(boardWithDucks(7, first!, second!))) continue;
+      const mirrored = boardWithDucks(7, flip(first), flip(second));
+      if (JSON.stringify(mirrored) === JSON.stringify(boardWithDucks(7, first, second))) continue;
       expect(askSmartBot(mirrored)).toEqual(flip(answer));
     }
   });

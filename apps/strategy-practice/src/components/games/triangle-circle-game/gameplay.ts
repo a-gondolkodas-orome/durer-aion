@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 import { EDGES, TRIANGLES, TRIANGLE_COUNT, EDGE_COUNT } from './geometry';
 
 // Board state. `edges[e]` is true once the line player has shaded edge e;
@@ -94,11 +94,11 @@ export const moves = {
   // Line player shades one edge; they win at once if it completes an un-circled
   // triangle, otherwise the turn passes.
   shadeEdge: {
-    validate: (board: Board, { ctx }: { ctx: Ctx }, edgeId: number) =>
+    validate: (board, { ctx }, edgeId: number) =>
       ctx.currentPlayer === LINE
         && Number.isInteger(edgeId) && edgeId >= 0 && edgeId < EDGE_COUNT
         && !board.edges[edgeId],
-    apply: (board: Board, _, edgeId: number): MoveOutcome<Board> => {
+    apply: (board, _, edgeId: number): MoveOutcome<Board> => {
       const nextBoard = applyShade(board, edgeId);
       if (isLineWin(nextBoard)) {
         return { nextBoard, gameEnd: { winnerIndex: LINE } };
@@ -109,11 +109,11 @@ export const moves = {
   // Circle player drops a circle into one triangle; they win once every triangle
   // is circled, otherwise the turn passes.
   placeCircle: {
-    validate: (board: Board, { ctx }: { ctx: Ctx }, triangleId: number) =>
+    validate: (board, { ctx }, triangleId: number) =>
       ctx.currentPlayer === CIRCLE
         && Number.isInteger(triangleId) && triangleId >= 0 && triangleId < TRIANGLE_COUNT
         && !board.circles[triangleId],
-    apply: (board: Board, _, triangleId: number): MoveOutcome<Board> => {
+    apply: (board, _, triangleId: number): MoveOutcome<Board> => {
       const nextBoard = applyCircle(board, triangleId);
       if (isCircleWin(nextBoard)) {
         return { nextBoard, gameEnd: { winnerIndex: CIRCLE } };
@@ -121,6 +121,6 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-};
+} satisfies MoveDefs<Board>;
 
 export type Moves = typeof moves;

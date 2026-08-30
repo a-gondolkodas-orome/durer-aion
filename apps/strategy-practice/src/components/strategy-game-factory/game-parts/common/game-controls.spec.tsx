@@ -26,8 +26,8 @@ describe('ModeSelector', () => {
 
     const [firstComputer, secondComputer] = getAllByTestId('mode-vsComputer') as HTMLInputElement[];
 
-    expect(firstComputer!.name).not.toBe(secondComputer!.name);
-    expect(firstComputer!.name).toBeTruthy();
+    expect(firstComputer.name).not.toBe(secondComputer.name);
+    expect(firstComputer.name).toBeTruthy();
   });
 
   // The failure this prevents: the browser moves "checked" within a shared
@@ -44,12 +44,12 @@ describe('ModeSelector', () => {
     const [firstComputer] = getAllByTestId('mode-vsComputer') as HTMLInputElement[];
     const [, secondHuman] = getAllByTestId('mode-vsHuman') as HTMLInputElement[];
 
-    expect(firstComputer!.checked).toBe(true);
-    expect(secondHuman!.checked).toBe(true);
+    expect(firstComputer.checked).toBe(true);
+    expect(secondHuman.checked).toBe(true);
 
-    fireEvent.click(secondHuman!);
+    fireEvent.click(secondHuman);
 
-    expect(firstComputer!.checked).toBe(true);
+    expect(firstComputer.checked).toBe(true);
   });
 });
 
@@ -70,8 +70,8 @@ describe('DifficultySelector', () => {
 
   it('marks a variant whose bot is not always optimal', () => {
     const withMarker: Variant[] = [
-      variants[0]!,
-      { ...variants[1]!, notAlwaysOptimal: true }
+      variants[0],
+      { ...variants[1], notAlwaysOptimal: true }
     ];
     const { getAllByTitle } = render(
       <DifficultySelector variants={withMarker} selectedIndex={0} onSelect={() => {}} disabled={false} />

@@ -36,17 +36,17 @@ const vertices = [
 ];
 
 const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
-  const getTrianglePoints = i => {
+  const getTrianglePoints = (i: number) => {
     const v = triangles[i].v;
     const [v0, v1, v2] = [vertices[v[0]], vertices[v[1]], vertices[v[2]]];
     return `${v0.cx},${v0.cy} ${v1.cx},${v1.cy} ${v2.cx},${v2.cy}`
   }
 
-  const isClickable = i => moves.colorTriangle.isAllowed(board, i);
+  const isClickable = (i: number) => moves.colorTriangle.isAllowed(board, i);
 
-  const colorTriangle = i => moves.colorTriangle(board, i);
+  const colorTriangle = (i: number) => moves.colorTriangle(board, i);
 
-  const getColor = i => {
+  const getColor = (i: number) => {
     if (board[i] === COLORED) return 'fill-blue-800';
     if (board[i] === FORBIDDEN) return 'fill-slate-900/40 dark:fill-white/20';
     return 'fill-transparent';

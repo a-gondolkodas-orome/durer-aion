@@ -66,7 +66,7 @@ const askBot = (b: Board, player: number) =>
 const namedPoliceTurn = (b: Board): [number, number] => {
   const named = askBot(b, POLICE) as { move: string, args?: unknown[] }[];
   expect(named.map(m => m.move)).toEqual(['moveFirstPoliceman', 'moveSecondPoliceman']);
-  return [named[0]!.args![0] as number, named[1]!.args![0] as number];
+  return [named[0].args![0] as number, named[1].args![0] as number];
 };
 
 const namedThiefVertex = (b: Board): number => botNextMoveArgs(askBot(b, THIEF))[0];
@@ -76,8 +76,8 @@ const randomBot: BotStrategy<Board> = ({ board: b, ctx }) => {
   const pick = (from: number) => neighbours[from][Math.floor(Math.random() * 3)];
   if (ctx.currentPlayer === THIEF) return { move: 'moveThief', args: [pick(b.thief)] };
   return [
-    { move: 'moveFirstPoliceman', args: [pick(b.policemen[0]!)] },
-    { move: 'moveSecondPoliceman', args: [pick(b.policemen[1]!)] }
+    { move: 'moveFirstPoliceman', args: [pick(b.policemen[0])] },
+    { move: 'moveSecondPoliceman', args: [pick(b.policemen[1])] }
   ];
 };
 
@@ -89,7 +89,7 @@ describe('policeWin', () => {
     for (const b of positions()) {
       expect({ ...b, win: policeWin(b) }).toEqual({
         ...b,
-        win: refPoliceWin(b.policemen[0]!, b.policemen[1]!, b.thief, movesLeftIn(b))
+        win: refPoliceWin(b.policemen[0], b.policemen[1], b.thief, movesLeftIn(b))
       });
     }
   });
@@ -117,14 +117,14 @@ describe('smartBotStrategy as the police', () => {
   it('names two legal steps, one per policeman', () => {
     for (const b of positions()) {
       const [first, second] = namedPoliceTurn(b);
-      expect(neighbours[b.policemen[0]!]).toContain(first);
-      expect(neighbours[b.policemen[1]!]).toContain(second);
+      expect(neighbours[b.policemen[0]]).toContain(first);
+      expect(neighbours[b.policemen[1]]).toContain(second);
     }
   });
 
   it('keeps the win from every position the police can win', () => {
     for (const b of positions()) {
-      if (!refPoliceWin(b.policemen[0]!, b.policemen[1]!, b.thief, movesLeftIn(b))) continue;
+      if (!refPoliceWin(b.policemen[0], b.policemen[1], b.thief, movesLeftIn(b))) continue;
       const [first, second] = namedPoliceTurn(b);
       const wins = refPoliceWinAfterPoliceTurn(first, second, b.thief, movesLeftIn(b));
       expect({ ...b, first, second, wins }).toEqual({ ...b, first, second, wins: true });
@@ -143,10 +143,10 @@ describe('smartBotStrategy as the thief', () => {
     for (const b of positions()) {
       const movesLeft = movesLeftIn(b);
       // the police have just moved; the thief replies
-      if (refPoliceWinAfterPoliceTurn(b.policemen[0]!, b.policemen[1]!, b.thief, movesLeft)) continue;
+      if (refPoliceWinAfterPoliceTurn(b.policemen[0], b.policemen[1], b.thief, movesLeft)) continue;
       const vertex = namedThiefVertex(b);
       const escapes = vertex !== b.policemen[0] && vertex !== b.policemen[1]
-        && (movesLeft === 1 || !refPoliceWin(b.policemen[0]!, b.policemen[1]!, vertex, movesLeft - 1));
+        && (movesLeft === 1 || !refPoliceWin(b.policemen[0], b.policemen[1], vertex, movesLeft - 1));
       expect({ ...b, vertex, escapes: true }).toEqual({ ...b, vertex, escapes });
     }
   });
@@ -202,8 +202,8 @@ describe.each([
       expect(b.turnCount).toBe(0);
       expect(b.policemen).not.toContain(b.thief);
       // the police must not be able to take them on the very first step
-      expect(neighbours[b.policemen[0]!]).not.toContain(b.thief);
-      expect(neighbours[b.policemen[1]!]).not.toContain(b.thief);
+      expect(neighbours[b.policemen[0]]).not.toContain(b.thief);
+      expect(neighbours[b.policemen[1]]).not.toContain(b.thief);
     }
   });
 

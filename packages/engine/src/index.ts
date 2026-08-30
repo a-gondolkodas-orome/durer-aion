@@ -8,8 +8,8 @@
 // export.
 export type {
   Phase, Mode, Ctx,
-  MoveOutcome, MoveFunction, MoveDefinition, Gameplay, GameMoves, ClientGameMoves,
-  StrategyArgs, BotStrategy, BotMove, BoardClientProps,
+  MoveOutcome, MoveFunction, MoveDefinition, MoveDefs, MoveValidator, Gameplay, GameMoves, ClientGameMoves,
+  StrategyArgs, BotStrategy, BotMove, NamedBotMove, BoardClientProps,
   Variant, VariantInput, Presentation, StrategyGameConfig
 } from './types';
 export type { I18nString, I18nNode, Language, Translatable, TranslatableNode } from './i18n';

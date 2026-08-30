@@ -5,8 +5,13 @@ import { setTeamState, useTeamStateValue } from './team-state-store';
 import { TeamModelDto } from '../dto/TeamStateDto';
 
 // Module state rather than per-provider state — see the note atop
-// team-state-store.ts. Every test starts from the logged-out snapshot.
-afterEach(() => setTeamState(null));
+// team-state-store.ts. Every test starts from the logged-out snapshot. This
+// hook runs before Testing Library's own cleanup, so the components the test
+// rendered are still mounted and the reset re-renders them: `act` for the same
+// reason the writes below need it.
+afterEach(() => {
+  act(() => setTeamState(null));
+});
 
 const team = (id: string) => ({ id } as unknown as TeamModelDto);
 

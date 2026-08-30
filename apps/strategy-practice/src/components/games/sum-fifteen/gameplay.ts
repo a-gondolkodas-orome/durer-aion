@@ -1,4 +1,4 @@
-import type { MoveOutcome, Ctx } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 
 // owner[i] holds who owns the number (i + 1): 0 = first player, 1 = second
 // player, null = still available.
@@ -51,11 +51,11 @@ export const moves = {
     // A player may claim any of 1..9 that nobody has claimed yet. Both players
     // draw from the same nine numbers, so whose turn it is does not enter into
     // legality.
-    validate: (board: Board, _, n: number) =>
+    validate: (board, _, n: number) =>
       Number.isInteger(n) && n >= 1 && n <= allNumbers.length && board.owner[n - 1] === null,
-    apply: (board: Board, { ctx }: { ctx: Ctx }, n: number): MoveOutcome<Board> => {
+    apply: (board, { ctx }, n: number): MoveOutcome<Board> => {
       const player = ctx.currentPlayer as 0 | 1;
-      const owner = board.owner.slice() as Board['owner'];
+      const owner = board.owner.slice();
       owner[n - 1] = player;
       const nextBoard = { owner };
 
@@ -69,6 +69,6 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-};
+} satisfies MoveDefs<Board>;
 
 export type Moves = typeof moves;

@@ -58,7 +58,7 @@ export const injectBot = async (
 };
 
 /**
- * Cheks if the status of the global timer
+ * Checks if the status of the global timer
  * TODO: implement usage
  * @returns {"WAITING"|"FINISHED"|undefined} - status of global game
  */
@@ -216,17 +216,17 @@ export async function closeMatch(
   const teamId = currentMatch.metadata.players[0].name;
   if (!teamId)
     throw new Error(
-      `Match teamId is not valid, the match has the following players:${currentMatch.metadata.players}`
+      `Match teamId is not valid, the match has the following players:${JSON.stringify(currentMatch.metadata.players)}`
     );
   const team: TeamModel | null = (await teams.getTeam({ teamId })) ?? null;
   if (team == null)
     throw new Error(
-      `Match team is not found, the match has the following players:${currentMatch.metadata.players}`
+      `Match team is not found, the match has the following players:${JSON.stringify(currentMatch.metadata.players)}`
     );
 
   const type = inferenceGameType(currentMatch.metadata.gameName);
   //check if the match is already started. We are allowing to close the gamestate even if teamstate id FINISHED, because it may happen, 
-  //that the game is closed before the GBIO backend closes the game. (Even tought it should not happen, and we made some progress to prevent it)
+  //that the game is closed before the BGIO backend closes the game. (Even though it should not happen, and we made some progress to prevent it)
   if (team[type].state === "NOT STARTED")
     throw new Error(
       `The match{${matchId}} is not started yet, you can't close it`
@@ -250,7 +250,7 @@ export async function getNewGame(
     (await teams.getTeam({ teamId: GUID })) ??
     ctx.throw(404, `Team with {id:${GUID}} not found.`);
 
-  //if middelware setup was better understand, this should be in a separated midleware
+  //if middleware setup was better understood, this should be in a separate middleware
   const staleInfo = await checkStaleMatch(team);
   if (staleInfo.isStale) {
     await closeMatch(

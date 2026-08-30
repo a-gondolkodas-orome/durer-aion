@@ -4,7 +4,7 @@ import { useTranslation } from 'language';
 import { generateStartBoard, generateTestStartBoard, moves, type Board } from './gameplay';
 import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
 
-const DisabledDisc = ({ bgColor }) => (
+const DisabledDisc = ({ bgColor }: { bgColor: string }) => (
   <button className={`size-12 rounded-full ${bgColor}`} disabled />
 );
 
@@ -19,11 +19,12 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const isSelectable = (pile: number, i: number) =>
     moveForPile(pile).isAllowed(board, board[pile] - i);
 
-  const select = (pile, i) => moveForPile(pile)(board, board[pile] - i);
+  const select = (pile: number, i: number) => moveForPile(pile)(board, board[pile] - i);
 
-  const isSelected = (pile, i) => isEqual(validHovered, [pile, i]) || isEqual(validHovered, [pile, i - 1]);
+  const isSelected = (pile: number, i: number) =>
+    isEqual(validHovered, [pile, i]) || isEqual(validHovered, [pile, i - 1]);
 
-  const fmt = (red, blue) => t({
+  const fmt = (red: number, blue: number) => t({
     hu: ` → ${red} piros és ${blue} kék korong`,
     en: ` → ${red} red and ${blue} blue discs`
   });
@@ -88,7 +89,7 @@ const getPlayerStepDescription = () => ({
     'or do the same with red discs to flip 1 or 2 of them to blue.'
 });
 
-const rule = (maxDiscs) => ({
+const rule = (maxDiscs: number) => ({
   hu: <>
     A játék kezdetén néhány, de legfeljebb {maxDiscs} piros vagy kék korong van az asztalon.
     A soron következő játékos összesen négyfélét léphet:

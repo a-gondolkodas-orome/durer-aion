@@ -16,7 +16,7 @@ const play = (
 
 // The board the first bot produced, for judging a single decision.
 const afterFirstMove = (grid: Grid) =>
-  play(grid, [smartBotStrategy, randomBotStrategy]).history[0]!.board.grid;
+  play(grid, [smartBotStrategy, randomBotStrategy]).history[0].board.grid;
 
 describe('grundy', () => {
   it('is zero exactly when both sides are even', () => {

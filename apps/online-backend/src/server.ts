@@ -6,10 +6,6 @@ import {
   strategyNames,
 } from 'game';
 import { RelayStrategy } from 'strategy';
-//import { 
-//  RelayStrategy,
-//  strategyWrapper as StrategyStrategyremovefromcirclee,
-//} from 'strategy';
 import { PostgresStore } from 'bgio-postgres';
 import { argv, env, exit } from 'process';
 import { SocketIOButBotMoves } from './socketio_botmoves';
@@ -28,7 +24,7 @@ import { closeMatch } from './server/team_manage';
 import * as Sentry from '@sentry/node';
 import dotenv from 'dotenv';
 
-dotenv.config(); // Loads .env file into process.env
+dotenv.config({ quiet: true }); // Loads .env file into process.env
 
 function getDb() {
   if (env.DATABASE_URL) {
@@ -83,7 +79,10 @@ const { db, teams } = getDb();
 // node: argv[0] vs server.ts: argv[1]
 if (argv[2] === "import") {
   const filename = argv[3];
-  import_teams_from_tsv_locally(teams, filename).then(() => exit(0));
+  import_teams_from_tsv_locally(teams, filename).then(() => exit(0)).catch((e: unknown) => {
+    console.error("team import failed", e);
+    exit(1);
+  });
 } else {
   const botSetup = Object.fromEntries(
     games.map((game, idx) =>
@@ -128,12 +127,19 @@ if (argv[2] === "import") {
 
   server.app.on("error", (err, ctx) => {
     Sentry.withScope(function (scope: Sentry.Scope) {
-      scope.addEventProcessor(function (event: Sentry.Event) {
-        return Sentry.addRequestDataToEvent(event, ctx.request);
+      // addRequestDataToEvent is gone since v9; the default requestData
+      // integration picks the request up from this metadata key instead.
+      scope.setSDKProcessingMetadata({
+        normalizedRequest: {
+          url: ctx.request.href,
+          method: ctx.request.method,
+          query_string: ctx.request.querystring,
+          headers: ctx.request.headers,
+        },
       });
       Sentry.captureException(err);
     });
   });
 
-  server.run(PORT);
+  void server.run(PORT);
 }
