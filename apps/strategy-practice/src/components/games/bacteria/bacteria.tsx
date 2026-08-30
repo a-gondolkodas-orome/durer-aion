@@ -206,7 +206,7 @@ const getPlayerStepDescription = ({ ctx }: StrategyArgs<Board>) => {
     };
   } else {
     return {
-      hu: 'Kattints egy mezőre, amin van baktérium, hogy eltávolíts egy bakériumot onnan.',
+      hu: 'Kattints egy mezőre, amin van baktérium, hogy eltávolíts egy baktériumot onnan.',
       en: 'Click on a square with bacteria to remove one bacterium from it.'
     };
   }

@@ -114,8 +114,8 @@ npm run i18n:check
 npm run spell-check
 ```
 
-`npm ci`, `npm run build` and `npm run typecheck` cover `apps/strategy-practice` too;
-`npm run lint` and `npm test` do not — *Project Structure* above says why. Its
+`npm ci`, `npm run build`, `npm run typecheck` and `npm run spell-check` cover
+`apps/strategy-practice` too; `npm run lint` and `npm test` do not — *Project Structure* above says why. Its
 checks run from that directory, with no install of their own:
 
 ```bash

@@ -49,8 +49,8 @@ export const isGameEnd = (board: Board) => {
 export const getAllowedSuperset = (board: Board, { from, to }: { from: number | null; to: number | null }) => {
   if (from == null || to == null || from === to) return null;
   if (!isAllowed(board, { from, to })) return { from, to };
-  const edgeSupsersets = superSets[`${from}-${to}`] || superSets[`${to}-${from}`] || [];
-  const allowedSupersets = edgeSupsersets.filter((e: number[]) => isAllowed(board, { from: e[0], to: e[1] }));
+  const edgeSupersets = superSets[`${from}-${to}`] || superSets[`${to}-${from}`] || [];
+  const allowedSupersets = edgeSupersets.filter((e: number[]) => isAllowed(board, { from: e[0], to: e[1] }));
   if (allowedSupersets.length > 0) {
     const e = last(allowedSupersets)!;
     return { from: e[0], to: e[1] };
