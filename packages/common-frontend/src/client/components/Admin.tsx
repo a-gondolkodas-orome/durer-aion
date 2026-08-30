@@ -4,7 +4,7 @@ import { Button, Dialog, Table, TableBody, TableCell, TableHead, TableRow, IconB
 import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
 import { Fragment, useEffect, useState } from 'react';
 import useSWR from 'swr';
-import { DataGrid, GridToolbarContainer, GridToolbarExport } from '@mui/x-data-grid';
+import { DataGrid, ExportCsv, Toolbar } from '@mui/x-data-grid';
 import { TeamModelDto } from '../dto/TeamStateDto';
 import { TeamDetailDialog } from './TeamDetailDialog';
 import Form from './form';
@@ -21,14 +21,15 @@ import { FieldProps } from "formik"
 // GridToolbar also carries are not what this page is for.
 function TeamsToolbar() {
   return (
-    <GridToolbarContainer>
-      <GridToolbarExport
+    <Toolbar>
+      <ExportCsv
         // allColumns so the `other` column, hidden by default below, is still
         // in the file; the two button columns opt out with disableExport.
-        csvOptions={{ fileName: 'durer-csapatok', utf8WithBom: true, allColumns: true }}
-        printOptions={{ disableToolbarButton: true }}
-      />
-    </GridToolbarContainer>
+        options={{ fileName: 'durer-csapatok', utf8WithBom: true, allColumns: true }}
+      >
+        Letöltés CSV-ként
+      </ExportCsv>
+    </Toolbar>
   );
 }
 
@@ -209,11 +210,8 @@ export function Admin(props: {teamId?: string}) {
             },
           }}
           pageSizeOptions={[10, 25, 50]}
+          showToolbar
           slots={{ toolbar: TeamsToolbar }}
-          localeText={{
-            toolbarExport: 'Exportálás',
-            toolbarExportCSV: 'Letöltés CSV-ként',
-          }}
           sx={{
             height: "auto",
           }}
