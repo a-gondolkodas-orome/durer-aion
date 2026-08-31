@@ -302,6 +302,22 @@ that changed a column needs the change applied by hand**, or the volume dropped
 All three services are `restart: unless-stopped`, so a reboot brings the stack back by
 itself — with whatever image and `dist` were last built, since nothing rebuilds on boot.
 
+### Once, on an instance deployed before `postgres:17`
+
+The compose file used to run `bitnami/postgresql` with the named volume mounted at
+`/var/lib/postgresql/data` — the *official* image's data directory, not bitnami's. On such
+an instance the database is in the container's writable layer and recreating the container
+drops it, so **dump it before pulling that change**, while the old container is still up:
+
+```bash
+docker compose --env-file=.env.docker exec -e PGPASSWORD="$POSTGRESQL_PASSWORD" \
+  postgres pg_dumpall -U postgres -h 127.0.0.1 > backup.sql
+```
+
+Then `npm run stack:prod` and restore, or re-run the team import if the competition has not
+started. From `postgres:17` on the mount is the image's real data directory, so
+`stack:down` preserves the data.
+
 > **Test drive:** tear the machine down instead, per the last column of the provider table.
 > Stopping is not deleting on any of them, and on DigitalOcean it does not stop the bill.
 > **Delete the DNS record too.** The IP goes back to the provider's pool, and a record left
