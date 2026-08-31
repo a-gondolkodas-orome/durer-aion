@@ -115,6 +115,27 @@ After all of this, you should be able to follow the readme on how to build your 
 It will be hosted default on port 80, and all the stuff will be running in the docker container(s).
 You still need to set up the ssl certificate, and DNS.
 
+### One-time step for an instance deployed before `postgres:17`
+
+The compose file used to run `bitnami/postgresql` while mounting the named
+volume at `/var/lib/postgresql/data`. That is the *official* image's data
+directory; bitnami keeps its data under `/bitnami/postgresql`. So on such an
+instance the database lives in the container's writable layer and recreating
+the container drops it — the volume it looks like it is using is empty.
+
+Dump it **before** pulling this change, while the old container is still up
+(`POSTGRESQL_PASSWORD` is the one from `.env.docker`):
+
+```bash
+docker compose --env-file=.env.docker exec -e PGPASSWORD="$POSTGRESQL_PASSWORD" \
+  postgres pg_dumpall -U postgres -h 127.0.0.1 > backup.sql
+```
+
+Then `npm run stack:prod` and restore it, or — if the competition has not
+started — just re-run the team import. From `postgres:17` on, the mount path
+is the image's real data directory, so `stack:down` preserves the data as
+`README.md` says it does.
+
 ## Access your docker containers
 
 To access your docker containers, you have to find your containers first:

@@ -50,12 +50,20 @@ services:
     # does so over the compose network. Publishing 5432 on a deployed host puts
     # the database on the internet behind nothing but POSTGRESQL_PASSWORD.
     # docker-compose.dev.yml publishes it on loopback for local psql.
-    image: bitnami/postgresql
+
+    # The official image, pinned. Bitnami's free catalogue changed in 2025, so
+    # an untagged `bitnami/postgresql` pull no longer gives what earlier deploys
+    # got. Staying on 17 is deliberate: 18 moved PGDATA to
+    # /var/lib/postgresql/18/docker and its volume to /var/lib/postgresql, so
+    # the mount below would have to move with it.
+    image: postgres:17.11
     restart: unless-stopped
     volumes:
       - postgresdb:/var/lib/postgresql/data
     environment:
-      - POSTGRESQL_PASSWORD=${POSTGRESQL_PASSWORD}
+      # This image reads POSTGRES_PASSWORD; the compose variable keeps its name
+      # so .env.docker and DATABASE_URL above are unchanged.
+      - POSTGRES_PASSWORD=${POSTGRESQL_PASSWORD}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
