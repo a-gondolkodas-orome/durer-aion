@@ -1,3 +1,9 @@
+# syntax=docker/dockerfile:1.26.0
+# `COPY --parents` below is stable only from Dockerfile frontend 1.20 on, and
+# Docker Desktop ships an older one for a good while after a release. Naming
+# the frontend here makes BuildKit fetch it, so the build does not depend on
+# how recent the daemon's built-in version happens to be.
+
 FROM node:24.20.0
 
 WORKDIR /usr/src/app
