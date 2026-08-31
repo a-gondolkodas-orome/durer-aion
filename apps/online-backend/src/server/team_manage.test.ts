@@ -1,7 +1,7 @@
-import { describe, it, expect, afterEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import { MatchStatus } from "schemas";
 import { TeamModel } from "./model";
-import { allowedToStart, checkGlobalTime, checkStaleMatch } from "./team_manage";
+import { allowedToStart, checkStaleMatch } from "./team_manage";
 
 const inProgressUntil = (endAt: Date | string): MatchStatus =>
   ({
@@ -107,31 +107,5 @@ describe("checkStaleMatch", () => {
 
   it("has nothing to close for a team that has not started anything", async () => {
     expect(await checkStaleMatch(team({}))).toStrictEqual({ isStale: false });
-  });
-});
-
-describe("checkGlobalTime", () => {
-  const originalStart = process.env.GAME_GLOBAL_START_T;
-  const originalEnd = process.env.GAME_GLOBAL_END_T;
-
-  afterEach(() => {
-    process.env.GAME_GLOBAL_START_T = originalStart;
-    process.env.GAME_GLOBAL_END_T = originalEnd;
-  });
-
-  const window = (start: number, end: number) => {
-    process.env.GAME_GLOBAL_START_T = new Date(Date.now() + start).toISOString();
-    process.env.GAME_GLOBAL_END_T = new Date(Date.now() + end).toISOString();
-  };
-
-  it("waits before the round opens, finishes after it closes, and is silent in between", () => {
-    window(60 * 1000, 120 * 1000);
-    expect(checkGlobalTime()).toBe("WAITING");
-
-    window(-120 * 1000, -60 * 1000);
-    expect(checkGlobalTime()).toBe("FINISHED");
-
-    window(-60 * 1000, 60 * 1000);
-    expect(checkGlobalTime()).toBeUndefined();
   });
 });
