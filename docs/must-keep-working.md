@@ -16,15 +16,23 @@ below.
 
 ## Online competition round
 
-- Team login by join code; disclaimer → chooser flow.
+- Team login by join code; disclaimer → chooser flow. *(The session half —
+  a join code loading its team, and a logout dropping the saved match with it —
+  is covered by `user-model.test.ts`.)*
 - A team can start, play and finish a **strategy** match against the server
   bot, in both test and live mode, with role choice, streak scoring and the
   30-minute countdown.
 - A team can start, play and finish a **relay** match: problems are served,
   answers accepted with 3 tries and decreasing points, on the 60-minute clock.
-- Reload or disconnect mid-match resumes without loss of state.
+  *(The round against the bot — problems served, the three tries and what each
+  is still worth — is covered by `strategy.test.ts`.)*
+- Reload or disconnect mid-match resumes without loss of state. *(The rules
+  deciding what a returning team may start, and the closing of a match whose
+  time ran out while it was away, are covered by `team_manage.test.ts`.)*
 - A second browser tab cannot corrupt a running match.
-- The clock cannot be gamed from the client.
+- The clock cannot be gamed from the client. *(Covered by
+  `gamewrapper.test.ts`: the time left is recomputed from the match's own end,
+  and only the team may poll for it.)*
 - The served online bundle contains no bot strategy — competitors must not be
   able to read the bot out of the client. *(By hand: build, then grep
   `apps/online-frontend/dist` for a string from the bot's lookup tables.)*
