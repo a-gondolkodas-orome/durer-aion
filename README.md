@@ -287,6 +287,14 @@ npm run spell-check
 Those are the six jobs in `.github/workflows/ci.yml`; `apps/strategy-practice`
 has its own two (`practice-test` and `patch-coverage`), which run from its
 directory.
+
+`npm run lint` is the whole of the lint gate: one config, `eslint.config.mjs`
+at the root, run over the whole repository. Outside `apps/strategy-practice` no
+workspace carries a `lint` script of its own, deliberately — to lint one package
+while you work in it, run `npx eslint .` from its directory. ESLint walks up to
+the root config and lints exactly that subtree, so what you see there is what CI
+sees.
+
 `npm run spell-check` checks English and Hungarian alike (via
 `@cspell/dict-hu-hu`, with both British and American spellings accepted),
 past competition problem text included — the same config the VS Code Code
