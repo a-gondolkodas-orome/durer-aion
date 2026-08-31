@@ -2,10 +2,10 @@ name: CI:practice
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
-    # apps/strategy-practice has its own ESLint config, vitest suite and Vite build, so most of
+    # apps/strategy-practice has its own vitest suite, Vite build and coverage gate, so most of
     # the monorepo cannot change what these jobs measure — but its dependencies resolve through
-    # the root lockfile, so that counts too. ci.yml covers the rest and carries no paths filter,
-    # so every PR still gets a gate.
+    # the root lockfile, so that counts too. Lint is not among them: one root `eslint .` covers
+    # this app through its own eslint.config.js, and ci.yml runs it on every PR.
     paths:
       - 'apps/strategy-practice/**'
       # The engine and games packages are this app's code, moved out (PRs 1.2a and 1.4):
@@ -58,9 +58,6 @@ jobs:
       - name: Check tool versions
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: npm run check:versions
-      - name: Lint
-        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
-        run: npm run lint
       - name: Typecheck
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: npm run typecheck

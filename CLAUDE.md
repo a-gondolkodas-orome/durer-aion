@@ -33,10 +33,13 @@ competition round, not a practice site.
 **`apps/strategy-practice` is a workspace, but not like the others.** One root `npm ci`
 installs it, and turbo builds and typechecks it with everything else — but it
 keeps its own `eslint.config.js`, its own vitest setup and its own CI workflow.
-So the root's `npm run lint` and `npm test` still skip it, and its checks run
-from `apps/strategy-practice`. What that ESLint config differs on is the *rule
-set* — `@eslint-react`, react-hooks, and a stylistic dialect (no trailing comma,
-single quotes, `max-len` 120) the root does not impose. It is not a second
+`npm test` at the root still skips it — `npm run lint` does not. ESLint resolves
+a config per directory as it walks, so one `eslint .` at the root lints this app
+through *its* config and everything else through the root one, in one pass; only
+the unit tests still run from `apps/strategy-practice`. What that ESLint config
+differs on is the *rule set* — `@eslint-react`, react-hooks, and a stylistic
+dialect (no trailing comma, single quotes, `max-len` 120) the root does not
+impose. It is not a second
 toolchain: eslint, typescript and vitest are pinned to the same versions as the
 root and npm hoists them, its own plugins included. It came in as a subtree
 merge from `durer-jatekok` with that dialect already set, and reconciling the
@@ -122,9 +125,10 @@ npm run i18n:check
 npm run spell-check
 ```
 
-`npm ci`, `npm run build`, `npm run typecheck` and `npm run spell-check` cover
-`apps/strategy-practice` too; `npm run lint` and `npm test` do not — *Project Structure* above says why. Its
-checks run from that directory, with no install of their own:
+`npm ci`, `npm run lint`, `npm run build`, `npm run typecheck` and
+`npm run spell-check` cover `apps/strategy-practice` too; `npm test` does not —
+*Project Structure* above says why. Its remaining checks run from that
+directory, with no install of their own:
 
 ```bash
 npm run dev:strategy-practice                     # from the root; it is a workspace

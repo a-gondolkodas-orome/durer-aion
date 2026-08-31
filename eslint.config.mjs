@@ -64,7 +64,7 @@ export default defineConfig(
   // packages/engine and packages/games are apps/strategy-practice code moved out of it, still
   // written in that app's dialect and composing its types. Two rules of this config
   // disagree with the conventions that code follows, and rewriting it would turn a move
-  // into a rewrite — they stay off here until the two ESLint setups are unified.
+  // into a rewrite — they stay off here until the two rule sets are unified.
   {
     files: [
       'packages/engine/**/*.{ts,tsx}',
@@ -125,12 +125,6 @@ export default defineConfig(
       '**/dist/**',
       '**/build/**',
       '**/node_modules/**',
-      // apps/strategy-practice has its own rule set — @eslint-react, react-hooks,
-      // and a stylistic dialect this config does not impose — so it is linted by
-      // its own eslint.config.js, through its own `npm run lint`. Not a second
-      // toolchain: eslint and typescript are pinned to the versions here, and
-      // npm hoists both. CLAUDE.md § Project Structure owns the split.
-      'apps/strategy-practice/**',
       // Hand-written pages the deploy copies verbatim, with no build step. See pages/README.md.
       'pages/**',
       // The assembled Pages artifact `npm run site:build` writes: every app's built

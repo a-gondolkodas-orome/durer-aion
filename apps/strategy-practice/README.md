@@ -68,7 +68,7 @@ The hook lives at the repository root because only the root
 
 ```bash
 npm run dev              # compiles and hot-reloads for development
-npm run test             # lint, typecheck and unit tests, as GitHub Actions runs them
+npm run test             # lint, typecheck and unit tests in one go (CI splits them across jobs)
 npm run lint:fix         # auto-fix simple formatting errors such as trailing spaces
 npm run build            # prod build — some problems only appear here
 

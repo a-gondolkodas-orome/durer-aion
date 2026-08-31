@@ -256,9 +256,9 @@ Its vite config binds all interfaces and pins port 8012, so it forwards out of
 the dev container with no extra setup, and does not collide with the 5173 the
 other frontends share.
 
-`npm ci`, `npm run build` and `npm run typecheck` at the root cover it, but its
-own ESLint config and vitest setup mean the root's `npm run lint` and `npm test`
-skip it — a different rule set, not a different toolchain;
+`npm ci`, `npm run lint`, `npm run build` and `npm run typecheck` at the root
+cover it — the lint through its own config, which ESLint picks up as it walks
+into the directory. Only `npm test` skips it, its vitest setup being its own;
 [`CLAUDE.md`](CLAUDE.md) § Project Structure has the why. Its suite runs from anywhere by naming the workspace:
 
 ```bash
@@ -289,12 +289,13 @@ Those are the six jobs in `.github/workflows/ci.yml`; `apps/strategy-practice`
 has its own two (`practice-test` and `patch-coverage`), which run from its
 directory.
 
-`npm run lint` is the whole of the lint gate: one config, `eslint.config.mjs`
-at the root, run over the whole repository. Outside `apps/strategy-practice` no
-workspace carries a `lint` script of its own, deliberately — to lint one package
-while you work in it, run `npx eslint .` from its directory. ESLint walks up to
-the root config and lints exactly that subtree, so what you see there is what CI
-sees.
+`npm run lint` is the whole of the lint gate, `apps/strategy-practice` included:
+ESLint resolves a config per directory as it walks, so that app is checked
+against its own `eslint.config.js` and everything else against the root
+`eslint.config.mjs`, in one pass. No workspace carries a `lint` script of its
+own — to lint one package while you work in it, run `npx eslint .` from its
+directory and you get exactly that subtree, under whichever config governs it.
+What you see there is what CI sees.
 
 `npm run spell-check` checks English and Hungarian alike (via
 `@cspell/dict-hu-hu`, with both British and American spellings accepted),
