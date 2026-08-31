@@ -18,7 +18,7 @@ export const getRectangleAt = (grid: Grid, sr: number, sc: number): Rect | null 
   if (!grid[sr]?.[sc]) return null;
   let minR = sr, maxR = sr, minC = sc, maxC = sc;
   const seen = new Set<string>([`${sr},${sc}`]);
-  const stack: Array<[number, number]> = [[sr, sc]];
+  const stack: [number, number][] = [[sr, sc]];
   while (stack.length) {
     const [r, c] = stack.pop()!;
     minR = Math.min(minR, r); maxR = Math.max(maxR, r);

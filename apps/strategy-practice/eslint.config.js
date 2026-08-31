@@ -1,4 +1,6 @@
 import js from '@eslint/js';
+import { defineConfig } from 'eslint/config';
+import tseslint from 'typescript-eslint';
 import reactPlugin from '@eslint-react/eslint-plugin';
 import reactHooks from 'eslint-plugin-react-hooks';
 import tsParser from '@typescript-eslint/parser';
@@ -31,7 +33,26 @@ const layout = {
   'array-element-newline': ['error', 'consistent']
 };
 
-export default [
+export default defineConfig(
+  // The same four presets the root eslint.config.mjs extends. Until these were
+  // added this app ran 27 rules to the root's 97, and the missing 70 were not
+  // dialect: no-fallthrough, no-dupe-else-if, no-invalid-regexp and the rest of
+  // the baseline never ran over the game logic, which is the code where a wrong
+  // branch decides a competition.
+  {
+    files: ['src/**/*.{ts,tsx}'],
+    extends: [
+      js.configs.recommended,
+      tseslint.configs.recommended,
+      tseslint.configs.stylistic,
+      tseslint.configs.strict
+    ],
+    // See the matching note in the root eslint.config.mjs: with both configs in
+    // one process this has to be named rather than inferred.
+    languageOptions: {
+      parserOptions: { tsconfigRootDir: import.meta.dirname }
+    }
+  },
   {
     files: ['src/**/*.{ts,tsx}'],
     plugins: { 'react-hooks': reactHooks },
@@ -73,6 +94,18 @@ export default [
         caughtErrorsIgnorePattern: '^_'
       }],
       '@typescript-eslint/consistent-type-imports': 'error',
+      // 448 of them, across 175 files: this code leans on `!` to say "the rules
+      // guarantee this square is on the board", and each one is a judgement about
+      // what the right guard would be rather than a mechanical edit. The root
+      // config already turns this rule off for packages/engine and packages/games
+      // — this app's code, moved out — so leaving it on here is what would be
+      // inconsistent. Turning it on is a project of its own.
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      // Off here for the same reason the root config turns it off for
+      // packages/engine and packages/games — this app's code, moved out, in this
+      // app's dialect. 78 violations, every one mechanically fixable; the next
+      // commit fixes all three workspaces and removes both exemptions.
+      '@typescript-eslint/consistent-type-definitions': 'off',
       // The same type-aware rules as the root eslint.config.mjs, kept in step
       // with it — this config lints what that one skips.
       // An object interpolated into a string prints `[object Object]`, which is
@@ -141,7 +174,13 @@ export default [
   {
     // test files may contain nicely formatted arrays such as for tictactoe
     files: ['src/**/*spec.{ts,tsx}'],
-    rules: { 'array-element-newline': 'off' }
+    rules: {
+      'array-element-newline': 'off',
+      // `() => {}` as a prop or a stubbed DOM method is a test double saying "this
+      // is never called, and if it is, do nothing" — which is the assertion. In
+      // application code an empty function is a hole; here it is the point.
+      '@typescript-eslint/no-empty-function': 'off'
+    }
   },
   // This app's own JavaScript: the Vite config, this config, the repo scripts and
   // the skill driver. None of the blocks above reach it — they are all src/*.ts(x)
@@ -192,4 +231,4 @@ export default [
   {
     ignores: ['dist/**', 'coverage/**']
   }
-];
+);

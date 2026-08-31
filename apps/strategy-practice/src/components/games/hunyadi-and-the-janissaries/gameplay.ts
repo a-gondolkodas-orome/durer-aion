@@ -10,7 +10,7 @@ export const generateStartBoard = (): Board => {
   // one, biased towards boards with more soldiers so the game lasts more than a
   // single step.
   const rowCount = 5;
-  let board: SoldierColor[][] = [];
+  const board: SoldierColor[][] = [];
   // Complexity score: a soldier counts for more the closer to the castle it
   // starts. The threshold below rejects boards that would be over too quickly.
   let totalScore = 0;

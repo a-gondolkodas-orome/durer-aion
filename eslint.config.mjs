@@ -14,6 +14,13 @@ export default defineConfig(
       tseslint.configs.stylistic,
       tseslint.configs.strict,
     ],
+    // Pinned, not inferred. One `eslint .` loads this config and
+    // apps/strategy-practice's in the same process, so typescript-eslint sees two
+    // candidate roots and refuses to guess — even for the files here that no
+    // type-aware rule touches. Both configs name their own root explicitly.
+    languageOptions: {
+      parserOptions: { tsconfigRootDir: import.meta.dirname },
+    },
   },
   // Type-aware linting for source TypeScript files
   {
