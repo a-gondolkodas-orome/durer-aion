@@ -126,9 +126,11 @@ export default defineConfig(
       '**/build/**',
       '**/node_modules/**',
       '**/*.config.{js,mjs,cjs,ts,mts}',
-      // apps/strategy-practice is linted by its own eslint config, through its
-      // own `npm run lint` — it keeps its own ESLint version and plugins (npm
-      // nests them), which this config's flat resolution would not find.
+      // apps/strategy-practice has its own rule set — @eslint-react, react-hooks,
+      // and a stylistic dialect this config does not impose — so it is linted by
+      // its own eslint.config.js, through its own `npm run lint`. Not a second
+      // toolchain: eslint and typescript are pinned to the versions here, and
+      // npm hoists both. CLAUDE.md § Project Structure owns the split.
       'apps/strategy-practice/**',
       // Hand-written pages the deploy copies verbatim, with no build step. See pages/README.md.
       'pages/**',

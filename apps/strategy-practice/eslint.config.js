@@ -24,7 +24,7 @@ export default [
       'no-duplicate-imports': 'error',
       'no-multiple-empty-lines': ['error', { max: 2 }],
       'no-trailing-spaces': 'error',
-      'no-var': 'warn',
+      'no-var': 'error',
       'object-curly-newline': ['error', { 'consistent': true }],
       'object-property-newline': ['error', { 'allowAllPropertiesOnSameLine': true }],
       'quotes': ['error', 'single', { avoidEscape: true, allowTemplateLiterals: true }],

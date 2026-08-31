@@ -257,8 +257,9 @@ the dev container with no extra setup, and does not collide with the 5173 the
 other frontends share.
 
 `npm ci`, `npm run build` and `npm run typecheck` at the root cover it, but its
-own ESLint and vitest setups mean the root's `npm run lint` and `npm test` skip
-it. Its suite runs from anywhere by naming the workspace:
+own ESLint config and vitest setup mean the root's `npm run lint` and `npm test`
+skip it — a different rule set, not a different toolchain;
+[`CLAUDE.md`](CLAUDE.md) § Project Structure has the why. Its suite runs from anywhere by naming the workspace:
 
 ```bash
 npm test --workspace=strategy-practice   # version check, lint, typecheck, unit
@@ -336,9 +337,9 @@ dependencies, every action pinned in `.github/workflows/`, and each `.nvmrc`.
 — it asks the registry directly rather than shelling out to `npm outdated`.
 
 A row is one *upgrade*, not one package. The same name pinned at two versions is
-two rows, because `apps/strategy-practice` has deliberately run ahead of the rest
-on eslint, vite and typescript; the `written down in` column lists every file the
-bump has to touch, which is the honest measure of how big it is.
+two rows rather than one reporting a version it is not; the `written down in`
+column lists every file the bump has to touch, which is the honest measure of
+how big it is.
 
 The report opens no pull requests — upgrading stays deliberate, majors one at a
 time as in

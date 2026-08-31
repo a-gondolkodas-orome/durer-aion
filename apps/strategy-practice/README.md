@@ -256,8 +256,9 @@ For an example of internationalizing an existing game, see
 The monthly report covers this app along with the rest of the monorepo, and the
 root [`README.md`](../../README.md) § Dependency updates is the authority on it.
 This app appears in its own rows rather than the shared ones wherever it runs
-ahead — eslint, vite, typescript and its own `.nvmrc` are all pinned here, not at
-the root.
+ahead. Its eslint, typescript and vitest pins match the root's and its vite
+matches the other frontends'; `.nvmrc` is the one version still written down
+here and nowhere else.
 
 `playwright` is the one dependency pinned exactly, deliberately: the devcontainer
 image bakes browser binaries for one specific version, so an incidental bump

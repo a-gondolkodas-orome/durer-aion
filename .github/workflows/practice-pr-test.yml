@@ -2,9 +2,9 @@ name: CI:practice
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
-    # apps/strategy-practice keeps its own ESLint, TypeScript and Vite, so most of the monorepo
-    # cannot change what these jobs measure — but its dependencies now resolve through the
-    # root lockfile, so that counts too. ci.yml covers the rest and carries no paths filter,
+    # apps/strategy-practice has its own ESLint config, vitest suite and Vite build, so most of
+    # the monorepo cannot change what these jobs measure — but its dependencies resolve through
+    # the root lockfile, so that counts too. ci.yml covers the rest and carries no paths filter,
     # so every PR still gets a gate.
     paths:
       - 'apps/strategy-practice/**'

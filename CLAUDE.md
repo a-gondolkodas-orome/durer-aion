@@ -32,10 +32,16 @@ competition round, not a practice site.
 
 **`apps/strategy-practice` is a workspace, but not like the others.** One root `npm ci`
 installs it, and turbo builds and typechecks it with everything else — but it
-keeps its own ESLint, TypeScript and Vite versions (npm nests them), its own
-`eslint.config.js`, its own vitest setup and its own CI workflow. So the root's
-`npm run lint` and `npm test` still skip it, and its checks run from
-`apps/strategy-practice`. Its own [`AGENTS.md`](apps/strategy-practice/AGENTS.md) loads
+keeps its own `eslint.config.js`, its own vitest setup and its own CI workflow.
+So the root's `npm run lint` and `npm test` still skip it, and its checks run
+from `apps/strategy-practice`. What that ESLint config differs on is the *rule
+set* — `@eslint-react`, react-hooks, and a stylistic dialect (no trailing comma,
+single quotes, `max-len` 120) the root does not impose. It is not a second
+toolchain: eslint, typescript and vitest are pinned to the same versions as the
+root and npm hoists them, its own plugins included. It came in as a subtree
+merge from `durer-jatekok` with that dialect already set, and reconciling the
+two would be a rewrite rather than a merge — so the two configs stay, and
+ESLint applies each where it belongs. Its own [`AGENTS.md`](apps/strategy-practice/AGENTS.md) loads
 automatically when you work under that directory and is the authority on
 everything inside it — memory files nest by directory; settings do not.
 
@@ -66,8 +72,10 @@ regression checklist every change is measured against.
 - **Testing**: vitest, React Testing Library. Suites are `*.test.ts(x)` under
   the root config and `*.spec.ts(x)` in `apps/strategy-practice`; both run through
   vitest, and neither uses Jest.
-- **`apps/strategy-practice`** is on the same React major but its own Vite/TS/ESLint
-  versions, plus Tailwind. See its `package.json` rather than assuming this one's.
+- **`apps/strategy-practice`** shares this React major, the root's eslint,
+  typescript and vitest pins, and the same vite as the other frontends;
+  Tailwind and its own build/test setup are what set it apart. See its
+  `package.json` rather than assuming this one's.
 
 ## Development Commands
 

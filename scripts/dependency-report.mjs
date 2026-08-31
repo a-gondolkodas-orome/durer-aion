@@ -76,9 +76,9 @@ export const workspaces = () => {
 };
 
 const npmRows = () => {
-  // Keyed by package *and* installed version, not by name: apps/strategy-practice deliberately runs
-  // ahead of the rest on eslint, vite and typescript, and one row per name would report one of the
-  // two versions as if it were both. Two upgrades, two rows — and `where` says which is which.
+  // Keyed by package *and* installed version, not by name: a workspace is free to pin a version
+  // the others have not taken yet, and one row per name would report one of the two versions as
+  // if it were both. Two upgrades, two rows — and `where` says which is which.
   const rows = new Map();
 
   for (const workspace of workspaces()) {
