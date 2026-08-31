@@ -8,12 +8,12 @@ const chipBase = 'rounded-full drop-shadow-sm px-2 py-0.5 whitespace-nowrap bg-s
 // chip and the icon badge; both adapt to dark mode. E/E+ carry `text-white`, so
 // a `currentColor` icon placed on them turns white automatically.
 const categoryColorClass: Record<Category, string> = {
-  'A':  'bg-green-200 dark:bg-green-700',
+  'A':  'bg-emerald-200 dark:bg-emerald-700',
   'B':  'bg-teal-300 dark:bg-teal-700',
-  'C':  'bg-blue-300 dark:bg-blue-700',
-  'D':  'bg-blue-400 dark:bg-blue-600',
-  'E':  'bg-blue-600 text-white',
-  'E+': 'bg-blue-800 text-white'
+  'C':  'bg-red-300 dark:bg-red-700',
+  'D':  'bg-red-400 dark:bg-red-600',
+  'E':  'bg-red-600 text-white dark:bg-red-700',
+  'E+': 'bg-red-800 text-white'
 };
 
 
@@ -32,8 +32,8 @@ export const GameCard = ({ gameId, gameProps }: { gameId: string; gameProps: Gam
     data-testid="game-card"
     className={`
       rounded-lg border p-1 sm:p-2 max-w-[20ch] sm:max-w-[32ch] w-full flex flex-col items-center
-      cursor-pointer hocus:bg-blue-50 dark:hocus:bg-blue-950 hocus:border-blue-400
-      no-underline text-inherit
+      cursor-pointer hocus:bg-red-50 dark:hocus:bg-red-950/30 hocus:border-red-400 hocus:shadow-md
+      no-underline text-inherit transition-all
     `}
   >
     <span
