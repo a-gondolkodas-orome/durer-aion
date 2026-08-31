@@ -28,13 +28,13 @@ export const MyGameWrapper = function (category: "C" | "D") {
     },
 
     moves: {
-      removeNumber: ({G, ctx, playerID, events }, choosenNumber: number) => {
-        if( choosenNumber<=0 || choosenNumber>G.numbersOnTable.length || !G.numbersOnTable[choosenNumber-1] || (choosenNumber % G.previousMove !== 0 && G.previousMove % choosenNumber !== 0) ) {
+      removeNumber: ({G, ctx, playerID, events }, chosenNumber: number) => {
+        if( chosenNumber<=0 || chosenNumber>G.numbersOnTable.length || !G.numbersOnTable[chosenNumber-1] || (chosenNumber % G.previousMove !== 0 && G.previousMove % chosenNumber !== 0) ) {
           return INVALID_MOVE;
         }
 
-        G.numbersOnTable[choosenNumber-1] = false;
-        G.previousMove = choosenNumber;
+        G.numbersOnTable[chosenNumber-1] = false;
+        G.previousMove = chosenNumber;
 
         const isGameEnd = MyGame.possibleMoves(G, ctx, playerID as PlayerIDType).length === 0;
 

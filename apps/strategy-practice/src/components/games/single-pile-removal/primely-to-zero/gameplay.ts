@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 import { range, sample } from 'lodash';
 
 export type Board = number
@@ -19,15 +19,15 @@ const isMoveValid = (board: Board, target: number): boolean => {
 
 export const moves = {
   moveTo: {
-    validate: (board: Board, _, target: number) => isMoveValid(board, target),
-    apply: (_board: Board, { ctx }: { ctx: Ctx }, target: number): MoveOutcome<Board> => {
+    validate: (board, _, target: number) => isMoveValid(board, target),
+    apply: (_board, { ctx }, target: number): MoveOutcome<Board> => {
       if (target === 0) {
         return { nextBoard: target, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }
       return { nextBoard: target, isTurnEnd: true };
     }
   }
-};
+} satisfies MoveDefs<Board>;
 
 export type Moves = typeof moves;
 

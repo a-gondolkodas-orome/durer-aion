@@ -37,7 +37,11 @@ export default [
     files: ['src/**/*.{ts,tsx}'],
     plugins: { '@typescript-eslint': tsPlugin },
     languageOptions: {
-      parser: tsParser
+      parser: tsParser,
+      parserOptions: {
+        project: true,
+        tsconfigRootDir: import.meta.dirname
+      }
     },
     rules: {
       'no-unused-vars': 'off',
@@ -52,6 +56,31 @@ export default [
         caughtErrorsIgnorePattern: '^_'
       }],
       '@typescript-eslint/consistent-type-imports': 'error',
+      // The same type-aware rules as the root eslint.config.mjs, kept in step
+      // with it — this config lints what that one skips.
+      // An object interpolated into a string prints `[object Object]`, which is
+      // never what the message meant to say.
+      '@typescript-eslint/no-base-to-string': 'error',
+      // A promise nobody waits for: the caller reports success before the work has
+      // landed, and a failure surfaces only as an unhandled rejection.
+      '@typescript-eslint/no-floating-promises': 'error',
+      // `for…in` over an array walks its keys as strings, and its own properties
+      // too. No violations today; this keeps it that way.
+      '@typescript-eslint/no-for-in-array': 'error',
+      // A deprecated API still compiles; this is the only thing that says so before
+      // the removal lands.
+      '@typescript-eslint/no-deprecated': 'error',
+      // An async function handed to something that ignores what it returns: React
+      // event handlers, addEventListener, Array.forEach. The await never happens.
+      '@typescript-eslint/no-misused-promises': 'error',
+      // A type assertion the compiler already knows is redundant. Deleting them is
+      // what keeps the ones that remain worth reading: a stray `!` is where a null
+      // dereference hides.
+      '@typescript-eslint/no-unnecessary-type-assertion': 'error',
+      // A catch callback's parameter is implicitly `any`, so reading `.message` off
+      // it yields undefined for anything that is not an Error — and the UI shows an
+      // empty error where the reason should be.
+      '@typescript-eslint/use-unknown-in-catch-callback-variable': 'error',
       'no-restricted-syntax': ['error', {
         selector: 'TSAsExpression > TSNeverKeyword.typeAnnotation',
         message: "'as never' is not allowed; use a more specific type or fix the underlying type instead."

@@ -1,4 +1,4 @@
-import type { MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 
 export type Board = { digits: number[], sumMod9: number }
 
@@ -10,9 +10,9 @@ export const moves = {
     // Only one of the six offered digits may be appended, and only while the
     // number is still short of its ten digits. Both players draw from the same
     // six, so whose turn it is does not enter into legality.
-    validate: (board: Board, _, digit: number) =>
+    validate: (board, _, digit: number) =>
       board.digits.length < totalDigits && availableDigits.includes(digit),
-    apply: (board: Board, _, digit: number): MoveOutcome<Board> => {
+    apply: (board, _, digit: number): MoveOutcome<Board> => {
       const newDigits = [...board.digits, digit];
       const newSumMod9 = (board.sumMod9 + digit) % 9;
       const nextBoard = { digits: newDigits, sumMod9: newSumMod9 };
@@ -22,6 +22,6 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-};
+} satisfies MoveDefs<Board>;
 
 export type Moves = typeof moves;

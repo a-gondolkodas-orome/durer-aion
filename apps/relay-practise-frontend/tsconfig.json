@@ -1,0 +1,49 @@
+{
+  "ts-node": {
+    "compilerOptions": {
+        "module": "CommonJS"
+    }
+  },
+  "compilerOptions": {
+    "allowJs": false,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "noEmit": true,
+    "noFallthroughCasesInSwitch": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "ESNext",
+    "types": ["vite/client"],
+    "paths": {
+      "game": ["../../packages/game"],
+      "strategy": ["../../packages/strategy"],
+      "schemas": ["../../packages/schemas"],
+      "common-frontend": ["../../packages/common-frontend"]
+    }
+  },
+  "include": [
+    "src",
+    "../../packages/*/src",
+    "../../packages/*/index.d.ts", 
+    "../../packages/*/index.ts"
+  ],
+  // Same reason as apps/offline-frontend's, whose tsconfig this one was copied from:
+  // this app typechecks every package's src, so it also has to skip every package's
+  // suites, and a `**/` pattern never reaches up into packages/.
+  "exclude": [
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/__tests__/**",
+    "../../packages/*/src/**/*.test.ts",
+    "../../packages/*/src/**/*.test.tsx",
+    "../../packages/*/src/**/*.spec.ts",
+    "../../packages/*/src/**/*.spec.tsx"
+  ]
+}

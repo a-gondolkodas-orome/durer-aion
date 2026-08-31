@@ -11,7 +11,7 @@
     "isolatedModules": true,
     "module": "ESNext",
     "target": "ES6",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "preserveWatchOutput": true,

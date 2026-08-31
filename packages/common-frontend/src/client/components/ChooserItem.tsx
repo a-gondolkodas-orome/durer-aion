@@ -1,6 +1,6 @@
 import { Button } from '@mui/material';
 import { Stack, alpha } from '@mui/system';
-import { MatchStatus, FinishedMatchStatus } from '../dto/TeamStateDto';
+import { MatchStatus } from '../dto/TeamStateDto';
 import { useStartRelay, useStartStrategy } from '../hooks/user-hooks';
 import { formatTime } from '../utils/DateFormatter';
 import { useState } from 'react';
@@ -75,7 +75,7 @@ export function ChooserItem(props: {
             md: 0,
           }
         }}>
-          {t('chooser.filledAt')}: {formatTime((props.status as FinishedMatchStatus).startAt)} - {formatTime((props.status as FinishedMatchStatus).endAt)} {t('chooser.achievedPoint')}: {(props.status as FinishedMatchStatus).score}
+          {t('chooser.filledAt')}: {formatTime(props.status.startAt)} - {formatTime(props.status.endAt)} {t('chooser.achievedPoint')}: {props.status.score}
         </Stack>
       }
       {props.type === 'relay' &&
@@ -141,9 +141,9 @@ export function ChooserItem(props: {
         textTransform: 'none',
       }} variant='contained' color='primary' onClick={()=>{
         if (props.type === "relay") {
-          startRelay()
+          void startRelay()
         } else {
-          startStrategy()
+          void startStrategy()
         }
       }} disabled={props.status.state !== "NOT STARTED"}>
         {t('chooser.start')}

@@ -16,15 +16,26 @@ below.
 
 ## Online competition round
 
-- Team login by join code; disclaimer → chooser flow.
+- Team login by join code; disclaimer → chooser flow. *(The session half —
+  a join code loading its team, and a logout dropping the saved match with it —
+  is covered by `user-model.test.ts`.)*
 - A team can start, play and finish a **strategy** match against the server
   bot, in both test and live mode, with role choice, streak scoring and the
   30-minute countdown.
 - A team can start, play and finish a **relay** match: problems are served,
   answers accepted with 3 tries and decreasing points, on the 60-minute clock.
-- Reload or disconnect mid-match resumes without loss of state.
+  *(The round against the bot — problems served, the three tries and what each
+  is still worth — is covered by `strategy.test.ts`.)*
+- Reload or disconnect mid-match resumes without loss of state. *(The rules
+  deciding what a returning team may start, and the closing of a match whose
+  time ran out while it was away, are covered by `team_manage.test.ts`.)*
 - A second browser tab cannot corrupt a running match.
-- The clock cannot be gamed from the client.
+- The clock cannot be gamed from the client. *(Covered by
+  `gamewrapper.test.ts`: the time left is recomputed from the match's own end,
+  and only the team may poll for it.)*
+- The served online bundle contains no bot strategy — competitors must not be
+  able to read the bot out of the client. *(By hand: build, then grep
+  `apps/online-frontend/dist` for a string from the bot's lookup tables.)*
 - The final score (relay + strategy) shows on the finished screen.
 
 ## Admin / operations
@@ -42,12 +53,12 @@ below.
   serving stack, team import runs inside the container, and Sentry receives
   events.
 
-## Offline practice build
+## Offline dry-run build (`/proba-verseny/`)
 
 - The gh-pages build serves the competition games with the in-browser bot and
   localStorage persistence that survives a reload.
 
-## Practice site
+## Strategy practice site
 
 *(Applies from the subtree merge in PR 0.2 on, when durer-jatekok became a
 workspace — `apps/practice` then, `apps/strategy-practice` since the rename.)*
@@ -57,16 +68,25 @@ workspace — `apps/practice` then, `apps/strategy-practice` since the rename.)*
 - Its existing CI gates — lint, typecheck, unit tests, patch coverage — stay
   green.
 
+## Relay practice site
+
+*(Applies from #224, which replaced the frozen 2023 build at `/valto/` with
+`apps/relay-practise-frontend`.)*
+
+- `/valto/` on the Pages site serves the relay practice: pick a past year's
+  problem set and play it through against the in-browser bot, with
+  localStorage persistence that survives a reload.
+
 ## Competition secrecy flow
 
-See the plan's "Competition secrecy: the yearly private-repo flow" section for
-why this matters.
+See `README.md`, under *Competition secrecy*, for why this matters.
 
 - Pushing a `sync-*` branch mirrors it into the year's private repo
   (`sync.yml`).
 - A competition game can be developed and deployed from the private repo with
   zero trace in the public repo.
-- The post-competition merge-back PR publishes that game as a practice game.
+- The post-competition merge-back PR publishes that game as a strategy
+  practice game.
 
 ## Developer workflows
 
@@ -74,8 +94,8 @@ why this matters.
 tooling arrives alongside the existing setup, not instead of it.)*
 
 - `npm ci` at the repo root installs everything.
-- `npm run dev:server`, `npm run dev:online`, `npm run dev:offline` start what
-  they say they start.
+- `npm run dev:server`, `npm run dev:online`, `npm run dev:offline` and
+  `npm run dev:relay-practice` start what they say they start.
 - `npm run setup` seeds every env file the README expects, and overwrites none.
 - The docker-compose dev flow from the README works — `npm run stack:up` then
   `npm run teams:import` — backend auto-reload included.

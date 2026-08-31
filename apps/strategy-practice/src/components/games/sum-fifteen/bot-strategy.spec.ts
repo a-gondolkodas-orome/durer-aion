@@ -32,7 +32,7 @@ const playSmartBotVsRandom = (botPlayer: 0 | 1, rng: () => number): 0 | 1 => {
     const move = cp === botPlayer
       ? chooseSmartMove(owner, cp)
       : freeNumbers(owner)[Math.floor(rng() * freeNumbers(owner).length)];
-    owner = owner.slice() as Owner;
+    owner = owner.slice();
     owner[move - 1] = cp;
     if (hasSum15(numbersOwnedBy(owner, cp))) return cp;
     if (owner.every(o => o !== null)) return 1;

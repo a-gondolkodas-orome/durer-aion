@@ -12,7 +12,7 @@ export function Strategy(props: { state: TeamModelDto }) {
     case "FINISHED":
     case "IN PROGRESS":
       return (
-        <div data-testId={testId}>
+        <div data-testid={testId}>
          {StrategyClient ? <Suspense fallback={<div>{t('general.loading')}</div>}>
             <StrategyClient
               category={props.state.category as "C" | "D" | "E"}
@@ -24,6 +24,6 @@ export function Strategy(props: { state: TeamModelDto }) {
       );
     case "NOT STARTED":
     default:
-      return <div data-testId={testId}>{t('strategy.notSupported')}</div>;
+      return <div data-testid={testId}>{t('strategy.notSupported')}</div>;
   }
 }

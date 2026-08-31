@@ -1,4 +1,4 @@
-import type { MoveOutcome, Ctx } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 import { some, range, groupBy, cloneDeep } from 'lodash';
 import { hasWinningSubset, type Board, validatePlacement } from '../gameplay';
 
@@ -24,7 +24,7 @@ export const hasFirstPlayerWon = (board: Board) => {
 export const moves = {
   placePiece: {
     validate: validatePlacement,
-    apply: (board: Board, { ctx }: { ctx: Ctx }, id: number): MoveOutcome<Board> => {
+    apply: (board, { ctx }, id: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard[id] = ctx.currentPlayer === 0 ? 'red' : 'blue';
       if (isGameEnd(nextBoard)) {
@@ -33,6 +33,6 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-}
+} satisfies MoveDefs<Board>
 
 export type Moves = typeof moves;

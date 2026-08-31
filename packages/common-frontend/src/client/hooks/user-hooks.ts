@@ -22,6 +22,9 @@ export const LoadTeamState = () => {
           .getTeamState()
           .then(teamState => {
             setTeamState(teamState);
+          })
+          .catch((e: unknown) => {
+            console.error("could not load the team state", e);
           });
 
       
@@ -68,7 +71,7 @@ export const useResetRelay = () => {
   const repo = useClientRepo();
   return async (teamId: string) => {
     const userModel = new UserModel(repo);
-    return await userModel.resetRealy(teamId);
+    return await userModel.resetRelay(teamId);
   };
 };
 

@@ -1,14 +1,21 @@
 import { Client } from 'boardgame.io/react';
+import type { BoardProps } from 'boardgame.io/react';
 import { SocketIO } from 'boardgame.io/multiplayer';
 import { gameWrapper, GameType } from 'game';
 import { boardWrapper } from './boardwrapper';
-import type {GameRelay} from 'game';
+import type { StrategyBoard } from './boardwrapper';
+import type { ComponentType, ReactNode } from 'react';
+import type {GameRelay, MyGameState as RelayGameState} from 'game';
+
+/// The relay board is handed straight to boardgame.io, so it sees the plain
+/// bgio props: the relay game carries its own timer instead of gameWrapper's.
+export type RelayBoard = ComponentType<BoardProps<RelayGameState>>;
 
 export function MyClient<T_SpecificGameState>(
   game: GameType<T_SpecificGameState>,
-  board: any,
-  description: string
-) { // TODO: finish types
+  board: StrategyBoard<T_SpecificGameState>,
+  description: ReactNode
+) {
   return Client({
     game: gameWrapper(game),
     board: boardWrapper(board, description),
@@ -18,9 +25,9 @@ export function MyClient<T_SpecificGameState>(
 
 export function MyClientRelay(
   game: typeof GameRelay,
-  board: any,
-  _description: string
-) { // TODO: finish types
+  board: RelayBoard,
+  _description: ReactNode
+) {
   return Client({
     game: game,
     board: board,
@@ -28,10 +35,10 @@ export function MyClientRelay(
   });
 }
 
-export function MyOnlineClient<T_SpecificGameState >(
+export function MyOnlineClient<T_SpecificGameState>(
   game: GameType<T_SpecificGameState>,
-  board: any,
-  description: string,
+  board: StrategyBoard<T_SpecificGameState>,
+  description: ReactNode,
   serverUrl: string | undefined = undefined,
 ) {
   return Client({
@@ -45,8 +52,8 @@ export function MyOnlineClient<T_SpecificGameState >(
 
 export function MyOnlineRelayClient(
   game: typeof GameRelay,
-  board: any,
-  description: string,
+  board: RelayBoard,
+  description: ReactNode,
   serverUrl: string | undefined = undefined
 ) {
   return Client({

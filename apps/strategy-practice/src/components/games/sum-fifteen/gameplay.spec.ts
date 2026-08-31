@@ -68,7 +68,7 @@ const asPlayer = (currentPlayer: number) => ({ ctx: makeCtx({ currentPlayer }) }
 
 // `owner[n - 1]` is who holds n.
 const board = (assignments: Record<number, 0 | 1>): Board => ({
-  owner: Array(9).fill(null).map((_, i) => assignments[i + 1] ?? null) as Board['owner']
+  owner: Array(9).fill(null).map((_, i) => assignments[i + 1] ?? null)
 });
 
 describe('end of game', () => {

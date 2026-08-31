@@ -186,13 +186,22 @@ Team import has two paths and both need checking: `npm run teams:import`, which
 runs `scripts/import_teams.sh` inside the container, and the TSV upload on the
 admin page.
 
-`scripts/admin.py` is the post-competition scoring pull. Against the docker
-stack set its `BASE_URL` to `http://localhost` — the backend's port 8000 is not
-published, nginx proxies `/team` and `/game` — and `ADMIN_PASSWORD` to match
-`.env.docker`. Against `npm run dev:server` its default `http://localhost:8000`
-is right.
+`scripts/admin.py` is the post-competition scoring pull. It reads two
+environment variables and holds no credential of its own:
 
-## The offline practice build
+- `DURER_ADMIN_PASSWORD` — the backend's `ADMIN_CREDENTIALS`. Unset, the script
+  prompts for it; with no terminal to prompt on, it stops rather than sending an
+  unauthenticated request.
+- `DURER_BASE_URL` — defaults to `http://localhost:8000`, which is right against
+  `npm run dev:server`. Against the docker stack set it to `http://localhost`:
+  the backend's port 8000 is not published, nginx proxies `/team` and `/game`.
+  Production is `https://verseny.durerinfo.hu`.
+
+```bash
+DURER_BASE_URL=http://localhost python3 scripts/admin.py   # prompts for the password
+```
+
+## The offline dry run (`/proba-verseny/`)
 
 ```bash
 npm run dev:offline
@@ -200,7 +209,19 @@ npm run dev:offline
 
 `http://localhost:5173`, with no backend and no database: the games run against
 the in-browser bot and persist to localStorage. Reload mid-game to check the
-persistence.
+persistence. This is the dry run of the competition round — not to be confused
+with the two practice sites below.
+
+## The relay practice site (`apps/relay-practise-frontend`)
+
+```bash
+npm run dev:relay-practice
+```
+
+`http://localhost:5173`, again with no backend: the `/valto/` subpage of the
+Pages site, where #224 replaced the frozen 2023 build. Pick a past year's relay
+problem set and play it through against the in-browser bot, with progress in
+localStorage — reload mid-round to check it resumes.
 
 ## The public Pages site
 
@@ -211,16 +232,15 @@ npm run site:serve   # on http://localhost:4321
 
 `site:build` is the same script `.github/workflows/pages-deploy.yml` runs, so
 this is the artifact a push to `main` would publish rather than an
-approximation of it — base paths, the rebased 2023 relay build and the CNAME
-assertion included. Worth a look before merging anything that touches an app on
+approximation of it — base paths and the CNAME assertion included. Worth a look before merging anything that touches an app on
 the site, because the workflow going green *is* the cutover: there is no staging
 step between it and gyakorlo.durerinfo.hu.
 
 The one thing it cannot reproduce is the upload itself, and GitHub's own serving
-behaviour around 404s. CI builds in `node:24.11.1`; to match that too, run the
-same command under `docker run -v "$PWD":/w -w /w node:24.11.1 npm run site:build`.
+behaviour around 404s. CI builds in `node:24.20.0`; to match that too, run the
+same command under `docker run -v "$PWD":/w -w /w node:24.20.0 npm run site:build`.
 
-## The practice site (`apps/strategy-practice`)
+## The strategy practice site (`apps/strategy-practice`)
 
 The strategy-game practice site (https://gyakorlo.durerinfo.hu) lives in
 `apps/strategy-practice`, merged in from the durer-jatekok repository with its
@@ -229,12 +249,12 @@ history and renamed from `apps/practice` when the relay practice app arrived
 from the root like the other frontends:
 
 ```bash
-npm run dev:practice   # the practice site, on http://localhost:8012
+npm run dev:strategy-practice   # the strategy practice site, on http://localhost:8012
 ```
 
 Its vite config binds all interfaces and pins port 8012, so it forwards out of
 the dev container with no extra setup, and does not collide with the 5173 the
-other two frontends share.
+other frontends share.
 
 `npm ci`, `npm run build` and `npm run typecheck` at the root cover it, but its
 own ESLint and vitest setups mean the root's `npm run lint` and `npm test` skip
@@ -261,13 +281,88 @@ npm run typecheck
 npm test
 npm run build
 npm run i18n:check
+npm run spell-check
 ```
 
-Those are the five jobs in `.github/workflows/ci.yml`; `apps/strategy-practice`
+Those are the six jobs in `.github/workflows/ci.yml`; `apps/strategy-practice`
 has its own two (`practice-test` and `patch-coverage`), which run from its
 directory.
-`npm run spell-check` exists but is not one of them — it reports on the
-Hungarian problem text as well, so it is a thing to read, not a gate.
+`npm run spell-check` checks English and Hungarian alike (via
+`@cspell/dict-hu-hu`, with both British and American spellings accepted),
+past competition problem text included — the same config the VS Code Code
+Spell Checker extension reads. It covers the sources, the translation
+JSONs and every markdown file in the repository, the ones under dot
+directories included — hence the three markdown globs in the script, since
+`**/*.md` alone skips `.github/` and friends. Only `teamData.ts` (arbitrary
+team names) stays ignored as data. Vocabulary the dictionaries lack lives in three
+places: technical identifiers in `cspell.json`'s `words` list; the
+competition's own coinages and proper nouns in `hungarian-words.txt`
+(hand-curated, small); and the everyday agglutinated forms
+`@cspell/dict-hu-hu` misses in `hungarian-hunspell-words.txt`, which no
+one maintains by hand — `npm run spell-check:hu-triage` regenerates it,
+validating every word against real hunspell (needs
+`apt install hunspell hunspell-hu`) and printing whatever hunspell rejects
+for a human to fix or bless.
+
+## Dependency updates
+
+Every dependency is pinned exactly, in every workspace — `save-exact` in
+`.npmrc` keeps new ones that way — so `package.json` says what is installed and
+nothing moves without a visible diff. A package that several workspaces share
+is pinned to the same number everywhere: differing exact pins force npm to nest
+a duplicate, which some packages do not survive (the typescript note in
+[`apps/strategy-practice/package.json`](apps/strategy-practice/package.json));
+`npm ls <package>` showing one deduped install is the check. Peer dependencies
+keep ranges — they state compatibility, not an install. `package-lock.json` is
+still what `npm ci` installs, and everything here that compares a version reads
+it.
+
+`npm run update:minors` is the routine sweep: it bumps every pin to the newest
+release inside its major, across all workspaces at once, then prints what to
+run next (`npm install`, then the usual gates). It never crosses a major.
+
+`.github/workflows/dependency-report.yml` runs on the 1st of each month and
+keeps one `OPS` issue in sync with whatever is behind: every workspace's
+dependencies, every action pinned in `.github/workflows/`, and each `.nvmrc`.
+`npm run report:outdated` prints the same table on demand, and needs no install
+— it asks the registry directly rather than shelling out to `npm outdated`.
+
+A row is one *upgrade*, not one package. The same name pinned at two versions is
+two rows, because `apps/strategy-practice` has deliberately run ahead of the rest
+on eslint, vite and typescript; the `written down in` column lists every file the
+bump has to touch, which is the honest measure of how big it is.
+
+The report opens no pull requests — upgrading stays deliberate, majors one at a
+time as in
+[#168](https://github.com/a-gondolkodas-orome/durer-jatekok/issues/168). Why a
+report rather than dependabot or renovate: the header comment of
+`scripts/dependency-report.mjs`. Two versions are written down in files no
+`package.json` names — Playwright and `apps/strategy-practice`'s Node — and
+[that app's README](apps/strategy-practice/README.md#project-setup) lists where;
+`npm run check:versions --workspace=strategy-practice` fails until they agree.
+
+### Held back deliberately
+
+The report will keep listing these as behind; that is it doing its job of
+remembering. Each stays where it is until the named blocker moves (#317):
+
+- **`koa` 2 → 3**: the server's Koa app is constructed by boardgame.io, which
+  pins `koa@^2` — the backend's own `koa` entry only has to agree with the
+  instance it receives. Nothing here constructs a Koa 3 app to upgrade.
+- **`@koa/router` 10 → 15**: same shape — the backend never constructs a
+  router, it types `server.router`, boardgame.io's own `@koa/router@10`
+  instance. v15's types do not even structurally match that object.
+- **`typescript` 6.0 → 7**: `typescript-eslint` caps `typescript` at
+  `<6.1.0`, and 6.0 is the highest version inside the cap. That cap is the
+  only remaining blocker: every tsconfig is off the `node10` resolution 7.0
+  removes (`bundler` for the Vite- and tsdown-built code, `nodenext` for the
+  backend).
+- **`@types/node` 24 → 26**: not a blocker but a policy — the types track the
+  Node major the repo actually runs (`.nvmrc`), so they move when Node does.
+
+Both halves of the boardgame.io situation — why its transitive advisories
+cannot be fixed from here and why `npm audit fix --force` must never be run —
+are in [`CLAUDE.md`](CLAUDE.md).
 
 # Configuration you may want to change
 
@@ -281,6 +376,7 @@ locally and are meaningless anywhere else.
 | `apps/online-backend/.env` | the same settings for `npm run dev:server`, plus `DATABASE_URL` |
 | `apps/online-frontend/.env` | accent colour and language of the competition site |
 | `apps/offline-frontend/.env` | the same, for the offline build |
+| `apps/relay-practise-frontend/.env` | the same, for the relay practice site |
 | `.env.local` | `VITE_FEEDBACK_URL`, read by `common-frontend`'s build |
 
 Whatever reads one of them takes the change at start: vite does not pick up
@@ -315,7 +411,7 @@ When the repo is created:
 - **Set `PUBLIC_URL`** in `apps/offline-frontend/package.json` to the new repo's
   name, so the dry run's asset paths resolve.
 
-# Debugging (TODO)
+# Debugging
 VS code gives you two options to debug the application. Both of them needs some setup first, and they can't be used at the same time.
 
 Breakpoints work either on the server, or on the frontend, but not on both at the same time. See different debugging options for further references.

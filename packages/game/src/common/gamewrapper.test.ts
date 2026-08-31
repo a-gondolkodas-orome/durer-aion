@@ -1,5 +1,5 @@
-import { describe, test, beforeEach, expect, vi } from "vitest";
-import { gameWrapper } from "./gamewrapper";
+import { describe, test, afterEach, beforeEach, expect, vi } from "vitest";
+import { gameWrapper, isMakeMovePayloadReadOnly } from "./gamewrapper";
 import { Client } from "boardgame.io/client";
 import {
   createGameWithoutStartingPosition,
@@ -24,7 +24,7 @@ describe("gameWrapper", () => {
 
   test("whether client calls into wrapped setup", () => {
     Client({ game: wrappedGame, numPlayers: 2 });
-    expect(setup).toBeCalled();
+    expect(setup).toHaveBeenCalled();
   });
 
   test("whether default state is consistent", () => {
@@ -71,7 +71,7 @@ describe("gameWrapper", () => {
     });
     client.moves.move("move");
 
-    expect(move).toBeCalled();
+    expect(move).toHaveBeenCalled();
     expect(client.getState()?.G.data).toStrictEqual("move");
   });
 });
@@ -131,13 +131,43 @@ describe("gameWrapper high-level logic", () => {
 
     client.moves.win();
 
-    console.log(client.getState());
-
     expect(client.getState()?.ctx.phase).toStrictEqual(null);
     expect(client.getState()?.G.numberOfTries).toStrictEqual(2);
     expect(client.getState()?.G.numberOfLoss).toStrictEqual(0);
     expect(client.getState()?.G.winningStreak).toStrictEqual(2);
     expect(client.getState()?.G.points).toStrictEqual(12);
+  });
+
+  // The offline app persists the score from these reports (issue #168), so a
+  // play-phase exit that stops reporting silently zeroes practice scores.
+  // G is an immer draft revoked after the reducer returns, so the report's
+  // values are copied at call time — as the real consumers read them.
+  test("reports the end of each round with the current points", () => {
+    const reports: { phase: string; points: number }[] = [];
+    const client = Client({
+      game: gameWrapper(createGameWithoutStartingPosition(setup), (report) => {
+        reports.push({ phase: report.phase, points: report.G.points });
+      }),
+      numPlayers: 2,
+    });
+    client.start();
+    client.moves.chooseNewGameType("live");
+    client.moves.setStartingPosition({ data: "startingPosition" });
+    client.moves.chooseRole("0");
+
+    client.moves.win();
+
+    client.moves.chooseNewGameType("live");
+    client.moves.setStartingPosition({ data: "startingPosition" });
+    client.moves.chooseRole("0");
+
+    client.moves.win();
+
+    const endReports = reports.filter((report) => report.phase === "end");
+    expect(endReports).toStrictEqual([
+      { phase: "end", points: 0 },
+      { phase: "end", points: 12 },
+    ]);
   });
 
   test("win in test", () => {
@@ -154,5 +184,73 @@ describe("gameWrapper high-level logic", () => {
     expect(client.getState()?.G.numberOfLoss).toStrictEqual(0);
     expect(client.getState()?.G.winningStreak).toStrictEqual(0);
     expect(client.getState()?.G.points).toStrictEqual(0);
+  });
+});
+
+describe("gameWrapper clock", () => {
+  const wrappedGame = gameWrapper(createGameWithoutStartingPosition(() => ({ data: "asd" })));
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  // The client polls this move for the countdown it shows. It carries no time
+  // of its own: the server recomputes what is left from the match's own end,
+  // so a client cannot buy itself extra minutes by reporting a longer one.
+  test("the time left is recomputed from the match's end on every poll", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-03-21T10:00:00Z"));
+    const client = Client({ game: wrappedGame, numPlayers: 2 });
+    client.start();
+
+    vi.setSystemTime(new Date("2026-03-21T10:05:00Z"));
+    client.moves.getTime();
+
+    expect(client.getState()?.G.millisecondsRemaining).toStrictEqual(25 * 60 * 1000);
+    expect(client.getState()?.G.end).toStrictEqual("2026-03-21T10:30:00.000Z");
+  });
+
+  test("only the team may ask for the time", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-03-21T10:00:00Z"));
+    const client = Client({ game: wrappedGame, numPlayers: 2 });
+    client.start();
+    client.moves.chooseNewGameType("live"); // hands the turn to the judge
+
+    vi.setSystemTime(new Date("2026-03-21T10:05:00Z"));
+    client.moves.getTime();
+
+    expect(client.getState()?.G.millisecondsRemaining).toStrictEqual(30 * 60 * 1000);
+  });
+
+  // The server reacts to a team's move by letting the bot move. A clock poll is
+  // not a move of the game, so the bot must not answer one.
+  test("a clock poll is not something the bot should answer", () => {
+    expect(isMakeMovePayloadReadOnly("getTime")).toBe(true);
+    expect(isMakeMovePayloadReadOnly("chooseRole")).toBe(false);
+  });
+});
+
+describe("gameWrapper move guards", () => {
+  const wrappedGame = gameWrapper(createGameWithoutStartingPosition(() => ({ data: "setup" })));
+
+  test("the team cannot send the opening position the bot picks", () => {
+    const client = Client({ game: wrappedGame, numPlayers: 2 });
+    client.start();
+
+    client.moves.setStartingPosition({ data: "startingPosition" });
+
+    expect(client.getState()?.G.data).toStrictEqual("setup");
+  });
+
+  test("the bot cannot choose the difficulty", () => {
+    const client = Client({ game: wrappedGame, numPlayers: 2 });
+    client.start();
+    client.moves.chooseNewGameType("live"); // hands the turn to the judge
+
+    client.moves.chooseNewGameType("test");
+
+    expect(client.getState()?.G.difficulty).toStrictEqual("live");
+    expect(client.getState()?.G.numberOfTries).toStrictEqual(1);
   });
 });

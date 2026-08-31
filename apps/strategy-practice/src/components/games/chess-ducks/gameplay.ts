@@ -1,5 +1,5 @@
 import { flatMap, range, cloneDeep } from 'lodash';
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 
 export const DUCK = 1 as const;
 export const FORBIDDEN = 2 as const;
@@ -48,9 +48,9 @@ export const moves = {
     // A duck goes on a field that is still free — neither holding a duck nor
     // attacked by one. Both players place on the same board, so whose turn it is
     // does not enter into legality.
-    validate: (board: Board, _, field: Field) =>
+    validate: (board, _, field: Field) =>
       !!field && board[field.row]?.[field.col] === null,
-    apply: (board: Board, { ctx }: { ctx: Ctx }, field: Field): MoveOutcome<Board> => {
+    apply: (board, { ctx }, field: Field): MoveOutcome<Board> => {
       const nextBoard = withDuckPlaced(board, field);
       if (getAllowedMoves(nextBoard).length === 0) {
         return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
@@ -58,7 +58,7 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-};
+} satisfies MoveDefs<Board>;
 
 export type Moves = typeof moves;
 

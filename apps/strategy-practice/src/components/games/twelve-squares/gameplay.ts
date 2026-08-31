@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 
 export type Board = { left: number, right: number }
 
@@ -8,9 +8,9 @@ export const moves = {
   step: {
     // A piece advances one or two squares; landing exactly on the other piece is
     // the one thing forbidden. Both players step by the same rule.
-    validate: (board: Board, _, step: number) =>
+    validate: (board, _, step: number) =>
       (step === 1 || step === 2) && step !== board.right - board.left,
-    apply: (board: Board, { ctx }: { ctx: Ctx }, step: number): MoveOutcome<Board> => {
+    apply: (board, { ctx }, step: number): MoveOutcome<Board> => {
       const nextBoard = ctx.currentPlayer === 0
         ? { left: board.left + step, right: board.right }
         : { left: board.left, right: board.right - step };
@@ -20,6 +20,6 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-};
+} satisfies MoveDefs<Board>;
 
 export type Moves = typeof moves;

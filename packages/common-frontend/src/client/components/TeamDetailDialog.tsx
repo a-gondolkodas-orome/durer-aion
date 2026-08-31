@@ -3,7 +3,7 @@ import { useAddMinutes, useGetLogs, useMatchState, useResetRelay, useResetStrate
 import { Button } from '@mui/material';
 import { Dispatch, useState } from 'react';
 import useSWR from 'swr';
-import { TeamModelDto, InProgressMatchStatus, FinishedMatchStatus, MatchStatus } from '../dto/TeamStateDto';
+import { TeamModelDto, MatchStatus } from '../dto/TeamStateDto';
 import { formatTime } from '../utils/DateFormatter';
 import { ErrorMessage, Field, FieldProps } from 'formik';
 import Form from "./form";
@@ -73,7 +73,7 @@ export function TeamDetailDialog(props: {data: TeamModelDto, setConfirmDialog: D
       {teamState.relayMatch.state !== "NOT STARTED" && <Button sx={{
         maxWidth: "125px",
       }}
-          onClick={async ()=>{
+          onClick={()=>{
             props.setConfirmDialog({
               text: `Erősítsd meg, hogy ${teamState.teamName} csapatnak alaphelyzetbe akarod állítani a váltó állását`,
               confirm: async () => {
@@ -95,7 +95,7 @@ export function TeamDetailDialog(props: {data: TeamModelDto, setConfirmDialog: D
       {teamState.strategyMatch.state !== "NOT STARTED" && <Button sx={{
         maxWidth: "125px",
       }}
-          onClick={async ()=>{
+          onClick={()=>{
             props.setConfirmDialog({
               text: `Erősítsd meg, hogy ${teamState.teamName} csapatnak alaphelyzetbe akarod állítani a stratégiás állását`,
               confirm: async () => {
@@ -126,7 +126,7 @@ function MatchStatusField(props: {name: string, data: MatchStatus, isRelay: bool
 
   switch (props.data.state) {
     case "IN PROGRESS": {
-      const inProgressState = props.data as InProgressMatchStatus 
+      const inProgressState = props.data 
       return (
         <><Stack>
           Folyamatban <br/>
@@ -142,7 +142,7 @@ function MatchStatusField(props: {name: string, data: MatchStatus, isRelay: bool
             .typeError('Számot kell írni')
             .required('Nincs megadva érték')
           })}
-        onSubmit={async (values) => { 
+        onSubmit={(values) => { 
           props.setConfirmDialog({
             text: `Erősítsd meg, hogy ${props.name} csapatnak meg akarod növelni az idejét ${values.time} perccel`,
             confirm: async () => {
@@ -195,7 +195,7 @@ function MatchStatusField(props: {name: string, data: MatchStatus, isRelay: bool
       variant='contained'
       color='primary'
       onClick={()=>{
-        getLogs(inProgressState.matchID).then(logs=>{
+        void getLogs(inProgressState.matchID).then(logs=>{
           setMatchLogs(logs);
         });
       }}>logok Lekérése</Button>
@@ -216,7 +216,7 @@ function MatchStatusField(props: {name: string, data: MatchStatus, isRelay: bool
       )
     }
     case "FINISHED": {
-      const finishedState = props.data as FinishedMatchStatus 
+      const finishedState = props.data 
       return (
         <Stack>
           Végzett <br/>
@@ -233,7 +233,7 @@ function MatchStatusField(props: {name: string, data: MatchStatus, isRelay: bool
           variant='contained'
           color='primary'
           onClick={()=>{
-            getLogs(finishedState.matchID).then(logs=>{
+            void getLogs(finishedState.matchID).then(logs=>{
               setMatchLogs(logs);
             });
           }}>logok Lekérése</Button>
@@ -266,11 +266,18 @@ function MatchStatusDataField(props: {matchId: string, isRelay: boolean}) {
   const matchState = useMatchState();
   const [msRemaining, setMsRemaining] = useState<number>(10000);
   const { data } = useSWR([`users/${props.matchId}`, props.matchId], ([, matchId]) => matchState(matchId))
+  if (!data) {
+    return null;
+  }
+  // Which match this is, read off the payload rather than taken on trust from
+  // isRelay — see MatchStateDto.
+  const relayG = 'currentProblem' in data.G ? data.G : null;
+  const strategyG = 'numberOfTries' in data.G ? data.G : null;
   return (<>
-  {data && <Stack>
-      { props.isRelay && <Stack>Aktuális feladatszám: {data.G.currentProblem + 1}</Stack>}
-      { !props.isRelay && <Stack>próbálkozások száma: {(data.G as any).numberOfTries}</Stack>}
-      { !props.isRelay && <Stack>Éles játékok eddigi eredményei: {(data.G as any).numberOfTries-(data.G as any).numberOfLoss-Number((data.G as any).winner===null && (data.G as any).difficulty==="live")} győzelem, {(data.G as any).numberOfLoss} vereség</Stack>}
+  <Stack>
+      { props.isRelay && relayG && <Stack>Aktuális feladatszám: {relayG.currentProblem + 1}</Stack>}
+      { !props.isRelay && strategyG && <Stack>próbálkozások száma: {strategyG.numberOfTries}</Stack>}
+      { !props.isRelay && strategyG && <Stack>Éles játékok eddigi eredményei: {strategyG.numberOfTries-strategyG.numberOfLoss-Number(strategyG.winner===null && strategyG.difficulty==="live")} győzelem, {strategyG.numberOfLoss} vereség</Stack>}
       <Stack>Befejezés dátuma: {formatTime(new Date(data.G.end))}</Stack>
       <Stack>pontszám: { data.G.points }</Stack>
       <Stack>Hátralévő idő: <Countdown
@@ -280,17 +287,17 @@ function MatchStatusDataField(props: {matchId: string, isRelay: boolean}) {
         getServerTimer={() => undefined}
         serverRemainingMs={new Date(data.G.end).getTime() - new Date().getTime()}
       /></Stack>
-      { props.isRelay && <Stack>
-      <RelayEndTableData allPoints={data.G.points} task={
+      { props.isRelay && relayG && <Stack>
+      <RelayEndTableData allPoints={relayG.points} task={
            // TODO .maxpoints
            [3, 3, 4, 4, 4, 5, 5, 6, 6].map((it, idx)=>({
             max: it,
-            got: data.G.previousPoints[idx] ?? null,
-            answers: data.G.previousAnswers[idx]?.map((a: { answer: any; }) => a.answer) ?? [],
+            got: relayG.previousPoints[idx] ?? null,
+            answers: relayG.previousAnswers[idx]?.map((a) => a.answer) ?? [],
            })
            ) 
           }/>
       </Stack>}
-    </Stack>}
+    </Stack>
   </>)
 }

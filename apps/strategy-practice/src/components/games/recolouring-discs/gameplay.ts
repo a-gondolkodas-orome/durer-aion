@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { Ctx, MoveDefs, MoveOutcome } from 'strategy-game-factory';
 import { range, sample } from 'lodash';
 
 export type Cell = 'red' | 'blue' | null;
@@ -102,7 +102,7 @@ export const FIRST_PLAYER_WIN_SIZES = [7, 9, 10, 11];
 export const SECOND_PLAYER_WIN_SIZES = [8, 12];
 
 export const generateStartBoard = (): Board => {
-  const pool = sample([FIRST_PLAYER_WIN_SIZES, SECOND_PLAYER_WIN_SIZES])!;
+  const pool = sample([FIRST_PLAYER_WIN_SIZES, SECOND_PLAYER_WIN_SIZES]);
   return { cells: startCells(sample(pool)!) };
 };
 
@@ -130,23 +130,23 @@ export const moves = {
   moveDisc: {
     // A player may only pick up a disc of their own colour, and only drop it on
     // a cell `moveTargets` offers (empty, 1–2 away).
-    validate: (board: Board, { ctx }: { ctx: Ctx }, from: number, to: number) =>
+    validate: (board, { ctx }, from: number, to: number) =>
       board.cells[from] === colorOf(ctx.currentPlayer!)
         && moveTargets(board.cells, from).includes(to),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, from: number, to: number) =>
+    apply: (board, { ctx }, from: number, to: number) =>
       finalize(applyMove(board.cells, ctx.currentPlayer!, { type: 'move', from, to }), ctx)
   },
   placeDisc: {
     // A new disc may only go on an empty cell next to one of the player's own discs.
-    validate: (board: Board, { ctx }: { ctx: Ctx }, at: number) =>
+    validate: (board, { ctx }, at: number) =>
       placeTargets(board.cells, colorOf(ctx.currentPlayer!)).includes(at),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, at: number) =>
+    apply: (board, { ctx }, at: number) =>
       finalize(applyMove(board.cells, ctx.currentPlayer!, { type: 'place', to: at }), ctx)
   },
   pass: {
-    apply: (board: Board, { ctx }: { ctx: Ctx }) =>
+    apply: (board, { ctx }) =>
       finalize([...board.cells], ctx)
   }
-};
+} satisfies MoveDefs<Board>;
 
 export type Moves = typeof moves;

@@ -103,7 +103,10 @@ change rather than as an afterthought.
 Game-specific logic is also worth testing when the winning strategy is
 non-trivial. Because bots name their moves, a spec can read a decision straight
 off the return value (`botNextMoveArgs` in `test-utils`, imported as
-`from 'test-utils'` — an alias, so no `../../../`), and `runMatch`
+`from 'test-utils'` — an alias, so no `../../../`). What comes back is the named
+move's own argument tuple, so name the game's moves wherever a spec types a
+strategy — `BotStrategy<Board, Moves>`, not `BotStrategy<Board>`, which drops
+back to unchecked args. `runMatch`
 (`packages/engine/src/run-match.ts`) plays two strategies against each
 other through the real moves and the real reducer — no fake `moves` object, no
 hand-rolled game loop. That is what turns "the AI is truly optimal" into a test:

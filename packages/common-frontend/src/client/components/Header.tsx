@@ -7,7 +7,9 @@ import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { LanguageDropdown } from './Langswitcher';
 
-export function Header(props: { teamName: string | null, admin: boolean }) {
+// titles[0] and titles[1] are translation keys for the two side titles;
+// titles[2] is an optional, already-translated text shown instead of the team name
+export function Header(props: { teamName: string | null, admin: boolean, titles?: string[], homeAddress?: string}) {
   const { t } = useTranslation();
   const theme = useTheme();
   const logout = useLogout();
@@ -40,7 +42,12 @@ export function Header(props: { teamName: string | null, admin: boolean }) {
           fontWeight: 'bold',
           paddingTop: '20px',
           whiteSpace: 'nowrap',
-        }}>{t('header.title')}</Stack>
+          cursor: props.homeAddress ? 'pointer' : 'default',
+        }} onClick={() => {
+          if (props.homeAddress) {
+            window.location.href = props.homeAddress;
+          }
+        }}>{(props.titles) ? t(props.titles[0]) : t('header.title')}</Stack>
         {
           <Stack sx={{
             flexDirection: 'row',
@@ -67,7 +74,7 @@ export function Header(props: { teamName: string | null, admin: boolean }) {
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
-                }}>{props.teamName}</Stack>
+                }}>{props.titles?.[2] ?? props.teamName}</Stack>
                 <Stack onClick={()=>{
                   logout();
                   if ( clientRepository.version === "OFFLINE") {
@@ -111,20 +118,20 @@ export function Header(props: { teamName: string | null, admin: boolean }) {
             md: 'flex'
           },
           whiteSpace: 'nowrap',
-        }}>{t('header.subtitle')}</Stack>
+        }}>{(props.titles) ? t(props.titles[1]) : t('header.subtitle')}</Stack>
         <Dialog
           open={mobileMenuOpen}
           onClose={()=>{
             setMobileMenuOpen(false)
           }}
-          PaperProps = {{
+          slotProps={{ paper: {
             sx: {
               width: '100%',
               textAlign: 'center',
               padding: '30px',
               top: 0
             }
-          }}
+          } }}
         >
           {props.teamName && <>
               <Stack sx={{
@@ -133,7 +140,7 @@ export function Header(props: { teamName: string | null, admin: boolean }) {
                 paddingBottom: '20px',
                 display: 'flex',
                 alignItems: 'center'
-              }}>{props.teamName}</Stack>
+              }}>{props.titles?.[2] ?? props.teamName}</Stack>
               <Button onClick={()=>{
                 setMobileMenuOpen(false);
                 logout();

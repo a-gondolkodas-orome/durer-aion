@@ -1,37 +1,38 @@
-import { Ctx, Game } from 'boardgame.io';
+import { Ctx, DefaultPluginAPIs, FnContext, Game, PlayerID } from 'boardgame.io';
 import { INVALID_MOVE, TurnOrder } from 'boardgame.io/core';
-import { GameStateMixin, GameType, GUESSER_PLAYER, JUDGE_PLAYER } from './types';
+import { GameStateMixin, GameType, GUESSER_PLAYER, JUDGE_PLAYER, PlayerIDType } from './types';
 
-function chooseRole({ G, _ctx, _playerID }: any, firstPlayer: string):void { // TODO: type
+/// What boardgame.io hands a move. The wrapper's own moves read and write only
+/// the mixin, so they name that as their state: a move whose context is the
+/// mixin fits a game whose state is the mixin plus anything else.
+type MoveContext = FnContext<GameStateMixin> & { playerID: PlayerID };
+
+/// Each of these writes to the draft rather than returning a new state — the
+/// two ways boardgame.io accepts a move's result, and the only one that keeps
+/// the game's own half of the state typed.
+function chooseRole({ G }: MoveContext, firstPlayer: PlayerIDType): void {
   G.firstPlayer = firstPlayer;
 }
 
-function chooseNewGameType({ G, _ctx, playerID, _random, events }: any, difficulty: string) {
+function chooseNewGameType({ G, playerID, events }: MoveContext, difficulty: string) {
   if (playerID !== GUESSER_PLAYER) {
     return INVALID_MOVE;
   };
-  const newG = {
-    ...G,
-    difficulty: difficulty,
-    firstPlayer: null,
-    winner: null,
-    numberOfTries: G.numberOfTries + (difficulty === "live" ? 1 : 0),
-  }
+  G.difficulty = difficulty;
+  G.firstPlayer = null;
+  G.winner = null;
+  G.numberOfTries = G.numberOfTries + (difficulty === "live" ? 1 : 0);
   events.endTurn();
-  return {
-    ...newG,
-  }
 };
 
-function setStartingPosition({ G, _ctx, playerID, _random, events }: any, startingPosition: any) { // TODO: type
+function setStartingPosition({ G, playerID, events }: MoveContext, startingPosition: Record<string, unknown>) {
   if (playerID !== JUDGE_PLAYER) {
     return INVALID_MOVE;
   };
   events.endTurn();
-  return {
-    ...G,
-    ...startingPosition,
-  };
+  // The position is the game's own half of the state, which this move is
+  // deliberately blind to — the judge (the bot) is the one that knows it.
+  Object.assign(G, startingPosition);
 };
 
 const lengthOfCompetition = 30 * 60; // seconds
@@ -42,15 +43,27 @@ export function isMakeMovePayloadReadOnly(payload_type: string) {
 }
 
 
-function getTime({ G, _ctx, playerID, _events }: any) {
+function getTime({ G, playerID }: MoveContext) {
   if (playerID !== GUESSER_PLAYER) {
     return INVALID_MOVE;
   }
   G.millisecondsRemaining = new Date(G.end).getTime() - new Date().getTime();
 }
 
+/// What the wrapper reports after each step and at the end of a match; hosts
+/// accept a superset of this shape (the offline frontend's SendGameDataParams).
+/// `log` is boardgame.io's log *plugin*, which is what a move context carries —
+/// not the match's log entries.
+export interface StrategyReport<T_SpecificGameState> {
+  component: "strategy";
+  phase: "step" | "end";
+  G: T_SpecificGameState & GameStateMixin;
+  ctx: Ctx;
+  log?: DefaultPluginAPIs['log'];
+}
+
 export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameState>, 
-                                                 sendStrategyFunction = (..._inputs: any[]): void => undefined,
+                                                 sendStrategyFunction: (_report: StrategyReport<T_SpecificGameState>) => void = () => undefined,
                                                 ): Game<T_SpecificGameState & GameStateMixin> {
   const myGameWrapper: Game<T_SpecificGameState & GameStateMixin> = {
     setup: () => ({
@@ -116,16 +129,16 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
             sendStrategyFunction({component: "strategy", phase: "step", G: G, ctx: ctx, log: log});
           },
         },
-        onEnd: ({G, ctx, _playerID, _events, _random, _log}) => {
-          if (typeof localStorage !== "undefined") {
-            localStorage.setItem("StrategyPoints", G.points.toString());
-          }
+        onEnd: ({G, ctx}) => {
           sendStrategyFunction({component: "strategy", phase: "end", G: G, ctx: ctx});
         }
       },
     },
-    // conflict with boardgameio type, where id is string, instead of playerIDType
-    ai: { enumerate: game.possibleMoves as (G:T_SpecificGameState,ctx:Ctx,playerID:string)=>any[] }
+    // boardgame.io types playerID as a plain string.
+    ai: {
+      enumerate: (G, ctx, playerID) =>
+        game.possibleMoves(G, ctx, playerID as PlayerIDType),
+    }
   };
 
   return myGameWrapper;

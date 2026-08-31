@@ -253,31 +253,24 @@ For an example of internationalizing an existing game, see
 
 ## Dependency updates
 
-Every version is pinned exactly by `package-lock.json`, so nothing drifts on its
-own — and nothing goes stale loudly either. `package.json` carries ranges; the
-lockfile is what `npm ci` installs and what this report and `npm run
-check:versions` both read, so they say what is actually *installed* rather than
-what would be accepted.
+The monthly report covers this app along with the rest of the monorepo, and the
+root [`README.md`](../../README.md) § Dependency updates is the authority on it.
+This app appears in its own rows rather than the shared ones wherever it runs
+ahead — eslint, vite, typescript and its own `.nvmrc` are all pinned here, not at
+the root.
 
-`playwright` is the one dependency still pinned exactly, deliberately: the
-devcontainer image bakes browser binaries for one specific version, so an
-incidental bump inside a range would be a broken container rather than a newer
-library. `check:versions` fails if it and `.devcontainer/Dockerfile` disagree.
-
-`.github/workflows/dependency_report.yml` runs monthly and keeps one `OPS` issue in sync with whatever is behind (npm
-packages, actions, the Node in `.nvmrc`); `npm run report:outdated` prints the
-same table on demand. It opens no pull requests — upgrading stays deliberate,
-majors one at a time as in
-[#168](https://github.com/a-gondolkodas-orome/durer-jatekok/issues/168). Why a
-report rather than dependabot or renovate: the header comment of
-`scripts/dependency-report.mjs`.
+`playwright` is the one dependency pinned exactly, deliberately: the devcontainer
+image bakes browser binaries for one specific version, so an incidental bump
+inside a range would be a broken container rather than a newer library.
+`npm run check:versions` fails if it and `.devcontainer/Dockerfile` disagree, and
+does the same for the five files the Node version is written down in.
 
 ## License
 
 Copyright (c) 2020-present [A Gondolkodás Öröme
 Alapítvány](https://agondolkodasorome.hu/).
 
-The promblems originate from the [Dürer Math Competition](https://durerinfo.hu/)
+The problems originate from the [Dürer Math Competition](https://durerinfo.hu/)
 and remain the intellectual property of their respective authors.
 
 This project is licensed under [Creative Commons

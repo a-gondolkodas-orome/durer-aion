@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 import { random } from 'lodash';
 
 // Chips in each of the three piles. The total is always even (it starts even
@@ -71,11 +71,9 @@ export const generateStartBoard = (): Board => {
 export const moves = {
   takeChips: {
     // A move takes one chip from each of two *distinct* non-empty piles.
-    validate: (board: Board, _, i: number, j: number) =>
+    validate: (board, _, i: number, j: number) =>
       isPile(i) && isPile(j) && i !== j && board[i] > 0 && board[j] > 0,
-    apply: (
-      board: Board, { ctx }: { ctx: Ctx }, i: number, j: number
-    ): MoveOutcome<Board> => {
+    apply: (board, { ctx }, i: number, j: number): MoveOutcome<Board> => {
       const nextBoard = applyMove(board, [i, j]);
       if (isTerminal(nextBoard)) {
         return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
@@ -83,6 +81,6 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-};
+} satisfies MoveDefs<Board>;
 
 export type Moves = typeof moves;

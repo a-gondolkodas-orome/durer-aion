@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { gameList, type Category, type IconKey } from '../games/gameList';
 import { useTranslation, LanguageSelector, type I18nNode } from 'language';
+import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
+import { IconButton } from '@mui/material';
 import { ThemeSwitcher } from '../../theme';
 import {
   FilterToggle, CategoryFilter, IconFilter, filterByCategories, filterByIcons
@@ -85,9 +87,20 @@ const OverviewHeader = ({ filtersOpen, onToggleFilters, activeFilterCount }: {
   const { t } = useTranslation();
   return <>
     <header className="flex items-center gap-2 pb-2">
-      <h1 className="grow text-blue-600 dark:text-blue-400 font-bold text-center">
-        {t({ hu: 'Dürer stratégiás játékok', en: 'Dürer Strategy Games' })}
-      </h1>
+      <div className="grow flex items-center justify-center gap-2">
+        <IconButton
+          component="a"
+          href="/.."
+          aria-label="Home"
+          size="small"
+          className="text-inherit"
+        >
+          <HomeRoundedIcon fontSize="small" className="text-slate-700 dark:text-slate-200" />
+        </IconButton>
+        <h1 className="text-blue-600 dark:text-blue-400 font-bold text-center">
+          {t({ hu: 'Dürer stratégiás játékok', en: 'Dürer Strategy Games' })}
+        </h1>
+      </div>
       <FilterToggle open={filtersOpen} onToggle={onToggleFilters} activeCount={activeFilterCount} />
       <span className="hidden md:flex items-center gap-2">
         <ThemeSwitcher />

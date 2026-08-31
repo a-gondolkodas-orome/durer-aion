@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 import { range } from 'lodash';
 
 // The board is a 4-field graph holding coin counts: K4 minus one edge. Indices
@@ -35,8 +35,8 @@ export const hasAnyMove = (board: Board): boolean =>
 
 export const moves = {
   placeCoin: {
-    validate: (board: Board, _, node: number) => isNodePlayable(board, node),
-    apply: (board: Board, { ctx }: { ctx: Ctx }, node: number): MoveOutcome<Board> => {
+    validate: (board, _, node: number) => isNodePlayable(board, node),
+    apply: (board, { ctx }, node: number): MoveOutcome<Board> => {
       const nextBoard = board.slice();
       nextBoard[node] += 1;
       if (!hasAnyMove(nextBoard)) {
@@ -45,6 +45,6 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-};
+} satisfies MoveDefs<Board>;
 
 export type Moves = typeof moves;

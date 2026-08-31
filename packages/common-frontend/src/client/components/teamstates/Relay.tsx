@@ -12,10 +12,11 @@ export function Relay(props: { state: TeamModelDto }) {
     case "FINISHED":
     case "IN PROGRESS":
       return (
-        <div data-testId={testId}>
+        <div data-testid={testId}>
           {RelayClient ? <Suspense fallback={<div>{t('general.loading')}</div>}>
             <RelayClient
               category={props.state.category as "C" | "D" | "E"}
+              teamName={props.state.teamName}
               credentials={props.state.credentials}
               matchID={(props.state.relayMatch  as InProgressMatchStatus).matchID}
             />
@@ -24,6 +25,6 @@ export function Relay(props: { state: TeamModelDto }) {
       );
     case "NOT STARTED":
     default:
-      return <div data-testId={testId}>{t('relay.error.badCategory')}</div>;
+      return <div data-testid={testId}>{t('relay.error.badCategory')}</div>;
   }
 }

@@ -1,10 +1,10 @@
 import { Stack } from '@mui/system';
 import { useAddMinutes, useAll, useRemoveTeam } from '../hooks/user-hooks';
-import { Button, Dialog, Table, TableCell, TableRow, IconButton } from '@mui/material';
+import { Button, Dialog, Table, TableBody, TableCell, TableHead, TableRow, IconButton } from '@mui/material';
 import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import useSWR from 'swr';
-import { DataGrid } from '@mui/x-data-grid';
+import { DataGrid, ExportCsv, Toolbar } from '@mui/x-data-grid';
 import { TeamModelDto } from '../dto/TeamStateDto';
 import { TeamDetailDialog } from './TeamDetailDialog';
 import Form from './form';
@@ -16,6 +16,22 @@ import { ConfirmDialogInterface, ConfirmDialog } from './ConfirmDialog';
 import * as Yup from 'yup';
 import { alpha } from '@mui/system'
 import { FieldProps } from "formik"
+
+// Only the export button: the columns/filter/density controls the stock
+// GridToolbar also carries are not what this page is for.
+function TeamsToolbar() {
+  return (
+    <Toolbar>
+      <ExportCsv
+        // allColumns so the `other` column, hidden by default below, is still
+        // in the file; the two button columns opt out with disableExport.
+        options={{ fileName: 'durer-csapatok', utf8WithBom: true, allColumns: true }}
+      >
+        Letöltés CSV-ként
+      </ExportCsv>
+    </Toolbar>
+  );
+}
 
 export function Admin(props: {teamId?: string}) {
   const theme = useTheme();
@@ -56,7 +72,7 @@ export function Admin(props: {teamId?: string}) {
     }} data-testid="adminRoot">
       <Dialog 
         maxWidth={false} 
-        PaperProps={{
+        slotProps={{ paper: {
           sx: {
             marginLeft: {
               xs: 0,
@@ -71,10 +87,10 @@ export function Admin(props: {teamId?: string}) {
               md: 'calc(100% - 64px)'
             },
           }
-        }}
+        } }}
         open={
           selectedRow != null
-        } onClose={async () => {
+        } onClose={() => {
             setSelectedRow(null); 
            }}>
           {selectedRow && <TeamDetailDialog data={selectedRow} setConfirmDialog={setConfirmDialog}/>}
@@ -142,12 +158,13 @@ export function Admin(props: {teamId?: string}) {
               field: 'view',
               width: 170,
               headerName: '',
+              disableExport: true,
               renderCell: (renderData) => {
                 return (
                   <Button
                     color='primary'
                     variant='contained'
-                    onClick={() => {setSelectedRow(renderData.row as TeamModelDto)}}>
+                    onClick={() => {setSelectedRow(renderData.row)}}>
                       Szerkesztés
                   </Button>
                 )
@@ -157,6 +174,7 @@ export function Admin(props: {teamId?: string}) {
               field: 'view_tab',
               width: 170,
               headerName: '',
+              disableExport: true,
               renderCell: (renderData) => {
                 return (
                   <Button
@@ -192,6 +210,8 @@ export function Admin(props: {teamId?: string}) {
             },
           }}
           pageSizeOptions={[10, 25, 50]}
+          showToolbar
+          slots={{ toolbar: TeamsToolbar }}
           sx={{
             height: "auto",
           }}
@@ -207,19 +227,19 @@ export function Admin(props: {teamId?: string}) {
               .typeError('Számot kell írni')
               .required('Nincs megadva érték')
             })}
-          onSubmit={async (values) => { 
+          onSubmit={(values) => { 
             setConfirmDialog({
               text: `Erősítsd meg, hogy minden aktuális csapatnak meg akarod növelni az idejét ${values.time} perccel`,
               confirm: async () => {
                 try {
-                  data?.forEach(async a=>{
+                  for (const a of data ?? []) {
                     if(a.relayMatch.state === "IN PROGRESS") {
                       await addMinutes(a.relayMatch.matchID, values.time);
                     }
                     if(a.strategyMatch.state === "IN PROGRESS") {
                       await addMinutes(a.strategyMatch.matchID, values.time);
                     }
-                  })
+                  }
                   enqueueSnackbar("Sikeres művelet", { variant: 'success' });
                 } catch (e) {
                   const message = e instanceof Error ? e.message : "Váratlan hiba történt";
@@ -269,13 +289,13 @@ export function Admin(props: {teamId?: string}) {
                 text: 'Biztosan törlöd az összes csapatot? Ez a művelet nem visszavonható!',
                 confirm: async () => {
                   try {
-                    data.forEach(team => {
-                      removeTeam(team.teamId);
-                    });
+                    for (const team of data) {
+                      await removeTeam(team.teamId);
+                    }
                     enqueueSnackbar('Összes csapat törölve', { variant: 'success' });
                     // Refresh the list
                     if (typeof window !== 'undefined') {
-                      getAll();
+                      await getAll();
                     }
                   } catch (e) {
                     const message = e instanceof Error ? e.message : "Váratlan hiba történt";
@@ -324,26 +344,30 @@ function Stats(props: {data: TeamModelDto[]}) {
     }
   })
   return <Table>
-    <TableRow>
-      <TableCell>Kategória</TableCell>
-      <TableCell>Összesen</TableCell>
-      <TableCell>Váltó</TableCell>
-      <TableCell>Stratégiás</TableCell>
-      <TableCell>Teljes verseny</TableCell>
-      <TableCell>Relay-Pontszámok</TableCell>
-      <TableCell>Strategy-Pontszámok</TableCell>
-    </TableRow>
-    {stat.map(s=> (
+    <TableHead>
       <TableRow>
-        <TableCell>{s.category}</TableCell>
-        <TableCell>{s.all}</TableCell>
-        <TableCell><Progress notStarted={s.all - s.relayInProgress - s.relay} inProgress={s.relayInProgress} finished={s.relay}/></TableCell>
-        <TableCell><Progress notStarted={s.all - s.strategyInProgress - s.strategy} inProgress={s.strategyInProgress} finished={s.strategy}/></TableCell>
-        <TableCell><Progress notStarted={s.notStarted} inProgress={s.all - s.notStarted - s.finished} finished={s.finished}/></TableCell>
-        <TableCell>{s.relayPoints.sort((a, b)=>a.point-b.point).map(it=><>{it.point}: {it.count} db <br/></>)}</TableCell>
-        <TableCell>{s.strategyPoints.sort((a, b)=>a.point-b.point).map(it=><>{it.point}: {it.count} db <br/></>)}</TableCell>
+        <TableCell>Kategória</TableCell>
+        <TableCell>Összesen</TableCell>
+        <TableCell>Váltó</TableCell>
+        <TableCell>Stratégiás</TableCell>
+        <TableCell>Teljes verseny</TableCell>
+        <TableCell>Relay-Pontszámok</TableCell>
+        <TableCell>Strategy-Pontszámok</TableCell>
       </TableRow>
-    ))}
+    </TableHead>
+    <TableBody>
+      {stat.map(s=> (
+        <TableRow key={s.category}>
+          <TableCell>{s.category}</TableCell>
+          <TableCell>{s.all}</TableCell>
+          <TableCell><Progress notStarted={s.all - s.relayInProgress - s.relay} inProgress={s.relayInProgress} finished={s.relay}/></TableCell>
+          <TableCell><Progress notStarted={s.all - s.strategyInProgress - s.strategy} inProgress={s.strategyInProgress} finished={s.strategy}/></TableCell>
+          <TableCell><Progress notStarted={s.notStarted} inProgress={s.all - s.notStarted - s.finished} finished={s.finished}/></TableCell>
+          <TableCell>{s.relayPoints.sort((a, b)=>a.point-b.point).map(it=><Fragment key={it.point}>{it.point}: {it.count} db <br/></Fragment>)}</TableCell>
+          <TableCell>{s.strategyPoints.sort((a, b)=>a.point-b.point).map(it=><Fragment key={it.point}>{it.point}: {it.count} db <br/></Fragment>)}</TableCell>
+        </TableRow>
+      ))}
+    </TableBody>
   </Table>
 }
 

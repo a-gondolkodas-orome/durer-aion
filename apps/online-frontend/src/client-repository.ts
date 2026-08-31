@@ -1,13 +1,11 @@
 import urlcat from "urlcat";
 import axios, { AxiosInstance,AxiosError } from 'axios';
-import { ClientRepository, TeamModelDto, MatchStateDto } from "common-frontend";
+import { ClientRepository, TeamModelDto, MatchStateDto, BoardMoves } from "common-frontend";
 
 const serverUrl = import.meta.env.VITE_SERVER_URL || '/';
 function apiAxiosInstance(): AxiosInstance {
-  const apiUrl = serverUrl; // TODO: env or something
-
   return axios.create({
-    baseURL: apiUrl,
+    baseURL: serverUrl,
     timeout: 10000,
   });
 }
@@ -36,7 +34,7 @@ export class RealClientRepository implements ClientRepository {
     } catch (e: unknown) {
       console.error(e)
       // here we can set message according to status (or data)
-      throw new Error('Váratlan hiba történt');
+      throw new Error('Váratlan hiba történt', { cause: e });
     }
 
     if (result.data.relayMatch.startAt) {
@@ -67,10 +65,10 @@ export class RealClientRepository implements ClientRepository {
     } catch (e: unknown) {
       const err = makeAxiosError(e);
       if(err.response?.status === 404) {
-        throw new Error('Nem létező kód');
+        throw new Error('Nem létező kód', { cause: e });
       }
       // here we can set message according to status (or data)
-      throw new Error('Váratlan hiba történt');
+      throw new Error('Váratlan hiba történt', { cause: e });
     }
     
     console.log("joinWithCode result", result);
@@ -91,7 +89,7 @@ export class RealClientRepository implements ClientRepository {
       const err = makeAxiosError(e)
       console.error(err.message)
       // here we can set message according to status (or data)
-      throw new Error('Váratlan hiba történt');
+      throw new Error('Váratlan hiba történt', { cause: e });
     }
 
     return result.data as string;
@@ -110,7 +108,7 @@ export class RealClientRepository implements ClientRepository {
       const err = makeAxiosError(e);
       console.error(err.message)
       // here we can set message according to status (or data)
-      throw new Error('Váratlan hiba történt');
+      throw new Error('Váratlan hiba történt', { cause: e });
     }
 
     return result.data as string;
@@ -129,7 +127,7 @@ export class RealClientRepository implements ClientRepository {
       const err = makeAxiosError(e);
       console.error(err.message)
       // here we can set message according to status (or data)
-      throw new Error('Váratlan hiba történt');
+      throw new Error('Váratlan hiba történt', { cause: e });
     }
 
     return result.data as string;
@@ -145,7 +143,7 @@ export class RealClientRepository implements ClientRepository {
       const err = makeAxiosError(e);
       console.error(err.message)
       // here we can set message according to status (or data)
-      throw new Error('Váratlan hiba történt');
+      throw new Error('Váratlan hiba történt', { cause: e });
     }
 
     return result.data as TeamModelDto[];
@@ -157,12 +155,12 @@ export class RealClientRepository implements ClientRepository {
     });
     let result;
     try {
-      result = await apiAxiosInstance().get(url);
+      result = await apiAxiosInstance().post(url);
     } catch (e: unknown) {
       const err = makeAxiosError(e);
       console.error(err.message)
       // here we can set message according to status (or data)
-      throw new Error('Váratlan hiba történt');
+      throw new Error('Váratlan hiba történt', { cause: e });
     }
     return result.data as TeamModelDto;
   }
@@ -173,12 +171,12 @@ export class RealClientRepository implements ClientRepository {
     });
     let result;
     try {
-      result = await apiAxiosInstance().get(url);
+      result = await apiAxiosInstance().post(url);
     } catch (e: unknown) {
       const err = makeAxiosError(e);
       console.error(err.message)
       // here we can set message according to status (or data)
-      throw new Error('Váratlan hiba történt');
+      throw new Error('Váratlan hiba történt', { cause: e });
     }
     return result.data as TeamModelDto;
   }
@@ -190,15 +188,15 @@ export class RealClientRepository implements ClientRepository {
     });
     let result;
     try {
-      result = await apiAxiosInstance().get(url);
+      result = await apiAxiosInstance().post(url);
     } catch (e: unknown) {
       const err = makeAxiosError(e);
       console.error(err.message)
       // here we can set message according to status (or data)
       if (err.code === "501") {
-        throw new Error('Lejárt játékot már nem lehet módosítani');
+        throw new Error('Lejárt játékot már nem lehet módosítani', { cause: e });
       }
-      throw new Error('Váratlan hiba történt');
+      throw new Error('Váratlan hiba történt', { cause: e });
     }
     return result.data;
   }
@@ -214,7 +212,7 @@ export class RealClientRepository implements ClientRepository {
       const err = makeAxiosError(e);
       console.error(err.message)
       // here we can set message according to status (or data)
-      throw new Error('Váratlan hiba történt');
+      throw new Error('Váratlan hiba történt', { cause: e });
     }
     return result.data as MatchStateDto;
   }
@@ -230,7 +228,7 @@ export class RealClientRepository implements ClientRepository {
       const err = makeAxiosError(e);
       console.error(err.message)
       // here we can set message according to status (or data)
-      throw new Error('Váratlan hiba történt');
+      throw new Error('Váratlan hiba történt', { cause: e });
     }
     return result.data;
   }
@@ -246,5 +244,23 @@ export class RealClientRepository implements ClientRepository {
       console.error(err.message)
       throw e;
     }
+  }
+
+  // Scoring and the clock are server-authoritative, so these travel as the
+  // moves themselves over the match's socket rather than as separate HTTP
+  // calls.
+  submitRelayAnswer(answer: number, moves: BoardMoves): Promise<void> {
+    moves.submitAnswer(answer);
+    return Promise.resolve();
+  }
+
+  startRelayGame(moves: BoardMoves): Promise<void> {
+    moves.startGame();
+    return Promise.resolve();
+  }
+
+  syncRelayTime(moves: BoardMoves): Promise<void> {
+    moves.getTime();
+    return Promise.resolve();
   }
 }

@@ -4,6 +4,15 @@ import { teamAttributes, TeamModel } from './model';
 import { DeletedTeamModel, deletedTeamAttributes } from './deletedTeam';
 import { Sequelize, Op, WhereOptions } from 'sequelize';
 
+// `%` and `_` are wildcards inside a LIKE pattern, so a fragment carrying them
+// would match more than the caller asked for — a bare `%` matches every team.
+// Backslash is postgres' default LIKE escape character, so no ESCAPE clause is
+// needed; it has to escape itself too, or a trailing one would escape the `%`
+// that the pattern appends.
+export function escapeLike(fragment: string): string {
+  return fragment.replace(/[\\%_]/g, character => `\\${character}`);
+}
+
 export class TeamsRepository {
   sequelize: Sequelize;
   constructor(db: PostgresStore) {
@@ -20,10 +29,14 @@ export class TeamsRepository {
   async connect() {
     await this.sequelize.sync();
   }
+  /**
+   * Teams whose `other` field contains every one of the given fragments.
+   * An empty list matches all teams: `Sequelize.and()` with no arguments
+   * produces no WHERE clause.
+   */
   async fetch(filter: string[]) : Promise<TeamModel[]> {
-    // TODO: Like-injection
     return await TeamModel.findAll({ where:
-      Sequelize.and(...filter.map(part => ({'other': { [Op.like]: `%${part}%`} }))),
+      Sequelize.and(...filter.map(part => ({'other': { [Op.like]: `%${escapeLike(part)}%`} }))),
     });
   }
 

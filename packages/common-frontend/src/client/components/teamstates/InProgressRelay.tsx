@@ -5,8 +5,8 @@ import { BoardProps } from 'boardgame.io/react';
 import { MyGameState } from 'game';
 import { Dialog } from '@mui/material';
 import { useRefreshTeamState, useToHome } from '../../hooks/user-hooks';
-import { ExcerciseTask } from '../ExcerciseTask';
-import { ExcerciseForm } from '../ExcerciseForm';
+import { ExerciseTask } from '../ExerciseTask';
+import { ExerciseForm } from '../ExerciseForm';
 import { RelayEndTable } from '../RelayEndTable';
 import { useClientRepo } from '../../api-repository-interface';
 import { useTheme } from '@mui/material/styles';
@@ -15,13 +15,30 @@ import { useTranslation } from 'react-i18next';
 
 type MyGameProps = BoardProps<MyGameState>;
 
-export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
+// Max points of the tasks in the yearly online competition's relay round
+const DEFAULT_MAX_POINTS = [3, 3, 4, 4, 4, 5, 5, 6, 6];
+
+// maxPointsList and selectRoundOnEnd are extra props for relay-practise:
+// the max points of the loaded problem set (so the end table can show all
+// of its tasks), and a logout button leading back to the round selector
+export function InProgressRelay({ G, ctx, moves, maxPointsList, selectRoundOnEnd }: MyGameProps & {
+  maxPointsList?: number[],
+  selectRoundOnEnd?: boolean,
+}) {
   const [msRemaining, setMsRemaining] = useState(G.millisecondsRemaining);
   const [gameover, setGameover] = useState(ctx.gameover);
+  const clientRepo = useClientRepo();
   const refreshState = useRefreshTeamState();
   const toHome = useToHome();
   const theme = useTheme();
   const { t } = useTranslation();
+  // Named so the handler below can stay synchronous: React ignores what an
+  // event handler returns, so an async one leaves its promise unhandled.
+  const backToHome = async () => {
+    await refreshState();
+    await toHome();
+    window.location.reload();
+  };
 
   useEffect(()=>{
     if (!ctx.gameover) {
@@ -29,9 +46,9 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
       // Otherwise, it would run on every render.
       const gameNotStarted = G.numberOfTry === 0;
       if (gameNotStarted) {
-        moves.startGame();
+        void clientRepo.startRelayGame(moves);
       } else {
-        moves.getTime();
+        void clientRepo.syncRelayTime(moves);
       }
     }
     setGameover(ctx.gameover)
@@ -40,12 +57,12 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
     setMsRemaining(G.millisecondsRemaining);
   }, [G.millisecondsRemaining]);
   const finished = msRemaining < - 5000 || gameover === true
-  const isOffline = useClientRepo().version === "OFFLINE";
+  const isOffline = clientRepo.version === "OFFLINE";
   return (
     <>
       <Dialog 
         maxWidth={false} 
-        PaperProps={{
+        slotProps={{ paper: {
           sx: {
             marginLeft: {
               xs: 0,
@@ -61,21 +78,16 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
             },
             backgroundColor: theme.palette.background.paper,
           }
-        }}
+        } }}
         open={
           finished
-        } onClose={async () => { 
-          refreshState()
-          await toHome();
-          window.location.reload(); 
-           }}>
-          {<RelayEndTable allPoints={G.points} task={
-           // TODO .maxpoints
-           [3, 3, 4, 4, 4, 5, 5, 6, 6].map((it, idx)=>({
+        } onClose={() => void backToHome()}>
+          {<RelayEndTable allPoints={G.points} selectRound={selectRoundOnEnd} task={
+           (maxPointsList ?? DEFAULT_MAX_POINTS).map((it, idx)=>({
             max: it,
             got: G.previousPoints[idx] ?? null,
            })
-           ) 
+           )
           }/>}
         </Dialog>
       <Stack sx={{
@@ -118,7 +130,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
           },
           padding: '30px',
         }}>
-          <ExcerciseTask 
+          <ExerciseTask 
             task={G.problemText}
             maxPoints={G.currentProblemMaxPoints}
             serial={G.currentProblem+1}
@@ -145,14 +157,11 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
           borderRadius: "25px",
           padding: '30px',
         }}>
-          <ExcerciseForm 
+          <ExerciseForm 
             previousTries={G.previousAnswers[G.currentProblem].map(it=>it.answer)} 
             previousCorrectness={!finished ? G.correctnessPreviousAnswer : null}
             attempt={(G.currentProblem+1) * 3 + G.numberOfTry}
-            onSubmit={(input: number) => {
-              moves.submitAnswer(input);
-              // TODO this should be done in repository
-            }}
+            onSubmit={(input: number) => clientRepo.submitRelayAnswer(input, moves)}
           />
           <Stack sx={{
             marginTop: "15px",
@@ -165,7 +174,7 @@ export function InProgressRelay({ G, ctx, moves }: MyGameProps) {
             {!finished && <Countdown
               msRemaining={msRemaining ?? null}
               setMsRemaining={setMsRemaining}
-              getServerTimer={moves.getTime}
+              getServerTimer={() => void clientRepo.syncRelayTime(moves)}
               endTime={new Date(G.end)}
               serverRemainingMs={G.millisecondsRemaining} />}
           </Stack>

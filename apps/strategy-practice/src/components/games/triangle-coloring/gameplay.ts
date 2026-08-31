@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 import { range, cloneDeep } from 'lodash';
 
 export const [ALLOWED, COLORED, FORBIDDEN] = [1 as const, 2 as const, 3 as const];
@@ -40,9 +40,9 @@ export const moves = {
     // A triangle may be coloured while it is still ALLOWED — neither coloured
     // already nor forbidden by a neighbour someone coloured earlier. Both players
     // colour from the same board, so whose turn it is does not enter into legality.
-    validate: (board: Board, _, id: number) =>
+    validate: (board, _, id: number) =>
       Number.isInteger(id) && id >= 0 && id < triangles.length && board[id] === ALLOWED,
-    apply: (board: Board, { ctx }: { ctx: Ctx }, id: number): MoveOutcome<Board> => {
+    apply: (board, { ctx }, id: number): MoveOutcome<Board> => {
       const nextBoard = withTriangleColored(board, id);
       if (getAllowedMoves(nextBoard).length === 0) {
         return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
@@ -50,7 +50,7 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-};
+} satisfies MoveDefs<Board>;
 
 export type Moves = typeof moves;
 

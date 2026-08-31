@@ -17,7 +17,7 @@ disabled in index.html because the app uses a hash router (see
 use-pageview-tracking) — the hash never reaches umami's default url.
 */
 export const trackPageview = (url: string) => {
-  window.umami?.track(props => ({ ...(props as object), url }));
+  window.umami?.track((props: unknown) => ({ ...(props as object), url }));
 };
 
 /*

@@ -1,6 +1,8 @@
-import type { Ctx, MoveOutcome } from 'strategy-game-factory';
+import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 import { range, random, sample, difference, cloneDeep } from 'lodash';
-export const neighbours = {
+// The cube graph the chase is played on, as an adjacency list keyed by
+// intersection — the same shape policeman-thief-c uses.
+export const neighbours: Record<number, number[]> = {
   0: [1, 2, 4],
   1: [0, 3, 5],
   2: [0, 3, 6],
@@ -36,7 +38,9 @@ export type Board = {
 export const generateStartBoardA = (): Board => {
   const policeStartPosition = random(0, 7);
   const immediatePoliceWinPositions = [policeStartPosition, ...neighbours[policeStartPosition]];
-  const thiefStartPosition = sample(difference(range(0, 8), immediatePoliceWinPositions));
+  // Every intersection has exactly three neighbours, so this removes four of
+  // the eight and always leaves the thief somewhere to start.
+  const thiefStartPosition = sample(difference(range(0, 8), immediatePoliceWinPositions))!;
   return {
     turnCount: 0,
     policemen: [policeStartPosition, policeStartPosition],
@@ -56,7 +60,7 @@ export const generateStartBoardB = (): Board => {
   if (thiefStartPositionOptions.length === 0) {
     return generateStartBoardB();
   }
-  const thiefStartPosition = sample(thiefStartPositionOptions);
+  const thiefStartPosition = sample(thiefStartPositionOptions)!;
   return {
     turnCount: 0,
     policemen: policeStartPosition,
@@ -71,9 +75,9 @@ export const generateStartBoardB = (): Board => {
 // say *which* piece may move, not merely whose turn it is.
 export const moves = {
   moveThief: {
-    validate: (board: Board, { ctx }: { ctx: Ctx }, vertex: number) =>
+    validate: (board, { ctx }, vertex: number) =>
       ctx.currentPlayer === THIEF && isNeighbour(board.thief, vertex),
-    apply: (board: Board, _, vertex: number): MoveOutcome<Board> => {
+    apply: (board, _, vertex: number): MoveOutcome<Board> => {
       const overrides: Partial<Board> = { thief: vertex, turnCount: board.turnCount + 1 };
       const nextBoard = { ...cloneDeep(board), ...overrides };
       if (isGameEnd(nextBoard)) {
@@ -86,11 +90,11 @@ export const moves = {
     }
   },
   moveFirstPoliceman: {
-    validate: (board: Board, { ctx }: { ctx: Ctx }, vertex: number) =>
+    validate: (board, { ctx }, vertex: number) =>
       ctx.currentPlayer === POLICE && !board.firstPolicemanMoved
         && isNeighbour(board.policemen[0], vertex),
     // First half of the police turn: both policemen move, one after the other.
-    apply: (board: Board, _, vertex: number): MoveOutcome<Board> => {
+    apply: (board, _, vertex: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard.policemen[0] = vertex;
       nextBoard.firstPolicemanMoved = true;
@@ -98,10 +102,10 @@ export const moves = {
     }
   },
   moveSecondPoliceman: {
-    validate: (board: Board, { ctx }: { ctx: Ctx }, vertex: number) =>
+    validate: (board, { ctx }, vertex: number) =>
       ctx.currentPlayer === POLICE && board.firstPolicemanMoved
         && isNeighbour(board.policemen[1], vertex),
-    apply: (board: Board, _, vertex: number): MoveOutcome<Board> => {
+    apply: (board, _, vertex: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
       nextBoard.policemen[1] = vertex;
       nextBoard.firstPolicemanMoved = false;
@@ -114,7 +118,7 @@ export const moves = {
       return { nextBoard, isTurnEnd: true };
     }
   }
-};
+} satisfies MoveDefs<Board>;
 
 export type Moves = typeof moves;
 

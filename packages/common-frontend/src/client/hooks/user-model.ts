@@ -1,19 +1,14 @@
-import { LOCAL_STORAGE_TEAMSTATE } from "../api-repository-interface";
 import type { ClientRepository } from "../api-repository-interface";
 import type { MatchStateDto, TeamModelDto } from "../dto/TeamStateDto";
-import { BGIO_LOCALSTORAGE_PREFIX } from "../utils/util";
+import { bgioStoragePrefix, guidStorageKey, relayPointsStorageKey, strategyPointsStorageKey, teamStateStorageKey } from "../utils/storage-keys";
 
-const LOCAL_STORAGE_GUID = "kjqAEKeFkMpOvOZrzcvp";
 function removeGameStateLocalStorage() {
-  let idx = 0;
-  let key = localStorage.key(idx);
-  while (key !== null) {
-    if (key.startsWith(BGIO_LOCALSTORAGE_PREFIX)) {
-      localStorage.removeItem(key);
-    }
-    idx++;
-    key = localStorage.key(idx);
-  }
+  // Collect first, remove after: removeItem inside a key(idx) loop shifts the
+  // remaining keys down, so every key right after a removed one is skipped.
+  const keys = [...Array(localStorage.length).keys()]
+    .map(idx => localStorage.key(idx))
+    .filter((key): key is string => key !== null && key.startsWith(bgioStoragePrefix()));
+  keys.forEach(key => localStorage.removeItem(key));
 }
 
 export class UserModel {
@@ -21,7 +16,7 @@ export class UserModel {
   constructor(private repo: ClientRepository) {}
 
   private async saveGUID(guid: string) {
-    localStorage.setItem(LOCAL_STORAGE_GUID, guid);
+    localStorage.setItem(guidStorageKey(), guid);
   }
 
   getGuid(): string | null {
@@ -29,7 +24,7 @@ export class UserModel {
       return null;
     }
 
-    const guid = localStorage.getItem(LOCAL_STORAGE_GUID);
+    const guid = localStorage.getItem(guidStorageKey());
 
     if (!guid) {
       return null;
@@ -69,7 +64,7 @@ export class UserModel {
     return res;
   }
 
-  async resetRealy(teamId: string): Promise<TeamModelDto> {
+  async resetRelay(teamId: string): Promise<TeamModelDto> {
     return this.repo.resetRelay(teamId);
   }
 
@@ -126,17 +121,17 @@ export class UserModel {
   }
 
   logout() {
-    localStorage.removeItem(LOCAL_STORAGE_GUID);
-    localStorage.removeItem(LOCAL_STORAGE_TEAMSTATE);
-    localStorage.removeItem("RelayPoints");
-    localStorage.removeItem("StrategyPoints");
+    localStorage.removeItem(guidStorageKey());
+    localStorage.removeItem(teamStateStorageKey());
+    localStorage.removeItem(relayPointsStorageKey());
+    localStorage.removeItem(strategyPointsStorageKey());
     removeGameStateLocalStorage();
   }
 
   async login(joinCode: string): Promise<string | null> {
     const guid = await this.repo.joinWithCode(joinCode);
     console.log("login guid", guid);
-    this.saveGUID(guid);
+    await this.saveGUID(guid);
     return null;
   }
 
@@ -162,8 +157,8 @@ export class UserModel {
     if (typeof window !== "undefined" && !UserModel.wasListenerAddedYet) {
       UserModel.wasListenerAddedYet = true;
       let previousValue: TeamModelDto | null = null;
-      window.addEventListener("storage", async (event) => {
-        if (event?.key !== LOCAL_STORAGE_GUID) {
+      const onGuidChanged = async (event: StorageEvent) => {
+        if (event.key !== guidStorageKey()) {
           return;
         }
 
@@ -173,6 +168,9 @@ export class UserModel {
           setTeamState(value);
           previousValue = value;
         }
+      };
+      window.addEventListener("storage", (event) => {
+        void onGuidChanged(event);
       });
     }
   }

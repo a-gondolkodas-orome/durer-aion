@@ -58,7 +58,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 
   const submit = () => {
     if (!ctx.isClientMoveAllowed || keepId === null || !splitValid) return;
-    const parts = [p1!, p2!, p3!];
+    const parts = [p1, p2, p3];
     // Step 1: keep the chosen pile (drops the other two). Step 2 (after a beat):
     // split it into the three new piles.
     const { nextBoard } = moves.keepPile(board, keepId);

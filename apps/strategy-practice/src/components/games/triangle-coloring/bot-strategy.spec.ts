@@ -37,7 +37,7 @@ describe('smartBotStrategy', () => {
     // Three triangles are open and only one of them wins; the other two hand
     // the game to the opponent. Nothing local to the board says which — the
     // bot has to look ahead, so this is the case a broken search fails.
-    const board = boardAfterColoring(colored as number[]);
+    const board = boardAfterColoring(colored);
     expect(getAllowedMoves(board)).toEqual(allowed);
 
     // it shuffles before searching, so the answer must not depend on the draw

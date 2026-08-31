@@ -5,18 +5,37 @@ import { StrategyEndTable } from "../client/components/StrategyEndTable";
 import { useRefreshTeamState, useToHome } from "../client/hooks/user-hooks";
 import { useClientRepo } from "../client/api-repository-interface";
 import { GUESSER_PLAYER, JUDGE_PLAYER } from "game";
+import type { GameStateMixin } from "game";
+import type { BoardProps } from "boardgame.io/react";
+import type { ReactNode } from "react";
 import { useTheme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
 
-export function boardWrapper(board: any, description: any) { //<please> TODO: solve types with BoardProps<MyGameState>
-  return ({ G, ctx, moves, _log }: any) => {
-    const [msRemaining, setMsRemaining] = useState(G.millisecondsRemaining as number); // asked from the server
-    const [gameover, setGameover] = useState(ctx.gameover);
+/// What boardgame.io hands a strategy game's board: the game's own state as
+/// gameWrapper extends it, plus the client API. The wrapper passes its props
+/// through untouched, so a board may read anything bgio put there.
+export type StrategyBoardProps<G> = BoardProps<G & GameStateMixin>;
+export type StrategyBoard<G> = (props: StrategyBoardProps<G>) => ReactNode;
+
+export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode) {
+  return (props: StrategyBoardProps<G>) => {
+    const { G, ctx, moves } = props;
+    const [msRemaining, setMsRemaining] = useState(G.millisecondsRemaining); // asked from the server
+    // ctx.gameover is whatever the game passed to events.endGame(); this wrapper
+    // only ever asks whether it is `true`.
+    const [gameover, setGameover] = useState<unknown>(ctx.gameover);
     const toHome = useToHome();
     const refreshState = useRefreshTeamState();
     const isOffline = useClientRepo().version === "OFFLINE";
     const theme = useTheme();
     const { t } = useTranslation();
+    // Named so the handler below can stay synchronous: React ignores what an
+    // event handler returns, so an async one leaves its promise unhandled.
+    const backToHome = async () => {
+      await refreshState();
+      await toHome();
+      window.location.reload();
+    };
 
     useEffect(() => {
       if (!ctx.gameover) {
@@ -32,7 +51,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
       <>
         <Dialog
           maxWidth={false}
-          PaperProps={{
+          slotProps={{ paper: {
             sx: {
               marginLeft: {
                 xs: 0,
@@ -48,14 +67,10 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
               },
               backgroundColor: theme.palette.background.paper,
             }
-          }}
+          } }}
           open={
             finished
-          } onClose={async () => {
-            await refreshState();
-            await toHome();
-            window.location.reload();
-          }}>
+          } onClose={() => void backToHome()}>
           <StrategyEndTable allPoints={G.points} numOfTries={G.numberOfTries} />
         </Dialog>
         <Stack sx={{
@@ -291,7 +306,7 @@ export function boardWrapper(board: any, description: any) { //<please> TODO: so
               flexDirection: 'row',
               padding: '15px',
             }}>
-              {board({ G, ctx, moves })}
+              {board(props)}
             </Stack>
           </Stack>
         </Stack>
