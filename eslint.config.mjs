@@ -7,7 +7,7 @@ import tseslint from 'typescript-eslint';
 export default defineConfig(
   // Apply recommended rules to all files
   {
-    files: ['**/*.{js,mjs,cjs,ts,tsx}'],
+    files: ['**/*.{js,mjs,cjs,mts,ts,tsx}'],
     extends: [
       eslint.configs.recommended,
       tseslint.configs.recommended,
@@ -125,7 +125,6 @@ export default defineConfig(
       '**/dist/**',
       '**/build/**',
       '**/node_modules/**',
-      '**/*.config.{js,mjs,cjs,ts,mts}',
       // apps/strategy-practice has its own rule set — @eslint-react, react-hooks,
       // and a stylistic dialect this config does not impose — so it is linted by
       // its own eslint.config.js, through its own `npm run lint`. Not a second
