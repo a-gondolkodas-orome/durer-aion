@@ -52,7 +52,7 @@ export const Overview = () => {
       onToggleFilters={() => setShowFilters(o => !o)}
       activeFilterCount={selectedCategories.length + selectedIcons.length}
     />
-    <div className="px-3 sm:px-4 py-3 sm:py-4 max-w-6xl mx-auto">
+    <div className="px-3 sm:px-4 py-3 sm:py-4 max-w-6xl mx-auto mb-4">
       {showFilters && (
         <div className="border-t border-slate-200 dark:border-slate-700 mt-2 pt-3 flex flex-col gap-1 mb-2">
           <CategoryFilter selected={selectedCategories} onChange={setSelectedCategories} />

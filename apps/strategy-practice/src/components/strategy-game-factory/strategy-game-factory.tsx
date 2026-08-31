@@ -351,7 +351,7 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
     return (
     <main className="flex flex-col p-2 min-h-screen">
       <GameHeader />
-      <div className="flex justify-center grow">
+      <div className="flex justify-center grow mb-4">
         <div className="max-w-[100ch] w-full">
           <GameRule ruleDescription={t(activeVariant.rule ?? rule)} />
           <div className="flex flex-wrap">
