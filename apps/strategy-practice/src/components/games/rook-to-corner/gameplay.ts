@@ -1,8 +1,8 @@
 import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 import { random, some, isEqual, cloneDeep } from 'lodash';
 
-export type Field = { row: number; col: number };
-export type Board = { rookPosition: Field };
+export interface Field { row: number; col: number }
+export interface Board { rookPosition: Field }
 
 export const boardSize = 8;
 export const target: Field = { row: boardSize - 1, col: boardSize - 1 };

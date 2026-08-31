@@ -3,7 +3,7 @@ import type { MoveDefs } from 'strategy-game-factory';
 
 export type SoldierColor = 'blue' | 'red';
 export type Board = SoldierColor[][];
-export type Soldier = { rowIndex: number; pieceIndex: number; group: SoldierColor };
+export interface Soldier { rowIndex: number; pieceIndex: number; group: SoldierColor }
 
 export const generateStartBoard = (): Board => {
   // Not an exact 50/50 generator between the two roles, only a roughly balanced

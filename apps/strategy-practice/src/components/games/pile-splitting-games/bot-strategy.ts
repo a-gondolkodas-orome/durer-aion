@@ -4,7 +4,7 @@ import { isRemovalAllowed, isSplitAllowed, withPileRemoved, type Board, type Mov
 
 // A turn is one decision expressed as two moves: which pile to discard, and
 // where to cut one of those left.
-export type BotStep = { removedPileId: number; pileId: number; pieceCount: number };
+export interface BotStep { removedPileId: number; pileId: number; pieceCount: number }
 
 export type Bot = BotStrategy<Board, Moves>
 

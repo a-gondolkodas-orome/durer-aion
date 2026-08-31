@@ -1,6 +1,6 @@
 import type { Ctx, MoveOutcome } from 'engine';
 
-export type Board = { piles: [number, number], leftRestriction: [boolean, boolean] }
+export interface Board { piles: [number, number], leftRestriction: [boolean, boolean] }
 
 // The pile must have a stone left, and the left pile is closed to a player who
 // took from it on their previous turn. The restriction is recorded per player,

@@ -28,7 +28,7 @@ export const isNeighbour = (from: number, to: number): boolean =>
 // `gameEnd` winner a move returns and in the board client, so they get names.
 export const [POLICE, THIEF] = [0, 1];
 
-export type Board = {
+export interface Board {
   turnCount: number
   policemen: number[]
   thief: number

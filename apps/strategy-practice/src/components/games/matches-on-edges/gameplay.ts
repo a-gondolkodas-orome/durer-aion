@@ -8,9 +8,9 @@ import { random, sample } from 'lodash';
 // each match-free edge bounding the window. A move is legal when it places at
 // least one match and either k = 1 or k is divisible by 4. On each turn the
 // player must play one of the *largest* legal moves.
-export type Board = { n: number; edges: boolean[] };
+export interface Board { n: number; edges: boolean[] }
 
-export type Move = { a: number; b: number; k: number };
+export interface Move { a: number; b: number; k: number }
 
 // Matched edges act as walls, splitting the strip into independent blocks of
 // consecutive cells that carry no interior match. A block's own boundary (a

@@ -20,7 +20,7 @@ export const vertices = [
   { id: 9, x: 3, y: 3, z: 0, cx: '75%', cy: '57.5%' }
 ];
 
-export type Edge = { from: number, to: number }
+export interface Edge { from: number, to: number }
 export type Board = Edge[]
 
 // Takes a half-built edge as well as a complete one: the board client asks about

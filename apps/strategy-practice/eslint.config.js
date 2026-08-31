@@ -101,11 +101,6 @@ export default defineConfig(
       // — this app's code, moved out — so leaving it on here is what would be
       // inconsistent. Turning it on is a project of its own.
       '@typescript-eslint/no-non-null-assertion': 'off',
-      // Off here for the same reason the root config turns it off for
-      // packages/engine and packages/games — this app's code, moved out, in this
-      // app's dialect. 78 violations, every one mechanically fixable; the next
-      // commit fixes all three workspaces and removes both exemptions.
-      '@typescript-eslint/consistent-type-definitions': 'off',
       // The same type-aware rules as the root eslint.config.mjs, kept in step
       // with it — this config lints what that one skips.
       // An object interpolated into a string prints `[object Object]`, which is

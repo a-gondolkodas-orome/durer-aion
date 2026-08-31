@@ -1,6 +1,6 @@
 import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 export type Coef = 'a' | 'b' | 'c'
-export type Board = { a: number | null; b: number | null; c: number | null }
+export interface Board { a: number | null; b: number | null; c: number | null }
 
 export const COEFS: Coef[] = ['a', 'b', 'c'];
 

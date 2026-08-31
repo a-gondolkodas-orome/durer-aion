@@ -1,10 +1,10 @@
 import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 
 export type Grid = boolean[][]
-export type Board = { grid: Grid }
+export interface Board { grid: Grid }
 export type Orientation = 'row' | 'col'
 // The disc the player picked first, while choosing between its row and its column.
-export type TurnState = { r: number; c: number }
+export interface TurnState { r: number; c: number }
 interface Rect { minR: number; maxR: number; minC: number; maxC: number }
 export interface Move { r: number; c: number; orientation: Orientation }
 

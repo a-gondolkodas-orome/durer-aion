@@ -1,7 +1,7 @@
 import { range, sample, difference } from 'lodash';
 import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 
-export type Board = { current: number, target: number, restricted: number | null }
+export interface Board { current: number, target: number, restricted: number | null }
 
 export const generateStartBoard = (): Board => {
   const losingPositions = range(29, 127, 14);

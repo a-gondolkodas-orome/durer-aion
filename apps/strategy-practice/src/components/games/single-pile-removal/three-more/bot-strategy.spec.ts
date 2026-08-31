@@ -25,7 +25,7 @@ const solve = (() => {
 const MAX = 80;
 const INCREMENT = 3;
 
-type Board = { stones: number; maxTake: number };
+interface Board { stones: number; maxTake: number }
 
 describe('three-more analysis', () => {
   it('moverWins agrees with an independent brute-force solver', () => {

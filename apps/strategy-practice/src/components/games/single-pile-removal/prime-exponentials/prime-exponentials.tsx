@@ -14,12 +14,12 @@ import {
 // What the three presentational pieces below all need to judge and dispatch an
 // entry. `hoverProps` is read off the hook rather than restated, so it cannot
 // drift from it.
-type EntryProps = {
+interface EntryProps {
   board: Board;
   isEntryAllowed: (entry: PrimePower) => boolean;
   chooseEntry: (entry: PrimePower) => void;
   hoverProps: ReturnType<typeof useHoverPreview<PrimePower>>['hoverProps'];
-};
+}
 import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
 
 const PrimePowerButton = (

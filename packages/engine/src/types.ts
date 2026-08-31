@@ -32,7 +32,7 @@ export interface Ctx<TTurnState = unknown> {
 
 // Everything a move can cause, expressed as data: the engine interprets what
 // the move returns, so a move never reaches out and changes anything itself.
-export type MoveOutcome<TBoard, TTurnState = unknown> = {
+export interface MoveOutcome<TBoard, TTurnState = unknown> {
   nextBoard: TBoard
   // Turn passes to the other player. Omitted = further moves follow in the same
   // turn. Ignored when `gameEnd` is present.
@@ -71,7 +71,7 @@ export type MoveFunction<TBoard, TTurnState = unknown> = (
 export type MoveValidator<TBoard, TTurnState = unknown> = (
   board: TBoard, meta: { ctx: Ctx<TTurnState> }, ...args: BivariantArgs
 ) => boolean
-export type MoveDefinition<TBoard, TTurnState = unknown> = {
+export interface MoveDefinition<TBoard, TTurnState = unknown> {
   apply: MoveFunction<TBoard, TTurnState>
   validate?: MoveValidator<TBoard, TTurnState>
 }
@@ -99,7 +99,7 @@ export type ClientGameMoves<TBoard, TTurnState = unknown> = Record<
   ((board: TBoard, ...args: unknown[]) => MoveOutcome<TBoard, TTurnState>)
     & { isAllowed: (board: TBoard, ...args: unknown[]) => boolean }
 >
-export type StrategyArgs<TBoard, TTurnState = unknown> = {
+export interface StrategyArgs<TBoard, TTurnState = unknown> {
   board: TBoard
   ctx: Ctx<TTurnState>
 }
@@ -115,7 +115,7 @@ type MoveArgs<TApply> =
 // Any named move, as a shape rather than through `BotMove` below. `BotMove` is
 // a conditional type, so nothing can be inferred through it; a helper that wants
 // to keep hold of a concrete move's argument tuple takes this instead.
-export type NamedBotMove = { move: string; args?: unknown[] }
+export interface NamedBotMove { move: string; args?: unknown[] }
 // A move a bot wants played, named rather than dispatched. Given the game's
 // `Moves` it pins the name and the arguments; given only a union of names (or
 // nothing) it still pins the name, leaving `args` unchecked.
@@ -185,7 +185,7 @@ export interface Presentation<TBoard, TTurnState = unknown> {
 // host consumes: `strategyGameFactory` turns it into a practice page, and a
 // competition shell renders its `BoardClient` and plays its `gameplay` —
 // which is why it lives here rather than with any one of those hosts.
-export type StrategyGameConfig<TBoard, TTurnState = unknown> = {
+export interface StrategyGameConfig<TBoard, TTurnState = unknown> {
   presentation: Presentation<TBoard, TTurnState>
   BoardClient: ComponentType<BoardClientProps<TBoard, TTurnState>>
   gameplay: Gameplay<TBoard, TTurnState>

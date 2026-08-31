@@ -21,7 +21,7 @@ const boardToMask = (board: Board): number => {
   return mask;
 };
 
-type MaskMove = { domino: Domino; mask: number };
+interface MaskMove { domino: Domino; mask: number }
 
 const movesForPlayer = (mask: number, player: number): MaskMove[] => {
   const result: MaskMove[] = [];

@@ -68,10 +68,10 @@ export default defineConfig(
       '@typescript-eslint/use-unknown-in-catch-callback-variable': 'error',
     },
   },
-  // packages/engine and packages/games are apps/strategy-practice code moved out of it, still
-  // written in that app's dialect and composing its types. Two rules of this config
-  // disagree with the conventions that code follows, and rewriting it would turn a move
-  // into a rewrite — they stay off here until the two rule sets are unified.
+  // packages/engine and packages/games are apps/strategy-practice code moved out of it,
+  // still written in that app's dialect: `!` stands in for a guard the game's rules
+  // already make redundant, and auditing several hundred of those would turn a move
+  // into a rewrite. Off in apps/strategy-practice's own config too, for the same code.
   {
     files: [
       'packages/engine/**/*.{ts,tsx}',
@@ -79,7 +79,6 @@ export default defineConfig(
     ],
     rules: {
       '@typescript-eslint/no-non-null-assertion': 'off',
-      '@typescript-eslint/consistent-type-definitions': 'off',
     },
   },
   // The core of the package is what a bare node server imports; its React client half

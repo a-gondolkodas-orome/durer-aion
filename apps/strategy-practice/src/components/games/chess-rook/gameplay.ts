@@ -2,8 +2,8 @@ import { cloneDeep, isEqual, range, some } from 'lodash';
 import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 
 export type CellValue = null | 'rook' | 'visited';
-export type Field = { row: number; col: number };
-export type Board = { chessBoard: CellValue[][]; rookPosition: Field };
+export interface Field { row: number; col: number }
+export interface Board { chessBoard: CellValue[][]; rookPosition: Field }
 
 export const startBoard: Board = {
 chessBoard: range(0, 8).map(row =>

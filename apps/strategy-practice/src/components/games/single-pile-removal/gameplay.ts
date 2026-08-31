@@ -5,7 +5,7 @@ import type { MoveValidator } from 'strategy-game-factory';
 // `maxTake` is the most a player may take this turn: each game bakes its opening
 // cap into the start board, and its `take` move derives the next cap from its
 // own rule.
-export type Board = { stones: number; maxTake: number }
+export interface Board { stones: number; maxTake: number }
 
 // The most a player may legally take this turn.
 export const cap = (board: Board): number => Math.min(board.maxTake, board.stones);

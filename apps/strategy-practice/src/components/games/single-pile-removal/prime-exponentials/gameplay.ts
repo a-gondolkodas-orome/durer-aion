@@ -21,7 +21,7 @@ const primeList = [
 
 // One subtractable entry: the base, the power it is raised to, and the number
 // that comes out. The board renders all three, so all three are named.
-export type PrimePower = { prime: number; exponent: number; value: number };
+export interface PrimePower { prime: number; exponent: number; value: number }
 
 export const allPrimePowers: PrimePower[] = (() => {
   const entries = [{ prime: 2, exponent: 0, value: 1 }];
