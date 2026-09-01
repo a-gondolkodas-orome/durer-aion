@@ -3,6 +3,7 @@
 import eslint from '@eslint/js';
 import { defineConfig } from 'eslint/config';
 import tseslint from 'typescript-eslint';
+import { quotesRule, stylisticPlugin, stylisticRules, stylisticRulesOff } from './eslint.stylistic.mjs';
 
 export default defineConfig(
   // Apply recommended rules to all files
@@ -116,6 +117,36 @@ export default defineConfig(
         }],
       }],
     },
+  },
+  // Formatting, shared with apps/strategy-practice's config — see eslint.stylistic.mjs
+  // for what belongs in that list and why it is rules rather than prettier. `--fix`
+  // applies all of it, which is what the editor runs on save.
+  {
+    files: ['**/*.{js,mjs,cjs,mts,ts,tsx}'],
+    plugins: stylisticPlugin,
+    rules: stylisticRules,
+  },
+  {
+    // Quote style, for the same two packages the block above exempts from
+    // no-non-null-assertion and for the same reason: this is apps/strategy-practice
+    // code, moved out, and that app has enforced single quotes all along. Both
+    // already comply, so this rewrites nothing and keeps it that way. The rest of
+    // the repo never had the rule and never settled — see eslint.stylistic.mjs.
+    files: [
+      'packages/engine/**/*.{ts,tsx}',
+      'packages/games/**/*.{ts,tsx}',
+    ],
+    rules: quotesRule,
+  },
+  {
+    // Written by a generator that has to reproduce them byte for byte:
+    // remove-divisor-multiple's table says so at the top of the file, and moveMap
+    // is what generateStrategy.py beside it prints. See eslint.stylistic.mjs.
+    files: [
+      'packages/games/src/remove-divisor-multiple/bot-strategy.ts',
+      'packages/game/src/games/strategy/stones/moveMap.ts',
+    ],
+    rules: stylisticRulesOff,
   },
   // Build and repo tooling under scripts/ runs in Node, not the browser, so `process`, `console`,
   // `URL` and `fetch` are globals rather than undefined names.

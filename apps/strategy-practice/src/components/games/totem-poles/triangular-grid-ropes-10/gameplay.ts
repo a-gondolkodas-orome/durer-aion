@@ -59,13 +59,13 @@ export const getAllowedSuperset = (board: Board, { from, to }: { from: number | 
 };
 
 
-/* eslint-disable array-element-newline */
+/* eslint-disable @stylistic/array-element-newline */
 const oneLengthEdges = [
   '0-1', '1-3', '3-6', '2-4', '4-7', '5-8',
   '0-2', '2-5', '5-9', '1-4', '4-8', '3-7',
   '6-7', '7-8', '8-9', '3-4', '4-5', '1-2'
 ];
-/* eslint-enable array-element-newline */
+/* eslint-enable @stylistic/array-element-newline */
 
 export type Direction = 'x' | 'y' | 'z';
 

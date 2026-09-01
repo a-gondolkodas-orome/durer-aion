@@ -1,0 +1,18 @@
+# What every editor should do to a file before ESLint ever sees it. This is where
+# indentation lives: `@stylistic/indent` is deliberately not enabled (see
+# eslint.stylistic.mjs), because reindenting existing code fights styles that were
+# chosen on purpose — deep JSX under a `return (`, most of all. Settling it for new
+# code costs nothing and rewrites nothing.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.md]
+# Two trailing spaces are a hard line break in markdown.
+trim_trailing_whitespace = false

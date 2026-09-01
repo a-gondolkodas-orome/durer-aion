@@ -109,8 +109,9 @@ npm run dev:relay-practice
 # Build all packages
 npm run build
 
-# Lint
+# Lint — also the formatter: `lint:fix` applies it, and the editor runs it on save
 npm run lint
+npm run lint:fix
 
 # Typecheck (tsc --noEmit per workspace, via turbo)
 npm run typecheck
@@ -249,6 +250,23 @@ mirror works, and what to set up when the year's repo is created.
   strategy and relay practice sites also offer English through their own
   language switchers
 - Winner is tracked in `G.winner` state field
+- **Formatting is ESLint's, through `@stylistic`, not prettier's.** The
+  character-level rules — spacing, blank lines, final newlines — live in
+  `eslint.stylistic.mjs`, which both configs import; the rules that decide where a
+  line *breaks* stay per-workspace (`layout` in
+  `apps/strategy-practice/eslint.config.js` says why). A rule joins the shared set
+  only if it fixes characters, never line breaks: layout here often carries meaning
+  — a board written as a grid, assertions aligned to be read side by side — and
+  `--fix` must not rewrite it. `@stylistic/indent` is absent for that reason, and
+  `.editorconfig` settles indentation for new code instead. Quote style is enforced
+  only where the code already agrees on one — `apps/strategy-practice` and the two
+  packages moved out of it — because the rest of the repo never settled, and
+  picking for it is a decision of its own rather than a side effect of a formatting
+  change. Prettier was evaluated and rejected: it re-prints each file from its AST,
+  and rewrote 661 files where these rules rewrite 112 — the difference being
+  prettier's opinion, not this repo's inconsistency. Generated lookup tables have
+  the formatting rules switched off by name (`stylisticRulesOff`), which keeps
+  every rule about meaning applying to them.
 - Comment what is not evident from the code — a rule the condition alone does
   not imply, a non-obvious invariant, why an apparently redundant branch
   exists. A comment restating the line below it is noise.

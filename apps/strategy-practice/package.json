@@ -61,9 +61,5 @@
     "plugins": {
       "@tailwindcss/postcss": {}
     }
-  },
-  "prettier": {
-    "trailingComma": "none",
-    "printWidth": 120
   }
 }
