@@ -28,8 +28,8 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 
   const toAppear = ({ pileId, pieceId }: Piece) => {
     if (validHoveredPiece === null) return false;
-    if(pileId === validHoveredPiece.pileId) return false;
-    if(pieceId > board[pileId] + removedCount() / 2 - 1) return false;
+    if (pileId === validHoveredPiece.pileId) return false;
+    if (pieceId > board[pileId] + removedCount() / 2 - 1) return false;
     return true;
   };
 

@@ -40,7 +40,7 @@ export function InProgressRelay({ G, ctx, moves, maxPointsList, selectRoundOnEnd
     window.location.reload();
   };
 
-  useEffect(()=>{
+  useEffect(() => {
     if (!ctx.gameover) {
       // This function runs only once (on page reload) because it is inside a useEffect.
       // Otherwise, it would run on every render.
@@ -60,8 +60,8 @@ export function InProgressRelay({ G, ctx, moves, maxPointsList, selectRoundOnEnd
   const isOffline = clientRepo.version === "OFFLINE";
   return (
     <>
-      <Dialog 
-        maxWidth={false} 
+      <Dialog
+        maxWidth={false}
         slotProps={{ paper: {
           sx: {
             marginLeft: {
@@ -83,7 +83,7 @@ export function InProgressRelay({ G, ctx, moves, maxPointsList, selectRoundOnEnd
           finished
         } onClose={() => void backToHome()}>
           {<RelayEndTable allPoints={G.points} selectRound={selectRoundOnEnd} task={
-           (maxPointsList ?? DEFAULT_MAX_POINTS).map((it, idx)=>({
+           (maxPointsList ?? DEFAULT_MAX_POINTS).map((it, idx) => ({
             max: it,
             got: G.previousPoints[idx] ?? null,
            })
@@ -110,12 +110,12 @@ export function InProgressRelay({ G, ctx, moves, maxPointsList, selectRoundOnEnd
             paddingLeft: "30px",
             marginBottom: '20px'
           }}>
-            <b style={{marginRight: '5px'}}>{t('general.remainingTime')}:</b>
+            <b style={{ marginRight: '5px' }}>{t('general.remainingTime')}:</b>
             <Countdown
               msRemaining={msRemaining ?? null}
               setMsRemaining={() => undefined}
               getServerTimer={() => undefined}
-              endTime={new Date(G.end)} 
+              endTime={new Date(G.end)}
               serverRemainingMs={G.millisecondsRemaining}/>
           </Stack>
         <Stack sx={{
@@ -130,10 +130,10 @@ export function InProgressRelay({ G, ctx, moves, maxPointsList, selectRoundOnEnd
           },
           padding: '30px',
         }}>
-          <ExerciseTask 
+          <ExerciseTask
             task={G.problemText}
             maxPoints={G.currentProblemMaxPoints}
-            serial={G.currentProblem+1}
+            serial={G.currentProblem + 1}
             pictureUrl={G.url}
           />
         </Stack>
@@ -157,10 +157,10 @@ export function InProgressRelay({ G, ctx, moves, maxPointsList, selectRoundOnEnd
           borderRadius: "25px",
           padding: '30px',
         }}>
-          <ExerciseForm 
-            previousTries={G.previousAnswers[G.currentProblem].map(it=>it.answer)} 
+          <ExerciseForm
+            previousTries={G.previousAnswers[G.currentProblem].map(it => it.answer)}
             previousCorrectness={!finished ? G.correctnessPreviousAnswer : null}
-            attempt={(G.currentProblem+1) * 3 + G.numberOfTry}
+            attempt={(G.currentProblem + 1) * 3 + G.numberOfTry}
             onSubmit={(input: number) => clientRepo.submitRelayAnswer(input, moves)}
           />
           <Stack sx={{
@@ -170,7 +170,7 @@ export function InProgressRelay({ G, ctx, moves, maxPointsList, selectRoundOnEnd
             fontSize: 18,
             flexDirection: 'row',
           }}>
-            <b style={{marginRight: '5px'}}>{t('general.remainingTime')}:</b>
+            <b style={{ marginRight: '5px' }}>{t('general.remainingTime')}:</b>
             {!finished && <Countdown
               msRemaining={msRemaining ?? null}
               setMsRemaining={setMsRemaining}
@@ -178,7 +178,7 @@ export function InProgressRelay({ G, ctx, moves, maxPointsList, selectRoundOnEnd
               endTime={new Date(G.end)}
               serverRemainingMs={G.millisecondsRemaining} />}
           </Stack>
-          { isOffline && 
+          { isOffline &&
             <Stack sx={{
               flexDirection: 'row',
               width: '250px',

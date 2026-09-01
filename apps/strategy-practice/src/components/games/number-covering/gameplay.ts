@@ -16,7 +16,7 @@ export const moves = {
         && board[number - 1] !== COVERED,
     apply: (board, _, number: number): MoveOutcome<Board> => {
       const nextBoard = cloneDeep(board);
-      nextBoard[number-1] = COVERED;
+      nextBoard[number - 1] = COVERED;
 
       const remaining = getRemaining(nextBoard);
       if (remaining.length === 2) {

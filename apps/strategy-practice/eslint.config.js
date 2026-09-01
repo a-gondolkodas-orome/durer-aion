@@ -5,19 +5,35 @@ import reactPlugin from '@eslint-react/eslint-plugin';
 import reactHooks from 'eslint-plugin-react-hooks';
 import tsParser from '@typescript-eslint/parser';
 import tsPlugin from '@typescript-eslint/eslint-plugin';
+import { quotesRule, stylisticPlugin, stylisticRules, stylisticRulesOff } from '../../eslint.stylistic.mjs';
 
 // The house spelling: rules that say the same thing about any file, whatever it
 // holds. Shared rather than repeated — the TypeScript under src/ and this app's
 // own JavaScript are both held to it.
+//
+// Most of it is now the repo's, from eslint.stylistic.mjs, which the root config
+// imports too: trailing whitespace, blank lines and spacing say the same thing on
+// either side of the workspace boundary, and there was no reason for two answers.
+// `quotesRule` comes from there as well, unchanged in effect — this app is where
+// single quotes were already enforced, and that module explains why the rest of
+// the repo does not get it yet. What stays below is what is this app's alone.
 const houseStyle = {
-  'comma-dangle': ['error', 'never'],
-  'max-len': ['error', { code: 120, ignoreUrls: true }],
+  ...stylisticRules,
+  ...quotesRule,
+  // `generics: 'ignore'` is load-bearing: in a .tsx file `<T, >` is how a generic
+  // parameter says it is not a JSX tag, and @stylistic's comma-dangle reaches type
+  // parameters where eslint core's did not — `--fix` would strip that comma and
+  // leave the file unparseable. Everything else stays 'never', as it was.
+  '@stylistic/comma-dangle': ['error', {
+    arrays: 'never', objects: 'never', imports: 'never', exports: 'never',
+    functions: 'never', enums: 'never', tuples: 'never', generics: 'ignore'
+  }],
+  '@stylistic/max-len': ['error', { code: 120, ignoreUrls: true }],
+  // Rules about meaning, which stayed in eslint core when the formatting ones were
+  // deprecated out of it.
   'no-debugger': 'error',
   'no-duplicate-imports': 'error',
-  'no-multiple-empty-lines': ['error', { max: 2 }],
-  'no-trailing-spaces': 'error',
-  'no-var': 'error',
-  'quotes': ['error', 'single', { avoidEscape: true, allowTemplateLiterals: true }]
+  'no-var': 'error'
 };
 
 // How code breaks across lines. Tuned for components — nested JSX props and
@@ -27,10 +43,14 @@ const houseStyle = {
 // max-len is off for *-svg and array-element-newline for specs, below.
 const layout = {
   'curly': ['error', 'multi-line'],
-  'object-curly-newline': ['error', { 'consistent': true }],
-  'object-property-newline': ['error', { 'allowAllPropertiesOnSameLine': true }],
-  'array-bracket-newline': ['error', 'consistent'],
-  'array-element-newline': ['error', 'consistent']
+  '@stylistic/object-curly-newline': ['error', { 'consistent': true }],
+  '@stylistic/array-bracket-newline': ['error', 'consistent'],
+  '@stylistic/array-element-newline': ['error', 'consistent']
+  // object-property-newline is deliberately not carried over with the rest.
+  // @stylistic's version reaches TypeScript type members, where eslint core's
+  // stopped at object literals, and it splits declarations this code pairs on
+  // purpose — `x1: number; y1: number;` over one line and `x2, y2` over the next,
+  // which is the shape of the thing — leaving the halves unindented.
 };
 
 export default defineConfig(
@@ -64,7 +84,7 @@ export default defineConfig(
   },
   {
     files: ['src/**/*.{ts,tsx}'],
-    plugins: { '@eslint-react': reactPlugin },
+    plugins: { ...stylisticPlugin, '@eslint-react': reactPlugin },
     rules: {
       ...houseStyle,
       ...layout,
@@ -164,13 +184,13 @@ export default defineConfig(
   {
     // SVG files contain inline path data that cannot be meaningfully reformatted
     files: ['src/**/*-svg.{ts,tsx}'],
-    rules: { 'max-len': 'off' }
+    rules: { '@stylistic/max-len': 'off' }
   },
   {
     // test files may contain nicely formatted arrays such as for tictactoe
     files: ['src/**/*spec.{ts,tsx}'],
     rules: {
-      'array-element-newline': 'off',
+      '@stylistic/array-element-newline': 'off',
       // `() => {}` as a prop or a stubbed DOM method is a test double saying "this
       // is never called, and if it is, do nothing" — which is the assertion. In
       // application code an empty function is a hole; here it is the point.
@@ -193,6 +213,7 @@ export default defineConfig(
     languageOptions: {
       globals: { process: 'readonly', console: 'readonly', URL: 'readonly', fetch: 'readonly' }
     },
+    plugins: stylisticPlugin,
     rules: { ...js.configs.recommended.rules, ...houseStyle }
   },
   // The pre-generated AI move tables are built by CommonJS scripts; package.json
@@ -202,6 +223,7 @@ export default defineConfig(
     languageOptions: {
       globals: { module: 'readonly', require: 'readonly', console: 'readonly', __dirname: 'readonly' }
     },
+    plugins: stylisticPlugin,
     rules: { ...js.configs.recommended.rules, ...houseStyle }
   },
   // These one-off generators write their search as blocks of parallel lines — four
@@ -210,7 +232,7 @@ export default defineConfig(
   // direction, which is the only reason the code is readable at all.
   {
     files: ['scripts/pre-generate-ai-moves/**'],
-    rules: { 'max-len': 'off' }
+    rules: { '@stylistic/max-len': 'off' }
   },
   // vite.config.js sets `test.globals: true`, so these specs take describe/it/expect
   // from the environment. The root's scripts/*.test.mjs import them from 'vitest'
@@ -220,6 +242,12 @@ export default defineConfig(
     languageOptions: {
       globals: { describe: 'readonly', it: 'readonly', expect: 'readonly' }
     }
+  },
+  {
+    // Generated verbatim from the board's definition and marked as such at the top
+    // of the file; the formatting rules are off for it, the rules about meaning are not.
+    files: ['src/components/games/modified-mill/board-data.ts'],
+    rules: stylisticRulesOff
   },
   // The root config's `**/dist/**` does not reach in here: ESLint picks a directory's
   // config from its *parent*, so everything under this one is judged by this file.

@@ -27,7 +27,7 @@ export const moves = {
       for (let i = pileId - pieceCount; i < pileId; i++) {
         nextBoard[i] = board[i] + 1;
       }
-      const isGameEnd = nextBoard[1]===0 && nextBoard[2]===0 && nextBoard[3]===0;
+      const isGameEnd = nextBoard[1] === 0 && nextBoard[2] === 0 && nextBoard[3] === 0;
       if (isGameEnd) {
         return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }

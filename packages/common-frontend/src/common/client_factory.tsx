@@ -6,7 +6,7 @@ import { GameType } from "game";
 import type { GameRelay } from "game";
 
 export const ClientFactory = function<T_SpecificGameState> (
-  game: GameType<T_SpecificGameState>, 
+  game: GameType<T_SpecificGameState>,
   board: StrategyBoard<T_SpecificGameState>,
   description: ReactNode,
   serverUrl: string | undefined = undefined,

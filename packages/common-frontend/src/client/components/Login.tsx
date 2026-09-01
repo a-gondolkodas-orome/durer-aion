@@ -81,7 +81,7 @@ export function Login() {
         <Stack>
           <Form style={{ position: "relative", zIndex: 2 }} initialValues={{ joinCode: '' }}
             onSubmit={(values) => {
-              if(!values.joinCode) {
+              if (!values.joinCode) {
                 enqueueSnackbar(t('login.error.empty'), { variant: 'error' });
                 return;
               }
@@ -91,14 +91,14 @@ export function Login() {
                 enqueueSnackbar(err instanceof Error ? err.message : t('error.unexpected'), { variant: 'error' });
               });
             }}>
-            <Field 
+            <Field
               name="joinCode"
               type="text"
             >
 
         {
           ({
-            field, 
+            field,
             form: { handleChange },
           }: FieldProps) => <MaskedInput
             {...field}
@@ -117,7 +117,7 @@ export function Login() {
           />
         }
             </Field>
-            <Button 
+            <Button
               type="submit"
               color='primary'
               variant='contained'
@@ -152,7 +152,7 @@ export function Login() {
          paddingTop: {
           xs: "20px",
           md: "100px"
-        }}}>
+        } }}>
         {t('login.fallback')}
       </Stack>
     </Stack>

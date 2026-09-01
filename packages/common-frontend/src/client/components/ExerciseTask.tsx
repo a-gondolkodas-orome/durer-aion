@@ -14,12 +14,12 @@ export const ExerciseTask: React.FunctionComponent<ExerciseTaskProps> = (props: 
 </latex-js>`;
   const { t } = useTranslation();
   return <Stack>
-    <Trans sx={{fontSize: '20px'}}
+    <Trans sx={{ fontSize: '20px' }}
       i18nKey='relay.task'
-      values={{ num: props.serial, maxpoints: t('general.points', { count: props.maxPoints})}}
+      values={{ num: props.serial, maxpoints: t('general.points', { count: props.maxPoints }) }}
       />
     <div dangerouslySetInnerHTML={{ __html: completestring }} />
-    {props.pictureUrl && <img src={props.pictureUrl} style={{maxWidth:'80%', display: 'flex', marginLeft:'auto', marginRight: 'auto', marginTop: "30px"}} alt={t('relay.taskImage')}/>}
+    {props.pictureUrl && <img src={props.pictureUrl} style={{ maxWidth: '80%', display: 'flex', marginLeft: 'auto', marginRight: 'auto', marginTop: "30px" }} alt={t('relay.taskImage')}/>}
   </Stack>
-    
+
 }

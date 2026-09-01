@@ -16,7 +16,7 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
     >{label} → {result}</button>
   );
 
-  return(
+  return (
     <GameBoard>
       <h2 className="text-center text-5xl font-bold my-4">{board}</h2>
       <div className="flex flex-wrap gap-2">

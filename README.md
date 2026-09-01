@@ -277,7 +277,7 @@ authority on everything under that directory.
 ## The checks CI runs
 
 ```bash
-npm run lint
+npm run lint          # also the formatter — `npm run lint:fix` applies it
 npm run typecheck
 npm test
 npm run build
@@ -296,6 +296,18 @@ against its own `eslint.config.js` and everything else against the root
 own — to lint one package while you work in it, run `npx eslint .` from its
 directory and you get exactly that subtree, under whichever config governs it.
 What you see there is what CI sees.
+
+It is the formatting gate too, so there is nothing extra for CI to run.
+`eslint.stylistic.mjs` holds the character-level rules both configs import —
+spacing, blank lines, final newlines — while the rules that decide where a line
+*breaks* stay per-workspace. `npm run lint:fix` applies them, and
+`.vscode/settings.json` runs the same fixes on save. They are `@stylistic` rules
+because eslint core's formatting rules are deprecated and frozen. What the shared
+set deliberately excludes is anything that moves code between lines: layout in this
+repo is often deliberate, and a formatter that re-prints from the AST cannot tell a
+grid from an accident. `.editorconfig` covers indentation for new code, and quote
+style is enforced only where the code already agrees on one — that module says
+which, and why the rest is left alone.
 
 `npm run spell-check` checks English and Hungarian alike (via
 `@cspell/dict-hu-hu`, with both British and American spellings accepted),

@@ -19,7 +19,7 @@ import {
 } from './game-list/sections';
 
 const sectionTitles: Record<SectionKey, I18nNode> = {
-  AB:  { hu: '5-8. osztályosoknak (A-B kategória)', en: 'For grades 5–8 (A–B category)' },
+  AB: { hu: '5-8. osztályosoknak (A-B kategória)', en: 'For grades 5–8 (A–B category)' },
   CDE: { hu: '9-12. osztályosoknak (C-D-E kategória)', en: 'For grades 9–12 (C-D-E category)' }
 };
 

@@ -24,7 +24,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board, TurnState>) 
               key={i}
               className={`
                 m-[2%] aspect-square inline-block bg-blue-800 rounded-full
-                ${board[id] <= 4 ? 'w-[37%]' : (board[id] <= 6 ? 'w-[28%]': 'w-[20%]')}
+                ${board[id] <= 4 ? 'w-[37%]' : (board[id] <= 6 ? 'w-[28%]' : 'w-[20%]')}
                 ${showDimmedDisc && id === firstPlacedSquareIndex && i === board[id] - 1 ? 'opacity-40' : ''}
               `}
             >

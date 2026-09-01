@@ -1,7 +1,7 @@
 import { Client } from 'boardgame.io/react';
 import { Local } from 'boardgame.io/multiplayer';
 import type { RelayBoard } from 'common-frontend';
-import type {GameRelay, MyGameState as RelayGameState} from 'game';
+import type { GameRelay, MyGameState as RelayGameState } from 'game';
 import { RelayWrapper } from 'game';
 import botWrapper from './botwrapper';
 import type { BotStrategy } from './botwrapper';
@@ -18,7 +18,7 @@ export function ClientRelayWithBot(
   // The relay bot answers with the next problem's text, points and image URL,
   // so its move args are that mixed tuple rather than a position.
   strategy: BotStrategy<RelayGameState, (number | string | boolean)[]>,
-  _description: ReactNode){
+  _description: ReactNode) {
   return Client({
     game: RelayWrapper(handleGameReport),
     board: board,

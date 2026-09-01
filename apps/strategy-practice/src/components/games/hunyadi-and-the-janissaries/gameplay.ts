@@ -22,7 +22,7 @@ export const generateStartBoard = (): Board => {
     }
     if (random(0, 6) >= 3) {
       row.push('blue');
-      totalScore += (1/2)**i;
+      totalScore += (1 / 2) ** i;
     }
     board.push(row);
   }

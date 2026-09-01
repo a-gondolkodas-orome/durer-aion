@@ -63,8 +63,8 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           key={rowIndex}
           style={{
             aspectRatio: rowIndex === 6 ? 24 : 8,
-            marginLeft: (6-rowIndex) + 'rem',
-            marginRight: (6-rowIndex) + 'rem'
+            marginLeft: (6 - rowIndex) + 'rem',
+            marginRight: (6 - rowIndex) + 'rem'
           }}
           className="border-t-stone-600 border-t-2 p-0.5 text-center whitespace-nowrap"
         >

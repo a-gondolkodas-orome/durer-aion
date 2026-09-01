@@ -7,12 +7,12 @@ const GameE = MyGameWrappers.E();
 
 const description = <p className="text-justify"></p>
 const serverUrl = import.meta.env.VITE_SERVER_URL;
-export const { Client:RelayClient_C, OnlineClient:RelayOnlineClient_C } = ClientFactoryRelay({...GameRelay, name: "relay_c"}, InProgressRelay, description, serverUrl);
-export const { Client:RelayClient_D, OnlineClient:RelayOnlineClient_D } = ClientFactoryRelay({...GameRelay, name: "relay_d"}, InProgressRelay, description, serverUrl);
-export const { Client:RelayClient_E, OnlineClient:RelayOnlineClient_E } = ClientFactoryRelay({...GameRelay, name: "relay_e"}, InProgressRelay, description, serverUrl);
-export const { Client: Client_C, OnlineClient: StrategyOnlineClient_C } = ClientFactory({...GameC, name: strategyNames.C}, MyBoardWrapper("C"), descriptionC, serverUrl);
-export const { Client: Client_D, OnlineClient: StrategyOnlineClient_D } = ClientFactory({...GameD, name: strategyNames.D}, MyBoardWrapper("D"), descriptionD, serverUrl);
-export const { Client: Client_E, OnlineClient: StrategyOnlineClient_E } = ClientFactory({...GameE, name: strategyNames.E}, MyBoardWrapper("E"), descriptionE, serverUrl);
+export const { Client: RelayClient_C, OnlineClient: RelayOnlineClient_C } = ClientFactoryRelay({ ...GameRelay, name: "relay_c" }, InProgressRelay, description, serverUrl);
+export const { Client: RelayClient_D, OnlineClient: RelayOnlineClient_D } = ClientFactoryRelay({ ...GameRelay, name: "relay_d" }, InProgressRelay, description, serverUrl);
+export const { Client: RelayClient_E, OnlineClient: RelayOnlineClient_E } = ClientFactoryRelay({ ...GameRelay, name: "relay_e" }, InProgressRelay, description, serverUrl);
+export const { Client: Client_C, OnlineClient: StrategyOnlineClient_C } = ClientFactory({ ...GameC, name: strategyNames.C }, MyBoardWrapper("C"), descriptionC, serverUrl);
+export const { Client: Client_D, OnlineClient: StrategyOnlineClient_D } = ClientFactory({ ...GameD, name: strategyNames.D }, MyBoardWrapper("D"), descriptionD, serverUrl);
+export const { Client: Client_E, OnlineClient: StrategyOnlineClient_E } = ClientFactory({ ...GameE, name: strategyNames.E }, MyBoardWrapper("E"), descriptionE, serverUrl);
 
 
 const DURER_XVI_CLIENT_C_RELAY = RelayOnlineClient_C;
@@ -30,17 +30,17 @@ export function RelayClient({ category, matchID, credentials }: {
     <>
     {
       category === 'C' && (
-        <DURER_XVI_CLIENT_C_RELAY {...{credentials, matchID}}/>
+        <DURER_XVI_CLIENT_C_RELAY {...{ credentials, matchID }}/>
       )
     }
     {
       category === 'D' && (
-        <DURER_XVI_CLIENT_D_RELAY {...{credentials, matchID}}/>
+        <DURER_XVI_CLIENT_D_RELAY {...{ credentials, matchID }}/>
       )
     }
     {
       category === 'E' && (
-        <DURER_XVI_CLIENT_E_RELAY {...{credentials, matchID}}/>
+        <DURER_XVI_CLIENT_E_RELAY {...{ credentials, matchID }}/>
       )
     }
     </>
@@ -56,17 +56,17 @@ export function StrategyClient({ category, matchID, credentials }: {
     <>
     {
       category === 'C' && (
-        <DURER_XVI_CLIENT_C_STRATEGY {...{credentials, matchID}}/>
+        <DURER_XVI_CLIENT_C_STRATEGY {...{ credentials, matchID }}/>
       )
     }
     {
       category === 'D' && (
-        <DURER_XVI_CLIENT_D_STRATEGY {...{credentials, matchID}}/>
+        <DURER_XVI_CLIENT_D_STRATEGY {...{ credentials, matchID }}/>
       )
     }
     {
       category === 'E' && (
-        <DURER_XVI_CLIENT_E_STRATEGY {...{credentials, matchID}}/>
+        <DURER_XVI_CLIENT_E_STRATEGY {...{ credentials, matchID }}/>
       )
     }
     </>

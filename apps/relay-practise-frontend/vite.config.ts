@@ -30,8 +30,8 @@ export default defineConfig(() => {
       },
     },
     optimizeDeps: {
-      exclude: ["game", "schemas", "strategy", "common-frontend"], 
-      include: ["boardgame.io"], 
+      exclude: ["game", "schemas", "strategy", "common-frontend"],
+      include: ["boardgame.io"],
     },
     build: {
       rollupOptions: {

@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
  * @param props {{setShow: React.Dispatch<boolean>, points: number}}
  * @returns End screen
  */
-export function StrategyEndTable(props: {allPoints: number, numOfTries: number}) {
+export function StrategyEndTable(props: { allPoints: number, numOfTries: number }) {
   const theme = useTheme();
   const toHome = useToHome();
   const refreshState = useRefreshTeamState();

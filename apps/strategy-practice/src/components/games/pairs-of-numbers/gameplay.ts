@@ -50,7 +50,7 @@ export const generateStartBoard = () => {
     }
   } else {
     const b = random(5, 9) * 2;
-    const a = b * (2 + random(0, 3)) + random(0, Math.floor((b - 1)/2)) * 2 + 1;
+    const a = b * (2 + random(0, 3)) + random(0, Math.floor((b - 1) / 2)) * 2 + 1;
     return [a, b];
   }
 
