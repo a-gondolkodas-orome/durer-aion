@@ -7,13 +7,20 @@ import tseslint from 'typescript-eslint';
 export default defineConfig(
   // Apply recommended rules to all files
   {
-    files: ['**/*.{js,mjs,cjs,ts,tsx}'],
+    files: ['**/*.{js,mjs,cjs,mts,ts,tsx}'],
     extends: [
       eslint.configs.recommended,
       tseslint.configs.recommended,
       tseslint.configs.stylistic,
       tseslint.configs.strict,
     ],
+    // Pinned, not inferred. One `eslint .` loads this config and
+    // apps/strategy-practice's in the same process, so typescript-eslint sees two
+    // candidate roots and refuses to guess — even for the files here that no
+    // type-aware rule touches. Both configs name their own root explicitly.
+    languageOptions: {
+      parserOptions: { tsconfigRootDir: import.meta.dirname },
+    },
   },
   // Type-aware linting for source TypeScript files
   {
@@ -61,10 +68,10 @@ export default defineConfig(
       '@typescript-eslint/use-unknown-in-catch-callback-variable': 'error',
     },
   },
-  // packages/engine and packages/games are apps/strategy-practice code moved out of it, still
-  // written in that app's dialect and composing its types. Two rules of this config
-  // disagree with the conventions that code follows, and rewriting it would turn a move
-  // into a rewrite — they stay off here until the two ESLint setups are unified.
+  // packages/engine and packages/games are apps/strategy-practice code moved out of it,
+  // still written in that app's dialect: `!` stands in for a guard the game's rules
+  // already make redundant, and auditing several hundred of those would turn a move
+  // into a rewrite. Off in apps/strategy-practice's own config too, for the same code.
   {
     files: [
       'packages/engine/**/*.{ts,tsx}',
@@ -72,7 +79,6 @@ export default defineConfig(
     ],
     rules: {
       '@typescript-eslint/no-non-null-assertion': 'off',
-      '@typescript-eslint/consistent-type-definitions': 'off',
     },
   },
   // The core of the package is what a bare node server imports; its React client half
@@ -125,11 +131,6 @@ export default defineConfig(
       '**/dist/**',
       '**/build/**',
       '**/node_modules/**',
-      '**/*.config.{js,mjs,cjs,ts,mts}',
-      // apps/strategy-practice is linted by its own eslint config, through its
-      // own `npm run lint` — it keeps its own ESLint version and plugins (npm
-      // nests them), which this config's flat resolution would not find.
-      'apps/strategy-practice/**',
       // Hand-written pages the deploy copies verbatim, with no build step. See pages/README.md.
       'pages/**',
       // The assembled Pages artifact `npm run site:build` writes: every app's built

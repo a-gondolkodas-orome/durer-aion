@@ -3,7 +3,7 @@ import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 
 // Both variants play the same chase, differing only in how many sectors a side
 // of the lake has (4 vs 5) and how many days the shark must survive.
-export type Board = { submarines: number[]; shark: number; turn: number; sharkMovesInTurn: number }
+export interface Board { submarines: number[]; shark: number; turn: number; sharkMovesInTurn: number }
 
 // The two players move different pieces, so which of them is to move is part of
 // a move's legality rather than merely of whose turn it is.

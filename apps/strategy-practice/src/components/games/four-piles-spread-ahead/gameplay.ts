@@ -2,7 +2,7 @@ import { random, cloneDeep } from 'lodash';
 import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 
 export type Board = number[];
-export type Piece = { pileId: number; pieceId: number };
+export interface Piece { pileId: number; pieceId: number }
 
 export const generateStartBoard = (): Board => ([random(0, 9), random(0, 9), random(0, 9), random(4, 9)]);
 export const generateTestStartBoard = (): Board => ([random(0, 6), random(0, 6), random(0, 6), random(4, 6)]);

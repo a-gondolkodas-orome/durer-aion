@@ -5,7 +5,7 @@ import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 // array so pile indices stay stable across a game). pointed: indices of the
 // piles the previous player pointed at (length 1 or 2), or null when the
 // current player still has to point.
-export type Board = { piles: number[]; pointed: number[] | null };
+export interface Board { piles: number[]; pointed: number[] | null }
 
 export const nonEmptyIndices = (piles: number[]): number[] =>
   range(piles.length).filter(i => piles[i] > 0);

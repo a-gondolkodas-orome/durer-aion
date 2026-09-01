@@ -155,13 +155,18 @@ describe('parseLcov', () => {
 
 describe('collect', () => {
   const hits = parseLcov(
-    ['SF:apps/strategy-practice/src/a.ts', 'DA:1,3', 'DA:2,0', 'DA:4,0', 'end_of_record', 'SF:apps/strategy-practice/src/b.ts', 'DA:9,2', 'end_of_record'].join('\n')
+    [
+      'SF:apps/strategy-practice/src/a.ts', 'DA:1,3', 'DA:2,0', 'DA:4,0', 'end_of_record',
+      'SF:apps/strategy-practice/src/b.ts', 'DA:9,2', 'end_of_record'
+    ].join('\n')
   );
 
   it('splits added lines into measured and never-reached', () => {
     const files = collect(new Map([['apps/strategy-practice/src/a.ts', new Set([1, 2, 4])]]), hits);
 
-    expect(files).toEqual([{ path: 'apps/strategy-practice/src/a.ts', measured: 3, uncovered: [2, 4], unloaded: false }]);
+    expect(files).toEqual([
+      { path: 'apps/strategy-practice/src/a.ts', measured: 3, uncovered: [2, 4], unloaded: false }
+    ]);
   });
 
   it('skips an added line with no DA record — a blank, a comment or a type-only declaration', () => {
@@ -178,7 +183,10 @@ describe('collect', () => {
   // coverage.include adds the rest as records with no DA lines. Dropping those would let a module
   // nothing in the repo touches pass as "nothing to measure".
   it('flags a file whose record has no lines at all rather than dropping it', () => {
-    const withEmpty = parseLcov(['SF:apps/strategy-practice/src/a.ts', 'DA:1,3', 'end_of_record', 'SF:apps/strategy-practice/src/new.ts', 'end_of_record'].join('\n'));
+    const withEmpty = parseLcov([
+      'SF:apps/strategy-practice/src/a.ts', 'DA:1,3', 'end_of_record',
+      'SF:apps/strategy-practice/src/new.ts', 'end_of_record'
+    ].join('\n'));
     const files = collect(new Map([['apps/strategy-practice/src/new.ts', new Set([1, 2, 3])]]), withEmpty);
 
     expect(files).toEqual([{ path: 'apps/strategy-practice/src/new.ts', measured: 0, uncovered: [], unloaded: true }]);
@@ -195,9 +203,13 @@ describe('collect', () => {
   });
 
   it('puts the worst file first', () => {
-    const files = collect(new Map([['apps/strategy-practice/src/b.ts', new Set([9])], ['apps/strategy-practice/src/a.ts', new Set([1, 2, 4])]]), hits);
+    const files = collect(new Map([
+      ['apps/strategy-practice/src/b.ts', new Set([9])],
+      ['apps/strategy-practice/src/a.ts', new Set([1, 2, 4])]
+    ]), hits);
 
-    expect(files.map(({ path }) => path)).toEqual(['apps/strategy-practice/src/a.ts', 'apps/strategy-practice/src/b.ts']);
+    expect(files.map(({ path }) => path))
+      .toEqual(['apps/strategy-practice/src/a.ts', 'apps/strategy-practice/src/b.ts']);
   });
 });
 

@@ -6,7 +6,7 @@ export const FORBIDDEN = 2 as const;
 
 export type CellValue = null | typeof BISHOP | typeof FORBIDDEN;
 export type Board = CellValue[][];
-export type Field = { row: number; col: number };
+export interface Field { row: number; col: number }
 
 export const startBoard: Board = range(0, 8).map(() => range(0, 8).map(() => null));
 

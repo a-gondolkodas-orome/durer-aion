@@ -1,15 +1,15 @@
 import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 import { random } from 'lodash';
 
-export type Piece = { id: number; w: number; h: number };
-export type Board = { pieces: Piece[]; nextId: number };
-export type Move = { id: number; dir: 'v' | 'h'; pos: number };
-export type Split = {
+export interface Piece { id: number; w: number; h: number }
+export interface Board { pieces: Piece[]; nextId: number }
+export interface Move { id: number; dir: 'v' | 'h'; pos: number }
+export interface Split {
   dir: 'v' | 'h';
   pos: number;
   a: { w: number; h: number };
   b: { w: number; h: number };
-};
+}
 
 const is1x1 = (w: number, h: number) => w === 1 && h === 1;
 

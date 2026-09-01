@@ -1,15 +1,15 @@
 import { random, sample, shuffle, sum } from 'lodash';
 import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 
-export type Slot = { value: number; state: 'active' | 'consumed' };
+export interface Slot { value: number; state: 'active' | 'consumed' }
 export type Level = (Slot | null)[];
-export type Board = {
+export interface Board {
   levels: Level[];
   target: number;
   sortedInitial: number[];
-};
+}
 // The first of the two slots a turn combines, while the player picks the second.
-export type TurnState = { levelIdx: number; slotIdx: number };
+export interface TurnState { levelIdx: number; slotIdx: number }
 
 export const generateStartBoard = (tries = 0): Board => {
   if (tries >= 100) throw new Error('generateStartBoard: too many retries');

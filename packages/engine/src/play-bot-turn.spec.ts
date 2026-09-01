@@ -3,7 +3,7 @@ import type { BotStrategy, Ctx, Gameplay, MoveOutcome } from './types';
 import { playBotTurn } from './play-bot-turn';
 import { createInitialCoreState, type CoreState } from './store';
 
-type Board = { stones: number }
+interface Board { stones: number }
 
 const takeStones = (board: Board, count: number, ctx: Ctx): MoveOutcome<Board> => {
   const nextBoard = { stones: board.stones - count };

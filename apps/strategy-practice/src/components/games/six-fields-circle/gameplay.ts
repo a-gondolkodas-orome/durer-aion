@@ -9,7 +9,7 @@ import { random, sample } from 'lodash';
 export type Board = number[]
 export type Move = [number, number]
 // The field clicked first, while the player picks the second one of the pair.
-export type TurnState = { first: number }
+export interface TurnState { first: number }
 
 export const FIELD_COUNT = 6;
 

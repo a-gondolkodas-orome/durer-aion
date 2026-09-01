@@ -3,7 +3,7 @@ import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 // owner[i] holds who owns the number (i + 1): 0 = first player, 1 = second
 // player, null = still available.
 export type Owner = (0 | 1 | null)[]
-export type Board = { owner: Owner }
+export interface Board { owner: Owner }
 
 export const allNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 

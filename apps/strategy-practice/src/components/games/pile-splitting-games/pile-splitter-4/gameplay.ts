@@ -12,7 +12,7 @@ export const generateStartBoard = (): Board => generateStartBoardWonBy(random(0,
 export const generateTestStartBoard = (): Board =>
   generateStartBoardWonBy(random(0, 1) === 1, { pileMin: 3, pileMax: 6, remainingTrials: 5 });
 
-type BoardOptions = { pileMin?: number; pileMax?: number; remainingTrials?: number };
+interface BoardOptions { pileMin?: number; pileMax?: number; remainingTrials?: number }
 
 // Draw boards until one falls on the wanted side of `isLosingForMover`, then
 // vary its shape: doubling, and doubling with one piece taken off, both leave

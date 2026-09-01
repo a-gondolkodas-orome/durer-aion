@@ -2,7 +2,7 @@ import { uniq, sample } from 'lodash';
 import type { BotStrategy } from 'strategy-game-factory';
 import { type Board, type Moves } from './gameplay';
 
-type Move = { k: number, l: number, resultSet: number[] }
+interface Move { k: number, l: number, resultSet: number[] }
 
 export const distinctValues = (board: Board): number[] => uniq(board).sort((a, b) => a - b);
 

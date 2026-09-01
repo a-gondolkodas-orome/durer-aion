@@ -256,9 +256,10 @@ Its vite config binds all interfaces and pins port 8012, so it forwards out of
 the dev container with no extra setup, and does not collide with the 5173 the
 other frontends share.
 
-`npm ci`, `npm run build` and `npm run typecheck` at the root cover it, but its
-own ESLint and vitest setups mean the root's `npm run lint` and `npm test` skip
-it. Its suite runs from anywhere by naming the workspace:
+`npm ci`, `npm run lint`, `npm run build` and `npm run typecheck` at the root
+cover it — the lint through its own config, which ESLint picks up as it walks
+into the directory. Only `npm test` skips it, its vitest setup being its own;
+[`CLAUDE.md`](CLAUDE.md) § Project Structure has the why. Its suite runs from anywhere by naming the workspace:
 
 ```bash
 npm test --workspace=strategy-practice   # version check, lint, typecheck, unit
@@ -287,6 +288,15 @@ npm run spell-check
 Those are the six jobs in `.github/workflows/ci.yml`; `apps/strategy-practice`
 has its own two (`practice-test` and `patch-coverage`), which run from its
 directory.
+
+`npm run lint` is the whole of the lint gate, `apps/strategy-practice` included:
+ESLint resolves a config per directory as it walks, so that app is checked
+against its own `eslint.config.js` and everything else against the root
+`eslint.config.mjs`, in one pass. No workspace carries a `lint` script of its
+own — to lint one package while you work in it, run `npx eslint .` from its
+directory and you get exactly that subtree, under whichever config governs it.
+What you see there is what CI sees.
+
 `npm run spell-check` checks English and Hungarian alike (via
 `@cspell/dict-hu-hu`, with both British and American spellings accepted),
 past competition problem text included — the same config the VS Code Code
@@ -328,9 +338,9 @@ dependencies, every action pinned in `.github/workflows/`, and each `.nvmrc`.
 — it asks the registry directly rather than shelling out to `npm outdated`.
 
 A row is one *upgrade*, not one package. The same name pinned at two versions is
-two rows, because `apps/strategy-practice` has deliberately run ahead of the rest
-on eslint, vite and typescript; the `written down in` column lists every file the
-bump has to touch, which is the honest measure of how big it is.
+two rows rather than one reporting a version it is not; the `written down in`
+column lists every file the bump has to touch, which is the honest measure of
+how big it is.
 
 The report opens no pull requests — upgrading stays deliberate, majors one at a
 time as in

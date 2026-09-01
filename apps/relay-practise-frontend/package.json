@@ -4,7 +4,6 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "lint": "cross-env TIMING=1 eslint \"**/*.ts*\" --max-warnings=0",
     "typecheck": "tsc --noEmit",
     "start": "vite",
     "dev": "vite",
@@ -34,7 +33,6 @@
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.5",
     "@vitejs/plugin-react": "6.1.1",
-    "cross-env": "10.1.0",
     "vite": "8.2.2"
   },
   "peerDependencies": {

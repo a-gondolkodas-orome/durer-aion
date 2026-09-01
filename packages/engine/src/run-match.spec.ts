@@ -2,7 +2,7 @@
 import type { BotStrategy, Ctx, Gameplay, MoveOutcome } from './types';
 import { runMatch } from './run-match';
 
-type Board = { stones: number }
+interface Board { stones: number }
 
 const takeStones = (board: Board, count: number, ctx: Ctx): MoveOutcome<Board> => {
   const nextBoard = { stones: board.stones - count };

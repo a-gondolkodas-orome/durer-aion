@@ -7,7 +7,7 @@ import { smartBotStrategy } from './bot-strategy';
 import { generateStartBoard, moves, SULTAN, type Board, type SoldierColor } from './gameplay';
 import { useTranslation } from 'language';
 
-type Piece = { rowIndex: number, pieceIndex: number }
+interface Piece { rowIndex: number, pieceIndex: number }
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();

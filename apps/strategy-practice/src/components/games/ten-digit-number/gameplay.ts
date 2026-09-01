@@ -1,6 +1,6 @@
 import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 
-export type Board = { digits: number[], sumMod9: number }
+export interface Board { digits: number[], sumMod9: number }
 
 export const totalDigits = 10;
 export const availableDigits = [1, 2, 3, 4, 5, 6];
