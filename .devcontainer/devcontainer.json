@@ -2,6 +2,10 @@
   "name": "durer-aion",
   "image": "mcr.microsoft.com/devcontainers/typescript-node:24",
   "features": {
+    // The image tag only fixes the Node major (MCR publishes no patch tags), and the
+    // patch it happens to bake is older than `engines.node` — hence npm's EBADENGINE
+    // warnings on install. Pin it here instead, to the version the `Dockerfile` runs.
+    "ghcr.io/devcontainers/features/node:1": { "version": "24.20.0" },
     "ghcr.io/devcontainers/features/docker-in-docker:2": {
       "moby": false
     }
