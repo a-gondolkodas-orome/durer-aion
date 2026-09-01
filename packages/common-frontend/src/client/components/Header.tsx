@@ -9,7 +9,7 @@ import { LanguageDropdown } from './Langswitcher';
 
 // titles[0] and titles[1] are translation keys for the two side titles;
 // titles[2] is an optional, already-translated text shown instead of the team name
-export function Header(props: { teamName: string | null, admin: boolean, titles?: string[], homeAddress?: string}) {
+export function Header(props: { teamName: string | null, admin: boolean, titles?: string[], homeAddress?: string }) {
   const { t } = useTranslation();
   const theme = useTheme();
   const logout = useLogout();
@@ -75,11 +75,11 @@ export function Header(props: { teamName: string | null, admin: boolean, titles?
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                 }}>{props.titles?.[2] ?? props.teamName}</Stack>
-                <Stack onClick={()=>{
+                <Stack onClick={() => {
                   logout();
-                  if ( clientRepository.version === "OFFLINE") {
+                  if (clientRepository.version === "OFFLINE") {
                     window.location.reload();
-                  }            
+                  }
                 }} sx={{
                   fontSize: 20,
                   margin: '0px 15px',
@@ -94,20 +94,20 @@ export function Header(props: { teamName: string | null, admin: boolean, titles?
               flex: 1
             }}>
             </Stack>
-            {props.admin && 
+            {props.admin &&
               <LanguageDropdown fontColor={theme.palette.primary.contrastText} />
             }
           </Stack>
         }
-        {(props.teamName || props.admin) &&<Stack sx={{
+        {(props.teamName || props.admin) && <Stack sx={{
           display: {
             xs: 'flex',
             md: 'none'
           },
-        }}><PowerSettingsNewIcon onClick={()=>{
+        }}><PowerSettingsNewIcon onClick={() => {
           setMobileMenuOpen(true)
         }} sx={{
-         fontSize: '35px' 
+         fontSize: '35px'
         }}/></Stack>}
         <Stack sx={{
           fontSize: 30,
@@ -121,7 +121,7 @@ export function Header(props: { teamName: string | null, admin: boolean, titles?
         }}>{(props.titles) ? t(props.titles[1]) : t('header.subtitle')}</Stack>
         <Dialog
           open={mobileMenuOpen}
-          onClose={()=>{
+          onClose={() => {
             setMobileMenuOpen(false)
           }}
           slotProps={{ paper: {
@@ -141,7 +141,7 @@ export function Header(props: { teamName: string | null, admin: boolean, titles?
                 display: 'flex',
                 alignItems: 'center'
               }}>{props.titles?.[2] ?? props.teamName}</Stack>
-              <Button onClick={()=>{
+              <Button onClick={() => {
                 setMobileMenuOpen(false);
                 logout();
               }} variant='outlined'

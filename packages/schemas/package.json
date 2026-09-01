@@ -9,7 +9,6 @@
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "lint": "cross-env TIMING=1 eslint \"src/**/*.ts*\" --max-warnings=0",
     "typecheck": "tsc --noEmit",
     "build": "npx tsdown",
     "dev": "npx tsdown --watch --no-clean --onSuccess \"echo rebuilt schemas\""

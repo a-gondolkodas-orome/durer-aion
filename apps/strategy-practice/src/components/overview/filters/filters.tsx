@@ -79,12 +79,12 @@ export const FilterToggle = ({ open, onToggle, activeCount }: {
 // clear (×) button. Shared by the category and type filters so both look and
 // behave the same. Visibility of the whole panel is controlled by FilterToggle,
 // so the rows themselves are always expanded when rendered.
-type FilterOption<T> = {
+interface FilterOption<T> {
   value: T
   content: ReactNode       // shown inside the toggle button
   label?: string           // accessible label + tooltip when `content` isn't readable text
   buttonClassName?: string // per-option sizing (defaults to text-style padding)
-};
+}
 
 const FilterRow = <T,>({ label, options, selected, onChange }: {
   label: I18nString

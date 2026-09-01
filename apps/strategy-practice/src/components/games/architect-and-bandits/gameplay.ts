@@ -3,7 +3,7 @@ import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 
 // Both variants play the same game on a regular polygon, differing only in how
 // many vertices the wall has and how far the architect may walk in a day.
-export type Board = { architectPosition: number; towers: boolean[]; day: number; kmUsedToday: number }
+export interface Board { architectPosition: number; towers: boolean[]; day: number; kmUsedToday: number }
 
 // The two players have disjoint move sets, so which of them is to move is part
 // of a move's legality rather than merely of whose turn it is.

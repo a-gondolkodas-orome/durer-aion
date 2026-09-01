@@ -4,7 +4,7 @@ import { maxStep, moves, target, type Board } from './gameplay';
 import { smartBotStrategy } from './bot-strategy';
 
 const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
-  return(
+  return (
     <GameBoard>
       <div className="flex flex-wrap gap-2">
       {range(target + maxStep + 1).map(i =>

@@ -174,7 +174,7 @@ const BoardClient = ({ board: { bacteria, goals }, ctx, moves }: BoardClientProp
         <tbody>
           {range(bacteria.length).map((row) => (
             <tr
-              style={{ transform: `translateX(${rowShift(row)})`}}
+              style={{ transform: `translateX(${rowShift(row)})` }}
               key={row}
             >
               {range(boardWidth).map((col) => (

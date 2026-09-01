@@ -4,7 +4,7 @@ import { Overview } from './overview';
 import type { Category, GameList, IconKey } from '../games/gameList';
 import { HashRouter } from 'react-router';
 
-type CanonicalConstants = { iconKeys: readonly IconKey[]; categories: readonly Category[] };
+interface CanonicalConstants { iconKeys: readonly IconKey[]; categories: readonly Category[] }
 
 vi.mock('../games/gameList', async (importOriginal): Promise<CanonicalConstants & { gameList: GameList }> => ({
   ...(await importOriginal<CanonicalConstants>()),

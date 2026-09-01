@@ -60,13 +60,13 @@ export function Main(props: { language: string, gitCommitHash: string }) {
           <Chooser state={teamState} setState={setFrontEndState}/>
         )}
         {teamState && (
-          teamState.pageState === "RELAY" || 
+          teamState.pageState === "RELAY" ||
           (teamState.pageState === "HOME" && frontendState === "R")
         ) && (
           <Relay state={teamState} />
         )}
         {teamState && (
-          teamState.pageState === "STRATEGY" || 
+          teamState.pageState === "STRATEGY" ||
           (teamState.pageState === "HOME" && frontendState === "S")
         ) && (
           <Strategy state={teamState} />

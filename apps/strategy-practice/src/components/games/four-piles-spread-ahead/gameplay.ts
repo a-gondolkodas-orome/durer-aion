@@ -2,7 +2,7 @@ import { random, cloneDeep } from 'lodash';
 import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 
 export type Board = number[];
-export type Piece = { pileId: number; pieceId: number };
+export interface Piece { pileId: number; pieceId: number }
 
 export const generateStartBoard = (): Board => ([random(0, 9), random(0, 9), random(0, 9), random(4, 9)]);
 export const generateTestStartBoard = (): Board => ([random(0, 6), random(0, 6), random(0, 6), random(4, 6)]);
@@ -27,7 +27,7 @@ export const moves = {
       for (let i = pileId - pieceCount; i < pileId; i++) {
         nextBoard[i] = board[i] + 1;
       }
-      const isGameEnd = nextBoard[1]===0 && nextBoard[2]===0 && nextBoard[3]===0;
+      const isGameEnd = nextBoard[1] === 0 && nextBoard[2] === 0 && nextBoard[3] === 0;
       if (isGameEnd) {
         return { nextBoard, gameEnd: { winnerIndex: ctx.currentPlayer! } };
       }

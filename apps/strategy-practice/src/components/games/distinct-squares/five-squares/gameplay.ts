@@ -5,7 +5,7 @@ import { isPlacementAllowed } from '../gameplay';
 export type Board = number[]
 // Where the second player put the first of their two pieces, so the
 // BoardClient can dim it for the rest of the turn.
-export type TurnState = { firstPlacedSquareIndex: number }
+export interface TurnState { firstPlacedSquareIndex: number }
 
 export const generateStartBoard = (): Board => {
   const board = Array(5).fill(0);

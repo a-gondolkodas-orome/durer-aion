@@ -1,4 +1,4 @@
-/* eslint-disable max-len */
+/* eslint-disable @stylistic/max-len */
 // AUTO-GENERATED — do not edit by hand (compact single-line data literals).
 // 24-node board: three concentric squares whose CORNERS are joined across
 // squares by the four corner diagonals. Edge-midpoints connect only to their

@@ -5,7 +5,7 @@ import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
-  return(
+  return (
     <GameBoard>
       <p className='text-4xl font-bold text-center mb-2'>
         <code>({board[0]},{board[1]})</code>

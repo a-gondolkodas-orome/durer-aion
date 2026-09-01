@@ -7,7 +7,11 @@ interface ThemeContextValue {
   setTheme: (theme: Theme) => void;
 }
 
-const ThemeContext = createContext<ThemeContextValue>({ theme: 'system', setTheme: () => {} });
+const ThemeContext = createContext<ThemeContextValue>({
+  theme: 'system',
+  // Replaced by ThemeProvider; a consumer rendered outside one cannot set a theme.
+  setTheme: () => { /* no provider above: nothing to set */ }
+});
 
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   const [theme, setThemeState] = useState<Theme>(

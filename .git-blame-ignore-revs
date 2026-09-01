@@ -1,0 +1,9 @@
+# Commits that only reformatted code. `git blame` skips them with
+#
+#   git config blame.ignoreRevsFile .git-blame-ignore-revs
+#
+# which GitHub's blame view does on its own. Add a commit here only if it
+# changed nothing but formatting.
+
+# Apply the formatting rules
+d064cc9c59abd9bee282bbb79c24f0ea64348fa8

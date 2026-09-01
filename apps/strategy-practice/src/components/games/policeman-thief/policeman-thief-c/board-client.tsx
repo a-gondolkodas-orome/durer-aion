@@ -6,7 +6,7 @@ import { useTranslation } from 'language';
 const COP_COLORS = ['var(--color-blue-800)', 'var(--color-green-600)', 'var(--color-amber-500)'];
 const THIEF_COLOR = 'var(--color-red-500)';
 
-type Piece = { color: string; isThief: boolean; isActive: boolean };
+interface Piece { color: string; isThief: boolean; isActive: boolean }
 
 const vertexLabel = (v: number) => (v < 5 ? `O${v}` : v < 10 ? `M${v - 5}` : `I${v - 10}`);
 

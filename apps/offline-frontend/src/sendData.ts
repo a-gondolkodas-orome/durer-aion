@@ -10,7 +10,7 @@ let warnedAboutMissingBucket = false;
 // throwing here breaks the round itself. Builds without a bucket configured
 // (the practice deploy) therefore drop the data and carry on; the
 // per-competition build sets the vars and uploads as before.
-function sendData(fileName: string, data: string){
+function sendData(fileName: string, data: string) {
   const bucketName = import.meta.env.VITE_S3_BUCKET_NAME;
   const folder = import.meta.env.VITE_S3_FOLDER;
   if (!bucketName || !folder) {
@@ -31,20 +31,20 @@ function sendData(fileName: string, data: string){
   fd.append('Content-Type', 'text/plain; charset=utf-8');
   fetch(
     bucketName,
-    { method: 'POST', body: fd, mode: 'cors'}).then(res => console.log(res.status)
+    { method: 'POST', body: fd, mode: 'cors' }).then(res => console.log(res.status)
   ).catch((e: unknown) => console.warn('play data upload failed', e));
 }
 
-const randomID = Math.floor(Math.random() * 900000)+100000;
+const randomID = Math.floor(Math.random() * 900000) + 100000;
 
-function now(){
+function now() {
   const date = new Date()
   // Removing ":", because Windows can not process it if the file name contains it.
-  const result = date.toISOString().replace(/[^A-Za-z0-9]+/g,'').slice(0, -1)
+  const result = date.toISOString().replace(/[^A-Za-z0-9]+/g, '').slice(0, -1)
   return result;
 }
 
-function getJoinCode(teamState?: TeamModelDto){
+function getJoinCode(teamState?: TeamModelDto) {
   if (teamState !== undefined) {
     return teamState.joinCode;
   }
@@ -55,9 +55,9 @@ function getJoinCode(teamState?: TeamModelDto){
   return teamStateStorage.joinCode;
 }
 
-export function sendDataLogin(teamState: TeamModelDto){
+export function sendDataLogin(teamState: TeamModelDto) {
   const code = getJoinCode(teamState);
-  sendData(code+"_"+randomID+"_login_"+now(), "code");
+  sendData(code + "_" + randomID + "_login_" + now(), "code");
 }
 
 export interface SendGameDataParams {
@@ -73,22 +73,22 @@ export interface SendGameDataParams {
   log?: unknown;
 }
 
-export function sendGameData(params: SendGameDataParams){
-  const {component, phase, answer, G, ctx, log} = params;
+export function sendGameData(params: SendGameDataParams) {
+  const { component, phase, answer, G, ctx, log } = params;
   const joinCode = getJoinCode();
   switch (phase) {
     case "start":
-      sendData(joinCode+"_"+randomID+"_"+component+"start_"+now(), "");
+      sendData(joinCode + "_" + randomID + "_" + component + "start_" + now(), "");
       break;
     case "step":
       switch (component) {
         case "relay": {
           const problemNumber = G?.currentProblem;
-          sendData(joinCode+"_"+randomID+"_"+component+"_"+problemNumber+"_"+answer+"_"+now(), JSON.stringify({G, ctx}));
+          sendData(joinCode + "_" + randomID + "_" + component + "_" + problemNumber + "_" + answer + "_" + now(), JSON.stringify({ G, ctx }));
           break;
         }
         case "strategy":
-          sendData(joinCode+"_"+randomID+"_stratstep_"+now(), JSON.stringify({G, ctx, log}));
+          sendData(joinCode + "_" + randomID + "_stratstep_" + now(), JSON.stringify({ G, ctx, log }));
           break;
         default:
           break;
@@ -96,7 +96,7 @@ export function sendGameData(params: SendGameDataParams){
       break;
     case "end": {
       const points = G?.points;
-      sendData(joinCode+"_"+randomID+"_"+component+"end_"+points+"_"+now(), JSON.stringify({G, ctx}));
+      sendData(joinCode + "_" + randomID + "_" + component + "end_" + points + "_" + now(), JSON.stringify({ G, ctx }));
       break;
     }
     default:

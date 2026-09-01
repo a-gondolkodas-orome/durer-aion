@@ -90,14 +90,14 @@ export async function fetch<T_Opts extends StorageAPI.FetchOpts>(
     : await db.fetch(matchID, partial);
 }
 
-/// Bot's playerID is '1', because the gameWrapper uses player '0' for the human player. 
+/// Bot's playerID is '1', because the gameWrapper uses player '0' for the human player.
 export const BOT_ID = PlayerIDType.JUDGE_PLAYER;
 
 /** This is a special transport specifically designed for replacing a player's move
  * with a bot's move.
- * 
+ *
  * BOT_ID represents the player to replace.
- * 
+ *
  * Modifying the server is also needed to fill the bot's slot in the lobby (see injectBots()).
  */
 export class SocketIOButBotMoves extends SocketIO {
@@ -114,8 +114,8 @@ export class SocketIOButBotMoves extends SocketIO {
     this.onFinishedMatch = onFinishedMatch;
   }
   init(
-    app: Server.App & { _io: IOTypes.Server; }, 
-    games: Game[], 
+    app: Server.App & { _io: IOTypes.Server; },
+    games: Game[],
     origins?: Exclude<IOTypes.ServerOptions['cors'], undefined | CorsOptionsDelegate>['origin']
   ): void {
     super.init(app, games, origins);

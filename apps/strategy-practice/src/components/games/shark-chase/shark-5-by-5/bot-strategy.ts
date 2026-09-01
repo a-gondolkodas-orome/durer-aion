@@ -13,7 +13,7 @@ const sharkExceptionMoves: Record<string, number> = sharkExceptionMovesJson;
 // `makeSharkBots` searches for a move wherever this names none or names one the
 // position does not allow, which is what covers both.
 const getOptimalSubmarineMoveByBot = (board: Board): { from: number; to: number } | undefined => {
-  switch(board.turn){
+  switch (board.turn) {
     case 1:
       return { from: 8, to: 7 };
     case 2:
@@ -34,7 +34,7 @@ const getOptimalSubmarineMoveByBot = (board: Board): { from: number; to: number 
       return { from: 4, to: 9 };
     default:
       if ([0, 1, 5, 6, 10, 15].includes(board.shark)) {
-        switch(board.turn) {
+        switch (board.turn) {
           case 10:
             return { from: 9, to: 8 };
           case 11:
@@ -47,7 +47,7 @@ const getOptimalSubmarineMoveByBot = (board: Board): { from: number; to: number 
             return board.shark === 15 ? { from: 5, to: 10 } : { from: 3, to: 2 };
         }
       } else {
-        switch(board.turn){
+        switch (board.turn) {
           case 10:
             return { from: 9, to: 14 };
           case 11:

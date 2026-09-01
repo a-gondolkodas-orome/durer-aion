@@ -1,7 +1,7 @@
 import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 import { range, cloneDeep, random, sample } from 'lodash';
 
-export type Board = { circle: boolean[], lastMove: number | null, firstMove: number | null }
+export interface Board { circle: boolean[], lastMove: number | null, firstMove: number | null }
 
 export const moves = {
   rob: {
@@ -34,7 +34,7 @@ export const isRobbable = (board: Board, index: number): boolean =>
 
 export const getAllowedBanks = (board: Board) => {
   return range(board.circle.length).filter(i => {
-    return board.circle[i] && (board.circle.at(i-1) || board.circle[(i+1)%board.circle.length]);
+    return board.circle[i] && (board.circle.at(i - 1) || board.circle[(i + 1) % board.circle.length]);
   })
 }
 

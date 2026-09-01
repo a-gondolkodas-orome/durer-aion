@@ -28,7 +28,7 @@ export class TeamModel {
   public credentials!: string;
   public email!: string;
 
-  public pageState!: 'DISCLAIMER'|'HOME'|'RELAY'|'STRATEGY';
+  public pageState!: 'DISCLAIMER' | 'HOME' | 'RELAY' | 'STRATEGY';
 
   public relayMatch!: MatchStatus;
   public strategyMatch!: MatchStatus;

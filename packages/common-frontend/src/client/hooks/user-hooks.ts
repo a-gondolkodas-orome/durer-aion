@@ -27,7 +27,7 @@ export const LoadTeamState = () => {
             console.error("could not load the team state", e);
           });
 
-      
+
           userModel.addListener(setTeamState);
   }, []);
 

@@ -24,10 +24,10 @@ export function MyBoard({ G, ctx, moves }: BoardProps<MyGameState>, _theme?: The
           <Typography variant="h6" sx={{ marginBottom: 1 }}>
             Bal kupac
           </Typography>
-          <Box sx={{ 
-            display: 'flex', 
-            flexWrap: 'wrap', 
-            gap: 1, 
+          <Box sx={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 1,
             justifyContent: 'center',
             minHeight: '60px',
             alignItems: 'center',
@@ -63,10 +63,10 @@ export function MyBoard({ G, ctx, moves }: BoardProps<MyGameState>, _theme?: The
           <Typography variant="h6" sx={{ marginBottom: 1 }}>
             Jobb kupac
           </Typography>
-          <Box sx={{ 
-            display: 'flex', 
-            flexWrap: 'wrap', 
-            gap: 1, 
+          <Box sx={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 1,
             justifyContent: 'center',
             minHeight: '60px',
             alignItems: 'center',
@@ -100,10 +100,10 @@ export function MyBoard({ G, ctx, moves }: BoardProps<MyGameState>, _theme?: The
 
       {/* Action Buttons */}
       <Stack direction="row" spacing={2}>
-        <Button 
+        <Button
           variant='contained'
-          color='primary' 
-          disabled={ctx.phase !== 'play' || !canTakeFromLeft || ctx.currentPlayer !== GUESSER_PLAYER} 
+          color='primary'
+          disabled={ctx.phase !== 'play' || !canTakeFromLeft || ctx.currentPlayer !== GUESSER_PLAYER}
           onClick={() => moves.takeStone(true)}
           sx={{ minWidth: '150px' }}
         >
@@ -114,11 +114,11 @@ export function MyBoard({ G, ctx, moves }: BoardProps<MyGameState>, _theme?: The
             </Typography>
           )}
         </Button>
-        
-        <Button 
-          variant='contained' 
+
+        <Button
+          variant='contained'
           color='primary'
-          disabled={ctx.phase !== 'play' || !canTakeFromRight || ctx.currentPlayer !== GUESSER_PLAYER} 
+          disabled={ctx.phase !== 'play' || !canTakeFromRight || ctx.currentPlayer !== GUESSER_PLAYER}
           onClick={() => moves.takeStone(false)}
           sx={{ minWidth: '150px' }}
         >

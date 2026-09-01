@@ -47,10 +47,10 @@ export interface PossibleMove {
   move: string;
   args?: unknown[];
 }
-export type StartingPositionFunction<G> = (_: {G: G & GameStateMixin; ctx: Ctx; playerID: PlayerIDType; random: RandomAPI}) => G;
+export type StartingPositionFunction<G> = (_: { G: G & GameStateMixin; ctx: Ctx; playerID: PlayerIDType; random: RandomAPI }) => G;
 
 /// GameWrapper's mixin.
-/// setup() is defined here, as it returns G instead of G & WrapperState 
+/// setup() is defined here, as it returns G instead of G & WrapperState
 interface GameMixin<G> {
   possibleMoves: (G: G, ctx: Ctx, playerID: PlayerIDType) => PossibleMove[];
   setup: SetupFunction<G>,

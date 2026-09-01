@@ -41,7 +41,10 @@ const packageJson = JSON.parse(read('package.json'));
 // reading the declared range instead is a trap rather than a shortcut.
 compare('Playwright', [
   ['package-lock.json playwright', resolvedVersion('playwright', 'apps/strategy-practice')],
-  ['.devcontainer/Dockerfile PLAYWRIGHT_VERSION', read('.devcontainer/Dockerfile').match(/^ARG PLAYWRIGHT_VERSION=(.+)$/m)?.[1]]
+  [
+    '.devcontainer/Dockerfile PLAYWRIGHT_VERSION',
+    read('.devcontainer/Dockerfile').match(/^ARG PLAYWRIGHT_VERSION=(.+)$/m)?.[1]
+  ]
 ]);
 
 // devcontainer.json allows comments, which JSON.parse does not — read the version with a regex
@@ -61,7 +64,10 @@ compare('Node', [
   ['package.json engines.node', packageJson.engines?.node?.match(/>=\s*(\d+\.\d+\.\d+)/)?.[1]],
   ...workflowNodeImages('.github/workflows/practice-pr-test.yml'),
   ...workflowNodeImages('.github/workflows/pages-deploy.yml'),
-  ['.devcontainer/devcontainer.json node feature', devcontainer.match(/features\/node:1"\s*:\s*\{\s*"version"\s*:\s*"(.+?)"/)?.[1]]
+  [
+    '.devcontainer/devcontainer.json node feature',
+    devcontainer.match(/features\/node:1"\s*:\s*\{\s*"version"\s*:\s*"(.+?)"/)?.[1]
+  ]
 ]);
 
 if (errors.length > 0) {

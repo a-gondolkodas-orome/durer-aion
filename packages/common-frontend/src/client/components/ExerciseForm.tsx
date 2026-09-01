@@ -30,15 +30,15 @@ export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) =
   const refreshState = useRefreshTeamState();
   const [sentAnswer, setSentAnswer] = useState<number>(0);
   const { t } = useTranslation();
-  useEffect(()=>{
-    if(props.previousCorrectness!=null){
-      if(props.previousCorrectness){
+  useEffect(() => {
+    if (props.previousCorrectness != null) {
+      if (props.previousCorrectness) {
         enqueueSnackbar(t('relay.goodGuess'), { variant: 'success' });
       } else {
         enqueueSnackbar(t('relay.wrongGuess'), { variant: 'error' });
       }
     }
-    setSentAnswer((p)=>{return p-1;});
+    setSentAnswer((p) => {return p - 1;});
   }, [props.previousCorrectness, props.attempt, enqueueSnackbar])
   return <Stack>
     <Stack sx={{
@@ -86,13 +86,13 @@ export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) =
         >
         {
           ({
-            field, 
+            field,
             form: { handleChange },
           }: FieldProps<number>) => <input
-            autoFocus={sentAnswer>0}
+            autoFocus={sentAnswer > 0}
             autoComplete="off"
             {...field}
-            onChange={(e)=>{
+            onChange={(e) => {
                 e.preventDefault();
                 if (sanitizeValue(e.target.value)) {
                   handleChange(e);
@@ -115,7 +115,7 @@ export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) =
         <Stack sx={{ minHeight: '1.5em' }}>
           <ErrorMessage name="result" />
         </Stack>
-        <Stack sx={{marginTop: '20px'}}>
+        <Stack sx={{ marginTop: '20px' }}>
           {props.previousTries.map((data, idx) => {
             return <Stack sx={{
               display: 'flex',

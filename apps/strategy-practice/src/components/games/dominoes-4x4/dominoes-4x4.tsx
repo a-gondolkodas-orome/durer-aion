@@ -21,9 +21,9 @@ const getDominoDirection = (field: Field, board: Board) => {
 
 // Each direction: all 4 borders except the shared side, rounded on its own outer side.
 const DOMINO_BORDER_CLASSES = {
-  left:   'rounded-l-md border-t-4 border-b-4 border-l-4',
-  right:  'rounded-r-md border-t-4 border-b-4 border-r-4',
-  top:    'rounded-t-md border-t-4 border-l-4 border-r-4',
+  left: 'rounded-l-md border-t-4 border-b-4 border-l-4',
+  right: 'rounded-r-md border-t-4 border-b-4 border-r-4',
+  top: 'rounded-t-md border-t-4 border-l-4 border-r-4',
   bottom: 'rounded-b-md border-b-4 border-l-4 border-r-4'
 };
 

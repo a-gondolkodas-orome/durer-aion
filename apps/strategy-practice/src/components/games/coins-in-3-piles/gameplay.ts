@@ -4,7 +4,7 @@ import type { Ctx, MoveDefs, MoveOutcome } from 'strategy-game-factory';
 export type Board = number[]
 // The coin taken in the first half of the turn, while the player decides what
 // (if anything) to place back.
-export type TurnState = { removedCoinValue: number }
+export interface TurnState { removedCoinValue: number }
 
 // Is the player to move lost against optimal play? Closed-form parity
 // predicate: a turn changes the parity of one pile, or of two when a coin is

@@ -279,5 +279,5 @@ export const useClientRepo = (): ClientRepository => {
 };
 
 const addMin = (from: Date, t: number): Date => {
-  return new Date(from.setMinutes(from.getMinutes()+t));
+  return new Date(from.setMinutes(from.getMinutes() + t));
 }

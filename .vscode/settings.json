@@ -2,7 +2,17 @@
   "editor.detectIndentation": false,
   "editor.tabSize": 2,
   "editor.insertSpaces": true,
+  // Formatting is eslint's here, so saving runs its fixes rather than a formatter:
+  // there is no prettier in this repo, and letting VS Code fall back to its built-in
+  // TypeScript formatter would undo them. See eslint.stylistic.mjs.
   "editor.formatOnSave": false,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "eslint.useFlatConfig": true,
+  "eslint.workingDirectories": [{ "mode": "auto" }],
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
   "js/ts.tsdk.path": "node_modules/typescript/lib",
   "js/ts.tsdk.promptToUseWorkspaceVersion": true,
   "i18n-ally.localesPaths": [

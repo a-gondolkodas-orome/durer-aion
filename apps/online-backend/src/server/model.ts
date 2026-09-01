@@ -26,7 +26,7 @@ export class TeamModel extends Model<
   declare credentials: string;
   declare email: string;
 
-  declare pageState: 'DISCLAIMER'|'HOME'|'RELAY'|'STRATEGY';
+  declare pageState: 'DISCLAIMER' | 'HOME' | 'RELAY' | 'STRATEGY';
 
   declare relayMatch: MatchStatus;
   declare strategyMatch: MatchStatus;
@@ -53,9 +53,9 @@ export const teamAttributes: ModelAttributes<
       msg: 'TeamId already exists.'
     },
     primaryKey: true,
-    validate:{
+    validate: {
       isUUID: {
-        args:4,
+        args: 4,
         msg: 'TeamId must be a UUIDv4.'
       }
     }
@@ -66,9 +66,9 @@ export const teamAttributes: ModelAttributes<
   },
   email: {
     type: DataTypes.STRING,
-    validate:{
+    validate: {
       len: {
-        args: [0,255],
+        args: [0, 255],
         msg: 'Email must be between 0 and 255 characters.'
       }
     }
@@ -79,7 +79,7 @@ export const teamAttributes: ModelAttributes<
       name: "joinCode",
       msg: 'JoinCode already exists.'
     },
-    validate:{
+    validate: {
       is: {
         args: /^[0-9]{3}-[0-9]{4}-[0-9]{3}$/,
         msg: 'JoinCode must be in the format 111-2222-333.'
@@ -92,23 +92,23 @@ export const teamAttributes: ModelAttributes<
       name: "teamName",
       msg: 'Teamname already exists.'
     },
-    validate:{
+    validate: {
       len: {
-        args: [1,255],
+        args: [1, 255],
         msg: 'Teamname must be between 1 and 255 characters.'
       }
     }
   },
   credentials: {
     type: DataTypes.STRING,
-    validate:{
+    validate: {
       is: {
-        args:/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
+        args: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
         msg: 'Credentials must be a valid UUIDv4.'
       }
     }
   },
-  pageState:{
+  pageState: {
     type: DataTypes.STRING,
   },
   relayMatch: {
@@ -119,9 +119,9 @@ export const teamAttributes: ModelAttributes<
   },
   other: {
     type: DataTypes.STRING(1024),
-    validate:{
+    validate: {
       len: {
-        args: [0,700], 
+        args: [0, 700],
         msg: 'Other field must be between 0 and 700 characters.'
       },
     }

@@ -10,7 +10,7 @@ import { useTheme } from '@mui/material/styles';
  * @param props {{state: TeamModelDto}} (The null potion should be handled earlier, but it is not)
  * @returns Aggregated point visualisations
  */
-export function Finished(props: {state: TeamModelDto}) {
+export function Finished(props: { state: TeamModelDto }) {
   const theme = useTheme();
   const relayScore = (props.state.relayMatch as FinishedMatchStatus).score;
   const stratScore = (props.state.strategyMatch as FinishedMatchStatus).score;
@@ -46,7 +46,7 @@ export function Finished(props: {state: TeamModelDto}) {
         alignItems: 'baseline',
       }}>
         { /*TODO: add additional metrics */ }
-        {stratScore + relayScore} <span style={{fontSize: '16px', color: '#000', marginLeft: '5px'}}>pont</span>
+        {stratScore + relayScore} <span style={{ fontSize: '16px', color: '#000', marginLeft: '5px' }}>pont</span>
       </Stack>
 
     </Stack>

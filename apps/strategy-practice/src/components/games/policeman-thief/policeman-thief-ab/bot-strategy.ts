@@ -6,7 +6,7 @@ type Bot = BotStrategy<Board, Moves>
 
 // What the search works on. `firstPolicemanMoved` is not part of it: the bot
 // names a whole police turn at once, so it only ever searches from a fresh one.
-type Position = { policemen: [number, number], thief: number, turnCount: number }
+interface Position { policemen: [number, number], thief: number, turnCount: number }
 
 // A police turn is where each policeman goes — one decision, nine ways to make it.
 type PoliceTurn = [number, number]

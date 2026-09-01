@@ -4,7 +4,7 @@ import { colors, startBoard, isAllowedStep, moves, type Board } from './gameplay
 import { botNextMoveArgs, makeCtx, moveValidator } from 'test-utils';
 
 
-type Step = { vertex: number; color: string };
+interface Step { vertex: number; color: string }
 
 const boardWith = (colored: Record<number, string>): Board => {
   const board = cloneDeep(startBoard);

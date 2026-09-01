@@ -5,9 +5,9 @@ import { readStoredTeamState } from "./stored-team-state";
 import i18n from "i18next";
 
 export class OfflineClientRepository implements ClientRepository {
-  
+
   version = "OFFLINE" as const;
-  
+
   startRelay(_joinCode: string): Promise<string> {
     const teamState = getTeamStateFromLocal();
     if (!(teamState.pageState === 'HOME' && teamState.relayMatch.state === 'NOT STARTED' && teamState.strategyMatch.state !== 'IN PROGRESS')) {
@@ -23,7 +23,7 @@ export class OfflineClientRepository implements ClientRepository {
         matchID: "",
       },
     }
-    sendGameData({component: "relay", phase: "start"});
+    sendGameData({ component: "relay", phase: "start" });
     localStorage.setItem(teamStateStorageKey(),
       JSON.stringify(newState)
     );
@@ -37,10 +37,10 @@ export class OfflineClientRepository implements ClientRepository {
 
   toHome(_joinCode: string): Promise<string> {
     const teamState = getTeamStateFromLocal();
-    const newState = {...teamState, pageState: 'HOME'}
-    if (teamState.relayMatch.state === "IN PROGRESS"){
+    const newState = { ...teamState, pageState: 'HOME' }
+    if (teamState.relayMatch.state === "IN PROGRESS") {
       const score = Number(localStorage.getItem(relayPointsStorageKey()))
-      sendGameData({component: "relay", phase: "end", G: {points: score}})
+      sendGameData({ component: "relay", phase: "end", G: { points: score } })
       newState.relayMatch = {
         ...teamState.relayMatch,
         state: "FINISHED",
@@ -149,5 +149,5 @@ const getTeamStateFromLocal = (): TeamModelDto => {
 }
 
 const addMin = (from: Date, t: number): Date => {
-  return new Date(from.setMinutes(from.getMinutes()+t));
+  return new Date(from.setMinutes(from.getMinutes() + t));
 }

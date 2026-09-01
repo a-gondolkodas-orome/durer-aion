@@ -20,7 +20,7 @@ const parsePart = (raw: string): number | null => {
   return value >= 1 ? value : null;
 };
 
-type Inputs = { p1: string; p2: string }
+interface Inputs { p1: string; p2: string }
 
 // module scope: useMoveScopedState hands this back on every render where the
 // stamp is stale, so it has to be one stable reference

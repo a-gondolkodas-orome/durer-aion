@@ -17,7 +17,7 @@ import { vertices, type Board, type Edge } from './gameplay';
 const nodeCount = vertices.length;
 const bit = (i: number) => 1 << i;
 
-type Rope = { from: number; to: number; str: string; nodeMask: number; midMask: number };
+interface Rope { from: number; to: number; str: string; nodeMask: number; midMask: number }
 
 // --- rope universe: every collinear segment on the grid ----------------------
 const orient = (a: number, b: number) => (a < b ? `${a}-${b}` : `${b}-${a}`);
