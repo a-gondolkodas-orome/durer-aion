@@ -5,7 +5,7 @@ import { generateStartBoard, isRobbable, moves, type Board } from './gameplay';
 
 const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   const getCoords = (index: number) => {
-    const step = Math.PI * 2/board.circle.length;
+    const step = Math.PI * 2 / board.circle.length;
     const angle = index * step + (board.firstMove === null ? 0 : board.firstMove * step);
     return { x: 55 + 50 * Math.cos(angle), y: 55 + 50 * Math.sin(angle) };
   };

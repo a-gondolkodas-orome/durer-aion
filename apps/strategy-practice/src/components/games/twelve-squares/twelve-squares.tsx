@@ -24,7 +24,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   <GameBoard>
     <ChessBishopSvg/>
     <div className="grid grid-cols-12 gap-1">
-        {range(1,13).map(i =>
+        {range(1, 13).map(i =>
           <button
             key={i}
             className={`

@@ -12,8 +12,8 @@ import { useTranslation, Trans } from 'react-i18next';
 
 export function ChooserItem(props: {
   status: MatchStatus,
-  type: 'strategy'|'relay',
-  setState: React.Dispatch<"R" | "S" | null> 
+  type: 'strategy' | 'relay',
+  setState: React.Dispatch<"R" | "S" | null>
   hideDesc?: boolean
 }) {
   const startRelay = useStartRelay();
@@ -46,12 +46,12 @@ export function ChooserItem(props: {
           md: 0,
         }
       }}
-      onClick={()=>{
-        setMobileDescOpen((prev)=> {
+      onClick={() => {
+        setMobileDescOpen((prev) => {
           return !prev
         })
       }}>
-        <span>{props.type==='relay' ? t('relay.name') : t('strategy.name')}  {!props.hideDesc && (mobileDescOpen ? <KeyboardArrowUpIcon sx={{
+        <span>{props.type === 'relay' ? t('relay.name') : t('strategy.name')}  {!props.hideDesc && (mobileDescOpen ? <KeyboardArrowUpIcon sx={{
           fontSize: 33,
           marginBottom: "-9px",
           display: {
@@ -95,14 +95,14 @@ export function ChooserItem(props: {
             md: "0px",
           },
         }}>
-          <Stack sx={{marginTop: {
+          <Stack sx={{ marginTop: {
             md: 0,
             xs: '10px'
-          }}}>
+          } }}>
             {!props.hideDesc && t('chooser.relayDescription')}
           </Stack>
         </Stack>
-      }        
+      }
       {props.type === 'strategy' &&
         <Stack sx={{
           fontSize: 14,
@@ -120,7 +120,7 @@ export function ChooserItem(props: {
             marginBlockEnd: 0,
           },
         }}>
-          {!props.hideDesc && 
+          {!props.hideDesc &&
           <Trans
             i18nKey='chooser.gameDescriptionHtml'
             components={{
@@ -139,7 +139,7 @@ export function ChooserItem(props: {
         fontSize: '26px',
         alignSelf: 'center',
         textTransform: 'none',
-      }} variant='contained' color='primary' onClick={()=>{
+      }} variant='contained' color='primary' onClick={() => {
         if (props.type === "relay") {
           void startRelay()
         } else {
@@ -157,7 +157,7 @@ export function ChooserItem(props: {
         alignSelf: 'center',
         textTransform: 'none',
         marginTop: '15px',
-      }} variant='contained' color='primary' onClick={()=>{
+      }} variant='contained' color='primary' onClick={() => {
         if (props.type === "relay") {
           props.setState("R");
         } else {

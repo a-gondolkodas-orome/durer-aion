@@ -89,10 +89,10 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
         },
         turn: {
           order: TurnOrder.ONCE,
-          onMove: ({G, _ctx, playerID, events }) => {
-            if(playerID === GUESSER_PLAYER) {
+          onMove: ({ G, _ctx, playerID, events }) => {
+            if (playerID === GUESSER_PLAYER) {
               const currentTime = new Date();
-              if(currentTime.getTime() - new Date(G.end).getTime() > 1000*10){
+              if (currentTime.getTime() - new Date(G.end).getTime() > 1000 * 10) {
                 // Do not accept any answer if the time is over since more than 10 seconds
                 events.endGame();
               }
@@ -108,21 +108,21 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
             first: () => {
               return 0;
             },
-            next: ({ctx}) => {
+            next: ({ ctx }) => {
               return Number(otherPlayer(ctx.currentPlayer as PlayerIDType));
             }
           },
-          onMove: ({G, ctx, playerID, events }) => {
-            if(playerID === GUESSER_PLAYER) {
+          onMove: ({ G, ctx, playerID, events }) => {
+            if (playerID === GUESSER_PLAYER) {
               const currentTime = new Date();
-              sendRelayFunction({component: "relay", phase: "step", answer: G.answer, G: G, ctx: ctx});
-              if(currentTime.getTime() - new Date(G.end).getTime() > 1000*10){
+              sendRelayFunction({ component: "relay", phase: "step", answer: G.answer, G: G, ctx: ctx });
+              if (currentTime.getTime() - new Date(G.end).getTime() > 1000 * 10) {
                 // Do not accept any answer if the time is over since more than 10 seconds
                 events.endGame();
               }
             }
           },
-          onEnd: ({G, ctx, _playerID, events}) => {
+          onEnd: ({ G, ctx, _playerID, events }) => {
             if (ctx.currentPlayer === JUDGE_PLAYER) {
               const currentTime = new Date();
               if (currentTime.getTime() - new Date(G.end).getTime() >= 0) {
@@ -132,8 +132,8 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
             }
           }
         },
-        onEnd: ({G, ctx, _playerID, _events, _random, _log}) => {
-          sendRelayFunction({component: "relay", phase: "end", G: G, ctx: ctx});
+        onEnd: ({ G, ctx, _playerID, _events, _random, _log }) => {
+          sendRelayFunction({ component: "relay", phase: "end", G: G, ctx: ctx });
         },
         moves: {
           newProblem({ G, _ctx, playerID, events }, problemText: string, nextProblemMaxPoints: number, correctnessPreviousAnswer: boolean, url: string) {
@@ -142,7 +142,7 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
               return INVALID_MOVE;
             }
             G.url = url;
-            G.previousAnswers[G.currentProblem].push({answer: G.answer, date: new Date().toISOString()});
+            G.previousAnswers[G.currentProblem].push({ answer: G.answer, date: new Date().toISOString() });
             G.problemText = problemText;
             G.previousAnswers.push(Array(0));
             G.correctnessPreviousAnswer = correctnessPreviousAnswer;
@@ -162,7 +162,7 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
             if (playerID !== JUDGE_PLAYER || G.answer === null) {
               return INVALID_MOVE;
             }
-            G.previousAnswers[G.currentProblem].push({answer: G.answer, date: new Date().toISOString()});
+            G.previousAnswers[G.currentProblem].push({ answer: G.answer, date: new Date().toISOString() });
             G.answer = null;
             G.correctnessPreviousAnswer = false;
             G.numberOfTry++;
@@ -180,7 +180,7 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
             if (playerID !== JUDGE_PLAYER || G.answer === null) {
               return INVALID_MOVE;
             }
-            G.previousAnswers[G.currentProblem].push({answer: G.answer, date: new Date().toISOString()});
+            G.previousAnswers[G.currentProblem].push({ answer: G.answer, date: new Date().toISOString() });
             G.correctnessPreviousAnswer = correctnessPreviousAnswer;
             if (correctnessPreviousAnswer) {
               G.points += G.currentProblemMaxPoints;

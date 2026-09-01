@@ -34,7 +34,7 @@ export const isRobbable = (board: Board, index: number): boolean =>
 
 export const getAllowedBanks = (board: Board) => {
   return range(board.circle.length).filter(i => {
-    return board.circle[i] && (board.circle.at(i-1) || board.circle[(i+1)%board.circle.length]);
+    return board.circle[i] && (board.circle.at(i - 1) || board.circle[(i + 1) % board.circle.length]);
   })
 }
 

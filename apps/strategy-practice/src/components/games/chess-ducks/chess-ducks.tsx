@@ -22,7 +22,7 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
     return board[row][col] === DUCK;
   };
 
-  return(
+  return (
     <GameBoard>
       <DuckSvg />
       <table className="w-full border-collapse table-fixed">

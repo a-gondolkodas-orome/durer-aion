@@ -8,10 +8,10 @@ export interface ConfirmDialogInterface {
   confirm: () => Promise<void>;
 }
 
-export function ConfirmDialog(props: {confirmDialog: ConfirmDialogInterface | null, setConfirmDialog: Dispatch<ConfirmDialogInterface|null>}) {
+export function ConfirmDialog(props: { confirmDialog: ConfirmDialogInterface | null, setConfirmDialog: Dispatch<ConfirmDialogInterface | null> }) {
   const [confirmDialog, setConfirmDialog] = [props.confirmDialog, props.setConfirmDialog];
-  return <Dialog 
-  maxWidth={false} 
+  return <Dialog
+  maxWidth={false}
   slotProps={{ paper: {
     sx: {
       marginLeft: {
@@ -31,7 +31,7 @@ export function ConfirmDialog(props: {confirmDialog: ConfirmDialogInterface | nu
   open={
     confirmDialog != null
   } onClose={() => {
-      setConfirmDialog(null); 
+      setConfirmDialog(null);
      }}>
     {confirmDialog && <Stack
       sx={{
@@ -45,10 +45,10 @@ export function ConfirmDialog(props: {confirmDialog: ConfirmDialogInterface | nu
       <WarningAmberIcon sx={{ color: '#FF0000', fontSize: '150px' }} />
       <Stack>{confirmDialog.text}</Stack>
       <Button
-        sx={{width:"130px", height: "45px", alignSelf: "center"}}
+        sx={{ width: "130px", height: "45px", alignSelf: "center" }}
         color='primary'
         variant='contained'
-        onClick={()=>{
+        onClick={() => {
           void confirmDialog.confirm()
           setConfirmDialog(null);
         }}

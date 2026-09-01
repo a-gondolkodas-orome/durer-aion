@@ -18,23 +18,23 @@ export function MyBoard({ G, moves }: MyGameProps) {
       {
         range(G.numbersOnTable.length).map(n => (
           <Fragment key={n}><rect
-              x={(n%5)*40+5} y={Math.floor(n/5)*40+5+20+20} width={30} height={30} fill="white"
-              stroke= {G.numbersOnTable[n] ? 
-                              (G.previousMove%(n+1)===0 || (n+1)%G.previousMove===0)? "green" : "lightgreen" : "red"}
-                              //: G.previousMove === n+1 ? "red" : "#ff9999"} 
+              x={(n % 5) * 40 + 5} y={Math.floor(n / 5) * 40 + 5 + 20 + 20} width={30} height={30} fill="white"
+              stroke= {G.numbersOnTable[n] ?
+                              (G.previousMove % (n + 1) === 0 || (n + 1) % G.previousMove === 0) ? "green" : "lightgreen" : "red"}
+                              //: G.previousMove === n+1 ? "red" : "#ff9999"}
               opacity={ G.numbersOnTable[n] ? 1 : 0.1}
-              strokeWidth="1%" 
-              onClick={() => onClick(n+1)} 
-            /> 
+              strokeWidth="1%"
+              onClick={() => onClick(n + 1)}
+            />
           <text
-              x={(n%5)*40+20}
-              y={Math.floor(n/5)*40+20+20+20} 
-              fontSize="100%" 
-              textAnchor="middle" 
+              x={(n % 5) * 40 + 20}
+              y={Math.floor(n / 5) * 40 + 20 + 20 + 20}
+              fontSize="100%"
+              textAnchor="middle"
               dominantBaseline="middle"
               opacity={ G.numbersOnTable[n] ? 1 : 0.1}
               fill="black"
-              onClick={() => onClick(n+1)}>{n+1}</text></Fragment>
+              onClick={() => onClick(n + 1)}>{n + 1}</text></Fragment>
         ))}
       <text x="5" y="30" fontSize="10" textAnchor="start"  fill="black">Az előző lépés: {G.previousMove === -1 ? "" : G.previousMove}</text>
       <text x="5" y="10" fontSize="10" textAnchor="start"  fill="black">A mostani játékban n={G.numbersOnTable.length}</text>

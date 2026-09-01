@@ -32,7 +32,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { value: hoveredAction, hoverProps } = useHoverPreview<'take1' | 'halve'>(ctx.moveCount);
   const canTake1 = moves.take1.isAllowed(board);
   const canHalve = moves.halve.isAllowed(board);
-  return(
+  return (
     <GameBoard>
       <h2 className="text-center">{board}</h2>
       <CoinPile count={board} hoveredAction={hoveredAction} />

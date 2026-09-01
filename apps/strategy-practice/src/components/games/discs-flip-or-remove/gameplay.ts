@@ -4,12 +4,12 @@ import { range, isEqual, random, sample, difference, cloneDeep } from 'lodash';
 export type Board = [number, number]
 
 export const generateStartBoard = (maxDiscs: number) => (): Board => {
-  const discCount = random(Math.floor(maxDiscs/2), maxDiscs);
+  const discCount = random(Math.floor(maxDiscs / 2), maxDiscs);
   if (random(0, 1)) {
     const blueCount = sample(range(0, discCount + 1, 3))!;
     return [blueCount, discCount - blueCount];
   } else {
-    const nextDivisibleBy3 = 3 * (Math.floor(maxDiscs/3) + 1);
+    const nextDivisibleBy3 = 3 * (Math.floor(maxDiscs / 3) + 1);
     const blueCount = sample(
       difference(range(0, discCount + 1), range(0, nextDivisibleBy3, 3))
     )!;

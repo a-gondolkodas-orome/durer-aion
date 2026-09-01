@@ -89,7 +89,7 @@ uniqueDuckPositions.map(([r1, c1]) => {
   const optimalMove = getOptimalAiMove(nextBoard);
 
   const endDate = new Date();
-  const calcDuration = Math.trunc((endDate - startDate)/1000);
+  const calcDuration = Math.trunc((endDate - startDate) / 1000);
   const aiMoveMessage = `
     ${new Date().toISOString()}:\
     AI Move: (calc took ${calcDuration.toString().padStart(3, '0')} seconds):\

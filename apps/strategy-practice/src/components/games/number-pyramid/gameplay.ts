@@ -85,7 +85,7 @@ export const activeSlotIndices = (level: Level): number[] =>
 // writes their sum one level up — so the level must have a level above it.
 // Both players combine on the same pyramid, so whose turn it is does not enter
 // into legality.
-const isCombineAllowed =(board: Board, move: { levelIdx: number; indices: number[] }): boolean => {
+const isCombineAllowed = (board: Board, move: { levelIdx: number; indices: number[] }): boolean => {
   if (!move) return false;
   const { levelIdx, indices } = move;
   if (!Number.isInteger(levelIdx) || levelIdx < 0 || levelIdx >= board.levels.length - 1) return false;

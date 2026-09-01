@@ -8,7 +8,7 @@ export interface TeamModelDto {
   category: string;
   credentials: string;
   email: string;
-  pageState: 'DISCLAIMER'|'HOME'|'RELAY'|'STRATEGY'
+  pageState: 'DISCLAIMER' | 'HOME' | 'RELAY' | 'STRATEGY'
   relayMatch: MatchStatus;
   strategyMatch: MatchStatus;
 }
