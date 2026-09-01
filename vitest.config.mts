@@ -13,5 +13,8 @@ export default defineConfig({
     // a `// @vitest-environment jsdom` docblock.
     environment: 'node',
     include: ['{apps,packages}/*/src/**/*.test.{ts,tsx}', 'scripts/**/*.test.mjs'],
+    // Keeps the run's output to the report itself — see the file for how a test
+    // that means to log opts out.
+    setupFiles: ['./vitest.setup.mts'],
   },
 });

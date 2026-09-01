@@ -281,6 +281,9 @@ mirror works, and what to set up when the year's repo is created.
   [`docs/must-keep-working.md`](docs/must-keep-working.md) catches
   whole-feature breakage by hand; the test pins the specific bug so it cannot
   quietly return.
+- A test run writes its report and nothing else: a console call during it fails
+  the test that made it, and a test that exercises a logging path on purpose
+  stubs the method and asserts on the spy. `vitest.setup.mts` says why and how.
 - PRs are split by **atomicity, not size** — one independent change each, so a
   reviewer can accept or reject them separately.
 - An agent opening a PR assigns the person it is working for, so it lands in
