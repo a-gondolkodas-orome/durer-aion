@@ -16,8 +16,8 @@
     "coverage:unswept": "vitest run --coverage --exclude \"**/plays-to-an-end.spec.ts\" --exclude \"**/renders.spec.tsx\"",
     "coverage:patch": "npm run coverage:unswept -- --coverage.reporter=lcovonly && node scripts/patch-coverage.mjs",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint \"src/**/*.{ts,tsx}\" --no-fix --max-warnings=0",
-    "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
+    "lint": "eslint . --max-warnings=0",
+    "lint:fix": "eslint . --fix",
     "dev": "vite",
     "build": "vite build"
   },
