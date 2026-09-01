@@ -1,7 +1,7 @@
 import type { Ctx, MoveOutcome } from 'engine';
 import { range, cloneDeep, sample, random } from 'lodash';
 
-export type Board = { numbersOnTable: boolean[], previousMove: number | null }
+export interface Board { numbersOnTable: boolean[], previousMove: number | null }
 
 // The number must still be on the table, and — from the second move on — be a
 // divisor or a multiple of the number the other player just removed. The

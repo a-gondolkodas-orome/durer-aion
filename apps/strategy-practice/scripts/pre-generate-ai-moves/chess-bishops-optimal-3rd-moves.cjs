@@ -1,6 +1,6 @@
 'use strict';
 
-/* 
+/*
   If the player is second, but does not play optimally, we try to search for an
   optimal move after two bishops. This is too slow to do real-time, that is why
   we pre-generate positions. Later, after more bishops have been placed, we
@@ -36,7 +36,7 @@ const uniqueStates = range(boardSize).map((r1) => range(boardSize).map((c1) =>
       return true;
     }
     return false;
-  }))  
+  }))
 ));
 
 const rotate90 = ([r, c]) => [c, boardSize - 1 - r];
@@ -101,7 +101,7 @@ range(boardSize).map((r1) => range(boardSize).map((c1) =>
         markAsSame(uniqueStates, mb1, mb2);
       }
     }
-  }))  
+  }))
 ));
 
 // collect those left
@@ -112,7 +112,7 @@ range(boardSize).map((r1) => range(boardSize).map((c1) =>
       console.log(`${r1};${c1} - ${r2};${c2}`)
       uniqueBishopPairs.push([r1, c1, r2, c2]);
     }
-  }))  
+  }))
 ));
 
 const boardIndices = flatMap(range(0, boardSize), row => range(0, boardSize).map(col => ({ row, col })));
@@ -134,7 +134,7 @@ const getOptimalAiMove = (board) => {
   if (optimalPlace !== undefined) {
     return { optimal: true, move: optimalPlace };
   }
-  
+
   return { optimal: false, move: sample(allowedMoves) };
 };
 
@@ -183,28 +183,28 @@ const optimalMoves = {};
 console.log(`Will search optimal step for ${uniqueBishopPairs.length} positions`)
 uniqueBishopPairs.map(([r1, c1, r2, c2]) => {
   const nextBoard = range(0, boardSize).map(() => range(0, boardSize).map(() => null));
-  
+
   markForbiddenFields(nextBoard, { row: r1, col: c1 });
   nextBoard[r1][c1] = BISHOP;
   markForbiddenFields(nextBoard, { row: r2, col: c2 });
   nextBoard[r2][c2] = BISHOP;
-  
+
   const initialMessage = `Initial steps: ${JSON.stringify({ r1, c1, r2, c2 })}`;
-  
+
   console.log(initialMessage);
-  
+
   const startDate = new Date();
-  
+
   const optimalMove = getOptimalAiMove(nextBoard);
-  
+
   const endDate = new Date();
-  const calcDuration = Math.trunc((endDate - startDate)/1000);
+  const calcDuration = Math.trunc((endDate - startDate) / 1000);
   const aiMoveMessage = `
     ${new Date().toISOString()}:\
     AI Move: (calc took ${calcDuration.toString().padStart(3, '0')} seconds):\
     ${JSON.stringify(optimalMove)}\
   `.replace(/\s+/g, ' ');
-  
+
   console.log(aiMoveMessage);
 
   optimalMoves[`${r1};${c1} - ${r2};${c2}`] = optimalMove['move'];

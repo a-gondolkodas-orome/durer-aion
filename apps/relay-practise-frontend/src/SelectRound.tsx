@@ -28,25 +28,25 @@ export const relayTestCode = (yearIdx: number, round: RoundType, category: Categ
   `${yearIdx + 1}_${round === 'final' ? 'D' : (round === 'online' ? 'O' : 'H')}_${category}`;
 
 export const availableRelayTests: TestListElement[] = [
-    {final: [Category.B, Category.C, Category.D]},
-    {final: [Category.B, Category.C, Category.D]},
-    {final: [Category.B, Category.C, Category.D]},
-    {final: [Category.B, Category.C, Category.D]},
-    {final: [Category.A, Category.B, Category.C, Category.D]},
-    {final: [Category.A, Category.B, Category.C, Category.D]},
-    {local: [Category.A, Category.B], final: [Category.A, Category.B, Category.C]},
-    {local: [Category.A, Category.B], final: [Category.A, Category.B, Category.C, Category.D]},
-    {local: [Category.A, Category.B], final: [Category.A, Category.B, Category.C, Category.Cp, Category.D, Category.Dp]},
-    {local: [Category.A, Category.B], final: [Category.A, Category.B, Category.C, Category.Cp, Category.D, Category.Dp]},
-    {local: [Category.A, Category.B], final: [Category.A, Category.B, Category.C, Category.Cp, Category.D, Category.Dp]},
-    {local: [Category.A, Category.B], final: [Category.A, Category.B, Category.C, Category.D, Category.E, Category.Ep]},
+    { final: [Category.B, Category.C, Category.D] },
+    { final: [Category.B, Category.C, Category.D] },
+    { final: [Category.B, Category.C, Category.D] },
+    { final: [Category.B, Category.C, Category.D] },
+    { final: [Category.A, Category.B, Category.C, Category.D] },
+    { final: [Category.A, Category.B, Category.C, Category.D] },
+    { local: [Category.A, Category.B], final: [Category.A, Category.B, Category.C] },
+    { local: [Category.A, Category.B], final: [Category.A, Category.B, Category.C, Category.D] },
+    { local: [Category.A, Category.B], final: [Category.A, Category.B, Category.C, Category.Cp, Category.D, Category.Dp] },
+    { local: [Category.A, Category.B], final: [Category.A, Category.B, Category.C, Category.Cp, Category.D, Category.Dp] },
+    { local: [Category.A, Category.B], final: [Category.A, Category.B, Category.C, Category.Cp, Category.D, Category.Dp] },
+    { local: [Category.A, Category.B], final: [Category.A, Category.B, Category.C, Category.D, Category.E, Category.Ep] },
     {},
     {},
     {},
     {},
     {},
     {},
-    {online: [Category.C, Category.D, Category.E]},
+    { online: [Category.C, Category.D, Category.E] },
 ]
 
 export default function SelectRelayRound() {

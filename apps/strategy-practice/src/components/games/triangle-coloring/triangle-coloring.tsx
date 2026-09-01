@@ -52,7 +52,7 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
     return 'fill-transparent';
   };
 
-  return(
+  return (
     <GameBoard>
       <svg className="aspect-square" viewBox="0 0 100 100">
         <defs>

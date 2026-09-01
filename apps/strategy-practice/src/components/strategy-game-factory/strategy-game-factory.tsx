@@ -80,7 +80,10 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
       try {
         const stored = localStorage.getItem('durer-player-names');
         if (stored) return JSON.parse(stored) as [string, string];
-      } catch {}
+      } catch {
+        // Anything unparseable in localStorage means the same as nothing stored:
+        // fall through to the empty pair below rather than break the game screen.
+      }
       return ['', ''];
     });
 

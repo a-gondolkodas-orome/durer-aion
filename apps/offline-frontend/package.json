@@ -6,7 +6,6 @@
   "scripts": {
     "predeploy": "cross-env PUBLIC_URL=/repository-name npm run build",
     "deploy": "gh-pages -d dist",
-    "lint": "cross-env TIMING=1 eslint \"**/*.ts*\" --max-warnings=0",
     "typecheck": "tsc --noEmit",
     "start": "vite",
     "dev": "vite",

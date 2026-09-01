@@ -7,8 +7,8 @@ import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 // pile count is the only thing that varies between them, and `board.length`
 // already carries it, so they share these moves outright.
 export type Board = number[];
-export type Piece = { pileId: number; pieceId: number };
-type Split = { pileId: number; pieceCount: number };
+export interface Piece { pileId: number; pieceId: number }
+interface Split { pileId: number; pieceCount: number }
 
 // At the start of a turn every pile is non-empty, so the slot emptied by
 // `removePile` is what marks the turn as half-done. That makes both halves of

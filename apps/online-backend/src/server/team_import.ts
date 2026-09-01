@@ -123,7 +123,7 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
     if (credentials === undefined || credentials === "") {
       oninfo('Generating credentials')
       credentials = randomUUID();
-    } 
+    }
 
     if (ok) {
       oninfo(`Adding ${teamname} to DB.`);

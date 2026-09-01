@@ -18,13 +18,13 @@ function App() {
   const StrategyClient = React.lazy(() => import('./ReactClient').then(module => ({ default: module.StrategyClient })));
 
   return (
-    <GameProvider 
+    <GameProvider
       value={{
         RelayClient: RelayClient,
         StrategyClient: StrategyClient,
     }}>
       <ThemeProvider theme={theme}>
-        <ClientRepoProvider 
+        <ClientRepoProvider
           value={new OfflineClientRepository()}>
           <Main language={import.meta.env.VITE_LANGUAGE} gitCommitHash={import.meta.env.VITE_GIT_COMMIT_HASH}/>
         </ClientRepoProvider>

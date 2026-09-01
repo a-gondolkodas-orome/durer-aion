@@ -37,8 +37,8 @@ const ExponentsTable = (
     </div>
     {hovered !== null && isPowerAllowed(hovered) && <p className="mt-2">
       {t({
-        hu: `Kivonandó 2-hatvány: 2^${hovered} = ${2**hovered}. Eredmény: ${board-2**hovered}.`,
-        en: `Power to subtract: 2^${hovered} = ${2**hovered}. Result: ${board-2**hovered}.`
+        hu: `Kivonandó 2-hatvány: 2^${hovered} = ${2 ** hovered}. Eredmény: ${board - 2 ** hovered}.`,
+        en: `Power to subtract: 2^${hovered} = ${2 ** hovered}. Result: ${board - 2 ** hovered}.`
       })}
     </p>}
   </>;

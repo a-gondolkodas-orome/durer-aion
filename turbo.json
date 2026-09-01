@@ -27,7 +27,6 @@
       "cache": false,
       "env": []
     },
-    "lint": {},
     "typecheck": {
       "dependsOn": ["^build"]
     },

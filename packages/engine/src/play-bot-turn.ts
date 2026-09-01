@@ -4,7 +4,7 @@ import { asBotMoves, isBotTurnUnfinished, unknownMoveMessage } from './bot-turn'
 import { reduceMove } from './reducer';
 import type { CoreState } from './store';
 
-export type MatchMove<TBoard> = {
+export interface MatchMove<TBoard> {
   player: number
   move: string
   args: unknown[]

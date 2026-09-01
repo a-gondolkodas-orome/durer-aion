@@ -19,7 +19,7 @@ export const randomBotStrategy: Bot = ({ board }) => {
 
 export const smartBotStrategy: Bot = ({ board }) => asTurn(planTurn(board));
 
-type TurnPlan = { remove: number; add: number | null }
+interface TurnPlan { remove: number; add: number | null }
 
 // The opponent is lost when the number of odd piles is 0 or 3 (see
 // `isLostForMover`), and a turn flips the parity of the pile taken from and of

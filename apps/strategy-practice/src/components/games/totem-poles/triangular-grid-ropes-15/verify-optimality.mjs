@@ -60,10 +60,12 @@ const allowedMoves = board => {
   allowedCache.set(k, res); return res; };
 const corners = [0, (N * (N + 1)) / 2, V - 1];
 const oneLenSet = new Set();
-for (const line of linesArr) for (let i = 0; i + 1 < line.length; i++) oneLenSet.add(ropeIndex[orient(line[i], line[i + 1])]);
+for (const line of linesArr) for (let i = 0; i + 1 < line.length; i++)
+  oneLenSet.add(ropeIndex[orient(line[i], line[i + 1])]);
 const trivialMoves = board => { const occ = occMask(board); const cov = i => (occ & bit(i)) !== 0;
   return allowedMoves(board).filter(ri => oneLenSet.has(ri)).filter(ri => { const r = ropes[ri];
-    return (cov(r.from) && cov(r.to)) || (corners.includes(r.from) && cov(r.to)) || (cov(r.from) && corners.includes(r.to)); }); };
+    return (cov(r.from) && cov(r.to)) || (corners.includes(r.from) && cov(r.to))
+      || (cov(r.from) && corners.includes(r.to)); }); };
 const insert = (b, ri) => { const c = b.slice(); c.push(ri); c.sort((x, y) => x - y); return c; };
 const insertAll = (b, ris) => { const c = b.concat(ris); c.sort((x, y) => x - y); return c; };
 
@@ -86,7 +88,8 @@ const findWinningMove = board => {
   return -1; };
 
 const canonKey = board => { let best = null;
-  for (const pm of ropePerm) { const k = board.map(ri => ropes[pm[ri]].str).sort().join(','); if (best === null || k < best) best = k; }
+  for (const pm of ropePerm) {
+    const k = board.map(ri => ropes[pm[ri]].str).sort().join(','); if (best === null || k < best) best = k; }
   return best; };
 
 console.log(`isPreviousPlayerWinning([]) = ${isPreviousPlayerWinning([])} (true => 2nd player wins the empty board)`);

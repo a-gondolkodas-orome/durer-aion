@@ -5,7 +5,7 @@ import { getAllowedBanks, type Board, type Moves } from './gameplay';
 type Bot = BotStrategy<Board, Moves>
 
 export const smartBotStrategy: Bot = ({ board }) => {
-  let bankIndex = 0;
+  let bankIndex: number;
   if (board.lastMove === null) {
     bankIndex = random(board.circle.length - 1);
   } else {

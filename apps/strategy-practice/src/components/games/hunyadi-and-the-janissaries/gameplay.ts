@@ -3,14 +3,14 @@ import type { MoveDefs } from 'strategy-game-factory';
 
 export type SoldierColor = 'blue' | 'red';
 export type Board = SoldierColor[][];
-export type Soldier = { rowIndex: number; pieceIndex: number; group: SoldierColor };
+export interface Soldier { rowIndex: number; pieceIndex: number; group: SoldierColor }
 
 export const generateStartBoard = (): Board => {
   // Not an exact 50/50 generator between the two roles, only a roughly balanced
   // one, biased towards boards with more soldiers so the game lasts more than a
   // single step.
   const rowCount = 5;
-  let board: SoldierColor[][] = [];
+  const board: SoldierColor[][] = [];
   // Complexity score: a soldier counts for more the closer to the castle it
   // starts. The threshold below rejects boards that would be over too quickly.
   let totalScore = 0;
@@ -22,7 +22,7 @@ export const generateStartBoard = (): Board => {
     }
     if (random(0, 6) >= 3) {
       row.push('blue');
-      totalScore += (1/2)**i;
+      totalScore += (1 / 2) ** i;
     }
     board.push(row);
   }

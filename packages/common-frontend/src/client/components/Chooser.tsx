@@ -24,7 +24,7 @@ export function Chooser(props: {
       sx={{
         display: "flex",
         width: "100%",
-        margin: { 
+        margin: {
           xs: 0,
           md: "40px",
         },
@@ -57,7 +57,7 @@ export function Chooser(props: {
             {t('chooser.finish.title')}
           </p>
           <span>
-            <Trans 
+            <Trans
               i18nKey='chooser.finish.content'
               components={{
                 a: <a href={process.env.VITE_FEEDBACK_URL} target="_blank" rel="noopener noreferrer" />
@@ -89,7 +89,7 @@ export function Chooser(props: {
           setState={props.setState}
           hideDesc={finished}
         />
-        <Stack sx={{ 
+        <Stack sx={{
           width: "20px",
           height: "20px"
         }} />

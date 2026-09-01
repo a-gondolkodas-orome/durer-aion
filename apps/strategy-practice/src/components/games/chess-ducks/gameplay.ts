@@ -6,7 +6,7 @@ export const FORBIDDEN = 2 as const;
 
 export type CellValue = null | typeof DUCK | typeof FORBIDDEN;
 export type Board = CellValue[][];
-export type Field = { row: number; col: number };
+export interface Field { row: number; col: number }
 
 export const getBoardIndices = (rows: number, cols: number): Field[] =>
   flatMap(range(0, rows), row => range(0, cols).map(col => ({ row, col })));

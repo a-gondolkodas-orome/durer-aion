@@ -1,15 +1,15 @@
 import { random, sample, shuffle, sum } from 'lodash';
 import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 
-export type Slot = { value: number; state: 'active' | 'consumed' };
+export interface Slot { value: number; state: 'active' | 'consumed' }
 export type Level = (Slot | null)[];
-export type Board = {
+export interface Board {
   levels: Level[];
   target: number;
   sortedInitial: number[];
-};
+}
 // The first of the two slots a turn combines, while the player picks the second.
-export type TurnState = { levelIdx: number; slotIdx: number };
+export interface TurnState { levelIdx: number; slotIdx: number }
 
 export const generateStartBoard = (tries = 0): Board => {
   if (tries >= 100) throw new Error('generateStartBoard: too many retries');
@@ -85,7 +85,7 @@ export const activeSlotIndices = (level: Level): number[] =>
 // writes their sum one level up — so the level must have a level above it.
 // Both players combine on the same pyramid, so whose turn it is does not enter
 // into legality.
-const isCombineAllowed =(board: Board, move: { levelIdx: number; indices: number[] }): boolean => {
+const isCombineAllowed = (board: Board, move: { levelIdx: number; indices: number[] }): boolean => {
   if (!move) return false;
   const { levelIdx, indices } = move;
   if (!Number.isInteger(levelIdx) || levelIdx < 0 || levelIdx >= board.levels.length - 1) return false;

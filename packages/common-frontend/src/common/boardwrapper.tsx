@@ -104,7 +104,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
                 serverRemainingMs={G.millisecondsRemaining} />}
             </Stack>
           </Stack>
-          { isOffline && 
+          { isOffline &&
           <Stack sx={{
             flexDirection: 'row',
             width: '250px',

@@ -10,9 +10,9 @@ export const randomBotStrategy: Bot = ({ board, ctx }) => {
 };
 
 export const optimalBotStrategy: Bot = ({ board: { left, right } }) => {
-  const dst = right-left;
-  if(dst === 1) return { move: 'step', args: [2] };
-  if(dst === 2) return { move: 'step', args: [1] };
-  if(dst % 3 === 2) return { move: 'step', args: [random(1,2)] };
-  return { move: 'step', args: [(dst+1) % 3] };
+  const dst = right - left;
+  if (dst === 1) return { move: 'step', args: [2] };
+  if (dst === 2) return { move: 'step', args: [1] };
+  if (dst % 3 === 2) return { move: 'step', args: [random(1, 2)] };
+  return { move: 'step', args: [(dst + 1) % 3] };
 };

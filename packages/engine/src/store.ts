@@ -4,7 +4,7 @@ import type { Mode, Phase } from './types';
 // dispatches (setTimeout closures) read and write it synchronously through the
 // store, so they can never observe a stale snapshot — the root cause behind
 // the old board-threading convention and the ctxRef per-field shadow.
-export type CoreState<TBoard, TTurnState = unknown> = {
+export interface CoreState<TBoard, TTurnState = unknown> {
   board: TBoard
   phase: Phase
   mode: Mode
@@ -33,7 +33,7 @@ export const createInitialCoreState = <TBoard, TTurnState = unknown>(
   currentTurnHasMoves: false
 });
 
-type GameStore<TBoard, TTurnState = unknown> = {
+interface GameStore<TBoard, TTurnState = unknown> {
   getState: () => CoreState<TBoard, TTurnState>
   setState: (patch: Partial<CoreState<TBoard, TTurnState>>) => void
   subscribe: (listener: () => void) => () => void

@@ -23,12 +23,12 @@ import { SLOW_VARIANTS } from './slow-variants';
 const MAX_MATCHES = 8;
 const MATCH_BUDGET_MS = 15;
 
-type Case = {
+interface Case {
   name: string
   gameplay: Gameplay<unknown>
   generateStartBoard: () => unknown
   botStrategy: BotStrategy<unknown>
-};
+}
 
 // Resolved exactly as the factory resolves them, so a variant that inherits its
 // bot or its start boards from the default one is swept the way it is played.

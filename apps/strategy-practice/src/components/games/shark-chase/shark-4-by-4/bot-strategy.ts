@@ -7,7 +7,7 @@ import { MAX_TURN } from './gameplay';
 // stops where the shark can no longer be alive; `makeSharkBots` searches for a
 // move wherever this names none or names one the position does not allow.
 const getOptimalSubmarineMoveByBot = (board: Board): { from: number; to: number } | undefined => {
-  switch(board.turn){
+  switch (board.turn) {
     case 1:
       return { from: 2, to: 1 };
     case 2:
@@ -22,7 +22,7 @@ const getOptimalSubmarineMoveByBot = (board: Board): { from: number; to: number 
       return { from: 3, to: 2 };
     default:
       if (board.shark === 7 || board.shark === 11) {
-        switch(board.turn) {
+        switch (board.turn) {
           case 7:
             return { from: 2, to: 3 };
           case 8:
@@ -31,7 +31,7 @@ const getOptimalSubmarineMoveByBot = (board: Board): { from: number; to: number 
             return { from: 7, to: 11 };
         }
       } else {
-        switch(board.turn){
+        switch (board.turn) {
           case 7:
             return { from: 2, to: 1 };
           case 8:

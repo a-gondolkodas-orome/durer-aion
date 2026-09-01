@@ -36,7 +36,7 @@ type Bot = BotStrategy<Board, Moves>
 // the bounded search to dodge deeper tactics — a human playing line only beats
 // it by executing a genuine winning plan.
 
-type SearchOpts = { depth: number; budget: number };
+interface SearchOpts { depth: number; budget: number }
 
 // Per-move limits for the bounded search used in fallback positions. Modest so
 // a bot turn never blocks the UI thread for long.

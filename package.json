@@ -6,7 +6,7 @@
     "predeploy": "npx turbo run build --filter=offline-frontend && npm run predeploy --workspace=offline-frontend",
     "deploy": "gh-pages -d apps/offline-frontend/dist",
     "lint": "eslint . --max-warnings=0",
-    "lint:turbo": "turbo lint",
+    "lint:fix": "eslint . --fix",
     "start": "turbo start",
     "build": "turbo build",
     "spell-check": "cspell \"**/*.{ts,mts,tsx}\" \"**/*.md\" \"**/.*/**/*.md\" \".*/**/*.md\" \"packages/common-frontend/public/locales/**/*.json\" --no-progress",
@@ -47,9 +47,14 @@
       "last 1 safari version"
     ]
   },
-  "packageManager": "npm@8.5.0",
   "engines": {
-    "node": ">=24.20.0"
+    "node": ">=24"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "npm",
+      "version": "^11"
+    }
   },
   "workspaces": [
     "apps/offline-frontend",
@@ -63,6 +68,7 @@
     "@cspell/dict-hu-hu": "1.1.2",
     "@eslint/js": "10.0.1",
     "@lingual/i18n-check": "0.9.5",
+    "@stylistic/eslint-plugin": "5.10.0",
     "@testing-library/dom": "10.4.1",
     "@testing-library/jest-dom": "7.0.1",
     "@testing-library/react": "16.3.3",

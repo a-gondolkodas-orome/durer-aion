@@ -13,7 +13,7 @@ import {
 
 type Bot = BotStrategy<Board, Moves>
 
-type Removal = { index: number; amount: number };
+interface Removal { index: number; amount: number }
 
 const allPairs = (indices: number[]): [number, number][] => {
   const pairs: [number, number][] = [];

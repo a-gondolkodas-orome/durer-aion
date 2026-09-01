@@ -8,7 +8,7 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation();
 
 
-  return(
+  return (
     <GameBoard>
       <div className="flex flex-wrap gap-1">
       {range(board.length).map(i => (

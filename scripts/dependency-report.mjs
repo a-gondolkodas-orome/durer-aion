@@ -31,6 +31,19 @@ export const ALSO_WRITTEN_IN = {
   playwright: ['apps/strategy-practice/.devcontainer/Dockerfile']
 };
 
+// Majors this repo has decided not to take yet, and the one line that says why. Listing them
+// among the real work made every month's issue read as five upgrades when only one was: they are
+// reported, because a hold worth keeping is worth re-reading, but in their own section.
+// README § Held back deliberately owns the reasoning and is where a hold is argued or lifted; the
+// value here is only the caption a table cell has room for. The spec fails when the two lists stop
+// naming the same packages, so a hold cannot be lifted in one of them alone.
+export const HELD_BACK = {
+  koa: 'boardgame.io constructs the Koa app, at koa@^2',
+  '@koa/router': 'the backend types boardgame.io\'s own @koa/router@10 instance',
+  typescript: 'typescript-eslint caps typescript at <6.1.0',
+  '@types/node': 'policy: tracks the Node major in .nvmrc'
+};
+
 // Node is written down far more often than it is depended on, and listing all of it in a table cell
 // would crowd out the version. The app's README carries the list; the row carries the count.
 const NVMRC_COMPANIONS = {
@@ -76,9 +89,9 @@ export const workspaces = () => {
 };
 
 const npmRows = () => {
-  // Keyed by package *and* installed version, not by name: apps/strategy-practice deliberately runs
-  // ahead of the rest on eslint, vite and typescript, and one row per name would report one of the
-  // two versions as if it were both. Two upgrades, two rows — and `where` says which is which.
+  // Keyed by package *and* installed version, not by name: a workspace is free to pin a version
+  // the others have not taken yet, and one row per name would report one of the two versions as
+  // if it were both. Two upgrades, two rows — and `where` says which is which.
   const rows = new Map();
 
   for (const workspace of workspaces()) {
@@ -154,14 +167,18 @@ const isMajorBump = ({ current, latest }) =>
 export const formatReport = rows => {
   const failed = rows.filter(row => row.error);
   const behind = rows.filter(row => !row.error && row.current !== row.latest);
-  const major = behind.filter(isMajorBump);
+  // A hold is about the major: a patch released inside the version we are held at is still routine,
+  // so only the major bumps are partitioned, and the rest of the split is untouched.
+  const held = behind.filter(row => isMajorBump(row) && row.name in HELD_BACK);
+  const major = behind.filter(row => isMajorBump(row) && !(row.name in HELD_BACK));
   const minor = behind.filter(row => !isMajorBump(row));
 
   if (behind.length === 0 && failed.length === 0) {
     return `Every pinned version is current — ${rows.length} checked, nothing behind.`;
   }
 
-  const table = (title, entries, note) =>
+  // `extra` adds one more column, which only the held-back table has: [heading, row => cell].
+  const table = (title, entries, note, extra) =>
     entries.length === 0
       ? []
       : [
@@ -169,25 +186,35 @@ export const formatReport = rows => {
         '',
         note,
         '',
-        '| | pinned | latest | written down in |',
-        '| --- | --- | --- | --- |',
-        ...entries.map(({ name, current, latest, where }) =>
-          `| \`${name}\` | ${current} | ${latest} | ${where.join(', ')} |`),
+        `| | pinned | latest | written down in |${extra ? ` ${extra[0]} |` : ''}`,
+        `| --- | --- | --- | --- |${extra ? ' --- |' : ''}`,
+        ...entries.map(row =>
+          `| \`${row.name}\` | ${row.current} | ${row.latest} | ${row.where.join(', ')} |`
+          + (extra ? ` ${extra[1](row)} |` : '')),
         ''
       ];
 
   return [
-    `${behind.length} of ${rows.length} pinned versions are behind.`,
+    `${behind.length} of ${rows.length} pinned versions are behind`
+    + (held.length === 0 ? '.' : `, ${held.length} of them held back deliberately.`),
     '',
     ...table(
       `Patch and minor (${minor.length})`,
       minor,
-      'Safe to batch into one PR. `npm test` and the build are the gate — plus `npm test --workspace=strategy-practice` for anything that app pins itself.'
+      '`npm run update:minors` makes every one of these edits that lives in a `package.json`, then `npm install`; an `.nvmrc` row is a hand edit. Safe to batch into one PR — `npm test` and the build are the gate, plus `npm test --workspace=strategy-practice` for anything that app pins itself.'
     ),
     ...table(
       `Major (${major.length})`,
       major,
       'One at a time, against the upstream upgrade guide — see [#168](https://github.com/a-gondolkodas-orome/durer-jatekok/issues/168) for the shape.'
+    ),
+    // Absolute, not relative: this report's home is an issue body, where `README.md#…` resolves
+    // against the issue rather than the repository.
+    ...table(
+      `Held back deliberately (${held.length})`,
+      held,
+      'Not work: each stays until its named blocker moves — see [README § Held back deliberately](https://github.com/a-gondolkodas-orome/durer-aion#held-back-deliberately).',
+      ['held back by', ({ name }) => HELD_BACK[name]]
     ),
     ...(failed.length === 0
       ? []

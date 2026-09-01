@@ -25,7 +25,7 @@ const solve = (() => {
 
 const MAX = 48;
 
-type Board = { stones: number; maxTake: number };
+interface Board { stones: number; maxTake: number }
 
 describe('doubling-reduction analysis', () => {
   it('mover loses exactly when the cap is below the lowest power of 2 dividing the pile', () => {

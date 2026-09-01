@@ -5,7 +5,7 @@ import { useClientRepo } from "../api-repository-interface";
 import { useTheme } from "@mui/material/styles";
 import { useTranslation, Trans } from 'react-i18next';
 
-export function Disclaimer(props: {teamName: string, category: string}) {
+export function Disclaimer(props: { teamName: string, category: string }) {
   const goHome = useToHome();
   const theme = useTheme();
   const isOffline = useClientRepo().version === "OFFLINE";
@@ -51,28 +51,28 @@ export function Disclaimer(props: {teamName: string, category: string}) {
           flexDirection: "row",
           alignSelf: "center",
         }}>
-          <div style={{textAlign: "center"}}>
+          <div style={{ textAlign: "center" }}>
             <Trans
               i18nKey='disclaimer.welcome'
               values={{ tname: props.teamName }}
               components={{
-                i: <i style={{color: theme.palette.primary.main}} />
+                i: <i style={{ color: theme.palette.primary.main }} />
               }} />
           </div>
         </Stack>
         <Stack sx={{
-          fontStyle:"italic",
+          fontStyle: "italic",
           alignSelf: "center",
           flexDirection: "row",
           fontSize: 18,
           marginBottom: "20px",
         }}>
-          <div style={{textAlign: "center"}}>
+          <div style={{ textAlign: "center" }}>
             <Trans
               i18nKey='disclaimer.category'
               values={{ category: props.category }}
               components={{
-                b: <b style={{color: theme.palette.primary.main}} />
+                b: <b style={{ color: theme.palette.primary.main }} />
               }} />
           </div>
         </Stack>
@@ -98,7 +98,7 @@ export function Disclaimer(props: {teamName: string, category: string}) {
           }
         }}
       >
-        {t('disclaimer.progressDescription', {minpoints: 25, maxpoints: 52})}
+        {t('disclaimer.progressDescription', { minpoints: 25, maxpoints: 52 })}
       </Stack>
 
       <Stack
@@ -133,7 +133,6 @@ export function Disclaimer(props: {teamName: string, category: string}) {
           />
         </div>
       </Stack>
-
 
 
       <Button

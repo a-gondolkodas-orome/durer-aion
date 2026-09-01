@@ -9,7 +9,7 @@ export interface MyGameState {
 
 export const MyGameWrapper = (_category: "E") => {
   // Set initial stones based on category
-  const initialConfig = {left: 0, right: 0};
+  const initialConfig = { left: 0, right: 0 };
 
   const MyGame: GameType<MyGameState> = {
     name: "stones_e",
@@ -79,7 +79,7 @@ export const MyGameWrapper = (_category: "E") => {
 
     possibleMoves: (G, ctx) =>  {
       const moves = [];
-      
+
       if (G.stonesRight > 0) {
         moves.push({ move: 'takeStone', args: [false] });
       }

@@ -94,14 +94,14 @@ export const [POLICE, THIEF] = [0, 1];
 
 export type Phase = 'placingCops' | 'placingThief' | 'chasing';
 
-export type Board = {
+export interface Board {
   copCount: number
   phase: Phase
   policemen: number[]   // grows during placingCops; length === copCount afterwards
   thief: number | null  // null until placed
   thiefMoveCount: number // completed thief moves; thief wins on reaching 3
   copCursor: number     // index of the cop that moves next in a chasing cop-turn
-};
+}
 
 // Most games use 2 policemen — the tight, genuinely hard case. A small share
 // deal out 3 instead, where the police win much more easily.
