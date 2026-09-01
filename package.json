@@ -46,9 +46,14 @@
       "last 1 safari version"
     ]
   },
-  "packageManager": "npm@8.5.0",
   "engines": {
-    "node": ">=24.20.0"
+    "node": ">=24"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "npm",
+      "version": "^11"
+    }
   },
   "workspaces": [
     "apps/offline-frontend",
