@@ -130,8 +130,9 @@ cd <the-private-repo>
 
 ## 3. Install Node
 
-The version in [`.nvmrc`](./.nvmrc), which is what CI and the backend image run. From
-inside the checkout, [nvm](https://github.com/nvm-sh/nvm) reads it:
+The major in [`.nvmrc`](./.nvmrc), which is what CI reads and what `engines.node` requires;
+the backend image pins a patch within it. From inside the checkout,
+[nvm](https://github.com/nvm-sh/nvm) reads it:
 
 ```bash
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh | bash
