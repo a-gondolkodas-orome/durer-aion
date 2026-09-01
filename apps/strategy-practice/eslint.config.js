@@ -94,7 +94,7 @@ export default defineConfig(
         caughtErrorsIgnorePattern: '^_'
       }],
       '@typescript-eslint/consistent-type-imports': 'error',
-      // 448 of them, across 175 files: this code leans on `!` to say "the rules
+      // this code leans on `!` to say "the rules
       // guarantee this square is on the board", and each one is a judgement about
       // what the right guard would be rather than a mechanical edit. The root
       // config already turns this rule off for packages/engine and packages/games
