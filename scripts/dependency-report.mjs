@@ -6,11 +6,12 @@
 // compares the versions written down in this repo against *each other* and fails a build on a
 // mismatch; this one compares them against *upstream* and never fails anything.
 //
-// Three sources, each read-only over the network:
+// Four sources, each read-only over the network:
 //   - npm packages: every workspace's dependencies + devDependencies, against the registry's
 //     `latest` dist-tag. The workspaces themselves are not among them — see npmRows.
 //   - GitHub Actions: every `uses:` in .github/workflows, against the action's latest release.
 //   - Node: each .nvmrc, against the newest release sharing its major.
+//   - Docker images: the tag each deployed image is pinned to, against Docker Hub — see DOCKER_IMAGES.
 //
 // Deliberately not `npm outdated`: the lockfile already names the installed version, so the
 // registry can be asked directly and this needs no install and no node_modules.
@@ -49,6 +50,22 @@ export const HELD_BACK = {
 const NVMRC_COMPANIONS = {
   'apps/strategy-practice/.nvmrc': ['4 more files — see apps/strategy-practice/README.md']
 };
+
+// The images a deployment actually runs. Pinning them exactly (#203) made two deploys weeks apart
+// the same deploy; it also means nothing moves them when a base image ships a security patch, which
+// is what these rows are for.
+// `line` is how many version components a row may not cross, and the reasoning is the same one
+// nodeRows gives: a major is a decision, not a monthly nudge — the compose file argues postgres's.
+// nginx is the exception at 2, because its majors and minors both carry meaning: 1.30.x is the
+// stable line and 1.31.x is mainline, both current on Docker Hub, so a major-wide row would keep
+// offering mainline as if it were a patch.
+// Not here on purpose: mcr.microsoft.com/devcontainers/*, which floats on a major because a dev
+// environment is not a deployment.
+export const DOCKER_IMAGES = [
+  { image: 'node', where: 'Dockerfile', line: 1 },
+  { image: 'nginx', where: 'apps/online-frontend/nginx/Dockerfile', line: 2 },
+  { image: 'postgres', where: 'docker-compose.yml', line: 1 }
+];
 
 const fetchJson = async url => {
   // The GitHub API rate-limits anonymous callers to 60 requests an hour, which the handful of
@@ -160,6 +177,43 @@ const nodeRows = () => {
   });
 };
 
+// Docker Hub answers with every variant of every tag — `1.30.4-alpine3.24`, `1.30-perl`, `1.30` —
+// newest-pushed-first rather than newest-version-first. Picking the pin's successor out of that is
+// parsing, not network, which is why it is a function of its own and the one part of the lookup
+// with a spec: it has to keep 1.30.4 ahead of the mainline 1.31.4, of the abbreviated 1.30 and of
+// every suffixed variant.
+export const newestTagInLine = (tags, current, line) => {
+  const parts = current.split('.');
+  const prefix = parts.slice(0, line);
+  const candidates = tags
+    // Bare tags only: a variant pins a base distribution this repo never asked for.
+    .filter(tag => /^\d+(\.\d+)*$/.test(tag))
+    .map(tag => tag.split('.'))
+    // Same precision as the pin, so `1.30` does not win over `1.30.4` by being a prefix of it, and
+    // same line, so a major (or minor) bump stays a decision rather than a monthly nudge.
+    .filter(tag => tag.length === parts.length && prefix.every((part, i) => tag[i] === part));
+  if (candidates.length === 0) throw new Error(`no ${prefix.join('.')}.x tag found`);
+  // Numeric, not lexicographic: 1.30.10 is newer than 1.30.9.
+  return candidates
+    .sort((a, b) => a.reduce((diff, part, i) => diff || Number(part) - Number(b[i]), 0))
+    .at(-1)
+    .join('.');
+};
+
+const dockerRows = () => DOCKER_IMAGES.map(({ image, where, line }) => {
+  // `FROM node:24.20.0` in a Dockerfile, `image: postgres:17.11` in the compose file.
+  const [, current] = read(where).match(new RegExp(`(?:FROM|image:)[ \\t]*${image}:(\\S+)`)) ?? [];
+  return checkVersion(`library/${image}`, current ?? 'unknown', [where], async () => {
+    if (!current) throw new Error(`no ${image}: tag found in ${where}`);
+    // Filtered server-side to the pinned line, because these repositories carry thousands of tags
+    // and one page is all this asks for. `library/` is where Docker Hub keeps the official images;
+    // the endpoint answers anonymously, and GITHUB_TOKEN does not apply to it.
+    const { results } = await fetchJson(
+      `https://hub.docker.com/v2/repositories/library/${image}/tags?page_size=100&name=${current.split('.').slice(0, line).join('.')}.`);
+    return newestTagInLine(results.map(({ name }) => name), current, line);
+  });
+});
+
 const isMajorBump = ({ current, latest }) =>
   current.replace(/^v/, '').split('.')[0] !== latest.replace(/^v/, '').split('.')[0];
 
@@ -201,7 +255,7 @@ export const formatReport = rows => {
     ...table(
       `Patch and minor (${minor.length})`,
       minor,
-      '`npm run update:minors` makes every one of these edits that lives in a `package.json`, then `npm install`; an `.nvmrc` row is a hand edit. Safe to batch into one PR — `npm test` and the build are the gate, plus `npm test --workspace=strategy-practice` for anything that app pins itself.'
+      '`npm run update:minors` makes every one of these edits that lives in a `package.json`, then `npm install`; an `.nvmrc` or docker tag row is a hand edit. Safe to batch into one PR — `npm test` and the build are the gate, plus `npm test --workspace=strategy-practice` for anything that app pins itself.'
     ),
     ...table(
       `Major (${major.length})`,
@@ -230,7 +284,7 @@ export const formatReport = rows => {
 
 // Guarded so the spec can import formatReport without the script reaching for the network.
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const rows = await Promise.all([...npmRows(), ...actionRows(), ...nodeRows()]);
+  const rows = await Promise.all([...npmRows(), ...actionRows(), ...nodeRows(), ...dockerRows()]);
   const report = formatReport(rows);
 
   const outFile = process.argv[process.argv.indexOf('--out') + 1];
