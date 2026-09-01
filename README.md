@@ -345,7 +345,9 @@ run next (`npm install`, then the usual gates). It never crosses a major.
 
 `.github/workflows/dependency-report.yml` runs on the 1st of each month and
 keeps one `OPS` issue in sync with whatever is behind: every workspace's
-dependencies, every action pinned in `.github/workflows/`, and each `.nvmrc`.
+dependencies, every action pinned in `.github/workflows/`, each `.nvmrc`, and
+the docker image each deployment runs (`DOCKER_IMAGES` in
+`scripts/dependency-report.mjs` says how far each is allowed to reach, and why).
 `npm run report:outdated` prints the same table on demand, and needs no install
 — it asks the registry directly rather than shelling out to `npm outdated`.
 
