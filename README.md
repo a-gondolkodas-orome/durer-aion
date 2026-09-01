@@ -353,8 +353,14 @@ report rather than dependabot or renovate: the header comment of
 
 ### Held back deliberately
 
-The report will keep listing these as behind; that is it doing its job of
-remembering. Each stays where it is until the named blocker moves (#317):
+The report keeps listing these as behind — that is it doing its job of
+remembering — but in a section of their own, so the `Major` count above it is
+the work actually waiting (#409). The four names below are mirrored by
+`HELD_BACK` in [`scripts/dependency-report.mjs`](scripts/dependency-report.mjs),
+which carries the one-line caption a table cell has room for and nothing more;
+`scripts/dependency-report.test.mjs` fails when the two lists stop agreeing, so
+lifting a hold means editing both. Each stays where it is until the named
+blocker moves (#317):
 
 - **`koa` 2 → 3**: the server's Koa app is constructed by boardgame.io, which
   pins `koa@^2` — the backend's own `koa` entry only has to agree with the
