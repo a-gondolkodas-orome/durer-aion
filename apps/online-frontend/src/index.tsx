@@ -5,16 +5,19 @@ import App from './App';
 
 import * as Sentry from "@sentry/react";
 
-Sentry.init({
-  // TODO: DSN only works when we give sentry to the people...
-  dsn: "https://c94695b2ab564e258774e5d0e5c97d79@sentry.durerinfo.hu/2",
-  integrations: [Sentry.browserTracingIntegration()],
+// Reporting is opt-in per build — see *Error reporting* in README.md.
+const sentryDsn = import.meta.env.VITE_SENTRY_DSN;
+if (sentryDsn) {
+  Sentry.init({
+    dsn: sentryDsn,
+    integrations: [Sentry.browserTracingIntegration()],
 
-  // Set tracesSampleRate to 1.0 to capture 100%
-  // of transactions for performance monitoring.
-  // We recommend adjusting this value in production
-  tracesSampleRate: 1.0,
-});
+    // Set tracesSampleRate to 1.0 to capture 100%
+    // of transactions for performance monitoring.
+    // We recommend adjusting this value in production
+    tracesSampleRate: 1.0,
+  });
+}
 const root = document.getElementById('root');
 if (!root) throw new Error('Root container not found');
 
