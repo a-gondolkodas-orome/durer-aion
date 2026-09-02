@@ -345,7 +345,9 @@ run next (`npm install`, then the usual gates). It never crosses a major.
 
 `.github/workflows/dependency-report.yml` runs on the 1st of each month and
 keeps one `OPS` issue in sync with whatever is behind: every workspace's
-dependencies, every action pinned in `.github/workflows/`, and each `.nvmrc`.
+dependencies, every action pinned in `.github/workflows/`, each `.nvmrc`, and
+the docker image each deployment runs (`DOCKER_IMAGES` in
+`scripts/dependency-report.mjs` says how far each is allowed to reach, and why).
 `npm run report:outdated` prints the same table on demand, and needs no install
 — it asks the registry directly rather than shelling out to `npm outdated`.
 
@@ -409,6 +411,26 @@ locally and are meaningless anywhere else.
 
 Whatever reads one of them takes the change at start: vite does not pick up
 `.env` edits, and the docker stack reads `.env.docker` at `up`.
+
+## Error reporting
+
+Each frontend sends errors and pageload traces to Sentry only when its `.env`
+sets `VITE_SENTRY_DSN`. Without one the SDK is never initialised, so a build
+with nowhere to report to makes no requests rather than failing them.
+
+The gate replaced a DSN hardcoded in all three entry points, pointing at a
+project `sentry.durerinfo.hu` answers `400` for. Every visitor of the public
+practice sites got that failed POST in the console on load, and no report ever
+arrived. Issuing a DSN that works is a change on the Sentry server rather than
+in this repository; set it here once there is one.
+
+`pages-deploy.yml` passes the repository variable `SENTRY_DSN` to the builds,
+which is how `/valto/` and `/proba-verseny/` would get theirs — there is no
+`.env` in CI to read.
+
+The backend reports separately, to its own project, from a DSN still written
+into `apps/online-backend/src/server.ts`. Its failures reach the server log,
+not a competitor's browser.
 
 # Competition secrecy
 

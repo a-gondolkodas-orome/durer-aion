@@ -66,6 +66,11 @@ jobs:
       # is this deploy's own code — the site root, the subpaths, the CNAME assertion and all.
       # A build failure in any app blocks the whole deploy, the accepted cost of a single site.
       - name: Build and assemble the site
+        env:
+          # The apps read this through vite; empty — the repository variable being unset —
+          # leaves error reporting off rather than pointing the site at a dead endpoint. See
+          # *Error reporting* in README.md.
+          VITE_SENTRY_DSN: ${{ vars.SENTRY_DSN }}
         run: node scripts/assemble-site.mjs
 
       - name: Upload Pages artifact

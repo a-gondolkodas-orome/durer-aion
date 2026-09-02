@@ -35,13 +35,11 @@ export class UserModel {
 
   async getTeamState(): Promise<TeamModelDto | null> {
     const guid = this.getGuid();
-    console.log("getTeamState guid", guid);
     if (!guid) {
       return null;
     }
 
     const res = await this.repo.getTeamState(guid);
-    console.log("getTeamState res", res);
     return res;
   }
 
@@ -130,7 +128,6 @@ export class UserModel {
 
   async login(joinCode: string): Promise<string | null> {
     const guid = await this.repo.joinWithCode(joinCode);
-    console.log("login guid", guid);
     await this.saveGUID(guid);
     return null;
   }

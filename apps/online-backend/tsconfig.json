@@ -16,13 +16,17 @@
     "allowSyntheticDefaultImports": true,
     "isolatedModules": true,
     "noEmit": false,
-    // No baseUrl (deprecated in TS 6): paths entries resolve relative to this file.
-    "paths": {
-      "game": ["../../packages/game"],
-      "strategy": ["../../packages/strategy"],
-      "schemas": ["../../packages/schemas"],
-      "common-frontend": ["../../packages/common-frontend"]
-    },
+    // No `paths` for the workspace packages: they used to be mapped to the
+    // package *directories*, and a directory only resolves to `dist` while a
+    // build is there. With `dist` missing — a first build, or one interrupted
+    // mid-clean — tsc silently fell back to the package's source barrel and
+    // pulled the games' JSX boards into this CommonJS server compile, failing
+    // with two dozen rootDir and `--jsx is not set` errors that named the game
+    // package rather than the missing build. npm links every workspace into
+    // node_modules, so a bare `game` resolves on its own, through the `exports`
+    // map that package now carries; when its `dist` is missing the error is one
+    // "Cannot find module 'game'" line, pointing at the real cause.
+
     // Pinned, not inferred. tsc otherwise derives the root from the common
     // parent of its inputs, which was the app directory only because a stray
     // config file sat there — deleting it moved the build to dist/server.js and
