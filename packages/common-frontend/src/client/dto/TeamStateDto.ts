@@ -1,13 +1,16 @@
 import { Ctx } from "boardgame.io";
 import { GameStateMixin, MyGameState as RelayGameState } from "game";
 
+/// `joinCode` and `email` are optional because only the authenticated admin
+/// routes serve them: a team asking for its own state over `/team/:GUID` gets
+/// everything but its secrets, so no component may depend on those two.
 export interface TeamModelDto {
   teamId: string;
-  joinCode: string;
+  joinCode?: string;
   teamName: string;
   category: string;
   credentials: string;
-  email: string;
+  email?: string;
   pageState: 'DISCLAIMER' | 'HOME' | 'RELAY' | 'STRATEGY'
   relayMatch: MatchStatus;
   strategyMatch: MatchStatus;
