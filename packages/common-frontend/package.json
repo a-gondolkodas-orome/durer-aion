@@ -4,9 +4,9 @@
   "files": [
     "dist/**"
   ],
-  "main": "./dist/index.js",
+  "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/index.d.mts",
   "license": "MIT",
   "scripts": {
     "typecheck": "tsc --noEmit",
