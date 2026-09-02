@@ -12,6 +12,7 @@
   ],
   "words": [
     "addminutes",
+    "adduser",
     "aion",
     "alikes",
     "argmax",
@@ -80,6 +81,8 @@
     "newgrp",
     "notistack",
     "onwarn",
+    "passwordauthentication",
+    "permitrootlogin",
     "PGPASSWORD",
     "playout",
     "playouts",

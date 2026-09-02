@@ -58,6 +58,44 @@ costs at the time of writing and what actually stops the bill:
 | DigitalOcean | Basic, 2 vCPU / 4 GB / 80 GB | $24/mo, $0.036/h | **destroy** the droplet; powering it off still bills |
 | AWS | t3.medium | ~$30/mo, ~$0.042/h | stopping stops compute, the EBS volume keeps billing |
 
+## First minutes on the machine
+
+Patch it, and keep it patched — the realistic risk to a box that lives for weeks is an
+unpatched service:
+
+```bash
+apt update && apt upgrade -y
+apt install unattended-upgrades
+dpkg-reconfigure -plow unattended-upgrades
+```
+
+If the upgrade asks about a locally modified `sshd_config`, keep the local version: those
+edits are the image's, and the patched binary installs either way.
+
+Then make a non-root user. Everything below runs as that user — `npm` as root leaves
+root-owned files in `node_modules`:
+
+```bash
+adduser deploy
+usermod -aG sudo deploy
+rsync --archive --chown=deploy:deploy ~/.ssh /home/deploy
+```
+
+**Log in as it from a second terminal before closing the first.** A broken `sshd` config or
+a mis-copied key only shows up on the next login, which is when you no longer have a way
+in. Once it works, close root's own door — cloud images often ship `PermitRootLogin yes`:
+
+```bash
+printf 'PermitRootLogin prohibit-password\nPasswordAuthentication no\n' \
+  | sudo tee /etc/ssh/sshd_config.d/99-hardening.conf
+sudo sshd -t && sudo systemctl reload ssh
+sshd -T | grep -E 'permitrootlogin|passwordauthentication'
+```
+
+A drop-in rather than an edit to `/etc/ssh/sshd_config`, because the `Include` at the top of
+that file means later lines in it lose to whatever the directory already sets. `sshd -t`
+validates before the reload.
+
 Add swap on anything at or below 4 GB — the builds are what need it:
 
 ```bash
