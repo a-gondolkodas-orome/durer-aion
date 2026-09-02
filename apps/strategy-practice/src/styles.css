@@ -95,6 +95,9 @@
         background-color: var(--primary-color);
         border-color: color-mix(in srgb, var(--primary-color), black 20%);
     }
+    .primary-footer {
+        box-shadow: 0 -3px 8px rgb(0 0 0 / 20%);
+    }
     .primary-link {
         color: color-mix(in srgb, var(--primary-color), white 80%);
     }
@@ -117,6 +120,22 @@
     .primary-control:hover,
     .primary-control:focus-visible {
         background-color: color-mix(in srgb, var(--primary-color), black 15%);
+    }
+    .primary-control-muted {
+        background-color: color-mix(in srgb, var(--primary-color), white 10%);
+        color: white;
+    }
+    .primary-control-muted:hover,
+    .primary-control-muted:focus-visible {
+        background-color: color-mix(in srgb, var(--primary-color), white 20%);
+    }
+    .primary-control-selected {
+        background-color: color-mix(in srgb, var(--primary-color), black 15%);
+        color: white;
+    }
+    .primary-control-selected:hover,
+    .primary-control-selected:focus-visible {
+        background-color: color-mix(in srgb, var(--primary-color), black 25%);
     }
     .primary-tint {
         background-color: color-mix(in srgb, var(--primary-color), white 85%);

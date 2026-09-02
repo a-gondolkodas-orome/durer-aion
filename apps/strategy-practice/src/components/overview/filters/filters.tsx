@@ -63,7 +63,7 @@ export const FilterToggle = ({ open, onToggle, activeCount }: {
       aria-label={t({ hu: 'Szűrők', en: 'Filters' })}
       className={`
         h-8 px-2 inline-flex items-center gap-1 rounded-sm drop-shadow-md
-        ${open || activeCount > 0 ? 'primary-control' : 'primary-control opacity-80'}
+        ${open || activeCount > 0 ? 'primary-control-selected' : 'primary-control-muted'}
         transition-colors
       `}
     >

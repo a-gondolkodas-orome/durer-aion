@@ -30,7 +30,7 @@ export const GameFooter = () => {
             : ''}
         </p>
       )}
-      <div className="primary-surface px-2 md:hidden fixed bottom-0 left-0 right-0 flex justify-end items-center gap-3 py-4">
+      <div className="primary-surface primary-footer px-2 md:hidden fixed bottom-0 left-0 right-0 flex justify-end items-center gap-3 py-4">
         <a
           href="https://forms.gle/7DwugmXNrvKgkiiu8"
           target="_blank"

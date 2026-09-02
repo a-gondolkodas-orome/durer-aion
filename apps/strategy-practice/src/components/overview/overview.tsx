@@ -89,8 +89,8 @@ const OverviewHeader = ({ filtersOpen, onToggleFilters, activeFilterCount }: {
   const { t } = useTranslation();
   return <>
     <header className="primary-surface sticky top-0 z-40 shadow-md" style={{ fontFamily: 'Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif' }}>
-      <div className="max-w-6xl mx-auto px-3 sm:px-4 pt-3 sm:py-5">
-        <div className="flex items-center justify-between gap-3 mb-4">
+      <div className="max-w-6xl mx-auto px-3 sm:px-4 py-3 sm:py-5">
+        <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <IconButton
               component="a"
