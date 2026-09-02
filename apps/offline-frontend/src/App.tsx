@@ -7,7 +7,7 @@ import { ThemeProvider } from '@mui/material/styles';
 const theme = {
   palette: {
     primary: {
-      main: import.meta.env.VITE_ACCENT_COLOR || '#9F0712',
+      main: import.meta.env.VITE_ACCENT_COLOR || '#46871b',
       contrastText: '#fff',
     },
   },

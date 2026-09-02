@@ -21,7 +21,7 @@
        against the dark piece body in light mode; dark against the light body in
        dark mode. Driven by a custom property so it inherits into <use>. */
     :root {
-        --primary-color: #7b021a;
+        --primary-color: #46871b;
         --rook-groove: var(--color-white);
     }
     :root.dark {
