@@ -68,10 +68,14 @@ regression checklist every change is measured against.
 
 - **Frontend**: React 19, Vite, MUI (Material-UI), React Router
 - **Backend**: boardgame.io server, Koa, PostgreSQL (via bgio-postgres)
-- **Build**: Turborepo, TypeScript, tsdown. Each package's build config is
-  `tsdown.config.mts`, not `.ts`: the packages ship CommonJS and so carry no
-  `"type": "module"`, which leaves node guessing at the config's module system
-  and warning about it on every build.
+- **Build**: Turborepo, TypeScript, tsdown. The packages build into `dist`;
+  the backend is one tsdown bundle too, built from the packages' *source*
+  rather than their `dist` (`apps/online-backend/tsdown.config.mts` says how
+  and why), so its build and its dev server never wait on a package build —
+  only its typecheck does. Each build config is `tsdown.config.mts`, not
+  `.ts`: the packages ship CommonJS and so carry no `"type": "module"`, which
+  leaves node guessing at the config's module system and warning about it on
+  every build.
 - **Testing**: vitest, React Testing Library. Suites are `*.test.ts(x)` under
   the root config and `*.spec.ts(x)` in `apps/strategy-practice`; both run through
   vitest, and neither uses Jest.

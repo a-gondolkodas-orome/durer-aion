@@ -2,12 +2,13 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-// The server compiles with rootDir and without JSX, so it must never reach a
-// workspace package's TypeScript source — the games' boards alone would fail
-// the build. Node resolution only guarantees that while each package's exports
-// map is the single way in: without one, a missing `dist` falls back to the
-// package's source barrel and the build dies pointing at the game package
-// instead of at the build that never ran.
+// The server's bundle reads the workspace packages' source through tsdown's
+// aliases, but its typecheck resolves them like Node does, without JSX, so it
+// must never reach a package's TypeScript source — the games' boards alone
+// would fail it. Node resolution only guarantees that while each package's
+// exports map is the single way in: without one, a missing `dist` falls back
+// to the package's source barrel and the typecheck dies pointing at the game
+// package instead of at the build that never ran.
 const packages = ["game", "strategy", "schemas"] as const;
 
 function manifestOf(name: string) {

@@ -2,10 +2,11 @@
   "include": ["."],
   "exclude": ["dist", "build", "node_modules"],
   "compilerOptions": {
-    // nodenext, not commonjs/node10: Node runs this output, so tsc should model
-    // Node's real resolution (the `exports` field, require() of ESM on Node ≥ 22 —
-    // which the runtime already relies on for nanoid 6). With no `type: module` in
-    // package.json the emit is still CommonJS, same as before.
+    // Typecheck only: tsdown emits the bundle (tsdown.config.mts). nodenext,
+    // not commonjs/node10, because Node runs that bundle as CommonJS and tsc
+    // should model Node's real resolution — the `exports` field, require() of
+    // ESM on Node ≥ 22, which the runtime already relies on for nanoid 6. With
+    // no `type: module` in package.json the sources are CommonJS to tsc.
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "target": "ES2020",
@@ -15,24 +16,15 @@
     "strict": true,
     "allowSyntheticDefaultImports": true,
     "isolatedModules": true,
-    "noEmit": false,
-    // No `paths` for the workspace packages: they used to be mapped to the
-    // package *directories*, and a directory only resolves to `dist` while a
-    // build is there. With `dist` missing — a first build, or one interrupted
-    // mid-clean — tsc silently fell back to the package's source barrel and
-    // pulled the games' JSX boards into this CommonJS server compile, failing
-    // with two dozen rootDir and `--jsx is not set` errors that named the game
-    // package rather than the missing build. npm links every workspace into
+    "noEmit": true,
+    // No `paths` for the workspace packages: the bundle reads their source
+    // through tsdown's aliases, but this typecheck must not — the games' JSX
+    // boards would fail it with `--jsx is not set` errors that name the game
+    // package rather than the cause. npm links every workspace into
     // node_modules, so a bare `game` resolves on its own, through the `exports`
-    // map that package now carries; when its `dist` is missing the error is one
-    // "Cannot find module 'game'" line, pointing at the real cause.
-
-    // Pinned, not inferred. tsc otherwise derives the root from the common
-    // parent of its inputs, which was the app directory only because a stray
-    // config file sat there — deleting it moved the build to dist/server.js and
-    // broke `npm start`, which the Dockerfile's CMD runs.
-    "rootDir": ".",
-    "outDir": "dist",
-    "skipLibCheck": true,
+    // map each package carries, to the declarations in its `dist`; when that
+    // is missing the error is one "Cannot find module 'game'" line, pointing
+    // at the build that never ran.
+    "skipLibCheck": true
   }
 }
