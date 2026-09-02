@@ -21,6 +21,7 @@
        against the dark piece body in light mode; dark against the light body in
        dark mode. Driven by a custom property so it inherits into <use>. */
     :root {
+        --primary-color: #7b021a;
         --rook-groove: var(--color-white);
     }
     :root.dark {
@@ -48,10 +49,11 @@
         text-wrap: balance;
     }
     a {
-        @apply text-red-700 dark:text-red-400 underline hover:text-red-800 dark:hover:text-red-300 transition-colors;
+        @apply underline transition-colors;
+        color: var(--primary-color);
     }
-    header a {
-        @apply text-red-200 dark:text-red-200 hover:text-white dark:hover:text-white;
+    a:hover {
+        color: color-mix(in srgb, var(--primary-color), black 15%);
     }
     [role="button"] {
         cursor: pointer;
@@ -68,14 +70,73 @@
     .fill-surface-elevated {
         @apply fill-slate-50 dark:fill-slate-800;
     }
+    .primary-tint-hover:hover,
+    .primary-tint-hover:focus-visible {
+        background-color: color-mix(in srgb, var(--primary-color), white 95%);
+    }
+    :root.dark .primary-tint-hover:hover,
+    :root.dark .primary-tint-hover:focus-visible {
+        background-color: color-mix(in srgb, var(--primary-color), black 85%);
+    }
 }
 
 @layer components {
     .primary-button {
         @apply block w-full py-2 sm:py-2.5 px-3 sm:px-4;
         @apply text-base sm:text-lg font-semibold rounded-lg disabled:opacity-50;
-        @apply border-none bg-red-700 text-white enabled:hover:bg-red-800 enabled:focus-visible:bg-red-800;
-        @apply shadow-md enabled:hover:shadow-lg transition-all;
+        @apply border-none text-white;
+        background-color: var(--primary-color);
+    }
+    .primary-button:hover,
+    .primary-button:focus-visible {
+        background-color: color-mix(in srgb, var(--primary-color), black 15%);
+    }
+    .primary-surface {
+        background-color: var(--primary-color);
+        border-color: color-mix(in srgb, var(--primary-color), black 20%);
+    }
+    .primary-link {
+        color: color-mix(in srgb, var(--primary-color), white 80%);
+    }
+    .primary-link:hover {
+        color: color-mix(in srgb, var(--primary-color), white 45%);
+    }
+    .primary-link:focus-visible {
+        color: white;
+    }
+    .primary-link,
+    .primary-surface {
+            transition-property: color, background-color, border-color;
+            transition-duration: 150ms;
+            transition-timing-function: ease;
+    }
+    .primary-control {
+        background-color: var(--primary-color);
+        color: white;
+    }
+    .primary-control:hover,
+    .primary-control:focus-visible {
+        background-color: color-mix(in srgb, var(--primary-color), black 15%);
+    }
+    .primary-tint {
+        background-color: color-mix(in srgb, var(--primary-color), white 85%);
+        color: var(--primary-color);
+    }
+    .primary-tint:hover,
+    .primary-tint:focus-visible {
+        background-color: color-mix(in srgb, var(--primary-color), white 75%);
+    }
+    .primary-outline:hover,
+    .primary-outline:focus-visible {
+        border-color: var(--primary-color);
+    }
+    .primary-focus:focus-visible,
+    .primary-focus:has(:focus-visible) {
+        --tw-ring-color: var(--primary-color);
+    }
+    :root.dark .primary-tint {
+        background-color: color-mix(in srgb, var(--primary-color), black 65%);
+        color: color-mix(in srgb, var(--primary-color), white 70%);
     }
     .secondary-button {
         @apply block w-full py-2.5 px-3;

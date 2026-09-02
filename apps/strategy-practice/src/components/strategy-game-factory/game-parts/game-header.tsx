@@ -10,12 +10,12 @@ export const GameHeader = () => {
   const title = t(gameEntry?.title ?? gameEntry?.name ?? '');
   return (
   <>
-    <header className="bg-red-800 dark:bg-red-900 border-b border-red-900 dark:border-red-950 sticky top-0 z-40 shadow-md" style={{ fontFamily: 'Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif' }}>
+    <header className="primary-surface sticky top-0 z-40 shadow-md" style={{ fontFamily: 'Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif' }}>
       <div className="max-w-6xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <Link
             to='/'
-            className="text-sm font-medium text-red-100 hover:text-white transition-colors whitespace-nowrap"
+            className="primary-link text-sm font-medium transition-colors whitespace-nowrap"
           >
             ← <span className="hidden sm:inline">{t({ hu: 'Vissza a listához', en: 'Back to list' })}</span>
           </Link>
@@ -27,7 +27,7 @@ export const GameHeader = () => {
               href="https://forms.gle/7DwugmXNrvKgkiiu8"
               rel="noreferrer"
               target="_blank"
-              className="text-red-100 hover:text-white transition-colors"
+              className="primary-link transition-colors"
             >
               {t({ hu: 'Hibabejelentő', en: 'Bug report' })}
             </a>

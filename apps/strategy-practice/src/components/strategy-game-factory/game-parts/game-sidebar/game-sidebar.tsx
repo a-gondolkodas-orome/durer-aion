@@ -213,7 +213,7 @@ const PlayerNameSetup = ({ roleLabels, playerNames, setPlayerNames, onStart }: {
           name={i === 0 ? 'name_of_first_player' : 'name_of_second_player'}
           className="border rounded-md text-slate-600 dark:text-slate-200
            bg-surface-elevated
-            px-2 py-1 text-sm flex-1 min-w-20 focus:outline-none focus:ring-1 focus:ring-red-400"
+            px-2 py-1 text-sm flex-1 min-w-20 focus:outline-none focus:ring-1 primary-focus"
           placeholder={t([
             { hu: 'Neved (Nyuszika)', en: 'Your name (Pip)' },
             { hu: 'Neved (Teknős)', en: 'Your name (Dot)' }
@@ -229,7 +229,7 @@ const PlayerNameSetup = ({ roleLabels, playerNames, setPlayerNames, onStart }: {
         <button
           data-testid={`start-hh-game-${i}`}
           className="shrink-0 px-2 py-1 text-sm font-semibold rounded-md
-            bg-red-700 text-white enabled:hocus:bg-red-800 disabled:opacity-50 transition-colors"
+            primary-control disabled:opacity-50 transition-colors"
           disabled={hasCollision}
           onClick={() => {
             setPlayerNames([playerNames[i], playerNames[1 - i]]);

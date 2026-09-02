@@ -30,12 +30,12 @@ export const GameFooter = () => {
             : ''}
         </p>
       )}
-      <div className="px-2 md:hidden fixed bottom-0 left-0 right-0 bg-red-800 dark:bg-red-900 flex justify-end items-center gap-3 py-4">
+      <div className="primary-surface px-2 md:hidden fixed bottom-0 left-0 right-0 flex justify-end items-center gap-3 py-4">
         <a
           href="https://forms.gle/7DwugmXNrvKgkiiu8"
           target="_blank"
           rel="noreferrer"
-          className="text-red-100 hover:text-white transition-colors"
+          className="primary-link transition-colors"
         >
           {t({ hu: 'Hibabejelentő', en: 'Bug report' })}
         </a>

@@ -74,7 +74,7 @@ export const Overview = () => {
       ))}
     </div>
 
-    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-red-800 dark:bg-red-900 flex justify-end items-center gap-3 px-3 py-4">
+    <div className="primary-surface md:hidden fixed bottom-0 left-0 right-0 flex justify-end items-center gap-3 px-3 py-4">
       <ThemeSwitcher />
       <LanguageSelector />
     </div>
@@ -88,7 +88,7 @@ const OverviewHeader = ({ filtersOpen, onToggleFilters, activeFilterCount }: {
 }) => {
   const { t } = useTranslation();
   return <>
-    <header className="bg-red-800 dark:bg-red-900 border-b border-red-900 dark:border-red-950 sticky top-0 z-40 shadow-md" style={{ fontFamily: 'Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif' }}>
+    <header className="primary-surface sticky top-0 z-40 shadow-md" style={{ fontFamily: 'Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif' }}>
       <div className="max-w-6xl mx-auto px-3 sm:px-4 pt-3 sm:py-5">
         <div className="flex items-center justify-between gap-3 mb-4">
           <div className="flex items-center gap-2">
