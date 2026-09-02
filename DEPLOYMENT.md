@@ -40,7 +40,8 @@ machine, follow the same steps with the right-hand values — each is repeated a
 | database | must survive; there are no backups | expendable |
 | HTTP→HTTPS redirect | wanted; needs a repo change | skip |
 | certificate renewal | set up the cron | skip |
-| afterwards | stays up; a reboot takes the site down | tear the machine down **and delete the DNS record** |
+| unattended upgrades | stop the timers for the competition window | leave them running |
+| afterwards | stays up | tear the machine down **and delete the DNS record** |
 
 ## What the machine needs
 
@@ -70,7 +71,31 @@ dpkg-reconfigure -plow unattended-upgrades
 ```
 
 If the upgrade asks about a locally modified `sshd_config`, keep the local version: those
-edits are the image's, and the patched binary installs either way.
+edits are the image's, and the patched binary installs either way. `*** System restart
+required ***` in the MOTD afterwards means a kernel or library was replaced and the running
+system is still on the old one — `sudo reboot`, then reconnect. Cheapest now, before
+anything is installed.
+
+Unattended upgrades take security updates only and do not reboot on their own
+(`grep Automatic-Reboot /etc/apt/apt.conf.d/50unattended-upgrades`), but they do restart
+services — and a `docker-ce` or `containerd.io` upgrade bounces every container. Keep them
+out of it:
+
+```
+// /etc/apt/apt.conf.d/51durer-blacklist
+Unattended-Upgrade::Package-Blacklist {
+    "docker-ce";
+    "docker-ce-cli";
+    "containerd.io";
+};
+```
+
+**And stop the timers for the competition window**, so nothing at all moves while teams are
+playing:
+
+```bash
+sudo systemctl stop apt-daily.timer apt-daily-upgrade.timer   # start them again afterwards
+```
 
 Then make a non-root user. Everything below runs as that user — `npm` as root leaves
 root-owned files in `node_modules`:
