@@ -74,7 +74,7 @@ describe('three-piles-rebuild gameplay', () => {
         const board = generateStartBoard();
         expect(board).toHaveLength(3);
         expect(isTerminal(board)).toBe(false);
-        isWinningBoard(board) ? winningStarts++ : losingStarts++;
+        if (isWinningBoard(board)) winningStarts++; else losingStarts++;
       }
       expect(winningStarts).toBeGreaterThan(0);
       expect(losingStarts).toBeGreaterThan(0);

@@ -10,7 +10,8 @@
     "GAME_GLOBAL_START_T",
     "GAME_GLOBAL_END_T",
     "DEV_SERVER_HOST",
-    "SITE_BASE"
+    "SITE_BASE",
+    "VITE_SENTRY_DSN"
   ],
   "tasks": {
     "start": {
@@ -27,7 +28,6 @@
       "cache": false,
       "env": []
     },
-    "lint": {},
     "typecheck": {
       "dependsOn": ["^build"]
     },

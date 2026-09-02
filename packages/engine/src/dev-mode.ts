@@ -7,7 +7,7 @@
 // issue #313 hands these modules to, where reading `.DEV` off it would throw
 // before the game logic ever ran. Node's own convention decides there instead,
 // defaulting to dev so a host that says nothing still gets the loud behaviour.
-type NodeGlobal = { process?: { env?: Record<string, string | undefined> } };
+interface NodeGlobal { process?: { env?: Record<string, string | undefined> } }
 
 export const isDevMode = (): boolean => {
   // Read on every call, and written out **exactly** like this. Vite substitutes

@@ -14,7 +14,7 @@ import { TeamModel } from "./model";
 /** Joins a player to a match where the bot's side is not connected.
  * @param db: Database context
  * @param matchID: match id to connect a bot to
- * 
+ *
  * This should be in line with boardgame.io/src/server/api.ts
  * path would be '/games/:name/:id/join'.
  */
@@ -42,7 +42,7 @@ export const injectPlayer = async (
 /** Joins a bot to a match where the bot's side is not connected.
  * @param db: Database context
  * @param matchID: match id to connect a bot to
- * 
+ *
  * This should be in line with boardgame.io/src/server/api.ts
  * path would be '/games/:name/:id/join'.
  */
@@ -78,7 +78,7 @@ export function checkGlobalTime(): "WAITING" | "FINISHED" | undefined {
 /**
  * Creates a game based on context, and given Game.
  * This is the interface between the API, and BGio components.
- * 
+ *
  * @param {AnyBgioGame} game - Game object
  * @param {Server.AppCtx} ctx - Context of the Koa & BGio call
  * @returns {LobbyAPI.CreatedMatch} - MatchID for the created game
@@ -225,7 +225,7 @@ export async function closeMatch(
     );
 
   const type = inferenceGameType(currentMatch.metadata.gameName);
-  //check if the match is already started. We are allowing to close the gamestate even if teamstate id FINISHED, because it may happen, 
+  //check if the match is already started. We are allowing to close the gamestate even if teamstate id FINISHED, because it may happen,
   //that the game is closed before the BGIO backend closes the game. (Even though it should not happen, and we made some progress to prevent it)
   if (team[type].state === "NOT STARTED")
     throw new Error(

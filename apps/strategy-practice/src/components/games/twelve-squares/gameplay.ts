@@ -1,6 +1,6 @@
 import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 
-export type Board = { left: number, right: number }
+export interface Board { left: number, right: number }
 
 export const startBoard: Board = { left: 1, right: 12 };
 

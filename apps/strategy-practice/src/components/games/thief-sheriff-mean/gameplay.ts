@@ -2,7 +2,7 @@ import { range, difference } from 'lodash';
 
 export const [Sheriff, Thief] = [0, 1];
 
-export type Board = { cards: number[][], numTurns: number }
+export interface Board { cards: number[][], numTurns: number }
 
 export const hasWinningTriple = (thiefCards: number[]) => {
   const thiefCardsSort = thiefCards.slice().sort((a, b) => a - b);

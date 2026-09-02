@@ -1,0 +1,10 @@
+# Review requests are opened automatically for the owner of every path a pull
+# request touches. Patterns are matched last-one-wins, so a later line for a
+# subdirectory overrides an earlier, broader one.
+#
+# Note: /packages/games/ (competition games) is a different directory from
+# /packages/game/ (the boardgame.io game logic); only the former is listed.
+
+/apps/strategy-practice/  @czeildi
+/packages/games/          @czeildi
+/packages/engine/         @czeildi

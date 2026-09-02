@@ -9,8 +9,8 @@ export const randomBotStrategy: Bot = ({ board }) =>
 
 export const smartBotStrategy: Bot = ({ board, ctx }) => {
   const remaining = getRemaining(board);
-  const evens = remaining.filter(i => i%2 === 0);
-  const odds = remaining.filter(i => i%2 === 1);
+  const evens = remaining.filter(i => i % 2 === 0);
+  const odds = remaining.filter(i => i % 2 === 1);
   if (evens.length === odds.length || evens.length === 0 || odds.length === 0) {
     return { move: 'coverNumber', args: [sample(remaining)!] };
   } else if (ctx.currentPlayer === 0) {

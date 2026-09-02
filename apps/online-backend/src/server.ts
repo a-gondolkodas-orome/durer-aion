@@ -1,4 +1,4 @@
-import { 
+import {
   GameRelay,
   MyGameWrappers as strategyGameWrappers,
   StrategyWrappers as StrategyStrategy,

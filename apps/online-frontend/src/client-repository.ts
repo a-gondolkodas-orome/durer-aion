@@ -1,5 +1,5 @@
 import urlcat from "urlcat";
-import axios, { AxiosInstance,AxiosError } from 'axios';
+import axios, { AxiosInstance, AxiosError } from 'axios';
 import { ClientRepository, TeamModelDto, MatchStateDto, BoardMoves } from "common-frontend";
 
 const serverUrl = import.meta.env.VITE_SERVER_URL || '/';
@@ -11,7 +11,7 @@ function apiAxiosInstance(): AxiosInstance {
 }
 
 function makeAxiosError(any_error: unknown): AxiosError {
-  if(!axios.isAxiosError(any_error)){
+  if (!axios.isAxiosError(any_error)) {
     throw  any_error;
   }
   const axiosError = any_error as AxiosError<Error>;
@@ -64,13 +64,13 @@ export class RealClientRepository implements ClientRepository {
       result = await apiAxiosInstance().get(url);
     } catch (e: unknown) {
       const err = makeAxiosError(e);
-      if(err.response?.status === 404) {
+      if (err.response?.status === 404) {
         throw new Error('Nem létező kód', { cause: e });
       }
       // here we can set message according to status (or data)
       throw new Error('Váratlan hiba történt', { cause: e });
     }
-    
+
     console.log("joinWithCode result", result);
 
     return result.data as string;

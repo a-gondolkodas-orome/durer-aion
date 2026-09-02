@@ -17,9 +17,9 @@ export const Layout: React.FunctionComponent<LayoutProps> = (props: LayoutProps)
               anchorOrigin={{
                 vertical: 'top',
                 horizontal: 'right',
-              }}            
+              }}
             >
-                <Stack sx={(theme) => ({backgroundColor: theme.palette.background.default})}>
+                <Stack sx={(theme) => ({ backgroundColor: theme.palette.background.default })}>
                   <Stack sx={{
                       position: 'absolute',
                       right: 0, top: 100,
@@ -30,7 +30,7 @@ export const Layout: React.FunctionComponent<LayoutProps> = (props: LayoutProps)
                       overflow: "hidden",
                       height: 'calc(100% - 100px)'
                     }}>
-                    <SuperPicture picture={{webPUrl: "durerbackground.png", jpegOrPngUrl: "durerbackground.png", alt: "", title: ""}} style={{opacity:.3, height: '100%'}}/>
+                    <SuperPicture picture={{ webPUrl: "durerbackground.png", jpegOrPngUrl: "durerbackground.png", alt: "", title: "" }} style={{ opacity: .3, height: '100%' }}/>
                   </Stack>
                   <div>
                     {props.children}

@@ -21,7 +21,6 @@
       "extensions": [
         "dbaeumer.vscode-eslint"
         , "bradlc.vscode-tailwindcss"
-        , "esbenp.prettier-vscode"
         , "anthropic.claude-code"
         , "streetsidesoftware.code-spell-checker"
       ],

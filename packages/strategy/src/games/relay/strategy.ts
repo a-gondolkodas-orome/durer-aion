@@ -16,7 +16,7 @@ interface RelayProblems {
   E: Problem[];
 }
 
-const problems : RelayProblems ={
+const problems : RelayProblems = {
   C: [
     {
       problemText: "Ábel a bolhapiacon 5 kalapot 2 madáretetőre tud elcserélni, illetve 3 madáretetőért 7 tányért kap. Legfeljebb hány tányérra tudja elcserélni Ábel a 35 kalapját és a 43 madáretetőjét a bolhapiacon?",
@@ -172,23 +172,23 @@ const problems : RelayProblems ={
   ],
 }
 
-export function relayStrategy(problemList: Problem[]){
-  return (state: State<MyGameState>, _botID: string): [(number|string|boolean)[], string] => {
+export function relayStrategy(problemList: Problem[]) {
+  return (state: State<MyGameState>, _botID: string): [(number | string | boolean)[], string] => {
     if (state.G.numberOfTry === 0) {
       const firstProblem = problemList[state.G.currentProblem];
       return [[firstProblem.problemText, firstProblem.points, firstProblem.url ?? ""], "firstProblem"];
     }
     let correctnessPreviousAnswer = false;
-    if(state.G.answer === problemList[state.G.currentProblem].answer){
+    if (state.G.answer === problemList[state.G.currentProblem].answer) {
       correctnessPreviousAnswer = true;
-    } else if (state.G.numberOfTry < 3){
+    } else if (state.G.numberOfTry < 3) {
       // One more try
       return [[state.G.currentProblemMaxPoints - 1], "nextTry"];
     }
 
     // Next problem if there is one and the time is not over
     if (state.G.currentProblem < problemList.length - 1) {
-      const url = problemList[state.G.currentProblem+1].url ?? "";
+      const url = problemList[state.G.currentProblem + 1].url ?? "";
       const nextProblem = problemList[state.G.currentProblem + 1];
       return [[nextProblem.problemText, nextProblem.points, correctnessPreviousAnswer, url], "newProblem"];
     }
@@ -197,6 +197,6 @@ export function relayStrategy(problemList: Problem[]){
   }
 }
 
-export function strategy(category: "C" | "D" | "E"){
+export function strategy(category: "C" | "D" | "E") {
   return relayStrategy(problems[category]);
 }

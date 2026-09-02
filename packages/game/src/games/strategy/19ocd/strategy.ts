@@ -22,50 +22,50 @@ function startingPosition({ G }: Pick<State<MyGameState & GameStateMixin>, 'G' |
   if (category === "C") {
     if (G.difficulty === "live") {
       if (G.winningStreak % 2 === 0) {
-        return { numbersOnTable: Array(6).fill(true), previousMove:-1};
+        return { numbersOnTable: Array(6).fill(true), previousMove: -1 };
       } else {
-        return { numbersOnTable: Array(7).fill(true), previousMove:-1};
+        return { numbersOnTable: Array(7).fill(true), previousMove: -1 };
       }
     } else {
-      return { numbersOnTable: Array([3,4,5,8,9][Math.floor(Math.random()*5)]).fill(true), previousMove:-1};
+      return { numbersOnTable: Array([3, 4, 5, 8, 9][Math.floor(Math.random() * 5)]).fill(true), previousMove: -1 };
     }
   }
   if (category === "D") {
     if (G.difficulty === "live") {
       if (G.winningStreak % 2 === 0) {
-        return { numbersOnTable: Array(10).fill(true), previousMove:-1};
+        return { numbersOnTable: Array(10).fill(true), previousMove: -1 };
       } else {
-        return { numbersOnTable: Array(11).fill(true), previousMove:-1};
+        return { numbersOnTable: Array(11).fill(true), previousMove: -1 };
       }
     } else {
-      return { numbersOnTable: Array([3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13][Math.floor(Math.random()*11)]).fill(true), previousMove:-1};
+      return { numbersOnTable: Array([3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13][Math.floor(Math.random() * 11)]).fill(true), previousMove: -1 };
     }
   }
-  
+
   throw new Error("Invalid category");
 }
 
 function randomStrategy(G: MyGameState): [number, string] {
   const pMoves =  possibleMoves(G);
-  const i = Math.floor(Math.random()*pMoves.length);
+  const i = Math.floor(Math.random() * pMoves.length);
   return [pMoves[i].args[0], pMoves[i].move];
 }
 
 function generateStateID(numbersOnTable: boolean[], previousMove: number): string {
   let id = 0
   for (let i = 0; i < numbersOnTable.length; i++) {
-    if (numbersOnTable[i]){
-      id += 2**(i)
+    if (numbersOnTable[i]) {
+      id += 2 ** (i)
     }
   }
-  return previousMove+"_"+id;
+  return previousMove + "_" + id;
 }
 
 
 function winningStrategy(G: MyGameState): [number, string] {
   try {
     const pMoves = strategyDict[G.numbersOnTable.length][generateStateID(G.numbersOnTable, G.previousMove)];
-    const i = Math.floor(Math.random()*pMoves.length);
+    const i = Math.floor(Math.random() * pMoves.length);
     return [pMoves[i], "removeNumber"];
   } catch {
     console.error("Winning strategy not found, using random strategy instead.");

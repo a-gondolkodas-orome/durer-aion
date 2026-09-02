@@ -1,6 +1,6 @@
 'use strict';
 
-/* 
+/*
   Finding optimal step is too slow real-time after only 1 or 2 ducks, that is why
   we pre-generate positions. Later, after more ducks have been placed, we
   calculate optimal moves real-time.
@@ -26,7 +26,7 @@ const uniqueStates = range(ROWS).map((r1) => range(COLS).map((c1) =>
       return true;
     }
     return false;
-  }))  
+  }))
 ));
 
 const flipH = ([r, c]) => [ROWS - 1 - r, c];
@@ -69,7 +69,7 @@ range(ROWS).map((r1) => range(COLS).map((c1) =>
         markAsSame(uniqueStates, mb1, mb2);
       }
     }
-  }))  
+  }))
 ));
 
 // collect those left
@@ -80,7 +80,7 @@ range(ROWS).map((r1) => range(COLS).map((c1) =>
       console.log(`${r1};${c1} - ${r2};${c2}`)
       uniqueDuckPairs.push([r1, c1, r2, c2]);
     }
-  }))  
+  }))
 ));
 
 const boardIndices = flatMap(range(0, ROWS), row => range(0, COLS).map(col => ({ row, col })));
@@ -99,7 +99,7 @@ const getOptimalAiMove = (board) => {
   if (optimalPlace !== undefined) {
     return { optimal: true, move: optimalPlace };
   }
-  
+
   return { optimal: false, move: sample(allowedMoves) };
 };
 
@@ -145,28 +145,28 @@ const optimalMoves = {};
 console.log(`Will search optimal step for ${uniqueDuckPairs.length} positions`)
 uniqueDuckPairs.map(([r1, c1, r2, c2]) => {
   const nextBoard = range(0, ROWS).map(() => range(0, COLS).map(() => null));
-  
+
   markForbiddenFields(nextBoard, { row: r1, col: c1 });
   nextBoard[r1][c1] = DUCK;
   markForbiddenFields(nextBoard, { row: r2, col: c2 });
   nextBoard[r2][c2] = DUCK;
-  
+
   const initialMessage = `Initial steps: ${JSON.stringify({ r1, c1, r2, c2 })}`;
-  
+
   console.log(initialMessage);
-  
+
   const startDate = new Date();
-  
+
   const optimalMove = getOptimalAiMove(nextBoard);
-  
+
   const endDate = new Date();
-  const calcDuration = Math.trunc((endDate - startDate)/1000);
+  const calcDuration = Math.trunc((endDate - startDate) / 1000);
   const aiMoveMessage = `
     ${new Date().toISOString()}:\
     AI Move: (calc took ${calcDuration.toString().padStart(3, '0')} seconds):\
     ${JSON.stringify(optimalMove)}\
   `.replace(/\s+/g, ' ');
-  
+
   console.log(aiMoveMessage);
 
   if (optimalMove.optimal) {

@@ -1,6 +1,6 @@
 'use strict';
 
-/* 
+/*
   Finding optimal step is too slow real-time after only 1 or 2 ducks, that is why
   we pre-generate positions. Later, after more ducks have been placed, we
   calculate optimal moves real-time.
@@ -27,7 +27,7 @@ const getOptimalAiMove = (board) => {
   if (optimalPlace !== undefined) {
     return { optimal: true, move: optimalPlace };
   }
-  
+
   return { optimal: false, move: sample(allowedMoves) };
 };
 
@@ -76,26 +76,26 @@ const uniqueDuckPositions = cloneDeep(boardIndices).map(({ row, col }) => ([row,
 console.log(`Will search optimal step for ${uniqueDuckPositions.length} positions`)
 uniqueDuckPositions.map(([r1, c1]) => {
   const nextBoard = range(0, ROWS).map(() => range(0, COLS).map(() => null));
-  
+
   markForbiddenFields(nextBoard, { row: r1, col: c1 });
   nextBoard[r1][c1] = DUCK;
-  
+
   const initialMessage = `Initial steps: ${JSON.stringify({ r1, c1 })}`;
-  
+
   console.log(initialMessage);
-  
+
   const startDate = new Date();
-  
+
   const optimalMove = getOptimalAiMove(nextBoard);
-  
+
   const endDate = new Date();
-  const calcDuration = Math.trunc((endDate - startDate)/1000);
+  const calcDuration = Math.trunc((endDate - startDate) / 1000);
   const aiMoveMessage = `
     ${new Date().toISOString()}:\
     AI Move: (calc took ${calcDuration.toString().padStart(3, '0')} seconds):\
     ${JSON.stringify(optimalMove)}\
   `.replace(/\s+/g, ' ');
-  
+
   console.log(aiMoveMessage);
 
   if (optimalMove.optimal) {

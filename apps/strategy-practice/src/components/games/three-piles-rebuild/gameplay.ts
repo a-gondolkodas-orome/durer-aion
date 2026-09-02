@@ -2,7 +2,7 @@ import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 import { random, range, sample } from 'lodash';
 
 export type Board = number[]; // always length 3
-export type BotStep = { keepId: number; parts: number[] };
+export interface BotStep { keepId: number; parts: number[] }
 
 // A pile can be kept and split only if it has at least 3 pebbles.
 export const canSplit = (n: number): boolean => n >= 3;

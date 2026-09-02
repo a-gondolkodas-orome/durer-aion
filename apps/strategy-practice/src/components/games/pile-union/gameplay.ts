@@ -3,7 +3,7 @@ import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 export type Board = number[]
 export type MoveType = 'remove' | 'merge'
 // The pile clicked first, while the player picks the one to merge it with.
-export type TurnState = { firstSelectedPile: number }
+export interface TurnState { firstSelectedPile: number }
 
 // Empty piles never survive a move (removeOne drops a pile it empties), so any
 // pile still on the table has a match to take.

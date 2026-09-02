@@ -62,7 +62,7 @@ export interface StrategyReport<T_SpecificGameState> {
   log?: DefaultPluginAPIs['log'];
 }
 
-export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameState>, 
+export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameState>,
                                                  sendStrategyFunction: (_report: StrategyReport<T_SpecificGameState>) => void = () => undefined,
                                                 ): Game<T_SpecificGameState & GameStateMixin> {
   const myGameWrapper: Game<T_SpecificGameState & GameStateMixin> = {
@@ -122,15 +122,15 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
             maxMoves: 1
           }),
           ...game.turn,
-          onEnd: ({G, ctx, playerID, events, random, log}) => {
+          onEnd: ({ G, ctx, playerID, events, random, log }) => {
             if (game.turn?.onEnd !== undefined) {
-              game.turn.onEnd({G, ctx, playerID, events, log, random});
+              game.turn.onEnd({ G, ctx, playerID, events, log, random });
             }
-            sendStrategyFunction({component: "strategy", phase: "step", G: G, ctx: ctx, log: log});
+            sendStrategyFunction({ component: "strategy", phase: "step", G: G, ctx: ctx, log: log });
           },
         },
-        onEnd: ({G, ctx}) => {
-          sendStrategyFunction({component: "strategy", phase: "end", G: G, ctx: ctx});
+        onEnd: ({ G, ctx }) => {
+          sendStrategyFunction({ component: "strategy", phase: "end", G: G, ctx: ctx });
         }
       },
     },

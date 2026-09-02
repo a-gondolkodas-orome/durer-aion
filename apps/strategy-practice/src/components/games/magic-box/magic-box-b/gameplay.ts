@@ -1,6 +1,6 @@
 import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 
-export type Board = { stones: boolean[]; pendingLine: number | null }
+export interface Board { stones: boolean[]; pendingLine: number | null }
 
 /*
 board indices topography

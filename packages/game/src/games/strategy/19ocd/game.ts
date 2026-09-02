@@ -8,9 +8,9 @@ export interface MyGameState {
 
 export function possibleMoves(G: MyGameState) {
   const moves = [];
-  for (let i = 1; i<=G.numbersOnTable.length; i++) {
-    if ((G.numbersOnTable[i-1] && (G.previousMove % i === 0 || i % G.previousMove === 0))) {
-      moves.push({move: 'removeNumber', args: [i]});
+  for (let i = 1; i <= G.numbersOnTable.length; i++) {
+    if ((G.numbersOnTable[i - 1] && (G.previousMove % i === 0 || i % G.previousMove === 0))) {
+      moves.push({ move: 'removeNumber', args: [i] });
     }
   }
   return moves;
@@ -19,7 +19,7 @@ export function possibleMoves(G: MyGameState) {
 export const MyGameWrapper = function (category: "C" | "D") {
 
   const MyGame: GameType<MyGameState> = {
-    name: '19o' + category, 
+    name: '19o' + category,
     setup: () => {
       return {
         numbersOnTable: Array(8).fill(true),
@@ -28,12 +28,12 @@ export const MyGameWrapper = function (category: "C" | "D") {
     },
 
     moves: {
-      removeNumber: ({G, ctx, playerID, events }, chosenNumber: number) => {
-        if( chosenNumber<=0 || chosenNumber>G.numbersOnTable.length || !G.numbersOnTable[chosenNumber-1] || (chosenNumber % G.previousMove !== 0 && G.previousMove % chosenNumber !== 0) ) {
+      removeNumber: ({ G, ctx, playerID, events }, chosenNumber: number) => {
+        if (chosenNumber <= 0 || chosenNumber > G.numbersOnTable.length || !G.numbersOnTable[chosenNumber - 1] || (chosenNumber % G.previousMove !== 0 && G.previousMove % chosenNumber !== 0)) {
           return INVALID_MOVE;
         }
 
-        G.numbersOnTable[chosenNumber-1] = false;
+        G.numbersOnTable[chosenNumber - 1] = false;
         G.previousMove = chosenNumber;
 
         const isGameEnd = MyGame.possibleMoves(G, ctx, playerID as PlayerIDType).length === 0;
@@ -76,7 +76,7 @@ export const MyGameWrapper = function (category: "C" | "D") {
         events.endTurn();
       },
     },
-    
+
     possibleMoves: possibleMoves,
 
     turn: {

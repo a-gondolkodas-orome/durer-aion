@@ -7,7 +7,7 @@ import type { ComponentPropsWithoutRef, FocusEvent, PointerEvent, ReactNode } fr
 // states are optional in practice.
 export type DiscardState = 'no' | 'preview' | 'chosen';
 
-type PileCardProps = {
+interface PileCardProps {
   size: number;
   // the pile's count, plus what the move under the pointer would leave of it
   caption: ReactNode;
@@ -25,7 +25,7 @@ type PileCardProps = {
   // spread onto the card itself, for a game where the pile as a whole is a
   // click target
   cardProps?: ComponentPropsWithoutRef<'div'>;
-};
+}
 
 /**
  * Whether this device can preview a piece before the click that plays it. Where
@@ -67,7 +67,7 @@ export const previewProps = <T, >(value: T, { set, clear }: PreviewControls<T>) 
   };
 };
 
-type PreviewControls<T> = { set: (value: T) => void; clear: () => void };
+interface PreviewControls<T> { set: (value: T) => void; clear: () => void }
 
 const pieceColor = (isDiscarded: boolean, isInFirstHalf: boolean) => {
   if (isDiscarded) return 'bg-slate-400 dark:bg-slate-600';

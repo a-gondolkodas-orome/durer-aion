@@ -256,9 +256,10 @@ Its vite config binds all interfaces and pins port 8012, so it forwards out of
 the dev container with no extra setup, and does not collide with the 5173 the
 other frontends share.
 
-`npm ci`, `npm run build` and `npm run typecheck` at the root cover it, but its
-own ESLint and vitest setups mean the root's `npm run lint` and `npm test` skip
-it. Its suite runs from anywhere by naming the workspace:
+`npm ci`, `npm run lint`, `npm run build` and `npm run typecheck` at the root
+cover it — the lint through its own config, which ESLint picks up as it walks
+into the directory. Only `npm test` skips it, its vitest setup being its own;
+[`CLAUDE.md`](CLAUDE.md) § Project Structure has the why. Its suite runs from anywhere by naming the workspace:
 
 ```bash
 npm test --workspace=strategy-practice   # version check, lint, typecheck, unit
@@ -276,7 +277,7 @@ authority on everything under that directory.
 ## The checks CI runs
 
 ```bash
-npm run lint
+npm run lint          # also the formatter — `npm run lint:fix` applies it
 npm run typecheck
 npm test
 npm run build
@@ -287,6 +288,27 @@ npm run spell-check
 Those are the six jobs in `.github/workflows/ci.yml`; `apps/strategy-practice`
 has its own two (`practice-test` and `patch-coverage`), which run from its
 directory.
+
+`npm run lint` is the whole of the lint gate, `apps/strategy-practice` included:
+ESLint resolves a config per directory as it walks, so that app is checked
+against its own `eslint.config.js` and everything else against the root
+`eslint.config.mjs`, in one pass. No workspace carries a `lint` script of its
+own — to lint one package while you work in it, run `npx eslint .` from its
+directory and you get exactly that subtree, under whichever config governs it.
+What you see there is what CI sees.
+
+It is the formatting gate too, so there is nothing extra for CI to run.
+`eslint.stylistic.mjs` holds the character-level rules both configs import —
+spacing, blank lines, final newlines — while the rules that decide where a line
+*breaks* stay per-workspace. `npm run lint:fix` applies them, and
+`.vscode/settings.json` runs the same fixes on save. They are `@stylistic` rules
+because eslint core's formatting rules are deprecated and frozen. What the shared
+set deliberately excludes is anything that moves code between lines: layout in this
+repo is often deliberate, and a formatter that re-prints from the AST cannot tell a
+grid from an accident. `.editorconfig` covers indentation for new code, and quote
+style is enforced only where the code already agrees on one — that module says
+which, and why the rest is left alone.
+
 `npm run spell-check` checks English and Hungarian alike (via
 `@cspell/dict-hu-hu`, with both British and American spellings accepted),
 past competition problem text included — the same config the VS Code Code
@@ -323,14 +345,16 @@ run next (`npm install`, then the usual gates). It never crosses a major.
 
 `.github/workflows/dependency-report.yml` runs on the 1st of each month and
 keeps one `OPS` issue in sync with whatever is behind: every workspace's
-dependencies, every action pinned in `.github/workflows/`, and each `.nvmrc`.
+dependencies, every action pinned in `.github/workflows/`, each `.nvmrc`, and
+the docker image each deployment runs (`DOCKER_IMAGES` in
+`scripts/dependency-report.mjs` says how far each is allowed to reach, and why).
 `npm run report:outdated` prints the same table on demand, and needs no install
 — it asks the registry directly rather than shelling out to `npm outdated`.
 
 A row is one *upgrade*, not one package. The same name pinned at two versions is
-two rows, because `apps/strategy-practice` has deliberately run ahead of the rest
-on eslint, vite and typescript; the `written down in` column lists every file the
-bump has to touch, which is the honest measure of how big it is.
+two rows rather than one reporting a version it is not; the `written down in`
+column lists every file the bump has to touch, which is the honest measure of
+how big it is.
 
 The report opens no pull requests — upgrading stays deliberate, majors one at a
 time as in
@@ -343,8 +367,14 @@ report rather than dependabot or renovate: the header comment of
 
 ### Held back deliberately
 
-The report will keep listing these as behind; that is it doing its job of
-remembering. Each stays where it is until the named blocker moves (#317):
+The report keeps listing these as behind — that is it doing its job of
+remembering — but in a section of their own, so the `Major` count above it is
+the work actually waiting (#409). The four names below are mirrored by
+`HELD_BACK` in [`scripts/dependency-report.mjs`](scripts/dependency-report.mjs),
+which carries the one-line caption a table cell has room for and nothing more;
+`scripts/dependency-report.test.mjs` fails when the two lists stop agreeing, so
+lifting a hold means editing both. Each stays where it is until the named
+blocker moves (#317):
 
 - **`koa` 2 → 3**: the server's Koa app is constructed by boardgame.io, which
   pins `koa@^2` — the backend's own `koa` entry only has to agree with the
@@ -381,6 +411,26 @@ locally and are meaningless anywhere else.
 
 Whatever reads one of them takes the change at start: vite does not pick up
 `.env` edits, and the docker stack reads `.env.docker` at `up`.
+
+## Error reporting
+
+Each frontend sends errors and pageload traces to Sentry only when its `.env`
+sets `VITE_SENTRY_DSN`. Without one the SDK is never initialised, so a build
+with nowhere to report to makes no requests rather than failing them.
+
+The gate replaced a DSN hardcoded in all three entry points, pointing at a
+project `sentry.durerinfo.hu` answers `400` for. Every visitor of the public
+practice sites got that failed POST in the console on load, and no report ever
+arrived. Issuing a DSN that works is a change on the Sentry server rather than
+in this repository; set it here once there is one.
+
+`pages-deploy.yml` passes the repository variable `SENTRY_DSN` to the builds,
+which is how `/valto/` and `/proba-verseny/` would get theirs — there is no
+`.env` in CI to read.
+
+The backend reports separately, to its own project, from a DSN still written
+into `apps/online-backend/src/server.ts`. Its failures reach the server log,
+not a competitor's browser.
 
 # Competition secrecy
 

@@ -6,11 +6,12 @@
 // compares the versions written down in this repo against *each other* and fails a build on a
 // mismatch; this one compares them against *upstream* and never fails anything.
 //
-// Three sources, each read-only over the network:
+// Four sources, each read-only over the network:
 //   - npm packages: every workspace's dependencies + devDependencies, against the registry's
 //     `latest` dist-tag. The workspaces themselves are not among them — see npmRows.
 //   - GitHub Actions: every `uses:` in .github/workflows, against the action's latest release.
 //   - Node: each .nvmrc, against the newest release sharing its major.
+//   - Docker images: the tag each deployed image is pinned to, against Docker Hub — see DOCKER_IMAGES.
 //
 // Deliberately not `npm outdated`: the lockfile already names the installed version, so the
 // registry can be asked directly and this needs no install and no node_modules.
@@ -31,11 +32,40 @@ export const ALSO_WRITTEN_IN = {
   playwright: ['apps/strategy-practice/.devcontainer/Dockerfile']
 };
 
+// Majors this repo has decided not to take yet, and the one line that says why. Listing them
+// among the real work made every month's issue read as five upgrades when only one was: they are
+// reported, because a hold worth keeping is worth re-reading, but in their own section.
+// README § Held back deliberately owns the reasoning and is where a hold is argued or lifted; the
+// value here is only the caption a table cell has room for. The spec fails when the two lists stop
+// naming the same packages, so a hold cannot be lifted in one of them alone.
+export const HELD_BACK = {
+  koa: 'boardgame.io constructs the Koa app, at koa@^2',
+  '@koa/router': 'the backend types boardgame.io\'s own @koa/router@10 instance',
+  typescript: 'typescript-eslint caps typescript at <6.1.0',
+  '@types/node': 'policy: tracks the Node major in .nvmrc'
+};
+
 // Node is written down far more often than it is depended on, and listing all of it in a table cell
 // would crowd out the version. The app's README carries the list; the row carries the count.
 const NVMRC_COMPANIONS = {
   'apps/strategy-practice/.nvmrc': ['4 more files — see apps/strategy-practice/README.md']
 };
+
+// The images a deployment actually runs. Pinning them exactly (#203) made two deploys weeks apart
+// the same deploy; it also means nothing moves them when a base image ships a security patch, which
+// is what these rows are for.
+// `line` is how many version components a row may not cross, and the reasoning is the same one
+// nodeRows gives: a major is a decision, not a monthly nudge — the compose file argues postgres's.
+// nginx is the exception at 2, because its majors and minors both carry meaning: 1.30.x is the
+// stable line and 1.31.x is mainline, both current on Docker Hub, so a major-wide row would keep
+// offering mainline as if it were a patch.
+// Not here on purpose: mcr.microsoft.com/devcontainers/*, which floats on a major because a dev
+// environment is not a deployment.
+export const DOCKER_IMAGES = [
+  { image: 'node', where: 'Dockerfile', line: 1 },
+  { image: 'nginx', where: 'apps/online-frontend/nginx/Dockerfile', line: 2 },
+  { image: 'postgres', where: 'docker-compose.yml', line: 1 }
+];
 
 const fetchJson = async url => {
   // The GitHub API rate-limits anonymous callers to 60 requests an hour, which the handful of
@@ -76,9 +106,9 @@ export const workspaces = () => {
 };
 
 const npmRows = () => {
-  // Keyed by package *and* installed version, not by name: apps/strategy-practice deliberately runs
-  // ahead of the rest on eslint, vite and typescript, and one row per name would report one of the
-  // two versions as if it were both. Two upgrades, two rows — and `where` says which is which.
+  // Keyed by package *and* installed version, not by name: a workspace is free to pin a version
+  // the others have not taken yet, and one row per name would report one of the two versions as
+  // if it were both. Two upgrades, two rows — and `where` says which is which.
   const rows = new Map();
 
   for (const workspace of workspaces()) {
@@ -147,6 +177,43 @@ const nodeRows = () => {
   });
 };
 
+// Docker Hub answers with every variant of every tag — `1.30.4-alpine3.24`, `1.30-perl`, `1.30` —
+// newest-pushed-first rather than newest-version-first. Picking the pin's successor out of that is
+// parsing, not network, which is why it is a function of its own and the one part of the lookup
+// with a spec: it has to keep 1.30.4 ahead of the mainline 1.31.4, of the abbreviated 1.30 and of
+// every suffixed variant.
+export const newestTagInLine = (tags, current, line) => {
+  const parts = current.split('.');
+  const prefix = parts.slice(0, line);
+  const candidates = tags
+    // Bare tags only: a variant pins a base distribution this repo never asked for.
+    .filter(tag => /^\d+(\.\d+)*$/.test(tag))
+    .map(tag => tag.split('.'))
+    // Same precision as the pin, so `1.30` does not win over `1.30.4` by being a prefix of it, and
+    // same line, so a major (or minor) bump stays a decision rather than a monthly nudge.
+    .filter(tag => tag.length === parts.length && prefix.every((part, i) => tag[i] === part));
+  if (candidates.length === 0) throw new Error(`no ${prefix.join('.')}.x tag found`);
+  // Numeric, not lexicographic: 1.30.10 is newer than 1.30.9.
+  return candidates
+    .sort((a, b) => a.reduce((diff, part, i) => diff || Number(part) - Number(b[i]), 0))
+    .at(-1)
+    .join('.');
+};
+
+const dockerRows = () => DOCKER_IMAGES.map(({ image, where, line }) => {
+  // `FROM node:24.20.0` in a Dockerfile, `image: postgres:17.11` in the compose file.
+  const [, current] = read(where).match(new RegExp(`(?:FROM|image:)[ \\t]*${image}:(\\S+)`)) ?? [];
+  return checkVersion(`library/${image}`, current ?? 'unknown', [where], async () => {
+    if (!current) throw new Error(`no ${image}: tag found in ${where}`);
+    // Filtered server-side to the pinned line, because these repositories carry thousands of tags
+    // and one page is all this asks for. `library/` is where Docker Hub keeps the official images;
+    // the endpoint answers anonymously, and GITHUB_TOKEN does not apply to it.
+    const { results } = await fetchJson(
+      `https://hub.docker.com/v2/repositories/library/${image}/tags?page_size=100&name=${current.split('.').slice(0, line).join('.')}.`);
+    return newestTagInLine(results.map(({ name }) => name), current, line);
+  });
+});
+
 const isMajorBump = ({ current, latest }) =>
   current.replace(/^v/, '').split('.')[0] !== latest.replace(/^v/, '').split('.')[0];
 
@@ -154,14 +221,18 @@ const isMajorBump = ({ current, latest }) =>
 export const formatReport = rows => {
   const failed = rows.filter(row => row.error);
   const behind = rows.filter(row => !row.error && row.current !== row.latest);
-  const major = behind.filter(isMajorBump);
+  // A hold is about the major: a patch released inside the version we are held at is still routine,
+  // so only the major bumps are partitioned, and the rest of the split is untouched.
+  const held = behind.filter(row => isMajorBump(row) && row.name in HELD_BACK);
+  const major = behind.filter(row => isMajorBump(row) && !(row.name in HELD_BACK));
   const minor = behind.filter(row => !isMajorBump(row));
 
   if (behind.length === 0 && failed.length === 0) {
     return `Every pinned version is current — ${rows.length} checked, nothing behind.`;
   }
 
-  const table = (title, entries, note) =>
+  // `extra` adds one more column, which only the held-back table has: [heading, row => cell].
+  const table = (title, entries, note, extra) =>
     entries.length === 0
       ? []
       : [
@@ -169,25 +240,35 @@ export const formatReport = rows => {
         '',
         note,
         '',
-        '| | pinned | latest | written down in |',
-        '| --- | --- | --- | --- |',
-        ...entries.map(({ name, current, latest, where }) =>
-          `| \`${name}\` | ${current} | ${latest} | ${where.join(', ')} |`),
+        `| | pinned | latest | written down in |${extra ? ` ${extra[0]} |` : ''}`,
+        `| --- | --- | --- | --- |${extra ? ' --- |' : ''}`,
+        ...entries.map(row =>
+          `| \`${row.name}\` | ${row.current} | ${row.latest} | ${row.where.join(', ')} |`
+          + (extra ? ` ${extra[1](row)} |` : '')),
         ''
       ];
 
   return [
-    `${behind.length} of ${rows.length} pinned versions are behind.`,
+    `${behind.length} of ${rows.length} pinned versions are behind`
+    + (held.length === 0 ? '.' : `, ${held.length} of them held back deliberately.`),
     '',
     ...table(
       `Patch and minor (${minor.length})`,
       minor,
-      'Safe to batch into one PR. `npm test` and the build are the gate — plus `npm test --workspace=strategy-practice` for anything that app pins itself.'
+      '`npm run update:minors` makes every one of these edits that lives in a `package.json`, then `npm install`; an `.nvmrc` or docker tag row is a hand edit. Safe to batch into one PR — `npm test` and the build are the gate, plus `npm test --workspace=strategy-practice` for anything that app pins itself.'
     ),
     ...table(
       `Major (${major.length})`,
       major,
       'One at a time, against the upstream upgrade guide — see [#168](https://github.com/a-gondolkodas-orome/durer-jatekok/issues/168) for the shape.'
+    ),
+    // Absolute, not relative: this report's home is an issue body, where `README.md#…` resolves
+    // against the issue rather than the repository.
+    ...table(
+      `Held back deliberately (${held.length})`,
+      held,
+      'Not work: each stays until its named blocker moves — see [README § Held back deliberately](https://github.com/a-gondolkodas-orome/durer-aion#held-back-deliberately).',
+      ['held back by', ({ name }) => HELD_BACK[name]]
     ),
     ...(failed.length === 0
       ? []
@@ -203,7 +284,7 @@ export const formatReport = rows => {
 
 // Guarded so the spec can import formatReport without the script reaching for the network.
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const rows = await Promise.all([...npmRows(), ...actionRows(), ...nodeRows()]);
+  const rows = await Promise.all([...npmRows(), ...actionRows(), ...nodeRows(), ...dockerRows()]);
   const report = formatReport(rows);
 
   const outFile = process.argv[process.argv.indexOf('--out') + 1];

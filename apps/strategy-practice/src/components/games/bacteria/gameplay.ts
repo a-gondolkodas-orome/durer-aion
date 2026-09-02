@@ -1,8 +1,8 @@
 import { cloneDeep } from 'lodash';
 import type { Ctx, MoveDefs, MoveOutcome } from 'strategy-game-factory';
 
-export type Board = { bacteria: number[][], goals: number[] };
-export type Cell = { row: number; col: number };
+export interface Board { bacteria: number[][], goals: number[] }
+export interface Cell { row: number; col: number }
 // A cell paired with the attacking cell it is being judged against.
 export type AttackZone = Cell & { attackRow: number; attackCol: number };
 
@@ -53,7 +53,7 @@ export const removeOne = (board: Board, row: number, col: number): Board => {
 
 // Attacker moves ------------------------------------------------------------
 export type MoveType = 'shiftRight' | 'shiftLeft' | 'jump' | 'spread';
-export type AttackMove = { type: MoveType; row: number; col: number };
+export interface AttackMove { type: MoveType; row: number; col: number }
 
 // Pure attacker move: returns the next board, the cells reached, and whether a
 // goal was reached. Single source of truth for both real play (`moves` below)

@@ -33,7 +33,7 @@ function TeamsToolbar() {
   );
 }
 
-export function Admin(props: {teamId?: string}) {
+export function Admin(props: { teamId?: string }) {
   const theme = useTheme();
   const getAll = useAll();
   const addMinutes = useAddMinutes();
@@ -45,9 +45,9 @@ export function Admin(props: {teamId?: string}) {
   const [teamFromPath, setTeamFromPath] = useState<TeamModelDto | null>(null);
   const [adminPageOpen, setAdminPageOpen] = useState<boolean>(true);
 
-  useEffect(()=>{
+  useEffect(() => {
     if (props.teamId) {
-      const current = data?.find(d=>d.teamId === props.teamId)
+      const current = data?.find(d => d.teamId === props.teamId)
       if (current) {
         setTeamFromPath(current);
       }
@@ -70,8 +70,8 @@ export function Admin(props: {teamId?: string}) {
       },
       backgroundColor: alpha(theme.palette.background.paper, theme.palette.background.paperOpacity),
     }} data-testid="adminRoot">
-      <Dialog 
-        maxWidth={false} 
+      <Dialog
+        maxWidth={false}
         slotProps={{ paper: {
           sx: {
             marginLeft: {
@@ -91,20 +91,20 @@ export function Admin(props: {teamId?: string}) {
         open={
           selectedRow != null
         } onClose={() => {
-            setSelectedRow(null); 
+            setSelectedRow(null);
            }}>
           {selectedRow && <TeamDetailDialog data={selectedRow} setConfirmDialog={setConfirmDialog}/>}
       </Dialog>
       <ConfirmDialog confirmDialog={confirmDialog}  setConfirmDialog={setConfirmDialog}/>
-      <Stack sx={{width: "100%", display:"flex", flexDirection: "row", alignItems: "center", justifyContent: "center"}}>
+      <Stack sx={{ width: "100%", display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
         <IconButton
           onClick={() => setAdminPageOpen(!adminPageOpen)}
           size="large"
-          sx={{marginRight: "8px"}}
+          sx={{ marginRight: "8px" }}
         >
           {adminPageOpen ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
         </IconButton>
-        <Stack sx={{fontSize:"32px", textAlign: "center"}}>Admin felület </Stack>
+        <Stack sx={{ fontSize: "32px", textAlign: "center" }}>Admin felület </Stack>
       </Stack>
       {adminPageOpen && <>
         {teamFromPath && <TeamDetailDialog data={teamFromPath} setConfirmDialog={setConfirmDialog}/>}
@@ -180,8 +180,8 @@ export function Admin(props: {teamId?: string}) {
                   <Button
                     color='primary'
                     variant='contained'
-                    onClick={()=>{
-                      window.open("/admin/"+renderData.row.teamId, '_blank', 'noopener,noreferrer')
+                    onClick={() => {
+                      window.open("/admin/" + renderData.row.teamId, '_blank', 'noopener,noreferrer')
                     }}>
                       + új tab
                   </Button>
@@ -189,7 +189,7 @@ export function Admin(props: {teamId?: string}) {
               }
             }
           ]}
-          rows={data.map((a)=>{
+          rows={data.map((a) => {
             return {
               id: a.teamId,
               relayMatchState: a.relayMatch.state,
@@ -217,7 +217,7 @@ export function Admin(props: {teamId?: string}) {
           }}
           />}
         </Stack>}
-        {!teamFromPath && data && <Stack sx={{padding: "10px"}}>
+        {!teamFromPath && data && <Stack sx={{ padding: "10px" }}>
           idő hozzáadása minden aktív játékosnak:
           <Form
           initialValues={{ time: '' }}
@@ -227,16 +227,16 @@ export function Admin(props: {teamId?: string}) {
               .typeError('Számot kell írni')
               .required('Nincs megadva érték')
             })}
-          onSubmit={(values) => { 
+          onSubmit={(values) => {
             setConfirmDialog({
               text: `Erősítsd meg, hogy minden aktuális csapatnak meg akarod növelni az idejét ${values.time} perccel`,
               confirm: async () => {
                 try {
                   for (const a of data ?? []) {
-                    if(a.relayMatch.state === "IN PROGRESS") {
+                    if (a.relayMatch.state === "IN PROGRESS") {
                       await addMinutes(a.relayMatch.matchID, values.time);
                     }
-                    if(a.strategyMatch.state === "IN PROGRESS") {
+                    if (a.strategyMatch.state === "IN PROGRESS") {
                       await addMinutes(a.strategyMatch.matchID, values.time);
                     }
                   }
@@ -248,12 +248,12 @@ export function Admin(props: {teamId?: string}) {
               },
             })
           }}>
-          <Stack sx={{display: "flex", flexDirection: "row", margin: "15px"}}>
+          <Stack sx={{ display: "flex", flexDirection: "row", margin: "15px" }}>
           <Field
             name="time"
           >
           {
-            ({field}: FieldProps<string | number>) => <input
+            ({ field }: FieldProps<string | number>) => <input
               {...field}
               className="text-input"
               placeholder="perc"
@@ -313,15 +313,15 @@ export function Admin(props: {teamId?: string}) {
   )
 }
 
-function Stats(props: {data: TeamModelDto[]}) {
-  const categories = Array.from(new Set(props.data.map(it=>it.category)));
-  const stat = categories.sort().map(cat=>{
-    const current = props.data.filter(it=>it.category===cat);
-    const bothNotStarted = current.filter(it=>it.strategyMatch.state === "NOT STARTED" && it.relayMatch.state === "NOT STARTED").length;
-    const relayInProgress = current.filter(it=>it.relayMatch.state === "IN PROGRESS").length;
-    const strategyInProgress = current.filter(it=>it.strategyMatch.state === "IN PROGRESS").length;
-    const finishedRelayScores = current.filter(it=>it.relayMatch.state === "FINISHED").map(it=>(it.relayMatch as FinishedMatchStatus).score);
-    const finishedStrategyScores = current.filter(it=>it.strategyMatch.state === "FINISHED").map(it=>(it.strategyMatch as FinishedMatchStatus).score);
+function Stats(props: { data: TeamModelDto[] }) {
+  const categories = Array.from(new Set(props.data.map(it => it.category)));
+  const stat = categories.sort().map(cat => {
+    const current = props.data.filter(it => it.category === cat);
+    const bothNotStarted = current.filter(it => it.strategyMatch.state === "NOT STARTED" && it.relayMatch.state === "NOT STARTED").length;
+    const relayInProgress = current.filter(it => it.relayMatch.state === "IN PROGRESS").length;
+    const strategyInProgress = current.filter(it => it.strategyMatch.state === "IN PROGRESS").length;
+    const finishedRelayScores = current.filter(it => it.relayMatch.state === "FINISHED").map(it => (it.relayMatch as FinishedMatchStatus).score);
+    const finishedStrategyScores = current.filter(it => it.strategyMatch.state === "FINISHED").map(it => (it.strategyMatch as FinishedMatchStatus).score);
     const strategyPoints = Array.from(new Set(finishedStrategyScores));
     const relayPoints = Array.from(new Set(finishedRelayScores));
     return {
@@ -332,14 +332,14 @@ function Stats(props: {data: TeamModelDto[]}) {
       strategyInProgress: strategyInProgress,
       relay: finishedRelayScores.length,
       strategy: finishedStrategyScores.length,
-      finished: current.filter(it=>it.strategyMatch.state === "FINISHED" && it.relayMatch.state === "FINISHED").length,
-      strategyPoints: strategyPoints.map(it=> ({
+      finished: current.filter(it => it.strategyMatch.state === "FINISHED" && it.relayMatch.state === "FINISHED").length,
+      strategyPoints: strategyPoints.map(it => ({
         point: it,
-        count: finishedStrategyScores.filter(s=>s === it).length
+        count: finishedStrategyScores.filter(s => s === it).length
       })),
-      relayPoints: relayPoints.map(it=> ({
+      relayPoints: relayPoints.map(it => ({
         point: it,
-        count: finishedRelayScores.filter(s=>s === it).length
+        count: finishedRelayScores.filter(s => s === it).length
       })),
     }
   })
@@ -356,23 +356,23 @@ function Stats(props: {data: TeamModelDto[]}) {
       </TableRow>
     </TableHead>
     <TableBody>
-      {stat.map(s=> (
+      {stat.map(s => (
         <TableRow key={s.category}>
           <TableCell>{s.category}</TableCell>
           <TableCell>{s.all}</TableCell>
           <TableCell><Progress notStarted={s.all - s.relayInProgress - s.relay} inProgress={s.relayInProgress} finished={s.relay}/></TableCell>
           <TableCell><Progress notStarted={s.all - s.strategyInProgress - s.strategy} inProgress={s.strategyInProgress} finished={s.strategy}/></TableCell>
           <TableCell><Progress notStarted={s.notStarted} inProgress={s.all - s.notStarted - s.finished} finished={s.finished}/></TableCell>
-          <TableCell>{s.relayPoints.sort((a, b)=>a.point-b.point).map(it=><Fragment key={it.point}>{it.point}: {it.count} db <br/></Fragment>)}</TableCell>
-          <TableCell>{s.strategyPoints.sort((a, b)=>a.point-b.point).map(it=><Fragment key={it.point}>{it.point}: {it.count} db <br/></Fragment>)}</TableCell>
+          <TableCell>{s.relayPoints.sort((a, b) => a.point - b.point).map(it => <Fragment key={it.point}>{it.point}: {it.count} db <br/></Fragment>)}</TableCell>
+          <TableCell>{s.strategyPoints.sort((a, b) => a.point - b.point).map(it => <Fragment key={it.point}>{it.point}: {it.count} db <br/></Fragment>)}</TableCell>
         </TableRow>
       ))}
     </TableBody>
   </Table>
 }
 
-export function Progress(props: { notStarted: number, inProgress: number, finished: number}) {
-  return ( <>
-    <i title='NOT STARTED' style={{color: "red"}}>{props.notStarted}</i> / <i title='IN PROGRESS' style={{color: "orange"}}>{props.inProgress}</i> / <i title='FINISHED' style={{color: "green"}}>{[props.finished]}</i>
+export function Progress(props: { notStarted: number, inProgress: number, finished: number }) {
+  return (<>
+    <i title='NOT STARTED' style={{ color: "red" }}>{props.notStarted}</i> / <i title='IN PROGRESS' style={{ color: "orange" }}>{props.inProgress}</i> / <i title='FINISHED' style={{ color: "green" }}>{[props.finished]}</i>
   </>);
 }

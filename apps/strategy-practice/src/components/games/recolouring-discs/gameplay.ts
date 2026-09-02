@@ -2,7 +2,7 @@ import type { Ctx, MoveDefs, MoveOutcome } from 'strategy-game-factory';
 import { range, sample } from 'lodash';
 
 export type Cell = 'red' | 'blue' | null;
-export type Board = { cells: Cell[] };
+export interface Board { cells: Cell[] }
 
 export const RED = 0;
 export const BLUE = 1;

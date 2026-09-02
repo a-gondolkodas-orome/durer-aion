@@ -4,7 +4,7 @@ import { Tooltip } from "@mui/material";
 import { useTranslation } from "react-i18next";
 
 export function Countdown(
-  props: PropsWithoutRef<{ 
+  props: PropsWithoutRef<{
     msRemaining: number | null,
     setMsRemaining: Dispatch<SetStateAction<number>>,
     endTime: Date,
@@ -12,7 +12,7 @@ export function Countdown(
     serverRemainingMs: number;
   }>
 ) {
-    const {msRemaining, setMsRemaining, endTime, getServerTimer, serverRemainingMs} = props
+    const { msRemaining, setMsRemaining, endTime, getServerTimer, serverRemainingMs } = props
     const [countdown, setCountdown] = useState("??:??:??");
     const [offset, setOffset] = useState(0); // to show warning icon
     const { t } = useTranslation();
@@ -60,7 +60,7 @@ export function Countdown(
         } else {
             setCountdown(`${Math.floor(msRemaining / 3600 / 1000).toString().padStart(2, '0')
                 }:${(Math.floor(msRemaining / 60 / 1000) % 60).toString().padStart(2, '0')
-                }:${Math.floor(msRemaining / 1000 % 60).toString().slice(0,2).padStart(2, '0')
+                }:${Math.floor(msRemaining / 1000 % 60).toString().slice(0, 2).padStart(2, '0')
                 }`);
         }
     }, [msRemaining, endTime]);

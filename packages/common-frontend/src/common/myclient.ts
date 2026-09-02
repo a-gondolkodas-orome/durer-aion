@@ -5,7 +5,7 @@ import { gameWrapper, GameType } from 'game';
 import { boardWrapper } from './boardwrapper';
 import type { StrategyBoard } from './boardwrapper';
 import type { ComponentType, ReactNode } from 'react';
-import type {GameRelay, MyGameState as RelayGameState} from 'game';
+import type { GameRelay, MyGameState as RelayGameState } from 'game';
 
 /// The relay board is handed straight to boardgame.io, so it sees the plain
 /// bgio props: the relay game carries its own timer instead of gameWrapper's.

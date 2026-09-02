@@ -1,10 +1,10 @@
 import type { MoveDefs, MoveOutcome } from 'strategy-game-factory';
 
 export type Grid = boolean[][]
-export type Board = { grid: Grid }
+export interface Board { grid: Grid }
 export type Orientation = 'row' | 'col'
 // The disc the player picked first, while choosing between its row and its column.
-export type TurnState = { r: number; c: number }
+export interface TurnState { r: number; c: number }
 interface Rect { minR: number; maxR: number; minC: number; maxC: number }
 export interface Move { r: number; c: number; orientation: Orientation }
 
@@ -18,7 +18,7 @@ export const getRectangleAt = (grid: Grid, sr: number, sc: number): Rect | null 
   if (!grid[sr]?.[sc]) return null;
   let minR = sr, maxR = sr, minC = sc, maxC = sc;
   const seen = new Set<string>([`${sr},${sc}`]);
-  const stack: Array<[number, number]> = [[sr, sc]];
+  const stack: [number, number][] = [[sr, sc]];
   while (stack.length) {
     const [r, c] = stack.pop()!;
     minR = Math.min(minR, r); maxR = Math.max(maxR, r);

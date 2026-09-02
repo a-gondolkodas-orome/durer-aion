@@ -1,9 +1,26 @@
 // .mts, not .ts: the root package.json is not a module, so Vite loads a .ts config as
 // CommonJS and warns that the ESM syntax below will stop working once its native config
 // loader becomes the default.
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitest/config';
 
+// The suites run against the packages' TypeScript sources, with no build in
+// front of them — the CI test job installs and runs vitest, nothing more. That
+// used to happen by accident: resolution fell through each package's unbuilt
+// `main` to the source barrel next to it. Their exports maps close that path
+// now, so say it outright, which also stops a stale `dist` on a developer's
+// machine from being what the suites test.
+const source = (pkg: string) =>
+  fileURLToPath(new URL(`packages/${pkg}/index.ts`, import.meta.url));
+
 export default defineConfig({
+  resolve: {
+    alias: {
+      game: source('game'),
+      schemas: source('schemas'),
+      strategy: source('strategy'),
+    },
+  },
   test: {
     // The suites import from 'vitest' explicitly, so they typecheck without an
     // ambient-types entry in every workspace tsconfig. Globals stay on because
@@ -13,5 +30,8 @@ export default defineConfig({
     // a `// @vitest-environment jsdom` docblock.
     environment: 'node',
     include: ['{apps,packages}/*/src/**/*.test.{ts,tsx}', 'scripts/**/*.test.mjs'],
+    // Keeps the run's output to the report itself — see the file for how a test
+    // that means to log opts out.
+    setupFiles: ['./vitest.setup.mts'],
   },
 });

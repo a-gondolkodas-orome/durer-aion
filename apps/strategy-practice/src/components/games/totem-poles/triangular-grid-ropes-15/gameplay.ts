@@ -19,7 +19,7 @@ const nodeCount = ((N + 1) * (N + 2)) / 2;
 // x, y, z: 3 "axis" coordinates, one per family of lines parallel to a
 // triangle side. x is the row (0 at the top). Every node satisfies
 // x + y + z = 2N.
-type Vertex = { id: number, x: number, y: number, z: number, cx: string, cy: string };
+interface Vertex { id: number, x: number, y: number, z: number, cx: string, cy: string }
 
 // Layout: an equilateral triangle. The svg is square, so the vertical step is
 // sqrt(3)/2 of the horizontal step to keep the triangle equilateral.
@@ -47,7 +47,7 @@ export const vertices: Vertex[] = (() => {
   return result;
 })();
 
-export type Edge = { from: number, to: number }
+export interface Edge { from: number, to: number }
 export type Board = Edge[]
 
 export type Direction = 'x' | 'y' | 'z';

@@ -10,10 +10,10 @@
 // is a per-game judgement (drag the game out, avoid handing over an obvious
 // win, concede) and deliberately has no home here.
 
-type Solver<Position, Move> = {
+interface Solver<Position, Move> {
   isWinningForMover: (position: Position) => boolean;
   winningMoves: (position: Position) => Move[];
-};
+}
 
 export const createWinLossSolver = <Position, Move>({ key, legalMoves, apply }: {
   // The position's identity for memoisation. This is where a game folds in its

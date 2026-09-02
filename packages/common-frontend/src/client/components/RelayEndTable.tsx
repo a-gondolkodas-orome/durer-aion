@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 
 const pointColours: string[] = ['#3fc523', '#9beb53', '#d5eb42', '#ee5555'];
 
-const pointCellStyle = (data: {max: number, got: number | null}) =>
+const pointCellStyle = (data: { max: number, got: number | null }) =>
   data.got === null
     ? { backgroundColor: '#fff' }
     : { backgroundColor: pointColours[Math.min(data.max - data.got, 3)] };
@@ -27,7 +27,7 @@ const chunkTasks = <T,>(tasks: T[]): T[][] => {
  * (by logging out) instead of reloading into the competition home page
  * @returns End screen
  */
-export function RelayEndTable(props: {allPoints: number, task: {max: number, got: number | null}[], selectRound?: boolean}) {
+export function RelayEndTable(props: { allPoints: number, task: { max: number, got: number | null }[], selectRound?: boolean }) {
   const theme = useTheme();
   const refreshState = useRefreshTeamState();
   const toHome = useToHome();
@@ -70,40 +70,40 @@ export function RelayEndTable(props: {allPoints: number, task: {max: number, got
         }}>
         <Table sx={{
         marginTop: '20px',
-        marginLeft:'10px',
+        marginLeft: '10px',
         borderCollapse: 'collapse',
         fontSize: '18px',
-        '& td':{
+        '& td': {
             borderStyle: 'solid',
             borderColor: '#000',
             borderWidth: '1px',
             textAlign: 'center',
             padding: '5px',
             minWidth: '40px',
-            [theme.breakpoints.down(800)]:{
+            [theme.breakpoints.down(800)]: {
                 minWidth: '0px',
                 padding: '0px',
             }
         },
-        [theme.breakpoints.down(1200)]:{
+        [theme.breakpoints.down(1200)]: {
             width: '100%',
-            marginLeft:'0px',
+            marginLeft: '0px',
         },
-        [theme.breakpoints.down(800)]:{
+        [theme.breakpoints.down(800)]: {
             fontSize: '11px',
         }
     }}>
             <TableBody>
-            {chunkTasks(props.task).map((chunk, chunkIdx)=><Fragment key={chunkIdx}>
+            {chunkTasks(props.task).map((chunk, chunkIdx) => <Fragment key={chunkIdx}>
               <TableRow>
                 <TableCell>{t('relay.endTable.task')}</TableCell>
-                {chunk.map((_data, idx)=><TableCell key={idx}>
-                    {chunkIdx*10 + idx+1}.
+                {chunk.map((_data, idx) => <TableCell key={idx}>
+                    {chunkIdx * 10 + idx + 1}.
                 </TableCell>)}
             </TableRow>
             <TableRow>
                 <TableCell>{t('relay.endTable.point')}</TableCell>
-                {chunk.map((data, idx)=><TableCell key={idx} sx={pointCellStyle(data)}>
+                {chunk.map((data, idx) => <TableCell key={idx} sx={pointCellStyle(data)}>
                     {data.got}
                 </TableCell>)}
             </TableRow>
@@ -129,9 +129,9 @@ export function RelayEndTable(props: {allPoints: number, task: {max: number, got
           }
         }}>
           {pointColours.map((colour, attempt) => (
-            <Stack key={attempt} sx={{display: 'flex' }}>
+            <Stack key={attempt} sx={{ display: 'flex' }}>
               <Stack sx={{ backgroundColor: colour }}></Stack>
-              <span>{attempt === 3 ? t('relay.endTable.wrong') : t('relay.endTable.try', {count: attempt + 1})}</span>
+              <span>{attempt === 3 ? t('relay.endTable.wrong') : t('relay.endTable.try', { count: attempt + 1 })}</span>
             </Stack>
           ))}
         </Stack>
@@ -159,52 +159,52 @@ export function RelayEndTable(props: {allPoints: number, task: {max: number, got
   )
 }
 
-export function RelayEndTableData(props: {allPoints: number, task: {max: number, got: number | null, answers: number[]}[]}) {
+export function RelayEndTableData(props: { allPoints: number, task: { max: number, got: number | null, answers: number[] }[] }) {
   const theme = useTheme();
   const { t } = useTranslation();
   return (
         <Table sx={{
         marginTop: '20px',
-        marginLeft:'10px',
+        marginLeft: '10px',
         borderCollapse: 'collapse',
         fontSize: '18px',
-        '& td':{
+        '& td': {
             borderStyle: 'solid',
             borderColor: '#000',
             borderWidth: '1px',
             textAlign: 'center',
             padding: '5px',
             minWidth: '40px',
-            [theme.breakpoints.down(800)]:{
+            [theme.breakpoints.down(800)]: {
                 minWidth: '0px',
                 padding: '0px',
             }
         },
-        [theme.breakpoints.down(1200)]:{
+        [theme.breakpoints.down(1200)]: {
             width: '100%',
-            marginLeft:'0px',
+            marginLeft: '0px',
         },
-        [theme.breakpoints.down(800)]:{
+        [theme.breakpoints.down(800)]: {
             fontSize: '11px',
         }
     }}>
             <TableBody>
-            {chunkTasks(props.task).map((chunk, chunkIdx)=><Fragment key={chunkIdx}>
+            {chunkTasks(props.task).map((chunk, chunkIdx) => <Fragment key={chunkIdx}>
               <TableRow>
                 <TableCell>{t('relay.endTable.task')}</TableCell>
-                {chunk.map((_data, idx)=><TableCell key={idx}>
-                    {chunkIdx*10 + idx+1}.
+                {chunk.map((_data, idx) => <TableCell key={idx}>
+                    {chunkIdx * 10 + idx + 1}.
                 </TableCell>)}
             </TableRow>
             <TableRow>
                 <TableCell>{t('relay.endTable.point')}</TableCell>
-                {chunk.map((data, idx)=><TableCell key={idx} sx={pointCellStyle(data)}>
+                {chunk.map((data, idx) => <TableCell key={idx} sx={pointCellStyle(data)}>
                     {data.got}
                 </TableCell>)}
             </TableRow>
             <TableRow>
                 <TableCell>Válaszok</TableCell>
-                {chunk.map((data, idx)=><TableCell key={idx}>
+                {chunk.map((data, idx) => <TableCell key={idx}>
                     {data.answers.join(", ")}
                 </TableCell>)}
             </TableRow>

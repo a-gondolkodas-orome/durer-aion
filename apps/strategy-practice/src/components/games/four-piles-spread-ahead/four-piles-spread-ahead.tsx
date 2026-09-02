@@ -30,9 +30,9 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const toAppear = ({ pileId, pieceId }: Piece) => {
     if (validHoveredPiece === null) return false;
     return (
-      (pileId<validHoveredPiece.pileId) &&
-      (pileId>validHoveredPiece.pileId-removedCount()-1) &&
-      (pieceId===board[pileId])
+      (pileId < validHoveredPiece.pileId) &&
+      (pileId > validHoveredPiece.pileId - removedCount() - 1) &&
+      (pieceId === board[pileId])
     );
   };
 
@@ -41,16 +41,16 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     const pileName = language === 'en' ? 'pile' : 'kupac';
 
     if (!ctx.isClientMoveAllowed || !validHoveredPiece) {
-      return `${pileId+1}. ${pileName}: ${pieceCountInPile}`;
+      return `${pileId + 1}. ${pileName}: ${pieceCountInPile}`;
     }
 
-    if (pileId===validHoveredPiece.pileId) {
-      return `${pileId+1}. ${pileName}: ${pieceCountInPile} → ${pieceCountInPile - removedCount()}`;
+    if (pileId === validHoveredPiece.pileId) {
+      return `${pileId + 1}. ${pileName}: ${pieceCountInPile} → ${pieceCountInPile - removedCount()}`;
     }
-    if ((pileId<validHoveredPiece.pileId) && (pileId>validHoveredPiece.pileId-removedCount()-1)) {
-      return `${pileId+1}. ${pileName}: ${pieceCountInPile} → ${pieceCountInPile + 1}`;
+    if ((pileId < validHoveredPiece.pileId) && (pileId > validHoveredPiece.pileId - removedCount() - 1)) {
+      return `${pileId + 1}. ${pileName}: ${pieceCountInPile} → ${pieceCountInPile + 1}`;
     }
-    return `${pileId+1}. ${pileName}: ${pieceCountInPile} `;
+    return `${pileId + 1}. ${pileName}: ${pieceCountInPile} `;
   };
 
   const pieceVisibility = ({ pileId, pieceId }: Piece) => {
@@ -85,7 +85,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         key={pileId}
         className={`
           w-[50%] pl-1 inline-block text-center
-          ${pileId < 2 ? 'border-t-2': ''}
+          ${pileId < 2 ? 'border-t-2' : ''}
           ${rightBorder(pileId) ? 'border-r-2' : ''}
           ${leftBorder(pileId) ? 'border-l-2' : ''}
         `}
@@ -94,7 +94,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         <p className="text-xl" style={{ transform: 'scaleY(-1)' }}>
           {currentChoiceDescription(pileId)}
         </p>
-          {range(board[pileId]+5).map(pieceId => (
+          {range(board[pileId] + 5).map(pieceId => (
             <button
               key={pieceId}
               disabled={isDisabled({ pileId, pieceId })}

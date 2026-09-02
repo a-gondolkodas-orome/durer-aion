@@ -27,7 +27,7 @@ export const LoadTeamState = () => {
             console.error("could not load the team state", e);
           });
 
-      
+
           userModel.addListener(setTeamState);
   }, []);
 
@@ -95,12 +95,9 @@ export const useLogin = () => {
   const repo = useClientRepo();
   return async (joinCode: string) => {
     const userModel = new UserModel(repo);
-    console.log("joinCode", joinCode);
-    const res = await userModel.login(joinCode);
-    console.log("res", res);
+    await userModel.login(joinCode);
 
     const state = await userModel.getTeamState();
-    console.log("useLogin", state);
     setTeamState(state);
   }
 };

@@ -4,7 +4,7 @@ import { buildCtx } from './build-ctx';
 import { isDevMode } from './dev-mode';
 import type { CoreState } from './store';
 
-type MoveTransition<TBoard, TTurnState> = {
+interface MoveTransition<TBoard, TTurnState> {
   state: CoreState<TBoard, TTurnState>
   // validate rejected the dispatch; state is unchanged (same reference)
   illegal?: boolean

@@ -2,7 +2,7 @@ import type { BotStrategy, Gameplay } from './types';
 import { playBotTurn, type MatchMove } from './play-bot-turn';
 import { createInitialCoreState, type CoreState } from './store';
 
-export type MatchResult<TBoard> = {
+export interface MatchResult<TBoard> {
   winnerIndex: number
   board: TBoard
   history: MatchMove<TBoard>[]

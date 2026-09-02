@@ -11,9 +11,9 @@ import { import_teams_from_tsv } from './team_import';
 import { AnyBgioGame, PlayerIDType } from 'game';
 
 /**
- * 
+ *
  * Big factory to set up the Router for the API, and also contains API function implementations.
- * 
+ *
  * @param router - Koa Router
  * @param teams - List of teams, provided as a TeamsRepository
  * @param games - List of possible games for teams
@@ -247,9 +247,9 @@ export function configureTeamsRouter(
 
   /**
    * Run a user defined filter query on teams
-   * 
+   *
    * @param {string|string[]} filter - Get parameter to pass the filter
-   * @returns {TeamModel[]} - List of the selected teams 
+   * @returns {TeamModel[]} - List of the selected teams
    */
   router.get("/team/admin/filter", koaBody(), async (ctx) => {
     const filter_string: string | string[] | undefined =
@@ -269,7 +269,7 @@ export function configureTeamsRouter(
 
   /**
    * Get all teams as a full object
-   * @returns {TeamModel[]} - List of the selected teams 
+   * @returns {TeamModel[]} - List of the selected teams
    */
   router.get("/team/admin/all", koaBody(), async (ctx) => {
     ctx.body = await teams.listTeams();
@@ -277,7 +277,7 @@ export function configureTeamsRouter(
 
   /**
  * Get all teams as a full object
- * @returns {TeamModel[]} - List of the selected teams 
+ * @returns {TeamModel[]} - List of the selected teams
  */
   router.put("/team/admin/import", koaBody({ multipart: true }), async (ctx) => {
     const { file } = ctx.request.files ?? ctx.throw(400, 'No files uploaded!');
@@ -296,12 +296,12 @@ export function configureTeamsRouter(
 
     const import_results = await import_teams_from_tsv(teams, file.filepath)
 
-    ctx.body = import_results;  
+    ctx.body = import_results;
   })
 
   /**
    * Get team ID based on login token
-   * 
+   *
    * @param {string} token: Login token
    * @returns {string} - TeamId for the team
    */
@@ -316,10 +316,10 @@ export function configureTeamsRouter(
   /**
    * ROUTING FOR TEAM DATA is handled here. If wrong team then returns 400
    * This is the main middleware to catch wrong team id-s
-   * 
+   *
    * @param {string} GUID - TeamId
    * @returns {TeamModel} - raw TeamModell if called directly
-   * 
+   *
    */
   router.get(
     /^\/team\/(?<GUID>[^-]{8}-[^-]{4}-[^-]{4}-[^-]{4}-[^-]{12}$)/,
@@ -347,7 +347,7 @@ export function configureTeamsRouter(
 
   /**
    * Let a team start a RELAY match.
-   * 
+   *
    * @param {string} GUID - TeamId
    */
   router.get("/team/:GUID/relay/play", koaBody(), async (ctx) => {
@@ -376,7 +376,7 @@ export function configureTeamsRouter(
 
   /**
    * Let a team start a STRATEGY match.
-   * 
+   *
    * @param {string} GUID - TeamId
    */
   router.get("/team/:GUID/strategy/play", koaBody(), async (ctx) => {
@@ -400,7 +400,7 @@ export function configureTeamsRouter(
 
   /**
    * Let a team set their PageState to HOME
-   * 
+   *
    * @param {string} GUID - TeamId
    */
   router.get("/team/:GUID/gohome", koaBody(), async (ctx) => {
@@ -420,9 +420,9 @@ export function configureTeamsRouter(
 
   /**
    * Create a new BGio game
-   * 
+   *
    * @param {string} nameid - game ID to create
-   * 
+   *
    * This should be in line with boardgame.io/src/server/api.ts
    */
   router.post("/games/:nameid/create", async (ctx, next) => {
