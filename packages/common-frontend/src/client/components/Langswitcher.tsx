@@ -4,7 +4,7 @@ import LanguageIcon from '@mui/icons-material/Language';
 import { useTranslation } from "react-i18next";
 import { useId } from "react"
 
-export const Languages = {
+const Languages = {
   hu: {
     label: 'Magyar',
     flag: (
@@ -29,10 +29,10 @@ export const Languages = {
   },
 } as const;
 
-export type LanguageCode = keyof typeof Languages;
-export const supportedCodes = Object.keys(Languages) as LanguageCode[];
+type LanguageCode = keyof typeof Languages;
+const supportedCodes = Object.keys(Languages) as LanguageCode[];
 
-export const LanguageFlag = ({ langcode }: { langcode: LanguageCode }) => {
+const LanguageFlag = ({ langcode }: { langcode: LanguageCode }) => {
   const dropdownid = useId();
   return (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" width="24" height="24">
@@ -46,40 +46,24 @@ export const LanguageFlag = ({ langcode }: { langcode: LanguageCode }) => {
   );
 }
 
-const selectSx = (theme: Theme, color?: string, size: 'default' | 'small' = 'default', borderColor?: string) => {
-  const defaultSize = size === 'small' ? {
-    margin: '0px 4px',
-    minWidth: '90px',
-    fontSize: '0.875rem',
-    '& .MuiInput-input': {
-      padding: '2px 4px',
-    },
-    '& .MuiSvgIcon-root': { fill: color ?? '#000', fontSize: '1.2rem' },
-  } : {
-    margin: "10px",
-    minWidth: "80px",
-    '& .MuiInput-input': {
-      padding: "5px 8px",
-    },
-    '& .MuiSvgIcon-root': { fill: color ?? '#000' },
-  };
-  
-  borderColor = borderColor ?? theme.palette.primary.main
-
-  return {
-    ...defaultSize,
-    color: color ?? '#000',
-    border: borderColor + " 1px solid",
-    borderRadius: "3px",
-    "&::before": { borderBottom: "transparent" },
-    "&&:hover:before": {
-      borderBottom: "2px solid " + (color ?? theme.palette.primary.main),
-    },
-    "&&::after": {
-      borderBottom: "2px solid " + (color ?? theme.palette.primary.main),
-    },
-  };
-};
+const selectSx = (theme: Theme, color?: string) => ({
+  margin: "10px",
+  minWidth: "80px",
+  color: color ?? '#000',
+  border: theme.palette.primary.main + " 1px solid",
+  borderRadius: "3px",
+  "& .MuiInput-input": {
+    padding: "5px 8px",
+  },
+  "& .MuiSvgIcon-root": { fill: color ?? '#000' },
+  "&::before": { borderBottom: "transparent" },
+  "&&:hover:before": {
+    borderBottom: "2px solid " + (color ?? theme.palette.primary.main),
+  },
+  "&&::after": {
+    borderBottom: "2px solid " + (color ?? theme.palette.primary.main),
+  },
+});
 
 function useLanguages() {
   const { i18n } = useTranslation();
@@ -90,37 +74,20 @@ function useLanguages() {
     .map((code) => ({ code, label: Languages[code].label }));
 }
 
-export function LanguageDropdown({ 
-  fontColor,
-  borderColor,
-  size = 'default',
-  language: externalLanguage,
-  onLanguageChange
-} : { 
-  fontColor?: string,
-  borderColor?: string,
-  size?: 'default' | 'small',
-  language?: string,
-  onLanguageChange?: (lang: string) => void
-}) {
+export function LanguageDropdown({ fontColor } : { fontColor?: string }) {
   const theme = useTheme();
   const { i18n } = useTranslation();
-  
-  // Use external language/callback if provided, otherwise use i18n
-  const currentLanguage = externalLanguage ?? i18n.language;
-  const handleChange = onLanguageChange ?? ((lang: string) => { void i18n.changeLanguage(lang); });
-  
   const languages = useLanguages();
 
   return (
     <Select<string>
-      value={currentLanguage}
+      value={i18n.language}
       variant="standard"
-      onChange={(e) => handleChange(e.target.value)}
-      sx={selectSx(theme, fontColor, size, borderColor)}
+      onChange={(e) => { void i18n.changeLanguage(e.target.value); }}
+      sx={selectSx(theme, fontColor)}
       renderValue={(value) => (
-        <Stack sx={{ display: "flex", alignItems: "center", gap: size === 'small' ? "4px" : "8px", flexDirection: "row" }}>
-          <LanguageIcon sx={{ fontSize: size === 'small' ? '1rem' : '1.5rem' }} />
+        <Stack sx={{ display: "flex", alignItems: "center", gap: "8px", flexDirection: "row" }}>
+          <LanguageIcon />
           {languages.find(({ code }) => code === value)?.label}
         </Stack>
       )}
