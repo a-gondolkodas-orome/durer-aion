@@ -145,7 +145,7 @@ why `coverage.include` in `vite.config.js` names every file under `src/` rather
 than only what a test imported.
 
 A gate on the lines a PR *added*, measured with the sweeps excluded, ran on every
-PR until #427 retired it with the rest of the duplicated CI: it was the suite run
+PR until #431 retired it with the rest of the duplicated CI (#427): it was the suite run
 a second time, instrumented, for one number. What it asked for still holds — a
 new game or bot gets its `gameplay.spec.ts` and `bot-strategy.spec.ts` (§ Testing)
 — and is the reviewer's to check. Don't add a gate on the global number either;
