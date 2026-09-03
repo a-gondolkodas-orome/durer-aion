@@ -138,7 +138,7 @@ directory, with no install of their own:
 
 ```bash
 npm run dev:strategy-practice                     # from the root; it is a workspace
-npm test --workspace=strategy-practice   # check:versions + lint + typecheck + unit
+npm test --workspace=strategy-practice   # lint + typecheck + unit
 ```
 
 Every long docker invocation lives in a root npm script rather than in prose,

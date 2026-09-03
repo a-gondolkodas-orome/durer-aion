@@ -52,9 +52,6 @@ jobs:
         run: npm ci
       # Each check runs even after an earlier one failed, so a red build names every problem
       # at once rather than only the first.
-      - name: Check tool versions
-        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
-        run: npm run check:versions
       - name: Typecheck
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: npm run typecheck

@@ -2,9 +2,8 @@
 // released yesterday until something asks. This reports what is behind (README § Dependency
 // updates), across every workspace at once.
 //
-// It is the outward-facing half of apps/strategy-practice/scripts/check-versions.mjs: that one
-// compares the versions written down in this repo against *each other* and fails a build on a
-// mismatch; this one compares them against *upstream* and never fails anything.
+// It is the outward-facing half of check-versions.test.mjs: that one compares the versions
+// written down in this repo against *each other* and fails the test run on a mismatch; this one compares them against *upstream* and never fails anything.
 //
 // Four sources, each read-only over the network:
 //   - npm packages: every workspace's dependencies + devDependencies, against the registry's
@@ -27,7 +26,7 @@ const read = file => readFileSync(`${repoRoot}${file}`, 'utf8');
 const WORKFLOWS = '.github/workflows/';
 
 // Places a version is written down that no package.json names, so a bump has to touch them in the
-// same commit. `npm run check:versions` fails until they agree; this only says where to look.
+// same commit. check-versions.test.mjs fails until they agree; this only says where to look.
 export const ALSO_WRITTEN_IN = {
   playwright: ['apps/strategy-practice/.devcontainer/Dockerfile']
 };

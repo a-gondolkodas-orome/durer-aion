@@ -40,10 +40,6 @@ jobs:
       # pull requests, so without these a check nobody ran on main would ship. The rest of the
       # monorepo is covered by ci.yml on the same push, and by the build below — and lint is now
       # part of that rest, since one root `eslint .` covers this app too.
-      - name: Check tool versions
-        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
-        working-directory: apps/strategy-practice
-        run: npm run check:versions
       - name: Typecheck practice
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         working-directory: apps/strategy-practice

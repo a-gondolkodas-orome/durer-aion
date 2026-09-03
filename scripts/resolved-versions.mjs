@@ -1,5 +1,5 @@
 // What `package.json` states is a *range*; what npm installs is in the lockfile. Both callers here
-// compare against something exact — `check-versions.mjs` compares the Playwright string against the
+// compare against something exact — `check-versions.test.mjs` compares the Playwright string against the
 // devcontainer Dockerfile, `dependency-report.mjs` compares it against the registry's `latest` — so
 // a range is the wrong end of the comparison twice over: a caret makes the first a permanent
 // mismatch and the second a permanent "behind".

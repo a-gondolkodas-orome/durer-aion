@@ -47,8 +47,8 @@ The hook lives at the repository root because only the root
   `.devcontainer/devcontainer.json` (the image tag only fixes the major) to the
   version in the repository root's `.nvmrc`; the root README § Requirements lists
   every file that repeats it. Bump them together, or the container quietly runs
-  a different Node than CI. `npm run test` fails on either mismatch, so you
-  will not find out the hard way.
+  a different Node than CI. The root `npm test` fails on either mismatch, so
+  you will not find out the hard way.
 - **npm's update notifier is off** (`NPM_CONFIG_UPDATE_NOTIFIER`): the npm that
   matters is the one bundled with the pinned Node.
 - **`gh`** does not pick up your SSH key or VS Code's credential helper, so run
@@ -261,9 +261,9 @@ matches the other frontends'.
 `playwright` is the one dependency pinned exactly, deliberately: the devcontainer
 image bakes browser binaries for one specific version, so an incidental bump
 inside a range would be a broken container rather than a newer library.
-`npm run check:versions` fails if it and `.devcontainer/Dockerfile` disagree, and
-does the same for every file the Node version is written down in (the root
-README § Requirements lists them).
+The root `npm test` fails if it and `.devcontainer/Dockerfile` disagree
+(`scripts/check-versions.test.mjs`), and does the same for every file the Node
+version is written down in (the root README § Requirements lists them).
 
 ## License
 

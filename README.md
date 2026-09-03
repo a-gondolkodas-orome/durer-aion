@@ -16,7 +16,7 @@ All demos are in Hungarian.
 
 ## Requirements
 
-- [Node.js](https://nodejs.org/) — the exact version in [`.nvmrc`](./.nvmrc), which every CI job, both dev containers and the Docker image run. With [nvm](https://github.com/nvm-sh/nvm) installed, `nvm use` anywhere in the repo picks it up. Another 24.x will most likely work too, but CI runs exactly this one. The same version is written down in four more files — `engines.node` in `apps/strategy-practice/package.json`, the `node` feature in both `devcontainer.json` files, and the `Dockerfile`'s `FROM` line — and `npm run check:versions --workspace=strategy-practice` fails until they all agree.
+- [Node.js](https://nodejs.org/) — the exact version in [`.nvmrc`](./.nvmrc), which every CI job, both dev containers and the Docker image run. With [nvm](https://github.com/nvm-sh/nvm) installed, `nvm use` anywhere in the repo picks it up. Another 24.x will most likely work too, but CI runs exactly this one. The same version is written down in four more files — `engines.node` in `apps/strategy-practice/package.json`, the `node` feature in both `devcontainer.json` files, and the `Dockerfile`'s `FROM` line — and `npm test` fails until they all agree (`scripts/check-versions.test.mjs`).
 - [Docker](https://www.docker.com/), with your user in the `docker` group so the
   commands below need no `sudo` — `DEPLOYMENT.md` has the three lines that do
   it. Plain `sudo docker …` works too, but never `sudo npm run …`: that runs
@@ -263,7 +263,7 @@ into the directory. Only `npm test` skips it, its vitest setup being its own;
 [`CLAUDE.md`](CLAUDE.md) § Project Structure has the why. Its suite runs from anywhere by naming the workspace:
 
 ```bash
-npm test --workspace=strategy-practice   # version check, lint, typecheck, unit
+npm test --workspace=strategy-practice   # lint, typecheck, unit
 ```
 
 `cd apps/strategy-practice` if you are going to iterate in there — the rest of
@@ -363,7 +363,7 @@ report rather than dependabot or renovate: the header comment of
 `scripts/dependency-report.mjs`. Two versions are written down in files no
 `package.json` names — Node (§ Requirements lists where) and Playwright
 ([that app's README](apps/strategy-practice/README.md#project-setup) says where);
-`npm run check:versions --workspace=strategy-practice` fails until they agree.
+`npm test` fails until they agree (`scripts/check-versions.test.mjs`).
 
 ### Held back deliberately
 
