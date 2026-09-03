@@ -267,7 +267,7 @@ npm test --workspace=strategy-practice   # version check, lint, typecheck, unit
 ```
 
 `cd apps/strategy-practice` if you are going to iterate in there — the rest of
-its scripts, `coverage:patch` among them, work the same either way.
+its scripts work the same either way.
 
 **Do not run `npm ci` from `apps/strategy-practice`.** There is one lockfile, at
 the root; from a workspace directory npm installs that workspace's subtree and
@@ -287,8 +287,7 @@ npm run spell-check
 ```
 
 Those are the six jobs in `.github/workflows/ci.yml`; `apps/strategy-practice`
-has its own two (`practice-test` and `patch-coverage`), which run from its
-directory.
+has its own one (`practice-test`), which runs from its directory.
 
 `npm run lint` is the whole of the lint gate, `apps/strategy-practice` included:
 ESLint resolves a config per directory as it walks, so that app is checked

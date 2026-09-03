@@ -34,8 +34,6 @@
       "Bash(npm run i18n:check)",
       "Bash(npm run spell-check)",
       "Bash(npm run coverage)",
-      "Bash(npm run coverage:unswept)",
-      "Bash(npm run coverage:patch)",
       "Bash(npm run check:versions)",
       "Bash(npm run report:outdated)",
       "Bash(npx tsc --noEmit)",

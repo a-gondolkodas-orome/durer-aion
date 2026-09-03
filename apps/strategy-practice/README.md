@@ -74,11 +74,9 @@ npm run lint:fix         # auto-fix simple formatting errors such as trailing sp
 npm run build            # prod build — some problems only appear here
 
 npm run coverage         # line coverage, on demand
-npm run coverage:unswept # the same, without the two all-games sweeps
-npm run coverage:patch   # how much of what your branch adds a spec reaches
 ```
 
-The three coverage commands, and which of them CI gates on, are explained in
+What the coverage report is good for, and why nothing gates on it, is in
 [AGENTS.md § Coverage](AGENTS.md#coverage).
 
 ## IDE setup

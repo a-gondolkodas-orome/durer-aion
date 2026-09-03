@@ -65,8 +65,9 @@ workspace — `apps/practice` then, `apps/strategy-practice` since the rename.)*
 
 - `jatek.durerinfo.hu` serves the site and deploy-on-main works.
 - Every game is playable in both modes.
-- Its existing CI gates — lint, typecheck, unit tests, patch coverage — stay
-  green.
+- Its CI gates — lint, typecheck, unit tests — stay green. *(Patch coverage was
+  retired in #427, which removed the duplicated CI: the suite it measured still
+  runs, once, and `npm run coverage` stays available on demand.)*
 
 ## Relay practice site
 

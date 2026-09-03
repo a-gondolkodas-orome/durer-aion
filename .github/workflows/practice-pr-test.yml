@@ -1,15 +1,14 @@
 name: CI:practice
 on:
   pull_request:
-    # apps/strategy-practice has its own vitest suite, Vite build and coverage gate, so most of
-    # the monorepo cannot change what these jobs measure — but its dependencies resolve through
+    # apps/strategy-practice has its own vitest suite and Vite build, so most of the monorepo
+    # cannot change what this job measures — but its dependencies resolve through
     # the root lockfile, so that counts too. Lint is not among them: one root `eslint .` covers
     # this app through its own eslint.config.js, and ci.yml runs it on every PR.
     paths:
       - 'apps/strategy-practice/**'
       # The engine and games packages are this app's code, moved out (PRs 1.2a and 1.4):
-      # their specs run in this suite and patch-coverage gates their added lines, so a
-      # package-only PR must trigger both.
+      # their specs run in this suite, so a package-only PR must trigger it.
       - 'packages/engine/**'
       - 'packages/games/**'
       - 'package.json'
@@ -65,41 +64,3 @@ jobs:
       - name: Build
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: npm run build
-
-  # A separate job rather than a step of `test`: the coverage run is the suite again and
-  # instrumented, so it belongs alongside the checks a contributor is waiting on rather than after
-  # them, and a PR failing it still reads as passing everything else at a glance. The
-  # `skip coverage` label skips rather than fails it (AGENTS.md § Coverage).
-  patch-coverage:
-    name: patch-coverage
-    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip coverage') }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-        with:
-          # The merge base has to exist locally for `<base>...HEAD` to resolve; the default shallow
-          # fetch gives one commit and the diff would come out as the whole repository.
-          fetch-depth: 0
-      - name: Set up Node
-        uses: actions/setup-node@v7
-        with:
-          node-version-file: .nvmrc
-          cache: npm
-      - name: Install dependencies
-        working-directory: .
-        run: npm ci
-      # Deliberately not `npm run coverage` — see the comment atop scripts/patch-coverage.mjs.
-      - name: Measure coverage without the sweeps
-        run: npm run coverage:unswept -- --coverage.reporter=lcovonly
-      # base.sha is the base branch as of the last sync, which is exactly the merge base the diff
-      # should be taken against — commits landed on main since are not this PR's to cover. The base
-      # is not always the default branch: a PR stacked on another PR is measured against that PR's
-      # branch, and everything it merged from the default branch to get there would otherwise count
-      # as its own. `--upstream` is what the script subtracts; `fetch-depth: 0` above is what puts
-      # the ref in the checkout.
-      - name: Report coverage of added lines
-        run: >-
-          node scripts/patch-coverage.mjs
-          --base ${{ github.event.pull_request.base.sha }}
-          --upstream origin/${{ github.event.pull_request.base.repo.default_branch }}

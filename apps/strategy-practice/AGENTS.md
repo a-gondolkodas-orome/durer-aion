@@ -133,36 +133,23 @@ predicate.
 
 ```bash
 npm run coverage         # line coverage, on demand
-npm run coverage:unswept # the same, without the two all-games sweeps
-npm run coverage:patch   # how much of what a branch adds a spec reaches
 ```
 
-The first two are **on demand and have no threshold**, and should stay that way.
-The two sweeps execute ~94% of the source — that is how much of this repo is
-`games/` — while asserting only that a match ends and a board renders, so the
-global percentage reads high whatever the tests are worth, and a CI gate on it
-would be satisfied by registering another game. What the report is good for is
-the question grep cannot answer: which modules **no spec loads at all**, which
-is why `coverage.include` in `vite.config.js` names every file under `src/`
-rather than only what a test imported. `coverage:unswept` is the other half:
-what drops to near zero there is the game logic nothing but a sweep touches.
+It is **on demand and has no threshold**, and should stay that way. The two
+sweeps execute ~94% of the source — that is how much of this repo is `games/` —
+while asserting only that a match ends and a board renders, so the global
+percentage reads high whatever the tests are worth, and a CI gate on it would be
+satisfied by registering another game. What the report is good for is the
+question grep cannot answer: which modules **no spec loads at all**, which is
+why `coverage.include` in `vite.config.js` names every file under `src/` rather
+than only what a test imported.
 
-`coverage:patch` (`scripts/patch-coverage.mjs`, run by the `patch-coverage` job
-on every PR) is the one number CI gates on: the lines a branch **adds** to
-non-JSX files under `src/` — and under `packages/engine/src/`, which is this
-app's engine moved out, its specs running in this suite — measured against
-`coverage:unswept`. Added means
-added against the base branch *and* against `main` — a branch that merged `main`
-in, or one stacked on a PR that predates it, is not asked to cover the lines
-that came with it. Added lines
-cannot be diluted by the rest of the repo, so the number means the same thing in
-every PR, and excluding the sweeps is what stops `gameList.ts` registration from
-reading as coverage. Under 85% fails, diffs under twenty measured lines never
-do, and the `skip coverage` label skips the job. Failing means the added logic
-is not *unit-tested*, not that it is untested. The bar is a floor under existing
-habit, not a stretch above it — recent history sits at 87–96%. A gate on either
-of the other two reports would still be wrong for the reasons above; don't add
-one.
+A gate on the lines a PR *added*, measured with the sweeps excluded, ran on every
+PR until #427 retired it with the rest of the duplicated CI: it was the suite run
+a second time, instrumented, for one number. What it asked for still holds — a
+new game or bot gets its `gameplay.spec.ts` and `bot-strategy.spec.ts` (§ Testing)
+— and is the reviewer's to check. Don't add a gate on the global number either;
+the reasons above have not changed.
 
 ## Planned future directions
 
