@@ -1,7 +1,8 @@
 import { defineConfig } from 'tsdown'
 
 export default defineConfig({
-  entry: ['index.ts'],
+  // One entry per export: the shared rules, the bots, the React client half.
+  entry: ['index.ts', 'bot.ts', 'client.ts'],
   // ESM only: the frontends import it and the backend bundles the source; a
   // CommonJS half would have no consumer.
   format: ['esm'],

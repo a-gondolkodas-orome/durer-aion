@@ -1,6 +1,6 @@
 import { State } from 'boardgame.io';
 import { MyGameState } from './game';
-import { GameStateMixin, GUESSER_PLAYER, JUDGE_PLAYER } from '../../../common';
+import { GameStateMixin, GUESSER_PLAYER, JUDGE_PLAYER } from '../../../common/types';
 import { moveMap } from './moveMap';
 
 function startingPosition({ G }: Pick<State<MyGameState & GameStateMixin>, 'G' | 'ctx'>, _category: "E"): MyGameState {

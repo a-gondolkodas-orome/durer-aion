@@ -118,6 +118,22 @@ export default defineConfig(
       }],
     },
   },
+  // The live client must not ship the bot. packages/game keeps its bots behind the
+  // `game/bot` entry, so the rule is about naming it: nothing in apps/online-frontend
+  // may import `game/bot`, nor reach into packages/game by path. What the rule cannot
+  // see is the package's own graph — a board importing a strategy file; the walk in
+  // packages/game/src/entries.test.ts pins that.
+  {
+    files: ['apps/online-frontend/**/*.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': ['error', {
+        patterns: [{
+          group: ['game/bot', '**/packages/game/**'],
+          message: 'The live client must not ship the bot: import `game` or `game/client` only.',
+        }],
+      }],
+    },
+  },
   // Formatting, shared with apps/strategy-practice's config — see eslint.stylistic.mjs
   // for what belongs in that list and why it is rules rather than prettier. `--fix`
   // applies all of it, which is what the editor runs on save.

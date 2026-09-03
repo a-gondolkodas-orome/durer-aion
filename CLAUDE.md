@@ -184,22 +184,28 @@ start boards, board client and specs together.
    - `strategy.ts` - the server bot, plus any lookup tables it imports
    - `board.tsx` - React component for the game board
    - `main.tsx` - the game description shown to players
-   - `index.ts` - re-exports
 
-2. Register it in `packages/game/src/games/strategy/strategy-games.ts`. The
-   apps import everything from the `game` package:
-   `apps/online-backend/src/server.ts` wires the bot, the frontends the
-   boards and descriptions.
+   No `index.ts` barrel: the three files are registered separately, below,
+   and a barrel re-exporting the bot next to the board would undo that.
 
-**The live client must not ship the bot.** `apps/online-frontend` never
-imports the strategy exports — only the backend does, and the offline
-dry-run build deliberately does (its bot runs in the browser, after the
-game is public). Tree-shaking of the `game` package's ESM build is all that
-keeps the bot out of the served bundle, so one stray import from
-`strategy.ts` into a board hands every competitor the bot's tables. No CI
-gate covers this: after touching a game's imports, build and check by hand
-that nothing distinctive to the bot — a lookup-table key, say — appears in
-`apps/online-frontend/dist`.
+2. Register it in the three registries under
+   `packages/game/src/games/strategy/`, one per package entry:
+   `strategy-games.ts` (the game definition and its name — the `game` entry),
+   `strategy-bots.ts` (`game/bot`) and `strategy-client.ts` (`game/client`).
+   `apps/online-backend/src/server.ts` imports `game` and `game/bot`; the
+   live client `game` and `game/client`; the offline dry run all three.
+
+**The live client must not ship the bot.** The bots are reachable only
+through the `game/bot` entry, and `apps/online-frontend` may not import it:
+ESLint forbids the specifier there (`eslint.config.mjs`), and
+`packages/game/src/entries.test.ts` walks the package's own graph to pin
+that neither the shared nor the client entry reaches a `strategy.ts` or a
+lookup table — so a stray import from a board into the bot fails the tests
+instead of handing every competitor the tables. The offline dry-run build
+imports `game/bot` on purpose (its bot runs in the browser, after the game
+is public). Before a competition, still do the by-hand check in
+`README.md` § *Checking it works*: build, then grep `apps/online-frontend/dist`
+for a lookup-table key.
 
 ### Game Structure (boardgame.io)
 
@@ -272,8 +278,9 @@ mirror works, and what to set up when the year's repo is created.
 ## Key Conventions
 
 - Games are organized by type: `strategy/` (two-player), `relay/` (team relay)
-- Each game's folder exports its game wrapper, strategy wrapper and board
-  through its `index.ts`
+- Each game's folder holds its game wrapper, bot and board as separate files,
+  registered in the three registries next to the folders — never through a
+  folder barrel, so the `game`, `game/bot` and `game/client` entries stay apart
 - Use Hungarian for user-facing text (competition is in Hungarian); the
   strategy and relay practice sites also offer English through their own
   language switchers

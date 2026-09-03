@@ -23,6 +23,7 @@
     "types": ["vite/client"],
     "paths": {
       "game": ["../../packages/game"],
+      "game/*": ["../../packages/game/*"],
       "strategy": ["../../packages/strategy"],
       "schemas": ["../../packages/schemas"],
       "common-frontend": ["../../packages/common-frontend"]
