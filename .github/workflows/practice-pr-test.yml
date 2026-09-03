@@ -32,18 +32,18 @@ jobs:
     # names — two entries reading `test` would be ambiguous both to a reader and to whoever
     # configures required checks.
     name: practice-test
-    runs-on: ubuntu-24.04
-    container:
-      image: node:24.20.0
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v7
-      - name: Cache npm downloads
-        uses: actions/cache@v6
+      # The same three opening steps as every job in ci.yml, so a job here runs the Node a
+      # contributor runs locally. The path is repository-relative: `defaults.run` above applies to
+      # `run:` steps only, not to an action's inputs.
+      - name: Set up Node
+        uses: actions/setup-node@v7
         with:
-          path: ~/.npm
-          key: npm-${{ hashFiles('package-lock.json') }}
-          restore-keys: npm-
+          node-version-file: .nvmrc
+          cache: npm
       # At the root, not in apps/strategy-practice: there is one lockfile now, and `npm ci` from a
       # workspace directory installs that workspace's subtree and leaves the root's own
       # dependencies unmet — which the other apps then fail to build against.
@@ -73,9 +73,7 @@ jobs:
   patch-coverage:
     name: patch-coverage
     if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip coverage') }}
-    runs-on: ubuntu-24.04
-    container:
-      image: node:24.20.0
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -83,18 +81,11 @@ jobs:
           # The merge base has to exist locally for `<base>...HEAD` to resolve; the default shallow
           # fetch gives one commit and the diff would come out as the whole repository.
           fetch-depth: 0
-      # actions/checkout marks the workspace safe itself, but under a HOME it overrides for the
-      # duration of its own steps, so in a container job the setting is gone by the time a later
-      # `run:` calls git — which fails with "detected dubious ownership" rather than anything about
-      # ownership being fine. The other jobs never notice: they run npm, not git.
-      - name: Let git read the checkout
-        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
-      - name: Cache npm downloads
-        uses: actions/cache@v6
+      - name: Set up Node
+        uses: actions/setup-node@v7
         with:
-          path: ~/.npm
-          key: npm-${{ hashFiles('package-lock.json') }}
-          restore-keys: npm-
+          node-version-file: .nvmrc
+          cache: npm
       - name: Install dependencies
         working-directory: .
         run: npm ci

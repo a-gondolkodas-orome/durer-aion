@@ -16,7 +16,7 @@ All demos are in Hungarian.
 
 ## Requirements
 
-- [Node.js](https://nodejs.org/) — the version in [`.nvmrc`](./.nvmrc) (Node 24), which is what CI and the Docker image run. With [nvm](https://github.com/nvm-sh/nvm) installed, `nvm use` in the repo root picks it up. Older versions may still work; `npm` will warn rather than stop you.
+- [Node.js](https://nodejs.org/) — the exact version in [`.nvmrc`](./.nvmrc), which every CI job, both dev containers and the Docker image run. With [nvm](https://github.com/nvm-sh/nvm) installed, `nvm use` anywhere in the repo picks it up. Another 24.x will most likely work too, but CI runs exactly this one. The same version is written down in four more files — `engines.node` in `apps/strategy-practice/package.json`, the `node` feature in both `devcontainer.json` files, and the `Dockerfile`'s `FROM` line — and `npm run check:versions --workspace=strategy-practice` fails until they all agree.
 - [Docker](https://www.docker.com/), with your user in the `docker` group so the
   commands below need no `sudo` — `DEPLOYMENT.md` has the three lines that do
   it. Plain `sudo docker …` works too, but never `sudo npm run …`: that runs
@@ -237,8 +237,9 @@ the site, because the workflow going green *is* the cutover: there is no staging
 step between it and gyakorlo.durerinfo.hu.
 
 The one thing it cannot reproduce is the upload itself, and GitHub's own serving
-behaviour around 404s. CI builds in `node:24.20.0`; to match that too, run the
-same command under `docker run -v "$PWD":/w -w /w node:24.20.0 npm run site:build`.
+behaviour around 404s. CI builds on the Node in `.nvmrc`, on a clean tree; to match
+that too, run the same command under
+`docker run -v "$PWD":/w -w /w node:$(cat .nvmrc) npm run site:build`.
 
 ## The strategy practice site (`apps/strategy-practice`)
 
@@ -361,8 +362,8 @@ time as in
 [#168](https://github.com/a-gondolkodas-orome/durer-jatekok/issues/168). Why a
 report rather than dependabot or renovate: the header comment of
 `scripts/dependency-report.mjs`. Two versions are written down in files no
-`package.json` names — Playwright and `apps/strategy-practice`'s Node — and
-[that app's README](apps/strategy-practice/README.md#project-setup) lists where;
+`package.json` names — Node (§ Requirements lists where) and Playwright
+([that app's README](apps/strategy-practice/README.md#project-setup) says where);
 `npm run check:versions --workspace=strategy-practice` fails until they agree.
 
 ### Held back deliberately

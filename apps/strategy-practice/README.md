@@ -14,8 +14,9 @@ successful, the project is deployed to the live website within a few minutes.
 
 Two ways to get started:
 
-- **Locally**: install the Node.js version in `.nvmrc` globally (or run `nvm use`
-  in this directory), then run `npm ci` **at the repository root**. This app is a
+- **Locally**: install the Node.js version in the repository root's `.nvmrc`
+  globally (or run `nvm use`, which finds that file from this directory too), then
+  run `npm ci` **at the repository root**. This app is a
   workspace of the monorepo now: there is one lockfile, at the root, and running
   `npm ci` here installs only this subtree and leaves the root's own dependencies
   unmet — exiting 0 while doing it. Every other command below runs from here.
@@ -42,10 +43,10 @@ The hook lives at the repository root because only the root
 - **Playwright**: bumping `playwright` in `package.json` means bumping
   `PLAYWRIGHT_VERSION` in `.devcontainer/Dockerfile` and rebuilding, or
   Playwright looks for a browser revision that is not in the image.
-- **Node** is pinned in four other places besides the devcontainer feature in
-  `.devcontainer/devcontainer.json` (the image tag only fixes the major):
-  `.nvmrc`, `engines.node`, and the container image in both
-  `.github/workflows/*.yml`. Bump them together, or the container quietly runs
+- **Node** is pinned by the devcontainer feature in
+  `.devcontainer/devcontainer.json` (the image tag only fixes the major) to the
+  version in the repository root's `.nvmrc`; the root README § Requirements lists
+  every file that repeats it. Bump them together, or the container quietly runs
   a different Node than CI. `npm run test` fails on either mismatch, so you
   will not find out the hard way.
 - **npm's update notifier is off** (`NPM_CONFIG_UPDATE_NOTIFIER`): the npm that
@@ -257,14 +258,14 @@ The monthly report covers this app along with the rest of the monorepo, and the
 root [`README.md`](../../README.md) § Dependency updates is the authority on it.
 This app appears in its own rows rather than the shared ones wherever it runs
 ahead. Its eslint, typescript and vitest pins match the root's and its vite
-matches the other frontends'; `.nvmrc` is the one version still written down
-here and nowhere else.
+matches the other frontends'.
 
 `playwright` is the one dependency pinned exactly, deliberately: the devcontainer
 image bakes browser binaries for one specific version, so an incidental bump
 inside a range would be a broken container rather than a newer library.
 `npm run check:versions` fails if it and `.devcontainer/Dockerfile` disagree, and
-does the same for the five files the Node version is written down in.
+does the same for every file the Node version is written down in (the root
+README § Requirements lists them).
 
 ## License
 
