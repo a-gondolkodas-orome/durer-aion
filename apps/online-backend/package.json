@@ -5,8 +5,7 @@
     "typecheck": "tsc --noEmit",
     "build": "npx tsdown",
     "start": "cross-env ALLOW_CORS=true node --enable-source-maps dist/server.js",
-    "dev": "cross-env ALLOW_CORS=true tsdown --watch --onSuccess \"node --inspect --enable-source-maps dist/server.js\"",
-    "spell-check": "cspell \"**/*.{ts,tsx}\" --no-progress"
+    "dev": "cross-env ALLOW_CORS=true tsdown --watch --onSuccess \"node --inspect --enable-source-maps dist/server.js\""
   },
   "license": "MIT",
   "dependencies": {
