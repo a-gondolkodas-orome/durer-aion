@@ -2,14 +2,11 @@ import { defineConfig } from 'tsdown'
 
 export default defineConfig({
   entry: ['index.ts'],
-  format: ['esm', 'cjs'],
+  // ESM only: the frontends import it and the backend bundles the source; a
+  // CommonJS half would have no consumer.
+  format: ['esm'],
   outDir: 'dist',
   clean: true,
-
-  // This package is CJS-typed, so this keeps cjs on `.js` and esm on `.mjs`,
-  // which is where `main` and `module` point. tsdown otherwise fixes the
-  // extensions to `.cjs`/`.mjs` whenever `platform` is node, its default.
-  fixedExtension: false,
 
   // The tsconfig here sets `declarationMap` and tsdown honours it. Nothing
   // reads the map, and emitting one puts a `sourceMappingURL` into output the

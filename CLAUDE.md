@@ -73,9 +73,10 @@ regression checklist every change is measured against.
   rather than their `dist` (`apps/online-backend/tsdown.config.mts` says how
   and why), so its build and its dev server never wait on a package build —
   only its typecheck does. Each build config is `tsdown.config.mts`, not
-  `.ts`: the packages ship CommonJS and so carry no `"type": "module"`, which
-  leaves node guessing at the config's module system and warning about it on
-  every build.
+  `.ts`: the packages carry no `"type": "module"`, which leaves node guessing
+  at a `.ts` config's module system and warning about it on every build. The
+  packages ship ESM only — the frontends import it and the backend bundles
+  their source, so a CommonJS build would have no consumer.
 - **Testing**: vitest, React Testing Library. Suites are `*.test.ts(x)` under
   the root config and `*.spec.ts(x)` in `apps/strategy-practice`; both run through
   vitest, and neither uses Jest.
