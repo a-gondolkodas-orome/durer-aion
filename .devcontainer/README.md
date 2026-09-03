@@ -25,8 +25,7 @@ where the file does not exist yet, so your own values are never overwritten:
   `Dockerfile` run. The image tag names only the major, and the patch it bakes
   lags — the `node` feature in `devcontainer.json` is what pins it, so bumping
   `.nvmrc` means bumping that too (README § Requirements lists every file that
-  repeats the version; `npm run check:versions --workspace=strategy-practice`
-  fails until they agree).
+  repeats the version; `npm test` fails until they agree).
 - **Docker inside the container**, so every documented flow works unchanged
   from a terminal in here — `docker run … bitnami/postgresql` for the
   database, and `docker compose up --build` for the full stack. It installs

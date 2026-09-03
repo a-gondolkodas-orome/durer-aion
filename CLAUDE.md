@@ -32,11 +32,12 @@ competition round, not a practice site.
 
 **`apps/strategy-practice` is a workspace, but not like the others.** One root `npm ci`
 installs it, and turbo builds and typechecks it with everything else — but it
-keeps its own `eslint.config.js`, its own vitest setup and its own CI workflow.
-`npm test` at the root still skips it — `npm run lint` does not. ESLint resolves
-a config per directory as it walks, so one `eslint .` at the root lints this app
-through *its* config and everything else through the root one, in one pass; only
-the unit tests still run from `apps/strategy-practice`. What that ESLint config
+keeps its own `eslint.config.js` and its own vitest config. Neither is a second
+command: ESLint resolves a config per directory as it walks, so one `eslint .` at
+the root lints this app through *its* config and everything else through the
+root one, in one pass; and the root `vitest.config.mts` lists that vitest config
+as a second project, so one `npm test` runs its suite next to the root's, each
+under its own setup. What that ESLint config
 differs on is the *rule set* — `@eslint-react`, react-hooks, and a stylistic
 dialect (no trailing comma, single quotes, `max-len` 120) the root does not
 impose. It is not a second
@@ -78,8 +79,8 @@ change is measured against.
   packages ship ESM only — the frontends import it and the backend bundles
   their source, so a CommonJS build would have no consumer.
 - **Testing**: vitest, React Testing Library. Suites are `*.test.ts(x)` under
-  the root config and `*.spec.ts(x)` in `apps/strategy-practice`; both run through
-  vitest, and neither uses Jest.
+  the root config and `*.spec.ts(x)` in `apps/strategy-practice`; one `npm test`
+  runs both through vitest, and neither uses Jest.
 - **`apps/strategy-practice`** shares this React major, the root's eslint,
   typescript and vitest pins, and the same vite as the other frontends;
   Tailwind and its own build/test setup are what set it apart. See its
@@ -131,15 +132,14 @@ npm run i18n:check
 npm run spell-check
 ```
 
-`npm ci`, `npm run lint`, `npm run build`, `npm run typecheck` and
-`npm run spell-check` cover `apps/strategy-practice` too; `npm test` does not —
-*Project Structure* above says why. Its remaining checks run from that
-directory, with no install of their own:
+`npm ci`, `npm run lint`, `npm run build`, `npm run typecheck`, `npm test` and
+`npm run spell-check` cover `apps/strategy-practice` too — *Project Structure*
+above says how. To work on it alone:
 
 ```bash
-npm run dev:strategy-practice                     # from the root; it is a workspace
-npm test --workspace=strategy-practice   # check:versions + lint + typecheck + unit
-cd apps/strategy-practice && npm run coverage:patch
+npm run dev:strategy-practice            # from the root; it is a workspace
+npm test --workspace=strategy-practice   # its suite alone
+cd apps/strategy-practice && npm run coverage
 ```
 
 Every long docker invocation lives in a root npm script rather than in prose,
