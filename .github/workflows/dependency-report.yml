@@ -16,10 +16,9 @@ jobs:
     # `issues: write`, so in the year's private mirror it would open dependency issues
     # there every month, about the public repo's dependencies, on billed minutes.
     if: github.repository == 'a-gondolkodas-orome/durer-aion'
-    runs-on: ubuntu-24.04
-    # No pinned container, unlike the other two workflows: this job only reads version strings and
-    # fetches URLs, and pinning Node here would add a place check-versions.mjs does not look at —
-    # and one more row for this very report to nag about.
+    runs-on: ubuntu-latest
+    # No setup-node, unlike the other workflows: this job only reads version strings and fetches
+    # URLs, which any current Node does — the runner's own is enough.
     steps:
       - name: Checkout
         uses: actions/checkout@v7
