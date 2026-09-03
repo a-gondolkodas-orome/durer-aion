@@ -1,7 +1,6 @@
 name: CI:practice
 on:
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
     # apps/strategy-practice has its own vitest suite, Vite build and coverage gate, so most of
     # the monorepo cannot change what these jobs measure — but its dependencies resolve through
     # the root lockfile, so that counts too. Lint is not among them: one root `eslint .` covers
@@ -33,7 +32,6 @@ jobs:
     # names — two entries reading `test` would be ambiguous both to a reader and to whoever
     # configures required checks.
     name: practice-test
-    if: github.event.pull_request.draft == false
     runs-on: ubuntu-24.04
     container:
       image: node:24.20.0
@@ -74,9 +72,7 @@ jobs:
   # `skip coverage` label skips rather than fails it (AGENTS.md § Coverage).
   patch-coverage:
     name: patch-coverage
-    if: >-
-      github.event.pull_request.draft == false &&
-      !contains(github.event.pull_request.labels.*.name, 'skip coverage')
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip coverage') }}
     runs-on: ubuntu-24.04
     container:
       image: node:24.20.0
