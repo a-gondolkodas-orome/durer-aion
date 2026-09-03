@@ -234,15 +234,6 @@ export default defineConfig(
     files: ['scripts/pre-generate-ai-moves/**'],
     rules: { '@stylistic/max-len': 'off' }
   },
-  // vite.config.js sets `test.globals: true`, so these specs take describe/it/expect
-  // from the environment. The root's scripts/*.test.mjs import them from 'vitest'
-  // instead — the two conventions differ, and this is the one that needs declaring.
-  {
-    files: ['scripts/**/*.spec.mjs'],
-    languageOptions: {
-      globals: { describe: 'readonly', it: 'readonly', expect: 'readonly' }
-    }
-  },
   {
     // Generated verbatim from the board's definition and marked as such at the top
     // of the file; the formatting rules are off for it, the rules about meaning are not.

@@ -33,5 +33,15 @@ export default defineConfig({
     // Keeps the run's output to the report itself — see the file for how a test
     // that means to log opts out.
     setupFiles: ['./vitest.setup.mts'],
+    // apps/strategy-practice runs as a second project, under its own vite
+    // config: its aliases, setup file and `isolate: false` are its own, and
+    // CLAUDE.md § Project Structure says why the two configs stay separate.
+    // `extends: true` keeps the options above for the root project only. That
+    // config is also the root config when vitest runs from that directory,
+    // which is what its `npm run coverage` relies on.
+    projects: [
+      { extends: true, test: { name: 'root' } },
+      './apps/strategy-practice/vite.config.js',
+    ],
   },
 });

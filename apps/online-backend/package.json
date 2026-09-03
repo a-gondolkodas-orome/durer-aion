@@ -3,10 +3,9 @@
   "version": "0.0.0",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "build": "npx tsc",
-    "start": "cross-env ALLOW_CORS=true node dist/src/server.js",
-    "dev": "cross-env ALLOW_CORS=true tsx watch --inspect src/server.ts",
-    "spell-check": "cspell \"**/*.{ts,tsx}\" --no-progress"
+    "build": "npx tsdown",
+    "start": "cross-env ALLOW_CORS=true node --enable-source-maps dist/server.js",
+    "dev": "cross-env ALLOW_CORS=true tsdown --watch --onSuccess \"node --inspect --enable-source-maps dist/server.js\""
   },
   "license": "MIT",
   "dependencies": {
@@ -34,7 +33,6 @@
     "@types/koa-mount": "4.0.5",
     "@types/node": "24.13.3",
     "@types/pg": "8.23.1",
-    "cross-env": "10.1.0",
-    "tsx": "4.23.13"
+    "cross-env": "10.1.0"
   }
 }

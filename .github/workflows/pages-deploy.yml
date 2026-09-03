@@ -17,50 +17,27 @@ jobs:
     # push to main would build the site from the secret game and publish it. Only the public
     # repo may run it.
     if: github.repository == 'a-gondolkodas-orome/durer-aion'
-    runs-on: ubuntu-24.04
-    # Practice's pin, which also satisfies the root .nvmrc (`24`). One container builds both
-    # rather than two jobs handing a partial artifact to each other.
-    container:
-      image: node:24.20.0
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v7
-      # offline-frontend's vite config stamps the build with `git rev-parse HEAD`, and in a
-      # container job actions/checkout's safe.directory setting is gone by the time a later
-      # step runs git — it fails with "detected dubious ownership".
-      - name: Let git read the checkout
-        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
-
-      - name: Cache npm downloads
-        uses: actions/cache@v6
+      # The same three opening steps as every job in ci.yml: the Node in .nvmrc is the one a
+      # contributor builds with locally, and one job builds every app rather than two jobs handing
+      # a partial artifact to each other.
+      - name: Set up Node
+        uses: actions/setup-node@v7
         with:
-          path: ~/.npm
-          key: npm-pages-${{ hashFiles('package-lock.json') }}
-          restore-keys: npm-pages-
+          node-version-file: .nvmrc
+          cache: npm
 
       # One install for the whole monorepo: apps/strategy-practice is a workspace now, so the root
       # lockfile covers it too.
       - name: Install dependencies
-        id: install
         run: npm ci
 
-      # apps/strategy-practice keeps its own gates here, as its deploy workflow did: pr-test only runs on
-      # pull requests, so without these a check nobody ran on main would ship. The rest of the
-      # monorepo is covered by ci.yml on the same push, and by the build below — and lint is now
-      # part of that rest, since one root `eslint .` covers this app too.
-      - name: Check tool versions
-        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
-        working-directory: apps/strategy-practice
-        run: npm run check:versions
-      - name: Typecheck practice
-        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
-        working-directory: apps/strategy-practice
-        run: npm run typecheck
-      - name: Test practice
-        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
-        working-directory: apps/strategy-practice
-        run: npm run test:unit
-
+      # No checks of its own: ci.yml runs every gate — apps/strategy-practice's suite and typecheck
+      # included — on the same push to main. The build below is the one check a deploy cannot do
+      # without.
       # Builds each app and assembles the one artifact. The same script backs
       # `npm run site:build`, so what a maintainer previews locally with `npm run site:serve`
       # is this deploy's own code — the site root, the subpaths, the CNAME assertion and all.
@@ -84,7 +61,7 @@ jobs:
     concurrency:
       group: pages
       cancel-in-progress: false
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
