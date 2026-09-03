@@ -8,13 +8,10 @@
     "node": ">=24.20.0 <25"
   },
   "scripts": {
-    "test:unit": "vitest run",
-    "test": "npm run lint && npm run typecheck && npm run test:unit",
+    "test": "vitest run",
     "test:watch": "vitest",
     "coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint . --max-warnings=0",
-    "lint:fix": "eslint . --fix",
     "dev": "vite",
     "build": "vite build"
   },

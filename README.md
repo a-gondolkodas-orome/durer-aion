@@ -257,13 +257,14 @@ Its vite config binds all interfaces and pins port 8012, so it forwards out of
 the dev container with no extra setup, and does not collide with the 5173 the
 other frontends share.
 
-`npm ci`, `npm run lint`, `npm run build` and `npm run typecheck` at the root
-cover it — the lint through its own config, which ESLint picks up as it walks
-into the directory. Only `npm test` skips it, its vitest setup being its own;
-[`CLAUDE.md`](CLAUDE.md) § Project Structure has the why. Its suite runs from anywhere by naming the workspace:
+`npm ci`, `npm run lint`, `npm run build`, `npm run typecheck` and `npm test` at
+the root cover it — the lint through its own config, which ESLint picks up as it
+walks into the directory, the tests through its own vite config, which the root
+`vitest.config.mts` lists as a second project; [`CLAUDE.md`](CLAUDE.md) § Project
+Structure has the why. Its suite alone runs from anywhere by naming the workspace:
 
 ```bash
-npm test --workspace=strategy-practice   # lint, typecheck, unit
+npm test --workspace=strategy-practice
 ```
 
 `cd apps/strategy-practice` if you are going to iterate in there — the rest of
@@ -286,8 +287,8 @@ npm run i18n:check
 npm run spell-check
 ```
 
-Those are the six jobs in `.github/workflows/ci.yml`; `apps/strategy-practice`
-has its own one (`practice-test`), which runs from its directory.
+Those are the six jobs in `.github/workflows/ci.yml`, and they cover
+`apps/strategy-practice` too — it has no workflow of its own.
 
 `npm run lint` is the whole of the lint gate, `apps/strategy-practice` included:
 ESLint resolves a config per directory as it walks, so that app is checked

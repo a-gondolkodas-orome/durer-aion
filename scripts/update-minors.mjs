@@ -102,7 +102,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       .map(name => `  ${name} is also written down in: ${ALSO_WRITTEN_IN[name].join(', ')}`);
     if (elsewhere.length > 0) console.log(`\nThe same bump has to reach files no package.json names:\n${elsewhere.join('\n')}`);
     console.log('\nNext: npm install, then the usual gates — npm run build, npm run lint, npm run typecheck,');
-    console.log('npm test, and npm test --workspace=strategy-practice. Majors stay with npm run report:outdated.');
+    console.log('npm test. Majors stay with npm run report:outdated.');
   }
 
   if (problems.length > 0) {

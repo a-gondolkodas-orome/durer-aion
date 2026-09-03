@@ -254,7 +254,7 @@ export const formatReport = rows => {
     ...table(
       `Patch and minor (${minor.length})`,
       minor,
-      '`npm run update:minors` makes every one of these edits that lives in a `package.json`, then `npm install`; an `.nvmrc` or docker tag row is a hand edit. Safe to batch into one PR — `npm test` and the build are the gate, plus `npm test --workspace=strategy-practice` for anything that app pins itself.'
+      '`npm run update:minors` makes every one of these edits that lives in a `package.json`, then `npm install`; an `.nvmrc` or docker tag row is a hand edit. Safe to batch into one PR — `npm test` and the build are the gate.'
     ),
     ...table(
       `Major (${major.length})`,

@@ -33,22 +33,11 @@ jobs:
       # One install for the whole monorepo: apps/strategy-practice is a workspace now, so the root
       # lockfile covers it too.
       - name: Install dependencies
-        id: install
         run: npm ci
 
-      # apps/strategy-practice keeps its own gates here, as its deploy workflow did: pr-test only runs on
-      # pull requests, so without these a check nobody ran on main would ship. The rest of the
-      # monorepo is covered by ci.yml on the same push, and by the build below — and lint is now
-      # part of that rest, since one root `eslint .` covers this app too.
-      - name: Typecheck practice
-        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
-        working-directory: apps/strategy-practice
-        run: npm run typecheck
-      - name: Test practice
-        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
-        working-directory: apps/strategy-practice
-        run: npm run test:unit
-
+      # No checks of its own: ci.yml runs every gate — apps/strategy-practice's suite and typecheck
+      # included — on the same push to main. The build below is the one check a deploy cannot do
+      # without.
       # Builds each app and assembles the one artifact. The same script backs
       # `npm run site:build`, so what a maintainer previews locally with `npm run site:serve`
       # is this deploy's own code — the site root, the subpaths, the CNAME assertion and all.
