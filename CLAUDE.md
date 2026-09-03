@@ -61,8 +61,8 @@ cannot be fixed from here. **Never run `npm audit fix --force`:** its fix for
 them is `boardgame.io@0.22.1`, a four-year downgrade that would take the
 competition with it. What is behind otherwise is `npm run report:outdated`'s
 job, monthly.
-[`docs/must-keep-working.md`](docs/must-keep-working.md) is the standing
-regression checklist every change is measured against.
+*What must keep working* below is the standing regression checklist every
+change is measured against.
 
 ## Tech Stack
 
@@ -145,7 +145,30 @@ cd apps/strategy-practice && npm run coverage:patch
 Every long docker invocation lives in a root npm script rather than in prose,
 so it is written down once. [`README.md`](README.md) is the authority on
 running things locally: how to bring the stack up, and — under *Checking it
-works* — how to exercise each item of `docs/must-keep-working.md` by hand.
+works* — the regression checklist, with how to exercise each item by hand.
+
+## What must keep working
+
+[`README.md`](README.md) § *Checking it works* is the standing regression
+checklist: what the competition round, the admin side and the public sites
+must keep doing, with how to exercise each item by hand. **A change is done
+only when each item there still holds.** An item is removed only when the
+capability is deliberately retired, with a note saying which PR did and what
+replaced it. The README's own setup steps are on the list too: `npm ci`,
+`npm run setup` and the `dev:*` and `stack:*` commands must keep doing what it
+says they do.
+
+It is a hand-walked checklist, not a suite. Four items have a unit test pinning
+part of them; the rest are checked by someone actually doing them:
+
+- a join code loading its team, and a logout dropping the saved match with it:
+  `packages/common-frontend/src/client/hooks/user-model.test.ts`
+- the relay round against the bot — problems served, the three tries and what
+  each is still worth: `packages/strategy/src/games/relay/strategy.test.ts`
+- what a returning team may start, and the closing of a match whose time ran
+  out while it was away: `apps/online-backend/src/server/team_manage.test.ts`
+- the time left recomputed from the match's own end, and only the team allowed
+  to poll for it: `packages/game/src/common/gamewrapper.test.ts`
 
 ## Creating a New Game
 
@@ -283,7 +306,7 @@ mirror works, and what to set up when the year's repo is created.
   pass-through props) needs no tests, and exhausting every branch is not the
   goal: test the rules and the edge cases that could plausibly be gotten wrong.
 - Every regression fixed gets a unit test that fails without the fix.
-  [`docs/must-keep-working.md`](docs/must-keep-working.md) catches
+  The README's checklist (*What must keep working* above) catches
   whole-feature breakage by hand; the test pins the specific bug so it cannot
   quietly return.
 - A test run writes its report and nothing else: a console call during it fails
