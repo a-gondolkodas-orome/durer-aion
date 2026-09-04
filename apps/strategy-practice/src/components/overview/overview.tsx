@@ -52,9 +52,9 @@ export const Overview = () => {
       onToggleFilters={() => setShowFilters(o => !o)}
       activeFilterCount={selectedCategories.length + selectedIcons.length}
     />
-    <div className="px-3 sm:px-4 py-3 sm:py-4 max-w-6xl mx-auto mb-4">
+    <div className="px-2 sm:px-3 py-3 sm:py-4 mb-10">
       {showFilters && (
-        <div className="border-t border-slate-200 dark:border-slate-700 mt-2 pt-3 flex flex-col gap-1 mb-2">
+        <div className="mt-2 pt-3 flex flex-col gap-1 mb-2">
           <CategoryFilter selected={selectedCategories} onChange={setSelectedCategories} />
           <IconFilter selected={selectedIcons} onChange={setSelectedIcons} />
         </div>
@@ -74,7 +74,8 @@ export const Overview = () => {
       ))}
     </div>
 
-    <div className="primary-surface md:hidden fixed bottom-0 left-0 right-0 flex justify-end items-center gap-3 px-3 py-4">
+    <div className="primary-surface md:hidden fixed bottom-0 left-0 right-0 flex justify-end items-center gap-3 px-3
+      py-4">
       <ThemeSwitcher />
       <LanguageSelector />
     </div>
@@ -88,7 +89,7 @@ const OverviewHeader = ({ filtersOpen, onToggleFilters, activeFilterCount }: {
 }) => {
   const { t } = useTranslation();
   return <>
-    <header className="primary-surface sticky top-0 z-40 shadow-md" style={{ fontFamily: 'Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif' }}>
+    <header className="primary-surface sticky top-0 z-40 shadow-md font-roboto">
       <div className="max-w-6xl mx-auto px-3 sm:px-4 py-3 sm:py-5">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
@@ -97,7 +98,7 @@ const OverviewHeader = ({ filtersOpen, onToggleFilters, activeFilterCount }: {
               href="/.."
               aria-label="Home"
               size="small"
-              sx={{ color: 'white', '&:hover': { color: '#fef2f2' } }}
+              sx={{ color: 'white', '&:hover': { color: '#eeeeee' } }}
             >
               <HomeRoundedIcon fontSize="small" />
             </IconButton>
@@ -115,7 +116,7 @@ const OverviewHeader = ({ filtersOpen, onToggleFilters, activeFilterCount }: {
         </div>
       </div>
     </header>
-    <div className="mt-6 pb-3 text-left px-3 sm:px-5.5 pl-2">
+    <div className="max-w-[100ch] mx-auto mt-6 pb-3 text-left px-3 sm:px-5.5 pl-2">
       {t({
         hu: <>
           A <i>stratégiás játék</i> egy két szereplős játék,
