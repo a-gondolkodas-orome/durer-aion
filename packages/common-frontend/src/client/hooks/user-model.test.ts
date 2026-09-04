@@ -1,23 +1,54 @@
 // @vitest-environment jsdom
-import { describe, test, expect, beforeEach, vi } from "vitest";
+import { describe, test, expect, beforeEach, afterEach, vi } from "vitest";
 import { MockClientRepository } from "../api-repository-interface";
-import { bgioStoragePrefix, guidStorageKey, relayPointsStorageKey } from "../utils/storage-keys";
+import { bgioStoragePrefix, legacyGuidStorageKey, loginMarkerStorageKey, relayPointsStorageKey } from "../utils/storage-keys";
 import { UserModel } from "./user-model";
 
 // The mock repository answers join code "2" with a team that is in the middle
-// of a relay match.
-const repo = new MockClientRepository();
+// of a relay match. The session lives in the repository — online it is an
+// HttpOnly cookie — so every test gets a fresh one.
+let repo: MockClientRepository;
 
 describe("UserModel session", () => {
   beforeEach(() => {
     localStorage.clear();
+    repo = new MockClientRepository();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
   });
 
   test("a browser with no session has no team to show", async () => {
     const user = new UserModel(repo);
 
-    expect(user.isUserLoggedIn()).toBe(false);
     expect(await user.getTeamState()).toBeNull();
+  });
+
+  // Regression: the GUID used to live in localStorage (issue #89), and a
+  // browser that logged in before the cookie kept it there indefinitely, since
+  // nothing wrote or read the key any more.
+  test("a browser that logged in before the cookie is relieved of its GUID", async () => {
+    localStorage.setItem(legacyGuidStorageKey(), "8eae8669-125c-42e5-8b49-89afbac31679");
+    const user = new UserModel(repo);
+
+    await user.getTeamState();
+
+    expect(localStorage.getItem(legacyGuidStorageKey())).toBeNull();
+  });
+
+  // Regression: the marker is a constant, and writing a value a key already
+  // holds fires no `storage` event — so a marker outliving its session (the
+  // cookie expired, or the teams were re-imported) hid the next login from
+  // the other tabs.
+  test("finding no session clears the marker, so the next login is heard", async () => {
+    localStorage.setItem(loginMarkerStorageKey(), "1");
+    const user = new UserModel(repo);
+
+    expect(await user.getTeamState()).toBeNull();
+
+    expect(localStorage.getItem(loginMarkerStorageKey())).toBeNull();
   });
 
   test("logging in with a join code loads that team on the next look", async () => {
@@ -25,7 +56,6 @@ describe("UserModel session", () => {
 
     await user.login("2");
 
-    expect(user.isUserLoggedIn()).toBe(true);
     expect(await user.getTeamState()).toMatchObject({ pageState: "RELAY" });
   });
 
@@ -37,22 +67,48 @@ describe("UserModel session", () => {
     await user.login("2");
     localStorage.setItem(`${bgioStoragePrefix()}relay_c`, '{"G":{}}');
     localStorage.setItem(relayPointsStorageKey(), "12");
+    const endSession = vi.spyOn(repo, "logout");
 
-    user.logout();
+    await user.logout();
 
-    expect(localStorage.getItem(guidStorageKey())).toBeNull();
+    expect(endSession).toHaveBeenCalledTimes(1);
+    expect(localStorage.getItem(loginMarkerStorageKey())).toBeNull();
     expect(localStorage.getItem(`${bgioStoragePrefix()}relay_c`)).toBeNull();
     expect(localStorage.getItem(relayPointsStorageKey())).toBeNull();
-    expect(user.isUserLoggedIn()).toBe(false);
+    expect(await user.getTeamState()).toBeNull();
   });
 
+  // Regression: the marker was removed before the server was asked, so a
+  // logout that failed took it with it, and the retry that succeeded removed
+  // a key already gone — which fires no `storage` event, leaving the other
+  // tabs showing a team that was logged out.
+  test("a logout the server refused keeps the marker for the retry to remove", async () => {
+    const user = new UserModel(repo);
+    await user.login("2");
+    const endSession = vi.spyOn(repo, "logout").mockRejectedValueOnce(new Error("offline"));
+
+    await expect(user.logout()).rejects.toThrow("offline");
+
+    expect(localStorage.getItem(loginMarkerStorageKey())).toBe("1");
+    endSession.mockRestore();
+
+    await user.logout();
+
+    expect(localStorage.getItem(loginMarkerStorageKey())).toBeNull();
+  });
+
+  // Nothing client-side knows whether there is a session, so the refusal is
+  // the server's (a 401); the page reloads to show the login form.
   test("a logged-out browser cannot start a round", async () => {
     const startRelay = vi.spyOn(repo, "startRelay");
+    const reload = vi.fn();
+    vi.stubGlobal("location", { reload });
+    vi.spyOn(console, "log").mockImplementation(() => undefined);
     const user = new UserModel(repo);
 
     await user.startRelay();
 
-    expect(startRelay).not.toHaveBeenCalled();
-    startRelay.mockRestore();
+    expect(startRelay.mock.results[0].type).toBe("throw");
+    expect(reload).toHaveBeenCalledTimes(1);
   });
 });

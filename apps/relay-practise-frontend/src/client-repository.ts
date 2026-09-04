@@ -8,7 +8,7 @@ export class OfflineClientRepository implements ClientRepository {
 
   version = "OFFLINE" as const;
 
-  startRelay(_joinCode: string): Promise<string> {
+  startRelay(): Promise<void> {
     const teamState = getTeamStateFromLocal();
     if (!(teamState.pageState === 'HOME' && teamState.relayMatch.state === 'NOT STARTED' && teamState.strategyMatch.state !== 'IN PROGRESS')) {
       throw new Error(i18n.t('error.unexpected'));
@@ -27,15 +27,15 @@ export class OfflineClientRepository implements ClientRepository {
     localStorage.setItem(teamStateStorageKey(),
       JSON.stringify(newState)
     );
-    return Promise.resolve("ok");
+    return Promise.resolve();
   }
 
   // Relay-only app: nothing renders a strategy game, so nothing may call this.
-  startStrategy(_joinCode: string): Promise<string> {
+  startStrategy(): Promise<void> {
     throw Error("NOT call this");
   }
 
-  toHome(_joinCode: string): Promise<string> {
+  toHome(): Promise<void> {
     const teamState = getTeamStateFromLocal();
     const newState = { ...teamState, pageState: 'HOME' }
     if (teamState.relayMatch.state === "IN PROGRESS") {
@@ -49,12 +49,16 @@ export class OfflineClientRepository implements ClientRepository {
       }
     }
     localStorage.setItem(teamStateStorageKey(), JSON.stringify(newState));
-    return Promise.resolve("ok");
+    return Promise.resolve();
   }
 
-  getTeamState(_joinCode: string): Promise<TeamModelDto> {
-    const teamState = getTeamStateFromLocal();
-    return Promise.resolve(teamState);
+  // The stored team state is the session here: UserModel.logout removes it.
+  getTeamState(): Promise<TeamModelDto | null> {
+    return Promise.resolve(readStoredTeamState());
+  }
+
+  logout(): Promise<void> {
+    return Promise.resolve();
   }
 
   async getAll(): Promise<TeamModelDto[]> {
@@ -101,7 +105,7 @@ export class OfflineClientRepository implements ClientRepository {
     return Promise.resolve();
   }
 
-  joinWithCode(joinCode: string): Promise<string> {
+  joinWithCode(joinCode: string): Promise<void> {
     // return the joincode if it is in the teamData.ts file
 
     const i = teamData.findIndex(e => e.join_code === joinCode);
@@ -131,7 +135,7 @@ export class OfflineClientRepository implements ClientRepository {
       localStorage.setItem(teamStateStorageKey(),
         JSON.stringify(teamState)
       );
-      return Promise.resolve(joinCode);
+      return Promise.resolve();
     }
 
     throw new Error(i18n.t('login.error.wrongid'));

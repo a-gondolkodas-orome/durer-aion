@@ -2,11 +2,11 @@
   "$schema": "https://turbo.build/schema.json",
   "extends": ["//"],
   "tasks": {
-    // The bundle reads the workspace packages' source (tsdown.config.mts), so
-    // neither the build nor the watching dev server waits for their builds.
-    // `typecheck` still does: tsc resolves the packages through their exports
-    // maps, to the declarations in `dist`.
+    // The bundle and the typecheck both read the workspace packages' source
+    // (tsdown.config.mts and tsconfig.json's `paths`), so none of these waits
+    // for a package build.
     "build": { "dependsOn": [] },
-    "dev": { "dependsOn": [] }
+    "dev": { "dependsOn": [] },
+    "typecheck": { "dependsOn": [] }
   }
 }

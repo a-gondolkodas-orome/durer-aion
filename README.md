@@ -115,11 +115,12 @@ Then import the teams once, and open `http://localhost:5173`:
 npm run teams:import:local
 ```
 
-Here the frontend calls the backend across origins — `dev:online` sets
-`VITE_SERVER_URL` and `dev:server` sets `ALLOW_CORS` — where the docker stack
-puts both behind nginx on one origin. That difference is why anything touching
-routing, the socket transport or the built assets wants a `stack:up` run before
-you believe it.
+Here the Vite dev server proxies the backend's routes and the socket to
+`:8000` — `apps/online-frontend/vite.config.ts` carries the same map as
+`nginx.conf` — so the page talks to one origin, as it does behind nginx in the
+docker stack; the session cookie needs that. It is still Vite standing in for
+nginx, which is why anything touching routing, the socket transport or the
+built assets wants a `stack:up` run before you believe it.
 
 `db:up` keeps its data inside the throwaway container, so stopping it discards
 everything and the next start needs the import again. The docker stack keeps
@@ -166,10 +167,25 @@ the list binds a change, and which items a unit test pins.
    not fork, and the countdown must read the same in both tabs — the time
    left comes from the server, never from the client.
 6. Finish both and check the combined score on the finished screen.
-7. `npm run build`, then grep `apps/online-frontend/dist` for a string from
-   the bot's lookup tables: the served bundle must contain no bot.
-   [`CLAUDE.md`](CLAUDE.md) § Creating a New Game says why nothing but
-   tree-shaking keeps it out.
+7. Log out and reload: the login form is back. The session is an HttpOnly
+   cookie set on login, so the browser's devtools show `durer_team` under
+   Cookies while logged in, gone after, and localStorage holds no GUID —
+   only a `loggedIn` flag, which is how the other tabs hear of a login.
+   Nor does the GUID come back in the `GET /team/me` response: it is the
+   cookie's value, so a copy there would be the session in a form a script can
+   read. (boardgame.io still gives the same GUID out as the match's player
+   name, so this narrows the exposure rather than ending it — issue #434.) On
+   the deployed host the login response's `Set-Cookie` also carries `Secure`:
+   the backend takes that from nginx's own scheme, so a proxy in front of the
+   container's nginx would silently lose it.
+8. `npm run build`, then grep `apps/online-frontend/dist` for a string from
+   the bot's lookup tables: the served bundle must contain no bot. Since #429
+   the bots sit behind the `game/bot` entry, ESLint forbids importing it
+   anywhere but the server and the offline dry run, and
+   `packages/game/src/entries.test.ts` pins that the other two entries never
+   reach a bot — so this grep is the final check
+   before a competition, not the only one. [`CLAUDE.md`](CLAUDE.md)
+   § Creating a New Game has the layout.
 
 Join codes `001-0000-000` and `002-0000-000` are categories D and E, which get
 different games.
@@ -185,11 +201,11 @@ At `http://localhost/admin`, user `admin`, password from `.env.docker`:
   soft delete. Start a match as a team in another tab first, then act on it
   from here.
 
-This is the one thing the stack is required for. The admin pages do not work
-from `dev:online` on 5173: basic auth cannot ride a cross-origin request, and
-the backend answers those with `Access-Control-Allow-Origin: *`, which may not
-carry credentials. Through nginx it is all one origin, so the browser's password
-prompt is all it takes.
+Through nginx it is all one origin, so the browser's password prompt is all it
+takes. The `dev:online` proxy puts 5173 on one origin too, which removes the
+reason these pages used to need the stack — but whether the password prompt
+appears for the admin pages' XHRs there has not been walked, so check them
+against `stack:up` as before until someone has.
 
 Team import has two paths and both need checking: `npm run teams:import`, which
 runs `scripts/import_teams.sh` inside the container, and the TSV upload on the

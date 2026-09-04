@@ -92,7 +92,12 @@ export async function createGame(
     game,
     numPlayers: 2,
     setupData: undefined,
-    unlisted: false,
+    // A listed match is served by boardgame.io's unauthenticated
+    // `GET /games/:name`, metadata included — and the team's GUID, which is
+    // what the session cookie carries (server/team_session.ts), is that
+    // metadata's player name. Nothing in this codebase reads the lobby
+    // listing.
+    unlisted: true,
   });
 
   if ("setupDataError" in match) {
@@ -243,13 +248,9 @@ export async function getNewGame(
   ctx: Server.AppCtx,
   teams: TeamsRepository,
   games: AnyBgioGame[],
-  gameType: "RELAY" | "STRATEGY"
+  gameType: "RELAY" | "STRATEGY",
+  team: TeamModel
 ) {
-  const GUID = ctx.params.GUID;
-  const team: TeamModel =
-    (await teams.getTeam({ teamId: GUID })) ??
-    ctx.throw(404, `Team with {id:${GUID}} not found.`);
-
   //if middleware setup was better understood, this should be in a separate middleware
   const staleInfo = await checkStaleMatch(team);
   if (staleInfo.isStale) {
@@ -264,7 +265,6 @@ export async function getNewGame(
     ctx.throw(403, "Team is not allowed to start game.");
   }
   //find gameName based on team category
-  console.log(team.category);
   const gameName =
     gameType === "RELAY"
       ? relayNames[team.category as keyof typeof relayNames]

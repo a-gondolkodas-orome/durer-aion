@@ -230,21 +230,28 @@ sudo docker run -p 80:80 -p 443:443 -it --rm --name certbot \
             certbot/certbot --standalone --nginx
 ```
 
-After this, apply the following changes to `nginx/nginx.conf`
+After this, apply the following changes to `nginx/nginx.conf`. Certbot rewrites
+the `listen` lines and the `server` blocks around them; leave the
+`proxy_set_header X-Forwarded-Proto $scheme;` line in every `location` alone.
+That header is how the backend learns the request reached this nginx over
+HTTPS, and it is what puts `Secure` on the session cookie — dropped, the
+cookie still works and nothing complains, so the loss shows up nowhere but a
+packet capture (`apps/online-backend/src/server/team_session.ts` says why).
 
 ```diff
-@@ -1,5 +1,8 @@
+@@ -3,7 +3,8 @@
+ # nginx when DEPLOYMENT.md's certbot setup is followed, so its own scheme is
+ # the truth — a client's X-Forwarded-Proto is never passed through.
  server {
 -    listen       80;
 +
 +    server_name verseny.durerinfo.hu; # managed by Certbot
-
+ 
      location /socket.io/ {
          proxy_pass http://backend:8000;
-@@ -19,4 +22,25 @@ server {
-     location / {
-         root   /usr/share/nginx/html;
+@@ -32,4 +33,25 @@
          index  index.html index.htm;
+         try_files $uri $uri/ /index.html;
      }
 +    listen [::]:443 ssl ipv6only=on; # managed by Certbot
 +    listen 443 ssl; # managed by Certbot

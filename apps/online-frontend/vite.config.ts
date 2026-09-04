@@ -3,6 +3,8 @@ import react from '@vitejs/plugin-react'
 import { execSync } from 'child_process'
 
 // https://vite.dev/config/
+const backend = 'http://localhost:8000';
+
 export default defineConfig(() => {
   process.env.VITE_GIT_COMMIT_HASH = execSync('git rev-parse HEAD').toString().trimEnd();
 
@@ -15,6 +17,15 @@ export default defineConfig(() => {
       // than failing. `.devcontainer` sets DEV_SERVER_HOST for that case;
       // outside a container nothing changes.
       host: process.env.DEV_SERVER_HOST === "true" || undefined,
+      // The backend's routes, the same map as nginx/nginx.conf: the session is
+      // a cookie, which only rides same-origin requests, so the dev server
+      // proxies the backend rather than the page calling it across origins.
+      proxy: {
+        '/team': backend,
+        '/game': backend,
+        '/games': backend,
+        '/socket.io': { target: backend, ws: true },
+      },
     },
     build: {
       rollupOptions: {
