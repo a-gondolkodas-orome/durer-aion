@@ -17,8 +17,7 @@ const team = {
   updatedAt: new Date("2026-03-21T10:00:00Z"),
 } as unknown as TeamModel;
 
-// The team routes authenticate nobody: whatever this returns is readable by
-// anyone who knows a team's GUID.
+// Whatever this returns is readable by any script on the page.
 describe("publicTeamView", () => {
   it("keeps out the login code, the address and the organisers' notes", () => {
     expect(publicTeamView(team)).not.toHaveProperty("joinCode");
@@ -26,9 +25,15 @@ describe("publicTeamView", () => {
     expect(publicTeamView(team)).not.toHaveProperty("other");
   });
 
+  // Regression: the GUID is the session cookie's value, and a browser sets
+  // cookies of its own — so serving it here would let a script on the page
+  // read the session the cookie's `httpOnly` exists to hide.
+  it("keeps out the GUID, which is the session itself", () => {
+    expect(publicTeamView(team)).not.toHaveProperty("teamId");
+  });
+
   it("serves what the client plays with", () => {
     expect(publicTeamView(team)).toStrictEqual({
-      teamId: "8eae8669-125c-42e5-8b49-89afbac31679",
       teamName: "Csapat",
       category: "E",
       credentials: "secret-token",

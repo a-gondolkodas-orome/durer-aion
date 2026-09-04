@@ -3,13 +3,21 @@ import { MatchStatus } from "schemas";
 
 /** What the playing client is served for its own team.
  *
- * The team routes are reachable with nothing but the team's GUID, so the row
- * must never travel whole: `joinCode` is the team's login secret, `email`
- * identifies the people behind the team, and `other` carries the organisers'
- * notes. `credentials` stays because the board client signs its moves with it.
+ * The row must never travel whole: `joinCode` is the team's login secret,
+ * `email` identifies the people behind the team, and `other` carries the
+ * organisers' notes.
+ *
+ * `teamId` is left out for the same reason, and it is the one that would
+ * undo the session cookie: the GUID is the cookie's value, and a browser
+ * may set a cookie of its own under that name, so anyone holding a team's
+ * GUID can be that team. Keeping it out of the body is what makes the
+ * cookie's `httpOnly` worth anything — otherwise a script on the page could
+ * read `GET /team/me` and carry the session off (server/team_session.ts).
+ * Nothing the team plays with needs it: the board signs its moves with
+ * `credentials` and addresses the match by `matchID`, and the admin pages
+ * take the GUID from their own authenticated route.
  */
 export interface PublicTeamView {
-  teamId: string;
   teamName: string;
   category: string;
   credentials: string;
@@ -26,7 +34,6 @@ export interface PublicTeamView {
  */
 export function publicTeamView(team: TeamModel): PublicTeamView {
   return {
-    teamId: team.teamId,
     teamName: team.teamName,
     category: team.category,
     credentials: team.credentials,

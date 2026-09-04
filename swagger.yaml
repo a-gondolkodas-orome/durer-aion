@@ -503,11 +503,12 @@ components:
           type: number
 
     PublicTeamView:
-      description: What a team is served about itself — the row without its secrets.
+      description: >
+        What a team is served about itself — the row without its secrets. The
+        GUID is one of them: it is the session cookie's value, so serving it
+        here would hand any script on the page the session.
       type: object
       properties:
-        teamId:
-          type: string
         teamName:
           type: string
         category:
