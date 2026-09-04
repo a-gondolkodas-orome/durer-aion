@@ -3,22 +3,16 @@ import { TeamModelDto } from "common-frontend";
 import { readStoredTeamState } from "./stored-team-state";
 
 
-let warnedAboutMissingBucket = false;
-
 // Same reasoning as apps/offline-frontend/src/sendData.ts: `sendGameData` runs from
 // `startRelay` and from the game reducers, so throwing here breaks the round itself.
 // The /valto/ deploy configures no bucket at all, so an unconfigured build drops the
-// data and carries on.
+// data and carries on. Unlike there, no build of this app sets the vars, so an
+// unset bucket is the expected configuration rather than something to report:
+// warning about it would only tell every practising team that nothing is wrong.
 function sendData(fileName: string, data: string) {
   const bucketName = import.meta.env.VITE_S3_BUCKET_NAME;
   const folder = import.meta.env.VITE_S3_FOLDER;
   if (!bucketName || !folder) {
-    if (!warnedAboutMissingBucket) {
-      warnedAboutMissingBucket = true;
-      console.warn(
-        'VITE_S3_BUCKET_NAME / VITE_S3_FOLDER are unset: play data is not being uploaded.'
-      );
-    }
     return;
   }
   const fd = new FormData();
@@ -28,7 +22,7 @@ function sendData(fileName: string, data: string) {
   fd.append('Content-Type', 'text/plain; charset=utf-8');
   fetch(
     bucketName,
-    { method: 'POST', body: fd, mode: 'cors' }).then(res => console.log(res.status)
+    { method: 'POST', body: fd, mode: 'cors' }
   ).catch((e: unknown) => console.warn('play data upload failed', e));
 }
 

@@ -290,15 +290,67 @@ paths:
                   error:
                     type: string
                     description: Description of the import error
-  /team/join/{token}:
+  /team/join:
+    post:
+      summary: Log a team in
+      description: >
+        The join code is the team's login secret, so it travels in the body,
+        never in the path. The answer sets the session cookie that the
+        /team/me routes read.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code]
+              properties:
+                code:
+                  type: string
+                  example: "000-0000-000"
+      tags:
+      - user
+      responses:
+        "204":
+          description: Logged in; the session cookie is set
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: durer_team=8eae8669-125c-42e5-8b49-89afbac31679; path=/team/me; httponly; samesite=lax
+        "400":
+          description: No join code in the body
+        "404":
+          description: Team not found
+        "415":
+          description: The body is not JSON, or there is none — a form post cannot log a team in
+
+  /team/me/logout:
+    post:
+      summary: Log the team out
+      description: >
+        Expires the session cookie. Succeeds with no session too. The body
+        must be JSON — an empty object will do — so that a form another site
+        submits cannot log the team out.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      tags:
+      - user
+      responses:
+        "204":
+          description: Logged out
+        "415":
+          description: The body is not JSON, or there is none
+
+  /team/me:
     get:
-      summary: Get team ID based on login token
-      parameters:
-        - name: token
-          in: path
-          required: true
-          schema:
-            type: string
+      summary: Get the logged-in team's data
+      security:
+      - teamSession: []
       tags:
       - user
       responses:
@@ -307,40 +359,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/GUID"
-        "404":
-          description: Team not found
+                $ref: "#/components/schemas/PublicTeamView"
+        "401":
+          description: No session
 
-  /team/{GUID}:
-    get:
-      summary: Get team data
-      parameters:
-        - name: GUID
-          in: path
-          required: true
-          schema:
-            $ref: "#/components/schemas/GUID"
-      tags:
-      - user
-      responses:
-        "200":
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TeamModel"
-        "404":
-          description: Team not found
-
-  /team/{GUID}/relay/play:
-    get:
-      summary: Let a team start a RELAY match
-      parameters:
-        - name: GUID
-          in: path
-          required: true
-          schema:
-            $ref: "#/components/schemas/GUID"
+  /team/me/relay/play:
+    post:
+      summary: Let the logged-in team start a RELAY match
+      security:
+      - teamSession: []
       tags:
       - user
       responses:
@@ -350,16 +377,16 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/CreatedMatch"
+        "401":
+          description: No session
+        "403":
+          description: Not allowed to start
 
-  /team/{GUID}/strategy/play:
-    get:
-      summary: Let a team start a STRATEGY match
-      parameters:
-        - name: GUID
-          in: path
-          required: true
-          schema:
-            $ref: "#/components/schemas/GUID"
+  /team/me/strategy/play:
+    post:
+      summary: Let the logged-in team start a STRATEGY match
+      security:
+      - teamSession: []
       tags:
       - user
       responses:
@@ -369,16 +396,16 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/CreatedMatch"
+        "401":
+          description: No session
+        "403":
+          description: Not allowed to start
 
-  /team/{GUID}/gohome:
-    get:
-      summary: Let a team set their PageState to HOME
-      parameters:
-        - name: GUID
-          in: path
-          required: true
-          schema:
-            $ref: "#/components/schemas/GUID"
+  /team/me/gohome:
+    post:
+      summary: Let the logged-in team set their PageState to HOME
+      security:
+      - teamSession: []
       tags:
       - user
       responses:
@@ -387,7 +414,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/TeamModel"
+                $ref: "#/components/schemas/PublicTeamView"
+        "401":
+          description: No session
         "403":
           description: Not allowed, match in progress
 
@@ -415,6 +444,13 @@ components:
    basicAdminAuth:
     type: http
     scheme: basic
+   teamSession:
+    type: apiKey
+    in: cookie
+    name: durer_team
+    description: >
+      The team's GUID, set by POST /team/join and set afresh by every /team/me
+      request it admits. HttpOnly, SameSite=Lax, path /team/me.
   schemas:
     GUID:
       type: string
@@ -465,6 +501,30 @@ components:
           type: string
         score:
           type: number
+
+    PublicTeamView:
+      description: >
+        What a team is served about itself — the row without its secrets. The
+        GUID is one of them: it is the session cookie's value, so serving it
+        here would hand any script on the page the session. Note that
+        boardgame.io still discloses the same GUID as the match's player name
+        once a team has started a match, so this narrows where the session
+        travels rather than closing it off — see issue #434.
+      type: object
+      properties:
+        teamName:
+          type: string
+        category:
+          type: string
+        credentials:
+          type: string
+        pageState:
+          type: string
+          enum: ["DISCLAIMER", "HOME", "RELAY", "STRATEGY"]
+        relayMatch:
+          $ref: "#/components/schemas/MatchStatus"
+        strategyMatch:
+          $ref: "#/components/schemas/MatchStatus"
 
     TeamModel:
       type: object

@@ -1,40 +1,22 @@
+// The strategy games' registries, one per package entry. This one is the shared
+// half: the game definitions and their names, which the server and every client
+// need alike. The bots live in strategy-bots.ts (the `game/bot` entry) and the
+// boards and descriptions in strategy-client.ts (`game/client`), and each
+// registry imports a game folder's *files*, never a folder barrel — a barrel
+// re-exporting `strategy` next to `board` is what would hand the bot to the
+// live client again. entries.test.ts walks the three graphs to pin this.
 import {
-  strategyWrapper as stonesStrategy,
-  MyBoard as StonesBoard,
   MyGameWrapper as StonesGameWrapper,
   MyGameState as StonesGameState
-} from "./stones";
+} from "./stones/game";
 import {
-  strategyWrapper as Strategy19ocd,
-  MyBoard as Board19ocd,
   MyGameWrapper as GameWrapper19ocd,
   MyGameState as GameState19ocd
-} from "./19ocd";
+} from "./19ocd/game";
 
 export type MyGameStateC = GameState19ocd;
 export type MyGameStateD = GameState19ocd;
 export type MyGameStateE = StonesGameState;
-export { descriptionC, descriptionD } from "./19ocd";
-export { descriptionE } from "./stones";
-
-export const StrategyWrappers = {
-  C: () => Strategy19ocd("C"),
-  D: () => Strategy19ocd("D"),
-  E: () => stonesStrategy("E"),
-}
-
-const boards = {
-  C: Board19ocd,
-  D: Board19ocd,
-  E: StonesBoard,
-};
-
-// Generic over the category so the caller keeps the board's own state type: a
-// plain "C" | "D" | "E" parameter would widen the result to a union of boards,
-// which no single game's client can accept.
-export function MyBoardWrapper<T_Category extends keyof typeof boards>(category: T_Category): (typeof boards)[T_Category] {
-  return boards[category];
-}
 
 export const MyGameWrappers = {
   C: () => GameWrapper19ocd("C"),

@@ -4,7 +4,6 @@
 // VITE_GIT_COMMIT_HASH via vite.config.ts — and optional when the code has a
 // fallback for a build without it.
 interface ImportMetaEnv {
-  readonly VITE_SERVER_URL?: string;
   readonly VITE_ACCENT_COLOR?: string;
   readonly VITE_LANGUAGE: string;
   readonly VITE_GIT_COMMIT_HASH: string;

@@ -1,11 +1,12 @@
-// Only formatReport is tested: the rest of dependency-report.mjs is three network lookups, and a
-// spec that mocked them would assert the mock. The sorting into patch/minor vs major, and the
-// handling of a failed lookup, are where the report could quietly mislead — a row dropped instead
-// of reported would read as "up to date".
+// The network lookups are not tested: a spec that mocked them would assert the mock. What is left
+// is where the report could quietly mislead — the sorting into patch/minor vs major and the
+// handling of a failed lookup in formatReport, a row dropped instead of reported reading as "up to
+// date"; and newestTagInLine, which is pure parsing of a tag list Docker Hub hands over in an order
+// that is not the one we want.
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { HELD_BACK, formatReport } from './dependency-report.mjs';
+import { HELD_BACK, formatReport, newestTagInLine } from './dependency-report.mjs';
 
 const row = (name, current, latest, where = ['root']) => ({ name, current, latest, where });
 
@@ -166,5 +167,49 @@ describe('HELD_BACK against README', () => {
     const documented = [...section.matchAll(/^- \*\*`([^`]+)`/gm)].map(([, name]) => name);
 
     expect(documented.sort()).toEqual(Object.keys(HELD_BACK).sort());
+  });
+});
+
+// Docker Hub answers newest-*pushed* first and with every variant of every tag, so the tag lists
+// below are in the order it really returns them — the real 1.30 page had 1.31.4 sitting above the
+// 1.30.4 this repo is pinned to.
+describe('newestTagInLine', () => {
+  const nginxTags = [
+    '1.30.4-trixie-perl', '1.30-perl', '1.31.4-perl', '1.30.4-trixie', '1.30.4', '1.30',
+    '1.31.4-trixie', '1.31.4', '1.31', '1.30.4-alpine3.24', '1.30.4-alpine', '1.30.3', '1.30.0'
+  ];
+
+  it('ignores every suffixed variant of the tag', () => {
+    expect(newestTagInLine(nginxTags, '1.30.4', 2)).toBe('1.30.4');
+  });
+
+  // 1.30.x is nginx's stable line and 1.31.x is mainline; both are current, and a report that kept
+  // offering mainline would be offering a decision, not a bump.
+  it('stays inside the pinned line', () => {
+    expect(newestTagInLine(nginxTags, '1.30.0', 2)).toBe('1.30.4');
+    expect(newestTagInLine(['24.20.0', '24.19.0', '26.8.1', '26.8.0'], '24.19.0', 1)).toBe('24.20.0');
+  });
+
+  // `1.30` is a moving alias for the newest 1.30.x, not a version this repo could pin to.
+  it('ignores a tag written at another precision than the pin', () => {
+    expect(newestTagInLine(nginxTags, '1.30', 2)).toBe('1.30');
+    expect(newestTagInLine(['24.20.0', '24.20', '24.19.0'], '24.20.0', 1)).toBe('24.20.0');
+  });
+
+  it('compares numerically, so a two-digit patch is not sorted under a one-digit one', () => {
+    expect(newestTagInLine(['1.30.9', '1.30.10', '1.30.4'], '1.30.4', 2)).toBe('1.30.10');
+    expect(newestTagInLine(['17.9', '17.11', '17.10'], '17.9', 1)).toBe('17.11');
+  });
+
+  // postgres publishes `19beta3` alongside its releases, and a beta is not what a deployment moves
+  // to. Failing the lookup would be wrong too — that reads as "could not check".
+  it('ignores a prerelease tag', () => {
+    expect(newestTagInLine(['18.6', '19beta3', '18.5'], '18.5', 1)).toBe('18.6');
+  });
+
+  // A failed lookup counts as behind, which is the right default: the report must never stay quiet
+  // about a version it could not check.
+  it('throws rather than inventing a version when the line has no tag', () => {
+    expect(() => newestTagInLine(['1.31.4', '1.29.0'], '1.30.4', 2)).toThrow('no 1.30.x tag found');
   });
 });

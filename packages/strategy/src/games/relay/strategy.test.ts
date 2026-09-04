@@ -1,4 +1,4 @@
-import { describe, test, expect } from "vitest";
+import { describe, test, afterEach, expect, vi } from "vitest";
 import { State } from "boardgame.io";
 import { Client } from "boardgame.io/client";
 import { GameRelay, MyGameState } from "game";
@@ -129,14 +129,24 @@ describe("relay answers", () => {
     return client;
   };
 
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   // The answer boxes are the only thing a team types into, so what the round
   // accepts is decided here rather than in the form.
   test("only a whole number between 0 and 9999 is accepted", () => {
+    // boardgame.io reports every move it rejects on the console, and the four
+    // below are rejected on purpose, so the test takes those messages rather
+    // than leaving them in the report.
+    const logged = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
     for (const rejected of [-1, 10000, 1.5, Number.NaN]) {
       const client = startRound();
       client.moves.submitAnswer(rejected);
       expect(client.getState()?.G.answer).toBeNull();
     }
+    expect(logged).toHaveBeenCalledTimes(4);
 
     const client = startRound();
     client.moves.submitAnswer(9999);

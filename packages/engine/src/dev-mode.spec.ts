@@ -22,7 +22,7 @@ describe('isDevMode', () => {
   // `import.meta.env` here is a proxy that answers `DEV` from `MODE` whatever is
   // stubbed or deleted, so "no Vite at all" has to be a real node without one.
   // Node runs the .ts source as-is — type stripping is on by default from 23.6,
-  // and `check:versions` holds every host in this repo to the .nvmrc pin.
+  // and `scripts/check-versions.test.mjs` holds every host in this repo to the .nvmrc pin.
   describe('imported by a bare node, as the competition server will (#313)', () => {
     const moduleUrl = new URL('./dev-mode.ts', import.meta.url).href;
 

@@ -41,7 +41,7 @@ export function RelayEndTable(props: { allPoints: number, task: { max: number, g
     if (props.selectRound) {
       // Logging out leads back to the round selector, and it also clears
       // the saved match so the round can be replayed later
-      logout();
+      await logout();
     } else {
       window.location.reload();
     }

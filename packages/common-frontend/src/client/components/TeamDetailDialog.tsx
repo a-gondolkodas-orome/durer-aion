@@ -3,7 +3,7 @@ import { useAddMinutes, useGetLogs, useMatchState, useResetRelay, useResetStrate
 import { Button } from '@mui/material';
 import { Dispatch, useState } from 'react';
 import useSWR from 'swr';
-import { TeamModelDto, MatchStatus } from '../dto/TeamStateDto';
+import { TeamModelDto, MatchStatus, adminTeamId } from '../dto/TeamStateDto';
 import { formatTime } from '../utils/DateFormatter';
 import { ErrorMessage, Field, FieldProps } from 'formik';
 import Form from "./form";
@@ -62,7 +62,7 @@ export function TeamDetailDialog(props: { data: TeamModelDto, setConfirmDialog: 
         onClick={() => {
           props.setConfirmDialog({
             text: `Biztosan törlöd a(z) ${teamState.teamName} csapatot?`,
-            confirm: async () => removeTeam(teamState.teamId),
+            confirm: async () => removeTeam(adminTeamId(teamState)),
           });
         }}
       >
@@ -78,7 +78,7 @@ export function TeamDetailDialog(props: { data: TeamModelDto, setConfirmDialog: 
               text: `Erősítsd meg, hogy ${teamState.teamName} csapatnak alaphelyzetbe akarod állítani a váltó állását`,
               confirm: async () => {
                 try {
-                  const changed = await resetRelay(teamState.teamId);
+                  const changed = await resetRelay(adminTeamId(teamState));
                   setTeamState(changed);
                   enqueueSnackbar("Sikeres művelet", { variant: 'success' });
                 } catch (e: unknown) {
@@ -100,7 +100,7 @@ export function TeamDetailDialog(props: { data: TeamModelDto, setConfirmDialog: 
               text: `Erősítsd meg, hogy ${teamState.teamName} csapatnak alaphelyzetbe akarod állítani a stratégiás állását`,
               confirm: async () => {
                 try {
-                  const changed = await resetStrategy(teamState.teamId);
+                  const changed = await resetStrategy(adminTeamId(teamState));
                   setTeamState(changed);
                   enqueueSnackbar("Sikeres művelet", { variant: 'success' });
                 } catch (e: unknown) {
