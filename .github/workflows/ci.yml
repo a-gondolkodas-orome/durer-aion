@@ -15,11 +15,15 @@ permissions:
   contents: read
 
 concurrency:
-  # A PR's later push supersedes the run still going for the earlier one. On main
-  # the group is the sha, which is unique, so a push to main is never cancelled:
-  # pages-deploy.yml cuts over on the same push, and the checks behind it have to
-  # finish rather than be superseded by the next merge.
-  group: ci-${{ github.head_ref || github.sha }}
+  # A PR's later push supersedes the run still going for the earlier one. Keyed on
+  # the pull request rather than on its head branch, because one branch can have
+  # two pull requests open — a stacked one and the same work onto main — and a
+  # push then starts a run for each, which a shared group would have cancelling
+  # its sibling. On a push the key falls back to the sha, which is unique, so a
+  # run on main is never cancelled: pages-deploy.yml cuts the public site over on
+  # that same push, and the checks behind it have to finish rather than be
+  # superseded by the next merge.
+  group: ci-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
 jobs:
