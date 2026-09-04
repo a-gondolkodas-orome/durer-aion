@@ -5,6 +5,14 @@ import { defineConfig } from 'eslint/config';
 import tseslint from 'typescript-eslint';
 import { quotesRule, stylisticPlugin, stylisticRules, stylisticRulesOff } from './eslint.stylistic.mjs';
 
+// The `game/bot` entry and every relative spelling of it or of the package's
+// source: `../../packages/game/...` from an app, `../../game/...` from a sibling
+// package. Shared by the three no-restricted-imports blocks below — see the first.
+const noBotInTheClient = {
+  group: ['game/bot', '**/packages/game/**', '**/game/bot', '**/game/bot.ts', '**/game/src/**'],
+  message: 'The live client must not ship the bot: import `game` or `game/client` only.',
+};
+
 export default defineConfig(
   // Apply recommended rules to all files
   {
@@ -82,6 +90,33 @@ export default defineConfig(
       '@typescript-eslint/no-non-null-assertion': 'off',
     },
   },
+  // The live client must not ship the bot. packages/game keeps its bots behind the
+  // `game/bot` entry, so the rule is about naming it: nothing may import `game/bot`,
+  // nor reach into packages/game by path, except the server and the offline dry run,
+  // allowed below. The ban is repo-wide rather than on apps/online-frontend alone
+  // because the served bundle is more than that app: packages/common-frontend is in
+  // it too, and an import there would ship the bot just the same. The path patterns
+  // cover both ways a relative import can spell the package: through `packages/`
+  // from an app, and as a sibling (`../../game/...`) from another package. What the
+  // rule cannot see is the package's own graph — a board importing a strategy file;
+  // the walk in packages/game/src/entries.test.ts pins that.
+  //
+  // A flat config replaces a rule's options wholesale when a later object sets the
+  // same rule, so this block comes first and the two package blocks below carry the
+  // pattern as well as their own — otherwise whichever set is last would silently
+  // switch the other off.
+  {
+    files: ['**/*.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': ['error', {
+        patterns: [noBotInTheClient],
+      }],
+    },
+  },
+  {
+    files: ['apps/online-backend/**/*.{ts,tsx}', 'apps/offline-frontend/**/*.{ts,tsx}'],
+    rules: { '@typescript-eslint/no-restricted-imports': 'off' },
+  },
   // The core of the package is what a bare node server imports; its React client half
   // lives in src/react/ and is exempt — that is the whole point of the split. What this
   // rule cannot see is a relative import resolving into src/react/; the walk in
@@ -93,7 +128,7 @@ export default defineConfig(
     ignores: ['packages/engine/react.ts', 'packages/engine/src/react/**'],
     rules: {
       '@typescript-eslint/no-restricted-imports': ['error', {
-        patterns: [{
+        patterns: [noBotInTheClient, {
           group: ['react', 'react/*', 'react-*', '*.tsx', '**/*.tsx'],
           allowTypeImports: true,
           message: 'packages/engine runs with no framework attached; keep React on the app side.',
@@ -110,36 +145,13 @@ export default defineConfig(
     files: ['packages/games/**/*.ts'],
     rules: {
       '@typescript-eslint/no-restricted-imports': ['error', {
-        patterns: [{
+        patterns: [noBotInTheClient, {
           group: ['react', 'react/*', 'react-*', '*.tsx', '**/*.tsx'],
           allowTypeImports: true,
           message: 'A game\'s .ts half runs in plain Node; move anything React-flavoured into the game .tsx.',
         }],
       }],
     },
-  },
-  // The live client must not ship the bot. packages/game keeps its bots behind the
-  // `game/bot` entry, so the rule is about naming it: nothing may import `game/bot`,
-  // nor reach into packages/game by path, except the server and the offline dry run,
-  // allowed below. The ban is repo-wide rather than on apps/online-frontend alone
-  // because the served bundle is more than that app: packages/common-frontend is in
-  // it too, and an import there would ship the bot just the same. What the rule
-  // cannot see is the package's own graph — a board importing a strategy file; the
-  // walk in packages/game/src/entries.test.ts pins that.
-  {
-    files: ['**/*.{ts,tsx}'],
-    rules: {
-      '@typescript-eslint/no-restricted-imports': ['error', {
-        patterns: [{
-          group: ['game/bot', '**/packages/game/**'],
-          message: 'The live client must not ship the bot: import `game` or `game/client` only.',
-        }],
-      }],
-    },
-  },
-  {
-    files: ['apps/online-backend/**/*.{ts,tsx}', 'apps/offline-frontend/**/*.{ts,tsx}'],
-    rules: { '@typescript-eslint/no-restricted-imports': 'off' },
   },
   // Formatting, shared with apps/strategy-practice's config — see eslint.stylistic.mjs
   // for what belongs in that list and why it is rules rather than prettier. `--fix`

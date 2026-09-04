@@ -12,13 +12,20 @@ export default defineConfig(() => {
     base: process.env.SITE_BASE || process.env.PUBLIC_URL || '/',
     plugins: [react()],
     resolve: {
-      alias: {
-        "boardgame.io": path.resolve(import.meta.dirname, "../../node_modules/boardgame.io"),
-        game: path.resolve(import.meta.dirname, "../../packages/game"),
-        schemas: path.resolve(import.meta.dirname, "../../packages/schemas"),
-        strategy: path.resolve(import.meta.dirname, "../../packages/strategy"),
-        "common-frontend": path.resolve(import.meta.dirname, "../../packages/common-frontend"),
-      },
+      // Anchored patterns, not string keys: a string key matches as a prefix too, so
+      // `game` alone would send `game/bot` to the package *directory* plus `/bot` —
+      // that is, to the source entry bot.ts — while `game` itself resolves through
+      // the exports map to the built dist, and the rules end up in the bundle twice,
+      // once from each. Each subpath names its dist file, so the three entries share
+      // one copy of the rules.
+      alias: [
+        { find: "boardgame.io", replacement: path.resolve(import.meta.dirname, "../../node_modules/boardgame.io") },
+        { find: /^game$/, replacement: path.resolve(import.meta.dirname, "../../packages/game") },
+        { find: /^game\/(bot|client)$/, replacement: path.resolve(import.meta.dirname, "../../packages/game/dist/$1.mjs") },
+        { find: /^schemas$/, replacement: path.resolve(import.meta.dirname, "../../packages/schemas") },
+        { find: /^strategy$/, replacement: path.resolve(import.meta.dirname, "../../packages/strategy") },
+        { find: /^common-frontend$/, replacement: path.resolve(import.meta.dirname, "../../packages/common-frontend") },
+      ],
       dedupe: ["react", "react-dom", "boardgame.io"], // ✅ avoid duplicate instances
       preserveSymlinks: true, // this is needed to make sure that linked packages are properly resolved (like game and schemas
     },

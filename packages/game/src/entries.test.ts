@@ -6,11 +6,11 @@ import { fileURLToPath } from "node:url";
 // Three entries share this package: `game` (the rules, which the server and
 // every client need), `game/bot` (the bots and their lookup tables, which the
 // live client must never ship) and `game/client` (the React boards, which the
-// server never renders). ESLint bans `game/bot` in apps/online-frontend by
-// specifier, but a specifier does not say what it resolves to — a board
-// importing './strategy', or a registry importing a folder barrel that
-// re-exports both, is invisible to it. This walk pins the boundaries the
-// entries exist for.
+// server never renders). ESLint bans `game/bot` everywhere but the server and
+// the offline dry run by specifier, but a specifier does not say what it
+// resolves to — a board importing './strategy', or a registry importing a
+// folder barrel that re-exports both, is invisible to it. This walk pins the
+// boundaries the entries exist for.
 const root = fileURLToPath(new URL("..", import.meta.url));
 
 // Every .ts/.tsx under the package root, keyed by its path relative to it.
@@ -41,12 +41,14 @@ const resolvePath = (fromFile: string, specifier: string): string => {
   return target;
 };
 
-// Both forms a barrel uses: `import … from` and `export … from`. Type-only
-// edges are erased before any bundle sees them, so they cannot drag code in.
+// Both forms a barrel uses, `import … from` and `export … from`, and the bare
+// `import './x'` that pulls a module in for its side effects — an edge like any
+// other to a bundler. Type-only edges are erased before any bundle sees them,
+// so they cannot drag code in.
 const relativeImports = (file: string): string[] =>
-  [...(sources.get(file) ?? "").matchAll(/^(?:import|export)\s[^;]*?from\s*['"](\.[^'"]+)['"]/gm)]
+  [...(sources.get(file) ?? "").matchAll(/^(?:import\s*['"](\.[^'"]+)['"]|(?:import|export)\s[^;]*?from\s*['"](\.[^'"]+)['"])/gm)]
     .filter(([statement]) => !statement.startsWith("import type") && !statement.startsWith("export type"))
-    .map(match => match[1]);
+    .map(match => match[1] ?? match[2]);
 
 // Every module reachable from `entry` through relative value imports, entry included.
 const reachableFrom = (entry: string): string[] => {
