@@ -5,17 +5,29 @@ import { defineConfig } from 'eslint/config';
 import tseslint from 'typescript-eslint';
 import { quotesRule, stylisticPlugin, stylisticRules, stylisticRulesOff } from './eslint.stylistic.mjs';
 
+const noBotMessage = 'The live client must not ship the bot: import `game` or `game/client` only.';
+
 // The `game/bot` entry and every relative spelling of it, of the package's source
 // and of its build: `../../packages/game/...` from an app, `../../game/...` from a
-// sibling package. See the block that uses it, below.
+// sibling package, with or without an extension (`../../game/bot.js` resolves to
+// bot.ts and used to slip through). See the block that uses it, below.
 const noBotInTheClient = {
   group: [
     'game/bot',
     '**/packages/game/**',
-    '**/game/bot', '**/game/bot.ts',
+    '**/game/bot', '**/game/bot.*',
     '**/game/src/**', '**/game/dist/**',
   ],
-  message: 'The live client must not ship the bot: import `game` or `game/client` only.',
+  message: noBotMessage,
+};
+
+// The same spellings once more, for `import()`. no-restricted-imports reads import
+// and export *declarations* only — the core rule has no ImportExpression case at all
+// — so `await import('game/bot')` walked straight past it and would have handed the
+// browser a lazy chunk of the bot.
+const noDynamicBotImport = {
+  selector: 'ImportExpression > Literal[value=/(^|\\/)game\\/(bot($|\\.)|src\\/|dist\\/)|packages\\/game\\//]',
+  message: noBotMessage,
 };
 
 export default defineConfig(
@@ -98,31 +110,33 @@ export default defineConfig(
   // The live client must not ship the bot. packages/game keeps its bots behind the
   // `game/bot` entry, so the rule is about naming it: nothing may import `game/bot`,
   // nor reach into packages/game by path, except the server and the offline dry run,
-  // allowed below. The ban is repo-wide rather than on apps/online-frontend alone
-  // because the served bundle is more than that app: packages/common-frontend is in
-  // it too, and an import there would ship the bot just the same. The path patterns
-  // cover both ways a relative import can spell the package: through `packages/`
-  // from an app, and as a sibling (`../../game/...`) from another package. What the
-  // rule cannot see is the package's own graph — a board importing a strategy file;
-  // the walk in packages/game/src/entries.test.ts pins that.
+  // which this block's `ignores` exempts. The ban is repo-wide rather than on
+  // apps/online-frontend alone because the served bundle is more than that app:
+  // packages/common-frontend is in it too, and an import there would ship the bot
+  // just the same. The path patterns cover both ways a relative import can spell the
+  // package: through `packages/` from an app, and as a sibling (`../../game/...`)
+  // from another package. What the rule cannot see is the package's own graph — a
+  // board importing a strategy file; the walk in packages/game/src/entries.test.ts
+  // pins that.
   //
-  // This ban rides the core `no-restricted-imports`, while the React bans below use
-  // the typescript-eslint rule of the same name: a flat config replaces a rule's
-  // options wholesale, so two blocks setting one rule name silently switch each
-  // other's patterns off — two rule names cannot, whatever order they come in. The
-  // core rule differs only in having no `allowTypeImports`, which this ban has no
-  // use for: nothing outside the bot needs to name a bot's types either.
+  // The two exempt apps are named here rather than in a second block switching the
+  // rules off, and the ban rides the core `no-restricted-imports` while the React
+  // bans below use the typescript-eslint rule of the same name. Both for one reason:
+  // a flat config replaces a rule's options wholesale, so every extra block naming a
+  // rule is another way to disarm it silently — one block, and a rule name nothing
+  // else sets, cannot be. The core rule differs only in having no `allowTypeImports`,
+  // which this ban has no use for: nothing outside the bot needs to name a bot's
+  // types either. `.mts` and the rest of the extensions are in because a config or a
+  // script is as able to import the bot as a source file is.
   {
-    files: ['**/*.{ts,tsx}'],
+    files: ['**/*.{js,mjs,cjs,mts,ts,tsx}'],
+    ignores: ['apps/online-backend/**', 'apps/offline-frontend/**'],
     rules: {
       'no-restricted-imports': ['error', {
         patterns: [noBotInTheClient],
       }],
+      'no-restricted-syntax': ['error', noDynamicBotImport],
     },
-  },
-  {
-    files: ['apps/online-backend/**/*.{ts,tsx}', 'apps/offline-frontend/**/*.{ts,tsx}'],
-    rules: { 'no-restricted-imports': 'off' },
   },
   // The core of the package is what a bare node server imports; its React client half
   // lives in src/react/ and is exempt — that is the whole point of the split. What this

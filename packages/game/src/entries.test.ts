@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { readdirSync, readFileSync } from "node:fs";
 import { join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
+import ts from "typescript";
 
 // Three entries share this package: `game` (the rules, which the server and
 // every client need), `game/bot` (the bots and their lookup tables, which the
@@ -41,17 +42,61 @@ const resolvePath = (fromFile: string, specifier: string): string => {
   return target;
 };
 
-// Both forms a barrel uses, `import … from` and `export … from`, and the bare
-// `import './x'` that pulls a module in for its side effects — an edge like any
-// other to a bundler. Type-only edges are erased before any bundle sees them,
-// so they cannot drag code in. A statement ends at a semicolon or at a quoted
-// specifier, whichever comes first: nothing quoted precedes `from` inside one
-// statement, so stopping at a quote keeps a match from running into the next
-// line when the previous one has no semicolon (the last test says why).
-const relativeImports = (file: string): string[] =>
-  [...(sources.get(file) ?? "").matchAll(/^(?:import\s*['"](\.[^'"]+)['"]|(?:import|export)\s[^;'"]*?from\s*['"](\.[^'"]+)['"])/gm)]
-    .filter(([statement]) => !statement.startsWith("import type") && !statement.startsWith("export type"))
-    .map(match => match[1] ?? match[2]);
+// A specifier a bundler resolves but this walk cannot read — `import(name)`, a
+// template literal — is a hole like any other, so it stops the run.
+const moduleName = (node: ts.Node | undefined, file: string): string => {
+  if (node === undefined || !ts.isStringLiteral(node)) {
+    throw new Error(`${file} has an import whose specifier this walk cannot read`);
+  }
+  return node.text;
+};
+
+// Every edge a bundler would follow out of one file: both forms a barrel uses,
+// `import … from` and `export … from`, the bare `import './x'` that pulls a module
+// in for its side effects, and `import()`, which splits a chunk out rather than
+// dropping it. Type-only declarations are erased before any bundle sees them, so
+// they cannot drag code in; an inline `type` specifier does not make its statement
+// type-only, and counting the statement is the safe way round.
+//
+// Read from TypeScript's own parse, not a regex. A regex has to shape-match a
+// statement, and the shapes it did not match it dropped in silence — an indented
+// import, a member list carrying a comment with an apostrophe, a second statement
+// on one line, `import()` in any position — which is the one failure this walk must
+// not have: an edge lost here is a hole in every check below. The last two tests
+// pin the shapes.
+const specifierOf = (node: ts.Node, file: string): string | undefined => {
+  // `phaseModifier`, not the deprecated `isTypeOnly`: the modifier is `defer` as
+  // well as `type` now, and a deferred import is an edge — the module is loaded,
+  // just later.
+  if (ts.isImportDeclaration(node) && node.importClause?.phaseModifier !== ts.SyntaxKind.TypeKeyword) {
+    return moduleName(node.moduleSpecifier, file);
+  }
+  if (ts.isExportDeclaration(node) && !node.isTypeOnly && node.moduleSpecifier !== undefined) {
+    return moduleName(node.moduleSpecifier, file);
+  }
+  if (ts.isCallExpression(node) && node.expression.kind === ts.SyntaxKind.ImportKeyword) {
+    return moduleName(node.arguments[0], file);
+  }
+  return undefined;
+};
+
+const relativeImports = (file: string): string[] => {
+  const parsed = ts.createSourceFile(
+    file,
+    sources.get(file) ?? "",
+    ts.ScriptTarget.Latest,
+    false,
+    file.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
+  );
+  const found: string[] = [];
+  const visit = (node: ts.Node) => {
+    const specifier = specifierOf(node, file);
+    if (specifier?.startsWith(".") === true) found.push(specifier);
+    ts.forEachChild(node, visit);
+  };
+  ts.forEachChild(parsed, visit);
+  return found;
+};
 
 // Every module reachable from `entry` through relative value imports, entry included.
 const reachableFrom = (entry: string): string[] => {
@@ -109,20 +154,44 @@ describe("the package's entries", () => {
     expect(leaked, "rules belong in src/common or a game's game.ts, a bot's own files in neither").toEqual([]);
   });
 
-  // Without a semicolon, a type-only import from a package used to swallow the
-  // relative import on the next line: the match started at `import type`, ran
-  // on to the first `from './…'` it found, and the type filter then dropped
-  // the whole thing — a board importing its bot under that line went unseen
-  // by every check above. A bare `import 'pkg'` did the same to `import './x'`.
-  it("reads a relative import that follows a semicolon-free bare one", () => {
-    sources.set("probe.ts", [
+  // One statement per shape a regex walk got wrong, each of which dropped its edge
+  // in silence and with it every check above. In order: a semicolon-free type-only
+  // import, which used to run on to the `from './…'` on the line below and then be
+  // discarded as type-only, taking the board's import of its bot with it; a member
+  // list whose comment carries an apostrophe, which ended the match early; an
+  // indented statement; a second statement on the same line; and `import()`, which a
+  // bundler answers with a lazy chunk — a board's bot served on the first click
+  // rather than never.
+  it("reads every import shape an edge can hide in", () => {
+    sources.set("probe.tsx", [
       "import type { State } from 'boardgame.io'",
       "import { strategyWrapper } from './strategy'",
+      "import {",
+      "  moveMap, // don't drop this one",
+      "} from './moveMap';",
+      "  import { table } from './indented';",
+      "import { a } from './a'; import { b } from './b';",
+      "const lazy = () => import('./lazy');",
       "import 'lodash'",
       "import './side'",
+      "export * from './reexported';",
+      "export type { Move } from './erased';",
+      "import { type Category, wrapper } from './inline-type';",
     ].join("\n"));
     try {
-      expect(relativeImports("probe.ts")).toEqual(["./strategy", "./side"]);
+      expect(relativeImports("probe.tsx")).toEqual([
+        "./strategy", "./moveMap", "./indented", "./a", "./b",
+        "./lazy", "./side", "./reexported", "./inline-type",
+      ]);
+    } finally {
+      sources.delete("probe.tsx");
+    }
+  });
+
+  it("stops on a specifier it cannot read", () => {
+    sources.set("probe.ts", "const name = './strategy';\nconst lazy = () => import(name);");
+    try {
+      expect(() => relativeImports("probe.ts")).toThrow(/cannot read/);
     } finally {
       sources.delete("probe.ts");
     }
