@@ -12,8 +12,9 @@ import { TeamModel } from './model';
  * and any script on the page could read it. Here it is a cookie that only the
  * `/team/me` routes ever receive:
  *
- * - `httpOnly`: no script on the page can read it, so an XSS is not an
- *   account takeover.
+ * - `httpOnly`: no script on the page can read the cookie itself. That is not
+ *   yet XSS protection, because the *value* is still reachable by another
+ *   route — see the note below.
  * - `sameSite: 'lax'`: the browser does not attach it to requests other sites
  *   make, and every state-changing team route is a POST — together that is
  *   the CSRF protection.
@@ -34,6 +35,15 @@ import { TeamModel } from './model';
  *
  * The GUID stays an opaque, unguessable value looked up in the database on
  * every request, as it was in the URL — no signing, no secret to configure.
+ *
+ * What this does *not* yet do is survive an XSS. The GUID is also the name
+ * boardgame.io gives the match's player, and it hands that back both from the
+ * unauthenticated `GET /games/:name/:matchID` and in the socket's `sync`
+ * payload — so once a team has started a match, a script on the page can
+ * recover the session and set a cookie of its own. Keeping the GUID out of
+ * `GET /team/me` (server/team_view.ts) narrows that window to "before the
+ * first match" rather than closing it. Issue #434 has the fix: give the cookie
+ * a session token of its own, which nothing else discloses.
  */
 export const TEAM_COOKIE = 'durer_team';
 export const TEAM_COOKIE_PATH = '/team/me';

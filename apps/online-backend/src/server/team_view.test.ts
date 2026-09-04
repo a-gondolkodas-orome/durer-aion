@@ -26,8 +26,9 @@ describe("publicTeamView", () => {
   });
 
   // Regression: the GUID is the session cookie's value, and a browser sets
-  // cookies of its own — so serving it here would let a script on the page
-  // read the session the cookie's `httpOnly` exists to hide.
+  // cookies of its own — so serving it here would hand the session to any
+  // script on the page. boardgame.io discloses the same GUID once a match
+  // exists (issue #434), so this narrows the window rather than closing it.
   it("keeps out the GUID, which is the session itself", () => {
     expect(publicTeamView(team)).not.toHaveProperty("teamId");
   });

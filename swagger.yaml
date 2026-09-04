@@ -506,7 +506,10 @@ components:
       description: >
         What a team is served about itself — the row without its secrets. The
         GUID is one of them: it is the session cookie's value, so serving it
-        here would hand any script on the page the session.
+        here would hand any script on the page the session. Note that
+        boardgame.io still discloses the same GUID as the match's player name
+        once a team has started a match, so this narrows where the session
+        travels rather than closing it off — see issue #434.
       type: object
       properties:
         teamName:

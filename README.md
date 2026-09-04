@@ -172,7 +172,9 @@ the list binds a change, and which items a unit test pins.
    Cookies while logged in, gone after, and localStorage holds no GUID —
    only a `loggedIn` flag, which is how the other tabs hear of a login.
    Nor does the GUID come back in the `GET /team/me` response: it is the
-   cookie's value, so a copy a script could read would undo the HttpOnly. On
+   cookie's value, so a copy there would be the session in a form a script can
+   read. (boardgame.io still gives the same GUID out as the match's player
+   name, so this narrows the exposure rather than ending it — issue #434.) On
    the deployed host the login response's `Set-Cookie` also carries `Secure`:
    the backend takes that from nginx's own scheme, so a proxy in front of the
    container's nginx would silently lose it.

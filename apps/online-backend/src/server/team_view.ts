@@ -7,15 +7,17 @@ import { MatchStatus } from "schemas";
  * `email` identifies the people behind the team, and `other` carries the
  * organisers' notes.
  *
- * `teamId` is left out for the same reason, and it is the one that would
- * undo the session cookie: the GUID is the cookie's value, and a browser
- * may set a cookie of its own under that name, so anyone holding a team's
- * GUID can be that team. Keeping it out of the body is what makes the
- * cookie's `httpOnly` worth anything — otherwise a script on the page could
- * read `GET /team/me` and carry the session off (server/team_session.ts).
- * Nothing the team plays with needs it: the board signs its moves with
- * `credentials` and addresses the match by `matchID`, and the admin pages
+ * `teamId` is left out for the same reason, and it is the one that matters
+ * most: the GUID is the session cookie's value, and a browser may set a
+ * cookie of its own under that name, so anyone holding a team's GUID can be
+ * that team. Nothing the team plays with needs it — the board signs its moves
+ * with `credentials` and addresses the match by `matchID`, and the admin pages
  * take the GUID from their own authenticated route.
+ *
+ * Leaving it out narrows where the session travels rather than putting it
+ * beyond a page script's reach — boardgame.io discloses the same GUID by
+ * another route. `server/team_session.ts` has the threat model and issue #434
+ * the fix.
  */
 export interface PublicTeamView {
   teamName: string;
