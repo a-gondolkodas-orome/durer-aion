@@ -2,11 +2,12 @@ import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'tsdown'
 
 // The three workspace packages are bundled in from their TypeScript source —
-// the same entries vitest.config.mts aliases — so this build needs no
-// `packages/*/dist` and cannot go stale against one. Only `tsc --noEmit` still
-// reaches the packages through their exports maps, for the declarations.
-const source = (pkg: string) =>
-  fileURLToPath(new URL(`../../packages/${pkg}/index.ts`, import.meta.url))
+// the same entries vitest.config.mts and tsconfig.json's `paths` name — so this
+// build needs no `packages/*/dist` and cannot go stale against one. The server
+// imports `game` and `game/bot`, never `game/client`, so the bundle carries no
+// board and requires neither React nor MUI.
+const source = (file: string) =>
+  fileURLToPath(new URL(`../../packages/${file}`, import.meta.url))
 
 export default defineConfig({
   entry: ['src/server.ts'],
@@ -27,9 +28,10 @@ export default defineConfig({
   sourcemap: true,
 
   alias: {
-    game: source('game'),
-    schemas: source('schemas'),
-    strategy: source('strategy'),
+    game: source('game/index.ts'),
+    'game/bot': source('game/bot.ts'),
+    schemas: source('schemas/index.ts'),
+    strategy: source('strategy/index.ts'),
   },
 
   deps: {
@@ -39,9 +41,9 @@ export default defineConfig({
     // this package.json declares would inline those.
     neverBundle: true,
     // The alias resolves each of these to a source path, but the external
-    // check runs on the bare specifier first, and all three are declared
+    // check runs on the bare specifier first, and they all belong to declared
     // dependencies; this is what makes the alias win.
-    alwaysBundle: ['game', 'schemas', 'strategy'],
+    alwaysBundle: ['game', 'game/bot', 'schemas', 'strategy'],
     // Keep `boardgame.io/server` and the like as written, so the bundle
     // requires what the source imports rather than a `dist/cjs/...` path.
     resolveDepSubpath: false,
