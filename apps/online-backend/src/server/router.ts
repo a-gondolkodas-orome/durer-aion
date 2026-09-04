@@ -9,7 +9,7 @@ import { getFilterPlayerView } from "boardgame.io/internal";
 import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus, createGame, injectBot, injectPlayer } from './team_manage';
 import { import_teams_from_tsv } from './team_import';
 import { publicTeamView } from './team_view';
-import { TeamState, clearTeamCookie, requireTeam, setTeamCookie } from './team_session';
+import { TeamState, clearTeamCookie, requireJson, requireTeam, setTeamCookie } from './team_session';
 import { AnyBgioGame, PlayerIDType } from 'game';
 
 /**
@@ -306,11 +306,11 @@ export function configureTeamsRouter(
    *
    * The code travels in the body, never in the path — it is the team's login
    * secret, and a path lands in access logs and browser history. What the
-   * cookie is and why is `team_session.ts`.
+   * cookie is and why, and why the body must be JSON, is `team_session.ts`.
    *
    * @param {string} code - the team's join code, as `{ "code": ... }`
    */
-  router.post("/team/join", koaBody(), async (ctx) => {
+  router.post("/team/join", requireJson, koaBody(), async (ctx) => {
     const sent: unknown = (ctx.request.body as { code?: unknown } | undefined)?.code;
     const code = typeof sent === "string" ? sent : ctx.throw(400, "Expected { code: string }.");
     const team = await teams.getTeam({ joinCode: code }) ?? ctx.throw(404, "Team not found!");

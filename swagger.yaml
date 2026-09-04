@@ -322,6 +322,8 @@ paths:
           description: No join code in the body
         "404":
           description: Team not found
+        "415":
+          description: The body is not JSON — a form post cannot log a team in
 
   /team/me/logout:
     post:

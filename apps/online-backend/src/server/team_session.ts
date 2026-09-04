@@ -1,4 +1,5 @@
 import type * as Router from '@koa/router';
+import type { DefaultState } from 'koa';
 import type { Server } from 'boardgame.io';
 import { TeamsRepository } from './db';
 import { TeamModel } from './model';
@@ -22,7 +23,8 @@ import { TeamModel } from './model';
  *   when the request came over HTTPS, and *forcing* it over plain HTTP throws,
  *   which would break login on the docker stack at `http://localhost`. Behind
  *   nginx the request only looks like HTTPS through `X-Forwarded-Proto`, which
- *   `app.proxy = true` in `server.ts` honours and `nginx.conf` forwards.
+ *   `nginx.conf` sets from its own scheme and `app.proxy = true` in `server.ts`
+ *   honours.
  * - A week's lifetime: the localStorage entry it replaces never expired, and a
  *   team that logs in the evening before to read the disclaimer must still be
  *   logged in for the round.
@@ -61,15 +63,38 @@ export interface TeamState {
  *
  * A cookie naming no team — deleted, or a database re-imported since the
  * login — is expired on the way out, so the browser does not keep sending it.
+ * That answer is written, not thrown: koa's default error handler strips every
+ * header already set before it writes the error, `Set-Cookie` included, so a
+ * `ctx.throw(401)` after `clearTeamCookie` would silently keep the cookie.
  */
 export function requireTeam(teams: TeamsRepository): Router.Middleware<TeamState, Server.AppCtx> {
   return async (ctx, next) => {
-    const teamId = ctx.cookies.get(TEAM_COOKIE) ?? ctx.throw(401, 'Not logged in.');
-    const team = await teams.getTeam({ teamId });
+    const teamId = ctx.cookies.get(TEAM_COOKIE);
+    const team = teamId ? await teams.getTeam({ teamId }) : null;
     if (!team) {
-      clearTeamCookie(ctx);
+      if (teamId !== undefined) {
+        clearTeamCookie(ctx);
+      }
+      ctx.status = 401;
+      ctx.body = 'Not logged in.';
+      return;
     }
-    ctx.state.team = team ?? ctx.throw(401, 'Not logged in.');
+    ctx.state.team = team;
     await next();
   };
 }
+
+/** Admits a JSON body only, for the login route.
+ *
+ * The cookie's `SameSite` limits when it is *sent*, not when it is *set*: a
+ * form another site auto-submits to `/team/join` is a top-level navigation,
+ * whose answer may set the cookie — logging this browser into a team of that
+ * site's choosing. A JSON content type cannot be sent cross-site without a
+ * CORS preflight, which the server does not grant, so requiring it closes that.
+ */
+export const requireJson: Router.Middleware<DefaultState, Server.AppCtx> = async (ctx, next) => {
+  if (!ctx.is('json')) {
+    ctx.throw(415, 'Expected application/json.');
+  }
+  await next();
+};

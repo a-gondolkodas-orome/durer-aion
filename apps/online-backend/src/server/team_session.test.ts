@@ -1,7 +1,13 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
+import * as http from "node:http";
+import type { AddressInfo } from "node:net";
+import Koa from "koa";
+import Router from "@koa/router";
+import type { Server } from "boardgame.io";
 import type { TeamsRepository } from "./db";
 import type { TeamModel } from "./model";
 import { TEAM_COOKIE, TEAM_COOKIE_PATH, clearTeamCookie, requireTeam, setTeamCookie } from "./team_session";
+import { configureTeamsRouter } from "./router";
 
 const GUID = "8eae8669-125c-42e5-8b49-89afbac31679";
 
@@ -12,9 +18,8 @@ function fakeCtx(cookie?: string) {
   const ctx = {
     cookies: { get: () => cookie, set },
     state: {},
-    throw: (status: number, message: string) => {
-      throw new Error(`${status} ${message}`);
-    },
+    status: 404,
+    body: undefined,
   } as unknown as TeamCtx;
   return { ctx, set };
 }
@@ -61,11 +66,14 @@ describe("clearTeamCookie", () => {
 describe("requireTeam", () => {
   const team = { teamId: GUID } as TeamModel;
 
-  it("answers 401 to a request with no cookie", async () => {
-    const { ctx } = fakeCtx();
+  it("answers 401 to a request with no cookie, and sets none", async () => {
+    const { ctx, set } = fakeCtx();
     const next = vi.fn();
 
-    await expect(requireTeam(teamsWith(team))(ctx, next)).rejects.toThrow("401");
+    await requireTeam(teamsWith(team))(ctx, next);
+
+    expect(ctx.status).toBe(401);
+    expect(set).not.toHaveBeenCalled();
     expect(next).not.toHaveBeenCalled();
   });
 
@@ -73,9 +81,11 @@ describe("requireTeam", () => {
     const { ctx, set } = fakeCtx(GUID);
     const next = vi.fn();
 
-    await expect(requireTeam(teamsWith(null))(ctx, next)).rejects.toThrow("401");
-    expect(next).not.toHaveBeenCalled();
+    await requireTeam(teamsWith(null))(ctx, next);
+
+    expect(ctx.status).toBe(401);
     expect(set).toHaveBeenCalledWith(TEAM_COOKIE, null, expect.anything());
+    expect(next).not.toHaveBeenCalled();
   });
 
   it("hands the cookie's team to the route", async () => {
@@ -88,5 +98,73 @@ describe("requireTeam", () => {
     expect(teams.getTeam).toHaveBeenCalledWith({ teamId: GUID });
     expect(ctx.state.team).toBe(team);
     expect(next).toHaveBeenCalledTimes(1);
+  });
+});
+
+// Through a real koa app, because what reaches the wire is not what the
+// middleware set: koa's error handler drops every header before writing an
+// error, so an expiry followed by `ctx.throw` never left the server.
+describe("the team routes over HTTP", () => {
+  const servers: http.Server[] = [];
+
+  afterEach(async () => {
+    await Promise.all(servers.splice(0).map(server => new Promise(resolve => server.close(resolve))));
+  });
+
+  async function serve(teams: TeamsRepository) {
+    const app = new Koa<Koa.DefaultState, Server.AppCtx>();
+    // The 401 is a written answer, not an error; a throw elsewhere in the
+    // route would fail the test through koa's own error logging below.
+    app.silent = true;
+    const router = new Router<Koa.DefaultState, Server.AppCtx>();
+    configureTeamsRouter(router, teams, []);
+    app.use(router.routes());
+    const handle = app.callback();
+    const server = http.createServer((req, res) => { void handle(req, res); }).listen(0, "127.0.0.1");
+    servers.push(server);
+    await new Promise(resolve => server.once("listening", resolve));
+    const { port } = server.address() as AddressInfo;
+    return (path: string, init?: RequestInit) => fetch(`http://127.0.0.1:${port}${path}`, init);
+  }
+
+  it("expires a cookie naming no team on the way out", async () => {
+    const request = await serve(teamsWith(null));
+
+    const response = await request("/team/me", { headers: { cookie: `${TEAM_COOKIE}=${GUID}` } });
+
+    expect(response.status).toBe(401);
+    const expiry = response.headers.getSetCookie();
+    expect(expiry).toHaveLength(1);
+    expect(expiry[0]).toMatch(new RegExp(`^${TEAM_COOKIE}=; path=${TEAM_COOKIE_PATH}; expires=`));
+  });
+
+  it("logs a team in with a JSON body", async () => {
+    const request = await serve(teamsWith({ teamId: GUID } as TeamModel));
+
+    const response = await request("/team/join", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ code: "000-0000-000" }),
+    });
+
+    expect(response.status).toBe(204);
+    expect(response.headers.getSetCookie()[0]).toMatch(new RegExp(`^${TEAM_COOKIE}=${GUID}; path=${TEAM_COOKIE_PATH};`));
+  });
+
+  // A form another site auto-submits is a top-level navigation whose answer
+  // may set the cookie (login CSRF); a JSON body cannot be sent that way.
+  it("refuses to log a team in from a form post", async () => {
+    const teams = teamsWith({ teamId: GUID } as TeamModel);
+    const request = await serve(teams);
+
+    const response = await request("/team/join", {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: "code=000-0000-000",
+    });
+
+    expect(response.status).toBe(415);
+    expect(response.headers.getSetCookie()).toHaveLength(0);
+    expect(teams.getTeam).not.toHaveBeenCalled();
   });
 });
