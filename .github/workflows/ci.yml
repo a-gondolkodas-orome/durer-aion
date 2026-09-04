@@ -8,10 +8,25 @@ on:
   # gets the same gates as one straight onto main.
   pull_request:
 
+# Every job only reads the checkout; nothing here writes to the repository, opens
+# an issue or deploys. pages-deploy.yml and dependency-report.yml already declare
+# the permissions they need, so this is the last workflow taking the default set.
+permissions:
+  contents: read
+
+concurrency:
+  # A PR's later push supersedes the run still going for the earlier one. On main
+  # the group is the sha, which is unique, so a push to main is never cancelled:
+  # pages-deploy.yml cuts over on the same push, and the checks behind it have to
+  # finish rather than be superseded by the next merge.
+  group: ci-${{ github.head_ref || github.sha }}
+  cancel-in-progress: true
+
 jobs:
   lint:
     name: lint
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -24,6 +39,7 @@ jobs:
   typecheck:
     name: typecheck
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -36,6 +52,7 @@ jobs:
   test:
     name: test
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -48,6 +65,7 @@ jobs:
   build:
     name: build
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -60,6 +78,7 @@ jobs:
   i18n:
     name: i18n
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -72,6 +91,7 @@ jobs:
   spell-check:
     name: spell-check
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
