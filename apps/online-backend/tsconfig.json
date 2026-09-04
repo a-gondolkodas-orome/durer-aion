@@ -17,14 +17,24 @@
     "allowSyntheticDefaultImports": true,
     "isolatedModules": true,
     "noEmit": true,
-    // No `paths` for the workspace packages: the bundle reads their source
-    // through tsdown's aliases, but this typecheck must not — the games' JSX
-    // boards would fail it with `--jsx is not set` errors that name the game
-    // package rather than the cause. npm links every workspace into
-    // node_modules, so a bare `game` resolves on its own, through the `exports`
-    // map each package carries, to the declarations in its `dist`; when that
-    // is missing the error is one "Cannot find module 'game'" line, pointing
-    // at the build that never ran.
+    // The same sources the bundle reads (tsdown.config.mts), so this typecheck
+    // needs no package build either. `game/client` is mapped like the rest, and
+    // is what keeps the boards out of the server: this compile has no `jsx`, so
+    // an import of it here fails with `--jsx is not set` errors naming the game
+    // package. Left unmapped it would resolve through the exports map to the
+    // declarations in `dist` instead and pass, and tsdown — which aliases only
+    // what is listed below — would leave a bare `require("game/client")` in a
+    // bundle whose image never builds that `dist`.
+    // The flip side of reading source: those packages are compiled under this
+    // file's `lib` and `target` as well as their own, so an error in them shows
+    // up in both typechecks, and the game package must stay DOM-free.
+    "paths": {
+      "game": ["../../packages/game/index.ts"],
+      "game/bot": ["../../packages/game/bot.ts"],
+      "game/client": ["../../packages/game/client.ts"],
+      "schemas": ["../../packages/schemas/index.ts"],
+      "strategy": ["../../packages/strategy/index.ts"]
+    },
     "skipLibCheck": true
   }
 }

@@ -1,4 +1,5 @@
-import { GameRelay, descriptionC, descriptionD, descriptionE, MyBoardWrapper, MyGameWrappers, strategyNames } from "game";
+import { GameRelay, MyGameWrappers, strategyNames } from "game";
+import { descriptionC, descriptionD, descriptionE, MyBoardWrapper } from "game/client";
 import { ClientFactory, ClientFactoryRelay, InProgressRelay } from "common-frontend";
 
 const GameC = MyGameWrappers.C();
