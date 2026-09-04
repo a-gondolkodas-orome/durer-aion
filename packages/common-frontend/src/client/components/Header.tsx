@@ -5,6 +5,7 @@ import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import { useClientRepo } from '../api-repository-interface';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
+import { useSnackbar } from 'notistack';
 import { LanguageDropdown } from './Langswitcher';
 
 // titles[0] and titles[1] are translation keys for the two side titles;
@@ -13,8 +14,20 @@ export function Header(props: { teamName: string | null, admin: boolean, titles?
   const { t } = useTranslation();
   const theme = useTheme();
   const logout = useLogout();
+  const { enqueueSnackbar } = useSnackbar();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const clientRepository = useClientRepo();
+  const onLogout = () => {
+    logout()
+      .then(() => {
+        if (clientRepository.version === "OFFLINE") {
+          window.location.reload();
+        }
+      })
+      .catch(() => {
+        enqueueSnackbar(t('error.unexpected'), { variant: 'error' });
+      });
+  };
   return (
     <Stack sx={{
       backgroundColor: theme.palette.primary.main,
@@ -75,13 +88,7 @@ export function Header(props: { teamName: string | null, admin: boolean, titles?
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                 }}>{props.titles?.[2] ?? props.teamName}</Stack>
-                <Stack onClick={() => {
-                  void logout().then(() => {
-                    if (clientRepository.version === "OFFLINE") {
-                      window.location.reload();
-                    }
-                  });
-                }} sx={{
+                <Stack onClick={onLogout} sx={{
                   fontSize: 20,
                   margin: '0px 15px',
                   cursor: 'pointer',
@@ -144,7 +151,7 @@ export function Header(props: { teamName: string | null, admin: boolean, titles?
               }}>{props.titles?.[2] ?? props.teamName}</Stack>
               <Button onClick={() => {
                 setMobileMenuOpen(false);
-                void logout();
+                onLogout();
               }} variant='outlined'
               sx={{
                 fontSize: 20,

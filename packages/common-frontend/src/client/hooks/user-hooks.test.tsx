@@ -1,10 +1,10 @@
 // @vitest-environment jsdom
 import React from 'react';
-import { afterEach, beforeEach, expect, test } from 'vitest';
+import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 import { act, renderHook } from '@testing-library/react';
 import { ClientRepoProvider, MockClientRepository } from '../api-repository-interface';
 import { setTeamState, useTeamStateValue } from './team-state-store';
-import { useLogin } from './user-hooks';
+import { useLogin, useLogout } from './user-hooks';
 
 // The session lives in the repository, so each test starts a fresh one.
 let repo: MockClientRepository;
@@ -36,6 +36,22 @@ test('logging in loads the team without narrating it to the console', async () =
 
   // The mock repository answers join code "2" with a team mid-relay.
   await act(() => result.current.login('2'));
+
+  expect(result.current.team).toMatchObject({ pageState: 'RELAY' });
+});
+
+// The server ending the session is what logs the team out. If that fails the
+// cookie is still alive, and a login form shown over it would only log the
+// team back in on the next reload — so the team stays, and the caller hears.
+test('a logout the server refused leaves the team logged in', async () => {
+  vi.spyOn(repo, 'logout').mockRejectedValue(new Error('offline'));
+  const { result } = renderHook(
+    () => ({ login: useLogin(), logout: useLogout(), team: useTeamStateValue() }),
+    { wrapper },
+  );
+  await act(() => result.current.login('2'));
+
+  await expect(act(() => result.current.logout())).rejects.toThrow('offline');
 
   expect(result.current.team).toMatchObject({ pageState: 'RELAY' });
 });

@@ -1,7 +1,7 @@
-// cspell:ignore aegnjrlearnjla
+// cspell:ignore aegnjrlearnjla Zrzcvp
 // @vitest-environment jsdom
 import { describe, test, expect } from "vitest";
-import { setLocalStorageNamespace, teamStateStorageKey, loginMarkerStorageKey, bgioStoragePrefix, relayPointsStorageKey, strategyPointsStorageKey } from "./storage-keys";
+import { setLocalStorageNamespace, teamStateStorageKey, loginMarkerStorageKey, legacyGuidStorageKey, bgioStoragePrefix, relayPointsStorageKey, strategyPointsStorageKey } from "./storage-keys";
 import { UserModel } from "../hooks/user-model";
 import type { ClientRepository } from "../api-repository-interface";
 
@@ -16,6 +16,7 @@ describe("storage keys", () => {
   test("the default keys are the historical ones", () => {
     expect(teamStateStorageKey()).toStrictEqual("aegnjrlearnjla");
     expect(loginMarkerStorageKey()).toStrictEqual("loggedIn");
+    expect(legacyGuidStorageKey()).toStrictEqual("kjqAEKeFkMpOvOZrzcvp");
     expect(bgioStoragePrefix()).toStrictEqual("bgio_");
     expect(relayPointsStorageKey()).toStrictEqual("RelayPoints");
     expect(strategyPointsStorageKey()).toStrictEqual("StrategyPoints");
@@ -29,11 +30,13 @@ describe("storage keys", () => {
 
     localStorage.setItem("aegnjrlearnjla", "other app's team state");
     localStorage.setItem("loggedIn", "other app's login");
+    localStorage.setItem("kjqAEKeFkMpOvOZrzcvp", "other app's old guid");
     localStorage.setItem("bgio_relay_state", "other app's saved match");
     localStorage.setItem("RelayPoints", "other app's relay score");
     localStorage.setItem("StrategyPoints", "other app's strategy score");
     localStorage.setItem(teamStateStorageKey(), "own team state");
     localStorage.setItem(loginMarkerStorageKey(), "own login");
+    localStorage.setItem(legacyGuidStorageKey(), "own old guid");
     localStorage.setItem(bgioStoragePrefix() + "relay_6_d_a_state", "own saved match");
     localStorage.setItem(relayPointsStorageKey(), "own relay score");
     localStorage.setItem(strategyPointsStorageKey(), "own strategy score");
@@ -42,11 +45,13 @@ describe("storage keys", () => {
 
     expect(localStorage.getItem(teamStateStorageKey())).toBeNull();
     expect(localStorage.getItem(loginMarkerStorageKey())).toBeNull();
+    expect(localStorage.getItem(legacyGuidStorageKey())).toBeNull();
     expect(localStorage.getItem(bgioStoragePrefix() + "relay_6_d_a_state")).toBeNull();
     expect(localStorage.getItem(relayPointsStorageKey())).toBeNull();
     expect(localStorage.getItem(strategyPointsStorageKey())).toBeNull();
     expect(localStorage.getItem("aegnjrlearnjla")).toStrictEqual("other app's team state");
     expect(localStorage.getItem("loggedIn")).toStrictEqual("other app's login");
+    expect(localStorage.getItem("kjqAEKeFkMpOvOZrzcvp")).toStrictEqual("other app's old guid");
     expect(localStorage.getItem("bgio_relay_state")).toStrictEqual("other app's saved match");
     expect(localStorage.getItem("RelayPoints")).toStrictEqual("other app's relay score");
     expect(localStorage.getItem("StrategyPoints")).toStrictEqual("other app's strategy score");

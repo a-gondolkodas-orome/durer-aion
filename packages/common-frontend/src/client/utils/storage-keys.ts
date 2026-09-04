@@ -1,4 +1,4 @@
-// cspell:ignore aegnjrlearnjla
+// cspell:ignore aegnjrlearnjla Zrzcvp
 // This module stays import-free: the unit tests load it without the workspace
 // packages' dist builds, which the CI test job does not produce.
 
@@ -24,6 +24,10 @@ export const teamStateStorageKey = () => namespace + LOCAL_STORAGE_TEAMSTATE;
 // Only a flag that changes on login and logout, so another tab's `storage`
 // event tells it to look again.
 export const loginMarkerStorageKey = () => namespace + "loggedIn";
+// Where the GUID lived before it became the cookie. Nothing writes it any
+// more; UserModel removes it, so a browser that logged in before that change
+// is not left holding the team's secret.
+export const legacyGuidStorageKey = () => namespace + "kjqAEKeFkMpOvOZrzcvp";
 export const bgioStoragePrefix = () => namespace + BGIO_LOCALSTORAGE_PREFIX;
 export const relayPointsStorageKey = () => namespace + "RelayPoints";
 export const strategyPointsStorageKey = () => namespace + "StrategyPoints";

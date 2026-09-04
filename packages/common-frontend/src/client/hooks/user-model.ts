@@ -1,6 +1,6 @@
 import type { ClientRepository } from "../api-repository-interface";
 import type { MatchStateDto, TeamModelDto } from "../dto/TeamStateDto";
-import { bgioStoragePrefix, loginMarkerStorageKey, relayPointsStorageKey, strategyPointsStorageKey, teamStateStorageKey } from "../utils/storage-keys";
+import { bgioStoragePrefix, legacyGuidStorageKey, loginMarkerStorageKey, relayPointsStorageKey, strategyPointsStorageKey, teamStateStorageKey } from "../utils/storage-keys";
 
 function removeGameStateLocalStorage() {
   // Collect first, remove after: removeItem inside a key(idx) loop shifts the
@@ -18,7 +18,16 @@ export class UserModel {
   // The session lives with the repository (online: an HttpOnly cookie), so
   // whether a team is logged in is only known by asking.
   async getTeamState(): Promise<TeamModelDto | null> {
-    return await this.repo.getTeamState();
+    localStorage.removeItem(legacyGuidStorageKey());
+    const state = await this.repo.getTeamState();
+    if (state === null) {
+      // The marker must be gone before the next login writes it: writing the
+      // value a key already holds fires no `storage` event, so a marker left
+      // over from a session that expired would keep the other tabs from
+      // noticing the login.
+      localStorage.removeItem(loginMarkerStorageKey());
+    }
+    return state;
   }
 
   async adminAll(): Promise<TeamModelDto[] | null> {
@@ -80,6 +89,7 @@ export class UserModel {
   // request that fails, and another team may be next at this computer.
   async logout(): Promise<void> {
     localStorage.removeItem(loginMarkerStorageKey());
+    localStorage.removeItem(legacyGuidStorageKey());
     localStorage.removeItem(teamStateStorageKey());
     localStorage.removeItem(relayPointsStorageKey());
     localStorage.removeItem(strategyPointsStorageKey());

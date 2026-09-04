@@ -102,15 +102,15 @@ export const useLogin = () => {
   }
 };
 
+// Rejects when the session could not be ended, and then leaves the team
+// shown: a login form over a cookie that is still alive would only log the
+// team back in on the next reload. The caller reports the failure.
 export const useLogout = () => {
   const repo = useClientRepo();
   return async () => {
     const userModel = new UserModel(repo);
-    try {
-      await userModel.logout();
-    } finally {
-      setTeamState(null);
-    }
+    await userModel.logout();
+    setTeamState(null);
   };
 };
 
