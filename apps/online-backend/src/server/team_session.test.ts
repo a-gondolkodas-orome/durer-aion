@@ -178,4 +178,32 @@ describe("the team routes over HTTP", () => {
     expect(response.headers.getSetCookie()).toHaveLength(0);
     expect(teams.getTeam).not.toHaveBeenCalled();
   });
+
+  // The same navigation the other way: `SameSite` keeps the cookie off the
+  // request, but the browser honours the expiry in the answer all the same.
+  it("refuses to log a team out from a form post", async () => {
+    const request = await serve(teamsWith({ teamId: GUID } as TeamModel));
+
+    const response = await request("/team/me/logout", {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: "",
+    });
+
+    expect(response.status).toBe(415);
+    expect(response.headers.getSetCookie()).toHaveLength(0);
+  });
+
+  it("logs a team out with a JSON body", async () => {
+    const request = await serve(teamsWith({ teamId: GUID } as TeamModel));
+
+    const response = await request("/team/me/logout", {
+      method: "POST",
+      headers: { "content-type": "application/json", cookie: `${TEAM_COOKIE}=${GUID}` },
+      body: "{}",
+    });
+
+    expect(response.status).toBe(204);
+    expect(response.headers.getSetCookie()[0]).toMatch(new RegExp(`^${TEAM_COOKIE}=; path=${TEAM_COOKIE_PATH}; expires=`));
+  });
 });

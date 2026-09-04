@@ -90,13 +90,15 @@ export function requireTeam(teams: TeamsRepository): Router.Middleware<TeamState
   };
 }
 
-/** Admits a JSON body only, for the login route.
+/** Admits a JSON body only, for the login and logout routes.
  *
  * The cookie's `SameSite` limits when it is *sent*, not when it is *set*: a
  * form another site auto-submits to `/team/join` is a top-level navigation,
  * whose answer may set the cookie — logging this browser into a team of that
- * site's choosing. A JSON content type cannot be sent cross-site without a
- * CORS preflight, which the server does not grant, so requiring it closes that.
+ * site's choosing — and one submitted to `/team/me/logout` is answered with
+ * its expiry, which the browser honours just the same. A JSON content type
+ * cannot be sent cross-site without a CORS preflight, which the server does
+ * not grant, so requiring it closes both.
  */
 export const requireJson: Router.Middleware<DefaultState, Server.AppCtx> = async (ctx, next) => {
   if (!ctx.is('json')) {

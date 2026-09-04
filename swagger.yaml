@@ -328,12 +328,23 @@ paths:
   /team/me/logout:
     post:
       summary: Log the team out
-      description: Expires the session cookie. Succeeds with no session too.
+      description: >
+        Expires the session cookie. Succeeds with no session too. The body
+        must be JSON — an empty object will do — so that a form another site
+        submits cannot log the team out.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
       tags:
       - user
       responses:
         "204":
           description: Logged out
+        "415":
+          description: The body is not JSON, or there is none
 
   /team/me:
     get:

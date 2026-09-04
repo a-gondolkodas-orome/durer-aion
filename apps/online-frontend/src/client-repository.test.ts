@@ -49,14 +49,22 @@ describe("the team routes", () => {
     await repo.startRelay();
     await repo.startStrategy();
     await repo.toHome();
-    await repo.logout();
 
     expect(calls.map(call => [call.method, call.url])).toStrictEqual([
       ["post", "team/me/relay/play"],
       ["post", "team/me/strategy/play"],
       ["post", "team/me/gohome"],
-      ["post", "team/me/logout"],
     ]);
+  });
+
+  // The server takes the logout as JSON only, so a form another site submits
+  // cannot log the team out; a body, even an empty one, is what makes it JSON.
+  test("logging out sends a JSON body", async () => {
+    const calls = fakeAxios(ok);
+
+    await new RealClientRepository().logout();
+
+    expect(calls).toStrictEqual([{ method: "post", url: "team/me/logout", body: {} }]);
   });
 
   test("a browser with no session has no team", async () => {

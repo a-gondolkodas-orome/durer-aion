@@ -76,7 +76,8 @@ export class RealClientRepository implements ClientRepository {
 
   async logout(): Promise<void> {
     try {
-      await apiAxiosInstance().post('team/me/logout');
+      // The empty body is what makes it JSON, which the server requires.
+      await apiAxiosInstance().post('team/me/logout', {});
     } catch (e: unknown) {
       const err = makeAxiosError(e);
       console.error(err.message)

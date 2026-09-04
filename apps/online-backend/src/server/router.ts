@@ -322,8 +322,11 @@ export function configureTeamsRouter(
    * Log a team out: the session cookie expired.
    *
    * No `requireTeam` here — a cookie naming no team must still be cleared.
+   * `requireJson` is: the cookie's `SameSite` keeps it off a form another site
+   * submits here, but the browser still honours the expiry this answers with,
+   * so without it any site could log the team out.
    */
-  router.post("/team/me/logout", async (ctx) => {
+  router.post("/team/me/logout", requireJson, async (ctx) => {
     clearTeamCookie(ctx);
     ctx.status = 204;
   });
