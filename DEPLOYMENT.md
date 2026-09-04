@@ -415,8 +415,10 @@ of `http://localhost`. Reloading mid-match and opening a second tab on the same 
 are the two items only a deployed instance exercises: both go through the websocket, where
 a proxy misconfiguration behind TLS shows up.
 
-> **Test drive:** the Sentry DSN is compiled in, not configured, so your errors land in the
-> real project alongside the live ones.
+> **Test drive:** the frontend reports nothing unless its `.env` sets `VITE_SENTRY_DSN`,
+> which the samples leave empty. The backend still reports from a DSN written into
+> `apps/online-backend/src/server.ts`, so its errors do leave the machine — see *Error
+> reporting* in [`README.md`](./README.md).
 
 ## Troubleshooting
 
