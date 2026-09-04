@@ -10,16 +10,20 @@ import { defineConfig } from 'vitest/config';
 // `main` to the source barrel next to it. Their exports maps close that path
 // now, so say it outright, which also stops a stale `dist` on a developer's
 // machine from being what the suites test.
-const source = (pkg: string) =>
-  fileURLToPath(new URL(`packages/${pkg}/index.ts`, import.meta.url));
+const source = (file: string) =>
+  fileURLToPath(new URL(`packages/${file}`, import.meta.url));
 
 export default defineConfig({
   resolve: {
-    alias: {
-      game: source('game'),
-      schemas: source('schemas'),
-      strategy: source('strategy'),
-    },
+    // Anchored patterns, not string keys: a string key matches as a prefix too,
+    // so `game` alone would send `game/bot` to `index.ts/bot`.
+    alias: [
+      { find: /^game$/, replacement: source('game/index.ts') },
+      { find: /^game\/bot$/, replacement: source('game/bot.ts') },
+      { find: /^game\/client$/, replacement: source('game/client.ts') },
+      { find: /^schemas$/, replacement: source('schemas/index.ts') },
+      { find: /^strategy$/, replacement: source('strategy/index.ts') },
+    ],
   },
   test: {
     // The suites import from 'vitest' explicitly, so they typecheck without an
@@ -33,5 +37,15 @@ export default defineConfig({
     // Keeps the run's output to the report itself — see the file for how a test
     // that means to log opts out.
     setupFiles: ['./vitest.setup.mts'],
+    // apps/strategy-practice runs as a second project, under its own vite
+    // config: its aliases, setup file and `isolate: false` are its own, and
+    // CLAUDE.md § Project Structure says why the two configs stay separate.
+    // `extends: true` keeps the options above for the root project only. That
+    // config is also the root config when vitest runs from that directory,
+    // which is what its `npm run coverage` relies on.
+    projects: [
+      { extends: true, test: { name: 'root' } },
+      './apps/strategy-practice/vite.config.js',
+    ],
   },
 });

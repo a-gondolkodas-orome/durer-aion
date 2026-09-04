@@ -21,11 +21,11 @@ where the file does not exist yet, so your own values are never overwritten:
 
 ## What's in it
 
-- **Node 24.20.0**, the exact version the `Dockerfile` runs and the floor
-  `engines.node` states. The image tag names only the major, and the patch it
-  bakes lags — the `node` feature in `devcontainer.json` is what pins it, so
-  raising the floor means bumping that too. CI is the looser end of the same
-  pin: it reads `.nvmrc`, which names the major.
+- **Node**, the exact version in `.nvmrc` — the one every CI job and the
+  `Dockerfile` run. The image tag names only the major, and the patch it bakes
+  lags — the `node` feature in `devcontainer.json` is what pins it, so bumping
+  `.nvmrc` means bumping that too (README § Requirements lists every file that
+  repeats the version; `npm test` fails until they agree).
 - **Docker inside the container**, so every documented flow works unchanged
   from a terminal in here — `docker run … bitnami/postgresql` for the
   database, and `docker compose up --build` for the full stack. It installs

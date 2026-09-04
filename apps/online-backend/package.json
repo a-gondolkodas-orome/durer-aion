@@ -3,14 +3,12 @@
   "version": "0.0.0",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "build": "npx tsc",
-    "start": "cross-env ALLOW_CORS=true node dist/src/server.js",
-    "dev": "cross-env ALLOW_CORS=true tsx watch --inspect src/server.ts",
-    "spell-check": "cspell \"**/*.{ts,tsx}\" --no-progress"
+    "build": "npx tsdown",
+    "start": "node --enable-source-maps dist/server.js",
+    "dev": "tsdown --watch --onSuccess \"node --inspect --enable-source-maps dist/server.js\""
   },
   "license": "MIT",
   "dependencies": {
-    "@koa/cors": "5.0.0",
     "@koa/router": "10.1.1",
     "@sentry/node": "10.72.0",
     "bgio-postgres": "1.0.16",
@@ -29,12 +27,9 @@
   },
   "devDependencies": {
     "@types/cors": "2.8.19",
-    "@types/koa__cors": "5.0.1",
     "@types/koa-basic-auth": "2.0.7",
     "@types/koa-mount": "4.0.5",
     "@types/node": "24.13.3",
-    "@types/pg": "8.23.1",
-    "cross-env": "10.1.0",
-    "tsx": "4.23.13"
+    "@types/pg": "8.23.1"
   }
 }

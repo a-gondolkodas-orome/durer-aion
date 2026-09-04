@@ -8,16 +8,10 @@
     "node": ">=24.20.0 <25"
   },
   "scripts": {
-    "test:unit": "vitest run",
-    "test": "npm run check:versions && npm run lint && npm run typecheck && npm run test:unit",
-    "check:versions": "node scripts/check-versions.mjs",
+    "test": "vitest run",
     "test:watch": "vitest",
     "coverage": "vitest run --coverage",
-    "coverage:unswept": "vitest run --coverage --exclude \"**/plays-to-an-end.spec.ts\" --exclude \"**/renders.spec.tsx\"",
-    "coverage:patch": "npm run coverage:unswept -- --coverage.reporter=lcovonly && node scripts/patch-coverage.mjs",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint . --max-warnings=0",
-    "lint:fix": "eslint . --fix",
     "dev": "vite",
     "build": "vite build"
   },
@@ -32,7 +26,7 @@
     "react-router": "8.3.1"
   },
   "//": [
-    "playwright is imported by no code here. It is a dependency so that its version is written down where the devcontainer's ARG PLAYWRIGHT_VERSION can be checked against it, which `npm run check:versions` does.",
+    "playwright is imported by no code here. It is a dependency so that its version is written down where the devcontainer's ARG PLAYWRIGHT_VERSION can be checked against it, which `scripts/check-versions.test.mjs` does in the root `npm test`.",
     "typescript is held to the root's version, not the newest, so that npm dedupes it to a single install. With a newer version nested here, the type-aware lint rules crash: npm hoists their helper ts-api-utils to the root, where it binds the root's typescript, and the flags it then reads off this app's parser's types are another version's (issue #355). Lift the pin when the root moves majors."
   ],
   "devDependencies": {

@@ -32,11 +32,12 @@ competition round, not a practice site.
 
 **`apps/strategy-practice` is a workspace, but not like the others.** One root `npm ci`
 installs it, and turbo builds and typechecks it with everything else — but it
-keeps its own `eslint.config.js`, its own vitest setup and its own CI workflow.
-`npm test` at the root still skips it — `npm run lint` does not. ESLint resolves
-a config per directory as it walks, so one `eslint .` at the root lints this app
-through *its* config and everything else through the root one, in one pass; only
-the unit tests still run from `apps/strategy-practice`. What that ESLint config
+keeps its own `eslint.config.js` and its own vitest config. Neither is a second
+command: ESLint resolves a config per directory as it walks, so one `eslint .` at
+the root lints this app through *its* config and everything else through the
+root one, in one pass; and the root `vitest.config.mts` lists that vitest config
+as a second project, so one `npm test` runs its suite next to the root's, each
+under its own setup. What that ESLint config
 differs on is the *rule set* — `@eslint-react`, react-hooks, and a stylistic
 dialect (no trailing comma, single quotes, `max-len` 120) the root does not
 impose. It is not a second
@@ -61,20 +62,25 @@ cannot be fixed from here. **Never run `npm audit fix --force`:** its fix for
 them is `boardgame.io@0.22.1`, a four-year downgrade that would take the
 competition with it. What is behind otherwise is `npm run report:outdated`'s
 job, monthly.
-[`docs/must-keep-working.md`](docs/must-keep-working.md) is the standing
-regression checklist every change is measured against.
+*What must keep working* below is the standing regression checklist every
+change is measured against.
 
 ## Tech Stack
 
 - **Frontend**: React 19, Vite, MUI (Material-UI), React Router
 - **Backend**: boardgame.io server, Koa, PostgreSQL (via bgio-postgres)
-- **Build**: Turborepo, TypeScript, tsdown. Each package's build config is
-  `tsdown.config.mts`, not `.ts`: the packages ship CommonJS and so carry no
-  `"type": "module"`, which leaves node guessing at the config's module system
-  and warning about it on every build.
+- **Build**: Turborepo, TypeScript, tsdown. The packages build into `dist`;
+  the backend is one tsdown bundle too, built from the packages' *source*
+  rather than their `dist` (`apps/online-backend/tsdown.config.mts` says how
+  and why), so neither its build, its dev server nor its typecheck waits on a
+  package build. Each build config is `tsdown.config.mts`, not
+  `.ts`: the packages carry no `"type": "module"`, which leaves node guessing
+  at a `.ts` config's module system and warning about it on every build. The
+  packages ship ESM only — the frontends import it and the backend bundles
+  their source, so a CommonJS build would have no consumer.
 - **Testing**: vitest, React Testing Library. Suites are `*.test.ts(x)` under
-  the root config and `*.spec.ts(x)` in `apps/strategy-practice`; both run through
-  vitest, and neither uses Jest.
+  the root config and `*.spec.ts(x)` in `apps/strategy-practice`; one `npm test`
+  runs both through vitest, and neither uses Jest.
 - **`apps/strategy-practice`** shares this React major, the root's eslint,
   typescript and vitest pins, and the same vite as the other frontends;
   Tailwind and its own build/test setup are what set it apart. See its
@@ -126,21 +132,43 @@ npm run i18n:check
 npm run spell-check
 ```
 
-`npm ci`, `npm run lint`, `npm run build`, `npm run typecheck` and
-`npm run spell-check` cover `apps/strategy-practice` too; `npm test` does not —
-*Project Structure* above says why. Its remaining checks run from that
-directory, with no install of their own:
+`npm ci`, `npm run lint`, `npm run build`, `npm run typecheck`, `npm test` and
+`npm run spell-check` cover `apps/strategy-practice` too — *Project Structure*
+above says how. To work on it alone:
 
 ```bash
-npm run dev:strategy-practice                     # from the root; it is a workspace
-npm test --workspace=strategy-practice   # check:versions + lint + typecheck + unit
-cd apps/strategy-practice && npm run coverage:patch
+npm run dev:strategy-practice            # from the root; it is a workspace
+npm test --workspace=strategy-practice   # its suite alone
+cd apps/strategy-practice && npm run coverage
 ```
 
 Every long docker invocation lives in a root npm script rather than in prose,
 so it is written down once. [`README.md`](README.md) is the authority on
 running things locally: how to bring the stack up, and — under *Checking it
-works* — how to exercise each item of `docs/must-keep-working.md` by hand.
+works* — the regression checklist, with how to exercise each item by hand.
+
+## What must keep working
+
+[`README.md`](README.md) § *Checking it works* is the standing regression
+checklist: what the competition round, the admin side and the public sites
+must keep doing, with how to exercise each item by hand. **A change is done
+only when each item there still holds.** An item is removed only when the
+capability is deliberately retired, with a note saying which PR did and what
+replaced it. The README's own setup steps are on the list too: `npm ci`,
+`npm run setup` and the `dev:*` and `stack:*` commands must keep doing what it
+says they do.
+
+It is a hand-walked checklist, not a suite. Four items have a unit test pinning
+part of them; the rest are checked by someone actually doing them:
+
+- a join code loading its team, and a logout dropping the saved match with it:
+  `packages/common-frontend/src/client/hooks/user-model.test.ts`
+- the relay round against the bot — problems served, the three tries and what
+  each is still worth: `packages/strategy/src/games/relay/strategy.test.ts`
+- what a returning team may start, and the closing of a match whose time ran
+  out while it was away: `apps/online-backend/src/server/team_manage.test.ts`
+- the time left recomputed from the match's own end, and only the team allowed
+  to poll for it: `packages/game/src/common/gamewrapper.test.ts`
 
 ## Creating a New Game
 
@@ -156,22 +184,30 @@ start boards, board client and specs together.
    - `strategy.ts` - the server bot, plus any lookup tables it imports
    - `board.tsx` - React component for the game board
    - `main.tsx` - the game description shown to players
-   - `index.ts` - re-exports
 
-2. Register it in `packages/game/src/games/strategy/strategy-games.ts`. The
-   apps import everything from the `game` package:
-   `apps/online-backend/src/server.ts` wires the bot, the frontends the
-   boards and descriptions.
+   No `index.ts` barrel: the three files are registered separately, below,
+   and a barrel re-exporting the bot next to the board would undo that.
 
-**The live client must not ship the bot.** `apps/online-frontend` never
-imports the strategy exports — only the backend does, and the offline
-dry-run build deliberately does (its bot runs in the browser, after the
-game is public). Tree-shaking of the `game` package's ESM build is all that
-keeps the bot out of the served bundle, so one stray import from
-`strategy.ts` into a board hands every competitor the bot's tables. No CI
-gate covers this: after touching a game's imports, build and check by hand
-that nothing distinctive to the bot — a lookup-table key, say — appears in
-`apps/online-frontend/dist`.
+2. Register it in the three registries under
+   `packages/game/src/games/strategy/`, one per package entry:
+   `strategy-games.ts` (the game definition and its name — the `game` entry),
+   `strategy-bots.ts` (`game/bot`) and `strategy-client.ts` (`game/client`).
+   `apps/online-backend/src/server.ts` imports `game` and `game/bot`; the
+   live client `game` and `game/client`; the offline dry run all three.
+
+**The live client must not ship the bot.** The bots are reachable only
+through the `game/bot` entry, and only the server and the offline dry run may
+import it: ESLint forbids the specifier everywhere else (`eslint.config.mjs`),
+`packages/common-frontend` included, since the served bundle carries that
+package too. `packages/game/src/entries.test.ts` walks the package's own
+graph to pin that everything the bot entry shares with the two entries the live
+client ships is a rules file — `src/common/` or a game's `game.ts` — so a table
+under whatever name, reached from a board or pulled into the rules, fails the
+tests instead of handing every competitor the tables. The offline dry-run build
+imports `game/bot` on purpose (its bot runs in the browser, after the game
+is public). Before a competition, still do the by-hand check in
+`README.md` § *Checking it works*: build, then grep `apps/online-frontend/dist`
+for a lookup-table key.
 
 ### Game Structure (boardgame.io)
 
@@ -244,8 +280,9 @@ mirror works, and what to set up when the year's repo is created.
 ## Key Conventions
 
 - Games are organized by type: `strategy/` (two-player), `relay/` (team relay)
-- Each game's folder exports its game wrapper, strategy wrapper and board
-  through its `index.ts`
+- Each game's folder holds its game wrapper, bot and board as separate files,
+  registered in the three registries next to the folders — never through a
+  folder barrel, so the `game`, `game/bot` and `game/client` entries stay apart
 - Use Hungarian for user-facing text (competition is in Hungarian); the
   strategy and relay practice sites also offer English through their own
   language switchers
@@ -278,7 +315,7 @@ mirror works, and what to set up when the year's repo is created.
   pass-through props) needs no tests, and exhausting every branch is not the
   goal: test the rules and the edge cases that could plausibly be gotten wrong.
 - Every regression fixed gets a unit test that fails without the fix.
-  [`docs/must-keep-working.md`](docs/must-keep-working.md) catches
+  The README's checklist (*What must keep working* above) catches
   whole-feature breakage by hand; the test pins the specific bug so it cannot
   quietly return.
 - A test run writes its report and nothing else: a console call during it fails

@@ -7,10 +7,9 @@
     "predeploy": "cross-env PUBLIC_URL=/durer-aion npm run build",
     "deploy": "gh-pages -d build",
     "typecheck": "tsc --noEmit",
-    "dev": "cross-env VITE_SERVER_URL=http://localhost:8000 vite",
+    "dev": "vite",
     "start": "vite",
-    "build": "tsc && vite build",
-    "spell-check": "cspell \"**/*.{ts,tsx}\" --no-progress"
+    "build": "vite build"
   },
   "license": "MIT",
   "dependencies": {

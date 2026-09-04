@@ -13,23 +13,20 @@ export { LOCAL_STORAGE_TEAMSTATE } from "./utils/storage-keys";
 // knowing which move carries each action.
 export type BoardMoves = BoardProps['moves'];
 
+// The session is the repository's to keep, not the caller's: online it is an
+// HttpOnly cookie the server set on `joinWithCode` (issue #89), which no script
+// can read, so nothing here takes or returns the team's id.
 export interface ClientRepository {
   version: "MOCK" | "OFFLINE" | "ONLINE"
-  getTeamState(
-    guid: string,
-  ): Promise<TeamModelDto>;
+  /** The logged-in team, or null when there is no session. */
+  getTeamState(): Promise<TeamModelDto | null>;
   joinWithCode(
     code: string,
-  ): Promise<string>
-  startRelay(
-    code: string,
-  ): Promise<string>
-  startStrategy(
-    code: string,
-  ): Promise<string>
-  toHome(
-    code: string,
-  ): Promise<string>
+  ): Promise<void>
+  logout(): Promise<void>
+  startRelay(): Promise<void>
+  startStrategy(): Promise<void>
+  toHome(): Promise<void>
   getAll(): Promise<TeamModelDto[]>
   getMatchState(matchId: string): Promise<MatchStateDto>
   getMatchLogs(matchId: string): Promise<MatchStateDto>
@@ -47,16 +44,36 @@ export interface ClientRepository {
 
 export class MockClientRepository implements ClientRepository {
   version = "MOCK" as const;
-  startRelay(_code: string): Promise<string> {
-    return Promise.resolve("ok");
+  // The join code last logged in with; the fixtures below are keyed by it.
+  private session: string | null = null;
+
+  private requireSession(): string {
+    if (this.session === null) {
+      throw new Error("NOT LOGGED IN");
+    }
+    return this.session;
   }
-  startStrategy(_code: string): Promise<string> {
-    return Promise.resolve("ok");
+  startRelay(): Promise<void> {
+    this.requireSession();
+    return Promise.resolve();
   }
-  toHome(_code: string): Promise<string> {
-    return Promise.resolve("ok");
+  startStrategy(): Promise<void> {
+    this.requireSession();
+    return Promise.resolve();
   }
-  getTeamState(guid: string): Promise<TeamModelDto> {
+  toHome(): Promise<void> {
+    this.requireSession();
+    return Promise.resolve();
+  }
+  logout(): Promise<void> {
+    this.session = null;
+    return Promise.resolve();
+  }
+  getTeamState(): Promise<TeamModelDto | null> {
+    const guid = this.session;
+    if (guid === null) {
+      return Promise.resolve(null);
+    }
     if (guid === "1") {
       return Promise.resolve(
         {
@@ -229,9 +246,10 @@ export class MockClientRepository implements ClientRepository {
     }
     throw new Error("BAD GUID");
   }
-  joinWithCode(code: string): Promise<string> {
+  joinWithCode(code: string): Promise<void> {
     if (+code < 8 && +code > 0) {
-      return Promise.resolve(code)
+      this.session = code;
+      return Promise.resolve();
     }
     throw new Error("BAD CODE");
   }
