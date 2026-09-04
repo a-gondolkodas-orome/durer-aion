@@ -117,7 +117,9 @@ if (argv[2] === "import") {
 
   // Behind nginx every request arrives over plain HTTP; `X-Forwarded-Proto` is
   // how koa learns it was HTTPS to the browser, and the session cookie takes
-  // its `Secure` flag from that (see server/team_session.ts).
+  // its `Secure` flag from that (see server/team_session.ts). This trusts the
+  // `X-Forwarded-*` headers of whoever reaches this port, so the docker stack
+  // does not publish it: only nginx, which sets them, can.
   server.app.proxy = true;
 
   //Admin page auth setup
@@ -139,9 +141,10 @@ if (argv[2] === "import") {
           url: ctx.request.href,
           method: ctx.request.method,
           query_string: ctx.request.querystring,
-          // Minus the cookie: it is the team's session (server/team_session.ts),
-          // and an error report is no place for a login.
-          headers: { ...ctx.request.headers, cookie: undefined },
+          // Minus the logins: the cookie is the team's session
+          // (server/team_session.ts) and the authorization header the admin
+          // password, and an error report is no place for either.
+          headers: { ...ctx.request.headers, cookie: undefined, authorization: undefined },
         },
       });
       Sentry.captureException(err);
