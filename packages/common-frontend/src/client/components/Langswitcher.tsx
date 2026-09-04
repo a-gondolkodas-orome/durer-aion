@@ -63,7 +63,7 @@ const selectSx = (theme: Theme, color?: string, size: 'default' | 'small' = 'def
     },
     '& .MuiSvgIcon-root': { fill: color ?? '#000' },
   };
-  
+
   borderColor = borderColor ?? theme.palette.primary.main
 
   return {
@@ -90,30 +90,30 @@ function useLanguages() {
     .map((code) => ({ code, label: Languages[code].label }));
 }
 
-export function LanguageDropdown({ 
+export function LanguageDropdown({
   fontColor,
   borderColor,
   size = 'default',
   language: externalLanguage,
   onLanguageChange
-} : { 
+} : {
   fontColor?: string,
   borderColor?: string,
   size?: 'default' | 'small',
-  language?: string,
-  onLanguageChange?: (lang: string) => void
+  language?: LanguageCode,
+  onLanguageChange?: (lang: LanguageCode) => void
 }) {
   const theme = useTheme();
   const { i18n } = useTranslation();
-  
+
   // Use external language/callback if provided, otherwise use i18n
-  const currentLanguage = externalLanguage ?? i18n.language;
-  const handleChange = onLanguageChange ?? ((lang: string) => { void i18n.changeLanguage(lang); });
-  
+  const currentLanguage = externalLanguage ?? (i18n.language as LanguageCode);
+  const handleChange = onLanguageChange ?? ((lang: LanguageCode) => { void i18n.changeLanguage(lang); });
+
   const languages = useLanguages();
 
   return (
-    <Select<string>
+    <Select<LanguageCode>
       value={currentLanguage}
       variant="standard"
       onChange={(e) => handleChange(e.target.value)}
