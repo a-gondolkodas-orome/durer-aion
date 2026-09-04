@@ -15,9 +15,8 @@ import { configureTeamsRouter } from './server/router';
 import { TeamsRepository } from './server/db';
 import { getBotCredentials, getGameStartAndEndTime, relayNames } from './server/common';
 import { import_teams_from_tsv_locally } from './server/team_import';
+import { requireAdmin } from './server/admin_session';
 
-import auth from 'koa-basic-auth';
-import mount from 'koa-mount';
 import { closeMatch } from './server/team_manage';
 
 import * as Sentry from '@sentry/node';
@@ -118,13 +117,11 @@ if (argv[2] === "import") {
   // publish it: only nginx, which sets them, can.
   server.app.proxy = true;
 
-  //Admin page auth setup
-  server.app.use(mount('/team/admin', auth({ name: 'admin', pass: getAdminCredentials() })));
-  server.app.use(mount('/game/admin', auth({ name: 'admin', pass: getAdminCredentials() })));
-
   //TODO regex mount protection for Boardgame.io endpoints
 
-  configureTeamsRouter(server.router, teams, games);
+  // The organisers' login travels with the admin routes rather than being
+  // mounted on the prefix they share — server/admin_session.ts says why.
+  configureTeamsRouter(server.router, teams, games, requireAdmin(getAdminCredentials()));
 
   Sentry.init({ dsn: "https://1f4c47a1692b4936951908e2669a1e99@sentry.durerinfo.hu/4" });
 
