@@ -94,8 +94,9 @@ export async function createGame(
     setupData: undefined,
     // A listed match is served by boardgame.io's unauthenticated
     // `GET /games/:name`, metadata included — and the team's GUID, which is
-    // the capability for every `/team/:GUID/...` route, is that metadata's
-    // player name. Nothing in this codebase reads the lobby listing.
+    // what the session cookie carries (server/team_session.ts), is that
+    // metadata's player name. Nothing in this codebase reads the lobby
+    // listing.
     unlisted: true,
   });
 

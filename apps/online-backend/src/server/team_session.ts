@@ -65,7 +65,12 @@ export interface TeamState {
 /** Loads the team the cookie names into `ctx.state.team`, or answers 401.
  *
  * A team it admits gets its cookie set again, so the week runs from the
- * last request (see above).
+ * last request (see above). The same header-stripping described below costs
+ * that renewal whenever the route then throws — a `gohome` refused mid-match,
+ * say — so the week runs from the last request that *answered*. Harmless:
+ * the cookie keeps the life the previous answer gave it, and the client asks
+ * `/team/me` often enough that a renewal is never far away.
+ *
  * A cookie naming no team — deleted, or a database re-imported since the
  * login — is expired on the way out, so the browser does not keep sending it.
  * That answer is written, not thrown: koa's default error handler strips every

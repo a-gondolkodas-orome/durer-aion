@@ -196,7 +196,10 @@ At `http://localhost/admin`, user `admin`, password from `.env.docker`:
   from here.
 
 Through nginx it is all one origin, so the browser's password prompt is all it
-takes; the Vite proxy of `dev:online` makes 5173 one origin too.
+takes. The `dev:online` proxy puts 5173 on one origin too, which removes the
+reason these pages used to need the stack — but whether the password prompt
+appears for the admin pages' XHRs there has not been walked, so check them
+against `stack:up` as before until someone has.
 
 Team import has two paths and both need checking: `npm run teams:import`, which
 runs `scripts/import_teams.sh` inside the container, and the TSV upload on the
