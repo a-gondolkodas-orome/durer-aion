@@ -119,12 +119,15 @@ export default defineConfig(
     },
   },
   // The live client must not ship the bot. packages/game keeps its bots behind the
-  // `game/bot` entry, so the rule is about naming it: nothing in apps/online-frontend
-  // may import `game/bot`, nor reach into packages/game by path. What the rule cannot
-  // see is the package's own graph — a board importing a strategy file; the walk in
-  // packages/game/src/entries.test.ts pins that.
+  // `game/bot` entry, so the rule is about naming it: nothing may import `game/bot`,
+  // nor reach into packages/game by path, except the server and the offline dry run,
+  // allowed below. The ban is repo-wide rather than on apps/online-frontend alone
+  // because the served bundle is more than that app: packages/common-frontend is in
+  // it too, and an import there would ship the bot just the same. What the rule
+  // cannot see is the package's own graph — a board importing a strategy file; the
+  // walk in packages/game/src/entries.test.ts pins that.
   {
-    files: ['apps/online-frontend/**/*.{ts,tsx}'],
+    files: ['**/*.{ts,tsx}'],
     rules: {
       '@typescript-eslint/no-restricted-imports': ['error', {
         patterns: [{
@@ -133,6 +136,10 @@ export default defineConfig(
         }],
       }],
     },
+  },
+  {
+    files: ['apps/online-backend/**/*.{ts,tsx}', 'apps/offline-frontend/**/*.{ts,tsx}'],
+    rules: { '@typescript-eslint/no-restricted-imports': 'off' },
   },
   // Formatting, shared with apps/strategy-practice's config — see eslint.stylistic.mjs
   // for what belongs in that list and why it is rules rather than prettier. `--fix`

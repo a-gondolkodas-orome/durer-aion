@@ -25,16 +25,20 @@ const collect = (dir: string) => {
 };
 collect(root);
 
-// 'a/b.ts' + '../c' -> 'c.ts' (or c.tsx, c/index.ts, c/index.tsx — whichever exists)
-const resolvePath = (fromFile: string, specifier: string): string | null => {
+// 'a/b.ts' + '../c' -> 'c.ts' (or c.tsx, c/index.ts, c/index.tsx — whichever
+// exists). A specifier this cannot place — one with an extension, say — must
+// fail loudly: an edge dropped here is a hole in every check below.
+const resolvePath = (fromFile: string, specifier: string): string => {
   const segments = fromFile.split("/").slice(0, -1);
   for (const part of specifier.split("/")) {
     if (part === "..") segments.pop();
     else if (part !== ".") segments.push(part);
   }
   const base = segments.join("/");
-  return [`${base}.ts`, `${base}.tsx`, `${base}/index.ts`, `${base}/index.tsx`]
-    .find(candidate => sources.has(candidate)) ?? null;
+  const target = [`${base}.ts`, `${base}.tsx`, `${base}/index.ts`, `${base}/index.tsx`]
+    .find(candidate => sources.has(candidate));
+  if (target === undefined) throw new Error(`${fromFile} imports '${specifier}', which this walk cannot resolve`);
+  return target;
 };
 
 // Both forms a barrel uses: `import … from` and `export … from`. Type-only
@@ -54,12 +58,15 @@ const reachableFrom = (entry: string): string[] => {
     seen.add(file);
     for (const specifier of relativeImports(file)) {
       const target = resolvePath(file, specifier);
-      if (target !== null && !seen.has(target)) stack.push(target);
+      if (!seen.has(target)) stack.push(target);
     }
   }
   return [...seen];
 };
 
+// The bot files by name, for the positive checks: that an entry reaches what it
+// should. The negative check — that the client reaches nothing of the bot's —
+// does not go by name, since a table can be called anything (last test).
 const isBot = (file: string) => /(^|\/)(strategy|strategydict|moveMap)\.ts$/.test(file);
 const isBoard = (file: string) => file.endsWith(".tsx");
 
@@ -84,5 +91,16 @@ describe("the package's entries", () => {
     const reached = reachableFrom("client.ts");
     expect(reached.filter(isBoard).length).toBeGreaterThan(0);
     expect(reached.filter(isBot)).toEqual([]);
+  });
+
+  // Whatever the bot and the client both reach must be rules, i.e. reached by
+  // the shared entry too. This is the check that needs no list of bot file
+  // names: a board importing a lookup table under any name is a file the bot
+  // entry reaches, the client entry reaches, and the shared entry does not.
+  it("the client and the bot share nothing but the rules", () => {
+    const shared = new Set(reachableFrom("index.ts"));
+    const bot = new Set(reachableFrom("bot.ts"));
+    const both = reachableFrom("client.ts").filter(file => bot.has(file) && !shared.has(file));
+    expect(both).toEqual([]);
   });
 });

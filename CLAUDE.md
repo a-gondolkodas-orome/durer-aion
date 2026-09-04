@@ -72,8 +72,8 @@ change is measured against.
 - **Build**: Turborepo, TypeScript, tsdown. The packages build into `dist`;
   the backend is one tsdown bundle too, built from the packages' *source*
   rather than their `dist` (`apps/online-backend/tsdown.config.mts` says how
-  and why), so its build and its dev server never wait on a package build —
-  only its typecheck does. Each build config is `tsdown.config.mts`, not
+  and why), so neither its build, its dev server nor its typecheck waits on a
+  package build. Each build config is `tsdown.config.mts`, not
   `.ts`: the packages carry no `"type": "module"`, which leaves node guessing
   at a `.ts` config's module system and warning about it on every build. The
   packages ship ESM only — the frontends import it and the backend bundles
@@ -196,12 +196,14 @@ start boards, board client and specs together.
    live client `game` and `game/client`; the offline dry run all three.
 
 **The live client must not ship the bot.** The bots are reachable only
-through the `game/bot` entry, and `apps/online-frontend` may not import it:
-ESLint forbids the specifier there (`eslint.config.mjs`), and
-`packages/game/src/entries.test.ts` walks the package's own graph to pin
-that neither the shared nor the client entry reaches a `strategy.ts` or a
-lookup table — so a stray import from a board into the bot fails the tests
-instead of handing every competitor the tables. The offline dry-run build
+through the `game/bot` entry, and only the server and the offline dry run may
+import it: ESLint forbids the specifier everywhere else (`eslint.config.mjs`),
+`packages/common-frontend` included, since the served bundle carries that
+package too. `packages/game/src/entries.test.ts` walks the package's own
+graph to pin that nothing the bot entry reaches is also reached by the client
+entry unless the shared entry reaches it — so a stray import from a board
+into the bot, or into a table under whatever name, fails the tests instead of
+handing every competitor the tables. The offline dry-run build
 imports `game/bot` on purpose (its bot runs in the browser, after the game
 is public). Before a competition, still do the by-hand check in
 `README.md` § *Checking it works*: build, then grep `apps/online-frontend/dist`

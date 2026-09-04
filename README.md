@@ -168,9 +168,10 @@ the list binds a change, and which items a unit test pins.
 6. Finish both and check the combined score on the finished screen.
 7. `npm run build`, then grep `apps/online-frontend/dist` for a string from
    the bot's lookup tables: the served bundle must contain no bot. Since #424
-   the bots sit behind the `game/bot` entry, ESLint forbids importing it from
-   `apps/online-frontend`, and `packages/game/src/entries.test.ts` pins that
-   the other two entries never reach a bot — so this grep is the final check
+   the bots sit behind the `game/bot` entry, ESLint forbids importing it
+   anywhere but the server and the offline dry run, and
+   `packages/game/src/entries.test.ts` pins that the other two entries never
+   reach a bot — so this grep is the final check
    before a competition, not the only one. [`CLAUDE.md`](CLAUDE.md)
    § Creating a New Game has the layout.
 
