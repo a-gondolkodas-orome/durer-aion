@@ -323,7 +323,7 @@ paths:
         "404":
           description: Team not found
         "415":
-          description: The body is not JSON — a form post cannot log a team in
+          description: The body is not JSON, or there is none — a form post cannot log a team in
 
   /team/me/logout:
     post:

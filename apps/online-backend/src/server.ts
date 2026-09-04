@@ -113,8 +113,9 @@ if (argv[2] === "import") {
   // Behind nginx every request arrives over plain HTTP; `X-Forwarded-Proto` is
   // how koa learns it was HTTPS to the browser, and the session cookie takes
   // its `Secure` flag from that (see server/team_session.ts). This trusts the
-  // `X-Forwarded-*` headers of whoever reaches this port, so the docker stack
-  // does not publish it: only nginx, which sets them, can.
+  // `X-Forwarded-*` headers of whoever reaches this port — the scheme, and
+  // with it the host and ip koa reports — so the docker stack does not
+  // publish it: only nginx, which sets them, can.
   server.app.proxy = true;
 
   //Admin page auth setup

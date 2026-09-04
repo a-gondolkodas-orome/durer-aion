@@ -170,7 +170,10 @@ the list binds a change, and which items a unit test pins.
 7. Log out and reload: the login form is back. The session is an HttpOnly
    cookie set on login, so the browser's devtools show `durer_team` under
    Cookies while logged in, gone after, and localStorage holds no GUID —
-   only a `loggedIn` flag, which is how the other tabs hear of a login.
+   only a `loggedIn` flag, which is how the other tabs hear of a login. On
+   the deployed host the login response's `Set-Cookie` also carries `Secure`:
+   the backend takes that from nginx's own scheme, so a proxy in front of the
+   container's nginx would silently lose it.
 8. `npm run build`, then grep `apps/online-frontend/dist` for a string from
    the bot's lookup tables: the served bundle must contain no bot.
    [`CLAUDE.md`](CLAUDE.md) § Creating a New Game says why nothing but
