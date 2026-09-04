@@ -167,7 +167,7 @@ the list binds a change, and which items a unit test pins.
    left comes from the server, never from the client.
 6. Finish both and check the combined score on the finished screen.
 7. `npm run build`, then grep `apps/online-frontend/dist` for a string from
-   the bot's lookup tables: the served bundle must contain no bot. Since #424
+   the bot's lookup tables: the served bundle must contain no bot. Since #429
    the bots sit behind the `game/bot` entry, ESLint forbids importing it
    anywhere but the server and the offline dry run, and
    `packages/game/src/entries.test.ts` pins that the other two entries never

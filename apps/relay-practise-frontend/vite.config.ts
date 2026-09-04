@@ -12,16 +12,13 @@ export default defineConfig(() => {
     base: process.env.SITE_BASE || process.env.PUBLIC_URL || '/',
     plugins: [react()],
     resolve: {
-      // Anchored patterns, not string keys: a string key matches as a prefix too, so
-      // `game` alone would send `game/bot` to the package *directory* plus `/bot` —
-      // that is, to the source entry bot.ts — while `game` itself resolves through
-      // the exports map to the built dist, and the rules end up in the bundle twice,
-      // once from each. Each subpath names its dist file, so the three entries share
-      // one copy of the rules.
+      // Anchored patterns, not string keys, so `game` cannot match `game/bot` or
+      // `game/client` as a prefix. This site imports neither subpath; if one ever
+      // appears here it resolves through the exports map, to dist, like `game`
+      // does. The offline dry run's config says what a prefix match did there.
       alias: [
         { find: "boardgame.io", replacement: path.resolve(import.meta.dirname, "../../node_modules/boardgame.io") },
         { find: /^game$/, replacement: path.resolve(import.meta.dirname, "../../packages/game") },
-        { find: /^game\/(bot|client)$/, replacement: path.resolve(import.meta.dirname, "../../packages/game/dist/$1.mjs") },
         { find: /^schemas$/, replacement: path.resolve(import.meta.dirname, "../../packages/schemas") },
         { find: /^strategy$/, replacement: path.resolve(import.meta.dirname, "../../packages/strategy") },
         { find: /^common-frontend$/, replacement: path.resolve(import.meta.dirname, "../../packages/common-frontend") },

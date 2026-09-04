@@ -44,9 +44,12 @@ const resolvePath = (fromFile: string, specifier: string): string => {
 // Both forms a barrel uses, `import … from` and `export … from`, and the bare
 // `import './x'` that pulls a module in for its side effects — an edge like any
 // other to a bundler. Type-only edges are erased before any bundle sees them,
-// so they cannot drag code in.
+// so they cannot drag code in. A statement ends at a semicolon or at a quoted
+// specifier, whichever comes first: nothing quoted precedes `from` inside one
+// statement, so stopping at a quote keeps a match from running into the next
+// line when the previous one has no semicolon (the last test says why).
 const relativeImports = (file: string): string[] =>
-  [...(sources.get(file) ?? "").matchAll(/^(?:import\s*['"](\.[^'"]+)['"]|(?:import|export)\s[^;]*?from\s*['"](\.[^'"]+)['"])/gm)]
+  [...(sources.get(file) ?? "").matchAll(/^(?:import\s*['"](\.[^'"]+)['"]|(?:import|export)\s[^;'"]*?from\s*['"](\.[^'"]+)['"])/gm)]
     .filter(([statement]) => !statement.startsWith("import type") && !statement.startsWith("export type"))
     .map(match => match[1] ?? match[2]);
 
@@ -85,7 +88,10 @@ describe("the package's entries", () => {
 
   it("the bot entry reaches every game's bot and no board", () => {
     const reached = reachableFrom("bot.ts");
-    expect(reached.filter(isBot).length).toBeGreaterThan(0);
+    // Every game folder's strategy.ts, whether or not a registry names it.
+    const bots = [...sources.keys()].filter(file => file.endsWith("/strategy.ts"));
+    expect(bots.length).toBeGreaterThan(0);
+    expect(reached.filter(isBot)).toEqual(expect.arrayContaining(bots));
     expect(reached.filter(isBoard)).toEqual([]);
   });
 
@@ -104,5 +110,24 @@ describe("the package's entries", () => {
     const bot = new Set(reachableFrom("bot.ts"));
     const both = reachableFrom("client.ts").filter(file => bot.has(file) && !shared.has(file));
     expect(both).toEqual([]);
+  });
+
+  // Without a semicolon, a type-only import from a package used to swallow the
+  // relative import on the next line: the match started at `import type`, ran
+  // on to the first `from './…'` it found, and the type filter then dropped
+  // the whole thing — a board importing its bot under that line went unseen
+  // by every check above. A bare `import 'pkg'` did the same to `import './x'`.
+  it("reads a relative import that follows a semicolon-free bare one", () => {
+    sources.set("probe.ts", [
+      "import type { State } from 'boardgame.io'",
+      "import { strategyWrapper } from './strategy'",
+      "import 'lodash'",
+      "import './side'",
+    ].join("\n"));
+    try {
+      expect(relativeImports("probe.ts")).toEqual(["./strategy", "./side"]);
+    } finally {
+      sources.delete("probe.ts");
+    }
   });
 });
