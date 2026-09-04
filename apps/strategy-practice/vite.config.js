@@ -94,7 +94,7 @@ export default defineConfig(() => ({
     // in a browser. Vitest resolves them through the alias above, so they test
     // the source rather than a build.
     include: [
-      '**/*.{test,spec}.?(c|m)[jt]s?(x)',
+      'src/**/*.spec.{ts,tsx}',
       '../../packages/engine/src/**/*.spec.{ts,tsx}',
       '../../packages/games/src/**/*.spec.{ts,tsx}'
     ],
@@ -105,9 +105,9 @@ export default defineConfig(() => ({
       provider: 'v8',
       // Without this, only files a test imported are reported, and a module no
       // spec touches is missing from the report rather than showing up at 0%.
-      // The engine package counts as this app's source for coverage purposes:
-      // its specs run here, and patch-coverage gates its added lines the same
-      // way (allowExternal is what lets v8 keep files above the app root).
+      // The engine and games packages count as this app's source for coverage
+      // purposes: their specs run here (allowExternal is what lets v8 keep files
+      // above the app root).
       allowExternal: true,
       include: [
         'src/**/*.{ts,tsx}',
