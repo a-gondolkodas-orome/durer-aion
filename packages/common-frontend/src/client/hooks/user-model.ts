@@ -86,15 +86,18 @@ export class UserModel {
   }
 
   // The saved match goes first, synchronously: it must not survive a logout
-  // request that fails, and another team may be next at this computer.
+  // request that fails, and another team may be next at this computer. The
+  // marker goes last, once the session is really over: removing it is what
+  // the other tabs hear, and a key already removed by a failed attempt would
+  // fire no `storage` event when the retry succeeds.
   async logout(): Promise<void> {
-    localStorage.removeItem(loginMarkerStorageKey());
     localStorage.removeItem(legacyGuidStorageKey());
     localStorage.removeItem(teamStateStorageKey());
     localStorage.removeItem(relayPointsStorageKey());
     localStorage.removeItem(strategyPointsStorageKey());
     removeGameStateLocalStorage();
     await this.repo.logout();
+    localStorage.removeItem(loginMarkerStorageKey());
   }
 
   async login(joinCode: string): Promise<void> {

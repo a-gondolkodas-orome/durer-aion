@@ -78,6 +78,25 @@ describe("UserModel session", () => {
     expect(await user.getTeamState()).toBeNull();
   });
 
+  // Regression: the marker was removed before the server was asked, so a
+  // logout that failed took it with it, and the retry that succeeded removed
+  // a key already gone — which fires no `storage` event, leaving the other
+  // tabs showing a team that was logged out.
+  test("a logout the server refused keeps the marker for the retry to remove", async () => {
+    const user = new UserModel(repo);
+    await user.login("2");
+    const endSession = vi.spyOn(repo, "logout").mockRejectedValueOnce(new Error("offline"));
+
+    await expect(user.logout()).rejects.toThrow("offline");
+
+    expect(localStorage.getItem(loginMarkerStorageKey())).toBe("1");
+    endSession.mockRestore();
+
+    await user.logout();
+
+    expect(localStorage.getItem(loginMarkerStorageKey())).toBeNull();
+  });
+
   // Nothing client-side knows whether there is a session, so the refusal is
   // the server's (a 401); the page reloads to show the login form.
   test("a logged-out browser cannot start a round", async () => {
