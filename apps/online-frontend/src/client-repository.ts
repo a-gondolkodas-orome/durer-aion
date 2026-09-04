@@ -1,11 +1,15 @@
 import urlcat from "urlcat";
 import axios, { AxiosInstance, AxiosError } from 'axios';
-import { ClientRepository, TeamModelDto, MatchStateDto, BoardMoves } from "common-frontend";
+// Type-only on purpose: client-repository.test.ts loads this file without the
+// package's dist build, which the CI test job does not produce.
+import type { ClientRepository, TeamModelDto, MatchStateDto, BoardMoves } from "common-frontend";
 
-const serverUrl = import.meta.env.VITE_SERVER_URL || '/';
+// Always the page's own origin: the session is a cookie, and a cookie does not
+// ride a cross-origin request. In dev the Vite server proxies the backend
+// (vite.config.ts) the way nginx does in the docker stack.
 function apiAxiosInstance(): AxiosInstance {
   return axios.create({
-    baseURL: serverUrl,
+    baseURL: '/',
     timeout: 10000,
   });
 }
@@ -18,21 +22,23 @@ function makeAxiosError(any_error: unknown): AxiosError {
   return axiosError;
 }
 
+/** The team routes: the session cookie says which team, so nothing here
+ * carries the team's id (issue #89). */
 export class RealClientRepository implements ClientRepository {
 
   version = "ONLINE" as const;
 
-  async getTeamState(
-    guid: string,
-  ): Promise<TeamModelDto> {
-    const url = urlcat('team/:guid', {
-      guid,
-    });
+  async getTeamState(): Promise<TeamModelDto | null> {
     let result;
     try {
-      result = await apiAxiosInstance().get(url);
+      result = await apiAxiosInstance().get('team/me');
     } catch (e: unknown) {
-      console.error(e)
+      const err = makeAxiosError(e);
+      // No session — a browser that never logged in, or whose cookie expired.
+      if (err.response?.status === 401) {
+        return null;
+      }
+      console.error(err.message)
       // here we can set message according to status (or data)
       throw new Error('Váratlan hiba történt', { cause: e });
     }
@@ -52,16 +58,12 @@ export class RealClientRepository implements ClientRepository {
     return result.data as TeamModelDto;
   }
 
+  // The code goes in the body, never in the URL: it is the team's login secret.
   async joinWithCode(
     code: string,
-  ): Promise<string> {
-    const url = urlcat('team/join/:code', {
-      code,
-    });
-    console.log("joinWithCode url", url);
-    let result;
+  ): Promise<void> {
     try {
-      result = await apiAxiosInstance().get(url);
+      await apiAxiosInstance().post('team/join', { code });
     } catch (e: unknown) {
       const err = makeAxiosError(e);
       if (err.response?.status === 404) {
@@ -70,67 +72,50 @@ export class RealClientRepository implements ClientRepository {
       // here we can set message according to status (or data)
       throw new Error('Váratlan hiba történt', { cause: e });
     }
-
-    console.log("joinWithCode result", result);
-
-    return result.data as string;
   }
 
-  async startRelay(
-    guid: string,
-  ): Promise<string> {
-    const url = urlcat('/team/:guid/relay/play', {
-      guid,
-    });
-    let result;
+  async logout(): Promise<void> {
     try {
-      result = await apiAxiosInstance().get(url);
+      // The empty body is what makes it JSON, which the server requires.
+      await apiAxiosInstance().post('team/me/logout', {});
+    } catch (e: unknown) {
+      const err = makeAxiosError(e);
+      console.error(err.message)
+      throw new Error('Váratlan hiba történt', { cause: e });
+    }
+  }
+
+  async startRelay(): Promise<void> {
+    try {
+      await apiAxiosInstance().post('team/me/relay/play');
     } catch (e: unknown) {
       const err = makeAxiosError(e)
       console.error(err.message)
       // here we can set message according to status (or data)
       throw new Error('Váratlan hiba történt', { cause: e });
     }
-
-    return result.data as string;
   }
 
-  async startStrategy(
-    guid: string,
-  ): Promise<string> {
-    const url = urlcat('/team/:guid/strategy/play', {
-      guid,
-    });
-    let result;
+  async startStrategy(): Promise<void> {
     try {
-      result = await apiAxiosInstance().get(url);
+      await apiAxiosInstance().post('team/me/strategy/play');
     } catch (e: unknown) {
       const err = makeAxiosError(e);
       console.error(err.message)
       // here we can set message according to status (or data)
       throw new Error('Váratlan hiba történt', { cause: e });
     }
-
-    return result.data as string;
   }
 
-  async toHome(
-    guid: string,
-  ): Promise<string> {
-    const url = urlcat('/team/:guid/goHome', {
-      guid,
-    });
-    let result;
+  async toHome(): Promise<void> {
     try {
-      result = await apiAxiosInstance().get(url);
+      await apiAxiosInstance().post('team/me/gohome');
     } catch (e: unknown) {
       const err = makeAxiosError(e);
       console.error(err.message)
       // here we can set message according to status (or data)
       throw new Error('Váratlan hiba történt', { cause: e });
     }
-
-    return result.data as string;
   }
 
   async getAll(): Promise<TeamModelDto[]> {

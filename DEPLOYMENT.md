@@ -193,9 +193,8 @@ cd <the-private-repo>
 
 ## 3. Install Node
 
-The major in [`.nvmrc`](./.nvmrc), which is what CI reads and what `engines.node` requires;
-the backend image pins a patch within it. From inside the checkout,
-[nvm](https://github.com/nvm-sh/nvm) reads it:
+The exact version in [`.nvmrc`](./.nvmrc) — the same one CI and the backend image pin.
+From inside the checkout, [nvm](https://github.com/nvm-sh/nvm) reads it:
 
 ```bash
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh | bash
@@ -283,8 +282,7 @@ sudo docker run --rm \
   -d verseny.durerinfo.hu --agree-tos -m you@example.com -n
 ```
 
-Then two files on the host, outside the repository so `git pull` leaves them alone.
-`docker-compose.tls.yml`:
+Then open port 443 and mount the certificates, in a `docker-compose.tls.yml` on the host:
 
 ```yaml
 services:
@@ -293,44 +291,55 @@ services:
       - 443:443
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt:ro
-      - ./nginx-tls.conf:/etc/nginx/conf.d/tls.conf:ro
 ```
 
-and `nginx-tls.conf`:
+**TLS has to terminate in this nginx, in the same `server` block that proxies to the
+backend.** `nginx.conf` sets `X-Forwarded-Proto $scheme` on every proxied location, and
+that header is the only way the backend knows to put `Secure` on the team's session cookie
+(`apps/online-backend/src/server/team_session.ts`). Anything that hands this nginx a plain
+HTTP request — a proxy on the host, or a second `server` block forwarding to port 80 —
+makes `$scheme` say `http`, and the cookie ships without `Secure` while everything appears
+to work.
 
-```nginx
-server {
-    listen 443 ssl;
-    server_name verseny.durerinfo.hu;
+So edit `apps/online-frontend/nginx/nginx.conf` in the checkout, adding the listener and
+certificate to the block that is already there rather than writing a second one:
 
-    ssl_certificate     /etc/letsencrypt/live/verseny.durerinfo.hu/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/verseny.durerinfo.hu/privkey.pem;
-
-    # Hand off to this same container's port 80 server, so the routing stays defined once,
-    # in apps/online-frontend/nginx/nginx.conf, instead of being copied here.
-    location / {
-        proxy_pass http://127.0.0.1:80;
-        proxy_set_header Host $host;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto https;
-        # The games are websockets; without these a match connects and never updates.
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection $http_connection;
-    }
-}
+```diff
+ server {
+     listen       80;
++    listen       443 ssl;
++    server_name  verseny.durerinfo.hu;
++
++    ssl_certificate     /etc/letsencrypt/live/verseny.durerinfo.hu/fullchain.pem;
++    ssl_certificate_key /etc/letsencrypt/live/verseny.durerinfo.hu/privkey.pem;
++
++    # Renewal fetches this over plain HTTP, so it must not be redirected.
++    location ^~ /.well-known/acme-challenge/ {
++        root /usr/share/nginx/html;
++    }
++
++    # Everything else on 80 goes to HTTPS. Add this only after the first certificate
++    # exists: redirecting the challenge to an address with no working certificate is
++    # how issuance fails.
++    if ($scheme = http) {
++        return 301 https://$host$request_uri;
++    }
 ```
 
-Bring the stack up with the override:
+One `server` block on both ports keeps `$scheme` right per request, and keeps the four
+`location` blocks defined once. It is a local edit to a tracked file, so `git pull` will
+report a conflict on it — visibly, which is the point.
+
+Rebuild with the override:
 
 ```bash
 npm run build
 docker compose --env-file=.env.docker -f docker-compose.yml -f docker-compose.tls.yml up --build --wait
 ```
 
-Port 80 keeps serving plaintext. Forcing a redirect means editing
-`apps/online-frontend/nginx/nginx.conf`, a change to the repository rather than to this
-machine.
+**Then check the cookie**, because losing `Secure` is silent: log in as a team and look at
+the login response's `Set-Cookie` for `durer_team` in devtools. It must carry `Secure`
+alongside `HttpOnly` and `SameSite=Lax`.
 
 Renew weekly from cron; certbot only acts when the certificate is near expiry. A
 `npm run build` mid-renewal empties `dist` and takes the challenge file with it — rerun.

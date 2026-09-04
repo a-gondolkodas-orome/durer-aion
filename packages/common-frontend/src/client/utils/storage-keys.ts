@@ -3,7 +3,7 @@
 // packages' dist builds, which the CI test job does not produce.
 
 // The two names the apps have always used; their historical homes re-export
-// them. The GUID key below never had an exported constant.
+// them.
 export const LOCAL_STORAGE_TEAMSTATE = "aegnjrlearnjla";
 export const BGIO_LOCALSTORAGE_PREFIX = "bgio_";
 
@@ -20,7 +20,14 @@ export function setLocalStorageNamespace(appName: string) {
 }
 
 export const teamStateStorageKey = () => namespace + LOCAL_STORAGE_TEAMSTATE;
-export const guidStorageKey = () => namespace + "kjqAEKeFkMpOvOZrzcvp";
+// Not the session — that is an HttpOnly cookie no script can read (issue #89).
+// Only a flag that changes on login and logout, so another tab's `storage`
+// event tells it to look again.
+export const loginMarkerStorageKey = () => namespace + "loggedIn";
+// Where the GUID lived before it became the cookie. Nothing writes it any
+// more; UserModel removes it, so a browser that logged in before that change
+// is not left holding the team's secret.
+export const legacyGuidStorageKey = () => namespace + "kjqAEKeFkMpOvOZrzcvp";
 export const bgioStoragePrefix = () => namespace + BGIO_LOCALSTORAGE_PREFIX;
 export const relayPointsStorageKey = () => namespace + "RelayPoints";
 export const strategyPointsStorageKey = () => namespace + "StrategyPoints";

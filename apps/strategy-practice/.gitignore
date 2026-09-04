@@ -7,7 +7,6 @@ npm-debug.log*
 .vscode
 # rollup-plugin-visualizer output
 stats.html
-# coverage output: the `npm run coverage` html report, and the lcov file
-# `npm run coverage:patch` reads
+# coverage output: the `npm run coverage` html report
 /reports
 .claude/settings.local.json

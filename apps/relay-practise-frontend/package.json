@@ -7,8 +7,7 @@
     "typecheck": "tsc --noEmit",
     "start": "vite",
     "dev": "vite",
-    "build": "vite build",
-    "spell-check": "cspell \"**/*.{ts,tsx}\" --no-progress"
+    "build": "vite build"
   },
   "license": "MIT",
   "dependencies": {

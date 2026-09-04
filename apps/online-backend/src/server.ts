@@ -1,17 +1,16 @@
 import {
   GameRelay,
   MyGameWrappers as strategyGameWrappers,
-  StrategyWrappers as StrategyStrategy,
   gameWrapper,
   strategyNames,
 } from 'game';
+import { StrategyWrappers as StrategyStrategy } from 'game/bot';
 import { RelayStrategy } from 'strategy';
 import { PostgresStore } from 'bgio-postgres';
 import { argv, env, exit } from 'process';
 import { SocketIOButBotMoves } from './socketio_botmoves';
 import { Server } from 'boardgame.io/server';
 import botWrapper from './botwrapper';
-import cors from '@koa/cors';
 import { configureTeamsRouter } from './server/router';
 import { TeamsRepository } from './server/db';
 import { getBotCredentials, getGameStartAndEndTime, relayNames } from './server/common';
@@ -108,12 +107,16 @@ if (argv[2] === "import") {
 
   const PORT = parseInt(env.PORT || "8000");
 
-  if (env.ALLOW_CORS === 'true') {
-    server.app.use(cors({ origin: '*' }));
-  }
-
   // Set up transport layer for updates
   server.app.context.durer_transport = socketio;
+
+  // Behind nginx every request arrives over plain HTTP; `X-Forwarded-Proto` is
+  // how koa learns it was HTTPS to the browser, and the session cookie takes
+  // its `Secure` flag from that (see server/team_session.ts). This trusts the
+  // `X-Forwarded-*` headers of whoever reaches this port — the scheme, and
+  // with it the host and ip koa reports — so the docker stack does not
+  // publish it: only nginx, which sets them, can.
+  server.app.proxy = true;
 
   //Admin page auth setup
   server.app.use(mount('/team/admin', auth({ name: 'admin', pass: getAdminCredentials() })));
@@ -134,7 +137,10 @@ if (argv[2] === "import") {
           url: ctx.request.href,
           method: ctx.request.method,
           query_string: ctx.request.querystring,
-          headers: ctx.request.headers,
+          // Minus the logins: the cookie is the team's session
+          // (server/team_session.ts) and the authorization header the admin
+          // password, and an error report is no place for either.
+          headers: { ...ctx.request.headers, cookie: undefined, authorization: undefined },
         },
       });
       Sentry.captureException(err);

@@ -85,7 +85,7 @@ with `botNextMoveArgs`, and how many boards to sweep given what the strategy
 costs.
 
 ```bash
-npm run test
+npm run typecheck && npm test
 ```
 Then start the dev server and manually verify the game:
 ```bash
@@ -130,6 +130,6 @@ If the optimal AI strategy was implemented in step 2, ask the user:
    ```
    By default `generateStartBoard` stays on the `isDefault` variant only. If the test variant benefits from a simpler starting position, add its own `generateStartBoard` override.
 
-4. Re-run `npm run test` and verify both variants work in the dev server before declaring done.
+4. Re-run `npm run typecheck && npm test` and verify both variants work in the dev server before declaring done.
 
 **If no**, skip and declare the game done.

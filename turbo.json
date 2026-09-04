@@ -10,7 +10,8 @@
     "GAME_GLOBAL_START_T",
     "GAME_GLOBAL_END_T",
     "DEV_SERVER_HOST",
-    "SITE_BASE"
+    "SITE_BASE",
+    "VITE_SENTRY_DSN"
   ],
   "tasks": {
     "start": {
@@ -32,10 +33,10 @@
     },
     "dev": {
       // Build the workspace's dependencies before starting anything. Without
-      // this the backend's `tsx watch` races the package watchers' first build
-      // and imports `game` while its dist does not exist yet — which resolves
-      // to the package's source barrel and dies on JSX the server never meant
-      // to load. The watchers keep it fresh from there.
+      // this a frontend's Vite dev server races the package watchers' first
+      // build and resolves `game` through its exports map while the dist does
+      // not exist yet. The watchers keep it fresh from there. The backend
+      // bundles the packages from source and opts out in its own turbo.json.
       "dependsOn": ["^build"],
       "cache": false,
       "persistent": true

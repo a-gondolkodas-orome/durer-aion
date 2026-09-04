@@ -1,4 +1,4 @@
-import { describe, test, afterEach, beforeEach, expect, vi } from "vitest";
+import { describe, test, afterEach, beforeEach, expect, vi, type MockInstance } from "vitest";
 import { gameWrapper, isMakeMovePayloadReadOnly } from "./gamewrapper";
 import { Client } from "boardgame.io/client";
 import {
@@ -192,6 +192,7 @@ describe("gameWrapper clock", () => {
 
   afterEach(() => {
     vi.useRealTimers();
+    vi.restoreAllMocks();
   });
 
   // The client polls this move for the countdown it shows. It carries no time
@@ -211,6 +212,9 @@ describe("gameWrapper clock", () => {
   });
 
   test("only the team may ask for the time", () => {
+    // boardgame.io reports every move it rejects on the console, and this test
+    // provokes one, so it takes the message rather than leaving it in the report.
+    const rejected = vi.spyOn(console, "error").mockImplementation(() => undefined);
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-03-21T10:00:00Z"));
     const client = Client({ game: wrappedGame, numPlayers: 2 });
@@ -221,6 +225,7 @@ describe("gameWrapper clock", () => {
     client.moves.getTime();
 
     expect(client.getState()?.G.millisecondsRemaining).toStrictEqual(30 * 60 * 1000);
+    expect(rejected).toHaveBeenCalledOnce();
   });
 
   // The server reacts to a team's move by letting the bot move. A clock poll is
@@ -234,6 +239,19 @@ describe("gameWrapper clock", () => {
 describe("gameWrapper move guards", () => {
   const wrappedGame = gameWrapper(createGameWithoutStartingPosition(() => ({ data: "setup" })));
 
+  // Both tests here provoke a move boardgame.io rejects, and it reports every
+  // one of those on the console, so each takes the message it causes rather
+  // than leaving it in the test report.
+  let rejected: MockInstance<typeof console.error>;
+
+  beforeEach(() => {
+    rejected = vi.spyOn(console, "error").mockImplementation(() => undefined);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   test("the team cannot send the opening position the bot picks", () => {
     const client = Client({ game: wrappedGame, numPlayers: 2 });
     client.start();
@@ -241,6 +259,7 @@ describe("gameWrapper move guards", () => {
     client.moves.setStartingPosition({ data: "startingPosition" });
 
     expect(client.getState()?.G.data).toStrictEqual("setup");
+    expect(rejected).toHaveBeenCalledOnce();
   });
 
   test("the bot cannot choose the difficulty", () => {
@@ -252,5 +271,6 @@ describe("gameWrapper move guards", () => {
 
     expect(client.getState()?.G.difficulty).toStrictEqual("live");
     expect(client.getState()?.G.numberOfTries).toStrictEqual(1);
+    expect(rejected).toHaveBeenCalledOnce();
   });
 });

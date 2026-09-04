@@ -22,7 +22,8 @@
     "target": "ESNext",
     "types": ["vite/client"],
     "paths": {
-      "game": ["../../packages/game/src"],
+      // No entry for the game package: it resolves through its exports map, to
+      // the declarations in its dist, for tsc and Vite alike.
       // urlcat 3.1.0's exports map has no types condition, so bundler resolution
       // finds index.mjs but no declarations (node10 read the legacy top-level
       // `types` field instead). Point tsc at the shipped d.ts; Vite resolves the
