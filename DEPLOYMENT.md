@@ -280,7 +280,7 @@ sudo docker run --rm \
   -v /etc/letsencrypt:/etc/letsencrypt \
   -v "$PWD/apps/online-frontend/dist:/webroot" \
   certbot/certbot certonly --webroot -w /webroot \
-  -d verseny.example.com --agree-tos -m you@example.com -n
+  -d verseny.durerinfo.hu --agree-tos -m you@example.com -n
 ```
 
 Then two files on the host, outside the repository so `git pull` leaves them alone.
@@ -301,10 +301,10 @@ and `nginx-tls.conf`:
 ```nginx
 server {
     listen 443 ssl;
-    server_name verseny.example.com;
+    server_name verseny.durerinfo.hu;
 
-    ssl_certificate     /etc/letsencrypt/live/verseny.example.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/verseny.example.com/privkey.pem;
+    ssl_certificate     /etc/letsencrypt/live/verseny.durerinfo.hu/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/verseny.durerinfo.hu/privkey.pem;
 
     # Hand off to this same container's port 80 server, so the routing stays defined once,
     # in apps/online-frontend/nginx/nginx.conf, instead of being copied here.
