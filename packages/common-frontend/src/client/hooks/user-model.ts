@@ -1,6 +1,6 @@
 import type { ClientRepository } from "../api-repository-interface";
 import type { MatchStateDto, TeamModelDto } from "../dto/TeamStateDto";
-import { bgioStoragePrefix, guidStorageKey, relayPointsStorageKey, strategyPointsStorageKey, teamStateStorageKey } from "../utils/storage-keys";
+import { bgioStoragePrefix, legacyGuidStorageKey, loginMarkerStorageKey, relayPointsStorageKey, strategyPointsStorageKey, teamStateStorageKey } from "../utils/storage-keys";
 
 function removeGameStateLocalStorage() {
   // Collect first, remove after: removeItem inside a key(idx) loop shifts the
@@ -15,32 +15,19 @@ export class UserModel {
 
   constructor(private repo: ClientRepository) {}
 
-  private async saveGUID(guid: string) {
-    localStorage.setItem(guidStorageKey(), guid);
-  }
-
-  getGuid(): string | null {
-    if (typeof localStorage === "undefined") {
-      return null;
-    }
-
-    const guid = localStorage.getItem(guidStorageKey());
-
-    if (!guid) {
-      return null;
-    }
-
-    return guid;
-  }
-
+  // The session lives with the repository (online: an HttpOnly cookie), so
+  // whether a team is logged in is only known by asking.
   async getTeamState(): Promise<TeamModelDto | null> {
-    const guid = this.getGuid();
-    if (!guid) {
-      return null;
+    localStorage.removeItem(legacyGuidStorageKey());
+    const state = await this.repo.getTeamState();
+    if (state === null) {
+      // The marker must be gone before the next login writes it: writing the
+      // value a key already holds fires no `storage` event, so a marker left
+      // over from a session that expired would keep the other tabs from
+      // noticing the login.
+      localStorage.removeItem(loginMarkerStorageKey());
     }
-
-    const res = await this.repo.getTeamState(guid);
-    return res;
+    return state;
   }
 
   async adminAll(): Promise<TeamModelDto[] | null> {
@@ -75,13 +62,8 @@ export class UserModel {
   }
 
   async startRelay(): Promise<void> {
-    const guid = this.getGuid();
-
-    if (!guid) {
-      return;
-    }
     try {
-      await this.repo.startRelay(guid);
+      await this.repo.startRelay();
     }
     catch (e) {
       console.log(e);
@@ -90,13 +72,8 @@ export class UserModel {
   }
 
   async starStrategy(): Promise<void> {
-    const guid = this.getGuid();
-
-    if (!guid) {
-      return;
-    }
     try {
-      await this.repo.startStrategy(guid);
+      await this.repo.startStrategy();
     }
     catch (e) {
       console.log(e);
@@ -108,39 +85,29 @@ export class UserModel {
     await this.repo.removeTeam(teamId);
   }
 
-  isUserLoggedIn(): boolean {
-    const guid = this.getGuid();
-
-    if (!guid) {
-      return false;
-    }
-
-    return true;
-  }
-
-  logout() {
-    localStorage.removeItem(guidStorageKey());
+  // The saved match goes first, synchronously: it must not survive a logout
+  // request that fails, and another team may be next at this computer. The
+  // marker goes last, once the session is really over: removing it is what
+  // the other tabs hear, and a key already removed by a failed attempt would
+  // fire no `storage` event when the retry succeeds.
+  async logout(): Promise<void> {
+    localStorage.removeItem(legacyGuidStorageKey());
     localStorage.removeItem(teamStateStorageKey());
     localStorage.removeItem(relayPointsStorageKey());
     localStorage.removeItem(strategyPointsStorageKey());
     removeGameStateLocalStorage();
+    await this.repo.logout();
+    localStorage.removeItem(loginMarkerStorageKey());
   }
 
-  async login(joinCode: string): Promise<string | null> {
-    const guid = await this.repo.joinWithCode(joinCode);
-    await this.saveGUID(guid);
-    return null;
+  async login(joinCode: string): Promise<void> {
+    await this.repo.joinWithCode(joinCode);
+    localStorage.setItem(loginMarkerStorageKey(), "1");
   }
 
   async toHome(): Promise<void> {
-    const guid = this.getGuid();
-
-    if (!guid) {
-      return;
-    }
-
     try {
-      await this.repo.toHome(guid);
+      await this.repo.toHome();
     }
     catch (e) {
       console.log(e);
@@ -154,8 +121,8 @@ export class UserModel {
     if (typeof window !== "undefined" && !UserModel.wasListenerAddedYet) {
       UserModel.wasListenerAddedYet = true;
       let previousValue: TeamModelDto | null = null;
-      const onGuidChanged = async (event: StorageEvent) => {
-        if (event.key !== guidStorageKey()) {
+      const onLoginChanged = async (event: StorageEvent) => {
+        if (event.key !== loginMarkerStorageKey()) {
           return;
         }
 
@@ -167,7 +134,7 @@ export class UserModel {
         }
       };
       window.addEventListener("storage", (event) => {
-        void onGuidChanged(event);
+        void onLoginChanged(event);
       });
     }
   }

@@ -5,7 +5,7 @@ import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
 import { Fragment, useEffect, useState } from 'react';
 import useSWR from 'swr';
 import { DataGrid, ExportCsv, Toolbar } from '@mui/x-data-grid';
-import { TeamModelDto } from '../dto/TeamStateDto';
+import { TeamModelDto, adminTeamId } from '../dto/TeamStateDto';
 import { TeamDetailDialog } from './TeamDetailDialog';
 import Form from './form';
 import { ErrorMessage, Field } from 'formik';
@@ -290,7 +290,7 @@ export function Admin(props: { teamId?: string }) {
                 confirm: async () => {
                   try {
                     for (const team of data) {
-                      await removeTeam(team.teamId);
+                      await removeTeam(adminTeamId(team));
                     }
                     enqueueSnackbar('Összes csapat törölve', { variant: 'success' });
                     // Refresh the list

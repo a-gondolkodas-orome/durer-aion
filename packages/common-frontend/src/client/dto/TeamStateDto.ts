@@ -1,11 +1,13 @@
 import { Ctx } from "boardgame.io";
 import { GameStateMixin, MyGameState as RelayGameState } from "game";
 
-/// `joinCode` and `email` are optional because only the authenticated admin
-/// routes serve them: a team asking for its own state over `/team/:GUID` gets
-/// everything but its secrets, so no component may depend on those two.
+/// `teamId`, `joinCode` and `email` are optional because only the
+/// authenticated admin routes serve them: `GET /team/me` answers a team with
+/// everything but its secrets, so no component the team sees may depend on
+/// these three. `teamId` is among them because the GUID *is* the session
+/// cookie's value — see `server/team_view.ts` in the backend.
 export interface TeamModelDto {
-  teamId: string;
+  teamId?: string;
   joinCode?: string;
   teamName: string;
   category: string;
@@ -14,6 +16,17 @@ export interface TeamModelDto {
   pageState: 'DISCLAIMER' | 'HOME' | 'RELAY' | 'STRATEGY'
   relayMatch: MatchStatus;
   strategyMatch: MatchStatus;
+}
+
+/// The GUID of a team an admin page is acting on. Optional on the DTO because
+/// the team's own state leaves it out, but every row the authenticated admin
+/// routes serve carries it — so its absence here is a bug, not a case to
+/// render around, and the surrounding handlers report the throw.
+export function adminTeamId(team: TeamModelDto): string {
+  if (team.teamId === undefined) {
+    throw new Error(`A(z) ${team.teamName} csapat azonosítója hiányzik.`);
+  }
+  return team.teamId;
 }
 
 /// One admin endpoint serves both kinds of match, and the payload carries no

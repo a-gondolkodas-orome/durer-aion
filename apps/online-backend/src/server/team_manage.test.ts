@@ -114,7 +114,7 @@ describe("checkStaleMatch", () => {
 
 // boardgame.io serves listed matches, metadata and all, from an
 // unauthenticated `GET /games/:name`, and that metadata names the playing
-// team by its GUID — the capability for every team route.
+// team by its GUID — which is what the session cookie carries.
 describe("createGame", () => {
   it("creates the match unlisted", async () => {
     const game = { name: "test", setup: () => ({}), moves: {} } as unknown as AnyBgioGame;
