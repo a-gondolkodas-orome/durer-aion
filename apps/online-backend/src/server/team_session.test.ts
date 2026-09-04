@@ -99,6 +99,17 @@ describe("requireTeam", () => {
     expect(ctx.state.team).toBe(team);
     expect(next).toHaveBeenCalledTimes(1);
   });
+
+  // The week runs from the last request, not from the login: a team that
+  // logged in early must not be logged out mid-match.
+  it("sets the cookie afresh on every request it admits", async () => {
+    const { ctx, set } = fakeCtx(GUID);
+
+    await requireTeam(teamsWith(team))(ctx, vi.fn());
+
+    expect(set).toHaveBeenCalledTimes(1);
+    expect(set).toHaveBeenCalledWith(TEAM_COOKIE, GUID, expect.objectContaining({ maxAge: expect.any(Number) }));
+  });
 });
 
 // Through a real koa app, because what reaches the wire is not what the

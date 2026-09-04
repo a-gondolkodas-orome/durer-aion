@@ -25,9 +25,12 @@ import { TeamModel } from './model';
  *   nginx the request only looks like HTTPS through `X-Forwarded-Proto`, which
  *   `nginx.conf` sets from its own scheme and `app.proxy = true` in `server.ts`
  *   honours.
- * - A week's lifetime: the localStorage entry it replaces never expired, and a
- *   team that logs in the evening before to read the disclaimer must still be
- *   logged in for the round.
+ * - A week's lifetime, from the last request rather than from the login:
+ *   `requireTeam` sets the cookie afresh on every request it admits. The
+ *   localStorage entry it replaces never expired, and a team that logs in
+ *   the evening before to read the disclaimer must still be logged in for
+ *   the round — and one that logged in a week earlier must not find itself
+ *   logged out mid-match.
  *
  * The GUID stays an opaque, unguessable value looked up in the database on
  * every request, as it was in the URL — no signing, no secret to configure.
@@ -61,6 +64,8 @@ export interface TeamState {
 
 /** Loads the team the cookie names into `ctx.state.team`, or answers 401.
  *
+ * A team it admits gets its cookie set again, so the week runs from the
+ * last request (see above).
  * A cookie naming no team — deleted, or a database re-imported since the
  * login — is expired on the way out, so the browser does not keep sending it.
  * That answer is written, not thrown: koa's default error handler strips every
@@ -80,6 +85,7 @@ export function requireTeam(teams: TeamsRepository): Router.Middleware<TeamState
       return;
     }
     ctx.state.team = team;
+    setTeamCookie(ctx, team.teamId);
     await next();
   };
 }

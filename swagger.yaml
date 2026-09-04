@@ -437,7 +437,9 @@ components:
     type: apiKey
     in: cookie
     name: durer_team
-    description: The team's GUID, set by POST /team/join. HttpOnly, SameSite=Lax, path /team/me.
+    description: >
+      The team's GUID, set by POST /team/join and set afresh by every /team/me
+      request it admits. HttpOnly, SameSite=Lax, path /team/me.
   schemas:
     GUID:
       type: string
