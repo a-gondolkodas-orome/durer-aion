@@ -61,11 +61,16 @@ costs at the time of writing and what actually stops the bill:
 
 ## First minutes on the machine
 
-Patch it, and keep it patched — the realistic risk to a box that lives for weeks is an
-unpatched service:
+Patch it — the realistic risk to a box that lives for weeks is an unpatched service:
 
 ```bash
 apt update && apt upgrade -y
+```
+
+**Optional, for a machine that will live longer than the drive:** keep it patched by
+itself. The rest of this section's upgrade advice only applies if you do this.
+
+```bash
 apt install unattended-upgrades
 dpkg-reconfigure -plow unattended-upgrades
 ```
@@ -108,7 +113,10 @@ rsync --archive --chown=deploy:deploy ~/.ssh /home/deploy
 
 **Log in as it from a second terminal before closing the first.** A broken `sshd` config or
 a mis-copied key only shows up on the next login, which is when you no longer have a way
-in. Once it works, close root's own door — cloud images often ship `PermitRootLogin yes`:
+in.
+
+**Optional, and worth it on anything that outlives the drive:** close root's own door, since
+cloud images often ship `PermitRootLogin yes`.
 
 ```bash
 printf 'PermitRootLogin prohibit-password\nPasswordAuthentication no\n' \
@@ -130,8 +138,8 @@ sudo mkswap /swapfile
 sudo swapon /swapfile
 ```
 
-Add it to `/etc/fstab` to survive a reboot. Work inside `tmux`, since a dropped ssh session
-kills the build in progress:
+Add it to `/etc/fstab` to survive a reboot. Optionally work inside `tmux`, since a dropped
+ssh session kills the build in progress:
 
 ```bash
 sudo apt install tmux -y
@@ -266,9 +274,11 @@ The admin page's TSV upload does the same job through the browser.
 
 ## 8. A domain and HTTPS
 
-Point an A record at the machine and wait for it to resolve. Give the machine a static
-address first if the provider hands out ephemeral ones (a DigitalOcean reserved IP, an AWS
-elastic IP).
+Point an A record at the machine and wait for it to resolve. Its address is its own for as
+long as it exists, so that is enough. A reserved address (DigitalOcean reserved IP, AWS
+elastic IP) buys something else — rebuilding the machine under an unchanged DNS record —
+which is worth having live and not on a drive. It also bills while *unattached*, so taking
+one adds a third thing to release at teardown.
 
 Issue the certificate with the stack up — nginx serves the challenge out of `dist`, so
 nothing has to stop:
