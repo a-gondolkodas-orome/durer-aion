@@ -3,7 +3,8 @@
 Loaded when working under `src/components/` — the games in `games/` and the
 `strategy-game-factory` engine they are built on. Project-wide context (what
 this project is, testing policy, styling, i18n, PR conventions) lives in
-`AGENTS.md` at the repo root.
+`AGENTS.md` at the root of this app, `apps/strategy-practice/`. The repository
+root has `CLAUDE.md` instead, which owns the monorepo-wide conventions.
 
 ## Adding a new game
 
@@ -34,7 +35,11 @@ strategyGameFactory({
 ### Variants
 
 An array of `{ id?, botStrategy?, generateStartBoard?, startBoards?, label?,
-isDefault? }`. The default variant (marked `isDefault: true`, or the only entry
+isDefault?, notAlwaysOptimal?, rule? }` — `VariantInput` in
+`packages/engine/src/types.ts`. `notAlwaysOptimal` is § Bot / variant
+conventions below; `rule` overrides `presentation.rule` for that variant alone,
+which is what lets sibling games differing only in rule wording be merged into
+one. The default variant (marked `isDefault: true`, or the only entry
 if there is just one) must state its start position. If `botStrategy` is omitted
 on a variant, the default variant's `botStrategy` is used as fallback. If
 multiple variants are provided, exactly one must be `isDefault: true`. A
