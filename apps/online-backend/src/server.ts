@@ -11,7 +11,6 @@ import { argv, env, exit } from 'process';
 import { SocketIOButBotMoves } from './socketio_botmoves';
 import { Server } from 'boardgame.io/server';
 import botWrapper from './botwrapper';
-import cors from '@koa/cors';
 import { configureTeamsRouter } from './server/router';
 import { TeamsRepository } from './server/db';
 import { getBotCredentials, getGameStartAndEndTime, relayNames } from './server/common';
@@ -107,10 +106,6 @@ if (argv[2] === "import") {
   });
 
   const PORT = parseInt(env.PORT || "8000");
-
-  if (env.ALLOW_CORS === 'true') {
-    server.app.use(cors({ origin: '*' }));
-  }
 
   // Set up transport layer for updates
   server.app.context.durer_transport = socketio;
