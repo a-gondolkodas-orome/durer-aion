@@ -25,17 +25,27 @@ readability.
 
 ## Architecture
 
-Games live under `src/components/games/`, one folder per game, registered in
-`gameList.ts`. Shared infrastructure lives in
-`src/components/strategy-game-factory/`, a sibling of `games/`:
+Most games live under `src/components/games/`, one folder per game, registered
+in `gameList.ts`. The newest ones live in `packages/games/src/` instead —
+`remove-divisor-multiple` and `stones-remove-one-not-twice-from-left` — where a
+game is a `StrategyGameConfig` object rather than a component, turned into a
+page by `strategyGameFactory` at its one export site in
+`src/components/games/index.ts`. That is the shape a **new** game takes; the
+folder layout below is the same either way.
+
+Shared infrastructure lives in `src/components/strategy-game-factory/`, a
+sibling of `games/`:
 
 - `game-parts/` — common UI elements (rules section, role chooser, restart
   button, etc.)
-- `strategy-game-factory.tsx` — the game flow engine: turn-taking, end-of-game
-  detection, restart/clean state, and the API every game implements. Games
-  import through the barrel (`index.ts`) — no deep imports. The barrel is a
-  path alias, so no `../../` either, which is what makes the rule
-  self-enforcing.
+- `strategy-game-factory.tsx` — the browser shell around the game flow: it
+  renders the board, the role chooser and the status line against the API every
+  game implements. The flow itself — turn-taking, end-of-game detection,
+  restart/clean state, the reducer, the store, `runMatch` and `playBotTurn` —
+  is in `packages/engine`, imported as `engine`, and `index.ts` here re-exports
+  it. Games import through that barrel — no deep imports. The barrel is a path
+  alias, so no `../../` either, which is what makes the rule self-enforcing.
+  [src/components/CLAUDE.md](src/components/CLAUDE.md) has the detail.
 
 Each game folder implements the optimal strategy (computer AI) and its own UI
 against that API. Strategy is implemented however is simplest: calculated on the
@@ -135,8 +145,9 @@ predicate.
 npm run coverage         # line coverage, on demand
 ```
 
-It is **on demand and has no threshold**, and should stay that way. The two
-sweeps execute ~94% of the source — that is how much of this repo is `games/` —
+It is **on demand and has no threshold**, and should stay that way. The
+all-games sweeps — `plays-to-an-end`, `renders` and `json-round-trip` —
+execute ~94% of the source — that is how much of this repo is `games/` —
 while asserting only that a match ends and a board renders, so the global
 percentage reads high whatever the tests are worth, and a CI gate on it would be
 satisfied by registering another game. What the report is good for is the
@@ -153,22 +164,24 @@ the reasons above have not changed.
 
 ## Planned future directions
 
-- **Replace `boardgame.io` in `durer-aion` with this engine** — the current main
-  effort. `a-gondolkodas-orome/durer-aion` already runs real competitions
-  (server-authoritative match state, team identity, timers, results); the plan
-  is for `strategyGameFactory` to take over its game-engine slot rather than
-  build a competition backend here (issue #313). What this repo owes that effort
-  is the engine work they share: a game's rules and its bot each importable with
-  no React, which is why `gameplay.ts` and `bot-strategy.ts` are separate files.
 - **Add Dürer competition games** — the games of each new competition, plus the
   tail of older ones still missing
 - **Refactoring and style improvements** — keep the codebase clean, consistent,
   and easy to maintain
 
-**Do not propose adopting boardgame.io.** The engine deliberately borrows its
-ideas — the long-form move shape and the external store already do — but the
-library itself is effectively unmaintained (no meaningful releases for years,
-and its React client pins React versions well behind the one used here). Build
+**Replacing `boardgame.io` with this engine is not on the list.** The plan was
+drafted — this app and the live competition round are the same repository, and
+`packages/engine` was pulled out of here partly with that in mind — and then
+deprioritized, because upstream boardgame.io is under active development again
+(issue #277). The root [`CLAUDE.md`](../../CLAUDE.md) is the authority: don't
+build toward that replacement. What survives it is the engine work that pays
+for itself either way — a game's rules and its bot each importable with no
+React, which is why `gameplay.ts` and `bot-strategy.ts` are separate files.
+
+**Do not propose adopting boardgame.io here either.** The engine deliberately
+borrows its ideas — the long-form move shape and the external store already do
+— but this site is static and client-only, with nothing for a match server to
+do; and its React client pins React versions behind the one used here. Build
 the rest in-repo.
 
 ## Adding a new game
