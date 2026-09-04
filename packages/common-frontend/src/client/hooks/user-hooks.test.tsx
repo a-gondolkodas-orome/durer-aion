@@ -6,7 +6,8 @@ import { ClientRepoProvider, MockClientRepository } from '../api-repository-inte
 import { setTeamState, useTeamStateValue } from './team-state-store';
 import { useLogin } from './user-hooks';
 
-const repo = new MockClientRepository();
+// The session lives in the repository, so each test starts a fresh one.
+let repo: MockClientRepository;
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <ClientRepoProvider value={repo}>{children}</ClientRepoProvider>
@@ -14,6 +15,7 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 
 beforeEach(() => {
   localStorage.clear();
+  repo = new MockClientRepository();
 });
 
 // The store is module state — see the note atop team-state-store.ts.

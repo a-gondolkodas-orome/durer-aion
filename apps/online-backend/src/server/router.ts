@@ -9,6 +9,7 @@ import { getFilterPlayerView } from "boardgame.io/internal";
 import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus, createGame, injectBot, injectPlayer } from './team_manage';
 import { import_teams_from_tsv } from './team_import';
 import { publicTeamView } from './team_view';
+import { TeamState, clearTeamCookie, requireTeam, setTeamCookie } from './team_session';
 import { AnyBgioGame, PlayerIDType } from 'game';
 
 /**
@@ -301,66 +302,66 @@ export function configureTeamsRouter(
   })
 
   /**
-   * Get team ID based on login token
+   * Log a team in: the join code answered with the session cookie.
    *
-   * @param {string} token: Login token
-   * @returns {string} - TeamId for the team
+   * The code travels in the body, never in the path — it is the team's login
+   * secret, and a path lands in access logs and browser history. What the
+   * cookie is and why is `team_session.ts`.
+   *
+   * @param {string} code - the team's join code, as `{ "code": ... }`
    */
-  router.get("/team/join/:token", koaBody(), async (ctx) => {
-    const connect_token: string = ctx.params.token ?? "no-token";
-    const team = await teams.getTeam({ joinCode: connect_token });
-    ctx.body = team?.teamId;
-    if (team === null)
-      ctx.throw(404, "Team not found!")
-  })
+  router.post("/team/join", koaBody(), async (ctx) => {
+    const sent: unknown = (ctx.request.body as { code?: unknown } | undefined)?.code;
+    const code = typeof sent === "string" ? sent : ctx.throw(400, "Expected { code: string }.");
+    const team = await teams.getTeam({ joinCode: code }) ?? ctx.throw(404, "Team not found!");
+    setTeamCookie(ctx, team.teamId);
+    ctx.status = 204;
+  });
 
   /**
-   * ROUTING FOR TEAM DATA is handled here. If wrong team then returns 400
-   * This is the main middleware to catch wrong team id-s
+   * Log a team out: the session cookie expired.
    *
-   * @param {string} GUID - TeamId
-   * @returns {PublicTeamView} - the team's own state, without its secrets
-   *
+   * No `requireTeam` here — a cookie naming no team must still be cleared.
    */
-  router.get(
-    /^\/team\/(?<GUID>[^-]{8}-[^-]{4}-[^-]{4}-[^-]{4}-[^-]{12}$)/,
-    koaBody(),
-    async (ctx) => {
-      const GUID = ctx.params.GUID ?? ctx.throw(400);
-      let team =
-        (await teams.getTeam({ teamId: GUID })) ??
-        ctx.throw(404, `Team with {teamId:${GUID}} not found.`);
+  router.post("/team/me/logout", async (ctx) => {
+    clearTeamCookie(ctx);
+    ctx.status = 204;
+  });
+
+  /**
+   * The logged-in team's own state. This is where a match whose time ran out
+   * while the team was away gets closed.
+   *
+   * @returns {PublicTeamView} - the team's own state, without its secrets
+   */
+  router.get<TeamState>("/team/me", requireTeam(teams), async (ctx) => {
+    let team = ctx.state.team;
     const staleInfo = await checkStaleMatch(team);
     if (staleInfo.isStale) {
-        console.log(`Stale found: ${JSON.stringify(staleInfo)}`);
-        await closeMatch(
-          (team[staleInfo.gameState] as InProgressMatchStatus).matchID,
-          teams,
-          ctx.db
-        );
-        team =
-          (await teams.getTeam({ teamId: GUID })) ??
-          ctx.throw(404, `Team with {teamId:${GUID}} not found.`);
+      console.log(`Stale found: ${JSON.stringify(staleInfo)}`);
+      await closeMatch(
+        (team[staleInfo.gameState] as InProgressMatchStatus).matchID,
+        teams,
+        ctx.db
+      );
+      team =
+        (await teams.getTeam({ teamId: team.teamId })) ??
+        ctx.throw(404, `Team with {teamId:${team.teamId}} not found.`);
     }
     ctx.body = publicTeamView(team);
-    }
-  );
+  });
 
   /**
-   * Let a team start a RELAY match.
-   *
-   * @param {string} GUID - TeamId
+   * Let the logged-in team start a RELAY match.
    */
-  router.get("/team/:GUID/relay/play", koaBody(), async (ctx) => {
-    const GUID = ctx.params.GUID;
-
+  router.post<TeamState>("/team/me/relay/play", requireTeam(teams), async (ctx) => {
     //check if in progress, it is not allowed to play
     //check if it can be started, throw error if not
-    const { game, team } = await getNewGame(ctx, teams, games, "RELAY");
+    const { game, team } = await getNewGame(ctx, teams, games, "RELAY", ctx.state.team);
 
     // about to start a game
     const body: LobbyAPI.CreatedMatch = await createGame(game, ctx);
-    await injectPlayer(ctx.db, body.matchID, { playerID: PlayerIDType.GUESSER_PLAYER, name: GUID, credentials: team.credentials });
+    await injectPlayer(ctx.db, body.matchID, { playerID: PlayerIDType.GUESSER_PLAYER, name: team.teamId, credentials: team.credentials });
     await injectBot(ctx.db, body.matchID);
 
     //created new game, updated team state accordingly
@@ -376,19 +377,16 @@ export function configureTeamsRouter(
   });
 
   /**
-   * Let a team start a STRATEGY match.
-   *
-   * @param {string} GUID - TeamId
+   * Let the logged-in team start a STRATEGY match.
    */
-  router.get("/team/:GUID/strategy/play", koaBody(), async (ctx) => {
-    const GUID = ctx.params.GUID;
+  router.post<TeamState>("/team/me/strategy/play", requireTeam(teams), async (ctx) => {
     //check if in progress, it is not allowed to play
     //check if it can be started, throw error if not
-    const { game, team } = await getNewGame(ctx, teams, games, "STRATEGY");
+    const { game, team } = await getNewGame(ctx, teams, games, "STRATEGY", ctx.state.team);
     //about to start
 
     const body: LobbyAPI.CreatedMatch = await createGame(game, ctx);
-    await injectPlayer(ctx.db, body.matchID, { playerID: PlayerIDType.GUESSER_PLAYER, name: GUID, credentials: team.credentials });
+    await injectPlayer(ctx.db, body.matchID, { playerID: PlayerIDType.GUESSER_PLAYER, name: team.teamId, credentials: team.credentials });
     await injectBot(ctx.db, body.matchID);
 
     //created new game, updated team state accordingly
@@ -400,15 +398,10 @@ export function configureTeamsRouter(
   });
 
   /**
-   * Let a team set their PageState to HOME
-   *
-   * @param {string} GUID - TeamId
+   * Let the logged-in team set their PageState to HOME
    */
-  router.get("/team/:GUID/gohome", koaBody(), async (ctx) => {
-    const GUID = ctx.params.GUID;
-    //check if in progress, it is not allowed to play
-    //check if it can be started, throw error if not
-    const team = await teams.getTeam({ teamId: GUID }) ?? ctx.throw(404, `Team with {id:${GUID}} not found.`)
+  router.post<TeamState>("/team/me/gohome", requireTeam(teams), async (ctx) => {
+    const team = ctx.state.team;
     if (team.relayMatch.state === 'IN PROGRESS' || team.strategyMatch.state === 'IN PROGRESS')
       ctx.throw(403, "Not allowed, match in progress.")
 

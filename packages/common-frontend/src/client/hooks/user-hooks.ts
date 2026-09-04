@@ -104,10 +104,13 @@ export const useLogin = () => {
 
 export const useLogout = () => {
   const repo = useClientRepo();
-  return () => {
+  return async () => {
     const userModel = new UserModel(repo);
-    userModel.logout();
-    setTeamState(null);
+    try {
+      await userModel.logout();
+    } finally {
+      setTeamState(null);
+    }
   };
 };
 

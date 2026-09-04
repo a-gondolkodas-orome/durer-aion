@@ -115,6 +115,11 @@ if (argv[2] === "import") {
   // Set up transport layer for updates
   server.app.context.durer_transport = socketio;
 
+  // Behind nginx every request arrives over plain HTTP; `X-Forwarded-Proto` is
+  // how koa learns it was HTTPS to the browser, and the session cookie takes
+  // its `Secure` flag from that (see server/team_session.ts).
+  server.app.proxy = true;
+
   //Admin page auth setup
   server.app.use(mount('/team/admin', auth({ name: 'admin', pass: getAdminCredentials() })));
   server.app.use(mount('/game/admin', auth({ name: 'admin', pass: getAdminCredentials() })));
@@ -134,7 +139,9 @@ if (argv[2] === "import") {
           url: ctx.request.href,
           method: ctx.request.method,
           query_string: ctx.request.querystring,
-          headers: ctx.request.headers,
+          // Minus the cookie: it is the team's session (server/team_session.ts),
+          // and an error report is no place for a login.
+          headers: { ...ctx.request.headers, cookie: undefined },
         },
       });
       Sentry.captureException(err);

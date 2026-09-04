@@ -115,11 +115,12 @@ Then import the teams once, and open `http://localhost:5173`:
 npm run teams:import:local
 ```
 
-Here the frontend calls the backend across origins — `dev:online` sets
-`VITE_SERVER_URL` and `dev:server` sets `ALLOW_CORS` — where the docker stack
-puts both behind nginx on one origin. That difference is why anything touching
-routing, the socket transport or the built assets wants a `stack:up` run before
-you believe it.
+Here the Vite dev server proxies the backend's routes and the socket to
+`:8000` — `apps/online-frontend/vite.config.ts` carries the same map as
+`nginx.conf` — so the page talks to one origin, as it does behind nginx in the
+docker stack; the session cookie needs that. It is still Vite standing in for
+nginx, which is why anything touching routing, the socket transport or the
+built assets wants a `stack:up` run before you believe it.
 
 `db:up` keeps its data inside the throwaway container, so stopping it discards
 everything and the next start needs the import again. The docker stack keeps
@@ -161,6 +162,10 @@ transport and the built frontend at once.
 5. Open the same join code in a second tab mid-match: the running match must
    not fork.
 6. Finish both and check the combined score on the finished screen.
+7. Log out and reload: the login form is back. The session is an HttpOnly
+   cookie set on login, so the browser's devtools show `durer_team` under
+   Cookies while logged in, gone after, and nothing team-related in
+   localStorage.
 
 Join codes `001-0000-000` and `002-0000-000` are categories D and E, which get
 different games.
@@ -176,11 +181,8 @@ At `http://localhost/admin`, user `admin`, password from `.env.docker`:
   soft delete. Start a match as a team in another tab first, then act on it
   from here.
 
-This is the one thing the stack is required for. The admin pages do not work
-from `dev:online` on 5173: basic auth cannot ride a cross-origin request, and
-the backend answers those with `Access-Control-Allow-Origin: *`, which may not
-carry credentials. Through nginx it is all one origin, so the browser's password
-prompt is all it takes.
+Through nginx it is all one origin, so the browser's password prompt is all it
+takes; the Vite proxy of `dev:online` makes 5173 one origin too.
 
 Team import has two paths and both need checking: `npm run teams:import`, which
 runs `scripts/import_teams.sh` inside the container, and the TSV upload on the

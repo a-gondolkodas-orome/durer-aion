@@ -76,10 +76,11 @@ export function Header(props: { teamName: string | null, admin: boolean, titles?
                   textOverflow: 'ellipsis',
                 }}>{props.titles?.[2] ?? props.teamName}</Stack>
                 <Stack onClick={() => {
-                  logout();
-                  if (clientRepository.version === "OFFLINE") {
-                    window.location.reload();
-                  }
+                  void logout().then(() => {
+                    if (clientRepository.version === "OFFLINE") {
+                      window.location.reload();
+                    }
+                  });
                 }} sx={{
                   fontSize: 20,
                   margin: '0px 15px',
@@ -143,7 +144,7 @@ export function Header(props: { teamName: string | null, admin: boolean, titles?
               }}>{props.titles?.[2] ?? props.teamName}</Stack>
               <Button onClick={() => {
                 setMobileMenuOpen(false);
-                logout();
+                void logout();
               }} variant='outlined'
               sx={{
                 fontSize: 20,

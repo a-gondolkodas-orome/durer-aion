@@ -1,22 +1,28 @@
 // @vitest-environment jsdom
-import { describe, test, expect, beforeEach, vi } from "vitest";
+import { describe, test, expect, beforeEach, afterEach, vi } from "vitest";
 import { MockClientRepository } from "../api-repository-interface";
-import { bgioStoragePrefix, guidStorageKey, relayPointsStorageKey } from "../utils/storage-keys";
+import { bgioStoragePrefix, loginMarkerStorageKey, relayPointsStorageKey } from "../utils/storage-keys";
 import { UserModel } from "./user-model";
 
 // The mock repository answers join code "2" with a team that is in the middle
-// of a relay match.
-const repo = new MockClientRepository();
+// of a relay match. The session lives in the repository — online it is an
+// HttpOnly cookie — so every test gets a fresh one.
+let repo: MockClientRepository;
 
 describe("UserModel session", () => {
   beforeEach(() => {
     localStorage.clear();
+    repo = new MockClientRepository();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
   });
 
   test("a browser with no session has no team to show", async () => {
     const user = new UserModel(repo);
 
-    expect(user.isUserLoggedIn()).toBe(false);
     expect(await user.getTeamState()).toBeNull();
   });
 
@@ -25,7 +31,6 @@ describe("UserModel session", () => {
 
     await user.login("2");
 
-    expect(user.isUserLoggedIn()).toBe(true);
     expect(await user.getTeamState()).toMatchObject({ pageState: "RELAY" });
   });
 
@@ -37,22 +42,29 @@ describe("UserModel session", () => {
     await user.login("2");
     localStorage.setItem(`${bgioStoragePrefix()}relay_c`, '{"G":{}}');
     localStorage.setItem(relayPointsStorageKey(), "12");
+    const endSession = vi.spyOn(repo, "logout");
 
-    user.logout();
+    await user.logout();
 
-    expect(localStorage.getItem(guidStorageKey())).toBeNull();
+    expect(endSession).toHaveBeenCalledTimes(1);
+    expect(localStorage.getItem(loginMarkerStorageKey())).toBeNull();
     expect(localStorage.getItem(`${bgioStoragePrefix()}relay_c`)).toBeNull();
     expect(localStorage.getItem(relayPointsStorageKey())).toBeNull();
-    expect(user.isUserLoggedIn()).toBe(false);
+    expect(await user.getTeamState()).toBeNull();
   });
 
+  // Nothing client-side knows whether there is a session, so the refusal is
+  // the server's (a 401); the page reloads to show the login form.
   test("a logged-out browser cannot start a round", async () => {
     const startRelay = vi.spyOn(repo, "startRelay");
+    const reload = vi.fn();
+    vi.stubGlobal("location", { reload });
+    vi.spyOn(console, "log").mockImplementation(() => undefined);
     const user = new UserModel(repo);
 
     await user.startRelay();
 
-    expect(startRelay).not.toHaveBeenCalled();
-    startRelay.mockRestore();
+    expect(startRelay.mock.results[0].type).toBe("throw");
+    expect(reload).toHaveBeenCalledTimes(1);
   });
 });
