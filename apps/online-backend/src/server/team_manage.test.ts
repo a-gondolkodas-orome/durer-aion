@@ -1,7 +1,9 @@
 import { describe, it, expect } from "vitest";
 import { MatchStatus } from "schemas";
 import { TeamModel } from "./model";
-import { allowedToStart, checkStaleMatch } from "./team_manage";
+import { AnyBgioGame } from "game";
+import { Server } from "boardgame.io";
+import { allowedToStart, checkStaleMatch, createGame } from "./team_manage";
 
 const inProgressUntil = (endAt: Date | string): MatchStatus =>
   ({
@@ -107,5 +109,24 @@ describe("checkStaleMatch", () => {
 
   it("has nothing to close for a team that has not started anything", async () => {
     expect(await checkStaleMatch(team({}))).toStrictEqual({ isStale: false });
+  });
+});
+
+// boardgame.io serves listed matches, metadata and all, from an
+// unauthenticated `GET /games/:name`, and that metadata names the playing
+// team by its GUID — the capability for every team route.
+describe("createGame", () => {
+  it("creates the match unlisted", async () => {
+    const game = { name: "test", setup: () => ({}), moves: {} } as unknown as AnyBgioGame;
+    const created: Server.MatchData[] = [];
+    const ctx = {
+      db: { createMatch: (_id: string, match: { metadata: Server.MatchData }) => created.push(match.metadata) },
+      throw: (_status: number, message: string) => { throw new Error(message); },
+    } as unknown as Server.AppCtx;
+
+    await createGame(game, ctx);
+
+    expect(created).toHaveLength(1);
+    expect(created[0].unlisted).toBe(true);
   });
 });

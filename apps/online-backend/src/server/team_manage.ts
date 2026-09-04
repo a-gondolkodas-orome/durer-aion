@@ -92,7 +92,11 @@ export async function createGame(
     game,
     numPlayers: 2,
     setupData: undefined,
-    unlisted: false,
+    // A listed match is served by boardgame.io's unauthenticated
+    // `GET /games/:name`, metadata included — and the team's GUID, which is
+    // the capability for every `/team/:GUID/...` route, is that metadata's
+    // player name. Nothing in this codebase reads the lobby listing.
+    unlisted: true,
   });
 
   if ("setupDataError" in match) {

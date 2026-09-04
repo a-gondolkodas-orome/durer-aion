@@ -8,6 +8,7 @@ import { TransportAPI } from '../socketio_botmoves';
 import { getFilterPlayerView } from "boardgame.io/internal";
 import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus, createGame, injectBot, injectPlayer } from './team_manage';
 import { import_teams_from_tsv } from './team_import';
+import { publicTeamView } from './team_view';
 import { AnyBgioGame, PlayerIDType } from 'game';
 
 /**
@@ -318,7 +319,7 @@ export function configureTeamsRouter(
    * This is the main middleware to catch wrong team id-s
    *
    * @param {string} GUID - TeamId
-   * @returns {TeamModel} - raw TeamModell if called directly
+   * @returns {PublicTeamView} - the team's own state, without its secrets
    *
    */
   router.get(
@@ -341,7 +342,7 @@ export function configureTeamsRouter(
           (await teams.getTeam({ teamId: GUID })) ??
           ctx.throw(404, `Team with {teamId:${GUID}} not found.`);
     }
-    ctx.body = team;
+    ctx.body = publicTeamView(team);
     }
   );
 
@@ -415,7 +416,7 @@ export function configureTeamsRouter(
     await team.update({
       pageState: "HOME",
     });
-    ctx.body = team;
+    ctx.body = publicTeamView(team);
   });
 
   /**
