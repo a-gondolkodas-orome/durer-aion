@@ -77,13 +77,13 @@ so nothing downstream distinguishes the two. Each pick is cloned, so a curated
 board is as freshly owned by its match as a generated one.
 
 Reach for the list whenever the positions are enumerable rather than sampled: a
-competition hands out one entry per attempt (#314), so the list order is part of
-the contract — **append, never reorder** — and a spec can judge every entry
-instead of calling the generator until they have all come up. The commonest case
-is a list of one, for a game that always starts from the same position:
-`startBoards: [startBoard]`, rather than wrapping that constant in a function
-nobody varies. `generateStartBoard` is then what it says — positions that are
-actually *generated*, by sampling or rejection.
+competition hands out one entry per attempt (durer-jatekok#314), so the list
+order is part of the contract — **append, never reorder** — and a spec can judge
+every entry instead of calling the generator until they have all come up. The
+commonest case is a list of one, for a game that always starts from the same
+position: `startBoards: [startBoard]`, rather than wrapping that constant in a
+function nobody varies. `generateStartBoard` is then what it says — positions
+that are actually *generated*, by sampling or rejection.
 
 **Name the boards, not the list.** A module exports the positions themselves —
 `startBoard`, `startBoardOfCategoryA`, `adjacentStartBoards` — and the variant
@@ -126,7 +126,7 @@ turn); `gameEnd: { winnerIndex }` ends the game with an always-explicit winner
 `nextTurnState` sets `ctx.turnState` (`null` clears, omitted keeps);
 `autoEndOfTurn: true` schedules `endOfTurnMove`. Causing nothing directly is
 what makes a move a pure reducer, and what lets the same function run in a
-future authoritative competition server (issue #313).
+future authoritative competition server (durer-jatekok#313).
 
 The object carries a `satisfies MoveDefs<Board>` clause — `MoveDefs<Board,
 TurnState>` where the game names a turn state. `satisfies` rather than an

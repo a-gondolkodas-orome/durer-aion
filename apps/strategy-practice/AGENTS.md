@@ -68,8 +68,8 @@ the committed file byte for byte, and so it verifies the table before writing
 
 `gameplay.ts` is the **framework-free half of a game**: the same module a
 server-authoritative competition mode would validate moves with, so it has to
-run in plain Node (issue #313). ESLint enforces that — a `react` import, or a
-value import from the `strategy-game-factory` barrel, is an error there; types
+run in plain Node (durer-jatekok#313). ESLint enforces that — a `react` import,
+or a value import from the `strategy-game-factory` barrel, is an error there; types
 from the barrel are fine, since `import type` is erased. A game whose gameplay
 is a handful of lines still gets the file: uniform layout is what makes the
 catalog skimmable, and it is what a spec and the bot's move pinning import

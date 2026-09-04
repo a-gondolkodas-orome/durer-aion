@@ -3,8 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "predeploy": "npx turbo run build --filter=offline-frontend && npm run predeploy --workspace=offline-frontend",
-    "deploy": "gh-pages -d apps/offline-frontend/dist",
     "lint": "eslint . --max-warnings=0",
     "lint:fix": "eslint . --fix",
     "start": "turbo start",
@@ -75,7 +73,6 @@
     "cross-env": "10.1.0",
     "cspell": "10.1.1",
     "eslint": "10.9.1",
-    "gh-pages": "6.3.0",
     "jsdom": "30.0.1",
     "tsdown": "0.22.14",
     "turbo": "2.10.12",
