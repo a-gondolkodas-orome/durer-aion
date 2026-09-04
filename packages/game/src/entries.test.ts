@@ -69,10 +69,11 @@ const reachableFrom = (entry: string): string[] => {
   return [...seen];
 };
 
-// The bot files by name, for the positive checks: that an entry reaches what it
-// should. The negative check — that the client reaches nothing of the bot's —
-// does not go by name, since a table can be called anything (last test).
-const isBot = (file: string) => /(^|\/)(strategy|strategydict|moveMap)\.ts$/.test(file);
+// A game folder's game.ts holds its rules and src/common the wrapper around them:
+// the only files a bot and a board may legitimately have in common, per the game
+// layout in CLAUDE.md. Everything else the bot entry reaches is the bot's own — a
+// strategy file, or a lookup table under whatever name (last checks).
+const isRules = (file: string) => file.startsWith("src/common/") || /(^|\/)game\.ts$/.test(file);
 const isBoard = (file: string) => file.endsWith(".tsx");
 
 describe("the package's entries", () => {
@@ -80,10 +81,8 @@ describe("the package's entries", () => {
     expect(reachableFrom("index.ts").length).toBeGreaterThan(5);
   });
 
-  it("the shared entry reaches no bot and no board", () => {
-    const reached = reachableFrom("index.ts");
-    expect(reached.filter(isBot)).toEqual([]);
-    expect(reached.filter(isBoard)).toEqual([]);
+  it("the shared entry reaches no board", () => {
+    expect(reachableFrom("index.ts").filter(isBoard)).toEqual([]);
   });
 
   it("the bot entry reaches every game's bot and no board", () => {
@@ -91,25 +90,23 @@ describe("the package's entries", () => {
     // Every game folder's strategy.ts, whether or not a registry names it.
     const bots = [...sources.keys()].filter(file => file.endsWith("/strategy.ts"));
     expect(bots.length).toBeGreaterThan(0);
-    expect(reached.filter(isBot)).toEqual(expect.arrayContaining(bots));
+    expect(reached).toEqual(expect.arrayContaining(bots));
     expect(reached.filter(isBoard)).toEqual([]);
   });
 
-  it("the client entry reaches every game's board and no bot", () => {
-    const reached = reachableFrom("client.ts");
-    expect(reached.filter(isBoard).length).toBeGreaterThan(0);
-    expect(reached.filter(isBot)).toEqual([]);
+  it("the client entry reaches every game's board", () => {
+    expect(reachableFrom("client.ts").filter(isBoard).length).toBeGreaterThan(0);
   });
 
-  // Whatever the bot and the client both reach must be rules, i.e. reached by
-  // the shared entry too. This is the check that needs no list of bot file
-  // names: a board importing a lookup table under any name is a file the bot
-  // entry reaches, the client entry reaches, and the shared entry does not.
-  it("the client and the bot share nothing but the rules", () => {
-    const shared = new Set(reachableFrom("index.ts"));
-    const bot = new Set(reachableFrom("bot.ts"));
-    const both = reachableFrom("client.ts").filter(file => bot.has(file) && !shared.has(file));
-    expect(both).toEqual([]);
+  // The check that needs no list of bot file names. The live client ships what the
+  // shared and the client entry reach between them, so anything the bot entry
+  // reaches from there is a table or a strategy in the served bundle — whether a
+  // board imported it, or the rules themselves did, which is the one way a table
+  // can be shipped while each entry looks clean on its own.
+  it("shares nothing but the rules with the entries the live client ships", () => {
+    const shipped = new Set([...reachableFrom("index.ts"), ...reachableFrom("client.ts")]);
+    const leaked = reachableFrom("bot.ts").filter(file => shipped.has(file) && !isRules(file));
+    expect(leaked, "rules belong in src/common or a game's game.ts, a bot's own files in neither").toEqual([]);
   });
 
   // Without a semicolon, a type-only import from a package used to swallow the

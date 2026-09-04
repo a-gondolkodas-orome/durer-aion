@@ -200,10 +200,10 @@ through the `game/bot` entry, and only the server and the offline dry run may
 import it: ESLint forbids the specifier everywhere else (`eslint.config.mjs`),
 `packages/common-frontend` included, since the served bundle carries that
 package too. `packages/game/src/entries.test.ts` walks the package's own
-graph to pin that nothing the bot entry reaches is also reached by the client
-entry unless the shared entry reaches it — so a stray import from a board
-into the bot, or into a table under whatever name, fails the tests instead of
-handing every competitor the tables. The offline dry-run build
+graph to pin that everything the bot entry shares with the two entries the live
+client ships is a rules file — `src/common/` or a game's `game.ts` — so a table
+under whatever name, reached from a board or pulled into the rules, fails the
+tests instead of handing every competitor the tables. The offline dry-run build
 imports `game/bot` on purpose (its bot runs in the browser, after the game
 is public). Before a competition, still do the by-hand check in
 `README.md` § *Checking it works*: build, then grep `apps/online-frontend/dist`

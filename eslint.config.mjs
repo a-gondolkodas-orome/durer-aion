@@ -5,11 +5,16 @@ import { defineConfig } from 'eslint/config';
 import tseslint from 'typescript-eslint';
 import { quotesRule, stylisticPlugin, stylisticRules, stylisticRulesOff } from './eslint.stylistic.mjs';
 
-// The `game/bot` entry and every relative spelling of it or of the package's
-// source: `../../packages/game/...` from an app, `../../game/...` from a sibling
-// package. Shared by the three no-restricted-imports blocks below — see the first.
+// The `game/bot` entry and every relative spelling of it, of the package's source
+// and of its build: `../../packages/game/...` from an app, `../../game/...` from a
+// sibling package. See the block that uses it, below.
 const noBotInTheClient = {
-  group: ['game/bot', '**/packages/game/**', '**/game/bot', '**/game/bot.ts', '**/game/src/**'],
+  group: [
+    'game/bot',
+    '**/packages/game/**',
+    '**/game/bot', '**/game/bot.ts',
+    '**/game/src/**', '**/game/dist/**',
+  ],
   message: 'The live client must not ship the bot: import `game` or `game/client` only.',
 };
 
@@ -101,21 +106,23 @@ export default defineConfig(
   // rule cannot see is the package's own graph — a board importing a strategy file;
   // the walk in packages/game/src/entries.test.ts pins that.
   //
-  // A flat config replaces a rule's options wholesale when a later object sets the
-  // same rule, so this block comes first and the two package blocks below carry the
-  // pattern as well as their own — otherwise whichever set is last would silently
-  // switch the other off.
+  // This ban rides the core `no-restricted-imports`, while the React bans below use
+  // the typescript-eslint rule of the same name: a flat config replaces a rule's
+  // options wholesale, so two blocks setting one rule name silently switch each
+  // other's patterns off — two rule names cannot, whatever order they come in. The
+  // core rule differs only in having no `allowTypeImports`, which this ban has no
+  // use for: nothing outside the bot needs to name a bot's types either.
   {
     files: ['**/*.{ts,tsx}'],
     rules: {
-      '@typescript-eslint/no-restricted-imports': ['error', {
+      'no-restricted-imports': ['error', {
         patterns: [noBotInTheClient],
       }],
     },
   },
   {
     files: ['apps/online-backend/**/*.{ts,tsx}', 'apps/offline-frontend/**/*.{ts,tsx}'],
-    rules: { '@typescript-eslint/no-restricted-imports': 'off' },
+    rules: { 'no-restricted-imports': 'off' },
   },
   // The core of the package is what a bare node server imports; its React client half
   // lives in src/react/ and is exempt — that is the whole point of the split. What this
@@ -128,7 +135,7 @@ export default defineConfig(
     ignores: ['packages/engine/react.ts', 'packages/engine/src/react/**'],
     rules: {
       '@typescript-eslint/no-restricted-imports': ['error', {
-        patterns: [noBotInTheClient, {
+        patterns: [{
           group: ['react', 'react/*', 'react-*', '*.tsx', '**/*.tsx'],
           allowTypeImports: true,
           message: 'packages/engine runs with no framework attached; keep React on the app side.',
@@ -145,7 +152,7 @@ export default defineConfig(
     files: ['packages/games/**/*.ts'],
     rules: {
       '@typescript-eslint/no-restricted-imports': ['error', {
-        patterns: [noBotInTheClient, {
+        patterns: [{
           group: ['react', 'react/*', 'react-*', '*.tsx', '**/*.tsx'],
           allowTypeImports: true,
           message: 'A game\'s .ts half runs in plain Node; move anything React-flavoured into the game .tsx.',
