@@ -100,3 +100,27 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run spell-check
+
+  docker:
+    name: docker
+    runs-on: ubuntu-latest
+    # A cold build of the backend image — npm ci and turbo inside it — is the
+    # bulk of this, and runs in a few minutes.
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      # No setup-node, for the same reason dependency-report.yml has none: the
+      # only thing run outside docker is the env seeding below, which any Node
+      # does, and the image pins its own Node in the Dockerfile — which
+      # scripts/check-versions.test.mjs already holds to .nvmrc.
+      - name: Seed .env.docker
+        # compose is invoked with --env-file, so the gitignored file has to
+        # exist. These are the sample values `npm run setup` gives a developer;
+        # nothing here starts a container, so they are never used as credentials.
+        run: npm run setup
+      # The competition is deployed from these two images and nothing else in CI
+      # touches them, so a broken Dockerfile or nginx.conf used to surface at
+      # deploy time. No compose overlay: this is the production image set, the
+      # one `npm run stack:prod` builds.
+      - name: Build the deployed images
+        run: npm run stack:build
