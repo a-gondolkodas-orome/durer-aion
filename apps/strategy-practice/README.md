@@ -5,10 +5,13 @@ Math Competition. Merged into the monorepo from the durer-jatekok repository;
 lived as `apps/practice` until the relay practice app made that name ambiguous
 (pre-rename history: `git log -- apps/practice`).
 
-The deployed version is here: https://jatek.durerinfo.hu/ .
+The deployed version is here: https://gyakorlo.durerinfo.hu/jatekok/ .
 
-When you push to the default (main) branch, the tests are run, and if they are
-successful, the project is deployed to the live website within a few minutes.
+A push to the default (main) branch deploys to the live website within a few
+minutes. The checks run on the same push but do **not** gate it: `ci.yml` and
+`pages-deploy.yml` are separate workflows with no dependency between them, so a
+red build does not hold the deploy back. There is no staging step either — the
+workflow going green *is* the cutover.
 
 ## Project setup
 
@@ -93,14 +96,22 @@ To keep track of who works on which game, use [this
 table](https://docs.google.com/spreadsheets/d/1-6u9PCtvf_gDHrs65x36pmDzFt4nZZx_IUuXrgS2aZk/edit#gid=0).
 
 1. Add the game metadata to `src/components/games/gameList.ts`.
-2. Create a folder for the game under `src/components/games` with the standard
+2. Create a folder for the game under `packages/games/src/` with the standard
    files: a React-free `gameplay.ts` (the `Board` type, start boards and
-   `moves`), `bot-strategy.ts`, the game component `<game>.tsx` (plus
+   `moves`), `bot-strategy.ts`, the game itself `<game>.tsx` (plus
    `board-client.tsx` once the JSX outgrows the game file), and a
-   `gameplay.spec.ts` — see [Where it lives](#where-it-lives).
-3. Re-export the game component from the barrel in
-   `src/components/games/index.ts`, keyed by the game's `gameList` key. The router
-   in `src/components/app/app.tsx` picks it up automatically — no edit needed there.
+   `gameplay.spec.ts` — see [Where it lives](#where-it-lives). A game there
+   exports a `StrategyGameConfig` object rather than a component;
+   `remove-divisor-multiple` is the one to copy.
+3. Export the config from `packages/games/index.ts`, then turn it into a page in
+   the barrel at `src/components/games/index.ts` —
+   `export const MyGame = strategyGameFactory(myGameConfig);` — keyed by the
+   game's `gameList` key. The router in `src/components/app/app.tsx` picks it up
+   automatically — no edit needed there.
+
+   The older games still live under `src/components/games/<game>/` and export a
+   component the barrel re-exports directly. Both shapes work; new games take
+   the first.
 
 Every field, edge case and enforcement rule of the engine API lives in
 [src/components/CLAUDE.md](src/components/CLAUDE.md). *It is recommended to copy
@@ -225,10 +236,11 @@ The site supports Hungarian (default) and English. See `TicTacToe`
 for a complete example. English translations are added on a game-per-game bases,
 it is fine to add new games with Hungarian only.
 
-The `t()` helper from `translate.ts` resolves a value to the active language.
-The value can be a plain string if there are no translations available, or a
-`{ hu, en }` object. It is reached through the `language` barrel, which is a
-path alias — `import { useTranslation } from 'language';`, no `../../../`.
+The `t()` helper resolves a value to the active language. The value can be a
+plain string if there are no translations available, or a `{ hu, en }` object.
+`useTranslation()` returns it; the hook lives in `packages/engine`
+(`src/react/translate.ts`) and is reached through the `language` barrel, which
+is a path alias — `import { useTranslation } from 'language';`, no `../../../`.
 
 Check the [Dürer Archive](https://durerinfo.hu/archivum/feladatsorok/) for
 existing translations.
@@ -259,10 +271,11 @@ This app appears in its own rows rather than the shared ones wherever it runs
 ahead. Its eslint, typescript and vitest pins match the root's and its vite
 matches the other frontends'.
 
-`playwright` is the one dependency pinned exactly, deliberately: the devcontainer
-image bakes browser binaries for one specific version, so an incidental bump
-inside a range would be a broken container rather than a newer library.
-The root `npm test` fails if it and `.devcontainer/Dockerfile` disagree
+Every dependency here is pinned exactly, as everywhere else in the monorepo
+(`save-exact` in `.npmrc`). `playwright` carries an extra constraint on top of
+that: the devcontainer image bakes browser binaries for one specific version, so
+the pin has to agree with `.devcontainer/Dockerfile` as well as with the
+lockfile. The root `npm test` fails when they disagree
 (`scripts/check-versions.test.mjs`), and does the same for every file the Node
 version is written down in (the root README § Requirements lists them).
 
