@@ -10,6 +10,7 @@ import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus, createGame, 
 import { import_teams_from_tsv } from './team_import';
 import { publicTeamView } from './team_view';
 import { TeamState, clearTeamCookie, requireJson, requireTeam, setTeamCookie } from './team_session';
+import type { requireAdmin } from './admin_session';
 import { AnyBgioGame, PlayerIDType } from 'game';
 
 /**
@@ -19,11 +20,17 @@ import { AnyBgioGame, PlayerIDType } from 'game';
  * @param router - Koa Router
  * @param teams - List of teams, provided as a TeamsRepository
  * @param games - List of possible games for teams
+ * @param adminAuth - The organisers' login, from `requireAdmin`. Passed in
+ *   rather than built here so a test can serve the routes without the
+ *   environment the real password comes from. Every `/team/admin` and
+ *   `/game/admin` route below names it; `server/admin_session.ts` says why it
+ *   hangs on the routes instead of on the prefix they share.
  */
 export function configureTeamsRouter(
   router: Router<DefaultState, Server.AppCtx>,
   teams: TeamsRepository,
-  games: AnyBgioGame[]
+  games: AnyBgioGame[],
+  adminAuth: ReturnType<typeof requireAdmin>
 ) {
   /**
    * Get the log data about a specific match.
@@ -31,8 +38,7 @@ export function configureTeamsRouter(
    * @param {string} matchId - The ID of the match.
    * @returns {LogEntry[]} - A list of log objects.
    */
-  router.get("/game/admin/:matchId/logs", async (ctx) => {
-    //It is already authenticated by the admin mount routing
+  router.get("/game/admin/:matchId/logs", adminAuth, async (ctx) => {
     const matchID = ctx.params.matchId;
     const { log } = await (ctx.db as StorageAPI.Async).fetch(matchID, {
       log: true,
@@ -49,7 +55,7 @@ export function configureTeamsRouter(
    * @param {string} matchId - The ID of the match.
    * @returns {State<any>} - A match state object object.
    */
-  router.get("/game/admin/:matchId/state", async (ctx) => {
+  router.get("/game/admin/:matchId/state", adminAuth, async (ctx) => {
     const matchID = ctx.params.matchId;
     const { state } = await (ctx.db as StorageAPI.Async).fetch(matchID, {
       state: true,
@@ -67,7 +73,7 @@ export function configureTeamsRouter(
  * @param {integer} minutes - How many minutes to add
  * @returns {State<any>} - A match state object object.
  */
-  router.post("/game/admin/:matchId/addminutes/:minutes", async (ctx) => {
+  router.post("/game/admin/:matchId/addminutes/:minutes", adminAuth, async (ctx) => {
     const matchID = ctx.params.matchId;
     const minutes = Number(ctx.params.minutes);
     const { state, metadata } = await (ctx.db as StorageAPI.Async).fetch(
@@ -170,7 +176,7 @@ export function configureTeamsRouter(
    * @param {string} matchId - The ID of the match.
    * @returns {Server.MatchData} - A match object.
    */
-  router.get("/game/admin/:matchId/metadata", async (ctx) => {
+  router.get("/game/admin/:matchId/metadata", adminAuth, async (ctx) => {
     const matchID = ctx.params.matchId;
     const { metadata } = await (ctx.db as StorageAPI.Async).fetch(matchID, {
       metadata: true,
@@ -187,7 +193,7 @@ export function configureTeamsRouter(
      * @param {string} teamID - The ID of the team.
      * @returns {TeamModel} - Returns the modified team model.
      */
-  router.post("/team/admin/:teamID/reset/strategy", async (ctx) => {
+  router.post("/team/admin/:teamID/reset/strategy", adminAuth, async (ctx) => {
     const teamId = ctx.params.teamID;
     const team = await teams.getTeam({ teamId });
 
@@ -213,7 +219,7 @@ export function configureTeamsRouter(
      * @param {string} teamID - The ID of the team.
      * @returns {TeamModel} - Returns the modified team model.
      */
-  router.post("/team/admin/:teamID/reset/relay", async (ctx) => {
+  router.post("/team/admin/:teamID/reset/relay", adminAuth, async (ctx) => {
     const teamId = ctx.params.teamID;
     const team = await teams.getTeam({ teamId });
 
@@ -238,7 +244,7 @@ export function configureTeamsRouter(
    *
    * @param {string} teamID - The ID of the team.
    */
-  router.delete("/team/admin/:teamID/remove", async (ctx) => {
+  router.delete("/team/admin/:teamID/remove", adminAuth, async (ctx) => {
     const teamId = ctx.params.teamID;
     const deleted = teams.removeTeam(teamId);
     if (await deleted === 0) {
@@ -253,7 +259,7 @@ export function configureTeamsRouter(
    * @param {string|string[]} filter - Get parameter to pass the filter
    * @returns {TeamModel[]} - List of the selected teams
    */
-  router.get("/team/admin/filter", koaBody(), async (ctx) => {
+  router.get("/team/admin/filter", adminAuth, koaBody(), async (ctx) => {
     const filter_string: string | string[] | undefined =
       ctx.request.query["filter"];
     let filters: string[];
@@ -273,7 +279,7 @@ export function configureTeamsRouter(
    * Get all teams as a full object
    * @returns {TeamModel[]} - List of the selected teams
    */
-  router.get("/team/admin/all", koaBody(), async (ctx) => {
+  router.get("/team/admin/all", adminAuth, koaBody(), async (ctx) => {
     ctx.body = await teams.listTeams();
   })
 
@@ -281,7 +287,7 @@ export function configureTeamsRouter(
  * Get all teams as a full object
  * @returns {TeamModel[]} - List of the selected teams
  */
-  router.put("/team/admin/import", koaBody({ multipart: true }), async (ctx) => {
+  router.put("/team/admin/import", adminAuth, koaBody({ multipart: true }), async (ctx) => {
     const { file } = ctx.request.files ?? ctx.throw(400, 'No files uploaded!');
     // Check if multiple files are uploaded
     if (Array.isArray(file)) {
