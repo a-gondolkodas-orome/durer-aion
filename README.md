@@ -200,20 +200,6 @@ At `http://localhost/admin`, user `admin`, password from `.env.docker`:
   soft delete. Start a match as a team in another tab first, then act on it
   from here.
 
-The password is what stands between the internet and every team's join code,
-so the other half of this item is that the API refuses anyone without it:
-
-```bash
-curl -si http://localhost/team/admin/all | head -1   # 401
-curl -si http://localhost/team/ADMIN/all | head -1   # 401
-```
-
-The second one used to answer 200 with every team's login secret: the login was
-mounted on a path prefix that matched case-sensitively while the routes under it
-matched case-insensitively. It hangs on the routes themselves now
-(`apps/online-backend/src/server/admin_session.ts`, pinned by
-`admin_session.test.ts`).
-
 Through nginx it is all one origin, so the browser's password prompt is all it
 takes. The `dev:online` proxy puts 5173 on one origin too, which removes the
 reason these pages used to need the stack — but whether the password prompt
