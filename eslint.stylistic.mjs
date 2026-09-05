@@ -58,9 +58,9 @@ export const stylisticRules = {
 };
 
 // Quote style, applied where the code already agrees on one rather than everywhere.
-// apps/strategy-practice has enforced single quotes across its 487 files all along,
-// and packages/engine and packages/games — that app's code, moved out — follow it
-// with no violations. Turning it on there costs nothing and keeps it true.
+// apps/strategy-practice has enforced single quotes across its whole source tree
+// all along, and packages/engine and packages/games — that app's code, moved out —
+// follow it with no violations. Turning it on there costs nothing and keeps it true.
 //
 // The other eight workspaces never had the rule and never settled on a style:
 // packages/common-frontend is 18 files single-quoted, 16 double-quoted and 10 that

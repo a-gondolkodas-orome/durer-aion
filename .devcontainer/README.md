@@ -1,8 +1,16 @@
 # Dev container
 
-An **optional** reproducible development environment. Nothing in the repo
-requires it — the setup steps in the root `README.md` keep working exactly as
-before, and developers who ignore this folder lose nothing.
+An **optional** reproducible development environment for the repository as a
+whole. Nothing in the repo requires it — the setup steps in the root
+`README.md` keep working exactly as before, and developers who ignore this
+folder lose nothing.
+
+`apps/strategy-practice` carries a second, narrower one of its own
+([`apps/strategy-practice/.devcontainer/`](../apps/strategy-practice/.devcontainer/)):
+an image with Playwright's Chromium baked in, port 8012 in `forwardPorts`, and
+an `npm ci --prefix ../..` that installs the monorepo from the root rather than
+the workspace. It has no docker-in-docker, so the stack commands need this one.
+Everything below describes this one.
 
 ## Using it
 
@@ -27,30 +35,33 @@ where the file does not exist yet, so your own values are never overwritten:
   `.nvmrc` means bumping that too (README § Requirements lists every file that
   repeats the version; `npm test` fails until they agree).
 - **Docker inside the container**, so every documented flow works unchanged
-  from a terminal in here — `docker run … bitnami/postgresql` for the
-  database, and `docker compose up --build` for the full stack. It installs
-  Docker CE rather than Moby (`"moby": false`), because the Node 24 image is
-  Debian trixie-based and Debian does not package `moby-cli` there.
-- **Labelled ports**: 5173 (vite dev servers), 8012 (strategy-practice),
-  8000 (online-backend), 80 (nginx, when running docker compose), 5432
-  (postgres). These are labels only — VS Code forwards each port when something
-  actually starts listening on it. They are deliberately *not* in
-  `forwardPorts`, which forwards eagerly and logs `ECONNREFUSED` against ports
-  no server has bound yet. The flip side is that an empty Ports panel means
-  nothing is running, not that forwarding is broken.
+  from a terminal in here — `npm run db:up` for the database on its own, and
+  `npm run stack:up` for the full stack. It installs Docker CE rather than Moby
+  (`"moby": false`), because the Node 24 image is Debian trixie-based and Debian
+  does not package `moby-cli` there.
+- **Labelled ports**: 5173 (the online, offline and relay practice dev
+  servers, one at a time), 8012 (strategy-practice), 8000 (online-backend),
+  80 (nginx, when running docker compose), 5432 (postgres). These are labels
+  only — VS Code forwards each port when something actually starts listening on
+  it. They are deliberately *not* in `forwardPorts`, which forwards eagerly and
+  logs `ECONNREFUSED` against ports no server has bound yet. The flip side is
+  that an empty Ports panel means nothing is running, not that forwarding is
+  broken.
 - **`DEV_SERVER_HOST=true`**, which makes the vite dev servers listen on all
   interfaces instead of loopback only. Without it the forwarded port accepts
   the connection and then hangs, because a loopback-bound server inside the
   container is not reachable from outside its network namespace. Set only
-  here, so running vite on your own machine is unaffected.
+  here, so running vite on your own machine is unaffected. Each config reads
+  it for itself — a new frontend has to opt in, or it hangs exactly this way.
 - **ESLint and cspell extensions**, so editor feedback matches
   `npm run lint` and `npm run spell-check`.
 
 ## What it does not do
 
 It does not import teams, and it does not start any service: you still run
-`npm run stack:up` (or `dev:offline` / `dev:server` / `dev:online`) yourself,
-and `npm run teams:import` after it.
+`npm run stack:up` (or `dev:server` / `dev:online` / `dev:offline` /
+`dev:relay-practice` / `dev:strategy-practice`) yourself, and
+`npm run teams:import` after it.
 
 The seeded env files carry the sample values, which are enough to run
 offline-frontend and to bring the docker stack up. For anything involving the

@@ -853,6 +853,7 @@ távolságokról
 távolságunkra
 Tekinthetjük
 teletöltenénk
+tengelyesen
 téren
 terjedése
 tévedésből
