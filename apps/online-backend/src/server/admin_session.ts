@@ -3,6 +3,9 @@ import type * as Router from '@koa/router';
 import type { DefaultState } from 'koa';
 import type { Server } from 'boardgame.io';
 
+/** The one account the organisers' password belongs to. */
+export const ADMIN_USER = 'admin';
+
 /** The organisers' login for the `/team/admin` and `/game/admin` routes.
  *
  * HTTP Basic, one shared password from `ADMIN_CREDENTIALS`. `koa-basic-auth`
@@ -20,8 +23,6 @@ import type { Server } from 'boardgame.io';
  * `admin_session.test.ts` pins both halves: the case-folded paths answer 401,
  * and no route under either prefix is registered without this middleware.
  */
-export const ADMIN_USER = 'admin';
-
 export function requireAdmin(password: string): Router.Middleware<DefaultState, Server.AppCtx> {
   return auth({ name: ADMIN_USER, pass: password });
 }
