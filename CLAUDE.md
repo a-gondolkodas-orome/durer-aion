@@ -37,12 +37,13 @@ command: ESLint resolves a config per directory as it walks, so one `eslint .` a
 the root lints this app through *its* config and everything else through the
 root one, in one pass; and the root `vitest.config.mts` lists that vitest config
 as a second project, so one `npm test` runs its suite next to the root's, each
-under its own setup. What that ESLint config
-differs on is the *rule set* — `@eslint-react`, react-hooks, and a stylistic
-dialect (no trailing comma, single quotes, `max-len` 120) the root does not
-impose. It is not a second
-toolchain: eslint, typescript and vitest are pinned to the same versions as the
-root and npm hoists them, its own plugins included. It came in as a subtree
+under its own setup. What that ESLint config differs on is the *rule set* —
+`@eslint-react`, react-hooks, and a stylistic dialect (no trailing comma,
+`max-len` 120) the root does not impose. Single quotes are not part of that
+difference: the root config applies the same rule to `packages/engine` and
+`packages/games`, this app's code moved out. It is not a second toolchain:
+eslint, typescript and vitest are pinned to the same versions as the root and
+npm hoists them, its own plugins included. It came in as a subtree
 merge from `durer-jatekok` with that dialect already set, and reconciling the
 two would be a rewrite rather than a merge — so the two configs stay, and
 ESLint applies each where it belongs. Its own [`AGENTS.md`](apps/strategy-practice/AGENTS.md) loads
@@ -69,18 +70,24 @@ change is measured against.
 
 - **Frontend**: React 19, Vite, MUI (Material-UI), React Router
 - **Backend**: boardgame.io server, Koa, PostgreSQL (via bgio-postgres)
-- **Build**: Turborepo, TypeScript, tsdown. The packages build into `dist`;
-  the backend is one tsdown bundle too, built from the packages' *source*
+- **Build**: Turborepo, TypeScript, tsdown. The packages build into `dist` —
+  all but `packages/games`, which has no build at all, because
+  `apps/strategy-practice` reads it from source through a vite alias. The
+  backend is one tsdown bundle too, built from the packages' *source*
   rather than their `dist` (`apps/online-backend/tsdown.config.mts` says how
   and why), so neither its build, its dev server nor its typecheck waits on a
   package build. Each build config is `tsdown.config.mts`, not
   `.ts`: the packages carry no `"type": "module"`, which leaves node guessing
   at a `.ts` config's module system and warning about it on every build. The
   packages ship ESM only — the frontends import it and the backend bundles
-  their source, so a CommonJS build would have no consumer.
+  their source, so a CommonJS build would have no consumer. `packages/engine` is
+  the exception: it is CJS-typed and builds both formats, so a host that
+  `require`s it works too (its `tsdown.config.mts` says how).
 - **Testing**: vitest, React Testing Library. Suites are `*.test.ts(x)` under
-  the root config and `*.spec.ts(x)` in `apps/strategy-practice`; one `npm test`
-  runs both through vitest, and neither uses Jest.
+  the root config and `*.spec.ts(x)` under the `apps/strategy-practice` project,
+  which also takes the `.spec` files in `packages/engine` and `packages/games` —
+  that app's code, moved out. One `npm test` runs both projects through vitest,
+  and neither uses Jest.
 - **`apps/strategy-practice`** shares this React major, the root's eslint,
   typescript and vitest pins, and the same vite as the other frontends;
   Tailwind and its own build/test setup are what set it apart. See its
@@ -94,6 +101,7 @@ npm ci
 npm run setup
 
 # The whole online round in docker: nginx + backend + postgres (detached)
+npm run stack:build   # just the two deployed images, starting nothing — the CI gate
 npm run stack:up      # builds, then brings the stack up on http://localhost
 npm run teams:import  # loads scripts/test.tsv, once postgres is accepting connections
 npm run stack:ps      # which services are up, when a URL shows nothing
@@ -241,13 +249,12 @@ The opening position has two homes, and `GameMixin.startingPosition` in
 
 ## Environment Files
 
-- `apps/online-backend/.env` - Backend config (copy from `.env.sample`)
-- `apps/offline-frontend/.env` - Offline frontend config
-- `apps/relay-practise-frontend/.env` - Relay practice frontend config
-- `.env.docker`, `.env.local` - Docker compose config (copy from the `.sample` files)
-
-`npm run setup` creates all of them from their samples, never overwriting one
-that exists. The dev container runs it for you.
+`npm run setup` copies each from its committed `*.sample` twin, never
+overwriting one that exists, and the dev container runs it for you. Six files:
+`.env.docker` for the docker stack, `.env.local` for `common-frontend`'s build,
+and an `.env` each for `online-backend`, `online-frontend`, `offline-frontend`
+and `relay-practise-frontend`. [`README.md`](README.md) § *Configuration you may
+want to change* is the table of what reads which.
 
 ## Docker Deployment
 
