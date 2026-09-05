@@ -352,7 +352,7 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
     const visibleVariants = getVariantsForMode(mode);
 
     return (
-    <main className="flex flex-col p-2 min-h-screen">
+    <main className="flex flex-col p-2 min-h-screen mb-14">
       <GameHeader />
       <div className="flex justify-center grow">
         <div className="max-w-[100ch] w-full">

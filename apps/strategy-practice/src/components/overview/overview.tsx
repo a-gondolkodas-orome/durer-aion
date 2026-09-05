@@ -46,36 +46,39 @@ export const Overview = () => {
     gameList
   );
 
-  return <main className="p-2">
+  return <main className="flex-1 w-full">
     <OverviewHeader
       filtersOpen={showFilters}
       onToggleFilters={() => setShowFilters(o => !o)}
       activeFilterCount={selectedCategories.length + selectedIcons.length}
     />
-    {showFilters && (
-      <div className="border-t mt-2 pt-3 flex flex-col gap-1 mb-2">
-        <CategoryFilter selected={selectedCategories} onChange={setSelectedCategories} />
-        <IconFilter selected={selectedIcons} onChange={setSelectedIcons} />
-      </div>
-    )}
+    <div className="px-2 sm:px-3 py-3 sm:py-4 mb-10">
+      {showFilters && (
+        <div className="mt-2 pt-3 flex flex-col gap-1 mb-2">
+          <CategoryFilter selected={selectedCategories} onChange={setSelectedCategories} />
+          <IconFilter selected={selectedIcons} onChange={setSelectedIcons} />
+        </div>
+      )}
 
-    <FeaturedStrip gameIds={featuredIds} />
+      <FeaturedStrip gameIds={featuredIds} />
 
-    {sectionOrder.map(section => (
-      <CategorySection
-        key={section}
-        title={sectionTitles[section]}
-        gameIds={orderByCategoryThenYear(groups[section], gameList)}
-        defaultOpen={defaultOpenSections.includes(section)}
-        forceOpen={isFiltering}
-        storageKey={section}
-      />
-    ))}
+      {sectionOrder.map(section => (
+        <CategorySection
+          key={section}
+          title={sectionTitles[section]}
+          gameIds={orderByCategoryThenYear(groups[section], gameList)}
+          defaultOpen={defaultOpenSections.includes(section)}
+          forceOpen={isFiltering}
+          storageKey={section}
+        />
+      ))}
+    </div>
 
-    <footer className="md:hidden flex justify-end items-center gap-3 mt-4 px-2">
+    <div className="primary-surface md:hidden fixed bottom-0 left-0 right-0 flex justify-end items-center gap-3 px-3
+      py-4">
       <ThemeSwitcher />
       <LanguageSelector />
-    </footer>
+    </div>
   </main>;
 };
 
@@ -86,28 +89,34 @@ const OverviewHeader = ({ filtersOpen, onToggleFilters, activeFilterCount }: {
 }) => {
   const { t } = useTranslation();
   return <>
-    <header className="flex items-center gap-2 pb-2">
-      <div className="grow flex items-center justify-center gap-2">
-        <IconButton
-          component="a"
-          href="/.."
-          aria-label="Home"
-          size="small"
-          className="text-inherit"
-        >
-          <HomeRoundedIcon fontSize="small" className="text-slate-700 dark:text-slate-200" />
-        </IconButton>
-        <h1 className="text-blue-600 dark:text-blue-400 font-bold text-center">
-          {t({ hu: 'Dürer stratégiás játékok', en: 'Dürer Strategy Games' })}
-        </h1>
+    <header className="primary-surface sticky top-0 z-40 shadow-md font-roboto">
+      <div className="max-w-6xl mx-auto px-3 sm:px-4 py-3 sm:py-5">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <IconButton
+              component="a"
+              href="/.."
+              aria-label="Home"
+              size="small"
+              sx={{ color: 'white', '&:hover': { color: '#eeeeee' } }}
+            >
+              <HomeRoundedIcon fontSize="small" />
+            </IconButton>
+            <h1 className="text-white font-bold text-2xl sm:text-3xl tracking-tight">
+              {t({ hu: 'Dürer stratégiás játékok', en: 'Dürer Strategy Games' })}
+            </h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <FilterToggle open={filtersOpen} onToggle={onToggleFilters} activeCount={activeFilterCount} />
+            <span className="hidden md:flex items-center gap-2">
+              <ThemeSwitcher />
+              <LanguageSelector />
+            </span>
+          </div>
+        </div>
       </div>
-      <FilterToggle open={filtersOpen} onToggle={onToggleFilters} activeCount={activeFilterCount} />
-      <span className="hidden md:flex items-center gap-2">
-        <ThemeSwitcher />
-        <LanguageSelector />
-      </span>
     </header>
-    <div className="max-w-[100ch] mx-auto pb-2">
+    <div className="max-w-[100ch] mx-auto mt-6 pb-3 text-left px-3 sm:px-5.5 pl-2">
       {t({
         hu: <>
           A <i>stratégiás játék</i> egy két szereplős játék,

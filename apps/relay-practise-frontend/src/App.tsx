@@ -11,7 +11,7 @@ import { LoginToRelay } from './LoginToRelay';
 const theme = {
   palette: {
     primary: {
-      main: import.meta.env.VITE_ACCENT_COLOR || '#7B021A',
+      main: import.meta.env.VITE_ACCENT_COLOR || '#46871b',
       contrastText: '#f5f5f5',
     },
   },
