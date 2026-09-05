@@ -105,19 +105,23 @@ describe("every admin route", () => {
     const router = new Router<Koa.DefaultState, Server.AppCtx>();
     configureTeamsRouter(router, teamsWith([]), [], adminAuth);
     // @koa/router types a layer's middleware against the default context, not
-    // the router's own, so the identity check needs the wider element type.
-    const guards = (layer: (typeof router.stack)[number]) =>
-      (layer.stack as unknown[]).includes(adminAuth);
-    return { stack: router.stack, guards };
+    // the router's own, so the identity checks need the wider element type.
+    const middleware = (layer: (typeof router.stack)[number]) => layer.stack as unknown[];
+    const guards = (layer: (typeof router.stack)[number]) => middleware(layer).includes(adminAuth);
+    const guardsFirst = (layer: (typeof router.stack)[number]) => middleware(layer)[0] === adminAuth;
+    return { stack: router.stack, guards, guardsFirst };
   }
 
-  it("asks for the organisers' password", () => {
-    const { stack, guards } = routes();
+  // First in the route's stack rather than merely somewhere in it: several of
+  // these routes run a body parser, and one that parsed before the password was
+  // checked would write an unauthenticated upload to disk.
+  it("asks for the organisers' password before it does anything", () => {
+    const { stack, guardsFirst } = routes();
 
     const admin = stack.filter(layer => ADMIN_PATH.test(layer.path));
 
     expect(admin.length).toBeGreaterThan(0);
-    expect(admin.filter(layer => !guards(layer)).map(layer => layer.path)).toStrictEqual([]);
+    expect(admin.filter(layer => !guardsFirst(layer)).map(layer => layer.path)).toStrictEqual([]);
   });
 
   // The other way round: the login belongs to the admin routes only, so a
