@@ -2,7 +2,13 @@
   "name": "durer-aion",
   "version": "0.1.0",
   "private": true,
+  "//": [
+    "predeploy/deploy publish the testers' dry run to the year's PRIVATE repo's Pages. pages-deploy.yml is guarded to the public repository, so nothing replaces this there - see DEPLOYMENT.md and README.md section Setting up the year's private repo. Removed as dead twice now; it is neither.",
+    "predeploy builds the workspace packages offline-frontend resolves through their dist. Its own predeploy then rebuilds it with PUBLIC_URL set, and its own deploy runs gh-pages, so the command and the dependency stay declared in the one workspace that owns them."
+  ],
   "scripts": {
+    "predeploy": "npx turbo run build --filter=offline-frontend",
+    "deploy": "npm run deploy --workspace=offline-frontend",
     "lint": "eslint . --max-warnings=0",
     "lint:fix": "eslint . --fix",
     "start": "turbo start",
