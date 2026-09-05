@@ -121,6 +121,12 @@ const reachableFrom = (entry: string): string[] => {
 const isRules = (file: string) => file.startsWith("src/common/") || /(^|\/)game\.ts$/.test(file);
 const isBoard = (file: string) => file.endsWith(".tsx");
 
+// A suite and the fixtures it builds on. Matched by the convention rather than
+// by one file's name, for the reason the bot checks never name a table either:
+// the next fixture is covered the day it is added, not the day someone
+// remembers to extend a list.
+const isTestSupport = (file: string) => /(\.test|_for_testing)\.tsx?$/.test(file);
+
 describe("the package's entries", () => {
   it("walk a graph, not an empty set", () => {
     expect(reachableFrom("index.ts").length).toBeGreaterThan(5);
@@ -152,6 +158,21 @@ describe("the package's entries", () => {
     const shipped = new Set([...reachableFrom("index.ts"), ...reachableFrom("client.ts")]);
     const leaked = reachableFrom("bot.ts").filter(file => shipped.has(file) && !isRules(file));
     expect(leaked, "rules belong in src/common or a game's game.ts, a bot's own files in neither").toEqual([]);
+  });
+
+  // A fixture is written for a suite, so no entry should reach one. This one did:
+  // game_for_testing.ts — three stub games and the live scoring table — sat on
+  // src/common/index.ts, which index.ts re-exports, which carried it into the
+  // package's own dist and its public types. Vite did tree-shake it back out of
+  // the served bundle, so nothing leaked; but that is the bundler's choice, and
+  // the entries exist so the boundary is the package's own instead.
+  it("reaches no test fixture from any entry", () => {
+    const support = [...sources.keys()].filter(isTestSupport);
+    expect(support.length, "no fixture to keep out means this check proves nothing").toBeGreaterThan(0);
+
+    for (const entry of ["index.ts", "bot.ts", "client.ts"]) {
+      expect(reachableFrom(entry).filter(isTestSupport), `${entry} reaches test-only code`).toEqual([]);
+    }
   });
 
   // One statement per shape a regex walk got wrong, each of which dropped its edge
