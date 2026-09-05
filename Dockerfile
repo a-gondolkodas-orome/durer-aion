@@ -18,6 +18,20 @@ RUN npm ci
 # Copy source code
 COPY . .
 
+# .dockerignore keeps credentials and team lists out of the context; this fails
+# the build if one of those patterns ever stops matching. Docker matches a
+# pattern against the whole path, so the `**/` prefixes are load-bearing and
+# easy to drop by accident — that is how apps/online-backend/.env used to get
+# baked in (#443). CI seeds the env files before building, so a regression
+# surfaces in the docker job rather than in a deployed image. node_modules is
+# pruned because npm ci has already filled it above.
+RUN leaked=$(find . -name node_modules -prune -o \( -name '.env*' -o -name '*.tsv' \) -print); \
+    if [ -n "$leaked" ]; then \
+      echo "These must not reach the image — check .dockerignore:" >&2; \
+      echo "$leaked" >&2; \
+      exit 1; \
+    fi
+
 RUN npx turbo build --filter=online-backend
 
 EXPOSE 8000

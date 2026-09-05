@@ -442,13 +442,19 @@ locally and are meaningless anywhere else.
 | --- | --- |
 | `.env.docker` | the docker stack — bot and admin credentials, the postgres password, the competition window |
 | `apps/online-backend/.env` | the same settings for `npm run dev:server`, plus `DATABASE_URL` |
-| `apps/online-frontend/.env` | accent colour and language of the competition site |
-| `apps/offline-frontend/.env` | the same, for the offline build |
+| `apps/online-frontend/.env` | `VITE_SENTRY_DSN` for the competition site |
+| `apps/offline-frontend/.env` | the same for the dry run, plus the S3 bucket its play data goes to |
 | `apps/relay-practise-frontend/.env` | the same, for the relay practice site |
 | `.env.local` | `VITE_FEEDBACK_URL`, read by `common-frontend`'s build |
 
 Whatever reads one of them takes the change at start: vite does not pick up
 `.env` edits, and the docker stack reads `.env.docker` at `up`.
+
+The accent colour and the interface language are deliberately not in that table.
+Every build of an app uses the same two values, so they are constants at the top
+of its `src/App.tsx` rather than env vars. As env vars they were a gitignored
+copy of the sample, and a change to the sample reached only whoever happened to
+delete their `.env` and re-run `npm run setup` (#443).
 
 ## Error reporting
 

@@ -1,5 +1,35 @@
-node_modules
-.env.*
+# Patterns here are matched against a file's whole path, so a leading `**/` is
+# what makes one apply at any depth. Without it `node_modules` meant the root's
+# alone, and `COPY . .` laid the host's `apps/online-backend/node_modules` over
+# the tree `npm ci` had just installed in the image.
+**/node_modules
+
+# Every env file, at any depth. `.env.*` on its own matched neither a bare
+# `.env` nor `apps/online-backend/.env` — which on a maintainer's machine holds
+# the real BOT_CREDENTIALS, ADMIN_CREDENTIALS and DATABASE_URL, and which CI
+# seeds from the sample right before building. Nothing in the image wants one:
+# no build step reads an env file, and docker-compose.yml passes the backend its
+# environment, which dotenv then leaves alone (#443).
+**/.env
+**/.env.*
+
+# Real team lists are dropped into scripts/ on the host — that is why
+# .gitignore carries `scripts/*.tsv*`. docker-compose.yml bind-mounts ./scripts
+# in production too and `npm run teams:import` reads the file through that
+# mount, so a TSV baked into the image would be competitors' data shipped for
+# nothing.
+scripts/*.tsv
+
+# Build output, caches and history. Each is rebuilt or unused inside the image
+# and only churns the `COPY . .` layer; apps/online-backend/dist is also what
+# CMD runs, so host output landing there is a correctness hazard, not just noise.
+.git
+**/dist
+**/build
+**/.turbo
+**/coverage
+site
+
 # The backend image has no use for the practice site, and copying it would
 # invalidate the image cache on every practice change.
 apps/strategy-practice
