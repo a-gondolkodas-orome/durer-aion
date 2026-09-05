@@ -7,7 +7,7 @@ import { ThemeProvider } from '@mui/material/styles';
 // Branding, not configuration: every build of this app uses these, so they live
 // in git rather than in a gitignored `.env` that goes stale when the sample
 // changes (#443).
-const ACCENT_COLOR = '#7B021A';
+const ACCENT_COLOR = '#46871B';
 const LANGUAGE = 'hu';
 
 const theme = {

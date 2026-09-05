@@ -23,7 +23,7 @@ export const ModeSelector = ({ isHumanVsHumanGame, onSwitchMode, disabled }: {
         {t({ hu: 'Játékmód', en: 'Game mode' })}
       </legend>
       <div className={`flex divide-x divide-slate-300 rounded-lg overflow-hidden border text-sm
-        has-focus-visible:ring-2 has-focus-visible:ring-red-400 has-focus-visible:ring-offset-1`}>
+        primary-focus has-focus-visible:ring-2 has-focus-visible:ring-offset-1`}>
         <label className={labelClass(!isHumanVsHumanGame, disabled)}>
           <input
             type="radio"
@@ -68,7 +68,7 @@ export const DifficultySelector = ({ variants, selectedIndex, onSelect, disabled
         {t({ hu: 'Változat', en: 'Variant' })}
       </legend>
       <div className={`flex divide-x divide-slate-300 rounded-lg overflow-hidden border text-sm
-        has-focus-visible:ring-2 has-focus-visible:ring-red-400 has-focus-visible:ring-offset-1`}>
+        primary-focus has-focus-visible:ring-2 has-focus-visible:ring-offset-1`}>
         {variants.map(v => (
           <label
             key={v.originalIndex}
@@ -105,6 +105,7 @@ export const DifficultySelector = ({ variants, selectedIndex, onSelect, disabled
 const labelClass = (active: boolean, disabled: boolean) => `
   grow flex items-center justify-center py-1 px-2 text-center
   ${disabled ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}
-  ${active ? 'bg-blue-500 text-white font-semibold' : 'bg-slate-100 dark:bg-slate-700'}
+  ${active ? 'primary-control font-semibold' : 'bg-slate-100 dark:bg-slate-700'}
   ${!active && !disabled ? 'hocus:bg-slate-200 dark:hocus:bg-slate-600' : ''}
+  transition-colors
 `;
