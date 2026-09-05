@@ -4,8 +4,6 @@ Real-time multiplayer framework for online math competitions with interactive ga
 
 ## Demos
 
-An offline version of the 2023 framework is available [here](https://a-gondolkodas-orome.github.io/durer-jatekok-new/)
-
 An offline version of previous relay games is available [here](https://gyakorlo.durerinfo.hu/valto/)
 
 Strategy games are available [here](https://gyakorlo.durerinfo.hu/jatekok/)
@@ -117,10 +115,11 @@ npm run teams:import:local
 
 Here the Vite dev server proxies the backend's routes and the socket to
 `:8000` — `apps/online-frontend/vite.config.ts` carries the same map as
-`nginx.conf` — so the page talks to one origin, as it does behind nginx in the
-docker stack; the session cookie needs that. It is still Vite standing in for
-nginx, which is why anything touching routing, the socket transport or the
-built assets wants a `stack:up` run before you believe it.
+`apps/online-frontend/nginx/nginx.conf` — so the page talks to one origin, as it
+does behind nginx in the docker stack; the session cookie needs that. It is
+still Vite standing in for nginx, which is why anything touching routing, the
+socket transport or the built assets wants a `stack:up` run before you believe
+it.
 
 `db:up` keeps its data inside the throwaway container, so stopping it discards
 everything and the next start needs the import again. The docker stack keeps
@@ -268,9 +267,9 @@ that too, run the same command under
 
 ## The strategy practice site (`apps/strategy-practice`)
 
-The strategy-game practice site (https://gyakorlo.durerinfo.hu) lives in
-`apps/strategy-practice`, merged in from the durer-jatekok repository with its
-history and renamed from `apps/practice` when the relay practice app arrived
+The strategy-game practice site (https://gyakorlo.durerinfo.hu/jatekok/) lives
+in `apps/strategy-practice`, merged in from the durer-jatekok repository with
+its history and renamed from `apps/practice` when the relay practice app arrived
 (pre-rename history: `git log -- apps/practice`). It is a workspace, so it runs
 from the root like the other frontends:
 
@@ -315,7 +314,9 @@ npm run spell-check
 
 Those are the six jobs in `.github/workflows/ci.yml`, and they cover
 `apps/strategy-practice` too — it has no workflow of its own. Its patch-coverage
-gate was retired in #431; `npm run coverage` stays, on demand.
+gate was retired in #431; that app's own `npm run coverage` stays, on demand —
+run it from `apps/strategy-practice`, or as
+`npm run coverage --workspace=strategy-practice`. There is no root script.
 
 `npm run lint` is the whole of the lint gate, `apps/strategy-practice` included:
 ESLint resolves a config per directory as it walks, so that app is checked
@@ -340,12 +341,16 @@ which, and why the rest is left alone.
 `npm run spell-check` checks English and Hungarian alike (via
 `@cspell/dict-hu-hu`, with both British and American spellings accepted),
 past competition problem text included — the same config the VS Code Code
-Spell Checker extension reads. It covers the sources, the translation
+Spell Checker extension reads. It covers the TypeScript sources, the translation
 JSONs and every markdown file in the repository, the ones under dot
 directories included — hence the three markdown globs in the script, since
-`**/*.md` alone skips `.github/` and friends. Only `teamData.ts` (arbitrary
-team names) stays ignored as data. Vocabulary the dictionaries lack lives in three
-places: technical identifiers in `cspell.json`'s `words` list; the
+`**/*.md` alone skips `.github/` and friends. What it does not read is the
+`.js`, `.mjs` and `.py` files, several of which carry as much prose as the
+markdown does (`scripts/*.mjs`, `eslint.config.mjs`, `scripts/admin.py`);
+widening the glob wants a triage pass of its own. The data files are ignored
+outright in `cspell.json`: `teamData.ts` for its arbitrary team names and
+`scripts/test.tsv` for the same reason. Vocabulary the dictionaries lack lives
+in three places: technical identifiers in `cspell.json`'s `words` list; the
 competition's own coinages and proper nouns in `hungarian-words.txt`
 (hand-curated, small); and the everyday agglutinated forms
 `@cspell/dict-hu-hu` misses in `hungarian-hunspell-words.txt`, which no
