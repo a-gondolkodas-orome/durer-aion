@@ -341,23 +341,20 @@ which, and why the rest is left alone.
 `npm run spell-check` checks English and Hungarian alike (via
 `@cspell/dict-hu-hu`, with both British and American spellings accepted),
 past competition problem text included — the same config the VS Code Code
-Spell Checker extension reads. It covers the TypeScript sources, the translation
-JSONs and every markdown file in the repository, the ones under dot
-directories included — hence the three markdown globs in the script, since
-`**/*.md` alone skips `.github/` and friends. What it does not read is the
-`.js`, `.mjs` and `.py` files, several of which carry as much prose as the
-markdown does (`scripts/*.mjs`, `eslint.config.mjs`, `scripts/admin.py`);
-widening the glob wants a triage pass of its own. The data files are ignored
-outright in `cspell.json`: `teamData.ts` for its arbitrary team names and
-`scripts/test.tsv` for the same reason. Vocabulary the dictionaries lack lives
-in three places: technical identifiers in `cspell.json`'s `words` list; the
-competition's own coinages and proper nouns in `hungarian-words.txt`
-(hand-curated, small); and the everyday agglutinated forms
-`@cspell/dict-hu-hu` misses in `hungarian-hunspell-words.txt`, which no
-one maintains by hand — `npm run spell-check:hu-triage` regenerates it,
-validating every word against real hunspell (needs
-`apt install hunspell hunspell-hu`) and printing whatever hunspell rejects
-for a human to fix or bless.
+Spell Checker extension reads. It covers every source file in the repository —
+TypeScript, `.js`/`.mjs`/`.cjs`, Python and markdown — along with the
+translation JSONs, the files under dot directories included: hence the three
+globs in the script over one shared extension list, since `**/*` alone skips
+`.github/` and friends. The data files are ignored outright in `cspell.json`:
+`teamData.ts` for its arbitrary team names and `scripts/test.tsv` for the same
+reason. Vocabulary the dictionaries lack lives in three places: technical
+identifiers in `cspell.json`'s `words` list; the competition's own coinages and
+proper nouns in `hungarian-words.txt` (hand-curated, small); and the everyday
+agglutinated forms `@cspell/dict-hu-hu` misses in
+`hungarian-hunspell-words.txt`, which no one maintains by hand —
+`npm run spell-check:hu-triage` regenerates it from the same globs, validating
+every word against real hunspell (needs `apt install hunspell hunspell-hu`) and
+printing whatever hunspell rejects for a human to fix or bless.
 
 ## Dependency updates
 

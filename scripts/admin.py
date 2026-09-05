@@ -59,33 +59,33 @@ for team in team_states:
 MATCH_TYPES = ['relay', 'strategy']
 MATCH_DATA_TYPES = ['state', 'logs']
 
-def get_matchdatas(team_states, match_type:str, match_data_type:str, force_download:bool = False):
+def get_match_data(team_states, match_type:str, match_data_type:str, force_download:bool = False):
   if match_type not in MATCH_TYPES:
       raise ValueError(f'Wrong match_type: {match_type}, only {MATCH_TYPES} allowed')
   if match_data_type not in MATCH_DATA_TYPES:
       raise ValueError(f'Wrong match_data_type: {match_data_type}, only {MATCH_DATA_TYPES} allowed')
-  file_name = f'matchdatas_{match_type}_{match_data_type}.json'
+  file_name = f'match_data_{match_type}_{match_data_type}.json'
   if not force_download:
     try:
       with open(file_name, 'r') as f:
         return json.load(f)
     except FileNotFoundError:
       pass
-  match_datas = {}
+  match_data = {}
   match_type_id = 'relayMatch' if match_type == 'relay' else 'strategyMatch'
   for team_state in tqdm(team_states, f"Downloading {match_type} {match_data_type}"):
     if team_state[match_type_id]["state"] != "NOT STARTED":
       matchID = team_state[match_type_id]["matchID"]
-      match_datas[team_state["joinCode"]] = get_request('admin', ADMIN_PASSWORD, BASE_URL, f'/game/admin/{matchID}/{match_data_type}')
+      match_data[team_state["joinCode"]] = get_request('admin', ADMIN_PASSWORD, BASE_URL, f'/game/admin/{matchID}/{match_data_type}')
   with open(file_name, 'w') as f:
-    json.dump(match_datas, f)
-  return match_datas
+    json.dump(match_data, f)
+  return match_data
 
 # %%
-relay_states = get_matchdatas(team_states, 'relay', 'state')
-strategy_states = get_matchdatas(team_states, 'strategy', 'state')
-relay_logs = get_matchdatas(team_states, 'relay', 'logs')
-strategy_logs = get_matchdatas(team_states, 'strategy', 'logs')
+relay_states = get_match_data(team_states, 'relay', 'state')
+strategy_states = get_match_data(team_states, 'strategy', 'state')
+relay_logs = get_match_data(team_states, 'relay', 'logs')
+strategy_logs = get_match_data(team_states, 'strategy', 'logs')
 
 # %%
 def export_results_tsv(team_states_dict, relay_states, strategy_states):
@@ -100,13 +100,13 @@ def export_results_tsv(team_states_dict, relay_states, strategy_states):
       if "score" in team_states_dict[code]["relayMatch"]:
         team_state_points = team_states_dict[code]["relayMatch"]["score"]
       if relay_states[code]["G"]["points"] != team_state_points:
-        print(f"ERROR relay {code}: teamsstates says {team_state_points}, while gamestate {relay_states[code]['G']['points']}")
+        print(f"ERROR relay {code}: team_states says {team_state_points}, while gamestate {relay_states[code]['G']['points']}")
     if code in strategy_states:
       team_state_points = 0
       if "score" in team_states_dict[code]["strategyMatch"]:
         team_state_points = team_states_dict[code]["strategyMatch"]["score"]
       if strategy_states[code]["G"]["points"] != team_state_points:
-        print(f"ERROR strategy {code}: teamsstates says {team_state_points}, while gamestate {relay_states[code]['G']['points']}")
+        print(f"ERROR strategy {code}: team_states says {team_state_points}, while gamestate {relay_states[code]['G']['points']}")
 
   # Get results
   for code in login_codes:
@@ -132,7 +132,7 @@ export_results_tsv(team_states_dict, relay_states, strategy_states)
 # def add_minutes(minutes:int,type:str, user:str, passwd:str, baseurl:str = 'http://localhost:8000'):
 
 #   if type not in ['relay','strategy']:
-#       raise ValueError(f'Wrong type: {type}, only {['relay','strategy']} alowed')
+#       raise ValueError(f'Wrong type: {type}, only {['relay','strategy']} allowed')
 
 #   # Replace these with your actual credentials and endpoint
 #   username = user
@@ -150,7 +150,7 @@ export_results_tsv(team_states_dict, relay_states, strategy_states)
 #             print(response)
 #             print(f'Error at adding minutes to team {team['teamId']}')
 #           else:
-#             print(f'Addded {minutes} min to team {team['teamId']}')
+#             print(f'Added {minutes} min to team {team['teamId']}')
 #       elif type == 'strategy' and team['strategyMatch']['state'] == 'IN PROGRESS':
 #         url = baseurl + f'/game/{ team['strategyMatch']['matchID']}/addminutes/{minutes}'
 #         response = requests.post(url, auth=HTTPBasicAuth(username, password))
