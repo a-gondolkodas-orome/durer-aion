@@ -5,14 +5,25 @@
     // The image tag only fixes the Node major (MCR publishes no patch tags), and the
     // patch it happens to bake is older than `engines.node` — hence npm's EBADENGINE
     // warnings on install. Pin it here instead, to the version in .nvmrc —
-    // `npm test` fails on a mismatch (scripts/check-versions.test.mjs).
+    // `npm test` fails on a mismatch (scripts/check-versions.test.mjs). Listed first
+    // so the features below that install global npm packages run against this Node.
     "ghcr.io/devcontainers/features/node:1": { "version": "24.20.0" },
     "ghcr.io/devcontainers/features/docker-in-docker:2": {
       "moby": false
-    }
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/anthropics/devcontainer-features/claude-code:1": {}
   },
+  // The same volume names apps/strategy-practice/.devcontainer uses: the two containers
+  // are alternative ways into one repository, so logging in to either tool in one of them
+  // should not have to be repeated in the other.
+  "mounts": [
+    "source=durer-gh-config,target=/home/node/.config/gh,type=volume",
+    "source=durer-claude-home,target=/home/node/.claude,type=volume"
+  ],
   "containerEnv": {
-    "DEV_SERVER_HOST": "true"
+    "DEV_SERVER_HOST": "true",
+    "CLAUDE_CONFIG_DIR": "/home/node/.claude"
   },
   "portsAttributes": {
     "5173": { "label": "online / offline / relay practice (vite)" },
@@ -24,11 +35,23 @@
   "postCreateCommand": "bash .devcontainer/post-create.sh",
   "customizations": {
     "vscode": {
+      // Each one mirrors a check or a config the repository already has, so the editor
+      // says what CI will — README.md § What's in it says which is which.
       "extensions": [
         "dbaeumer.vscode-eslint",
+        "streetsidesoftware.code-spell-checker",
+        "vitest.explorer",
         "lokalise.i18n-ally",
-        "streetsidesoftware.code-spell-checker"
+        "editorconfig.editorconfig",
+        "bradlc.vscode-tailwindcss",
+        "ms-azuretools.vscode-docker",
+        "github.vscode-github-actions",
+        "redhat.vscode-yaml",
+        "anthropic.claude-code"
       ]
+      // No "settings" block: this container opens the repository root, so
+      // .vscode/settings.json applies and is the one place they are written down.
+      // apps/strategy-practice/.devcontainer has to inline its own — see the note there.
     }
   }
 }

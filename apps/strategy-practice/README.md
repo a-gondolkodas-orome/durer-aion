@@ -85,10 +85,20 @@ What the coverage report is good for, and why nothing gates on it, is in
 
 ## IDE setup
 
-Recommended VS Code extensions:
+Recommended VS Code extensions — the same list `.devcontainer/devcontainer.json`
+installs, so a dev container needs nothing from this section:
 
 - [Eslint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
 - [Tailwind Css](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss)
+- [Code Spell Checker](https://marketplace.visualstudio.com/items?itemName=streetsidesoftware.code-spell-checker)
+- [Vitest](https://marketplace.visualstudio.com/items?itemName=vitest.explorer)
+- [Claude Code](https://marketplace.visualstudio.com/items?itemName=anthropic.claude-code)
+
+This app's `.gitignore` excludes `.vscode/`, so the editor settings that go with
+them — eslint-on-save, and `formatOnSave` off so no formatter undoes it — are
+inlined in `.devcontainer/devcontainer.json` rather than committed as a
+workspace settings file. Working outside a container, copy them from there; the
+repository root keeps the equivalent settings in its own `.vscode/settings.json`.
 
 ## Adding a new game
 
