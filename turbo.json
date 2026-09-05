@@ -2,8 +2,6 @@
   "$schema": "https://turbo.build/schema.json",
   "globalDependencies": ["**/.env.*"],
   "globalEnv": [
-    "NEXT_PUBLIC_API_URL",
-    "NEXT_PUBLIC_MAPBOX_TOKEN",
     "BOT_CREDENTIALS",
     "ADMIN_CREDENTIALS",
     "DATABASE_URL",
@@ -14,14 +12,6 @@
     "VITE_SENTRY_DSN"
   ],
   "tasks": {
-    "start": {
-      "dependsOn": ["^build"],
-      "persistent": true
-    },
-    "test": {
-      "dependsOn": ["^build"],
-      "outputs": ["dist", "build"]
-    },
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist", "build"],

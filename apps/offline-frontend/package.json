@@ -7,7 +7,6 @@
     "predeploy": "cross-env PUBLIC_URL=/repository-name npm run build",
     "deploy": "gh-pages -d dist",
     "typecheck": "tsc --noEmit",
-    "start": "vite",
     "dev": "vite",
     "build": "vite build"
   },
