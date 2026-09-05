@@ -5,18 +5,8 @@
 // registry imports a game folder's *files*, never a folder barrel — a barrel
 // re-exporting `strategy` next to `board` is what would hand the bot to the
 // live client again. entries.test.ts walks the three graphs to pin this.
-import {
-  MyGameWrapper as StonesGameWrapper,
-  MyGameState as StonesGameState
-} from "./stones/game";
-import {
-  MyGameWrapper as GameWrapper19ocd,
-  MyGameState as GameState19ocd
-} from "./19ocd/game";
-
-export type MyGameStateC = GameState19ocd;
-export type MyGameStateD = GameState19ocd;
-export type MyGameStateE = StonesGameState;
+import { MyGameWrapper as StonesGameWrapper } from "./stones/game";
+import { MyGameWrapper as GameWrapper19ocd } from "./19ocd/game";
 
 export const MyGameWrappers = {
   C: () => GameWrapper19ocd("C"),

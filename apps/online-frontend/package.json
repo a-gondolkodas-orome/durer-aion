@@ -6,7 +6,6 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "dev": "vite",
-    "start": "vite",
     "build": "vite build"
   },
   "license": "MIT",
@@ -22,7 +21,6 @@
     "process": "0.11.10",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "react-i18next": "17.0.12",
     "urlcat": "3.1.0"
   },
   "devDependencies": {

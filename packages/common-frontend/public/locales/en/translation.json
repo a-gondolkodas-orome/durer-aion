@@ -138,11 +138,5 @@
     "testGameButton": "Start a new test game",
     "wins_one": "1 win",
     "wins_other": "{{count}} wins"
-  },
-  "waitingRoom": {
-    "instruction": "When the competition starts, you will be automatically redirected to the competition interface.",
-    "remainingEnd": "left until start!",
-    "remainingStart": "Still",
-    "soon": "The online round will start soon!"
   }
 }

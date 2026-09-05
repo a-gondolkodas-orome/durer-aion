@@ -123,20 +123,6 @@ export async function startMatchStatus(
   };
 }
 
-export async function endMatchStatusFromScratch(
-  matchId: string,
-  ctx: Server.AppCtx
-): Promise<FinishedMatchStatus> {
-  const currentMatch = await ctx.db.fetch(matchId, { state: true });
-  return {
-    state: "FINISHED",
-    matchID: matchId,
-    startAt: new Date(currentMatch.state.G.start),
-    endAt: new Date(currentMatch.state.G.end),
-    score: currentMatch.state.G.score,
-  };
-}
-
 export async function endMatchStatus(
   progressStatus: InProgressMatchStatus,
   finalScore: number
