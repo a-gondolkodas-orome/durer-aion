@@ -8,10 +8,16 @@ import { Container } from "@mui/material";
 import { LoginToRelay } from './LoginToRelay';
 
 
+// Branding, not configuration: every build of this app uses these, so they live
+// in git rather than in a gitignored `.env` that goes stale when the sample
+// changes (#443).
+const ACCENT_COLOR = '#7B021A';
+const LANGUAGE = 'hu';
+
 const theme = {
   palette: {
     primary: {
-      main: import.meta.env.VITE_ACCENT_COLOR || '#7B021A',
+      main: ACCENT_COLOR,
       contrastText: '#f5f5f5',
     },
   },
@@ -31,7 +37,7 @@ function App() {
   const { t } = useTranslation();
 
   useEffect(() => {
-    void i18next.changeLanguage(import.meta.env.VITE_LANGUAGE);
+    void i18next.changeLanguage(LANGUAGE);
   }, [])
 
   // The teamName is the join code of the selected test (`<num>_<H|D|O>_<category>`),

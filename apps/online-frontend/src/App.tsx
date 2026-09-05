@@ -4,10 +4,16 @@ import { Main, GameProvider, ClientRepoProvider } from 'common-frontend';
 import { RealClientRepository } from './client-repository';
 import { ThemeProvider } from '@mui/material/styles';
 
+// Branding, not configuration: every build of this app uses these, so they live
+// in git rather than in a gitignored `.env` that goes stale when the sample
+// changes (#443).
+const ACCENT_COLOR = '#11009E';
+const LANGUAGE = 'hu';
+
 const theme = {
   palette: {
     primary: {
-      main: import.meta.env.VITE_ACCENT_COLOR || '#11009E',
+      main: ACCENT_COLOR,
       contrastText: '#fff',
     },
   },
@@ -26,7 +32,7 @@ function App() {
       <ThemeProvider theme={theme}>
         <ClientRepoProvider
           value={new RealClientRepository()}>
-          <Main language={import.meta.env.VITE_LANGUAGE} gitCommitHash={import.meta.env.VITE_GIT_COMMIT_HASH}/>
+          <Main language={LANGUAGE} gitCommitHash={import.meta.env.VITE_GIT_COMMIT_HASH}/>
         </ClientRepoProvider>
       </ThemeProvider>
     </GameProvider>
