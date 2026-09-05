@@ -310,13 +310,21 @@ npm test
 npm run build
 npm run i18n:check
 npm run spell-check
+npm run stack:build   # needs docker; the other six do not
 ```
 
-Those are the six jobs in `.github/workflows/ci.yml`, and they cover
+Those are the seven jobs in `.github/workflows/ci.yml`, and they cover
 `apps/strategy-practice` too — it has no workflow of its own. Its patch-coverage
 gate was retired in #431; that app's own `npm run coverage` stays, on demand —
 run it from `apps/strategy-practice`, or as
 `npm run coverage --workspace=strategy-practice`. There is no root script.
+
+`npm run stack:build` builds the two images the competition is deployed from —
+the backend and nginx — without starting anything. It is the production image
+set, so no compose overlay, and it is the one gate that reaches the
+`Dockerfile`, `apps/online-frontend/nginx/Dockerfile` and `nginx.conf`; before
+it, a break in any of them surfaced at deploy time. It does not run the stack:
+the round itself is still walked by hand, above.
 
 `npm run lint` is the whole of the lint gate, `apps/strategy-practice` included:
 ESLint resolves a config per directory as it walks, so that app is checked
