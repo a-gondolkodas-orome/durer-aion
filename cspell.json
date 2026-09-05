@@ -139,6 +139,7 @@
     "node_modules",
     "dist",
     "build",
+    "site",
     "*.log",
     "package.json",
     "coverage/**/*",
