@@ -26,5 +26,9 @@
   "i18n-ally.defaultNamespace": "translation",
   "i18n-ally.sourceLanguage": "hu",
   "i18n-ally.keystyle": "nested",
-  "i18n-ally.namespace": true
+  "i18n-ally.namespace": true,
+  // Tailwind v4 configures itself from CSS rather than a tailwind.config file, so the
+  // extension has to be pointed at the stylesheet or it offers no completions at all.
+  // Only apps/strategy-practice uses Tailwind; everything else here styles with MUI.
+  "tailwindCSS.experimental.configFile": "apps/strategy-practice/src/styles.css"
 }
