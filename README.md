@@ -1,9 +1,10 @@
 # Durer Online Round framework
 
 Real-time multiplayer framework for online math competitions with interactive
-games, built on top of boardgame.io. The public demos — all in Hungarian — are
-the [relay practice site](https://gyakorlo.durerinfo.hu/valto/) and the
-[strategy games](https://gyakorlo.durerinfo.hu/jatekok/).
+games, built on top of boardgame.io. The public demos are the
+[relay practice site](https://gyakorlo.durerinfo.hu/valto/), in Hungarian, and
+the [strategy games](https://gyakorlo.durerinfo.hu/jatekok/), which offer
+English as well.
 
 # Getting Started
 
