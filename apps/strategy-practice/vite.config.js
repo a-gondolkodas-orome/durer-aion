@@ -38,8 +38,8 @@ export default defineConfig(() => ({
       },
       // Source rather than a build, for the same reasons as `engine` above.
       {
-        find: /^games$/,
-        replacement: fileURLToPath(new URL('../../packages/games/index.ts', import.meta.url))
+        find: /^strategy-games$/,
+        replacement: fileURLToPath(new URL('../../packages/strategy-games/index.ts', import.meta.url))
       }
     ]
   },
@@ -96,7 +96,7 @@ export default defineConfig(() => ({
     include: [
       'src/**/*.spec.{ts,tsx}',
       '../../packages/strategy-engine/src/**/*.spec.{ts,tsx}',
-      '../../packages/games/src/**/*.spec.{ts,tsx}'
+      '../../packages/strategy-games/src/**/*.spec.{ts,tsx}'
     ],
     // On demand only, never in `npm test` or CI, and with no thresholds — see
     // AGENTS.md § Coverage for why, and for what the report is actually good
@@ -112,7 +112,7 @@ export default defineConfig(() => ({
       include: [
         'src/**/*.{ts,tsx}',
         '../../packages/strategy-engine/src/**/*.{ts,tsx}',
-        '../../packages/games/src/**/*.{ts,tsx}'
+        '../../packages/strategy-games/src/**/*.{ts,tsx}'
       ],
       exclude: [
         'src/**/*.spec.{ts,tsx}',
@@ -121,7 +121,7 @@ export default defineConfig(() => ({
         'src/**/spec-helpers.tsx',
         'src/main.tsx',
         '../../packages/strategy-engine/src/**/*.spec.{ts,tsx}',
-        '../../packages/games/src/**/*.spec.{ts,tsx}'
+        '../../packages/strategy-games/src/**/*.spec.{ts,tsx}'
       ],
       reporter: ['text', 'html'],
       // /reports is gitignored

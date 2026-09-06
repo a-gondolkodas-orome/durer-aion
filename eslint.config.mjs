@@ -94,14 +94,14 @@ export default defineConfig(
       '@typescript-eslint/use-unknown-in-catch-callback-variable': 'error',
     },
   },
-  // packages/strategy-engine and packages/games are apps/strategy-practice code moved out of it,
+  // packages/strategy-engine and packages/strategy-games are apps/strategy-practice code moved out of it,
   // still written in that app's dialect: `!` stands in for a guard the game's rules
   // already make redundant, and auditing several hundred of those would turn a move
   // into a rewrite. Off in apps/strategy-practice's own config too, for the same code.
   {
     files: [
       'packages/strategy-engine/**/*.{ts,tsx}',
-      'packages/games/**/*.{ts,tsx}',
+      'packages/strategy-games/**/*.{ts,tsx}',
     ],
     rules: {
       '@typescript-eslint/no-non-null-assertion': 'off',
@@ -163,7 +163,7 @@ export default defineConfig(
   // blind spot as above: `gameplay-react-free.spec.ts` in apps/strategy-practice watches what
   // a relative import resolves to.
   {
-    files: ['packages/games/**/*.ts'],
+    files: ['packages/strategy-games/**/*.ts'],
     rules: {
       '@typescript-eslint/no-restricted-imports': ['error', {
         patterns: [{
@@ -190,7 +190,7 @@ export default defineConfig(
     // the repo never had the rule and never settled — see eslint.stylistic.mjs.
     files: [
       'packages/strategy-engine/**/*.{ts,tsx}',
-      'packages/games/**/*.{ts,tsx}',
+      'packages/strategy-games/**/*.{ts,tsx}',
     ],
     rules: quotesRule,
   },
@@ -199,7 +199,7 @@ export default defineConfig(
     // remove-divisor-multiple's table says so at the top of the file, and moveMap
     // is what generateStrategy.py beside it prints. See eslint.stylistic.mjs.
     files: [
-      'packages/games/src/remove-divisor-multiple/bot-strategy.ts',
+      'packages/strategy-games/src/remove-divisor-multiple/bot-strategy.ts',
       'packages/game/src/games/strategy/stones/moveMap.ts',
     ],
     rules: stylisticRulesOff,

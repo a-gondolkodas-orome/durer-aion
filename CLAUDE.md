@@ -17,7 +17,7 @@ packages/
   game/               # Game logic (boardgame.io games); strategy games carry their bot and board in their own folder
   strategy/           # AI/bot strategy for the relay game (strategy games keep theirs in packages/game)
   strategy-engine/    # the strategy practice site's game engine: rules, moves, bots, match state, no framework
-  games/              # competition games in that engine's format; only strategy-practice consumes it
+  strategy-games/     # competition games in that engine's format; only strategy-practice consumes it
   common-frontend/    # Shared React components
   schemas/            # TypeScript models/types
 pages/                # static content the Pages deploy serves but no app builds
@@ -41,7 +41,7 @@ under its own setup. What that ESLint config differs on is the *rule set* —
 `@eslint-react`, react-hooks, and a stylistic dialect (no trailing comma,
 `max-len` 120) the root does not impose. Single quotes are not part of that
 difference: the root config applies the same rule to `packages/strategy-engine` and
-`packages/games`, this app's code moved out. It is not a second toolchain:
+`packages/strategy-games`, this app's code moved out. It is not a second toolchain:
 eslint, typescript and vitest are pinned to the same versions as the root and
 npm hoists them, its own plugins included. It came in as a subtree
 merge from `durer-jatekok` with that dialect already set, and reconciling the
@@ -71,7 +71,7 @@ change is measured against.
 - **Frontend**: React 19, Vite, MUI (Material-UI), React Router
 - **Backend**: boardgame.io server, Koa, PostgreSQL (via bgio-postgres)
 - **Build**: Turborepo, TypeScript, tsdown. The packages build into `dist` —
-  all but `packages/games`, which has no build at all, because
+  all but `packages/strategy-games`, which has no build at all, because
   `apps/strategy-practice` reads it from source through a vite alias. The
   backend is one tsdown bundle too, built from the packages' *source*
   rather than their `dist` (`apps/online-backend/tsdown.config.mts` says how
@@ -85,7 +85,7 @@ change is measured against.
   `require`s it works too (its `tsdown.config.mts` says how).
 - **Testing**: vitest, React Testing Library. Suites are `*.test.ts(x)` under
   the root config and `*.spec.ts(x)` under the `apps/strategy-practice` project,
-  which also takes the `.spec` files in `packages/strategy-engine` and `packages/games` —
+  which also takes the `.spec` files in `packages/strategy-engine` and `packages/strategy-games` —
   that app's code, moved out. One `npm test` runs both projects through vitest,
   and neither uses Jest.
 - **`apps/strategy-practice`** shares this React major, the root's eslint,

@@ -106,14 +106,14 @@ To keep track of who works on which game, use [this
 table](https://docs.google.com/spreadsheets/d/1-6u9PCtvf_gDHrs65x36pmDzFt4nZZx_IUuXrgS2aZk/edit#gid=0).
 
 1. Add the game metadata to `src/components/games/gameList.ts`.
-2. Create a folder for the game under `packages/games/src/` with the standard
+2. Create a folder for the game under `packages/strategy-games/src/` with the standard
    files: a React-free `gameplay.ts` (the `Board` type, start boards and
    `moves`), `bot-strategy.ts`, the game itself `<game>.tsx` (plus
    `board-client.tsx` once the JSX outgrows the game file), and a
    `gameplay.spec.ts` — see [Where it lives](#where-it-lives). A game there
    exports a `StrategyGameConfig` object rather than a component;
    `remove-divisor-multiple` is the one to copy.
-3. Export the config from `packages/games/index.ts`, then turn it into a page in
+3. Export the config from `packages/strategy-games/index.ts`, then turn it into a page in
    the barrel at `src/components/games/index.ts` —
    `export const MyGame = strategyGameFactory(myGameConfig);` — keyed by the
    game's `gameList` key. The router in `src/components/app/app.tsx` picks it up

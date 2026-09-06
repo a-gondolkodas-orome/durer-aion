@@ -26,7 +26,7 @@ readability.
 ## Architecture
 
 Most games live under `src/components/games/`, one folder per game, registered
-in `gameList.ts`. The newest ones live in `packages/games/src/` instead —
+in `gameList.ts`. The newest ones live in `packages/strategy-games/src/` instead —
 `remove-divisor-multiple` and `stones-remove-one-not-twice-from-left` — where a
 game is a `StrategyGameConfig` object rather than a component, turned into a
 page by `strategyGameFactory` at its one export site in

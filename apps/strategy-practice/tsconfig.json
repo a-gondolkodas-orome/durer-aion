@@ -14,7 +14,7 @@
       "language": ["./src/language/index.ts"],
       "strategy-engine": ["../../packages/strategy-engine/index.ts"],
       "strategy-engine/react": ["../../packages/strategy-engine/react.ts"],
-      "games": ["../../packages/games/index.ts"]
+      "strategy-games": ["../../packages/strategy-games/index.ts"]
     },
     "skipLibCheck": true,
     "types": ["vitest/globals", "vite/client"]

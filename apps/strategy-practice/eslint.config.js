@@ -117,7 +117,7 @@ export default defineConfig(
       // this code leans on `!` to say "the rules
       // guarantee this square is on the board", and each one is a judgement about
       // what the right guard would be rather than a mechanical edit. The root
-      // config already turns this rule off for packages/strategy-engine and packages/games
+      // config already turns this rule off for packages/strategy-engine and packages/strategy-games
       // — this app's code, moved out — so leaving it on here is what would be
       // inconsistent. Turning it on is a project of its own.
       '@typescript-eslint/no-non-null-assertion': 'off',

@@ -10,7 +10,7 @@
    use the same ones. */
 @source "../../../packages/strategy-engine/src/react";
 /* The moved games' board clients, for the same reason. */
-@source "../../../packages/games/src";
+@source "../../../packages/strategy-games/src";
 @variant dark (&:where(.dark, .dark *));
 
 @custom-variant hocus {

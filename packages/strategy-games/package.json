@@ -1,5 +1,5 @@
 {
-  "name": "games",
+  "name": "strategy-games",
   "version": "0.0.0",
   "private": true,
   "description": "Past competition games for the strategy practice site, as self-contained folders: gameplay, bot, curated start boards, board client and specs.",

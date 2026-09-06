@@ -59,7 +59,7 @@ export const stylisticRules = {
 
 // Quote style, applied where the code already agrees on one rather than everywhere.
 // apps/strategy-practice has enforced single quotes across its whole source tree
-// all along, and packages/strategy-engine and packages/games — that app's code, moved out —
+// all along, and packages/strategy-engine and packages/strategy-games — that app's code, moved out —
 // follow it with no violations. Turning it on there costs nothing and keeps it true.
 //
 // The other eight workspaces never had the rule and never settled on a style:
@@ -80,7 +80,7 @@ export const quotesRule = {
 // are off for them while every rule about meaning still applies. Turning the rules
 // off by name, rather than ignoring the files, is what keeps that distinction.
 //
-// Built over both sets: remove-divisor-multiple's table is inside packages/games,
+// Built over both sets: remove-divisor-multiple's table is inside packages/strategy-games,
 // which `quotesRule` covers, and its keys are double-quoted JSON. Deriving this from
 // `stylisticRules` alone would leave it exposed to the one rule it most needs off.
 export const stylisticRulesOff = Object.fromEntries(
