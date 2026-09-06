@@ -1,4 +1,4 @@
-import { Problem } from "strategy";
+import { Problem } from "relay-bot";
 export type RelayProblems = Record<string, Problem[]>;
 
 export const loadProblemSet = (code: string): Problem[] => {

@@ -25,7 +25,7 @@
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "react-i18next": "17.0.12",
-    "strategy": "*"
+    "relay-bot": "*"
   },
   "devDependencies": {
     "@types/react": "19.2.18",

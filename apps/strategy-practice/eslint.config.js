@@ -97,7 +97,9 @@ export default defineConfig(
     languageOptions: {
       parser: tsParser,
       parserOptions: {
-        project: true,
+        // Kept in step with the root eslint.config.mjs, which explains the choice;
+        // one `eslint .` runs both configs in the same process.
+        projectService: true,
         tsconfigRootDir: import.meta.dirname
       }
     },
@@ -117,7 +119,7 @@ export default defineConfig(
       // this code leans on `!` to say "the rules
       // guarantee this square is on the board", and each one is a judgement about
       // what the right guard would be rather than a mechanical edit. The root
-      // config already turns this rule off for packages/engine and packages/games
+      // config already turns this rule off for packages/strategy-engine and packages/strategy-games
       // — this app's code, moved out — so leaving it on here is what would be
       // inconsistent. Turning it on is a project of its own.
       '@typescript-eslint/no-non-null-assertion': 'off',
@@ -158,7 +160,7 @@ export default defineConfig(
     // is start-boards.ts, the curated data a competition hands out, and the .ts
     // half of games/shared/ — its *-svg.tsx siblings are deliberately unmatched.
     // The engine's own React-free half is no longer here to list; it is guarded
-    // by the root config, which is what lints packages/engine.
+    // by the root config, which is what lints packages/strategy-engine.
     files: [
       'src/components/games/**/gameplay.ts',
       'src/components/games/**/start-boards.ts',
@@ -201,7 +203,8 @@ export default defineConfig(
   // the skill driver. None of the blocks above reach it — they are all src/*.ts(x)
   // — so until this block existed ESLint governed these files with no rules at
   // all, reporting them clean because it checked them for nothing. Not type-aware:
-  // tsconfig.json is `include: ["src"]`, so `project: true` would reject them.
+  // tsconfig.json is `include: ["src"]`, so the project service does not find them
+  // and typing them at all would take an `allowDefaultProject` entry.
   {
     files: [
       'scripts/**/*.mjs',

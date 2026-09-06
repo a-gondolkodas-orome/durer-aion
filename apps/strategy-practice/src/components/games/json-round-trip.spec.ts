@@ -5,7 +5,7 @@ import {
 } from 'strategy-game-factory';
 import { SLOW_VARIANTS } from './slow-variants';
 
-// The serialization contract of packages/engine/src/types.ts, swept across
+// The serialization contract of packages/strategy-engine/src/types.ts, swept across
 // every registered game: a board must survive JSON.parse(JSON.stringify(x))
 // with its behaviour intact, because a competition server persists and
 // transports boards as JSON. Checked with toEqual, which is exactly the

@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from 'engine';
+import type { Ctx, MoveOutcome } from 'strategy-engine';
 import { range, cloneDeep, sample, random } from 'lodash';
 
 export interface Board { numbersOnTable: boolean[], previousMove: number | null }

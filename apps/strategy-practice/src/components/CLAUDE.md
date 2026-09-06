@@ -36,7 +36,7 @@ strategyGameFactory({
 
 An array of `{ id?, botStrategy?, generateStartBoard?, startBoards?, label?,
 isDefault?, notAlwaysOptimal?, rule? }` — `VariantInput` in
-`packages/engine/src/types.ts`. `notAlwaysOptimal` is § Bot / variant
+`packages/strategy-engine/src/types.ts`. `notAlwaysOptimal` is § Bot / variant
 conventions below; `rule` overrides `presentation.rule` for that variant alone,
 which is what lets sibling games differing only in rule wording be merged into
 one. The default variant (marked `isDefault: true`, or the only entry
@@ -279,7 +279,7 @@ state without going through a move, deliberately: a selection is not a move, so
 it must not bump `moveCount` or take an undo snapshot. Moves never get it; they
 return `nextTurnState` instead.
 
-Three hooks from `engine/react` (re-exported by the factory barrel) cover the
+Three hooks from `strategy-engine/react` (re-exported by the factory barrel) cover the
 rest; each carries its
 own usage notes and footguns in its JSDoc, so reach for them rather than
 re-deriving the pattern:
@@ -330,7 +330,7 @@ Two conventions to keep in mind:
   because it keeps a move a pure function of its inputs, callable on
   hypothetical boards outside a live game — bot look-ahead and specs both do
   that.
-- The engine now lives in `packages/engine`, imported as `engine` — the same
+- The engine now lives in `packages/strategy-engine`, imported as `strategy-engine` — the same
   package a competition server imports, which is why it is React-free, for the
   reason each game's `gameplay.ts` is ([AGENTS.md § Files in a game
   folder](../../AGENTS.md#files-in-a-game-folder)). Don't import React (or

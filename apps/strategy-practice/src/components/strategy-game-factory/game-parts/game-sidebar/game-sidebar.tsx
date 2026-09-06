@@ -4,7 +4,7 @@ import { useTranslation, type I18nString } from 'language';
 import { ModeSelector, DifficultySelector } from '../common/game-controls';
 import { getCtaText } from '../common/cta-text';
 import { DEFAULT_PLAYER_NAMES, havePlayerNameCollision } from '../common/player-names';
-import type { Ctx, Mode, Variant } from 'engine';
+import type { Ctx, Mode, Variant } from 'strategy-engine';
 
 import type { Stats } from '../../hooks/use-game-stats';
 

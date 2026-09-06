@@ -22,7 +22,7 @@ export default defineConfig({
       { find: /^game\/bot$/, replacement: source('game/bot.ts') },
       { find: /^game\/client$/, replacement: source('game/client.ts') },
       { find: /^schemas$/, replacement: source('schemas/index.ts') },
-      { find: /^strategy$/, replacement: source('strategy/index.ts') },
+      { find: /^relay-bot$/, replacement: source('relay-bot/index.ts') },
     ],
   },
   test: {

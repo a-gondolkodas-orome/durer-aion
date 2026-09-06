@@ -15,14 +15,14 @@ line here — the key, and therefore the route, never changes. Keep entries in a
 order by key. `gameList.spec.ts` guards that this set of keys and
 `gameList` stay in one-to-one sync.
 
-A game that has moved to `packages/games` exports a config object rather than a
+A game that has moved to `packages/strategy-games` exports a config object rather than a
 component, and this file is where it becomes a page: the one
 `strategyGameFactory(config)` call per game, in its abc slot like any other
 entry. That keeps the package host-agnostic — a competition shell consumes the
 same config without this wrapping.
 */
 import { strategyGameFactory } from 'strategy-game-factory';
-import { removeDivisorMultipleConfig, stonesRemoveOneNotTwiceFromLeftConfig } from 'games';
+import { removeDivisorMultipleConfig, stonesRemoveOneNotTwiceFromLeftConfig } from 'strategy-games';
 
 export { AddReduceDouble } from './add-reduce-double/add-reduce-double';
 export { AmorAndCupido } from './amor-and-cupido/amor-and-cupido';

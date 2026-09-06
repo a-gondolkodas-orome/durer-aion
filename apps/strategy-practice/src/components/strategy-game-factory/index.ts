@@ -1,17 +1,17 @@
 // The barrel every game imports through. Half of what it hands out now lives in
-// `packages/engine` — the rules, the move interpreter and the headless runner,
+// `packages/strategy-engine` — the rules, the move interpreter and the headless runner,
 // which a competition server imports the same way — and this re-exports it so
 // no game had to learn where it went. What it offers is unchanged, deliberately:
 // the engine's public surface is wider than a game has any use for.
-export { resolveVariants, variantKey, runMatch } from 'engine';
+export { resolveVariants, variantKey, runMatch } from 'strategy-engine';
 export type {
   Phase, Mode, Ctx,
   MoveOutcome, MoveFunction, MoveDefinition, MoveDefs, MoveValidator, Gameplay, GameMoves, ClientGameMoves,
   StrategyArgs, BotStrategy, BotMove, BoardClientProps,
   Variant, VariantInput, Presentation, StrategyGameConfig,
   MatchMove, MatchResult
-} from 'engine';
+} from 'strategy-engine';
 
 export { strategyGameFactory } from './strategy-game-factory';
 export type { StrategyGame } from './strategy-game-factory';
-export { GameBoard, useHoverPreview, useMoveScopedState, useDeferredMove } from 'engine/react';
+export { GameBoard, useHoverPreview, useMoveScopedState, useDeferredMove } from 'strategy-engine/react';
