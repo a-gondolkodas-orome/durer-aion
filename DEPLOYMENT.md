@@ -397,6 +397,12 @@ npm run stack:prod
 With TLS set up, use the two-command form from step 8 instead — `stack:prod` takes no
 arguments.
 
+That `git pull` refuses if the update also touches `nginx.conf`, the file step 8 had you
+edit, and leaves the tree alone when it does. Read what changed and re-apply the four TLS
+lines: that file carries the `X-Forwarded-Proto` the session cookie depends on. Not
+`--autostash`, which turns the refusal into conflict markers in a file `stack:prod` then
+builds into the image.
+
 `sequelize.sync()` creates missing tables but does not alter existing ones, so **a release
 that changed a column needs the change applied by hand**, or the volume dropped
 (`npm run stack:down -- --volumes`, then import the teams again) if the data is expendable.
