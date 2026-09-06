@@ -132,6 +132,48 @@ export class SocketIOButBotMoves extends SocketIO {
        * See boardgame.io/dist/src/server/transport/socketio.ts
        */
       nsp.on("connection", (socket: IOTypes.Socket) => {
+        /** Refuses a `sync` naming a match that storage does not have.
+         *
+         * boardgame.io's `Master.onSync` skips its credential check when
+         * `playerID` is null — the spectator case it is written for — and
+         * creates and persists a match when it finds none under the id it was
+         * given. Between the two, anonymous socket traffic writes rows into
+         * Postgres for as long as it cares to, none of which any team can
+         * reach and nothing of which asks who is asking.
+         *
+         * A match here is only ever created by the server, for a team that
+         * asked for one (`server/team_manage.ts`), and the id reaches a
+         * browser only in that answer. So a sync for a match storage does not
+         * have belongs to no client of this competition, and the packet never
+         * reaches boardgame.io's listener.
+         *
+         * A packet middleware rather than a wrapped listener: it is the hook
+         * socket.io documents for this, and it does not depend on what the
+         * base transport registered before us.
+         */
+        socket.use(([event, matchID]: IOTypes.Event, next) => {
+          if (event !== "sync") {
+            next();
+            return;
+          }
+          if (typeof matchID !== "string" || matchID === "") {
+            next(new Error("sync without a match id"));
+            return;
+          }
+          void fetch(app.context.db, matchID, { metadata: true } as const).then(
+            ({ metadata }) => {
+              next(metadata === undefined ? new Error(`sync for unknown match ${matchID}`) : undefined);
+            },
+            (error: unknown) => { next(error instanceof Error ? error : new Error(String(error))); }
+          );
+        });
+
+        /* Where a refused packet lands. With no listener here socket.io
+         * writes "Missing error handler on `socket`" and a stack trace for
+         * every one of them — a log an unauthenticated client could fill at
+         * will. Refusing a sync is routine, so it is answered with nothing. */
+        socket.on("error", () => undefined);
+
         socket.on("update", async (...args: Parameters<Master['onUpdate']>) => {
           // The arguments are stale: we react to a player's step
           // But we are on the same API that reacts to it
