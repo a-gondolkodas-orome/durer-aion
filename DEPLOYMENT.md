@@ -4,8 +4,8 @@
 up by hand over ssh. The machine checks out the repository and builds everything itself —
 there is no pipeline and no registry.
 
-> **Not re-run end to end yet.** Rewritten against the current repository, but the test
-> deployment that proves it has not happened. Correct this file from what actually happens.
+> Walked end to end on a DigitalOcean droplet. Azure and AWS appear below for sizing and
+> price only — everything after provisioning is the same on all three.
 
 Testers who only need to try the games and the UX get a lighter option with no server at
 all — see *The dry run for testers* at the end.
