@@ -1,24 +1,25 @@
 # Durer Online Round framework
 
-Real-time multiplayer framework for online math competitions with interactive games, built on top of boardgame.io.
-
-## Demos
-
-An offline version of previous relay games is available [here](https://gyakorlo.durerinfo.hu/valto/)
-
-Strategy games are available [here](https://gyakorlo.durerinfo.hu/jatekok/)
-
-All demos are in Hungarian.
+Real-time multiplayer framework for online math competitions with interactive
+games, built on top of boardgame.io. The public demos — all in Hungarian — are
+the [relay practice site](https://gyakorlo.durerinfo.hu/valto/) and the
+[strategy games](https://gyakorlo.durerinfo.hu/jatekok/).
 
 # Getting Started
 
 ## Requirements
 
-- [Node.js](https://nodejs.org/) — the exact version in [`.nvmrc`](./.nvmrc), which every CI job, both dev containers and the Docker image run. With [nvm](https://github.com/nvm-sh/nvm) installed, `nvm use` anywhere in the repo picks it up. Another 24.x will most likely work too, but CI runs exactly this one. The same version is written down in four more files — `engines.node` in `apps/strategy-practice/package.json`, the `node` feature in both `devcontainer.json` files, and the `Dockerfile`'s `FROM` line — and `npm test` fails until they all agree (`scripts/check-versions.test.mjs`).
+- [Node.js](https://nodejs.org/), the exact version in [`.nvmrc`](./.nvmrc) —
+  `nvm use` anywhere in the repo picks it up. Another 24.x will most likely
+  work, but CI, both dev containers and the Docker image run exactly this one.
+  Four more files write the same version down — `engines.node` in
+  `apps/strategy-practice/package.json`, the `node` feature in both
+  `devcontainer.json` files, and the `Dockerfile`'s `FROM` line — and `npm test`
+  fails until they all agree (`scripts/check-versions.test.mjs`).
 - [Docker](https://www.docker.com/), with your user in the `docker` group so the
   commands below need no `sudo` — `DEPLOYMENT.md` has the three lines that do
-  it. Plain `sudo docker …` works too, but never `sudo npm run …`: that runs
-  npm as root and leaves root-owned files behind in `node_modules`.
+  it. Plain `sudo docker …` works too, but never `sudo npm run …`: that runs npm
+  as root and leaves root-owned files behind in `node_modules`.
 
 ## The whole stack in four commands
 
@@ -29,62 +30,50 @@ npm run stack:up      # builds everything, then starts nginx + backend + postgre
 npm run teams:import  # loads scripts/test.tsv
 ```
 
-Open `http://localhost` and log in with the join code `000-0000-000`.
-
-`stack:up` returns once the containers are actually up, and fails if they are
-not — so if it came back clean, the stack is running. It runs in the background,
-so that is one terminal, not two, and closing it leaves the stack up.
-`npm run stack:logs` follows the output of all three containers — Ctrl-C stops
-watching, not the stack. `npm run stack:down` is what stops it.
-
-That is the whole online round: the site teams see, the game server they play
-against, and the database behind it.
+Open `http://localhost` and log in with the join code `000-0000-000`. That is
+the whole online round: the site teams see, the game server they play against,
+and the database behind it.
 
 | where | what |
 | --- | --- |
 | `http://localhost` | the competition site — team login, chooser, relay and strategy matches |
-| `http://localhost/admin` | the admin pages; the browser asks for basic auth, user `admin`, password `ADMIN_CREDENTIALS` from `.env.docker` |
+| `http://localhost/admin` | the admin pages; basic auth, user `admin`, password `ADMIN_CREDENTIALS` from `.env.docker` |
 | `localhost:5432` | postgres, if you want to look at the data directly |
+
+`stack:up` returns once the containers are actually up and fails if they are
+not, and it runs in the background — so that is one terminal, not two, and
+closing it leaves the stack up. `npm run stack:logs` follows all three
+containers (Ctrl-C stops watching, not the stack); `npm run stack:down` stops
+it. The imported teams cover the three age categories: `000-0000-000` is C,
+`001-0000-000` is D, `002-0000-000` is E, with a thousand more behind them.
 
 **Only one of the two flows at a time.** The stack's postgres and
 `npm run db:up` both bind 5432, so `stack:up` fails while the other one holds
-it. Stop the one you are not using — `npm run stack:down`, or Ctrl-C the
-`db:up` terminal — before starting the other.
+it. Stop the one you are not using first.
 
-### In the dev container
+<details><summary>In the dev container, and moving the port</summary>
 
 Everything above works unchanged: the inner dockerd publishes port 80 on the
 container's own interfaces, VS Code forwards it, and `http://localhost` is the
-address.
+address. In a Codespace take the address from VS Code's **Ports** panel instead
+— it is a rewritten `*.app.github.dev` URL. A port appears there only once
+something binds it, so an empty panel means the stack is not running.
 
-Take the address from VS Code's **Ports** panel rather than typing one if you
-are in a Codespace, where it is a rewritten `*.app.github.dev` URL and not
-localhost at all. A port appears there only once something binds it, so an empty
-panel means the stack is not running — `npm run stack:ps`, then
-`npm run stack:logs`.
+If something already holds port 80, `WEB_PORT=8080 npm run stack:up` moves the
+stack; read `8080` for `80` in everything above.
+</details>
 
-If something on your machine already holds port 80, or VS Code cannot bind it,
-set `WEB_PORT` to move the stack: `WEB_PORT=8080 npm run stack:up`, then read
-`8080` for `80` in everything above.
+<details><summary>When a URL shows nothing</summary>
 
-### When a URL shows nothing
+`npm run stack:ps` says which services are up, `npm run stack:logs` why one is
+not. If `stack:up` itself fails with `network <id> does not exist`, that is
+docker's own state — usually its daemon restarted while an earlier stack was
+still around. `npm run stack:down` and retry; if it repeats, restart docker. The
+`postgresdb` volume survives all of that, so imported teams do not need loading
+again.
+</details>
 
-```bash
-npm run stack:ps    # which services are up
-npm run stack:logs  # and why one is not
-```
-
-If `stack:up` itself fails with `network <id> does not exist`, that is docker's
-own state rather than anything here — usually its daemon restarted while an
-earlier stack was still around. `npm run stack:down` and retry; if it repeats,
-restart docker. The `postgresdb` volume survives all of that, so imported teams
-do not need loading again.
-
-`npm run teams:import` loads `scripts/test.tsv`. Its first three teams cover the
-three age categories — `000-0000-000` is a category C join code, `001-0000-000`
-is D, `002-0000-000` is E — and there are a thousand more behind them.
-
-### Editing code with the stack up
+<details><summary>Editing code with the stack up</summary>
 
 The backend reloads itself: `stack:up` adds the `docker-compose.dev.yml`
 overlay, which mounts the backend and shared package sources and runs
@@ -94,212 +83,174 @@ are the exception, and a new backend dependency needs the image rebuilt —
 `stack:up` again.
 
 nginx serves the frontend from `apps/online-frontend/dist` on the host, so a
-frontend change needs `npm run build` and a page reload. If you are mostly
-working on the frontend, the route below reloads it for you.
+frontend change needs `npm run build` and a page reload. The docker-less route
+below reloads it for you.
+</details>
 
 ## Running it without docker (except the database)
 
-Everything reloads, including the frontend. Three terminals:
+Everything reloads, including the frontend. Three terminals, then the import
+once, then `http://localhost:5173`:
 
 ```bash
 npm run db:up       # postgres in a throwaway container
 npm run dev:server  # backend on :8000
 npm run dev:online  # frontend on :5173
-```
-
-Then import the teams once, and open `http://localhost:5173`:
-
-```bash
 npm run teams:import:local
 ```
 
-Here the Vite dev server proxies the backend's routes and the socket to
-`:8000` — `apps/online-frontend/vite.config.ts` carries the same map as
-`apps/online-frontend/nginx/nginx.conf` — so the page talks to one origin, as it
-does behind nginx in the docker stack; the session cookie needs that. It is
-still Vite standing in for nginx, which is why anything touching routing, the
-socket transport or the built assets wants a `stack:up` run before you believe
-it.
+Vite proxies the backend's routes and the socket to `:8000`
+(`apps/online-frontend/vite.config.ts` carries the same map as
+`apps/online-frontend/nginx/nginx.conf`), so the page talks to one origin as it
+does behind nginx — the session cookie needs that. It is still Vite standing in
+for nginx, so anything touching routing, the socket transport or the built
+assets wants a `stack:up` run before you believe it.
 
 `db:up` keeps its data inside the throwaway container, so stopping it discards
-everything and the next start needs the import again. The docker stack keeps
-postgres in a named volume: `npm run stack:down` preserves it, and
-`npm run stack:down -- --volumes` wipes it.
+everything. The docker stack keeps postgres in a named volume:
+`npm run stack:down` preserves it, `npm run stack:down -- --volumes` wipes it.
 
 ## Running the production stack
-
-What a deployed instance runs (see [`DEPLOYMENT.md`](./DEPLOYMENT.md)):
 
 ```bash
 npm run stack:prod
 ```
 
-The same compose file without the dev overlay, so the container runs the server
-compiled into the image instead of a watcher, and code changes need the command
-again. The overlay is also what publishes postgres on `localhost:5432`, so
-under `stack:prod` the database is reachable only from the `backend` container.
-Detached like `stack:up`, so an ssh session dropping does not take the
-stack with it. Worth a run before a competition, and before merging anything that
+What a deployed instance runs (see [`DEPLOYMENT.md`](./DEPLOYMENT.md)): the same
+compose file without the dev overlay, so the container runs the server compiled
+into the image instead of a watcher, code changes need the command again, and
+postgres is reachable only from the `backend` container. Detached like
+`stack:up`. Worth a run before a competition, and before merging anything that
 touches the `Dockerfile`, nginx or the routes.
 
 # Checking it works
 
-This is the standing regression checklist: what the competition round, the
-admin side and the public sites must keep doing through any change, and how to
-exercise each part of it locally. Do the round against `npm run stack:up` —
-that is the only setup that covers nginx, the socket transport and the built
-frontend at once. [`CLAUDE.md`](CLAUDE.md) § What must keep working says how
-the list binds a change, and which items a unit test pins.
+This is the standing regression checklist: what the competition round, the admin
+side and the public sites must keep doing through any change. Do the round
+against `npm run stack:up` — the only setup that covers nginx, the socket
+transport and the built frontend at once. [`CLAUDE.md`](CLAUDE.md) § What must
+keep working says how the list binds a change, and which items a unit test pins.
 
 ## A team playing the round
 
 1. `http://localhost`, join code `000-0000-000`: disclaimer, then the chooser
-   offers the relay and the strategy game.
-2. Play the **relay** through to the end: the problems are served in turn,
-   three tries each at decreasing points, on the 60-minute clock.
+   offers the relay and the strategy game. (`001-0000-000` and `002-0000-000`
+   are categories D and E, which get different games.)
+2. Play the **relay** through to the end: the problems are served in turn, three
+   tries each at decreasing points, on the 60-minute clock.
 3. Play the **strategy** game through to the end against the server bot,
    choosing a role first: a test game, then live ones, with the winning streak
    scored and the 30-minute countdown running.
 4. Reload mid-match, in both. Resuming without loss of state is the thing that
    breaks quietly.
-5. Open the same join code in a second tab mid-match: the running match must
-   not fork, and the countdown must read the same in both tabs — the time
-   left comes from the server, never from the client.
+5. Open the same join code in a second tab mid-match: the running match must not
+   fork, and the countdown must read the same in both tabs — the time left comes
+   from the server, never from the client.
 6. Finish both and check the combined score on the finished screen.
 7. Log out and reload: the login form is back. The session is an HttpOnly
-   cookie set on login, so the browser's devtools show `durer_team` under
-   Cookies while logged in, gone after, and localStorage holds no GUID —
-   only a `loggedIn` flag, which is how the other tabs hear of a login.
-   Nor does the GUID come back in the `GET /team/me` response: it is the
-   cookie's value, so a copy there would be the session in a form a script can
-   read. (boardgame.io still gives the same GUID out as the match's player
-   name, so this narrows the exposure rather than ending it — issue #434.) On
-   the deployed host the login response's `Set-Cookie` also carries `Secure`:
-   the backend takes that from nginx's own scheme, so a proxy in front of the
-   container's nginx would silently lose it.
-8. `npm run build`, then grep `apps/online-frontend/dist` for a string from
-   the bot's lookup tables: the served bundle must contain no bot. Since #429
-   the bots sit behind the `game/bot` entry, ESLint forbids importing it
-   anywhere but the server and the offline dry run, and
-   `packages/game/src/entries.test.ts` pins that the other two entries never
-   reach a bot — so this grep is the final check
-   before a competition, not the only one. [`CLAUDE.md`](CLAUDE.md)
-   § Creating a New Game has the layout.
+   cookie, so devtools show `durer_team` under Cookies while logged in and gone
+   after; localStorage holds no GUID, only the `loggedIn` flag other tabs hear a
+   login through.
+8. `npm run build`, then grep `apps/online-frontend/dist` for a string from the
+   bot's lookup tables: the served bundle must contain no bot.
 
-Join codes `001-0000-000` and `002-0000-000` are categories D and E, which get
-different games.
+<details><summary>What items 7 and 8 are guarding</summary>
+
+The GUID does not come back in the `GET /team/me` response either: it is the
+cookie's value, so a copy there would be the session in a form a script can
+read. boardgame.io still gives the same GUID out as the match's player name, so
+this narrows the exposure rather than ending it — issue #434. On the deployed
+host the login response's `Set-Cookie` also carries `Secure`, which the backend
+takes from nginx's own scheme — a proxy in front of the container's nginx would
+silently lose it.
+
+Since #429 the bots sit behind the `game/bot` entry, ESLint forbids importing it
+anywhere but the server and the offline dry run, and
+`packages/game/src/entries.test.ts` pins that the other two entries never reach
+a bot. The grep is the final check before a competition, not the only one;
+[`CLAUDE.md`](CLAUDE.md) § Creating a New Game has the layout.
+</details>
 
 ## Admin and operations
 
 At `http://localhost/admin`, user `admin`, password from `.env.docker`:
 
-- the team list, and a team's details from it — `/admin/<teamId>` opens one
-  team directly;
+- the team list, and a team's details from it — `/admin/<teamId>` opens one team
+  directly;
 - per-match state dump, per-match log dump, per-category stats;
-- the actions on a running match: add minutes, relay reset, strategy reset,
-  soft delete. Start a match as a team in another tab first, then act on it
-  from here.
-
-Through nginx it is all one origin, so the browser's password prompt is all it
-takes. The `dev:online` proxy puts 5173 on one origin too, which removes the
-reason these pages used to need the stack — but whether the password prompt
-appears for the admin pages' XHRs there has not been walked, so check them
-against `stack:up` as before until someone has.
+- the actions on a running match: add minutes, relay reset, strategy reset, soft
+  delete. Start a match as a team in another tab first, then act on it here.
 
 Team import has two paths and both need checking: `npm run teams:import`, which
 runs `scripts/import_teams.sh` inside the container, and the TSV upload on the
 admin page.
 
-`scripts/admin.py` is the post-competition scoring pull. It reads two
-environment variables and holds no credential of its own:
-
-- `DURER_ADMIN_PASSWORD` — the backend's `ADMIN_CREDENTIALS`. Unset, the script
-  prompts for it; with no terminal to prompt on, it stops rather than sending an
-  unauthenticated request.
-- `DURER_BASE_URL` — defaults to `http://localhost:8000`, which is right against
-  `npm run dev:server`. Against the docker stack set it to `http://localhost`:
-  the backend's port 8000 is not published, nginx proxies `/team` and `/game`.
-  Production is `https://verseny.durerinfo.hu`.
+`scripts/admin.py` is the post-competition scoring pull, holding no credential
+of its own:
 
 ```bash
 DURER_BASE_URL=http://localhost python3 scripts/admin.py   # prompts for the password
 ```
 
-## The offline dry run (`/proba-verseny/`)
+- `DURER_ADMIN_PASSWORD` — the backend's `ADMIN_CREDENTIALS`. Unset it prompts,
+  and with no terminal to prompt on it stops rather than sending an
+  unauthenticated request.
+- `DURER_BASE_URL` — defaults to `http://localhost:8000`, right against
+  `dev:server`. Against the docker stack it must be `http://localhost`: port
+  8000 is not published, nginx proxies `/team` and `/game`. Production is
+  `https://verseny.durerinfo.hu`.
 
-```bash
-npm run dev:offline
-```
+Whether the browser's password prompt appears for the admin pages' XHRs under
+the `dev:online` proxy has not been walked, so check them against `stack:up`.
 
-`http://localhost:5173`, with no backend and no database: the games run against
-the in-browser bot and persist to localStorage. Reload mid-game to check the
-persistence. This is the dry run of the competition round — not to be confused
-with the two practice sites below.
+## The other sites
 
-## The relay practice site (`apps/relay-practise-frontend`)
+Each runs with no backend and no database, and each persists to localStorage —
+reload mid-game to check it resumes.
 
-```bash
-npm run dev:relay-practice
-```
+| what | run it | notes |
+| --- | --- | --- |
+| the offline dry run (`/proba-verseny/`) | `npm run dev:offline` | the rehearsal of the competition round, against the in-browser bot |
+| the relay practice site (`/valto/`) | `npm run dev:relay-practice` | pick a past year's problem set and play it through (#224 replaced the frozen 2023 build) |
+| the strategy practice site (`/jatekok/`) | `npm run dev:strategy-practice` | on port 8012, not 5173; every game playable both against the computer and two players in one browser |
 
-`http://localhost:5173`, again with no backend: the `/valto/` subpage of the
-Pages site, where #224 replaced the frozen 2023 build. Pick a past year's relay
-problem set and play it through against the in-browser bot, with progress in
-localStorage — reload mid-round to check it resumes.
-
-## The public Pages site
+The Pages site assembles all three plus a home page:
 
 ```bash
 npm run site:build   # home + /jatekok/ + /proba-verseny/ + /valto/ into site/
 npm run site:serve   # on http://localhost:4321
 ```
 
-`site:build` is the same script `.github/workflows/pages-deploy.yml` runs, so
-this is the artifact a push to `main` would publish rather than an
-approximation of it — base paths and the CNAME assertion included. Worth a look before merging anything that touches an app on
-the site, because the workflow going green *is* the cutover: there is no staging
-step between it and gyakorlo.durerinfo.hu.
-
-The one thing it cannot reproduce is the upload itself, and GitHub's own serving
-behaviour around 404s. CI builds on the Node in `.nvmrc`, on a clean tree; to match
-that too, run the same command under
+`site:build` is the same script `.github/workflows/pages-deploy.yml` runs, base
+paths and the CNAME assertion included, so this is the artifact a push to `main`
+would publish. Worth a look before merging anything that touches an app on the
+site, because the workflow going green *is* the cutover — there is no staging
+step between it and gyakorlo.durerinfo.hu. What it cannot reproduce is the
+upload itself and GitHub's serving behaviour around 404s. To match CI's clean
+tree and Node as well, run it under
 `docker run -v "$PWD":/w -w /w node:$(cat .nvmrc) npm run site:build`.
 
-## The strategy practice site (`apps/strategy-practice`)
+<details><summary>The strategy practice site is a workspace, but not like the others</summary>
 
-The strategy-game practice site (https://gyakorlo.durerinfo.hu/jatekok/) lives
-in `apps/strategy-practice`, merged in from the durer-jatekok repository with
-its history and renamed from `apps/practice` when the relay practice app arrived
-(pre-rename history: `git log -- apps/practice`). It is a workspace, so it runs
-from the root like the other frontends:
-
-```bash
-npm run dev:strategy-practice   # the strategy practice site, on http://localhost:8012
-```
-
-Its vite config binds all interfaces and pins port 8012, so it forwards out of
-the dev container with no extra setup, and does not collide with the 5173 the
-other frontends share. Every game must be playable in both of its modes:
-against the computer, and two players in one browser.
+`apps/strategy-practice` was merged in from the durer-jatekok repository with
+its history, and renamed from `apps/practice` when the relay practice app
+arrived (pre-rename history: `git log -- apps/practice`). Its vite config binds
+all interfaces and pins port 8012, so it forwards out of the dev container with
+no extra setup and does not collide with the 5173 the other frontends share.
 
 `npm ci`, `npm run lint`, `npm run build`, `npm run typecheck` and `npm test` at
 the root cover it — the lint through its own config, which ESLint picks up as it
 walks into the directory, the tests through its own vite config, which the root
 `vitest.config.mts` lists as a second project; [`CLAUDE.md`](CLAUDE.md) § Project
-Structure has the why. Its suite alone runs from anywhere by naming the workspace:
-
-```bash
-npm test --workspace=strategy-practice
-```
-
-`cd apps/strategy-practice` if you are going to iterate in there — the rest of
-its scripts work the same either way.
+Structure has the why. Its suite alone is
+`npm test --workspace=strategy-practice`, from anywhere.
 
 **Do not run `npm ci` from `apps/strategy-practice`.** There is one lockfile, at
 the root; from a workspace directory npm installs that workspace's subtree and
 leaves the root's own dependencies unmet, while exiting 0.
 [`apps/strategy-practice/AGENTS.md`](apps/strategy-practice/AGENTS.md) is the
 authority on everything under that directory.
+</details>
 
 ## The checks CI runs
 
@@ -314,136 +265,131 @@ npm run stack:build   # needs docker; the other six do not
 ```
 
 Those are the seven jobs in `.github/workflows/ci.yml`, and they cover
-`apps/strategy-practice` too — it has no workflow of its own. Its patch-coverage
+`apps/strategy-practice` too — it has no workflow of its own. (Its patch-coverage
 gate was retired in #431; that app's own `npm run coverage` stays, on demand —
-run it from `apps/strategy-practice`, or as
-`npm run coverage --workspace=strategy-practice`. There is no root script.
+`npm run coverage --workspace=strategy-practice`, with no root script.)
 
 `npm run stack:build` builds the two images the competition is deployed from —
-the backend and nginx — without starting anything. It is the production image
-set, so no compose overlay, and it is the one gate that reaches the
-`Dockerfile`, `apps/online-frontend/nginx/Dockerfile` and `nginx.conf`; before
-it, a break in any of them surfaced at deploy time. It does not run the stack:
-the round itself is still walked by hand, above.
+the backend and nginx — without starting anything, and is the one gate that
+reaches the `Dockerfile`, `apps/online-frontend/nginx/Dockerfile` and
+`nginx.conf`. The round itself is still walked by hand, above.
 
-`npm run lint` is the whole of the lint gate, `apps/strategy-practice` included:
-ESLint resolves a config per directory as it walks, so that app is checked
-against its own `eslint.config.js` and everything else against the root
-`eslint.config.mjs`, in one pass. No workspace carries a `lint` script of its
-own — to lint one package while you work in it, run `npx eslint .` from its
-directory and you get exactly that subtree, under whichever config governs it.
-What you see there is what CI sees.
+`npm run lint` is the whole of the lint and formatting gate. ESLint resolves a
+config per directory as it walks, so `apps/strategy-practice` is checked against
+its own `eslint.config.js` and everything else against the root
+`eslint.config.mjs`, in one pass.
 
-It is the formatting gate too, so there is nothing extra for CI to run.
-`eslint.stylistic.mjs` holds the character-level rules both configs import —
+<details><summary>Why formatting is ESLint's, and what it deliberately leaves alone</summary>
+
+No workspace carries a `lint` script of its own — to lint one package while you
+work in it, `npx eslint .` from its directory gives exactly that subtree, under
+whichever config governs it. `eslint.stylistic.mjs` holds the character-level rules both configs import —
 spacing, blank lines, final newlines — while the rules that decide where a line
 *breaks* stay per-workspace. `npm run lint:fix` applies them, and
 `.vscode/settings.json` runs the same fixes on save. They are `@stylistic` rules
-because eslint core's formatting rules are deprecated and frozen. What the shared
-set deliberately excludes is anything that moves code between lines: layout in this
-repo is often deliberate, and a formatter that re-prints from the AST cannot tell a
-grid from an accident. `.editorconfig` covers indentation for new code, and quote
-style is enforced only where the code already agrees on one — that module says
-which, and why the rest is left alone.
+because eslint core's formatting rules are deprecated and frozen. The shared set
+excludes anything that moves code between lines: layout here is often
+deliberate, and a formatter that re-prints from the AST cannot tell a grid from
+an accident. `.editorconfig` covers indentation for new code, and quote style is
+enforced only where the code already agrees on one — that module says which, and
+why the rest is left alone.
+</details>
+
+<details><summary>What the spell check covers, and where its vocabulary lives</summary>
 
 `npm run spell-check` checks English and Hungarian alike (via
-`@cspell/dict-hu-hu`, with both British and American spellings accepted),
-past competition problem text included — the same config the VS Code Code
-Spell Checker extension reads. It covers every source file in the repository —
+`@cspell/dict-hu-hu`, with both British and American spellings accepted), past
+competition problem text included — the same config the VS Code Code Spell
+Checker extension reads. It covers every source file in the repository —
 TypeScript, `.js`/`.mjs`/`.cjs`, Python and markdown — along with the
 translation JSONs, the files under dot directories included: hence the three
 globs in the script over one shared extension list, since `**/*` alone skips
 `.github/` and friends. The data files are ignored outright in `cspell.json`:
 `teamData.ts` for its arbitrary team names and `scripts/test.tsv` for the same
-reason. Vocabulary the dictionaries lack lives in three places: technical
-identifiers in `cspell.json`'s `words` list; the competition's own coinages and
-proper nouns in `hungarian-words.txt` (hand-curated, small); and the everyday
-agglutinated forms `@cspell/dict-hu-hu` misses in
-`hungarian-hunspell-words.txt`, which no one maintains by hand —
-`npm run spell-check:hu-triage` regenerates it from the same globs, validating
-every word against real hunspell (needs `apt install hunspell hunspell-hu`) and
-printing whatever hunspell rejects for a human to fix or bless.
+reason.
+
+Vocabulary the dictionaries lack lives in three places: technical identifiers in
+`cspell.json`'s `words` list; the competition's own coinages and proper nouns in
+`hungarian-words.txt` (hand-curated, small); and the everyday agglutinated forms
+`@cspell/dict-hu-hu` misses in `hungarian-hunspell-words.txt`, which no one
+maintains by hand — `npm run spell-check:hu-triage` regenerates it from the same
+globs, validating every word against real hunspell (needs
+`apt install hunspell hunspell-hu`) and printing whatever hunspell rejects for a
+human to fix or bless.
+</details>
 
 ## Dependency updates
 
 Every dependency is pinned exactly, in every workspace — `save-exact` in
-`.npmrc` keeps new ones that way — so `package.json` says what is installed and
-nothing moves without a visible diff. A package that several workspaces share
-is pinned to the same number everywhere: differing exact pins force npm to nest
-a duplicate, which some packages do not survive (the typescript note in
+`.npmrc` keeps new ones that way — so nothing moves without a visible diff. A
+shared package is pinned to the same number everywhere, since differing exact
+pins force npm to nest a duplicate, which some packages do not survive (the
+typescript note in
 [`apps/strategy-practice/package.json`](apps/strategy-practice/package.json));
 `npm ls <package>` showing one deduped install is the check. Peer dependencies
-keep ranges — they state compatibility, not an install. `package-lock.json` is
-still what `npm ci` installs, and everything here that compares a version reads
-it.
+keep ranges: they state compatibility, not an install.
 
 `npm run update:minors` is the routine sweep: it bumps every pin to the newest
-release inside its major, across all workspaces at once, then prints what to
-run next (`npm install`, then the usual gates). It never crosses a major.
+release inside its major, across all workspaces at once, then prints what to run
+next. It never crosses a major.
 
-`.github/workflows/dependency-report.yml` runs on the 1st of each month and
-keeps one `OPS` issue in sync with whatever is behind: every workspace's
-dependencies, every action pinned in `.github/workflows/`, each `.nvmrc`, and
-the docker image each deployment runs (`DOCKER_IMAGES` in
-`scripts/dependency-report.mjs` says how far each is allowed to reach, and why).
-`npm run report:outdated` prints the same table on demand, and needs no install
-— it asks the registry directly rather than shelling out to `npm outdated`.
+`.github/workflows/dependency-report.yml` runs on the 1st of each month and keeps
+one `OPS` issue in sync with whatever is behind: every workspace's dependencies,
+every action pinned in `.github/workflows/`, each `.nvmrc`, and the docker image
+each deployment runs. `npm run report:outdated` prints the same table on demand,
+and needs no install.
+
+<details><summary>Why a report rather than dependabot, and what a row means</summary>
 
 A row is one *upgrade*, not one package. The same name pinned at two versions is
 two rows rather than one reporting a version it is not; the `written down in`
-column lists every file the bump has to touch, which is the honest measure of
-how big it is.
+column lists every file the bump has to touch, which is the honest measure of how
+big it is. `DOCKER_IMAGES` in `scripts/dependency-report.mjs` says how far each
+image is allowed to reach, and the header comment of the same file says why this
+is a report rather than dependabot or renovate. `package-lock.json` is still what
+`npm ci` installs, and everything here that compares a version reads it.
 
 The report opens no pull requests — upgrading stays deliberate, majors one at a
 time as in
-[#168](https://github.com/a-gondolkodas-orome/durer-jatekok/issues/168). Why a
-report rather than dependabot or renovate: the header comment of
-`scripts/dependency-report.mjs`. Two versions are written down in files no
-`package.json` names — Node (§ Requirements lists where) and Playwright
-([that app's README](apps/strategy-practice/README.md#project-setup) says where);
-`npm test` fails until they agree (`scripts/check-versions.test.mjs`).
+[#168](https://github.com/a-gondolkodas-orome/durer-jatekok/issues/168). Two
+versions are written down in files no `package.json` names: Node (§ Requirements
+lists where) and Playwright ([that app's
+README](apps/strategy-practice/README.md#project-setup) says where); `npm test`
+fails until they agree (`scripts/check-versions.test.mjs`).
+</details>
 
 ### Held back deliberately
 
-The report keeps listing these as behind — that is it doing its job of
-remembering — but in a section of their own, so the `Major` count above it is
-the work actually waiting (#409). The four names below are mirrored by
-`HELD_BACK` in [`scripts/dependency-report.mjs`](scripts/dependency-report.mjs),
-which carries the one-line caption a table cell has room for and nothing more;
-`scripts/dependency-report.test.mjs` fails when the two lists stop agreeing, so
-lifting a hold means editing both. Each stays where it is until the named
-blocker moves (#317):
+The report still lists these, in a section of their own, so the `Major` count
+above it is the work actually waiting (#409). Each stays until its named blocker
+moves (#317). `HELD_BACK` in
+[`scripts/dependency-report.mjs`](scripts/dependency-report.mjs) mirrors the four
+names, and `scripts/dependency-report.test.mjs` fails when the two lists stop
+agreeing.
 
 - **`koa` 2 → 3**: the server's Koa app is constructed by boardgame.io, which
   pins `koa@^2` — the backend's own `koa` entry only has to agree with the
   instance it receives. Nothing here constructs a Koa 3 app to upgrade.
-- **`@koa/router` 10 → 15**: same shape — the backend never constructs a
-  router, it types `server.router`, boardgame.io's own `@koa/router@10`
-  instance. v15's types do not even structurally match that object.
-- **`typescript` 6.0 → 7**: `typescript-eslint` caps `typescript` at
-  `<6.1.0`, and 6.0 is the highest version inside the cap. That cap is the
-  only remaining blocker: every tsconfig is off the `node10` resolution 7.0
-  removes (`bundler` for the Vite- and tsdown-built code, `nodenext` for the
-  backend).
+- **`@koa/router` 10 → 15**: same shape — the backend never constructs a router,
+  it types `server.router`, boardgame.io's own `@koa/router@10` instance. v15's
+  types do not even structurally match that object.
+- **`typescript` 6.0 → 7**: `typescript-eslint` caps `typescript` at `<6.1.0`,
+  and 6.0 is the highest version inside the cap. That cap is the only remaining
+  blocker: every tsconfig is off the `node10` resolution 7.0 removes.
 - **`@types/node` 24 → 26**: not a blocker but a policy — the types track the
   Node major the repo actually runs (`.nvmrc`), so they move when Node does.
 
-Both halves of the boardgame.io situation — why its transitive advisories
-cannot be fixed from here and why `npm audit fix --force` must never be run —
-are in [`CLAUDE.md`](CLAUDE.md).
+Both halves of the boardgame.io situation — why its transitive advisories cannot
+be fixed from here and why `npm audit fix --force` must never be run — are in
+[`CLAUDE.md`](CLAUDE.md).
 
 # Configuration you may want to change
 
 `npm run setup` creates each of these from its committed `*.sample` twin, and
-never overwrites one that already exists. The sample values run the stack
-locally and are meaningless anywhere else.
-
-Because it never overwrites, a file you already have goes stale when its sample
-gains a setting. So setup — and each `dev:*` script, which runs it first — names
-any setting the sample has that your file lacks, and stays quiet otherwise. It
-compares key names only: your credentials, `DATABASE_URL` and the competition
-window are *meant* to differ from the sample, so a value diff would be noise on
-every run, and a check that never reads a value cannot print one.
+never overwrites one that already exists. The sample values run the stack locally
+and are meaningless anywhere else. Whatever reads one takes the change at start:
+vite does not pick up `.env` edits, and the docker stack reads `.env.docker` at
+`up`.
 
 | file | what reads it |
 | --- | --- |
@@ -454,34 +400,44 @@ every run, and a check that never reads a value cannot print one.
 | `apps/relay-practise-frontend/.env` | the same, for the relay practice site |
 | `.env.local` | `VITE_FEEDBACK_URL`, read by `common-frontend`'s build |
 
-Whatever reads one of them takes the change at start: vite does not pick up
-`.env` edits, and the docker stack reads `.env.docker` at `up`.
+Because setup never overwrites, a file you already have goes stale when its
+sample gains a setting — so setup, and each `dev:*` script that runs it first,
+names any setting the sample has that yours lacks.
 
-The accent colour and the interface language are deliberately not in that table.
-Every build of an app uses the same two values, so they are constants at the top
-of its `src/App.tsx` rather than env vars. As env vars they were a gitignored
-copy of the sample, and a change to the sample reached only whoever happened to
-delete their `.env` and re-run `npm run setup` (#443).
+<details><summary>Why it compares key names only, and what is not in the table</summary>
+
+Your credentials, `DATABASE_URL` and the competition window are *meant* to differ
+from the sample, so a value diff would be noise on every run, and a check that
+never reads a value cannot print one.
+
+The accent colour and the interface language are deliberately not env vars: every
+build of an app uses the same two values, so they are constants at the top of its
+`src/App.tsx`. As env vars they were a gitignored copy of the sample, and a change
+to the sample reached only whoever happened to delete their `.env` and re-run
+`npm run setup` (#443).
+</details>
 
 ## Error reporting
 
 Each frontend sends errors and pageload traces to Sentry only when its `.env`
-sets `VITE_SENTRY_DSN`. Without one the SDK is never initialised, so a build
-with nowhere to report to makes no requests rather than failing them.
-
-The gate replaced a DSN hardcoded in all three entry points, pointing at a
-project `sentry.durerinfo.hu` answers `400` for. Every visitor of the public
-practice sites got that failed POST in the console on load, and no report ever
-arrived. Issuing a DSN that works is a change on the Sentry server rather than
-in this repository; set it here once there is one.
-
+sets `VITE_SENTRY_DSN`. Without one the SDK is never initialised, so a build with
+nowhere to report to makes no requests rather than failing them.
 `pages-deploy.yml` passes the repository variable `SENTRY_DSN` to the builds,
 which is how `/valto/` and `/proba-verseny/` would get theirs — there is no
 `.env` in CI to read.
 
 The backend reports separately, to its own project, from a DSN still written
-into `apps/online-backend/src/server.ts`. Its failures reach the server log,
-not a competitor's browser.
+into `apps/online-backend/src/server.ts` — its failures reach the server log, not
+a competitor's browser.
+
+<details><summary>Why the gate exists, and why no DSN is set</summary>
+
+It replaced a DSN hardcoded in all three entry points, pointing at a project
+`sentry.durerinfo.hu` answers `400` for: every visitor of the public practice
+sites got that failed POST in the console on load, and no report ever arrived.
+Issuing a DSN that works is a change on the Sentry server rather than in this
+repository; set it here once there is one.
+</details>
 
 # Competition secrecy
 
@@ -489,45 +445,38 @@ A new competition's game must stay secret until after the competition, which is
 why each year has a private synced repo: `sync.yml` mirrors any pushed `sync-*`
 branch into it, the game is developed and deployed from there, and a merge-back
 PR publishes it afterwards as a strategy practice game. Nothing about an
-unreleased game may appear in a public commit — including engine changes
-phrased around its needs.
+unreleased game may appear in a public commit — including engine changes phrased
+around its needs.
 
-## Setting up the year's private repo
+When the year's repo is created:
 
-The mirror carries `.github/workflows` along with the code, so every workflow in
-this repository also lands there under that repo's own triggers. Two of them are
-guarded to run only in the public repository (`pages-deploy.yml`, which would
-otherwise publish the secret game to Pages on a push to `main`, and `sync.yml`,
-which would otherwise mirror back). The rest are left to run, so the game gets
-lint, typecheck and tests while it is being developed.
-
-When the repo is created:
-
-- **Turn Actions off** (Settings → Actions → Disable) unless you want those
-  checks. The guards make the dangerous jobs no-ops either way; this makes the
-  question moot rather than answered, and it is easier to do once now than to
-  re-derive later.
-- **Enable Pages**, which is what serves the testers' dry run — see
-  *The dry run for testers* in [`DEPLOYMENT.md`](./DEPLOYMENT.md). That site is
-  public, protected only by the repository's unguessable name.
+- **Turn Actions off** (Settings → Actions → Disable) unless you want lint,
+  typecheck and tests on the game while it is developed. The mirror carries
+  `.github/workflows` too, so every workflow here also lands there under that
+  repo's own triggers; the two dangerous ones — `pages-deploy.yml` and
+  `sync.yml` — are already guarded to run only in the public repository, but
+  disabling Actions makes the question moot rather than answered.
+- **Enable Pages**, which is what serves the testers' dry run — see *The dry run
+  for testers* in [`DEPLOYMENT.md`](./DEPLOYMENT.md). That site is public,
+  protected only by the repository's unguessable name.
 - **Set `PUBLIC_URL`** in `apps/offline-frontend/package.json` to the new repo's
   name, so the dry run's asset paths resolve.
 
 # Debugging
 
-`npm run dev:server` starts the backend with `--inspect`, so with it running,
-the `Attach to Backend` configuration in `.vscode/launch.json` attaches on
-port 9229 and breakpoints in `apps/online-backend/src` hold — it restarts the
-attachment when tsdown rebuilds. The frontend is debugged in the browser's
-devtools, where Vite's source maps show the original files. The
-`Debug Frontend` launch configuration predates Vite (port 3000, webpack
-source-map paths) and does not work until someone updates it.
+`npm run dev:server` starts the backend with `--inspect`, so with it running the
+`Attach to Backend` configuration in `.vscode/launch.json` attaches on port 9229
+and breakpoints in `apps/online-backend/src` hold — it restarts the attachment
+when tsdown rebuilds. The frontend is debugged in the browser's devtools, where
+Vite's source maps show the original files. The `Debug Frontend` launch
+configuration predates Vite (port 3000, webpack source-map paths) and does not
+work until someone updates it.
 
 # Creating a new game
 
 A game for the live competition is one folder under
-`packages/game/src/games/strategy/`; [`CLAUDE.md`](CLAUDE.md) § *Creating a
-New Game* has the files it holds, where to register it, and the rule that the
-served bundle must not carry the bot. A game for the strategy practice site is
-a different shape entirely: see
+`packages/game/src/games/strategy/`; [`CLAUDE.md`](CLAUDE.md) § *Creating a New
+Game* has the files it holds, where to register it, and the rule that the served
+bundle must not carry the bot. A game for the strategy practice site is a
+different shape entirely: see
 [`apps/strategy-practice/README.md`](apps/strategy-practice/README.md#adding-a-new-game).
