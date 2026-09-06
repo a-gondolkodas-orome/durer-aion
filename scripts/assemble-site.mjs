@@ -34,9 +34,12 @@ const run = (command, args, options = {}) =>
 
 const step = message => console.log(`\n=== ${message}`);
 
+// Through turbo, exactly as the two below and as the root `npm run build`: turbo builds
+// whatever a workspace package the app imports needs first. A bare `npm run build` inside the
+// app would skip that, and the app importing its first built package would fail here on a
+// missing `dist` while CI's build job stayed green — with a push to `main` being the deploy.
 step('Build strategy game practice');
-run('npm', ['run', 'build'], {
-  cwd: join(repoRoot, 'apps/strategy-practice'),
+run('npx', ['turbo', 'build', '--filter=strategy-practice'], {
   env: { SITE_BASE: `${SITE_ROOT}jatekok/` },
 });
 
