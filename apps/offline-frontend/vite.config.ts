@@ -24,7 +24,7 @@ export default defineConfig(() => {
         { find: /^game$/, replacement: path.resolve(import.meta.dirname, "../../packages/game") },
         { find: /^game\/(bot|client)$/, replacement: path.resolve(import.meta.dirname, "../../packages/game/dist/$1.mjs") },
         { find: /^schemas$/, replacement: path.resolve(import.meta.dirname, "../../packages/schemas") },
-        { find: /^strategy$/, replacement: path.resolve(import.meta.dirname, "../../packages/strategy") },
+        { find: /^relay-bot$/, replacement: path.resolve(import.meta.dirname, "../../packages/relay-bot") },
         { find: /^common-frontend$/, replacement: path.resolve(import.meta.dirname, "../../packages/common-frontend") },
       ],
       dedupe: ["react", "react-dom", "boardgame.io"], // ✅ avoid duplicate instances
@@ -44,7 +44,7 @@ export default defineConfig(() => {
       },
     },
     optimizeDeps: {
-      exclude: ["game", "schemas", "strategy", "common-frontend"],
+      exclude: ["game", "schemas", "relay-bot", "common-frontend"],
       include: ["boardgame.io"],
     },
     build: {

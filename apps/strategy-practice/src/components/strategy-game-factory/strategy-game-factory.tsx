@@ -15,7 +15,7 @@ import {
   type Mode, type Ctx, type MoveOutcome, type Gameplay, type GameMoves, type ClientGameMoves,
   type BotStrategy, type BotMove,
   type StrategyGameConfig, type Variant as DisplayVariant, type VariantInput
-} from 'engine';
+} from 'strategy-engine';
 import { resolvePlayerNames } from './game-parts/common/player-names';
 
 // The game component carries the headless half of its own configuration — what

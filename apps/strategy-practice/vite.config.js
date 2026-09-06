@@ -29,17 +29,17 @@ export default defineConfig(() => ({
       // before `npm run dev` and no HMR into engine source. This app reads the
       // source, exactly as it did when these files sat under src/.
       {
-        find: /^engine$/,
-        replacement: fileURLToPath(new URL('../../packages/engine/index.ts', import.meta.url))
+        find: /^strategy-engine$/,
+        replacement: fileURLToPath(new URL('../../packages/strategy-engine/index.ts', import.meta.url))
       },
       {
-        find: /^engine\/react$/,
-        replacement: fileURLToPath(new URL('../../packages/engine/react.ts', import.meta.url))
+        find: /^strategy-engine\/react$/,
+        replacement: fileURLToPath(new URL('../../packages/strategy-engine/react.ts', import.meta.url))
       },
       // Source rather than a build, for the same reasons as `engine` above.
       {
-        find: /^games$/,
-        replacement: fileURLToPath(new URL('../../packages/games/index.ts', import.meta.url))
+        find: /^strategy-games$/,
+        replacement: fileURLToPath(new URL('../../packages/strategy-games/index.ts', import.meta.url))
       }
     ]
   },
@@ -95,8 +95,8 @@ export default defineConfig(() => ({
     // the source rather than a build.
     include: [
       'src/**/*.spec.{ts,tsx}',
-      '../../packages/engine/src/**/*.spec.{ts,tsx}',
-      '../../packages/games/src/**/*.spec.{ts,tsx}'
+      '../../packages/strategy-engine/src/**/*.spec.{ts,tsx}',
+      '../../packages/strategy-games/src/**/*.spec.{ts,tsx}'
     ],
     // On demand only, never in `npm test` or CI, and with no thresholds — see
     // AGENTS.md § Coverage for why, and for what the report is actually good
@@ -111,8 +111,8 @@ export default defineConfig(() => ({
       allowExternal: true,
       include: [
         'src/**/*.{ts,tsx}',
-        '../../packages/engine/src/**/*.{ts,tsx}',
-        '../../packages/games/src/**/*.{ts,tsx}'
+        '../../packages/strategy-engine/src/**/*.{ts,tsx}',
+        '../../packages/strategy-games/src/**/*.{ts,tsx}'
       ],
       exclude: [
         'src/**/*.spec.{ts,tsx}',
@@ -120,8 +120,8 @@ export default defineConfig(() => ({
         'src/test-setup.ts',
         'src/**/spec-helpers.tsx',
         'src/main.tsx',
-        '../../packages/engine/src/**/*.spec.{ts,tsx}',
-        '../../packages/games/src/**/*.spec.{ts,tsx}'
+        '../../packages/strategy-engine/src/**/*.spec.{ts,tsx}',
+        '../../packages/strategy-games/src/**/*.spec.{ts,tsx}'
       ],
       reporter: ['text', 'html'],
       // /reports is gitignored

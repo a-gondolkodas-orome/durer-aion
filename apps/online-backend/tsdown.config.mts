@@ -43,7 +43,7 @@ export default defineConfig({
     // The alias resolves each of these to a source path, but the external
     // check runs on the bare specifier first, and they all belong to declared
     // dependencies; this is what makes the alias win.
-    alwaysBundle: ['game', 'game/bot', 'schemas', 'strategy'],
+    alwaysBundle: ['game', 'game/bot', 'schemas', 'relay-bot'],
     // Keep `boardgame.io/server` and the like as written, so the bundle
     // requires what the source imports rather than a `dist/cjs/...` path.
     resolveDepSubpath: false,

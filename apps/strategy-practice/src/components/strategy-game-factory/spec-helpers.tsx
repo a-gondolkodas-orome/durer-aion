@@ -10,7 +10,7 @@ import { Link, MemoryRouter, useLocation } from 'react-router';
 import { strategyGameFactory } from './strategy-game-factory';
 import type {
   BoardClientProps, BotStrategy, Gameplay, StrategyGameConfig, VariantInput
-} from 'engine';
+} from 'strategy-engine';
 
 export type Board = string[];
 

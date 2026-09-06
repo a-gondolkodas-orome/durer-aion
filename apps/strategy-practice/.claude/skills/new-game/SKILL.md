@@ -49,14 +49,14 @@ Choose the simplest existing game that resembles the new one structurally:
 Read the chosen reference file in full before writing anything.
 
 ### 4. Create the game files
-Create `packages/games/src/<game-name>/gameplay.ts` (board type, start boards, moves) and `<game-name>.tsx` (rule text, step description, variants, factory call — exported as a `StrategyGameConfig` object, not a component). That package is where new games go; the older ones still sit under `src/components/games/<game-name>/` and export a component instead, which is what the reference games in Step 3 show. Copy `packages/games/src/remove-divisor-multiple/` for the current shape. Which file holds what — and why `gameplay.ts` must stay React-free — is in [AGENTS.md § Files in a game folder](../../../AGENTS.md#files-in-a-game-folder); the contract you are implementing — `moves`/`apply`/`validate`, `isAllowed`, the bot contract, `ctx`, `setTurnState`, `useDeferredMove` — is in [src/components/CLAUDE.md § strategyGameFactory API](../../../src/components/CLAUDE.md#strategygamefactory-api). Read both rather than guessing from the reference game alone. Authoring decisions on top of them:
+Create `packages/strategy-games/src/<game-name>/gameplay.ts` (board type, start boards, moves) and `<game-name>.tsx` (rule text, step description, variants, factory call — exported as a `StrategyGameConfig` object, not a component). That package is where new games go; the older ones still sit under `src/components/games/<game-name>/` and export a component instead, which is what the reference games in Step 3 show. Copy `packages/strategy-games/src/remove-divisor-multiple/` for the current shape. Which file holds what — and why `gameplay.ts` must stay React-free — is in [AGENTS.md § Files in a game folder](../../../AGENTS.md#files-in-a-game-folder); the contract you are implementing — `moves`/`apply`/`validate`, `isAllowed`, the bot contract, `ctx`, `setTurnState`, `useDeferredMove` — is in [src/components/CLAUDE.md § strategyGameFactory API](../../../src/components/CLAUDE.md#strategygamefactory-api). Read both rather than guessing from the reference game alone. Authoring decisions on top of them:
 - If the user supplied the rule text, use it verbatim in `rule.hu` by default. Don't silently rephrase, correct, or abbreviate it. **Exception:** when the original wording doesn't fit the online implementation — e.g. it refers to the competition organizers/judges instead of the opponent/computer, or to physical artifacts (paper, pencil, cards on a table) that don't exist in the browser version — it's fine to reword it slightly to fit. In that case, explicitly highlight every change you made to the user (e.g. show before/after) so they can review it. For any other wording change, propose it and wait for approval before applying.
 - For user-facing text referring to the other participant, prefer "other player" / "másik játékos" over "opponent" / "ellenfél" — the latter reads as too harsh, especially in Hungarian
 - `getPlayerStepDescription` should make it obvious what the current player should do — it is the game's instruction line, not a status label
 - Pull `name`, `title`, `credit` from `gameList` rather than hardcoding them
 
 ### 5. Export the game, then wire it into `src/components/games/index.ts`
-Export the config from `packages/games/index.ts`, then add one line to the app's
+Export the config from `packages/strategy-games/index.ts`, then add one line to the app's
 barrel keyed by the game's `gameList` key, keeping alphabetical order:
 `export const YourGame = strategyGameFactory(yourGameConfig);`. (A game under
 `src/components/games/` is re-exported directly instead —
@@ -69,7 +69,7 @@ Using the metadata collected in Step 1, add the entry in alphabetical order by k
 
 ### 7. Run tests and verify
 If the optimal AI was implemented, write a spec that plays it rather than one
-that eyeballs a single decision. `runMatch` (from `engine`, re-exported by
+that eyeballs a single decision. `runMatch` (from `strategy-engine`, re-exported by
 `strategy-game-factory`) plays
 a whole game headless through the real moves, validators and win detection:
 

@@ -5,7 +5,7 @@ import {
   strategyNames,
 } from 'game';
 import { StrategyWrappers as StrategyStrategy } from 'game/bot';
-import { RelayStrategy } from 'strategy';
+import { RelayStrategy } from 'relay-bot';
 import { PostgresStore } from 'bgio-postgres';
 import { argv, env, exit } from 'process';
 import { SocketIOButBotMoves } from './socketio_botmoves';

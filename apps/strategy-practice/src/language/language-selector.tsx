@@ -1,4 +1,4 @@
-import { useLanguage } from 'engine/react';
+import { useLanguage } from 'strategy-engine/react';
 
 export const LanguageSelector = () => {
   const { language, setLanguage } = useLanguage();

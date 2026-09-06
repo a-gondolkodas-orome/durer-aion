@@ -5,7 +5,7 @@ import { strategyGameFactory, type StrategyGameConfig } from '../strategy-game-f
 import {
   runMatch, playBotTurn, createInitialCoreState,
   type BotMove, type BotStrategy, type Ctx, type Gameplay, type MoveOutcome
-} from 'engine';
+} from 'strategy-engine';
 
 // Three hosts play a named turn out separately — the React shell paced by a
 // timer, runMatch and playBotTurn (the competition server's host) straight

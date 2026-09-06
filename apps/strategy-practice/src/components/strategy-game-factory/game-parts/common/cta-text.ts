@@ -1,5 +1,5 @@
 import type { I18nString } from 'language';
-import type { Ctx } from 'engine';
+import type { Ctx } from 'strategy-engine';
 
 export const getCtaText = ({
   phase,

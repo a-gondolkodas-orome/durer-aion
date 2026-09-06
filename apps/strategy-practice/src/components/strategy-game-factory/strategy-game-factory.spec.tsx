@@ -6,7 +6,7 @@ import {
 } from './spec-helpers';
 import type {
   BoardClientProps, BotMove, BotStrategy, Ctx, Gameplay, StrategyArgs, StrategyGameConfig, VariantInput
-} from 'engine';
+} from 'strategy-engine';
 
 beforeAll(warmUpPlayerNameSetup);
 
