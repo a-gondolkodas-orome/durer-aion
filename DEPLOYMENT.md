@@ -359,9 +359,16 @@ npm run build
 docker compose --env-file=.env.docker -f docker-compose.yml -f docker-compose.tls.yml up --build --wait
 ```
 
-**Then check the cookie**, because losing `Secure` is silent: log in as a team and look at
-the login response's `Set-Cookie` for `durer_team` in devtools. It must carry `Secure`
-alongside `HttpOnly` and `SameSite=Lax`.
+**Then check the cookie**, because losing `Secure` is silent. Log in as a team with
+devtools' **Network** tab open, select the `POST /team/join` request — the login itself,
+answered with `204` and no body — and read `Set-Cookie` in its response headers: it must
+carry `Secure` alongside `HttpOnly` and `SameSite=Lax`.
+
+The Application tab lists it too, but under path `/team/me` rather than the site root,
+because it is scoped to the routes that read it. If the login request is a
+`GET /team/join/<code>` instead, the deployment predates the session cookie
+(`apps/online-backend/src/server/team_session.ts` will not exist in the checkout) and there
+is nothing to look for.
 
 Renew weekly from cron; certbot only acts when the certificate is near expiry. A
 `npm run build` mid-renewal empties `dist` and takes the challenge file with it — rerun.
