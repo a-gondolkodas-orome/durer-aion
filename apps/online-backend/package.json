@@ -30,6 +30,7 @@
     "@types/cors": "2.8.19",
     "@types/koa-basic-auth": "2.0.7",
     "@types/node": "24.13.3",
-    "@types/pg": "8.23.1"
+    "@types/pg": "8.23.1",
+    "socket.io-client": "4.8.3"
   }
 }
