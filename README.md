@@ -9,13 +9,9 @@ the [relay practice site](https://gyakorlo.durerinfo.hu/valto/) and the
 
 ## Requirements
 
-- [Node.js](https://nodejs.org/), the exact version in [`.nvmrc`](./.nvmrc) —
-  `nvm use` anywhere in the repo picks it up. Another 24.x will most likely
-  work, but CI, both dev containers and the Docker image run exactly this one.
-  Four more files write the same version down — `engines.node` in
-  `apps/strategy-practice/package.json`, the `node` feature in both
-  `devcontainer.json` files, and the `Dockerfile`'s `FROM` line — and `npm test`
-  fails until they all agree (`scripts/check-versions.test.mjs`).
+- [Node.js](https://nodejs.org/), the version in [`.nvmrc`](./.nvmrc) —
+  `nvm use` anywhere in the repo picks it up. Another 24.x will most likely work
+  too, but CI runs exactly this one.
 - [Docker](https://www.docker.com/), with your user in the `docker` group so the
   commands below need no `sudo` — `DEPLOYMENT.md` has the three lines that do
   it. Plain `sudo docker …` works too, but never `sudo npm run …`: that runs npm
@@ -352,10 +348,10 @@ is a report rather than dependabot or renovate. `package-lock.json` is still wha
 The report opens no pull requests — upgrading stays deliberate, majors one at a
 time as in
 [#168](https://github.com/a-gondolkodas-orome/durer-jatekok/issues/168). Two
-versions are written down in files no `package.json` names: Node (§ Requirements
-lists where) and Playwright ([that app's
-README](apps/strategy-practice/README.md#project-setup) says where); `npm test`
-fails until they agree (`scripts/check-versions.test.mjs`).
+versions are written down in files no `package.json` names: Node and Playwright.
+`npm test` fails until every copy agrees, and
+[`scripts/check-versions.test.mjs`](scripts/check-versions.test.mjs) is the list
+of where they are — the `.nvmrc` row's count comes from it.
 </details>
 
 ### Held back deliberately
