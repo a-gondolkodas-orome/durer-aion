@@ -8,8 +8,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "engine": "*",
-    "lodash": "4.18.1"
+    "lodash": "4.18.1",
+    "strategy-engine": "*"
   },
   "peerDependencies": {
     "react": "^19.2.0"

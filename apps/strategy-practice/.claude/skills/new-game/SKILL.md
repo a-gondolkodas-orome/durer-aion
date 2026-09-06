@@ -69,7 +69,7 @@ Using the metadata collected in Step 1, add the entry in alphabetical order by k
 
 ### 7. Run tests and verify
 If the optimal AI was implemented, write a spec that plays it rather than one
-that eyeballs a single decision. `runMatch` (from `engine`, re-exported by
+that eyeballs a single decision. `runMatch` (from `strategy-engine`, re-exported by
 `strategy-game-factory`) plays
 a whole game headless through the real moves, validators and win detection:
 

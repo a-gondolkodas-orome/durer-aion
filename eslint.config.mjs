@@ -94,13 +94,13 @@ export default defineConfig(
       '@typescript-eslint/use-unknown-in-catch-callback-variable': 'error',
     },
   },
-  // packages/engine and packages/games are apps/strategy-practice code moved out of it,
+  // packages/strategy-engine and packages/games are apps/strategy-practice code moved out of it,
   // still written in that app's dialect: `!` stands in for a guard the game's rules
   // already make redundant, and auditing several hundred of those would turn a move
   // into a rewrite. Off in apps/strategy-practice's own config too, for the same code.
   {
     files: [
-      'packages/engine/**/*.{ts,tsx}',
+      'packages/strategy-engine/**/*.{ts,tsx}',
       'packages/games/**/*.{ts,tsx}',
     ],
     rules: {
@@ -141,18 +141,18 @@ export default defineConfig(
   // The core of the package is what a bare node server imports; its React client half
   // lives in src/react/ and is exempt — that is the whole point of the split. What this
   // rule cannot see is a relative import resolving into src/react/; the walk in
-  // packages/engine/src/react-free.spec.ts pins that. `import type` is allowed because
+  // packages/strategy-engine/src/react-free.spec.ts pins that. `import type` is allowed because
   // it is erased: i18n.ts has to name React's node type to say what a game's rule text
   // may be, and naming it costs a bare node nothing.
   {
-    files: ['packages/engine/**/*.ts'],
-    ignores: ['packages/engine/react.ts', 'packages/engine/src/react/**'],
+    files: ['packages/strategy-engine/**/*.ts'],
+    ignores: ['packages/strategy-engine/react.ts', 'packages/strategy-engine/src/react/**'],
     rules: {
       '@typescript-eslint/no-restricted-imports': ['error', {
         patterns: [{
           group: ['react', 'react/*', 'react-*', '*.tsx', '**/*.tsx'],
           allowTypeImports: true,
-          message: 'packages/engine runs with no framework attached; keep React on the app side.',
+          message: 'packages/strategy-engine runs with no framework attached; keep React on the app side.',
         }],
       }],
     },
@@ -189,7 +189,7 @@ export default defineConfig(
     // already comply, so this rewrites nothing and keeps it that way. The rest of
     // the repo never had the rule and never settled — see eslint.stylistic.mjs.
     files: [
-      'packages/engine/**/*.{ts,tsx}',
+      'packages/strategy-engine/**/*.{ts,tsx}',
       'packages/games/**/*.{ts,tsx}',
     ],
     rules: quotesRule,

@@ -248,7 +248,7 @@ it is fine to add new games with Hungarian only.
 
 The `t()` helper resolves a value to the active language. The value can be a
 plain string if there are no translations available, or a `{ hu, en }` object.
-`useTranslation()` returns it; the hook lives in `packages/engine`
+`useTranslation()` returns it; the hook lives in `packages/strategy-engine`
 (`src/react/translate.ts`) and is reached through the `language` barrel, which
 is a path alias — `import { useTranslation } from 'language';`, no `../../../`.
 

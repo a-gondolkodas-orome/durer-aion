@@ -2,7 +2,7 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { GameSidebar, type SidebarMoves } from './game-sidebar';
-import type { Ctx } from 'engine';
+import type { Ctx } from 'strategy-engine';
 import { makeCtx } from 'test-utils';
 
 beforeAll(() => {

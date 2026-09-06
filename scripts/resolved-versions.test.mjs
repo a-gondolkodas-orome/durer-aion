@@ -45,14 +45,14 @@ describe('findResolved', () => {
 
 describe('findWorkspaceLink', () => {
   // What npm writes for a workspace dependency: the directory it points at, and no version.
-  const link = { resolved: 'packages/engine', link: true };
+  const link = { resolved: 'packages/strategy-engine', link: true };
 
   it('recognises a workspace linked into the root of the tree', () => {
-    expect(findWorkspaceLink(lockfile({ 'node_modules/engine': link }), 'engine', practice)).toBe(true);
+    expect(findWorkspaceLink(lockfile({ 'node_modules/strategy-engine': link }), 'strategy-engine', practice)).toBe(true);
   });
 
   it('recognises one linked under the workspace asking', () => {
-    expect(findWorkspaceLink(lockfile({ 'apps/strategy-practice/node_modules/engine': link }), 'engine', practice)).toBe(true);
+    expect(findWorkspaceLink(lockfile({ 'apps/strategy-practice/node_modules/strategy-engine': link }), 'strategy-engine', practice)).toBe(true);
   });
 
   it('is false for a package installed from the registry', () => {
@@ -60,14 +60,14 @@ describe('findWorkspaceLink', () => {
   });
 
   it('is false for a package the lockfile does not mention', () => {
-    expect(findWorkspaceLink(lockfile({}), 'engine', practice)).toBe(false);
+    expect(findWorkspaceLink(lockfile({}), 'strategy-engine', practice)).toBe(false);
   });
 
-  // Without a lockfile the report falls back to declared ranges, and `"engine": "*"` would be
+  // Without a lockfile the report falls back to declared ranges, and `"strategy-engine": "*"` would be
   // reported against a stranger's package. Nothing is claimed to be a workspace on no evidence,
   // so the caller keeps the row — a wrong row is visible, a silently dropped one is not.
   it('is false when there is no lockfile at all', () => {
-    expect(findWorkspaceLink(null, 'engine', practice)).toBe(false);
+    expect(findWorkspaceLink(null, 'strategy-engine', practice)).toBe(false);
   });
 });
 

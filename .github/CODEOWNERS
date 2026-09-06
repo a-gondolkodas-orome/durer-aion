@@ -5,6 +5,6 @@
 # Note: /packages/games/ (competition games) is a different directory from
 # /packages/game/ (the boardgame.io game logic); only the former is listed.
 
-/apps/strategy-practice/  @czeildi
-/packages/games/          @czeildi
-/packages/engine/         @czeildi
+/apps/strategy-practice/   @czeildi
+/packages/games/           @czeildi
+/packages/strategy-engine/ @czeildi

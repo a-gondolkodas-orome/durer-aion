@@ -42,7 +42,7 @@ sibling of `games/`:
   renders the board, the role chooser and the status line against the API every
   game implements. The flow itself — turn-taking, end-of-game detection,
   restart/clean state, the reducer, the store, `runMatch` and `playBotTurn` —
-  is in `packages/engine`, imported as `engine`, and `index.ts` here re-exports
+  is in `packages/strategy-engine`, imported as `strategy-engine`, and `index.ts` here re-exports
   it. Games import through that barrel — no deep imports. The barrel is a path
   alias, so no `../../` either, which is what makes the rule self-enforcing.
   [src/components/CLAUDE.md](src/components/CLAUDE.md) has the detail.
@@ -117,7 +117,7 @@ off the return value (`botNextMoveArgs` in `test-utils`, imported as
 move's own argument tuple, so name the game's moves wherever a spec types a
 strategy — `BotStrategy<Board, Moves>`, not `BotStrategy<Board>`, which drops
 back to unchecked args. `runMatch`
-(`packages/engine/src/run-match.ts`) plays two strategies against each
+(`packages/strategy-engine/src/run-match.ts`) plays two strategies against each
 other through the real moves and the real reducer — no fake `moves` object, no
 hand-rolled game loop. That is what turns "the AI is truly optimal" into a test:
 the smart bot must win as the mover from a winning start board, and as the
@@ -171,7 +171,7 @@ the reasons above have not changed.
 
 **Replacing `boardgame.io` with this engine is not on the list.** The plan was
 drafted — this app and the live competition round are the same repository, and
-`packages/engine` was pulled out of here partly with that in mind — and then
+`packages/strategy-engine` was pulled out of here partly with that in mind — and then
 deprioritized, because upstream boardgame.io is under active development again
 (issue #277). The root [`CLAUDE.md`](../../CLAUDE.md) is the authority: don't
 build toward that replacement. What survives it is the engine work that pays

@@ -117,7 +117,7 @@ export default defineConfig(
       // this code leans on `!` to say "the rules
       // guarantee this square is on the board", and each one is a judgement about
       // what the right guard would be rather than a mechanical edit. The root
-      // config already turns this rule off for packages/engine and packages/games
+      // config already turns this rule off for packages/strategy-engine and packages/games
       // — this app's code, moved out — so leaving it on here is what would be
       // inconsistent. Turning it on is a project of its own.
       '@typescript-eslint/no-non-null-assertion': 'off',
@@ -158,7 +158,7 @@ export default defineConfig(
     // is start-boards.ts, the curated data a competition hands out, and the .ts
     // half of games/shared/ — its *-svg.tsx siblings are deliberately unmatched.
     // The engine's own React-free half is no longer here to list; it is guarded
-    // by the root config, which is what lints packages/engine.
+    // by the root config, which is what lints packages/strategy-engine.
     files: [
       'src/components/games/**/gameplay.ts',
       'src/components/games/**/start-boards.ts',

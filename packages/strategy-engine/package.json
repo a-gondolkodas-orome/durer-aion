@@ -1,5 +1,5 @@
 {
-  "name": "engine",
+  "name": "strategy-engine",
   "version": "0.0.0",
   "private": true,
   "description": "The strategy-game engine: rules, moves, bots and match state, with no framework attached.",

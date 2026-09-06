@@ -8,7 +8,7 @@
    React half carries utility classes of its own (GameBoard). Without this line its
    classes are silently missing from the build whenever no in-app file happens to
    use the same ones. */
-@source "../../../packages/engine/src/react";
+@source "../../../packages/strategy-engine/src/react";
 /* The moved games' board clients, for the same reason. */
 @source "../../../packages/games/src";
 @variant dark (&:where(.dark, .dark *));

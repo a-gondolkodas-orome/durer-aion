@@ -1,4 +1,4 @@
-import type { BotStrategy } from 'engine';
+import type { BotStrategy } from 'strategy-engine';
 import { sample } from 'lodash';
 import { boardAfterRemoval, openPiles, type Board, type Moves } from './gameplay';
 
