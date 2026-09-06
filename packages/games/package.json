@@ -2,7 +2,7 @@
   "name": "games",
   "version": "0.0.0",
   "private": true,
-  "description": "The live competition games as self-contained folders: gameplay, bot, curated start boards, board client and specs.",
+  "description": "Past competition games for the strategy practice site, as self-contained folders: gameplay, bot, curated start boards, board client and specs.",
   "license": "MIT",
   "scripts": {
     "typecheck": "tsc --noEmit"

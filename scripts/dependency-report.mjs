@@ -45,9 +45,9 @@ export const HELD_BACK = {
 };
 
 // Node is written down far more often than it is depended on, and listing all of it in a table cell
-// would crowd out the version. README § Requirements carries the list; the row carries the count.
+// would crowd out the version. check-versions.test.mjs carries the list; the row carries the count.
 const NVMRC_COMPANIONS = {
-  '.nvmrc': ['4 more files — see README.md § Requirements']
+  '.nvmrc': ['4 more files — see scripts/check-versions.test.mjs']
 };
 
 // The images a deployment actually runs. Pinning them exactly (#203) made two deploys weeks apart

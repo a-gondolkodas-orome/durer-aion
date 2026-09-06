@@ -42,8 +42,9 @@ which the helper handles.
 
 ```js
 const REPO = '/workspaces/durer-aion';      // git rev-parse --show-toplevel
+const APP = `${REPO}/apps/strategy-practice`;
 const { launchGame, sampleDuringBeat, readAll } =
-  await import(`${REPO}/.claude/skills/play-game-in-browser/drive.mjs`);
+  await import(`${APP}/.claude/skills/play-game-in-browser/drive.mjs`);
 
 const { browser, page } = await launchGame('PileSplitter', { mode: 'vsHuman' });
 

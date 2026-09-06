@@ -466,12 +466,12 @@ command, from a checkout of that repo:
 npm run deploy
 ```
 
-npm runs the root `predeploy` first, which builds `offline-frontend` with `PUBLIC_URL` as
-its base path; `deploy` pushes `apps/offline-frontend/dist` to the `gh-pages` branch of the
-private repo, which has Pages enabled and serves it. `PUBLIC_URL` lives in
-`apps/offline-frontend/package.json` as a `/repository-name` placeholder — replace it with
-the year's actual repo name so the asset paths resolve, and keep the change local rather
-than committing it.
+That runs the root `predeploy`, then hands off to `offline-frontend`'s own `deploy`, whose
+`predeploy` rebuilds it with `PUBLIC_URL` as the base path before pushing `dist` to the
+`gh-pages` branch of the private repo, which has Pages enabled and serves it. `PUBLIC_URL`
+lives in `apps/offline-frontend/package.json` as a `/repository-name` placeholder — replace
+it with the year's actual repo name so the asset paths resolve, and keep the change local
+rather than committing it.
 
 **The site is public.** Pages serves it to anyone; the deliberately unguessable repository
 name is the whole of the protection. Treat the link as the secret, and understand that this

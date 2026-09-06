@@ -1,4 +1,9 @@
 @import "tailwindcss";
+
+@theme {
+    --font-roboto: Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+}
+
 /* Tailwind's automatic source detection stops at this app's root, and the engine's
    React half carries utility classes of its own (GameBoard). Without this line its
    classes are silently missing from the build whenever no in-app file happens to
@@ -15,12 +20,13 @@
 
 @layer base {
     html {
-        @apply bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100;
+        @apply bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50;
     }
     /* Engraving/detail lines of the rook piece (see shared/rook-svg.tsx). White
        against the dark piece body in light mode; dark against the light body in
        dark mode. Driven by a custom property so it inherits into <use>. */
     :root {
+        --primary-color: #46871b;
         --rook-groove: var(--color-white);
     }
     :root.dark {
@@ -40,21 +46,25 @@
         overflow-wrap: break-word;
     }
     h1 {
-        @apply text-xl sm:text-2xl font-bold;
+        @apply text-xl sm:text-4xl font-bold tracking-tight;
         text-wrap: balance;
     }
     h2 {
-        @apply text-lg sm:text-xl font-semibold;
+        @apply text-lg sm:text-2xl font-semibold tracking-tight;
         text-wrap: balance;
     }
     a {
-        @apply text-blue-700 dark:text-blue-400 underline;
+        @apply underline transition-colors;
+        color: var(--primary-color);
+    }
+    a:hover {
+        color: color-mix(in srgb, var(--primary-color), black 15%);
     }
     [role="button"] {
         cursor: pointer;
     }
     button {
-        @apply text-center enabled:cursor-pointer disabled:cursor-not-allowed;
+        @apply text-center enabled:cursor-pointer disabled:cursor-not-allowed transition-colors;
     }
 }
 
@@ -65,18 +75,93 @@
     .fill-surface-elevated {
         @apply fill-slate-50 dark:fill-slate-800;
     }
+    .primary-tint-hover:hover,
+    .primary-tint-hover:focus-visible {
+        background-color: color-mix(in srgb, var(--primary-color), transparent 90%);
+    }
 }
 
 @layer components {
     .primary-button {
-        @apply block w-full py-1 sm:py-1.5 px-1.5 sm:px-2;
+        @apply block w-full py-2 sm:py-2.5 px-3 sm:px-4;
         @apply text-base sm:text-lg font-semibold rounded-lg disabled:opacity-50;
-        @apply border-none bg-blue-500 text-white enabled:hocus:bg-blue-600;
+        @apply border-none text-white;
+        background-color: var(--primary-color);
+    }
+    .primary-button:hover,
+    .primary-button:focus-visible {
+        background-color: color-mix(in srgb, var(--primary-color), black 15%);
+    }
+    .primary-surface {
+        background-color: var(--primary-color);
+        border-color: color-mix(in srgb, var(--primary-color), black 20%);
+    }
+    .primary-footer {
+        box-shadow: 0 -3px 8px rgb(0 0 0 / 20%);
+    }
+    .primary-link {
+        color: color-mix(in srgb, var(--primary-color), white 80%);
+    }
+    .primary-link:hover {
+        color: color-mix(in srgb, var(--primary-color), white 45%);
+    }
+    .primary-link:focus-visible {
+        color: white;
+    }
+    .primary-link,
+    .primary-surface {
+            transition-property: color, background-color, border-color;
+            transition-duration: 150ms;
+            transition-timing-function: ease;
+    }
+    .primary-control {
+        background-color: var(--primary-color);
+        color: white;
+    }
+    .primary-control:hover,
+    .primary-control:focus-visible {
+        background-color: color-mix(in srgb, var(--primary-color), black 15%);
+    }
+    .primary-control-muted {
+        background-color: color-mix(in srgb, var(--primary-color), white 10%);
+        color: white;
+    }
+    .primary-control-muted:hover,
+    .primary-control-muted:focus-visible {
+        background-color: color-mix(in srgb, var(--primary-color), white 20%);
+    }
+    .primary-control-selected {
+        background-color: color-mix(in srgb, var(--primary-color), black 15%);
+        color: white;
+    }
+    .primary-control-selected:hover,
+    .primary-control-selected:focus-visible {
+        background-color: color-mix(in srgb, var(--primary-color), black 25%);
+    }
+    .primary-outline:hover,
+    .primary-outline:focus-visible {
+        border-color: var(--primary-color);
+    }
+    .primary-focus:focus-visible,
+    .primary-focus:has(:focus-visible) {
+        --tw-ring-color: var(--primary-color);
+    }
+    .primary-tint {
+        background-color: var(--primary-color);
+        color: white;
+    }
+    .primary-tint:hover,
+    .primary-tint:focus-visible {
+        background-color: color-mix(in srgb, var(--primary-color), transparent 45%);
     }
     .secondary-button {
-        @apply block w-full py-1.5 px-2;
+        @apply block w-full py-2.5 px-3;
         @apply text-base sm:text-lg rounded-lg disabled:opacity-50;
-        @apply border enabled:hocus:border-slate-300 bg-slate-50 dark:bg-slate-800 enabled:hocus:bg-slate-100;
-        @apply dark:enabled:hocus:bg-slate-700 dark:enabled:hocus:border-slate-600;
+        @apply border border-slate-300 dark:border-slate-600;
+        @apply bg-slate-50 dark:bg-slate-800;
+        @apply enabled:hover:bg-slate-100 dark:enabled:hover:bg-slate-700;
+        @apply enabled:hover:border-slate-400 dark:enabled:hover:border-slate-500;
+        @apply enabled:focus-visible:bg-slate-100 dark:enabled:focus-visible:bg-slate-700;
+        @apply shadow-md enabled:hover:shadow-lg transition-all;
     }
 }

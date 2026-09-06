@@ -9,6 +9,10 @@ import { useTheme } from '@mui/material/styles';
  * Contains some primitive logic, to aggregate the points, and creates a stack of mui components to display these
  * @param props {{state: TeamModelDto}} (The null potion should be handled earlier, but it is not)
  * @returns Aggregated point visualisations
+ *
+ * Nothing renders it: `Main.tsx` dispatches Relay and Strategy alone, and no
+ * pageState reaches this. Issue #40 tracks the ending screen against the sum
+ * below — the one number it asks to be split into its two subtotals.
  */
 export function Finished(props: { state: TeamModelDto }) {
   const theme = useTheme();

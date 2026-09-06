@@ -63,9 +63,8 @@ export const FilterToggle = ({ open, onToggle, activeCount }: {
       aria-label={t({ hu: 'Szűrők', en: 'Filters' })}
       className={`
         h-8 px-2 inline-flex items-center gap-1 rounded-sm drop-shadow-md
-        ${open || activeCount > 0
-          ? 'bg-blue-200 dark:bg-blue-800'
-          : 'bg-surface-elevated hocus:bg-blue-200 dark:hocus:bg-blue-800'}
+        ${open || activeCount > 0 ? 'primary-control-selected' : 'primary-control-muted'}
+        transition-colors
       `}
     >
       <FunnelIcon />
@@ -109,9 +108,8 @@ const FilterRow = <T,>({ label, options, selected, onChange }: {
             title={optionLabel}
             className={`
               h-7 inline-flex items-center justify-center rounded-sm drop-shadow-md ${buttonClassName ?? 'px-2'}
-              ${isSelected
-                ? 'bg-blue-200 dark:bg-blue-800 hocus:bg-slate-200 dark:hocus:bg-slate-700'
-                : 'bg-surface-elevated hocus:bg-blue-200 dark:hocus:bg-blue-800'}`}
+              ${isSelected ? 'primary-tint' : 'bg-surface-elevated primary-tint-hover'}
+              transition-colors`}
           >{content}</button>
         );
       })}

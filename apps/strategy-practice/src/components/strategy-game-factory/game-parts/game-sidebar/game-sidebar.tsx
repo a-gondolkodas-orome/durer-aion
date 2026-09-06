@@ -114,8 +114,8 @@ export const GameSidebar = ({
           />
         ) : (
           <details className="border rounded-lg p-2 text-sm">
-            <summary className="cursor-pointer text-slate-500 hocus:text-slate-600
-              dark:text-slate-400 dark:hocus:text-slate-300">
+            <summary className="cursor-pointer text-slate-500 hocus:text-slate-700
+              dark:text-slate-400 dark:hocus:text-slate-200 transition-colors font-medium">
               {modeSummaryLabel}{variantSummaryLabel}
             </summary>
             <div className="mt-2 flex flex-col gap-3">
@@ -213,7 +213,7 @@ const PlayerNameSetup = ({ roleLabels, playerNames, setPlayerNames, onStart }: {
           name={i === 0 ? 'name_of_first_player' : 'name_of_second_player'}
           className="border rounded-md text-slate-600 dark:text-slate-200
            bg-surface-elevated
-            px-2 py-1 text-sm flex-1 min-w-20 focus:outline-none focus:ring-1 focus:ring-blue-400"
+            px-2 py-1 text-sm flex-1 min-w-20 focus:outline-none focus:ring-1 primary-focus"
           placeholder={t([
             { hu: 'Neved (Nyuszika)', en: 'Your name (Pip)' },
             { hu: 'Neved (Teknős)', en: 'Your name (Dot)' }
@@ -229,7 +229,7 @@ const PlayerNameSetup = ({ roleLabels, playerNames, setPlayerNames, onStart }: {
         <button
           data-testid={`start-hh-game-${i}`}
           className="shrink-0 px-2 py-1 text-sm font-semibold rounded-md
-            bg-blue-500 text-white enabled:hocus:bg-blue-600 disabled:opacity-50"
+            primary-control disabled:opacity-50 transition-colors"
           disabled={hasCollision}
           onClick={() => {
             setPlayerNames([playerNames[i], playerNames[1 - i]]);
