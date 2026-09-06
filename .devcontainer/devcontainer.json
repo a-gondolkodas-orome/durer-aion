@@ -24,14 +24,16 @@
   "containerEnv": {
     "DEV_SERVER_HOST": "true",
     "CLAUDE_CONFIG_DIR": "/home/node/.claude",
-    // `npm run lint` needs more than 2.5 GB of V8 heap — one `eslint .` builds a
-    // type-aware program per tsconfig and there are eleven of them. Node sizes its
-    // default heap from the memory it can see, so on a developer's own machine it
-    // picks several GB and nobody notices; inside a container it reads the cgroup
-    // limit instead and lands near 2 GB, where lint dies with "Reached heap limit".
-    // Measured: 2560 MB fails, 3072 MB passes. This is a ceiling, not a
-    // reservation — but it only helps if the container has the RAM, so see
-    // README.md § What's in it if lint is killed outright instead.
+    // `npm run lint` needs about 2.5 GB of V8 heap — one `eslint .` type-checks the
+    // whole repository. Node sizes its default heap from the memory it can see, so
+    // on a developer's own machine it picks several GB and nobody notices; inside a
+    // container it reads the cgroup limit instead and lands near 2 GB, where lint
+    // dies with "Reached heap limit". Measured: 2304 MB fails, 2560 MB passes
+    // (3072 MB was the requirement before #456 moved both configs to
+    // typescript-eslint's `projectService`, which is one 512 MB step and not enough
+    // to clear the 2 GB a container defaults to — hence this line stays). It is a
+    // ceiling, not a reservation — but it only helps if the container has the RAM,
+    // so see README.md § What's in it if lint is killed outright instead.
     "NODE_OPTIONS": "--max-old-space-size=4096"
   },
   "portsAttributes": {
