@@ -1,0 +1,223 @@
+import { describe, it, expect, vi, afterEach } from "vitest";
+import * as http from "node:http";
+import type { AddressInfo } from "node:net";
+import Koa from "koa";
+import Router from "@koa/router";
+import type { Server } from "boardgame.io";
+import type { TeamsRepository } from "./db";
+import type { TeamModel } from "./model";
+import { requireAdmin } from "./admin_session";
+import { configureTeamsRouter } from "./router";
+import { JOIN_ATTEMPT_LIMIT, clientKey, rateLimit } from "./rate_limit";
+
+type LimitedCtx = Parameters<ReturnType<typeof rateLimit>>[0];
+
+// One client, so a bucket is the whole address; the /64 is what the IPv6 cases
+// below are about.
+describe("clientKey", () => {
+  it("keeps an IPv4 address whole", () => {
+    expect(clientKey("192.0.2.7")).toBe("192.0.2.7");
+    expect(clientKey("192.0.2.8")).not.toBe(clientKey("192.0.2.7"));
+  });
+
+  // What a dual-stack socket reports with no proxy in front of it.
+  it("reads an IPv4-mapped address as that IPv4 address", () => {
+    expect(clientKey("::ffff:192.0.2.7")).toBe("192.0.2.7");
+  });
+
+  // A client with a /64 would otherwise get 18 quintillion buckets.
+  it("gives one bucket to an IPv6 /64", () => {
+    const key = clientKey("2001:db8:1:2:3:4:5:6");
+    expect(key).toBe("2001:db8:1:2");
+    expect(clientKey("2001:db8:1:2:ffff:ffff:ffff:ffff")).toBe(key);
+  });
+
+  it("expands the zeroes a compressed address leaves out", () => {
+    expect(clientKey("2001:db8::1")).toBe("2001:db8:0:0");
+    expect(clientKey("::1")).toBe("0:0:0:0");
+  });
+
+  it("keeps different /64s apart", () => {
+    expect(clientKey("2001:db8:1:3::1")).not.toBe(clientKey("2001:db8:1:2::1"));
+  });
+});
+
+describe("rateLimit", () => {
+  // The clock the window is measured on, so no test waits one out.
+  function clock(start = 1_000_000) {
+    let at = start;
+    return { now: () => at, advance: (ms: number) => (at += ms) };
+  }
+
+  function fakeCtx(ip = "192.0.2.7") {
+    return { ip, status: 404, body: undefined, set: vi.fn() } as unknown as LimitedCtx;
+  }
+
+  /** A route that answers with `status`, as the next middleware in line. */
+  const answering = (ctx: LimitedCtx, status: number) => () => {
+    ctx.status = status;
+    return Promise.resolve();
+  };
+
+  it("lets an attempt through and passes the route's answer back", async () => {
+    const limit = rateLimit({ limit: 2, windowMs: 60_000, now: clock().now });
+    const ctx = fakeCtx();
+
+    await limit(ctx, answering(ctx, 204));
+
+    expect(ctx.status).toBe(204);
+    expect(ctx.set).not.toHaveBeenCalled();
+  });
+
+  it("refuses the attempt after the limit, and says how long for", async () => {
+    const time = clock();
+    const limit = rateLimit({ limit: 2, windowMs: 60_000, now: time.now });
+    const route = vi.fn();
+
+    for (let i = 0; i < 2; i++) {
+      const ctx = fakeCtx();
+      await limit(ctx, answering(ctx, 404));
+    }
+    time.advance(15_000);
+    const ctx = fakeCtx();
+    await limit(ctx, route);
+
+    expect(ctx.status).toBe(429);
+    expect(route).not.toHaveBeenCalled();
+    expect(ctx.set).toHaveBeenCalledWith("Retry-After", "45");
+  });
+
+  // The limit is on guessing, not on logging in: a school behind one NAT
+  // address must not lock its next team out by getting the code right.
+  it("charges nothing for an attempt that succeeded", async () => {
+    const limit = rateLimit({ limit: 2, windowMs: 60_000, now: clock().now });
+
+    for (let i = 0; i < 20; i++) {
+      const ctx = fakeCtx();
+      await limit(ctx, answering(ctx, 204));
+      expect(ctx.status).toBe(204);
+    }
+  });
+
+  // The join route answers a missing code by throwing, which is the failure
+  // the whole limit is about.
+  it("charges an attempt whose route threw", async () => {
+    const limit = rateLimit({ limit: 1, windowMs: 60_000, now: clock().now });
+    const boom = new Error("Team not found!");
+
+    await expect(limit(fakeCtx(), () => Promise.reject(boom))).rejects.toBe(boom);
+    const ctx = fakeCtx();
+    await limit(ctx, () => Promise.reject(boom));
+
+    expect(ctx.status).toBe(429);
+  });
+
+  // Charging only once a guess has been answered would let a client send its
+  // whole burst before any of them counted.
+  it("counts guesses sent at once, not only the ones already answered", async () => {
+    const limit = rateLimit({ limit: 2, windowMs: 60_000, now: clock().now });
+    let release = () => { /* replaced below */ };
+    const held = new Promise<void>(resolve => { release = resolve; });
+    const entered = vi.fn();
+    const attempts = Array.from({ length: 5 }, () => fakeCtx());
+
+    const answers = Promise.all(attempts.map(ctx => limit(ctx, async () => {
+      entered();
+      await held;
+      ctx.status = 404;
+    })));
+    release();
+    await answers;
+
+    expect(entered).toHaveBeenCalledTimes(2);
+    expect(attempts.filter(ctx => ctx.status === 429)).toHaveLength(3);
+  });
+
+  it("gives the client its attempts back in the next window", async () => {
+    const time = clock();
+    const limit = rateLimit({ limit: 1, windowMs: 60_000, now: time.now });
+
+    const spent = fakeCtx();
+    await limit(spent, answering(spent, 404));
+    time.advance(60_000);
+    const ctx = fakeCtx();
+    await limit(ctx, answering(ctx, 404));
+
+    expect(ctx.status).toBe(404);
+  });
+
+  it("counts each client separately", async () => {
+    const limit = rateLimit({ limit: 1, windowMs: 60_000, now: clock().now });
+
+    const spent = fakeCtx("192.0.2.7");
+    await limit(spent, answering(spent, 404));
+    const other = fakeCtx("192.0.2.8");
+    await limit(other, answering(other, 404));
+
+    expect(other.status).toBe(404);
+  });
+
+  it("keeps one route's budget out of another's", async () => {
+    const first = rateLimit({ limit: 1, windowMs: 60_000, now: clock().now });
+    const second = rateLimit({ limit: 1, windowMs: 60_000, now: clock().now });
+
+    const spent = fakeCtx();
+    await first(spent, answering(spent, 404));
+    const ctx = fakeCtx();
+    await second(ctx, answering(ctx, 404));
+
+    expect(ctx.status).toBe(404);
+  });
+});
+
+// The join code is a team's whole login, and this route is the only place an
+// unauthenticated client gets to guess at one.
+describe("POST /team/join over HTTP", () => {
+  const servers: http.Server[] = [];
+
+  afterEach(async () => {
+    await Promise.all(servers.splice(0).map(server => new Promise(resolve => server.close(resolve))));
+  });
+
+  async function serve(teams: TeamsRepository) {
+    const app = new Koa<Koa.DefaultState, Server.AppCtx>();
+    // The 404s below are the point of the test, and koa logs every error.
+    app.silent = true;
+    const router = new Router<Koa.DefaultState, Server.AppCtx>();
+    configureTeamsRouter(router, teams, [], requireAdmin("unused-here"));
+    app.use(router.routes());
+    const handle = app.callback();
+    const server = http.createServer((req, res) => { void handle(req, res); }).listen(0, "127.0.0.1");
+    servers.push(server);
+    await new Promise(resolve => server.once("listening", resolve));
+    const { port } = server.address() as AddressInfo;
+    return (code: string) => fetch(`http://127.0.0.1:${port}/team/join`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ code }),
+    });
+  }
+
+  it("stops guessing at the limit, without looking the guess up", async () => {
+    const teams = { getTeam: vi.fn().mockResolvedValue(null) } as unknown as TeamsRepository;
+    const request = await serve(teams);
+
+    for (let i = 0; i < JOIN_ATTEMPT_LIMIT; i++) {
+      expect((await request(`000-0000-${`${i}`.padStart(3, "0")}`)).status).toBe(404);
+    }
+    const refused = await request("000-0000-999");
+
+    expect(refused.status).toBe(429);
+    expect(refused.headers.get("retry-after")).toMatch(/^\d+$/);
+    expect(teams.getTeam).toHaveBeenCalledTimes(JOIN_ATTEMPT_LIMIT);
+  });
+
+  it("lets a team log in however often it gets the code right", async () => {
+    const team = { teamId: "8eae8669-125c-42e5-8b49-89afbac31679" } as TeamModel;
+    const request = await serve({ getTeam: vi.fn().mockResolvedValue(team) } as unknown as TeamsRepository);
+
+    for (let i = 0; i < JOIN_ATTEMPT_LIMIT + 5; i++) {
+      expect((await request("000-0000-000")).status).toBe(204);
+    }
+  });
+});

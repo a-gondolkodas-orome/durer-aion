@@ -150,8 +150,13 @@ keep working says how the list binds a change, and which items a unit test pins.
    login through.
 8. `npm run build`, then grep `apps/online-frontend/dist` for a string from the
    bot's lookup tables: the served bundle must contain no bot.
+9. Guess wrong: twenty bad join codes in a row, then a twenty-first, which the
+   login refuses until the minute is out. A correct code before the twentieth
+   still logs in — only wrong ones count against the limit. Repeat the refused
+   attempt with `curl -H 'X-Forwarded-For: 1.2.3.4'`: still refused, because
+   nginx overwrites that header with the address that connected.
 
-<details><summary>What items 7 and 8 are guarding</summary>
+<details><summary>What items 7 to 9 are guarding</summary>
 
 The GUID does not come back in the `GET /team/me` response either: it is the
 cookie's value, so a copy there would be the session in a form a script can
@@ -166,6 +171,12 @@ anywhere but the server and the offline dry run, and
 `packages/game/src/entries.test.ts` pins that the other two entries never reach
 a bot. The grep is the final check before a competition, not the only one;
 [`CLAUDE.md`](CLAUDE.md) § Creating a New Game has the layout.
+
+A join code is ten digits against a few thousand live ones, which an unlimited
+route gives away inside a round (issue #437). `rate_limit.test.ts` pins the
+counting; what it cannot see is the deployment, where a client's own
+`X-Forwarded-For` or a proxy in front of nginx would put every team in one
+bucket — hence the header in item 9.
 </details>
 
 ## Admin and operations

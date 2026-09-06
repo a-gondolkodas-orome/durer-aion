@@ -69,6 +69,12 @@ export class RealClientRepository implements ClientRepository {
       if (err.response?.status === 404) {
         throw new Error('Nem létező kód', { cause: e });
       }
+      // The server limits how often a code may be guessed at
+      // (apps/online-backend/src/server/rate_limit.ts). Only wrong codes count
+      // against it, so a team that sees this has been typing them.
+      if (err.response?.status === 429) {
+        throw new Error('Túl sok hibás próbálkozás, várj egy percet', { cause: e });
+      }
       // here we can set message according to status (or data)
       throw new Error('Váratlan hiba történt', { cause: e });
     }

@@ -314,6 +314,13 @@ HTTP request — a proxy on the host, or a second `server` block forwarding to p
 makes `$scheme` say `http`, and the cookie ships without `Secure` while everything appears
 to work.
 
+The same block sets `X-Forwarded-For $remote_addr`, which is the client the backend counts
+join-code attempts against (`apps/online-backend/src/server/rate_limit.ts`). A proxy in
+front of this nginx costs that too, and less quietly: every team would then arrive from one
+address and share one allowance, so a competition's worth of mistyped codes would lock
+everybody out together. If one has to be there, it must pass the client's address through
+and this nginx must stop overwriting it.
+
 So edit `apps/online-frontend/nginx/nginx.conf` in the checkout. Paste these four lines
 into the `server` block that is already there, just after `listen       80;`:
 

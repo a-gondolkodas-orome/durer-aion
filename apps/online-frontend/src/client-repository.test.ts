@@ -40,6 +40,12 @@ describe("the team routes", () => {
     await expect(new RealClientRepository().joinWithCode("999-9999-999")).rejects.toThrow("Nem létező kód");
   });
 
+  test("a client over the guessing limit is told to wait", async () => {
+    fakeAxios(() => status(429));
+
+    await expect(new RealClientRepository().joinWithCode("999-9999-999")).rejects.toThrow("Túl sok hibás");
+  });
+
   // The session is the cookie, so the routes name no team; and starting a
   // match changes state, so it is a POST.
   test("starting a round is a POST naming no team", async () => {

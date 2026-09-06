@@ -10,6 +10,7 @@ import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus, createGame, 
 import { import_teams_from_tsv } from './team_import';
 import { publicTeamView } from './team_view';
 import { TeamState, clearTeamCookie, requireJson, requireTeam, setTeamCookie } from './team_session';
+import { JOIN_ATTEMPT_LIMIT, JOIN_ATTEMPT_WINDOW_MS, rateLimit } from './rate_limit';
 import type { requireAdmin } from './admin_session';
 import { AnyBgioGame, PlayerIDType } from 'game';
 
@@ -32,6 +33,10 @@ export function configureTeamsRouter(
   games: AnyBgioGame[],
   adminAuth: ReturnType<typeof requireAdmin>
 ) {
+  // Per router rather than per module, so its counts belong to the server it
+  // serves and a test starts with an empty one.
+  const joinLimit = rateLimit({ limit: JOIN_ATTEMPT_LIMIT, windowMs: JOIN_ATTEMPT_WINDOW_MS });
+
   /**
    * Get the log data about a specific match.
    *
@@ -313,9 +318,14 @@ export function configureTeamsRouter(
    * secret, and a path lands in access logs and browser history. What the
    * cookie is and why, and why the body must be JSON, is `team_session.ts`.
    *
+   * This is the one route where an unauthenticated client guesses at a secret,
+   * so it is the one the attempt limit is on — `rate_limit.ts` for the numbers.
+   * It runs before the body parser: a client over its limit is answered
+   * without reading what it sent.
+   *
    * @param {string} code - the team's join code, as `{ "code": ... }`
    */
-  router.post("/team/join", requireJson, koaBody(), async (ctx) => {
+  router.post("/team/join", joinLimit, requireJson, koaBody(), async (ctx) => {
     const sent: unknown = (ctx.request.body as { code?: unknown } | undefined)?.code;
     const code = typeof sent === "string" ? sent : ctx.throw(400, "Expected { code: string }.");
     const team = await teams.getTeam({ joinCode: code }) ?? ctx.throw(404, "Team not found!");
