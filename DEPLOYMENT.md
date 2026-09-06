@@ -4,8 +4,9 @@
 up by hand over ssh. The machine checks out the repository and builds everything itself —
 there is no pipeline and no registry.
 
-> Walked end to end on a DigitalOcean droplet. Azure and AWS appear below for sizing and
-> price only — everything after provisioning is the same on all three.
+We used AWS or Azure for deployment, but generally, the deployment is done in a virtual
+machine, generally available almost everywhere. For cross vendor compatibility, please use
+an Ubuntu installer for your instance.
 
 Testers who only need to try the games and the UX get a lighter option with no server at
 all — see *The dry run for testers* at the end.
