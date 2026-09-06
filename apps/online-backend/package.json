@@ -15,6 +15,7 @@
     "boardgame.io": "0.50.2",
     "dotenv": "17.4.2",
     "game": "*",
+    "ip-address": "10.7.0",
     "koa": "2.16.4",
     "koa-basic-auth": "4.0.0",
     "koa-body": "8.0.0",

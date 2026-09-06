@@ -12,8 +12,8 @@ import { JOIN_ATTEMPT_LIMIT, clientKey, rateLimit } from "./rate_limit";
 
 type LimitedCtx = Parameters<ReturnType<typeof rateLimit>>[0];
 
-// One client, so a bucket is the whole address; the /64 is what the IPv6 cases
-// below are about.
+// One client is a whole IPv6 prefix, not one address; the parsing that decides
+// which addresses land in the same bucket is `ip-address`'.
 describe("clientKey", () => {
   it("keeps an IPv4 address whole", () => {
     expect(clientKey("192.0.2.7")).toBe("192.0.2.7");
@@ -25,20 +25,27 @@ describe("clientKey", () => {
     expect(clientKey("::ffff:192.0.2.7")).toBe("192.0.2.7");
   });
 
-  // A client with a /64 would otherwise get 18 quintillion buckets.
-  it("gives one bucket to an IPv6 /64", () => {
+  // A subscriber is handed a prefix, so counting per address would hand one
+  // client as many buckets as it cares to use.
+  it("gives one bucket to an IPv6 prefix", () => {
     const key = clientKey("2001:db8:1:2:3:4:5:6");
-    expect(key).toBe("2001:db8:1:2");
+    expect(key).toBe("2001:db8:1::/56");
     expect(clientKey("2001:db8:1:2:ffff:ffff:ffff:ffff")).toBe(key);
+    expect(clientKey("2001:db8:1:3::1")).toBe(key);
   });
 
-  it("expands the zeroes a compressed address leaves out", () => {
-    expect(clientKey("2001:db8::1")).toBe("2001:db8:0:0");
-    expect(clientKey("::1")).toBe("0:0:0:0");
+  it("keeps separate prefixes apart", () => {
+    expect(clientKey("2001:db8:2::1")).not.toBe(clientKey("2001:db8:1::1"));
   });
 
-  it("keeps different /64s apart", () => {
-    expect(clientKey("2001:db8:1:3::1")).not.toBe(clientKey("2001:db8:1:2::1"));
+  // Every spelling that reaches a different key is a bucket the same client
+  // did not have to spend, and an address has more spellings than one would
+  // think: hex case is not one of them, and `::` stands wherever it likes.
+  it("reads one address the same however it is spelled", () => {
+    const key = clientKey("2001:db8:1:2::1");
+    expect(clientKey("2001:DB8:1:2::1")).toBe(key);
+    expect(clientKey("2001:db8:1:2:0:0:0:1")).toBe(key);
+    expect(clientKey("2001:0db8:0001:0002:0000:0000:0000:0001")).toBe(key);
   });
 });
 

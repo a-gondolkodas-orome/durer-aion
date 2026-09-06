@@ -1,6 +1,8 @@
 import type * as Router from '@koa/router';
 import type { DefaultState } from 'koa';
 import type { Server } from 'boardgame.io';
+import { isIPv6 } from 'node:net';
+import { Address6 } from 'ip-address';
 import { RateLimiterMemory, RateLimiterRes } from 'rate-limiter-flexible';
 
 /** Rate limiting for the routes that answer a guess at a secret (issue #437).
@@ -41,16 +43,15 @@ export interface RateLimitOptions {
 export const JOIN_ATTEMPT_LIMIT = 20;
 export const JOIN_ATTEMPT_WINDOW_SECONDS = 60;
 
-/** Expands an IPv6 address's `::` and keeps the first four groups. */
-function ipv6Network(ip: string): string {
-  const [head, tail] = ip.split('::');
-  const groups = (part: string | undefined) => (part ? part.split(':') : []);
-  const before = groups(head);
-  const after = groups(tail);
-  const zeroes: string[] =
-    tail === undefined ? [] : Array<string>(Math.max(0, 8 - before.length - after.length)).fill('0');
-  return [...before, ...zeroes, ...after].slice(0, 4).join(':');
-}
+/** How much of an IPv6 address counts as one client.
+ *
+ * A single subscriber is handed a whole prefix — commonly a /56, sometimes a
+ * /48 — so counting per address would let one client have as many buckets as
+ * it cared to use. /56 is what `express-rate-limit` settled on for the same
+ * problem. It can put two subscribers of the same ISP in one bucket, which is
+ * cheap here precisely because only wrong codes are charged.
+ */
+const IPV6_CLIENT_PREFIX = 56;
 
 /** The client a bucket belongs to.
  *
@@ -60,17 +61,17 @@ function ipv6Network(ip: string): string {
  * appending to what the client sent — otherwise a client would pick its own
  * bucket by sending a header, and the limit would count nothing.
  *
- * An IPv6 client is usually given a whole /64 to itself, so its address alone
- * would hand it as many buckets as it cares to use: everything after the
- * fourth group is dropped. An IPv4 address is one client, mapped form
- * (`::ffff:1.2.3.4`, which is what a dual-stack socket reports with no proxy
- * in front) included. The library counts against whatever key it is given, so
- * this is the whole of what "one client" means here.
+ * Parsing is `ip-address`', not this file's: an address has more spellings
+ * than are worth re-deriving here — upper case, `::` in any position, a zone
+ * id, and the `::ffff:` form a dual-stack socket reports with no proxy in
+ * front — and every spelling that reaches a different key is a bucket the
+ * same client did not have to spend.
  */
 export function clientKey(ip: string): string {
-  if (ip.includes('.')) return ip.slice(ip.lastIndexOf(':') + 1);
-  if (!ip.includes(':')) return ip;
-  return ipv6Network(ip);
+  if (!isIPv6(ip)) return ip;
+  const address = new Address6(ip);
+  if (address.isMapped4()) return address.to4().correctForm();
+  return new Address6(`${ip}/${IPV6_CLIENT_PREFIX}`).networkForm();
 }
 
 /** Answers 429 to a client that has spent its window's attempts.
