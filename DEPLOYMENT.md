@@ -293,9 +293,28 @@ sudo docker run --rm \
   -d verseny.durerinfo.hu --agree-tos -m you@example.com -n
 ```
 
-Then open port 443 and mount the certificates. Put this in `docker-compose.tls.yml` in the
-checkout, beside `docker-compose.yml` — the command below resolves both from there — and
-leave it uncommitted; it names this machine's certificate and belongs to no other:
+Then write the TLS half of the nginx config. It goes in `nginx-tls.conf` in the checkout —
+`nginx.conf` includes `/etc/nginx/tls/*.conf`, and the compose override below mounts this
+file there, so nothing tracked is edited:
+
+```nginx
+listen              443 ssl;
+server_name         verseny.durerinfo.hu;
+ssl_certificate     /etc/letsencrypt/live/verseny.durerinfo.hu/fullchain.pem;
+ssl_certificate_key /etc/letsencrypt/live/verseny.durerinfo.hu/privkey.pem;
+```
+
+**TLS has to terminate in this nginx, in the same `server` block that proxies to the
+backend** — which is what the include gives you. `nginx.conf` sets `X-Forwarded-Proto
+$scheme` on every proxied location, and that header is the only way the backend knows to
+put `Secure` on the team's session cookie
+(`apps/online-backend/src/server/team_session.ts`). Anything that hands this nginx a plain
+HTTP request — a proxy on the host, or a second `server` block forwarding to port 80 —
+makes `$scheme` say `http`, and the cookie ships without `Secure` while everything appears
+to work.
+
+Then `docker-compose.tls.yml`, beside `docker-compose.yml` in the checkout, opening the port
+and mounting both the certificates and that file:
 
 ```yaml
 services:
@@ -304,54 +323,31 @@ services:
       - 443:443
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt:ro
+      - ./nginx-tls.conf:/etc/nginx/tls/tls.conf:ro
 ```
 
-**TLS has to terminate in this nginx, in the same `server` block that proxies to the
-backend.** `nginx.conf` sets `X-Forwarded-Proto $scheme` on every proxied location, and
-that header is the only way the backend knows to put `Secure` on the team's session cookie
-(`apps/online-backend/src/server/team_session.ts`). Anything that hands this nginx a plain
-HTTP request — a proxy on the host, or a second `server` block forwarding to port 80 —
-makes `$scheme` say `http`, and the cookie ships without `Secure` while everything appears
-to work.
+Rebuild with the override:
 
-So edit `apps/online-frontend/nginx/nginx.conf` in the checkout. Paste these four lines
-into the `server` block that is already there, just after `listen       80;`:
+```bash
+npm run build
+docker compose --env-file=.env.docker -f docker-compose.yml -f docker-compose.tls.yml up --build --wait
+```
+
+**For the live deployment, once that certificate exists**, send plain HTTP to HTTPS by
+adding this to `nginx-tls.conf` and rebuilding again. Certbot's renewal fetches its
+challenge over plain HTTP, so that one path has to survive the redirect; everything else on
+port 80 goes to HTTPS before it can reach a proxied location, which is what keeps a
+plaintext request from ever reporting the wrong scheme to the backend.
 
 ```nginx
-    listen              443 ssl;
-    server_name         verseny.durerinfo.hu;
-    ssl_certificate     /etc/letsencrypt/live/verseny.durerinfo.hu/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/verseny.durerinfo.hu/privkey.pem;
+set $to_https 0;
+if ($scheme = http)                                { set $to_https 1; }
+if ($request_uri ~ ^/\.well-known/acme-challenge/) { set $to_https 0; }
+if ($to_https)                                     { return 301 https://$host$request_uri; }
 ```
 
-One `server` block on both ports keeps `$scheme` right per request and keeps the four
-`location` blocks defined once. It is a local edit to a tracked file, so `git pull` will
-report a conflict on it — visibly, which is the point.
-
-**For the live deployment, once that certificate exists**, send plain HTTP to HTTPS: delete
-`listen       80;` from the block you just edited, and add a second block at the end of the
-file that does nothing else.
-
-```nginx
-server {
-    listen      80;
-    server_name verseny.durerinfo.hu;
-
-    # Renewal fetches the challenge over plain HTTP. `^~` beats the prefix match below, so
-    # this has to be a location: a `return` at server level runs before nginx picks a
-    # location at all, and would redirect the challenge away too.
-    location ^~ /.well-known/acme-challenge/ {
-        root /usr/share/nginx/html;
-    }
-
-    location / {
-        return 301 https://$host$request_uri;
-    }
-}
-```
-
-This block never proxies, so it cannot report the wrong scheme to the backend. Adding it
-before the first certificate exists is what breaks issuance, which is why it comes second.
+Adding it before the first certificate exists is what breaks issuance, which is why it
+comes second.
 
 Rebuild with the override:
 
@@ -397,12 +393,6 @@ npm run stack:prod
 
 With TLS set up, use the two-command form from step 8 instead — `stack:prod` takes no
 arguments.
-
-That `git pull` refuses if the update also touches `nginx.conf`, the file step 8 had you
-edit, and leaves the tree alone when it does. Read what changed and re-apply the four TLS
-lines: that file carries the `X-Forwarded-Proto` the session cookie depends on. Not
-`--autostash`, which turns the refusal into conflict markers in a file `stack:prod` then
-builds into the image.
 
 `sequelize.sync()` creates missing tables but does not alter existing ones, so **a release
 that changed a column needs the change applied by hand**, or the volume dropped
