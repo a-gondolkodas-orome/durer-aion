@@ -295,9 +295,10 @@ mirror works, and what to set up when the year's repo is created.
 - Each game's folder holds its game wrapper, bot and board as separate files,
   registered in the three registries next to the folders — never through a
   folder barrel, so the `game`, `game/bot` and `game/client` entries stay apart
-- Use Hungarian for user-facing text (competition is in Hungarian); the
-  strategy and relay practice sites also offer English through their own
-  language switchers
+- Use Hungarian for user-facing text (competition is in Hungarian). The
+  strategy practice site is the exception: it has an HU/EN switcher (and a
+  `?lang=` param), so its strings are translated. The relay practice site is
+  pinned to Hungarian — `LANGUAGE` in `apps/relay-practise-frontend/src/App.tsx`
 - Winner is tracked in `G.winner` state field
 - **Formatting is ESLint's, through `@stylistic`, not prettier's.** The
   character-level rules — spacing, blank lines, final newlines — live in

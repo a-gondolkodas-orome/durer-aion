@@ -1,6 +1,6 @@
-// Playwright and Node are each written down in several places — Node's are listed in the root
-// README § Requirements, Playwright's in apps/strategy-practice/README.md § Project setup — and a
-// mismatch stays invisible until something fails far from the cause. Fail the test run instead.
+// Playwright and Node are each written down in several places — the two tests below are the list
+// of where, and what everything else pointing at "the files the version is repeated in" means — and
+// a mismatch stays invisible until something fails far from the cause. Fail the test run instead.
 //
 // Files are compared against each other only — never against the running process.version, so a
 // contributor on a slightly different local patch is not blocked.
