@@ -1,7 +1,7 @@
 import {
   runMatch, asBotMoves,
   type BotStrategy, type Ctx, type Gameplay, type MoveDefinition, type NamedBotMove
-} from 'engine';
+} from 'strategy-engine';
 
 // Mock `ctx` for testing move functions and bot strategies. A game that pins
 // its mid-turn state names it — `makeCtx<TurnState>({ turnState: … })` — so the

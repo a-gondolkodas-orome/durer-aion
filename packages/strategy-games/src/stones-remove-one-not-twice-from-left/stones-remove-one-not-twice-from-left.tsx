@@ -1,5 +1,5 @@
-import type { BoardClientProps, StrategyGameConfig } from 'engine';
-import { GameBoard, useHoverPreview, useTranslation } from 'engine/react';
+import type { BoardClientProps, StrategyGameConfig } from 'strategy-engine';
+import { GameBoard, useHoverPreview, useTranslation } from 'strategy-engine/react';
 import { range } from 'lodash';
 import { fullStartBoards, testStartBoards, moves, type Board } from './gameplay';
 import { randomBotStrategy, smartBotStrategy } from './bot-strategy';

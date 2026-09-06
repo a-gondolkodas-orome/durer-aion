@@ -12,9 +12,9 @@
       "test-utils": ["./src/test-utils.ts"],
       "strategy-game-factory": ["./src/components/strategy-game-factory/index.ts"],
       "language": ["./src/language/index.ts"],
-      "engine": ["../../packages/engine/index.ts"],
-      "engine/react": ["../../packages/engine/react.ts"],
-      "games": ["../../packages/games/index.ts"]
+      "strategy-engine": ["../../packages/strategy-engine/index.ts"],
+      "strategy-engine/react": ["../../packages/strategy-engine/react.ts"],
+      "strategy-games": ["../../packages/strategy-games/index.ts"]
     },
     "skipLibCheck": true,
     "types": ["vitest/globals", "vite/client"]

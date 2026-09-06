@@ -2,6 +2,11 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import { RealClientRepository } from "./client-repository";
 
+// Uninitialised, i18next's `t` answers with nothing at all, which would make
+// the assertion below read `Error: undefined`; the app initialises it, a unit
+// test has no reason to.
+vi.mock("i18next", () => ({ default: { t: (key: string) => key } }));
+
 // Every call the repository makes, with what it was given. `axios.create` is
 // what the repository builds its client from, so this is the whole transport.
 function fakeAxios(answer: (method: string, url: string) => Promise<unknown>) {
@@ -38,6 +43,16 @@ describe("the team routes", () => {
     fakeAxios(() => status(404));
 
     await expect(new RealClientRepository().joinWithCode("999-9999-999")).rejects.toThrow("Nem létező kód");
+  });
+
+  // The message is a translation key, not a Hungarian string: what this pins
+  // is that a 429 picks that key, and `npm run i18n:check` that hu and en both
+  // carry it. i18next answers with the key itself here, uninitialised.
+  test("a client over the guessing limit is told to wait", async () => {
+    fakeAxios(() => status(429));
+
+    await expect(new RealClientRepository().joinWithCode("999-9999-999"))
+      .rejects.toThrow("login.error.tooManyAttempts");
   });
 
   // The session is the cookie, so the routes name no team; and starting a

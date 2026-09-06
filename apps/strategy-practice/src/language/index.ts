@@ -5,5 +5,5 @@
 // both ride its router and its chrome.
 export { LanguageProvider } from './language-context';
 export { LanguageSelector } from './language-selector';
-export { useLanguage, useTranslation, translate } from 'engine/react';
-export type { I18nString, I18nNode, Language, Translatable, TranslatableNode } from 'engine';
+export { useLanguage, useTranslation, translate } from 'strategy-engine/react';
+export type { I18nString, I18nNode, Language, Translatable, TranslatableNode } from 'strategy-engine';

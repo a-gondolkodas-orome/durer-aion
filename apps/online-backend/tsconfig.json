@@ -33,7 +33,7 @@
       "game/bot": ["../../packages/game/bot.ts"],
       "game/client": ["../../packages/game/client.ts"],
       "schemas": ["../../packages/schemas/index.ts"],
-      "strategy": ["../../packages/strategy/index.ts"]
+      "relay-bot": ["../../packages/relay-bot/index.ts"]
     },
     "skipLibCheck": true
   }

@@ -2,10 +2,10 @@
 // game folder). ESLint bans `react` and the factory barrel by specifier, but it
 // cannot tell that a specifier like './pebble-pile' resolves to a .tsx — that is
 // what this walk is for, and it follows the .ts files it finds so an indirect
-// pull is caught too. The games that moved to `packages/games` stay under the
+// pull is caught too. The games that moved to `packages/strategy-games` stay under the
 // sweep: their gameplay carries the same obligation wherever the folder lives.
 const sources = import.meta.glob(
-  ['./**/*.{ts,tsx}', '../../../../../packages/games/src/**/*.{ts,tsx}'],
+  ['./**/*.{ts,tsx}', '../../../../../packages/strategy-games/src/**/*.{ts,tsx}'],
   { query: '?raw', import: 'default', eager: true }
 );
 

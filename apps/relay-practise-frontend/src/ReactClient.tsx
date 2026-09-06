@@ -1,7 +1,7 @@
 import { ComponentProps, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { GameRelay } from "game";
-import { relayStrategy, Problem } from "strategy";
+import { relayStrategy, Problem } from "relay-bot";
 import { InProgressRelay } from "common-frontend";
 import { ClientFactoryRelay } from "./client_factory";
 import { loadProblemSet } from "./problems";

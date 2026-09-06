@@ -1,4 +1,4 @@
-import type { Ctx, MoveOutcome } from 'engine';
+import type { Ctx, MoveOutcome } from 'strategy-engine';
 
 export interface Board { piles: [number, number], leftRestriction: [boolean, boolean] }
 

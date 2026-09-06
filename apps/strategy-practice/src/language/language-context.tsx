@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router';
-import { LanguageProvider as ProvideLanguage } from 'engine/react';
-import type { Language } from 'engine';
+import { LanguageProvider as ProvideLanguage } from 'strategy-engine/react';
+import type { Language } from 'strategy-engine';
 
 // The stateful half of the language plumbing, and the reason it stays in this
 // app: the language lives in the URL (`?lang=`) and localStorage, and the URL
 // half rides this app's router. The engine's provider is deliberately
-// controlled and router-free (see packages/engine/src/react/language.tsx); this
+// controlled and router-free (see packages/strategy-engine/src/react/language.tsx); this
 // wrapper owns the state and hands it down.
 export const LanguageProvider = ({ children }: { children: React.ReactNode }) => {
   const [searchParams, setSearchParams] = useSearchParams();

@@ -1,6 +1,6 @@
 import { useId } from 'react';
 import { useTranslation } from 'language';
-import type { Variant, Mode } from 'engine';
+import type { Variant, Mode } from 'strategy-engine';
 
 // Radios sharing a `name` form one native group, and the browser keeps exactly
 // one of them checked. The sidebar and the game-end dialog each render these

@@ -17,6 +17,7 @@
     "alikes",
     "argmax",
     "argmin",
+    "askpass",
     "autostash",
     "bgio",
     "bivariance",
@@ -174,7 +175,7 @@
     {
       "filename": [
         "apps/relay-practise-frontend/src/problems.ts",
-        "packages/strategy/src/games/relay/strategy.ts"
+        "packages/relay-bot/src/games/relay/strategy.ts"
       ],
       "ignoreRegExpList": [
         "/\\\\+[a-zA-Z]+/g",

@@ -15,11 +15,11 @@ apps/
   strategy-practice/  # the public strategy game practice site (from the durer-jatekok repo), served at /jatekok/
 packages/
   game/               # Game logic (boardgame.io games); strategy games carry their bot and board in their own folder
-  strategy/           # AI/bot strategy for the relay game (strategy games keep theirs in packages/game)
-  engine/             # the strategy practice site's game engine: rules, moves, bots, match state, no framework
-  games/              # competition games in that engine's format; only strategy-practice consumes it
+  relay-bot/          # the relay game's opponent: the problem bank, and what each try is worth
   common-frontend/    # Shared React components
   schemas/            # TypeScript models/types
+  strategy-engine/    # the strategy practice site's game engine: rules, moves, bots, match state, no framework
+  strategy-games/     # competition games in that engine's format; only strategy-practice consumes it
 pages/                # static content the Pages deploy serves but no app builds
 ```
 
@@ -40,8 +40,8 @@ as a second project, so one `npm test` runs its suite next to the root's, each
 under its own setup. What that ESLint config differs on is the *rule set* —
 `@eslint-react`, react-hooks, and a stylistic dialect (no trailing comma,
 `max-len` 120) the root does not impose. Single quotes are not part of that
-difference: the root config applies the same rule to `packages/engine` and
-`packages/games`, this app's code moved out. It is not a second toolchain:
+difference: the root config applies the same rule to `packages/strategy-engine` and
+`packages/strategy-games`, this app's code moved out. It is not a second toolchain:
 eslint, typescript and vitest are pinned to the same versions as the root and
 npm hoists them, its own plugins included. It came in as a subtree
 merge from `durer-jatekok` with that dialect already set, and reconciling the
@@ -58,11 +58,26 @@ build against. It exits 0 while doing it.
 A plan to replace boardgame.io with the strategy practice engine was drafted and then
 deprioritized — upstream is actively maintained again (issue #277); don't
 build toward that replacement. Its remaining `npm audit` advisories are its own
-transitive tree — `ws` through `koa-socket-2`, `@koa/cors@3`, `engine.io` — and
-cannot be fixed from here. **Never run `npm audit fix --force`:** its fix for
+transitive tree — `@koa/cors@3`, `cookie` through `react-cookies`, `svelte` —
+and cannot be fixed from here. **Never run `npm audit fix --force`:** its fix for
 them is `boardgame.io@0.22.1`, a four-year downgrade that would take the
 competition with it. What is behind otherwise is `npm run report:outdated`'s
 job, monthly.
+
+`ws` and `engine.io` were on that list until #461 and are not any more.
+boardgame.io builds its socket layer from `koa-socket-2`, which asks for
+`socket.io ^3`, so npm nested a 3.x copy under it — and *that* copy, not the 4.x
+one `apps/online-backend` declares, served every match. Nothing showed it: a 4.x
+browser client and a 3.x server both speak Engine.IO 4, so the round worked
+while the transport was type-checked against a version it was not running and
+the advisories were counted against a tree nobody loaded. The `overrides` block
+in the root `package.json` points `koa-socket-2`'s dependency at 4, which makes
+the tree one install. Two tests keep it that way:
+`scripts/socketio-single-copy.test.mjs` reads the lockfile and fails the moment a
+second copy appears, and `apps/online-backend/src/socketio_transport.test.ts`
+plays a match over a real socket, which is what a version change has to keep
+working.
+
 *What must keep working* below is the standing regression checklist every
 change is measured against.
 
@@ -71,7 +86,7 @@ change is measured against.
 - **Frontend**: React 19, Vite, MUI (Material-UI), React Router
 - **Backend**: boardgame.io server, Koa, PostgreSQL (via bgio-postgres)
 - **Build**: Turborepo, TypeScript, tsdown. The packages build into `dist` —
-  all but `packages/games`, which has no build at all, because
+  all but `packages/strategy-games`, which has no build at all, because
   `apps/strategy-practice` reads it from source through a vite alias. The
   backend is one tsdown bundle too, built from the packages' *source*
   rather than their `dist` (`apps/online-backend/tsdown.config.mts` says how
@@ -80,12 +95,12 @@ change is measured against.
   `.ts`: the packages carry no `"type": "module"`, which leaves node guessing
   at a `.ts` config's module system and warning about it on every build. The
   packages ship ESM only — the frontends import it and the backend bundles
-  their source, so a CommonJS build would have no consumer. `packages/engine` is
+  their source, so a CommonJS build would have no consumer. `packages/strategy-engine` is
   the exception: it is CJS-typed and builds both formats, so a host that
   `require`s it works too (its `tsdown.config.mts` says how).
 - **Testing**: vitest, React Testing Library. Suites are `*.test.ts(x)` under
   the root config and `*.spec.ts(x)` under the `apps/strategy-practice` project,
-  which also takes the `.spec` files in `packages/engine` and `packages/games` —
+  which also takes the `.spec` files in `packages/strategy-engine` and `packages/strategy-games` —
   that app's code, moved out. One `npm test` runs both projects through vitest,
   and neither uses Jest.
 - **`apps/strategy-practice`** shares this React major, the root's eslint,
@@ -166,13 +181,13 @@ replaced it. The README's own setup steps are on the list too: `npm ci`,
 `npm run setup` and the `dev:*` and `stack:*` commands must keep doing what it
 says they do.
 
-It is a hand-walked checklist, not a suite. Five items have a unit test pinning
+It is a hand-walked checklist, not a suite. Six items have a unit test pinning
 part of them; the rest are checked by someone actually doing them:
 
 - a join code loading its team, and a logout dropping the saved match with it:
   `packages/common-frontend/src/client/hooks/user-model.test.ts`
 - the relay round against the bot — problems served, the three tries and what
-  each is still worth: `packages/strategy/src/games/relay/strategy.test.ts`
+  each is still worth: `packages/relay-bot/src/games/relay/strategy.test.ts`
 - what a returning team may start, and the closing of a match whose time ran
   out while it was away: `apps/online-backend/src/server/team_manage.test.ts`
 - the time left recomputed from the match's own end, and only the team allowed
@@ -180,6 +195,11 @@ part of them; the rest are checked by someone actually doing them:
 - the admin API asking for the organisers' password on every route under
   `/team/admin` and `/game/admin`, whatever the path's case:
   `apps/online-backend/src/server/admin_session.test.ts`
+- a strategy match played over a real socket — the player's move, the bot's
+  answer and a reload resuming where it left off:
+  `apps/online-backend/src/socketio_transport.test.ts`. The only suite that
+  crosses the wire, and it is still no substitute for the round against
+  `npm run stack:up`: it has no nginx and no built frontend in front of it.
 
 ## Creating a New Game
 

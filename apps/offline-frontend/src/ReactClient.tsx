@@ -1,7 +1,7 @@
 import { GameRelay, MyGameWrappers, strategyNames } from "game";
 import { StrategyWrappers } from "game/bot";
 import { descriptionC, descriptionD, descriptionE, MyBoardWrapper } from "game/client";
-import { RelayStrategy } from "strategy";
+import { RelayStrategy } from "relay-bot";
 import { InProgressRelay } from "common-frontend";
 import { ClientFactory, ClientFactoryRelay } from "./client_factory";
 
