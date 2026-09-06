@@ -51,7 +51,8 @@
     "error": {
       "empty": "You didn't give any code!",
       "wrongid": "Incorrect log-in code.",
-      "noRound": "No round selected!"
+      "noRound": "No round selected!",
+      "tooManyAttempts": "Too many failed attempts, wait a minute!"
     },
     "fallback": "If you can't find the email, write to us at the verseny (at) durerinfo (dot) hu email address.",
     "greeting": "Dear Competitor!",
