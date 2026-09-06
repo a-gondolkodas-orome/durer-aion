@@ -39,3 +39,8 @@ __pycache__
 
 # `npm run report:outdated -- --out dependency-report.md` output
 /dependency-report.md
+
+# Per-machine compose overrides, e.g. the TLS one in DEPLOYMENT.md § 8: they name
+# that host's certificate and belong to no other.
+/docker-compose.*.yml
+!/docker-compose.dev.yml
