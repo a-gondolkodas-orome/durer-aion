@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import * as http from "node:http";
 import type { AddressInfo } from "node:net";
 import Koa from "koa";
@@ -43,11 +43,15 @@ describe("clientKey", () => {
 });
 
 describe("rateLimit", () => {
-  // The clock the window is measured on, so no test waits one out.
-  function clock(start = 1_000_000) {
-    let at = start;
-    return { now: () => at, advance: (ms: number) => (at += ms) };
-  }
+  // The library counts against the real clock, so the two tests that care
+  // about time move it rather than wait.
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
 
   function fakeCtx(ip = "192.0.2.7") {
     return { ip, status: 404, body: undefined, set: vi.fn() } as unknown as LimitedCtx;
@@ -60,7 +64,7 @@ describe("rateLimit", () => {
   };
 
   it("lets an attempt through and passes the route's answer back", async () => {
-    const limit = rateLimit({ limit: 2, windowMs: 60_000, now: clock().now });
+    const limit = rateLimit({ limit: 2, windowSeconds: 60 });
     const ctx = fakeCtx();
 
     await limit(ctx, answering(ctx, 204));
@@ -70,15 +74,14 @@ describe("rateLimit", () => {
   });
 
   it("refuses the attempt after the limit, and says how long for", async () => {
-    const time = clock();
-    const limit = rateLimit({ limit: 2, windowMs: 60_000, now: time.now });
+    const limit = rateLimit({ limit: 2, windowSeconds: 60 });
     const route = vi.fn();
 
     for (let i = 0; i < 2; i++) {
       const ctx = fakeCtx();
       await limit(ctx, answering(ctx, 404));
     }
-    time.advance(15_000);
+    vi.advanceTimersByTime(15_000);
     const ctx = fakeCtx();
     await limit(ctx, route);
 
@@ -90,7 +93,7 @@ describe("rateLimit", () => {
   // The limit is on guessing, not on logging in: a school behind one NAT
   // address must not lock its next team out by getting the code right.
   it("charges nothing for an attempt that succeeded", async () => {
-    const limit = rateLimit({ limit: 2, windowMs: 60_000, now: clock().now });
+    const limit = rateLimit({ limit: 2, windowSeconds: 60 });
 
     for (let i = 0; i < 20; i++) {
       const ctx = fakeCtx();
@@ -102,7 +105,7 @@ describe("rateLimit", () => {
   // The join route answers a missing code by throwing, which is the failure
   // the whole limit is about.
   it("charges an attempt whose route threw", async () => {
-    const limit = rateLimit({ limit: 1, windowMs: 60_000, now: clock().now });
+    const limit = rateLimit({ limit: 1, windowSeconds: 60 });
     const boom = new Error("Team not found!");
 
     await expect(limit(fakeCtx(), () => Promise.reject(boom))).rejects.toBe(boom);
@@ -115,7 +118,7 @@ describe("rateLimit", () => {
   // Charging only once a guess has been answered would let a client send its
   // whole burst before any of them counted.
   it("counts guesses sent at once, not only the ones already answered", async () => {
-    const limit = rateLimit({ limit: 2, windowMs: 60_000, now: clock().now });
+    const limit = rateLimit({ limit: 2, windowSeconds: 60 });
     let release = () => { /* replaced below */ };
     const held = new Promise<void>(resolve => { release = resolve; });
     const entered = vi.fn();
@@ -134,12 +137,11 @@ describe("rateLimit", () => {
   });
 
   it("gives the client its attempts back in the next window", async () => {
-    const time = clock();
-    const limit = rateLimit({ limit: 1, windowMs: 60_000, now: time.now });
+    const limit = rateLimit({ limit: 1, windowSeconds: 60 });
 
     const spent = fakeCtx();
     await limit(spent, answering(spent, 404));
-    time.advance(60_000);
+    vi.advanceTimersByTime(60_000);
     const ctx = fakeCtx();
     await limit(ctx, answering(ctx, 404));
 
@@ -147,7 +149,7 @@ describe("rateLimit", () => {
   });
 
   it("counts each client separately", async () => {
-    const limit = rateLimit({ limit: 1, windowMs: 60_000, now: clock().now });
+    const limit = rateLimit({ limit: 1, windowSeconds: 60 });
 
     const spent = fakeCtx("192.0.2.7");
     await limit(spent, answering(spent, 404));
@@ -158,8 +160,8 @@ describe("rateLimit", () => {
   });
 
   it("keeps one route's budget out of another's", async () => {
-    const first = rateLimit({ limit: 1, windowMs: 60_000, now: clock().now });
-    const second = rateLimit({ limit: 1, windowMs: 60_000, now: clock().now });
+    const first = rateLimit({ limit: 1, windowSeconds: 60 });
+    const second = rateLimit({ limit: 1, windowSeconds: 60 });
 
     const spent = fakeCtx();
     await first(spent, answering(spent, 404));
