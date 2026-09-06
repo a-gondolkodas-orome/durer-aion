@@ -313,34 +313,44 @@ HTTP request — a proxy on the host, or a second `server` block forwarding to p
 makes `$scheme` say `http`, and the cookie ships without `Secure` while everything appears
 to work.
 
-So edit `apps/online-frontend/nginx/nginx.conf` in the checkout, adding the listener and
-certificate to the block that is already there rather than writing a second one:
+So edit `apps/online-frontend/nginx/nginx.conf` in the checkout. Paste these four lines
+into the `server` block that is already there, just after `listen       80;`:
 
-```diff
- server {
-     listen       80;
-+    listen       443 ssl;
-+    server_name  verseny.durerinfo.hu;
-+
-+    ssl_certificate     /etc/letsencrypt/live/verseny.durerinfo.hu/fullchain.pem;
-+    ssl_certificate_key /etc/letsencrypt/live/verseny.durerinfo.hu/privkey.pem;
-+
-+    # Renewal fetches this over plain HTTP, so it must not be redirected.
-+    location ^~ /.well-known/acme-challenge/ {
-+        root /usr/share/nginx/html;
-+    }
-+
-+    # Everything else on 80 goes to HTTPS. Add this only after the first certificate
-+    # exists: redirecting the challenge to an address with no working certificate is
-+    # how issuance fails.
-+    if ($scheme = http) {
-+        return 301 https://$host$request_uri;
-+    }
+```nginx
+    listen              443 ssl;
+    server_name         verseny.durerinfo.hu;
+    ssl_certificate     /etc/letsencrypt/live/verseny.durerinfo.hu/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/verseny.durerinfo.hu/privkey.pem;
 ```
 
-One `server` block on both ports keeps `$scheme` right per request, and keeps the four
+One `server` block on both ports keeps `$scheme` right per request and keeps the four
 `location` blocks defined once. It is a local edit to a tracked file, so `git pull` will
 report a conflict on it — visibly, which is the point.
+
+**For the live deployment, once that certificate exists**, send plain HTTP to HTTPS: delete
+`listen       80;` from the block you just edited, and add a second block at the end of the
+file that does nothing else.
+
+```nginx
+server {
+    listen      80;
+    server_name verseny.durerinfo.hu;
+
+    # Renewal fetches the challenge over plain HTTP. `^~` beats the prefix match below, so
+    # this has to be a location: a `return` at server level runs before nginx picks a
+    # location at all, and would redirect the challenge away too.
+    location ^~ /.well-known/acme-challenge/ {
+        root /usr/share/nginx/html;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+```
+
+This block never proxies, so it cannot report the wrong scheme to the backend. Adding it
+before the first certificate exists is what breaks issuance, which is why it comes second.
 
 Rebuild with the override:
 
