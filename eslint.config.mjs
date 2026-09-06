@@ -48,13 +48,18 @@ export default defineConfig(
       parserOptions: { tsconfigRootDir: import.meta.dirname },
     },
   },
-  // Type-aware linting for source TypeScript files
+  // Type-aware linting for source TypeScript files.
+  // `projectService`, not `project: true`: one TypeScript project service shared
+  // across the run, rather than a program held open per tsconfig — and there are
+  // eleven tsconfigs here. It is what typescript-eslint 8 recommends for this
+  // shape, and it costs one 512 MB step less heap; the measurements, and why they
+  // still miss a container's default heap, are in .devcontainer/devcontainer.json.
   {
     files: ['**/*.{ts,tsx}'],
     ignores: ['**/*.config.{ts,mts}', '**/dist/**', '**/build/**'],
     languageOptions: {
       parserOptions: {
-        project: true,
+        projectService: true,
         tsconfigRootDir: import.meta.dirname,
       },
     },

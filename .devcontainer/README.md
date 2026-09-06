@@ -63,9 +63,11 @@ where the file does not exist yet, so your own values are never overwritten:
   the container; the settings behind them are in `.vscode/settings.json`, which
   applies here because this container opens the repository root.
 - **A raised Node heap ceiling** (`NODE_OPTIONS=--max-old-space-size=4096`).
-  `npm run lint` is one `eslint .` that builds a type-aware TypeScript program
-  per `tsconfig.json`, and there are eleven — it needs over 2.5 GB of heap
-  (measured: 2560 MB fails, 3072 MB passes). Node picks its default heap from
+  `npm run lint` is one `eslint .` that type-checks the whole repository, and it
+  needs about 2.5 GB of heap (measured: 2304 MB fails, 2560 MB passes; it was
+  3072 MB before #456 switched both ESLint configs to typescript-eslint's
+  `projectService`, which shares one project service instead of holding a program
+  open per `tsconfig.json` — eleven of them). Node picks its default heap from
   the memory it can see, so on a developer's own machine it chooses several GB
   and this never comes up; in a container it reads the cgroup limit and settles
   near 2 GB, where lint dies with `FATAL ERROR: Reached heap limit`. The flag is

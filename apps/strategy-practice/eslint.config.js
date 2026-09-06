@@ -97,7 +97,9 @@ export default defineConfig(
     languageOptions: {
       parser: tsParser,
       parserOptions: {
-        project: true,
+        // Kept in step with the root eslint.config.mjs, which explains the choice;
+        // one `eslint .` runs both configs in the same process.
+        projectService: true,
         tsconfigRootDir: import.meta.dirname
       }
     },
@@ -201,7 +203,8 @@ export default defineConfig(
   // the skill driver. None of the blocks above reach it — they are all src/*.ts(x)
   // — so until this block existed ESLint governed these files with no rules at
   // all, reporting them clean because it checked them for nothing. Not type-aware:
-  // tsconfig.json is `include: ["src"]`, so `project: true` would reject them.
+  // tsconfig.json is `include: ["src"]`, so the project service does not find them
+  // and typing them at all would take an `allowDefaultProject` entry.
   {
     files: [
       'scripts/**/*.mjs',
