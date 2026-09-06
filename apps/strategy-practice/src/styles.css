@@ -102,9 +102,11 @@
         }
     }
     /* A filled control on the page: the selected option of a group, a start
-       button. `primary-button` is the same fill at full width. */
+       button. `primary-button` is the same fill at full width. `not-disabled`
+       rather than `enabled`: the selected option is a <label>, which `:enabled`
+       never matches. */
     .primary-control {
-        @apply bg-primary text-white enabled:hocus:bg-primary-dark;
+        @apply bg-primary text-white not-disabled:hocus:bg-primary-dark;
     }
     .primary-button {
         @apply block w-full py-2 sm:py-2.5 px-3 sm:px-4;
