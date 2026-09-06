@@ -115,7 +115,7 @@ const OverviewHeader = ({ filtersOpen, onToggleFilters, activeFilterCount }: {
         </div>
       </div>
     </header>
-    <div className="max-w-[100ch] mx-auto mt-6 pb-3 px-2 sm:px-3">
+    <div className="max-w-[100ch] mx-auto mt-6 pb-3 text-left px-3 sm:px-5.5 pl-2">
       {t({
         hu: <>
           A <i>stratégiás játék</i> egy két szereplős játék,
