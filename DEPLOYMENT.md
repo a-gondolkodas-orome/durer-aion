@@ -292,7 +292,9 @@ sudo docker run --rm \
   -d verseny.durerinfo.hu --agree-tos -m you@example.com -n
 ```
 
-Then open port 443 and mount the certificates, in a `docker-compose.tls.yml` on the host:
+Then open port 443 and mount the certificates. Put this in `docker-compose.tls.yml` in the
+checkout, beside `docker-compose.yml` — the command below resolves both from there — and
+leave it uncommitted; it names this machine's certificate and belongs to no other:
 
 ```yaml
 services:
