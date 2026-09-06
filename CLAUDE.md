@@ -253,8 +253,10 @@ The opening position has two homes, and `GameMixin.startingPosition` in
 overwriting one that exists, and the dev container runs it for you. Six files:
 `.env.docker` for the docker stack, `.env.local` for `common-frontend`'s build,
 and an `.env` each for `online-backend`, `online-frontend`, `offline-frontend`
-and `relay-practise-frontend`. [`README.md`](README.md) § *Configuration you may
-want to change* is the table of what reads which.
+and `relay-practise-frontend`. It also names any setting a file lacks that its
+sample has — key names only, never values. [`README.md`](README.md) §
+*Configuration you may want to change* is the table of what reads which, and
+says why values are left out of that comparison.
 
 ## Docker Deployment
 

@@ -438,6 +438,13 @@ are in [`CLAUDE.md`](CLAUDE.md).
 never overwrites one that already exists. The sample values run the stack
 locally and are meaningless anywhere else.
 
+Because it never overwrites, a file you already have goes stale when its sample
+gains a setting. So setup — and each `dev:*` script, which runs it first — names
+any setting the sample has that your file lacks, and stays quiet otherwise. It
+compares key names only: your credentials, `DATABASE_URL` and the competition
+window are *meant* to differ from the sample, so a value diff would be noise on
+every run, and a check that never reads a value cannot print one.
+
 | file | what reads it |
 | --- | --- |
 | `.env.docker` | the docker stack — bot and admin credentials, the postgres password, the competition window |
