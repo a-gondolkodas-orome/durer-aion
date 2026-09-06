@@ -58,11 +58,26 @@ build against. It exits 0 while doing it.
 A plan to replace boardgame.io with the strategy practice engine was drafted and then
 deprioritized — upstream is actively maintained again (issue #277); don't
 build toward that replacement. Its remaining `npm audit` advisories are its own
-transitive tree — `ws` through `koa-socket-2`, `@koa/cors@3`, `engine.io` — and
-cannot be fixed from here. **Never run `npm audit fix --force`:** its fix for
+transitive tree — `@koa/cors@3`, `cookie` through `react-cookies`, `svelte` —
+and cannot be fixed from here. **Never run `npm audit fix --force`:** its fix for
 them is `boardgame.io@0.22.1`, a four-year downgrade that would take the
 competition with it. What is behind otherwise is `npm run report:outdated`'s
 job, monthly.
+
+`ws` and `engine.io` were on that list until #461 and are not any more.
+boardgame.io builds its socket layer from `koa-socket-2`, which asks for
+`socket.io ^3`, so npm nested a 3.x copy under it — and *that* copy, not the 4.x
+one `apps/online-backend` declares, served every match. Nothing showed it: a 4.x
+browser client and a 3.x server both speak Engine.IO 4, so the round worked
+while the transport was type-checked against a version it was not running and
+the advisories were counted against a tree nobody loaded. The `overrides` block
+in the root `package.json` points `koa-socket-2`'s dependency at 4, which makes
+the tree one install. Two tests keep it that way:
+`scripts/socketio-single-copy.test.mjs` reads the lockfile and fails the moment a
+second copy appears, and `apps/online-backend/src/socketio_transport.test.ts`
+plays a match over a real socket, which is what a version change has to keep
+working.
+
 *What must keep working* below is the standing regression checklist every
 change is measured against.
 
@@ -166,7 +181,7 @@ replaced it. The README's own setup steps are on the list too: `npm ci`,
 `npm run setup` and the `dev:*` and `stack:*` commands must keep doing what it
 says they do.
 
-It is a hand-walked checklist, not a suite. Five items have a unit test pinning
+It is a hand-walked checklist, not a suite. Six items have a unit test pinning
 part of them; the rest are checked by someone actually doing them:
 
 - a join code loading its team, and a logout dropping the saved match with it:
@@ -180,6 +195,11 @@ part of them; the rest are checked by someone actually doing them:
 - the admin API asking for the organisers' password on every route under
   `/team/admin` and `/game/admin`, whatever the path's case:
   `apps/online-backend/src/server/admin_session.test.ts`
+- a strategy match played over a real socket — the player's move, the bot's
+  answer and a reload resuming where it left off:
+  `apps/online-backend/src/socketio_transport.test.ts`. The only suite that
+  crosses the wire, and it is still no substitute for the round against
+  `npm run stack:up`: it has no nginx and no built frontend in front of it.
 
 ## Creating a New Game
 

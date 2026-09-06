@@ -1,4 +1,10 @@
 // Demultiplexes to real transport or bots
+
+// The types below describe the socket.io this workspace declares. That used to
+// be a different copy from the one boardgame.io actually serves matches with,
+// which reaches it through `koa-socket-2`; the root package.json's `overrides`
+// block is what makes them one install, and socketio_transport.test.ts fails if
+// they split again (#461).
 import type IOTypes from 'socket.io';
 import type { Game, PlayerID, Server, State, StorageAPI } from "boardgame.io";
 import type { Bot } from "boardgame.io/ai";

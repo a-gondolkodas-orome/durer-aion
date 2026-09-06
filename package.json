@@ -4,7 +4,8 @@
   "private": true,
   "//": [
     "predeploy/deploy publish the testers' dry run to the year's PRIVATE repo's Pages. pages-deploy.yml is guarded to the public repository, so nothing replaces this there - see DEPLOYMENT.md and README.md section Setting up the year's private repo. Removed as dead twice now; it is neither.",
-    "predeploy builds the workspace packages offline-frontend resolves through their dist. Its own predeploy then rebuilds it with PUBLIC_URL set, and its own deploy runs gh-pages, so the command and the dependency stay declared in the one workspace that owns them."
+    "predeploy builds the workspace packages offline-frontend resolves through their dist. Its own predeploy then rebuilds it with PUBLIC_URL set, and its own deploy runs gh-pages, so the command and the dependency stay declared in the one workspace that owns them.",
+    "overrides: koa-socket-2 asks for socket.io ^3, and its copy - not the one apps/online-backend declares - is the one that serves every match. A range, not a pin: the exact version stays in the workspace that declares it, and update:minors does not walk this block. CLAUDE.md, under the boardgame.io note, says what this changed."
   ],
   "scripts": {
     "predeploy": "npx turbo run build --filter=offline-frontend",
@@ -58,6 +59,11 @@
     "packageManager": {
       "name": "npm",
       "version": "^11"
+    }
+  },
+  "overrides": {
+    "koa-socket-2": {
+      "socket.io": "^4"
     }
   },
   "workspaces": [
