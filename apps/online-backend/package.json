@@ -19,10 +19,10 @@
     "koa-basic-auth": "4.0.0",
     "koa-body": "8.0.0",
     "nanoid": "6.0.1",
+    "relay-bot": "*",
     "schemas": "*",
     "sequelize": "6.37.8",
-    "socket.io": "4.8.3",
-    "strategy": "*"
+    "socket.io": "4.8.3"
   },
   "devDependencies": {
     "@types/cors": "2.8.19",

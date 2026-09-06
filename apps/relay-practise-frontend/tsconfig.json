@@ -23,7 +23,7 @@
     "types": ["vite/client"],
     "paths": {
       "game": ["../../packages/game"],
-      "strategy": ["../../packages/strategy"],
+      "relay-bot": ["../../packages/relay-bot"],
       "schemas": ["../../packages/schemas"],
       "common-frontend": ["../../packages/common-frontend"]
     }

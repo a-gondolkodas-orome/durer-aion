@@ -25,7 +25,7 @@
       "game": ["../../packages/game"],
       "game/bot": ["../../packages/game/dist/bot.d.mts"],
       "game/client": ["../../packages/game/dist/client.d.mts"],
-      "strategy": ["../../packages/strategy"],
+      "relay-bot": ["../../packages/relay-bot"],
       "schemas": ["../../packages/schemas"],
       "common-frontend": ["../../packages/common-frontend"]
     }

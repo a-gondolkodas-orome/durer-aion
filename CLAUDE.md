@@ -15,11 +15,11 @@ apps/
   strategy-practice/  # the public strategy game practice site (from the durer-jatekok repo), served at /jatekok/
 packages/
   game/               # Game logic (boardgame.io games); strategy games carry their bot and board in their own folder
-  strategy/           # AI/bot strategy for the relay game (strategy games keep theirs in packages/game)
-  strategy-engine/    # the strategy practice site's game engine: rules, moves, bots, match state, no framework
-  strategy-games/     # competition games in that engine's format; only strategy-practice consumes it
+  relay-bot/          # the relay game's opponent: the problem bank, and what each try is worth
   common-frontend/    # Shared React components
   schemas/            # TypeScript models/types
+  strategy-engine/    # the strategy practice site's game engine: rules, moves, bots, match state, no framework
+  strategy-games/     # competition games in that engine's format; only strategy-practice consumes it
 pages/                # static content the Pages deploy serves but no app builds
 ```
 
@@ -172,7 +172,7 @@ part of them; the rest are checked by someone actually doing them:
 - a join code loading its team, and a logout dropping the saved match with it:
   `packages/common-frontend/src/client/hooks/user-model.test.ts`
 - the relay round against the bot — problems served, the three tries and what
-  each is still worth: `packages/strategy/src/games/relay/strategy.test.ts`
+  each is still worth: `packages/relay-bot/src/games/relay/strategy.test.ts`
 - what a returning team may start, and the closing of a match whose time ran
   out while it was away: `apps/online-backend/src/server/team_manage.test.ts`
 - the time left recomputed from the match's own end, and only the team allowed

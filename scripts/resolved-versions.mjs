@@ -28,7 +28,7 @@ export const findResolved = (lockfile, name, workspace) =>
 
 // A dependency on one of this repo's own workspaces — `"strategy-engine": "*"` — is not installed from the
 // registry at all: npm links the directory, and the lockfile entry says `link: true` and carries no
-// version. Names like `engine`, `game` and `games` also belong to unrelated packages on the public
+// version. Names like `game` and `schemas` also belong to unrelated packages on the public
 // registry, so a caller that cannot tell the difference ends up asking about a stranger's package.
 export const findWorkspaceLink = (lockfile, name, workspace) =>
   entries(lockfile, name, workspace).some(entry => entry?.link === true);
