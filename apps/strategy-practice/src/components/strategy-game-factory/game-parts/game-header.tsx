@@ -10,28 +10,33 @@ export const GameHeader = () => {
   const title = t(gameEntry?.title ?? gameEntry?.name ?? '');
   return (
   <>
-    <header className="flex flex-wrap items-baseline border-b pb-2 mb-2">
-      <Link
-        to='/'
-        className="md:basis-36 text-sm whitespace-nowrap"
-      >
-        ← <span className="hidden md:inline">{t({ hu: 'Vissza a listához', en: 'Back to list' })}</span>
-      </Link>
-      <h1 className="grow text-blue-600 dark:text-blue-400 text-center">
-        {title}
-      </h1>
-      <span className="md:basis-36 text-sm ml-auto hidden md:flex items-center justify-end gap-2">
-        <a
-          href="https://forms.gle/7DwugmXNrvKgkiiu8"
-          rel="noreferrer"
-          target="_blank"
-          className="whitespace-nowrap"
-        >
-          {t({ hu: 'Hibabejelentő', en: 'Bug report' })}
-        </a>
-        <ThemeSwitcher />
-        <LanguageSelector />
-      </span>
+    <header className="primary-surface sticky top-0 z-40 shadow-md font-roboto">
+      <div className="max-w-6xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <Link
+            to='/'
+            className="primary-link text-sm font-medium transition-colors whitespace-nowrap"
+          >
+            ← <span className="hidden sm:inline">{t({ hu: 'Vissza a listához', en: 'Back to list' })}</span>
+          </Link>
+          <h1 className="flex-1 text-center text-white text-xl sm:text-2xl font-bold tracking-tight">
+            {title}
+          </h1>
+          <span className="hidden md:flex items-center justify-end gap-3 text-sm whitespace-nowrap"
+            style={{ color: 'white' }}>
+            <a
+              href="https://forms.gle/7DwugmXNrvKgkiiu8"
+              rel="noreferrer"
+              target="_blank"
+              className="primary-link transition-colors"
+            >
+              {t({ hu: 'Hibabejelentő', en: 'Bug report' })}
+            </a>
+            <ThemeSwitcher />
+            <LanguageSelector />
+          </span>
+        </div>
+      </div>
     </header>
   </>);
 };

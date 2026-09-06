@@ -74,8 +74,8 @@ const isPreviousPlayerWinning = board => {
   const key = board.join(','); const hit = memo.get(key); if (hit !== undefined) return hit;
   let res; const allowed = allowedMoves(board);
   if (allowed.length === 0) res = true;
-  else { const trivial = trivialMoves(board); const tset = new Set(trivial);
-    const nonTrivial = allowed.filter(ri => !tset.has(ri));
+  else { const trivial = trivialMoves(board); const trivialSet = new Set(trivial);
+    const nonTrivial = allowed.filter(ri => !trivialSet.has(ri));
     if (nonTrivial.length === 0) res = trivial.length % 2 === 0;
     else if (trivial.length % 2 === 0) { const sim = insertAll(board, trivial);
       res = !nonTrivial.some(ri => isPreviousPlayerWinning(insert(sim, ri))); }

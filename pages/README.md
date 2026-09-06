@@ -10,11 +10,16 @@ them.
 
 ## `home/` — the site's front page
 
-One page and its favicon, no build step: the signpost for the subpages around
-it. Its links are **relative**, so it works under `/durer-aion/` and under a
-custom domain alike with nothing to rebase. It links the two practice sites and not
-`/proba-verseny/`, which uploads play data to a shared bucket and is meant to be
-handed to testers rather than discovered.
+One page, its favicon and the `CNAME`, no build step: the signpost for the
+subpages around it. Its links are **relative**, so it works under
+`/durer-aion/` and under a custom domain alike with nothing to rebase. It links
+the two practice sites and not `/proba-verseny/`, which uploads play data to a
+shared bucket and is meant to be handed to testers rather than discovered.
+
+The `CNAME` is what declares the custom domain, and it is not incidental:
+`scripts/assemble-site.mjs` reads it back out of the assembled `site/` and
+throws unless it says `gyakorlo.durerinfo.hu`, so a deploy cannot silently lose
+the domain.
 
 ## The 2023 relay practice build, and where it went
 

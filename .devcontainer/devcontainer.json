@@ -15,7 +15,7 @@
     "DEV_SERVER_HOST": "true"
   },
   "portsAttributes": {
-    "5173": { "label": "online-frontend / offline-frontend (vite)" },
+    "5173": { "label": "online / offline / relay practice (vite)" },
     "8012": { "label": "strategy-practice (vite)" },
     "8000": { "label": "online-backend" },
     "80": { "label": "nginx (docker compose)" },

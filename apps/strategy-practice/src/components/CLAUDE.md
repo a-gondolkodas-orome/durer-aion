@@ -3,7 +3,8 @@
 Loaded when working under `src/components/` — the games in `games/` and the
 `strategy-game-factory` engine they are built on. Project-wide context (what
 this project is, testing policy, styling, i18n, PR conventions) lives in
-`AGENTS.md` at the repo root.
+`AGENTS.md` at the root of this app, `apps/strategy-practice/`. The repository
+root has `CLAUDE.md` instead, which owns the monorepo-wide conventions.
 
 ## Adding a new game
 
@@ -34,7 +35,11 @@ strategyGameFactory({
 ### Variants
 
 An array of `{ id?, botStrategy?, generateStartBoard?, startBoards?, label?,
-isDefault? }`. The default variant (marked `isDefault: true`, or the only entry
+isDefault?, notAlwaysOptimal?, rule? }` — `VariantInput` in
+`packages/engine/src/types.ts`. `notAlwaysOptimal` is § Bot / variant
+conventions below; `rule` overrides `presentation.rule` for that variant alone,
+which is what lets sibling games differing only in rule wording be merged into
+one. The default variant (marked `isDefault: true`, or the only entry
 if there is just one) must state its start position. If `botStrategy` is omitted
 on a variant, the default variant's `botStrategy` is used as fallback. If
 multiple variants are provided, exactly one must be `isDefault: true`. A
@@ -72,13 +77,13 @@ so nothing downstream distinguishes the two. Each pick is cloned, so a curated
 board is as freshly owned by its match as a generated one.
 
 Reach for the list whenever the positions are enumerable rather than sampled: a
-competition hands out one entry per attempt (#314), so the list order is part of
-the contract — **append, never reorder** — and a spec can judge every entry
-instead of calling the generator until they have all come up. The commonest case
-is a list of one, for a game that always starts from the same position:
-`startBoards: [startBoard]`, rather than wrapping that constant in a function
-nobody varies. `generateStartBoard` is then what it says — positions that are
-actually *generated*, by sampling or rejection.
+competition hands out one entry per attempt (durer-jatekok#314), so the list
+order is part of the contract — **append, never reorder** — and a spec can judge
+every entry instead of calling the generator until they have all come up. The
+commonest case is a list of one, for a game that always starts from the same
+position: `startBoards: [startBoard]`, rather than wrapping that constant in a
+function nobody varies. `generateStartBoard` is then what it says — positions
+that are actually *generated*, by sampling or rejection.
 
 **Name the boards, not the list.** A module exports the positions themselves —
 `startBoard`, `startBoardOfCategoryA`, `adjacentStartBoards` — and the variant
@@ -121,7 +126,7 @@ turn); `gameEnd: { winnerIndex }` ends the game with an always-explicit winner
 `nextTurnState` sets `ctx.turnState` (`null` clears, omitted keeps);
 `autoEndOfTurn: true` schedules `endOfTurnMove`. Causing nothing directly is
 what makes a move a pure reducer, and what lets the same function run in a
-future authoritative competition server (issue #313).
+future authoritative competition server (durer-jatekok#313).
 
 The object carries a `satisfies MoveDefs<Board>` clause — `MoveDefs<Board,
 TurnState>` where the game names a turn state. `satisfies` rather than an
