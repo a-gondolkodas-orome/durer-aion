@@ -44,3 +44,6 @@ __pycache__
 # that host's certificate and belong to no other.
 /docker-compose.*.yml
 !/docker-compose.dev.yml
+
+# The TLS snippet DEPLOYMENT.md § 8 mounts into nginx: same, one host's certificate.
+/nginx-tls.conf
