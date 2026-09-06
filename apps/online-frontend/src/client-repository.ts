@@ -1,5 +1,6 @@
 import urlcat from "urlcat";
 import axios, { AxiosInstance, AxiosError } from 'axios';
+import i18n from "i18next";
 // Type-only on purpose: client-repository.test.ts loads this file without the
 // package's dist build, which the CI test job does not produce.
 import type { ClientRepository, TeamModelDto, MatchStateDto, BoardMoves } from "common-frontend";
@@ -73,7 +74,7 @@ export class RealClientRepository implements ClientRepository {
       // (apps/online-backend/src/server/rate_limit.ts). Only wrong codes count
       // against it, so a team that sees this has been typing them.
       if (err.response?.status === 429) {
-        throw new Error('Túl sok hibás próbálkozás, várj egy percet', { cause: e });
+        throw new Error(i18n.t('login.error.tooManyAttempts'), { cause: e });
       }
       // here we can set message according to status (or data)
       throw new Error('Váratlan hiba történt', { cause: e });
