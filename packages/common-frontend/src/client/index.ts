@@ -17,6 +17,8 @@ export * from './components/RelayEndTable';
 export * from './components/StrategyEndTable';
 export * from './components/TeamDetailDialog';
 export * from './components/theme';
+export * from './components/WaitingRoom';
+export * from './components/teamstates/Finished';
 export * from './components/teamstates/InProgressRelay';
 export * from './components/teamstates/Relay';
 export * from './components/teamstates/Strategy';

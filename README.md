@@ -208,7 +208,13 @@ against `stack:up` as before until someone has.
 
 Team import has two paths and both need checking: `npm run teams:import`, which
 runs `scripts/import_teams.sh` inside the container, and the TSV upload on the
-admin page.
+admin page. Two fixtures feed those by hand, which is why no code names either:
+`scripts/test.tsv` is the happy path — the file `teams:import` loads — and
+`scripts/unit_test.tsv` is the one shaped for the rejections, its team names
+saying what each row is for: the cells to blank so the importer generates them,
+the empty row to leave in, the duplicated login code and duplicated credentials
+only a real database refuses. `team_import.test.ts` mocks the filesystem, so the
+upload is the only thing that exercises those.
 
 `scripts/admin.py` is the post-competition scoring pull. It reads two
 environment variables and holds no credential of its own:

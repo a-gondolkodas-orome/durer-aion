@@ -133,5 +133,11 @@
     "secondPlayer": "Második leszek",
     "testGameButton": "Új próbajáték kezdése",
     "wins": "{{count}} győzelem"
+  },
+  "waitingRoom": {
+    "instruction": "A verseny kezdetekor automatikusan átirányításra kerültök a verseny felületre.",
+    "remainingEnd": "van hátra kezdésig!",
+    "remainingStart": "Még",
+    "soon": "Az online forduló hamarosan kezdődik!"
   }
 }

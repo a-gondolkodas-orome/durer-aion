@@ -5,8 +5,22 @@
 // registry imports a game folder's *files*, never a folder barrel — a barrel
 // re-exporting `strategy` next to `board` is what would hand the bot to the
 // live client again. entries.test.ts walks the three graphs to pin this.
-import { MyGameWrapper as StonesGameWrapper } from "./stones/game";
-import { MyGameWrapper as GameWrapper19ocd } from "./19ocd/game";
+import {
+  MyGameWrapper as StonesGameWrapper,
+  MyGameState as StonesGameState
+} from "./stones/game";
+import {
+  MyGameWrapper as GameWrapper19ocd,
+  MyGameState as GameState19ocd
+} from "./19ocd/game";
+
+// One state type per competition category, on the `game` entry so a year's game can
+// type its board against the category it is played in. Both games here are shared
+// between categories, so nothing in this repo reads these — the consumer is the
+// year's private repo, which a sweep of this one cannot see.
+export type MyGameStateC = GameState19ocd;
+export type MyGameStateD = GameState19ocd;
+export type MyGameStateE = StonesGameState;
 
 export const MyGameWrappers = {
   C: () => GameWrapper19ocd("C"),
