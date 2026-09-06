@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@headlessui/react": "2.2.10",
+    "common-frontend": "*",
     "engine": "*",
     "games": "*",
     "lodash": "4.18.1",
