@@ -17,6 +17,8 @@ export function createGameWithMoveWithoutStartingPosition(setup: SetupFunction<G
   return game;
 }
 
+// The variant for a game that defines `startingPosition`. Neither game in this repo
+// does, so only a year's private game exercises it.
 export function createGameWithMove(setup: SetupFunction<G>, startingPosition: StartingPositionFunction<G>,
   move: ({ G, ctx, playerID, random }: { G: G, ctx: Ctx; playerID: string; random: RandomAPI; }, ...args: unknown[]) => GameStateMixin & G): GameType<G> {
   // Wraps move in a function so that it is registered as function (solves `invalid move object` error)

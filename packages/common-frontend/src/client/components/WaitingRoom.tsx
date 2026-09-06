@@ -2,6 +2,11 @@ import { Stack, alpha } from '@mui/system';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 
+// Nothing renders this: `pageState` is DISCLAIMER | HOME | RELAY | STRATEGY, with
+// no WAITING among them. It is the frontend half of issue #345 — the server's
+// `checkGlobalTime()` computes WAITING and FINISHED and no route acts on either —
+// and this screen, with its `waitingRoom.*` keys in both locales, is what a WAITING
+// status would render once one does.
 export function WaitingRoom() {
   const theme = useTheme();
   const { t } = useTranslation();

@@ -1,5 +1,4 @@
 import React from 'react';
-import './App.css';
 import { Main, GameProvider, ClientRepoProvider } from 'common-frontend';
 import { RealClientRepository } from './client-repository';
 import { ThemeProvider } from '@mui/material/styles';

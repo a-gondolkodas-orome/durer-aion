@@ -11,7 +11,6 @@
     "deploy": "npm run deploy --workspace=offline-frontend",
     "lint": "eslint . --max-warnings=0",
     "lint:fix": "eslint . --fix",
-    "start": "turbo start",
     "build": "turbo build",
     "spell-check": "cspell \"**/*.{ts,mts,tsx,js,mjs,cjs,py,md}\" \"**/.*/**/*.{ts,mts,tsx,js,mjs,cjs,py,md}\" \".*/**/*.{ts,mts,tsx,js,mjs,cjs,py,md}\" \"packages/common-frontend/public/locales/**/*.json\" --no-progress",
     "spell-check:hu-triage": "node scripts/hu-spell-triage.mjs",

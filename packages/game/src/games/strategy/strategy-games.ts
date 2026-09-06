@@ -14,6 +14,10 @@ import {
   MyGameState as GameState19ocd
 } from "./19ocd/game";
 
+// One state type per competition category, on the `game` entry so a year's game can
+// type its board against the category it is played in. Both games here are shared
+// between categories, so nothing in this repo reads these — the consumer is the
+// year's private repo, which a sweep of this one cannot see.
 export type MyGameStateC = GameState19ocd;
 export type MyGameStateD = GameState19ocd;
 export type MyGameStateE = StonesGameState;
