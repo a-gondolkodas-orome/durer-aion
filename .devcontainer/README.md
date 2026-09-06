@@ -53,8 +53,40 @@ where the file does not exist yet, so your own values are never overwritten:
   container is not reachable from outside its network namespace. Set only
   here, so running vite on your own machine is unaffected. Each config reads
   it for itself — a new frontend has to opt in, or it hangs exactly this way.
-- **ESLint and cspell extensions**, so editor feedback matches
-  `npm run lint` and `npm run spell-check`.
+- **Extensions that mirror the repository's own checks and configs**, so editor
+  feedback matches what CI will say: eslint (`npm run lint`, formatting
+  included), cspell (`npm run spell-check`), vitest (`npm test`), i18n-ally
+  (`npm run i18n:check`), EditorConfig (VS Code ignores `.editorconfig`
+  without it), Tailwind for `apps/strategy-practice`, Docker for the compose
+  stack, and YAML for the workflows, the compose files and `swagger.yaml`.
+  `.vscode/extensions.json` recommends the same list to anyone working outside
+  the container; the settings behind them are in `.vscode/settings.json`, which
+  applies here because this container opens the repository root.
+- **A raised Node heap ceiling** (`NODE_OPTIONS=--max-old-space-size=4096`).
+  `npm run lint` is one `eslint .` that builds a type-aware TypeScript program
+  per `tsconfig.json`, and there are eleven — it needs over 2.5 GB of heap
+  (measured: 2560 MB fails, 3072 MB passes). Node picks its default heap from
+  the memory it can see, so on a developer's own machine it chooses several GB
+  and this never comes up; in a container it reads the cgroup limit and settles
+  near 2 GB, where lint dies with `FATAL ERROR: Reached heap limit`. The flag is
+  a ceiling rather than a reservation, so it costs nothing when lint is not
+  running — but it only helps if the container actually has the memory. If lint
+  is `Killed` with no V8 message instead, that is the kernel, and the fix is to
+  give the container more RAM: Docker Desktop → Settings → Resources → Memory,
+  6 GB or more. On Codespaces the machine type decides it, and nothing here
+  requests a size.
+- **The GitHub CLI and Claude Code**, each with its configuration on a named
+  volume (`durer-gh-config`, `durer-claude-home`) — the same two the
+  `apps/strategy-practice` container uses, so a login survives a rebuild and
+  does not have to be repeated in the other container. `gh` does not pick up
+  your SSH key or VS Code's credential helper, so run `gh auth login` once
+  inside; a fine-grained token limited to this repository is enough.
+  `post-create.sh` fixes the volumes' ownership before anything else, because
+  Docker seeds a new volume from the image and this one is a plain `image:`
+  with no build step to create those paths as `node` — the failure that
+  otherwise looks like `gh auth login` refusing to write. Codespaces supports
+  only a restricted set of devcontainer properties and may ignore `mounts`
+  altogether, in which case none of this persistence happens.
 
 ## What it does not do
 

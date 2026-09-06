@@ -23,9 +23,21 @@
         , "bradlc.vscode-tailwindcss"
         , "anthropic.claude-code"
         , "streetsidesoftware.code-spell-checker"
+        , "vitest.explorer"
       ],
+      // Inlined rather than committed as a .vscode/settings.json, as the repository root
+      // does — README.md § IDE setup says why. Keep in step with the root
+      // .vscode/settings.json; paths differ because the workspace folder here is this app.
       "settings": {
+        // detectIndentation guesses from the file being edited and overrides tabSize
+        // wherever it guesses differently, so the two below only hold with it off.
+        "editor.detectIndentation": false,
         "editor.tabSize": 2,
+        "editor.insertSpaces": true,
+        // Formatting is eslint's here too (apps/strategy-practice/eslint.config.js), so
+        // saving runs its fixes rather than a formatter: leaving formatOnSave to whatever
+        // the user has globally lets VS Code's built-in TypeScript formatter undo them.
+        "editor.formatOnSave": false,
         "editor.codeActionsOnSave": { "source.fixAll.eslint": "explicit" },
         "tailwindCSS.experimental.configFile": "src/styles.css",
         "javascript.updateImportsOnFileMove.enabled": "always",
