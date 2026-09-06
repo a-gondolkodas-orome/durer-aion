@@ -31,14 +31,36 @@ jobs:
               echo "Error: PRIVATE_REPO_NAME secret is not set"
               exit 0
             fi
+
+            # The `sync-*` trigger decides which pushes get here, but the rest of
+            # the name is whatever the pusher called the branch, and it is spent
+            # below on git commands run with the mirror's PAT in scope. Pin it to
+            # characters that mean nothing to a shell or to git's option parser,
+            # so what follows can only be a branch name.
+            if ! printf '%s' "$REF" | grep -Eq '^sync-[A-Za-z0-9._-]+$'; then
+              echo "Error: refusing to sync '$REF': not a sync-<name> branch"
+              exit 1
+            fi
+
             git config --global user.name 'github-actions[bot]'
             git config --global user.email 'github-actions[bot]@users.noreply.github.com'
             git clone https://github.com/a-gondolkodas-orome/durer-aion.git public-repo
             cd public-repo
             git checkout "$REF"
-            git remote add private "https://x-access-token:$PRIVATE_PAT@github.com/$PRIVATE_REPO_NAME.git"
+
+            # The PAT reaches git through this helper rather than through the
+            # remote's URL: a URL carrying it is written to .git/config, and from
+            # there into anything that later reads the checkout — a cache, an
+            # uploaded artifact, a step added to this job. The helper holds no
+            # secret itself, it reads one from the step's environment when git
+            # asks, so the token exists only for as long as the job does.
+            printf '%s\n' '#!/bin/sh' 'printf "%s\n" "$PRIVATE_PAT"' > "$RUNNER_TEMP/askpass"
+            chmod 700 "$RUNNER_TEMP/askpass"
+            export GIT_ASKPASS="$RUNNER_TEMP/askpass"
+
+            git remote add private "https://x-access-token@github.com/$PRIVATE_REPO_NAME.git"
             git remote update
-            
+
             if git show-ref --quiet "refs/remotes/private/$REF"; then
               git merge "private/$REF" -X ours -m "Sync from public repository"
             fi
