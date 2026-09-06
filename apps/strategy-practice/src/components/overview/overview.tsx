@@ -74,8 +74,7 @@ export const Overview = () => {
       ))}
     </div>
 
-    <div className="primary-surface md:hidden fixed bottom-0 left-0 right-0 flex justify-end items-center gap-3 px-3
-      py-4">
+    <div className="primary-footer">
       <ThemeSwitcher />
       <LanguageSelector />
     </div>
@@ -89,7 +88,7 @@ const OverviewHeader = ({ filtersOpen, onToggleFilters, activeFilterCount }: {
 }) => {
   const { t } = useTranslation();
   return <>
-    <header className="primary-surface sticky top-0 z-40 shadow-md font-roboto">
+    <header className="primary-header">
       <div className="max-w-6xl mx-auto px-3 sm:px-4 py-3 sm:py-5">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
@@ -98,11 +97,11 @@ const OverviewHeader = ({ filtersOpen, onToggleFilters, activeFilterCount }: {
               href="/.."
               aria-label="Home"
               size="small"
-              sx={{ color: 'white', '&:hover': { color: '#eeeeee' } }}
+              color="inherit"
             >
               <HomeRoundedIcon fontSize="small" />
             </IconButton>
-            <h1 className="text-white font-bold text-2xl sm:text-3xl tracking-tight">
+            <h1 className="text-2xl sm:text-3xl">
               {t({ hu: 'Dürer stratégiás játékok', en: 'Dürer Strategy Games' })}
             </h1>
           </div>
@@ -116,7 +115,7 @@ const OverviewHeader = ({ filtersOpen, onToggleFilters, activeFilterCount }: {
         </div>
       </div>
     </header>
-    <div className="max-w-[100ch] mx-auto mt-6 pb-3 text-left px-3 sm:px-5.5 pl-2">
+    <div className="max-w-[100ch] mx-auto mt-6 pb-3 px-2 sm:px-3">
       {t({
         hu: <>
           A <i>stratégiás játék</i> egy két szereplős játék,

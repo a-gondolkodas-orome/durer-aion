@@ -2,6 +2,12 @@
 
 @theme {
     --font-roboto: Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+    /* The accent of the site's chrome and controls: a theme colour, so it is
+       `bg-primary`, `text-primary`, `bg-primary/10` and so on in the markup and
+       `var(--color-primary)` in CSS. `-dark` is the hover shade of anything
+       painted with it. */
+    --color-primary: #46871b;
+    --color-primary-dark: color-mix(in srgb, var(--color-primary), black 15%);
 }
 
 /* Tailwind's automatic source detection stops at this app's root, and the engine's
@@ -13,6 +19,10 @@
 @source "../../../packages/strategy-games/src";
 @variant dark (&:where(.dark, .dark *));
 
+/* Hover and keyboard focus together. Hover is what a mouse gets: on a touch
+   device a tap would otherwise leave the element stuck in its hover look, so
+   index.html marks touch use on <html> and this variant skips hover there.
+   State a hover through this variant, never through a bare `:hover`. */
 @custom-variant hocus {
   html:not(.using-touch) &:hover { @slot; }
   &:focus-visible { @slot; }
@@ -26,7 +36,6 @@
        against the dark piece body in light mode; dark against the light body in
        dark mode. Driven by a custom property so it inherits into <use>. */
     :root {
-        --primary-color: #46871b;
         --rook-groove: var(--color-white);
     }
     :root.dark {
@@ -54,11 +63,7 @@
         text-wrap: balance;
     }
     a {
-        @apply underline transition-colors;
-        color: var(--primary-color);
-    }
-    a:hover {
-        color: color-mix(in srgb, var(--primary-color), black 15%);
+        @apply underline transition-colors text-primary hocus:text-primary-dark;
     }
     [role="button"] {
         cursor: pointer;
@@ -75,93 +80,58 @@
     .fill-surface-elevated {
         @apply fill-slate-50 dark:fill-slate-800;
     }
-    .primary-tint-hover:hover,
-    .primary-tint-hover:focus-visible {
-        background-color: color-mix(in srgb, var(--primary-color), transparent 90%);
-    }
 }
 
 @layer components {
+    /* The two bars of the site's chrome. The header holds the switchers from
+       `md` up; below that the footer takes them, fixed to the bottom edge. */
+    .primary-header {
+        @apply bg-primary text-white font-roboto sticky top-0 z-40 shadow-md;
+    }
+    .primary-footer {
+        @apply bg-primary text-white font-roboto fixed bottom-0 inset-x-0 flex md:hidden;
+        @apply justify-end items-center gap-3 px-3 py-4;
+        box-shadow: 0 -3px 8px rgb(0 0 0 / 20%);
+    }
+    /* A link on one of those bars, where the page's primary-coloured links
+       would vanish into the background. */
+    .primary-link {
+        color: color-mix(in srgb, var(--color-primary), white 80%);
+        @variant hocus {
+            color: color-mix(in srgb, var(--color-primary), white 45%);
+        }
+    }
+    /* A filled control on the page: the selected option of a group, a start
+       button. `primary-button` is the same fill at full width. */
+    .primary-control {
+        @apply bg-primary text-white enabled:hocus:bg-primary-dark;
+    }
     .primary-button {
         @apply block w-full py-2 sm:py-2.5 px-3 sm:px-4;
         @apply text-base sm:text-lg font-semibold rounded-lg disabled:opacity-50;
-        @apply border-none text-white;
-        background-color: var(--primary-color);
+        @apply border-none bg-primary text-white enabled:hocus:bg-primary-dark;
     }
-    .primary-button:hover,
-    .primary-button:focus-visible {
-        background-color: color-mix(in srgb, var(--primary-color), black 15%);
-    }
-    .primary-surface {
-        background-color: var(--primary-color);
-        border-color: color-mix(in srgb, var(--primary-color), black 20%);
-    }
-    .primary-footer {
-        box-shadow: 0 -3px 8px rgb(0 0 0 / 20%);
-    }
-    .primary-link {
-        color: color-mix(in srgb, var(--primary-color), white 80%);
-    }
-    .primary-link:hover {
-        color: color-mix(in srgb, var(--primary-color), white 45%);
-    }
-    .primary-link:focus-visible {
-        color: white;
-    }
-    .primary-link,
-    .primary-surface {
-            transition-property: color, background-color, border-color;
-            transition-duration: 150ms;
-            transition-timing-function: ease;
-    }
-    .primary-control {
-        background-color: var(--primary-color);
-        color: white;
-    }
-    .primary-control:hover,
-    .primary-control:focus-visible {
-        background-color: color-mix(in srgb, var(--primary-color), black 15%);
-    }
+    /* The same control sitting on a primary-coloured bar, where it needs a
+       tone step away from its background instead of the fill itself. */
     .primary-control-muted {
-        background-color: color-mix(in srgb, var(--primary-color), white 10%);
-        color: white;
-    }
-    .primary-control-muted:hover,
-    .primary-control-muted:focus-visible {
-        background-color: color-mix(in srgb, var(--primary-color), white 20%);
+        @apply text-white;
+        background-color: color-mix(in srgb, var(--color-primary), white 10%);
+        @variant hocus {
+            background-color: color-mix(in srgb, var(--color-primary), white 20%);
+        }
     }
     .primary-control-selected {
-        background-color: color-mix(in srgb, var(--primary-color), black 15%);
-        color: white;
-    }
-    .primary-control-selected:hover,
-    .primary-control-selected:focus-visible {
-        background-color: color-mix(in srgb, var(--primary-color), black 25%);
-    }
-    .primary-outline:hover,
-    .primary-outline:focus-visible {
-        border-color: var(--primary-color);
-    }
-    .primary-focus:focus-visible,
-    .primary-focus:has(:focus-visible) {
-        --tw-ring-color: var(--primary-color);
-    }
-    .primary-tint {
-        background-color: var(--primary-color);
-        color: white;
-    }
-    .primary-tint:hover,
-    .primary-tint:focus-visible {
-        background-color: color-mix(in srgb, var(--primary-color), transparent 45%);
+        @apply text-white bg-primary-dark;
+        @variant hocus {
+            background-color: color-mix(in srgb, var(--color-primary), black 25%);
+        }
     }
     .secondary-button {
         @apply block w-full py-2.5 px-3;
         @apply text-base sm:text-lg rounded-lg disabled:opacity-50;
-        @apply border border-slate-300 dark:border-slate-600;
-        @apply bg-slate-50 dark:bg-slate-800;
-        @apply enabled:hover:bg-slate-100 dark:enabled:hover:bg-slate-700;
-        @apply enabled:hover:border-slate-400 dark:enabled:hover:border-slate-500;
-        @apply enabled:focus-visible:bg-slate-100 dark:enabled:focus-visible:bg-slate-700;
-        @apply shadow-md enabled:hover:shadow-lg transition-all;
+        @apply border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800;
+        @apply enabled:hocus:bg-slate-100 dark:enabled:hocus:bg-slate-700;
+        @apply enabled:hocus:border-slate-400 dark:enabled:hocus:border-slate-500;
+        @apply shadow-md enabled:hocus:shadow-lg transition-all;
     }
 }
