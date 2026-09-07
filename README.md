@@ -16,7 +16,11 @@ conventions a review will otherwise be the first to tell you about.
 
 - [Node.js](https://nodejs.org/), the version in [`.nvmrc`](./.nvmrc) —
   `nvm use` anywhere in the repo picks it up. Another 24.x will most likely work
-  too, but CI runs exactly this one.
+  too, but CI runs exactly this one. An **older** Node will not work at all:
+  `devEngines` in the root `package.json` requires npm 11, which 24.x bundles
+  and 22.x does not, and npm treats that as an error rather than a warning — so
+  every `npm run …` fails before your command runs, complaining about the
+  package manager rather than about Node.
 - [Docker](https://www.docker.com/), with your user in the `docker` group so the
   commands below need no `sudo` — `DEPLOYMENT.md` has the three lines that do
   it. Plain `sudo docker …` works too, but never `sudo npm run …`: that runs npm
