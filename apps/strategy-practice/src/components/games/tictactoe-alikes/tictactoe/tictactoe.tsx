@@ -41,7 +41,7 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
             <span
               className={`
                 w-full aspect-square block rounded-full
-                ${!gameIsInPlacingPhase && isMoveAllowed(id) ? 'hover:opacity-50' : ''}
+                ${!gameIsInPlacingPhase && isMoveAllowed(id) ? 'hocus:opacity-50' : ''}
                 ${pieceColor(id)}
                 ${board[id] === 'white' ? 'border-4 border-slate-900 dark:border-slate-300' : ''}
               `}
