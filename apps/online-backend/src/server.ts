@@ -13,7 +13,7 @@ import { Server } from 'boardgame.io/server';
 import botWrapper from './botwrapper';
 import { configureTeamsRouter } from './server/router';
 import { TeamsRepository } from './server/db';
-import { getBotCredentials, getGameStartAndEndTime, relayNames } from './server/common';
+import { getBotCredentials, relayNames } from './server/common';
 import { import_teams_from_tsv_locally } from './server/team_import';
 import { requireAdmin } from './server/admin_session';
 
@@ -70,7 +70,6 @@ if (argv[2] === "sanity-check") {
 
 getBotCredentials(); // give love if no creds are supplied
 getAdminCredentials(); // give love if no creds are supplied
-getGameStartAndEndTime(); // give love if no creds are supplied
 
 const { db, teams } = getDb();
 

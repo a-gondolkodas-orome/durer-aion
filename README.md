@@ -400,7 +400,7 @@ vite does not pick up `.env` edits, and the docker stack reads `.env.docker` at
 
 | file | what reads it |
 | --- | --- |
-| `.env.docker` | the docker stack — bot and admin credentials, the postgres password, the competition window |
+| `.env.docker` | the docker stack — bot and admin credentials, the postgres password |
 | `apps/online-backend/.env` | the same settings for `npm run dev:server`, plus `DATABASE_URL` |
 | `apps/online-frontend/.env` | `VITE_SENTRY_DSN` for the competition site |
 | `apps/offline-frontend/.env` | the same for the dry run, plus the S3 bucket its play data goes to |
@@ -413,9 +413,9 @@ names any setting the sample has that yours lacks.
 
 <details><summary>Why it compares key names only, and what is not in the table</summary>
 
-Your credentials, `DATABASE_URL` and the competition window are *meant* to differ
-from the sample, so a value diff would be noise on every run, and a check that
-never reads a value cannot print one.
+Your credentials and `DATABASE_URL` are *meant* to differ from the sample, so a
+value diff would be noise on every run, and a check that never reads a value
+cannot print one.
 
 The accent colour and the interface language are deliberately not env vars: every
 build of an app uses the same two values, so they are constants at the top of its
