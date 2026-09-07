@@ -121,6 +121,18 @@ assets wants a `stack:up` run before you believe it.
 everything. The docker stack keeps postgres in a named volume:
 `npm run stack:down` preserves it, `npm run stack:down -- --volumes` wipes it.
 
+### Which of the two a review needs
+
+Reaching for `stack:up` out of habit pays for an image build on changes that
+never touch the image. This route is enough for game logic, the boards and
+any backend route the vite proxy carries — and it reloads while you are still
+reading the diff. Take `stack:up` when the change is one Vite cannot stand in
+for: nginx and its routing, the socket transport, the session cookie's `Secure`
+flag, the built bundle itself, or the admin pages, whose behaviour behind the
+proxy nobody has walked (see *Admin and operations* below). When in doubt the
+paragraph above is the rule — Vite is standing in for nginx, so anything about
+nginx wants the stack.
+
 ## Running the production stack
 
 ```bash
