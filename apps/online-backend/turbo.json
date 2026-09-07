@@ -5,8 +5,15 @@
     // The bundle and the typecheck both read the workspace packages' source
     // (tsdown.config.mts and tsconfig.json's `paths`), so none of these waits
     // for a package build.
-    "build": { "dependsOn": [] },
+    //
+    // The other half of that: turbo hashes a task from its own package's files
+    // plus its dependsOn edges, and with no edge there is nothing to carry a
+    // packages/* change into these hashes. Reading source across the workspace
+    // boundary is what buys the build its independence, and what costs it a
+    // cache — a hit here would restore a bundle built against a game/ that has
+    // since moved. scripts/turbo-source-crossing.test.mjs pins the pair.
+    "build": { "dependsOn": [], "cache": false },
     "dev": { "dependsOn": [] },
-    "typecheck": { "dependsOn": [] }
+    "typecheck": { "dependsOn": [], "cache": false }
   }
 }
