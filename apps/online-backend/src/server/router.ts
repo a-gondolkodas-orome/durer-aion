@@ -251,8 +251,8 @@ export function configureTeamsRouter(
    */
   router.delete("/team/admin/:teamID/remove", adminAuth, async (ctx) => {
     const teamId = ctx.params.teamID;
-    const deleted = teams.removeTeam(teamId);
-    if (await deleted === 0) {
+    const deleted = await teams.removeTeam(teamId);
+    if (deleted === 0) {
       ctx.throw(404, `team with teamId ${teamId} not found.`);
     }
     ctx.body = {};
