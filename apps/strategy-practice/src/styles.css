@@ -100,6 +100,12 @@
         @variant hocus {
             color: color-mix(in srgb, var(--color-primary), white 45%);
         }
+        /* Brighter than the resting shade rather than the hover variant's darker
+           one, which against the bar reads as 2.1:1 — a keyboard-focused link
+           would be the least legible of the three states. */
+        &:focus-visible {
+            color: white;
+        }
     }
     /* A filled control on the page: the selected option of a group, a start
        button. `primary-button` is the same fill at full width. `not-disabled`
