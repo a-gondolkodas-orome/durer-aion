@@ -234,7 +234,12 @@ export class RealClientRepository implements ClientRepository {
     } catch (e: unknown) {
       const err = makeAxiosError(e);
       console.error(err.message)
-      throw e;
+      // The server answers 404 for a team it no longer has: the list the admin
+      // acted on was stale, which is worth saying in so many words.
+      if (err.response?.status === 404) {
+        throw new Error('A csapat már nem létezik', { cause: e });
+      }
+      throw new Error('Váratlan hiba történt', { cause: e });
     }
   }
 
