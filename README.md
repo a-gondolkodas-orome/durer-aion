@@ -457,12 +457,16 @@ around its needs.
 
 When the year's repo is created:
 
-- **Turn Actions off** (Settings → Actions → Disable) unless you want lint,
-  typecheck and tests on the game while it is developed. The mirror carries
-  `.github/workflows` too, so every workflow here also lands there under that
-  repo's own triggers; the two dangerous ones — `pages-deploy.yml` and
-  `sync.yml` — are already guarded to run only in the public repository, but
-  disabling Actions makes the question moot rather than answered.
+- **Decide about Actions.** The mirror carries `.github/workflows` too, so every
+  workflow here also lands there under that repo's own triggers. Leaving them on
+  is what gets lint, typecheck and tests run against the game while it is being
+  developed, which is when they are worth the most; the two that would reach
+  outside the repository — `pages-deploy.yml` and `sync.yml` — are already
+  guarded to run only in the public one. What is left to weigh is cost: Actions
+  minutes are metered on a private repository where the public one runs free,
+  and so is the GitHub Packages storage a private image would take should #202
+  publish one from there. TBD — neither has been measured against this
+  organisation's plan.
 - **Enable Pages**, which is what serves the testers' dry run — see *The dry run
   for testers* in [`DEPLOYMENT.md`](./DEPLOYMENT.md). That site is public,
   protected only by the repository's unguessable name.
