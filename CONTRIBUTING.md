@@ -41,8 +41,9 @@ npm run check
 That is the six CI gates that need no docker, cheapest first, in two or three
 minutes. CI runs a seventh, `npm run stack:build`, and the competition round
 itself is walked by hand — [`README.md` § *Checking it
-works*](README.md#checking-it-works) is that checklist, and says which parts a
-unit test already pins.
+works*](README.md#checking-it-works) is that checklist. It opens with a table of
+how much of it a given change actually needs, and says which parts a unit test
+already pins.
 
 `npm run lint` is also the formatter, so `npm run lint:fix` settles most of what
 it finds. Your editor does it on save if you install the recommended extensions

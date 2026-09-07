@@ -132,6 +132,25 @@ against `npm run stack:up` — the only setup that covers nginx, the socket
 transport and the built frontend at once. [`CLAUDE.md`](CLAUDE.md) § What must
 keep working says how the list binds a change, and which items a unit test pins.
 
+## How much of it your change needs
+
+The list is what must keep working, not what every change has to walk. Find the
+row your change fits, and walk the sections it names:
+
+| your change touches | walk |
+| --- | --- |
+| a practice site or the dry run only — `apps/strategy-practice`, `apps/relay-practise-frontend`, `apps/offline-frontend` | *The other sites*, the one you touched |
+| a game's rules or bot under `packages/game` | that game in *A team playing the round* |
+| the admin pages, or team import | *Admin and operations* |
+| the backend, `packages/common-frontend`, nginx, routing, auth, the socket transport, the build, or a dependency | all of it |
+| documentation or CI only | nothing here |
+
+Two things do not scope down, and they are the point of the table rather than
+exceptions to it. **Before a competition the whole list is walked**, whatever the
+last change was — that run is what the checklist exists for. And a change that
+fits no row above walks all of it: the rows are the cases someone has already
+thought through, not a closed set.
+
 ## A team playing the round
 
 1. `http://localhost`, join code `000-0000-000`: disclaimer, then the chooser

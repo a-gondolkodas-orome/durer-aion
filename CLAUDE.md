@@ -174,12 +174,14 @@ works* — the regression checklist, with how to exercise each item by hand.
 
 [`README.md`](README.md) § *Checking it works* is the standing regression
 checklist: what the competition round, the admin side and the public sites
-must keep doing, with how to exercise each item by hand. **A change is done
-only when each item there still holds.** An item is removed only when the
-capability is deliberately retired, with a note saying which PR did and what
-replaced it. The README's own setup steps are on the list too: `npm ci`,
-`npm run setup` and the `dev:*` and `stack:*` commands must keep doing what it
-says they do.
+must keep doing, with how to exercise each item by hand. **A change is done only
+when every item it reaches still holds** — that section opens with the table of
+which items a change reaches, and one fitting none of its rows reaches all of
+them. Before a competition the whole list is walked whatever the last change
+was. An item is removed only when the capability is deliberately retired, with a
+note saying which PR did and what replaced it. The README's own setup steps are
+on the list too: `npm ci`, `npm run setup` and the `dev:*` and `stack:*`
+commands must keep doing what it says they do.
 
 It is a hand-walked checklist, not a suite. Six items have a unit test pinning
 part of them; the rest are checked by someone actually doing them:
