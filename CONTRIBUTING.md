@@ -81,8 +81,8 @@ pull request is merged; you do not write it yourself.
 so a reviewer can take or leave them separately. A big mechanical change is one
 PR; two unrelated one-line fixes are two.
 
-Fill the template in. It renders as headings with the prompts hidden in HTML
-comments, so an unedited body looks deliberate and says nothing.
+Fill the template in. Its prompts are HTML comments, so you have them in front
+of you while writing the description and they leave no trace in the body.
 
 `.github/CODEOWNERS` requests a reviewer automatically for the strategy practice
 paths. It does not cover the rest of the repository yet, so for anything else,
