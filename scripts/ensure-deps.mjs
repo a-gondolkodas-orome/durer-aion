@@ -2,7 +2,7 @@
 // Runs `npm ci` only when something it installs from has actually moved. Every
 // `dev:*` script, `stack:up` and `stack:prod` call this, so switching to a
 // branch for a review costs an install only on the branches that changed one —
-// which is a minority of them, while `npm ci` deletes and refetches the whole
+// which is a minority of them, while `npm ci` deletes and reinstalls the whole
 // 900-package tree every time it runs.
 //
 // The stamp lives inside node_modules on purpose: a tree wiped by hand, by
@@ -35,7 +35,7 @@ const inputPaths = () => [
     .map((path) => path.replaceAll('\\', '/')),
 ];
 
-// Content hashes rather than mtimes: `git switch` there and back rewrites the
+// Content hashes rather than timestamps: `git switch` there and back rewrites the
 // file with the bytes it had, and that is precisely the case worth skipping.
 export const hashFiles = (entries) =>
   Object.fromEntries(

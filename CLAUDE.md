@@ -115,6 +115,10 @@ change is measured against.
 npm ci
 npm run setup
 
+# On a checkout you already have, `npm ci` again only if a manifest moved.
+# Every dev:* and stack:* script does this for you; this is the standalone name.
+npm run deps
+
 # The whole online round in docker: nginx + backend + postgres (detached)
 npm run stack:build   # just the two deployed images, starting nothing — the CI gate
 npm run stack:up      # builds, then brings the stack up on http://localhost
