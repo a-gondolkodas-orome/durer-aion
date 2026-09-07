@@ -22,6 +22,8 @@ export interface MyProps {
   previousCorrectness: boolean | null;
   onSubmit: (result: number) => Promise<void>;
   attempt: number;
+  // Whether a guess may be sent right now; the host knows whose turn it is.
+  disabled: boolean;
 }
 
 export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) => {
@@ -67,6 +69,11 @@ export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) =
             .required(t('relay.error.empty'))
         })}
         onSubmit={(values) => {
+          // Enter in the input submits the form without going through the
+          // button, so its `disabled` alone would not hold.
+          if (props.disabled) {
+            return;
+          }
           if (props.previousTries.includes(parseInt(values.result))) {
             enqueueSnackbar(t('relay.error.duplicate'), { variant: 'error' });
             return;
@@ -140,7 +147,7 @@ export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) =
           textTransform: 'none',
           borderRadius: '10px',
           marginTop: '40px',
-        }} variant='contained' color='primary' type="submit">
+        }} variant='contained' color='primary' type="submit" disabled={props.disabled}>
           {t('relay.send')}
         </Button>
       </Form>

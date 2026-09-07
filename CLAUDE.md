@@ -181,7 +181,7 @@ replaced it. The README's own setup steps are on the list too: `npm ci`,
 `npm run setup` and the `dev:*` and `stack:*` commands must keep doing what it
 says they do.
 
-It is a hand-walked checklist, not a suite. Seven items have a unit test pinning
+It is a hand-walked checklist, not a suite. Eight items have a unit test pinning
 part of them; the rest are checked by someone actually doing them:
 
 - a join code loading its team, and a logout dropping the saved match with it:
@@ -195,6 +195,9 @@ part of them; the rest are checked by someone actually doing them:
 - the strategy board's buttons greyed out and its board inert whenever the
   rules would reject the click, and the board faded until a game is running:
   `packages/common-frontend/src/common/boardwrapper.test.tsx`
+- the relay's send button greyed out while the bot grades, before the first
+  problem and after the time ran out:
+  `packages/common-frontend/src/client/components/teamstates/InProgressRelay.test.tsx`
 - the admin API asking for the organisers' password on every route under
   `/team/admin` and `/game/admin`, whatever the path's case:
   `apps/online-backend/src/server/admin_session.test.ts`
