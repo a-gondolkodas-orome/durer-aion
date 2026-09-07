@@ -121,7 +121,7 @@ npm run deps
 
 # The whole online round in docker: nginx + backend + postgres (detached)
 npm run stack:build   # just the two deployed images, starting nothing — the CI gate
-npm run stack:up      # builds, then brings the stack up on http://localhost
+npm run stack:up      # builds the site, then brings the stack up on http://localhost
 npm run teams:import  # loads scripts/test.tsv, once postgres is accepting connections
 npm run stack:ps      # which services are up, when a URL shows nothing
 npm run stack:logs    # follow all three containers; Ctrl-C stops watching, not the stack

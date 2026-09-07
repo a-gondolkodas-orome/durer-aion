@@ -23,7 +23,7 @@ English as well.
 ```bash
 npm ci
 npm run setup         # creates the gitignored .env files from their samples
-npm run stack:up      # builds everything, then starts nginx + backend + postgres
+npm run stack:up      # builds the site, then starts nginx + backend + postgres
 npm run teams:import  # loads scripts/test.tsv
 ```
 
@@ -87,8 +87,15 @@ are the exception, and a new backend dependency needs the image rebuilt —
 `stack:up` again.
 
 nginx serves the frontend from `apps/online-frontend/dist` on the host, so a
-frontend change needs `npm run build` and a page reload. The docker-less route
-below reloads it for you.
+frontend change needs `npx turbo build --filter=online-frontend` and a page
+reload — the same build `stack:up` runs, and the only one the stack reads. The
+docker-less route below reloads it for you.
+
+`stack:up` deliberately builds no further than that: the offline dry run, the
+two practice sites and the backend's host-side bundle are not what the
+containers serve, and building them here only made `stack:up` an accidental
+whole-repo check. `npm run build` is still that check, and CI's `build` job is
+where it is enforced.
 </details>
 
 ## Running it without docker (except the database)
