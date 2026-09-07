@@ -7,6 +7,13 @@ export function getBotCredentials() {
   return env.BOT_CREDENTIALS;
 }
 
+export function getAdminCredentials() {
+  if (!env.ADMIN_CREDENTIALS) {
+    throw new Error('No ADMIN_CREDENTIALS supplied! Do set it in the environment');
+  }
+  return env.ADMIN_CREDENTIALS;
+}
+
 export function getGameStartAndEndTime() {
   if (!env.GAME_GLOBAL_START_T) {
     throw new Error('No GAME_GLOBAL_START_T supplied! Do set it in the environment');

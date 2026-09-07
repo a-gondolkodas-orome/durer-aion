@@ -184,7 +184,10 @@ At `http://localhost/admin`, user `admin`, password from `.env.docker`:
 
 Team import has two paths and both need checking: `npm run teams:import`, which
 runs `scripts/import_teams.sh` inside the container, and the TSV upload on the
-admin page. Two fixtures feed those by hand, which is why no code names either:
+admin page. The first is its own process — `dist/import_teams.js`, which reads
+`DATABASE_URL` and nothing else — so it runs against a stack whose credentials
+or competition window are unset, and a server that fails to start does not stop
+it (#190). Two fixtures feed those by hand, which is why no code names either:
 `scripts/test.tsv` is the happy path — the file `teams:import` loads — and
 `scripts/unit_test.tsv` is the one shaped for the rejections, its team names
 saying what each row is for: the cells to blank so the importer generates them,
@@ -401,7 +404,7 @@ vite does not pick up `.env` edits, and the docker stack reads `.env.docker` at
 | file | what reads it |
 | --- | --- |
 | `.env.docker` | the docker stack — bot and admin credentials, the postgres password, the competition window |
-| `apps/online-backend/.env` | the same settings for `npm run dev:server`, plus `DATABASE_URL` |
+| `apps/online-backend/.env` | the same settings for `npm run dev:server`, plus `DATABASE_URL` — which is all `teams:import:local` reads |
 | `apps/online-frontend/.env` | `VITE_SENTRY_DSN` for the competition site |
 | `apps/offline-frontend/.env` | the same for the dry run, plus the S3 bucket its play data goes to |
 | `apps/relay-practise-frontend/.env` | the same, for the relay practice site |
