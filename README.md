@@ -272,6 +272,11 @@ Those are the seven jobs in `.github/workflows/ci.yml`, and they cover
 gate was retired in #431; that app's own `npm run coverage` stays, on demand —
 `npm run coverage --workspace=strategy-practice`, with no root script.)
 
+`npm run check` runs the six that need no docker, in one command and cheapest
+first, so a misspelt word costs seconds rather than the two or three minutes the
+whole set takes. It is what to run before pushing; `stack:build` is separate because it
+needs docker, and the round itself is still walked by hand.
+
 `npm run stack:build` builds the two images the competition is deployed from —
 the backend and nginx — without starting anything, and is the one gate that
 reaches the `Dockerfile`, `apps/online-frontend/nginx/Dockerfile` and
