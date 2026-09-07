@@ -175,8 +175,12 @@ At `http://localhost/admin`, user `admin`, password from `.env.docker`:
 - the team list, and a team's details from it — `/admin/<teamId>` opens one team
   directly;
 - per-match state dump, per-match log dump, per-category stats;
-- the actions on a running match: add minutes, relay reset, strategy reset, soft
-  delete. Start a match as a team in another tab first, then act on it here.
+- the actions on a running match: add minutes, relay reset, strategy reset.
+  Start a match as a team in another tab first, then act on it here;
+- deleting one team from its details, and every team from the list. The rows
+  leave the grid with no reload, and each lands in `DeletedTeams` (look at
+  `localhost:5432`), where it stays when the team is imported again and
+  deleted a second time.
 
 Team import has two paths and both need checking: `npm run teams:import`, which
 runs `scripts/import_teams.sh` inside the container, and the TSV upload on the
