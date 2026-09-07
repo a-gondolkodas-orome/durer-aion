@@ -311,6 +311,11 @@ mirror works, and what to set up when the year's repo is created.
 
 ## Key Conventions
 
+[`CONTRIBUTING.md`](CONTRIBUTING.md) is the human-facing front door to this
+section: it routes to the docs below rather than restating them, and carries the
+few rules — commit subjects, the test-file naming split, requesting a reviewer —
+that were previously written down only here or nowhere.
+
 - Games are organized by type: `strategy/` (two-player), `relay/` (team relay)
 - Each game's folder holds its game wrapper, bot and board as separate files,
   registered in the three registries next to the folders — never through a

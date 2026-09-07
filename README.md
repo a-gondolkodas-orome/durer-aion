@@ -8,6 +8,10 @@ English as well.
 
 # Getting Started
 
+New here? [`CONTRIBUTING.md`](CONTRIBUTING.md) is the shorter way in: a first
+change that needs no docker, the one command to run before pushing, and the
+conventions a review will otherwise be the first to tell you about.
+
 ## Requirements
 
 - [Node.js](https://nodejs.org/), the version in [`.nvmrc`](./.nvmrc) —
