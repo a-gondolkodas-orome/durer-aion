@@ -128,11 +128,11 @@ paths:
       - admin
       responses:
         "200":
-          description: Team successfully removed
+          description: Team successfully removed, into the DeletedTeams archive. The body is an empty object.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/TeamModel"
+                type: object
         "404":
           description: Team not found
 
@@ -224,6 +224,105 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/TeamModel"
+    delete:
+      summary: Remove every team at once
+      description: >
+        Archives every team into DeletedTeams under one shared deletedAt, then
+        drops them, in one transaction. The shared timestamp is the batch a
+        restore names.
+      security:
+      - basicAdminAuth: []
+      tags:
+      - admin
+      responses:
+        "200":
+          description: The batch
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    type: integer
+                  deletedAt:
+                    type: string
+                    format: date-time
+  /team/admin/deleted:
+    get:
+      summary: The archive of deleted teams, newest deletion first
+      security:
+      - basicAdminAuth: []
+      tags:
+      - admin
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DeletedTeam"
+  /team/admin/deleted/{deletionId}/restore:
+    post:
+      summary: Restore one deleted team
+      description: >
+        Moves the archived row back into Teams with its page state and both
+        matches, and out of the archive, in one transaction.
+      parameters:
+        - name: deletionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      security:
+      - basicAdminAuth: []
+      tags:
+      - admin
+      responses:
+        "200":
+          description: The team, live again
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeamModel"
+        "400":
+          description: deletionId is not an integer
+        "404":
+          description: No archive row with that deletionId
+        "409":
+          description: A live team holds the same id, join code or name; the body says which
+  /team/admin/deleted/restore:
+    post:
+      summary: Restore a whole batch of deleted teams
+      description: >
+        Every archive row sharing the given deletedAt, restored one by one so a
+        team blocked by a live one is reported and the rest still come back.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deletedAt]
+              properties:
+                deletedAt:
+                  type: string
+                  format: date-time
+                  description: The batch, as GET /team/admin/deleted served it
+      security:
+      - basicAdminAuth: []
+      tags:
+      - admin
+      responses:
+        "200":
+          description: Team names restored, and team names a live team blocked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RestoreResult"
+        "400":
+          description: deletedAt missing or not a date
   /team/admin/import:
     put:
       summary: Import teams from a TSV file
@@ -556,6 +655,34 @@ components:
         updatedAt:
           type: string
           format: date-time
+
+    DeletedTeam:
+      description: >
+        A TeamModel as it was when deleted, plus when. Rows sharing a deletedAt
+        were deleted together and form a batch.
+      allOf:
+        - $ref: "#/components/schemas/TeamModel"
+        - type: object
+          properties:
+            deletedAt:
+              type: string
+              format: date-time
+            deletionId:
+              type: integer
+
+    RestoreResult:
+      type: object
+      properties:
+        restored:
+          type: array
+          items:
+            type: string
+          description: Team names now live again
+        conflicts:
+          type: array
+          items:
+            type: string
+          description: Team names still archived, each blocked by a live team
 
     ActionShape:
       type: string
