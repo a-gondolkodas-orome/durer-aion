@@ -12,8 +12,20 @@ cd "$CLAUDE_PROJECT_DIR"
 # Attribution for web sessions: the agent writes the code, so it is the author.
 # Set before the Node block below so a failed install cannot leave commits
 # misattributed.
+#
+# The address is not interchangeable with the human's. Claude Code signs every
+# web commit with an SSH key GitHub holds against this one address, and GitHub
+# verifies a signature only against the account the committer address resolves
+# to — so a session that repoints user.email to credit the person instead pushes
+# a branch GitHub marks Unverified, as #474 did. Credit belongs in the co-author
+# trailer below, which costs the signature nothing.
+SIGNING_IDENTITY="noreply@anthropic.com"
 git config user.name "Claude"
-git config user.email "noreply@anthropic.com"
+git config user.email "$SIGNING_IDENTITY"
+
+# Read back by the commit hook below rather than repeated into it, for the same
+# reason as the co-author: it keeps that heredoc quoted.
+git config claude.signingidentity "$SIGNING_IDENTITY"
 
 # Whoever wants the credit names themselves in CLAUDE_COMMIT_COAUTHOR, in their
 # own cloud environment. There is deliberately no default: a name hardcoded here
@@ -33,6 +45,21 @@ mkdir -p .git/hooks
 cat > .git/hooks/prepare-commit-msg << 'HOOK'
 #!/bin/bash
 set -euo pipefail
+
+# The identity is set once, at session start, and a commit made after anything
+# repoints it is signed by a key GitHub cannot match to the new address. Refusing
+# the commit is what keeps that recoverable: the alternative is noticed only as a
+# pushed branch full of Unverified commits, rewritable only by force. Checked
+# ahead of the merge bail below, since a merge commit is signed too.
+expected=$(git config claude.signingidentity || true)
+committer=$(git config user.email || true)
+if [ -n "$expected" ] && [ "$committer" != "$expected" ]; then
+  echo "prepare-commit-msg: committing as '$committer', but the commit-signing key is" >&2
+  echo "  registered against '$expected', so this commit would land Unverified." >&2
+  echo "  Restore it with: git config user.email '$expected'" >&2
+  echo "  To credit a person, set CLAUDE_COMMIT_COAUTHOR, not the committer address." >&2
+  exit 1
+fi
 
 # $2 is the message source. Merges and squashes take their message from git
 # rather than from the agent, so they are left alone; an amend re-runs this hook

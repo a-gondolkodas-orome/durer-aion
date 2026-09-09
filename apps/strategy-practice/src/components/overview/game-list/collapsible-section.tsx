@@ -57,7 +57,7 @@ export const CollapsibleSection = ({
         onClick={toggleOpen}
         aria-expanded={isOpen}
         aria-controls={panelId}
-        className="w-full flex items-center justify-center gap-2 my-4 hocus:text-[var(--primary-color)]
+        className="w-full flex items-center justify-center gap-2 my-4 hocus:text-primary
           transition-colors"
       >
         <span

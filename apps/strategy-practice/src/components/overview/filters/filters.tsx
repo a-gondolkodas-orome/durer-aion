@@ -108,7 +108,7 @@ const FilterRow = <T,>({ label, options, selected, onChange }: {
             title={optionLabel}
             className={`
               h-7 inline-flex items-center justify-center rounded-sm drop-shadow-md ${buttonClassName ?? 'px-2'}
-              ${isSelected ? 'primary-tint' : 'bg-surface-elevated primary-tint-hover'}
+              ${isSelected ? 'bg-primary text-white hocus:bg-primary/55' : 'bg-surface-elevated hocus:bg-primary/10'}
               transition-colors`}
           >{content}</button>
         );

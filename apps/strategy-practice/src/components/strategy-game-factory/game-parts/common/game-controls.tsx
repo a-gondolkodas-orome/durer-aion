@@ -23,7 +23,7 @@ export const ModeSelector = ({ isHumanVsHumanGame, onSwitchMode, disabled }: {
         {t({ hu: 'Játékmód', en: 'Game mode' })}
       </legend>
       <div className={`flex divide-x divide-slate-300 rounded-lg overflow-hidden border text-sm
-        primary-focus has-focus-visible:ring-2 has-focus-visible:ring-offset-1`}>
+        has-focus-visible:ring-2 has-focus-visible:ring-primary has-focus-visible:ring-offset-1`}>
         <label className={labelClass(!isHumanVsHumanGame, disabled)}>
           <input
             type="radio"
@@ -68,7 +68,7 @@ export const DifficultySelector = ({ variants, selectedIndex, onSelect, disabled
         {t({ hu: 'Változat', en: 'Variant' })}
       </legend>
       <div className={`flex divide-x divide-slate-300 rounded-lg overflow-hidden border text-sm
-        primary-focus has-focus-visible:ring-2 has-focus-visible:ring-offset-1`}>
+        has-focus-visible:ring-2 has-focus-visible:ring-primary has-focus-visible:ring-offset-1`}>
         {variants.map(v => (
           <label
             key={v.originalIndex}
