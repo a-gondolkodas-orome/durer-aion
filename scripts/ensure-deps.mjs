@@ -51,7 +51,7 @@ export const changedFiles = (before, after) =>
 // spawn fails outright with ENOENT rather than the command exiting non-zero. So
 // both have to be checked, and the error said out loud — reading `status` alone
 // turned that into a silent exit one line after "Installing dependencies", which
-// is what it looked like from the outside (#482).
+// is what it looked like from the outside (#483).
 //
 // `spawn` and `platform` are parameters so the two failures can be tested
 // without a Windows machine or a real install.

@@ -61,7 +61,7 @@ describe('changedFiles', () => {
   });
 });
 
-// #482: a contributor saw "Installing dependencies (no install recorded)" and
+// #483: a contributor saw "Installing dependencies (no install recorded)" and
 // nothing else — the command exited there. npm is `npm.cmd` on Windows, so the
 // spawn failed with ENOENT instead of running, and reading only `status` (null
 // in that case) turned the failure into a silent exit code.
