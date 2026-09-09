@@ -1,4 +1,5 @@
-import type { PostgresStore } from 'bgio-postgres';
+import { PostgresStore } from 'bgio-postgres';
+import { env } from 'process';
 import { InProgressMatchStatus } from 'schemas';
 import { teamAttributes, TeamModel } from './model';
 import { DeletedTeamModel, deletedTeamAttributes } from './deletedTeam';
@@ -182,4 +183,18 @@ export class TeamsRepository {
     }
     return result;
   }
+}
+
+// The one connection every entry opens: the server needs both halves — the
+// store is boardgame.io's match state and the repository the teams beside it —
+// while the team import needs only the repository.
+export function getDb() {
+  if (!env.DATABASE_URL) {
+    throw new Error('Failed to load DB data. Only postgres is supported!');
+  }
+  const db = new PostgresStore(env.DATABASE_URL, { logging: false });
+  return {
+    db,
+    teams: new TeamsRepository(db),
+  };
 }

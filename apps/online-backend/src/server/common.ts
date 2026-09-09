@@ -7,6 +7,13 @@ export function getBotCredentials() {
   return env.BOT_CREDENTIALS;
 }
 
+export function getAdminCredentials() {
+  if (!env.ADMIN_CREDENTIALS) {
+    throw new Error('No ADMIN_CREDENTIALS supplied! Do set it in the environment');
+  }
+  return env.ADMIN_CREDENTIALS;
+}
+
 export const relayNames = {
   C: 'relay_c',
   D: 'relay_d',

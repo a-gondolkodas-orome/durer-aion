@@ -267,6 +267,14 @@ docker compose --env-file=.env.docker exec backend ./scripts/import_teams.sh scr
 This writes `scripts/<file>.tsv.export` back on the host, with the generated join codes.
 The admin page's TSV upload does the same job through the browser.
 
+If the backend will not stay up, `exec` has nothing to enter. Run the importer as a
+one-off container instead — it needs postgres and `DATABASE_URL`, not a server that
+boots:
+
+```bash
+docker compose --env-file=.env.docker run --rm backend ./scripts/import_teams.sh scripts/<file>.tsv
+```
+
 > **Test drive:** `npm run teams:import` runs the same thing against `scripts/test.tsv`.
 
 ## 8. A domain and HTTPS
