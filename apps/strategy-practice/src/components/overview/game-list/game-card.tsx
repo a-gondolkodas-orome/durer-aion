@@ -32,7 +32,7 @@ export const GameCard = ({ gameId, gameProps }: { gameId: string; gameProps: Gam
     data-testid="game-card"
     className={`
       rounded-lg border p-1 sm:p-2 max-w-[20ch] sm:max-w-[32ch] w-full flex flex-col items-center
-      cursor-pointer primary-outline primary-tint-hover hocus:shadow-md
+      cursor-pointer hocus:border-primary hocus:bg-primary/10 hocus:shadow-md
       no-underline text-inherit transition-all
     `}
   >

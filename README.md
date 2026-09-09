@@ -202,8 +202,12 @@ At `http://localhost/admin`, user `admin`, password from `.env.docker`:
 - the team list, and a team's details from it — `/admin/<teamId>` opens one team
   directly;
 - per-match state dump, per-match log dump, per-category stats;
-- the actions on a running match: add minutes, relay reset, strategy reset, soft
-  delete. Start a match as a team in another tab first, then act on it here.
+- the actions on a running match: add minutes, relay reset, strategy reset.
+  Start a match as a team in another tab first, then act on it here;
+- deleting one team from its details, and every team from the list. The rows
+  leave the grid with no reload, and each lands in `DeletedTeams` (look at
+  `localhost:5432`), where it stays when the team is imported again and
+  deleted a second time.
 
 Team import has two paths and both need checking: `npm run teams:import`, which
 runs `scripts/import_teams.sh` inside the container, and the TSV upload on the
@@ -428,7 +432,7 @@ vite does not pick up `.env` edits, and the docker stack reads `.env.docker` at
 
 | file | what reads it |
 | --- | --- |
-| `.env.docker` | the docker stack — bot and admin credentials, the postgres password, the competition window |
+| `.env.docker` | the docker stack — bot and admin credentials, the postgres password |
 | `apps/online-backend/.env` | the same settings for `npm run dev:server`, plus `DATABASE_URL` |
 | `apps/online-frontend/.env` | `VITE_SENTRY_DSN` for the competition site |
 | `apps/offline-frontend/.env` | the same for the dry run, plus the S3 bucket its play data goes to |
@@ -441,9 +445,9 @@ names any setting the sample has that yours lacks.
 
 <details><summary>Why it compares key names only, and what is not in the table</summary>
 
-Your credentials, `DATABASE_URL` and the competition window are *meant* to differ
-from the sample, so a value diff would be noise on every run, and a check that
-never reads a value cannot print one.
+Your credentials and `DATABASE_URL` are *meant* to differ from the sample, so a
+value diff would be noise on every run, and a check that never reads a value
+cannot print one.
 
 The accent colour and the interface language are deliberately not env vars: every
 build of an app uses the same two values, so they are constants at the top of its
@@ -485,12 +489,16 @@ around its needs.
 
 When the year's repo is created:
 
-- **Turn Actions off** (Settings → Actions → Disable) unless you want lint,
-  typecheck and tests on the game while it is developed. The mirror carries
-  `.github/workflows` too, so every workflow here also lands there under that
-  repo's own triggers; the two dangerous ones — `pages-deploy.yml` and
-  `sync.yml` — are already guarded to run only in the public repository, but
-  disabling Actions makes the question moot rather than answered.
+- **Decide about Actions.** The mirror carries `.github/workflows` too, so every
+  workflow here also lands there under that repo's own triggers. Leaving them on
+  is what gets lint, typecheck and tests run against the game while it is being
+  developed, which is when they are worth the most; the two that would reach
+  outside the repository — `pages-deploy.yml` and `sync.yml` — are already
+  guarded to run only in the public one. What is left to weigh is cost: Actions
+  minutes are metered on a private repository where the public one runs free,
+  and so is the GitHub Packages storage a private image would take should #202
+  publish one from there. TBD — neither has been measured against this
+  organisation's plan.
 - **Enable Pages**, which is what serves the testers' dry run — see *The dry run
   for testers* in [`DEPLOYMENT.md`](./DEPLOYMENT.md). That site is public,
   protected only by the repository's unguessable name.

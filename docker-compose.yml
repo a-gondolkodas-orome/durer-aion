@@ -18,8 +18,6 @@ services:
       - PORT=8000
       - BOT_CREDENTIALS=${BOT_CREDENTIALS}
       - ADMIN_CREDENTIALS=${ADMIN_CREDENTIALS}
-      - GAME_GLOBAL_START_T=${GAME_GLOBAL_START_T}
-      - GAME_GLOBAL_END_T=${GAME_GLOBAL_END_T}
     volumes:
       # Team import TSVs are dropped here on the host and run with `docker exec`,
       # so this is mounted in production too.
