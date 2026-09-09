@@ -45,6 +45,10 @@ works*](README.md#checking-it-works) is that checklist. It opens with a table of
 how much of it a given change actually needs, and says which parts a unit test
 already pins.
 
+Working only in `apps/strategy-practice`? `npm run check` from that directory is
+the same idea scoped to it, in about seventy seconds — the loop to iterate on.
+The root one is still what CI runs.
+
 `npm run lint` is also the formatter, so `npm run lint:fix` settles most of what
 it finds. Your editor does it on save if you install the recommended extensions
 — VS Code offers them from `.vscode/extensions.json` when you open the repo.
