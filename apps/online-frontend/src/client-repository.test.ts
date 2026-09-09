@@ -22,8 +22,8 @@ function fakeAxios(answer: (method: string, url: string) => Promise<unknown>) {
 
 const ok = () => Promise.resolve({ data: {} });
 
-const status = (code: number) =>
-  Promise.reject(new AxiosError("failed", "ERR_BAD_REQUEST", undefined, undefined, { status: code } as AxiosResponse));
+const status = (code: number, data?: unknown) =>
+  Promise.reject(new AxiosError("failed", "ERR_BAD_REQUEST", undefined, undefined, { status: code, data } as AxiosResponse));
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -115,5 +115,43 @@ describe("removing a team", () => {
     vi.spyOn(console, "error").mockImplementation(() => undefined);
 
     await expect(new RealClientRepository().removeTeam(teamId)).rejects.toThrow("Váratlan hiba történt");
+  });
+});
+
+describe("the archive of deleted teams", () => {
+  const deletedAt = "2026-09-07T10:00:00.123Z";
+
+  test("is read, restored and refilled through the admin routes", async () => {
+    const calls = fakeAxios(ok);
+    const repo = new RealClientRepository();
+
+    await repo.getDeleted();
+    await repo.removeAllTeams();
+    await repo.restoreTeam(7);
+    await repo.restoreBatch(deletedAt);
+
+    expect(calls).toStrictEqual([
+      { method: "get", url: "/team/admin/deleted" },
+      { method: "delete", url: "/team/admin/all" },
+      { method: "post", url: "/team/admin/deleted/7/restore", body: undefined },
+      { method: "post", url: "/team/admin/deleted/restore", body: { deletedAt } },
+    ]);
+  });
+
+  // The body names the column a live team holds; the message carries it on,
+  // so the organiser knows what to rename or delete first.
+  test("a restore a live team blocks says what it clashes on", async () => {
+    fakeAxios(() => status(409, "Teamname already exists."));
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    await expect(new RealClientRepository().restoreTeam(7))
+      .rejects.toThrow("Ütközik egy élő csapattal: Teamname already exists.");
+  });
+
+  test("a restore of a row the archive no longer has is reported as such", async () => {
+    fakeAxios(() => status(404));
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    await expect(new RealClientRepository().restoreTeam(7)).rejects.toThrow("A csapat már nincs az archívumban");
   });
 });

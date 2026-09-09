@@ -1,12 +1,14 @@
 import { Stack } from '@mui/system';
-import { useAddMinutes, useAll, useRemoveTeam } from '../hooks/user-hooks';
-import { Button, Dialog, Table, TableBody, TableCell, TableHead, TableRow, IconButton } from '@mui/material';
+import { useAddMinutes, useAll, useRemoveAllTeams } from '../hooks/user-hooks';
+import { Button, Dialog, Table, TableBody, TableCell, TableHead, TableRow, IconButton, Tab, Tabs } from '@mui/material';
 import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
 import { Fragment, useState } from 'react';
 import useSWR from 'swr';
-import { DataGrid, ExportCsv, Toolbar } from '@mui/x-data-grid';
-import { TeamModelDto, adminTeamId } from '../dto/TeamStateDto';
+import { DataGrid } from '@mui/x-data-grid';
+import { TeamModelDto } from '../dto/TeamStateDto';
 import { TeamDetailDialog } from './TeamDetailDialog';
+import { DeletedTeams } from './DeletedTeams';
+import { csvToolbar } from './CsvToolbar';
 import Form from './form';
 import { ErrorMessage, Field } from 'formik';
 import { useTheme } from '@mui/material/styles';
@@ -17,37 +19,30 @@ import * as Yup from 'yup';
 import { alpha } from '@mui/system'
 import { FieldProps } from "formik"
 
-// Only the export button: the columns/filter/density controls the stock
-// GridToolbar also carries are not what this page is for.
-function TeamsToolbar() {
-  return (
-    <Toolbar>
-      <ExportCsv
-        // allColumns so the `other` column, hidden by default below, is still
-        // in the file; the two button columns opt out with disableExport.
-        options={{ fileName: 'durer-csapatok', utf8WithBom: true, allColumns: true }}
-      >
-        Letöltés CSV-ként
-      </ExportCsv>
-    </Toolbar>
-  );
-}
+const TeamsToolbar = csvToolbar('durer-csapatok');
+
+// The page's tabs. Component state rather than a path: `Main.tsx` reads
+// `/admin/<teamId>` off the URL, so a path for the archive would be taken for
+// a team id. Issue #135 is the rest of the page's layout.
+type AdminTab = 'teams' | 'deleted';
 
 export function Admin(props: { teamId?: string }) {
   const theme = useTheme();
   const getAll = useAll();
   const addMinutes = useAddMinutes();
-  const removeTeam = useRemoveTeam();
+  const removeAllTeams = useRemoveAllTeams();
   const { enqueueSnackbar } = useSnackbar();
   const { data, mutate } = useSWR("users/all", getAll)
   const [selectedRow, setSelectedRow] = useState<TeamModelDto | null>(null);
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogInterface | null>(null);
   const [adminPageOpen, setAdminPageOpen] = useState<boolean>(true);
+  const [tab, setTab] = useState<AdminTab>('teams');
 
   // Read off the list rather than kept as state, so a team deleted from the
   // `/admin/<teamId>` page drops out with the list's next load and the page
   // falls back to the grid instead of showing the team it no longer has.
   const teamFromPath = props.teamId ? data?.find(d => d.teamId === props.teamId) ?? null : null;
+  const showTeams = !teamFromPath && tab === 'teams';
 
   // The server has dropped the team: the dialog closes, and the grid reloads so
   // it no longer offers a team that is gone.
@@ -108,7 +103,13 @@ export function Admin(props: { teamId?: string }) {
       </Stack>
       {adminPageOpen && <>
         {teamFromPath && <TeamDetailDialog data={teamFromPath} setConfirmDialog={setConfirmDialog} onRemoved={onRemoved}/>}
-        {!teamFromPath && <Stack sx={{
+        {!teamFromPath && <Tabs value={tab} onChange={(_, value: AdminTab) => setTab(value)} sx={{ marginBottom: '8px' }}>
+          <Tab value="teams" label="Csapatok"/>
+          <Tab value="deleted" label="Törölt csapatok"/>
+        </Tabs>}
+        {!teamFromPath && tab === 'deleted' &&
+          <DeletedTeams setConfirmDialog={setConfirmDialog} onRestored={() => { void mutate(); }}/>}
+        {showTeams && <Stack sx={{
           height: "635px",
         }}>
           {data && <DataGrid columns={[
@@ -217,7 +218,7 @@ export function Admin(props: { teamId?: string }) {
           }}
           />}
         </Stack>}
-        {!teamFromPath && data && <Stack sx={{ padding: "10px" }}>
+        {showTeams && data && <Stack sx={{ padding: "10px" }}>
           idő hozzáadása minden aktív játékosnak:
           <Form
           initialValues={{ time: '' }}
@@ -279,26 +280,24 @@ export function Admin(props: { teamId?: string }) {
           )}/>
         </Form>
         </Stack>}
-        {!teamFromPath && data &&
+        {showTeams && data &&
           <Button
             color="error"
             variant="contained"
             sx={{ margin: '10px 0', maxWidth: 300 }}
             onClick={() => {
               setConfirmDialog({
-                text: 'Biztosan törlöd az összes csapatot? Ez a művelet nem visszavonható!',
+                text: 'Biztosan törlöd az összes csapatot? A Törölt csapatok fülön állíthatók vissza.',
                 confirm: async () => {
                   try {
-                    for (const team of data) {
-                      await removeTeam(adminTeamId(team));
-                    }
-                    enqueueSnackbar('Összes csapat törölve', { variant: 'success' });
+                    // One request, one transaction: all of them go, or none,
+                    // and they land in the archive as one batch.
+                    const { deleted } = await removeAllTeams();
+                    enqueueSnackbar(`${deleted} csapat törölve`, { variant: 'success' });
                   } catch (e) {
                     const message = e instanceof Error ? e.message : "Váratlan hiba történt";
                     enqueueSnackbar(message, { variant: 'error' });
                   } finally {
-                    // The teams deleted before a failure are gone as well, so
-                    // the grid reloads either way.
                     await mutate();
                   }
                 }
@@ -307,7 +306,7 @@ export function Admin(props: { teamId?: string }) {
           >
             Összes csapat törlése
           </Button>}
-      {!teamFromPath && data && <Stats data={data}/>}
+      {showTeams && data && <Stats data={data}/>}
       </>}
     </Stack>
   )

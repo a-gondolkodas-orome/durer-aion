@@ -1,4 +1,4 @@
-import { ClientRepository, LOCAL_STORAGE_TEAMSTATE, TeamModelDto, MatchStateDto, BoardMoves, relayPointsStorageKey, strategyPointsStorageKey } from "common-frontend";
+import { ClientRepository, LOCAL_STORAGE_TEAMSTATE, TeamModelDto, MatchStateDto, DeletedTeamDto, RestoreResultDto, BoardMoves, relayPointsStorageKey, strategyPointsStorageKey } from "common-frontend";
 import { teamData } from "./teamData";
 import { sendDataLogin, sendGameData } from "./sendData";
 import { readStoredTeamState } from "./stored-team-state";
@@ -110,6 +110,18 @@ export class OfflineClientRepository implements ClientRepository {
     throw Error("NOT call this");
   }
   async removeTeam(_teamId: string): Promise<void> {
+    throw Error("NOT call this");
+  }
+  async removeAllTeams(): Promise<{ deleted: number, deletedAt: string }> {
+    throw Error("NOT call this");
+  }
+  async getDeleted(): Promise<DeletedTeamDto[]> {
+    throw Error("NOT call this");
+  }
+  async restoreTeam(_deletionId: number): Promise<void> {
+    throw Error("NOT call this");
+  }
+  async restoreBatch(_deletedAt: string): Promise<RestoreResultDto> {
     throw Error("NOT call this");
   }
 

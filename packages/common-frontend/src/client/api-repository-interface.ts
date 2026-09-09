@@ -1,6 +1,6 @@
 // cspell:ignore asjdgaskjd
 
-import { MatchStateDto, TeamModelDto } from "./dto/TeamStateDto";
+import { DeletedTeamDto, MatchStateDto, RestoreResultDto, TeamModelDto } from "./dto/TeamStateDto";
 import { createContext, useContext } from 'react';
 import type { BoardProps } from 'boardgame.io/react';
 
@@ -34,6 +34,11 @@ export interface ClientRepository {
   resetStrategy(teamId: string): Promise<TeamModelDto>
   addMinutes(matchId: string, minutes: number): Promise<string>
   removeTeam(teamId: string): Promise<void>;
+  /** Every team at once, archived as one batch: how many, and the batch's `deletedAt`. */
+  removeAllTeams(): Promise<{ deleted: number, deletedAt: string }>;
+  getDeleted(): Promise<DeletedTeamDto[]>;
+  restoreTeam(deletionId: number): Promise<void>;
+  restoreBatch(deletedAt: string): Promise<RestoreResultDto>;
   submitRelayAnswer(answer: number, moves: BoardMoves): Promise<void>;
   // Unlike startRelay, which moves the team to the relay page, this dispatches
   // the opening move of the match once the board is up.
@@ -272,6 +277,18 @@ export class MockClientRepository implements ClientRepository {
     return Promise.resolve("OK");
   }
   removeTeam(_teamId: string): Promise<void> {
+    throw Error("NOT call this");
+  }
+  removeAllTeams(): Promise<{ deleted: number, deletedAt: string }> {
+    throw Error("NOT call this");
+  }
+  getDeleted(): Promise<DeletedTeamDto[]> {
+    return Promise.resolve([]);
+  }
+  restoreTeam(_deletionId: number): Promise<void> {
+    throw Error("NOT call this");
+  }
+  restoreBatch(_deletedAt: string): Promise<RestoreResultDto> {
     throw Error("NOT call this");
   }
   submitRelayAnswer(answer: number, moves: BoardMoves): Promise<void> {
