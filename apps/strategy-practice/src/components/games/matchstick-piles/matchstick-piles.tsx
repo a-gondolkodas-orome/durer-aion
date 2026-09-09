@@ -86,8 +86,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                     disabled={!moves.removeMatch.isAllowed(board, pileId)}
                     className={`
                       p-1 rounded-sm
-                      enabled:hover:bg-slate-200 dark:enabled:hover:bg-slate-700
-                      enabled:focus:bg-slate-200 dark:enabled:focus:bg-slate-700
+                      enabled:hocus:bg-slate-200 dark:enabled:hocus:bg-slate-700
                     `}
                     onClick={() => moves.removeMatch(board, pileId)}
                     {...(moves.removeMatch.isAllowed(board, pileId) ? hoverProps({ pileId, kind: 'remove' }) : {})}
