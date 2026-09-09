@@ -80,7 +80,7 @@ export default defineConfig(() => ({
   test: {
     globals: true,
     // Without this vitest replaces every CSS import with an empty string, and the
-    // `styles.css?raw` styles.spec.ts asserts on would pass against nothing. No
+    // `styles.css?raw` styles.test.ts asserts on would pass against nothing. No
     // component imports CSS, so processing it costs the suite nothing.
     css: true,
     environment: 'node',
