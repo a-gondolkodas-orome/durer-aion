@@ -227,6 +227,28 @@ test('restoring a batch names the teams a live team blocked', async () => {
   await waitFor(() => expect(screen.queryByText('Alpha')).not.toBeInTheDocument());
 });
 
+// Teams deleted one by one, before batches existed, are a batch each — a
+// thousand of them for a past year — and a grid per batch all at once is what
+// made the tab crawl. A page of them, and a button for the next.
+test('the archive tab shows ten batches at a time', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  const singles = Array.from({ length: 12 }, (_, i) =>
+    archived(team(`0000000${i}-0000-4000-8000-000000000000`, `Team ${i}`), i, `2026-09-07T10:${String(i).padStart(2, '0')}:00.000Z`));
+  vi.spyOn(repo, 'getDeleted').mockResolvedValue(singles);
+  renderAdmin();
+  await openDeletedTab();
+
+  expect(await screen.findAllByText(/^Törölve: /)).toHaveLength(10);
+  expect(screen.getByText('A(z) 12 törlésből 10 látszik.')).toBeInTheDocument();
+  expect(screen.queryByText('Team 11')).not.toBeInTheDocument();
+
+  fireEvent.click(screen.getByText('További 2 betöltése'));
+
+  expect(await screen.findAllByText(/^Törölve: /)).toHaveLength(12);
+  expect(screen.getByText('Team 11')).toBeInTheDocument();
+  expect(screen.queryByText(/betöltése$/)).not.toBeInTheDocument();
+});
+
 test('the archive tab says so when it is empty', async () => {
   vi.spyOn(repo, 'getAll').mockResolvedValue([]);
   renderAdmin();

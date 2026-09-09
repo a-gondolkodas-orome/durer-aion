@@ -1,6 +1,6 @@
 import { Stack } from '@mui/system';
 import { Button } from '@mui/material';
-import { Dispatch } from 'react';
+import { Dispatch, useState } from 'react';
 import useSWR from 'swr';
 import { DataGrid } from '@mui/x-data-grid';
 import { useSnackbar } from 'notistack';
@@ -22,6 +22,13 @@ function downloadTsv(fileName: string, text: string) {
   URL.revokeObjectURL(url);
 }
 
+// Batches shown at once. Every team deleted before "delete all" was one
+// request carries its own timestamp, so a past year's archive is a thousand
+// one-team batches, and a grid for each of them at once is what made the tab
+// crawl. The newest ten are what an organiser comes for; the rest are a click
+// away, ten at a time.
+const BATCHES_PER_PAGE = 10;
+
 /// The archive, one section per batch — the rows one "delete all" archived
 /// together, or one team deleted on its own. `onRestored` fires whenever a
 /// team is live again, since the live list this page's other tab shows is
@@ -29,6 +36,7 @@ function downloadTsv(fileName: string, text: string) {
 export function DeletedTeams(props: { setConfirmDialog: Dispatch<ConfirmDialogInterface | null>, onRestored: () => void }) {
   const getDeleted = useDeleted();
   const { data, mutate } = useSWR('users/deleted', getDeleted);
+  const [shown, setShown] = useState(BATCHES_PER_PAGE);
 
   if (!data) {
     return null;
@@ -40,11 +48,22 @@ export function DeletedTeams(props: { setConfirmDialog: Dispatch<ConfirmDialogIn
     await mutate();
     props.onRestored();
   };
+  const batches = batchesOf(data);
+  const visible = batches.slice(0, shown);
+  const hidden = batches.length - visible.length;
   return (
     <Stack sx={{ gap: '24px', padding: '10px 0' }} data-testid="deletedTeamsRoot">
-      {batchesOf(data).map(batch => (
+      {visible.map(batch => (
         <Batch key={batch.deletedAt} batch={batch} setConfirmDialog={props.setConfirmDialog} onRestored={restored}/>
       ))}
+      {hidden > 0 && (
+        <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '16px' }}>
+          <Stack>A(z) {batches.length} törlésből {visible.length} látszik.</Stack>
+          <Button variant="outlined" color="primary" onClick={() => setShown(count => count + BATCHES_PER_PAGE)}>
+            További {Math.min(BATCHES_PER_PAGE, hidden)} betöltése
+          </Button>
+        </Stack>
+      )}
     </Stack>
   );
 }
