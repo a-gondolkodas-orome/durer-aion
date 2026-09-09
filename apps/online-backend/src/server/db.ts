@@ -2,7 +2,7 @@ import type { PostgresStore } from 'bgio-postgres';
 import { InProgressMatchStatus } from 'schemas';
 import { teamAttributes, TeamModel } from './model';
 import { DeletedTeamModel, deletedTeamAttributes } from './deletedTeam';
-import { Sequelize, Op, WhereOptions } from 'sequelize';
+import { Sequelize, Op, Transaction, WhereOptions } from 'sequelize';
 
 // `%` and `_` are wildcards inside a LIKE pattern, so a fragment carrying them
 // would match more than the caller asked for — a bare `%` matches every team.
@@ -78,13 +78,26 @@ export class TeamsRepository {
     });
   }
 
+  /**
+   * Copies the team into `DeletedTeams`, then drops it: how many were dropped,
+   * so 0 for a team that was not there. One transaction, so a failure between
+   * the two statements leaves both tables as they were rather than a team gone
+   * without its copy; and the row is locked while it is read, so two admins
+   * deleting the same team at once archive it once, and the second is told it
+   * was not there.
+   *
+   * The team's matches stay. The archived row keeps both match ids, and the
+   * match rows are the record of what was played.
+   */
   async removeTeam(teamId: string): Promise<number> {
-    const team = await TeamModel.findOne({ where: { teamId } });
-    if (!team) return 0;
-    await DeletedTeamModel.create({
-      ...team.toJSON(),
-      deletedAt: new Date(),
+    return await this.sequelize.transaction(async transaction => {
+      const team = await TeamModel.findOne({ where: { teamId }, transaction, lock: Transaction.LOCK.UPDATE });
+      if (!team) return 0;
+      await DeletedTeamModel.create({
+        ...team.toJSON(),
+        deletedAt: new Date(),
+      }, { transaction });
+      return await TeamModel.destroy({ where: { teamId }, transaction });
     });
-    return await TeamModel.destroy({ where: { teamId } });
   }
 }
