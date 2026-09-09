@@ -36,7 +36,7 @@
     "stack:ps": "docker compose --env-file=.env.docker ps",
     "stack:prod": "node scripts/ensure-deps.mjs && npx turbo build --filter=online-frontend && docker compose --env-file=.env.docker up --build --wait",
     "teams:import": "docker compose --env-file=.env.docker exec backend ./scripts/import_teams.sh scripts/test.tsv",
-    "teams:import:local": "npx turbo build --filter=online-backend && cd apps/online-backend && node dist/server.js import ../../scripts/test.tsv",
+    "teams:import:local": "npx turbo build --filter=online-backend && node apps/online-backend/dist/import_teams.js scripts/test.tsv",
     "site:build": "node scripts/assemble-site.mjs",
     "site:serve": "node scripts/serve-site.mjs",
     "db:up": "docker run -it --rm -e POSTGRES_PASSWORD=postgres -p 127.0.0.1:5432:5432 postgres:17.11",

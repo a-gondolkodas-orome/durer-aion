@@ -10,7 +10,10 @@ const source = (file: string) =>
   fileURLToPath(new URL(`../../packages/${file}`, import.meta.url))
 
 export default defineConfig({
-  entry: ['src/server.ts'],
+  // Two entries: the server, and the team import, which used to be a mode of
+  // it (#190). rolldown puts what they share — the database and the team
+  // repository — in a chunk beside them, which each `require`s by name.
+  entry: ['src/server.ts', 'src/import_teams.ts'],
   // CommonJS, not ESM: every dependency stays a bare `require()` below, and
   // boardgame.io ships no `exports` map — its subpaths are directories, which
   // Node's ESM loader refuses (ERR_UNSUPPORTED_DIR_IMPORT on
@@ -23,8 +26,8 @@ export default defineConfig({
   // `.js`, not the `.cjs` tsdown picks for node: the package is CJS-typed, so
   // `.js` already means CommonJS, and `npm start` names the file.
   fixedExtension: false,
-  // The bundle is one file; the map is what gives Sentry and the debugger the
-  // source lines back. `start` and `dev` run node with --enable-source-maps.
+  // The map is what gives Sentry and the debugger the source lines back.
+  // `start`, `dev` and `import-teams` run node with --enable-source-maps.
   sourcemap: true,
 
   alias: {
