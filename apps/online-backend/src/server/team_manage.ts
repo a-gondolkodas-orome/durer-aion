@@ -1,6 +1,6 @@
 import { createMatch } from "boardgame.io/internal";
 import { nanoid } from "nanoid";
-import { getBotCredentials, getGameStartAndEndTime, relayNames } from "./common";
+import { getBotCredentials, relayNames } from "./common";
 import { AnyBgioGame, PlayerIDType, strategyNames } from "game";
 import { LobbyAPI, Server, StorageAPI } from "boardgame.io";
 import { TeamsRepository } from "./db";
@@ -56,24 +56,6 @@ export const injectBot = async (
     credentials: getBotCredentials(),
   });
 };
-
-/**
- * Checks if the status of the global timer
- * TODO: implement usage
- * @returns {"WAITING"|"FINISHED"|undefined} - status of global game
- */
-export function checkGlobalTime(): "WAITING" | "FINISHED" | undefined {
-  const now = new Date();
-  const { globalStartAt, globalEndAt } = getGameStartAndEndTime();
-
-  if (now.getTime() < globalStartAt.getTime()) {
-    return "WAITING";
-  }
-  if (globalEndAt.getTime() < now.getTime()) {
-    return "FINISHED";
-  }
-  return undefined;
-}
 
 /**
  * Creates a game based on context, and given Game.

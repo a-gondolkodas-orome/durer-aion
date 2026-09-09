@@ -36,7 +36,6 @@ machine, follow the same steps with the right-hand values — each is repeated a
 | code from | the year's private repo, deploy key | the public repo, HTTPS clone |
 | domain | the real subdomain, static IP | a subdomain of one you already own |
 | `.env.docker` | real secrets, rotated afterwards | throwaway values, still off the samples |
-| competition window | the real start and end | anything covering your session |
 | teams | the real TSV; the `.export` goes back to the organisers | `scripts/test.tsv` |
 | database | must survive; there are no backups | expendable |
 | HTTP→HTTPS redirect | wanted; needs a repo change | skip |
@@ -224,9 +223,6 @@ Edit `.env.docker` before the first `up`:
 - `BOT_CREDENTIALS` — sample value `bot_passwd`.
 - `POSTGRESQL_PASSWORD` — sample value `postgres_passwd`. It is also in the backend's
   `DATABASE_URL`, so change it here and nowhere else.
-- `GAME_GLOBAL_START_T` and `GAME_GLOBAL_END_T` — the competition window. Teams cannot log
-  in outside it. The sample end date is far future so the stack runs out of the box; set
-  both to the real window.
 
 The other files `npm run setup` creates are frontend build settings; the samples are fine.
 [`README.md`](./README.md), under *Configuration you may want to change*, says what reads
@@ -464,8 +460,6 @@ sudo chown -R `whoami` node_modules
 **The site loads but every request 502s.** The backend is not healthy; `npm run stack:logs`
 says why. Usually a missing variable in `.env.docker` — the server validates them at boot
 and exits.
-
-**The competition says it is over.** `GAME_GLOBAL_END_T` in `.env.docker`; see step 4.
 
 ## The dry run for testers
 
