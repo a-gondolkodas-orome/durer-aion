@@ -37,7 +37,7 @@ const infinityToLarge = (r: number): number => (r === Infinity ? Number.MAX_SAFE
 const opponentInstantWins = (cells: Cell[], opponent: number): number =>
   optionsFor(cells, opponent).filter(o => majorityWinner(o.cells) === opponent).length;
 
-// Optimal bot. Verified in bot-strategy.spec.ts: from the winning role it never
+// Optimal bot. Verified in bot-strategy.test.ts: from the winning role it never
 // loses; its moves keep the position in its own attractor and strictly reduce
 // the rank, so it always reaches its majority (well within the 200-ply cap).
 export const smartBotStrategy: Bot = ({ board, ctx }) => {

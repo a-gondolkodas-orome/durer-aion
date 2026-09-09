@@ -23,7 +23,7 @@ import { type Board, applyShade, applyCircle, shadedCount } from '../gameplay';
 // out, leaving three hots no single reply can split; two survive, and the march
 // finishes the game.
 //
-// This plan is CERTIFIED by `forced-win.spec.ts`: from the empty board, after
+// This plan is CERTIFIED by `forced-win.test.ts`: from the empty board, after
 // OPENING_EDGE, for every one of the 36 circle replies either the position is
 // already two-hot or a second pair-heat exists after which ALL circle replies
 // leave a two-hot position — a complete-branching, two-move-deep certificate.

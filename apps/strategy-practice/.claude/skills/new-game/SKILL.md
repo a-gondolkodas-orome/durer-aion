@@ -1,6 +1,6 @@
 ---
 name: new-game
-description: Implement a new Dürer competition game from scratch, under apps/strategy-practice. Use when asked to add, implement or port a Dürer strategy game — it covers the game folder layout, the gameplay/bot split, curated start boards, specs and registration.
+description: Implement a new Dürer competition game from scratch, under apps/strategy-practice. Use when asked to add, implement or port a Dürer strategy game — it covers the game folder layout, the gameplay/bot split, curated start boards, tests and registration.
 ---
 
 # Implement a new Dürer competition game
@@ -68,7 +68,7 @@ from `gameList` automatically — no edit is needed there.
 Using the metadata collected in Step 1, add the entry in alphabetical order by key. Use `title` only if a longer display name is needed on the game page beyond the short name.
 
 ### 7. Run tests and verify
-If the optimal AI was implemented, write a spec that plays it rather than one
+If the optimal AI was implemented, write a test that plays it rather than one
 that eyeballs a single decision. `runMatch` (from `strategy-engine`, re-exported by
 `strategy-game-factory`) plays
 a whole game headless through the real moves, validators and win detection:
@@ -101,7 +101,7 @@ checklist](../../../src/components/CLAUDE.md#new-game-checklist) and verify each
 running game, not against your intent to have satisfied it. Two of them are
 worth naming here because they are the ones that quietly go unchecked:
 
-- the optimality claim must be backed by the `runMatch` spec from step 7, not by
+- the optimality claim must be backed by the `runMatch` test from step 7, not by
   eyeballing a few of the bot's moves
 - the game must be played through in **both** `vsComputer` and `vsHuman` mode
 

@@ -110,7 +110,7 @@ table](https://docs.google.com/spreadsheets/d/1-6u9PCtvf_gDHrs65x36pmDzFt4nZZx_I
    files: a React-free `gameplay.ts` (the `Board` type, start boards and
    `moves`), `bot-strategy.ts`, the game itself `<game>.tsx` (plus
    `board-client.tsx` once the JSX outgrows the game file), and a
-   `gameplay.spec.ts` — see [Where it lives](#where-it-lives). A game there
+   `gameplay.test.ts` — see [Where it lives](#where-it-lives). A game there
    exports a `StrategyGameConfig` object rather than a component;
    `remove-divisor-multiple` is the one to copy.
 3. Export the config from `packages/strategy-games/index.ts`, then turn it into a page in
@@ -205,7 +205,7 @@ within a turn (a hover, a pending selection) belongs in the component, not in
 `botStrategy`: a pure function of the position that *names* the move it wants,
 `({ board, ctx }) => ({ move, args })`. See [src/components/CLAUDE.md § Bot
 contract](src/components/CLAUDE.md#bot-contract), and [AGENTS.md §
-Testing](AGENTS.md#testing) for what being a pure function buys a spec.
+Testing](AGENTS.md#testing) for what being a pure function buys a test.
 
 **`presentation`** — the rule text and `getPlayerStepDescription`, both i18n
 values.

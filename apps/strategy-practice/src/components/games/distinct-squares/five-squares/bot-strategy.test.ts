@@ -27,7 +27,7 @@ const namedSquares = (strategy: typeof smartBotStrategy, board: Board, currentPl
 // already lost and can only win on a mistake.
 describe('smartBotStrategy', () => {
   // The minimax runs unmemoised over the whole game tree, which is why
-  // FiveSquares[1] is listed out of plays-to-an-end.spec.ts; five matches is
+  // FiveSquares[1] is listed out of plays-to-an-end.test.ts; five matches is
   // the exhaustive argument here, since the start board is one piece on one of
   // the five squares.
   it('wins as the replier from every start square in optimal-vs-optimal play', () => {

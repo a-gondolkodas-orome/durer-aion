@@ -12,7 +12,7 @@ Each game is listed here exactly once. Where a component's export name differs
 from the key, alias it on re-export (`export { PolicemanthiefA as Policemanthief }`).
 That indirection is the point: renaming or moving a component only touches its
 line here — the key, and therefore the route, never changes. Keep entries in abc
-order by key. `gameList.spec.ts` guards that this set of keys and
+order by key. `gameList.test.ts` guards that this set of keys and
 `gameList` stay in one-to-one sync.
 
 A game that has moved to `packages/strategy-games` exports a config object rather than a

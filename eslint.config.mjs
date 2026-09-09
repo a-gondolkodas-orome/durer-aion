@@ -146,7 +146,7 @@ export default defineConfig(
   // The core of the package is what a bare node server imports; its React client half
   // lives in src/react/ and is exempt — that is the whole point of the split. What this
   // rule cannot see is a relative import resolving into src/react/; the walk in
-  // packages/strategy-engine/src/react-free.spec.ts pins that. `import type` is allowed because
+  // packages/strategy-engine/src/react-free.test.ts pins that. `import type` is allowed because
   // it is erased: i18n.ts has to name React's node type to say what a game's rule text
   // may be, and naming it costs a bare node nothing.
   {
@@ -165,7 +165,7 @@ export default defineConfig(
   // A game's .ts half — gameplay, bot, curated start boards — is what a competition
   // server validates moves and plays bot turns with, so it runs in plain Node; only
   // the game's .tsx (its board client and config) may be React-flavoured. Same
-  // blind spot as above: `gameplay-react-free.spec.ts` in apps/strategy-practice watches what
+  // blind spot as above: `gameplay-react-free.test.ts` in apps/strategy-practice watches what
   // a relative import resolves to.
   {
     files: ['packages/strategy-games/**/*.ts'],

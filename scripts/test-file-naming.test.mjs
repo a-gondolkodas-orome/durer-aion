@@ -5,7 +5,8 @@
 //
 // Which of the two projects owns a file is decided by its path — vitest.config.mts
 // excludes the directories apps/strategy-practice's own config includes — so the
-// name is free to be the same everywhere, and nothing here has to know about it.
+// name is the same everywhere, and the second rule below is what keeps it so: a
+// `.spec` left behind, or written out of habit, now matches no glob at all.
 import { readdirSync } from 'node:fs';
 import { join, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -39,6 +40,16 @@ describe('every suite is somewhere a project looks', () => {
       stray,
       `These suites are outside a workspace's \`src/\`, so no project's glob reaches them `
       + `and they never run:\n${list(stray)}\nMove each one under its workspace's \`src/\`.`
+    ).toStrictEqual([]);
+  });
+
+  it('is named .test, the one suffix both projects look for', () => {
+    const spec = suites.filter(file => !file.endsWith('.test.ts') && !file.endsWith('.test.tsx'));
+
+    expect(
+      spec,
+      `These suites are not named \`.test\`, which is the only suffix either project's glob `
+      + `takes, so they never run:\n${list(spec)}\nRename each to \`.test\`.`
     ).toStrictEqual([]);
   });
 });

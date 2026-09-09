@@ -54,16 +54,13 @@ it finds. Your editor does it on save if you install the recommended extensions
 Cover new logic with a test, and pin every regression you fix with one that
 fails without the fix.
 
-**The file name decides which project runs it, and the wrong one fails quietly.**
+Name it `*.test.ts` or `*.test.tsx`, and put it under a workspace's `src/`,
+beside what it tests. That is the whole rule — which of the two vitest projects
+picks it up follows from where it is, not from what it is called.
 
-| your file is under | name it |
-| --- | --- |
-| `apps/strategy-practice/src/`, `packages/strategy-engine/src/`, `packages/strategy-games/src/` | `*.spec.ts` / `*.spec.tsx` |
-| any other workspace's `src/` | `*.test.ts` / `*.test.tsx` |
-
-Get it wrong and the suite tells you which rename fixes it
-(`scripts/test-file-naming.test.mjs`). Before that test existed, a `*.spec.ts` in
-the wrong workspace simply never ran, and CI stayed green.
+Both halves matter, because a suite no glob reaches does not fail: it is simply
+never run, and the green tick says nothing was wrong. `npm test` refuses either
+mistake by name (`scripts/test-file-naming.test.mjs`).
 
 One more: **a test that writes to the console fails.** `vitest.setup.mts` says
 why and how to opt out when a test means to exercise a logging path. If a

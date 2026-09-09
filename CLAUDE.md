@@ -98,11 +98,12 @@ change is measured against.
   their source, so a CommonJS build would have no consumer. `packages/strategy-engine` is
   the exception: it is CJS-typed and builds both formats, so a host that
   `require`s it works too (its `tsdown.config.mts` says how).
-- **Testing**: vitest, React Testing Library. Suites are `*.test.ts(x)` under
-  the root config and `*.spec.ts(x)` under the `apps/strategy-practice` project,
-  which also takes the `.spec` files in `packages/strategy-engine` and `packages/strategy-games` —
-  that app's code, moved out. One `npm test` runs both projects through vitest,
-  and neither uses Jest.
+- **Testing**: vitest, React Testing Library. Every suite is `*.test.ts(x)`, and
+  which of the two projects runs one is decided by its **path**: the root
+  `vitest.config.mts` excludes `apps/strategy-practice`, `packages/strategy-engine`
+  and `packages/strategy-games` — that app and the code it moved out — from its own
+  project, and that app's config includes exactly those three. One `npm test` runs
+  both projects through vitest, and neither uses Jest.
 - **`apps/strategy-practice`** shares this React major, the root's eslint,
   typescript and vitest pins, and the same vite as the other frontends;
   Tailwind and its own build/test setup are what set it apart. See its

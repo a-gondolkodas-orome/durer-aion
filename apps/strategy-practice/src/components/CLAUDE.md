@@ -78,7 +78,7 @@ board is as freshly owned by its match as a generated one.
 
 Reach for the list whenever the positions are enumerable rather than sampled: a
 competition hands out one entry per attempt (durer-jatekok#314), so the list
-order is part of the contract — **append, never reorder** — and a spec can judge
+order is part of the contract — **append, never reorder** — and a test can judge
 every entry instead of calling the generator until they have all come up. The
 commonest case is a list of one, for a game that always starts from the same
 position: `startBoards: [startBoard]`, rather than wrapping that constant in a
@@ -91,8 +91,8 @@ assembles the list where it is used: `startBoards: [startBoardOfCategoryA]`. A
 single position stays singular, and the name says which position it is instead
 of restating the field it feeds.
 
-**A spec never edits an exported board — it works on `cloneDeep(startBoard)`.**
-`isolate: false` (vite.config.js) shares one module registry across every spec
+**A test never edits an exported board — it works on `cloneDeep(startBoard)`.**
+`isolate: false` (vite.config.js) shares one module registry across every test
 file in a worker, so an in-place edit of module-scope data corrupts that board
 for every later file, surfacing as a failure in an unrelated game and in some
 file orderings only — which is how it reached a deploy once. Reading is fine;
@@ -100,7 +100,7 @@ only an edit needs the copy, and you need not work out which is which:
 `test-setup.ts` deep-freezes every exported start board, with no per-game
 upkeep, so an edit throws where it happens.
 
-Curated boards want `forcedWinnerIndex` (`test-utils`) in their spec: it plays
+Curated boards want `forcedWinnerIndex` (`test-utils`) in their test: it plays
 the game's own optimal bot against itself and returns the role that forces the
 win, throwing when playouts disagree — which means either a board that is not
 decisive or a bot that is not optimal. Assert the *role*, not just that the game
@@ -199,7 +199,7 @@ engine package — the latter being how a competition server answers a team's
 move, with `runMatch` driving its turns through it. They differ deliberately in
 pacing and in how loudly they complain — a bad strategy must not crash the site
 in production, while headless it should throw — but *which* moves land has to
-be identical, which `strategy-game-factory/bot-turn-agreement.spec.tsx` pins by
+be identical, which `strategy-game-factory/bot-turn-agreement.test.tsx` pins by
 playing the same turn through all of them.
 
 Left unpinned, neither a mistyped move name nor wrong arguments surface until
@@ -262,7 +262,7 @@ The factory infers `TTurnState` from the config, so the game file's
 `getPlayerStepDescription` takes `StrategyArgs<Board, TurnState>`, the moves
 object says `satisfies MoveDefs<Board, TurnState>` and each `apply` returns
 `MoveOutcome<Board, TurnState>` — name it at all of them, since inference reads
-every one of those sites and a leftover bare `Ctx` contradicts the rest. A spec
+every one of those sites and a leftover bare `Ctx` contradicts the rest. A test
 that builds a ctx names it too: `makeCtx<TurnState>({ … })`. Games with no
 mid-turn state say nothing and keep compiling.
 
@@ -328,7 +328,7 @@ Two conventions to keep in mind:
   ("stale board passed to move …", converting a chaining bug into a loud,
   located error), in prod the store board silently wins. The argument stays
   because it keeps a move a pure function of its inputs, callable on
-  hypothetical boards outside a live game — bot look-ahead and specs both do
+  hypothetical boards outside a live game — bot look-ahead and tests both do
   that.
 - The engine now lives in `packages/strategy-engine`, imported as `strategy-engine` — the same
   package a competition server imports, which is why it is React-free, for the
@@ -336,7 +336,7 @@ Two conventions to keep in mind:
   folder](../../AGENTS.md#files-in-a-game-folder)). Don't import React (or
   anything React-flavoured) there; the root ESLint config enforces it, allowing
   only `import type`, which is erased. This app reads the package's *source*
-  through an alias, so editing it needs no build step and its specs run in
+  through an alias, so editing it needs no build step and its tests run in
   `npm test` here.
 
 ## New game checklist

@@ -51,7 +51,7 @@ export const resolveVariants = <TBoard,>(variants: VariantInput<TBoard>[]) => {
     ?? variants.find(v => v.botStrategy)?.botStrategy;
   // `startBoards` is dropped rather than carried through: resolving normalises
   // every variant to one start-board channel, and the resolved array is what
-  // `Game.variants` exposes — which `plays-to-an-end.spec.ts` resolves a second
+  // `Game.variants` exposes — which `plays-to-an-end.test.ts` resolves a second
   // time, so resolution has to be a no-op on its own output. The curated list
   // stays readable where a server would take it from anyway: the game's own
   // React-free module.

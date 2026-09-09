@@ -42,9 +42,7 @@ export default defineConfig({
     // Most suites are plain Node. Component tests opt into a DOM per file with
     // a `// @vitest-environment jsdom` docblock.
     environment: 'node',
-    // Both suffixes, while the repo finishes settling on `.test` — so a file
-    // renamed ahead of or behind the sweep still runs rather than going quiet.
-    include: ['{apps,packages}/*/src/**/*.{test,spec}.{ts,tsx}', 'scripts/**/*.{test,spec}.mjs'],
+    include: ['{apps,packages}/*/src/**/*.test.{ts,tsx}', 'scripts/**/*.test.mjs'],
     // What decides which project owns a file is its path, not its name. The glob
     // above reaches into apps/strategy-practice and the two packages whose code
     // moved out of it, and those belong to the project below — which reads them

@@ -3,7 +3,7 @@ import { fireEvent, act } from '@testing-library/react';
 import {
   makeConfig, ctxAwareConfig, renderGame, warmUpPlayerNameSetup,
   CtxAwareBoardClient, type Board
-} from './spec-helpers';
+} from './test-helpers';
 import type { BoardClientProps, BotMove, Gameplay } from 'strategy-engine';
 
 // Undo rewinds a whole turn, not a move: the snapshot is taken at the first
