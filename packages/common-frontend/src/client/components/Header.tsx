@@ -1,7 +1,7 @@
 import { Container, Dialog, Stack, Button } from '@mui/material';
 import { useState } from 'react';
 import { useLogout } from '../hooks/user-hooks';
-import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
+import { MoreVert } from '@mui/icons-material';
 import { useClientRepo } from '../api-repository-interface';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
@@ -112,11 +112,11 @@ export function Header(props: { teamName: string | null, admin: boolean, titles?
             xs: 'flex',
             md: 'none'
           },
-        }}><PowerSettingsNewIcon onClick={() => {
+        }}><MoreVert onClick={() => {
           setMobileMenuOpen(true)
         }} sx={{
-         fontSize: '35px'
-        }}/></Stack>}
+          fontSize: '35px'
+        }} /></Stack>}
         <Stack sx={{
           fontSize: 30,
           fontWeight: 'bold',
@@ -132,33 +132,35 @@ export function Header(props: { teamName: string | null, admin: boolean, titles?
           onClose={() => {
             setMobileMenuOpen(false)
           }}
-          slotProps={{ paper: {
-            sx: {
-              width: '100%',
-              textAlign: 'center',
-              padding: '30px',
-              top: 0
+          slotProps={{
+            paper: {
+              sx: {
+                width: '100%',
+                textAlign: 'center',
+                padding: '30px',
+                top: 0
+              }
             }
-          } }}
+          }}
         >
           {props.teamName && <>
-              <Stack sx={{
-                fontSize: 30,
-                paddingTop: '10px',
-                paddingBottom: '20px',
-                display: 'flex',
-                alignItems: 'center'
-              }}>{props.titles?.[2] ?? props.teamName}</Stack>
-              <Button onClick={() => {
-                setMobileMenuOpen(false);
-                onLogout();
-              }} variant='outlined'
+            <Stack sx={{
+              fontSize: 30,
+              paddingTop: '10px',
+              paddingBottom: '20px',
+              display: 'flex',
+              alignItems: 'center'
+            }}>{props.titles?.[2] ?? props.teamName}</Stack>
+            <Button onClick={() => {
+              setMobileMenuOpen(false);
+              onLogout();
+            }} variant='outlined'
               sx={{
                 fontSize: 20,
                 textTransform: 'capitalize'
               }}
-              >{t('header.logout')}</Button>
-            </>}
+            >{t('header.logout')}</Button>
+          </>}
           {props.admin && <LanguageDropdown />}
         </Dialog>
       </Container>
