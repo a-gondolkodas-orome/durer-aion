@@ -2,7 +2,7 @@
 // CommonJS and warns that the ESM syntax below will stop working once its native config
 // loader becomes the default.
 import { fileURLToPath } from 'node:url';
-import { defineConfig } from 'vitest/config';
+import { configDefaults, defineConfig } from 'vitest/config';
 
 // The suites run against the packages' TypeScript sources, with no build in
 // front of them — the CI test job installs and runs vitest, nothing more. That
@@ -12,6 +12,15 @@ import { defineConfig } from 'vitest/config';
 // machine from being what the suites test.
 const source = (file: string) =>
   fileURLToPath(new URL(`packages/${file}`, import.meta.url));
+
+// The directories apps/strategy-practice's own vite config lists in its
+// `test.include` — this app's source, and the two packages its code moved out
+// to. Kept out of the root project so each file has exactly one project.
+const strategyPracticeProject = [
+  'apps/strategy-practice/**',
+  'packages/strategy-engine/**',
+  'packages/strategy-games/**',
+];
 
 export default defineConfig({
   resolve: {
@@ -33,7 +42,15 @@ export default defineConfig({
     // Most suites are plain Node. Component tests opt into a DOM per file with
     // a `// @vitest-environment jsdom` docblock.
     environment: 'node',
-    include: ['{apps,packages}/*/src/**/*.test.{ts,tsx}', 'scripts/**/*.test.mjs'],
+    // Both suffixes, while the repo finishes settling on `.test` — so a file
+    // renamed ahead of or behind the sweep still runs rather than going quiet.
+    include: ['{apps,packages}/*/src/**/*.{test,spec}.{ts,tsx}', 'scripts/**/*.{test,spec}.mjs'],
+    // What decides which project owns a file is its path, not its name. The glob
+    // above reaches into apps/strategy-practice and the two packages whose code
+    // moved out of it, and those belong to the project below — which reads them
+    // through its own aliases and setup file, and where the root project's node
+    // environment would fail them on the first unresolved import.
+    exclude: [...configDefaults.exclude, ...strategyPracticeProject],
     // Keeps the run's output to the report itself — see the file for how a test
     // that means to log opts out.
     setupFiles: ['./vitest.setup.mts'],

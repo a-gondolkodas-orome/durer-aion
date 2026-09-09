@@ -93,10 +93,13 @@ export default defineConfig(() => ({
     // written against this setup, and this is the app that exercises the engine
     // in a browser. Vitest resolves them through the alias above, so they test
     // the source rather than a build.
+    // Both suffixes, while the repo finishes settling on `.test`. The root config
+    // excludes these three directories from its own project, so what runs here
+    // is decided by the path rather than by the name — see vitest.config.mts.
     include: [
-      'src/**/*.spec.{ts,tsx}',
-      '../../packages/strategy-engine/src/**/*.spec.{ts,tsx}',
-      '../../packages/strategy-games/src/**/*.spec.{ts,tsx}'
+      'src/**/*.{test,spec}.{ts,tsx}',
+      '../../packages/strategy-engine/src/**/*.{test,spec}.{ts,tsx}',
+      '../../packages/strategy-games/src/**/*.{test,spec}.{ts,tsx}'
     ],
     // On demand only, never in `npm test` or CI, and with no thresholds — see
     // AGENTS.md § Coverage for why, and for what the report is actually good
@@ -115,13 +118,13 @@ export default defineConfig(() => ({
         '../../packages/strategy-games/src/**/*.{ts,tsx}'
       ],
       exclude: [
-        'src/**/*.spec.{ts,tsx}',
+        'src/**/*.{test,spec}.{ts,tsx}',
         'src/test-utils.ts',
         'src/test-setup.ts',
         'src/**/spec-helpers.tsx',
         'src/main.tsx',
-        '../../packages/strategy-engine/src/**/*.spec.{ts,tsx}',
-        '../../packages/strategy-games/src/**/*.spec.{ts,tsx}'
+        '../../packages/strategy-engine/src/**/*.{test,spec}.{ts,tsx}',
+        '../../packages/strategy-games/src/**/*.{test,spec}.{ts,tsx}'
       ],
       reporter: ['text', 'html'],
       // /reports is gitignored
