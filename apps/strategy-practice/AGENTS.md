@@ -72,7 +72,7 @@ run in plain Node (durer-jatekok#313). ESLint enforces that — a `react` import
 or a value import from the `strategy-game-factory` barrel, is an error there; types
 from the barrel are fine, since `import type` is erased. A game whose gameplay
 is a handful of lines still gets the file: uniform layout is what makes the
-catalog skimmable, and it is what a spec and the bot's move pinning import
+catalog skimmable, and it is what a test and the bot's move pinning import
 without dragging in JSX.
 
 Two rules keep the boundary meaningful rather than nominal:
@@ -93,16 +93,16 @@ enumerable, and verify each entry with `forcedWinnerIndex` — the contract and
 the reasoning are in [src/components/CLAUDE.md § Curated start
 boards](src/components/CLAUDE.md#curated-start-boards).
 
-### Where a spec lives
+### Where a test lives
 
-A spec is named after the module whose behaviour it asserts —
-`gameplay.spec.ts` for the rules, `bot-strategy.spec.ts` for the strategy,
-`<game>.spec.ts` for what the game file itself holds — plus a topical name
-(`solver.spec.ts`, `geometry.spec.ts`) where one part of the strategy is worth
+A test is named after the module whose behaviour it asserts —
+`gameplay.test.ts` for the rules, `bot-strategy.test.ts` for the strategy,
+`<game>.test.ts` for what the game file itself holds — plus a topical name
+(`solver.test.ts`, `geometry.test.ts`) where one part of the strategy is worth
 testing on its own. What the module *is* decides, not what the test reads along
 the way: "the bot only ever produces legal moves" belongs with the bot even
 though it checks a rule. What must not happen is moves being tested from
-anywhere but `gameplay.spec.ts`.
+anywhere but `gameplay.test.ts`.
 
 ## Testing
 
@@ -111,10 +111,10 @@ overview page must be covered by new unit tests, added before or alongside the
 change rather than as an afterthought.
 
 Game-specific logic is also worth testing when the winning strategy is
-non-trivial. Because bots name their moves, a spec can read a decision straight
+non-trivial. Because bots name their moves, a test can read a decision straight
 off the return value (`botNextMoveArgs` in `test-utils`, imported as
 `from 'test-utils'` — an alias, so no `../../../`). What comes back is the named
-move's own argument tuple, so name the game's moves wherever a spec types a
+move's own argument tuple, so name the game's moves wherever a test types a
 strategy — `BotStrategy<Board, Moves>`, not `BotStrategy<Board>`, which drops
 back to unchecked args. `runMatch`
 (`packages/strategy-engine/src/run-match.ts`) plays two strategies against each
@@ -123,13 +123,13 @@ hand-rolled game loop. That is what turns "the AI is truly optimal" into a test:
 the smart bot must win as the mover from a winning start board, and as the
 replier from a losing one (see `coins-in-3-piles`, `remove-row-or-column`).
 
-Every registered game is already swept once by `games/plays-to-an-end.spec.ts`,
+Every registered game is already swept once by `games/plays-to-an-end.test.ts`,
 which plays each variant headlessly and asserts only that a match completes and
 names a winner. `runMatch` throws on an unknown move, a move the game's own
 `validate` rejects, a move named after the turn ended, and a game that never
 ends, so a new game gets that much conformance for free. It tests the *game*,
 not the bot's judgement, and is kept cheap on purpose: variants whose bot
-searches are listed out of it by name (their own bot spec covers them), and the
+searches are listed out of it by name (their own bot test covers them), and the
 rest play as many random start boards as a small per-variant time budget allows.
 
 Size the sweep to what the strategy costs: every start board for a cheap
@@ -151,14 +151,14 @@ execute ~94% of the source — that is how much of this repo is `games/` —
 while asserting only that a match ends and a board renders, so the global
 percentage reads high whatever the tests are worth, and a CI gate on it would be
 satisfied by registering another game. What the report is good for is the
-question grep cannot answer: which modules **no spec loads at all**, which is
+question grep cannot answer: which modules **no test loads at all**, which is
 why `coverage.include` in `vite.config.js` names every file under `src/` rather
 than only what a test imported.
 
 A gate on the lines a PR *added*, measured with the sweeps excluded, ran on every
 PR until #431 retired it with the rest of the duplicated CI (#427): it was the suite run
 a second time, instrumented, for one number. What it asked for still holds — a
-new game or bot gets its `gameplay.spec.ts` and `bot-strategy.spec.ts` (§ Testing)
+new game or bot gets its `gameplay.test.ts` and `bot-strategy.test.ts` (§ Testing)
 — and is the reviewer's to check. Don't add a gate on the global number either;
 the reasons above have not changed.
 

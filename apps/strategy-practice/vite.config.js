@@ -79,6 +79,10 @@ export default defineConfig(() => ({
   },
   test: {
     globals: true,
+    // Without this vitest replaces every CSS import with an empty string, and the
+    // `styles.css?raw` styles.test.ts asserts on would pass against nothing. No
+    // component imports CSS, so processing it costs the suite nothing.
+    css: true,
     environment: 'node',
     clearMocks: true,
     restoreMocks: true,
@@ -93,10 +97,13 @@ export default defineConfig(() => ({
     // written against this setup, and this is the app that exercises the engine
     // in a browser. Vitest resolves them through the alias above, so they test
     // the source rather than a build.
+    // The root config excludes these three directories from its own project, so
+    // what runs here is decided by the path, not by the file's name — see
+    // vitest.config.mts.
     include: [
-      'src/**/*.spec.{ts,tsx}',
-      '../../packages/strategy-engine/src/**/*.spec.{ts,tsx}',
-      '../../packages/strategy-games/src/**/*.spec.{ts,tsx}'
+      'src/**/*.test.{ts,tsx}',
+      '../../packages/strategy-engine/src/**/*.test.{ts,tsx}',
+      '../../packages/strategy-games/src/**/*.test.{ts,tsx}'
     ],
     // On demand only, never in `npm test` or CI, and with no thresholds — see
     // AGENTS.md § Coverage for why, and for what the report is actually good
@@ -115,13 +122,13 @@ export default defineConfig(() => ({
         '../../packages/strategy-games/src/**/*.{ts,tsx}'
       ],
       exclude: [
-        'src/**/*.spec.{ts,tsx}',
+        'src/**/*.test.{ts,tsx}',
         'src/test-utils.ts',
         'src/test-setup.ts',
-        'src/**/spec-helpers.tsx',
+        'src/**/test-helpers.tsx',
         'src/main.tsx',
-        '../../packages/strategy-engine/src/**/*.spec.{ts,tsx}',
-        '../../packages/strategy-games/src/**/*.spec.{ts,tsx}'
+        '../../packages/strategy-engine/src/**/*.test.{ts,tsx}',
+        '../../packages/strategy-games/src/**/*.test.{ts,tsx}'
       ],
       reporter: ['text', 'html'],
       // /reports is gitignored

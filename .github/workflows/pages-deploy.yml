@@ -48,6 +48,11 @@ jobs:
           # leaves error reporting off rather than pointing the site at a dead endpoint. See
           # *Error reporting* in README.md.
           VITE_SENTRY_DSN: ${{ vars.SENTRY_DSN }}
+          # The vite configs read HEAD when this is unset, which on a checkout
+          # actions/checkout made is the same commit. Setting it says so
+          # outright, and keeps the banner exact if a build ever comes from a
+          # turbo cache rather than from these sources.
+          VITE_GIT_COMMIT_HASH: ${{ github.sha }}
         run: node scripts/assemble-site.mjs
 
       - name: Upload Pages artifact

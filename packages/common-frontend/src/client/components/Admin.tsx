@@ -2,7 +2,7 @@ import { Stack } from '@mui/system';
 import { useAddMinutes, useAll, useRemoveTeam } from '../hooks/user-hooks';
 import { Button, Dialog, Table, TableBody, TableCell, TableHead, TableRow, IconButton } from '@mui/material';
 import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useState } from 'react';
 import useSWR from 'swr';
 import { DataGrid, ExportCsv, Toolbar } from '@mui/x-data-grid';
 import { TeamModelDto, adminTeamId } from '../dto/TeamStateDto';
@@ -39,22 +39,22 @@ export function Admin(props: { teamId?: string }) {
   const addMinutes = useAddMinutes();
   const removeTeam = useRemoveTeam();
   const { enqueueSnackbar } = useSnackbar();
-  const { data } = useSWR("users/all", getAll)
+  const { data, mutate } = useSWR("users/all", getAll)
   const [selectedRow, setSelectedRow] = useState<TeamModelDto | null>(null);
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogInterface | null>(null);
-  const [teamFromPath, setTeamFromPath] = useState<TeamModelDto | null>(null);
   const [adminPageOpen, setAdminPageOpen] = useState<boolean>(true);
 
-  useEffect(() => {
-    if (props.teamId) {
-      const current = data?.find(d => d.teamId === props.teamId)
-      if (current) {
-        setTeamFromPath(current);
-      }
-    } else if (teamFromPath) {
-      setTeamFromPath(null);
-    }
-  }, [data, props.teamId, teamFromPath]);
+  // Read off the list rather than kept as state, so a team deleted from the
+  // `/admin/<teamId>` page drops out with the list's next load and the page
+  // falls back to the grid instead of showing the team it no longer has.
+  const teamFromPath = props.teamId ? data?.find(d => d.teamId === props.teamId) ?? null : null;
+
+  // The server has dropped the team: the dialog closes, and the grid reloads so
+  // it no longer offers a team that is gone.
+  const onRemoved = () => {
+    setSelectedRow(null);
+    void mutate();
+  };
 
   return (
     <Stack sx={{
@@ -93,7 +93,7 @@ export function Admin(props: { teamId?: string }) {
         } onClose={() => {
             setSelectedRow(null);
            }}>
-          {selectedRow && <TeamDetailDialog data={selectedRow} setConfirmDialog={setConfirmDialog}/>}
+          {selectedRow && <TeamDetailDialog data={selectedRow} setConfirmDialog={setConfirmDialog} onRemoved={onRemoved}/>}
       </Dialog>
       <ConfirmDialog confirmDialog={confirmDialog}  setConfirmDialog={setConfirmDialog}/>
       <Stack sx={{ width: "100%", display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
@@ -107,7 +107,7 @@ export function Admin(props: { teamId?: string }) {
         <Stack sx={{ fontSize: "32px", textAlign: "center" }}>Admin felület </Stack>
       </Stack>
       {adminPageOpen && <>
-        {teamFromPath && <TeamDetailDialog data={teamFromPath} setConfirmDialog={setConfirmDialog}/>}
+        {teamFromPath && <TeamDetailDialog data={teamFromPath} setConfirmDialog={setConfirmDialog} onRemoved={onRemoved}/>}
         {!teamFromPath && <Stack sx={{
           height: "635px",
         }}>
@@ -293,13 +293,13 @@ export function Admin(props: { teamId?: string }) {
                       await removeTeam(adminTeamId(team));
                     }
                     enqueueSnackbar('Összes csapat törölve', { variant: 'success' });
-                    // Refresh the list
-                    if (typeof window !== 'undefined') {
-                      await getAll();
-                    }
                   } catch (e) {
                     const message = e instanceof Error ? e.message : "Váratlan hiba történt";
                     enqueueSnackbar(message, { variant: 'error' });
+                  } finally {
+                    // The teams deleted before a failure are gone as well, so
+                    // the grid reloads either way.
+                    await mutate();
                   }
                 }
               });

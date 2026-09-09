@@ -3,10 +3,12 @@ import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 
 // Nothing renders this: `pageState` is DISCLAIMER | HOME | RELAY | STRATEGY, with
-// no WAITING among them. It is the frontend half of issue #345 — the server's
-// `checkGlobalTime()` computes WAITING and FINISHED and no route acts on either —
-// and this screen, with its `waitingRoom.*` keys in both locales, is what a WAITING
-// status would render once one does.
+// no WAITING among them, and nothing on the server gates on a competition-wide
+// window either — #345 removed the unused `checkGlobalTime()` and the config
+// behind it, the round's start being enforced by handing the join codes out when
+// it opens. This screen and its `waitingRoom.*` keys in both locales are what a
+// WAITING status would render if the deadline #345 leaves open is ever built: as
+// admin-set state in the database, not as an environment variable.
 export function WaitingRoom() {
   const theme = useTheme();
   const { t } = useTranslation();

@@ -14,6 +14,7 @@ function fakeAxios(answer: (method: string, url: string) => Promise<unknown>) {
   const instance = {
     get: (url: string) => { calls.push({ method: "get", url }); return answer("get", url); },
     post: (url: string, body?: unknown) => { calls.push({ method: "post", url, body }); return answer("post", url); },
+    delete: (url: string) => { calls.push({ method: "delete", url }); return answer("delete", url); },
   } as unknown as AxiosInstance;
   vi.spyOn(axios, "create").mockReturnValue(instance);
   return calls;
@@ -86,5 +87,33 @@ describe("the team routes", () => {
     fakeAxios(() => status(401));
 
     expect(await new RealClientRepository().getTeamState()).toBeNull();
+  });
+});
+
+describe("removing a team", () => {
+  const teamId = "8eae8669-125c-42e5-8b49-89afbac31679";
+
+  test("is a DELETE naming the team", async () => {
+    const calls = fakeAxios(ok);
+
+    await new RealClientRepository().removeTeam(teamId);
+
+    expect(calls).toStrictEqual([{ method: "delete", url: `/team/admin/${teamId}/remove` }]);
+  });
+
+  // The server's 404 means the team is already gone — the admin page acted on
+  // a stale list — and the message says that rather than quoting axios.
+  test("a team the server no longer has is reported as such", async () => {
+    fakeAxios(() => status(404));
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    await expect(new RealClientRepository().removeTeam(teamId)).rejects.toThrow("A csapat már nem létezik");
+  });
+
+  test("any other failure is reported like the other admin actions", async () => {
+    fakeAxios(() => status(500));
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    await expect(new RealClientRepository().removeTeam(teamId)).rejects.toThrow("Váratlan hiba történt");
   });
 });

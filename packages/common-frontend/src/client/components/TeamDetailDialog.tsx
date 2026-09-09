@@ -16,7 +16,13 @@ import * as Yup from 'yup';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
-export function TeamDetailDialog(props: { data: TeamModelDto, setConfirmDialog: Dispatch<ConfirmDialogInterface | null> }) {
+/// `onRemoved` fires once the server has dropped the team: the list this dialog
+/// was opened from is stale from that moment, and the dialog cannot refresh it.
+export function TeamDetailDialog(props: {
+  data: TeamModelDto,
+  setConfirmDialog: Dispatch<ConfirmDialogInterface | null>,
+  onRemoved: () => void,
+}) {
   const resetRelay = useResetRelay();
   const resetStrategy = useResetStrategy();
   const repoRemoveTeam = useRemoveTeam();
@@ -35,9 +41,9 @@ export function TeamDetailDialog(props: { data: TeamModelDto, setConfirmDialog: 
   const removeTeam = async (teamId: string) => {
     setRemoving(true);
     try {
-      // Dynamically import to avoid circular deps
       await repoRemoveTeam(teamId);
       enqueueSnackbar('Csapat törölve', { variant: 'success' });
+      props.onRemoved();
     } catch (e: unknown) {
       enqueueSnackbar((e instanceof Error && e.message) || 'Hiba történt', { variant: 'error' });
     } finally {

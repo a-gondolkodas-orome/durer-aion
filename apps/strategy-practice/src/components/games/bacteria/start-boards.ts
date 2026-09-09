@@ -3,7 +3,7 @@ import type { Board } from './gameplay';
 
 // Curated start boards for the bacteria game. This is the single source of
 // truth: bacteria.tsx hands these lists to its variants as `startBoards`, and
-// bot-strategy.spec.ts iterates the same boards to prove they stay ~50/50
+// bot-strategy.test.ts iterates the same boards to prove they stay ~50/50
 // balanced and bot-optimal. Keep it that way — don't copy the data into tests.
 
 const rowCount = 9;

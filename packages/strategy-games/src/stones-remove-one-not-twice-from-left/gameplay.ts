@@ -56,6 +56,6 @@ const fromPiles = (pairs: [number, number][]): Board[] =>
 
 export const testStartBoards = fromPiles([[3, 4], [4, 3], [3, 3], [4, 4]]);
 
-// Curated so that either role can be the winning one — see gameplay.spec.ts,
+// Curated so that either role can be the winning one — see gameplay.test.ts,
 // which judges the whole list rather than a sample of it.
 export const fullStartBoards = fromPiles([[11, 8], [9, 9], [9, 8], [9, 7], [5, 8], [8, 7], [6, 4]]);

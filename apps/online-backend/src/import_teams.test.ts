@@ -4,9 +4,9 @@ import { join } from "node:path";
 import ts from "typescript";
 
 // The team import was a mode of the server until #190 — `server.js import
-// <tsv>` — so loading a TSV first had to satisfy the bot password, the admin
-// password and the competition window, none of which it reads, and any
-// load-time failure anywhere in the server stopped it. It is its own entry
+// <tsv>` — so loading a TSV first had to satisfy the bot password and the
+// admin password, neither of which it reads, and any load-time failure
+// anywhere in the server stopped it. It is its own entry
 // now; this walk is what keeps it one. A specifier is not the whole story —
 // an innocent-looking helper that re-exports the server's env checks, or the
 // game registry behind them, would put them back — so this follows the edges

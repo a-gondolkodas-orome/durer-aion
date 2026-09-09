@@ -19,7 +19,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const winningEdges =
     ctx.winnerIndex !== null ? findWinningTriangle(board, ctx.winnerIndex) : null;
 
-  const hoverStroke = ctx.currentPlayer === 0 ? 'hover:stroke-red-500/50' : 'hover:stroke-blue-500/50';
+  const hoverStroke = ctx.currentPlayer === 0 ? 'hocus:stroke-red-500/50' : 'hocus:stroke-blue-500/50';
 
   return (
     <GameBoard>

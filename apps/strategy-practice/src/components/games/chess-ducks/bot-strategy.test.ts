@@ -35,7 +35,7 @@ const at = (key: string): Field => {
 // win when the opponent errs.
 describe('smartBotStrategy', () => {
   // A searching bot on a board this size is why the variant is listed out of
-  // plays-to-an-end.spec.ts, so these play a few boards rather than sweeping.
+  // plays-to-an-end.test.ts, so these play a few boards rather than sweeping.
   it.each([[4, 6], [4, 7]])('wins as the replier on %ix%i against the random bot', (rows, cols) => {
     for (let trial = 0; trial < 3; trial++) {
       expect(play(emptyBoard(rows, cols), [randomBotStrategy, smartBotStrategy]).winnerIndex).toBe(1);

@@ -7,6 +7,11 @@
 # `docker-compose.yml` on its own runs the built server, as deployment does.
 services:
   backend:
+    # The Dockerfile's dev stage: no server build, since the watcher below
+    # rebuilds over it the moment the container starts.
+    build:
+      context: .
+      target: dev
     command: npm run dev:server
     volumes:
       # Mount backend source
@@ -17,7 +22,9 @@ services:
       - ./packages/relay-bot:/usr/src/app/packages/relay-bot
       # Keep node_modules from image (avoid reinstall each time)
       # - /usr/src/app/node_modules
-      # Keep dist from image (so build output survives)
+      # Give dist a volume of its own, so the watcher's output is not written
+      # into the container's writable layer and does not outlive the container.
+      # The dev stage builds nothing, so there is no image output to preserve.
       - /usr/src/app/apps/online-backend/dist
   postgres:
     ports:

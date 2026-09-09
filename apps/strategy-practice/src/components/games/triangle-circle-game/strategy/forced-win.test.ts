@@ -6,7 +6,7 @@ import {
 } from '../gameplay';
 import { OPENING_EDGE, OPENING_EDGES, isLineTurnWon, marchEdges, winningPairHeatEdges } from './forced-win';
 import { makeSmartBotStrategy } from './bot-strategy';
-import { playBotTurn } from './spec-helpers';
+import { playBotTurn } from './test-helpers';
 
 // The centrepiece: a complete-branching certificate that the LINE player wins
 // the side-6 board. Soundness rests on the March Lemma (see forced-win.ts);
