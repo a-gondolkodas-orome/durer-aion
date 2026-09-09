@@ -1,0 +1,16 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    // vite.config.js and tsconfig.json read packages/strategy-games and
+    // packages/strategy-engine as source rather than through a build. For the
+    // engine `^build` still gives turbo an edge to hash, but strategy-games has
+    // no build task at all, so `^build` traverses straight through it and its
+    // files reach no hash — a cache hit would publish a dist built against
+    // games that have since changed, and this app's dist is what
+    // scripts/assemble-site.mjs puts on the Pages site.
+    // apps/online-backend/turbo.json has the same shape for the same reason.
+    "build": { "cache": false },
+    "typecheck": { "cache": false }
+  }
+}

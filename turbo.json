@@ -1,20 +1,35 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": ["**/.env.*"],
+  // Both forms: `.env.*` matches .env.docker and .env.local, and matches
+  // neither a bare `.env` nor apps/*/.env — which seed-env-files.mjs writes and
+  // which vite reads at build time for the VITE_* settings it inlines.
+  "globalDependencies": ["**/.env", "**/.env.*"],
   "globalEnv": [
     "BOT_CREDENTIALS",
     "ADMIN_CREDENTIALS",
     "DATABASE_URL",
     "DEV_SERVER_HOST",
     "SITE_BASE",
-    "VITE_SENTRY_DSN"
+    // The `base` fallback in the offline dry run's and the relay practice
+    // site's vite configs. Its own deploy path sets it outside turbo today, so
+    // undeclared it would let one PUBLIC_URL build answer for an unset one.
+    "PUBLIC_URL",
+    "VITE_SENTRY_DSN",
+    // Set by the three frontends' vite configs from `git rev-parse HEAD` when
+    // it is unset, which is every local build — so locally they share one hash
+    // bucket, and a restored bundle names the commit that first built these
+    // exact sources rather than the one checked out. The trees being identical
+    // is what makes that only a difference of identity. The Pages workflow sets
+    // it per run, where the banner has to be exact and no cache persists.
+    "VITE_GIT_COMMIT_HASH"
   ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist", "build"],
-      "cache": false,
-      "env": []
+      // Globbed: a bare "dist" matches the directory entry, not the files in
+      // it, so turbo would cache a hit it could restore nothing from. Every
+      // workspace that builds emits here; nothing emits `build/`.
+      "outputs": ["dist/**"]
     },
     "typecheck": {
       "dependsOn": ["^build"]

@@ -4,7 +4,11 @@ import path from 'path';
 import { execSync } from 'child_process';
 
 export default defineConfig(() => {
-  process.env.VITE_GIT_COMMIT_HASH = execSync('git rev-parse HEAD').toString().trimEnd();
+  // ||=, so a caller may set it and turbo can hash what the bundle will carry
+  // (it is in globalEnv). Unset — every local build — this reads HEAD, and a
+  // restored cache entry names the commit that first built these exact sources
+  // instead. Identical trees, so only the commit's identity is approximate.
+  process.env.VITE_GIT_COMMIT_HASH ||= execSync('git rev-parse HEAD').toString().trimEnd();
 
   return {
     // SITE_BASE is the Pages deploy's prefix, composed by the workflow from one variable so the

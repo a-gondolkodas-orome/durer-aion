@@ -31,9 +31,17 @@ conventions a review will otherwise be the first to tell you about.
 ```bash
 npm ci
 npm run setup         # creates the gitignored .env files from their samples
-npm run stack:up      # builds everything, then starts nginx + backend + postgres
+npm run stack:up      # builds the site, then starts nginx + backend + postgres
 npm run teams:import  # loads scripts/test.tsv
 ```
+
+Coming back to a checkout you already have — switching to a branch to review it,
+say — is `npm run stack:up` on its own. Every `dev:*` and `stack:*` script runs
+`scripts/prepare.mjs` first, which installs and seeds only if it has to: the
+install happens when the lockfile or a workspace manifest actually moved, which
+most branches leave alone, and nothing happens at all otherwise. `npm run deps`
+runs that check by itself, for when you want the install out of the way before
+starting anything.
 
 Open `http://localhost` and log in with the join code `000-0000-000`. That is
 the whole online round: the site teams see, the game server they play against,
@@ -88,8 +96,15 @@ are the exception, and a new backend dependency needs the image rebuilt —
 `stack:up` again.
 
 nginx serves the frontend from `apps/online-frontend/dist` on the host, so a
-frontend change needs `npm run build` and a page reload. The docker-less route
-below reloads it for you.
+frontend change needs `npx turbo build --filter=online-frontend` and a page
+reload — the same build `stack:up` runs, and the only one the stack reads. The
+docker-less route below reloads it for you.
+
+`stack:up` deliberately builds no further than that: the offline dry run, the
+two practice sites and the backend's host-side bundle are not what the
+containers serve, and building them here only made `stack:up` an accidental
+whole-repo check. `npm run build` is still that check, and CI's `build` job is
+where it is enforced.
 </details>
 
 ## Running it without docker (except the database)
@@ -114,6 +129,18 @@ assets wants a `stack:up` run before you believe it.
 `db:up` keeps its data inside the throwaway container, so stopping it discards
 everything. The docker stack keeps postgres in a named volume:
 `npm run stack:down` preserves it, `npm run stack:down -- --volumes` wipes it.
+
+### Which of the two a review needs
+
+Reaching for `stack:up` out of habit pays for an image build on changes that
+never touch the image. This route is enough for game logic, the boards and
+any backend route the vite proxy carries — and it reloads while you are still
+reading the diff. Take `stack:up` when the change is one Vite cannot stand in
+for: nginx and its routing, the socket transport, the session cookie's `Secure`
+flag, the built bundle itself, or the admin pages, whose behaviour behind the
+proxy nobody has walked (see *Admin and operations* below). When in doubt the
+paragraph above is the rule — Vite is standing in for nginx, so anything about
+nginx wants the stack.
 
 ## Running the production stack
 
