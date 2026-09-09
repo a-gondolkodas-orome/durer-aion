@@ -72,6 +72,7 @@ The hook lives at the repository root because only the root
 
 ```bash
 npm run dev              # compiles and hot-reloads for development
+npm run check            # the five below at once, this app only — the fast loop
 npm test                 # unit tests; the root `npm test` runs them too
 npm run typecheck
 npx eslint . --fix       # lint this app alone; `npm run lint:fix` at the root does the whole repo
@@ -79,6 +80,11 @@ npm run build            # prod build — some problems only appear here
 
 npm run coverage         # line coverage, on demand
 ```
+
+`npm run check` is the inner loop while you work here: build, spell check,
+typecheck, this app's tests and its lint, about 70 seconds against the repository
+root's two-odd minutes. It is not a substitute for the root `npm run check` —
+that is what CI runs, and it covers this app too.
 
 What the coverage report is good for, and why nothing gates on it, is in
 [AGENTS.md § Coverage](AGENTS.md#coverage).
@@ -110,7 +116,7 @@ table](https://docs.google.com/spreadsheets/d/1-6u9PCtvf_gDHrs65x36pmDzFt4nZZx_I
    files: a React-free `gameplay.ts` (the `Board` type, start boards and
    `moves`), `bot-strategy.ts`, the game itself `<game>.tsx` (plus
    `board-client.tsx` once the JSX outgrows the game file), and a
-   `gameplay.spec.ts` — see [Where it lives](#where-it-lives). A game there
+   `gameplay.test.ts` — see [Where it lives](#where-it-lives). A game there
    exports a `StrategyGameConfig` object rather than a component;
    `remove-divisor-multiple` is the one to copy.
 3. Export the config from `packages/strategy-games/index.ts`, then turn it into a page in
@@ -205,7 +211,7 @@ within a turn (a hover, a pending selection) belongs in the component, not in
 `botStrategy`: a pure function of the position that *names* the move it wants,
 `({ board, ctx }) => ({ move, args })`. See [src/components/CLAUDE.md § Bot
 contract](src/components/CLAUDE.md#bot-contract), and [AGENTS.md §
-Testing](AGENTS.md#testing) for what being a pure function buys a spec.
+Testing](AGENTS.md#testing) for what being a pure function buys a test.
 
 **`presentation`** — the rule text and `getPlayerStepDescription`, both i18n
 values.

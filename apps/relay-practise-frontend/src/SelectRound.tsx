@@ -132,7 +132,8 @@ export default function SelectRelayRound() {
       <Stack sx={{
         display: "flex",
         flexDirection: "row",
-        gap: "5%"
+        gap: "15px",
+        flexWrap: "wrap"
       }}>
         <FormControl sx={{ minWidth: minWidthForLabel(categoryLabel) }}>
           <InputLabel id="category-select-label">{categoryLabel}</InputLabel>

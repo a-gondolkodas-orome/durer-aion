@@ -98,11 +98,12 @@ change is measured against.
   their source, so a CommonJS build would have no consumer. `packages/strategy-engine` is
   the exception: it is CJS-typed and builds both formats, so a host that
   `require`s it works too (its `tsdown.config.mts` says how).
-- **Testing**: vitest, React Testing Library. Suites are `*.test.ts(x)` under
-  the root config and `*.spec.ts(x)` under the `apps/strategy-practice` project,
-  which also takes the `.spec` files in `packages/strategy-engine` and `packages/strategy-games` —
-  that app's code, moved out. One `npm test` runs both projects through vitest,
-  and neither uses Jest.
+- **Testing**: vitest, React Testing Library. Every suite is `*.test.ts(x)`, and
+  which of the two projects runs one is decided by its **path**: the root
+  `vitest.config.mts` excludes `apps/strategy-practice`, `packages/strategy-engine`
+  and `packages/strategy-games` — that app and the code it moved out — from its own
+  project, and that app's config includes exactly those three. One `npm test` runs
+  both projects through vitest, and neither uses Jest.
 - **`apps/strategy-practice`** shares this React major, the root's eslint,
   typescript and vitest pins, and the same vite as the other frontends;
   Tailwind and its own build/test setup are what set it apart. See its
@@ -115,9 +116,14 @@ change is measured against.
 npm ci
 npm run setup
 
+# On a checkout you already have, `npm ci` again only if a manifest moved.
+# The dev:* and stack:* scripts do this and the seeding above for you, through
+# scripts/prepare.mjs; these two names are for running either step on its own.
+npm run deps
+
 # The whole online round in docker: nginx + backend + postgres (detached)
 npm run stack:build   # just the two deployed images, starting nothing — the CI gate
-npm run stack:up      # builds, then brings the stack up on http://localhost
+npm run stack:up      # builds the site, then brings the stack up on http://localhost
 npm run teams:import  # loads scripts/test.tsv, once postgres is accepting connections
 npm run stack:ps      # which services are up, when a URL shows nothing
 npm run stack:logs    # follow all three containers; Ctrl-C stops watching, not the stack
@@ -174,12 +180,14 @@ works* — the regression checklist, with how to exercise each item by hand.
 
 [`README.md`](README.md) § *Checking it works* is the standing regression
 checklist: what the competition round, the admin side and the public sites
-must keep doing, with how to exercise each item by hand. **A change is done
-only when each item there still holds.** An item is removed only when the
-capability is deliberately retired, with a note saying which PR did and what
-replaced it. The README's own setup steps are on the list too: `npm ci`,
-`npm run setup` and the `dev:*` and `stack:*` commands must keep doing what it
-says they do.
+must keep doing, with how to exercise each item by hand. **A change is done only
+when every item it reaches still holds** — that section opens with the table of
+which items a change reaches, and one fitting none of its rows reaches all of
+them. Before a competition the whole list is walked whatever the last change
+was. An item is removed only when the capability is deliberately retired, with a
+note saying which PR did and what replaced it. The README's own setup steps are
+on the list too: `npm ci`, `npm run setup` and the `dev:*` and `stack:*`
+commands must keep doing what it says they do.
 
 It is a hand-walked checklist, not a suite. Six items have a unit test pinning
 part of them; the rest are checked by someone actually doing them:
@@ -310,6 +318,11 @@ including engine changes phrased around its needs.
 mirror works, and what to set up when the year's repo is created.
 
 ## Key Conventions
+
+[`CONTRIBUTING.md`](CONTRIBUTING.md) is the human-facing front door to this
+section: it routes to the docs below rather than restating them, and carries the
+few rules — commit subjects, the test-file naming split, requesting a reviewer —
+that were previously written down only here or nowhere.
 
 - Games are organized by type: `strategy/` (two-player), `relay/` (team relay)
 - Each game's folder holds its game wrapper, bot and board as separate files,

@@ -28,7 +28,7 @@ const SYMMETRY_OPENINGS: Edge[] = [{ from: 3, to: 5 }, { from: 1, to: 8 }, { fro
 // The mover wins this grid, by opening on a symmetry axis and answering into
 // it; the replier is lost and can only win on a mistake. The searching half of
 // the strategy runs unmemoised, which is why TriangularGridRopes[1] is listed
-// out of plays-to-an-end.spec.ts, so these play a few games rather than sweep.
+// out of plays-to-an-end.test.ts, so these play a few games rather than sweep.
 describe('smartBotStrategy', () => {
   it('wins as the mover against the random bot', () => {
     for (let trial = 0; trial < 3; trial++) {

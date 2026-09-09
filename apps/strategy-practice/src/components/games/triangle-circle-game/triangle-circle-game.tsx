@@ -50,7 +50,7 @@ export const TriangleCircleGame = strategyGameFactory({
       label: { hu: 'Teszt', en: 'Test' }
     },
     // Smart bot. As the line player it executes a proven forced win (see
-    // forced-win.ts and the certificate in forced-win.spec.ts) — the line
+    // forced-win.ts and the certificate in forced-win.test.ts) — the line
     // player wins this board with perfect play. As the circle player no
     // winning strategy exists; it defends as well as possible (two-hot safety
     // filter + bounded search), hence the notAlwaysOptimal marker.

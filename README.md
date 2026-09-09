@@ -8,11 +8,19 @@ English as well.
 
 # Getting Started
 
+New here? [`CONTRIBUTING.md`](CONTRIBUTING.md) is the shorter way in: a first
+change that needs no docker, the one command to run before pushing, and the
+conventions a review will otherwise be the first to tell you about.
+
 ## Requirements
 
 - [Node.js](https://nodejs.org/), the version in [`.nvmrc`](./.nvmrc) —
   `nvm use` anywhere in the repo picks it up. Another 24.x will most likely work
-  too, but CI runs exactly this one.
+  too, but CI runs exactly this one. An **older** Node will not work at all:
+  `devEngines` in the root `package.json` requires npm 11, which 24.x bundles
+  and 22.x does not, and npm treats that as an error rather than a warning — so
+  every `npm run …` fails before your command runs, complaining about the
+  package manager rather than about Node.
 - [Docker](https://www.docker.com/), with your user in the `docker` group so the
   commands below need no `sudo` — `DEPLOYMENT.md` has the three lines that do
   it. Plain `sudo docker …` works too, but never `sudo npm run …`: that runs npm
@@ -23,9 +31,17 @@ English as well.
 ```bash
 npm ci
 npm run setup         # creates the gitignored .env files from their samples
-npm run stack:up      # builds everything, then starts nginx + backend + postgres
+npm run stack:up      # builds the site, then starts nginx + backend + postgres
 npm run teams:import  # loads scripts/test.tsv
 ```
+
+Coming back to a checkout you already have — switching to a branch to review it,
+say — is `npm run stack:up` on its own. Every `dev:*` and `stack:*` script runs
+`scripts/prepare.mjs` first, which installs and seeds only if it has to: the
+install happens when the lockfile or a workspace manifest actually moved, which
+most branches leave alone, and nothing happens at all otherwise. `npm run deps`
+runs that check by itself, for when you want the install out of the way before
+starting anything.
 
 Open `http://localhost` and log in with the join code `000-0000-000`. That is
 the whole online round: the site teams see, the game server they play against,
@@ -80,8 +96,15 @@ are the exception, and a new backend dependency needs the image rebuilt —
 `stack:up` again.
 
 nginx serves the frontend from `apps/online-frontend/dist` on the host, so a
-frontend change needs `npm run build` and a page reload. The docker-less route
-below reloads it for you.
+frontend change needs `npx turbo build --filter=online-frontend` and a page
+reload — the same build `stack:up` runs, and the only one the stack reads. The
+docker-less route below reloads it for you.
+
+`stack:up` deliberately builds no further than that: the offline dry run, the
+two practice sites and the backend's host-side bundle are not what the
+containers serve, and building them here only made `stack:up` an accidental
+whole-repo check. `npm run build` is still that check, and CI's `build` job is
+where it is enforced.
 </details>
 
 ## Running it without docker (except the database)
@@ -107,6 +130,18 @@ assets wants a `stack:up` run before you believe it.
 everything. The docker stack keeps postgres in a named volume:
 `npm run stack:down` preserves it, `npm run stack:down -- --volumes` wipes it.
 
+### Which of the two a review needs
+
+Reaching for `stack:up` out of habit pays for an image build on changes that
+never touch the image. This route is enough for game logic, the boards and
+any backend route the vite proxy carries — and it reloads while you are still
+reading the diff. Take `stack:up` when the change is one Vite cannot stand in
+for: nginx and its routing, the socket transport, the session cookie's `Secure`
+flag, the built bundle itself, or the admin pages, whose behaviour behind the
+proxy nobody has walked (see *Admin and operations* below). When in doubt the
+paragraph above is the rule — Vite is standing in for nginx, so anything about
+nginx wants the stack.
+
 ## Running the production stack
 
 ```bash
@@ -127,6 +162,25 @@ side and the public sites must keep doing through any change. Do the round
 against `npm run stack:up` — the only setup that covers nginx, the socket
 transport and the built frontend at once. [`CLAUDE.md`](CLAUDE.md) § What must
 keep working says how the list binds a change, and which items a unit test pins.
+
+## How much of it your change needs
+
+The list is what must keep working, not what every change has to walk. Find the
+row your change fits, and walk the sections it names:
+
+| your change touches | walk |
+| --- | --- |
+| a practice site or the dry run only — `apps/strategy-practice`, `apps/relay-practise-frontend`, `apps/offline-frontend` | *The other sites*, the one you touched |
+| a game's rules or bot under `packages/game` | that game in *A team playing the round* |
+| the admin pages, or team import | *Admin and operations* |
+| the backend, `packages/common-frontend`, nginx, routing, auth, the socket transport, the build, or a dependency | all of it |
+| documentation or CI only | nothing here |
+
+Two things do not scope down, and they are the point of the table rather than
+exceptions to it. **Before a competition the whole list is walked**, whatever the
+last change was — that run is what the checklist exists for. And a change that
+fits no row above walks all of it: the rows are the cases someone has already
+thought through, not a closed set.
 
 ## A team playing the round
 
@@ -184,7 +238,12 @@ At `http://localhost/admin`, user `admin`, password from `.env.docker`:
 
 Team import has two paths and both need checking: `npm run teams:import`, which
 runs `scripts/import_teams.sh` inside the container, and the TSV upload on the
-admin page. Two fixtures feed those by hand, which is why no code names either:
+admin page. The first is its own process — `dist/import_teams.js`, which reads
+`DATABASE_URL` and nothing else, so no credential has to be set for a TSV to
+load (#190). It reaches that process with `docker compose exec`, so the backend
+container still has to be up; `teams:import:local` runs the same code with
+nothing in front of it, and imports against a server that will not boot. Two
+fixtures feed those by hand, which is why no code names either:
 `scripts/test.tsv` is the happy path — the file `teams:import` loads — and
 `scripts/unit_test.tsv` is the one shaped for the rejections, its team names
 saying what each row is for: the cells to blank so the importer generates them,
@@ -275,6 +334,11 @@ Those are the seven jobs in `.github/workflows/ci.yml`, and they cover
 `apps/strategy-practice` too — it has no workflow of its own. (Its patch-coverage
 gate was retired in #431; that app's own `npm run coverage` stays, on demand —
 `npm run coverage --workspace=strategy-practice`, with no root script.)
+
+`npm run check` runs the six that need no docker, in one command and cheapest
+first, so a misspelt word costs seconds rather than the two or three minutes the
+whole set takes. It is what to run before pushing; `stack:build` is separate because it
+needs docker, and the round itself is still walked by hand.
 
 `npm run stack:build` builds the two images the competition is deployed from —
 the backend and nginx — without starting anything, and is the one gate that
@@ -401,7 +465,7 @@ vite does not pick up `.env` edits, and the docker stack reads `.env.docker` at
 | file | what reads it |
 | --- | --- |
 | `.env.docker` | the docker stack — bot and admin credentials, the postgres password |
-| `apps/online-backend/.env` | the same settings for `npm run dev:server`, plus `DATABASE_URL` |
+| `apps/online-backend/.env` | the same settings for `npm run dev:server`, plus `DATABASE_URL` — which is all `teams:import:local` reads |
 | `apps/online-frontend/.env` | `VITE_SENTRY_DSN` for the competition site |
 | `apps/offline-frontend/.env` | the same for the dry run, plus the S3 bucket its play data goes to |
 | `apps/relay-practise-frontend/.env` | the same, for the relay practice site |

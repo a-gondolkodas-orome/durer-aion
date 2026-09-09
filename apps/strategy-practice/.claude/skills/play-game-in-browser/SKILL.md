@@ -1,14 +1,14 @@
 ---
 name: play-game-in-browser
-description: Launch the dev server and play a game in a real browser with Playwright, to verify a BoardClient or game-parts change. Use whenever board rendering, hover previews, mid-turn state, disabled pieces, theming or anything else visual changed — no spec in this repo covers board interaction.
+description: Launch the dev server and play a game in a real browser with Playwright, to verify a BoardClient or game-parts change. Use whenever board rendering, hover previews, mid-turn state, disabled pieces, theming or anything else visual changed — no test in this repo covers board interaction.
 ---
 
 # Play a game in a browser
 
 ## Why this exists
 
-Nothing in the test suite clicks a board. `plays-to-an-end.spec.ts` asserts that
-a match completes and names a winner, `renders.spec.tsx` that a board renders at
+Nothing in the test suite clicks a board. `plays-to-an-end.test.ts` asserts that
+a match completes and names a winner, `renders.test.tsx` that a board renders at
 all — both drive the *engine*, not the UI. So every claim about what a player
 sees mid-turn is unverified until someone plays the game.
 
@@ -108,4 +108,4 @@ Worth a playthrough whenever the diff touches a board:
 
 Stop the dev server and delete the scratch script. If you found a bug, the fix
 belongs with a note in the PR that it was found by playing the game — that is
-the only evidence available, since no spec can carry it.
+the only evidence available, since no test can carry it.

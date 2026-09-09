@@ -5,6 +5,7 @@
     "typecheck": "tsc --noEmit",
     "build": "npx tsdown",
     "start": "node --enable-source-maps dist/server.js",
+    "import-teams": "node --enable-source-maps dist/import_teams.js",
     "dev": "tsdown --watch --onSuccess \"node --inspect --enable-source-maps dist/server.js\""
   },
   "license": "MIT",

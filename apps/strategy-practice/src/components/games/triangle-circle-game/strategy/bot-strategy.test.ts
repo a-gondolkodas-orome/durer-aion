@@ -5,7 +5,7 @@ import {
   isLineWin, isCircleWin, isWinningShade, liveThreats, preThreatEdges
 } from '../gameplay';
 import { smartBotStrategy, randomBotStrategy, makeSmartBotStrategy } from './bot-strategy';
-import { playBotTurn } from './spec-helpers';
+import { playBotTurn } from './test-helpers';
 
 // Cheap search budget so full-game simulations stay fast in CI.
 const fastBot = makeSmartBotStrategy({ depth: 6, budget: 2000 });

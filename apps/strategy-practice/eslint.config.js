@@ -190,7 +190,7 @@ export default defineConfig(
   },
   {
     // test files may contain nicely formatted arrays such as for tictactoe
-    files: ['src/**/*spec.{ts,tsx}'],
+    files: ['src/**/*.test.{ts,tsx}'],
     rules: {
       '@stylistic/array-element-newline': 'off',
       // `() => {}` as a prop or a stubbed DOM method is a test double saying "this

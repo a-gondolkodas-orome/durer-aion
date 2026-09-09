@@ -33,7 +33,7 @@ export const isSplitAllowed = (board: Board, parts: number[]): boolean => {
 };
 
 // Winning ("N") numbers are n >= 3 with n % 6 in {0,3,4,5}; the losing ("P")
-// numbers are exactly n % 6 in {1,2} (1,2,7,8,13,14,...). See bot-strategy.spec.ts /
+// numbers are exactly n % 6 in {1,2} (1,2,7,8,13,14,...). See bot-strategy.test.ts /
 // the written proof: a number is winning iff it can be split into three losing
 // numbers, and only n % 6 in {1,2} cannot.
 export const isWinningNumber = (n: number): boolean =>

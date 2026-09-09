@@ -46,8 +46,6 @@
     "**/*.test.tsx",
     "**/__tests__/**",
     "../../packages/*/src/**/*.test.ts",
-    "../../packages/*/src/**/*.test.tsx",
-    "../../packages/*/src/**/*.spec.ts",
-    "../../packages/*/src/**/*.spec.tsx"
+    "../../packages/*/src/**/*.test.tsx"
   ]
 }

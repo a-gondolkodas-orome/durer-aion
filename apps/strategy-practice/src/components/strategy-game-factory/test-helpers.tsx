@@ -1,5 +1,5 @@
-// Shared fixtures for the factory's own specs. Not a spec itself — the name
-// keeps it out of vitest's `*.spec.*` glob.
+// Shared fixtures for the factory's own tests. Not a suite itself — only a file
+// ending in `.test.tsx` is, which is what keeps this one out of the glob.
 //
 // The engine's behaviour is tested by rendering a deliberately trivial game
 // through the real factory, so every spec of it needs the same few pieces: a
@@ -71,7 +71,7 @@ export const ctxAwareConfig = (botStrategy?: BotStrategy<Board>) =>
   makeConfig({ BoardClient: CtxAwareBoardClient, botStrategy });
 
 // The factory both reads and writes `?variant=`, so the harness shows the URL
-// next to the game — the same shape language-context.spec.tsx uses. The links
+// next to the game — the same shape language-context.test.tsx uses. The links
 // navigate within the same route, which is what a shared variant link does and
 // the one case that remounts nothing.
 const UrlProbe = () => <>

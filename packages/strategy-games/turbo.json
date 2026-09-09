@@ -1,0 +1,14 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    // tsconfig.json maps `test-utils` to apps/strategy-practice's source, which
+    // runs against the dependency direction: the app depends on this package,
+    // not the reverse, so no `^build` edge reaches those files and a cache hit
+    // would report a typecheck of a helper that has since changed. The engine
+    // this also reads is fine — it is a declared dependency with a build whose
+    // hash `^build` carries. There is no build task here to opt out of.
+    // scripts/turbo-source-crossing.test.mjs pins all of this.
+    "typecheck": { "cache": false }
+  }
+}

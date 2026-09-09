@@ -100,7 +100,7 @@ describe('getNextSharkPositionByAI', () => {
 
 // The researchers' half is not a search but a table of moves per day, branching
 // on where the shark is, and nothing played it before this: the sweep in
-// plays-to-an-end.spec.ts asks only that a match ends, so a script that wins
+// plays-to-an-end.test.ts asks only that a match ends, so a script that wins
 // and one that merely finishes read the same there. `runMatch` throws on a move
 // the game's own `validate` rejects, so these pin that the table names a legal
 // move on every line as well as that it wins.
