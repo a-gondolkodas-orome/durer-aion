@@ -72,7 +72,9 @@ const crossingsOf = (workspace) => {
   return Object.values(readJsonc(tsconfig).compilerOptions?.paths ?? {})
     .flat()
     .filter((target) => target.startsWith('../'))
-    .map((target) => ({ target, path: resolve(dirname(tsconfig), target) }))
+    // resolve() gives platform separators; the dist check reads the path, so it
+    // is normalised first or a Windows `\dist\` counts as source.
+    .map((target) => ({ target, path: resolve(dirname(tsconfig), target).replaceAll('\\', '/') }))
     .filter(({ path }) => !path.includes('/dist/') && /\.tsx?$/.test(path) && existsSync(path))
     .map((crossing) => ({ ...crossing, read: owningWorkspace(crossing.path) }))
     .filter(({ read }) => !coveredByAnEdge(workspace, read));
