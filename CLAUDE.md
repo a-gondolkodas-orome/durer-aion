@@ -116,7 +116,8 @@ npm ci
 npm run setup
 
 # On a checkout you already have, `npm ci` again only if a manifest moved.
-# Every dev:* and stack:* script does this for you; this is the standalone name.
+# The dev:* and stack:* scripts do this and the seeding above for you, through
+# scripts/prepare.mjs; these two names are for running either step on its own.
 npm run deps
 
 # The whole online round in docker: nginx + backend + postgres (detached)

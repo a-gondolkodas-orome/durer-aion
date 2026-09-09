@@ -42,7 +42,7 @@ function samplesIn(dir) {
     .map((name) => join(dir, name));
 }
 
-function main() {
+export function main() {
   const appDirs = readdirSync(join(repoRoot, 'apps'), { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
     .map((entry) => join('apps', entry.name));

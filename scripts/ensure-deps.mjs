@@ -47,7 +47,7 @@ export const changedFiles = (before, after) =>
     .filter((path) => before[path] !== after[path])
     .sort();
 
-function main() {
+export function main() {
   if (process.env.DURER_SKIP_DEPS === '1') return;
 
   const current = {

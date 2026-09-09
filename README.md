@@ -28,11 +28,12 @@ npm run teams:import  # loads scripts/test.tsv
 ```
 
 Coming back to a checkout you already have — switching to a branch to review it,
-say — is `npm run stack:up` on its own. Every `dev:*` and `stack:*` script
-installs first if it has to: `scripts/ensure-deps.mjs` reinstalls only when the
-lockfile or a workspace manifest actually moved, which most branches leave
-alone, and does nothing at all otherwise. `npm run deps` runs that check by
-itself, for when you want the install out of the way before starting anything.
+say — is `npm run stack:up` on its own. Every `dev:*` and `stack:*` script runs
+`scripts/prepare.mjs` first, which installs and seeds only if it has to: the
+install happens when the lockfile or a workspace manifest actually moved, which
+most branches leave alone, and nothing happens at all otherwise. `npm run deps`
+runs that check by itself, for when you want the install out of the way before
+starting anything.
 
 Open `http://localhost` and log in with the join code `000-0000-000`. That is
 the whole online round: the site teams see, the game server they play against,
