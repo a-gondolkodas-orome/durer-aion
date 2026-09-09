@@ -13,6 +13,7 @@ import { TeamState, clearTeamCookie, requireJson, requireTeam, setTeamCookie } f
 import { JOIN_ATTEMPT_LIMIT, JOIN_ATTEMPT_WINDOW_SECONDS, rateLimit } from './rate_limit';
 import type { requireAdmin } from './admin_session';
 import { AnyBgioGame, PlayerIDType } from 'game';
+import { UniqueConstraintError } from 'sequelize';
 
 /**
  *
@@ -256,6 +257,63 @@ export function configureTeamsRouter(
       ctx.throw(404, `team with teamId ${teamId} not found.`);
     }
     ctx.body = {};
+  });
+
+  /**
+   * Delete every team at once. One request rather than one per team, so the
+   * archive rows share a `deletedAt` — the batch a restore names.
+   *
+   * @returns {{ deleted: number, deletedAt: Date }}
+   */
+  router.delete("/team/admin/all", adminAuth, async (ctx) => {
+    ctx.body = await teams.removeAllTeams();
+  });
+
+  /**
+   * The archive: every deleted team, newest deletion first.
+   *
+   * @returns {DeletedTeamModel[]}
+   */
+  router.get("/team/admin/deleted", adminAuth, async (ctx) => {
+    ctx.body = await teams.listDeletedTeams();
+  });
+
+  /**
+   * Restore one archived team, page state and matches included.
+   *
+   * @param {number} deletionId - The archive row.
+   * @returns {TeamModel} - The team, live again. 404 for an unknown row; 409
+   *   when a live team holds its id, join code or name, saying which.
+   */
+  router.post("/team/admin/deleted/:deletionId/restore", adminAuth, async (ctx) => {
+    const deletionId = Number(ctx.params.deletionId);
+    if (!Number.isInteger(deletionId)) {
+      ctx.throw(400, `Expected an integer deletionId, got ${ctx.params.deletionId}.`);
+    }
+    const team = await teams.restoreTeam(deletionId).catch((error: unknown) => {
+      if (error instanceof UniqueConstraintError) {
+        ctx.throw(409, error.errors.map(item => item.message).join(" "));
+      }
+      throw error;
+    });
+    ctx.body = team ?? ctx.throw(404, `Deleted team ${deletionId} not found.`);
+  });
+
+  /**
+   * Restore a whole batch: the archive rows sharing a `deletedAt`.
+   *
+   * @param {string} deletedAt - The batch, as `{ "deletedAt": <ISO 8601> }`,
+   *   the value `GET /team/admin/deleted` served.
+   * @returns {RestoreResult} - Team names restored, and team names a live team
+   *   blocked.
+   */
+  router.post("/team/admin/deleted/restore", adminAuth, koaBody(), async (ctx) => {
+    const sent: unknown = (ctx.request.body as { deletedAt?: unknown } | undefined)?.deletedAt;
+    const deletedAt = new Date(typeof sent === "string" ? sent : NaN);
+    if (Number.isNaN(deletedAt.getTime())) {
+      ctx.throw(400, "Expected { deletedAt: ISO 8601 string }.");
+    }
+    ctx.body = await teams.restoreBatch(deletedAt);
   });
 
   /**
