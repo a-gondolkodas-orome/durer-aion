@@ -10,6 +10,7 @@
   "scripts": {
     "predeploy": "npx turbo run build --filter=offline-frontend",
     "deploy": "npm run deploy --workspace=offline-frontend",
+    "check": "npm run i18n:check && npm run spell-check && npm run build && npm test && npm run typecheck && npm run lint",
     "lint": "eslint . --max-warnings=0",
     "lint:fix": "eslint . --fix",
     "build": "turbo build",

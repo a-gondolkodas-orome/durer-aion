@@ -54,7 +54,7 @@ export const isWinningInOneMove = (board: Board, move: Move): boolean =>
   isTerminal(applyMove(board, move));
 
 // The player to move LOSES exactly when the three smallest piles are equal.
-// (Verified against exhaustive minimax in bot-strategy.spec.ts.) Terminal positions –
+// (Verified against exhaustive minimax in bot-strategy.test.ts.) Terminal positions –
 // at most one non-empty pile – have three zero piles, so they satisfy this too.
 const threeSmallestEqual = (board: Board): boolean => {
   const s = sortBy(board);

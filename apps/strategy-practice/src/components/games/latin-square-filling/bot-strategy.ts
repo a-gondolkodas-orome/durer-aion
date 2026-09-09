@@ -16,7 +16,7 @@ type Bot = BotStrategy<Board, Moves>
 // Winner index (0 or 1) under optimal play from `board`, with `playerToMove`
 // to move. The reachable state space is tiny (~1400 positions), so a memoised
 // exhaustive minimax is both fast and provably optimal. Player 0 has a forced
-// win from the empty board (see bot-strategy.spec.ts / the written solution: reach a
+// win from the empty board (see bot-strategy.test.ts / the written solution: reach a
 // "mixed rook arrangement" — a transversal holding all three digits).
 const winnerCache = new Map<string, number>();
 

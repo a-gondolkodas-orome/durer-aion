@@ -48,7 +48,7 @@ describe('getNextSharkPositionByAI', () => {
 // it got wrong are here: the day its table names a submarine that is not there,
 // and a day it has no entry for at all.
 //
-// Nothing else plays this line: `plays-to-an-end.spec.ts` skips SharkChase5[1]
+// Nothing else plays this line: `plays-to-an-end.test.ts` skips SharkChase5[1]
 // for the cost of its shark, leaving the scripted researchers to this file.
 describe('the researchers\' scripted line', () => {
   const catchesTheShark = () => runMatch({

@@ -10,7 +10,7 @@ import type { I18nString, TranslatableNode } from './i18n';
 // array holes; an `undefined` object member is dropped in transit, which only
 // behaves the same because readers here treat a missing key as undefined.
 // Pinned across every registered game by apps/strategy-practice's
-// games/json-round-trip.spec.ts.
+// games/json-round-trip.test.ts.
 
 export type Phase = 'roleSelection' | 'play' | 'gameEnd'
 export type Mode = 'vsComputer' | 'vsHuman'

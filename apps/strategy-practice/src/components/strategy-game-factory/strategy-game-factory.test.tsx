@@ -3,7 +3,7 @@ import { fireEvent, act } from '@testing-library/react';
 import {
   makeConfig, minimalConfig, ctxAwareConfig, renderGame, warmUpPlayerNameSetup,
   MinimalBoardClient, CtxAwareBoardClient, defaultGameplay, type Board
-} from './spec-helpers';
+} from './test-helpers';
 import type {
   BoardClientProps, BotMove, BotStrategy, Ctx, Gameplay, StrategyArgs, StrategyGameConfig, VariantInput
 } from 'strategy-engine';

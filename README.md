@@ -8,11 +8,19 @@ English as well.
 
 # Getting Started
 
+New here? [`CONTRIBUTING.md`](CONTRIBUTING.md) is the shorter way in: a first
+change that needs no docker, the one command to run before pushing, and the
+conventions a review will otherwise be the first to tell you about.
+
 ## Requirements
 
 - [Node.js](https://nodejs.org/), the version in [`.nvmrc`](./.nvmrc) —
   `nvm use` anywhere in the repo picks it up. Another 24.x will most likely work
-  too, but CI runs exactly this one.
+  too, but CI runs exactly this one. An **older** Node will not work at all:
+  `devEngines` in the root `package.json` requires npm 11, which 24.x bundles
+  and 22.x does not, and npm treats that as an error rather than a warning — so
+  every `npm run …` fails before your command runs, complaining about the
+  package manager rather than about Node.
 - [Docker](https://www.docker.com/), with your user in the `docker` group so the
   commands below need no `sudo` — `DEPLOYMENT.md` has the three lines that do
   it. Plain `sudo docker …` works too, but never `sudo npm run …`: that runs npm
@@ -127,6 +135,25 @@ side and the public sites must keep doing through any change. Do the round
 against `npm run stack:up` — the only setup that covers nginx, the socket
 transport and the built frontend at once. [`CLAUDE.md`](CLAUDE.md) § What must
 keep working says how the list binds a change, and which items a unit test pins.
+
+## How much of it your change needs
+
+The list is what must keep working, not what every change has to walk. Find the
+row your change fits, and walk the sections it names:
+
+| your change touches | walk |
+| --- | --- |
+| a practice site or the dry run only — `apps/strategy-practice`, `apps/relay-practise-frontend`, `apps/offline-frontend` | *The other sites*, the one you touched |
+| a game's rules or bot under `packages/game` | that game in *A team playing the round* |
+| the admin pages, or team import | *Admin and operations* |
+| the backend, `packages/common-frontend`, nginx, routing, auth, the socket transport, the build, or a dependency | all of it |
+| documentation or CI only | nothing here |
+
+Two things do not scope down, and they are the point of the table rather than
+exceptions to it. **Before a competition the whole list is walked**, whatever the
+last change was — that run is what the checklist exists for. And a change that
+fits no row above walks all of it: the rows are the cases someone has already
+thought through, not a closed set.
 
 ## A team playing the round
 
@@ -275,6 +302,11 @@ Those are the seven jobs in `.github/workflows/ci.yml`, and they cover
 `apps/strategy-practice` too — it has no workflow of its own. (Its patch-coverage
 gate was retired in #431; that app's own `npm run coverage` stays, on demand —
 `npm run coverage --workspace=strategy-practice`, with no root script.)
+
+`npm run check` runs the six that need no docker, in one command and cheapest
+first, so a misspelt word costs seconds rather than the two or three minutes the
+whole set takes. It is what to run before pushing; `stack:build` is separate because it
+needs docker, and the round itself is still walked by hand.
 
 `npm run stack:build` builds the two images the competition is deployed from —
 the backend and nginx — without starting anything, and is the one gate that
