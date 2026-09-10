@@ -7,14 +7,21 @@ import { InProgressMatchStatus } from 'schemas';
 import { TransportAPI } from '../socketio_botmoves';
 import { getFilterPlayerView } from "boardgame.io/internal";
 import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus, createGame, injectBot, injectPlayer } from './team_manage';
-import { readFileSync } from 'fs';
 import { importTeamsFromTsv } from './team_import';
 import { publicTeamView } from './team_view';
 import { TeamState, clearTeamCookie, requireJson, requireTeam, setTeamCookie } from './team_session';
 import { JOIN_ATTEMPT_LIMIT, JOIN_ATTEMPT_WINDOW_SECONDS, rateLimit } from './rate_limit';
+import { requireTsv } from './admin_session';
 import type { requireAdmin } from './admin_session';
 import { AnyBgioGame, PlayerIDType } from 'game';
 import { UniqueConstraintError } from 'sequelize';
+
+// What a team import may weigh. koa-body's own default is 56 kB, which is about
+// 300 teams — fewer than a competition imports. A row is ~250 bytes of real
+// registration data and 1.9 kB at its widest legal size, so this clears several
+// thousand teams either way. nginx has to allow it too
+// (apps/online-frontend/nginx/nginx.conf).
+const TSV_BODY_LIMIT = '8mb';
 
 /**
  *
@@ -347,27 +354,40 @@ export function configureTeamsRouter(
   })
 
   /**
- * Get all teams as a full object
- * @returns {TeamModel[]} - List of the selected teams
- */
-  router.put("/team/admin/import", adminAuth, koaBody({ multipart: true }), async (ctx) => {
-    const { file } = ctx.request.files ?? ctx.throw(400, 'No files uploaded!');
-    // Check if multiple files are uploaded
-    if (Array.isArray(file)) {
-      ctx.throw(400, 'Multiple files are not supported.');
-      return;
+   * Load a TSV of teams: the whole file or none of it.
+   *
+   * The file is the body, not a multipart upload. It was an upload until the
+   * body carried join codes — team login secrets — into the OS temp directory,
+   * where formidable named the file and nothing ever unlinked it. A body is
+   * read into memory and gone with the request, and it is also the only shape
+   * a paste into the admin page can take.
+   *
+   * The size cap is not the default: koa-body admits 56 kB of text, which is
+   * about 300 teams, and a competition imports more than that in one file.
+   *
+   * @param {string} dryRun - `1` to check the file and write nothing. It is how
+   *   the admin page reports the clashes with live teams that a check in the
+   *   browser cannot see. An unrecognised value is refused rather than taken
+   *   for a real import, which would write the file it was asked to test.
+   * @returns {ImportResult} - What loaded, and everything wrong with the file.
+   */
+  router.put("/team/admin/import", adminAuth, requireTsv, koaBody({
+    text: true,
+    multipart: false,
+    textLimit: TSV_BODY_LIMIT,
+  }), async (ctx) => {
+    const asked = ctx.request.query["dryRun"];
+    const dryRun = asked === undefined ? false
+      : asked === "1" || asked === "true" ? true
+        : ctx.throw(400, "Expected dryRun=1.");
+
+    const sent: unknown = ctx.request.body;
+    const content = typeof sent === "string" ? sent : "";
+    if (content.trim() === "") {
+      ctx.throw(400, "Expected a TSV body.");
     }
 
-    // Check if the file is a TSV file
-    if (!file || !file.filepath?.endsWith('.tsv')) {
-      ctx.status = 400;
-      ctx.body = { error: 'Invalid file format. Only TSV files are allowed.' };
-      return;
-    }
-
-    const import_results = await importTeamsFromTsv(teams, readFileSync(file.filepath, 'utf-8'))
-
-    ctx.body = import_results;
+    ctx.body = await importTeamsFromTsv(teams, content, { dryRun });
   })
 
   /**

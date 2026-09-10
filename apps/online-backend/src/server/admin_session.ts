@@ -26,3 +26,22 @@ export const ADMIN_USER = 'admin';
 export function requireAdmin(password: string): Router.Middleware<DefaultState, Server.AppCtx> {
   return auth({ name: ADMIN_USER, pass: password });
 }
+
+/** Admits a TSV body only, for the team import.
+ *
+ * A content type rather than a shape check: it is also what keeps another site
+ * from posting an import. `text/tab-separated-values` cannot be set by a form,
+ * and a cross-site `fetch` that sets it triggers a CORS preflight, which this
+ * server does not grant. `requireJson` in `team_session.ts` closes the login routes the
+ * same way and says more about why.
+ *
+ * The admin routes are behind Basic auth, whose credentials a browser will
+ * attach to a cross-site request of its own accord — so the guard is doing
+ * work here, not just describing the body.
+ */
+export const requireTsv: Router.Middleware<DefaultState, Server.AppCtx> = async (ctx, next) => {
+  if (!ctx.is('text/tab-separated-values')) {
+    ctx.throw(415, 'Expected text/tab-separated-values.');
+  }
+  await next();
+};
