@@ -3,13 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "//": [
-    "predeploy/deploy publish the testers' dry run to the year's PRIVATE repo's Pages. pages-deploy.yml is guarded to the public repository, so nothing replaces this there - see DEPLOYMENT.md and README.md section Setting up the year's private repo. Removed as dead twice now; it is neither.",
-    "predeploy builds the workspace packages offline-frontend resolves through their dist. Its own predeploy then rebuilds it with PUBLIC_URL set, and its own deploy runs gh-pages, so the command and the dependency stay declared in the one workspace that owns them.",
+    "deploy publishes the testers' dry run to the year's PRIVATE repo's Pages, and .github/workflows/dry-run-deploy.yml runs the same script on demand from inside that repo. pages-deploy.yml is guarded to the public repository, so nothing replaces this there - see DEPLOYMENT.md and README.md section Competition secrecy. Removed as dead twice now; it is neither.",
     "overrides: koa-socket-2 asks for socket.io ^3, and its copy - not the one apps/online-backend declares - is the one that serves every match. A range, not a pin: the exact version stays in the workspace that declares it, and update:minors does not walk this block. CLAUDE.md, under the boardgame.io note, says what this changed."
   ],
   "scripts": {
-    "predeploy": "npx turbo run build --filter=offline-frontend",
-    "deploy": "npm run deploy --workspace=offline-frontend",
+    "deploy": "node scripts/deploy-dry-run.mjs",
     "check": "npm run i18n:check && npm run spell-check && npm run build && npm test && npm run typecheck && npm run lint",
     "lint": "eslint . --max-warnings=0",
     "lint:fix": "eslint . --fix",
@@ -87,6 +85,7 @@
     "cross-env": "10.1.0",
     "cspell": "10.1.1",
     "eslint": "10.9.1",
+    "gh-pages": "6.3.0",
     "jsdom": "30.0.1",
     "tsdown": "0.22.14",
     "turbo": "2.10.12",
