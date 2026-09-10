@@ -276,7 +276,7 @@ reload mid-game to check it resumes.
 
 | what | run it | notes |
 | --- | --- | --- |
-| the offline dry run (`/proba-verseny/`) | `npm run dev:offline` | the rehearsal of the competition round, against the in-browser bot |
+| the offline dry run (`/proba-verseny/`) | `npm run dev:offline` | the rehearsal of the competition round, against the in-browser bot. With `VITE_S3_*` set — the competition-year build, not this one — every strategy move also uploads a `_stratstep_` file, and its `log` is the entries the live round's admin dump serves |
 | the relay practice site (`/valto/`) | `npm run dev:relay-practice` | pick a past year's problem set and play it through (#224 replaced the frozen 2023 build) |
 | the strategy practice site (`/jatekok/`) | `npm run dev:strategy-practice` | on port 8012, not 5173; every game playable both against the computer and two players in one browser |
 

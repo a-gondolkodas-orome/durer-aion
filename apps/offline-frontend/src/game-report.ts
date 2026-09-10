@@ -6,7 +6,7 @@ import { sendGameData, SendGameDataParams } from "./sendData";
 // Relay end reports are persist-only — toHome() is the relay-end uploader,
 // because it also covers giving up mid-match, when the reducer's onEnd never
 // fires; forwarding from here too would upload a second end file.
-export function handleGameReport(report: SendGameDataParams) {
+export function handleGameReport(report: SendGameDataParams, logStorageKey?: string) {
   if (report.phase === "end") {
     const key = report.component === "relay" ? relayPointsStorageKey() : strategyPointsStorageKey();
     localStorage.setItem(key, String(report.G?.points ?? 0));
@@ -14,5 +14,5 @@ export function handleGameReport(report: SendGameDataParams) {
       return;
     }
   }
-  sendGameData(report);
+  sendGameData(report, logStorageKey);
 }
