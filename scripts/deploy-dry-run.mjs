@@ -11,6 +11,7 @@
 
 import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -54,6 +55,17 @@ const run = (command, args, options = {}) =>
     env: { ...process.env, ...options.env },
   });
 
+// Both tools this script runs ship a plain node script as their bin, so run them with the node
+// binary already running this one. Not `npx`: on Windows that is `npx.cmd`, which node cannot exec
+// without a shell (#483) — and a shell there would be worse than the disease, since cmd.exe reads
+// the angle brackets in the git identity below as redirection.
+const nodeRequire = createRequire(import.meta.url);
+
+export const binOf = specifier => nodeRequire.resolve(specifier);
+
+const runNode = (specifier, args, options = {}) =>
+  run(process.execPath, [binOf(specifier), ...args], options);
+
 const step = message => console.log(`\n=== ${message}`);
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
@@ -63,7 +75,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   // Through turbo, for the reason scripts/assemble-site.mjs gives: a bare `npm run build` inside
   // the app has no `^build` in front of it, so a workspace package it imports has no dist (#451).
   step(`Build the competition dry run for ${base}`);
-  run('npx', ['turbo', 'build', '--filter=offline-frontend'], { env: { SITE_BASE: base } });
+  runNode('turbo/bin/turbo', ['build', '--filter=offline-frontend'], { env: { SITE_BASE: base } });
 
   // The private site's protection is that its github.io URL is unguessable, so it must not carry
   // a CNAME pointing it at a name anyone can type. True by construction — the site's CNAME lives
@@ -78,8 +90,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   // A runner has no git identity configured and gh-pages commits with whatever it finds, so name
   // one here rather than let the push fail on CI only.
   step(`Publish ${base} to the gh-pages branch`);
-  run('npx', [
-    'gh-pages',
+  runNode('gh-pages/bin/gh-pages.js', [
     '-d', 'apps/offline-frontend/dist',
     '-u', 'github-actions[bot] <github-actions[bot]@users.noreply.github.com>',
   ]);
