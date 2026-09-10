@@ -172,3 +172,8 @@ export const useRestoreBatch = () => {
   const repo = useClientRepo();
   return async (deletedAt: string) => await repo.restoreBatch(deletedAt);
 };
+
+export const useImportTeams = () => {
+  const repo = useClientRepo();
+  return async (tsv: string, options?: { dryRun?: boolean }) => await repo.importTeams(tsv, options);
+};

@@ -236,12 +236,32 @@ At `http://localhost/admin`, user `admin`, password from `.env.docker`:
   `localhost:5432`), where it stays when the team is imported again and
   deleted a second time.
 
-Team import runs as its own process — `dist/import_teams.js`, which reads
-`DATABASE_URL` and nothing else, so no credential has to be set for a TSV to
-load (#190). `npm run teams:import` reaches it with `docker compose exec`, so
-the backend container still has to be up; `teams:import:local` runs the same
-code with nothing in front of it, and imports against a server that will not
-boot.
+Team import has two paths and both need checking. The command line runs as its
+own process — `dist/import_teams.js`, which reads `DATABASE_URL` and nothing
+else, so no credential has to be set for a TSV to load (#190), which is what
+makes it the way a fresh deploy is seeded. `npm run teams:import` reaches it
+with `docker compose exec`, so the backend container still has to be up;
+`teams:import:local` runs the same code with nothing in front of it, and imports
+against a server that will not boot.
+
+The **Importálás** tab on the admin page is the same import for someone with
+the admin password and a browser and no shell on the host. Walk it against
+`stack:up` rather than `dev:online`: the body size limit and the read timeout
+are nginx's, and Vite's proxy shows you neither.
+
+- a file through *Fájl kiválasztása*, and rows pasted into the box. Picking a
+  file also checks it — the count and any problems appear without importing.
+- `scripts/unit_test.tsv`: every problem listed against the line it is on, the
+  import button disabled, and the team list unchanged.
+- *Ellenőrzés* on a file naming a team that already exists: reported as a
+  clash, still nothing written. This is the check only the server can make.
+- `scripts/test.tsv`, all 999 rows — the size check. The generated join codes
+  download on their own when it succeeds, the Csapatok tab shows the teams with
+  no reload, and one of those codes logs a team in at `http://localhost`.
+- that same downloaded file fed straight back: every row refused as a
+  duplicate, and no team doubled.
+- the archive round trip: delete all, download the batch as import-TSV, import
+  it back.
 
 Two fixtures feed it by hand, which is why no code names either.
 `scripts/test.tsv` is the happy path — the file `teams:import` loads.

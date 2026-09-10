@@ -7,7 +7,7 @@ import '@testing-library/jest-dom';
 import { SWRConfig } from 'swr';
 import { ThemeProvider } from '@mui/material/styles';
 import { ClientRepoProvider, MockClientRepository } from '../api-repository-interface';
-import { DeletedTeamDto, TeamModelDto } from '../dto/TeamStateDto';
+import { DeletedTeamDto, ImportResultDto, TeamModelDto } from '../dto/TeamStateDto';
 import { Layout } from './Layout';
 import { Admin } from './Admin';
 
@@ -18,19 +18,24 @@ vi.mock('react-syntax-highlighter/dist/esm/styles/prism', () => ({
 // The grid measures its container and jsdom lays nothing out, so the real one
 // reports a zero width to the console — which the setup file counts as a
 // failure. What this file is about is what the page does around the grid, so
-// the grid is a list of the rows it was handed, with the buttons the page puts
-// in each row.
+// the grid is a list of the rows it was handed: each column's value, and the
+// buttons the page puts in the columns that render their own.
 vi.mock('@mui/x-data-grid', () => {
-  interface Row { id: string, teamName: string }
+  type Row = Record<string, unknown>;
   interface Column { field: string, renderCell?: (params: { row: Row }) => React.ReactNode }
+  // A row's cells are whatever the page put in them, the match objects
+  // included; only the ones a grid would show as text are worth rendering.
+  const text = (value: unknown): string =>
+    typeof value === 'string' ? value : typeof value === 'number' ? `${value}` : '';
   return {
     DataGrid: (props: { rows: Row[], columns: Column[] }) => (
       <ul>
-        {props.rows.map(row => (
-          <li key={row.id}>
-            {row.teamName}
-            {props.columns.filter(column => column.renderCell).map(column => (
-              <span key={column.field}>{column.renderCell?.({ row })}</span>
+        {props.rows.map((row, index) => (
+          <li key={text(row.id) || `${index}`}>
+            {props.columns.map(column => (
+              <span key={column.field}>
+                {column.renderCell ? column.renderCell({ row }) : text(row[column.field])}
+              </span>
             ))}
           </li>
         ))}
@@ -256,4 +261,103 @@ test('the archive tab says so when it is empty', async () => {
   await openDeletedTab();
 
   expect(await screen.findByText('Nincs törölt csapat.')).toBeInTheDocument();
+});
+
+const openImportTab = async () => {
+  fireEvent.click(await screen.findByText('Importálás'));
+};
+
+const HEADER = 'Teamname\tCategory\tEmail\tOther\tID\tLogin Code\tCredentials';
+const importRow = (name: string, category = 'C') => `${name}\t${category}\ta@b.com\tx\t\t\t`;
+
+const paste = (tsv: string) =>
+  fireEvent.change(screen.getByTestId('importTeamsTsv'), { target: { value: tsv } });
+
+const importResult = (overrides: Partial<ImportResultDto> = {}): ImportResultDto => ({
+  imported: 0, rows: 0, problems: [], problemsTruncated: 0, exportTable: [], ...overrides,
+});
+
+// The browser knows the file's own rules, so a mistake in it is named before a
+// request is made — and the button that would write 500 teams stays disabled.
+test('the import tab refuses a bad row without asking the server', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  const importTeams = vi.spyOn(repo, 'importTeams');
+  renderAdmin();
+  await openImportTab();
+
+  paste([HEADER, importRow('Alpha'), importRow('Bravo', 'X')].join('\n'));
+
+  expect(await screen.findByText(/3\. sor/)).toBeInTheDocument();
+  expect(screen.getByText('A kategória nem C, D vagy E.')).toBeInTheDocument();
+  expect(screen.getByText('2 sor, ebből 1 hibás. Az importálás így nem futna le.')).toBeInTheDocument();
+  fireEvent.click(screen.getByText('Importálás indítása'));
+  expect(importTeams).not.toHaveBeenCalled();
+});
+
+test('the import tab sends the pasted text as it stands, and hands back the codes', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  const importTeams = vi.spyOn(repo, 'importTeams').mockResolvedValue(importResult({
+    imported: 1, rows: 1, exportTable: [['Alpha', 'C', 'a@b.com', 'x', 'id', '111-2222-333', 'creds']],
+  }));
+  // jsdom will not follow the download, and the click is how we see it happen.
+  const download = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
+  renderAdmin();
+  await openImportTab();
+  const tsv = [HEADER, importRow('Alpha')].join('\n');
+
+  paste(tsv);
+  fireEvent.click(screen.getByText('Importálás indítása'));
+
+  expect(await screen.findByText('1 csapat importálva')).toBeInTheDocument();
+  expect(importTeams).toHaveBeenCalledWith(tsv, undefined);
+  expect(screen.getByText('1 sorból 1 csapat importálva.')).toBeInTheDocument();
+  // Unasked for: it is the only copy of the join codes the import generated.
+  expect(download).toHaveBeenCalledOnce();
+});
+
+// Only the server knows what the live teams hold, so "Ellenőrzés" is the one
+// way to find out before writing anything.
+test('the import tab reports what a live team blocks, without importing', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  const importTeams = vi.spyOn(repo, 'importTeams').mockResolvedValue(importResult({
+    rows: 1,
+    problems: [{ row: 2, column: 'Teamname', severity: 'error', code: 'teamname-taken', found: 'Alpha' }],
+  }));
+  renderAdmin();
+  await openImportTab();
+
+  paste([HEADER, importRow('Alpha')].join('\n'));
+  fireEvent.click(screen.getByText('Ellenőrzés'));
+
+  expect(await screen.findByText('Már van ilyen nevű csapat.')).toBeInTheDocument();
+  expect(importTeams).toHaveBeenCalledWith(expect.any(String), { dryRun: true });
+});
+
+test('the import tab reports a refused file as a failure, not a success', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  vi.spyOn(repo, 'importTeams').mockResolvedValue(importResult({
+    rows: 2,
+    problems: [{ row: 3, severity: 'error', code: 'database-refused', found: 'Teamname already exists.' }],
+  }));
+  renderAdmin();
+  await openImportTab();
+
+  paste([HEADER, importRow('Alpha'), importRow('Bravo')].join('\n'));
+  fireEvent.click(screen.getByText('Importálás indítása'));
+
+  expect(await screen.findByText('Az importálás nem futott le, egy csapat sem került be.')).toBeInTheDocument();
+  expect(screen.getByText('Az adatbázis visszautasította ezt a sort.')).toBeInTheDocument();
+});
+
+test('the import tab shows the request failing rather than looking like it worked', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  vi.spyOn(repo, 'importTeams').mockRejectedValue(new Error('A fájl túl nagy.'));
+  renderAdmin();
+  await openImportTab();
+
+  paste([HEADER, importRow('Alpha')].join('\n'));
+  fireEvent.click(screen.getByText('Importálás indítása'));
+
+  expect(await screen.findByText('A fájl túl nagy.')).toBeInTheDocument();
+  expect(screen.queryByText(/csapat importálva\.$/)).not.toBeInTheDocument();
 });
