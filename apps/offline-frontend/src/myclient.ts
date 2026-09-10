@@ -18,14 +18,17 @@ export function ClientWithBot<T_SpecificGameState, T_SpecificPosition>(
   strategy: (state: State<T_SpecificGameState & GameStateMixin>, botID: string) => [T_SpecificPosition | undefined, string],
   description: ReactNode
   ) {
+  // The same key to both: what `Local` persists the match log under is what
+  // the step files report as the match's log.
+  const storageKey = BGIO_LOCALSTORAGE_PREFIX + game.name;
   return Client({
-    game: gameWrapper(game, handleGameReport),
+    game: gameWrapper(game, (report) => handleGameReport(report, storageKey)),
     board: boardWrapper(board, description),
     multiplayer: Local(
       {
         bots: { '1': botWrapper(strategy) },
         persist: true,
-        storageKey: BGIO_LOCALSTORAGE_PREFIX + game.name,
+        storageKey,
       }
     ),
     numPlayers: 2,

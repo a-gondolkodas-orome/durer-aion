@@ -1,4 +1,4 @@
-import { Ctx, DefaultPluginAPIs, FnContext, Game, PlayerID } from 'boardgame.io';
+import { Ctx, FnContext, Game, PlayerID } from 'boardgame.io';
 import { INVALID_MOVE, TurnOrder } from 'boardgame.io/core';
 import { GameStateMixin, GameType, GUESSER_PLAYER, JUDGE_PLAYER, PlayerIDType } from './types';
 
@@ -52,14 +52,15 @@ function getTime({ G, playerID }: MoveContext) {
 
 /// What the wrapper reports after each step and at the end of a match; hosts
 /// accept a superset of this shape (the offline frontend's SendGameDataParams).
-/// `log` is boardgame.io's log *plugin*, which is what a move context carries —
-/// not the match's log entries.
+/// The match's move log is not in here: a move context carries boardgame.io's
+/// log *plugin*, not the log's entries. Those are boardgame.io's own to keep —
+/// the live round reads them with `GET /game/admin/:matchId/logs`, the dry run
+/// from the local master (apps/offline-frontend/src/bgio-log.ts).
 export interface StrategyReport<T_SpecificGameState> {
   component: "strategy";
   phase: "step" | "end";
   G: T_SpecificGameState & GameStateMixin;
   ctx: Ctx;
-  log?: DefaultPluginAPIs['log'];
 }
 
 export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameState>,
@@ -126,7 +127,7 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
             if (game.turn?.onEnd !== undefined) {
               game.turn.onEnd({ G, ctx, playerID, events, log, random });
             }
-            sendStrategyFunction({ component: "strategy", phase: "step", G: G, ctx: ctx, log: log });
+            sendStrategyFunction({ component: "strategy", phase: "step", G: G, ctx: ctx });
           },
         },
         onEnd: ({ G, ctx }) => {

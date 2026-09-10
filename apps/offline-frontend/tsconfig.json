@@ -37,13 +37,14 @@
     "../../packages/*/index.ts"
   ],
   // This app typechecks every package's src, not only its own, so it also has to
-  // skip every package's suites — and packages/strategy-engine came from apps/strategy-practice,
-  // where suites are named .spec rather than .test (root CLAUDE.md § Tech Stack).
+  // skip every package's suites — those belong to their own workspace's typecheck,
+  // and packages/strategy-engine came from apps/strategy-practice, where suites are
+  // named .spec rather than .test (root CLAUDE.md § Tech Stack).
   // A `**/` pattern is anchored at this directory and so never reaches up into
-  // packages/; the paths below have to walk the same way `include` does.
+  // packages/; the paths below have to walk the same way `include` does. This
+  // app's own suites under src/ are not excluded: nothing else typechecks them,
+  // and ESLint's project service parses only files a project claims.
   "exclude": [
-    "**/*.test.ts",
-    "**/*.test.tsx",
     "**/__tests__/**",
     "../../packages/*/src/**/*.test.ts",
     "../../packages/*/src/**/*.test.tsx"
