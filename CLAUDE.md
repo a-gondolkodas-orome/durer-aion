@@ -309,6 +309,14 @@ the deploy's own code, not a copy of it.
 **A push to `main` deploys the public site.** There is no staging step and no
 separate approval — the workflow going green is the cutover.
 
+The testers' dry run is the other Pages deploy and not part of that artifact:
+`.github/workflows/dry-run-deploy.yml` publishes `apps/offline-frontend` to the
+year's *private* repo's Pages, on demand only, and runs the same
+`scripts/deploy-dry-run.mjs` that `npm run deploy` does. Its base path is the
+repository's own name rather than a value anyone edits. The two workflows are
+guarded in opposite directions — `pages-deploy.yml` to the public repo, this one
+away from it — and `scripts/workflow-safety.test.mjs` pins both.
+
 ## Competition Secrecy
 
 A new competition's game must stay secret until after the competition, so each

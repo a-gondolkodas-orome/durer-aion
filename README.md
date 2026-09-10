@@ -549,16 +549,23 @@ When the year's repo is created:
   is what gets lint, typecheck and tests run against the game while it is being
   developed, which is when they are worth the most; the two that would reach
   outside the repository — `pages-deploy.yml` and `sync.yml` — are already
-  guarded to run only in the public one. What is left to weigh is cost: Actions
+  guarded to run only in the public one. A third, `dry-run-deploy.yml`, is
+  guarded the other way and *is* meant to run here: it is the one-button deploy
+  of the testers' dry run, so turning Actions off costs that button and leaves
+  `npm run deploy` from a checkout. What is left to weigh is cost: Actions
   minutes are metered on a private repository where the public one runs free,
   and so is the GitHub Packages storage a private image would take should #202
   publish one from there. TBD — neither has been measured against this
   organisation's plan.
-- **Enable Pages**, which is what serves the testers' dry run — see *The dry run
-  for testers* in [`DEPLOYMENT.md`](./DEPLOYMENT.md). That site is public,
-  protected only by the repository's unguessable name.
-- **Set `PUBLIC_URL`** in `apps/offline-frontend/package.json` to the new repo's
-  name, so the dry run's asset paths resolve.
+- **Enable Pages**, serving from the `gh-pages` branch — that is what the
+  testers' dry run is pushed to, see *The dry run for testers* in
+  [`DEPLOYMENT.md`](./DEPLOYMENT.md). That site is public, protected only by the
+  repository's unguessable name, which is why the deploy ships no `CNAME`.
+- **Get `dry-run-deploy.yml` onto the default branch** if you want the Run
+  workflow button. GitHub lists a `workflow_dispatch` workflow only when the file
+  is on the repo's default branch — `dev` here — so a sync branch has to be
+  merged there before the button exists. The dispatch form then picks which
+  branch gets published. Nothing else about this repo needs `main`.
 
 # Debugging
 

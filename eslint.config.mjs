@@ -30,6 +30,30 @@ const noDynamicBotImport = {
   message: noBotMessage,
 };
 
+const noProblemsMessage =
+  'The live client must not ship the relay problems: `relay-bot` carries their answers.';
+
+// `relay-bot` is the relay problem bank — each problem's text, its answer and what
+// it is worth — so the live competition client must not name it, by the package or
+// by any path spelling of its source or its build. The bank is not behind a
+// sub-entry the way packages/game's bots are: the package *is* the bot, so the ban
+// is on the package itself.
+const noProblemsInTheClient = {
+  group: [
+    'relay-bot', 'relay-bot/*',
+    '**/packages/relay-bot/**',
+    '**/relay-bot/src/**', '**/relay-bot/dist/**',
+  ],
+  message: noProblemsMessage,
+};
+
+// The same spellings for `import()`, which the core rule does not read at all —
+// see the note on noDynamicBotImport above.
+const noDynamicProblemsImport = {
+  selector: 'ImportExpression > Literal[value=/(^|\\/)relay-bot($|\\/)|packages\\/relay-bot\\//]',
+  message: noProblemsMessage,
+};
+
 export default defineConfig(
   // Apply recommended rules to all files
   {
@@ -133,14 +157,24 @@ export default defineConfig(
   // which this ban has no use for: nothing outside the bot needs to name a bot's
   // types either. `.mts` and the rest of the extensions are in because a config or a
   // script is as able to import the bot as a source file is.
+  //
+  // The relay problems ride the same ban, for the same reason and with one more
+  // exempt app. relay-practise-frontend is the public practice site: it serves past
+  // years' problem sets, which are public already, so it names `relay-bot` on
+  // purpose. Exempting it here rather than disabling the rule at its two import
+  // sites keeps this the only place an exemption is written down — but it also
+  // takes that app out of the `game/bot` ban it never needed, so
+  // apps/relay-practise-frontend/src/no-bot-entry.test.ts pins that it still names
+  // none, the way the walks elsewhere pin what a specifier ban cannot see. What that
+  // app's specifiers resolve to in turn is packages/game/src/entries.test.ts's walk.
   {
     files: ['**/*.{js,mjs,cjs,mts,ts,tsx}'],
-    ignores: ['apps/online-backend/**', 'apps/offline-frontend/**'],
+    ignores: ['apps/online-backend/**', 'apps/offline-frontend/**', 'apps/relay-practise-frontend/**'],
     rules: {
       'no-restricted-imports': ['error', {
-        patterns: [noBotInTheClient],
+        patterns: [noBotInTheClient, noProblemsInTheClient],
       }],
-      'no-restricted-syntax': ['error', noDynamicBotImport],
+      'no-restricted-syntax': ['error', noDynamicBotImport, noDynamicProblemsImport],
     },
   },
   // The core of the package is what a bare node server imports; its React client half

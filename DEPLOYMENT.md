@@ -478,30 +478,40 @@ and exits.
 ## The dry run for testers
 
 The offline build of the competition, published to GitHub Pages from the year's private
-repo, so testers can play the upcoming games and try the UX before there is a server. One
-command, from a checkout of that repo:
+repo, so testers can play the upcoming games and try the UX before there is a server. Two
+ways to publish it, running the same `scripts/deploy-dry-run.mjs` either way.
+
+From a checkout of that repo:
 
 ```bash
 npm run deploy
 ```
 
-That runs the root `predeploy`, then hands off to `offline-frontend`'s own `deploy`, whose
-`predeploy` rebuilds it with `PUBLIC_URL` as the base path before pushing `dist` to the
-`gh-pages` branch of the private repo, which has Pages enabled and serves it. `PUBLIC_URL`
-lives in `apps/offline-frontend/package.json` as a `/repository-name` placeholder — replace
-it with the year's actual repo name so the asset paths resolve, and keep the change local
-rather than committing it.
+Or, inside that repo on GitHub, **Actions → dry-run-deploy → Run workflow**, which needs
+nothing checked out and lets you pick the branch to publish. The workflow only appears once
+the file is on the repo's default branch, and it is dispatch-only — see *Competition
+secrecy* in [`README.md`](./README.md).
+
+Either way the script builds `offline-frontend` through turbo and pushes `dist` to the
+`gh-pages` branch, which Pages serves. **There is nothing to edit first.** The base path is
+the repository's own name, read off the checkout's `origin` remote, so it is right in both
+routes and there is no per-competition value to set — or to leak by committing it, which is
+what the `PUBLIC_URL` placeholder it replaced was for (#296). It also refuses to publish to
+the public repository, and refuses to ship a `CNAME`: the site's protection is that its
+`github.io` URL is unguessable, and a custom domain would undo that.
 
 **The site is public.** Pages serves it to anyone; the deliberately unguessable repository
 name is the whole of the protection. Treat the link as the secret, and understand that this
 is obscurity rather than access control — a known risk, accepted, because the audience is a
 handful of testers and the exposure lasts weeks.
 
-**Nothing publishes it automatically.** A maintainer runs the command when there is
-something for testers to see.
+**Nothing publishes it automatically.** No push deploys it; a maintainer runs the command
+or dispatches the workflow when there is something for testers to see.
 
 ---
 
 The public practice site (`gyakorlo.durerinfo.hu`) is a different thing entirely: built and
 published by `.github/workflows/pages-deploy.yml` on every push to `main`, no server
-involved. `scripts/assemble-site.mjs` is what it runs.
+involved. `scripts/assemble-site.mjs` is what it runs. That workflow is guarded to the
+public repository and this one guarded away from it, so neither can publish the other's
+site.

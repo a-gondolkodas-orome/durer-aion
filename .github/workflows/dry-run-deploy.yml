@@ -1,0 +1,49 @@
+name: dry-run-deploy
+# On demand only. A push must not publish: the year's game is developed on this repo's branches
+# while it is still secret, and the site this deploys is public to anyone with the URL. A
+# maintainer dispatches it when there is something for testers to see — and the branch picked in
+# the dispatch form is the branch published, since the checkout below takes github.ref.
+on: workflow_dispatch
+
+permissions:
+  # gh-pages pushes a branch. Nothing else here writes anything.
+  contents: write
+
+jobs:
+  deploy:
+    # The mirror image of pages-deploy.yml's guard. This workflow syncs into the year's private
+    # repo, where it is meant to run — but it lands in the public repo too, and a dispatch there
+    # would replace gyakorlo.durerinfo.hu with the dry run.
+    if: github.repository != 'a-gondolkodas-orome/durer-aion'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: pages-dry-run
+      cancel-in-progress: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      # The same three opening steps as pages-deploy.yml and every job in ci.yml: the Node in
+      # .nvmrc is the one a contributor builds with locally.
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # scripts/deploy-dry-run.mjs, the same script `npm run deploy` runs on a maintainer's
+      # machine. It reads the base path off this checkout's origin remote rather than taking it
+      # from here: one source of truth for the string, and the local run and this one stay the
+      # same code path.
+      - name: Build and publish the dry run
+        env:
+          # As in pages-deploy.yml: unset — no repository variable — leaves error reporting off
+          # rather than pointing the site at a dead endpoint.
+          VITE_SENTRY_DSN: ${{ vars.SENTRY_DSN }}
+          # The vite configs read HEAD when this is unset. Setting it keeps the banner exact even
+          # if a build ever comes from a turbo cache rather than from these sources.
+          VITE_GIT_COMMIT_HASH: ${{ github.sha }}
+        run: npm run deploy
