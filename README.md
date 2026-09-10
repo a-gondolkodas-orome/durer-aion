@@ -236,20 +236,23 @@ At `http://localhost/admin`, user `admin`, password from `.env.docker`:
   `localhost:5432`), where it stays when the team is imported again and
   deleted a second time.
 
-Team import has two paths and both need checking: `npm run teams:import`, which
-runs `scripts/import_teams.sh` inside the container, and the TSV upload on the
-admin page. The first is its own process — `dist/import_teams.js`, which reads
+Team import runs as its own process — `dist/import_teams.js`, which reads
 `DATABASE_URL` and nothing else, so no credential has to be set for a TSV to
-load (#190). It reaches that process with `docker compose exec`, so the backend
-container still has to be up; `teams:import:local` runs the same code with
-nothing in front of it, and imports against a server that will not boot. Two
-fixtures feed those by hand, which is why no code names either:
-`scripts/test.tsv` is the happy path — the file `teams:import` loads — and
+load (#190). `npm run teams:import` reaches it with `docker compose exec`, so
+the backend container still has to be up; `teams:import:local` runs the same
+code with nothing in front of it, and imports against a server that will not
+boot.
+
+Two fixtures feed it by hand, which is why no code names either.
+`scripts/test.tsv` is the happy path — the file `teams:import` loads.
 `scripts/unit_test.tsv` is the one shaped for the rejections, its team names
 saying what each row is for: the cells to blank so the importer generates them,
-the empty row to leave in, the duplicated login code and duplicated credentials
-only a real database refuses. `team_import.test.ts` mocks the filesystem, so the
-upload is the only thing that exercises those.
+the empty row to leave in, a category, an ID and a login code of the wrong
+shape, a team name, an ID and a login code each used by two rows, and a row with
+no `Other`, which is the one warning that does not refuse the file. Load it and
+every one of them should be reported at once, against the line it is on, with
+**no team written** — the import is all or nothing, so a file with one bad row
+leaves the database as it was and can be fixed and loaded again.
 
 `scripts/admin.py` is the post-competition scoring pull, holding no credential
 of its own:
