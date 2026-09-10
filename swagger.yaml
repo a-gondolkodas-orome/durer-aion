@@ -347,48 +347,15 @@ paths:
                 - file
       responses:
         "200":
-          description: Teams imported successfully
+          description: >
+            The outcome, whether the file loaded or was refused. The import is
+            all-or-nothing, so `imported` is either every row or zero.
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  successful:
-                    type: integer
-                    description: The number of successfully imported teams
-                  failed:
-                    type: integer
-                    description: The number of teams that failed to import
-                  export_table:
-                    type: array
-                    items:
-                      type: array
-                      items:
-                        type: string
-                  logs:
-                    type: object
-                    properties:
-                      sev:
-                        type: array
-                        items:
-                          type: string
-                          enum: ["info", "warn", "error"]
-                          description: Severity level of log messages
-                      value:
-                        type: array
-                        items:
-                          type: string
-                        description: Log messages
+                $ref: "#/components/schemas/ImportResult"
         "400":
-          description: Invalid file format or multiple files uploaded
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    description: Description of the import error
+          description: The body was empty
   /team/join:
     post:
       summary: Log a team in
@@ -683,6 +650,67 @@ components:
           items:
             type: string
           description: Team names still archived, each blocked by a live team
+
+    TeamTsvProblem:
+      type: object
+      description: One thing wrong with the uploaded file.
+      properties:
+        row:
+          type: integer
+          description: >
+            The file's own 1-based line number, header included, so it is the
+            line a spreadsheet shows. 0 means the file as a whole.
+        column:
+          type: string
+          enum: ["Teamname", "Category", "Email", "Other", "ID", "Login Code", "Credentials"]
+        severity:
+          type: string
+          enum: ["error", "warning"]
+          description: One error refuses the whole file; a warning does not.
+        code:
+          type: string
+          description: >
+            What is wrong, as a code rather than a sentence, so each caller
+            words it in its own language.
+          enum:
+            ["header-mismatch", "no-rows", "wrong-column-count", "empty-teamname",
+             "teamname-too-long", "invalid-category", "email-too-long", "other-missing",
+             "other-too-long", "invalid-team-id", "invalid-join-code", "invalid-credentials",
+             "duplicate-teamname", "duplicate-team-id", "duplicate-join-code",
+             "teamname-taken", "team-id-taken", "join-code-taken", "database-refused"]
+        found:
+          type: string
+          description: The offending value, when quoting it helps
+        otherRow:
+          type: integer
+          description: For a duplicate, the line that used the value first
+
+    ImportResult:
+      type: object
+      properties:
+        imported:
+          type: integer
+          description: Teams written; zero whenever the file was refused
+        rows:
+          type: integer
+          description: Data rows the file held, blank lines excluded
+        problems:
+          type: array
+          items:
+            $ref: "#/components/schemas/TeamTsvProblem"
+          description: Errors first, then warnings, each in the order of the file
+        problemsTruncated:
+          type: integer
+          description: Problems past the cap, which are not in `problems`
+        exportTable:
+          type: array
+          items:
+            type: array
+            items:
+              type: string
+          description: >
+            One row per imported team, in header order, with the generated
+            cells filled in. The only copy of the join codes the import created.
 
     ActionShape:
       type: string

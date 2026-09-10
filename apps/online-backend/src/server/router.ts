@@ -7,7 +7,8 @@ import { InProgressMatchStatus } from 'schemas';
 import { TransportAPI } from '../socketio_botmoves';
 import { getFilterPlayerView } from "boardgame.io/internal";
 import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus, createGame, injectBot, injectPlayer } from './team_manage';
-import { import_teams_from_tsv } from './team_import';
+import { readFileSync } from 'fs';
+import { importTeamsFromTsv } from './team_import';
 import { publicTeamView } from './team_view';
 import { TeamState, clearTeamCookie, requireJson, requireTeam, setTeamCookie } from './team_session';
 import { JOIN_ATTEMPT_LIMIT, JOIN_ATTEMPT_WINDOW_SECONDS, rateLimit } from './rate_limit';
@@ -364,7 +365,7 @@ export function configureTeamsRouter(
       return;
     }
 
-    const import_results = await import_teams_from_tsv(teams, file.filepath)
+    const import_results = await importTeamsFromTsv(teams, readFileSync(file.filepath, 'utf-8'))
 
     ctx.body = import_results;
   })
