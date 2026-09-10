@@ -10,10 +10,6 @@
     "DATABASE_URL",
     "DEV_SERVER_HOST",
     "SITE_BASE",
-    // The `base` fallback in the offline dry run's and the relay practice
-    // site's vite configs. Its own deploy path sets it outside turbo today, so
-    // undeclared it would let one PUBLIC_URL build answer for an unset one.
-    "PUBLIC_URL",
     "VITE_SENTRY_DSN",
     // Set by the three frontends' vite configs from `git rev-parse HEAD` when
     // it is unset, which is every local build — so locally they share one hash
