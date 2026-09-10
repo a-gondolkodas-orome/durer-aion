@@ -189,7 +189,7 @@ note saying which PR did and what replaced it. The README's own setup steps are
 on the list too: `npm ci`, `npm run setup` and the `dev:*` and `stack:*`
 commands must keep doing what it says they do.
 
-It is a hand-walked checklist, not a suite. Six items have a unit test pinning
+It is a hand-walked checklist, not a suite. Seven items have a unit test pinning
 part of them; the rest are checked by someone actually doing them:
 
 - a join code loading its team, and a logout dropping the saved match with it:
@@ -203,11 +203,14 @@ part of them; the rest are checked by someone actually doing them:
 - the admin API asking for the organisers' password on every route under
   `/team/admin` and `/game/admin`, whatever the path's case:
   `apps/online-backend/src/server/admin_session.test.ts`
+- a saved match resuming with the bot to move, on the sites that run the bot in
+  the browser: `packages/common-frontend/src/common/local-with-bots.test.ts`
 - a strategy match played over a real socket — the player's move, the bot's
-  answer and a reload resuming where it left off:
-  `apps/online-backend/src/socketio_transport.test.ts`. The only suite that
-  crosses the wire, and it is still no substitute for the round against
-  `npm run stack:up`: it has no nginx and no built frontend in front of it.
+  answer, a reload resuming where it left off, and a match left on the judge's
+  turn played on: `apps/online-backend/src/socketio_transport.test.ts`. The only
+  suite that crosses the wire, and it is still no substitute for the round
+  against `npm run stack:up`: it has no nginx and no built frontend in front of
+  it.
 
 ## Creating a New Game
 
