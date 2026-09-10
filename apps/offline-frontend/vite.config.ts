@@ -12,9 +12,9 @@ export default defineConfig(() => {
 
   return {
     // SITE_BASE is the Pages deploy's prefix, composed by the workflow from one variable so the
-    // three subpages move together (scripts/assemble-site.mjs). PUBLIC_URL stays supported
-    // because DEPLOYMENT.md's per-competition deploy sets it, and that build is not this one.
-    base: process.env.SITE_BASE || process.env.PUBLIC_URL || '/',
+    // three subpages move together (scripts/assemble-site.mjs). The dry run's own deploy sets it
+    // too, to the private repo's name (scripts/deploy-dry-run.mjs).
+    base: process.env.SITE_BASE || '/',
     plugins: [react()],
     resolve: {
       // Anchored patterns, not string keys: a string key matches as a prefix too, so
