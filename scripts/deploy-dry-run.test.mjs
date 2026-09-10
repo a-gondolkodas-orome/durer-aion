@@ -9,23 +9,26 @@ import { basePathFor, binOf, repoNameFromRemote } from './deploy-dry-run.mjs';
 const repoRoot = fileURLToPath(new URL('../', import.meta.url));
 const script = readFileSync(`${repoRoot}scripts/deploy-dry-run.mjs`, 'utf8');
 
-const PRIVATE_SSH = 'git@github.com:a-gondolkodas-orome/durer19o-xn7ElDP7nQm2M1.git';
+// A deliberately obvious placeholder. The real thing is a random-looking string kept secret
+// until the competition is over, and a fixture shaped like one reads as if it were the leaked
+// name rather than test data — which is the mistake #296 exists to stop repeating.
+const PRIVATE_SSH = 'git@github.com:a-gondolkodas-orome/durer-example-not-a-real-repo.git';
 
 describe('repoNameFromRemote', () => {
   // The four spellings git leaves in a checkout: ssh is what a maintainer clones with, https is
   // what actions/checkout writes, and either may come without the suffix.
   it.each([
     ['ssh with .git', PRIVATE_SSH],
-    ['ssh without .git', 'git@github.com:a-gondolkodas-orome/durer19o-xn7ElDP7nQm2M1'],
-    ['https with .git', 'https://github.com/a-gondolkodas-orome/durer19o-xn7ElDP7nQm2M1.git'],
-    ['https without .git', 'https://github.com/a-gondolkodas-orome/durer19o-xn7ElDP7nQm2M1'],
+    ['ssh without .git', 'git@github.com:a-gondolkodas-orome/durer-example-not-a-real-repo'],
+    ['https with .git', 'https://github.com/a-gondolkodas-orome/durer-example-not-a-real-repo.git'],
+    ['https without .git', 'https://github.com/a-gondolkodas-orome/durer-example-not-a-real-repo'],
   ])('reads owner/repo out of an %s remote', (_name, url) => {
-    expect(repoNameFromRemote(url)).toBe('a-gondolkodas-orome/durer19o-xn7ElDP7nQm2M1');
+    expect(repoNameFromRemote(url)).toBe('a-gondolkodas-orome/durer-example-not-a-real-repo');
   });
 
   it('reads a remote that git printed with its trailing newline', () => {
     expect(repoNameFromRemote(`${PRIVATE_SSH}\n`)).toBe(
-      'a-gondolkodas-orome/durer19o-xn7ElDP7nQm2M1'
+      'a-gondolkodas-orome/durer-example-not-a-real-repo'
     );
   });
 
@@ -36,11 +39,13 @@ describe('repoNameFromRemote', () => {
 
 describe('basePathFor', () => {
   it('derives the base path from the repository, so nothing has to be edited per competition', () => {
-    expect(basePathFor(PRIVATE_SSH, {})).toBe('/durer19o-xn7ElDP7nQm2M1/');
+    expect(basePathFor(PRIVATE_SSH, {})).toBe('/durer-example-not-a-real-repo/');
   });
 
   it('lets SITE_BASE override it, which is how a wrong-base bug is reproduced by hand', () => {
-    expect(basePathFor(PRIVATE_SSH, { SITE_BASE: '/durer-fake-Xy7/' })).toBe('/durer-fake-Xy7/');
+    const override = '/durer-example-overridden/';
+
+    expect(basePathFor(PRIVATE_SSH, { SITE_BASE: override })).toBe(override);
   });
 
   // The public repo's Pages is pages-deploy.yml's, and the checkout this would run from is the
