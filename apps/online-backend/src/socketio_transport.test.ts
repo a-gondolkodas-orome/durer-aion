@@ -15,6 +15,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AddressInfo } from "node:net";
 import { io as connect, Socket } from "socket.io-client";
+import { Client } from "boardgame.io/client";
 import { createMatch } from "boardgame.io/internal";
 import { Server } from "boardgame.io/server";
 import { MyGameWrappers, gameWrapper, strategyNames } from "game";
@@ -186,6 +187,38 @@ describe("the socket transport a browser talks to", () => {
     const afterReload = await syncAs(await connectClient(), MATCH_ID, HUMAN_ID);
     expect(afterReload._stateID).toBe(beforeReload._stateID);
     expect(afterReload.G).toStrictEqual(beforeReload.G);
+  });
+
+  /** A match state on the judge's turn, played out by a local client rather
+   *  than assembled by hand — the same move `startLiveGame` sends, with nobody
+   *  to answer it. That is what the store holds when the bot's move never
+   *  happened: the backend restarted mid-turn, or the bot's own update lost a
+   *  stateID race. */
+  function stateOnTheJudgesTurn() {
+    const scratch = Client({ game, numPlayers: 2, playerID: HUMAN_ID });
+    scratch.start();
+    scratch.moves.chooseNewGameType("live");
+    const state = scratch.store.getState();
+    scratch.stop();
+    return state;
+  }
+
+  /** The regression: a player's move used to be the only thing that asked the
+   *  bot to play, so a match left on the judge's turn stayed there however
+   *  often the team came back to it (#133). */
+  it("plays the judge's turn a team comes back to", async () => {
+    await createStoredMatch();
+    const stuck = stateOnTheJudgesTurn();
+    expect(stuck.ctx.currentPlayer).toBe(BOT_ID);
+    await server.db.setState(MATCH_ID, stuck);
+
+    const socket = await connectClient();
+    const botAnswered = updateMatching(socket, ({ G }) => G.stonesLeft > 0);
+    await syncAs(socket, MATCH_ID, HUMAN_ID);
+    const state = await botAnswered;
+
+    expect(state.G.stonesRight).toBeGreaterThan(0);
+    expect(state.ctx.currentPlayer).not.toBe(BOT_ID);
   });
 
   it("refuses a sync for a match nobody created", async () => {
