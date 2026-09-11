@@ -23,6 +23,8 @@
   },
   "license": "MIT",
   "scripts": {
+    "lint": "eslint . --max-warnings=0",
+    "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
     "build": "npx tsdown",
     "dev": "npx tsdown --watch --onSuccess \"echo rebuilt engine\""
