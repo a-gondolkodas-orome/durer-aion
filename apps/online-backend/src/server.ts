@@ -17,6 +17,7 @@ import { getAdminCredentials, getBotCredentials, relayNames } from './server/com
 import { requireAdmin } from './server/admin_session';
 
 import { closeMatch } from './server/team_manage';
+import { startStaleSweep } from './server/stale_sweep';
 
 import * as Sentry from '@sentry/node';
 
@@ -109,6 +110,16 @@ server.app.on("error", (err, ctx) => {
     });
     Sentry.captureException(err);
   });
+});
+
+// A match is closed when it ends, and the socket handler above is how that
+// usually happens. This is for the ones nobody is left to finish: a team that
+// closed the tab at the buzzer, or whose laptop died. See server/stale_sweep.ts.
+startStaleSweep(teams, db, ({ closed, failed }) => {
+  if (closed.length > 0) console.log(`Closed ${closed.length} match(es) whose time had run out: ${closed.join(", ")}`);
+  for (const { matchID, message } of failed) {
+    Sentry.captureException(new Error(`Could not close match ${matchID}: ${message}`));
+  }
 });
 
 void server.run(PORT);

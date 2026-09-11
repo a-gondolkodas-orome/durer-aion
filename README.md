@@ -234,7 +234,11 @@ At `http://localhost/admin`, user `admin`, password from `.env.docker`:
 - deleting one team from its details, and every team from the list. The rows
   leave the grid with no reload, and each lands in `DeletedTeams` (look at
   `localhost:5432`), where it stays when the team is imported again and
-  deleted a second time.
+  deleted a second time;
+- a match whose time has run out is scored without the team. Start one, close
+  the team's tab, and let its clock pass the end: within a minute the row in the
+  grid reads `FINISHED` with the points it had. Nothing about that waits for the
+  team to come back — `server/stale_sweep.ts` says why it must not.
 
 Team import has two paths and both need checking: `npm run teams:import`, which
 runs `scripts/import_teams.sh` inside the container, and the TSV upload on the
