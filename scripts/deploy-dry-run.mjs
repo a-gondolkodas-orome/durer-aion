@@ -55,16 +55,33 @@ const run = (command, args, options = {}) =>
     env: { ...process.env, ...options.env },
   });
 
-// Both tools this script runs ship a plain node script as their bin, so run them with the node
-// binary already running this one. Not `npx`: on Windows that is `npx.cmd`, which node cannot exec
-// without a shell (#483) — and a shell there would be worse than the disease, since cmd.exe reads
-// the angle brackets in the git identity below as redirection.
+// turbo ships a plain node script as its bin, so run it with the node binary already running this
+// one. Not `npx`: on Windows that is `npx.cmd`, which node cannot exec without a shell (#483), and
+// no argument here is safe to hand to cmd.exe.
 const nodeRequire = createRequire(import.meta.url);
 
 export const binOf = specifier => nodeRequire.resolve(specifier);
 
 const runNode = (specifier, args, options = {}) =>
   run(process.execPath, [binOf(specifier), ...args], options);
+
+// A runner has no git identity configured and gh-pages commits with whatever it finds, so name one
+// here rather than let the commit fail on CI only. The same bot .github/workflows/sync.yml commits
+// as — and a name git takes literally but RFC 5322 has no room for: that grammar allows square
+// brackets only inside a domain literal, so no plain spelling of it parses as an address.
+export const COMMITTER = {
+  name: 'github-actions[bot]',
+  email: 'github-actions[bot]@users.noreply.github.com',
+};
+
+// gh-pages as a library rather than as its bin: the bin takes the committer as one `-u` address
+// string and runs it through an RFC 5322 parser, which rejects the identity above before git — the
+// only thing that ever sees it — gets a say. The library takes the name and the email as separate
+// fields and writes them straight into the clone's git config.
+export const publish = (dir, options) =>
+  new Promise((resolve, reject) => {
+    nodeRequire('gh-pages').publish(dir, options, error => (error ? reject(error) : resolve()));
+  });
 
 const step = message => console.log(`\n=== ${message}`);
 
@@ -87,13 +104,13 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     );
   }
 
-  // A runner has no git identity configured and gh-pages commits with whatever it finds, so name
-  // one here rather than let the push fail on CI only.
   step(`Publish ${base} to the gh-pages branch`);
-  runNode('gh-pages/bin/gh-pages.js', [
-    '-d', 'apps/offline-frontend/dist',
-    '-u', 'github-actions[bot] <github-actions[bot]@users.noreply.github.com>',
-  ]);
+  // Publishing happens in this process, so give gh-pages the same two things the child processes
+  // above get explicitly: the repository to push to — the remote read above, not whatever origin
+  // the working directory happens to have — and a working directory inside this checkout, which is
+  // what its clone cache is resolved against.
+  process.chdir(repoRoot);
+  await publish(dist, { repo: remote.trim(), user: COMMITTER });
 
   console.log(`\nthe dry run is published under ${base} — Pages serves it once the branch lands`);
 }

@@ -32,13 +32,15 @@ first two are the practice sites; the dry run is a rehearsal of the
 competition round, not a practice site.
 
 **`apps/strategy-practice` is a workspace, but not like the others.** One root `npm ci`
-installs it, and turbo builds and typechecks it with everything else — but it
-keeps its own `eslint.config.js` and its own vitest config. Neither is a second
-command: ESLint resolves a config per directory as it walks, so one `eslint .` at
-the root lints this app through *its* config and everything else through the
-root one, in one pass; and the root `vitest.config.mts` lists that vitest config
-as a second project, so one `npm test` runs its suite next to the root's, each
-under its own setup. What that ESLint config differs on is the *rule set* —
+installs it, and turbo builds, typechecks and lints it with everything else — but
+it keeps its own `eslint.config.js` and its own vitest config. Neither is a second
+command: `npm run lint` runs one ESLint process per workspace through turbo, and
+each resolves the config nearest the files it is given, so this app is linted
+through *its* config and everything else through the root one; and the root
+`vitest.config.mts` lists that vitest config as a second project, so one
+`npm test` runs its suite next to the root's, each under its own setup. (One
+`eslint .` over the whole repo did the same job in a single process, and needed
+3072 MB of V8 heap to do it — `turbo.json` says what that cost and why the split.) What that ESLint config differs on is the *rule set* —
 `@eslint-react`, react-hooks, and a stylistic dialect (no trailing comma,
 `max-len` 120) the root does not impose. Single quotes are not part of that
 difference: the root config applies the same rule to `packages/strategy-engine` and
@@ -145,7 +147,8 @@ npm run dev:relay-practice
 # Build all packages
 npm run build
 
-# Lint — also the formatter: `lint:fix` applies it, and the editor runs it on save
+# Lint — also the formatter: `lint:fix` applies it, and the editor runs it on save.
+# One eslint per workspace, via turbo; `lint:root` is the pass for files in none.
 npm run lint
 npm run lint:fix
 

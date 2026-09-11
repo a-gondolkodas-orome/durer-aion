@@ -54,6 +54,53 @@ const noDynamicProblemsImport = {
   message: noProblemsMessage,
 };
 
+// The half of the type-aware block below that asks the type checker a question,
+// as opposed to reading the syntax tree. Hoisted so the off-list that follows can be
+// derived from it rather than written out a second time: the pair cannot drift the
+// way two hand-kept lists do.
+// They are also where the time goes — no-deprecated alone is 38% of rule time, and
+// no-misused-promises another 19%.
+const typeAwareRules = {
+  // An object interpolated into a string prints `[object Object]`, which is
+  // never what the message meant to say.
+  '@typescript-eslint/no-base-to-string': 'error',
+  // A promise nobody waits for: the caller reports success before the work has
+  // landed, and a failure surfaces only as an unhandled rejection.
+  '@typescript-eslint/no-floating-promises': 'error',
+  // `for…in` over an array walks its keys as strings, and its own properties
+  // too. No violations today; this keeps it that way.
+  '@typescript-eslint/no-for-in-array': 'error',
+  // A deprecated API still compiles; this is the only thing that says so before
+  // the removal lands.
+  '@typescript-eslint/no-deprecated': 'error',
+  // An async function handed to something that ignores what it returns: React
+  // event handlers, addEventListener, Array.forEach. The await never happens.
+  '@typescript-eslint/no-misused-promises': 'error',
+  // A type assertion the compiler already knows is redundant. Deleting them is
+  // what keeps the ones that remain worth reading: a stray `!` is where a null
+  // dereference hides.
+  '@typescript-eslint/no-unnecessary-type-assertion': 'error',
+  // A catch callback's parameter is implicitly `any`, so reading `.message` off
+  // it yields undefined for anything that is not an Error — and the UI shows an
+  // empty error where the reason should be.
+  '@typescript-eslint/use-unknown-in-catch-callback-variable': 'error',
+};
+
+// For the files that are a data literal with a type annotation on it. Asking the
+// checker what a 16,000-line `Record<number, Record<string, number[]>>` means, then
+// asking again per rule, is most of what linting them costs — and none of these rules
+// has anything to find in a table of numbers. `tsc` still checks each table against
+// its annotation on every `npm run typecheck`, which is the check that catches a
+// mis-pasted one; this only stops ESLint redoing it to no purpose.
+//
+// Off by name rather than by ignoring the files, for the reason eslint.stylistic.mjs
+// gives about the formatting rules: the syntactic rules, and above all the import
+// bans that keep a bot's tables out of the live bundle, must keep applying. Naming
+// the rules is what keeps that distinction visible.
+const typeAwareRulesOff = Object.fromEntries(
+  Object.keys(typeAwareRules).map(rule => [rule, 'off'])
+);
+
 export default defineConfig(
   // Apply recommended rules to all files
   {
@@ -64,10 +111,11 @@ export default defineConfig(
       tseslint.configs.stylistic,
       tseslint.configs.strict,
     ],
-    // Pinned, not inferred. One `eslint .` loads this config and
-    // apps/strategy-practice's in the same process, so typescript-eslint sees two
-    // candidate roots and refuses to guess — even for the files here that no
-    // type-aware rule touches. Both configs name their own root explicitly.
+    // Pinned, not inferred, in both configs — even for the files here that no
+    // type-aware rule touches. `npm run lint` gives each workspace its own process,
+    // so each loads one config; but a bare `npx eslint .` at the root, and the
+    // editor's server, still load this one and apps/strategy-practice's together,
+    // and typescript-eslint refuses to guess between two candidate roots.
     languageOptions: {
       parserOptions: { tsconfigRootDir: import.meta.dirname },
     },
@@ -76,8 +124,10 @@ export default defineConfig(
   // `projectService`, not `project: true`: one TypeScript project service shared
   // across the run, rather than a program held open per tsconfig — and there are
   // eleven tsconfigs here. It is what typescript-eslint 8 recommends for this
-  // shape, and it costs one 512 MB step less heap; the measurements, and why they
-  // still miss a container's default heap, are in .devcontainer/devcontainer.json.
+  // shape, and it was one 512 MB step less heap. What actually brought the run
+  // inside a small machine's default heap was giving each workspace its own
+  // process, so that a run holds one project rather than eleven — turbo.json says
+  // how, and .devcontainer/README.md has the measurements.
   {
     files: ['**/*.{ts,tsx}'],
     ignores: ['**/*.config.{ts,mts}', '**/dist/**', '**/build/**'],
@@ -98,29 +148,7 @@ export default defineConfig(
       '@typescript-eslint/no-empty-function': 'error',
       '@typescript-eslint/no-empty-object-type': 'error',
       'prefer-const': 'error',
-      // An object interpolated into a string prints `[object Object]`, which is
-      // never what the message meant to say.
-      '@typescript-eslint/no-base-to-string': 'error',
-      // A promise nobody waits for: the caller reports success before the work has
-      // landed, and a failure surfaces only as an unhandled rejection.
-      '@typescript-eslint/no-floating-promises': 'error',
-      // `for…in` over an array walks its keys as strings, and its own properties
-      // too. No violations today; this keeps it that way.
-      '@typescript-eslint/no-for-in-array': 'error',
-      // A deprecated API still compiles; this is the only thing that says so before
-      // the removal lands.
-      '@typescript-eslint/no-deprecated': 'error',
-      // An async function handed to something that ignores what it returns: React
-      // event handlers, addEventListener, Array.forEach. The await never happens.
-      '@typescript-eslint/no-misused-promises': 'error',
-      // A type assertion the compiler already knows is redundant. Deleting them is
-      // what keeps the ones that remain worth reading: a stray `!` is where a null
-      // dereference hides.
-      '@typescript-eslint/no-unnecessary-type-assertion': 'error',
-      // A catch callback's parameter is implicitly `any`, so reading `.message` off
-      // it yields undefined for anything that is not an Error — and the UI shows an
-      // empty error where the reason should be.
-      '@typescript-eslint/use-unknown-in-catch-callback-variable': 'error',
+      ...typeAwareRules,
     },
   },
   // packages/strategy-engine and packages/strategy-games are apps/strategy-practice code moved out of it,
@@ -242,6 +270,18 @@ export default defineConfig(
       'packages/game/src/games/strategy/stones/moveMap.ts',
     ],
     rules: stylisticRulesOff,
+  },
+  {
+    // The two generated tables above, plus the relay practice site's problem bank —
+    // 8,456 lines of past years' problems, hand-maintained rather than generated, so
+    // the formatting rules stay on for it. All three are a single annotated literal;
+    // see typeAwareRulesOff for why the checker rules come off them.
+    files: [
+      'packages/strategy-games/src/remove-divisor-multiple/bot-strategy.ts',
+      'packages/game/src/games/strategy/stones/moveMap.ts',
+      'apps/relay-practise-frontend/src/problems.ts',
+    ],
+    rules: typeAwareRulesOff,
   },
   // Build and repo tooling under scripts/ runs in Node, not the browser, so `process`, `console`,
   // `URL` and `fetch` are globals rather than undefined names.

@@ -30,6 +30,37 @@
     "typecheck": {
       "dependsOn": ["^build"]
     },
+    // One ESLint process per workspace, not one over the whole repo. A single
+    // `eslint .` holds a TypeScript program per tsconfig at once — each with its own
+    // parsed copy of lib.*.d.ts, React and MUI — and needed 3072 MB of V8 heap where
+    // every workspace on its own needs under 1024 MB. V8 sizes its default heap at
+    // about half of physical memory, so that passed on a 16 GB runner and died at a
+    // 2048 MB limit on a smaller one. .devcontainer/README.md has the measurements.
+    //
+    // No `dependsOn`: lint reads source, not dist. CI lints straight after `npm ci`,
+    // where no package has been built yet.
+    //
+    // Not cached, deliberately. A workspace's type-aware lint reads *other*
+    // workspaces' sources, which a per-package input hash does not cover, so a hit
+    // could go stale across a package boundary. Caching it means `dependsOn: ["^lint"]`
+    // to make the hashes transitive, plus the two eslint configs in
+    // globalDependencies — a change worth making on its own, not a side effect.
+    "lint": {
+      "cache": false
+    },
+    "lint:fix": {
+      "cache": false
+    },
+    // Files in no workspace: scripts/, the root configs, the eslint configs
+    // themselves. Turbo runs a root script only when it is declared as `//#<task>`,
+    // which is also what keeps the root `lint` script — the entry point that calls
+    // `turbo run lint` — from recursing into itself.
+    "//#lint:root": {
+      "cache": false
+    },
+    "//#lint:fix:root": {
+      "cache": false
+    },
     "dev": {
       // Build the workspace's dependencies before starting anything. Without
       // this a frontend's Vite dev server races the package watchers' first

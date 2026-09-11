@@ -82,6 +82,17 @@ describe('the two Pages workflows', () => {
     expect(source('dry-run-deploy.yml')).toContain(`if: github.repository != '${PUBLIC_REPO}'`);
   });
 
+  it('gives the dry run deploy a credential to clone and push with', () => {
+    // The one thing the job needs that actions/checkout does not leave it: gh-pages publishes
+    // from a clone of its own, which inherits neither the workspace's config nor the credentials
+    // in it, so a private repo's clone fails outright. Losing this breaks a deploy that is only
+    // ever run by hand, months apart — see the same helper, and why it is not a URL, in sync.yml.
+    const workflow = source('dry-run-deploy.yml');
+
+    expect(workflow).toMatch(/GITHUB_TOKEN: \$\{\{ (?:github\.token|secrets\.GITHUB_TOKEN) \}\}/);
+    expect(workflow).toContain('export GIT_ASKPASS=');
+  });
+
   it('publishes the dry run on demand only', () => {
     // A push must not publish it: the year's game is on that repo's branches while it is still
     // secret, and the site it deploys to is public to anyone holding the URL.
