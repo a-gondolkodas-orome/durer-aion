@@ -189,20 +189,14 @@ export class SocketIOButBotMoves extends SocketIO {
           //this in theory means, that the match already exist
           //also we assume, this event can't happen, after the game is finished
           this.unFinishedMatches.add(matchID);
-          if (actionData.type !== "MAKE_MOVE") {
-            // skip if alma type is not 'MAKE_MOVE'
-            return;
-          }
-          if (isMakeMovePayloadReadOnly(actionData.payload.type)) {
-            // also skip if payload type is getTime
-            return;
-          }
-          if (stalePlayerID === BOT_ID) {
-            // Do not react to bot's turn
-            return;
-          }
           const matchQueue = this.getMatchQueue(matchID);
-          await matchQueue.add(async () => {
+          // Whether the bot owes an answer. A clock poll is not a step of the
+          // game (`isMakeMovePayloadReadOnly`), the bot does not answer itself,
+          // and an action that is not a move is nothing to answer.
+          const botOwesAnAnswer = actionData.type === "MAKE_MOVE"
+            && !isMakeMovePayloadReadOnly(actionData.payload.type)
+            && stalePlayerID !== BOT_ID;
+          if (botOwesAnAnswer) await matchQueue.add(async () => {
             // These happen after the player stepped.
             // The state is written to storage, and the server now returned
             // the authoritative state to the player.
@@ -263,6 +257,13 @@ export class SocketIOButBotMoves extends SocketIO {
               BOT_ID
             );
           });
+          // Asked for every packet, not only the ones the bot answers: this is
+          // the only place a finished match is closed from the socket, and the
+          // packet that finishes one is often a packet the bot has nothing to
+          // say to. A move arriving past the deadline ends the match through
+          // the game's own turn guard, and the clock poll the countdown sends
+          // as time runs out is such a move — so gating this on the bot having
+          // work to do left exactly those matches open.
           await matchQueue.add(async () => {
             const {  state  } = await fetch(app.context.db, matchID, {
                state: true,

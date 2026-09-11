@@ -201,6 +201,9 @@ part of them; the rest are checked by someone actually doing them:
   each is still worth: `packages/relay-bot/src/games/relay/strategy.test.ts`
 - what a returning team may start, and the closing of a match whose time ran
   out while it was away: `apps/online-backend/src/server/team_manage.test.ts`
+- the same closing for a team that never comes back, which is the one that
+  decides whether a score exists at all:
+  `apps/online-backend/src/server/stale_sweep.test.ts`
 - the time left recomputed from the match's own end, and only the team allowed
   to poll for it: `packages/game/src/common/gamewrapper.test.ts`
 - the admin API asking for the organisers' password on every route under
