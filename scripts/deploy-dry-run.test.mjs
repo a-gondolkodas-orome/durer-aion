@@ -1,10 +1,14 @@
-// The dry run is published to a repository whose name is the whole of its protection, so the two
-// things worth pinning are that the base path comes out of that repository rather than out of an
-// edited file, and that the script refuses the one repository it must never publish to.
-import { readFileSync } from 'node:fs';
+// The dry run is published to a repository whose name is the whole of its protection, so what is
+// worth pinning is that the base path comes out of that repository rather than out of an edited
+// file, that the script refuses the one repository it must never publish to, and that the commit
+// it pushes is one git will make.
+import { execFileSync } from 'node:child_process';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { describe, expect, it } from 'vitest';
-import { basePathFor, binOf, repoNameFromRemote } from './deploy-dry-run.mjs';
+import { afterAll, describe, expect, it } from 'vitest';
+import { COMMITTER, basePathFor, binOf, publish, repoNameFromRemote } from './deploy-dry-run.mjs';
 
 const repoRoot = fileURLToPath(new URL('../', import.meta.url));
 const script = readFileSync(`${repoRoot}scripts/deploy-dry-run.mjs`, 'utf8');
@@ -67,24 +71,56 @@ describe('deploy-dry-run.mjs', () => {
   });
 
   // #483/#484: npm and npx are `.cmd` on Windows, and node cannot exec one without a shell — the
-  // spawn fails outright instead of the command running. Both bins here are node scripts, so the
-  // node binary already running this script runs them and no shell is needed anywhere.
+  // spawn fails outright instead of the command running. The one bin left here is a node script,
+  // so the node binary already running this script runs it and no shell is needed anywhere.
   it('runs its tools with node rather than through npx, which is a .cmd on Windows', () => {
     expect(script).not.toMatch(/execFileSync\('np[mx]'|run\('np[mx]'/);
     expect(script).toMatch(/run\(process\.execPath, \[binOf\(specifier\)/);
   });
 
-  it('never asks for a shell, which would reinterpret the git identity on Windows', () => {
-    // `-u 'github-actions[bot] <...@...>'` is fine as an argv entry and a disaster through
-    // cmd.exe, which reads the angle brackets as redirection.
+  it('never asks for a shell, which on Windows would reinterpret what it is given', () => {
     expect(script).not.toMatch(/shell:/);
   });
 
-  it.each(['turbo/bin/turbo', 'gh-pages/bin/gh-pages.js'])('resolves the %s bin', specifier => {
-    expect(binOf(specifier)).toMatch(/node_modules/);
+  it('resolves the turbo bin', () => {
+    expect(binOf('turbo/bin/turbo')).toMatch(/node_modules/);
   });
 
   it('ships no CNAME, so the site stays on its unguessable github.io URL', () => {
     expect(script).toMatch(/existsSync\(join\(dist, 'CNAME'\)\)/);
+  });
+});
+
+// All the identity has to do is reach a commit, and as a `-u` string for the gh-pages bin it did
+// not: the bin parses that argument as an RFC 5322 address, so the deploy died on the name of the
+// bot it deploys as — every time, after the build, at the last step.
+describe('the committer', () => {
+  const tmp = mkdtempSync(join(tmpdir(), 'deploy-dry-run-'));
+  const origin = join(tmp, 'origin.git');
+  const site = join(tmp, 'site');
+  const cacheDir = process.env.CACHE_DIR;
+
+  afterAll(() => {
+    process.env.CACHE_DIR = cacheDir;
+    rmSync(tmp, { recursive: true, force: true });
+  });
+
+  it('commits as a name git takes literally, brackets and all', async () => {
+    execFileSync('git', ['init', '--quiet', '--bare', origin]);
+    mkdirSync(site);
+    writeFileSync(join(site, 'index.html'), '<!doctype html>\n');
+    // gh-pages clones the repository it publishes to; keep that clone of a throwaway origin out
+    // of the repository's own node_modules/.cache, where it would outlive this test.
+    process.env.CACHE_DIR = join(tmp, 'cache');
+
+    // Square brackets are legal in neither a display name nor a local part, so the publish now
+    // hands gh-pages the name and the email as fields and leaves no address to parse.
+    await publish(site, { repo: origin, user: COMMITTER, message: 'test' });
+
+    const committer = execFileSync(
+      'git', ['--git-dir', origin, 'log', 'gh-pages', '-1', '--format=%an <%ae>']
+    ).toString().trim();
+
+    expect(committer).toBe(`${COMMITTER.name} <${COMMITTER.email}>`);
   });
 });
