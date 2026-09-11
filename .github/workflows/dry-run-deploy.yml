@@ -46,4 +46,21 @@ jobs:
           # The vite configs read HEAD when this is unset. Setting it keeps the banner exact even
           # if a build ever comes from a turbo cache rather than from these sources.
           VITE_GIT_COMMIT_HASH: ${{ github.sha }}
-        run: npm run deploy
+          # gh-pages publishes from a clone it makes itself, which inherits none of the credentials
+          # actions/checkout leaves in this checkout's config — so this job's token has to reach git
+          # a second time. Without it the clone of a private repo fails before anything is pushed.
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          # The token reaches git through this helper rather than through the remote's URL, for the
+          # reason sync.yml gives at more length: a URL carrying it is written into .git/config and
+          # read by whatever comes after it. The helper holds no secret of its own — git runs it and
+          # it prints what this step's environment holds, so the token lives as long as the job.
+          printf '%s\n' '#!/bin/sh' 'printf "%s\n" "$GITHUB_TOKEN"' > "$RUNNER_TEMP/askpass"
+          chmod 700 "$RUNNER_TEMP/askpass"
+          export GIT_ASKPASS="$RUNNER_TEMP/askpass"
+
+          # The username is the half of the credential that is not a secret, and this remote is
+          # both what the script reads the base path off and what gh-pages clones to publish.
+          git remote set-url origin "https://x-access-token@github.com/$GITHUB_REPOSITORY.git"
+
+          npm run deploy
