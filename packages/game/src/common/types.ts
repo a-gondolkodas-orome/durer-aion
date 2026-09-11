@@ -22,6 +22,17 @@ export function otherPlayer(playerID: PlayerIDType): PlayerIDType {
 
 export const { GUESSER_PLAYER, JUDGE_PLAYER } = PlayerIDType;
 
+/** How late a move may still be taken, in milliseconds.
+ *
+ * A team that clicks as the clock hits zero should not lose the move to the
+ * round trip, so a move arriving just after the match's own end is still played.
+ * The same allowance applies wherever a game checks the deadline: `turn.onMove`
+ * decides whether to take the move, `turn.onEnd` whether the match is over once
+ * the bot has answered it, and a shorter allowance at the second would end the
+ * match while a move the first had just accepted was still on screen.
+ */
+export const LATE_MOVE_GRACE_MS = 10 * 1000;
+
 export interface GameStateMixin extends GameStateTimer {
   firstPlayer: null | PlayerIDType;
   winner: PlayerIDType | "draw" | null;
