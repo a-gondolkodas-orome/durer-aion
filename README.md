@@ -305,8 +305,8 @@ all interfaces and pins port 8012, so it forwards out of the dev container with
 no extra setup and does not collide with the 5173 the other frontends share.
 
 `npm ci`, `npm run lint`, `npm run build`, `npm run typecheck` and `npm test` at
-the root cover it — the lint through its own config, which ESLint picks up as it
-walks into the directory, the tests through its own vite config, which the root
+the root cover it — the lint as one more workspace turbo runs eslint in, under its
+own config, the tests through its own vite config, which the root
 `vitest.config.mts` lists as a second project; [`CLAUDE.md`](CLAUDE.md) § Project
 Structure has the why. Its suite alone is
 `npm test --workspace=strategy-practice`, from anywhere.
@@ -345,16 +345,29 @@ the backend and nginx — without starting anything, and is the one gate that
 reaches the `Dockerfile`, `apps/online-frontend/nginx/Dockerfile` and
 `nginx.conf`. The round itself is still walked by hand, above.
 
-`npm run lint` is the whole of the lint and formatting gate. ESLint resolves a
-config per directory as it walks, so `apps/strategy-practice` is checked against
-its own `eslint.config.js` and everything else against the root
-`eslint.config.mjs`, in one pass.
+`npm run lint` is the whole of the lint and formatting gate. It runs one ESLint
+process per workspace through turbo, plus `lint:root` for the files in no
+workspace — `scripts/`, the root configs — and each resolves the config nearest
+what it is given, so `apps/strategy-practice` is checked against its own
+`eslint.config.js` and everything else against the root `eslint.config.mjs`.
+
+It was a single `eslint .` over the repository until it stopped fitting: that
+process holds a TypeScript program per `tsconfig.json` at once, each with its own
+parsed copy of `lib.*.d.ts`, React and MUI, and needed 3072 MB of V8 heap where
+every workspace on its own needs under 1024 MB. Node sizes its default heap at
+about half of the memory it can see, so the same command passed on a 16 GB runner
+and died at a 2048 MB limit on a smaller one — which is how CI first failed on a
+private repository. `turbo.json` carries the reasoning, `.devcontainer/README.md`
+the measurements, and `scripts/lint-coverage.test.mjs` pins that the split leaves
+no file unlinted: a workspace with no `lint` script would otherwise be skipped in
+silence.
 
 <details><summary>Why formatting is ESLint's, and what it deliberately leaves alone</summary>
 
-No workspace carries a `lint` script of its own — to lint one package while you
-work in it, `npx eslint .` from its directory gives exactly that subtree, under
-whichever config governs it. `eslint.stylistic.mjs` holds the character-level rules both configs import —
+Every workspace carries `lint` and `lint:fix`, which is what turbo runs; to lint
+one while you work in it, `npm run lint --workspace=<name>` is that one process,
+and `npx eslint .` from its directory is the same subtree under whichever config
+governs it. `eslint.stylistic.mjs` holds the character-level rules both configs import —
 spacing, blank lines, final newlines — while the rules that decide where a line
 *breaks* stay per-workspace. `npm run lint:fix` applies them, and
 `.vscode/settings.json` runs the same fixes on save. They are `@stylistic` rules

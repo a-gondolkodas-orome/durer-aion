@@ -2,6 +2,8 @@
   "name": "online-backend",
   "version": "0.0.0",
   "scripts": {
+    "lint": "eslint . --max-warnings=0",
+    "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
     "build": "npx tsdown",
     "start": "node --enable-source-maps dist/server.js",
