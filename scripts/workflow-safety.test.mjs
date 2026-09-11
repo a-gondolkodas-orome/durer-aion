@@ -64,3 +64,40 @@ describe('a workflow that runs a shell script', () => {
     expect(offenders(/https?:\/\/[^\s'"]*\$[^\s'"]*@/), 'Use a credential helper or GIT_ASKPASS instead:').toEqual([]);
   });
 });
+
+// Which repository a workflow may run in is the other property no linter checks, and the two
+// Pages workflows are guarded in opposite directions: one publishes the public site, the other
+// the private dry run. A lost guard has no symptom until the wrong site is serving the wrong
+// thing — gyakorlo.durerinfo.hu replaced by the dry run, or the unreleased game published.
+const source = name => workflows().find(([file]) => file === `${WORKFLOWS}${name}`)?.[1];
+
+const PUBLIC_REPO = 'a-gondolkodas-orome/durer-aion';
+
+describe('the two Pages workflows', () => {
+  it('runs the public site deploy only in the public repository', () => {
+    expect(source('pages-deploy.yml')).toContain(`if: github.repository == '${PUBLIC_REPO}'`);
+  });
+
+  it('runs the dry run deploy anywhere but the public repository', () => {
+    expect(source('dry-run-deploy.yml')).toContain(`if: github.repository != '${PUBLIC_REPO}'`);
+  });
+
+  it('gives the dry run deploy a credential to clone and push with', () => {
+    // The one thing the job needs that actions/checkout does not leave it: gh-pages publishes
+    // from a clone of its own, which inherits neither the workspace's config nor the credentials
+    // in it, so a private repo's clone fails outright. Losing this breaks a deploy that is only
+    // ever run by hand, months apart — see the same helper, and why it is not a URL, in sync.yml.
+    const workflow = source('dry-run-deploy.yml');
+
+    expect(workflow).toMatch(/GITHUB_TOKEN: \$\{\{ (?:github\.token|secrets\.GITHUB_TOKEN) \}\}/);
+    expect(workflow).toContain('export GIT_ASKPASS=');
+  });
+
+  it('publishes the dry run on demand only', () => {
+    // A push must not publish it: the year's game is on that repo's branches while it is still
+    // secret, and the site it deploys to is public to anyone holding the URL.
+    const triggers = /\non:([\s\S]*?)(?:\n\w|$)/.exec(source('dry-run-deploy.yml'))[1];
+    expect(triggers).toContain('workflow_dispatch');
+    expect(triggers).not.toContain('push');
+  });
+});

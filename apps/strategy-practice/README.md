@@ -75,7 +75,7 @@ npm run dev              # compiles and hot-reloads for development
 npm run check            # the five below at once, this app only — the fast loop
 npm test                 # unit tests; the root `npm test` runs them too
 npm run typecheck
-npx eslint . --fix       # lint this app alone; `npm run lint:fix` at the root does the whole repo
+npm run lint:fix         # lint this app alone; `npm run lint:fix` at the root does the whole repo
 npm run build            # prod build — some problems only appear here
 
 npm run coverage         # line coverage, on demand
