@@ -5,6 +5,7 @@ import {
   createGameWithoutStartingPosition,
   createGameWithMoveWithoutStartingPosition,
 } from "./game_for_testing";
+import { GUESSER_PLAYER, JUDGE_PLAYER, type GameType } from "./types";
 
 describe("gameWrapper", () => {
   const setup = vi.fn();
@@ -233,6 +234,47 @@ describe("gameWrapper clock", () => {
   test("a clock poll is not something the bot should answer", () => {
     expect(isMakeMovePayloadReadOnly("getTime")).toBe(true);
     expect(isMakeMovePayloadReadOnly("chooseRole")).toBe(false);
+  });
+});
+
+// boardgame.io gives `playerID` to `turn.onMove` and to nothing else, so what
+// the wrapper forwarded to a game's `turn.onEnd` was always undefined — and
+// both live games guard that hook with `playerID === JUDGE_PLAYER`, which
+// therefore never ran. The wrapper spreads `game.turn` into the play phase
+// alone, so that is where this is visible.
+describe("what a game's turn.onEnd is told", () => {
+  const turnEnd = vi.fn();
+
+  // `step` ends its own turn without ending the match, so the play phase stays
+  // open and both sides get a turn end to report.
+  const gameReporting = (): GameType<{ data: string }> => ({
+    name: "stub-game",
+    setup: () => ({ data: "setup" }),
+    possibleMoves: () => [{ move: "step" }],
+    moves: { step: ({ G, events }) => { G.data = "stepped"; events.endTurn(); } },
+    turn: { onEnd: ({ playerID }) => { turnEnd(playerID); } },
+  });
+
+  /// A match taken to the play phase, with the team to move.
+  function playing() {
+    const client = Client({ game: gameWrapper(gameReporting()), numPlayers: 2 });
+    client.start();
+    client.moves.chooseNewGameType("live");
+    // The judge's turn, and the one that exhausts TurnOrder.ONCE, which is what
+    // ends the opening phase for a game with no `startingPosition` of its own.
+    client.moves.setStartingPosition({ data: "startingPosition" });
+    client.moves.chooseRole(GUESSER_PLAYER);
+    turnEnd.mockReset();
+    return client;
+  }
+
+  test("the player whose turn is ending, not undefined", () => {
+    const client = playing();
+
+    client.moves.step();
+    client.moves.step();
+
+    expect(turnEnd.mock.calls.flat()).toStrictEqual([GUESSER_PLAYER, JUDGE_PLAYER]);
   });
 });
 
