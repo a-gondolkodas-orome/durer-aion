@@ -50,6 +50,22 @@ function getTime({ G, playerID }: MoveContext) {
   G.millisecondsRemaining = new Date(G.end).getTime() - new Date().getTime();
 }
 
+/// How every phase below registers the clock poll: a move boardgame.io does not
+/// count towards a turn's move limit.
+///
+/// The client polls this once a second as the clock runs out (`Countdown.tsx`)
+/// and once when a board mounts (`boardwrapper.tsx`), and a poll is not a step
+/// of the game — the same thing `isMakeMovePayloadReadOnly` says on the server,
+/// where it stops the bot answering one. boardgame.io counts a move unless it
+/// says otherwise (`ProcessMove`: `shouldCount = !move || typeof move ===
+/// 'function' || move.noLimit !== true`), so a plain function here would spend
+/// the turn of any game that sets `maxMoves` — handing the bot the turn while
+/// the team was still thinking. Neither game in this repo sets one today, which
+/// is the only reason that has never happened; CLAUDE.md's *Creating a New
+/// Game* shows `maxMoves: 1` as the shape a game writes, and `...game.turn`
+/// below puts it straight into the play phase.
+const clockPoll = { move: getTime, noLimit: true };
+
 /// What the wrapper reports after each step and at the end of a match; hosts
 /// accept a superset of this shape (the offline frontend's SendGameDataParams).
 /// The match's move log is not in here: a move context carries boardgame.io's
@@ -80,6 +96,10 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
       winningStreak: 0,
       points: 0,
     }),
+    // Reached by no phase: boardgame.io gives a phase without a `turn` of its
+    // own this one (`Flow`: `if (phaseConfig.turn === undefined) phaseConfig.turn
+    // = turn`), it does not merge the two, and all three phases below declare
+    // theirs. It stands as the default for a phase added without one.
     turn: {
       minMoves: 1,
       maxMoves: 1,
@@ -89,7 +109,7 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
     maxPlayers: 2,
     phases: {
       startNewGame: {
-        moves: { chooseNewGameType, setStartingPosition, getTime },
+        moves: { chooseNewGameType, setStartingPosition, getTime: clockPoll },
         endIf: ({ G }) => { return G.difficulty !== null && G.winner === null && 'startingPosition' in game },
         next: "chooseRole",
         turn: {
@@ -98,7 +118,7 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
         start: true,
       },
       chooseRole: {
-        moves: { chooseRole, getTime },
+        moves: { chooseRole, getTime: clockPoll },
         endIf: ({ G }) => { return G.firstPlayer !== null },
         next: "play",
         turn: {
@@ -106,7 +126,7 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
         },
       },
       play: {
-        moves: { ...game.moves, getTime },
+        moves: { ...game.moves, getTime: clockPoll },
         endIf: ({ G }) => { return G.winner !== null },
         next: "startNewGame",
         turn: {

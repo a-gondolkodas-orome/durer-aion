@@ -5,6 +5,7 @@ import {
   createGameWithoutStartingPosition,
   createGameWithMoveWithoutStartingPosition,
 } from "./game_for_testing";
+import { GUESSER_PLAYER, JUDGE_PLAYER, type GameType } from "./types";
 
 describe("gameWrapper", () => {
   const setup = vi.fn();
@@ -233,6 +234,74 @@ describe("gameWrapper clock", () => {
   test("a clock poll is not something the bot should answer", () => {
     expect(isMakeMovePayloadReadOnly("getTime")).toBe(true);
     expect(isMakeMovePayloadReadOnly("chooseRole")).toBe(false);
+  });
+});
+
+// CLAUDE.md's *Creating a New Game* shows `turn: { minMoves: 1, maxMoves: 1 }`
+// as the shape a game writes, and the wrapper spreads `game.turn` into the play
+// phase — so a game that follows the documentation gets a move limit, and the
+// clock poll must not be what spends it. Neither live game sets one, which is
+// the only reason registering `getTime` as a plain move has never cost a team
+// its turn.
+describe("the clock poll against a game that limits its moves", () => {
+  // `step` neither ends the turn nor the match, so what ends the turn here is
+  // the limit and nothing else.
+  const oneMovePerTurn = (): GameType<{ data: string }> => ({
+    name: "stub-game",
+    setup: () => ({ data: "setup" }),
+    possibleMoves: () => [{ move: "step" }],
+    moves: { step: ({ G }) => { G.data = "stepped"; } },
+    turn: { minMoves: 1, maxMoves: 1 },
+  });
+
+  /// A match taken to the play phase, with the team to move.
+  function playing() {
+    const client = Client({ game: gameWrapper(oneMovePerTurn()), numPlayers: 2 });
+    client.start();
+    client.moves.chooseNewGameType("live");
+    // The judge's turn, and the one that exhausts TurnOrder.ONCE — which is what
+    // ends the phase for a game with no `startingPosition` of its own.
+    client.moves.setStartingPosition({ data: "startingPosition" });
+    client.moves.chooseRole(GUESSER_PLAYER);
+    return client;
+  }
+
+  test("the play phase is reached with the team to move", () => {
+    const client = playing();
+
+    expect(client.getState()?.ctx.phase).toStrictEqual("play");
+    expect(client.getState()?.ctx.currentPlayer).toStrictEqual(GUESSER_PLAYER);
+  });
+
+  // The countdown polls once a second as the clock runs out. Spending the
+  // team's one move on that would hand the bot the turn mid-thought.
+  test("polling the clock does not spend the team's move", () => {
+    const client = playing();
+
+    client.moves.getTime();
+    client.moves.getTime();
+
+    expect(client.getState()?.ctx.numMoves).toStrictEqual(0);
+    expect(client.getState()?.ctx.currentPlayer).toStrictEqual(GUESSER_PLAYER);
+  });
+
+  test("the team can still play after polling the clock", () => {
+    const client = playing();
+
+    client.moves.getTime();
+    client.moves.step();
+
+    expect(client.getState()?.G.data).toStrictEqual("stepped");
+  });
+
+  // The limit still bites: this is not a way for a game to opt out of one.
+  test("a move of the game does spend it", () => {
+    const client = playing();
+
+    client.moves.getTime();
+    client.moves.step();
+
+    expect(client.getState()?.ctx.currentPlayer).toStrictEqual(JUDGE_PLAYER);
   });
 });
 
