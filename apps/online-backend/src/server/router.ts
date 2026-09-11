@@ -13,6 +13,7 @@ import { TeamState, clearTeamCookie, requireJson, requireTeam, setTeamCookie } f
 import { JOIN_ATTEMPT_LIMIT, JOIN_ATTEMPT_WINDOW_SECONDS, rateLimit } from './rate_limit';
 import type { requireAdmin } from './admin_session';
 import { AnyBgioGame, PlayerIDType } from 'game';
+import { appendOtherNote } from './model';
 import { UniqueConstraintError } from 'sequelize';
 
 /**
@@ -169,7 +170,7 @@ export function configureTeamsRouter(
       }
     )
 
-    team.other += ` te[${matchID}]:${minutes}`;
+    team.other = appendOtherNote(team.other, `te[${matchID}]:${minutes}`);
     await team.save();
 
     ctx.body = { updatedEndTime: newEndDate, matchID: matchID, team: team };
@@ -213,7 +214,7 @@ export function configureTeamsRouter(
 
     //log earlier matchid
     if (team.strategyMatch.state !== 'NOT STARTED')
-      team.other += ` prevstratid:${team.strategyMatch.matchID}`
+      team.other = appendOtherNote(team.other, `prevstratid:${team.strategyMatch.matchID}`)
     team.strategyMatch = { state: 'NOT STARTED' }
     await team.save();
     ctx.body = team;
@@ -239,7 +240,7 @@ export function configureTeamsRouter(
 
     //log earlier matchid
     if (team.relayMatch.state !== 'NOT STARTED')
-      team.other += ` prevrelayid:${team.relayMatch.matchID}`
+      team.other = appendOtherNote(team.other, `prevrelayid:${team.relayMatch.matchID}`)
     team.relayMatch = { state: 'NOT STARTED' }
     await team.save();
     ctx.body = team;
