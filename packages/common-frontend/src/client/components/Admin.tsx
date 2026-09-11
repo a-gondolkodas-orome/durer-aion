@@ -15,6 +15,7 @@ import { useTheme } from '@mui/material/styles';
 import { useSnackbar } from 'notistack';
 import { FinishedMatchStatus } from 'schemas';
 import { ConfirmDialogInterface, ConfirmDialog } from './ConfirmDialog';
+import { addMinutesToRunningMatches, bulkAddMinutesMessage } from '../utils/bulk-add-minutes';
 import * as Yup from 'yup';
 import { alpha } from '@mui/system'
 import { FieldProps } from "formik"
@@ -229,23 +230,30 @@ export function Admin(props: { teamId?: string }) {
               .required('Nincs megadva érték')
             })}
           onSubmit={(values) => {
+            // Formik keeps what was typed, and `FormikValues` is `any`, so the
+            // number Yup validated above is still a string here.
+            const minutes = Number(values.time);
             setConfirmDialog({
-              text: `Erősítsd meg, hogy minden aktuális csapatnak meg akarod növelni az idejét ${values.time} perccel`,
+              text: `Erősítsd meg, hogy minden aktuális csapatnak meg akarod növelni az idejét ${minutes} perccel`,
               confirm: async () => {
-                try {
-                  for (const a of data ?? []) {
-                    if (a.relayMatch.state === "IN PROGRESS") {
-                      await addMinutes(a.relayMatch.matchID, values.time);
-                    }
-                    if (a.strategyMatch.state === "IN PROGRESS") {
-                      await addMinutes(a.strategyMatch.matchID, values.time);
-                    }
-                  }
-                  enqueueSnackbar("Sikeres művelet", { variant: 'success' });
-                } catch (e) {
-                  const message = e instanceof Error ? e.message : "Váratlan hiba történt";
-                  enqueueSnackbar(message, { variant: 'error' });
-                }
+                // Against the list as it is now, not the one on screen: nothing
+                // polls it, so a match it still calls running may have finished
+                // long ago — and every one of those is a match the server
+                // refuses. Falling back to the snapshot when the refetch itself
+                // fails is no worse than what this button always did.
+                const teams = await mutate().catch(() => data) ?? [];
+                const result = await addMinutesToRunningMatches(teams, minutes, addMinutes);
+                enqueueSnackbar(bulkAddMinutesMessage(result, minutes), {
+                  variant: result.failures.length === 0 ? 'success'
+                    : result.extended === 0 ? 'error' : 'warning',
+                  // The failures name every team left out, which takes longer to
+                  // read than the default five seconds. Not `persist`: the
+                  // provider (Layout.tsx) gives a snackbar no dismiss action, so
+                  // one that never times out cannot be got rid of.
+                  autoHideDuration: result.failures.length > 0 ? 15000 : undefined,
+                });
+                // The rows carry each match's end time; the walk moved them.
+                await mutate().catch(() => undefined);
               },
             })
           }}>

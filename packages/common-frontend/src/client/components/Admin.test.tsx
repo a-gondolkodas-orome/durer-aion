@@ -54,6 +54,20 @@ const team = (teamId: string, teamName: string): TeamModelDto => ({
 const alpha = team('8eae8669-125c-42e5-8b49-89afbac31679', 'Alpha');
 const bravo = team('1f9e1c9a-4e5b-4d0f-9a2b-3c4d5e6f7a8b', 'Bravo');
 
+const START = new Date('2026-09-11T18:00:00.000Z');
+const END = new Date('2026-09-11T19:00:00.000Z');
+
+const playing = (source: TeamModelDto, matchID: string): TeamModelDto => ({
+  ...source,
+  pageState: 'RELAY',
+  relayMatch: { state: 'IN PROGRESS', matchID, startAt: START, endAt: END },
+});
+
+const played = (source: TeamModelDto, matchID: string): TeamModelDto => ({
+  ...source,
+  relayMatch: { state: 'FINISHED', matchID, startAt: START, endAt: END, score: 12 },
+});
+
 const archived = (source: TeamModelDto, deletionId: number, deletedAt: string): DeletedTeamDto => ({
   ...source,
   teamId: source.teamId ?? '',
@@ -160,6 +174,68 @@ test('a failed bulk delete is reported, and the list kept', async () => {
   expect(await screen.findByText('Váratlan hiba történt')).toBeInTheDocument();
   expect(screen.getByText('Alpha')).toBeInTheDocument();
   expect(screen.getByText('Bravo')).toBeInTheDocument();
+});
+
+const addMinutesTo = async (teams: TeamModelDto[], minutes: string) => {
+  renderAdmin();
+  await screen.findByText(teams[0].teamName);
+  fireEvent.change(screen.getByPlaceholderText('perc'), { target: { value: minutes } });
+  fireEvent.click(screen.getByText('hozzáadás'));
+  // Yup validates the field before Formik calls onSubmit, so the dialog the
+  // submit opens is a tick away rather than up already.
+  fireEvent.click(await screen.findByText('Megerősítés'));
+};
+
+const charlie = team('2b7c4d5e-6f70-4182-9394-a5b6c7d8e9f0', 'Charlie');
+
+// The defect: one `try` around the whole walk, so the first team the server
+// refused — a match that finished since the list was loaded is refused — left
+// every team after it without the extra minutes, mid-round, and the organiser
+// was told only that an error happened.
+test('a team the server refuses does not cost the teams after it their minutes', async () => {
+  const teams = [playing(alpha, 'relay-a'), playing(bravo, 'relay-b'), playing(charlie, 'relay-c')];
+  vi.spyOn(repo, 'getAll').mockResolvedValue(teams);
+  vi.spyOn(repo, 'addMinutes')
+    .mockResolvedValueOnce('OK')
+    .mockRejectedValueOnce(new Error('Lejárt játékot már nem lehet módosítani'))
+    .mockResolvedValueOnce('OK');
+
+  await addMinutesTo(teams, '10');
+
+  await waitFor(() => expect(repo.addMinutes).toHaveBeenCalledTimes(3));
+  expect(vi.mocked(repo.addMinutes).mock.calls).toStrictEqual([
+    ['relay-a', 10], ['relay-b', 10], ['relay-c', 10],
+  ]);
+  expect(await screen.findByText(
+    '2 meccs kapott +10 percet, 1 sikertelen: Bravo (Lejárt játékot már nem lehet módosítani)'
+  )).toBeInTheDocument();
+});
+
+test('every match taking the minutes is reported as the count it is', async () => {
+  const teams = [playing(alpha, 'relay-a'), playing(bravo, 'relay-b')];
+  vi.spyOn(repo, 'getAll').mockResolvedValue(teams);
+  vi.spyOn(repo, 'addMinutes').mockResolvedValue('OK');
+
+  await addMinutesTo(teams, '5');
+
+  expect(await screen.findByText('2 meccs kapott +5 percet')).toBeInTheDocument();
+});
+
+// The list is only revalidated on focus, so the one on screen can call a match
+// running that ended long ago — and every one of those is a match the server
+// refuses. The walk asks for it again first.
+test('the walk uses the list as it is now, not the one on screen', async () => {
+  const shown = [playing(alpha, 'relay-a'), playing(bravo, 'relay-b')];
+  vi.spyOn(repo, 'getAll')
+    .mockResolvedValueOnce(shown)
+    .mockResolvedValue([played(alpha, 'relay-a'), playing(bravo, 'relay-b')]);
+  vi.spyOn(repo, 'addMinutes').mockResolvedValue('OK');
+
+  await addMinutesTo(shown, '10');
+
+  await waitFor(() => expect(repo.addMinutes).toHaveBeenCalledTimes(1));
+  expect(repo.addMinutes).toHaveBeenCalledWith('relay-b', 10);
+  expect(await screen.findByText('1 meccs kapott +10 percet')).toBeInTheDocument();
 });
 
 const openDeletedTab = async () => {
