@@ -188,10 +188,13 @@ thought through, not a closed set.
    offers the relay and the strategy game. (`001-0000-000` and `002-0000-000`
    are categories D and E, which get different games.)
 2. Play the **relay** through to the end: the problems are served in turn, three
-   tries each at decreasing points, on the 60-minute clock.
+   tries each at decreasing points, on the 60-minute clock. The send button
+   greys out while the bot grades a guess and once the clock runs out.
 3. Play the **strategy** game through to the end against the server bot,
    choosing a role first: a test game, then live ones, with the winning streak
-   scored and the 30-minute countdown running.
+   scored and the 30-minute countdown running. The start and role buttons grey
+   out while the bot answers, the board is faded until a game is on it, and
+   once the clock runs out nothing under the end dialog takes a click.
 4. Reload mid-match, in both. Resuming without loss of state is the thing that
    breaks quietly.
 5. Open the same join code in a second tab mid-match: the running match must not

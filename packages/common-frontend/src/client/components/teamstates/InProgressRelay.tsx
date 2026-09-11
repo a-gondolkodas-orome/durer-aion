@@ -21,7 +21,7 @@ const DEFAULT_MAX_POINTS = [3, 3, 4, 4, 4, 5, 5, 6, 6];
 // maxPointsList and selectRoundOnEnd are extra props for relay-practise:
 // the max points of the loaded problem set (so the end table can show all
 // of its tasks), and a logout button leading back to the round selector
-export function InProgressRelay({ G, ctx, moves, maxPointsList, selectRoundOnEnd }: MyGameProps & {
+export function InProgressRelay({ G, ctx, moves, isActive, maxPointsList, selectRoundOnEnd }: MyGameProps & {
   maxPointsList?: number[],
   selectRoundOnEnd?: boolean,
 }) {
@@ -57,6 +57,10 @@ export function InProgressRelay({ G, ctx, moves, maxPointsList, selectRoundOnEnd
     setMsRemaining(G.millisecondsRemaining);
   }, [G.millisecondsRemaining]);
   const finished = msRemaining < - 5000 || gameover === true
+  // `isActive` is bgio's: the team's turn and no gameover. The turn is the
+  // judge's while it grades, and in `startNewGame` no problem is on the board
+  // yet; a guess sent then is refused by the server, so the button says so.
+  const canAnswer = isActive && ctx.phase === 'play' && !finished;
   const isOffline = clientRepo.version === "OFFLINE";
   return (
     <>
@@ -162,6 +166,7 @@ export function InProgressRelay({ G, ctx, moves, maxPointsList, selectRoundOnEnd
             previousCorrectness={!finished ? G.correctnessPreviousAnswer : null}
             attempt={(G.currentProblem + 1) * 3 + G.numberOfTry}
             onSubmit={(input: number) => clientRepo.submitRelayAnswer(input, moves)}
+            disabled={!canAnswer}
           />
           <Stack sx={{
             marginTop: "15px",
