@@ -1,5 +1,5 @@
 import { Stack } from '@mui/system';
-import { useAddMinutes, useAll, useRemoveAllTeams } from '../hooks/user-hooks';
+import { useAddMinutesToEveryone, useAll, useRemoveAllTeams } from '../hooks/user-hooks';
 import { Button, Dialog, Table, TableBody, TableCell, TableHead, TableRow, IconButton, Tab, Tabs } from '@mui/material';
 import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
 import { Fragment, useState } from 'react';
@@ -15,6 +15,7 @@ import { useTheme } from '@mui/material/styles';
 import { useSnackbar } from 'notistack';
 import { FinishedMatchStatus } from 'schemas';
 import { ConfirmDialogInterface, ConfirmDialog } from './ConfirmDialog';
+import { bulkAddMinutesMessage, bulkAddMinutesVariant, newGrant } from '../utils/bulk-add-minutes';
 import * as Yup from 'yup';
 import { alpha } from '@mui/system'
 import { FieldProps } from "formik"
@@ -29,7 +30,7 @@ type AdminTab = 'teams' | 'deleted';
 export function Admin(props: { teamId?: string }) {
   const theme = useTheme();
   const getAll = useAll();
-  const addMinutes = useAddMinutes();
+  const addMinutesToEveryone = useAddMinutesToEveryone();
   const removeAllTeams = useRemoveAllTeams();
   const { enqueueSnackbar } = useSnackbar();
   const { data, mutate } = useSWR("users/all", getAll)
@@ -229,23 +230,32 @@ export function Admin(props: { teamId?: string }) {
               .required('Nincs megadva érték')
             })}
           onSubmit={(values) => {
+            // Formik keeps what was typed, and `FormikValues` is `any`, so the
+            // number Yup validated above is still a string here.
+            const minutes = Number(values.time);
+            // One grant per press, made before the dialog so the same one goes
+            // with every attempt this confirmation leads to: the server moves a
+            // match once per grant, which is what makes asking again safe when
+            // the answer to a long walk never arrives.
+            const grant = newGrant();
             setConfirmDialog({
-              text: `Erősítsd meg, hogy minden aktuális csapatnak meg akarod növelni az idejét ${values.time} perccel`,
+              text: `Erősítsd meg, hogy minden aktuális csapatnak meg akarod növelni az idejét ${minutes} perccel`,
               confirm: async () => {
                 try {
-                  for (const a of data ?? []) {
-                    if (a.relayMatch.state === "IN PROGRESS") {
-                      await addMinutes(a.relayMatch.matchID, values.time);
-                    }
-                    if (a.strategyMatch.state === "IN PROGRESS") {
-                      await addMinutes(a.strategyMatch.matchID, values.time);
-                    }
-                  }
-                  enqueueSnackbar("Sikeres művelet", { variant: 'success' });
+                  const result = await addMinutesToEveryone(minutes, grant);
+                  enqueueSnackbar(bulkAddMinutesMessage(result, minutes), {
+                    variant: bulkAddMinutesVariant(result),
+                    // The problems name every team left out, which takes longer
+                    // to read than the default five seconds. Not `persist`: the
+                    // provider (Layout.tsx) gives a snackbar no dismiss action.
+                    autoHideDuration: result.problems.length > 0 ? 15000 : undefined,
+                  });
                 } catch (e) {
                   const message = e instanceof Error ? e.message : "Váratlan hiba történt";
                   enqueueSnackbar(message, { variant: 'error' });
                 }
+                // The rows carry each match's end time; the walk moved them.
+                await mutate().catch(() => undefined);
               },
             })
           }}>

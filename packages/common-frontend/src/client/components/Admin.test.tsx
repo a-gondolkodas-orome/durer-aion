@@ -162,6 +162,68 @@ test('a failed bulk delete is reported, and the list kept', async () => {
   expect(screen.getByText('Bravo')).toBeInTheDocument();
 });
 
+const START = new Date('2026-09-11T18:00:00.000Z');
+const END = new Date('2026-09-11T19:00:00.000Z');
+
+const playing = (source: TeamModelDto, matchID: string): TeamModelDto => ({
+  ...source,
+  pageState: 'RELAY',
+  relayMatch: { state: 'IN PROGRESS', matchID, startAt: START, endAt: END },
+});
+
+const addMinutesTo = async (teams: TeamModelDto[], minutes: string) => {
+  renderAdmin();
+  await screen.findByText(teams[0].teamName);
+  fireEvent.change(screen.getByPlaceholderText('perc'), { target: { value: minutes } });
+  fireEvent.click(screen.getByText('hozzáadás'));
+  // Yup validates the field before Formik calls onSubmit, so the dialog the
+  // submit opens is a tick away rather than up already.
+  fireEvent.click(await screen.findByText('Megerősítés'));
+};
+
+// This was a loop in the page, one request per team inside one `try`, so the
+// first match the server refused cost every later team its minutes. It is one
+// request now, and the server reports each match.
+test('extending everyone is a single request, carrying the minutes and a grant', async () => {
+  const teams = [playing(alpha, 'relay-a'), playing(bravo, 'relay-b')];
+  vi.spyOn(repo, 'getAll').mockResolvedValue(teams);
+  const addMinutesToEveryone = vi.spyOn(repo, 'addMinutesToEveryone')
+    .mockResolvedValue({ extended: ['Alpha', 'Bravo'], alreadyGranted: [], problems: [] });
+
+  await addMinutesTo(teams, '10');
+
+  await waitFor(() => expect(addMinutesToEveryone).toHaveBeenCalledOnce());
+  expect(addMinutesToEveryone).toHaveBeenCalledWith(10, expect.stringMatching(/^[0-9a-f]{8}$/));
+  expect(await screen.findByText('2 meccs kapott +10 percet')).toBeInTheDocument();
+});
+
+test('a team the server could not move is named, and the rest still got theirs', async () => {
+  const teams = [playing(alpha, 'relay-a'), playing(bravo, 'relay-b')];
+  vi.spyOn(repo, 'getAll').mockResolvedValue(teams);
+  vi.spyOn(repo, 'addMinutesToEveryone').mockResolvedValue({
+    extended: ['Alpha'],
+    alreadyGranted: [],
+    problems: [{ teamName: 'Bravo', matchID: 'relay-b', reason: 'no-match-running' }],
+  });
+
+  await addMinutesTo(teams, '10');
+
+  expect(await screen.findByText(
+    '1 meccs kapott +10 percet, 1 sikertelen: Bravo (nem fut meccs)'
+  )).toBeInTheDocument();
+});
+
+test('a request that never answered is reported, and the list kept', async () => {
+  const teams = [playing(alpha, 'relay-a')];
+  vi.spyOn(repo, 'getAll').mockResolvedValue(teams);
+  vi.spyOn(repo, 'addMinutesToEveryone').mockRejectedValue(new Error('Váratlan hiba történt'));
+
+  await addMinutesTo(teams, '10');
+
+  expect(await screen.findByText('Váratlan hiba történt')).toBeInTheDocument();
+  expect(screen.getByText('Alpha')).toBeInTheDocument();
+});
+
 const openDeletedTab = async () => {
   fireEvent.click(await screen.findByText('Törölt csapatok'));
 };

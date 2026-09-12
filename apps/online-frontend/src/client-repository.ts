@@ -3,7 +3,7 @@ import axios, { AxiosInstance, AxiosError } from 'axios';
 import i18n from "i18next";
 // Type-only on purpose: client-repository.test.ts loads this file without the
 // package's dist build, which the CI test job does not produce.
-import type { ClientRepository, TeamModelDto, MatchStateDto, DeletedTeamDto, RestoreResultDto, BoardMoves } from "common-frontend";
+import type { ClientRepository, TeamModelDto, MatchStateDto, DeletedTeamDto, RestoreResultDto, BoardMoves, BulkAddMinutesDto } from "common-frontend";
 
 // Always the page's own origin: the session is a cookie, and a cookie does not
 // ride a cross-origin request. In dev the Vite server proxies the backend
@@ -191,6 +191,22 @@ export class RealClientRepository implements ClientRepository {
       throw new Error('Váratlan hiba történt', { cause: e });
     }
     return result.data;
+  }
+
+  /** Every running match at once. One request rather than one per team: the
+   *  server walks the list as it is, and puts each write on its match's own
+   *  queue. `grant` must be the same on a retry — that is what stops a match
+   *  the server already moved from moving twice. */
+  async addMinutesToEveryone(minutes: number, grant: string): Promise<BulkAddMinutesDto> {
+    let result;
+    try {
+      result = await apiAxiosInstance().post('/game/admin/addminutes', { minutes, grant });
+    } catch (e: unknown) {
+      const err = makeAxiosError(e);
+      console.error(err.message)
+      throw new Error('Váratlan hiba történt', { cause: e });
+    }
+    return result.data as BulkAddMinutesDto;
   }
 
   async getMatchState(matchId: string): Promise<MatchStateDto> {
