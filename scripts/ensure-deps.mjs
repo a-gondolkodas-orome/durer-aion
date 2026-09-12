@@ -47,6 +47,32 @@ export const changedFiles = (before, after) =>
     .filter((path) => before[path] !== after[path])
     .sort();
 
+// npm is `npm.cmd` on Windows, and node cannot exec a .cmd without a shell: the
+// spawn fails outright with ENOENT rather than the command exiting non-zero. So
+// both have to be checked, and the error said out loud — reading `status` alone
+// turned that into a silent exit one line after "Installing dependencies", which
+// is what it looked like from the outside (#483).
+//
+// `spawn` and `platform` are parameters so the two failures can be tested
+// without a Windows machine or a real install.
+export function install(spawn = spawnSync, platform = process.platform) {
+  const { status, error } = spawn('npm', ['ci'], {
+    cwd: repoRoot,
+    stdio: 'inherit',
+    shell: platform === 'win32',
+  });
+
+  if (error) {
+    return {
+      ok: false,
+      code: 1,
+      message: `Could not run npm ci: ${error.message}\nInstall the dependencies yourself, then run this again.`,
+    };
+  }
+
+  return status === 0 ? { ok: true } : { ok: false, code: status ?? 1 };
+}
+
 export function main() {
   if (process.env.DURER_SKIP_DEPS === '1') return;
 
@@ -82,9 +108,10 @@ export function main() {
   }
 
   console.log(`Installing dependencies (${reason})`);
-  const { status } = spawnSync('npm', ['ci'], { cwd: repoRoot, stdio: 'inherit', shell: false });
-  if (status !== 0) {
-    process.exitCode = status ?? 1;
+  const outcome = install();
+  if (outcome.message) console.error(outcome.message);
+  if (!outcome.ok) {
+    process.exitCode = outcome.code;
     return;
   }
 

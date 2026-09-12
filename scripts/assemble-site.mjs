@@ -28,6 +28,11 @@ const run = (command, args, options = {}) =>
   execFileSync(command, args, {
     cwd: repoRoot,
     stdio: 'inherit',
+    // npx is `npx.cmd` on Windows, and node cannot exec a .cmd without a shell: the spawn fails
+    // with ENOENT rather than the command running, so `npm run site:build` never worked there
+    // (#483 is the same root cause, one script over). Safe to hand these to cmd.exe — every
+    // argument below is a plain flag with nothing a shell would reinterpret.
+    shell: process.platform === 'win32',
     ...options,
     env: { ...process.env, ...options.env },
   });
