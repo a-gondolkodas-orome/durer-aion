@@ -532,6 +532,12 @@ PR publishes it afterwards as a strategy practice game. Nothing about an
 unreleased game may appear in a public commit — including engine changes phrased
 around its needs.
 
+The mirroring itself is
+[`scripts/sync-mirror.mjs`](scripts/sync-mirror.mjs), which that workflow only
+calls. It takes the two repositories as arguments, so a change to it runs
+between two local repos — or against a throwaway of your own — without the
+workflow's single-valued secrets.
+
 When the year's repo is created:
 
 - **Decide about Actions.** The mirror carries `.github/workflows` too, so every

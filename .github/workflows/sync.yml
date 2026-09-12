@@ -5,8 +5,8 @@ on:
     branches:
       - sync-*
 
-# Nothing here touches this repository: the push goes to the private mirror over
-# PRIVATE_PAT, and the clone below is of a public repo.
+# Nothing here writes to this repository: the checkout below carries no credential, and the only
+# thing pushed to is the private mirror, over PRIVATE_PAT.
 permissions:
   contents: read
 
@@ -17,51 +17,26 @@ jobs:
     timeout-minutes: 15
 
     steps:
+      # For the script alone — it clones the branch it syncs itself, so that one code path is the
+      # one scripts/sync-mirror.test.mjs exercises.
+      - uses: actions/checkout@v7
+        with:
+          # Otherwise actions/checkout writes an `http.https://github.com/.extraheader` credential
+          # into the config, and that header is host-wide: git would send this repository's token
+          # to the private mirror in place of the PAT.
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+
+      # What this does, and why it is a script rather than the shell that used to be inline here,
+      # is in scripts/sync-mirror.mjs. No `npm ci`: it uses node builtins and git, nothing else.
       - name: Sync with private repository
-        # Passed as environment variables rather than expanded into the script:
-        # a `${{ }}` inside a `run:` body is substituted before the shell sees
-        # it, so a branch name would be executable text rather than a value.
+        # Passed as environment variables rather than expanded into the command: a `${{ }}` inside
+        # a `run:` body is substituted before the shell sees it, so a branch name would arrive as
+        # executable text rather than as a value.
         env:
           PRIVATE_REPO_NAME: ${{ secrets.PRIVATE_REPO_NAME }}
           PRIVATE_PAT: ${{ secrets.PRIVATE_PAT }}
           REF: ${{ github.ref_name }}
-        run: |
-            # Check if PRIVATE_REPO_NAME is set
-            if [ -z "$PRIVATE_REPO_NAME" ]; then
-              echo "Error: PRIVATE_REPO_NAME secret is not set"
-              exit 0
-            fi
-
-            # The `sync-*` trigger decides which pushes get here, but the rest of
-            # the name is whatever the pusher called the branch, and it is spent
-            # below on git commands run with the mirror's PAT in scope. Pin it to
-            # characters that mean nothing to a shell or to git's option parser,
-            # so what follows can only be a branch name.
-            if ! printf '%s' "$REF" | grep -Eq '^sync-[A-Za-z0-9._-]+$'; then
-              echo "Error: refusing to sync '$REF': not a sync-<name> branch"
-              exit 1
-            fi
-
-            git config --global user.name 'github-actions[bot]'
-            git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-            git clone https://github.com/a-gondolkodas-orome/durer-aion.git public-repo
-            cd public-repo
-            git checkout "$REF"
-
-            # The PAT reaches git through this helper rather than through the
-            # remote's URL: a URL carrying it is written to .git/config, and from
-            # there into anything that later reads the checkout — a cache, an
-            # uploaded artifact, a step added to this job. The helper holds no
-            # secret itself, it reads one from the step's environment when git
-            # asks, so the token exists only for as long as the job does.
-            printf '%s\n' '#!/bin/sh' 'printf "%s\n" "$PRIVATE_PAT"' > "$RUNNER_TEMP/askpass"
-            chmod 700 "$RUNNER_TEMP/askpass"
-            export GIT_ASKPASS="$RUNNER_TEMP/askpass"
-
-            git remote add private "https://x-access-token@github.com/$PRIVATE_REPO_NAME.git"
-            git remote update
-
-            if git show-ref --quiet "refs/remotes/private/$REF"; then
-              git merge "private/$REF" -X ours -m "Sync from public repository"
-            fi
-            git push private "$REF"
+        run: node scripts/sync-mirror.mjs

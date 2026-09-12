@@ -9,7 +9,8 @@ import { describe, expect, it } from 'vitest';
 const WORKFLOWS = '.github/workflows/';
 const repoRoot = fileURLToPath(new URL('../', import.meta.url));
 
-// sync.yml is stored with CRLF line endings; normalising here keeps that off every pattern below.
+// Normalised so CRLF line endings stay off every pattern below. sync.yml was the file that had
+// them, until the shell in it moved to scripts/sync-mirror.mjs.
 const workflows = () =>
   readdirSync(`${repoRoot}${WORKFLOWS}`)
     .filter(name => /\.ya?ml$/.test(name))
@@ -65,10 +66,11 @@ describe('a workflow that runs a shell script', () => {
   });
 });
 
-// Which repository a workflow may run in is the other property no linter checks, and the two
-// Pages workflows are guarded in opposite directions: one publishes the public site, the other
-// the private dry run. A lost guard has no symptom until the wrong site is serving the wrong
-// thing — gyakorlo.durerinfo.hu replaced by the dry run, or the unreleased game published.
+// Which repository a workflow may run in is the other property no linter checks, and three
+// workflows here reach outside their own. The two Pages ones are guarded in opposite directions:
+// one publishes the public site, the other the private dry run. A lost guard has no symptom until
+// the wrong site is serving the wrong thing — gyakorlo.durerinfo.hu replaced by the dry run, or
+// the unreleased game published.
 const source = name => workflows().find(([file]) => file === `${WORKFLOWS}${name}`)?.[1];
 
 const PUBLIC_REPO = 'a-gondolkodas-orome/durer-aion';
@@ -86,7 +88,8 @@ describe('the two Pages workflows', () => {
     // The one thing the job needs that actions/checkout does not leave it: gh-pages publishes
     // from a clone of its own, which inherits neither the workspace's config nor the credentials
     // in it, so a private repo's clone fails outright. Losing this breaks a deploy that is only
-    // ever run by hand, months apart — see the same helper, and why it is not a URL, in sync.yml.
+    // ever run by hand, months apart — see the same helper, and why it is not a URL, in
+    // scripts/sync-mirror.mjs.
     const workflow = source('dry-run-deploy.yml');
 
     expect(workflow).toMatch(/GITHUB_TOKEN: \$\{\{ (?:github\.token|secrets\.GITHUB_TOKEN) \}\}/);
@@ -99,5 +102,21 @@ describe('the two Pages workflows', () => {
     const triggers = /\non:([\s\S]*?)(?:\n\w|$)/.exec(source('dry-run-deploy.yml'))[1];
     expect(triggers).toContain('workflow_dispatch');
     expect(triggers).not.toContain('push');
+  });
+});
+
+describe('the mirror sync', () => {
+  it('runs only in the public repository', () => {
+    // The mirror carries .github/workflows too, so the private repo holds a copy of this
+    // workflow and a `sync-*` branch pushed there fires it. This line is the whole of what stops
+    // that copy from running — and what it would run is a push, outward, from the secret side.
+    expect(source('sync.yml')).toContain(`if: github.repository == '${PUBLIC_REPO}'`);
+  });
+
+  it('checks out without a credential, which would otherwise outrank the PAT', () => {
+    // actions/checkout writes `http.https://github.com/.extraheader`, and that header is
+    // host-wide rather than per-repository: git sends this repository's token to the private
+    // mirror too, in place of the PAT the push needs.
+    expect(source('sync.yml')).toContain('persist-credentials: false');
   });
 });
