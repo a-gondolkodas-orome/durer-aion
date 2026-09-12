@@ -10,6 +10,11 @@
 // and "no node_modules" are the same state and neither needs a .gitignore
 // entry. CI and the dev container's post-create step check out clean, so they
 // install unconditionally and are left calling `npm ci` directly.
+//
+// The compose dev backend is the third of those and reaches this the other way
+// round: it runs a `dev:*` script, but its tree is the image's, installed at
+// build and replaced whenever a manifest changes. It sets DURER_SKIP_DEPS
+// instead, and docker-compose.dev.yml says why.
 
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';

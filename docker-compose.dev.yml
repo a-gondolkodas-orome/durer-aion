@@ -13,6 +13,21 @@ services:
       context: .
       target: dev
     command: npm run dev:server
+    environment:
+      # `dev:server` starts with `scripts/prepare.mjs`, whose first job is to
+      # install the tree if nothing has recorded one — and nothing has here. The
+      # image's own `npm ci` (Dockerfile) leaves no stamp, the stamp lives inside
+      # node_modules in the container's writable layer, and `stack:up` builds
+      # with `COPY . .`, so any edit gives a new image, a new container and a
+      # fresh layer. The check therefore found "no install recorded" every time
+      # and deleted and refetched ~900 packages before the server started,
+      # sometimes for longer than the healthcheck waits.
+      #
+      # In here the image owns the tree: it is installed at build, from the same
+      # manifests, and a manifest change rebuilds the layer that installs it.
+      # There is nothing for a check at start-up to add. On the host, where the
+      # tree is the developer's, `dev:server` still runs it.
+      - DURER_SKIP_DEPS=1
     volumes:
       # Mount backend source
       - ./apps/online-backend/src:/usr/src/app/apps/online-backend/src
