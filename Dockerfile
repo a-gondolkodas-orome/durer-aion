@@ -31,10 +31,12 @@ COPY . .
 # the build if one of those patterns ever stops matching. Docker matches a
 # pattern against the whole path, so the `**/` prefixes are load-bearing and
 # easy to drop by accident — that is how apps/online-backend/.env used to get
-# baked in (#443). CI seeds the env files before building, so a regression
+# baked in (#443). Both names here are prefix globs for the same reason: the
+# importer writes `<file>.tsv.export` next to the list it read, and `*.tsv`
+# does not match it. CI seeds the env files before building, so a regression
 # surfaces in the docker job rather than in a deployed image. node_modules is
 # pruned because npm ci has already filled it above.
-RUN leaked=$(find . -name node_modules -prune -o \( -name '.env*' -o -name '*.tsv' \) -print); \
+RUN leaked=$(find . -name node_modules -prune -o \( -name '.env*' -o -name '*.tsv*' \) -print); \
     if [ -n "$leaked" ]; then \
       echo "These must not reach the image — check .dockerignore:" >&2; \
       echo "$leaked" >&2; \
