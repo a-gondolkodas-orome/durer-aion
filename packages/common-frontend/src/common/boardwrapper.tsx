@@ -47,6 +47,10 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
       setMsRemaining(G.millisecondsRemaining);
     }, [G.millisecondsRemaining]);
     const finished = msRemaining < - 5000 || gameover === true
+    // The judge is the bot, so its turn is a wait rather than a move to
+    // offer. It takes one in every phase, not only in `play`: the opening
+    // position of each new game is the judge's to set.
+    const waitingForJudge = !finished && ctx.currentPlayer === JUDGE_PLAYER;
     return (
       <>
         <Dialog
@@ -210,7 +214,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
                       borderBottom: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
                     }}
                   >
-                    {ctx.phase === 'startNewGame' && (
+                    {ctx.phase === 'startNewGame' && !waitingForJudge && (
                     <Stack sx={{ width: '100%', flexDirection: 'row' }}>
                       <Button sx={{
                         width: '48%',
@@ -258,7 +262,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
                     </Stack>
                     )}
 
-                    {ctx.phase !== 'startNewGame' && ctx.phase !== 'chooseRole' &&
+                    {(waitingForJudge || (ctx.phase !== 'startNewGame' && ctx.phase !== 'chooseRole')) &&
                     <Stack sx={{ width: '100%', flexDirection: 'row' }}>
                       <Button sx={{
                         width: '100%',
@@ -285,10 +289,10 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
                     fontWeight: 500,
                     }}
                   >
-                    {ctx.phase === 'startNewGame' && G.winner === null && t('strategy.guide.newGame')}
+                    {ctx.phase === 'startNewGame' && !waitingForJudge && G.winner === null && t('strategy.guide.newGame')}
                     {ctx.phase === 'chooseRole' && t('strategy.guide.ifFirstPlayer')}
-                    {ctx.phase === 'play' && ctx.currentPlayer === "0" && t('strategy.guide.yourTurn')}
-                    {ctx.phase === 'play' && ctx.currentPlayer === "1" && t('strategy.guide.waitingForServer')}
+                    {ctx.phase === 'play' && !waitingForJudge && t('strategy.guide.yourTurn')}
+                    {waitingForJudge && t('strategy.guide.waitingForServer')}
                     {ctx.phase === 'startNewGame' && G.winner === "0" && G.difficulty === "live" && t('strategy.guide.realGameWin')}
                     {ctx.phase === 'startNewGame' && G.winner === "0" && G.difficulty === "test" && t('strategy.guide.testGameWin')}
                     {ctx.phase === 'startNewGame' && G.winner === "1" && t('strategy.guide.botWins')}

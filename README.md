@@ -193,7 +193,8 @@ thought through, not a closed set.
    choosing a role first: a test game, then live ones, with the winning streak
    scored and the 30-minute countdown running.
 4. Reload mid-match, in both. Resuming without loss of state is the thing that
-   breaks quietly.
+   breaks quietly. Reload in the half second after a move as well, while the
+   judge is thinking: a match left on the judge's turn used to stay there (#133).
 5. Open the same join code in a second tab mid-match: the running match must not
    fork, and the countdown must read the same in both tabs — the time left comes
    from the server, never from the client.
@@ -272,7 +273,8 @@ the `dev:online` proxy has not been walked, so check them against `stack:up`.
 ## The other sites
 
 Each runs with no backend and no database, and each persists to localStorage —
-reload mid-game to check it resumes.
+reload mid-game to check it resumes, including in the half second after a move,
+while the bot is thinking.
 
 | what | run it | notes |
 | --- | --- | --- |
