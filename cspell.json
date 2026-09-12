@@ -84,6 +84,7 @@
     "newgrp",
     "newstate",
     "notistack",
+    "NXDOMAIN",
     "onwarn",
     "packument",
     "passwordauthentication",
