@@ -38,7 +38,7 @@ machine, follow the same steps with the right-hand values — each is repeated a
 | `.env.docker` | real secrets, rotated afterwards | throwaway values, still off the samples |
 | teams | the real TSV; the `.export` goes back to the organisers | `scripts/test.tsv` |
 | database | must survive; there are no backups | expendable |
-| HTTP→HTTPS redirect | wanted; needs a repo change | skip |
+| HTTP→HTTPS redirect | wanted; goes in the untracked `nginx-tls.conf` | skip |
 | certificate renewal | set up the cron | skip |
 | unattended upgrades | stop the timers for the competition window | leave them running |
 | afterwards | stays up | tear the machine down **and delete the DNS record** |
@@ -67,6 +67,19 @@ Patch it — the realistic risk to a box that lives for weeks is an unpatched se
 apt update && apt upgrade -y
 ```
 
+If it asks about a locally modified `sshd_config`, keep the local version: those edits are
+the image's, and the patched binary installs either way.
+
+**Then reboot, if it asks for one.** `*** System restart required ***` in the MOTD means a
+kernel or library was replaced and the running system is still on the old one — a patch that
+has not taken effect:
+
+```bash
+sudo reboot   # then reconnect
+```
+
+Cheapest here, before anything is installed or running.
+
 **Optional, for a machine that will live longer than the drive:** keep it patched by
 itself. The rest of this section's upgrade advice only applies if you do this.
 
@@ -74,12 +87,6 @@ itself. The rest of this section's upgrade advice only applies if you do this.
 apt install unattended-upgrades
 dpkg-reconfigure -plow unattended-upgrades
 ```
-
-If the upgrade asks about a locally modified `sshd_config`, keep the local version: those
-edits are the image's, and the patched binary installs either way. `*** System restart
-required ***` in the MOTD afterwards means a kernel or library was replaced and the running
-system is still on the old one — `sudo reboot`, then reconnect. Cheapest now, before
-anything is installed.
 
 Unattended upgrades take security updates only and do not reboot on their own
 (`grep Automatic-Reboot /etc/apt/apt.conf.d/50unattended-upgrades`), but they do restart
@@ -138,8 +145,14 @@ sudo mkswap /swapfile
 sudo swapon /swapfile
 ```
 
-Add it to `/etc/fstab` to survive a reboot. Optionally work inside `tmux`, since a dropped
-ssh session kills the build in progress:
+`swapon` lasts only until the next reboot. This line is what brings the file back after
+one:
+
+```bash
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+```
+
+Optionally work inside `tmux`, since a dropped ssh session kills the build in progress:
 
 ```bash
 sudo apt install tmux -y
@@ -229,7 +242,7 @@ The other files `npm run setup` creates are frontend build settings; the samples
 which.
 
 > **Test drive:** throwaway values are fine, but still change all three credentials off the
-> samples — the machine is on the internet. The sample window needs no change.
+> samples — the machine is on the internet.
 
 ## 5. Close the ports
 
@@ -247,7 +260,8 @@ rules for published ports bypass it.
 npm run stack:prod
 ```
 
-Builds the frontend, builds the backend image, starts the three containers detached, and
+Reinstalls the dependencies if a manifest or the lockfile has moved since the last run,
+builds the frontend, builds the backend image, starts the three containers detached, and
 returns only once the backend is healthy. When it is not:
 
 ```bash
@@ -279,11 +293,23 @@ docker compose --env-file=.env.docker run --rm backend ./scripts/import_teams.sh
 
 ## 8. A domain and HTTPS
 
-Point an A record at the machine and wait for it to resolve. Its address is its own for as
-long as it exists, so that is enough. A reserved address (DigitalOcean reserved IP, AWS
-elastic IP) buys something else — rebuilding the machine under an unchanged DNS record —
-which is worth having live and not on a drive. It also bills while *unattached*, so taking
-one adds a third thing to release at teardown.
+Point an A record at the machine and wait for it to resolve — until it does, the certificate
+below has nothing to validate against:
+
+```bash
+dig +short @1.1.1.1 verseny.durerinfo.hu   # the machine's IP, once it answers at all
+```
+
+A public resolver rather than the machine's own, which may still be holding the `NXDOMAIN`
+it cached before the record existed. A name nobody has asked for yet answers within seconds
+of the record being created; one you queried too early takes as long as the zone's negative
+cache instead, typically 5 to 60 minutes. Neither is the "24 to 48 hours" that belongs to
+changing a domain's nameservers, which this is not.
+
+The machine's address is its own for as long as it exists, so that is enough. A reserved
+address (DigitalOcean reserved IP, AWS elastic IP) buys something else — rebuilding the
+machine under an unchanged DNS record — which is worth having live and not on a drive. It
+also bills while *unattached*, so taking one adds a third thing to release at teardown.
 
 Issue the certificate with the stack up — nginx serves the challenge out of `dist`, so
 nothing has to stop:
@@ -297,9 +323,17 @@ sudo docker run --rm \
   -d verseny.durerinfo.hu --agree-tos -m you@example.com -n
 ```
 
-Then write the TLS half of the nginx config. It goes in `nginx-tls.conf` in the checkout —
-`nginx.conf` includes `/etc/nginx/tls/*.conf`, and the compose override below mounts this
-file there, so nothing tracked is edited:
+Then write the TLS half of the nginx config. **`nginx-tls.conf` is a new file you create**,
+at the root of the checkout beside `docker-compose.yml`; it is gitignored, because it names
+this machine's certificate and belongs to no other.
+
+The tracked config it extends is `apps/online-frontend/nginx/nginx.conf`, which includes
+`/etc/nginx/tls/*.conf`. The compose override below mounts your new file there, so nothing
+tracked is edited.
+
+These four lines are the whole file. The include sits *inside* the `server` block that is
+already there, next to its `listen 80;`, so this is a fragment spliced into that block —
+no `server { }` of its own, no braces at all:
 
 ```nginx
 listen              443 ssl;
@@ -309,7 +343,7 @@ ssl_certificate_key /etc/letsencrypt/live/verseny.durerinfo.hu/privkey.pem;
 ```
 
 **TLS has to terminate in this nginx, in the same `server` block that proxies to the
-backend** — which is what the include gives you. `nginx.conf` sets `X-Forwarded-Proto
+backend** — which is what the include gives you. The tracked config sets `X-Forwarded-Proto
 $scheme` on every proxied location, and that header is the only way the backend knows to
 put `Secure` on the team's session cookie
 (`apps/online-backend/src/server/team_session.ts`). Anything that hands this nginx a plain
@@ -337,9 +371,12 @@ services:
       - ./nginx-tls.conf:/etc/nginx/tls/tls.conf:ro
 ```
 
-Rebuild with the override:
+Rebuild with the override. `npm run deps` is the install `npm run stack:prod` does for
+itself and this path does not — without it a pull that moved the lockfile builds the
+frontend against the tree the previous release installed:
 
 ```bash
+npm run deps
 npm run build
 docker compose --env-file=.env.docker -f docker-compose.yml -f docker-compose.tls.yml up --build --wait
 ```
@@ -360,12 +397,7 @@ if ($to_https)                                     { return 301 https://$host$re
 Adding it before the first certificate exists is what breaks issuance, which is why it
 comes second.
 
-Rebuild with the override:
-
-```bash
-npm run build
-docker compose --env-file=.env.docker -f docker-compose.yml -f docker-compose.tls.yml up --build --wait
-```
+Rebuild with the same three commands as above.
 
 **Then check the cookie**, because losing `Secure` is silent. Log in as a team with
 devtools' **Network** tab open, select the `POST /team/join` request — the login itself,
@@ -402,7 +434,7 @@ git pull
 npm run stack:prod
 ```
 
-With TLS set up, use the two-command form from step 8 instead — `stack:prod` takes no
+With TLS set up, use the three-command form from step 8 instead — `stack:prod` takes no
 arguments.
 
 `sequelize.sync()` creates missing tables but does not alter existing ones, so **a release
@@ -411,22 +443,6 @@ that changed a column needs the change applied by hand**, or the volume dropped
 
 All three services are `restart: unless-stopped`, so a reboot brings the stack back by
 itself — with whatever image and `dist` were last built, since nothing rebuilds on boot.
-
-### Once, on an instance deployed before `postgres:17`
-
-The compose file used to run `bitnami/postgresql` with the named volume mounted at
-`/var/lib/postgresql/data` — the *official* image's data directory, not bitnami's. On such
-an instance the database is in the container's writable layer and recreating the container
-drops it, so **dump it before pulling that change**, while the old container is still up:
-
-```bash
-docker compose --env-file=.env.docker exec -e PGPASSWORD="$POSTGRESQL_PASSWORD" \
-  postgres pg_dumpall -U postgres -h 127.0.0.1 > backup.sql
-```
-
-Then `npm run stack:prod` and restore, or re-run the team import if the competition has not
-started. From `postgres:17` on the mount is the image's real data directory, so
-`stack:down` preserves the data.
 
 > **Test drive:** tear the machine down instead, per the last column of the provider table.
 > Stopping is not deleting on any of them, and on DigitalOcean it does not stop the bill.
