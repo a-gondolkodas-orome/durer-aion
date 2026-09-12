@@ -57,6 +57,39 @@ paths:
         "404":
           description: Match not found
 
+  /game/admin/addminutes:
+    post:
+      summary: Give every running match more time, under one grant
+      description: >
+        The grant is what makes asking twice safe: a match already carrying it
+        is reported in alreadyGranted and not moved again. Send the same grant
+        on a retry; send a new one only for a second, deliberate extension.
+      security:
+      - basicAdminAuth: []
+      tags:
+      - admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [minutes, grant]
+              properties:
+                minutes:
+                  type: integer
+                grant:
+                  type: string
+      responses:
+        "200":
+          description: What the walk did, by team name
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BulkAddMinutesResponse"
+        "400":
+          description: Body was not { minutes, grant }
+
   /game/admin/{matchId}/addminutes/{minutes}:
     post:
       summary: Add extra time to a specific match
@@ -762,6 +795,30 @@ components:
         - ctx
         - plugins
         - _stateID
+
+    BulkAddMinutesResponse:
+      type: object
+      properties:
+        extended:
+          type: array
+          items:
+            type: string
+        alreadyGranted:
+          type: array
+          items:
+            type: string
+        problems:
+          type: array
+          items:
+            type: object
+            properties:
+              teamName:
+                type: string
+              matchID:
+                type: string
+              reason:
+                type: string
+                enum: [match-not-found, team-not-found, other-match-running, no-match-running, game-not-found, error]
 
     AddMinutesResponse:
       type: object

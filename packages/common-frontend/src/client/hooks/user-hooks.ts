@@ -91,6 +91,13 @@ export const useAddMinutes = () => {
   };
 };
 
+/** Every running match at once. The grant is the caller's to keep: sending the
+ *  same one again is what makes a retry safe. */
+export const useAddMinutesToEveryone = () => {
+  const repo = useClientRepo();
+  return async (minutes: number, grant: string) => await repo.addMinutesToEveryone(minutes, grant);
+};
+
 export const useLogin = () => {
   const repo = useClientRepo();
   return async (joinCode: string) => {

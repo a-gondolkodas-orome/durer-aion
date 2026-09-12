@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { StorageAPI } from "boardgame.io";
 import type { AnyBgioGame } from "game";
 import type { TeamsRepository } from "./db";
-import type { TeamModel } from "./model";
+import { OTHER_MAX_LENGTH, type TeamModel } from "./model";
 import {
   addMinutesToEveryRunningMatch,
   addMinutesToMatch,
@@ -215,6 +215,21 @@ describe("a grant", () => {
 
     expect(result).toMatchObject({ status: "extended" });
     expect(alpha.update).toHaveBeenCalledOnce();
+  });
+
+  // `other` holds the organisers' notes as well as this trail, and a team whose
+  // notes fill it must still be given the minutes: the note is what gives way.
+  // The cost is that a grant whose note did not fit is one a repeat applies
+  // again, which is the safe way round.
+  it("that will not fit in the notes still moves the clock", async () => {
+    const alpha = team({ other: "x".repeat(OTHER_MAX_LENGTH) });
+    const db = storage();
+
+    const result = await addMinutesToMatch(clockOf([alpha], db), { matchID: MATCH, minutes: 10, grant: GRANT });
+
+    expect(result).toMatchObject({ status: "extended" });
+    expect(alpha.update).toHaveBeenCalledWith(expect.objectContaining({ other: "x".repeat(OTHER_MAX_LENGTH) }));
+    expect(vi.mocked(db.setState)).toHaveBeenCalledOnce();
   });
 
   // The same grant reaching a team's other match is a different match.
