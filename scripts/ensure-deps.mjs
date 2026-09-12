@@ -8,8 +8,11 @@
 // The stamp lives inside node_modules on purpose: a tree wiped by hand, by
 // `npm ci` itself or by a fresh clone takes the stamp with it, so "no stamp"
 // and "no node_modules" are the same state and neither needs a .gitignore
-// entry. CI and the dev container's post-create step check out clean, so they
-// install unconditionally and are left calling `npm ci` directly.
+// entry. CI checks out clean and runs no `dev:*` script, so it installs
+// unconditionally and is left calling `npm ci` directly. The places that do
+// both — the backend image and the two dev containers — follow their `npm ci`
+// with `--record`, since a tree this script did not install itself is one it
+// cannot tell from an absent one, and would install again.
 
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -47,6 +50,24 @@ export const changedFiles = (before, after) =>
     .filter((path) => before[path] !== after[path])
     .sort();
 
+// What the stamp says once the tree matches what is on disk right now.
+export const currentStamp = () => ({
+  version: VERSION,
+  node: process.version,
+  files: hashFiles(inputPaths().map((path) => [path, readFileSync(`${repoRoot}${path}`)])),
+});
+
+const writeStamp = (stamp, stampPath = STAMP) =>
+  writeFileSync(stampPath, `${JSON.stringify(stamp, null, 2)}\n`);
+
+// Records an install this script did not perform, for the callers that install
+// unconditionally: the image and the dev containers install from the same
+// manifests the check would read, so there is nothing left to decide — but
+// `npm ci` on its own leaves no stamp, and the first `dev:*` script then
+// installs the whole tree a second time. The path is a parameter so a test can
+// read back what this writes without touching the tree it is running from.
+export const record = (stampPath = STAMP) => writeStamp(currentStamp(), stampPath);
+
 // npm is `npm.cmd` on Windows, and node cannot exec a .cmd without a shell: the
 // spawn fails outright with ENOENT rather than the command exiting non-zero. So
 // both have to be checked, and the error said out loud — reading `status` alone
@@ -76,11 +97,12 @@ export function install(spawn = spawnSync, platform = process.platform) {
 export function main() {
   if (process.env.DURER_SKIP_DEPS === '1') return;
 
-  const current = {
-    version: VERSION,
-    node: process.version,
-    files: hashFiles(inputPaths().map((path) => [path, readFileSync(`${repoRoot}${path}`)])),
-  };
+  if (process.argv.includes('--record')) {
+    record();
+    return;
+  }
+
+  const current = currentStamp();
 
   let previous = { version: VERSION, node: null, files: {} };
   try {
@@ -117,7 +139,7 @@ export function main() {
 
   // Written after the install, so an install that died leaves the stamp saying
   // what was last known good rather than claiming this tree.
-  writeFileSync(STAMP, `${JSON.stringify(current, null, 2)}\n`);
+  writeStamp(current);
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

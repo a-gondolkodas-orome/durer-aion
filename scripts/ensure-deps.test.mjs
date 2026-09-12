@@ -3,9 +3,12 @@
 // time, and which moved. Both are pure functions over (path, contents) pairs;
 // the install itself is one spawnSync call and is not worth mocking.
 import { Buffer } from 'node:buffer';
-import { describe, expect, it } from 'vitest';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { afterAll, describe, expect, it } from 'vitest';
 
-import { changedFiles, hashFiles, install } from './ensure-deps.mjs';
+import { changedFiles, currentStamp, hashFiles, install, record } from './ensure-deps.mjs';
 
 const tree = (lock, workspace) => [
   ['package-lock.json', lock],
@@ -110,5 +113,45 @@ describe('install', () => {
     const { spawn } = spawnReturning({ status: 0 });
 
     expect(install(spawn, 'linux')).toStrictEqual({ ok: true });
+  });
+});
+
+// `npm ci` run by something else — the backend image, either dev container —
+// leaves node_modules full and the stamp absent, which reads here as a tree
+// that was never installed. `--record` is how those say what they did, so what
+// it writes has to be a stamp this script would then accept.
+describe('record', () => {
+  const tmp = mkdtempSync(join(tmpdir(), 'ensure-deps-'));
+
+  afterAll(() => rmSync(tmp, { recursive: true, force: true }));
+
+  it('writes a stamp that leaves nothing for the check to install', () => {
+    const stamp = join(tmp, 'stamp.json');
+
+    record(stamp);
+    const written = JSON.parse(readFileSync(stamp, 'utf8'));
+
+    expect(changedFiles(written.files, currentStamp().files)).toStrictEqual([]);
+    expect(written.node).toBe(process.version);
+  });
+
+  // The version is what tells a stamp from a later format apart, and a missing
+  // one would be read as a stamp to discard — an install on every run, silently.
+  it('stamps the format it was written in', () => {
+    const stamp = join(tmp, 'version.json');
+
+    record(stamp);
+
+    expect(JSON.parse(readFileSync(stamp, 'utf8')).version).toBe(currentStamp().version);
+  });
+
+  it('records the manifests the check reads, the lockfile among them', () => {
+    const stamp = join(tmp, 'files.json');
+
+    record(stamp);
+
+    const { files } = JSON.parse(readFileSync(stamp, 'utf8'));
+    expect(Object.keys(files)).toContain('package-lock.json');
+    expect(Object.keys(files)).toContain('packages/game/package.json');
   });
 });

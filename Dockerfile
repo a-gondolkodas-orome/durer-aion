@@ -43,6 +43,15 @@ RUN leaked=$(find . -name node_modules -prune -o \( -name '.env*' -o -name '*.ts
       exit 1; \
     fi
 
+# The install above leaves no stamp, and the dev server docker-compose.dev.yml
+# runs in here begins by reading one (scripts/ensure-deps.mjs) — so it found "no
+# install recorded" and reinstalled all 900 packages before starting, on every
+# container whose writable layer was new, which `COPY . .` makes that of every
+# edit. In `dev` and not in `deps`, because .nvmrc and the script itself arrive
+# with the source above, and copying them earlier would rebuild the install
+# layer whenever either changed.
+RUN node scripts/ensure-deps.mjs --record
+
 EXPOSE 8000
 
 # Run the server that was just built. docker-compose.dev.yml overrides this with
