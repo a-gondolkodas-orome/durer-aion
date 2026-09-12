@@ -12,7 +12,8 @@ import { JOIN_ATTEMPT_LIMIT, JOIN_ATTEMPT_WINDOW_SECONDS, rateLimit } from './ra
 import type { requireAdmin } from './admin_session';
 import { AnyBgioGame, PlayerIDType } from 'game';
 import { appendOtherNote } from './model';
-import { addMinutesToMatch, type ExtendRefusal, type MatchClock, type MatchQueue } from './add_minutes';
+import { addMinutesToEveryRunningMatch, addMinutesToMatch, type ExtendRefusal, type MatchClock, type MatchQueue }
+  from './add_minutes';
 import { UniqueConstraintError } from 'sequelize';
 
 /**
@@ -124,6 +125,35 @@ export function configureTeamsRouter(
     const result = await addMinutesToMatch(matchClock(ctx), { matchID, minutes: Number(ctx.params.minutes) });
     if (result.status === "refused") refuse(ctx, result.reason, matchID);
     else ctx.body = { updatedEndTime: result.endAt, matchID: result.matchID, team: result.team };
+  });
+
+  /**
+   * Give every running match more time, under one grant.
+   *
+   * The grant is the caller's, and is what makes asking twice safe: a match
+   * already carrying it is reported as `alreadyGranted` and not moved again.
+   * That is the case a long walk needs — the browser giving up on a request the
+   * server went on to finish — so the same grant must be sent on a retry, and a
+   * new one only when the organiser means a second extension.
+   *
+   * @param {{minutes: number, grant: string}} body
+   * @returns {BulkExtendResult} - team names extended, already granted, and the
+   *   ones with a problem, each with why.
+   */
+  router.post("/game/admin/addminutes", adminAuth, koaBody(), async (ctx) => {
+    const body = ctx.request.body as { minutes?: unknown; grant?: unknown } | undefined;
+    const minutes = Number(body?.minutes);
+    // Rejected here rather than reaching `setMinutes`, where a non-number
+    // becomes an Invalid Date and throws on the way out of `toISOString`.
+    if (!Number.isInteger(minutes)) {
+      ctx.throw(400, "Expected { minutes: integer, grant: string }.");
+    }
+    const sent: unknown = body?.grant;
+    const grant = typeof sent === "string" && sent !== ""
+      ? sent
+      : ctx.throw(400, "Expected { minutes: integer, grant: string }.");
+
+    ctx.body = await addMinutesToEveryRunningMatch(matchClock(ctx), { minutes, grant });
   });
 
   /**

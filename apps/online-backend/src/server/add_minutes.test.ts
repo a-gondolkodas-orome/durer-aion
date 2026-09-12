@@ -3,7 +3,13 @@ import type { StorageAPI } from "boardgame.io";
 import type { AnyBgioGame } from "game";
 import type { TeamsRepository } from "./db";
 import type { TeamModel } from "./model";
-import { addMinutesToMatch, grantMarker, type MatchClock, type MatchQueue } from "./add_minutes";
+import {
+  addMinutesToEveryRunningMatch,
+  addMinutesToMatch,
+  grantMarker,
+  type MatchClock,
+  type MatchQueue,
+} from "./add_minutes";
 
 const MATCH = "0EKBiMgbJ5A";
 const TEAM_ID = "8eae8669-125c-42e5-8b49-89afbac31679";
@@ -218,5 +224,117 @@ describe("a grant", () => {
     const result = await addMinutesToMatch(clockOf([alpha], storage()), { matchID: MATCH, minutes: 10, grant: GRANT });
 
     expect(result).toMatchObject({ status: "extended" });
+  });
+});
+
+describe("addMinutesToEveryRunningMatch", () => {
+  const GRANT = "a1b2c3d4";
+
+  const playing = (teamId: string, teamName: string, matchID: string, fields: Partial<TeamModel> = {}) =>
+    team({
+      teamId,
+      teamName,
+      other: "",
+      relayMatch: { state: "IN PROGRESS", matchID, startAt: new Date(START), endAt: new Date(END) },
+      ...fields,
+    });
+
+  /** Storage answering for any match, owned by whoever the id names. */
+  const anyMatch = () =>
+    ({
+      fetch: vi.fn().mockImplementation((matchID: string) => Promise.resolve({
+        state: { _stateID: 7, G: { start: START, end: END }, ctx: {} },
+        metadata: { gameName: "relay_c", players: [{ name: `team-of-${matchID}` }] },
+      })),
+      setState: vi.fn().mockResolvedValue(undefined),
+    }) as unknown as StorageAPI.Async;
+
+  const clockOver = (rows: TeamModel[], db: StorageAPI.Async = anyMatch()): MatchClock => ({
+    ...clockOf(rows, db),
+    teams: {
+      listTeams: vi.fn().mockResolvedValue(rows),
+      getTeam: vi.fn().mockImplementation(({ teamId }: { teamId: string }) =>
+        Promise.resolve(rows.find(row => row.teamId === teamId) ?? null)),
+    } as unknown as TeamsRepository,
+  });
+
+  it("extends every running match and names the teams", async () => {
+    const rows = [
+      playing("team-of-m1", "Alpha", "m1"),
+      playing("team-of-m2", "Bravo", "m2"),
+      team({ teamId: "team-of-m3", teamName: "Charlie", relayMatch: { state: "NOT STARTED" } }),
+    ];
+
+    const result = await addMinutesToEveryRunningMatch(clockOver(rows), { minutes: 10, grant: GRANT });
+
+    expect(result).toStrictEqual({ extended: ["Alpha", "Bravo"], alreadyGranted: [], problems: [] });
+    expect(rows[2].update).not.toHaveBeenCalled();
+  });
+
+  it("extends both of a team's matches when both are running", async () => {
+    const both = playing("team-of-m1", "Alpha", "m1", {
+      strategyMatch: { state: "IN PROGRESS", matchID: "m1", startAt: new Date(START), endAt: new Date(END) },
+    });
+
+    const result = await addMinutesToEveryRunningMatch(clockOver([both]), { minutes: 10, grant: GRANT });
+
+    expect(result.extended).toStrictEqual(["Alpha", "Alpha"]);
+  });
+
+  // The defect this replaces: one `try` around the whole walk in the browser, so
+  // the first refusal cost every later team its minutes.
+  it("carries on past a match it cannot move, and says which", async () => {
+    const rows = [
+      playing("team-of-m1", "Alpha", "m1"),
+      playing("team-of-m2", "Bravo", "m2"),
+      playing("team-of-m3", "Charlie", "m3"),
+    ];
+    const db = anyMatch();
+    vi.mocked(db.fetch).mockImplementationOnce(() => Promise.resolve({} as never));
+
+    const result = await addMinutesToEveryRunningMatch(clockOver(rows, db), { minutes: 10, grant: GRANT });
+
+    expect(result.extended).toStrictEqual(["Bravo", "Charlie"]);
+    expect(result.problems).toStrictEqual([
+      { teamName: "Alpha", matchID: "m1", reason: "match-not-found" },
+    ]);
+  });
+
+  it("treats a match that threw as that match's problem", async () => {
+    const rows = [playing("team-of-m1", "Alpha", "m1"), playing("team-of-m2", "Bravo", "m2")];
+    const db = anyMatch();
+    vi.mocked(db.setState).mockRejectedValueOnce(new Error("the database went away"));
+
+    const result = await addMinutesToEveryRunningMatch(clockOver(rows, db), { minutes: 10, grant: GRANT });
+
+    expect(result.extended).toStrictEqual(["Bravo"]);
+    expect(result.problems).toStrictEqual([{ teamName: "Alpha", matchID: "m1", reason: "error" }]);
+  });
+
+  // The same grant twice is the retry case: the second ask moves nothing.
+  it("asked for twice under one grant moves each match once", async () => {
+    const rows = [playing("team-of-m1", "Alpha", "m1"), playing("team-of-m2", "Bravo", "m2")];
+    const db = anyMatch();
+    const clock = clockOver(rows, db);
+    // What the first walk wrote, as the rows would carry it on a second read.
+    await addMinutesToEveryRunningMatch(clock, { minutes: 10, grant: GRANT });
+    for (const row of rows) {
+      const [{ other }] = vi.mocked(row.update).mock.calls[0] as [{ other: string }];
+      Object.assign(row, { other });
+    }
+    vi.mocked(db.setState).mockClear();
+
+    const again = await addMinutesToEveryRunningMatch(clock, { minutes: 10, grant: GRANT });
+
+    expect(again).toStrictEqual({ extended: [], alreadyGranted: ["Alpha", "Bravo"], problems: [] });
+    expect(vi.mocked(db.setState)).not.toHaveBeenCalled();
+  });
+
+  it("has nothing to do when no match is running", async () => {
+    const idle = team({ teamId: "t", relayMatch: { state: "NOT STARTED" } });
+
+    const result = await addMinutesToEveryRunningMatch(clockOver([idle]), { minutes: 10, grant: GRANT });
+
+    expect(result).toStrictEqual({ extended: [], alreadyGranted: [], problems: [] });
   });
 });
