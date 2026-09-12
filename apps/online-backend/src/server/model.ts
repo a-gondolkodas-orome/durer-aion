@@ -54,8 +54,12 @@ export class TeamModel extends Model<
 export const OTHER_MAX_LENGTH = 1024;
 
 /** What the team import accepts, which is deliberately less than the column
- * holds: the difference is the room the audit trail grows into. */
-export const OTHER_IMPORT_MAX_LENGTH = 700;
+ * holds: the difference is the room the audit trail grows into.
+ *
+ * Defined with the rest of the import format's rules in `schemas`, since the
+ * admin page enforces the same limit before it uploads, and re-exported here
+ * so the column's two limits still read side by side. */
+export { OTHER_IMPORT_MAX_LENGTH } from "schemas";
 
 /** A team's notes with one audit note appended, or unchanged when it will not
  * fit.

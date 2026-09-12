@@ -59,6 +59,7 @@ beírni
 beírt
 bejelentkezhettek
 bejelölgetni
+bekerültek
 bekötötte
 beküldött
 belebújások
@@ -75,6 +76,8 @@ beszínezve
 beszúrni
 betartásával
 betöltése
+betölthető
+betöltött
 beválthatjuk
 beváltotok
 bevezetett
@@ -307,6 +310,8 @@ huszárjait
 huszárok
 hússzorosánál
 húzhatunk
+importálása
+indítása
 indulása
 írhattunk
 írhatunk
@@ -530,6 +535,7 @@ leszámítva
 leszámolni
 leszúrni
 leszúrt
+letöltött
 letörli
 letörni
 letörölhetjük
@@ -903,4 +909,6 @@ visszanézve
 Visszaragasztottam
 visszarakási
 visszatérjen
+visszautasítja
+visszautasította
 vízszintesen

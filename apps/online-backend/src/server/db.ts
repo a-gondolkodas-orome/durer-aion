@@ -3,8 +3,38 @@ import { env } from 'process';
 import { InProgressMatchStatus } from 'schemas';
 import { teamAttributes, TeamModel } from './model';
 import { DeletedTeamModel, deletedTeamAttributes } from './deletedTeam';
-import { InferAttributes, InferCreationAttributes, Sequelize, Op, Transaction, UniqueConstraintError, WhereOptions } from 'sequelize';
+import { InferAttributes, InferCreationAttributes, Sequelize, Op, Transaction, UniqueConstraintError, ValidationError, WhereOptions } from 'sequelize';
 import type { OmitTimestamps } from './model';
+
+/** The fields an import supplies for a team; everything else about a new team
+ * is the same for all of them. */
+export interface NewTeam {
+  teamname: string;
+  category: string;
+  email: string;
+  other: string;
+  teamId: string;
+  joinCode: string;
+  credentials: string;
+}
+
+/** The values live teams already hold, for an importer that has to generate the
+ * ones a file left blank and wants to say which row clashes rather than hand
+ * back a constraint name. */
+export interface TakenIdentifiers {
+  teamIds: Set<string>;
+  teamNames: Set<string>;
+  joinCodes: Set<string>;
+}
+
+/** Carries a refused row out of the transaction it has to abort. A managed
+ * transaction commits on a normal return, and the whole point here is that one
+ * refused row takes the file with it. */
+class ImportRejected extends Error {
+  constructor(readonly failedRow: number, readonly validation: ValidationError) {
+    super(`row ${failedRow} refused`);
+  }
+}
 
 /** What one deletion moved and one restore moves back: how many teams, and the
  * team names for an answer an organiser can read. */
@@ -24,6 +54,23 @@ const teamColumns = Object.keys(teamAttributes) as (keyof InferAttributes<TeamMo
 // that the pattern appends.
 export function escapeLike(fragment: string): string {
   return fragment.replace(/[\\%_]/g, character => `\\${character}`);
+}
+
+// Everything a new team starts with beyond what the file supplies: no matches
+// played, and the disclaimer still to accept.
+function newTeamRow(team: NewTeam) {
+  return {
+    teamId: team.teamId,
+    joinCode: team.joinCode,
+    other: team.other,
+    category: team.category,
+    email: team.email,
+    credentials: team.credentials,
+    strategyMatch: { state: "NOT STARTED" } as const,
+    relayMatch: { state: "NOT STARTED" } as const,
+    teamName: team.teamname,
+    pageState: 'DISCLAIMER' as const,
+  };
 }
 
 export class TeamsRepository {
@@ -76,19 +123,59 @@ export class TeamsRepository {
       (searchCondition)
     });
   }
-  async insertTeam(
-      { teamname, category, email, other, teamId, joinCode, credentials } :
-      { teamname: string, category: string, email: string, other: string, teamId: string, joinCode: string, credentials: string }) {
-    return await TeamModel.create({
-      teamId, joinCode, other,
-      category,
-      email,
-      credentials,
-      strategyMatch: { state: "NOT STARTED" },
-      relayMatch: { state: "NOT STARTED" },
-      teamName: teamname,
-      pageState: 'DISCLAIMER',
-    });
+  async insertTeam(team: NewTeam) {
+    return await TeamModel.create(newTeamRow(team));
+  }
+
+  /**
+   * The identifiers live teams hold. Read before an import so a generated join
+   * code is checked against them rather than trusted, and so a clash is
+   * reported against the row that causes it.
+   *
+   * It is not the guard — the unique constraints are, and `insertTeams` rolls
+   * the file back on one. This read only buys the readable answer.
+   */
+  async takenIdentifiers(): Promise<TakenIdentifiers> {
+    const teams = await TeamModel.findAll({ attributes: ['teamId', 'teamName', 'joinCode'] });
+    return {
+      teamIds: new Set(teams.map(team => team.teamId)),
+      teamNames: new Set(teams.map(team => team.teamName)),
+      joinCodes: new Set(teams.map(team => team.joinCode)),
+    };
+  }
+
+  /**
+   * A whole import, in one transaction: every team or none. Returns the row the
+   * database refused, or null when they all went in.
+   *
+   * All-or-nothing, unlike `restoreBatch` next door, which deliberately gives
+   * each row its own transaction. The difference is that a restore invents
+   * nothing — the archived rows carry their own join codes, so re-running one
+   * is idempotent. An import generates the codes it writes, so a half-finished
+   * one cannot be retried: the teams that landed would clash with themselves on
+   * the second run, and their codes would be split across two export files.
+   *
+   * One transaction is also the fast way to do it. 500 rows under autocommit is
+   * 500 commits, each waiting on its own fsync; here it is one.
+   */
+  async insertTeams(rows: readonly { row: number, team: NewTeam }[]):
+    Promise<{ failedRow: number, error: ValidationError } | null> {
+    try {
+      await this.sequelize.transaction(async transaction => {
+        for (const { row, team } of rows) {
+          try {
+            await TeamModel.create(newTeamRow(team), { transaction });
+          } catch (error) {
+            if (!(error instanceof ValidationError)) throw error;
+            throw new ImportRejected(row, error);
+          }
+        }
+      });
+      return null;
+    } catch (error) {
+      if (error instanceof ImportRejected) return { failedRow: error.failedRow, error: error.validation };
+      throw error;
+    }
   }
 
   /**

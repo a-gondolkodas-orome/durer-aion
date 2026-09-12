@@ -17,7 +17,8 @@ packages/
   game/               # Game logic (boardgame.io games); strategy games carry their bot and board in their own folder
   relay-bot/          # the relay game's opponent: the problem bank, and what each try is worth
   common-frontend/    # Shared React components
-  schemas/            # TypeScript models/types
+  schemas/            # TypeScript models/types, plus the team import's TSV format —
+                      # its columns and rules, shared by the CLI, the API and the admin page
   strategy-engine/    # the strategy practice site's game engine: rules, moves, bots, match state, no framework
   strategy-games/     # competition games in that engine's format; only strategy-practice consumes it
 pages/                # static content the Pages deploy serves but no app builds

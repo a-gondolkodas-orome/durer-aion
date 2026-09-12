@@ -1,5 +1,6 @@
 import { Ctx } from "boardgame.io";
 import { GameStateMixin, MyGameState as RelayGameState } from "game";
+import { TeamTsvProblem } from "schemas";
 
 /// `teamId`, `joinCode` and `email` are optional because only the
 /// authenticated admin routes serve them: `GET /team/me` answers a team with
@@ -47,6 +48,22 @@ export interface DeletedTeamDto extends TeamModelDto {
 export interface RestoreResultDto {
   restored: string[];
   conflicts: string[];
+}
+
+/// What a team import did, and everything wrong with the file it was given.
+/// The import is all or nothing, so `imported` is either every row or zero —
+/// and it is zero for a dry run, which checks and writes nothing.
+export interface ImportResultDto {
+  imported: number;
+  rows: number;
+  /// Errors first, then warnings, each in the order of the file.
+  problems: TeamTsvProblem[];
+  /// Problems past the server's cap, which are not in `problems`.
+  problemsTruncated: number;
+  /// One row per imported team, in `TEAM_IMPORT_HEADER` order. The only copy
+  /// of the join codes the import generated, which is why the page hands it
+  /// to the browser to save rather than only offering to.
+  exportTable: string[][];
 }
 
 /// One admin endpoint serves both kinds of match, and the payload carries no

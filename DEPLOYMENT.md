@@ -279,7 +279,13 @@ docker compose --env-file=.env.docker exec backend ./scripts/import_teams.sh scr
 ```
 
 This writes `scripts/<file>.tsv.export` back on the host, with the generated join codes.
-The admin page's TSV upload does the same job through the browser.
+
+The admin page's **Importálás** tab does the same job through the browser, and hands
+the join codes back as a download rather than leaving them on the host — the path for
+an organiser who has the admin password but no shell here. It is the one import path
+that needs `ADMIN_CREDENTIALS` set. A 500-team file is well inside nginx's
+`client_max_body_size`, which this repo's nginx sets to 8m; a deployment running its
+own proxy in front of this one has to allow it there too.
 
 If the backend will not stay up, `exec` has nothing to enter. Run the importer as a
 one-off container instead — it needs postgres and `DATABASE_URL`, not a server that

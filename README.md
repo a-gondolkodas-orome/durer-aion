@@ -236,20 +236,43 @@ At `http://localhost/admin`, user `admin`, password from `.env.docker`:
   `localhost:5432`), where it stays when the team is imported again and
   deleted a second time.
 
-Team import has two paths and both need checking: `npm run teams:import`, which
-runs `scripts/import_teams.sh` inside the container, and the TSV upload on the
-admin page. The first is its own process — `dist/import_teams.js`, which reads
-`DATABASE_URL` and nothing else, so no credential has to be set for a TSV to
-load (#190). It reaches that process with `docker compose exec`, so the backend
-container still has to be up; `teams:import:local` runs the same code with
-nothing in front of it, and imports against a server that will not boot. Two
-fixtures feed those by hand, which is why no code names either:
-`scripts/test.tsv` is the happy path — the file `teams:import` loads — and
+Team import has two paths and both need checking. The command line runs as its
+own process — `dist/import_teams.js`, which reads `DATABASE_URL` and nothing
+else, so no credential has to be set for a TSV to load (#190), which is what
+makes it the way a fresh deploy is seeded. `npm run teams:import` reaches it
+with `docker compose exec`, so the backend container still has to be up;
+`teams:import:local` runs the same code with nothing in front of it, and imports
+against a server that will not boot.
+
+The **Importálás** tab on the admin page is the same import for someone with
+the admin password and a browser and no shell on the host. Walk it against
+`stack:up` rather than `dev:online`: the body size limit and the read timeout
+are nginx's, and Vite's proxy shows you neither.
+
+- a file through *Fájl kiválasztása*, and rows pasted into the box. Picking a
+  file also checks it — the count and any problems appear without importing.
+- `scripts/unit_test.tsv`: every problem listed against the line it is on, the
+  import button disabled, and the team list unchanged.
+- *Ellenőrzés* on a file naming a team that already exists: reported as a
+  clash, still nothing written. This is the check only the server can make.
+- `scripts/test.tsv`, all 999 rows — the size check. The generated join codes
+  download on their own when it succeeds, the Csapatok tab shows the teams with
+  no reload, and one of those codes logs a team in at `http://localhost`.
+- that same downloaded file fed straight back: every row refused as a
+  duplicate, and no team doubled.
+- the archive round trip: delete all, download the batch as import-TSV, import
+  it back.
+
+Two fixtures feed it by hand, which is why no code names either.
+`scripts/test.tsv` is the happy path — the file `teams:import` loads.
 `scripts/unit_test.tsv` is the one shaped for the rejections, its team names
 saying what each row is for: the cells to blank so the importer generates them,
-the empty row to leave in, the duplicated login code and duplicated credentials
-only a real database refuses. `team_import.test.ts` mocks the filesystem, so the
-upload is the only thing that exercises those.
+the empty row to leave in, a category, an ID and a login code of the wrong
+shape, a team name, an ID and a login code each used by two rows, and a row with
+no `Other`, which is the one warning that does not refuse the file. Load it and
+every one of them should be reported at once, against the line it is on, with
+**no team written** — the import is all or nothing, so a file with one bad row
+leaves the database as it was and can be fixed and loaded again.
 
 `scripts/admin.py` is the post-competition scoring pull, holding no credential
 of its own:
