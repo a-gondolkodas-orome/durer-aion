@@ -10,8 +10,7 @@
  * `apps/online-backend/src/server/model.ts`. The database stays the authority;
  * this pre-pass exists so a bad file is refused before anything is written
  * rather than halfway through, and so a limit can be stricter here than the
- * column is wide (`other` is a `STRING(1024)` holding a 700-character rule,
- * because the admin routes append audit notes to it).
+ * column is wide — see `OTHER_IMPORT_MAX_LENGTH` below.
  *
  * What this module deliberately does not do:
  *
@@ -34,7 +33,16 @@ export const TEAM_CATEGORIES = ['C', 'D', 'E'] as const;
 
 export const TEAMNAME_MAX_LENGTH = 255;
 export const EMAIL_MAX_LENGTH = 255;
-export const OTHER_MAX_LENGTH = 700;
+
+/** What the import accepts in `Other`, which is deliberately less than the
+ * column holds (`OTHER_MAX_LENGTH` in the backend's `model.ts`, 1024).
+ *
+ * The difference is not headroom, it is the room the audit trail grows into:
+ * the admin routes append `prevstratid:` and `te[…]:` notes to this same field,
+ * and sequelize validates a changed attribute on every save. #497 is the bug
+ * that made the point — with both limits at 700, a team imported with notes
+ * that long had its first reset refused, for good. */
+export const OTHER_IMPORT_MAX_LENGTH = 700;
 
 export const JOIN_CODE_PATTERN = /^[0-9]{3}-[0-9]{4}-[0-9]{3}$/;
 
@@ -190,7 +198,7 @@ export function parseTeamsTsv(content: string): TeamTsvParseResult {
       // Not fatal, but the field is how an organiser finds a team again from a
       // phone call: contestant names, school, email addresses.
       warn({ row, column: 'Other', code: 'other-missing' });
-    } else if (other.length > OTHER_MAX_LENGTH) {
+    } else if (other.length > OTHER_IMPORT_MAX_LENGTH) {
       error({ row, column: 'Other', code: 'other-too-long', found: `${other.length}` });
     }
 

@@ -3,7 +3,9 @@ import { Stack } from '@mui/system';
 import { Button } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { useSnackbar } from 'notistack';
-import { TeamTsvProblem, TeamTsvProblemCode, parseTeamsTsv, teamsToImportTsv } from 'schemas';
+import {
+  OTHER_IMPORT_MAX_LENGTH, TeamTsvProblem, TeamTsvProblemCode, parseTeamsTsv, teamsToImportTsv,
+} from 'schemas';
 import { ImportResultDto } from '../dto/TeamStateDto';
 import { useImportTeams } from '../hooks/user-hooks';
 import { downloadTsv } from '../utils/download';
@@ -20,7 +22,7 @@ const PROBLEM_TEXT: Record<TeamTsvProblemCode, string> = {
   'invalid-category': 'A kategória nem C, D vagy E.',
   'email-too-long': 'Az e-mail cím túl hosszú (legfeljebb 255 karakter).',
   'other-missing': 'Az „Other” mező üres. Ez alapján lehet később azonosítani a csapatot: nevek, iskola, e-mail címek.',
-  'other-too-long': 'Az „Other” mező túl hosszú (legfeljebb 700 karakter).',
+  'other-too-long': `Az „Other” mező túl hosszú (legfeljebb ${OTHER_IMPORT_MAX_LENGTH} karakter).`,
   'invalid-team-id': 'Az ID nem érvényes UUIDv4.',
   'invalid-join-code': 'A belépőkód nem 111-2222-333 alakú.',
   'invalid-credentials': 'A credentials nem érvényes UUID.',

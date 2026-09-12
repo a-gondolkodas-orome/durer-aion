@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  OTHER_MAX_LENGTH,
+  OTHER_IMPORT_MAX_LENGTH,
   TEAMNAME_MAX_LENGTH,
   TEAM_IMPORT_HEADER,
   parseTeamsTsv,
@@ -122,8 +122,8 @@ describe('parseTeamsTsv', () => {
     });
 
     it('takes an "Other" field of 700 characters and refuses 701', () => {
-      expect(codes(file(row({ other: 'a'.repeat(OTHER_MAX_LENGTH) })))).toEqual([]);
-      expect(codes(file(row({ other: 'a'.repeat(OTHER_MAX_LENGTH + 1) })))).toEqual(['other-too-long']);
+      expect(codes(file(row({ other: 'a'.repeat(OTHER_IMPORT_MAX_LENGTH) })))).toEqual([]);
+      expect(codes(file(row({ other: 'a'.repeat(OTHER_IMPORT_MAX_LENGTH + 1) })))).toEqual(['other-too-long']);
     });
 
     it('warns, without failing, when "Other" is empty', () => {
