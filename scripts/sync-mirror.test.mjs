@@ -194,6 +194,39 @@ describe('the direction of a sync', () => {
   });
 });
 
+// Everything above calls syncBranch directly. The CLI is the half a maintainer actually types,
+// and until SYNC_SOURCE and SYNC_TARGET existed it could only ever sync the real public repo into
+// whatever PRIVATE_REPO_NAME named — which is to say it could not be rehearsed at all.
+describe('the command line', () => {
+  const script = fileURLToPath(new URL('./sync-mirror.mjs', import.meta.url));
+
+  // Built rather than inherited: PRIVATE_REPO_NAME or PRIVATE_PAT picked up from the ambient
+  // environment would quietly decide what these runs do.
+  const run = overrides => execFileSync(process.execPath, [script], {
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe'],
+    env: { PATH: process.env.PATH, HOME: process.env.HOME, ...overrides },
+  });
+
+  it('syncs between two repositories of your own, with no repo name and no token', () => {
+    const { source, target, filesIn } = scenario();
+
+    run({ SYNC_SOURCE: source, SYNC_TARGET: target, REF });
+
+    expect(filesIn(target)).toStrictEqual(['engine.txt', 'shared.txt']);
+  });
+
+  it('does nothing when no mirror is configured, which is the state between competitions', () => {
+    expect(run({ REF })).toContain('no mirror to sync to');
+  });
+
+  it('fails on a ref that is not a sync branch', () => {
+    const { target } = scenario();
+
+    expect(() => run({ SYNC_TARGET: target, REF: 'main' })).toThrow(/not a sync-<name> branch/);
+  });
+});
+
 describe('the credential', () => {
   const script = readFileSync(fileURLToPath(new URL('./sync-mirror.mjs', import.meta.url)), 'utf8');
 

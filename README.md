@@ -534,9 +534,15 @@ around its needs.
 
 The mirroring itself is
 [`scripts/sync-mirror.mjs`](scripts/sync-mirror.mjs), which that workflow only
-calls. It takes the two repositories as arguments, so a change to it runs
-between two local repos — or against a throwaway of your own — without the
-workflow's single-valued secrets.
+calls. `SYNC_SOURCE` and `SYNC_TARGET` override the two repositories it would
+otherwise derive, so a change to it is rehearsed between two of your own — two
+`git init --bare` directories will do — rather than against the mirror, whose
+name and token the workflow holds one value of:
+
+```bash
+SYNC_SOURCE=/tmp/public.git SYNC_TARGET=/tmp/private.git REF=sync-test \
+  node scripts/sync-mirror.mjs
+```
 
 When the year's repo is created:
 

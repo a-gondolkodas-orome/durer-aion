@@ -96,12 +96,23 @@ export const writeAskpass = dir => {
 };
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const { PRIVATE_REPO_NAME, PRIVATE_PAT, REF, RUNNER_TEMP } = process.env;
+  const { PRIVATE_REPO_NAME, PRIVATE_PAT, REF, RUNNER_TEMP, SYNC_SOURCE, SYNC_TARGET } = process.env;
+
+  // SYNC_SOURCE and SYNC_TARGET are for a hand-run, the way SITE_BASE overrides the derived base
+  // path in scripts/deploy-dry-run.mjs: a sync between two repositories of your own — two local
+  // paths will do — is how this is rehearsed without the workflow's single-valued secrets.
+  // .github/workflows/sync.yml sets neither, so CI takes the defaults by construction.
+  //
+  // The default source is the constant rather than GITHUB_REPOSITORY, so that the `if:` guard on
+  // the workflow is not the only thing keeping the clone off the private side.
+  const source = SYNC_SOURCE || `https://github.com/${PUBLIC_REPO}.git`;
+  const target = SYNC_TARGET
+    || (PRIVATE_REPO_NAME && `https://x-access-token@github.com/${PRIVATE_REPO_NAME}.git`);
 
   // No mirror configured is the public repository's normal state between competitions, not a
   // failure: the year's repo is created when the year's game starts.
-  if (!PRIVATE_REPO_NAME) {
-    console.log('PRIVATE_REPO_NAME is not set: no private mirror to sync to');
+  if (!target) {
+    console.log('neither SYNC_TARGET nor PRIVATE_REPO_NAME is set: no mirror to sync to');
     process.exit(0);
   }
 
@@ -109,19 +120,16 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const workdir = mkdtempSync(join(RUNNER_TEMP || tmpdir(), 'sync-mirror-'));
   const env = { ...process.env };
 
-  // Only when there is one to hand over. Without it — a maintainer running this against a local
-  // path or an ssh remote — git uses whatever credentials that remote already works with.
+  // Only when there is one to hand over. A SYNC_TARGET that is a local path or an ssh remote
+  // needs none, and git uses whatever credentials that remote already works with. Note that
+  // syncBranch sets GIT_TERMINAL_PROMPT=0, so an https target with no token here fails rather
+  // than stopping to ask.
   if (PRIVATE_PAT) env.GIT_ASKPASS = writeAskpass(workdir);
 
   try {
-    syncBranch({
-      source: `https://github.com/${PUBLIC_REPO}.git`,
-      target: `https://x-access-token@github.com/${PRIVATE_REPO_NAME}.git`,
-      ref,
-      workdir,
-      env,
-    });
-    console.log(`\n${ref} is mirrored into the private repository`);
+    syncBranch({ source, target, ref, workdir, env });
+    // Not the target itself: in CI naming it would put the private repository in a public log.
+    console.log(`\n${ref} is mirrored into the target repository`);
   } finally {
     rmSync(workdir, { recursive: true, force: true });
   }
