@@ -532,8 +532,22 @@ PR publishes it afterwards as a strategy practice game. Nothing about an
 unreleased game may appear in a public commit — including engine changes phrased
 around its needs.
 
+The mirroring itself is
+[`scripts/sync-mirror.mjs`](scripts/sync-mirror.mjs), which that workflow only
+calls. `SYNC_SOURCE` and `SYNC_TARGET` override the two repositories it would
+otherwise derive:
+
+```bash
+SYNC_SOURCE=/tmp/public.git SYNC_TARGET=/tmp/private.git REF=sync-test \
+  node scripts/sync-mirror.mjs
+```
+
 When the year's repo is created:
 
+- **Set the two secrets**, on the *public* repository, which is where `sync.yml`
+  runs: `PRIVATE_REPO_NAME` is the mirror's `owner/repo`, and `PRIVATE_PAT` is a
+  token that both fetches from it and pushes to it. A fine-grained token scoped
+  to that one repository with **Contents: Read and write** is enough
 - **Decide about Actions.** The mirror carries `.github/workflows` too, so every
   workflow here also lands there under that repo's own triggers. Leaving them on
   is what gets lint, typecheck and tests run against the game while it is being
