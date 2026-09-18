@@ -392,7 +392,11 @@ that were previously written down only here or nowhere.
 - Keep PR descriptions and review comments short. Say what changed and why, and
   stop; the diff, the commit messages and the linked docs carry the rest. Length
   is not thoroughness — it costs the reviewer the time the change was meant to
-  save.
+  save. The template's own comments say the shape, section by section.
+- A PR body carries one Claude Code footer, and it is not the agent's to write —
+  the integration appends one, with the session link, to every body it opens, so
+  a footer in the text leaves two. A *comment* is the other way round: the
+  duplicate is stripped there, so write it.
 - Do not `@`-mention anyone not already involved in the thread: a mention is a
   notification. Naming a person plainly, or referring to their PR by number,
   says the same thing without pulling them in.
