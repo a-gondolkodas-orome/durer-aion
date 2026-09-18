@@ -392,11 +392,7 @@ that were previously written down only here or nowhere.
 - Keep PR descriptions and review comments short. Say what changed and why, and
   stop; the diff, the commit messages and the linked docs carry the rest. Length
   is not thoroughness — it costs the reviewer the time the change was meant to
-  save. In the template that means prose under *Motivation*, short bullets under
-  *Key changes*, and under *Details* only what the diff cannot say. Never write
-  that lint, the typecheck, the spell check or the tests pass: the checks on the
-  PR report that themselves, and a sentence beside them is either redundant or
-  contradicted.
+  save. The template's own comments say the shape, section by section.
 - A PR body carries one Claude Code footer, and it is not the agent's to write —
   the integration appends one, with the session link, to every body it opens, so
   a footer in the text leaves two. A *comment* is the other way round: the
