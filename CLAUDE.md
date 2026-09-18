@@ -382,6 +382,10 @@ that were previously written down only here or nowhere.
   reviewer can accept or reject them separately.
 - An agent opening a PR assigns the person it is working for, so it lands in
   their queue rather than going unnoticed.
+- An agent names its session for what the work is about, not for the ticket
+  alone — `#461 duplicate socket.io copy in the lockfile`, not `Issue 461
+  investigation`. Keep the number, but the session list is read at a glance, and
+  a bare number says nothing about which one to go back to.
 - Permission to commit to someone else's branch is not permission to comment on
   their PR. An agent asks first before posting to a thread it does not own — the
   commit messages already carry the reasoning, and the thread is the author's.
