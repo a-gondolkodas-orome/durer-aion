@@ -397,7 +397,28 @@ if ($to_https)                                     { return 301 https://$host$re
 Adding it before the first certificate exists is what breaks issuance, which is why it
 comes second.
 
-Rebuild with the same three commands as above.
+This one is a reload, not a rebuild. `docker compose up` recreates a container only when its
+*configuration* changes, and editing a file that is already bind-mounted is not that — the
+three commands above would leave `web` running with the config it parsed at startup, the
+redirect correct on disk and not being served:
+
+```bash
+docker compose --env-file=.env.docker exec web nginx -t         # validates what the reload will load
+docker compose --env-file=.env.docker exec web nginx -s reload
+```
+
+Both `nginx -t` and `nginx -T` re-read the files from disk, so neither reports what the
+running process has loaded: a `-T` dump containing the redirect is not evidence that it is
+live. Asking the site is:
+
+```bash
+curl -sI http://verseny.durerinfo.hu/ | head -3                                  # 301 to https
+curl -sI http://verseny.durerinfo.hu/.well-known/acme-challenge/probe | head -3  # 200, no Location
+```
+
+The challenge path answers 200 rather than 404 because `location /` ends in
+`try_files $uri $uri/ /index.html`, so a missing file under it falls through to the app.
+What says the exemption works is the absent `Location` header, not the status.
 
 **Then check the cookie**, because losing `Secure` is silent. Log in as a team with
 devtools' **Network** tab open, select the `POST /team/join` request — the login itself,
@@ -435,7 +456,8 @@ npm run stack:prod
 ```
 
 With TLS set up, use the three-command form from step 8 instead — `stack:prod` takes no
-arguments.
+arguments. A change to `nginx-tls.conf` itself is the reload in step 8 rather than either:
+`up` does not recreate `web` for it.
 
 `sequelize.sync()` creates missing tables but does not alter existing ones, so **a release
 that changed a column needs the change applied by hand**, or the volume dropped
