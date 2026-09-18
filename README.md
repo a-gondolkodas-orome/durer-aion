@@ -535,9 +535,7 @@ around its needs.
 The mirroring itself is
 [`scripts/sync-mirror.mjs`](scripts/sync-mirror.mjs), which that workflow only
 calls. `SYNC_SOURCE` and `SYNC_TARGET` override the two repositories it would
-otherwise derive, so a change to it is rehearsed between two of your own — two
-`git init --bare` directories will do — rather than against the mirror, whose
-name and token the workflow holds one value of:
+otherwise derive:
 
 ```bash
 SYNC_SOURCE=/tmp/public.git SYNC_TARGET=/tmp/private.git REF=sync-test \
@@ -549,12 +547,7 @@ When the year's repo is created:
 - **Set the two secrets**, on the *public* repository, which is where `sync.yml`
   runs: `PRIVATE_REPO_NAME` is the mirror's `owner/repo`, and `PRIVATE_PAT` is a
   token that both fetches from it and pushes to it. A fine-grained token scoped
-  to that one repository with **Contents: Read and write** is enough; a classic
-  token needs `repo`, which reaches every repository the account can. Check
-  whether this organisation requires an owner to approve a fine-grained token
-  before it works. Fine-grained tokens expire, and a sync runs a handful of
-  times a year — so an expired one is discovered as a failed sync rather than as
-  a warning.
+  to that one repository with **Contents: Read and write** is enough
 - **Decide about Actions.** The mirror carries `.github/workflows` too, so every
   workflow here also lands there under that repo's own triggers. Leaving them on
   is what gets lint, typecheck and tests run against the game while it is being
