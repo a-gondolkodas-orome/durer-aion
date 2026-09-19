@@ -77,7 +77,10 @@ export type TeamTsvProblemCode =
   | 'teamname-taken'
   | 'team-id-taken'
   | 'join-code-taken'
-  | 'database-refused';
+  | 'database-refused'
+  // The server drew a generated id or join code a hundred times and every one
+  // was already in use, which is a broken generator rather than bad luck.
+  | 'could-not-generate';
 
 export interface TeamTsvProblem {
   /** The file's own 1-based line number, header included, so it is the line a

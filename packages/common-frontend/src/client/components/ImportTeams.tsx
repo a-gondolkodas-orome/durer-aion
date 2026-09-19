@@ -34,6 +34,7 @@ const PROBLEM_TEXT: Record<TeamTsvProblemCode, string> = {
   'team-id-taken': 'Már van ilyen ID-jú csapat.',
   'join-code-taken': 'Már van ilyen belépőkódú csapat.',
   'database-refused': 'Az adatbázis visszautasította ezt a sort.',
+  'could-not-generate': 'A szerver nem tudott szabad azonosítót vagy belépőkódot generálni. Ez a szerver hibája, nem a fájlé.',
 };
 
 // Above this many warnings of one kind, the rows say the same thing and only

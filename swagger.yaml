@@ -696,7 +696,8 @@ components:
              "teamname-too-long", "invalid-category", "email-too-long", "other-missing",
              "other-too-long", "invalid-team-id", "invalid-join-code", "invalid-credentials",
              "duplicate-teamname", "duplicate-team-id", "duplicate-join-code",
-             "teamname-taken", "team-id-taken", "join-code-taken", "database-refused"]
+             "teamname-taken", "team-id-taken", "join-code-taken", "database-refused",
+             "could-not-generate"]
         found:
           type: string
           description: The offending value, when quoting it helps
