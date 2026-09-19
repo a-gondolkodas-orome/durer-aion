@@ -294,6 +294,21 @@ test('the import tab refuses a bad row without asking the server', async () => {
   expect(importTeams).not.toHaveBeenCalled();
 });
 
+// One row can break several rules at once. Counting problems made the summary
+// say "1 sor, ebből 2 hibás", which is more broken rows than there are rows.
+test('the import tab counts the rows at fault, not the rules they break', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  renderAdmin();
+  await openImportTab();
+
+  // No team name and a category that is not one: two problems, one row.
+  paste([HEADER, importRow('Alpha'), '\tX\ta@b.com\tx\t\t\t'].join('\n'));
+
+  expect(await screen.findByText('Hiányzik a csapatnév.')).toBeInTheDocument();
+  expect(screen.getByText('A kategória nem C, D vagy E.')).toBeInTheDocument();
+  expect(screen.getByText('2 sor, ebből 1 hibás. Az importálás így nem futna le.')).toBeInTheDocument();
+});
+
 test('the import tab sends the pasted text as it stands, and hands back the codes', async () => {
   vi.spyOn(repo, 'getAll').mockResolvedValue([]);
   const importTeams = vi.spyOn(repo, 'importTeams').mockResolvedValue(importResult({

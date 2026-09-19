@@ -111,7 +111,12 @@ export function ImportTeams(props: { onImported: () => void }) {
   // and it is about this text: any edit drops it.
   const problems = result?.problems ?? (tsv.trim() === '' ? [] : local.problems);
   const truncated = result?.problemsTruncated ?? 0;
-  const errorCount = problems.filter(problem => problem.severity === 'error').length;
+  const errors = problems.filter(problem => problem.severity === 'error');
+  // Rows, not problems: one row can break several rules at once, and a problem
+  // about the file — a missing header, no rows at all — belongs to no row. The
+  // summary counts what it says it counts; the grid below lists every problem.
+  const errorLines = new Set(errors.map(problem => problem.row));
+  const badRows = local.rows.filter(row => errorLines.has(row.row)).length;
   const imported = result !== null && result.imported > 0;
 
   const edited = (text: string) => {
@@ -236,9 +241,11 @@ export function ImportTeams(props: { onImported: () => void }) {
           ? `${result.rows} sorból ${result.imported} csapat importálva.`
           : tsv.trim() === ''
             ? 'Nincs betöltött fájl.'
-            : errorCount === 0
+            : errors.length === 0
               ? `${local.rows.length} sor, hiba nélkül.`
-              : `${local.rows.length} sor, ebből ${errorCount} hibás. Az importálás így nem futna le.`}
+              : badRows === 0
+                ? `${local.rows.length} sor. Magával a fájllal van baj, az importálás így nem futna le.`
+                : `${local.rows.length} sor, ebből ${badRows} hibás. Az importálás így nem futna le.`}
       </Stack>
 
       {problems.length > 0 && (
