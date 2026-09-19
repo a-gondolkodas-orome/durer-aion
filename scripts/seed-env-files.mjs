@@ -8,14 +8,17 @@
 // An existing file is never overwritten: a developer's own values live there,
 // and in `.env.docker` those are credentials worth keeping.
 //
-// `--check` reports what is missing and exits non-zero instead of writing it,
-// for `stack:prod` and any other deployment path. Seeding is right for a
-// developer and wrong for a deployed host: the samples carry
-// `ADMIN_CREDENTIALS=admin` and a postgres password to match, so a deployment
-// that seeded them would come up on credentials nobody chose. The check earns
-// its place by running before the frontend build rather than after it, and by
-// naming every missing file at once — `docker compose --env-file` sees only
-// `.env.docker`, and the frontends' values are inlined into the bundle.
+// `--check` writes nothing: it reports what the deployed stack is missing and
+// exits non-zero, which is what `stack:prod` runs before it builds. What it buys
+// is the moment: `docker compose --env-file` opens `.env.docker` only once the
+// bundle is built, and a frontend's values are inlined into that bundle, so
+// without this the first thing anyone hears is compose naming one file, after a
+// build that already went out wrong. Seeding instead would be worse than either:
+// the samples carry `ADMIN_CREDENTIALS=admin` and a postgres password to match,
+// and a host that seeded them mid-deploy would come up on credentials nobody
+// chose. It cannot check that anyone *edited* those — no value is ever read
+// here, see `missingKeys` — so DEPLOYMENT.md § 4 asking the operator to is still
+// what stands between a deployment and the sample password.
 
 import { copyFileSync, existsSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
@@ -45,14 +48,41 @@ export const missingKeys = (sampleText, targetText) => {
   return keysOf(sampleText).filter((key) => !present.has(key));
 };
 
+// The env files the deployed stack reads, and the only ones `--check` blocks a
+// deployment on. `.env.docker` is what `docker compose --env-file` opens; the
+// other two are inlined into the one bundle `stack:prod` builds, `.env.local` by
+// common-frontend and the third by online-frontend itself. The three left out
+// are read by builds a deployment never runs — the dry run's and the relay
+// practice site's — and by `npm run dev:server`, which a deployed host does not
+// use either: the docker stack has no `apps/online-backend/.env` on purpose,
+// because compose passes the backend its environment and dotenv leaves it alone
+// (`apps/online-backend/src/env.ts`, and `.dockerignore` keeps the file out of
+// the image). Stopping a deployment for one of those would be demanding a file
+// nothing on that path opens. `npm run setup` still seeds all six.
+export const DEPLOYED_STACK_READS = [
+  '.env.docker',
+  '.env.local',
+  join('apps', 'online-frontend', '.env'),
+];
+
+// A file that exists but has fallen behind fails the check as surely as one that
+// is not there: the sample gained a key, the deployment's build inlines it as
+// undefined, and nothing downstream says so. It is also the likelier of the two
+// on DEPLOYMENT.md § 9's `git pull && npm run stack:prod`, where every file was
+// written once at § 4 and the samples are what moved.
+export const checkFailed = ({ absent, behind }) => absent.length > 0 || behind.length > 0;
+
 function samplesIn(dir) {
   return readdirSync(join(repoRoot, dir))
     .filter((name) => name.startsWith('.env') && name.endsWith(SUFFIX))
     .map((name) => join(dir, name));
 }
 
-export function main() {
-  const check = process.argv.includes('--check');
+// `check` is a parameter rather than a read of `process.argv`, because
+// scripts/prepare.mjs imports this function: what it does should follow from
+// what its caller asked for, not from the command line that caller happens to
+// have been started with.
+export function main({ check = false } = {}) {
   const appDirs = readdirSync(join(repoRoot, 'apps'), { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
     .map((entry) => join('apps', entry.name));
@@ -63,6 +93,7 @@ export function main() {
 
   for (const sample of ['.', ...appDirs].flatMap(samplesIn)) {
     const target = sample.slice(0, -SUFFIX.length);
+    if (check && !DEPLOYED_STACK_READS.includes(target)) continue;
     if (!existsSync(join(repoRoot, target))) {
       if (check) {
         absent.push({ target, sample });
@@ -97,14 +128,16 @@ the ones worth editing.`);
     console.log(`${target} does not exist — copy it from ${sample} and fill in the values`);
   }
 
-  if (absent.length > 0) {
-    console.log(`Missing ${absent.length} env file(s). Locally, "npm run setup" writes them from the
-samples; a deployment fills in its own values — see "Configuration you may want
-to change" in README.md.`);
+  if (check && checkFailed({ absent, behind })) {
+    const count = absent.length + behind.length;
+    console.log(`${count} env file(s) the deployed stack reads are not ready, and nothing here
+was written. Locally, "npm run setup" fills them from the samples; a deployment
+supplies its own values — see "Configuration you may want to change" in
+README.md.`);
     process.exitCode = 1;
   }
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  main();
+  main({ check: process.argv.includes('--check') });
 }

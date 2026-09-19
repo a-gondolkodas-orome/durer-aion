@@ -261,13 +261,16 @@ npm run stack:prod
 ```
 
 Reinstalls the dependencies if a manifest or the lockfile has moved since the last run,
-checks that every env file above exists, builds the frontend, builds the backend image,
-starts the three containers detached, and returns only once the backend and nginx are
-healthy. It
-stops at the check rather than writing the missing files from their samples: those carry
-`ADMIN_CREDENTIALS=admin` and a postgres password to match, and the frontend is built
-before the stack starts, so a seeded file would go into the bundle before anyone read it.
-When the stack does not come up:
+checks the env files, builds the frontend, builds the backend image, starts the three
+containers detached, and returns only once the backend and nginx are healthy.
+
+The check is `npm run env:check`, and it is there for its timing: the three files this
+stack reads are `.env.docker`, `.env.local` and `apps/online-frontend/.env`, and the last
+two are inlined into the bundle that is built *before* compose ever opens the first. It
+stops if one is absent or has fallen behind the settings its sample has gained — the one
+a `git pull` in step 9 brings. It writes nothing, and it reads no values, so **editing the
+credentials in step 4 is still yours alone to have done**. When the stack does not come
+up:
 
 ```bash
 npm run stack:ps
