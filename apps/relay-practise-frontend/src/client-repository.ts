@@ -77,8 +77,10 @@ export class OfflineClientRepository implements ClientRepository {
     return Promise.resolve("OK");
   }
 
+  // Nothing to walk: `getAll` has no teams here either, so an empty result is
+  // what the admin page's message is honestly made of.
   async addMinutesToEveryone(_minutes: number, _grant: string): Promise<BulkAddMinutesDto> {
-    throw Error("NOT call this");
+    return { extended: [], alreadyGranted: [], problems: [] };
   }
 
   async getMatchState(_matchId: string): Promise<MatchStateDto> {
