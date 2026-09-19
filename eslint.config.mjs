@@ -151,15 +151,12 @@ export default defineConfig(
       ...typeAwareRules,
     },
   },
-  // packages/strategy-engine and packages/strategy-games are apps/strategy-practice code moved out of it,
-  // still written in that app's dialect: `!` stands in for a guard the game's rules
-  // already make redundant, and auditing several hundred of those would turn a move
-  // into a rewrite. Off in apps/strategy-practice's own config too, for the same code.
+  // packages/strategy-engine is apps/strategy-practice code moved out of it, still
+  // written in that app's dialect: `!` stands in for a guard the game's rules already
+  // make redundant, and auditing several hundred of those would turn a move into a
+  // rewrite. Off in apps/strategy-practice's own config too, for the same code.
   {
-    files: [
-      'packages/strategy-engine/**/*.{ts,tsx}',
-      'packages/strategy-games/**/*.{ts,tsx}',
-    ],
+    files: ['packages/strategy-engine/**/*.{ts,tsx}'],
     rules: {
       '@typescript-eslint/no-non-null-assertion': 'off',
     },
@@ -224,23 +221,6 @@ export default defineConfig(
       }],
     },
   },
-  // A game's .ts half — gameplay, bot, curated start boards — is what a competition
-  // server validates moves and plays bot turns with, so it runs in plain Node; only
-  // the game's .tsx (its board client and config) may be React-flavoured. Same
-  // blind spot as above: `gameplay-react-free.test.ts` in apps/strategy-practice watches what
-  // a relative import resolves to.
-  {
-    files: ['packages/strategy-games/**/*.ts'],
-    rules: {
-      '@typescript-eslint/no-restricted-imports': ['error', {
-        patterns: [{
-          group: ['react', 'react/*', 'react-*', '*.tsx', '**/*.tsx'],
-          allowTypeImports: true,
-          message: 'A game\'s .ts half runs in plain Node; move anything React-flavoured into the game .tsx.',
-        }],
-      }],
-    },
-  },
   // Formatting, shared with apps/strategy-practice's config — see eslint.stylistic.mjs
   // for what belongs in that list and why it is rules rather than prettier. `--fix`
   // applies all of it, which is what the editor runs on save.
@@ -255,29 +235,22 @@ export default defineConfig(
     // code, moved out, and that app has enforced single quotes all along. Both
     // already comply, so this rewrites nothing and keeps it that way. The rest of
     // the repo never had the rule and never settled — see eslint.stylistic.mjs.
-    files: [
-      'packages/strategy-engine/**/*.{ts,tsx}',
-      'packages/strategy-games/**/*.{ts,tsx}',
-    ],
+    files: ['packages/strategy-engine/**/*.{ts,tsx}'],
     rules: quotesRule,
   },
   {
-    // Written by a generator that has to reproduce them byte for byte:
-    // remove-divisor-multiple's table says so at the top of the file, and moveMap
-    // is what generateStrategy.py beside it prints. See eslint.stylistic.mjs.
-    files: [
-      'packages/strategy-games/src/remove-divisor-multiple/bot-strategy.ts',
-      'packages/game/src/games/strategy/stones/moveMap.ts',
-    ],
+    // Written by a generator that has to reproduce it byte for byte: moveMap is what
+    // generateStrategy.py beside it prints. See eslint.stylistic.mjs. The practice
+    // site's own generated tables are exempted in its config, which lints them.
+    files: ['packages/game/src/games/strategy/stones/moveMap.ts'],
     rules: stylisticRulesOff,
   },
   {
-    // The two generated tables above, plus the relay practice site's problem bank —
-    // 8,456 lines of past years' problems, hand-maintained rather than generated, so
-    // the formatting rules stay on for it. All three are a single annotated literal;
-    // see typeAwareRulesOff for why the checker rules come off them.
+    // The generated table above, plus the relay practice site's problem bank — 8,456
+    // lines of past years' problems, hand-maintained rather than generated, so the
+    // formatting rules stay on for it. Both are a single annotated literal; see
+    // typeAwareRulesOff for why the checker rules come off them.
     files: [
-      'packages/strategy-games/src/remove-divisor-multiple/bot-strategy.ts',
       'packages/game/src/games/strategy/stones/moveMap.ts',
       'apps/relay-practise-frontend/src/problems.ts',
     ],

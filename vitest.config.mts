@@ -14,12 +14,11 @@ const source = (file: string) =>
   fileURLToPath(new URL(`packages/${file}`, import.meta.url));
 
 // The directories apps/strategy-practice's own vite config lists in its
-// `test.include` — this app's source, and the two packages its code moved out
-// to. Kept out of the root project so each file has exactly one project.
+// `test.include` — this app's source, and the package its engine moved out to.
+// Kept out of the root project so each file has exactly one project.
 const strategyPracticeProject = [
   'apps/strategy-practice/**',
   'packages/strategy-engine/**',
-  'packages/strategy-games/**',
 ];
 
 export default defineConfig({
@@ -44,8 +43,8 @@ export default defineConfig({
     environment: 'node',
     include: ['{apps,packages}/*/src/**/*.test.{ts,tsx}', 'scripts/**/*.test.mjs'],
     // What decides which project owns a file is its path, not its name. The glob
-    // above reaches into apps/strategy-practice and the two packages whose code
-    // moved out of it, and those belong to the project below — which reads them
+    // above reaches into apps/strategy-practice and the package whose code moved
+    // out of it, and those belong to the project below — which reads them
     // through its own aliases and setup file, and where the root project's node
     // environment would fail them on the first unresolved import.
     exclude: [...configDefaults.exclude, ...strategyPracticeProject],
