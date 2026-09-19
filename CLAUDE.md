@@ -230,12 +230,24 @@ start boards, board client and specs together.
    No `index.ts` barrel: the three files are registered separately, below,
    and a barrel re-exporting the bot next to the board would undo that.
 
+   More files are fine — `stones/` keeps its `moveMap.ts` beside the bot — but
+   what the bot and the board *both* need goes in `game.ts`. A helper beside
+   them is a file the bot entry and the client entry have in common, which the
+   walk below reads as the bot reaching the served bundle, and fails.
+
 2. Register it in the three registries under
    `packages/game/src/games/strategy/`, one per package entry:
    `strategy-games.ts` (the game definition and its name — the `game` entry),
    `strategy-bots.ts` (`game/bot`) and `strategy-client.ts` (`game/client`).
    `apps/online-backend/src/server.ts` imports `game` and `game/bot`; the
    live client `game` and `game/client`; the offline dry run all three.
+
+**The rules and the bot are typechecked twice.** The server reads this
+package's source rather than its `dist`, under its own `lib` and without the
+DOM (`apps/online-backend/tsconfig.json` says why), so a `document` in
+`game.ts` or `strategy.ts` passes `packages/game`'s own typecheck and fails the
+server's, naming the game package. A board may use whatever the browser gives
+it: the server never imports `game/client`.
 
 **The live client must not ship the bot.** The bots are reachable only
 through the `game/bot` entry, and only the server and the offline dry run may
