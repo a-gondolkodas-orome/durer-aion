@@ -1,13 +1,13 @@
 // @vitest-environment jsdom
 import React from 'react';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 // `toBeInTheDocument` and friends.
 import '@testing-library/jest-dom';
 import { SWRConfig } from 'swr';
 import { ThemeProvider } from '@mui/material/styles';
 import { ClientRepoProvider, MockClientRepository } from '../api-repository-interface';
-import { DeletedTeamDto, TeamModelDto } from '../dto/TeamStateDto';
+import { BulkAddMinutesDto, DeletedTeamDto, TeamModelDto } from '../dto/TeamStateDto';
 import { Layout } from './Layout';
 import { Admin } from './Admin';
 
@@ -171,15 +171,31 @@ const playing = (source: TeamModelDto, matchID: string): TeamModelDto => ({
   relayMatch: { state: 'IN PROGRESS', matchID, startAt: START, endAt: END },
 });
 
+// The button carries the walk's state, so a second press waits for it to come
+// back rather than for the label it had the first time.
+const pressAddMinutes = async (minutes: string) => {
+  fireEvent.change(screen.getByPlaceholderText('perc'), { target: { value: minutes } });
+  fireEvent.click(await screen.findByText('hozzáadás'));
+  // Yup validates the field before Formik calls onSubmit, so the dialog the
+  // submit opens is a tick away rather than up already.
+  const confirmButton = await screen.findByText('Megerősítés');
+  // The confirmation fires the walk without awaiting it, so what the walk does
+  // when it answers — the message, and the button coming back up — settles
+  // after the click. Flushed here, or React reports it from whichever
+  // assertion happens to run while it lands.
+  await act(async () => { fireEvent.click(confirmButton); });
+};
+
 const addMinutesTo = async (teams: TeamModelDto[], minutes: string) => {
   renderAdmin();
   await screen.findByText(teams[0].teamName);
-  fireEvent.change(screen.getByPlaceholderText('perc'), { target: { value: minutes } });
-  fireEvent.click(screen.getByText('hozzáadás'));
-  // Yup validates the field before Formik calls onSubmit, so the dialog the
-  // submit opens is a tick away rather than up already.
-  fireEvent.click(await screen.findByText('Megerősítés'));
+  await pressAddMinutes(minutes);
 };
+
+const grantsOf = (walk: { mock: { calls: [number, string][] } }) => walk.mock.calls.map(([, grant]) => grant);
+
+const walked = (fields: Partial<BulkAddMinutesDto> = {}): BulkAddMinutesDto =>
+  ({ extended: [], alreadyGranted: [], problems: [], ...fields });
 
 // This was a loop in the page, one request per team inside one `try`, so the
 // first match the server refused cost every later team its minutes. It is one
@@ -220,8 +236,80 @@ test('a request that never answered is reported, and the list kept', async () =>
 
   await addMinutesTo(teams, '10');
 
-  expect(await screen.findByText('Váratlan hiba történt')).toBeInTheDocument();
+  expect(await screen.findByText(/^Váratlan hiba történt —/)).toBeInTheDocument();
   expect(screen.getByText('Alpha')).toBeInTheDocument();
+});
+
+// The grant is what stops a retry from moving a match twice, and a walk the
+// browser gave up on is the case it exists for — the server may well have
+// finished it. So the retry has to carry the grant the abandoned attempt used;
+// a fresh one is a second extension and would move every match again.
+test('a walk that never answered is retried under the grant it used', async () => {
+  const teams = [playing(alpha, 'relay-a')];
+  vi.spyOn(repo, 'getAll').mockResolvedValue(teams);
+  const walk = vi.spyOn(repo, 'addMinutesToEveryone')
+    .mockRejectedValueOnce(new Error('Váratlan hiba történt'))
+    .mockResolvedValue(walked({ alreadyGranted: ['Alpha'] }));
+
+  await addMinutesTo(teams, '10');
+  // The message says the button is the retry; without it the organiser goes
+  // looking for another way to give time the server may already have given.
+  expect(await screen.findByText(/nyomd meg újra/)).toBeInTheDocument();
+  await pressAddMinutes('10');
+
+  await waitFor(() => expect(walk).toHaveBeenCalledTimes(2));
+  const [first, second] = grantsOf(walk);
+  expect(second).toBe(first);
+  expect(await screen.findByText('0 meccs kapott +10 percet, 1 már megkapta')).toBeInTheDocument();
+});
+
+// A walk that answered is finished, so pressing again means a second, deliberate
+// extension — which has to move the matches the first one moved.
+test('an extension after a walk that answered is a new grant', async () => {
+  const teams = [playing(alpha, 'relay-a')];
+  vi.spyOn(repo, 'getAll').mockResolvedValue(teams);
+  const walk = vi.spyOn(repo, 'addMinutesToEveryone').mockResolvedValue(walked({ extended: ['Alpha'] }));
+
+  await addMinutesTo(teams, '10');
+  await waitFor(() => expect(walk).toHaveBeenCalledOnce());
+  await pressAddMinutes('10');
+
+  await waitFor(() => expect(walk).toHaveBeenCalledTimes(2));
+  const [first, second] = grantsOf(walk);
+  expect(second).not.toBe(first);
+});
+
+// Different minutes is a different intent, not the same one asked for again.
+test('a different number of minutes after a failure is a new grant', async () => {
+  const teams = [playing(alpha, 'relay-a')];
+  vi.spyOn(repo, 'getAll').mockResolvedValue(teams);
+  const walk = vi.spyOn(repo, 'addMinutesToEveryone').mockRejectedValue(new Error('Váratlan hiba történt'));
+
+  await addMinutesTo(teams, '10');
+  await pressAddMinutes('20');
+
+  await waitFor(() => expect(walk).toHaveBeenCalledTimes(2));
+  const [first, second] = grantsOf(walk);
+  expect(second).not.toBe(first);
+});
+
+// The confirmation closes as soon as it is pressed, so without this the page
+// says nothing while every running match is being walked — and a second press
+// would start a second walk.
+test('the button says the walk is running, and cannot start another', async () => {
+  const teams = [playing(alpha, 'relay-a')];
+  vi.spyOn(repo, 'getAll').mockResolvedValue(teams);
+  // Held open, so the page is looked at while the walk is still running.
+  let finish!: (result: BulkAddMinutesDto) => void;
+  vi.spyOn(repo, 'addMinutesToEveryone')
+    .mockReturnValue(new Promise<BulkAddMinutesDto>(resolve => { finish = resolve; }));
+
+  await addMinutesTo(teams, '10');
+
+  const running = await screen.findByText('folyamatban…');
+  expect(running.closest('button')).toBeDisabled();
+  await act(async () => { finish(walked({ extended: ['Alpha'] })); });
+  expect(await screen.findByText('hozzáadás')).toBeInTheDocument();
 });
 
 const openDeletedTab = async () => {

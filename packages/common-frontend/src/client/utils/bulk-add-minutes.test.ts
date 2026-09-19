@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { BulkAddMinutesDto } from '../dto/TeamStateDto';
-import { bulkAddMinutesMessage, bulkAddMinutesVariant, newGrant } from './bulk-add-minutes';
+import { bulkAddMinutesMessage, bulkAddMinutesRetryMessage, bulkAddMinutesVariant, newGrant }
+  from './bulk-add-minutes';
 
 const result = (fields: Partial<BulkAddMinutesDto> = {}): BulkAddMinutesDto =>
   ({ extended: [], alreadyGranted: [], problems: [], ...fields });
@@ -76,5 +77,16 @@ describe('bulkAddMinutesVariant', () => {
   // A repeat that moved nothing because it had all been done is not a failure.
   test('is a success when the grant had already covered everything', () => {
     expect(bulkAddMinutesVariant(result({ alreadyGranted: ['Alpha'] }))).toBe('success');
+  });
+});
+
+describe('bulkAddMinutesRetryMessage', () => {
+  // The organiser has to know that the same button is the retry, or they go
+  // looking for another way to give time the server may already have given.
+  test('keeps what went wrong and says pressing again is safe', () => {
+    const message = bulkAddMinutesRetryMessage('Váratlan hiba történt');
+
+    expect(message).toContain('Váratlan hiba történt');
+    expect(message).toContain('nyomd meg újra');
   });
 });

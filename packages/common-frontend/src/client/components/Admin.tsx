@@ -2,7 +2,7 @@ import { Stack } from '@mui/system';
 import { useAddMinutesToEveryone, useAll, useRemoveAllTeams } from '../hooks/user-hooks';
 import { Button, Dialog, Table, TableBody, TableCell, TableHead, TableRow, IconButton, Tab, Tabs } from '@mui/material';
 import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
-import { Fragment, useState } from 'react';
+import { Fragment, useRef, useState } from 'react';
 import useSWR from 'swr';
 import { DataGrid } from '@mui/x-data-grid';
 import { TeamModelDto } from '../dto/TeamStateDto';
@@ -15,7 +15,8 @@ import { useTheme } from '@mui/material/styles';
 import { useSnackbar } from 'notistack';
 import { FinishedMatchStatus } from 'schemas';
 import { ConfirmDialogInterface, ConfirmDialog } from './ConfirmDialog';
-import { bulkAddMinutesMessage, bulkAddMinutesVariant, newGrant } from '../utils/bulk-add-minutes';
+import { bulkAddMinutesMessage, bulkAddMinutesRetryMessage, bulkAddMinutesVariant, newGrant }
+  from '../utils/bulk-add-minutes';
 import * as Yup from 'yup';
 import { alpha } from '@mui/system'
 import { FieldProps } from "formik"
@@ -38,6 +39,17 @@ export function Admin(props: { teamId?: string }) {
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogInterface | null>(null);
   const [adminPageOpen, setAdminPageOpen] = useState<boolean>(true);
   const [tab, setTab] = useState<AdminTab>('teams');
+  // A walk is in flight: the button that starts one stays down until it
+  // answers, because the dialog that confirmed it has already closed and there
+  // would otherwise be nothing on the page saying the round is being extended.
+  const [extending, setExtending] = useState(false);
+  // The grant of an extension that has not been answered yet, with the minutes
+  // it was made for. Kept so that pressing again after a walk the browser gave
+  // up on sends the *same* grant, which the server refuses to apply twice — a
+  // fresh one would be a second, deliberate extension and would move every
+  // match the abandoned walk had already reached. Cleared once a walk answers,
+  // and not reused for a different number of minutes, which is a new intent.
+  const pendingGrant = useRef<{ minutes: number, grant: string } | null>(null);
 
   // Read off the list rather than kept as state, so a team deleted from the
   // `/admin/<teamId>` page drops out with the list's next load and the page
@@ -233,16 +245,19 @@ export function Admin(props: { teamId?: string }) {
             // Formik keeps what was typed, and `FormikValues` is `any`, so the
             // number Yup validated above is still a string here.
             const minutes = Number(values.time);
-            // One grant per press, made before the dialog so the same one goes
-            // with every attempt this confirmation leads to: the server moves a
-            // match once per grant, which is what makes asking again safe when
-            // the answer to a long walk never arrives.
-            const grant = newGrant();
+            const unanswered = pendingGrant.current;
+            const grant = unanswered !== null && unanswered.minutes === minutes
+              ? unanswered.grant
+              : newGrant();
+            pendingGrant.current = { minutes, grant };
             setConfirmDialog({
               text: `Erősítsd meg, hogy minden aktuális csapatnak meg akarod növelni az idejét ${minutes} perccel`,
               confirm: async () => {
+                setExtending(true);
                 try {
                   const result = await addMinutesToEveryone(minutes, grant);
+                  // Answered, so the next press means a second extension.
+                  pendingGrant.current = null;
                   enqueueSnackbar(bulkAddMinutesMessage(result, minutes), {
                     variant: bulkAddMinutesVariant(result),
                     // The problems name every team left out, which takes longer
@@ -251,11 +266,22 @@ export function Admin(props: { teamId?: string }) {
                     autoHideDuration: result.problems.length > 0 ? 15000 : undefined,
                   });
                 } catch (e) {
+                  // The grant is kept, so the same button is the retry. Saying
+                  // so is the point: an organiser who thinks the extension did
+                  // not happen would otherwise go looking for another way to
+                  // give it, and the walk may well have finished server-side.
                   const message = e instanceof Error ? e.message : "Váratlan hiba történt";
-                  enqueueSnackbar(message, { variant: 'error' });
+                  enqueueSnackbar(bulkAddMinutesRetryMessage(message), {
+                    variant: 'error',
+                    autoHideDuration: 15000,
+                  });
+                } finally {
+                  // The rows carry each match's end time; the walk moved them.
+                  // Before the button comes back up, so what it comes back to
+                  // is a list that has been told.
+                  await mutate().catch(() => undefined);
+                  setExtending(false);
                 }
-                // The rows carry each match's end time; the walk moved them.
-                await mutate().catch(() => undefined);
               },
             })
           }}>
@@ -279,8 +305,8 @@ export function Admin(props: { teamId?: string }) {
             width: '150px',
             alignSelf: 'center',
             textTransform: 'none',
-          }} variant='contained' color='primary' type="submit">
-            hozzáadás
+          }} variant='contained' color='primary' type="submit" disabled={extending}>
+            {extending ? 'folyamatban…' : 'hozzáadás'}
           </Button>
           </Stack>
           <ErrorMessage name="time"/><ErrorMessage name="time" render={msg => (

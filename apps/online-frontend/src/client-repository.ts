@@ -5,13 +5,25 @@ import i18n from "i18next";
 // package's dist build, which the CI test job does not produce.
 import type { ClientRepository, TeamModelDto, MatchStateDto, DeletedTeamDto, RestoreResultDto, BoardMoves, BulkAddMinutesDto } from "common-frontend";
 
+/** Long enough for the bulk time extension.
+ *
+ * It walks every running match one at a time, each behind that match's own
+ * queue and so behind any bot move already on it — two matches per team, and a
+ * thousand teams is a file `scripts/test.tsv` already has. Ten seconds is the
+ * request timeout for everything else and it aborted the walk mid-round, which
+ * costs more than waiting: a retry re-reads every match it had already done.
+ * nginx has to allow the same (`apps/online-frontend/nginx/nginx.conf`) — the
+ * route sends nothing until the walk is over, so its read timeout is what the
+ * browser is really waiting on. */
+const BULK_TIMEOUT_MS = 300_000;
+
 // Always the page's own origin: the session is a cookie, and a cookie does not
 // ride a cross-origin request. In dev the Vite server proxies the backend
 // (vite.config.ts) the way nginx does in the docker stack.
-function apiAxiosInstance(): AxiosInstance {
+function apiAxiosInstance(timeout = 10000): AxiosInstance {
   return axios.create({
     baseURL: '/',
-    timeout: 10000,
+    timeout,
   });
 }
 
@@ -200,7 +212,7 @@ export class RealClientRepository implements ClientRepository {
   async addMinutesToEveryone(minutes: number, grant: string): Promise<BulkAddMinutesDto> {
     let result;
     try {
-      result = await apiAxiosInstance().post('/game/admin/addminutes', { minutes, grant });
+      result = await apiAxiosInstance(BULK_TIMEOUT_MS).post('/game/admin/addminutes', { minutes, grant });
     } catch (e: unknown) {
       const err = makeAxiosError(e);
       console.error(err.message)

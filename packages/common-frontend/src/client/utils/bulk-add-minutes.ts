@@ -1,12 +1,14 @@
 import { BulkAddMinutesDto } from '../dto/TeamStateDto';
 
-/** A fresh grant for one press of the button.
+/** A fresh grant for one extension.
  *
  * The server records it against every match it moves and refuses to move a
  * match twice under the same one, so this is what makes sending the request
  * again safe — the case being a walk the server finished and the browser gave
- * up on. Short because it is appended to the team's notes, which has a length
- * the admin routes share with the organisers' own text.
+ * up on. That only works if the retry carries the grant the abandoned attempt
+ * used, so the caller keeps it until a walk answers (`Admin.tsx`) rather than
+ * making one per press. Short because it is appended to the team's notes,
+ * which has a length the admin routes share with the organisers' own text.
  */
 export function newGrant(): string {
   const bytes = crypto.getRandomValues(new Uint8Array(4));
@@ -48,4 +50,15 @@ export function bulkAddMinutesMessage(result: BulkAddMinutesDto, minutes: number
 export function bulkAddMinutesVariant(result: BulkAddMinutesDto): 'success' | 'warning' | 'error' {
   if (result.problems.length === 0) return 'success';
   return result.extended.length + result.alreadyGranted.length > 0 ? 'warning' : 'error';
+}
+
+/** What to say when the walk never answered.
+ *
+ * The grant is kept, so the same button is the retry and the matches already
+ * moved will not move again. Saying so is the point: an organiser who reads
+ * only the error goes looking for another way to give the time, and the walk
+ * may well have finished on the server after the browser stopped waiting.
+ */
+export function bulkAddMinutesRetryMessage(error: string): string {
+  return `${error} — nyomd meg újra, a már meghosszabbított meccsek nem kapnak kétszer időt.`;
 }
