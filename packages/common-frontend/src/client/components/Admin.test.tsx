@@ -412,6 +412,22 @@ test('the import tab stops a check on text it has just imported', async () => {
   expect(screen.getByText('Belépőkódok letöltése újra')).toBeInTheDocument();
 });
 
+// The read failing leaves the box as it was, so without a word the pick looks
+// like it simply did nothing.
+test('the import tab says so when the picked file cannot be read', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  const importTeams = vi.spyOn(repo, 'importTeams');
+  renderAdmin();
+  await openImportTab();
+  const file = new File(['ignored'], 'teams.tsv', { type: 'text/tab-separated-values' });
+  vi.spyOn(file, 'text').mockRejectedValue(new Error('A fájl nem olvasható.'));
+
+  fireEvent.change(screen.getByTestId('importTeamsFile'), { target: { files: [file] } });
+
+  expect(await screen.findByText('A fájl nem olvasható.')).toBeInTheDocument();
+  expect(importTeams).not.toHaveBeenCalled();
+});
+
 // Only the server knows what the live teams hold, so "Ellenőrzés" is the one
 // way to find out before writing anything.
 test('the import tab reports what a live team blocks, without importing', async () => {

@@ -151,7 +151,15 @@ export function ImportTeams(props: {
     // fires on a change of value.
     event.target.value = '';
     if (!file) return;
-    const text = await file.text();
+    let text: string;
+    try {
+      text = await file.text();
+    } catch (e: unknown) {
+      // Said rather than swallowed: the read failing leaves the box as it was,
+      // so without this the pick looks like it simply did nothing.
+      failed(e);
+      return;
+    }
     edited(text);
     await check(text);
   };
