@@ -36,6 +36,47 @@ const houseStyle = {
   'no-var': 'error'
 };
 
+// The same type-aware rules as the root eslint.config.mjs, kept in step with it —
+// this config lints what that one skips. Named rather than spelled out inline so
+// `typeAwareRulesOff` below can be derived from the list instead of repeating it.
+// They are also where the time goes — no-deprecated alone is 38% of rule time, and
+// no-misused-promises another 19%.
+const typeAwareRules = {
+  // An object interpolated into a string prints `[object Object]`, which is
+  // never what the message meant to say.
+  '@typescript-eslint/no-base-to-string': 'error',
+  // A promise nobody waits for: the caller reports success before the work has
+  // landed, and a failure surfaces only as an unhandled rejection.
+  '@typescript-eslint/no-floating-promises': 'error',
+  // `for…in` over an array walks its keys as strings, and its own properties
+  // too. No violations today; this keeps it that way.
+  '@typescript-eslint/no-for-in-array': 'error',
+  // A deprecated API still compiles; this is the only thing that says so before
+  // the removal lands.
+  '@typescript-eslint/no-deprecated': 'error',
+  // An async function handed to something that ignores what it returns: React
+  // event handlers, addEventListener, Array.forEach. The await never happens.
+  '@typescript-eslint/no-misused-promises': 'error',
+  // A type assertion the compiler already knows is redundant. Deleting them is
+  // what keeps the ones that remain worth reading: a stray `!` is where a null
+  // dereference hides.
+  '@typescript-eslint/no-unnecessary-type-assertion': 'error',
+  // A catch callback's parameter is implicitly `any`, so reading `.message` off
+  // it yields undefined for anything that is not an Error — and the UI shows an
+  // empty error where the reason should be.
+  '@typescript-eslint/use-unknown-in-catch-callback-variable': 'error'
+};
+
+// For a file that is a data literal with a type annotation on it. Asking the checker
+// what a 16,000-line `Record<number, Record<string, number[]>>` means, then asking
+// again per rule, is most of what linting it costs — and none of these rules has
+// anything to find in a table of numbers. `tsc` still checks the table against its
+// annotation on every `npm run typecheck`, which is the check that catches a
+// mis-pasted one; this only stops ESLint redoing it to no purpose.
+const typeAwareRulesOff = Object.fromEntries(
+  Object.keys(typeAwareRules).map(rule => [rule, 'off'])
+);
+
 // How code breaks across lines. Tuned for components — nested JSX props and
 // option objects — and applied only to them: the same rules run over a dense
 // numeric script explode a hand-aligned matrix into one entry per line, and
@@ -119,35 +160,11 @@ export default defineConfig(
       // this code leans on `!` to say "the rules
       // guarantee this square is on the board", and each one is a judgement about
       // what the right guard would be rather than a mechanical edit. The root
-      // config already turns this rule off for packages/strategy-engine and packages/strategy-games
-      // — this app's code, moved out — so leaving it on here is what would be
+      // config already turns this rule off for packages/strategy-engine — this
+      // app's code, moved out — so leaving it on here is what would be
       // inconsistent. Turning it on is a project of its own.
       '@typescript-eslint/no-non-null-assertion': 'off',
-      // The same type-aware rules as the root eslint.config.mjs, kept in step
-      // with it — this config lints what that one skips.
-      // An object interpolated into a string prints `[object Object]`, which is
-      // never what the message meant to say.
-      '@typescript-eslint/no-base-to-string': 'error',
-      // A promise nobody waits for: the caller reports success before the work has
-      // landed, and a failure surfaces only as an unhandled rejection.
-      '@typescript-eslint/no-floating-promises': 'error',
-      // `for…in` over an array walks its keys as strings, and its own properties
-      // too. No violations today; this keeps it that way.
-      '@typescript-eslint/no-for-in-array': 'error',
-      // A deprecated API still compiles; this is the only thing that says so before
-      // the removal lands.
-      '@typescript-eslint/no-deprecated': 'error',
-      // An async function handed to something that ignores what it returns: React
-      // event handlers, addEventListener, Array.forEach. The await never happens.
-      '@typescript-eslint/no-misused-promises': 'error',
-      // A type assertion the compiler already knows is redundant. Deleting them is
-      // what keeps the ones that remain worth reading: a stray `!` is where a null
-      // dereference hides.
-      '@typescript-eslint/no-unnecessary-type-assertion': 'error',
-      // A catch callback's parameter is implicitly `any`, so reading `.message` off
-      // it yields undefined for anything that is not an Error — and the UI shows an
-      // empty error where the reason should be.
-      '@typescript-eslint/use-unknown-in-catch-callback-variable': 'error',
+      ...typeAwareRules,
       'no-restricted-syntax': ['error', {
         selector: 'TSAsExpression > TSNeverKeyword.typeAnnotation',
         message: "'as never' is not allowed; use a more specific type or fix the underlying type instead."
@@ -163,6 +180,7 @@ export default defineConfig(
     // by the root config, which is what lints packages/strategy-engine.
     files: [
       'src/components/games/**/gameplay.ts',
+      'src/components/games/**/bot-strategy.ts',
       'src/components/games/**/start-boards.ts',
       'src/components/games/shared/**/*.ts'
     ],
@@ -238,10 +256,22 @@ export default defineConfig(
     rules: { '@stylistic/max-len': 'off' }
   },
   {
-    // Generated verbatim from the board's definition and marked as such at the top
-    // of the file; the formatting rules are off for it, the rules about meaning are not.
-    files: ['src/components/games/modified-mill/board-data.ts'],
+    // Written by a generator that has to reproduce them byte for byte, and marked as
+    // such at the top of each file: modified-mill's board data, and the pre-generated
+    // move table remove-divisor-multiple's bot reads. The formatting rules are off for
+    // them — including quotes, since the table's keys are double-quoted JSON — and the
+    // rules about meaning are not.
+    files: [
+      'src/components/games/modified-mill/board-data.ts',
+      'src/components/games/remove-divisor-multiple/bot-strategy.ts'
+    ],
     rules: stylisticRulesOff
+  },
+  {
+    // The move table is a single annotated literal; see typeAwareRulesOff for why the
+    // checker rules come off it while the syntactic ones stay on.
+    files: ['src/components/games/remove-divisor-multiple/bot-strategy.ts'],
+    rules: typeAwareRulesOff
   },
   // The root config's `**/dist/**` does not reach in here: ESLint picks a directory's
   // config from its *parent*, so everything under this one is judged by this file.

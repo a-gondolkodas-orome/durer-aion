@@ -19,7 +19,6 @@ packages/
   common-frontend/    # Shared React components
   schemas/            # TypeScript models/types
   strategy-engine/    # the strategy practice site's game engine: rules, moves, bots, match state, no framework
-  strategy-games/     # competition games in that engine's format; only strategy-practice consumes it
 pages/                # static content the Pages deploy serves but no app builds
 ```
 
@@ -42,8 +41,8 @@ through *its* config and everything else through the root one; and the root
 3072 MB of V8 heap to do it — `turbo.json` says what that cost and why the split.) What that ESLint config differs on is the *rule set* —
 `@eslint-react`, react-hooks, and a stylistic dialect (no trailing comma,
 `max-len` 120) the root does not impose. Single quotes are not part of that
-difference: the root config applies the same rule to `packages/strategy-engine` and
-`packages/strategy-games`, this app's code moved out. It is not a second toolchain:
+difference: the root config applies the same rule to `packages/strategy-engine`,
+this app's engine moved out. It is not a second toolchain:
 eslint, typescript and vitest are pinned to the same versions as the root and
 npm hoists them, its own plugins included. It came in as a subtree
 merge from `durer-jatekok` with that dialect already set, and reconciling the
@@ -87,9 +86,7 @@ change is measured against.
 
 - **Frontend**: React 19, Vite, MUI (Material-UI), React Router
 - **Backend**: boardgame.io server, Koa, PostgreSQL (via bgio-postgres)
-- **Build**: Turborepo, TypeScript, tsdown. The packages build into `dist` —
-  all but `packages/strategy-games`, which has no build at all, because
-  `apps/strategy-practice` reads it from source through a vite alias. The
+- **Build**: Turborepo, TypeScript, tsdown. The packages build into `dist`. The
   backend is one tsdown bundle too, built from the packages' *source*
   rather than their `dist` (`apps/online-backend/tsdown.config.mts` says how
   and why), so neither its build, its dev server nor its typecheck waits on a
@@ -102,9 +99,9 @@ change is measured against.
   `require`s it works too (its `tsdown.config.mts` says how).
 - **Testing**: vitest, React Testing Library. Every suite is `*.test.ts(x)`, and
   which of the two projects runs one is decided by its **path**: the root
-  `vitest.config.mts` excludes `apps/strategy-practice`, `packages/strategy-engine`
-  and `packages/strategy-games` — that app and the code it moved out — from its own
-  project, and that app's config includes exactly those three. One `npm test` runs
+  `vitest.config.mts` excludes `apps/strategy-practice` and
+  `packages/strategy-engine` — that app and the engine it moved out — from its own
+  project, and that app's config includes exactly those two. One `npm test` runs
   both projects through vitest, and neither uses Jest.
 - **`apps/strategy-practice`** shares this React major, the root's eslint,
   typescript and vitest pins, and the same vite as the other frontends;

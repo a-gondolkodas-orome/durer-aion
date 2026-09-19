@@ -15,8 +15,6 @@
    classes are silently missing from the build whenever no in-app file happens to
    use the same ones. */
 @source "../../../packages/strategy-engine/src/react";
-/* The moved games' board clients, for the same reason. */
-@source "../../../packages/strategy-games/src";
 @variant dark (&:where(.dark, .dark *));
 
 /* Hover and keyboard focus together. Hover is what a mouse gets: on a touch

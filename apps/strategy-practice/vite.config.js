@@ -35,11 +35,6 @@ export default defineConfig(() => ({
       {
         find: /^strategy-engine\/react$/,
         replacement: fileURLToPath(new URL('../../packages/strategy-engine/react.ts', import.meta.url))
-      },
-      // Source rather than a build, for the same reasons as `engine` above.
-      {
-        find: /^strategy-games$/,
-        replacement: fileURLToPath(new URL('../../packages/strategy-games/index.ts', import.meta.url))
       }
     ]
   },
@@ -97,13 +92,12 @@ export default defineConfig(() => ({
     // written against this setup, and this is the app that exercises the engine
     // in a browser. Vitest resolves them through the alias above, so they test
     // the source rather than a build.
-    // The root config excludes these three directories from its own project, so
+    // The root config excludes these two directories from its own project, so
     // what runs here is decided by the path, not by the file's name — see
     // vitest.config.mts.
     include: [
       'src/**/*.test.{ts,tsx}',
-      '../../packages/strategy-engine/src/**/*.test.{ts,tsx}',
-      '../../packages/strategy-games/src/**/*.test.{ts,tsx}'
+      '../../packages/strategy-engine/src/**/*.test.{ts,tsx}'
     ],
     // On demand only, never in `npm test` or CI, and with no thresholds — see
     // AGENTS.md § Coverage for why, and for what the report is actually good
@@ -112,14 +106,13 @@ export default defineConfig(() => ({
       provider: 'v8',
       // Without this, only files a test imported are reported, and a module no
       // spec touches is missing from the report rather than showing up at 0%.
-      // The engine and games packages count as this app's source for coverage
-      // purposes: their specs run here (allowExternal is what lets v8 keep files
-      // above the app root).
+      // The engine package counts as this app's source for coverage purposes:
+      // its specs run here (allowExternal is what lets v8 keep files above the
+      // app root).
       allowExternal: true,
       include: [
         'src/**/*.{ts,tsx}',
-        '../../packages/strategy-engine/src/**/*.{ts,tsx}',
-        '../../packages/strategy-games/src/**/*.{ts,tsx}'
+        '../../packages/strategy-engine/src/**/*.{ts,tsx}'
       ],
       exclude: [
         'src/**/*.test.{ts,tsx}',
@@ -127,8 +120,7 @@ export default defineConfig(() => ({
         'src/test-setup.ts',
         'src/**/test-helpers.tsx',
         'src/main.tsx',
-        '../../packages/strategy-engine/src/**/*.test.{ts,tsx}',
-        '../../packages/strategy-games/src/**/*.test.{ts,tsx}'
+        '../../packages/strategy-engine/src/**/*.test.{ts,tsx}'
       ],
       reporter: ['text', 'html'],
       // /reports is gitignored
