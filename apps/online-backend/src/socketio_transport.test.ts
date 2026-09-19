@@ -12,7 +12,7 @@
  * Still no substitute for the round against `npm run stack:up`: nginx and the
  * built frontend are not in front of this, and postgres is not behind it.
  */
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from "vitest";
 import { AddressInfo } from "node:net";
 import { io as connect, Socket } from "socket.io-client";
 import { Client } from "boardgame.io/client";
@@ -99,7 +99,7 @@ describe("the socket transport a browser talks to", () => {
 
   /** The one the tests share, unless a test replaces it: the real judge, the
    *  in-memory store, and the wait on a judge's turn left at its default. */
-  async function startServer(bot: Bot = new RealBot({ enumerate: game.ai?.enumerate })) {
+  async function startServer(bot: Bot = new RealBot({ enumerate: game.ai?.enumerate }), syncBotTurnWaitMs?: number) {
     server = Server({
       games: [game],
       // No `db`, so boardgame.io hands us its in-memory store — the transport
@@ -107,6 +107,8 @@ describe("the socket transport a browser talks to", () => {
       transport: new SocketIOButBotMoves(
         { https: undefined },
         { [GAME_NAME]: bot },
+        undefined,
+        syncBotTurnWaitMs,
       ),
       // Set, rather than left out, so the server does not warn about CORS.
       origins: [],
@@ -117,12 +119,13 @@ describe("the socket transport a browser talks to", () => {
     url = `http://localhost:${(running.appServer.address() as AddressInfo).port}`;
   }
 
-  /** Throws the shared server away and starts one built for this test — a
-   *  judge it can hold still. The rest want the defaults, so the cost of
-   *  building it twice falls only on the test that needs it. */
-  async function restartServerWith(bot: Bot) {
+  /** Throws the shared server away and starts one built for this test. Two of
+   *  them need a judge they can hold still, or a wait they can outlast; the
+   *  rest want the defaults, so the cost of building it twice falls only on
+   *  the two. */
+  async function restartServerWith(bot: Bot, syncBotTurnWaitMs?: number) {
     server.kill(running);
-    await startServer(bot);
+    await startServer(bot, syncBotTurnWaitMs);
   }
 
   beforeEach(async () => {
@@ -350,6 +353,30 @@ describe("the socket transport a browser talks to", () => {
     const { state } = await fetchMatch(server.db, MATCH_ID, { state: true } as const);
     expect(answered._stateID).toBe(state._stateID);
     expect(answered.G).toStrictEqual(state.G);
+  });
+
+  /** The wait `resumeBotTurn` puts on the judge has to be bounded. This is the
+   *  packet boardgame.io answers *and* registers the socket on, so a turn that
+   *  never came back would not only lose this answer — it would leave the
+   *  socket off the match's channel, where no later push could reach it
+   *  either. Late is recoverable; never is not. */
+  it("answers a sync whose judge's turn never comes back", async () => {
+    const warned = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    onTestFinished(() => { warned.mockRestore(); });
+    class SilentBot extends RealBot {
+      play(): ReturnType<Bot["play"]> {
+        return new Promise<never>(() => undefined);
+      }
+    }
+    await restartServerWith(new SilentBot({ enumerate: game.ai?.enumerate }), 200);
+    await createStoredMatch();
+    await server.db.setState(MATCH_ID, stateOnTheJudgesTurn());
+
+    const state = await syncAs(await connectClient(), MATCH_ID, HUMAN_ID);
+
+    // Late, not wrong: the stored state, with the judge still to move.
+    expect(state.ctx.currentPlayer).toBe(BOT_ID);
+    expect(warned).toHaveBeenCalledWith(expect.stringContaining(MATCH_ID));
   });
 
   it("refuses a sync for a match nobody created", async () => {

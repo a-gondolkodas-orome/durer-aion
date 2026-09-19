@@ -99,6 +99,11 @@ export async function fetch<T_Opts extends StorageAPI.FetchOpts>(
 /// Bot's playerID is '1', because the gameWrapper uses player '0' for the human player.
 export const BOT_ID = PlayerIDType.JUDGE_PLAYER;
 
+/** How long a sync waits for the bot's turn before it is answered without it.
+ *  Generous against what the wait is really made of: the bot's own 400ms pause
+ *  (botwrapper.ts), plus a player's move it may be queued behind. */
+export const SYNC_BOT_TURN_WAIT_MS = 5000;
+
 /** This is a special transport specifically designed for replacing a player's move
  * with a bot's move.
  *
@@ -110,14 +115,19 @@ export class SocketIOButBotMoves extends SocketIO {
   bots: Record<string, Bot>;
   onFinishedMatch: (matchID: string) => Promise<void>;
   unFinishedMatches = new Set<string>();
+  /** A parameter only so a test can shrink it; the server passes three
+   *  arguments and takes the constant. */
+  readonly syncBotTurnWaitMs: number;
   constructor(
     socketOpts: SocketOpts,
     bots: Record<string, Bot>,
-    onFinishedMatch: (matchID: string) => Promise<void> = async () => undefined
+    onFinishedMatch: (matchID: string) => Promise<void> = async () => undefined,
+    syncBotTurnWaitMs: number = SYNC_BOT_TURN_WAIT_MS
   ) {
     super({ ...socketOpts });
     this.bots = bots;
     this.onFinishedMatch = onFinishedMatch;
+    this.syncBotTurnWaitMs = syncBotTurnWaitMs;
   }
   init(
     app: Server.App & { _io: IOTypes.Server; },
@@ -238,8 +248,12 @@ export class SocketIOButBotMoves extends SocketIO {
    *  once and sees the board it should, rather than seeing a stale one at once
    *  and depending on a push that may never arrive.
    *
-   *  Answers nothing and throws nothing: a bot that could not play is no
-   *  reason to drop the team's sync. */
+   *  Answers nothing and throws nothing, and does not wait forever: a bot
+   *  that could not play is no reason to drop the team's sync. A turn that
+   *  never settles would be worse than the stale answer this replaced — the
+   *  packet would never reach boardgame.io's listener, and `addClient` is
+   *  there too, so the socket would be left off the match's channel and no
+   *  later push could reach it either. */
   private async resumeBotTurn(
     app: Server.App,
     game: Game,
@@ -267,9 +281,31 @@ export class SocketIOButBotMoves extends SocketIO {
       // No socket: `Master.onUpdate` only ever publishes to the match's
       // channel, and this caller is not on it yet — the router's add-minutes
       // handler passes null for the same reason.
-      await this.takeBotTurn(app, game, null, bot, matchID);
+      //
+      // The failure handler goes on the turn rather than on the race below:
+      // past the wait nothing is listening to `turn` any more, so a bot that
+      // throws then would be an unhandled rejection.
+      const turn = this.takeBotTurn(app, game, null, bot, matchID).catch((error: unknown) => {
+        console.error(`could not take the bot's turn on a sync for match ${matchID}`, error);
+      });
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      const expired = new Promise<"expired">(resolve => {
+        timer = setTimeout(() => { resolve("expired"); }, this.syncBotTurnWaitMs);
+      });
+      try {
+        if (await Promise.race([turn, expired]) === "expired") {
+          // Not an abandoned turn: it stays on the match queue and its move is
+          // persisted, so the next sync reads it back. Only this packet stops
+          // waiting for it.
+          console.warn(`the judge's turn outlasted the sync for match ${matchID}; answering with the stored state`);
+        }
+      } finally {
+        clearTimeout(timer);
+      }
     } catch (error) {
-      console.error(`could not take the bot's turn on a sync for match ${matchID}`, error);
+      // Only the credential check reaches here; the turn carries its own
+      // handler above.
+      console.error(`could not check who the sync for match ${matchID} is from`, error);
     }
   }
 
