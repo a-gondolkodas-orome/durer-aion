@@ -25,7 +25,10 @@ describe('the env files', () => {
   // `prepare.mjs` writes the missing ones from their samples, which is what a developer
   // wants; `--check` only reports them, which is what a deployment wants. Either answers
   // the question before the build.
-  const LOOKS_AT_THEM = /scripts\/prepare\.mjs|npm run env:check/;
+  // The `npm run` spelling and the direct one both count: which of the two a chain uses
+  // is a choice about readability, and a test that accepted only one would be rejecting
+  // a correct script for writing itself out.
+  const LOOKS_AT_THEM = /scripts\/prepare\.mjs|npm run env:check|seed-env-files\.mjs[^&]*--check/;
 
   it.each(scriptsMatching(BUILDS_A_BUNDLE_OR_STARTS_THE_STACK))(
     '%s looks at them before it builds or starts anything',
@@ -69,7 +72,12 @@ describe('every deployed service', () => {
     let inServices = false;
     let current = null;
     for (const line of lines) {
-      if (/^\S/.test(line)) {
+      // A comment is not a key at any column. Reading one in the first column as the end
+      // of the services block would drop every service after it, and the assertion below
+      // would then pass on what was left.
+      if (/^\s*#/.test(line)) {
+        continue;
+      } else if (/^\S/.test(line)) {
         inServices = line.startsWith('services:');
         current = null;
       } else if (!inServices) {
@@ -84,10 +92,19 @@ describe('every deployed service', () => {
     return found;
   };
 
+  // Written out rather than counted, because the reading above is a handful of regexes
+  // and not a YAML parser: anything it stops recognising — a service written
+  // `web: {…}` on one line, a shape nobody has used here yet — would otherwise take
+  // that service out of the check silently, which is the one way this test could report
+  // success for a stack it never looked at. Adding a service means adding it here, and
+  // then the healthcheck question is asked of it.
+  it('is one of the three this file defines', () => {
+    expect([...services().keys()]).toStrictEqual(['web', 'backend', 'postgres']);
+  });
+
   it('is one `up --wait` can wait for', () => {
     const withoutOne = [...services()].filter(([, has]) => !has).map(([name]) => name);
 
-    expect([...services()].length).toBeGreaterThan(0);
     expect(withoutOne).toStrictEqual([]);
   });
 });
