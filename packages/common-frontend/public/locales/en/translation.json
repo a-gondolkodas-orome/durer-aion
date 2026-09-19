@@ -29,6 +29,8 @@
   },
   "general": {
     "loading": "Loading game or task…",
+    "notLoading": "The game has not loaded. Reloading the page usually helps; the remaining time does not stop meanwhile.",
+    "reload": "Reload the page",
     "points_one": "1 point",
     "points_other": "{{count}} points",
     "remainingTime": "Remaining time",

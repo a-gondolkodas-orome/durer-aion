@@ -29,6 +29,8 @@
   },
   "general": {
     "loading": "Játék vagy feladat betöltése…",
+    "notLoading": "A játék nem töltődött be. Az oldal újra töltése megoldhatja, a hátralevő idő közben nem áll meg.",
+    "reload": "Oldal újra töltése",
     "points": "{{count}} pont",
     "remainingTime": "Hátralevő idő",
     "warning": {

@@ -189,6 +189,9 @@ describe("the socket transport a browser talks to", () => {
   });
 
   it("refuses a sync for a match nobody created", async () => {
+    // The refusal is reported, once for the socket that earned it, so this is
+    // a test that means to exercise a logging path.
+    const warned = vi.spyOn(console, "warn").mockImplementation(() => undefined);
     const socket = await connectClient();
     const heard: string[] = [];
     for (const event of ["sync", "update", "connect_error"]) {
@@ -205,5 +208,7 @@ describe("the socket transport a browser talks to", () => {
     // which is what stops anonymous traffic from writing matches into storage.
     expect(heard).toStrictEqual([]);
     expect(socket.connected).toBe(true);
+    expect(warned.mock.calls.map(([line]) => String(line)))
+      .toContainEqual(expect.stringContaining("sync for unknown match no-such-match"));
   });
 });
