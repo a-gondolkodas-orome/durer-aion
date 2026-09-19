@@ -38,3 +38,18 @@ describe('the env files', () => {
     }
   );
 });
+
+describe('the dev overlay', () => {
+  // Teardown, logs and `ps` find the containers by the project name docker compose derives
+  // from this directory, so they need the service names and nothing else — while
+  // `docker-compose.dev.yml` is what replaces the backend's command with the watcher and
+  // publishes postgres on loopback. `stack:down` composed it and `stack:prod`, `stack:logs`
+  // and `stack:ps` did not, which left a production operator running DEPLOYMENT.md's
+  // `npm run stack:down -- --volumes` against a different file set than the one they
+  // brought up.
+  const OVERLAY = /docker-compose\.dev\.yml/;
+
+  it('is composed by stack:up alone', () => {
+    expect(scriptsMatching(OVERLAY).map(([name]) => name)).toStrictEqual(['stack:up']);
+  });
+});

@@ -32,7 +32,7 @@
     "update:minors": "node scripts/update-minors.mjs",
     "stack:build": "docker compose --env-file=.env.docker build",
     "stack:up": "node scripts/prepare.mjs && npx turbo build --filter=online-frontend && docker compose -f docker-compose.yml -f docker-compose.dev.yml --env-file=.env.docker up --build --wait",
-    "stack:down": "docker compose -f docker-compose.yml -f docker-compose.dev.yml --env-file=.env.docker down",
+    "stack:down": "docker compose --env-file=.env.docker down",
     "stack:logs": "docker compose --env-file=.env.docker logs -f",
     "stack:ps": "docker compose --env-file=.env.docker ps",
     "stack:prod": "node scripts/ensure-deps.mjs && npm run env:check && npx turbo build --filter=online-frontend && docker compose --env-file=.env.docker up --build --wait",
