@@ -3,7 +3,10 @@ import axios, { AxiosInstance, AxiosError } from 'axios';
 import i18n from "i18next";
 // Type-only on purpose: client-repository.test.ts loads this file without the
 // package's dist build, which the CI test job does not produce.
-import type { ClientRepository, TeamModelDto, MatchStateDto, DeletedTeamDto, RestoreResultDto, BoardMoves } from "common-frontend";
+import type { ClientRepository, TeamModelDto, MatchStateDto, DeletedTeamDto, RestoreResultDto } from "common-frontend";
+// `MatchMoveDispatch` is a class, so it cannot come as a type — hence the
+// package's own small entry for it, which the same test resolves to source.
+import { MatchMoveDispatch } from "common-frontend/match-moves";
 
 // Always the page's own origin: the session is a cookie, and a cookie does not
 // ride a cross-origin request. In dev the Vite server proxies the backend
@@ -25,7 +28,7 @@ function makeAxiosError(any_error: unknown): AxiosError {
 
 /** The team routes: the session cookie says which team, so nothing here
  * carries the team's id (issue #89). */
-export class RealClientRepository implements ClientRepository {
+export class RealClientRepository extends MatchMoveDispatch implements ClientRepository {
 
   version = "ONLINE" as const;
 
@@ -292,23 +295,5 @@ export class RealClientRepository implements ClientRepository {
       console.error(err.message)
       throw new Error('Váratlan hiba történt', { cause: e });
     }
-  }
-
-  // Scoring and the clock are server-authoritative, so these travel as the
-  // moves themselves over the match's socket rather than as separate HTTP
-  // calls.
-  submitRelayAnswer(answer: number, moves: BoardMoves): Promise<void> {
-    moves.submitAnswer(answer);
-    return Promise.resolve();
-  }
-
-  startRelayGame(moves: BoardMoves): Promise<void> {
-    moves.startGame();
-    return Promise.resolve();
-  }
-
-  syncRelayTime(moves: BoardMoves): Promise<void> {
-    moves.getTime();
-    return Promise.resolve();
   }
 }

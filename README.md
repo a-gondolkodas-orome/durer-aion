@@ -197,15 +197,19 @@ thought through, not a closed set.
 5. Open the same join code in a second tab mid-match: the running match must not
    fork, and the countdown must read the same in both tabs — the time left comes
    from the server, never from the client.
-6. Finish both and check the combined score on the finished screen.
-7. Log out and reload: the login form is back. The session is an HttpOnly
+6. Cut the socket mid-relay — devtools' Offline throttling, or `docker compose
+   stop backend` — and send an answer: a message must say the connection dropped
+   and the answer may not have arrived. An answer lost in silence is the one
+   failure that costs a team points they earned.
+7. Finish both and check the combined score on the finished screen.
+8. Log out and reload: the login form is back. The session is an HttpOnly
    cookie, so devtools show `durer_team` under Cookies while logged in and gone
    after; localStorage holds no GUID, only the `loggedIn` flag other tabs hear a
    login through.
-8. `npm run build`, then grep `apps/online-frontend/dist` for a string from the
+9. `npm run build`, then grep `apps/online-frontend/dist` for a string from the
    bot's lookup tables: the served bundle must contain no bot.
 
-<details><summary>What items 7 and 8 are guarding</summary>
+<details><summary>What items 8 and 9 are guarding</summary>
 
 The GUID does not come back in the `GET /team/me` response either: it is the
 cookie's value, so a copy there would be the session in a form a script can

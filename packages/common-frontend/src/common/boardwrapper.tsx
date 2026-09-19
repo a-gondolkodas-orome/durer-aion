@@ -1,9 +1,10 @@
 import { Button, Dialog, Stack, alpha } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Countdown } from "../client/components/Countdown";
 import { StrategyEndTable } from "../client/components/StrategyEndTable";
 import { useRefreshTeamState, useToHome } from "../client/hooks/user-hooks";
 import { useClientRepo } from "../client/api-repository-interface";
+import { asMatchTimeMoves } from "../client/match-moves";
 import { GUESSER_PLAYER, JUDGE_PLAYER } from "game";
 import type { GameStateMixin } from "game";
 import type { BoardProps } from "boardgame.io/react";
@@ -26,7 +27,12 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
     const [gameover, setGameover] = useState<unknown>(ctx.gameover);
     const toHome = useToHome();
     const refreshState = useRefreshTeamState();
-    const isOffline = useClientRepo().version === "OFFLINE";
+    const clientRepo = useClientRepo();
+    // The strategy board's clock is the relay's: same `getTime` move, same
+    // repository method, so it goes the same way round rather than reaching
+    // for `moves` directly.
+    const matchTimeMoves = useMemo(() => asMatchTimeMoves(moves), [moves]);
+    const isOffline = clientRepo.version === "OFFLINE";
     const theme = useTheme();
     const { t } = useTranslation();
     // Named so the handler below can stay synchronous: React ignores what an
@@ -39,7 +45,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
 
     useEffect(() => {
       if (!ctx.gameover) {
-        moves.getTime();
+        void clientRepo.syncMatchTime(matchTimeMoves);
       }
       setGameover(ctx.gameover)
     }, [ctx.gameover, moves]);
@@ -99,7 +105,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
               {!finished && <Countdown
                 msRemaining={msRemaining ?? null}
                 setMsRemaining={setMsRemaining}
-                getServerTimer={moves.getTime}
+                getServerTimer={() => void clientRepo.syncMatchTime(matchTimeMoves)}
                 endTime={new Date(G.end)}
                 serverRemainingMs={G.millisecondsRemaining} />}
             </Stack>

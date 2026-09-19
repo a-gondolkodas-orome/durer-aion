@@ -1,4 +1,4 @@
-{   
+{
   "chooser": {
     "achievedPoint": "Elért pontszám",
     "filledAt": "Kitöltve ekkor",
@@ -25,6 +25,7 @@
     "welcome": "Kedves <i>{{tname}}</i> csapat, üdvözlünk az online fordulón!"
   },
   "error": {
+    "disconnected": "Megszakadt a kapcsolat a szerverrel, lehet, hogy ez nem ért oda. Ellenőrizzétek, és ha kell, küldjétek el újra.",
     "unexpected": "Váratlan hiba történt"
   },
   "general": {

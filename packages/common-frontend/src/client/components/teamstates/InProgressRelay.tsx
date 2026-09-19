@@ -1,5 +1,5 @@
 import { Stack } from '@mui/system';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Countdown } from '../Countdown';
 import { BoardProps } from 'boardgame.io/react';
 import { MyGameState } from 'game';
@@ -9,6 +9,8 @@ import { ExerciseTask } from '../ExerciseTask';
 import { ExerciseForm } from '../ExerciseForm';
 import { RelayEndTable } from '../RelayEndTable';
 import { useClientRepo } from '../../api-repository-interface';
+import { asRelayMoves } from '../../match-moves';
+import { useSnackbar } from 'notistack';
 import { useTheme } from '@mui/material/styles';
 import { alpha } from "@mui/system/colorManipulator"
 import { useTranslation } from 'react-i18next';
@@ -21,13 +23,18 @@ const DEFAULT_MAX_POINTS = [3, 3, 4, 4, 4, 5, 5, 6, 6];
 // maxPointsList and selectRoundOnEnd are extra props for relay-practise:
 // the max points of the loaded problem set (so the end table can show all
 // of its tasks), and a logout button leading back to the round selector
-export function InProgressRelay({ G, ctx, moves, maxPointsList, selectRoundOnEnd }: MyGameProps & {
+export function InProgressRelay({ G, ctx, moves, isMultiplayer, isConnected, maxPointsList, selectRoundOnEnd }: MyGameProps & {
   maxPointsList?: number[],
   selectRoundOnEnd?: boolean,
 }) {
   const [msRemaining, setMsRemaining] = useState(G.millisecondsRemaining);
   const [gameover, setGameover] = useState(ctx.gameover);
   const clientRepo = useClientRepo();
+  const { enqueueSnackbar } = useSnackbar();
+  // Narrowed once per `moves` object rather than per render: boardgame.io
+  // rebuilds it only when the client does.
+  const relayMoves = useMemo(() => asRelayMoves(moves), [moves]);
+  const connection = useMemo(() => ({ isMultiplayer, isConnected }), [isMultiplayer, isConnected]);
   const refreshState = useRefreshTeamState();
   const toHome = useToHome();
   const theme = useTheme();
@@ -46,9 +53,15 @@ export function InProgressRelay({ G, ctx, moves, maxPointsList, selectRoundOnEnd
       // Otherwise, it would run on every render.
       const gameNotStarted = G.numberOfTry === 0;
       if (gameNotStarted) {
-        void clientRepo.startRelayGame(moves);
+        // Losing this one leaves the team on a match that never starts, so it
+        // is the other dispatch worth reporting; see ExerciseForm for the
+        // answer's own handling.
+        void clientRepo.startRelayGame(relayMoves, connection)
+          .catch((e: unknown) => {
+            enqueueSnackbar(e instanceof Error ? e.message : t('error.unexpected'), { variant: 'error' });
+          });
       } else {
-        void clientRepo.syncRelayTime(moves);
+        void clientRepo.syncMatchTime(relayMoves);
       }
     }
     setGameover(ctx.gameover)
@@ -161,7 +174,7 @@ export function InProgressRelay({ G, ctx, moves, maxPointsList, selectRoundOnEnd
             previousTries={G.previousAnswers[G.currentProblem].map(it => it.answer)}
             previousCorrectness={!finished ? G.correctnessPreviousAnswer : null}
             attempt={(G.currentProblem + 1) * 3 + G.numberOfTry}
-            onSubmit={(input: number) => clientRepo.submitRelayAnswer(input, moves)}
+            onSubmit={(input: number) => clientRepo.submitRelayAnswer(input, relayMoves, connection)}
           />
           <Stack sx={{
             marginTop: "15px",
@@ -174,7 +187,7 @@ export function InProgressRelay({ G, ctx, moves, maxPointsList, selectRoundOnEnd
             {!finished && <Countdown
               msRemaining={msRemaining ?? null}
               setMsRemaining={setMsRemaining}
-              getServerTimer={() => void clientRepo.syncRelayTime(moves)}
+              getServerTimer={() => void clientRepo.syncMatchTime(relayMoves)}
               endTime={new Date(G.end)}
               serverRemainingMs={G.millisecondsRemaining} />}
           </Stack>

@@ -30,6 +30,22 @@ export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) =
   const refreshState = useRefreshTeamState();
   const [sentAnswer, setSentAnswer] = useState<number>(0);
   const { t } = useTranslation();
+  // Named so the form's handler can stay synchronous — Form calls it and then
+  // resets, and would drop a promise returned to it. The call is inside the
+  // try rather than chained onto what it returns, so that a handler throwing
+  // where it was expected to reject — a move name gone missing, say — reaches
+  // the same snackbar instead of escaping as an unhandled exception.
+  const sendAnswer = async (result: number) => {
+    try {
+      await props.onSubmit(result);
+      // Not awaited: a failure to refresh is the team state's problem, and the
+      // answer itself has already landed.
+      void refreshState();
+    } catch (e: unknown) {
+      console.error(e);
+      enqueueSnackbar(e instanceof Error ? e.message : t('error.unexpected'), { variant: 'error' });
+    }
+  };
   useEffect(() => {
     if (props.previousCorrectness != null) {
       if (props.previousCorrectness) {
@@ -71,15 +87,8 @@ export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) =
             enqueueSnackbar(t('relay.error.duplicate'), { variant: 'error' });
             return;
           }
-          props.onSubmit(parseInt(values.result))
-            .then(() => {
-              void refreshState();
-            })
-            .catch((e: unknown) => {
-              console.log(e);
-              enqueueSnackbar(e instanceof Error ? e.message : t('error.unexpected'), { variant: 'error' });
-            });
           setSentAnswer(1);
+          void sendAnswer(parseInt(values.result));
         }}>
         <Field
           name="result"
