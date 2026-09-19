@@ -123,9 +123,6 @@ export class TeamsRepository {
       (searchCondition)
     });
   }
-  async insertTeam(team: NewTeam) {
-    return await TeamModel.create(newTeamRow(team));
-  }
 
   /**
    * The identifiers live teams hold. Read before an import so a generated join
