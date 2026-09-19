@@ -272,7 +272,20 @@ export async function import_teams_from_tsv_locally(
     return false;
   }
   console.info(`Successfully imported ${result.imported} teams.`);
-  writeFileSync(exportFile, teamsToImportTsv(result.exportTable), { encoding: 'utf-8' });
-  console.info(`Their login codes are in ${exportFile}`);
+  const exportTsv = teamsToImportTsv(result.exportTable);
+  try {
+    writeFileSync(exportFile, exportTsv, { encoding: 'utf-8' });
+    console.info(`Their login codes are in ${exportFile}`);
+  } catch (e: unknown) {
+    // The teams are committed, and `teamName` is unique, so the file cannot be
+    // run again to make the codes a second time. Throwing out of here would
+    // exit 1 — which now says "imported nothing", sending the operator to do
+    // exactly that — so the failure is reported and the codes printed instead,
+    // as the only copy left of them.
+    console.error(`Could not write ${exportFile}: ${e instanceof Error ? e.message : String(e)}`);
+    console.error('The teams ARE imported; running this file again will not work. '
+      + 'Their login codes follow — save them before this output scrolls away.');
+    console.info(exportTsv);
+  }
   return true;
 }

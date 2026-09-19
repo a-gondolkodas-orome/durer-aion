@@ -434,4 +434,21 @@ describe('import_teams_from_tsv_locally', () => {
 
     expect(logged.join('\n')).not.toContain('earlier run');
   });
+
+  // The teams are committed by the time the export is written, and `teamName`
+  // is unique, so the run cannot be repeated to remake the codes. Throwing
+  // from here exited 1 — the status that now says `imported nothing`, whose
+  // message sends the operator to run the file again.
+  it('prints the join codes when the export file cannot be written', async () => {
+    const teams = stubTeams();
+    vi.mocked(readFileSync).mockReturnValue(file(row('Alpha')));
+    vi.mocked(writeFileSync).mockImplementation(() => { throw new Error('EROFS: read-only file system'); });
+
+    expect(await import_teams_from_tsv_locally(teams, 'teams.tsv')).toBe(true);
+
+    const said = logged.join('\n');
+    expect(said).toContain('EROFS: read-only file system');
+    expect(said).toContain('running this file again will not work');
+    expect(said).toContain('Alpha');
+  });
 });
