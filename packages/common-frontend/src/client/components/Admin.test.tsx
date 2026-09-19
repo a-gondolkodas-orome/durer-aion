@@ -8,6 +8,7 @@ import { SWRConfig } from 'swr';
 import { ThemeProvider } from '@mui/material/styles';
 import { ClientRepoProvider, MockClientRepository } from '../api-repository-interface';
 import { BulkAddMinutesDto, DeletedTeamDto, TeamModelDto } from '../dto/TeamStateDto';
+import { forgetGrant, pendingGrantStorageKey } from '../utils/bulk-add-minutes';
 import { Layout } from './Layout';
 import { Admin } from './Admin';
 
@@ -71,6 +72,9 @@ let repo: MockClientRepository;
 
 beforeEach(() => {
   repo = new MockClientRepository();
+  // An unanswered grant is kept in storage so it survives a reload, which means
+  // it survives a test too unless the next one starts without it.
+  forgetGrant();
 });
 
 afterEach(() => {
@@ -261,6 +265,35 @@ test('a walk that never answered is retried under the grant it used', async () =
   const [first, second] = grantsOf(walk);
   expect(second).toBe(first);
   expect(await screen.findByText('0 meccs kapott +10 percet, 1 már megkapta')).toBeInTheDocument();
+});
+
+// The case the page cannot cover on its own: the organiser sees nothing
+// happening and reloads. A grant only the page held would be gone, and the next
+// press a second extension on top of every match the abandoned walk reached.
+// That the stored one is read back again is `bulk-add-minutes.test.ts`'.
+test('a walk that never answered leaves its grant where a reload will find it', async () => {
+  const teams = [playing(alpha, 'relay-a')];
+  vi.spyOn(repo, 'getAll').mockResolvedValue(teams);
+  const walk = vi.spyOn(repo, 'addMinutesToEveryone')
+    .mockRejectedValue(new Error('Váratlan hiba történt'));
+
+  await addMinutesTo(teams, '10');
+
+  await waitFor(() => expect(walk).toHaveBeenCalledOnce());
+  expect(JSON.parse(window.localStorage.getItem(pendingGrantStorageKey) ?? 'null'))
+    .toMatchObject({ minutes: 10, grant: grantsOf(walk)[0] });
+});
+
+// Nothing is left behind once the walk has answered, so the next press is a
+// second, deliberate extension rather than a retry of this one.
+test('a walk that answered leaves no grant behind', async () => {
+  const teams = [playing(alpha, 'relay-a')];
+  vi.spyOn(repo, 'getAll').mockResolvedValue(teams);
+  vi.spyOn(repo, 'addMinutesToEveryone').mockResolvedValue(walked({ extended: ['Alpha'] }));
+
+  await addMinutesTo(teams, '10');
+
+  await waitFor(() => expect(window.localStorage.getItem(pendingGrantStorageKey)).toBeNull());
 });
 
 // A walk that answered is finished, so pressing again means a second, deliberate

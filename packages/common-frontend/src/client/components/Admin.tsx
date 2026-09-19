@@ -2,7 +2,7 @@ import { Stack } from '@mui/system';
 import { useAddMinutesToEveryone, useAll, useRemoveAllTeams } from '../hooks/user-hooks';
 import { Button, Dialog, Table, TableBody, TableCell, TableHead, TableRow, IconButton, Tab, Tabs } from '@mui/material';
 import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
-import { Fragment, useRef, useState } from 'react';
+import { Fragment, useState } from 'react';
 import useSWR from 'swr';
 import { DataGrid } from '@mui/x-data-grid';
 import { TeamModelDto } from '../dto/TeamStateDto';
@@ -15,7 +15,7 @@ import { useTheme } from '@mui/material/styles';
 import { useSnackbar } from 'notistack';
 import { FinishedMatchStatus } from 'schemas';
 import { ConfirmDialogInterface, ConfirmDialog } from './ConfirmDialog';
-import { bulkAddMinutesMessage, bulkAddMinutesRetryMessage, bulkAddMinutesVariant, newGrant }
+import { bulkAddMinutesMessage, bulkAddMinutesRetryMessage, bulkAddMinutesVariant, forgetGrant, grantFor }
   from '../utils/bulk-add-minutes';
 import * as Yup from 'yup';
 import { alpha } from '@mui/system'
@@ -43,13 +43,6 @@ export function Admin(props: { teamId?: string }) {
   // answers, because the dialog that confirmed it has already closed and there
   // would otherwise be nothing on the page saying the round is being extended.
   const [extending, setExtending] = useState(false);
-  // The grant of an extension that has not been answered yet, with the minutes
-  // it was made for. Kept so that pressing again after a walk the browser gave
-  // up on sends the *same* grant, which the server refuses to apply twice — a
-  // fresh one would be a second, deliberate extension and would move every
-  // match the abandoned walk had already reached. Cleared once a walk answers,
-  // and not reused for a different number of minutes, which is a new intent.
-  const pendingGrant = useRef<{ minutes: number, grant: string } | null>(null);
 
   // Read off the list rather than kept as state, so a team deleted from the
   // `/admin/<teamId>` page drops out with the list's next load and the page
@@ -245,11 +238,11 @@ export function Admin(props: { teamId?: string }) {
             // Formik keeps what was typed, and `FormikValues` is `any`, so the
             // number Yup validated above is still a string here.
             const minutes = Number(values.time);
-            const unanswered = pendingGrant.current;
-            const grant = unanswered !== null && unanswered.minutes === minutes
-              ? unanswered.grant
-              : newGrant();
-            pendingGrant.current = { minutes, grant };
+            // The same grant as the walk that never answered, if there was one:
+            // the server refuses to apply it twice, so pressing again is the
+            // retry. A fresh one would be a second, deliberate extension and
+            // would move every match the abandoned walk had already reached.
+            const grant = grantFor(minutes);
             setConfirmDialog({
               text: `Erősítsd meg, hogy minden aktuális csapatnak meg akarod növelni az idejét ${minutes} perccel`,
               confirm: async () => {
@@ -257,10 +250,10 @@ export function Admin(props: { teamId?: string }) {
                 try {
                   const result = await addMinutesToEveryone(minutes, grant);
                   // Answered, so the next press means a second extension.
-                  pendingGrant.current = null;
+                  forgetGrant();
                   enqueueSnackbar(bulkAddMinutesMessage(result, minutes), {
                     variant: bulkAddMinutesVariant(result),
-                    // The problems name every team left out, which takes longer
+                    // The problems name the teams left out, which takes longer
                     // to read than the default five seconds. Not `persist`: the
                     // provider (Layout.tsx) gives a snackbar no dismiss action.
                     autoHideDuration: result.problems.length > 0 ? 15000 : undefined,
