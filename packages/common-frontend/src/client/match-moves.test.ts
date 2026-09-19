@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
+import type { Mock } from "vitest";
 import { Client } from "boardgame.io/client";
 import { GameRelay } from "game";
 import { asMatchTimeMoves, asRelayMoves, MatchMoveDispatch } from "./match-moves";
@@ -17,11 +18,21 @@ const dropped = { isMultiplayer: true, isConnected: false };
 const local = { isMultiplayer: false, isConnected: false };
 
 let repo: Repo;
-let moves: { submitAnswer: ReturnType<typeof vi.fn>, startGame: ReturnType<typeof vi.fn>, getTime: ReturnType<typeof vi.fn> };
+// Typed to the moves themselves, so the spies satisfy `RelayMoves` rather than
+// being asserted into it — the narrowing under test is the point.
+let moves: {
+  submitAnswer: Mock<(answer: number) => void>,
+  startGame: Mock<() => void>,
+  getTime: Mock<() => void>,
+};
 
 beforeEach(() => {
   repo = new Repo();
-  moves = { submitAnswer: vi.fn(), startGame: vi.fn(), getTime: vi.fn() };
+  moves = {
+    submitAnswer: vi.fn<(answer: number) => void>(),
+    startGame: vi.fn<() => void>(),
+    getTime: vi.fn<() => void>(),
+  };
 });
 
 describe("narrowing a board's moves", () => {
